@@ -7,51 +7,28 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiFilterButton,
-  EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiSearchBar,
-  EuiSelectable,
   EuiText,
   EuiTitle,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { debounce } from 'lodash';
 import React, { useMemo, useState, useEffect } from 'react';
-import type {
-  Attachment,
-  AttachmentType,
-} from '@kbn/streams-plugin/server/lib/streams/attachments/types';
+import type { Attachment } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
+import {
+  AttachmentFilters,
+  DEFAULT_ATTACHMENT_FILTERS,
+  type AttachmentFiltersState,
+} from './attachment_filters';
 import { AttachmentsTable } from './attachment_table';
-
-const ATTACHMENT_TYPE_LABELS: Record<AttachmentType, string> = {
-  dashboard: i18n.translate('xpack.streams.addAttachmentFlyout.typeDashboard', {
-    defaultMessage: 'Dashboard',
-  }),
-  rule: i18n.translate('xpack.streams.addAttachmentFlyout.typeRule', {
-    defaultMessage: 'Rule',
-  }),
-  slo: i18n.translate('xpack.streams.addAttachmentFlyout.typeSlo', {
-    defaultMessage: 'SLO',
-  }),
-};
-
-const ATTACHMENT_TYPE_OPTIONS = Object.entries(ATTACHMENT_TYPE_LABELS).map(([type, label]) => ({
-  value: type as AttachmentType,
-  label,
-}));
 
 export function AddAttachmentFlyout({
   entityId,
@@ -68,26 +45,15 @@ export function AddAttachmentFlyout({
     dependencies: {
       start: {
         streams: { streamsRepositoryClient },
-        savedObjectsTagging: { ui: savedObjectsTaggingUi },
       },
     },
   } = useKibana();
 
   const { euiTheme } = useEuiTheme();
 
-  const [query, setQuery] = useState('');
-
-  const [submittedQuery, setSubmittedQuery] = useState(query);
+  const [filters, setFilters] = useState<AttachmentFiltersState>(DEFAULT_ATTACHMENT_FILTERS);
   const [selectedAttachments, setSelectedAttachments] = useState<Attachment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [selectedType, setSelectedType] = useState<AttachmentType | undefined>(undefined);
-  const [isTagsPopoverOpen, setIsTagsPopoverOpen] = useState(false);
-  const [isTypePopoverOpen, setIsTypePopoverOpen] = useState(false);
-
-  const setSubmittedQueryDebounced = useMemo(() => {
-    return debounce(setSubmittedQuery, 150);
-  }, []);
 
   const attachmentSuggestionsFetch = useStreamsAppFetch(
     ({ signal }) => {
@@ -99,11 +65,11 @@ export function AddAttachmentFlyout({
               streamName: entityId,
             },
             query: {
-              query: submittedQuery,
-              attachmentType: selectedType,
+              query: filters.debouncedQuery,
+              attachmentType: filters.type,
             },
             body: {
-              tags: selectedTags,
+              tags: filters.tags,
             },
           },
         })
@@ -120,52 +86,12 @@ export function AddAttachmentFlyout({
     [
       streamsRepositoryClient,
       entityId,
-      submittedQuery,
-      selectedType,
-      selectedTags,
+      filters.debouncedQuery,
+      filters.type,
+      filters.tags,
       linkedAttachments,
     ]
   );
-
-  const tagList = savedObjectsTaggingUi.getTagList();
-
-  const tagsFilterButton = (
-    <EuiFilterButton
-      iconType="arrowDown"
-      badgeColor="accent"
-      onClick={() => setIsTagsPopoverOpen(!isTagsPopoverOpen)}
-      isSelected={isTagsPopoverOpen}
-      numFilters={tagList.length}
-      hasActiveFilters={selectedTags.length > 0}
-      numActiveFilters={selectedTags.length}
-    >
-      {i18n.translate('xpack.streams.addAttachmentFlyout.tagsFilterButtonLabel', {
-        defaultMessage: 'Tags',
-      })}
-    </EuiFilterButton>
-  );
-
-  const typeFilterButton = (
-    <EuiFilterButton
-      iconType="arrowDown"
-      onClick={() => setIsTypePopoverOpen(!isTypePopoverOpen)}
-      isSelected={isTypePopoverOpen}
-      hasActiveFilters={selectedType !== undefined}
-      numActiveFilters={selectedType !== undefined ? 1 : 0}
-    >
-      {i18n.translate('xpack.streams.addAttachmentFlyout.typeFilterButtonLabel', {
-        defaultMessage: 'Type',
-      })}
-    </EuiFilterButton>
-  );
-
-  const tagsPopoverId = useGeneratedHtmlId({
-    prefix: 'tagsPopover',
-  });
-
-  const typePopoverId = useGeneratedHtmlId({
-    prefix: 'typePopover',
-  });
 
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'addAttachmentFlyoutTitle',
@@ -192,100 +118,16 @@ export function AddAttachmentFlyout({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiFlexGroup direction="column" gutterSize="m">
-          <EuiFlexGroup direction="row" gutterSize="s">
-            <EuiFlexItem grow>
-              <EuiSearchBar
-                box={{
-                  incremental: true,
-                  placeholder: i18n.translate(
-                    'xpack.streams.addAttachmentFlyout.searchPlaceholder',
-                    {
-                      defaultMessage: 'Search for attachments',
-                    }
-                  ),
-                }}
-                query={query}
-                onChange={({ queryText }) => {
-                  setQuery(queryText);
-                  setSubmittedQueryDebounced(queryText);
-                }}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFilterGroup>
-                <EuiPopover
-                  id={typePopoverId}
-                  button={typeFilterButton}
-                  isOpen={isTypePopoverOpen}
-                  closePopover={() => setIsTypePopoverOpen(false)}
-                  panelPaddingSize="none"
-                >
-                  <EuiSelectable
-                    singleSelection
-                    options={ATTACHMENT_TYPE_OPTIONS.map((option) => ({
-                      label: option.label,
-                      checked: selectedType === option.value ? 'on' : undefined,
-                      value: option.value,
-                    }))}
-                    onChange={(newOptions) => {
-                      const selected = newOptions.find((option) => option.checked === 'on');
-                      setSelectedType(selected ? selected.value : undefined);
-                    }}
-                  >
-                    {(list) => (
-                      <div
-                        css={css`
-                          min-width: 200px;
-                        `}
-                      >
-                        {list}
-                      </div>
-                    )}
-                  </EuiSelectable>
-                </EuiPopover>
-                <EuiPopover
-                  id={tagsPopoverId}
-                  button={tagsFilterButton}
-                  isOpen={isTagsPopoverOpen}
-                  closePopover={() => setIsTagsPopoverOpen(false)}
-                  panelPaddingSize="none"
-                >
-                  <EuiSelectable
-                    allowExclusions
-                    searchable
-                    searchProps={{
-                      placeholder: i18n.translate(
-                        'xpack.streams.addAttachmentFlyout.searchTagsLabel',
-                        {
-                          defaultMessage: 'Search tags',
-                        }
-                      ),
-                      compressed: true,
-                    }}
-                    options={(tagList || []).map((tag) => ({
-                      label: tag.name,
-                      checked: selectedTags.includes(tag.id) ? 'on' : undefined,
-                      tagId: tag.id,
-                    }))}
-                    onChange={(newOptions) => {
-                      setSelectedTags(
-                        newOptions
-                          .filter((option) => option.checked === 'on')
-                          .map(({ tagId }) => tagId)
-                      );
-                    }}
-                  >
-                    {(list, search) => (
-                      <div style={{ width: 300 }}>
-                        <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
-                        {list}
-                      </div>
-                    )}
-                  </EuiSelectable>
-                </EuiPopover>
-              </EuiFilterGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <AttachmentFilters
+            filters={filters}
+            onFiltersChange={setFilters}
+            searchPlaceholder={i18n.translate(
+              'xpack.streams.addAttachmentFlyout.searchPlaceholder',
+              {
+                defaultMessage: 'Search for attachments',
+              }
+            )}
+          />
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiText size="s">
@@ -312,6 +154,7 @@ export function AddAttachmentFlyout({
             loading={attachmentSuggestionsFetch.loading}
             selectedAttachments={selectedAttachments}
             setSelectedAttachments={setSelectedAttachments}
+            showActions={false}
             dataTestSubj="streamsAppAddAttachmentFlyoutAttachmentsTable"
           />
         </EuiFlexGroup>

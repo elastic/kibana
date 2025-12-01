@@ -8,6 +8,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
   EuiBasicTable,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -17,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type {
   Attachment,
   AttachmentType,
@@ -31,11 +32,12 @@ import {
   type RuleDetailsLocatorParams,
 } from '@kbn/deeplinks-observability';
 import type { LocatorClient } from '@kbn/share-plugin/common/url_service/locators';
+import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { useKibana } from '../../hooks/use_kibana';
 import { tagListToReferenceList } from './to_reference_list';
 import { useTimefilter } from '../../hooks/use_timefilter';
 
-const ATTACHMENT_TYPE_CONFIG: Record<AttachmentType, { label: string; icon: string }> = {
+const ATTACHMENT_TYPE_CONFIG: Record<AttachmentType, { label: string; icon: EuiIconType }> = {
   dashboard: {
     label: i18n.translate('xpack.streams.attachmentTable.attachmentTypeDashboard', {
       defaultMessage: 'Dashboard',
@@ -62,32 +64,32 @@ const ATTACHMENT_URL_GETTERS: Record<
     redirectId: string,
     locatorsService: LocatorClient,
     timeRange: { from: string; to: string }
-  ) => string
+  ) => string | undefined
 > = {
   dashboard: (redirectId, locatorsService, timeRange) => {
     const dashboardLocator = locatorsService.get<DashboardLocatorParams>(DASHBOARD_APP_LOCATOR);
-    return (
-      dashboardLocator?.getRedirectUrl({
-        dashboardId: redirectId,
-        timeRange,
-      }) || ''
-    );
+    return dashboardLocator?.getRedirectUrl({
+      dashboardId: redirectId,
+      timeRange,
+    });
   },
   rule: (redirectId, locatorsService) => {
     const ruleLocator = locatorsService.get<RuleDetailsLocatorParams>(ruleDetailsLocatorID);
-    return ruleLocator?.getRedirectUrl({ ruleId: redirectId }) || '';
+    return ruleLocator?.getRedirectUrl({ ruleId: redirectId });
   },
   slo: (redirectId, locatorsService) => {
     const sloLocator = locatorsService.get<SloDetailsLocatorParams>(sloDetailsLocatorID);
-    return sloLocator?.getRedirectUrl({ sloId: redirectId }) || '';
+    return sloLocator?.getRedirectUrl({ sloId: redirectId });
   },
 };
 
 export function AttachmentsTable({
   attachments,
   compact = false,
+  showActions = true,
   selectedAttachments,
   setSelectedAttachments,
+  onUnlinkAttachment,
   loading,
   entityId,
   dataTestSubj,
@@ -96,8 +98,10 @@ export function AttachmentsTable({
   loading: boolean;
   attachments: Attachment[] | undefined;
   compact?: boolean;
+  showActions?: boolean;
   selectedAttachments?: Attachment[];
   setSelectedAttachments?: (attachments: Attachment[]) => void;
+  onUnlinkAttachment?: (attachment: Attachment) => void;
   dataTestSubj?: string;
 }) {
   const {
@@ -120,39 +124,127 @@ export function AttachmentsTable({
     }
   `;
 
+  const navigateToAttachment = useCallback(
+    ({ attachment, url }: { attachment: Attachment; url: string }) => {
+      if (entityId) {
+        telemetryClient.trackAttachmentClick({
+          attachment_id: attachment.id,
+          attachment_type: attachment.type,
+          name: entityId,
+        });
+      }
+      application.navigateToUrl(url);
+    },
+    [application, entityId, telemetryClient]
+  );
+
   const columns = useMemo((): Array<EuiBasicTableColumn<Attachment>> => {
+    const detailsColumn: EuiBasicTableColumn<Attachment> = {
+      field: 'details',
+      name: '',
+      width: '40px',
+      render: (_, attachment) => (
+        <EuiButtonIcon
+          data-test-subj="streamsAppAttachmentDetailsButton"
+          iconType="expand"
+          aria-label={i18n.translate('xpack.streams.attachmentTable.detailsButtonAriaLabel', {
+            defaultMessage: 'View details',
+          })}
+          onClick={() => {
+            // eslint-disable-next-line no-console
+            console.log('Details clicked', attachment.id);
+          }}
+        />
+      ),
+    };
+
+    const actionsColumn: EuiBasicTableColumn<Attachment> = {
+      name: i18n.translate('xpack.streams.attachmentTable.actionsColumnTitle', {
+        defaultMessage: 'Actions',
+      }),
+      actions: [
+        {
+          name: i18n.translate('xpack.streams.attachmentTable.seeDetailsActionTitle', {
+            defaultMessage: 'See details',
+          }),
+          description: i18n.translate('xpack.streams.attachmentTable.seeDetailsActionDescription', {
+            defaultMessage: 'See attachment details',
+          }),
+          type: 'icon',
+          icon: 'tableDensityExpanded',
+          onClick: (attachment) => {
+            // eslint-disable-next-line no-console
+            console.log('See details clicked', attachment.id);
+          },
+          'data-test-subj': 'streamsAppAttachmentSeeDetailsAction',
+        },
+        {
+          name: (attachment) => {
+            const config = ATTACHMENT_TYPE_CONFIG[attachment.type];
+            return i18n.translate('xpack.streams.attachmentTable.goToActionTitle', {
+              defaultMessage: 'Go to {type}',
+              values: { type: config.label },
+            });
+          },
+          description: i18n.translate('xpack.streams.attachmentTable.goToActionDescription', {
+            defaultMessage: 'Navigate to attachment',
+          }),
+          type: 'icon',
+          icon: (attachment) => ATTACHMENT_TYPE_CONFIG[attachment.type].icon,
+          onClick: (attachment) => {
+            const url = ATTACHMENT_URL_GETTERS[attachment.type](
+              attachment.redirectId,
+              share.url.locators,
+              timeState.timeRange
+            );
+            if (url) {
+              navigateToAttachment({ attachment, url });
+            }
+          },
+          'data-test-subj': 'streamsAppAttachmentGoToAction',
+        },
+        {
+          name: i18n.translate('xpack.streams.attachmentTable.unlinkActionTitle', {
+            defaultMessage: 'Unlink attachment',
+          }),
+          description: i18n.translate('xpack.streams.attachmentTable.unlinkActionDescription', {
+            defaultMessage: 'Unlink this attachment from stream',
+          }),
+          type: 'icon',
+          icon: 'unlink',
+          enabled: () => onUnlinkAttachment !== undefined,
+          onClick: (attachment) => {
+            onUnlinkAttachment?.(attachment);
+          },
+          'data-test-subj': 'streamsAppAttachmentUnlinkAction',
+        },
+      ],
+    };
+
     return [
+      ...(showActions ? [detailsColumn] : []),
       {
         field: 'label',
         name: i18n.translate('xpack.streams.attachmentTable.titleColumnTitle', {
           defaultMessage: 'Title',
         }),
-        render: (_, { title, id, redirectId, type }) => {
-          const url = ATTACHMENT_URL_GETTERS[type](
-            redirectId,
+        render: (_, attachment) => {
+          const url = ATTACHMENT_URL_GETTERS[attachment.type](
+            attachment.redirectId,
             share.url.locators,
             timeState.timeRange
           );
 
           if (!url) {
-            return <EuiText size="s">{title}</EuiText>;
+            return <EuiText size="s">{attachment.title}</EuiText>;
           }
 
           return (
             <EuiLink
               data-test-subj="streamsAppAttachmentColumnsLink"
-              onClick={() => {
-                if (entityId) {
-                  telemetryClient.trackAttachmentClick({
-                    attachment_id: id,
-                    attachment_type: type,
-                    name: entityId,
-                  });
-                }
-                application.navigateToUrl(url);
-              }}
+              onClick={() => navigateToAttachment({ attachment, url })}
             >
-              {title}
+              {attachment.title}
             </EuiLink>
           );
         },
@@ -195,8 +287,17 @@ export function AttachmentsTable({
             },
           ] satisfies Array<EuiBasicTableColumn<Attachment>>)
         : []),
+      ...(showActions ? [actionsColumn] : []),
     ];
-  }, [application, compact, share, entityId, savedObjectsTaggingUi, telemetryClient, timeState]);
+  }, [
+    compact,
+    showActions,
+    share,
+    savedObjectsTaggingUi,
+    timeState,
+    onUnlinkAttachment,
+    navigateToAttachment,
+  ]);
 
   const items = useMemo(() => {
     return attachments ?? [];
