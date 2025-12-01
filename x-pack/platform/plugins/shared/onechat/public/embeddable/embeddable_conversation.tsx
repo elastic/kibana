@@ -12,6 +12,7 @@ import type { EmbeddableConversationInternalProps } from './types';
 import { EmbeddableConversationsProvider } from '../application/context/conversation/embeddable_conversations_provider';
 import { Conversation } from '../application/components/conversations/conversation';
 import { ConversationHeader } from '../application/components/conversations/conversation_header/conversation_header';
+import { conversationBackgroundStyles } from '../application/components/conversations/conversation.styles';
 
 export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInternalProps> = (
   props
@@ -19,12 +20,17 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
   const { euiTheme } = useEuiTheme();
   const { onClose, ariaLabelledBy } = props;
 
-  const backgroundStyles = css`
-    background-color: ${euiTheme.colors.backgroundBasePlain};
+  const wrapperStyles = css`
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    ${conversationBackgroundStyles(euiTheme)}
   `;
 
+  const headerHeight = `calc(${euiTheme.size.xl} * 2)`;
   const headerStyles = css`
-    ${backgroundStyles}
+    display: flex;
+    height: ${headerHeight};
     &.euiFlyoutHeader {
       padding-inline: 0;
       padding-block-start: 0;
@@ -32,9 +38,9 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
     }
   `;
   const bodyStyles = css`
-    ${backgroundStyles}
     flex: 1;
     padding: 0 ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.base};
+    min-height: 0;
 
     .euiFlyoutBody__overflow {
       overflow: hidden;
@@ -53,13 +59,15 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
   `;
 
   return (
-    <EmbeddableConversationsProvider {...props}>
-      <EuiFlyoutHeader css={headerStyles}>
-        <ConversationHeader onClose={onClose} ariaLabelledBy={ariaLabelledBy} />
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody css={bodyStyles}>
-        <Conversation />
-      </EuiFlyoutBody>
-    </EmbeddableConversationsProvider>
+    <div css={wrapperStyles}>
+      <EmbeddableConversationsProvider {...props}>
+        <EuiFlyoutHeader css={headerStyles}>
+          <ConversationHeader onClose={onClose} ariaLabelledBy={ariaLabelledBy} />
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody css={bodyStyles}>
+          <Conversation />
+        </EuiFlyoutBody>
+      </EmbeddableConversationsProvider>
+    </div>
   );
 };

@@ -9,6 +9,7 @@
 
 import { Builder } from '@kbn/esql-ast';
 import type { ESQLAstCommand } from '@kbn/esql-ast';
+import { isAlwaysCondition } from '../../../..';
 import type { ConvertType } from '../../../../types/formats';
 import type { ConvertProcessor } from '../../../../types/processors';
 import { conditionToESQLAst } from '../condition_to_esql';
@@ -91,7 +92,7 @@ export function convertConvertProcessorToESQL(processor: ConvertProcessor): ESQL
    *    ```
    */
 
-  if ('where' in processor) {
+  if ('where' in processor && !isAlwaysCondition(processor.where)) {
     const evalCommandWithCondition = Builder.command({
       name: 'eval',
       args: [

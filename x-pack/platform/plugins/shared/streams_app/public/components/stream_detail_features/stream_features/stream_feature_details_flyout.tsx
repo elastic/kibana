@@ -20,7 +20,8 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import type { Streams, Feature } from '@kbn/streams-schema';
+import { type Streams, type Feature, isFeatureWithFilter } from '@kbn/streams-schema';
+import type { Condition } from '@kbn/streamlang';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import useToggle from 'react-use/lib/useToggle';
@@ -42,19 +43,18 @@ export const StreamFeatureDetailsFlyout = ({
   const [featureDescription, setFeatureDescription] = React.useState(feature.description);
   const { upsertQuery } = useStreamFeaturesApi(definition);
   const [isUpdating, setIsUpdating] = React.useState(false);
-  const [featureFilter, setFeatureFilter] = React.useState(feature.filter);
+  const [featureFilter, setFeatureFilter] = React.useState<Condition>(feature.filter);
   const [isEditingCondition, toggleIsEditingCondition] = useToggle(false);
 
   const updateFeature = () => {
     setIsUpdating(true);
-    upsertQuery(feature.name, {
-      description: featureDescription,
-      filter: featureFilter,
-    }).finally(() => {
-      setIsUpdating(false);
-      refreshFeatures();
-      closeFlyout();
-    });
+    upsertQuery({ ...feature, description: featureDescription, filter: featureFilter }).finally(
+      () => {
+        setIsUpdating(false);
+        refreshFeatures();
+        closeFlyout();
+      }
+    );
   };
 
   return (
@@ -115,16 +115,23 @@ export const StreamFeatureDetailsFlyout = ({
                     defaultMessage: 'Edit filter',
                   }
                 )}
+                data-test-subj={
+                  isEditingCondition
+                    ? 'feature_identification_existing_edit_filter_button'
+                    : 'feature_identification_existing_save_filter_button'
+                }
               />
             </EuiFlexGroup>
-            <EditableConditionPanel
-              condition={featureFilter}
-              isEditingCondition={isEditingCondition}
-              setCondition={setFeatureFilter}
-            />
+            {featureFilter && (
+              <EditableConditionPanel
+                condition={featureFilter}
+                isEditingCondition={isEditingCondition}
+                setCondition={setFeatureFilter}
+              />
+            )}
           </EuiFlexGroup>
           <EuiSpacer size="m" />
-          <FeatureEventsData feature={feature} />
+          {isFeatureWithFilter(feature) && <FeatureEventsData feature={feature} />}
         </div>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -138,6 +145,7 @@ export const StreamFeatureDetailsFlyout = ({
               aria-label={i18n.translate('xpack.streams.featureDetails.closeButtonAriaLabel', {
                 defaultMessage: 'Close flyout',
               })}
+              data-test-subj="feature_identification_existing_cancel_edit_button"
             >
               <FormattedMessage
                 id="xpack.streams.featureDetails.cancelButton"
@@ -146,7 +154,12 @@ export const StreamFeatureDetailsFlyout = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton isLoading={isUpdating} onClick={updateFeature} fill>
+            <EuiButton
+              isLoading={isUpdating}
+              onClick={updateFeature}
+              fill
+              data-test-subj="feature_identification_existing_save_changes_button"
+            >
               <FormattedMessage
                 id="xpack.streams.featureDetails.saveChanges"
                 defaultMessage="Save changes"

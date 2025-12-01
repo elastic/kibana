@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAstQueryExpression } from '@kbn/esql-ast';
 import {
   type ESQLCommand,
   type FunctionDefinition,
@@ -15,7 +14,7 @@ import {
   Builder,
   isSubQuery,
 } from '@kbn/esql-ast';
-import type { ESQLAstAllCommands } from '@kbn/esql-ast/src/types';
+import type { ESQLAstAllCommands, ESQLAstForkCommand } from '@kbn/esql-ast/src/types';
 import { expandEvals } from '../shared/expand_evals';
 
 /**
@@ -58,7 +57,7 @@ export function getSubqueriesToValidate(rootCommands: ESQLCommand[]) {
 
     // every command within FORK's branches is its own subquery to be validated
     if (command.name.toLowerCase() === 'fork') {
-      const branchSubqueries = getForkBranchSubqueries(command as ESQLCommand<'fork'>);
+      const branchSubqueries = getForkBranchSubqueries(command as ESQLAstForkCommand);
       for (const subquery of branchSubqueries) {
         subsequences.push([...expandedCommands.slice(0, i), ...subquery]);
       }
@@ -89,9 +88,10 @@ export function getSubqueriesToValidate(rootCommands: ESQLCommand[]) {
  * @param command a FORK command
  * @returns an array of expanded subqueries
  */
-function getForkBranchSubqueries(command: ESQLCommand<'fork'>): ESQLCommand[][] {
+function getForkBranchSubqueries(command: ESQLAstForkCommand): ESQLCommand[][] {
   const expanded: ESQLCommand[][] = [];
-  const branches = command.args as ESQLAstQueryExpression[];
+  const branches = command.args.map((parens) => parens.child);
+
   for (let j = 0; j < branches.length; j++) {
     for (let k = 0; k < branches[j].commands.length; k++) {
       const partialQuery = branches[j].commands.slice(0, k + 1);

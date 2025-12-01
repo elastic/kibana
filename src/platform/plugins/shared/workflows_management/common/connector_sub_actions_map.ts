@@ -6,20 +6,39 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 // Import SUB_ACTION enums from all stack connectors
+import {
+  CONNECTOR_ID as BEDROCK_CONNECTOR_ID,
+  SUB_ACTION as BEDROCK_SUB_ACTION,
+} from '@kbn/connector-schemas/bedrock/constants';
 import {
   CONNECTOR_ID as D3_SECURITY_CONNECTOR_ID,
   SUB_ACTION as D3SECURITY_SUB_ACTION,
 } from '@kbn/connector-schemas/d3security/constants';
 import {
+  CONNECTOR_ID as GEMINI_CONNECTOR_ID,
+  SUB_ACTION as GEMINI_SUB_ACTION,
+} from '@kbn/connector-schemas/gemini/constants';
+import {
+  CONNECTOR_ID as INFERENCE_CONNECTOR_ID,
+  SUB_ACTION as INFERENCE_SUB_ACTION,
+} from '@kbn/connector-schemas/inference/constants';
+import {
   CONNECTOR_ID as JIRA_SERVICE_MANAGEMENT_CONNECTOR_TYPE_ID,
   SUB_ACTION as JiraServiceManagementSubActions,
 } from '@kbn/connector-schemas/jira-service-management/constants';
 import {
+  CONNECTOR_ID as OPENAI_CONNECTOR_ID,
+  SUB_ACTION as OPENAI_SUB_ACTION,
+} from '@kbn/connector-schemas/openai/constants';
+import {
   CONNECTOR_ID as OpsgenieConnectorTypeId,
   SUB_ACTION as OpsgenieSubActions,
 } from '@kbn/connector-schemas/opsgenie/constants';
+import {
+  CONNECTOR_ID as THEHIVE_CONNECTOR_ID,
+  SUB_ACTION as THEHIVE_SUB_ACTION,
+} from '@kbn/connector-schemas/thehive/constants';
 import {
   CONNECTOR_ID as TINES_CONNECTOR_ID,
   SUB_ACTION as TINES_SUB_ACTION,
@@ -28,26 +47,8 @@ import {
   CONNECTOR_ID as XSOAR_CONNECTOR_ID,
   SUB_ACTION as XSOAR_SUB_ACTION,
 } from '@kbn/connector-schemas/xsoar/constants';
-import {
-  BEDROCK_CONNECTOR_ID,
-  SUB_ACTION as BEDROCK_SUB_ACTION,
-} from '@kbn/stack-connectors-plugin/common/bedrock/constants';
-import {
-  GEMINI_CONNECTOR_ID,
-  SUB_ACTION as GEMINI_SUB_ACTION,
-} from '@kbn/stack-connectors-plugin/common/gemini/constants';
-import {
-  INFERENCE_CONNECTOR_ID,
-  SUB_ACTION as INFERENCE_SUB_ACTION,
-} from '@kbn/stack-connectors-plugin/common/inference/constants';
-import {
-  OPENAI_CONNECTOR_ID,
-  SUB_ACTION as OPENAI_SUB_ACTION,
-} from '@kbn/stack-connectors-plugin/common/openai/constants';
-import {
-  THEHIVE_CONNECTOR_ID,
-  SUB_ACTION as THEHIVE_SUB_ACTION,
-} from '@kbn/stack-connectors-plugin/common/thehive/constants';
+
+import { connectorsSpecs } from '@kbn/connector-specs';
 
 // Helper function to format sub-action names for display
 function formatSubActionName(action: string): string {
@@ -130,6 +131,13 @@ function createSubActionsMapping() {
 
   connectorSubActions.forEach(({ id, actions }) => {
     mapping[id] = Object.values(actions).map((action) => ({
+      name: action,
+      displayName: formatSubActionName(action),
+    }));
+  });
+
+  Object.values(connectorsSpecs).forEach((connectorSpec) => {
+    mapping[connectorSpec.metadata.id] = Object.keys(connectorSpec.actions).map((action) => ({
       name: action,
       displayName: formatSubActionName(action),
     }));

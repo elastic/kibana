@@ -20,6 +20,7 @@ import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { ConnectorUsageCollector, SSLSettings } from '../types';
 import { combineHeadersWithBasicAuthHeader } from './get_basic_auth_header';
 import { createAndThrowUserError } from './create_and_throw_user_error';
+import { getBeforeRedirectFn } from './before_redirect';
 
 export const request = async <T = unknown>({
   axios,
@@ -79,6 +80,7 @@ export const request = async <T = unknown>({
       proxy: false,
       maxContentLength,
       timeout: Math.max(settingsTimeout, timeout ?? 0),
+      beforeRedirect: getBeforeRedirectFn(configurationUtilities),
     });
 
     if (connectorUsageCollector) {
