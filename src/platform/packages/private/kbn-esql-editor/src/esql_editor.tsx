@@ -56,6 +56,7 @@ import {
   RESIZABLE_CONTAINER_INITIAL_HEIGHT,
   esqlEditorStyles,
 } from './esql_editor.styles';
+import { useQueryStatusDecorations } from './query_status_decorations';
 import { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
 import {
   clearCacheWhenOld,
@@ -186,6 +187,14 @@ const ESQLEditorInternal = function ESQLEditor({
     errors: serverErrors ? parseErrors(serverErrors, code) : [],
     warnings: serverWarning ? parseWarning(serverWarning) : [],
   });
+
+  const { cleanupQueryStatusDecorations, queryStatusDecorationsStyles } = useQueryStatusDecorations(
+    {
+      editor: editorRef.current,
+      errors: editorMessages.errors,
+      warnings: editorMessages.warnings,
+    }
+  );
   const onQueryUpdate = useCallback(
     (value: string) => {
       onTextLangQueryChange({ esql: value } as AggregateQuery);
@@ -840,19 +849,6 @@ const ESQLEditorInternal = function ESQLEditor({
     return ESQLLang.getInlineCompletionsProvider?.(esqlCallbacks);
   }, [esqlCallbacks]);
 
-  const onErrorClick = useCallback(({ startLineNumber, startColumn }: MonacoMessage) => {
-    if (!editorRef.current) {
-      return;
-    }
-
-    editorRef.current.focus();
-    editorRef.current.setPosition({
-      lineNumber: startLineNumber,
-      column: startColumn,
-    });
-    editorRef.current.revealLine(startLineNumber);
-  }, []);
-
   // Clean up the monaco editor and DOM on unmount
   useEffect(() => {
     const disposablesMap = editorCommandDisposables.current;
@@ -868,13 +864,13 @@ const ESQLEditorInternal = function ESQLEditor({
           disposablesMap.delete(currentEditor);
         }
       }
-
+      cleanupQueryStatusDecorations();
       editorModel.current?.dispose();
       editorRef.current?.dispose();
       editorModel.current = undefined;
       editorRef.current = undefined;
     };
-  }, []);
+  }, [cleanupQueryStatusDecorations]);
 
   // When the layout changes, and the editor is not focused, we want to
   // recalculate the visible code so it fills up the available space. We
@@ -907,9 +903,10 @@ const ESQLEditorInternal = function ESQLEditor({
       lightbulb: {
         enabled: false,
       },
-      lineDecorationsWidth: 20,
+      lineDecorationsWidth: 15,
       lineNumbers: 'on',
-      lineNumbersMinChars: 3,
+      lineNumbersMinChars: 1,
+      glyphMargin: true,
       minimap: { enabled: false },
       overviewRulerLanes: 0,
       overviewRulerBorder: false,
@@ -946,7 +943,12 @@ const ESQLEditorInternal = function ESQLEditor({
   const [labelInFocus, setLabelInFocus] = useState(false);
   const editorPanel = (
     <>
-      <Global styles={lookupIndexBadgeStyle} />
+      <Global
+        styles={css`
+          ${lookupIndexBadgeStyle}
+          ${queryStatusDecorationsStyles}
+        `}
+      />
       {Boolean(editorIsInline) && (
         <EuiFlexGroup
           gutterSize="none"
@@ -1186,13 +1188,11 @@ const ESQLEditorInternal = function ESQLEditor({
           historyContainer: styles.historyContainer,
         }}
         code={code}
-        onErrorClick={onErrorClick}
         onUpdateAndSubmitQuery={onUpdateAndSubmitQuery}
         updateQuery={onQueryUpdate}
         hideRunQueryText={hideRunQueryText}
         editorIsInline={editorIsInline}
         isSpaceReduced={isSpaceReduced}
-        {...editorMessages}
         isHistoryOpen={isHistoryOpen}
         setIsHistoryOpen={onClickQueryHistory}
         isLanguageComponentOpen={isLanguageComponentOpen}

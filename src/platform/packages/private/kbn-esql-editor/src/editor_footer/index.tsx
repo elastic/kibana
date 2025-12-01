@@ -25,11 +25,9 @@ import {
   LanguageDocumentationInline,
 } from '@kbn/language-documentation';
 import React, { memo, useCallback } from 'react';
-import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 import type { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
 import type { ESQLQueryStats as QueryStats } from '@kbn/esql-types';
 import type { DataErrorsControl, ESQLEditorDeps } from '../types';
-import { StatusIndicator } from './errors_warnings_popover';
 import { HistoryAndStarredQueriesTabs, QueryHistoryAction } from './history_starred_queries';
 import { KeyboardShortcuts } from './keyboard_shortcuts';
 import { QueryWrapComponent } from './query_wrap_component';
@@ -45,9 +43,6 @@ interface EditorFooterProps {
     historyContainer: Interpolation<Theme>;
   };
   code: string;
-  errors?: MonacoMessage[];
-  warnings?: MonacoMessage[];
-  onErrorClick: (error: MonacoMessage) => void;
   onUpdateAndSubmitQuery: (newQuery: string, querySource: QuerySource) => void;
   updateQuery: (qs: string) => void;
   isHistoryOpen: boolean;
@@ -70,9 +65,6 @@ interface EditorFooterProps {
 
 export const EditorFooter = memo(function EditorFooter({
   styles,
-  errors,
-  warnings,
-  onErrorClick,
   onUpdateAndSubmitQuery,
   updateQuery,
   hideRunQueryText,
@@ -126,28 +118,13 @@ export const EditorFooter = memo(function EditorFooter({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="none" responsive={false} alignItems="center">
               <QueryWrapComponent code={code} updateQuery={updateQuery} />
-              <StatusIndicator
+              {/* <StatusIndicator
                 errors={errors}
                 warnings={warnings}
                 onErrorClick={onErrorClick}
                 dataErrorsControl={dataErrorsControl}
-              />
+              /> */}
               {queryStats && <ESQLQueryStats queryStats={queryStats} />}
-              {!queryStats && errors && errors.length > 0 && (
-                <EuiFlexItem grow={false}>
-                  <EuiText
-                    size="xs"
-                    color="subdued"
-                    data-test-subj="ESQLEditor-queryStats-failedToFetch"
-                  >
-                    <p>
-                      {i18n.translate('esqlEditor.queryStats.failedLabel', {
-                        defaultMessage: 'Failed',
-                      })}
-                    </p>
-                  </EuiText>
-                </EuiFlexItem>
-              )}
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

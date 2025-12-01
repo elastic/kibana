@@ -335,8 +335,11 @@ export const onKeyDownResizeHandler = (
 
 export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
   return css`
+    .monaco-editor .overflow-guard {
+      overflow: visible !important;
+    }
+
     .monaco-hover {
-      display: block !important;
       background-color: ${theme.euiTheme.colors.backgroundBasePlain} !important;
       line-height: 1.5rem;
       border-radius: ${theme.euiTheme.border.radius.medium} !important;
