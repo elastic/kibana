@@ -245,6 +245,55 @@
       },
       {
         "parentPluginId": "@kbn/field-utils",
+        "id": "def-public.FieldSelect",
+        "type": "Function",
+        "tags": [],
+        "label": "FieldSelect",
+        "description": [
+          "\nA ComboBox component for selecting field types.\nRenders icons next to field types and groups them into categories."
+        ],
+        "signature": [
+          "({ selectedType, onTypeChange, docLinks, ...restOfProps }: ",
+          {
+            "pluginId": "@kbn/field-utils",
+            "scope": "public",
+            "docId": "kibKbnFieldUtilsPluginApi",
+            "section": "def-public.FieldSelectProps",
+            "text": "FieldSelectProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-field-utils/src/components/field_select/field_select.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/field-utils",
+            "id": "def-public.FieldSelect.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  selectedType,\n  onTypeChange,\n  docLinks,\n  ...restOfProps\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/field-utils",
+                "scope": "public",
+                "docId": "kibKbnFieldUtilsPluginApi",
+                "section": "def-public.FieldSelectProps",
+                "text": "FieldSelectProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-field-utils/src/components/field_select/field_select.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/field-utils",
         "id": "def-public.fieldSupportsBreakdown",
         "type": "Function",
         "tags": [],
@@ -814,6 +863,81 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-field-utils/src/components/field_description/field_description.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/field-utils",
+        "id": "def-public.FieldSelectProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldSelectProps",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-field-utils/src/components/field_select/field_select.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/field-utils",
+            "id": "def-public.FieldSelectProps.selectedType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "selectedType",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "src/platform/packages/shared/kbn-field-utils/src/components/field_select/field_select.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/field-utils",
+            "id": "def-public.FieldSelectProps.onTypeChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onTypeChange",
+            "description": [],
+            "signature": [
+              "(type: string | null) => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-field-utils/src/components/field_select/field_select.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/field-utils",
+                "id": "def-public.FieldSelectProps.onTypeChange.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string | null"
+                ],
+                "path": "src/platform/packages/shared/kbn-field-utils/src/components/field_select/field_select.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/field-utils",
+            "id": "def-public.FieldSelectProps.docLinks",
+            "type": "Object",
+            "tags": [],
+            "label": "docLinks",
+            "description": [],
+            "signature": [
+              "DocLinksStart",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-field-utils/src/components/field_select/field_select.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
