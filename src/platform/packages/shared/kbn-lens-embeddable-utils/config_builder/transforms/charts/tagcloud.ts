@@ -35,8 +35,8 @@ import {
   generateApiLayer,
   generateLayer,
   getAdhocDataviews,
-  operationFromColumn,
   isTextBasedLayer,
+  operationFromColumn,
 } from '../utils';
 import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
 import { fromColorMappingAPIToLensState, fromColorMappingLensStateToAPI } from '../coloring';

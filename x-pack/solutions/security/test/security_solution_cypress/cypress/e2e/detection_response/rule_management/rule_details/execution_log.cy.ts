@@ -22,10 +22,11 @@ import { getCustomQueryRuleParams } from '../../../../objects/rule';
 import { EXECUTION_SHOWING } from '../../../../screens/rule_details';
 import { manualRuleRun } from '../../../../tasks/api_calls/backfill';
 
+// TODO: https://github.com/elastic/kibana/issues/244006
 describe(
   'Event log',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
   function () {
     before(() => {

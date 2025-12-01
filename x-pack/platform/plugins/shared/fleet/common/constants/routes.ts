@@ -95,6 +95,7 @@ export const AGENT_POLICY_API_ROUTES = {
   INFO_OUTPUTS_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}/outputs`,
   AUTO_UPGRADE_AGENTS_STATUS_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}/auto_upgrade_agents_status`,
   CREATE_WITH_PACKAGE_POLICIES: `${INTERNAL_ROOT}/agent_and_package_policies`,
+  CLEANUP_REVISIONS_PATTERN: `${INTERNAL_ROOT}/agent_policies/_cleanup_revisions`,
 };
 
 // Cloud Connector API routes
@@ -195,6 +196,7 @@ export const AGENT_API_ROUTES = {
 export const AGENTLESS_POLICIES_ROUTES = {
   CREATE_PATTERN: `${API_ROOT}/agentless_policies`,
   DELETE_PATTERN: `${API_ROOT}/agentless_policies/{policyId}`,
+  SYNC_PATTERN: `${INTERNAL_ROOT}/agentless_policies/_sync`,
 };
 
 export const ENROLLMENT_API_KEY_ROUTES = {
