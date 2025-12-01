@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import { isEmpty } from 'lodash';
-import type { MaintenanceWindow } from '@kbn/alerting-plugin/server/application/maintenance_window/types';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import type { ConfigKey, MonitorFields } from '../../../common/runtime_types';
 import type { ParsedVars } from './lightweight_param_formatter';
 import { replaceVarsWithParams } from './lightweight_param_formatter';

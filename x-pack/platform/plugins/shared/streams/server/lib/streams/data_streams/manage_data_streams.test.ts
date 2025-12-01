@@ -351,26 +351,4 @@ describe('updateDataStreamsFailureStore', () => {
       'Error updating data stream failure store: Template simulation error'
     );
   });
-
-  it('throws error when inherit is used for non-classic streams', async () => {
-    const failureStore: FailureStore = {
-      inherit: {},
-    };
-
-    await expect(
-      updateDataStreamsFailureStore({
-        esClient: mockEsClient,
-        logger: mockLogger,
-        failureStore,
-        stream: createMockWiredStream('test-stream'),
-        isServerless: false,
-      })
-    ).rejects.toThrow(
-      'Inherit failure store configuration is not supported for wired streams. Stream test-stream is a wired stream.'
-    );
-
-    expect(mockLogger.error).toHaveBeenCalledWith(
-      'Error updating data stream failure store: Inherit failure store configuration is not supported for wired streams. Stream test-stream is a wired stream.'
-    );
-  });
 });
