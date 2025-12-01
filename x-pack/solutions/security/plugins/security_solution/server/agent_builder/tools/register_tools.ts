@@ -8,6 +8,7 @@
 import { platformCoreTools } from '@kbn/onechat-common';
 import type { OnechatPluginSetup } from '@kbn/onechat-plugin/server';
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
+import { alertsTool } from './alerts_tool';
 import { SECURITY_LABS_SEARCH_TOOL_ID, securityLabsSearchTool } from './security_labs_search_tool';
 import {
   attackDiscoverySearchTool,
@@ -38,4 +39,5 @@ export const registerTools = async (onechat: OnechatPluginSetup, core: CoreSetup
   onechat.tools.register(entityRiskScoreTool(core));
   onechat.tools.register(attackDiscoverySearchTool());
   onechat.tools.register(securityLabsSearchTool(core));
+  onechat.tools.register(alertsTool());
 };
