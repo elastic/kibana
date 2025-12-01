@@ -20738,6 +20738,11 @@ exponential-backoff@^3.1.1:
   resolved "https://registry.yarnpkg.com/exponential-backoff/-/exponential-backoff-3.1.1.tgz#64ac7526fe341ab18a39016cd22c787d01e00bf6"
   integrity sha512-dX7e/LHVJ6W3DE1MHWi9S1EYzDESENfLrYohG2G++ovZrYOkm4Knwa0mc1cn84xJOR4KEU0WSchhLbd0UklbHw==
 
+expr-eval-fork@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/expr-eval-fork/-/expr-eval-fork-3.0.0.tgz#5c8327acc399405b168fccfe917f161c076b2840"
+  integrity sha512-29S+IZ2g8qSk5q7gOUYozO7zi4mj/sCVo+HB2h0f0ER4ZCZr9b/+5SWIedvV0SHq3IxBW2/TJrPn77YxMsoVwg==
+
 expr-eval@^2.0.2:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/expr-eval/-/expr-eval-2.0.2.tgz#fa6f044a7b0c93fde830954eb9c5b0f7fbc7e201"
