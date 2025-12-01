@@ -6,16 +6,11 @@
  */
 
 import expect from 'expect';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
-import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AutomaticImportService } from './automatic_import_service';
-import type {
-  SavedObjectsServiceSetup,
-  SavedObjectsServiceStart,
-  SecurityServiceStart,
-} from '@kbn/core/server';
+import type { SavedObjectsServiceSetup, SavedObjectsClient } from '@kbn/core/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -35,8 +30,7 @@ describe('AutomaticImportSetupService', () => {
   let mockLoggerFactory: ReturnType<typeof loggerMock.create>;
   let mockEsClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let mockSavedObjectsSetup: jest.Mocked<SavedObjectsServiceSetup>;
-  let mockSavedObjectsStart: jest.Mocked<SavedObjectsServiceStart>;
-  let mockSecurity: SecurityServiceStart;
+  let mockSavedObjectsClient: SavedObjectsClient;
   let mockTaskManagerSetup: jest.Mocked<TaskManagerSetupContract>;
   let mockTaskManagerStart: jest.Mocked<TaskManagerStartContract>;
 
@@ -45,8 +39,7 @@ describe('AutomaticImportSetupService', () => {
     mockLoggerFactory = loggerMock.create();
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
     mockSavedObjectsSetup = savedObjectsServiceMock.createSetupContract();
-    mockSavedObjectsStart = savedObjectsServiceMock.createStartContract();
-    mockSecurity = securityMock.createStart() as unknown as SecurityServiceStart;
+    mockSavedObjectsClient = savedObjectsClientMock.create() as unknown as SavedObjectsClient;
 
     // Mock TaskManager contracts
     mockTaskManagerSetup = {
@@ -98,52 +91,30 @@ describe('AutomaticImportSetupService', () => {
   });
 
   describe('initialize', () => {
-    it('should create internal repository and initialize saved object service', async () => {
-      await service.initialize(mockSecurity, mockSavedObjectsStart, mockTaskManagerStart);
+    it('should initialize saved object service', async () => {
+      await service.initialize(mockSavedObjectsClient, mockTaskManagerStart);
 
-      expect(mockSavedObjectsStart.createInternalRepository).toHaveBeenCalledTimes(1);
-      expect((service as any).security).toBe(mockSecurity);
       expect((service as any).savedObjectService).toBeDefined();
     });
 
-    it('should set security reference', async () => {
-      expect((service as any).security).toBeNull();
-
-      await service.initialize(mockSecurity, mockSavedObjectsStart, mockTaskManagerStart);
-
-      expect((service as any).security).toBe(mockSecurity);
-    });
-
     it('should create savedObjectService with correct parameters', async () => {
-      await service.initialize(mockSecurity, mockSavedObjectsStart, mockTaskManagerStart);
+      await service.initialize(mockSavedObjectsClient, mockTaskManagerStart);
 
       const savedObjectService = (service as any).savedObjectService;
       expect(savedObjectService).toBeDefined();
     });
-
-    it('should use internal repository from createInternalRepository', async () => {
-      await service.initialize(mockSecurity, mockSavedObjectsStart, mockTaskManagerStart);
-
-      expect(mockSavedObjectsStart.createInternalRepository).toHaveBeenCalled();
-    });
   });
 
   describe('methods before initialization', () => {
-    it('should throw error when calling insertIntegration before initialize', async () => {
-      await expect(service.createIntegration({} as any, {} as any)).rejects.toThrow(
+    it('should throw error when calling createIntegration before initialize', async () => {
+      await expect(service.createIntegration({} as any)).rejects.toThrow(
         'Saved Objects service not initialized.'
       );
     });
 
-    it('should throw error when calling getIntegration before initialize', async () => {
-      await expect(service.getIntegration('test-id')).rejects.toThrow(
+    it('should throw error when calling getIntegrationById before initialize', async () => {
+      await expect(service.getIntegrationById('test-id')).rejects.toThrow(
         'Saved Objects service not initialized.'
-      );
-    });
-
-    it('should throw error when calling addSamplesToDataStream before initialize', async () => {
-      await expect(service.addSamplesToDataStream({} as any, {} as any)).rejects.toThrow(
-        'Security service not initialized.'
       );
     });
   });
@@ -205,8 +176,7 @@ describe('AutomaticImportSetupService', () => {
       expect(MockedService).toHaveBeenCalledWith(mockLoggerFactory, expect.any(Promise));
 
       expect(mockSavedObjectsSetup.registerType).toHaveBeenCalledTimes(2);
-      await service.initialize(mockSecurity, mockSavedObjectsStart, mockTaskManagerStart);
-      expect(mockSavedObjectsStart.createInternalRepository).toHaveBeenCalled();
+      await service.initialize(mockSavedObjectsClient, mockTaskManagerStart);
 
       // Stop the service
       service.stop();
@@ -235,7 +205,7 @@ describe('AutomaticImportSetupService', () => {
     it('should complete full lifecycle: construct -> initialize -> stop', async () => {
       expect((service as any).savedObjectService).toBeNull();
 
-      await service.initialize(mockSecurity, mockSavedObjectsStart, mockTaskManagerStart);
+      await service.initialize(mockSavedObjectsClient, mockTaskManagerStart);
       expect((service as any).savedObjectService).toBeDefined();
 
       // Stop

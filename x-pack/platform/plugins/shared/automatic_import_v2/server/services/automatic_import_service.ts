@@ -22,21 +22,19 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { DataStream, InputType, Integration } from '../../common';
+import type { IntegrationResponse, DataStreamResponse, TaskStatus, InputType } from '../../common';
 import type { IntegrationAttributes, DataStreamAttributes } from './saved_objects/schemas/types';
-import {
-  AddSamplesToDataStreamParams,
-  AutomaticImportSamplesIndexService,
-} from './samples_index/index_service';
+import type { AddSamplesToDataStreamParams as SamplesToDataStreamParams } from './samples_index/index_service';
+import { AutomaticImportSamplesIndexService } from './samples_index/index_service';
 import { AutomaticImportSavedObjectService } from './saved_objects/saved_objects_service';
 import { integrationSavedObjectType } from './saved_objects/integration';
 import { dataStreamSavedObjectType } from './saved_objects/data_stream';
 import type { DataStreamTaskParams } from './task_manager/task_manager_service';
 import { TaskManagerService } from './task_manager/task_manager_service';
-import { CreateDataStreamParams, CreateIntegrationParams } from '../routes/types';
+import type { CreateDataStreamParams, CreateIntegrationParams } from '../routes/types';
 import { TASK_STATUSES } from './saved_objects/constants';
 import { DATA_STREAM_CREATION_TASK_TYPE } from './task_manager';
-import { IntegrationResponse } from '@kbn/automatic-import-v2-plugin/common/model/common_attributes.gen';
+
 export class AutomaticImportService {
   private pluginStop$: Subject<void>;
   private samplesIndexService: AutomaticImportSamplesIndexService;
@@ -101,7 +99,7 @@ export class AutomaticImportService {
     return this.savedObjectService.updateIntegration(data, expectedVersion, versionUpdate, options);
   }
 
-  public async getIntegrationById(integrationId: string): Promise<Integration> {
+  public async getIntegrationById(integrationId: string): Promise<IntegrationResponse> {
     if (!this.savedObjectService) {
       throw new Error('Saved Objects service not initialized.');
     }
@@ -110,23 +108,23 @@ export class AutomaticImportService {
       integrationId
     );
 
-    const dataStreams: DataStream[] = dataStreamsSO.map((ds) => ({
-      title: ds.title,
-      description: ds.description,
-      inputTypes: ds.input_types.map((name) => ({ name } as const as InputType)),
-      originalSource: {
-        sourceType: 'file',
-        sourceValue: ds.data_stream_id,
-      },
+    const dataStreamsResponses: DataStreamResponse[] = dataStreamsSO.map((dataStream) => ({
+      dataStreamId: dataStream.data_stream_id,
+      title: dataStream.title,
+      description: dataStream.description,
+      inputTypes: dataStream.input_types.map((type) => ({ name: type })) as InputType[],
+      status: dataStream.job_info.status as TaskStatus,
     }));
 
-    const integration: Integration = {
-      dataStreams,
+    const integrationResponse: IntegrationResponse = {
+      integrationId: integrationSO.integration_id,
       title: integrationSO.metadata.title,
       logo: integrationSO.metadata.logo,
       description: integrationSO.metadata.description,
+      status: integrationSO.status as TaskStatus,
+      dataStreams: dataStreamsResponses,
     };
-    return integration;
+    return integrationResponse;
   }
 
   public async getAllIntegrations(): Promise<IntegrationResponse[]> {
@@ -134,24 +132,28 @@ export class AutomaticImportService {
       throw new Error('Saved Objects service not initialized.');
     }
     const integrations = await this.savedObjectService.getAllIntegrations();
-    const dataStreams = integrations.map(async (integration) => {
-      const dataStreams = await this.getAllDataStreams(integration.integration_id);
-      return dataStreams.map((dataStream) => ({
-        dataStreamId: dataStream.data_stream_id,
-        title: dataStream.title,
-        description: dataStream.description,
-        inputTypes: dataStream.inputTypes,
-        status: dataStream.job_info.status,
-      }));
-    });
-    return integrations.map((integration) => ({
-      integrationId: integration.integration_id,
-      title: integration.metadata.title,
-      logo: integration.metadata.logo,
-      description: integration.metadata.description,
-      status: integration.status,
-      dataStreams: integration.dataStreams,
-    }));
+    return Promise.all(
+      integrations.map(async (integration) => {
+        const dataStreams = await this.savedObjectService!.getAllDataStreams(
+          integration.integration_id
+        );
+        const dataStreamsResponses: DataStreamResponse[] = dataStreams.map((dataStream) => ({
+          dataStreamId: dataStream.data_stream_id,
+          title: dataStream.title,
+          description: dataStream.description,
+          inputTypes: dataStream.input_types.map((type) => ({ name: type })) as InputType[],
+          status: dataStream.job_info.status as TaskStatus,
+        }));
+        return {
+          integrationId: integration.integration_id,
+          title: integration.metadata.title,
+          logo: integration.metadata.logo,
+          description: integration.metadata.description,
+          status: integration.status as TaskStatus,
+          dataStreams: dataStreamsResponses,
+        };
+      })
+    );
   }
 
   public async deleteIntegration(
@@ -173,14 +175,14 @@ export class AutomaticImportService {
     const { authenticatedUser, dataStreamParams } = params;
 
     // Add samples to samples index
-    const addSamplesToDataStreamParams: AddSamplesToDataStreamParams = {
+    const samplesToDataStreamParams: SamplesToDataStreamParams = {
       integrationId: dataStreamParams.integrationId,
       dataStreamId: dataStreamParams.dataStreamId,
       rawSamples: dataStreamParams.rawSamples,
       originalSource: dataStreamParams.originalSource,
       authenticatedUser,
     };
-    await this.samplesIndexService.addSamplesToDataStream(addSamplesToDataStreamParams);
+    await this.samplesIndexService.addSamplesToDataStream(samplesToDataStreamParams);
 
     // Schedule the data stream creation Background task
     const dataStreamTaskParams: DataStreamTaskParams = {
@@ -191,7 +193,7 @@ export class AutomaticImportService {
       dataStreamTaskParams
     );
 
-    // Insert the data stream in saved objects
+    // Insert the data stream in saved object
     await this.savedObjectService.insertDataStream(
       {
         ...dataStreamParams,

@@ -55,7 +55,7 @@ export class AutomaticImportSamplesIndexService {
         data_stream_id: dataStreamId,
         log_data: sample,
         created_by: authenticatedUser.username,
-        original_filename: originalSource.sourceValue,
+        original_source: originalSource.sourceValue,
         metadata: {
           created_at: new Date().toISOString(),
         },

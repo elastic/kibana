@@ -9,7 +9,7 @@ import expect from 'expect';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AutomaticImportSamplesIndexService } from './index_service';
-import type { DataStreamSamples } from '../../../common';
+import type { AddSamplesToDataStreamParams } from './index_service';
 import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 
 // Mock the storage adapter
@@ -78,18 +78,16 @@ describe('AutomaticImportSamplesIndexService', () => {
   });
 
   describe('addSamplesToDataStream', () => {
-    it('should create multiple sample documents from logData array', async () => {
-      const dataStream: DataStreamSamples = {
+    it('should create multiple sample documents from rawSamples array', async () => {
+      const params: AddSamplesToDataStreamParams = {
         integrationId: 'integration-123',
         dataStreamId: 'data-stream-456',
-        projectId: 'project-789',
-        logData: ['Sample log line 1', 'Sample log line 2', 'Sample log line 3'],
-        createdBy: 'user-1',
-        createdAt: '2024-01-01T00:00:00Z',
-        originalFilename: 'logs.txt',
+        rawSamples: ['Sample log line 1', 'Sample log line 2', 'Sample log line 3'],
+        originalSource: { sourceType: 'file', sourceValue: 'logs.txt' },
+        authenticatedUser: mockUser,
       };
 
-      await service.addSamplesToDataStream(mockUser, dataStream);
+      await service.addSamplesToDataStream(params);
 
       const { createIndexAdapter } = jest.requireMock('./storage');
       const adapterInstance = createIndexAdapter.mock.results[0].value;
@@ -104,7 +102,7 @@ describe('AutomaticImportSamplesIndexService', () => {
         data_stream_id: 'data-stream-456',
         log_data: 'Sample log line 1',
         created_by: 'test-user',
-        original_filename: 'logs.txt',
+        original_source: 'logs.txt',
       });
       expect(callArgs.operations[1].index.document.log_data).toBe('Sample log line 2');
       expect(callArgs.operations[2].index.document.log_data).toBe('Sample log line 3');
@@ -112,17 +110,15 @@ describe('AutomaticImportSamplesIndexService', () => {
     });
 
     it('should create a single sample document', async () => {
-      const dataStream: DataStreamSamples = {
+      const params: AddSamplesToDataStreamParams = {
         integrationId: 'integration-123',
         dataStreamId: 'data-stream-456',
-        projectId: 'project-789',
-        logData: ['Sample log line 1'],
-        createdBy: 'user-1',
-        createdAt: '2024-01-01T00:00:00Z',
-        originalFilename: 'logs.txt',
+        rawSamples: ['Sample log line 1'],
+        originalSource: { sourceType: 'file', sourceValue: 'logs.txt' },
+        authenticatedUser: mockUser,
       };
 
-      await service.addSamplesToDataStream(mockUser, dataStream);
+      await service.addSamplesToDataStream(params);
 
       const { createIndexAdapter } = jest.requireMock('./storage');
       const adapterInstance = createIndexAdapter.mock.results[0].value;
@@ -137,21 +133,20 @@ describe('AutomaticImportSamplesIndexService', () => {
         data_stream_id: 'data-stream-456',
         log_data: 'Sample log line 1',
         created_by: 'test-user',
-        original_filename: 'logs.txt',
+        original_source: 'logs.txt',
       });
     });
 
     it('should use authenticated user for created_by field', async () => {
-      const dataStream: DataStreamSamples = {
+      const params: AddSamplesToDataStreamParams = {
         integrationId: 'integration-123',
         dataStreamId: 'data-stream-456',
-        logData: ['Sample log'],
-        createdBy: 'original-user', // This should be ignored
-        createdAt: '2024-01-01T00:00:00Z',
-        originalFilename: 'logs.txt',
+        rawSamples: ['Sample log'],
+        originalSource: { sourceType: 'file', sourceValue: 'logs.txt' },
+        authenticatedUser: mockUser,
       };
 
-      await service.addSamplesToDataStream(mockUser, dataStream);
+      await service.addSamplesToDataStream(params);
 
       const { createIndexAdapter } = jest.requireMock('./storage');
       const adapterInstance = createIndexAdapter.mock.results[0].value;
@@ -164,16 +159,15 @@ describe('AutomaticImportSamplesIndexService', () => {
     });
 
     it('should generate created_at timestamp in metadata', async () => {
-      const dataStream: DataStreamSamples = {
+      const params: AddSamplesToDataStreamParams = {
         integrationId: 'integration-123',
         dataStreamId: 'data-stream-456',
-        logData: ['Sample log'],
-        createdBy: 'user-1',
-        createdAt: '2024-01-01T00:00:00Z',
-        originalFilename: 'logs.txt',
+        rawSamples: ['Sample log'],
+        originalSource: { sourceType: 'file', sourceValue: 'logs.txt' },
+        authenticatedUser: mockUser,
       };
 
-      await service.addSamplesToDataStream(mockUser, dataStream);
+      await service.addSamplesToDataStream(params);
 
       const { createIndexAdapter } = jest.requireMock('./storage');
       const adapterInstance = createIndexAdapter.mock.results[0].value;
@@ -189,17 +183,16 @@ describe('AutomaticImportSamplesIndexService', () => {
       );
     });
 
-    it('should handle empty logData array', async () => {
-      const dataStream: DataStreamSamples = {
+    it('should handle empty rawSamples array', async () => {
+      const params: AddSamplesToDataStreamParams = {
         integrationId: 'integration-123',
         dataStreamId: 'data-stream-456',
-        logData: [],
-        createdBy: 'user-1',
-        createdAt: '2024-01-01T00:00:00Z',
-        originalFilename: 'logs.txt',
+        rawSamples: [],
+        originalSource: { sourceType: 'file', sourceValue: 'logs.txt' },
+        authenticatedUser: mockUser,
       };
 
-      await service.addSamplesToDataStream(mockUser, dataStream);
+      await service.addSamplesToDataStream(params);
 
       const { createIndexAdapter } = jest.requireMock('./storage');
       const adapterInstance = createIndexAdapter.mock.results[0].value;
@@ -211,17 +204,15 @@ describe('AutomaticImportSamplesIndexService', () => {
     });
 
     it('should handle special characters in log data', async () => {
-      const dataStream: DataStreamSamples = {
+      const params: AddSamplesToDataStreamParams = {
         integrationId: 'integration-123',
         dataStreamId: 'data-stream-456',
-        projectId: 'project-with-special-chars-@#$',
-        logData: ['Log with "quotes" and \\backslashes\\ and \nnewlines'],
-        createdBy: 'user-1',
-        createdAt: '2024-01-01T00:00:00Z',
-        originalFilename: 'logs with spaces.txt',
+        rawSamples: ['Log with "quotes" and \\backslashes\\ and \nnewlines'],
+        originalSource: { sourceType: 'file', sourceValue: 'logs with spaces.txt' },
+        authenticatedUser: mockUser,
       };
 
-      await service.addSamplesToDataStream(mockUser, dataStream);
+      await service.addSamplesToDataStream(params);
 
       const { createIndexAdapter } = jest.requireMock('./storage');
       const adapterInstance = createIndexAdapter.mock.results[0].value;
@@ -231,7 +222,7 @@ describe('AutomaticImportSamplesIndexService', () => {
       const document = callArgs.operations[0].index.document;
 
       expect(document.log_data).toBe('Log with "quotes" and \\backslashes\\ and \nnewlines');
-      expect(document.original_filename).toBe('logs with spaces.txt');
+      expect(document.original_source).toBe('logs with spaces.txt');
     });
 
     it('should throw error when samplesIndexAdapter is not initialized', async () => {
@@ -240,18 +231,17 @@ describe('AutomaticImportSamplesIndexService', () => {
         new Promise(() => {}) // Never resolves
       );
 
-      const dataStream: DataStreamSamples = {
+      const params: AddSamplesToDataStreamParams = {
         integrationId: 'integration-123',
         dataStreamId: 'data-stream-456',
-        logData: ['Sample log'],
-        createdBy: 'user-1',
-        createdAt: '2024-01-01T00:00:00Z',
-        originalFilename: 'logs.txt',
+        rawSamples: ['Sample log'],
+        originalSource: { sourceType: 'file', sourceValue: 'logs.txt' },
+        authenticatedUser: mockUser,
       };
 
-      await expect(
-        uninitializedService.addSamplesToDataStream(mockUser, dataStream)
-      ).rejects.toThrow('Samples index adapter not initialized');
+      await expect(uninitializedService.addSamplesToDataStream(params)).rejects.toThrow(
+        'Samples index adapter not initialized'
+      );
     });
   });
 

@@ -12,15 +12,15 @@ import type {
   CreateAutoImportIntegrationResponse,
   GetAllAutoImportIntegrationsResponse,
   GetAutoImportIntegrationResponse,
+  IntegrationResponse,
 } from '../../common';
 import {
   CreateAutoImportIntegrationRequestBody,
   GetAutoImportIntegrationRequestParams,
 } from '../../common';
 import { buildAutomaticImportResponse } from './utils';
-import { IntegrationParams, DataStreamParams } from './types';
+import type { IntegrationParams, DataStreamParams } from './types';
 import { AUTOMATIC_IMPORT_API_PRIVILEGES } from '../feature';
-import { IntegrationResponse } from '@kbn/automatic-import-v2-plugin/common/model/common_attributes.gen';
 
 export const registerIntegrationRoutes = (
   router: IRouter<AutomaticImportV2PluginRequestHandlerContext>,
@@ -54,10 +54,10 @@ const getAllIntegrationsRoute = (
         try {
           const automaticImportv2 = await context.automaticImportv2;
           const automaticImportService = automaticImportv2.automaticImportService;
-          const integrations = await automaticImportService.getAllIntegrations();
-
+          const integrationResponses: IntegrationResponse[] =
+            await automaticImportService.getAllIntegrations();
           const body: GetAllAutoImportIntegrationsResponse = {
-            integrationResponse: integrationResponses,
+            ...integrationResponses,
           };
           return response.ok({ body });
         } catch (err) {
@@ -100,7 +100,7 @@ const getIntegrationByIdRoute = (
           const automaticImportService = automaticImportv2.automaticImportService;
           const { integration_id: integrationId } = request.params;
           const integration = await automaticImportService.getIntegrationById(integrationId);
-          const body: GetAutoImportIntegrationResponse = { integration };
+          const body: GetAutoImportIntegrationResponse = { integrationResponse: integration };
           return response.ok({ body });
         } catch (err) {
           logger.error(`getIntegrationByIdRoute: Caught error:`, err);

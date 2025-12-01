@@ -62,4 +62,3 @@ export class AutomaticImportResponseFactory {
 
 export const buildAutomaticImportResponse = (response: KibanaResponseFactory) =>
   new AutomaticImportResponseFactory(response);
-

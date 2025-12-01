@@ -66,7 +66,9 @@ export class TaskManagerService {
     this.logger.debug('TaskManagerService initialized');
   }
 
-  public async scheduleDataStreamCreationTask(params: DataStreamTaskParams): Promise<{ taskId: string }> {
+  public async scheduleDataStreamCreationTask(
+    params: DataStreamTaskParams
+  ): Promise<{ taskId: string }> {
     assert(this.taskManager, 'TaskManager not initialized');
 
     // Generate an unique task ID

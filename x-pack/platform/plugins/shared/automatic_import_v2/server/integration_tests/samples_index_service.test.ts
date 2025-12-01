@@ -10,9 +10,8 @@ import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import type { createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
 import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/server';
-import type { DataStreamSamples } from '../../common';
-import { AutomaticImportSamplesIndexService } from '../services';
-import { AutomaticImportSamplesIndexName } from '../services';
+import { AutomaticImportSamplesIndexService, AutomaticImportSamplesIndexName } from '../services';
+import type { AddSamplesToDataStreamParams } from '../services/samples_index/index_service';
 
 describe('AutomaticImportSamplesIndexService Integration Tests', () => {
   let manageES: TestElasticsearchUtils;
@@ -96,17 +95,16 @@ describe('AutomaticImportSamplesIndexService Integration Tests', () => {
   });
 
   describe('addSamplesToDataStream', () => {
-    it('should create multiple sample documents from logData array', async () => {
-      const dataStream: DataStreamSamples = {
+    it('should create multiple sample documents from rawSamples array', async () => {
+      const params: AddSamplesToDataStreamParams = {
         integrationId: 'integration-multi-123',
         dataStreamId: 'data-stream-multi-456',
-        logData: ['Sample log line 1', 'Sample log line 2', 'Sample log line 3'],
-        createdBy: 'user-1',
-        createdAt: '2024-01-01T00:00:00Z',
-        originalFilename: 'logs.txt',
+        rawSamples: ['Sample log line 1', 'Sample log line 2', 'Sample log line 3'],
+        originalSource: { sourceType: 'file', sourceValue: 'logs.txt' },
+        authenticatedUser: mockUser,
       };
 
-      const result = await samplesIndexService.addSamplesToDataStream(mockUser, dataStream);
+      const result = await samplesIndexService.addSamplesToDataStream(params);
 
       expect(result.errors).toBe(false);
       expect(result.items).toHaveLength(3);
@@ -128,7 +126,7 @@ describe('AutomaticImportSamplesIndexService Integration Tests', () => {
       expect(docs[0].integration_id).toBe('integration-multi-123');
       expect(docs[0].data_stream_id).toBe('data-stream-multi-456');
       expect(docs[0].created_by).toBe('test-user');
-      expect(docs[0].original_filename).toBe('logs.txt');
+      expect(docs[0].original_source).toBe('logs.txt');
       expect(docs[0].metadata.created_at).toBeDefined();
 
       // Check that all three log lines are present
@@ -137,16 +135,15 @@ describe('AutomaticImportSamplesIndexService Integration Tests', () => {
     });
 
     it('should create a single sample document', async () => {
-      const dataStream: DataStreamSamples = {
+      const params: AddSamplesToDataStreamParams = {
         integrationId: 'integration-single-999',
         dataStreamId: 'data-stream-single-888',
-        logData: ['Sample log line 1'],
-        createdBy: 'user-1',
-        createdAt: '2024-01-01T00:00:00Z',
-        originalFilename: 'logs.txt',
+        rawSamples: ['Sample log line 1'],
+        originalSource: { sourceType: 'file', sourceValue: 'logs.txt' },
+        authenticatedUser: mockUser,
       };
 
-      const result = await samplesIndexService.addSamplesToDataStream(mockUser, dataStream);
+      const result = await samplesIndexService.addSamplesToDataStream(params);
 
       expect(result.errors).toBe(false);
       expect(result.items).toHaveLength(1);
@@ -168,22 +165,21 @@ describe('AutomaticImportSamplesIndexService Integration Tests', () => {
     });
 
     it('should use authenticated user for created_by field', async () => {
-      mockUser = {
+      const adminUser = {
         username: 'admin-user',
         roles: ['admin'],
         profile_uid: 'admin-profile',
       } as unknown as AuthenticatedUser;
 
-      const dataStream: DataStreamSamples = {
+      const params: AddSamplesToDataStreamParams = {
         integrationId: 'integration-auth-777',
         dataStreamId: 'data-stream-auth-666',
-        logData: ['Sample log'],
-        createdBy: 'original-user', // Should be overridden
-        createdAt: '2024-01-01T00:00:00Z',
-        originalFilename: 'logs.txt',
+        rawSamples: ['Sample log'],
+        originalSource: { sourceType: 'file', sourceValue: 'logs.txt' },
+        authenticatedUser: adminUser,
       };
 
-      await samplesIndexService.addSamplesToDataStream(mockUser, dataStream);
+      await samplesIndexService.addSamplesToDataStream(params);
 
       await esClient.indices.refresh({ index: `${AutomaticImportSamplesIndexName}*` });
 
@@ -202,16 +198,15 @@ describe('AutomaticImportSamplesIndexService Integration Tests', () => {
     });
 
     it('should handle special characters', async () => {
-      const dataStream: DataStreamSamples = {
+      const params: AddSamplesToDataStreamParams = {
         integrationId: 'integration-special-555',
         dataStreamId: 'data-stream-special-444',
-        logData: ['Log with "quotes" and \\backslashes\\ and \nnewlines'],
-        createdBy: 'user-1',
-        createdAt: '2024-01-01T00:00:00Z',
-        originalFilename: 'logs with spaces.txt',
+        rawSamples: ['Log with "quotes" and \\backslashes\\ and \nnewlines'],
+        originalSource: { sourceType: 'file', sourceValue: 'logs with spaces.txt' },
+        authenticatedUser: mockUser,
       };
 
-      const result = await samplesIndexService.addSamplesToDataStream(mockUser, dataStream);
+      const result = await samplesIndexService.addSamplesToDataStream(params);
 
       expect(result.errors).toBe(false);
 
@@ -229,21 +224,20 @@ describe('AutomaticImportSamplesIndexService Integration Tests', () => {
       expect(searchResult.hits.total).toEqual({ value: 1, relation: 'eq' });
       const doc = searchResult.hits.hits[0]._source as any;
       expect(doc.log_data).toBe('Log with "quotes" and \\backslashes\\ and \nnewlines');
-      expect(doc.original_filename).toBe('logs with spaces.txt');
+      expect(doc.original_source).toBe('logs with spaces.txt');
     });
 
     it('should create documents with proper timestamp', async () => {
-      const dataStream: DataStreamSamples = {
+      const params: AddSamplesToDataStreamParams = {
         integrationId: 'integration-time-333',
         dataStreamId: 'data-stream-time-222',
-        logData: ['Sample log'],
-        createdBy: 'user-1',
-        createdAt: '2024-01-01T00:00:00Z',
-        originalFilename: 'logs.txt',
+        rawSamples: ['Sample log'],
+        originalSource: { sourceType: 'file', sourceValue: 'logs.txt' },
+        authenticatedUser: mockUser,
       };
 
       const beforeTime = new Date();
-      await samplesIndexService.addSamplesToDataStream(mockUser, dataStream);
+      await samplesIndexService.addSamplesToDataStream(params);
       const afterTime = new Date();
 
       await esClient.indices.refresh({ index: `${AutomaticImportSamplesIndexName}*` });
@@ -267,18 +261,17 @@ describe('AutomaticImportSamplesIndexService Integration Tests', () => {
     });
 
     it('should handle large batch of log lines', async () => {
-      const logData = Array.from({ length: 100 }, (_, i) => `Log data for document ${i}`);
+      const rawSamples = Array.from({ length: 100 }, (_, i) => `Log data for document ${i}`);
 
-      const dataStream: DataStreamSamples = {
+      const params: AddSamplesToDataStreamParams = {
         integrationId: 'integration-batch-111',
         dataStreamId: 'data-stream-batch-000',
-        logData,
-        createdBy: 'batch-user',
-        createdAt: '2024-01-01T00:00:00Z',
-        originalFilename: 'batch.txt',
+        rawSamples,
+        originalSource: { sourceType: 'file', sourceValue: 'batch.txt' },
+        authenticatedUser: mockUser,
       };
 
-      const result = await samplesIndexService.addSamplesToDataStream(mockUser, dataStream);
+      const result = await samplesIndexService.addSamplesToDataStream(params);
 
       expect(result.errors).toBe(false);
       expect(result.items).toHaveLength(100);
@@ -298,17 +291,16 @@ describe('AutomaticImportSamplesIndexService Integration Tests', () => {
       expect(searchResult.hits.total).toEqual({ value: 100, relation: 'eq' });
     });
 
-    it('should handle empty logData array', async () => {
-      const dataStream: DataStreamSamples = {
+    it('should handle empty rawSamples array', async () => {
+      const params: AddSamplesToDataStreamParams = {
         integrationId: 'integration-empty-543',
         dataStreamId: 'data-stream-empty-987',
-        logData: [],
-        createdBy: 'user-1',
-        createdAt: '2024-01-01T00:00:00Z',
-        originalFilename: 'logs.txt',
+        rawSamples: [],
+        originalSource: { sourceType: 'file', sourceValue: 'logs.txt' },
+        authenticatedUser: mockUser,
       };
 
-      const result = await samplesIndexService.addSamplesToDataStream(mockUser, dataStream);
+      const result = await samplesIndexService.addSamplesToDataStream(params);
 
       expect(result.errors).toBe(false);
       expect(result.items).toHaveLength(0);
@@ -328,16 +320,15 @@ describe('AutomaticImportSamplesIndexService Integration Tests', () => {
     });
 
     it('should verify index mapping is created correctly', async () => {
-      const dataStream: DataStreamSamples = {
+      const params: AddSamplesToDataStreamParams = {
         integrationId: 'integration-mapping-654',
         dataStreamId: 'data-stream-mapping-321',
-        logData: ['Sample log'],
-        createdBy: 'user-1',
-        createdAt: '2024-01-01T00:00:00Z',
-        originalFilename: 'logs.txt',
+        rawSamples: ['Sample log'],
+        originalSource: { sourceType: 'file', sourceValue: 'logs.txt' },
+        authenticatedUser: mockUser,
       };
 
-      await samplesIndexService.addSamplesToDataStream(mockUser, dataStream);
+      await samplesIndexService.addSamplesToDataStream(params);
 
       // Wait for index to be created
       await esClient.indices.refresh({ index: `${AutomaticImportSamplesIndexName}*` });
@@ -353,7 +344,7 @@ describe('AutomaticImportSamplesIndexService Integration Tests', () => {
       expect(mapping?.properties?.integration_id).toBeDefined();
       expect(mapping?.properties?.data_stream_id).toBeDefined();
       expect(mapping?.properties?.created_by).toBeDefined();
-      expect(mapping?.properties?.original_filename).toBeDefined();
+      expect(mapping?.properties?.original_source).toBeDefined();
       expect(mapping?.properties?.log_data).toBeDefined();
       expect(mapping?.properties?.metadata).toBeDefined();
     });
@@ -362,16 +353,15 @@ describe('AutomaticImportSamplesIndexService Integration Tests', () => {
   describe('getSamplesForDataStream', () => {
     it('should retrieve samples for a specific data stream', async () => {
       // Add samples first
-      const dataStream: DataStreamSamples = {
+      const params: AddSamplesToDataStreamParams = {
         integrationId: 'integration-test',
         dataStreamId: 'data-stream-test',
-        logData: ['Log line 1', 'Log line 2', 'Log line 3'],
-        createdBy: 'user-1',
-        createdAt: '2024-01-01T00:00:00Z',
-        originalFilename: 'test.txt',
+        rawSamples: ['Log line 1', 'Log line 2', 'Log line 3'],
+        originalSource: { sourceType: 'file', sourceValue: 'test.txt' },
+        authenticatedUser: mockUser,
       };
 
-      await samplesIndexService.addSamplesToDataStream(mockUser, dataStream);
+      await samplesIndexService.addSamplesToDataStream(params);
       await esClient.indices.refresh({ index: `${AutomaticImportSamplesIndexName}*` });
 
       // Retrieve samples
@@ -397,27 +387,25 @@ describe('AutomaticImportSamplesIndexService Integration Tests', () => {
 
     it('should isolate samples between different data streams', async () => {
       // Add samples to first data stream
-      const dataStream1: DataStreamSamples = {
+      const params1: AddSamplesToDataStreamParams = {
         integrationId: 'integration-1',
         dataStreamId: 'data-stream-1',
-        logData: ['Log 1 for DS1', 'Log 2 for DS1'],
-        createdBy: 'user-1',
-        createdAt: '2024-01-01T00:00:00Z',
-        originalFilename: 'ds1.txt',
+        rawSamples: ['Log 1 for DS1', 'Log 2 for DS1'],
+        originalSource: { sourceType: 'file', sourceValue: 'ds1.txt' },
+        authenticatedUser: mockUser,
       };
 
       // Add samples to second data stream
-      const dataStream2: DataStreamSamples = {
+      const params2: AddSamplesToDataStreamParams = {
         integrationId: 'integration-1',
         dataStreamId: 'data-stream-2',
-        logData: ['Log 1 for DS2', 'Log 2 for DS2', 'Log 3 for DS2'],
-        createdBy: 'user-1',
-        createdAt: '2024-01-01T00:00:00Z',
-        originalFilename: 'ds2.txt',
+        rawSamples: ['Log 1 for DS2', 'Log 2 for DS2', 'Log 3 for DS2'],
+        originalSource: { sourceType: 'file', sourceValue: 'ds2.txt' },
+        authenticatedUser: mockUser,
       };
 
-      await samplesIndexService.addSamplesToDataStream(mockUser, dataStream1);
-      await samplesIndexService.addSamplesToDataStream(mockUser, dataStream2);
+      await samplesIndexService.addSamplesToDataStream(params1);
+      await samplesIndexService.addSamplesToDataStream(params2);
       await esClient.indices.refresh({ index: `${AutomaticImportSamplesIndexName}*` });
 
       // Retrieve samples for each data stream separately
@@ -445,17 +433,16 @@ describe('AutomaticImportSamplesIndexService Integration Tests', () => {
 
     it('should respect 500 sample size limit', async () => {
       // Create a data stream with more than 500 log entries
-      const logData = Array.from({ length: 600 }, (_, i) => `Log line ${i}`);
-      const dataStream: DataStreamSamples = {
+      const rawSamples = Array.from({ length: 600 }, (_, i) => `Log line ${i}`);
+      const params: AddSamplesToDataStreamParams = {
         integrationId: 'integration-large',
         dataStreamId: 'data-stream-large',
-        logData,
-        createdBy: 'user-1',
-        createdAt: '2024-01-01T00:00:00Z',
-        originalFilename: 'large.txt',
+        rawSamples,
+        originalSource: { sourceType: 'file', sourceValue: 'large.txt' },
+        authenticatedUser: mockUser,
       };
 
-      await samplesIndexService.addSamplesToDataStream(mockUser, dataStream);
+      await samplesIndexService.addSamplesToDataStream(params);
       await esClient.indices.refresh({ index: `${AutomaticImportSamplesIndexName}*` });
 
       // Retrieve samples - should be limited to 500
@@ -493,16 +480,15 @@ describe('AutomaticImportSamplesIndexService Integration Tests', () => {
       }
 
       // Verify we can add documents (index will be created automatically)
-      const dataStream: DataStreamSamples = {
+      const params: AddSamplesToDataStreamParams = {
         integrationId: 'integration-lifecycle-147',
         dataStreamId: 'data-stream-lifecycle-258',
-        logData: ['Sample log'],
-        createdBy: 'user-1',
-        createdAt: '2024-01-01T00:00:00Z',
-        originalFilename: 'logs.txt',
+        rawSamples: ['Sample log'],
+        originalSource: { sourceType: 'file', sourceValue: 'logs.txt' },
+        authenticatedUser: mockUser,
       };
 
-      const result = await samplesIndexService.addSamplesToDataStream(mockUser, dataStream);
+      const result = await samplesIndexService.addSamplesToDataStream(params);
       expect(result.errors).toBe(false);
       expect(result.items).toHaveLength(1);
 

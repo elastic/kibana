@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import type { LoggerFactory, Logger, AuthenticatedUser } from '@kbn/core/server';
+import type {
+  LoggerFactory,
+  Logger,
+  AuthenticatedUser,
+  SavedObjectsClient,
+} from '@kbn/core/server';
 import {
-  type SavedObjectsClientContract,
   type SavedObjectsUpdateOptions,
   type SavedObjectsDeleteOptions,
   type SavedObjectsCreateOptions,
   type SavedObject,
   type SavedObjectsFindResponse,
   type SavedObjectsUpdateResponse,
-  type KibanaRequest,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import type { IntegrationAttributes, DataStreamAttributes } from './schemas/types';
@@ -87,11 +90,17 @@ export class AutomaticImportSavedObjectService {
     authenticatedUser: AuthenticatedUser
   ): Promise<SavedObject<IntegrationAttributes>> {
     const { integrationId } = integrationParams;
+
+    if (!integrationId) {
+      throw new Error('Integration ID is required');
+    }
+
     try {
       this.logger.debug(`Creating integration: ${integrationId}`);
 
       const initialIntegrationData: IntegrationAttributes = {
         integration_id: integrationId,
+        data_stream_count: 0,
         status: TASK_STATUSES.pending,
         created_by: authenticatedUser.username,
         metadata: {
@@ -136,12 +145,7 @@ export class AutomaticImportSavedObjectService {
     versionUpdate?: 'major' | 'minor' | 'patch',
     options?: SavedObjectsUpdateOptions<IntegrationAttributes>
   ): Promise<SavedObjectsUpdateResponse<IntegrationAttributes>> {
-    const {
-      integration_id: integrationId,
-      data_stream_count: dataStreamCount = 0,
-      status,
-      metadata = {},
-    } = data;
+    const { integration_id: integrationId, data_stream_count: dataStreamCount = 0, status } = data;
 
     if (!integrationId) {
       throw new Error('Integration ID is required');
@@ -155,7 +159,7 @@ export class AutomaticImportSavedObjectService {
         throw new Error(`Integration ${integrationId} not found`);
       }
 
-      const currentVersion = existingIntegration.attributes.metadata?.version || '0.0.0';
+      const currentVersion = existingIntegration.metadata?.version || '0.0.0';
 
       if (currentVersion !== expectedVersion) {
         throw new Error(
@@ -168,23 +172,21 @@ export class AutomaticImportSavedObjectService {
       const integrationData: IntegrationAttributes = {
         integration_id: integrationId,
         data_stream_count: dataStreamCount,
-        created_by: existingIntegration.attributes.created_by,
-        status: status || existingIntegration.attributes.status,
+        created_by: existingIntegration.created_by,
+        status: status || existingIntegration.status,
         metadata: {
-          ...metadata,
+          ...existingIntegration.metadata,
           version: newVersion,
+          title: data.metadata.title,
+          description: data.metadata.description,
         },
       };
 
-      const internalVersion = existingIntegration.version;
       return await this.savedObjectsClient.update<IntegrationAttributes>(
         INTEGRATION_SAVED_OBJECT_TYPE,
         integrationId,
         integrationData,
-        {
-          ...options,
-          version: internalVersion,
-        }
+        options
       );
     } catch (error) {
       this.logger.error(`Failed to update integration: ${error}`);
@@ -383,7 +385,8 @@ export class AutomaticImportSavedObjectService {
     authenticatedUser: AuthenticatedUser,
     options?: SavedObjectsCreateOptions
   ): Promise<SavedObject<DataStreamAttributes>> {
-    const { integrationId, dataStreamId, jobInfo, metadata } = dataStreamParams;
+    const { integrationId, dataStreamId, jobInfo, title, description, inputTypes } =
+      dataStreamParams;
 
     if (!integrationId) {
       throw new Error('Integration ID is required');
@@ -393,7 +396,7 @@ export class AutomaticImportSavedObjectService {
       throw new Error('Data stream ID is required');
     }
 
-    let existingIntegration: SavedObject<IntegrationAttributes> | null = null;
+    let existingIntegration: IntegrationAttributes | null = null;
     // Check for existing integration
     try {
       existingIntegration = await this.getIntegration(integrationId);
@@ -410,20 +413,23 @@ export class AutomaticImportSavedObjectService {
     try {
       this.logger.debug(`Creating data stream: ${dataStreamId}`);
 
-      const { sample_count: sampleCount = 0, ...restMetadata } = metadata || {};
-
       const initialDataStreamData: DataStreamAttributes = {
         integration_id: integrationId,
         data_stream_id: dataStreamId,
         created_by: authenticatedUser.username,
-        job_info: jobInfo,
+        title,
+        description,
+        input_types: inputTypes.map((type) => type.name),
+        job_info: {
+          job_id: jobInfo?.jobId ?? '',
+          job_type: jobInfo?.jobType ?? '',
+          status: jobInfo?.status ?? TASK_STATUSES.pending,
+        },
         metadata: {
-          sample_count: sampleCount,
-          ...restMetadata,
+          sample_count: dataStreamParams.metadata?.sampleCount ?? 0,
           created_at: new Date().toISOString(),
           version: '0.0.0',
         },
-        result: result || {},
       };
 
       // Create automatically checks if there is an existing data stream with the same id and will throw an error if so
@@ -445,32 +451,37 @@ export class AutomaticImportSavedObjectService {
           );
 
           const updatedIntegrationData: IntegrationAttributes = {
-            ...existingIntegration.attributes,
-            data_stream_count: existingIntegration.attributes.data_stream_count! + 1,
+            ...existingIntegration,
+            data_stream_count: (existingIntegration.data_stream_count ?? 0) + 1,
           };
 
           await this.updateIntegration(
             updatedIntegrationData,
-            existingIntegration.attributes.metadata?.version || '0.0.0'
+            existingIntegration.metadata?.version || '0.0.0'
           );
         } else {
           this.logger.debug(
             `Data stream created successfully, creating new integration ${integrationId}`
           );
 
-          const defaultIntegrationData: IntegrationAttributes = {
-            integration_id: integrationId,
-            data_stream_count: 1,
-            created_by: authenticatedUser.username,
-            status: TASK_STATUSES.pending,
-            metadata: {
-              created_at: new Date().toISOString(),
-              version: '0.0.0',
-              title: `Auto-generated integration ${integrationId}`,
-            },
+          const integrationParams: IntegrationParams = {
+            integrationId,
+            title: `Auto-generated integration ${integrationId}`,
+            description: '',
           };
 
-          await this.insertIntegration(request, defaultIntegrationData);
+          await this.insertIntegration(integrationParams, authenticatedUser);
+
+          // Increment the data_stream_count for the newly created integration
+          const newIntegration = await this.getIntegration(integrationId);
+          const updatedIntegrationData: IntegrationAttributes = {
+            ...newIntegration,
+            data_stream_count: 1,
+          };
+          await this.updateIntegration(
+            updatedIntegrationData,
+            newIntegration.metadata?.version || '0.0.0'
+          );
         }
       } catch (integrationError) {
         this.logger.error(
@@ -507,6 +518,9 @@ export class AutomaticImportSavedObjectService {
       job_info: jobInfo,
       metadata = { sample_count: 0 },
       result = {},
+      title,
+      description,
+      input_types: inputTypes,
     } = data;
 
     if (!integrationId) {
@@ -547,6 +561,9 @@ export class AutomaticImportSavedObjectService {
           version: newVersion,
         },
         result: result || {},
+        title: title || existingDataStream.attributes.title,
+        description: description || existingDataStream.attributes.description,
+        input_types: inputTypes || existingDataStream.attributes.input_types,
       };
 
       const internalVersion = existingDataStream.version;
@@ -658,7 +675,7 @@ export class AutomaticImportSavedObjectService {
 
     // update the integration count since we are deleting a data stream
     try {
-      const parentIntegration = await this.getIntegration(parentIntegrationId);
+      const parentIntegration = await this.getIntegration(parentIntegrationId!);
       if (!parentIntegration) {
         throw new Error(
           `Integration associated with this data stream ${parentIntegrationId} not found`
@@ -666,13 +683,13 @@ export class AutomaticImportSavedObjectService {
       }
 
       const updatedIntegrationData: IntegrationAttributes = {
-        ...parentIntegration.attributes,
-        data_stream_count: parentIntegration.attributes.data_stream_count! - 1,
+        ...parentIntegration,
+        data_stream_count: (parentIntegration.data_stream_count ?? 0) - 1,
       };
 
       await this.updateIntegration(
         updatedIntegrationData,
-        parentIntegration.attributes.metadata?.version || '0.0.0'
+        parentIntegration.metadata?.version || '0.0.0'
       );
     } catch (integrationError) {
       this.logger.error(

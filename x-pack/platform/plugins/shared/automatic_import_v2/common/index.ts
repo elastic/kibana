@@ -9,7 +9,7 @@ export type {
   CreateAutoImportIntegrationResponse,
   DeleteAutoImportIntegrationRequestParams,
   GetAutoImportIntegrationResponse,
-  GetAutoImportIntegrationsResponse,
+  GetAllAutoImportIntegrationsResponse,
   UpdateAutoImportIntegrationRequestBody,
   UpdateAutoImportIntegrationRequestParams,
 } from './model/api/integrations/integration.gen';
@@ -19,4 +19,12 @@ export {
   GetAutoImportIntegrationRequestParams,
 } from './model/api/integrations/integration.gen';
 
-export type { Integration, DataStream, InputType } from './model/common_attributes.gen';
+export type {
+  Integration,
+  DataStream,
+  InputType,
+  TaskStatusEnum,
+  TaskStatus,
+  IntegrationResponse,
+  DataStreamResponse,
+} from './model/common_attributes.gen';
