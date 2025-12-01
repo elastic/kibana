@@ -679,7 +679,7 @@ export class LensVisService {
         context,
         dataView,
         ['lnsDatatable'],
-        ChartType.Line,
+        preferredChartType,
         visAttributes
       ) ?? []
     );
