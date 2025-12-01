@@ -23,13 +23,32 @@ export class ConsoleWorkerProxyService {
     if (!this.worker) {
       throw new Error('Worker Proxy Service has not been setup!');
     }
-    await this.worker.withSyncedResources([modelUri]);
-    const parser = await this.worker.getProxy();
-    return parser.getParserResult(modelUri.toString());
+    try {
+      await this.worker.withSyncedResources([modelUri]);
+      const parser = await this.worker.getProxy();
+      return parser.getParserResult(modelUri.toString());
+    } catch (e) {
+      // Gracefully handle worker errors
+      // eslint-disable-next-line no-console
+      console.warn('Console worker getParserResult failed', e);
+      return undefined;
+    }
   }
 
   public setup() {
-    this.worker = monaco.editor.createWebWorker({ label: CONSOLE_LANG_ID, moduleId: '' });
+    // Monaco 0.54.0: createWebWorker() no longer resolves workers from moduleId.
+    // Instead, manually create the Worker using MonacoEnvironment.getWorkerUrl and pass it in.
+    const workerUrl = globalThis.MonacoEnvironment?.getWorkerUrl?.(
+      'workerMain.js',
+      CONSOLE_LANG_ID
+    );
+    if (!workerUrl) {
+      throw new Error('MonacoEnvironment.getWorkerUrl is not defined');
+    }
+    const worker = Promise.resolve(
+      new Worker(workerUrl, { name: CONSOLE_LANG_ID, type: 'module' })
+    );
+    this.worker = monaco.editor.createWebWorker({ worker });
   }
 
   public stop() {
