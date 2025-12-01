@@ -109,9 +109,6 @@ export const suggestionsApi = ({
   ) {
     return [];
   }
-  const isSubTypeForActive = preferredChartType
-    ? activeVisualization?.isSubtypeSupported?.(preferredChartType.toLowerCase())
-    : undefined;
   // compute the rest suggestions depending on the active one and filter out the lnsLegacyMetric
   const newSuggestions = getSuggestions({
     datasourceMap,
@@ -123,7 +120,6 @@ export const suggestionsApi = ({
     },
     visualizationMap,
     activeVisualization,
-    subVisualizationId: isSubTypeForActive ? preferredChartType : undefined,
     visualizationState: primarySuggestion.visualizationState,
     dataViews,
   }).filter(
