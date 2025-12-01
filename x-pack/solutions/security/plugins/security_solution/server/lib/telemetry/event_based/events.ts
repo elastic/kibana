@@ -474,16 +474,11 @@ export const ENTITY_STORE_HEALTH_REPORT_EVENT: EventTypeOpts<{
     indexPattern: string;
     filter: string;
     timestampField: string;
-    maxPageSearchSize: number;
     components: Array<{
       id: string;
       resource: string;
       installed: boolean;
       health?: string;
-      enabled?: boolean;
-      status?: string;
-      lastRun?: string;
-      nextRun?: string;
     }>;
   }>;
 }> = {
@@ -546,12 +541,6 @@ export const ENTITY_STORE_HEALTH_REPORT_EVENT: EventTypeOpts<{
                 'Name of the timestamp field used for all operations (e.g. "@timestamp")',
             },
           },
-          maxPageSearchSize: {
-            type: 'long',
-            _meta: {
-              description: 'Maximum page size',
-            },
-          },
           components: {
             type: 'array',
             items: {
@@ -575,34 +564,6 @@ export const ENTITY_STORE_HEALTH_REPORT_EVENT: EventTypeOpts<{
                   _meta: {
                     optional: true,
                     description: 'Reported component health; Present for transforms',
-                  },
-                },
-                enabled: {
-                  type: 'boolean',
-                  _meta: {
-                    optional: true,
-                    description: 'Whether the task is enabled; Present for tasks',
-                  },
-                },
-                status: {
-                  type: 'keyword',
-                  _meta: {
-                    optional: true,
-                    description: 'Task status (e.g., "running", "idle")',
-                  },
-                },
-                lastRun: {
-                  type: 'keyword',
-                  _meta: {
-                    optional: true,
-                    description: 'Last run timestamp; Present for tasks',
-                  },
-                },
-                nextRun: {
-                  type: 'keyword',
-                  _meta: {
-                    optional: true,
-                    description: 'Next scheduled run timestamp; Present for tasks',
                   },
                 },
               },
@@ -1683,6 +1644,8 @@ export const events = [
   ENDPOINT_WORKFLOW_INSIGHTS_REMEDIATED_EVENT,
   FIELD_RETENTION_ENRICH_POLICY_EXECUTION_EVENT,
   ENTITY_STORE_DATA_VIEW_REFRESH_EXECUTION_EVENT,
+  ENTITY_STORE_SNAPSHOT_TASK_EXECUTION_EVENT,
+  ENTITY_STORE_HEALTH_REPORT_EVENT,
   ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
   ENTITY_ENGINE_INITIALIZATION_EVENT,
   ENTITY_STORE_USAGE_EVENT,

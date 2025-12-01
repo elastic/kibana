@@ -8,5 +8,5 @@
 export const SCOPE = ['securitySolution'];
 export const TYPE = 'entity_store:health';
 export const VERSION = '1.0.0';
-export const INTERVAL = '30m';
+export const INTERVAL = '1m';
 export const TIMEOUT = '10m';

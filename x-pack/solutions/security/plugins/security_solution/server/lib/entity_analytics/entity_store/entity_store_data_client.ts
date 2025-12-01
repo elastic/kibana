@@ -74,6 +74,7 @@ import {
 import { AssetCriticalityMigrationClient } from '../asset_criticality/asset_criticality_migration_client';
 import {
   startEntityStoreFieldRetentionEnrichTask,
+  startEntityStoreHealthTask,
   removeEntityStoreFieldRetentionEnrichTask,
   getEntityStoreFieldRetentionEnrichTaskState as getEntityStoreFieldRetentionEnrichTaskStatus,
   removeEntityStoreDataViewRefreshTask,
@@ -564,6 +565,14 @@ export class EntityStoreDataClient {
       this.options.telemetry?.reportEvent(ENTITY_ENGINE_INITIALIZATION_EVENT.eventType, {
         duration,
       });
+
+      // this task will report Entity Store state as telemetry events
+      await startEntityStoreHealthTask({
+        namespace,
+        logger,
+        taskManager,
+      });
+      this.log(`debug`, entityType, `Started entity store health task`);
 
       return updated;
     } catch (err) {

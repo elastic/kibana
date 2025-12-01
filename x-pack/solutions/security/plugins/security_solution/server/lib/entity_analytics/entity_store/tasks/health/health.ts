@@ -36,6 +36,7 @@ import type { AppClientFactory } from '../../../../../client';
 import { PrivilegeMonitoringDataClient } from '../../../privilege_monitoring/engine/data_client';
 import { createPrivmonIndexService } from '../../../privilege_monitoring/engine/elasticsearch/indices';
 import { checkandInitPrivilegeMonitoringResourcesNoContext } from '../../../privilege_monitoring/check_and_init_privmon_resources';
+import type { GetEntityStoreStatusResponse } from '../../../../../../common/api/entity_analytics/entity_store/status.gen';
 
 const getTaskName = (): string => TYPE;
 
@@ -136,9 +137,10 @@ export const registerEntityStoreHealthTask = ({
     await checkandInitPrivilegeMonitoringResourcesNoContext(privmonIndexService, logger);
 
     const statusResponse = await entityStoreClient.status({ include_components: true });
-    statusResponse.engines.forEach((engine) => {
-      telemetry.reportEvent(ENTITY_STORE_HEALTH_REPORT_EVENT.eventType, engine);
-    });
+    telemetry.reportEvent(
+      ENTITY_STORE_HEALTH_REPORT_EVENT.eventType,
+      extractEngineHealthInformation(statusResponse)
+    );
   };
 
   taskManager.registerTaskDefinitions({
@@ -328,3 +330,59 @@ export const getEntityStoreHealthTaskState = async ({
     throw e;
   }
 };
+
+function extractEngineHealthInformation(statusResponse: GetEntityStoreStatusResponse): Event {
+  const unpacked: Event = {
+    engines: [],
+  };
+  statusResponse.engines.forEach((engine) => {
+    unpacked.engines.push({
+      type: engine.type as string,
+      status: engine.status,
+      delay: engine.delay,
+      frequency: engine.frequency,
+      docsPerSecond: engine.docsPerSecond,
+      lookbackPeriod: engine.lookbackPeriod,
+      fieldHistoryLength: engine.fieldHistoryLength,
+      indexPattern: engine.indexPattern,
+      filter: engine.filter,
+      timestampField: engine.timestampField,
+      components: (engine.components || []).map((c) => ({
+        id: c.id,
+        resource: c.resource,
+        installed: c.installed,
+        health: c.health,
+      })),
+    } as Engine);
+  });
+  return unpacked;
+}
+
+interface Component {
+  id: string;
+  resource: string;
+  installed: boolean;
+  health?: string;
+  enabled?: boolean;
+  status?: string;
+  lastRun?: string;
+  nextRun?: string;
+}
+
+interface Engine {
+  type: string;
+  status: string;
+  delay: string;
+  frequency: string;
+  docsPerSecond: number;
+  lookbackPeriod: string;
+  fieldHistoryLength: number;
+  indexPattern: string;
+  filter: string;
+  timestampField: string;
+  components: Component[];
+}
+
+interface Event {
+  engines: Engine[];
+}
