@@ -23,6 +23,7 @@ import {
   ALWAYS_CONDITION,
   conditionSchema,
   convertStepToUIDefinition,
+  isAlwaysCondition,
   streamlangProcessorSchema,
 } from '@kbn/streamlang';
 import { isWhereBlock } from '@kbn/streamlang/types/streamlang';
@@ -415,7 +416,10 @@ export const convertFormStateToProcessor = (
           ignore_failure,
           ignore_missing,
           description,
-          where: 'where' in formState ? formState.where : undefined,
+          where:
+            'where' in formState && !isAlwaysCondition(formState.where)
+              ? formState.where
+              : undefined,
         } as ConvertProcessor,
       };
     }
