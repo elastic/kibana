@@ -57,14 +57,10 @@ export function buildAlertParamsFromAnomaly(
   }
 
   // Add actual value filter
-  const actualValue = isDefined(anomaly.actual)
-    ? Array.isArray(anomaly.actual)
-      ? anomaly.actual[0]
-      : anomaly.actual
-    : undefined;
+  const actualValue = Array.isArray(anomaly.actual) ? anomaly.actual[0] : anomaly.actual;
 
   // Add actual value filter if we have a value
-  if (isDefined(actualValue) && typeof actualValue === 'number') {
+  if (typeof actualValue === 'number') {
     // Determine if this is a population job by checking if the anomaly has causes
     // Population jobs have anomalies with a causes array
     const hasCauses = Array.isArray(anomaly.source.causes) && anomaly.source.causes.length > 0;
@@ -79,7 +75,7 @@ export function buildAlertParamsFromAnomaly(
   }
 
   // Combine all KQL parts
-  const customFilter = kqlParts.length > 0 ? kqlParts.join(' and ') : null;
+  const kqlQueryString = kqlParts.length > 0 ? kqlParts.join(' and ') : null;
 
   // Set severity slightly lower than the anomaly to catch similar anomalies
   const severity = Math.max(0, Math.floor(anomaly.severity) - SEVERITY_THRESHOLD_ADJUSTMENT);
@@ -91,6 +87,6 @@ export function buildAlertParamsFromAnomaly(
     severity,
     resultType: ML_ANOMALY_RESULT_TYPE.RECORD,
     includeInterim: false,
-    customFilter,
+    kqlQueryString,
   };
 }
