@@ -26,6 +26,7 @@ import {
 import type { RoutingStatus } from '@kbn/streams-schema';
 import React, { useMemo } from 'react';
 import useToggle from 'react-use/lib/useToggle';
+import type { StreamType } from '../../../telemetry/types';
 import {
   alwaysToEmptyEquals,
   conditionNeedsValueField,
@@ -35,6 +36,8 @@ import {
 import type { Suggestion } from './autocomplete_selector';
 import { AutocompleteSelector } from './autocomplete_selector';
 import { OperatorSelector } from './operator_selector';
+import { useStreamEnrichmentSelector } from '../stream_detail_enrichment/state_management/stream_enrichment_state_machine';
+import { selectStreamTypeForTelemetry } from '../stream_detail_enrichment/state_management/stream_enrichment_state_machine/selectors';
 
 export interface ConditionEditorProps {
   condition: Condition;
@@ -129,6 +132,10 @@ function FilterConditionForm(props: {
 }) {
   const { condition, disabled, onConditionChange, fieldSuggestions, valueSuggestions } = props;
 
+  const streamType: StreamType = useStreamEnrichmentSelector((snapshot) =>
+    selectStreamTypeForTelemetry(snapshot.context)
+  );
+
   const operator = useMemo(() => {
     return getFilterOperator(condition);
   }, [condition]);
@@ -154,7 +161,12 @@ function FilterConditionForm(props: {
   const showValueField = useMemo(() => conditionNeedsValueField(condition), [condition]);
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="streamsAppConditionEditor">
+    <EuiFlexGroup
+      gutterSize="s"
+      alignItems="center"
+      data-test-subj="streamsAppConditionEditor"
+      data-stream-type={streamType}
+    >
       <EuiFlexItem grow={2}>
         <AutocompleteSelector
           value={condition.field}
