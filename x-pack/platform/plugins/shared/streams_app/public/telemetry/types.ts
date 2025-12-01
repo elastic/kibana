@@ -155,5 +155,4 @@ export {
   type StreamsFeatureIdentificationDeletedProps,
   type StreamsDescriptionGeneratedProps,
   type StreamsProcessingSimulationSamplesFetchLatencyProps,
-  type StreamType,
 };

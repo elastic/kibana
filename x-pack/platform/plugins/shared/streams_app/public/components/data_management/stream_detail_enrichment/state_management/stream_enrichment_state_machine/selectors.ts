@@ -13,7 +13,6 @@ import type { StreamEnrichmentContextType } from './types';
 import { isStepUnderEdit } from '../steps_state_machine';
 import { canDataSourceTypeBeOutdated } from './utils';
 import type { DataSourceContext } from '../data_source_state_machine';
-import type { StreamType } from '../../../../../telemetry/types';
 
 /**
  * Selects the processor marked as the draft processor.
@@ -106,7 +105,7 @@ export const selectWhetherThereAreOutdatedDocumentsInSimulation = createSelector
 
 export const selectStreamType = createSelector(
   [(context: StreamEnrichmentContextType) => context.definition],
-  (definition): StreamType => {
+  (definition) => {
     return getStreamTypeFromDefinition(definition.stream);
   }
 );
