@@ -59,7 +59,7 @@ export const updateWorkflowThunk = createAsyncThunk<
         }
 
         // Also update the workflow object in the store
-        dispatch(updateWorkflow(workflow));
+        dispatch(updateWorkflow({ ...workflow, yaml: updatedYaml ));
 
         // Reload the workflow from server to sync
         await dispatch(loadWorkflowThunk({ id }));
