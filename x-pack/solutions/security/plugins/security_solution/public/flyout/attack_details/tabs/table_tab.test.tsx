@@ -67,8 +67,6 @@ describe('<TableTab /> (attack details)', () => {
   });
 
   it('filters the table correctly via the search input', async () => {
-    const user = userEvent.setup();
-
     const { getByTestId, queryByText } = render(
       <TestProviders>
         <TableTab />
