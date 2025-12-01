@@ -21,7 +21,6 @@ import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
-import type { AxiosInstance } from 'axios';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 import { ConnectorUsageCollector } from '../usage/connector_usage_collector';
 import {
@@ -101,12 +100,6 @@ type ExecuteHelperOptions<Source = unknown> = Omit<ExecuteOptions<Source>, 'requ
   services: Services | UnsecuredServices;
   spaceId?: string;
 };
-
-interface GetAxiosInstanceParams {
-  actionId: string;
-  request: KibanaRequest;
-  getAxiosInstanceWithAuth: (validatedSecrets: Record<string, unknown>) => Promise<AxiosInstance>;
-}
 
 type UnsecuredExecuteOptions<Source = unknown> = Pick<
   ExecuteOptions<Source>,
@@ -199,45 +192,6 @@ export class ActionExecutor {
       spaceId,
       taskInfo,
     });
-  }
-
-  public async getAxiosInstance({
-    actionId,
-    request,
-    getAxiosInstanceWithAuth,
-  }: GetAxiosInstanceParams): Promise<AxiosInstance> {
-    if (!this.isInitialized) {
-      throw new Error('ActionExecutor not initialized');
-    }
-
-    const { spaces, actionTypeRegistry } = this.actionExecutorContext!;
-    const spaceId = spaces && spaces.getSpaceId(request);
-    const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
-
-    const actionInfo = await this.getActionInfoInternal(actionId, namespace.namespace);
-
-    const { actionTypeId, secrets } = actionInfo;
-
-    if (!this.actionInfo || this.actionInfo.actionId !== actionId) {
-      this.actionInfo = actionInfo;
-    }
-
-    const actionType = actionTypeRegistry.get(actionTypeId);
-    const configurationUtilities = actionTypeRegistry.getUtils();
-
-    let validatedSecrets;
-    try {
-      validatedSecrets = validateSecrets(actionType, secrets, { configurationUtilities });
-    } catch (err) {
-      throw new ActionExecutionError(err.message, ActionExecutionErrorReason.Validation, {
-        actionId,
-        status: 'error',
-        message: err.message,
-        errorSource: TaskErrorSource.FRAMEWORK,
-      });
-    }
-
-    return await getAxiosInstanceWithAuth(validatedSecrets);
   }
 
   public async executeUnsecured({
