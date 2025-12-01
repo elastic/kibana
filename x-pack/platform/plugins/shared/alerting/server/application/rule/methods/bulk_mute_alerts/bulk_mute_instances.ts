@@ -6,16 +6,16 @@
  */
 
 import Boom from '@hapi/boom';
+import type { RawRule } from '../../../../saved_objects/schemas/raw_rule/latest';
+import { bulkUpdateRuleSo } from '../../../../data/rule/methods/bulk_update_rule_so';
+import { bulkGetRulesSo } from '../../../../data/rule/methods/bulk_get_rules_so';
+import { retryIfBulkEditConflicts } from '../../../../rules_client/common/bulk_edit/retry_if_bulk_edit_conflicts';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { updateRuleSo } from '../../../../data/rule/methods/update_rule_so';
 import { bulkMuteAlertsParamsSchema } from './schemas';
 import type { BulkMuteAlertsParams } from './types';
-import type { Rule } from '../../../../types';
 import { AlertingAuthorizationEntity, WriteOperations } from '../../../../authorization';
-import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { RuleAuditAction, ruleAuditEvent } from '../../../../rules_client/common/audit_events';
 import type { RulesClientContext } from '../../../../rules_client/types';
-import { updateMeta } from '../../../../rules_client/lib';
 
 export async function bulkMuteInstances(
   context: RulesClientContext,
@@ -27,78 +27,78 @@ export async function bulkMuteInstances(
     throw Boom.badRequest(`Failed to validate params: ${error.message}`);
   }
 
-  return await retryIfConflicts(
+  await retryIfBulkEditConflicts(
     context.logger,
-    `rulesClient.bulkMuteInstances('${params.ruleId}')`,
+    `rulesClient.bulkMuteInstances('${JSON.stringify(params)}')`,
     async () => await bulkMuteInstancesWithOCC(context, params)
   );
 }
 
-async function bulkMuteInstancesWithOCC(
-  context: RulesClientContext,
-  { ruleId, alertInstanceIds }: BulkMuteAlertsParams
-) {
-  const { attributes, version } = await context.unsecuredSavedObjectsClient.get<Rule>(
-    RULE_SAVED_OBJECT_TYPE,
-    ruleId
-  );
+async function bulkMuteInstancesWithOCC(context: RulesClientContext, params: BulkMuteAlertsParams) {
+  // TODO: Handle errors returned by the SO client
+  const rules = await bulkGetRulesSo({
+    savedObjectsClient: context.unsecuredSavedObjectsClient,
+    ids: params.rules.map((p) => p.id),
+  });
 
   try {
-    await context.authorization.ensureAuthorized({
-      ruleTypeId: attributes.alertTypeId,
-      consumer: attributes.consumer,
+    const ruleTypeIdConsumersPairs = rules.saved_objects.map((rule) => ({
+      ruleTypeId: rule.attributes.alertTypeId,
+      consumers: [rule.attributes.consumer],
+    }));
+
+    await context.authorization.bulkEnsureAuthorized({
+      ruleTypeIdConsumersPairs,
       operation: WriteOperations.MuteAlert,
       entity: AlertingAuthorizationEntity.Rule,
     });
 
-    if (attributes.actions.length) {
-      await context.actionsAuthorization.ensureAuthorized({ operation: 'execute' });
+    for (const rule of rules.saved_objects) {
+      context.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.BULK_MUTE_ALERTS,
+          outcome: 'unknown',
+          savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: rule.id, name: rule.attributes.name },
+        })
+      );
     }
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.BULK_MUTE_ALERTS,
-        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId, name: attributes.name },
         error,
       })
     );
+
     throw error;
   }
 
-  context.auditLogger?.log(
-    ruleAuditEvent({
-      action: RuleAuditAction.BULK_MUTE_ALERTS,
-      outcome: 'unknown',
-      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId, name: attributes.name },
-    })
-  );
+  const rulesToUpdate = params.rules.map((rule) => ({
+    id: rule.id,
+    // TODO: Inculde the existing mutedInstanceIds to avoid overwriting them
+    attributes: transformRequestToRuleAttributes({ alertInstanceIds: rule.alertInstanceIds }),
+  }));
 
-  context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
-
-  if (attributes.muteAll) {
-    return;
-  }
-
-  const newMutedInstanceIds = [
-    ...new Set([...(attributes.mutedInstanceIds || []), ...alertInstanceIds]),
-  ];
-
-  if (
-    attributes.mutedInstanceIds &&
-    newMutedInstanceIds.length === attributes.mutedInstanceIds.length
-  ) {
-    // No changes needed
-    return;
-  }
-
-  await updateRuleSo({
+  const bulkUpdateRes = await bulkUpdateRuleSo({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
-    savedObjectsUpdateOptions: { version },
-    id: ruleId,
-    updateRuleAttributes: updateMeta(context, {
-      mutedInstanceIds: newMutedInstanceIds,
-      updatedBy: await context.getUserName(),
-      updatedAt: new Date().toISOString(),
-    }),
+    rules: rulesToUpdate,
   });
+
+  // TODO: Populate the res correctly and return errors if any
+  return {
+    apiKeysToInvalidate: [],
+    resultSavedObjects: bulkUpdateRes.saved_objects,
+    errors: [],
+    rules: [],
+    skipped: [],
+  };
 }
+
+const transformRequestToRuleAttributes = ({
+  alertInstanceIds,
+}: {
+  alertInstanceIds: string[];
+}): Pick<RawRule, 'mutedInstanceIds' | 'updatedAt'> => ({
+  mutedInstanceIds: alertInstanceIds,
+  updatedAt: new Date().toISOString(),
+});

@@ -7,9 +7,12 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const bulkMuteUnmuteAlertsBodySchema = schema.arrayOf(
-  schema.object({
-    rule_id: schema.string(),
-    alert_instance_id: schema.string(),
-  })
-);
+export const bulkMuteUnmuteAlertsBodySchema = schema.object({
+  rules: schema.arrayOf(
+    schema.object({
+      rule_id: schema.string(),
+      alert_instance_ids: schema.arrayOf(schema.string()),
+    }),
+    { maxSize: 100 }
+  ),
+});

@@ -8,6 +8,11 @@
 import { schema } from '@kbn/config-schema';
 
 export const bulkMuteAlertsParamsSchema = schema.object({
-  ruleId: schema.string(),
-  alertInstanceIds: schema.arrayOf(schema.string()),
+  rules: schema.arrayOf(
+    schema.object({
+      id: schema.string(),
+      alertInstanceIds: schema.arrayOf(schema.string()),
+    }),
+    { maxSize: 100 }
+  ),
 });

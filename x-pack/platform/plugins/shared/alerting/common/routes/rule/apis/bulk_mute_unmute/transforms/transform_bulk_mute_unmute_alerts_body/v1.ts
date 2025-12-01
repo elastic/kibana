@@ -5,16 +5,14 @@
  * 2.0.
  */
 
+import type { BulkMuteAlertsParams } from '../../../../../../../server/application/rule/methods/bulk_mute_alerts/types';
 import type { BulkMuteUnmuteAlertsRequestBodyV1 } from '../..';
 
 export const transformBulkMuteUnmuteAlertsBody = (
   body: BulkMuteUnmuteAlertsRequestBodyV1
-): Record<string, string[]> => {
-  return body.reduce<Record<string, string[]>>((acc, item) => {
-    if (!acc[item.rule_id]) {
-      acc[item.rule_id] = [];
-    }
-    acc[item.rule_id].push(item.alert_instance_id);
-    return acc;
-  }, {});
+): BulkMuteAlertsParams['rules'] => {
+  return body.rules.map(({ rule_id: id, alert_instance_ids: alertInstanceIds }) => ({
+    id,
+    alertInstanceIds,
+  }));
 };
