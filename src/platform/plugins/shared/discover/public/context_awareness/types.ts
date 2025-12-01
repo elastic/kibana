@@ -27,7 +27,7 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { ChartSectionConfiguration } from '@kbn/unified-histogram/types';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { DiscoverDataSource } from '../../common/data_sources';
-import type { DiscoverAppState } from '../application/main/state_management/discover_app_state_container';
+import type { DiscoverAppState } from '../application/main/state_management/redux';
 import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
 import type { TabState } from '../application/main/state_management/redux';
 
@@ -136,6 +136,20 @@ export interface DocViewerExtension {
  * Parameters passed to the doc viewer extension
  */
 export interface DocViewerExtensionParams {
+  /**
+   * Available actions for the doc viewer extension
+   */
+  actions: {
+    /**
+     * Opens a new tab
+     * @param params The parameters for the open in new tab action
+     */
+    openInNewTab?: (params: OpenInNewTabParams) => void;
+    /**
+     * Updates the current ES|QL query
+     */
+    updateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
+  };
   /**
    * The record being displayed in the doc viewer
    */
