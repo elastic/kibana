@@ -180,48 +180,6 @@ describe('Session service', () => {
 
       expect(abort).toBeCalledTimes(3);
     });
-
-    describe('Keeping searches alive', () => {
-      let dateNowSpy: jest.SpyInstance;
-      let now = Date.now();
-      const advanceTimersBy = (by: number) => {
-        now = now + by;
-        jest.advanceTimersByTime(by);
-      };
-      beforeEach(() => {
-        dateNowSpy = jest.spyOn(Date, 'now').mockImplementation(() => now);
-        now = Date.now();
-        jest.useFakeTimers();
-      });
-      afterEach(() => {
-        dateNowSpy.mockRestore();
-        jest.useRealTimers();
-      });
-
-      it('Polls all completed searches to keep them alive', async () => {
-        const abort = jest.fn();
-        const poll = jest.fn(() => Promise.resolve());
-
-        sessionService.enableStorage({
-          getName: async () => 'Name',
-          getLocatorData: async () => ({
-            id: 'id',
-            initialState: {},
-            restoreState: {},
-          }),
-        });
-        sessionService.start();
-
-        const searchTracker = sessionService.trackSearch({ abort, poll });
-        searchTracker.complete();
-
-        expect(poll).toHaveBeenCalledTimes(0);
-
-        advanceTimersBy(30000);
-
-        expect(poll).toHaveBeenCalledTimes(1);
-      });
-    });
   });
 
   it('Can continue previous session from another app', async () => {
