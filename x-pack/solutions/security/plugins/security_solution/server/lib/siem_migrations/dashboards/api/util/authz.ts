@@ -6,8 +6,7 @@
  */
 
 import { SIEM_MIGRATIONS_API_ACTION_ALL } from '@kbn/security-solution-features/actions';
-import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 
-export const commonAuthz = {
-  requiredPrivileges: [RULES_API_READ, SIEM_MIGRATIONS_API_ACTION_ALL],
+export const authz = {
+  requiredPrivileges: [SIEM_MIGRATIONS_API_ACTION_ALL],
 };

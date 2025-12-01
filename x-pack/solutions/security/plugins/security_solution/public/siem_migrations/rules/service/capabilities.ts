@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import {
+  RULES_UI_EDIT_PRIVILEGE,
   RULES_UI_READ_PRIVILEGE,
-  SIEM_MIGRATIONS_FEATURE_ID,
 } from '@kbn/security-solution-features/constants';
 import {
   requiredSiemMigrationCapabilities,
@@ -16,7 +16,7 @@ import {
   type MissingCapability,
 } from '../../common/service/capabilities';
 
-const allRuleMigrationCapabilities: MissingCapability[] = [
+const minimumRuleMigrationCapabilities: MissingCapability[] = [
   {
     capability: RULES_UI_READ_PRIVILEGE,
     description: i18n.translate(
@@ -26,12 +26,12 @@ const allRuleMigrationCapabilities: MissingCapability[] = [
   },
 ];
 
-const minimumRuleMigrationCapabilities: MissingCapability[] = [
+const allRuleMigrationCapabilities: MissingCapability[] = [
   {
-    capability: `${SIEM_MIGRATIONS_FEATURE_ID}.all`,
+    capability: RULES_UI_EDIT_PRIVILEGE,
     description: i18n.translate(
-      'xpack.securitySolution.siemMigrations.service.capabilities.siemMigrationsAll',
-      { defaultMessage: 'Security > SIEM migrations: All' }
+      'xpack.securitySolution.siemMigrations.service.capabilities.rulesAll',
+      { defaultMessage: 'Security > Rules: All' }
     ),
   },
 ];
