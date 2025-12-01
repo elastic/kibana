@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { Streams, emptyAssets } from '@kbn/streams-schema';
+import { OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS } from '@kbn/management-settings-ids';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
@@ -15,6 +16,7 @@ import { deleteStream, fetchDocument, indexDocument, putStream } from './helpers
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const esClient = getService('es');
+  const kibanaServer = getService('kibanaServer');
   const config = getService('config');
   const isServerless = !!config.get('serverless');
 
@@ -727,6 +729,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const ORPHANED_STREAM_NAME = 'logs-orphaned-default';
 
       before(async () => {
+        await kibanaServer.uiSettings.update({
+          [OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS]: true,
+        });
         const doc = {
           message: '2023-01-01T00:00:10.000Z error test',
         };
@@ -759,6 +764,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
 
+      after(async () => {
+        await kibanaServer.uiSettings.update({
+          [OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS]: false,
+        });
+      });
+
       it('should still be able to fetch the stream', async () => {
         const getResponse = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
           params: {
@@ -771,13 +782,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should still be able to fetch the dashboards for the stream', async () => {
-        const getResponse = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
-          params: {
-            path: {
-              name: ORPHANED_STREAM_NAME,
+        const getResponse = await apiClient.fetch(
+          'GET /api/streams/{streamName}/attachments 2023-10-31',
+          {
+            params: {
+              path: {
+                streamName: ORPHANED_STREAM_NAME,
+              },
+              query: {
+                attachmentType: 'dashboard',
+              },
             },
-          },
-        });
+          }
+        );
         expect(getResponse.status).to.eql(200);
       });
 
@@ -806,11 +823,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
         expect(getStreamResponse.status).to.eql(404);
         const getDashboardsResponse = await apiClient.fetch(
-          'GET /api/streams/{name}/dashboards 2023-10-31',
+          'GET /api/streams/{streamName}/attachments 2023-10-31',
           {
             params: {
               path: {
-                name: 'non-existing-stream',
+                streamName: 'non-existing-stream',
+              },
+              query: {
+                attachmentType: 'dashboard',
               },
             },
           }
