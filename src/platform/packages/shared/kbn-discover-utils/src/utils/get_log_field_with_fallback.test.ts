@@ -204,6 +204,75 @@ describe('getLogFieldWithFallback', () => {
       expect(result.value).toBe('not a json string');
       if (result.field) {
         expect(result.formattedValue).toBeUndefined();
+        expect(result.originalValue).toBeUndefined();
+      }
+    });
+  });
+
+  describe('originalValue', () => {
+    it('returns originalValue when includeOriginalValue is true', () => {
+      const doc: LogDocumentOverview = {
+        ...createBaseDoc(),
+        'exception.type': ['Error', 'withMessage', 'withStack'] as any,
+      };
+
+      const result = getLogFieldWithFallback(doc, ['exception.type'] as const, {
+        includeOriginalValue: true,
+      });
+
+      expect(result.field).toBe('exception.type');
+      expect(result.value).toBe('Error,withMessage,withStack');
+      if (result.field) {
+        expect(result.originalValue).toEqual(['Error', 'withMessage', 'withStack']);
+      }
+    });
+
+    it('returns undefined originalValue when includeOriginalValue is false', () => {
+      const doc: LogDocumentOverview = {
+        ...createBaseDoc(),
+        'exception.type': ['Error', 'withMessage', 'withStack'] as any,
+      };
+
+      const result = getLogFieldWithFallback(doc, ['exception.type'] as const, {
+        includeOriginalValue: false,
+      });
+
+      expect(result.field).toBe('exception.type');
+      expect(result.value).toBe('Error,withMessage,withStack');
+      if (result.field) {
+        expect(result.originalValue).toBeUndefined();
+      }
+    });
+
+    it('always returns value as string even when originalValue is an array', () => {
+      const doc: LogDocumentOverview = {
+        ...createBaseDoc(),
+        'exception.type': ['Error', 'withMessage'] as any,
+      };
+
+      const result = getLogFieldWithFallback(doc, ['exception.type'] as const, {
+        includeOriginalValue: true,
+      });
+
+      expect(result.field).toBe('exception.type');
+      if (result.field) {
+        expect(typeof result.value).toBe('string');
+        expect(Array.isArray(result.originalValue)).toBe(true);
+      }
+    });
+
+    it('returns undefined originalValue by default when not specified', () => {
+      const doc: LogDocumentOverview = {
+        ...createBaseDoc(),
+        message: 'test message',
+      };
+
+      const result = getLogFieldWithFallback(doc, ['message'] as const);
+
+      expect(result.field).toBe('message');
+      expect(result.value).toBe('test message');
+      if (result.field) {
+        expect(result.originalValue).toBeUndefined();
       }
     });
   });
