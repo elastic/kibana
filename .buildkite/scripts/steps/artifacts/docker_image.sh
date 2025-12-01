@@ -23,7 +23,7 @@ export KIBANA_WORKPLACE_AI_IMAGE="$KIBANA_WORKPLACE_AI_BASE_IMAGE:$KIBANA_IMAGE_
 KIBANA_OBSERVABILITY_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless-observability"
 export KIBANA_OBSERVABILITY_IMAGE="$KIBANA_OBSERVABILITY_BASE_IMAGE:$KIBANA_IMAGE_TAG"
 
-KIBANA_SEARCH_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless-search"
+KIBANA_SEARCH_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless-elasticsearch"
 export KIBANA_SEARCH_IMAGE="$KIBANA_SEARCH_BASE_IMAGE:$KIBANA_IMAGE_TAG"
 
 KIBANA_SECURITY_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless-security"
