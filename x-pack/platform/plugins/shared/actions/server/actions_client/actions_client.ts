@@ -20,6 +20,9 @@ import type {
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import type { IEventLogClient } from '@kbn/event-log-plugin/server';
 import type { KueryNode } from '@kbn/es-query';
+import type { AxiosInstance } from 'axios';
+import type { SpacesServiceSetup } from '@kbn/spaces-plugin/server';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 import type { Connector, ConnectorWithExtraFindData } from '../application/connector/types';
 import type { ConnectorType } from '../application/connector/types';
 import { get } from '../application/connector/methods/get';
@@ -82,9 +85,6 @@ import { isSystemAction } from '../lib/is_system_action';
 import type { ConnectorExecuteParams } from '../application/connector/methods/execute/types';
 import { connectorFromInMemoryConnector } from '../application/connector/lib/connector_from_in_memory_connector';
 import { getAxiosInstance } from '../application/connector/methods/get_axios_instance';
-import { AxiosInstance } from 'axios';
-import { SpacesServiceSetup } from '@kbn/spaces-plugin/server';
-import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 
 export interface ConstructorOptions {
   logger: Logger;

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import type { AxiosInstance } from 'axios';
 import type { RawAction } from '../../../../types';
 import { getActionKibanaPrivileges } from '../../../../lib/get_action_kibana_privileges';
 import { isPreconfigured } from '../../../../lib/is_preconfigured';
 import { isSystemAction } from '../../../../lib/is_system_action';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../constants/saved_objects';
 import type { ActionsClientContext } from '../../../../actions_client';
-import { AxiosInstance } from 'axios';
-import { validateSecrets } from '@kbn/actions-plugin/server/lib';
+import { validateSecrets } from '../../../../lib';
 
 type ValidatedSecrets = Record<string, unknown>;
 

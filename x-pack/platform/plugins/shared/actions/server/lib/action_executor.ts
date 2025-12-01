@@ -21,6 +21,7 @@ import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import type { AxiosInstance } from 'axios';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 import { ConnectorUsageCollector } from '../usage/connector_usage_collector';
 import {
@@ -56,7 +57,6 @@ import { createActionEventLogRecordObject } from './create_action_event_log_reco
 import { ActionExecutionError, ActionExecutionErrorReason } from './errors/action_execution_error';
 import type { ActionsAuthorization } from '../authorization/actions_authorization';
 import type { ConnectorRateLimiter } from './connector_rate_limiter';
-import { AxiosInstance } from 'axios';
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
@@ -102,11 +102,11 @@ type ExecuteHelperOptions<Source = unknown> = Omit<ExecuteOptions<Source>, 'requ
   spaceId?: string;
 };
 
-type GetAxiosInstanceParams = {
+interface GetAxiosInstanceParams {
   actionId: string;
   request: KibanaRequest;
   getAxiosInstanceWithAuth: (validatedSecrets: Record<string, unknown>) => Promise<AxiosInstance>;
-};
+}
 
 type UnsecuredExecuteOptions<Source = unknown> = Pick<
   ExecuteOptions<Source>,
