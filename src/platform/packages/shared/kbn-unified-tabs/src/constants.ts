@@ -10,7 +10,7 @@
 export const MAX_TAB_LABEL_LENGTH = 120;
 
 export const MAX_TAB_WIDTH = 280;
-export const MIN_TAB_WIDTH = 90;
+export const MIN_TAB_WIDTH = 100;
 
 export const PREVIEW_WIDTH = 280;
 
