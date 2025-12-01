@@ -132,3 +132,10 @@ export const GAP_AUTO_FILL_LOGS_CALLOUT_TITLE = i18n.translate(
     defaultMessage: 'About the scheduler logs',
   }
 );
+
+export const GAP_AUTO_FILL_STATUS_NO_GAPS = i18n.translate(
+  'xpack.securitySolution.gapAutoFillLogs.statusNoGaps',
+  {
+    defaultMessage: 'No gaps',
+  }
+);

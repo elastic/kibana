@@ -85,7 +85,6 @@ export default function getGapAutoFillSchedulerTests({ getService }: FtrProvider
           }
         });
 
-
         it('returns 404 for non-existent id when authorized', async () => {
           if (
             ![

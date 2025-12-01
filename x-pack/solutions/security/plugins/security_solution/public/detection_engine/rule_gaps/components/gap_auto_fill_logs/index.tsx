@@ -25,6 +25,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { GapAutoFillSchedulerLogsResponseBodyV1 } from '@kbn/alerting-plugin/common/routes/gaps/apis/gap_auto_fill_scheduler';
+import { GAP_AUTO_FILL_STATUS, type GapAutoFillStatus } from '@kbn/alerting-plugin/common';
 import { CallOutSwitcher } from '../../../../common/components/callouts';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import * as i18n from './translations';
@@ -39,11 +40,21 @@ interface GapAutoFillLogsFlyoutProps {
   onClose: () => void;
 }
 
+const statuses: GapAutoFillStatus[] = [
+  GAP_AUTO_FILL_STATUS.SUCCESS,
+  GAP_AUTO_FILL_STATUS.ERROR,
+  GAP_AUTO_FILL_STATUS.SKIPPED,
+  GAP_AUTO_FILL_STATUS.NO_GAPS,
+];
+
 export const GapAutoFillLogsFlyout = ({ isOpen, onClose }: GapAutoFillLogsFlyoutProps) => {
   const { data: scheduler } = useGetGapAutoFillScheduler();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const [selectedStatuses, setSelectedStatuses] = useState<string[]>(['success', 'error']);
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([
+    GAP_AUTO_FILL_STATUS.SUCCESS,
+    GAP_AUTO_FILL_STATUS.ERROR,
+  ]);
 
   const { data: logsData, isFetching: isLogsLoading } = useGetGapAutoFillSchedulerLogs({
     page: pageIndex + 1,
@@ -63,11 +74,13 @@ export const GapAutoFillLogsFlyout = ({ isOpen, onClose }: GapAutoFillLogsFlyout
   const getStatusLabel = (status: string | undefined) => {
     if (!status) return '';
     switch (status) {
-      case 'success':
+      case GAP_AUTO_FILL_STATUS.NO_GAPS:
+        return i18n.GAP_AUTO_FILL_STATUS_NO_GAPS;
+      case GAP_AUTO_FILL_STATUS.SUCCESS:
         return i18n.GAP_AUTO_FILL_STATUS_SUCCESS;
-      case 'error':
+      case GAP_AUTO_FILL_STATUS.ERROR:
         return i18n.GAP_AUTO_FILL_STATUS_ERROR;
-      case 'skipped':
+      case GAP_AUTO_FILL_STATUS.SKIPPED:
         return i18n.GAP_AUTO_FILL_STATUS_SKIPPED;
       default:
         return status;
@@ -90,14 +103,21 @@ export const GapAutoFillLogsFlyout = ({ isOpen, onClose }: GapAutoFillLogsFlyout
         width: '150px',
         name: i18n.GAP_AUTO_FILL_LOGS_STATUS_COLUMN,
         render: (status: SchedulerLog['status']) => {
-          const badgeColor =
-            status === 'success'
-              ? 'success'
-              : status === 'warning'
-              ? 'warning'
-              : status === 'skipped'
-              ? 'hollow'
-              : 'danger';
+          let badgeColor: 'success' | 'hollow' | 'danger';
+
+          switch (status) {
+            case GAP_AUTO_FILL_STATUS.SUCCESS:
+              badgeColor = 'success';
+              break;
+            case GAP_AUTO_FILL_STATUS.ERROR:
+              badgeColor = 'danger';
+              break;
+            case GAP_AUTO_FILL_STATUS.SKIPPED:
+            case GAP_AUTO_FILL_STATUS.NO_GAPS:
+            default:
+              badgeColor = 'hollow';
+          }
+
           return <EuiBadge color={badgeColor}>{getStatusLabel(status)}</EuiBadge>;
         },
       },
@@ -222,7 +242,7 @@ export const GapAutoFillLogsFlyout = ({ isOpen, onClose }: GapAutoFillLogsFlyout
                     <MultiselectFilter
                       data-test-subj="gap-auto-fill-logs-status-filter"
                       title={i18n.GAP_AUTO_FILL_STATUS_FILTER_TITLE}
-                      items={['success', 'error', 'skipped']}
+                      items={statuses}
                       selectedItems={selectedStatuses}
                       onSelectionChange={(items) => setSelectedStatuses(items)}
                       renderItem={(s: string) => getStatusLabel(s)}

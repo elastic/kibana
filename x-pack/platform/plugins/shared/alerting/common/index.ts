@@ -180,7 +180,8 @@ export {
   systemConnectorActionRefPrefix,
 } from './action_ref_prefix';
 export { gapStatus } from './constants';
-
+export { GAP_AUTO_FILL_STATUS } from './constants';
+export type { GapAutoFillStatus } from './constants';
 export {
   mappingFromFieldMap,
   getComponentTemplateFromFieldMap,

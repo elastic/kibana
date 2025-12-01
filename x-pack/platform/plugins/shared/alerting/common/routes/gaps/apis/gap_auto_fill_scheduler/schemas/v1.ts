@@ -152,7 +152,12 @@ export const gapAutoFillSchedulerLogsRequestQuerySchema = schema.object({
   }),
   statuses: schema.maybe(
     schema.arrayOf(
-      schema.oneOf([schema.literal('success'), schema.literal('error'), schema.literal('skipped')])
+      schema.oneOf([
+        schema.literal('success'),
+        schema.literal('error'),
+        schema.literal('skipped'),
+        schema.literal('no_gaps'),
+      ])
     )
   ),
 });

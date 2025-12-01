@@ -11,7 +11,7 @@ import { backfillClientMock } from '../../../backfill_client/backfill_client.moc
 import { rulesClientMock } from '../../../rules_client.mock';
 import type { RulesClientContext } from '../../../rules_client/types';
 import { Gap } from '../gap';
-import { GAP_AUTO_FILL_STATUS } from '../../../application/gaps/types/scheduler';
+import { GAP_AUTO_FILL_STATUS } from '../../../../common/constants';
 import {
   resultsFromMap,
   formatConsolidatedSummary,
