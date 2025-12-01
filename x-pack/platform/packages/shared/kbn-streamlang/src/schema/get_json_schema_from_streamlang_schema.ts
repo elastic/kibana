@@ -176,11 +176,9 @@ function fixBrokenSchemaReferencesAndEnforceStrictValidation(schema: any): any {
 /**
  * Enhance the generated schema with additional metadata that helps schema-driven
  * tooling (e.g. Monaco YAML) distinguish between the different types of Streamlang
- * steps. This keeps the exhaustive action schemas untouched (to preserve all
- * validation rules) while giving editors easy hints about the primary discriminator
- * fields.
- * All of this ceremony is needed because we don't have a discriminator field in
- * the Streamlang schema itself for our action vs where steps.
+ * steps. At the schema level, action steps are represented as a union (anyOf) of
+ * different action types, while where blocks have a 'condition' property. We add
+ * helpful metadata like titles and aggregated enums to improve the editor experience.
  */
 
 function enhanceStreamlangSchemaForEditor(schema: any): void {
@@ -199,7 +197,10 @@ function enhanceStreamlangSchemaForEditor(schema: any): void {
     return;
   }
 
-  const actionIndex = stepOptions.findIndex(
+  // Find action steps (union with anyOf, not a where block) and where blocks (have 'condition' property)
+  // Action steps are represented as a union (anyOf) of different action schemas
+  // Where blocks have a 'condition' property at the top level
+  const actionUnionSchema = stepOptions.find(
     (option: unknown) =>
       option &&
       typeof option === 'object' &&
@@ -207,176 +208,280 @@ function enhanceStreamlangSchemaForEditor(schema: any): void {
       !(option as { properties?: Record<string, unknown> }).properties?.condition
   );
 
-  const whereIndex = stepOptions.findIndex(
+  const whereSchema = stepOptions.find(
     (option: unknown) =>
       option &&
       typeof option === 'object' &&
       (option as { properties?: Record<string, unknown> }).properties?.condition
   );
 
-  if (actionIndex === -1 || whereIndex === -1) {
+  if (!actionUnionSchema || !whereSchema) {
     return;
   }
 
-  const actionUnionSchema = stepOptions[actionIndex];
-  const whereSchema = stepOptions[whereIndex];
-
-  if (
-    actionUnionSchema &&
-    typeof actionUnionSchema === 'object' &&
-    Array.isArray(actionUnionSchema.anyOf)
-  ) {
-    // Supply human-friendly metadata and a shared action enum across all
-    // processor variants to help editors surface better suggestions.
-    if (!actionUnionSchema.title) {
-      actionUnionSchema.title = 'Action step';
-    }
-    actionUnionSchema['x-kbn-step-kind'] = 'action';
-
-    const actionRequired = Array.isArray(actionUnionSchema.required)
-      ? new Set<string>(actionUnionSchema.required)
-      : new Set<string>();
-    actionRequired.add('action');
-    actionUnionSchema.required = Array.from(actionRequired);
-
-    if (!actionUnionSchema.type) {
-      actionUnionSchema.type = 'object';
-    }
-
-    const aggregatedActionProperties =
-      actionUnionSchema.properties && typeof actionUnionSchema.properties === 'object'
-        ? { ...actionUnionSchema.properties }
-        : {};
-
-    const actionEnumValues = Array.from(
-      new Set(
-        actionUnionSchema.anyOf
-          .map((option: any) => option?.properties?.action?.const as string | undefined)
-          .filter((value: string | undefined): value is string => typeof value === 'string')
-      )
-    );
-
-    actionUnionSchema.anyOf.forEach((option: any) => {
-      const actionName = option?.properties?.action?.const as string | undefined;
-      if (!actionName) {
-        return;
-      }
-      const metadata = ACTION_METADATA_MAP[actionName];
-      option.title = metadata?.name ?? actionName;
-      if (metadata?.description) {
-        option.description = metadata.description;
-      }
-    });
-
-    aggregatedActionProperties.action = {
-      type: 'string',
-      ...(actionEnumValues.length > 0 ? { enum: actionEnumValues } : {}),
-      description: 'Processor action identifier.',
-    };
-
-    actionUnionSchema.properties = aggregatedActionProperties;
+  // Enhance action steps with metadata and aggregated action enum
+  if (typeof actionUnionSchema === 'object' && Array.isArray(actionUnionSchema.anyOf)) {
+    enhanceActionSchema(actionUnionSchema);
   }
 
-  // The second option is the where block schema (recursive condition with steps)
-  if (whereSchema && typeof whereSchema === 'object') {
-    // Mirroring the action metadata gives us consistent UX across both union
-    // arms (tooltips, palettes, etc.).
-    if (!whereSchema.title) {
-      whereSchema.title = 'Where block';
-    }
-    whereSchema['x-kbn-step-kind'] = 'where';
-
-    const whereRequired = Array.isArray(whereSchema.required)
-      ? new Set<string>(whereSchema.required)
-      : new Set<string>();
-    whereRequired.add('condition');
-    whereSchema.required = Array.from(whereRequired);
-
-    if (!whereSchema.type) {
-      whereSchema.type = 'object';
-    }
-
-    enhanceWherePropertyWithSteps(schema, whereSchema);
+  // Enhance where blocks with metadata and flattened condition property
+  if (typeof whereSchema === 'object') {
+    enhanceWhereSchema(schema, whereSchema);
   }
 }
 
-function enhanceWherePropertyWithSteps(rootSchema: any, whereBlockOption: any): void {
+/**
+ * Add metadata and aggregated action enum to action step schema.
+ */
+function enhanceActionSchema(actionUnionSchema: any): void {
+  // Supply human-friendly metadata and a shared action enum across all
+  // processor variants to help editors surface better suggestions.
+  if (!actionUnionSchema.title) {
+    actionUnionSchema.title = 'Action step';
+  }
+
+  ensureRequiredProperty(actionUnionSchema, 'action');
+  ensureObjectType(actionUnionSchema);
+
+  const aggregatedActionProperties =
+    actionUnionSchema.properties && typeof actionUnionSchema.properties === 'object'
+      ? { ...actionUnionSchema.properties }
+      : {};
+
+  const actionEnumValues = Array.from(
+    new Set(
+      actionUnionSchema.anyOf
+        .map((option: any) => option?.properties?.action?.const as string | undefined)
+        .filter((value: string | undefined): value is string => typeof value === 'string')
+    )
+  );
+
+  actionUnionSchema.anyOf.forEach((option: any) => {
+    const actionName = option?.properties?.action?.const as string | undefined;
+    if (!actionName) {
+      return;
+    }
+    const metadata = ACTION_METADATA_MAP[actionName];
+    option.title = metadata?.name ?? actionName;
+    if (metadata?.description) {
+      option.description = metadata.description;
+    }
+  });
+
+  aggregatedActionProperties.action = {
+    type: 'string',
+    ...(actionEnumValues.length > 0 ? { enum: actionEnumValues } : {}),
+    description: 'Processor action identifier.',
+  };
+
+  actionUnionSchema.properties = aggregatedActionProperties;
+}
+
+/**
+ * Add metadata and flatten condition property for where block schema.
+ */
+function enhanceWhereSchema(rootSchema: any, whereSchema: any): void {
+  if (!whereSchema.title) {
+    whereSchema.title = 'Condition block';
+  }
+
+  ensureRequiredProperty(whereSchema, 'condition');
+  ensureObjectType(whereSchema);
+
+  // Add defaultSnippets for better autocomplete experience
+  // Provide multiple snippet options for common condition patterns
+  whereSchema.defaultSnippets = [
+    {
+      label: 'Condition block',
+      description: 'Conditional step execution with field equals condition',
+      body: {
+        condition: {
+          field: '${1:field.name}',
+          eq: '${2:value}',
+          steps: ['${3}'],
+        },
+      },
+    },
+    {
+      label: 'Condition block (AND)',
+      description: 'Execute steps if all conditions are true',
+      body: {
+        condition: {
+          and: [
+            {
+              field: '${1:field1.name}',
+              eq: '${2:value1}',
+            },
+            {
+              field: '${3:field2.name}',
+              eq: '${4:value2}',
+            },
+          ],
+          steps: ['${5}'],
+        },
+      },
+    },
+    {
+      label: 'Condition block (OR)',
+      description: 'Execute steps if any condition is true',
+      body: {
+        condition: {
+          or: [
+            {
+              field: '${1:field1.name}',
+              eq: '${2:value1}',
+            },
+            {
+              field: '${3:field2.name}',
+              eq: '${4:value2}',
+            },
+          ],
+          steps: ['${5}'],
+        },
+      },
+    },
+  ];
+
+  // Flatten the condition allOf intersection for Monaco's benefit
+  // This makes the `steps` property directly visible in autocomplete
+  enhanceConditionPropertyForEditor(rootSchema, whereSchema);
+}
+
+/**
+ * Helper to ensure a property is in the required array.
+ */
+function ensureRequiredProperty(schema: any, propertyName: string): void {
+  const required = Array.isArray(schema.required)
+    ? new Set<string>(schema.required)
+    : new Set<string>();
+  required.add(propertyName);
+  schema.required = Array.from(required);
+}
+
+/**
+ * Helper to ensure schema has type: 'object'.
+ */
+function ensureObjectType(schema: any): void {
+  if (!schema.type) {
+    schema.type = 'object';
+  }
+}
+
+/**
+ * Flatten the condition property's allOf intersection (condition ref + steps) into
+ * a single schema that Monaco can easily understand and provide good autocomplete for.
+ */
+function enhanceConditionPropertyForEditor(rootSchema: any, whereBlockOption: any): void {
   const conditionProperty = whereBlockOption?.properties?.condition;
 
-  if (
-    !conditionProperty ||
-    typeof conditionProperty !== 'object' ||
-    !Array.isArray(conditionProperty.allOf) ||
-    conditionProperty.allOf.length < 2
-  ) {
-    // Nothing to do if the schema already moved away from the intersection shape.
+  // Validate the condition property has the expected allOf structure
+  if (!isAllOfIntersection(conditionProperty)) {
     return;
   }
 
   const [conditionRefCandidate, stepsSchemaCandidate] = conditionProperty.allOf;
 
-  if (
-    !conditionRefCandidate ||
-    typeof conditionRefCandidate !== 'object' ||
-    typeof conditionRefCandidate.$ref !== 'string'
-  ) {
+  // Extract and validate the condition reference
+  const conditionRef = extractConditionRef(conditionRefCandidate);
+  if (!conditionRef) {
     return;
   }
 
-  // The second component of the intersection holds the `steps` schema definition.
-  if (
-    !stepsSchemaCandidate ||
-    typeof stepsSchemaCandidate !== 'object' ||
-    !stepsSchemaCandidate.properties ||
-    !stepsSchemaCandidate.properties.steps
-  ) {
+  // Extract and validate the steps schema
+  const stepsInfo = extractStepsInfo(stepsSchemaCandidate);
+  if (!stepsInfo) {
     return;
   }
 
-  const conditionSchema = resolveJsonPointer(rootSchema, conditionRefCandidate.$ref);
+  // Resolve the condition schema from the reference
+  const conditionSchema = resolveJsonPointer(rootSchema, conditionRef);
   if (!conditionSchema) {
     return;
   }
 
-  const stepsPropertySchema = stepsSchemaCandidate.properties.steps;
-  const shouldRequireSteps =
-    Array.isArray(stepsSchemaCandidate.required) && stepsSchemaCandidate.required.includes('steps');
-
-  const augmentedConditionSchema = augmentConditionSchemaWithSteps(
+  // Clone and augment the condition schema with the steps property
+  const augmentedConditionSchema = cloneAndAddStepsToCondition(
     conditionSchema,
-    stepsPropertySchema,
-    shouldRequireSteps
+    stepsInfo.stepsPropertySchema,
+    stepsInfo.shouldRequireSteps
   );
 
   if (!augmentedConditionSchema) {
     return;
   }
 
-  if (Array.isArray(augmentedConditionSchema.anyOf)) {
-    // Preserve the union style from the source schema whenever possible to keep
-    // downstream tooling behaviour identical.
-    conditionProperty.anyOf = augmentedConditionSchema.anyOf;
-  } else if (Array.isArray(augmentedConditionSchema.oneOf)) {
-    conditionProperty.oneOf = augmentedConditionSchema.oneOf;
-  } else {
-    conditionProperty.anyOf = [augmentedConditionSchema];
-  }
+  // Replace the allOf intersection with a flattened union/object
+  flattenIntersectionToUnion(conditionProperty, augmentedConditionSchema);
 
+  // Add steps property to the flattened schema
   conditionProperty.type = 'object';
   conditionProperty.properties = {
     ...(conditionProperty.properties ?? {}),
-    steps: stepsPropertySchema,
+    steps: stepsInfo.stepsPropertySchema,
   };
 
-  if (shouldRequireSteps) {
-    const requiredSet = new Set<string>(
-      Array.isArray(conditionProperty.required) ? conditionProperty.required : []
-    );
-    requiredSet.add('steps');
-    conditionProperty.required = Array.from(requiredSet);
+  if (stepsInfo.shouldRequireSteps) {
+    ensureRequiredProperty(conditionProperty, 'steps');
   }
 
+  // Remove the original allOf intersection now that we've flattened it
   delete conditionProperty.allOf;
+}
+
+/**
+ * Check if a property is an allOf intersection with at least 2 elements.
+ */
+function isAllOfIntersection(property: any): boolean {
+  return (
+    property &&
+    typeof property === 'object' &&
+    Array.isArray(property.allOf) &&
+    property.allOf.length >= 2
+  );
+}
+
+/**
+ * Extract the condition reference from an allOf element.
+ */
+function extractConditionRef(candidate: any): string | undefined {
+  if (!candidate || typeof candidate !== 'object' || typeof candidate.$ref !== 'string') {
+    return undefined;
+  }
+  return candidate.$ref;
+}
+
+/**
+ * Extract steps property schema and required flag from an allOf element.
+ */
+function extractStepsInfo(
+  candidate: any
+): { stepsPropertySchema: any; shouldRequireSteps: boolean } | undefined {
+  if (
+    !candidate ||
+    typeof candidate !== 'object' ||
+    !candidate.properties ||
+    !candidate.properties.steps
+  ) {
+    return undefined;
+  }
+
+  return {
+    stepsPropertySchema: candidate.properties.steps,
+    shouldRequireSteps: Array.isArray(candidate.required) && candidate.required.includes('steps'),
+  };
+}
+
+/**
+ * Replace an allOf intersection with a flattened union structure.
+ */
+function flattenIntersectionToUnion(targetProperty: any, augmentedSchema: any): void {
+  if (Array.isArray(augmentedSchema.anyOf)) {
+    targetProperty.anyOf = augmentedSchema.anyOf;
+  } else if (Array.isArray(augmentedSchema.oneOf)) {
+    targetProperty.oneOf = augmentedSchema.oneOf;
+  } else {
+    targetProperty.anyOf = [augmentedSchema];
+  }
 }
 
 function resolveJsonPointer(root: any, pointer: string): any {
@@ -402,11 +507,11 @@ function resolveJsonPointer(root: any, pointer: string): any {
 }
 
 /**
- * Clone the condition schema referenced by a where block and augment every
- * branch with the nested steps definition so editors do not need to follow the
- * original `$ref`.
+ * Clone the condition schema and add the `steps` property to every variant.
+ * Conditions can be composed via anyOf/oneOf/allOf, so we need to recursively
+ * add `steps` to each branch for Monaco to show proper autocomplete.
  */
-function augmentConditionSchemaWithSteps(
+function cloneAndAddStepsToCondition(
   conditionSchema: any,
   stepsPropertySchema: any,
   shouldRequireSteps: boolean
@@ -416,15 +521,13 @@ function augmentConditionSchemaWithSteps(
   }
 
   const clonedSchema = deepClone(conditionSchema);
-  return applyStepsToConditionNode(clonedSchema, stepsPropertySchema, shouldRequireSteps);
+  return recursivelyAddStepsProperty(clonedSchema, stepsPropertySchema, shouldRequireSteps);
 }
 
 /**
- * Recursively attach the `steps` property to every object node found within the
- * condition schema. This is required because Streamlang conditions can be
- * arbitrarily composed via `anyOf`, `allOf`, and `oneOf`.
+ * Recursively add the `steps` property to every object variant in the condition schema.
  */
-function applyStepsToConditionNode(
+function recursivelyAddStepsProperty(
   node: any,
   stepsPropertySchema: any,
   shouldRequireSteps: boolean
@@ -433,43 +536,56 @@ function applyStepsToConditionNode(
     return node;
   }
 
-  if (Array.isArray(node.anyOf)) {
+  // Recursively process union/intersection schemas
+  const unionType = getUnionType(node);
+  if (unionType) {
     return {
       ...node,
-      anyOf: node.anyOf.map((option: any) =>
-        applyStepsToConditionNode(option, stepsPropertySchema, shouldRequireSteps)
+      [unionType]: node[unionType].map((option: any) =>
+        recursivelyAddStepsProperty(option, stepsPropertySchema, shouldRequireSteps)
       ),
     };
   }
 
-  if (Array.isArray(node.oneOf)) {
-    return {
-      ...node,
-      oneOf: node.oneOf.map((option: any) =>
-        applyStepsToConditionNode(option, stepsPropertySchema, shouldRequireSteps)
-      ),
-    };
-  }
-
-  if (Array.isArray(node.allOf)) {
-    return {
-      ...node,
-      allOf: node.allOf.map((option: any) =>
-        applyStepsToConditionNode(option, stepsPropertySchema, shouldRequireSteps)
-      ),
-    };
-  }
-
-  const hasObjectShape =
-    node.type === 'object' ||
-    node.properties ||
-    Array.isArray(node.required) ||
-    node.additionalProperties !== undefined;
-
-  if (!hasObjectShape) {
+  // Only add steps to object-shaped schemas
+  if (!isObjectSchema(node)) {
     return node;
   }
 
+  // Add the steps property to this object variant
+  return addStepsPropertyToObject(node, stepsPropertySchema, shouldRequireSteps);
+}
+
+/**
+ * Check if a node is a union/intersection and return the type (anyOf, oneOf, or allOf).
+ */
+function getUnionType(node: any): 'anyOf' | 'oneOf' | 'allOf' | undefined {
+  if (Array.isArray(node.anyOf)) return 'anyOf';
+  if (Array.isArray(node.oneOf)) return 'oneOf';
+  if (Array.isArray(node.allOf)) return 'allOf';
+  return undefined;
+}
+
+/**
+ * Check if a node represents an object schema.
+ */
+function isObjectSchema(node: any): boolean {
+  return (
+    node.type === 'object' ||
+    node.properties ||
+    Array.isArray(node.required) ||
+    node.additionalProperties !== undefined
+  );
+}
+
+/**
+ * Add the steps property to an object schema node.
+ */
+function addStepsPropertyToObject(
+  node: any,
+  stepsPropertySchema: any,
+  shouldRequireSteps: boolean
+): any {
   const updatedNode = {
     ...node,
     properties: {
@@ -479,22 +595,17 @@ function applyStepsToConditionNode(
   };
 
   if (shouldRequireSteps) {
-    const requiredSet = new Set<string>(Array.isArray(node.required) ? node.required : []);
-    requiredSet.add('steps');
-    updatedNode.required = Array.from(requiredSet);
+    ensureRequiredProperty(updatedNode, 'steps');
   }
 
-  if (!updatedNode.type) {
-    updatedNode.type = 'object';
-  }
+  ensureObjectType(updatedNode);
 
   return updatedNode;
 }
 
 /**
- * Utility helper used throughout this module. All schema fragments are plain
- * JSON-like objects, so serialising to and from JSON is a safe cloning strategy
- * that preserves nested structures without pulling in an additional dependency.
+ * Deep clone utility for schema objects.
+ * Uses JSON serialization since schema fragments are plain objects.
  */
 function deepClone<T = any>(value: T): T {
   return value === undefined ? value : (JSON.parse(JSON.stringify(value)) as T);
