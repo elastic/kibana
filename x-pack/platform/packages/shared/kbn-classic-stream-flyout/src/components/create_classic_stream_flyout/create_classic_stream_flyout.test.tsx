@@ -75,7 +75,7 @@ describe('CreateClassicStreamFlyout', () => {
 
       expect(getByText('No index templates detected')).toBeInTheDocument();
       expect(
-        getByText(/To create a new classic stream, you must select an index template/i)
+        getByText(/Classic streams require an index template to set their initial settings/i)
       ).toBeInTheDocument();
       expect(getByTestId('createTemplateButton')).toBeInTheDocument();
     });
@@ -97,7 +97,7 @@ describe('CreateClassicStreamFlyout', () => {
       });
 
       expect(getByTestId('errorLoadingTemplates')).toBeInTheDocument();
-      expect(getByText("Uh-oh, we weren't able to fetch your index templates")).toBeInTheDocument();
+      expect(getByText("We couldn't fetch your index templates")).toBeInTheDocument();
     });
 
     it('calls onRetryLoadTemplates when Retry button is clicked', () => {
