@@ -29,7 +29,7 @@ import {
   getRecommendedQueriesTemplates,
   getTimeAndCategorizationFields,
 } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
-import { getColumnsByTypeRetriever } from '../shared/columns';
+import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 import { setToCache } from './inline_suggestions_cache';
 
 const mockGetRecommendedQueriesTemplates = getRecommendedQueriesTemplates as jest.MockedFunction<
