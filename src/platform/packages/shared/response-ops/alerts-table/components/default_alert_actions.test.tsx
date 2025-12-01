@@ -17,6 +17,7 @@ import { createPartialObjectMock, testQueryClientConfig } from '../utils/test';
 import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
+import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions');
 
@@ -27,6 +28,7 @@ jest.mock('./view_rule_details_alert_action', () => {
     ),
   };
 });
+
 jest.mock('./view_alert_details_alert_action', () => {
   return {
     ViewAlertDetailsAlertAction: () => (
@@ -34,14 +36,22 @@ jest.mock('./view_alert_details_alert_action', () => {
     ),
   };
 });
+
 jest.mock('./mute_alert_action', () => {
   return { MuteAlertAction: () => <div data-test-subj="muteAlertAction">{'MuteAlertAction'}</div> };
 });
+
 jest.mock('./mark_as_untracked_alert_action', () => {
   return {
     MarkAsUntrackedAlertAction: () => (
       <div data-test-subj="markAsUntrackedAlertAction">{'MarkAsUntrackedAlertAction'}</div>
     ),
+  };
+});
+
+jest.mock('./edit_tags_action', () => {
+  return {
+    EditTagsAction: () => <div data-test-subj="editTagsAction">{'EditTagsAction'}</div>,
   };
 });
 
@@ -74,21 +84,123 @@ const TestComponent = (_props: AlertActionsProps) => (
 );
 
 describe('DefaultAlertActions', () => {
-  it('should show "Mute" and "Marked as untracked" option', async () => {
-    useGetRuleTypesPermissions.mockReturnValue({ authorizedToCreateAnyRules: true });
-
-    render(<TestComponent {...props} />);
-
-    expect(await screen.findByText('MuteAlertAction')).toBeInTheDocument();
-    expect(await screen.findByText('MarkAsUntrackedAlertAction')).toBeInTheDocument();
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  it('should hide "Mute" and "Marked as untracked" option', async () => {
-    useGetRuleTypesPermissions.mockReturnValue({ authorizedToCreateAnyRules: false });
+  describe('with authorization to create rules', () => {
+    beforeEach(() => {
+      useGetRuleTypesPermissions.mockReturnValue({ authorizedToCreateAnyRules: true });
+    });
 
-    render(<TestComponent {...props} />);
+    describe('for non-security rule types', () => {
+      const nonSecurityProps = createPartialObjectMock<AlertActionsProps>({
+        alert: {
+          [ALERT_RULE_TYPE_ID]: 'apm.anomaly' as any,
+        },
+        refresh: jest.fn(),
+      });
+      const noRuleTypeProps = createPartialObjectMock<AlertActionsProps>({
+        alert: {},
+        refresh: jest.fn(),
+      });
 
-    expect(screen.queryByText('MuteAlertAction')).not.toBeInTheDocument();
-    expect(screen.queryByText('MarkAsUntrackedAlertAction')).not.toBeInTheDocument();
+      it.each([nonSecurityProps, noRuleTypeProps])(
+        'should hide all modify options for rule type %s',
+        async (standardProps) => {
+          render(<TestComponent {...standardProps} />);
+
+          expect(screen.queryByText('MuteAlertAction')).toBeInTheDocument();
+          expect(screen.queryByText('MarkAsUntrackedAlertAction')).toBeInTheDocument();
+          expect(screen.queryByText('EditTagsAction')).toBeInTheDocument();
+        }
+      );
+    });
+
+    describe('for security rule types', () => {
+      it.each(['siem.queryRule', 'siem.esqlRuleType', 'attack-discovery', 'siem.mlRule'])(
+        'should hide all modify options for rule type %s',
+        async (ruleTypeId) => {
+          const securityProps = createPartialObjectMock<AlertActionsProps>({
+            alert: {
+              [ALERT_RULE_TYPE_ID]: ruleTypeId as any,
+            },
+            refresh: jest.fn(),
+          });
+
+          render(<TestComponent {...securityProps} />);
+
+          expect(screen.queryByText('MuteAlertAction')).not.toBeInTheDocument();
+          expect(screen.queryByText('MarkAsUntrackedAlertAction')).not.toBeInTheDocument();
+          expect(screen.queryByText('EditTagsAction')).not.toBeInTheDocument();
+        }
+      );
+    });
+
+    describe('view-only actions', () => {
+      it('should always show "View rule details" and "View alert details" for all rule types', async () => {
+        render(<TestComponent {...props} />);
+
+        expect(await screen.findByText('ViewRuleDetailsAlertAction')).toBeInTheDocument();
+        expect(await screen.findByText('ViewAlertDetailsAlertAction')).toBeInTheDocument();
+      });
+
+      it('should show view actions for security rules even when modify options are hidden', async () => {
+        const siemProps = createPartialObjectMock<AlertActionsProps>({
+          alert: {
+            [ALERT_RULE_TYPE_ID]: 'siem.queryRule' as any,
+          },
+          refresh: jest.fn(),
+        });
+
+        render(<TestComponent {...siemProps} />);
+
+        expect(await screen.findByText('ViewRuleDetailsAlertAction')).toBeInTheDocument();
+        expect(await screen.findByText('ViewAlertDetailsAlertAction')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('without authorization to create rules', () => {
+    beforeEach(() => {
+      useGetRuleTypesPermissions.mockReturnValue({ authorizedToCreateAnyRules: false });
+    });
+
+    it('should hide "Mute", "Marked as untracked", and "Edit tags" options for non-security rules', async () => {
+      const nonSecurityProps = createPartialObjectMock<AlertActionsProps>({
+        alert: {
+          [ALERT_RULE_TYPE_ID]: 'apm.anomaly' as any,
+        },
+        refresh: jest.fn(),
+      });
+
+      render(<TestComponent {...nonSecurityProps} />);
+
+      expect(screen.queryByText('MuteAlertAction')).not.toBeInTheDocument();
+      expect(screen.queryByText('MarkAsUntrackedAlertAction')).not.toBeInTheDocument();
+      expect(screen.queryByText('EditTagsAction')).not.toBeInTheDocument();
+    });
+
+    it('should hide all modify options for security rules', async () => {
+      const siemProps = createPartialObjectMock<AlertActionsProps>({
+        alert: {
+          [ALERT_RULE_TYPE_ID]: 'siem.queryRule' as any,
+        },
+        refresh: jest.fn(),
+      });
+
+      render(<TestComponent {...siemProps} />);
+
+      expect(screen.queryByText('MuteAlertAction')).not.toBeInTheDocument();
+      expect(screen.queryByText('MarkAsUntrackedAlertAction')).not.toBeInTheDocument();
+      expect(screen.queryByText('EditTagsAction')).not.toBeInTheDocument();
+    });
+
+    it('should still show view actions', async () => {
+      render(<TestComponent {...props} />);
+
+      expect(await screen.findByText('ViewRuleDetailsAlertAction')).toBeInTheDocument();
+      expect(await screen.findByText('ViewAlertDetailsAlertAction')).toBeInTheDocument();
+    });
   });
 });
