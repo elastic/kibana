@@ -22,10 +22,12 @@ export async function getEsqlDataView(
   services: DiscoverServices
 ) {
   const indexPatternFromQuery = getIndexPatternFromESQLQuery(query.esql);
-  const newTimeField = getTimeFieldFromESQLQuery(query.esql);
+  // Convert undefined time fields to a string since '' and undefined are equivalent here
+  const currentTimeField = currentDataView?.timeFieldName ?? '';
+  const newTimeField = getTimeFieldFromESQLQuery(query.esql) ?? '';
   const onlyTimeFieldChanged =
     indexPatternFromQuery === currentDataView?.getIndexPattern() &&
-    newTimeField !== currentDataView?.timeFieldName;
+    newTimeField !== currentTimeField;
 
   if (
     currentDataView?.isPersisted() ||

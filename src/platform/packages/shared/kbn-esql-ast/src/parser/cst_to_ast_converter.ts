@@ -2425,6 +2425,20 @@ export class CstToAstConverter {
     return column;
   }
 
+  private fromQualifiedName(ctx: cst.QualifiedNameContext): ast.ESQLColumn {
+    const node = this.toColumn(ctx);
+    const qualifierToken = ctx._qualifier;
+
+    if (qualifierToken) {
+      const qualifierNode = this.toIdentifierFromToken(qualifierToken);
+
+      node.qualifier = qualifierNode;
+      node.args = [qualifierNode, ...node.args];
+    }
+
+    return node;
+  }
+
   private fromQualifiedNamePattern(
     ctx: cst.QualifiedNamePatternContext
   ): ast.ESQLColumn | ast.ESQLParam | ast.ESQLIdentifier {
@@ -2477,6 +2491,15 @@ export class CstToAstConverter {
         incomplete: Boolean(ctx.exception || text === ''),
       }
     );
+
+    const qualifierToken = ctx._qualifier;
+
+    if (qualifierToken) {
+      const qualifierNode = this.toIdentifierFromToken(qualifierToken);
+
+      column.qualifier = qualifierNode;
+      column.args = [qualifierNode, ...column.args];
+    }
 
     column.name = text;
     column.quoted = hasQuotes;
@@ -2554,8 +2577,9 @@ export class CstToAstConverter {
 
   private fromField(ctx: cst.FieldContext): ast.ESQLAstField | undefined {
     const qualifiedNameCtx = ctx.qualifiedName();
-    if (qualifiedNameCtx) {
-      const left = this.toColumn(qualifiedNameCtx!);
+
+    if (qualifiedNameCtx && ctx.ASSIGN()) {
+      const left = this.fromQualifiedName(qualifiedNameCtx);
       const right = this.fromBooleanExpressionToExpressionOrUnknown(ctx.booleanExpression());
       const args = [
         left,
@@ -2563,6 +2587,7 @@ export class CstToAstConverter {
         //       should be probably fixed in a standalone PR.
         [right],
       ] as ast.ESQLBinaryExpression['args'];
+
       const assignment = this.toFunction(
         '=',
         ctx,
