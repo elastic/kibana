@@ -31,7 +31,6 @@ export const registerClustersRoute = ({
   getStartServices,
   cloudApiUrl,
 }: ClustersRouteOptions) => {
-  // GET /internal/cloud_connect/cluster_details
   router.get(
     {
       path: '/internal/cloud_connect/cluster_details',
@@ -127,7 +126,6 @@ export const registerClustersRoute = ({
     }
   );
 
-  // DELETE /internal/cloud_connect/cluster
   router.delete(
     {
       path: '/internal/cloud_connect/cluster',
@@ -201,7 +199,6 @@ export const registerClustersRoute = ({
     }
   );
 
-  // PUT /internal/cloud_connect/cluster_details
   router.put(
     {
       path: '/internal/cloud_connect/cluster_details',
@@ -261,14 +258,31 @@ export const registerClustersRoute = ({
           const esClient = coreContext.elasticsearch.client.asCurrentUser;
           const eisKey = updatedCluster.keys?.eis;
 
+          // When enabling EIS, it should(TM) always return an eisKey. But in case it
+          // doesnt, lets rollback the change and return an error since we wont be able
+          // to configure inference CCM without the key.
           if (eisRequest?.enabled && !eisKey) {
-            logger.warn(
+            logger.error(
               'EIS was enabled but Cloud API did not return an API key for Cloud Connect inference'
             );
-            return response.ok({
+
+            try {
+              await cloudConnectClient.updateClusterServices(
+                apiKeyData.apiKey,
+                apiKeyData.clusterId,
+                {
+                  eis: { enabled: false },
+                }
+              );
+              logger.info('Successfully rolled back EIS enablement in Cloud API');
+            } catch (rollbackError) {
+              logger.error('Failed to rollback Cloud API changes', { error: rollbackError });
+            }
+
+            return response.customError({
+              statusCode: 500,
               body: {
-                success: true,
-                warning: 'EIS was enabled but inference could not be configured. Contact support.',
+                message: 'EIS was enabled but Cloud API did not return an API key',
               },
             });
           }
@@ -280,12 +294,42 @@ export const registerClustersRoute = ({
               await disableInferenceCCM(esClient, logger);
             }
           } catch (inferenceError) {
-            return response.ok({
+            logger.error('Failed to update Cloud Connect inference settings, rolling back', {
+              error: inferenceError,
+            });
+
+            // If enabling the inference CCM settings failed, we need to rollback the service state
+            const rollbackEnabled = !eisRequest.enabled;
+            try {
+              await cloudConnectClient.updateClusterServices(
+                apiKeyData.apiKey,
+                apiKeyData.clusterId,
+                {
+                  eis: { enabled: rollbackEnabled },
+                }
+              );
+              logger.info(
+                `Successfully rolled back EIS to enabled=${rollbackEnabled} in Cloud API`
+              );
+            } catch (rollbackError) {
+              logger.error('Failed to rollback Cloud API changes', { error: rollbackError });
+              return response.customError({
+                statusCode: 500,
+                body: {
+                  message:
+                    'Failed to update Cloud Connect inference settings and rollback also failed',
+                  attributes: {
+                    inferenceError: (inferenceError as Error).message,
+                    rollbackError: (rollbackError as Error).message,
+                  },
+                },
+              });
+            }
+
+            return response.customError({
+              statusCode: 500,
               body: {
-                success: true,
-                warning:
-                  'Cluster service updated, but failed to update Cloud Connect inference settings.',
-                warningError: (inferenceError as Error).message,
+                message: (inferenceError as Error).message,
               },
             });
           }
@@ -296,48 +340,13 @@ export const registerClustersRoute = ({
         logger.error('Failed to update cluster services', { error });
 
         if (axios.isAxiosError(error)) {
-          const status = error.response?.status;
+          const status = error.response?.status || 500;
           const errorData = error.response?.data;
 
-          // Extract the actual error message from Cloud API if available
-          let errorMessage = 'An error occurred while updating cluster services';
-          if (errorData?.errors && Array.isArray(errorData.errors) && errorData.errors.length > 0) {
-            errorMessage = errorData.errors[0].message || errorMessage;
-          } else if (errorData?.message) {
-            errorMessage = errorData.message;
-          }
-
-          if (status === 401) {
-            return response.unauthorized({
-              body: {
-                message: 'Invalid or expired API key',
-              },
-            });
-          }
-
-          if (status === 403) {
-            return response.forbidden({
-              body: {
-                message: errorMessage,
-              },
-            });
-          }
-
-          if (status === 404) {
-            return response.notFound({
-              body: {
-                message: 'Cluster not found',
-              },
-            });
-          }
-
-          if (status === 400) {
-            return response.badRequest({
-              body: {
-                message: errorMessage,
-              },
-            });
-          }
+          return response.customError({
+            statusCode: status,
+            body: errorData || { message: 'An error occurred while updating cluster services' },
+          });
         }
 
         return response.customError({
