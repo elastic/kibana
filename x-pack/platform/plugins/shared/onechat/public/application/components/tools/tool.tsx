@@ -19,6 +19,7 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
   useIsWithinBreakpoints,
+  useUpdateEffect,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ToolDefinitionWithSchema, ToolType } from '@kbn/onechat-common';
@@ -26,7 +27,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { defer } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { FormProvider } from 'react-hook-form';
+import { FormProvider, useWatch } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { docLinks } from '../../../../common/doc_links';
@@ -110,7 +111,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   }, [urlToolType]);
 
   const form = useToolForm(tool, initialToolType);
-  const { reset, formState, watch, handleSubmit, getValues } = form;
+  const { control, reset, formState, handleSubmit, getValues } = form;
   const { errors, isDirty, isSubmitSuccessful } = formState;
   const [isCancelling, setIsCancelling] = useState(false);
   const {
@@ -127,7 +128,8 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
     appParams: { history },
   } = services;
 
-  const currentToolId = watch('toolId');
+  const currentToolId = useWatch({ name: 'toolId', control });
+  const toolType = useWatch({ name: 'type', control });
 
   // Handle opening test tool flyout on navigation
   useEffect(() => {
@@ -193,11 +195,11 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   }, [tool, reset]);
 
   // Switching tool types clears tool-specific fields
-  useEffect(() => {
-    if (!urlToolType) return;
+  useUpdateEffect(() => {
+    if (!toolType) return;
     if (mode !== ToolFormMode.Create) return;
     const currentValues = getValues();
-    const newDefaultValues = getToolTypeDefaultValues(urlToolType);
+    const newDefaultValues = getToolTypeDefaultValues(toolType);
 
     const mergedValues: ToolFormData = {
       ...newDefaultValues,
@@ -207,7 +209,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
     };
 
     reset(mergedValues);
-  }, [urlToolType, initialToolType, mode, getValues, reset]);
+  }, [toolType, mode, getValues, reset]);
 
   const toolFormId = useGeneratedHtmlId({
     prefix: 'toolForm',
@@ -217,7 +219,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   const hasErrors = Object.keys(errors).length > 0;
 
   const renderSaveButton = useCallback(
-    ({ size = 's' }: Pick<EuiButtonProps, 'size'> = {}) => {
+    ({ size = 's', testSubj }: { size?: EuiButtonProps['size']; testSubj?: string } = {}) => {
       const saveButton = (
         <EuiButton
           size={size}
@@ -228,6 +230,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
           disabled={hasErrors || isSubmitting || (mode === ToolFormMode.Edit && !isDirty)}
           isLoading={submittingButtonId === BUTTON_IDS.SAVE}
           minWidth="112px"
+          data-test-subj={testSubj}
         >
           {labels.tools.saveButtonLabel}
         </EuiButton>
@@ -244,7 +247,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   );
 
   const renderTestButton = useCallback(
-    ({ size = 's' }: Pick<EuiButtonProps, 'size'> = {}) => {
+    ({ size = 's', testSubj }: Pick<EuiButtonProps, 'size'> & { testSubj?: string } = {}) => {
       const isCreateMode = mode === ToolFormMode.Create;
       const commonProps: EuiButtonProps = {
         size,
@@ -257,11 +260,17 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
           onClick={handleSubmit(handleSaveAndTest)}
           isLoading={submittingButtonId === BUTTON_IDS.SAVE_AND_TEST}
           minWidth="124px"
+          data-test-subj={testSubj}
         >
           {labels.tools.saveAndTestButtonLabel}
         </EuiButton>
       ) : (
-        <EuiButton {...commonProps} onClick={handleTestTool} minWidth="112px">
+        <EuiButton
+          {...commonProps}
+          onClick={handleTestTool}
+          minWidth="112px"
+          data-test-subj={testSubj}
+        >
           {labels.tools.testButtonLabel}
         </EuiButton>
       );
@@ -290,7 +299,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   return (
     <>
       <FormProvider {...form}>
-        <KibanaPageTemplate>
+        <KibanaPageTemplate data-test-subj="agentBuilderToolFormPage">
           <KibanaPageTemplate.Header
             pageTitle={
               <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
@@ -301,7 +310,11 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
                 </EuiFlexItem>
                 {tool?.readonly && (
                   <EuiFlexItem grow={false}>
-                    <EuiBadge color="hollow" iconType="lock">
+                    <EuiBadge
+                      color="hollow"
+                      iconType="lock"
+                      data-test-subj="agentBuilderToolReadOnlyBadge"
+                    >
                       {labels.tools.readOnly}
                     </EuiBadge>
                   </EuiFlexItem>
@@ -335,8 +348,10 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
               ) : undefined
             }
             rightSideItems={[
-              ...(mode !== ToolFormMode.View ? [renderSaveButton({ size: 'm' })] : []),
-              renderTestButton({ size: 'm' }),
+              ...(mode !== ToolFormMode.View
+                ? [renderSaveButton({ size: 'm', testSubj: 'toolFormSaveButton' })]
+                : []),
+              renderTestButton({ size: 'm', testSubj: 'toolFormTestButton' }),
               ...(mode === ToolFormMode.Edit ? [<ToolEditContextMenu />] : []),
             ]}
             rightSideGroupProps={{ gutterSize: 's' }}

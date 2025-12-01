@@ -9,8 +9,10 @@ import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import {
   streamsAIGrokSuggestionAcceptedEventType,
   streamsAIGrokSuggestionLatencyEventType,
-  streamsAssetClickEventType,
-  streamsAssetCountEventType,
+  streamsAIDissectSuggestionAcceptedEventType,
+  streamsAIDissectSuggestionLatencyEventType,
+  streamsAttachmentClickEventType,
+  streamsAttachmentCountEventType,
   streamsChildStreamCreatedEventType,
   streamsProcessingSavedEventType,
   streamsRetentionChangedEventType,
@@ -18,6 +20,10 @@ import {
   streamsSignificantEventsCreatedEventType,
   streamsSignificantEventsSuggestionsGeneratedEventType,
   wiredStreamsStatusChangedEventType,
+  streamsFeatureIdentificationIdentifiedEventType,
+  streamsFeatureIdentificationSavedEventType,
+  streamsFeatureIdentificationDeletedEventType,
+  streamsDescriptionGeneratedEventType,
 } from './events';
 import { StreamsTelemetryClient } from './client';
 
@@ -28,10 +34,12 @@ export class StreamsTelemetryService {
 
   public setup(analytics: AnalyticsServiceSetup) {
     this.analytics = analytics;
-    this.analytics.registerEventType(streamsAssetCountEventType);
-    this.analytics.registerEventType(streamsAssetClickEventType);
+    this.analytics.registerEventType(streamsAttachmentCountEventType);
+    this.analytics.registerEventType(streamsAttachmentClickEventType);
     this.analytics.registerEventType(streamsAIGrokSuggestionLatencyEventType);
     this.analytics.registerEventType(streamsAIGrokSuggestionAcceptedEventType);
+    this.analytics.registerEventType(streamsAIDissectSuggestionLatencyEventType);
+    this.analytics.registerEventType(streamsAIDissectSuggestionAcceptedEventType);
     this.analytics.registerEventType(streamsProcessingSavedEventType);
     this.analytics.registerEventType(streamsRetentionChangedEventType);
     this.analytics.registerEventType(streamsChildStreamCreatedEventType);
@@ -39,6 +47,10 @@ export class StreamsTelemetryService {
     this.analytics.registerEventType(streamsSignificantEventsSuggestionsGeneratedEventType);
     this.analytics.registerEventType(streamsSignificantEventsCreatedEventType);
     this.analytics.registerEventType(wiredStreamsStatusChangedEventType);
+    this.analytics.registerEventType(streamsFeatureIdentificationIdentifiedEventType);
+    this.analytics.registerEventType(streamsFeatureIdentificationSavedEventType);
+    this.analytics.registerEventType(streamsFeatureIdentificationDeletedEventType);
+    this.analytics.registerEventType(streamsDescriptionGeneratedEventType);
   }
 
   public getClient() {

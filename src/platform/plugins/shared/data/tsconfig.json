@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -58,8 +58,8 @@
     "@kbn/logging",
     "@kbn/core-execution-context-server",
     "@kbn/data-service-server",
-    "@kbn/css-utils",
-    "@kbn/core-elasticsearch-client-server-mocks"
+    "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/field-formats-common",
   ],
   "exclude": ["target/**/*"]
 }

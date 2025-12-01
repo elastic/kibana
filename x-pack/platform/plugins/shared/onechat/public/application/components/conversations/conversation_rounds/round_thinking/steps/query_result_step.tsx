@@ -5,41 +5,40 @@
  * 2.0.
  */
 
-import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
-import type { QueryResult } from '@kbn/onechat-common/tools/tool_result';
+import { EuiCodeBlock, EuiSplitPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
+import type { QueryResult } from '@kbn/onechat-common/tools/tool_result';
+import { css } from '@emotion/react';
 
+const labels = {
+  title: i18n.translate('xpack.onechat.round.thinking.steps.queryResultStep.title', {
+    defaultMessage: 'ESQL',
+  }),
+};
 interface QueryResultStepProps {
   result: QueryResult;
 }
-
 export const QueryResultStep: React.FC<QueryResultStepProps> = ({ result: { data } }) => {
   const { euiTheme } = useEuiTheme();
-  const codeBlockStyles = css`
-    background-color: ${euiTheme.colors.lightestShade};
-    & .euiCodeBlock__controls {
-      background: none;
-    }
+  // We add padding left to make tool result artifacts appear inline with the text of the progression step above it
+  const paddingLeftStyles = css`
+    padding-left: ${euiTheme.size.xl};
   `;
-  const dsl = 'dsl' in data && data.dsl;
-  const esql = 'esql' in data && data.esql;
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem>
-        {esql && (
-          <EuiCodeBlock css={codeBlockStyles} language="sql" isCopyable paddingSize="m">
-            {esql}
+    <div css={paddingLeftStyles}>
+      <EuiSplitPanel.Outer hasBorder hasShadow={false}>
+        <EuiSplitPanel.Inner color="plain" grow={false} paddingSize="m">
+          <EuiText size="s">
+            <strong>{labels.title}</strong>
+          </EuiText>
+        </EuiSplitPanel.Inner>
+        <EuiSplitPanel.Inner paddingSize="none">
+          <EuiCodeBlock language="esql" isCopyable paddingSize="m" lineNumbers>
+            {data.esql}
           </EuiCodeBlock>
-        )}
-      </EuiFlexItem>
-      <EuiFlexItem>
-        {dsl && (
-          <EuiCodeBlock css={codeBlockStyles} language="json" isCopyable paddingSize="m">
-            {JSON.stringify(dsl, null, 2)}
-          </EuiCodeBlock>
-        )}
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        </EuiSplitPanel.Inner>
+      </EuiSplitPanel.Outer>
+    </div>
   );
 };

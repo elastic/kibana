@@ -28,6 +28,7 @@ export {
   EsqlToolFieldType,
   type EsqlToolFieldTypes,
   type EsqlToolParam,
+  type EsqlToolParamValue,
   type EsqlToolDefinition,
   type EsqlToolDefinitionWithSchema,
   isEsqlTool,
@@ -45,11 +46,24 @@ export {
   type WorkflowToolDefinitionWithSchema,
 } from './types/workflow';
 export {
+  isBuiltinTool,
+  type BuiltinToolConfig,
+  type BuiltinToolDefinition,
+  type BuiltinToolDefinitionWithSchema,
+} from './types/builtin';
+export {
   ToolResultType,
   type ToolResult,
   type ErrorResult,
   type QueryResult,
   type ResourceResult,
   type TabularDataResult,
+  type VisualizationResult,
   type OtherResult,
+  isErrorResult,
+  isOtherResult,
+  isQueryResult,
+  isResourceResult,
+  isTabularDataResult,
 } from './tool_result';
+export { type BrowserApiToolMetadata } from './browser_tool_metadata';

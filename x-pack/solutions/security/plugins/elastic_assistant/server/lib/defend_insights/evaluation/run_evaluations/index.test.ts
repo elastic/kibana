@@ -14,6 +14,7 @@ import { runDefendInsightsEvaluations } from '.';
 import type { DefaultDefendInsightsGraph } from '../../graphs/default_defend_insights_graph';
 import { getLlmType } from '../../../../routes/utils';
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
+import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 jest.mock('langsmith/evaluation', () => ({
   evaluate: jest.fn(async (predict: Function) =>
@@ -33,7 +34,7 @@ jest.mock('../helpers/get_graph_input_overrides', () => ({
   getDefendInsightsGraphInputOverrides: jest.fn((input) => input.overrides ?? {}),
 }));
 
-const mockExperimentConnector = {
+const mockExperimentConnector = createMockConnector({
   name: 'Gemini 1.5 Pro 002',
   actionTypeId: '.gemini',
   config: {
@@ -42,14 +43,9 @@ const mockExperimentConnector = {
     gcpRegion: 'test-region',
     gcpProjectID: 'test-project-id',
   },
-  secrets: {
-    credentialsJson: '{}',
-  },
   id: 'gemini-1-5-pro-002',
   isPreconfigured: true,
-  isSystemAction: false,
-  isDeprecated: false,
-} as Connector;
+});
 
 const datasetName = 'test-dataset';
 const evaluatorConnectorId = 'test-evaluator-connector-id';

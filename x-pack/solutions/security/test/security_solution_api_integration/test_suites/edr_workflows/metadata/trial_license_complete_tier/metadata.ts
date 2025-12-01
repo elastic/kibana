@@ -99,10 +99,36 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await endpointDataStreamHelpers.deleteAllDocsFromFleetAgents(getService);
-        await endpointDataStreamHelpers.deleteAllDocsFromMetadataDatastream(getService);
-        await endpointDataStreamHelpers.deleteAllDocsFromMetadataCurrentIndex(getService);
-        await endpointDataStreamHelpers.deleteAllDocsFromIndex(getService, METADATA_UNITED_INDEX);
+        // Delete data loaded and suppress any errors (no point in failing test suite on data
+        // cleanup, since all test already ran)
+        await endpointDataStreamHelpers.deleteAllDocsFromFleetAgents(getService).catch((error) => {
+          log.warning(
+            `afterAll: 'deleteAllDocsFromFleetAgents()' returned error: ${error.message}`
+          );
+          log.debug(error);
+        });
+        await endpointDataStreamHelpers
+          .deleteAllDocsFromMetadataDatastream(getService)
+          .catch((error) => {
+            log.warning(
+              `afterAll: 'deleteAllDocsFromMetadataDatastream()' returned error: ${error.message}`
+            );
+            log.debug(error);
+          });
+        await endpointDataStreamHelpers
+          .deleteAllDocsFromMetadataCurrentIndex(getService)
+          .catch((error) => {
+            log.warning(
+              `afterAll: 'deleteAllDocsFromMetadataCurrentIndex()' returned error: ${error.message}`
+            );
+            log.debug(error);
+          });
+        await endpointDataStreamHelpers
+          .deleteAllDocsFromIndex(getService, METADATA_UNITED_INDEX)
+          .catch((error) => {
+            log.warning(`afterAll: 'deleteAllDocsFromIndex()' returned error: ${error.message}`);
+            log.debug(error);
+          });
       });
 
       it('should return one entry for each host with default paging', async () => {

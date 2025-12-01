@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { getAlwaysFiringInternalRule } from '../../../../common/lib/alert_utils';
-import { UserAtSpaceScenarios } from '../../../scenarios';
+import { DefaultSpace, Superuser, UserAtSpaceScenarios } from '../../../scenarios';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   AlertUtils,
@@ -383,6 +383,12 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
     describe('internally managed rule types', () => {
       const rulePayload = getAlwaysFiringInternalRule();
 
+      const alertUtils = new AlertUtils({
+        user: Superuser,
+        space: DefaultSpace,
+        supertestWithoutAuth: supertest,
+      });
+
       it('should throw 400 error when trying to snooze an internally managed rule type', async () => {
         const { body: createdRule } = await supertest
           .post('/api/alerts_fixture/rule/internally_managed')
@@ -390,14 +396,16 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
           .send(rulePayload)
           .expect(200);
 
-        objectRemover.add('default', createdRule.id, 'rule', 'alerting');
-
         await supertest
           .post(`/api/alerting/rule/${createdRule.id}/snooze_schedule`)
           .set('kbn-xsrf', 'foo')
           .set('content-type', 'application/json')
           .send(snoozeSchedule)
           .expect(400);
+
+        const res = await alertUtils.deleteInternallyManagedRule(createdRule.id);
+
+        expect(res.statusCode).to.eql(200);
       });
     });
   });

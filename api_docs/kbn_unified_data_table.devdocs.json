@@ -514,7 +514,7 @@
         "label": "RowHeightSettings",
         "description": [],
         "signature": [
-          "({\n  lineCountInput,\n  label,\n  rowHeight = RowHeightMode.custom,\n  onChangeRowHeight,\n  onChangeLineCountInput,\n  maxRowHeight = 20,\n  ['data-test-subj']: dataTestSubj,\n}: ",
+          "({\n  lineCountInput,\n  label,\n  rowHeight = RowHeightMode.custom,\n  onChangeRowHeight,\n  onChangeLineCountInput,\n  maxRowHeight = 20,\n  ['data-test-subj']: dataTestSubj,\n  fullWidth,\n}: ",
           {
             "pluginId": "@kbn/unified-data-table",
             "scope": "public",
@@ -533,7 +533,7 @@
             "id": "def-public.RowHeightSettings.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  lineCountInput,\n  label,\n  rowHeight = RowHeightMode.custom,\n  onChangeRowHeight,\n  onChangeLineCountInput,\n  maxRowHeight = 20,\n  ['data-test-subj']: dataTestSubj,\n}",
+            "label": "{\n  lineCountInput,\n  label,\n  rowHeight = RowHeightMode.custom,\n  onChangeRowHeight,\n  onChangeLineCountInput,\n  maxRowHeight = 20,\n  ['data-test-subj']: dataTestSubj,\n  fullWidth,\n}",
             "description": [],
             "signature": [
               {
@@ -1303,8 +1303,7 @@
             "label": "rowHeight",
             "description": [],
             "signature": [
-              "RowHeightMode",
-              " | undefined"
+              "\"custom\" | \"auto\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/row_height_settings.tsx",
             "deprecated": false,
@@ -1343,9 +1342,7 @@
             "label": "onChangeRowHeight",
             "description": [],
             "signature": [
-              "(newHeightMode: ",
-              "RowHeightMode",
-              " | undefined) => void"
+              "(newHeightMode: \"custom\" | \"auto\" | undefined) => void"
             ],
             "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/row_height_settings.tsx",
             "deprecated": false,
@@ -1359,8 +1356,7 @@
                 "label": "newHeightMode",
                 "description": [],
                 "signature": [
-                  "RowHeightMode",
-                  " | undefined"
+                  "\"custom\" | \"auto\" | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/row_height_settings.tsx",
                 "deprecated": false,
@@ -1426,6 +1422,20 @@
             "description": [],
             "signature": [
               "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/row_height_settings.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.RowHeightSettingsProps.fullWidth",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fullWidth",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/row_height_settings.tsx",
             "deprecated": false,

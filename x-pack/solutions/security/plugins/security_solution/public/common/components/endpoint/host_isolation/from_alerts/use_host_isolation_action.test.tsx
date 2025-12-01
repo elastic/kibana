@@ -60,10 +60,6 @@ describe('useHostIsolationAction', () => {
       onAddIsolationStatusClick: jest.fn(),
     };
     apiMock = agentStatusGetHttpMock(appContextMock.coreStart.http);
-    appContextMock.setExperimentalFlag({
-      responseActionsSentinelOneV1Enabled: true,
-      responseActionsCrowdstrikeManualHostIsolationEnabled: true,
-    });
     authMockSetter.set({
       canIsolateHost: true,
       canUnIsolateHost: true,

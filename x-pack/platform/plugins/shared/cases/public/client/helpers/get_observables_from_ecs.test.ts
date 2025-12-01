@@ -5,12 +5,7 @@
  * 2.0.
  */
 import type { ObservablePost } from '../../../common/types/api';
-import {
-  getIPType,
-  getHashValues,
-  getObservablesFromEcs,
-  processObservable,
-} from './get_observables_from_ecs';
+import { getIPType, getObservablesFromEcs, processObservable } from './get_observables_from_ecs';
 
 describe('getIPType', () => {
   it('should return IPV4 for a valid IPv4 address', () => {
@@ -65,53 +60,19 @@ describe('processObservable', () => {
   });
 });
 
-describe('getHashValues', () => {
-  it('should return an empty array for a valid Ecs data', () => {
-    expect(getHashValues({ _id: '1', _index: '2' })).toEqual([]);
-  });
-  it('should return an array of hash values for a valid Ecs data', () => {
-    expect(
-      getHashValues({
-        _id: '1',
-        _index: '2',
-        file: {
-          hash: {
-            md5: ['md5hasg'],
-            sha256: ['sha1hash'],
-          },
-        },
-        process: {
-          hash: {
-            md5: ['ssdeephash'],
-          },
-        },
-      })
-    ).toEqual(['md5hasg', 'sha1hash', 'ssdeephash']);
-  });
-});
-
-describe('getObservablesFromEcsData', () => {
+describe('getObservablesFromEcsDataArray', () => {
   it('should return an array of observables for a valid Ecs data', () => {
     expect(
-      getObservablesFromEcs({
-        _id: '1',
-        _index: '2',
-        source: { ip: ['192.168.1.1'] },
-        destination: { ip: ['023:023:023:023:023:023:023:023'] },
-        host: {
-          name: ['host1'],
-        },
-        file: {
-          hash: {
-            sha256: ['sha256hash', 'sha256hash2'],
-          },
-        },
-        dns: {
-          question: {
-            name: ['example.com', 'example.org'],
-          },
-        },
-      })
+      getObservablesFromEcs([
+        [
+          { field: 'source.ip', value: ['192.168.1.1'] },
+          { field: 'destination.ip', value: ['023:023:023:023:023:023:023:023'] },
+          { field: 'host.name', value: ['host1'] },
+          { field: 'file.hash.sha256', value: ['sha256hash', 'sha256hash2'] },
+          { field: 'dns.question.name', value: ['example.com', 'example.org'] },
+          { field: 'agent.id', value: ['agent1', 'agent2'] },
+        ],
+      ])
     ).toEqual([
       {
         typeKey: 'observable-type-ipv4',
@@ -148,21 +109,40 @@ describe('getObservablesFromEcsData', () => {
         value: 'example.org',
         description: 'Auto extracted observable',
       },
+      {
+        typeKey: 'observable-type-agent-id',
+        value: 'agent1',
+        description: 'Auto extracted observable',
+      },
+      {
+        typeKey: 'observable-type-agent-id',
+        value: 'agent2',
+        description: 'Auto extracted observable',
+      },
     ]);
   });
 
   it('should return unique observables', () => {
     expect(
-      getObservablesFromEcs({
-        _id: '1',
-        _index: '2',
-        file: {
-          hash: {
-            sha512: ['sha'],
-            sha256: ['sha'],
-          },
-        },
-      })
+      getObservablesFromEcs([
+        [
+          { field: 'file.hash.sha512', value: ['sha'] },
+          { field: 'file.hash.sha256', value: ['sha'] },
+        ],
+      ])
+    ).toEqual([
+      {
+        typeKey: 'observable-type-file-hash',
+        value: 'sha',
+        description: 'Auto extracted observable',
+      },
+    ]);
+  });
+  it('should not include observables with no value', () => {
+    expect(
+      getObservablesFromEcs([
+        [{ field: 'host.name' }, { field: 'file.hash.sha512', value: ['sha'] }],
+      ])
     ).toEqual([
       {
         typeKey: 'observable-type-file-hash',
@@ -174,16 +154,12 @@ describe('getObservablesFromEcsData', () => {
 
   it('should return observables with different key value pairs', () => {
     expect(
-      getObservablesFromEcs({
-        _id: '1',
-        _index: '2',
-        host: {
-          name: ['name'],
-        },
-        file: {
-          path: ['name'],
-        },
-      })
+      getObservablesFromEcs([
+        [
+          { field: 'host.name', value: ['name'] },
+          { field: 'file.path', value: ['name'] },
+        ],
+      ])
     ).toEqual([
       {
         typeKey: 'observable-type-hostname',
@@ -193,6 +169,42 @@ describe('getObservablesFromEcsData', () => {
       {
         typeKey: 'observable-type-file-path',
         value: 'name',
+        description: 'Auto extracted observable',
+      },
+    ]);
+  });
+
+  it('should return correct observables from multiple ecs data arrays', () => {
+    expect(
+      getObservablesFromEcs([
+        [
+          { field: 'host.name', value: ['host1'] },
+          { field: 'file.path', value: ['path1'] },
+        ],
+        [
+          { field: 'host.name', value: ['host2'] },
+          { field: 'file.path', value: ['path2'] },
+        ],
+      ])
+    ).toEqual([
+      {
+        typeKey: 'observable-type-hostname',
+        value: 'host1',
+        description: 'Auto extracted observable',
+      },
+      {
+        typeKey: 'observable-type-file-path',
+        value: 'path1',
+        description: 'Auto extracted observable',
+      },
+      {
+        typeKey: 'observable-type-hostname',
+        value: 'host2',
+        description: 'Auto extracted observable',
+      },
+      {
+        typeKey: 'observable-type-file-path',
+        value: 'path2',
         description: 'Auto extracted observable',
       },
     ]);

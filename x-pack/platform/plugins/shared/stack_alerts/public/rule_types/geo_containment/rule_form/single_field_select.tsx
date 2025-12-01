@@ -76,6 +76,7 @@ export function SingleFieldSelect({ isInvalid, placeholder, value, onChange, fie
       renderOption={renderOption}
       isClearable={false}
       placeholder={placeholder}
+      aria-label={placeholder}
     />
   );
 }

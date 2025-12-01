@@ -35,6 +35,7 @@ export function TimestampFieldSelector({ fields, isDisabled, isLoading }: Props)
 
   return (
     <EuiFormRow
+      fullWidth
       label={i18n.translate('xpack.slo.sloEdit.timestampField.label', {
         defaultMessage: 'Timestamp field',
       })}
@@ -48,6 +49,7 @@ export function TimestampFieldSelector({ fields, isDisabled, isLoading }: Props)
           return (
             <EuiComboBox<string>
               {...field}
+              fullWidth
               compressed
               async
               placeholder={placeholder}

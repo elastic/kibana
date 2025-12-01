@@ -30,20 +30,6 @@ export const ALERTS_GRAPH_TITLE = i18n.translate(
   }
 );
 
-export const ERROR_FETCHING_ALERTS_DATA = i18n.translate(
-  'xpack.securitySolution.eventsTab.errorFetchingAlertsData',
-  {
-    defaultMessage: 'Failed to query alerts data',
-  }
-);
-
-export const ERROR_FETCHING_EVENTS_DATA = i18n.translate(
-  'xpack.securitySolution.eventsTab.errorFetchingEventsData',
-  {
-    defaultMessage: 'Failed to query events data',
-  }
-);
-
 export const SHOW_EXTERNAL_ALERTS = i18n.translate(
   'xpack.securitySolution.eventsTab.showExternalAlerts',
   {

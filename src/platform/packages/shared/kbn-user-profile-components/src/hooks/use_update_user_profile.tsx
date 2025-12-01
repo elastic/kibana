@@ -84,6 +84,7 @@ export const useUpdateUserProfile = ({
                       size="s"
                       onClick={() => window.location.reload()}
                       data-test-subj="windowReloadButton"
+                      autoFocus
                     >
                       {i18n.translate(
                         'userProfileComponents.updateUserProfile.notification.requiresPageReloadButtonLabel',

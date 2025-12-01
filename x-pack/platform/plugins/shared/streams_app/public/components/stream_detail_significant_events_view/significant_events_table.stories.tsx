@@ -43,6 +43,7 @@ const logsStreamDefinition: Streams.WiredStream.Definition = {
     lifecycle: { inherit: {} },
     processing: { steps: [] },
     settings: {},
+    failure_store: { inherit: {} },
   },
 };
 
@@ -72,8 +73,8 @@ export const SomeThings: StoryFn<{}> = () => {
             kql: {
               query: '*',
             },
-            system: {
-              name: 'System',
+            feature: {
+              name: 'Feature',
               filter: {
                 always: {},
               },

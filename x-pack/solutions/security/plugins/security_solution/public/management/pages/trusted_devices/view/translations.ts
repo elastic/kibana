@@ -121,57 +121,6 @@ export const CONDITION_FIELD_TITLE: { [K in TrustedDeviceConditionEntryField]: s
   ),
 };
 
-export const CONDITION_FIELD_DESCRIPTION: { [K in TrustedDeviceConditionEntryField]: string } = {
-  [TrustedDeviceConditionEntryField.USERNAME]: i18n.translate(
-    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.description.username',
-    {
-      defaultMessage: 'The username of the device user',
-    }
-  ),
-  [TrustedDeviceConditionEntryField.HOST]: i18n.translate(
-    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.description.host',
-    {
-      defaultMessage: 'The hostname of the device',
-    }
-  ),
-  [TrustedDeviceConditionEntryField.DEVICE_ID]: i18n.translate(
-    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.description.deviceId',
-    {
-      defaultMessage: 'The serial number of the device',
-    }
-  ),
-  [TrustedDeviceConditionEntryField.MANUFACTURER]: i18n.translate(
-    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.description.manufacturer',
-    {
-      defaultMessage: 'The vendor name of the device manufacturer',
-    }
-  ),
-  [TrustedDeviceConditionEntryField.PRODUCT_ID]: i18n.translate(
-    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.description.productId',
-    {
-      defaultMessage: 'The product identifier of the device',
-    }
-  ),
-  [TrustedDeviceConditionEntryField.PRODUCT_NAME]: i18n.translate(
-    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.description.productName',
-    {
-      defaultMessage: 'The product name of the device',
-    }
-  ),
-  [TrustedDeviceConditionEntryField.DEVICE_TYPE]: i18n.translate(
-    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.description.deviceType',
-    {
-      defaultMessage: 'The type of the device',
-    }
-  ),
-  [TrustedDeviceConditionEntryField.MANUFACTURER_ID]: i18n.translate(
-    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.description.manufacturerId',
-    {
-      defaultMessage: 'The vendor identifier of the device manufacturer',
-    }
-  ),
-};
-
 export const OPERATOR_TITLES = {
   is: i18n.translate('xpack.securitySolution.trustedDevices.card.operator.is', {
     defaultMessage: 'is',
@@ -188,11 +137,6 @@ export const INPUT_ERRORS = {
   entries: i18n.translate('xpack.securitySolution.trustedDevices.form.errors.entriesRequired', {
     defaultMessage: 'At least one condition is required',
   }),
-  entriesDuplicateFields: (duplicateFields: string[]) =>
-    i18n.translate('xpack.securitySolution.trustedDevices.form.errors.entriesDuplicateFields', {
-      defaultMessage: 'Duplicate field(s): {duplicateFields}',
-      values: { duplicateFields: duplicateFields.join(', ') },
-    }),
   invalidHash: i18n.translate('xpack.securitySolution.trustedDevices.form.errors.invalidHash', {
     defaultMessage: 'Invalid hash value',
   }),

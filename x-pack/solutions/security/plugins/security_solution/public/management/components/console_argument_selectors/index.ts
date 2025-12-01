@@ -6,3 +6,5 @@
  */
 export * from './file_selector';
 export * from './pending_actions_selector';
+export * from './textarea_input_argument';
+export * from './script_input_params_selector';

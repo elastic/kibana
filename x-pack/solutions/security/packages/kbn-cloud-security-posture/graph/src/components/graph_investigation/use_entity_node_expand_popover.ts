@@ -92,7 +92,8 @@ export const useEntityNodeExpandPopover = (
         : 'show';
 
       const shouldDisableEntityDetailsListItem =
-        !onShowEntityDetailsClick || getNodeDocumentMode(node.data) !== 'single-entity';
+        !onShowEntityDetailsClick ||
+        !['single-entity', 'grouped-entities'].includes(getNodeDocumentMode(node.data));
 
       return [
         {

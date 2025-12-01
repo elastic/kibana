@@ -13,9 +13,14 @@ import { SampleDataActionButton } from './sample_data_action_button';
 interface SampleDataPanelProps {
   isLoading: boolean;
   onIngestSampleData: () => void;
+  hasRequiredLicense?: boolean;
 }
 
-export const SampleDataPanel = ({ isLoading, onIngestSampleData }: SampleDataPanelProps) => {
+export const SampleDataPanel = ({
+  isLoading,
+  onIngestSampleData,
+  hasRequiredLicense = false,
+}: SampleDataPanelProps) => {
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center">
       <EuiFlexItem grow={false}>
@@ -29,7 +34,11 @@ export const SampleDataPanel = ({ isLoading, onIngestSampleData }: SampleDataPan
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <SampleDataActionButton isLoading={isLoading} onIngestSampleData={onIngestSampleData} />
+        <SampleDataActionButton
+          isLoading={isLoading}
+          onIngestSampleData={onIngestSampleData}
+          hasRequiredLicense={hasRequiredLicense}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

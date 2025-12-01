@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -34,7 +34,6 @@
     "@kbn/rule-data-utils",
     "@kbn/alerts-as-data-utils",
     "@kbn/esql",
-    "@kbn/esql-editor",
     "@kbn/core-http-browser",
     "@kbn/core-doc-links-browser",
     "@kbn/core-ui-settings-server",
@@ -52,7 +51,6 @@
     "@kbn/alerting-rule-utils",
     "@kbn/response-ops-rule-params",
     "@kbn/object-utils",
-    "@kbn/expressions-plugin",
     "@kbn/esql-ast",
   ],
   "exclude": ["target/**/*"]

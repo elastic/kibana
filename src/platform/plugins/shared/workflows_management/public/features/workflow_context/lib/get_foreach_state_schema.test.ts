@@ -8,9 +8,9 @@
  */
 
 import { DynamicStepContextSchema, ForEachContextSchema } from '@kbn/workflows';
+import { z } from '@kbn/zod';
 import { getForeachStateSchema } from './get_foreach_state_schema';
 import { expectZodSchemaEqual } from '../../../../common/lib/zod/zod_utils';
-import { z } from '@kbn/zod';
 
 describe('getForeachStateSchema', () => {
   it('should return plain foreach state if item type is not inferable', () => {
@@ -20,20 +20,21 @@ describe('getForeachStateSchema', () => {
       type: 'foreach',
       name: 'foreach-step',
     });
-    expectZodSchemaEqual(foreachStateSchema, ForEachContextSchema);
+    expect(foreachStateSchema).toBeDefined();
+    expect(foreachStateSchema.shape.item.description).toMatch(/Unable to parse foreach parameter/);
   });
 
   it('should return foreach state with item type if it is possible to infer from previous step output', () => {
     const itemSchema = z.object({ name: z.string(), surname: z.string() });
     const stepContext = DynamicStepContextSchema.extend({
       steps: z.object({
-        'previous-step': z.object({
+        previous_step: z.object({
           output: z.array(itemSchema),
         }),
       }),
     });
     const foreachStateSchema = getForeachStateSchema(stepContext, {
-      foreach: 'steps.previous-step.output',
+      foreach: '{{steps.previous_step.output}}',
       type: 'foreach',
       name: 'foreach-step',
     });
@@ -54,7 +55,7 @@ describe('getForeachStateSchema', () => {
       }),
     });
     const foreachStateSchema = getForeachStateSchema(stepContext, {
-      foreach: 'consts.items',
+      foreach: '{{consts.items}}',
       type: 'foreach',
       name: 'foreach-step',
     });
@@ -73,12 +74,14 @@ describe('getForeachStateSchema', () => {
         items: z.object({ name: z.string(), surname: z.string() }),
       }),
     });
-    expect(() =>
-      getForeachStateSchema(stepContext, {
-        foreach: 'consts.items',
-        type: 'foreach',
-        name: 'foreach-step',
-      })
-    ).toThrow(/Foreach step must iterate over an array/);
+    const foreachStateSchema = getForeachStateSchema(stepContext, {
+      foreach: '{{consts.items}}',
+      type: 'foreach',
+      name: 'foreach-step',
+    });
+    expect(foreachStateSchema).toBeDefined();
+    expect(foreachStateSchema.shape.item.description).toMatch(
+      /Expected array for foreach iteration, but got object/
+    );
   });
 });

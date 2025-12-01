@@ -22,10 +22,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { PackageInfo } from '../../../../../types';
 
 import { useGetInputsTemplatesQuery, useStartServices } from '../../../../../hooks';
-import { PrereleaseCallout } from '../overview/overview';
 
 import { isPackagePrerelease } from '../../../../../../../../common/services';
 import { SideBarColumn } from '../../../components/side_bar_column';
+import { PrereleaseCallout } from '../overview/prerelease_callout';
 
 interface ConfigsProps {
   packageInfo: PackageInfo;
@@ -52,6 +52,7 @@ export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
       {error ? (
         <EuiFlexItem grow={7}>
           <EuiCallOut
+            announceOnMount
             data-test-subj="configsTab.errorCallout"
             title={
               <FormattedMessage
@@ -79,10 +80,8 @@ export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
               {isPrerelease && (
                 <>
                   <EuiSpacer size="s" />
-                  <PrereleaseCallout
-                    packageName={packageInfo.name}
-                    packageTitle={packageInfo.title}
-                  />
+                  <PrereleaseCallout packageInfo={packageInfo} />
+                  <EuiSpacer size="l" />
                 </>
               )}
               <EuiText>
@@ -114,6 +113,7 @@ export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
                 <>
                   <EuiSpacer size="s" />
                   <EuiCallOut
+                    announceOnMount
                     data-test-subj="configsTab.notInstalled"
                     title={
                       <FormattedMessage

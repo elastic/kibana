@@ -41,9 +41,14 @@ export interface MigrationDataInputFlyoutProps {
   onClose: () => void;
   migrationStats?: RuleMigrationStats;
 }
+
+const RULES_MIGRATION_DATA_INPUT_FLYOUT_TITLE = 'rulesMigrationDataInputFlyoutTitle';
+
 export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps>(
   ({ onClose, migrationStats: initialMigrationSats }) => {
-    const modalTitleId = useGeneratedHtmlId();
+    const modalTitleId = useGeneratedHtmlId({
+      prefix: RULES_MIGRATION_DATA_INPUT_FLYOUT_TITLE,
+    });
 
     const [migrationStats, setMigrationStats] = useState<RuleMigrationStats | undefined>(
       initialMigrationSats
@@ -128,7 +133,7 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
-              <h2 id={modalTitleId}>
+              <h2 id={modalTitleId} aria-label={RULES_MIGRATION_DATA_INPUT_FLYOUT_TITLE}>
                 <FormattedMessage
                   id="xpack.securitySolution.siemMigrations.rules.dataInputFlyout.title"
                   defaultMessage="Upload Splunk SIEM rules"

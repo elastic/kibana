@@ -70,6 +70,22 @@ components:
       type: boolean
       description: Determines whether an external/prebuilt rule has been customized by the user (i.e. any of its fields have been modified and diverged from the base value).
 
+    ExternalRuleHasBaseVersion:
+      type: boolean
+      description: Determines whether an external/prebuilt rule has its original, unmodified version present when the calculation of its customization status is performed (`rule_source.is_customized` and `rule_source.customized_fields`).
+
+    ExternalRuleCustomizedFields:
+      type: array
+      description: An array of customized field names — that is, fields that the user has modified from their base value. Defaults to an empty array.
+      items:
+        type: object
+        properties:
+          field_name:
+            type: string
+            description: Name of a user-modified field in the rule object.
+        required:
+          - field_name
+
     InternalRuleSource:
       description: Type of rule source for internally sourced rules, i.e. created within the Kibana apps.
       type: object
@@ -91,9 +107,15 @@ components:
             - external
         is_customized:
           $ref: '#/components/schemas/IsExternalRuleCustomized'
+        has_base_version:
+          $ref: '#/components/schemas/ExternalRuleHasBaseVersion'
+        customized_fields:
+          $ref: '#/components/schemas/ExternalRuleCustomizedFields'
       required:
         - type
         - is_customized
+        - has_base_version
+        - customized_fields
 
     RuleSource:
       description: Discriminated union that determines whether the rule is internally sourced (created within the Kibana app) or has an external source, such as the Elastic Prebuilt rules repo.

@@ -41,9 +41,19 @@ describe('CspDirectives', () => {
       expect(directives.getCspHeader()).toMatchInlineSnapshot(`"style-src foo bar"`);
     });
 
+    it(`removes 'none' from object_src when other values are added`, () => {
+      const config = cspConfig.schema.validate({
+        object_src: [`some-object_src-value`],
+      });
+      const directives = CspDirectives.fromConfig(config);
+      expect(directives.getCspHeader()).toMatchInlineSnapshot(
+        `"script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' some-object_src-value"`
+      );
+    });
+
     it('automatically adds single quotes for keywords', () => {
       const directives = new CspDirectives();
-      directives.addDirectiveValue('style-src', 'none');
+      directives.addDirectiveValue('script-src', 'none');
       directives.addDirectiveValue('style-src', 'self');
       directives.addDirectiveValue('style-src', 'strict-dynamic');
       directives.addDirectiveValue('style-src', 'report-sample');
@@ -53,13 +63,13 @@ describe('CspDirectives', () => {
       directives.addDirectiveValue('style-src', 'unsafe-allow-redirects');
 
       expect(directives.getCspHeader()).toMatchInlineSnapshot(
-        `"style-src 'none' 'self' 'strict-dynamic' 'report-sample' 'unsafe-inline' 'unsafe-eval' 'unsafe-hashes' 'unsafe-allow-redirects'"`
+        `"script-src 'none'; style-src 'self' 'strict-dynamic' 'report-sample' 'unsafe-inline' 'unsafe-eval' 'unsafe-hashes' 'unsafe-allow-redirects'"`
       );
     });
 
     it('does not add single quotes for keywords when already present', () => {
       const directives = new CspDirectives();
-      directives.addDirectiveValue('style-src', `'none'`);
+      directives.addDirectiveValue('script-src', `'none'`);
       directives.addDirectiveValue('style-src', `'self'`);
       directives.addDirectiveValue('style-src', `'strict-dynamic'`);
       directives.addDirectiveValue('style-src', `'report-sample'`);
@@ -69,7 +79,7 @@ describe('CspDirectives', () => {
       directives.addDirectiveValue('style-src', `'unsafe-allow-redirects'`);
 
       expect(directives.getCspHeader()).toMatchInlineSnapshot(
-        `"style-src 'none' 'self' 'strict-dynamic' 'report-sample' 'unsafe-inline' 'unsafe-eval' 'unsafe-hashes' 'unsafe-allow-redirects'"`
+        `"script-src 'none'; style-src 'self' 'strict-dynamic' 'report-sample' 'unsafe-inline' 'unsafe-eval' 'unsafe-hashes' 'unsafe-allow-redirects'"`
       );
     });
   });
@@ -79,7 +89,7 @@ describe('CspDirectives', () => {
       const config = cspConfig.schema.validate({});
       const directives = CspDirectives.fromConfig(config);
       expect(directives.getCspHeader()).toMatchInlineSnapshot(
-        `"script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'"`
+        `"script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'"`
       );
     });
 
@@ -92,7 +102,7 @@ describe('CspDirectives', () => {
       const directives = CspDirectives.fromConfig(config);
 
       expect(directives.getCspHeader()).toMatchInlineSnapshot(
-        `"script-src 'report-sample' 'self' baz; worker-src 'report-sample' 'self' blob: foo; style-src 'report-sample' 'self' 'unsafe-inline' bar dolly"`
+        `"script-src 'report-sample' 'self' baz; worker-src 'report-sample' 'self' blob: foo; style-src 'report-sample' 'self' 'unsafe-inline' bar dolly; object-src 'report-sample' 'none'"`
       );
     });
 
@@ -109,7 +119,7 @@ describe('CspDirectives', () => {
       });
       const directives = CspDirectives.fromConfig(config);
       expect(directives.getCspHeader()).toMatchInlineSnapshot(
-        `"script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; connect-src 'self' connect-src; default-src 'self' default-src; font-src 'self' font-src; frame-src 'self' frame-src; img-src 'self' img-src; frame-ancestors 'self' frame-ancestors; report-uri report-uri; report-to report-to"`
+        `"script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'; connect-src 'self' connect-src; default-src 'self' default-src; font-src 'self' font-src; frame-src 'self' frame-src; img-src 'self' img-src; frame-ancestors 'self' frame-ancestors; report-uri report-uri; report-to report-to"`
       );
     });
 
@@ -119,7 +129,7 @@ describe('CspDirectives', () => {
       });
       const directives = CspDirectives.fromConfig(config);
       expect(directives.getCspHeader()).toMatchInlineSnapshot(
-        `"script-src 'report-sample' 'self' 'unsafe-hashes'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'"`
+        `"script-src 'report-sample' 'self' 'unsafe-hashes'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'"`
       );
     });
 
@@ -142,7 +152,7 @@ describe('CspDirectives', () => {
       };
       const directives = CspDirectives.fromConfig(config, additionalConfig1, additionalConfig2);
       expect(directives.getCspHeader()).toEqual(
-        `script-src 'report-sample' 'self' cdn.host.test; worker-src 'report-sample' 'self' blob: cdn.host.test; style-src 'report-sample' 'self' 'unsafe-inline' cdn.host.test; connect-src 'self' *.foo.bar cdn.host.test; font-src 'self' cdn.host.test; frame-src 'self' cdn.host.test; img-src 'self' *.foo.bar cdn.host.test`
+        `script-src 'report-sample' 'self' cdn.host.test; worker-src 'report-sample' 'self' blob: cdn.host.test; style-src 'report-sample' 'self' 'unsafe-inline' cdn.host.test; object-src 'report-sample' 'none'; connect-src 'self' *.foo.bar cdn.host.test; font-src 'self' cdn.host.test; frame-src 'self' cdn.host.test; img-src 'self' *.foo.bar cdn.host.test`
       );
     });
   });

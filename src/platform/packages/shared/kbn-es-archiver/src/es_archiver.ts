@@ -14,6 +14,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { KbnClient } from '@kbn/test';
+import { withSpan } from '@kbn/apm-utils';
 import type { LoadActionPerfOptions } from './lib';
 import {
   saveAction,
@@ -97,16 +98,18 @@ export class EsArchiver {
       performance?: LoadActionPerfOptions;
     } = {}
   ) {
-    return await loadAction({
-      inputDir: this.findArchive(path),
-      skipExisting: !!skipExisting,
-      useCreate: !!useCreate,
-      docsOnly,
-      client: this.client,
-      log: this.log,
-      kbnClient: this.kbnClient,
-      performance,
-    });
+    return await withSpan('es_archiver load', () =>
+      loadAction({
+        inputDir: this.findArchive(path),
+        skipExisting: !!skipExisting,
+        useCreate: !!useCreate,
+        docsOnly,
+        client: this.client,
+        log: this.log,
+        kbnClient: this.kbnClient,
+        performance,
+      })
+    );
   }
 
   /**
@@ -115,12 +118,14 @@ export class EsArchiver {
    * @param {String} path - relative path to the archive to unload, resolved relative to this.baseDir which defaults to REPO_ROOT
    */
   async unload(path: string) {
-    return await unloadAction({
-      inputDir: this.findArchive(path),
-      client: this.client,
-      log: this.log,
-      kbnClient: this.kbnClient,
-    });
+    return await withSpan('es_archiver unload', () =>
+      unloadAction({
+        inputDir: this.findArchive(path),
+        client: this.client,
+        log: this.log,
+        kbnClient: this.kbnClient,
+      })
+    );
   }
 
   /**
@@ -164,10 +169,12 @@ export class EsArchiver {
    * Cleanup saved object indices, preserving the space:default saved object.
    */
   async emptyKibanaIndex() {
-    return await emptyKibanaIndexAction({
-      client: this.client,
-      log: this.log,
-    });
+    return await withSpan('es_archiver empty_kibana_index', () =>
+      emptyKibanaIndexAction({
+        client: this.client,
+        log: this.log,
+      })
+    );
   }
 
   /**

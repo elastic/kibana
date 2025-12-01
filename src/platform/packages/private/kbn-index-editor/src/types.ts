@@ -29,7 +29,10 @@ export interface EditLookupIndexContentContext {
     indexName: string | null;
     /** Indicates if the index was created */
     indexCreatedDuringFlyout: boolean;
+    /** Indicates if new fields have been added to the index */
+    indexHasNewFields: boolean;
   }) => void;
+  onOpenIndexInDiscover?: (indexName: string, esqlQuery: string) => Promise<void>;
 }
 
 export interface EditLookupIndexFlyoutDeps {
@@ -60,6 +63,7 @@ export interface KibanaContextExtra {
   /** Custom service for indexing documents */
   indexUpdateService: IndexUpdateService;
   fileUploadManager: FileUploadManager;
+  indexEditorTelemetryService: IndexEditorTelemetryService;
   // Required services
   theme: ThemeServiceStart;
   uiSettings: IUiSettingsClient;

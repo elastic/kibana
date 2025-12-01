@@ -28,14 +28,6 @@ export const CONNECTOR = i18n.translate(
   }
 );
 
-export const CUSTOMIZE_THE_ALERTS = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.settingsFlyout.alertSelection.customizeTheAlertsLabel',
-  {
-    defaultMessage:
-      'Customize the set of alerts that will be analyzed when generating Attack discoveries.',
-  }
-);
-
 export const CUSTOMIZE_THE_CONNECTOR_AND_ALERTS = i18n.translate(
   'xpack.securitySolution.attackDiscovery.settingsFlyout.alertSelection.customizeTheConnectorAndAlertsLabel',
   {

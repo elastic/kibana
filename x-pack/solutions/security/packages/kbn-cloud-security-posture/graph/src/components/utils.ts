@@ -10,6 +10,11 @@ import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/cloud-security-posture-common/utils/helpers';
 import type { Node, Edge } from '@xyflow/react';
 import { Position } from '@xyflow/react';
+import {
+  DOCUMENT_TYPE_ENTITY,
+  DOCUMENT_TYPE_EVENT,
+  DOCUMENT_TYPE_ALERT,
+} from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import type {
   NodeViewModel,
   NodeDocumentDataViewModel,
@@ -65,9 +70,15 @@ export const getNodeDocumentMode = (
   }
 
   // Single alert contains both event's document data and alert's document data.
-  if (node.documentsData.find((doc) => doc.type === 'alert') && node.documentsData.length <= 2) {
+  if (
+    node.documentsData.find((doc) => doc.type === DOCUMENT_TYPE_ALERT) &&
+    node.documentsData.length <= 1
+  ) {
     return 'single-alert';
-  } else if (node.documentsData.length === 1 && node.documentsData[0].type === 'event') {
+  } else if (
+    node.documentsData.length === 1 &&
+    node.documentsData[0].type === DOCUMENT_TYPE_EVENT
+  ) {
     return 'single-event';
   } else if (isEntityNode(node) && node.documentsData.length === 1) {
     return 'single-entity';
@@ -97,13 +108,13 @@ export const getSingleDocumentData = (
 
   // For single-entity mode, prioritize finding the entity document
   if (mode === 'single-entity') {
-    return node.documentsData.find((doc) => doc.type === 'entity');
+    return node.documentsData.find((doc) => doc.type === DOCUMENT_TYPE_ENTITY);
   }
 
   // For single-alert and single-event modes, prefer alert document over event document
   const documentData =
-    node.documentsData.find((doc) => doc.type === 'alert') ??
-    node.documentsData.find((doc) => doc.type === 'event');
+    node.documentsData.find((doc) => doc.type === DOCUMENT_TYPE_ALERT) ??
+    node.documentsData.find((doc) => doc.type === DOCUMENT_TYPE_EVENT);
 
   return documentData;
 };
@@ -115,6 +126,13 @@ const FETCH_GRAPH_FAILED_TEXT = i18n.translate(
   }
 );
 
+const FETCH_GROUP_DETAILS_FAILED_TEXT = i18n.translate(
+  'securitySolutionPackages.csp.graph.investigation.errorFetchingGroupDetails',
+  {
+    defaultMessage: 'Error fetching group details',
+  }
+);
+
 export const showErrorToast = (
   toasts: CoreStart['notifications']['toasts'],
   error: unknown
@@ -123,6 +141,17 @@ export const showErrorToast = (
     toasts.addError(error, { title: FETCH_GRAPH_FAILED_TEXT });
   } else {
     toasts.addDanger(extractErrorMessage(error, FETCH_GRAPH_FAILED_TEXT));
+  }
+};
+
+export const showDetailsErrorToast = (
+  toasts: CoreStart['notifications']['toasts'],
+  error: unknown
+): void => {
+  if (error instanceof Error) {
+    toasts.addError(error, { title: FETCH_GROUP_DETAILS_FAILED_TEXT });
+  } else {
+    toasts.addDanger(extractErrorMessage(error, FETCH_GROUP_DETAILS_FAILED_TEXT));
   }
 };
 

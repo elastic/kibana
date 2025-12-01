@@ -19,12 +19,12 @@ import { css } from '@emotion/react';
 import { Markdown } from '@kbn/kibana-react-plugin/public';
 import { MessageRole } from '@kbn/inference-common';
 import type { VisualizationTablesWithMeta } from '../../../common/components/visualization_actions/types';
-import { DEFAULT_AI_CONNECTOR } from '../../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
 import * as i18n from './translations';
 import { licenseService } from '../../../common/hooks/use_license';
 import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
 import { useFindCostSavingsPrompts } from '../../hooks/use_find_cost_savings_prompts';
+import { useDefaultAIConnectorId } from '../../../common/hooks/use_default_ai_connector_id';
 
 interface Props {
   isLoading: boolean;
@@ -36,9 +36,9 @@ export const CostSavingsKeyInsight: React.FC<Props> = ({ isLoading, lensResponse
     euiTheme: { size },
   } = useEuiTheme();
 
-  const { http, notifications, inference, uiSettings } = useKibana().services;
-  const connectorId = uiSettings.get<string>(DEFAULT_AI_CONNECTOR);
+  const { http, notifications, inference } = useKibana().services;
   const [insightResult, setInsightResult] = useState<string>('');
+  const { defaultConnectorId } = useDefaultAIConnectorId();
 
   const hasEnterpriseLicence = licenseService.isEnterprise();
   const { hasAssistantPrivilege, isAssistantEnabled } = useAssistantAvailability();
@@ -51,11 +51,11 @@ export const CostSavingsKeyInsight: React.FC<Props> = ({ isLoading, lensResponse
     },
   });
   const fetchInsight = useCallback(async () => {
-    if (lensResponse && connectorId && prompts !== null) {
+    if (lensResponse && defaultConnectorId && prompts !== null) {
       try {
         const prompt = getPrompt(JSON.stringify(lensResponse), prompts);
         const result = await inference.chatComplete({
-          connectorId,
+          connectorId: defaultConnectorId,
           messages: [{ role: MessageRole.User, content: prompt }],
         });
         setInsightResult(result.content);
@@ -65,7 +65,7 @@ export const CostSavingsKeyInsight: React.FC<Props> = ({ isLoading, lensResponse
         );
       }
     }
-  }, [connectorId, lensResponse, inference, prompts]);
+  }, [defaultConnectorId, lensResponse, inference, prompts]);
 
   useEffect(() => {
     fetchInsight();

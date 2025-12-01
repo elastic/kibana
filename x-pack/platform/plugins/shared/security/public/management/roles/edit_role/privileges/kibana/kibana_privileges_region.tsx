@@ -54,8 +54,11 @@ export class KibanaPrivilegesRegion extends Component<Props, {}> {
       spacesApiUi,
     } = this.props;
 
-    if (role._transform_error && role._transform_error.includes('kibana')) {
-      return <TransformErrorSection />;
+    if (
+      role._transform_error &&
+      role._transform_error.some((error) => error.reason.startsWith('kibana'))
+    ) {
+      return <TransformErrorSection transformErrors={role._transform_error} />;
     }
 
     if (spacesApiUi && spacesEnabled) {

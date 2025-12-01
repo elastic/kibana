@@ -27,6 +27,8 @@ import { RerankFieldContext } from "./esql_parser.js";
 import { FromCommandContext } from "./esql_parser.js";
 import { TimeSeriesCommandContext } from "./esql_parser.js";
 import { IndexPatternAndMetadataFieldsContext } from "./esql_parser.js";
+import { IndexPatternOrSubqueryContext } from "./esql_parser.js";
+import { SubqueryContext } from "./esql_parser.js";
 import { IndexPatternContext } from "./esql_parser.js";
 import { ClusterStringContext } from "./esql_parser.js";
 import { SelectorStringContext } from "./esql_parser.js";
@@ -79,10 +81,10 @@ import { ForkSubQueryProcessingCommandContext } from "./esql_parser.js";
 import { RerankCommandContext } from "./esql_parser.js";
 import { CompletionCommandContext } from "./esql_parser.js";
 import { InlineStatsCommandContext } from "./esql_parser.js";
-import { LookupCommandContext } from "./esql_parser.js";
-import { InsistCommandContext } from "./esql_parser.js";
 import { FuseCommandContext } from "./esql_parser.js";
 import { FuseConfigurationContext } from "./esql_parser.js";
+import { LookupCommandContext } from "./esql_parser.js";
+import { InsistCommandContext } from "./esql_parser.js";
 import { SetCommandContext } from "./esql_parser.js";
 import { SetFieldContext } from "./esql_parser.js";
 import { MatchExpressionContext } from "./esql_parser.js";
@@ -131,6 +133,10 @@ import { ComparisonOperatorContext } from "./esql_parser.js";
 import { JoinCommandContext } from "./esql_parser.js";
 import { JoinTargetContext } from "./esql_parser.js";
 import { JoinConditionContext } from "./esql_parser.js";
+import { PromqlCommandContext } from "./esql_parser.js";
+import { PromqlParamContext } from "./esql_parser.js";
+import { PromqlParamContentContext } from "./esql_parser.js";
+import { PromqlQueryPartContext } from "./esql_parser.js";
 
 
 /**
@@ -304,6 +310,26 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitIndexPatternAndMetadataFields?: (ctx: IndexPatternAndMetadataFieldsContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.indexPatternOrSubquery`.
+	 * @param ctx the parse tree
+	 */
+	enterIndexPatternOrSubquery?: (ctx: IndexPatternOrSubqueryContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.indexPatternOrSubquery`.
+	 * @param ctx the parse tree
+	 */
+	exitIndexPatternOrSubquery?: (ctx: IndexPatternOrSubqueryContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.subquery`.
+	 * @param ctx the parse tree
+	 */
+	enterSubquery?: (ctx: SubqueryContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.subquery`.
+	 * @param ctx the parse tree
+	 */
+	exitSubquery?: (ctx: SubqueryContext) => void;
 	/**
 	 * Enter a parse tree produced by `esql_parser.indexPattern`.
 	 * @param ctx the parse tree
@@ -839,26 +865,6 @@ export default class esql_parserListener extends ParseTreeListener {
 	 */
 	exitInlineStatsCommand?: (ctx: InlineStatsCommandContext) => void;
 	/**
-	 * Enter a parse tree produced by `esql_parser.lookupCommand`.
-	 * @param ctx the parse tree
-	 */
-	enterLookupCommand?: (ctx: LookupCommandContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.lookupCommand`.
-	 * @param ctx the parse tree
-	 */
-	exitLookupCommand?: (ctx: LookupCommandContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.insistCommand`.
-	 * @param ctx the parse tree
-	 */
-	enterInsistCommand?: (ctx: InsistCommandContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.insistCommand`.
-	 * @param ctx the parse tree
-	 */
-	exitInsistCommand?: (ctx: InsistCommandContext) => void;
-	/**
 	 * Enter a parse tree produced by `esql_parser.fuseCommand`.
 	 * @param ctx the parse tree
 	 */
@@ -878,6 +884,26 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitFuseConfiguration?: (ctx: FuseConfigurationContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.lookupCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterLookupCommand?: (ctx: LookupCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.lookupCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitLookupCommand?: (ctx: LookupCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.insistCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterInsistCommand?: (ctx: InsistCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.insistCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitInsistCommand?: (ctx: InsistCommandContext) => void;
 	/**
 	 * Enter a parse tree produced by `esql_parser.setCommand`.
 	 * @param ctx the parse tree
@@ -1420,5 +1446,45 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitJoinCondition?: (ctx: JoinConditionContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.promqlCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterPromqlCommand?: (ctx: PromqlCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.promqlCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitPromqlCommand?: (ctx: PromqlCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.promqlParam`.
+	 * @param ctx the parse tree
+	 */
+	enterPromqlParam?: (ctx: PromqlParamContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.promqlParam`.
+	 * @param ctx the parse tree
+	 */
+	exitPromqlParam?: (ctx: PromqlParamContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.promqlParamContent`.
+	 * @param ctx the parse tree
+	 */
+	enterPromqlParamContent?: (ctx: PromqlParamContentContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.promqlParamContent`.
+	 * @param ctx the parse tree
+	 */
+	exitPromqlParamContent?: (ctx: PromqlParamContentContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.promqlQueryPart`.
+	 * @param ctx the parse tree
+	 */
+	enterPromqlQueryPart?: (ctx: PromqlQueryPartContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.promqlQueryPart`.
+	 * @param ctx the parse tree
+	 */
+	exitPromqlQueryPart?: (ctx: PromqlQueryPartContext) => void;
 }
 

@@ -144,7 +144,7 @@ export function OverrideSwitch({
           content={<CodeExample propName="overrides" code={JSON.stringify(override, null, 2)} />}
           position="right"
         >
-          <span>
+          <span tabIndex={0}>
             {rowLabel} <EuiIcon type="question" color="subdued" />
           </span>
         </EuiToolTip>
@@ -584,7 +584,7 @@ export function PanelMenu({
               }
               position="right"
             >
-              <span>
+              <span tabIndex={0}>
                 Show custom action <EuiIcon type="question" color="subdued" />
               </span>
             </EuiToolTip>

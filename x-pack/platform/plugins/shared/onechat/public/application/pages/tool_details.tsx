@@ -16,11 +16,13 @@ import { useNavigation } from '../hooks/use_navigation';
 import { appPaths } from '../utils/app_paths';
 import { labels } from '../utils/i18n';
 import { ToolsProvider } from '../context/tools_provider';
+import { useUiPrivileges } from '../hooks/use_ui_privileges';
 
 export const OnechatToolDetailsPage = () => {
   const { toolId } = useParams<{ toolId: string }>();
   const { navigateToOnechatUrl } = useNavigation();
   const { tool, isLoading } = useTool({ toolId });
+  const { manageTools } = useUiPrivileges();
 
   useBreadcrumb([
     {
@@ -48,5 +50,7 @@ export const OnechatToolDetailsPage = () => {
     return;
   }
 
-  return <ToolsProvider>{tool.readonly ? <ViewTool /> : <EditTool />}</ToolsProvider>;
+  return (
+    <ToolsProvider>{!tool.readonly && manageTools ? <EditTool /> : <ViewTool />}</ToolsProvider>
+  );
 };

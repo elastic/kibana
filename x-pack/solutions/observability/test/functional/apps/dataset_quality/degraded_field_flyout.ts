@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import moment from 'moment/moment';
-import { generateShortId, log, timerange } from '@kbn/apm-synthtrace-client';
+import { generateShortId, log, timerange } from '@kbn/synthtrace-client';
 import type { DatasetQualityFtrProviderContext } from './config';
 import {
   createDegradedFieldsRecord,
@@ -31,6 +31,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const synthtrace = getService('logSynthtraceEsClient');
   const esClient = getService('es');
   const retry = getService('retry');
+  const queryBar = getService('queryBar');
   const to = new Date().toISOString();
   const type = 'logs';
   const degradedDatasetName = 'synth.degraded';
@@ -105,6 +106,21 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         );
 
         await PageObjects.datasetQuality.closeFlyout();
+      });
+
+      it('should go to discover page when the open in discover button is clicked', async () => {
+        await PageObjects.datasetQuality.navigateToDetails({
+          dataStream: degradedDataStreamName,
+          expandedDegradedField: 'test_field',
+        });
+
+        await testSubjects.click('datasetQualityDetailsDegradedFieldFlyoutTitleLinkToDiscover');
+
+        await retry.tryForTime(5000, async () => {
+          const queryText = await queryBar.getQueryString();
+
+          expect(queryText).to.be('_ignored: test_field');
+        });
       });
     });
 

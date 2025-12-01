@@ -14,8 +14,8 @@ import type {
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
 import type { ConnectorAdapter } from '@kbn/alerting-plugin/server';
-import { schema } from '@kbn/config-schema';
 import type { KibanaRequest } from '@kbn/core/server';
+import { z } from '@kbn/zod';
 import { api } from './api';
 import { ExecutorParamsSchema, WorkflowsRuleActionParamsSchema } from './schema';
 import { createExternalService, type WorkflowsServiceFunction } from './service';
@@ -26,6 +26,7 @@ import type {
   WorkflowsActionParamsType,
   WorkflowsExecutorResultData,
 } from './types';
+import { buildAlertEvent } from '../../../common/utils/build_alert_event';
 
 const supportedSubActions: string[] = ['run'];
 export type ActionParamsType = WorkflowsActionParamsType;
@@ -62,10 +63,10 @@ export function getConnectorType(
         schema: ExecutorParamsSchema,
       },
       config: {
-        schema: schema.object({}),
+        schema: z.object({}).strict(),
       },
       secrets: {
-        schema: schema.object({}),
+        schema: z.object({}).strict(),
       },
     },
     executor: (execOptions) => executor(execOptions, deps),
@@ -157,30 +158,19 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
           );
         }
 
-        // Extract only new alerts for workflow execution (similar to Cases pattern)
-        const workflowAlerts = [...alerts.new.data];
-
-        // Merge alert context with user inputs
-        const alertContext = {
-          alerts: { new: alerts.new },
-          rule: {
-            id: rule.id,
-            name: rule.name,
-            tags: rule.tags,
-            consumer: rule.consumer,
-            producer: rule.producer,
-            ruleTypeId: rule.ruleTypeId,
-          },
+        // Build alert event using shared utility function
+        const alertEvent = buildAlertEvent({
+          alerts,
+          rule,
           ruleUrl,
           spaceId,
-        };
+        });
 
         return {
           subAction: 'run' as const,
           subActionParams: {
             workflowId,
-            alerts: workflowAlerts,
-            inputs: { event: alertContext },
+            inputs: { event: alertEvent },
             spaceId,
           },
         };
@@ -189,7 +179,6 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
           subAction: 'run' as const,
           subActionParams: {
             workflowId: params?.subActionParams?.workflowId || 'unknown',
-            alerts: [],
             spaceId,
           },
         };

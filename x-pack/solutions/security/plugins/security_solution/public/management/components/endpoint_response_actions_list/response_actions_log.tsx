@@ -9,7 +9,6 @@ import type { CriteriaWithPagination } from '@elastic/eui';
 import { EuiEmptyPrompt, EuiFlexItem } from '@elastic/eui';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import {
   RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP,
   type ResponseActionsApiCommandNames,
@@ -64,16 +63,6 @@ export const ResponseActionsLog = memo<
 
     const getTestId = useTestIdGenerator(dataTestSubj);
 
-    const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
-      'responseActionsSentinelOneV1Enabled'
-    );
-    const isCrowdstrikeEnabled = useIsExperimentalFeatureEnabled(
-      'responseActionsCrowdstrikeManualHostIsolationEnabled'
-    );
-    const isMicrosoftDefenderEnabled = useIsExperimentalFeatureEnabled(
-      'responseActionsMSDefenderEndpointEnabled'
-    );
-
     // Used to decide if display global loader or not (only the fist time tha page loads)
     const [isFirstAttempt, setIsFirstAttempt] = useState(true);
 
@@ -94,12 +83,7 @@ export const ResponseActionsLog = memo<
       if (!isFlyout) {
         setQueryParams((prevState) => ({
           ...prevState,
-          agentTypes:
-            isSentinelOneV1Enabled || isCrowdstrikeEnabled || isMicrosoftDefenderEnabled
-              ? agentTypesFromUrl?.length
-                ? agentTypesFromUrl
-                : prevState.agentTypes
-              : [],
+          agentTypes: agentTypesFromUrl?.length ? agentTypesFromUrl : prevState.agentTypes,
           commands: commandsFromUrl?.length
             ? commandsFromUrl.map(
                 (commandFromUrl) => RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[commandFromUrl]
@@ -122,9 +106,6 @@ export const ResponseActionsLog = memo<
       commandsFromUrl,
       agentIdsFromUrl,
       isFlyout,
-      isCrowdstrikeEnabled,
-      isSentinelOneV1Enabled,
-      isMicrosoftDefenderEnabled,
       statusesFromUrl,
       setQueryParams,
       usersFromUrl,

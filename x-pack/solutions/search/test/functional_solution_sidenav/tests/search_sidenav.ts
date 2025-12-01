@@ -10,6 +10,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { common, solutionNavigation } = getPageObjects(['common', 'solutionNavigation']);
   const spaces = getService('spaces');
+  const testSubjects = getService('testSubjects');
   const browser = getService('browser');
 
   describe('search solution', () => {
@@ -34,9 +35,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('sidenav & breadcrumbs', () => {
       it('renders the correct nav and navigate to links', async () => {
-        const isV2 = await solutionNavigation.sidenav.isV2();
-        const expectNoPageReload = await solutionNavigation.createNoPageReloadCheck();
-
         await solutionNavigation.expectExists();
         await solutionNavigation.breadcrumbs.expectExists();
 
@@ -45,44 +43,24 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           deepLinkId: 'searchHomepage',
         });
 
-        if (isV2) {
-          await solutionNavigation.sidenav.clickLink({
-            deepLinkId: 'discover',
-          });
-          await solutionNavigation.sidenav.expectLinkActive({
-            deepLinkId: 'discover',
-          });
+        await solutionNavigation.sidenav.clickLink({
+          deepLinkId: 'discover',
+        });
+        await solutionNavigation.sidenav.expectLinkActive({
+          deepLinkId: 'discover',
+        });
 
-          await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Discover' });
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Discover' });
 
-          // navigate to a different section
-          await solutionNavigation.sidenav.clickLink({
-            deepLinkId: 'searchPlayground',
-          });
-          await solutionNavigation.sidenav.expectLinkActive({
-            deepLinkId: 'searchPlayground',
-          });
-          await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
-          await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Playground' });
-        } else {
-          // check the Data > Indices section
-          await solutionNavigation.sidenav.clickLink({
-            deepLinkId: 'elasticsearchIndexManagement',
-          });
-          await solutionNavigation.sidenav.expectLinkActive({
-            deepLinkId: 'elasticsearchIndexManagement',
-          });
-          await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
-          await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Index Management' });
-          await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-            text: 'Indices',
-          });
-
-          // navigate to a different section
-          await solutionNavigation.sidenav.openSection(
-            'search_project_nav_footer.project_settings_project_nav'
-          );
-        }
+        // navigate to a different section
+        await solutionNavigation.sidenav.clickLink({
+          deepLinkId: 'searchPlayground',
+        });
+        await solutionNavigation.sidenav.expectLinkActive({
+          deepLinkId: 'searchPlayground',
+        });
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Playground' });
 
         await solutionNavigation.sidenav.clickLink({ navId: 'stack_management' });
         await solutionNavigation.sidenav.expectLinkActive({ navId: 'stack_management' });
@@ -92,13 +70,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await solutionNavigation.sidenav.expectLinkActive({
           deepLinkId: 'searchHomepage',
         });
-
-        // Redirected to Onboarding Page to Create Index
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-          text: 'Create your first index',
-        });
-
-        await expectNoPageReload();
       });
 
       it('renders a feedback callout', async function () {
@@ -108,6 +79,23 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await solutionNavigation.sidenav.feedbackCallout.expectMissing();
         await browser.refresh();
         await solutionNavigation.sidenav.feedbackCallout.expectMissing();
+      });
+
+      it('renders tour', async () => {
+        await solutionNavigation.sidenav.tour.reset();
+        await solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-home');
+        await solutionNavigation.sidenav.tour.nextStep();
+        await solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-manage-data');
+        await solutionNavigation.sidenav.tour.nextStep();
+        await solutionNavigation.sidenav.tour.expectHidden();
+        await browser.refresh();
+        await solutionNavigation.sidenav.tour.expectHidden();
+      });
+
+      it('opens panel on legacy management landing page', async () => {
+        await common.navigateToApp('management', { basePath: `/s/${spaceCreated.id}` });
+        await testSubjects.existOrFail('managementHomeSolution');
+        await solutionNavigation.sidenav.expectPanelExists('stack_management');
       });
     });
   });

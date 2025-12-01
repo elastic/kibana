@@ -242,6 +242,9 @@ export const TransformManagement: FC = () => {
       target="_blank"
       iconType="question"
       data-test-subj="documentationLink"
+      aria-label={i18n.translate('xpack.transform.transformList.transformDocsLinkAriaLabel', {
+        defaultMessage: 'Transform documentation link',
+      })}
     >
       <FormattedMessage
         id="xpack.transform.transformList.transformDocsLinkText"

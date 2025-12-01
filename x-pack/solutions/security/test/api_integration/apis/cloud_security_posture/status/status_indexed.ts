@@ -12,9 +12,9 @@ import {
 } from '@kbn/cloud-security-posture-common';
 import type { CspSetupStatus } from '@kbn/cloud-security-posture-common';
 
+import { createPackagePolicy } from '@kbn/cloud-security-posture-common/test_helper';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { EsIndexDataProvider } from '../../../../cloud_security_posture_api/utils';
-import { createPackagePolicy } from '../helper';
 import { findingsMockData, vulnerabilityMockData } from '../mock_data';
 
 export default function (providerContext: FtrProviderContext) {
@@ -41,6 +41,12 @@ export default function (providerContext: FtrProviderContext) {
       beforeEach(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
         await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
+
+        await supertest
+          .post(`/api/fleet/setup`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
 
         const { body: agentPolicyResponse } = await supertest
           .post(`/api/fleet/agent_policies`)

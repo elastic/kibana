@@ -8,9 +8,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import type { CoreStart } from '@kbn/core/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { CoreStart, DocLinksStart } from '@kbn/core/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -20,16 +18,15 @@ import type { EsqlPluginStart } from './plugin';
 
 export let core: CoreStart;
 
-interface ServiceDeps {
+export interface ServiceDeps {
   core: CoreStart;
-  dataViews: DataViewsPublicPluginStart;
   data: DataPublicPluginStart;
-  expressions: ExpressionsStart;
   storage: Storage;
   uiActions: UiActionsStart;
   fieldsMetadata?: FieldsMetadataPublicStart;
   usageCollection?: UsageCollectionStart;
   esql: EsqlPluginStart;
+  docLinks: DocLinksStart;
 }
 
 const servicesReady$ = new BehaviorSubject<ServiceDeps | undefined>(undefined);
@@ -48,9 +45,7 @@ export const untilPluginStartServicesReady = () => {
 export const setKibanaServices = (
   esql: EsqlPluginStart,
   kibanaCore: CoreStart,
-  dataViews: DataViewsPublicPluginStart,
   data: DataPublicPluginStart,
-  expressions: ExpressionsStart,
   storage: Storage,
   uiActions: UiActionsStart,
   fieldsMetadata?: FieldsMetadataPublicStart,
@@ -59,13 +54,12 @@ export const setKibanaServices = (
   core = kibanaCore;
   servicesReady$.next({
     core,
-    dataViews,
-    expressions,
     data,
     storage,
     uiActions,
     fieldsMetadata,
     usageCollection,
+    docLinks: core.docLinks,
     esql,
   });
 };

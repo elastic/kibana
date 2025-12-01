@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -19,6 +19,11 @@
     "@kbn/storybook",
     "@kbn/data-plugin",
     "@kbn/core-application-browser-mocks",
-    "@kbn/core"
+    "@kbn/core",
+    "@kbn/discover-utils",
+    "@kbn/cloud-security-posture",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/expandable-flyout",
+    "@kbn/react-query"
   ]
 }

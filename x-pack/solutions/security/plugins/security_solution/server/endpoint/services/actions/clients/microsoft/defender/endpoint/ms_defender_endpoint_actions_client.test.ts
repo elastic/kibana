@@ -27,8 +27,8 @@ import {
 import type {
   MicrosoftDefenderEndpointGetActionsResponse,
   MicrosoftDefenderEndpointMachineAction,
-} from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/types';
-import { MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/constants';
+} from '@kbn/connector-schemas/microsoft_defender_endpoint';
+import { SUB_ACTION as MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION } from '@kbn/connector-schemas/microsoft_defender_endpoint';
 import { MICROSOFT_DEFENDER_ENDPOINT_LOG_INDEX_PATTERN } from '../../../../../../../../common/endpoint/service/response_actions/microsoft_defender';
 import { MicrosoftDefenderDataGenerator } from '../../../../../../../../common/endpoint/data_generators/microsoft_defender_data_generator';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
@@ -59,22 +59,15 @@ describe('MS Defender response actions client', () => {
       clientConstructorOptionsMock.connectorActions as NormalizedExternalConnectorClientMock;
     msClientMock = new MicrosoftDefenderEndpointActionsClient(clientConstructorOptionsMock);
 
+    // Mock ensureInCurrentSpace to avoid space validation issues in tests
+    const fleetServices = clientConstructorOptionsMock.endpointService.getInternalFleetServices();
+    jest.spyOn(fleetServices, 'ensureInCurrentSpace').mockResolvedValue(undefined);
+
     getActionDetailsByIdMock.mockImplementation(async (_, __, id: string) => {
       return new EndpointActionGenerator('seed').generateActionDetails({
         id,
       });
     });
-
-    const fleetServices = clientConstructorOptionsMock.endpointService.getInternalFleetServices();
-    const ensureInCurrentSpaceMock = jest.spyOn(fleetServices, 'ensureInCurrentSpace');
-
-    ensureInCurrentSpaceMock.mockResolvedValue(undefined);
-
-    const getInternalFleetServicesMock = jest.spyOn(
-      clientConstructorOptionsMock.endpointService,
-      'getInternalFleetServices'
-    );
-    getInternalFleetServicesMock.mockReturnValue(fleetServices);
   });
 
   const supportedResponseActionClassMethods: Record<keyof ResponseActionsClient, boolean> = {
@@ -93,6 +86,7 @@ describe('MS Defender response actions client', () => {
     processPendingActions: true,
     getCustomScripts: true,
     cancel: true,
+    memoryDump: false,
   };
 
   it.each(
@@ -439,6 +433,392 @@ describe('MS Defender response actions client', () => {
         });
       });
     });
+
+    describe('MDE action validation and throttling detection', () => {
+      beforeEach(() => {
+        getActionDetailsByIdMock.mockImplementation(async (_, __, id: string) => {
+          return new EndpointActionGenerator('seed').generateActionDetails({
+            id,
+            command: 'runscript',
+          });
+        });
+      });
+
+      it('should validate action details after sending runscript action', async () => {
+        // Uses default mock which dynamically captures and returns matching action details
+        await msClientMock.runscript(
+          responseActionsClientMock.createRunScriptOptions({
+            parameters: { scriptName: 'test-script.ps1' },
+          })
+        );
+
+        // Verify GET_ACTIONS was called with the machineActionId from the RUN_SCRIPT response
+        expect(connectorActionsMock.execute).toHaveBeenCalledWith(
+          expect.objectContaining({
+            params: expect.objectContaining({
+              subAction: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTIONS,
+              subActionParams: expect.objectContaining({
+                id: ['5382f7ea-7557-4ab7-9782-d50480024a4e'],
+                pageSize: 1,
+              }),
+            }),
+          })
+        );
+      });
+
+      it('should throw error when MDE returns action with different script name (throttling)', async () => {
+        // Access the underlying ActionsClient mock to preserve NormalizedExternalConnectorClient context
+        const underlyingClient = (
+          connectorActionsMock as unknown as { connectorsClient: { execute: jest.Mock } }
+        ).connectorsClient;
+        const defaultMockImpl = underlyingClient.execute.getMockImplementation();
+
+        underlyingClient.execute.mockImplementation(
+          async (options: Parameters<typeof underlyingClient.execute>[0]) => {
+            if (options.params.subAction === MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTIONS) {
+              return {
+                status: 'ok',
+                data: {
+                  '@odata.context': 'test',
+                  value: [
+                    {
+                      id: '5382f7ea-7557-4ab7-9782-d50480024a4e',
+                      type: 'LiveResponse',
+                      status: 'InProgress',
+                      requestor: 'user@example.com',
+                      requestSource: 'API',
+                      commands: [
+                        {
+                          index: 0,
+                          startTime: '2025-01-30T10:00:00Z',
+                          endTime: '2025-01-30T10:00:10Z',
+                          commandStatus: 'InProgress',
+                          errors: [],
+                          command: {
+                            type: 'RunScript',
+                            params: [{ key: 'ScriptName', value: 'different-script.ps1' }],
+                          },
+                        },
+                      ],
+                      cancellationRequestor: 'elastic',
+                      requestorComment: 'Some other comment',
+                      cancellationComment: 'test cancel data',
+                      machineId: '1-2-3',
+                      computerDnsName: 'test-machine',
+                      creationDateTimeUtc: '2025-01-30T10:00:00Z',
+                      cancellationDateTimeUtc: '',
+                      lastUpdateDateTimeUtc: '2025-01-30T10:00:05Z',
+                      title: 'Run Script',
+                    },
+                  ],
+                  total: 1,
+                  page: 1,
+                  pageSize: 1,
+                },
+                actionId: 'test',
+              };
+            }
+
+            return defaultMockImpl!(options);
+          }
+        );
+
+        await expect(
+          msClientMock.runscript(
+            responseActionsClientMock.createRunScriptOptions({
+              parameters: { scriptName: 'test-script.ps1' },
+            })
+          )
+        ).rejects.toMatchObject({
+          message: expect.stringContaining('Cannot run script'),
+          statusCode: 409,
+        });
+      });
+
+      it('should throw error when MDE returns action without our action ID in comment', async () => {
+        const underlyingClient = (
+          connectorActionsMock as unknown as { connectorsClient: { execute: jest.Mock } }
+        ).connectorsClient;
+        const defaultMockImpl = underlyingClient.execute.getMockImplementation();
+
+        underlyingClient.execute.mockImplementation(
+          async (options: Parameters<typeof underlyingClient.execute>[0]) => {
+            if (options.params.subAction === MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTIONS) {
+              return {
+                status: 'ok',
+                data: {
+                  '@odata.context': 'test',
+                  value: [
+                    {
+                      id: '5382f7ea-7557-4ab7-9782-d50480024a4e',
+                      type: 'LiveResponse',
+                      status: 'InProgress',
+                      requestor: 'user@example.com',
+                      requestSource: 'API',
+                      commands: [
+                        {
+                          index: 0,
+                          startTime: '2025-01-30T10:00:00Z',
+                          endTime: '2025-01-30T10:00:10Z',
+                          commandStatus: 'InProgress',
+                          errors: [],
+                          command: {
+                            type: 'RunScript',
+                            params: [{ key: 'ScriptName', value: 'test-script.ps1' }],
+                          },
+                        },
+                      ],
+                      cancellationRequestor: 'elastic',
+                      requestorComment: 'Comment from different action',
+                      cancellationComment: '',
+                      machineId: '1-2-3',
+                      computerDnsName: 'test-machine',
+                      creationDateTimeUtc: '2025-01-30T10:00:00Z',
+                      cancellationDateTimeUtc: '',
+                      lastUpdateDateTimeUtc: '2025-01-30T10:00:05Z',
+                      title: 'Run Script',
+                    },
+                  ],
+                  total: 1,
+                  page: 1,
+                  pageSize: 1,
+                },
+                actionId: 'test',
+              };
+            }
+
+            return defaultMockImpl!(options);
+          }
+        );
+
+        await expect(
+          msClientMock.runscript(
+            responseActionsClientMock.createRunScriptOptions({
+              parameters: { scriptName: 'test-script.ps1' },
+            })
+          )
+        ).rejects.toMatchObject({
+          message: expect.stringContaining('Cannot run script'),
+          statusCode: 409,
+        });
+      });
+
+      // TODO: Fix this slow test
+      it('should throw error when GET_ACTIONS returns no action details after retry', async () => {
+        const underlyingClient = (
+          connectorActionsMock as unknown as { connectorsClient: { execute: jest.Mock } }
+        ).connectorsClient;
+        const defaultMockImpl = underlyingClient.execute.getMockImplementation();
+
+        underlyingClient.execute.mockImplementation(
+          async (options: Parameters<typeof underlyingClient.execute>[0]) => {
+            if (options.params.subAction === MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTIONS) {
+              return {
+                status: 'ok',
+                data: {
+                  '@odata.context': 'test',
+                  value: [],
+                  total: 0,
+                  page: 1,
+                  pageSize: 1,
+                },
+                actionId: 'test',
+              };
+            }
+
+            return defaultMockImpl!(options);
+          }
+        );
+
+        await expect(
+          msClientMock.runscript(
+            responseActionsClientMock.createRunScriptOptions({
+              parameters: { scriptName: 'test-script.ps1' },
+            })
+          )
+        ).rejects.toMatchObject({
+          message: expect.stringContaining('Action details not found'),
+          statusCode: 409,
+        });
+      });
+
+      // TODO: Fix this slow test
+      it('should throw error when GET_ACTIONS call fails', async () => {
+        const underlyingClient = (
+          connectorActionsMock as unknown as { connectorsClient: { execute: jest.Mock } }
+        ).connectorsClient;
+        const defaultMockImpl = underlyingClient.execute.getMockImplementation();
+
+        underlyingClient.execute.mockImplementation(
+          async (options: Parameters<typeof underlyingClient.execute>[0]) => {
+            if (options.params.subAction === MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTIONS) {
+              return {
+                status: 'error',
+                message: 'MDE API temporarily unavailable',
+                serviceMessage: 'Service unavailable',
+                actionId: 'test',
+              };
+            }
+
+            return defaultMockImpl!(options);
+          }
+        );
+
+        await expect(
+          msClientMock.runscript(
+            responseActionsClientMock.createRunScriptOptions({
+              parameters: { scriptName: 'test-script.ps1' },
+            })
+          )
+        ).rejects.toThrow();
+      });
+
+      it('should succeed when action details found and validation passes on first attempt', async () => {
+        // Uses default mock which handles validation correctly
+        await expect(
+          msClientMock.runscript(
+            responseActionsClientMock.createRunScriptOptions({
+              parameters: { scriptName: 'test-script.ps1' },
+            })
+          )
+        ).resolves.toEqual(
+          expect.objectContaining({
+            command: 'runscript',
+            id: expect.any(String),
+          })
+        );
+
+        // Verify GET_ACTIONS was called (validation occurred)
+        const getActionsCalls = (connectorActionsMock.execute as jest.Mock).mock.calls.filter(
+          (call) => call[0].params.subAction === MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTIONS
+        );
+        expect(getActionsCalls.length).toBeGreaterThanOrEqual(1);
+      });
+
+      it('should throw 409 error when action has no commands array', async () => {
+        const underlyingClient = (
+          connectorActionsMock as unknown as { connectorsClient: { execute: jest.Mock } }
+        ).connectorsClient;
+        const defaultMockImpl = underlyingClient.execute.getMockImplementation();
+
+        underlyingClient.execute.mockImplementation(
+          async (options: Parameters<typeof underlyingClient.execute>[0]) => {
+            if (options.params.subAction === MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTIONS) {
+              return {
+                status: 'ok',
+                data: {
+                  '@odata.context': 'test',
+                  value: [
+                    {
+                      id: '5382f7ea-7557-4ab7-9782-d50480024a4e',
+                      type: 'LiveResponse',
+                      status: 'InProgress',
+                      requestor: 'user@example.com',
+                      requestSource: 'API',
+                      commands: [],
+                      cancellationRequestor: '',
+                      requestorComment: 'Some comment',
+                      cancellationComment: '',
+                      machineId: '1-2-3',
+                      computerDnsName: 'test-machine',
+                      creationDateTimeUtc: '2025-01-30T10:00:00Z',
+                      cancellationDateTimeUtc: '',
+                      lastUpdateDateTimeUtc: '2025-01-30T10:00:05Z',
+                      title: 'Run Script',
+                    },
+                  ],
+                  total: 1,
+                  page: 1,
+                  pageSize: 1,
+                },
+                actionId: 'test',
+              };
+            }
+
+            return defaultMockImpl!(options);
+          }
+        );
+
+        await expect(
+          msClientMock.runscript(
+            responseActionsClientMock.createRunScriptOptions({
+              parameters: { scriptName: 'test-script.ps1' },
+            })
+          )
+        ).rejects.toMatchObject({
+          message: expect.stringContaining('Unable to verify action details'),
+          statusCode: 409,
+        });
+      });
+
+      it('should throw 409 error when script name param is missing from action', async () => {
+        const underlyingClient = (
+          connectorActionsMock as unknown as { connectorsClient: { execute: jest.Mock } }
+        ).connectorsClient;
+        const defaultMockImpl = underlyingClient.execute.getMockImplementation();
+
+        underlyingClient.execute.mockImplementation(
+          async (options: Parameters<typeof underlyingClient.execute>[0]) => {
+            if (options.params.subAction === MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTIONS) {
+              return {
+                status: 'ok',
+                data: {
+                  '@odata.context': 'test',
+                  value: [
+                    {
+                      id: '5382f7ea-7557-4ab7-9782-d50480024a4e',
+                      type: 'LiveResponse',
+                      status: 'InProgress',
+                      requestor: 'user@example.com',
+                      requestSource: 'API',
+                      commands: [
+                        {
+                          index: 0,
+                          startTime: '2025-01-30T10:00:00Z',
+                          endTime: '2025-01-30T10:00:10Z',
+                          commandStatus: 'InProgress',
+                          errors: [],
+                          command: {
+                            type: 'RunScript',
+                            params: [{ key: 'Args', value: 'some-args' }], // Missing ScriptName
+                          },
+                        },
+                      ],
+                      cancellationRequestor: '',
+                      requestorComment: 'Action triggered from Elastic Security',
+                      cancellationComment: '',
+                      machineId: '1-2-3',
+                      computerDnsName: 'test-machine',
+                      creationDateTimeUtc: '2025-01-30T10:00:00Z',
+                      cancellationDateTimeUtc: '',
+                      lastUpdateDateTimeUtc: '2025-01-30T10:00:05Z',
+                      title: 'Run Script',
+                    },
+                  ],
+                  total: 1,
+                  page: 1,
+                  pageSize: 1,
+                },
+                actionId: 'test',
+              };
+            }
+
+            return defaultMockImpl!(options);
+          }
+        );
+
+        await expect(
+          msClientMock.runscript(
+            responseActionsClientMock.createRunScriptOptions({
+              parameters: { scriptName: 'test-script.ps1' },
+            })
+          )
+        ).rejects.toMatchObject({
+          message: expect.stringContaining('Unable to verify which script is running'),
+          statusCode: 409,
+        });
+      });
+    });
   });
 
   describe('#getFileInfo()', () => {
@@ -473,7 +853,6 @@ describe('MS Defender response actions client', () => {
       // @ts-expect-error assign to readonly property
       clientConstructorOptionsMock.endpointService.experimentalFeatures.microsoftDefenderEndpointRunScriptEnabled =
         false;
-
       await expect(msClientMock.getFileInfo('abc', '123')).rejects.toThrow(
         'File downloads are not supported for microsoft_defender_endpoint agent type. Feature disabled'
       );
@@ -638,7 +1017,6 @@ describe('MS Defender response actions client', () => {
       // @ts-expect-error assign to readonly property
       clientConstructorOptionsMock.endpointService.experimentalFeatures.microsoftDefenderEndpointRunScriptEnabled =
         false;
-
       await expect(msClientMock.getFileDownload('abc', '123')).rejects.toThrow(
         'File downloads are not supported for microsoft_defender_endpoint agent type. Feature disabled'
       );
@@ -1005,6 +1383,39 @@ describe('MS Defender response actions client', () => {
           parameters: { id: 'original-action-id' },
         })
       ).rejects.toThrow('Microsoft Defender cancel API error');
+    });
+
+    it('should throw validation error when attempting to cancel a cancel action', async () => {
+      // Mock getActionDetailsById to return a cancel action
+      getActionDetailsByIdMock.mockResolvedValueOnce(
+        new EndpointActionGenerator('seed').generateActionDetails({
+          id: 'cancel-action-id',
+          command: 'cancel',
+          isCompleted: false,
+          wasSuccessful: false,
+          agents: ['1-2-3'],
+        })
+      );
+
+      await expect(
+        msClientMock.cancel({
+          endpoint_ids: ['1-2-3'],
+          comment: 'trying to cancel a cancel action',
+          parameters: { id: 'cancel-action-id' },
+        })
+      ).rejects.toMatchObject({
+        message: 'Cannot cancel a cancel action.',
+        statusCode: 400,
+      });
+
+      // Verify that the connector was NOT called since validation should fail first
+      expect(connectorActionsMock.execute).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            subAction: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.CANCEL_ACTION,
+          }),
+        })
+      );
     });
 
     it('should handle MDE error when action status is not Pending or InProgress', async () => {
@@ -1519,6 +1930,32 @@ describe('MS Defender response actions client', () => {
     let abortController: AbortController;
     let processPendingActionsOptions: ProcessPendingActionsMethodOptions;
 
+    const setGetRunscriptResponseFile = (response: {
+      script_name?: string;
+      script_output?: string;
+      script_errors?: string;
+      exit_code?: number;
+    }) => {
+      const executeMockFn = (connectorActionsMock.execute as jest.Mock).getMockImplementation();
+
+      (connectorActionsMock.execute as jest.Mock).mockImplementation(async (options) => {
+        if (
+          options.params.subAction === MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTION_RESULTS
+        ) {
+          return responseActionsClientMock.createConnectorActionExecuteResponse({
+            data: new Readable({
+              read() {
+                this.push(JSON.stringify(response));
+                this.push(null);
+              },
+            }),
+          });
+        }
+
+        return executeMockFn!.call(connectorActionsMock, options);
+      });
+    };
+
     beforeEach(() => {
       abortController = new AbortController();
       processPendingActionsOptions = {
@@ -1686,10 +2123,7 @@ describe('MS Defender response actions client', () => {
               errors: [],
               command: {
                 type: 'RunScript',
-                params: [
-                  { key: 'ScriptName', value: 'hello.sh' },
-                  { key: 'Args', value: '--noargs' },
-                ],
+                params: [{ key: 'ScriptName', value: 'hello.sh' }],
               },
             },
           ],
@@ -1720,16 +2154,26 @@ describe('MS Defender response actions client', () => {
           EndpointActions: {
             action_id: '90d62689-f72d-4a05-b5e3-500cad0dc366',
             completed_at: expect.any(String),
-            data: { command: 'runscript' },
+            data: {
+              command: 'runscript',
+              output: expect.objectContaining({
+                type: 'json',
+                content: expect.objectContaining({
+                  code: expect.any(String),
+                  stdout: expect.any(String),
+                  stderr: expect.any(String),
+                }),
+              }),
+            },
             input_type: 'microsoft_defender_endpoint',
             started_at: expect.any(String),
           },
           agent: { id: 'agent-uuid-1' },
           error: undefined,
           meta: expect.objectContaining({
-            machineActionId: expect.any(String),
             createdAt: expect.any(String),
             filename: expect.any(String),
+            machineActionId: expect.any(String),
           }),
         });
       });
@@ -1759,7 +2203,17 @@ describe('MS Defender response actions client', () => {
             EndpointActions: {
               action_id: '90d62689-f72d-4a05-b5e3-500cad0dc366',
               completed_at: expect.any(String),
-              data: { command: 'runscript' },
+              data: {
+                command: 'runscript',
+                output: expect.objectContaining({
+                  type: 'json',
+                  content: expect.objectContaining({
+                    code: expect.any(String),
+                    stdout: expect.any(String),
+                    stderr: expect.any(String),
+                  }),
+                }),
+              },
               input_type: 'microsoft_defender_endpoint',
               started_at: expect.any(String),
             },
@@ -1807,6 +2261,40 @@ describe('MS Defender response actions client', () => {
               message:
                 'Running script on endpoint failed: Error in Download Script phase: One or more arguments are invalid.\nAnother error',
             },
+          })
+        );
+      });
+
+      it('should have an script output in the completed response when file size is within limit', async () => {
+        setGetRunscriptResponseFile({
+          script_name: 'list-files.sh',
+          exit_code: 0,
+          script_output:
+            'Files and directories in /home/ubuntu/:\ntotal 116\ndrwxr-x--- 4 ubuntu ubuntu  4096 Nov 10 13:53 .\ndrwxr-xr-x 3 root   root    4096 Nov 10 10:26 ..\n-rw------- 1 ubuntu ubuntu   126 Nov 10 13:53 .bash_history\n-rw-r--r-- 1 ubuntu ubuntu   220 Jan  6  2022 .bash_logout\n-rw-r--r-- 1 ubuntu ubuntu  3771 Jan  6  2022 .bashrc\ndrwx------ 2 ubuntu ubuntu  4096 Nov 10 10:26 .cache\n-rw-r--r-- 1 ubuntu ubuntu   807 Jan  6  2022 .profile\ndrwx------ 2 ubuntu ubuntu  4096 Nov 10 10:26 .ssh\n-rw-r--r-- 1 ubuntu ubuntu     0 Nov 10 10:26 .sudo_as_admin_successful\n-rw-r--r-- 1 ubuntu ubuntu  5550 Nov 10 10:26 GatewayWindowsDefenderATPOnboardingPackage.zip\n-rw-r--r-- 1 ubuntu ubuntu  9067 Dec 17  2024 MicrosoftDefenderATPOnboardingLinuxServer.py\n-rwxrwxr-x 1 ubuntu ubuntu 63356 Nov 10 10:26 mde_installer.sh\n',
+          script_errors: '',
+        });
+
+        msMachineActionsApiResponse.value[0].status = 'Succeeded';
+
+        await msClientMock.processPendingActions(processPendingActionsOptions);
+
+        expect(processPendingActionsOptions.addToQueue).toHaveBeenCalledWith(
+          expect.objectContaining({
+            EndpointActions: expect.objectContaining({
+              data: expect.objectContaining({
+                command: 'runscript',
+                output: expect.objectContaining({
+                  type: 'json',
+                  content: expect.objectContaining({
+                    code: expect.stringContaining('0'),
+                    stderr: expect.stringContaining(''),
+                    stdout: expect.stringContaining(
+                      'Files and directories in /home/ubuntu/:\ntotal 116'
+                    ),
+                  }),
+                }),
+              }),
+            }),
           })
         );
       });
@@ -1935,10 +2423,7 @@ describe('MS Defender response actions client', () => {
                 errors: [],
                 command: {
                   type: 'RunScript',
-                  params: [
-                    { key: 'ScriptName', value: 'hello.sh' },
-                    { key: 'Args', value: '--noargs' },
-                  ],
+                  params: [{ key: 'ScriptName', value: 'hello.sh' }],
                 },
               },
             ],
@@ -2122,9 +2607,6 @@ describe('MS Defender response actions client', () => {
 
   describe('and space awareness is enabled', () => {
     beforeEach(() => {
-      // @ts-expect-error assign to readonly property
-      clientConstructorOptionsMock.endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
-        true;
       // @ts-expect-error assign to readonly property
       clientConstructorOptionsMock.endpointService.experimentalFeatures.microsoftDefenderEndpointCancelEnabled =
         true;

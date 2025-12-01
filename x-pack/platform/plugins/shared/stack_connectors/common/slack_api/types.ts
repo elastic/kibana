@@ -6,29 +6,16 @@
  */
 
 import type { ActionType as ConnectorType } from '@kbn/actions-plugin/server/types';
-import type { TypeOf } from '@kbn/config-schema';
 import type { ActionTypeExecutorOptions as ConnectorTypeExecutorOptions } from '@kbn/actions-plugin/server/types';
 import type { ActionTypeExecutorResult as ConnectorTypeExecutorResult } from '@kbn/actions-plugin/server/types';
 import type {
-  PostMessageParamsSchema,
-  PostMessageSubActionParamsSchema,
-  PostBlockkitSubActionParamsSchema,
-  PostBlockkitParamsSchema,
-  SlackApiSecretsSchema,
-  SlackApiParamsSchema,
-  SlackApiConfigSchema,
-  ValidChannelIdSubActionParamsSchema,
-} from './schema';
+  PostBlockkitSubActionParams,
+  PostMessageSubActionParams,
+  SlackApiConfig,
+  SlackApiParams,
+  SlackApiSecrets,
+} from '@kbn/connector-schemas/slack_api';
 
-export type SlackApiSecrets = TypeOf<typeof SlackApiSecretsSchema>;
-export type SlackApiConfig = TypeOf<typeof SlackApiConfigSchema>;
-
-export type PostMessageParams = TypeOf<typeof PostMessageParamsSchema>;
-export type PostMessageSubActionParams = TypeOf<typeof PostMessageSubActionParamsSchema>;
-export type PostBlockkitSubActionParams = TypeOf<typeof PostBlockkitSubActionParamsSchema>;
-export type PostBlockkitParams = TypeOf<typeof PostBlockkitParamsSchema>;
-export type ValidChannelIdSubActionParams = TypeOf<typeof ValidChannelIdSubActionParamsSchema>;
-export type SlackApiParams = TypeOf<typeof SlackApiParamsSchema>;
 export type SlackApiConnectorType = ConnectorType<
   SlackApiConfig,
   SlackApiSecrets,
@@ -47,8 +34,6 @@ export type SlackExecutorOptions = ConnectorTypeExecutorOptions<
   SlackApiSecrets,
   SlackApiParams
 >;
-
-export type SlackApiActionParams = TypeOf<typeof SlackApiParamsSchema>;
 
 export interface SlackAPiResponse {
   ok: boolean;
@@ -89,11 +74,13 @@ export interface SlackApiService {
   postMessage: ({
     channels,
     channelIds,
+    channelNames,
     text,
   }: PostMessageSubActionParams) => Promise<ConnectorTypeExecutorResult<unknown>>;
   postBlockkit: ({
     channels,
     channelIds,
+    channelNames,
     text,
   }: PostBlockkitSubActionParams) => Promise<ConnectorTypeExecutorResult<unknown>>;
 }

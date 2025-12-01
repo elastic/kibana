@@ -7,9 +7,11 @@
 
 import { getCostSavingsMetricLensAttributes } from './cost_savings_metric';
 import type { EuiThemeComputed } from '@elastic/eui';
+import { getAlertIndexFilter } from './helpers';
 
 describe('getCostSavingsMetricLensAttributes', () => {
   const mockTheme = {} as EuiThemeComputed;
+  const defaultSignalIndexName = '.alerts-security.alerts-default';
   const defaultParams = {
     euiTheme: mockTheme,
     minutesPerAlert: 8,
@@ -18,6 +20,7 @@ describe('getCostSavingsMetricLensAttributes', () => {
     stackByField: undefined,
     esql: undefined,
     backgroundColor: '#00FF00',
+    signalIndexName: defaultSignalIndexName,
   };
 
   it('returns correct lens attributes with formula and filter handling', () => {
@@ -40,12 +43,40 @@ describe('getCostSavingsMetricLensAttributes', () => {
       ...defaultParams,
       extraOptions: { filters },
     });
-    expect(resultWithFilters.state.filters).toBe(filters);
+    expect(resultWithFilters.state.filters).toEqual([
+      getAlertIndexFilter(defaultSignalIndexName),
+      ...filters,
+    ]);
 
     const resultWithoutFilters = getCostSavingsMetricLensAttributes({
       ...defaultParams,
       extraOptions: undefined,
     });
-    expect(resultWithoutFilters.state.filters).toEqual([]);
+    expect(resultWithoutFilters.state.filters).toEqual([
+      getAlertIndexFilter(defaultSignalIndexName),
+    ]);
+  });
+
+  it('includes alert index filter in filters array', () => {
+    const result = getCostSavingsMetricLensAttributes(defaultParams);
+    const expectedFilter = getAlertIndexFilter(defaultSignalIndexName);
+    expect(result.state.filters).toContainEqual(expectedFilter);
+  });
+
+  it('handles different signal index names correctly', () => {
+    const testCases = [
+      '.alerts-security.alerts-default',
+      '.alerts-security.alerts-custom-space',
+      'custom-alerts-index',
+    ];
+
+    testCases.forEach((signalIndexName) => {
+      const result = getCostSavingsMetricLensAttributes({
+        ...defaultParams,
+        signalIndexName,
+      });
+      const expectedFilter = getAlertIndexFilter(signalIndexName);
+      expect(result.state.filters).toContainEqual(expectedFilter);
+    });
   });
 });

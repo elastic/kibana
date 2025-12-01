@@ -8,7 +8,6 @@
 import { schema } from '@kbn/config-schema';
 import { errors } from '@elastic/elasticsearch';
 import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
-import { REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-pkg-server';
 import { REINDEX_SERVICE_BASE_PATH } from '../../../common';
 import type { RouteDependencies } from '../../types';
 import { mapAnyErrorToKibanaHttpResponse } from './map_any_error_to_kibana_http_response';
@@ -33,13 +32,10 @@ export function registerBatchReindexIndicesRoutes({
     async ({ core }, request, response) => {
       const {
         elasticsearch: { client: esClient },
-        savedObjects,
       } = await core;
-      const { getClient } = savedObjects;
 
       try {
         const reindexService = (await getReindexService()).getScopedClient({
-          savedObjects: getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
           dataClient: esClient,
           request,
         });
@@ -74,13 +70,11 @@ export function registerBatchReindexIndicesRoutes({
     },
     async ({ core }, request, response) => {
       const {
-        savedObjects: { getClient },
         elasticsearch: { client: esClient },
       } = await core;
       const { indices } = request.body;
 
       const reindexService = (await getReindexService()).getScopedClient({
-        savedObjects: getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
         dataClient: esClient,
         request,
       });

@@ -25,6 +25,7 @@ import {
 import { mockCustomizationContext } from '../../../customizations/__mocks__/customization_context';
 import { omit } from 'lodash';
 import { createTabsStorageManager } from './tabs_storage_manager';
+import { DiscoverSearchSessionManager } from './discover_search_session';
 
 describe('DiscoverSavedSearchContainer', () => {
   const savedSearch = savedSearchMock;
@@ -40,6 +41,10 @@ describe('DiscoverSavedSearchContainer', () => {
     runtimeStateManager: createRuntimeStateManager(),
     urlStateStorage,
     tabsStorageManager,
+    searchSessionManager: new DiscoverSearchSessionManager({
+      history: services.history,
+      session: services.data.search.session,
+    }),
   });
   const getCurrentTab = () =>
     selectTab(internalState.getState(), internalState.getState().tabs.unsafeCurrentId);

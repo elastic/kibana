@@ -35,7 +35,7 @@ export const HealthTruncateText: React.FC<PropsWithChildren<HealthTruncateTextPr
 }) => (
   <EuiToolTip content={tooltipContent}>
     <EuiHealth color={healthColor} data-test-subj={dataTestSubj}>
-      <StatusTextWrapper>
+      <StatusTextWrapper tabIndex={0}>
         <span className="eui-textTruncate">{children}</span>
       </StatusTextWrapper>
     </EuiHealth>

@@ -28,7 +28,7 @@ const ManagedPipelineBadge: React.FC = () => (
       { defaultMessage: 'This pipeline is managed and cannot be edited' }
     )}
   >
-    <EuiBadge iconType="lock" color="warning">
+    <EuiBadge iconType="lock" color="warning" tabIndex={0}>
       {i18n.translate(
         'xpack.enterpriseSearch.content.indices.pipelines.tabs.jsonConfigurations.managed',
         { defaultMessage: 'Managed' }
@@ -57,7 +57,7 @@ const UnmanagedPipelineBadge: React.FC = () => (
       />
     }
   >
-    <EuiBadge iconType="lockOpen">
+    <EuiBadge iconType="lockOpen" tabIndex={0}>
       {i18n.translate(
         'xpack.enterpriseSearch.content.indices.pipelines.tabs.jsonConfigurations.unmanaged',
         { defaultMessage: 'Unmanaged' }
@@ -74,7 +74,7 @@ const SharedPipelineBadge: React.FC = () => (
       { defaultMessage: 'This pipeline is shared across all Search ingestion methods' }
     )}
   >
-    <EuiBadge iconType="logstashIf" color="hollow">
+    <EuiBadge iconType="logstashIf" color="hollow" tabIndex={0}>
       {i18n.translate(
         'xpack.enterpriseSearch.content.indices.pipelines.tabs.jsonConfigurations.shared',
         { defaultMessage: 'Shared' }
@@ -91,7 +91,7 @@ const IndexPipelineBadge: React.FC = () => (
       { defaultMessage: 'This pipeline contains configurations specific to this index only' }
     )}
   >
-    <EuiBadge iconType="document" color="hollow">
+    <EuiBadge iconType="document" color="hollow" tabIndex={0}>
       {i18n.translate(
         'xpack.enterpriseSearch.content.indices.pipelines.tabs.jsonConfigurations.indexSpecific',
         { defaultMessage: 'Index specific' }
@@ -111,7 +111,7 @@ const MlInferenceBadge: React.FC = () => (
       }
     )}
   >
-    <EuiBadge iconType="compute" color="hollow">
+    <EuiBadge iconType="compute" color="hollow" tabIndex={0}>
       {i18n.translate(
         'xpack.enterpriseSearch.content.indices.pipelines.tabs.jsonConfigurations.mlInference',
         { defaultMessage: 'ML Inference' }

@@ -294,7 +294,7 @@
             "label": "euiColumn",
             "description": [],
             "signature": [
-              "{ id?: string | undefined; prefix?: string | undefined; onError?: React.ReactEventHandler<HTMLTableCellElement> | undefined; scope?: string | undefined; defaultValue?: string | number | readonly string[] | undefined; name: React.ReactNode; security?: string | undefined; className?: string | undefined; 'aria-label'?: string | undefined; 'data-test-subj'?: string | undefined; css?: ",
+              "{ id?: string | undefined; prefix?: string | undefined; onError?: React.ReactEventHandler<HTMLTableCellElement> | undefined; scope?: string | undefined; name: React.ReactNode; security?: string | undefined; defaultValue?: string | number | readonly string[] | undefined; className?: string | undefined; 'aria-label'?: string | undefined; 'data-test-subj'?: string | undefined; css?: ",
               "Interpolation",
               "<",
               "Theme",
@@ -1024,6 +1024,32 @@
                 "section": "def-common.SavedObjectMetadata",
                 "text": "SavedObjectMetadata"
               }
+            ],
+            "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-public.SavedObjectRelation.managed",
+            "type": "boolean",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-public.SavedObjectRelation.references",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [],
+            "signature": [
+              "SavedObjectReference",
+              "[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
@@ -2220,6 +2246,32 @@
                 "section": "def-common.SavedObjectMetadata",
                 "text": "SavedObjectMetadata"
               }
+            ],
+            "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-common.SavedObjectRelation.managed",
+            "type": "boolean",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-common.SavedObjectRelation.references",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [],
+            "signature": [
+              "SavedObjectReference",
+              "[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
             "deprecated": false,

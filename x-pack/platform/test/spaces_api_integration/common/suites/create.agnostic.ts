@@ -33,10 +33,10 @@ interface CreateTestDefinition {
 }
 
 export function createTestSuiteFactory({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const spacesSupertest = getService('spacesSupertest');
   const config = getService('config');
   const isServerless = config.get('serverless');
+  const spacesService = getService('spaces');
   const noop = () => undefined;
 
   const expectConflictResponse = (resp: { [key: string]: any }) => {
@@ -118,20 +118,9 @@ export function createTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
           await supertest.destroy();
         });
 
-        beforeEach(() =>
-          esArchiver.load(
-            'x-pack/platform/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-          )
-        );
-        afterEach(() =>
-          esArchiver.unload(
-            'x-pack/platform/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-          )
-        );
-
         getTestScenariosForSpace(spaceId).forEach(({ urlPrefix, scenario }) => {
           it(`should return ${tests.newSpace.statusCode} ${scenario}`, async () => {
-            return supertest
+            const response = await supertest
               .post(`${urlPrefix}/api/spaces/space`)
               .send({
                 name: 'marketing',
@@ -140,8 +129,13 @@ export function createTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
                 color: '#5c5959',
                 disabledFeatures: [],
               })
-              .expect(tests.newSpace.statusCode)
-              .then(tests.newSpace.response);
+              .expect(tests.newSpace.statusCode);
+
+            if (response.status === 200) {
+              await spacesService.delete('marketing');
+            }
+
+            return tests.newSpace.response(response);
           });
 
           describe('when it already exists', () => {
@@ -162,7 +156,7 @@ export function createTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
 
           describe('when _reserved is specified', () => {
             it(`should return ${tests.reservedSpecified.statusCode} and ignore _reserved ${scenario}`, async () => {
-              return supertest
+              const response = await supertest
                 .post(`${urlPrefix}/api/spaces/space`)
                 .send({
                   name: 'reserved space',
@@ -172,8 +166,13 @@ export function createTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
                   _reserved: true,
                   disabledFeatures: [],
                 })
-                .expect(tests.reservedSpecified.statusCode)
-                .then(tests.reservedSpecified.response);
+                .expect(tests.reservedSpecified.statusCode);
+
+              if (response.status === 200) {
+                await spacesService.delete('reserved');
+              }
+
+              return tests.reservedSpecified.response(response);
             });
           });
 
@@ -181,7 +180,7 @@ export function createTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
             it(`should return ${tests.solutionSpecified.statusCode}`, async () => {
               const statusCode = isServerless ? 400 : tests.solutionSpecified.statusCode;
 
-              return supertest
+              const response = await supertest
                 .post(`${urlPrefix}/api/spaces/space`)
                 .send({
                   name: 'space with solution',
@@ -191,8 +190,13 @@ export function createTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
                   solution: 'es',
                   disabledFeatures: [],
                 })
-                .expect(statusCode)
-                .then(isServerless ? noop : tests.solutionSpecified.response);
+                .expect(statusCode);
+
+              if (response.status === 200) {
+                await spacesService.delete('solution');
+              }
+
+              return isServerless ? noop : tests.solutionSpecified.response(response);
             });
           });
         });

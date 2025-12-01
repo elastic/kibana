@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -20,30 +21,37 @@ import {
   EuiFieldText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import type { Streams } from '@kbn/streams-schema';
-import { type ReviewSuggestionsInputs } from './use_review_suggestions_form';
-import { useForkStream } from './use_fork_stream';
+import { type PartitionSuggestion } from './use_review_suggestions_form';
 import { ConditionPanel } from '../../shared';
+import {
+  useStreamRoutingEvents,
+  useStreamsRoutingSelector,
+} from '../state_management/stream_routing_state_machine';
 
 export function CreateStreamConfirmationModal({
-  definition,
   partition,
-  onClose,
   onSuccess,
 }: {
-  definition: Streams.WiredStream.GetResponse;
-  partition: ReviewSuggestionsInputs['suggestions'][number];
-  onClose: () => void;
+  partition: PartitionSuggestion;
   onSuccess: () => void;
 }) {
-  const [forkStreamState, forkStream] = useForkStream(onSuccess);
   const modalTitleId = useGeneratedHtmlId();
+  const isForking = useStreamsRoutingSelector((snapshot) =>
+    snapshot.matches({ ready: { reviewSuggestedRule: 'forking' } })
+  );
+  const { cancelChanges, forkStream } = useStreamRoutingEvents();
 
   return (
-    <EuiModal onClose={onClose} aria-labelledby={modalTitleId}>
+    <EuiModal
+      onClose={() => cancelChanges()}
+      aria-labelledby={modalTitleId}
+      data-test-subj="streamsAppCreateStreamConfirmationModal"
+    >
       <EuiModalHeader>
-        <EuiModalHeaderTitle id={modalTitleId}>
+        <EuiModalHeaderTitle
+          id={modalTitleId}
+          data-test-subj="streamsAppCreateStreamConfirmationModalTitle"
+        >
           {i18n.translate('xpack.streams.streamDetailRouting.partitionSuggestion.confirmTitle', {
             defaultMessage: 'Confirm stream creation',
           })}
@@ -58,7 +66,11 @@ export function CreateStreamConfirmationModal({
             }
           )}
         >
-          <EuiFieldText value={partition.name} readOnly />
+          <EuiFieldText
+            value={partition.name}
+            readOnly
+            data-test-subj="streamsAppCreateStreamConfirmationModalStreamName"
+          />
         </EuiFormRow>
         <EuiSpacer />
         <EuiTitle size="xxxs">
@@ -72,21 +84,29 @@ export function CreateStreamConfirmationModal({
         <ConditionPanel condition={partition.condition} />
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose} isDisabled={forkStreamState.loading}>
+        <EuiButtonEmpty
+          onClick={() => cancelChanges()}
+          isDisabled={isForking}
+          data-test-subj="streamsAppCreateStreamConfirmationModalCancelButton"
+        >
           {i18n.translate('xpack.streams.streamDetailRouting.partitionSuggestion.cancel', {
             defaultMessage: 'Cancel',
           })}
         </EuiButtonEmpty>
         <EuiButton
-          isLoading={forkStreamState.loading}
+          isLoading={isForking}
           onClick={() =>
             forkStream({
-              parentName: definition.stream.name,
-              name: partition.name,
-              condition: partition.condition,
+              destination: partition.name,
+              where: partition.condition,
+            }).then((result) => {
+              if (result.success) {
+                onSuccess();
+              }
             })
           }
           fill
+          data-test-subj="streamsAppCreateStreamConfirmationModalCreateButton"
         >
           {i18n.translate('xpack.streams.streamDetailRouting.partitionSuggestion.confirm', {
             defaultMessage: 'Create stream',

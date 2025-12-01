@@ -9,14 +9,14 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import {
   EuiFlyout,
-  EuiFlyoutFooter,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiTitle,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@kbn/react-query';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useKibana } from '../../../common/lib/kibana';
 import { OsqueryEventDetailsFooter } from './osquery_flyout_footer';
@@ -48,10 +48,8 @@ const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({
   ecsData,
 }) => {
   const { euiTheme } = useEuiTheme();
-
-  // we need this flyout to be above the timeline flyout (which has a z-index of 1002)
   const maskProps = useMemo(
-    () => ({ style: `z-index: ${(euiTheme.levels.flyout as number) + 3}` }),
+    () => ({ style: `z-index: ${(euiTheme.levels.flyout as number) + 4}` }), // we need this flyout to be above the timeline flyout (which has a z-index of 1003)
     [euiTheme.levels.flyout]
   );
 

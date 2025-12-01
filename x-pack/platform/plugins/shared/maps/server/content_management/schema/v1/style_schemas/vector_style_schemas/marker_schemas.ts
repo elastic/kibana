@@ -12,7 +12,8 @@ import {
   STYLE_TYPE,
   SYMBOLIZE_AS_TYPES,
 } from '../../../../../../common/constants';
-import { fieldMetaOptions, styleField } from './vector_style_schemas';
+import { fieldMetaOptionsSchema } from './field_meta_options_schema';
+import { styleFieldSchema } from './style_field_schema';
 
 export const symbolizeAsOptions = schema.object({
   value: schema.maybe(
@@ -60,8 +61,8 @@ export const iconDynamicOptions = schema.object({
   iconPaletteId: schema.nullable(schema.string()),
   customIconStops: schema.maybe(schema.arrayOf(iconStop)),
   useCustomIconMap: schema.maybe(schema.boolean()),
-  field: schema.maybe(styleField),
-  fieldMetaOptions,
+  field: schema.maybe(styleFieldSchema),
+  fieldMetaOptions: fieldMetaOptionsSchema,
 });
 
 export const iconStaticOptions = schema.object({
@@ -100,8 +101,8 @@ export const iconSchema = schema.oneOf(
 );
 
 export const orientationDynamicOptions = schema.object({
-  field: schema.maybe(styleField),
-  fieldMetaOptions,
+  field: schema.maybe(styleFieldSchema),
+  fieldMetaOptions: fieldMetaOptionsSchema,
 });
 
 export const orientationStaticOptions = schema.object({
@@ -136,8 +137,8 @@ export const orientationSchema = schema.oneOf(
 export const sizeDynamicOptions = schema.object({
   minSize: schema.number(),
   maxSize: schema.number(),
-  field: schema.maybe(styleField),
-  fieldMetaOptions,
+  field: schema.maybe(styleFieldSchema),
+  fieldMetaOptions: fieldMetaOptionsSchema,
   invert: schema.maybe(schema.boolean()),
 });
 

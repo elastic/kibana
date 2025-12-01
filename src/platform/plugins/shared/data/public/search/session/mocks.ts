@@ -13,6 +13,7 @@ import type { ISessionService } from './session_service';
 import { SearchSessionState } from './search_session_state';
 import type { SessionMeta } from './search_session_state';
 import type { PersistedSearchSessionSavedObjectAttributes } from './sessions_mgmt/types';
+import type { ISearchSessionEBTManager } from './ebt_manager';
 
 export function getSessionsClientMock(): jest.Mocked<ISessionsClient> {
   return {
@@ -33,6 +34,7 @@ export function getSessionServiceMock(
     clear: jest.fn(),
     start: jest.fn(),
     restore: jest.fn(),
+    reset: jest.fn(),
     getSessionId: jest.fn(),
     getSession$: jest.fn(() => new BehaviorSubject(undefined).asObservable()),
     state$: new BehaviorSubject<SearchSessionState>(SearchSessionState.None).asObservable(),
@@ -51,6 +53,7 @@ export function getSessionServiceMock(
     })),
     destroy: jest.fn(),
     cancel: jest.fn(),
+    isSaving: jest.fn(),
     isStored: jest.fn(),
     isRestore: jest.fn(),
     save: jest.fn(),
@@ -82,3 +85,14 @@ export const getPersistedSearchSessionSavedObjectAttributesMock = (
     ...overrides,
   };
 };
+
+export function getSearchSessionEBTManagerMock(): jest.Mocked<ISearchSessionEBTManager> {
+  return {
+    trackBgsStarted: jest.fn(),
+    trackBgsCompleted: jest.fn(),
+    trackBgsError: jest.fn(),
+    trackBgsCancelled: jest.fn(),
+    trackBgsOpened: jest.fn(),
+    trackBgsListView: jest.fn(),
+  };
+}

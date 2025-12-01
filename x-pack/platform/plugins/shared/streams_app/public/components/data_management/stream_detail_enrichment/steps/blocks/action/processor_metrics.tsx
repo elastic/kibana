@@ -12,11 +12,13 @@ import {
   EuiBadge,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiTextBlockTruncate,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiTextColor,
   EuiToolTip,
+  EuiLink,
   useEuiTheme,
 } from '@elastic/eui';
 import React from 'react';
@@ -29,6 +31,51 @@ import type { ProcessorMetrics } from '../../../state_management/simulation_stat
 type ProcessorMetricBadgesProps = ProcessorMetrics;
 
 const formatter = getPercentageFormatter();
+
+const messageStyles = css`
+  overflow-wrap: anywhere;
+`;
+
+const ProcessorErrorMessage = ({ message }: { message: string }) => {
+  const [expanded, toggleExpanded] = useToggle(false);
+  const { euiTheme } = useEuiTheme();
+
+  const CLAMP_LINES = 5;
+  const LONG_MESSAGE_CHARACTER_THRESHOLD = 300;
+  const shouldTruncate = message.length > LONG_MESSAGE_CHARACTER_THRESHOLD;
+
+  return (
+    <>
+      {expanded ? (
+        <div css={messageStyles}>{message}</div>
+      ) : (
+        <EuiTextBlockTruncate lines={CLAMP_LINES} cloneElement>
+          <span css={messageStyles}>{message}</span>
+        </EuiTextBlockTruncate>
+      )}
+
+      {shouldTruncate && (
+        <EuiLink
+          onClick={toggleExpanded}
+          data-test-subj="streamsAppProcessorErrorMessageToggle"
+          css={css`
+            padding-top: ${euiTheme.size.xs};
+          `}
+        >
+          {expanded
+            ? i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.enrichment.processorErrors.message.showLess',
+                { defaultMessage: 'Show less' }
+              )
+            : i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.enrichment.processorErrors.message.showMore',
+                { defaultMessage: 'Show full message' }
+              )}
+        </EuiLink>
+      )}
+    </>
+  );
+};
 
 export const ProcessorMetricBadges = ({
   detected_fields,
@@ -74,7 +121,7 @@ export const ProcessorMetricBadges = ({
               values: { failedRate },
             })}
           >
-            <>
+            <span tabIndex={0}>
               <EuiTextColor color="danger">
                 <EuiFlexGroup gutterSize="xs">
                   <EuiFlexItem grow={false}>
@@ -83,7 +130,7 @@ export const ProcessorMetricBadges = ({
                   <EuiFlexItem>{failedRate}</EuiFlexItem>
                 </EuiFlexGroup>
               </EuiTextColor>
-            </>
+            </span>
           </EuiToolTip>
         </EuiFlexItem>
       )}
@@ -155,14 +202,8 @@ export const ProcessorErrors = ({ metrics }: { metrics: ProcessorMetrics }) => {
         `}
       >
         {visibleErrors.map((error, id) => (
-          <EuiCallOut
-            key={id}
-            {...getCalloutProps(error.type)}
-            iconType="warning"
-            size="s"
-            title={errorTitle}
-          >
-            {error.message}
+          <EuiCallOut key={id} {...getCalloutProps(error.type)} size="s" title={errorTitle}>
+            <ProcessorErrorMessage message={error.message} />
           </EuiCallOut>
         ))}
       </EuiFlexGroup>

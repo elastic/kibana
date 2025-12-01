@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 export const INDEX_HELPER_TEXT = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.indicesHelperDescription',
@@ -68,92 +66,6 @@ export const SOURCE = i18n.translate(
     defaultMessage: 'Source',
   }
 );
-
-export const DATA_SOURCE_GUIDE_SUB_TITLE = i18n.translate(
-  'xpack.securitySolution.detections.dataSource.popover.title',
-  {
-    defaultMessage: 'Select a data source',
-  }
-);
-
-export const DATA_SOURCE_GUIDE_TITLE = i18n.translate(
-  'xpack.securitySolution.detections.dataSource.popover.subTitle',
-  {
-    defaultMessage: 'Data sources',
-  }
-);
-
-export const DATA_SOURCE_GUIDE_CONTENT = i18n.translate(
-  'xpack.securitySolution.detections.dataSource.popover.content',
-  {
-    defaultMessage: 'Rules can now query index patterns or data views.',
-  }
-);
-
-export const RULE_PREVIEW_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.rulePreviewTitle',
-  {
-    defaultMessage: 'Rule Preview',
-  }
-);
-
-export const ALERT_SUPPRESSION_MISSING_FIELDS_FORM_ROW_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppressionMissingFieldsLabel',
-  {
-    defaultMessage: 'If a suppression field is missing',
-  }
-);
-
-export const ALERT_SUPPRESSION_MISSING_FIELDS_SUPPRESS_OPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppressionMissingFieldsSuppressLabel',
-  {
-    defaultMessage: 'Suppress and group alerts for events with missing fields',
-  }
-);
-
-export const ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS_OPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppressionMissingFieldsDoNotSuppressLabel',
-  {
-    defaultMessage: 'Do not suppress alerts for events with missing fields',
-  }
-);
-
-export const ALERT_SUPPRESSION_PER_RULE_EXECUTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppressionOptions.perRuleExecutionLabel',
-  {
-    defaultMessage: 'Per rule execution',
-  }
-);
-
-export const ALERT_SUPPRESSION_PER_TIME_PERIOD = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppressionOptions.perTimePeriodLabel',
-  {
-    defaultMessage: 'Per time period',
-  }
-);
-
-export const THRESHOLD_SUPPRESSION_PER_RULE_EXECUTION_WARNING = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.Su.perRuleExecutionWarning',
-  {
-    defaultMessage: 'Per rule execution option is not available for Threshold rule type',
-  }
-);
-
-export const getEnableThresholdSuppressionLabel = (fields: string[] | undefined) =>
-  fields?.length ? (
-    <FormattedMessage
-      id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ga.enableThresholdSuppressionForFieldsLabel"
-      defaultMessage="Suppress alerts by selected fields: {fieldsString}"
-      values={{ fieldsString: <strong>{fields.join(', ')}</strong> }}
-    />
-  ) : (
-    i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ga.enableThresholdSuppressionLabel',
-      {
-        defaultMessage: 'Suppress alerts',
-      }
-    )
-  );
 
 export const MACHINE_LEARNING_SUPPRESSION_DISABLED_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.machineLearningSuppressionDisabledLabel',

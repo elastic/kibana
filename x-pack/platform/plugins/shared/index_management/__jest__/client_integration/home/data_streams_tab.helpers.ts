@@ -47,6 +47,8 @@ export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
   findDetailPanelIlmPolicyDetail: () => ReactWrapper;
   findDetailPanelIndexTemplateLink: () => ReactWrapper;
   findDetailPanelDataRetentionDetail: () => ReactWrapper;
+  findDetailPanelFailureStoreDetail: () => ReactWrapper;
+  findDetailPanelFailureStoreRetentionDetail: () => ReactWrapper;
 }
 
 export const setup = async (
@@ -250,6 +252,16 @@ export const setup = async (
     return find('dataRetentionDetail');
   };
 
+  const findDetailPanelFailureStoreDetail = () => {
+    const { find } = testBed;
+    return find('failureStoreDetail');
+  };
+
+  const findDetailPanelFailureStoreRetentionDetail = () => {
+    const { find } = testBed;
+    return find('failureStoreRetentionDetail');
+  };
+
   return {
     ...testBed,
     actions: {
@@ -281,6 +293,8 @@ export const setup = async (
     findDetailPanelIlmPolicyDetail,
     findDetailPanelIndexTemplateLink,
     findDetailPanelDataRetentionDetail,
+    findDetailPanelFailureStoreDetail,
+    findDetailPanelFailureStoreRetentionDetail,
   };
 };
 
@@ -311,6 +325,9 @@ export const createDataStreamPayload = (dataStream: Partial<DataStream>): DataSt
   lifecycle: {
     enabled: true,
     data_retention: '7d',
+  },
+  failureStoreRetention: {
+    defaultRetentionPeriod: '30d',
   },
   indexMode: 'standard',
   ...dataStream,

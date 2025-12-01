@@ -50,6 +50,7 @@ export const WaffleTimeControls = withEuiTheme(({ interval }: PropsWithTheme) =>
       iconSide="left"
       iconType="pause"
       onClick={stopAutoReload}
+      size="s"
     >
       <FormattedMessage
         id="xpack.infra.waffleTime.stopRefreshingButtonLabel"
@@ -62,6 +63,7 @@ export const WaffleTimeControls = withEuiTheme(({ interval }: PropsWithTheme) =>
       iconSide="left"
       iconType="play"
       onClick={startAutoReload}
+      size="s"
     >
       <FormattedMessage
         id="xpack.infra.waffleTime.autoRefreshButtonLabel"
@@ -102,6 +104,7 @@ export const WaffleTimeControls = withEuiTheme(({ interval }: PropsWithTheme) =>
             popoverPlacement="upRight"
             selected={currentMoment}
             shouldCloseOnSelect
+            compressed
             showTimeSelect
             timeFormat="LT"
           />

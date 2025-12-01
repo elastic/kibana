@@ -79,7 +79,7 @@ export const LastUpdatedAt = React.memo<LastUpdatedAtProps>(
           `,
         }}
       >
-        <EuiText color="subdued" size="xs" data-test-subj="toolbar-updated-at">
+        <EuiText color="subdued" size="xs" data-test-subj="toolbar-updated-at" tabIndex={0}>
           {updateText}
         </EuiText>
       </EuiToolTip>

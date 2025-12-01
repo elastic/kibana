@@ -130,15 +130,13 @@ describe('RERANK', () => {
             type: 'function',
             subtype: 'binary-expression',
             name: '=',
-            args: expect.arrayContaining([
-              expect.objectContaining({ type: 'column', name: 'overview' }),
-              expect.arrayContaining([
-                expect.objectContaining({
-                  type: 'function',
-                  name: 'substring',
-                }),
-              ]),
-            ]),
+            args: [
+              {},
+              {
+                type: 'function',
+                name: 'substring',
+              },
+            ],
           },
         ],
       });

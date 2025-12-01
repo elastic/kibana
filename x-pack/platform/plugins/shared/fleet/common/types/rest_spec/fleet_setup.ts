@@ -19,4 +19,5 @@ export interface GetFleetStatusResponse {
   package_verification_key_id?: string;
   is_space_awareness_enabled?: boolean;
   is_secrets_storage_enabled?: boolean;
+  is_action_secrets_storage_enabled?: boolean;
 }

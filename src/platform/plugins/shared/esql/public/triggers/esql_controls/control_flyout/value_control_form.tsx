@@ -29,7 +29,7 @@ import {
   appendStatsByToQuery,
 } from '@kbn/esql-utils';
 import { ESQLLangEditor } from '../../../create_editor';
-import { ControlWidth, ControlLabel } from './shared_form_components';
+import { ControlWidth, ControlLabel, ControlSelectionType } from './shared_form_components';
 import { ChooseColumnPopover } from './choose_column_popover';
 
 interface ValueControlFormProps {
@@ -102,6 +102,11 @@ export function ValueControlForm({
   );
   const [label, setLabel] = useState(initialState?.title ?? '');
   const [minimumWidth, setMinimumWidth] = useState(initialState?.width ?? 'medium');
+  const shouldDefaultToMultiSelect = variableType === ESQLVariableType.MULTI_VALUES;
+  const [singleSelect, setSingleSelect] = useState<boolean>(
+    initialState?.singleSelect ?? !shouldDefaultToMultiSelect
+  );
+
   const [grow, setGrow] = useState(initialState?.grow ?? false);
 
   const onValuesChange = useCallback((selectedOptions: EuiComboBoxOptionOption[]) => {
@@ -143,6 +148,10 @@ export function ValueControlForm({
     if (optionId) {
       setMinimumWidth(optionId as ControlWidthOptions);
     }
+  }, []);
+
+  const onSelectionTypeChange = useCallback((isSingleSelect: boolean) => {
+    setSingleSelect(isSingleSelect);
   }, []);
 
   const onGrowChange = useCallback((e: EuiSwitchEvent) => {
@@ -191,18 +200,18 @@ export function ValueControlForm({
   );
 
   useEffect(() => {
-    if (
-      !selectedValues?.length &&
-      controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY &&
-      valuesRetrieval
-    ) {
-      const queryForValues =
-        variableName !== ''
-          ? `FROM ${getIndexPatternFromESQLQuery(queryString)} | STATS BY ${valuesRetrieval}`
-          : '';
-      onValuesQuerySubmit(queryForValues);
+    if (!selectedValues?.length && controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY) {
+      if (initialState?.esqlQuery) {
+        onValuesQuerySubmit(initialState.esqlQuery);
+      } else if (valuesRetrieval) {
+        const queryForValues = `FROM ${getIndexPatternFromESQLQuery(
+          queryString
+        )} | STATS BY ${valuesRetrieval}`;
+        onValuesQuerySubmit(queryForValues);
+      }
     }
   }, [
+    initialState?.esqlQuery,
     controlFlyoutType,
     onValuesQuerySubmit,
     queryString,
@@ -219,9 +228,10 @@ export function ValueControlForm({
       availableOptions,
       selectedOptions: [availableOptions[0]],
       width: minimumWidth,
+      singleSelect,
       title: label || variableNameWithoutQuestionmark,
       variableName: variableNameWithoutQuestionmark,
-      variableType,
+      variableType: singleSelect ? variableType : ESQLVariableType.MULTI_VALUES,
       esqlQuery: valuesQuery || queryString,
       controlType: controlFlyoutType,
       grow,
@@ -230,6 +240,7 @@ export function ValueControlForm({
       setControlState(state);
     }
   }, [
+    singleSelect,
     controlFlyoutType,
     grow,
     initialState,
@@ -299,6 +310,7 @@ export function ValueControlForm({
                 </EuiPanel>
               ) : (
                 <EuiCallOut
+                  announceOnMount
                   title={i18n.translate('esql.flyout.displayMultipleColsCallout.title', {
                     defaultMessage: 'Your query must return a single column',
                   })}
@@ -369,6 +381,11 @@ export function ValueControlForm({
         // This property is not compatible with the unified search yet
         // we will hide this possibility for now
         hideFitToSpace={currentApp === 'discover'}
+      />
+
+      <ControlSelectionType
+        singleSelect={singleSelect}
+        onSelectionTypeChange={onSelectionTypeChange}
       />
     </>
   );

@@ -84,7 +84,7 @@ describe('OnboardingFlowForm', () => {
       renderWithProviders(<OnboardingFlowForm />);
 
       expect(
-        screen.getByText(/Monitor your host and the services running on it, set-up SLO/)
+        screen.getByText(/Track your host and its services by setting up SLOs/)
       ).toBeInTheDocument();
     });
 
@@ -92,7 +92,7 @@ describe('OnboardingFlowForm', () => {
       renderWithProviders(<OnboardingFlowForm />);
 
       expect(
-        screen.getByText(/Observe your Kubernetes cluster.*using logs, metrics, traces/)
+        screen.getByText(/Monitor your Kubernetes cluster and container workloads using logs/)
       ).toBeInTheDocument();
     });
 
@@ -164,7 +164,7 @@ describe('OnboardingFlowForm', () => {
 
       expect(screen.getByText('Cloud')).toBeInTheDocument();
       expect(
-        screen.getByText(/Ingest telemetry data from the Cloud for your applications/)
+        screen.getByText(/Ingest telemetry data from your cloud services to better understand/)
       ).toBeInTheDocument();
     });
 

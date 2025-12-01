@@ -7,7 +7,12 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { HuggingFaceDatasetSpec } from '../types';
-import { createOneChatDatasetSpec, isOneChatDataset } from './onechat';
+import {
+  createOneChatDatasetSpec,
+  isOneChatDataset,
+  isOneChatWildcard,
+  listOneChatDatasets,
+} from './onechat';
 
 const BEIR_NAMES = [
   'trec-covid',
@@ -89,15 +94,40 @@ export const PREDEFINED_HUGGING_FACE_DATASETS: HuggingFaceDatasetSpec[] = [
 ];
 
 /**
- * Get dataset specifications, including dynamically generated OneChat datasets
+ * Expands wildcard dataset patterns into concrete dataset names
+ */
+async function expandDatasetNames(
+  datasetNames: string[],
+  accessToken: string,
+  logger: Logger
+): Promise<string[]> {
+  const expansions = await Promise.all(
+    datasetNames.map(async (datasetName) => {
+      if (isOneChatWildcard(datasetName)) {
+        const directory = datasetName.split('/')[1];
+        const datasetsForDirectory = await listOneChatDatasets(directory, accessToken, logger);
+        return datasetsForDirectory;
+      }
+      return [datasetName];
+    })
+  );
+
+  return expansions.flat();
+}
+
+/**
+ * Gets dataset specifications, including dynamically generated OneChat datasets
  */
 export async function getDatasetSpecs(
   accessToken: string,
   logger: Logger,
   datasetNames: string[]
 ): Promise<HuggingFaceDatasetSpec[]> {
+  // First, expand any wildcards into concrete dataset names
+  const expandedNames = await expandDatasetNames(datasetNames, accessToken, logger);
+
   const specs: HuggingFaceDatasetSpec[] = [];
-  for (const name of datasetNames) {
+  for (const name of expandedNames) {
     if (isOneChatDataset(name)) {
       const spec = await createOneChatDatasetSpec(name, accessToken, logger);
       specs.push(spec);

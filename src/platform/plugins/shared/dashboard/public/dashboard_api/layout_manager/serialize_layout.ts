@@ -17,7 +17,7 @@ export function serializeLayout(
 ): Pick<DashboardState, 'panels' | 'references'> {
   const sections: { [sectionId: string]: DashboardSection } = {};
   Object.entries(layout.sections).forEach(([sectionId, sectionState]) => {
-    sections[sectionId] = { ...sectionState, panels: [] };
+    sections[sectionId] = { ...sectionState, uid: sectionId, panels: [] };
   });
 
   const references: DashboardState['references'] = [];

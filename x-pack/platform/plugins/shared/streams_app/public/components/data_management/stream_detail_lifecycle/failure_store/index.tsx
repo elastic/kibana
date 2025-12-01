@@ -9,12 +9,19 @@ import type { Streams } from '@kbn/streams-schema';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { withSuspense } from '@kbn/shared-ux-utility';
+import type { FailureStoreFormData } from '@kbn/failure-store-modal';
 import { NoFailureStorePanel } from './no_failure_store_panel';
 import { FailureStoreInfo } from './failure_store_info';
 import { useUpdateFailureStore } from '../../../../hooks/use_update_failure_store';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { NoPermissionBanner } from './no_permission_banner';
-import { useFailureStoreStats } from '../hooks/use_failure_store_stats';
+import { useTimefilter } from '../../../../hooks/use_timefilter';
+import type { useDataStreamStats } from '../hooks/use_data_stream_stats';
+import { getFormattedError } from '../../../../util/errors';
+import {
+  transformFailureStoreConfig,
+  useFailureStoreConfig,
+} from '../hooks/use_failure_store_config';
 
 // Lazy load the FailureStoreModal to reduce bundle size
 const LazyFailureStoreModal = React.lazy(async () => ({
@@ -25,14 +32,21 @@ const FailureStoreModal = withSuspense(LazyFailureStoreModal);
 
 export const StreamDetailFailureStore = ({
   definition,
+  data,
+  refreshDefinition,
 }: {
   definition: Streams.ingest.all.GetResponse;
+  data: ReturnType<typeof useDataStreamStats>;
+  refreshDefinition: () => void;
 }) => {
   const [isFailureStoreModalOpen, setIsFailureStoreModalOpen] = useState(false);
-  const { updateFailureStore } = useUpdateFailureStore();
+  const { updateFailureStore } = useUpdateFailureStore(definition.stream);
   const {
     core: { notifications },
   } = useKibana();
+
+  const { timeState } = useTimefilter();
+  const { isServerless } = useKibana();
 
   const {
     privileges: {
@@ -41,26 +55,26 @@ export const StreamDetailFailureStore = ({
     },
   } = definition;
 
+  const failureStoreConfig = useFailureStoreConfig(definition);
+  const {
+    failureStoreEnabled,
+    defaultRetentionPeriod,
+    customRetentionPeriod,
+    inheritOptions,
+    refreshDefaultRetention,
+    retentionDisabled,
+  } = failureStoreConfig;
+
   const closeModal = () => {
     setIsFailureStoreModalOpen(false);
   };
 
-  const {
-    data,
-    isLoading: isLoadingStats,
-    error: statsError,
-    refresh,
-  } = useFailureStoreStats({ definition });
-
-  const handleSaveModal = async (update: {
-    failureStoreEnabled: boolean;
-    customRetentionPeriod?: string;
-  }) => {
+  const handleSaveModal = async (update: FailureStoreFormData) => {
     try {
-      await updateFailureStore(definition.stream.name, {
-        failureStoreEnabled: update.failureStoreEnabled,
-        customRetentionPeriod: update.customRetentionPeriod,
-      });
+      await updateFailureStore(definition.stream.name, transformFailureStoreConfig(update));
+
+      refreshDefinition();
+      refreshDefaultRetention();
 
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.streams.streamDetailFailureStore.updateFailureStoreSuccess', {
@@ -68,15 +82,16 @@ export const StreamDetailFailureStore = ({
         }),
       });
     } catch (error) {
-      notifications.toasts.addDanger({
+      notifications.toasts.addError(error, {
         title: i18n.translate('xpack.streams.streamDetailFailureStore.updateFailureStoreFailed', {
           defaultMessage: "We couldn't update the failure store settings.",
         }),
-        text: error.message,
+        toastMessage: getFormattedError(error).message,
       });
+    } finally {
+      closeModal();
+      data.refresh();
     }
-    closeModal();
-    refresh();
   };
 
   return (
@@ -84,25 +99,37 @@ export const StreamDetailFailureStore = ({
       <EuiFlexGroup direction="column" gutterSize="m">
         {readFailureStorePrivilege ? (
           <>
-            {isFailureStoreModalOpen && manageFailureStorePrivilege && data?.config && (
+            {isFailureStoreModalOpen && manageFailureStorePrivilege && (
               <FailureStoreModal
                 onCloseModal={closeModal}
                 onSaveModal={handleSaveModal}
                 failureStoreProps={{
-                  failureStoreEnabled: data?.config.enabled,
-                  defaultRetentionPeriod: data?.config.retentionPeriod.default,
-                  customRetentionPeriod: data?.config.retentionPeriod.custom,
+                  failureStoreEnabled,
+                  defaultRetentionPeriod,
+                  customRetentionPeriod,
+                  retentionDisabled,
                 }}
+                inheritOptions={inheritOptions}
+                showIlmDescription={!isServerless}
+                canShowDisableLifecycle={!isServerless}
+                disableButtonLabel={i18n.translate(
+                  'xpack.streams.dataManagement.streamDetailLifecycle.indefinite',
+                  {
+                    defaultMessage: 'Indefinite',
+                  }
+                )}
               />
             )}
-            {isLoadingStats || data?.config.enabled ? (
+            {data.isLoading || failureStoreEnabled ? (
               <FailureStoreInfo
                 openModal={setIsFailureStoreModalOpen}
                 definition={definition}
-                statsError={statsError}
-                isLoadingStats={isLoadingStats}
-                stats={data?.stats}
-                config={data?.config}
+                statsError={data.error}
+                isLoadingStats={data.isLoading}
+                stats={data.stats?.fs.stats}
+                timeState={timeState}
+                aggregations={data?.stats?.fs.aggregations}
+                failureStoreConfig={failureStoreConfig}
               />
             ) : (
               <NoFailureStorePanel openModal={setIsFailureStoreModalOpen} definition={definition} />

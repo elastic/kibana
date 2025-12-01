@@ -26,8 +26,10 @@ import type { Agent } from '../types';
 import { SO_SEARCH_LIMIT } from '../constants';
 import { getAgentPolicySavedObjectType } from '../services/agent_policy';
 
+import { throwIfAborted } from './utils';
+
 export const TYPE = 'fleet:agent-status-change-task';
-export const VERSION = '1.0.1';
+export const VERSION = '1.0.2';
 const TITLE = 'Fleet Agent Status Change Task';
 const SCOPE = ['fleet'];
 const DEFAULT_INTERVAL = '1m';
@@ -117,7 +119,7 @@ export class AgentStatusChangeTask {
   }
 
   private endRun(msg: string = '') {
-    this.logger.info(`[AgentStatusChangeTask] runTask ended${msg ? ': ' + msg : ''}`);
+    this.logger.debug(`[AgentStatusChangeTask] runTask ended${msg ? ': ' + msg : ''}`);
   }
 
   public runTask = async (
@@ -143,7 +145,7 @@ export class AgentStatusChangeTask {
       return getDeleteTaskRunResult();
     }
 
-    this.logger.info(`[runTask()] started`);
+    this.logger.debug(`[runTask()] started`);
 
     const [coreStart, _startDeps] = (await core.getStartServices()) as any;
     const esClient = coreStart.elasticsearch.client.asInternalUser;
@@ -183,7 +185,7 @@ export class AgentStatusChangeTask {
       const agentsToUpdate = [];
 
       for (const agent of agentPageResults) {
-        this.throwIfAborted(abortController);
+        throwIfAborted(abortController);
 
         if (agent.status !== agent.last_known_status) {
           agentsToUpdate.push(agent);
@@ -268,10 +270,4 @@ export class AgentStatusChangeTask {
       refresh: 'wait_for',
     });
   };
-
-  private throwIfAborted(abortController: AbortController) {
-    if (abortController.signal.aborted) {
-      throw new Error('Task was aborted');
-    }
-  }
 }

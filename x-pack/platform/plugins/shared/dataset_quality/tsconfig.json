@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -72,7 +72,8 @@
     "@kbn/xstate-utils",
     "@kbn/failure-store-modal",
     "@kbn/logging-mocks",
-    "@kbn/core-http-server-mocks"
+    "@kbn/core-http-server-mocks",
+    "@kbn/test-jest-helpers"
   ],
   "exclude": [
     "target/**/*"

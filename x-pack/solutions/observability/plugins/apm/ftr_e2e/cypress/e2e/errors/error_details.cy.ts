@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { generateLongIdWithSeed } from '@kbn/apm-synthtrace-client/src/lib/utils/generate_id';
+import { generateLongIdWithSeed } from '@kbn/synthtrace-client/src/lib/utils/generate_id';
 
 import url from 'url';
 import { synthtrace } from '../../../synthtrace';
@@ -47,8 +47,8 @@ describe('Error details', () => {
 
       cy.visitKibana(errorDetailsPageHref);
       cy.contains(`Error group ${errorGroupingKeyShort}`);
-      // set skipFailures to true to not fail the test when there are accessibility failures
-      checkA11y({ skipFailures: true });
+
+      checkA11y();
     });
 
     describe('when error has no occurrences', () => {

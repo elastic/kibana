@@ -11,7 +11,7 @@ import Boom from '@hapi/boom';
 
 import { MAX_OBSERVABLES_PER_CASE } from '../../../common/constants';
 import type { Observable } from '../../../common/types/domain';
-import { CaseRt } from '../../../common/types/domain';
+import { CaseRt, UserActionTypes } from '../../../common/types/domain';
 import {
   AddObservableRequestRt,
   type AddObservableRequest,
@@ -58,8 +58,9 @@ export const addObservable = async (
   casesClient: CasesClient
 ) => {
   const {
-    services: { caseService, licensingService },
+    services: { caseService, licensingService, userActionService },
     authorization,
+    user,
   } = clientArgs;
 
   const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
@@ -109,6 +110,19 @@ export const addObservable = async (
       originalCase: retrievedCase,
       updatedAttributes: {
         observables: updatedObservables,
+        total_observables: updatedObservables.length,
+      },
+    });
+
+    await userActionService.creator.createUserAction({
+      userAction: {
+        type: UserActionTypes.observables,
+        caseId: retrievedCase.id,
+        owner: retrievedCase.attributes.owner,
+        user,
+        payload: {
+          observables: { count: 1, actionType: 'add' },
+        },
       },
     });
 
@@ -135,8 +149,9 @@ export const updateObservable = async (
   casesClient: CasesClient
 ) => {
   const {
-    services: { caseService, licensingService },
+    services: { caseService, licensingService, userActionService },
     authorization,
+    user,
   } = clientArgs;
 
   const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
@@ -185,6 +200,19 @@ export const updateObservable = async (
       originalCase: retrievedCase,
       updatedAttributes: {
         observables: updatedObservables,
+        total_observables: updatedObservables.length,
+      },
+    });
+
+    await userActionService.creator.createUserAction({
+      userAction: {
+        type: UserActionTypes.observables,
+        caseId: retrievedCase.id,
+        owner: retrievedCase.attributes.owner,
+        user,
+        payload: {
+          observables: { count: 1, actionType: 'update' },
+        },
       },
     });
 
@@ -210,8 +238,9 @@ export const deleteObservable = async (
   casesClient: CasesClient
 ) => {
   const {
-    services: { caseService, licensingService },
+    services: { caseService, licensingService, userActionService },
     authorization,
+    user,
   } = clientArgs;
 
   const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
@@ -240,7 +269,21 @@ export const deleteObservable = async (
     await caseService.patchCase({
       caseId: retrievedCase.id,
       originalCase: retrievedCase,
-      updatedAttributes: { observables: updatedObservables },
+      updatedAttributes: {
+        observables: updatedObservables,
+        total_observables: updatedObservables.length,
+      },
+    });
+    await userActionService.creator.createUserAction({
+      userAction: {
+        type: UserActionTypes.observables,
+        caseId: retrievedCase.id,
+        owner: retrievedCase.attributes.owner,
+        user,
+        payload: {
+          observables: { count: 1, actionType: 'delete' },
+        },
+      },
     });
   } catch (error) {
     throw Boom.badRequest(`Failed to delete observable id: ${observableId}: ${error}`);
@@ -253,8 +296,9 @@ export const bulkAddObservables = async (
   casesClient: CasesClient
 ) => {
   const {
-    services: { caseService, licensingService },
+    services: { caseService, licensingService, userActionService },
     authorization,
+    user,
   } = clientArgs;
 
   const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
@@ -301,6 +345,21 @@ export const bulkAddObservables = async (
       originalCase: retrievedCase,
       updatedAttributes: {
         observables: finalObservables,
+        total_observables: finalObservables.length,
+      },
+    });
+
+    const newObservablesCount = finalObservables.length - currentObservables.length;
+
+    await userActionService.creator.createUserAction({
+      userAction: {
+        type: UserActionTypes.observables,
+        caseId: retrievedCase.id,
+        owner: retrievedCase.attributes.owner,
+        user,
+        payload: {
+          observables: { count: newObservablesCount, actionType: 'add' },
+        },
       },
     });
 

@@ -1,0 +1,24 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "node"
+    ],
+  },
+  "include": [
+    "**/*"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/tooling-log",
+    "@kbn/security-solution-plugin",
+    "@kbn/rule-data-utils",
+    "@kbn/core-http-common",
+    "@kbn/alerting-plugin",
+    "@kbn/task-manager-plugin",
+    "@kbn/test"
+  ]
+}

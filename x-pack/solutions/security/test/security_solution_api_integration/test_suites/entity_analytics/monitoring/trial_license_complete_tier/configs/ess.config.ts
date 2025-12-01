@@ -18,9 +18,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
         '--xpack.securitySolution.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed=100',
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'integrationsSyncEnabled',
-        ])}`,
+        `--xpack.securitySolution.enableExperimental=${JSON.stringify([])}`,
       ],
     },
     testFiles: [require.resolve('..')],

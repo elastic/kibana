@@ -10,7 +10,12 @@ import type { CreateAgentPolicyResponse } from '@kbn/fleet-plugin/common';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from './api_helper';
-import { cleanFleetIndices, expectToRejectWithError, expectToRejectWithNotFound } from './helpers';
+import {
+  cleanFleetIndices,
+  createTestSpace,
+  expectToRejectWithError,
+  expectToRejectWithNotFound,
+} from './helpers';
 import { setupTestUsers, testUsers } from '../test_users';
 
 export default function (providerContext: FtrProviderContext) {
@@ -21,7 +26,7 @@ export default function (providerContext: FtrProviderContext) {
   const spaces = getService('spaces');
   let TEST_SPACE_1: string;
 
-  describe('agent policies', function () {
+  describe('test_agent_policies', function () {
     skipIfNoDockerRegistry(providerContext);
     const apiClient = new SpaceTestApiClient(supertestWithoutAuth, {
       username: testUsers.fleet_all_int_all.username,
@@ -40,6 +45,7 @@ export default function (providerContext: FtrProviderContext) {
     let spaceTest1Policy1: CreateAgentPolicyResponse;
     let spaceTest1Policy2: CreateAgentPolicyResponse;
     let defaultAndTestSpacePolicy: CreateAgentPolicyResponse;
+    let allSpaceAgentPolicy: CreateAgentPolicyResponse;
 
     before(async () => {
       await setupTestUsers(getService('security'), true);
@@ -51,13 +57,14 @@ export default function (providerContext: FtrProviderContext) {
       await cleanFleetIndices(esClient);
 
       await apiClient.postEnableSpaceAwareness();
-
-      await spaces.createTestSpace(TEST_SPACE_1);
+      await apiClient.setup();
+      await createTestSpace(providerContext, TEST_SPACE_1);
       const [
         _defaultSpacePolicy1,
         _spaceTest1Policy1,
         _spaceTest1Policy2,
         _defaultAndTestSpacePolicy,
+        _allSpacePolicy,
       ] = await Promise.all([
         apiClient.createAgentPolicy(),
         apiClient.createAgentPolicy(TEST_SPACE_1),
@@ -65,11 +72,15 @@ export default function (providerContext: FtrProviderContext) {
         apiClient.createAgentPolicy(undefined, {
           space_ids: ['default', TEST_SPACE_1],
         }),
+        apiClient.createAgentPolicy(undefined, {
+          space_ids: ['*'],
+        }),
       ]);
       defaultSpacePolicy1 = _defaultSpacePolicy1;
       spaceTest1Policy1 = _spaceTest1Policy1;
       spaceTest1Policy2 = _spaceTest1Policy2;
       defaultAndTestSpacePolicy = _defaultAndTestSpacePolicy;
+      allSpaceAgentPolicy = _allSpacePolicy;
     });
 
     after(async () => {
@@ -83,22 +94,26 @@ export default function (providerContext: FtrProviderContext) {
     describe('GET /agent_policies', () => {
       it('should return policies in a specific space', async () => {
         const agentPolicies = await apiClient.getAgentPolicies(TEST_SPACE_1);
-        expect(agentPolicies.total).to.eql(3);
+        expect(agentPolicies.total).to.eql(4);
         const policyIds = agentPolicies.items?.map((item) => item.id);
         expect(policyIds).to.contain(spaceTest1Policy1.item.id);
         expect(policyIds).to.contain(spaceTest1Policy2.item.id);
+        expect(policyIds).to.contain(allSpaceAgentPolicy.item.id);
+        expect(policyIds).to.contain(defaultAndTestSpacePolicy.item.id);
+
         expect(policyIds).to.contain(defaultAndTestSpacePolicy.item.id);
         expect(policyIds).not.to.contain(defaultSpacePolicy1.item.id);
       });
 
       it('should return policies in default space', async () => {
         const agentPolicies = await apiClient.getAgentPolicies();
-        expect(agentPolicies.total).to.eql(2);
+        expect(agentPolicies.total).to.eql(3);
         const policyIds = agentPolicies.items?.map((item) => item.id);
         expect(policyIds).not.to.contain(spaceTest1Policy1.item.id);
         expect(policyIds).not.contain(spaceTest1Policy2.item.id);
         expect(policyIds).to.contain(defaultSpacePolicy1.item.id);
         expect(policyIds).to.contain(defaultAndTestSpacePolicy.item.id);
+        expect(policyIds).to.contain(allSpaceAgentPolicy.item.id);
       });
 
       it('should return only spaces user can access', async () => {
@@ -170,13 +185,71 @@ export default function (providerContext: FtrProviderContext) {
           /No enough permissions to create policies in space test1/
         );
       });
+
+      it('should correctly increment package policy names when creating agent policy with system package across multiple spaces', async () => {
+        const res = await apiClient.postOutput(
+          {
+            name: `test output ${Date.now()}`,
+            type: 'elasticsearch',
+            is_default: false,
+            is_default_monitoring: false,
+            hosts: ['https://test.fr'],
+          },
+          TEST_SPACE_1
+        );
+        const outputId = res.item.id;
+        await apiClient.installPackage({ pkgName: 'system', force: true, pkgVersion: '1.54.0' });
+
+        await apiClient.createAgentPolicy('default', {}, { sys_monitoring: true });
+
+        const newMultiSpacePolicy = await apiClient.createAgentPolicy(
+          TEST_SPACE_1,
+          {
+            space_ids: ['default', TEST_SPACE_1],
+            data_output_id: outputId,
+            monitoring_output_id: outputId,
+          },
+          { sys_monitoring: true }
+        );
+
+        const multiSpacePolicy = await apiClient.getAgentPolicy(
+          newMultiSpacePolicy.item.id,
+          'default'
+        );
+
+        const systemPackagePolicy = multiSpacePolicy.item.package_policies?.find(
+          (packagePolicy) => packagePolicy.package?.name === 'system'
+        );
+        expect(systemPackagePolicy?.name).to.be('system-2');
+      });
+
+      it('should prevent creating agent policy for multiple spaces with same name as policy in non-current namespace', async () => {
+        const testSpaceOnlyPolicy = await apiClient.createAgentPolicy(TEST_SPACE_1);
+
+        // Try to create a multi-space policy (default + test) from default space with same name
+        // This should fail because the name conflicts with policy in test space
+        await expectToRejectWithError(
+          () =>
+            apiClient.createAgentPolicy('default', {
+              name: testSpaceOnlyPolicy.item.name,
+              space_ids: ['default', TEST_SPACE_1],
+            }),
+          /409 "Conflict" Agent Policy\s.* already exists with name\s.*$/i
+        );
+      });
     });
 
     describe('GET /agent_policies_spaces', () => {
-      it('should return all spaces user can write agent policies to', async () => {
+      it('should return all spaces for a user with access to all spaces', async () => {
         const res = await apiClient.getAgentPoliciesSpaces();
 
-        expect(res.items.map(({ id }: { id: string }) => id)).to.eql(['default', 'test1']);
+        expect(res.items.map(({ id }: { id: string }) => id)).to.eql(['default', 'test1', '*']);
+      });
+
+      it('should return all spaces user can write agent policies to', async () => {
+        const res = await apiClientDefaultSpaceOnly.getAgentPoliciesSpaces();
+
+        expect(res.items.map(({ id }: { id: string }) => id)).to.eql(['default']);
       });
 
       it('should return no spaces for user with readonly access', async () => {

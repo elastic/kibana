@@ -5,16 +5,199 @@
  * 2.0.
  */
 
+import { buildFiltersForEntityType, calculateRiskScores } from './calculate_risk_scores';
+import type { EntityType } from '../../../../common/entity_analytics/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { assetCriticalityServiceMock } from '../asset_criticality/asset_criticality_service.mock';
 
-import { calculateRiskScores } from './calculate_risk_scores';
-import { calculateRiskScoresMock } from './calculate_risk_scores.mock';
-
-import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import { EntityType } from '../../../../common/search_strategy';
 import { allowedExperimentalValues } from '../../../../common';
+
+describe('buildFiltersForEntityType', () => {
+  const mockUserFilter = { term: { 'user.name': 'test-user' } };
+  const mockExcludeAlertStatuses = ['closed'];
+  const mockExcludeAlertTags = ['test-tag'];
+
+  it('should build basic filters without custom filters', () => {
+    const filters = buildFiltersForEntityType(
+      'host' as EntityType,
+      mockUserFilter,
+      [],
+      mockExcludeAlertStatuses,
+      mockExcludeAlertTags
+    );
+
+    expect(filters).toHaveLength(4);
+    expect(filters[0]).toEqual({ exists: { field: 'kibana.alert.risk_score' } });
+    expect(filters[1]).toEqual(mockUserFilter);
+    expect(filters[2]).toEqual({
+      bool: { must_not: { terms: { 'kibana.alert.workflow_status': mockExcludeAlertStatuses } } },
+    });
+    expect(filters[3]).toEqual({
+      bool: { must_not: { terms: { 'kibana.alert.workflow_tags': mockExcludeAlertTags } } },
+    });
+  });
+
+  it('should apply entity-specific custom filters (exclusive)', () => {
+    const customFilters = [
+      { entity_types: ['host'], filter: 'agent.type: filebeat' },
+      { entity_types: ['user'], filter: 'user.name: ubuntu' },
+    ];
+
+    const hostFilters = buildFiltersForEntityType(
+      'host' as EntityType,
+      mockUserFilter,
+      customFilters,
+      mockExcludeAlertStatuses,
+      mockExcludeAlertTags
+    );
+
+    const userFilters = buildFiltersForEntityType(
+      'user' as EntityType,
+      mockUserFilter,
+      customFilters,
+      mockExcludeAlertStatuses,
+      mockExcludeAlertTags
+    );
+
+    // Host filters should include the host-specific filter (must)
+    expect(hostFilters).toHaveLength(5);
+    expect(hostFilters[4]).toEqual(
+      expect.objectContaining({
+        bool: expect.objectContaining({
+          must: expect.objectContaining({
+            bool: expect.objectContaining({
+              should: expect.arrayContaining([
+                expect.objectContaining({
+                  match: expect.objectContaining({
+                    'agent.type': 'filebeat',
+                  }),
+                }),
+              ]),
+            }),
+          }),
+        }),
+      })
+    );
+
+    // User filters should include the user-specific filter (must)
+    expect(userFilters).toHaveLength(5);
+    expect(userFilters[4]).toEqual(
+      expect.objectContaining({
+        bool: expect.objectContaining({
+          must: expect.objectContaining({
+            bool: expect.objectContaining({
+              should: expect.arrayContaining([
+                expect.objectContaining({
+                  match: expect.objectContaining({
+                    'user.name': 'ubuntu',
+                  }),
+                }),
+              ]),
+            }),
+          }),
+        }),
+      })
+    );
+  });
+
+  it('should apply multiple exclusive filters for the same entity type', () => {
+    const customFilters = [
+      { entity_types: ['host'], filter: 'agent.type: filebeat' },
+      { entity_types: ['host'], filter: 'host.os.name: linux' },
+    ];
+
+    const filters = buildFiltersForEntityType(
+      'host' as EntityType,
+      mockUserFilter,
+      customFilters,
+      mockExcludeAlertStatuses,
+      mockExcludeAlertTags
+    );
+
+    expect(filters).toHaveLength(6); // 4 base filters + 2 custom filters
+  });
+
+  it('should handle empty custom filters array', () => {
+    const filters = buildFiltersForEntityType(
+      'host' as EntityType,
+      mockUserFilter,
+      [],
+      mockExcludeAlertStatuses,
+      mockExcludeAlertTags
+    );
+
+    expect(filters).toHaveLength(4);
+  });
+
+  it('should handle invalid KQL filters gracefully', () => {
+    const customFilters = [{ entity_types: ['host'], filter: 'invalid kql syntax {' }];
+
+    const filters = buildFiltersForEntityType(
+      'host' as EntityType,
+      mockUserFilter,
+      customFilters,
+      mockExcludeAlertStatuses,
+      mockExcludeAlertTags
+    );
+
+    // Should still return the base filters even if custom filter is invalid
+    // Invalid KQL filters are silently ignored to prevent query failures
+    expect(filters).toHaveLength(4); // Base filters + exclude filters, invalid custom filter is ignored
+  });
+
+  it('should handle empty user filter', () => {
+    const filters = buildFiltersForEntityType(
+      'host' as EntityType,
+      {},
+      [],
+      mockExcludeAlertStatuses,
+      mockExcludeAlertTags
+    );
+
+    expect(filters).toHaveLength(3); // No user filter added
+    expect(filters[0]).toEqual({ exists: { field: 'kibana.alert.risk_score' } });
+  });
+
+  it('should handle empty exclude arrays', () => {
+    const filters = buildFiltersForEntityType('host' as EntityType, mockUserFilter, [], [], []);
+
+    expect(filters).toHaveLength(2); // Only base filters + user filter
+    expect(filters[0]).toEqual({ exists: { field: 'kibana.alert.risk_score' } });
+    expect(filters[1]).toEqual(mockUserFilter);
+  });
+
+  it('should handle service entity type', () => {
+    const customFilters = [{ entity_types: ['service'], filter: 'service.name: nginx' }];
+
+    const filters = buildFiltersForEntityType(
+      'service' as EntityType,
+      mockUserFilter,
+      customFilters,
+      mockExcludeAlertStatuses,
+      mockExcludeAlertTags
+    );
+
+    expect(filters).toHaveLength(5);
+    expect(filters[4]).toEqual(
+      expect.objectContaining({
+        bool: expect.objectContaining({
+          must: expect.objectContaining({
+            bool: expect.objectContaining({
+              should: expect.arrayContaining([
+                expect.objectContaining({
+                  match: expect.objectContaining({
+                    'service.name': 'nginx',
+                  }),
+                }),
+              ]),
+            }),
+          }),
+        }),
+      })
+    );
+  });
+});
 
 describe('calculateRiskScores()', () => {
   let params: Parameters<typeof calculateRiskScores>[0];
@@ -59,233 +242,6 @@ describe('calculateRiskScores()', () => {
       expect(
         (esClient.search as jest.Mock).mock.calls[0][0].query.function_score.query.bool.filter
       ).toEqual(expect.not.arrayContaining([{}]));
-    });
-
-    it('drops an empty array filter if specified by the caller', async () => {
-      params.filter = [];
-      await calculateRiskScores(params);
-
-      expect(
-        (esClient.search as jest.Mock).mock.calls[0][0].query.function_score.query.bool.filter
-      ).toEqual(expect.not.arrayContaining([[]]));
-    });
-
-    describe('identifierType', () => {
-      it('creates aggs for both host and user by default', async () => {
-        await calculateRiskScores(params);
-        expect(esClient.search).toHaveBeenCalledWith(
-          expect.objectContaining({
-            aggs: expect.objectContaining({ host: expect.anything(), user: expect.anything() }),
-          })
-        );
-      });
-
-      it('creates an aggregation per specified identifierType', async () => {
-        params = { ...params, identifierType: EntityType.host };
-        await calculateRiskScores(params);
-        const [[call]] = (esClient.search as jest.Mock).mock.calls;
-        expect(call).toEqual(
-          expect.objectContaining({ aggs: expect.objectContaining({ host: expect.anything() }) })
-        );
-        expect(call.aggs).toHaveProperty('host');
-        expect(call.aggs).not.toHaveProperty('user');
-      });
-    });
-
-    describe('after_keys', () => {
-      it('applies a single after_key to the correct aggregation', async () => {
-        params = { ...params, afterKeys: { host: { 'host.name': 'foo' } } };
-        await calculateRiskScores(params);
-        const [[call]] = (esClient.search as jest.Mock).mock.calls;
-        expect(call).toEqual(
-          expect.objectContaining({
-            aggs: expect.objectContaining({
-              host: expect.objectContaining({
-                composite: expect.objectContaining({ after: { 'host.name': 'foo' } }),
-              }),
-            }),
-          })
-        );
-      });
-
-      it('applies multiple after_keys to the correct aggregations', async () => {
-        params = {
-          ...params,
-          afterKeys: {
-            host: { 'host.name': 'foo' },
-            user: { 'user.name': 'bar' },
-          },
-        };
-        await calculateRiskScores(params);
-        const [[call]] = (esClient.search as jest.Mock).mock.calls;
-
-        expect(call).toEqual(
-          expect.objectContaining({
-            aggs: expect.objectContaining({
-              host: expect.objectContaining({
-                composite: expect.objectContaining({ after: { 'host.name': 'foo' } }),
-              }),
-              user: expect.objectContaining({
-                composite: expect.objectContaining({ after: { 'user.name': 'bar' } }),
-              }),
-            }),
-          })
-        );
-      });
-
-      it('uses an undefined after_key by default', async () => {
-        await calculateRiskScores(params);
-        const [[call]] = (esClient.search as jest.Mock).mock.calls;
-
-        expect(call).toEqual(
-          expect.objectContaining({
-            aggs: expect.objectContaining({
-              host: expect.objectContaining({
-                composite: expect.objectContaining({ after: undefined }),
-              }),
-              user: expect.objectContaining({
-                composite: expect.objectContaining({ after: undefined }),
-              }),
-            }),
-          })
-        );
-      });
-    });
-
-    describe('excludeAlertStatuses', () => {
-      it('should not add the filter when excludeAlertStatuses is empty', async () => {
-        params = { ...params, excludeAlertStatuses: [] };
-        await calculateRiskScores(params);
-        expect(
-          (esClient.search as jest.Mock).mock.calls[0][0].query.function_score.query.bool.filter
-        ).toEqual(
-          expect.not.arrayContaining([
-            {
-              bool: {
-                must_not: { terms: { [ALERT_WORKFLOW_STATUS]: params.excludeAlertStatuses } },
-              },
-            },
-          ])
-        );
-      });
-
-      it('should add the filter when excludeAlertStatuses is not empty', async () => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-        esClient.search as jest.Mock;
-        params = { ...params, excludeAlertStatuses: ['closed'] };
-        await calculateRiskScores(params);
-        expect(
-          (esClient.search as jest.Mock).mock.calls[0][0].query.function_score.query.bool.filter
-        ).toEqual(
-          expect.arrayContaining([
-            {
-              bool: {
-                must_not: { terms: { [ALERT_WORKFLOW_STATUS]: params.excludeAlertStatuses } },
-              },
-            },
-          ])
-        );
-      });
-    });
-  });
-
-  describe('outputs', () => {
-    beforeEach(() => {
-      // stub out a reasonable response
-      (esClient.search as jest.Mock).mockResolvedValueOnce({
-        aggregations: calculateRiskScoresMock.buildAggregationResponse(),
-      });
-    });
-
-    it('returns a flattened list of risk scores', async () => {
-      const response = await calculateRiskScores(params);
-      expect(response).toHaveProperty('scores');
-      expect(response.scores.host).toHaveLength(2);
-      expect(response.scores.user).toHaveLength(2);
-      expect(response.scores.service).toHaveLength(2);
-    });
-
-    it('returns scores in the expected format', async () => {
-      const {
-        scores: { host: hostScores },
-      } = await calculateRiskScores(params);
-      const [score] = hostScores ?? [];
-      expect(score).toEqual(
-        expect.objectContaining({
-          '@timestamp': expect.any(String),
-          id_field: expect.any(String),
-          id_value: expect.any(String),
-          calculated_level: 'Low',
-          calculated_score: expect.any(Number),
-          calculated_score_norm: expect.any(Number),
-          category_1_score: expect.any(Number),
-          category_1_count: expect.any(Number),
-          notes: expect.any(Array),
-        })
-      );
-    });
-
-    it('returns risk inputs in the expected format', async () => {
-      const {
-        scores: { user: userScores },
-      } = await calculateRiskScores(params);
-      const [score] = userScores ?? [];
-      expect(score).toEqual(
-        expect.objectContaining({
-          inputs: expect.arrayContaining([
-            expect.objectContaining({
-              id: expect.any(String),
-              index: expect.any(String),
-              category: expect.any(String),
-              description: expect.any(String),
-              risk_score: expect.any(Number),
-              timestamp: expect.any(String),
-            }),
-          ]),
-        })
-      );
-    });
-  });
-
-  describe('error conditions', () => {
-    it('raises an error if elasticsearch client rejects', async () => {
-      (esClient.search as jest.Mock).mockRejectedValueOnce({
-        aggregations: calculateRiskScoresMock.buildAggregationResponse(),
-      });
-
-      await expect(() => calculateRiskScores(params)).rejects.toEqual({
-        aggregations: calculateRiskScoresMock.buildAggregationResponse(),
-      });
-    });
-
-    describe('when the asset criticality service throws an error', () => {
-      beforeEach(() => {
-        (esClient.search as jest.Mock).mockResolvedValueOnce({
-          aggregations: calculateRiskScoresMock.buildAggregationResponse(),
-        });
-        (
-          params.assetCriticalityService.getCriticalitiesByIdentifiers as jest.Mock
-        ).mockRejectedValueOnce(new Error('foo'));
-      });
-
-      it('logs the error but proceeds if asset criticality service throws', async () => {
-        await expect(calculateRiskScores(params)).resolves.toEqual(
-          expect.objectContaining({
-            scores: expect.objectContaining({
-              host: expect.arrayContaining([
-                expect.objectContaining({
-                  calculated_level: expect.any(String),
-                  id_field: expect.any(String),
-                  id_value: expect.any(String),
-                }),
-              ]),
-            }),
-          })
-        );
-        expect(logger.warn).toHaveBeenCalledWith(
-          'Error retrieving criticality: Error: foo. Scoring will proceed without criticality information.'
-        );
-      });
     });
   });
 });

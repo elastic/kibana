@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import * as i18n from './translations';
 import { getCaseConnectors } from './api';
 import type { ServerError } from '../types';

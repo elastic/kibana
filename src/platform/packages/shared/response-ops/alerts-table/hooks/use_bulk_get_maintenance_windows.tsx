@@ -8,8 +8,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useQuery } from '@tanstack/react-query';
-import type { MaintenanceWindow } from '@kbn/alerting-plugin/common';
+import { useQuery } from '@kbn/react-query';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import type { QueryOptionsOverrides } from '@kbn/alerts-ui-shared/src/common/types/tanstack_query_utility_types';
 import type { ServerError } from '@kbn/response-ops-alerts-apis/types';
 import type { HttpStart } from '@kbn/core-http-browser';

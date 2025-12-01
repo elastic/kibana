@@ -22,25 +22,18 @@ import {
   UNISOLATE_HOST_ROUTE_V2,
   UPLOAD_ROUTE,
   CANCEL_ROUTE,
+  MEMORY_DUMP_ROUTE,
 } from '../../../../common/endpoint/constants';
 import type { ActionDetails, ActionDetailsApiResponse } from '../../../../common/endpoint/types';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import { ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS } from '../../../../common/endpoint/service/response_actions/constants';
 
 export const validateAvailableCommands = () => {
-  // TODO: TC- use ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS when we go GA with automated process actions
-  const config = Cypress.config();
-  const automatedActionsPAttern = /automatedProcessActionsEnabled/;
-  const automatedProcessActionsEnabled =
-    config.env.ftrConfig.kbnServerArgs[0].match(automatedActionsPAttern);
-
-  const enabledActions = [
-    ...ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS,
-    ...(automatedProcessActionsEnabled ? ['kill-process', 'suspend-process'] : []),
-  ];
-
-  cy.get('[data-test-subj^="command-type"]').should('have.length', enabledActions.length);
-  enabledActions.forEach((command) => {
+  cy.get('[data-test-subj^="command-type"]').should(
+    'have.length',
+    ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS.length
+  );
+  ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS.forEach((command) => {
     cy.getByTestSubj(`command-type-${command}`);
   });
 };
@@ -284,6 +277,11 @@ export const ensureResponseActionAuthzAccess = (
     case 'cancel':
       url = CANCEL_ROUTE;
       Object.assign(apiPayload, { action_id: 'some-action-id' });
+      break;
+
+    case 'memory-dump':
+      url = MEMORY_DUMP_ROUTE;
+      Object.assign(apiPayload, { parameters: { type: 'kernel' } });
       break;
 
     default:

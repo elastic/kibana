@@ -14,7 +14,7 @@ import type {
 import type { Logger } from '@kbn/logging';
 import { createRepositoryClient } from '@kbn/server-route-repository-client';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, of, from } from 'rxjs';
+import { of, from } from 'rxjs';
 import { map, catchError } from 'rxjs';
 import { once } from 'lodash';
 import type { StreamsPublicConfig } from '../common/config';
@@ -35,7 +35,6 @@ export class Plugin implements StreamsPluginClass {
 
   private repositoryClient!: StreamsRepositoryClient;
   private isServerless: boolean;
-  private wiredStatusSubject = new BehaviorSubject<WiredStreamsStatus>(UNKNOWN_STATUS);
 
   constructor(context: PluginInitializerContext<{}>) {
     this.config = context.config.get();
@@ -49,8 +48,6 @@ export class Plugin implements StreamsPluginClass {
   }
 
   start(core: CoreStart, pluginsStart: StreamsPluginStartDependencies): StreamsPluginStart {
-    this.refreshWiredStatus();
-
     return {
       streamsRepositoryClient: this.repositoryClient,
       navigationStatus$: createStreamsNavigationStatusObservable(
@@ -58,42 +55,28 @@ export class Plugin implements StreamsPluginClass {
         core.application,
         this.isServerless
       ),
-      wiredStatus$: this.wiredStatusSubject.asObservable(),
+      getWiredStatus: async () => {
+        try {
+          return await this.repositoryClient.fetch('GET /api/streams/_status', {
+            signal: new AbortController().signal,
+          });
+        } catch (error) {
+          this.logger.error(error);
+          return UNKNOWN_STATUS;
+        }
+      },
       enableWiredMode: async (signal: AbortSignal) => {
-        const response = await this.repositoryClient.fetch('POST /api/streams/_enable 2023-10-31', {
+        return await this.repositoryClient.fetch('POST /api/streams/_enable 2023-10-31', {
           signal,
         });
-        this.wiredStatusSubject.next({
-          ...this.wiredStatusSubject.value,
-          enabled: true,
-        });
-        return response;
       },
       disableWiredMode: async (signal: AbortSignal) => {
-        const response = await this.repositoryClient.fetch(
-          'POST /api/streams/_disable 2023-10-31',
-          { signal }
-        );
-        this.wiredStatusSubject.next({
-          ...this.wiredStatusSubject.value,
-          enabled: false,
+        return await this.repositoryClient.fetch('POST /api/streams/_disable 2023-10-31', {
+          signal,
         });
-        return response;
       },
       config$: of(this.config),
     };
-  }
-
-  private async refreshWiredStatus() {
-    try {
-      const response = await this.repositoryClient.fetch('GET /api/streams/_status', {
-        signal: new AbortController().signal,
-      });
-      this.wiredStatusSubject.next(response);
-    } catch (error) {
-      this.logger.error(error);
-      this.wiredStatusSubject.next(UNKNOWN_STATUS);
-    }
   }
 
   stop() {}
@@ -109,6 +92,7 @@ const createStreamsNavigationStatusObservable = once(
   ): Observable<StreamsNavigationStatus> => {
     const hasCapabilities = application.capabilities?.streams?.show;
     const isServerlessObservability = deps.cloud?.serverless.projectType === 'observability';
+    const isServerlessSecurity = deps.cloud?.serverless.projectType === 'security';
 
     if (!hasCapabilities) {
       return of({ status: 'disabled' });
@@ -117,7 +101,7 @@ const createStreamsNavigationStatusObservable = once(
     if (isServerless) {
       // For serverless, only check cloud project type
       return of({
-        status: isServerlessObservability ? 'enabled' : 'disabled',
+        status: isServerlessObservability || isServerlessSecurity ? 'enabled' : 'disabled',
       });
     }
 
@@ -130,7 +114,10 @@ const createStreamsNavigationStatusObservable = once(
       map((space) => {
         const spaceSolution = space?.solution;
         const isValidSolution =
-          !spaceSolution || spaceSolution === 'classic' || spaceSolution === 'oblt';
+          !spaceSolution ||
+          spaceSolution === 'classic' ||
+          spaceSolution === 'oblt' ||
+          spaceSolution === 'security';
         return { status: isValidSolution ? 'enabled' : 'disabled' } as const;
       }),
       catchError(() => {

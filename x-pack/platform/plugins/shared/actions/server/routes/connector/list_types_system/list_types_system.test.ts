@@ -13,6 +13,7 @@ import { listTypesWithSystemRoute } from './list_types_system';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { actionsClientMock } from '../../../mocks';
 import type { SubFeature } from '../../../../common';
+import { createMockConnectorType } from '../../../application/connector/mocks';
 
 jest.mock('../../verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),
@@ -35,17 +36,14 @@ describe('listTypesWithSystemRoute', () => {
     expect(config.path).toMatchInlineSnapshot(`"/internal/actions/connector_types"`);
 
     const listTypes = [
-      {
+      createMockConnectorType({
         id: '1',
         name: 'name',
-        enabled: true,
-        enabledInConfig: true,
-        enabledInLicense: true,
         minimumLicenseRequired: 'gold' as LicenseType,
         supportedFeatureIds: ['alerting'],
         isSystemActionType: true,
         subFeature: 'endpointSecurity' as SubFeature,
-      },
+      }),
     ];
 
     const actionsClient = actionsClientMock.create();
@@ -60,6 +58,7 @@ describe('listTypesWithSystemRoute', () => {
             "enabled_in_config": true,
             "enabled_in_license": true,
             "id": "1",
+            "is_deprecated": false,
             "is_system_action_type": true,
             "minimum_license_required": "gold",
             "name": "name",
@@ -84,6 +83,7 @@ describe('listTypesWithSystemRoute', () => {
           minimum_license_required: 'gold',
           is_system_action_type: true,
           sub_feature: 'endpointSecurity',
+          is_deprecated: false,
         },
       ],
     });
@@ -100,16 +100,12 @@ describe('listTypesWithSystemRoute', () => {
     expect(config.path).toMatchInlineSnapshot(`"/internal/actions/connector_types"`);
 
     const listTypes = [
-      {
+      createMockConnectorType({
         id: '1',
         name: 'name',
-        enabled: true,
-        enabledInConfig: true,
-        enabledInLicense: true,
         supportedFeatureIds: ['alerting'],
         minimumLicenseRequired: 'gold' as LicenseType,
-        isSystemActionType: false,
-      },
+      }),
     ];
 
     const actionsClient = actionsClientMock.create();
@@ -132,6 +128,7 @@ describe('listTypesWithSystemRoute', () => {
             "enabled_in_config": true,
             "enabled_in_license": true,
             "id": "1",
+            "is_deprecated": false,
             "is_system_action_type": false,
             "minimum_license_required": "gold",
             "name": "name",
@@ -165,6 +162,7 @@ describe('listTypesWithSystemRoute', () => {
           supported_feature_ids: ['alerting'],
           minimum_license_required: 'gold',
           is_system_action_type: false,
+          is_deprecated: false,
         },
       ],
     });
@@ -181,16 +179,12 @@ describe('listTypesWithSystemRoute', () => {
     expect(config.path).toMatchInlineSnapshot(`"/internal/actions/connector_types"`);
 
     const listTypes = [
-      {
+      createMockConnectorType({
         id: '1',
         name: 'name',
-        enabled: true,
-        enabledInConfig: true,
-        enabledInLicense: true,
         supportedFeatureIds: ['alerting'],
         minimumLicenseRequired: 'gold' as LicenseType,
-        isSystemActionType: false,
-      },
+      }),
     ];
 
     const actionsClient = actionsClientMock.create();
@@ -224,16 +218,12 @@ describe('listTypesWithSystemRoute', () => {
     expect(config.path).toMatchInlineSnapshot(`"/internal/actions/connector_types"`);
 
     const listTypes = [
-      {
+      createMockConnectorType({
         id: '1',
         name: 'name',
-        enabled: true,
-        enabledInConfig: true,
-        enabledInLicense: true,
         supportedFeatureIds: ['alerting'],
         minimumLicenseRequired: 'gold' as LicenseType,
-        isSystemActionType: false,
-      },
+      }),
     ];
 
     const actionsClient = actionsClientMock.create();

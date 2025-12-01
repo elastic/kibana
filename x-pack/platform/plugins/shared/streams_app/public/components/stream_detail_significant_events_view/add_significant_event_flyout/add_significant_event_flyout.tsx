@@ -20,7 +20,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { StreamQueryKql, Streams, System } from '@kbn/streams-schema';
+import type { StreamQueryKql, Streams, Feature, FeatureType } from '@kbn/streams-schema';
 import { streamQuerySchema } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/css';
@@ -35,7 +35,7 @@ import { ManualFlowForm } from './manual_flow_form/manual_flow_form';
 import type { Flow, SaveData } from './types';
 import { defaultQuery } from './utils/default_query';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
-import { SystemSelector } from '../system_selector';
+import { FeaturesSelector } from '../feature_selector';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { useAIFeatures } from './generated_flow_form/use_ai_features';
 import { validateQuery } from './common/validate_query';
@@ -45,10 +45,10 @@ interface Props {
   onClose: () => void;
   definition: Streams.all.Definition;
   onSave: (data: SaveData) => Promise<void>;
-  systems: System[];
+  features: Feature[];
   query?: StreamQueryKql;
   initialFlow?: Flow;
-  initialSelectedSystems?: System[];
+  initialSelectedFeatures?: Feature[];
 }
 
 export function AddSignificantEventFlyout({
@@ -57,8 +57,8 @@ export function AddSignificantEventFlyout({
   definition,
   onSave,
   initialFlow = undefined,
-  initialSelectedSystems = [],
-  systems,
+  initialSelectedFeatures = [],
+  features,
 }: Props) {
   const { euiTheme } = useEuiTheme();
   const {
@@ -90,7 +90,7 @@ export function AddSignificantEventFlyout({
   const [canSave, setCanSave] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [selectedSystems, setSelectedSystems] = useState<System[]>(initialSelectedSystems);
+  const [selectedFeatures, setSelectedFeatures] = useState<Feature[]>(initialSelectedFeatures);
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedQueries, setGeneratedQueries] = useState<StreamQueryKql[]>([]);
@@ -114,8 +114,14 @@ export function AddSignificantEventFlyout({
   }, [selectedFlow]);
 
   const generateQueries = useCallback(() => {
+    let numberOfGeneratedQueries = 0;
+    const numberOfGeneratedQueriesByFeature: Record<FeatureType, number> = {
+      system: 0,
+    };
+    let inputTokensUsed = 0;
+    let outputTokensUsed = 0;
     const connector = aiFeatures?.genAiConnectors.selectedConnector;
-    if (!connector || selectedSystems.length === 0) {
+    if (!connector || selectedFeatures.length === 0) {
       return;
     }
 
@@ -123,27 +129,35 @@ export function AddSignificantEventFlyout({
     setIsGenerating(true);
     setGeneratedQueries([]);
 
-    from(selectedSystems)
+    from(selectedFeatures)
       .pipe(
-        concatMap((system) =>
-          generate(connector, system).pipe(
-            concatMap((result) => {
-              const validation = validateQuery({
-                title: result.query.title,
-                kql: { query: result.query.kql },
-              });
+        concatMap((feature) =>
+          generate(connector, feature).pipe(
+            concatMap(({ queries: nextQueries, tokensUsed }) => {
+              numberOfGeneratedQueries += nextQueries.length;
+              numberOfGeneratedQueriesByFeature[feature.type] += nextQueries.length;
+              inputTokensUsed += tokensUsed.prompt;
+              outputTokensUsed += tokensUsed.completion;
 
-              if (!validation.kql.isInvalid) {
-                setGeneratedQueries((prev) => [
-                  ...prev,
-                  {
+              setGeneratedQueries((prev) => [
+                ...prev,
+                ...nextQueries
+                  .filter((nextQuery) => {
+                    const validation = validateQuery({
+                      title: nextQuery.title,
+                      kql: { query: nextQuery.kql },
+                    });
+
+                    return validation.kql.isInvalid === false;
+                  })
+                  .map((nextQuery) => ({
                     id: v4(),
-                    kql: { query: result.query.kql },
-                    title: result.query.title,
-                    system: result.query.system,
-                  },
-                ]);
-              }
+                    kql: { query: nextQuery.kql },
+                    title: nextQuery.title,
+                    feature: nextQuery.feature,
+                  })),
+              ]);
+
               return [];
             })
           )
@@ -174,15 +188,30 @@ export function AddSignificantEventFlyout({
           });
           telemetryClient.trackSignificantEventsSuggestionsGenerate({
             duration_ms: Date.now() - startTime,
+            input_tokens_used: inputTokensUsed,
+            output_tokens_used: outputTokensUsed,
+            count: numberOfGeneratedQueries,
+            count_by_feature_type: numberOfGeneratedQueriesByFeature,
+            features_selected: selectedFeatures.length,
+            features_total: features.length,
+            stream_name: definition.name,
             stream_type: getStreamTypeFromDefinition(definition),
           });
           setIsGenerating(false);
         },
       });
-  }, [aiFeatures, definition, generate, notifications, telemetryClient, selectedSystems]);
+  }, [
+    aiFeatures?.genAiConnectors.selectedConnector,
+    selectedFeatures,
+    generate,
+    notifications,
+    telemetryClient,
+    features.length,
+    definition,
+  ]);
 
   useEffect(() => {
-    if (initialFlow === 'ai' && initialSelectedSystems.length > 0) {
+    if (initialFlow === 'ai' && initialSelectedFeatures.length > 0) {
       generateQueries();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -231,11 +260,11 @@ export function AddSignificantEventFlyout({
               `}
             >
               <EuiPanel hasShadow={false} paddingSize="l">
-                <EuiText>
+                <EuiText size="xs">
                   <h4>
                     {i18n.translate(
                       'xpack.streams.streamDetailView.addSignificantEventFlyout.selectOptionLabel',
-                      { defaultMessage: 'Select an option' }
+                      { defaultMessage: 'Select a method' }
                     )}
                   </h4>
                 </EuiText>
@@ -245,16 +274,16 @@ export function AddSignificantEventFlyout({
                   selected={selectedFlow}
                   updateSelected={(flow) => {
                     setSelectedFlow(flow);
-                    setSelectedSystems([]);
+                    setSelectedFeatures([]);
                   }}
                 />
                 <EuiSpacer size="m" />
                 {selectedFlow === 'ai' && (
                   <>
-                    <SystemSelector
-                      systems={systems}
-                      selectedSystems={selectedSystems}
-                      onSystemsChange={setSelectedSystems}
+                    <FeaturesSelector
+                      features={features}
+                      selectedFeatures={selectedFeatures}
+                      onFeaturesChange={setSelectedFeatures}
                     />
                     <EuiButton
                       iconType="sparkles"
@@ -262,10 +291,11 @@ export function AddSignificantEventFlyout({
                       isLoading={isGenerating}
                       disabled={
                         isSubmitting ||
-                        selectedSystems.length === 0 ||
+                        selectedFeatures.length === 0 ||
                         !aiFeatures?.genAiConnectors?.selectedConnector
                       }
                       onClick={generateQueries}
+                      data-test-subj="significant_events_flyout_generate_suggestions_button"
                     >
                       {i18n.translate(
                         'xpack.streams.streamDetailView.addSignificantEventFlyout.generateSuggestionsButtonLabel',
@@ -315,12 +345,7 @@ export function AddSignificantEventFlyout({
                         }}
                         definition={definition}
                         dataViews={dataViewsFetch.value ?? []}
-                        systems={
-                          systems.map((system) => ({
-                            name: system.name,
-                            filter: system.filter,
-                          })) || []
-                        }
+                        features={features}
                       />
                     </>
                   )}
@@ -343,7 +368,7 @@ export function AddSignificantEventFlyout({
                       setCanSave={(next: boolean) => {
                         setCanSave(next);
                       }}
-                      systems={systems}
+                      features={features}
                       dataViews={dataViewsFetch.value ?? []}
                     />
                   )}
@@ -358,7 +383,16 @@ export function AddSignificantEventFlyout({
                 }}
               >
                 <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="center">
-                  <EuiButtonEmpty color="primary" onClick={() => onClose()} disabled={isSubmitting}>
+                  <EuiButtonEmpty
+                    color="primary"
+                    onClick={() => onClose()}
+                    disabled={isSubmitting}
+                    data-test-subj={
+                      selectedFlow === 'manual'
+                        ? 'significant_events_manual_entry_cancel_button'
+                        : 'significant_events_ai_generate_cancel_button'
+                    }
+                  >
                     {i18n.translate(
                       'xpack.streams.streamDetailView.addSignificantEventFlyout.cancelButtonLabel',
                       { defaultMessage: 'Cancel' }
@@ -387,6 +421,13 @@ export function AddSignificantEventFlyout({
                           break;
                       }
                     }}
+                    data-test-subj={
+                      isEditMode
+                        ? 'significant_events_edit_save_button'
+                        : selectedFlow === 'manual'
+                        ? 'significant_events_manual_entry_save_button'
+                        : 'significant_events_ai_generate_save_button'
+                    }
                   >
                     {selectedFlow === 'manual'
                       ? isEditMode

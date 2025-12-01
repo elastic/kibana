@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
 
 export const useFetchPrivilegedUserIndices = (query: string | undefined) => {

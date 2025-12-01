@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from './api_helper';
-import { cleanFleetIndices, createFleetAgent } from './helpers';
+import { cleanFleetIndices, createFleetAgent, createTestSpace } from './helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -30,7 +30,7 @@ export default function (providerContext: FtrProviderContext) {
         space: TEST_SPACE_1,
       });
       await cleanFleetIndices(esClient);
-      await spaces.createTestSpace(TEST_SPACE_1);
+      await createTestSpace(providerContext, TEST_SPACE_1);
     });
 
     after(async () => {

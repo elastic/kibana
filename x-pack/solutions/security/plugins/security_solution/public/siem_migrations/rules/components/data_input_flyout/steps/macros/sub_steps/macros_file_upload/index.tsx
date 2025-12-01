@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { EuiStepProps, EuiStepStatus } from '@elastic/eui';
+import { useAppToasts } from '../../../../../../../../common/hooks/use_app_toasts';
 import type { SiemMigrationResourceData } from '../../../../../../../../../common/siem_migrations/model/common.gen';
 import { RuleResourceIdentifier } from '../../../../../../../../../common/siem_migrations/rules/resources';
 import { useUpsertResources } from '../../../../../../service/hooks/use_upsert_resources';
@@ -27,6 +28,7 @@ export const useMacrosFileUploadStep = ({
   missingMacros,
   onMacrosCreated,
 }: RulesFileUploadStepProps): EuiStepProps => {
+  const { addWarning } = useAppToasts();
   const { upsertResources, isLoading, error } = useUpsertResources(onMacrosCreated);
 
   const upsertMigrationResources = useCallback(
@@ -61,11 +63,12 @@ export const useMacrosFileUploadStep = ({
       }
 
       if (macrosToUpsert.length === 0) {
+        addWarning({ title: i18n.NO_MISSING_MACROS_PROVIDED });
         return; // No missing macros provided
       }
       upsertResources(migrationStats.id, macrosToUpsert);
     },
-    [upsertResources, migrationStats, missingMacros]
+    [missingMacros, upsertResources, migrationStats.id, addWarning]
   );
 
   const uploadStepStatus = useMemo(() => {

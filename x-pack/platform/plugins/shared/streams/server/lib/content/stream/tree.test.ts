@@ -7,6 +7,7 @@
 
 import { asTree, mergeTrees } from './tree';
 import { testContentPackEntry } from './test.utils';
+import { baseFields } from '../../streams/component_templates/logs_layer';
 
 describe('content pack tree helpers', () => {
   describe('asTree', () => {
@@ -154,35 +155,35 @@ describe('content pack tree helpers', () => {
   describe('mergeTrees', () => {
     it('merges distinct children and fields', () => {
       const existing = asTree({
-        root: 'root',
+        root: 'logs.foo',
         streams: [
           testContentPackEntry({
-            name: 'root',
-            routing: [{ destination: 'root.a', where: { always: {} }, status: 'enabled' }],
+            name: 'logs.foo',
+            routing: [{ destination: 'logs.foo.one', where: { always: {} }, status: 'enabled' }],
             fields: { existing: { type: 'keyword' } },
           }),
-          testContentPackEntry({ name: 'root.a' }),
+          testContentPackEntry({ name: 'logs.foo.one' }),
         ],
         include: { objects: { all: {} } },
       });
 
       const incoming = asTree({
-        root: 'root',
+        root: 'logs.foo',
         streams: [
           testContentPackEntry({
-            name: 'root',
-            routing: [{ destination: 'root.b', where: { always: {} }, status: 'enabled' }],
+            name: 'logs.foo',
+            routing: [{ destination: 'logs.foo.two', where: { always: {} }, status: 'enabled' }],
             fields: { custom: { type: 'keyword' } },
           }),
-          testContentPackEntry({ name: 'root.b' }),
+          testContentPackEntry({ name: 'logs.foo.two' }),
         ],
         include: { objects: { all: {} } },
       });
 
       const merged = mergeTrees({ existing, incoming });
       expect(merged.request.stream.ingest.wired.routing).toEqual([
-        { destination: 'root.a', where: { always: {} }, status: 'enabled' },
-        { destination: 'root.b', where: { always: {} }, status: 'enabled' },
+        { destination: 'logs.foo.one', where: { always: {} }, status: 'enabled' },
+        { destination: 'logs.foo.two', where: { always: {} }, status: 'enabled' },
       ]);
       expect(merged.request.stream.ingest.wired.fields).toEqual({
         existing: { type: 'keyword' },
@@ -192,64 +193,69 @@ describe('content pack tree helpers', () => {
 
     it('throws on duplicate child destination', () => {
       const existing = asTree({
-        root: 'root',
+        root: 'logs',
         streams: [
           testContentPackEntry({
-            name: 'root',
-            routing: [{ destination: 'root.a', where: { always: {} }, status: 'enabled' }],
+            name: 'logs',
+            routing: [{ destination: 'logs.foo', where: { always: {} }, status: 'enabled' }],
           }),
-          testContentPackEntry({ name: 'root.a' }),
-        ],
-        include: { objects: { all: {} } },
-      });
-      const incoming = asTree({
-        root: 'root',
-        streams: [
-          testContentPackEntry({
-            name: 'root',
-            routing: [{ destination: 'root.a', where: { always: {} }, status: 'enabled' }],
-          }),
-          testContentPackEntry({ name: 'root.a' }),
+          testContentPackEntry({ name: 'logs.foo' }),
         ],
         include: { objects: { all: {} } },
       });
 
-      expect(() => mergeTrees({ existing, incoming })).toThrow('[root.a] already exists');
+      const incoming = asTree({
+        root: 'logs',
+        streams: [
+          testContentPackEntry({
+            name: 'logs',
+            routing: [{ destination: 'logs.foo', where: { always: {} }, status: 'enabled' }],
+          }),
+          testContentPackEntry({ name: 'logs.foo' }),
+        ],
+        include: { objects: { all: {} } },
+      });
+
+      expect(() => mergeTrees({ existing, incoming })).toThrow('[logs.foo] already exists');
     });
 
     it('throws on conflicting field mapping', () => {
       const existing = asTree({
-        root: 'root',
-        streams: [testContentPackEntry({ name: 'root', fields: { custom: { type: 'keyword' } } })],
+        root: 'logs.foo',
+        streams: [
+          testContentPackEntry({ name: 'logs.foo', fields: { custom: { type: 'keyword' } } }),
+        ],
         include: { objects: { all: {} } },
       });
+
       const incoming = asTree({
-        root: 'root',
-        streams: [testContentPackEntry({ name: 'root', fields: { custom: { type: 'long' } } })],
+        root: 'logs.foo',
+        streams: [testContentPackEntry({ name: 'logs.foo', fields: { custom: { type: 'long' } } })],
         include: { objects: { all: {} } },
       });
 
       expect(() => mergeTrees({ existing, incoming })).toThrow(
-        'Cannot change mapping of [custom] for [root]'
+        'Cannot change mapping of [custom] for [logs.foo]'
       );
     });
 
     it('throws on duplicate query', () => {
       const existing = asTree({
-        root: 'root',
+        root: 'logs',
         streams: [
           testContentPackEntry({
-            name: 'root',
+            name: 'logs',
             queries: [{ id: 'one', title: 'title', kql: { query: 'qty: one' } }],
           }),
         ],
         include: { objects: { all: {} } },
       });
+
       const incoming = asTree({
-        root: 'root',
+        root: 'logs',
         streams: [
           testContentPackEntry({
-            name: 'root',
+            name: 'logs',
             queries: [{ id: 'one', title: 'title', kql: { query: 'qty: two' } }],
           }),
         ],
@@ -257,8 +263,25 @@ describe('content pack tree helpers', () => {
       });
 
       expect(() => mergeTrees({ existing, incoming })).toThrow(
-        `Query [one | title] already exists on [root]`
+        `Query [one | title] already exists on [logs]`
       );
+    });
+
+    it('keeps base fields on root stream', () => {
+      const existing = asTree({
+        root: 'logs',
+        streams: [testContentPackEntry({ name: 'logs', fields: baseFields })],
+        include: { objects: { all: {} } },
+      });
+
+      const incoming = asTree({
+        root: 'logs',
+        streams: [testContentPackEntry({ name: 'logs', fields: {} })],
+        include: { objects: { all: {} } },
+      });
+
+      const merged = mergeTrees({ existing, incoming });
+      expect(merged.request.stream.ingest.wired.fields).toEqual(baseFields);
     });
   });
 });

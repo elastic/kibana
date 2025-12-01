@@ -10,20 +10,19 @@ import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type { AxiosError } from 'axios';
-
 import type {
   Config,
   Secrets,
-  XSOARRunActionParams,
   XSOARPlaybooksActionResponse,
-} from '../../../common/xsoar/types';
+  XSOARRunActionParams,
+} from '@kbn/connector-schemas/xsoar';
 import {
-  XSOARRunActionResponseSchema,
-  XSOARPlaybooksActionResponseSchema,
+  SUB_ACTION,
   XSOARPlaybooksActionParamsSchema,
+  XSOARPlaybooksActionResponseSchema,
   XSOARRunActionParamsSchema,
-} from '../../../common/xsoar/schema';
-import { SUB_ACTION } from '../../../common/xsoar/constants';
+  XSOARRunActionResponseSchema,
+} from '@kbn/connector-schemas/xsoar';
 
 export const CLOUD_API_PATH = '/xsoar/public/v1';
 export const INCIDENT_PATH = '/incident';

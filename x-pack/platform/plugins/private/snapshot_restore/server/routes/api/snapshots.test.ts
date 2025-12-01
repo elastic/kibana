@@ -215,6 +215,263 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
 
       await expect(router.runRequest(mockRequest)).rejects.toThrowError();
     });
+
+    describe('last successful managed snapshot protection', () => {
+      test('marks the most recent successful snapshot in managed repository as non-deletable', async () => {
+        const managedRepository = 'myManagedRepository';
+        const mockManagedRepoSettings = {
+          defaults: {
+            'cluster.metadata.managed_repository': managedRepository,
+          },
+        };
+
+        // Mock the main snapshots request
+        const mockGetSnapshotsResponse = {
+          snapshots: [
+            {
+              snapshot: 'snapshot1',
+              repository: managedRepository,
+              state: 'SUCCESS',
+              start_time_in_millis: 1000,
+            },
+            {
+              snapshot: 'snapshot2',
+              repository: managedRepository,
+              state: 'SUCCESS',
+              start_time_in_millis: 2000,
+            },
+            {
+              snapshot: 'snapshot3',
+              repository: managedRepository,
+              state: 'FAILED',
+              start_time_in_millis: 3000,
+            },
+          ],
+        };
+
+        // Mock the request to get the last successful snapshot from managed repo
+        const mockGetLastSuccessfulSnapshotResponse = {
+          snapshots: [
+            {
+              snapshot: 'snapshot2',
+              repository: managedRepository,
+              state: 'SUCCESS',
+              start_time_in_millis: 2000,
+            },
+          ],
+        };
+
+        const mockGetRepositoryEsResponse = {
+          [managedRepository]: {},
+        };
+
+        getClusterSettingsFn.mockResolvedValue(mockManagedRepoSettings);
+        getLifecycleFn.mockResolvedValue({});
+        getRepoFn.mockResolvedValue(mockGetRepositoryEsResponse);
+        // First call is for the last successful snapshot, second is for the main list
+        getSnapshotFn.mockResolvedValueOnce(mockGetLastSuccessfulSnapshotResponse);
+        getSnapshotFn.mockResolvedValueOnce(mockGetSnapshotsResponse);
+
+        const response = await router.runRequest(mockRequest);
+
+        // snapshot2 should be marked as non-deletable
+        expect(response.body.snapshots).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              snapshot: 'snapshot2',
+              isLastSuccessfulSnapshot: true,
+            }),
+          ])
+        );
+
+        // Other snapshots should not have the flag
+        const snapshot1 = response.body.snapshots.find((s: any) => s.snapshot === 'snapshot1');
+        expect(snapshot1).toBeDefined();
+        expect(snapshot1.isLastSuccessfulSnapshot).toBeUndefined();
+      });
+
+      test('does not mark snapshots in non-managed repositories', async () => {
+        const managedRepository = 'myManagedRepository';
+        const regularRepository = 'regularRepository';
+        const mockManagedRepoSettings2 = {
+          defaults: {
+            'cluster.metadata.managed_repository': managedRepository,
+          },
+        };
+
+        // Mock the main snapshots request with snapshots from both repos
+        const mockGetSnapshotsResponse = {
+          snapshots: [
+            {
+              snapshot: 'managed_snapshot',
+              repository: managedRepository,
+              state: 'SUCCESS',
+              start_time_in_millis: 1000,
+            },
+            {
+              snapshot: 'regular_snapshot',
+              repository: regularRepository,
+              state: 'SUCCESS',
+              start_time_in_millis: 2000,
+            },
+          ],
+        };
+
+        // Mock the request to get the last successful snapshot from managed repo
+        const mockGetLastSuccessfulSnapshotResponse = {
+          snapshots: [
+            {
+              snapshot: 'managed_snapshot',
+              repository: managedRepository,
+              state: 'SUCCESS',
+              start_time_in_millis: 1000,
+            },
+          ],
+        };
+
+        const mockGetRepositoryEsResponse = {
+          [managedRepository]: {},
+          [regularRepository]: {},
+        };
+
+        getClusterSettingsFn.mockResolvedValue(mockManagedRepoSettings2);
+        getLifecycleFn.mockResolvedValue({});
+        getRepoFn.mockResolvedValue(mockGetRepositoryEsResponse);
+        getSnapshotFn.mockResolvedValueOnce(mockGetLastSuccessfulSnapshotResponse);
+        getSnapshotFn.mockResolvedValueOnce(mockGetSnapshotsResponse);
+
+        const response = await router.runRequest(mockRequest);
+
+        // Only the managed repository snapshot should be marked
+        expect(response.body.snapshots).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              snapshot: 'managed_snapshot',
+              isLastSuccessfulSnapshot: true,
+            }),
+          ])
+        );
+
+        const regularSnapshot = response.body.snapshots.find(
+          (s: any) => s.snapshot === 'regular_snapshot'
+        );
+        expect(regularSnapshot).toBeDefined();
+        expect(regularSnapshot.isLastSuccessfulSnapshot).toBeUndefined();
+      });
+
+      test('handles case when managed repository has no successful snapshots', async () => {
+        const managedRepository = 'myManagedRepository';
+        const mockManagedRepoSettings3 = {
+          defaults: {
+            'cluster.metadata.managed_repository': managedRepository,
+          },
+        };
+
+        const mockGetSnapshotsResponse = {
+          snapshots: [
+            {
+              snapshot: 'snapshot1',
+              repository: managedRepository,
+              state: 'FAILED',
+              start_time_in_millis: 1000,
+            },
+          ],
+        };
+
+        // No successful snapshots in managed repo
+        const mockGetLastSuccessfulSnapshotResponse = {
+          snapshots: [],
+        };
+
+        const mockGetRepositoryEsResponse = {
+          [managedRepository]: {},
+        };
+
+        getClusterSettingsFn.mockResolvedValue(mockManagedRepoSettings3);
+        getLifecycleFn.mockResolvedValue({});
+        getRepoFn.mockResolvedValue(mockGetRepositoryEsResponse);
+        getSnapshotFn.mockResolvedValueOnce(mockGetLastSuccessfulSnapshotResponse);
+        getSnapshotFn.mockResolvedValueOnce(mockGetSnapshotsResponse);
+
+        const response = await router.runRequest(mockRequest);
+
+        // No snapshots should be marked
+        const snapshot1 = response.body.snapshots.find((s: any) => s.snapshot === 'snapshot1');
+        expect(snapshot1).toBeDefined();
+        expect(snapshot1.isLastSuccessfulSnapshot).toBeUndefined();
+      });
+
+      test('handles case when there is no managed repository', async () => {
+        const mockManagedRepoSettings4 = {
+          defaults: {},
+        };
+
+        const mockGetSnapshotsResponse = {
+          snapshots: [
+            {
+              snapshot: 'snapshot1',
+              repository: 'regularRepository',
+              state: 'SUCCESS',
+              start_time_in_millis: 1000,
+            },
+          ],
+        };
+
+        const mockGetRepositoryEsResponse = {
+          regularRepository: {},
+        };
+
+        getClusterSettingsFn.mockResolvedValue(mockManagedRepoSettings4);
+        getLifecycleFn.mockResolvedValue({});
+        getRepoFn.mockResolvedValue(mockGetRepositoryEsResponse);
+        getSnapshotFn.mockResolvedValueOnce(mockGetSnapshotsResponse);
+
+        const response = await router.runRequest(mockRequest);
+
+        // No snapshots should be marked
+        const snapshot1 = response.body.snapshots.find((s: any) => s.snapshot === 'snapshot1');
+        expect(snapshot1).toBeDefined();
+        expect(snapshot1.isLastSuccessfulSnapshot).toBeUndefined();
+      });
+
+      test('continues to work if fetching last successful snapshot fails', async () => {
+        const managedRepository = 'myManagedRepository';
+        const mockManagedRepoSettings5 = {
+          defaults: {
+            'cluster.metadata.managed_repository': managedRepository,
+          },
+        };
+
+        const mockGetSnapshotsResponse = {
+          snapshots: [
+            {
+              snapshot: 'snapshot1',
+              repository: managedRepository,
+              state: 'SUCCESS',
+              start_time_in_millis: 1000,
+            },
+          ],
+        };
+
+        const mockGetRepositoryEsResponse = {
+          [managedRepository]: {},
+        };
+
+        getClusterSettingsFn.mockResolvedValue(mockManagedRepoSettings5);
+        getLifecycleFn.mockResolvedValue({});
+        getRepoFn.mockResolvedValue(mockGetRepositoryEsResponse);
+        // First call fails, second succeeds
+        getSnapshotFn.mockRejectedValueOnce(new Error('ES Error'));
+        getSnapshotFn.mockResolvedValueOnce(mockGetSnapshotsResponse);
+
+        const response = await router.runRequest(mockRequest);
+
+        // Should still return snapshots, just without the protection flag
+        expect(response.body.snapshots).toHaveLength(1);
+        expect(response.body.snapshots[0].snapshot).toBe('snapshot1');
+        expect(response.body.snapshots[0].isLastSuccessfulSnapshot).toBeUndefined();
+      });
+    });
   });
 
   describe('getOneHandler()', () => {

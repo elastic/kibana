@@ -283,6 +283,9 @@ export const SettingsEditor = (props: Props) => {
             inputDisplay: host,
           }))}
           valueOfSelected={selectedHost || (availableHosts.length > 0 ? availableHosts[0] : '')}
+          aria-label={i18n.translate('console.settingsPage.elasticsearchHostLabel', {
+            defaultMessage: 'Elasticsearch host',
+          })}
           onChange={(value) => setSelectedHost(value)}
         />
       </SettingsFormRow>
@@ -381,6 +384,9 @@ export const SettingsEditor = (props: Props) => {
               compressed
               options={intervalOptions}
               valueOfSelected={pollInterval.toString()}
+              aria-label={i18n.translate('console.settingsPage.refreshingDataLabel', {
+                defaultMessage: 'Refresh frequency',
+              })}
               onChange={onPollingIntervalChange}
             />
           </SettingsFormRow>

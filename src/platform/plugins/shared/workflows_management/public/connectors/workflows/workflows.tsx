@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { lazy } from 'react';
 import type { WorkflowsActionParams, WorkflowsConfig, WorkflowsSecrets } from './types';
 
 export function getConnectorType(): ConnectorTypeModel<
@@ -22,8 +22,7 @@ export function getConnectorType(): ConnectorTypeModel<
 > {
   return {
     id: '.workflows',
-    // TODO: workflows icon
-    iconClass: lazy(() => import('./logo')),
+    iconClass: 'workflowsApp',
     selectMessage: i18n.translate('xpack.stackConnectors.components.workflows.selectMessageText', {
       defaultMessage: 'Execute workflows when alerts are triggered.',
     }),
@@ -38,7 +37,7 @@ export function getConnectorType(): ConnectorTypeModel<
     ): Promise<GenericValidationResult<unknown>> => {
       const translations = await import('./translations');
       const errors = {
-        'subActionParams.workflowId': new Array<string>(),
+        'subActionParams.workflowId': [] as string[],
       };
       const validationResult = { errors };
       const workflowId = actionParams.subActionParams?.workflowId?.trim();

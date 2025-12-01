@@ -98,14 +98,28 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isValid, currentStep]);
 
-  const onNextStep = useCallback(
-    async (selectedStep?: PossibleStepNumbers) => {
-      const nextStep =
-        selectedStep != null
-          ? selectedStep
-          : currentStep === 4
-          ? currentStep
-          : ((currentStep + 1) as PossibleStepNumbers);
+  const getNextStep = (
+    selectedStep: PossibleStepNumbers | undefined,
+    step: PossibleStepNumbers
+  ): PossibleStepNumbers => {
+    if (selectedStep) return selectedStep;
+    return step === 4 ? step : ((step + 1) as PossibleStepNumbers);
+  };
+
+  const getFieldsToValidate = useCallback(
+    (nextStep: PossibleStepNumbers, step: PossibleStepNumbers): string[] => {
+      const currentFields = getFields();
+      const headerFields = Object.keys(currentFields).filter((field) =>
+        field.startsWith('__internal__.headers')
+      );
+
+      if (step === 1) {
+        headerFields.forEach((field) => {
+          if (!fields.step1.includes(field)) {
+            fields.step1.push(field);
+          }
+        });
+      }
       const fieldsToValidate: string[] =
         nextStep === 2
           ? fields.step1
@@ -114,6 +128,18 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
           : nextStep === 4
           ? [...fields.step1, ...fields.step2, ...fields.step3]
           : [];
+
+      return fieldsToValidate;
+    },
+    [getFields]
+  );
+
+  const onNextStep = useCallback(
+    async (selectedStep?: PossibleStepNumbers) => {
+      const nextStep = getNextStep(selectedStep, currentStep);
+
+      const fieldsToValidate = getFieldsToValidate(nextStep, currentStep);
+
       // step validation needs async call in order to run each field through validator
       const { areFieldsValid } = await validateFields(fieldsToValidate);
 
@@ -128,7 +154,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
         setCurrentStep(nextStep);
       }
     },
-    [currentStep, validateFields]
+    [currentStep, getFieldsToValidate, validateFields]
   );
 
   const horizontalSteps = useMemo(

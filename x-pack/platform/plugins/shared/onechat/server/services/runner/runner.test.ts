@@ -11,6 +11,7 @@ import type {
   ScopedRunnerRunAgentParams,
   RunToolParams,
   RunAgentParams,
+  ToolHandlerFn,
 } from '@kbn/onechat-server';
 import type {
   CreateScopedRunnerDepsMock,
@@ -21,6 +22,7 @@ import type {
 } from '../../test_utils';
 import {
   createScopedRunnerDepsMock,
+  createRunnerDepsMock,
   createMockedTool,
   createMockedAgent,
   createMockedAgentRegistry,
@@ -29,16 +31,21 @@ import {
 import { createScopedRunner, createRunner } from './runner';
 import { createAgentHandler } from '../agents/modes/create_handler';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import { getToolResultId } from '@kbn/onechat-server/tools/utils';
 
 jest.mock('../agents/modes/create_handler');
+jest.mock('@kbn/onechat-server/tools/utils');
 
+const getToolResultIdMock = getToolResultId as jest.MockedFn<typeof getToolResultId>;
 const createAgentHandlerMock = createAgentHandler as jest.MockedFn<typeof createAgentHandler>;
 
 describe('Onechat runner', () => {
-  let runnerDeps: CreateScopedRunnerDepsMock;
+  let scopedRunnerDeps: CreateScopedRunnerDepsMock;
+  let toolHandler: jest.MockedFunction<ToolHandlerFn>;
 
   beforeEach(() => {
-    runnerDeps = createScopedRunnerDepsMock();
+    scopedRunnerDeps = createScopedRunnerDepsMock();
+    getToolResultIdMock.mockReturnValue('some-result-id');
   });
 
   describe('runTool', () => {
@@ -49,19 +56,23 @@ describe('Onechat runner', () => {
       registry = createToolRegistryMock();
       const {
         toolsService: { getRegistry },
-      } = runnerDeps;
+      } = scopedRunnerDeps;
       getRegistry.mockResolvedValue(registry);
 
-      tool = createMockedTool({
-        schema: z.object({
+      toolHandler = jest.fn().mockReturnValue({ results: [] });
+
+      tool = createMockedTool({});
+      tool.getSchema.mockReturnValue(
+        z.object({
           foo: z.string(),
-        }),
-      });
+        })
+      );
+      tool.getHandler.mockReturnValue(toolHandler);
       registry.get.mockResolvedValue(tool);
     });
 
     it('can be invoked through a scoped runner', async () => {
-      tool.handler.mockReturnValue({
+      toolHandler.mockReturnValue({
         results: [{ type: ToolResultType.other, data: { someProp: 'someValue' } }],
       });
 
@@ -70,38 +81,51 @@ describe('Onechat runner', () => {
         toolParams: { foo: 'bar' },
       };
 
-      const runner = createScopedRunner(runnerDeps);
+      const runner = createScopedRunner(scopedRunnerDeps);
       const response = await runner.runTool(params);
 
-      expect(tool.handler).toHaveBeenCalledTimes(1);
-      expect(tool.handler).toHaveBeenCalledWith(params.toolParams, expect.any(Object));
+      expect(toolHandler).toHaveBeenCalledTimes(1);
+      expect(toolHandler).toHaveBeenCalledWith(params.toolParams, expect.any(Object));
 
       expect(response).toEqual({
-        results: [{ type: ToolResultType.other, data: { someProp: 'someValue' } }],
+        results: [
+          {
+            tool_result_id: 'some-result-id',
+            type: ToolResultType.other,
+            data: { someProp: 'someValue' },
+          },
+        ],
       });
     });
 
     it('can be invoked through a runner', async () => {
-      tool.handler.mockReturnValue({
+      toolHandler.mockReturnValue({
         results: [{ type: ToolResultType.other, data: { someProp: 'someValue' } }],
       });
 
-      const { request, ...otherRunnerDeps } = runnerDeps;
+      const runnerDeps = createRunnerDepsMock();
+      runnerDeps.toolsService.getRegistry.mockResolvedValue(registry);
 
       const params: RunToolParams = {
         toolId: 'test-tool',
         toolParams: { foo: 'bar' },
-        request,
+        request: scopedRunnerDeps.request,
       };
 
-      const runner = createRunner(otherRunnerDeps);
+      const runner = createRunner(runnerDeps);
       const response = await runner.runTool(params);
 
-      expect(tool.handler).toHaveBeenCalledTimes(1);
-      expect(tool.handler).toHaveBeenCalledWith(params.toolParams, expect.any(Object));
+      expect(toolHandler).toHaveBeenCalledTimes(1);
+      expect(toolHandler).toHaveBeenCalledWith(params.toolParams, expect.any(Object));
 
       expect(response).toEqual({
-        results: [{ type: ToolResultType.other, data: { someProp: 'someValue' } }],
+        results: [
+          {
+            tool_result_id: 'some-result-id',
+            type: ToolResultType.other,
+            data: { someProp: 'someValue' },
+          },
+        ],
       });
     });
   });
@@ -119,7 +143,7 @@ describe('Onechat runner', () => {
 
       const {
         agentsService: { getRegistry },
-      } = runnerDeps;
+      } = scopedRunnerDeps;
       getRegistry.mockResolvedValue(agentClient);
 
       agentHandler = jest.fn();
@@ -141,7 +165,7 @@ describe('Onechat runner', () => {
         agentParams: { nextInput: { message: 'dolly' } },
       };
 
-      const runner = createScopedRunner(runnerDeps);
+      const runner = createScopedRunner(scopedRunnerDeps);
       const response = await runner.runAgent(params);
 
       expect(agentHandler).toHaveBeenCalledTimes(1);
@@ -161,15 +185,16 @@ describe('Onechat runner', () => {
     it('can be invoked through a runner', async () => {
       agentHandler.mockResolvedValue({ result: 'someResult' as any });
 
-      const { request, ...otherRunnerDeps } = runnerDeps;
+      const runnerDeps = createRunnerDepsMock();
+      runnerDeps.agentsService.getRegistry.mockResolvedValue(agentClient);
 
       const params: RunAgentParams = {
         agentId: 'test-tool',
         agentParams: { nextInput: { message: 'dolly' } },
-        request,
+        request: scopedRunnerDeps.request,
       };
 
-      const runner = createRunner(otherRunnerDeps);
+      const runner = createRunner(runnerDeps);
       const response = await runner.runAgent(params);
 
       expect(agentHandler).toHaveBeenCalledTimes(1);

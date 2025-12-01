@@ -12,5 +12,3 @@ export const displayEventName = ({ action, id }: Pick<EventItem | AlertItem, 'ac
 
 export const displayEntityName = ({ label, id }: Pick<EntityItem, 'label' | 'id'>) =>
   label || id || '-';
-
-export const i18nNamespaceKey = 'securitySolutionPackages.csp.graph.flyout.groupedItem';

@@ -33,15 +33,12 @@ export function SearchNavigationProvider({ getService, getPageObjects }: FtrProv
         });
       });
     },
-    async navigateToElasticsearchStartPage(expectRedirect: boolean = false, basePath?: string) {
+    async navigateToElasticsearchSearchGettingStartedPage(basePath?: string) {
       await retry.tryForTime(60 * 1000, async () => {
-        await common.navigateToApp('elasticsearchStart', {
-          basePath,
+        await common.navigateToApp('searchGettingStarted', {
           shouldLoginIfPrompted: false,
+          basePath,
         });
-        if (!expectRedirect) {
-          await testSubjects.existOrFail('elasticsearchStartPage', { timeout: 2000 });
-        }
       });
     },
     async navigateToIndexDetailPage(indexName: string) {

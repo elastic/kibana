@@ -8,14 +8,15 @@
  */
 
 import type { PartialFieldsMetadataClient } from '@kbn/esql-validation-autocomplete/src/shared/types';
-import { getHoverItem } from '@kbn/esql-validation-autocomplete';
+import { getHoverItem, suggest } from '@kbn/esql-validation-autocomplete';
 import { monaco } from '../../monaco_imports';
 import { ESQLLang, type ESQLDependencies } from './language';
 
-// Mock the getHoverItem function
+// Mock the getHoverItem and suggest functions
 jest.mock('@kbn/esql-validation-autocomplete', () => ({
   ...jest.requireActual('@kbn/esql-validation-autocomplete'),
   getHoverItem: jest.fn(),
+  suggest: jest.fn(),
 }));
 
 describe('ESQLLang', () => {
@@ -134,6 +135,80 @@ describe('ESQLLang', () => {
         );
         expect(mockFind).toBeCalledTimes(1);
         expect(notECSFieldResolvedItem).toEqual(notECSFieldItem);
+      });
+
+      it('should call onSuggestionsWithCustomCommandShown when suggestions contain custom commands', async () => {
+        const mockOnSuggestionsWithCustomCommandShown = jest.fn();
+
+        const mockDeps: ESQLDependencies = {
+          telemetry: {
+            onSuggestionsWithCustomCommandShown: mockOnSuggestionsWithCustomCommandShown,
+          },
+        };
+
+        // Mock the suggest function to return suggestions with custom commands
+        const mockSuggest = suggest as jest.MockedFunction<typeof suggest>;
+        mockSuggest.mockResolvedValue([
+          {
+            label: 'EVAL',
+            text: 'EVAL',
+            kind: 'Keyword',
+            detail: 'EVAL command',
+            command: {
+              title: 'Trigger suggest',
+              id: 'editor.action.triggerSuggest',
+            },
+          },
+          {
+            label: 'Custom Command 1',
+            text: 'custom1',
+            kind: 'Method',
+            detail: 'Custom command 1',
+            command: {
+              title: 'Custom Action 1',
+              id: 'custom.command.1',
+            },
+          },
+          {
+            label: 'Custom Command 2',
+            text: 'custom2',
+            kind: 'Method',
+            detail: 'Custom command 2',
+            command: {
+              title: 'Custom Action 2',
+              id: 'custom.command.2',
+            },
+          },
+          {
+            label: 'No Command',
+            text: 'nocommand',
+            kind: 'Variable',
+            detail: 'No command item',
+          },
+        ]);
+
+        const suggestionProvider = ESQLLang.getSuggestionProvider(mockDeps);
+
+        const mockModel = {
+          getValue: jest.fn().mockReturnValue('FROM index | EVAL'),
+        } as unknown as monaco.editor.ITextModel;
+
+        const mockPosition = new monaco.Position(1, 18);
+        const mockContext = {} as monaco.languages.CompletionContext;
+        const mockToken = {} as monaco.CancellationToken;
+
+        await suggestionProvider.provideCompletionItems(
+          mockModel,
+          mockPosition,
+          mockContext,
+          mockToken
+        );
+
+        // Should be called with the custom command IDs (excluding 'editor.action.triggerSuggest')
+        expect(mockOnSuggestionsWithCustomCommandShown).toHaveBeenCalledWith([
+          'custom.command.1',
+          'custom.command.2',
+        ]);
       });
     });
   });

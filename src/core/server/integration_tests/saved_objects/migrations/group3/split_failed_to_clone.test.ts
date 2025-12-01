@@ -8,6 +8,7 @@
  */
 
 import { join } from 'path';
+import { setTimeout as timer } from 'timers/promises';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { CloneIndexParams } from '@kbn/core-saved-objects-migration-server-internal/src/actions';
 
@@ -18,20 +19,18 @@ import {
   type KibanaMigratorTestKit,
   defaultKibanaTaskIndex,
   defaultKibanaIndex,
-} from '../kibana_migrator_test_kit';
+} from '@kbn/migrator-test-kit';
 import { BASELINE_TEST_ARCHIVE_SMALL } from '../kibana_migrator_archive_utils';
-import {
-  getRelocatingMigratorTestKit,
-  kibanaSplitIndex,
-} from '../kibana_migrator_test_kit.fixtures';
-import { delay } from '../test_utils';
+import { getRelocatingMigratorTestKit, kibanaSplitIndex } from '@kbn/migrator-test-kit/fixtures';
 import '../jest_matchers';
 
 // mock clone_index from src/core/packages/saved-objects
 jest.mock('@kbn/core-saved-objects-migration-server-internal/src/actions/clone_index', () => {
+  const { setTimeout: actualTimer } = jest.requireActual('timers/promises');
   const realModule = jest.requireActual(
     '@kbn/core-saved-objects-migration-server-internal/src/actions/clone_index'
   );
+
   return {
     ...realModule,
     cloneIndex: (params: CloneIndexParams) => async () => {
@@ -39,7 +38,7 @@ jest.mock('@kbn/core-saved-objects-migration-server-internal/src/actions/clone_i
       // .kibana_migrator so that .kibana_migrator can completely finish the migration before we
       // fail
       if (!params.target.includes('tasks') && !params.target.includes('new'))
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        await actualTimer(2_000);
       return realModule.cloneIndex(params)();
     },
   };
@@ -58,7 +57,7 @@ describe('when splitting .kibana into multiple indices and one clone fails', () 
 
   afterAll(async () => {
     await esServer?.stop();
-    await delay(2);
+    await timer(2_000);
   });
 
   it('after resolving the problem and retrying the migration completes successfully', async () => {

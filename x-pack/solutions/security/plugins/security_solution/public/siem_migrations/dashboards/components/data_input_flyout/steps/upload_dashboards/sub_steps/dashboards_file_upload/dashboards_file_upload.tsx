@@ -112,7 +112,7 @@ export const DashboardsFileUpload = React.memo<DashboardsFileUploadProps>(
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} data-test-subj="dashboardsUploadFileButton">
               <UploadFileButton
                 onClick={createDashboards}
                 isLoading={showLoader}

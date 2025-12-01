@@ -10,7 +10,11 @@ import { EuiSpacer, EuiPortal } from '@elastic/eui';
 
 import { isStuckInUpdating } from '../../../../../../common/services/agent_status';
 import { FLEET_SERVER_PACKAGE } from '../../../../../../common';
-import { isAgentMigrationSupported } from '../../../../../../common/services';
+import {
+  isAgentMigrationSupported,
+  isAgentPrivilegeLevelChangeSupported,
+  isRootPrivilegeRequired,
+} from '../../../../../../common/services';
 import type { Agent } from '../../../types';
 
 import {
@@ -44,9 +48,10 @@ import {
   SearchAndFilterBar,
   TableRowActions,
   TagsAddRemove,
+  AgentActivityFlyout,
   AgentMigrateFlyout,
+  ChangeAgentPrivilegeLevelFlyout,
 } from './components';
-import { AgentActivityFlyout } from './components/agent_activity_flyout';
 import { useAgentSoftLimit, useMissingEncryptionKeyCallout, useFetchAgentsData } from './hooks';
 
 export const AgentListPage: React.FunctionComponent<{}> = () => {
@@ -83,11 +88,12 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [agentToRequestDiagnostics, setAgentToRequestDiagnostics] = useState<Agent | undefined>(
     undefined
   );
+  const [agentToMigrate, setAgentToMigrate] = useState<Agent | undefined>(undefined);
+  const [agentToChangePrivilege, setAgentToChangePrivilege] = useState<Agent | undefined>(
+    undefined
+  );
 
   const [showAgentActivityTour, setShowAgentActivityTour] = useState(false);
-
-  // migrateAgentState
-  const [agentToMigrate, setAgentToMigrate] = useState<Agent | undefined>(undefined);
 
   const {
     allTags,
@@ -100,14 +106,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     managedAgentsOnCurrentPage,
     showUpgradeable,
     setShowUpgradeable,
-    search,
     setSearch,
     selectedAgentPolicies,
     setSelectedAgentPolicies,
-    sortField,
-    setSortField,
-    sortOrder,
-    setSortOrder,
+    sort,
     selectedStatus,
     setSelectedStatus,
     selectedTags,
@@ -115,69 +117,34 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     allAgentPolicies,
     agentPoliciesRequest,
     agentPoliciesIndexedById,
-    pagination,
+    page,
     pageSizeOptions,
-    setPagination,
     kuery,
     draftKuery,
     setDraftKuery,
     fetchData,
-    currentRequestRef,
+    queryHasChanged,
     latestAgentActionErrors,
     setLatestAgentActionErrors,
+    isUsingFilter,
+    onTableChange,
+    clearFilters: clearFiltersFromSession,
   } = useFetchAgentsData();
 
   const onSubmitSearch = useCallback(
     (newKuery: string) => {
       setSearch(newKuery);
-      setPagination({
-        ...pagination,
-        currentPage: 1,
+      onTableChange({
+        page: { index: 0, size: page.size },
       });
     },
-    [setSearch, pagination, setPagination]
-  );
-
-  const isUsingFilter = !!(
-    search.trim() ||
-    selectedAgentPolicies.length ||
-    selectedStatus.length ||
-    selectedTags.length ||
-    showUpgradeable
+    [setSearch, onTableChange, page.size]
   );
 
   const clearFilters = useCallback(() => {
     setDraftKuery('');
-    setSearch('');
-    setSelectedAgentPolicies([]);
-    setSelectedStatus([]);
-    setSelectedTags([]);
-    setShowUpgradeable(false);
-  }, [
-    setDraftKuery,
-    setSearch,
-    setSelectedAgentPolicies,
-    setSelectedStatus,
-    setSelectedTags,
-    setShowUpgradeable,
-  ]);
-
-  const onTableChange = ({
-    page,
-    sort,
-  }: {
-    page?: { index: number; size: number };
-    sort?: { field: keyof Agent; direction: 'asc' | 'desc' };
-  }) => {
-    const newPagination = {
-      ...pagination,
-      currentPage: page!.index + 1,
-      pageSize: page!.size,
-    };
-    setPagination(newPagination);
-    setSortField(sort!.field);
-    setSortOrder(sort!.direction);
-  };
+    clearFiltersFromSession();
+  }, [setDraftKuery, clearFiltersFromSession]);
 
   const unsupportedMigrateAgents = useMemo(() => {
     const protectedAgents = Array.isArray(selectedAgents)
@@ -196,6 +163,37 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       ? selectedAgents.filter((agent) => !isAgentMigrationSupported(agent))
       : [];
     return [...protectedAgents, ...fleetAgents, ...unsupportedVersionAgents];
+  }, [selectedAgents, agentPoliciesIndexedById]);
+
+  const unsupportedPrivilegeLevelChangeAgents = useMemo(() => {
+    const alreadyUnprivilegedAgents = Array.isArray(selectedAgents)
+      ? selectedAgents.filter(
+          (agent) => agent.local_metadata?.elastic?.agent?.unprivileged === true
+        )
+      : [];
+    const rootAccessNeededAgents = Array.isArray(selectedAgents)
+      ? selectedAgents.filter((agent) =>
+          isRootPrivilegeRequired(
+            agentPoliciesIndexedById[agent.policy_id as string]?.package_policies || []
+          )
+        )
+      : [];
+    const fleetServerAgents = Array.isArray(selectedAgents)
+      ? selectedAgents.filter((agent) =>
+          agentPoliciesIndexedById[agent.policy_id as string]?.package_policies?.some(
+            (p) => p.package?.name === FLEET_SERVER_PACKAGE
+          )
+        )
+      : [];
+    const unsupportedVersionAgents = Array.isArray(selectedAgents)
+      ? selectedAgents.filter((agent) => !isAgentPrivilegeLevelChangeSupported(agent))
+      : [];
+    return [
+      ...alreadyUnprivilegedAgents,
+      ...rootAccessNeededAgents,
+      ...fleetServerAgents,
+      ...unsupportedVersionAgents,
+    ];
   }, [selectedAgents, agentPoliciesIndexedById]);
 
   const renderActions = (agent: Agent) => {
@@ -221,6 +219,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         onGetUninstallCommandClick={() => setAgentToGetUninstallCommand(agent)}
         onRequestDiagnosticsClick={() => setAgentToRequestDiagnostics(agent)}
         onMigrateAgentClick={() => setAgentToMigrate(agent)}
+        onChangeAgentPrivilegeLevelClick={() => setAgentToChangePrivilege(agent)}
       />
     );
   };
@@ -304,8 +303,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     fetchData({ refreshTags });
     setShowAgentActivityTour(true);
   };
-
-  const isCurrentRequestIncremented = currentRequestRef?.current === 1;
 
   return (
     <>
@@ -433,12 +430,28 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           <AgentMigrateFlyout
             agents={[agentToMigrate]}
             agentCount={1}
-            unsupportedMigrateAgents={unsupportedMigrateAgents ?? []}
+            unsupportedMigrateAgents={[]}
             onClose={() => {
               setAgentToMigrate(undefined);
             }}
             onSave={() => {
               setAgentToMigrate(undefined);
+              refreshAgents();
+            }}
+          />
+        </EuiPortal>
+      )}
+      {agentToChangePrivilege && (
+        <EuiPortal>
+          <ChangeAgentPrivilegeLevelFlyout
+            agents={[agentToChangePrivilege]}
+            agentCount={1}
+            unsupportedAgents={[]}
+            onClose={() => {
+              setAgentToChangePrivilege(undefined);
+            }}
+            onSave={() => {
+              setAgentToChangePrivilege(undefined);
               refreshAgents();
             }}
           />
@@ -494,9 +507,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         onClickAgentActivity={onClickAgentActivity}
         shouldShowAgentActivityTour={showAgentActivityTour}
         latestAgentActionErrors={latestAgentActionErrors.length}
-        sortField={sortField}
-        sortOrder={sortOrder}
+        sortField={sort.field}
+        sortOrder={sort.direction}
         unsupportedMigrateAgents={unsupportedMigrateAgents}
+        unsupportedPrivilegeLevelChangeAgents={unsupportedPrivilegeLevelChangeAgents}
       />
       <EuiSpacer size="m" />
       {/* Agent total, bulk actions and status bar */}
@@ -520,9 +534,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       {/* Agent list table */}
       <AgentListTable
         agents={agentsOnCurrentPage}
-        sortField={sortField}
-        pageSizeOptions={pageSizeOptions}
-        sortOrder={sortOrder}
+        sortField={sort.field}
+        sortOrder={sort.direction}
         isLoading={isLoading}
         agentPoliciesIndexedById={agentPoliciesIndexedById}
         renderActions={renderActions}
@@ -530,12 +543,16 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         selected={selectedAgents}
         showUpgradeable={showUpgradeable}
         onTableChange={onTableChange}
-        pagination={pagination}
+        pagination={{
+          currentPage: page.index + 1, // Convert from 0-based to 1-based
+          pageSize: page.size,
+        }}
+        pageSizeOptions={pageSizeOptions}
         totalAgents={Math.min(nAgentsInTable, SO_SEARCH_LIMIT)}
         isUsingFilter={isUsingFilter}
         setEnrollmentFlyoutState={setEnrollmentFlyoutState}
         clearFilters={clearFilters}
-        isCurrentRequestIncremented={isCurrentRequestIncremented}
+        queryHasChanged={queryHasChanged}
       />
     </>
   );

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { StreamQueryKql, System } from '@kbn/streams-schema';
+import type { StreamQueryKql, Feature } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
 import React, { useEffect, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -22,7 +22,7 @@ interface Props {
   isSubmitting: boolean;
   setQueries: (queries: StreamQueryKql[]) => void;
   setCanSave: (canSave: boolean) => void;
-  systems: Omit<System, 'description'>[];
+  features: Omit<Feature, 'description'>[];
   dataViews: DataView[];
 }
 
@@ -35,7 +35,7 @@ export function GeneratedFlowForm({
   definition,
   setCanSave,
   isSubmitting,
-  systems,
+  features,
   dataViews,
 }: Props) {
   const [selectedQueries, setSelectedQueries] = useState<StreamQueryKql[]>([]);
@@ -76,7 +76,7 @@ export function GeneratedFlowForm({
         selectedQueries={selectedQueries}
         onSelectionChange={onSelectionChange}
         definition={definition}
-        systems={systems}
+        features={features}
         dataViews={dataViews}
       />
       {isGenerating && (

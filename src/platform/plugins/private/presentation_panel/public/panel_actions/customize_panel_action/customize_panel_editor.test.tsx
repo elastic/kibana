@@ -18,6 +18,11 @@ import { BehaviorSubject } from 'rxjs';
 import type { CustomizePanelActionApi } from './customize_panel_action';
 import { CustomizePanelEditor } from './customize_panel_editor';
 
+// Mock FilterItems to avoid expensive rendering and lazy-loading delays in tests
+jest.mock('@kbn/unified-search-plugin/public', () => ({
+  FilterItems: () => <div data-test-subj="mocked-filter-items">Mocked FilterItems</div>,
+}));
+
 describe('customize panel editor', () => {
   let api: CustomizePanelActionApi;
   let setTitle: (title?: string) => void;

@@ -6,12 +6,8 @@
  */
 import type { GetSLOBurnRatesResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import type {
-  QueryObserverResult,
-  RefetchOptions,
-  RefetchQueryFilters,
-} from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
+import type { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
 import { SLO_LONG_REFETCH_INTERVAL } from '../constants';
 import { sloKeys } from './query_key_factory';
 import { usePluginContext } from './use_plugin_context';

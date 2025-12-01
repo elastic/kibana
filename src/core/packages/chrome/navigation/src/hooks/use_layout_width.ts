@@ -11,7 +11,7 @@ import { useEffect } from 'react';
 
 export const COLLAPSED_WIDTH = 48;
 export const EXPANDED_WIDTH = 100;
-export const SIDE_PANEL_WIDTH = 260;
+export const SIDE_PANEL_WIDTH = 240;
 
 interface UseLayoutWidthArgs {
   isCollapsed: boolean;
@@ -22,17 +22,15 @@ interface UseLayoutWidthArgs {
 /**
  * Hook for handling layout width changes.
  *
- * @param isCollapsed - Whether the side nav is collapsed.
- * @param isSidePanelOpen - Whether the side panel is open.
- * @param setWidth - Callback to set the width of the navigation component.
+ * @param isCollapsed - whether the side nav is collapsed.
+ * @param isSidePanelOpen - whether the side panel is open.
+ * @param setWidth - callback to set the width of the navigation component.
  */
 export const useLayoutWidth = ({ isCollapsed, isSidePanelOpen, setWidth }: UseLayoutWidthArgs) => {
   useEffect(() => {
-    setWidth(isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH);
-    if (isSidePanelOpen) {
-      setWidth(
-        isCollapsed ? COLLAPSED_WIDTH + SIDE_PANEL_WIDTH : EXPANDED_WIDTH + SIDE_PANEL_WIDTH
-      );
-    }
+    const baseWidth = isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
+    const width = isSidePanelOpen ? baseWidth + SIDE_PANEL_WIDTH : baseWidth;
+
+    setWidth(width);
   }, [isCollapsed, isSidePanelOpen, setWidth]);
 };

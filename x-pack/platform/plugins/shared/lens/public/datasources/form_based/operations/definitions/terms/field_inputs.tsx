@@ -15,10 +15,9 @@ import {
   DraggableBucketContainer,
 } from '@kbn/visualization-ui-components';
 import { useDebouncedValue } from '@kbn/visualization-utils';
-import type { IndexPattern } from '../../../../../types';
+import type { IndexPattern, TermsIndexPatternColumn } from '@kbn/lens-common';
 import type { FieldChoiceWithOperationType } from '../../../dimension_panel/field_select';
 import { FieldSelect } from '../../../dimension_panel/field_select';
-import type { TermsIndexPatternColumn } from './types';
 import type { OperationSupportMatrix } from '../../../dimension_panel';
 import { supportedTypes } from './constants';
 

@@ -13,6 +13,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IngestStreamLifecycle, Streams } from '@kbn/streams-schema';
 import type { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
+import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
 
 export interface UpsertComponentTemplateAction {
   type: 'upsert_component_template';
@@ -125,6 +126,15 @@ export interface DeleteDotStreamsDocumentAction {
   };
 }
 
+export interface UpdateFailureStoreAction {
+  type: 'update_failure_store';
+  request: {
+    name: string;
+    failure_store: FailureStore;
+    definition: Streams.all.Definition;
+  };
+}
+
 export interface DeleteQueriesAction {
   type: 'delete_queries';
   request: {
@@ -139,8 +149,8 @@ export interface UnlinkAssetsAction {
   };
 }
 
-export interface UnlinkSystemsAction {
-  type: 'unlink_systems';
+export interface UnlinkFeaturesAction {
+  type: 'unlink_features';
   request: {
     name: string;
   };
@@ -177,7 +187,8 @@ export type ElasticsearchAction =
   | UpdateDataStreamMappingsAction
   | DeleteQueriesAction
   | UnlinkAssetsAction
-  | UnlinkSystemsAction
+  | UnlinkFeaturesAction
+  | UpdateFailureStoreAction
   | UpdateIngestSettingsAction;
 
 export interface ActionsByType {
@@ -199,6 +210,7 @@ export interface ActionsByType {
   update_data_stream_mappings: UpdateDataStreamMappingsAction[];
   delete_queries: DeleteQueriesAction[];
   unlink_assets: UnlinkAssetsAction[];
-  unlink_systems: UnlinkSystemsAction[];
+  unlink_features: UnlinkFeaturesAction[];
+  update_failure_store: UpdateFailureStoreAction[];
   update_ingest_settings: UpdateIngestSettingsAction[];
 }

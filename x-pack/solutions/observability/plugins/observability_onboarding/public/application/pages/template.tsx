@@ -33,7 +33,6 @@ export const PageTemplate: React.FC<React.PropsWithChildren<TemplateProps>> = ({
       </EuiPageTemplate.Section>
       <EuiSpacer size="xl" />
       <EuiPageTemplate.Section
-        contentProps={{ css: { paddingBlock: 0 } }}
         css={css`
           padding-inline: 0px;
           border-top: ${euiTheme.border.thin};

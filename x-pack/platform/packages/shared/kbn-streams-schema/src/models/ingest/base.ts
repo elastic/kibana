@@ -16,12 +16,16 @@ import { ingestStreamLifecycleSchema } from './lifecycle';
 import { BaseStream } from '../base';
 import type { IngestStreamSettings } from './settings';
 import { ingestStreamSettingsSchema } from './settings';
+import type { FailureStore } from './failure_store';
+import { failureStoreSchema } from './failure_store';
 
 interface IngestStreamPrivileges {
   // User can change everything about the stream
   manage: boolean;
   // User can read stats (like size in bytes) about the stream
   monitor: boolean;
+  // User can view general metadata about the stream
+  view_index_metadata: boolean;
   // User can change the retention policy of the stream
   lifecycle: boolean;
   // User can simulate changes to the processing or the mapping of the stream
@@ -37,6 +41,7 @@ interface IngestStreamPrivileges {
 const ingestStreamPrivilegesSchema: z.Schema<IngestStreamPrivileges> = z.object({
   manage: z.boolean(),
   monitor: z.boolean(),
+  view_index_metadata: z.boolean(),
   lifecycle: z.boolean(),
   simulate: z.boolean(),
   text_structure: z.boolean(),
@@ -48,6 +53,7 @@ export interface IngestBase {
   lifecycle: IngestStreamLifecycle;
   processing: StreamlangDSL;
   settings: IngestStreamSettings;
+  failure_store: FailureStore;
 }
 
 export const IngestBase: Validation<unknown, IngestBase> = validation(
@@ -56,6 +62,7 @@ export const IngestBase: Validation<unknown, IngestBase> = validation(
     lifecycle: ingestStreamLifecycleSchema,
     processing: streamlangDSLSchema,
     settings: ingestStreamSettingsSchema,
+    failure_store: failureStoreSchema,
   })
 );
 

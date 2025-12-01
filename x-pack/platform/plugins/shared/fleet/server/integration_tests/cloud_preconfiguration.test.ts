@@ -214,9 +214,9 @@ describe('Fleet cloud preconfiguration', () => {
                 },
                 id: 'fleet-server-fleet_server-elastic-cloud-fleet-server',
                 meta: {
-                  package: {
+                  package: expect.objectContaining({
                     name: 'fleet_server',
-                  },
+                  }),
                 },
                 name: 'Fleet Server',
                 package_policy_id: 'elastic-cloud-fleet-server',
@@ -313,9 +313,9 @@ describe('Fleet cloud preconfiguration', () => {
                 },
                 id: 'elastic-cloud-apm',
                 meta: {
-                  package: {
+                  package: expect.objectContaining({
                     name: 'apm',
-                  },
+                  }),
                 },
                 name: 'Elastic APM',
                 package_policy_id: 'elastic-cloud-apm',

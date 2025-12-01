@@ -9,29 +9,13 @@
 
 import { omit } from 'lodash';
 import { internalStateSlice, syncLocallyPersistedTabState } from './internal_state';
-import {
-  loadDataViewList,
-  appendAdHocDataViews,
-  initializeSingleTab,
-  replaceAdHocDataViewWithId,
-  setAdHocDataViews,
-  setDataView,
-  setDefaultProfileAdHocDataViews,
-  setTabs,
-  updateTabs,
-  disconnectTab,
-  restoreTab,
-  openInNewTab,
-  clearRecentlyClosedTabs,
-  initializeTabs,
-  saveDiscoverSession,
-  resetDiscoverSession,
-} from './actions';
+import { actions } from './actions';
 
 export {
   type DiscoverInternalState,
   type TabState,
   type TabStateGlobalState,
+  type DiscoverAppState,
   type InternalStateDataRequestParams,
 } from './types';
 
@@ -40,29 +24,9 @@ export { DEFAULT_TAB_STATE } from './constants';
 export { type InternalStateStore, createInternalStateStore } from './internal_state';
 
 export const internalStateActions = {
-  ...omit(
-    internalStateSlice.actions,
-    'setTabs',
-    'setDataViewId',
-    'setDefaultProfileAdHocDataViewIds'
-  ),
-  loadDataViewList,
-  setTabs,
-  updateTabs,
-  disconnectTab,
-  setDataView,
-  setAdHocDataViews,
-  setDefaultProfileAdHocDataViews,
-  appendAdHocDataViews,
-  replaceAdHocDataViewWithId,
-  initializeSingleTab,
+  ...omit(internalStateSlice.actions, 'setTabs', 'setDefaultProfileAdHocDataViewIds'),
+  ...actions,
   syncLocallyPersistedTabState,
-  restoreTab,
-  openInNewTab,
-  clearRecentlyClosedTabs,
-  initializeTabs,
-  saveDiscoverSession,
-  resetDiscoverSession,
 };
 
 export {
@@ -71,6 +35,7 @@ export {
   useInternalStateSelector,
   CurrentTabProvider,
   useCurrentTabSelector,
+  useAppStateSelector,
   useCurrentTabAction,
   useCurrentChartPortalNode,
   useDataViewsForPicker,
@@ -92,6 +57,7 @@ export {
   createRuntimeStateManager,
   useRuntimeState,
   selectTabRuntimeState,
+  selectIsDataViewUsedInMultipleRuntimeTabStates,
   selectInitialUnifiedHistogramLayoutPropsMap,
   useCurrentTabRuntimeState,
   RuntimeStateProvider,

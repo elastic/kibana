@@ -1,59 +1,82 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Search should render normally 1`] = `
-<Fragment>
-  <EuiSearchBar
-    box={
-      Object {
-        "data-test-subj": "settingsSearchBar",
-        "incremental": true,
-        "placeholder": "Search advanced settings",
-      }
-    }
-    filters={
-      Array [
-        Object {
-          "field": "categories",
-          "multiSelect": "or",
-          "name": "Category",
-          "options": Array [
-            Object {
-              "name": "General",
-              "value": "general",
-            },
-            Object {
-              "name": "Notifications",
-              "value": "notifications",
-            },
-            Object {
-              "name": "Dashboard",
-              "value": "dashboard",
-            },
-          ],
-          "type": "field_value_selection",
-        },
-      ]
-    }
-    onChange={[Function]}
-    query={
-      Query {
-        "ast": _AST {
-          "_clauses": Array [],
-          "_indexedClauses": Object {
-            "field": Object {},
-            "group": Array [],
-            "is": Object {},
-            "term": Array [],
-          },
-        },
-        "syntax": Object {
-          "parse": [Function],
-          "print": [Function],
-          "printClause": [Function],
-        },
-        "text": "",
-      }
-    }
-  />
-</Fragment>
+<div>
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-center-row"
+  >
+    <div
+      class="euiFlexItem euiSearchBar__searchHolder emotion-euiFlexItem-grow-1-euiSearchBar__searchHolder"
+    >
+      <div
+        class="euiFormControlLayout emotion-euiFormControlLayout-fullWidth"
+      >
+        <div
+          class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+          style="--euiFormControlLeftIconsCount: 1;"
+        >
+          <div
+            class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-left"
+          >
+            <span
+              class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
+            >
+              <span
+                aria-hidden="true"
+                class="euiFormControlLayoutCustomIcon__icon"
+                data-euiicon-type="search"
+              />
+            </span>
+          </div>
+          <input
+            aria-label="This is a search bar. As you type, the results lower in the page will automatically filter."
+            class="euiFieldSearch emotion-euiFieldSearch-fullWidth"
+            data-test-subj="settingsSearchBar"
+            placeholder="Search advanced settings"
+            type="search"
+            value=""
+          />
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem euiSearchBar__filtersHolder emotion-euiFlexItem-growZero-euiSearchBar__filtersHolder"
+    >
+      <div
+        class="euiFilterGroup emotion-euiFilterGroup-uncompressed"
+      >
+        <div
+          class="euiPopover emotion-euiPopover-inline-block"
+        >
+          <div
+            class="euiFilterButton__wrapper css-ln4f6z-wrapper"
+          >
+            <button
+              aria-expanded="false"
+              aria-label="Category Selection"
+              class="euiButtonEmpty euiFilterButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiFilterButton-default"
+              type="button"
+            >
+              <span
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent-euiFilterButton__content-hasIcon"
+              >
+                <span
+                  class="euiFilterButton__text emotion-euiFilterButton__text"
+                  data-text="Category"
+                  title="Category"
+                >
+                  Category
+                </span>
+                <span
+                  color="inherit"
+                  data-euiicon-type="arrowDown"
+                />
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 `;

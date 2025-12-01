@@ -26,7 +26,7 @@ describe('generateKibanaPackageTool', () => {
     const result = await generateKibanaPackageTool.handler({
       name: '@kbn/some-pkg',
       owner: 'kibana-foo',
-      group: 'chat',
+      group: 'workplaceai',
     });
 
     expect(result.content[0].text).toBe('package created');
@@ -40,6 +40,6 @@ describe('generateKibanaPackageTool', () => {
     );
 
     expect(command).toContain('--owner kibana-foo');
-    expect(command).toContain('--group chat');
+    expect(command).toContain('--group workplaceai');
   });
 });

@@ -177,5 +177,79 @@ describe('Policy Device Control Card', () => {
         )
       );
     });
+
+    it.each([
+      [DeviceControlAccessLevel.audit, 'Allow read, write and execute'],
+      [DeviceControlAccessLevel.read_only, 'Read only'],
+      [DeviceControlAccessLevel.no_execute, 'Read and write'],
+    ])(
+      'should NOT display user notification section when access level is %s',
+      (accessLevel, accessLevelLabel) => {
+        set(formProps.policy, 'windows.device_control.usb_storage', accessLevel);
+        set(formProps.policy, 'mac.device_control.usb_storage', accessLevel);
+
+        const { getByTestId } = render();
+
+        expectIsViewOnly(getByTestId(testSubj.card));
+
+        expect(getByTestId(testSubj.card)).toHaveTextContent(
+          exactMatchText(
+            `TypeDevice ControlOperating systemWindows, Mac Device ControlUSB storage access level${accessLevelLabel}`
+          )
+        );
+        expect(renderResult.queryByTestId('test-deviceControl-notifyUser')).toBeNull();
+      }
+    );
+  });
+
+  describe('and policy change detection', () => {
+    it('should properly handle toggle off and back on to match original policy', () => {
+      const originalPolicy = JSON.parse(JSON.stringify(formProps.policy));
+      const { getByTestId } = render();
+      const deviceControlSwitch = getByTestId(testSubj.enableDisableSwitch);
+
+      // Verify initial state - device control should be enabled
+      expect(deviceControlSwitch.getAttribute('aria-checked')).toBe('true');
+      expect(formProps.policy.windows.device_control?.enabled).toBe(true);
+      expect(formProps.policy.mac.device_control?.enabled).toBe(true);
+
+      // Toggle device control OFF
+      deviceControlSwitch.click();
+
+      // Verify onChange was called and device control is disabled
+      expect(formProps.onChange).toHaveBeenCalled();
+      const offCallArgs = (formProps.onChange as jest.Mock).mock.calls[0][0];
+      expect(offCallArgs.updatedPolicy.windows.device_control.enabled).toBe(false);
+      expect(offCallArgs.updatedPolicy.mac.device_control.enabled).toBe(false);
+
+      // Update the policy with the disabled state
+      formProps.policy = offCallArgs.updatedPolicy;
+      formProps.onChange = jest.fn(); // Reset mock
+
+      // Re-render with updated policy
+      renderResult.rerender(<DeviceControlCard {...formProps} />);
+
+      // Toggle device control back ON
+      getByTestId(testSubj.enableDisableSwitch).click();
+
+      // Verify onChange was called and device control is re-enabled
+      expect(formProps.onChange).toHaveBeenCalled();
+      const onCallArgs = (formProps.onChange as jest.Mock).mock.calls[0][0];
+
+      // The key assertion: after toggling off and back on, the policy should match the original
+      // This ensures the Save Changes button will be properly disabled when reverting changes
+      expect(onCallArgs.updatedPolicy.windows.device_control).toEqual(
+        originalPolicy.windows.device_control
+      );
+      expect(onCallArgs.updatedPolicy.mac.device_control).toEqual(
+        originalPolicy.mac.device_control
+      );
+      expect(onCallArgs.updatedPolicy.windows.popup.device_control).toEqual(
+        originalPolicy.windows.popup.device_control
+      );
+      expect(onCallArgs.updatedPolicy.mac.popup.device_control).toEqual(
+        originalPolicy.mac.popup.device_control
+      );
+    });
   });
 });

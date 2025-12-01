@@ -16,6 +16,11 @@ export interface ResolvedDataView {
   timeFieldName: string;
 }
 
+interface AdhocDataView {
+  dataViewsService: DataViewsContract;
+  dataViewId: string;
+  attributes: DataViewAttributes;
+}
 interface PersistedDataView {
   dataViewsService: DataViewsContract;
   dataViewId: string;
@@ -25,6 +30,13 @@ interface DataViewAttributes {
   timeFieldName: string;
   name?: string;
 }
+
+const buildResolvedDataView = (dataViewReference: DataView): ResolvedDataView => ({
+  indices: dataViewReference.getIndexPattern(),
+  timeFieldName: dataViewReference.timeFieldName ?? TIMESTAMP_FIELD,
+  fields: dataViewReference.fields ?? [],
+  dataViewReference,
+});
 
 export const resolveDataView = async ({
   dataViewId,
@@ -51,36 +63,28 @@ export const resolvePersistedDataView = async ({
   dataViewId,
 }: PersistedDataView): Promise<ResolvedDataView> => {
   const dataView = await dataViewsService.get(dataViewId, false);
-
-  return {
-    indices: dataView.getIndexPattern(),
-    timeFieldName: dataView.timeFieldName ?? TIMESTAMP_FIELD,
-    fields: dataView.fields ?? [],
-    dataViewReference: dataView,
-  };
+  return buildResolvedDataView(dataView);
 };
 
 export const resolveAdHocDataView = async ({
   dataViewsService,
   dataViewId,
   attributes,
-}: PersistedDataView & { attributes: DataViewAttributes }): Promise<ResolvedDataView> => {
+}: AdhocDataView): Promise<ResolvedDataView> => {
   const { name, timeFieldName } = attributes;
-  const dataViewReference = await dataViewsService.create(
-    {
-      id: dataViewId,
-      name,
-      title: dataViewId,
-      timeFieldName,
-    },
-    false,
-    false
-  );
 
-  return {
-    indices: dataViewId,
-    timeFieldName,
-    fields: dataViewReference.fields,
-    dataViewReference,
-  };
+  const dataViewReference = await dataViewsService.get(dataViewId, false, true).catch(() => {
+    return dataViewsService.create(
+      {
+        id: dataViewId,
+        name,
+        title: dataViewId,
+        timeFieldName,
+      },
+      false,
+      false
+    );
+  });
+
+  return buildResolvedDataView(dataViewReference);
 };

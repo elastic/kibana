@@ -23,18 +23,7 @@ export const INVESTIGATION_TIME_ENRICHMENT_SECTION =
 export const ENRICHMENT_SECTION_BUTTON_CONTENT =
   '[data-test-subj="securitySolutionFlyoutThreatIntelligenceDetailsEnrichmentButtonContent"]';
 
-export const JSON_VIEW_TAB = '[data-test-subj="jsonViewTab"]';
-
-export const OVERVIEW_STATUS = '[data-test-subj="eventDetails"] [data-test-subj="alertStatus"]';
-
-export const EVENT_DETAILS_ALERT_STATUS_POPOVER =
-  '[data-test-subj="event-details-alertStatusPopover"]';
-
 export const TABLE_CELL = '.euiTableRowCell .euiTableCellContent';
-
-export const CELL_EXPAND_VALUE = '[data-test-subj="euiDataGridCellExpandButton"]';
-
-export const TABLE_TAB = '[data-test-subj="tableTab"]';
 
 export const TABLE_ROWS = '.euiTableRow';
 

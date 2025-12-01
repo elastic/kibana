@@ -9,19 +9,25 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const querySchema = schema.object({
-  query: schema.oneOf([
-    schema.string({
-      meta: {
-        description:
-          'A text-based query such as Kibana Query Language (KQL) or Lucene query language.',
-      },
-    }),
-    schema.recordOf(schema.string(), schema.any()),
-  ]),
-  language: schema.string(),
-});
+export const querySchema = schema.object(
+  {
+    query: schema.oneOf([
+      schema.string({
+        meta: {
+          description:
+            'A text-based query such as Kibana Query Language (KQL) or Lucene query language.',
+        },
+      }),
+      schema.recordOf(schema.string(), schema.any()),
+    ]),
+    language: schema.string(),
+  },
+  { meta: { id: 'kbn-es-query-server-querySchema' } }
+);
 
-export const aggregateQuerySchema = schema.object({
-  esql: schema.string(),
-});
+export const aggregateQuerySchema = schema.object(
+  {
+    esql: schema.string(),
+  },
+  { meta: { id: 'kbn-es-query-server-aggregateQuerySchema' } }
+);

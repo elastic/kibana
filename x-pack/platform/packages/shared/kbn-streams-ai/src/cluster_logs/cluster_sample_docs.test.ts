@@ -10,21 +10,29 @@
  */
 
 import { clusterSampleDocs } from './cluster_sample_docs';
+import * as dbscanModule from './dbscan';
 
 // mock ai-tools heavy functions to keep test deterministic and focused
 jest.mock('@kbn/ai-tools', () => {
+  const module = jest.requireActual('@kbn/ai-tools');
+
   return {
+    formatDocumentAnalysis: module.formatDocumentAnalysis,
     mergeSampleDocumentsWithFieldCaps: jest.fn().mockImplementation(({ hits }) => {
       return {
         total: hits.length,
-        analyzedFields: hits.length > 0 ? Object.keys(hits[0]._source || {}) : [],
+        sampled: hits.length > 0 ? Object.keys(hits[0]._source || {}) : [],
+        fields: [],
       };
     }),
-    sortAndTruncateAnalyzedFields: jest.fn().mockImplementation((analysis) => analysis),
   };
 });
 
 describe('clusterSampleDocs', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('returns empty result when no hits', () => {
     const result = clusterSampleDocs({ hits: [], fieldCaps: { fields: {}, indices: [] } });
     expect(result).toEqual({ sampled: 0, noise: [], clusters: [] });
@@ -84,9 +92,6 @@ describe('clusterSampleDocs', () => {
     expect(result.noise.length).toBe(2);
     const noiseIds = result.noise.map((idx) => hits[idx]._id).sort();
     expect(noiseIds).toEqual(['n-1', 'n-2']);
-
-    // merged analysis should reflect total documents in the cluster
-    expect(cluster.analysis.total).toBe(5);
   });
 
   it('can produce multiple clusters', () => {
@@ -231,5 +236,56 @@ describe('clusterSampleDocs', () => {
       expect(result.clusters.length).toBe(1);
       expect(result.clusters[0].count).toBe(5);
     });
+  });
+
+  it('skips high-cardinality field values while retaining schema membership', () => {
+    const dbscanSpy = jest
+      .spyOn(dbscanModule, 'dbscan')
+      .mockImplementation(() => ({ clusters: [], noise: [] }));
+
+    const hits = Array.from({ length: 3 }).map((_, i) => ({
+      _id: `hc-${i}`,
+      _index: '',
+      _source: {
+        'service.name': 'checkout',
+        'log.level': 'info',
+        'user.id': `user-${i}`,
+      },
+    }));
+
+    const fieldCaps = {
+      indices: [],
+      fields: {
+        'service.name': { keyword: { type: 'keyword', searchable: true, aggregatable: true } },
+        'log.level': { keyword: { type: 'keyword', searchable: true, aggregatable: true } },
+        'user.id': { keyword: { type: 'keyword', searchable: true, aggregatable: true } },
+      },
+    };
+
+    clusterSampleDocs({
+      hits,
+      fieldCaps,
+      valueCardinalityLimit: 1,
+    });
+
+    expect(dbscanSpy).toHaveBeenCalled();
+    const dataset = dbscanSpy.mock.calls[0][0] as Array<{
+      fieldIds: number[];
+      kvPairIds: number[];
+      kvWeightSum: number;
+    }>;
+
+    expect(dataset).toHaveLength(3);
+    for (const doc of dataset) {
+      expect(doc.fieldIds).toHaveLength(3);
+      expect(doc.kvPairIds.length).toBe(2);
+      expect(doc.kvWeightSum).toBeGreaterThan(0);
+    }
+
+    const uniqueKvIds = new Set<number>();
+    for (const doc of dataset) {
+      doc.kvPairIds.forEach((id) => uniqueKvIds.add(id));
+    }
+    expect(uniqueKvIds.size).toBe(2);
   });
 });

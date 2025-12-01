@@ -14,8 +14,9 @@ import {
 import type { CspSetupStatus } from '@kbn/cloud-security-posture-common';
 import { BENCHMARK_SCORE_INDEX_DEFAULT_NS } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { find, without } from 'lodash';
+import { createPackagePolicy } from '@kbn/cloud-security-posture-common/test_helper';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
-import { createPackagePolicy, createUser, createCSPRole, deleteRole, deleteUser } from '../helper';
+import { createUser, createCSPRole, deleteRole, deleteUser } from '../helper';
 
 const UNPRIVILEGED_ROLE = 'unprivileged_test_role';
 const UNPRIVILEGED_USERNAME = 'unprivileged_test_user';
@@ -57,6 +58,12 @@ export default function (providerContext: FtrProviderContext) {
 
       beforeEach(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
+
+        await supertest
+          .post(`/api/fleet/setup`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
 
         const { body: agentPolicyResponse } = await supertest
           .post(`/api/fleet/agent_policies`)
@@ -109,6 +116,12 @@ export default function (providerContext: FtrProviderContext) {
     describe('status = unprivileged test indices', () => {
       beforeEach(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
+
+        await supertest
+          .post(`/api/fleet/setup`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
 
         const { body: agentPolicyResponse } = await supertest
           .post(`/api/fleet/agent_policies`)

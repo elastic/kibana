@@ -32,31 +32,17 @@ Array [
 
 exports[`policy table changes pages when a pagination link is clicked on 2`] = `
 Array [
-  "testy0",
-  "testy1",
-  "testy101",
-  "testy103",
-  "testy11",
-  "testy13",
-  "testy17",
-  "testy19",
-  "testy23",
-  "testy25",
-  "testy29",
-  "testy31",
-  "testy35",
-  "testy37",
-  "testy41",
-  "testy43",
-  "testy47",
-  "testy49",
-  "testy5",
-  "testy53",
-  "testy55",
-  "testy59",
-  "testy61",
-  "testy65",
-  "testy67",
+  "testy7",
+  "testy71",
+  "testy73",
+  "testy77",
+  "testy79",
+  "testy83",
+  "testy85",
+  "testy89",
+  "testy91",
+  "testy95",
+  "testy97",
 ]
 `;
 
@@ -67,67 +53,69 @@ Array [
 `;
 
 exports[`policy table shows empty state when there are no policies 1`] = `
-<section
-  class="emotion-euiPageSection-grow-l-center-transparent"
->
-  <div
-    class="emotion-euiPageSection__content-l-center"
+<div>
+  <section
+    class="emotion-euiPageSection-grow-l-center-transparent"
   >
     <div
-      class="euiPanel euiPanel--plain euiEmptyPrompt emotion-euiPanel-m-plain-hasShadow-euiEmptyPrompt-vertical"
+      class="emotion-euiPageSection__content-l-center"
     >
       <div
-        class="euiEmptyPrompt__main emotion-euiEmptyPrompt__main-vertical-l"
+        class="euiPanel euiPanel--plain euiEmptyPrompt emotion-euiPanel-m-plain-hasShadow-euiEmptyPrompt-vertical"
       >
         <div
-          class="euiEmptyPrompt__icon emotion-euiEmptyPrompt__icon-vertical"
+          class="euiEmptyPrompt__main emotion-euiEmptyPrompt__main-vertical-l"
         >
-          <span
-            color="subdued"
-            data-euiicon-type="managementApp"
-          />
-        </div>
-        <div
-          class="euiEmptyPrompt__content emotion-euiEmptyPrompt__content-vertical"
-        >
-          <h1
-            class="euiTitle emotion-euiTitle-m"
-          >
-            Create your first index lifecycle policy
-          </h1>
           <div
-            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-          />
-          <div
-            class="euiText emotion-euiText-m-euiTextColor-subdued"
-          >
-            <p>
-               An index lifecycle policy helps you manage your indices as they age.
-            </p>
-          </div>
-          <div
-            class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
-          />
-          <button
-            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
-            data-test-subj="createPolicyButton"
-            type="button"
+            class="euiEmptyPrompt__icon emotion-euiEmptyPrompt__icon-vertical"
           >
             <span
-              class="emotion-euiButtonDisplayContent"
+              color="subdued"
+              data-euiicon-type="managementApp"
+            />
+          </div>
+          <div
+            class="euiEmptyPrompt__content emotion-euiEmptyPrompt__content-vertical"
+          >
+            <h1
+              class="euiTitle emotion-euiTitle-m"
+            >
+              Create your first index lifecycle policy
+            </h1>
+            <div
+              class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+            />
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <p>
+                 An index lifecycle policy helps you manage your indices as they age.
+              </p>
+            </div>
+            <div
+              class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+            />
+            <button
+              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+              data-test-subj="createPolicyButton"
+              type="button"
             >
               <span
-                color="inherit"
-                data-euiicon-type="plusInCircle"
-              />
-              Create policy
-            </span>
-          </button>
+                class="emotion-euiButtonDisplayContent"
+              >
+                <span
+                  color="inherit"
+                  data-euiicon-type="plusInCircle"
+                />
+                Create policy
+              </span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
+</div>
 `;
 
 exports[`policy table sorts when linked index templates header is clicked 1`] = `
@@ -157,6 +145,17 @@ Array [
   "testy67",
   "testy71",
   "testy73",
+  "testy77",
+  "testy79",
+  "testy83",
+  "testy85",
+  "testy89",
+  "testy91",
+  "testy95",
+  "testy97",
+  "testy101",
+  "testy103",
+  "testy0",
 ]
 `;
 
@@ -187,6 +186,17 @@ Array [
   "testy65",
   "testy67",
   "testy71",
+  "testy73",
+  "testy77",
+  "testy79",
+  "testy83",
+  "testy85",
+  "testy89",
+  "testy91",
+  "testy95",
+  "testy97",
+  "testy101",
+  "testy103",
 ]
 `;
 
@@ -217,6 +227,17 @@ Array [
   "testy67",
   "testy71",
   "testy73",
+  "testy77",
+  "testy79",
+  "testy83",
+  "testy85",
+  "testy89",
+  "testy91",
+  "testy95",
+  "testy97",
+  "testy101",
+  "testy103",
+  "testy0",
 ]
 `;
 
@@ -247,6 +268,17 @@ Array [
   "testy65",
   "testy67",
   "testy71",
+  "testy73",
+  "testy77",
+  "testy79",
+  "testy83",
+  "testy85",
+  "testy89",
+  "testy91",
+  "testy95",
+  "testy97",
+  "testy101",
+  "testy103",
 ]
 `;
 
@@ -277,6 +309,17 @@ Array [
   "testy41",
   "testy37",
   "testy35",
+  "testy31",
+  "testy29",
+  "testy25",
+  "testy23",
+  "testy19",
+  "testy17",
+  "testy13",
+  "testy11",
+  "testy7",
+  "testy5",
+  "testy1",
 ]
 `;
 
@@ -307,6 +350,17 @@ Array [
   "testy67",
   "testy71",
   "testy73",
+  "testy77",
+  "testy79",
+  "testy83",
+  "testy85",
+  "testy89",
+  "testy91",
+  "testy95",
+  "testy97",
+  "testy101",
+  "testy103",
+  "testy0",
 ]
 `;
 
@@ -337,6 +391,17 @@ Array [
   "testy37",
   "testy35",
   "testy31",
+  "testy29",
+  "testy25",
+  "testy23",
+  "testy19",
+  "testy17",
+  "testy13",
+  "testy11",
+  "testy103",
+  "testy101",
+  "testy1",
+  "testy0",
 ]
 `;
 
@@ -367,5 +432,16 @@ Array [
   "testy65",
   "testy67",
   "testy71",
+  "testy73",
+  "testy77",
+  "testy79",
+  "testy83",
+  "testy85",
+  "testy89",
+  "testy91",
+  "testy95",
+  "testy97",
+  "testy101",
+  "testy103",
 ]
 `;

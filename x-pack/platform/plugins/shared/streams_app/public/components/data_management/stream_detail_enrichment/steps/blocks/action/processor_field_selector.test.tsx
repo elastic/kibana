@@ -10,9 +10,8 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FormProvider, useForm } from 'react-hook-form';
 import { ProcessorFieldSelector } from './processor_field_selector';
-import { FieldSelector } from '../../../../shared/field_selector';
+import { AutocompleteSelector } from '../../../../shared/autocomplete_selector';
 
-// Mock the field suggestions hook
 jest.mock('../../../../../../hooks/use_field_suggestions', () => ({
   useEnrichmentFieldSuggestions: jest.fn(() => [
     { name: '@timestamp', type: 'date' },
@@ -22,9 +21,32 @@ jest.mock('../../../../../../hooks/use_field_suggestions', () => ({
   ]),
 }));
 
-// Mock the FieldSelector component to focus on ProcessorFieldSelector-specific logic
-jest.mock('../../../../shared/field_selector', () => ({
-  FieldSelector: jest.fn(
+jest.mock('../../../../../../hooks/use_stream_data_view_field_types', () => ({
+  useStreamDataViewFieldTypes: jest.fn(() => ({
+    fieldTypes: [
+      { name: '@timestamp', type: 'date', esType: 'date' },
+      { name: 'log.level', type: 'string', esType: 'keyword' },
+      { name: 'service.name', type: 'string', esType: 'keyword' },
+      { name: 'error.message', type: 'string', esType: 'text' },
+    ],
+    fieldTypeMap: new Map([
+      ['@timestamp', 'date'],
+      ['log.level', 'keyword'],
+      ['service.name', 'keyword'],
+      ['error.message', 'text'],
+    ]),
+    dataView: {} as any,
+  })),
+}));
+
+// Mock the simulator selector hook
+jest.mock('../../../state_management/stream_enrichment_state_machine', () => ({
+  useSimulatorSelector: jest.fn((selector) => selector({ context: { streamName: 'test-stream' } })),
+}));
+
+// Mock the AutocompleteSelector component to focus on ProcessorFieldSelector-specific logic
+jest.mock('../../../../shared/autocomplete_selector', () => ({
+  AutocompleteSelector: jest.fn(
     ({
       value,
       onChange,
@@ -38,10 +60,14 @@ jest.mock('../../../../shared/field_selector', () => ({
       compressed,
       fullWidth,
       suggestions,
-      ...restProps
+      labelAppend,
+      autoFocus,
     }) => (
       <div>
-        <label htmlFor="mock-field-selector">{label}</label>
+        <label htmlFor="mock-field-selector">
+          {label}
+          {labelAppend && <span>{labelAppend}</span>}
+        </label>
         {helpText && <div>{helpText}</div>}
         <input
           id="mock-field-selector"
@@ -50,7 +76,7 @@ jest.mock('../../../../shared/field_selector', () => ({
           onChange={(e) => onChange?.(e.target.value)}
           placeholder={placeholder}
           disabled={disabled}
-          {...restProps}
+          autoFocus={autoFocus}
         />
         {isInvalid && error && <div role="alert">{error}</div>}
       </div>
@@ -155,17 +181,34 @@ describe('ProcessorFieldSelector', () => {
         placeholder: 'Custom placeholder',
       });
 
-      expect(FieldSelector).toHaveBeenCalledWith(
+      expect(AutocompleteSelector).toHaveBeenCalledWith(
         expect.objectContaining({
           placeholder: 'Custom placeholder',
           fullWidth: true,
           dataTestSubj: 'streamsAppProcessorFieldSelectorComboFieldText',
+          showIcon: true,
           suggestions: [
             { name: '@timestamp', type: 'date' },
             { name: 'log.level', type: 'keyword' },
             { name: 'service.name', type: 'keyword' },
             { name: 'error.message', type: 'text' },
           ],
+        }),
+        expect.anything()
+      );
+    });
+
+    it('enriches field suggestions with DataView types', () => {
+      renderComponent();
+
+      // Verify that suggestions are enriched with types from DataView
+      expect(AutocompleteSelector).toHaveBeenCalledWith(
+        expect.objectContaining({
+          suggestions: expect.arrayContaining([
+            expect.objectContaining({ name: '@timestamp', type: 'date' }),
+            expect.objectContaining({ name: 'log.level', type: 'keyword' }),
+          ]),
+          showIcon: true,
         }),
         expect.anything()
       );

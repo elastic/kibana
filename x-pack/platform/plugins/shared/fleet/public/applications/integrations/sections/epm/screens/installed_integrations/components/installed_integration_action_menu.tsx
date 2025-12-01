@@ -17,12 +17,15 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { InstalledPackageUIPackageListItem } from '../types';
 import { useInstalledIntegrationsActions } from '../hooks/use_installed_integrations_actions';
+import { ExperimentalFeaturesService } from '../../../../../services';
+import { useLicense } from '../../../../../hooks';
 
 export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
   selectedItems: InstalledPackageUIPackageListItem[];
 }> = ({ selectedItems }) => {
   const [isOpen, setIsOpen] = useState(false);
-
+  const { enablePackageRollback } = ExperimentalFeaturesService.get();
+  const licenseService = useLicense();
   const button = (
     <EuiButton
       iconType="arrowDown"
@@ -73,7 +76,8 @@ export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
     );
 
     const hasRollbackableIntegrations = selectedItems.some(
-      (item) => !!item.installationInfo?.previous_version
+      (item) =>
+        !!item.installationInfo?.previous_version && !item.installationInfo?.is_rollback_ttl_expired
     );
 
     return [
@@ -127,22 +131,35 @@ export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
           />
         )}
       </EuiContextMenuItem>,
-      <EuiContextMenuItem
-        key="rollback"
-        icon="returnKey"
-        disabled={!hasRollbackableIntegrations}
-        onClick={openRollbackModal}
-      >
-        <FormattedMessage
-          id="xpack.fleet.epmInstalledIntegrations.bulkRollbackButton"
-          defaultMessage={'Rollback {count, plural, one {# integration} other {# integrations}}'}
-          values={{
-            count: selectedItems.length,
-          }}
-        />
-      </EuiContextMenuItem>,
+      ...(enablePackageRollback
+        ? [
+            <EuiContextMenuItem
+              key="rollback"
+              icon="returnKey"
+              disabled={!hasRollbackableIntegrations || !licenseService.isEnterprise()}
+              onClick={openRollbackModal}
+            >
+              <FormattedMessage
+                id="xpack.fleet.epmInstalledIntegrations.bulkRollbackButton"
+                defaultMessage={
+                  'Rollback {count, plural, one {# integration} other {# integrations}}'
+                }
+                values={{
+                  count: selectedItems.length,
+                }}
+              />
+            </EuiContextMenuItem>,
+          ]
+        : []),
     ];
-  }, [selectedItems, openUninstallModal, openUpgradeModal, openRollbackModal]);
+  }, [
+    selectedItems,
+    openUninstallModal,
+    openUpgradeModal,
+    openRollbackModal,
+    enablePackageRollback,
+    licenseService,
+  ]);
 
   return (
     <EuiPopover

@@ -9,9 +9,9 @@
 
 import React, { useEffect, useState } from 'react';
 import { ExecutionStatus, type ExecutionType } from '@kbn/workflows';
+import { WorkflowExecutionList as WorkflowExecutionListComponent } from './workflow_execution_list';
 import { useWorkflowExecutions } from '../../../entities/workflows/model/use_workflow_executions';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
-import { WorkflowExecutionList as WorkflowExecutionListComponent } from './workflow_execution_list';
 
 const EXECUTIONS_LIST_REFETCH_INTERVAL = 5000;
 const EXECUTIONS_LIST_REFETCH_INTERVAL_ACTIVE = 1000;
@@ -35,8 +35,10 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
   const [filters, setFilters] = useState<ExecutionListFiltersQueryParams>(DEFAULT_FILTERS);
   const {
     data: workflowExecutions,
-    isLoading: isLoadingWorkflowExecutions,
+    isInitialLoading: isLoadingWorkflowExecutions,
+    isLoadingMore: isLoadingMoreWorkflowExecutions,
     error,
+    setPaginationObserver,
   } = useWorkflowExecutions(
     { workflowId, statuses: filters.statuses, executionTypes: filters.executionTypes },
     {
@@ -75,10 +77,12 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
       executions={workflowExecutions ?? null}
       onExecutionClick={handleViewWorkflowExecution}
       selectedId={selectedExecutionId ?? null}
-      isLoading={isLoadingWorkflowExecutions}
+      isInitialLoading={isLoadingWorkflowExecutions}
+      isLoadingMore={isLoadingMoreWorkflowExecutions}
       error={error as Error | null}
       filters={filters}
       onFiltersChange={setFilters}
+      setPaginationObserver={setPaginationObserver}
     />
   );
 }

@@ -29,14 +29,14 @@ describe('<GroupedItem />', () => {
       const { queryByTestId, getByTestId } = render(
         <GroupedItem
           item={{
-            type: 'entity',
+            itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
             icon: 'node',
             timestamp,
             risk: 55,
-            ip: '5.5.5.5',
-            countryCode: 'US',
+            ips: ['5.5.5.5'],
+            countryCodes: ['US'],
           }}
         />
       );
@@ -50,7 +50,7 @@ describe('<GroupedItem />', () => {
       );
       expect(getByTestId(GROUPED_ITEM_IP_TEST_ID).textContent).toContain('IP: 5.5.5.5');
       expect(getByTestId(GROUPED_ITEM_GEO_TEST_ID).textContent).toBe(
-        'Geo 🇺🇸 United States of America'
+        'Geo:  🇺🇸 United States of America'
       );
     });
 
@@ -59,7 +59,7 @@ describe('<GroupedItem />', () => {
       const { getByTestId, queryByTestId } = render(
         <GroupedItem
           item={{
-            type: 'event',
+            itemType: 'event',
             id: 'event-id',
             action: 'process_start',
             timestamp,
@@ -85,7 +85,7 @@ describe('<GroupedItem />', () => {
       const { getByTestId, queryByTestId } = render(
         <GroupedItem
           item={{
-            type: 'alert',
+            itemType: 'alert',
             id: 'alert-id',
             action: 'alert_action',
             timestamp,
@@ -111,39 +111,24 @@ describe('<GroupedItem />', () => {
     describe('entity', () => {
       it('falls back to entity id when entity label is missing', () => {
         const entityId = 'entity-id';
-        const { getByTestId } = render(<GroupedItem item={{ type: 'entity', id: entityId }} />);
+        const { getByTestId } = render(<GroupedItem item={{ itemType: 'entity', id: entityId }} />);
         expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID).textContent).toBe(entityId);
-      });
-
-      it('falls back to dash when entity label and entity id are both missing', () => {
-        const { getByTestId } = render(<GroupedItem item={{ type: 'entity' }} />);
-        expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID).textContent).toBe('-');
       });
     });
 
     describe('event', () => {
       it('falls back to event id when event action is missing', () => {
         const eventId = 'event-id';
-        const { getByTestId } = render(<GroupedItem item={{ type: 'event', id: eventId }} />);
+        const { getByTestId } = render(<GroupedItem item={{ itemType: 'event', id: eventId }} />);
         expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID).textContent).toBe(eventId);
-      });
-
-      it('falls back to dash when event action and event id are both missing', () => {
-        const { getByTestId } = render(<GroupedItem item={{ type: 'event' }} />);
-        expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID).textContent).toBe('-');
       });
     });
 
     describe('alert', () => {
       it('falls back to alert id when alert action is missing', () => {
         const alertId = 'alert-id';
-        const { getByTestId } = render(<GroupedItem item={{ type: 'alert', id: alertId }} />);
+        const { getByTestId } = render(<GroupedItem item={{ itemType: 'alert', id: alertId }} />);
         expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID).textContent).toBe(alertId);
-      });
-
-      it('falls back to dash when alert action and alert id are both missing', () => {
-        const { getByTestId } = render(<GroupedItem item={{ type: 'alert' }} />);
-        expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID).textContent).toBe('-');
       });
     });
   });
@@ -154,7 +139,7 @@ describe('<GroupedItem />', () => {
         <GroupedItem
           item={
             {
-              type: 'entity',
+              itemType: 'entity',
               id: 'e1',
               label: 'entity-1',
               actor: { id: 'a1', label: 'actor' },
@@ -172,7 +157,7 @@ describe('<GroupedItem />', () => {
       const { queryByTestId } = render(
         <GroupedItem
           item={{
-            type: 'event',
+            itemType: 'event',
             id: 'event-1',
             action: 'test_action',
             target: { id: 't1', label: 'target' },
@@ -188,7 +173,7 @@ describe('<GroupedItem />', () => {
       const { queryByTestId } = render(
         <GroupedItem
           item={{
-            type: 'event',
+            itemType: 'event',
             id: 'event-1',
             action: 'test_action',
             actor: { id: 'a1', label: 'actor' },
@@ -204,7 +189,7 @@ describe('<GroupedItem />', () => {
       const { queryByTestId } = render(
         <GroupedItem
           item={{
-            type: 'alert',
+            itemType: 'alert',
             id: 'alert-1',
             action: 'test_action',
             target: { id: 't1', label: 'target' },
@@ -220,7 +205,7 @@ describe('<GroupedItem />', () => {
       const { queryByTestId } = render(
         <GroupedItem
           item={{
-            type: 'alert',
+            itemType: 'alert',
             id: 'alert-1',
             action: 'test_action',
             actor: { id: 'a1', label: 'actor' },
@@ -236,7 +221,7 @@ describe('<GroupedItem />', () => {
       const { getByTestId } = render(
         <GroupedItem
           item={{
-            type: 'event',
+            itemType: 'event',
             id: 'event-1',
             action: 'test_action',
             actor: { id: 'a1', label: 'actor' },
@@ -253,7 +238,7 @@ describe('<GroupedItem />', () => {
       const { getByTestId } = render(
         <GroupedItem
           item={{
-            type: 'alert',
+            itemType: 'alert',
             id: 'alert-1',
             action: 'test_action',
             actor: { id: 'a1', label: 'actor' },
@@ -270,7 +255,7 @@ describe('<GroupedItem />', () => {
       const { getByTestId } = render(
         <GroupedItem
           item={{
-            type: 'event',
+            itemType: 'event',
             id: 'event-1',
             action: 'test_action',
             actor: { id: 'a1' }, // No label
@@ -287,7 +272,7 @@ describe('<GroupedItem />', () => {
       const { getByTestId } = render(
         <GroupedItem
           item={{
-            type: 'event',
+            itemType: 'event',
             id: 'event-1',
             action: 'test_action',
             actor: { id: 'a1', label: 'actor' },
@@ -304,7 +289,7 @@ describe('<GroupedItem />', () => {
       const { getByTestId } = render(
         <GroupedItem
           item={{
-            type: 'event',
+            itemType: 'event',
             id: 'event-1',
             action: 'test_action',
             actor: { id: 'a1' }, // Only id
@@ -321,7 +306,7 @@ describe('<GroupedItem />', () => {
       const { getByTestId } = render(
         <GroupedItem
           item={{
-            type: 'event',
+            itemType: 'event',
             id: 'event-1',
             action: 'test_action',
             actor: { id: 'a1', label: 'actor', icon: 'user' },
@@ -348,7 +333,7 @@ describe('<GroupedItem />', () => {
       const { container } = render(
         <GroupedItem
           item={{
-            type: 'alert',
+            itemType: 'alert',
             id: 'alert-1',
             action: 'test_action',
           }}
@@ -364,7 +349,7 @@ describe('<GroupedItem />', () => {
       const { container } = render(
         <GroupedItem
           item={{
-            type: 'event',
+            itemType: 'event',
             id: 'event-1',
             action: 'test_action',
           }}
@@ -379,7 +364,7 @@ describe('<GroupedItem />', () => {
       const { container } = render(
         <GroupedItem
           item={{
-            type: 'entity',
+            itemType: 'entity',
             id: 'entity-1',
             label: 'test_entity',
           }}
@@ -396,25 +381,25 @@ describe('<GroupedItem />', () => {
       const { getByTestId } = render(
         <GroupedItem
           item={{
-            type: 'entity',
+            itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
-            countryCode: 'il',
+            countryCodes: ['il'],
           }}
         />
       );
 
-      expect(getByTestId(GROUPED_ITEM_GEO_TEST_ID).textContent).toBe('Geo 🇮🇱 Israel');
+      expect(getByTestId(GROUPED_ITEM_GEO_TEST_ID).textContent).toBe('Geo:  🇮🇱 Israel');
     });
 
     it('does not render geolocation info when countryCode is undefined', () => {
       const { queryByTestId } = render(
         <GroupedItem
           item={{
-            type: 'entity',
+            itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
-            countryCode: undefined,
+            countryCodes: undefined,
           }}
         />
       );
@@ -426,10 +411,10 @@ describe('<GroupedItem />', () => {
       const { queryByTestId } = render(
         <GroupedItem
           item={{
-            type: 'entity',
+            itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
-            countryCode: '',
+            countryCodes: [''],
           }}
         />
       );
@@ -441,10 +426,10 @@ describe('<GroupedItem />', () => {
       const { queryByTestId } = render(
         <GroupedItem
           item={{
-            type: 'entity',
+            itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
-            countryCode: 'INVALID',
+            countryCodes: ['INVALID'],
           }}
         />
       );
@@ -455,7 +440,7 @@ describe('<GroupedItem />', () => {
 
     it('handles uppercase, lowercase or mixed case country codes', () => {
       const item: EntityOrEventItem = {
-        type: 'entity',
+        itemType: 'entity',
         id: 'e1',
         label: 'entity-1',
       };
@@ -464,23 +449,23 @@ describe('<GroupedItem />', () => {
         <GroupedItem
           item={{
             ...item,
-            countryCode: 'us', // lowercase
+            countryCodes: ['us'], // lowercase
           }}
         />
       );
 
       expect(getByTestId(GROUPED_ITEM_GEO_TEST_ID).textContent).toBe(
-        'Geo 🇺🇸 United States of America'
+        'Geo:  🇺🇸 United States of America'
       );
 
-      rerender(<GroupedItem item={{ ...item, countryCode: 'US' }} />); // uppercase
+      rerender(<GroupedItem item={{ ...item, countryCodes: ['US'] }} />); // uppercase
       expect(getByTestId(GROUPED_ITEM_GEO_TEST_ID).textContent).toBe(
-        'Geo 🇺🇸 United States of America'
+        'Geo:  🇺🇸 United States of America'
       );
 
-      rerender(<GroupedItem item={{ ...item, countryCode: 'uS' }} />); // mixed case
+      rerender(<GroupedItem item={{ ...item, countryCodes: ['uS'] }} />); // mixed case
       expect(getByTestId(GROUPED_ITEM_GEO_TEST_ID).textContent).toBe(
-        'Geo 🇺🇸 United States of America'
+        'Geo:  🇺🇸 United States of America'
       );
     });
   });
@@ -490,10 +475,10 @@ describe('<GroupedItem />', () => {
       const { queryByTestId } = render(
         <GroupedItem
           item={{
-            type: 'entity',
+            itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
-            ip: undefined,
+            ips: undefined,
           }}
         />
       );
@@ -505,10 +490,10 @@ describe('<GroupedItem />', () => {
       const { queryByTestId } = render(
         <GroupedItem
           item={{
-            type: 'entity',
+            itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
-            ip: '',
+            ips: [''],
           }}
         />
       );
@@ -521,15 +506,111 @@ describe('<GroupedItem />', () => {
       const { getByTestId } = render(
         <GroupedItem
           item={{
-            type: 'entity',
+            itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
-            ip: ipv4,
+            ips: [ipv4],
           }}
         />
       );
 
       expect(getByTestId(GROUPED_ITEM_IP_TEST_ID).textContent).toContain(`IP: ${ipv4}`);
+    });
+
+    it('renders first IP address when ip is an array', () => {
+      const ipArray = ['192.168.1.1', '10.0.0.1'];
+      const { getByTestId } = render(
+        <GroupedItem
+          item={{
+            itemType: 'entity',
+            id: 'e1',
+            label: 'entity-1',
+            ips: ipArray,
+          }}
+        />
+      );
+
+      expect(getByTestId(GROUPED_ITEM_IP_TEST_ID).textContent).toContain(`IP: ${ipArray[0]}`);
+    });
+
+    it('does not render IP when ip is an empty array', () => {
+      const { queryByTestId } = render(
+        <GroupedItem
+          item={{
+            itemType: 'entity',
+            id: 'e1',
+            label: 'entity-1',
+            ips: [],
+          }}
+        />
+      );
+
+      expect(queryByTestId(GROUPED_ITEM_IP_TEST_ID)).not.toBeInTheDocument();
+    });
+
+    it('does not render IP when ip array contains only empty strings', () => {
+      const { queryByTestId } = render(
+        <GroupedItem
+          item={{
+            itemType: 'entity',
+            id: 'e1',
+            label: 'entity-1',
+            ips: ['', ''],
+          }}
+        />
+      );
+
+      expect(queryByTestId(GROUPED_ITEM_IP_TEST_ID)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('country code format variations', () => {
+    it('renders first country code when countryCode is an array', () => {
+      const countryArray = ['US', 'IL'];
+      const { getByTestId } = render(
+        <GroupedItem
+          item={{
+            itemType: 'entity',
+            id: 'e1',
+            label: 'entity-1',
+            countryCodes: countryArray,
+          }}
+        />
+      );
+
+      expect(getByTestId(GROUPED_ITEM_GEO_TEST_ID).textContent).toBe(
+        'Geo:  🇺🇸 United States of America'
+      );
+    });
+
+    it('does not render geolocation when countryCode is an empty array', () => {
+      const { queryByTestId } = render(
+        <GroupedItem
+          item={{
+            itemType: 'entity',
+            id: 'e1',
+            label: 'entity-1',
+            countryCodes: [],
+          }}
+        />
+      );
+
+      expect(queryByTestId(GROUPED_ITEM_GEO_TEST_ID)).not.toBeInTheDocument();
+    });
+
+    it('does not render geolocation when countryCode array contains only empty strings', () => {
+      const { queryByTestId } = render(
+        <GroupedItem
+          item={{
+            itemType: 'entity',
+            id: 'e1',
+            label: 'entity-1',
+            countryCodes: ['', ''],
+          }}
+        />
+      );
+
+      expect(queryByTestId(GROUPED_ITEM_GEO_TEST_ID)).not.toBeInTheDocument();
     });
   });
 
@@ -547,7 +628,7 @@ describe('<GroupedItem />', () => {
         <GroupedItem
           isLoading
           item={{
-            type: 'entity',
+            itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
           }}
@@ -564,7 +645,7 @@ describe('<GroupedItem />', () => {
         <GroupedItem
           isLoading={false}
           item={{
-            type: 'entity',
+            itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
           }}
@@ -580,7 +661,7 @@ describe('<GroupedItem />', () => {
       const { queryByTestId } = render(
         <GroupedItem
           item={{
-            type: 'entity',
+            itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
           }}

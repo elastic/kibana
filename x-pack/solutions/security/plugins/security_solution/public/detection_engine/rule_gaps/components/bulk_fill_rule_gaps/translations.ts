@@ -20,20 +20,6 @@ export const BULK_FILL_RULE_GAPS_TIME_RANGE_TITLE = i18n.translate(
   }
 );
 
-export const BULK_FILL_RULE_GAPS_START_AT_TITLE = i18n.translate(
-  'xpack.securitySolution.bulkFillRuleGapsModal.startAtTitle',
-  {
-    defaultMessage: 'Start at',
-  }
-);
-
-export const BULK_FILL_RULE_GAPS_END_AT_TITLE = i18n.translate(
-  'xpack.securitySolution.bulkFillRuleGapsModal.endAtTitle',
-  {
-    defaultMessage: 'Finish at',
-  }
-);
-
 export const BULK_FILL_RULE_GAPS_CONFIRM_BUTTON = i18n.translate(
   'xpack.securitySolution.bulkFillRuleGapsModal.confirmButton',
   {

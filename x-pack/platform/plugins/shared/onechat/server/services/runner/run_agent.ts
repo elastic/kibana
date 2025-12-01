@@ -10,10 +10,15 @@ import type {
   ScopedRunnerRunAgentParams,
   RunAgentReturn,
 } from '@kbn/onechat-server';
+import { getCurrentSpaceId } from '../../utils/spaces';
 import { withAgentSpan } from '../../tracing';
-import { registryToProvider } from '../tools/utils';
 import { createAgentHandler } from '../agents/modes/create_handler';
-import { createAgentEventEmitter, forkContextForAgentRun } from './utils';
+import {
+  createAgentEventEmitter,
+  forkContextForAgentRun,
+  createAttachmentsService,
+  createToolProvider,
+} from './utils';
 import type { RunnerManager } from './runner';
 
 export const createAgentHandlerContext = async <TParams = Record<string, unknown>>({
@@ -24,18 +29,37 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
   manager: RunnerManager;
 }): Promise<AgentHandlerContext> => {
   const { onEvent } = agentExecutionParams;
-  const { request, defaultConnectorId, elasticsearch, modelProviderFactory, toolsService, logger } =
-    manager.deps;
+  const {
+    request,
+    spaces,
+    elasticsearch,
+    modelProvider,
+    toolsService,
+    attachmentsService,
+    resultStore,
+    logger,
+  } = manager.deps;
+
+  const spaceId = getCurrentSpaceId({ request, spaces });
+
   return {
     request,
     logger,
+    modelProvider,
     esClient: elasticsearch.client.asScoped(request),
-    modelProvider: modelProviderFactory({ request, defaultConnectorId }),
     runner: manager.getRunner(),
-    toolProvider: registryToProvider({
+    toolProvider: createToolProvider({
       registry: await toolsService.getRegistry({ request }),
-      getRunner: manager.getRunner,
+      runner: manager.getRunner(),
       request,
+    }),
+    resultStore,
+    attachments: createAttachmentsService({
+      attachmentsStart: attachmentsService,
+      toolsStart: toolsService,
+      request,
+      spaceId,
+      runner: manager.getRunner(),
     }),
     events: createAgentEventEmitter({ eventHandler: onEvent, context: manager.context }),
   };

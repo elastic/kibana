@@ -30,8 +30,8 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
       },
       access: 'public',
       summary: 'MCP server',
-      description:
-        'Communicate with the MCP server via JSON-RPC 2.0. MCP is designed for AI clients like Claude Desktop, Cursor, and VS Code extensions to access your Elastic tools. Use this endpoint for testing MCP connectivity or debugging protocol communication. This endpoint requires JSON-RPC formatting and will not work from the Dev Tools Console.',
+      description: `> warn
+> This endpoint is designed for MCP clients (Claude Desktop, Cursor, VS Code, etc.) and should not be used directly via REST APIs. Use MCP Inspector or native MCP clients instead.`,
       options: {
         tags: ['mcp', 'oas-tag:agent builder'],
         xsrfRequired: false,
@@ -81,8 +81,7 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
 
           // Expose tools scoped to the request
           for (const tool of tools) {
-            const toolSchema =
-              typeof tool.schema === 'function' ? await tool.schema() : tool.schema;
+            const toolSchema = await tool.getSchema();
             server.tool(
               idMapping.get(tool.id) ?? tool.id,
               tool.description,

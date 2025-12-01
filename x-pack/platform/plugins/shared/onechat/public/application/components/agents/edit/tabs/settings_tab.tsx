@@ -139,6 +139,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                   aria-label={i18n.translate('xpack.onechat.agents.form.idAriaLabel', {
                     defaultMessage: 'Agent ID input field',
                   })}
+                  data-test-subj="agentSettingsIdInput"
                 />
               )}
             />
@@ -242,6 +243,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                   aria-label={i18n.translate('xpack.onechat.agents.form.labelsAriaLabel', {
                     defaultMessage: 'Agent labels selection',
                   })}
+                  data-test-subj="agentSettingsLabelsComboBox"
                 />
               )}
             />
@@ -339,6 +341,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                   aria-label={i18n.translate('xpack.onechat.agents.form.nameAriaLabel', {
                     defaultMessage: 'Agent display name input field',
                   })}
+                  data-test-subj="agentSettingsDisplayNameInput"
                 />
               )}
             />
@@ -364,6 +367,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                   aria-label={i18n.translate('xpack.onechat.agents.form.descriptionAriaLabel', {
                     defaultMessage: 'Agent display description text area',
                   })}
+                  data-test-subj="agentSettingsDescriptionInput"
                 />
               )}
             />

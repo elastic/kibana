@@ -34,7 +34,7 @@ import type { SignificantItem } from '@kbn/ml-agg-utils';
 import { CASES_TOAST_MESSAGES_TITLES } from '../../../cases/constants';
 import { useCasesModal } from '../../../hooks/use_cases_modal';
 import { useDataSource } from '../../../hooks/use_data_source';
-import type { LogRateAnalysisEmbeddableState } from '../../../embeddables/log_rate_analysis/types';
+import type { LogRateAnalysisEmbeddableState } from '../../../../common/embeddables/log_rate_analysis/types';
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 import { getDataviewReferences } from '../../../embeddables/get_dataview_references';
 
@@ -101,7 +101,7 @@ export const LogRateAnalysisAttachmentsMenu = ({
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
 
-      stateTransfer.navigateToWithEmbeddablePackage('dashboards', { state, path });
+      stateTransfer.navigateToWithEmbeddablePackages('dashboards', { state: [state], path });
     },
     [dataView.id, embeddable, applyTimeRange, timeRange]
   );

@@ -13,7 +13,7 @@ import { METRICS_EXPERIENCE_FEATURE_FLAG_KEY } from '../../../common/constants';
 export const throwNotFoundIfMetricsExperienceDisabled = async (
   featureFlag: FeatureFlagsRequestHandlerContext
 ) => {
-  const isEnabled = await featureFlag.getBooleanValue(METRICS_EXPERIENCE_FEATURE_FLAG_KEY, false);
+  const isEnabled = await featureFlag.getBooleanValue(METRICS_EXPERIENCE_FEATURE_FLAG_KEY, true);
 
   if (!isEnabled) {
     throw notFound();

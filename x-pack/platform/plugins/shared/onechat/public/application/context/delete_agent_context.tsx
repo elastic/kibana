@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
 import React from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useKibana } from '../hooks/use_kibana';
 import { queryKeys } from '../query_keys';
 import { useOnechatServices } from '../hooks/use_onechat_service';

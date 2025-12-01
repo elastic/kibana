@@ -11,10 +11,10 @@ import type {
   UserConfiguredActionConnector,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type {
-  JiraServiceManagementActionConfig,
-  JiraServiceManagementActionSecrets,
-  JiraServiceManagementActionParams,
-} from '../../../server/connector_types';
+  Config as JiraServiceManagementActionConfig,
+  Secrets as JiraServiceManagementActionSecrets,
+  Params as JiraServiceManagementActionParams,
+} from '@kbn/connector-schemas/jira-service-management';
 
 export type JiraServiceManagementActionConnector = UserConfiguredActionConnector<
   JiraServiceManagementActionConfig,

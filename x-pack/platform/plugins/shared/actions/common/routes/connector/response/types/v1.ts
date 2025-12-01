@@ -8,7 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import type {
   connectorResponseSchemaV1,
-  connectorTypesResponseSchemaV1,
+  connectorTypeResponseSchemaV1,
   allConnectorsResponseSchema,
   connectorExecuteResponseSchema,
 } from '..';
@@ -31,17 +31,17 @@ export interface AllConnectorsResponse extends ConnectorResponse {
   referenced_by_count: AllConnectorsResponseSchemaType['referenced_by_count'];
 }
 
-type ConnectorTypesResponseSchemaType = TypeOf<typeof connectorTypesResponseSchemaV1>;
+type ConnectorTypeResponseSchemaType = TypeOf<typeof connectorTypeResponseSchemaV1>;
 export interface ConnectorTypesResponse {
-  id: ConnectorTypesResponseSchemaType['id'];
-  name: ConnectorTypesResponseSchemaType['name'];
-  enabled: ConnectorTypesResponseSchemaType['enabled'];
-  enabled_in_config: ConnectorTypesResponseSchemaType['enabled_in_config'];
-  enabled_in_license: ConnectorTypesResponseSchemaType['enabled_in_license'];
-  minimum_license_required: ConnectorTypesResponseSchemaType['minimum_license_required'];
-  supported_feature_ids: ConnectorTypesResponseSchemaType['supported_feature_ids'];
-  is_system_action_type: ConnectorTypesResponseSchemaType['is_system_action_type'];
-  sub_feature?: ConnectorTypesResponseSchemaType['sub_feature'];
+  id: ConnectorTypeResponseSchemaType['id'];
+  name: ConnectorTypeResponseSchemaType['name'];
+  enabled: ConnectorTypeResponseSchemaType['enabled'];
+  enabled_in_config: ConnectorTypeResponseSchemaType['enabled_in_config'];
+  enabled_in_license: ConnectorTypeResponseSchemaType['enabled_in_license'];
+  minimum_license_required: ConnectorTypeResponseSchemaType['minimum_license_required'];
+  supported_feature_ids: ConnectorTypeResponseSchemaType['supported_feature_ids'];
+  is_system_action_type: ConnectorTypeResponseSchemaType['is_system_action_type'];
+  sub_feature?: ConnectorTypeResponseSchemaType['sub_feature'];
 }
 
 type ConnectorExecuteResponseSchemaType = TypeOf<typeof connectorExecuteResponseSchema>;

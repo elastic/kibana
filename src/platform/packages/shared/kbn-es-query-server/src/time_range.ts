@@ -12,16 +12,25 @@ import { schema } from '@kbn/config-schema';
 const absoluteTimeRangeMode = schema.literal('absolute');
 const relativeTimeRangeMode = schema.literal('relative');
 
-export const timeRangeSchema = schema.object({
-  from: schema.string(),
-  to: schema.string(),
-  mode: schema.maybe(schema.oneOf([absoluteTimeRangeMode, relativeTimeRangeMode])),
-});
+export const timeRangeSchema = schema.object(
+  {
+    from: schema.string(),
+    to: schema.string(),
+    mode: schema.maybe(schema.oneOf([absoluteTimeRangeMode, relativeTimeRangeMode])),
+  },
+  { meta: { id: 'kbn-es-query-server-timeRangeSchema' } }
+);
 
-export const absoluteTimeRangeSchema = timeRangeSchema.extends({
-  mode: absoluteTimeRangeMode,
-});
+export const absoluteTimeRangeSchema = timeRangeSchema.extends(
+  {
+    mode: absoluteTimeRangeMode,
+  },
+  { meta: { id: 'kbn-es-query-server-absoluteTimeRangeSchema' } }
+);
 
-export const relativeTimeRangeSchema = timeRangeSchema.extends({
-  mode: relativeTimeRangeMode,
-});
+export const relativeTimeRangeSchema = timeRangeSchema.extends(
+  {
+    mode: relativeTimeRangeMode,
+  },
+  { meta: { id: 'kbn-es-query-server-relativeTimeRangeSchema' } }
+);

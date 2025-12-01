@@ -56,7 +56,7 @@ export class MetricsExperiencePlugin
       });
 
       this.metricExperienceEnabled$ = coreStart.featureFlags
-        .getBooleanValue$(METRICS_EXPERIENCE_FEATURE_FLAG_KEY, false)
+        .getBooleanValue$(METRICS_EXPERIENCE_FEATURE_FLAG_KEY, true)
         .pipe(takeUntil(this.pluginStop$))
         .subscribe((isMetricsExperienceEnabled) => {
           if (isMetricsExperienceEnabled) {

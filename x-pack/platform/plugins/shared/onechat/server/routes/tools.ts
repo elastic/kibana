@@ -22,6 +22,7 @@ import type {
 } from '../../common/http_api/tools';
 import { apiPrivileges } from '../../common/features';
 import { publicApiPath } from '../../common/constants';
+import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
 
 export function registerToolsRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
@@ -68,7 +69,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
   // get tool by ID
   router.versioned
     .get({
-      path: `${publicApiPath}/tools/{id}`,
+      path: `${publicApiPath}/tools/{toolId}`,
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
@@ -90,7 +91,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         validate: {
           request: {
             params: schema.object({
-              id: schema.string({
+              toolId: schema.string({
                 meta: { description: 'The unique identifier of the tool to retrieve.' },
               }),
             }),
@@ -101,10 +102,10 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { id } = request.params;
+        const { toolId } = request.params;
         const { tools: toolService } = getInternalServices();
         const registry = await toolService.getRegistry({ request });
-        const tool = await registry.get(id);
+        const tool = await registry.get(toolId);
         return response.ok<GetToolResponse>({
           body: await toDescriptorWithSchema(tool),
         });
@@ -259,7 +260,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
   // delete tool
   router.versioned
     .delete({
-      path: `${publicApiPath}/tools/{id}`,
+      path: `${publicApiPath}/tools/{toolId}`,
       security: {
         authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
       },
@@ -280,7 +281,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         validate: {
           request: {
             params: schema.object({
-              id: schema.string({
+              toolId: schema.string({
                 meta: { description: 'The unique identifier of the tool to delete.' },
               }),
             }),
@@ -291,10 +292,10 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { id } = request.params;
+        const { toolId } = request.params;
         const { tools: toolService } = getInternalServices();
         const registry = await toolService.getRegistry({ request });
-        const success = await registry.delete(id);
+        const success = await registry.delete(toolId);
         return response.ok<DeleteToolResponse>({
           body: { success },
         });
@@ -312,6 +313,9 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       description:
         'Execute a tool with parameters. Use this endpoint to run a tool directly with specified inputs and optional external connector integration.',
       options: {
+        timeout: {
+          idleSocket: AGENT_SOCKET_TIMEOUT_MS,
+        },
         tags: ['tools', 'oas-tag:agent builder'],
         availability: {
           stability: 'experimental',
@@ -357,7 +361,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         const { tools: toolService } = getInternalServices();
         const registry = await toolService.getRegistry({ request });
         const tool = await registry.get(id);
-        const toolSchema = typeof tool.schema === 'function' ? await tool.schema() : tool.schema;
+        const toolSchema = await tool.getSchema();
         const validation = toolSchema.safeParse(toolParams);
         if (validation.error) {
           return response.badRequest({

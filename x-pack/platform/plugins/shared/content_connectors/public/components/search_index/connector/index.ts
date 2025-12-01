@@ -8,5 +8,4 @@
 export { ConnectorScheduling } from './connector_scheduling';
 export { ConnectorSyncRules } from './sync_rules/connector_rules';
 export { ConvertConnectorLogic } from './native_connector_configuration/convert_connector_logic';
-export { ConnectorNameAndDescriptionFlyout } from './connector_name_and_description/connector_name_and_description_flyout';
 export { ConnectorOverviewPanels } from './connector_overview_panels';

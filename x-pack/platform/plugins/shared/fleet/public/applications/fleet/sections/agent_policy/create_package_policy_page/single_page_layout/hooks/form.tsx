@@ -9,16 +9,25 @@ import React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { load } from 'js-yaml';
-import { isEqual } from 'lodash';
+import { isEqual, omit } from 'lodash';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
+
+import { inputsFormat } from '../../../../../../../../common/constants';
+import {
+  formatInputs,
+  formatVars,
+} from '../../../../../../../../common/services/simplified_package_policy_helper';
+
+import { sendCreateAgentlessPolicy } from '../../../../../../../hooks/use_request/agentless_policy';
 
 import {
   AgentlessAgentCreateFleetUnreachableError,
   AgentlessAgentCreateOverProvisionedError,
 } from '../../../../../../../../common/errors';
 import { useSpaceSettingsContext } from '../../../../../../../hooks/use_space_settings_context';
+import type { CloudProvider } from '../../../../../types';
 import {
   type AgentPolicy,
   type NewPackagePolicy,
@@ -31,14 +40,21 @@ import {
 import {
   useStartServices,
   sendCreateAgentPolicy,
-  sendCreatePackagePolicy,
   sendBulkInstallPackages,
   sendGetPackagePolicies,
   useMultipleAgentPolicies,
   useFleetStatus,
+  sendCreatePackagePolicyForRq,
 } from '../../../../../hooks';
-import { isVerificationError, packageToPackagePolicy } from '../../../../../services';
-import type { NewPackagePolicyInput } from '../../../../../../../../common';
+import {
+  ExperimentalFeaturesService,
+  isVerificationError,
+  packageToPackagePolicy,
+} from '../../../../../services';
+import type {
+  CreatePackagePolicyResponse,
+  NewPackagePolicyInput,
+} from '../../../../../../../../common';
 import {
   FLEET_ELASTIC_AGENT_PACKAGE,
   FLEET_SYSTEM_PACKAGE,
@@ -119,6 +135,15 @@ export const createAgentPolicyIfNeeded = async ({
         await sendBulkInstallPackages([...new Set(packagesToPreinstall)]);
       }
     }
+
+    // Skip policy creation for agentless as it's done through agentless_policies API
+    if (
+      ExperimentalFeaturesService.get().useAgentlessAPIInUI &&
+      newAgentPolicy.supports_agentless
+    ) {
+      return;
+    }
+
     return await createAgentPolicy({
       newAgentPolicy,
       packagePolicy,
@@ -127,9 +152,100 @@ export const createAgentPolicyIfNeeded = async ({
   }
 };
 
+// TODO: This is temporary name generation logic.
+// Will be replaced when https://github.com/elastic/security-team/issues/14283 is completed
+// and users can provide custom cloud connector names via the UI
+function generateCloudConnectorName(
+  pkgPolicy: CreatePackagePolicyRequest['body']
+): string | undefined {
+  // Find the enabled input stream with vars
+  const enabledInput = pkgPolicy.inputs?.find((input) => input.enabled !== false);
+  const vars = enabledInput?.streams?.[0]?.vars;
+
+  if (!vars) {
+    return undefined;
+  }
+
+  // Determine cloud provider from enabled input type
+  const cloudProvider = enabledInput?.type?.match(/aws|azure|gcp/)?.[0] as
+    | CloudProvider
+    | undefined;
+
+  // Extract name based on cloud provider
+  if (cloudProvider === 'aws') {
+    // For AWS, use role_arn if available
+    const roleArn = vars.role_arn?.value || vars['aws.credentials.role_arn']?.value;
+    if (roleArn) {
+      return roleArn;
+    }
+  } else if (cloudProvider === 'azure') {
+    // For Azure, use azure_credentials_cloud_connector_id if available
+    const managedIdentity =
+      vars.azure_credentials_cloud_connector_id?.value ||
+      vars['azure.credentials.cloud_connector_id']?.value;
+    if (managedIdentity) {
+      return managedIdentity;
+    }
+  }
+
+  // Fallback: generate default name with cloud provider prefix
+  if (cloudProvider && pkgPolicy.name) {
+    return `${cloudProvider}-cloud-connector: ${pkgPolicy.name}`;
+  }
+
+  return undefined;
+}
+
 async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) {
   const { policy, forceCreateNeeded } = await prepareInputPackagePolicyDataset(pkgPolicy);
-  const result = await sendCreatePackagePolicy({
+
+  // If agentless and feature enabled use new API
+  if (ExperimentalFeaturesService.get().useAgentlessAPIInUI && policy.supports_agentless) {
+    function formatPackage(pkg: NewPackagePolicy['package']) {
+      return omit(pkg, 'title');
+    }
+
+    const result = await sendCreateAgentlessPolicy(
+      {
+        package: formatPackage(pkgPolicy.package),
+        ...omit(
+          pkgPolicy,
+          'policy_ids',
+          'package',
+          'enabled',
+          'inputs',
+          'vars',
+          'id',
+          'supports_agentless',
+          'supports_cloud_connector',
+          'cloud_connector_id'
+        ),
+        id: pkgPolicy.id ? String(pkgPolicy.id) : undefined,
+        inputs: formatInputs(pkgPolicy.inputs),
+        vars: formatVars(pkgPolicy.vars),
+        // Build cloud_connector object if cloud connectors are supported
+        ...(pkgPolicy.supports_cloud_connector && {
+          cloud_connector: {
+            enabled: true,
+            ...(pkgPolicy.cloud_connector_id && {
+              cloud_connector_id: pkgPolicy.cloud_connector_id,
+            }),
+            // Only pass the name if creating a new connector (no cloud_connector_id)
+            ...(!pkgPolicy.cloud_connector_id && {
+              name: generateCloudConnectorName(pkgPolicy),
+            }),
+          },
+        }),
+      },
+      {
+        format: inputsFormat.Legacy,
+      }
+    );
+
+    return result as CreatePackagePolicyResponse;
+  }
+
+  const result = await sendCreatePackagePolicyForRq({
     ...policy,
     ...(forceCreateNeeded && { force: true }),
   });
@@ -184,7 +300,7 @@ export const updateAgentlessCloudConnectorConfig = (
         ...newAgentPolicy.agentless,
         cloud_connectors: {
           enabled: cloudConnectorPolicyEnabled,
-          target_csp: targetCsp,
+          target_csp: targetCsp as CloudProvider,
         },
       },
     });
@@ -480,6 +596,7 @@ export function useOnSubmit({
         setFormState('CONFIRM');
         return;
       }
+
       let createdPolicy = overrideCreatedAgentPolicy;
       if (!overrideCreatedAgentPolicy) {
         try {
@@ -580,51 +697,53 @@ export function useOnSubmit({
       const forceInstall = force || shouldForceInstallOnAgentless;
 
       setFormState('LOADING');
-      // passing pkgPolicy with policy_id here as setPackagePolicy doesn't propagate immediately
-      const { error, data } = await savePackagePolicy({
-        ...packagePolicy,
-        policy_ids: agentPolicyIdToSave,
-        force: forceInstall,
-      });
-
-      if (!error && data?.item.package) {
-        await ensurePackageKibanaAssetsInstalled({
-          currentSpaceId: spaceId ?? DEFAULT_SPACE_ID,
-          pkgName: data.item.package.name,
-          pkgVersion: data.item.package.version,
-          toasts: notifications.toasts,
+      try {
+        // passing pkgPolicy with policy_id here as setPackagePolicy doesn't propagate immediately
+        const data = await savePackagePolicy({
+          ...packagePolicy,
+          policy_ids: agentPolicyIdToSave,
+          force: forceInstall,
         });
-      }
 
-      const hasAzureArmTemplate = data?.item
-        ? getAzureArmPropsFromPackagePolicy(data.item).templateUrl
-        : false;
-
-      const hasCloudFormation = data?.item
-        ? getCloudFormationPropsFromPackagePolicy(data.item).templateUrl
-        : false;
-
-      const hasGoogleCloudShell = data?.item ? getCloudShellUrlFromPackagePolicy(data.item) : false;
-
-      // Check if agentless is configured in ESS and Serverless until Agentless API migrates to Serverless
-      const isAgentlessConfigured = isAgentlessAgentPolicy(createdPolicy);
-
-      // Removing this code will disabled the Save and Continue button. We need code below update form state and trigger correct modal depending on agent count
-      if (hasFleetAddAgentsPrivileges && !isAgentlessConfigured && !skipConfirmModal) {
-        if (agentCount) {
-          setFormState('SUBMITTED');
-        } else if (hasAzureArmTemplate) {
-          setFormState('SUBMITTED_AZURE_ARM_TEMPLATE');
-        } else if (hasCloudFormation) {
-          setFormState('SUBMITTED_CLOUD_FORMATION');
-        } else if (hasGoogleCloudShell) {
-          setFormState('SUBMITTED_GOOGLE_CLOUD_SHELL');
-        } else {
-          setFormState('SUBMITTED_NO_AGENTS');
+        if (data?.item.package) {
+          await ensurePackageKibanaAssetsInstalled({
+            currentSpaceId: spaceId ?? DEFAULT_SPACE_ID,
+            pkgName: data.item.package.name,
+            pkgVersion: data.item.package.version,
+            toasts: notifications.toasts,
+          });
         }
-      }
+        const hasAzureArmTemplate = data?.item
+          ? getAzureArmPropsFromPackagePolicy(data.item).templateUrl
+          : false;
 
-      if (!error) {
+        const hasCloudFormation = data?.item
+          ? getCloudFormationPropsFromPackagePolicy(data.item).templateUrl
+          : false;
+
+        const hasGoogleCloudShell = data?.item
+          ? getCloudShellUrlFromPackagePolicy(data.item)
+          : false;
+
+        // Check if agentless is configured in ESS and Serverless until Agentless API migrates to Serverless
+        const isAgentlessConfigured = createdPolicy
+          ? isAgentlessAgentPolicy(createdPolicy)
+          : data?.item?.supports_agentless;
+
+        // Removing this code will disabled the Save and Continue button. We need code below update form state and trigger correct modal depending on agent count
+        if (hasFleetAddAgentsPrivileges && !isAgentlessConfigured && !skipConfirmModal) {
+          if (agentCount) {
+            setFormState('SUBMITTED');
+          } else if (hasAzureArmTemplate) {
+            setFormState('SUBMITTED_AZURE_ARM_TEMPLATE');
+          } else if (hasCloudFormation) {
+            setFormState('SUBMITTED_CLOUD_FORMATION');
+          } else if (hasGoogleCloudShell) {
+            setFormState('SUBMITTED_GOOGLE_CLOUD_SHELL');
+          } else {
+            setFormState('SUBMITTED_NO_AGENTS');
+          }
+        }
         setSavedPackagePolicy(data!.item);
 
         const promptForAgentEnrollment =
@@ -674,7 +793,7 @@ export function useOnSubmit({
             : undefined,
           'data-test-subj': 'packagePolicyCreateSuccessToast',
         });
-      } else {
+      } catch (error) {
         if (isVerificationError(error)) {
           setFormState('VALID'); // don't show the add agent modal
           const forceInstallUnverifiedIntegration = await confirmForceInstall(

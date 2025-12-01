@@ -369,15 +369,15 @@
         "signature": [
           "(grokProcessor: Pick<",
           {
-            "pluginId": "@kbn/grok-heuristics",
+            "pluginId": "@kbn/streamlang",
             "scope": "common",
-            "docId": "kibKbnGrokHeuristicsPluginApi",
-            "section": "def-common.GrokProcessorResult",
-            "text": "GrokProcessorResult"
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.GrokProcessor",
+            "text": "GrokProcessor"
           },
           ", \"patterns\" | \"pattern_definitions\">) => string[]"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/review/unwrap_pattern_definitions.ts",
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/utils/grok_pattern_definitions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -393,15 +393,15 @@
             "signature": [
               "Pick<",
               {
-                "pluginId": "@kbn/grok-heuristics",
+                "pluginId": "@kbn/streamlang",
                 "scope": "common",
-                "docId": "kibKbnGrokHeuristicsPluginApi",
-                "section": "def-common.GrokProcessorResult",
-                "text": "GrokProcessorResult"
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.GrokProcessor",
+                "text": "GrokProcessor"
               },
               ", \"patterns\" | \"pattern_definitions\">"
             ],
-            "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/review/unwrap_pattern_definitions.ts",
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/utils/grok_pattern_definitions.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

@@ -137,7 +137,7 @@ export function SelectModelAndInstallKnowledgeBase({
         </EuiLink>
       </EuiText>
 
-      <EuiSpacer size="l" />
+      <EuiSpacer size="s" />
 
       <EuiFlexGroup justifyContent="center">
         <EuiFlexItem grow={false} css={{ width: 320 }}>
@@ -150,15 +150,19 @@ export function SelectModelAndInstallKnowledgeBase({
             onChange={(value) => setSelectedInferenceId(value)}
             disabled={isInstalling}
             data-test-subj="observabilityAiAssistantKnowledgeBaseModelDropdown"
+            aria-label={i18n.translate('xpack.aiAssistant.knowledgeBase.modelSelectAriaLabel', {
+              defaultMessage: 'Default language model',
+            })}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
 
       <EuiFlexGroup justifyContent="center">
         <EuiFlexItem grow={false}>
           <EuiButton
+            size="s"
             color="primary"
             fill
             isLoading={isInstalling}
@@ -172,6 +176,8 @@ export function SelectModelAndInstallKnowledgeBase({
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      <EuiSpacer size="l" />
     </>
   );
 }

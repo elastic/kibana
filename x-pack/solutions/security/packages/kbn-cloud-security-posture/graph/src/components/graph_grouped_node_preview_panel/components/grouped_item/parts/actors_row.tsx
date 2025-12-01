@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiIcon } from '@elastic/eui';
 import { GROUPED_ITEM_ACTOR_TEST_ID, GROUPED_ITEM_TARGET_TEST_ID } from '../../../test_ids';
 import type { AlertItem } from '../types';
@@ -16,6 +17,10 @@ export interface ActorsRowProps {
   target: NonNullable<AlertItem['target']>;
 }
 
+const badgeStyles = css`
+  max-width: 200px;
+`;
+
 export const ActorsRow = ({ actor, target }: ActorsRowProps) => {
   return (
     <EuiFlexGroup wrap gutterSize="xs" responsive={false} alignItems="center" direction="row">
@@ -25,6 +30,7 @@ export const ActorsRow = ({ actor, target }: ActorsRowProps) => {
           iconType={actor.icon}
           iconSide="left"
           data-test-subj={GROUPED_ITEM_ACTOR_TEST_ID}
+          css={badgeStyles}
         >
           {displayEntityName(actor)}
         </EuiBadge>
@@ -38,6 +44,7 @@ export const ActorsRow = ({ actor, target }: ActorsRowProps) => {
           iconType={target.icon}
           iconSide="left"
           data-test-subj={GROUPED_ITEM_TARGET_TEST_ID}
+          css={badgeStyles}
         >
           {displayEntityName(target)}
         </EuiBadge>

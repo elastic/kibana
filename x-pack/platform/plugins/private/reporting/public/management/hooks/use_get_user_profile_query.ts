@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { queryKeys } from '../query_keys';
 

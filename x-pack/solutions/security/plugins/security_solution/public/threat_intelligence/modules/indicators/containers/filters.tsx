@@ -7,17 +7,17 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React, { useMemo } from 'react';
+import { useSelector } from 'react-redux';
+import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useSecurityContext } from '../../../hooks/use_security_context';
 import type { IndicatorsFiltersContextValue } from '../hooks/use_filters_context';
 import { IndicatorsFiltersContext } from '../hooks/use_filters_context';
+import { inputsSelectors } from '../../../../common/store';
 
 /**
  * Container used to wrap components and share the {@link FilterManager} through React context.
  */
 export const IndicatorsFilters: FC<PropsWithChildren<unknown>> = ({ children }) => {
-  const securityContext = useSecurityContext();
-
   const {
     services: {
       data: {
@@ -26,9 +26,9 @@ export const IndicatorsFilters: FC<PropsWithChildren<unknown>> = ({ children }) 
     },
   } = useKibana();
 
-  const globalFilters = securityContext.useFilters();
-  const globalQuery = securityContext.useQuery();
-  const globalTimeRange = securityContext.useGlobalTime();
+  const globalFilters = useSelector(inputsSelectors.globalFiltersQuerySelector());
+  const globalQuery = useSelector(inputsSelectors.globalQuerySelector());
+  const globalTimeRange = useGlobalTime();
 
   const contextValue: IndicatorsFiltersContextValue = useMemo(
     () => ({

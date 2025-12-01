@@ -29,6 +29,7 @@ import {
   ALERT_SEVERITY_IMPROVING,
   ALERT_RULE_EXECUTION_UUID,
   ALERT_STATUS_RECOVERED,
+  ALERT_STATE_NAMESPACE,
 } from '@kbn/rule-data-utils';
 import type { DeepPartial } from '@kbn/utility-types';
 import { get } from 'lodash';
@@ -38,6 +39,7 @@ import type { AlertRule } from '../types';
 import { stripFrameworkFields } from './strip_framework_fields';
 import { nanosToMicros } from './nanos_to_micros';
 import { removeUnflattenedFieldsFromAlert, replaceRefreshableAlertFields } from './format_alert';
+import { filterAlertState } from './filter_alert_state';
 
 interface BuildRecoveredAlertOpts<
   AlertData extends RuleAlertData,
@@ -89,6 +91,9 @@ export const buildRecoveredAlert = <
 
   // Make sure that any alert fields that are updateable are flattened.
   const refreshableAlertFields = replaceRefreshableAlertFields(alert);
+  const alertState = legacyAlert.getState();
+  const filteredAlertState = filterAlertState(alertState);
+  const hasAlertState = Object.keys(filteredAlertState).length > 0;
 
   const alertUpdates = {
     // Update the timestamp to reflect latest update time
@@ -113,17 +118,15 @@ export const buildRecoveredAlert = <
     // Set status to 'recovered'
     [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
     // Set latest duration as recovered alerts should have updated duration
-    ...(legacyAlert.getState().duration
-      ? { [ALERT_DURATION]: nanosToMicros(legacyAlert.getState().duration) }
-      : {}),
+    ...(alertState.duration ? { [ALERT_DURATION]: nanosToMicros(alertState.duration) } : {}),
     // Set end time
-    ...(legacyAlert.getState().end && legacyAlert.getState().start
+    ...(alertState.end && alertState.start
       ? {
-          [ALERT_START]: legacyAlert.getState().start,
-          [ALERT_END]: legacyAlert.getState().end,
+          [ALERT_START]: alertState.start,
+          [ALERT_END]: alertState.end,
           [ALERT_TIME_RANGE]: {
-            gte: legacyAlert.getState().start,
-            lte: legacyAlert.getState().end,
+            gte: alertState.start,
+            lte: alertState.end,
           },
         }
       : {}),
@@ -138,6 +141,7 @@ export const buildRecoveredAlert = <
         ...(rule[ALERT_RULE_TAGS] ?? []),
       ])
     ),
+    ...(hasAlertState ? { [ALERT_STATE_NAMESPACE]: filteredAlertState } : {}),
   };
 
   // Clean the existing alert document so any nested fields that will be updated

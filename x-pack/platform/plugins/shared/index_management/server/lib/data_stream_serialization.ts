@@ -13,7 +13,7 @@ import type { DataStream, EnhancedDataStreamFromEs, Health } from '../../common'
 export function deserializeDataStream(
   dataStreamFromEs: EnhancedDataStreamFromEs,
   isLogsdbEnabled: boolean,
-  failureStoreSettings?: { enabled?: string[] | string }
+  failureStoreSettings?: { enabled?: string[] | string; defaultRetentionPeriod?: string }
 ): DataStream {
   const {
     name,
@@ -35,6 +35,7 @@ export function deserializeDataStream(
     global_max_retention: globalMaxRetention,
     next_generation_managed_by: nextGenerationManagedBy,
     index_mode: indexMode,
+    failure_store: failureStore,
   } = dataStreamFromEs;
 
   const meteringStorageSize =
@@ -58,15 +59,16 @@ export function deserializeDataStream(
 
     if (matchesPattern) {
       // If matches pattern, enable unless explicitly disabled
-      const isExplicitlyDisabled = dataStreamFromEs?.failure_store?.enabled === false;
+      const isExplicitlyDisabled = failureStore?.enabled === false;
       failureStoreEnabled = !isExplicitlyDisabled;
     }
   }
 
   // If explicitly enabled in data stream config, always enable
-  if (dataStreamFromEs?.failure_store?.enabled === true) {
+  if (failureStore?.enabled === true) {
     failureStoreEnabled = true;
   }
+  const failureStoreLifecycle = failureStore?.lifecycle;
 
   return {
     name,
@@ -108,6 +110,14 @@ export function deserializeDataStream(
     },
     nextGenerationManagedBy,
     failureStoreEnabled,
+    failureStoreRetention: {
+      customRetentionPeriod:
+        failureStoreLifecycle?.enabled && failureStoreLifecycle?.data_retention
+          ? failureStoreLifecycle.data_retention
+          : undefined,
+      defaultRetentionPeriod: failureStoreSettings?.defaultRetentionPeriod,
+      retentionDisabled: failureStoreLifecycle?.enabled === false,
+    },
     indexMode: (indexMode ??
       (isLogsdbEnabled && /^logs-[^-]+-[^-]+$/.test(name)
         ? LOGSDB_INDEX_MODE

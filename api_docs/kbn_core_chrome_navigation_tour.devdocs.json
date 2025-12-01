@@ -188,9 +188,9 @@
         "label": "Tour",
         "description": [],
         "signature": [
-          "({ tourManager }: ",
+          "(props: ",
           "TourProps",
-          ") => React.JSX.Element | null"
+          ") => React.JSX.Element"
         ],
         "path": "src/core/packages/chrome/navigation-tour/src/tour.tsx",
         "deprecated": false,
@@ -201,7 +201,7 @@
             "id": "def-public.Tour.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ tourManager }",
+            "label": "props",
             "description": [],
             "signature": [
               "TourProps"
@@ -256,7 +256,7 @@
         "label": "TourStepId",
         "description": [],
         "signature": [
-          "\"sidenav-home\" | \"sidenav-more\" | \"sidenav-manage-data\""
+          "\"sidenav-home\" | \"sidenav-more\" | \"sidenav-manage-data\" | \"sidenav-search-getting-started\""
         ],
         "path": "src/core/packages/chrome/navigation-tour/src/types.ts",
         "deprecated": false,

@@ -75,9 +75,10 @@ const stubSecurityDataView = createStubDataView({
 const getDefaultIndexes = (type: string) => {
   return [
     stubSecurityDataView.getIndexPattern(),
+    ...(type === 'user' ? ['.entity_analytics.monitoring.users-default'] : []),
     '.asset-criticality.asset-criticality-default',
     'risk-score.risk-score-latest-default',
-    `.entities.v1.reset.security_${type}_default`,
+    `.entities.v1.reset.security_${type}_default*`,
     `.entities.v1.updates.security_${type}_default*`,
   ];
 };

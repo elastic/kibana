@@ -2,7 +2,7 @@
   "type": "shared-browser",
   "id": "@kbn/security-solution-distribution-bar",
   "owner": [
-    "@elastic/kibana-cloud-security-posture"
+    "@elastic/contextual-security-apps"
   ],
   "group": "security",
   "visibility": "private"

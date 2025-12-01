@@ -25,7 +25,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { act } from 'react-dom/test-utils';
 import type { HeatmapRenderProps, HeatmapArguments } from '../../common';
 import HeatmapComponent from './heatmap_component';
-import { LegendSize } from '@kbn/visualizations-plugin/common';
+import { LegendSize } from '@kbn/chart-expressions-common';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 const actWithTimeout = (action: Function, timer: number = 1) =>

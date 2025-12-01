@@ -338,7 +338,7 @@ export default ({ getService }: FtrProviderContext) => {
         type: 'alert',
         id: ruleId,
         provider: 'alerting',
-        actions: new Map([['active-instance', { gte: 1 }]]),
+        actions: new Map([['execute', { gte: 1 }]]),
       });
     });
   };

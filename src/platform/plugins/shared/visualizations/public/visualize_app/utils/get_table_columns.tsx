@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiBetaBadge, EuiButton, EuiEmptyPrompt, EuiIcon, EuiBadge } from '@elastic/eui';
+import { EuiBetaBadge, EuiButton, EuiEmptyPrompt, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CustomSortingOptions } from '@kbn/content-management-table-list-view-table';
@@ -49,23 +49,20 @@ const getBadge = (item: VisualizationListItem) => {
 };
 
 const renderItemTypeIcon = (item: VisualizationListItem) => {
-  let icon;
   if (item.image) {
-    icon = (
+    return (
       <img className="visListingTable__typeImage" aria-hidden="true" alt="" src={item.image} />
-    );
-  } else {
-    icon = (
-      <EuiIcon
-        className="visListingTable__typeIcon"
-        aria-hidden="true"
-        type={item.icon || 'empty'}
-        size="m"
-      />
     );
   }
 
-  return icon;
+  return (
+    <EuiIcon
+      className="visListingTable__typeIcon"
+      aria-hidden="true"
+      type={item.icon || 'empty'}
+      size="m"
+    />
+  );
 };
 
 export const getCustomColumn = () => {
@@ -76,18 +73,50 @@ export const getCustomColumn = () => {
     }),
     sortable: true,
     width: '150px',
-    render: (field: string, record: VisualizationListItem) =>
-      !record.error ? (
-        <span>
-          {renderItemTypeIcon(record)}
-          {record.typeTitle}
-          {getBadge(record)}
-        </span>
-      ) : (
-        <EuiBadge iconType="warning" color="warning">
-          {record.error}
-        </EuiBadge>
-      ),
+    render: (field: string, record: VisualizationListItem) => {
+      if (!record.error) {
+        return (
+          <span>
+            {renderItemTypeIcon(record)}
+            {record.typeTitle}
+            {getBadge(record)}
+          </span>
+        );
+      }
+
+      if (!record.typeTitle) {
+        return (
+          <EuiToolTip position="left" content={record.error}>
+            <span>
+              <EuiIcon
+                className="visListingTable__typeIcon"
+                aria-hidden="true"
+                color="warning"
+                type="warning"
+                size="m"
+              />
+              <FormattedMessage id="visualizations.listing.type.unknown" defaultMessage="Unknown" />
+            </span>
+          </EuiToolTip>
+        );
+      }
+
+      // We should have a way to display generic item errors from TableListViewTable
+      return (
+        <EuiToolTip position="left" content={record.error}>
+          <span>
+            <EuiIcon
+              className="visListingTable__typeIcon"
+              aria-hidden="true"
+              color="danger"
+              type="error"
+              size="m"
+            />
+            <FormattedMessage id="visualizations.listing.type.error" defaultMessage="Error" />
+          </span>
+        </EuiToolTip>
+      );
+    },
   };
 };
 

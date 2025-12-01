@@ -56,25 +56,32 @@ export function extractPanelsState(state: { [key: string]: unknown }): {
   const standardizedPanels: DashboardState['panels'] = panels.map((legacyPanel) => {
     const panel = typeof legacyPanel === 'object' ? { ...legacyPanel } : {};
 
+    if (panel.panels) {
+      const { panels: sectionPanels, savedObjectReferences: sectionPanelReferences } =
+        extractPanelsState({ panels: panel.panels });
+      savedObjectReferences.push(...(sectionPanelReferences ?? []));
+      panel.panels = sectionPanels;
+    }
+
     // < 8.17 panels state stored panelConfig as embeddableConfig
     if (panel?.embeddableConfig) {
       panel.config = panel.embeddableConfig;
       delete panel.embeddableConfig;
     }
 
-    // < 9.3 panels state stored config as panelConfig
+    // < 9.2 panels state stored config as panelConfig
     if (panel?.panelConfig) {
       panel.config = panel.panelConfig;
       delete panel.panelConfig;
     }
 
-    // < 9.3 grid stored as gridData
+    // < 9.2 grid stored as gridData
     if (panel?.gridData) {
       panel.grid = panel.gridData;
       delete panel.gridData;
     }
 
-    // < 9.3 uid stored as panelIndex
+    // < 9.2 uid stored as panelIndex
     if (panel?.panelIndex) {
       panel.uid = panel.panelIndex;
       delete panel.panelIndex;
@@ -106,6 +113,15 @@ export function extractPanelsState(state: { [key: string]: unknown }): {
           },
         ])
       );
+    }
+
+    // <9.3 panel state included "i" in grid
+    if (panel.grid) {
+      const { i, ...rest } = panel.grid;
+      panel.grid = rest;
+      if (i && !panel.uid) {
+        panel.uid = i;
+      }
     }
 
     return panel;

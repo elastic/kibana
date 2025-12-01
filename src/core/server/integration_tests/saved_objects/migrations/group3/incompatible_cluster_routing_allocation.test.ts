@@ -15,8 +15,8 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { LogRecord } from '@kbn/logging';
 import { retryAsync } from '@kbn/core-saved-objects-migration-server-mocks';
 import { BASELINE_TEST_ARCHIVE_SMALL } from '../kibana_migrator_archive_utils';
-import { getRelocatingMigratorTestKit } from '../kibana_migrator_test_kit.fixtures';
-import { clearLog } from '../kibana_migrator_test_kit';
+import { getRelocatingMigratorTestKit } from '@kbn/migrator-test-kit/fixtures';
+import { clearLog } from '@kbn/migrator-test-kit';
 
 const logFilePath = Path.join(__dirname, 'incompatible_cluster_routing_allocation.log');
 

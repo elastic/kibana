@@ -31,9 +31,7 @@ import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_
 import { UPGRADE_AGENT_FOR_RESPONDER } from '../../../../../common/translations';
 import type { CommandDefinition } from '../../../console';
 
-// TODO This tests need revisting, there are problems with `enterComment` after the
-// upgrade to user-event v14 https://github.com/elastic/kibana/pull/189949
-describe.skip('When using the kill-process action from response actions console', () => {
+describe('When using the kill-process action from response actions console', () => {
   let user: UserEvent;
   let mockedContext: AppContextTestRender;
   let render: (
@@ -168,7 +166,7 @@ describe.skip('When using the kill-process action from response actions console'
     await enterConsoleCommand(renderResult, user, 'kill-process --pid 123 --entityId 123wer');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-      'This command supports only one of the following arguments: --pid, --entityId'
+      'This command supports only one of the following arguments: --entityId, --pid'
     );
   });
 
@@ -177,7 +175,7 @@ describe.skip('When using the kill-process action from response actions console'
     await enterConsoleCommand(renderResult, user, 'kill-process');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-      'This command supports only one of the following arguments: --pid, --entityId'
+      'This command supports only one of the following arguments: --entityId, --pid'
     );
   });
 
@@ -410,9 +408,6 @@ describe.skip('When using the kill-process action from response actions console'
 
   describe('and the agent type is `SentinelOne`', () => {
     beforeEach(() => {
-      mockedContext.setExperimentalFlag({
-        responseActionsSentinelOneKillProcessEnabled: true,
-      });
       setConsoleCommands(undefined, 'sentinel_one');
     });
 
@@ -426,10 +421,10 @@ describe.skip('When using the kill-process action from response actions console'
             'Kill/terminate a process' +
             'Usage' +
             'kill-process --processName [--comment]' +
-            'Example' +
-            'kill-process --processName="notepad" --comment="kill malware"' +
             'Required parameters--processName - The process name to kill' +
-            'Optional parameters--comment - A comment to go along with the action'
+            'Optional parameters--comment - A comment to go along with the action' +
+            'Example' +
+            'kill-process --processName="notepad" --comment="kill malware"'
         );
       });
     });
@@ -463,6 +458,9 @@ describe.skip('When using the kill-process action from response actions console'
     });
 
     it('should call API with correct payload for SentinelOne kill-process', async () => {
+      apiMocks.responseProvider.killProcess.mockDelay.mockImplementation(
+        () => new Promise((r) => setTimeout(r, 100))
+      );
       await render();
       await enterConsoleCommand(
         renderResult,
@@ -485,37 +483,6 @@ describe.skip('When using the kill-process action from response actions console'
             }),
           })
         );
-      });
-    });
-
-    describe('and `responseActionsSentinelOneKillProcessEnabled` feature flag is disabled', () => {
-      beforeEach(() => {
-        mockedContext.setExperimentalFlag({ responseActionsSentinelOneKillProcessEnabled: false });
-        setConsoleCommands(undefined, 'sentinel_one');
-      });
-
-      it('should error if kill-process is entered', async () => {
-        await render();
-        await enterConsoleCommand(renderResult, user, 'kill-process --processName=foo');
-
-        await waitFor(() => {
-          expect(renderResult.getByTestId('test-validationError')).toHaveTextContent(
-            'Unsupported actionSupport for kill-process is not currently available for SentinelOne.'
-          );
-        });
-
-        await waitFor(() => {
-          expect(apiMocks.responseProvider.killProcess).not.toHaveBeenCalled();
-        });
-      });
-
-      it('should not display kill-process in help', async () => {
-        await render();
-        consoleSelectors.openHelpPanel();
-
-        expect(
-          renderResult.queryByTestId('test-commandList-Responseactions-kill-process')
-        ).toBeNull();
       });
     });
   });

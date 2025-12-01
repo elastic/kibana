@@ -11,6 +11,7 @@ import React, { useCallback, useMemo } from 'react';
 import { useCurrentEuiBreakpoint } from '@elastic/eui';
 import styled from '@emotion/styled';
 import type { DataSchemaFormat, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import moment from 'moment';
 import { SwitchSchemaMessage } from '../../../../components/shared/switch_schema_message';
 import { useTimeRangeMetadataContext } from '../../../../hooks/use_time_range_metadata';
 import type {
@@ -28,6 +29,7 @@ import { Legend } from './waffle/legend';
 import { useAssetDetailsFlyoutState } from '../hooks/use_asset_details_flyout_url_state';
 import { AssetDetailsFlyout } from './waffle/asset_details_flyout';
 import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
+import { useWaffleTimeContext } from '../hooks/use_waffle_time';
 
 export interface KueryFilterQuery {
   kind: 'kuery';
@@ -39,7 +41,6 @@ interface Props {
   nodeType: InventoryItemType;
   nodes: SnapshotNode[];
   loading: boolean;
-  reload: () => void;
   onDrilldown: (filter: string) => void;
   currentTime: number;
   view: string;
@@ -58,7 +59,6 @@ export const NodesOverview = ({
   loading,
   nodes,
   nodeType,
-  reload,
   view,
   currentTime,
   options,
@@ -72,6 +72,7 @@ export const NodesOverview = ({
   const currentBreakpoint = useCurrentEuiBreakpoint();
   const [{ detailsItemId, entityType }, setFlyoutUrlState] = useAssetDetailsFlyoutState();
   const { onPageReady } = usePerformanceContext();
+  const { jumpToTime } = useWaffleTimeContext();
   const { data: timeRangeMetadata } = useTimeRangeMetadataContext();
   const { preferredSchema } = useWaffleOptionsContext();
   const schemas: DataSchemaFormat[] = useMemo(
@@ -111,7 +112,7 @@ export const NodesOverview = ({
           defaultMessage: 'Check for new data',
         }),
         onRefetch: () => {
-          reload();
+          jumpToTime(moment().valueOf());
         },
       };
 

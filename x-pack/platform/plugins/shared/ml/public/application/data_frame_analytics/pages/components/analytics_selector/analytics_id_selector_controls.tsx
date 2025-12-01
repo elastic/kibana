@@ -53,6 +53,7 @@ const SelectorControl = ({ analyticsId, 'data-test-subj': dataTestSubj }: Select
               defaultMessage: 'Job details',
             }),
             icon: 'eye',
+            'data-test-subj': `mlAnalyticsJobDetailsFlyoutButton-${analyticsId}`,
             onClick: () => {
               setActiveJobId(analyticsId);
               setActiveFlyout(FlyoutType.DATA_FRAME_ANALYTICS_DETAILS);
@@ -108,7 +109,7 @@ export const AnalyticsIdSelectorControls: FC<Props> = ({
           {selectedId ? (
             <SelectorControl
               key={`${selectedId}-id`}
-              data-test-subj={`mlAnalyticsIdSelectionBadge ${selectedId}`}
+              data-test-subj={`mlAnalyticsIdSelectionBadge-${selectedId}`}
               analyticsId={selectedId}
             />
           ) : null}
@@ -127,6 +128,13 @@ export const AnalyticsIdSelectorControls: FC<Props> = ({
             iconType="pencil"
             onClick={setIsIdSelectorFlyoutVisible.bind(null, true)}
             data-test-subj="mlButtonEditAnalyticsIdSelection"
+            aria-label={i18n.translate(
+              'xpack.ml.overview.dataFrameAnalytics.analyticsIdSelector.editSelectionForAriaLabel',
+              {
+                defaultMessage: 'Edit selection for {id}',
+                values: { id: selectedId },
+              }
+            )}
           >
             <FormattedMessage
               id="xpack.ml.dataframe.analytics.editSelection"
@@ -144,6 +152,12 @@ export const AnalyticsIdSelectorControls: FC<Props> = ({
               onClick={redirectToDfaJobManagement}
               disabled={!canGetDataFrameAnalytics}
               data-test-subj="mlJobSelectorManageJobsButton"
+              aria-label={i18n.translate(
+                'xpack.ml.overview.dataFrameAnalytics.jobSelector.manageJobsForAriaLabel',
+                {
+                  defaultMessage: 'Manage jobs',
+                }
+              )}
             >
               {canCreateDataFrameAnalytics ? (
                 <FormattedMessage

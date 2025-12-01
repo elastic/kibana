@@ -7,7 +7,7 @@
 
 import chroma from 'chroma-js';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -63,6 +63,9 @@ export default function AlertDetailsAppSection({ alert }: AppSectionProps) {
   const alertStart = alert.fields[ALERT_START];
   const alertEnd = alert.fields[ALERT_END];
   const groups = alert.fields[ALERT_GROUP];
+  const additionalFilters = useMemo(() => getGroupFilters(groups), [groups]);
+  const hasEvaluationValues: boolean =
+    alert.fields[ALERT_EVALUATION_VALUES]?.some((value) => value != null) ?? false;
 
   const chartTitleAndTooltip: Array<{ title: string; tooltip: string }> = [];
 
@@ -160,7 +163,7 @@ export default function AlertDetailsAppSection({ alert }: AppSectionProps) {
                 </EuiFlexItem>
                 <EuiFlexItem grow={5}>
                   <RuleConditionChart
-                    additionalFilters={getGroupFilters(groups)}
+                    additionalFilters={additionalFilters}
                     annotations={annotations}
                     chartOptions={{
                       // For alert details page, the series type needs to be changed to 'bar_stacked'
@@ -179,7 +182,9 @@ export default function AlertDetailsAppSection({ alert }: AppSectionProps) {
           </EuiFlexItem>
         );
       })}
-      {aiopsEnabled && <LogRateAnalysis alert={alert} dataView={dataView} services={services} />}
+      {aiopsEnabled && hasEvaluationValues && (
+        <LogRateAnalysis alert={alert} dataView={dataView} services={services} />
+      )}
     </EuiFlexGroup>
   );
 }

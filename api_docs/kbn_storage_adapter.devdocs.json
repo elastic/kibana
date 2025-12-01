@@ -12,12 +12,83 @@
     "classes": [
       {
         "parentPluginId": "@kbn/storage-adapter",
+        "id": "def-server.BulkOperationError",
+        "type": "Class",
+        "tags": [],
+        "label": "BulkOperationError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/storage-adapter",
+            "scope": "server",
+            "docId": "kibKbnStorageAdapterPluginApi",
+            "section": "def-server.BulkOperationError",
+            "text": "BulkOperationError"
+          },
+          " extends Error"
+        ],
+        "path": "src/platform/packages/shared/kbn-storage-adapter/src/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/storage-adapter",
+            "id": "def-server.BulkOperationError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-storage-adapter/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/storage-adapter",
+                "id": "def-server.BulkOperationError.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-storage-adapter/src/errors.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/storage-adapter",
+                "id": "def-server.BulkOperationError.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "response",
+                "description": [],
+                "signature": [
+                  "BulkResponse"
+                ],
+                "path": "src/platform/packages/shared/kbn-storage-adapter/src/errors.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/storage-adapter",
         "id": "def-server.StorageIndexAdapter",
         "type": "Class",
         "tags": [],
         "label": "StorageIndexAdapter",
         "description": [
-          "\nAdapter for writing and reading documents to/from Elasticsearch,\nusing plain indices.\n\nTODO:\n- Index Lifecycle Management\n- Schema upgrades w/ fallbacks"
+          "\nAdapter for writing and reading documents to/from Elasticsearch,\nusing plain indices.\n\nTODO:\n- Schema upgrades w/ fallbacks"
         ],
         "signature": [
           {
@@ -293,7 +364,14 @@
                     "section": "def-server.StorageClientBulkOperation",
                     "text": "StorageClientBulkOperation"
                   },
-                  "<TDocumentType>[]; }"
+                  "<TDocumentType>[]; } & ",
+                  {
+                    "pluginId": "@kbn/storage-adapter",
+                    "scope": "server",
+                    "docId": "kibKbnStorageAdapterPluginApi",
+                    "section": "def-server.StorageClientBulkOptions",
+                    "text": "StorageClientBulkOptions"
+                  }
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
                 "deprecated": false,
@@ -470,15 +548,15 @@
                 "label": "request",
                 "description": [],
                 "signature": [
-                  "{ id: string; sort?: ",
+                  "{ id: string; explain?: boolean | undefined; scroll?: ",
+                  "Duration",
+                  " | undefined; sort?: ",
                   "Sort",
                   " | undefined; aggs?: Record<string, ",
                   "AggregationsAggregationContainer",
                   "> | undefined; slice?: ",
                   "SlicedScroll",
-                  " | undefined; version?: undefined; explain?: boolean | undefined; scroll?: ",
-                  "Duration",
-                  " | undefined; size?: number | undefined; fields?: (string | ",
+                  " | undefined; version?: undefined; size?: number | undefined; fields?: (string | ",
                   "QueryDslFieldAndFormat",
                   ")[] | undefined; query?: ",
                   "QueryDslQueryContainer",
@@ -559,6 +637,38 @@
             "trackAdoption": false,
             "returnComment": [],
             "children": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/storage-adapter",
+        "id": "def-server.StorageClientBulkOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "StorageClientBulkOptions",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/storage-adapter",
+            "id": "def-server.StorageClientBulkOptions.throwOnFail",
+            "type": "CompoundType",
+            "tags": [
+              "default"
+            ],
+            "label": "throwOnFail",
+            "description": [
+              "\nIf true, throws BulkOperationError when any operation in the bulk request fails.\nIf false (default), returns the response with errors field populated, similar to Promise.allSettled behavior."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -780,7 +890,9 @@
         "type": "Type",
         "tags": [],
         "label": "StorageClientBulk",
-        "description": [],
+        "description": [
+          "\nPerforms bulk operations on documents.\n\nBy default, behaves similar to Promise.allSettled - individual operation failures\nare returned in the response without throwing an error. Set `throwOnFail: true`\nto throw a BulkOperationError when any operation fails."
+        ],
         "signature": [
           "(request: ",
           {
@@ -817,7 +929,14 @@
                 "section": "def-server.StorageClientBulkOperation",
                 "text": "StorageClientBulkOperation"
               },
-              "<TDocumentType>[]; }"
+              "<TDocumentType>[]; } & ",
+              {
+                "pluginId": "@kbn/storage-adapter",
+                "scope": "server",
+                "docId": "kibKbnStorageAdapterPluginApi",
+                "section": "def-server.StorageClientBulkOptions",
+                "text": "StorageClientBulkOptions"
+              }
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
             "deprecated": false,
@@ -859,7 +978,14 @@
             "section": "def-server.StorageClientBulkOperation",
             "text": "StorageClientBulkOperation"
           },
-          "<TDocument>[]; }"
+          "<TDocument>[]; } & ",
+          {
+            "pluginId": "@kbn/storage-adapter",
+            "scope": "server",
+            "docId": "kibKbnStorageAdapterPluginApi",
+            "section": "def-server.StorageClientBulkOptions",
+            "text": "StorageClientBulkOptions"
+          }
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
         "deprecated": false,
@@ -1041,15 +1167,15 @@
             "label": "request",
             "description": [],
             "signature": [
-              "{ id: string; sort?: ",
+              "{ id: string; explain?: boolean | undefined; scroll?: ",
+              "Duration",
+              " | undefined; sort?: ",
               "Sort",
               " | undefined; aggs?: Record<string, ",
               "AggregationsAggregationContainer",
               "> | undefined; slice?: ",
               "SlicedScroll",
-              " | undefined; version?: undefined; explain?: boolean | undefined; scroll?: ",
-              "Duration",
-              " | undefined; size?: number | undefined; fields?: (string | ",
+              " | undefined; version?: undefined; size?: number | undefined; fields?: (string | ",
               "QueryDslFieldAndFormat",
               ")[] | undefined; query?: ",
               "QueryDslQueryContainer",
@@ -1124,15 +1250,15 @@
         "label": "StorageClientGetRequest",
         "description": [],
         "signature": [
-          "{ id: string; sort?: ",
+          "{ id: string; explain?: boolean | undefined; scroll?: ",
+          "Duration",
+          " | undefined; sort?: ",
           "Sort",
           " | undefined; aggs?: Record<string, ",
           "AggregationsAggregationContainer",
           "> | undefined; slice?: ",
           "SlicedScroll",
-          " | undefined; version?: undefined; explain?: boolean | undefined; scroll?: ",
-          "Duration",
-          " | undefined; size?: number | undefined; fields?: (string | ",
+          " | undefined; version?: undefined; size?: number | undefined; fields?: (string | ",
           "QueryDslFieldAndFormat",
           ")[] | undefined; query?: ",
           "QueryDslQueryContainer",

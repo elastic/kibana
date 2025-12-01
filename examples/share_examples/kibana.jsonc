@@ -3,6 +3,8 @@
   "id": "@kbn/share-examples-plugin",
   "owner": "@elastic/appex-sharedux",
   "description": "Small demos of share plugin usage",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "shareExamples",
     "server": false,

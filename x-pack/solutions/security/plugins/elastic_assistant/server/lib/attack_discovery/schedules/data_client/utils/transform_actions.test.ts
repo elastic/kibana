@@ -6,13 +6,11 @@
  */
 
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import { loggerMock } from '@kbn/logging-mocks';
 
 import { convertScheduleActionsToAlertingActions } from './transform_actions';
 import { getScheduleActions } from '../../../../../__mocks__/attack_discovery_schedules.mock';
 
 const mockActionsClient = actionsClientMock.create();
-const mockLogger = loggerMock.create();
 
 describe('convertScheduleActionsToAlertingActions', () => {
   const systemAction = getScheduleActions().find((action) => action.actionTypeId === '.cases');
@@ -29,7 +27,6 @@ describe('convertScheduleActionsToAlertingActions', () => {
     const scheduleActions = getScheduleActions();
     const { actions, systemActions } = convertScheduleActionsToAlertingActions({
       actionsClient: mockActionsClient,
-      logger: mockLogger,
       scheduleActions,
     });
 
@@ -53,45 +50,6 @@ describe('convertScheduleActionsToAlertingActions', () => {
         params: { message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts' },
       },
     ]);
-    expect(systemActions).toEqual([
-      {
-        id: '74ad56aa-cc3d-45a4-a944-654b625ed054',
-        actionTypeId: '.cases',
-        params: {
-          subAction: 'run',
-          subActionParams: {
-            timeWindow: '5m',
-            reopenClosedCases: false,
-            groupingBy: ['kibana.alert.attack_discovery.alert_ids'],
-            templateId: null,
-          },
-        },
-      },
-    ]);
-  });
-
-  it('should log an error when there is a non system action with undefined group', async () => {
-    const scheduleActions = getScheduleActions().map(({ group, ...restOfAction }) => {
-      return restOfAction;
-    });
-
-    const { actions, systemActions } = convertScheduleActionsToAlertingActions({
-      actionsClient: mockActionsClient,
-      logger: mockLogger,
-      scheduleActions,
-    });
-
-    expect(mockLogger.error).toHaveBeenCalledTimes(2);
-    expect(mockLogger.error).toHaveBeenNthCalledWith(
-      1,
-      'Missing group for non-system action ab81485e-3685-4215-9804-7693d0271d1b of type .email'
-    );
-    expect(mockLogger.error).toHaveBeenNthCalledWith(
-      2,
-      'Missing group for non-system action a6c9e92a-b701-41f3-9e26-aca7563e6908 of type .slack'
-    );
-
-    expect(actions).toEqual([]);
     expect(systemActions).toEqual([
       {
         id: '74ad56aa-cc3d-45a4-a944-654b625ed054',

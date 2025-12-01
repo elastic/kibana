@@ -52,6 +52,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - [Common terminology](./prebuilt_rules_common_info.md#common-terminology).
 - **Rule source**, or **`ruleSource`**: a rule field that defines the rule's origin. Can be `internal` or `external`. Currently, custom rules have `internal` rule source and prebuilt rules have `external` rule source.
 - **`is_customized`**: a field within `ruleSource` that exists when rule source is set to `external`. It is a boolean value based on if the rule has been changed from its base version.
+- **`customized_fields`**: a field within `ruleSource` that exists when rule source is set to `external`. It is an array of objects containing field names that have been changed from their base version counterparts.
 - **rule customization**: a change to a customizable field of a prebuilt rule. Full list of customizable rule fields can be found in [Common information about prebuilt rules](./prebuilt_rules_common_info.md#customizable-rule-fields).
 
 ## Requirements
@@ -105,6 +106,7 @@ When user reverts that rule customizations
 Then rule customizations should be reset
 And rule data should match the base version
 And the rule's `is_customized` value should be false
+And the rule's `customized_fields` value should be an empty array
 ```
 
 #### **Scenario: Showing a customizations diff view in the flyout**
@@ -195,6 +197,7 @@ And that rule has an existing base version
 And that rule has a custom <customization_adjacent_field_name> field different from the base version
 When user makes a request to revert the rule customizations
 Then the rule's `is_customized` value should be false
+And the rule's `customized_fields` value should be an empty array
 And the <customization_adjacent_field_name> field stay unchanged
 ```
 

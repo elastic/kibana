@@ -305,7 +305,7 @@
           "\nPublic-facing interface\nApps should use this interface to build job params. The browserTimezone and version\nfields become automatically provided by Reporting"
         ],
         "signature": [
-          "{ title: string; columns?: string[] | undefined; searchSource: ",
+          "{ title: string; columns?: string[] | undefined; forceNow?: string | undefined; searchSource: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -313,7 +313,7 @@
             "section": "def-common.SerializedSearchSourceFields",
             "text": "SerializedSearchSourceFields"
           },
-          "; forceNow?: string | undefined; layout?: { id?: ",
+          "; layout?: { id?: ",
           {
             "pluginId": "screenshotting",
             "scope": "common",

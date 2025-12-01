@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { BehaviorSubject, type Subscription } from 'rxjs';
+import { type Subscription } from 'rxjs';
 
-import type { Plugin, AppUpdater } from '@kbn/core/public';
+import type { Plugin } from '@kbn/core/public';
 import {
   type CoreSetup,
   type CoreStart,
   type AppMountParameters,
   type PluginInitializerContext,
   DEFAULT_APP_CATEGORIES,
-  AppStatus,
 } from '@kbn/core/public';
 import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_PATH } from '../common';
 import { docLinks } from '../common/doc_links';
 import type {
   AppPluginSetupDependencies,
   AppPluginStartDependencies,
+  AppServices,
   SearchPlaygroundConfigType,
   SearchPlaygroundPluginSetup,
   SearchPlaygroundPluginStart,
@@ -31,8 +31,9 @@ export class SearchPlaygroundPlugin
   implements Plugin<SearchPlaygroundPluginSetup, SearchPlaygroundPluginStart>
 {
   private config: SearchPlaygroundConfigType;
-  private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private licenseSubscription: Subscription | undefined;
+  private hasRequiredLicense = false;
+  private hasExpiredLicense = false;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<SearchPlaygroundConfigType>();
@@ -49,25 +50,25 @@ export class SearchPlaygroundPlugin
       appRoute: PLUGIN_PATH,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       euiIconType: 'logoElasticsearch',
-      status: AppStatus.inaccessible,
       title: PLUGIN_NAME,
-      updater$: this.appUpdater$,
-      async mount({ element, history }: AppMountParameters) {
+      mount: async ({ element, history }: AppMountParameters) => {
         const { renderApp } = await import('./application');
         const [coreStart, depsStart] = await core.getStartServices();
 
         coreStart.chrome.docTitle.change(PLUGIN_NAME);
         depsStart.searchNavigation?.handleOnAppMount();
 
-        const startDeps: AppPluginStartDependencies = {
+        const startDeps: AppServices = {
           ...depsStart,
           history,
+          licenseManagement: deps.licenseManagement,
+          getLicenseStatus: this.getLicenseStatus.bind(this),
         };
 
         return renderApp(coreStart, startDeps, element);
       },
       visibleIn: ['sideNav', 'globalSearch'],
-      order: 2,
+      order: 3,
     });
 
     registerLocators(deps.share);
@@ -82,14 +83,9 @@ export class SearchPlaygroundPlugin
     docLinks.setDocLinks(core.docLinks.links);
 
     this.licenseSubscription = licensing.license$.subscribe((license) => {
-      const status: AppStatus =
-        license && license.isAvailable && license.isActive && license.hasAtLeast('enterprise')
-          ? AppStatus.accessible
-          : AppStatus.inaccessible;
-
-      this.appUpdater$.next(() => ({
-        status,
-      }));
+      this.hasRequiredLicense =
+        license && license.isAvailable && license.isActive && license.hasAtLeast('enterprise');
+      this.hasExpiredLicense = license && license.status === 'expired';
     });
     return {};
   }
@@ -99,5 +95,12 @@ export class SearchPlaygroundPlugin
       this.licenseSubscription.unsubscribe();
       this.licenseSubscription = undefined;
     }
+  }
+
+  private getLicenseStatus() {
+    return {
+      hasRequiredLicense: this.hasRequiredLicense,
+      hasExpiredLicense: this.hasExpiredLicense,
+    };
   }
 }

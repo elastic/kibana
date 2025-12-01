@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
-import React from 'react';
+import React, { useMemo } from 'react';
 import moment from 'moment';
 import {
   EuiFlexGroup,
@@ -68,6 +68,8 @@ export function AlertDetailsAppSection({ alert, rule }: AppSectionProps) {
   };
   const alertEnd = alert.fields[ALERT_END];
   const alertStart = alert.fields[ALERT_START];
+
+  const additionalFilters = useMemo(() => getGroupFilters(groups), [groups]);
 
   const alertStartAnnotation: PointInTimeEventAnnotationConfig = {
     label: 'Alert',
@@ -161,7 +163,7 @@ export function AlertDetailsAppSection({ alert, rule }: AppSectionProps) {
                 <EuiFlexItem grow={5}>
                   {metricsView && (
                     <RuleConditionChart
-                      additionalFilters={getGroupFilters(groups)}
+                      additionalFilters={additionalFilters}
                       metricExpression={{
                         metrics: metricExpression,
                         threshold: criterion.threshold,

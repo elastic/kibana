@@ -27,6 +27,7 @@ import { appendAssistantMessageToConversation, langChainExecute } from './helper
 import { getPrompt } from '../lib/prompt';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import expect from 'expect';
+import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 const license = licensingMock.createLicenseMock();
 const actionsClient = actionsClientMock.create();
@@ -176,20 +177,16 @@ describe('postActionsConnectorExecuteRoute', () => {
       }
     );
     actionsClient.getBulk.mockResolvedValue([
-      {
+      createMockConnector({
         id: '1',
-        isPreconfigured: false,
-        isSystemAction: false,
-        isDeprecated: false,
         name: 'my name',
         actionTypeId: '.gen-ai',
-        isMissingSecrets: false,
         config: {
           a: true,
           b: true,
           c: true,
         },
-      },
+      }),
     ]);
   });
 

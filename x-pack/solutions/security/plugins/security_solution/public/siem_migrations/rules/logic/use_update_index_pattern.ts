@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { updateIndexPattern, type UpdateIndexPatternParams } from '../api';
 import * as i18n from './translations';
