@@ -67,10 +67,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'visualizationsGroup',
         'annotation-and-navigationGroup',
         'observabilityGroup',
+        'legacyGroup',
       ]);
 
       // Any changes to the number of panels needs to be audited by @elastic/kibana-presentation
-      expect(panelTypes.length).to.eql(11);
+      expect(panelTypes.length).to.eql(12);
     });
   });
 }
