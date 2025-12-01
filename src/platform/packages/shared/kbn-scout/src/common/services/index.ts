@@ -8,6 +8,7 @@
  */
 
 export { getEsClient, getKbnClient } from './clients';
+export type { KbnClientProxy as ClientProxy } from './clients';
 export { createScoutConfig } from './config';
 export { getEsArchiver } from './es_archiver';
 export { createKbnUrl } from './kibana_url';
