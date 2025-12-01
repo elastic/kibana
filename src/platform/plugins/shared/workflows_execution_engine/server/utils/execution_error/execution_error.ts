@@ -30,7 +30,7 @@ export class ExecutionError extends Error {
     }
 
     return new ExecutionError({
-      type: 'Error',
+      type: error.name || 'Error',
       message: error.message,
     });
   }
