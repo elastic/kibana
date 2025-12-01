@@ -24,20 +24,6 @@ import type {
 } from './types';
 
 /**
- * Type guard to check if a content part is a valid text part.
- * @param part - The content part to check
- * @returns True if the part is a valid TextPart
- */
-function isTextPart(part: ContentPart | null | undefined): part is TextPart {
-  return (
-    part !== null &&
-    part !== undefined &&
-    part.type === 'text' &&
-    typeof part.text === 'string'
-  );
-}
-
-/**
  * McpClient is a wrapper around the MCP client SDK.
  * It provides a simple interface for connecting to an MCP client,
  * listing tools, and calling tools.
@@ -183,4 +169,17 @@ export class McpClient {
       content: textParts,
     };
   }
+}
+
+/**
+ * Type guard to check if a content part is a valid text part.
+ * @param part - The content part to check
+ */
+function isTextPart(part: ContentPart | null | undefined): part is TextPart {
+  return (
+    part !== null &&
+    part !== undefined &&
+    part.type === 'text' &&
+    typeof part.text === 'string'
+  );
 }
