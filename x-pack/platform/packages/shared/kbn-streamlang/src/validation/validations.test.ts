@@ -47,7 +47,7 @@ describe('validateStreamlang', () => {
     const dsl: StreamlangDSL = {
       steps: [
         {
-          where: {
+          condition: {
             field: 'status',
             eq: 'active',
             steps: [
@@ -69,7 +69,7 @@ describe('validateStreamlang', () => {
     const dsl: StreamlangDSL = {
       steps: [
         {
-          where: {
+          condition: {
             field: 'status',
             eq: 'active',
             steps: [

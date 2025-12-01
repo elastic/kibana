@@ -157,8 +157,8 @@ export const WhereBlockConfiguration = forwardRef<HTMLDivElement, WhereBlockConf
 );
 
 export const WhereBlockConditionEditor = () => {
-  const { field } = useController<WhereBlockFormState, 'where'>({
-    name: 'where',
+  const { field } = useController<WhereBlockFormState, 'condition'>({
+    name: 'condition',
     rules: {
       validate: (value) => isCondition(value),
     },

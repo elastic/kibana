@@ -76,12 +76,18 @@ export function mapStepsToYamlLines(yamlString: string): YamlLineMap {
         };
 
         // Handle nested where blocks recursively
-        if (isWhereBlock(dslStep) && dslStep.where?.steps) {
-          const whereNode = stepNode.get && stepNode.get('where');
-          const nestedStepsNode = whereNode && whereNode.get && whereNode.get('steps');
+        if (isWhereBlock(dslStep) && dslStep.condition?.steps) {
+          const conditionNode = stepNode.get && stepNode.get('condition');
+          const nestedStepsNode = conditionNode && conditionNode.get && conditionNode.get('steps');
 
           if (nestedStepsNode && nestedStepsNode.items) {
-            processSteps(nestedStepsNode.items, dslStep.where.steps, lineMap, yamlValue, stepPath);
+            processSteps(
+              nestedStepsNode.items,
+              dslStep.condition.steps,
+              lineMap,
+              yamlValue,
+              stepPath
+            );
           }
         }
       });

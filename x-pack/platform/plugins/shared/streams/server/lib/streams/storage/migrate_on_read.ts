@@ -15,6 +15,7 @@ import { isNeverCondition } from '@kbn/streamlang';
 import {
   migrateRoutingIfConditionToStreamlang,
   migrateOldProcessingArrayToStreamlang,
+  migrateWhereBlocksToCondition,
 } from './migrate_to_streamlang_on_read';
 
 export function migrateOnRead(definition: Record<string, unknown>): Streams.all.Definition {
@@ -148,6 +149,21 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
       set(migratedDefinition, 'ingest.failure_store', { inherit: {} });
     }
     hasBeenMigrated = true;
+  }
+
+  // Migrate where blocks to use 'condition' property instead of 'where'
+  if (
+    isObject(migratedDefinition.ingest) &&
+    isObject((migratedDefinition.ingest as any).processing) &&
+    Array.isArray((migratedDefinition.ingest as any).processing.steps)
+  ) {
+    const steps = (migratedDefinition.ingest as any).processing.steps;
+    const migratedSteps = migrateWhereBlocksToCondition(steps);
+
+    if (migratedSteps.migrated) {
+      set(migratedDefinition, 'ingest.processing.steps', migratedSteps.steps);
+      hasBeenMigrated = true;
+    }
   }
 
   if (hasBeenMigrated) {

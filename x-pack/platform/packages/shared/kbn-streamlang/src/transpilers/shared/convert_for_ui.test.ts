@@ -29,13 +29,13 @@ describe('convertStepsForUI', () => {
     const dsl: StreamlangDSL = {
       steps: [
         {
-          where: {
+          condition: {
             field: 'foo',
             eq: 'bar',
             steps: [
               { action: 'set', to: 'a', value: 'b' },
               {
-                where: {
+                condition: {
                   field: 'baz',
                   eq: 'qux',
                   steps: [{ action: 'append', to: 'c', value: [3] }],
@@ -52,7 +52,7 @@ describe('convertStepsForUI', () => {
     expect(result).toHaveLength(5);
 
     // Top-level where
-    expect(result[0]).toHaveProperty('where');
+    expect(result[0]).toHaveProperty('condition');
     expect(result[0].parentId).toBeNull();
 
     // set inside first where
@@ -60,7 +60,7 @@ describe('convertStepsForUI', () => {
     expect(result[1].parentId).toBe(result[0].customIdentifier);
 
     // nested where inside first where
-    expect(result[2]).toHaveProperty('where');
+    expect(result[2]).toHaveProperty('condition');
     expect(result[2].parentId).toBe(result[0].customIdentifier);
 
     // append inside nested where
@@ -84,7 +84,7 @@ describe('convertStepsForUI', () => {
         { customIdentifier: 'custom1', action: 'set', to: 'foo', value: 'bar' },
         {
           customIdentifier: 'where1',
-          where: {
+          condition: {
             field: 'foo',
             eq: 'bar',
             steps: [{ customIdentifier: 'custom2', action: 'set', to: 'a', value: 'b' }],
@@ -116,7 +116,7 @@ describe('convertUIStepsToDSL', () => {
     const uiSteps: StreamlangStepWithUIAttributes[] = [
       {
         customIdentifier: 'where1',
-        where: { field: 'foo', eq: 'bar' },
+        condition: { field: 'foo', eq: 'bar' },
         parentId: null,
       },
       {
@@ -128,7 +128,7 @@ describe('convertUIStepsToDSL', () => {
       },
       {
         customIdentifier: 'where2',
-        where: { field: 'baz', eq: 'qux' },
+        condition: { field: 'baz', eq: 'qux' },
         parentId: 'where1',
       },
       {
@@ -149,12 +149,12 @@ describe('convertUIStepsToDSL', () => {
     const dsl = convertUIStepsToDSL(uiSteps, false) as any;
     expect(dsl.steps).toHaveLength(2); // where1 and set2 at root
     const where1 = dsl.steps[0];
-    expect(where1).toHaveProperty('where');
-    expect(where1.where.steps).toHaveLength(2); // set1 and where2
-    const where2 = where1.where.steps.find((s: any) => s.customIdentifier === 'where2');
+    expect(where1).toHaveProperty('condition');
+    expect(where1.condition.steps).toHaveLength(2); // set1 and where2
+    const where2 = where1.condition.steps.find((s: any) => s.customIdentifier === 'where2');
     expect(where2).toBeDefined();
-    expect(where2.where.steps).toHaveLength(1);
-    expect(where2.where.steps[0].action).toBe('append');
+    expect(where2.condition.steps).toHaveLength(1);
+    expect(where2.condition.steps[0].action).toBe('append');
     expect(dsl.steps[1].action).toBe('set');
     expect(dsl.steps[1].to).toBe('x');
   });

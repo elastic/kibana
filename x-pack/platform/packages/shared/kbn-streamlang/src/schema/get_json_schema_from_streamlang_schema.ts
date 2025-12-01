@@ -204,14 +204,14 @@ function enhanceStreamlangSchemaForEditor(schema: any): void {
       option &&
       typeof option === 'object' &&
       Array.isArray((option as { anyOf?: unknown[] }).anyOf) &&
-      !(option as { properties?: Record<string, unknown> }).properties?.where
+      !(option as { properties?: Record<string, unknown> }).properties?.condition
   );
 
   const whereIndex = stepOptions.findIndex(
     (option: unknown) =>
       option &&
       typeof option === 'object' &&
-      (option as { properties?: Record<string, unknown> }).properties?.where
+      (option as { properties?: Record<string, unknown> }).properties?.condition
   );
 
   if (actionIndex === -1 || whereIndex === -1) {
@@ -289,7 +289,7 @@ function enhanceStreamlangSchemaForEditor(schema: any): void {
     const whereRequired = Array.isArray(whereSchema.required)
       ? new Set<string>(whereSchema.required)
       : new Set<string>();
-    whereRequired.add('where');
+    whereRequired.add('condition');
     whereSchema.required = Array.from(whereRequired);
 
     if (!whereSchema.type) {
@@ -301,19 +301,19 @@ function enhanceStreamlangSchemaForEditor(schema: any): void {
 }
 
 function enhanceWherePropertyWithSteps(rootSchema: any, whereBlockOption: any): void {
-  const whereProperty = whereBlockOption?.properties?.where;
+  const conditionProperty = whereBlockOption?.properties?.condition;
 
   if (
-    !whereProperty ||
-    typeof whereProperty !== 'object' ||
-    !Array.isArray(whereProperty.allOf) ||
-    whereProperty.allOf.length < 2
+    !conditionProperty ||
+    typeof conditionProperty !== 'object' ||
+    !Array.isArray(conditionProperty.allOf) ||
+    conditionProperty.allOf.length < 2
   ) {
     // Nothing to do if the schema already moved away from the intersection shape.
     return;
   }
 
-  const [conditionRefCandidate, stepsSchemaCandidate] = whereProperty.allOf;
+  const [conditionRefCandidate, stepsSchemaCandidate] = conditionProperty.allOf;
 
   if (
     !conditionRefCandidate ||
@@ -355,28 +355,28 @@ function enhanceWherePropertyWithSteps(rootSchema: any, whereBlockOption: any): 
   if (Array.isArray(augmentedConditionSchema.anyOf)) {
     // Preserve the union style from the source schema whenever possible to keep
     // downstream tooling behaviour identical.
-    whereProperty.anyOf = augmentedConditionSchema.anyOf;
+    conditionProperty.anyOf = augmentedConditionSchema.anyOf;
   } else if (Array.isArray(augmentedConditionSchema.oneOf)) {
-    whereProperty.oneOf = augmentedConditionSchema.oneOf;
+    conditionProperty.oneOf = augmentedConditionSchema.oneOf;
   } else {
-    whereProperty.anyOf = [augmentedConditionSchema];
+    conditionProperty.anyOf = [augmentedConditionSchema];
   }
 
-  whereProperty.type = 'object';
-  whereProperty.properties = {
-    ...(whereProperty.properties ?? {}),
+  conditionProperty.type = 'object';
+  conditionProperty.properties = {
+    ...(conditionProperty.properties ?? {}),
     steps: stepsPropertySchema,
   };
 
   if (shouldRequireSteps) {
     const requiredSet = new Set<string>(
-      Array.isArray(whereProperty.required) ? whereProperty.required : []
+      Array.isArray(conditionProperty.required) ? conditionProperty.required : []
     );
     requiredSet.add('steps');
-    whereProperty.required = Array.from(requiredSet);
+    conditionProperty.required = Array.from(requiredSet);
   }
 
-  delete whereProperty.allOf;
+  delete conditionProperty.allOf;
 }
 
 function resolveJsonPointer(root: any, pointer: string): any {

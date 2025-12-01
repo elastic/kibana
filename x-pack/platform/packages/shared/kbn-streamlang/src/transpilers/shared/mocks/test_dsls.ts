@@ -101,7 +101,7 @@ export const comprehensiveTestDSL: StreamlangDSL = {
     } as SetProcessor,
     // Multiple steps under a condition (where block)
     {
-      where: {
+      condition: {
         field: 'attributes.env',
         eq: 'prod',
         steps: [
@@ -115,7 +115,7 @@ export const comprehensiveTestDSL: StreamlangDSL = {
     },
     // Nested conditionals
     {
-      where: {
+      condition: {
         or: [
           { field: 'attributes.a', eq: 1 }, // condition A
           { field: 'attributes.b', eq: 2 }, // condition B
@@ -127,7 +127,7 @@ export const comprehensiveTestDSL: StreamlangDSL = {
             value: 'prod-env',
           } as SetProcessor,
           {
-            where: {
+            condition: {
               field: 'attributes.department',
               eq: 'legal',
               steps: [
@@ -188,7 +188,7 @@ export const notConditionsTestDSL: StreamlangDSL = {
       },
     } as SetProcessor,
     {
-      where: {
+      condition: {
         not: {
           or: [
             { field: 'attributes.a', eq: 1 },

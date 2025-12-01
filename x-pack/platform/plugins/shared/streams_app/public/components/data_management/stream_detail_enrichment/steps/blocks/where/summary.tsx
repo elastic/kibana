@@ -53,7 +53,7 @@ export const WhereBlockSummary = ({
         `}
       >
         <ConditionDisplay
-          condition={step.where}
+          condition={step.condition}
           showKeyword={true}
           keyword="WHERE"
           keywordWrapper={(children) => (

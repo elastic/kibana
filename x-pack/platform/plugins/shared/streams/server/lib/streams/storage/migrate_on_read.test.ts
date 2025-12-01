@@ -15,6 +15,7 @@ jest.mock('@kbn/streamlang', () => ({
 jest.mock('./migrate_to_streamlang_on_read', () => ({
   migrateRoutingIfConditionToStreamlang: jest.fn((definition) => definition),
   migrateOldProcessingArrayToStreamlang: jest.fn((definition) => definition),
+  migrateWhereBlocksToCondition: jest.fn((steps) => ({ steps, migrated: false })),
 }));
 
 jest.mock('@kbn/streams-schema', () => ({

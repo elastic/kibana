@@ -23,9 +23,9 @@ export function stripCustomIdentifiers(dsl: StreamlangDSL): StreamlangDSL {
         // Handle where blocks with nested steps
         return {
           ...restOfStep,
-          where: {
-            ...step.where,
-            steps: stripFromSteps(step.where.steps),
+          condition: {
+            ...step.condition,
+            steps: stripFromSteps(step.condition.steps),
           },
         };
       } else {
@@ -60,8 +60,8 @@ export function addStepIdentifiers(steps: StreamlangStep[], path = 'root') {
       const { stepPath } = addIdentifierToStep(step, path, i);
 
       // Only recurse into nested steps for where blocks
-      if (isWhereBlock(step) && Array.isArray(step.where?.steps)) {
-        addStepIdentifiers(step.where.steps, stepPath);
+      if (isWhereBlock(step) && Array.isArray(step.condition?.steps)) {
+        addStepIdentifiers(step.condition.steps, stepPath);
       }
     });
   }
@@ -117,8 +117,8 @@ const collectStepIds = (steps: StreamlangStep[], target: Set<string>) => {
       target.add(step.customIdentifier);
     }
 
-    if (isWhereBlock(step) && step.where?.steps) {
-      collectStepIds(step.where.steps, target);
+    if (isWhereBlock(step) && step.condition?.steps) {
+      collectStepIds(step.condition.steps, target);
     }
   }
 };
@@ -139,12 +139,12 @@ const stripNestedStepsForComparison = (step: StreamlangStep) => {
     customIdentifier?: string;
   };
 
-  if (isWhereBlock(step) && step.where) {
-    const { steps, ...whereWithoutSteps } = step.where;
+  if (isWhereBlock(step) && step.condition) {
+    const { steps, ...conditionWithoutSteps } = step.condition;
     return {
       ...restOfStep,
-      where: {
-        ...whereWithoutSteps,
+      condition: {
+        ...conditionWithoutSteps,
         steps: [],
       },
     };
@@ -190,8 +190,8 @@ const diffStepsForAdditions = (
     }
 
     if (isWhereBlock(previousStep) && isWhereBlock(nextStep)) {
-      const previousNested = previousStep.where?.steps ?? [];
-      const nextNested = nextStep.where?.steps ?? [];
+      const previousNested = previousStep.condition?.steps ?? [];
+      const nextNested = nextStep.condition?.steps ?? [];
 
       const nestedDiff = diffStepsForAdditions(previousNested, nextNested);
 
@@ -256,9 +256,9 @@ export const getProcessorsCount = (dsl: StreamlangDSL): number => {
       if (isActionBlock(step)) {
         // Count action blocks
         count++;
-      } else if (isWhereBlock(step) && step.where?.steps) {
+      } else if (isWhereBlock(step) && step.condition?.steps) {
         // Recursively traverse nested steps in where blocks
-        traverseSteps(step.where.steps);
+        traverseSteps(step.condition.steps);
       }
     }
   };

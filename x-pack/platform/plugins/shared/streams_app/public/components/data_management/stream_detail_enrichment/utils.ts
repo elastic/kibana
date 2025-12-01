@@ -536,7 +536,7 @@ export const getValidSteps = (
   function processStep(step: StreamlangStepWithUIAttributes): boolean {
     if (isWhereBlock(step)) {
       // If the where block is invalid, skip it and all its children
-      if (!isSchema(conditionSchema, step.where)) {
+      if (!isSchema(conditionSchema, step.condition)) {
         return false;
       }
 

@@ -23,13 +23,13 @@ describe('flattenSteps', () => {
   it('should flatten nested where blocks', () => {
     const steps = [
       {
-        where: {
+        condition: {
           field: 'foo',
           eq: 'bar',
           steps: [
             { action: 'set', to: 'baz', value: 'qux' },
             {
-              where: {
+              condition: {
                 field: 'baz',
                 eq: 'qux',
                 steps: [{ action: 'rename', from: 'baz', to: 'final' }],

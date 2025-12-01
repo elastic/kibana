@@ -195,7 +195,7 @@ describe('checkAdditiveChanges', () => {
       steps: [
         { action: 'set', to: 'field1', value: 'value1', customIdentifier: 'id1' },
         {
-          where: {
+          condition: {
             field: 'status',
             eq: 'active',
             steps: [
@@ -221,7 +221,7 @@ describe('checkAdditiveChanges', () => {
     const previousDSL: StreamlangDSL = {
       steps: [
         {
-          where: {
+          condition: {
             field: 'status',
             eq: 'active',
             steps: [
@@ -236,7 +236,7 @@ describe('checkAdditiveChanges', () => {
     const nextDSL: StreamlangDSL = {
       steps: [
         {
-          where: {
+          condition: {
             field: 'status',
             eq: 'active',
             steps: [
@@ -309,7 +309,7 @@ describe('getProcessorsCount', () => {
       steps: [
         { action: 'set', to: 'field1', value: 'value1' },
         {
-          where: {
+          condition: {
             field: 'status',
             eq: 'active',
             steps: [{ action: 'set', to: 'field2', value: 'value2' }],
@@ -329,13 +329,13 @@ describe('getProcessorsCount', () => {
       steps: [
         { action: 'set', to: 'field1', value: 'value1' },
         {
-          where: {
+          condition: {
             field: 'level1',
             eq: 'value1',
             steps: [
               { action: 'set', to: 'field2', value: 'value2' },
               {
-                where: {
+                condition: {
                   field: 'level2',
                   eq: 'value2',
                   steps: [
@@ -362,7 +362,7 @@ describe('getProcessorsCount', () => {
       steps: [
         { action: 'set', to: 'field1', value: 'value1' },
         {
-          where: {
+          condition: {
             field: 'status',
             eq: 'active',
             steps: [
@@ -372,7 +372,7 @@ describe('getProcessorsCount', () => {
           },
         },
         {
-          where: {
+          condition: {
             field: 'status',
             eq: 'inactive',
             steps: [{ action: 'set', to: 'inactive_field', value: 'no' }],
@@ -393,7 +393,7 @@ describe('getProcessorsCount', () => {
       steps: [
         { action: 'set', to: 'field1', value: 'value1' },
         {
-          where: {
+          condition: {
             field: 'status',
             eq: 'active',
             steps: [],

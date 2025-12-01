@@ -31,7 +31,7 @@ export function flattenSteps(
   return steps.flatMap((step) => {
     // Handle where blocks (conditional execution)
     if (isWhereBlockSchema(step)) {
-      const conditionWithSteps = step.where;
+      const conditionWithSteps = step.condition;
       // Strip steps for the resursive call, everything left is the condition.
       const { steps: nestedSteps, ...rest } = conditionWithSteps;
       // Combine parent and current condition as an "and" condition if both exist

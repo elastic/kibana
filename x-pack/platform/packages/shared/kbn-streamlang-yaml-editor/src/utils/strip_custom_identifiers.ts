@@ -21,9 +21,9 @@ export function stripCustomIdentifiers(dsl: StreamlangDSL): StreamlangDSL {
         const { customIdentifier, ...restOfStep } = step as any;
         return {
           ...restOfStep,
-          where: {
-            ...step.where,
-            steps: stripFromSteps(step.where.steps),
+          condition: {
+            ...step.condition,
+            steps: stripFromSteps(step.condition.steps),
           },
         };
       } else {

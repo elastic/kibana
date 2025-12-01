@@ -78,10 +78,10 @@ export const validateStreamlang = (dsl: StreamlangDSL, streamType?: StreamType):
 
 function validateSteps(steps: StreamlangStep[], errors: string[]) {
   for (const step of steps) {
-    if ('where' in step && step.where && 'steps' in step.where) {
-      validateCondition(step.where as Condition, errors);
+    if ('condition' in step && step.condition && 'steps' in step.condition) {
+      validateCondition(step.condition as Condition, errors);
       // Steps inside a where block are nested
-      validateSteps(step.where.steps, errors);
+      validateSteps(step.condition.steps, errors);
     } else if (isActionBlock(step)) {
       if ('where' in step && step.where) {
         validateCondition(step.where, errors);
@@ -166,8 +166,8 @@ function validateNoManualIngestPipelineUsage(steps: StreamlangStep[], errors: st
     if ('action' in step && step.action === 'manual_ingest_pipeline') {
       errors.push('Manual ingest pipelines are not allowed');
     }
-    if ('where' in step && step.where && 'steps' in step.where) {
-      validateNoManualIngestPipelineUsage(step.where.steps, errors);
+    if ('condition' in step && step.condition && 'steps' in step.condition) {
+      validateNoManualIngestPipelineUsage(step.condition.steps, errors);
     }
   }
 }
@@ -184,7 +184,7 @@ const validateConvertActionConditions = (
     // Handle where blocks with nested steps
     if (isWhereBlock(step)) {
       // Recursively validate nested steps (they are within a where block)
-      validateConvertActionConditions(step.where.steps, errors, true);
+      validateConvertActionConditions(step.condition.steps, errors, true);
       if (errors.length > 0) {
         return;
       }
@@ -238,7 +238,7 @@ const validateRemoveByPrefixInWhereBlocks = (
     // Handle where blocks with nested steps
     if (isWhereBlock(step)) {
       // Recursively validate nested steps (they are within a where block)
-      validateRemoveByPrefixInWhereBlocks(step.where.steps, errors, true);
+      validateRemoveByPrefixInWhereBlocks(step.condition.steps, errors, true);
     } else {
       if (step.action === 'remove_by_prefix' && isWithinWhereBlock) {
         errors.push(

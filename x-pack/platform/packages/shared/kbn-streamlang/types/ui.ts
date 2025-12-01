@@ -22,8 +22,8 @@ export type StreamlangProcessorDefinitionWithUIAttributes = StreamlangProcessorD
   UIAttributes;
 
 export type StreamlangConditionWithoutSteps = Omit<ConditionWithSteps, 'steps'>;
-export type StreamlangWhereBlockWithUIAttributes = Omit<StreamlangWhereBlock, 'where'> & {
-  where: StreamlangConditionWithoutSteps;
+export type StreamlangWhereBlockWithUIAttributes = Omit<StreamlangWhereBlock, 'condition'> & {
+  condition: StreamlangConditionWithoutSteps;
 } & UIAttributes;
 
 export type StreamlangStepWithUIAttributes =

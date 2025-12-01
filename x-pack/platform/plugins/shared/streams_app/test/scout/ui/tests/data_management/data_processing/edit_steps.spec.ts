@@ -20,7 +20,7 @@ test.describe('Stream data processing - editing steps', { tag: ['@ess', '@svlObl
     await apiServices.streams.updateStreamProcessors('logs-generic-default', {
       steps: [
         {
-          where: {
+          condition: {
             field: 'test_field',
             contains: 'logs',
             steps: [{ action: 'grok', from: 'message', patterns: ['%{WORD:attributes.method}'] }],

@@ -20,11 +20,11 @@ export const convertStepsForUI = (dsl: StreamlangDSL): StreamlangStepWithUIAttri
 
       // If this is a Where block with nested steps, unnest them.
       // Remove the steps property, as these will now become flattened items.
-      if (isWhereBlock(step) && Array.isArray(step.where.steps)) {
+      if (isWhereBlock(step) && Array.isArray(step.condition.steps)) {
         // Add the where block itself
         result.push(stepWithUI);
         // Recursively unnest children, passing the current id as parentId
-        unnestSteps(step.where.steps, stepWithUI.customIdentifier);
+        unnestSteps(step.condition.steps, stepWithUI.customIdentifier);
       } else {
         // Add non-where steps
         result.push(stepWithUI);
@@ -43,15 +43,15 @@ export const convertStepToUIDefinition = <TStepDefinition extends StreamlangStep
 ): StreamlangStepWithUIAttributes => {
   const id = step.customIdentifier || createId();
 
-  // If this is a where step, remove where.steps.
+  // If this is a where step, remove condition.steps.
   // UI versions of the steps keep a flat array and work off parentId to represent hierarchy.
-  if (isWhereBlock(step) && Array.isArray(step.where.steps)) {
-    const { steps, ...whereWithoutSteps } = step.where;
+  if (isWhereBlock(step) && Array.isArray(step.condition.steps)) {
+    const { steps, ...conditionWithoutSteps } = step.condition;
     return {
       customIdentifier: id,
       parentId: options.parentId,
       ...step,
-      where: whereWithoutSteps,
+      condition: conditionWithoutSteps,
     };
   }
   return {
@@ -75,8 +75,8 @@ export const convertUIStepsToDSL = (
     const stepObj: Omit<StreamlangStepWithUIAttributes, 'parentId'> = { ...rest, customIdentifier };
     // Where block
     if (isWhereBlock(stepObj)) {
-      // Ensure where is always present and has steps
-      stepObj.where = { ...stepObj.where, steps: [] };
+      // Ensure condition is always present and has steps
+      stepObj.condition = { ...stepObj.condition, steps: [] };
       idToStep[customIdentifier] = { ...stepObj, parentId } as StreamlangStepWithParentId;
     } else {
       idToStep[customIdentifier] = { ...stepObj, parentId } as StreamlangStepWithParentId;
@@ -89,7 +89,7 @@ export const convertUIStepsToDSL = (
     if (parentId && idToStep[parentId]) {
       const parent = idToStep[parentId];
       if (isWhereBlock(parent)) {
-        parent.where.steps.push(step);
+        parent.condition.steps.push(step);
       }
     } else {
       rootSteps.push(step);
@@ -105,9 +105,9 @@ export const convertUIStepsToDSL = (
       const { parentId, customIdentifier, ...whereRest } = step;
       return {
         ...(removeCustomIdentifiers ? { ...whereRest } : { ...whereRest, customIdentifier }),
-        where: {
-          ...whereRest.where,
-          steps: (whereRest.where.steps as StreamlangStepWithParentId[]).map((child) =>
+        condition: {
+          ...whereRest.condition,
+          steps: (whereRest.condition.steps as StreamlangStepWithParentId[]).map((child) =>
             stripUIProperties(child, removeCustomIdentifiers)
           ),
         },

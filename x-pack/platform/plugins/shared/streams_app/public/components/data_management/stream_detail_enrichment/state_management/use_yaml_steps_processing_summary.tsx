@@ -93,8 +93,8 @@ export const useYamlStepsProcessingSummary = () => {
         }
 
         // Recursively process nested steps in where blocks
-        if (isWhereBlock(step) && step.where?.steps) {
-          traverseSteps(step.where.steps);
+        if (isWhereBlock(step) && step.condition?.steps) {
+          traverseSteps(step.condition.steps);
         }
       });
     }

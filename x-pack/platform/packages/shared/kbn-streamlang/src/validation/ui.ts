@@ -34,7 +34,7 @@ const violatesConditionDepth = (
       continue;
     }
 
-    const condition = step.where;
+    const condition = step.condition;
     const newDepth = currentDepth + 1;
 
     if (newDepth > 3) {

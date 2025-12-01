@@ -130,7 +130,7 @@ export const interactiveModeMachine = setup({
       ) => {
         if (!condition) {
           condition = {
-            where: {
+            condition: {
               ...ALWAYS_CONDITION,
               steps: [],
             },

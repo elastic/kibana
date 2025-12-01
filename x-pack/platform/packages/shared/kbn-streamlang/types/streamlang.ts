@@ -30,7 +30,7 @@ export type ConditionWithSteps = Condition & { steps: StreamlangStep[] };
  */
 export interface StreamlangWhereBlock {
   customIdentifier?: string;
-  where: ConditionWithSteps;
+  condition: ConditionWithSteps;
 }
 
 /**
@@ -38,7 +38,7 @@ export interface StreamlangWhereBlock {
  */
 export const streamlangWhereBlockSchema: z.ZodType<StreamlangWhereBlock> = z.object({
   customIdentifier: z.string().optional(),
-  where: conditionWithStepsSchema,
+  condition: conditionWithStepsSchema,
 });
 
 export const isWhereBlockSchema = (obj: any): obj is StreamlangWhereBlock => {
@@ -48,7 +48,7 @@ export const isWhereBlockSchema = (obj: any): obj is StreamlangWhereBlock => {
 // Cheap check that bypasses having to do full schema checks.
 // This is useful for quickly identifying where blocks without full recursive validation.
 export const isWhereBlock = (obj: any): obj is StreamlangWhereBlock => {
-  return 'where' in obj && !('action' in obj);
+  return 'condition' in obj && !('action' in obj);
 };
 
 /**
