@@ -16,7 +16,7 @@ jest.mock('@kbn/esql-ast/src/commands_registry/options/recommended_queries', () 
   getTimeAndCategorizationFields: jest.fn(),
 }));
 
-jest.mock('../shared/columns', () => ({
+jest.mock('../shared/columns_retrieval_helpers', () => ({
   getColumnsByTypeRetriever: jest.fn(),
 }));
 
