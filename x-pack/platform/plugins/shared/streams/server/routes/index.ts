@@ -24,6 +24,7 @@ import { internalIngestRoutes } from './internal/streams/ingest/route';
 import { connectorRoutes } from './internal/connectors/route';
 import { attachmentRoutes } from './attachments/route';
 import { internalAttachmentRoutes } from './internal/attachments/route';
+import { internalSignificantEventsRoutes } from './internal/streams/significant_events/route';
 
 export const streamsRouteRepository = {
   // internal APIs
@@ -37,6 +38,7 @@ export const streamsRouteRepository = {
   ...internalIngestRoutes,
   ...connectorRoutes,
   ...internalAttachmentRoutes,
+  ...internalSignificantEventsRoutes,
   // public APIs
   ...crudRoutes,
   ...enablementRoutes,

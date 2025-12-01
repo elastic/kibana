@@ -24,6 +24,7 @@ import type {
   StreamsFeatureIdentificationIdentifiedProps,
   StreamsFeatureIdentificationDeletedProps,
   StreamsDescriptionGeneratedProps,
+  StreamsSignificantEventsSummaryGeneratedEventProps,
 } from './types';
 import {
   STREAMS_AI_GROK_SUGGESTION_ACCEPTED_EVENT_TYPE,
@@ -43,6 +44,7 @@ import {
   STREAMS_FEATURE_IDENTIFICATION_SAVED_EVENT_TYPE,
   STREAMS_FEATURE_IDENTIFICATION_DELETED_EVENT_TYPE,
   STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE,
+  STREAMS_SIGNIFICANT_EVENTS_SUMMARY_GENERATED_EVENT_TYPE,
 } from './constants';
 
 export class StreamsTelemetryClient {
@@ -140,6 +142,12 @@ export class StreamsTelemetryClient {
 
   public trackStreamDescriptionGenerated(params: StreamsDescriptionGeneratedProps) {
     this.analytics.reportEvent(STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE, params);
+  }
+
+  public trackSignificantEventsSummaryGenerated(
+    params: StreamsSignificantEventsSummaryGeneratedEventProps
+  ) {
+    this.analytics.reportEvent(STREAMS_SIGNIFICANT_EVENTS_SUMMARY_GENERATED_EVENT_TYPE, params);
   }
 
   private getLifecycleType(lifecycle: IngestStreamLifecycle): 'dsl' | 'ilm' | 'inherit' {

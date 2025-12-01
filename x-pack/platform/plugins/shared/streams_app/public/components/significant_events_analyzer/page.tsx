@@ -14,6 +14,7 @@ import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
 import { FeedbackButton } from '../feedback_button';
 import { useStreamsAppBreadcrumbs } from '../../hooks/use_streams_app_breadcrumbs';
+import { SignificantEventsSummary } from './significant_events_summary';
 
 export function SignificantEventsAnalyzerPage() {
   const {
@@ -67,7 +68,7 @@ export function SignificantEventsAnalyzerPage() {
         }
       />
       <StreamsAppPageTemplate.Body grow>
-        {/* Significant events analyzer content goes here */}
+        <SignificantEventsSummary />
       </StreamsAppPageTemplate.Body>
     </>
   );

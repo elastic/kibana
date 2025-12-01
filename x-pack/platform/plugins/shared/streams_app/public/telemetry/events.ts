@@ -23,6 +23,7 @@ import {
   STREAMS_FEATURE_IDENTIFICATION_SAVED_EVENT_TYPE,
   STREAMS_FEATURE_IDENTIFICATION_DELETED_EVENT_TYPE,
   STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE,
+  STREAMS_SIGNIFICANT_EVENTS_SUMMARY_GENERATED_EVENT_TYPE,
 } from './constants';
 import {
   streamsAIGrokSuggestionAcceptedSchema,
@@ -42,6 +43,7 @@ import {
   streamsFeatureIdentificationSavedSchema,
   streamsFeatureIdentificationDeletedSchema,
   streamsDescriptionGeneratedSchema,
+  streamsSignificantEventsSummaryGeneratedSchema,
 } from './schemas';
 
 const streamsAttachmentCountEventType = {
@@ -129,6 +131,11 @@ const wiredStreamsStatusChangedEventType = {
   schema: wiredStreamsStatusChangedSchema,
 };
 
+const streamsSignificantEventsSummaryGeneratedEventType = {
+  eventType: STREAMS_SIGNIFICANT_EVENTS_SUMMARY_GENERATED_EVENT_TYPE,
+  schema: streamsSignificantEventsSummaryGeneratedSchema,
+};
+
 export {
   streamsAttachmentCountEventType,
   streamsAttachmentClickEventType,
@@ -147,4 +154,5 @@ export {
   streamsFeatureIdentificationSavedEventType,
   streamsFeatureIdentificationDeletedEventType,
   streamsDescriptionGeneratedEventType,
+  streamsSignificantEventsSummaryGeneratedEventType,
 };
