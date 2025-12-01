@@ -76,7 +76,7 @@ describe('EditTagsFlyout', () => {
   it('shows the number of total selected alerts in the title when selecting multiple alerts', async () => {
     const mockAlert2 = {
       ...mockAlert,
-      id: 'alert-2',
+      _id: 'alert-2',
       title: 'Test Alert 2',
       'kibana.alert.workflow_tags': ['one', 'three'],
     } as unknown as Alert;
