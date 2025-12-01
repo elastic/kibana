@@ -49,7 +49,7 @@ export const SchemaEditorFlyout = ({
   const [isValidAdvancedFieldMappings, setValidAdvancedFieldMappings] = useState(true);
   const [isValidSimulation, setValidSimulation] = useState(true);
   const [isIgnoredField, setIsIgnoredField] = useState(false);
-
+  const [isExpensiveQueriesError, setIsExpensiveQueriesError] = useState(false);
   const flyoutId = useGeneratedHtmlId({ prefix: 'streams-edit-field' });
 
   const [nextField, setNextField] = useReducer(
@@ -63,9 +63,18 @@ export const SchemaEditorFlyout = ({
 
   const hasValidFieldType = nextField.type !== undefined;
 
-  const onValidate = ({ isValid, isIgnored }: { isValid: boolean; isIgnored: boolean }) => {
+  const onValidate = ({
+    isValid,
+    isIgnored,
+    isExpensiveQueries,
+  }: {
+    isValid: boolean;
+    isIgnored: boolean;
+    isExpensiveQueries: boolean;
+  }) => {
     setIsIgnoredField(isIgnored);
     setValidSimulation(isValid);
+    setIsExpensiveQueriesError(isExpensiveQueries);
   };
 
   return (
@@ -128,7 +137,11 @@ export const SchemaEditorFlyout = ({
             </EuiButtonEmpty>
             <EuiButton
               data-test-subj="streamsAppSchemaEditorFieldStageButton"
-              disabled={!hasValidFieldType || !isValidAdvancedFieldMappings || !isValidSimulation}
+              disabled={
+                !hasValidFieldType ||
+                !isValidAdvancedFieldMappings ||
+                (!isValidSimulation && !isExpensiveQueriesError)
+              }
               onClick={() => {
                 onStage({
                   ...nextField,

@@ -673,11 +673,11 @@ export const getMetricVisualization = ({
   },
 
   DimensionEditorComponent(props) {
-    return <DimensionEditor {...props} paletteService={paletteService} />;
+    return <DimensionEditor {...props} />;
   },
 
   DimensionEditorAdditionalSectionComponent(props) {
-    return <DimensionEditorAdditionalSection {...props} />;
+    return <DimensionEditorAdditionalSection {...props} paletteService={paletteService} />;
   },
 
   getDisplayOptions() {
