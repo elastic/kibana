@@ -245,7 +245,7 @@ export class OneChatPageObject extends FtrService {
    * Get the thinking details text
    */
   async getThinkingDetails() {
-    const responseElement = await this.testSubjects.find('agentBuilderRoundResponse');
+    const responseElement = await this.testSubjects.find('agentBuilderThinkingPanel');
     return await responseElement.getVisibleText();
   }
 
