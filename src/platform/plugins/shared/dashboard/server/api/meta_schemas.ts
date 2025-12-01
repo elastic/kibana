@@ -23,10 +23,10 @@ export const baseMetaSchema = schema.object({
 });
 
 export const accessMetaSchema = schema.object({
-  accessControl: schema.maybe(
+  access_control: schema.maybe(
     schema.object({
       owner: schema.maybe(schema.string()),
-      accessMode: schema.maybe(
+      access_mode: schema.maybe(
         schema.oneOf([schema.literal('write_restricted'), schema.literal('default')])
       ),
     })

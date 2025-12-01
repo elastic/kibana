@@ -51,7 +51,6 @@ export async function search(
           ...(description && { description }),
           ...(tags && { tags }),
           ...(timeRange && { timeRange }),
-          ...(so.accessControl && { accessControl: so.accessControl }),
           title: title ?? '',
         },
         meta: getDashboardMeta(so, 'search'),

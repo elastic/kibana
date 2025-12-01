@@ -56,14 +56,6 @@ export const searchResponseBodySchema = schema.object({
         tags: schema.maybe(schema.arrayOf(schema.string())),
         timeRange: schema.maybe(timeRangeSchema),
         title: schema.string(),
-        accessControl: schema.maybe(
-          schema.object({
-            owner: schema.maybe(schema.string()),
-            accessMode: schema.maybe(
-              schema.oneOf([schema.literal('default'), schema.literal('write_restricted')])
-            ),
-          })
-        ),
       }),
       meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema, accessMetaSchema]),
     })

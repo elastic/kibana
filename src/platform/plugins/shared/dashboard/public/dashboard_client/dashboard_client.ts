@@ -48,7 +48,7 @@ export const dashboardClient = {
         },
         meta: accessMode
           ? {
-              accessControl: { accessMode },
+              access_control: { access_mode: accessMode },
             }
           : undefined,
       }),
