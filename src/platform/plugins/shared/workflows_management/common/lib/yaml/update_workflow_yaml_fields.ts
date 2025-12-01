@@ -16,11 +16,10 @@ import { updateYamlField } from './update_yaml_field';
  */
 export function affectsYamlMetadata(workflow: Partial<EsWorkflow>): boolean {
   return (
-    !workflow.yaml &&
-    (workflow.enabled !== undefined ||
-      workflow.name !== undefined ||
-      workflow.description !== undefined ||
-      workflow.tags !== undefined)
+    workflow.enabled !== undefined ||
+    workflow.name !== undefined ||
+    workflow.description !== undefined ||
+    workflow.tags !== undefined
   );
 }
 
