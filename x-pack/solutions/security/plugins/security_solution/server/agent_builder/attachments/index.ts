@@ -6,6 +6,5 @@
  */
 
 export { createAlertAttachmentType } from './alert';
-export { createAttackDiscoveryAttachmentType } from './attack_discovery';
 export { createEntityRiskAttachmentType } from './entity_risk';
 export { createQueryHelpAttachmentType } from './query_help';

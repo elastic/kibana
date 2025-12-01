@@ -7,7 +7,6 @@
 
 import type { OnechatPluginSetup } from '@kbn/onechat-plugin/server';
 import { createAlertAttachmentType } from './alert';
-import { createAttackDiscoveryAttachmentType } from './attack_discovery';
 import { createEntityRiskAttachmentType } from './entity_risk';
 import { createQueryHelpAttachmentType } from './query_help';
 
@@ -16,7 +15,6 @@ import { createQueryHelpAttachmentType } from './query_help';
  */
 export const registerAttachments = async (onechat: OnechatPluginSetup) => {
   onechat.attachments.registerType(createAlertAttachmentType());
-  onechat.attachments.registerType(createAttackDiscoveryAttachmentType());
   onechat.attachments.registerType(createEntityRiskAttachmentType());
   onechat.attachments.registerType(createQueryHelpAttachmentType());
 };

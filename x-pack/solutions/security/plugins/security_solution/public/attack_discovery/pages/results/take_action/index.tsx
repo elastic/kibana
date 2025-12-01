@@ -211,9 +211,9 @@ const TakeActionComponent: React.FC<Props> = ({
   const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
   const attackDiscovery = attackDiscoveries.length === 1 ? attackDiscoveries[0] : null;
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
-    attachmentType: SecurityAgentBuilderAttachments.attack_discovery,
+    attachmentType: SecurityAgentBuilderAttachments.alert,
     attachmentData: {
-      attackDiscovery: attackDiscovery
+      alert: attackDiscovery
         ? getAttackDiscoveryMarkdown({
             attackDiscovery,
             replacements,

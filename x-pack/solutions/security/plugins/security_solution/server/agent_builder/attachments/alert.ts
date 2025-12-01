@@ -6,7 +6,6 @@
  */
 
 import { z } from '@kbn/zod';
-import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
 import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
 import type { Attachment } from '@kbn/onechat-common/attachments';
 import { platformCoreTools } from '@kbn/onechat-common';
@@ -77,39 +76,11 @@ SECURITY ALERT DATA:
 ---
 Complete in order:
 
-1. Extract alert id: kibana.alert.uuid or _id
+1. Extract alert id(s): _id
 2. Extract rule name: kibana.alert.rule.name
 3. Extract entities: host.name, user.name, service.name
 4. Extract MITRE fields: kibana.alert.rule.threat.tactic.id, kibana.alert.rule.threat.technique.id, threat.tactic.id
-5. IMPORTANT Skip step if ${sanitizeToolId(SECURITY_ENTITY_RISK_SCORE_TOOL_ID)} is unavailable!
-   Query RISK SCORES for entities:
-   Tool: ${sanitizeToolId(SECURITY_ENTITY_RISK_SCORE_TOOL_ID)}
-   Parameters: { identifierType: "host.name", identifier: "MyHostName" }
-
-6. Query ATTACK DISCOVERIES for the extracted alert id:
-   Tool: ${sanitizeToolId(SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID)}
-   Parameters: { alertIds: ["[alert ID]"] }
-
-7. Query CASES with the extracted alert id to find related cases. Case URLs must be included in response.
-   Tool: ${sanitizeToolId(platformCoreTools.cases)}
-   Parameters: { query: "Do I have any open security cases?", alertIds: ["[alert ID]"], owner: "securitySolution" }
-
-8. IMPORTANT Skip step if ${sanitizeToolId(SECURITY_LABS_SEARCH_TOOL_ID)} is unavailable!
-   Query SECURITY LABS:
-   Tool: ${sanitizeToolId(SECURITY_LABS_SEARCH_TOOL_ID)}
-   Parameters: { query: "Find Security Labs articles about [MITRE technique or rule name]" }
-
-9. Generate ESQL for related entities:
-   Tool: ${sanitizeToolId(platformCoreTools.generateEsql)}
-   Parameters: { query: "Write ESQL query to find events in the security solution data view from host.name: "MyHostName" }
-
-CRITICAL: You MUST call all 5 tools (steps 5-9) before responding. Do not skip any step.`;
-      // TODO add this once product doc tool available
-      // 9. Query PRODUCT DOCUMENTATION:
-      //   Tool: ${sanitizeToolId(platformCoreTools.productDocumentation)}
-      // Parameters: { query: "Find alert triage steps", product: "security" }
-      //
-      // CRITICAL: You MUST call all 6 tools (steps 5-10) before responding. Do not skip any step.`;
+5. Use the available tools to gather context about the alert and provide a response.`;
       return description;
     },
   };
