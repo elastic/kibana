@@ -91,7 +91,7 @@ compare_with_baseline() {
   
   # Strip ANSI escape codes (colors, cursor movements, etc.)
   # This removes sequences like [2K, [1G, [31m, [39m, etc.
-  COMPARISON_OUTPUT=$(echo "$COMPARISON_OUTPUT" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' | sed -E 's/\[[0-9;]*[a-zA-Z]//g')
+  COMPARISON_OUTPUT=$(echo "$COMPARISON_OUTPUT" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g')
 
   export COMPARISON_OUTPUT
   export COMPARISON_EXIT_CODE

@@ -84,7 +84,7 @@ run_performance_tests() {
 
   # Generate performance data file
   echo "--- Generate Performance Data File"
-  echo "Creating performance data file: $PERF_DATA_FILE with $PERF_ENTITY_COUNT entities, $PERF_LOGS_PER_ENTITY log per entity"
+  echo "Creating performance data file: $PERF_DATA_FILE with $PERF_ENTITY_COUNT entities, $PERF_LOGS_PER_ENTITY logs per entity"
   yarn start create-perf-data "$PERF_DATA_FILE" "$PERF_ENTITY_COUNT" "$PERF_LOGS_PER_ENTITY"
 
   # Run the performance test

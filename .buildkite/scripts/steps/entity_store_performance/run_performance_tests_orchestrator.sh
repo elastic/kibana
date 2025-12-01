@@ -179,7 +179,7 @@ run_performance_tests
 export TEST_EXIT_CODE
 export TEST_DURATION
 export TEST_LOG_DIR
-export PERF_DATA_FILE="${PERF_DATA_FILE:-big}"
+export PERF_DATA_FILE="${PERF_DATA_FILE:-standard}"
 export PERF_TOTAL_ROWS  # Set by run_performance_tests function
 export PERF_ENTITY_COUNT  # Set by run_performance_tests function
 export PERF_LOGS_PER_ENTITY  # Set by run_performance_tests function

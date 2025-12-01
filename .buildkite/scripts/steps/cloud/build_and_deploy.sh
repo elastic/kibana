@@ -114,6 +114,11 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ] || [ "${CLOUD_DEPLOYMENT_ID}" = 'null' ]; the
     (.resources.elasticsearch[0].plan.cluster_topology[] | select(.id == "hot_content") | .size.value) = '$ES_HOT_TIER_MEMORY_SIZE'
     ' .buildkite/scripts/steps/cloud/deploy.json > /tmp/deploy.json
 
+  # Verify that zone_count was set (at least one topology element should have zone_count)
+  if ! jq -e '.resources.elasticsearch[0].plan.cluster_topology[]? | select(.zone_count != null) | .zone_count' /tmp/deploy.json > /dev/null 2>&1; then
+    echo "⚠️  Warning: No cluster_topology elements with zone_count found in deployment configuration"
+  fi
+
   echo "Creating deployment..."
   ecctl deployment create --track --output json --file /tmp/deploy.json > "$ECCTL_LOGS"
 
@@ -155,6 +160,11 @@ else
     (.resources.elasticsearch[0].plan.cluster_topology[]? | select(.zone_count != null) | .zone_count) = '$ES_ZONE_COUNT' |
     (.resources.elasticsearch[0].plan.cluster_topology[]? | select(.id == "hot_content") | .size.value) = '$ES_HOT_TIER_MEMORY_SIZE'
     ' > /tmp/deploy.json
+
+  # Verify that zone_count was set (at least one topology element should have zone_count)
+  if ! jq -e '.resources.elasticsearch[0].plan.cluster_topology[]? | select(.zone_count != null) | .zone_count' /tmp/deploy.json > /dev/null 2>&1; then
+    echo "⚠️  Warning: No cluster_topology elements with zone_count found in deployment update payload"
+  fi
 
   echo "Updating deployment..."
   ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/deploy.json > "$ECCTL_LOGS"
