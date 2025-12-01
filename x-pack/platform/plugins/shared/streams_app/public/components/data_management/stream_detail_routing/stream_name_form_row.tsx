@@ -17,16 +17,16 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-plugin/public';
 import type { ReactNode } from 'react';
 import React, { useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import useDebounce from 'react-use/lib/useDebounce';
 import type { StatefulStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useStreamsRoutingSelector } from './state_management/stream_routing_state_machine';
 
 interface StreamNameFormRowProps {
+  onChange?: (value: string) => void;
   setLocalStreamName?: React.Dispatch<React.SetStateAction<string>>;
   readOnly?: boolean;
   autoFocus?: boolean;
@@ -120,10 +120,9 @@ interface ChildStreamInputHookResponse {
 
 /**
  * Custom hook that handles computations necessary for child stream input component instances.
- * Used by parent components to lift up the states needed for the local input field.
+ * Used by parent components to lift up the states needed for the local input field so validation concerns can be shared across components.
  * @param streamName - The stream name to use for the local input field.
  * @param readOnly - Whether the input field is read only.
- * @param onChange - The function to call when the local input field changes after debouncing.
  * @returns An object containing local states, input validation flags, and help/error messages.
  * @example
  * const { localStreamName, setLocalStreamName, isStreamNameValid, prefix, partitionName, helpText, errorMessage } = useChildStreamInput('logs.linux');
@@ -141,17 +140,9 @@ interface ChildStreamInputHookResponse {
  */
 export const useChildStreamInput = (
   streamName: string,
-  readOnly: boolean = false,
-  onChange: (value: string) => void = () => {}
+  readOnly: boolean = false
 ): ChildStreamInputHookResponse => {
   const [localStreamName, setLocalStreamName] = useState(streamName);
-  useDebounce(
-    () => {
-      onChange(localStreamName);
-    },
-    500,
-    [localStreamName]
-  );
 
   const router = useStreamsAppRouter();
   const parentStreamName = useStreamsRoutingSelector(
@@ -200,6 +191,7 @@ export const useChildStreamInput = (
 };
 
 export function StreamNameFormRow({
+  onChange = (value: string) => {},
   setLocalStreamName = () => {},
   readOnly = false,
   autoFocus = false,
@@ -216,6 +208,7 @@ export function StreamNameFormRow({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newPartitionName = e.target.value;
     setLocalStreamName(`${prefix}${newPartitionName}`);
+    onChange(`${prefix}${newPartitionName}`);
   };
 
   return (

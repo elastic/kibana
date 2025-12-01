@@ -53,7 +53,7 @@ export function SuggestedStreamPanel({
   onSave?: () => void;
 }) {
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
-  const { changeSuggestionName, changeSuggestionCondition, reviewSuggestedRule } =
+  const { changeSuggestionNameDebounced, changeSuggestionCondition, reviewSuggestedRule } =
     useStreamRoutingEvents();
 
   const editedSuggestion = routingSnapshot.context.editedSuggestion;
@@ -86,9 +86,10 @@ export function SuggestedStreamPanel({
     return undefined;
   }, [isEditing, currentSuggestion.condition]);
 
+  // Use debounced handler for stream name input to prevent expensive re-renders on each keystroke
   const handleNameChange = (name: string) => {
     if (!isEditing) return;
-    changeSuggestionName(name);
+    changeSuggestionNameDebounced(name);
   };
 
   const handleConditionChange = (condition: any) => {
@@ -97,13 +98,14 @@ export function SuggestedStreamPanel({
   };
 
   const { isStreamNameValid, setLocalStreamName, partitionName, prefix, helpText, errorMessage } =
-    useChildStreamInput(currentSuggestion.name, false, handleNameChange);
+    useChildStreamInput(currentSuggestion.name, false);
 
   if (isEditing) {
     return (
       <SelectablePanel paddingSize="m" isSelected={isSelected}>
         <EuiFlexGroup direction="column" gutterSize="m">
           <StreamNameFormRow
+            onChange={handleNameChange}
             setLocalStreamName={setLocalStreamName}
             partitionName={partitionName}
             prefix={prefix}

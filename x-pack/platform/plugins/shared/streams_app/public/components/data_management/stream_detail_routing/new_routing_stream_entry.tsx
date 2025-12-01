@@ -20,7 +20,7 @@ import { StreamNameFormRow, useChildStreamInput } from './stream_name_form_row';
 export function NewRoutingStreamEntry() {
   const panelRef = useRef<HTMLDivElement>(null);
 
-  const { changeRule } = useStreamRoutingEvents();
+  const { changeRule, changeRuleDebounced } = useStreamRoutingEvents();
   const currentRule = useStreamsRoutingSelector((snapshot) => selectCurrentRule(snapshot.context));
 
   useEffect(() => {
@@ -29,16 +29,16 @@ export function NewRoutingStreamEntry() {
     }
   }, []);
 
+  // Use debounced handler for stream name input to prevent expensive re-renders on each keystroke
   const { setLocalStreamName, isStreamNameValid, partitionName, prefix, helpText, errorMessage } =
-    useChildStreamInput(currentRule.destination, false, (value) =>
-      changeRule({ destination: value })
-    );
+    useChildStreamInput(currentRule.destination, false);
 
   return (
     <div ref={panelRef}>
       <EuiPanel hasShadow={false} hasBorder paddingSize="m">
         <EuiFlexGroup gutterSize="m" direction="column">
           <StreamNameFormRow
+            onChange={(value) => changeRuleDebounced({ destination: value })}
             setLocalStreamName={setLocalStreamName}
             autoFocus
             partitionName={partitionName}
