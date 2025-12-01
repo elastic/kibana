@@ -21,7 +21,7 @@ import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks
 import type { DiscoverServices } from '../../../../../build_services';
 import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
 import { dataViewWithNoTimefieldMock } from '../../../../../__mocks__/data_view_no_timefield';
-import type { DiscoverAppState } from '../../discover_app_state_container';
+import type { DiscoverAppState } from '../types';
 
 const createPersistedTab = ({
   tabId,
