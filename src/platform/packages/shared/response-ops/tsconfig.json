@@ -8,5 +8,7 @@
   "kbn_references": [
     "@kbn/storybook",
     "@kbn/react-query",
+    "@kbn/core",
+    "@kbn/kibana-react-plugin",
   ]
 }
