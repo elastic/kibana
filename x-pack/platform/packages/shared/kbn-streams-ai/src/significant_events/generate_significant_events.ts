@@ -19,7 +19,9 @@ interface Query {
   kql: string;
   title: string;
   category: SignificantEventType;
+  severity_score: number;
 }
+
 /**
  * Generate significant event definitions, based on:
  * - the description of the feature (or stream if feature is undefined)

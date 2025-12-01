@@ -50,6 +50,7 @@ interface GeneratedSignificantEventQuery {
     name: string;
     filter: Condition;
   };
+  severity_score: number;
 }
 
 type SignificantEventsGenerateResponse = Observable<

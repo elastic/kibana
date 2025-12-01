@@ -51,5 +51,6 @@ export async function generateSignificantEventDefinitions(
     title: query.title,
     kql: query.kql,
     feature: feature ? { name: feature.name, filter: feature?.filter } : undefined,
+    severity_score: query.severity_score,
   }));
 }

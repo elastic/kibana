@@ -26,6 +26,7 @@ export interface StreamQueryKql extends StreamQueryBase {
   kql: {
     query: string;
   };
+  severity_score?: number;
 }
 
 export type StreamQuery = StreamQueryKql;
@@ -47,6 +48,7 @@ export const streamQueryKqlSchema: z.Schema<StreamQueryKql> = z.intersection(
     kql: z.object({
       query: z.string(),
     }),
+    severity_score: z.number().optional(),
   })
 );
 
@@ -67,6 +69,7 @@ export const upsertStreamQueryRequestSchema = z.object({
   kql: z.object({
     query: z.string(),
   }),
+  severity_score: z.number().optional(),
 });
 
 export const isStreamQueryKql = createIsNarrowSchema(streamQuerySchema, streamQueryKqlSchema);
