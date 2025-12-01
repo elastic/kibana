@@ -193,15 +193,56 @@ export const SCHEDULED_REPORT_FORM_EMAIL_RECIPIENTS_REQUIRED_MESSAGE = i18n.tran
 export const SCHEDULED_REPORT_FORM_EMAIL_RECIPIENTS_HINT = i18n.translate(
   'xpack.reporting.scheduledReportingForm.emailRecipientsHint',
   {
-    defaultMessage:
-      "On the scheduled date, we'll also email the report to the addresses you specify here.",
+    defaultMessage: "We'll email the report to the addresses you specify here.",
   }
 );
 
 export const SCHEDULED_REPORT_FORM_EMAIL_SELF_HINT = i18n.translate(
   'xpack.reporting.scheduledReportingForm.emailSelfHint',
   {
-    defaultMessage: "On the scheduled date, we'll also email the report to your address.",
+    defaultMessage: "We'll email the report to your address.",
+  }
+);
+
+export const SCHEDULED_REPORT_FORM_EMAIL_SHOW_CC_BCC_LABEL = i18n.translate(
+  'xpack.reporting.scheduledReportingForm.emailShowCcBccLabel',
+  {
+    defaultMessage: 'Cc Bcc',
+  }
+);
+
+export const SCHEDULED_REPORT_FORM_EMAIL_CC_RECIPIENTS_LABEL = i18n.translate(
+  'xpack.reporting.scheduledReportingForm.emailCcRecipientsLabel',
+  {
+    defaultMessage: 'Cc',
+  }
+);
+
+export const SCHEDULED_REPORT_FORM_EMAIL_BCC_RECIPIENTS_LABEL = i18n.translate(
+  'xpack.reporting.scheduledReportingForm.emailBccRecipientsLabel',
+  {
+    defaultMessage: 'Bcc',
+  }
+);
+
+export const SCHEDULED_REPORT_FORM_EMAIL_SUBJECT_LABEL = i18n.translate(
+  'xpack.reporting.scheduledReportingForm.emailSubjectLabel',
+  {
+    defaultMessage: 'Subject',
+  }
+);
+
+export const SCHEDULED_REPORT_FORM_EMAIL_MESSAGE_LABEL = i18n.translate(
+  'xpack.reporting.scheduledReportingForm.emailMessageLabel',
+  {
+    defaultMessage: 'Message',
+  }
+);
+
+export const SCHEDULED_REPORT_FORM_EMAIL_MESSAGE_HINT = i18n.translate(
+  'xpack.reporting.scheduledReportingForm.emailMessageHint',
+  {
+    defaultMessage: 'Supports Mustache variables and markdown formatting.',
   }
 );
 
