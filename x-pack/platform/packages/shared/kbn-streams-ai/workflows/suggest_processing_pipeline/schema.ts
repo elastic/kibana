@@ -35,6 +35,8 @@ export const pipelineDefinitionSchema = z
     steps: z
       .array(
         // Explicitly set list of processors we want to include in suggestions
+        // Currently focused on extract and parse date use cases
+        // Future: add set, replace, drop, append processors
         z.union([
           grokProcessorSchema,
           dissectProcessorSchema,

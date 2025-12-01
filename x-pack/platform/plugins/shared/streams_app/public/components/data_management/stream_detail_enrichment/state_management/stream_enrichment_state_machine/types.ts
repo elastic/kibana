@@ -50,7 +50,6 @@ export interface StreamEnrichmentContextType {
   simulatorRef: SimulationActorRef;
   urlState: EnrichmentUrlState;
   suggestedPipeline?: StreamlangDSL;
-  showSuggestion: boolean;
 }
 
 export type StreamEnrichmentEvent =

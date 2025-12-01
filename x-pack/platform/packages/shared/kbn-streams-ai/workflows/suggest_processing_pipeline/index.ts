@@ -44,10 +44,14 @@ export async function suggestProcessingPipeline({
 
   // Collect metrics for the initial pipeline
   const isOtel = isOtelStream(definition);
-  const mappedFields = await getMappedFields(esClient, definition.name);
-  const simulationResult = await simulatePipeline({
-    steps: parsingProcessor ? [parsingProcessor] : [],
-  });
+
+  // Parallelize independent async operations
+  const [mappedFields, simulationResult] = await Promise.all([
+    getMappedFields(esClient, definition.name),
+    simulatePipeline({
+      steps: parsingProcessor ? [parsingProcessor] : [],
+    }),
+  ]);
   const simulationMetrics = await getSimulationMetrics(
     simulationResult,
     fieldsMetadataClient,
@@ -159,6 +163,11 @@ export async function suggestProcessingPipeline({
     },
     abortSignal: signal,
   });
+
+  // Check for empty toolCalls array (similar to #244335)
+  if (!('toolCalls' in response) || response.toolCalls.length === 0) {
+    throw new Error('The LLM response did not contain any tool calls');
+  }
 
   const commitPipeline = pipelineDefinitionSchema.safeParse(
     response.toolCalls[0].function.arguments.pipeline

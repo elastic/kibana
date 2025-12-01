@@ -13,6 +13,7 @@ import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
 import type { FlattenRecord } from '@kbn/streams-schema';
+import type { usePipelineSuggestion } from './state_management/stream_enrichment_state_machine';
 import {
   useSimulatorSelector,
   useStreamEnrichmentSelector,
@@ -21,7 +22,6 @@ import { hasValidMessageFieldsForSuggestion } from './utils';
 import { NoStepsEmptyPrompt } from './empty_prompts';
 import { RootSteps } from './steps/root_steps';
 import { useAIFeatures } from '../../../hooks/use_ai_features';
-import type { useSuggestPipeline } from './state_management/stream_enrichment_state_machine/use_pipeline_suggestions';
 import { GenerateSuggestionButton } from '../stream_detail_routing/review_suggestions_form/generate_suggestions_button';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { PipelineSuggestion } from './pipeline_suggestions/pipeline_suggestion';
@@ -30,7 +30,7 @@ import { SuggestPipelinePanel } from './pipeline_suggestions/suggest_pipeline_pa
 import { getActiveDataSourceRef } from './state_management/stream_enrichment_state_machine/utils';
 
 export interface StepsEditorProps {
-  suggestionState: ReturnType<typeof useSuggestPipeline>;
+  suggestionState: ReturnType<typeof usePipelineSuggestion>;
 }
 
 export const StepsEditor = React.memo(({ suggestionState }: StepsEditorProps) => {
@@ -105,7 +105,6 @@ export const StepsEditor = React.memo(({ suggestionState }: StepsEditorProps) =>
       return (
         <PipelineSuggestion
           aiFeatures={aiFeatures}
-          pipeline={suggestionState.state.value}
           onAccept={() => {
             // Just hide the suggestion panel, keep the steps
             suggestionState.setShowSuggestion(false);

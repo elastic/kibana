@@ -94,7 +94,7 @@ const imageSets = {
   },
   suggestPipeline: {
     light: () => import('./suggest_pipeline.svg'),
-    dark: () => import('./suggest_pipeline.svg'),
+    dark: () => import('./suggest_pipeline_dark.svg'),
     alt: i18n.translate('xpack.streams.suggestPipelineImage', {
       defaultMessage: 'Suggest pipeline',
     }),

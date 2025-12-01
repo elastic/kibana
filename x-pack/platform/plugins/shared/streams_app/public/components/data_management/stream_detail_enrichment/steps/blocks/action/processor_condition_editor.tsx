@@ -10,17 +10,14 @@ import { useController } from 'react-hook-form';
 import type { ProcessorFormState } from '../../../types';
 import { ProcessorConditionEditorWrapper } from '../../../processor_condition_editor';
 
-import { undefinedToAlways } from '../../../../../../util/condition';
-
 export const ProcessorConditionEditor = () => {
-  const { field } = useController<ProcessorFormState, 'where'>({
-    name: 'where',
-  });
+  const { field } = useController<ProcessorFormState, 'where'>({ name: 'where' });
+
+  if (field.value === undefined) {
+    return null;
+  }
 
   return (
-    <ProcessorConditionEditorWrapper
-      condition={undefinedToAlways(field.value)}
-      onConditionChange={field.onChange}
-    />
+    <ProcessorConditionEditorWrapper condition={field.value} onConditionChange={field.onChange} />
   );
 };

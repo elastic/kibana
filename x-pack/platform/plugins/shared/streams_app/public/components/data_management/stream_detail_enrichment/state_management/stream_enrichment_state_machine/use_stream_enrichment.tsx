@@ -126,9 +126,61 @@ export const useStreamEnrichmentEvents = () => {
       setPreviewColumnsSorting: (sorting: SimulationContext['previewColumnsSorting']) => {
         service.send({ type: 'previewColumns.setSorting', sorting });
       },
+      // Pipeline suggestion actions
+      suggestPipeline: (params: { connectorId: string; streamName: string }) => {
+        service.send({ type: 'suggestion.generate', connectorId: params.connectorId });
+      },
+      clearSuggestedSteps: () => {
+        service.send({ type: 'suggestion.dismiss' });
+      },
+      cancelSuggestion: () => {
+        service.send({ type: 'suggestion.cancel' });
+      },
+      acceptSuggestion: () => {
+        service.send({ type: 'suggestion.accept' });
+      },
     }),
     [service]
   );
+};
+
+/**
+ * Hook for pipeline suggestion state and actions.
+ * Consolidated from the former use_pipeline_suggestions hook.
+ */
+export const usePipelineSuggestion = () => {
+  const events = useStreamEnrichmentEvents();
+
+  const loading = useStreamEnrichmentSelector((snapshot) =>
+    snapshot.matches({ ready: { enrichment: { pipelineSuggestion: 'generatingSuggestion' } } })
+  );
+  const suggestedPipeline = useStreamEnrichmentSelector(
+    (snapshot) => snapshot.context.suggestedPipeline
+  );
+  const showSuggestion = useStreamEnrichmentSelector((snapshot) =>
+    snapshot.matches({ ready: { enrichment: { pipelineSuggestion: 'viewingSuggestion' } } })
+  );
+
+  return {
+    state: {
+      loading,
+      value: suggestedPipeline,
+      error: undefined, // XState doesn't expose errors in context yet
+    },
+    showSuggestion,
+    suggestPipeline: events.suggestPipeline,
+    clearSuggestedSteps: events.clearSuggestedSteps,
+    cancelSuggestion: events.cancelSuggestion,
+    setShowSuggestion: useCallback(
+      (show: boolean) => {
+        if (!show) {
+          events.acceptSuggestion();
+        }
+        // Re-showing is not currently supported
+      },
+      [events]
+    ),
+  };
 };
 
 export const StreamEnrichmentContextProvider = ({

@@ -6,11 +6,11 @@
  */
 import type { MachineImplementationsFrom, ActorRefFrom, SnapshotFrom } from 'xstate5';
 import { htmlIdGenerator } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import {
   assign,
   enqueueActions,
   forwardTo,
-  fromPromise,
   setup,
   sendTo,
   stopChild,
@@ -18,6 +18,7 @@ import {
   raise,
   stateIn,
   cancel,
+  assertEvent,
 } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { Streams } from '@kbn/streams-schema';
@@ -73,7 +74,7 @@ import {
 import { setupGrokCollectionActor } from './setup_grok_collection_actor';
 import { selectPreviewRecords } from '../simulation_state_machine/selectors';
 import { selectWhetherAnyProcessorBeforePersisted } from './selectors';
-import { type SuggestPipelineInputMinimal } from './suggest_pipeline_actor';
+import { createSuggestPipelineActor } from './suggest_pipeline_actor';
 
 export type StreamEnrichmentActorRef = ActorRefFrom<typeof streamEnrichmentMachine>;
 export type StreamEnrichmentActorSnapshot = SnapshotFrom<typeof streamEnrichmentMachine>;
@@ -93,13 +94,12 @@ export const streamEnrichmentMachine = setup({
     setupGrokCollection: getPlaceholderFor(setupGrokCollectionActor),
     stepMachine: getPlaceholderFor(() => stepMachine),
     simulationMachine: getPlaceholderFor(() => simulationMachine),
-    suggestPipeline: fromPromise<StreamlangDSL, SuggestPipelineInputMinimal>(
-      async () => ({} as StreamlangDSL) // Placeholder
-    ),
+    suggestPipeline: getPlaceholderFor(createSuggestPipelineActor),
   },
   actions: {
     notifyUpsertStreamSuccess: getPlaceholderFor(createUpsertStreamSuccessNofitier),
     notifyUpsertStreamFailure: getPlaceholderFor(createUpsertStreamFailureNofitier),
+    notifySuggestionFailure: () => {}, // Placeholder for suggestion failure notification
     refreshDefinition: () => {},
     /* URL state actions */
     storeUrlState: assign((_, params: { urlState: EnrichmentUrlState }) => ({
@@ -229,7 +229,7 @@ export const streamEnrichmentMachine = setup({
         stepRefs: [...reorderSteps(context.stepRefs, params.stepId, params.direction)],
       };
     }),
-    resetSteps: assign((assignArgs, params: { steps: StreamlangDSL['steps'] }) => {
+    overwriteSteps: assign((assignArgs, params: { steps: StreamlangDSL['steps'] }) => {
       // Clean-up existing step refs
       assignArgs.context.stepRefs.forEach(stopChild);
 
@@ -273,10 +273,8 @@ export const streamEnrichmentMachine = setup({
     /* Pipeline suggestion actions */
     storeSuggestedPipeline: assign((_, params: { pipeline: StreamlangDSL }) => ({
       suggestedPipeline: params.pipeline,
-      showSuggestion: true,
     })),
-    hideSuggestion: assign({ showSuggestion: false }),
-    clearSuggestion: assign({ suggestedPipeline: undefined, showSuggestion: false }),
+    clearSuggestion: assign({ suggestedPipeline: undefined }),
     /* @ts-expect-error The error is thrown because the type of the event is not inferred correctly when using enqueueActions during setup */
     sendStepsEventToSimulator: enqueueActions(
       ({ context, enqueue }, params?: { type: StreamEnrichmentEvent['type'] }) => {
@@ -339,7 +337,6 @@ export const streamEnrichmentMachine = setup({
     stepRefs: [],
     urlState: defaultEnrichmentUrlState,
     suggestedPipeline: undefined,
-    showSuggestion: false,
     simulatorRef: spawn('simulationMachine', {
       id: 'simulator',
       input: {
@@ -584,7 +581,7 @@ export const streamEnrichmentMachine = setup({
                     'step.resetSteps': {
                       guard: 'hasManagePrivileges',
                       actions: [
-                        { type: 'resetSteps', params: ({ event }) => event },
+                        { type: 'overwriteSteps', params: ({ event }) => event },
                         { type: 'sendStepsEventToSimulator' },
                       ],
                     },
@@ -610,7 +607,6 @@ export const streamEnrichmentMachine = setup({
                     },
                     'step.save': {
                       target: 'idle',
-                      actions: [{ type: 'reassignSteps' }],
                     },
                   },
                 },
@@ -645,7 +641,10 @@ export const streamEnrichmentMachine = setup({
               states: {
                 idle: {
                   on: {
-                    'suggestion.generate': 'generatingSuggestion',
+                    'suggestion.generate': {
+                      guard: ({ context }) => context.stepRefs.length === 0,
+                      target: 'generatingSuggestion',
+                    },
                   },
                 },
                 generatingSuggestion: {
@@ -653,12 +652,7 @@ export const streamEnrichmentMachine = setup({
                     id: 'suggestPipelineActor',
                     src: 'suggestPipeline',
                     input: ({ context, event }) => {
-                      if (
-                        event.type !== 'suggestion.generate' &&
-                        event.type !== 'suggestion.regenerate'
-                      ) {
-                        throw new Error('Invalid event type for suggestion generation');
-                      }
+                      assertEvent(event, ['suggestion.generate', 'suggestion.regenerate']);
                       // Get preview documents from simulator
                       const documents = getActiveDataSourceSamples(context);
 
@@ -676,13 +670,19 @@ export const streamEnrichmentMachine = setup({
                           params: ({ event }) => ({ pipeline: event.output }),
                         },
                         {
-                          type: 'resetSteps',
+                          type: 'overwriteSteps',
                           params: ({ event }) => ({ steps: event.output.steps }),
                         },
                       ],
                     },
                     onError: {
                       target: 'idle',
+                      actions: [
+                        {
+                          type: 'notifySuggestionFailure',
+                          params: ({ event }: { event: { error: unknown } }) => ({ event }),
+                        },
+                      ],
                     },
                   },
                   on: {
@@ -691,7 +691,7 @@ export const streamEnrichmentMachine = setup({
                       actions: [
                         cancel('suggestPipelineActor'),
                         { type: 'clearSuggestion' },
-                        { type: 'resetSteps', params: () => ({ steps: [] }) },
+                        { type: 'overwriteSteps', params: () => ({ steps: [] }) },
                         { type: 'sendStepsEventToSimulator' },
                       ],
                     },
@@ -702,13 +702,13 @@ export const streamEnrichmentMachine = setup({
                   on: {
                     'suggestion.accept': {
                       target: 'idle',
-                      actions: [{ type: 'hideSuggestion' }],
+                      actions: [{ type: 'clearSuggestion' }],
                     },
                     'suggestion.dismiss': {
                       target: 'idle',
                       actions: [
                         { type: 'clearSuggestion' },
-                        { type: 'resetSteps', params: () => ({ steps: [] }) },
+                        { type: 'overwriteSteps', params: () => ({ steps: [] }) },
                         { type: 'sendStepsEventToSimulator' },
                       ],
                     },
@@ -716,7 +716,7 @@ export const streamEnrichmentMachine = setup({
                       target: 'generatingSuggestion',
                       actions: [
                         { type: 'clearSuggestion' },
-                        { type: 'resetSteps', params: () => ({ steps: [] }) },
+                        { type: 'overwriteSteps', params: () => ({ steps: [] }) },
                         { type: 'sendStepsEventToSimulator' },
                       ],
                     },
@@ -756,17 +756,10 @@ export const createStreamEnrichmentMachineImplementations = ({
         toasts: core.notifications.toasts,
       })
     ),
-    suggestPipeline: fromPromise(async ({ input, signal }) => {
-      const { suggestPipelineLogic } = await import('./suggest_pipeline_actor');
-      return suggestPipelineLogic({
-        streamName: input.streamName,
-        connectorId: input.connectorId,
-        documents: input.documents,
-        signal,
-        streamsRepositoryClient,
-        telemetryClient,
-        notifications: core.notifications,
-      });
+    suggestPipeline: createSuggestPipelineActor({
+      streamsRepositoryClient,
+      telemetryClient,
+      notifications: core.notifications,
     }),
   },
   actions: {
@@ -778,5 +771,15 @@ export const createStreamEnrichmentMachineImplementations = ({
     notifyUpsertStreamFailure: createUpsertStreamFailureNofitier({
       toasts: core.notifications.toasts,
     }),
+    notifySuggestionFailure: (params: { event: unknown }) => {
+      const event = params.event as { error: Error };
+      core.notifications.toasts.addError(event.error, {
+        title: i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.suggestionError',
+          { defaultMessage: 'Failed to generate pipeline suggestion' }
+        ),
+        toastMessage: event.error.message,
+      });
+    },
   },
 });

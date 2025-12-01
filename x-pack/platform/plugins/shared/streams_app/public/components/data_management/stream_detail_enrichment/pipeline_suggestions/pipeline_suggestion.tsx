@@ -12,34 +12,17 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiPanel,
-  EuiTextTruncate,
-  euiTextTruncate,
-  EuiText,
-  useEuiTheme,
   EuiButtonEmpty,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type {
-  StreamlangDSL,
-  StreamlangProcessorDefinition,
-  StreamlangProcessorDefinitionWithUIAttributes,
-} from '@kbn/streamlang';
-import { isActionBlock } from '@kbn/streamlang';
-import { css } from '@emotion/react';
-import { getStepDescription } from '../steps/blocks/action/utils';
 import type { AIFeatures } from '../../../../hooks/use_ai_features';
 import { GenerateSuggestionButton } from '../../stream_detail_routing/review_suggestions_form/generate_suggestions_button';
-import { useSimulatorSelector } from '../state_management/stream_enrichment_state_machine';
-import type {
-  Simulation,
-  ProcessorMetrics,
-} from '../state_management/simulation_state_machine/types';
-import { getPercentageFormatter } from '../../../../util/formatters';
+import { useStreamEnrichmentSelector } from '../state_management/stream_enrichment_state_machine';
+import { RootSteps } from '../steps/root_steps';
 
 export interface PipelineSuggestionProps {
   aiFeatures: AIFeatures;
-  pipeline: StreamlangDSL;
   onAccept(): void;
   onDismiss(): void;
   onRegenerate(connectorId: string): void;
@@ -47,13 +30,11 @@ export interface PipelineSuggestionProps {
 
 export function PipelineSuggestion({
   aiFeatures,
-  pipeline,
   onAccept,
   onDismiss,
   onRegenerate,
 }: PipelineSuggestionProps) {
-  const simulation = useSimulatorSelector((state) => state.context.simulation);
-  const isSimulating = useSimulatorSelector((state) => state.matches('runningSimulation'));
+  const stepRefs = useStreamEnrichmentSelector((state) => state.context.stepRefs);
 
   return (
     <EuiCallOut
@@ -72,21 +53,7 @@ export function PipelineSuggestion({
         })}
       </EuiText>
       <EuiSpacer size="m" />
-      {pipeline.steps.map((step, i) =>
-        isActionBlock(step) ? (
-          <>
-            <ActionBlock
-              key={i}
-              step={step}
-              stepIndex={i}
-              pipeline={pipeline}
-              simulation={simulation}
-              isSimulating={isSimulating}
-            />
-            <EuiSpacer size="s" />
-          </>
-        ) : null
-      )}
+      <RootSteps stepRefs={stepRefs} />
       <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
         <EuiFlexItem>
@@ -128,121 +95,3 @@ export function PipelineSuggestion({
     </EuiCallOut>
   );
 }
-
-const ActionBlock = ({
-  step,
-  stepIndex,
-  pipeline,
-  simulation,
-  isSimulating,
-}: {
-  step: StreamlangProcessorDefinition;
-  stepIndex: number;
-  pipeline: StreamlangDSL;
-  simulation: Simulation | undefined;
-  isSimulating: boolean;
-}) => {
-  const { euiTheme } = useEuiTheme();
-  const stepDescription = getStepDescription(step as StreamlangProcessorDefinitionWithUIAttributes);
-
-  // Get processor metrics - since suggested steps don't have IDs yet, we match by index
-  const processorKeys = simulation?.processors_metrics
-    ? Object.keys(simulation.processors_metrics)
-    : [];
-  const processorMetrics: ProcessorMetrics | undefined =
-    processorKeys[stepIndex] && simulation?.processors_metrics
-      ? simulation.processors_metrics[processorKeys[stepIndex]]
-      : undefined;
-
-  const parsedRate = processorMetrics?.parsed_rate;
-  const failedRate = processorMetrics?.failed_rate;
-
-  const formatter = getPercentageFormatter();
-  const formattedParsedRate =
-    parsedRate !== undefined && parsedRate > 0 ? formatter.format(parsedRate) : null;
-  const formattedFailedRate =
-    failedRate !== undefined && failedRate > 0 ? formatter.format(failedRate) : null;
-
-  return (
-    <EuiPanel
-      hasShadow={false}
-      css={css`
-        border: ${euiTheme.border.thin};
-        border-radius: ${euiTheme.size.s};
-        padding: ${euiTheme.size.m};
-      `}
-    >
-      <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
-        <EuiFlexItem>
-          <EuiFlexGroup gutterSize="xs" alignItems="center">
-            <EuiFlexItem
-              grow={true}
-              css={css`
-                min-width: 0;
-                margin-right: ${euiTheme.size.s};
-              `}
-            >
-              <EuiFlexGroup alignItems="center" gutterSize="xs">
-                <EuiText
-                  size="s"
-                  style={{ fontWeight: euiTheme.font.weight.bold }}
-                  css={css`
-                    display: block;
-                    ${euiTextTruncate()}
-                  `}
-                >
-                  {step.action.toUpperCase()}
-                </EuiText>
-                {!isSimulating && processorMetrics && (
-                  <>
-                    {formattedParsedRate && (
-                      <EuiText size="xs" color="success">
-                        {i18n.translate('xpack.streams.processingSuggestion.stepParsedRate', {
-                          defaultMessage: '{percentage} success',
-                          values: { percentage: formattedParsedRate },
-                        })}
-                      </EuiText>
-                    )}
-                    {formattedFailedRate && (
-                      <EuiText size="xs" color="danger">
-                        {i18n.translate('xpack.streams.processingSuggestion.stepFailedRate', {
-                          defaultMessage: '{percentage} failed',
-                          values: { percentage: formattedFailedRate },
-                        })}
-                      </EuiText>
-                    )}
-                  </>
-                )}
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiPanel
-            hasShadow={false}
-            color="subdued"
-            css={css`
-              padding: ${euiTheme.size.xs} ${euiTheme.size.s};
-            `}
-          >
-            <EuiTextTruncate
-              text={stepDescription}
-              truncation="end"
-              children={() => (
-                <EuiText
-                  size="xs"
-                  color="subdued"
-                  css={css`
-                    font-family: ${euiTheme.font.familyCode};
-                  `}
-                >
-                  {stepDescription}
-                </EuiText>
-              )}
-            />
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
-  );
-};

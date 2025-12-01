@@ -7,27 +7,15 @@
 
 import { lastValueFrom, map } from 'rxjs';
 import { fromPromise } from 'xstate5';
-import { isRequestAbortedError } from '@kbn/server-route-repository-client';
 import type { NotificationsStart } from '@kbn/core/public';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { streamlangDSLSchema, type StreamlangDSL } from '@kbn/streamlang';
 import type { FlattenRecord } from '@kbn/streams-schema';
+import { flattenObjectNestedLast } from '@kbn/object-utils';
 import {
   extractGrokPatternDangerouslySlow,
-  getGrokProcessor,
-  getReviewFields as getGrokReviewFields,
   groupMessagesByPattern as groupMessagesByGrokPattern,
-  mergeGrokProcessors,
-  unwrapPatternDefinitions,
-  type GrokProcessorResult,
 } from '@kbn/grok-heuristics';
-import {
-  extractDissectPattern,
-  getDissectProcessorWithReview,
-  getReviewFields as getDissectReviewFields,
-  groupMessagesByPattern as groupMessagesByDissectPattern,
-} from '@kbn/dissect-heuristics';
-import { flattenObjectNestedLast } from '@kbn/object-utils';
 import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
 import { PRIORITIZED_CONTENT_FIELDS, getDefaultTextField } from '../../utils';
 import { extractMessagesFromField } from '../../steps/blocks/action/utils/pattern_suggestion_helpers';
@@ -47,25 +35,19 @@ export interface SuggestPipelineInput extends SuggestPipelineInputMinimal {
   notifications: NotificationsStart;
 }
 
-const SUGGESTED_GROK_PROCESSOR_ID = 'grok-processor';
-const SUGGESTED_DISSECT_PROCESSOR_ID = 'dissect-processor';
-
-interface GrokParsingProcessor {
-  action: 'grok';
-  from: string;
-  patterns: [string, ...string[]];
+interface ExtractedGrokPattern {
+  type: 'grok';
+  fieldName: string;
+  patternGroups: Array<{
+    messages: string[];
+    patterns: string[];
+  }>;
 }
 
-interface DissectParsingProcessor {
-  action: 'dissect';
-  from: string;
-  pattern: string;
-}
-
-interface ParsingProcessorCandidate {
-  type: 'grok' | 'dissect';
-  processor: GrokParsingProcessor | DissectParsingProcessor;
-  parsedRate: number;
+interface ExtractedDissectPattern {
+  type: 'dissect';
+  fieldName: string;
+  messages: string[];
 }
 
 export async function suggestPipelineLogic(input: SuggestPipelineInput): Promise<StreamlangDSL> {
@@ -74,30 +56,20 @@ export async function suggestPipelineLogic(input: SuggestPipelineInput): Promise
     (doc) => flattenObjectNestedLast(doc.document) as FlattenRecord
   );
 
-  // Determine the best field to use for pattern extraction
+  // Step 1: CLIENT-SIDE - Extract patterns from documents
+  // This is compute-intensive and synchronous, so it stays client-side
   const fieldName = getDefaultTextField(documents, PRIORITIZED_CONTENT_FIELDS);
   const messages = extractMessagesFromField(documents, fieldName);
 
-  // Step 1: Generate both grok and dissect patterns in parallel
-  const [grokCandidate, dissectCandidate] = await Promise.all([
-    generateGrokProcessor(input, messages, fieldName, documents),
-    generateDissectProcessor(input, messages, fieldName, documents),
+  const [grokPatterns, dissectPatterns] = await Promise.all([
+    extractGrokPatternsClientSide(messages, fieldName),
+    extractDissectPatternsClientSide(messages, fieldName),
   ]);
 
-  // Step 2: Pick the better parsing processor based on parsed rate
-  const candidates = [grokCandidate, dissectCandidate].filter(
-    (c): c is ParsingProcessorCandidate => c !== null
-  );
-
-  if (candidates.length === 0) {
-    throw new Error('Both grok and dissect pattern generation failed');
-  }
-
-  // Sort by parsed rate (highest first) and pick the best one
-  candidates.sort((a, b) => b.parsedRate - a.parsedRate);
-  const bestCandidate = candidates[0];
-
-  // Step 3: Generate full pipeline using the best parsing processor
+  // Step 2: SERVER-SIDE - Pass extracted patterns to server for:
+  // - LLM review of patterns
+  // - Simulation to pick best processor
+  // - Full pipeline generation
   const pipeline = await lastValueFrom(
     input.streamsRepositoryClient
       .stream('POST /internal/streams/{name}/_suggest_processing_pipeline', {
@@ -107,7 +79,10 @@ export async function suggestPipelineLogic(input: SuggestPipelineInput): Promise
           body: {
             connector_id: input.connectorId,
             documents,
-            parsing_processor: bestCandidate.processor,
+            extracted_patterns: {
+              grok: grokPatterns,
+              dissect: dissectPatterns,
+            },
           },
         },
       })
@@ -118,232 +93,85 @@ export async function suggestPipelineLogic(input: SuggestPipelineInput): Promise
 }
 
 /**
- * Generate grok processor from messages
+ * CLIENT-SIDE: Extract grok patterns from messages
+ * This is compute-intensive pattern matching that should stay client-side
  */
-async function generateGrokProcessor(
-  input: SuggestPipelineInput,
+async function extractGrokPatternsClientSide(
   messages: string[],
-  fieldName: string,
-  documents: FlattenRecord[]
-): Promise<ParsingProcessorCandidate | null> {
-  const groupedMessages = groupMessagesByGrokPattern(messages);
-
-  const finishTrackingGrok = input.telemetryClient.startTrackingAIGrokSuggestionLatency({
-    name: input.streamName,
-    field: fieldName,
-    connector_id: input.connectorId,
-  });
-
+  fieldName: string
+): Promise<ExtractedGrokPattern | null> {
   try {
-    // Request grok patterns for each message group in parallel
-    const grokResults = await Promise.allSettled(
-      groupedMessages.map((group) => {
-        const grokPatternNodes = extractGrokPatternDangerouslySlow(group.messages);
+    const groupedMessages = groupMessagesByGrokPattern(messages);
 
-        return lastValueFrom(
-          input.streamsRepositoryClient.stream(
-            'POST /internal/streams/{name}/processing/_suggestions/grok',
-            {
-              signal: input.signal,
-              params: {
-                path: { name: input.streamName },
-                body: {
-                  connector_id: input.connectorId,
-                  sample_messages: group.messages.slice(0, 10),
-                  review_fields: getGrokReviewFields(grokPatternNodes, 10),
-                },
-              },
-            }
-          )
-        ).then((reviewResult) => {
-          const grokProcessor = getGrokProcessor(grokPatternNodes, reviewResult.grokProcessor);
-
-          return {
-            ...grokProcessor,
-            patterns: unwrapPatternDefinitions(grokProcessor),
-            pattern_definitions: {},
-          };
-        });
-      })
-    );
-
-    // Collect successful results
-    const grokProcessors = grokResults.reduce<GrokProcessorResult[]>((acc, result) => {
-      if (result.status === 'fulfilled') {
-        acc.push(result.value);
-      }
-      return acc;
-    }, []);
-
-    if (grokProcessors.length === 0) {
-      finishTrackingGrok(0, [0]);
+    if (groupedMessages.length === 0) {
       return null;
     }
 
-    // Merge all grok processors into one
-    const combinedGrokProcessor = mergeGrokProcessors(grokProcessors);
-
-    // Run simulation to verify grok patterns work
-    const simulationResult = await input.streamsRepositoryClient.fetch(
-      'POST /internal/streams/{name}/processing/_simulate',
-      {
-        signal: input.signal,
-        params: {
-          path: { name: input.streamName },
-          body: {
-            documents,
-            processing: {
-              steps: [
-                {
-                  action: 'grok',
-                  customIdentifier: SUGGESTED_GROK_PROCESSOR_ID,
-                  from: fieldName,
-                  patterns: combinedGrokProcessor.patterns,
-                },
-              ],
-            },
-          },
-        },
-      }
-    );
-
-    const parsedRate =
-      simulationResult.processors_metrics[SUGGESTED_GROK_PROCESSOR_ID]?.parsed_rate ?? 0;
-
-    finishTrackingGrok(1, [parsedRate]);
+    // Extract patterns for each message group
+    const patternGroups = groupedMessages.map((group) => {
+      const grokPatternNodes = extractGrokPatternDangerouslySlow(group.messages);
+      return {
+        messages: group.messages.slice(0, 10), // Limit to 10 samples per group
+        patterns: grokPatternNodes
+          .filter((node): node is { pattern: string } => 'pattern' in node)
+          .map((node) => node.pattern),
+      };
+    });
 
     return {
       type: 'grok',
-      processor: {
-        action: 'grok',
-        from: fieldName,
-        patterns: combinedGrokProcessor.patterns as [string, ...string[]],
-      },
-      parsedRate,
+      fieldName,
+      patternGroups,
     };
   } catch (error) {
-    finishTrackingGrok(0, [0]);
-
-    // Don't show error toast for abort errors, just return null
-    if (!isRequestAbortedError(error)) {
-      // Log but don't throw - we want to try dissect even if grok fails
-      // eslint-disable-next-line no-console
-      console.warn('Grok pattern generation failed:', error);
-    }
+    // eslint-disable-next-line no-console
+    console.warn('Client-side grok pattern extraction failed:', error);
     return null;
   }
 }
 
 /**
- * Generate dissect processor from messages
+ * CLIENT-SIDE: Prepare dissect data for server-side processing
+ * Just extract and group messages - pattern extraction happens server-side
  */
-async function generateDissectProcessor(
-  input: SuggestPipelineInput,
+async function extractDissectPatternsClientSide(
   messages: string[],
-  fieldName: string,
-  documents: FlattenRecord[]
-): Promise<ParsingProcessorCandidate | null> {
-  const finishTrackingDissect = input.telemetryClient.startTrackingAIDissectSuggestionLatency({
-    name: input.streamName,
-    field: fieldName,
-    connector_id: input.connectorId,
-  });
-
+  fieldName: string
+): Promise<ExtractedDissectPattern | null> {
   try {
-    // Group messages by pattern and use only the largest group for dissect
-    const groupedMessages = groupMessagesByDissectPattern(messages);
-    const largestGroup = groupedMessages[0]; // Groups are sorted by probability (descending)
-
-    if (!largestGroup || largestGroup.messages.length === 0) {
-      finishTrackingDissect(0, [0]);
+    // Just return the messages and fieldName - server will do the extraction
+    if (messages.length === 0) {
       return null;
     }
-
-    // Extract dissect pattern from the largest group
-    const dissectPattern = extractDissectPattern(largestGroup.messages);
-
-    if (dissectPattern.fields.length === 0) {
-      finishTrackingDissect(0, [0]);
-      return null;
-    }
-
-    // Call LLM to review and map fields to ECS
-    const reviewResult = await lastValueFrom(
-      input.streamsRepositoryClient.stream(
-        'POST /internal/streams/{name}/processing/_suggestions/dissect',
-        {
-          signal: input.signal,
-          params: {
-            path: { name: input.streamName },
-            body: {
-              connector_id: input.connectorId,
-              sample_messages: largestGroup.messages.slice(0, 10),
-              review_fields: getDissectReviewFields(dissectPattern, 10),
-            },
-          },
-        }
-      )
-    );
-
-    const dissectProcessor = getDissectProcessorWithReview(
-      dissectPattern,
-      reviewResult.dissectProcessor,
-      fieldName
-    );
-
-    // Run simulation to verify dissect pattern works
-    const simulationResult = await input.streamsRepositoryClient.fetch(
-      'POST /internal/streams/{name}/processing/_simulate',
-      {
-        signal: input.signal,
-        params: {
-          path: { name: input.streamName },
-          body: {
-            documents,
-            processing: {
-              steps: [
-                {
-                  action: 'dissect',
-                  customIdentifier: SUGGESTED_DISSECT_PROCESSOR_ID,
-                  from: fieldName,
-                  pattern: dissectProcessor.pattern,
-                },
-              ],
-            },
-          },
-        },
-      }
-    );
-
-    const parsedRate =
-      simulationResult.processors_metrics[SUGGESTED_DISSECT_PROCESSOR_ID]?.parsed_rate ?? 0;
-
-    finishTrackingDissect(1, [parsedRate]);
 
     return {
       type: 'dissect',
-      processor: {
-        action: 'dissect',
-        from: fieldName,
-        pattern: dissectProcessor.pattern,
-      },
-      parsedRate,
+      fieldName,
+      messages: messages.slice(0, 10), // Limit to 10 samples
     };
   } catch (error) {
-    finishTrackingDissect(0, [0]);
-
-    // Don't show error toast for abort errors, just return null
-    if (!isRequestAbortedError(error)) {
-      // Log but don't throw - we want to try grok even if dissect fails
-      // eslint-disable-next-line no-console
-      console.warn('Dissect pattern generation failed:', error);
-    }
+    // eslint-disable-next-line no-console
+    console.warn('Client-side dissect data preparation failed:', error);
     return null;
   }
 }
 
-export const createSuggestPipelineActor = () => {
-  return fromPromise<StreamlangDSL, SuggestPipelineInput>(async ({ input }) =>
-    suggestPipelineLogic(input)
+export const createSuggestPipelineActor = ({
+  streamsRepositoryClient,
+  telemetryClient,
+  notifications,
+}: {
+  streamsRepositoryClient: StreamsRepositoryClient;
+  telemetryClient: StreamsTelemetryClient;
+  notifications: NotificationsStart;
+}) => {
+  return fromPromise<StreamlangDSL, SuggestPipelineInputMinimal>(async ({ input, signal }) =>
+    suggestPipelineLogic({
+      ...input,
+      signal,
+      streamsRepositoryClient,
+      telemetryClient,
+      notifications,
+    })
   );
 };
