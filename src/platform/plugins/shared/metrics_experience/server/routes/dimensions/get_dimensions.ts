@@ -74,7 +74,7 @@ export const getDimensions = async ({
     )
     .toString();
 
-  console.log('queryOld',queryOld);
+  console.log('queryOld', queryOld);
   try {
     const response = await esClient.esql(
       'get_dimensions',
