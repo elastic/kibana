@@ -129,7 +129,6 @@ export class LlmProxy {
         response.writeHead(500, {
           'Elastic-Interceptor': 'Interceptor not found',
         });
-        response.write(sseEvent({ errorMessage, availableInterceptorNames }));
         response.end();
       })
       .on('error', (error) => {
