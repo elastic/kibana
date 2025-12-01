@@ -11,7 +11,7 @@ import type { EnterContinueNode } from '@kbn/workflows/graph';
 import type { EsWorkflowStepExecution } from '@kbn/workflows/types/v1';
 import type { StepExecutionRuntime } from '../../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
-import type { IWorkflowEventLogger } from '../../../../workflow_event_logger/workflow_event_logger';
+import type { IWorkflowEventLogger } from '../../../../workflow_event_logger';
 import { EnterContinueNodeImpl } from '../enter_continue_node_impl';
 
 describe('EnterContinueNodeImpl', () => {
