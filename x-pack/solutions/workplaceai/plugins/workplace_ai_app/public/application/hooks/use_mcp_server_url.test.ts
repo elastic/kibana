@@ -95,6 +95,7 @@ describe('useMcpServerUrl', () => {
       'https://localhost:5601/s/default/api/agent_builder/mcp'
     );
 
+    // @ts-expect-error upgrade typescript v5.9.3
     window.location = originalLocation;
   });
 
@@ -125,6 +126,7 @@ describe('useMcpServerUrl', () => {
       'https://example.com/custom-base-path/api/agent_builder/mcp'
     );
 
+    // @ts-expect-error upgrade typescript v5.9.3
     window.location = originalLocation;
   });
 
