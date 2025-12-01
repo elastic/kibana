@@ -12479,7 +12479,7 @@
               "\nIf set, the component will only re-render if any of the listed properties change.\nWhen set to `['data', 'error']`, the component will only re-render when the `data` or `error` properties change.\nWhen set to `'all'`, the component will re-render whenever a query is updated.\nBy default, access to properties will be tracked, and the component will only re-render when one of the tracked properties change."
             ],
             "signature": [
-              "\"all\" | (\"error\" | \"data\" | \"status\" | \"isError\" | \"isLoading\" | \"isSuccess\" | \"failureCount\" | \"failureReason\" | \"isPaused\" | \"isInitialLoading\" | \"remove\" | \"refetch\" | \"isFetching\" | \"isLoadingError\" | \"dataUpdatedAt\" | \"errorUpdateCount\" | \"errorUpdatedAt\" | \"fetchStatus\" | \"isRefetchError\" | \"fetchNextPage\" | \"fetchPreviousPage\" | \"hasNextPage\" | \"hasPreviousPage\" | \"isFetchingNextPage\" | \"isFetchingPreviousPage\" | \"isFetched\" | \"isFetchedAfterMount\" | \"isPlaceholderData\" | \"isPreviousData\" | \"isRefetching\" | \"isStale\")[] | undefined"
+              "\"all\" | (\"error\" | \"data\" | \"status\" | \"remove\" | \"isError\" | \"isLoading\" | \"isSuccess\" | \"failureCount\" | \"failureReason\" | \"isPaused\" | \"isInitialLoading\" | \"refetch\" | \"isFetching\" | \"isLoadingError\" | \"dataUpdatedAt\" | \"errorUpdateCount\" | \"errorUpdatedAt\" | \"fetchStatus\" | \"isRefetchError\" | \"fetchNextPage\" | \"fetchPreviousPage\" | \"hasNextPage\" | \"hasPreviousPage\" | \"isFetchingNextPage\" | \"isFetchingPreviousPage\" | \"isFetched\" | \"isFetchedAfterMount\" | \"isPlaceholderData\" | \"isPreviousData\" | \"isRefetching\" | \"isStale\")[] | undefined"
             ],
             "path": "node_modules/@tanstack/query-core/build/lib/types.d.ts",
             "deprecated": false,
@@ -12983,11 +12983,11 @@
               },
               {
                 "plugin": "slo",
-                "path": "x-pack/solutions/observability/plugins/slo/public/pages/slos/hooks/use_fetch_slos_overview.ts"
+                "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_fetch_global_diagnosis.ts"
               },
               {
                 "plugin": "slo",
-                "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_fetch_global_diagnosis.ts"
+                "path": "x-pack/solutions/observability/plugins/slo/public/pages/slos/hooks/use_fetch_slos_overview.ts"
               },
               {
                 "plugin": "searchPlayground",

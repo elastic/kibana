@@ -16,8 +16,9 @@ export default function ({ getService }: FtrProviderContext) {
       filePath: require.resolve('./files_to_import/anomaly_detection_jobs_7.16.json'),
       expected: {
         jobType: 'anomaly-detector' as JobType,
-        jobIds: ['ad-test1', 'ad-test3'],
-        skippedJobIds: ['ad-test2'],
+        jobIds: ['ad-test1', 'ad-test2', 'ad-test3'],
+        skippedJobIds: ['ad-test4'],
+        jobIdsWithDatafeedWarnings: ['ad-test2'],
       },
     },
     {
@@ -26,6 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
         jobType: 'data-frame-analytics' as JobType,
         jobIds: ['dfa-test1'],
         skippedJobIds: ['dfa-test2'],
+        jobIdsWithDatafeedWarnings: [] as string[],
       },
     },
   ];
@@ -64,7 +66,12 @@ export default function ({ getService }: FtrProviderContext) {
           testData.expected.jobType
         );
         await ml.stackManagementJobs.assertJobIdsExist(testData.expected.jobIds);
+
         await ml.stackManagementJobs.assertJobIdsSkipped(testData.expected.skippedJobIds);
+
+        await ml.stackManagementJobs.assertDatafeedWarnings(
+          testData.expected.jobIdsWithDatafeedWarnings.length
+        );
       });
 
       it('imports jobs', async () => {
