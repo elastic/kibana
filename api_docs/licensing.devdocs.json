@@ -696,6 +696,10 @@
               "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts"
             },
             {
+              "plugin": "maintenanceWindows",
+              "path": "x-pack/platform/plugins/shared/maintenance_windows/server/plugin.ts"
+            },
+            {
               "plugin": "alerting",
               "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts"
             },
@@ -798,6 +802,14 @@
             {
               "plugin": "alerting",
               "path": "x-pack/platform/plugins/shared/alerting/server/lib/license_state.test.ts"
+            },
+            {
+              "plugin": "maintenanceWindows",
+              "path": "x-pack/platform/plugins/shared/maintenance_windows/server/lib/license_state.test.ts"
+            },
+            {
+              "plugin": "maintenanceWindows",
+              "path": "x-pack/platform/plugins/shared/maintenance_windows/server/lib/license_state.test.ts"
             }
           ]
         },

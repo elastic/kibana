@@ -15,7 +15,6 @@ import type {
   LensResponseItem,
   LensUpdateRequestBody,
 } from './types';
-
 /**
  * Converts Lens request data to Lens Config
  */
