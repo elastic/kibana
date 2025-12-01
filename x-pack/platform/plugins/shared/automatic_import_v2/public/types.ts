@@ -9,7 +9,7 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import type { CreateIntegrationComponent } from './components/create_integration/types';
+import type { IntegrationManagementComponent } from './components/integration_management/types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AutomaticImportPluginSetup {}
@@ -17,12 +17,10 @@ export interface AutomaticImportPluginSetup {}
 export interface AutomaticImportPluginStart {
   components: {
     /**
-     * Component that allows the user to create an integration.
+     * Component that allows the user to manage an integration.
      */
-    CreateIntegration: CreateIntegrationComponent;
+    IntegrationManagement: IntegrationManagementComponent;
   };
-
-  // TODO: Include renderUpselling function in the future
 }
 
 export interface AutomaticImportPluginSetupDependencies {

@@ -17,12 +17,3 @@ export const CreateIntegration = React.memo(() => {
 
   return CreateAutomaticImport ? <CreateAutomaticImport /> : null;
 });
-
-export const CreateIntegrationV2 = React.memo(() => {
-  const { automaticImportVTwo } = useStartServices();
-  useBreadcrumbs('integration_create_v2');
-
-  const CreateAutomaticImportV2 = automaticImportVTwo?.components.CreateIntegration;
-
-  return CreateAutomaticImportV2 ? <CreateAutomaticImportV2 /> : null;
-});

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type CreateIntegrationComponent = React.ComponentType;
+export type IntegrationManagementComponent = React.ComponentType;

@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-import type { CoreStart, Plugin, CoreSetup, PluginInitializerContext } from '@kbn/core/public';
+import type {
+  CoreStart,
+  Plugin,
+  CoreSetup,
+  PluginInitializerContext,
+  AppMountParameters,
+} from '@kbn/core/public';
 
-import { getCreateIntegrationLazy } from './components/create_integration';
+import { PLUGIN_ID, PLUGIN_NAME } from '../common/constants';
+import { getIntegrationManagementLazy } from './components/integration_management';
 import type {
   AutomaticImportPluginSetup,
   AutomaticImportPluginStart,
@@ -19,7 +26,20 @@ export class AutomaticImportPlugin
 {
   constructor(_: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup): AutomaticImportPluginSetup {
+  public setup(
+    core: CoreSetup<AutomaticImportPluginStartDependencies, AutomaticImportPluginStart>
+  ): AutomaticImportPluginSetup {
+    core.application.register({
+      id: PLUGIN_ID,
+      title: PLUGIN_NAME,
+      visibleIn: [],
+      async mount(params: AppMountParameters) {
+        const { renderApp } = await import('./application');
+        const [coreStart, plugins] = await core.getStartServices();
+        return renderApp({ coreStart, plugins, params });
+      },
+    });
+
     return {};
   }
 
@@ -34,7 +54,7 @@ export class AutomaticImportPlugin
 
     return {
       components: {
-        CreateIntegration: getCreateIntegrationLazy(services),
+        IntegrationManagement: getIntegrationManagementLazy(services),
       },
     };
   }
