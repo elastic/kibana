@@ -14,7 +14,6 @@ test.describe(
   { tag: ['@ess', '@svlOblt'] },
   () => {
     test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-      await apiServices.streams.enable();
       // Clear existing rules
       await apiServices.streams.clearStreamChildren('logs');
       // Create a parent wired stream
