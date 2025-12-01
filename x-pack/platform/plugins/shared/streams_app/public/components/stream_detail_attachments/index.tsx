@@ -16,6 +16,7 @@ import { useAttachmentsFetch } from '../../hooks/use_attachments_fetch';
 import { useKibana } from '../../hooks/use_kibana';
 import { AddAttachmentFlyout } from './add_attachment_flyout';
 import { AttachmentsTable } from './attachment_table';
+import { AttachmentsEmptyPrompt } from './attachments_empty_prompt';
 
 export function StreamDetailAttachments({
   definition,
@@ -56,84 +57,102 @@ export function StreamDetailAttachments({
     },
   } = useKibana();
 
+  const hasNoAttachments = !attachmentsFetch.loading && linkedAttachments.length === 0;
+
+  const openAddAttachmentFlyout = () => {
+    setIsAddAttachmentFlyoutOpen(true);
+  };
+
   return (
     <EuiFlexGroup direction="column">
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup direction="row" gutterSize="s">
-          {selectedAttachments.length > 0 && (
-            <EuiButton
-              data-test-subj="streamsAppStreamDetailRemoveAttachmentButton"
-              iconType="trash"
-              isLoading={isUnlinkLoading}
-              onClick={async () => {
-                try {
-                  setIsUnlinkLoading(true);
-
-                  await removeAttachments(selectedAttachments);
-                  attachmentsFetch.refresh();
-
-                  setSelectedAttachments([]);
-                } finally {
-                  setIsUnlinkLoading(false);
-                }
-              }}
-              color="danger"
-            >
-              {i18n.translate(
-                'xpack.streams.streamDetailAttachmentView.removeSelectedButtonLabel',
-                {
-                  defaultMessage: 'Unlink selected',
-                }
-              )}
-            </EuiButton>
-          )}
-          <EuiSearchBar
-            query={query}
-            box={{
-              incremental: true,
-            }}
-            onChange={(nextQuery) => {
-              setQuery(nextQuery.queryText);
-            }}
-          />
-          <EuiButton
-            data-test-subj="streamsAppStreamDetailAddAttachmentButton"
-            iconType="plusInCircle"
+      {hasNoAttachments ? (
+        <EuiFlexItem>
+          <AttachmentsEmptyPrompt
+            onAddAttachments={openAddAttachmentFlyout}
             disabled={!canLinkAttachments}
-            onClick={() => {
-              setIsAddAttachmentFlyoutOpen(true);
-            }}
-          >
-            {i18n.translate('xpack.streams.streamDetailAttachmentView.addAnAttachmentButtonLabel', {
-              defaultMessage: 'Add an attachment',
-            })}
-          </EuiButton>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <AttachmentsTable
-          entityId={definition?.stream.name}
-          attachments={filteredAttachments}
-          loading={attachmentsFetch.loading}
-          selectedAttachments={selectedAttachments}
-          setSelectedAttachments={canLinkAttachments ? setSelectedAttachments : undefined}
-          dataTestSubj="streamsAppStreamDetailAttachmentsTable"
-        />
-        {definition && isAddAttachmentFlyoutOpen ? (
-          <AddAttachmentFlyout
-            linkedAttachments={linkedAttachments}
-            entityId={definition.stream.name}
-            onAddAttachments={async (attachments) => {
-              await addAttachments(attachments);
-              attachmentsFetch.refresh();
-              setIsAddAttachmentFlyoutOpen(false);
-            }}
-            onClose={() => {
-              setIsAddAttachmentFlyoutOpen(false);
-            }}
           />
-        ) : null}
-      </EuiFlexItem>
+        </EuiFlexItem>
+      ) : (
+        <>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup direction="row" gutterSize="s">
+              {selectedAttachments.length > 0 && (
+                <EuiButton
+                  data-test-subj="streamsAppStreamDetailRemoveAttachmentButton"
+                  iconType="trash"
+                  isLoading={isUnlinkLoading}
+                  onClick={async () => {
+                    try {
+                      setIsUnlinkLoading(true);
+
+                      await removeAttachments(selectedAttachments);
+                      attachmentsFetch.refresh();
+
+                      setSelectedAttachments([]);
+                    } finally {
+                      setIsUnlinkLoading(false);
+                    }
+                  }}
+                  color="danger"
+                >
+                  {i18n.translate(
+                    'xpack.streams.streamDetailAttachmentView.removeSelectedButtonLabel',
+                    {
+                      defaultMessage: 'Unlink selected',
+                    }
+                  )}
+                </EuiButton>
+              )}
+              <EuiSearchBar
+                query={query}
+                box={{
+                  incremental: true,
+                }}
+                onChange={(nextQuery) => {
+                  setQuery(nextQuery.queryText);
+                }}
+              />
+              <EuiButton
+                data-test-subj="streamsAppStreamDetailAddAttachmentButton"
+                iconType="plusInCircle"
+                disabled={!canLinkAttachments}
+                onClick={openAddAttachmentFlyout}
+              >
+                {i18n.translate(
+                  'xpack.streams.streamDetailAttachmentView.addAnAttachmentButtonLabel',
+                  {
+                    defaultMessage: 'Add an attachment',
+                  }
+                )}
+              </EuiButton>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <AttachmentsTable
+              entityId={definition?.stream.name}
+              attachments={filteredAttachments}
+              loading={attachmentsFetch.loading}
+              selectedAttachments={selectedAttachments}
+              setSelectedAttachments={canLinkAttachments ? setSelectedAttachments : undefined}
+              dataTestSubj="streamsAppStreamDetailAttachmentsTable"
+            />
+          </EuiFlexItem>
+        </>
+      )}
+      {definition && isAddAttachmentFlyoutOpen ? (
+        <AddAttachmentFlyout
+          linkedAttachments={linkedAttachments}
+          entityId={definition.stream.name}
+          onAddAttachments={async (attachments) => {
+            await addAttachments(attachments);
+            attachmentsFetch.refresh();
+            setIsAddAttachmentFlyoutOpen(false);
+          }}
+          onClose={() => {
+            setIsAddAttachmentFlyoutOpen(false);
+          }}
+        />
+      ) : null}
     </EuiFlexGroup>
   );
 }

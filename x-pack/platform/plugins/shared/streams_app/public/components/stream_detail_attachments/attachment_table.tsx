@@ -5,7 +5,17 @@
  * 2.0.
  */
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiBasicTable,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import type {
@@ -25,16 +35,25 @@ import { useKibana } from '../../hooks/use_kibana';
 import { tagListToReferenceList } from './to_reference_list';
 import { useTimefilter } from '../../hooks/use_timefilter';
 
-const ATTACHMENT_TYPE_LABELS: Record<AttachmentType, string> = {
-  dashboard: i18n.translate('xpack.streams.attachmentTable.attachmentTypeDashboard', {
-    defaultMessage: 'Dashboard',
-  }),
-  rule: i18n.translate('xpack.streams.attachmentTable.attachmentTypeRule', {
-    defaultMessage: 'Rule',
-  }),
-  slo: i18n.translate('xpack.streams.attachmentTable.attachmentTypeSlo', {
-    defaultMessage: 'SLO',
-  }),
+const ATTACHMENT_TYPE_CONFIG: Record<AttachmentType, { label: string; icon: string }> = {
+  dashboard: {
+    label: i18n.translate('xpack.streams.attachmentTable.attachmentTypeDashboard', {
+      defaultMessage: 'Dashboard',
+    }),
+    icon: 'dashboardApp',
+  },
+  rule: {
+    label: i18n.translate('xpack.streams.attachmentTable.attachmentTypeRule', {
+      defaultMessage: 'Rule',
+    }),
+    icon: 'bell',
+  },
+  slo: {
+    label: i18n.translate('xpack.streams.attachmentTable.attachmentTypeSlo', {
+      defaultMessage: 'SLO',
+    }),
+    icon: 'watchesApp',
+  },
 };
 
 const ATTACHMENT_URL_GETTERS: Record<
@@ -92,14 +111,21 @@ export function AttachmentsTable({
     },
   } = useKibana();
 
+  const { euiTheme } = useEuiTheme();
   const { timeState } = useTimefilter();
+
+  const tableStyles = css`
+    & thead tr {
+      background-color: ${euiTheme.colors.backgroundBaseSubdued};
+    }
+  `;
 
   const columns = useMemo((): Array<EuiBasicTableColumn<Attachment>> => {
     return [
       {
         field: 'label',
-        name: i18n.translate('xpack.streams.attachmentTable.attachmentNameColumnTitle', {
-          defaultMessage: 'Attachment name',
+        name: i18n.translate('xpack.streams.attachmentTable.titleColumnTitle', {
+          defaultMessage: 'Title',
         }),
         render: (_, { title, id, redirectId, type }) => {
           const url = ATTACHMENT_URL_GETTERS[type](
@@ -133,11 +159,21 @@ export function AttachmentsTable({
       },
       {
         field: 'type',
-        name: i18n.translate('xpack.streams.attachmentTable.attachmentTypeColumnTitle', {
-          defaultMessage: 'Attachment type',
+        name: i18n.translate('xpack.streams.attachmentTable.typeColumnTitle', {
+          defaultMessage: 'Type',
         }),
         render: (type: AttachmentType) => {
-          return ATTACHMENT_TYPE_LABELS[type];
+          const config = ATTACHMENT_TYPE_CONFIG[type];
+          return (
+            <EuiBadge color="hollow">
+              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type={config.icon} size="s" color="subdued" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>{config.label}</EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiBadge>
+          );
         },
       },
       ...(!compact
@@ -167,20 +203,21 @@ export function AttachmentsTable({
   }, [attachments]);
 
   return (
-    <EuiFlexGroup direction="column">
-      <EuiFlexItem grow={false} />
-      <EuiBasicTable
-        data-test-subj={dataTestSubj}
-        columns={columns}
-        itemId="id"
-        items={items}
-        loading={loading}
-        selection={
-          setSelectedAttachments
-            ? { onSelectionChange: setSelectedAttachments, selected: selectedAttachments }
-            : undefined
-        }
-      />
-    </EuiFlexGroup>
+    <EuiBasicTable
+      css={tableStyles}
+      tableCaption={i18n.translate('xpack.streams.attachmentTable.tableCaption', {
+        defaultMessage: 'List of attachments',
+      })}
+      data-test-subj={dataTestSubj}
+      columns={columns}
+      itemId="id"
+      items={items}
+      loading={loading}
+      selection={
+        setSelectedAttachments
+          ? { onSelectionChange: setSelectedAttachments, selected: selectedAttachments }
+          : undefined
+      }
+    />
   );
 }

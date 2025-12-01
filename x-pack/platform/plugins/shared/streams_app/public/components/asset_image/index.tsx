@@ -92,6 +92,13 @@ const imageSets = {
       defaultMessage: 'Checklist',
     }),
   },
+  attachmentsEmpty: {
+    light: () => import('./attachments_empty_light.svg'),
+    dark: () => import('./attachments_empty_dark.svg'),
+    alt: i18n.translate('xpack.streams.attachments.emptyStateImage', {
+      defaultMessage: 'Attachments empty state image',
+    }),
+  },
 };
 
 interface AssetImageProps extends Omit<EuiImageProps, 'src' | 'url' | 'alt'> {
