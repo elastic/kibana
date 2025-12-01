@@ -319,7 +319,12 @@ tags:
       url: https://www.elastic.co/docs/deploy-manage/distributed-architecture/kibana-tasks-management
     name: task manager
     x-displayName: Task manager
-  - description: The assistant helps you prepare for the next major version of Elasticsearch.
+  - description: |
+      The Kibana Upgrade Assistant API helps you prepare for the next major Elasticsearch release.
+      > warn
+      > This is a Kibana REST API (not an Elasticsearch API) and requests must target your Kibana URL:
+      > * Self-managed URL pattern: `https://localhost:5601`
+      > * Elastic Cloud URL pattern: `https://your-deployment.kb.us-east-1.aws.elastic.cloud:9243`
     name: upgrade
     x-displayName: Upgrade assistant
   - description: Uptime APIs enable you to view and update uptime monitoring settings.
