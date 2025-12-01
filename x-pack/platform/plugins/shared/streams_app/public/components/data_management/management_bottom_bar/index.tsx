@@ -15,7 +15,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import type { StreamType } from '../../../telemetry/types';
 import { useDiscardConfirm } from '../../../hooks/use_discard_confirm';
+import { selectStreamTypeForTelemetry } from '../stream_detail_enrichment/state_management/stream_enrichment_state_machine/selectors';
+import { useStreamEnrichmentSelector } from '../stream_detail_enrichment/state_management/stream_enrichment_state_machine';
 
 interface ManagementBottomBarProps {
   confirmButtonText?: string;
@@ -38,6 +41,10 @@ export function ManagementBottomBar({
   onConfirm,
   onViewCodeClick,
 }: ManagementBottomBarProps) {
+  const streamType: StreamType = useStreamEnrichmentSelector((snapshot) =>
+    selectStreamTypeForTelemetry(snapshot.context)
+  );
+
   const handleCancel = useDiscardConfirm(onCancel, {
     title: discardUnsavedChangesTitle,
     message: discardUnsavedChangesMessage,
@@ -56,6 +63,7 @@ export function ManagementBottomBar({
         {onViewCodeClick && (
           <EuiButtonEmpty
             data-test-subj="streamsAppManagementBottomBarViewRequestButton"
+            data-stream-type={streamType}
             color="text"
             size="s"
             iconType="editorCodeBlock"
@@ -74,6 +82,7 @@ export function ManagementBottomBar({
           >
             <EuiButtonEmpty
               data-test-subj="streamsAppManagementBottomBarCancelChangesButton"
+              data-stream-type={streamType}
               disabled={disabled}
               color="text"
               size="s"
@@ -105,6 +114,7 @@ export function ManagementBottomBar({
             >
               <EuiButton
                 data-test-subj="streamsAppManagementBottomBarButton"
+                data-stream-type={streamType}
                 disabled={disabled || insufficientPrivileges || isInvalid}
                 color="primary"
                 fill
