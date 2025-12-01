@@ -25,7 +25,7 @@ import {
   CLOUD_POSTURE_APP_ID,
   SERVER_APP_ID,
   SECURITY_FEATURE_ID_V5,
-  RULES_FEATURE_ID_V2,
+  RULES_FEATURE_ID_V3,
   LISTS_API_SUMMARY,
   LISTS_API_READ,
   LISTS_API_ALL,
@@ -41,6 +41,7 @@ import {
   USERS_API_READ,
   EXCEPTIONS_SUBFEATURE_ID_ALL,
   EXCEPTIONS_SUBFEATURE_ID_READ,
+  ALERTS_FEATURE_ID,
 } from '../../constants';
 import type { SecurityFeatureParams } from '../types';
 import type { BaseKibanaFeatureConfig } from '../../types';
@@ -104,14 +105,16 @@ export const getSecurityV3BaseKibanaFeature = ({
       replacedBy: {
         default: [
           { feature: SECURITY_FEATURE_ID_V5, privileges: ['all'] },
-          { feature: RULES_FEATURE_ID_V2, privileges: ['all'] },
+          { feature: RULES_FEATURE_ID_V3, privileges: ['all'] },
+          { feature: ALERTS_FEATURE_ID, privileges: ['all'] },
         ],
         minimal: [
           { feature: SECURITY_FEATURE_ID_V5, privileges: ['minimal_all'] },
           {
-            feature: RULES_FEATURE_ID_V2,
+            feature: RULES_FEATURE_ID_V3,
             privileges: ['minimal_all', EXCEPTIONS_SUBFEATURE_ID_ALL],
           },
+          { feature: ALERTS_FEATURE_ID, privileges: ['minimal_all'] },
         ],
       },
       app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
@@ -148,14 +151,16 @@ export const getSecurityV3BaseKibanaFeature = ({
       replacedBy: {
         default: [
           { feature: SECURITY_FEATURE_ID_V5, privileges: ['read'] },
-          { feature: RULES_FEATURE_ID_V2, privileges: ['read'] },
+          { feature: RULES_FEATURE_ID_V3, privileges: ['read'] },
+          { feature: ALERTS_FEATURE_ID, privileges: ['read'] },
         ],
         minimal: [
           { feature: SECURITY_FEATURE_ID_V5, privileges: ['minimal_read'] },
           {
-            feature: RULES_FEATURE_ID_V2,
+            feature: RULES_FEATURE_ID_V3,
             privileges: ['minimal_read', EXCEPTIONS_SUBFEATURE_ID_READ],
           },
+          { feature: ALERTS_FEATURE_ID, privileges: ['minimal_read'] },
         ],
       },
       app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],

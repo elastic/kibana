@@ -19,6 +19,7 @@ import {
   extractRulesCapabilities,
   getRulesCapabilitiesInitialState,
 } from '../../utils/rules_capabilities';
+import { AlertsUICapabilities, extractAlertsCapabilities, getAlertsCapabilitiesInitialState } from '../../utils/alerts_capabilities';
 
 export interface UserPrivilegesState {
   listPrivileges: ReturnType<typeof useFetchListPrivileges>;
@@ -28,6 +29,7 @@ export interface UserPrivilegesState {
   timelinePrivileges: { crud: boolean; read: boolean };
   notesPrivileges: { crud: boolean; read: boolean };
   rulesPrivileges: RulesUICapabilities;
+  alertsPrivileges: AlertsUICapabilities;
 }
 
 export const initialUserPrivilegesState = (): UserPrivilegesState => ({
@@ -38,6 +40,7 @@ export const initialUserPrivilegesState = (): UserPrivilegesState => ({
   timelinePrivileges: { crud: false, read: false },
   notesPrivileges: { crud: false, read: false },
   rulesPrivileges: getRulesCapabilitiesInitialState(),
+  alertsPrivileges: getAlertsCapabilitiesInitialState(),
 });
 export const UserPrivilegesContext = createContext<UserPrivilegesState>(
   initialUserPrivilegesState()
@@ -59,6 +62,12 @@ export const UserPrivilegesProvider = ({
     () => extractRulesCapabilities(kibanaCapabilities),
     [kibanaCapabilities]
   );
+
+  const alertsPrivileges = useMemo(
+    ()=> extractAlertsCapabilities(kibanaCapabilities),
+    [kibanaCapabilities]
+  )
+
   const shouldFetchListPrivileges = read || rulesPrivileges.rules.read;
 
   const listPrivileges = useFetchListPrivileges(shouldFetchListPrivileges);
@@ -92,6 +101,7 @@ export const UserPrivilegesProvider = ({
       timelinePrivileges,
       notesPrivileges,
       rulesPrivileges,
+      alertsPrivileges,
     }),
     [
       listPrivileges,
@@ -101,6 +111,7 @@ export const UserPrivilegesProvider = ({
       timelinePrivileges,
       notesPrivileges,
       rulesPrivileges,
+      alertsPrivileges,
     ]
   );
 

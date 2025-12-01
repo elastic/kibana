@@ -30,7 +30,7 @@ import {
   LISTS_API_SUMMARY,
   LISTS_API_READ,
   LISTS_API_ALL,
-  RULES_FEATURE_ID_V2,
+  RULES_FEATURE_ID_V3,
   SECURITY_UI_SHOW,
   SECURITY_UI_CRUD,
   INITIALIZE_SECURITY_SOLUTION,
@@ -43,6 +43,7 @@ import {
   USERS_API_READ,
   EXCEPTIONS_SUBFEATURE_ID_ALL,
   EXCEPTIONS_SUBFEATURE_ID_READ,
+  ALERTS_FEATURE_ID,
 } from '../../constants';
 import type { SecurityFeatureParams } from '../types';
 import type { BaseKibanaFeatureConfig } from '../../types';
@@ -111,7 +112,8 @@ export const getSecurityBaseKibanaFeature = ({
           { feature: NOTES_FEATURE_ID, privileges: ['all'] },
           // note: overriden by product feature endpointArtifactManagement when enabled
           { feature: SECURITY_FEATURE_ID_V5, privileges: ['all'] },
-          { feature: RULES_FEATURE_ID_V2, privileges: ['all'] },
+          { feature: RULES_FEATURE_ID_V3, privileges: ['all'] },
+          { feature: ALERTS_FEATURE_ID, privileges: ['all'] },
         ],
         minimal: [
           { feature: TIMELINE_FEATURE_ID, privileges: ['all'] },
@@ -119,9 +121,10 @@ export const getSecurityBaseKibanaFeature = ({
           // note: overriden by product feature endpointArtifactManagement when enabled
           { feature: SECURITY_FEATURE_ID_V5, privileges: ['minimal_all'] },
           {
-            feature: RULES_FEATURE_ID_V2,
+            feature: RULES_FEATURE_ID_V3,
             privileges: ['minimal_all', EXCEPTIONS_SUBFEATURE_ID_ALL],
           },
+          { feature: ALERTS_FEATURE_ID, privileges: ['minimal_all'] },
         ],
       },
       app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
@@ -170,16 +173,18 @@ export const getSecurityBaseKibanaFeature = ({
           { feature: TIMELINE_FEATURE_ID, privileges: ['read'] },
           { feature: NOTES_FEATURE_ID, privileges: ['read'] },
           { feature: SECURITY_FEATURE_ID_V5, privileges: ['read'] },
-          { feature: RULES_FEATURE_ID_V2, privileges: ['read'] },
+          { feature: RULES_FEATURE_ID_V3, privileges: ['read'] },
+          { feature: ALERTS_FEATURE_ID, privileges: ['read'] },
         ],
         minimal: [
           { feature: TIMELINE_FEATURE_ID, privileges: ['read'] },
           { feature: NOTES_FEATURE_ID, privileges: ['read'] },
           { feature: SECURITY_FEATURE_ID_V5, privileges: ['minimal_read'] },
           {
-            feature: RULES_FEATURE_ID_V2,
+            feature: RULES_FEATURE_ID_V3,
             privileges: ['minimal_read', EXCEPTIONS_SUBFEATURE_ID_READ],
           },
+          { feature: ALERTS_FEATURE_ID, privileges: ['minimal_read'] },
         ],
       },
       app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],

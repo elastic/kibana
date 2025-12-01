@@ -25,6 +25,7 @@ import type {
   ProductFeatureNotesKey,
   ProductFeatureRulesKey,
 } from './product_features_keys';
+import { AlertsProductFeaturesConfig } from './alerts/types';
 
 export type { ProductFeatureKeyType };
 export type ProductFeatureKeys = ProductFeatureKeyType[];
@@ -125,6 +126,7 @@ interface ProductFeatureConfigExtensions {
   notes: ConfigExtensions<NotesProductFeaturesConfig>;
   siemMigrations: ConfigExtensions<SiemMigrationsProductFeaturesConfig>;
   rules: ConfigExtensions<RulesProductFeaturesConfig>;
+  alerts: ConfigExtensions<AlertsProductFeaturesConfig>;
 }
 
 export type ProductFeaturesConfiguratorExtensions = Partial<ProductFeatureConfigExtensions>;

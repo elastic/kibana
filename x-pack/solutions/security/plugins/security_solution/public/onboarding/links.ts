@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import {
+  ALERTS_UI_READ_PRIVILEGE,
   RULES_UI_READ_PRIVILEGE,
   SECURITY_UI_SHOW_PRIVILEGE,
 } from '@kbn/security-solution-features/constants';
@@ -18,7 +19,8 @@ export const onboardingLinks: LinkItem = {
   id: SecurityPageName.landing,
   title: GETTING_STARTED,
   path: ONBOARDING_PATH,
-  capabilities: [SECURITY_UI_SHOW_PRIVILEGE, RULES_UI_READ_PRIVILEGE],
+  // TODO: verify if we want this to be shown for people with alerts only permissions
+  capabilities: [SECURITY_UI_SHOW_PRIVILEGE, RULES_UI_READ_PRIVILEGE, ALERTS_UI_READ_PRIVILEGE],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.getStarted', {
       defaultMessage: 'Getting started',

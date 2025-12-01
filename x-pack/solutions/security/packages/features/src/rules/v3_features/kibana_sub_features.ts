@@ -8,10 +8,8 @@
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 import { RulesSubFeatureId } from '../../product_features_keys';
 import { getExceptionsSubFeature } from '../kibana_sub_features';
-import { addAllSubFeatureReplacements } from '../../utils';
-import { RULES_FEATURE_ID_V3 } from '../../constants';
 
-export const getRulesBaseKibanaSubFeatureIdsV2 = (): RulesSubFeatureId[] => [
+export const getRulesBaseKibanaSubFeatureIdsV3 = (): RulesSubFeatureId[] => [
   RulesSubFeatureId.exceptions,
 ];
 
@@ -19,11 +17,8 @@ export const getRulesBaseKibanaSubFeatureIdsV2 = (): RulesSubFeatureId[] => [
  * Defines all the Security Solution Rules subFeatures available.
  * The order of the subFeatures is the order they will be displayed
  */
-export const getRulesSubFeaturesMapV2 = () => {
-  const subFeaturesList =  new Map<RulesSubFeatureId, SubFeatureConfig>([
+export const getRulesSubFeaturesMapV3 = () => {
+  return new Map<RulesSubFeatureId, SubFeatureConfig>([
     [RulesSubFeatureId.exceptions, getExceptionsSubFeature()],
   ]);
-
-
-  return addAllSubFeatureReplacements(subFeaturesList, [{ feature: RULES_FEATURE_ID_V3 }]);
 };

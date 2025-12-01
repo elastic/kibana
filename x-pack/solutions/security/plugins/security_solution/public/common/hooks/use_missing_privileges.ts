@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { ALERTS_FEATURE_ID, RULES_FEATURE_ID } from '../../../common/constants';
 import { useMemo } from 'react';
-import { RULES_FEATURE_ID } from '../../../common/constants';
 import type { Privilege } from '../../detections/containers/detection_engine/alerts/types';
 import { useUserPrivileges } from '../components/user_privileges';
 
@@ -48,7 +48,7 @@ export interface MissingPrivileges {
  * Hook that returns index and feature privileges that are missing for the user.
  */
 export const useMissingPrivileges = (): MissingPrivileges => {
-  const { detectionEnginePrivileges, listPrivileges, rulesPrivileges } = useUserPrivileges();
+  const { detectionEnginePrivileges, listPrivileges, rulesPrivileges, alertsPrivileges } = useUserPrivileges();
 
   return useMemo<MissingPrivileges>(() => {
     const featurePrivileges: MissingFeaturePrivileges[] = [];
@@ -67,6 +67,10 @@ export const useMissingPrivileges = (): MissingPrivileges => {
 
     if (rulesPrivileges.rules.edit === false) {
       featurePrivileges.push([RULES_FEATURE_ID, ['all']]);
+    }
+
+    if (alertsPrivileges.alerts.edit === false) {
+      featurePrivileges.push([ALERTS_FEATURE_ID, ['all']]);
     }
 
     const missingItemsPrivileges = getMissingIndexPrivileges(listPrivileges.result.listItems.index);
@@ -90,5 +94,5 @@ export const useMissingPrivileges = (): MissingPrivileges => {
       featurePrivileges,
       indexPrivileges,
     };
-  }, [listPrivileges.result, detectionEnginePrivileges.result, rulesPrivileges.rules.edit]);
+  }, [listPrivileges.result, detectionEnginePrivileges.result, rulesPrivileges.rules.edit, alertsPrivileges.alerts.edit]);
 };

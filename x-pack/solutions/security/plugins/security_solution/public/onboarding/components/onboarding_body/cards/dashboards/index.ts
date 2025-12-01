@@ -27,5 +27,6 @@ export const dashboardsCardConfig: OnboardingCardConfig = {
   capabilitiesRequired: [
     ['dashboard_v2.show', `${SECURITY_FEATURE_ID}.detections`],
     ['dashboard_v2.show', RULES_UI_DETECTIONS_PRIVILEGE],
+    // TODO: should alerts:all also be able to read dashboards?
   ],
 };

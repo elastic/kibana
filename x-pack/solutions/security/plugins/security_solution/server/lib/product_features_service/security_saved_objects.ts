@@ -73,5 +73,6 @@ export const securityNotesSavedObjects = notesSavedObjectTypes;
 
 export const rulesSavedObjects = ['exception-list', prebuiltRuleAssetType.name];
 export const rulesV2SavedObjects = [prebuiltRuleAssetType.name];
+export const rulesV3SavedObjects = [...rulesV2SavedObjects]
 
 export const securityExceptionsSavedObjects = exceptionsSavedObjectTypes;

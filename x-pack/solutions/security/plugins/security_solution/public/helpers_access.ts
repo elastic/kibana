@@ -5,20 +5,25 @@
  * 2.0.
  */
 import type { Capabilities } from '@kbn/core/public';
-import { RULES_UI_READ } from '@kbn/security-solution-features/constants';
-import { SECURITY_FEATURE_ID, CASES_FEATURE_ID, RULES_FEATURE_ID } from '../common/constants';
+import { ALERTS_UI_READ, RULES_UI_READ } from '@kbn/security-solution-features/constants';
+import { SECURITY_FEATURE_ID, CASES_FEATURE_ID, RULES_FEATURE_ID, ALERTS_FEATURE_ID } from '../common/constants';
 
 export function hasAccessToSecuritySolution(capabilities: Capabilities): boolean {
   return Boolean(
     capabilities[SECURITY_FEATURE_ID]?.show ||
       capabilities.securitySolutionAttackDiscovery?.['attack-discovery'] ||
-      hasAccessToRules(capabilities)
+      hasAccessToRules(capabilities) ||
+      hasAccessToAlerts(capabilities)
   );
 }
-
 export function hasAccessToRules(capabilities: Capabilities): boolean {
   return Boolean(capabilities[RULES_FEATURE_ID]?.[RULES_UI_READ]);
 }
+
+export function hasAccessToAlerts(capabilities: Capabilities): boolean {
+  return Boolean(capabilities[ALERTS_FEATURE_ID]?.[ALERTS_UI_READ]);
+}
+
 
 export function hasAccessToCases(capabilities: Capabilities): boolean {
   return Boolean(capabilities[CASES_FEATURE_ID]?.read_cases);

@@ -121,8 +121,10 @@ export class FeatureCatalogueRegistry {
     const capabilities = this.capabilities;
     return [...this.solutions.values()]
       .filter(
-        (solution) =>
-          solution.isVisible?.(capabilities) ?? capabilities.catalogue[solution.id] !== false
+        (solution) => {
+          const result = solution.isVisible?.(capabilities) ?? capabilities.catalogue[solution.id] !== false
+          return result
+        }
       )
       .sort(compareByKey('title'));
   }
