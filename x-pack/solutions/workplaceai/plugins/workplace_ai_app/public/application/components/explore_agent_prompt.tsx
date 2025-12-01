@@ -1,0 +1,209 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useState } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiTextArea,
+  EuiButtonIcon,
+  EuiButtonEmpty,
+  useEuiTheme,
+  useEuiShadow,
+  useEuiShadowHover,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
+import { useKibana } from '../hooks/use_kibana';
+
+const INPUT_MIN_HEIGHT = '150px';
+
+const titleStyles = css`
+  font-weight: 400;
+`;
+
+const useInputShadowStyles = () => {
+  return css`
+    ${useEuiShadow('s')}
+    &:hover {
+      ${useEuiShadowHover('s')}
+    }
+    &:focus-within {
+      ${useEuiShadow('xl')}
+      :hover {
+        ${useEuiShadowHover('xl')}
+      }
+    }
+  `;
+};
+
+export const ExploreAgentPrompt: React.FC = () => {
+  const {
+    services: { application },
+  } = useKibana();
+  const { euiTheme } = useEuiTheme();
+  const [chatInput, setChatInput] = useState('');
+
+  const titleContainerStyles = css`
+    width: 100%;
+  `;
+
+  const inputContainerStyles = css`
+    width: 100%;
+    min-height: ${INPUT_MIN_HEIGHT};
+    padding: ${euiTheme.size.base};
+    flex-grow: 0;
+    transition: box-shadow 250ms;
+    background-color: ${euiTheme.colors.backgroundBasePlain};
+    border: none;
+
+    ${useInputShadowStyles()}
+  `;
+
+  const textAreaStyles = css`
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    padding: 0;
+    resize: none;
+    &:focus {
+      border: none !important;
+      box-shadow: none !important;
+      outline: none !important;
+      background-image: none !important;
+    }
+  `;
+
+  const handleSubmit = () => {
+    if (chatInput.trim() === '') {
+      return;
+    }
+
+    // Navigate to Agent Builder with the message in location state
+    application.navigateToApp(AGENT_BUILDER_APP_ID, {
+      path: '/conversations/new',
+      state: {
+        initialMessage: chatInput.trim(),
+      },
+    });
+  };
+
+  return (
+    <EuiFlexGroup
+      responsive={false}
+      alignItems="flexStart"
+      direction="column"
+      gutterSize="l"
+      data-test-subj="workplaceAIExploreAgentPrompt"
+    >
+      <EuiFlexItem grow={false} css={titleContainerStyles}>
+        <EuiTitle size="m" css={titleStyles}>
+          <h2>
+            {i18n.translate('xpack.workplaceai.exploreAgentPrompt.title', {
+              defaultMessage: 'How can I help you?',
+            })}
+          </h2>
+        </EuiTitle>
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false} style={{ width: '100%' }}>
+        <EuiFlexGroup
+          css={inputContainerStyles}
+          direction="column"
+          gutterSize="s"
+          responsive={false}
+          alignItems="stretch"
+          justifyContent="center"
+          data-test-subj="workplaceAIExploreAgentInputForm"
+        >
+          <EuiFlexItem>
+            <EuiTextArea
+              placeholder={i18n.translate('xpack.workplaceai.exploreAgentPrompt.inputPlaceholder', {
+                defaultMessage: 'Ask anything',
+              })}
+              value={chatInput}
+              onChange={(e) => setChatInput(e.target.value)}
+              rows={3}
+              fullWidth
+              css={textAreaStyles}
+              data-test-subj="workplaceAIExploreAgentInput"
+            />
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup
+              gutterSize="s"
+              responsive={false}
+              alignItems="center"
+              justifyContent="spaceBetween"
+            >
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  iconSide="right"
+                  flush="both"
+                  iconType="arrowDown"
+                  data-test-subj="workplaceAIConnectorSelector"
+                  aria-label={i18n.translate(
+                    'xpack.workplaceai.exploreAgentPrompt.connectorSelectorAriaLabel',
+                    {
+                      defaultMessage: 'Select connector',
+                    }
+                  )}
+                >
+                  {i18n.translate('xpack.workplaceai.exploreAgentPrompt.openAI', {
+                    defaultMessage: 'Open AI',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      iconSide="right"
+                      flush="both"
+                      iconType="arrowDown"
+                      data-test-subj="workplaceAIAgentSelector"
+                      aria-label={i18n.translate(
+                        'xpack.workplaceai.exploreAgentPrompt.agentSelectorAriaLabel',
+                        {
+                          defaultMessage: 'Select agent',
+                        }
+                      )}
+                    >
+                      {i18n.translate('xpack.workplaceai.exploreAgentPrompt.elasticAIAgent', {
+                        defaultMessage: 'Elastic AI Agent',
+                      })}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      iconType="arrowUp"
+                      aria-label={i18n.translate(
+                        'xpack.workplaceai.exploreAgentPrompt.submitAriaLabel',
+                        {
+                          defaultMessage: 'Submit',
+                        }
+                      )}
+                      color="primary"
+                      display="fill"
+                      size="m"
+                      disabled={chatInput.trim() === ''}
+                      onClick={handleSubmit}
+                      data-test-subj="workplaceAIExploreAgentSubmit"
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
