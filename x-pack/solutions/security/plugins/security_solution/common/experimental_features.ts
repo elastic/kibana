@@ -137,6 +137,11 @@ export const allowedExperimentalValues = Object.freeze({
   defendInsightsPolicyResponseFailure: true,
 
   /**
+   * Enables exporting and importing Endpoint Artifacts.
+   */
+  endpointArtifactsExportImportEnabled: false,
+
+  /**
    * Removes Endpoint Exceptions from Rules/Alerts pages, and shows it instead in Manage/Assets.
    */
   endpointExceptionsMovedUnderManagement: false,
