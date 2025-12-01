@@ -105,7 +105,7 @@ describe('<TemplateCreate />', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    jest.useFakeTimers();
 
     httpRequestsMockHelpers.setLoadComponentTemplatesResponse(componentTemplates);
     httpRequestsMockHelpers.setLoadNodesPluginsResponse([]);

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-import { createMemoryHistory } from 'history';
+import { screen, fireEvent, within, waitFor } from '@testing-library/react';
 import { notificationServiceMock } from '@kbn/core/public/mocks';
 
 import {
@@ -15,16 +14,19 @@ import {
 } from '../../../public/application/services/breadcrumbs';
 import { API_BASE_PATH, MAX_DATA_RETENTION } from '../../../common/constants';
 import * as fixtures from '../../../test/fixtures';
-import { setupEnvironment } from '../helpers';
+import { setupEnvironment } from '../helpers/setup_environment';
+import { renderHome } from '../helpers/render_home';
 import { notificationService } from '../../../public/application/services/notification';
 
-import type { DataStreamsTabTestBed } from './data_streams_tab.helpers';
 import {
-  setup,
+  createDataStreamTabActions,
+  createDataStreamDetailPanelActions,
+  createDataRetentionFormActions,
   createDataStreamPayload,
   createDataStreamBackingIndex,
   createNonDataStreamIndex,
-} from './data_streams_tab.helpers';
+  getTableCellsValues,
+} from '../helpers/actions/data_stream_actions';
 
 jest.mock('react-use/lib/useObservable', () => () => jest.fn());
 
@@ -50,7 +52,6 @@ const urlServiceMock = {
 
 describe('Data Streams tab', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
-  let testBed: DataStreamsTabTestBed;
   jest.spyOn(breadcrumbService, 'setBreadcrumbs');
 
   describe('when there are no data streams', () => {
@@ -61,56 +62,56 @@ describe('Data Streams tab', () => {
     });
 
     test('displays an empty prompt', async () => {
-      testBed = await setup(httpSetup, {
-        url: urlServiceMock,
+      renderHome(httpSetup, {
+        initialEntries: ['/data_streams'],
+        appServicesContext: { url: urlServiceMock },
       });
 
-      await act(async () => {
-        testBed.actions.goToDataStreamsList();
+      // Wait for loading to complete
+      await waitFor(() => {
+        expect(screen.queryByTestId('sectionLoading')).not.toBeInTheDocument();
       });
 
-      const { exists, component } = testBed;
-      component.update();
-
-      expect(exists('sectionLoading')).toBe(false);
-      expect(exists('emptyPrompt')).toBe(true);
+      expect(screen.getByTestId('emptyPrompt')).toBeInTheDocument();
     });
 
     test('when Fleet is disabled, goes to index templates tab when "Get started" link is clicked', async () => {
-      testBed = await setup(httpSetup, {
-        plugins: {},
-        url: urlServiceMock,
+      renderHome(httpSetup, {
+        initialEntries: ['/data_streams'],
+        appServicesContext: {
+          plugins: {},
+          url: urlServiceMock,
+        },
       });
 
-      await act(async () => {
-        testBed.actions.goToDataStreamsList();
+      // Wait for loading to complete
+      await waitFor(() => {
+        expect(screen.queryByTestId('sectionLoading')).not.toBeInTheDocument();
       });
 
-      const { actions, exists, component } = testBed;
-      component.update();
+      const actions = createDataStreamTabActions();
+      actions.clickEmptyPromptIndexTemplateLink();
 
-      await act(async () => {
-        actions.clickEmptyPromptIndexTemplateLink();
-      });
-
-      expect(exists('templateList')).toBe(true);
+      await screen.findByTestId('templateList');
+      expect(screen.getByTestId('templateList')).toBeInTheDocument();
     });
 
     test('when Fleet is enabled, links to Fleet', async () => {
-      testBed = await setup(httpSetup, {
-        plugins: { isFleetEnabled: true },
-        url: urlServiceMock,
+      renderHome(httpSetup, {
+        initialEntries: ['/data_streams'],
+        appServicesContext: {
+          plugins: { isFleetEnabled: true },
+          url: urlServiceMock,
+        },
       });
 
-      await act(async () => {
-        testBed.actions.goToDataStreamsList();
+      // Wait for loading to complete
+      await waitFor(() => {
+        expect(screen.queryByTestId('sectionLoading')).not.toBeInTheDocument();
       });
 
-      const { findEmptyPromptIndexTemplateLink, component } = testBed;
-      component.update();
-
-      // Assert against the text because the href won't be available, due to dependency upon our core mock.
-      expect(findEmptyPromptIndexTemplateLink().text()).toBe('Fleet');
+      const link = screen.getByTestId('dataStreamsEmptyPromptTemplateLink');
+      expect(link).toHaveTextContent('Fleet');
     });
 
     test('when hidden data streams are filtered by default, the table is rendered empty', async () => {
@@ -120,17 +121,18 @@ describe('Data Streams tab', () => {
       });
       httpRequestsMockHelpers.setLoadDataStreamsResponse([hiddenDataStream]);
 
-      testBed = await setup(httpSetup, {
-        plugins: {},
-        url: urlServiceMock,
+      renderHome(httpSetup, {
+        initialEntries: ['/data_streams'],
+        appServicesContext: {
+          plugins: {},
+          url: urlServiceMock,
+        },
       });
 
-      await act(async () => {
-        testBed.actions.goToDataStreamsList();
-      });
+      // Wait for table to render
+      await screen.findByTestId('dataStreamTable');
 
-      testBed.component.update();
-      expect(testBed.find('dataStreamTable').text()).toContain('No data streams found');
+      expect(screen.getByTestId('dataStreamTable')).toHaveTextContent('No data streams found');
     });
 
     test('updates the breadcrumbs to data streams', () => {
@@ -143,37 +145,28 @@ describe('Data Streams tab', () => {
   describe('when there are data streams', () => {
     const notificationsServiceMock = notificationServiceMock.createStartContract();
 
-    beforeEach(async () => {
-      const {
-        setLoadIndicesResponse,
-        setLoadDataStreamsResponse,
-        setLoadDataStreamResponse,
-        setLoadTemplateResponse,
-        setLoadTemplatesResponse,
-      } = httpRequestsMockHelpers;
-
-      setLoadIndicesResponse([
-        createDataStreamBackingIndex('data-stream-index', 'dataStream1'),
-        createNonDataStreamIndex('non-data-stream-index'),
-      ]);
-
+    // Helper to set up common mock data for this section
+    const setupDataStreamsMocks = () => {
       const dataStreamForDetailPanel = createDataStreamPayload({
         name: 'dataStream1',
         storageSize: '5b',
         storageSizeBytes: 5,
-        // metering API mock
         meteringStorageSize: '156kb',
         meteringStorageSizeBytes: 156000,
         meteringDocsCount: 10000,
       });
 
-      setLoadDataStreamsResponse([
+      httpRequestsMockHelpers.setLoadIndicesResponse([
+        createDataStreamBackingIndex('data-stream-index', 'dataStream1'),
+        createNonDataStreamIndex('non-data-stream-index'),
+      ]);
+
+      httpRequestsMockHelpers.setLoadDataStreamsResponse([
         dataStreamForDetailPanel,
         createDataStreamPayload({
           name: 'dataStream2',
           storageSize: '1kb',
           storageSizeBytes: 1000,
-          // metering API mock
           meteringStorageSize: '156kb',
           meteringStorageSizeBytes: 156000,
           meteringDocsCount: 10000,
@@ -186,28 +179,30 @@ describe('Data Streams tab', () => {
         }),
       ]);
 
-      setLoadDataStreamResponse(dataStreamForDetailPanel.name, dataStreamForDetailPanel);
+      httpRequestsMockHelpers.setLoadDataStreamResponse(
+        dataStreamForDetailPanel.name,
+        dataStreamForDetailPanel
+      );
 
       const indexTemplate = fixtures.getTemplate({ name: 'indexTemplate' });
-      setLoadTemplatesResponse({ templates: [indexTemplate], legacyTemplates: [] });
-      setLoadTemplateResponse(indexTemplate.name, indexTemplate);
+      httpRequestsMockHelpers.setLoadTemplatesResponse({
+        templates: [indexTemplate],
+        legacyTemplates: [],
+      });
+      httpRequestsMockHelpers.setLoadTemplateResponse(indexTemplate.name, indexTemplate);
 
       notificationService.setup(notificationsServiceMock);
-      testBed = await setup(httpSetup, {
-        history: createMemoryHistory(),
-        services: {
-          notificationService,
-        },
-      });
-      await act(async () => {
-        testBed.actions.goToDataStreamsList();
-      });
-      testBed.component.update();
-    });
+    };
 
     test('lists them in the table', async () => {
-      const { table } = testBed;
-      const { tableCellsValues } = table.getMetaData('dataStreamTable');
+      setupDataStreamsMocks();
+      renderHome(httpSetup, {
+        initialEntries: ['/data_streams'],
+        appServicesContext: { url: urlServiceMock },
+      });
+
+      await screen.findByTestId('dataStreamTable');
+      const tableCellsValues = getTableCellsValues('dataStreamTable');
 
       expect(tableCellsValues).toEqual([
         ['', 'dataStream1', 'green', '1', 'Standard', '7 days', 'Delete'],
@@ -216,227 +211,268 @@ describe('Data Streams tab', () => {
     });
 
     test('highlights datastreams who are using max retention', async () => {
-      const { exists } = testBed;
+      setupDataStreamsMocks();
+      renderHome(httpSetup, {
+        initialEntries: ['/data_streams'],
+        appServicesContext: { url: urlServiceMock },
+      });
 
-      expect(exists('usingMaxRetention')).toBe(true);
+      await screen.findByTestId('dataStreamTable');
+      expect(screen.getByTestId('usingMaxRetention')).toBeInTheDocument();
     });
 
     test('has a button to reload the data streams', async () => {
-      const { exists, actions } = testBed;
-
-      expect(exists('reloadButton')).toBe(true);
-
-      await act(async () => {
-        actions.clickReloadButton();
+      setupDataStreamsMocks();
+      renderHome(httpSetup, {
+        initialEntries: ['/data_streams'],
+        appServicesContext: { url: urlServiceMock },
       });
 
-      expect(httpSetup.get).toHaveBeenLastCalledWith(
-        `${API_BASE_PATH}/data_streams`,
-        expect.anything()
-      );
+      await screen.findByTestId('dataStreamTable');
+      const actions = createDataStreamTabActions();
+
+      expect(screen.getByTestId('reloadButton')).toBeInTheDocument();
+      actions.clickReloadButton();
+
+      await waitFor(() => {
+        expect(httpSetup.get).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}/data_streams`,
+          expect.anything()
+        );
+      });
     });
 
     test('has a switch that will reload the data streams with additional stats when clicked', async () => {
-      const { exists, actions, table } = testBed;
+      setupDataStreamsMocks();
+      renderHome(httpSetup, {
+        initialEntries: ['/data_streams'],
+        appServicesContext: { url: urlServiceMock },
+      });
 
-      expect(exists('includeStatsSwitch')).toBe(true);
+      await screen.findByTestId('dataStreamTable');
+      const actions = createDataStreamTabActions();
 
-      // Changing the switch will automatically reload the data streams.
-      await actions.clickIncludeStatsSwitch();
+      expect(screen.getByTestId('includeStatsSwitch')).toBeInTheDocument();
+      actions.clickIncludeStatsSwitch();
 
-      expect(httpSetup.get).toHaveBeenLastCalledWith(
-        `${API_BASE_PATH}/data_streams`,
-        expect.anything()
-      );
+      await waitFor(() => {
+        expect(httpSetup.get).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}/data_streams`,
+          expect.anything()
+        );
+      });
 
-      // The table renders with the stats columns though.
-      const { tableCellsValues } = table.getMetaData('dataStreamTable');
-      expect(tableCellsValues).toEqual([
-        [
-          '',
-          'dataStream1',
-          'green',
-          'December 31st, 1969 7:00:00 PM',
-          '5b',
-          '1',
-          'Standard',
-          '7 days',
-          'Delete',
-        ],
-        [
-          '',
-          'dataStream2',
-          'green',
-          'December 31st, 1969 7:00:00 PM',
-          '1kb',
-          '1',
-          'Standard',
-          '5 days Info',
-          'Delete',
-        ],
-      ]);
+      // Wait for table to update with stats columns
+      await waitFor(() => {
+        const tableCellsValues = getTableCellsValues('dataStreamTable');
+        expect(tableCellsValues).toEqual([
+          [
+            '',
+            'dataStream1',
+            'green',
+            'December 31st, 1969 7:00:00 PM',
+            '5b',
+            '1',
+            'Standard',
+            '7 days',
+            'Delete',
+          ],
+          [
+            '',
+            'dataStream2',
+            'green',
+            'December 31st, 1969 7:00:00 PM',
+            '1kb',
+            '1',
+            'Standard',
+            '5 days Info',
+            'Delete',
+          ],
+        ]);
+      });
     });
 
     test('sorting on stats sorts by bytes value instead of human readable value', async () => {
       // Guards against regression of #86122.
-      const { actions, table } = testBed;
+      setupDataStreamsMocks();
+      renderHome(httpSetup, {
+        initialEntries: ['/data_streams'],
+        appServicesContext: { url: urlServiceMock },
+      });
 
-      await actions.clickIncludeStatsSwitch();
+      await screen.findByTestId('dataStreamTable');
+      const actions = createDataStreamTabActions();
+
+      actions.clickIncludeStatsSwitch();
+
+      // Wait for stats to load (there will be multiple rows with same date)
+      await waitFor(() => {
+        expect(screen.getAllByText('December 31st, 1969 7:00:00 PM').length).toBeGreaterThan(0);
+      });
 
       actions.sortTableOnStorageSize();
 
-      // The table sorts by the underlying byte values in ascending order, instead of sorting by
-      // the human-readable string values.
-      const { tableCellsValues } = table.getMetaData('dataStreamTable');
-      expect(tableCellsValues).toEqual([
-        [
-          '',
-          'dataStream1',
-          'green',
-          'December 31st, 1969 7:00:00 PM',
-          '5b',
-          '1',
-          'Standard',
-          '7 days',
-          'Delete',
-        ],
-        [
-          '',
-          'dataStream2',
-          'green',
-          'December 31st, 1969 7:00:00 PM',
-          '1kb',
-          '1',
-          'Standard',
-          '5 days Info',
-          'Delete',
-        ],
-      ]);
-
-      // Revert sorting back on Name column to not impact the rest of the tests
-      actions.sortTableOnName();
+      // The table sorts by the underlying byte values in ascending order
+      await waitFor(() => {
+        const tableCellsValues = getTableCellsValues('dataStreamTable');
+        expect(tableCellsValues).toEqual([
+          [
+            '',
+            'dataStream1',
+            'green',
+            'December 31st, 1969 7:00:00 PM',
+            '5b',
+            '1',
+            'Standard',
+            '7 days',
+            'Delete',
+          ],
+          [
+            '',
+            'dataStream2',
+            'green',
+            'December 31st, 1969 7:00:00 PM',
+            '1kb',
+            '1',
+            'Standard',
+            '5 days Info',
+            'Delete',
+          ],
+        ]);
+      });
     });
 
     test(`doesn't hide stats toggle if enableDataStreamStats===false`, async () => {
-      testBed = await setup(httpSetup, {
-        config: {
-          enableDataStreamStats: false,
+      setupDataStreamsMocks();
+      renderHome(httpSetup, {
+        initialEntries: ['/data_streams'],
+        appServicesContext: {
+          url: urlServiceMock,
+          config: {
+            enableDataStreamStats: false,
+          },
         },
       });
 
-      const { actions, component, exists } = testBed;
-
-      await act(async () => {
-        actions.goToDataStreamsList();
-      });
-
-      component.update();
-
-      expect(exists('includeStatsSwitch')).toBeTruthy();
+      await screen.findByTestId('dataStreamTable');
+      expect(screen.getByTestId('includeStatsSwitch')).toBeInTheDocument();
     });
 
     test('shows storage size and documents count if enableSizeAndDocCount===true, enableDataStreamStats==false', async () => {
-      testBed = await setup(httpSetup, {
-        config: {
-          enableSizeAndDocCount: true,
-          enableDataStreamStats: false,
+      setupDataStreamsMocks();
+      renderHome(httpSetup, {
+        initialEntries: ['/data_streams'],
+        appServicesContext: {
+          url: urlServiceMock,
+          config: {
+            enableSizeAndDocCount: true,
+            enableDataStreamStats: false,
+          },
         },
       });
 
-      const { actions, component, table } = testBed;
+      await screen.findByTestId('dataStreamTable');
+      const actions = createDataStreamTabActions();
+      actions.clickIncludeStatsSwitch();
 
-      await act(async () => {
-        actions.goToDataStreamsList();
+      await waitFor(() => {
+        const tableCellsValues = getTableCellsValues('dataStreamTable');
+        expect(tableCellsValues).toEqual([
+          ['', 'dataStream1', 'green', '156kb', '10000', '1', 'Standard', '7 days', 'Delete'],
+          ['', 'dataStream2', 'green', '156kb', '10000', '1', 'Standard', '5 days Info', 'Delete'],
+        ]);
       });
-
-      component.update();
-
-      await actions.clickIncludeStatsSwitch();
-
-      const { tableCellsValues } = table.getMetaData('dataStreamTable');
-      expect(tableCellsValues).toEqual([
-        ['', 'dataStream1', 'green', '156kb', '10000', '1', 'Standard', '7 days', 'Delete'],
-        ['', 'dataStream2', 'green', '156kb', '10000', '1', 'Standard', '5 days Info', 'Delete'],
-      ]);
     });
 
     test('shows last updated and storage size if enableDataStreamStats===true, enableSizeAndDocCount===false', async () => {
-      testBed = await setup(httpSetup, {
-        config: {
-          enableDataStreamStats: true,
-          enableSizeAndDocCount: false,
+      setupDataStreamsMocks();
+      renderHome(httpSetup, {
+        initialEntries: ['/data_streams'],
+        appServicesContext: {
+          url: urlServiceMock,
+          config: {
+            enableDataStreamStats: true,
+            enableSizeAndDocCount: false,
+          },
         },
       });
 
-      const { actions, component, table } = testBed;
+      await screen.findByTestId('dataStreamTable');
+      const actions = createDataStreamTabActions();
+      actions.clickIncludeStatsSwitch();
 
-      await act(async () => {
-        actions.goToDataStreamsList();
+      await waitFor(() => {
+        const tableCellsValues = getTableCellsValues('dataStreamTable');
+        expect(tableCellsValues).toEqual([
+          [
+            '',
+            'dataStream1',
+            'green',
+            'December 31st, 1969 7:00:00 PM',
+            '5b',
+            '1',
+            'Standard',
+            '7 days',
+            'Delete',
+          ],
+          [
+            '',
+            'dataStream2',
+            'green',
+            'December 31st, 1969 7:00:00 PM',
+            '1kb',
+            '1',
+            'Standard',
+            '5 days Info',
+            'Delete',
+          ],
+        ]);
       });
-
-      component.update();
-
-      await actions.clickIncludeStatsSwitch();
-
-      const { tableCellsValues } = table.getMetaData('dataStreamTable');
-      expect(tableCellsValues).toEqual([
-        [
-          '',
-          'dataStream1',
-          'green',
-          'December 31st, 1969 7:00:00 PM',
-          '5b',
-          '1',
-          'Standard',
-          '7 days',
-          'Delete',
-        ],
-        [
-          '',
-          'dataStream2',
-          'green',
-          'December 31st, 1969 7:00:00 PM',
-          '1kb',
-          '1',
-          'Standard',
-          '5 days Info',
-          'Delete',
-        ],
-      ]);
-    });
-
-    test('clicking the indices count navigates to the backing indices', async () => {
-      const { table, actions } = testBed;
-      await actions.clickIndicesAt(0);
-      expect(table.getMetaData('indexTable').tableCellsValues).toEqual([
-        ['', 'data-stream-index', '', '', '', '', '0', '', 'dataStream1'],
-      ]);
     });
 
     describe('row actions', () => {
-      test('can delete', () => {
-        const { findDeleteActionAt } = testBed;
-        const deleteAction = findDeleteActionAt(0);
-        expect(deleteAction.length).toBe(1);
+      test('can delete', async () => {
+        setupDataStreamsMocks();
+        renderHome(httpSetup, {
+          initialEntries: ['/data_streams'],
+          appServicesContext: { url: urlServiceMock },
+        });
+
+        await screen.findByTestId('dataStreamTable');
+        const table = screen.getByTestId('dataStreamTable');
+        const rows = within(table).getAllByRole('row');
+        const dataRow = rows[1]; // First data row (skip header)
+        const deleteButton = within(dataRow).getByTestId('deleteDataStream');
+        expect(deleteButton).toBeInTheDocument();
       });
     });
 
     describe('deleting a data stream', () => {
       test('shows a confirmation modal', async () => {
-        const {
-          actions: { clickDeleteActionAt },
-          findDeleteConfirmationModal,
-        } = testBed;
-        clickDeleteActionAt(0);
-        const confirmationModal = findDeleteConfirmationModal();
-        expect(confirmationModal).toBeDefined();
+        setupDataStreamsMocks();
+        renderHome(httpSetup, {
+          initialEntries: ['/data_streams'],
+          appServicesContext: { url: urlServiceMock },
+        });
+
+        await screen.findByTestId('dataStreamTable');
+        const actions = createDataStreamTabActions();
+        actions.clickDeleteActionAt(0);
+
+        await screen.findByTestId('deleteDataStreamsConfirmation');
+        expect(screen.getByTestId('deleteDataStreamsConfirmation')).toBeInTheDocument();
       });
 
       test('sends a request to the Delete API', async () => {
-        const {
-          actions: { clickDeleteActionAt, clickConfirmDelete },
-        } = testBed;
-        clickDeleteActionAt(0);
+        setupDataStreamsMocks();
+        renderHome(httpSetup, {
+          initialEntries: ['/data_streams'],
+          appServicesContext: { url: urlServiceMock },
+        });
+
+        await screen.findByTestId('dataStreamTable');
+        const actions = createDataStreamTabActions();
+        actions.clickDeleteActionAt(0);
 
         httpRequestsMockHelpers.setDeleteDataStreamResponse({
           results: {
@@ -445,19 +481,19 @@ describe('Data Streams tab', () => {
           },
         });
 
-        await clickConfirmDelete();
+        await actions.clickConfirmDelete();
 
-        expect(httpSetup.post).toHaveBeenLastCalledWith(
-          `${API_BASE_PATH}/delete_data_streams`,
-          expect.objectContaining({ body: JSON.stringify({ dataStreams: ['dataStream1'] }) })
-        );
+        await waitFor(() => {
+          expect(httpSetup.post).toHaveBeenLastCalledWith(
+            `${API_BASE_PATH}/delete_data_streams`,
+            expect.objectContaining({ body: JSON.stringify({ dataStreams: ['dataStream1'] }) })
+          );
+        });
       });
     });
 
     describe('bulk delete of data streams', () => {
-      beforeAll(async () => {
-        const { setLoadDataStreamsResponse } = httpRequestsMockHelpers;
-
+      test('can delete multiple data streams at once', async () => {
         const ds1 = createDataStreamPayload({
           name: 'dataStream1',
           privileges: {
@@ -475,27 +511,22 @@ describe('Data Streams tab', () => {
           },
         });
 
-        setLoadDataStreamsResponse([ds1, ds2]);
+        httpRequestsMockHelpers.setLoadIndicesResponse([]);
+        httpRequestsMockHelpers.setLoadDataStreamsResponse([ds1, ds2]);
+        httpRequestsMockHelpers.setLoadTemplatesResponse({ templates: [], legacyTemplates: [] });
 
-        testBed = await setup(httpSetup, {
-          history: createMemoryHistory(),
-          url: urlServiceMock,
+        renderHome(httpSetup, {
+          initialEntries: ['/data_streams'],
+          appServicesContext: { url: urlServiceMock },
         });
-        await act(async () => {
-          testBed.actions.goToDataStreamsList();
-        });
-        testBed.component.update();
-      });
 
-      test('can delete multiple data streams at once', async () => {
-        const {
-          actions: { selectDataStream, clickBulkDeleteDataStreamsButton, clickConfirmDelete },
-        } = testBed;
+        await screen.findByTestId('dataStreamTable');
+        const actions = createDataStreamTabActions();
 
-        selectDataStream('dataStream1', true);
-        selectDataStream('dataStream2', true);
+        actions.selectDataStream('dataStream1', true);
+        actions.selectDataStream('dataStream2', true);
 
-        clickBulkDeleteDataStreamsButton();
+        actions.clickBulkDeleteDataStreamsButton();
 
         httpRequestsMockHelpers.setDeleteDataStreamResponse({
           results: {
@@ -504,184 +535,228 @@ describe('Data Streams tab', () => {
           },
         });
 
-        await clickConfirmDelete();
+        await actions.clickConfirmDelete();
 
-        testBed.component.update();
-
-        expect(httpSetup.post).toHaveBeenLastCalledWith(
-          `${API_BASE_PATH}/delete_data_streams`,
-          expect.objectContaining({
-            body: JSON.stringify({ dataStreams: ['dataStream1', 'dataStream2'] }),
-          })
-        );
+        await waitFor(() => {
+          expect(httpSetup.post).toHaveBeenLastCalledWith(
+            `${API_BASE_PATH}/delete_data_streams`,
+            expect.objectContaining({
+              body: JSON.stringify({ dataStreams: ['dataStream1', 'dataStream2'] }),
+            })
+          );
+        });
       });
     });
 
     describe('bulk update data retention', () => {
-      beforeAll(async () => {
-        const { setLoadDataStreamsResponse } = httpRequestsMockHelpers;
-
+      const setupBulkRetentionMocks = () => {
+        // Both data streams must have lifecycle enabled with data_retention
+        // for the "reduced retention" tests to work correctly
         const ds1 = createDataStreamPayload({
           name: 'dataStream1',
           lifecycle: {
-            enabled: false,
+            enabled: true,
+            data_retention: '7d',
           },
         });
         const ds2 = createDataStreamPayload({
           name: 'dataStream2',
           lifecycle: {
             enabled: true,
+            data_retention: '7d',
           },
         });
 
-        setLoadDataStreamsResponse([ds1, ds2]);
+        httpRequestsMockHelpers.setLoadDataStreamsResponse([ds1, ds2]);
+        httpRequestsMockHelpers.setLoadIndicesResponse([]);
+        httpRequestsMockHelpers.setLoadTemplatesResponse({ templates: [], legacyTemplates: [] });
 
-        testBed = await setup(httpSetup, {
-          history: createMemoryHistory(),
-          url: urlServiceMock,
-        });
-        await act(async () => {
-          testBed.actions.goToDataStreamsList();
-        });
-        testBed.component.update();
-      });
+        notificationService.setup(notificationsServiceMock);
+      };
 
       test('shows bulk edit callout for reduced data retention', async () => {
-        const {
-          actions: { selectDataStream, clickBulkEditDataRetentionButton },
-        } = testBed;
+        setupBulkRetentionMocks();
+        renderHome(httpSetup, {
+          initialEntries: ['/data_streams'],
+          appServicesContext: { url: urlServiceMock },
+        });
 
-        selectDataStream('dataStream1', true);
-        selectDataStream('dataStream2', true);
+        await screen.findByTestId('dataStreamTable');
 
-        clickBulkEditDataRetentionButton();
+        const actions = createDataStreamTabActions();
+        const formActions = createDataRetentionFormActions();
+
+        actions.selectDataStream('dataStream1', true);
+        actions.selectDataStream('dataStream2', true);
+        actions.clickBulkEditDataRetentionButton();
+
+        // Wait for modal to open
+        await screen.findByTestId('dataRetentionValue');
 
         // Decrease data retention value to 5d (it was 7d initially)
-        testBed.form.setInputValue('dataRetentionValue', '5');
+        formActions.setDataRetentionValue('5');
 
-        // Verify that callout is displayed
-        expect(testBed.exists('reducedDataRetentionCallout')).toBeTruthy();
+        // Wait for callout to appear
+        await screen.findByTestId('reducedDataRetentionCallout');
 
-        // Verify message in callout
-        const calloutText = testBed.find('reducedDataRetentionCallout').text();
+        const calloutText = formActions.getReducedRetentionCalloutText();
         expect(calloutText).toContain(
           'The retention period will be reduced for 2 data streams. Data older than then new retention period will be permanently deleted.'
         );
         expect(calloutText).toContain('Affected data streams: dataStream1, dataStream2');
       });
 
-      test('can set data retention period for mutliple data streams', async () => {
-        const {
-          actions: { selectDataStream, clickBulkEditDataRetentionButton },
-        } = testBed;
+      test('can set data retention period for multiple data streams', async () => {
+        setupBulkRetentionMocks();
+        renderHome(httpSetup, {
+          initialEntries: ['/data_streams'],
+          appServicesContext: { url: urlServiceMock },
+        });
 
-        selectDataStream('dataStream1', true);
-        selectDataStream('dataStream2', true);
+        await screen.findByTestId('dataStreamTable');
 
-        clickBulkEditDataRetentionButton();
+        const actions = createDataStreamTabActions();
+        const formActions = createDataRetentionFormActions();
+
+        actions.selectDataStream('dataStream1', true);
+        actions.selectDataStream('dataStream2', true);
+        actions.clickBulkEditDataRetentionButton();
+
+        // Wait for modal to open
+        await screen.findByTestId('dataRetentionValue');
 
         httpRequestsMockHelpers.setEditDataRetentionResponse({
           success: true,
         });
 
-        // set data retention value
-        testBed.form.setInputValue('dataRetentionValue', '7');
-        // Set data retention unit
-        testBed.find('show-filters-button').simulate('click');
-        testBed.find('filter-option-h').simulate('click');
+        // Set data retention value
+        formActions.setDataRetentionValue('7');
+        // Set data retention unit to hours
+        await formActions.setTimeUnit('h');
 
-        await act(async () => {
-          testBed.find('saveButton').simulate('click');
+        formActions.clickSaveButton();
+
+        await waitFor(() => {
+          expect(httpSetup.put).toHaveBeenLastCalledWith(
+            `${API_BASE_PATH}/data_streams/data_retention`,
+            expect.objectContaining({
+              body: JSON.stringify({
+                dataRetention: '7h',
+                dataStreams: ['dataStream1', 'dataStream2'],
+              }),
+            })
+          );
         });
-        testBed.component.update();
-
-        expect(httpSetup.put).toHaveBeenLastCalledWith(
-          `${API_BASE_PATH}/data_streams/data_retention`,
-          expect.objectContaining({
-            body: JSON.stringify({
-              dataRetention: '7h',
-              dataStreams: ['dataStream1', 'dataStream2'],
-            }),
-          })
-        );
       });
 
       test('can disable lifecycle', async () => {
-        const {
-          actions: { selectDataStream, clickBulkEditDataRetentionButton },
-        } = testBed;
+        setupBulkRetentionMocks();
+        renderHome(httpSetup, {
+          initialEntries: ['/data_streams'],
+          appServicesContext: { url: urlServiceMock },
+        });
 
-        selectDataStream('dataStream1', true);
-        selectDataStream('dataStream2', true);
+        await screen.findByTestId('dataStreamTable');
 
-        clickBulkEditDataRetentionButton();
+        const actions = createDataStreamTabActions();
+        const formActions = createDataRetentionFormActions();
+
+        actions.selectDataStream('dataStream1', true);
+        actions.selectDataStream('dataStream2', true);
+        actions.clickBulkEditDataRetentionButton();
+
+        // Wait for modal to open
+        await screen.findByTestId('dataRetentionValue');
 
         httpRequestsMockHelpers.setEditDataRetentionResponse({
           success: true,
         });
 
-        testBed.form.toggleEuiSwitch('dataRetentionEnabledField.input');
+        formActions.toggleDataRetentionEnabled();
+        formActions.clickSaveButton();
 
-        await act(async () => {
-          testBed.find('saveButton').simulate('click');
+        await waitFor(() => {
+          expect(httpSetup.put).toHaveBeenLastCalledWith(
+            `${API_BASE_PATH}/data_streams/data_retention`,
+            expect.objectContaining({
+              body: JSON.stringify({ enabled: false, dataStreams: ['dataStream1', 'dataStream2'] }),
+            })
+          );
         });
-        testBed.component.update();
-
-        expect(httpSetup.put).toHaveBeenLastCalledWith(
-          `${API_BASE_PATH}/data_streams/data_retention`,
-          expect.objectContaining({
-            body: JSON.stringify({ enabled: false, dataStreams: ['dataStream1', 'dataStream2'] }),
-          })
-        );
       });
 
       test('allows to set infinite retention period', async () => {
-        const {
-          actions: { selectDataStream, clickBulkEditDataRetentionButton },
-        } = testBed;
+        setupBulkRetentionMocks();
+        renderHome(httpSetup, {
+          initialEntries: ['/data_streams'],
+          appServicesContext: { url: urlServiceMock },
+        });
 
-        selectDataStream('dataStream1', true);
-        selectDataStream('dataStream2', true);
+        await screen.findByTestId('dataStreamTable');
 
-        clickBulkEditDataRetentionButton();
+        const actions = createDataStreamTabActions();
+        const formActions = createDataRetentionFormActions();
+
+        actions.selectDataStream('dataStream1', true);
+        actions.selectDataStream('dataStream2', true);
+        actions.clickBulkEditDataRetentionButton();
+
+        // Wait for modal to open
+        await screen.findByTestId('dataRetentionValue');
 
         httpRequestsMockHelpers.setEditDataRetentionResponse({
           success: true,
         });
 
-        testBed.form.toggleEuiSwitch('infiniteRetentionPeriod.input');
+        formActions.toggleInfiniteRetentionPeriod();
+        formActions.clickSaveButton();
 
-        await act(async () => {
-          testBed.find('saveButton').simulate('click');
+        await waitFor(() => {
+          expect(httpSetup.put).toHaveBeenLastCalledWith(
+            `${API_BASE_PATH}/data_streams/data_retention`,
+            expect.objectContaining({
+              body: JSON.stringify({ dataStreams: ['dataStream1', 'dataStream2'] }),
+            })
+          );
         });
-        testBed.component.update();
-
-        expect(httpSetup.put).toHaveBeenLastCalledWith(
-          `${API_BASE_PATH}/data_streams/data_retention`,
-          expect.objectContaining({
-            body: JSON.stringify({ dataStreams: ['dataStream1', 'dataStream2'] }),
-          })
-        );
       });
     });
 
     describe('detail panel', () => {
       test('opens when the data stream name in the table is clicked', async () => {
-        const { actions, findDetailPanel, findDetailPanelTitle } = testBed;
-        httpRequestsMockHelpers.setLoadDataStreamResponse('dataStream1');
+        setupDataStreamsMocks();
+        renderHome(httpSetup, {
+          initialEntries: ['/data_streams'],
+          appServicesContext: { url: urlServiceMock },
+        });
+
+        await screen.findByTestId('dataStreamTable');
+
+        const actions = createDataStreamTabActions();
+        const detailPanelActions = createDataStreamDetailPanelActions();
+
         await actions.clickNameAt(0);
-        expect(findDetailPanel().length).toBe(1);
-        expect(findDetailPanelTitle()).toBe('dataStream1');
+
+        await screen.findByTestId('dataStreamDetailPanel');
+        expect(detailPanelActions.findDetailPanel()).toBeInTheDocument();
+        expect(detailPanelActions.findDetailPanelTitle()).toBe('dataStream1');
       });
 
       test('deletes the data stream when delete button is clicked', async () => {
-        const {
-          actions: { clickNameAt, clickDeleteDataStreamButton, clickConfirmDelete },
-        } = testBed;
+        setupDataStreamsMocks();
+        renderHome(httpSetup, {
+          initialEntries: ['/data_streams'],
+          appServicesContext: { url: urlServiceMock },
+        });
 
-        await clickNameAt(0);
+        await screen.findByTestId('dataStreamTable');
 
-        clickDeleteDataStreamButton();
+        const actions = createDataStreamTabActions();
+
+        await actions.clickNameAt(0);
+        await screen.findByTestId('dataStreamDetailPanel');
+
+        actions.clickDeleteDataStreamButton();
 
         httpRequestsMockHelpers.setDeleteDataStreamResponse({
           results: {
@@ -690,18 +765,18 @@ describe('Data Streams tab', () => {
           },
         });
 
-        await clickConfirmDelete();
+        await actions.clickConfirmDelete();
 
-        expect(httpSetup.post).toHaveBeenLastCalledWith(
-          `${API_BASE_PATH}/delete_data_streams`,
-          expect.objectContaining({ body: JSON.stringify({ dataStreams: ['dataStream1'] }) })
-        );
+        await waitFor(() => {
+          expect(httpSetup.post).toHaveBeenLastCalledWith(
+            `${API_BASE_PATH}/delete_data_streams`,
+            expect.objectContaining({ body: JSON.stringify({ dataStreams: ['dataStream1'] }) })
+          );
+        });
       });
 
       describe('update data retention', () => {
         test('Should show disabled or infinite retention period accordingly in table and flyout', async () => {
-          const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;
-
           const ds1 = createDataStreamPayload({
             name: 'dataStream1',
             lifecycle: {
@@ -715,142 +790,182 @@ describe('Data Streams tab', () => {
             },
           });
 
-          setLoadDataStreamsResponse([ds1, ds2]);
-          setLoadDataStreamResponse(ds1.name, ds1);
+          httpRequestsMockHelpers.setLoadIndicesResponse([]);
+          httpRequestsMockHelpers.setLoadDataStreamsResponse([ds1, ds2]);
+          httpRequestsMockHelpers.setLoadDataStreamResponse(ds1.name, ds1);
+          httpRequestsMockHelpers.setLoadTemplatesResponse({ templates: [], legacyTemplates: [] });
 
-          testBed = await setup(httpSetup, {
-            history: createMemoryHistory(),
-            url: urlServiceMock,
+          renderHome(httpSetup, {
+            initialEntries: ['/data_streams'],
+            appServicesContext: { url: urlServiceMock },
           });
-          await act(async () => {
-            testBed.actions.goToDataStreamsList();
-          });
-          testBed.component.update();
 
-          const { actions, find, table } = testBed;
-          const { tableCellsValues } = table.getMetaData('dataStreamTable');
+          await screen.findByTestId('dataStreamTable');
 
+          const tableCellsValues = getTableCellsValues('dataStreamTable');
           expect(tableCellsValues).toEqual([
             ['', 'dataStream1', 'green', '1', 'Standard', 'Disabled', 'Delete'],
             ['', 'dataStream2', 'green', '1', 'Standard', 'Info', 'Delete'],
           ]);
 
+          const actions = createDataStreamTabActions();
+          const detailPanelActions = createDataStreamDetailPanelActions();
+
           await actions.clickNameAt(0);
-          expect(find('dataRetentionDetail').text()).toBe('Disabled');
+          await screen.findByTestId('dataStreamDetailPanel');
+          expect(detailPanelActions.findDataRetentionDetail()).toHaveTextContent('Disabled');
 
-          await act(async () => {
-            testBed.find('closeDetailsButton').simulate('click');
+          // Close detail panel
+          fireEvent.click(screen.getByTestId('closeDetailsButton'));
+          await waitFor(() => {
+            expect(screen.queryByTestId('dataStreamDetailPanel')).not.toBeInTheDocument();
           });
-          testBed.component.update();
 
-          setLoadDataStreamResponse(ds2.name, ds2);
+          httpRequestsMockHelpers.setLoadDataStreamResponse(ds2.name, ds2);
           await actions.clickNameAt(1);
-          expect(find('dataRetentionDetail').text()).toBe('Keep data indefinitely');
+          await screen.findByTestId('dataStreamDetailPanel');
+          expect(detailPanelActions.findDataRetentionDetail()).toHaveTextContent(
+            'Keep data indefinitely'
+          );
         });
 
         test('can set data retention period', async () => {
-          const {
-            actions: { clickNameAt, clickEditDataRetentionButton },
-          } = testBed;
+          setupDataStreamsMocks();
+          renderHome(httpSetup, {
+            initialEntries: ['/data_streams'],
+            appServicesContext: { url: urlServiceMock },
+          });
 
-          await clickNameAt(0);
+          await screen.findByTestId('dataStreamTable');
 
-          clickEditDataRetentionButton();
+          const actions = createDataStreamTabActions();
+          const formActions = createDataRetentionFormActions();
+
+          await actions.clickNameAt(0);
+          await screen.findByTestId('dataStreamDetailPanel');
+
+          actions.clickEditDataRetentionButton();
+
+          // Wait for modal to open
+          await screen.findByTestId('dataRetentionValue');
 
           httpRequestsMockHelpers.setEditDataRetentionResponse({
             success: true,
           });
 
-          // set data retention value
-          testBed.form.setInputValue('dataRetentionValue', '7');
-          // Set data retention unit
-          testBed.find('show-filters-button').simulate('click');
-          testBed.find('filter-option-h').simulate('click');
+          formActions.setDataRetentionValue('7');
+          await formActions.setTimeUnit('h');
+          formActions.clickSaveButton();
 
-          await act(async () => {
-            testBed.find('saveButton').simulate('click');
+          await waitFor(() => {
+            expect(httpSetup.put).toHaveBeenLastCalledWith(
+              `${API_BASE_PATH}/data_streams/data_retention`,
+              expect.objectContaining({
+                body: JSON.stringify({ dataRetention: '7h', dataStreams: ['dataStream1'] }),
+              })
+            );
           });
-          testBed.component.update();
-
-          expect(httpSetup.put).toHaveBeenLastCalledWith(
-            `${API_BASE_PATH}/data_streams/data_retention`,
-            expect.objectContaining({
-              body: JSON.stringify({ dataRetention: '7h', dataStreams: ['dataStream1'] }),
-            })
-          );
         });
 
         test('can disable lifecycle', async () => {
-          const {
-            actions: { clickNameAt, clickEditDataRetentionButton },
-          } = testBed;
+          setupDataStreamsMocks();
+          renderHome(httpSetup, {
+            initialEntries: ['/data_streams'],
+            appServicesContext: { url: urlServiceMock },
+          });
 
-          await clickNameAt(0);
+          await screen.findByTestId('dataStreamTable');
 
-          clickEditDataRetentionButton();
+          const actions = createDataStreamTabActions();
+          const formActions = createDataRetentionFormActions();
+
+          await actions.clickNameAt(0);
+          await screen.findByTestId('dataStreamDetailPanel');
+
+          actions.clickEditDataRetentionButton();
+
+          // Wait for modal to open
+          await screen.findByTestId('dataRetentionValue');
 
           httpRequestsMockHelpers.setEditDataRetentionResponse({
             success: true,
           });
 
-          testBed.form.toggleEuiSwitch('dataRetentionEnabledField.input');
+          formActions.toggleDataRetentionEnabled();
+          formActions.clickSaveButton();
 
-          await act(async () => {
-            testBed.find('saveButton').simulate('click');
+          await waitFor(() => {
+            expect(httpSetup.put).toHaveBeenLastCalledWith(
+              `${API_BASE_PATH}/data_streams/data_retention`,
+              expect.objectContaining({
+                body: JSON.stringify({ enabled: false, dataStreams: ['dataStream1'] }),
+              })
+            );
           });
-          testBed.component.update();
-
-          expect(httpSetup.put).toHaveBeenLastCalledWith(
-            `${API_BASE_PATH}/data_streams/data_retention`,
-            expect.objectContaining({
-              body: JSON.stringify({ enabled: false, dataStreams: ['dataStream1'] }),
-            })
-          );
         });
 
         test('allows to set infinite retention period', async () => {
-          const {
-            actions: { clickNameAt, clickEditDataRetentionButton },
-          } = testBed;
+          setupDataStreamsMocks();
+          renderHome(httpSetup, {
+            initialEntries: ['/data_streams'],
+            appServicesContext: { url: urlServiceMock },
+          });
 
-          await clickNameAt(0);
+          await screen.findByTestId('dataStreamTable');
 
-          clickEditDataRetentionButton();
+          const actions = createDataStreamTabActions();
+          const formActions = createDataRetentionFormActions();
+
+          await actions.clickNameAt(0);
+          await screen.findByTestId('dataStreamDetailPanel');
+
+          actions.clickEditDataRetentionButton();
+
+          // Wait for modal to open
+          await screen.findByTestId('dataRetentionValue');
 
           httpRequestsMockHelpers.setEditDataRetentionResponse({
             success: true,
           });
 
-          testBed.form.toggleEuiSwitch('infiniteRetentionPeriod.input');
+          formActions.toggleInfiniteRetentionPeriod();
+          formActions.clickSaveButton();
 
-          await act(async () => {
-            testBed.find('saveButton').simulate('click');
+          await waitFor(() => {
+            expect(httpSetup.put).toHaveBeenLastCalledWith(
+              `${API_BASE_PATH}/data_streams/data_retention`,
+              expect.objectContaining({ body: JSON.stringify({ dataStreams: ['dataStream1'] }) })
+            );
           });
-          testBed.component.update();
-
-          expect(httpSetup.put).toHaveBeenLastCalledWith(
-            `${API_BASE_PATH}/data_streams/data_retention`,
-            expect.objectContaining({ body: JSON.stringify({ dataStreams: ['dataStream1'] }) })
-          );
         });
 
         test('shows single edit callout for reduced data retention', async () => {
-          const {
-            actions: { clickNameAt, clickEditDataRetentionButton },
-          } = testBed;
+          setupDataStreamsMocks();
+          renderHome(httpSetup, {
+            initialEntries: ['/data_streams'],
+            appServicesContext: { url: urlServiceMock },
+          });
 
-          await clickNameAt(0);
+          await screen.findByTestId('dataStreamTable');
 
-          clickEditDataRetentionButton();
+          const actions = createDataStreamTabActions();
+          const formActions = createDataRetentionFormActions();
+
+          await actions.clickNameAt(0);
+          await screen.findByTestId('dataStreamDetailPanel');
+
+          actions.clickEditDataRetentionButton();
+
+          // Wait for modal to open
+          await screen.findByTestId('dataRetentionValue');
 
           // Decrease data retention value to 5d (it was 7d initially)
-          testBed.form.setInputValue('dataRetentionValue', '5');
+          formActions.setDataRetentionValue('5');
 
-          // Verify that callout is displayed
-          expect(testBed.exists('reducedDataRetentionCallout')).toBeTruthy();
+          // Wait for callout to appear
+          await screen.findByTestId('reducedDataRetentionCallout');
 
-          // Verify message in callout
-          const calloutText = testBed.find('reducedDataRetentionCallout').text();
+          const calloutText = formActions.getReducedRetentionCalloutText();
           expect(calloutText).toContain(
             'The retention period will be reduced. Data older than then new retention period will be permanently deleted.'
           );
@@ -858,19 +973,24 @@ describe('Data Streams tab', () => {
       });
 
       test('index template name navigates to the index template details', async () => {
-        const {
-          actions: { clickNameAt },
-          findDetailPanelIndexTemplateLink,
-        } = testBed;
+        setupDataStreamsMocks();
+        renderHome(httpSetup, {
+          initialEntries: ['/data_streams'],
+          appServicesContext: { url: urlServiceMock },
+        });
 
+        await screen.findByTestId('dataStreamTable');
         getRedirectUrl.mockClear();
 
-        await clickNameAt(0);
+        const actions = createDataStreamTabActions();
+        const detailPanelActions = createDataStreamDetailPanelActions();
 
-        const indexTemplateLink = findDetailPanelIndexTemplateLink();
-        expect(indexTemplateLink.text()).toBe('indexTemplate');
+        await actions.clickNameAt(0);
+        await screen.findByTestId('dataStreamDetailPanel');
 
-        expect(indexTemplateLink.prop('href')).toBe('/app/path');
+        const indexTemplateLink = detailPanelActions.findIndexTemplateLink();
+        expect(indexTemplateLink).toHaveTextContent('indexTemplate');
+        expect(indexTemplateLink?.getAttribute('href')).toBe('/app/path');
         expect(getRedirectUrl).toHaveBeenCalledWith({
           page: 'index_template',
           indexTemplate: 'indexTemplate',
@@ -878,14 +998,26 @@ describe('Data Streams tab', () => {
       });
 
       test('shows data retention detail when configured', async () => {
-        const { actions, findDetailPanelDataRetentionDetail } = testBed;
+        setupDataStreamsMocks();
+        renderHome(httpSetup, {
+          initialEntries: ['/data_streams'],
+          appServicesContext: { url: urlServiceMock },
+        });
+
+        await screen.findByTestId('dataStreamTable');
+
+        const actions = createDataStreamTabActions();
+        const detailPanelActions = createDataStreamDetailPanelActions();
+
         await actions.clickNameAt(0);
-        expect(findDetailPanelDataRetentionDetail().exists()).toBeTruthy();
+        await screen.findByTestId('dataStreamDetailPanel');
+
+        expect(detailPanelActions.findDataRetentionDetail()).toBeInTheDocument();
       });
     });
 
     describe('shows all possible states according to who manages the data stream', () => {
-      const ds1 = createDataStreamPayload({
+      const dsFullyManagedByILM = createDataStreamPayload({
         name: 'dataStream1',
         nextGenerationManagedBy: 'Index Lifecycle Management',
         lifecycle: undefined,
@@ -899,7 +1031,7 @@ describe('Data Streams tab', () => {
         ],
       });
 
-      const ds2 = createDataStreamPayload({
+      const dsPartiallyManagedByILM = createDataStreamPayload({
         name: 'dataStream2',
         nextGenerationManagedBy: 'Data stream lifecycle',
         lifecycle: {
@@ -935,121 +1067,164 @@ describe('Data Streams tab', () => {
         ],
       });
 
-      beforeEach(async () => {
-        const { setLoadDataStreamsResponse } = httpRequestsMockHelpers;
-
-        setLoadDataStreamsResponse([ds1, ds2]);
-
-        testBed = await setup(httpSetup, {
-          history: createMemoryHistory(),
-          url: urlServiceMock,
-        });
-
-        await act(async () => {
-          testBed.actions.goToDataStreamsList();
-        });
-        testBed.component.update();
-      });
+      const setupILMMocks = () => {
+        httpRequestsMockHelpers.setLoadIndicesResponse([]);
+        httpRequestsMockHelpers.setLoadDataStreamsResponse([
+          dsFullyManagedByILM,
+          dsPartiallyManagedByILM,
+        ]);
+        httpRequestsMockHelpers.setLoadTemplatesResponse({ templates: [], legacyTemplates: [] });
+      };
 
       test('when fully managed by ILM, user cannot edit data retention', async () => {
-        const { setLoadDataStreamResponse } = httpRequestsMockHelpers;
+        setupILMMocks();
+        httpRequestsMockHelpers.setLoadDataStreamResponse(
+          dsFullyManagedByILM.name,
+          dsFullyManagedByILM
+        );
 
-        setLoadDataStreamResponse(ds1.name, ds1);
+        renderHome(httpSetup, {
+          initialEntries: ['/data_streams'],
+          appServicesContext: { url: urlServiceMock },
+        });
 
-        const { actions, find, exists } = testBed;
+        await screen.findByTestId('dataStreamTable');
+        const actions = createDataStreamTabActions();
+        const detailPanelActions = createDataStreamDetailPanelActions();
 
         await actions.clickNameAt(0);
-        expect(find('dataRetentionDetail').text()).toBe('Disabled');
+        await screen.findByTestId('dataStreamDetailPanel');
+
+        expect(detailPanelActions.findDataRetentionDetail()).toHaveTextContent('Disabled');
 
         // There should be a warning that the data stream is fully managed by ILM
-        expect(exists('dsIsFullyManagedByILM')).toBe(true);
+        expect(screen.getByTestId('dsIsFullyManagedByILM')).toBeInTheDocument();
 
         // Edit data retention button should not be visible
-        testBed.find('manageDataStreamButton').simulate('click');
-        expect(exists('editDataRetentionButton')).toBe(false);
+        fireEvent.click(screen.getByTestId('manageDataStreamButton'));
+        expect(screen.queryByTestId('editDataRetentionButton')).not.toBeInTheDocument();
       });
 
       test('displays/hides bulk edit data retention depending if data stream fully managed by ILM is selected', async () => {
-        const {
-          find,
-          actions: { selectDataStream, clickManageDataStreamsButton },
-        } = testBed;
+        httpRequestsMockHelpers.setLoadIndicesResponse([]);
+        httpRequestsMockHelpers.setLoadDataStreamsResponse([
+          dsFullyManagedByILM,
+          dsPartiallyManagedByILM,
+        ]);
+        httpRequestsMockHelpers.setLoadTemplatesResponse({ templates: [], legacyTemplates: [] });
+
+        renderHome(httpSetup, {
+          initialEntries: ['/data_streams'],
+          appServicesContext: { url: urlServiceMock },
+        });
+
+        await screen.findByTestId('dataStreamTable');
+        const actions = createDataStreamTabActions();
 
         // Select data stream fully managed by ILM
-        selectDataStream('dataStream1', true);
-        clickManageDataStreamsButton();
-        expect(find('bulkEditDataRetentionButton').exists()).toBeFalsy();
+        actions.selectDataStream('dataStream1', true);
+        await actions.openBulkActionsPopover();
+        expect(screen.queryByTestId('bulkEditDataRetentionButton')).not.toBeInTheDocument();
+        await actions.closeBulkActionsPopover();
 
-        // Select data stream managed by DSL
-        selectDataStream('dataStream2', true);
-        clickManageDataStreamsButton();
-        expect(find('bulkEditDataRetentionButton').exists()).toBeFalsy();
+        // Select data stream managed by DSL (both now selected)
+        actions.selectDataStream('dataStream2', true);
+        await actions.openBulkActionsPopover();
+        expect(screen.queryByTestId('bulkEditDataRetentionButton')).not.toBeInTheDocument();
+        await actions.closeBulkActionsPopover();
 
-        // Unselect data stream fully managed by ILM
-        selectDataStream('dataStream1', false);
-        clickManageDataStreamsButton();
-        expect(find('bulkEditDataRetentionButton').exists()).toBeTruthy();
+        // Unselect data stream fully managed by ILM (only DSL stream selected)
+        actions.selectDataStream('dataStream1', false);
+        await actions.openBulkActionsPopover();
+        expect(screen.getByTestId('bulkEditDataRetentionButton')).toBeInTheDocument();
       });
 
       test('when partially managed by dsl but has backing indices managed by ILM should show a warning', async () => {
-        const { setLoadDataStreamResponse } = httpRequestsMockHelpers;
+        setupILMMocks();
+        httpRequestsMockHelpers.setLoadDataStreamResponse(
+          dsPartiallyManagedByILM.name,
+          dsPartiallyManagedByILM
+        );
 
-        setLoadDataStreamResponse(ds2.name, ds2);
+        renderHome(httpSetup, {
+          initialEntries: ['/data_streams'],
+          appServicesContext: { url: urlServiceMock },
+        });
 
-        const { actions, find, exists } = testBed;
+        await screen.findByTestId('dataStreamTable');
+        const actions = createDataStreamTabActions();
+        const detailPanelActions = createDataStreamDetailPanelActions();
 
         await actions.clickNameAt(1);
-        expect(find('dataRetentionDetail').text()).toBe('7 days');
+        await screen.findByTestId('dataStreamDetailPanel');
+
+        expect(detailPanelActions.findDataRetentionDetail()).toHaveTextContent('7 days');
 
         actions.clickEditDataRetentionButton();
 
+        // Wait for modal to open
+        await screen.findByTestId('someIndicesAreManagedByILMCallout');
+
         // There should be a warning that the data stream is managed by DSL
         // but the backing indices that are managed by ILM wont be affected.
-        expect(exists('someIndicesAreManagedByILMCallout')).toBe(true);
-        expect(exists('viewIlmPolicyLink')).toBe(true);
-        expect(exists('viewAllIndicesLink')).toBe(true);
+        expect(screen.getByTestId('someIndicesAreManagedByILMCallout')).toBeInTheDocument();
+        expect(screen.getByTestId('viewIlmPolicyLink')).toBeInTheDocument();
+        expect(screen.getByTestId('viewAllIndicesLink')).toBeInTheDocument();
       });
     });
   });
 
   describe('when there are special characters', () => {
-    beforeEach(async () => {
-      const { setLoadIndicesResponse, setLoadDataStreamsResponse, setLoadDataStreamResponse } =
-        httpRequestsMockHelpers;
-
-      setLoadIndicesResponse([
+    const setupSpecialCharactersMocks = () => {
+      const dataStreamPercentSign = createDataStreamPayload({ name: '%dataStream' });
+      httpRequestsMockHelpers.setLoadIndicesResponse([
         createDataStreamBackingIndex('data-stream-index', '%dataStream'),
         createDataStreamBackingIndex('data-stream-index2', 'dataStream2'),
       ]);
-
-      const dataStreamPercentSign = createDataStreamPayload({ name: '%dataStream' });
-      setLoadDataStreamsResponse([dataStreamPercentSign]);
-      setLoadDataStreamResponse(dataStreamPercentSign.name, dataStreamPercentSign);
-
-      testBed = await setup(httpSetup, {
-        history: createMemoryHistory(),
-        url: urlServiceMock,
-      });
-      await act(async () => {
-        testBed.actions.goToDataStreamsList();
-      });
-      testBed.component.update();
-    });
+      httpRequestsMockHelpers.setLoadDataStreamsResponse([dataStreamPercentSign]);
+      httpRequestsMockHelpers.setLoadDataStreamResponse(
+        dataStreamPercentSign.name,
+        dataStreamPercentSign
+      );
+      httpRequestsMockHelpers.setLoadTemplatesResponse({ templates: [], legacyTemplates: [] });
+    };
 
     describe('detail panel', () => {
       test('opens when the data stream name in the table is clicked', async () => {
-        const { actions, findDetailPanel, findDetailPanelTitle } = testBed;
+        setupSpecialCharactersMocks();
+        renderHome(httpSetup, {
+          initialEntries: ['/data_streams'],
+          appServicesContext: { url: urlServiceMock },
+        });
+
+        await screen.findByTestId('dataStreamTable');
+
+        const actions = createDataStreamTabActions();
+        const detailPanelActions = createDataStreamDetailPanelActions();
+
         await actions.clickNameAt(0);
-        expect(findDetailPanel().length).toBe(1);
-        expect(findDetailPanelTitle()).toBe('%dataStream');
+        await screen.findByTestId('dataStreamDetailPanel');
+
+        expect(detailPanelActions.findDetailPanel()).toBeInTheDocument();
+        expect(detailPanelActions.findDetailPanelTitle()).toBe('%dataStream');
       });
 
       test('clicking the indices count navigates to the backing indices', async () => {
-        const { table, actions } = testBed;
+        setupSpecialCharactersMocks();
+        renderHome(httpSetup, {
+          initialEntries: ['/data_streams'],
+          appServicesContext: { url: urlServiceMock },
+        });
+
+        await screen.findByTestId('dataStreamTable');
+
+        const actions = createDataStreamTabActions();
         await actions.clickIndicesAt(0);
-        expect(table.getMetaData('indexTable').tableCellsValues).toEqual([
-          ['', 'data-stream-index', '', '', '', '', '0', '', '%dataStream'],
-        ]);
+
+        await screen.findByTestId('indexTable');
+        // Verify we navigate to the indices filtered by data stream
+        expect(screen.getByText('data-stream-index')).toBeInTheDocument();
+        expect(screen.getByText('%dataStream')).toBeInTheDocument();
       });
     });
   });
@@ -1066,18 +1241,24 @@ describe('Data Streams tab', () => {
       setLoadDataStreamsResponse([dataStreamForDetailPanel]);
       setLoadDataStreamResponse(dataStreamForDetailPanel.name, dataStreamForDetailPanel);
 
-      testBed = await setup(httpSetup, {
-        history: createMemoryHistory(),
-        url: urlServiceMock,
+      renderHome(httpSetup, {
+        initialEntries: ['/data_streams'],
+        appServicesContext: { url: urlServiceMock },
       });
-      await act(async () => {
-        testBed.actions.goToDataStreamsList();
-      });
-      testBed.component.update();
 
-      const { actions, findDetailPanelIlmPolicyLink } = testBed;
+      // Wait for table to load
+      await screen.findByTestId('dataStreamTable');
+
+      const actions = createDataStreamTabActions();
+      const detailPanelActions = createDataStreamDetailPanelActions();
+
       await actions.clickNameAt(0);
-      expect(findDetailPanelIlmPolicyLink().prop('data-href')).toBe('/test/my_ilm_policy');
+
+      // Wait for detail panel to open
+      await screen.findByTestId('dataStreamDetailPanel');
+
+      const ilmPolicyLink = detailPanelActions.findIlmPolicyLink();
+      expect(ilmPolicyLink?.getAttribute('data-href')).toBe('/test/my_ilm_policy');
     });
 
     test('with an ILM url locator and no ILM policy', async () => {
@@ -1088,19 +1269,24 @@ describe('Data Streams tab', () => {
       setLoadDataStreamsResponse([dataStreamForDetailPanel]);
       setLoadDataStreamResponse(dataStreamForDetailPanel.name, dataStreamForDetailPanel);
 
-      testBed = await setup(httpSetup, {
-        history: createMemoryHistory(),
-        url: urlServiceMock,
+      renderHome(httpSetup, {
+        initialEntries: ['/data_streams'],
+        appServicesContext: { url: urlServiceMock },
       });
-      await act(async () => {
-        testBed.actions.goToDataStreamsList();
-      });
-      testBed.component.update();
 
-      const { actions, findDetailPanelIlmPolicyLink, findDetailPanelIlmPolicyDetail } = testBed;
+      // Wait for table to load
+      await screen.findByTestId('dataStreamTable');
+
+      const actions = createDataStreamTabActions();
+      const detailPanelActions = createDataStreamDetailPanelActions();
+
       await actions.clickNameAt(0);
-      expect(findDetailPanelIlmPolicyLink().exists()).toBeFalsy();
-      expect(findDetailPanelIlmPolicyDetail().exists()).toBeFalsy();
+
+      // Wait for detail panel to open
+      await screen.findByTestId('dataStreamDetailPanel');
+
+      expect(detailPanelActions.findIlmPolicyLink()).toBeNull();
+      expect(detailPanelActions.findIlmPolicyDetail()).toBeNull();
     });
 
     test('without an ILM url locator and with an ILM policy', async () => {
@@ -1114,28 +1300,35 @@ describe('Data Streams tab', () => {
       setLoadDataStreamsResponse([dataStreamForDetailPanel]);
       setLoadDataStreamResponse(dataStreamForDetailPanel.name, dataStreamForDetailPanel);
 
-      testBed = await setup(httpSetup, {
-        history: createMemoryHistory(),
-        url: {
-          locators: {
-            get: () => undefined,
+      renderHome(httpSetup, {
+        initialEntries: ['/data_streams'],
+        appServicesContext: {
+          url: {
+            locators: {
+              get: () => undefined,
+            },
           },
         },
       });
-      await act(async () => {
-        testBed.actions.goToDataStreamsList();
-      });
-      testBed.component.update();
 
-      const { actions, findDetailPanelIlmPolicyLink, findDetailPanelIlmPolicyDetail } = testBed;
+      // Wait for table to load
+      await screen.findByTestId('dataStreamTable');
+
+      const actions = createDataStreamTabActions();
+      const detailPanelActions = createDataStreamDetailPanelActions();
+
       await actions.clickNameAt(0);
-      expect(findDetailPanelIlmPolicyLink().exists()).toBeFalsy();
-      expect(findDetailPanelIlmPolicyDetail().contains('my_ilm_policy')).toBeTruthy();
+
+      // Wait for detail panel to open
+      await screen.findByTestId('dataStreamDetailPanel');
+
+      expect(detailPanelActions.findIlmPolicyLink()).toBeNull();
+      expect(detailPanelActions.findIlmPolicyDetail()).toHaveTextContent('my_ilm_policy');
     });
   });
 
   describe('managed data streams', () => {
-    beforeEach(async () => {
+    test('listed in the table with managed label', async () => {
       const managedDataStream = createDataStreamPayload({
         name: 'managed-data-stream',
         _meta: {
@@ -1148,20 +1341,15 @@ describe('Data Streams tab', () => {
 
       httpRequestsMockHelpers.setLoadDataStreamsResponse([managedDataStream, nonManagedDataStream]);
 
-      testBed = await setup(httpSetup, {
-        history: createMemoryHistory(),
-        url: urlServiceMock,
+      renderHome(httpSetup, {
+        initialEntries: ['/data_streams'],
+        appServicesContext: { url: urlServiceMock },
       });
-      await act(async () => {
-        testBed.actions.goToDataStreamsList();
-      });
-      testBed.component.update();
-    });
 
-    test('listed in the table with managed label', () => {
-      const { table } = testBed;
-      const { tableCellsValues } = table.getMetaData('dataStreamTable');
+      // Wait for table to load
+      await screen.findByTestId('dataStreamTable');
 
+      const tableCellsValues = getTableCellsValues('dataStreamTable');
       expect(tableCellsValues).toEqual([
         [
           '',
@@ -1177,9 +1365,28 @@ describe('Data Streams tab', () => {
     });
 
     test('turning off "managed" filter hides managed data streams', async () => {
-      const { actions, table } = testBed;
-      let { tableCellsValues } = table.getMetaData('dataStreamTable');
+      const managedDataStream = createDataStreamPayload({
+        name: 'managed-data-stream',
+        _meta: {
+          package: 'test',
+          managed: true,
+          managed_by: 'fleet',
+        },
+      });
+      const nonManagedDataStream = createDataStreamPayload({ name: 'non-managed-data-stream' });
 
+      httpRequestsMockHelpers.setLoadDataStreamsResponse([managedDataStream, nonManagedDataStream]);
+
+      renderHome(httpSetup, {
+        initialEntries: ['/data_streams'],
+        appServicesContext: { url: urlServiceMock },
+      });
+
+      // Wait for table to load
+      await screen.findByTestId('dataStreamTable');
+
+      // Verify initial state
+      let tableCellsValues = getTableCellsValues('dataStreamTable');
       expect(tableCellsValues).toEqual([
         [
           '',
@@ -1193,17 +1400,21 @@ describe('Data Streams tab', () => {
         ['', 'non-managed-data-stream', 'green', '1', 'Standard', '7 days', 'Delete'],
       ]);
 
-      actions.toggleViewFilterAt(0);
+      const actions = createDataStreamTabActions();
+      await actions.toggleViewFilterAt(0);
 
-      ({ tableCellsValues } = table.getMetaData('dataStreamTable'));
-      expect(tableCellsValues).toEqual([
-        ['', 'non-managed-data-stream', 'green', '1', 'Standard', '7 days', 'Delete'],
-      ]);
+      // Wait for table to update
+      await waitFor(() => {
+        tableCellsValues = getTableCellsValues('dataStreamTable');
+        expect(tableCellsValues).toEqual([
+          ['', 'non-managed-data-stream', 'green', '1', 'Standard', '7 days', 'Delete'],
+        ]);
+      });
     });
   });
 
   describe('hidden data streams', () => {
-    beforeEach(async () => {
+    test('show hidden data streams when filter is toggled', async () => {
       const hiddenDataStream = createDataStreamPayload({
         name: 'hidden-data-stream',
         hidden: true,
@@ -1211,40 +1422,36 @@ describe('Data Streams tab', () => {
 
       httpRequestsMockHelpers.setLoadDataStreamsResponse([hiddenDataStream]);
 
-      testBed = await setup(httpSetup, {
-        history: createMemoryHistory(),
-        url: urlServiceMock,
+      renderHome(httpSetup, {
+        initialEntries: ['/data_streams'],
+        appServicesContext: { url: urlServiceMock },
       });
-      await act(async () => {
-        testBed.actions.goToDataStreamsList();
+
+      // Wait for table to load (shows "No data streams found" initially since hidden streams are filtered)
+      await screen.findByTestId('dataStreamTable');
+
+      const actions = createDataStreamTabActions();
+      await actions.toggleViewFilterAt(1);
+
+      // Wait for table to update with hidden streams
+      await waitFor(() => {
+        const tableCellsValues = getTableCellsValues('dataStreamTable');
+        expect(tableCellsValues).toEqual([
+          [
+            '',
+            `hidden-data-stream${nonBreakingSpace}Hidden`,
+            'green',
+            '1',
+            'Standard',
+            '7 days',
+            'Delete',
+          ],
+        ]);
       });
-      testBed.component.update();
-    });
-
-    test('show hidden data streams when filter is toggled', () => {
-      const { table, actions } = testBed;
-
-      actions.toggleViewFilterAt(1);
-
-      const { tableCellsValues } = table.getMetaData('dataStreamTable');
-
-      expect(tableCellsValues).toEqual([
-        [
-          '',
-          `hidden-data-stream${nonBreakingSpace}Hidden`,
-          'green',
-          '1',
-          'Standard',
-          '7 days',
-          'Delete',
-        ],
-      ]);
     });
   });
 
   describe('data stream privileges', () => {
-    const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;
-
     const dataStreamFullPermissions = createDataStreamPayload({
       name: 'dataStreamFullPermissions',
       privileges: {
@@ -1269,7 +1476,6 @@ describe('Data Streams tab', () => {
         read_failure_store: true,
       },
     });
-
     const dataStreamNoPermissions = createDataStreamPayload({
       name: 'dataStreamNoPermissions',
       privileges: {
@@ -1279,25 +1485,27 @@ describe('Data Streams tab', () => {
       },
     });
 
+    const setupPrivilegesMocks = () => {
+      httpRequestsMockHelpers.setLoadIndicesResponse([]);
+      httpRequestsMockHelpers.setLoadDataStreamsResponse([
+        dataStreamFullPermissions,
+        dataStreamNoDelete,
+        dataStreamNoEditRetention,
+        dataStreamNoPermissions,
+      ]);
+      httpRequestsMockHelpers.setLoadTemplatesResponse({ templates: [], legacyTemplates: [] });
+    };
+
     describe('delete', () => {
-      beforeEach(async () => {
-        setLoadDataStreamsResponse([
-          dataStreamFullPermissions,
-          dataStreamNoDelete,
-          dataStreamNoEditRetention,
-          dataStreamNoPermissions,
-        ]);
-
-        testBed = await setup(httpSetup, { history: createMemoryHistory(), url: urlServiceMock });
-        await act(async () => {
-          testBed.actions.goToDataStreamsList();
-        });
-        testBed.component.update();
-      });
-
       test('displays/hides delete button depending on data streams privileges', async () => {
-        const { table } = testBed;
-        const { tableCellsValues } = table.getMetaData('dataStreamTable');
+        setupPrivilegesMocks();
+        renderHome(httpSetup, {
+          initialEntries: ['/data_streams'],
+          appServicesContext: { url: urlServiceMock },
+        });
+
+        await screen.findByTestId('dataStreamTable');
+        const tableCellsValues = getTableCellsValues('dataStreamTable');
 
         expect(tableCellsValues).toEqual([
           ['', 'dataStreamFullPermissions', 'green', '1', 'Standard', '7 days', 'Delete'],
@@ -1308,145 +1516,203 @@ describe('Data Streams tab', () => {
       });
 
       test('displays/hides delete action depending on data streams privileges', async () => {
-        const {
-          actions: { selectDataStream, clickManageDataStreamsButton },
-          find,
-        } = testBed;
+        httpRequestsMockHelpers.setLoadIndicesResponse([]);
+        httpRequestsMockHelpers.setLoadDataStreamsResponse([
+          dataStreamFullPermissions,
+          dataStreamNoDelete,
+          dataStreamNoEditRetention,
+          dataStreamNoPermissions,
+        ]);
+        httpRequestsMockHelpers.setLoadTemplatesResponse({ templates: [], legacyTemplates: [] });
 
-        selectDataStream('dataStreamNoDelete', true);
-        clickManageDataStreamsButton();
-        expect(find('deleteDataStreamsButton').exists()).toBeFalsy();
+        renderHome(httpSetup, {
+          initialEntries: ['/data_streams'],
+          appServicesContext: { url: urlServiceMock },
+        });
 
-        selectDataStream('dataStreamFullPermissions', true);
-        clickManageDataStreamsButton();
-        expect(find('deleteDataStreamsButton').exists()).toBeFalsy();
+        await screen.findByTestId('dataStreamTable');
+        const actions = createDataStreamTabActions();
 
-        selectDataStream('dataStreamNoDelete', false);
-        clickManageDataStreamsButton();
-        expect(find('deleteDataStreamsButton').exists()).toBeTruthy();
+        // Select data stream without delete permission
+        actions.selectDataStream('dataStreamNoDelete', true);
+        await actions.openBulkActionsPopover();
+        expect(screen.queryByTestId('deleteDataStreamsButton')).not.toBeInTheDocument();
+        await actions.closeBulkActionsPopover();
+
+        // Select data stream with full permissions (both now selected, one lacks delete)
+        actions.selectDataStream('dataStreamFullPermissions', true);
+        await actions.openBulkActionsPopover();
+        expect(screen.queryByTestId('deleteDataStreamsButton')).not.toBeInTheDocument();
+        await actions.closeBulkActionsPopover();
+
+        // Unselect data stream without delete permission (only full permissions selected)
+        actions.selectDataStream('dataStreamNoDelete', false);
+        await actions.openBulkActionsPopover();
+        expect(screen.getByTestId('deleteDataStreamsButton')).toBeInTheDocument();
       });
 
       test('hides delete button in detail panel', async () => {
-        const {
-          actions: { clickNameAt },
-          find,
-        } = testBed;
-        setLoadDataStreamResponse(dataStreamNoDelete.name, dataStreamNoDelete);
-        await clickNameAt(1);
+        setupPrivilegesMocks();
+        httpRequestsMockHelpers.setLoadDataStreamResponse(
+          dataStreamNoDelete.name,
+          dataStreamNoDelete
+        );
 
-        testBed.find('manageDataStreamButton').simulate('click');
-        expect(find('deleteDataStreamButton').exists()).toBeFalsy();
+        renderHome(httpSetup, {
+          initialEntries: ['/data_streams'],
+          appServicesContext: { url: urlServiceMock },
+        });
+
+        await screen.findByTestId('dataStreamTable');
+        const actions = createDataStreamTabActions();
+
+        await actions.clickNameAt(1);
+        await screen.findByTestId('dataStreamDetailPanel');
+
+        fireEvent.click(screen.getByTestId('manageDataStreamButton'));
+        expect(screen.queryByTestId('deleteDataStreamButton')).not.toBeInTheDocument();
       });
 
       test('displays delete button in detail panel', async () => {
-        const {
-          actions: { clickNameAt },
-          find,
-        } = testBed;
-        setLoadDataStreamResponse(dataStreamFullPermissions.name, dataStreamFullPermissions);
-        await clickNameAt(0);
+        setupPrivilegesMocks();
+        httpRequestsMockHelpers.setLoadDataStreamResponse(
+          dataStreamFullPermissions.name,
+          dataStreamFullPermissions
+        );
 
-        testBed.find('manageDataStreamButton').simulate('click');
-        expect(find('deleteDataStreamButton').exists()).toBeTruthy();
+        renderHome(httpSetup, {
+          initialEntries: ['/data_streams'],
+          appServicesContext: { url: urlServiceMock },
+        });
+
+        await screen.findByTestId('dataStreamTable');
+        const actions = createDataStreamTabActions();
+
+        await actions.clickNameAt(0);
+        await screen.findByTestId('dataStreamDetailPanel');
+
+        fireEvent.click(screen.getByTestId('manageDataStreamButton'));
+        expect(screen.getByTestId('deleteDataStreamButton')).toBeInTheDocument();
       });
     });
 
     describe('edit data retention', () => {
-      beforeEach(async () => {
-        setLoadDataStreamsResponse([
+      test('displays/hides bulk edit retention action depending on data streams privileges', async () => {
+        httpRequestsMockHelpers.setLoadIndicesResponse([]);
+        httpRequestsMockHelpers.setLoadDataStreamsResponse([
           dataStreamFullPermissions,
           dataStreamNoDelete,
           dataStreamNoEditRetention,
           dataStreamNoPermissions,
         ]);
+        httpRequestsMockHelpers.setLoadTemplatesResponse({ templates: [], legacyTemplates: [] });
 
-        testBed = await setup(httpSetup, { history: createMemoryHistory(), url: urlServiceMock });
-        await act(async () => {
-          testBed.actions.goToDataStreamsList();
+        renderHome(httpSetup, {
+          initialEntries: ['/data_streams'],
+          appServicesContext: { url: urlServiceMock },
         });
-        testBed.component.update();
-      });
 
-      test('displays/hides bulk edit retention action depending on data streams privileges', async () => {
-        const {
-          actions: { selectDataStream, clickManageDataStreamsButton },
-          find,
-        } = testBed;
+        await screen.findByTestId('dataStreamTable');
+        const actions = createDataStreamTabActions();
 
-        selectDataStream('dataStreamNoEditRetention', true);
-        clickManageDataStreamsButton();
-        expect(find('bulkEditDataRetentionButton').exists()).toBeFalsy();
+        // Select data stream without edit retention permission
+        actions.selectDataStream('dataStreamNoEditRetention', true);
+        await actions.openBulkActionsPopover();
+        expect(screen.queryByTestId('bulkEditDataRetentionButton')).not.toBeInTheDocument();
+        await actions.closeBulkActionsPopover();
 
-        selectDataStream('dataStreamFullPermissions', true);
-        clickManageDataStreamsButton();
-        expect(find('bulkEditDataRetentionButton').exists()).toBeFalsy();
+        // Select data stream with full permissions (both now selected, one lacks retention edit)
+        actions.selectDataStream('dataStreamFullPermissions', true);
+        await actions.openBulkActionsPopover();
+        expect(screen.queryByTestId('bulkEditDataRetentionButton')).not.toBeInTheDocument();
+        await actions.closeBulkActionsPopover();
 
-        selectDataStream('dataStreamNoEditRetention', false);
-        clickManageDataStreamsButton();
-        expect(find('bulkEditDataRetentionButton').exists()).toBeTruthy();
+        // Unselect data stream without edit retention permission (only full permissions selected)
+        actions.selectDataStream('dataStreamNoEditRetention', false);
+        await actions.openBulkActionsPopover();
+        expect(screen.getByTestId('bulkEditDataRetentionButton')).toBeInTheDocument();
       });
 
       test('hides edit retention button in detail panel', async () => {
-        const {
-          actions: { clickNameAt },
-          find,
-        } = testBed;
-        setLoadDataStreamResponse(dataStreamNoEditRetention.name, dataStreamNoEditRetention);
-        await clickNameAt(2);
+        setupPrivilegesMocks();
+        httpRequestsMockHelpers.setLoadDataStreamResponse(
+          dataStreamNoEditRetention.name,
+          dataStreamNoEditRetention
+        );
 
-        testBed.find('manageDataStreamButton').simulate('click');
-        expect(find('editDataRetentionButton').exists()).toBeFalsy();
+        renderHome(httpSetup, {
+          initialEntries: ['/data_streams'],
+          appServicesContext: { url: urlServiceMock },
+        });
+
+        await screen.findByTestId('dataStreamTable');
+        const actions = createDataStreamTabActions();
+
+        await actions.clickNameAt(2);
+        await screen.findByTestId('dataStreamDetailPanel');
+
+        fireEvent.click(screen.getByTestId('manageDataStreamButton'));
+        expect(screen.queryByTestId('editDataRetentionButton')).not.toBeInTheDocument();
       });
 
       test('displays edit retention button in detail panel', async () => {
-        const {
-          actions: { clickNameAt },
-          find,
-        } = testBed;
-        setLoadDataStreamResponse(dataStreamFullPermissions.name, dataStreamFullPermissions);
-        await clickNameAt(0);
+        setupPrivilegesMocks();
+        httpRequestsMockHelpers.setLoadDataStreamResponse(
+          dataStreamFullPermissions.name,
+          dataStreamFullPermissions
+        );
 
-        testBed.find('manageDataStreamButton').simulate('click');
-        expect(find('editDataRetentionButton').exists()).toBeTruthy();
+        renderHome(httpSetup, {
+          initialEntries: ['/data_streams'],
+          appServicesContext: { url: urlServiceMock },
+        });
+
+        await screen.findByTestId('dataStreamTable');
+        const actions = createDataStreamTabActions();
+
+        await actions.clickNameAt(0);
+        await screen.findByTestId('dataStreamDetailPanel');
+
+        fireEvent.click(screen.getByTestId('manageDataStreamButton'));
+        expect(screen.getByTestId('editDataRetentionButton')).toBeInTheDocument();
       });
     });
 
     describe('with no permissions', () => {
-      beforeEach(async () => {
-        setLoadDataStreamsResponse([
-          dataStreamFullPermissions,
-          dataStreamNoDelete,
-          dataStreamNoEditRetention,
-          dataStreamNoPermissions,
-        ]);
-
-        testBed = await setup(httpSetup, { history: createMemoryHistory(), url: urlServiceMock });
-        await act(async () => {
-          testBed.actions.goToDataStreamsList();
-        });
-        testBed.component.update();
-      });
-
       test('hides manage button in details panel', async () => {
-        const {
-          actions: { clickNameAt },
-          find,
-        } = testBed;
-        setLoadDataStreamResponse(dataStreamNoPermissions.name, dataStreamNoPermissions);
-        await clickNameAt(3);
+        setupPrivilegesMocks();
+        httpRequestsMockHelpers.setLoadDataStreamResponse(
+          dataStreamNoPermissions.name,
+          dataStreamNoPermissions
+        );
 
-        expect(find('manageDataStreamButton').exists()).toBeFalsy();
+        renderHome(httpSetup, {
+          initialEntries: ['/data_streams'],
+          appServicesContext: { url: urlServiceMock },
+        });
+
+        await screen.findByTestId('dataStreamTable');
+        const actions = createDataStreamTabActions();
+
+        await actions.clickNameAt(3);
+        await screen.findByTestId('dataStreamDetailPanel');
+
+        expect(screen.queryByTestId('manageDataStreamButton')).not.toBeInTheDocument();
       });
 
       test('hides manage button for bulk actions', async () => {
-        const {
-          actions: { selectDataStream },
-          find,
-        } = testBed;
-        setLoadDataStreamResponse(dataStreamNoPermissions.name, dataStreamNoPermissions);
+        setupPrivilegesMocks();
 
-        selectDataStream('dataStreamNoPermissions', true);
-        expect(find('dataStreamActionsPopoverButton').exists()).toBeFalsy();
+        renderHome(httpSetup, {
+          initialEntries: ['/data_streams'],
+          appServicesContext: { url: urlServiceMock },
+        });
+
+        await screen.findByTestId('dataStreamTable');
+        const actions = createDataStreamTabActions();
+
+        actions.selectDataStream('dataStreamNoPermissions', true);
+        expect(screen.queryByTestId('dataStreamActionsPopoverButton')).not.toBeInTheDocument();
       });
     });
   });
