@@ -27,7 +27,10 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
 
   describe('mutedAlerts', () => {
     const objectRemover = new ObjectRemover(supertest);
-    const alertUtils = new AlertUtils({ space: Spaces.space1, supertestWithoutAuth: supertest });
+    const alertUtils: AlertUtils = new AlertUtils({
+      space: Spaces.space1,
+      supertestWithoutAuth: supertest,
+    });
 
     const createRule = async () => {
       const { body: createdRule } = await supertest
@@ -324,6 +327,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       // Manually set the alert document to have incorrect muted state
       await es.updateByQuery({
         index: alertAsDataIndex,
+        conflicts: 'proceed',
         query: {
           bool: {
             must: [
