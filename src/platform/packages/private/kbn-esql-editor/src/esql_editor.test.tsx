@@ -282,10 +282,10 @@ describe('ESQLEditor', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('1 warning')).toBeInTheDocument();
+      expect(screen.getByTestId('ESQLEditor-footerPopoverButton-warning')).toBeInTheDocument();
     });
 
-    await user.click(screen.getByText('1 warning'));
+    await user.click(screen.getByTestId('ESQLEditor-footerPopoverButton-warning'));
 
     await waitFor(() => {
       expect(screen.getByText('Client warning example')).toBeInTheDocument();
