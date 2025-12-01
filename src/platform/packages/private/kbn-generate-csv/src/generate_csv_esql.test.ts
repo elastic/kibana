@@ -640,10 +640,6 @@ describe('CsvESQLGenerator', () => {
           abortSignal: expect.any(AbortSignal),
         }
       );
-
-      expect(mockLogger.info.mock.calls[0][0]).toMatchInlineSnapshot(
-        `"This search has been limited by the recommended row limit (500). This limit can be configured in kibana.yml, but increasing it may impact performance."`
-      );
     });
   });
 

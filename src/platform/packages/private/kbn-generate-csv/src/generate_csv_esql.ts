@@ -95,9 +95,6 @@ export class CsvESQLGenerator {
 
     let query = this.job.query.esql;
     if (query && maxRows) {
-      this.logger.info(
-        `This search has been limited by the recommended row limit (${maxRows}). This limit can be configured in kibana.yml, but increasing it may impact performance.`
-      );
       query = `${this.job.query.esql} | limit ${maxRows}`;
     }
     const searchParams: IKibanaSearchRequest<ESQLSearchParams> = {
