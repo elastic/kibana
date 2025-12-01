@@ -72,7 +72,10 @@ export function getDashboardApi({
     incomingEmbeddables,
     isManaged,
     savedObjectId,
-    accessControl: readResult?.meta?.access_control,
+    accessControl: {
+      accessMode: readResult?.meta?.access_control?.access_mode,
+      owner: readResult?.meta?.access_control?.owner,
+    },
     createdBy: readResult?.meta?.createdBy,
     user,
   });

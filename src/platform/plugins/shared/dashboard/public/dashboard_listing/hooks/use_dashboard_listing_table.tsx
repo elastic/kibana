@@ -238,7 +238,10 @@ export const useDashboardListingTable = ({
               const canManageAccessControl =
                 isGloballyAuthorized ||
                 accessControlClient.checkUserAccessControl({
-                  accessControl: meta?.access_control,
+                  accessControl: {
+                    owner: meta?.access_control?.owner,
+                    accessMode: meta?.access_control?.access_mode,
+                  },
                   createdBy: meta.createdBy,
                   userId,
                 });
