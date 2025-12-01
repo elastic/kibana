@@ -107,11 +107,12 @@ test.describe(
       await page.keyboard.type(ecsFieldName);
       await page.keyboard.press('Enter');
 
-      // Wait a moment for ECS/Otel recommendation to load
-      await page.waitForTimeout(500);
-
-      // Check if IP type is pre-selected or recommended
-      expect(await pageObjects.streams.fieldTypeSuperSelect.getSelectedValue()).toBe('ip');
+      // Wait for ECS/Otel recommendation to load and field type to be pre-selected
+      await expect
+        .poll(async () => await pageObjects.streams.fieldTypeSuperSelect.getSelectedValue(), {
+          timeout: 2000,
+        })
+        .toBe('ip');
 
       await page.getByTestId('streamsAppSchemaEditorAddFieldButton').click();
       await expect(
