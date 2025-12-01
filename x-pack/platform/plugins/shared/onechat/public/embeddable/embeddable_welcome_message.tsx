@@ -7,14 +7,15 @@
 
 import { EuiCallOut, EuiFlexGroup, EuiLink, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import { useKibana } from '../application/hooks/use_kibana';
 import { docLinks } from '../../common/doc_links';
 import { useConversationList } from '../application/hooks/use_conversation_list';
+import { useSendMessage } from '../application/context/send_message/send_message_context';
 
 // TODO: Replace with actual user role check
-const isAdminOrAdvancedUser = false;
+const isAdminOrAdvancedUser = true;
 
 const LOCAL_STORAGE_KEY = 'agentBuilder.embeddable.welcomeMessage.dismissed';
 
@@ -30,6 +31,15 @@ export const EmbeddableWelcomeMessage = () => {
     localStorage.setItem(LOCAL_STORAGE_KEY, 'true');
     setShowCallOut(false);
   };
+
+  const { isResponseLoading } = useSendMessage();
+
+  // Dismiss the welcome message when a message has been sent
+  useEffect(() => {
+    if (isResponseLoading) {
+      onDismiss();
+    }
+  }, [isResponseLoading]);
 
   const { conversations = [], isLoading } = useConversationList();
   const hasNoConversations = isLoading === false && conversations.length === 0;
