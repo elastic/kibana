@@ -193,17 +193,14 @@ const FTR_ENABLE_FIPS_AGENT = process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() =
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/fips.yml'));
     }
 
-    // TODO: consider later if unblock - automatically trigger entity store performance tests
-    // when both ci:entity-store-performance and ci:cloud-redeploy labels are present
-    // Currently, performance tests must be triggered manually via the kibana-entity-store-performance-from-pr checkbox
-    // if (
-    //   GITHUB_PR_LABELS.includes('ci:entity-store-performance') &&
-    //   GITHUB_PR_LABELS.includes('ci:cloud-redeploy')
-    // ) {
-    //   pipeline.push(
-    //     getPipeline('.buildkite/pipelines/pull_request/trigger_entity_store_performance.yml')
-    //   );
-    // }
+    if (
+      GITHUB_PR_LABELS.includes('ci:entity-store-performance') &&
+      GITHUB_PR_LABELS.includes('ci:cloud-redeploy')
+    ) {
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/trigger_entity_store_performance.yml')
+      );
+    }
 
     if (
       GITHUB_PR_LABELS.includes('ci:project-deploy-elasticsearch') ||
