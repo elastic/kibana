@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -96,7 +96,6 @@
     "@kbn/cypress-test-helper",
     "@kbn/streams-schema",
     "@kbn/streams-plugin",
-    "@kbn/es-errors",
     "@kbn/content-packs-schema",
     "@kbn/server-route-repository-utils",
     "@kbn/guided-onboarding-plugin",

@@ -53,6 +53,7 @@ describe('sendEmailGraphApi', () => {
       Array [
         "https://graph.microsoft.com/v1.0/users/fred@example.com/sendMail",
         Object {
+          "beforeRedirect": [Function],
           "data": Object {
             "message": Object {
               "bccRecipients": Array [],
@@ -149,6 +150,7 @@ describe('sendEmailGraphApi', () => {
       Array [
         "https://graph.microsoft.com/v1.0/users/fred@example.com/sendMail",
         Object {
+          "beforeRedirect": [Function],
           "data": Object {
             "message": Object {
               "bccRecipients": Array [],
@@ -248,6 +250,7 @@ describe('sendEmailGraphApi', () => {
       Array [
         "https://test/users/fred@example.com/sendMail",
         Object {
+          "beforeRedirect": [Function],
           "data": Object {
             "message": Object {
               "bccRecipients": Array [],

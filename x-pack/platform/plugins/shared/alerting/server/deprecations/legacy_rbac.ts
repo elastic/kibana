@@ -15,7 +15,7 @@ export const getLegacyRbacDeprecationsInfo = async (
   docLinks: DocLinksServiceSetup
 ): Promise<DeprecationsDetails[]> => {
   const { hits: legacyRBACExemptions } = await esClient.asCurrentUser.search({
-    index: '.kibana*',
+    index: '.kibana,.kibana_alerting_cases',
     body: {
       runtime_mappings: {
         apiKeyVersion: {

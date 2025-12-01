@@ -73,6 +73,7 @@ describe('request', () => {
       proxy: false,
       maxContentLength: 1000000,
       timeout: 360000,
+      beforeRedirect: expect.any(Function),
     });
     expect(res).toEqual({
       status: 200,
@@ -180,6 +181,7 @@ describe('request', () => {
       proxy: false,
       maxContentLength: 1000000,
       timeout: 360000,
+      beforeRedirect: expect.any(Function),
     });
     expect(res).toEqual({
       status: 200,
@@ -211,6 +213,7 @@ describe('request', () => {
       proxy: false,
       maxContentLength: 1000000,
       timeout: 360000,
+      beforeRedirect: expect.any(Function),
     });
     expect(res).toEqual({
       status: 200,
@@ -329,6 +332,7 @@ describe('request', () => {
       proxy: false,
       maxContentLength: 1000000,
       timeout: 360000,
+      beforeRedirect: expect.any(Function),
     });
     expect(res).toEqual({
       status: 200,
@@ -434,6 +438,7 @@ describe('request', () => {
       maxContentLength: 1000000,
       timeout: 360000,
       headers: { Authorization: `Basic ${Buffer.from('username:password').toString('base64')}` },
+      beforeRedirect: expect.any(Function),
     });
   });
 
@@ -463,6 +468,7 @@ describe('request', () => {
         'X-Test-Header': 'test',
         Authorization: 'Bearer my_token',
       },
+      beforeRedirect: expect.any(Function),
     });
   });
 });
@@ -491,6 +497,7 @@ describe('patch', () => {
       proxy: false,
       maxContentLength: 1000000,
       timeout: 360000,
+      beforeRedirect: expect.any(Function),
     });
   });
 });
