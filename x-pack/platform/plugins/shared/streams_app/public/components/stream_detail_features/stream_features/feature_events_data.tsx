@@ -67,6 +67,7 @@ export const FeatureEventsData = ({ feature }: { feature: FeatureWithFilter }) =
                   defaultMessage: 'Open in Discover',
                 }
               )}
+              data-test-subj="feature_identification_existing_open_in_discover_button"
             >
               {i18n.translate('xpack.streams.identifiedFeatureEvents.viewAllLinkText', {
                 defaultMessage: 'Open in Discover',

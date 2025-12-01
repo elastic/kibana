@@ -42,9 +42,16 @@ export function CreateStreamConfirmationModal({
   const { cancelChanges, forkStream } = useStreamRoutingEvents();
 
   return (
-    <EuiModal onClose={() => cancelChanges()} aria-labelledby={modalTitleId}>
+    <EuiModal
+      onClose={() => cancelChanges()}
+      aria-labelledby={modalTitleId}
+      data-test-subj="streamsAppCreateStreamConfirmationModal"
+    >
       <EuiModalHeader>
-        <EuiModalHeaderTitle id={modalTitleId}>
+        <EuiModalHeaderTitle
+          id={modalTitleId}
+          data-test-subj="streamsAppCreateStreamConfirmationModalTitle"
+        >
           {i18n.translate('xpack.streams.streamDetailRouting.partitionSuggestion.confirmTitle', {
             defaultMessage: 'Confirm stream creation',
           })}
@@ -59,7 +66,11 @@ export function CreateStreamConfirmationModal({
             }
           )}
         >
-          <EuiFieldText value={partition.name} readOnly />
+          <EuiFieldText
+            value={partition.name}
+            readOnly
+            data-test-subj="streamsAppCreateStreamConfirmationModalStreamName"
+          />
         </EuiFormRow>
         <EuiSpacer />
         <EuiTitle size="xxxs">
@@ -73,7 +84,11 @@ export function CreateStreamConfirmationModal({
         <ConditionPanel condition={partition.condition} />
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={() => cancelChanges()} isDisabled={isForking}>
+        <EuiButtonEmpty
+          onClick={() => cancelChanges()}
+          isDisabled={isForking}
+          data-test-subj="streamsAppCreateStreamConfirmationModalCancelButton"
+        >
           {i18n.translate('xpack.streams.streamDetailRouting.partitionSuggestion.cancel', {
             defaultMessage: 'Cancel',
           })}
@@ -91,6 +106,7 @@ export function CreateStreamConfirmationModal({
             })
           }
           fill
+          data-test-subj="streamsAppCreateStreamConfirmationModalCreateButton"
         >
           {i18n.translate('xpack.streams.streamDetailRouting.partitionSuggestion.confirm', {
             defaultMessage: 'Create stream',
