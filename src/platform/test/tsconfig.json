@@ -22,7 +22,6 @@
   "exclude": ["target/**/*", "*/plugins/**/*", "plugins/**/*"],
   "kbn_references": [
     "@kbn/core",
-    { "path": "../../../src/setup_node_env/tsconfig.json" },
     "@kbn/bfetch-plugin",
     "@kbn/dashboard-plugin",
     "@kbn/expressions-plugin",
@@ -81,5 +80,6 @@
     "@kbn/esql-utils",
     "@kbn/apm-synthtrace-client",
     "@kbn/apm-synthtrace",
+    "@kbn/setup-node-env",
   ]
 }
