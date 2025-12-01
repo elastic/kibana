@@ -47,6 +47,7 @@ import {
   selectEditorYaml,
   selectHasChanges,
   selectIsExecutionsTab,
+  selectIsSavingYaml,
   selectStepExecutions,
   selectWorkflow,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
@@ -59,6 +60,7 @@ import type { YamlValidationResult } from '../../../features/validate_workflow_y
 import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/model/use_workflow_json_schema';
 import { useKibana } from '../../../hooks/use_kibana';
 import { UnsavedChangesPrompt, YamlEditor } from '../../../shared/ui';
+import { interceptMonacoYamlProvider } from '../lib/autocomplete/intercept_monaco_yaml_provider';
 import {
   ElasticsearchMonacoConnectorHandler,
   GenericMonacoConnectorHandler,
@@ -137,7 +139,8 @@ export const WorkflowYAMLEditor = ({
   const { euiTheme } = useEuiTheme();
   const { http, notifications } = useKibana().services;
 
-  const [saveYaml, { isLoading: isSaving }] = useSaveYaml();
+  const saveYaml = useSaveYaml();
+  const isSaving = useSelector(selectIsSavingYaml);
   const dispatch = useDispatch();
   const onChange = useCallback(
     (yaml: string) => {
@@ -191,6 +194,11 @@ export const WorkflowYAMLEditor = ({
 
   // Only show debug features in development
   const isDevelopment = process.env.NODE_ENV !== 'production';
+
+  // Initialize monkey-patch to intercept monaco-yaml's provider BEFORE it loads
+  useEffect(() => {
+    interceptMonacoYamlProvider();
+  }, []);
 
   // Validation
   const { jsonSchema: workflowJsonSchemaStrict, uri: workflowSchemaUriStrict } =

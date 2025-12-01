@@ -8,7 +8,11 @@
  */
 import { i18n } from '@kbn/i18n';
 import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
-import type { ESQLAstAllCommands, ESQLCommand } from '../../../types';
+import type {
+  ESQLAstAllCommands,
+  ESQLAstForkCommand,
+  ESQLAstQueryExpression,
+} from '../../../types';
 import { pipeCompleteItem, getCommandAutocompleteDefinitions } from '../../complete_items';
 import { pipePrecedesCurrentWord } from '../../../definitions/utils/shared';
 import type { ICommandCallbacks } from '../../types';
@@ -22,12 +26,14 @@ export async function autocomplete(
   context?: ICommandContext,
   cursorPosition: number = query.length
 ): Promise<ISuggestionItem[]> {
+  const forkCommand = command as ESQLAstForkCommand;
+
   const innerText = query.substring(0, cursorPosition);
   if (/FORK\s+$/i.test(innerText)) {
     return [newBranchSuggestion];
   }
 
-  const activeBranch = getActiveBranch(command);
+  const activeBranch = getActiveBranch(forkCommand);
   const withinActiveBranch =
     activeBranch &&
     activeBranch.location.min <= innerText.length &&
@@ -35,7 +41,7 @@ export async function autocomplete(
 
   if (!withinActiveBranch && /\)\s+$/i.test(innerText)) {
     const suggestions = [newBranchSuggestion];
-    if (command.args.length > 1) {
+    if (forkCommand.args.length > 1) {
       suggestions.push(pipeCompleteItem);
     }
     return suggestions;
@@ -58,13 +64,7 @@ export async function autocomplete(
 
   const subCommandMethods = esqlCommandRegistry.getCommandMethods(subCommand.name);
   return (
-    subCommandMethods?.autocomplete(
-      innerText,
-      subCommand as ESQLCommand,
-      callbacks,
-      context,
-      cursorPosition
-    ) || []
+    subCommandMethods?.autocomplete(innerText, subCommand, callbacks, context, cursorPosition) || []
   );
 }
 
@@ -80,13 +80,12 @@ const newBranchSuggestion: ISuggestionItem = withAutoSuggest({
   asSnippet: true,
 });
 
-const getActiveBranch = (command: ESQLAstAllCommands) => {
+const getActiveBranch = (command: ESQLAstForkCommand): ESQLAstQueryExpression | undefined => {
   const finalBranch = command.args[command.args.length - 1];
 
-  if (Array.isArray(finalBranch) || finalBranch.type !== 'query') {
-    // should never happen
+  if (!finalBranch) {
     return;
   }
 
-  return finalBranch;
+  return finalBranch.child;
 };
