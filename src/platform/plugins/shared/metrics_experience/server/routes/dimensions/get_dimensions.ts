@@ -63,7 +63,7 @@ export const getDimensions = async ({
   const query = esql.from(indices).pipe`EVAL ??dim = ??dim::string`.sort(`??dim`).limit(20);
   // I set it as param so we can use the ??dim template literal in the query
   query.setParam('dim', dim);
-  
+
   const whereCommandDiscover = originalQuery ? extractWhereCommand(originalQuery) : undefined;
   if (whereCommandDiscover) {
     const whereCommandString = BasicPrettyPrinter.print(whereCommandDiscover);
@@ -75,8 +75,8 @@ export const getDimensions = async ({
   }
   query.pipe`STATS BY ??dim`;
 
-  console.log('query new',query.inlineParams().print('wrapping'));
-  
+  console.log('query new', query.inlineParams().print('wrapping'));
+
   // Old: Build query using the esql composer
   const whereCommand = originalQuery ? extractWhereCommand(originalQuery) : undefined;
 
@@ -94,7 +94,7 @@ export const getDimensions = async ({
     )
     .toString();
 
-  console.log('queryOld',queryOld);
+  console.log('queryOld', queryOld);
   try {
     const response = await esClient.esql(
       'get_dimensions',
