@@ -5,17 +5,7 @@
  * 2.0.
  */
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import {
-  EuiBadge,
-  EuiBasicTable,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLink,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiButtonIcon, EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
@@ -23,65 +13,11 @@ import type {
   Attachment,
   AttachmentType,
 } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
-import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
-import {
-  ruleDetailsLocatorID,
-  sloDetailsLocatorID,
-  type SloDetailsLocatorParams,
-  type RuleDetailsLocatorParams,
-} from '@kbn/deeplinks-observability';
-import type { LocatorClient } from '@kbn/share-plugin/common/url_service/locators';
-import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { useKibana } from '../../hooks/use_kibana';
-import { tagListToReferenceList } from './to_reference_list';
+import { AttachmentTagsList } from './attachment_tags_list';
+import { ATTACHMENT_TYPE_CONFIG, AttachmentTypeBadge } from './attachment_type_badge';
+import { getAttachmentUrl } from './get_attachment_url';
 import { useTimefilter } from '../../hooks/use_timefilter';
-
-const ATTACHMENT_TYPE_CONFIG: Record<AttachmentType, { label: string; icon: EuiIconType }> = {
-  dashboard: {
-    label: i18n.translate('xpack.streams.attachmentTable.attachmentTypeDashboard', {
-      defaultMessage: 'Dashboard',
-    }),
-    icon: 'dashboardApp',
-  },
-  rule: {
-    label: i18n.translate('xpack.streams.attachmentTable.attachmentTypeRule', {
-      defaultMessage: 'Rule',
-    }),
-    icon: 'bell',
-  },
-  slo: {
-    label: i18n.translate('xpack.streams.attachmentTable.attachmentTypeSlo', {
-      defaultMessage: 'SLO',
-    }),
-    icon: 'watchesApp',
-  },
-};
-
-const ATTACHMENT_URL_GETTERS: Record<
-  AttachmentType,
-  (
-    redirectId: string,
-    locatorsService: LocatorClient,
-    timeRange: { from: string; to: string }
-  ) => string | undefined
-> = {
-  dashboard: (redirectId, locatorsService, timeRange) => {
-    const dashboardLocator = locatorsService.get<DashboardLocatorParams>(DASHBOARD_APP_LOCATOR);
-    return dashboardLocator?.getRedirectUrl({
-      dashboardId: redirectId,
-      timeRange,
-    });
-  },
-  rule: (redirectId, locatorsService) => {
-    const ruleLocator = locatorsService.get<RuleDetailsLocatorParams>(ruleDetailsLocatorID);
-    return ruleLocator?.getRedirectUrl({ ruleId: redirectId });
-  },
-  slo: (redirectId, locatorsService) => {
-    const sloLocator = locatorsService.get<SloDetailsLocatorParams>(sloDetailsLocatorID);
-    return sloLocator?.getRedirectUrl({ sloId: redirectId });
-  },
-};
 
 export function AttachmentsTable({
   attachments,
@@ -90,6 +26,7 @@ export function AttachmentsTable({
   selectedAttachments,
   setSelectedAttachments,
   onUnlinkAttachment,
+  onViewDetails,
   loading,
   entityId,
   dataTestSubj,
@@ -102,16 +39,14 @@ export function AttachmentsTable({
   selectedAttachments?: Attachment[];
   setSelectedAttachments?: (attachments: Attachment[]) => void;
   onUnlinkAttachment?: (attachment: Attachment) => void;
+  onViewDetails: (attachment: Attachment) => void;
   dataTestSubj?: string;
 }) {
   const {
     core: { application },
     services: { telemetryClient },
     dependencies: {
-      start: {
-        savedObjectsTagging: { ui: savedObjectsTaggingUi },
-        share,
-      },
+      start: { share },
     },
   } = useKibana();
 
@@ -150,10 +85,7 @@ export function AttachmentsTable({
           aria-label={i18n.translate('xpack.streams.attachmentTable.detailsButtonAriaLabel', {
             defaultMessage: 'View details',
           })}
-          onClick={() => {
-            // eslint-disable-next-line no-console
-            console.log('Details clicked', attachment.id);
-          }}
+          onClick={() => onViewDetails(attachment)}
         />
       ),
     };
@@ -172,10 +104,7 @@ export function AttachmentsTable({
           }),
           type: 'icon',
           icon: 'tableDensityExpanded',
-          onClick: (attachment) => {
-            // eslint-disable-next-line no-console
-            console.log('See details clicked', attachment.id);
-          },
+          onClick: (attachment) => onViewDetails(attachment),
           'data-test-subj': 'streamsAppAttachmentSeeDetailsAction',
         },
         {
@@ -192,8 +121,9 @@ export function AttachmentsTable({
           type: 'icon',
           icon: (attachment) => ATTACHMENT_TYPE_CONFIG[attachment.type].icon,
           onClick: (attachment) => {
-            const url = ATTACHMENT_URL_GETTERS[attachment.type](
+            const url = getAttachmentUrl(
               attachment.redirectId,
+              attachment.type,
               share.url.locators,
               timeState.timeRange
             );
@@ -229,8 +159,9 @@ export function AttachmentsTable({
           defaultMessage: 'Title',
         }),
         render: (_, attachment) => {
-          const url = ATTACHMENT_URL_GETTERS[attachment.type](
+          const url = getAttachmentUrl(
             attachment.redirectId,
+            attachment.type,
             share.url.locators,
             timeState.timeRange
           );
@@ -254,19 +185,7 @@ export function AttachmentsTable({
         name: i18n.translate('xpack.streams.attachmentTable.typeColumnTitle', {
           defaultMessage: 'Type',
         }),
-        render: (type: AttachmentType) => {
-          const config = ATTACHMENT_TYPE_CONFIG[type];
-          return (
-            <EuiBadge color="hollow">
-              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type={config.icon} size="s" color="subdued" />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>{config.label}</EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiBadge>
-          );
-        },
+        render: (type: AttachmentType) => <AttachmentTypeBadge type={type} />,
       },
       ...(!compact
         ? ([
@@ -275,15 +194,7 @@ export function AttachmentsTable({
               name: i18n.translate('xpack.streams.attachmentTable.tagsColumnTitle', {
                 defaultMessage: 'Tags',
               }),
-              render: (_, { tags }) => {
-                return (
-                  <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" wrap>
-                    <savedObjectsTaggingUi.components.TagList
-                      object={{ references: tagListToReferenceList(tags) }}
-                    />
-                  </EuiFlexGroup>
-                );
-              },
+              render: (_, { tags }) => <AttachmentTagsList tags={tags} />,
             },
           ] satisfies Array<EuiBasicTableColumn<Attachment>>)
         : []),
@@ -293,9 +204,9 @@ export function AttachmentsTable({
     compact,
     showActions,
     share,
-    savedObjectsTaggingUi,
     timeState,
     onUnlinkAttachment,
+    onViewDetails,
     navigateToAttachment,
   ]);
 

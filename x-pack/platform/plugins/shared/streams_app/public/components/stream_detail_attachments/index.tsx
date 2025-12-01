@@ -26,6 +26,7 @@ import { useAttachmentsApi } from '../../hooks/use_attachments_api';
 import { useAttachmentsFetch } from '../../hooks/use_attachments_fetch';
 import { useKibana } from '../../hooks/use_kibana';
 import { AddAttachmentFlyout } from './add_attachment_flyout';
+import { AttachmentDetailsFlyout } from './attachment_details_flyout';
 import {
   AttachmentFilters,
   DEFAULT_ATTACHMENT_FILTERS,
@@ -43,6 +44,7 @@ export function StreamDetailAttachments({
   const [isSelectionPopoverOpen, setIsSelectionPopoverOpen] = useState(false);
 
   const [isAddAttachmentFlyoutOpen, setIsAddAttachmentFlyoutOpen] = useState(false);
+  const [detailsAttachment, setDetailsAttachment] = useState<Attachment | null>(null);
 
   const {
     core: {
@@ -241,6 +243,7 @@ export function StreamDetailAttachments({
                   ? (attachment) => handleUnlinkAttachments([attachment])
                   : undefined
               }
+              onViewDetails={setDetailsAttachment}
               dataTestSubj="streamsAppStreamDetailAttachmentsTable"
             />
           </EuiFlexItem>
@@ -260,6 +263,21 @@ export function StreamDetailAttachments({
           }}
         />
       ) : null}
+      {detailsAttachment && (
+        <AttachmentDetailsFlyout
+          attachment={detailsAttachment}
+          streamName={definition.stream.name}
+          onClose={() => setDetailsAttachment(null)}
+          onUnlink={
+            canLinkAttachments
+              ? () => {
+                  handleUnlinkAttachments([detailsAttachment]);
+                  setDetailsAttachment(null);
+                }
+              : undefined
+          }
+        />
+      )}
     </EuiFlexGroup>
   );
 }
