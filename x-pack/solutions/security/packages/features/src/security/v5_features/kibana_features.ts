@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import {
   APP_ID,
+  CLOUD_DEFEND_APP_ID,
   CLOUD_POSTURE_APP_ID,
   INITIALIZE_SECURITY_SOLUTION,
   LISTS_API_ALL,
@@ -35,7 +36,7 @@ export const getSecurityV5BaseKibanaFeature = ({
   ),
   order: 1100,
   category: DEFAULT_APP_CATEGORIES.security,
-  app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
+  app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
   catalogue: [APP_ID],
   description: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.securityGroupDescription',
@@ -46,7 +47,7 @@ export const getSecurityV5BaseKibanaFeature = ({
   ),
   privileges: {
     all: {
-      app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
+      app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
       catalogue: [APP_ID],
       api: [
         APP_ID,
@@ -64,7 +65,7 @@ export const getSecurityV5BaseKibanaFeature = ({
       ui: [SECURITY_UI_SHOW, SECURITY_UI_CRUD],
     },
     read: {
-      app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
+      app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
       catalogue: [APP_ID],
       api: [APP_ID, 'rac', LISTS_API_READ, USERS_API_READ, INITIALIZE_SECURITY_SOLUTION],
       savedObject: {
