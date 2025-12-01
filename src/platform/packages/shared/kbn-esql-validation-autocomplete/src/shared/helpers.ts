@@ -167,6 +167,9 @@ export async function getCurrentQueryAvailableColumns(
   getPolicies: () => Promise<Map<string, ESQLPolicy>>,
   originalQueryText: string
 ) {
+  if (commands.length === 0) {
+    return previousPipeFields;
+  }
   const lastCommand = commands[commands.length - 1];
   const commandDef = esqlCommandRegistry.getCommandByName(lastCommand.name);
   if (!commandDef?.methods.columnsAfter) {
