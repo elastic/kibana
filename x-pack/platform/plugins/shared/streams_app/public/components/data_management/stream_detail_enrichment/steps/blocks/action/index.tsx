@@ -10,13 +10,18 @@ import React, { useEffect, useRef } from 'react';
 import { EuiPanel, useEuiTheme } from '@elastic/eui';
 import { useFirstMountState } from 'react-use/lib/useFirstMountState';
 import { css } from '@emotion/react';
-import { useSimulatorSelector } from '../../../state_management/stream_enrichment_state_machine';
+import type { StreamType } from '../../../../../../telemetry/types';
+import {
+  useSimulatorSelector,
+  useStreamEnrichmentSelector,
+} from '../../../state_management/stream_enrichment_state_machine';
 import { isRootStep, isStepUnderEdit } from '../../../state_management/steps_state_machine';
 import type { StepConfigurationProps } from '../../steps_list';
 import type { ProcessorMetrics } from '../../../state_management/simulation_state_machine';
 import { ActionBlockEditor } from './editor';
 import { ActionBlockListItem } from './list_item';
 import { getStepPanelColour } from '../../../utils';
+import { selectStreamTypeForTelemetry } from '../../../state_management/stream_enrichment_state_machine/selectors';
 
 export type ActionBlockProps = StepConfigurationProps & {
   processorMetrics?: ProcessorMetrics;
@@ -28,6 +33,10 @@ export function ActionBlock(props: StepConfigurationProps) {
   const isRootStepValue = useSelector(stepRef, (snapshot) => isRootStep(snapshot));
 
   const simulation = useSimulatorSelector((snapshot) => snapshot.context.simulation);
+
+  const streamType: StreamType = useStreamEnrichmentSelector((snapshot) =>
+    selectStreamTypeForTelemetry(snapshot.context)
+  );
 
   const panelColour = getStepPanelColour(level);
 
@@ -49,6 +58,7 @@ export function ActionBlock(props: StepConfigurationProps) {
   return (
     <EuiPanel
       data-test-subj="streamsAppProcessorBlock"
+      data-stream-type={streamType}
       hasShadow={false}
       color={isUnderEdit && isRootStepValue ? undefined : panelColour}
       css={
