@@ -90,6 +90,21 @@ describe('DateRangeFilter', () => {
     });
   });
 
+  it('should call onFilterOptionsChange with last 30 days when last 30 days is clicked', async () => {
+    renderWithTestingProviders(<DateRangeFilter {...defaultProps} />);
+
+    const quickMenuButton = screen.getByTestId(QUICK_MENU_BUTTON_TEST_SUBJ);
+    await userEvent.click(quickMenuButton);
+
+    expect(screen.getByTestId('last-30-days-link')).toBeInTheDocument();
+    await userEvent.click(screen.getByTestId('last-30-days-link'));
+
+    expect(mockOnFilterOptionsChange).toHaveBeenCalledWith({
+      from: 'now-30d',
+      to: 'now',
+    });
+  });
+
   it('should use DEFAULT_FROM_DATE when earliest case is not available and show all cases is clicked', async () => {
     (useGetEarliestCase as jest.Mock).mockReturnValue({
       earliestCase: undefined,

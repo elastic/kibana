@@ -7,10 +7,10 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { OnTimeChangeProps } from '@elastic/eui';
-import { EuiLink, EuiSuperDatePicker } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiLink, EuiSuperDatePicker } from '@elastic/eui';
 import type { FilterOptions } from '../../containers/types';
 import { useRefreshCases } from './use_on_refresh_cases';
-import { CUSTOM_QUICK_SELECT_PANEL, SHOW_ALL_CASES } from './translations';
+import { CUSTOM_QUICK_SELECT_PANEL, LAST_30_DAYS, SHOW_ALL_CASES } from './translations';
 import { useGetEarliestCase } from './use_get_earliest_case';
 import { DEFAULT_FROM_DATE } from '../../containers/constants';
 
@@ -47,18 +47,31 @@ export const DateRangeFilter = ({
     onFilterOptionsChange({ from: fromDate, to: 'now' });
   }, [onFilterOptionsChange, earliestCase]);
 
+  const onLast30Days = useCallback(() => {
+    onFilterOptionsChange({ from: 'now-30d', to: 'now' });
+  }, [onFilterOptionsChange]);
+
   const customQuickSelectPanels = useMemo(
     () => [
       {
         title: CUSTOM_QUICK_SELECT_PANEL,
         content: (
-          <EuiLink onClick={onShowAllCases} data-test-subj="show-all-cases-link">
-            {SHOW_ALL_CASES}
-          </EuiLink>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiLink onClick={onShowAllCases} data-test-subj="show-all-cases-link">
+                {SHOW_ALL_CASES}
+              </EuiLink>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiLink onClick={onLast30Days} data-test-subj="last-30-days-link">
+                {LAST_30_DAYS}
+              </EuiLink>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ),
       },
     ],
-    [onShowAllCases]
+    [onShowAllCases, onLast30Days]
   );
 
   return (
