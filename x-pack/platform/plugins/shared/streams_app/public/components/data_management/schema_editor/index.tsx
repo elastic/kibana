@@ -93,9 +93,7 @@ export function SchemaEditor({
   );
 
   const filteredFields = React.useMemo(() => {
-    const geoPointFields = new Set(
-      fields.filter((f) => f.type === 'geo_point').map((f) => f.name)
-    );
+    const geoPointFields = new Set(fields.filter((f) => f.type === 'geo_point').map((f) => f.name));
 
     return fields.filter((f) => {
       const latMatch = f.name.match(/^(.*)\.lat$/);
