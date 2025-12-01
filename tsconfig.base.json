@@ -1752,6 +1752,8 @@
       "@kbn/response-ops-alerts-filters-form/*": ["src/platform/packages/shared/response-ops/alerts-filters-form/*"],
       "@kbn/response-ops-alerts-table": ["src/platform/packages/shared/response-ops/alerts-table"],
       "@kbn/response-ops-alerts-table/*": ["src/platform/packages/shared/response-ops/alerts-table/*"],
+      "@kbn/response-ops-form-generator": ["src/platform/packages/shared/response-ops/form-generator"],
+      "@kbn/response-ops-form-generator/*": ["src/platform/packages/shared/response-ops/form-generator/*"],
       "@kbn/response-ops-recurring-schedule-form": ["src/platform/packages/shared/response-ops/recurring-schedule-form"],
       "@kbn/response-ops-recurring-schedule-form/*": ["src/platform/packages/shared/response-ops/recurring-schedule-form/*"],
       "@kbn/response-ops-rule-form": ["src/platform/packages/shared/response-ops/rule_form"],
@@ -2465,7 +2467,9 @@
         "typings/@opentelemetry/semantic-conventions/incubating"
       ],
       "@typescript-eslint/parser": ["typings/@typescript-eslint/parser"],
-      "@a2a-js/sdk/server": ["typings/@a2a-js-sdk/server"]
+      "@a2a-js/sdk/server": ["typings/@a2a-js-sdk/server"],
+      "zod": ["typings/zod/v3"],
+      "zod/v4": ["typings/zod/v4"]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
