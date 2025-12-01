@@ -17,6 +17,7 @@ import {
   EuiFlexItem,
   EuiIconTip,
   useEuiTheme,
+  EuiTextTruncate,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
@@ -75,7 +76,7 @@ export const SelectTemplateStep = ({
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiText size="s" color="subdued">
-                  {template.ilmPolicy?.name}
+                  <EuiTextTruncate text={template.ilmPolicy?.name ?? ''} width={250} />
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -98,7 +99,9 @@ export const SelectTemplateStep = ({
 
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>{option.label}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiTextTruncate text={option.label} width={250} />
+        </EuiFlexItem>
         {isManaged && (
           <EuiFlexItem grow={false}>
             <EuiIconTip

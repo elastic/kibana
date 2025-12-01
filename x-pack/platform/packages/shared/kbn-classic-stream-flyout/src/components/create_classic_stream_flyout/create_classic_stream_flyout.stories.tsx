@@ -83,6 +83,13 @@ const MOCK_TEMPLATES: TemplateDeserialized[] = [
     _kbnMeta: { type: 'default', hasDatastream: true },
   },
   {
+    name: 'logs-auditd.log-and-more-text-here-to-make-it-longer',
+    ilmPolicy: { name: 'ilm-policy-with-a-long-name-and-more-text-here-to-make-it-longer' },
+    indexPatterns: ['logs-auditd.log-*'],
+    allowAutoCreate: 'NO_OVERWRITE',
+    _kbnMeta: { type: 'managed', hasDatastream: true },
+  },
+  {
     name: 'logs-auditd_manager.auditd',
     ilmPolicy: { name: 'logs' },
     indexPatterns: ['logs-auditd_manager.auditd-*'],
