@@ -315,7 +315,7 @@ test('createAPIKey() returns an API key when security is enabled', async () => {
   expect(securityPluginStart.authc.apiKeys.grantAsInternalUser).toHaveBeenCalledWith(
     expect.any(Object),
     {
-      metadata: { managed: true },
+      metadata: { managed: true, kibana: { type: 'alerting_rule' } },
       name: 'test',
       role_descriptors: {},
     }
