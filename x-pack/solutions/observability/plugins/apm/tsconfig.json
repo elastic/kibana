@@ -42,7 +42,7 @@
     "@kbn/i18n",
     "@kbn/es-query",
     "@kbn/ui-theme",
-    "@kbn/apm-synthtrace-client",
+    "@kbn/synthtrace-client",
     "@kbn/lens-plugin",
     "@kbn/unified-search-plugin",
     "@kbn/share-plugin",
