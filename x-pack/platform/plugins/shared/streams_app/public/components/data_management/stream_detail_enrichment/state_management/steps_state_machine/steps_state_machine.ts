@@ -8,8 +8,10 @@ import type { ActorRefFrom, SnapshotFrom } from 'xstate5';
 import { assign, forwardTo, sendTo, setup } from 'xstate5';
 import type {
   StreamlangProcessorDefinition,
+  StreamlangStepWithUIAttributes,
   StreamlangWhereBlockWithUIAttributes,
 } from '@kbn/streamlang';
+import { isActionBlock } from '@kbn/streamlang';
 import type { ProcessorResources, StepContext, StepEvent, StepInput } from './types';
 
 export type StepActorRef = ActorRefFrom<typeof stepMachine>;
@@ -30,12 +32,14 @@ export const stepMachine = setup({
           resources?: ProcessorResources;
         }
       ) => {
+        const nextStep: StreamlangStepWithUIAttributes = {
+          ...params.step,
+          customIdentifier: context.step.customIdentifier,
+          parentId: context.step.parentId,
+        };
+
         return {
-          step: {
-            ...params.step,
-            customIdentifier: context.step.customIdentifier,
-            parentId: context.step.parentId,
-          },
+          step: nextStep,
           resources: params.resources,
         };
       }
@@ -55,6 +59,23 @@ export const stepMachine = setup({
         };
       }
     ),
+    changeDescription: assign(({ context }, { description }: { description?: string }) => {
+      if (!isActionBlock(context.step)) {
+        return {};
+      }
+
+      const trimmedDescription = description?.trim();
+      const updatedStep = {
+        ...context.step,
+        description: trimmedDescription || undefined,
+      };
+
+      return {
+        step: updatedStep,
+        previousStep: updatedStep,
+        isUpdated: true,
+      };
+    }),
     resetToPrevious: assign(({ context }) => ({
       step: context.previousStep,
     })),
@@ -114,6 +135,12 @@ export const stepMachine = setup({
             { type: 'forwardChangeEventToParent' },
           ],
         },
+        'step.changeDescription': {
+          actions: [
+            { type: 'changeDescription', params: ({ event }) => event },
+            { type: 'forwardChangeEventToParent' },
+          ],
+        },
       },
     },
     configured: {
@@ -125,6 +152,12 @@ export const stepMachine = setup({
             'step.edit': {
               target: 'editing',
               actions: [{ type: 'forwardEventToParent' }],
+            },
+            'step.changeDescription': {
+              actions: [
+                { type: 'changeDescription', params: ({ event }) => event },
+                { type: 'forwardChangeEventToParent' },
+              ],
             },
             'step.delete': '#deleted',
           },
@@ -148,6 +181,12 @@ export const stepMachine = setup({
             'step.changeCondition': {
               actions: [
                 { type: 'changeCondition', params: ({ event }) => event },
+                { type: 'forwardChangeEventToParent' },
+              ],
+            },
+            'step.changeDescription': {
+              actions: [
+                { type: 'changeDescription', params: ({ event }) => event },
                 { type: 'forwardChangeEventToParent' },
               ],
             },
