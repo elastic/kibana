@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ModelVersionIdentifier, SavedObjectsType } from '@kbn/core-saved-objects-server';
 import type { MigrationInfoRecord } from '../types';
 
 /**
@@ -21,6 +22,13 @@ export function getVersions(
   return [
     '0.0.0',
     ...typeSnapshot.migrationVersions,
+    ...(typeSnapshot.modelVersions.length ? ['10.0.0'] : []),
     ...typeSnapshot.modelVersions.map(({ version }) => `10.${version}.0`),
   ].reverse() as string[];
+}
+
+export function latestVersion(type: SavedObjectsType<any>): ModelVersionIdentifier {
+  const mvs = typeof type.modelVersions === 'function' ? type.modelVersions() : type.modelVersions;
+  const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
+  return Object.keys(mvs!).sort(collator.compare).pop()! as ModelVersionIdentifier;
 }

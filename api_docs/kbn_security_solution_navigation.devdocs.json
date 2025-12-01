@@ -932,6 +932,23 @@
     "misc": [
       {
         "parentPluginId": "@kbn/security-solution-navigation",
+        "id": "def-common.ATTACKS_ALERTS_ALIGNMENT_ENABLED",
+        "type": "string",
+        "tags": [],
+        "label": "ATTACKS_ALERTS_ALIGNMENT_ENABLED",
+        "description": [
+          "Feature flag for the alerts and attacks alignment feature"
+        ],
+        "signature": [
+          "\"securitySolution.attacksAlertsAlignment\""
+        ],
+        "path": "x-pack/solutions/security/packages/navigation/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-navigation",
         "id": "def-common.GetAppUrl",
         "type": "Type",
         "tags": [],

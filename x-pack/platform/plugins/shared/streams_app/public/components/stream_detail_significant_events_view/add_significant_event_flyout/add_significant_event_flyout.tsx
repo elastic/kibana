@@ -20,7 +20,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { StreamQueryKql, Streams, Feature } from '@kbn/streams-schema';
+import type { StreamQueryKql, Streams, Feature, FeatureType } from '@kbn/streams-schema';
 import { streamQuerySchema } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/css';
@@ -114,6 +114,12 @@ export function AddSignificantEventFlyout({
   }, [selectedFlow]);
 
   const generateQueries = useCallback(() => {
+    let numberOfGeneratedQueries = 0;
+    const numberOfGeneratedQueriesByFeature: Record<FeatureType, number> = {
+      system: 0,
+    };
+    let inputTokensUsed = 0;
+    let outputTokensUsed = 0;
     const connector = aiFeatures?.genAiConnectors.selectedConnector;
     if (!connector || selectedFeatures.length === 0) {
       return;
@@ -127,23 +133,31 @@ export function AddSignificantEventFlyout({
       .pipe(
         concatMap((feature) =>
           generate(connector, feature).pipe(
-            concatMap((result) => {
-              const validation = validateQuery({
-                title: result.query.title,
-                kql: { query: result.query.kql },
-              });
+            concatMap(({ queries: nextQueries, tokensUsed }) => {
+              numberOfGeneratedQueries += nextQueries.length;
+              numberOfGeneratedQueriesByFeature[feature.type] += nextQueries.length;
+              inputTokensUsed += tokensUsed.prompt;
+              outputTokensUsed += tokensUsed.completion;
 
-              if (!validation.kql.isInvalid) {
-                setGeneratedQueries((prev) => [
-                  ...prev,
-                  {
+              setGeneratedQueries((prev) => [
+                ...prev,
+                ...nextQueries
+                  .filter((nextQuery) => {
+                    const validation = validateQuery({
+                      title: nextQuery.title,
+                      kql: { query: nextQuery.kql },
+                    });
+
+                    return validation.kql.isInvalid === false;
+                  })
+                  .map((nextQuery) => ({
                     id: v4(),
-                    kql: { query: result.query.kql },
-                    title: result.query.title,
-                    feature: result.query.feature,
-                  },
-                ]);
-              }
+                    kql: { query: nextQuery.kql },
+                    title: nextQuery.title,
+                    feature: nextQuery.feature,
+                  })),
+              ]);
+
               return [];
             })
           )
@@ -174,12 +188,27 @@ export function AddSignificantEventFlyout({
           });
           telemetryClient.trackSignificantEventsSuggestionsGenerate({
             duration_ms: Date.now() - startTime,
+            input_tokens_used: inputTokensUsed,
+            output_tokens_used: outputTokensUsed,
+            count: numberOfGeneratedQueries,
+            count_by_feature_type: numberOfGeneratedQueriesByFeature,
+            features_selected: selectedFeatures.length,
+            features_total: features.length,
+            stream_name: definition.name,
             stream_type: getStreamTypeFromDefinition(definition),
           });
           setIsGenerating(false);
         },
       });
-  }, [aiFeatures, definition, generate, notifications, telemetryClient, selectedFeatures]);
+  }, [
+    aiFeatures?.genAiConnectors.selectedConnector,
+    selectedFeatures,
+    generate,
+    notifications,
+    telemetryClient,
+    features.length,
+    definition,
+  ]);
 
   useEffect(() => {
     if (initialFlow === 'ai' && initialSelectedFeatures.length > 0) {
@@ -266,6 +295,7 @@ export function AddSignificantEventFlyout({
                         !aiFeatures?.genAiConnectors?.selectedConnector
                       }
                       onClick={generateQueries}
+                      data-test-subj="significant_events_flyout_generate_suggestions_button"
                     >
                       {i18n.translate(
                         'xpack.streams.streamDetailView.addSignificantEventFlyout.generateSuggestionsButtonLabel',
@@ -315,12 +345,7 @@ export function AddSignificantEventFlyout({
                         }}
                         definition={definition}
                         dataViews={dataViewsFetch.value ?? []}
-                        features={
-                          features.map((feature) => ({
-                            name: feature.name,
-                            filter: feature.filter,
-                          })) || []
-                        }
+                        features={features}
                       />
                     </>
                   )}
@@ -358,7 +383,16 @@ export function AddSignificantEventFlyout({
                 }}
               >
                 <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="center">
-                  <EuiButtonEmpty color="primary" onClick={() => onClose()} disabled={isSubmitting}>
+                  <EuiButtonEmpty
+                    color="primary"
+                    onClick={() => onClose()}
+                    disabled={isSubmitting}
+                    data-test-subj={
+                      selectedFlow === 'manual'
+                        ? 'significant_events_manual_entry_cancel_button'
+                        : 'significant_events_ai_generate_cancel_button'
+                    }
+                  >
                     {i18n.translate(
                       'xpack.streams.streamDetailView.addSignificantEventFlyout.cancelButtonLabel',
                       { defaultMessage: 'Cancel' }
@@ -387,6 +421,13 @@ export function AddSignificantEventFlyout({
                           break;
                       }
                     }}
+                    data-test-subj={
+                      isEditMode
+                        ? 'significant_events_edit_save_button'
+                        : selectedFlow === 'manual'
+                        ? 'significant_events_manual_entry_save_button'
+                        : 'significant_events_ai_generate_save_button'
+                    }
                   >
                     {selectedFlow === 'manual'
                       ? isEditMode

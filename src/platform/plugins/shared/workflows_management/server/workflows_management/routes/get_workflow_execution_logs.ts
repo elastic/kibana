@@ -30,8 +30,8 @@ export function registerGetWorkflowExecutionLogsRoute({
         }),
         query: schema.object({
           stepExecutionId: schema.maybe(schema.string()),
-          limit: schema.maybe(schema.number({ min: 1, max: 1000 })),
-          offset: schema.maybe(schema.number({ min: 0 })),
+          size: schema.number({ min: 1, max: 1000, defaultValue: 100 }),
+          page: schema.number({ min: 1, defaultValue: 1 }),
           sortField: schema.maybe(schema.string()),
           sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
         }),
@@ -40,20 +40,18 @@ export function registerGetWorkflowExecutionLogsRoute({
     async (context, request, response) => {
       try {
         const { workflowExecutionId } = request.params;
-        const { limit, offset, sortField, sortOrder, stepExecutionId } = request.query;
+        const { size, page, sortField, sortOrder, stepExecutionId } = request.query;
         const spaceId = spaces.getSpaceId(request);
 
-        const logs = await api.getWorkflowExecutionLogs(
-          {
-            executionId: workflowExecutionId,
-            limit,
-            offset,
-            sortField,
-            sortOrder,
-            stepExecutionId,
-          },
-          spaceId
-        );
+        const logs = await api.getWorkflowExecutionLogs({
+          executionId: workflowExecutionId,
+          size,
+          page,
+          sortField,
+          sortOrder,
+          stepExecutionId,
+          spaceId,
+        });
 
         return response.ok({
           body: logs,

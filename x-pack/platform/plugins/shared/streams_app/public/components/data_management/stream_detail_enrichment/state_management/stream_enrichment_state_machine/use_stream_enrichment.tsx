@@ -97,6 +97,9 @@ export const useStreamEnrichmentEvents = () => {
       addDataSource: (dataSource: EnrichmentDataSource) => {
         service.send({ type: 'dataSources.add', dataSource });
       },
+      selectDataSource: (id: string) => {
+        service.send({ type: 'dataSources.select', id });
+      },
       setExplicitlyEnabledPreviewColumns: (columns: string[]) => {
         service.send({
           type: 'previewColumns.updateExplicitlyEnabledColumns',

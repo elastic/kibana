@@ -19,6 +19,7 @@ export {
   type ReasoningStepData,
   type ReasoningStep,
   type ToolCallProgress,
+  type RoundModelUsageStats,
   ConversationRoundStepType,
   isToolCallStep,
   isReasoningStep,

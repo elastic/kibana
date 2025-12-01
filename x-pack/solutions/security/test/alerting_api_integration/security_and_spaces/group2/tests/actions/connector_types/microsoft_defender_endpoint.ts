@@ -7,9 +7,9 @@
 
 import type { FeaturesPrivileges, Role } from '@kbn/security-plugin-types-common';
 import {
-  MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID,
-  MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION,
-} from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/constants';
+  CONNECTOR_ID as MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID,
+  SUB_ACTION as MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION,
+} from '@kbn/connector-schemas/microsoft_defender_endpoint/constants';
 import type SuperTest from 'supertest';
 import expect from '@kbn/expect';
 import { getUrlPrefix } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib';

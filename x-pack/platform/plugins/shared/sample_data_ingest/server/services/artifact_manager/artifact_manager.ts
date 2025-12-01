@@ -57,7 +57,10 @@ export class ArtifactManager {
     this.log = logger;
   }
 
-  async prepareArtifact(sampleType: DatasetSampleType): Promise<PreparedArtifact> {
+  async prepareArtifact(
+    sampleType: DatasetSampleType,
+    abortController?: AbortController
+  ): Promise<PreparedArtifact> {
     const productName = mapDatasetSampleTypeToProduct[sampleType];
 
     if (!productName) {
@@ -68,7 +71,7 @@ export class ArtifactManager {
     const artifactUrl = `${this.artifactRepositoryUrl}/${artifactFileName}`;
     const artifactPath = `${this.artifactsFolder}/${artifactFileName}`;
     this.log.debug(`Downloading artifact from [${artifactUrl}]`);
-    await download(artifactUrl, artifactPath, 'application/zip');
+    await download(artifactUrl, artifactPath, 'application/zip', abortController);
 
     this.downloadedFiles.add(artifactPath);
 

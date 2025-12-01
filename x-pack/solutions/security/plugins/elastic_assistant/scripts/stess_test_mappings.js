@@ -19,7 +19,7 @@
  * - Original simple and complex field types for comprehensive stress testing
  */
 
-require('../../../../../../src/setup_node_env');
+require('@kbn/setup-node-env');
 const http = require('http');
 const https = require('https');
 const readline = require('readline');

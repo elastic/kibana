@@ -19,9 +19,7 @@ import {
   EuiIconAxisTop,
 } from '@kbn/chart-icons';
 import { useDebouncedValue } from '@kbn/visualization-utils';
-import { isHorizontalChart } from '../state_helpers';
 import {
-  ToolbarPopover,
   ToolbarTitleSettings,
   AxisBoundsControl,
   AxisTicksSettings,
@@ -34,7 +32,61 @@ import type { XYLayerConfig } from '../types';
 import { validateExtent } from '../../../shared_components/axis/extent/helpers';
 import { getBounds } from '../../../shared_components/axis/extent/axis_extent_settings';
 
-export interface AxisSettingsPopoverProps {
+export const axisConfig = (
+  axis: AxesSettingsConfigKeys,
+  isHorizontal: boolean
+): {
+  icon: IconType;
+  groupPosition: ToolbarButtonProps<'iconButton'>['groupPosition'];
+  popoverTitle: string;
+  buttonDataTestSubj: string;
+} => {
+  switch (axis) {
+    case 'yLeft':
+      return {
+        icon: (isHorizontal ? EuiIconAxisBottom : EuiIconAxisLeft) as IconType,
+        groupPosition: 'left',
+        popoverTitle: isHorizontal
+          ? i18n.translate('xpack.lens.xyChart.bottomAxisLabel', {
+              defaultMessage: 'Bottom axis',
+            })
+          : i18n.translate('xpack.lens.xyChart.leftAxisLabel', {
+              defaultMessage: 'Left axis',
+            }),
+        buttonDataTestSubj: 'lnsLeftAxisButton',
+      };
+    case 'yRight':
+      return {
+        icon: (isHorizontal ? EuiIconAxisTop : EuiIconAxisRight) as IconType,
+        groupPosition: 'right',
+        popoverTitle: isHorizontal
+          ? i18n.translate('xpack.lens.xyChart.topAxisLabel', {
+              defaultMessage: 'Top axis',
+            })
+          : i18n.translate('xpack.lens.xyChart.rightAxisLabel', {
+              defaultMessage: 'Right axis',
+            }),
+        buttonDataTestSubj: 'lnsRightAxisButton',
+      };
+    case 'x':
+    default:
+      return {
+        icon: (isHorizontal ? EuiIconAxisLeft : EuiIconAxisBottom) as IconType,
+        groupPosition: 'center',
+        popoverTitle: isHorizontal
+          ? i18n.translate('xpack.lens.xyChart.leftAxisLabel', {
+              defaultMessage: 'Left axis',
+            })
+          : i18n.translate('xpack.lens.xyChart.bottomAxisLabel', {
+              defaultMessage: 'Bottom axis',
+            }),
+
+        buttonDataTestSubj: 'lnsBottomAxisButton',
+      };
+  }
+};
+
+export interface AxisSettingsProps {
   /**
    * Determines the axis
    */
@@ -54,10 +106,6 @@ export interface AxisSettingsPopoverProps {
     title: { title?: string; visible: boolean },
     settingId: AxesSettingsConfigKeys
   ) => void;
-  /**
-   * Determines if the popover is Disabled
-   */
-  isDisabled?: boolean;
   /**
    * Determines if the ticklabels of the axis are visible
    */
@@ -134,85 +182,7 @@ export interface AxisSettingsPopoverProps {
   useMultilayerTimeAxis?: boolean;
 }
 
-export const popoverConfig = (
-  axis: AxesSettingsConfigKeys,
-  isHorizontal: boolean
-): {
-  icon: IconType;
-  groupPosition: ToolbarButtonProps<'iconButton'>['groupPosition'];
-  popoverTitle: string;
-  buttonDataTestSubj: string;
-} => {
-  switch (axis) {
-    case 'yLeft':
-      return {
-        icon: (isHorizontal ? EuiIconAxisBottom : EuiIconAxisLeft) as IconType,
-        groupPosition: 'left',
-        popoverTitle: isHorizontal
-          ? i18n.translate('xpack.lens.xyChart.bottomAxisLabel', {
-              defaultMessage: 'Bottom axis',
-            })
-          : i18n.translate('xpack.lens.xyChart.leftAxisLabel', {
-              defaultMessage: 'Left axis',
-            }),
-        buttonDataTestSubj: 'lnsLeftAxisButton',
-      };
-    case 'yRight':
-      return {
-        icon: (isHorizontal ? EuiIconAxisTop : EuiIconAxisRight) as IconType,
-        groupPosition: 'right',
-        popoverTitle: isHorizontal
-          ? i18n.translate('xpack.lens.xyChart.topAxisLabel', {
-              defaultMessage: 'Top axis',
-            })
-          : i18n.translate('xpack.lens.xyChart.rightAxisLabel', {
-              defaultMessage: 'Right axis',
-            }),
-        buttonDataTestSubj: 'lnsRightAxisButton',
-      };
-    case 'x':
-    default:
-      return {
-        icon: (isHorizontal ? EuiIconAxisLeft : EuiIconAxisBottom) as IconType,
-        groupPosition: 'center',
-        popoverTitle: isHorizontal
-          ? i18n.translate('xpack.lens.xyChart.leftAxisLabel', {
-              defaultMessage: 'Left axis',
-            })
-          : i18n.translate('xpack.lens.xyChart.bottomAxisLabel', {
-              defaultMessage: 'Bottom axis',
-            }),
-
-        buttonDataTestSubj: 'lnsBottomAxisButton',
-      };
-  }
-};
-
-/**
- *  TODO: Delete this component after migration to flyout toolbar
- * See: https://github.com/elastic/kibana/issues/240088
- */
-export const AxisSettingsPopover: React.FC<AxisSettingsPopoverProps> = (props) => {
-  const { layers, axis, isDisabled } = props;
-
-  const isHorizontal = layers?.length ? isHorizontalChart(layers) : false;
-  const config = popoverConfig(axis, isHorizontal);
-
-  return (
-    <ToolbarPopover
-      title={config.popoverTitle}
-      type={config.icon}
-      groupPosition={config.groupPosition}
-      isDisabled={isDisabled}
-      buttonDataTestSubj={config.buttonDataTestSubj}
-      panelStyle={{ width: '500px' }}
-    >
-      <XyAxisSettings {...props} />
-    </ToolbarPopover>
-  );
-};
-
-export const XyAxisSettings: React.FC<AxisSettingsPopoverProps> = ({
+export const XyAxisSettings: React.FC<AxisSettingsProps> = ({
   axis,
   axisTitle,
   updateTitleState,
