@@ -28,8 +28,6 @@ test.describe('Stream data processing - outdated documents', { tag: ['@ess', '@s
   };
 
   test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-    await apiServices.streams.enable();
-
     const newDocsTime = moment().utc().add(1, 'day').toDate().getTime();
     newDocumentsDateRange.from = moment(newDocsTime)
       .utc()
@@ -71,7 +69,7 @@ test.describe('Stream data processing - outdated documents', { tag: ['@ess', '@s
 
   test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
     await logsSynthtraceEsClient.clean();
-    await apiServices.streams.disable();
+    await apiServices.streams.clearStreamChildren('logs');
   });
 
   test('with outdated documents - should display warning tip for latest samples datasource', async ({
