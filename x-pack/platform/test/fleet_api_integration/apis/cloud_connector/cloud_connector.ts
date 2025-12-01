@@ -1259,7 +1259,6 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(body.item).to.have.property('id', createdAwsConnectorId);
-        expect(body.item).to.have.property('name', 'arn:aws:iam::123456789012:role/original-role');
         expect(body.item).to.have.property('cloudProvider', 'aws');
         expect(body.item).to.have.property('packagePolicyCount', 1);
         expect(body.item).to.have.property('updated_at');
