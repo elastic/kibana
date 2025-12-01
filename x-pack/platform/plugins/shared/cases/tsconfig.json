@@ -91,7 +91,6 @@
     "@kbn/dev-utils",
     "@kbn/tooling-log",
     "@kbn/core-elasticsearch-server-utils",
-    "@kbn/core-notifications-browser-mocks",
     "@kbn/licensing-types",
     "@kbn/lazy-object",
     "@kbn/setup-node-env",
