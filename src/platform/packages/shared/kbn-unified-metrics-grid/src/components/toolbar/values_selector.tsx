@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import { ToolbarSelector, type SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -19,7 +19,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 import { css } from '@emotion/react';
 import type { Dimension } from '@kbn/metrics-experience-plugin/common/types';
 import type { TimeRange } from '@kbn/data-plugin/common';
@@ -54,6 +53,8 @@ export const ValuesSelector = ({
   indices = [],
   onClear,
 }: ValuesFilterProps) => {
+  const [searchQuery, setSearchQuery] = useState('');
+
   const selectedDimensionNames = useMemo(
     () => selectedDimensions.map((d) => d.name),
     [selectedDimensions]
@@ -68,6 +69,7 @@ export const ValuesSelector = ({
     indices,
     from: timeRange?.from,
     to: timeRange?.to,
+    search: searchQuery,
   });
 
   const groupedValues = useMemo(() => {
@@ -210,7 +212,7 @@ export const ValuesSelector = ({
       data-selected-value={selectedDimensionNames}
       searchable
       buttonLabel={buttonLabel}
-      optionMatcher={comboBoxFieldOptionMatcher}
+      onSearchChange={setSearchQuery}
       options={options}
       singleSelection={false}
       hasArrow={!isLoading}

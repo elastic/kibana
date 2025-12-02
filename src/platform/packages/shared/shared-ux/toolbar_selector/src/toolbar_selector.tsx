@@ -38,6 +38,7 @@ export interface BaseToolbarProps {
   options: SelectableEntry[];
   searchable: boolean;
   optionMatcher?: EuiSelectableProps['optionMatcher'];
+  onSearchChange?: (searchTerm: string) => void;
   hasArrow?: boolean;
   disabled?: boolean;
   fullWidth?: boolean;
@@ -65,6 +66,7 @@ export const ToolbarSelector = ({
   options,
   searchable,
   optionMatcher,
+  onSearchChange,
   onChange,
   singleSelection,
   hasArrow = true,
@@ -79,8 +81,12 @@ export const ToolbarSelector = ({
   const [searchTermDebounced, _setSearchTermDebounced] = useState<string>(); // debounced value to filter options less often when typing
 
   const setSearchTermDebounced = useMemo(
-    () => debounce(_setSearchTermDebounced, 300),
-    [_setSearchTermDebounced]
+    () =>
+      debounce((value: string) => {
+        _setSearchTermDebounced(value);
+        onSearchChange?.(value);
+      }, 300),
+    [_setSearchTermDebounced, onSearchChange]
   );
 
   const setSearchTerm = useCallback(

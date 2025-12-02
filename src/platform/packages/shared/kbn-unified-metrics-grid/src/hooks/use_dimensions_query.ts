@@ -15,17 +15,19 @@ export const useDimensionsQuery = (params: {
   indices?: string[];
   from?: string;
   to?: string;
+  search?: string;
 }) => {
   const { client } = useMetricsExperienceClient();
 
   return useQuery({
     queryKey: ['dimensionValues', params],
     queryFn: async ({ signal }) => {
-      const { dimensions, indices, ...rest } = params;
+      const { dimensions, indices, search, ...rest } = params;
       const response = await client.getDimensions(
         {
           dimensions: JSON.stringify(dimensions),
           indices: JSON.stringify(indices),
+          ...(search ? { search } : {}),
           ...rest,
         },
         signal

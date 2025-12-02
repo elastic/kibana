@@ -51,13 +51,14 @@ export const getDimensionsRoute = createRoute({
         .datetime()
         .default(dateMathParse('now-15m', { roundUp: true })!.toISOString())
         .transform(isoToEpoch),
+      search: z.string().optional(),
     }),
   }),
   handler: async ({ context, params, logger, request }) => {
     const { elasticsearch, featureFlags } = await context.core;
     await throwNotFoundIfMetricsExperienceDisabled(featureFlags);
 
-    const { dimensions, indices, from, to } = params.query;
+    const { dimensions, indices, from, to, search } = params.query;
     const esClient = elasticsearch.client.asCurrentUser;
     const values = await getDimensions({
       esClient: createTracedEsClient({
@@ -70,6 +71,7 @@ export const getDimensionsRoute = createRoute({
       indices,
       from,
       to,
+      search,
       logger,
     });
 

@@ -18,6 +18,7 @@ interface CreateDimensionsParams {
   indices: string[];
   from: number;
   to: number;
+  search?: string;
   logger: Logger;
 }
 
@@ -27,6 +28,7 @@ export const getDimensions = async ({
   indices,
   from,
   to,
+  search,
   logger,
 }: CreateDimensionsParams): Promise<Array<{ value: string; field: string }>> => {
   if (!dimensions || dimensions.length === 0) {
@@ -34,15 +36,18 @@ export const getDimensions = async ({
   }
 
   const source = fromCommand(indices);
+
   const query = source
     .pipe(
       evaluate('??dim = ??dim::string', { dim: dimensions[0] }),
-      where('??dim IS NOT NULL', { dim: dimensions[0] }),
+      search
+        ? where(`TO_LOWER(??dim) LIKE "*${search.toLowerCase()}*"`, { dim: dimensions[0] })
+        : where('??dim IS NOT NULL', { dim: dimensions[0] }),
       stats('BY ??dim', {
         dim: dimensions[0],
       }),
       sort('??dim', { dim: dimensions[0] }),
-      limit(20)
+      limit(50)
     )
     .toString();
 
