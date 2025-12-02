@@ -308,10 +308,7 @@ export const useBulkTagsActions = ({ refresh, clearSelection }: UseBulkTagsActio
     clearSelection();
   }, [clearSelection, refresh]);
 
-  const onAction = useCallback(() => {}, []);
-
   const tagsAction = useTagsAction({
-    onAction,
     onActionSuccess,
     onActionError,
     isDisabled: false,

@@ -9,49 +9,56 @@
 
 import { EuiIcon } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
+import type { Alert } from '@kbn/alerting-types';
 import type { ItemsSelectionState, UseActionProps } from './items/types';
 import * as i18n from './translations';
 import { useBulkUpdateAlertTags } from '../../hooks/use_bulk_update_alert_tags';
 import { useAlertsTableContext } from '../../contexts/alerts_table_context';
 
-export interface AlertIdentifier {
-  _id: string;
-  _index: string;
+export interface TagsActionState {
+  isFlyoutOpen: boolean;
+  onClose: () => void;
+  openFlyout: (alerts: Alert[]) => void;
+  onSaveTags: (tagsSelection: ItemsSelectionState) => Promise<void>;
+  selectedAlerts: Alert[];
+  getAction: (alerts: Alert[]) => {
+    name: string;
+    onClick: () => void;
+    disabled: boolean;
+    'data-test-subj': string;
+    icon: React.ReactNode;
+    key: string;
+  };
 }
 
 export const useTagsAction = ({
-  onAction,
   onActionSuccess,
   onActionError,
   isDisabled,
-}: UseActionProps) => {
+}: UseActionProps): TagsActionState => {
   const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>(false);
   const onClose = useCallback(() => setIsFlyoutOpen(false), []);
-  const [selectedAlertsToEdit, setSelectedAlertsToEdit] = useState<AlertIdentifier[]>([]);
+  const [selectedAlerts, setSelectedAlerts] = useState<Alert[]>([]);
   const {
     services: { http, notifications },
   } = useAlertsTableContext();
 
   const { mutateAsync: bulkUpdateAlertTags } = useBulkUpdateAlertTags({ http, notifications });
 
-  const openFlyout = useCallback(
-    (selectedAlerts: AlertIdentifier[]) => {
-      onAction();
-      setIsFlyoutOpen(true);
-      setSelectedAlertsToEdit(selectedAlerts);
-    },
-    [onAction]
-  );
+  const openFlyout = useCallback((alerts: Alert[]) => {
+    setIsFlyoutOpen(true);
+    setSelectedAlerts(alerts);
+  }, []);
 
   const onSaveItems = useCallback(
     async (tagsSelection: ItemsSelectionState) => {
-      const alertsByIndex = selectedAlertsToEdit.reduce((acc, alert) => {
+      const alertsByIndex = selectedAlerts.reduce((acc, alert) => {
         if (!acc[alert._index]) {
           acc[alert._index] = [];
         }
         acc[alert._index].push(alert);
         return acc;
-      }, {} as Record<string, AlertIdentifier[]>);
+      }, {} as Record<string, Alert[]>);
 
       try {
         await Promise.all(
@@ -67,18 +74,18 @@ export const useTagsAction = ({
           )
         );
         onClose();
-        onActionSuccess();
+        onActionSuccess?.();
       } catch {
-        onActionError();
+        onActionError?.();
       }
     },
-    [bulkUpdateAlertTags, onClose, onActionSuccess, onActionError, selectedAlertsToEdit]
+    [bulkUpdateAlertTags, onClose, onActionSuccess, onActionError, selectedAlerts]
   );
 
-  const getAction = (selectedAlerts: AlertIdentifier[]) => {
+  const getAction = (alerts: Alert[]) => {
     return {
       name: i18n.EDIT_TAGS,
-      onClick: () => openFlyout(selectedAlerts),
+      onClick: () => openFlyout(alerts),
       disabled: isDisabled,
       'data-test-subj': 'alerts-bulk-action-tags',
       icon: <EuiIcon type="tag" size="m" />,
@@ -86,7 +93,7 @@ export const useTagsAction = ({
     };
   };
 
-  return { getAction, isFlyoutOpen, onClose, onSaveTags: onSaveItems };
+  return { getAction, openFlyout, isFlyoutOpen, onClose, onSaveTags: onSaveItems, selectedAlerts };
 };
 
 export type UseTagsAction = ReturnType<typeof useTagsAction>;

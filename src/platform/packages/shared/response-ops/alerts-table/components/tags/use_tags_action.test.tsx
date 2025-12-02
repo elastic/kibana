@@ -45,7 +45,6 @@ describe('useTagsAction', () => {
     ALERT_WORKFLOW_TAGS: ['coke', 'pepsi'],
   } as unknown as Alert;
 
-  const onAction = jest.fn();
   const onActionSuccess = jest.fn();
   const onActionError = jest.fn();
   const http = httpServiceMock.createStartContract();
@@ -66,7 +65,6 @@ describe('useTagsAction', () => {
     const { result } = renderHook(
       () =>
         useTagsAction({
-          onAction,
           onActionSuccess,
           onActionError,
           isDisabled: false,
@@ -91,7 +89,7 @@ describe('useTagsAction', () => {
 
   it('processes the tags correctly', async () => {
     const { result } = renderHook(
-      () => useTagsAction({ onAction, onActionSuccess, onActionError, isDisabled: false }),
+      () => useTagsAction({ onActionSuccess, onActionError, isDisabled: false }),
       { wrapper }
     );
 
@@ -101,7 +99,6 @@ describe('useTagsAction', () => {
       action.onClick();
     });
 
-    expect(onAction).toHaveBeenCalled();
     expect(result.current.isFlyoutOpen).toBe(true);
 
     act(() => {
@@ -115,7 +112,7 @@ describe('useTagsAction', () => {
 
   it('opens and closes the flyout correctly', async () => {
     const { result } = renderHook(
-      () => useTagsAction({ onAction, onActionSuccess, onActionError, isDisabled: false }),
+      () => useTagsAction({ onActionSuccess, onActionError, isDisabled: false }),
       { wrapper }
     );
 
@@ -143,7 +140,7 @@ describe('useTagsAction', () => {
 
   it('handles multiple alerts', async () => {
     const { result } = renderHook(
-      () => useTagsAction({ onAction, onActionSuccess, onActionError, isDisabled: false }),
+      () => useTagsAction({ onActionSuccess, onActionError, isDisabled: false }),
       { wrapper }
     );
 
@@ -172,7 +169,7 @@ describe('useTagsAction', () => {
 
   it('handles multiple alerts from different indices', async () => {
     const { result } = renderHook(
-      () => useTagsAction({ onAction, onActionSuccess, onActionError, isDisabled: false }),
+      () => useTagsAction({ onActionSuccess, onActionError, isDisabled: false }),
       { wrapper }
     );
 

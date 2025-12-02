@@ -22,7 +22,7 @@ export const EditTagsAction = typedMemo(
     const { openFlyout } = useIndividualTagsActionContext();
 
     const handleOpenFlyout = useCallback(() => {
-      openFlyout(alert);
+      openFlyout([alert]);
       onActionExecuted?.(); // this will close the popover containing this action
     }, [alert, openFlyout, onActionExecuted]);
 

@@ -61,10 +61,11 @@ jest.mock('../contexts/individual_tags_action_context', () => {
     ...actual,
     useIndividualTagsActionContext: () => ({
       isFlyoutOpen: false,
-      selectedAlert: null,
+      selectedAlerts: [],
       openFlyout: jest.fn(),
-      closeFlyout: jest.fn(),
+      onClose: jest.fn(),
       onSaveTags: jest.fn(),
+      getAction: jest.fn(),
     }),
   };
 });

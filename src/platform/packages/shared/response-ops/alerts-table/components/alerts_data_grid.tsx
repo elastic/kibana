@@ -32,8 +32,8 @@ import { CellPopoverHost } from './cell_popover_host';
 import { NonVirtualizedGridBody } from './non_virtualized_grid_body';
 import type { AlertDetailFlyout as AlertDetailFlyoutType } from './alert_detail_flyout';
 import { EditTagsFlyout } from './tags/edit_tags_flyout';
-import { useIndividualTagsAction } from '../hooks/use_individual_tags_action';
 import { IndividualTagsActionContextProvider } from '../contexts/individual_tags_action_context';
+import { useTagsAction } from './tags/use_tags_action';
 
 const AlertDetailFlyout = lazy(
   () => import('./alert_detail_flyout')
@@ -338,9 +338,17 @@ export const AlertsDataGrid = typedMemo(
       [alerts, bulkActionsState.rowSelection]
     );
 
-    const individualTagsFlyout = useIndividualTagsAction();
+    const individualTagsFlyout = useTagsAction({
+      onActionSuccess: () => {
+        refresh();
+      },
+      onActionError: () => {
+        refresh();
+      },
+      isDisabled: false,
+    });
 
-    const { selectedAlert } = individualTagsFlyout;
+    const { selectedAlerts: selectedAlertsFromRowAction } = individualTagsFlyout;
 
     return (
       <IndividualTagsActionContextProvider value={individualTagsFlyout}>
@@ -358,9 +366,9 @@ export const AlertsDataGrid = typedMemo(
                 onSaveTags={bulkEditTagsFlyoutState.onSaveTags}
               />
             )}
-            {individualTagsFlyout.isFlyoutOpen && selectedAlert && (
+            {individualTagsFlyout.isFlyoutOpen && selectedAlertsFromRowAction?.length > 0 && (
               <EditTagsFlyout
-                selectedAlerts={[selectedAlert]}
+                selectedAlerts={selectedAlertsFromRowAction}
                 onClose={individualTagsFlyout.onClose}
                 onSaveTags={individualTagsFlyout.onSaveTags}
               />

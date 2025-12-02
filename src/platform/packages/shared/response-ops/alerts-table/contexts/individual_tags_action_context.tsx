@@ -10,16 +10,16 @@
 import type { PropsWithChildren } from 'react';
 import React, { createContext, useContext } from 'react';
 import { typedMemo } from '../utils/react';
-import type { IndividualTagsActionState } from '../hooks/use_individual_tags_action';
+import type { TagsActionState } from '../components/tags/use_tags_action';
 
-const IndividualTagsActionContext = createContext<IndividualTagsActionState | null>(null);
+const IndividualTagsActionContext = createContext<TagsActionState | null>(null);
 
 export const IndividualTagsActionContextProvider = typedMemo(
   ({
     children,
     value,
   }: PropsWithChildren<{
-    value: IndividualTagsActionState;
+    value: TagsActionState;
   }>) => {
     return (
       <IndividualTagsActionContext.Provider value={value}>
@@ -29,7 +29,7 @@ export const IndividualTagsActionContextProvider = typedMemo(
   }
 );
 
-export const useIndividualTagsActionContext = (): IndividualTagsActionState => {
+export const useIndividualTagsActionContext = (): TagsActionState => {
   const context = useContext(IndividualTagsActionContext);
   if (!context) {
     throw new Error(

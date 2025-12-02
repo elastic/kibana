@@ -28,9 +28,9 @@ import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
 import { getJsDomPerformanceFix, testQueryClientConfig } from '../utils/test';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
-import { useIndividualTagsAction } from '../hooks/use_individual_tags_action';
+import { useTagsAction } from '../components/tags/use_tags_action';
 
-jest.mock('../hooks/use_individual_tags_action');
+jest.mock('../components/tags/use_tags_action');
 
 const columns = [
   {
@@ -62,17 +62,18 @@ afterAll(() => {
 });
 
 describe('AlertsDataGrid bulk actions', () => {
-  const mockUseIndividualTagsAction = jest.mocked(useIndividualTagsAction);
+  const mockUseTagsAction = jest.mocked(useTagsAction);
 
   beforeEach(() => {
-    // Reset and set up the mock for individual tags action
-    mockUseIndividualTagsAction.mockReset();
-    mockUseIndividualTagsAction.mockImplementation(() => ({
+    // Reset and set up the mock for tags action
+    mockUseTagsAction.mockReset();
+    mockUseTagsAction.mockImplementation(() => ({
       isFlyoutOpen: false,
-      selectedAlert: null,
+      selectedAlerts: [],
       openFlyout: jest.fn(),
       onClose: jest.fn(),
       onSaveTags: jest.fn(),
+      getAction: jest.fn(),
     }));
   });
 
