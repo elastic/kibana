@@ -92,7 +92,7 @@ export const findGapsSearchAfter = async ({
     hasInProgressIntervals,
     hasFilledIntervals,
     updatedBefore,
-    failedAutoAttemptsLessThan,
+    failedAutoFillAttemptsLessThan,
   } = params;
 
   if (ruleIds.length > FIND_GAPS_SEARCH_AFTER_MAX_RULES) {
@@ -107,7 +107,7 @@ export const findGapsSearchAfter = async ({
       hasUnfilledIntervals,
       hasInProgressIntervals,
       hasFilledIntervals,
-      failedAutoAttemptsLessThan,
+      failedAutoFillAttemptsLessThan,
       updatedBefore,
     });
     const gapsResponse = await eventLogClient.findEventsBySavedObjectIdsSearchAfter(

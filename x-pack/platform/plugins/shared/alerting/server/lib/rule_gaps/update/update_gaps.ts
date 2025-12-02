@@ -30,7 +30,7 @@ interface UpdateGapsParams {
   backfillClient: BackfillClient;
   actionsClient: ActionsClient;
   gaps?: Gap[];
-  initiator?: BackfillInitiator;
+  initiator: BackfillInitiator | undefined;
 }
 
 /**

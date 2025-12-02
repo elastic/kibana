@@ -65,5 +65,5 @@ export const findGapsSearchAfterParamsSchema = findGapsBaseParamsSchema.extends(
     schema.arrayOf(schema.oneOf([schema.string(), schema.number(), schema.boolean(), schema.any()]))
   ),
   updatedBefore: schema.maybe(schema.string()),
-  failedAutoAttemptsLessThan: schema.maybe(schema.number({ min: 1 })),
+  failedAutoFillAttemptsLessThan: schema.maybe(schema.number({ min: 1 })),
 });

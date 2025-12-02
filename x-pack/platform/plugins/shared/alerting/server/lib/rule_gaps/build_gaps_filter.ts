@@ -23,7 +23,7 @@ export const buildGapsFilter = ({
   hasInProgressIntervals,
   hasFilledIntervals,
   updatedBefore,
-  failedAutoAttemptsLessThan,
+  failedAutoFillAttemptsLessThan,
 }: {
   start?: string;
   end?: string;
@@ -32,7 +32,7 @@ export const buildGapsFilter = ({
   hasInProgressIntervals?: boolean;
   hasFilledIntervals?: boolean;
   updatedBefore?: string;
-  failedAutoAttemptsLessThan?: number;
+  failedAutoFillAttemptsLessThan?: number;
 }) => {
   const baseFilter =
     'event.action: gap AND event.provider: alerting AND not kibana.alert.rule.gap.deleted:true';
@@ -58,8 +58,8 @@ export const buildGapsFilter = ({
     ? `kibana.alert.rule.gap.updated_at < "${updatedBefore}"`
     : null;
 
-  const failedAutoAttemptsLessThanFilter = failedAutoAttemptsLessThan
-    ? `(NOT ${FAILED_AUTO_ATTEMPTS_FIELD}:* OR ${FAILED_AUTO_ATTEMPTS_FIELD}:*  AND ${FAILED_AUTO_ATTEMPTS_FIELD} < ${failedAutoAttemptsLessThan})`
+  const failedAutoAttemptsLessThanFilter = failedAutoFillAttemptsLessThan
+    ? `(NOT ${FAILED_AUTO_ATTEMPTS_FIELD}:* OR ${FAILED_AUTO_ATTEMPTS_FIELD}:*  AND ${FAILED_AUTO_ATTEMPTS_FIELD} < ${failedAutoFillAttemptsLessThan})`
     : null;
 
   return [
