@@ -324,6 +324,15 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       // Mute the alert instance via API
       await alertUtils.muteInstance(ruleId, alertInstanceId);
 
+      // Wait for mute to be reflected in the document (async updateByQuery with wait_for_completion: false)
+      await retry.try(async () => {
+        const mutedAlerts = await getAlertsByRuleId(ruleId);
+        const mutedAlert: any = mutedAlerts.find(
+          (alert: any) => alert._source[ALERT_INSTANCE_ID] === alertInstanceId
+        );
+        expect(mutedAlert._source[ALERT_MUTED]).to.be(true);
+      });
+
       // Manually set the alert document to have incorrect muted state
       await es.updateByQuery({
         index: alertAsDataIndex,
