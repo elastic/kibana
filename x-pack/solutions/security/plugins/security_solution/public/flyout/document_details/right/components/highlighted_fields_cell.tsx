@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -22,8 +22,7 @@ import {
 } from './test_ids';
 import { isFlyoutLink } from '../../../shared/utils/link_utils';
 import { PreviewLink } from '../../../shared/components/preview_link';
-
-const EMPTY_ARRAY: string[] = [];
+import { useExpandableValues } from '../../shared/hooks/use_expandable_values';
 
 export interface HighlightedFieldsCellProps {
   /**
@@ -76,48 +75,14 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
     return getAgentTypeForAgentIdField(originalField);
   }, [originalField]);
   const { euiTheme } = useEuiTheme();
-  const [isContentExpanded, setIsContentExpanded] = useState(false);
-  const toggleContentExpansion = useCallback(
-    () => setIsContentExpanded((currentIsOpen) => !currentIsOpen),
-    []
-  );
 
-  const visibleValues = useMemo(() => {
-    /**
-     * Check if a limit was set and if the limit
-     * is within the values size
-     */
-    if (
-      displayValuesLimit &&
-      displayValuesLimit > 0 &&
-      displayValuesLimit < (values?.length ?? 0)
-    ) {
-      return values?.slice(0, displayValuesLimit);
-    }
-
-    return values;
-  }, [values, displayValuesLimit]);
-
-  const overflownValues = useMemo(() => {
-    /**
-     * Check if a limit was set and if the limit
-     * is within the values size
-     */
-    if (
-      displayValuesLimit &&
-      displayValuesLimit > 0 &&
-      displayValuesLimit < (values?.length ?? 0)
-    ) {
-      return values?.slice(displayValuesLimit);
-    }
-
-    return EMPTY_ARRAY;
-  }, [values, displayValuesLimit]);
-
-  const isContentTooLarge = useMemo(
-    () => !!displayValuesLimit && displayValuesLimit < (values?.length ?? 0),
-    [displayValuesLimit, values]
-  );
+  const {
+    visibleValues,
+    overflownValues,
+    isContentExpanded,
+    isContentTooLarge,
+    toggleContentExpansion,
+  } = useExpandableValues({ values, displayValuesLimit });
 
   const renderValue = useCallback(
     (value: string, i: number) => (

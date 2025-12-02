@@ -6,8 +6,10 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { FieldSpec } from '@kbn/data-plugin/common';
+
 import { getFieldFormat } from '../utils/get_field_format';
 import type { EventFieldsData } from '../../../../common/components/event_details/types';
 import { OverflowField } from '../../../../common/components/tables/helpers';
@@ -16,6 +18,7 @@ import { MESSAGE_FIELD_NAME } from '../../../../timelines/components/timeline/bo
 import { FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID } from './test_ids';
 import { isFlyoutLink } from '../../../shared/utils/link_utils';
 import { PreviewLink } from '../../../shared/components/preview_link';
+import { useExpandableValues } from '../../shared/hooks/use_expandable_values';
 
 export interface FieldValueCellProps {
   /**
@@ -23,7 +26,7 @@ export interface FieldValueCellProps {
    */
   scopeId: string;
   /**
-   * Datq retrieved from the row
+   * Data retrieved from the row
    */
   data: EventFieldsData;
   /**
@@ -66,53 +69,94 @@ export const TableFieldValueCell = memo(
     values,
     isRulePreview,
   }: FieldValueCellProps) => {
+    // handle visible/hidden values and expansion state
+    const {
+      visibleValues,
+      overflownValues,
+      isContentExpanded,
+      isContentTooLarge,
+      toggleContentExpansion,
+    } = useExpandableValues({ values });
+
     if (values == null) {
       return null;
     }
 
-    return (
-      <EuiFlexGroup data-test-subj={`event-field-${data.field}`} direction="column" gutterSize="xs">
-        {values.map((value, i) => {
-          if (fieldFromBrowserField == null) {
-            return (
-              <EuiFlexItem grow={false} key={`${i}-${value}`}>
-                <EuiText size="xs" key={`${i}-${value}`}>
-                  {value}
-                </EuiText>
-              </EuiFlexItem>
-            );
-          }
+    const renderValue = (value: string, i: number) => {
+      if (fieldFromBrowserField == null) {
+        return (
+          <EuiFlexItem grow={false} key={`${i}-${value}`}>
+            <EuiText size="xs">{value}</EuiText>
+          </EuiFlexItem>
+        );
+      }
 
-          return (
-            <EuiFlexItem grow={false} key={`${i}-${value}`}>
-              {data.field === MESSAGE_FIELD_NAME ? (
-                <OverflowField value={value} />
-              ) : isFlyoutLink({ field: data.field, ruleId, scopeId }) ? (
-                <PreviewLink
-                  field={data.field}
-                  value={value}
-                  scopeId={scopeId}
-                  ruleId={ruleId}
-                  data-test-subj={`${FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID}-${i}`}
-                />
-              ) : (
-                <FormattedFieldValue
-                  contextId={`${scopeId}-${eventId}-${data.field}-${i}-${value}`}
-                  eventId={eventId}
-                  fieldFormat={getFieldFormat(data)}
-                  fieldName={data.field}
-                  fieldFromBrowserField={fieldFromBrowserField}
-                  fieldType={data.type}
-                  isAggregatable={fieldFromBrowserField.aggregatable}
-                  isObjectArray={data.isObjectArray}
-                  value={value}
-                  linkValue={getLinkValue && getLinkValue(data.field)}
-                  truncate={false}
-                />
-              )}
-            </EuiFlexItem>
-          );
-        })}
+      return (
+        <EuiFlexItem grow={false} key={`${i}-${value}`}>
+          {data.field === MESSAGE_FIELD_NAME ? (
+            <OverflowField value={value} />
+          ) : isFlyoutLink({ field: data.field, ruleId, scopeId }) ? (
+            <PreviewLink
+              field={data.field}
+              value={value}
+              scopeId={scopeId}
+              ruleId={ruleId}
+              data-test-subj={`${FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID}-${i}`}
+            />
+          ) : (
+            <FormattedFieldValue
+              contextId={`${scopeId}-${eventId}-${data.field}-${i}-${value}`}
+              eventId={eventId}
+              fieldFormat={getFieldFormat(data)}
+              fieldName={data.field}
+              fieldFromBrowserField={fieldFromBrowserField}
+              fieldType={data.type}
+              isAggregatable={fieldFromBrowserField.aggregatable}
+              isObjectArray={data.isObjectArray}
+              value={value}
+              linkValue={getLinkValue && getLinkValue(data.field)}
+              truncate={false}
+            />
+          )}
+        </EuiFlexItem>
+      );
+    };
+
+    return (
+      <EuiFlexGroup
+        data-test-subj={`event-field-${data.field}`}
+        direction="column"
+        gutterSize="xs"
+        alignItems="flexStart"
+      >
+        {visibleValues.map((value, i) => renderValue(value, i))}
+
+        {isContentExpanded &&
+          overflownValues.map((value, i) =>
+            // keys/contextIds remain unique
+            renderValue(value, i + visibleValues.length)
+          )}
+
+        {isContentTooLarge && (
+          <EuiButtonEmpty
+            size="xs"
+            flush="left"
+            onClick={toggleContentExpansion}
+            data-test-subj="event-field-toggle-show-more-button"
+          >
+            {isContentExpanded ? (
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.alertsHighlightedField.showMore"
+                defaultMessage="Show less"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.alertsHighlightedField.showLess"
+                defaultMessage="Show more"
+              />
+            )}
+          </EuiButtonEmpty>
+        )}
       </EuiFlexGroup>
     );
   }
