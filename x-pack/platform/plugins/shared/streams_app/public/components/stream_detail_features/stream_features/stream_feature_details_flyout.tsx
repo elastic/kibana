@@ -115,6 +115,11 @@ export const StreamFeatureDetailsFlyout = ({
                     defaultMessage: 'Edit filter',
                   }
                 )}
+                data-test-subj={
+                  isEditingCondition
+                    ? 'feature_identification_existing_edit_filter_button'
+                    : 'feature_identification_existing_save_filter_button'
+                }
               />
             </EuiFlexGroup>
             {featureFilter && (
@@ -140,6 +145,7 @@ export const StreamFeatureDetailsFlyout = ({
               aria-label={i18n.translate('xpack.streams.featureDetails.closeButtonAriaLabel', {
                 defaultMessage: 'Close flyout',
               })}
+              data-test-subj="feature_identification_existing_cancel_edit_button"
             >
               <FormattedMessage
                 id="xpack.streams.featureDetails.cancelButton"
@@ -148,7 +154,12 @@ export const StreamFeatureDetailsFlyout = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton isLoading={isUpdating} onClick={updateFeature} fill>
+            <EuiButton
+              isLoading={isUpdating}
+              onClick={updateFeature}
+              fill
+              data-test-subj="feature_identification_existing_save_changes_button"
+            >
               <FormattedMessage
                 id="xpack.streams.featureDetails.saveChanges"
                 defaultMessage="Save changes"

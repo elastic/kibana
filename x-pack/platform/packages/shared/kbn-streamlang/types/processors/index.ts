@@ -9,7 +9,7 @@ import { z } from '@kbn/zod';
 import { NonEmptyOrWhitespaceString, NonEmptyString } from '@kbn/zod-helpers';
 import { createIsNarrowSchema } from '@kbn/zod-helpers';
 import type { Condition } from '../conditions';
-import { conditionSchema } from '../conditions';
+import { conditionSchema, isAlwaysCondition } from '../conditions';
 import {
   NoMustacheValue,
   NoMustacheArrayValues,
@@ -232,11 +232,17 @@ export const convertProcessorSchema = processorBaseWithWhereSchema
     type: z.enum(convertTypes),
     ignore_missing: z.optional(z.boolean()),
   })
-  .refine((obj) => (obj.where && obj.to && obj.from !== obj.to) || !obj.where, {
-    message:
-      'Convert processor must have the "to" parameter when there is a "where" condition. It should not be the same as the source field.',
-    path: ['to', 'where'],
-  }) satisfies z.Schema<ConvertProcessor>;
+  .refine(
+    (obj) =>
+      !obj.where ||
+      (obj.where && isAlwaysCondition(obj.where)) ||
+      (obj.where && obj.to && obj.from !== obj.to),
+    {
+      message:
+        'Convert processor must have the "to" parameter when there is a "where" condition. It should not be the same as the source field.',
+      path: ['to', 'where'],
+    }
+  ) satisfies z.Schema<ConvertProcessor>;
 
 /**
  * RemoveByPrefix processor

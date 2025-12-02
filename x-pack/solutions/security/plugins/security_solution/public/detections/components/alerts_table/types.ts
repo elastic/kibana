@@ -77,7 +77,7 @@ export interface SecurityAlertsTableContext {
   isDraggable: boolean;
   leadingControlColumn: ControlColumnProps;
   userProfiles: AlertsUserProfilesData;
-  sourcererScope: PageScope;
+  pageScope: PageScope;
 }
 
 export type SecurityAlertsTableProps = AlertsTablePropsWithRef<SecurityAlertsTableContext>;
