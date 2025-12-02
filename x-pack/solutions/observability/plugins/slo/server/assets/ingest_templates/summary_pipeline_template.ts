@@ -249,6 +249,20 @@ export const getSummaryPipelineTemplate = (
           ignore_failure: true,
         },
       },
+      {
+        pipeline: {
+          ignore_missing_pipeline: true,
+          ignore_failure: true,
+          name: `slo-${slo.id}@custom`,
+        },
+      },
+      {
+        pipeline: {
+          ignore_missing_pipeline: true,
+          ignore_failure: true,
+          name: 'slo-summary-global@custom',
+        },
+      },
     ],
     _meta: {
       description: `Ingest pipeline for SLO summary data [id: ${slo.id}, revision: ${slo.revision}]`,

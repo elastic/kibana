@@ -71,7 +71,7 @@ export const getSLIPipelineTemplate = (
         date_index_name: {
           field: '@timestamp',
           index_name_prefix: SLI_INGEST_PIPELINE_INDEX_NAME_PREFIX,
-          date_rounding: 'M',
+          date_rounding: 'd',
           date_formats: ['UNIX_MS', 'ISO8601', "yyyy-MM-dd'T'HH:mm:ss.SSSXX"],
         },
       },
@@ -98,6 +98,13 @@ export const getSLIPipelineTemplate = (
           ignore_missing_pipeline: true,
           ignore_failure: true,
           name: `slo-${slo.id}@custom`,
+        },
+      },
+      {
+        pipeline: {
+          ignore_missing_pipeline: true,
+          ignore_failure: true,
+          name: 'slo-rollup-global@custom',
         },
       },
     ],

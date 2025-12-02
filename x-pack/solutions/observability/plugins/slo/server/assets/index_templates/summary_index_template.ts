@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   SLO_RESOURCES_VERSION,
   SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME,
@@ -13,11 +14,11 @@ import {
   SUMMARY_INDEX_TEMPLATE_PATTERN,
 } from '../../../common/constants';
 
-export const SUMMARY_INDEX_TEMPLATE = {
+export const SUMMARY_INDEX_TEMPLATE: IndicesPutIndexTemplateRequest = {
   name: SUMMARY_INDEX_TEMPLATE_NAME,
   index_patterns: [SUMMARY_INDEX_TEMPLATE_PATTERN],
   composed_of: [SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME, SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME],
-  priority: 500,
+  priority: 600,
   _meta: {
     description: 'SLO summary index template',
     version: SLO_RESOURCES_VERSION,
