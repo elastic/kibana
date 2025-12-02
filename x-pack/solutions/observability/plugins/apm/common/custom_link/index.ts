@@ -31,6 +31,16 @@ export const extractTemplateVariableNames = (url: string): string[] => {
   return Array.from(uniqueVariableNames);
 };
 
+function isValidUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    // Only consider http and https URLs as valid URLs that shouldn't be encoded
+    return url.protocol === 'http:' || url.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
 export function getEncodedCustomLinkUrl(url: string, transaction?: Transaction) {
   try {
     const templateVariables = extractTemplateVariableNames(url);
@@ -38,7 +48,9 @@ export function getEncodedCustomLinkUrl(url: string, transaction?: Transaction) 
     templateVariables.forEach((name) => {
       const value = get(transaction, name);
       if (value) {
-        const encodedValue = encodeURIComponent(value);
+        const stringValue = String(value);
+        // Don't encode if the value is a valid URL (http:// or https://)
+        const encodedValue = isValidUrl(stringValue) ? stringValue : encodeURIComponent(value);
         set(encodedTemplateVariables, name, encodedValue);
       }
     });
