@@ -24,6 +24,7 @@ import {
   EuiHealth,
   EuiSuperDatePicker,
   EuiTextColor,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useUserData } from '../../../../detections/components/user_info';
 import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
@@ -63,7 +64,22 @@ const getGapsTableColumns = (hasCRUDPermissions: boolean, ruleId: string, enable
           tooltipContent={i18n.GAPS_TABLE_STATUS_LABEL_TOOLTIP}
         />
       ),
-      render: (value: GapStatus) => getStatusLabel(value),
+      render: (value: GapStatus, gap: Gap) => {
+        const status = getStatusLabel(value);
+        if (gap.failed_auto_fill_attempts != null && gap.failed_auto_fill_attempts > 0) {
+          return (
+            <EuiToolTip
+              content={i18n.GAPS_FAILED_AUTO_FILL_ATTEMPTS_TOOLTIP(gap.failed_auto_fill_attempts)}
+            >
+              <EuiHealth color="danger" data-test-subj="auto-fill-failed-attempts-indicator">
+                {status}
+              </EuiHealth>
+            </EuiToolTip>
+          );
+        }
+
+        return status;
+      },
       width: '10%',
     },
     {
