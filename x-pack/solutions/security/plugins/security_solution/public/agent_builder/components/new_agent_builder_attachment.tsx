@@ -67,4 +67,3 @@ NewAgentBuilderAttachmentComponent.displayName = 'NewAgentBuilderAttachmentCompo
  * with attachment data. You may optionally override the default text.
  */
 export const NewAgentBuilderAttachment = React.memo(NewAgentBuilderAttachmentComponent);
-

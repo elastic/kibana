@@ -76,8 +76,12 @@ describe('attackDiscoverySearchTool', () => {
       expect(executeEsql).toHaveBeenCalled();
       const callArgs = (executeEsql as jest.Mock).mock.calls[0][0];
       expect(callArgs.query).toContain('FROM .alerts-security.attack.discovery.alerts-default*');
-      expect(callArgs.query).toContain('MV_CONTAINS(kibana.alert.attack_discovery.alert_ids,"alert-1")');
-      expect(callArgs.query).toContain('MV_CONTAINS(kibana.alert.attack_discovery.alert_ids,"alert-2")');
+      expect(callArgs.query).toContain(
+        'MV_CONTAINS(kibana.alert.attack_discovery.alert_ids,"alert-1")'
+      );
+      expect(callArgs.query).toContain(
+        'MV_CONTAINS(kibana.alert.attack_discovery.alert_ids,"alert-2")'
+      );
       expect(callArgs.query).toContain('@timestamp >=');
       expect(callArgs.query).toContain('LIMIT 100');
     });
@@ -159,4 +163,3 @@ describe('attackDiscoverySearchTool', () => {
     });
   });
 });
-

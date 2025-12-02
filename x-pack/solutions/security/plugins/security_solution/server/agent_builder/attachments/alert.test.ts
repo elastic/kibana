@@ -108,4 +108,3 @@ describe('createAlertAttachmentType', () => {
     });
   });
 });
-

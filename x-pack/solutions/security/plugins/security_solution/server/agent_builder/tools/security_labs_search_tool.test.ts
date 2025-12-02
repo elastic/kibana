@@ -75,7 +75,13 @@ describe('securityLabsSearchTool', () => {
         timed_out: false,
         _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
         hits: {
-          hits: [{ _id: 'test-id', _index: 'test-index', _source: { kb_resource: SECURITY_LABS_RESOURCE } }],
+          hits: [
+            {
+              _id: 'test-id',
+              _index: 'test-index',
+              _source: { kb_resource: SECURITY_LABS_RESOURCE },
+            },
+          ],
           total: { value: 1, relation: 'eq' },
         },
       });
@@ -212,4 +218,3 @@ describe('securityLabsSearchTool', () => {
     });
   });
 });
-
