@@ -26,6 +26,8 @@ import {
 import {
   getDissectProcessorWithReview,
   getReviewFields as getDissectReviewFields,
+  extractDissectPattern,
+  groupMessagesByPattern as groupMessagesByDissectPattern,
 } from '@kbn/dissect-heuristics';
 import { STREAMS_TIERED_ML_FEATURE } from '../../../../../common';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
@@ -51,32 +53,6 @@ export interface SuggestIngestPipelineParams {
       dissect: {
         fieldName: string;
         messages: string[];
-        patternAst: {
-          nodes: Array<
-            | {
-                type: 'field';
-                name: string;
-                modifiers?: {
-                  rightPadding?: boolean;
-                  skip?: boolean;
-                  namedSkip?: boolean;
-                  append?: boolean;
-                };
-              }
-            | { type: 'literal'; value: string }
-          >;
-        };
-        patternFields: Array<{
-          name: string;
-          values: string[];
-          position: number;
-          modifiers?: {
-            rightPadding?: boolean;
-            skip?: boolean;
-            namedSkip?: boolean;
-            append?: boolean;
-          };
-        }>;
       } | null;
     };
   };
@@ -112,43 +88,6 @@ export const suggestIngestPipelineSchema = z.object({
         .object({
           fieldName: z.string(),
           messages: z.array(z.string()),
-          patternAst: z.object({
-            nodes: z.array(
-              z.union([
-                z.object({
-                  type: z.literal('field'),
-                  name: z.string(),
-                  modifiers: z
-                    .object({
-                      rightPadding: z.boolean().optional(),
-                      skip: z.boolean().optional(),
-                      namedSkip: z.boolean().optional(),
-                      append: z.boolean().optional(),
-                    })
-                    .optional(),
-                }),
-                z.object({
-                  type: z.literal('literal'),
-                  value: z.string(),
-                }),
-              ])
-            ),
-          }),
-          patternFields: z.array(
-            z.object({
-              name: z.string(),
-              values: z.array(z.string()),
-              position: z.number(),
-              modifiers: z
-                .object({
-                  rightPadding: z.boolean().optional(),
-                  skip: z.boolean().optional(),
-                  namedSkip: z.boolean().optional(),
-                  append: z.boolean().optional(),
-                })
-                .optional(),
-            })
-          ),
         })
         .nullable(),
     }),
@@ -242,8 +181,6 @@ export const suggestProcessingPipelineRoute = createServerRoute({
           candidatePromises.push(
             processDissectPattern({
               messages: dissect.messages,
-              patternAst: dissect.patternAst,
-              patternFields: dissect.patternFields,
               fieldName: dissect.fieldName,
               streamName: stream.name,
               connectorId: params.body.connector_id,
@@ -451,15 +388,14 @@ async function processGrokPatterns({
 }
 
 /**
- * Process dissect pattern extracted client-side:
+ * Process dissect patterns by extracting them server-side:
+ * - Extract dissect pattern from messages
  * - Call LLM to review pattern
  * - Simulate to get parsed rate
  * - Return dissect processor
  */
 async function processDissectPattern({
   messages,
-  patternAst,
-  patternFields,
   fieldName,
   streamName,
   connectorId,
@@ -472,22 +408,6 @@ async function processDissectPattern({
   logger,
 }: {
   messages: string[];
-  patternAst: {
-    nodes: Array<
-      { type: 'field'; name: string; modifiers?: any } | { type: 'literal'; value: string }
-    >;
-  };
-  patternFields: Array<{
-    name: string;
-    values: string[];
-    position: number;
-    modifiers?: {
-      rightPadding?: boolean;
-      skip?: boolean;
-      namedSkip?: boolean;
-      append?: boolean;
-    };
-  }>;
   fieldName: string;
   streamName: string;
   connectorId: string;
@@ -500,18 +420,38 @@ async function processDissectPattern({
   logger: any;
 }): Promise<{ type: 'dissect'; processor: DissectProcessor; parsedRate: number } | null> {
   const SUGGESTED_DISSECT_PROCESSOR_ID = 'dissect-processor';
-  if (messages.length === 0 || patternAst.nodes.length === 0 || patternFields.length === 0) {
+
+  if (messages.length === 0) {
     return null;
   }
-  // Use client-provided fields directly for review & processor generation
-  const dissectPattern = { ast: patternAst, fields: patternFields };
+
+  // Extract dissect pattern on server-side
+  logger.debug('[suggest_pipeline][dissect] Grouping messages by pattern');
+  const grouped = groupMessagesByDissectPattern(messages);
+  if (grouped.length === 0) {
+    logger.debug('[suggest_pipeline][dissect] No patterns found in messages');
+    return null;
+  }
+
+  const largestGroup = grouped[0];
+  logger.debug(
+    `[suggest_pipeline][dissect] Extracting pattern from largest group messages=${largestGroup.messages.length}`
+  );
+  const dissectPattern = extractDissectPattern(largestGroup.messages);
+
+  if (!dissectPattern.ast.nodes.length) {
+    logger.debug('[suggest_pipeline][dissect] No AST nodes in extracted pattern');
+    return null;
+  }
+
+  // Use extracted fields for review & processor generation
   const reviewFields = getDissectReviewFields(dissectPattern, 10);
   const dissectReview = await handleProcessingDissectSuggestions({
     params: {
       path: { name: streamName },
       body: {
         connector_id: connectorId,
-        sample_messages: messages.slice(0, 10),
+        sample_messages: largestGroup.messages.slice(0, 10),
         review_fields: reviewFields,
       },
     },

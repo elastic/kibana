@@ -16,11 +16,7 @@ import {
   extractGrokPatternDangerouslySlow,
   groupMessagesByPattern as groupMessagesByGrokPattern,
 } from '@kbn/grok-heuristics';
-import {
-  groupMessagesByPattern as groupMessagesByDissectPattern,
-  extractDissectPattern,
-  type DissectASTNode,
-} from '@kbn/dissect-heuristics';
+
 import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
 import { PRIORITIZED_CONTENT_FIELDS, getDefaultTextField } from '../../utils';
 import { extractMessagesFromField } from '../../steps/blocks/action/utils/pattern_suggestion_helpers';
@@ -51,24 +47,6 @@ interface ExtractedGrokPattern {
   }>;
 }
 
-interface ExtractedDissectPattern {
-  type: 'dissect';
-  fieldName: string;
-  messages: string[]; // sample messages for review
-  patternAst: { nodes: DissectASTNode[] };
-  patternFields: Array<{
-    name: string;
-    values: string[];
-    position: number;
-    modifiers?: {
-      rightPadding?: boolean;
-      skip?: boolean;
-      namedSkip?: boolean;
-      append?: boolean;
-    };
-  }>;
-}
-
 export async function suggestPipelineLogic(input: SuggestPipelineInput): Promise<StreamlangDSL> {
   // Extract FlattenRecord documents from SampleDocumentWithUIAttributes
   const documents: FlattenRecord[] = input.documents.map(
@@ -80,12 +58,11 @@ export async function suggestPipelineLogic(input: SuggestPipelineInput): Promise
   const fieldName = getDefaultTextField(documents, PRIORITIZED_CONTENT_FIELDS);
   const messages = extractMessagesFromField(documents, fieldName);
 
-  const [grokPatterns, dissectPatterns] = await Promise.all([
-    extractGrokPatternsClientSide(messages, fieldName),
-    extractDissectPatternsClientSide(messages, fieldName),
-  ]);
+  // Only grok extraction is CPU-intensive enough to warrant client-side processing
+  const grokPatterns = await extractGrokPatternsClientSide(messages, fieldName);
 
-  // Step 2: SERVER-SIDE - Pass extracted patterns to server for:
+  // Step 2: SERVER-SIDE - Pass extracted grok patterns and raw messages to server for:
+  // - Dissect pattern extraction (cheap, can run server-side)
   // - LLM review of patterns
   // - Simulation to pick best processor
   // - Full pipeline generation
@@ -105,14 +82,13 @@ export async function suggestPipelineLogic(input: SuggestPipelineInput): Promise
                     patternGroups: grokPatterns.patternGroups,
                   }
                 : null,
-              dissect: dissectPatterns
-                ? {
-                    fieldName: dissectPatterns.fieldName,
-                    messages: dissectPatterns.messages,
-                    patternAst: dissectPatterns.patternAst,
-                    patternFields: dissectPatterns.patternFields,
-                  }
-                : null,
+              dissect:
+                messages.length > 0
+                  ? {
+                      fieldName,
+                      messages,
+                    }
+                  : null,
             },
           },
         },
@@ -155,41 +131,6 @@ async function extractGrokPatternsClientSide(
   } catch (error) {
     // eslint-disable-next-line no-console
     console.warn('Client-side grok pattern extraction failed:', error);
-    return null;
-  }
-}
-
-/**
- * CLIENT-SIDE: Prepare dissect data for server-side processing
- * Full pattern extraction (AST + fields) happens client-side; server only reviews & simulates.
- */
-async function extractDissectPatternsClientSide(
-  messages: string[],
-  fieldName: string
-): Promise<ExtractedDissectPattern | null> {
-  try {
-    if (messages.length === 0) {
-      return null;
-    }
-    const grouped = groupMessagesByDissectPattern(messages);
-    if (grouped.length === 0) {
-      return null;
-    }
-    const largestGroup = grouped[0]; // already sorted by probability descending
-    const pattern = extractDissectPattern(largestGroup.messages);
-    if (!pattern.ast.nodes.length) {
-      return null;
-    }
-    return {
-      type: 'dissect',
-      fieldName,
-      messages: largestGroup.messages.slice(0, 10),
-      patternAst: { nodes: pattern.ast.nodes },
-      patternFields: pattern.fields,
-    };
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.warn('Client-side dissect data preparation failed:', error);
     return null;
   }
 }

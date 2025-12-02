@@ -11,10 +11,10 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
   EuiButtonEmpty,
   EuiText,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AIFeatures } from '../../../../hooks/use_ai_features';
 import { GenerateSuggestionButton } from '../../stream_detail_routing/review_suggestions_form/generate_suggestions_button';
@@ -45,52 +45,58 @@ export function PipelineSuggestion({
       )}
       color="primary"
       onDismiss={onDismiss}
+      css={css`
+        flex-shrink: 0;
+      `}
     >
-      <EuiText size="s">
-        {i18n.translate('xpack.streams.processingSuggestion.previewEachSuggestionBeforeTextLabel', {
-          defaultMessage:
-            'Preview each suggestion before accepting, as they will change how your data is ingested. All suggestions are based on the same sample of 100 documents from the original stream.',
-        })}
-      </EuiText>
-      <EuiSpacer size="m" />
-      <RootSteps stepRefs={stepRefs} readOnly />
-      <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
-        <EuiFlexItem>
-          <GenerateSuggestionButton
-            iconType="refresh"
-            size="s"
-            onClick={onRegenerate}
-            aiFeatures={aiFeatures}
-          >
-            {i18n.translate(
-              'xpack.streams.streamDetailRouting.childStreamList.regenerateSuggestedPartitions',
-              {
-                defaultMessage: 'Regenerate',
-              }
-            )}
-          </GenerateSuggestionButton>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={onDismiss} color="primary" size="s">
-            {i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.grokPatternSuggestion.rejectButton',
-              {
-                defaultMessage: 'Reject',
-              }
-            )}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton iconType="check" onClick={onAccept} color="primary" size="s" fill>
-            {i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.grokPatternSuggestion.acceptButton',
-              {
-                defaultMessage: 'Accept',
-              }
-            )}
-          </EuiButton>
-        </EuiFlexItem>
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiText size="s">
+          {i18n.translate(
+            'xpack.streams.processingSuggestion.previewEachSuggestionBeforeTextLabel',
+            {
+              defaultMessage:
+                'Preview each suggestion before accepting, as they will change how your data is ingested. All suggestions are based on the same sample of 100 documents from the original stream.',
+            }
+          )}
+        </EuiText>
+        <RootSteps stepRefs={stepRefs} readOnly />
+        <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
+          <EuiFlexItem>
+            <GenerateSuggestionButton
+              iconType="refresh"
+              size="s"
+              onClick={onRegenerate}
+              aiFeatures={aiFeatures}
+            >
+              {i18n.translate(
+                'xpack.streams.streamDetailRouting.childStreamList.regenerateSuggestedPartitions',
+                {
+                  defaultMessage: 'Regenerate',
+                }
+              )}
+            </GenerateSuggestionButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={onDismiss} color="primary" size="s">
+              {i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.enrichment.grokPatternSuggestion.rejectButton',
+                {
+                  defaultMessage: 'Reject',
+                }
+              )}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton iconType="check" onClick={onAccept} color="primary" size="s" fill>
+              {i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.enrichment.grokPatternSuggestion.acceptButton',
+                {
+                  defaultMessage: 'Accept',
+                }
+              )}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexGroup>
     </EuiCallOut>
   );
