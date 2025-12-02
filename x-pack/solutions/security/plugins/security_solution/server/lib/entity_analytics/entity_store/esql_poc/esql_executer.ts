@@ -12,7 +12,7 @@ export const executeEsqlQuery = async (
   esClient: ElasticsearchClient,
   query: string,
   logger: Logger
-) => {
+): Promise<ESQLSearchResponse> => {
   try {
     const response = (await esClient.esql.query({
       query,
@@ -20,18 +20,10 @@ export const executeEsqlQuery = async (
       allow_partial_results: true,
     })) as unknown as ESQLSearchResponse;
 
-    const { columns, values } = response;
-
-    return values.map((row) => {
-      const mappedRow: Record<string, unknown> = {};
-      for (let i = 0; i < row.length; i++) {
-        mappedRow[columns[i].name] = row[i];
-      }
-
-      return mappedRow;
-    });
+    return response;
   } catch (error) {
-    logger.debug(`Error executing ES|QL request: ${error.message}`);
-    return [];
+    logger.error(`Error executing ES|QL request: ${error.message}`);
+    // Return empty response structure instead of empty array
+    return { columns: [], values: [] };
   }
 };

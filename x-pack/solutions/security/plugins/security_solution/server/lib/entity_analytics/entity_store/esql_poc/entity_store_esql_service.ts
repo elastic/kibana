@@ -140,23 +140,28 @@ export class EntityStoreESQLService {
       type,
       this.appClient,
       this.dataViews,
-      lastExecutionTime || defaultLookback(),
+      lastExecutionTime,
       now,
       state.config
     );
 
-    // this.logger.debug(`[Entity Store ESQL] [${type}-${this.namespace}] running query
-    // ${query}`);
+    const esqlResponse = await executeEsqlQuery(this.esClient, query, this.logger);
 
-    const docs = await executeEsqlQuery(this.esClient, query, this.logger);
+    await storeEntityStoreDocs(this.esClient, type, this.namespace, esqlResponse, this.logger);
 
-    await storeEntityStoreDocs(this.esClient, type, this.namespace, docs);
-
-    // this.logger.debug(JSON.stringify(docs, undefined, 2));
-
+    // Extract last seen timestamp from columnar format
     let lastSeenTimestamp;
-    if (docs.length > 0) {
-      lastSeenTimestamp = docs[docs.length - 1]['@timestamp'] as string;
+    const { columns, values } = esqlResponse;
+    if (values.length > 0) {
+      // Find @timestamp column index
+      const timestampIndex = columns.findIndex((col) => col.name === '@timestamp');
+      if (timestampIndex !== -1) {
+        // Get the last row's timestamp
+        const lastRow = values[values.length - 1];
+        lastSeenTimestamp = lastRow[timestampIndex] as string;
+      } else {
+        lastSeenTimestamp = now;
+      }
     } else {
       lastSeenTimestamp = now;
     }
@@ -169,7 +174,7 @@ export class EntityStoreESQLService {
     );
 
     this.logger.info(
-      `[Entity Store ESQL] [${type}-${this.namespace}] Processed ${docs.length} entities for type`
+      `[Entity Store ESQL] [${type}-${this.namespace}] Processed ${values.length} entities for type`
     );
   }
 }
