@@ -64,7 +64,7 @@ declare -A RUN_MODES
 RUN_MODES["platform"]="--stateful"
 RUN_MODES["observability"]="--stateful"
 RUN_MODES["search"]="--stateful"
-RUN_MODES["security"]="--stateful"
+RUN_MODES["security"]="--stateful --serverless=security --serverless=security-essentials --serverless=security-ease"
 
 # Determine valid run modes for the group
 RUN_MODE_LIST=${RUN_MODES[$group]}
