@@ -25,7 +25,6 @@ apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () 
 
   const spacesToCreate = [SPACES.SPACE_1, SPACES.SPACE_2];
   let savedObjectsManagementCredentials: RoleApiCredentials;
-  let createdSavedObjects: Array<{ type: string; id: string; spaceId: string }>;
 
   const createApiKeyWithSavedObjectsManagementPrivileges = async (
     requestAuth: RequestAuthFixture
@@ -68,23 +67,13 @@ apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () 
     );
   });
 
-  apiTest.beforeEach(() => {
-    createdSavedObjects = [];
-  });
-
-  apiTest.afterEach(async ({ apiServices, log }) => {
-    // Cleanup created objects in each space
-    if (createdSavedObjects.length > 0) {
-      for (const { type, id, spaceId } of createdSavedObjects) {
-        try {
-          await apiServices.savedObjects.delete(type, id, spaceId);
-          log.debug(`Cleaned up ${type}:${id} in space [${spaceId}]`);
-        } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          log.error(`Error cleaning up ${type}:${id} in space [${spaceId}]: ${errorMessage}`);
-        }
-      }
-    }
+  apiTest.afterEach(async ({ kbnClient, log }) => {
+    await Promise.all(
+      spacesToCreate.map(async (space) => {
+        await kbnClient.savedObjects.clean({ space: space.spaceId, types: ['dashboard'] });
+        log.info(`Removed dashboards in space [${space.spaceId}] after test`);
+      })
+    );
   });
 
   apiTest.afterAll(async ({ kbnClient, log }) => {
@@ -124,11 +113,6 @@ apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () 
           body: formData1.buffer,
         }
       );
-      createdSavedObjects.push({
-        type: 'dashboard',
-        id: objectId1,
-        spaceId: SPACES.SPACE_1.spaceId,
-      });
 
       expect(importResponse1.statusCode).toBe(200);
       expect(importResponse1.body.success).toBe(true);
@@ -155,11 +139,6 @@ apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () 
           body: formData2.buffer,
         }
       );
-      createdSavedObjects.push({
-        type: 'dashboard',
-        id: objectId2,
-        spaceId: SPACES.SPACE_2.spaceId,
-      });
 
       expect(importResponse2.statusCode).toBe(200);
       expect(importResponse2.body.success).toBe(true);
@@ -218,11 +197,6 @@ apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () 
           body: formData1.buffer,
         }
       );
-      createdSavedObjects.push({
-        type: 'dashboard',
-        id: uniqueId,
-        spaceId: SPACES.SPACE_1.spaceId,
-      });
 
       expect(importResponse1.statusCode).toBe(200);
       expect(importResponse1.body.success).toBe(true);
@@ -257,7 +231,6 @@ apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () 
       expect(importResponse2.body.successResults[0].id).toBe(uniqueId);
 
       const newID = importResponse2.body.successResults[0].destinationId;
-      createdSavedObjects.push({ type: 'dashboard', id: newID, spaceId: SPACES.SPACE_2.spaceId });
 
       // Verify that a new ID was generated
       expect(newID).not.toBe(uniqueId);

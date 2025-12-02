@@ -53,7 +53,6 @@ TEST_SPACES.forEach((space) => {
 
   apiTest.describe(`_import API within the ${space.name} space`, { tag: tags.ESS_ONLY }, () => {
     let savedObjectsManagementCredentials: RoleApiCredentials;
-    let createdSavedObjects: Array<{ type: string; id: string }>;
 
     apiTest.beforeAll(async ({ kbnClient, log, requestAuth }) => {
       // Create the space (skip for default which always exists)
@@ -74,26 +73,9 @@ TEST_SPACES.forEach((space) => {
       );
     });
 
-    apiTest.beforeEach(() => {
-      createdSavedObjects = [];
-    });
-
-    apiTest.afterEach(async ({ apiServices, log }) => {
-      if (createdSavedObjects.length > 0) {
-        try {
-          await apiServices.savedObjects.bulkDelete(createdSavedObjects, space.spaceId);
-          log.debug(
-            `Cleaned up ${createdSavedObjects.length} saved object(s) in space [${space.spaceId}]`
-          );
-        } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          log.error(
-            `Error during cleanup of saved objects [${createdSavedObjects
-              .map((o) => `${o.type}:${o.id}`)
-              .join(', ')}] in space [${space.spaceId}]: ${errorMessage}`
-          );
-        }
-      }
+    apiTest.afterEach(async ({ kbnClient, log }) => {
+      await kbnClient.savedObjects.clean({ space: space.spaceId, types: ['dashboard'] });
+      log.info(`Cleaned up saved objects in space [${space.spaceId}] after test`);
     });
 
     apiTest.afterAll(async ({ kbnClient, log }) => {
@@ -128,7 +110,6 @@ TEST_SPACES.forEach((space) => {
             body: formData1.buffer,
           }
         );
-        createdSavedObjects.push({ type: 'dashboard', id: uniqueId });
 
         expect(response1.statusCode).toBe(200);
         expect(response1.body.success).toBe(true);
@@ -186,7 +167,6 @@ TEST_SPACES.forEach((space) => {
             body: formData1.buffer,
           }
         );
-        createdSavedObjects.push({ type: 'dashboard', id: uniqueId });
 
         expect(response1.statusCode).toBe(200);
         expect(response1.body.success).toBe(true);
@@ -258,7 +238,6 @@ TEST_SPACES.forEach((space) => {
         expect(response1.body.successResults[0].id).toBe(uniqueId);
 
         const newID = response1.body.successResults[0].destinationId;
-        createdSavedObjects.push({ type: 'dashboard', id: newID });
 
         // Verify that a new ID was generated
         expect(newID).not.toBe(uniqueId);
