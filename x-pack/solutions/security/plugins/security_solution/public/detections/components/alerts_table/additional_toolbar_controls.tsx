@@ -138,7 +138,7 @@ const AdditionalToolbarControlsComponent = ({
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="m">
-      {DETECTIONS_TABLE_IDS.includes(tableType) && (
+      {DETECTIONS_TABLE_IDS.some((tableId) => tableId === tableType) && (
         <EuiFlexItem grow={false} data-test-subj="summary-view-selector">
           <SummaryViewSelector viewSelected={tableView} onViewChange={handleChangeTableView} />
         </EuiFlexItem>

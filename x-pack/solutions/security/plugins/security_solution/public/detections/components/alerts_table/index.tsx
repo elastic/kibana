@@ -489,7 +489,9 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
               actionsColumnWidth={leadingControlColumn.width}
               additionalBulkActions={bulkActions}
               fieldsBrowserOptions={
-                DETECTIONS_TABLE_IDS.includes(tableType) ? fieldsBrowserOptions : undefined
+                DETECTIONS_TABLE_IDS.some((tableId) => tableId === tableType)
+                  ? fieldsBrowserOptions
+                  : undefined
               }
               cellActionsOptions={cellActionsOptions}
               showInspectButton
