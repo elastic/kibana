@@ -17,9 +17,9 @@ import {
 import { entityRiskScoreTool } from './entity_risk_score_tool';
 import { createGetRiskScores } from '../../lib/entity_analytics/risk_score/get_risk_score';
 
-jest.mock('../../lib/entity_analytics/risk_score/get_risk_score', () => ({
-  createGetRiskScores: jest.fn(() => jest.fn()),
-}));
+jest.mock('../../lib/entity_analytics/risk_score/get_risk_score');
+
+const mockCreateGetRiskScores = createGetRiskScores as jest.Mock;
 
 describe('entityRiskScoreTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
@@ -104,7 +104,7 @@ describe('entityRiskScoreTool', () => {
 
   describe('handler', () => {
     beforeEach(() => {
-      createGetRiskScores.mockReturnValue(jest.fn());
+      mockCreateGetRiskScores.mockReturnValue(jest.fn());
     });
 
     it('successfully fetches risk score with valid identifierType and identifier', async () => {
@@ -122,7 +122,7 @@ describe('entityRiskScoreTool', () => {
           ],
         },
       ]);
-      createGetRiskScores.mockReturnValue(mockGetRiskScores);
+      mockCreateGetRiskScores.mockReturnValue(mockGetRiskScores);
 
       mockEsClient.asCurrentUser.search.mockResolvedValue({
         took: 1,
@@ -159,7 +159,7 @@ describe('entityRiskScoreTool', () => {
 
     it('returns error when no risk score found', async () => {
       const mockGetRiskScores = jest.fn().mockResolvedValue([]);
-      createGetRiskScores.mockReturnValue(mockGetRiskScores);
+      mockCreateGetRiskScores.mockReturnValue(mockGetRiskScores);
 
       const result = await tool.handler(
         { identifierType: 'user', identifier: 'username-1' },
@@ -187,7 +187,7 @@ describe('entityRiskScoreTool', () => {
           ],
         },
       ]);
-      createGetRiskScores.mockReturnValue(mockGetRiskScores);
+      mockCreateGetRiskScores.mockReturnValue(mockGetRiskScores);
 
       const alertData = { 'kibana.alert.rule.name': 'Test Rule' };
       mockEsClient.asCurrentUser.search.mockResolvedValue({
@@ -221,7 +221,7 @@ describe('entityRiskScoreTool', () => {
 
     it('handles ES client failures', async () => {
       const mockGetRiskScores = jest.fn().mockRejectedValue(new Error('ES error'));
-      createGetRiskScores.mockReturnValue(mockGetRiskScores);
+      mockCreateGetRiskScores.mockReturnValue(mockGetRiskScores);
 
       const result = await tool.handler(
         { identifierType: 'host', identifier: 'hostname-1' },

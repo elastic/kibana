@@ -10,14 +10,14 @@ import React from 'react';
 import { TestProviders } from '../../common/mock';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 import { useAgentBuilderAttachment } from './use_agent_builder_attachment';
-import type { OnechatPluginStart, OpenConversationFlyoutReturn } from '@kbn/onechat-plugin/public';
+import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
 
 const mockFlyoutRef = {
   close: jest.fn(),
 };
 
 const mockOpenConversationFlyout = jest.fn<
-  OpenConversationFlyoutReturn,
+  unknown,
   Parameters<OnechatPluginStart['openConversationFlyout']>
 >(() => ({
   flyoutRef: mockFlyoutRef,
@@ -37,7 +37,8 @@ const createWrapper = (onechatService?: OnechatPluginStart) => {
 };
 
 const mockOnechatService: OnechatPluginStart = {
-  openConversationFlyout: mockOpenConversationFlyout,
+  openConversationFlyout:
+    mockOpenConversationFlyout as OnechatPluginStart['openConversationFlyout'],
   tools: {} as OnechatPluginStart['tools'],
   setConversationFlyoutActiveConfig: jest.fn(),
   clearConversationFlyoutActiveConfig: jest.fn(),
@@ -151,7 +152,7 @@ describe('useAgentBuilderAttachment', () => {
     });
 
     const callArgs = mockOpenConversationFlyout.mock.calls[0][0];
-    const attachment = callArgs.attachments[0];
+    const attachment = callArgs?.attachments?.length ? callArgs?.attachments[0] : { id: '' };
 
     expect(attachment.id).toBe('alert-1234567890');
     expect(attachment.id).toMatch(/^alert-\d+$/);
@@ -167,7 +168,9 @@ describe('useAgentBuilderAttachment', () => {
     });
 
     const callArgs = mockOpenConversationFlyout.mock.calls[0][0];
-    const attachment = callArgs.attachments[0];
+    const attachment = callArgs?.attachments?.length
+      ? callArgs?.attachments[0]
+      : { getContent: jest.fn() };
     const content = await attachment.getContent();
 
     expect(content).toEqual({ alert: 'test alert data' });

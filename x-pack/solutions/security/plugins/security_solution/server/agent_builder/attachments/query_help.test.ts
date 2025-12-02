@@ -95,7 +95,7 @@ describe('createQueryHelpAttachmentType', () => {
       expect(tools).toBeDefined();
       if (tools) {
         expect(tools).toContain(platformCoreTools.generateEsql);
-        expect(tools).toContain('platformCoreTools.productDocumentation');
+        expect(tools).toContain(platformCoreTools.productDocumentation);
       }
     });
   });
