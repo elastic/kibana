@@ -252,4 +252,34 @@ describe('convertJsonSchemaToZod', () => {
     const zodSchema = convertJsonSchemaToZod(jsonSchema);
     expect(zodSchema).toBeDefined();
   });
+
+  describe('edge cases - defensive checks', () => {
+    it('should handle null schema gracefully', () => {
+      const zodSchema = convertJsonSchemaToZod(null as any);
+      expect(zodSchema).toBeDefined();
+      // Should return z.any() as fallback
+      expect(zodSchema.parse('anything')).toBe('anything');
+    });
+
+    it('should handle undefined schema gracefully', () => {
+      const zodSchema = convertJsonSchemaToZod(undefined as any);
+      expect(zodSchema).toBeDefined();
+      // Should return z.any() as fallback
+      expect(zodSchema.parse('anything')).toBe('anything');
+    });
+
+    it('should handle string input (invalid)', () => {
+      const zodSchema = convertJsonSchemaToZod('invalid' as any);
+      expect(zodSchema).toBeDefined();
+      // Should return z.any() as fallback
+      expect(zodSchema.parse('anything')).toBe('anything');
+    });
+
+    it('should handle number input (invalid)', () => {
+      const zodSchema = convertJsonSchemaToZod(123 as any);
+      expect(zodSchema).toBeDefined();
+      // Should return z.any() as fallback
+      expect(zodSchema.parse('anything')).toBe('anything');
+    });
+  });
 });

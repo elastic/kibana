@@ -203,4 +203,73 @@ describe('getWorkflowContextSchema - Nested Objects', () => {
       }
     }
   });
+
+  describe('edge cases - defensive checks', () => {
+    it('should handle properties with null schema values gracefully', () => {
+      const workflow: WorkflowDefinitionForContext = {
+        version: '1',
+        name: 'Test Workflow',
+        enabled: true,
+        triggers: [{ type: 'manual' }],
+        inputs: {
+          properties: {
+            name: null,
+            email: { type: 'string', format: 'email' },
+            age: null,
+          },
+        } as any,
+        steps: [{ name: 'step1', type: 'console' }],
+      };
+
+      // Should not crash when properties contain null values
+      expect(() => {
+        const contextSchema = getWorkflowContextSchema(workflow);
+        expect(contextSchema).toBeDefined();
+      }).not.toThrow();
+    });
+
+    it('should handle properties with undefined schema values gracefully', () => {
+      const workflow: WorkflowDefinitionForContext = {
+        version: '1',
+        name: 'Test Workflow',
+        enabled: true,
+        triggers: [{ type: 'manual' }],
+        inputs: {
+          properties: {
+            name: undefined,
+            email: { type: 'string', format: 'email' },
+          },
+        } as any,
+        steps: [{ name: 'step1', type: 'console' }],
+      };
+
+      // Should not crash when properties contain undefined values
+      expect(() => {
+        const contextSchema = getWorkflowContextSchema(workflow);
+        expect(contextSchema).toBeDefined();
+      }).not.toThrow();
+    });
+
+    it('should handle properties with string schema values (invalid) gracefully', () => {
+      const workflow: WorkflowDefinitionForContext = {
+        version: '1',
+        name: 'Test Workflow',
+        enabled: true,
+        triggers: [{ type: 'manual' }],
+        inputs: {
+          properties: {
+            name: 'invalid string schema',
+            email: { type: 'string', format: 'email' },
+          },
+        } as any,
+        steps: [{ name: 'step1', type: 'console' }],
+      };
+
+      // Should not crash when properties contain invalid schema values
+      expect(() => {
+        const contextSchema = getWorkflowContextSchema(workflow);
+        expect(contextSchema).toBeDefined();
+      }).not.toThrow();
+    });
+  });
 });

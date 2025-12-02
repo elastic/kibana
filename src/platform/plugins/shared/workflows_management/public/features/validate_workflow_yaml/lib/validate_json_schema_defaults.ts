@@ -53,7 +53,14 @@ export function validateJsonSchemaDefaults(
 
   // Normalize inputs to JSON Schema format
   const normalizedInputs = normalizeInputsToJsonSchema(inputs);
-  if (!normalizedInputs?.properties) {
+  // Defensive check: ensure normalizedInputs has valid properties object
+  if (
+    !normalizedInputs ||
+    !normalizedInputs.properties ||
+    typeof normalizedInputs.properties !== 'object' ||
+    normalizedInputs.properties === null ||
+    Array.isArray(normalizedInputs.properties)
+  ) {
     return errors;
   }
 
@@ -62,38 +69,54 @@ export function validateJsonSchemaDefaults(
   const propertySchemas = new Map<string, { schema: JSONSchema7; fullPath: string[] }>();
 
   function buildPropertyMap(properties: Record<string, JSONSchema7>, path: string[] = []): void {
+    // Defensive check: ensure properties is a valid object
+    if (!properties || typeof properties !== 'object' || Array.isArray(properties)) {
+      return;
+    }
+
     for (const [propName, propSchema] of Object.entries(properties)) {
-      const fullPath = [...path, propName];
+      // Skip null/undefined schemas (can happen when YAML is partially parsed)
+      if (propSchema && typeof propSchema === 'object' && !Array.isArray(propSchema)) {
+        const fullPath = [...path, propName];
 
-      // Resolve $ref if present
-      let resolvedSchema = propSchema;
-      if (propSchema.$ref) {
-        const resolved = resolveRef(propSchema.$ref, normalizedInputs);
-        if (resolved) {
-          resolvedSchema = resolved;
-        }
-      }
-
-      // Store the resolved schema for validation
-      // For nested properties, we need to validate against the property's own schema, not the parent
-      propertySchemas.set(fullPath.join('.'), { schema: resolvedSchema, fullPath });
-
-      // Recursively handle nested properties (including in resolved $ref schemas)
-      // When we recurse, we pass the fullPath so nested properties get keys like 'inputs.properties.analyst.name'
-      if (resolvedSchema.type === 'object' && resolvedSchema.properties) {
-        // Filter out boolean values (JSONSchema7Definition can be JSONSchema7 | boolean)
-        const filteredProperties: Record<string, JSONSchema7> = {};
-        for (const [key, schema] of Object.entries(resolvedSchema.properties)) {
-          if (typeof schema === 'object' && schema !== null) {
-            filteredProperties[key] = schema as JSONSchema7;
+        // Resolve $ref if present
+        let resolvedSchema = propSchema;
+        if (propSchema.$ref) {
+          const resolved = resolveRef(propSchema.$ref, normalizedInputs);
+          if (resolved) {
+            resolvedSchema = resolved;
           }
         }
-        buildPropertyMap(filteredProperties, fullPath);
+
+        // Store the resolved schema for validation
+        // For nested properties, we need to validate against the property's own schema, not the parent
+        propertySchemas.set(fullPath.join('.'), { schema: resolvedSchema, fullPath });
+
+        // Recursively handle nested properties (including in resolved $ref schemas)
+        // When we recurse, we pass the fullPath so nested properties get keys like 'inputs.properties.analyst.name'
+        if (resolvedSchema.type === 'object' && resolvedSchema.properties) {
+          // Filter out boolean values (JSONSchema7Definition can be JSONSchema7 | boolean)
+          const filteredProperties: Record<string, JSONSchema7> = {};
+          for (const [key, schema] of Object.entries(resolvedSchema.properties)) {
+            if (typeof schema === 'object' && schema !== null) {
+              filteredProperties[key] = schema as JSONSchema7;
+            }
+          }
+          buildPropertyMap(filteredProperties, fullPath);
+        }
       }
     }
   }
 
-  buildPropertyMap(normalizedInputs.properties, ['inputs', 'properties']);
+  // Only build property map if properties exist and is a valid object (not array, not null)
+  if (
+    normalizedInputs.properties &&
+    typeof normalizedInputs.properties === 'object' &&
+    normalizedInputs.properties !== null &&
+    !Array.isArray(normalizedInputs.properties)
+  ) {
+    buildPropertyMap(normalizedInputs.properties, ['inputs', 'properties']);
+  }
 
   // Also build a map for definitions (for $ref schemas)
   if (normalizedInputs.definitions || normalizedInputs.$defs) {

@@ -162,6 +162,94 @@ describe('normalizeInputsToJsonSchema', () => {
     expect(result).toBeUndefined();
   });
 
+  describe('edge cases - partially parsed YAML (defensive checks)', () => {
+    it('should handle string input (partially typed "properties")', () => {
+      // Simulates user typing "properties:" in YAML editor
+      const result = normalizeInputsToJsonSchema('properties' as any);
+      expect(result).toBeUndefined();
+    });
+
+    it('should handle number input', () => {
+      const result = normalizeInputsToJsonSchema(123 as any);
+      expect(result).toBeUndefined();
+    });
+
+    it('should handle boolean input', () => {
+      const result = normalizeInputsToJsonSchema(true as any);
+      expect(result).toBeUndefined();
+    });
+
+    it('should handle null input', () => {
+      const result = normalizeInputsToJsonSchema(null as any);
+      expect(result).toBeUndefined();
+    });
+
+    it('should handle empty string input', () => {
+      const result = normalizeInputsToJsonSchema('' as any);
+      expect(result).toBeUndefined();
+    });
+
+    it('should handle object without properties key', () => {
+      const result = normalizeInputsToJsonSchema({ foo: 'bar' } as any);
+      expect(result).toBeUndefined();
+    });
+
+    it('should handle object with null properties', () => {
+      const result = normalizeInputsToJsonSchema({ properties: null } as any);
+      expect(result).toBeUndefined();
+    });
+
+    it('should handle object with string properties', () => {
+      const result = normalizeInputsToJsonSchema({ properties: 'invalid' } as any);
+      expect(result).toBeUndefined();
+    });
+
+    it('should handle object with array properties (invalid)', () => {
+      const result = normalizeInputsToJsonSchema({ properties: [] } as any);
+      // Should return undefined or handle gracefully (array is not valid properties)
+      expect(result).toBeUndefined();
+    });
+
+    it('should handle object with properties containing null values', () => {
+      const result = normalizeInputsToJsonSchema({
+        properties: {
+          name: null,
+          age: { type: 'number' },
+        },
+      } as any);
+      // Should not crash, but may return undefined or handle gracefully
+      expect(result).toBeDefined();
+      expect(result?.properties?.age).toEqual({ type: 'number' });
+    });
+
+    it('should handle object with properties containing string values (invalid schema)', () => {
+      const result = normalizeInputsToJsonSchema({
+        properties: {
+          name: 'invalid string schema',
+          age: { type: 'number' },
+        },
+      } as any);
+      // Should not crash
+      expect(result).toBeDefined();
+    });
+
+    it('should handle deeply nested null values', () => {
+      const result = normalizeInputsToJsonSchema({
+        properties: {
+          user: {
+            type: 'object',
+            properties: {
+              name: null,
+              email: { type: 'string' },
+            },
+          },
+        },
+      } as any);
+      // Should not crash
+      expect(result).toBeDefined();
+    });
+  });
+
   it('should handle nested object example from requirements', () => {
     const inputs = {
       properties: {

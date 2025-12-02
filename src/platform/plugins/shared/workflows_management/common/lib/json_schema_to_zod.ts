@@ -163,7 +163,12 @@ function hasValidationConstraints(jsonSchema: JSONSchema7): boolean {
  * @param jsonSchema - The JSON Schema to convert
  * @returns A Zod schema equivalent to the JSON Schema
  */
-export function convertJsonSchemaToZod(jsonSchema: JSONSchema7): z.ZodType {
+export function convertJsonSchemaToZod(jsonSchema: JSONSchema7 | null | undefined): z.ZodType {
+  // Defensive check: handle null/undefined schemas (crash prevention)
+  if (!jsonSchema || typeof jsonSchema !== 'object') {
+    return z.any();
+  }
+
   // For nested objects, always use our recursive converter to ensure proper structure
   // This is critical for variable validation to work correctly with nested paths
   if (jsonSchema.type === 'object' && jsonSchema.properties) {

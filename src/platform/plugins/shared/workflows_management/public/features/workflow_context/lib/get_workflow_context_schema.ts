@@ -52,26 +52,29 @@ export function getWorkflowContextSchema(
 
   if (normalizedInputs?.properties) {
     for (const [propertyName, propertySchema] of Object.entries(normalizedInputs.properties)) {
-      const jsonSchema = propertySchema as JSONSchema7;
+      // Skip null/undefined schemas (can happen when YAML is partially parsed)
+      if (propertySchema && typeof propertySchema === 'object') {
+        const jsonSchema = propertySchema as JSONSchema7;
 
-      // Convert JSON Schema to Zod schema
-      // Note: convertJsonSchemaToZod already handles defaults and optional for nested properties
-      // We only need to apply defaults/optional at the top level here
-      let valueSchema: z.ZodType = convertJsonSchemaToZod(jsonSchema);
+        // Convert JSON Schema to Zod schema
+        // Note: convertJsonSchemaToZod already handles defaults and optional for nested properties
+        // We only need to apply defaults/optional at the top level here
+        let valueSchema: z.ZodType = convertJsonSchemaToZod(jsonSchema);
 
-      // Check if this property is required at the top level
-      const isRequired = normalizedInputs.required?.includes(propertyName) ?? false;
+        // Check if this property is required at the top level
+        const isRequired = normalizedInputs.required?.includes(propertyName) ?? false;
 
-      // Apply default value if present (default() automatically makes the field optional)
-      if (jsonSchema.default !== undefined) {
-        valueSchema = valueSchema.default(jsonSchema.default);
-      } else if (!isRequired) {
-        // Only apply optional if no default and not required
-        // (default() already makes it optional, so we don't need both)
-        valueSchema = valueSchema.optional();
+        // Apply default value if present (default() automatically makes the field optional)
+        if (jsonSchema.default !== undefined) {
+          valueSchema = valueSchema.default(jsonSchema.default);
+        } else if (!isRequired) {
+          // Only apply optional if no default and not required
+          // (default() already makes it optional, so we don't need both)
+          valueSchema = valueSchema.optional();
+        }
+
+        inputsObject[propertyName] = valueSchema;
       }
-
-      inputsObject[propertyName] = valueSchema;
     }
   }
 

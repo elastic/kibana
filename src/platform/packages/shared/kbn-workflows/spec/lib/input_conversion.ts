@@ -111,8 +111,21 @@ export function normalizeInputsToJsonSchema(
   }
 
   // If it's already in the new format (has properties), return as-is
-  if ('properties' in inputs && typeof inputs === 'object' && inputs !== null) {
-    return inputs as WorkflowInputsJsonSchemaType;
+  // Check typeof first to avoid 'in' operator error on primitives (e.g., when YAML is partially parsed)
+  if (
+    typeof inputs === 'object' &&
+    inputs !== null &&
+    !Array.isArray(inputs) &&
+    'properties' in inputs
+  ) {
+    const inputsWithProperties = inputs as { properties?: unknown };
+    if (
+      typeof inputsWithProperties.properties === 'object' &&
+      inputsWithProperties.properties !== null &&
+      !Array.isArray(inputsWithProperties.properties)
+    ) {
+      return inputs as WorkflowInputsJsonSchemaType;
+    }
   }
 
   // If it's an array, convert it

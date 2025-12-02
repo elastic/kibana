@@ -162,4 +162,276 @@ inputs:
     expect(errors[0].startLineNumber).toBe(10);
     expect(errors[0].message).toContain('email');
   });
+
+  describe('edge cases - partially parsed YAML (defensive checks)', () => {
+    it('should handle null yamlDocument gracefully', () => {
+      const errors = validateJsonSchemaDefaults(null, {} as any);
+      expect(errors).toEqual([]);
+    });
+
+    it('should handle inputs as string (partially typed)', () => {
+      const yaml = `
+name: Test Workflow
+inputs: properties
+`;
+      const doc = parseDocument(yaml);
+      const workflowDefinition = {
+        inputs: 'properties' as any,
+      };
+
+      const errors = validateJsonSchemaDefaults(doc, workflowDefinition as any);
+      expect(errors).toEqual([]);
+    });
+
+    it('should handle inputs as number', () => {
+      const yaml = `
+name: Test Workflow
+inputs: 123
+`;
+      const doc = parseDocument(yaml);
+      const workflowDefinition = {
+        inputs: 123 as any,
+      };
+
+      const errors = validateJsonSchemaDefaults(doc, workflowDefinition as any);
+      expect(errors).toEqual([]);
+    });
+
+    it('should handle inputs with null properties', () => {
+      const yaml = `
+name: Test Workflow
+inputs:
+  properties: null
+`;
+      const doc = parseDocument(yaml);
+      const workflowDefinition = {
+        inputs: {
+          properties: null,
+        } as any,
+      };
+
+      const errors = validateJsonSchemaDefaults(doc, workflowDefinition as any);
+      expect(errors).toEqual([]);
+    });
+
+    it('should handle inputs with string properties', () => {
+      const yaml = `
+name: Test Workflow
+inputs:
+  properties: invalid
+`;
+      const doc = parseDocument(yaml);
+      const workflowDefinition = {
+        inputs: {
+          properties: 'invalid',
+        } as any,
+      };
+
+      const errors = validateJsonSchemaDefaults(doc, workflowDefinition as any);
+      expect(errors).toEqual([]);
+    });
+
+    it('should handle properties with null schema values', () => {
+      const yaml = `
+name: Test Workflow
+inputs:
+  properties:
+    name: null
+    email:
+      type: string
+      default: "test@example.com"
+`;
+      const doc = parseDocument(yaml);
+      const workflowDefinition = {
+        inputs: {
+          properties: {
+            name: null,
+            email: {
+              type: 'string',
+              default: 'test@example.com',
+            },
+          },
+        } as any,
+      };
+
+      const errors = validateJsonSchemaDefaults(doc, workflowDefinition as any);
+      // Should not crash, may or may not have errors for valid email
+      expect(Array.isArray(errors)).toBe(true);
+    });
+
+    it('should handle properties with string schema values (invalid)', () => {
+      const yaml = `
+name: Test Workflow
+inputs:
+  properties:
+    name: invalid string schema
+    email:
+      type: string
+      default: "test@example.com"
+`;
+      const doc = parseDocument(yaml);
+      const workflowDefinition = {
+        inputs: {
+          properties: {
+            name: 'invalid string schema',
+            email: {
+              type: 'string',
+              default: 'test@example.com',
+            },
+          },
+        } as any,
+      };
+
+      const errors = validateJsonSchemaDefaults(doc, workflowDefinition as any);
+      // Should not crash
+      expect(Array.isArray(errors)).toBe(true);
+    });
+
+    it('should handle nested properties with null values', () => {
+      const yaml = `
+name: Test Workflow
+inputs:
+  properties:
+    user:
+      type: object
+      properties:
+        name: null
+        email:
+          type: string
+          default: "test@example.com"
+`;
+      const doc = parseDocument(yaml);
+      const workflowDefinition = {
+        inputs: {
+          properties: {
+            user: {
+              type: 'object',
+              properties: {
+                name: null,
+                email: {
+                  type: 'string',
+                  default: 'test@example.com',
+                },
+              },
+            },
+          },
+        } as any,
+      };
+
+      const errors = validateJsonSchemaDefaults(doc, workflowDefinition as any);
+      // Should not crash
+      expect(Array.isArray(errors)).toBe(true);
+    });
+
+    it('should handle $ref with null resolved schema', () => {
+      const yaml = `
+name: Test Workflow
+inputs:
+  properties:
+    user:
+      $ref: "#/definitions/User"
+  definitions:
+    User: null
+`;
+      const doc = parseDocument(yaml);
+      const workflowDefinition = {
+        inputs: {
+          properties: {
+            user: {
+              $ref: '#/definitions/User',
+            },
+          },
+          definitions: {
+            User: null,
+          },
+        } as any,
+      };
+
+      const errors = validateJsonSchemaDefaults(doc, workflowDefinition as any);
+      // Should not crash
+      expect(Array.isArray(errors)).toBe(true);
+    });
+
+    it('should handle malformed YAML that throws during toJSON', () => {
+      // Create a mock document that throws
+      const doc = {
+        toJSON: () => {
+          throw new Error('Malformed YAML');
+        },
+      } as any;
+
+      const workflowDefinition = {
+        inputs: {
+          properties: {
+            name: { type: 'string' },
+          },
+        },
+      };
+
+      const errors = validateJsonSchemaDefaults(doc, workflowDefinition as any);
+      // Should fallback to workflowDefinition inputs and not crash
+      expect(Array.isArray(errors)).toBe(true);
+    });
+
+    it('should handle properties that are arrays (invalid structure)', () => {
+      const yaml = `
+name: Test Workflow
+inputs:
+  properties: []
+`;
+      const doc = parseDocument(yaml);
+      const workflowDefinition = {
+        inputs: {
+          properties: [],
+        } as any,
+      };
+
+      const errors = validateJsonSchemaDefaults(doc, workflowDefinition as any);
+      expect(errors).toEqual([]);
+    });
+
+    it('should handle deeply nested null values', () => {
+      const yaml = `
+name: Test Workflow
+inputs:
+  properties:
+    level1:
+      type: object
+      properties:
+        level2:
+          type: object
+          properties:
+            level3: null
+            valid:
+              type: string
+              default: "test"
+`;
+      const doc = parseDocument(yaml);
+      const workflowDefinition = {
+        inputs: {
+          properties: {
+            level1: {
+              type: 'object',
+              properties: {
+                level2: {
+                  type: 'object',
+                  properties: {
+                    level3: null,
+                    valid: {
+                      type: 'string',
+                      default: 'test',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        } as any,
+      };
+
+      const errors = validateJsonSchemaDefaults(doc, workflowDefinition as any);
+      // Should not crash
+      expect(Array.isArray(errors)).toBe(true);
+    });
+  });
 });
