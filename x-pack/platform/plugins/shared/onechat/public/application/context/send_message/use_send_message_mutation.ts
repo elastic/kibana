@@ -87,13 +87,9 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       setPendingMessage(message);
       removeError();
       messageControllerRef.current = new AbortController();
-      // Convert AttachmentInput[] to Attachment[] for optimistic round
-      const attachmentsWithIds = (attachments ?? [])
-        .filter((att): att is typeof att & { id: string } => Boolean(att.id))
-        .map((att) => ({ ...att, id: att.id }));
       conversationActions.addOptimisticRound({
         userMessage: message,
-        attachments: attachmentsWithIds,
+        attachments: attachments ?? [],
       });
       if (isNewConversation) {
         if (!agentId) {
@@ -156,6 +152,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
         throw new Error('Pending message is not present');
       }
 
+      // Use stored attachments for retry
       mutate({ message: pendingMessage });
     },
     canCancel,

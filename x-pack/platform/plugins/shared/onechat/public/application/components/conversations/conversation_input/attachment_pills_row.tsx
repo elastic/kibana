@@ -8,11 +8,12 @@
 import { EuiBadgeGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { AttachmentType } from '@kbn/onechat-common/attachments';
+import type { Attachment } from '@kbn/onechat-common/attachments';
+import { AttachmentType } from '@kbn/onechat-common/attachments';
 import { AttachmentPill } from './attachment_pill';
 
 export interface AttachmentPillsRowProps {
-  attachments: Array<{ id: string; type: AttachmentType; hidden?: boolean }>;
+  attachments: Attachment[];
 }
 
 const labels = {
@@ -22,7 +23,7 @@ const labels = {
 };
 
 export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({ attachments }) => {
-  const visibleAttachments = attachments.filter((attachment) => !attachment.hidden);
+  const visibleAttachments: Attachment[] = attachments.filter((attachment) => !attachment.hidden);
 
   if (visibleAttachments.length === 0) {
     return null;
@@ -35,8 +36,12 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({ attachme
       aria-label={labels.attachments}
       data-test-subj="onechatAttachmentPillsRow"
     >
-      {visibleAttachments.map((attachment) => (
-        <AttachmentPill key={attachment.id} id={attachment.id} type={attachment.type} />
+      {visibleAttachments.map((attachment: Attachment) => (
+        <AttachmentPill
+          key={attachment.id}
+          id={attachment.id}
+          type={attachment.type as AttachmentType}
+        />
       ))}
     </EuiBadgeGroup>
   );
