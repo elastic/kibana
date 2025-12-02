@@ -35,7 +35,7 @@ const renderWithSecretFields = ({
           />
         );
       })}
-      // Will be ignored because it has no label
+      {/* will be ignored because it has no label */}
       <UseField path="secrets.authType" />
       <EncryptedFieldsCallout isEdit={isEdit} isMissingSecrets={isMissingSecrets} />
     </FormTestProvider>
