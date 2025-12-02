@@ -445,7 +445,7 @@ export function LayerPanel(props: LayerPanelProps) {
                       />
                     </EuiToolTip>
                   </EuiFlexItem>
-                  {supportsMultipleLayers ? (
+                  {supportsMultipleLayers && !isTextBasedLanguage ? (
                     <EuiFlexItem grow={false}>
                       <EuiToolTip
                         content={layerActions.cloneLayerAction.displayName}
@@ -483,6 +483,7 @@ export function LayerPanel(props: LayerPanelProps) {
             )}
             <ESQLEditor
               uiSettings={core.uiSettings}
+              http={core.http}
               isTextBasedLanguage={isTextBasedLanguage}
               framePublicAPI={framePublicAPI}
               layerId={layerId}
