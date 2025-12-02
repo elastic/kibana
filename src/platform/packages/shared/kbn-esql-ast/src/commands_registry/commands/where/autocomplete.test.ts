@@ -280,8 +280,8 @@ describe('WHERE Autocomplete', () => {
     });
 
     test('suggestions after IN', async () => {
-      await whereExpectSuggestions('from index | WHERE doubleField in ', ['( $0 )']);
-      await whereExpectSuggestions('from index | WHERE doubleField not in ', ['( $0 )']);
+      await whereExpectSuggestions('from index | WHERE doubleField in ', ['($0)']);
+      await whereExpectSuggestions('from index | WHERE doubleField not in ', ['($0)']);
       const expectedFields = getFieldNamesByType(['double']);
       mockFieldsWithTypes(mockCallbacks, expectedFields);
       await whereExpectSuggestions(
