@@ -72,25 +72,27 @@ function buildMetricMetadataMapFromEsql(
       continue;
     }
 
-    // Extract dimension field names that have values in the sample
-    const dimensions = columns.filter((fieldName, index) => {
-      if (!dimensionsSet.has(fieldName) || fieldName === semconvFlat.unit.name) {
-        return false;
-      }
-      const value = values[0][index];
-      return value !== null && value !== undefined;
-    });
+    const { dimensions, unitFromSample } = columns.reduce<{
+      dimensions: string[];
+      unitFromSample?: string;
+    }>(
+      (acc, fieldName, index) => {
+        const value = values[0][index];
 
-    // Extract unit value from the sample if present and valid
-    const unitIndex = columns.indexOf(semconvFlat.unit.name);
-    const unitValue = unitIndex !== -1 ? values[0][unitIndex] : undefined;
-    const unitFromSample = typeof unitValue === 'string' ? unitValue : undefined;
+        if (fieldName === semconvFlat.unit.name) {
+          return typeof value === 'string' ? { ...acc, unitFromSample: value } : acc;
+        }
 
-    entries.set(mapKey, {
-      dimensions,
-      unitFromSample,
-      totalHits: values[0].length,
-    });
+        if (dimensionsSet.has(fieldName) && value !== null && value !== undefined) {
+          return { ...acc, dimensions: [...acc.dimensions, fieldName] };
+        }
+
+        return acc;
+      },
+      { dimensions: [] }
+    );
+
+    entries.set(mapKey, { dimensions, unitFromSample, totalHits: values[0].length });
   }
 
   return entries;

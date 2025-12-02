@@ -244,7 +244,7 @@ const ChartItem = React.memo(
               metric,
               dimensions,
               filters,
-              requestParams: fetchParams,
+              fetchParams,
             })
           : '';
       }, [metric, dimensions, filters, fetchParams]);

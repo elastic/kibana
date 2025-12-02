@@ -26,7 +26,7 @@ interface CreateESQLQueryParams {
   metric: MetricField;
   dimensions?: Dimension[];
   filters?: DimensionFilters;
-  requestParams?: Pick<ChartSectionProps, 'fetchParams'>['fetchParams'];
+  fetchParams?: Pick<ChartSectionProps, 'fetchParams'>['fetchParams'];
 }
 
 const separator = '\u203A'.normalize('NFC');
@@ -67,18 +67,18 @@ function castFieldIfNeeded(fieldName: string, fieldType: string | undefined): st
  * @param metric - The full metric field object, including dimension type information.
  * @param dimensions - An array of selected dimension names.
  * @param filters - A map of field names to arrays of values to filter by.
- * @param requestParams - The request parameters from the chart section used to extract the WHERE clause.
+ * @param fetchParams - The request parameters from the chart section used to extract the WHERE clause.
  * @returns A complete ESQL query string.
  */
 export function createESQLQuery({
   metric,
   dimensions = [],
   filters = {},
-  requestParams,
+  fetchParams,
 }: CreateESQLQueryParams) {
-  const whereCommand = isOfAggregateQueryType(requestParams?.query)
+  const whereCommand = isOfAggregateQueryType(fetchParams?.query)
     ? Walker.find(
-        Parser.parse(requestParams.query.esql).root,
+        Parser.parse(fetchParams.query.esql).root,
         (node) => node.type === 'command' && node.name === 'where'
       )
     : undefined;
