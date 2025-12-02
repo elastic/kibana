@@ -11,7 +11,7 @@
     "configPath": ["xpack", "agentBuilderPlatform"],
     "requiredPlugins": ["onechat"],
     "requiredBundles": [],
-    "optionalPlugins": ["cases", "workflowsManagement"],
+    "optionalPlugins": ["cases", "llmTasks", "workflowsManagement"],
     "extraPublicDirs": []
   }
 }

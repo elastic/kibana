@@ -7,6 +7,7 @@
 
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
+import { productDocumentationTool } from './product_documentation';
 import type {
   AgentBuilderPlatformPluginStart,
   PluginSetupDependencies,
@@ -41,6 +42,7 @@ export const registerTools = ({
     listIndicesTool(),
     indexExplorerTool(),
     createVisualizationTool(),
+    productDocumentationTool(coreSetup),
     casesTool(coreSetup),
   ];
 
