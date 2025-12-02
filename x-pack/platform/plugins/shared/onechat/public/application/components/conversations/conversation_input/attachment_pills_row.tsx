@@ -9,7 +9,7 @@ import { EuiBadgeGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { Attachment } from '@kbn/onechat-common/attachments';
-import { AttachmentType } from '@kbn/onechat-common/attachments';
+import type { AttachmentType } from '@kbn/onechat-common/attachments';
 import { AttachmentPill } from './attachment_pill';
 
 export interface AttachmentPillsRowProps {
