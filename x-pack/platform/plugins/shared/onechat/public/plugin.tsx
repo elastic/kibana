@@ -33,6 +33,7 @@ import {
   type OnechatInternalService,
 } from './services';
 import { createPublicToolContract } from './services/tools';
+import { registerStepDefinitions } from './step_types';
 import type {
   ConfigSchema,
   OnechatPluginSetup,
@@ -95,6 +96,10 @@ export class OnechatPlugin
 
       registerAnalytics({ analytics: core.analytics });
       registerLocators(deps.share);
+    }
+
+    if (deps.workflowsExtensions) {
+      registerStepDefinitions(deps.workflowsExtensions);
     }
 
     try {
