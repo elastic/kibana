@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { EuiSearchBarProps } from '@elastic/eui';
+import type { EuiInMemoryTableSearchBarProps, EuiSearchBarProps } from '@elastic/eui';
 import {
   EuiCallOut,
   EuiFlexGroup,
@@ -186,7 +186,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     updatePageState
   );
 
-  const handleSearchOnChange: EuiSearchBarProps['onChange'] = (search) => {
+  const handleSearchOnChange: EuiInMemoryTableSearchBarProps['onChange'] = (search) => {
     if (search.error !== null) {
       setSearchError(search.error.message);
       return;
@@ -234,7 +234,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     </EuiFlexItem>
   );
 
-  const search: EuiSearchBarProps = {
+  const search: EuiInMemoryTableSearchBarProps = {
     query: searchQueryText,
     onChange: handleSearchOnChange,
     box: {

@@ -6,7 +6,7 @@
  */
 
 import { EuiInMemoryTable } from '@elastic/eui';
-import type { EuiSearchBarProps, EuiTableSelectionType } from '@elastic/eui';
+import type { EuiInMemoryTableSearchBarProps, EuiTableSelectionType } from '@elastic/eui';
 import React, { useMemo, useState, useRef } from 'react';
 
 import type { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas';
@@ -37,7 +37,7 @@ export interface Props {
   rawData: Record<string, string[]> | null;
 }
 
-const search: EuiSearchBarProps = {
+const search: EuiInMemoryTableSearchBarProps = {
   box: {
     incremental: true,
   },

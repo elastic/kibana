@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiSearchBarProps } from '@elastic/eui';
+import type { EuiInMemoryTableSearchBarProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiConfirmModal,
@@ -259,7 +259,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
     openFlyout();
   }, [openFlyout]);
 
-  const search: EuiSearchBarProps = useMemo(
+  const search: EuiInMemoryTableSearchBarProps = useMemo(
     () => ({
       toolsRight: (
         <EuiFlexGroup gutterSize={'m'}>

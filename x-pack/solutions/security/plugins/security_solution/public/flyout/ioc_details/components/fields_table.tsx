@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiBasicTableColumn, EuiSearchBarProps } from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiInMemoryTableSearchBarProps } from '@elastic/eui';
 import { EuiInMemoryTable, useEuiFontSize } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
@@ -20,7 +20,7 @@ import {
   SecurityCellActionsTrigger,
 } from '../../../common/components/cell_actions';
 
-const euiTableSearchOptions: EuiSearchBarProps = {
+const euiTableSearchOptions: EuiInMemoryTableSearchBarProps = {
   box: {
     schema: true,
     incremental: true,

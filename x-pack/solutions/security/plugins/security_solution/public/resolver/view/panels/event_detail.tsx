@@ -10,7 +10,11 @@
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EuiBreadcrumb, EuiBasicTableColumn, EuiSearchBarProps } from '@elastic/eui';
+import type {
+  EuiBreadcrumb,
+  EuiBasicTableColumn,
+  EuiInMemoryTableSearchBarProps,
+} from '@elastic/eui';
 import { EuiSpacer, EuiText, EuiInMemoryTable } from '@elastic/eui';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
@@ -186,7 +190,7 @@ function EventDetailFields({ event, id }: { event: SafeResolverEvent; id: string
     return returnValue;
   }, [event]);
 
-  const search: EuiSearchBarProps = {
+  const search: EuiInMemoryTableSearchBarProps = {
     box: {
       incremental: true,
       schema: true,

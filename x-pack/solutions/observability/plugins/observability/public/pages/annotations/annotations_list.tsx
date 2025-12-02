@@ -7,7 +7,11 @@
 import { i18n } from '@kbn/i18n';
 
 import React, { useState } from 'react';
-import type { EuiBasicTableColumn, EuiTableSelectionType, EuiSearchBarProps } from '@elastic/eui';
+import type {
+  EuiBasicTableColumn,
+  EuiTableSelectionType,
+  EuiInMemoryTableSearchBarProps,
+} from '@elastic/eui';
 import { EuiInMemoryTable, EuiSpacer } from '@elastic/eui';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { DeleteAnnotationsModal } from '../../components/annotations/components/common/delete_annotations_modal';
@@ -72,7 +76,7 @@ export function AnnotationsList() {
     ];
   };
   const allTags = data?.items?.map((obj) => obj.tags ?? []).flat() ?? [];
-  const search: EuiSearchBarProps = {
+  const search: EuiInMemoryTableSearchBarProps = {
     toolsLeft: renderToolsLeft(),
     toolsRight: renderToolsRight(),
     box: {

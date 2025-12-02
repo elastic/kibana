@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { EuiSearchBarOnChangeArgs, EuiSearchBarProps, Search } from '@elastic/eui';
+import type {
+  EuiInMemoryTableSearchBarOnChangeArgs,
+  EuiInMemoryTableSearchBarProps,
+  Search,
+} from '@elastic/eui';
 import { EuiSearchBar } from '@elastic/eui';
 import type { ToolDefinition } from '@kbn/onechat-common';
 import { countBy } from 'lodash';
@@ -32,7 +36,7 @@ const getToolsTableSearchConfig = ({
 }: {
   matchesByTag: Record<string, number>;
   tags: string[];
-}): EuiSearchBarProps => ({
+}): EuiInMemoryTableSearchBarProps => ({
   box: {
     incremental: true,
     placeholder: labels.tools.searchToolsPlaceholder,
@@ -73,7 +77,7 @@ export const useToolsTableSearch = (): ToolsTableSearch => {
   }, [tools]);
 
   const handleChange = useCallback(
-    ({ query, queryText, error: searchError }: EuiSearchBarOnChangeArgs) => {
+    ({ query, queryText, error: searchError }: EuiInMemoryTableSearchBarOnChangeArgs) => {
       if (searchError) {
         return;
       }

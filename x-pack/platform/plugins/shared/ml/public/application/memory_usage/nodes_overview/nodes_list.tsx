@@ -6,7 +6,7 @@
  */
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { EuiSearchBarProps } from '@elastic/eui';
+import type { EuiInMemoryTableSearchBarProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -174,7 +174,7 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
 
   let tableSettings: object = useTableSettings<NodeItem>(items.length, pageState, updatePageState);
 
-  const search: EuiSearchBarProps = {
+  const search: EuiInMemoryTableSearchBarProps = {
     query: searchQueryText,
     onChange: (searchChange) => {
       if (searchChange.error !== null) {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiSearchBarProps } from '@elastic/eui';
+import type { EuiInMemoryTableSearchBarProps } from '@elastic/eui';
 import { EuiText, EuiIcon, EuiInMemoryTable, type HorizontalAlignment } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -141,7 +141,7 @@ export const Table = ({ loading, rows, onSearchChange, search, showActionsColumn
     [debouncedSearchOnChange]
   );
 
-  const searchBar: EuiSearchBarProps = {
+  const searchBar: EuiInMemoryTableSearchBarProps = {
     onChange: searchBarOnChange,
     box: {
       'data-test-subj': 'infraAssetDetailsMetadataSearchBarInput',
