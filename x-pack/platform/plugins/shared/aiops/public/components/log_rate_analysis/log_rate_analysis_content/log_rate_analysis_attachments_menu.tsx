@@ -31,7 +31,6 @@ import type { SignificantItem } from '@kbn/ml-agg-utils';
 import { CASES_TOAST_MESSAGES_TITLES } from '../../../cases/constants';
 import { useCasesModal } from '../../../hooks/use_cases_modal';
 import { useDataSource } from '../../../hooks/use_data_source';
-import type { LogRateAnalysisEmbeddableState } from '../../../../common/embeddables/log_rate_analysis/types';
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
@@ -87,7 +86,7 @@ export const LogRateAnalysisAttachmentsMenu = ({
             dataViewId: dataView.id,
             hidePanelTitles: false,
             ...(applyTimeRange && { timeRange }),
-          } as LogRateAnalysisEmbeddableState,
+          },
           references: [],
         },
         type: EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE,

@@ -37,7 +37,6 @@ import {
   CHANGE_POINT_DETECTION_VIEW_TYPE,
   EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
 } from '@kbn/aiops-change-point-detection/constants';
-import type { ChangePointEmbeddableState } from '../../../common/embeddables/change_point_chart/types';
 import { MaxSeriesControl } from './max_series_control';
 import { useCasesModal } from '../../hooks/use_cases_modal';
 import { useDataSource } from '../../hooks/use_data_source';
@@ -494,7 +493,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
             ...(dashboardAttachment.applyTimeRange ? { timeRange } : {}),
             maxSeriesToPlot: dashboardAttachment.maxSeriesToPlot,
             ...(selectedChangePoints[panelIndex]?.length ? { partitions: selectedPartitions } : {}),
-          } as ChangePointEmbeddableState,
+          },
           references: [],
         },
         type: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,

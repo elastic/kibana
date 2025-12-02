@@ -34,7 +34,6 @@ import type { RandomSamplerOption, RandomSamplerProbability } from '@kbn/ml-rand
 import { useCasesModal } from '../../hooks/use_cases_modal';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { CASES_TOAST_MESSAGES_TITLES } from '../../cases/constants';
-import type { PatternAnalysisEmbeddableState } from '../../../common/embeddables/pattern_analysis/types';
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
@@ -91,7 +90,7 @@ export const AttachmentsMenu = ({
             randomSamplerProbability,
             minimumTimeRangeOption: 'No minimum',
             ...(applyTimeRange && { timeRange }),
-          } as PatternAnalysisEmbeddableState,
+          },
           references: [],
         },
         type: EMBEDDABLE_PATTERN_ANALYSIS_TYPE,
