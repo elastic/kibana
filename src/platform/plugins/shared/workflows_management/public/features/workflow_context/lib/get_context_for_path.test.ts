@@ -14,8 +14,6 @@ import { z } from '@kbn/zod';
 import { getContextSchemaForPath } from './get_context_for_path';
 import { expectZodSchemaEqual } from '../../../../common/lib/zod/zod_utils';
 
-jest.mock('../../../../common/schema');
-
 describe('getContextSchemaForPath', () => {
   const definition = {
     version: '1' as const,

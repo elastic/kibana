@@ -13,8 +13,6 @@ import { z } from '@kbn/zod';
 import { getStepsCollectionSchema } from './get_steps_collection_schema';
 import { expectZodSchemaEqual } from '../../../../common/lib/zod/zod_utils';
 
-jest.mock('../../../../common/schema');
-
 describe('getStepsCollectionSchema', () => {
   it('should return empty steps collection schema for a step with no predecessors', () => {
     const definition = {

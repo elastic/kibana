@@ -137,8 +137,7 @@ function generateKibanaConnectors(): InternalConnectorContract[] {
  * Get registered step definitions from workflowExtensions
  */
 function getRegisteredStepDefinitions(): EnhancedInternalConnectorContract[] {
-  const workflowsExtensions = stepSchemas.getWorkflowsExtensions();
-  return workflowsExtensions.getAllStepDefinitions().map((stepDefinition) => {
+  return stepSchemas.getAllRegisteredStepDefinitions().map((stepDefinition) => {
     const extra: Partial<EnhancedInternalConnectorContract> = {};
     if (stepSchemas.isPublicStepDefinition(stepDefinition)) {
       extra.summary = stepDefinition.description;

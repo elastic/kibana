@@ -46,13 +46,8 @@ class StepSchemas {
    * Get the workflowExtensions instance.
    * Throws if not initialized.
    */
-  public getWorkflowsExtensions(): WorkflowsExtensions {
-    if (this.workflowsExtensions === null) {
-      throw new Error(
-        'StepSchemas has not been initialized. Call stepSchemas.initialize() during plugin startup.'
-      );
-    }
-    return this.workflowsExtensions;
+  public getAllRegisteredStepDefinitions(): PublicStepDefinition[] | ServerStepDefinition[] {
+    return this.workflowsExtensions?.getAllStepDefinitions() ?? [];
   }
 
   /**

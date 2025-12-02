@@ -15,8 +15,6 @@ import { insertStepSnippet } from './insert_step_snippet';
 import { createFakeMonacoModel } from '../../../../../common/mocks/monaco_model';
 import { prependIndentToLines } from '../prepend_indent_to_lines';
 
-jest.mock('../../../../../common/schema');
-
 describe('insertStepSnippet', () => {
   let generateBuiltInStepSnippetSpy: jest.SpyInstance;
   let generateConnectorSnippetSpy: jest.SpyInstance;

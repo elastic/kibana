@@ -30,8 +30,7 @@ export class CustomMonacoStepHandler extends BaseMonacoConnectorHandler {
     super('CustomMonacoStepHandler', 80, ['']); // Empty prefix, canHandle will check if the step is registered
     this.registeredStepsMap = new Map<string, PublicStepDefinition>(
       stepSchemas
-        .getWorkflowsExtensions()
-        .getAllStepDefinitions()
+        .getAllRegisteredStepDefinitions()
         .map((step) => [step.id, step as PublicStepDefinition])
     );
   }
