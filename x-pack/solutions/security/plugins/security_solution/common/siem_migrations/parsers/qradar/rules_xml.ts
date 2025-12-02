@@ -66,7 +66,7 @@ export class QradarRulesXmlParser extends XmlParser {
     return this.findDeepValue(parsedRuleData, 'newevent', 'severity');
   }
 
-  public async getResources(): Promise<ResourceTypeMap> {
+  public async getResources(): Promise<Partial<ResourceTypeMap>> {
     const parsedXml = await this.parse();
 
     const [sensordevicetypes] = await Promise.all([this.getSensortDeviceType(parsedXml)]);

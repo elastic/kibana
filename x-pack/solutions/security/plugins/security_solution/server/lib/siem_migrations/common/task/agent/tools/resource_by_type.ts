@@ -59,7 +59,11 @@ const SCHEMA = z.object({
     .describe(
       'The type of resource to retrieve. Must be one of the valid resource types for the migration vendor.'
     ),
-  names: z.array(z.string()).describe('A list of resource names to retrieve of the specified type'),
+  names: z
+    .array(z.string())
+    .describe(
+      'A list of names to retrieve of the specified type. Multiple names should be provided if all the resource are of same type'
+    ),
 });
 
 export const getResourceByTypeGetter =

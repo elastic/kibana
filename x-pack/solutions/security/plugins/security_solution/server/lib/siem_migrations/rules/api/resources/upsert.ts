@@ -91,9 +91,9 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
 
             if (rule.original_rule.vendor === 'splunk') {
               const resourceIdentifier = new RuleResourceIdentifier(rule.original_rule.vendor);
-              const resourcesToCreate = resourceIdentifier
-                .fromResources(resources)
-                .map<CreateSiemMigrationResourceInput>((resource) => ({
+              const identifiedMissingResources = await resourceIdentifier.fromResources(resources);
+              const resourcesToCreate =
+                identifiedMissingResources.map<CreateSiemMigrationResourceInput>((resource) => ({
                   ...resource,
                   migration_id: migrationId,
                 }));

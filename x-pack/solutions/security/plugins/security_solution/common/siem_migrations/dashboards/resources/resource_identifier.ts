@@ -19,6 +19,11 @@ export class DashboardResourceIdentifier extends ResourceIdentifier<OriginalDash
     }
     const splunkDashboardXMLPaser = new SplunkXmlDashboardParser(originalDashboardXMLString);
     const queries: string[] = await splunkDashboardXMLPaser.extractQueries();
-    return queries.flatMap((query) => this.identifier(query));
+    const resources: SiemMigrationResourceBase[] = [];
+    for (const query of queries) {
+      const identifiedResources = await this.identifier(query);
+      resources.push(...identifiedResources);
+    }
+    return resources;
   }
 }

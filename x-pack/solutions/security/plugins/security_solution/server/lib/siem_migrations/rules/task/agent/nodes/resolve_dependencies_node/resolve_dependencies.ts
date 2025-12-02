@@ -6,11 +6,11 @@
  */
 
 import { cleanMarkdown, generateAssistantComment } from '../../../../../common/task/util/comments';
-import type { GraphNode, MigrateRuleGraphParams } from '../../types';
+import type { GraphNode, ModelWithTools } from '../../types';
 import { QRADAR_DEPENDENCIES_RESOLVE_PROMPT } from './prompts';
 
 interface GetCreateResolveDepsNodeParams {
-  model: MigrateRuleGraphParams['model'];
+  model: ModelWithTools;
 }
 
 export const getResolveDepsNode = ({ model }: GetCreateResolveDepsNodeParams): GraphNode => {
