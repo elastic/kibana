@@ -15,7 +15,7 @@ const path = require('path');
 
 let cached = null;
 
-const loadVegaAndLite = () => {
+const loadVegaAndVegaLite = () => {
   if (cached) return cached;
 
   const sandbox = {
@@ -42,16 +42,16 @@ const loadVegaAndLite = () => {
     vegaLite: sandbox.window.vegaLite || sandbox.globalThis.vegaLite,
   };
 
-  // both vega nad vega-lite
+  // both Vega and Vega-Lite
   return cached;
 };
 
 jest.mock('vega', () => {
-  const { vega } = loadVegaAndLite();
+  const { vega } = loadVegaAndVegaLite();
   return { ...vega };
 });
 
 jest.mock('vega-lite', () => {
-  const { vegaLite } = loadVegaAndLite();
+  const { vegaLite } = loadVegaAndVegaLite();
   return { ...vegaLite };
 });
