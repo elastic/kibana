@@ -8,7 +8,6 @@
 import type { CodeBlockDetails } from '@kbn/elastic-assistant';
 import type { TimelineEventsDetailsItem } from '../../common/search_strategy';
 import type { Rule } from '../detection_engine/rule_management/logic';
-import { ESSENTIAL_ALERT_FIELDS } from '../../common/constants';
 
 export const LOCAL_STORAGE_KEY = `securityAssistant`;
 
@@ -22,21 +21,6 @@ export const getRawData = (data: TimelineEventsDetailsItem[]): Record<string, st
   data
     .filter(({ field }) => !field.startsWith('signal.'))
     .reduce((acc, { field, values }) => ({ ...acc, [field]: values ?? [] }), {});
-
-/**
- * Filters raw alert data to only include essential fields and stringifies the result.
- * This reduces context window usage by keeping only the most relevant information.
- */
-export const filterAndStringifyAlertData = (rawData: Record<string, string[]>): string => {
-  const filteredData = ESSENTIAL_ALERT_FIELDS.reduce((acc, key) => {
-    if (key in rawData) {
-      acc[key] = rawData[key];
-    }
-    return acc;
-  }, {} as Record<string, string[]>);
-
-  return JSON.stringify(filteredData);
-};
 
 export const sendToTimelineEligibleQueryTypes: Array<CodeBlockDetails['type']> = [
   'kql',

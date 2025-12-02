@@ -16,7 +16,8 @@ import { useAssistant } from '../document_details/right/hooks/use_assistant';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { NewAgentBuilderAttachment } from '../../agent_builder/components/new_agent_builder_attachment';
 import { useAgentBuilderAttachment } from '../../agent_builder/hooks/use_agent_builder_attachment';
-import { getRawData, filterAndStringifyAlertData } from '../../assistant/helpers';
+import { getRawData } from '../../assistant/helpers';
+import { filterAndStringifyAlertData } from '../../agent_builder/helpers';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { ALERT_ATTACHMENT_PROMPT } from '../../agent_builder/components/prompts';
 
@@ -39,6 +40,7 @@ export const PanelFooter = memo(() => {
     dataFormattedForFieldBrowser,
     isAlert,
   });
+  // TODO enable agent builder for EASE roles
   const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
 
   const alertData = useMemo(() => {
