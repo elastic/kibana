@@ -51,8 +51,6 @@ export interface StreamsTourContextValue {
   isCalloutDismissed: boolean;
   dismissCallout: () => void;
   startTour: (streamName?: string) => void;
-  isTourAvailable: boolean;
-  setTourAvailable: (available: boolean) => void;
   tourStreamName: string | null;
   setTourStreamName: (name: string | null) => void;
   getStepPropsByStepId: (stepId: StreamsTourStepId) => StreamsTourStepProps | undefined;
@@ -164,7 +162,6 @@ export function StreamsTourProvider({ children }: StreamsTourProviderProps) {
     STREAMS_TOUR_STATE_KEY
   );
 
-  const [isTourAvailable, setTourAvailable] = useState(false);
   const [tourStreamName, setTourStreamName] = useState<string | null>(
     persistedTourState?.tourStreamName ?? null
   );
@@ -175,16 +172,13 @@ export function StreamsTourProvider({ children }: StreamsTourProviderProps) {
     [attachmentsEnabled]
   );
 
-  const restoredTourState = useMemo<EuiTourState>(
-    () => ({
-      ...DEFAULT_TOUR_STATE,
-      ...(persistedTourState && {
-        currentTourStep: persistedTourState.currentTourStep,
-        isTourActive: persistedTourState.isTourActive,
-      }),
+  const restoredTourState: EuiTourState = {
+    ...DEFAULT_TOUR_STATE,
+    ...(persistedTourState && {
+      currentTourStep: persistedTourState.currentTourStep,
+      isTourActive: persistedTourState.isTourActive,
     }),
-    []
-  );
+  };
 
   const [baseTourStepProps, actions, tourState] = useEuiTour(
     stepsConfig as unknown as EuiStatelessTourSteps,
@@ -269,8 +263,6 @@ export function StreamsTourProvider({ children }: StreamsTourProviderProps) {
       isCalloutDismissed: isCalloutDismissed ?? false,
       dismissCallout,
       startTour,
-      isTourAvailable,
-      setTourAvailable,
       tourStreamName,
       setTourStreamName,
       getStepPropsByStepId,
@@ -282,8 +274,6 @@ export function StreamsTourProvider({ children }: StreamsTourProviderProps) {
       isCalloutDismissed,
       dismissCallout,
       startTour,
-      isTourAvailable,
-      setTourAvailable,
       tourStreamName,
       getStepPropsByStepId,
     ]

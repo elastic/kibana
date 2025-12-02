@@ -26,6 +26,14 @@ export const STEP_ID_TO_TAB: Record<StreamsTourStepId, string | undefined> = {
   advanced: 'advanced',
 };
 
+// Reverse mapping: tab name → tour step ID
+export const TAB_TO_TOUR_STEP_ID: Record<string, StreamsTourStepId | undefined> =
+  Object.fromEntries(
+    Object.entries(STEP_ID_TO_TAB)
+      .filter(([, tab]) => tab !== undefined)
+      .map(([stepId, tab]) => [tab, stepId as StreamsTourStepId])
+  );
+
 export const DEFAULT_TOUR_STATE: EuiTourState = {
   currentTourStep: 1,
   isTourActive: false,

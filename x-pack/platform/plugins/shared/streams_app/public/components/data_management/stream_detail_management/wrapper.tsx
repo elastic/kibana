@@ -11,8 +11,7 @@ import React from 'react';
 import { Streams } from '@kbn/streams-schema';
 import type { ReactNode } from 'react';
 import useAsync from 'react-use/lib/useAsync';
-import { useStreamsTour } from '../../streams_tour';
-import type { StreamsTourStepId } from '../../streams_tour';
+import { useStreamsTour, TAB_TO_TOUR_STEP_ID } from '../../streams_tour';
 import { DatasetQualityIndicator } from '@kbn/dataset-quality-plugin/public';
 import { calculateDataQuality } from '../../../util/calculate_data_quality';
 import { useStreamDocCountsFetch } from '../../../hooks/use_streams_doc_counts_fetch';
@@ -36,13 +35,6 @@ export type ManagementTabs = Record<
     label: ReactNode;
   }
 >;
-
-const TAB_TO_TOUR_STEP_ID: Record<string, StreamsTourStepId | undefined> = {
-  retention: 'retention',
-  processing: 'processing',
-  attachments: 'attachments',
-  advanced: 'advanced',
-};
 
 export function Wrapper({
   tabs,
