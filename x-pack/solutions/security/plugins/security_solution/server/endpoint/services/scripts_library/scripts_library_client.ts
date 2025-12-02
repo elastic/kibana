@@ -305,9 +305,10 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
         type: SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE,
         perPage: pageSize,
         page,
-        sortField,
-        sortOrder: sortDirection,
         filter,
+        sortField:
+          KUERY_FIELD_TO_SO_FIELD_MAP[sortField as keyof typeof KUERY_FIELD_TO_SO_FIELD_MAP],
+        sortOrder: sortDirection,
       })
       .catch(catchAndWrapError.withMessage('Failed to search for scripts'));
 

@@ -20,8 +20,10 @@ export const ListScriptsRequestSchema = {
       sortField: schema.maybe(
         schema.oneOf([
           schema.literal('name'),
-          schema.literal('updatedAt'),
           schema.literal('createdAt'),
+          schema.literal('createdBy'),
+          schema.literal('updatedAt'),
+          schema.literal('updatedBy'),
         ])
       ),
       sortDirection: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
