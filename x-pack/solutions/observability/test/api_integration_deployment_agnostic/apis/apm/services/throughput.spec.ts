@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { apm, timerange } from '@kbn/synthtrace-client';
 import expect from '@kbn/expect';
 import { buildQueryFromFilters } from '@kbn/es-query';
 import { first, last, meanBy } from 'lodash';
@@ -18,7 +18,7 @@ import type {
 import type { RecursivePartial } from '@kbn/apm-plugin/typings/common';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { roundNumber } from '../utils/common';
 
