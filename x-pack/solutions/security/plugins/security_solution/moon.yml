@@ -263,6 +263,7 @@ dependsOn:
   - '@kbn/connector-schemas'
   - '@kbn/deeplinks-analytics'
   - '@kbn/tour-queue'
+  - '@kbn/shared-ux-file-types'
 tags:
   - plugin
   - prod
