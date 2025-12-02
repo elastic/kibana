@@ -86,7 +86,7 @@ describe('useAgentBuilderAttachment', () => {
         {
           id: 'alert-1234567890',
           type: 'alert',
-          getContent: expect.any(Function),
+          alert: 'test alert data',
         },
       ],
       sessionTag: 'security',
@@ -156,23 +156,5 @@ describe('useAgentBuilderAttachment', () => {
 
     expect(attachment.id).toBe('alert-1234567890');
     expect(attachment.id).toMatch(/^alert-\d+$/);
-  });
-
-  it('attachment getContent returns correct data', async () => {
-    const { result } = renderHook(() => useAgentBuilderAttachment(defaultParams), {
-      wrapper: createWrapper(mockOnechatService),
-    });
-
-    act(() => {
-      result.current.openAgentBuilderFlyout();
-    });
-
-    const callArgs = mockOpenConversationFlyout.mock.calls[0][0];
-    const attachment = callArgs?.attachments?.length
-      ? callArgs?.attachments[0]
-      : { getContent: jest.fn() };
-    const content = await attachment.getContent();
-
-    expect(content).toEqual({ alert: 'test alert data' });
   });
 });
