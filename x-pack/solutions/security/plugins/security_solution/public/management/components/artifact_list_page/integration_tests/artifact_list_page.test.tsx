@@ -12,7 +12,11 @@ import type { ArtifactListPageProps } from '../artifact_list_page';
 import { act, fireEvent, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ArtifactListPageRenderingSetup } from '../mocks';
-import { getArtifactListPageRenderingSetup } from '../mocks';
+import {
+  getArtifactImportFlyoutUiMocks,
+  getArtifactImportExportUiMocks,
+  getArtifactListPageRenderingSetup,
+} from '../mocks';
 import { getDeferred } from '../../../mocks/utils';
 import { useGetEndpointSpecificPolicies } from '../../../services/policies/hooks';
 import type { ArtifactEntryCardDecoratorProps } from '../../artifact_entry_card';
@@ -32,6 +36,8 @@ describe('When using the ArtifactListPage component', () => {
   let history: AppContextTestRender['history'];
   let mockedApi: ReturnType<typeof trustedAppsAllHttpMocks>;
   let getFirstCard: ArtifactListPageRenderingSetup['getFirstCard'];
+  let importExportUi: ReturnType<typeof getArtifactImportExportUiMocks>;
+  let importFlyoutUi: ReturnType<typeof getArtifactImportFlyoutUiMocks>;
   let setExperimentalFlag: ArtifactListPageRenderingSetup['setExperimentalFlag'];
 
   beforeEach(() => {
@@ -43,7 +49,13 @@ describe('When using the ArtifactListPage component', () => {
       data: mockedApi.responseProvider.endpointPackagePolicyList(),
     });
 
-    render = (props = {}) => (renderResult = renderSetup.renderArtifactListPage(props));
+    render = (props = {}) => {
+      renderResult = renderSetup.renderArtifactListPage(props);
+      importExportUi = getArtifactImportExportUiMocks(renderResult, 'testPage');
+      importFlyoutUi = getArtifactImportFlyoutUiMocks(renderResult);
+
+      return renderResult;
+    };
   });
 
   it('should display a loader while determining which view to show', async () => {
@@ -158,35 +170,53 @@ describe('When using the ArtifactListPage component', () => {
       it('should not show import and export actions with feature flag disabled', async () => {
         setExperimentalFlag({ endpointArtifactsExportImportEnabled: false });
 
-        const { queryByTestId } = await renderWithListData();
+        await renderWithListData();
 
-        expect(queryByTestId('testPage-exportImportMenuButtonIcon')).not.toBeInTheDocument();
+        expect(importExportUi.queryMenuButton()).not.toBeInTheDocument();
       });
 
       it('should show import and export actions', async () => {
-        const { getByTestId } = await renderWithListData();
+        await renderWithListData();
 
-        expect(getByTestId('testPage-exportImportMenuButtonIcon')).toBeInTheDocument();
+        expect(importExportUi.getMenuButton()).toBeInTheDocument();
 
-        await userEvent.click(getByTestId('testPage-exportImportMenuButtonIcon'));
-        expect(getByTestId('testPage-exportImportMenuActionItemImportButton')).toBeInTheDocument();
-        expect(getByTestId('testPage-exportImportMenuActionItemExportButton')).toBeInTheDocument();
+        await userEvent.click(importExportUi.getMenuButton());
+        expect(importExportUi.getImportButton()).toBeInTheDocument();
+        expect(importExportUi.getExportButton()).toBeInTheDocument();
       });
 
       it('should enable import and export buttons when user can create artifacts', async () => {
-        const { getByTestId } = await renderWithListData({ allowCardCreateAction: true });
+        await renderWithListData({ allowCardCreateAction: true });
 
-        await userEvent.click(getByTestId('testPage-exportImportMenuButtonIcon'));
-        expect(getByTestId('testPage-exportImportMenuActionItemImportButton')).toBeEnabled();
-        expect(getByTestId('testPage-exportImportMenuActionItemExportButton')).toBeEnabled();
+        await userEvent.click(importExportUi.getMenuButton());
+        expect(importExportUi.getImportButton()).toBeEnabled();
+        expect(importExportUi.getExportButton()).toBeEnabled();
       });
 
       it('should disable import button when user cannot create artifacts', async () => {
-        const { getByTestId } = await renderWithListData({ allowCardCreateAction: false });
+        await renderWithListData({ allowCardCreateAction: false });
 
-        await userEvent.click(getByTestId('testPage-exportImportMenuButtonIcon'));
-        expect(getByTestId('testPage-exportImportMenuActionItemImportButton')).toBeDisabled();
-        expect(getByTestId('testPage-exportImportMenuActionItemExportButton')).toBeEnabled();
+        await userEvent.click(importExportUi.getMenuButton());
+        expect(importExportUi.getImportButton()).toBeDisabled();
+        expect(importExportUi.getExportButton()).toBeEnabled();
+      });
+
+      it('should refetch list data after a successful import', async () => {
+        await renderWithListData();
+
+        await userEvent.click(importExportUi.getMenuButton());
+        await userEvent.click(importExportUi.getImportButton());
+
+        await importFlyoutUi.uploadFile();
+        const currentApiCallCount = mockedApi.responseProvider.trustedAppsList.mock.calls.length;
+
+        await userEvent.click(importFlyoutUi.getImportButton());
+
+        await waitFor(() => {
+          expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenCalledTimes(
+            currentApiCallCount + 1
+          );
+        });
       });
     });
 
