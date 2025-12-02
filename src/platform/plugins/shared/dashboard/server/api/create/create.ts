@@ -21,12 +21,13 @@ export async function create(
   createBody: DashboardCreateRequestBody
 ): Promise<DashboardCreateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
+  const { access_control: accessControl, ...restOfData } = createBody.data;
 
   const {
     attributes: soAttributes,
     references: soReferences,
     error: transformInError,
-  } = transformDashboardIn(createBody.data);
+  } = transformDashboardIn(restOfData);
   if (transformInError) {
     throw Boom.badRequest(`Invalid data. ${transformInError.message}`);
   }
