@@ -182,3 +182,16 @@ export function rebuildGeoPointsFromFlattened(
 
   return sourceWithGeoPoints;
 }
+
+export function collectFieldsWithGeoPoints(
+  fields: Record<string, { type?: string }>,
+  mappedFields: Set<string>,
+  geoPointFields: Set<string>
+): void {
+  for (const [name, def] of Object.entries(fields)) {
+    mappedFields.add(name);
+    if (def.type === 'geo_point') {
+      geoPointFields.add(name);
+    }
+  }
+}

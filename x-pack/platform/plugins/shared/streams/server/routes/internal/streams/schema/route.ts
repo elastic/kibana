@@ -23,10 +23,30 @@ import {
   buildGeoPointExistsQuery,
   normalizeGeoPointsInObject,
   rebuildGeoPointsFromFlattened,
+  collectFieldsWithGeoPoints,
 } from '../../../../lib/streams/helpers/normalize_geo_points';
 
 const UNMAPPED_SAMPLE_SIZE = 500;
 const FIELD_SIMULATION_TIMEOUT = '1s';
+
+interface SimulateIngestDoc {
+  _source: SampleDocument;
+  _index: string;
+  _id: string;
+  error?: {
+    type: string;
+    reason: string;
+  };
+  ignored_fields?: string[];
+}
+
+interface SimulateIngestDocResult {
+  doc: SimulateIngestDoc;
+}
+
+interface SimulateIngestResult {
+  docs: SimulateIngestDocResult[];
+}
 
 export const unmappedFieldsRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{name}/schema/unmapped_fields',
@@ -74,31 +94,37 @@ export const unmappedFieldsRoute = createServerRoute({
 
     // Mapped fields from the stream's definition and inherited from ancestors
     const mappedFields = new Set<string>();
+    const geoPointFields = new Set<string>();
 
     if (Streams.ClassicStream.Definition.is(streamDefinition)) {
-      Object.keys(streamDefinition.ingest.classic.field_overrides || {}).forEach((name) =>
-        mappedFields.add(name)
+      collectFieldsWithGeoPoints(
+        streamDefinition.ingest.classic.field_overrides || {},
+        mappedFields,
+        geoPointFields
       );
     }
 
     if (Streams.WiredStream.Definition.is(streamDefinition)) {
-      Object.keys(streamDefinition.ingest.wired.fields).forEach((name) => mappedFields.add(name));
+      collectFieldsWithGeoPoints(
+        streamDefinition.ingest.wired.fields,
+        mappedFields,
+        geoPointFields
+      );
     }
 
     for (const ancestor of ancestors) {
-      Object.keys(ancestor.ingest.wired.fields).forEach((name) => mappedFields.add(name));
+      collectFieldsWithGeoPoints(ancestor.ingest.wired.fields, mappedFields, geoPointFields);
     }
 
     const unmappedFields = Array.from(sourceFields)
       .filter((field) => {
         if (mappedFields.has(field)) return false;
 
-        // Skip if field is a subfield of a mapped field (e.g. location.lat when location is mapped)
-        for (const mappedField of mappedFields) {
-          if (field.startsWith(`${mappedField}.`)) {
-            return false;
-          }
-        }
+        const latMatch = field.match(/^(.+)\.lat$/);
+        const lonMatch = field.match(/^(.+)\.lon$/);
+
+        if (latMatch && geoPointFields.has(latMatch[1])) return false;
+        if (lonMatch && geoPointFields.has(lonMatch[1])) return false;
 
         return true;
       })
@@ -237,18 +263,16 @@ export const schemaFieldsSimulationRoute = createServerRoute({
       streamDefinition
     );
 
-    const hasErrors = simulation.docs.some((doc: any) => doc.doc.error !== undefined);
+    const hasErrors = simulation.docs.some((doc) => doc.doc.error !== undefined);
 
     if (hasErrors) {
-      const documentWithError = simulation.docs.find((doc: any) => {
-        return doc.doc.error !== undefined;
-      });
+      const documentWithError = simulation.docs.find((doc) => doc.doc.error !== undefined);
 
       return {
         status: 'failure',
         simulationError: JSON.stringify(
           // Use the first error as a representative error
-          documentWithError.doc.error
+          documentWithError?.doc.error
         ),
         documentsWithRuntimeFieldsApplied: null,
       };
@@ -257,12 +281,10 @@ export const schemaFieldsSimulationRoute = createServerRoute({
     return {
       status: 'success',
       simulationError: null,
-      documentsWithRuntimeFieldsApplied: simulation.docs.map((doc: any) => {
-        return {
-          values: doc.doc._source,
-          ignored_fields: doc.doc.ignored_fields || [],
-        };
-      }),
+      documentsWithRuntimeFieldsApplied: simulation.docs.map((doc) => ({
+        values: doc.doc._source,
+        ignored_fields: (doc.doc.ignored_fields || []).map((field) => ({ field })),
+      })),
     };
   },
 });
@@ -280,7 +302,7 @@ async function simulateIngest(
   propertiesForSimulation: StreamsMappingProperties,
   scopedClusterClient: IScopedClusterClient,
   streamDefinition: Streams.all.Definition
-) {
+): Promise<SimulateIngestResult> {
   // fetch the index template to get the base mappings
   const dataStream = await scopedClusterClient.asCurrentUser.indices.getDataStream({
     name: dataStreamName,
@@ -361,12 +383,12 @@ async function simulateIngest(
     pipeline_substitutions: pipelineSubstitutions,
   };
 
-  // TODO: We should be using scopedClusterClient.asCurrentUser.simulate.ingest() but the ES JS lib currently has a bug. The types also aren't available yet, so we use any.
+  // TODO: We should be using scopedClusterClient.asCurrentUser.simulate.ingest() but the ES JS lib currently has a bug.
   const simulation = (await scopedClusterClient.asCurrentUser.transport.request({
     method: 'POST',
     path: simulatePath,
     body: simulationBody,
-  })) as any;
+  })) as SimulateIngestResult;
 
   return simulation;
 }
