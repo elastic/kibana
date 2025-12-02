@@ -5,12 +5,12 @@ env:
 
 steps:
   - group: 'Notify if missing labels'
-    if: "build.env('GITHUB_PR_LABELS') !~ /ci:entity-store-performance/ || build.env('GITHUB_PR_LABELS') !~ /ci:cloud-redeploy/"
+    if: "build.env('GITHUB_PR_LABELS') !~ /ci:entity-store-performance/"
 
     steps:
       - command: |
           ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
-            --message "Entity store performance tests require both \`ci:entity-store-performance\` and \`ci:cloud-redeploy\` labels. Please add both labels and trigger the job through the checkbox again. **Note:** \`ci:cloud-redeploy\` ensures a fresh deployment is created for each test run." \
+            --message "Entity store performance tests require the \`ci:entity-store-performance\` label. Please add the label and trigger the job through the checkbox again." \
             --context "entity-store-performance-job" \
             --clear-previous
         label: Comment missing labels
@@ -22,7 +22,7 @@ steps:
         timeout_in_minutes: 5
 
   - group: 'Entity Store Performance Tests'
-    if: "build.env('GITHUB_PR_LABELS') =~ /ci:entity-store-performance/ && build.env('GITHUB_PR_LABELS') =~ /ci:cloud-redeploy/"
+    if: "build.env('GITHUB_PR_LABELS') =~ /ci:entity-store-performance/"
 
     steps:
       - command: .buildkite/scripts/lifecycle/pre_build.sh

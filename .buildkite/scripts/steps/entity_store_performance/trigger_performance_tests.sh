@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-echo "--- Trigger Entity Store Performance Tests Pipeline"
+echo "--- Entity Store Performance Tests Pipeline"
 
 # The Github env vars need to be passed along manually
 # GITHUB_PR_* is used to avoid any sensitive vars being passed along

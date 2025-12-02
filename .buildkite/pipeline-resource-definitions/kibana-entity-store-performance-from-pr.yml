@@ -16,7 +16,7 @@ spec:
     kind: Pipeline
     metadata:
       name: kibana / entity store performance from PR
-      description: 'Runs entity store performance tests from a PR. Requires ci:entity-store-performance and ci:cloud-redeploy labels.'
+      description: 'Runs entity store performance tests from a PR. Requires ci:entity-store-performance label.'
     spec:
       env:
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'false'

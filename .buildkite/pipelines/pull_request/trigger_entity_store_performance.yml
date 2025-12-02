@@ -1,6 +1,6 @@
 steps:
   - command: .buildkite/scripts/steps/entity_store_performance/trigger_performance_tests.sh
-    label: 'Trigger Entity Store Performance Tests'
+    label: 'Entity Store Performance Tests'
     agents:
       provider: gcp
       image: family/kibana-ubuntu-2404
