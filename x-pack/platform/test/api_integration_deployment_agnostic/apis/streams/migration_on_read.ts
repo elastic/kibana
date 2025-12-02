@@ -7,7 +7,10 @@
 
 import expect from '@kbn/expect';
 import type { Streams } from '@kbn/streams-schema';
-import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
+import {
+  OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS,
+  OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
+} from '@kbn/management-settings-ids';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { disableStreams, enableStreams, indexDocument } from './helpers/requests';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
@@ -188,6 +191,7 @@ const expectedDashboardsResponse = {
   dashboards: [
     {
       id: TEST_DASHBOARD_ID,
+      redirectId: TEST_DASHBOARD_ID,
       title: 'dashboard-4-panels',
       type: 'dashboard',
       tags: [],
@@ -233,24 +237,33 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await enableStreams(apiClient);
       await kibanaServer.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
+        [OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS]: true,
       });
       // link and unlink dashboard to make sure attachments index is created
-      await apiClient.fetch('PUT /api/streams/{name}/dashboards/{dashboardId} 2023-10-31', {
-        params: {
-          path: {
-            name: 'logs',
-            dashboardId: TEST_DASHBOARD_ID,
+      await apiClient.fetch(
+        'PUT /api/streams/{streamName}/attachments/{attachmentType}/{attachmentId} 2023-10-31',
+        {
+          params: {
+            path: {
+              streamName: 'logs',
+              attachmentType: 'dashboard',
+              attachmentId: TEST_DASHBOARD_ID,
+            },
           },
-        },
-      });
-      await apiClient.fetch('DELETE /api/streams/{name}/dashboards/{dashboardId} 2023-10-31', {
-        params: {
-          path: {
-            name: 'logs',
-            dashboardId: TEST_DASHBOARD_ID,
+        }
+      );
+      await apiClient.fetch(
+        'DELETE /api/streams/{streamName}/attachments/{attachmentType}/{attachmentId} 2023-10-31',
+        {
+          params: {
+            path: {
+              streamName: 'logs',
+              attachmentType: 'dashboard',
+              attachmentId: TEST_DASHBOARD_ID,
+            },
           },
-        },
-      });
+        }
+      );
       // link and unlink query asset to make sure assets index is created
       await apiClient.fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
         params: {
@@ -315,6 +328,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await disableStreams(apiClient);
       await kibanaServer.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
+        [OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS]: false,
       });
     });
 
@@ -333,10 +347,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expectStreams(['logs', TEST_STREAM_NAME], listResponse.body.streams);
 
       const dashboardResponse = await apiClient.fetch(
-        'GET /api/streams/{name}/dashboards 2023-10-31',
+        'GET /api/streams/{streamName}/attachments 2023-10-31',
         {
           params: {
-            path: { name: TEST_STREAM_NAME },
+            path: { streamName: TEST_STREAM_NAME },
+            query: { attachmentType: 'dashboard' },
           },
         }
       );
@@ -363,10 +378,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expectStreams(['logs', TEST_STREAM_NAME], listResponse.body.streams);
 
       const dashboardResponse = await apiClient.fetch(
-        'GET /api/streams/{name}/dashboards 2023-10-31',
+        'GET /api/streams/{streamName}/attachments 2023-10-31',
         {
           params: {
-            path: { name: TEST_STREAM_NAME },
+            path: { streamName: TEST_STREAM_NAME },
+            query: { attachmentType: 'dashboard' },
           },
         }
       );
@@ -374,13 +390,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('should read expected dashboards for classic stream', async () => {
-      const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
-        params: {
-          path: { name: TEST_STREAM_NAME },
-        },
-      });
+      const response = await apiClient.fetch(
+        'GET /api/streams/{streamName}/attachments 2023-10-31',
+        {
+          params: {
+            path: { streamName: TEST_STREAM_NAME },
+            query: { attachmentType: 'dashboard' },
+          },
+        }
+      );
       expect(response.status).to.eql(200);
-      expect(response.body.dashboards).to.eql(expectedDashboardsResponse.dashboards);
+      expect(response.body.attachments).to.eql(expectedDashboardsResponse.dashboards);
     });
 
     it('should read expected queries for classic stream', async () => {

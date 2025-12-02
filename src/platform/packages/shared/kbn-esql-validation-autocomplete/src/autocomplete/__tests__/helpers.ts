@@ -35,8 +35,8 @@ import {
 } from '@kbn/esql-ast/src/definitions/all_operators';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
-import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
-import { getLocationFromCommandOrOptionName } from '../../shared/types';
+import { getLocationFromCommandOrOptionName } from '@kbn/esql-ast/src/commands_registry/location';
+import { NOT_SUGGESTED_TYPES } from '../../query_columns_service';
 import * as autocomplete from '../autocomplete';
 import type { ESQLCallbacks } from '../../shared/types';
 import {
