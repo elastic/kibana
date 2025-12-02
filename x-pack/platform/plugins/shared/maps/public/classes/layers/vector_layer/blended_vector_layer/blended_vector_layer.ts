@@ -149,9 +149,10 @@ function getClusterStyleDescriptor(
                 ),
               }
             : undefined;
+
         clusterStyleDescriptor.properties[styleName] = {
           type: STYLE_TYPE.DYNAMIC,
-          // @ts-expect-error upgrade typescript v5.1.6
+          // @ts-expect-error
           options: {
             ...options,
             field,
@@ -161,7 +162,7 @@ function getClusterStyleDescriptor(
         // copy static styles to cluster style
         clusterStyleDescriptor.properties[styleName] = {
           type: STYLE_TYPE.STATIC,
-          // @ts-expect-error upgrade typescript v5.1.6
+          // @ts-expect-error
           options: { ...styleProperty.getOptions() },
         };
       }
