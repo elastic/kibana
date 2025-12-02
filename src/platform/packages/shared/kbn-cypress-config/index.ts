@@ -11,53 +11,105 @@ import { v4 as uuid } from 'uuid';
 import { defineConfig } from 'cypress';
 import wp from '@cypress/webpack-preprocessor';
 import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
-import fs from 'fs';
-import path from 'path';
+import {
+  SCOUT_REPORT_OUTPUT_ROOT,
+  SCOUT_REPORTER_ENABLED,
+  ScoutTestRunConfigCategory,
+} from '@kbn/scout-info';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { camelCase } from 'lodash';
 
-const SCOUT_REPORTER = '@kbn/scout-cypress-reporter';
+export const SCOUT_CYPRESS_REPORTER_PATH = path.join(
+  REPO_ROOT,
+  'src/platform/packages/shared/kbn-cypress-config/src/reporting/scout_events'
+);
 
-export function defineCypressConfig(options?: Cypress.ConfigOptions<any>) {
-  // Inject Scout reporter if enabled via environment variable
-  if (process.env.SCOUT_REPORTER_ENABLED && options?.reporterOptions) {
-    const { configFile } = options.reporterOptions as any;
+/**
+ * Extract the Cypress config file path from process arguments or environment
+ */
+function getCypressConfigPath(): string {
+  // Try to get from process.argv
+  const configFileArgIndex = process.argv.findIndex((arg) => arg === '--config-file');
+  if (configFileArgIndex !== -1 && process.argv[configFileArgIndex + 1]) {
+    return path.resolve(REPO_ROOT, process.argv[configFileArgIndex + 1]);
+  }
 
-    if (configFile) {
-      let reporterConfig: any;
+  // Try to get from environment variable (set by start_cypress_parallel script)
+  if (process.env.CYPRESS_CONFIG_FILE) {
+    return path.resolve(REPO_ROOT, process.env.CYPRESS_CONFIG_FILE);
+  }
 
-      // Check if configFile is a string (path) or an object
-      if (typeof configFile === 'string') {
-        // Load the JSON file - resolve path relative to process.cwd()
-        const resolvedPath = path.resolve(process.cwd(), configFile);
+  // Fallback to checking common config file names in order of precedence
+  const commonConfigFiles = ['cypress.config.ts', 'cypress.config.js', 'cypress.json'];
 
-        try {
-          const configContent = fs.readFileSync(resolvedPath, 'utf-8');
-          reporterConfig = JSON.parse(configContent);
-        } catch (error) {
-          // eslint-disable-next-line no-console
-          console.warn(`Warning: Could not read reporter config file at ${resolvedPath}`, error);
-        }
-      } else if (typeof configFile === 'object') {
-        // configFile is already an object
-        reporterConfig = configFile;
+  for (const configFile of commonConfigFiles) {
+    const configPath = path.join(process.cwd(), configFile);
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      if (require('fs').existsSync(configPath)) {
+        return configPath;
       }
-
-      // If we have a config and it has reporterEnabled, append our reporter
-      if (reporterConfig && reporterConfig.reporterEnabled) {
-        const currentReporters = reporterConfig.reporterEnabled;
-
-        // Only append if not already present
-        if (!currentReporters.includes(SCOUT_REPORTER)) {
-          reporterConfig.reporterEnabled = `${currentReporters}, ${SCOUT_REPORTER}`;
-        }
-
-        // Replace configFile with the modified object
-        options.reporterOptions.configFile = reporterConfig;
-      }
+    } catch {
+      // Continue to next option
     }
   }
 
+  // Return empty string if no config found
+  return '';
+}
+
+function getReportingOptionOverrides(options?: Cypress.ConfigOptions): Record<string, any> {
+  if (!SCOUT_REPORTER_ENABLED) {
+    // Scout reporter not enabled, no reporting settings to override
+    return {};
+  }
+
+  const reporter: string | undefined = options?.reporter;
+  // if reporter is not defined then config runs locally and logs results to console
+  if (reporter === undefined || !reporter.endsWith('cypress-multi-reporters')) {
+    return {};
+  }
+
+  // this is the list of reporters that should be enabled through the multi-reporter plugin
+  let enabledReporters: string[] = [];
+  let reporterOptions: Record<string, any> = options?.reporterOptions ?? {};
+
+  if (reporterOptions.configFile) {
+    // Load reporter options from file
+    // not sure if path is relative to process.cwd() will test it
+    reporterOptions = JSON.parse(readFileSync(reporterOptions.configFile, 'utf8'));
+    enabledReporters = reporterOptions.reporterEnabled.split(',').map((r: string) => r.trim());
+  }
+
+  // if (!reporter.endsWith('cypress-multi-reporters')) {
+  //   // Given options are not using the multi-reporters plugin
+  //   reporterEnabled.push(reporter);
+  //   reporter = 'cypress-multi-reporters';
+  // }
+
+  if (SCOUT_REPORTER_ENABLED) {
+    enabledReporters.push(SCOUT_CYPRESS_REPORTER_PATH);
+    reporterOptions[`${camelCase(SCOUT_CYPRESS_REPORTER_PATH)}ReporterOptions`] = {
+      name: 'cypress',
+      outputPath: SCOUT_REPORT_OUTPUT_ROOT,
+      config: {
+        path: getCypressConfigPath(),
+        category: ScoutTestRunConfigCategory.UI_TEST,
+      },
+    };
+  }
+
+  // Make sure all the correct reporters are enabled
+  reporterOptions.reporterEnabled = enabledReporters.join(', ');
+
+  return { reporter, reporterOptions };
+}
+
   return defineConfig({
     ...options,
+    ...getReportingOptionOverrides(options),
     e2e: {
       ...options?.e2e,
       setupNodeEvents(on, config) {
