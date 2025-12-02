@@ -10,7 +10,7 @@
 import type { ESQLAstQueryExpression } from '@kbn/esql-ast';
 import { EDITOR_MARKER } from '@kbn/esql-ast';
 import type { ESQLAstForkCommand } from '@kbn/esql-ast/src/types';
-import { expandEvals } from '../shared/expand_evals';
+import { expandEvals } from './expand_evals';
 
 /**
  * This function is used to build the query that will be used to compute the

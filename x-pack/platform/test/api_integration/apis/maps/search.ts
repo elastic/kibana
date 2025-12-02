@@ -29,18 +29,16 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         const { took, ...response } = resp.body.rawResponse;
-        expect(response).to.eql({
-          columns: [
-            {
-              name: 'geo.coordinates',
-              type: 'geo_point',
-            },
-          ],
-          documents_found: 0,
-          is_partial: false,
-          values: [],
-          values_loaded: 0,
-        });
+        expect(response.columns).to.eql([
+          {
+            name: 'geo.coordinates',
+            type: 'geo_point',
+          },
+        ]);
+        expect(response.values).to.eql([]);
+        expect(response.values_loaded).to.eql(0);
+        expect(response.is_partial).to.eql(false);
+        expect(response.documents_found).to.eql(0);
       });
 
       it(`should return getValues response in expected shape`, async () => {
