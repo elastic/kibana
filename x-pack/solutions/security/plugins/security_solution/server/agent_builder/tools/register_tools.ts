@@ -20,17 +20,13 @@ const PLATFORM_TOOL_IDS = [
   platformCoreTools.listIndices,
   platformCoreTools.getIndexMapping,
   platformCoreTools.getDocumentById,
-  // TODO add once product doc tool is merged https://github.com/elastic/kibana/pull/242598
-  // platformCoreTools.productDocumentation,
+  platformCoreTools.productDocumentation,
 ];
 export const SECURITY_TOOL_IDS = [
   SECURITY_LABS_SEARCH_TOOL_ID,
   SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
   SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
 ];
-
-export const SECURITY_AGENT_TOOL_IDS = [...PLATFORM_TOOL_IDS, ...SECURITY_TOOL_IDS];
-
 /**
  * Registers all security agent builder tools with the onechat plugin
  */

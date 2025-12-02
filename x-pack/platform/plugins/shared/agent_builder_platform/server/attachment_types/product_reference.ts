@@ -11,6 +11,7 @@ import {
   productReferenceAttachmentDataSchema,
 } from '@kbn/onechat-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
+import { platformCoreTools } from '@kbn/onechat-common';
 
 /**
  * Creates the definition for the `product_reference` attachment type.
@@ -36,8 +37,7 @@ export const createProductReferenceAttachmentType = (): AttachmentTypeDefinition
         },
       };
     },
-    // TODO use real tool once https://github.com/elastic/kibana/pull/242598 merges, same in description below
-    getTools: () => [`platformCoreTools.productDocumentation`],
+    getTools: () => [platformCoreTools.productDocumentation],
     getAgentDescription: () => {
       const description = `You have access to a product reference that needs to be queried for documentation.
 

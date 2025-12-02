@@ -50,8 +50,7 @@ export const createQueryHelpAttachmentType = (): AttachmentTypeDefinition => {
     getTools: () => {
       const tools: string[] = [
         platformCoreTools.generateEsql,
-        // TODO use real tool once product_documentation tool is merged, same in description below
-        'platformCoreTools.productDocumentation',
+        platformCoreTools.productDocumentation,
       ];
       return tools;
     },
