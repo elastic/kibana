@@ -100,7 +100,7 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
   const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
 
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
-    attachmentType: SecurityAgentBuilderAttachments.risk_entity,
+    attachmentType: SecurityAgentBuilderAttachments.entity,
     attachmentData: { identifierType: entityType, identifier: entityIdentifier },
     attachmentPrompt: `Investigate the entity and suggest next steps.`,
   });

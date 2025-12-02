@@ -58,14 +58,16 @@ export const GenericEntityFlyoutFooter = ({
 
   const attachmentData = useMemo(() => {
     return {
-      ...entityFields,
-      'asset.criticality': assetCriticalityLevel ? [assetCriticalityLevel] : undefined,
+      text: {
+        ...entityFields,
+        'asset.criticality': assetCriticalityLevel ? [assetCriticalityLevel] : undefined,
+      },
     };
   }, [entityFields, assetCriticalityLevel]);
 
   // TODO confirm behavior with @maxcold  https://github.com/elastic/kibana/pull/234324
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
-    attachmentType: AttachmentType.text,
+    attachmentType: AttachmentType.product_reference,
     attachmentData,
     attachmentPrompt: ENTITY_ANALYSIS,
   });

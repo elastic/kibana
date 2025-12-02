@@ -67,7 +67,7 @@ export const AskAiAssistant = <T extends EntityType>({
   });
 
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
-    attachmentType: SecurityAgentBuilderAttachments.risk_entity,
+    attachmentType: SecurityAgentBuilderAttachments.entity,
     attachmentData: { identifierType: entityType, identifier: entityName },
     attachmentPrompt: `Explain how inputs contributed to the risk score. Additionally, outline the recommended next steps for investigating or mitigating the risk if the entity is deemed risky.\nTo answer risk score questions, fetch the risk score information and take into consideration the risk score inputs.`,
   });
