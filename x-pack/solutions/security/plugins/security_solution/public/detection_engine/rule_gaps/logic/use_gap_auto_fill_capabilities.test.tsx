@@ -10,6 +10,7 @@ import { useGapAutoFillCapabilities } from './use_gap_auto_fill_capabilities';
 
 const mockUseLicense = jest.fn();
 const mockUseUserData = jest.fn();
+const mockUseIsExperimentalFeatureEnabled = jest.fn();
 
 jest.mock('../../../common/hooks/use_license', () => ({
   useLicense: () => mockUseLicense(),
@@ -19,6 +20,10 @@ jest.mock('../../../detections/components/user_info', () => ({
   useUserData: () => mockUseUserData(),
 }));
 
+jest.mock('../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: () => mockUseIsExperimentalFeatureEnabled(),
+}));
+
 describe('useGapAutoFillCapabilities', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -26,6 +31,7 @@ describe('useGapAutoFillCapabilities', () => {
     mockUseLicense.mockReturnValue({
       isPlatinumPlus: () => true,
     });
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
   });
 
   it('returns edit access when license and CRUD permissions are available', () => {

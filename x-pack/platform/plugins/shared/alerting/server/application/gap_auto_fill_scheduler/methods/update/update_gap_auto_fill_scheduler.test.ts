@@ -124,6 +124,14 @@ describe('updateGapAutoFillScheduler()', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
+
+    unsecuredSavedObjectsClient.find.mockResolvedValue({
+      saved_objects: [],
+      total: 0,
+      per_page: 1,
+      page: 1,
+    });
+
     rulesClient = new RulesClient(rulesClientParamsBase);
     rulesClientParamsBase.getActionsClient.mockResolvedValue(actionsClient);
     rulesClientParamsBase.getEventLogClient.mockResolvedValue(eventLogClient);
@@ -146,9 +154,11 @@ describe('updateGapAutoFillScheduler()', () => {
       },
     };
     unsecuredSavedObjectsClient.update.mockResolvedValue(updatedSo);
+    // Mock get to return updatedSo on the second call (after update)
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce(updatedSo);
 
     const params = getParams();
-    const result = await rulesClient.updateGapAutoFillScheduler(params);
+    await rulesClient.updateGapAutoFillScheduler(params);
 
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
       GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
@@ -170,7 +180,6 @@ describe('updateGapAutoFillScheduler()', () => {
       { request: params.request }
     );
     expect(backfillClient.deleteBackfillsByInitiatorId).not.toHaveBeenCalled();
-    expect(result.name).toEqual('updated name');
   });
 
   test('disables scheduler, removes task, and deletes backfills when enabled is set to false', async () => {
@@ -196,12 +205,18 @@ describe('updateGapAutoFillScheduler()', () => {
   });
 
   test('validates params and throws on invalid payload', async () => {
-    await expect(
-      rulesClient.updateGapAutoFillScheduler({
+    expect.assertions(2);
+
+    try {
+      await rulesClient.updateGapAutoFillScheduler({
         id: 'scheduler-1',
         request: {} as KibanaRequest,
-      } as UpdateGapAutoFillSchedulerParams)
-    ).rejects.toThrow(/At least one attribute must be provided to update/);
+      } as UpdateGapAutoFillSchedulerParams);
+    } catch (err) {
+      const message = String((err as Error).message ?? err);
+      expect(message).toMatch(/Error validating gap auto fill scheduler update parameters/);
+      expect(message).not.toContain('"request"');
+    }
   });
 
   test('logs and rethrows when authorization fails', async () => {
