@@ -286,21 +286,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(snapshotResponse.snapshot?.state).to.eql('SUCCESS');
         expect(snapshotResponse.snapshot?.snapshot).to.eql(SNAPSHOT_NAME);
 
-        // Step 7: Delete the streams to simulate a disaster scenario
-        await esClient.indices.deleteDataStream({ name: 'logs.web-app' });
-        await esClient.indices.deleteDataStream({ name: 'logs' });
-
-        // Also clean up component templates and index templates
-        try {
-          await esClient.cluster.deleteComponentTemplate({ name: 'logs*' });
-        } catch (e) {
-          // Might not exist
-        }
-        try {
-          await esClient.indices.deleteIndexTemplate({ name: 'logs*' });
-        } catch (e) {
-          // Might not exist
-        }
+        // Disable streams to delete everything
+        await disableStreams(apiClient);
 
         // Step 8: Restore from snapshot
         const restoreResponse = await esClient.snapshot.restore({
