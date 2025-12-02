@@ -52,7 +52,7 @@ describe('useGetMissingIndexPrivileges', () => {
   });
 
   it('should invoke `getMissingIndexPrivileges` and return data on success', async () => {
-    const mockResponse = [{ indexName: 'test-index', privileges: ['read'] }];
+    const mockResponse = [{ index_name: 'test-index', privileges: ['read'] }];
     mockHttpGet.mockResolvedValue(mockResponse);
 
     const { result } = renderHook(() => useGetMissingIndexPrivileges(), { wrapper });

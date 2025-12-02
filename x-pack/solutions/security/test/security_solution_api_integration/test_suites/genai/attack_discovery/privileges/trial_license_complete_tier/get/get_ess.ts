@@ -51,7 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(missingPrivileges).toEqual([
         {
-          indexName: '.adhoc.alerts-security.attack.discovery.alerts-default',
+          index_name: '.adhoc.alerts-security.attack.discovery.alerts-default',
           privileges: ['read', 'write', 'view_index_metadata', 'maintenance'],
         },
       ]);
@@ -67,7 +67,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(missingPrivileges).toEqual([
         {
-          indexName: '.alerts-security.attack.discovery.alerts-default',
+          index_name: '.alerts-security.attack.discovery.alerts-default',
           privileges: ['read', 'write', 'view_index_metadata', 'maintenance'],
         },
       ]);
@@ -83,11 +83,11 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(missingPrivileges).toEqual([
         {
-          indexName: '.alerts-security.attack.discovery.alerts-default',
+          index_name: '.alerts-security.attack.discovery.alerts-default',
           privileges: ['read', 'write', 'view_index_metadata', 'maintenance'],
         },
         {
-          indexName: '.adhoc.alerts-security.attack.discovery.alerts-default',
+          index_name: '.adhoc.alerts-security.attack.discovery.alerts-default',
           privileges: ['read', 'write', 'view_index_metadata', 'maintenance'],
         },
       ]);

@@ -123,7 +123,7 @@ describe('getMissingIndexPrivilegesInternalRoute', () => {
     expect(mockResponse.ok).toHaveBeenCalledWith({
       body: [
         {
-          indexName: scheduledIndexPattern,
+          index_name: scheduledIndexPattern,
           privileges: ['write', 'maintenance'],
         },
       ],
@@ -158,11 +158,11 @@ describe('getMissingIndexPrivilegesInternalRoute', () => {
     expect(mockResponse.ok).toHaveBeenCalledWith({
       body: [
         {
-          indexName: scheduledIndexPattern,
+          index_name: scheduledIndexPattern,
           privileges: ['read', 'write'],
         },
         {
-          indexName: adhocIndexPattern,
+          index_name: adhocIndexPattern,
           privileges: ['view_index_metadata', 'maintenance'],
         },
       ],

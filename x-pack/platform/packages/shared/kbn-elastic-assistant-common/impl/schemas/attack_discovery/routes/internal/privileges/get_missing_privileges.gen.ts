@@ -21,7 +21,7 @@ export const AttackDiscoveryMissingPrivileges = z.object({
   /**
    * The index name of the privilege missing
    */
-  indexName: z.string(),
+  index_name: z.string(),
   /**
    * The index privileges level missing
    */

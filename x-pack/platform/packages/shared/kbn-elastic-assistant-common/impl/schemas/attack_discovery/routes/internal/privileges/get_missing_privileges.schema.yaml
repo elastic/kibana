@@ -43,10 +43,10 @@ components:
     AttackDiscoveryMissingPrivileges:
       type: object
       required:
-        - indexName
+        - index_name
         - privileges
       properties:
-        indexName:
+        index_name:
           type: string
           description: The index name of the privilege missing
         privileges:

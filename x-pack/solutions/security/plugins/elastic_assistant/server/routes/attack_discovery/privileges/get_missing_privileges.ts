@@ -40,7 +40,7 @@ export const getMissingIndexPrivileges = (
   const missingPrivileges = REQUIRED_INDEX_PRIVILEGES.filter((privilege) => !privileges[privilege]);
 
   if (missingPrivileges.length) {
-    return { indexName, privileges: missingPrivileges };
+    return { index_name: indexName, privileges: missingPrivileges };
   }
 };
 
