@@ -29,9 +29,12 @@ describe('Indices Metadata - MetadataReceiver', () => {
         explainLifecycle: jest.fn(),
         getLifecycle: jest.fn(),
       },
+      transport: {
+        request: jest.fn(),
+      },
     } as unknown as ElasticsearchClient;
 
-    receiver = new MetadataReceiver(logger, esClient);
+    receiver = new MetadataReceiver(logger, esClient, false);
   });
 
   describe('getIndices', () => {
@@ -458,7 +461,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
           index_name: 'test-index-1',
           query_total: 100,
           query_time_in_millis: 1000,
-          docs_count: 500,
+          docs_count: 250,
           docs_deleted: 10,
           docs_total_size_in_bytes: 1024000,
           index_failed: 5,
@@ -564,7 +567,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
           index_name: 'test-index-1',
           query_total: 100,
           query_time_in_millis: 1000,
-          docs_count: 500,
+          docs_count: undefined,
           docs_deleted: 10,
           docs_total_size_in_bytes: 1024000,
           index_failed: 5,
@@ -618,7 +621,7 @@ describe('Indices Metadata - MetadataReceiver', () => {
           index_name: 'test-index-1',
           query_total: 100,
           query_time_in_millis: 1000,
-          docs_count: 500,
+          docs_count: 250,
           docs_deleted: 10,
           docs_total_size_in_bytes: 1024000,
           index_failed: undefined,
@@ -662,6 +665,288 @@ describe('Indices Metadata - MetadataReceiver', () => {
           docs_total_size_in_bytes_primaries: undefined,
         },
       ]);
+    });
+
+    describe('with metering stats', () => {
+      describe('serverless mode', () => {
+        let serverlessReceiver: MetadataReceiver;
+
+        beforeEach(() => {
+          serverlessReceiver = new MetadataReceiver(logger, esClient, true);
+        });
+
+        it('should override primaries with metering data when values match', async () => {
+          const mockMeteringResponse = {
+            indices: [
+              {
+                name: 'test-index-1',
+                num_docs: 250,
+                size_in_bytes: 512000,
+              },
+            ],
+          };
+
+          (esClient.indices.stats as jest.Mock).mockResolvedValue(mockStatsResponse);
+          (esClient.transport.request as jest.Mock).mockResolvedValue(mockMeteringResponse);
+
+          const results = [];
+          for await (const stat of serverlessReceiver.getIndicesStats(['test-index-1'], 10)) {
+            results.push(stat);
+          }
+
+          expect(esClient.transport.request).toHaveBeenCalledWith({
+            method: 'GET',
+            path: '/_metering/stats/test-index-1',
+          });
+
+          expect(results).toEqual([
+            {
+              index_name: 'test-index-1',
+              query_total: 100,
+              query_time_in_millis: 1000,
+              docs_count: 250,
+              docs_deleted: 10,
+              docs_total_size_in_bytes: 1024000,
+              index_failed: 5,
+              index_failed_due_to_version_conflict: 2,
+              docs_count_primaries: 250,
+              docs_deleted_primaries: 5,
+              docs_total_size_in_bytes_primaries: 512000,
+            },
+          ]);
+
+          expect(logger.debug).not.toHaveBeenCalledWith(
+            'Metering stats differ from regular stats',
+            expect.any(Object)
+          );
+        });
+
+        it('should log debug message when metering stats differ from regular stats', async () => {
+          const mockMeteringResponse = {
+            indices: [
+              {
+                name: 'test-index-1',
+                num_docs: 300,
+                size_in_bytes: 600000,
+              },
+            ],
+          };
+
+          (esClient.indices.stats as jest.Mock).mockResolvedValue(mockStatsResponse);
+          (esClient.transport.request as jest.Mock).mockResolvedValue(mockMeteringResponse);
+
+          const results = [];
+          for await (const stat of serverlessReceiver.getIndicesStats(['test-index-1'], 10)) {
+            results.push(stat);
+          }
+
+          expect(results).toEqual([
+            {
+              index_name: 'test-index-1',
+              query_total: 100,
+              query_time_in_millis: 1000,
+              docs_count: 250,
+              docs_deleted: 10,
+              docs_total_size_in_bytes: 1024000,
+              index_failed: 5,
+              index_failed_due_to_version_conflict: 2,
+              docs_count_primaries: 300,
+              docs_deleted_primaries: 5,
+              docs_total_size_in_bytes_primaries: 600000,
+            },
+          ]);
+
+          expect(logger.debug).toHaveBeenCalledWith('Metering stats differ from regular stats', {
+            index: 'test-index-1',
+            metering: { num_docs: 300, size_in_bytes: 600000 },
+            regular: { docs_count: 250, size_in_bytes: 512000 },
+          });
+        });
+
+        it('should handle metering stats fetch errors gracefully', async () => {
+          const error = new Error('Metering API error');
+          (esClient.indices.stats as jest.Mock).mockResolvedValue(mockStatsResponse);
+          (esClient.transport.request as jest.Mock).mockRejectedValue(error);
+
+          const results = [];
+          for await (const stat of serverlessReceiver.getIndicesStats(['test-index-1'], 10)) {
+            results.push(stat);
+          }
+
+          expect(logger.error).toHaveBeenCalledWith('Error fetching metering stats', { error });
+
+          expect(results).toEqual([
+            {
+              index_name: 'test-index-1',
+              query_total: 100,
+              query_time_in_millis: 1000,
+              docs_count: 250,
+              docs_deleted: 10,
+              docs_total_size_in_bytes: 1024000,
+              index_failed: 5,
+              index_failed_due_to_version_conflict: 2,
+              docs_count_primaries: 250,
+              docs_deleted_primaries: 5,
+              docs_total_size_in_bytes_primaries: 512000,
+            },
+          ]);
+
+          expect(logger.debug).not.toHaveBeenCalledWith(
+            'Metering stats differ from regular stats',
+            expect.any(Object)
+          );
+        });
+
+        it('should handle partial metering stats', async () => {
+          const mockMultiIndexStatsResponse = {
+            indices: {
+              'test-index-1': mockStatsResponse.indices['test-index-1'],
+              'test-index-2': {
+                total: {
+                  search: {
+                    query_total: 200,
+                    query_time_in_millis: 2000,
+                  },
+                  docs: {
+                    count: 1000,
+                    deleted: 20,
+                  },
+                  store: {
+                    size_in_bytes: 2048000,
+                  },
+                  indexing: {
+                    index_failed: 10,
+                    index_failed_due_to_version_conflict: 4,
+                  },
+                },
+                primaries: {
+                  docs: {
+                    count: 500,
+                    deleted: 10,
+                  },
+                  store: {
+                    size_in_bytes: 1024000,
+                  },
+                },
+              },
+            },
+          };
+
+          const mockMeteringResponse = {
+            indices: [
+              {
+                name: 'test-index-1',
+                num_docs: 300,
+                size_in_bytes: 600000,
+              },
+            ],
+          };
+
+          (esClient.indices.stats as jest.Mock).mockResolvedValue(mockMultiIndexStatsResponse);
+          (esClient.transport.request as jest.Mock).mockResolvedValue(mockMeteringResponse);
+
+          const results = [];
+          for await (const stat of serverlessReceiver.getIndicesStats(
+            ['test-index-1', 'test-index-2'],
+            100
+          )) {
+            results.push(stat);
+          }
+
+          expect(results).toEqual([
+            {
+              index_name: 'test-index-1',
+              query_total: 100,
+              query_time_in_millis: 1000,
+              docs_count: 250,
+              docs_deleted: 10,
+              docs_total_size_in_bytes: 1024000,
+              index_failed: 5,
+              index_failed_due_to_version_conflict: 2,
+              docs_count_primaries: 300,
+              docs_deleted_primaries: 5,
+              docs_total_size_in_bytes_primaries: 600000,
+            },
+            {
+              index_name: 'test-index-2',
+              query_total: 200,
+              query_time_in_millis: 2000,
+              docs_count: 500,
+              docs_deleted: 20,
+              docs_total_size_in_bytes: 2048000,
+              index_failed: 10,
+              index_failed_due_to_version_conflict: 4,
+              docs_count_primaries: 500,
+              docs_deleted_primaries: 10,
+              docs_total_size_in_bytes_primaries: 1024000,
+            },
+          ]);
+        });
+
+        it('should handle empty metering stats response', async () => {
+          const mockMeteringResponse = {
+            indices: [],
+          };
+
+          (esClient.indices.stats as jest.Mock).mockResolvedValue(mockStatsResponse);
+          (esClient.transport.request as jest.Mock).mockResolvedValue(mockMeteringResponse);
+
+          const results = [];
+          for await (const stat of serverlessReceiver.getIndicesStats(['test-index-1'], 10)) {
+            results.push(stat);
+          }
+
+          expect(results).toEqual([
+            {
+              index_name: 'test-index-1',
+              query_total: 100,
+              query_time_in_millis: 1000,
+              docs_count: 250,
+              docs_deleted: 10,
+              docs_total_size_in_bytes: 1024000,
+              index_failed: 5,
+              index_failed_due_to_version_conflict: 2,
+              docs_count_primaries: 250,
+              docs_deleted_primaries: 5,
+              docs_total_size_in_bytes_primaries: 512000,
+            },
+          ]);
+
+          expect(logger.debug).not.toHaveBeenCalledWith(
+            'Metering stats differ from regular stats',
+            expect.any(Object)
+          );
+        });
+      });
+
+      describe('non-serverless mode', () => {
+        it('should not call metering API', async () => {
+          (esClient.indices.stats as jest.Mock).mockResolvedValue(mockStatsResponse);
+
+          const results = [];
+          for await (const stat of receiver.getIndicesStats(['test-index-1'], 10)) {
+            results.push(stat);
+          }
+
+          expect(esClient.transport.request).not.toHaveBeenCalled();
+
+          expect(results).toEqual([
+            {
+              index_name: 'test-index-1',
+              query_total: 100,
+              query_time_in_millis: 1000,
+              docs_count: 250,
+              docs_deleted: 10,
+              docs_total_size_in_bytes: 1024000,
+              index_failed: 5,
+              index_failed_due_to_version_conflict: 2,
+              docs_count_primaries: 250,
+              docs_deleted_primaries: 5,
+              docs_total_size_in_bytes_primaries: 512000,
+            },
+          ]);
+        });
+      });
     });
   });
 

@@ -27,10 +27,25 @@ import type {
 } from './indices_metadata.types';
 import { chunkedBy } from '../utils';
 
+interface MeteringIndexData {
+  name: string;
+  num_docs: number;
+  size_in_bytes: number;
+}
+
+interface MeteringStatsResponse {
+  datastreams: Array<MeteringIndexData>;
+  indices: Array<MeteringIndexData>;
+}
+
 export class MetadataReceiver {
   private readonly logger: Logger;
 
-  constructor(logger: Logger, private readonly esClient: ElasticsearchClient) {
+  constructor(
+    logger: Logger,
+    private readonly esClient: ElasticsearchClient,
+    private readonly isServerless: boolean
+  ) {
     this.logger = logger.get(MetadataReceiver.name);
   }
 
@@ -137,12 +152,56 @@ export class MetadataReceiver {
 
       try {
         const response = await this.esClient.indices.stats(request);
+
+        let meteringStats: Map<string, MeteringIndexData> | undefined;
+        if (this.isServerless) {
+          meteringStats = await this.esClient.transport
+            .request<MeteringStatsResponse>({
+              method: 'GET',
+              path: `/_metering/stats/${group}`,
+            })
+            .then((res) => {
+              return res.indices.reduce((map, index) => {
+                map.set(index.name, index);
+                return map;
+              }, new Map<string, MeteringIndexData>());
+            })
+            .catch((error) => {
+              this.logger.error('Error fetching metering stats', { error });
+              return new Map<string, MeteringIndexData>();
+            });
+        }
+
         for (const [indexName, stats] of Object.entries(response.indices ?? {})) {
+          const meteringData = meteringStats?.get(indexName);
+
+          let docsCountPrimaries = stats.primaries?.docs?.count;
+          let sizeInBytesPrimaries = stats.primaries?.store?.size_in_bytes;
+
+          if (meteringData) {
+            if (
+              meteringData.num_docs !== docsCountPrimaries ||
+              meteringData.size_in_bytes !== sizeInBytesPrimaries
+            ) {
+              this.logger.debug('Metering stats differ from regular stats', {
+                index: indexName,
+                metering: {
+                  num_docs: meteringData.num_docs,
+                  size_in_bytes: meteringData.size_in_bytes,
+                },
+                regular: { docs_count: docsCountPrimaries, size_in_bytes: sizeInBytesPrimaries },
+              } as LogMeta);
+            }
+            docsCountPrimaries = meteringData.num_docs;
+            sizeInBytesPrimaries = meteringData.size_in_bytes;
+          }
+
           yield {
             index_name: indexName,
             query_total: stats.total?.search?.query_total,
             query_time_in_millis: stats.total?.search?.query_time_in_millis,
-            docs_count: stats.total?.docs?.count,
+
+            docs_count: stats.primaries?.docs?.count,
             docs_deleted: stats.total?.docs?.deleted,
             docs_total_size_in_bytes: stats.total?.store?.size_in_bytes,
 
@@ -150,9 +209,9 @@ export class MetadataReceiver {
             index_failed_due_to_version_conflict: (stats.total?.indexing as any)
               ?.index_failed_due_to_version_conflict,
 
-            docs_count_primaries: stats.primaries?.docs?.count,
+            docs_count_primaries: docsCountPrimaries,
             docs_deleted_primaries: stats.primaries?.docs?.deleted,
-            docs_total_size_in_bytes_primaries: stats.primaries?.store?.size_in_bytes,
+            docs_total_size_in_bytes_primaries: sizeInBytesPrimaries,
           } as IndexStats;
         }
       } catch (error) {
