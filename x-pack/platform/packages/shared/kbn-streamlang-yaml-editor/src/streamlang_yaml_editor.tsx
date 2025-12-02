@@ -38,7 +38,7 @@ const defaultMonacoYamlOptions: Partial<MonacoYamlOptions> = {
 
 export const StreamlangYamlEditor = ({
   dsl,
-  onChange,
+  onDslChange,
   readOnly = false,
   height = '100%',
   onMount,
@@ -68,8 +68,10 @@ export const StreamlangYamlEditor = ({
   }, []); // Empty deps - only compute on mount
 
   const [internalValue, setInternalValue] = useState<string>(initialValue);
-  const [debouncedValue, setDebouncedValue] = useState<string>(initialValue);
   const [isTyping, setIsTyping] = useState(false);
+
+  // Track the last value we sent to onDslChange to avoid duplicate calls
+  const lastNotifiedValueRef = useRef<string>(initialValue);
 
   // Create hover provider instance
   const hoverProvider = useMemo(() => createStreamlangHoverProvider(), []);
@@ -128,27 +130,34 @@ export const StreamlangYamlEditor = ({
     }
   }, [isTyping]);
 
-  const { run: scheduleDebouncedUpdate } = useDebounceFn(
+  // Single debounced handler for all post-change processing:
+  // - Update YAML line map (for step actions, decorations, etc.)
+  // - Parse YAML and notify parent if valid
+  const { run: processChanges } = useDebounceFn(
     (value: string) => {
-      setDebouncedValue(value);
       setIsTyping(false);
+
+      // Update YAML line map
+      if (value) {
+        const lineMap = mapStepsToYamlLines(value);
+        setYamlLineMap(lineMap);
+      } else {
+        setYamlLineMap(undefined);
+      }
+
+      // Parse YAML and notify parent if parsable and changed
+      if (value && value !== lastNotifiedValueRef.current && onDslChange) {
+        try {
+          const parsedDsl = yaml.parse(value);
+          lastNotifiedValueRef.current = value;
+          onDslChange(parsedDsl, value);
+        } catch {
+          // YAML isn't parsable.
+        }
+      }
     },
-    { wait: 500 }
+    { wait: 300 }
   );
-
-  useEffect(() => {
-    scheduleDebouncedUpdate(internalValue);
-  }, [internalValue, scheduleDebouncedUpdate]);
-
-  // Update YAML line map whenever debounced value changes (independent of simulation)
-  useEffect(() => {
-    if (debouncedValue) {
-      const lineMap = mapStepsToYamlLines(debouncedValue);
-      setYamlLineMap(lineMap);
-    } else {
-      setYamlLineMap(undefined);
-    }
-  }, [debouncedValue]);
 
   // For performance reasons we maintain an internal value, rather than waiting for round trips,
   // and various levels of processing / validation to complete. This effect keeps the internal values in
@@ -157,8 +166,14 @@ export const StreamlangYamlEditor = ({
     const cleanedDsl = stripCustomIdentifiers(dsl);
     const serialized = yaml.stringify(cleanedDsl);
     setInternalValue(serialized);
-    setDebouncedValue(serialized);
     setIsTyping(false);
+    // Update the last notified value so reinitialized content isn't treated as a user change
+    lastNotifiedValueRef.current = serialized;
+    // Update line map immediately for the new content
+    if (serialized) {
+      const lineMap = mapStepsToYamlLines(serialized);
+      setYamlLineMap(lineMap);
+    }
     editorRef.current?.setValue(serialized);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [...reinitializationDeps]);
@@ -268,14 +283,12 @@ export const StreamlangYamlEditor = ({
   const handleChange = useCallback(
     (newValue: string) => {
       if (!readOnly) {
-        if (onChange) {
-          onChange(newValue);
-        }
         setInternalValue(newValue);
+        processChanges(newValue); // Debounced processing of the change
         setIsTyping(true); // Mark as typing to clear decorations immediately
       }
     },
-    [onChange, readOnly]
+    [readOnly, processChanges]
   );
 
   return (

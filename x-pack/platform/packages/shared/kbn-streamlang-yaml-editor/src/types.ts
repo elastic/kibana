@@ -13,7 +13,8 @@ import type { StreamType } from '@kbn/streamlang';
 export interface StreamlangYamlEditorProps {
   /** Streamlang DSL object (customIdentifiers will be stripped automatically) */
   dsl: StreamlangDSL;
-  onChange?: (value: string) => void;
+  /** Called when the YAML content changes and is parsable. Debounced internally. */
+  onDslChange?: (dsl: StreamlangDSL, yaml: string) => void;
   readOnly?: boolean;
   height?: string;
   onMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;

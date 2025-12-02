@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
+import React, { useCallback } from 'react';
 import { StreamlangYamlEditor } from '@kbn/streamlang-yaml-editor';
-import yaml from 'yaml';
+import type { StreamlangDSL } from '@kbn/streamlang/types/streamlang';
 import {
   EuiAccordion,
   EuiCallOut,
@@ -64,29 +63,13 @@ export const YamlEditorWrapper = () => {
   const dslErrors = useYamlModeSelector((state) => state.context.errors);
   const additiveChanges = useYamlModeSelector((state) => state.context.additiveChanges);
 
-  // Track the current YAML value for debouncing
-  const [yamlValue, setYamlValue] = useState<string>('');
-
-  // Debounce sending updates to the state machine
-  useDebounce(
-    () => {
-      if (yamlValue) {
-        try {
-          // Provided the YAML is parseable we'll update the state machine.
-          // The machine will handle actual Streamlang validity.
-          const nextDsl = yaml.parse(yamlValue);
-          sendYAMLUpdates(nextDsl, yamlValue);
-          // eslint-disable-next-line no-empty
-        } catch (e) {}
-      }
+  // Handle DSL changes from the editor (already debounced and parsed)
+  const handleDslChange = useCallback(
+    (newDsl: StreamlangDSL, yamlString: string) => {
+      sendYAMLUpdates(newDsl, yamlString);
     },
-    300,
-    [yamlValue]
+    [sendYAMLUpdates]
   );
-
-  const handleChange = (newValue: string) => {
-    setYamlValue(newValue);
-  };
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m" css={fullHeightContainer}>
@@ -94,7 +77,7 @@ export const YamlEditorWrapper = () => {
         <EuiPanel css={fullHeightPanel} paddingSize="none">
           <StreamlangYamlEditor
             dsl={dsl}
-            onChange={handleChange}
+            onDslChange={handleDslChange}
             height="100%"
             data-test-subj="streamsAppEnrichmentYamlEditor"
             stepSummary={stepSummary}
