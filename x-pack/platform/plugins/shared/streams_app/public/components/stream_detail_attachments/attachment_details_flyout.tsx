@@ -18,6 +18,7 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate } from '@kbn/i18n-react';
 import type { Attachment } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
@@ -154,7 +155,9 @@ export function AttachmentDetailsFlyout({
       aria-labelledby={flyoutTitleId}
       type="push"
       ownFocus={false}
-      style={{ width: '40%' }}
+      css={css`
+        width: 40%;
+      `}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">

@@ -626,7 +626,7 @@ export class AttachmentClient {
     }
 
     const response = await this.clients.storageClient.search({
-      size: attachmentIds.length,
+      size: 10_000,
       track_total_hits: false,
       query: {
         bool: {

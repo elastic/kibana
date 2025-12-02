@@ -19,7 +19,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AttachmentType } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
 import { debounce } from 'lodash';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { ATTACHMENT_TYPE_CONFIG } from './attachment_constants';
 
@@ -75,6 +75,12 @@ export function AttachmentFilters({
       }, 150),
     [onFiltersChange]
   );
+
+  useEffect(() => {
+    return () => {
+      updateDebouncedQuery.cancel();
+    };
+  }, [updateDebouncedQuery]);
 
   const typePopoverId = useGeneratedHtmlId({
     prefix: 'typePopover',
