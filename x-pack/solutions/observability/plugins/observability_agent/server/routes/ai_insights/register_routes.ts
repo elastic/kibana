@@ -23,8 +23,7 @@ export function registerAiInsightRoutes(
       path: '/internal/observability_agent/ai_insights/alert',
       validate: {
         body: schema.object({
-          alertId: schema.maybe(schema.string()),
-          context: schema.string(),
+          alertId: schema.string(),
           connectorId: schema.maybe(schema.string()),
         }),
       },
@@ -39,26 +38,38 @@ export function registerAiInsightRoutes(
     },
     async (context, request, response) => {
       try {
-        const { context: requestContext, connectorId /* alertId */ } = request.body;
-        const [coreStart, pluginsStart] = await core.getStartServices();
+        const { connectorId, alertId } = request.body;
+        const [, pluginsStart] = await core.getStartServices();
         const inference = pluginsStart.inference;
-        // Resolve connector: prefer provided id, then default, then first available
-        const providedId =
-          typeof connectorId === 'string' && connectorId.trim() ? connectorId.trim() : undefined;
-        const connector =
-          (providedId
-            ? await inference.getConnectorById(providedId, request).catch(() => undefined)
-            : undefined) ??
-          (await inference.getDefaultConnector(request).catch(() => undefined)) ??
-          (await (async () => {
-            const list = await inference.getConnectorList(request);
-            return list[0];
-          })());
-        if (!connector) {
-          return response.badRequest({
-            body: { message: 'No inference connector configured. Please select a connector.' },
+        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+        try {
+          const alertSearch = await esClient.search({
+            index: ['.alerts-observability*'],
+            size: 1,
+            track_total_hits: false,
+            ignore_unavailable: true,
+            query: { term: { 'kibana.alert.uuid': alertId } },
+            _source: true,
           });
+          const hit = alertSearch.hits.hits[0];
+          if (hit?._source) {
+            logger.debug(
+              `AI insight: fetched alert ${alertId} from .alerts-observability*: ${JSON.stringify(
+                hit._source
+              )}`
+            );
+          } else {
+            logger.debug(`AI insight: alert ${alertId} not found in .alerts-observability*`);
+          }
+        } catch (err) {
+          logger.error(
+            `AI insight: error fetching alert ${alertId} from .alerts-observability*: ${
+              err instanceof Error ? err.message : String(err)
+            }`
+          );
         }
+
+        const relatedContext = 'TBD';
         const inferenceClient = inference.getClient({ request });
 
         const system = dedent(`
@@ -93,25 +104,25 @@ export function registerAiInsightRoutes(
         const prompt = dedent(`
 
           Context:
-          ${requestContext}
+          ${relatedContext}
 
           Task:
           Summarize likely cause, impact, and immediate next checks for this alert using the format above. Tie related signals to the alert scope; ignore unrelated noise. If signals are weak or conflicting, mark Assessment “Inconclusive” and propose the safest next diagnostic step.
         `);
 
         const completion = await inferenceClient.chatComplete({
-          connectorId,
+          connectorId: connectorId ?? '',
           system,
           messages: [{ role: MessageRole.User, content: prompt }],
           temperature: 0.2,
         });
 
-        const summary = completion.content ?? 'Inconclusive.';
+        const summary = completion.content?.trim() ? completion.content.trim() : 'Inconclusive.';
 
         return response.ok({
           body: {
             summary,
-            context: requestContext,
+            context: relatedContext ?? '',
           },
         });
       } catch (e) {

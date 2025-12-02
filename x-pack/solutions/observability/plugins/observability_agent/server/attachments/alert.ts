@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod';
 import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
 import dedent from 'dedent';
+import { OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID } from '../../common/constants';
 
 const alertEntitiesSchema = z.object({
   'service.name': z.string().optional(),
@@ -28,23 +29,16 @@ const alertDataSchema = z.object({
     status: z.enum(['active', 'recovered']).optional(),
   }),
   entities: alertEntitiesSchema,
-  relatedSignals: z.string().optional(),
 });
 
 export type AlertAttachmentData = z.infer<typeof alertDataSchema>;
 
-/**
- * Attachment type for Observability alerts.
- * - validate: enforces payload shape
- * - format: produces a concise representation for the LLM
- * - getAgentDescription: informs the agent how to treat this attachment
- */
 export function createAlertAttachmentType(): AttachmentTypeDefinition<
-  'observability.alert',
+  typeof OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
   AlertAttachmentData
 > {
   return {
-    id: 'observability.alert',
+    id: OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
     validate: (input) => {
       const parsed = alertDataSchema.safeParse(input);
       if (parsed.success) {
@@ -53,7 +47,7 @@ export function createAlertAttachmentType(): AttachmentTypeDefinition<
       return { valid: false, error: parsed.error.message };
     },
     format: (attachment) => {
-      const { alert, entities, relatedSignals } = attachment.data;
+      const { alert, entities } = attachment.data;
       const parts: string[] = [];
       if (alert.ruleName || alert.startedAt) {
         parts.push(
@@ -72,9 +66,6 @@ export function createAlertAttachmentType(): AttachmentTypeDefinition<
         parts.push(
           `Alert scope:\n${nonEmptyEntities.map(([k, v]) => `- ${k}: ${String(v)}`).join('\n')}`
         );
-      }
-      if (relatedSignals && relatedSignals.trim().length > 0) {
-        parts.push(`Related signals:${relatedSignals}`);
       }
       const value = parts.join('\n');
       // console.log('value', value);
