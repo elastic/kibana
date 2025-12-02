@@ -163,6 +163,7 @@ export class ScheduledReportsService {
         page,
         perPage: size,
         search,
+        searchFields: ['title', 'created_by'],
         ...(!this.userCanManageReporting
           ? { filter: `scheduled_report.attributes.createdBy: "${username}"` }
           : {}),
