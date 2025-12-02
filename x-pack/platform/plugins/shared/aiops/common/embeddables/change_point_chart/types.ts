@@ -19,4 +19,4 @@ export interface ChangePointEmbeddableState extends SerializedTitles, Serialized
   maxSeriesToPlot?: number;
 }
 
-export type StoredChangePointDetectionViewType = Omit<ChangePointEmbeddableState, 'dataViewId'>;
+export type StoredChangePointEmbeddableState = Omit<ChangePointEmbeddableState, 'dataViewId'>;

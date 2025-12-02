@@ -7,10 +7,10 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import { CHANGE_POINT_CHART_DATA_VIEW_REF_NAME } from '@kbn/aiops-change-point-detection/constants';
-import type { ChangePointEmbeddableState, StoredChangePointDetectionViewType } from './types';
+import type { ChangePointEmbeddableState, StoredChangePointEmbeddableState } from './types';
 
 export function transformOut(
-  state: StoredChangePointDetectionViewType,
+  state: StoredChangePointEmbeddableState,
   references?: Reference[]
 ): ChangePointEmbeddableState {
   const dataViewIdRef = references?.find(
