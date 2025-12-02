@@ -276,6 +276,302 @@ export class QueryUtils {
   }
 
   /**
+   * TTFT/TTLT percentile metrics structure
+   */
+  private readonly defaultTimingMetrics = {
+    p50: 0,
+    p75: 0,
+    p90: 0,
+    p95: 0,
+    p99: 0,
+    mean: 0,
+    total_samples: 0,
+  };
+
+  /**
+   * Get Time-to-First-Token (TTFT) metrics from conversation rounds
+   * Queries the conversations index and aggregates TTFT data
+   */
+  async getTTFTMetrics(): Promise<{
+    p50: number;
+    p75: number;
+    p90: number;
+    p95: number;
+    p99: number;
+    mean: number;
+    total_samples: number;
+  }> {
+    try {
+      const conversationIndexName = chatSystemIndex('conversations');
+      const response = await this.esClient.search({
+        index: conversationIndexName,
+        size: 0,
+        aggs: {
+          all_rounds: {
+            nested: {
+              path: 'conversation_rounds',
+            },
+            aggs: {
+              ttft_percentiles: {
+                percentiles: {
+                  field: 'conversation_rounds.time_to_first_token',
+                  percents: [50, 75, 90, 95, 99],
+                },
+              },
+              ttft_avg: {
+                avg: {
+                  field: 'conversation_rounds.time_to_first_token',
+                },
+              },
+              ttft_count: {
+                value_count: {
+                  field: 'conversation_rounds.time_to_first_token',
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const aggs = response.aggregations?.all_rounds as any;
+      if (!aggs) {
+        return { ...this.defaultTimingMetrics };
+      }
+
+      const percentiles = aggs.ttft_percentiles?.values || {};
+      return {
+        p50: Math.round(percentiles['50.0'] || 0),
+        p75: Math.round(percentiles['75.0'] || 0),
+        p90: Math.round(percentiles['90.0'] || 0),
+        p95: Math.round(percentiles['95.0'] || 0),
+        p99: Math.round(percentiles['99.0'] || 0),
+        mean: Math.round(aggs.ttft_avg?.value || 0),
+        total_samples: aggs.ttft_count?.value || 0,
+      };
+    } catch (error) {
+      if (!isIndexNotFoundError(error)) {
+        this.logger.warn(`Failed to fetch TTFT metrics: ${error.message}`);
+      }
+      return { ...this.defaultTimingMetrics };
+    }
+  }
+
+  /**
+   * Get Time-to-Last-Token (TTLT) metrics from conversation rounds
+   * Queries the conversations index and aggregates TTLT data
+   */
+  async getTTLTMetrics(): Promise<{
+    p50: number;
+    p75: number;
+    p90: number;
+    p95: number;
+    p99: number;
+    mean: number;
+    total_samples: number;
+  }> {
+    try {
+      const conversationIndexName = chatSystemIndex('conversations');
+      const response = await this.esClient.search({
+        index: conversationIndexName,
+        size: 0,
+        aggs: {
+          all_rounds: {
+            nested: {
+              path: 'conversation_rounds',
+            },
+            aggs: {
+              ttlt_percentiles: {
+                percentiles: {
+                  field: 'conversation_rounds.time_to_last_token',
+                  percents: [50, 75, 90, 95, 99],
+                },
+              },
+              ttlt_avg: {
+                avg: {
+                  field: 'conversation_rounds.time_to_last_token',
+                },
+              },
+              ttlt_count: {
+                value_count: {
+                  field: 'conversation_rounds.time_to_last_token',
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const aggs = response.aggregations?.all_rounds as any;
+      if (!aggs) {
+        return { ...this.defaultTimingMetrics };
+      }
+
+      const percentiles = aggs.ttlt_percentiles?.values || {};
+      return {
+        p50: Math.round(percentiles['50.0'] || 0),
+        p75: Math.round(percentiles['75.0'] || 0),
+        p90: Math.round(percentiles['90.0'] || 0),
+        p95: Math.round(percentiles['95.0'] || 0),
+        p99: Math.round(percentiles['99.0'] || 0),
+        mean: Math.round(aggs.ttlt_avg?.value || 0),
+        total_samples: aggs.ttlt_count?.value || 0,
+      };
+    } catch (error) {
+      if (!isIndexNotFoundError(error)) {
+        this.logger.warn(`Failed to fetch TTLT metrics: ${error.message}`);
+      }
+      return { ...this.defaultTimingMetrics };
+    }
+  }
+
+  /**
+   * Get latency breakdown by connector (which maps to provider/model)
+   * Returns TTFT and TTLT p50/p95 for each connector_id
+   */
+  async getLatencyByConnector(): Promise<
+    Array<{
+      connector_id: string;
+      ttft_p50: number;
+      ttft_p95: number;
+      ttlt_p50: number;
+      ttlt_p95: number;
+      sample_count: number;
+    }>
+  > {
+    try {
+      const conversationIndexName = chatSystemIndex('conversations');
+      const response = await this.esClient.search({
+        index: conversationIndexName,
+        size: 0,
+        aggs: {
+          all_rounds: {
+            nested: {
+              path: 'conversation_rounds',
+            },
+            aggs: {
+              by_connector: {
+                terms: {
+                  field: 'conversation_rounds.model_usage.connector_id',
+                  size: 20,
+                },
+                aggs: {
+                  ttft_percentiles: {
+                    percentiles: {
+                      field: 'conversation_rounds.time_to_first_token',
+                      percents: [50, 95],
+                    },
+                  },
+                  ttlt_percentiles: {
+                    percentiles: {
+                      field: 'conversation_rounds.time_to_last_token',
+                      percents: [50, 95],
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const aggs = response.aggregations?.all_rounds as any;
+      const buckets = aggs?.by_connector?.buckets || [];
+
+      return buckets.map((bucket: any) => ({
+        connector_id: bucket.key,
+        ttft_p50: Math.round(bucket.ttft_percentiles?.values?.['50.0'] || 0),
+        ttft_p95: Math.round(bucket.ttft_percentiles?.values?.['95.0'] || 0),
+        ttlt_p50: Math.round(bucket.ttlt_percentiles?.values?.['50.0'] || 0),
+        ttlt_p95: Math.round(bucket.ttlt_percentiles?.values?.['95.0'] || 0),
+        sample_count: bucket.doc_count || 0,
+      }));
+    } catch (error) {
+      if (!isIndexNotFoundError(error)) {
+        this.logger.warn(`Failed to fetch latency by connector: ${error.message}`);
+      }
+      return [];
+    }
+  }
+
+  /**
+   * Get latency breakdown by agent
+   * Returns TTFT and TTLT p50/p95 for each agent_id
+   */
+  async getLatencyByAgentType(): Promise<
+    Array<{
+      agent_id: string;
+      ttft_p50: number;
+      ttft_p95: number;
+      ttlt_p50: number;
+      ttlt_p95: number;
+      sample_count: number;
+    }>
+  > {
+    try {
+      const conversationIndexName = chatSystemIndex('conversations');
+
+      // Get latency metrics grouped by agent_id
+      const response = await this.esClient.search({
+        index: conversationIndexName,
+        size: 0,
+        aggs: {
+          by_agent: {
+            terms: {
+              field: 'agent_id',
+              size: 50,
+            },
+            aggs: {
+              all_rounds: {
+                nested: {
+                  path: 'conversation_rounds',
+                },
+                aggs: {
+                  ttft_percentiles: {
+                    percentiles: {
+                      field: 'conversation_rounds.time_to_first_token',
+                      percents: [50, 95],
+                    },
+                  },
+                  ttlt_percentiles: {
+                    percentiles: {
+                      field: 'conversation_rounds.time_to_last_token',
+                      percents: [50, 95],
+                    },
+                  },
+                  count: {
+                    value_count: {
+                      field: 'conversation_rounds.time_to_first_token',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const buckets = (response.aggregations?.by_agent as any)?.buckets || [];
+
+      return buckets.map((bucket: any) => {
+        const roundsAggs = bucket.all_rounds;
+        return {
+          agent_id: bucket.key,
+          ttft_p50: Math.round(roundsAggs?.ttft_percentiles?.values?.['50.0'] || 0),
+          ttft_p95: Math.round(roundsAggs?.ttft_percentiles?.values?.['95.0'] || 0),
+          ttlt_p50: Math.round(roundsAggs?.ttlt_percentiles?.values?.['50.0'] || 0),
+          ttlt_p95: Math.round(roundsAggs?.ttlt_percentiles?.values?.['95.0'] || 0),
+          sample_count: roundsAggs?.count?.value || 0,
+        };
+      });
+    } catch (error) {
+      if (!isIndexNotFoundError(error)) {
+        this.logger.warn(`Failed to fetch latency by agent: ${error.message}`);
+      }
+      return [];
+    }
+  }
+
+  /**
    * Calculate percentiles from bucketed time data
    * @param buckets - Map of bucket name → count
    * @returns Calculated percentiles (p50, p75, p90, p95, p99, mean)
