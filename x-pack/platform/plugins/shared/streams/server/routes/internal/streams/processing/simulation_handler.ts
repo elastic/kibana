@@ -287,8 +287,14 @@ const prepareSimulationData = (
       .filter(([, def]) => def.type === 'geo_point')
       .map(([name]) => name)
   );
-  const geoPointFieldsFromDocuments = detectGeoPointPatternsFromDocuments(documents);
-  const geoPointFields = new Set([...geoPointFieldsFromDefinition, ...geoPointFieldsFromDocuments]);
+
+  const geoPointFields =
+    Streams.ClassicStream.Definition.is(stream) && documents.length > 0
+      ? new Set([
+          ...geoPointFieldsFromDefinition,
+          ...detectGeoPointPatternsFromDocuments(documents),
+        ])
+      : geoPointFieldsFromDefinition;
 
   return {
     docs: prepareSimulationDocs(documents, targetStreamName, geoPointFields),
