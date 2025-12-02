@@ -6,7 +6,7 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
-import type { FindMaintenanceWindowsResult } from '@kbn/alerting-plugin/server/application/maintenance_window/methods/find/types';
+import type { FindMaintenanceWindowsResult } from '@kbn/maintenance-windows-plugin/common';
 import { getMaintenanceWindowsAction } from './actions';
 
 export interface MaintenanceWindowsState {
