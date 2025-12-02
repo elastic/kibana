@@ -16,7 +16,11 @@ import {
 import type { ESQLColumn, ESQLFunction } from '../../../../../types';
 import { getBinaryExpressionOperand, getExpressionType } from '../../../expressions';
 import type { ExpressionContext } from '../types';
-import { getLogicalContinuationSuggestions, shouldSuggestOpenListForOperand } from './utils';
+import {
+  getLogicalContinuationSuggestions,
+  isOperandMissing,
+  shouldSuggestOpenListForOperand,
+} from './utils';
 import { shouldSuggestComma } from '../comma_decision_engine';
 import { buildConstantsDefinitions } from '../../../literals';
 import { SuggestionBuilder } from '../suggestion_builder';
@@ -146,33 +150,9 @@ export async function handleStringListOperator(
 
   const operator = fn.name.toLowerCase();
   const rightOperand = getBinaryExpressionOperand(fn, 'right');
-  const leftOperand = getBinaryExpressionOperand(fn, 'left');
 
-  // No list yet: suggest any string expressions (LIKE pattern can be any string expression)
-  if (shouldSuggestOpenListForOperand(rightOperand)) {
-    // LIKE/RLIKE accepts any string pattern, so suggest all string-compatible expressions
-    const builder = new SuggestionBuilder(context);
-
-    const ignoredColumns = isColumn(leftOperand)
-      ? [leftOperand.parts.join('.')].filter(Boolean)
-      : [];
-
-    await builder.addFields({
-      types: ['any'],
-      ignoredColumns,
-    });
-
-    builder
-      .addFunctions({
-        types: ['any'],
-      })
-      .addLiterals({
-        types: ['any'],
-        includeDateLiterals: false,
-        includeCompatibleLiterals: true,
-      });
-
-    return builder.build();
+  if (isOperandMissing(rightOperand)) {
+    return getStringPatternSuggestions(operator);
   }
 
   // Only handle list form; otherwise, delegate by returning null
@@ -193,7 +173,6 @@ export async function handleStringListOperator(
     shouldSuggestComma({
       position: 'inside_list',
       innerText: context.innerText,
-      listHasValues: list.values && list.values.length > 0,
     })
   ) {
     return [{ ...commaCompleteItem, text: ', ' }];
@@ -203,13 +182,22 @@ export async function handleStringListOperator(
   return getStringPatternSuggestions(operator);
 }
 
-/** Returns basic pattern suggestions for LIKE/RLIKE operators */
+/** Returns pattern suggestion for LIKE/RLIKE operators with cursor inside quotes */
 function getStringPatternSuggestions(operator: string): ISuggestionItem[] {
   const isRlike = operator.includes('rlike');
 
-  // RLIKE: empty string, match anything, match from start to end
-  // LIKE: empty string, wildcard for any characters
-  const patterns = isRlike ? ['""', '".*"', '"^.*$"'] : ['""', '"*"'];
+  // LIKE: wildcard pattern (% = any chars, _ = single char)
+  // RLIKE: regular expression pattern
+  const { snippet, label, detail } = isRlike
+    ? { snippet: '"${0:.*}"', label: 'regex', detail: 'Regular expression pattern' }
+    : { snippet: '"${0:%}"', label: 'pattern', detail: 'Use % for any chars, _ for single char' };
 
-  return buildConstantsDefinitions(patterns, undefined, 'A');
+  return [
+    {
+      ...buildConstantsDefinitions([label], undefined, 'A')[0],
+      text: snippet,
+      detail,
+      asSnippet: true,
+    },
+  ];
 }

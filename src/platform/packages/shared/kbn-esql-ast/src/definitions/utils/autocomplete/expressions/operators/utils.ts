@@ -13,12 +13,37 @@ import { getOperatorSuggestion } from '../../../operators';
 import type { ISuggestionItem } from '../../../../../commands_registry/types';
 import { logicalOperators } from '../../../../all_operators';
 
-/** Returns true if we should suggest opening a list for the right operand */
-export function shouldSuggestOpenListForOperand(operand: any): boolean {
+export const LIKE_OPERATOR_REGEX = /\b(not\s+)?(r?like)\s*$/i;
+export const IS_NOT_REGEX = /\bis\s+not\b/i;
+export const IS_NULL_OPERATOR_REGEX =
+  /\bis\s+(?:n(?:o(?:t(?:\s+n(?:u(?:l(?:l)?)?)?|\s*)?)?|u(?:l(?:l)?)?)?)?$/i;
+export const IN_OPERATOR_REGEX = /\b(?:not\s+)?in\s*\(?\s*$/i;
+export const NOT_IN_REGEX = /\bnot\s+in\s*$/i;
+
+export function endsWithInOrNotInToken(innerText: string): boolean {
+  return IN_OPERATOR_REGEX.test(innerText);
+}
+
+export function endsWithLikeOrRlikeToken(innerText: string): boolean {
+  return LIKE_OPERATOR_REGEX.test(innerText);
+}
+
+export function endsWithIsOrIsNotToken(innerText: string): boolean {
+  return IS_NULL_OPERATOR_REGEX.test(innerText);
+}
+
+export function isOperandMissing(operand: any): boolean {
   return (
     !operand ||
     isMarkerNode(operand) ||
-    (operand?.type === 'unknown' && operand?.incomplete === true) ||
+    (operand?.type === 'unknown' && operand?.incomplete === true)
+  );
+}
+
+/** Returns true if we should suggest opening a list for the right operand */
+export function shouldSuggestOpenListForOperand(operand: any): boolean {
+  return (
+    isOperandMissing(operand) ||
     (isList(operand) && operand.location.min === 0 && operand.location.max === 0)
   );
 }
@@ -26,16 +51,4 @@ export function shouldSuggestOpenListForOperand(operand: any): boolean {
 /** Suggestions for logical continuations after a complete list or null-check operator */
 export function getLogicalContinuationSuggestions(): ISuggestionItem[] {
   return logicalOperators.map(getOperatorSuggestion);
-}
-
-export function endsWithInOrNotInToken(innerText: string): boolean {
-  return /\b(?:not\s+)?in\s*\(?\s*$/i.test(innerText);
-}
-
-export function endsWithLikeOrRlikeToken(innerText: string): boolean {
-  return /\b(?:not\s+)?r?like\s+$/i.test(innerText);
-}
-
-export function endsWithIsOrIsNotToken(innerText: string): boolean {
-  return /\bis\s+(?:n(?:o(?:t(?:\s+n(?:u(?:l(?:l)?)?)?|\s*)?)?|u(?:l(?:l)?)?)?)?$/i.test(innerText);
 }
