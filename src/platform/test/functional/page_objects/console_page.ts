@@ -83,8 +83,7 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async promptAutocomplete(letter = 'b') {
-    const textArea = await this.getTextArea();
-    await textArea.type(letter);
+    await this.monacoEditor.typeCodeEditorValue(letter, 'consoleMonacoEditor', true);
     await this.retry.waitFor(
       'autocomplete to be visible',
       async () => await this.isAutocompleteVisible()
