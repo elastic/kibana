@@ -208,6 +208,7 @@ export const ActionForm = ({
       const hasActionsDisabled = actions.some(
         (action) =>
           actionTypesIndex &&
+          actionTypesIndex[action.actionTypeId] &&
           !actionTypesIndex[action.actionTypeId].enabled &&
           !checkActionFormActionTypeEnabled(
             actionTypesIndex[action.actionTypeId],
