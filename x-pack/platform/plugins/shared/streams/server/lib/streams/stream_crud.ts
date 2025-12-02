@@ -284,6 +284,34 @@ export async function getDataStream({
   return dataStream;
 }
 
+export async function getClusterDefaultFailureStoreRetentionValue({
+  scopedClusterClient,
+  isServerless,
+}: {
+  scopedClusterClient: IScopedClusterClient;
+  isServerless: boolean;
+}): Promise<string | undefined> {
+  let defaultRetention: string | undefined;
+  try {
+    if (!isServerless) {
+      const { persistent, defaults } = await scopedClusterClient.asCurrentUser.cluster.getSettings({
+        include_defaults: true,
+      });
+      const persistentDSRetention =
+        persistent?.data_streams?.lifecycle?.retention?.failures_default;
+      const defaultsDSRetention = defaults?.data_streams?.lifecycle?.retention?.failures_default;
+      defaultRetention = persistentDSRetention ?? defaultsDSRetention;
+    }
+  } catch (e) {
+    if (e.meta?.statusCode === 403) {
+      // if user doesn't have permissions to read cluster settings, we just return undefined
+    } else {
+      throw e;
+    }
+  }
+  return defaultRetention;
+}
+
 export function getFailureStore({
   dataStream,
 }: {

@@ -138,6 +138,10 @@ export function isInheritFailureStore(input: FailureStore): input is FailureStor
   return isSchema(inheritFailureStoreSchema, input);
 }
 
+export const isDisabledFailureStore = (input: FailureStore): input is FailureStoreDisabled => {
+  return isSchema(disabledFailureStoreSchema, input);
+};
+
 export type DataStreamWithFailureStore = IndicesDataStream & {
   failure_store: {
     enabled?: boolean;

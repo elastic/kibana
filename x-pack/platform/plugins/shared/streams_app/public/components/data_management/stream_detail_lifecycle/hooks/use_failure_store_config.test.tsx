@@ -9,6 +9,10 @@ import { renderHook } from '@testing-library/react';
 import type { EffectiveFailureStore, Streams } from '@kbn/streams-schema';
 import { useFailureStoreConfig, transformFailureStoreConfig } from './use_failure_store_config';
 
+jest.mock('./use_failure_store_default_retention', () => ({
+  useFailureStoreDefaultRetention: jest.fn(() => ({ value: undefined })),
+}));
+
 const createBaseDefinition = (name: string): Partial<Streams.ingest.all.GetResponse> => ({
   stream: {
     name,
@@ -201,6 +205,38 @@ describe('useFailureStoreConfig', () => {
       const { result } = renderHook(() => useFailureStoreConfig(definition));
 
       expect(result.current.inheritOptions.isCurrentlyInherited).toBe(false);
+    });
+
+    it('should use cluster default retention when stream has no default retention', () => {
+      const { useFailureStoreDefaultRetention } = jest.requireMock(
+        './use_failure_store_default_retention'
+      );
+      useFailureStoreDefaultRetention.mockReturnValueOnce({
+        clusterDefaultRetention: '90d',
+      });
+
+      const definition = createClassicDefinition('logs-test', {
+        lifecycle: {
+          enabled: {
+            data_retention: '30d',
+            is_default_retention: false,
+          },
+        },
+      });
+
+      const { result } = renderHook(() => useFailureStoreConfig(definition));
+
+      expect(result.current).toEqual({
+        failureStoreEnabled: true,
+        customRetentionPeriod: '30d',
+        defaultRetentionPeriod: '90d',
+        retentionDisabled: false,
+        inheritOptions: {
+          canShowInherit: true,
+          isWired: false,
+          isCurrentlyInherited: true,
+        },
+      });
     });
   });
 

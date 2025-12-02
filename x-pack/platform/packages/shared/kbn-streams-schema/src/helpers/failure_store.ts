@@ -7,7 +7,13 @@
 
 import type { Streams } from '../models/streams';
 import type { WiredIngestStreamEffectiveFailureStore } from '../models/ingest/failure_store';
-import { isInheritFailureStore } from '../models/ingest/failure_store';
+import {
+  isDisabledLifecycleFailureStore,
+  isEnabledFailureStore,
+  isEnabledLifecycleFailureStore,
+  isInheritFailureStore,
+  isDisabledFailureStore,
+} from '../models/ingest/failure_store';
 import { getSegments } from '../shared/hierarchy';
 
 export function findInheritedFailureStore(
@@ -28,8 +34,8 @@ export function findInheritedFailureStore(
 
   const failureStore = originDefinition.ingest.failure_store;
 
-  if ('lifecycle' in failureStore) {
-    if ('enabled' in failureStore.lifecycle) {
+  if (isEnabledFailureStore(failureStore)) {
+    if (isEnabledLifecycleFailureStore(failureStore)) {
       const dataRetention = failureStore.lifecycle.enabled.data_retention;
       return {
         lifecycle: {
@@ -40,7 +46,7 @@ export function findInheritedFailureStore(
         },
         from: originDefinition.name,
       };
-    } else if ('disabled' in failureStore.lifecycle) {
+    } else if (isDisabledLifecycleFailureStore(failureStore)) {
       return {
         lifecycle: { disabled: {} },
         from: originDefinition.name,
@@ -48,7 +54,7 @@ export function findInheritedFailureStore(
     }
   }
 
-  if ('disabled' in failureStore) {
+  if (isDisabledFailureStore(failureStore)) {
     return {
       disabled: {},
       from: originDefinition.name,

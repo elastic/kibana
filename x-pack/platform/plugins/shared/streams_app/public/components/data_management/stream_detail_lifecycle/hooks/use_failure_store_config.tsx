@@ -12,6 +12,7 @@ import {
   isDisabledLifecycleFailureStore,
   isInheritFailureStore,
 } from '@kbn/streams-schema/src/models/ingest/failure_store';
+import { useFailureStoreDefaultRetention } from './use_failure_store_default_retention';
 
 export function transformFailureStoreConfig(update: {
   failureStoreEnabled?: boolean;
@@ -65,8 +66,10 @@ export function useFailureStoreConfig(definition: Streams.ingest.all.GetResponse
   const isCurrentlyInherited = isInheritFailureStore(definition.stream.ingest.failure_store);
   const canShowInherit = (isWired && !isRootStream) || isClassicStream;
 
+  const { clusterDefaultRetention } = useFailureStoreDefaultRetention(!isDefaultRetention);
+
   return {
-    defaultRetentionPeriod: isDefaultRetention ? retentionPeriod : undefined,
+    defaultRetentionPeriod: isDefaultRetention ? retentionPeriod : clusterDefaultRetention,
     customRetentionPeriod: !isDefaultRetention && retentionPeriod ? retentionPeriod : undefined,
     failureStoreEnabled,
     inheritOptions: {
