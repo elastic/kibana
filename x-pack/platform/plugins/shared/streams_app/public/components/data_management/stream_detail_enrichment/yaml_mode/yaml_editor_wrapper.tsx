@@ -174,7 +174,7 @@ const DSLErrorsList: React.FC<{ errors: string[] }> = ({ errors }) => {
           <p>
             <FormattedMessage
               id="xpack.streams.streamDetailView.managementTab.enrichment.yamlErrors.errors"
-              defaultMessage="The Streamlang DSL is invalid due to the following: {errors}"
+              defaultMessage="Streamlang DSL is invalid: {errors}"
               values={{
                 errors: errors.map((error) => (
                   <>

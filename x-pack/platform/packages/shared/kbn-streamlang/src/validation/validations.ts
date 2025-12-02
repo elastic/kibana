@@ -31,8 +31,8 @@ import type {
 import type { StreamlangStep } from '../../types/streamlang';
 import {
   isActionBlock,
-  isStreamlangDSLSchema,
   isWhereBlock,
+  streamlangDSLSchema,
   type StreamlangDSL,
   type StreamType,
 } from '../../types/streamlang';
@@ -44,14 +44,25 @@ export class StreamlangValidationError extends Error {
   }
 }
 
-export const validateStreamlang = (dsl: StreamlangDSL, streamType?: StreamType): true => {
-  // First, a schema check.
-  const isValidSchema = isStreamlangDSLSchema(dsl);
+/**
+ * Format Zod errors into human-readable error messages.
+ */
+function formatZodErrors(zodError: {
+  issues: Array<{ path: (string | number)[]; message: string }>;
+}): string[] {
+  return zodError.issues.map((issue) => {
+    const path = issue.path.length > 0 ? issue.path.join('.') : 'root';
+    return `${path}: ${issue.message}`;
+  });
+}
 
-  if (!isValidSchema) {
-    throw new StreamlangValidationError([
-      'Streamlang DSL does not conform to the Streamlang schema.',
-    ]);
+export const validateStreamlang = (dsl: StreamlangDSL, streamType?: StreamType): true => {
+  // First, a schema check using Zod's safeParse to get detailed errors.
+  const parseResult = streamlangDSLSchema.safeParse(dsl);
+
+  if (!parseResult.success) {
+    const schemaErrors = formatZodErrors(parseResult.error);
+    throw new StreamlangValidationError(schemaErrors);
   }
 
   // Next, additional validations outside of the Zod schema.

@@ -29,6 +29,22 @@ describe('validateStreamlang', () => {
     expect(() => validateStreamlang(invalidDsl as any)).toThrow(StreamlangValidationError);
   });
 
+  it('includes detailed Zod schema errors when validation fails', () => {
+    const invalidDsl = { steps: [{ action: 'invalid_action' }] };
+
+    try {
+      validateStreamlang(invalidDsl as any);
+      fail('Expected validateStreamlang to throw');
+    } catch (error) {
+      expect(error).toBeInstanceOf(StreamlangValidationError);
+      const validationError = error as StreamlangValidationError;
+      // Should have at least one error with path information
+      expect(validationError.errors.length).toBeGreaterThan(0);
+      // Errors should include path information (e.g., "steps.0.action: ...")
+      expect(validationError.errors.some((e) => e.includes('steps'))).toBe(true);
+    }
+  });
+
   it('throws StreamlangValidationError for invalid field names', () => {
     const dsl: StreamlangDSL = {
       steps: [
