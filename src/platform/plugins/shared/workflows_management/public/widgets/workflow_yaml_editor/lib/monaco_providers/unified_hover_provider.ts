@@ -10,7 +10,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type YAML from 'yaml';
-import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
 import type { HoverContext, ProviderConfig } from './provider_interfaces';
 import { getMonacoConnectorHandler } from './provider_registry';
@@ -23,133 +22,9 @@ import { isYamlValidationMarkerOwner } from '../../../../features/validate_workf
  */
 export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
   private readonly getYamlDocument: () => YAML.Document | null;
-  // private readonly options: Record<string, any>;
 
   constructor(config: ProviderConfig) {
     this.getYamlDocument = config.getYamlDocument;
-    // this.options = config.options || {};
-  }
-
-  /**
-   * Setup keyboard shortcuts for Monaco actions
-   * Consolidates functionality from elasticsearch_step_context_menu_provider.ts
-   */
-  public setupKeyboardShortcuts(editor: monaco.editor.IStandaloneCodeEditor): monaco.IDisposable[] {
-    const disposables: monaco.IDisposable[] = [];
-
-    // Add "Copy as Console" shortcut (Ctrl+K, C)
-    const copyAsConsoleAction = editor.addAction({
-      id: 'unified.copyAsConsole',
-      label: i18n.translate('workflows.workflowDetail.yamlEditor.action.copyAsConsole', {
-        defaultMessage: 'Copy step as Console format',
-      }),
-      keybindings: [
-        // eslint-disable-next-line no-bitwise
-        monaco.KeyMod.chord(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK, monaco.KeyCode.KeyC),
-      ],
-      run: async () => {
-        await this.runActionAtCurrentPosition(editor, 'copy-as-console');
-      },
-    });
-    disposables.push(copyAsConsoleAction);
-
-    // Add "Copy as cURL" shortcut (Ctrl+K, U)
-    const copyAsCurlAction = editor.addAction({
-      id: 'unified.copyAsCurl',
-      label: i18n.translate('workflows.workflowDetail.yamlEditor.action.copyAsCurl', {
-        defaultMessage: 'Copy step as cURL command',
-      }),
-      keybindings: [
-        // eslint-disable-next-line no-bitwise
-        monaco.KeyMod.chord(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK, monaco.KeyCode.KeyU),
-      ],
-      run: async () => {
-        await this.runActionAtCurrentPosition(editor, 'copy-as-curl');
-      },
-    });
-    disposables.push(copyAsCurlAction);
-
-    // Add "Copy Step" shortcut (Ctrl+K, S)
-    const copyStepAction = editor.addAction({
-      id: 'unified.copyStep',
-      label: i18n.translate('workflows.workflowDetail.yamlEditor.action.copyStep', {
-        defaultMessage: 'Copy workflow step',
-      }),
-      keybindings: [
-        // eslint-disable-next-line no-bitwise
-        monaco.KeyMod.chord(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK, monaco.KeyCode.KeyS),
-      ],
-      run: async () => {
-        await this.runActionAtCurrentPosition(editor, 'copy-step');
-      },
-    });
-    disposables.push(copyStepAction);
-
-    return disposables;
-  }
-
-  /**
-   * Run a specific action at the current cursor position
-   */
-  private async runActionAtCurrentPosition(
-    editor: monaco.editor.IStandaloneCodeEditor,
-    actionId: string
-  ): Promise<void> {
-    try {
-      const model = editor.getModel();
-      const position = editor.getPosition();
-
-      if (!model || !position) {
-        return;
-      }
-
-      const yamlDocument = this.getYamlDocument();
-      if (!yamlDocument) {
-        return;
-      }
-
-      // Build context
-      const context = await this.buildActionContext(model, position, yamlDocument, editor);
-      if (!context) {
-        return;
-      }
-
-      // Find handler
-      const handler = getMonacoConnectorHandler(context.connectorType);
-      if (!handler) {
-        return;
-      }
-
-      // Get actions and find the requested one
-      const actions = await handler.generateActions(context);
-      const action = actions.find((a) => a.id === actionId);
-
-      if (action) {
-        await action.handler();
-      }
-    } catch (error) {
-      // console.warn('UnifiedHoverProvider: Error running action', error);
-    }
-  }
-
-  /**
-   * Build action context (similar to hover context but includes editor)
-   */
-  private async buildActionContext(
-    model: monaco.editor.ITextModel,
-    position: monaco.Position,
-    yamlDocument: YAML.Document,
-    editor: monaco.editor.IStandaloneCodeEditor
-  ): Promise<any> {
-    const hoverContext = await this.buildHoverContext(model, position, yamlDocument);
-    if (!hoverContext) {
-      return null;
-    }
-
-    return {
-      ...hoverContext,
-      editor,
-    };
   }
 
   /**

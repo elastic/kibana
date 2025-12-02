@@ -125,11 +125,6 @@ export interface MonacoConnectorHandler {
   generateHoverContent(context: HoverContext): Promise<monaco.IMarkdownString | null>;
 
   /**
-   * Generate floating action buttons for the connector
-   */
-  generateActions(context: ActionContext): Promise<ActionInfo[]>;
-
-  /**
    * Get examples for the connector type
    */
   getExamples(connectorType: string): ConnectorExamples | null;

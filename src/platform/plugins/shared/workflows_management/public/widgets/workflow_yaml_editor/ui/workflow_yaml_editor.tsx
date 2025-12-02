@@ -339,9 +339,6 @@ export const WorkflowYAMLEditor = ({
         const customHandler = new CustomMonacoStepHandler();
         registerMonacoConnectorHandler(customHandler);
 
-        // Monaco YAML hover is now disabled via configuration (hover: false)
-        // The unified hover provider will handle all hover content including validation errors
-
         const genericHandler = new GenericMonacoConnectorHandler();
         registerMonacoConnectorHandler(genericHandler);
 

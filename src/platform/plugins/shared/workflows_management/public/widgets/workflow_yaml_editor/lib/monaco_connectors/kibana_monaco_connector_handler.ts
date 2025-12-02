@@ -337,33 +337,4 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
 
     return withParams;
   }
-
-  /**
-   * Copy entire workflow step
-   */
-  private async copyStep(context: ActionContext): Promise<void> {
-    try {
-      const { stepContext } = context;
-      if (!stepContext) return;
-
-      // Get the entire step YAML
-      const stepYaml = stepContext.stepNode?.toString() || '';
-
-      await navigator.clipboard.writeText(stepYaml);
-
-      if (this.notifications) {
-        this.notifications.toasts.addSuccess({
-          title: 'Copied to clipboard',
-          text: 'Workflow step copied successfully',
-        });
-      }
-    } catch (error) {
-      // console.error('KibanaMonacoConnectorHandler: Error copying step', error);
-      if (this.notifications) {
-        this.notifications.toasts.addError(error as Error, {
-          title: 'Failed to copy step',
-        });
-      }
-    }
-  }
 }

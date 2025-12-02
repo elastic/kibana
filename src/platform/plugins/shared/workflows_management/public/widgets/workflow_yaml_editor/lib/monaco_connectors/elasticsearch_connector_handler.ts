@@ -15,12 +15,7 @@ import { isEnhancedInternalConnector } from '@kbn/workflows';
 import { BaseMonacoConnectorHandler } from './base_monaco_connector_handler';
 import { getAllConnectors } from '../../../../../common/schema';
 import { getElasticsearchRequestInfo } from '../elasticsearch_step_utils';
-import type {
-  ActionContext,
-  ActionInfo,
-  ConnectorExamples,
-  HoverContext,
-} from '../monaco_providers/provider_interfaces';
+import type { ConnectorExamples, HoverContext } from '../monaco_providers/provider_interfaces';
 
 /**
  * Monaco connector handler for Elasticsearch APIs
@@ -95,31 +90,6 @@ export class ElasticsearchMonacoConnectorHandler extends BaseMonacoConnectorHand
       // console.warn('ElasticsearchMonacoConnectorHandler: Error generating hover content', error);
       return null;
     }
-  }
-
-  /**
-   * Generate floating action buttons for Elasticsearch connectors
-   */
-  async generateActions(context: ActionContext): Promise<ActionInfo[]> {
-    const actions: ActionInfo[] = [];
-
-    // Add "Copy as Console" action if we have the necessary services
-    if (this.http && this.notifications) {
-      actions.push(
-        this.createActionInfo(
-          'copy-as-console',
-          'Copy as Console',
-          () => this.copyAsConsole(context),
-          {
-            icon: 'copy',
-            tooltip: 'Copy this step as Console command',
-            priority: 10,
-          }
-        )
-      );
-    }
-
-    return actions;
   }
 
   /**
@@ -228,52 +198,6 @@ export class ElasticsearchMonacoConnectorHandler extends BaseMonacoConnectorHand
     }
 
     return withParams;
-  }
-
-  /**
-   * Generate console format for the request
-   */
-  private generateConsoleFormat(
-    requestInfo: { method: string; url: string; data?: string[] },
-    withParams: Record<string, unknown>
-  ): string {
-    const lines = [`${requestInfo.method} ${requestInfo.url}`];
-
-    if (requestInfo.data && requestInfo.data.length > 0) {
-      lines.push(...requestInfo.data);
-    }
-
-    return lines.join('\n');
-  }
-
-  /**
-   * Copy step as Console command
-   */
-  private async copyAsConsole(context: ActionContext): Promise<void> {
-    try {
-      const { connectorType, stepContext } = context;
-      if (!stepContext) return;
-
-      const withParams = this.extractWithParams(stepContext.stepNode);
-      const requestInfo = getElasticsearchRequestInfo(connectorType, withParams);
-      const consoleFormat = this.generateConsoleFormat(requestInfo, withParams);
-
-      await navigator.clipboard.writeText(consoleFormat);
-
-      if (this.notifications) {
-        this.notifications.toasts.addSuccess({
-          title: 'Copied to clipboard',
-          text: 'Console command copied successfully',
-        });
-      }
-    } catch (error) {
-      // console.error('ElasticsearchMonacoConnectorHandler: Error copying as console', error);
-      if (this.notifications) {
-        this.notifications.toasts.addError(error as Error, {
-          title: 'Failed to copy',
-        });
-      }
-    }
   }
 
   /**
