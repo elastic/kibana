@@ -54,19 +54,17 @@ const AiAssistantComponent: React.FC<AiAssistantProps> = ({
 
   const getPromptContext = useCallback(async () => {
     const queryField = getFields().queryBar;
-    const { query } = queryField.value;
+    const { query } = queryField.value.query;
 
     if (!query) {
       return '';
     }
 
     if (queryField.errors.length === 0) {
-      // TODO verify that this was previously a runtime error
-      return `No errors in ${languageName} language query detected. Current query: ${query.query.trim()}`;
+      return `No errors in ${languageName} language query detected. Current query: ${query.trim()}`;
     }
 
-    // TODO verify that this was previously a runtime error
-    return `${languageName} language query written for Elastic Security Detection rules: \"${query.query.trim()}\"
+    return `${languageName} language query written for Elastic Security Detection rules: \"${query.trim()}\"
 returns validation error on form: \"${retrieveErrorMessages(queryField.errors)}\"
 Fix ${languageName} language query and give an example of it in markdown format that can be copied.
 Proposed solution should be valid and must not contain new line symbols (\\n)`;
