@@ -6,7 +6,7 @@ Object {
     "description": "Ingest pipeline for SLO rollup data",
     "managed": true,
     "managed_by": "observability",
-    "version": 3.5,
+    "version": 3.6,
   },
   "description": "Ingest pipeline for SLO rollup data [id: irrelevant, revision: 1]",
   "id": ".slo-observability.sli.pipeline-irrelevant-1",
@@ -63,9 +63,9 @@ Object {
           "ISO8601",
           "yyyy-MM-dd'T'HH:mm:ss.SSSXX",
         ],
-        "date_rounding": "M",
+        "date_rounding": "d",
         "field": "@timestamp",
-        "index_name_prefix": ".slo-observability.sli-v3.5.",
+        "index_name_prefix": ".slo-observability.sli-v3.6.",
       },
     },
     Object {
@@ -90,6 +90,13 @@ Object {
         "name": "slo-irrelevant@custom",
       },
     },
+    Object {
+      "pipeline": Object {
+        "ignore_failure": true,
+        "ignore_missing_pipeline": true,
+        "name": "slo-rollup-global@custom",
+      },
+    },
   ],
 }
 `;
@@ -100,7 +107,7 @@ Object {
     "description": "Ingest pipeline for SLO rollup data",
     "managed": true,
     "managed_by": "observability",
-    "version": 3.5,
+    "version": 3.6,
   },
   "description": "Ingest pipeline for SLO rollup data [id: irrelevant, revision: 1]",
   "id": ".slo-observability.sli.pipeline-irrelevant-1",
@@ -157,9 +164,9 @@ Object {
           "ISO8601",
           "yyyy-MM-dd'T'HH:mm:ss.SSSXX",
         ],
-        "date_rounding": "M",
+        "date_rounding": "d",
         "field": "@timestamp",
-        "index_name_prefix": ".slo-observability.sli-v3.5.",
+        "index_name_prefix": ".slo-observability.sli-v3.6.",
       },
     },
     Object {
@@ -182,6 +189,13 @@ Object {
         "ignore_failure": true,
         "ignore_missing_pipeline": true,
         "name": "slo-irrelevant@custom",
+      },
+    },
+    Object {
+      "pipeline": Object {
+        "ignore_failure": true,
+        "ignore_missing_pipeline": true,
+        "name": "slo-rollup-global@custom",
       },
     },
   ],
