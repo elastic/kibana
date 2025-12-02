@@ -19,6 +19,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 
 import { isEqual } from 'lodash';
 import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
+import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
 import { useKibana } from '../../../common/lib/kibana';
 import { Schedule } from '../../../attack_discovery/pages/header/schedule';
 import { FilterByAssigneesPopover } from '../../../common/components/filter_by_assignees_popover/filter_by_assignees_popover';
@@ -70,8 +71,9 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
     inferenceEnabled,
     settings,
   });
-  // TODO: Filter names by connectors that generated attacks
-  const aiConnectorNames = useMemo(() => aiConnectors?.map((item) => item.name), [aiConnectors]);
+
+  const { data } = useFindAttackDiscoveries({ http, isAssistantEnabled: true });
+  const aiConnectorNames = useMemo(() => data?.connector_names ?? [], [data]);
 
   // showing / hiding the flyout:
   const [showFlyout, setShowFlyout] = useState<boolean>(false);
