@@ -6,11 +6,11 @@
  */
 
 import type { OnechatPluginSetup } from '@kbn/onechat-plugin/server';
-import { createSecurityAgent } from './security_agent';
+import { createAlertsAgent } from './alerts_agent';
 
 /**
  * Registers all security agent builder tools with the onechat plugin
  */
-export const registerAgent = async (onechat: OnechatPluginSetup) => {
-  onechat.agents.register(createSecurityAgent());
+export const registerAgents = async (onechat: OnechatPluginSetup) => {
+  onechat.agents.register(createAlertsAgent());
 };
