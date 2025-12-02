@@ -7,7 +7,11 @@
 
 import React from 'react';
 import { EuiPage, EuiPageBody, EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useCloudConnectedAppContext, CloudConnectedAppContextProvider } from './app_context';
+import {
+  useCloudConnectedAppContext,
+  CloudConnectedAppContextProvider,
+  type CloudConnectedAppContextValue,
+} from './app_context';
 import { useBreadcrumbs } from './hooks/use_breadcrumbs';
 import { OnboardingPage } from './components/onboarding';
 import { ConnectedServicesPage, useClusterConnection } from './components/connected_services';
@@ -52,9 +56,9 @@ export const CloudConnectedAppMain: React.FC = () => {
   }
 
   // Extend the context with the fetched config value
-  const extendedContext = {
+  const extendedContext: CloudConnectedAppContextValue = {
     ...appContext,
-    hasEncryptedSOEnabled: config?.hasEncryptedSOEnabled,
+    clusterConfig: config!,
     hasConfigurePermission: appContext.application.capabilities.cloudConnect?.configure === true,
   };
 

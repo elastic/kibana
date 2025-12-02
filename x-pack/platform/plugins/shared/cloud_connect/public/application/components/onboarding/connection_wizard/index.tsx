@@ -32,16 +32,19 @@ import {
   CONNECT_BUTTON,
   API_KEY_PLACEHOLDER,
 } from './translations';
+import { buildClusterQueryParams } from './utils';
 
 interface ConnectionWizardProps {
   onConnect: () => void;
 }
 
 export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect }) => {
-  const { docLinks, hasEncryptedSOEnabled, cloudUrl } = useCloudConnectedAppContext();
+  const { docLinks, clusterConfig, cloudUrl } = useCloudConnectedAppContext();
   const [apiKey, setApiKey] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const clusterParams = buildClusterQueryParams(clusterConfig);
 
   const handleConnect = async () => {
     if (!apiKey.trim()) {
@@ -81,7 +84,7 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              href={`${cloudUrl}/registration?onboarding_service_type=ccm`}
+              href={`${cloudUrl}/registration?onboarding_service_type=ccm${clusterParams}`}
               target="_blank"
               iconType="popout"
               iconSide="right"
@@ -91,7 +94,7 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              href={`${cloudUrl}/login?redirectTo=%2Fconnect-cluster-services`}
+              href={`${cloudUrl}/login?redirectTo=%2Fconnect-cluster-services${clusterParams}`}
               target="_blank"
               iconType="popout"
               iconSide="right"
@@ -132,13 +135,13 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               fullWidth
-              disabled={isLoading || !hasEncryptedSOEnabled}
+              disabled={isLoading || !clusterConfig?.hasEncryptedSOEnabled}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
               onClick={handleConnect}
-              disabled={!apiKey.trim() || isLoading || !hasEncryptedSOEnabled}
+              disabled={!apiKey.trim() || isLoading || !clusterConfig?.hasEncryptedSOEnabled}
               isLoading={isLoading}
             >
               {CONNECT_BUTTON}
@@ -158,7 +161,7 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
   };
 
   // Only show step 2 (encryption warning) if encrypted saved objects is not enabled
-  const steps: EuiStepsProps['steps'] = hasEncryptedSOEnabled
+  const steps: EuiStepsProps['steps'] = clusterConfig?.hasEncryptedSOEnabled
     ? [step1, stepApiKey]
     : [step1, step2, stepApiKey];
 

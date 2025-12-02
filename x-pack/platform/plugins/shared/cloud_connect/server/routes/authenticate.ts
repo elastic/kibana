@@ -38,7 +38,6 @@ export const registerAuthenticateRoute = ({
   hasEncryptedSOEnabled,
   cloudApiUrl,
 }: AuthenticateRouteOptions) => {
-  // GET /internal/cloud_connect/config
   router.get(
     {
       path: '/internal/cloud_connect/config',
@@ -54,15 +53,43 @@ export const registerAuthenticateRoute = ({
       },
     },
     async (context, request, response) => {
-      return response.ok({
-        body: {
-          hasEncryptedSOEnabled,
-        },
-      });
+      try {
+        const coreContext = await context.core;
+        const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+        // Fetch cluster and license information from Elasticsearch
+        const [licenseResponse, clusterResponse] = await Promise.all([
+          esClient.license.get(),
+          esClient.info(),
+        ]);
+
+        return response.ok({
+          body: {
+            hasEncryptedSOEnabled,
+            license: {
+              type: licenseResponse.license.type,
+              uid: licenseResponse.license.uid,
+            },
+            cluster: {
+              id: clusterResponse.cluster_uuid,
+              name: clusterResponse.cluster_name,
+              version: clusterResponse.version.number,
+            },
+          },
+        });
+      } catch (error) {
+        logger.error('Failed to fetch cluster and license information', { error });
+
+        // Return partial data if ES calls fail
+        return response.ok({
+          body: {
+            hasEncryptedSOEnabled,
+          },
+        });
+      }
     }
   );
 
-  // POST /internal/cloud_connect/authenticate
   router.post(
     {
       path: '/internal/cloud_connect/authenticate',

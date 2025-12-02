@@ -7,6 +7,7 @@
 
 import React, { createContext, useContext } from 'react';
 import type { CoreStart, AppMountParameters } from '@kbn/core/public';
+import type { CloudConnectApiConfig } from '../types';
 
 export interface CloudConnectedAppContextValue {
   chrome: CoreStart['chrome'];
@@ -16,7 +17,7 @@ export interface CloudConnectedAppContextValue {
   notifications: CoreStart['notifications'];
   history: AppMountParameters['history'];
   cloudUrl: string;
-  hasEncryptedSOEnabled?: boolean;
+  clusterConfig?: CloudConnectApiConfig;
   hasConfigurePermission?: boolean;
 }
 

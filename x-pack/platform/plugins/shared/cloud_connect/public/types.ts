@@ -22,6 +22,19 @@ export interface CloudConnectConfig {
   cloudUrl: string;
 }
 
+export interface CloudConnectApiConfig {
+  hasEncryptedSOEnabled: boolean;
+  license?: {
+    type: string;
+    uid: string;
+  };
+  cluster?: {
+    id: string;
+    name: string;
+    version: string;
+  };
+}
+
 export interface CloudConnectedSetupDeps {
   management: ManagementSetup;
   cloud?: CloudSetup;

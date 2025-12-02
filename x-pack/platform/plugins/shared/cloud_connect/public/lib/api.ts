@@ -6,7 +6,7 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
-import type { ClusterDetails } from '../types';
+import type { ClusterDetails, CloudConnectApiConfig } from '../types';
 import {
   type UseRequestConfig,
   type SendRequestConfig,
@@ -16,10 +16,6 @@ import {
 } from '../shared_imports';
 
 const API_BASE_PATH = '/internal/cloud_connect';
-
-export interface CloudConnectConfig {
-  hasEncryptedSOEnabled: boolean;
-}
 
 export interface UpdateServicesResponse {
   success: boolean;
@@ -63,7 +59,7 @@ export class ApiService {
   }
 
   public useLoadConfig() {
-    return this.useRequest<CloudConnectConfig>({
+    return this.useRequest<CloudConnectApiConfig>({
       path: `${API_BASE_PATH}/config`,
       method: 'get',
     });
