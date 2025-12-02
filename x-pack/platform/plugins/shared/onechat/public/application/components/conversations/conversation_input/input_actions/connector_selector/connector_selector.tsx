@@ -5,32 +5,133 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiPopover, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
-  ConnectorSelectable,
-  type ConnectorSelectableComponentProps,
-} from '@kbn/ai-assistant-connector-selector-action';
+  EuiBadge,
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHighlight,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSelectable,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useLoadConnectors } from '@kbn/elastic-assistant';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useMemo, useState } from 'react';
+import type { ReactNode } from 'react-markdown';
+import { i18n } from '@kbn/i18n';
 import { useSendMessage } from '../../../../../context/send_message/send_message_context';
 import { useDefaultConnector } from '../../../../../hooks/chat/use_default_connector';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useNavigation } from '../../../../../hooks/use_navigation';
 import { usePopoverButtonStyles } from '../input_actions.styles';
 
-const connectorSelectorButtonAriaLabel = i18n.translate(
-  'xpack.onechat.connectorSelector.selectConnector',
+const selectableAriaLabel = i18n.translate(
+  'xpack.onechat.conversationInput.connectorSelector.selectableAriaLabel',
   {
-    defaultMessage: 'Select connector',
+    defaultMessage: 'Select a connector',
   }
 );
+const manageConnectorsAriaLabel = i18n.translate(
+  'xpack.onechat.conversationInput.connectorSelector.manageConnectorAriaLabel',
+  {
+    defaultMessage: 'Manage connectors',
+  }
+);
+const defaultConnectorLabel = i18n.translate(
+  'xpack.onechat.conversationInput.connectorSelector.defaultConnectorLabel',
+  {
+    defaultMessage: 'Default',
+  }
+);
+const connectorSearchPlaceholder = i18n.translate(
+  'xpack.onechat.conversationInput.connectorSelector.search.placeholder',
+  { defaultMessage: 'Search LLMs' }
+);
+
+const connectorSelectId = 'agentBuilderConnectorSelect';
+
+const ConnectorPopoverButton: React.FC<{
+  isPopoverOpen: boolean;
+  onClick: () => void;
+  disabled: boolean;
+}> = ({ isPopoverOpen, onClick, disabled }) => {
+  const popoverButtonStyles = usePopoverButtonStyles({ open: isPopoverOpen });
+  return (
+    <EuiButtonEmpty
+      css={popoverButtonStyles}
+      color="text"
+      iconType="sparkles"
+      iconSide="left"
+      onClick={onClick}
+      disabled={disabled}
+      data-test-subj="agentBuilderConnectorSelectorButton"
+      aria-haspopup="menu"
+      aria-labelledby={connectorSelectId}
+    >
+      <FormattedMessage
+        id="xpack.onechat.conversationInput.connectorSelector.buttonLabel"
+        defaultMessage="LLM"
+      />
+    </EuiButtonEmpty>
+  );
+};
+
+const ConnectorPopoverTitle: React.FC<{ search: ReactNode }> = ({ search }) => {
+  const { navigateToManageConnectors } = useNavigation();
+  return (
+    <EuiPopoverTitle paddingSize="s">
+      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={true}>{search}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="gear"
+            color="text"
+            aria-label={manageConnectorsAriaLabel}
+            onClick={navigateToManageConnectors}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPopoverTitle>
+  );
+};
+
+const ConnectorOption: React.FC<{
+  connectorId?: string;
+  connectorName: string;
+  searchValue: string;
+}> = ({ connectorId, connectorName, searchValue }) => {
+  if (!connectorId) {
+    return null;
+  }
+  return (
+    <>
+      <EuiText size="s" color="subdued">
+        <h4>
+          <EuiHighlight search={searchValue}>{connectorName}</EuiHighlight>
+        </h4>
+      </EuiText>
+    </>
+  );
+};
+
+const DefaultConnectorBadge = () => {
+  return (
+    <EuiBadge color="hollow" data-test-subj="defaultConnectorBadge">
+      {defaultConnectorLabel}
+    </EuiBadge>
+  );
+};
+
+type ConnectorOptionData = EuiSelectableOption<{}>;
 
 export const ConnectorSelector: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
-  const { navigateToManageConnectors } = useNavigation();
   const {
     services: { http, settings },
   } = useKibana();
@@ -58,25 +159,22 @@ export const ConnectorSelector: React.FC<{}> = () => {
     inline-size: calc(${euiTheme.size.xxl} * 8);
   `;
 
-  const { preConfiguredConnectors, customConnectors } = useMemo(() => {
-    const preConfigured: ConnectorSelectableComponentProps['preConfiguredConnectors'] = [];
-    const custom: ConnectorSelectableComponentProps['customConnectors'] = [];
-
-    connectors.forEach((connector) => {
-      const option = {
-        value: connector.id,
-        label: connector.name,
-      };
-
-      if (connector.isPreconfigured) {
-        preConfigured.push(option);
-      } else {
-        custom.push(option);
+  const options = useMemo(() => {
+    const connectorOptions = connectors.map((connector) => {
+      let checked: 'on' | undefined;
+      if (connector.id === selectedConnectorId) {
+        checked = 'on';
       }
+      const option: ConnectorOptionData = {
+        key: connector.id,
+        label: connector.name,
+        checked,
+        append: connector.id === defaultConnectorId ? <DefaultConnectorBadge /> : undefined,
+      };
+      return option;
     });
-
-    return { preConfiguredConnectors: preConfigured, customConnectors: custom };
-  }, [connectors]);
+    return connectorOptions;
+  }, [connectors, selectedConnectorId, defaultConnectorId]);
 
   const initialConnectorId = useDefaultConnector({
     connectors,
@@ -99,48 +197,56 @@ export const ConnectorSelector: React.FC<{}> = () => {
     }
   }, [selectedConnectorId, selectedConnector, isLoading, initialConnectorId, onSelectConnector]);
 
-  const popoverButtonStyles = usePopoverButtonStyles({ open: isPopoverOpen });
-
-  const button = (
-    <EuiButtonEmpty
-      css={popoverButtonStyles}
-      color="text"
-      iconType="sparkles"
-      iconSide="left"
-      onClick={togglePopover}
-      disabled={isLoading || connectors.length === 0}
-      data-test-subj="onechatConnectorSelectorButton"
-      aria-haspopup="menu"
-      aria-label={connectorSelectorButtonAriaLabel}
-    >
-      <FormattedMessage
-        id="xpack.onechat.conversationInput.connectorSelector.buttonLabel"
-        defaultMessage="LLM"
-      />
-    </EuiButtonEmpty>
-  );
-
   return (
     <EuiPopover
       panelProps={{ css: panelStyles }}
-      button={button}
+      button={
+        <ConnectorPopoverButton
+          isPopoverOpen={isPopoverOpen}
+          onClick={togglePopover}
+          disabled={isLoading || connectors.length === 0}
+        />
+      }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       panelPaddingSize="none"
       anchorPosition="upCenter"
     >
-      <ConnectorSelectable
-        value={selectedConnectorId}
-        onValueChange={(connectorId) => {
-          onSelectConnector(connectorId);
-          closePopover();
+      <EuiSelectable
+        id={connectorSelectId}
+        data-test-subj="agentBuilderConnectorSelector"
+        aria-label={selectableAriaLabel}
+        singleSelection
+        searchable
+        searchProps={{ placeholder: connectorSearchPlaceholder }}
+        options={options}
+        onChange={(_options, _event, changedOption) => {
+          const { checked, key: connectorId } = changedOption;
+          const isChecked = checked === 'on';
+          if (isChecked && connectorId) {
+            onSelectConnector(connectorId);
+            closePopover();
+          }
         }}
-        customConnectors={customConnectors}
-        preConfiguredConnectors={preConfiguredConnectors}
-        defaultConnectorId={defaultConnectorId}
-        data-test-subj="onechatConnectorSelector"
-        onAddConnectorClick={() => navigateToManageConnectors()}
-      />
+        renderOption={(option, searchValue) => {
+          const { key: connectorId, label: connectorName } = option;
+          return (
+            <ConnectorOption
+              key={connectorId}
+              connectorId={connectorId}
+              connectorName={connectorName}
+              searchValue={searchValue}
+            />
+          );
+        }}
+      >
+        {(list, search) => (
+          <>
+            <ConnectorPopoverTitle search={search} />
+            {list}
+          </>
+        )}
+      </EuiSelectable>
     </EuiPopover>
   );
 };
