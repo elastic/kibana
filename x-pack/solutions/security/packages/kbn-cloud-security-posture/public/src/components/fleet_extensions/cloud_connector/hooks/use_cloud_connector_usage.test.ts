@@ -24,6 +24,9 @@ describe('useCloudConnectorUsage', () => {
   let queryClient: QueryClient;
 
   beforeEach(() => {
+    // Suppress console.error for expected error tests
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+
     queryClient = new QueryClient({
       defaultOptions: {
         queries: {
@@ -36,18 +39,18 @@ describe('useCloudConnectorUsage', () => {
       services: {
         http: mockHttp,
       },
-    } as any);
+    } as unknown as ReturnType<typeof useKibana>);
 
     mockHttp.get.mockClear();
   });
 
   afterEach(() => {
     queryClient.clear();
+    jest.restoreAllMocks();
   });
 
-  const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
+  const wrapper = ({ children }: { children: React.ReactNode }) =>
+    React.createElement(QueryClientProvider, { client: queryClient }, children);
 
   it('should fetch cloud connector usage', async () => {
     const mockUsageData = {
@@ -76,9 +79,10 @@ describe('useCloudConnectorUsage', () => {
     });
 
     expect(mockHttp.get).toHaveBeenCalledWith(
-      CLOUD_CONNECTOR_API_ROUTES.USAGE_PATTERN.replace('{cloudConnectorId}', 'connector-id-123')
+      CLOUD_CONNECTOR_API_ROUTES.USAGE_PATTERN.replace('{cloudConnectorId}', 'connector-id-123'),
+      { query: { page: 1, perPage: 10 } }
     );
-    expect(result.current.data).toEqual(mockUsageData.items);
+    expect(result.current.data).toEqual(mockUsageData);
   });
 
   it('should handle errors', async () => {
@@ -106,7 +110,7 @@ describe('useCloudConnectorUsage', () => {
       services: {
         http: undefined,
       },
-    } as any);
+    } as unknown as ReturnType<typeof useKibana>);
 
     const { result } = renderHook(() => useCloudConnectorUsage('connector-id-123'), { wrapper });
 
@@ -117,4 +121,3 @@ describe('useCloudConnectorUsage', () => {
     expect(result.current.error).toEqual(new Error('HTTP service is not available'));
   });
 });
-

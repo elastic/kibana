@@ -22,6 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ,
   AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ,
+  getCloudConnectorEditIconTestSubj,
 } from '@kbn/cloud-security-posture-common';
 import type { CloudConnectorCredentials, CloudProviders } from '../types';
 import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
@@ -105,8 +106,10 @@ export const CloudConnectorSelector = ({
                   )}
                   color="text"
                   size="s"
-                  onClick={(e) => handleOpenFlyout(e, connector.id)}
-                  data-test-subj={`cloudConnectorEditIcon-${connector.id}`}
+                  onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
+                    handleOpenFlyout(e, connector.id)
+                  }
+                  data-test-subj={getCloudConnectorEditIconTestSubj(connector.id)}
                 />
               </EuiToolTip>
             </EuiFlexItem>
@@ -129,31 +132,6 @@ export const CloudConnectorSelector = ({
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip
-                content={i18n.translate(
-                  'securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.viewDetailsTooltip',
-                  {
-                    defaultMessage: 'View connector details and usage',
-                  }
-                )}
-              >
-                <EuiButtonIcon
-                  iconType="iInCircle"
-                  aria-label={i18n.translate(
-                    'securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.viewDetailsAriaLabel',
-                    {
-                      defaultMessage: 'View details for {name}',
-                      values: { name: connector.name },
-                    }
-                  )}
-                  color="primary"
-                  size="s"
-                  onClick={(e) => handleOpenFlyout(e, connector.id)}
-                  data-test-subj={`cloudConnectorInfoIcon-${connector.id}`}
-                />
-              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         ),

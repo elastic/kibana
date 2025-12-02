@@ -8,8 +8,13 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { I18nProvider } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import {
+  AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ,
+  getCloudConnectorEditIconTestSubj,
+} from '@kbn/cloud-security-posture-common';
 import { CloudConnectorSelector } from './cloud_connector_selector';
 import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
 
@@ -67,13 +72,13 @@ describe('CloudConnectorSelector', () => {
           navigateToApp: jest.fn(),
         },
       },
-    } as any);
+    } as unknown as ReturnType<typeof useKibana>);
 
     mockUseGetCloudConnectors.mockReturnValue({
       data: mockCloudConnectors,
       isLoading: false,
       error: null,
-    } as any);
+    } as unknown as ReturnType<typeof useGetCloudConnectors>);
 
     mockSetCredentials.mockClear();
   });
@@ -92,9 +97,11 @@ describe('CloudConnectorSelector', () => {
     };
 
     return render(
-      <QueryClientProvider client={queryClient}>
-        <CloudConnectorSelector {...defaultProps} />
-      </QueryClientProvider>
+      <I18nProvider>
+        <QueryClientProvider client={queryClient}>
+          <CloudConnectorSelector {...defaultProps} />
+        </QueryClientProvider>
+      </I18nProvider>
     );
   };
 
@@ -108,7 +115,7 @@ describe('CloudConnectorSelector', () => {
     const user = userEvent.setup();
     renderSelector();
 
-    const selector = screen.getByTestId('awsCloudConnectorSuperSelect');
+    const selector = screen.getByTestId(AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ);
     await user.click(selector);
 
     await waitFor(() => {
@@ -117,32 +124,24 @@ describe('CloudConnectorSelector', () => {
     });
   });
 
-  it('should display info icon for each connector', async () => {
-    const user = userEvent.setup();
-    renderSelector();
-
-    const selector = screen.getByTestId('awsCloudConnectorSuperSelect');
-    await user.click(selector);
-
-    await waitFor(() => {
-      expect(screen.getByTestId('cloudConnectorInfoIcon-connector-1')).toBeInTheDocument();
-      expect(screen.getByTestId('cloudConnectorInfoIcon-connector-2')).toBeInTheDocument();
+  it('should display edit icon when connector is selected', () => {
+    renderSelector({
+      cloudConnectorId: 'connector-1',
     });
+
+    expect(
+      screen.getByTestId(getCloudConnectorEditIconTestSubj('connector-1'))
+    ).toBeInTheDocument();
   });
 
-  it('should open flyout when clicking info icon', async () => {
+  it('should open flyout when clicking edit icon on selected connector', async () => {
     const user = userEvent.setup();
-    renderSelector();
-
-    const selector = screen.getByTestId('awsCloudConnectorSuperSelect');
-    await user.click(selector);
-
-    await waitFor(() => {
-      expect(screen.getByTestId('cloudConnectorInfoIcon-connector-1')).toBeInTheDocument();
+    renderSelector({
+      cloudConnectorId: 'connector-1',
     });
 
-    const infoIcon = screen.getByTestId('cloudConnectorInfoIcon-connector-1');
-    await user.click(infoIcon);
+    const editIcon = screen.getByTestId(getCloudConnectorEditIconTestSubj('connector-1'));
+    await user.click(editIcon);
 
     await waitFor(() => {
       expect(screen.getByTestId('cloudConnectorPoliciesFlyout')).toBeInTheDocument();
@@ -153,7 +152,7 @@ describe('CloudConnectorSelector', () => {
     const user = userEvent.setup();
     renderSelector();
 
-    const selector = screen.getByTestId('awsCloudConnectorSuperSelect');
+    const selector = screen.getByTestId(AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ);
     await user.click(selector);
 
     await waitFor(() => {
@@ -174,25 +173,19 @@ describe('CloudConnectorSelector', () => {
       cloudConnectorId: 'connector-1',
     });
 
-    const input = screen.getByDisplayValue('AWS Connector 1');
-    expect(input).toBeInTheDocument();
+    expect(screen.getByText('AWS Connector 1')).toBeInTheDocument();
   });
 
-  it('should not call setCredentials when clicking info icon', async () => {
+  it('should not call setCredentials when clicking edit icon', async () => {
     const user = userEvent.setup();
-    renderSelector();
-
-    const selector = screen.getByTestId('awsCloudConnectorSuperSelect');
-    await user.click(selector);
-
-    await waitFor(() => {
-      expect(screen.getByTestId('cloudConnectorInfoIcon-connector-1')).toBeInTheDocument();
+    renderSelector({
+      cloudConnectorId: 'connector-1',
     });
 
-    const infoIcon = screen.getByTestId('cloudConnectorInfoIcon-connector-1');
-    await user.click(infoIcon);
+    const editIcon = screen.getByTestId(getCloudConnectorEditIconTestSubj('connector-1'));
+    await user.click(editIcon);
 
-    // Info icon click should not trigger connector selection
+    // Edit icon click should not trigger connector selection
     expect(mockSetCredentials).not.toHaveBeenCalled();
   });
 });

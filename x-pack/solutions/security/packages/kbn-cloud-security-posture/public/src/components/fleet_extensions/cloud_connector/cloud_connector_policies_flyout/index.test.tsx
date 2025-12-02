@@ -143,7 +143,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
     expect(
       screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.EMPTY_STATE)
     ).toBeInTheDocument();
-    expect(screen.getByText('No integrations using this connector')).toBeInTheDocument();
+    expect(screen.getByText('No integrations using this cloud connector')).toBeInTheDocument();
   });
 
   it('should show loading state', () => {
@@ -155,7 +155,9 @@ describe('CloudConnectorPoliciesFlyout', () => {
 
     renderFlyout();
 
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    expect(
+      screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.POLICIES_TABLE)
+    ).toHaveClass('euiBasicTable-loading');
   });
 
   it('should show error state', () => {
@@ -234,7 +236,9 @@ describe('CloudConnectorPoliciesFlyout', () => {
     const user = userEvent.setup();
     renderFlyout();
 
-    const closeButton = screen.getByLabelText('Closes this dialog');
+    const closeButton = screen.getByTestId(
+      CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.CLOSE_BUTTON
+    );
     await user.click(closeButton);
 
     expect(mockOnClose).toHaveBeenCalled();
@@ -244,6 +248,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
     renderFlyout({
       provider: 'azure',
       cloudConnectorVars: {
+        tenant_id: { value: 'tenant-123' },
         azure_credentials_cloud_connector_id: { value: 'subscription-123' },
       },
     });
@@ -251,5 +256,113 @@ describe('CloudConnectorPoliciesFlyout', () => {
     expect(
       screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IDENTIFIER_TEXT)
     ).toHaveTextContent('Cloud Connector ID: subscription-123');
+  });
+
+  describe('pagination', () => {
+    it('should call useCloudConnectorUsage with initial pagination parameters', () => {
+      renderFlyout();
+
+      expect(mockUseCloudConnectorUsage).toHaveBeenCalledWith('connector-123', 1, 10);
+    });
+
+    it('should display pagination controls when there are multiple pages', async () => {
+      const manyPolicies: CloudConnectorUsageItem[] = Array.from({ length: 15 }, (_, i) => ({
+        id: `policy-${i + 1}`,
+        name: `Test Policy ${i + 1}`,
+        package: {
+          name: 'cloud_security_posture',
+          title: 'Cloud Security Posture',
+          version: '1.0.0',
+        },
+        policy_ids: [`agent-policy-${i + 1}`],
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-02T00:00:00Z',
+      }));
+
+      mockUseCloudConnectorUsage.mockReturnValue({
+        data: { items: manyPolicies.slice(0, 10), total: 15, page: 1, perPage: 10 },
+        isLoading: false,
+        error: null,
+      } as unknown as UseQueryResult<{
+        items: CloudConnectorUsageItem[];
+        total: number;
+        page: number;
+        perPage: number;
+      }>);
+
+      renderFlyout();
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.POLICIES_TABLE)
+        ).toBeInTheDocument();
+      });
+
+      // EuiBasicTable renders pagination when totalItemCount > pageSize
+      expect(screen.getByText('Rows per page: 10')).toBeInTheDocument();
+    });
+
+    it('should update pagination when page is changed', async () => {
+      const user = userEvent.setup();
+
+      mockUseCloudConnectorUsage.mockReturnValue({
+        data: { items: mockUsageData, total: 25, page: 1, perPage: 10 },
+        isLoading: false,
+        error: null,
+      } as unknown as UseQueryResult<{
+        items: CloudConnectorUsageItem[];
+        total: number;
+        page: number;
+        perPage: number;
+      }>);
+
+      renderFlyout();
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.POLICIES_TABLE)
+        ).toBeInTheDocument();
+      });
+
+      // Click next page button
+      const nextPageButton = screen.getByLabelText('Next page');
+      await user.click(nextPageButton);
+
+      // Verify the hook was called with page 2
+      expect(mockUseCloudConnectorUsage).toHaveBeenLastCalledWith('connector-123', 2, 10);
+    });
+
+    it('should update pagination when page size is changed', async () => {
+      const user = userEvent.setup();
+
+      mockUseCloudConnectorUsage.mockReturnValue({
+        data: { items: mockUsageData, total: 30, page: 1, perPage: 10 },
+        isLoading: false,
+        error: null,
+      } as unknown as UseQueryResult<{
+        items: CloudConnectorUsageItem[];
+        total: number;
+        page: number;
+        perPage: number;
+      }>);
+
+      renderFlyout();
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.POLICIES_TABLE)
+        ).toBeInTheDocument();
+      });
+
+      // Click on "Rows per page" button and select 25
+      const rowsPerPageButton = screen.getByText('Rows per page: 10');
+      await user.click(rowsPerPageButton);
+
+      const option25 = await screen.findByText('25 rows');
+      await user.click(option25);
+
+      // Verify the hook was called with new page size
+      expect(mockUseCloudConnectorUsage).toHaveBeenLastCalledWith('connector-123', 1, 25);
+    });
   });
 });
