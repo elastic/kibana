@@ -62,7 +62,7 @@ export function getDashboardCRUResponseBody(
           owner: savedObject.accessControl.owner,
         },
       }),
-      references,
+      ...(references.length && { references }),
     },
     meta: getDashboardMeta(savedObject, operation),
     spaces: savedObject.namespaces,
