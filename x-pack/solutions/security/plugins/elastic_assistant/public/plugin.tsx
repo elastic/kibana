@@ -126,6 +126,10 @@ export class ElasticAssistantPublicPlugin
       </I18nProvider>,
       targetDomElement
     );
+
+    return () => {
+      ReactDOM.unmountComponentAtNode(targetDomElement);
+    };
   }
 
   public stop() {
