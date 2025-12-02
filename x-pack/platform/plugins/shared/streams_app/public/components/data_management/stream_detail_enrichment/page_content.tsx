@@ -33,7 +33,6 @@ import { getDefinitionFields } from '../schema_editor/hooks/use_schema_fields';
 import { SchemaChangesReviewModal, getChanges } from '../schema_editor/schema_changes_review_modal';
 import type { SchemaEditorField } from '../schema_editor/types';
 import { isFieldUncommitted } from '../schema_editor/utils';
-import { NoStepsEmptyPrompt } from './empty_prompts';
 import { SimulationPlayground } from './simulation_playground';
 import { selectFieldsInSamples } from './state_management/simulation_state_machine/selectors';
 import {
