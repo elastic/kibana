@@ -236,6 +236,7 @@ export const schema = Joi.object()
       .keys({
         host: Joi.string().ip(),
         resources: Joi.array().items(Joi.string()).default([]),
+        uiam: Joi.boolean().default(false),
       })
       .default(),
 

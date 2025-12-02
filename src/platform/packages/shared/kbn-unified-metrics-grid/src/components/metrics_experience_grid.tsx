@@ -51,6 +51,7 @@ export const MetricsExperienceGrid = ({
     fields,
     renderToggleActions,
     fetchParams,
+    isLoading: isFetchingAllFields,
   });
 
   const onKeyDown = useCallback(
