@@ -9,8 +9,8 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { CoreStart } from '@kbn/core/server';
 import { getCaseViewPath } from '@kbn/cases-plugin/server/common/utils';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
-import { getCurrentSpaceId } from './spaces';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { getCurrentSpaceId } from './spaces';
 
 /**
  * App routes for different Kibana applications
@@ -92,4 +92,3 @@ export function getCaseUrl(
     return null;
   }
 }
-

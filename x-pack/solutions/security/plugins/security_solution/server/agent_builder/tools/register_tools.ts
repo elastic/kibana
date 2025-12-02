@@ -5,33 +5,12 @@
  * 2.0.
  */
 
-import { platformCoreTools } from '@kbn/onechat-common';
 import type { OnechatPluginSetup } from '@kbn/onechat-plugin/server';
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
-import { alertsTool, SECURITY_ALERTS_TOOL_ID } from './alerts_tool';
-import { SECURITY_LABS_SEARCH_TOOL_ID, securityLabsSearchTool } from './security_labs_search_tool';
-import {
-  attackDiscoverySearchTool,
-  SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
-} from './attack_discovery_search_tool';
-import { entityRiskScoreTool, SECURITY_ENTITY_RISK_SCORE_TOOL_ID } from './entity_risk_score_tool';
-
-const PLATFORM_TOOL_IDS = [
-  platformCoreTools.search,
-  platformCoreTools.listIndices,
-  platformCoreTools.getIndexMapping,
-  platformCoreTools.getDocumentById,
-  // TODO add once product doc tool is merged https://github.com/elastic/kibana/pull/242598
-  // platformCoreTools.productDocumentation,
-];
-export const SECURITY_TOOL_IDS = [
-  SECURITY_LABS_SEARCH_TOOL_ID,
-  SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
-  SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
-  SECURITY_ALERTS_TOOL_ID,
-];
-
-export const SECURITY_AGENT_TOOL_IDS = [...PLATFORM_TOOL_IDS, ...SECURITY_TOOL_IDS];
+import { securityLabsSearchTool } from './security_labs_search_tool';
+import { attackDiscoverySearchTool } from './attack_discovery_search_tool';
+import { entityRiskScoreTool } from './entity_risk_score_tool';
+import { alertsTool } from './alerts_tool';
 
 /**
  * Registers all security agent builder tools with the onechat plugin

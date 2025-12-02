@@ -17,4 +17,3 @@ export const getSpaceIdFromRequest = (request: KibanaRequest): string => {
   const { spaceId } = getSpaceIdFromPath(pathname);
   return spaceId ?? DEFAULT_SPACE_ID;
 };
-
