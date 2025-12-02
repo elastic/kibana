@@ -205,6 +205,7 @@ export const createAgentGraph = ({
     capabilities,
     events,
     outputSchema,
+    attachmentTypes: processedConversation.attachmentTypes,
     logger,
   });
 

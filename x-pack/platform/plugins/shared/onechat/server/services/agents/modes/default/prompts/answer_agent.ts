@@ -7,6 +7,7 @@
 
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { ResolvedAgentCapabilities } from '@kbn/onechat-common';
+import { cleanPrompt } from '@kbn/onechat-genai-utils/prompts';
 import type { ProcessedAttachmentType } from '../../utils/prepare_conversation';
 import type { ResearchAgentAction, AnswerAgentAction } from '../actions';
 import { formatDate } from './utils/helpers';
@@ -42,7 +43,7 @@ export const getAnswerSystemMessage = ({
 }: AnswerAgentPromptParams): string => {
   const visEnabled = capabilities.visualizations;
 
-  return `You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
+  return cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
 
 Your role is to be the **final answering agent** in a multi-agent flow. Your **ONLY** capability is to generate a natural language response to the user.
 
@@ -83,7 +84,7 @@ ${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
 - [ ] I asked for missing mandatory parameters only when required.
 - [ ] The answer stays within the user's requested scope.
 - [ ] I answered every part of the user's request (identified sub-questions/requirements). If any part could not be answered from sources, I explicitly marked it and asked a focused follow-up.
-- [ ] No internal tool process or names revealed (unless user asked).`;
+- [ ] No internal tool process or names revealed (unless user asked).`);
 };
 
 export const getStructuredAnswerPrompt = ({
@@ -92,19 +93,21 @@ export const getStructuredAnswerPrompt = ({
   actions,
   answerActions,
   capabilities,
+  attachmentTypes,
 }: {
   customInstructions?: string;
   initialMessages: BaseMessageLike[];
   actions: ResearchAgentAction[];
   answerActions: AnswerAgentAction[];
   capabilities: ResolvedAgentCapabilities;
+  attachmentTypes: ProcessedAttachmentType[];
 }): BaseMessageLike[] => {
   const visEnabled = capabilities.visualizations;
 
   return [
     [
       'system',
-      `You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
+      cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
 
 Your role is to be the **final answering agent** in a multi-agent flow. You must respond using the structured output format that is provided to you.
 
@@ -124,6 +127,8 @@ Your role is to be the **final answering agent** in a multi-agent flow. You must
 
 ${customInstructionsBlock(customInstructions)}
 
+${attachmentTypeInstructions(attachmentTypes)}
+
 ## OUTPUT STYLE
 - Clear, direct, and scoped. No extraneous commentary.
 - Use custom rendering when appropriate.
@@ -142,7 +147,7 @@ ${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
 - [ ] I asked for missing mandatory parameters only when required.
 - [ ] The answer stays within the user's requested scope.
 - [ ] I answered every part of the user's request (identified sub-questions/requirements). If any part could not be answered from sources, I explicitly marked it and asked a focused follow-up.
-- [ ] No internal tool process or names revealed (unless user asked).`,
+- [ ] No internal tool process or names revealed (unless user asked).`),
     ],
     ...initialMessages,
     ...formatResearcherActionHistory({ actions }),
