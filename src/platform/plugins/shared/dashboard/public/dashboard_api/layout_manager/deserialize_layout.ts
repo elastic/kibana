@@ -8,14 +8,12 @@
  */
 
 import { v4 } from 'uuid';
-import type { Reference } from '@kbn/content-management-utils';
 import { type DashboardState, isDashboardSection } from '../../../common';
 import type { DashboardPanel } from '../../../server';
 import type { DashboardChildState, DashboardLayout } from './types';
 
 export function deserializeLayout(
   panels: DashboardState['panels'],
-  getReferences: (id: string) => Reference[]
 ) {
   const layout: DashboardLayout = {
     panels: {},
@@ -33,10 +31,7 @@ export function deserializeLayout(
       },
     };
     childState[panelId] = {
-      rawState: {
-        ...panel.config,
-      },
-      references: getReferences(panelId),
+      ...panel.config,
     };
   }
 

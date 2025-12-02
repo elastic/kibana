@@ -22,7 +22,7 @@ export function mergeControlGroupStates(
   initialControlGroupInput: ControlsGroupState | undefined,
   incomingControlGroup: EmbeddablePackageState | undefined
 ): ControlsGroupState | undefined {
-  const incomingControlGroupState = incomingControlGroup?.serializedState?.rawState;
+  const incomingControlGroupState = incomingControlGroup?.serializedState;
   let mergedControlGroupState: ControlsGroupState | undefined = initialControlGroupInput;
 
   if (mergedControlGroupState && incomingControlGroupState) {

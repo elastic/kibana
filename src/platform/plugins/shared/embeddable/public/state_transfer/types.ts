@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SerializedPanelState } from '@kbn/presentation-publishing';
-
 export const EMBEDDABLE_EDITOR_STATE_KEY = 'embeddable_editor_state';
 
 /**
@@ -40,7 +38,7 @@ export const EMBEDDABLE_PACKAGE_STATE_KEY = 'embeddable_package_state';
  */
 export interface EmbeddablePackageState<SerializedStateType extends object = object> {
   type: string;
-  serializedState: SerializedPanelState<SerializedStateType>;
+  serializedState: SerializedStateType;
   embeddableId?: string;
   size?: {
     width?: number;

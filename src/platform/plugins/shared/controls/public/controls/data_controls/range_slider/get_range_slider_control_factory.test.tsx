@@ -12,7 +12,6 @@ import { of } from 'rxjs';
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import type { SerializedPanelState } from '@kbn/presentation-publishing';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 
 import { dataService, dataViewsService } from '../../../services/kibana_services';
@@ -207,8 +206,8 @@ describe('RangesliderControlApi', () => {
         uuid,
         controlGroupApi,
       });
-      const serializedState = api.serializeState() as SerializedPanelState<RangesliderControlState>;
-      expect(serializedState.rawState.step).toBe(1);
+      const serializedState = api.serializeState() as RangesliderControlState;
+      expect(serializedState.step).toBe(1);
     });
 
     test('retains value from initial state', async () => {
@@ -222,8 +221,8 @@ describe('RangesliderControlApi', () => {
         uuid,
         controlGroupApi,
       });
-      const serializedState = api.serializeState() as SerializedPanelState<RangesliderControlState>;
-      expect(serializedState.rawState.step).toBe(1024);
+      const serializedState = api.serializeState() as RangesliderControlState;
+      expect(serializedState.step).toBe(1024);
     });
   });
 

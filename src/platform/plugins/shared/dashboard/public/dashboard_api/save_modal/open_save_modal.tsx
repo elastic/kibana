@@ -9,7 +9,6 @@
 
 import React from 'react';
 import type { ViewMode } from '@kbn/presentation-publishing';
-import type { Reference } from '@kbn/content-management-utils';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -41,7 +40,7 @@ export async function openSaveModal({
   description?: string;
   isManaged: boolean;
   lastSavedId: string | undefined;
-  serializeState: () => { dashboardState: DashboardState; references: Reference[] };
+  serializeState: () => DashboardState;
   setTimeRestore: (timeRestore: boolean) => void;
   tags?: string[];
   timeRestore: boolean;
@@ -85,7 +84,7 @@ export async function openSaveModal({
             }
 
             setTimeRestore(newTimeRestore);
-            const { dashboardState, references } = serializeState();
+            const dashboardState = serializeState();
 
             const dashboardStateToSave: DashboardState = {
               ...dashboardState,
@@ -100,7 +99,6 @@ export async function openSaveModal({
             const beforeAddTime = window.performance.now();
 
             const saveResult = await saveDashboard({
-              references,
               saveOptions,
               dashboardState: dashboardStateToSave,
               lastSavedId,

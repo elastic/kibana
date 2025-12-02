@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Reference } from '@kbn/content-management-utils';
 import type { ControlGroupApi } from '@kbn/controls-plugin/public';
 import type { ControlsGroupState } from '@kbn/controls-schemas';
 import type { ViewMode } from '@kbn/presentation-publishing';
@@ -17,7 +16,6 @@ export const CONTROL_GROUP_EMBEDDABLE_ID = 'CONTROL_GROUP_EMBEDDABLE_ID';
 
 export function initializeControlGroupManager(
   initialState: ControlsGroupState | undefined,
-  getReferences: (id: string) => Reference[],
   initialViewMode: ViewMode
 ) {
   const controlGroupApi$ = new BehaviorSubject<ControlGroupApi | undefined>(undefined);
@@ -52,31 +50,22 @@ export function initializeControlGroupManager(
     },
     internalApi: {
       getStateForControlGroup: () => {
-        return {
-          rawState: initialState
-            ? initialState
-            : ({
-                autoApplySelections: true,
-                chainingSystem: 'HIERARCHICAL',
-                controls: [],
-                ignoreParentSettings: {
-                  ignoreFilters: false,
-                  ignoreQuery: false,
-                  ignoreTimerange: false,
-                  ignoreValidations: false,
-                },
-                labelPosition: 'oneLine',
-              } as ControlsGroupState),
-          references: getReferences(CONTROL_GROUP_EMBEDDABLE_ID),
-        };
+        return initialState
+          ? initialState
+          : ({
+              autoApplySelections: true,
+              chainingSystem: 'HIERARCHICAL',
+              controls: [],
+              ignoreParentSettings: {
+                ignoreFilters: false,
+                ignoreQuery: false,
+                ignoreTimerange: false,
+                ignoreValidations: false,
+              },
+              labelPosition: 'oneLine',
+            } as ControlsGroupState);
       },
-      serializeControlGroup: () => {
-        const serializedState = controlGroupApi$.value?.serializeState();
-        return {
-          controlGroupInput: serializedState?.rawState,
-          controlGroupReferences: serializedState?.references ?? [],
-        };
-      },
+      serializeControlGroup: () => controlGroupApi$.value?.serializeState(),
       setControlGroupApi: (controlGroupApi: ControlGroupApi) =>
         controlGroupApi$.next(controlGroupApi),
     },

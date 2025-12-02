@@ -65,7 +65,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
     // Runtime state may contain title loaded from saved object
     // Initialize titleManager with serialized state
     // to avoid tracking runtime state title as serialized state title
-    const titleManager = initializeTitleManager(initialState.rawState);
+    const titleManager = initializeTitleManager(initialState);
 
     // Initialize dynamic actions
     const dynamicActionsManager = embeddableEnhancedStart?.initializeEmbeddableDynamicActions(
@@ -216,9 +216,9 @@ export const getVisualizeEmbeddableFactory: (deps: {
         };
       },
       onReset: async (lastSaved) => {
-        dynamicActionsManager?.reinitializeState(lastSaved?.rawState ?? {});
-        timeRangeManager.reinitializeState(lastSaved?.rawState);
-        titleManager.reinitializeState(lastSaved?.rawState);
+        dynamicActionsManager?.reinitializeState(lastSaved ?? {});
+        timeRangeManager.reinitializeState(lastSaved);
+        titleManager.reinitializeState(lastSaved);
 
         if (!lastSaved) return;
         const lastSavedRuntimeState = await deserializeState(lastSaved);

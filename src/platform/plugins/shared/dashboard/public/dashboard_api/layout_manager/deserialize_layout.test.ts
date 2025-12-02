@@ -35,8 +35,7 @@ describe('deserializeLayout', () => {
             },
           ],
         },
-      ],
-      () => []
+      ]
     );
     expect(layout.panels).toMatchInlineSnapshot(`
       Object {

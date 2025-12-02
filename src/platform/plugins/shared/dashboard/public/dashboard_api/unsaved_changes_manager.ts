@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Reference } from '@kbn/content-management-utils';
 import type { HasLastSavedChildState } from '@kbn/presentation-containers';
 import { childrenUnsavedChanges$ } from '@kbn/presentation-containers';
 import type {
@@ -36,12 +35,10 @@ export function initializeUnsavedChangesManager({
   viewMode$,
   storeUnsavedChanges,
   controlGroupManager,
-  getReferences,
   unifiedSearchManager,
 }: {
   lastSavedState: DashboardState;
   storeUnsavedChanges?: boolean;
-  getReferences: (id: string) => Reference[];
   savedObjectId$: PublishesSavedObjectId['savedObjectId$'];
   controlGroupManager: ReturnType<typeof initializeControlGroupManager>;
   layoutManager: ReturnType<typeof initializeLayoutManager>;
@@ -121,13 +118,9 @@ export function initializeUnsavedChangesManager({
 
           // Backup latest state from children that have unsaved changes
           if (hasChildrenUnsavedChanges || hasControlGroupChanges || hasLayoutChanges) {
-            const { panels, references } = layoutManager.internalApi.serializeLayout();
-            const { controlGroupInput, controlGroupReferences } =
+            const panels = layoutManager.internalApi.serializeLayout();
+            const controlGroupInput =
               controlGroupManager.internalApi.serializeControlGroup();
-            // dashboardStateToBackup.references will be used instead of savedObjectResult.references
-            // To avoid missing references, make sure references contains all references
-            // even if panels or control group does not have unsaved changes
-            dashboardBackupState.references = [...(references ?? []), ...controlGroupReferences];
             if (hasChildrenUnsavedChanges) dashboardBackupState.panels = panels;
             if (hasControlGroupChanges) dashboardBackupState.controlGroupInput = controlGroupInput;
           }
@@ -141,12 +134,7 @@ export function initializeUnsavedChangesManager({
     const lastSavedDashboardState = lastSavedState$.value;
 
     if (childId === CONTROL_GROUP_EMBEDDABLE_ID) {
-      return lastSavedDashboardState.controlGroupInput
-        ? {
-            rawState: lastSavedDashboardState.controlGroupInput,
-            references: getReferences(CONTROL_GROUP_EMBEDDABLE_ID),
-          }
-        : undefined;
+      return lastSavedDashboardState.controlGroupInput;
     }
 
     return layoutManager.internalApi.getLastSavedStateForPanel(childId);

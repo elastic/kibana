@@ -38,7 +38,7 @@ export const getControlGroupEmbeddableFactory = () => {
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const initialRuntimeState = deserializeControlGroup(initialState);
 
-      const editorStateManager = initializeEditorStateManager(initialState?.rawState);
+      const editorStateManager = initializeEditorStateManager(initialState);
 
       const defaultDataViewId = await dataViewsService.getDefaultId();
 
@@ -54,13 +54,10 @@ export const getControlGroupEmbeddableFactory = () => {
       const disabledActionIds$ = new BehaviorSubject<string[] | undefined>(undefined);
 
       function serializeState() {
-        const { controls, references } = controlsManager.serializeControls();
+        const { controls } = controlsManager.serializeControls();
         return {
-          rawState: {
-            ...editorStateManager.getLatestState(),
-            controls,
-          },
-          references,
+          ...editorStateManager.getLatestState(),
+          controls,
         };
       }
 

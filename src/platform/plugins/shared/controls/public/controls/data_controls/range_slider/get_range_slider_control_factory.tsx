@@ -91,12 +91,9 @@ export const getRangesliderControlFactory = (): DataControlFactory<
 
       function serializeState() {
         return {
-          rawState: {
-            ...dataControlManager.getLatestState(),
-            step: step$.getValue(),
-            value: selections.value$.getValue(),
-          },
-          references: dataControlManager.internalApi.extractReferences('rangeSliderDataView'),
+          ...dataControlManager.getLatestState(),
+          step: step$.getValue(),
+          value: selections.value$.getValue(),
         };
       }
 
@@ -115,9 +112,9 @@ export const getRangesliderControlFactory = (): DataControlFactory<
           };
         },
         onReset: (lastSaved) => {
-          dataControlManager.reinitializeState(lastSaved?.rawState);
-          selections.setValue(lastSaved?.rawState.value);
-          step$.next(lastSaved?.rawState.step ?? 1);
+          dataControlManager.reinitializeState(lastSaved);
+          selections.setValue(lastSaved?.value);
+          step$.next(lastSaved?.step ?? 1);
         },
       });
 

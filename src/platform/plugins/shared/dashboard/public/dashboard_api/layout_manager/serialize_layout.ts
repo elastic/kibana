@@ -7,25 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type DashboardState, prefixReferencesFromPanel } from '../../../common';
+import { type DashboardState } from '../../../common';
 import type { DashboardChildState, DashboardLayout } from './types';
 import type { DashboardSection } from '../../../server';
 
 export function serializeLayout(
   layout: DashboardLayout,
   childState: DashboardChildState
-): Pick<DashboardState, 'panels' | 'references'> {
+): DashboardState['panels'] {
   const sections: { [sectionId: string]: DashboardSection } = {};
   Object.entries(layout.sections).forEach(([sectionId, sectionState]) => {
     sections[sectionId] = { ...sectionState, uid: sectionId, panels: [] };
   });
 
-  const references: DashboardState['references'] = [];
   const panels: DashboardState['panels'] = [];
   Object.entries(layout.panels).forEach(([panelId, { grid, type }]) => {
-    const config = childState[panelId]?.rawState ?? {};
-    references.push(...prefixReferencesFromPanel(panelId, childState[panelId]?.references ?? []));
-
+    const config = childState[panelId] ?? {};
+    
     const { sectionId, ...restOfGridData } = grid; // drop section ID
     const panelState = {
       type,
@@ -41,8 +39,5 @@ export function serializeLayout(
     }
   });
 
-  return {
-    panels: [...panels, ...Object.values(sections)],
-    references,
-  };
+  return [...panels, ...Object.values(sections)];
 }

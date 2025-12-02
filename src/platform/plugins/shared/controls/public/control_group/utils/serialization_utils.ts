@@ -8,16 +8,14 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { SerializedPanelState } from '@kbn/presentation-publishing';
 import type { ControlsGroupState } from '@kbn/controls-schemas';
 import type { ControlGroupRuntimeState, ControlPanelsState } from '../../../common';
-import { parseReferenceName } from '../../controls/data_controls/reference_name_utils';
 
 export const deserializeControlGroup = (
-  state: SerializedPanelState<ControlsGroupState>
+  state: ControlsGroupState
 ): ControlGroupRuntimeState => {
   const initialChildControlState: ControlPanelsState = {};
-  (state.rawState.controls ?? []).forEach((controlSeriailizedState) => {
+  (state.controls ?? []).forEach((controlSeriailizedState) => {
     const { controlConfig, id, ...rest } = controlSeriailizedState;
     initialChildControlState[id ?? uuidv4()] = {
       ...rest,
@@ -25,19 +23,8 @@ export const deserializeControlGroup = (
     };
   });
 
-  // Inject data view references into each individual control
-  // TODO move reference injection into control factory to avoid leaking implemenation details like dataViewId to ControlGroup
-  const references = state.references ?? [];
-  references.forEach((reference) => {
-    const referenceName = reference.name;
-    const { controlId } = parseReferenceName(referenceName);
-    if (initialChildControlState[controlId]) {
-      (initialChildControlState[controlId] as { dataViewId?: string }).dataViewId = reference.id;
-    }
-  });
-
   return {
-    ...state.rawState,
+    ...state,
     initialChildControlState,
   };
 };

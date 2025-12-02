@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SerializedPanelState } from '@kbn/presentation-publishing';
 import { getRegistryItem } from './panel_placement_registry';
 import type { PanelSettings } from './types';
 
 export async function getPanelSettings(
   embeddableType: string,
-  serializedState?: SerializedPanelState<object>
+  serializedState?: object
 ): Promise<undefined | PanelSettings> {
   const registryItem = getRegistryItem(embeddableType);
   if (!registryItem) return;

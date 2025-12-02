@@ -218,12 +218,9 @@ export const getTimesliderControlFactory = (): ControlFactory<
 
       function serializeState() {
         return {
-          rawState: {
-            ...defaultControlManager.getLatestState(),
-            ...timeRangePercentage.getLatestState(),
-            isAnchored: isAnchored$.value,
-          },
-          references: [],
+          ...defaultControlManager.getLatestState(),
+          ...timeRangePercentage.getLatestState(),
+          isAnchored: isAnchored$.value,
         };
       }
 
@@ -245,9 +242,9 @@ export const getTimesliderControlFactory = (): ControlFactory<
           };
         },
         onReset: (lastSaved) => {
-          defaultControlManager.reinitializeState(lastSaved?.rawState);
-          timeRangePercentage.reinitializeState(lastSaved?.rawState);
-          setIsAnchored(lastSaved?.rawState?.isAnchored);
+          defaultControlManager.reinitializeState(lastSaved);
+          timeRangePercentage.reinitializeState(lastSaved);
+          setIsAnchored(lastSaved?.isAnchored);
         },
       });
 

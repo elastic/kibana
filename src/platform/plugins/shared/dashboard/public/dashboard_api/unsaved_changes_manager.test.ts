@@ -74,7 +74,6 @@ const unifiedSearchManagerMock = {
       >({}),
   },
 } as unknown as ReturnType<typeof initializeUnifiedSearchManager>;
-const getReferences = () => [];
 const savedObjectId$ = new BehaviorSubject<string | undefined>('dashboard1234');
 const viewMode$ = new BehaviorSubject<ViewMode>('edit');
 
@@ -105,7 +104,6 @@ describe('unsavedChangesManager', () => {
           savedObjectId$,
           settingsManager,
           unifiedSearchManager: unifiedSearchManagerMock,
-          getReferences,
         });
 
         unsavedChangesManager.api.hasUnsavedChanges$
@@ -130,7 +128,6 @@ describe('unsavedChangesManager', () => {
           savedObjectId$,
           settingsManager: settingsManagerMock,
           unifiedSearchManager: unifiedSearchManagerMock,
-          getReferences,
         });
 
         setBackupStateMock.mockImplementation((id, backupState) => {

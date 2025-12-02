@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PublishingSubject, SerializedPanelState } from '@kbn/presentation-publishing';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
 import { apiHasParentApi, apiHasUniqueId } from '@kbn/presentation-publishing';
 import type { BehaviorSubject, Observable } from 'rxjs';
 import { combineLatest, isObservable, map, of, switchMap } from 'rxjs';
@@ -21,7 +21,7 @@ export interface PanelPackage<SerializedStateType extends object = object> {
   /**
    * The serialized state of this panel.
    */
-  serializedState?: SerializedPanelState<SerializedStateType>;
+  serializedState?: SerializedStateType;
 }
 
 export interface PresentationContainer<ApiType extends unknown = unknown> extends CanAddNewPanel {

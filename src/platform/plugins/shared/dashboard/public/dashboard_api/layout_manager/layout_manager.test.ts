@@ -63,7 +63,7 @@ describe('layout manager', () => {
   };
 
   test('can register child APIs', () => {
-    const layoutManager = initializeLayoutManager(undefined, [panel1], trackPanelMock, () => []);
+    const layoutManager = initializeLayoutManager(undefined, [panel1], trackPanelMock);
     layoutManager.internalApi.registerChildApi(panel1Api);
     expect(layoutManager.api.children$.getValue()[PANEL_ONE_ID]).toBe(panel1Api);
   });
@@ -100,8 +100,7 @@ describe('layout manager', () => {
     const layoutManager = initializeLayoutManager(
       incomingEmbeddables,
       [panel1],
-      trackPanelMock,
-      () => []
+      trackPanelMock
     );
 
     const layout = layoutManager.internalApi.layout$.value;
@@ -128,17 +127,17 @@ describe('layout manager', () => {
       layoutManager.internalApi.getSerializedStateForPanel('panelTwo');
     const incomingPanelStatePanelThree =
       layoutManager.internalApi.getSerializedStateForPanel('panelThree');
-    expect(incomingPanelStatePanelTwo.rawState).toEqual({
+    expect(incomingPanelStatePanelTwo).toEqual({
       title: 'Panel Two',
     });
-    expect(incomingPanelStatePanelThree.rawState).toEqual({
+    expect(incomingPanelStatePanelThree).toEqual({
       title: 'Panel Three',
     });
   });
 
   describe('duplicatePanel', () => {
     test('should add duplicated panel to layout', async () => {
-      const layoutManager = initializeLayoutManager(undefined, [panel1], trackPanelMock, () => []);
+      const layoutManager = initializeLayoutManager(undefined, [panel1], trackPanelMock);
       layoutManager.internalApi.registerChildApi(panel1Api);
 
       await layoutManager.api.duplicatePanel('panelOne');
@@ -155,13 +154,13 @@ describe('layout manager', () => {
         type: 'testPanelType',
       });
       const duplicatedPanelState = layoutManager.internalApi.getSerializedStateForPanel('54321');
-      expect(duplicatedPanelState.rawState).toEqual({
+      expect(duplicatedPanelState).toEqual({
         title: 'Panel One (copy)',
       });
     });
 
     test('should clone by reference embeddable as by value', async () => {
-      const layoutManager = initializeLayoutManager(undefined, [panel1], trackPanelMock, () => []);
+      const layoutManager = initializeLayoutManager(undefined, [panel1], trackPanelMock);
       layoutManager.internalApi.registerChildApi({
         ...panel1Api,
         checkForDuplicateTitle: jest.fn(),
@@ -179,14 +178,14 @@ describe('layout manager', () => {
       await layoutManager.api.duplicatePanel('panelOne');
 
       const duplicatedPanelState = layoutManager.internalApi.getSerializedStateForPanel('54321');
-      expect(duplicatedPanelState.rawState).toEqual({
+      expect(duplicatedPanelState).toEqual({
         isByValue: true,
         title: 'Panel One (copy)',
       });
     });
 
     test('should give a correct title to the clone of a clone', async () => {
-      const layoutManager = initializeLayoutManager(undefined, [panel1], trackPanelMock, () => []);
+      const layoutManager = initializeLayoutManager(undefined, [panel1], trackPanelMock);
       const titleManagerOfClone = initializeTitleManager({ title: 'Panel One (copy)' });
       layoutManager.internalApi.registerChildApi({
         ...panel1Api,
@@ -199,7 +198,7 @@ describe('layout manager', () => {
       await layoutManager.api.duplicatePanel('panelOne');
 
       const duplicatedPanelState = layoutManager.internalApi.getSerializedStateForPanel('54321');
-      expect(duplicatedPanelState.rawState).toEqual({
+      expect(duplicatedPanelState).toEqual({
         title: 'Panel One (copy 1)',
       });
     });
@@ -213,8 +212,7 @@ describe('layout manager', () => {
         {
           ...trackPanelMock,
           expandedPanelId$: new BehaviorSubject<string | undefined>(undefined),
-        },
-        () => []
+        }
       );
       expect(layoutManager.api.canRemovePanels()).toBe(true);
     });
@@ -226,8 +224,7 @@ describe('layout manager', () => {
         {
           ...trackPanelMock,
           expandedPanelId$: new BehaviorSubject<string | undefined>('1'),
-        },
-        () => []
+        }
       );
       expect(layoutManager.api.canRemovePanels()).toBe(false);
     });
@@ -235,7 +232,7 @@ describe('layout manager', () => {
 
   describe('getChildApi', () => {
     test('should return api when api is available', (done) => {
-      const layoutManager = initializeLayoutManager(undefined, [panel1], trackPanelMock, () => []);
+      const layoutManager = initializeLayoutManager(undefined, [panel1], trackPanelMock);
 
       layoutManager.api.getChildApi(PANEL_ONE_ID).then((api) => {
         expect(api).toBe(panel1Api);
@@ -254,8 +251,7 @@ describe('layout manager', () => {
             collapsed: false,
           },
         ],
-        trackPanelMock,
-        () => []
+        trackPanelMock
       );
 
       layoutManager.api.getChildApi(PANEL_ONE_ID).then((api) => {
@@ -275,8 +271,7 @@ describe('layout manager', () => {
             collapsed: true,
           },
         ],
-        trackPanelMock,
-        () => []
+        trackPanelMock
       );
 
       layoutManager.api.getChildApi(PANEL_ONE_ID).then((api) => {

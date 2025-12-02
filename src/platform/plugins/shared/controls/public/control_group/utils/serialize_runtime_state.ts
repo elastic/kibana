@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SerializedPanelState } from '@kbn/presentation-publishing';
 import { omit } from 'lodash';
 import type {
   ControlsChainingSystem,
@@ -37,24 +36,22 @@ export const defaultRuntimeState = {
  */
 export function serializeRuntimeState(
   runtimeState: Partial<ControlGroupRuntimeState>
-): SerializedPanelState<ControlsGroupState> {
+): ControlsGroupState {
   return {
-    rawState: {
-      ...defaultRuntimeState,
-      ...omit(runtimeState, ['initialChildControlState']),
-      controls: Object.entries(runtimeState?.initialChildControlState ?? {}).map(
-        ([controlId, value]) => {
-          const { grow, order, type, width, ...controlConfig } = value;
-          return {
-            id: controlId,
-            grow,
-            order,
-            type,
-            width,
-            controlConfig,
-          };
-        }
-      ),
-    },
+    ...defaultRuntimeState,
+    ...omit(runtimeState, ['initialChildControlState']),
+    controls: Object.entries(runtimeState?.initialChildControlState ?? {}).map(
+      ([controlId, value]) => {
+        const { grow, order, type, width, ...controlConfig } = value;
+        return {
+          id: controlId,
+          grow,
+          order,
+          type,
+          width,
+          controlConfig,
+        };
+      }
+    ),
   };
 }

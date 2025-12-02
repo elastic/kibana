@@ -95,14 +95,14 @@ export function initControlsManager(
     { panelType, serializedState, maybePanelId }: PanelPackage<DefaultControlState>,
     index: number
   ) {
-    if ((serializedState?.rawState as DefaultDataControlState)?.dataViewId) {
-      lastUsedDataViewId$.next((serializedState!.rawState as DefaultDataControlState).dataViewId);
+    if ((serializedState as DefaultDataControlState)?.dataViewId) {
+      lastUsedDataViewId$.next((serializedState as DefaultDataControlState).dataViewId);
     }
-    if (serializedState?.rawState?.width) {
-      lastUsedWidth$.next(serializedState.rawState.width);
+    if (serializedState?.width) {
+      lastUsedWidth$.next(serializedState.width);
     }
-    if (typeof serializedState?.rawState?.grow === 'boolean') {
-      lastUsedGrow$.next(serializedState.rawState.grow);
+    if (typeof serializedState?.grow === 'boolean') {
+      lastUsedGrow$.next(serializedState.grow);
     }
 
     const id = maybePanelId ?? generateId();
@@ -112,7 +112,7 @@ export function initControlsManager(
       type: panelType,
     });
     controlsInOrder$.next(nextControlsInOrder);
-    currentControlsState[id] = serializedState?.rawState ?? {};
+    currentControlsState[id] = serializedState ?? {};
     return await untilControlLoaded(id);
   }
 
@@ -149,14 +149,7 @@ export function initControlsManager(
           return;
         }
 
-        const {
-          rawState: { grow, width, ...controlConfig },
-          references: controlReferences,
-        } = controlApi.serializeState();
-
-        if (controlReferences && controlReferences.length > 0) {
-          references.push(...controlReferences);
-        }
+        const { grow, width, ...controlConfig } = controlApi.serializeState();
 
         controls.push({
           id,

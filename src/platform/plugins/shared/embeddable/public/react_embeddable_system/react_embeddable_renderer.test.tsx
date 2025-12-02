@@ -22,17 +22,15 @@ const testEmbeddableFactory: EmbeddableFactory<{ name: string; bork: string }> =
   buildEmbeddable: async ({ initialState, finalizeApi }) => {
     const api = finalizeApi({
       serializeState: () => ({
-        rawState: {
-          name: initialState.rawState.name,
-          bork: initialState.rawState.bork,
-        },
+        name: initialState.name,
+        bork: initialState.bork,
       }),
     });
     return {
       Component: () => (
         <div data-test-subj="superTestEmbeddable">
-          SUPER TEST COMPONENT, name: {initialState.rawState.name} bork:{' '}
-          {initialState.rawState.bork}
+          SUPER TEST COMPONENT, name: {initialState.name} bork:{' '}
+          {initialState.bork}
         </div>
       ),
       api,
@@ -263,10 +261,8 @@ describe('reactEmbeddable phase events', () => {
         const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
         const api = finalizeApi({
           serializeState: () => ({
-            rawState: {
-              name: initialState.rawState.name,
-              bork: initialState.rawState.bork,
-            },
+            name: initialState.name,
+            bork: initialState.bork,
           }),
           dataLoading$,
         });
@@ -274,8 +270,8 @@ describe('reactEmbeddable phase events', () => {
           Component: () => (
             <>
               <div data-test-subj="superTestEmbeddable">
-                SUPER TEST COMPONENT, name: {initialState.rawState.name} bork:{' '}
-                {initialState.rawState.bork}
+                SUPER TEST COMPONENT, name: {initialState.name} bork:{' '}
+                {initialState.bork}
               </div>
               <button data-test-subj="clickToStopLoading" onClick={() => dataLoading$.next(false)}>
                 Done loading

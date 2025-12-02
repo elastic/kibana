@@ -20,7 +20,7 @@ export function extractControlGroupState(state: {
 }): DashboardState['controlGroupInput'] {
   if (state.controlGroupState && typeof state.controlGroupState === 'object') {
     // URL state created in 8.16 through 8.18 passed control group runtime state in with controlGroupState key
-    return serializeRuntimeState(state.controlGroupState).rawState;
+    return serializeRuntimeState(state.controlGroupState);
   }
 
   if (!state.controlGroupInput || typeof state.controlGroupInput !== 'object') return;

@@ -25,13 +25,12 @@ import {
 import { v4 } from 'uuid';
 
 import { METRIC_TYPE } from '@kbn/analytics';
-import type { Reference } from '@kbn/content-management-utils';
 import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { PanelNotFoundError } from '@kbn/embeddable-plugin/public';
 import type { GridLayoutData, GridPanelData, GridSectionData } from '@kbn/grid-layout';
 import { i18n } from '@kbn/i18n';
 import type { PanelPackage } from '@kbn/presentation-containers';
-import type { SerializedPanelState, SerializedTitles } from '@kbn/presentation-publishing';
+import type { SerializedTitles } from '@kbn/presentation-publishing';
 import {
   apiHasLibraryTransforms,
   apiHasSerializableState,
@@ -64,7 +63,6 @@ export function initializeLayoutManager(
   incomingEmbeddables: EmbeddablePackageState[] | undefined,
   initialPanels: DashboardState['panels'],
   trackPanel: ReturnType<typeof initializeTrackPanel>,
-  getReferences: (id: string) => Reference[]
 ) {
   // --------------------------------------------------------------------------------------
   // Set up panel state manager
@@ -72,7 +70,6 @@ export function initializeLayoutManager(
   const children$ = new BehaviorSubject<DashboardChildren>({});
   const { layout: initialLayout, childState: initialChildState } = deserializeLayout(
     initialPanels,
-    getReferences
   );
   const layout$ = new BehaviorSubject<DashboardLayout>(initialLayout); // layout is the source of truth for which panels are in the dashboard.
   const gridLayout$ = new BehaviorSubject(transformDashboardLayoutToGridLayout(initialLayout, {})); // source of truth for rendering
@@ -184,11 +181,8 @@ export function initializeLayoutManager(
             currentPanels: layout$.value.panels,
           }).newPanelPlacement;
       currentChildState[uuid] = {
-        rawState: {
-          ...(sameType && currentChildState[uuid] ? currentChildState[uuid].rawState : {}),
-          ...serializedState.rawState,
-        },
-        references: serializedState?.references,
+        ...(sameType && currentChildState[uuid] ? currentChildState[uuid] : {}),
+        ...serializedState,
       };
 
       layout$.next({
@@ -243,7 +237,7 @@ export function initializeLayoutManager(
     layout$.next(await placeNewPanel(uuid, panelPackage, grid));
 
     if (displaySuccessMessage) {
-      const title = (serializedState?.rawState as SerializedTitles)?.title;
+      const title = (serializedState as SerializedTitles)?.title;
       coreServices.notifications.toasts.addSuccess({
         title: getPanelAddedSuccessString(title),
         'data-test-subj': 'addEmbeddableToDashboardSuccess',
@@ -292,7 +286,7 @@ export function initializeLayoutManager(
     const serializedState = apiHasLibraryTransforms(apiToDuplicate)
       ? apiToDuplicate.getSerializedStateByValue()
       : apiToDuplicate.serializeState();
-    (serializedState.rawState as SerializedTitles).title = newTitle;
+    (serializedState as SerializedTitles).title = newTitle;
 
     currentChildState[uuidOfDuplicate] = serializedState;
 
@@ -371,7 +365,7 @@ export function initializeLayoutManager(
           debounceTime(100),
           combineLatestWith(
             lastSavedState$.pipe(
-              map((lastSaved) => deserializeLayout(lastSaved.panels, getReferences)),
+              map((lastSaved) => deserializeLayout(lastSaved.panels)),
               tap(({ layout, childState }) => {
                 lastSavedChildState = childState;
                 lastSavedLayout = layout;
@@ -381,7 +375,7 @@ export function initializeLayoutManager(
           map(([currentLayout]) => {
             if (!areLayoutsEqual(lastSavedLayout, currentLayout)) {
               logStateDiff('dashboard layout', lastSavedLayout, currentLayout);
-              return { panels: serializeLayout(currentLayout, currentChildState).panels };
+              return { panels: serializeLayout(currentLayout, currentChildState) };
             }
             return {};
           })
@@ -393,7 +387,7 @@ export function initializeLayoutManager(
           [api.uuid]: api,
         });
       },
-      setChildState: (uuid: string, state: SerializedPanelState<object>) => {
+      setChildState: (uuid: string, state: object) => {
         currentChildState[uuid] = state;
       },
       isSectionCollapsed,

@@ -55,9 +55,7 @@ export const ControlRenderer = <
           } as unknown as ApiType;
         };
 
-        const { rawState: initialState } = controlGroupApi.getSerializedStateForChild(uuid) ?? {
-          rawState: {},
-        };
+        const initialState = controlGroupApi.getSerializedStateForChild(uuid) ?? {};
         return await factory.buildControl({
           initialState: initialState as StateType,
           finalizeApi,
