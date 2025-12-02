@@ -42,10 +42,10 @@ export const EmbeddableWelcomeMessage = () => {
   }, [isResponseLoading]);
 
   const { conversations = [], isLoading } = useConversationList();
-  const hasNoConversations = isLoading === false && conversations.length === 0;
+  const hasConversations = isLoading === false && conversations.length > 0;
 
   // Only render the Welcome Message if the user has NO conversations AND the welcome message has not been dismissed
-  if (!showCallOut || hasNoConversations) return null;
+  if (!showCallOut || hasConversations) return null;
 
   const documentationLink = (
     <EuiLink href={docLinks.agentBuilder} target="_blank" external>
