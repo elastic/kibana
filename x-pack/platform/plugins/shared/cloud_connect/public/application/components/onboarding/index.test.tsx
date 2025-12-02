@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { IntlProvider } from '@kbn/i18n-react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { OnboardingPage } from '.';
 import { useCloudConnectedAppContext } from '../../app_context';
 import type { CloudConnectedAppContextValue } from '../../app_context';

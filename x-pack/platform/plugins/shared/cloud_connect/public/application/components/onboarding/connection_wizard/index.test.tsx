@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { IntlProvider } from '@kbn/i18n-react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ConnectionWizard } from '.';
 import { useCloudConnectedAppContext } from '../../../app_context';
 import { apiService } from '../../../../lib/api';
