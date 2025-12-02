@@ -12,7 +12,7 @@ import { fromObservable } from 'xstate5';
 import type { errors as esErrors } from '@elastic/elasticsearch';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
-import { Observable, filter, map, of, tap } from 'rxjs';
+import { Observable, filter, map, of, tap, timeout } from 'rxjs';
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import type { IEsSearchResponse } from '@kbn/search-types';
 import { pick } from 'lodash';
@@ -47,6 +47,8 @@ type CollectorParams = Pick<
   CollectKqlDataParams,
   'data' | 'index' | 'telemetryClient' | 'streamType'
 >;
+
+const SEARCH_TIMEOUT_MS = 10000; // 10 seconds
 
 /**
  * Creates a data collector actor that fetches sample documents based on the data source type
@@ -106,8 +108,6 @@ function collectKqlData({
     const subscription = data.search
       .search({ params }, { abortSignal: abortController.signal })
       .pipe(
-        filter(isValidSearchResult),
-        map(extractDocumentsFromResult),
         tap({
           subscribe: () => {
             registerFetchLatency = telemetryClient.startTrackingSimulationSamplesFetchLatency({
@@ -118,7 +118,10 @@ function collectKqlData({
           finalize: () => {
             registerFetchLatency();
           },
-        })
+        }),
+        timeout(SEARCH_TIMEOUT_MS),
+        filter(isValidSearchResult),
+        map(extractDocumentsFromResult)
       )
       .subscribe(observer);
 
@@ -201,12 +204,33 @@ export function createDataCollectionFailureNotifier({
 }) {
   return (params: { event: unknown }) => {
     const event = params.event as ErrorActorEvent<esErrors.ResponseError, string>;
-    const error = getFormattedError(event.error);
-    toasts.addError(error, {
+    const error = event.error;
+
+    if (error.name === 'TimeoutError') {
+      toasts.addError(error, {
+        title: i18n.translate(
+          'xpack.streams.enrichment.dataSources.dataCollectionErrorTimeoutTitle',
+          {
+            defaultMessage: 'Retrieving documents from the data source timed out.',
+          }
+        ),
+        toastMessage: i18n.translate(
+          'xpack.streams.enrichment.dataSources.dataCollectionErrorTimeoutMessage',
+          {
+            defaultMessage:
+              'Refresh the simulation or, if the error persists, try using a different data source.',
+          }
+        ),
+      });
+      return;
+    }
+
+    const formattedError = getFormattedError(error);
+    toasts.addError(formattedError, {
       title: i18n.translate('xpack.streams.enrichment.dataSources.dataCollectionError', {
         defaultMessage: 'An issue occurred retrieving documents from the data source.',
       }),
-      toastMessage: error.message,
+      toastMessage: formattedError.message,
     });
   };
 }
