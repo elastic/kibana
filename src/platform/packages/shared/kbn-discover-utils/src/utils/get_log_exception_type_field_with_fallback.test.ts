@@ -29,9 +29,7 @@ describe('getLogExceptionTypeFieldWithFallback', () => {
 
       expect(result.field).toBe(OTEL_EXCEPTION_TYPE_FIELD);
       expect(result.value).toBe('ProgrammingError');
-      if (result.field) {
-        expect(result.originalValue).toBe('ProgrammingError');
-      }
+      expect(result.originalValue).toBe('ProgrammingError');
     });
 
     it(`prioritizes ${OTEL_EXCEPTION_TYPE_FIELD} even when ${ERROR_EXCEPTION_TYPE_FIELD} also exists`, () => {
@@ -45,9 +43,7 @@ describe('getLogExceptionTypeFieldWithFallback', () => {
 
       expect(result.field).toBe(OTEL_EXCEPTION_TYPE_FIELD);
       expect(result.value).toBe('ProgrammingError');
-      if (result.field) {
-        expect(result.originalValue).toBe('ProgrammingError');
-      }
+      expect(result.originalValue).toBe('ProgrammingError');
       expect(result.value).not.toBe('UndefinedTable');
     });
   });
@@ -63,9 +59,7 @@ describe('getLogExceptionTypeFieldWithFallback', () => {
 
       expect(result.field).toBe(ERROR_EXCEPTION_TYPE_FIELD);
       expect(result.value).toBe('UndefinedTable');
-      if (result.field) {
-        expect(result.originalValue).toBe('UndefinedTable');
-      }
+      expect(result.originalValue).toBe('UndefinedTable');
     });
 
     it(`falls back to ${ERROR_EXCEPTION_TYPE_FIELD} when ${OTEL_EXCEPTION_TYPE_FIELD} is null`, () => {
@@ -79,9 +73,7 @@ describe('getLogExceptionTypeFieldWithFallback', () => {
 
       expect(result.field).toBe(ERROR_EXCEPTION_TYPE_FIELD);
       expect(result.value).toBe('UndefinedTable');
-      if (result.field) {
-        expect(result.originalValue).toBe('UndefinedTable');
-      }
+      expect(result.originalValue).toBe('UndefinedTable');
     });
 
     it(`falls back to ${ERROR_EXCEPTION_TYPE_FIELD} when ${OTEL_EXCEPTION_TYPE_FIELD} is undefined`, () => {
@@ -94,9 +86,7 @@ describe('getLogExceptionTypeFieldWithFallback', () => {
 
       expect(result.field).toBe(ERROR_EXCEPTION_TYPE_FIELD);
       expect(result.value).toBe('ValueError');
-      if (result.field) {
-        expect(result.originalValue).toBe('ValueError');
-      }
+      expect(result.originalValue).toBe('ValueError');
     });
   });
 
@@ -139,9 +129,7 @@ describe('getLogExceptionTypeFieldWithFallback', () => {
 
       expect(result.field).toBe(OTEL_EXCEPTION_TYPE_FIELD);
       expect(result.value).toBe('ProgrammingError,UndefinedTable');
-      if (result.field) {
-        expect(result.originalValue).toEqual(['ProgrammingError', 'UndefinedTable']);
-      }
+      expect(result.originalValue).toEqual(['ProgrammingError', 'UndefinedTable']);
     });
 
     it(`handles array values for ${ERROR_EXCEPTION_TYPE_FIELD} when ${OTEL_EXCEPTION_TYPE_FIELD} is not present`, () => {
@@ -154,9 +142,7 @@ describe('getLogExceptionTypeFieldWithFallback', () => {
 
       expect(result.field).toBe(ERROR_EXCEPTION_TYPE_FIELD);
       expect(result.value).toBe('Error,withMessage,withStack');
-      if (result.field) {
-        expect(result.originalValue).toEqual(['Error', 'withMessage', 'withStack']);
-      }
+      expect(result.originalValue).toEqual(['Error', 'withMessage', 'withStack']);
     });
   });
 });

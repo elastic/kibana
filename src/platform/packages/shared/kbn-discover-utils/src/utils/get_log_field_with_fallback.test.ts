@@ -185,9 +185,7 @@ describe('getLogFieldWithFallback', () => {
 
       expect(result.field).toBe('message');
       expect(result.value).toBe('{"key": "value"}');
-      if (result.field) {
-        expect(result.formattedValue).toBeUndefined();
-      }
+      expect(result.formattedValue).toBeUndefined();
     });
 
     it('does not return formattedValue when value is not valid JSON', () => {
@@ -202,10 +200,8 @@ describe('getLogFieldWithFallback', () => {
 
       expect(result.field).toBe('message');
       expect(result.value).toBe('not a json string');
-      if (result.field) {
-        expect(result.formattedValue).toBeUndefined();
-        expect(result.originalValue).toBeUndefined();
-      }
+      expect(result.formattedValue).toBeUndefined();
+      expect(result.originalValue).toBeUndefined();
     });
   });
 
@@ -222,9 +218,7 @@ describe('getLogFieldWithFallback', () => {
 
       expect(result.field).toBe('exception.type');
       expect(result.value).toBe('Error,withMessage,withStack');
-      if (result.field) {
-        expect(result.originalValue).toEqual(['Error', 'withMessage', 'withStack']);
-      }
+      expect(result.originalValue).toEqual(['Error', 'withMessage', 'withStack']);
     });
 
     it('returns undefined originalValue when includeOriginalValue is false', () => {
@@ -239,9 +233,7 @@ describe('getLogFieldWithFallback', () => {
 
       expect(result.field).toBe('exception.type');
       expect(result.value).toBe('Error,withMessage,withStack');
-      if (result.field) {
-        expect(result.originalValue).toBeUndefined();
-      }
+      expect(result.originalValue).toBeUndefined();
     });
 
     it('always returns value as string even when originalValue is an array', () => {
@@ -255,10 +247,8 @@ describe('getLogFieldWithFallback', () => {
       });
 
       expect(result.field).toBe('exception.type');
-      if (result.field) {
-        expect(typeof result.value).toBe('string');
-        expect(Array.isArray(result.originalValue)).toBe(true);
-      }
+      expect(typeof result.value).toBe('string');
+      expect(Array.isArray(result.originalValue)).toBe(true);
     });
 
     it('returns undefined originalValue by default when not specified', () => {
@@ -271,9 +261,7 @@ describe('getLogFieldWithFallback', () => {
 
       expect(result.field).toBe('message');
       expect(result.value).toBe('test message');
-      if (result.field) {
-        expect(result.originalValue).toBeUndefined();
-      }
+      expect(result.originalValue).toBeUndefined();
     });
   });
 });
