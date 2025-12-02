@@ -23,7 +23,6 @@
       "security",
       "features",
       "taskManager"
-    ],
-    "requiredBundles": []
+    ]
   }
 }

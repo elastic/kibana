@@ -14,7 +14,6 @@ import type {
 } from '@kbn/core/public';
 
 import { PLUGIN_ID, PLUGIN_NAME } from '../common/constants';
-import { getIntegrationManagementLazy } from './components/integration_management';
 import type {
   AutomaticImportPluginSetup,
   AutomaticImportPluginStart,
@@ -44,19 +43,10 @@ export class AutomaticImportPlugin
   }
 
   public start(
-    core: CoreStart,
-    dependencies: AutomaticImportPluginStartDependencies
+    _core: CoreStart,
+    _dependencies: AutomaticImportPluginStartDependencies
   ): AutomaticImportPluginStart {
-    const services = {
-      ...core,
-      ...dependencies,
-    };
-
-    return {
-      components: {
-        IntegrationManagement: getIntegrationManagementLazy(services),
-      },
-    };
+    return {};
   }
 
   public stop() {}
