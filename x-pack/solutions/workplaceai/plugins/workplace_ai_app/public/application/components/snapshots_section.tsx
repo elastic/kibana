@@ -51,7 +51,7 @@ export const SnapshotsSection: React.FC = () => {
         <h2>
           <FormattedMessage
             id="xpack.workplaceai.gettingStarted.snapshots.title"
-            defaultMessage="Snapshots"
+            defaultMessage="My Usage Snapshots"
           />
         </h2>
       </EuiTitle>
@@ -80,6 +80,12 @@ export const SnapshotsSection: React.FC = () => {
             <EuiBasicTable
               items={agents.slice(0, 3)}
               loading={isLoadingAgents}
+              tableCaption={i18n.translate(
+                'xpack.workplaceai.gettingStarted.snapshots.myAgentsTableCaption',
+                {
+                  defaultMessage: 'My agents list',
+                }
+              )}
               columns={[
                 {
                   field: 'name',
@@ -138,6 +144,12 @@ export const SnapshotsSection: React.FC = () => {
             </EuiText>
             <EuiSpacer size="m" />
             <EuiBasicTable
+              tableCaption={i18n.translate(
+                'xpack.workplaceai.gettingStarted.snapshots.mySourcesTableCaption',
+                {
+                  defaultMessage: 'My sources list',
+                }
+              )}
               items={[
                 {
                   name: i18n.translate(
@@ -240,7 +252,7 @@ export const SnapshotsSection: React.FC = () => {
               <h3>
                 <FormattedMessage
                   id="xpack.workplaceai.gettingStarted.snapshots.usageSnapshotTitle"
-                  defaultMessage="Usage snapshot"
+                  defaultMessage="Chat Activities"
                 />
               </h3>
             </EuiTitle>
@@ -254,6 +266,12 @@ export const SnapshotsSection: React.FC = () => {
             </EuiText>
             <EuiSpacer size="m" />
             <EuiBasicTable
+              tableCaption={i18n.translate(
+                'xpack.workplaceai.gettingStarted.snapshots.chatActivitiesTableCaption',
+                {
+                  defaultMessage: 'Chat activities metrics',
+                }
+              )}
               items={[
                 {
                   metric: i18n.translate(
