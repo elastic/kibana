@@ -18,10 +18,11 @@ import {
   euiDragDropReorder,
   EuiSpacer,
   useEuiTheme,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { MAX_NESTING_LEVEL, getSegments } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import { useScrollToActive } from '@kbn/core-chrome-navigation/src/hooks/use_scroll_to_active';
@@ -84,7 +85,41 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
   const isEditingOrReorderingStreams =
     routingSnapshot.matches({ ready: 'editingRule' }) ||
     routingSnapshot.matches({ ready: 'reorderingRules' });
-  const hasData = routing.length > 0 || (aiFeatures && aiFeatures.enabled && suggestions);
+
+  // Check if we're in any state that modifies data (creating, editing, etc.)
+  const isInDataModifyingState =
+    routingSnapshot.matches({ ready: 'creatingNewRule' }) ||
+    routingSnapshot.matches({ ready: 'editingRule' }) ||
+    routingSnapshot.matches({ ready: 'reorderingRules' }) ||
+    routingSnapshot.matches({ ready: 'reviewSuggestedRule' });
+
+  // Track when we're waiting for a refresh after a data-modifying operation
+  const [isPendingRefresh, setIsPendingRefresh] = useState(false);
+  const prevIsInDataModifyingState = useRef(isInDataModifyingState);
+  const definitionRouting = definition.stream.ingest.wired.routing;
+  const prevDefinitionRoutingRef = useRef(definitionRouting);
+
+  useEffect(() => {
+    // When we exit a data-modifying state, we're pending a refresh
+    if (prevIsInDataModifyingState.current && !isInDataModifyingState) {
+      setIsPendingRefresh(true);
+    }
+    prevIsInDataModifyingState.current = isInDataModifyingState;
+  }, [isInDataModifyingState]);
+
+  useEffect(() => {
+    // When the definition's routing changes (server data arrived), clear pending state
+    if (isPendingRefresh && definitionRouting !== prevDefinitionRoutingRef.current) {
+      setIsPendingRefresh(false);
+    }
+    prevDefinitionRoutingRef.current = definitionRouting;
+  }, [definitionRouting, isPendingRefresh]);
+
+  const hasData =
+    routing.length > 0 ||
+    (aiFeatures && aiFeatures.enabled && suggestions) ||
+    isInDataModifyingState ||
+    isPendingRefresh;
 
   const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
     if (source && destination) {
@@ -186,6 +221,12 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
               max-height: calc(100% - 80px);
             `}
           >
+            {/* Loading state while waiting for refresh - there's a delay between the state change and the data being available, noticeable now with the empty state */}
+            {isPendingRefresh && routing.length === 0 && (
+              <EuiFlexGroup justifyContent="center" alignItems="center" style={{ padding: 24 }}>
+                <EuiLoadingSpinner size="l" />
+              </EuiFlexGroup>
+            )}
             {routing.length > 0 && (
               <EuiDragDropContext onDragEnd={handlerItemDrag}>
                 <EuiDroppable droppableId="routing_children_reordering" spacing="none">
@@ -267,7 +308,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
             )}
           </EuiFlexItem>
 
-          {shouldDisplayCreateButton && renderCreateButton()}
+          {routing.length > 0 && shouldDisplayCreateButton && renderCreateButton()}
         </>
       )}
     </EuiFlexGroup>
