@@ -32,6 +32,9 @@ dependsOn:
   - '@kbn/onechat-plugin'
   - '@kbn/core-lifecycle-server'
   - '@kbn/esql-validation-autocomplete'
+  - '@kbn/cases-plugin'
+  - '@kbn/core-http-server'
+  - '@kbn/spaces-plugin'
 tags:
   - plugin
   - prod
