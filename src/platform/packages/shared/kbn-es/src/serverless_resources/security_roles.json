@@ -426,6 +426,7 @@
     ]
   },
   "readrules": {
+    "name": "readrules",
     "elasticsearch": {
       "cluster": [],
       "indices": [
@@ -472,6 +473,7 @@
     ]
   },
   "editrules": {
+    "name": "editrules",
     "elasticsearch": {
       "cluster": [],
       "indices": [
