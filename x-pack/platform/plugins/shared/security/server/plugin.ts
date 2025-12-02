@@ -481,6 +481,7 @@ export class SecurityPlugin
       license,
       logger,
       packageInfo: this.initializerContext.env.packageInfo,
+      docLinks: core.docLinks,
     });
   }
 }
