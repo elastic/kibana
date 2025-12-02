@@ -23,6 +23,7 @@ import type {
 import type { ApiExecutionContext } from './types';
 import { getNamespacesBoolFilter } from '../search';
 import type { NamespacesBoolFilter } from '../search/search_dsl/query_params';
+import { getRootFields } from '../utils';
 
 export interface PerformSearchParams {
   options: SavedObjectsSearchOptions;
@@ -112,9 +113,18 @@ export async function performSearch<T extends SavedObjectsRawDocSource, A = unkn
     getNamespacesBoolFilter({ namespaces, registry, types, typeToNamespacesMap })
   );
 
+  const rootFields = getRootFields();
+  const runtimeMappings: estypes.MappingRuntimeFields | undefined = esOptions.runtime_mappings
+    ? Object.fromEntries(
+        Object.entries(esOptions.runtime_mappings).filter(([key]) => !rootFields.includes(key))
+      )
+    : undefined;
+
   const result = await client.search<T, A>(
     {
       ...esOptions,
+      // Filter out forbidden fields from runtime_mappings
+      ...(runtimeMappings ? { runtime_mappings: runtimeMappings } : {}),
       // If `pit` is provided, we drop the `index`, otherwise ES returns 400.
       index: esOptions.pit ? undefined : commonHelper.getIndicesForTypes(types),
       query,
