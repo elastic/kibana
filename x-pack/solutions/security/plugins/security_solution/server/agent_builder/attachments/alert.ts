@@ -9,6 +9,7 @@ import { z } from '@kbn/zod';
 import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
 import type { Attachment } from '@kbn/onechat-common/attachments';
 import { platformCoreTools } from '@kbn/onechat-common';
+import { SECURITY_ALERTS_TOOL_ID } from '../tools/alerts_tool';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import {
   SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
@@ -64,6 +65,7 @@ export const createAlertAttachmentType = (): AttachmentTypeDefinition => {
       SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
       SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
       SECURITY_LABS_SEARCH_TOOL_ID,
+      SECURITY_ALERTS_TOOL_ID,
       platformCoreTools.cases,
       platformCoreTools.generateEsql,
     ],
