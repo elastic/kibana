@@ -6,3 +6,14 @@
  */
 
 export { CreateClassicStreamFlyout } from './components';
+export {
+  type StreamNameValidationResult,
+  type StreamNameValidator,
+  type IlmPolicyFetcher,
+  type PhaseDescription,
+  type PhaseColors,
+  type IlmPolicyDetails,
+  validateStreamName,
+  hasEmptyWildcards,
+  getPhaseDescriptions,
+} from './utils';

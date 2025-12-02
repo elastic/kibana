@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -25,7 +26,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
 import { css } from '@emotion/react';
-import { SelectTemplateStep } from './steps';
+import { SelectTemplateStep, NameAndConfirmStep, type ValidationErrorType } from './steps';
+import { validateStreamName, type StreamNameValidator, type IlmPolicyFetcher } from '../../utils';
+
+const VALIDATION_DEBOUNCE_MS = 300;
 
 enum ClassicStreamStep {
   SELECT_TEMPLATE = 'select_template',
@@ -46,14 +50,32 @@ const flyoutBodyStyles = css({
 });
 
 interface CreateClassicStreamFlyoutProps {
+  /** Callback when the flyout is closed */
   onClose: () => void;
-  onCreate: () => void;
+  /**
+   * Callback when the stream is created.
+   * Receives the stream name which can be used to create the classic stream.
+   */
+  onCreate: (streamName: string) => void;
+  /** Callback to navigate to create template flow */
   onCreateTemplate: () => void;
+  /** Available index templates to select from */
   templates: TemplateDeserialized[];
-  selectedTemplate: string | null;
-  onTemplateSelect: (templateName: string | null) => void;
+  /** Whether there was an error loading templates */
   hasErrorLoadingTemplates?: boolean;
+  /** Callback to retry loading templates */
   onRetryLoadTemplates: () => void;
+  /**
+   * Async callback to validate the stream name.
+   * Called after local empty field validation passes.
+   * Should check for duplicate names and higher priority template conflicts.
+   */
+  onValidate?: StreamNameValidator;
+  /**
+   * Async callback to fetch ILM policy details by name.
+   * If provided, ILM policy details will be displayed in the template details section.
+   */
+  getIlmPolicy?: IlmPolicyFetcher;
 }
 
 export const CreateClassicStreamFlyout = ({
@@ -61,14 +83,72 @@ export const CreateClassicStreamFlyout = ({
   onCreate,
   onCreateTemplate,
   templates,
-  selectedTemplate,
-  onTemplateSelect,
   hasErrorLoadingTemplates = false,
   onRetryLoadTemplates,
+  onValidate,
+  getIlmPolicy,
 }: CreateClassicStreamFlyoutProps) => {
   const [currentStep, setCurrentStep] = useState<ClassicStreamStep>(
     ClassicStreamStep.SELECT_TEMPLATE
   );
+  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+  const [streamName, setStreamName] = useState<string>('');
+  const [selectedIndexPattern, setSelectedIndexPattern] = useState<string>('');
+  const [validationError, setValidationError] = useState<ValidationErrorType>(null);
+  const [conflictingIndexPattern, setConflictingIndexPattern] = useState<string | undefined>();
+  const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
+
+  const selectedTemplateData = templates.find((t) => t.name === selectedTemplate);
+
+  // Run validation and update state, returns true if validation passes
+  const runValidation = useCallback(
+    async (name: string): Promise<boolean> => {
+      setIsValidating(true);
+      try {
+        const result = await validateStreamName(name, onValidate);
+        setValidationError(result.errorType);
+        setConflictingIndexPattern(result.conflictingIndexPattern);
+        return result.errorType === null;
+      } finally {
+        setIsValidating(false);
+      }
+    },
+    [onValidate]
+  );
+
+  // Debounced validation - only runs after first submit attempt with an error
+  // When validation passes, reset to "submit only" mode
+  useDebounce(
+    () => {
+      if (hasAttemptedSubmit && validationError !== null) {
+        runValidation(streamName).then((isValid) => {
+          if (isValid) {
+            // Validation passed, reset to "submit only" mode
+            setHasAttemptedSubmit(false);
+          }
+        });
+      }
+    },
+    VALIDATION_DEBOUNCE_MS,
+    [streamName, hasAttemptedSubmit, validationError, runValidation]
+  );
+
+  // Reset stream name and validation when changing templates
+  useEffect(() => {
+    setStreamName('');
+    setSelectedIndexPattern('');
+    setValidationError(null);
+    setConflictingIndexPattern(undefined);
+    setHasAttemptedSubmit(false);
+  }, [selectedTemplate]);
+
+  // Reset validation when changing index patterns within a template
+  useEffect(() => {
+    setValidationError(null);
+    setConflictingIndexPattern(undefined);
+    setHasAttemptedSubmit(false);
+  }, [selectedIndexPattern]);
 
   const isFirstStep = currentStep === ClassicStreamStep.SELECT_TEMPLATE;
   const hasNextStep = isFirstStep;
@@ -77,6 +157,23 @@ export const CreateClassicStreamFlyout = ({
 
   const goToNextStep = () => setCurrentStep(ClassicStreamStep.NAME_AND_CONFIRM);
   const goToPreviousStep = () => setCurrentStep(ClassicStreamStep.SELECT_TEMPLATE);
+
+  const handleCreate = useCallback(async () => {
+    setHasAttemptedSubmit(true);
+    setIsValidating(true);
+
+    try {
+      const result = await validateStreamName(streamName, onValidate);
+      setValidationError(result.errorType);
+      setConflictingIndexPattern(result.conflictingIndexPattern);
+
+      if (result.errorType === null) {
+        onCreate(streamName);
+      }
+    } finally {
+      setIsValidating(false);
+    }
+  }, [streamName, onValidate, onCreate]);
 
   const steps: EuiStepsHorizontalProps['steps'] = useMemo(
     () => [
@@ -108,15 +205,29 @@ export const CreateClassicStreamFlyout = ({
           <SelectTemplateStep
             templates={templates}
             selectedTemplate={selectedTemplate}
-            onTemplateSelect={onTemplateSelect}
+            onTemplateSelect={setSelectedTemplate}
             onCreateTemplate={onCreateTemplate}
             hasErrorLoadingTemplates={hasErrorLoadingTemplates}
             onRetryLoadTemplates={onRetryLoadTemplates}
           />
         );
 
-      case ClassicStreamStep.NAME_AND_CONFIRM:
-        return <div data-test-subj="nameAndConfirmStep" />;
+      case ClassicStreamStep.NAME_AND_CONFIRM: {
+        if (!selectedTemplateData) {
+          return null;
+        }
+        return (
+          <NameAndConfirmStep
+            template={selectedTemplateData}
+            selectedIndexPattern={selectedIndexPattern}
+            onIndexPatternChange={setSelectedIndexPattern}
+            onStreamNameChange={setStreamName}
+            validationError={validationError}
+            conflictingIndexPattern={conflictingIndexPattern}
+            getIlmPolicy={getIlmPolicy}
+          />
+        );
+      }
 
       default:
         return null;
@@ -181,7 +292,12 @@ export const CreateClassicStreamFlyout = ({
                 />
               </EuiButton>
             ) : (
-              <EuiButton onClick={onCreate} fill data-test-subj="createButton">
+              <EuiButton
+                onClick={handleCreate}
+                fill
+                isLoading={isValidating}
+                data-test-subj="createButton"
+              >
                 <FormattedMessage
                   id="xpack.createClassicStreamFlyout.footer.create"
                   defaultMessage="Create"

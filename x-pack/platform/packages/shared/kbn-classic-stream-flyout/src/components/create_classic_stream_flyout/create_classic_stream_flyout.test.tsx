@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, waitFor } from '@testing-library/react';
 import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
 import { CreateClassicStreamFlyout } from './create_classic_stream_flyout';
 
@@ -15,8 +15,10 @@ const MOCK_TEMPLATES: TemplateDeserialized[] = [
   {
     name: 'template-1',
     ilmPolicy: { name: '30d' },
-    indexPatterns: ['template-1-*'],
+    indexPatterns: ['logs-template-1-*'],
     allowAutoCreate: 'NO_OVERWRITE',
+    indexMode: 'standard',
+    composedOf: ['logs@mappings', 'logs@settings'],
     _kbnMeta: { type: 'default', hasDatastream: true },
   },
   {
@@ -24,6 +26,7 @@ const MOCK_TEMPLATES: TemplateDeserialized[] = [
     ilmPolicy: { name: '90d' },
     indexPatterns: ['template-2-*'],
     allowAutoCreate: 'NO_OVERWRITE',
+    indexMode: 'logsdb',
     _kbnMeta: { type: 'managed', hasDatastream: true },
   },
   {
@@ -33,6 +36,26 @@ const MOCK_TEMPLATES: TemplateDeserialized[] = [
     lifecycle: { enabled: true, value: 30, unit: 'd' },
     _kbnMeta: { type: 'default', hasDatastream: true },
   },
+  {
+    name: 'multi-pattern-template',
+    ilmPolicy: { name: 'logs' },
+    indexPatterns: ['*-logs-*-*', 'logs-*-data-*', 'metrics-*'],
+    allowAutoCreate: 'NO_OVERWRITE',
+    indexMode: 'lookup',
+    version: 12,
+    composedOf: ['logs@mappings', 'logs@settings'],
+    _kbnMeta: { type: 'managed', hasDatastream: true },
+  },
+  {
+    name: 'very-long-pattern-template',
+    ilmPolicy: { name: 'logs' },
+    indexPatterns: ['*-reallllllllllllllllllly-*-loooooooooooong-*-index-*-name-*', 'short-*'],
+    allowAutoCreate: 'NO_OVERWRITE',
+    indexMode: 'lookup',
+    version: 12,
+    composedOf: ['logs@mappings', 'logs@settings'],
+    _kbnMeta: { type: 'managed', hasDatastream: true },
+  },
 ];
 
 const defaultProps = {
@@ -41,8 +64,6 @@ const defaultProps = {
   onCreateTemplate: jest.fn(),
   onRetryLoadTemplates: jest.fn(),
   templates: MOCK_TEMPLATES,
-  selectedTemplate: null,
-  onTemplateSelect: jest.fn(),
 };
 
 const renderFlyout = (props = {}) => {
@@ -51,6 +72,19 @@ const renderFlyout = (props = {}) => {
       <CreateClassicStreamFlyout {...defaultProps} {...props} />
     </IntlProvider>
   );
+};
+
+// Helper to select a template and navigate to second step
+const selectTemplateAndGoToStep2 = (
+  getByTestId: (id: string) => HTMLElement,
+  templateName: string
+) => {
+  // Click on a template option
+  const templateOption = getByTestId(`template-option-${templateName}`);
+  fireEvent.click(templateOption);
+
+  // Navigate to second step
+  fireEvent.click(getByTestId('nextButton'));
 };
 
 describe('CreateClassicStreamFlyout', () => {
@@ -113,7 +147,7 @@ describe('CreateClassicStreamFlyout', () => {
     });
   });
 
-  describe('template selection', () => {
+  describe('select template step', () => {
     it('renders template search and list', () => {
       const { getByTestId } = renderFlyout();
 
@@ -131,7 +165,10 @@ describe('CreateClassicStreamFlyout', () => {
     });
 
     it('enables next step and Next button when a template is selected', () => {
-      const { getByTestId } = renderFlyout({ selectedTemplate: 'template-1' });
+      const { getByTestId } = renderFlyout();
+
+      // Select a template
+      fireEvent.click(getByTestId('template-option-template-1'));
 
       const nextStep = getByTestId('createClassicStreamStep-nameAndConfirm');
       expect(nextStep).toBeEnabled();
@@ -140,24 +177,13 @@ describe('CreateClassicStreamFlyout', () => {
       expect(nextButton).toBeEnabled();
     });
 
-    it('calls onTemplateSelect when a template is selected', () => {
-      const onTemplateSelect = jest.fn();
-      const { getByTestId } = renderFlyout({ onTemplateSelect });
-
-      // Click on a template option
-      const templateOption = getByTestId('template-option-template-1');
-      fireEvent.click(templateOption);
-
-      expect(onTemplateSelect).toHaveBeenCalledWith('template-1');
-    });
-
     it('displays ILM badge for templates with ILM policy', () => {
       const { getAllByText, getByText } = renderFlyout();
 
       // template-1 has ilmPolicy: { name: '30d' }, template-2 has ilmPolicy: { name: '90d' }
       // Both should display ILM badge
       const ilmBadges = getAllByText('ILM');
-      expect(ilmBadges.length).toBe(2);
+      expect(ilmBadges.length).toBeGreaterThanOrEqual(2);
       expect(getByText('90d')).toBeInTheDocument();
     });
 
@@ -168,8 +194,6 @@ describe('CreateClassicStreamFlyout', () => {
       // Should display the retention period in the template option
       const templateOption = getByTestId('template-option-template-3');
       expect(templateOption).toBeInTheDocument();
-      // The 30d retention should be displayed (same as ILM policy name for template-1,
-      // but this verifies template-3 option exists and is rendered)
     });
 
     it('renders all template options including managed templates', () => {
@@ -184,7 +208,10 @@ describe('CreateClassicStreamFlyout', () => {
 
   describe('navigation', () => {
     it('navigates to second step when clicking Next button with selected template', () => {
-      const { getByTestId, queryByTestId } = renderFlyout({ selectedTemplate: 'template-1' });
+      const { getByTestId, queryByTestId } = renderFlyout();
+
+      // Select a template first
+      fireEvent.click(getByTestId('template-option-template-1'));
 
       // Check that the first step content is rendered
       expect(getByTestId('selectTemplateStep')).toBeInTheDocument();
@@ -211,10 +238,10 @@ describe('CreateClassicStreamFlyout', () => {
     });
 
     it('navigates back to first step when clicking Back button', () => {
-      const { getByTestId, queryByTestId } = renderFlyout({ selectedTemplate: 'template-1' });
+      const { getByTestId, queryByTestId } = renderFlyout();
 
-      // Navigate to second step
-      fireEvent.click(getByTestId('nextButton'));
+      // Select template and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'template-1');
 
       // Verify that the second step content is rendered
       expect(queryByTestId('selectTemplateStep')).not.toBeInTheDocument();
@@ -255,27 +282,56 @@ describe('CreateClassicStreamFlyout', () => {
       expect(onClose).toHaveBeenCalledTimes(2);
     });
 
-    it('calls onCreate when Create button is clicked', () => {
+    it('calls onCreate with stream name when Create button is clicked and validation passes', async () => {
       const onCreate = jest.fn();
-      const { getByTestId } = renderFlyout({ onCreate, selectedTemplate: 'template-1' });
+      const { getByTestId } = renderFlyout({ onCreate });
 
-      // Navigate to second step
-      fireEvent.click(getByTestId('nextButton'));
+      // Select template and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'template-1');
+
+      // Fill in the stream name (pattern is logs-template-1-*)
+      const streamNameInput = getByTestId('streamNameInput-wildcard-0');
+      fireEvent.change(streamNameInput, { target: { value: 'mystream' } });
 
       // Click Create button
       fireEvent.click(getByTestId('createButton'));
 
-      expect(onCreate).toHaveBeenCalledTimes(1);
+      // Wait for validation to complete
+      await waitFor(() => {
+        expect(onCreate).toHaveBeenCalledTimes(1);
+        expect(onCreate).toHaveBeenCalledWith('logs-template-1-mystream');
+      });
+    });
+
+    it('does not call onCreate when validation fails (empty wildcard)', async () => {
+      const onCreate = jest.fn();
+      const { getByTestId, getByText } = renderFlyout({ onCreate });
+
+      // Select template and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'template-1');
+
+      // Don't fill in the stream name (leave wildcard empty)
+
+      // Click Create button
+      fireEvent.click(getByTestId('createButton'));
+
+      // Wait for validation error to appear
+      await waitFor(() => {
+        expect(
+          getByText(/Please supply a valid text string for all wildcards/i)
+        ).toBeInTheDocument();
+      });
+
+      expect(onCreate).not.toHaveBeenCalled();
     });
 
     it('does not call onCreate or onClose when navigating between steps', () => {
       const onClose = jest.fn();
       const onCreate = jest.fn();
-      const { getByTestId } = renderFlyout({
-        onCreate,
-        onClose,
-        selectedTemplate: 'template-1',
-      });
+      const { getByTestId } = renderFlyout({ onCreate, onClose });
+
+      // Select template
+      fireEvent.click(getByTestId('template-option-template-1'));
 
       // Navigate forward
       fireEvent.click(getByTestId('nextButton'));
@@ -286,6 +342,331 @@ describe('CreateClassicStreamFlyout', () => {
       fireEvent.click(getByTestId('backButton'));
       expect(onCreate).not.toHaveBeenCalled();
       expect(onClose).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('name and confirm step', () => {
+    it('renders the name and confirm step with template details', () => {
+      const { getByTestId, getByText } = renderFlyout();
+
+      // Select template and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'template-1');
+
+      // Check step content is rendered
+      expect(getByTestId('nameAndConfirmStep')).toBeInTheDocument();
+
+      // Check section titles
+      expect(getByText('Name classic stream')).toBeInTheDocument();
+      expect(getByText('Confirm index template details')).toBeInTheDocument();
+
+      // Check template details are displayed
+      expect(getByTestId('templateDetails')).toBeInTheDocument();
+      expect(getByText('Index mode')).toBeInTheDocument();
+      expect(getByText('Standard')).toBeInTheDocument();
+      expect(getByText('Component templates')).toBeInTheDocument();
+    });
+
+    it('displays the index pattern prefix in a read-only field', () => {
+      const { getByTestId } = renderFlyout();
+
+      // Select template and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'template-1');
+
+      // Check the static field - template-1 has indexPatterns: ['logs-template-1-*']
+      const staticField = getByTestId('streamNameInput-static-0');
+      expect(staticField).toBeInTheDocument();
+      expect(staticField).toHaveValue('logs-template-1-');
+      expect(staticField).toHaveAttribute('readonly');
+    });
+
+    it('allows editing the stream name input', () => {
+      const { getByTestId } = renderFlyout();
+
+      // Select template and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'template-1');
+
+      // Check the editable input
+      const streamNameInput = getByTestId('streamNameInput-wildcard-0');
+      expect(streamNameInput).toBeInTheDocument();
+
+      // Change the input value
+      fireEvent.change(streamNameInput, { target: { value: 'my-stream' } });
+      expect(streamNameInput).toHaveValue('my-stream');
+    });
+
+    it('displays component templates as separate lines', () => {
+      const { getByTestId, getByText } = renderFlyout();
+
+      // Select template and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'template-1');
+
+      // template-1 has composedOf: ['logs@mappings', 'logs@settings']
+      // Component templates are displayed as block elements (each on its own line)
+      expect(getByText('logs@mappings')).toBeInTheDocument();
+      expect(getByText('logs@settings')).toBeInTheDocument();
+    });
+
+    it('displays correct index mode for different templates', () => {
+      const { getByTestId, getByText } = renderFlyout();
+
+      // Select template-2 and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'template-2');
+
+      // template-2 has indexMode: 'logsdb'
+      expect(getByText('Logsdb')).toBeInTheDocument();
+    });
+
+    it('displays version when available', () => {
+      const { getByTestId, getByText } = renderFlyout();
+
+      // Select template and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'multi-pattern-template');
+
+      // multi-pattern-template has version: 12
+      expect(getByText('Version')).toBeInTheDocument();
+      expect(getByText('12')).toBeInTheDocument();
+    });
+  });
+
+  describe('multiple index patterns', () => {
+    it('shows index pattern selector when template has multiple patterns', () => {
+      const { getByTestId } = renderFlyout();
+
+      // Select template and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'multi-pattern-template');
+
+      // Should show index pattern selector
+      expect(getByTestId('indexPatternSelect')).toBeInTheDocument();
+    });
+
+    it('does not show index pattern selector when template has single pattern', () => {
+      const { getByTestId, queryByTestId } = renderFlyout();
+
+      // Select template and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'template-1');
+
+      // Should NOT show index pattern selector
+      expect(queryByTestId('indexPatternSelect')).not.toBeInTheDocument();
+    });
+
+    it('changes stream name inputs when index pattern is changed', () => {
+      const { getByTestId, queryByTestId } = renderFlyout();
+
+      // Select template and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'multi-pattern-template');
+
+      // Default pattern is '*-logs-*-*' which has 3 wildcards
+      expect(getByTestId('streamNameInput-wildcard-0')).toBeInTheDocument();
+      expect(getByTestId('streamNameInput-wildcard-1')).toBeInTheDocument();
+      expect(getByTestId('streamNameInput-wildcard-2')).toBeInTheDocument();
+      expect(getByTestId('streamNameInput-static-1')).toHaveValue('-logs-');
+      expect(getByTestId('streamNameInput-static-3')).toHaveValue('-');
+
+      // Change to 'metrics-*' which has only 1 wildcard
+      const patternSelect = getByTestId('indexPatternSelect');
+      fireEvent.change(patternSelect, { target: { value: 'metrics-*' } });
+
+      // Should now have only 1 editable input
+      expect(getByTestId('streamNameInput-wildcard-0')).toBeInTheDocument();
+      expect(queryByTestId('streamNameInput-wildcard-1')).not.toBeInTheDocument();
+      expect(queryByTestId('streamNameInput-wildcard-2')).not.toBeInTheDocument();
+
+      // Should have static prefix 'metrics-'
+      expect(getByTestId('streamNameInput-static-0')).toHaveValue('metrics-');
+    });
+  });
+
+  describe('multiple wildcards', () => {
+    it('renders multiple editable inputs for patterns with multiple wildcards', () => {
+      const { getByTestId } = renderFlyout();
+
+      // Select template and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'multi-pattern-template');
+
+      // Pattern '*-logs-*-*' has 3 wildcards
+      expect(getByTestId('streamNameInput-wildcard-0')).toBeInTheDocument();
+      expect(getByTestId('streamNameInput-wildcard-1')).toBeInTheDocument();
+      expect(getByTestId('streamNameInput-wildcard-2')).toBeInTheDocument();
+    });
+
+    it('renders static segments between wildcards', () => {
+      const { getByTestId } = renderFlyout();
+
+      // Select template and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'multi-pattern-template');
+
+      // Pattern '*-logs-*-*' has static segments '-logs-' and '-'
+      const staticSegment1 = getByTestId('streamNameInput-static-1');
+      expect(staticSegment1).toHaveValue('-logs-');
+      expect(staticSegment1).toHaveAttribute('readonly');
+
+      const staticSegment2 = getByTestId('streamNameInput-static-3');
+      expect(staticSegment2).toHaveValue('-');
+      expect(staticSegment2).toHaveAttribute('readonly');
+    });
+
+    it('allows editing each wildcard input independently', () => {
+      const { getByTestId } = renderFlyout();
+
+      // Select template and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'multi-pattern-template');
+
+      // Fill in each wildcard
+      const input0 = getByTestId('streamNameInput-wildcard-0');
+      const input1 = getByTestId('streamNameInput-wildcard-1');
+      const input2 = getByTestId('streamNameInput-wildcard-2');
+
+      fireEvent.change(input0, { target: { value: 'prefix' } });
+      fireEvent.change(input1, { target: { value: 'middle' } });
+      fireEvent.change(input2, { target: { value: 'suffix' } });
+
+      expect(input0).toHaveValue('prefix');
+      expect(input1).toHaveValue('middle');
+      expect(input2).toHaveValue('suffix');
+    });
+
+    it('supports patterns with many wildcards (5+)', () => {
+      const { getByTestId } = renderFlyout();
+
+      // Select template and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'very-long-pattern-template');
+
+      // Pattern '*-reallllllllllllllllllly-*-loooooooooooong-*-index-*-name-*' has 5 wildcards
+      expect(getByTestId('streamNameInput-wildcard-0')).toBeInTheDocument();
+      expect(getByTestId('streamNameInput-wildcard-1')).toBeInTheDocument();
+      expect(getByTestId('streamNameInput-wildcard-2')).toBeInTheDocument();
+      expect(getByTestId('streamNameInput-wildcard-3')).toBeInTheDocument();
+      expect(getByTestId('streamNameInput-wildcard-4')).toBeInTheDocument();
+
+      // Verify static segments
+      expect(getByTestId('streamNameInput-static-1')).toHaveValue('-reallllllllllllllllllly-');
+      expect(getByTestId('streamNameInput-static-3')).toHaveValue('-loooooooooooong-');
+      expect(getByTestId('streamNameInput-static-5')).toHaveValue('-index-');
+      expect(getByTestId('streamNameInput-static-7')).toHaveValue('-name-');
+    });
+  });
+
+  describe('stream name reset on template change', () => {
+    it('resets stream name inputs when going back and selecting a different template', () => {
+      const { getByTestId } = renderFlyout();
+
+      // Select template-1 and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'template-1');
+
+      // Fill in the stream name
+      const streamNameInput = getByTestId('streamNameInput-wildcard-0');
+      fireEvent.change(streamNameInput, { target: { value: 'my-value' } });
+      expect(streamNameInput).toHaveValue('my-value');
+
+      // Go back
+      fireEvent.click(getByTestId('backButton'));
+
+      // Select a different template
+      fireEvent.click(getByTestId('template-option-template-2'));
+
+      // Navigate to second step again
+      fireEvent.click(getByTestId('nextButton'));
+
+      // The input should be reset (empty)
+      const newInput = getByTestId('streamNameInput-wildcard-0');
+      expect(newInput).toHaveValue('');
+    });
+  });
+
+  describe('validation', () => {
+    it('shows validation error when trying to create with empty wildcard', async () => {
+      const onCreate = jest.fn();
+      const { getByTestId, getByText } = renderFlyout({ onCreate });
+
+      // Select template and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'template-1');
+
+      // Click Create without filling in the wildcard
+      fireEvent.click(getByTestId('createButton'));
+
+      // Should show validation error
+      await waitFor(() => {
+        expect(
+          getByText(/Please supply a valid text string for all wildcards/i)
+        ).toBeInTheDocument();
+      });
+
+      // onCreate should not be called
+      expect(onCreate).not.toHaveBeenCalled();
+    });
+
+    it('calls onValidate when provided and local validation passes', async () => {
+      const onCreate = jest.fn();
+      const onValidate = jest.fn().mockResolvedValue({ errorType: null });
+      const { getByTestId } = renderFlyout({ onCreate, onValidate });
+
+      // Select template and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'template-1');
+
+      // Fill in the stream name
+      const streamNameInput = getByTestId('streamNameInput-wildcard-0');
+      fireEvent.change(streamNameInput, { target: { value: 'mystream' } });
+
+      // Click Create
+      fireEvent.click(getByTestId('createButton'));
+
+      // Wait for validation
+      await waitFor(() => {
+        expect(onValidate).toHaveBeenCalledWith('logs-template-1-mystream');
+        expect(onCreate).toHaveBeenCalledWith('logs-template-1-mystream');
+      });
+    });
+
+    it('shows duplicate error from onValidate', async () => {
+      const onCreate = jest.fn();
+      const onValidate = jest.fn().mockResolvedValue({ errorType: 'duplicate' });
+      const { getByTestId, getByText } = renderFlyout({ onCreate, onValidate });
+
+      // Select template and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'template-1');
+
+      // Fill in the stream name
+      const streamNameInput = getByTestId('streamNameInput-wildcard-0');
+      fireEvent.change(streamNameInput, { target: { value: 'existing' } });
+
+      // Click Create
+      fireEvent.click(getByTestId('createButton'));
+
+      // Should show duplicate error
+      await waitFor(() => {
+        expect(getByText(/This stream name already exists/i)).toBeInTheDocument();
+      });
+
+      // onCreate should not be called
+      expect(onCreate).not.toHaveBeenCalled();
+    });
+
+    it('shows higher priority error from onValidate', async () => {
+      const onCreate = jest.fn();
+      const onValidate = jest.fn().mockResolvedValue({
+        errorType: 'higherPriority',
+        conflictingIndexPattern: 'logs-*',
+      });
+      const { getByTestId, getByText } = renderFlyout({ onCreate, onValidate });
+
+      // Select template and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'template-1');
+
+      // Fill in the stream name
+      const streamNameInput = getByTestId('streamNameInput-wildcard-0');
+      fireEvent.change(streamNameInput, { target: { value: 'conflict' } });
+
+      // Click Create
+      fireEvent.click(getByTestId('createButton'));
+
+      // Should show higher priority error
+      await waitFor(() => {
+        expect(getByText(/matches a higher priority index template/i)).toBeInTheDocument();
+        expect(getByText('logs-*')).toBeInTheDocument();
+      });
+
+      // onCreate should not be called
+      expect(onCreate).not.toHaveBeenCalled();
     });
   });
 });
