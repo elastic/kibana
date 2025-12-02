@@ -619,9 +619,11 @@ export function hasTimeseriesBucketAggregation(
   }
 
   const statsByCommands = Walker.matchAll(statsCommands, { type: 'option', name: 'by' });
+  if (statsByCommands.length === 0) {
+    return false;
+  }
 
-  const lastByCommand = statsByCommands[Math.max(statsByCommands.length - 1, 0)];
-
+  const lastByCommand = statsByCommands[statsByCommands.length - 1];
   const bucketFunction = Walker.match(lastByCommand, { type: 'function', name: 'bucket' });
   const tbucketFunction = Walker.match(lastByCommand, { type: 'function', name: 'tbucket' });
 
