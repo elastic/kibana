@@ -111,7 +111,7 @@ export function AttachmentDetailsFlyout({
       }),
       description:
         attachment.streamNames.length > 0 ? (
-          <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+          <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
             {attachment.streamNames.map((name) => (
               <EuiFlexItem key={name} grow={false}>
                 <EuiLink
