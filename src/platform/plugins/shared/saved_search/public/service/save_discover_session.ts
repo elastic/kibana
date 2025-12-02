@@ -136,8 +136,12 @@ export const saveDiscoverSession = async (
     ...tabs[0].attributes,
     sort: tabs[0].attributes.sort as SortOrder[],
     density: tabs[0].attributes.density as DataGridDensity,
-    projectRouting: discoverSession.projectRouting,
   };
+
+  // Only include projectRouting if explicitly provided (even if null to clear)
+  if ('projectRouting' in discoverSession) {
+    attributes.projectRouting = discoverSession.projectRouting ?? null;
+  }
 
   const references = savedObjectsTagging
     ? savedObjectsTagging.ui.updateTagsReferences(tabReferences, discoverSession.tags ?? [])

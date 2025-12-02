@@ -137,6 +137,7 @@ describe('Serialization utils', () => {
         uuid,
         initialState: {
           ...mockedSavedSearchAttributes,
+          projectRouting: undefined,
           serializedSearchSource: {} as SerializedSearchSourceFields,
         },
         savedSearch,
