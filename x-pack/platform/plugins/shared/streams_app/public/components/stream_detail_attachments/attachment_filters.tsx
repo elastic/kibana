@@ -21,22 +21,11 @@ import type { AttachmentType } from '@kbn/streams-plugin/server/lib/streams/atta
 import { debounce } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
+import { ATTACHMENT_TYPE_CONFIG } from './attachment_constants';
 
-const ATTACHMENT_TYPE_LABELS: Record<AttachmentType, string> = {
-  dashboard: i18n.translate('xpack.streams.attachmentFilters.typeDashboard', {
-    defaultMessage: 'Dashboard',
-  }),
-  rule: i18n.translate('xpack.streams.attachmentFilters.typeRule', {
-    defaultMessage: 'Rule',
-  }),
-  slo: i18n.translate('xpack.streams.attachmentFilters.typeSlo', {
-    defaultMessage: 'SLO',
-  }),
-};
-
-const ATTACHMENT_TYPE_OPTIONS = Object.entries(ATTACHMENT_TYPE_LABELS).map(([type, label]) => ({
+const ATTACHMENT_TYPE_OPTIONS = Object.entries(ATTACHMENT_TYPE_CONFIG).map(([type, config]) => ({
   value: type as AttachmentType,
-  label,
+  label: config.label,
 }));
 
 export interface AttachmentFiltersState {

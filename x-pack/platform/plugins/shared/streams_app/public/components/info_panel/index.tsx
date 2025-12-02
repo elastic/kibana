@@ -6,7 +6,7 @@
  */
 import { EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 interface InfoPanelProps {
   title: string;
@@ -16,27 +16,30 @@ interface InfoPanelProps {
 export function InfoPanel({ title, children }: InfoPanelProps) {
   const { euiTheme } = useEuiTheme();
 
-  const panelStyles = css`
-    padding: 0;
-    border-radius: 6px;
-  `;
-
-  const headerStyles = css`
-    background: ${euiTheme.colors.backgroundBaseSubdued};
-    padding: ${euiTheme.size.m};
-    border-bottom: ${euiTheme.border.thin};
-  `;
-
-  const contentStyles = css`
-    padding: ${euiTheme.size.m};
-  `;
+  const styles = useMemo(
+    () => ({
+      panel: css`
+        padding: 0;
+        border-radius: 6px;
+      `,
+      header: css`
+        background: ${euiTheme.colors.backgroundBaseSubdued};
+        padding: ${euiTheme.size.m};
+        border-bottom: ${euiTheme.border.thin};
+      `,
+      content: css`
+        padding: ${euiTheme.size.m};
+      `,
+    }),
+    [euiTheme]
+  );
 
   return (
-    <EuiPanel hasBorder borderRadius="none" css={panelStyles}>
-      <EuiText size="s" css={[headerStyles, { fontWeight: euiTheme.font.weight.semiBold }]}>
+    <EuiPanel hasBorder borderRadius="none" css={styles.panel}>
+      <EuiText size="s" css={[styles.header, { fontWeight: euiTheme.font.weight.semiBold }]}>
         {title}
       </EuiText>
-      <div css={contentStyles}>{children}</div>
+      <div css={styles.content}>{children}</div>
     </EuiPanel>
   );
 }

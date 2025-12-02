@@ -290,7 +290,7 @@ export function StreamDetailAttachments({
               }
               onViewDetails={setDetailsAttachment}
               dataTestSubj="streamsAppStreamDetailAttachmentsTable"
-              showActions={true}
+              showActions
             />
           </EuiFlexItem>
         </>
@@ -309,7 +309,6 @@ export function StreamDetailAttachments({
       {detailsAttachment && (
         <AttachmentDetailsFlyout
           attachment={detailsAttachment}
-          streamName={definition.stream.name}
           onClose={() => setDetailsAttachment(null)}
           onUnlink={
             canLinkAttachments

@@ -15,7 +15,8 @@ import type {
 } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
 import { useKibana } from '../../hooks/use_kibana';
 import { AttachmentTagsList } from './attachment_tags_list';
-import { ATTACHMENT_TYPE_CONFIG, AttachmentTypeBadge } from './attachment_type_badge';
+import { ATTACHMENT_TYPE_CONFIG } from './attachment_constants';
+import { AttachmentTypeBadge } from './attachment_type_badge';
 import { getAttachmentUrl } from './get_attachment_url';
 import { useTimefilter } from '../../hooks/use_timefilter';
 
@@ -64,12 +65,6 @@ export function AttachmentsTable({
 
   const { euiTheme } = useEuiTheme();
   const { timeState } = useTimefilter();
-
-  const tableStyles = css`
-    & thead tr {
-      background-color: ${euiTheme.colors.backgroundBaseSubdued};
-    }
-  `;
 
   const navigateToAttachment = useCallback(
     ({ attachment, url }: { attachment: Attachment; url: string }) => {
@@ -228,7 +223,11 @@ export function AttachmentsTable({
 
   return (
     <EuiBasicTable
-      css={tableStyles}
+      css={css`
+        & thead tr {
+          background-color: ${euiTheme.colors.backgroundBaseSubdued};
+        }
+      `}
       tableCaption={i18n.translate('xpack.streams.attachmentTable.tableCaption', {
         defaultMessage: 'List of attachments',
       })}

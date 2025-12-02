@@ -27,7 +27,8 @@ import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { InfoPanel } from '../info_panel';
 import { AttachmentTagsList } from './attachment_tags_list';
-import { ATTACHMENT_TYPE_CONFIG, AttachmentTypeBadge } from './attachment_type_badge';
+import { ATTACHMENT_TYPE_CONFIG } from './attachment_constants';
+import { AttachmentTypeBadge } from './attachment_type_badge';
 import { getAttachmentUrl } from './get_attachment_url';
 
 function FormattedDateTime({ value }: { value: string }) {
@@ -46,14 +47,12 @@ function FormattedDateTime({ value }: { value: string }) {
 
 interface AttachmentDetailsFlyoutProps {
   attachment: Attachment;
-  streamName: string;
   onClose: () => void;
   onUnlink?: () => void;
 }
 
 export function AttachmentDetailsFlyout({
   attachment,
-  streamName,
   onClose,
   onUnlink,
 }: AttachmentDetailsFlyoutProps) {
@@ -124,7 +123,7 @@ export function AttachmentDetailsFlyout({
             ))}
           </EuiFlexGroup>
         ) : (
-          <EuiText color="primary">{streamName}</EuiText>
+          <EuiText size="s">{noDataPlaceholder}</EuiText>
         ),
     },
     {
@@ -218,7 +217,7 @@ export function AttachmentDetailsFlyout({
               )}
             >
               {generalInfoItems.map((item, index) => (
-                <React.Fragment key={item.title}>
+                <React.Fragment key={index}>
                   <EuiDescriptionList
                     type="column"
                     columnWidths={[1, 2]}

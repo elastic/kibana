@@ -100,7 +100,7 @@ export function ConfirmAttachmentModal({
     & thead {
       position: sticky;
       top: 0;
-      background-color: ${euiTheme.colors.emptyShade};
+      background-color: ${euiTheme.colors.backgroundBasePlain};
       z-index: 1;
     }
   `;

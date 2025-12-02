@@ -5,32 +5,9 @@
  * 2.0.
  */
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
-import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
-import { i18n } from '@kbn/i18n';
 import type { AttachmentType } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
 import React from 'react';
-
-export const ATTACHMENT_TYPE_CONFIG: Record<AttachmentType, { label: string; icon: EuiIconType }> =
-  {
-    dashboard: {
-      label: i18n.translate('xpack.streams.attachmentTypeBadge.typeDashboard', {
-        defaultMessage: 'Dashboard',
-      }),
-      icon: 'dashboardApp',
-    },
-    rule: {
-      label: i18n.translate('xpack.streams.attachmentTypeBadge.typeRule', {
-        defaultMessage: 'Rule',
-      }),
-      icon: 'bell',
-    },
-    slo: {
-      label: i18n.translate('xpack.streams.attachmentTypeBadge.typeSlo', {
-        defaultMessage: 'SLO',
-      }),
-      icon: 'watchesApp',
-    },
-  };
+import { ATTACHMENT_TYPE_CONFIG } from './attachment_constants';
 
 interface AttachmentTypeBadgeProps {
   type: AttachmentType;
