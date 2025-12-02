@@ -128,7 +128,6 @@ function buildSamplesSearchParams({
       },
     ],
     size,
-    terminate_after: size,
     track_total_hits: false,
   };
 }
