@@ -92,12 +92,12 @@ export function convertConvertProcessorToESQL(processor: ConvertProcessor): ESQL
    *    ```
    */
 
-  if ('where' in processor && !isAlwaysCondition(processor.where)) {
+  if ('where' in processor && processor.where && !isAlwaysCondition(processor.where)) {
     const evalCommandWithCondition = Builder.command({
       name: 'eval',
       args: [
         Builder.expression.func.binary('=', [
-          Builder.expression.column(processor.to),
+          Builder.expression.column(processor.to!), // Safe because refinement ensures 'to' exists when 'where' is present
           Builder.expression.func.call('CASE', [
             buildWhereCondition(from, ignore_missing, processor.where, conditionToESQLAst),
             convertAssignment,

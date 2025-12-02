@@ -279,17 +279,10 @@ export interface BaseConvertProcessor extends ProcessorBase {
   ignore_missing?: boolean;
 }
 
-export type ConvertProcessor = BaseConvertProcessor &
-  (
-    | {
-        to?: string;
-        where?: undefined;
-      }
-    | {
-        to: string;
-        where: Condition;
-      }
-  );
+export interface ConvertProcessor extends BaseConvertProcessor {
+  to?: string;
+  where?: Condition;
+}
 
 export const convertProcessorSchema = processorBaseWithWhereSchema
   .extend({
