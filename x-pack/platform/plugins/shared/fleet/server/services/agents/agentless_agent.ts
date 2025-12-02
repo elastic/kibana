@@ -110,6 +110,7 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     soClient: SavedObjectsClientContract,
     agentlessAgentPolicy: AgentPolicy
   ) {
+    return;
     const traceId = apm.currentTransaction?.traceparent;
     const errorMetadata: LogMeta = {
       trace: {
