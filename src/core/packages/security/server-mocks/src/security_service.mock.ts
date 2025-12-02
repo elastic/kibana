@@ -94,6 +94,9 @@ const createRequestHandlerContextMock = () => {
         update: jest.fn(),
         validate: jest.fn(),
         invalidate: jest.fn(),
+        invalidateViaUiam: jest.fn(),
+        grantAsInternalUser: jest.fn(),
+        getScopedClusterClient: jest.fn(),
       }),
     }),
     audit: lazyObject({

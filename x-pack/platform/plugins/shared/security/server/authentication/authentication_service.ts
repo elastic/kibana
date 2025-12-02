@@ -80,6 +80,8 @@ export interface InternalAuthenticationServiceStart extends AuthenticationServic
     | 'validate'
     | 'grantAsInternalUser'
     | 'invalidateAsInternalUser'
+    | 'invalidateViaUiam'
+    | 'getScopedClusterClient'
   >;
   login: (request: KibanaRequest, attempt: ProviderLoginAttempt) => Promise<AuthenticationResult>;
   logout: (request: KibanaRequest) => Promise<DeauthenticationResult>;
@@ -352,6 +354,7 @@ export class AuthenticationService {
       applicationName,
       kibanaFeatures,
       buildFlavor,
+      uiam,
     });
     /**
      * Retrieves server protocol name/host name/port and merges it with `xpack.security.public` config
@@ -398,6 +401,8 @@ export class AuthenticationService {
         invalidate: apiKeys.invalidate.bind(apiKeys),
         validate: apiKeys.validate.bind(apiKeys),
         invalidateAsInternalUser: apiKeys.invalidateAsInternalUser.bind(apiKeys),
+        invalidateViaUiam: apiKeys.invalidateViaUiam.bind(apiKeys),
+        getScopedClusterClient: apiKeys.getScopedClusterClient.bind(apiKeys),
       },
 
       login: async (request: KibanaRequest, attempt: ProviderLoginAttempt) => {

@@ -18,6 +18,18 @@ import { getDetailedErrorMessage } from '../errors';
 import type { UserProfileGrant } from '../user_profile';
 
 /**
+ * Represents the response from granting an API key via UIAM.
+ */
+export interface GrantApiKeyResponse {
+  /** The unique identifier for the API key. */
+  id: string;
+  /** The API key value (encoded). */
+  key: string;
+  /** A descriptive name/description for the API key. */
+  description: string;
+}
+
+/**
  * The service that integrates with UIAM for user authentication and session management.
  */
 export interface UiamServicePublic {
@@ -34,6 +46,12 @@ export interface UiamServicePublic {
   getUserProfileGrant(accessToken: string): UserProfileGrant;
 
   /**
+   * Returns the Elasticsearch client authentication header (`x-client-authentication`) with the shared secret value.
+   * This header is used to authenticate requests from Kibana to Elasticsearch when using UIAM credentials.
+   */
+  getEsClientAuthenticationHeader(): Record<string, string>;
+
+  /**
    * Refreshes the UIAM user session and returns new access and refresh session tokens.
    * @param refreshToken UIAM session refresh token.
    */
@@ -47,6 +65,28 @@ export interface UiamServicePublic {
    * @param refreshToken UIAM session refresh token.
    */
   invalidateSessionTokens(accessToken: string, refreshToken: string): Promise<void>;
+
+  /**
+   * Grants an API key using the UIAM service.
+   * @param authcScheme The authentication scheme (e.g., 'Bearer', 'ApiKey').
+   * @param credential The authentication credential (e.g., access token, API key).
+   * @param name A descriptive name for the API key.
+   * @param expiration Optional expiration time for the API key (e.g., '1d', '7d').
+   * @returns A promise that resolves to an object containing the API key details.
+   */
+  grantApiKey(
+    authcScheme: string,
+    credential: string,
+    name: string,
+    expiration?: string
+  ): Promise<GrantApiKeyResponse>;
+
+  /**
+   * Revokes a UIAM API key by its ID.
+   * @param apiKeyId The ID of the API key to revoke.
+   * @param apiKey The API key to revoke; will be used for authentication on this request.
+   */
+  revokeApiKey(apiKeyId: string, apiKey: string): Promise<void>;
 }
 
 /**
@@ -96,6 +136,15 @@ export class UiamService implements UiamServicePublic {
       type: 'uiamAccessToken' as const,
       accessToken,
       sharedSecret: this.#config.sharedSecret,
+    };
+  }
+
+  /**
+   * See {@link UiamServicePublic.getEsClientAuthenticationHeader}.
+   */
+  getEsClientAuthenticationHeader(): Record<string, string> {
+    return {
+      [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
     };
   }
 
@@ -152,6 +201,73 @@ export class UiamService implements UiamServicePublic {
       this.#logger.error(
         () => `Failed to invalidate session tokens: ${getDetailedErrorMessage(err)}`
       );
+
+      throw err;
+    }
+  }
+
+  /**
+   * See {@link UiamServicePublic.grantApiKey}.
+   */
+  async grantApiKey(authcScheme: string, credential: string, name: string, expiration?: string) {
+    try {
+      this.#logger.debug('Attempting to grant API key.');
+      const response = await UiamService.#parseUiamResponse(
+        await fetch(`${this.#config.url}/uiam/api/v1/api-keys/_grant`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+            Authorization: `${authcScheme} ${credential}`,
+          },
+          body: JSON.stringify({
+            description: name,
+            internal: true,
+            ...(expiration ? { expiration } : {}),
+            role_assignments: {
+              limit: {
+                access: ['application'],
+                resource: ['project'],
+              },
+            },
+          }),
+          // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+          dispatcher: this.#dispatcher,
+        })
+      );
+
+      this.#logger.debug('Successfully granted API key.');
+      return response;
+    } catch (err) {
+      this.#logger.error(() => `Failed to grant API key: ${getDetailedErrorMessage(err)}`);
+
+      throw err;
+    }
+  }
+
+  /**
+   * See {@link UiamServicePublic.revokeApiKey}.
+   */
+  async revokeApiKey(apiKeyId: string, apiKey: string): Promise<void> {
+    try {
+      this.#logger.debug(`Attempting to revoke API key: ${apiKeyId}`);
+
+      await UiamService.#parseUiamResponse(
+        await fetch(`${this.#config.url}/uiam/api/v1/api-keys/${apiKeyId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+            Authorization: `ApiKey ${apiKey}`,
+          },
+          // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+          dispatcher: this.#dispatcher,
+        })
+      );
+
+      this.#logger.debug(`Successfully revoked API key: ${apiKeyId}`);
+    } catch (err) {
+      this.#logger.error(() => `Failed to revoke API key: ${getDetailedErrorMessage(err)}`);
 
       throw err;
     }
