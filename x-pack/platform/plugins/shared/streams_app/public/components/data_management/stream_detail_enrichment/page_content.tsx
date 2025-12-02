@@ -30,7 +30,6 @@ import {
   useSimulatorSelector,
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
-  usePipelineSuggestion,
 } from './state_management/stream_enrichment_state_machine';
 import {
   getConfiguredSteps,
@@ -88,9 +87,6 @@ export function StreamDetailEnrichmentContentImpl() {
   const isSimulating = useSimulatorSelector((state) => state.matches('runningSimulation'));
   const definitionFields = React.useMemo(() => getDefinitionFields(definition), [definition]);
   const fieldsInSamples = useSimulatorSelector((state) => selectFieldsInSamples(state.context));
-
-  // Lift suggestion state to page level
-  const suggestionState = usePipelineSuggestion();
 
   // Calculate schemaEditorFields with result property
   const schemaEditorFields = React.useMemo(() => {
@@ -157,9 +153,13 @@ export function StreamDetailEnrichmentContentImpl() {
   );
 
   const hasChanges = canUpdate && !isSimulating;
-  const isSuggestionVisible =
-    suggestionState.state.loading ||
-    (suggestionState.state.value && suggestionState.showSuggestion);
+  const isLoadingSuggestion = useStreamEnrichmentSelector((snapshot) =>
+    snapshot.matches({ ready: { enrichment: { pipelineSuggestion: 'generatingSuggestion' } } })
+  );
+  const isViewingSuggestion = useStreamEnrichmentSelector((snapshot) =>
+    snapshot.matches({ ready: { enrichment: { pipelineSuggestion: 'viewingSuggestion' } } })
+  );
+  const isSuggestionVisible = isLoadingSuggestion || isViewingSuggestion;
   const {
     isRequestPreviewFlyoutOpen,
     requestPreviewFlyoutCodeContent,
@@ -235,7 +235,7 @@ export function StreamDetailEnrichmentContentImpl() {
                 paddingSize="l"
                 css={verticalFlexCss}
               >
-                <StepsEditor suggestionState={suggestionState} />
+                <StepsEditor />
               </EuiResizablePanel>
               <EuiResizableButton indicator="border" />
               <EuiResizablePanel
