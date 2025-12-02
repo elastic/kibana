@@ -221,7 +221,7 @@ export const SCHEMA_SEARCH_MODEL_VERSION_10 = schema.object({
 });
 
 // Schema that works around saved objects API issues as in version 9
-export const SCHEMA_SEARCH_MODEL_VERSION_11_SO_API_WORKAROUND = schema.object({
+export const SCHEMA_SEARCH_MODEL_VERSION_10_SO_API_WORKAROUND = schema.object({
   ...restV10Props,
   tabs: schema.maybe(tabsV10),
 });
