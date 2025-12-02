@@ -255,17 +255,22 @@ const normalizeServerMode = (runMatrixEntry: CliSupportedServerModes): string =>
 
 /**
  * Filters Playwright configs to only those with tests matching specific tags
- * Returns a structure organized by server mode -> group -> { tag, configs }
+ * Returns a structure organized by server mode -> group -> { project, tag, configs }
+ * The output format is designed to easily build Playwright commands:
+ *   npx playwright test --project=<project> --grep=<tag> --config=<config>
  */
 export const filterConfigsWithTests = (
   scoutConfigs: Map<string, any>,
   log: ToolingLog
-): Record<string, Record<string, { tag: string; configs: string[] }>> => {
+): Record<string, Record<string, { project: string; tag: string; configs: string[] }>> => {
   const startTime = Date.now();
   log.info('Filtering Playwright configs to only those with tests...');
 
-  // Structure: serverMode -> group -> { tag, configs }
-  const result: Record<string, Record<string, { tag: string; configs: string[] }>> = {};
+  // Structure: serverMode -> group -> { project, tag, configs }
+  const result: Record<
+    string,
+    Record<string, { project: string; tag: string; configs: string[] }>
+  > = {};
 
   const testRunMatrix: Record<string, CliSupportedServerModes[]> = {
     platform: ['serverless=es', 'serverless=security', 'serverless=oblt', 'stateful'],
@@ -349,20 +354,25 @@ export const filterConfigsWithTests = (
             continue;
           }
 
+          // Determine the Playwright project name based on server mode
+          // For cloud runs: stateful -> 'ech', serverless -> 'mki'
+          const project = serverMode === 'stateful' ? 'ech' : 'mki';
+
           // Initialize structure if needed
           if (!result[serverMode]) {
             result[serverMode] = {};
           }
           if (!result[serverMode][group]) {
             result[serverMode][group] = {
+              project,
               tag: pwGrepTag,
               configs: [],
             };
           }
 
           // Add config if not already present
-          // Note: tag is set on first initialization and not overwritten
-          // This ensures consistent tag per group+serverMode combination
+          // Note: project and tag are set on first initialization and not overwritten
+          // This ensures consistent project and tag per group+serverMode combination
           if (!result[serverMode][group].configs.includes(pwConfigPath)) {
             result[serverMode][group].configs.push(pwConfigPath);
           }
@@ -381,7 +391,9 @@ export const filterConfigsWithTests = (
   Object.entries(result).forEach(([serverMode, groups]) => {
     log.info(`Server Mode: ${serverMode}`);
     Object.entries(groups).forEach(([group, entry]) => {
-      log.info(`  Group: ${group}, Tag: ${entry.tag}, Configs: ${entry.configs.length}`);
+      log.info(
+        `  Group: ${group}, Project: ${entry.project}, Tag: ${entry.tag}, Configs: ${entry.configs.length}`
+      );
       entry.configs.forEach((config) => log.info(`    - ${config}`));
     });
   });
