@@ -8,74 +8,76 @@
 export const ATTACK_DISCOVERY_ATTACHMENT_PROMPT = `Summarize the attack discovery attached and recommend next steps. Find the risk score for each extracted host.name and user.name. Case URLs MUST be included in the response if they exist. Summary should be in markdown.`;
 export const ALERT_ATTACHMENT_PROMPT = `Evaluate the provided security alert and generate a structured, markdown-formatted summary suitable for inclusion in an Elastic Security case. Use all available enrichment tools before generating your response. Include the following sections:
 
----
+1. Event Description 📝
+  - Summarize the alert using extracted data:
+    * **Alert ID**: Use the \`_id\` field value (not \`kibana.alert.uuid\`)
+    * **Rule Name**: \`kibana.alert.rule.name\`
+    * **Entities**: \`host.name\`, \`user.name\`, \`service.name\`
+    * Include associated **risk scores** for each entity (from the risk score tool)
+    * Reference **MITRE ATT&CK techniques** with links (\`kibana.alert.rule.threat.technique.id\`, \`kibana.alert.rule.threat.tactic.id\`, \`threat.tactic.id\`)
 
-## 1. Event Description 📝
+2. Associated Cases & Attack Discoveries 🔍
+  - Summarize any attack discoveries that include this alert ID, highlighting:
+    * Involved hosts, users, and status
+    * Patterns or recurring behaviors
+  - List all open or related security cases referencing this alert ID, **always using markdown links** to the case URLs (from the cases tool)
 
-* Summarize the alert using extracted data:
+3. Triage Steps 🛡️
 
-  * **Alert ID**: Use the \`_id\` field value (not \`kibana.alert.uuid\`)
-  * **Rule Name**: \`kibana.alert.rule.name\`
-  * **Entities**: \`host.name\`, \`user.name\`, \`service.name\`
-  * Include associated **risk scores** for each entity (from the risk score tool)
-  * Reference **MITRE ATT&CK techniques** with links (\`kibana.alert.rule.threat.technique.id\`, \`kibana.alert.rule.threat.tactic.id\`, \`threat.tactic.id\`)
+  - Provide clear, actionable triage steps tailored to Elastic Security workflows:
+    * Consider the alert’s rule, involved entities, and MITRE context
+    * Include relevant detection rules or anomaly findings
+    * Reference Security Labs articles related to the MITRE technique or alert rule (with links)
 
----
+4. Recommended Actions ⚡
 
-## 2. Associated Cases & Attack Discoveries 🔍
+  - Prioritized response actions using enriched context:
+    * **Elastic Defend endpoint actions** (e.g., isolate host, kill process, retrieve/delete file) with documentation links
+    * **Example queries for further investigation**:
+      * ESQL queries (code blocks)
+      * OSQuery Manager queries (code blocks)
+  - Guidance for using **Timelines** and **Entity Analytics** for deeper context (with documentation links)
 
-* Summarize any attack discoveries that include this alert ID, highlighting:
+5. MITRE ATT&CK Context 📊
 
-  * Involved hosts, users, and status
-  * Patterns or recurring behaviors
+  - Summarize mapped MITRE ATT&CK techniques
+  - Provide actionable recommendations based on MITRE guidance, including hyperlinks
 
-* List all open or related security cases referencing this alert ID, **always using markdown links** to the case URLs (from the cases tool)
+6. Documentation Links 📚
 
----
-
-## 3. Triage Steps 🛡️
-
-* Provide clear, actionable triage steps tailored to Elastic Security workflows:
-
-  * Consider the alert’s rule, involved entities, and MITRE context
-  * Include relevant detection rules or anomaly findings
-  * Reference Security Labs articles related to the MITRE technique or alert rule (with links)
-
----
-
-## 4. Recommended Actions ⚡
-
-* Prioritized response actions using enriched context:
-
-  * **Elastic Defend endpoint actions** (e.g., isolate host, kill process, retrieve/delete file) with documentation links
-  * **Example queries for further investigation**:
-
-    * Elasticsearch / EQL queries (code blocks)
-    * OSQuery Manager queries (code blocks)
-
-  * Guidance for using **Timelines** and **Entity Analytics** for deeper context (with documentation links)
-
----
-
-## 5. MITRE ATT&CK Context 📊
-
-* Summarize mapped MITRE ATT&CK techniques
-* Provide actionable recommendations based on MITRE guidance, including hyperlinks
-
----
-
-## 6. Documentation Links 📚
-
-* Include direct links to all referenced Elastic Security documentation, Security Labs articles, and MITRE ATT&CK pages
-
----
+  - Include direct links to all referenced Elastic Security documentation, Security Labs articles, and MITRE ATT&CK pages
 
 **Formatting Requirements**
 
-* Use markdown headers, tables, and code blocks for clarity
-* Organize sections visually and consistently
-* Use concise, actionable language
-* Include emojis in section headers for clarity`;
+  - Use markdown headers, tables, and code blocks for clarity
+  - Organize sections visually and consistently
+  - Use concise, actionable language
+  - Include emojis in section headers for clarity`;
+export const EVENT_ATTACHMENT_PROMPT = `Evaluate the security event described above and provide a structured, markdown-formatted summary suitable for inclusion in an Elastic Security case. Ensure you're using all tools available to you. Your response must include:
+1. Event Description
+  - Summarize the event using extracted data:
+    * **Entities**: \`host.name\`, \`user.name\`, \`service.name\`
+    * Include associated **risk scores** for each entity (from the risk score tool)
+  - Reference relevant MITRE ATT&CK techniques, with hyperlinks to the official MITRE pages.
+2. Triage Steps
+  - List clear, bulleted triage steps tailored to Elastic Security workflows (e.g., alert investigation, timeline creation, entity analytics review).
+  - Highlight any relevant detection rules or anomaly findings.
+3. Recommended Actions
+  - Provide prioritized response actions, including:
+    - Elastic Defend endpoint response actions (e.g., isolate host, kill process, retrieve/delete file), with links to Elastic documentation.
+    - Example ES|QL queries for further investigation, formatted as code blocks.
+    - Example OSQuery Manager queries for further investigation, formatted as code blocks.
+    - Guidance on using Timelines and Entity Analytics for deeper context, with documentation links.
+4. MITRE ATT&CK Context
+  - Summarize the mapped MITRE ATT&CK techniques and provide actionable recommendations based on MITRE guidance, with hyperlinks.
+5. Documentation Links
+  - Include direct links to all referenced Elastic Security documentation and MITRE ATT&CK pages.
+Formatting Requirements:
+  - Use markdown headers, tables, and code blocks for clarity.
+  - Organize the response into visually distinct sections.
+  - Use concise, actionable language.
+  - Include relevant emojis in section headers for visual clarity (e.g., 📝, 🛡️, 🔍, 📚).`;
+
 export const ENTITY_ANALYSIS = `Analyze asset data described above to provide security insights. The data contains the context of a specific asset (e.g., a host, user, service or cloud resource). Your response must be structured, contextual, and provide a general analysis based on the structure below.
 Your response must be in markdown format and include the following sections:
 **1. 🔍 Asset Overview**
