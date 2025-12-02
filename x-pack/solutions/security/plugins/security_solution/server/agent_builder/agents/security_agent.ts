@@ -7,23 +7,30 @@
 
 import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
 import { internalNamespaces } from '@kbn/onechat-common/base/namespaces';
-import { SECURITY_AGENT_TOOL_IDS } from '../tools/register_tools';
+import { platformCoreTools } from '@kbn/onechat-common';
+import { SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID, SECURITY_LABS_SEARCH_TOOL_ID } from '../tools';
+import { SECURITY_ALERTS_TOOL_ID } from '../tools/alerts_tool';
 
-export const SECURITY_AGENT_ID = `${internalNamespaces.security}.default`;
+export const SECURITY_ALERTS_AGENT_ID = `${internalNamespaces.security}.alerts`;
 export const createSecurityAgent = (): BuiltInAgentDefinition => {
   return {
-    id: SECURITY_AGENT_ID,
+    id: SECURITY_ALERTS_AGENT_ID,
     avatar_icon: 'logoSecurity',
-    name: 'Security Agent',
+    name: 'Alerts Agent',
     description:
-      'Agent specialized in security analysis tasks, including alert investigation, threat intelligence, and security documentation.',
+      'Agent specialized in security alert analysis tasks, including alert investigation and security documentation.',
     labels: ['security'],
     configuration: {
       instructions: `You are a Security Agent specialized in security analysis and threat intelligence.`,
-
       tools: [
         {
-          tool_ids: SECURITY_AGENT_TOOL_IDS,
+          tool_ids: [
+            SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
+            SECURITY_LABS_SEARCH_TOOL_ID,
+            SECURITY_ALERTS_TOOL_ID,
+            platformCoreTools.cases,
+            // 'platformCoreTools.productDocumentation',
+          ],
         },
       ],
     },

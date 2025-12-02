@@ -6,7 +6,7 @@
  */
 
 import type { OnechatPluginSetup } from '@kbn/onechat-plugin/server';
-import { createSecurityAgent } from './secuirty_agent';
+import { createSecurityAgent } from './security_agent';
 
 /**
  * Registers all security agent builder tools with the onechat plugin

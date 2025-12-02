@@ -9,7 +9,6 @@ import React, { useCallback, useState, useEffect } from 'react';
 import { EuiToolTip, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ChromeStyle } from '@kbn/core-chrome-browser';
-import { internalNamespaces } from '@kbn/onechat-common/base/namespaces';
 import { useKibana } from '../../common/lib/kibana/use_kibana';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
@@ -44,7 +43,6 @@ export function AgentBuilderNavControl() {
     onechat.openConversationFlyout({
       newConversation: false,
       sessionTag: 'security',
-      agentId: `${internalNamespaces.security}.default`,
     });
   }, [onechat]);
 
