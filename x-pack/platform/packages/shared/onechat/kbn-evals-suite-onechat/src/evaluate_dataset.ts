@@ -15,6 +15,8 @@ import {
   selectEvaluators,
   withEvaluatorSpan,
   createSpanLatencyEvaluator,
+  createRagEvaluators,
+  type GroundTruth,
 } from '@kbn/evals';
 import type { ExperimentTask } from '@kbn/evals/src/types';
 import type { TaskOutput } from '@arizeai/phoenix-client/dist/esm/types/experiments';
@@ -28,6 +30,10 @@ interface DatasetExample extends Example {
   };
   output: {
     expected?: string;
+  };
+  metadata?: {
+    groundTruth?: GroundTruth;
+    [key: string]: unknown;
   };
 }
 
@@ -102,11 +108,35 @@ export function createEvaluateDataset({
       return {
         errors: response.errors,
         messages: response.messages,
+        steps: response.steps,
         traceId: response.traceId,
         correctnessAnalysis: correctnessResult?.metadata,
         groundednessAnalysis: groundednessResult?.metadata,
       };
     };
+
+    const ragEvaluators = createRagEvaluators({
+      k: 10,
+      relevanceThreshold: 1,
+      extractRetrievedDocs: (output: TaskOutput) => {
+        const steps =
+          (
+            output as {
+              steps?: Array<{
+                type: string;
+                tool_id?: string;
+                results?: Array<{ data?: { reference?: { id?: string } } }>;
+              }>;
+            }
+          )?.steps ?? [];
+        return steps
+          .filter((step) => step.type === 'tool_call' && step.tool_id === 'platform.core.search')
+          .flatMap((step) => step.results ?? [])
+          .map((result) => result.data?.reference?.id)
+          .filter((id): id is string => typeof id === 'string');
+      },
+      extractGroundTruth: (metadata: DatasetExample['metadata']) => metadata?.groundTruth ?? {},
+    });
 
     await phoenixClient.runExperiment(
       {
@@ -116,6 +146,7 @@ export function createEvaluateDataset({
       selectEvaluators([
         ...createQuantitativeCorrectnessEvaluators(),
         createQuantitativeGroundednessEvaluator(),
+        ...ragEvaluators,
         ...Object.values({
           ...evaluators.traceBasedEvaluators,
           latency: createSpanLatencyEvaluator({

@@ -1127,4 +1127,45 @@ To transfer your domain:
       },
     });
   });
+
+  evaluate('retrieval quality', async ({ evaluateDataset }) => {
+    await evaluateDataset({
+      dataset: {
+        name: 'onechat: default-agent-retrieval-quality',
+        description: 'Dataset containing Retrieval Quality queries',
+        examples: [
+          {
+            input: {
+              question:
+                'Can I start accepting payments on my site while my Wix Payments account is still under verification?',
+            },
+            output: {
+              expected:
+                'You can start accepting payments on your site using [Wix Payments](https://support.wix.com/en/article/about-wix-payments) almost immediately. However, we need to verify your identity before your account can be fully activated.',
+            },
+            metadata: {
+              groundTruth: {
+                '49d9e88fadbf11fa4e685c847590078ff9394c2fe7566094f504f53ca4aca465': 1,
+              },
+            },
+          },
+          {
+            input: {
+              question:
+                'I am inquiring about purchasing the yearly premium plan for $17.00, which includes a free domain for 1 year. However, the voucher does not show up at checkout. Do I need to purchase the plan first and then will the voucher be available to activate?',
+            },
+            output: {
+              expected:
+                'When you purchase a yearly Premium plan, the free domain voucher is not immediately visible at checkout. Instead, the voucher becomes available after you complete the purchase of the plan. You can then claim the voucher by visiting the [Premium Vouchers page](https://manage.wix.com/account/vouchers?referralAdditionalInfo=%7Btheir) in your Wix account. The voucher is valid for two months from the date of purchase, and you can use it to register a domain for free for one year. If you have already purchased the plan and still do not see the voucher, ensure that you meet all eligibility criteria, such as not having purchased a monthly plan or a domain prior to the plan. If issues persist, you can [contact Wix Customer Care](https://support.wix.com/en/article/contacting-wix-customer-care-for-support) for further assistance.',
+            },
+            metadata: {
+              groundTruth: {
+                '06535db983ea0ffe0214af14497a1d158f279d92c92f211e87b8820aa95dbe43': 1,
+              },
+            },
+          },
+        ],
+      },
+    });
+  });
 });

@@ -1,0 +1,159 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { Evaluator } from '../../types';
+import type { RagEvaluatorConfig, GroundTruth } from './types';
+import {
+  DEFAULT_RELEVANCE_THRESHOLD,
+  getRelevantDocs,
+  countRelevantInGroundTruth,
+  calculatePrecision,
+  calculateRecall,
+  calculateF1,
+} from './utils';
+
+const PRECISION_EVALUATOR_NAME = 'Precision@K';
+const RECALL_EVALUATOR_NAME = 'Recall@K';
+const F1_EVALUATOR_NAME = 'F1@K';
+
+interface RagMetrics {
+  precision: number;
+  recall: number;
+  f1: number;
+  hits: number;
+  k: number;
+  totalRelevant: number;
+}
+
+function computeRagMetrics<TOutput, TMetadata>(
+  config: RagEvaluatorConfig<TOutput, TMetadata>,
+  output: TOutput,
+  metadata: TMetadata
+): RagMetrics | null {
+  const { k, extractRetrievedDocs, extractGroundTruth } = config;
+  const threshold = config.relevanceThreshold ?? DEFAULT_RELEVANCE_THRESHOLD;
+
+  const groundTruth: GroundTruth = extractGroundTruth(metadata);
+  if (!groundTruth || Object.keys(groundTruth).length === 0) {
+    return null;
+  }
+
+  const allRetrievedDocs = extractRetrievedDocs(output);
+  const topKDocs = allRetrievedDocs.slice(0, k);
+  const relevantInTopK = getRelevantDocs(topKDocs, groundTruth, threshold);
+  const hits = relevantInTopK.length;
+  const totalRelevant = countRelevantInGroundTruth(groundTruth, threshold);
+
+  const precision = calculatePrecision(hits, k);
+  const recall = calculateRecall(hits, totalRelevant);
+  const f1 = calculateF1(precision, recall);
+
+  return { precision, recall, f1, hits, k, totalRelevant };
+}
+
+export function createPrecisionAtKEvaluator<TOutput = unknown, TMetadata = unknown>(
+  config: RagEvaluatorConfig<TOutput, TMetadata>
+): Evaluator {
+  return {
+    name: PRECISION_EVALUATOR_NAME,
+    kind: 'CODE',
+    evaluate: async ({ output, metadata }) => {
+      const metrics = computeRagMetrics(config, output as TOutput, metadata as TMetadata);
+
+      if (!metrics) {
+        return {
+          score: null,
+          label: 'unavailable',
+          explanation: 'No ground truth available for Precision@K evaluation',
+        };
+      }
+
+      return {
+        score: metrics.precision,
+        explanation: `${metrics.hits} relevant docs in top ${metrics.k} (Precision: ${(
+          metrics.precision * 100
+        ).toFixed(1)}%)`,
+        metadata: { hits: metrics.hits, k: metrics.k },
+      };
+    },
+  };
+}
+
+export function createRecallAtKEvaluator<TOutput = unknown, TMetadata = unknown>(
+  config: RagEvaluatorConfig<TOutput, TMetadata>
+): Evaluator {
+  return {
+    name: RECALL_EVALUATOR_NAME,
+    kind: 'CODE',
+    evaluate: async ({ output, metadata }) => {
+      const metrics = computeRagMetrics(config, output as TOutput, metadata as TMetadata);
+
+      if (!metrics) {
+        return {
+          score: null,
+          label: 'unavailable',
+          explanation: 'No ground truth available for Recall@K evaluation',
+        };
+      }
+
+      return {
+        score: metrics.recall,
+        explanation: `${metrics.hits} of ${
+          metrics.totalRelevant
+        } relevant docs retrieved (Recall: ${(metrics.recall * 100).toFixed(1)}%)`,
+        metadata: { hits: metrics.hits, totalRelevant: metrics.totalRelevant },
+      };
+    },
+  };
+}
+
+export function createF1AtKEvaluator<TOutput = unknown, TMetadata = unknown>(
+  config: RagEvaluatorConfig<TOutput, TMetadata>
+): Evaluator {
+  return {
+    name: F1_EVALUATOR_NAME,
+    kind: 'CODE',
+    evaluate: async ({ output, metadata }) => {
+      const metrics = computeRagMetrics(config, output as TOutput, metadata as TMetadata);
+
+      if (!metrics) {
+        return {
+          score: null,
+          label: 'unavailable',
+          explanation: 'No ground truth available for F1@K evaluation',
+        };
+      }
+
+      return {
+        score: metrics.f1,
+        explanation: `F1@${metrics.k}: ${(metrics.f1 * 100).toFixed(1)}% (P: ${(
+          metrics.precision * 100
+        ).toFixed(1)}%, R: ${(metrics.recall * 100).toFixed(1)}%)`,
+        metadata: {
+          precision: metrics.precision,
+          recall: metrics.recall,
+          hits: metrics.hits,
+          k: metrics.k,
+          totalRelevant: metrics.totalRelevant,
+        },
+      };
+    },
+  };
+}
+
+/**
+ * Creates all RAG evaluators (Precision@K, Recall@K, F1@K) with shared configuration.
+ */
+export function createRagEvaluators<TOutput = unknown, TMetadata = unknown>(
+  config: RagEvaluatorConfig<TOutput, TMetadata>
+): Evaluator[] {
+  return [
+    createPrecisionAtKEvaluator(config),
+    createRecallAtKEvaluator(config),
+    createF1AtKEvaluator(config),
+  ];
+}
