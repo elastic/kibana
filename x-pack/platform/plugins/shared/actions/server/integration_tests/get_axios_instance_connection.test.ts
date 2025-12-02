@@ -31,6 +31,9 @@ import {
 import { getFips } from 'crypto';
 import { getAxiosInstanceWithAuth } from '../lib/get_axios_instance';
 import { AuthTypeRegistry, registerAuthTypes } from '../auth_types';
+import type { NormalizedAuthType } from '@kbn/connector-specs';
+import { PFX } from '@kbn/connector-specs/src/auth_types/pfx';
+import { CRT } from '@kbn/connector-specs/src/auth_types/crt';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
@@ -70,6 +73,10 @@ const AuthB64 = Buffer.from(Auth).toString('base64');
 
 const authTypeRegistry = new AuthTypeRegistry();
 registerAuthTypes(authTypeRegistry);
+
+// remove this when PFX and CRT is re-enabled in the exports
+authTypeRegistry.register(PFX as NormalizedAuthType);
+authTypeRegistry.register(CRT as NormalizedAuthType);
 
 describe('get preconfigured axios instance', () => {
   let testServer: http.Server | https.Server | null;
