@@ -21,6 +21,7 @@ export function ActionsOpsgenieServiceProvider(
 ) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const browser = getService('browser');
 
   return {
     async createNewConnector(fields: ConnectorFormFields) {
@@ -47,18 +48,23 @@ export function ActionsOpsgenieServiceProvider(
     },
 
     async getObjFromJsonEditor() {
-      const jsonEditor = await find.byCssSelector('.monaco-editor .view-lines');
-
-      return JSON.parse(await jsonEditor.getVisibleText());
+      const value = await browser.execute(() => {
+        const editor = window.MonacoEnvironment?.monaco.editor.getEditors()[0];
+        return editor?.getModel()?.getValue() ?? '';
+      });
+      return JSON.parse(value);
     },
 
     async setJsonEditor(value: object) {
       const stringified = JSON.stringify(value);
 
-      await find.clickByCssSelector('.monaco-editor');
-      const input = await find.activeElement();
-      await input.clearValueWithKeyboard({ charByChar: true });
-      await input.type(stringified);
+      await browser.execute((text: string) => {
+        const editor = window.MonacoEnvironment?.monaco.editor.getEditors()[0];
+        if (editor) {
+          editor.getModel()?.setValue(text);
+          editor.focus();
+        }
+      }, stringified);
     },
   };
 }
