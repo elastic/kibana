@@ -12,10 +12,75 @@ paths:
       x-labels: []
 #      TODO: When feature flag is enable, remove empty `x-labels` and un-comment the line below.
 #      x-labels: [ ess, serverless ]
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            $ref: '../model/schema/common.schema.yaml#/components/schemas/Page'
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/PageSize'
+        - name: sortField
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/SortField'
+        - name: sortDirection
+          in: query
+          required: false
+          schema:
+            $ref: '../model/schema/common.schema.yaml#/components/schemas/SortDirection'
+        - name: kuery
+          in: query
+          required: false
+          description: >
+            A KQL query string to filter the list of scripts. Nearly all fields in the script object are searchable.
+          schema:
+            allOf:
+              - $ref: '../model/schema/common.schema.yaml#/components/schemas/Kuery'
+              - example: "platform:windows"
+
       responses:
         '200':
           description: List of scripts response
           content:
             application/json:
               schema:
-                $ref: './common.yaml#/components/schemas/ScriptsApiResponse'
+                type: object
+                properties:
+                  page:
+                    $ref: '../model/schema/common.schema.yaml#/components/schemas/Page'
+                  pageSize:
+                    $ref: '#/components/schemas/PageSize'
+                  total:
+                    type: integer
+                    description: The total number of scripts matching the query
+                  sortField:
+                    $ref: '#/components/schemas/SortField'
+                  sortDirection:
+                    $ref: '../model/schema/common.schema.yaml#/components/schemas/SortDirection'
+                  data:
+                    type: array
+                    items:
+                      $ref: './common.yaml#/components/schemas/EndpointScript'
+
+
+components:
+  schemas:
+    PageSize:
+      allOf:
+        - $ref: '../model/schema/common.schema.yaml#/components/schemas/PageSize'
+        - maximum: 1000
+    SortField:
+      allOf:
+        - $ref: '../model/schema/common.schema.yaml#/components/schemas/SortField'
+        - enum:
+            - name
+            - createdAt
+            - createdBy
+            - updatedAt
+            - updatedBy
+        - example: name

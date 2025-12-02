@@ -34,7 +34,18 @@ paths:
           in: query
           required: false
           schema:
-            $ref: '../model/schema/common.schema.yaml#/components/schemas/SortField'
+            allOf:
+              - $ref: '../model/schema/common.schema.yaml#/components/schemas/SortField'
+              - enum:
+                  - enrolled_at
+                  - metadata.host.hostname
+                  - host_status
+                  - metadata.Endpoint.policy.applied.name
+                  - metadata.Endpoint.policy.applied.status
+                  - metadata.host.os.name
+                  - metadata.host.ip
+                  - metadata.agent.version
+                  - last_checkin
         - name: sortDirection
           in: query
           required: false
