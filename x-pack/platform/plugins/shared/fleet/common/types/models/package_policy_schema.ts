@@ -150,6 +150,8 @@ export const PackagePolicyBaseSchema = {
   cloud_connector_name: schema.maybe(
     schema.nullable(
       schema.string({
+        minLength: 1,
+        maxLength: 255,
         meta: {
           description: 'Transient field for cloud connector name during creation.',
         },
