@@ -13,8 +13,8 @@ describe('filterAndStringifyAlertData', () => {
     const rawData: Record<string, string[]> = {
       [ESSENTIAL_ALERT_FIELDS[0]]: ['value1'],
       [ESSENTIAL_ALERT_FIELDS[1]]: ['value2'],
-      'nonEssentialField': ['shouldBeExcluded'],
-      'anotherNonEssential': ['shouldAlsoBeExcluded'],
+      nonEssentialField: ['shouldBeExcluded'],
+      anotherNonEssential: ['shouldAlsoBeExcluded'],
     };
 
     const result = filterAndStringifyAlertData(rawData);
@@ -28,8 +28,8 @@ describe('filterAndStringifyAlertData', () => {
 
   it('excludes non-essential fields', () => {
     const rawData: Record<string, string[]> = {
-      'field1': ['value1'],
-      'field2': ['value2'],
+      field1: ['value1'],
+      field2: ['value2'],
     };
 
     const result = filterAndStringifyAlertData(rawData);
@@ -60,4 +60,3 @@ describe('filterAndStringifyAlertData', () => {
     expect(parsed).toEqual({});
   });
 });
-

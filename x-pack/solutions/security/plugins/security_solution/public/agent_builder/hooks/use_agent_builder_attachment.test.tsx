@@ -156,4 +156,3 @@ describe('useAgentBuilderAttachment', () => {
     expect(content).toEqual({ alert: 'test alert data' });
   });
 });
-

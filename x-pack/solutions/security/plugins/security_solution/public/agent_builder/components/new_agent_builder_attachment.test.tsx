@@ -109,4 +109,3 @@ describe('NewAgentBuilderAttachment', () => {
     expect(screen.getByTestId('newAgentBuilderAttachment')).toBeInTheDocument();
   });
 });
-
