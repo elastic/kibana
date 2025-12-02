@@ -80,13 +80,6 @@ const globalLayoutStyles = (euiThemeContext: UseEuiTheme) => css`
     top: var(--kbnHeaderBannerHeight);
   }
 
-  // make sure fixed bottom bars are positioned relative to the application area
-  .euiBottomBar.euiBottomBar--fixed {
-    left: ${layoutVar('application.left', '0px')} !important; /* override EUI inline style */
-    right: ${layoutVar('application.right', '0px')} !important; /* override EUI inline style */
-    bottom: ${layoutVar('application.bottom', '0px')} !important; /* override EUI inline style */
-  }
-
   .kbnChromeLayoutApplication {
     background-color: ${euiThemeContext.euiTheme.colors.backgroundBasePlain};
     border-radius: ${euiThemeContext.euiTheme.border.radius.medium};
@@ -122,10 +115,13 @@ const globalTempHackStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
     }
   }
 
-  // push flyout should be pushing the application area, instead of body
   #${APP_MAIN_SCROLL_CONTAINER_ID} {
+    // push flyout should be pushing the application area, instead of body
     ${logicalCSS('padding-right', `var(--euiPushFlyoutOffsetInlineEnd, 0px)`)};
     ${logicalCSS('padding-left', `var(--euiPushFlyoutOffsetInlineStart, 0px)`)};
+
+    // application area should have bottom padding when bottom bar is present
+    ${logicalCSS('padding-bottom', `var(--euiBottomBarOffset, 0px)`)};
   }
   .kbnBody {
     // this is a temporary hack to override EUI's body padding with push flyout
@@ -135,6 +131,13 @@ const globalTempHackStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
     ${logicalCSS('padding-bottom', `0px !important`)};
     // just for consistency with other sides
     ${logicalCSS('padding-top', `0px !important`)};
+  }
+
+  // make sure fixed bottom bars are positioned relative to the application area
+  .euiBottomBar.euiBottomBar--fixed {
+    left: ${layoutVar('application.left', '0px')} !important; /* override EUI inline style */
+    right: ${layoutVar('application.right', '0px')} !important; /* override EUI inline style */
+    bottom: ${layoutVar('application.bottom', '0px')} !important; /* override EUI inline style */
   }
 `;
 
