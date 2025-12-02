@@ -7,6 +7,7 @@
 
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { OnechatPluginSetup, OnechatPluginStart } from '@kbn/onechat-plugin/server';
+import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 
 export interface PluginSetupDependencies {
   workflowsManagement?: WorkflowsServerPluginSetup;
@@ -15,6 +16,7 @@ export interface PluginSetupDependencies {
 
 export interface PluginStartDependencies {
   onechat: OnechatPluginStart;
+  llmTasks?: LlmTasksPluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
