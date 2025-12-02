@@ -643,7 +643,18 @@ paths:
           name: sortField
           required: false
           schema:
-            $ref: '#/components/schemas/SortField'
+            allOf:
+              - $ref: '#/components/schemas/SortField'
+              - enum:
+                  - enrolled_at
+                  - metadata.host.hostname
+                  - host_status
+                  - metadata.Endpoint.policy.applied.name
+                  - metadata.Endpoint.policy.applied.status
+                  - metadata.host.os.name
+                  - metadata.host.ip
+                  - metadata.agent.version
+                  - last_checkin
         - in: query
           name: sortDirection
           required: false
@@ -2337,16 +2348,6 @@ components:
       type: string
     SortField:
       description: Determines which field is used to sort the results.
-      enum:
-        - enrolled_at
-        - metadata.host.hostname
-        - host_status
-        - metadata.Endpoint.policy.applied.name
-        - metadata.Endpoint.policy.applied.status
-        - metadata.host.os.name
-        - metadata.host.ip
-        - metadata.agent.version
-        - last_checkin
       example: enrolled_at
       type: string
     StartDate:
