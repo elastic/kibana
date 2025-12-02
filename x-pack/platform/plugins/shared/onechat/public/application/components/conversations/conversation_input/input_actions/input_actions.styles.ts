@@ -6,19 +6,28 @@
  */
 
 import { css } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
+import { euiButtonEmptyColor, useEuiTheme } from '@elastic/eui';
 import { roundedBorderRadiusStyles } from '../../conversation.styles';
 
 export const usePopoverButtonStyles = ({ open }: { open: boolean }) => {
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
   const popoverButtonStyles = css`
-    border-style: none;
+    transition-property: none;
+    border: ${euiTheme.border.width.thick} solid transparent;
+
     ${roundedBorderRadiusStyles}
   `;
   const openPopoverStyles = css`
-    border: ${euiTheme.border.width.thick} solid ${euiTheme.colors.borderStrongText};
+    border-color: ${euiTheme.colors.borderStrongText};
   `;
-  return [popoverButtonStyles, open && openPopoverStyles];
+  const closedPopoverStyles = css`
+    &:hover {
+      /* Use the same border color as the on hover background color */
+      border-color: ${euiButtonEmptyColor(euiThemeContext, 'text').backgroundColor};
+    }
+  `;
+  return [popoverButtonStyles, open ? openPopoverStyles : closedPopoverStyles];
 };
 
 export const selectorListStyles = ({ listId }: { listId: string }) => css`
