@@ -87,13 +87,16 @@ export const ReportSchedulesTable = () => {
     useState<boolean>(false);
   const [isDeleteModalConfirmationOpen, setIsDeleteModalConfirmationOpen] =
     useState<boolean>(false);
-  const [searchText, setSearchText] = useState('');
   const [queryParams, setQueryParams] = useState<QueryParams>({
     page: 1,
     perPage: 50,
-    search: searchText,
+    search: '',
   });
-  const { data: scheduledList, isLoading } = useGetScheduledList({
+  const {
+    data: scheduledList,
+    isLoading,
+    refetch: refreshScheduledReports,
+  } = useGetScheduledList({
     ...queryParams,
   });
 
@@ -417,9 +420,13 @@ export const ReportSchedulesTable = () => {
     [setQueryParams]
   );
 
-  const updateSearch = useCallback(() => {
+  const updateSearch = useCallback((searchText: string) => {
     setQueryParams((oldParams) => ({ ...oldParams, search: searchText, page: 1 }));
-  }, [searchText]);
+  }, []);
+
+  const refresh = useCallback(() => {
+    refreshScheduledReports();
+  }, [refreshScheduledReports]);
 
   return (
     <Fragment>
@@ -438,27 +445,23 @@ export const ReportSchedulesTable = () => {
               placeholder={i18n.translate(
                 'xpack.reporting.schedules.table.searchPlaceholderTitle',
                 {
-                  defaultMessage: 'Search scheduled reports by title or creator',
+                  defaultMessage: 'Search scheduled reports',
                 }
               )}
-              value={searchText}
-              onChange={(event) => {
-                setSearchText(event.target.value);
-              }}
               onSearch={updateSearch}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              data-test-subj="searchScheduledReportsButton"
-              iconType="search"
-              onClick={updateSearch}
-              name="search"
+              data-test-subj="refreshScheduledReportsButton"
+              iconType="refresh"
+              onClick={refresh}
+              name="refresh"
               color="primary"
             >
               <FormattedMessage
-                id="xpack.reporting.schedules.table.searchScheduledReportsButtonLabel"
-                defaultMessage="Search"
+                id="xpack.reporting.schedules.table.refreshScheduledReportsButtonLabel"
+                defaultMessage="Refresh"
               />
             </EuiButton>
           </EuiFlexItem>
