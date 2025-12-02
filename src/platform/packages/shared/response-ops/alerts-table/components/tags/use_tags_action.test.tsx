@@ -133,7 +133,7 @@ describe('useTagsAction', () => {
 
     // Close the flyout
     act(() => {
-      result.current.onFlyoutClosed();
+      result.current.onClose();
     });
 
     await waitFor(() => {

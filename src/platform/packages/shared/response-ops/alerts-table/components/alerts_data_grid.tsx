@@ -114,7 +114,7 @@ export const AlertsDataGrid = typedMemo(
       bulkActions,
       setIsBulkActionsLoading,
       clearSelection,
-      bulkEditTagsFlyout,
+      bulkEditTagsFlyoutState,
     } = useBulkActions({
       ruleTypeIds,
       query,
@@ -351,17 +351,17 @@ export const AlertsDataGrid = typedMemo(
                 <ExpandedAlertView {...renderContext} expandedAlertIndex={expandedAlertIndex} />
               )}
             </Suspense>
-            {bulkEditTagsFlyout.isFlyoutOpen && selectedAlerts.length > 0 && (
+            {bulkEditTagsFlyoutState.isFlyoutOpen && selectedAlerts.length > 0 && (
               <EditTagsFlyout
                 selectedAlerts={selectedAlerts}
-                onClose={bulkEditTagsFlyout.onFlyoutClosed}
-                onSaveTags={bulkEditTagsFlyout.onSaveTags}
+                onClose={bulkEditTagsFlyoutState.onClose}
+                onSaveTags={bulkEditTagsFlyoutState.onSaveTags}
               />
             )}
             {individualTagsFlyout.isFlyoutOpen && selectedAlert && (
               <EditTagsFlyout
                 selectedAlerts={[selectedAlert]}
-                onClose={individualTagsFlyout.closeFlyout}
+                onClose={individualTagsFlyout.onClose}
                 onSaveTags={individualTagsFlyout.onSaveTags}
               />
             )}

@@ -21,7 +21,7 @@ import type {
   BulkActionsState,
   BulkActionsReducerAction,
   TimelineItem,
-  BulkEditTagsFlyout,
+  BulkEditTagsFlyoutState,
 } from '../types';
 import { BulkActionsVerbs } from '../types';
 import type { CasesService, PublicAlertsDataGridProps } from '../types';
@@ -58,7 +58,7 @@ export interface UseBulkActions {
   setIsBulkActionsLoading: (isLoading: boolean) => void;
   clearSelection: () => void;
   updateBulkActionsState: React.Dispatch<BulkActionsReducerAction>;
-  bulkEditTagsFlyout: BulkEditTagsFlyout;
+  bulkEditTagsFlyoutState: BulkEditTagsFlyoutState;
 }
 
 type UseBulkAddToCaseActionsProps = Pick<
@@ -75,10 +75,8 @@ type UseBulkUntrackActionsProps = Pick<
     isAllSelected: boolean;
   };
 
-type UseBulkTagsActionsProps = Pick<BulkActionsProps, 'refresh' | 'http' | 'notifications'> &
-  Pick<UseBulkActions, 'clearSelection' | 'setIsBulkActionsLoading'> & {
-    isAllSelected: boolean;
-  };
+type UseBulkTagsActionsProps = Pick<BulkActionsProps, 'refresh'> &
+  Pick<UseBulkActions, 'clearSelection'>;
 
 const filterAlertsAlreadyAttachedToCase = (alerts: TimelineItem[], caseId: string) =>
   alerts.filter(
@@ -370,12 +368,8 @@ export function useBulkActions({
     notifications,
   });
   const { tagsAction } = useBulkTagsActions({
-    setIsBulkActionsLoading,
     refresh,
     clearSelection,
-    isAllSelected: bulkActionsState.isAllSelected,
-    http,
-    notifications,
   });
 
   const tagsBulkActions = useMemo(() => {
@@ -431,10 +425,10 @@ export function useBulkActions({
     });
   }, [alertsCount, updateBulkActionsState]);
 
-  const bulkEditTagsFlyout = useMemo(() => {
+  const bulkEditTagsFlyoutState = useMemo(() => {
     return {
       isFlyoutOpen: tagsAction.isFlyoutOpen,
-      onFlyoutClosed: tagsAction.onFlyoutClosed,
+      onClose: tagsAction.onClose,
       onSaveTags: tagsAction.onSaveTags,
     };
   }, [tagsAction]);
@@ -447,7 +441,7 @@ export function useBulkActions({
       setIsBulkActionsLoading,
       clearSelection,
       updateBulkActionsState,
-      bulkEditTagsFlyout,
+      bulkEditTagsFlyoutState,
     };
   }, [
     bulkActions,
@@ -456,6 +450,6 @@ export function useBulkActions({
     isBulkActionsColumnActive,
     setIsBulkActionsLoading,
     updateBulkActionsState,
-    bulkEditTagsFlyout,
+    bulkEditTagsFlyoutState,
   ]);
 }

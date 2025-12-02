@@ -689,9 +689,9 @@ export interface BulkActionsState {
   updatedAt: number;
 }
 
-export interface BulkEditTagsFlyout {
+export interface BulkEditTagsFlyoutState {
   isFlyoutOpen: boolean;
-  onFlyoutClosed: () => void;
+  onClose: () => void;
   onSaveTags: (itemsSelection: ItemsSelectionState) => void;
 }
 

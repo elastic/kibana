@@ -17,6 +17,10 @@ import type { AlertsDataGridProps, BulkActionsState } from '../types';
 import type { AdditionalContext, RenderContext } from '../types';
 import type { EuiDataGridColumnCellAction } from '@elastic/eui';
 import { EuiButton, EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { bulkActionsReducer } from '../reducers/bulk_actions_reducer';
 import { getJsDomPerformanceFix } from '../utils/test';
 import { useCaseViewNavigation } from '../hooks/use_case_view_navigation';
@@ -35,10 +39,8 @@ import {
   FIELD_BROWSER_CUSTOM_CREATE_BTN_TEST_ID,
   FIELD_BROWSER_TEST_ID,
 } from '../constants';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
+import { useIndividualTagsActionContext } from '../contexts/individual_tags_action_context';
+import { useIndividualTagsAction } from '../hooks/use_individual_tags_action';
 
 jest.mock('../hooks/use_case_view_navigation');
 jest.mock('../hooks/use_individual_tags_action');
@@ -134,6 +136,16 @@ describe('AlertsDataGrid', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Reset the individual tags action mock to default state
+    const mockUseIndividualTagsAction = jest.mocked(useIndividualTagsAction);
+    mockUseIndividualTagsAction.mockReset();
+    mockUseIndividualTagsAction.mockImplementation(() => ({
+      isFlyoutOpen: false,
+      selectedAlert: null,
+      openFlyout: jest.fn(),
+      onClose: jest.fn(),
+      onSaveTags: jest.fn(),
+    }));
   });
 
   describe('Alerts table UI', () => {
@@ -588,7 +600,7 @@ describe('AlertsDataGrid', () => {
     });
 
     describe('Individual tags flyout', () => {
-      const { useIndividualTagsAction } = jest.requireMock('../hooks/use_individual_tags_action');
+      const mockUseIndividualTagsAction = jest.mocked(useIndividualTagsAction);
       const mockAlert = {
         _id: 'alert-1',
         _index: 'test-index',
@@ -598,14 +610,16 @@ describe('AlertsDataGrid', () => {
       } as any;
 
       beforeEach(() => {
+        // Reset the mock before each test
+        mockUseIndividualTagsAction.mockReset();
         // Default mock: flyout closed
-        useIndividualTagsAction.mockReturnValue({
+        mockUseIndividualTagsAction.mockImplementation(() => ({
           isFlyoutOpen: false,
           selectedAlert: null,
           openFlyout: jest.fn(),
-          closeFlyout: jest.fn(),
+          onClose: jest.fn(),
           onSaveTags: jest.fn(),
-        });
+        }));
       });
 
       it('should not render individual tags flyout when closed', async () => {
@@ -616,16 +630,17 @@ describe('AlertsDataGrid', () => {
       });
 
       it('should render individual tags flyout when opened', async () => {
-        const mockCloseFlyout = jest.fn();
+        const mockOnClose = jest.fn();
         const mockOnSaveTags = jest.fn();
 
-        useIndividualTagsAction.mockReturnValue({
+        // Set up the mock implementation before rendering
+        mockUseIndividualTagsAction.mockImplementation(() => ({
           isFlyoutOpen: true,
           selectedAlert: mockAlert,
           openFlyout: jest.fn(),
-          closeFlyout: mockCloseFlyout,
+          onClose: mockOnClose,
           onSaveTags: mockOnSaveTags,
-        });
+        }));
 
         render(<TestComponent {...mockDataGridProps} />);
 
@@ -633,30 +648,29 @@ describe('AlertsDataGrid', () => {
         expect(screen.getByTestId('alerts-edit-tags-flyout-title')).toBeInTheDocument();
       });
 
-      it('should call closeFlyout when cancel button is clicked', async () => {
-        const mockCloseFlyout = jest.fn();
+      it('should call onClose when cancel button is clicked', async () => {
+        const mockOnClose = jest.fn();
         const mockOnSaveTags = jest.fn();
 
-        useIndividualTagsAction.mockReturnValue({
+        mockUseIndividualTagsAction.mockImplementation(() => ({
           isFlyoutOpen: true,
           selectedAlert: mockAlert,
           openFlyout: jest.fn(),
-          closeFlyout: mockCloseFlyout,
+          onClose: mockOnClose,
           onSaveTags: mockOnSaveTags,
-        });
+        }));
 
         render(<TestComponent {...mockDataGridProps} />);
 
         const cancelButton = await screen.findByTestId('alerts-edit-tags-flyout-cancel');
         await userEvent.click(cancelButton);
 
-        // The closeFlyout should be called
-        expect(mockCloseFlyout).toHaveBeenCalled();
+        // The onClose should be called
+        expect(mockOnClose).toHaveBeenCalled();
       });
 
       it('should provide IndividualTagsActionContext to child components', async () => {
         const TestChildComponent = () => {
-          const { useIndividualTagsActionContext } = require('../contexts/individual_tags_action_context');
           try {
             const context = useIndividualTagsActionContext();
             return (
@@ -683,13 +697,13 @@ describe('AlertsDataGrid', () => {
       });
 
       it('should render individual tags flyout with correct alert data', async () => {
-        useIndividualTagsAction.mockReturnValue({
+        mockUseIndividualTagsAction.mockImplementation(() => ({
           isFlyoutOpen: true,
           selectedAlert: mockAlert,
           openFlyout: jest.fn(),
-          closeFlyout: jest.fn(),
+          onClose: jest.fn(),
           onSaveTags: jest.fn(),
-        });
+        }));
 
         render(<TestComponent {...mockDataGridProps} />);
 

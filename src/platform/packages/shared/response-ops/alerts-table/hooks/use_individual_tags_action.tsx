@@ -17,7 +17,7 @@ export interface IndividualTagsActionState {
   isFlyoutOpen: boolean;
   selectedAlert: Alert | null;
   openFlyout: (alert: Alert) => void;
-  closeFlyout: () => void;
+  onClose: () => void;
   onSaveTags: (tagsSelection: ItemsSelectionState) => Promise<void>;
 }
 
@@ -36,7 +36,7 @@ export const useIndividualTagsAction = (): IndividualTagsActionState => {
     setIsFlyoutOpen(true);
   }, []);
 
-  const closeFlyout = useCallback(() => {
+  const onClose = useCallback(() => {
     setIsFlyoutOpen(false);
     setSelectedAlert(null);
   }, []);
@@ -52,21 +52,21 @@ export const useIndividualTagsAction = (): IndividualTagsActionState => {
           add: tagsSelection.selectedItems?.length ? tagsSelection.selectedItems : undefined,
           remove: tagsSelection.unSelectedItems?.length ? tagsSelection.unSelectedItems : undefined,
         });
-        closeFlyout();
+        onClose();
         refresh();
       } catch {
         // Error handling is done by the hook
         refresh();
       }
     },
-    [bulkUpdateAlertTags, closeFlyout, refresh, selectedAlert]
+    [bulkUpdateAlertTags, onClose, refresh, selectedAlert]
   );
 
   return {
     isFlyoutOpen,
     selectedAlert,
     openFlyout,
-    closeFlyout,
+    onClose,
     onSaveTags,
   };
 };

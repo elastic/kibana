@@ -26,7 +26,7 @@ export const useTagsAction = ({
   isDisabled,
 }: UseActionProps) => {
   const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>(false);
-  const onFlyoutClosed = useCallback(() => setIsFlyoutOpen(false), []);
+  const onClose = useCallback(() => setIsFlyoutOpen(false), []);
   const [selectedAlertsToEdit, setSelectedAlertsToEdit] = useState<AlertIdentifier[]>([]);
   const {
     services: { http, notifications },
@@ -66,13 +66,13 @@ export const useTagsAction = ({
             })
           )
         );
-        onFlyoutClosed();
+        onClose();
         onActionSuccess();
       } catch {
         onActionError();
       }
     },
-    [bulkUpdateAlertTags, onFlyoutClosed, onActionSuccess, onActionError, selectedAlertsToEdit]
+    [bulkUpdateAlertTags, onClose, onActionSuccess, onActionError, selectedAlertsToEdit]
   );
 
   const getAction = (selectedAlerts: AlertIdentifier[]) => {
@@ -86,7 +86,7 @@ export const useTagsAction = ({
     };
   };
 
-  return { getAction, isFlyoutOpen, onFlyoutClosed, onSaveTags: onSaveItems };
+  return { getAction, isFlyoutOpen, onClose, onSaveTags: onSaveItems };
 };
 
 export type UseTagsAction = ReturnType<typeof useTagsAction>;

@@ -13,7 +13,6 @@ export const useIndividualTagsAction = jest.fn<IndividualTagsActionState, []>(()
   isFlyoutOpen: false,
   selectedAlert: null,
   openFlyout: jest.fn(),
-  closeFlyout: jest.fn(),
+  onClose: jest.fn(),
   onSaveTags: jest.fn(),
 }));
-
