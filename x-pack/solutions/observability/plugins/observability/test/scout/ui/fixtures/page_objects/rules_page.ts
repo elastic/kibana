@@ -337,4 +337,11 @@ export class RulesPage {
     await expect(this.datePicker).toBeVisible();
     await expect(this.statusFilter).toBeVisible();
   }
+
+  /**
+   * Gets the rule search field locator
+   */
+  public get ruleSearchField() {
+    return this.page.testSubj.locator('ruleSearchField');
+  }
 }
