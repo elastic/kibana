@@ -56,7 +56,7 @@ import {
   RESIZABLE_CONTAINER_INITIAL_HEIGHT,
   esqlEditorStyles,
 } from './esql_editor.styles';
-import { useQueryStatusDecorations } from './query_status_decorations';
+import { useQueryStatusDecorations } from './use_query_status_decorations';
 import { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
 import {
   clearCacheWhenOld,
@@ -193,6 +193,7 @@ const ESQLEditorInternal = function ESQLEditor({
       editor: editorRef.current,
       errors: editorMessages.errors,
       warnings: editorMessages.warnings,
+      dataErrorsControl,
     }
   );
   const onQueryUpdate = useCallback(

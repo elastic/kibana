@@ -7,34 +7,47 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useMemo } from 'react';
 import { monaco } from '@kbn/monaco';
 import { css } from '@emotion/react';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
+import { useEuiTheme } from '@elastic/eui';
+import type { DataErrorsControl } from './types';
+import { filterDataErrors } from './helpers';
 
 export function useQueryStatusDecorations({
   editor,
   errors,
   warnings,
+  dataErrorsControl,
 }: {
   editor: monaco.editor.IStandaloneCodeEditor | undefined;
   errors: MonacoMessage[];
   warnings: MonacoMessage[];
+  dataErrorsControl?: DataErrorsControl;
 }) {
+  const theme = useEuiTheme();
   const decorationsCollectionRef = useRef<monaco.editor.IEditorDecorationsCollection>();
   const queryStatusDecorationsStyles = css`
     .esql-error-glyph {
-      background: #e74c3c;
-      width: 4px !important;
-      margin-left: 3px;
+      background: ${theme.euiTheme.colors.danger};
+      width: ${theme.euiTheme.size.xs} !important;
+      margin-left: ${theme.euiTheme.size.xs};
     }
 
     .esql-warning-glyph {
-      background: #f39c12;
-      width: 4px !important;
-      margin-left: 3px;
+      background: ${theme.euiTheme.colors.warning};
+      width: ${theme.euiTheme.size.xs} !important;
+      margin-left: ${theme.euiTheme.size.xs};
     }
   `;
+
+  const visibleErrors = useMemo(() => {
+    if (dataErrorsControl?.enabled === false) {
+      return filterDataErrors(errors);
+    }
+    return errors;
+  }, [errors, dataErrorsControl]);
 
   const updateDecorations = useCallback(() => {
     if (!editor || !editor.getModel()) {
@@ -44,7 +57,7 @@ export function useQueryStatusDecorations({
     const decorations: monaco.editor.IModelDeltaDecoration[] = [];
 
     // Errors
-    errors.forEach((error) => {
+    visibleErrors.forEach((error) => {
       decorations.push({
         range: {
           startLineNumber: error.startLineNumber || 1,
@@ -89,7 +102,7 @@ export function useQueryStatusDecorations({
     if (decorations.length > 0) {
       decorationsCollectionRef.current = editor.createDecorationsCollection(decorations);
     }
-  }, [editor, errors, warnings]);
+  }, [editor, visibleErrors, warnings]);
 
   useEffect(() => {
     updateDecorations();

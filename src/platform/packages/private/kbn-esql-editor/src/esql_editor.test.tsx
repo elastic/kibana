@@ -130,6 +130,11 @@ describe('ESQLEditor', () => {
     expect(queryByTestId('ESQLEditor-resize')).toBeInTheDocument();
   });
 
+  it('should render the footer for the expanded code editor mode', async () => {
+    const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...props }));
+    expect(queryByTestId('ESQLEditor-footer')).toBeInTheDocument();
+  });
+
   it('should render the run query text', async () => {
     const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...props }));
     expect(queryByTestId('ESQLEditor-run-query')).toBeInTheDocument();
@@ -200,25 +205,18 @@ describe('ESQLEditor', () => {
 
   describe('data errors display', () => {
     test('errors are displayed as Monaco decorations', async () => {
-      const newProps = {
-        ...props,
-        dataErrorsControl: { enabled: true, onChange: jest.fn() },
-      };
       mockValidate.mockResolvedValue({
-        errors: [
-          { message: 'Data error example', severity: 'error', code: 'unknownColumn' },
-          { message: 'Data error example', severity: 'error', code: 'unknownIndex' },
-        ],
+        errors: [{ message: 'Data error example', severity: 'error' }],
         warnings: [],
       });
-      const { container } = renderWithI18n(renderESQLEditorComponent(newProps));
+      const { container } = renderWithI18n(renderESQLEditorComponent(props));
       await waitFor(() => {
         const errorDecoration = container.querySelector('.esql-error-glyph');
         expect(errorDecoration).toBeInTheDocument();
       });
     });
 
-    test('errors are displayed with data errors disabled', async () => {
+    test('errors are not displayed with data errors disabled', async () => {
       const newProps = {
         ...props,
         dataErrorsControl: { enabled: false, onChange: jest.fn() },
@@ -233,16 +231,23 @@ describe('ESQLEditor', () => {
       const { container } = renderWithI18n(renderESQLEditorComponent(newProps));
       await waitFor(() => {
         const errorDecoration = container.querySelector('.esql-error-glyph');
-        expect(errorDecoration).toBeInTheDocument();
+        expect(errorDecoration).not.toBeInTheDocument();
       });
     });
 
-    test('errors are displayed when no data errors control is set', async () => {
+    test('errors are displayed when data errors enabled', async () => {
+      const newProps = {
+        ...props,
+        dataErrorsControl: { enabled: true, onChange: jest.fn() },
+      };
       mockValidate.mockResolvedValue({
-        errors: [{ message: 'Data error example', severity: 'error' }],
+        errors: [
+          { message: 'Data error example', severity: 'error', code: 'unknownColumn' },
+          { message: 'Data error example', severity: 'error', code: 'unknownIndex' },
+        ],
         warnings: [],
       });
-      const { container } = renderWithI18n(renderESQLEditorComponent(props));
+      const { container } = renderWithI18n(renderESQLEditorComponent(newProps));
       await waitFor(() => {
         const errorDecoration = container.querySelector('.esql-error-glyph');
         expect(errorDecoration).toBeInTheDocument();
