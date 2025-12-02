@@ -118,12 +118,6 @@ export const EditorFooter = memo(function EditorFooter({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="none" responsive={false} alignItems="center">
               <QueryWrapComponent code={code} updateQuery={updateQuery} />
-              {/* <StatusIndicator
-                errors={errors}
-                warnings={warnings}
-                onErrorClick={onErrorClick}
-                dataErrorsControl={dataErrorsControl}
-              /> */}
               {queryStats && <ESQLQueryStats queryStats={queryStats} />}
             </EuiFlexGroup>
           </EuiFlexItem>
