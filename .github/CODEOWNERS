@@ -2688,7 +2688,7 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/inv
 
 /x-pack/solutions/observability/test/screenshot_creation/apps/response_ops_docs/observability_cases @elastic/kibana-cases
 /x-pack/solutions/observability/test/serverless/functional/test_suites/screenshot_creation/response_ops_docs/cases @elastic/kibana-cases
-/x-pack/solutions/security/test/screenshot_creation/apps/response_ops_docs/security_cases/index.ts @elastic/kibana-cases
+/x-pack/solutions/security/test/screenshot_creation/apps/response_ops_docs/security_cases @elastic/kibana-cases
 /x-pack/solutions/security/test/serverless/functional/test_suites/screenshot_creation/response_ops_docs/cases @elastic/kibana-cases
 /x-pack/platform/test/screenshot_creation/apps/response_ops_docs/stack_cases @elastic/kibana-cases
 /x-pack/platform/test/screenshot_creation/apps/response_ops_docs/stack_connectors/cases_webhook_connector.ts @elastic/kibana-cases
