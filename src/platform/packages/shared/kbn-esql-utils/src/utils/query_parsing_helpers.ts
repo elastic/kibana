@@ -604,49 +604,26 @@ export function hasTimeseriesBucketAggregation(
 ): boolean {
   const { root } = Parser.parse(esql);
 
+  if (!columns.some((column) => column.meta.type === 'date')) {
+    return false;
+  }
+
   const isTimeseriesCommand = Walker.commands(root).some(({ name }) => name === 'ts');
   if (!isTimeseriesCommand) {
     return false;
   }
-
-  const columnsMap = new Map<string, DatatableColumn>();
-  columns.forEach((column) => {
-    const trimmedId = column.id.trim().replace(/\s+/g, '').toLowerCase();
-    columnsMap.set(trimmedId, column);
-  });
 
   const statsCommands = Walker.commands(root).filter(({ name }) => name === 'stats');
   if (statsCommands.length === 0) {
     return false;
   }
 
-  const byCommands = Walker.matchAll(statsCommands, { type: 'option', name: 'by' });
+  const statsByCommands = Walker.matchAll(statsCommands, { type: 'option', name: 'by' });
 
-  const lastByCommand = byCommands[Math.max(byCommands.length - 1, 0)];
-  const bucketColumns: string[] = [];
-  walk(lastByCommand, {
-    // STATS ... BY someAlias=BUCKET(column, interval), extracts the alias name
-    visitColumn: (node, parent) => {
-      if (isFunctionExpression(parent) && parent.subtype === 'binary-expression') {
-        bucketColumns.push(node.name);
-      }
-    },
-    // STATS ... BY BUCKET(column, interval), extracts the entire BUCKET function
-    visitFunction: (node, parent) => {
-      if (isFunctionExpression(parent) && parent.subtype === 'binary-expression') {
-        return;
-      }
+  const lastByCommand = statsByCommands[Math.max(statsByCommands.length - 1, 0)];
 
-      if (node.subtype === 'variadic-call' && node.name === 'bucket') {
-        bucketColumns.push(node.text.trim().replace(/\s+/g, '').toLowerCase());
-      }
-    },
-  });
+  const bucketFunction = Walker.match(lastByCommand, { type: 'function', name: 'bucket' });
+  const tbucketFunction = Walker.match(lastByCommand, { type: 'function', name: 'tbucket' });
 
-  const isDateHistogram = bucketColumns.some((column) => {
-    const columnData = columnsMap.get(column);
-    return columnData?.meta.type === 'date';
-  });
-
-  return isDateHistogram;
+  return !!bucketFunction || !!tbucketFunction;
 }

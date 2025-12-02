@@ -1090,14 +1090,27 @@ describe('esql query helpers', () => {
         hasTimeseriesBucketAggregation('FROM index | STATS COUNT() BY bucket(@timestamp, 1h)')
       ).toBe(false);
     });
-    it('should return false if there is no bucket aggregation', () => {
+    it('should return false if there is no BUCKET aggregation', () => {
       expect(hasTimeseriesBucketAggregation('TS index | STATS COUNT() BY @timestamp')).toBe(false);
     });
-    it('should return false if the bucket aggregation is not a date column', () => {
+    it('should return false if the BUCKET aggregation is not a date column', () => {
       expect(
         hasTimeseriesBucketAggregation(
           'TS index | STATS COUNT() BY bucket(c3, 20, 100, 200), agent.name',
-          mockColumns
+          [
+            {
+              id: 'agent.name',
+              isNull: false,
+              meta: { type: 'string', esType: 'keyword' },
+              name: 'agent.name',
+            },
+            {
+              id: 'c3',
+              isNull: false,
+              meta: { type: 'number', esType: 'long' },
+              name: 'c3',
+            },
+          ] as DatatableColumn[]
         )
       ).toBe(false);
     });
@@ -1106,7 +1119,7 @@ describe('esql query helpers', () => {
         hasTimeseriesBucketAggregation('TS index | STATS COUNT() BY bucket(@timestamp, 1h)')
       ).toBe(false);
     });
-    it('should return false if the last stats command does not contain a bucket aggregation', () => {
+    it('should return false if the last stats command does not contain a BUCKET aggregation', () => {
       expect(
         hasTimeseriesBucketAggregation(
           `TS index 
@@ -1118,7 +1131,7 @@ describe('esql query helpers', () => {
         )
       ).toBe(false);
     });
-    it('should return true if the query contains a bucket aggregation', () => {
+    it('should return true if the query contains a BUCKET aggregation', () => {
       expect(
         hasTimeseriesBucketAggregation(
           'TS index | STATS COUNT() BY bucket(@timestamp, 1h)',
@@ -1126,7 +1139,7 @@ describe('esql query helpers', () => {
         )
       ).toBe(true);
     });
-    it('should return true if the query contains aliased bucket aggregation', () => {
+    it('should return true if the query contains aliased BUCKET aggregation', () => {
       const columns = [
         {
           id: 't',
@@ -1143,7 +1156,7 @@ describe('esql query helpers', () => {
         )
       ).toBe(true);
     });
-    it('should return true if the query contains a bucket aggregation with multiple breakdowns', () => {
+    it('should return true if the query contains a BUCKET aggregation with multiple breakdowns', () => {
       expect(
         hasTimeseriesBucketAggregation(
           'TS index | STATS COUNT() BY bucket(@timestamp, 1h), agent.name',
@@ -1152,10 +1165,10 @@ describe('esql query helpers', () => {
       ).toBe(true);
     });
 
-    it('should return true if the query bucket aggregation, case insensitive and ignoring spaces', () => {
+    it('should return true if the query contains a TBUCKET aggregation with multiple breakdowns', () => {
       expect(
         hasTimeseriesBucketAggregation(
-          'TS index | STATS COUNT() BY BUCKET(@timestamp,    1h), agent.name',
+          'TS index | STATS COUNT() BY tbucket(@timestamp, 1h), agent.name',
           mockColumns
         )
       ).toBe(true);
