@@ -13,6 +13,7 @@ plugins:
     - streams_app
     - slo
     - spaces
+    - workflows_extensions
   disabled:
 
 packages:
