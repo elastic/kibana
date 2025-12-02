@@ -63,7 +63,7 @@ export const connectorTypeResponseSchema = schema.object({
   }),
   name: schema.string({
     meta: {
-      description: ' The name of the connector type.',
+      description: 'The name of the connector type.',
     },
   }),
   enabled: schema.boolean({
