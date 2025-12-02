@@ -36,7 +36,7 @@ export function getDetailedTypeDescription(
 ): string {
   const {
     detailed = true,
-    maxDepth = 6,
+    maxDepth = 10,
     showOptional = true,
     includeDescriptions = true,
     singleLine = false,
@@ -69,6 +69,8 @@ function handleZodObject(
   const shape = schema.shape;
   const properties: string[] = [];
   const nl = singleLine ? '' : '\n';
+  const indent = singleLine ? '' : ' '.repeat(indentSpacesNumber * (currentDepth + 1));
+  const closingIndent = singleLine ? '' : ' '.repeat(indentSpacesNumber * currentDepth);
 
   for (const [key, fieldSchema] of Object.entries(shape)) {
     const isOptional = (fieldSchema as z.ZodType) instanceof z.ZodOptional;
@@ -84,11 +86,11 @@ function handleZodObject(
     });
 
     const optionalMarker = showOptional && isOptional ? '?' : '';
-    const indent = ' '.repeat(indentSpacesNumber);
     properties.push(`${indent}${key}${optionalMarker}: ${fieldType}`);
   }
 
-  const objectBody = properties.length > 0 ? `{${nl}${properties.join(`;${nl}`)}${nl}}` : '{}';
+  const objectBody =
+    properties.length > 0 ? `{${nl}${properties.join(`;${nl}`)}${nl}${closingIndent}}` : '{}';
   return `${objectBody}${descriptionSuffix}`;
 }
 
@@ -103,7 +105,7 @@ function handleZodUnion(
 ): string {
   const { maxDepth, showOptional, includeDescriptions, indentSpacesNumber, singleLine } = opts;
   const unionTypes = schema.options.map((option: z.ZodType) =>
-    generateDetailedDescription(option, currentDepth + 1, {
+    generateDetailedDescription(option, currentDepth, {
       maxDepth,
       showOptional,
       includeDescriptions,
@@ -121,7 +123,7 @@ function handleZodIntersection(
   descriptionSuffix: string
 ): string {
   const intersectionTypes = [schema.def.left, schema.def.right].map((option: z.ZodType) =>
-    generateDetailedDescription(option, currentDepth + 1, opts)
+    generateDetailedDescription(option, currentDepth, opts)
   );
   return `(${intersectionTypes.join(' & ')})${descriptionSuffix}`;
 }
@@ -167,7 +169,7 @@ function generateDetailedDescription(
 
     case 'array': {
       const arraySchema = schema as z.ZodArray<z.ZodType>;
-      const elementType = generateDetailedDescription(arraySchema.element, currentDepth + 1, {
+      const elementType = generateDetailedDescription(arraySchema.element, currentDepth, {
         maxDepth,
         showOptional,
         includeDescriptions,
@@ -205,6 +207,17 @@ function generateDetailedDescription(
       return showOptional ? `${innerType}?` : innerType;
     }
 
+    case 'lazy': {
+      const lazySchema = schema as z.ZodLazy<z.ZodType>;
+      return generateDetailedDescription(lazySchema.unwrap(), currentDepth, {
+        maxDepth,
+        showOptional,
+        includeDescriptions,
+        indentSpacesNumber,
+        singleLine,
+      });
+    }
+
     case 'default': {
       const defaultSchema = schema as z.ZodDefault<z.ZodType>;
       const innerType = generateDetailedDescription(
@@ -234,7 +247,7 @@ function generateDetailedDescription(
           singleLine,
         }
       );
-      return `Record<string, ${valueType}>${descriptionSuffix}`;
+      return `record<string, ${valueType}>${descriptionSuffix}`;
     }
 
     default:

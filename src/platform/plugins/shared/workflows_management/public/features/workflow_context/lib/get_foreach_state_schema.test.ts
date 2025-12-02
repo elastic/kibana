@@ -8,9 +8,9 @@
  */
 
 import { DynamicStepContextSchema, ForEachContextSchema } from '@kbn/workflows';
+import { expectZodSchemaEqual } from '@kbn/workflows/common/utils/zod/test_utils/expect_zod_schema_equal';
 import { z } from '@kbn/zod/v4';
 import { getForeachStateSchema } from './get_foreach_state_schema';
-import { expectZodSchemaEqual } from '../../../../common/lib/zod/test_utils/expect_zod_schema_equal';
 
 describe('getForeachStateSchema', () => {
   it('should return plain foreach state if item type is not inferable', () => {

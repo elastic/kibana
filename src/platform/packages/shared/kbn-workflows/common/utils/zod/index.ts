@@ -16,3 +16,4 @@ export { getZodLooseObjectFromProperty } from './get_zod_loose_object_from_prope
 export { getZodParamSchema } from './get_zod_param_schema';
 export { getShapeAt } from './get_shape_at';
 export { expectZodSchemaEqual } from './get_zod_schema_equal';
+export { getSchemaAtPath } from './get_schema_at_path';

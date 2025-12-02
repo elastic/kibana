@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ZodType } from '@kbn/zod/v4';
 import { z } from '@kbn/zod/v4';
 
 export function parsePath(path: string) {
@@ -18,7 +17,7 @@ export function parsePath(path: string) {
 }
 
 interface GetSchemaAtPathResult {
-  schema: ZodType | null;
+  schema: z.ZodType | null;
   scopedToPath: string | null;
 }
 
@@ -32,7 +31,7 @@ interface GetSchemaAtPathResult {
  */
 // eslint-disable-next-line complexity
 export function getSchemaAtPath(
-  schema: ZodType,
+  schema: z.ZodType,
   path: string,
   { partial = false }: { partial?: boolean } = {}
 ): GetSchemaAtPathResult {
@@ -42,17 +41,17 @@ export function getSchemaAtPath(
       return { schema: null, scopedToPath: null };
     }
 
-    let current: ZodType = schema;
+    let current: z.ZodType = schema;
 
     for (const [index, segment] of segments.entries()) {
       if (current instanceof z.ZodOptional) {
-        current = current.unwrap() as ZodType;
+        current = current.unwrap() as z.ZodType;
       }
       if (current instanceof z.ZodDefault) {
-        current = current.unwrap() as ZodType;
+        current = current.unwrap() as z.ZodType;
       }
       if (current instanceof z.ZodLazy) {
-        current = current.unwrap() as ZodType;
+        current = current.unwrap() as z.ZodType;
       }
       if (current instanceof z.ZodObject) {
         const shape = current.shape;
@@ -66,7 +65,7 @@ export function getSchemaAtPath(
         const valueType = current.valueType;
         const keyType = current.keyType;
         if (keyType instanceof z.ZodString) {
-          current = valueType as ZodType;
+          current = valueType as z.ZodType;
         } else {
           return partial
             ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
@@ -83,7 +82,7 @@ export function getSchemaAtPath(
             : { schema: null, scopedToPath: null };
         }
         // We found a valid branch, now we need to traverse into it with the current segment
-        const branchResult = getSchemaAtPath(validBranch as ZodType, segment);
+        const branchResult = getSchemaAtPath(validBranch as z.ZodType, segment);
         if (!branchResult.schema) {
           return partial
             ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
@@ -91,7 +90,7 @@ export function getSchemaAtPath(
         }
         current = branchResult.schema;
       } else if (current instanceof z.ZodIntersection) {
-        const branches = [current.def.left as ZodType, current.def.right as ZodType];
+        const branches = [current.def.left as z.ZodType, current.def.right as z.ZodType];
         const validBranch = branches.find(
           (branch) => getSchemaAtPath(branch as z.ZodType, segment).schema !== null
         );
@@ -101,7 +100,7 @@ export function getSchemaAtPath(
             : { schema: null, scopedToPath: null };
         }
         // We found a valid branch, now we need to traverse into it with the current segment
-        const branchResult = getSchemaAtPath(validBranch as ZodType, segment);
+        const branchResult = getSchemaAtPath(validBranch as z.ZodType, segment);
         if (!branchResult.schema) {
           return partial
             ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
@@ -149,7 +148,7 @@ export function getSchemaAtPath(
 
         // For unconstrained arrays, we allow any non-negative index for schema introspection
         // This is because we're validating schema paths, not runtime data
-        current = current.element as ZodType;
+        current = current.element as z.ZodType;
       } else if (current instanceof z.ZodAny) {
         // pass through any to preserve the description
         return { schema: current, scopedToPath: segments.slice(0, index).join('.') };
@@ -162,10 +161,10 @@ export function getSchemaAtPath(
     }
 
     if (current instanceof z.ZodOptional || current instanceof z.ZodDefault) {
-      return { schema: current.unwrap() as ZodType, scopedToPath: segments.join('.') };
+      return { schema: current.unwrap() as z.ZodType, scopedToPath: segments.join('.') };
     }
 
-    return { schema: current as ZodType, scopedToPath: segments.join('.') };
+    return { schema: current as z.ZodType, scopedToPath: segments.join('.') };
   } catch {
     return { schema: null, scopedToPath: null };
   }

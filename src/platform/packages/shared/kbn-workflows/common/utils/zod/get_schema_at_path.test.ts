@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EsGenericResponseSchema } from '@kbn/workflows/common/elasticsearch_generic_response_schema';
 import { z } from '@kbn/zod/v4';
 import { getSchemaAtPath } from './get_schema_at_path';
 import { expectZodSchemaEqual } from './test_utils/expect_zod_schema_equal';
+import { EsGenericResponseSchema } from '../../elasticsearch_generic_response_schema';
 
 describe('getSchemaAtPath', () => {
   it('objects with simple paths', () => {

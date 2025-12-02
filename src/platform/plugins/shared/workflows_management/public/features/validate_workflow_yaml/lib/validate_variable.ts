@@ -53,7 +53,7 @@ export function validateVariable(
           message: 'Unable to determine foreach item type',
           severity: 'warning',
           owner: 'variable-validation',
-          hoverMessage: `<pre>(property) ${key}: ${getDetailedTypeDescription(itemSchema)}</pre>`,
+          hoverMessage: getVariableHoverMessage(key, itemSchema),
         };
       }
       return {
@@ -61,7 +61,7 @@ export function validateVariable(
         message: null,
         severity: null,
         owner: 'variable-validation',
-        hoverMessage: `<pre>(property) ${key}: ${getDetailedTypeDescription(itemSchema)}</pre>`,
+        hoverMessage: getVariableHoverMessage(key, itemSchema),
       };
     } catch (error) {
       if (error instanceof InvalidForeachParameterError) {
@@ -125,9 +125,7 @@ export function validateVariable(
       message: refSchema.description,
       severity: 'warning',
       owner: 'variable-validation',
-      hoverMessage: `<pre>(property) ${parsedPath.propertyPath}: ${getDetailedTypeDescription(
-        refSchema
-      )}</pre>`,
+      hoverMessage: getVariableHoverMessage(parsedPath.propertyPath, refSchema),
     };
   }
 
@@ -137,9 +135,7 @@ export function validateVariable(
       message: `Variable ${parsedPath.propertyPath} cannot be validated, because it's type is unknown`,
       severity: 'warning',
       owner: 'variable-validation',
-      hoverMessage: `<pre>(property) ${parsedPath.propertyPath}: ${getDetailedTypeDescription(
-        refSchema
-      )}</pre>`,
+      hoverMessage: getVariableHoverMessage(parsedPath.propertyPath, refSchema),
     };
   }
 
@@ -148,8 +144,20 @@ export function validateVariable(
     message: null,
     severity: null,
     owner: 'variable-validation',
-    hoverMessage: `<pre>(property) ${parsedPath.propertyPath}: ${getDetailedTypeDescription(
-      refSchema
-    )}</pre>`,
+    hoverMessage: getVariableHoverMessage(parsedPath.propertyPath, refSchema),
   };
+}
+
+// This function will be replaced with a hover provider,
+// which will allow to hover over each part of the path and show the type description
+function getVariableHoverMessage(propertyPath: string, schema: z.ZodType): string {
+  return [
+    `<pre>(property) ${propertyPath}:</pre>`,
+    '\n',
+    '```',
+    getDetailedTypeDescription(schema, {
+      maxDepth: 2,
+    }),
+    '```',
+  ].join('\n');
 }

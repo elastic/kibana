@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getSchemaAtPath, parsePath } from './get_schema_at_path';
+export { getSchemaAtPath, parsePath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
 export { inferZodType } from './infer_zod_type';
 export { getZodTypeName } from './get_zod_type_name';
 export { getCompactTypeDescription, getDetailedTypeDescription } from './zod_type_description';

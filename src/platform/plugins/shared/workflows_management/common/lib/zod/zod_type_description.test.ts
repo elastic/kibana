@@ -82,18 +82,18 @@ describe('zod_type_description', () => {
         const result = getDetailedTypeDescription(schema);
         const expected = `{
   user: {
-  id: string;
-  profile: {
-  firstName: string;
-  lastName: string;
-  age?: number
-}
-};
+    id: string;
+    profile: {
+      firstName: string;
+      lastName: string;
+      age?: number
+    }
+  };
   settings: {
-  theme: string;
-  notifications: boolean
-}
-}`;
+    theme: string;
+    notifications: boolean
+  }
+}`.trim();
         expect(result).toBe(expected);
       });
 
@@ -109,7 +109,13 @@ describe('zod_type_description', () => {
         });
 
         const result = getDetailedTypeDescription(schema, { maxDepth: 2 });
-        expect(result).toBe('{\n  level1: {\n  level2: object\n}\n}');
+        expect(result).toBe(
+          `{
+  level1: {
+    level2: object
+  }
+}`.trim()
+        );
       });
     });
 
@@ -139,10 +145,10 @@ describe('zod_type_description', () => {
         const result = getDetailedTypeDescription(schema);
         const expected = `{
   users: {
-  id: string;
-  name: string;
-  active?: boolean
-}[]
+    id: string;
+    name: string;
+    active?: boolean
+  }[]
 }`;
         expect(result).toBe(expected);
       });
@@ -173,13 +179,13 @@ describe('zod_type_description', () => {
         const result = getDetailedTypeDescription(schema);
         const expected = `{
   data: ({
-  type: "user";
-  userId: string
-} | {
-  type: "group";
-  groupId: string;
-  memberCount: number
-})
+    type: "user";
+    userId: string
+  } | {
+    type: "group";
+    groupId: string;
+    memberCount: number
+  })
 }`;
         expect(result).toBe(expected);
       });
@@ -222,13 +228,13 @@ describe('zod_type_description', () => {
         const result = getDetailedTypeDescription(schema);
         const expected = `{
   item: ({
-  type: "text";
-  content: string
-} | {
-  type: "image";
-  url: string;
-  alt?: string
-})
+    type: "text";
+    content: string
+  } | {
+    type: "image";
+    url: string;
+    alt?: string
+  })
 }`;
         expect(result).toBe(expected);
       });
@@ -294,9 +300,9 @@ describe('zod_type_description', () => {
   id: string;
   name?: string;
   settings: {
-  theme: string;
-  darkMode: boolean
-}
+    theme: string;
+    darkMode: boolean
+  }
 }`;
       expect(result).toBe(expected);
     });
@@ -317,7 +323,7 @@ describe('zod_type_description', () => {
       const result = getTypeScriptLikeDescription(schema);
       expect(result).toContain('steps: {');
       expect(result).toContain('type: "action" | "condition"');
-      expect(result).toContain('config: Record<string, any>');
+      expect(result).toContain('config: record<string, any>');
     });
   });
 
@@ -489,7 +495,12 @@ describe('zod_type_description', () => {
         )
         .default([{ id: '1', value: 10 }]);
       const result = getDetailedTypeDescription(schema);
-      expect(result).toBe('{\n  id: string;\n  value: number\n}[]');
+      expect(result).toBe(
+        `{
+  id: string;
+  value: number
+}[]`.trim()
+      );
     });
   });
 

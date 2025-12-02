@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { expectZodSchemaEqual } from '@kbn/workflows/common/utils/zod/test_utils/expect_zod_schema_equal';
 import { z } from '@kbn/zod/v4';
 import { inferZodType } from './infer_zod_type';
-import { expectZodSchemaEqual } from './test_utils/expect_zod_schema_equal';
 
 describe('inferZodType', () => {
   it('should return the correct type', () => {
