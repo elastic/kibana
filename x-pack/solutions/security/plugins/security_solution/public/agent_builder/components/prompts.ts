@@ -5,7 +5,7 @@
  * 2.0.
  */
 // temporary until we figure out if we are using prompt system or not
-export const ATTACK_DISCOVERY_ATTACHMENT_PROMPT = `Summarize the attack discovery attached and recommend next steps. Case URLs MUST be included in the response if they exist. Summary should be in markdown.`;
+export const ATTACK_DISCOVERY_ATTACHMENT_PROMPT = `Summarize the attack discovery attached and recommend next steps. Find the risk score for each extracted host.name and user.name. Case URLs MUST be included in the response if they exist. Summary should be in markdown.`;
 export const ALERT_ATTACHMENT_PROMPT = `Evaluate the provided security alert and generate a structured, markdown-formatted summary suitable for inclusion in an Elastic Security case. Use all available enrichment tools before generating your response. Include the following sections:
 
 ---
