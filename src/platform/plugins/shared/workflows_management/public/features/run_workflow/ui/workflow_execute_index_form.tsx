@@ -90,6 +90,7 @@ export const WorkflowExecuteIndexForm = ({
   const [selectedDocuments, setSelectedDocuments] = useState<SearchHit<Document>[]>([]);
   const [documentsLoading, setDocumentsLoading] = useState(false);
   const [query, setQuery] = useState<Query>({ query: '', language: 'kuery' });
+  const [submittedQuery, setSubmittedQuery] = useState<Query>({ query: '', language: 'kuery' });
   const [timeRange, setTimeRange] = useState<TimeRange>({
     from: 'now-15m',
     to: 'now',
@@ -110,6 +111,8 @@ export const WorkflowExecuteIndexForm = ({
           dataViewsList[0];
         if (defaultDataView) {
           const dataView = await services.dataViews.get(defaultDataView.id);
+          // Refresh fields to ensure they're up to date and properly loaded
+          await services.dataViews.refreshFields(dataView, false, true);
           setSelectedDataView(dataView);
         }
       } catch (error) {
@@ -120,6 +123,23 @@ export const WorkflowExecuteIndexForm = ({
     loadDataViews();
   }, [services.dataViews, setErrors]);
 
+  const transformQueryForAlerts = useCallback((inputQuery: Query): Query => {
+    if (!inputQuery.query || typeof inputQuery.query !== 'string') {
+      return inputQuery;
+    }
+
+    let transformedQuery = inputQuery.query;
+    transformedQuery = transformedQuery.replace(
+      /\brule\.([a-zA-Z_][a-zA-Z0-9_]*)\b/g,
+      'kibana.alert.rule.$1'
+    );
+
+    return {
+      ...inputQuery,
+      query: transformedQuery,
+    };
+  }, []);
+
   // Fetch documents based on selected data view and query
   const fetchDocuments = useCallback(async () => {
     if (!selectedDataView || !services.data) {
@@ -129,7 +149,9 @@ export const WorkflowExecuteIndexForm = ({
     setDocumentsLoading(true);
     setErrors(null);
 
-    const esQuery = buildEsQuery(selectedDataView, query ? [query] : [], []);
+    const transformedQuery = submittedQuery ? transformQueryForAlerts(submittedQuery) : null;
+
+    const esQuery = buildEsQuery(selectedDataView, transformedQuery ? [transformedQuery] : [], []);
     const searchQuery = {
       bool: {
         must: esQuery.bool.must || [],
@@ -178,7 +200,15 @@ export const WorkflowExecuteIndexForm = ({
           setDocumentsLoading(false);
         },
       });
-  }, [selectedDataView, query, services.data, setErrors, timeRange.from, timeRange.to]);
+  }, [
+    selectedDataView,
+    submittedQuery,
+    services.data,
+    setErrors,
+    timeRange.from,
+    timeRange.to,
+    transformQueryForAlerts,
+  ]);
 
   // Fetch documents when data view, query, or filters change
   useEffect(() => {
@@ -194,6 +224,8 @@ export const WorkflowExecuteIndexForm = ({
 
       try {
         const dataView = await services.dataViews.get(dataViewId);
+        // Refresh fields to ensure they're up to date and properly loaded
+        await services.dataViews.refreshFields(dataView, false, true);
         setSelectedDataView(dataView);
         setSelectedDocuments([]); // Clear selection when changing data view
       } catch (error) {
@@ -203,18 +235,31 @@ export const WorkflowExecuteIndexForm = ({
     [services.dataViews, setErrors]
   );
 
-  const handleQueryChange = ({
-    query: newQuery,
-    dateRange,
-  }: {
-    query?: Query;
-    dateRange: TimeRange;
-  }) => {
-    if (newQuery) {
-      setQuery(newQuery);
-    }
-    setTimeRange(dateRange);
-  };
+  const handleQueryChange = useCallback(
+    ({ query: newQuery, dateRange }: { query?: Query; dateRange: TimeRange }) => {
+      // Only update the draft query for the SearchBar input (for autocomplete)
+      // Don't trigger fetch - that happens only on submit
+      if (newQuery) {
+        setQuery(newQuery);
+      }
+      // Update time range immediately as it doesn't cause blinking
+      setTimeRange(dateRange);
+    },
+    []
+  );
+
+  const handleQuerySubmit = useCallback(
+    ({ query: newQuery, dateRange }: { query?: Query; dateRange: TimeRange }) => {
+      // Update both draft and submitted query on submit
+      if (newQuery) {
+        setQuery(newQuery);
+        setSubmittedQuery(newQuery);
+      }
+      setTimeRange(dateRange);
+      // fetchDocuments will be triggered by useEffect when submittedQuery changes
+    },
+    []
+  );
 
   // Handle document selection
   const handleDocumentSelection = (selectedItems: SearchHit<Document>[]) => {
@@ -230,7 +275,7 @@ export const WorkflowExecuteIndexForm = ({
             timestamp: doc._source['@timestamp'],
             data: doc._source,
           })),
-          query: query.query,
+          query: submittedQuery.query,
           dataView: selectedDataView?.title,
         },
       };
@@ -268,15 +313,16 @@ export const WorkflowExecuteIndexForm = ({
           };
 
           // Use formatHit to get properly formatted field pairs
-          const formattedPairs = selectedDataView
-            ? formatHit(
-                mockRecord,
-                selectedDataView,
-                () => true, // Show all fields
-                10, // Max entries
-                services.fieldFormats
-              )
-            : [];
+          const formattedPairs =
+            selectedDataView && typeof selectedDataView.getFieldByName === 'function'
+              ? formatHit(
+                  mockRecord,
+                  selectedDataView,
+                  () => true, // Show all fields
+                  10, // Max entries
+                  services.fieldFormats
+                )
+              : [];
 
           return (
             <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -333,7 +379,8 @@ export const WorkflowExecuteIndexForm = ({
         <EuiFlexItem>
           <SearchBar
             appName="workflow_management"
-            onQuerySubmit={handleQueryChange}
+            onQueryChange={handleQueryChange}
+            onQuerySubmit={handleQuerySubmit}
             query={query}
             indexPatterns={selectedDataView ? [selectedDataView] : []}
             showDatePicker={true}
@@ -379,6 +426,7 @@ export const WorkflowExecuteIndexForm = ({
             }}
             tableLayout="fixed"
             itemId="_id"
+            tableCaption="Documents list for workflow execution"
             data-test-subj="workflow-documents-table"
           />
         )}
