@@ -10,7 +10,7 @@ exports[`EventsTable Renders events table with no search bar 1`] = `
     data-test-subj="mlCalendarEventsTable"
   >
     <table
-      class="euiTable emotion-euiTable-fixed-uncompressed-desktop"
+      class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
       id="__table_generated-id"
       tabindex="-1"
     >
@@ -411,7 +411,7 @@ exports[`EventsTable Renders events table with search bar 1`] = `
       data-test-subj="mlCalendarEventsTable"
     >
       <table
-        class="euiTable emotion-euiTable-fixed-uncompressed-desktop"
+        class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
         id="__table_generated-id"
         tabindex="-1"
       >

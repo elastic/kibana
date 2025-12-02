@@ -6,7 +6,7 @@ Object {
   "baseElement": <body>
     <div>
       <table
-        class="euiTable emotion-euiTable-fixed-uncompressed-desktop"
+        class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
         data-test-subj="infraAssetDetailsProcessesTable"
         tabindex="-1"
       >
@@ -284,7 +284,7 @@ Object {
   </body>,
   "container": <div>
     <table
-      class="euiTable emotion-euiTable-fixed-uncompressed-desktop"
+      class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
       data-test-subj="infraAssetDetailsProcessesTable"
       tabindex="-1"
     >

@@ -211,7 +211,7 @@ Array [
     data-test-subj="inspectorTable"
   >
     <table
-      class="euiTable emotion-euiTable-auto-uncompressed-desktop"
+      class="euiTable emotion-euiTable-auto-uncompressed-hasBackground-desktop"
       id="__table_generated-id"
       tabindex="-1"
     >
@@ -495,7 +495,7 @@ Array [
     data-test-subj="inspectorTable"
   >
     <table
-      class="euiTable emotion-euiTable-auto-uncompressed-desktop"
+      class="euiTable emotion-euiTable-auto-uncompressed-hasBackground-desktop"
       id="__table_generated-id"
       tabindex="-1"
     >

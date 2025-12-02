@@ -16,7 +16,7 @@ exports[`TooltipPopover render should render tooltip popover 1`] = `
   }
   closePopover={[Function]}
   display="inline-block"
-  hasArrow={true}
+  hasArrow={false}
   id="mapTooltip"
   isOpen={true}
   ownFocus={true}
@@ -77,7 +77,7 @@ exports[`TooltipPopover render should render tooltip popover with custom tooltip
   }
   closePopover={[Function]}
   display="inline-block"
-  hasArrow={true}
+  hasArrow={false}
   id="mapTooltip"
   isOpen={true}
   ownFocus={true}
