@@ -82,14 +82,15 @@ function castFieldIfNeeded(fieldName: string, fieldType: string | undefined): st
 }
 
 /**
- * Applies dimension filters to a query using reduce pattern.
- * Same pattern as buildEsqlQuery in enrich_metric_fields.ts.
+ * Applies dimension filters and optional user WHERE clause to a query.
+ * Reusable helper shared with buildEsqlQuery in enrich_metric_fields.ts.
  *
- * @param query - The current query to apply filters to
+ * @param baseQuery - The base query to apply filters to
  * @param dimensionFilters - A map of field names to arrays of values to filter by
+ * @param userQuery - Optional ES|QL query string to extract WHERE clause from
  * @returns The query with all filter WHERE clauses applied
  */
-function applyDimensionFilters(
+export function applyDimensionFilters(
   baseQuery: ComposerQuery,
   dimensionFilters: DimensionFilters,
   userQuery?: string

@@ -12,13 +12,13 @@ import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { semconvFlat } from '@kbn/otel-semantic-conventions';
 import { dateRangeQuery } from '@kbn/es-query';
 import { ComposerQuery, esql } from '@kbn/esql-ast';
+import { applyDimensionFilters } from '@kbn/unified-metrics-grid';
 import pLimit from 'p-limit';
 import { chunk } from 'lodash';
 import type { IndexFieldCapsMap, EpochTimeRange } from '../../types';
 import type { Dimension, MetricField, DimensionFilters } from '../../../common/types';
 import { extractDimensions } from '../dimensions/extract_dimensions';
 import { normalizeUnit } from './normalize_unit';
-import { extractWhereCommand } from '../utils';
 
 export interface MetricMetadata {
   dimensions: string[];
@@ -103,35 +103,9 @@ export function buildEsqlQuery(
   dimensionFilters: DimensionFilters,
   userQuery: string
 ): string {
-  // Use accumulator to carry both query and param index (avoids mutable let)
-  const { query: queryWithFilters } = Object.entries(dimensionFilters).reduce(
-    (acc, [dimensionName, values]) => {
-      if (values.length === 0) {
-        return acc;
-      }
+  const queryWithFilters = applyDimensionFilters(baseQuery, dimensionFilters, userQuery);
 
-      const paramNames = values.map((_, i) => `?value${acc.paramIdx + i}`).join(', ');
-      const whereClause = `WHERE \`${dimensionName}\`::STRING IN (${paramNames})`;
-
-      const newQuery = values.reduce(
-        (q, value, i) => q.setParam(`value${acc.paramIdx + i}`, value),
-        acc.query.pipe(whereClause)
-      );
-
-      return { query: newQuery, paramIdx: acc.paramIdx + values.length };
-    },
-    { query: baseQuery, paramIdx: 0 }
-  );
-
-  const queryWithUserFilter = userQuery
-    ? (() => {
-        const whereCommand = extractWhereCommand(userQuery);
-        return whereCommand ? queryWithFilters.pipe(whereCommand) : queryWithFilters;
-      })()
-    : queryWithFilters;
-
-  // Add LIMIT and return inlined query string
-  return queryWithUserFilter.limit(1).inlineParams().print('basic');
+  return queryWithFilters.limit(1).inlineParams().print('basic');
 }
 
 async function executeEsqlQueriesForChunk(
