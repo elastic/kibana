@@ -25,16 +25,12 @@ describe(
   () => {
     beforeEach(() => {
       login();
-      startBasicLicense();
       deleteAlertsAndRules();
       deleteGapAutoFillScheduler();
+      startBasicLicense();
       createRule(
         getCustomQueryRuleParams({ rule_id: '1', name: 'Rule 1', interval: '1m', from: 'now-1m' })
       );
-    });
-
-    afterEach(() => {
-      deleteGapAutoFillScheduler();
     });
 
     it('hides the badge for basic licenses', () => {
