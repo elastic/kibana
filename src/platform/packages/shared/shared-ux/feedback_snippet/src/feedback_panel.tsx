@@ -110,10 +110,10 @@ export const FeedbackPanel = ({
           data-test-subj={`${feedbackSnippetId}PanelThumbDown`}
           onClick={handleNegativeFeedback}
           id={`${feedbackSnippetId}PanelThumbDown`}
-          color="danger"
+          color="text"
           size="s"
         >
-          <EuiIcon type="thumbDown" aria-label={thumbDownIconLabel} />
+          <EuiIcon type="thumbDown" aria-label={thumbDownIconLabel} color="danger" />
         </EuiButton>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -121,10 +121,10 @@ export const FeedbackPanel = ({
           data-test-subj={`${feedbackSnippetId}PanelThumbUp`}
           onClick={handlePositiveFeedback}
           id={`${feedbackSnippetId}PanelThumbUp`}
-          color="success"
+          color="text"
           size="s"
         >
-          <EuiIcon type="thumbUp" aria-label={thumbUpIconLabel} />
+          <EuiIcon type="thumbUp" aria-label={thumbUpIconLabel} color="success" />
         </EuiButton>
       </EuiFlexItem>
     </>
