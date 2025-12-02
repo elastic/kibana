@@ -13,80 +13,17 @@ import {
   mutate,
   synth,
   type ESQLAstCommand,
-  type FunctionDefinition,
 } from '@kbn/esql-ast';
 import type {
   ESQLColumnData,
   ESQLFieldWithMetadata,
   ESQLPolicy,
 } from '@kbn/esql-ast/src/commands_registry/types';
-import type { ESQLAstQueryExpression, ESQLParamLiteral } from '@kbn/esql-ast/src/types';
+import type { ESQLAstQueryExpression } from '@kbn/esql-ast/src/types';
 
 import type { IAdditionalFields } from '@kbn/esql-ast/src/commands_registry/registry';
-import { enrichFieldsWithECSInfo } from '../autocomplete/utils/ecs_metadata_helper';
-import type { ESQLCallbacks } from './types';
-
-export function nonNullable<T>(v: T): v is NonNullable<T> {
-  return v != null;
-}
-
-export function isSourceCommandSuggestion({ label }: { label: string }) {
-  const sourceCommands = esqlCommandRegistry
-    .getSourceCommandNames()
-    .map((cmd) => cmd.toUpperCase());
-
-  return sourceCommands.includes(label);
-}
-
-export function isHeaderCommandSuggestion({ label }: { label: string }) {
-  return label === 'SET';
-}
-
-export function createMapFromList<T extends { name: string }>(arr: T[]): Map<string, T> {
-  const arrMap = new Map<string, T>();
-  for (const item of arr) {
-    arrMap.set(item.name, item);
-  }
-  return arrMap;
-}
-
-export function areFieldAndUserDefinedColumnTypesCompatible(
-  fieldType: string | string[] | undefined,
-  userColumnType: string | string[]
-) {
-  if (fieldType == null) {
-    return false;
-  }
-  return fieldType === userColumnType;
-}
-
-export const isParam = (x: unknown): x is ESQLParamLiteral =>
-  !!x &&
-  typeof x === 'object' &&
-  (x as ESQLParamLiteral).type === 'literal' &&
-  (x as ESQLParamLiteral).literalType === 'param';
-
-/**
- * Compares two strings in a case-insensitive manner
- */
-export const noCaseCompare = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
-
-/**
- * Given a function signature, returns the parameter at the given position.
- *
- * Takes into account variadic functions (minParams), returning the last
- * parameter if the position is greater than the number of parameters.
- *
- * @param signature
- * @param position
- * @returns
- */
-export function getParamAtPosition(
-  { params, minParams }: FunctionDefinition['signatures'][number],
-  position: number
-) {
-  return params.length > position ? params[position] : minParams ? params[params.length - 1] : null;
-}
+import { enrichFieldsWithECSInfo } from './enrich_fields_with_ecs';
+import type { ESQLCallbacks } from '../shared/types';
 
 async function getEcsMetadata(resourceRetriever?: ESQLCallbacks) {
   if (!resourceRetriever?.getFieldsMetadata) {
