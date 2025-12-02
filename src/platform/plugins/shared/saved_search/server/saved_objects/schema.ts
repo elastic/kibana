@@ -182,7 +182,6 @@ const SCHEMA_DISCOVER_SESSION_TAB_VERSION_8 = SCHEMA_DISCOVER_SESSION_TAB.extend
 
 export const SCHEMA_SEARCH_MODEL_VERSION_8 = SCHEMA_SEARCH_MODEL_VERSION_7.extends({
   ...CONTROL_GROUP_JSON_SCHEMA,
-  projectRouting: schema.maybe(schema.nullable(schema.string())),
   tabs: schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB_VERSION_8, { minSize: 1 }),
 });
 
@@ -203,5 +202,31 @@ export const SCHEMA_SEARCH_MODEL_VERSION_9_SO_API_WORKAROUND = schema.object({
   tabs: schema.maybe(tabsV8),
 });
 
-export type DiscoverSessionTabAttributes = TypeOf<typeof DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_8>;
-export type DiscoverSessionTab = TypeOf<typeof SCHEMA_DISCOVER_SESSION_TAB_VERSION_8>;
+// Version 10 tabs use the same attributes as version 8
+const DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_10 = DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_8;
+
+const SCHEMA_DISCOVER_SESSION_TAB_VERSION_10 = SCHEMA_DISCOVER_SESSION_TAB_VERSION_8;
+
+// We need to extend from the base props rather than the full schema to avoid the same error as version 8
+const SCHEMA_SEARCH_MODEL_VERSION_10_EXTENDED = SCHEMA_SEARCH_MODEL_VERSION_8.extends({
+  projectRouting: schema.maybe(schema.nullable(schema.string())),
+  tabs: schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB_VERSION_10, { minSize: 1 }),
+});
+
+const { tabs: tabsV10, ...restV10Props } = SCHEMA_SEARCH_MODEL_VERSION_10_EXTENDED.getPropSchemas();
+
+export const SCHEMA_SEARCH_MODEL_VERSION_10 = schema.object({
+  ...restV10Props,
+  tabs: tabsV10,
+});
+
+// Schema that works around saved objects API issues as in version 9
+export const SCHEMA_SEARCH_MODEL_VERSION_11_SO_API_WORKAROUND = schema.object({
+  ...restV10Props,
+  tabs: schema.maybe(tabsV10),
+});
+
+export type DiscoverSessionTabAttributes = TypeOf<
+  typeof DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_10
+>;
+export type DiscoverSessionTab = TypeOf<typeof SCHEMA_DISCOVER_SESSION_TAB_VERSION_10>;
