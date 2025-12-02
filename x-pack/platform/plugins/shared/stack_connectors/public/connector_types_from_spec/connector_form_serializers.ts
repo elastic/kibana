@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
 import type { z } from '@kbn/zod/v4';
 
 /**
@@ -30,7 +31,12 @@ export const createConnectorFormSerializer = () => {
  * connector edit.
  */
 export const createConnectorFormDeserializer = (schema: z.ZodObject<z.ZodRawShape>) => {
-  return (apiData: { config: Record<string, unknown>; secrets: Record<string, unknown> }) => {
+  return (
+    apiData: ConnectorFormSchema<
+      { authType?: string } & Record<string, unknown>,
+      Record<string, unknown>
+    >
+  ) => {
     if (!apiData?.config?.authType || apiData.secrets?.authType) {
       return apiData;
     }
