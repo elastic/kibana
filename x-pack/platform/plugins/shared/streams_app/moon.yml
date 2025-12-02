@@ -95,6 +95,7 @@ dependsOn:
   - '@kbn/discover-contextual-components'
   - '@kbn/es-types'
   - '@kbn/esql-utils'
+  - '@kbn/streamlang-yaml-editor'
   - '@kbn/tooling-log'
   - '@kbn/inference-common'
   - '@kbn/core-chrome-navigation'
