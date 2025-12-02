@@ -13,6 +13,7 @@ import {
   isEnabledFailureStore,
   isInheritFailureStore,
   isDisabledLifecycleFailureStore,
+  isEnabledLifecycleFailureStore,
 } from '@kbn/streams-schema';
 import type { FailureStoreFormData } from '@kbn/failure-store-modal';
 import { i18n } from '@kbn/i18n';
@@ -70,19 +71,17 @@ export function useFailureStoreModal() {
     const isWired = view === 'wired';
     const canShowInherit = !isRootStreamDefinition(streamDefinition.stream);
 
-    const isCurrentlyInherited = isInheritFailureStore(
-      streamDefinition.stream.ingest.failure_store
-    );
+    const failureStore = streamDefinition.stream.ingest.failure_store;
 
-    const effectiveFailureStoreEnabled = isEnabledFailureStore(
-      streamDefinition.stream.ingest.failure_store
-    );
+    const isCurrentlyInherited = isInheritFailureStore(failureStore);
 
-    const retentionDisabled = isDisabledLifecycleFailureStore(
-      streamDefinition.stream.ingest.failure_store
-    );
-    const effectiveCustomRetentionPeriod =
-      streamDefinition.stream.ingest.failure_store.lifecycle?.enabled?.data_retention;
+    const effectiveFailureStoreEnabled = isEnabledFailureStore(failureStore);
+
+    const retentionDisabled = isDisabledLifecycleFailureStore(failureStore);
+
+    const effectiveCustomRetentionPeriod = isEnabledLifecycleFailureStore(failureStore)
+      ? failureStore.lifecycle.enabled.data_retention
+      : undefined;
 
     const isServerless = dataStreamDetails?.isServerless ?? false;
 
