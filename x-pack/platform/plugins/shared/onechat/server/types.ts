@@ -97,7 +97,9 @@ export interface OnechatPluginStart {
   /**
    * Agents service, to execute agents.
    */
-  runAgent: RunAgentFn;
+  agents: {
+    runAgent: RunAgentFn;
+  };
   /**
    * Tools service, to manage or execute tools.
    */
