@@ -34,7 +34,7 @@ import {
   deleteAllRules,
   deleteAllAlerts,
   waitForRuleSuccess,
-} from '../../../../../../config/services/detections_response';
+} from '@kbn/detections-response-ftr-services';
 import {
   getEqlRuleForAlertTesting,
   getOpenAlerts,
