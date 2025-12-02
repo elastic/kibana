@@ -11,6 +11,7 @@ import {
   rawScheduledReportSchemaV2,
   rawScheduledReportSchemaV3,
   rawScheduledReportSchemaV4,
+  rawScheduledReportSchemaV5,
 } from './schemas';
 
 export const scheduledReportModelVersions: SavedObjectsModelVersionMap = {
@@ -53,5 +54,9 @@ export const scheduledReportModelVersions: SavedObjectsModelVersionMap = {
         },
       },
     ],
+    schemas: {
+      forwardCompatibility: rawScheduledReportSchemaV5.extends({}, { unknowns: 'ignore' }),
+      create: rawScheduledReportSchemaV5,
+    },
   },
 };
