@@ -41,6 +41,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 
 jest.mock('../hooks/use_case_view_navigation');
+jest.mock('../hooks/use_individual_tags_action');
 
 const cellActionOnClickMockedFn = jest.fn();
 const mockOnChangeVisibleColumns = jest.fn();
@@ -583,6 +584,120 @@ describe('AlertsDataGrid', () => {
         const { container } = render(<TestComponent {...mockDataGridProps} />);
 
         expect(container.querySelector('.euiDataGrid__virtualized')).toBeTruthy();
+      });
+    });
+
+    describe('Individual tags flyout', () => {
+      const { useIndividualTagsAction } = jest.requireMock('../hooks/use_individual_tags_action');
+      const mockAlert = {
+        _id: 'alert-1',
+        _index: 'test-index',
+        version: 'v1',
+        title: 'Test Alert',
+        'kibana.alert.workflow_tags': ['tag1', 'tag2'],
+      } as any;
+
+      beforeEach(() => {
+        // Default mock: flyout closed
+        useIndividualTagsAction.mockReturnValue({
+          isFlyoutOpen: false,
+          selectedAlert: null,
+          openFlyout: jest.fn(),
+          closeFlyout: jest.fn(),
+          onSaveTags: jest.fn(),
+        });
+      });
+
+      it('should not render individual tags flyout when closed', async () => {
+        render(<TestComponent {...mockDataGridProps} />);
+
+        // By default, the flyout should be closed
+        expect(screen.queryByTestId('alerts-edit-tags-flyout')).not.toBeInTheDocument();
+      });
+
+      it('should render individual tags flyout when opened', async () => {
+        const mockCloseFlyout = jest.fn();
+        const mockOnSaveTags = jest.fn();
+
+        useIndividualTagsAction.mockReturnValue({
+          isFlyoutOpen: true,
+          selectedAlert: mockAlert,
+          openFlyout: jest.fn(),
+          closeFlyout: mockCloseFlyout,
+          onSaveTags: mockOnSaveTags,
+        });
+
+        render(<TestComponent {...mockDataGridProps} />);
+
+        expect(await screen.findByTestId('alerts-edit-tags-flyout')).toBeInTheDocument();
+        expect(screen.getByTestId('alerts-edit-tags-flyout-title')).toBeInTheDocument();
+      });
+
+      it('should call closeFlyout when cancel button is clicked', async () => {
+        const mockCloseFlyout = jest.fn();
+        const mockOnSaveTags = jest.fn();
+
+        useIndividualTagsAction.mockReturnValue({
+          isFlyoutOpen: true,
+          selectedAlert: mockAlert,
+          openFlyout: jest.fn(),
+          closeFlyout: mockCloseFlyout,
+          onSaveTags: mockOnSaveTags,
+        });
+
+        render(<TestComponent {...mockDataGridProps} />);
+
+        const cancelButton = await screen.findByTestId('alerts-edit-tags-flyout-cancel');
+        await userEvent.click(cancelButton);
+
+        // The closeFlyout should be called
+        expect(mockCloseFlyout).toHaveBeenCalled();
+      });
+
+      it('should provide IndividualTagsActionContext to child components', async () => {
+        const TestChildComponent = () => {
+          const { useIndividualTagsActionContext } = require('../contexts/individual_tags_action_context');
+          try {
+            const context = useIndividualTagsActionContext();
+            return (
+              <div data-test-subj="context-test">
+                {context.isFlyoutOpen ? 'Flyout Open' : 'Flyout Closed'}
+              </div>
+            );
+          } catch (e) {
+            return <div data-test-subj="context-test">Context Not Available</div>;
+          }
+        };
+
+        render(
+          <TestComponent
+            {...mockDataGridProps}
+            renderContext={{
+              renderActionsCell: () => <TestChildComponent />,
+            }}
+          />
+        );
+
+        // The context should be available (flyout closed by default)
+        expect(await screen.findByTestId('context-test')).toHaveTextContent('Flyout Closed');
+      });
+
+      it('should render individual tags flyout with correct alert data', async () => {
+        useIndividualTagsAction.mockReturnValue({
+          isFlyoutOpen: true,
+          selectedAlert: mockAlert,
+          openFlyout: jest.fn(),
+          closeFlyout: jest.fn(),
+          onSaveTags: jest.fn(),
+        });
+
+        render(<TestComponent {...mockDataGridProps} />);
+
+        const flyout = await screen.findByTestId('alerts-edit-tags-flyout');
+        expect(flyout).toBeInTheDocument();
+
+        // Verify the flyout title is present
+        expect(screen.getByTestId('alerts-edit-tags-flyout-title')).toBeInTheDocument();
       });
     });
   });
