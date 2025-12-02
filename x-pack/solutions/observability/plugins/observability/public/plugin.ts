@@ -75,6 +75,8 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
+
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -177,6 +179,7 @@ export interface ObservabilityPublicPluginsStart {
   fieldsMetadata: FieldsMetadataPublicStart;
   inspector: InspectorPluginStart;
   savedObjectsTagging: SavedObjectTaggingPluginStart;
+  apmSourcesAccess: ApmSourceAccessPluginStart;
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 

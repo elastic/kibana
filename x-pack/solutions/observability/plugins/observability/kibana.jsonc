@@ -46,6 +46,7 @@
       "esql",
       "savedObjectsTagging",
       "streams",
+      "apmSourcesAccess",
     ],
     "optionalPlugins": [
       "aiops",
