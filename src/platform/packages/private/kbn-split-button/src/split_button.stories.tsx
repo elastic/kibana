@@ -207,7 +207,7 @@ export const WithNotificationIndicator = {
     >['notificationIndicatorSize'];
     size: React.ComponentProps<typeof SplitButton>['size'];
   }) => (
-    <SplitButtonWithNotification secondaryButtonIcon={DEFAULT_SECONDARY_ICON} {...args}>
+    <SplitButtonWithNotification secondaryButtonIcon="arrowDown" {...args}>
       Save
     </SplitButtonWithNotification>
   ),
