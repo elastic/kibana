@@ -20,6 +20,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
+import type { AgentConfiguration, ToolSelection } from '@kbn/onechat-common';
 import { AGENT_BUILDER_AGENTS } from '../../../common';
 import { useAgents } from '../hooks/use_agents';
 import { useKibana } from '../hooks/use_kibana';
@@ -113,11 +114,19 @@ export const SnapshotsSection: React.FC = () => {
                   },
                 },
                 {
-                  field: 'type',
-                  name: i18n.translate('xpack.workplaceai.gettingStarted.snapshots.typeColumn', {
-                    defaultMessage: 'Type',
+                  field: 'configuration',
+                  name: i18n.translate('xpack.workplaceai.gettingStarted.snapshots.toolsColumn', {
+                    defaultMessage: 'Tools',
                   }),
-                  render: (type: string) => type || '-',
+                  render: (configuration?: AgentConfiguration) => {
+                    const toolCount =
+                      configuration?.tools?.reduce(
+                        (count: number, selection: ToolSelection) =>
+                          count + ('tool_ids' in selection ? selection.tool_ids.length : 0),
+                        0
+                      ) || 0;
+                    return toolCount;
+                  },
                 },
               ]}
             />
