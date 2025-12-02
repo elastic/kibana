@@ -15,7 +15,7 @@ export class ErrorPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
 
   public async expectForbidden() {
-    this.retry.tryForTime(10000, async () => {
+    await this.retry.tryForTime(10000, async () => {
       const messageText = await this.common.getBodyText();
       expect(messageText).to.contain('You do not have permission to access the requested page');
     });
