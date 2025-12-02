@@ -97,8 +97,6 @@ export function mapStepsToYamlLines(yamlString: string): YamlLineMap {
 
     return finalLineMap;
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.warn('Failed to parse YAML for line mapping:', error);
     return {};
   }
 }

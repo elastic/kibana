@@ -144,6 +144,7 @@ const DSLErrorsList: React.FC<{ errors: string[] }> = ({ errors }) => {
     <EuiPanel paddingSize="s" hasShadow={false} grow={false} color="danger">
       <EuiAccordion
         id="dsl-errors-accordion"
+        initialIsOpen={true}
         buttonContent={
           <strong>
             {i18n.translate(
