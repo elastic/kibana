@@ -5,10 +5,5 @@
  * 2.0.
  */
 
-import type { SiemMigrationFilters } from '../types';
-
-export interface RuleMigrationFilters extends SiemMigrationFilters {
-  titles?: string[];
-  prebuilt?: boolean;
-  missingIndex?: boolean;
-}
+export const TACTICS_BASE_URL = 'https://attack.mitre.org/tactics/';
+export const TECHNIQUES_BASE_URL = 'https://attack.mitre.org/techniques/';

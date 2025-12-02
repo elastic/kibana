@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-import type { SiemMigrationFilters } from '../types';
-
-export interface RuleMigrationFilters extends SiemMigrationFilters {
-  titles?: string[];
-  prebuilt?: boolean;
-  missingIndex?: boolean;
-}
+export { getMockQRadarXml } from './get_mock_qradar_rule';
