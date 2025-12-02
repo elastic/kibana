@@ -132,6 +132,7 @@ describe('updateGapsBatch', () => {
           backfillClient,
           actionsClient,
           ruleId,
+          initiator: backfillInitiator.USER,
         });
       });
     });
