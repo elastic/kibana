@@ -11,6 +11,8 @@ import type { YAMLMap } from 'yaml';
 import { isMap, isScalar } from 'yaml';
 import type { HttpSetup, NotificationsStart } from '@kbn/core/public';
 import type { monaco } from '@kbn/monaco';
+import type { InternalConnectorContract } from '@kbn/workflows';
+import { isInternalConnector } from '@kbn/workflows';
 import { BaseMonacoConnectorHandler } from './base_monaco_connector_handler';
 import { getAllConnectors } from '../../../../../common/schema';
 import { getElasticsearchRequestInfo } from '../elasticsearch_step_utils';
@@ -45,8 +47,14 @@ export class ElasticsearchMonacoConnectorHandler extends BaseMonacoConnectorHand
       const withParams = this.extractWithParams(stepContext.stepNode);
       const requestInfo = getElasticsearchRequestInfo(connectorType, withParams);
 
+      // Get connector contract
+      const connector = this.getConnectorContract(connectorType);
+      if (!connector) {
+        return null;
+      }
+
       // Get documentation URL from connector definition
-      const documentationUrl = this.getDocumentationUrl(connectorType);
+      const documentationUrl = this.getDocumentationUrl(connector);
 
       // Generate console format
       const consoleFormat = this.generateConsoleFormat(requestInfo, withParams);
@@ -55,13 +63,13 @@ export class ElasticsearchMonacoConnectorHandler extends BaseMonacoConnectorHand
       const content = [
         `**Endpoint**: \`${requestInfo.method} ${requestInfo.url}\``,
         '',
-        `**Description**: Execute ${requestInfo.method} request to ${requestInfo.url}`,
+        this.getDescription(connector),
         '',
         documentationUrl
-          ? `<span style="text-shadow: 0 0 6px rgba(255,165,0,0.6); opacity: 0.8;">📖</span> **[View API Documentation](${documentationUrl})** - Opens in new tab`
+          ? `<span style="text-shadow: 0 0 6px rgba(255,165,0,0.6); opacity: 0.8;">📖</span> **Documentation** \n\n [${documentationUrl}](${documentationUrl}) (Opens in new tab)`
           : '',
         documentationUrl ? '' : '',
-        `### <span style="text-shadow: 0 0 4px rgba(0,200,0,0.4); opacity: 0.8;">⚡</span> Console Format`,
+        `**Console Format**`,
         '```http',
         consoleFormat,
         '```',
@@ -188,19 +196,32 @@ export class ElasticsearchMonacoConnectorHandler extends BaseMonacoConnectorHand
     return withParams;
   }
 
+  private getConnectorContract(connectorType: string): InternalConnectorContract | null {
+    const allConnectors = getAllConnectors();
+    if (!allConnectors) {
+      return null;
+    }
+    const connector = allConnectors.find((c) => c.type === connectorType);
+    if (!connector || !isInternalConnector(connector)) {
+      return null;
+    }
+    return connector as InternalConnectorContract;
+  }
+
+  private getDescription(connector: InternalConnectorContract): string | null {
+    if (connector.description) {
+      // Remove "Documentation: " from the description as we add it manually to hover content
+      return connector.description.replace(/Documentation: .*$/, '');
+    }
+    return null;
+  }
+
   /**
    * Get documentation URL for the connector type
    */
-  private getDocumentationUrl(connectorType: string): string | null {
+  private getDocumentationUrl(connector: InternalConnectorContract): string | null {
     try {
-      const allConnectors = getAllConnectors();
-      if (!allConnectors) {
-        return null;
-      }
-
-      const connector = allConnectors.find((c) => c.type === connectorType);
-
-      if (connector && connector.documentation) {
+      if (connector.documentation) {
         // Similar to Console, replace version placeholders with current version
         let docUrl = connector.documentation;
 

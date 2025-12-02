@@ -51,14 +51,12 @@ export interface StepContext {
   stepName: string;
   /** Type of the step */
   stepType: string;
-  /** Index of the step in the steps array */
-  stepIndex: number;
   /** Whether we're inside the 'with' block */
   isInWithBlock: boolean;
   /** YAML node for the entire step */
   stepNode: YAMLMap;
   /** YAML node for the type field */
-  typeNode: Scalar<string>;
+  typeNode: Scalar<unknown>;
 }
 
 /**
@@ -164,4 +162,11 @@ export interface MonacoHandlerRegistry {
 
   /** Clear all handlers */
   clear(): void;
+}
+
+export interface ConnectorInfo {
+  name: string;
+  description: string;
+  documentation?: string;
+  examples?: ConnectorExamples;
 }

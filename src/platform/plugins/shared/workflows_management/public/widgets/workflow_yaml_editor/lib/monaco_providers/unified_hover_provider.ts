@@ -8,7 +8,6 @@
  */
 
 import type YAML from 'yaml';
-import { isMap, isScalar, type YAMLMap } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import type {
   HoverContext,
@@ -18,7 +17,9 @@ import type {
 } from './provider_interfaces';
 import { getMonacoConnectorHandler } from './provider_registry';
 import { getPathAtOffset } from '../../../../../common/lib/yaml';
+import { performComputation } from '../../../../entities/workflows/store/workflow_detail/utils/computation';
 import { isYamlValidationMarkerOwner } from '../../../../features/validate_workflow_yaml/model/types';
+import { getInterceptedHover } from '../hover/get_intercepted_hover';
 
 export const UNIFIED_HOVER_PROVIDER_ID = 'unified-hover-provider';
 
@@ -35,10 +36,21 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
     this.getYamlDocument = config.getYamlDocument;
   }
 
+  async provideHover(
+    model: monaco.editor.ITextModel,
+    position: monaco.Position,
+    cancellationToken: monaco.CancellationToken
+  ): Promise<monaco.languages.Hover | null> {
+    const customHover = await this.provideCustomHover(model, position);
+    if (customHover) {
+      return customHover;
+    }
+    return getInterceptedHover(model, position, cancellationToken);
+  }
   /**
    * Provide hover information for the current position
    */
-  async provideHover(
+  async provideCustomHover(
     model: monaco.editor.ITextModel,
     position: monaco.Position
   ): Promise<monaco.languages.Hover | null> {
@@ -162,7 +174,7 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
       }
 
       // Detect connector type and step context
-      const stepContext = this.detectStepContext(yamlDocument, yamlPath, position);
+      const stepContext = this.detectStepContext(model.getValue(), position);
       if (!stepContext?.stepType) {
         // console.log('🔍 buildHoverContext: No stepContext found for path:', yamlPath);
         return null;
@@ -255,79 +267,26 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
     }
   }
 
-  /**
-   * Detect step context from YAML path and document
-   */
-  private detectStepContext(
-    yamlDocument: YAML.Document,
-    yamlPath: (string | number)[],
-    position: monaco.Position
-  ): StepContext | null {
-    // Look for steps in the path
-    const stepsIndex = yamlPath.findIndex((segment) => segment === 'steps');
-    if (stepsIndex === -1) {
+  private detectStepContext(yamlString: string, position: monaco.Position): StepContext | null {
+    const computedData = performComputation(yamlString);
+    if (!computedData.workflowLookup) {
       return null;
     }
 
-    // Get step index
-    const stepIndex = parseInt(String(yamlPath[stepsIndex + 1]), 10);
-    if (isNaN(stepIndex)) {
+    const stepInfo = Object.values(computedData.workflowLookup.steps).find(
+      (step) => step.lineStart <= position.lineNumber && position.lineNumber <= step.lineEnd
+    );
+    if (!stepInfo) {
       return null;
     }
-
-    try {
-      // Get step node - handle being inside 'with' block
-      let stepPath = yamlPath.slice(0, stepsIndex + 2);
-
-      // If we're deeper in the path (e.g., in 'with' block), still get the step node
-      if (yamlPath.length > stepsIndex + 2) {
-        stepPath = yamlPath.slice(0, stepsIndex + 2);
-      }
-
-      const stepNode = yamlDocument.getIn(stepPath, true);
-      if (!stepNode || !isMap(stepNode)) {
-        // console.log('🔍 detectStepContext: No stepNode found for stepPath:', stepPath);
-        return null;
-      }
-
-      // TODO: use workflowLookup instead of parsing here
-      // Extract step information
-      // @ts-expect-error - stepNode is a YAMLMap
-      const stepName = (stepNode as YAMLMap)?.get?.('name')?.value || `step_${stepIndex}`;
-      const typeNode = (stepNode as YAMLMap)?.get?.('type', true);
-      const stepType = typeNode?.value as string;
-
-      // console.log('🔍 detectStepContext debug:', {
-      //   stepName,
-      //   stepType,
-      //   typeNode: typeNode?.value,
-      //   stepNodeType: typeof stepNode,
-      // });
-
-      if (!stepType) {
-        // console.log('❌ No stepType found, returning null');
-        return null;
-      }
-
-      if (!isScalar<string>(typeNode)) {
-        return null;
-      }
-
-      // Check if we're in the 'with' block
-      const isInWithBlock = yamlPath.some((segment) => segment === 'with');
-
-      return {
-        stepName,
-        stepType,
-        stepIndex,
-        isInWithBlock,
-        stepNode,
-        typeNode,
-      };
-    } catch (error) {
-      // console.warn('UnifiedHoverProvider: Error detecting step context', error);
-      return null;
-    }
+    // console.log('🔍 detectStepContext: Step info:', stepInfo);
+    return {
+      stepName: stepInfo.stepId,
+      stepType: stepInfo.stepType,
+      isInWithBlock: false,
+      stepNode: stepInfo.stepYamlNode,
+      typeNode: stepInfo.propInfos.type.valueNode,
+    };
   }
 
   /**

@@ -9,7 +9,11 @@
 
 import type { monaco } from '@kbn/monaco';
 import { BaseMonacoConnectorHandler } from './base_monaco_connector_handler';
-import type { ConnectorExamples, HoverContext } from '../monaco_providers/provider_interfaces';
+import type {
+  ConnectorExamples,
+  ConnectorInfo,
+  HoverContext,
+} from '../monaco_providers/provider_interfaces';
 
 /**
  * Generic Monaco connector handler for unknown/unsupported connector types
@@ -40,7 +44,10 @@ export class GenericMonacoConnectorHandler extends BaseMonacoConnectorHandler {
       }
 
       // Determine connector category
-      const category = this.categorizeConnector(connectorType);
+      const connectorInfo = this.getConnectorInfo(connectorType);
+      if (!connectorInfo) {
+        return null;
+      }
 
       // Create basic hover content
       const content = [
@@ -48,11 +55,11 @@ export class GenericMonacoConnectorHandler extends BaseMonacoConnectorHandler {
         '',
         this.createConnectorOverview(
           connectorType,
-          `${category.name} connector for workflow automation`,
+          `${connectorInfo.name} connector for workflow automation`,
           [
-            `**Type**: ${category.description}`,
+            `**Type**: ${connectorInfo.description}`,
             '**Usage**: Configure parameters in the `with` block to customize the connector behavior.',
-            category.documentation ? `**Documentation**: ${category.documentation}` : '',
+            connectorInfo.documentation ? `**Documentation**: ${connectorInfo.documentation}` : '',
           ].filter(Boolean)
         ),
         '',
@@ -72,16 +79,19 @@ export class GenericMonacoConnectorHandler extends BaseMonacoConnectorHandler {
    * Get basic examples for generic connector types
    */
   getExamples(connectorType: string): ConnectorExamples | null {
-    const category = this.categorizeConnector(connectorType);
+    const connectorInfo = this.getConnectorInfo(connectorType);
+    if (!connectorInfo) {
+      return null;
+    }
 
     // Return category-specific examples
-    if (category.examples) {
+    if (connectorInfo.examples) {
       return {
-        params: category.examples.params,
+        params: connectorInfo.examples.params,
         snippet: `- name: ${connectorType.replace(/[^a-zA-Z0-9]/g, '_')}_step
   type: ${connectorType}
   with:
-${Object.entries(category.examples.params || {})
+${Object.entries(connectorInfo.examples.params || {})
   .map(
     ([key, value]) =>
       `    ${key}: ${typeof value === 'string' ? `"${value}"` : JSON.stringify(value)}`
@@ -96,12 +106,7 @@ ${Object.entries(category.examples.params || {})
   /**
    * Categorize connector types to provide better help
    */
-  private categorizeConnector(connectorType: string): {
-    name: string;
-    description: string;
-    documentation?: string;
-    examples?: ConnectorExamples;
-  } {
+  private getConnectorInfo(connectorType: string): ConnectorInfo | null {
     // HTTP-related connectors
     if (connectorType.includes('http') || connectorType.includes('webhook')) {
       return {
@@ -127,7 +132,6 @@ ${Object.entries(category.examples.params || {})
         examples: {
           params: {
             message: 'Hello from workflow!',
-            channel: '#general',
           },
         },
       };
@@ -150,7 +154,7 @@ ${Object.entries(category.examples.params || {})
     }
 
     // Wait/delay connectors
-    if (connectorType.includes('wait') || connectorType.includes('delay')) {
+    if (connectorType.includes('wait')) {
       return {
         name: 'Wait',
         description: 'Timing connector for workflow delays',
@@ -164,7 +168,7 @@ ${Object.entries(category.examples.params || {})
     }
 
     // Console/logging connectors
-    if (connectorType.includes('console') || connectorType.includes('log')) {
+    if (connectorType.includes('console')) {
       return {
         name: 'Console',
         description: 'Logging connector for debugging and monitoring',
@@ -197,12 +201,7 @@ ${Object.entries(category.examples.params || {})
       };
     }
 
-    // Default fallback
-    return {
-      name: 'Custom',
-      description: 'Custom connector for specialized workflow tasks',
-      documentation: 'Refer to connector-specific documentation for parameter details',
-    };
+    return null;
   }
 
   /**
@@ -217,10 +216,13 @@ ${Object.entries(category.examples.params || {})
     ];
 
     // Add connector-specific hints
-    const category = this.categorizeConnector(connectorType);
-    if (category.examples?.params) {
+    const connectorInfo = this.getConnectorInfo(connectorType);
+    if (!connectorInfo) {
+      return '';
+    }
+    if (connectorInfo.examples?.params) {
       lines.push('', '**Example Parameters:**');
-      for (const [key, value] of Object.entries(category.examples.params)) {
+      for (const [key, value] of Object.entries(connectorInfo.examples.params)) {
         lines.push(
           `- \`${key}\`: ${typeof value === 'string' ? `"${value}"` : JSON.stringify(value)}`
         );
