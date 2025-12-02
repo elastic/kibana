@@ -8,10 +8,10 @@
  */
 
 import { EDITOR_MARKER } from '@kbn/esql-ast/src/definitions/constants';
-import { correctQuerySyntax } from '@kbn/esql-ast/src/definitions/utils/ast';
+import { correctQuerySyntax, isMarkerNode } from '@kbn/esql-ast/src/definitions/utils/ast';
 import type { ESQLAstItem } from '@kbn/esql-ast';
 import { Parser, Walker } from '@kbn/esql-ast';
-import { getAstContext, isMarkerNode } from './context';
+import { getCursorContext } from './get_cursor_context';
 
 const assertMarkerRemoved = (_query: string) => {
   const query = correctQuerySyntax(_query);
@@ -20,7 +20,7 @@ const assertMarkerRemoved = (_query: string) => {
   }
 
   const { root } = Parser.parse(query);
-  const result = getAstContext(query, root, _query.length);
+  const result = getCursorContext(query, root, _query.length);
 
   if (!result.command) {
     throw new Error(`No command found in AST for query: ${query}`);
