@@ -21,6 +21,7 @@ export function UnauthenticatedPage({ loginUrl }: Props) {
   return (
     <EuiEmptyPrompt
       iconType="securityApp"
+      data-test-subj="promptPage"
       title={
         <h2>
           {i18n.translate('xpack.security.unauthenticated.pageTitle', {

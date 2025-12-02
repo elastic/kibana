@@ -182,7 +182,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(401);
 
         expect(unauthenticatedResponse.headers['content-security-policy']).to.be.a('string');
-        expect(unauthenticatedResponse.text).to.contain('error');
+        expect(unauthenticatedResponse.text).to.contain('<h1>Unauthenticated</h1>');
       });
 
       it('should fail if state is not matching', async () => {
@@ -192,7 +192,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(401);
 
         expect(unauthenticatedResponse.headers['content-security-policy']).to.be.a('string');
-        expect(unauthenticatedResponse.text).to.contain('error');
+        expect(unauthenticatedResponse.text).to.contain('<h1>Unauthenticated</h1>');
       });
 
       it('should succeed if both the OpenID Connect response and the cookie are provided', async () => {

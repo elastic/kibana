@@ -25,6 +25,7 @@ export function ResetSessionPage({ logoutUrl }: Props) {
   return (
     <EuiEmptyPrompt
       iconType="securityApp"
+      data-test-subj="promptPage"
       title={
         <h2>
           {i18n.translate('xpack.security.resetSession.title', {

@@ -197,7 +197,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(401);
 
         expect(unauthenticatedResponse.headers['content-security-policy']).to.be.a('string');
-        expect(unauthenticatedResponse.text).to.contain('error');
+        expect(unauthenticatedResponse.text).to.contain('<h1>Unauthenticated</h1>');
       });
 
       it('should succeed if both SAML response and handshake cookie are provided', async () => {
@@ -244,7 +244,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(401);
 
         expect(unauthenticatedResponse.headers['content-security-policy']).to.be.a('string');
-        expect(unauthenticatedResponse.text).to.contain('error');
+        expect(unauthenticatedResponse.text).to.contain('<h1>Unauthenticated</h1>');
       });
     });
 
