@@ -22,7 +22,7 @@ pageLoadAssetSize:
   contentConnectors: 33014
   contentManagement: 8350
   controls: 12234
-  core: 565001
+  core: 564938
   cps: 5918
   crossClusterReplication: 12662
   customIntegrations: 11715
@@ -62,7 +62,7 @@ pageLoadAssetSize:
   expressionLegacyMetricVis: 11834
   expressionMetricVis: 17559
   expressionPartitionVis: 29826
-  expressions: 105113
+  expressions: 105076
   expressionTagcloud: 12643
   expressionXY: 45000
   features: 4145
@@ -88,7 +88,7 @@ pageLoadAssetSize:
   inputControlVis: 7660
   inspectComponent: 4900
   inspector: 17954
-  interactiveSetup: 36654
+  interactiveSetup: 36524
   intercepts: 19011
   kibanaOverview: 6339
   kibanaReact: 22503
@@ -122,7 +122,7 @@ pageLoadAssetSize:
   observabilityLogsExplorer: 4918
   observabilityOnboarding: 12872
   observabilityShared: 75115
-  onechat: 25223
+  onechat: 25218
   osquery: 47422
   painlessLab: 6299
   presentationPanel: 11418
@@ -157,12 +157,12 @@ pageLoadAssetSize:
   searchSynonyms: 6371
   security: 79627
   securitySolution: 186285
-  securitySolutionEss: 43319
-  securitySolutionServerless: 62689
-  serverless: 7852
-  serverlessObservability: 23774
-  serverlessSearch: 31189
-  serverlessWorkplaceAI: 7279
+  securitySolutionEss: 38783
+  securitySolutionServerless: 52185
+  serverless: 7451
+  serverlessObservability: 19472
+  serverlessSearch: 26393
+  serverlessWorkplaceAI: 6736
   sessionView: 47912
   share: 58677
   slo: 36645
@@ -204,5 +204,5 @@ pageLoadAssetSize:
   visualizations: 38375
   watcher: 10485
   workflowsExtensions: 2554
-  workflowsManagement: 8545
-  workplaceAIApp: 6454
+  workflowsManagement: 8497
+  workplaceAIApp: 6135
