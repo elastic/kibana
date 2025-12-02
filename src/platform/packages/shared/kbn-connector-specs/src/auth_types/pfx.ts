@@ -16,7 +16,7 @@ import * as i18n from './translations';
 
 const authSchema = z
   .object({
-    pfx: z.string().meta({ label: i18n.PFX_AUTH_CERT_LABEL, sensitive: true }),
+    pfx: z.base64().meta({ label: i18n.PFX_AUTH_CERT_LABEL, sensitive: true }),
     passphrase: z
       .string()
       .meta({ label: i18n.PFX_AUTH_PASSPHRASE_LABEL, sensitive: true })

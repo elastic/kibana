@@ -16,8 +16,8 @@ import * as i18n from './translations';
 
 const authSchema = z
   .object({
-    crt: z.string().meta({ label: i18n.CRT_AUTH_CERT_LABEL, sensitive: true }),
-    key: z.string().meta({ label: i18n.CRT_AUTH_KEY_LABEL, sensitive: true }),
+    crt: z.base64().meta({ label: i18n.CRT_AUTH_CERT_LABEL, sensitive: true }),
+    key: z.base64().meta({ label: i18n.CRT_AUTH_KEY_LABEL, sensitive: true }),
     passphrase: z
       .string()
       .meta({ label: i18n.CRT_AUTH_PASSPHRASE_LABEL, sensitive: true })
