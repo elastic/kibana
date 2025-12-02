@@ -8,26 +8,41 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
-import type { MigrationSnapshot } from '../../types';
-import type { FixtureTemplate } from './types';
-import { getVersions } from '../versions';
-import { getTypeFixtures } from './get_type_fixtures';
+import { relative } from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { getFixturesBasePath, getTypeFixtures } from './get_type_fixtures';
+import type { TypeVersionFixtures } from './types';
 
 interface GetLatestTypeFixturesParams<T = any> {
   type: SavedObjectsType<T>;
-  snapshot: MigrationSnapshot;
+  previous: string;
+  current: string;
   fix: boolean;
 }
 export async function getLatestTypeFixtures({
   type,
-  snapshot,
+  previous,
+  current,
   fix,
 }: GetLatestTypeFixturesParams): Promise<{
-  previous: FixtureTemplate[];
-  current: FixtureTemplate[];
+  previous: TypeVersionFixtures;
+  current: TypeVersionFixtures;
 }> {
-  const typeSnapshot = snapshot.typeDefinitions[type.name];
-  const [current, previous] = getVersions(typeSnapshot);
-  const fixtures = await getTypeFixtures({ type, current, previous, generate: fix });
-  return { previous: fixtures[previous], current: fixtures[current] };
+  const { name } = type;
+  const path = getFixturesBasePath(name, current);
+  const relativePath = relative(REPO_ROOT, path);
+  const fixtures = await getTypeFixtures({ path, type, current, previous, generate: fix });
+
+  return {
+    previous: {
+      relativePath,
+      version: previous,
+      documents: fixtures[previous],
+    },
+    current: {
+      relativePath,
+      version: current,
+      documents: fixtures[current],
+    },
+  };
 }
