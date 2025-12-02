@@ -123,7 +123,9 @@ export class OnechatPlugin
     const runner = runnerFactory.getRunner();
 
     return {
-      runAgent: agents.execute.bind(agents),
+      agents: {
+        runAgent: agents.execute.bind(agents),
+      },
       tools: {
         getRegistry: ({ request }) => tools.getRegistry({ request }),
         execute: runner.runTool.bind(runner),
