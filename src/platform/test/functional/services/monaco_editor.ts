@@ -8,7 +8,6 @@
  */
 
 import expect from '@kbn/expect';
-import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
 export class MonacoEditorService extends FtrService {
@@ -17,14 +16,20 @@ export class MonacoEditorService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly findService = this.ctx.getService('find');
 
-  public async waitCodeEditorReady(containerTestSubjId: string): Promise<WebElementWrapper> {
-    const editorContainer = await this.testSubjects.find(containerTestSubjId);
-    const editor = await editorContainer.findByCssSelector('textarea');
-    // Wait for the editor to be enabled
-    await this.retry.waitFor('editor enabled', async () => {
-      return (await editor.isDisplayed()) && (await editor.isEnabled());
+  public async waitCodeEditorReady(containerTestSubjId: string): Promise<void> {
+    await this.testSubjects.find(containerTestSubjId);
+    // Note: In Monaco 0.54.0, the textarea may not be "displayed" in Selenium terms
+    // but the editor is still functional, so we check via Monaco API instead
+    await this.retry.waitFor('editor ready', async () => {
+      const isReady = await this.browser.execute((id: string) => {
+        const container = document.querySelector(`[data-test-subj="${id}"]`);
+        const monacoEditor = window.MonacoEnvironment?.monaco?.editor
+          ?.getEditors()
+          ?.find((e: any) => container?.contains(e.getDomNode()));
+        return !!monacoEditor;
+      }, containerTestSubjId);
+      return isReady;
     });
-    return editor;
   }
 
   public async getCodeEditorValue(nthIndex: number = 0) {
@@ -43,19 +48,24 @@ export class MonacoEditorService extends FtrService {
     return values[nthIndex] as string;
   }
 
+  /**
+   * Focus the editor using Monaco's API.
+   */
   public async focusCodeEditor(testSubjId: string) {
     await this.browser.execute((id: string) => {
       const container = document.querySelector(`[data-test-subj="${id}"]`);
-      const textarea = container?.querySelector('textarea');
-      if (textarea) {
-        textarea.focus();
+      const editor = window.MonacoEnvironment?.monaco?.editor
+        ?.getEditors()
+        ?.find((e: any) => container?.contains(e.getDomNode()));
+      if (editor) {
+        editor.focus();
       }
     }, testSubjId);
   }
 
-  public async typeCodeEditorValue(value: string, testSubjId: string, triggerSuggest = true) {
+  public async typeCodeEditorValue(value: string, testSubjId: string) {
     await this.browser.execute(
-      (id: string, text: string, suggest: boolean) => {
+      (id: string, text: string) => {
         const container = document.querySelector(`[data-test-subj="${id}"]`);
         const editor = window
           .MonacoEnvironment!.monaco.editor.getEditors()
@@ -64,28 +74,18 @@ export class MonacoEditorService extends FtrService {
         if (!editor) return;
 
         editor.focus();
-        const pos = editor.getPosition() || { lineNumber: 1, column: 1 };
-        editor.executeEdits('test', [
-          {
-            range: {
-              startLineNumber: pos.lineNumber,
-              startColumn: pos.column,
-              endLineNumber: pos.lineNumber,
-              endColumn: pos.column,
-            },
-            text,
-          },
-        ]);
-        if (suggest) {
-          editor.trigger('keyboard', 'editor.action.triggerSuggest', {});
+        const model = editor.getModel();
+        if (model) {
+          model.setValue(text);
+          const endLine = model.getLineCount();
+          const endCol = model.getLineMaxColumn(endLine);
+          editor.setPosition({ lineNumber: endLine, column: endCol });
         }
+        editor.trigger('keyboard', 'editor.action.triggerSuggest', {});
       },
       testSubjId,
-      value,
-      triggerSuggest
+      value
     );
-
-    await this.focusCodeEditor(testSubjId);
   }
 
   public async setCodeEditorValue(value: string, nthIndex?: number) {
@@ -134,7 +134,7 @@ export class MonacoEditorService extends FtrService {
         .find((e: any) => container?.contains(e.getDomNode()));
       editor?.getModel()?.setValue('');
     }, testSubjId);
-
+    // Establish proper DOM focus for subsequent Selenium keyboard input
     await this.focusCodeEditor(testSubjId);
   }
 
@@ -167,5 +167,88 @@ export class MonacoEditorService extends FtrService {
         });
       }
     }, testSubjId);
+  }
+
+  // --- Methods that accept CSS selectors (for editors without data-test-subj) ---
+
+  public async focusCodeEditorByCssSelector(cssSelector: string) {
+    await this.browser.execute((selector: string) => {
+      const container = document.querySelector(selector);
+      const editor = window.MonacoEnvironment?.monaco?.editor
+        ?.getEditors()
+        ?.find((e: any) => container?.contains(e.getDomNode()));
+      if (editor) {
+        editor.focus();
+      }
+    }, cssSelector);
+  }
+
+  public async typeCodeEditorValueByCssSelector(
+    cssSelector: string,
+    value: string,
+    triggerSuggest = true
+  ) {
+    await this.browser.execute(
+      (selector: string, text: string, suggest: boolean) => {
+        const container = document.querySelector(selector);
+        const editor = window
+          .MonacoEnvironment!.monaco.editor.getEditors()
+          .find((e: any) => container?.contains(e.getDomNode()));
+
+        if (!editor) return;
+
+        editor.focus();
+        const pos = editor.getPosition() || { lineNumber: 1, column: 1 };
+        editor.executeEdits('test', [
+          {
+            range: {
+              startLineNumber: pos.lineNumber,
+              startColumn: pos.column,
+              endLineNumber: pos.lineNumber,
+              endColumn: pos.column,
+            },
+            text,
+          },
+        ]);
+        if (suggest) {
+          editor.trigger('keyboard', 'editor.action.triggerSuggest', {});
+        }
+      },
+      cssSelector,
+      value,
+      triggerSuggest
+    );
+    await this.focusCodeEditorByCssSelector(cssSelector);
+  }
+
+  public async setCodeEditorValueByCssSelector(cssSelector: string, value: string) {
+    await this.browser.execute(
+      (selector: string, text: string) => {
+        const container = document.querySelector(selector);
+        const editor = window
+          .MonacoEnvironment!.monaco.editor.getEditors()
+          .find((e: any) => container?.contains(e.getDomNode()));
+        if (editor) {
+          editor.getModel()?.setValue(text);
+          editor.focus();
+        }
+      },
+      cssSelector,
+      value
+    );
+  }
+
+  public async clearCodeEditorValueByCssSelector(cssSelector: string) {
+    await this.setCodeEditorValueByCssSelector(cssSelector, '');
+  }
+
+  public async getCodeEditorValueByCssSelector(cssSelector: string): Promise<string> {
+    return await this.browser.execute((selector: string) => {
+      const container = document.querySelector(selector);
+      const editor = window
+        .MonacoEnvironment!.monaco.editor.getEditors()
+        .find((e: any) => container?.contains(e.getDomNode()));
+      return editor?.getModel()?.getValue() ?? '';
+    }, cssSelector);
   }
 }
