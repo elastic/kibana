@@ -13,8 +13,6 @@ import {
   EuiTitle,
   EuiText,
   EuiSpacer,
-  EuiFormRow,
-  EuiFieldText,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
@@ -35,7 +33,12 @@ import { CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS } from '@kbn/cloud-securi
 import type { CloudProviders } from '../types';
 import { useCloudConnectorUsage } from '../hooks/use_cloud_connector_usage';
 import { useUpdateCloudConnector } from '../hooks/use_update_cloud_connector';
-import { isAwsCloudConnectorVars, isAzureCloudConnectorVars } from '../utils';
+import {
+  isAwsCloudConnectorVars,
+  isAzureCloudConnectorVars,
+  isCloudConnectorNameValid,
+} from '../utils';
+import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
 
 interface CloudConnectorPoliciesFlyoutProps {
   cloudConnectorId: string;
@@ -57,6 +60,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
   const flyoutTitleId = useGeneratedHtmlId();
   const [cloudConnectorName, setCloudConnectorName] = useState(initialName);
   const [editedName, setEditedName] = useState(initialName);
+  const [isNameValid, setIsNameValid] = useState(() => isCloudConnectorNameValid(initialName));
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
@@ -78,6 +82,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
     (updatedConnector) => {
       setCloudConnectorName(updatedConnector.name);
       setEditedName(updatedConnector.name);
+      setIsNameValid(true);
     }
   );
 
@@ -114,11 +119,12 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
     }
   };
 
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEditedName(e.target.value);
-  };
+  const handleNameChange = useCallback((name: string, valid: boolean) => {
+    setEditedName(name);
+    setIsNameValid(valid);
+  }, []);
 
-  const isSaveDisabled = !editedName || editedName === cloudConnectorName || isUpdating;
+  const isSaveDisabled = !isNameValid || editedName === cloudConnectorName || isUpdating;
 
   const tableCaption = useMemo(
     () =>
@@ -150,9 +156,10 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
   }, []);
 
   const handleNavigateToPolicy = useCallback(
-    (policyId: string, packagePolicyId: string) => {
-      const [, path] = pagePathGetters.edit_integration({ policyId, packagePolicyId });
-      application?.navigateToApp('fleet', { path });
+    (packagePolicyId: string) => {
+      // Use integrations app route to ensure cancel navigates back to integrations page
+      const [, path] = pagePathGetters.integration_policy_edit({ packagePolicyId });
+      application?.navigateToApp('integrations', { path });
     },
     [application]
   );
@@ -168,15 +175,11 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
           }
         ),
         render: (name: string, item) => {
-          // Use the first policy_id for navigation
-          const policyId = item.policy_ids[0];
-          if (!policyId) return name;
-
           return (
             <EuiLink
               onClick={(e: React.MouseEvent) => {
                 e.preventDefault();
-                handleNavigateToPolicy(policyId, item.id);
+                handleNavigateToPolicy(item.id);
               }}
               data-test-subj={CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.POLICY_LINK}
             >
@@ -276,22 +279,11 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
         <EuiSpacer size="m" />
 
         {/* Edit Name Section */}
-        <EuiFormRow
-          label={i18n.translate(
-            'securitySolutionPackages.cloudSecurityPosture.cloudConnectorPoliciesFlyout.cloudConnectorNameLabel',
-            {
-              defaultMessage: 'Cloud Connector Name',
-            }
-          )}
-          fullWidth
-        >
-          <EuiFieldText
-            value={editedName}
-            onChange={handleNameChange}
-            fullWidth
-            data-test-subj={CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.NAME_INPUT}
-          />
-        </EuiFormRow>
+        <CloudConnectorNameField
+          value={editedName}
+          onChange={handleNameChange}
+          data-test-subj={CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.NAME_INPUT}
+        />
 
         <EuiSpacer size="m" />
 

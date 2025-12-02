@@ -85,7 +85,9 @@ export const CloudConnectorSelector = ({
         value: connector.id,
         inputDisplay: (
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem>{connector.name}</EuiFlexItem>
+            <EuiFlexItem style={{ minWidth: 0 }}>
+              <EuiTextTruncate text={connector.name} />
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 content={i18n.translate(

@@ -227,8 +227,8 @@ describe('CloudConnectorPoliciesFlyout', () => {
     );
     await user.click(policyLink);
 
-    expect(mockNavigateToApp).toHaveBeenCalledWith('fleet', {
-      path: '/policies/agent-policy-1/edit-integration/policy-1',
+    expect(mockNavigateToApp).toHaveBeenCalledWith('integrations', {
+      path: '/edit-integration/policy-1',
     });
   });
 
@@ -363,6 +363,115 @@ describe('CloudConnectorPoliciesFlyout', () => {
 
       // Verify the hook was called with new page size
       expect(mockUseCloudConnectorUsage).toHaveBeenLastCalledWith('connector-123', 1, 25);
+    });
+  });
+
+  describe('name validation', () => {
+    it('should show validation error when name exceeds 255 characters', async () => {
+      const user = userEvent.setup();
+      renderFlyout();
+
+      const nameInput = screen.getByTestId(
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.NAME_INPUT
+      );
+
+      await user.clear(nameInput);
+      await user.click(nameInput);
+      await user.paste('a'.repeat(256));
+
+      expect(
+        screen.getByText('Cloud Connector Name must be 255 characters or less')
+      ).toBeInTheDocument();
+    });
+
+    it('should keep save button disabled when name exceeds 255 characters', async () => {
+      const user = userEvent.setup();
+      renderFlyout();
+
+      const nameInput = screen.getByTestId(
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.NAME_INPUT
+      );
+      const saveButton = screen.getByTestId(
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.SAVE_NAME_BUTTON
+      );
+
+      await user.clear(nameInput);
+      await user.click(nameInput);
+      await user.paste('a'.repeat(256));
+
+      expect(saveButton).toBeDisabled();
+    });
+
+    it('should show validation error when name is empty', async () => {
+      const user = userEvent.setup();
+      renderFlyout();
+
+      const nameInput = screen.getByTestId(
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.NAME_INPUT
+      );
+
+      await user.clear(nameInput);
+
+      expect(screen.getByText('Cloud Connector Name is required')).toBeInTheDocument();
+    });
+
+    it('should keep save button disabled when name is empty', async () => {
+      const user = userEvent.setup();
+      renderFlyout();
+
+      const nameInput = screen.getByTestId(
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.NAME_INPUT
+      );
+      const saveButton = screen.getByTestId(
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.SAVE_NAME_BUTTON
+      );
+
+      await user.clear(nameInput);
+
+      expect(saveButton).toBeDisabled();
+    });
+
+    it('should enable save button for valid name that is different from original', async () => {
+      const user = userEvent.setup();
+      renderFlyout();
+
+      const nameInput = screen.getByTestId(
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.NAME_INPUT
+      );
+      const saveButton = screen.getByTestId(
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.SAVE_NAME_BUTTON
+      );
+
+      await user.clear(nameInput);
+      await user.click(nameInput);
+      await user.paste('Valid New Name');
+
+      expect(saveButton).toBeEnabled();
+      expect(screen.queryByText('Cloud Connector Name is required')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('Cloud Connector Name must be 255 characters or less')
+      ).not.toBeInTheDocument();
+    });
+
+    it('should accept name with exactly 255 characters', async () => {
+      const user = userEvent.setup();
+      renderFlyout();
+
+      const nameInput = screen.getByTestId(
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.NAME_INPUT
+      );
+      const saveButton = screen.getByTestId(
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.SAVE_NAME_BUTTON
+      );
+
+      await user.clear(nameInput);
+      await user.click(nameInput);
+      await user.paste('a'.repeat(255));
+
+      expect(saveButton).toBeEnabled();
+      expect(
+        screen.queryByText('Cloud Connector Name must be 255 characters or less')
+      ).not.toBeInTheDocument();
     });
   });
 });
