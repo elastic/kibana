@@ -26,7 +26,7 @@ export function SuggestPipelineLoadingPrompt({ onCancel }: SuggestPipelineLoadin
     <EuiCallOut
       iconType="sparkles"
       title={i18n.translate('xpack.streams.stepsEditor.loadingDashboardsLabel', {
-        defaultMessage: 'Analysing your data...',
+        defaultMessage: 'Analyzing your data...',
       })}
       color="primary"
     >

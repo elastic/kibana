@@ -5,31 +5,39 @@
  * 2.0.
  */
 
-import type { Streams } from '@kbn/streams-schema';
-import React from 'react';
 import { EuiResizableContainer, EuiSplitPanel } from '@elastic/eui';
-import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { css } from '@emotion/react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { useKbnUrlStateStorageFromRouterContext } from '../../../util/kbn_url_state_context';
+import type { Streams } from '@kbn/streams-schema';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import React from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
+import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
+import { useKbnUrlStateStorageFromRouterContext } from '../../../util/kbn_url_state_context';
+import { StreamsAppContextProvider } from '../../streams_app_context_provider';
 import { ManagementBottomBar } from '../management_bottom_bar';
+import { RequestPreviewFlyout } from '../request_preview_flyout';
+import { useRequestPreviewFlyoutState } from '../request_preview_flyout/use_request_preview_flyout_state';
+import { getDefinitionFields } from '../schema_editor/hooks/use_schema_fields';
+import { SchemaChangesReviewModal, getChanges } from '../schema_editor/schema_changes_review_modal';
+import type { SchemaEditorField } from '../schema_editor/types';
+import { isFieldUncommitted } from '../schema_editor/utils';
 import { SimulationPlayground } from './simulation_playground';
+import { selectFieldsInSamples } from './state_management/simulation_state_machine/selectors';
 import {
   StreamEnrichmentContextProvider,
+  useGetStreamEnrichmentState,
   useSimulatorSelector,
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
   usePipelineSuggestion,
 } from './state_management/stream_enrichment_state_machine';
-import { StreamsAppContextProvider } from '../../streams_app_context_provider';
-import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
-import { SchemaChangesReviewModal, getChanges } from '../schema_editor/schema_changes_review_modal';
-import { getDefinitionFields } from '../schema_editor/hooks/use_schema_fields';
+import {
+  getConfiguredSteps,
+  getUpsertFields,
+} from './state_management/stream_enrichment_state_machine/utils';
 import { StepsEditor } from './steps_editor';
-import { selectFieldsInSamples } from './state_management/simulation_state_machine/selectors';
-import type { SchemaEditorField } from '../schema_editor/types';
-import { isFieldUncommitted } from '../schema_editor/utils';
+import { buildUpsertStreamRequestPayload } from './utils';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
 
@@ -70,6 +78,7 @@ export function StreamDetailEnrichmentContentImpl() {
   const context = useKibana();
   const { appParams, core } = context;
 
+  const getStreamEnrichmentState = useGetStreamEnrichmentState();
   const { resetChanges, saveChanges } = useStreamEnrichmentEvents();
 
   const isReady = useStreamEnrichmentSelector((state) => state.matches('ready'));
@@ -151,6 +160,27 @@ export function StreamDetailEnrichmentContentImpl() {
   const isSuggestionVisible =
     suggestionState.state.loading ||
     (suggestionState.state.value && suggestionState.showSuggestion);
+  const {
+    isRequestPreviewFlyoutOpen,
+    requestPreviewFlyoutCodeContent,
+    openRequestPreviewFlyout,
+    closeRequestPreviewFlyout,
+  } = useRequestPreviewFlyoutState();
+
+  const onBottomBarViewCodeClick = () => {
+    const { context: enrichmentContext } = getStreamEnrichmentState();
+    const body = buildUpsertStreamRequestPayload(
+      enrichmentContext.definition,
+      getConfiguredSteps(enrichmentContext),
+      getUpsertFields(enrichmentContext)
+    );
+
+    openRequestPreviewFlyout({
+      method: 'PUT',
+      url: `/api/streams/${enrichmentContext.definition.stream.name}/_ingest`,
+      body,
+    });
+  };
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges: hasChanges,
@@ -234,6 +264,13 @@ export function StreamDetailEnrichmentContentImpl() {
           disabled={!hasChanges}
           insufficientPrivileges={!canManage}
           isInvalid={hasDefinitionError}
+          onViewCodeClick={onBottomBarViewCodeClick}
+        />
+      )}
+      {isRequestPreviewFlyoutOpen && (
+        <RequestPreviewFlyout
+          codeContent={requestPreviewFlyoutCodeContent}
+          onClose={closeRequestPreviewFlyout}
         />
       )}
     </EuiSplitPanel.Outer>

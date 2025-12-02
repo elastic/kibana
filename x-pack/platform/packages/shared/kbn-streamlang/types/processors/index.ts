@@ -9,7 +9,7 @@ import { z } from '@kbn/zod';
 import { NonEmptyOrWhitespaceString, NonEmptyString } from '@kbn/zod-helpers';
 import { createIsNarrowSchema } from '@kbn/zod-helpers';
 import type { Condition } from '../conditions';
-import { conditionSchema } from '../conditions';
+import { conditionSchema, isAlwaysCondition } from '../conditions';
 import {
   NoMustacheValue,
   NoMustacheArrayValues,
@@ -291,30 +291,31 @@ export type ConvertProcessor = BaseConvertProcessor &
       }
   );
 
-export const baseConvertProcessorSchema = processorBaseWithWhereSchema.extend({
-  action: z.literal('convert'),
-  from: StreamlangSourceField.describe('Source field to convert to a different data type'),
-  to: z
-    .optional(StreamlangTargetField)
-    .describe('Target field for the converted value (defaults to source)'),
-  type: z
-    .enum(convertTypes)
-    .describe('Target data type: integer, long, double, boolean, or string'),
-  ignore_missing: z.optional(z.boolean()).describe('Skip processing when source field is missing'),
-}) satisfies z.Schema<BaseConvertProcessor>;
-
-export const convertProcessorSchema = z
-  .union([
-    baseConvertProcessorSchema.extend({
-      where: z.optional(z.undefined()),
-    }),
-    baseConvertProcessorSchema.required({ to: true, where: true }),
-  ])
-  .refine((obj) => (obj.where && obj.to && obj.from !== obj.to) || !obj.where, {
-    message:
-      'Convert processor must have the "to" parameter when there is a "where" condition. It should not be the same as the source field.',
-    path: ['to', 'where'],
+export const convertProcessorSchema = processorBaseWithWhereSchema
+  .extend({
+    action: z.literal('convert'),
+    from: StreamlangSourceField.describe('Source field to convert to a different data type'),
+    to: z
+      .optional(StreamlangTargetField)
+      .describe('Target field for the converted value (defaults to source)'),
+    type: z
+      .enum(convertTypes)
+      .describe('Target data type: integer, long, double, boolean, or string'),
+    ignore_missing: z
+      .optional(z.boolean())
+      .describe('Skip processing when source field is missing'),
   })
+  .refine(
+    (obj) =>
+      !obj.where ||
+      (obj.where && isAlwaysCondition(obj.where)) ||
+      (obj.where && obj.to && obj.from !== obj.to),
+    {
+      message:
+        'Convert processor must have the "to" parameter when there is a "where" condition. It should not be the same as the source field.',
+      path: ['to', 'where'],
+    }
+  )
   .describe(
     'Convert processor - Change the data type of a field value (integer, long, double, boolean, or string)'
   ) satisfies z.Schema<ConvertProcessor>;
