@@ -674,5 +674,5 @@ export const Tabs: React.FC<TabsProps> = ({
 };
 
 const selectStyles = css({
-  width: 200,
+  width: 150,
 });
