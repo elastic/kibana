@@ -18,7 +18,7 @@ import * as i18n from './translations';
 export function AlertSuppressionEditAdapter({
   finalDiffableRule,
 }: RuleFieldEditComponentProps): JSX.Element {
-  const { dataView } = useDiffableRuleDataView(finalDiffableRule);
+  const { dataView, isLoading: isDataViewLoading } = useDiffableRuleDataView(finalDiffableRule);
   const { fields: esqlSuppressionFields, isLoading: isEsqlSuppressionLoading } =
     useAllEsqlRuleFields({
       esqlQuery: 'esql_query' in finalDiffableRule ? finalDiffableRule.esql_query.query : undefined,
@@ -76,7 +76,13 @@ export function AlertSuppressionEditAdapter({
       warningText={
         isMlSuppressionIncomplete ? i18n.MACHINE_LEARNING_SUPPRESSION_INCOMPLETE_LABEL : undefined
       }
-      isLoading={mlRuleConfigLoading || isEsqlSuppressionLoading}
+      isLoading={
+        mlRuleConfigLoading ||
+        isEsqlSuppressionLoading ||
+        (isDataViewLoading &&
+          !isMlRule(finalDiffableRule.type) &&
+          !isEsqlRule(finalDiffableRule.type))
+      }
     />
   );
 }
