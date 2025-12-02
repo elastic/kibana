@@ -22,17 +22,6 @@ export const baseMetaSchema = schema.object({
   version: schema.maybe(schema.string()),
 });
 
-export const accessMetaSchema = schema.object({
-  access_control: schema.maybe(
-    schema.object({
-      owner: schema.maybe(schema.string()),
-      access_mode: schema.maybe(
-        schema.oneOf([schema.literal('write_restricted'), schema.literal('default')])
-      ),
-    })
-  ),
-});
-
 export const createdMetaSchema = schema.object({
   createdAt: schema.maybe(schema.string()),
   createdBy: schema.maybe(schema.string()),
