@@ -108,6 +108,7 @@ export function ValueControlForm({
   const [queryColumns, setQueryColumns] = useState<string[]>(
     valuesRetrieval ? [valuesRetrieval] : []
   );
+  const [showValuesPreview, setShowValuesPreview] = useState<boolean>(false);
   const [label, setLabel] = useState(initialState?.title ?? '');
   const [minimumWidth, setMinimumWidth] = useState(initialState?.width ?? 'medium');
   const shouldDefaultToMultiSelect = variableType === ESQLVariableType.MULTI_VALUES;
@@ -182,6 +183,7 @@ export function ValueControlForm({
           }
           const columns = results.response.columns.map((col) => col.name);
           setQueryColumns(columns);
+          setShowValuesPreview(true);
 
           if (columns.length === 1) {
             const valuesArray = results.response.values.map((value) => value[0]);
@@ -296,7 +298,7 @@ export function ValueControlForm({
               defaultMessage: 'Values query',
             })}
           />
-          {queryColumns.length === 0 && valuesQuery !== INITIAL_EMPTY_STATE_QUERY && (
+          {showValuesPreview && (
             <EuiFormRow
               label={i18n.translate('esql.flyout.previewValues.placeholder', {
                 defaultMessage: 'Values preview',
@@ -306,68 +308,61 @@ export function ValueControlForm({
                 margin-block-start: ${theme.euiTheme.size.base};
               `}
             >
-              <EuiCallOut
-                announceOnMount
-                title={i18n.translate('esql.flyout.displayNoValuesForControlCallout.title', {
-                  defaultMessage:
-                    "This query isn't returning any values. Edit it and run it again.",
-                })}
-                color="warning"
-                iconType="warning"
-                size="s"
-                data-test-subj="esqlNoValuesForControlCallout"
-              />
-            </EuiFormRow>
-          )}
-          {queryColumns.length > 0 && (
-            <EuiFormRow
-              label={i18n.translate('esql.flyout.previewValues.placeholder', {
-                defaultMessage: 'Values preview',
-              })}
-              fullWidth
-              css={css`
-                margin-block-start: ${theme.euiTheme.size.base};
-              `}
-            >
-              {queryColumns.length === 1 ? (
-                <EuiPanel
-                  paddingSize="s"
-                  color="primary"
-                  css={css`
-                    white-space: wrap;
-                    overflow-y: auto;
-                    max-height: 200px;
-                  `}
-                  data-test-subj="esqlValuesPreview"
-                >
-                  {selectedValues.map((value) => value.label).join(', ')}
-                </EuiPanel>
-              ) : (
-                <EuiCallOut
-                  announceOnMount
-                  title={i18n.translate('esql.flyout.displayMultipleColsCallout.title', {
-                    defaultMessage: 'Your query must return a single column',
-                  })}
-                  color="warning"
-                  iconType="warning"
-                  size="s"
-                  data-test-subj="esqlMoreThanOneColumnCallout"
-                >
-                  <p>
-                    <FormattedMessage
-                      id="esql.flyout.displayMultipleColsCallout.description"
-                      defaultMessage="Your query is currently returning {totalColumns} columns. Choose column {chooseColumnPopover} or use {boldText}."
-                      values={{
-                        totalColumns: queryColumns.length,
-                        boldText: <strong>STATS BY</strong>,
-                        chooseColumnPopover: (
-                          <ChooseColumnPopover columns={queryColumns} updateQuery={updateQuery} />
-                        ),
-                      }}
-                    />
-                  </p>
-                </EuiCallOut>
-              )}
+              <>
+                {queryColumns.length === 0 && (
+                  <EuiCallOut
+                    announceOnMount
+                    title={i18n.translate('esql.flyout.displayNoValuesForControlCallout.title', {
+                      defaultMessage:
+                        "This query isn't returning any values. Edit it and run it again.",
+                    })}
+                    color="warning"
+                    iconType="warning"
+                    size="s"
+                    data-test-subj="esqlNoValuesForControlCallout"
+                  />
+                )}
+                {queryColumns.length === 1 && (
+                  <EuiPanel
+                    paddingSize="s"
+                    color="primary"
+                    css={css`
+                      white-space: wrap;
+                      overflow-y: auto;
+                      max-height: 200px;
+                    `}
+                    data-test-subj="esqlValuesPreview"
+                  >
+                    {selectedValues.map((value) => value.label).join(', ')}
+                  </EuiPanel>
+                )}
+                {queryColumns.length > 1 && (
+                  <EuiCallOut
+                    announceOnMount
+                    title={i18n.translate('esql.flyout.displayMultipleColsCallout.title', {
+                      defaultMessage: 'Your query must return a single column',
+                    })}
+                    color="warning"
+                    iconType="warning"
+                    size="s"
+                    data-test-subj="esqlMoreThanOneColumnCallout"
+                  >
+                    <p>
+                      <FormattedMessage
+                        id="esql.flyout.displayMultipleColsCallout.description"
+                        defaultMessage="Your query is currently returning {totalColumns} columns. Choose column {chooseColumnPopover} or use {boldText}."
+                        values={{
+                          totalColumns: queryColumns.length,
+                          boldText: <strong>STATS BY</strong>,
+                          chooseColumnPopover: (
+                            <ChooseColumnPopover columns={queryColumns} updateQuery={updateQuery} />
+                          ),
+                        }}
+                      />
+                    </p>
+                  </EuiCallOut>
+                )}
+              </>
             </EuiFormRow>
           )}
         </>
