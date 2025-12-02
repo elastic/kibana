@@ -886,9 +886,9 @@ export class DiscoverPageObject extends FtrService {
 
   private resetRequestCount = -1;
 
-  public async expectRequestCount(endpoint: string, requestCount: number) {
+  public async expectRequestCount(endpointRegexp: RegExp, requestCount: number) {
     await this.retry.tryWithRetries(
-      `expect ${endpoint} request to match count ${requestCount}`,
+      `expect the request to match count ${requestCount}`,
       async () => {
         if (requestCount === this.resetRequestCount) {
           await this.browser.execute(async () => {
@@ -903,7 +903,7 @@ export class DiscoverPageObject extends FtrService {
             .getEntries()
             .filter((entry: any) => ['fetch', 'xmlhttprequest'].includes(entry.initiatorType))
         );
-        const result = requests.filter((entry) => entry.name.includes(endpoint));
+        const result = requests.filter((entry) => endpointRegexp.test(entry.name));
         const count = result.length;
         if (requestCount === this.resetRequestCount) {
           expect(count).to.be(0);
@@ -919,10 +919,10 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async expectFieldsForWildcardRequestCount(expectedCount: number, cb: Function) {
-    const endpoint = `/internal/data_views/_fields_for_wildcard`;
-    await this.expectRequestCount(endpoint, this.resetRequestCount);
+    const endpointRegExp = new RegExp('/internal/data_views/_fields_for_wildcard');
+    await this.expectRequestCount(endpointRegExp, this.resetRequestCount);
     await cb();
-    await this.expectRequestCount(endpoint, expectedCount);
+    await this.expectRequestCount(endpointRegExp, expectedCount);
   }
 
   public async expectSearchRequestCount(
@@ -931,11 +931,11 @@ export class DiscoverPageObject extends FtrService {
     cb?: Function
   ) {
     const searchType = type === 'esql' ? `${type}_async` : type;
-    const endpoint = `/internal/search/${searchType}`;
+    const endpointRegExp = new RegExp(`/internal/search/${searchType}$`);
     if (cb) {
-      await this.expectRequestCount(endpoint, this.resetRequestCount);
+      await this.expectRequestCount(endpointRegExp, this.resetRequestCount);
       await cb();
     }
-    await this.expectRequestCount(endpoint, expectedCount);
+    await this.expectRequestCount(endpointRegExp, expectedCount);
   }
 }
