@@ -75,8 +75,6 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       browserApiTools: browserApiToolsMetadata,
     });
 
-    resetAttachments?.();
-
     return subscribeToChatEvents(events$);
   };
 
@@ -105,6 +103,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
     },
     onSuccess: () => {
       removePendingMessage();
+      resetAttachments?.();
       if (isMutatingNewConversationRef.current) {
         conversationActions.removeNewConversationQuery();
       }
