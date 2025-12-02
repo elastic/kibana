@@ -8,6 +8,5 @@
 import { css } from '@emotion/react';
 
 export const codeblockStyles = css`
-  overflow-x: auto;
   word-break: break-word;
 `;
