@@ -39,7 +39,10 @@ export const StepExecutionDataView = React.memo<StepExecutionDataViewProps>(
         return { data: stepExecution.input, title: Titles.input };
       } else {
         if (stepExecution.error) {
-          return { data: { error: stepExecution.error }, title: Titles.error };
+          return {
+            data: { error: stepExecution.error as unknown as JsonValue },
+            title: Titles.error,
+          };
         }
         return { data: stepExecution.output, title: Titles.output };
       }
