@@ -202,6 +202,7 @@ const ruleState = (rule: CspBenchmarkRulesWithStates, switchRuleStates: () => Pr
             onChange={switchRuleStates}
             data-test-subj={RULES_FLYOUT_SWITCH_BUTTON}
             label=" "
+            aria-label="Enabled"
           />
         </>
       ),
