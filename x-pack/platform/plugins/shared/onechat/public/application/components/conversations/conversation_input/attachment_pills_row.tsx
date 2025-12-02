@@ -23,9 +23,7 @@ const labels = {
 };
 
 export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({ attachments }) => {
-  const visibleAttachments: Attachment[] = attachments.filter((attachment) => !attachment.hidden);
-
-  if (visibleAttachments.length === 0) {
+  if (attachments.length === 0) {
     return null;
   }
 
@@ -36,7 +34,7 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({ attachme
       aria-label={labels.attachments}
       data-test-subj="onechatAttachmentPillsRow"
     >
-      {visibleAttachments.map((attachment: Attachment) => (
+      {attachments.map((attachment: Attachment) => (
         <AttachmentPill
           key={attachment.id}
           id={attachment.id}
