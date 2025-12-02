@@ -25,7 +25,7 @@ export function AttachmentsEmptyPrompt({
         <EuiFlexGroup direction="column" alignItems="center" gutterSize="s">
           <EuiText size="m" css={{ fontWeight: 'bold' }}>
             {i18n.translate('xpack.streams.attachments.emptyState.title', {
-              defaultMessage: 'No attachments here',
+              defaultMessage: 'No attachments have been added',
             })}
           </EuiText>
           <EuiText size="s" textAlign="center" css={{ maxWidth: 480 }}>
