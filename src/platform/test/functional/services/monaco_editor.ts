@@ -63,28 +63,36 @@ export class MonacoEditorService extends FtrService {
     }, testSubjId);
   }
 
-  public async typeCodeEditorValue(value: string, testSubjId: string) {
+  /**
+   * Set editor value by test subject ID.
+   * @param triggerSuggest - Whether to trigger autocomplete suggestions (default: true)
+   */
+  public async typeCodeEditorValue(value: string, testSubjId: string, triggerSuggest = true) {
+    await this.waitCodeEditorReady(testSubjId);
     await this.browser.execute(
-      (id: string, text: string) => {
+      (id: string, text: string, suggest: boolean) => {
         const container = document.querySelector(`[data-test-subj="${id}"]`);
         const editor = window
           .MonacoEnvironment!.monaco.editor.getEditors()
           .find((e: any) => container?.contains(e.getDomNode()));
-
         if (!editor) return;
-
         editor.focus();
+        editor.getModel()?.setValue(text);
         const model = editor.getModel();
         if (model) {
-          model.setValue(text);
-          const endLine = model.getLineCount();
-          const endCol = model.getLineMaxColumn(endLine);
-          editor.setPosition({ lineNumber: endLine, column: endCol });
+          const lastLine = model.getLineCount();
+          editor.setPosition({
+            lineNumber: lastLine,
+            column: model.getLineMaxColumn(lastLine),
+          });
         }
-        editor.trigger('keyboard', 'editor.action.triggerSuggest', {});
+        if (suggest) {
+          editor.trigger('keyboard', 'editor.action.triggerSuggest', {});
+        }
       },
       testSubjId,
-      value
+      value,
+      triggerSuggest
     );
   }
 
