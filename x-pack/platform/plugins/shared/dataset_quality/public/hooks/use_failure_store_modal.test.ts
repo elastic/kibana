@@ -22,6 +22,7 @@ jest.mock('@kbn/streams-schema', () => ({
   isEnabledFailureStore: jest.fn(),
   isInheritFailureStore: jest.fn(),
   isDisabledLifecycleFailureStore: jest.fn(),
+  isEnabledLifecycleFailureStore: jest.fn(),
 }));
 
 import { useDatasetQualityDetailsState } from './use_dataset_quality_details_state';
@@ -31,6 +32,7 @@ import {
   isEnabledFailureStore,
   isInheritFailureStore,
   isDisabledLifecycleFailureStore,
+  isEnabledLifecycleFailureStore,
 } from '@kbn/streams-schema';
 
 describe('useFailureStoreModal', () => {
@@ -42,6 +44,7 @@ describe('useFailureStoreModal', () => {
   const mockIsInheritFailureStore = isInheritFailureStore as unknown as jest.Mock;
   const mockIsDisabledLifecycleFailureStore =
     isDisabledLifecycleFailureStore as unknown as jest.Mock;
+  const mockIsEnabledLifecycleFailureStore = isEnabledLifecycleFailureStore as unknown as jest.Mock;
 
   const defaultMockData = {
     canUserReadFailureStore: true,
@@ -66,6 +69,7 @@ describe('useFailureStoreModal', () => {
     mockIsEnabledFailureStore.mockReturnValue(true);
     mockIsInheritFailureStore.mockReturnValue(false);
     mockIsDisabledLifecycleFailureStore.mockReturnValue(false);
+    mockIsEnabledLifecycleFailureStore.mockReturnValue(true);
   });
 
   describe('initialization', () => {
@@ -491,6 +495,7 @@ describe('useFailureStoreModal', () => {
           mockIsEnabledFailureStore.mockReturnValue(true);
           mockIsInheritFailureStore.mockReturnValue(false);
           mockIsDisabledLifecycleFailureStore.mockReturnValue(false);
+          mockIsEnabledLifecycleFailureStore.mockReturnValue(true);
         });
 
         it('should return FailureStoreModal with inherit options for non-root stream', () => {
@@ -575,6 +580,7 @@ describe('useFailureStoreModal', () => {
           mockIsEnabledFailureStore.mockReturnValue(true);
           mockIsInheritFailureStore.mockReturnValue(false);
           mockIsDisabledLifecycleFailureStore.mockReturnValue(false);
+          mockIsEnabledLifecycleFailureStore.mockReturnValue(true);
         });
 
         it('should return FailureStoreModal with wired inherit options', () => {
@@ -675,6 +681,7 @@ describe('useFailureStoreModal', () => {
           mockIsEnabledFailureStore.mockReturnValue(true);
           mockIsInheritFailureStore.mockReturnValue(false);
           mockIsDisabledLifecycleFailureStore.mockReturnValue(false);
+          mockIsEnabledLifecycleFailureStore.mockReturnValue(true);
         });
 
         it('should not include inherit options for root stream', () => {
@@ -760,6 +767,7 @@ describe('useFailureStoreModal', () => {
           mockIsEnabledFailureStore.mockReturnValue(false);
           mockIsInheritFailureStore.mockReturnValue(true);
           mockIsDisabledLifecycleFailureStore.mockReturnValue(false);
+          mockIsEnabledLifecycleFailureStore.mockReturnValue(false);
         });
 
         it('should show inherited state in modal props', () => {
@@ -818,6 +826,7 @@ describe('useFailureStoreModal', () => {
           mockIsEnabledFailureStore.mockReturnValue(true);
           mockIsInheritFailureStore.mockReturnValue(false);
           mockIsDisabledLifecycleFailureStore.mockReturnValue(true);
+          mockIsEnabledLifecycleFailureStore.mockReturnValue(false);
         });
 
         it('should show retention disabled state in modal props', () => {
@@ -874,6 +883,7 @@ describe('useFailureStoreModal', () => {
           mockIsEnabledFailureStore.mockReturnValue(false);
           mockIsInheritFailureStore.mockReturnValue(false);
           mockIsDisabledLifecycleFailureStore.mockReturnValue(false);
+          mockIsEnabledLifecycleFailureStore.mockReturnValue(false);
         });
 
         it('should show disabled state in modal props', () => {
