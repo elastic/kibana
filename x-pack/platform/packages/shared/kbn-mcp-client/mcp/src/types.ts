@@ -36,6 +36,16 @@ export interface TextPart {
 
 export type ContentPart = TextPart | NonTextPart;
 
+/**
+ * Type guard to check if a content part is a valid text part.
+ * @param part - The content part to check
+ */
+export function isTextPart(part: ContentPart | null | undefined): part is TextPart {
+  return (
+    part !== null && part !== undefined && part.type === 'text' && typeof part.text === 'string'
+  );
+}
+
 export interface CallToolResponse {
   content: ContentPart[];
   /**

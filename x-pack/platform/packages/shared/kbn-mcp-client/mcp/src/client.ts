@@ -19,10 +19,10 @@ import type {
   CallToolResponse,
   ContentPart,
   ListToolsResponse,
-  TextPart,
   Tool,
   McpClientOptions,
 } from './types';
+import { isTextPart } from './types';
 
 /**
  * McpClient is a wrapper around the MCP client SDK.
@@ -73,7 +73,7 @@ export class McpClient {
   /**
    * Public getter for the connection status.
    */
-  async isConnected(): Promise<boolean> {
+  isConnected(): boolean {
     return this.connected;
   }
 
@@ -193,14 +193,4 @@ export class McpClient {
       content: textParts,
     };
   }
-}
-
-/**
- * Type guard to check if a content part is a valid text part.
- * @param part - The content part to check
- */
-function isTextPart(part: ContentPart | null | undefined): part is TextPart {
-  return (
-    part !== null && part !== undefined && part.type === 'text' && typeof part.text === 'string'
-  );
 }
