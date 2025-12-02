@@ -88,7 +88,7 @@ apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () 
 
   apiTest(
     'should import and export saved objects across different spaces',
-    async ({ apiClient, apiServices }) => {
+    async ({ apiClient, kbnClient }) => {
       const objectId1 = `dashboard-id-1-space1`;
       const objectId2 = `dashboard-id-2-space2`;
 
@@ -144,24 +144,22 @@ apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () 
       expect(importResponse2.body.success).toBe(true);
       expect(importResponse2.body.successCount).toBe(1);
 
-      // Verify objects exist in their respective spaces using apiServices (verification/teardown)
-      const export1 = await apiServices.savedObjects.export(
-        { objects: [{ type: 'dashboard', id: objectId1 }] },
-        SPACES.SPACE_1.spaceId
-      );
-      expect(export1.status).toBe(200);
-      expect(export1.data.exportedObjects).toHaveLength(1);
-      expect(export1.data.exportedObjects[0].attributes[ATTRIBUTE_TITLE_KEY]).toBe(
+      // Verify objects exist in their respective spaces using kbnClient (verification/teardown)
+      const export1 = await kbnClient.savedObjects.get({
+        type: 'dashboard',
+        id: objectId1,
+        space: SPACES.SPACE_1.spaceId,
+      });
+      expect(export1.attributes[ATTRIBUTE_TITLE_KEY]).toBe(
         `${ATTRIBUTE_TITLE_VALUE} in ${SPACES.SPACE_1.spaceId}`
       );
 
-      const export2 = await apiServices.savedObjects.export(
-        { objects: [{ type: 'dashboard', id: objectId2 }] },
-        SPACES.SPACE_2.spaceId
-      );
-      expect(export2.status).toBe(200);
-      expect(export2.data.exportedObjects).toHaveLength(1);
-      expect(export2.data.exportedObjects[0].attributes[ATTRIBUTE_TITLE_KEY]).toBe(
+      const export2 = await kbnClient.savedObjects.get({
+        type: 'dashboard',
+        id: objectId2,
+        space: SPACES.SPACE_2.spaceId,
+      });
+      expect(export2.attributes[ATTRIBUTE_TITLE_KEY]).toBe(
         `${ATTRIBUTE_TITLE_VALUE} in ${SPACES.SPACE_2.spaceId}`
       );
     }
@@ -169,7 +167,7 @@ apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () 
 
   apiTest(
     'should import a dashboard object in space_1 and import the same object into space_2 but with a new destination ID',
-    async ({ apiClient, apiServices }) => {
+    async ({ apiClient, kbnClient }) => {
       // Premise: if a saved object with the exact same ID exists in a different space, then Kibana will generate a random ID for the import destination
       // Learn more: https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects#saved-objects-copy-to-other-spaces
 
@@ -235,21 +233,19 @@ apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () 
       // Verify that a new ID was generated
       expect(newID).not.toBe(uniqueId);
 
-      const exportResponse = await apiServices.savedObjects.export(
-        { objects: [{ type: 'dashboard', id: newID }] },
-        SPACES.SPACE_2.spaceId
-      );
-
-      expect(exportResponse.status).toBe(200);
+      const exportResponse = await kbnClient.savedObjects.get({
+        type: 'dashboard',
+        id: newID,
+        space: SPACES.SPACE_2.spaceId,
+      });
 
       // Import should succeed and the object should exist in space 2 with the new ID
       expect(importResponse2.statusCode).toBe(200);
       expect(importResponse2.body.success).toBe(true);
-      expect(exportResponse.data.exportedObjects).toHaveLength(1);
 
       // The originId should point to the original object's ID
-      expect(exportResponse.data.exportedObjects[0].originId).toBe(uniqueId);
-      expect(exportResponse.data.exportedObjects[0].attributes[ATTRIBUTE_TITLE_KEY]).toBe(
+      expect((exportResponse as any).originId).toBe(uniqueId);
+      expect(exportResponse.attributes[ATTRIBUTE_TITLE_KEY]).toBe(
         `${ATTRIBUTE_TITLE_VALUE} in Space 2`
       );
     }

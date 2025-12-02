@@ -145,7 +145,7 @@ TEST_SPACES.forEach((space) => {
 
     apiTest(
       'should return 200 and override existing dashboard when importing a dashboard that already exists when overwrite=true',
-      async ({ apiClient, apiServices }) => {
+      async ({ apiClient, kbnClient }) => {
         const uniqueId = `dashboard-${Date.now()}-${space.spaceId}`;
 
         // First import should succeed
@@ -196,13 +196,13 @@ TEST_SPACES.forEach((space) => {
         expect(response2.statusCode).toBe(200);
         expect(response2.body.success).toBe(true);
 
-        const exportResponse = await apiServices.savedObjects.export(
-          { objects: [{ type: 'dashboard', id: uniqueId }] },
-          space.spaceId
-        );
+        const getResponse = await kbnClient.savedObjects.get({
+          type: 'dashboard',
+          id: uniqueId,
+          space: space.spaceId,
+        });
 
-        expect(exportResponse.data.exportedObjects).toHaveLength(1);
-        expect(exportResponse.data.exportedObjects[0].attributes[ATTRIBUTE_TITLE_KEY]).toBe(
+        expect(getResponse.attributes[ATTRIBUTE_TITLE_KEY]).toBe(
           `${ATTRIBUTE_TITLE_VALUE} - Overwritten`
         );
       }
@@ -210,7 +210,7 @@ TEST_SPACES.forEach((space) => {
 
     apiTest(
       'should return 200 and create a copy of the imported saved object (with a new ID) when createNewCopies=true',
-      async ({ apiClient, apiServices }) => {
+      async ({ apiClient, kbnClient }) => {
         const uniqueId = `dashboard-overwrite-${Date.now()}-${space.spaceId}`;
 
         const formData1 = prepareImportFormData([
@@ -242,16 +242,14 @@ TEST_SPACES.forEach((space) => {
         // Verify that a new ID was generated
         expect(newID).not.toBe(uniqueId);
 
-        const exportResponse = await apiServices.savedObjects.export(
-          { objects: [{ type: 'dashboard', id: newID }] },
-          space.spaceId
-        );
-
-        expect(exportResponse.status).toBe(200);
-        expect(exportResponse.data.exportedObjects).toHaveLength(1);
+        const exportResponse = await kbnClient.savedObjects.get({
+          type: 'dashboard',
+          id: newID,
+          space: space.spaceId,
+        });
 
         // the copy does not have the originId set since it was created as a new object
-        expect(exportResponse.data.exportedObjects[0].originId).toBeUndefined();
+        expect((exportResponse as any).originId).toBeUndefined();
       }
     );
 

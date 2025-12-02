@@ -18,8 +18,6 @@ import type { FleetApiService } from './fleet';
 import { getFleetApiHelper } from './fleet';
 import type { StreamsApiService } from './streams';
 import { getStreamsApiService } from './streams';
-import type { SavedObjectsApiService } from './saved_objects';
-import { getSavedObjectsApiHelper } from './saved_objects';
 
 export interface ApiServicesFixture {
   alerting: AlertingApiService;
@@ -27,7 +25,6 @@ export interface ApiServicesFixture {
   fleet: FleetApiService;
   streams: StreamsApiService;
   core: CoreApiService;
-  savedObjects: SavedObjectsApiService;
   // add more services here
 }
 
@@ -46,7 +43,6 @@ export const apiServicesFixture = coreWorkerFixtures.extend<
         fleet: getFleetApiHelper(log, kbnClient),
         streams: getStreamsApiService({ kbnClient, log }),
         core: getCoreApiHelper(log, kbnClient),
-        savedObjects: getSavedObjectsApiHelper(log, kbnClient),
       };
 
       log.serviceLoaded('apiServices');
