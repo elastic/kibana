@@ -43,6 +43,16 @@ export class MonacoEditorService extends FtrService {
     return values[nthIndex] as string;
   }
 
+  public async focusCodeEditor(testSubjId: string) {
+    await this.browser.execute((id: string) => {
+      const container = document.querySelector(`[data-test-subj="${id}"]`);
+      const textarea = container?.querySelector('textarea');
+      if (textarea) {
+        textarea.focus();
+      }
+    }, testSubjId);
+  }
+
   public async typeCodeEditorValue(value: string, testSubjId: string, triggerSuggest = true) {
     await this.browser.execute(
       (id: string, text: string, suggest: boolean) => {
@@ -74,6 +84,8 @@ export class MonacoEditorService extends FtrService {
       value,
       triggerSuggest
     );
+
+    await this.focusCodeEditor(testSubjId);
   }
 
   public async setCodeEditorValue(value: string, nthIndex?: number) {
@@ -121,8 +133,9 @@ export class MonacoEditorService extends FtrService {
         .MonacoEnvironment!.monaco.editor.getEditors()
         .find((e: any) => container?.contains(e.getDomNode()));
       editor?.getModel()?.setValue('');
-      editor?.focus();
     }, testSubjId);
+
+    await this.focusCodeEditor(testSubjId);
   }
 
   public async getCodeEditorValueByTestSubj(testSubjId: string): Promise<string> {
