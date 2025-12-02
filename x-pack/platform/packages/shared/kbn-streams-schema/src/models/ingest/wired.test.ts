@@ -22,6 +22,7 @@ describe('WiredStream', () => {
             fields: {},
             routing: [],
           },
+          failure_store: { inherit: {} },
         },
       },
     ] satisfies WiredStream.Definition[])('is valid %s', (val) => {
@@ -87,6 +88,7 @@ describe('WiredStream', () => {
               fields: {},
               routing: [],
             },
+            failure_store: { inherit: {} },
           },
         },
         privileges: {
@@ -105,6 +107,10 @@ describe('WiredStream', () => {
         },
         effective_settings: {},
         inherited_fields: {},
+        effective_failure_store: {
+          lifecycle: { enabled: { data_retention: '30d', is_default_retention: true } },
+          from: 'logs',
+        },
         ...emptyAssets,
       },
     ] satisfies WiredStream.GetResponse[])('is valid %s', (val) => {
@@ -162,6 +168,7 @@ describe('WiredStream', () => {
               fields: {},
               routing: [],
             },
+            failure_store: { inherit: {} },
           },
         },
         ...emptyAssets,

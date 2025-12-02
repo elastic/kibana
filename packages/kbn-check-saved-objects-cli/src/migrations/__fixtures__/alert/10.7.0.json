@@ -88,7 +88,7 @@
       "name": "Test rule",
       "enabled": true,
       "consumer": "test-consumer",
-      "tags": ["kibana"],
+      "tags": [],
       "alertTypeId": ".test",
       "apiKeyOwner": null,
       "apiKey": null,
@@ -113,7 +113,6 @@
       "params": {},
       "typeVersion": 1,
       "flapping": {
-        "enabled": true,
         "lookBackWindow": 20,
         "statusChangeThreshold": 4
       },

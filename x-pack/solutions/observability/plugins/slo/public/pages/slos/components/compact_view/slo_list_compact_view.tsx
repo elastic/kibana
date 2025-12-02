@@ -8,8 +8,8 @@ import type { DefaultItemAction, EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBasicTable, EuiFlexGroup, EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import { rulesLocatorID, sloFeatureId } from '@kbn/observability-plugin/common';
-import type { RulesParams } from '@kbn/observability-plugin/public';
+import { sloFeatureId } from '@kbn/observability-plugin/common';
+import { rulesLocatorID, type RulesLocatorParams } from '@kbn/deeplinks-observability';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
@@ -185,7 +185,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       enabled: (slo: SLOWithSummaryResponse) =>
         !!permissions?.hasAllWriteRequested && !isRemote(slo),
       onClick: (slo: SLOWithSummaryResponse) => {
-        const locator = locators.get<RulesParams>(rulesLocatorID);
+        const locator = locators.get<RulesLocatorParams>(rulesLocatorID);
         locator?.navigate({ params: { sloId: slo.id } }, { replace: false });
       },
     },

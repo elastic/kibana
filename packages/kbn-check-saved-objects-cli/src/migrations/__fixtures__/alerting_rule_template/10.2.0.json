@@ -23,7 +23,6 @@
       "tags": [],
       "ruleTypeId": ".test",
       "flapping": {
-        "enabled": true,
         "lookBackWindow": 20,
         "statusChangeThreshold": 4
       },
