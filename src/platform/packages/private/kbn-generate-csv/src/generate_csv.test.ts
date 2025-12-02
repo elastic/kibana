@@ -1577,10 +1577,7 @@ describe('CsvGenerator', () => {
     expect(mockLogger.error.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "CSV export search error: ResponseError: my error",
-        ],
-        Array [
-          [ResponseError: my error],
+          [ResponseError: CSV export search error: my error],
         ],
       ]
     `);
@@ -1622,7 +1619,7 @@ describe('CsvGenerator', () => {
         },
         "user_error": undefined,
         "warnings": Array [
-          "Encountered an unknown error: An unknown error",
+          "Encountered an unknown error: CSV export search error: An unknown error",
           "Encountered an error with the number of CSV rows generated from the search: expected rows were indeterminable, received 0.",
         ],
       }
@@ -1634,7 +1631,7 @@ describe('CsvGenerator', () => {
         ],
         Array [
           "
-      \\"Encountered an unknown error: An unknown error\\"
+      \\"Encountered an unknown error: CSV export search error: An unknown error\\"
       \\"Encountered an error with the number of CSV rows generated from the search: expected rows were indeterminable, received 0.\\"",
         ],
       ]
@@ -1695,10 +1692,7 @@ describe('CsvGenerator', () => {
       expect(mockLogger.error.mock.calls).toMatchInlineSnapshot(`
         Array [
           Array [
-            "CSV export search error: ResponseError: Response Error",
-          ],
-          Array [
-            [ResponseError: Response Error],
+            [ResponseError: CSV export search error: Response Error],
           ],
         ]
       `);

@@ -164,7 +164,8 @@ describe('retryOnError', () => {
     expect(logger.error).toHaveBeenCalledWith(
       `No retries left for report generation for report[${
         report._id
-      }]. No report generated after 4 attempts due to error: ${error.toString()} ${error.stack}`
+      }]. No report generated after 4 attempts due to error: ${error.toString()}`,
+      { error: { stack_trace: error.stack } }
     );
   });
 });
