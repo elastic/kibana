@@ -20,3 +20,11 @@ export const usePopoverButtonStyles = ({ open }: { open: boolean }) => {
   `;
   return [popoverButtonStyles, open && openPopoverStyles];
 };
+
+export const selectorListStyles = ({ listId }: { listId: string }) => css`
+  /* Override list item styles */
+  &#${listId} .euiSelectableListItem {
+    border-style: none;
+    background-color: transparent;
+  }
+`;

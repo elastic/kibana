@@ -23,7 +23,7 @@ import React, { useState } from 'react';
 import { useNavigation } from '../../../../../hooks/use_navigation';
 import { appPaths } from '../../../../../utils/app_paths';
 import { iconRobot } from '../../../../common/icons/robot';
-import { usePopoverButtonStyles } from '../input_actions.styles';
+import { selectorListStyles, usePopoverButtonStyles } from '../input_actions.styles';
 import { useAgentOptions } from './use_agent_options';
 
 const AGENT_OPTION_ROW_HEIGHT = 88;
@@ -52,6 +52,7 @@ const agentSearchPlaceholder = i18n.translate(
 );
 
 const agentSelectId = 'agentBuilderAgentSelect';
+const agentListId = `${agentSelectId}_listbox`;
 
 const AgentSelectPopoverButton: React.FC<{
   isPopoverOpen: boolean;
@@ -161,7 +162,12 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
         renderOption={(option, searchValue) =>
           renderAgentOption({ agent: option.agent, searchValue })
         }
-        listProps={{ isVirtualized: true, rowHeight: AGENT_OPTION_ROW_HEIGHT }}
+        listProps={{
+          id: agentListId,
+          isVirtualized: true,
+          rowHeight: AGENT_OPTION_ROW_HEIGHT,
+          css: selectorListStyles({ listId: agentListId }),
+        }}
       >
         {(list, search) => (
           <div>

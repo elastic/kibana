@@ -29,7 +29,7 @@ import { useSendMessage } from '../../../../../context/send_message/send_message
 import { useDefaultConnector } from '../../../../../hooks/chat/use_default_connector';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useNavigation } from '../../../../../hooks/use_navigation';
-import { usePopoverButtonStyles } from '../input_actions.styles';
+import { selectorListStyles, usePopoverButtonStyles } from '../input_actions.styles';
 
 const selectableAriaLabel = i18n.translate(
   'xpack.onechat.conversationInput.connectorSelector.selectableAriaLabel',
@@ -55,6 +55,7 @@ const connectorSearchPlaceholder = i18n.translate(
 );
 
 const connectorSelectId = 'agentBuilderConnectorSelect';
+const connectorListId = `${connectorSelectId}_listbox`;
 
 const ConnectorPopoverButton: React.FC<{
   isPopoverOpen: boolean;
@@ -239,6 +240,7 @@ export const ConnectorSelector: React.FC<{}> = () => {
             />
           );
         }}
+        listProps={{ id: connectorListId, css: selectorListStyles({ listId: connectorListId }) }}
       >
         {(list, search) => (
           <>
