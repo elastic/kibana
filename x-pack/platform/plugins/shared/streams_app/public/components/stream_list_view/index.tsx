@@ -21,6 +21,7 @@ import { css } from '@emotion/react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { isEmpty } from 'lodash';
 import type { OverlayRef } from '@kbn/core/public';
+import { Streams } from '@kbn/streams-schema';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { StreamsTreeTable } from './tree_table';
@@ -67,7 +68,7 @@ export function StreamListView() {
   const { hasClassicStreams, firstClassicStreamName } = useMemo(() => {
     const allStreams = streamsListFetch.value?.streams ?? [];
     const classicStreams = allStreams.filter(
-      (item) => item.stream?.name && !item.stream.name.startsWith('.')
+      (item) => item.stream && Streams.ClassicStream.Definition.is(item.stream)
     );
     return {
       hasClassicStreams: classicStreams.length > 0,
