@@ -23,6 +23,7 @@ import {
   MANAGEMENT_ROUTING_NOTES_PATH,
   MANAGEMENT_ROUTING_POLICIES_PATH,
   MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH,
+  MANAGEMENT_ROUTING_SCRIPTS_LIBRARY_PATH,
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
   MANAGEMENT_ROUTING_TRUSTED_DEVICES_PATH,
 } from '../common/constants';
@@ -42,6 +43,7 @@ import { PrivilegedRoute } from '../components/privileged_route';
 import { SecurityRoutePageWrapper } from '../../common/components/security_route_page_wrapper';
 import { TrustedDevicesContainer } from './trusted_devices';
 import { EndpointExceptionsContainer } from './endpoint_exceptions';
+import { ScriptsLibraryContainer } from './scripts_library';
 
 const EndpointTelemetry = () => (
   <TrackApplicationView viewId={SecurityPageName.endpoints}>
@@ -99,6 +101,13 @@ const ResponseActionsTelemetry = () => (
   </TrackApplicationView>
 );
 
+const ScriptsLibraryTelemetry = () => (
+  <TrackApplicationView viewId={SecurityPageName.scriptsLibrary}>
+    <ScriptsLibraryContainer />
+    <SpyRoute pageName={SecurityPageName.scriptsLibrary} />
+  </TrackApplicationView>
+);
+
 const Notes = () => (
   <SecurityRoutePageWrapper pageName={SecurityPageName.notes}>
     <NotesContainer />
@@ -109,6 +118,9 @@ export const ManagementContainer = memo(() => {
   const trustedDevicesEnabled = useIsExperimentalFeatureEnabled('trustedDevices');
   const endpointExceptionsMovedUnderManagement = useIsExperimentalFeatureEnabled(
     'endpointExceptionsMovedUnderManagement'
+  );
+  const showScriptsLibrary = useIsExperimentalFeatureEnabled(
+    'responseActionsScriptLibraryManagement'
   );
 
   const {
@@ -122,6 +134,7 @@ export const ManagementContainer = memo(() => {
     canReadEndpointList,
     canReadHostIsolationExceptions,
     canReadEndpointExceptions,
+    canReadScriptsLibrary,
   } = useUserPrivileges().endpointPrivileges;
 
   // Lets wait until we can verify permissions
@@ -196,6 +209,14 @@ export const ManagementContainer = memo(() => {
         component={ResponseActionsTelemetry}
         hasPrivilege={canReadActionsLogManagement}
       />
+
+      {showScriptsLibrary && (
+        <PrivilegedRoute
+          path={MANAGEMENT_ROUTING_SCRIPTS_LIBRARY_PATH}
+          component={ScriptsLibraryTelemetry}
+          hasPrivilege={canReadScriptsLibrary}
+        />
+      )}
 
       <Route path={MANAGEMENT_ROUTING_NOTES_PATH} component={Notes} />
 

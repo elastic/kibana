@@ -202,6 +202,7 @@ const componentStyles = {
       padding: euiTheme.size.m,
       height: '100%',
       overflow: 'hidden',
+      backgroundColor: euiTheme.colors.backgroundBasePlain,
     }),
   scrollableWrapper: css({
     minHeight: 0,

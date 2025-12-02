@@ -7,8 +7,8 @@
 
 import { z } from '@kbn/zod';
 import {
+  getClusterDefaultFailureStoreRetentionValue,
   getFailureStoreStats,
-  getFailureStoreDefaultRetention,
 } from '../../../../lib/streams/stream_crud';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
@@ -54,7 +54,7 @@ export const getFailureStoreStatsRoute = createServerRoute({
 });
 
 export const getFailureStoreDefaultRetentionRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/{name}/failure_store/default_retention',
+  endpoint: 'GET /internal/streams/failure_store/default_retention',
   options: {
     access: 'internal',
     summary: 'Get failure store default retention',
@@ -65,20 +65,12 @@ export const getFailureStoreDefaultRetentionRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
-    path: z.object({
-      name: z.string(),
-    }),
-  }),
-  handler: async ({ params, request, getScopedClients, server }) => {
+  handler: async ({ request, getScopedClients, server }) => {
     const { scopedClusterClient } = await getScopedClients({
       request,
     });
 
-    const { name } = params.path;
-
-    const defaultRetention = await getFailureStoreDefaultRetention({
-      name,
+    const defaultRetention = await getClusterDefaultFailureStoreRetentionValue({
       scopedClusterClient,
       isServerless: !!server.isServerless,
     });

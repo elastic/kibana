@@ -18,8 +18,11 @@ import {
   ResizableLayoutOrder,
 } from '@kbn/resizable-layout';
 import { WorkflowExecutionPanel } from './workflow_execution_panel';
+import {
+  buildOverviewStepExecutionFromContext,
+  buildTriggerStepExecutionFromContext,
+} from './workflow_pseudo_step_context';
 import { WorkflowStepExecutionDetails } from './workflow_step_execution_details';
-import { buildTriggerStepExecutionFromContext } from './workflow_trigger_context';
 import { useWorkflowExecutionPolling } from '../../../entities/workflows/model/use_workflow_execution_polling';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 
@@ -47,11 +50,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
         executionId === workflowExecution?.id && // execution id matches (not stale execution used)
         workflowExecution?.stepExecutions?.length // step executions are loaded
       ) {
-        // Auto-select the first step execution
-        const firstStepExecutionId = workflowExecution.stepExecutions[0]?.id;
-        if (firstStepExecutionId) {
-          setSelectedStepExecution(firstStepExecutionId);
-        }
+        setSelectedStepExecution('__overview');
       }
     }, [workflowExecution, selectedStepExecutionId, setSelectedStepExecution, executionId]);
 
@@ -72,6 +71,10 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
     const selectedStepExecution = useMemo(() => {
       if (!selectedStepExecutionId) {
         return undefined;
+      }
+
+      if (selectedStepExecutionId === '__overview' && workflowExecution) {
+        return buildOverviewStepExecutionFromContext(workflowExecution);
       }
 
       if (selectedStepExecutionId === 'trigger' && workflowExecution?.context) {
@@ -106,6 +109,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
             <WorkflowStepExecutionDetails
               workflowExecutionId={executionId}
               stepExecution={selectedStepExecution}
+              workflowExecutionDuration={workflowExecution?.duration ?? undefined}
             />
           }
           minFlexPanelSize={200}

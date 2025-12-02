@@ -93,6 +93,12 @@ export interface EmbeddableConversationProps {
 export interface EmbeddableConversationFlyoutProps {
   onClose: () => void;
   ariaLabelledBy: string;
+  /**
+   * Callback to register a function that will receive prop updates.
+   * Used internally to update flyout props without recreating it.
+   * @internal
+   */
+  onPropsUpdate?: (callback: (props: EmbeddableConversationProps) => void) => void;
 }
 
 export type EmbeddableConversationInternalProps = EmbeddableConversationDependencies &

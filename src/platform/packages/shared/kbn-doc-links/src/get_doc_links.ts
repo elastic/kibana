@@ -698,6 +698,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       kibanaPrivileges: `${ELASTIC_DOCS}deploy-manage/users-roles/cluster-or-deployment-auth/kibana-privileges`,
       mappingRoles: `${ELASTIC_DOCS}deploy-manage/users-roles/cluster-or-deployment-auth/mapping-users-groups-to-roles`,
       mappingRolesFieldRules: `${ELASTIC_DOCS}deploy-manage/users-roles/cluster-or-deployment-auth/role-mapping-resources#mapping-roles-rule-field`,
+      roles: `${ELASTIC_DOCS}reference/elasticsearch/roles`,
       runAsPrivilege: `${ELASTIC_DOCS}reference/elasticsearch/security-privileges#_run_as_privilege`,
       enableElasticSearchSecurityFeatures: `${ELASTIC_DOCS}deploy-manage/security/set-up-minimal-security#_enable_es_security_features`,
     },

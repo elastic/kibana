@@ -16,7 +16,6 @@ export type TriggerType = 'alert' | 'scheduled' | 'manual';
 export interface TriggerContextFromExecution {
   triggerType: TriggerType;
   input: JsonValue;
-  output: JsonValue;
 }
 
 export function buildTriggerContextFromExecution(
@@ -26,30 +25,25 @@ export function buildTriggerContextFromExecution(
     return null;
   }
 
-  let triggerType: TriggerType = 'alert';
+  let triggerType: TriggerType = 'manual'; // Default to manual trigger type
 
+  const hasEvent = executionContext.event !== undefined;
   const isScheduled =
     (executionContext.event as { type?: string } | undefined)?.type === 'scheduled';
-  const hasInputs =
-    executionContext.inputs &&
-    Object.keys(executionContext.inputs as Record<string, unknown>).length > 0;
 
-  if (hasInputs) {
-    triggerType = 'manual';
-  } else if (isScheduled) {
+  if (isScheduled) {
     triggerType = 'scheduled';
+  } else if (hasEvent) {
+    triggerType = 'alert';
   }
 
   const inputData = (executionContext as { event?: JsonValue; inputs?: JsonValue }).event
     ? executionContext.event
     : executionContext.inputs;
 
-  const { inputs, event, ...contextData } = executionContext;
-
   return {
     triggerType,
     input: inputData as JsonValue,
-    output: contextData as JsonValue,
   };
 }
 
@@ -70,7 +64,7 @@ export function buildTriggerStepExecutionFromContext(
     stepType: `trigger_${triggerContext.triggerType}`,
     status: ExecutionStatus.COMPLETED,
     input: triggerContext.input,
-    output: triggerContext.output,
+    output: undefined,
     scopeStack: [],
     workflowRunId: workflowExecution.id,
     workflowId: workflowExecution.workflowId || '',
@@ -79,4 +73,29 @@ export function buildTriggerStepExecutionFromContext(
     stepExecutionIndex: 0,
     topologicalIndex: -1,
   } as WorkflowStepExecutionDto;
+}
+
+export function buildOverviewStepExecutionFromContext(
+  workflowExecution: WorkflowExecutionDto
+): WorkflowStepExecutionDto {
+  let contextData: JsonValue | undefined;
+  if (workflowExecution.context) {
+    const { inputs, event, ...context } = workflowExecution.context;
+    contextData = context as JsonValue;
+  }
+
+  return {
+    id: '__overview',
+    stepId: 'Overview',
+    stepType: '__overview',
+    status: workflowExecution.status,
+    stepExecutionIndex: 0,
+    startedAt: workflowExecution.startedAt,
+    input: contextData,
+    scopeStack: [],
+    workflowRunId: workflowExecution.id,
+    workflowId: workflowExecution.workflowId ?? '',
+    topologicalIndex: -1,
+    globalExecutionIndex: -1,
+  };
 }

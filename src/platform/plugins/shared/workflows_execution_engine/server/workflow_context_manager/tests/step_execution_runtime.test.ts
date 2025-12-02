@@ -10,6 +10,7 @@
 import type { EsWorkflowExecution, EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
+import { ExecutionError } from '../../utils';
 import { createMockWorkflowEventLogger } from '../../workflow_event_logger/mocks';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/types';
 import { StepExecutionRuntime } from '../step_execution_runtime';
@@ -129,7 +130,7 @@ describe('StepExecutionRuntime', () => {
         stepId: 'node1',
         input: {},
         output: { success: true, data: {} },
-        error: 'Fake error',
+        error: { type: 'Error', message: 'Fake error' },
       } as Partial<EsWorkflowStepExecution>);
       const stepResult = underTest.getCurrentStepResult();
       expect(workflowExecutionState.getStepExecution).toHaveBeenCalledWith(
@@ -138,7 +139,7 @@ describe('StepExecutionRuntime', () => {
       expect(stepResult).toEqual({
         input: {},
         output: { success: true, data: {} },
-        error: 'Fake error',
+        error: new ExecutionError({ type: 'Error', message: 'Fake error' }),
       });
     });
   });
@@ -315,7 +316,7 @@ describe('StepExecutionRuntime', () => {
                 stepId: 'node1',
                 startedAt: '2025-08-05T00:00:00.000Z',
                 output: { success: true, data: {} },
-                error: null,
+                error: undefined,
               } as Partial<EsWorkflowStepExecution>;
             }
           }
@@ -400,17 +401,31 @@ describe('StepExecutionRuntime', () => {
       );
     });
 
-    it('should mark the step as failed', () => {
-      const error = new Error('Step execution failed');
-      underTest.failStep(error);
+    it.each([
+      {
+        testName: 'JS error',
+        inputError: new Error('Step execution failed'),
+        expectedError: { type: 'Error', message: 'Step execution failed' },
+      },
+      {
+        testName: 'execution error',
+        inputError: new ExecutionError({ type: 'CustomError', message: 'Custom step error' }),
+        expectedError: { type: 'CustomError', message: 'Custom step error' },
+      },
+    ])(
+      'should mark the step as failed and map "$testName" error to execution error',
+      async (testCase) => {
+        const { inputError, expectedError } = testCase;
+        await underTest.failStep(inputError);
 
-      expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: ExecutionStatus.FAILED,
-          error: String(error),
-        })
-      );
-    });
+        expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
+          expect.objectContaining({
+            status: ExecutionStatus.FAILED,
+            error: expectedError,
+          })
+        );
+      }
+    );
 
     it('should log the failure of the step', () => {
       const error = new Error('Step execution failed');

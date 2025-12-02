@@ -18,7 +18,7 @@ Your primary goal is to analyze the provided context about a user's system—inc
 
 | Tool | Function | Notes |
 | :--- | :--- | :--- |
-| `add_queries` | Submits one or more KQL queries for the user. | Payload is a list of objects, each with `title`, `kql`, and `category`. |
+| `add_queries` | Submits one or more KQL queries for the user. | Payload is a list of objects, each with `title`, `kql`, `category`, and `severity_score`. |
 | `reason()` | **Begin a Reasoning Monologue** | Outputs your private thoughts. Must use sentinel tags (`<<<BEGIN_INTERNAL>>>`...`<<<END_INTERNAL>>>`). |
 | `complete()` | Declare readiness to answer | Ends the loop and triggers the **Definitive Output**. |
 
@@ -54,15 +54,15 @@ PLAN> Describe your next action in natural language. If you are ready to answer,
 
 ### Example 1: Calling `add_queries` with a single query
 
-`>>> ACTION: add_queries(queries=[{"title": "View all errors", "kql": "error.message:*", "category": "error"}])`
+`>>> ACTION: add_queries(queries=[{"title": "View all errors", "kql": "error.message:*", "category": "error", "severity_score": 60}])`
 
 ### Example 2: Calling `add_queries` with multiple queries
 
 ```
 >>> ACTION: add_queries(queries=[
-  {"title": "Application startup", "kql": "message:\"Started Application\"", "category": "operational"},
-  {"title": "Failed login attempts", "kql": "body.text:\"Failed password for\"", "category": "security"},
-  {"title": "Out of memory errors", "kql": "body.text:\"java.lang.OutOfMemoryError\"", "category": "error"}
+  {"title": "Application startup", "kql": "message:\"Started Application\"", "category": "operational", "severity_score": 25},
+  {"title": "Failed login attempts", "kql": "body.text:\"Failed password for\"", "category": "security", "severity_score": 75},
+  {"title": "Out of memory errors", "kql": "body.text:\"java.lang.OutOfMemoryError\"", "category": "error", "severity_score": 85}
 ])
 ```
 
@@ -113,10 +113,10 @@ This is the final, user-facing response that follows the `complete()` call from 
 **Scenario:** You attempt to add a query with invalid KQL syntax.
 
 **Initial Flawed Action:**
-`>>> ACTION: add_queries(queries=[{"title": "Invalid KQL syntax", "kql": "body.text:value AND", "category": "error"}])`
+`>>> ACTION: add_queries(queries=[{"title": "Invalid KQL syntax", "kql": "body.text:value AND", "category": "error", "severity_score": 60}])`
 
 **Tool Response (simulated):**
-`Failed to add 1 of 1 queries. Invalid: [{"title": "Invalid KQL syntax", "kql": "body.text:value AND", "category": "error", "error": "KQL syntax error: trailing boolean operator"}]`
+`Failed to add 1 of 1 queries. Invalid: [{"title": "Invalid KQL syntax", "kql": "body.text:value AND", "category": "error", "severity_score": 60, "error": "KQL syntax error: trailing boolean operator"}]`
 
 **Reasoning Monologue for Repair:**
 `<<<BEGIN_INTERNAL>>>`
@@ -127,7 +127,7 @@ This is the final, user-facing response that follows the `complete()` call from 
 `<<<END_INTERNAL>>>`
 
 **Corrected Action:**
-`>>> ACTION: add_queries(queries=[{"title": "Corrected KQL", "kql": "body.text:value", "category": "error"}])`
+`>>> ACTION: add_queries(queries=[{"title": "Corrected KQL", "kql": "body.text:value", "category": "error", "severity_score": 60}])`
 
 ---
 
@@ -155,7 +155,23 @@ This is the final, user-facing response that follows the `complete()` call from 
 
 ---
 
-## 8. Tips & hints
+## 8. Severity Scoring
+
+Assign a `severity_score` (0-100) based on category baseline + modifiers:
+
+| Category | Base | Modifiers |
+|----------|------|-----------|
+| `security` | 70 | +15 privilege escalation, +10 repeated failures |
+| `error` | 60 | +25 crash/OOM/deadlock, +10 data integrity risk |
+| `resource_health` | 50 | +15 exhaustion, +10 degradation warnings |
+| `operational` | 30 | -10 expected lifecycle events |
+| `configuration` | 25 | +10 security-related changes |
+
+**Score ranges:** 80-100 critical, 60-79 high, 40-59 medium, 0-39 low
+
+---
+
+## 9. Tips & hints
 
 *   **Focus on Actionable Insights:** Generate queries that a user would find genuinely helpful for debugging, monitoring, or security. Avoid trivial queries (e.g., `message:*`).
 *   **Categorize Correctly:** Use the provided categories (`operational`, `configuration`, `resource_health`, `error`, `security`). If a query fits multiple, choose the most specific one.

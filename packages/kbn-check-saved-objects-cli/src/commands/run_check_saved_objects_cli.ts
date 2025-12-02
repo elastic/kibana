@@ -40,7 +40,6 @@ export function runCheckSavedObjectsCli() {
 
       const context: TaskContext = {
         gitRev: gitRev!,
-        newTypes: [],
         updatedTypes: [],
         currentRemovedTypes: [],
         newRemovedTypes: [],
@@ -141,6 +140,7 @@ export function runCheckSavedObjectsCli() {
           fallbackRenderer: 'simple',
           rendererOptions: {
             collapseSubtasks: false,
+            showErrorMessage: false,
             timer: PRESET_TIMER,
           },
         }

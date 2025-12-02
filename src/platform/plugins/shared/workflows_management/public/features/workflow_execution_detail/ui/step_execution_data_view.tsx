@@ -39,17 +39,25 @@ export const StepExecutionDataView = React.memo<StepExecutionDataViewProps>(
         return { data: stepExecution.input, title: Titles.input };
       } else {
         if (stepExecution.error) {
-          return { data: { error: stepExecution.error }, title: Titles.error };
+          return {
+            data: { error: stepExecution.error as unknown as JsonValue },
+            title: Titles.error,
+          };
         }
         return { data: stepExecution.output, title: Titles.output };
       }
     }, [mode, stepExecution]);
 
     const fieldPathActionsPrefix: string | undefined = useMemo(() => {
+      const isOverviewStep = stepExecution.stepType === '__overview';
       const isTriggerStep = stepExecution.stepType?.startsWith('trigger_');
       const triggerType = isTriggerStep
         ? stepExecution.stepType?.replace('trigger_', '')
         : undefined;
+
+      if (isOverviewStep) {
+        return ''; // overview context: paths like "<fieldPath>"
+      }
 
       if (!isTriggerStep) {
         if (mode !== 'output' || stepExecution.error) {

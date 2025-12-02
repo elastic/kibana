@@ -18,6 +18,7 @@ interface ConversationContextValue {
   sessionTag?: string;
   agentId?: string;
   initialMessage?: string;
+  resetInitialMessage?: () => void;
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
   setConversationId?: (conversationId?: string) => void;
   conversationActions: ConversationActions;

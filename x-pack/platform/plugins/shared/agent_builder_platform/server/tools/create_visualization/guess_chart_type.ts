@@ -12,7 +12,12 @@ import { SupportedChartType } from '@kbn/onechat-common/tools/tool_result';
 const chartTypeSchema = z
   .object({
     chartType: z
-      .enum([SupportedChartType.Metric, SupportedChartType.Gauge, SupportedChartType.Tagcloud])
+      .enum([
+        SupportedChartType.Metric,
+        SupportedChartType.Gauge,
+        SupportedChartType.Tagcloud,
+        SupportedChartType.XY,
+      ])
       .describe('The most appropriate chart type for the visualization'),
     reasoning: z
       .string()
@@ -44,11 +49,13 @@ Available chart types:
 - metric: For displaying single numeric values, KPIs, or metrics with optional trend lines. Best for showing key performance indicators, counts, sums, averages, or other aggregate statistics.
 - gauge: For displaying a single metric value within a range with min/max/goal values. Best for showing progress, performance against targets, or values within bounds (e.g., "show CPU usage as a gauge", "display sales target progress").
 - tagcloud: For displaying word frequency or categorical data where text size represents value. Best for showing top terms, keywords, categories, or text-based aggregations (e.g., "show top error messages", "display most common tags").
+- xy: For displaying time series, trends, comparisons, or distributions using line charts, bar charts, or area charts. Best for showing data over time, comparing multiple series, histograms, or any visualization with X and Y axes (e.g., "show request count over time", "compare sales by region as a bar chart", "display CPU usage trend as a line chart").
 
 Guidelines:
-- Choose 'metric' for numerical statistics, aggregations, counts, or KPIs without ranges
+- Choose 'metric' for single numerical statistics, aggregations, counts, or KPIs without ranges
 - Choose 'gauge' when showing a value within a range, progress toward a goal, or performance against min/max thresholds
 - Choose 'tagcloud' when visualizing text/categorical data where frequency or count determines size
+- Choose 'xy' when showing trends over time, comparing multiple data series, or displaying distributions with axes
 - Consider the user's intent and the nature of the data being visualized
 ${existingType ? `- The existing chart type is: ${existingType}` : ''}`,
     },

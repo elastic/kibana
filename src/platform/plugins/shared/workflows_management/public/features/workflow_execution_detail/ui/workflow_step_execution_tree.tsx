@@ -15,6 +15,7 @@ import type {
 } from '@elastic/eui';
 import {
   EuiEmptyPrompt,
+  EuiHorizontalRule,
   EuiIcon,
   EuiLoadingSpinner,
   EuiText,
@@ -39,8 +40,14 @@ import { isDangerousStatus, isInProgressStatus, isTerminalStatus } from '@kbn/wo
 import type { StepExecutionTreeItem } from './build_step_executions_tree';
 import { buildStepExecutionsTree } from './build_step_executions_tree';
 import { StepExecutionTreeItemLabel } from './step_execution_tree_item_label';
-import { buildTriggerStepExecutionFromContext } from './workflow_trigger_context';
+import {
+  buildOverviewStepExecutionFromContext,
+  buildTriggerStepExecutionFromContext,
+} from './workflow_pseudo_step_context';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
+
+const TRIGGER_BOLT_ICON_SVG =
+  'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path fill="%23535966" d="M7.04 13.274a.5.5 0 1 0 .892.453l3.014-5.931a.5.5 0 0 0-.445-.727H5.316L8.03 1.727a.5.5 0 1 0-.892-.453L4.055 7.343a.5.5 0 0 0 .446.726h5.185L7.04 13.274Z"/></svg>';
 
 function convertTreeToEuiTreeViewItems(
   treeItems: StepExecutionTreeItem[],
@@ -66,9 +73,27 @@ function convertTreeToEuiTreeViewItems(
       }
     };
 
+    // Check if this is a trigger pseudo-step
+    const isTriggerPseudoStep = stepType.startsWith('trigger_');
+
     return {
       id: item.stepExecutionId ?? `${item.stepId}-${item.executionIndex}-no-step-execution`,
-      css: getStatusCss({ status, selected }, euiTheme),
+      css: [
+        getStatusCss({ status, selected }, euiTheme),
+        isTriggerPseudoStep &&
+          css`
+            .euiTreeView__arrowPlaceholder::before {
+              content: '';
+              display: inline-block;
+              width: 16px;
+              height: 16px;
+              background-image: url('${TRIGGER_BOLT_ICON_SVG}');
+              background-repeat: no-repeat;
+              background-position: center;
+              background-size: 12px 12px;
+            }
+          `,
+      ],
       icon: (
         <StepIcon
           stepType={stepType}
@@ -212,19 +237,26 @@ export const WorkflowStepExecutionTree = ({
 
     const stepExecutionsTree = buildStepExecutionsTree(
       Array.from(stepExecutionMap.values()),
-      execution.context
+      execution.context,
+      execution.status
     );
 
-    const triggerPseudoStep = stepExecutionsTree.find((item) => item.stepType === '__trigger');
-    const inputsPseudoStep = stepExecutionsTree.find((item) => item.stepType === '__inputs');
-    const triggerStep = triggerPseudoStep ?? inputsPseudoStep;
+    const overviewPseudoStep = stepExecutionsTree.find((item) => item.stepType === '__overview');
+    if (overviewPseudoStep) {
+      const executionOverview = buildOverviewStepExecutionFromContext(execution);
+      stepExecutionMap.set('__overview', executionOverview);
+    }
 
-    if (triggerStep && execution.context) {
+    const triggerPseudoStep =
+      stepExecutionsTree.find((item) => item.stepType === '__trigger') ??
+      stepExecutionsTree.find((item) => item.stepType === '__inputs');
+
+    if (triggerPseudoStep && execution.context) {
       const triggerExecution = buildTriggerStepExecutionFromContext(execution);
       if (triggerExecution) {
         stepExecutionMap.set(triggerExecution.id, triggerExecution);
-        triggerStep.stepExecutionId = triggerExecution.id;
-        triggerStep.stepType = triggerExecution.stepType ?? '';
+        triggerPseudoStep.stepExecutionId = triggerExecution.id;
+        triggerPseudoStep.stepType = triggerExecution.stepType ?? '';
       }
     }
     const items: EuiTreeViewProps['items'] = convertTreeToEuiTreeViewItems(
@@ -234,20 +266,51 @@ export const WorkflowStepExecutionTree = ({
       selectedId,
       onStepExecutionClick
     );
+
+    const overviewItem = items.find(
+      (item) => stepExecutionMap.get(item.id)?.stepType === '__overview'
+    );
+    const regularItems = items.filter(
+      (item) => stepExecutionMap.get(item.id)?.stepType !== '__overview'
+    );
+
     return (
       <>
         <div css={styles.treeViewContainer}>
-          <EuiTreeView
-            showExpansionArrows
-            expandByDefault
-            items={items}
-            aria-label={i18n.translate(
-              'workflows.WorkflowStepExecutionTree.workflowStepExecutionTreeAriaLabel',
-              {
-                defaultMessage: 'Workflow step execution tree',
-              }
-            )}
-          />
+          {overviewItem && (
+            <>
+              <EuiTreeView
+                showExpansionArrows
+                expandByDefault
+                items={[overviewItem]}
+                aria-label={i18n.translate(
+                  'workflows.WorkflowStepExecutionTree.overviewAriaLabel',
+                  {
+                    defaultMessage: 'Execution overview',
+                  }
+                )}
+              />
+              <EuiHorizontalRule
+                margin="none"
+                css={{ marginTop: euiTheme.size.xs, marginBottom: euiTheme.size.xs }}
+              />
+            </>
+          )}
+
+          {/* Regular steps */}
+          {regularItems.length > 0 && (
+            <EuiTreeView
+              showExpansionArrows
+              expandByDefault
+              items={regularItems}
+              aria-label={i18n.translate(
+                'workflows.WorkflowStepExecutionTree.workflowStepExecutionTreeAriaLabel',
+                {
+                  defaultMessage: 'Workflow step execution tree',
+                }
+              )}
+            />
+          )}
         </div>
       </>
     );
@@ -271,6 +334,9 @@ export const WorkflowStepExecutionTree = ({
 
 const componentStyles = {
   treeViewContainer: ({ euiTheme }: UseEuiTheme) => css`
+    & .euiTreeView__expansionArrow {
+      inline-size: 12px;
+    }
     & .euiTreeView__nodeLabel {
       flex-grow: 1;
       text-align: left;

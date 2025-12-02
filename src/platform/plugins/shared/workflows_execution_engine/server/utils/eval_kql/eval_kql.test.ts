@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { evaluateKql } from '../eval_kql';
+import { evaluateKql } from './eval_kql';
 
 describe('evaluateKql', () => {
   it('should throw an error for invalid KQL', () => {

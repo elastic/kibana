@@ -8,7 +8,7 @@
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 
-export function useFailureStoreDefaultRetention(streamName: string) {
+export function useFailureStoreDefaultRetention(shouldFetch: boolean) {
   const {
     dependencies: {
       start: {
@@ -19,27 +19,25 @@ export function useFailureStoreDefaultRetention(streamName: string) {
 
   const result = useStreamsAppFetch(
     async ({ signal }) => {
+      if (!shouldFetch) {
+        return undefined;
+      }
+
       try {
         const response = await streamsRepositoryClient.fetch(
-          'GET /internal/streams/{name}/failure_store/default_retention',
+          'GET /internal/streams/failure_store/default_retention',
           {
             signal,
-            params: {
-              path: {
-                name: streamName,
-              },
-            },
           }
         );
         return response.default_retention;
       } catch (error) {
-        // If we can't fetch it, just return undefined
         return undefined;
       }
     },
-    [streamName, streamsRepositoryClient],
+    [streamsRepositoryClient, shouldFetch],
     { disableToastOnError: true }
   );
 
-  return { value: result.value, refresh: result.refresh };
+  return { clusterDefaultRetention: result.value };
 }

@@ -11,25 +11,12 @@ import equal from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
 import type { MigrationInfoRecord, ModelVersionSummary } from '../types';
 
-interface ValidateChangesParams {
-  from?: MigrationInfoRecord;
-  to: MigrationInfoRecord;
-}
-
 interface ValidateChangesExistingTypeParams {
   from: MigrationInfoRecord;
   to: MigrationInfoRecord;
 }
 
-interface ValidateChangesNewTypeParams {
-  to: MigrationInfoRecord;
-}
-
-export function validateChanges({ from, to }: ValidateChangesParams): void {
-  return from ? validateChangesExistingType({ from, to }) : validateChangesNewType({ to });
-}
-
-function validateChangesExistingType({ from, to }: ValidateChangesExistingTypeParams): void {
+export function validateChangesExistingType({ from, to }: ValidateChangesExistingTypeParams): void {
   const name = to.name;
 
   // check that no migrations have been removed
@@ -81,7 +68,11 @@ function validateChangesExistingType({ from, to }: ValidateChangesExistingTypePa
   }
 }
 
-function validateChangesNewType({ to }: ValidateChangesNewTypeParams): void {
+interface ValidateChangesNewTypeParams {
+  to: MigrationInfoRecord;
+}
+
+export function validateChangesNewType({ to }: ValidateChangesNewTypeParams): void {
   const name = to.name;
 
   if (to.migrationVersions?.length) {

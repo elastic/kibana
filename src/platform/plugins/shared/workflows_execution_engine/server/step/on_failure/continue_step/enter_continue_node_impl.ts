@@ -8,6 +8,7 @@
  */
 
 import type { EnterContinueNode } from '@kbn/workflows/graph';
+import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
 import type { NodeImplementation, NodeWithErrorCatching } from '../../node_implementation';
@@ -23,9 +24,20 @@ export class EnterContinueNodeImpl implements NodeImplementation, NodeWithErrorC
     this.workflowRuntime.navigateToNextNode();
   }
 
-  public catchError(): void {
-    this.workflowLogger.logDebug(`Error caught, continuing execution.`);
+  public catchError(failedContext: StepExecutionRuntime): void {
+    const shouldContinue = failedContext.contextManager.evaluateBooleanExpressionInContext(
+      this.node.configuration.condition,
+      {
+        error: failedContext.stepExecution?.error,
+      }
+    );
 
+    if (!shouldContinue) {
+      this.workflowLogger.logDebug(`Condition for continue step not met, propagating error.`);
+      return;
+    }
+
+    this.workflowLogger.logDebug(`Error caught, continuing execution.`);
     // Continue step should always go to exit continue node to continue execution
     // regardless of any errors that occurred within its scope
     this.workflowRuntime.navigateToNode(this.node.exitNodeId);

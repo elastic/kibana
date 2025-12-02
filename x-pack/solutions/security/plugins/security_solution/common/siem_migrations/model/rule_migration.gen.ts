@@ -17,6 +17,7 @@
 import { z } from '@kbn/zod';
 
 import { NonEmptyString } from '../../api/model/primitives.gen';
+import { Threat } from '../../api/detection_engine/model/rule_schema/common_attributes.gen';
 import { RuleResponse } from '../../api/detection_engine/model/rule_schema/rule_schemas.gen';
 import {
   MigrationTranslationResult,
@@ -84,6 +85,10 @@ export const OriginalRule = z.object({
    * The original rule's severity or some representation of it.
    */
   severity: z.string().optional(),
+  /**
+   * The MITRE ATT&CK threat information for this rule.
+   */
+  threat: z.array(Threat).optional(),
 });
 
 /**
@@ -127,6 +132,10 @@ export const ElasticRule = z.object({
    * The Elastic rule id installed as a result.
    */
   id: NonEmptyString.optional(),
+  /**
+   * The MITRE ATT&CK threat information for this rule.
+   */
+  threat: z.array(Threat).optional(),
 });
 
 /**
