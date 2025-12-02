@@ -62,7 +62,7 @@ export function registerAiInsightRoutes(
         const inferenceClient = inference.getClient({ request });
 
         const system = dedent(`
- You are an SRE assistant. Help an SRE quickly understand likely cause, impact, and next actions for this alert using only the provided context.  Be as concise as possible.
+ You are an SRE assistant. Help an SRE quickly understand likely cause, impact, and next actions for this alert using the provided context.
 
         Output shape (plain text):
         - Summary (1–2 sentences): What is likely happening and why it matters. If recovered, acknowledge and reduce urgency. If no strong signals, say “Inconclusive” and briefly note why.
@@ -90,18 +90,19 @@ export function registerAiInsightRoutes(
         - If inconclusive or signals skew Indirect/Unrelated, state that the alert may be unrelated/noisy and suggest targeted traces/logging for the suspected path.
         `);
 
-        const user = dedent(`
+        const prompt = dedent(`
+
           Context:
           ${requestContext}
 
           Task:
-          Provide a brief, actionable summary: what likely happened, why it matters, and immediate next checks.
+          Summarize likely cause, impact, and immediate next checks for this alert using the format above. Tie related signals to the alert scope; ignore unrelated noise. If signals are weak or conflicting, mark Assessment “Inconclusive” and propose the safest next diagnostic step.
         `);
 
         const completion = await inferenceClient.chatComplete({
-          connectorId: 'bedrock-claude-4_5',
+          connectorId,
           system,
-          messages: [{ role: MessageRole.User, content: user }],
+          messages: [{ role: MessageRole.User, content: prompt }],
           temperature: 0.2,
         });
 
