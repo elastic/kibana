@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { registerClustersRoute } from './clusters';
 import { CloudConnectClient } from '../services/cloud_connect_client';
@@ -84,6 +84,7 @@ describe('Clusters Routes', () => {
       customError: jest.fn((params) => params),
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { createStorageService } = require('../lib/create_storage_service');
     createStorageService.mockResolvedValue(mockStorageService);
   });
@@ -496,6 +497,7 @@ describe('Clusters Routes', () => {
     });
 
     it('should enable EIS and configure inference on happy path', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { enableInferenceCCM } = require('../services/inference_ccm');
 
       mockStorageService.getApiKey.mockResolvedValue({
@@ -643,6 +645,7 @@ describe('Clusters Routes', () => {
     });
 
     it('should rollback when inference configuration fails', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { enableInferenceCCM } = require('../services/inference_ccm');
 
       mockStorageService.getApiKey.mockResolvedValue({
@@ -710,6 +713,7 @@ describe('Clusters Routes', () => {
     });
 
     it('should return dual error when both inference and rollback fail', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { enableInferenceCCM } = require('../services/inference_ccm');
 
       mockStorageService.getApiKey.mockResolvedValue({

@@ -1,0 +1,231 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { IntlProvider } from 'react-intl';
+import { ConnectionWizard } from './index';
+import { useCloudConnectedAppContext } from '../../../app_context';
+import { apiService } from '../../../../lib/api';
+import type { CloudConnectedAppContextValue } from '../../../app_context';
+
+jest.mock('../../../app_context');
+jest.mock('../../../../lib/api');
+
+const mockUseCloudConnectedAppContext = useCloudConnectedAppContext as jest.MockedFunction<
+  typeof useCloudConnectedAppContext
+>;
+
+const renderWithIntl = (component: React.ReactElement) => {
+  return render(
+    <IntlProvider locale="en" messages={{}}>
+      {component}
+    </IntlProvider>
+  );
+};
+
+describe('ConnectionWizard', () => {
+  const mockOnConnect = jest.fn();
+  const mockContext: CloudConnectedAppContextValue = {
+    chrome: {} as any,
+    application: {} as any,
+    http: {} as any,
+    notifications: {} as any,
+    history: {} as any,
+    docLinks: {
+      links: {
+        kibana: {
+          secureSavedObject: 'https://docs.elastic.co/encryption',
+        },
+      },
+    } as any,
+    cloudUrl: 'https://cloud.elastic.co',
+    clusterConfig: {
+      hasEncryptedSOEnabled: true,
+      license: { type: 'platinum', uid: 'license-123' },
+      cluster: { id: 'cluster-123', name: 'test-cluster', version: '8.15.0' },
+    },
+    hasConfigurePermission: true,
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseCloudConnectedAppContext.mockReturnValue(mockContext);
+  });
+
+  it('should render 2 steps when hasEncryptedSOEnabled is true', () => {
+    renderWithIntl(<ConnectionWizard onConnect={mockOnConnect} />);
+
+    // Step 1: Sign up or log in to Elastic Cloud
+    expect(
+      screen.getByText(/sign up or log in to elastic cloud and get the cloud connect api key/i)
+    ).toBeInTheDocument();
+
+    // Step 2 (encryption warning) should NOT be present
+    expect(screen.queryByText(/configure an encryption key/i)).not.toBeInTheDocument();
+
+    // Step 3: Paste API key (should be step 2 in the UI since step 2 is skipped)
+    expect(
+      screen.getByText(/paste your cloud connect api key and connect/i)
+    ).toBeInTheDocument();
+  });
+
+  it('should render 3 steps when hasEncryptedSOEnabled is false', () => {
+    mockUseCloudConnectedAppContext.mockReturnValue({
+      ...mockContext,
+      clusterConfig: {
+        ...mockContext.clusterConfig!,
+        hasEncryptedSOEnabled: false,
+      },
+    });
+
+    renderWithIntl(<ConnectionWizard onConnect={mockOnConnect} />);
+
+    // Step 1: Sign up or log in to Elastic Cloud
+    expect(
+      screen.getByText(/sign up or log in to elastic cloud and get the cloud connect api key/i)
+    ).toBeInTheDocument();
+
+    // Step 2: Configure encryption key (should be present)
+    expect(screen.getByText(/configure an encryption key/i)).toBeInTheDocument();
+
+    // Step 3: Paste API key
+    expect(
+      screen.getByText(/paste your cloud connect api key and connect/i)
+    ).toBeInTheDocument();
+  });
+
+  it('should disable API key input when hasEncryptedSOEnabled is false', () => {
+    mockUseCloudConnectedAppContext.mockReturnValue({
+      ...mockContext,
+      clusterConfig: {
+        ...mockContext.clusterConfig!,
+        hasEncryptedSOEnabled: false,
+      },
+    });
+
+    renderWithIntl(<ConnectionWizard onConnect={mockOnConnect} />);
+
+    const input = screen.getByPlaceholderText(/paste your cloud connect api key/i);
+    expect(input).toBeDisabled();
+  });
+
+  it('should disable Connect button when API key is empty', () => {
+    renderWithIntl(<ConnectionWizard onConnect={mockOnConnect} />);
+
+    const connectButton = screen.getByRole('button', { name: /connect/i });
+    expect(connectButton).toBeDisabled();
+  });
+
+  it('should disable Connect button when hasEncryptedSOEnabled is false', () => {
+    mockUseCloudConnectedAppContext.mockReturnValue({
+      ...mockContext,
+      clusterConfig: {
+        ...mockContext.clusterConfig!,
+        hasEncryptedSOEnabled: false,
+      },
+    });
+
+    renderWithIntl(<ConnectionWizard onConnect={mockOnConnect} />);
+
+    const connectButton = screen.getByRole('button', { name: /connect/i });
+    expect(connectButton).toBeDisabled();
+  });
+
+  it('should enable Connect button when API key is entered AND hasEncryptedSOEnabled is true', async () => {
+    renderWithIntl(<ConnectionWizard onConnect={mockOnConnect} />);
+
+    const input = screen.getByPlaceholderText(/paste your cloud connect api key/i);
+    const connectButton = screen.getByRole('button', { name: /connect/i });
+
+    // Initially disabled
+    expect(connectButton).toBeDisabled();
+
+    // Type an API key
+    await userEvent.type(input, 'test-api-key-123');
+
+    // Should now be enabled
+    expect(connectButton).not.toBeDisabled();
+  });
+
+  it('should display error callout when authentication fails', async () => {
+    const mockApiService = apiService as jest.Mocked<typeof apiService>;
+    mockApiService.authenticate = jest.fn().mockResolvedValue({
+      data: null,
+      error: { message: 'Invalid API key' },
+    });
+
+    renderWithIntl(<ConnectionWizard onConnect={mockOnConnect} />);
+
+    const input = screen.getByPlaceholderText(/paste your cloud connect api key/i);
+    const connectButton = screen.getByRole('button', { name: /connect/i });
+
+    await userEvent.type(input, 'invalid-key');
+    await userEvent.click(connectButton);
+
+    await waitFor(() => {
+      expect(screen.getByText(/authentication failed/i)).toBeInTheDocument();
+      expect(screen.getByText(/invalid api key/i)).toBeInTheDocument();
+    });
+
+    expect(mockOnConnect).not.toHaveBeenCalled();
+  });
+
+  it('should show loading state during authentication', async () => {
+    const mockApiService = apiService as jest.Mocked<typeof apiService>;
+    let resolveAuthenticate: any;
+    const authenticatePromise = new Promise((resolve) => {
+      resolveAuthenticate = resolve;
+    });
+    mockApiService.authenticate = jest.fn().mockReturnValue(authenticatePromise);
+
+    renderWithIntl(<ConnectionWizard onConnect={mockOnConnect} />);
+
+    const input = screen.getByPlaceholderText(/paste your cloud connect api key/i);
+    const connectButton = screen.getByRole('button', { name: /connect/i });
+
+    await userEvent.type(input, 'test-api-key');
+    await userEvent.click(connectButton);
+
+    // Button should be disabled during loading
+    await waitFor(() => {
+      expect(connectButton).toBeDisabled();
+    });
+
+    // Resolve the promise
+    resolveAuthenticate({ data: { success: true }, error: null });
+
+    await waitFor(() => {
+      expect(mockOnConnect).toHaveBeenCalled();
+    });
+  });
+
+  it('should call onConnect callback on successful authentication', async () => {
+    const mockApiService = apiService as jest.Mocked<typeof apiService>;
+    mockApiService.authenticate = jest.fn().mockResolvedValue({
+      data: { success: true, cluster_id: 'cluster-123', organization_id: 'org-123' },
+      error: null,
+    });
+
+    renderWithIntl(<ConnectionWizard onConnect={mockOnConnect} />);
+
+    const input = screen.getByPlaceholderText(/paste your cloud connect api key/i);
+    const connectButton = screen.getByRole('button', { name: /connect/i });
+
+    await userEvent.type(input, 'valid-api-key');
+    await userEvent.click(connectButton);
+
+    await waitFor(() => {
+      expect(mockApiService.authenticate).toHaveBeenCalledWith('valid-api-key');
+      expect(mockOnConnect).toHaveBeenCalled();
+    });
+
+    // No error should be displayed
+    expect(screen.queryByText(/authentication failed/i)).not.toBeInTheDocument();
+  });
+});

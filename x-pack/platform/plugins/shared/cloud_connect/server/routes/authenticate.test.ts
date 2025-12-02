@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { registerAuthenticateRoute } from './authenticate';
 import { CloudConnectClient } from '../services/cloud_connect_client';
@@ -69,6 +69,7 @@ describe('Authentication Routes', () => {
       customError: jest.fn((params) => params),
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { createStorageService } = require('../lib/create_storage_service');
     createStorageService.mockResolvedValue(mockStorageService);
   });
@@ -173,6 +174,7 @@ describe('Authentication Routes', () => {
       const mockGetStartServices = jest.fn();
       const hasEncryptedSOEnabled = true;
 
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { createStorageService } = require('../lib/create_storage_service');
       createStorageService.mockResolvedValue(mockStorageService);
 
@@ -270,6 +272,7 @@ describe('Authentication Routes', () => {
     });
 
     it('should authenticate with admin key and generate cluster-scoped key', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { getCurrentClusterData } = require('../lib/cluster_info');
 
       mockCloudConnectInstance.validateApiKeyScope.mockResolvedValue({
@@ -430,9 +433,7 @@ describe('Authentication Routes', () => {
     });
 
     it('should return 500 for general errors', async () => {
-      mockCloudConnectInstance.validateApiKeyScope.mockRejectedValue(
-        new Error('Unexpected error')
-      );
+      mockCloudConnectInstance.validateApiKeyScope.mockRejectedValue(new Error('Unexpected error'));
 
       mockRequest = {
         body: {
