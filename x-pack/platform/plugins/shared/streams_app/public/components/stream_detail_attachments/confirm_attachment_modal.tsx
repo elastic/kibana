@@ -121,7 +121,7 @@ export function ConfirmAttachmentModal({
               iconType="warning"
               title={i18n.translate('xpack.streams.confirmAttachmentModal.unlinkWarning', {
                 defaultMessage:
-                  'Unlinking attachments will not delete the object, it will remove the connection with the stream.',
+                  'Removing an attachment only removes its connection to the stream. It does not delete the underlying object.',
               })}
             />
             <EuiSpacer size="m" />

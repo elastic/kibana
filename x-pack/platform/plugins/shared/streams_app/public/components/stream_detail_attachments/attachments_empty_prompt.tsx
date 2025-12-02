@@ -30,7 +30,8 @@ export function AttachmentsEmptyPrompt({
           </EuiText>
           <EuiText size="s" textAlign="center" css={{ maxWidth: 480 }}>
             {i18n.translate('xpack.streams.attachments.emptyState.description', {
-              defaultMessage: 'Start linking relevant attachments to your stream',
+              defaultMessage:
+                'Add relevant attachments to your stream so you can access them from one place',
             })}
           </EuiText>
         </EuiFlexGroup>
