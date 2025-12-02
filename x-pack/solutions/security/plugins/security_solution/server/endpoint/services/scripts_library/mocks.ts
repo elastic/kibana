@@ -67,7 +67,7 @@ const generateSavedObjectScriptEntryMock = (
       description: undefined,
       instructions: undefined,
       example: undefined,
-      pathToExecutable: undefined,
+      path_to_executable: undefined,
       created_by: 'elastic',
       updated_by: 'elastic',
       ...scriptEntrySoAttributeOverrides,

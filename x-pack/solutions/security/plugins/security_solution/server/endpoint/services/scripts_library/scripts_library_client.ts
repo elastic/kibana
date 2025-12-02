@@ -18,6 +18,7 @@ import { v4 as uuidV4 } from 'uuid';
 import assert from 'assert';
 import type { KueryNode } from '@kbn/es-query';
 import * as esKuery from '@kbn/es-query';
+import { KUERY_FIELD_TO_SO_FIELD_MAP } from '../../../../common/endpoint/service/scripts_library';
 import type { ListScriptsRequestQuery } from '../../../../common/api/endpoint/scripts_library/list_scripts';
 import {
   ENDPOINT_DEFAULT_PAGE_SIZE,
@@ -85,24 +86,26 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
     requiresInput,
     pathToExecutable,
   }: Omit<CreateScriptRequestBody, 'file'>): ScriptsLibrarySavedObjectAttributes {
+    const now = new Date().toISOString();
+
     return {
-      id: '',
-      hash: '',
       name,
       platform,
-      requires_input: requiresInput,
       description,
       instructions,
       example,
-      pathToExecutable,
+      id: '',
+      hash: '',
+      requires_input: requiresInput,
+      path_to_executable: pathToExecutable,
       created_by: '',
-      updated_by: '',
+      created_at: now,
+      updated_by: now,
+      updated_at: now,
     };
   }
 
   protected mapSoAttributesToEndpointScript({
-    created_at: createdAt = '',
-    updated_at: updatedAt = '',
     version = '',
     attributes: {
       id,
@@ -112,9 +115,11 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       description,
       instructions,
       requires_input: requiresInput = false,
-      pathToExecutable,
+      path_to_executable: pathToExecutable = undefined,
       created_by: createdBy,
       updated_by: updatedBy,
+      created_at: createdAt,
+      updated_at: updatedAt,
     },
   }: SavedObject<ScriptsLibrarySavedObjectAttributes>): EndpointScript {
     const downloadUri = SCRIPTS_LIBRARY_ITEM_DOWNLOAD_ROUTE.replace('{script_id}', id);
@@ -163,8 +168,12 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
               if (kueryAstNode.arguments && kueryAstNode.arguments.length > 0) {
                 const firstArg = kueryAstNode.arguments[0];
 
-                if (firstArg.type === 'literal') {
-                  firstArg.value = `${prefix}.${firstArg.value}`;
+                if (firstArg.type === 'literal' && !String(firstArg.value).startsWith(prefix)) {
+                  firstArg.value = `${prefix}.${
+                    KUERY_FIELD_TO_SO_FIELD_MAP[
+                      firstArg.value as keyof typeof KUERY_FIELD_TO_SO_FIELD_MAP
+                    ] ?? firstArg.value
+                  }`;
                 }
                 break;
               }
