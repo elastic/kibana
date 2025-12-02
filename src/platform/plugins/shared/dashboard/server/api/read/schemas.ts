@@ -10,7 +10,6 @@
 import { schema } from '@kbn/config-schema';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import {
-  accessMetaSchema,
   baseMetaSchema,
   createdMetaSchema,
   resolveMetaSchema,
@@ -21,13 +20,7 @@ export function getReadResponseBodySchema() {
   return schema.object({
     id: schema.string(),
     data: getDashboardStateSchema(),
-    meta: schema.allOf([
-      baseMetaSchema,
-      createdMetaSchema,
-      updatedMetaSchema,
-      resolveMetaSchema,
-      accessMetaSchema,
-    ]),
+    meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema, resolveMetaSchema]),
     spaces: schema.maybe(schema.arrayOf(schema.string())),
     warnings: schema.maybe(schema.arrayOf(schema.string())),
   });

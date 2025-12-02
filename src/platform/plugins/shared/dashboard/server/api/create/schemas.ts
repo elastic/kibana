@@ -9,19 +9,13 @@
 
 import { schema } from '@kbn/config-schema';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
-import {
-  accessMetaSchema,
-  baseMetaSchema,
-  createdMetaSchema,
-  updatedMetaSchema,
-} from '../meta_schemas';
+import { baseMetaSchema, createdMetaSchema, updatedMetaSchema } from '../meta_schemas';
 
 export function getCreateRequestBodySchema() {
   return schema.object({
     id: schema.maybe(schema.string()),
     data: getDashboardStateSchema(),
     spaces: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1, maxSize: 1 })),
-    meta: schema.maybe(accessMetaSchema),
   });
 }
 
@@ -29,7 +23,7 @@ export function getCreateResponseBodySchema() {
   return schema.object({
     id: schema.string(),
     data: getDashboardStateSchema(),
-    meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema, accessMetaSchema]),
+    meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema]),
     spaces: schema.maybe(schema.arrayOf(schema.string())),
   });
 }

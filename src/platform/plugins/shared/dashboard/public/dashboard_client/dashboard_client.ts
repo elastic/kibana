@@ -36,6 +36,12 @@ export const dashboardClient = {
     references: Reference[],
     accessMode?: SavedObjectAccessControl['accessMode']
   ) => {
+    const accessControl = accessMode
+      ? {
+          access_control: { access_mode: accessMode },
+        }
+      : undefined;
+
     return coreServices.http.post<DashboardCreateResponseBody>(`/api/dashboards/dashboard`, {
       version: DASHBOARD_API_VERSION,
       query: {
@@ -44,13 +50,9 @@ export const dashboardClient = {
       body: JSON.stringify({
         data: {
           ...dashboardState,
+          accessControl,
           references,
         },
-        meta: accessMode
-          ? {
-              access_control: { access_mode: accessMode },
-            }
-          : undefined,
       }),
     });
   },
