@@ -1,5 +1,3 @@
-TODO: Move all items related to installation review to this file.
-
 ## Summary <!-- omit from toc -->
 
 This test plan covers the following functionality of the "Add Elastic Rules" page:
