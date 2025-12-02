@@ -15,6 +15,7 @@ import {
   setupMockCoreStartServices,
 } from '../__mocks__/test_helpers';
 import { entityRiskScoreTool } from './entity_risk_score_tool';
+import { createGetRiskScores } from '../../lib/entity_analytics/risk_score/get_risk_score';
 
 jest.mock('../../lib/entity_analytics/risk_score/get_risk_score', () => ({
   createGetRiskScores: jest.fn(() => jest.fn()),
@@ -102,8 +103,6 @@ describe('entityRiskScoreTool', () => {
   });
 
   describe('handler', () => {
-    const { createGetRiskScores } = require('../../lib/entity_analytics/risk_score/get_risk_score');
-
     beforeEach(() => {
       createGetRiskScores.mockReturnValue(jest.fn());
     });
