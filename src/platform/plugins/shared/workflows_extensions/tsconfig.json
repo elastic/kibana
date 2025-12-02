@@ -16,7 +16,8 @@
     "@kbn/workflows",
     "@kbn/zod",
     "@kbn/config-schema",
-    "@kbn/crypto"
+    "@kbn/crypto",
+    "@kbn/scout"
   ],
   "exclude": [
     "target/**/*"
