@@ -11,8 +11,9 @@ This is a test plan for the workflows of:
 
 - installing single prebuilt rules one-by-one
 - installing multiple prebuilt rules in bulk
+- sorting and filtering prebuilt rules
 
-from the Rule Installation page.
+on the Rule Installation page.
 
 ## Table of contents <!-- omit from toc -->
 
