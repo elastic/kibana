@@ -14,6 +14,7 @@ import type {
   GrokProcessor,
   ProcessorType,
   ReplaceProcessor,
+  StreamlangDSL,
   StreamlangProcessorDefinition,
   StreamlangProcessorDefinitionWithUIAttributes,
   StreamlangStepWithUIAttributes,
@@ -24,18 +25,19 @@ import {
   conditionSchema,
   convertStepToUIDefinition,
   streamlangProcessorSchema,
+  stripCustomIdentifiers,
 } from '@kbn/streamlang';
 import { isWhereBlock } from '@kbn/streamlang/types/streamlang';
 import type { FlattenRecord } from '@kbn/streams-schema';
-import { isSchema } from '@kbn/streams-schema';
+import { Streams, isSchema, type FieldDefinition } from '@kbn/streams-schema';
 import { countBy, isEmpty, mapValues, omit, orderBy } from 'lodash';
 import type { EnrichmentDataSource } from '../../../../common/url_schema';
 import type { ProcessorResources } from './state_management/steps_state_machine';
 import type { StreamEnrichmentContextType } from './state_management/stream_enrichment_state_machine/types';
 import { configDrivenProcessors } from './steps/blocks/action/config_driven';
 import type {
-  ConfigDrivenProcessors,
   ConfigDrivenProcessorType,
+  ConfigDrivenProcessors,
 } from './steps/blocks/action/config_driven/types';
 import type {
   ConvertFormState,
@@ -582,4 +584,37 @@ export const getValidSteps = (
 export const getStepPanelColour = (stepIndex: number) => {
   const isEven = stepIndex % 2 === 0;
   return isEven ? 'subdued' : undefined;
+};
+
+export const buildUpsertStreamRequestPayload = (
+  definition: Streams.ingest.all.GetResponse,
+  dsl: StreamlangDSL,
+  fields?: FieldDefinition
+): { ingest: Streams.ingest.all.GetResponse['stream']['ingest'] } => {
+  const dslWithStrippedIds = stripCustomIdentifiers(dsl);
+  return Streams.WiredStream.GetResponse.is(definition)
+    ? {
+        ingest: {
+          ...definition.stream.ingest,
+          processing: dslWithStrippedIds,
+          ...(fields && {
+            wired: {
+              ...definition.stream.ingest.wired,
+              fields,
+            },
+          }),
+        },
+      }
+    : {
+        ingest: {
+          ...definition.stream.ingest,
+          processing: dslWithStrippedIds,
+          ...(fields && {
+            classic: {
+              ...definition.stream.ingest.classic,
+              field_overrides: fields,
+            },
+          }),
+        },
+      };
 };

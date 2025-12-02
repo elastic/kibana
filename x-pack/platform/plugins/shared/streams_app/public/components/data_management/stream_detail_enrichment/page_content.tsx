@@ -5,35 +5,40 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiResizableContainer, EuiSplitPanel } from '@elastic/eui';
+import { EuiSplitPanel, EuiResizableContainer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { Streams } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import React from 'react';
 import { css } from '@emotion/react';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import { useKbnUrlStateStorageFromRouterContext } from '../../../util/kbn_url_state_context';
-import { useKibana } from '../../../hooks/use_kibana';
-import { ManagementBottomBar } from '../management_bottom_bar';
-import { SimulationPlayground } from './simulation_playground';
-import {
-  StreamEnrichmentContextProvider,
-  useSimulatorSelector,
-  useStreamEnrichmentEvents,
-  useStreamEnrichmentSelector,
-} from './state_management/stream_enrichment_state_machine';
-import { selectIsInteractiveMode } from './state_management/stream_enrichment_state_machine/selectors';
-import { StreamsAppContextProvider } from '../../streams_app_context_provider';
 import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
-import { SchemaChangesReviewModal, getChanges } from '../schema_editor/schema_changes_review_modal';
+import { useKbnUrlStateStorageFromRouterContext } from '../../../util/kbn_url_state_context';
+import { StreamsAppContextProvider } from '../../streams_app_context_provider';
+import { ManagementBottomBar } from '../management_bottom_bar';
 import { getDefinitionFields } from '../schema_editor/hooks/use_schema_fields';
-import { EditModeToggle } from './edit_mode_toggle';
-import { RunSimulationButton } from './yaml_mode/run_simulation_button';
-import { YamlEditorWrapper } from './yaml_mode/yaml_editor_wrapper';
-import { StepsEditor } from './steps/steps_editor';
-import { stepUnderEditSelector } from './state_management/interactive_mode_machine/selectors';
-import { selectFieldsInSamples } from './state_management/simulation_state_machine/selectors';
+import { SchemaChangesReviewModal, getChanges } from '../schema_editor/schema_changes_review_modal';
 import type { SchemaEditorField } from '../schema_editor/types';
 import { isFieldUncommitted } from '../schema_editor/utils';
+import { EditModeToggle } from './edit_mode_toggle';
+import { SimulationPlayground } from './simulation_playground';
+import { stepUnderEditSelector } from './state_management/interactive_mode_machine/selectors';
+import { selectFieldsInSamples } from './state_management/simulation_state_machine/selectors';
+import {
+  StreamEnrichmentContextProvider,
+  useStreamEnrichmentSelector,
+  useGetStreamEnrichmentState,
+  useStreamEnrichmentEvents,
+  useSimulatorSelector,
+} from './state_management/stream_enrichment_state_machine';
+import { selectIsInteractiveMode } from './state_management/stream_enrichment_state_machine/selectors';
+import { StepsEditor } from './steps/steps_editor';
+import { RunSimulationButton } from './yaml_mode/run_simulation_button';
+import { YamlEditorWrapper } from './yaml_mode/yaml_editor_wrapper';
+import { useRequestPreviewFlyoutState } from '../request_preview_flyout/use_request_preview_flyout_state';
+import { useKibana } from '../../../hooks/use_kibana';
+import { buildUpsertStreamRequestPayload } from './utils';
+import { getUpsertFields } from './state_management/stream_enrichment_state_machine/utils';
+import { RequestPreviewFlyout } from '../request_preview_flyout';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
 
@@ -81,6 +86,7 @@ export function StreamDetailEnrichmentContentImpl() {
   });
   const { appParams, core } = context;
 
+  const getStreamEnrichmentState = useGetStreamEnrichmentState();
   const { resetChanges, saveChanges } = useStreamEnrichmentEvents();
 
   const isReady = useStreamEnrichmentSelector((state) => state.matches('ready'));
@@ -159,7 +165,31 @@ export function StreamDetailEnrichmentContentImpl() {
     (state) => state.context.isNextStreamlangDSLValid === false
   );
 
+  const nextDSL = useStreamEnrichmentSelector((state) => state.context.nextStreamlangDSL);
+
   const hasChanges = useStreamEnrichmentSelector((state) => state.context.hasChanges);
+
+  const {
+    isRequestPreviewFlyoutOpen,
+    requestPreviewFlyoutCodeContent,
+    openRequestPreviewFlyout,
+    closeRequestPreviewFlyout,
+  } = useRequestPreviewFlyoutState();
+
+  const onBottomBarViewCodeClick = () => {
+    const { context: enrichmentContext } = getStreamEnrichmentState();
+    const body = buildUpsertStreamRequestPayload(
+      enrichmentContext.definition,
+      nextDSL,
+      getUpsertFields(enrichmentContext)
+    );
+
+    openRequestPreviewFlyout({
+      method: 'PUT',
+      url: `/api/streams/${enrichmentContext.definition.stream.name}/_ingest`,
+      body,
+    });
+  };
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges: hasChanges,
@@ -265,6 +295,13 @@ export function StreamDetailEnrichmentContentImpl() {
           disabled={!canUpdate}
           insufficientPrivileges={!canManage}
           isInvalid={hasDefinitionError || isInvalid}
+          onViewCodeClick={onBottomBarViewCodeClick}
+        />
+      )}
+      {isRequestPreviewFlyoutOpen && (
+        <RequestPreviewFlyout
+          codeContent={requestPreviewFlyoutCodeContent}
+          onClose={closeRequestPreviewFlyout}
         />
       )}
     </EuiSplitPanel.Outer>

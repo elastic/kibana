@@ -7,27 +7,27 @@
 
 import type { FieldDefinition } from '@kbn/streams-schema';
 import { Streams } from '@kbn/streams-schema';
-import type { AssignArgs } from 'xstate5';
 import { v4 as uuidv4 } from 'uuid';
+import type { AssignArgs } from 'xstate5';
+import type {
+  CustomSamplesDataSource,
+  EnrichmentDataSource,
+  EnrichmentUrlState,
+  KqlSamplesDataSource,
+  LatestSamplesDataSource,
+} from '../../../../../../common/url_schema';
 import { CUSTOM_SAMPLES_DATA_SOURCE_STORAGE_KEY_PREFIX } from '../../../../../../common/url_schema/common';
-import type { StreamEnrichmentContextType } from './types';
+import { DATA_SOURCES_I18N } from '../../data_sources_flyout/translations';
+import { dataSourceConverter } from '../../utils';
+import type { DataSourceActorRef, DataSourceSimulationMode } from '../data_source_state_machine';
 import type { SampleDocumentWithUIAttributes } from '../simulation_state_machine';
 import {
   convertToFieldDefinition,
   getMappedSchemaFields,
   getUnmappedSchemaFields,
 } from '../simulation_state_machine';
-import type {
-  EnrichmentUrlState,
-  KqlSamplesDataSource,
-  LatestSamplesDataSource,
-  CustomSamplesDataSource,
-  EnrichmentDataSource,
-} from '../../../../../../common/url_schema';
-import { dataSourceConverter } from '../../utils';
 import type { StepActorRef } from '../steps_state_machine';
-import type { DataSourceActorRef, DataSourceSimulationMode } from '../data_source_state_machine';
-import { DATA_SOURCES_I18N } from '../../data_sources_flyout/translations';
+import type { StreamEnrichmentContextType } from './types';
 
 export const defaultLatestSamplesDataSource: LatestSamplesDataSource = {
   type: 'latest-samples',
