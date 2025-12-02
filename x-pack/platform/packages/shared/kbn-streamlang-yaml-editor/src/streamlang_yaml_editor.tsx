@@ -7,11 +7,11 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDebounceFn } from '@kbn/react-hooks';
-import type { MonacoYaml, MonacoYamlOptions } from 'monaco-yaml';
+import type { MonacoYamlOptions } from 'monaco-yaml';
 import { EuiPanel, useEuiTheme } from '@elastic/eui';
 import yaml from 'yaml';
 import { CodeEditor } from '@kbn/code-editor';
-import { configureMonacoYamlSchema, monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/monaco';
 import type { StreamlangYamlEditorProps, StepDecoration } from './types';
 import { useStepDecorations } from './hooks/use_step_decorations';
 import { useGutterSimulationMarkers } from './hooks/use_gutter_simulation_markers';
@@ -25,11 +25,12 @@ import {
 import { createStreamlangHoverProvider } from './monaco_providers';
 import { stripCustomIdentifiers } from './utils/strip_custom_identifiers';
 import { canRunSimulationForStep } from './utils/can_run_simulation';
+import { yamlLanguageService } from './services/yaml_language_service';
 import { StepActions } from './components/step_actions';
 import { getEditorContainerStyles, getEditorPanelStyles } from './styles';
 
 // Configure Monaco YAML with completion and hover managed by custom providers
-const defaultMonacoYamlOptions: MonacoYamlOptions = {
+const defaultMonacoYamlOptions: Partial<MonacoYamlOptions> = {
   completion: true, // Enable schema-based completions
   hover: false, // Hover is handled by custom providers
   validate: true, // Keep validation enabled
@@ -53,7 +54,6 @@ export const StreamlangYamlEditor = ({
   streamType,
 }: StreamlangYamlEditorProps) => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
-  const monacoYamlRef = useRef<MonacoYaml | null>(null);
   const [decorations, setDecorations] = useState<StepDecoration[]>([]);
   const [yamlLineMap, setYamlLineMap] = useState<YamlLineMap | undefined>(undefined);
   const { euiTheme } = useEuiTheme();
@@ -102,40 +102,23 @@ export const StreamlangYamlEditor = ({
   );
 
   useEffect(() => {
-    async function configureMonacoYaml(yamlSchemas: MonacoYamlOptions['schemas']) {
-      try {
-        monacoYamlRef.current = await configureMonacoYamlSchema(
-          yamlSchemas,
-          defaultMonacoYamlOptions
-        );
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.warn(
-          'Failed to configure Streamlang schema validation, using basic YAML highlighting:',
-          error
-        );
-      }
-    }
+    // Register this editor with the YAML language service
+    // The service manages a singleton monaco-yaml instance with reference counting
+    // to support multiple editors on the same page and prevents "Worker manager has been disposed" errors
+    yamlLanguageService.register(schemas, defaultMonacoYamlOptions).catch((error) => {
+      // eslint-disable-next-line no-console
+      console.warn(
+        'Failed to configure Streamlang schema validation, using basic YAML highlighting:',
+        error
+      );
+    });
 
-    // Configure or update the monaco yaml schema and options when the schemas change
-    if (!monacoYamlRef.current) {
-      configureMonacoYaml(schemas);
-    } else {
-      monacoYamlRef.current.update({
-        ...defaultMonacoYamlOptions,
-        schemas,
-      });
-    }
-  }, [schemas]);
-
-  useEffect(() => {
     return () => {
-      if (monacoYamlRef.current) {
-        monacoYamlRef.current.dispose();
-        monacoYamlRef.current = null;
-      }
+      // Release this editor's registration
+      // Schemas are only cleared when the last editor unmounts (reference counting)
+      yamlLanguageService.release();
     };
-  }, []);
+  }, [schemas]);
 
   // Clear decorations immediately when user starts typing
   // Note: We keep yamlLineMap intact so that step actions and outlines continue to work
