@@ -148,14 +148,8 @@ export const NewEnrollmentTokenModal: React.FunctionComponent<Props> = ({
             selectedOptions={
               form.policyIdInput.value
                 ? [
-                    {
-                      key: form.policyIdInput.value,
-                      label:
-                        selectPolicyOptions.find(
-                          (option) => option.key === form.policyIdInput.value
-                        )?.label || '',
-                    },
-                  ]
+                    selectPolicyOptions.find((option) => option.key === form.policyIdInput.value),
+                  ].filter((v): v is NonNullable<typeof v> => v !== undefined)
                 : []
             }
             onChange={(newOptions) => {
