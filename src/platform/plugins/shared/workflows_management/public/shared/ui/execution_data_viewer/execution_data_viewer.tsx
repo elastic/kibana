@@ -122,7 +122,7 @@ export const ExecutionDataViewer = React.memo<ExecutionDataViewerProps>(
           </EuiFlexGroup>
         </EuiFlexItem>
 
-        <EuiFlexItem grow={true}>
+        <EuiFlexItem grow={true} css={{ overflow: 'hidden', minHeight: 0 }}>
           <EuiSpacer size="s" />
           {selectedViewMode === 'table' && data && (
             <JSONDataTable
