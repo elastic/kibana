@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { monaco } from '@kbn/monaco';
 import type { SimulationMode } from '../types';
 import { getStepActionsStyles } from '../styles';
+import { canRunSimulationForStep } from '../utils/can_run_simulation';
 
 export interface StepActionsProps {
   stepId: string;
@@ -80,10 +81,15 @@ export const StepActions = memo<StepActionsProps>(
       onRunUpToStep(stepId);
     }, [stepId, onRunUpToStep]);
 
-    // Check if this step is in the additive steps list
+    // Check if simulation can run for this step
     const isAdditiveStep = additiveStepIds.includes(stepId);
     const isCompleteSimulation = simulationMode === 'complete';
-    const isButtonEnabled = canRunSimulation && (isCompleteSimulation || isAdditiveStep);
+    const isButtonEnabled = canRunSimulationForStep({
+      canRunSimulation,
+      additiveStepIds,
+      stepId,
+      simulationMode,
+    });
 
     let tooltipContent: string;
     if (!isCompleteSimulation && !isAdditiveStep) {

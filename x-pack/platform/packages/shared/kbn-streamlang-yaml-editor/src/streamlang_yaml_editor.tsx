@@ -11,8 +11,7 @@ import type { MonacoYaml, MonacoYamlOptions } from 'monaco-yaml';
 import { EuiPanel, useEuiTheme } from '@elastic/eui';
 import yaml from 'yaml';
 import { CodeEditor } from '@kbn/code-editor';
-import { configureMonacoYamlSchema } from '@kbn/monaco';
-import type { monaco } from '@kbn/monaco';
+import { configureMonacoYamlSchema, monaco } from '@kbn/monaco';
 import type { StreamlangYamlEditorProps, StepDecoration } from './types';
 import { useStepDecorations } from './hooks/use_step_decorations';
 import { useGutterSimulationMarkers } from './hooks/use_gutter_simulation_markers';
@@ -25,6 +24,7 @@ import {
 } from './utils/yaml_line_mapper';
 import { createStreamlangHoverProvider } from './monaco_providers';
 import { stripCustomIdentifiers } from './utils/strip_custom_identifiers';
+import { canRunSimulationForStep } from './utils/can_run_simulation';
 import { StepActions } from './components/step_actions';
 import { getEditorContainerStyles, getEditorPanelStyles } from './styles';
 
@@ -208,9 +208,72 @@ export const StreamlangYamlEditor = ({
     yamlLineMap
   );
 
+  // Keep refs for values needed in keyboard shortcut callback
+  // This allows the callback to access current values without recreating the keybinding
+  const runSimulationRef = useRef<{
+    onRunUpToStep: typeof onRunUpToStep;
+    focusedStepInfo: typeof focusedStepInfo;
+    canRunSimulation: boolean;
+    additiveStepIds: string[];
+    simulationMode: typeof simulationMode;
+    readOnly: boolean;
+  }>({
+    onRunUpToStep,
+    focusedStepInfo,
+    canRunSimulation,
+    additiveStepIds,
+    simulationMode,
+    readOnly,
+  });
+
+  // Update ref whenever relevant values change
+  useEffect(() => {
+    runSimulationRef.current = {
+      onRunUpToStep,
+      focusedStepInfo,
+      canRunSimulation,
+      additiveStepIds,
+      simulationMode,
+      readOnly,
+    };
+  }, [onRunUpToStep, focusedStepInfo, canRunSimulation, additiveStepIds, simulationMode, readOnly]);
+
   const handleEditorDidMount = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
       editorRef.current = editor;
+
+      // Add keyboard shortcut: Cmd+Enter (Mac) / Ctrl+Enter (Windows) to run simulation
+      editor.addAction({
+        id: 'streamlang.runSimulation',
+        label: 'Run simulation up to this step',
+        // eslint-disable-next-line no-bitwise
+        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
+        run: () => {
+          const {
+            onRunUpToStep: runUpToStep,
+            focusedStepInfo: stepInfo,
+            canRunSimulation: canRun,
+            additiveStepIds: additiveIds,
+            simulationMode: simMode,
+            readOnly: isReadOnly,
+          } = runSimulationRef.current;
+
+          if (isReadOnly || !runUpToStep || !stepInfo) {
+            return;
+          }
+
+          const canRunShortcut = canRunSimulationForStep({
+            canRunSimulation: canRun,
+            additiveStepIds: additiveIds,
+            stepId: stepInfo.stepId,
+            simulationMode: simMode,
+          });
+
+          if (canRunShortcut) {
+            runUpToStep(stepInfo.stepId);
+          }
+        },
+      });
 
       if (onMount) {
         onMount(editor);
