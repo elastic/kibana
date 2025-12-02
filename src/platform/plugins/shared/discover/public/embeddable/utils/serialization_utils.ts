@@ -44,6 +44,7 @@ export const deserializeState = async ({
     const { get } = discoverServices.savedSearch;
     const so = await get(savedObjectId, true);
 
+    // what is this??
     const rawSavedObjectAttributes = pick(so, EDITABLE_SAVED_SEARCH_KEYS);
     const savedObjectOverride = pick(serializedState.rawState, EDITABLE_SAVED_SEARCH_KEYS);
     // Filter out null projectRouting for type safety (runtime already filtered by fromSavedSearchAttributes)

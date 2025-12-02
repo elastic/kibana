@@ -21,7 +21,7 @@ import { apiPublishesProjectRouting, apiHasParentApi } from '@kbn/presentation-p
 import { combineLatest, map } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { CPS_USAGE_OVERRIDES_BADGE } from './constants';
-import { uiActions } from '../../kibana_services';
+import { uiActions, core } from '../../kibana_services';
 import { ACTION_EDIT_PANEL } from '../edit_panel_action/constants';
 import { CONTEXT_MENU_TRIGGER } from '../triggers';
 
@@ -80,11 +80,19 @@ export class CpsUsageOverridesBadge
 
     const handleEditClick = async () => {
       setIsPopoverOpen(false);
-      const action = await uiActions.getAction(ACTION_EDIT_PANEL);
-      if (action) {
-        await action.execute({
-          ...context,
-          trigger: { id: CONTEXT_MENU_TRIGGER },
+      try {
+        const action = await uiActions.getAction(ACTION_EDIT_PANEL);
+        if (action) {
+          await action.execute({
+            ...context,
+            trigger: { id: CONTEXT_MENU_TRIGGER },
+          });
+        }
+      } catch (error) {
+        core.notifications.toasts.addError(error, {
+          title: i18n.translate('presentationPanel.badge.cpsUsageOverrides.editError', {
+            defaultMessage: 'Failed to open panel configuration',
+          }),
         });
       }
     };

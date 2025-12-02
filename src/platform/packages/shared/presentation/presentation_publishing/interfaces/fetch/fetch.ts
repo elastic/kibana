@@ -68,8 +68,8 @@ function getFetchContext$(api: unknown): Observable<Omit<FetchContext, 'isReload
         ? api.parentApi.projectRouting$
         : of(undefined),
   }).pipe(
-    // Local projectRouting (from saved search) takes precedence over parent (from dashboard)
-    map(({ local, parent }) => local ?? parent)
+    map(({ local, parent }) => local ?? parent),
+    distinctUntilChanged()
   );
 
   observables.timeRange = combineLatest({
