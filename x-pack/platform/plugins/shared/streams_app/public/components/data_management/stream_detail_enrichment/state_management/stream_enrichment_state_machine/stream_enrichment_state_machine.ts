@@ -689,7 +689,6 @@ export const streamEnrichmentMachine = setup({
                     'suggestion.cancel': {
                       target: 'idle',
                       actions: [
-                        cancel('suggestPipelineActor'),
                         { type: 'clearSuggestion' },
                         { type: 'overwriteSteps', params: () => ({ steps: [] }) },
                         { type: 'sendStepsEventToSimulator' },
