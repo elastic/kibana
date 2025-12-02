@@ -76,6 +76,7 @@ export function AlertSuppressionEditAdapter({
       warningText={
         isMlSuppressionIncomplete ? i18n.MACHINE_LEARNING_SUPPRESSION_INCOMPLETE_LABEL : undefined
       }
+      isLoading={mlRuleConfigLoading || isEsqlSuppressionLoading}
     />
   );
 }

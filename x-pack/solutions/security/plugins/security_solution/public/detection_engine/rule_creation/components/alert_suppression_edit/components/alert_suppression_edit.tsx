@@ -21,6 +21,7 @@ interface AlertSuppressionEditProps {
   disabledText?: string;
   warningText?: string;
   fullWidth?: boolean;
+  isLoading?: boolean;
 }
 
 export const AlertSuppressionEdit = memo(function AlertSuppressionEdit({
@@ -30,6 +31,7 @@ export const AlertSuppressionEdit = memo(function AlertSuppressionEdit({
   disabledText,
   warningText,
   fullWidth,
+  isLoading = false,
 }: AlertSuppressionEditProps): JSX.Element {
   const [{ [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: suppressionFields }] = useFormData<{
     [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: string[];
@@ -38,7 +40,7 @@ export const AlertSuppressionEdit = memo(function AlertSuppressionEdit({
   });
   const hasSelectedFields = suppressionFields?.length > 0;
   const content = (
-    <>
+    <div data-test-subj={isLoading ? 'alertSuppressionLoading' : 'alertSuppressionReady'}>
       <SuppressionFieldsSelector
         suppressibleFields={suppressibleFields}
         labelAppend={labelAppend}
@@ -54,7 +56,7 @@ export const AlertSuppressionEdit = memo(function AlertSuppressionEdit({
         <SuppressionDurationSelector disabled={disabled || !hasSelectedFields} />
         <MissingFieldsStrategySelector disabled={disabled || !hasSelectedFields} />
       </EuiPanel>
-    </>
+    </div>
   );
 
   return (

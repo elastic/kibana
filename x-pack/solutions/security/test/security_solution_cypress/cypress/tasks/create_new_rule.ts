@@ -43,7 +43,9 @@ import {
   ALERT_SUPPRESSION_FIELDS,
   ALERT_SUPPRESSION_FIELDS_COMBO_BOX,
   ALERT_SUPPRESSION_FIELDS_INPUT,
+  ALERT_SUPPRESSION_LOADING,
   ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS,
+  ALERT_SUPPRESSION_READY,
   ALERTS_INDEX_BUTTON,
   ANOMALY_THRESHOLD_INPUT,
   APPLY_SELECTED_SAVED_QUERY_BUTTON,
@@ -948,6 +950,9 @@ export const enablesAndPopulatesThresholdSuppression = (
  * If there are many fields in combobox, they are might be visible only after scrolling down menu.
  */
 export const fillAlertSuppressionFields = (fields: string[], checkFieldsInComboBox?: boolean) => {
+  cy.get(ALERT_SUPPRESSION_LOADING).should('not.exist');
+  cy.get(ALERT_SUPPRESSION_READY).should('exist');
+
   cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).should('not.be.disabled');
   cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).click();
   fields.forEach((field) => {
@@ -957,6 +962,8 @@ export const fillAlertSuppressionFields = (fields: string[], checkFieldsInComboB
 
     cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type(`${field}{downArrow}{enter}{esc}`);
   });
+
+  cy.get(ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL).should('be.enabled');
 };
 
 export const clearAlertSuppressionFields = () => {
@@ -971,6 +978,9 @@ export const selectAlertSuppressionPerInterval = () => {
   // checkbox is covered by label, force:true is a workaround
   // click on label not working, likely because it has child components
   cy.get(ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL).click({ force: true });
+
+  cy.get(ALERT_SUPPRESSION_DURATION_VALUE_INPUT).should('be.enabled');
+  cy.get(ALERT_SUPPRESSION_DURATION_UNIT_INPUT).should('be.enabled');
 };
 
 export const selectAlertSuppressionPerRuleExecution = () => {
