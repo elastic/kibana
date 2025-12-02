@@ -52,9 +52,9 @@ export const FileUploadLiteLookUpView: FC<Props> = ({
     [fileUploadManager]
   );
 
-  const mappingsValid = useObservable(
-    mappingEditorService.mappingsValid$,
-    mappingEditorService.getMappingsValid()
+  const mappingsError = useObservable(
+    mappingEditorService.mappingsError$,
+    mappingEditorService.getMappingsError()
   );
 
   const [stepsStatus, setStepsStatus] = React.useState<StepsStatus>({
@@ -115,6 +115,7 @@ export const FileUploadLiteLookUpView: FC<Props> = ({
             <EuiSpacer />
 
             <EuiButton
+              disabled={fileClashes || uploadStatus.analysisStatus !== STATUS.COMPLETED}
               onClick={() => {
                 setStep('analysis', STATUS.COMPLETED);
                 setStep('mapping', STATUS.STARTED);
@@ -137,10 +138,19 @@ export const FileUploadLiteLookUpView: FC<Props> = ({
           <>
             <MappingEditor mappingEditorService={mappingEditorService} />
 
+            {mappingsError ? (
+              <>
+                <EuiSpacer size="s" />
+                <EuiText size="xs" color="danger">
+                  {mappingsError}
+                </EuiText>
+              </>
+            ) : null}
+
             <EuiSpacer />
 
             <EuiButton
-              disabled={!mappingsValid}
+              disabled={mappingsError !== null}
               onClick={() => {
                 setIsSaving(true);
                 onImportClick();

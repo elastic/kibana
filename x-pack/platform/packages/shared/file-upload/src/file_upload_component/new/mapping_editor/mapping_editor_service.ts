@@ -8,23 +8,34 @@
 import type { Subscription } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import type { MappingProperty, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import { uniqBy } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import type { FileUploadManager } from '../../../../file_upload_manager/file_manager';
+
+interface MappingEdits {
+  name: string;
+  originalName: string;
+  mappingProperty: MappingProperty;
+  originalMappingProperty: MappingProperty;
+}
+
+const blankMappingErrorText = i18n.translate('xpack.fileUpload.mappingEditor.blankMappingError', {
+  defaultMessage: 'Mapping name and type cannot be blank',
+});
+const duplicateMappingErrorText = i18n.translate(
+  'xpack.fileUpload.mappingEditor.duplicateMappingError',
+  {
+    defaultMessage: 'Duplicate field names are not allowed',
+  }
+);
 
 export class MappingEditorService {
   private mappingsSubscription: Subscription;
-  private _mappings$ = new BehaviorSubject<
-    Array<{
-      name: string;
-      originalName: string;
-      mappingProperty: MappingProperty;
-      originalMappingProperty: MappingProperty;
-    }>
-  >([]);
-
+  private _mappings$ = new BehaviorSubject<Array<MappingEdits>>([]);
   public mappings$ = this._mappings$.asObservable();
 
-  private _mappingsValid$ = new BehaviorSubject<boolean>(true);
-  public mappingsValid$ = this._mappingsValid$.asObservable();
+  private _mappingsError$ = new BehaviorSubject<string | null>(null);
+  public mappingsError$ = this._mappingsError$.asObservable();
 
   constructor(private readonly fileUploadManager: FileUploadManager) {
     this.initializeMappings();
@@ -52,7 +63,7 @@ export class MappingEditorService {
       }));
 
       this._mappings$.next(mappingsArray);
-      this.checkMappingsValid();
+      this.checkMappingsValid(mappingsArray);
     }
   }
 
@@ -76,8 +87,8 @@ export class MappingEditorService {
   getMappings() {
     return this._mappings$.getValue();
   }
-  getMappingsValid() {
-    return this._mappingsValid$.getValue();
+  getMappingsError() {
+    return this._mappingsError$.getValue();
   }
 
   updateMapping(index: number, fieldName: string, fieldType: string | null) {
@@ -89,35 +100,43 @@ export class MappingEditorService {
         mappingProperty: { type: fieldType } as MappingProperty,
       };
       this._mappings$.next(mappings);
-      this.checkMappingsValid();
+      this.checkMappingsValid(mappings);
     }
   }
 
-  private checkMappingsValid() {
-    const currentMappings = this.fileUploadManager.getMappings().json;
+  private checkMappingsValid(mappingsArray: Array<MappingEdits>) {
+    // Check for individual mapping validity
+    const mappingPopulated = mappingsArray.every((mapping) => {
+      // Name cannot be blank/empty
+      if (!mapping.name || mapping.name.trim() === '') {
+        return false;
+      }
 
-    if (!currentMappings.properties) {
-      this._mappingsValid$.next(false);
+      // mappingProperty.type cannot be null, undefined, or empty
+      if (
+        !mapping.mappingProperty ||
+        !mapping.mappingProperty.type ||
+        mapping.mappingProperty.type.trim() === ''
+      ) {
+        return false;
+      }
+
+      return true;
+    });
+
+    if (!mappingPopulated) {
+      this._mappingsError$.next(blankMappingErrorText);
       return;
     }
 
-    // Check if all mappings are valid
-    const isValid = Object.entries(currentMappings.properties).every(
-      ([fieldName, mappingConfig]) => {
-        // Field name (key) cannot be blank/empty
-        if (!fieldName || fieldName.trim() === '') {
-          return false;
-        }
+    // Check for duplicate names using lodash
+    const uniqueMappings = uniqBy(mappingsArray, (mapping) => mapping.name.trim().toLowerCase());
+    const noDuplicates = mappingsArray.length === uniqueMappings.length;
+    if (!noDuplicates) {
+      this._mappingsError$.next(duplicateMappingErrorText);
+      return;
+    }
 
-        // Type cannot be null, undefined, or empty
-        if (!mappingConfig?.type || mappingConfig.type.trim() === '') {
-          return false;
-        }
-
-        return true;
-      }
-    );
-
-    this._mappingsValid$.next(isValid);
+    this._mappingsError$.next(null);
   }
 }

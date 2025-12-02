@@ -6,18 +6,12 @@
  */
 
 import type { FC } from 'react';
-import React, { useEffect } from 'react';
-import {
-  EuiPanel,
-  EuiTitle,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFieldText,
-} from '@elastic/eui';
+import React, { useEffect, useMemo } from 'react';
+import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FieldSelect } from '@kbn/field-utils/src/components/field_select/field_select';
 import useObservable from 'react-use/lib/useObservable';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { MappingEditorService } from './mapping_editor_service';
 
 interface Props {
@@ -30,30 +24,28 @@ export const MappingEditor: FC<Props> = ({ mappingEditorService }) => {
     mappingEditorService.getMappings()
   );
 
+  const fieldCount = useMemo(() => mappings.length, [mappings]);
+
   useEffect(() => {
     return () => {
       mappingEditorService.destroy();
     };
   }, [mappingEditorService]);
 
-  // useEffect(() => {
-  //   const subscription = mappingEditorService.mappings$.subscribe(setMappings);
-  //   return () => subscription.unsubscribe();
-  // }, [mappingEditorService]);
-
   return (
-    <EuiPanel paddingSize="m">
-      <EuiTitle size="s">
-        <h3>
-          {i18n.translate('xpack.fileUpload.mappingEditor.title', {
-            defaultMessage: 'Field mappings',
-          })}
-        </h3>
-      </EuiTitle>
+    <>
+      <EuiText size="s" color="subdued">
+        <FormattedMessage
+          id="xpack.fileUpload.mappingEditor.fieldCountDescription"
+          defaultMessage={
+            "{fieldCount} fields found. Bear in mind you can't change the field type after creating this index."
+          }
+          values={{ fieldCount }}
+        />
+      </EuiText>
       <EuiSpacer size="m" />
 
       <EuiFlexGroup direction="column" gutterSize="s">
-        {/* Header Row */}
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="m" alignItems="center">
             <EuiFlexItem>
@@ -73,7 +65,6 @@ export const MappingEditor: FC<Props> = ({ mappingEditorService }) => {
           </EuiFlexGroup>
         </EuiFlexItem>
 
-        {/* Mapping Rows */}
         {mappings.map((mapping, index) => {
           const { name, mappingProperty } = mapping;
 
@@ -113,6 +104,6 @@ export const MappingEditor: FC<Props> = ({ mappingEditorService }) => {
           );
         })}
       </EuiFlexGroup>
-    </EuiPanel>
+    </>
   );
 };
