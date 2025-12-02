@@ -139,16 +139,11 @@ export function createESQLQuery({
 }: CreateESQLQueryParams) {
   const { name: metricField, instrument, index } = metric;
 
-  // Start with TS (timeseries) source command
-  // Use esql.src() to properly reference the index without quoting
   const baseQuery = esql.ts(index);
   const userQuery = isOfAggregateQueryType(fetchParams?.query) ? fetchParams.query.esql : undefined;
-
-  // Apply dimension filters using reduce pattern (like enrich_metric_fields.ts)
   const queryWithFilters = applyDimensionFilters(baseQuery, filters, userQuery);
-
-  // Build WHERE IS NOT NULL for unfiltered dimensions
   const unfilteredDimensions = dimensions.filter((dim) => !(dim.name in filters));
+
   const queryWithNullCheck =
     unfilteredDimensions.length > 0
       ? queryWithFilters.pipe(
