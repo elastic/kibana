@@ -69,8 +69,8 @@ function handleZodObject(
   const shape = schema.shape;
   const properties: string[] = [];
   const nl = singleLine ? '' : '\n';
-  const indent = singleLine ? '' : ' '.repeat(indentSpacesNumber * (currentDepth + 1));
-  const closingIndent = singleLine ? '' : ' '.repeat(indentSpacesNumber * currentDepth);
+  const indent = singleLine ? ' ' : ' '.repeat(indentSpacesNumber * (currentDepth + 1));
+  const closingIndent = singleLine ? ' ' : ' '.repeat(indentSpacesNumber * currentDepth);
 
   for (const [key, fieldSchema] of Object.entries(shape)) {
     const isOptional = (fieldSchema as z.ZodType) instanceof z.ZodOptional;

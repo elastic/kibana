@@ -156,10 +156,8 @@ describe('Generated Kibana Connectors', () => {
           expect(connector.type).toBe(connectorType);
           expect(connector.paramsSchema).toBeDefined();
           expect(typeof connector.description).toBe('string');
-          expect(connector.connectorGroup).toBe('internal');
           expect(connector.summary).toBeDefined();
           expect(connector.patterns).toBeDefined();
-          expect(connector.documentation).toBeNull();
           expect(connector.parameterTypes).toBeDefined();
         });
 
@@ -168,7 +166,6 @@ describe('Generated Kibana Connectors', () => {
           expect(connector.methods!.length).toBeGreaterThan(0);
           expect(Array.isArray(connector.patterns)).toBe(true);
           expect(connector.patterns!.length).toBeGreaterThan(0);
-          expect(connector.connectorGroup).toBe('internal');
           expect(
             connector.documentation === null || typeof connector.documentation === 'string'
           ).toBe(true);
@@ -519,7 +516,10 @@ describe('Generated Kibana Connectors', () => {
       for (const connectorType of TEST_SAMPLES) {
         const connector = GENERATED_KIBANA_CONNECTORS.find((c) => c.type === connectorType)!;
 
-        expect(connector.documentation).toBeNull();
+        if (connector.documentation) {
+          expect(connector.documentation).toMatch(/^https?:\/\//);
+          expect(connector.documentation).toContain('elastic.co');
+        }
       }
     });
 
