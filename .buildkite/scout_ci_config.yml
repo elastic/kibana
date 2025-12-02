@@ -2,6 +2,7 @@
 plugins:
   enabled:
     - apm
+    - infra
     - console
     - discover_enhanced
     - maps
