@@ -108,11 +108,7 @@ test.describe(
       await page.keyboard.press('Enter');
 
       // Wait for ECS/Otel recommendation to load and field type to be pre-selected
-      await expect
-        .poll(async () => await pageObjects.streams.fieldTypeSuperSelect.getSelectedValue(), {
-          timeout: 2000,
-        })
-        .toBe('ip');
+      await expect(pageObjects.streams.fieldTypeSuperSelect.valueInputLocator).toHaveValue('ip');
 
       await page.getByTestId('streamsAppSchemaEditorAddFieldButton').click();
       await expect(
