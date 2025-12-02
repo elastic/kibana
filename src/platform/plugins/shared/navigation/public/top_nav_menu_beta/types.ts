@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiButtonColor, IconType } from '@elastic/eui';
+import type { EuiButtonColor, EuiButtonProps, IconType } from '@elastic/eui';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { SplitButtonWithNotificationProps } from '@kbn/split-button';
 import type {
@@ -101,6 +101,7 @@ export type TopNavMenuActionItemBeta = TopNavMenuItemCommonBeta;
 export type TopNavMenuSecondaryActionItemBeta = TopNavMenuActionItemBeta & {
   color?: EuiButtonColor;
   isFilled?: boolean;
+  minWidth?: EuiButtonProps['minWidth'];
 };
 
 export type TopNavMenuPrimaryActionItemBeta = Omit<TopNavMenuActionItemBeta, 'items'> & {

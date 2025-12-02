@@ -137,6 +137,7 @@ const dashboardEditModeConfig: TopNavMenuConfigBeta = {
     testId: 'addButton',
     iconType: 'plusInCircle',
     color: 'success',
+    minWidth: false,
     items: [
       {
         run: () => action('create-visualization-clicked'),

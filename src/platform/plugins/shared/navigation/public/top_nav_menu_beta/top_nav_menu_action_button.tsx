@@ -57,6 +57,7 @@ export const TopNavMenuActionButton = (props: TopNavMenuActionButtonProps) => {
   const splitButtonProps = 'splitButtonProps' in props ? props.splitButtonProps : undefined;
   const colorProp = 'color' in props ? props.color : undefined;
   const isFilledProp = 'isFilled' in props ? props.isFilled : undefined;
+  const minWidthProp = 'minWidth' in props ? props.minWidth : undefined;
   const items = 'items' in props ? props.items : undefined;
 
   const {
@@ -143,10 +144,12 @@ export const TopNavMenuActionButton = (props: TopNavMenuActionButtonProps) => {
     <EuiButton
       {...commonProps}
       iconSide="left"
-      color={colorProp}
       aria-haspopup={hasItems ? 'menu' : undefined}
       isSelected={isPopoverOpen}
       css={buttonCss}
+      color={colorProp}
+      minWidth={minWidthProp}
+      fill={isFilledProp}
     >
       {itemText}
     </EuiButton>
