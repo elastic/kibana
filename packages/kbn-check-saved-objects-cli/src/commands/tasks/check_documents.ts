@@ -8,33 +8,36 @@
  */
 
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import { diff } from 'jest-diff';
 import equal from 'fast-deep-equal';
-import type { FixtureTemplate } from '../../migrations/fixtures';
-import type { Task } from '../types';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type { Task, FixtureMap } from '../types';
 
 export function checkDocuments({
   repository,
+  types,
   fixtures,
 }: {
   repository: ISavedObjectsRepository;
-  fixtures: Record<string, FixtureTemplate[]>;
+  types: SavedObjectsType[];
+  fixtures: FixtureMap;
 }): Task {
   return async () => {
-    const types = Object.keys(fixtures);
-    const results = await repository.search({ type: types, namespaces: ['*'] });
+    const typeNames = types.map(({ name }) => name);
+    const results = await repository.search({ type: typeNames, namespaces: ['*'] });
 
     results.hits.hits.forEach((hit) => {
       const type = hit._source!.type;
       const attributes = hit._source![type];
-
-      const matchingFixture = fixtures[type].find((fixture) => equal(fixture, attributes));
+      const { relativePath, version, documents } = fixtures[type];
+      const matchingFixture = documents.find((fixture) => equal(fixture, attributes));
       if (!matchingFixture) {
         const messages = [
-          '❌ The following document did NOT match any of the fixtures',
-          '📄 Document:',
-          JSON.stringify(hit, null, 2),
-          `🗃️ Fixtures for the '${type}' type:`,
-          JSON.stringify(fixtures[type], null, 2),
+          `❌ A document of type '${type}' did NOT match any of the fixtures`,
+          ...documents.map((fixture, index) => [
+            `document 🆚 fixtures['${version}'][${index}] (${relativePath})`,
+            diff(fixture, attributes),
+          ]),
         ];
         throw new Error(messages.join('\n'));
       }
