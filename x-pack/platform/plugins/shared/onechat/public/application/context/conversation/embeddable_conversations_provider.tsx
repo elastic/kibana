@@ -9,14 +9,12 @@ import React, { useMemo, useEffect, useCallback, useRef, useState } from 'react'
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import type { Conversation } from '@kbn/onechat-common';
 import type { EmbeddableConversationInternalProps } from '../../../embeddable/types';
 import { ConversationContext } from './conversation_context';
 import { OnechatServicesContext } from '../onechat_services_context';
 import { SendMessageProvider } from '../send_message/send_message_context';
 import { useConversationActions } from './use_conversation_actions';
 import { usePersistedConversationId } from '../../hooks/use_persisted_conversation_id';
-import { getProcessedAttachments } from './get_processed_attachments';
 import { AppLeaveContext } from '../app_leave_context';
 
 const noopOnAppLeave = () => {};
@@ -113,33 +111,20 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     onDeleteConversation,
   });
 
-  const attachmentMapRef = useRef<Map<string, Record<string, unknown>>>(new Map());
+  // Track which attachments have been sent (to hide them from input after sending)
+  const [sentAttachmentIds, setSentAttachmentIds] = useState<Set<string>>(new Set());
 
-  const setAttachmentMap = useCallback((attachments: Map<string, Record<string, unknown>>) => {
-    attachmentMapRef.current = attachments;
+  const markAttachmentsAsSent = useCallback((attachmentIds: string[]) => {
+    if (attachmentIds.length > 0) {
+      setSentAttachmentIds((prev) => new Set([...prev, ...attachmentIds]));
+    }
   }, []);
 
-  // Track removed attachments in this session
-  const [removedAttachmentIds, setRemovedAttachmentIds] = useState<Set<string>>(new Set());
-
-  const removeAttachment = useCallback((attachmentId: string) => {
-    setRemovedAttachmentIds((prev) => new Set([...prev, attachmentId]));
-  }, []);
-
-  const handleGetProcessedAttachments = useCallback(
-    (_conversation?: Conversation) => {
-      // Filter out removed attachments before processing
-      const activeAttachments = (contextProps.attachments ?? []).filter(
-        (attachment) => !removedAttachmentIds.has(attachment.id)
-      );
-      return getProcessedAttachments({
-        attachments: activeAttachments,
-        getAttachment: (id) => attachmentMapRef.current.get(id),
-        setAttachment: (id, content) => attachmentMapRef.current.set(id, content),
-      });
-    },
-    [contextProps.attachments, removedAttachmentIds]
-  );
+  // Filter out sent attachments for display in input
+  const pendingAttachments = useMemo(() => {
+    if (!contextProps.attachments) return [];
+    return contextProps.attachments.filter((att) => !sentAttachmentIds.has(att.id));
+  }, [contextProps.attachments, sentAttachmentIds]);
 
   const conversationContextValue = useMemo(
     () => ({
@@ -151,26 +136,20 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       initialMessage: contextProps.initialMessage,
       browserApiTools: contextProps.browserApiTools,
       setConversationId,
-      attachments: contextProps.attachments,
-      removedAttachmentIds,
-      removeAttachment,
+      attachments: pendingAttachments,
+      markAttachmentsAsSent,
       conversationActions,
-      getProcessedAttachments: handleGetProcessedAttachments,
-      setAttachmentMap,
     }),
     [
       persistedConversationId,
       contextProps.sessionTag,
       contextProps.agentId,
       contextProps.initialMessage,
-      contextProps.attachments,
+      pendingAttachments,
       contextProps.browserApiTools,
       conversationActions,
-      removedAttachmentIds,
-      removeAttachment,
-      handleGetProcessedAttachments,
+      markAttachmentsAsSent,
       setConversationId,
-      setAttachmentMap,
     ]
   );
 

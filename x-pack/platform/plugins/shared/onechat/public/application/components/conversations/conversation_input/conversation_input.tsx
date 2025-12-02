@@ -129,7 +129,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
   const agentId = useAgentId();
   const conversationId = useConversationId();
   const messageEditor = useMessageEditor();
-  const { attachments, removedAttachmentIds, removeAttachment } = useConversationContext();
+  const { attachments } = useConversationContext();
 
   const validateAgentId = useValidateAgentId();
   const isAgentIdValid = validateAgentId(agentId);
@@ -142,12 +142,12 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
   const visibleAttachments = useMemo(() => {
     if (!attachments) return [];
     return attachments
-      .filter((attachment) => !removedAttachmentIds?.has(attachment.id))
+      .filter((attachment) => !attachment.hidden)
       .map((attachment) => ({
         id: attachment.id,
         type: attachment.type,
       }));
-  }, [attachments, removedAttachmentIds]);
+  }, [attachments]);
 
   // Auto-focus when conversation changes
   useEffect(() => {
@@ -174,10 +174,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
     <InputContainer isDisabled={isInputDisabled}>
       {visibleAttachments.length > 0 && (
         <EuiFlexItem grow={false}>
-          <AttachmentPillsRow
-            attachments={visibleAttachments}
-            onRemoveAttachment={removeAttachment}
-          />
+          <AttachmentPillsRow attachments={visibleAttachments} />
         </EuiFlexItem>
       )}
       <EuiFlexItem css={inputContainerStyles}>

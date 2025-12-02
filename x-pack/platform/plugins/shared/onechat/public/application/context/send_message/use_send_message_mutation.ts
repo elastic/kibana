@@ -9,8 +9,8 @@ import { useMutation } from '@kbn/react-query';
 import { useRef, useState, useMemo, useCallback } from 'react';
 import { toToolMetadata } from '@kbn/onechat-browser/tools/browser_api_tool';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { AttachmentInput, Attachment } from '@kbn/onechat-common/attachments';
-import { useAgentId, useConversation } from '../../hooks/use_conversation';
+import type { Attachment } from '@kbn/onechat-common/attachments';
+import { useAgentId } from '../../hooks/use_conversation';
 import { useConversationContext } from '../conversation/conversation_context';
 import { useConversationId } from '../conversation/use_conversation_id';
 import { useOnechatServices } from '../../hooks/use_onechat_service';
@@ -20,12 +20,6 @@ import { usePendingMessageState } from './use_pending_message_state';
 import { useSubscribeToChatEvents } from './use_subscribe_to_chat_events';
 import { BrowserToolExecutor } from '../../services/browser_tool_executor';
 
-/** Convert AttachmentInput to Attachment (ensure id is present) */
-const toAttachment = (input: AttachmentInput): Attachment => ({
-  ...input,
-  id: input.id ?? `attachment-${Date.now()}`,
-});
-
 interface UseSendMessageMutationProps {
   connectorId?: string;
 }
@@ -34,7 +28,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
   const { chatService } = useOnechatServices();
   const { services } = useKibana();
   const { reportConverseError } = useReportConverseError();
-  const { conversationActions, getProcessedAttachments, browserApiTools } =
+  const { conversationActions, attachments, markAttachmentsAsSent, browserApiTools } =
     useConversationContext();
   const [isResponseLoading, setIsResponseLoading] = useState(false);
   const [agentReasoning, setAgentReasoning] = useState<string | null>(null);
@@ -42,7 +36,6 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
   const isMutatingNewConversationRef = useRef(false);
   const agentId = useAgentId();
   const messageControllerRef = useRef<AbortController | null>(null);
-  const { conversation } = useConversation();
 
   const browserApiToolsMetadata = useMemo(() => {
     if (!browserApiTools) return undefined;
@@ -67,15 +60,15 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
     browserToolExecutor,
   });
 
-  // Store processed attachments for optimistic update
+  // Store attachments for retry
   const pendingAttachmentsRef = useRef<Attachment[]>([]);
 
   const sendMessage = async ({
     message,
-    attachments,
+    messageAttachments,
   }: {
     message: string;
-    attachments: AttachmentInput[];
+    messageAttachments: Attachment[];
   }) => {
     const signal = messageControllerRef.current?.signal;
     if (!signal) {
@@ -88,7 +81,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       conversationId,
       agentId,
       connectorId,
-      attachments,
+      attachments: messageAttachments,
       browserApiTools: browserApiToolsMetadata,
     });
 
@@ -98,18 +91,16 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
   const { mutate, isLoading } = useMutation({
     mutationKey: mutationKeys.sendMessage,
     mutationFn: sendMessage,
-    onMutate: ({ message, attachments }) => {
+    onMutate: ({ message, messageAttachments }) => {
       const isNewConversation = !conversationId;
       isMutatingNewConversationRef.current = isNewConversation;
       setPendingMessage(message);
       removeError();
       messageControllerRef.current = new AbortController();
 
-      // Convert AttachmentInput to Attachment for optimistic round
-      const attachmentsForRound = attachments.map(toAttachment);
       conversationActions.addOptimisticRound({
         userMessage: message,
-        attachments: attachmentsForRound,
+        attachments: messageAttachments,
       });
 
       if (isNewConversation) {
@@ -150,19 +141,20 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
     messageControllerRef.current?.abort();
   };
 
-  // Wrapper to process attachments before calling mutate
+  // Wrapper that includes attachments from context
   const sendMessageWithAttachments = useCallback(
-    async ({ message }: { message: string }) => {
-      const processedAttachments = getProcessedAttachments
-        ? await getProcessedAttachments(conversation)
-        : [];
+    ({ message }: { message: string }) => {
+      const messageAttachments = attachments ?? [];
 
       // Store for potential retry
-      pendingAttachmentsRef.current = processedAttachments.map(toAttachment);
+      pendingAttachmentsRef.current = messageAttachments;
 
-      mutate({ message, attachments: processedAttachments });
+      // Mark attachments as sent (so they disappear from input)
+      markAttachmentsAsSent?.(messageAttachments.map((att) => att.id));
+
+      mutate({ message, messageAttachments });
     },
-    [getProcessedAttachments, conversation, mutate]
+    [attachments, markAttachmentsAsSent, mutate]
   );
 
   return {
@@ -188,7 +180,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       }
 
       // Use stored attachments for retry
-      mutate({ message: pendingMessage, attachments: pendingAttachmentsRef.current });
+      mutate({ message: pendingMessage, messageAttachments: pendingAttachmentsRef.current });
     },
     canCancel,
     cancel,

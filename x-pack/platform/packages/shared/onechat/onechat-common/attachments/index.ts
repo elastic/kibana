@@ -8,8 +8,6 @@
 export type {
   Attachment,
   AttachmentInput,
-  UiAttachment,
-  AttachmentDisplayInfo,
   TextAttachment,
   ScreenContextAttachment,
   EsqlAttachment,

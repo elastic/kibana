@@ -13,18 +13,7 @@ import { AttachmentType } from '@kbn/onechat-common/attachments';
 export interface AttachmentPillProps {
   id: string;
   type: AttachmentType;
-  onClick?: (id: string) => void;
-  onRemove?: (id: string) => void;
 }
-
-const labels = {
-  viewAttachment: i18n.translate('xpack.onechat.attachmentPill.viewAttachment', {
-    defaultMessage: 'View attachment',
-  }),
-  removeAttachment: i18n.translate('xpack.onechat.attachmentPill.removeAttachment', {
-    defaultMessage: 'Remove attachment',
-  }),
-};
 
 const getAttachmentIcon = (type: AttachmentType): string => {
   switch (type) {
@@ -58,31 +47,9 @@ const getAttachmentDisplayName = (type: AttachmentType): string => {
   }
 };
 
-export const AttachmentPill: React.FC<AttachmentPillProps> = ({ id, type, onClick, onRemove }) => {
+export const AttachmentPill: React.FC<AttachmentPillProps> = ({ id, type }) => {
   const displayName = getAttachmentDisplayName(type);
   const iconType = getAttachmentIcon(type);
-
-  const handleClick = onClick
-    ? () => {
-        onClick(id);
-      }
-    : undefined;
-
-  const handleRemove = onRemove
-    ? (event: React.MouseEvent<HTMLButtonElement>) => {
-        event.preventDefault();
-        event.stopPropagation();
-        onRemove(id);
-      }
-    : undefined;
-
-  const clickProps = handleClick
-    ? { onClick: handleClick, onClickAriaLabel: labels.viewAttachment }
-    : {};
-
-  const iconClickProps = handleRemove
-    ? { iconOnClick: handleRemove, iconOnClickAriaLabel: labels.removeAttachment }
-    : {};
 
   return (
     <EuiBadge
@@ -90,8 +57,6 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({ id, type, onClic
       iconType={iconType}
       iconSide="left"
       data-test-subj={`onechatAttachmentPill-${id}`}
-      {...clickProps}
-      {...iconClickProps}
     >
       {displayName}
     </EuiBadge>

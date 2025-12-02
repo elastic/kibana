@@ -6,8 +6,7 @@
  */
 
 import { createContext, useContext } from 'react';
-import type { AttachmentInput, UiAttachment } from '@kbn/onechat-common/attachments';
-import type { Conversation } from '@kbn/onechat-common/chat';
+import type { Attachment } from '@kbn/onechat-common/attachments';
 import type { BrowserApiToolDefinition } from '@kbn/onechat-browser/tools/browser_api_tool';
 import type { ConversationActions } from './use_conversation_actions';
 
@@ -21,11 +20,8 @@ interface ConversationContextValue {
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
   setConversationId?: (conversationId?: string) => void;
   conversationActions: ConversationActions;
-  attachments?: UiAttachment[];
-  removedAttachmentIds?: Set<string>;
-  removeAttachment?: (attachmentId: string) => void;
-  getProcessedAttachments?: (conversation?: Conversation) => Promise<AttachmentInput[]>;
-  setAttachmentMap?: (attachmentMap: Map<string, Record<string, unknown>>) => void;
+  attachments?: Attachment[];
+  markAttachmentsAsSent?: (attachmentIds: string[]) => void;
 }
 
 const ConversationContext = createContext<ConversationContextValue | undefined>(undefined);
