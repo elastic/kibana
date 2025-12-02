@@ -152,7 +152,6 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
         throw new Error('Pending message is not present');
       }
 
-      // Use stored attachments for retry
       mutate({ message: pendingMessage });
     },
     canCancel,
