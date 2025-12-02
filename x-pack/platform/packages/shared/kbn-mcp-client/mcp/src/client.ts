@@ -51,7 +51,7 @@ export class McpClient {
   ) {
     this.transport = new StreamableHTTPClientTransport(new URL(clientDetails.url), {
       requestInit: {
-        headers: headers ?? {},
+        headers: headers,
       },
       reconnectionOptions: {
         maxRetries,
