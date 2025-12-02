@@ -64,7 +64,8 @@ export default ({ getService }: FtrProviderContext) => {
    */
   const internalIdPipe = (id: string) => `| where id=="${id}"`;
 
-  describe('@ess @serverless ES|QL rule type', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/235895
+  describe.skip('@ess @serverless ES|QL rule type', () => {
     before(async () => {
       await esArchiver.load(
         'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
@@ -1711,7 +1712,8 @@ export default ({ getService }: FtrProviderContext) => {
           expect(alertsResponse.hits.hits).toHaveLength(4);
         });
 
-        it('should generate alerts over multiple pages from different indices but same event id for mv_expand when number alerts exceeds max signal', async () => {
+        // flaky test: https://github.com/elastic/kibana/issues/235895
+        it.skip('should generate alerts over multiple pages from different indices but same event id for mv_expand when number alerts exceeds max signal', async () => {
           const id = uuidv4();
           const rule: EsqlRuleCreateProps = {
             ...getCreateEsqlRulesSchemaMock(`rule-${id}`, true),

@@ -4466,6 +4466,10 @@
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/security_functional/plugins/test_endpoints/server/init_routes.ts"
               },
               {
@@ -4491,10 +4495,6 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/routes.ts"
-              },
-              {
-                "plugin": "observabilityAgent",
-                "path": "x-pack/solutions/observability/plugins/observability_agent/server/tools/search_knowledge_base/search_knowledge_base.ts"
               },
               {
                 "plugin": "synthetics",

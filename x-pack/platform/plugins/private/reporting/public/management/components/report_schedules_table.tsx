@@ -45,6 +45,7 @@ import { useBulkDelete } from '../hooks/use_bulk_delete';
 import { EditScheduledReportFlyout } from './edit_scheduled_report_flyout';
 import { useGetUserProfileQuery } from '../hooks/use_get_user_profile_query';
 import { ViewScheduledReportFlyout } from './view_scheduled_report_flyout';
+import { useBulkEnable } from '../hooks/use_bulk_enable';
 
 interface QueryParams {
   page: number;
@@ -71,7 +72,7 @@ export const ReportSchedulesTable = () => {
     return capabilities.manageReporting.show === true;
   }, [capabilities]);
 
-  const canEditSchedule = useCallback(
+  const canManageSchedule = useCallback(
     (item: ScheduledReportApiJSON) => {
       if (hasManageReportingPrivilege) return true;
 
@@ -98,6 +99,7 @@ export const ReportSchedulesTable = () => {
 
   const { mutateAsync: bulkDisableScheduledReports } = useBulkDisable();
   const { mutateAsync: bulkDeleteScheduledReports } = useBulkDelete();
+  const { mutateAsync: bulkEnableScheduledReports } = useBulkEnable();
 
   const sortedList = orderBy(scheduledList?.data || [], ['created_at'], ['desc']);
 
@@ -235,7 +237,7 @@ export const ReportSchedulesTable = () => {
           'data-test-subj': (item) => `reportEditConfig-${item.id}`,
           type: 'icon',
           icon: 'calendar',
-          available: (item) => canEditSchedule(item),
+          available: (item) => canManageSchedule(item),
           onClick: (item) => setReportAndOpenConfigFlyout(item),
         },
         {
@@ -248,7 +250,7 @@ export const ReportSchedulesTable = () => {
           'data-test-subj': (item) => `reportViewConfig-${item.id}`,
           type: 'icon',
           icon: 'calendar',
-          available: (item) => !canEditSchedule(item),
+          available: (item) => !canManageSchedule(item),
           onClick: (item) => setReportAndOpenConfigFlyout(item),
         },
         {
@@ -295,10 +297,28 @@ export const ReportSchedulesTable = () => {
             }
           ),
           'data-test-subj': (item) => `reportDisableSchedule-${item.id}`,
-          enabled: (item) => item.enabled,
+          available: (item) => item.enabled && canManageSchedule(item),
           type: 'icon',
           icon: 'cross',
           onClick: (item) => setReportAndOpenDisableModal(item),
+        },
+        {
+          name: i18n.translate('xpack.reporting.schedules.table.enableSchedule.title', {
+            defaultMessage: 'Enable schedule',
+          }),
+          description: i18n.translate(
+            'xpack.reporting.schedules.table.enableSchedule.description',
+            {
+              defaultMessage: 'Enable report schedule',
+            }
+          ),
+          'data-test-subj': (item) => `reportEnableSchedule-${item.id}`,
+          available: (item) => !item.enabled && canManageSchedule(item),
+          type: 'icon',
+          icon: 'check',
+          onClick: (item) => {
+            onEnable(item);
+          },
         },
         {
           name: i18n.translate('xpack.reporting.schedules.table.deleteSchedule.title', {
@@ -310,6 +330,7 @@ export const ReportSchedulesTable = () => {
               defaultMessage: 'Delete report schedule',
             }
           ),
+          available: (item) => canManageSchedule(item),
           'data-test-subj': (item) => `reportDeleteSchedule-${item.id}`,
           type: 'icon',
           icon: 'trash',
@@ -371,6 +392,13 @@ export const ReportSchedulesTable = () => {
     }
     unSetReportAndCloseDeleteModal();
   }, [selectedReport, unSetReportAndCloseDeleteModal, bulkDeleteScheduledReports]);
+
+  const onEnable = useCallback(
+    (item: ScheduledReportApiJSON) => {
+      bulkEnableScheduledReports({ ids: [item.id] });
+    },
+    [bulkEnableScheduledReports]
+  );
 
   const onCancelDestructiveAction = useCallback(
     () => unSetReportAndCloseDisableModal(),
@@ -461,7 +489,7 @@ export const ReportSchedulesTable = () => {
       </EuiFlexItem>
       {selectedReport &&
         isConfigFlyOutOpen &&
-        (canEditSchedule(selectedReport) ? (
+        (canManageSchedule(selectedReport) ? (
           <EditScheduledReportFlyout
             onClose={() => {
               unSetReportAndCloseConfigFlyout();
@@ -494,8 +522,7 @@ export const ReportSchedulesTable = () => {
             defaultMessage: 'Disable schedule',
           })}
           message={i18n.translate('xpack.reporting.schedules.table.disableSchedule.modalMessage', {
-            defaultMessage:
-              'Disabling this schedule will stop the generation of future exports. You will not be able to enable this schedule again.',
+            defaultMessage: 'Disabling this schedule will stop the generation of future exports.',
           })}
           onCancel={onCancelDestructiveAction}
           onConfirm={onDisableConfirm}

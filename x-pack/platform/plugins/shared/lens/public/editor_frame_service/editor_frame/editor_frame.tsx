@@ -6,6 +6,9 @@
  */
 
 import React, { useCallback, useRef } from 'react';
+import { css } from '@emotion/react';
+
+import { EuiSpacer } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import type { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
 import type { DragDropIdentifier } from '@kbn/dom-drag-drop';
@@ -19,10 +22,10 @@ import type {
 } from '@kbn/lens-common';
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { getAbsoluteDateRange } from '../../utils';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
+import { useAddLayerButton } from '../../app_plugin/shared/edit_on_the_fly/use_add_layer_button';
 import { DataPanelWrapper } from './data_panel_wrapper';
 import { BannerWrapper } from './banner_wrapper';
 import { ConfigPanelWrapper } from './config_panel';
@@ -45,6 +48,7 @@ import type { IndexPatternServiceAPI } from '../../data_views_service/service';
 import { getLongMessage } from '../../user_messages_utils';
 import { useEditorFrameService } from '../editor_frame_service_context';
 import { VisualizationToolbarWrapper } from './visualization_toolbar';
+import { LayerTabsWrapper } from '../../app_plugin/shared/edit_on_the_fly/layer_tabs';
 
 export interface EditorFrameProps {
   ExpressionRenderer: ReactExpressionRendererType;
@@ -126,6 +130,14 @@ export function EditorFrame(props: EditorFrameProps) {
     }
   }, []);
 
+  const addLayerButton = useAddLayerButton(
+    framePublicAPI,
+    props.core,
+    props.plugins.dataViews,
+    props.plugins.uiActions,
+    () => {}
+  );
+
   return (
     <RootDragDropProvider
       initialState={{ dataTestSubjPrefix: 'lnsDragDrop' }}
@@ -157,15 +169,26 @@ export function EditorFrame(props: EditorFrameProps) {
             <ErrorBoundary onError={onError}>
               <>
                 <EuiFlexGroup
+                  gutterSize="s"
                   css={styles.visualizationToolbar}
                   justifyContent="flexEnd"
                   responsive={false}
                   wrap={true}
                 >
                   <EuiFlexItem grow={false} data-test-subj="lnsVisualizationToolbar">
-                    <VisualizationToolbarWrapper framePublicAPI={framePublicAPI} />
+                    <VisualizationToolbarWrapper
+                      framePublicAPI={framePublicAPI}
+                      isInlineEditing={true}
+                    />
                   </EuiFlexItem>
+                  <EuiFlexItem grow={false}>{addLayerButton}</EuiFlexItem>
                 </EuiFlexGroup>
+                <EuiSpacer size="s" />
+                <LayerTabsWrapper
+                  coreStart={props.core}
+                  framePublicAPI={framePublicAPI}
+                  uiActions={props.plugins.uiActions}
+                />
                 <ConfigPanelWrapper
                   core={props.core}
                   framePublicAPI={framePublicAPI}

@@ -17,6 +17,7 @@ describe('isRootStreamDefinition', () => {
         processing: { steps: [] },
         settings: {},
         wired: { fields: {}, routing: [] },
+        failure_store: { inherit: {} },
       },
     };
     expect(isRootStreamDefinition(validWired)).toBe(true);
@@ -31,6 +32,7 @@ describe('isRootStreamDefinition', () => {
         processing: { steps: [] },
         settings: {},
         wired: { fields: {}, routing: [] },
+        failure_store: { inherit: {} },
       },
     };
     expect(isRootStreamDefinition(nonRootWired)).toBe(false);
@@ -45,6 +47,7 @@ describe('isRootStreamDefinition', () => {
         processing: { steps: [] },
         settings: {},
         classic: {},
+        failure_store: { inherit: {} },
       },
     };
     expect(isRootStreamDefinition(classic)).toBe(false);
