@@ -17,6 +17,7 @@ import { MuteAlertAction } from './mute_alert_action';
 import { MarkAsUntrackedAlertAction } from './mark_as_untracked_alert_action';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';
 import { EditTagsAction } from './edit_tags_action';
+import { ALERT_RULE_TYPE_ID, isSiemRuleType } from '@kbn/rule-data-utils';
 
 /**
  * Common alerts table row actions
@@ -37,13 +38,18 @@ export const DefaultAlertActions = <AC extends AdditionalContext = AdditionalCon
     context: AlertsQueryContext,
   });
 
+  const isSecurityRule =
+    props.alert[ALERT_RULE_TYPE_ID] && isSiemRuleType(props.alert[ALERT_RULE_TYPE_ID].toString());
+
+  const showModifyOption = authorizedToCreateAnyRules && !isSecurityRule;
+
   return (
     <>
       <ViewRuleDetailsAlertAction {...props} />
       <ViewAlertDetailsAlertAction {...props} />
-      {authorizedToCreateAnyRules && <MarkAsUntrackedAlertAction {...props} />}
-      {authorizedToCreateAnyRules && <MuteAlertAction {...props} />}
-      {authorizedToCreateAnyRules && <EditTagsAction {...props} />}
+      {showModifyOption && <MarkAsUntrackedAlertAction {...props} />}
+      {showModifyOption && <MuteAlertAction {...props} />}
+      {showModifyOption && <EditTagsAction {...props} />}
     </>
   );
 };

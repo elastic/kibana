@@ -32,6 +32,8 @@ import { CellPopoverHost } from './cell_popover_host';
 import { NonVirtualizedGridBody } from './non_virtualized_grid_body';
 import type { AlertDetailFlyout as AlertDetailFlyoutType } from './alert_detail_flyout';
 import { EditTagsFlyout } from './tags/edit_tags_flyout';
+import { useIndividualTagsAction } from '../hooks/use_individual_tags_action';
+import { IndividualTagsActionContextProvider } from '../contexts/individual_tags_action_context';
 
 const AlertDetailFlyout = lazy(
   () => import('./alert_detail_flyout')
@@ -328,7 +330,7 @@ export const AlertsDataGrid = typedMemo(
         : // Overriding the simplified type here to avoid cyclic problems with generics
           (AlertDetailFlyout as NonNullable<typeof renderExpandedAlertView>);
 
-    const selectedAlertsForFlyout = useMemo(
+    const selectedAlerts = useMemo(
       () =>
         Array.from(bulkActionsState.rowSelection.keys())
           .map((i) => alerts[i])
@@ -336,53 +338,66 @@ export const AlertsDataGrid = typedMemo(
       [alerts, bulkActionsState.rowSelection]
     );
 
+    const individualTagsFlyout = useIndividualTagsAction();
+
+    const { selectedAlert } = individualTagsFlyout;
+
     return (
-      <InspectButtonContainer>
-        <section style={{ width: '100%' }} data-test-subj={props['data-test-subj']}>
-          <Suspense fallback={null}>
-            {expandedAlertIndex != null && ExpandedAlertView && (
-              <ExpandedAlertView {...renderContext} expandedAlertIndex={expandedAlertIndex} />
+      <IndividualTagsActionContextProvider value={individualTagsFlyout}>
+        <InspectButtonContainer>
+          <section style={{ width: '100%' }} data-test-subj={props['data-test-subj']}>
+            <Suspense fallback={null}>
+              {expandedAlertIndex != null && ExpandedAlertView && (
+                <ExpandedAlertView {...renderContext} expandedAlertIndex={expandedAlertIndex} />
+              )}
+            </Suspense>
+            {bulkEditTagsFlyout.isFlyoutOpen && selectedAlerts.length > 0 && (
+              <EditTagsFlyout
+                selectedAlerts={selectedAlerts}
+                onClose={bulkEditTagsFlyout.onFlyoutClosed}
+                onSaveTags={bulkEditTagsFlyout.onSaveTags}
+              />
             )}
-          </Suspense>
-          {bulkEditTagsFlyout.isFlyoutOpen && selectedAlertsForFlyout.length > 0 && (
-            <EditTagsFlyout
-              selectedAlerts={selectedAlertsForFlyout}
-              onClose={bulkEditTagsFlyout.onFlyoutClosed}
-              onSaveTags={bulkEditTagsFlyout.onSaveTags}
-            />
-          )}
-          {alertsCount > 0 && (
-            <EuiDataGrid
-              {...euiDataGridProps}
-              // As per EUI docs, it is not recommended to switch between undefined and defined height.
-              // If user changes height, it is better to unmount and mount the component.
-              // Ref: https://eui.elastic.co/#/tabular-content/data-grid#virtualization
-              key={height ? 'fixedHeight' : 'autoHeight'}
-              ref={dataGridRef}
-              css={rowStyles}
-              aria-label="Alerts table"
-              data-test-subj={isLoading ? `alertsTableIsLoading` : `alertsTableIsLoaded`}
-              height={height}
-              columns={columnsWithCellActions}
-              columnVisibility={columnVisibility}
-              trailingControlColumns={trailingControlColumns}
-              leadingControlColumns={leadingControlColumns}
-              rowCount={alertsCount}
-              renderCustomGridBody={dynamicRowHeight ? renderCustomGridBody : undefined}
-              cellContext={renderContext}
-              // Cast necessary because `cellContext` is untyped in EuiDataGrid
-              renderCellValue={CellValueHost as RenderCellValue}
-              renderCellPopover={CellPopoverHost}
-              gridStyle={actualGridStyle}
-              sorting={sortProps}
-              toolbarVisibility={toolbarVisibility}
-              pagination={dataGridPagination}
-              rowHeightsOptions={rowHeightsOptions}
-              onColumnResize={onColumnResize}
-            />
-          )}
-        </section>
-      </InspectButtonContainer>
+            {individualTagsFlyout.isFlyoutOpen && selectedAlert && (
+              <EditTagsFlyout
+                selectedAlerts={[selectedAlert]}
+                onClose={individualTagsFlyout.closeFlyout}
+                onSaveTags={individualTagsFlyout.onSaveTags}
+              />
+            )}
+            {alertsCount > 0 && (
+              <EuiDataGrid
+                {...euiDataGridProps}
+                // As per EUI docs, it is not recommended to switch between undefined and defined height.
+                // If user changes height, it is better to unmount and mount the component.
+                // Ref: https://eui.elastic.co/#/tabular-content/data-grid#virtualization
+                key={height ? 'fixedHeight' : 'autoHeight'}
+                ref={dataGridRef}
+                css={rowStyles}
+                aria-label="Alerts table"
+                data-test-subj={isLoading ? `alertsTableIsLoading` : `alertsTableIsLoaded`}
+                height={height}
+                columns={columnsWithCellActions}
+                columnVisibility={columnVisibility}
+                trailingControlColumns={trailingControlColumns}
+                leadingControlColumns={leadingControlColumns}
+                rowCount={alertsCount}
+                renderCustomGridBody={dynamicRowHeight ? renderCustomGridBody : undefined}
+                cellContext={renderContext}
+                // Cast necessary because `cellContext` is untyped in EuiDataGrid
+                renderCellValue={CellValueHost as RenderCellValue}
+                renderCellPopover={CellPopoverHost}
+                gridStyle={actualGridStyle}
+                sorting={sortProps}
+                toolbarVisibility={toolbarVisibility}
+                pagination={dataGridPagination}
+                rowHeightsOptions={rowHeightsOptions}
+                onColumnResize={onColumnResize}
+              />
+            )}
+          </section>
+        </InspectButtonContainer>
+      </IndividualTagsActionContextProvider>
     );
   }
 );

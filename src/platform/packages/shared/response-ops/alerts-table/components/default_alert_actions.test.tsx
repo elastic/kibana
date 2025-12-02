@@ -55,6 +55,20 @@ jest.mock('./edit_tags_action', () => {
   };
 });
 
+jest.mock('../contexts/individual_tags_action_context', () => {
+  const actual = jest.requireActual('../contexts/individual_tags_action_context');
+  return {
+    ...actual,
+    useIndividualTagsActionContext: () => ({
+      isFlyoutOpen: false,
+      selectedAlert: null,
+      openFlyout: jest.fn(),
+      closeFlyout: jest.fn(),
+      onSaveTags: jest.fn(),
+    }),
+  };
+});
+
 const { useGetRuleTypesPermissions } = jest.requireMock(
   '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'
 );
@@ -106,7 +120,7 @@ describe('DefaultAlertActions', () => {
       });
 
       it.each([nonSecurityProps, noRuleTypeProps])(
-        'should hide all modify options for rule type %s',
+        'should show all modify options for rule type %s',
         async (standardProps) => {
           render(<TestComponent {...standardProps} />);
 
