@@ -49,7 +49,6 @@ dependsOn:
   - '@kbn/automatic-import-plugin'
   - '@kbn/cloud-security-posture-common'
   - '@kbn/dev-utils'
-  - '@kbn/ai-assistant-icon'
   - '@kbn/core-application-browser'
   - '@kbn/deeplinks-management'
   - '@kbn/connector-schemas'

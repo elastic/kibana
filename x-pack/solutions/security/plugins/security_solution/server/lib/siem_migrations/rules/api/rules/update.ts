@@ -14,7 +14,7 @@ import {
   UpdateRuleMigrationRulesRequestParams,
 } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import { authz } from '../../../common/api/util/authz';
+import { authz } from '../util/authz';
 import { SiemMigrationAuditLogger } from '../../../common/api/util/audit';
 import { transformToInternalUpdateRuleMigrationData } from '../util/update_rules';
 import { withLicense } from '../../../common/api/util/with_license';

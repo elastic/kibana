@@ -20,3 +20,4 @@ export type { BackfillInitiator } from './backfill';
 export { backfillInitiator } from './backfill';
 export type { ValidReadAuthEditFields } from './valid_fields_with_read_auth';
 export { validFields } from './valid_fields_with_read_auth';
+export { gapAutoFillSchedulerLimits } from './gap_auto_fill_scheduler';
