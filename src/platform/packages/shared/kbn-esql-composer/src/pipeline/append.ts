@@ -7,12 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { synth } from '@kbn/esql-ast';
+import { synth, Builder } from '@kbn/esql-ast';
 import type { QueryOperator, Params, Query } from '../types';
 
-export function append({ command, params }: { command: string; params?: Params }): QueryOperator {
+export function append({
+  command,
+  params,
+  comment,
+}: {
+  command: string;
+  params?: Params;
+  comment?: string;
+}): QueryOperator {
   return (source): Query => {
     const commandAst = synth.cmd(command);
+
+    // Attach comment to the command if provided
+    if (comment) {
+      const commentNode = Builder.comment('single-line', ` ${comment}`);
+      commandAst.formatting = {
+        top: [commentNode],
+      };
+    }
 
     return {
       root: source.root,

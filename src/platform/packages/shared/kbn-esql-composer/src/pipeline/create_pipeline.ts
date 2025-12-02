@@ -7,19 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BasicPrettyPrinter } from '@kbn/esql-ast';
-import type { Query, QueryPipeline, QueryRequest } from '../types';
+import { BasicPrettyPrinter, WrappingPrettyPrinter } from '@kbn/esql-ast';
+import type { Query, QueryPipeline, QueryRequest, ToStringOptions } from '../types';
 import { buildQueryAst } from './build_query_ast';
 import { replaceParameters } from './replace_parameters';
 
 export function createPipeline(source: Query): QueryPipeline {
-  const toString = (): string => {
+  const toString = (options?: ToStringOptions): string => {
     const ast = buildQueryAst(source);
     replaceParameters(ast, source.params);
 
-    return BasicPrettyPrinter.print(ast, {
-      multiline: true,
-    });
+    // Use WrappingPrettyPrinter if comments are needed, otherwise use BasicPrettyPrinter for backward compatibility
+    if (options?.withComments) {
+      return WrappingPrettyPrinter.print(ast, {
+        multiline: true,
+      });
+    } else {
+      return BasicPrettyPrinter.print(ast, {
+        multiline: true,
+      });
+    }
   };
 
   const asRequest = (): QueryRequest => {
