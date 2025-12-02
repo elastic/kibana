@@ -5,6 +5,5 @@ fileGroups:
   default:
     - '**/*'
   production: [ ]
-  src:
-    - 'src/**/*'
 
+tasks: {}
