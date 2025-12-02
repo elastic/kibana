@@ -69,10 +69,9 @@ test.describe('Rules Page - Rules Tab', { tag: ['@ess', '@svlOblt'] }, () => {
     await expect(pageObjects.rulesPage.rulesTableContainer).toBeVisible();
   });
 
-  // TODO: Sometimes this fails
   test('should see an editable rule in the Rules Table', async ({ pageObjects }) => {
     await expect(pageObjects.rulesPage.ruleSearchField).toBeVisible();
-    const editableRules = await pageObjects.rulesPage.getEditableRules();
+    const editableRules = pageObjects.rulesPage.getEditableRules();
     await expect(editableRules.filter({ hasText: createdRule.name })).toHaveCount(1);
   });
 });
