@@ -88,7 +88,6 @@ describe('scripts library client', () => {
       ).toHaveBeenCalledWith(
         SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE,
         {
-          created_by: 'elastic',
           description: 'does some stuff',
           example: 'bash -c script_one.sh',
           path_to_executable: undefined,
@@ -98,7 +97,10 @@ describe('scripts library client', () => {
           name: 'script one',
           platform: ['linux', 'macos'],
           requires_input: false,
+          created_by: 'elastic',
+          created_at: expect.any(String),
           updated_by: 'elastic',
+          updated_at: expect.any(String),
         },
         { id: scriptId }
       );
