@@ -22,7 +22,7 @@ import { useTimefilter } from '../../hooks/use_timefilter';
 interface BaseAttachmentsTableProps {
   entityId?: string;
   loading: boolean;
-  attachments: Attachment[] | undefined;
+  attachments: Attachment[];
   compact?: boolean;
   selectedAttachments?: Attachment[];
   setSelectedAttachments?: (attachments: Attachment[]) => void;

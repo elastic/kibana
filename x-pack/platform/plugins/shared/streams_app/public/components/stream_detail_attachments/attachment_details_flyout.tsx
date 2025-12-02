@@ -13,6 +13,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiHorizontalRule,
+  EuiLink,
   EuiPanel,
   EuiText,
   EuiTitle,
@@ -21,9 +22,11 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { FormattedDate } from '@kbn/i18n-react';
 import type { Attachment } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
 import React from 'react';
 import { useKibana } from '../../hooks/use_kibana';
+import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { AttachmentTagsList } from './attachment_tags_list';
 import { ATTACHMENT_TYPE_CONFIG, AttachmentTypeBadge } from './attachment_type_badge';
@@ -50,6 +53,20 @@ function InfoPanel({ title, children }: InfoPanelProps) {
   );
 }
 
+function FormattedDateTime({ value }: { value: string }) {
+  return (
+    <FormattedDate
+      value={new Date(value)}
+      year="numeric"
+      month="short"
+      day="2-digit"
+      hour="2-digit"
+      minute="2-digit"
+      second="2-digit"
+    />
+  );
+}
+
 interface AttachmentDetailsFlyoutProps {
   attachment: Attachment;
   streamName: string;
@@ -70,6 +87,7 @@ export function AttachmentDetailsFlyout({
     },
   } = useKibana();
 
+  const router = useStreamsAppRouter();
   const { timeState } = useTimefilter();
 
   const flyoutTitleId = useGeneratedHtmlId({
@@ -90,6 +108,8 @@ export function AttachmentDetailsFlyout({
     }
   };
 
+  const noDataPlaceholder = '-';
+
   const generalInfoItems = [
     {
       title: i18n.translate('xpack.streams.attachmentDetailsFlyout.attachmentTypeLabel', {
@@ -101,13 +121,54 @@ export function AttachmentDetailsFlyout({
       title: i18n.translate('xpack.streams.attachmentDetailsFlyout.tagsLabel', {
         defaultMessage: 'Tags',
       }),
-      description: <AttachmentTagsList tags={attachment.tags} />,
+      description:
+        attachment.tags.length > 0 ? (
+          <AttachmentTagsList tags={attachment.tags} />
+        ) : (
+          <EuiText size="s">{noDataPlaceholder}</EuiText>
+        ),
     },
     {
-      title: i18n.translate('xpack.streams.attachmentDetailsFlyout.streamLabel', {
-        defaultMessage: 'Stream',
+      title: i18n.translate('xpack.streams.attachmentDetailsFlyout.streamsLabel', {
+        defaultMessage: 'Streams',
       }),
-      description: <EuiText color="primary">{streamName}</EuiText>,
+      description:
+        attachment.streamNames.length > 0 ? (
+          <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+            {attachment.streamNames.map((name) => (
+              <EuiFlexItem key={name} grow={false}>
+                <EuiLink
+                  data-test-subj="streamsAppAttachmentDetailsFlyoutStreamLink"
+                  href={router.link('/{key}', { path: { key: name } })}
+                >
+                  {name}
+                </EuiLink>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        ) : (
+          <EuiText color="primary">{streamName}</EuiText>
+        ),
+    },
+    {
+      title: i18n.translate('xpack.streams.attachmentDetailsFlyout.createdAtLabel', {
+        defaultMessage: 'Created at',
+      }),
+      description: attachment.createdAt ? (
+        <FormattedDateTime value={attachment.createdAt} />
+      ) : (
+        <EuiText size="s">{noDataPlaceholder}</EuiText>
+      ),
+    },
+    {
+      title: i18n.translate('xpack.streams.attachmentDetailsFlyout.lastUpdatedLabel', {
+        defaultMessage: 'Last updated',
+      }),
+      description: attachment.updatedAt ? (
+        <FormattedDateTime value={attachment.updatedAt} />
+      ) : (
+        <EuiText size="s">{noDataPlaceholder}</EuiText>
+      ),
     },
   ];
 
@@ -163,9 +224,10 @@ export function AttachmentDetailsFlyout({
               })}
             >
               <EuiText>
-                {i18n.translate('xpack.streams.attachmentDetailsFlyout.noDescriptionAvailable', {
-                  defaultMessage: 'No description available',
-                })}
+                {attachment.description ||
+                  i18n.translate('xpack.streams.attachmentDetailsFlyout.noDescriptionAvailable', {
+                    defaultMessage: 'No description available',
+                  })}
               </EuiText>
             </InfoPanel>
           </EuiFlexItem>
