@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// TODO: Remove eslint exceptions comments and fix the issues
-// /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-non-null-assertion */
-
 import type { Client } from '@elastic/elasticsearch';
 import { v4 as generateUuid } from 'uuid';
 import type {
@@ -99,6 +96,9 @@ export class WorkflowsExecutionEnginePlugin
         timeout: '365d',
         maxAttempts: 1,
         createTaskRunner: ({ taskInstance, fakeRequest }) => {
+          if (!fakeRequest) {
+            throw new Error('Cannot run workflow without Kibana Request');
+          }
           const taskAbortController = new AbortController();
           return {
             run: async () => {
@@ -147,6 +147,9 @@ export class WorkflowsExecutionEnginePlugin
         timeout: '365d',
         maxAttempts: 1,
         createTaskRunner: ({ taskInstance, fakeRequest }) => {
+          if (!fakeRequest) {
+            throw new Error('Cannot resume workflow without Kibana Request');
+          }
           const taskAbortController = new AbortController();
           return {
             run: async () => {
@@ -196,6 +199,9 @@ export class WorkflowsExecutionEnginePlugin
         timeout: '365d',
         maxAttempts: 3,
         createTaskRunner: ({ taskInstance, fakeRequest }) => {
+          if (!fakeRequest) {
+            throw new Error('Cannot schedule workflow without Kibana Request');
+          }
           const taskAbortController = new AbortController();
           return {
             run: async () => {
@@ -333,9 +339,11 @@ export class WorkflowsExecutionEnginePlugin
       const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
 
       const triggeredBy = (context.triggeredBy as string | undefined) || defaultTriggeredBy;
+      const createdBy = (context.createdBy as string | undefined) || 'system';
+      const spaceId = (context.spaceId as string | undefined) || 'default';
       const workflowExecution: Partial<EsWorkflowExecution> = {
         id: generateUuid(),
-        spaceId: context.spaceId as string | undefined,
+        spaceId,
         workflowId: workflow.id,
         isTestRun: workflow.isTestRun,
         workflowDefinition: workflow.definition,
@@ -343,7 +351,7 @@ export class WorkflowsExecutionEnginePlugin
         context,
         status: ExecutionStatus.PENDING,
         createdAt: workflowCreatedAt.toISOString(),
-        createdBy: (context.createdBy as string | undefined) || '',
+        createdBy,
         triggeredBy,
       };
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
@@ -402,7 +410,7 @@ export class WorkflowsExecutionEnginePlugin
         );
 
         await runWorkflow({
-          workflowRunId: workflowExecution.id || '',
+          workflowRunId: workflowExecution.id as string,
           spaceId: workflowExecution.spaceId || 'default',
           workflowExecutionRepository,
           stepExecutionRepository,
@@ -425,7 +433,7 @@ export class WorkflowsExecutionEnginePlugin
       }
 
       return {
-        workflowExecutionId: workflowExecution.id || '',
+        workflowExecutionId: workflowExecution.id as string,
       };
     };
 
@@ -452,7 +460,7 @@ export class WorkflowsExecutionEnginePlugin
       );
 
       return {
-        workflowExecutionId: workflowExecution.id || '',
+        workflowExecutionId: workflowExecution.id as string,
       };
     };
 
@@ -490,7 +498,7 @@ export class WorkflowsExecutionEnginePlugin
         context,
         status: ExecutionStatus.PENDING,
         createdAt: workflowCreatedAt.toISOString(),
-        createdBy: (context.createdBy as string | undefined) || '', // TODO: set if available
+        createdBy: context.createdBy as string | undefined, // TODO: set if available
         triggeredBy, // <-- new field for scheduled workflows
       };
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
