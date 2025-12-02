@@ -169,7 +169,7 @@ export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecor
   [ServiceProviderKeys.groq]: {
     icon: groqIcon,
     name: 'Groq',
-    solutions: ['Search'],
+    solutions: ['Observability', 'Security', 'Search'],
   },
 };
 
