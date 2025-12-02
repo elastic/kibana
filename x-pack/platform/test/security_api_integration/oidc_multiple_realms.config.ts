@@ -32,7 +32,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `xpack.security.authc.realms.oidc.oidc2.rp.redirect_uri=http://localhost:${kibanaPort}/api/security/oidc/callback`,
         `xpack.security.authc.realms.oidc.oidc2.op.authorization_endpoint=https://test-op-2.elastic.co/oauth2/v1/authorize`,
         `xpack.security.authc.realms.oidc.oidc2.op.endsession_endpoint=https://test-op-2.elastic.co/oauth2/v1/endsession`,
-        `xpack.security.authc.realms.oidc.oidc2.op.token_endpoint=http://localhost:${kibanaPort}/api/oidc_provider/token_endpoint_2`,
+        `xpack.security.authc.realms.oidc.oidc2.op.token_endpoint=http://localhost:${kibanaPort}/api/oidc_provider/token_endpoint/${encodeURIComponent(
+          'https://test-op-2.elastic.co'
+        )}`,
         `xpack.security.authc.realms.oidc.oidc2.op.userinfo_endpoint=http://localhost:${kibanaPort}/api/oidc_provider/userinfo_endpoint`,
         `xpack.security.authc.realms.oidc.oidc2.op.issuer=https://test-op-2.elastic.co`,
         `xpack.security.authc.realms.oidc.oidc2.op.jwkset_path=${jwksPath}`,

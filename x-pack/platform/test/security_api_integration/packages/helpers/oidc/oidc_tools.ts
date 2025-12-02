@@ -18,7 +18,7 @@ function fromBase64(base64: string) {
   return base64.replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
 }
 
-export function createTokens(userId: string, nonce: string, issuer?: string) {
+export function createTokens(userId: string, nonce: string, issuer: string) {
   const idTokenHeader = fromBase64(
     Buffer.from(JSON.stringify({ alg: 'RS256' })).toString('base64')
   );
@@ -29,7 +29,7 @@ export function createTokens(userId: string, nonce: string, issuer?: string) {
   const idTokenBody = fromBase64(
     Buffer.from(
       JSON.stringify({
-        iss: issuer ?? 'https://test-op.elastic.co',
+        iss: issuer,
         sub: `user${userId}`,
         aud: '0oa8sqpov3TxMWJOt356',
         nonce,
