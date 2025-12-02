@@ -146,9 +146,9 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
     if (!attachments || shouldHideAttachments) return [];
     return attachments
       .filter((attachment) => !attachment.hidden)
-      .map((attachment) => ({
-        id: attachment.id,
-        type: attachment.type,
+      .map((attachment, idx) => ({
+        ...attachment,
+        id: attachment.id ?? `attachment-${idx}`,
       }));
   }, [attachments, shouldHideAttachments]);
 
