@@ -24,6 +24,8 @@ import type {
   ObservabilityAgentPluginStartDependencies,
 } from './types';
 
+import { ObservabilityAgentDataRegistry } from './data_registry';
+
 export class ObservabilityAgentPlugin
   implements
     Plugin<
@@ -34,9 +36,11 @@ export class ObservabilityAgentPlugin
     >
 {
   private readonly logger: Logger;
+  private readonly dataRegistry: ObservabilityAgentDataRegistry;
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();
+    this.dataRegistry = new ObservabilityAgentDataRegistry(this.logger);
   }
 
   public setup(
@@ -68,7 +72,9 @@ export class ObservabilityAgentPlugin
         this.logger.error(`Error checking whether the observability agent is enabled: ${error}`);
       });
 
-    return {};
+    return {
+      registerDataProvider: (id, provider) => this.dataRegistry.registerDataProvider(id, provider),
+    };
   }
 
   public start(
