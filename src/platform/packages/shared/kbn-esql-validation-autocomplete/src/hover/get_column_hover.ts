@@ -8,7 +8,7 @@
  */
 
 import type { ESQLColumn } from '@kbn/esql-ast';
-import type { GetColumnMapFn } from '../shared/columns';
+import type { GetColumnMapFn } from '../shared/columns_retrieval_helpers';
 
 export async function getColumnHover(
   node: ESQLColumn,
