@@ -88,8 +88,8 @@ export class DashboardPageControls extends FtrService {
   }
 
   public async getControlsCount() {
-    const allTitles = await this.getAllControlTitles();
-    return allTitles.length;
+    const allControlIds = await this.getAllControlIds();
+    return allControlIds.length;
   }
 
   public async clearAllControls() {

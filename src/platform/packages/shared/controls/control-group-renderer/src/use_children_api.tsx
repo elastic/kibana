@@ -79,6 +79,9 @@ export const useChildrenApi = (
             }
           });
           currentChildState$Ref.current.next(result);
+        } else {
+          // this will trigger `input$` when there are no unsaved changes
+          currentChildState$Ref.current.next(lastSavedChildState$Ref.current?.value);
         }
       });
     return () => {
