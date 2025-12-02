@@ -19,6 +19,7 @@ import type { ILicense } from '@kbn/licensing-types';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
+import { registerScriptsLibraryRoutes } from './endpoint/routes/scripts_library';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
 import { registerTools } from './agent_builder/tools/register_tools';
 import { migrateEndpointDataToSupportSpaces } from './endpoint/migrations/space_awareness_migration';
@@ -489,6 +490,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       plugins.encryptedSavedObjects?.canEncrypt === true
     );
     registerAgentRoutes(router, this.endpointContext);
+    registerScriptsLibraryRoutes(router, this.endpointContext);
 
     if (plugins.alerting != null) {
       const ruleNotificationType = legacyRulesNotificationRuleType({ logger });
