@@ -40,13 +40,10 @@ export async function search(
 
   return {
     dashboards: soResponse.saved_objects.map((so) => {
-      const {
-        description,
-        tags,
-        timeRange,
-        title,
-        access_control: accessControl,
-      } = transformDashboardOut(so.attributes, so.references);
+      const { description, tags, timeRange, title } = transformDashboardOut(
+        so.attributes,
+        so.references
+      );
 
       return {
         id: so.id,
@@ -54,7 +51,6 @@ export async function search(
           ...(description && { description }),
           ...(tags && { tags }),
           ...(timeRange && { timeRange }),
-          ...(accessControl && { access_control: accessControl }),
           title: title ?? '',
         },
         meta: getDashboardMeta(so, 'search'),
