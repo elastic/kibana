@@ -11,7 +11,7 @@ import type { Logger } from '@kbn/core/server';
 import { dateRangeQuery } from '@kbn/es-query';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { esql } from '@kbn/esql-ast';
-import { extractWhereCommand } from '@kbn/unified-metrics-grid';
+import { extractWhereCommand } from '../../../common/utils';
 
 interface CreateDimensionsParams {
   esClient: TracedElasticsearchClient;

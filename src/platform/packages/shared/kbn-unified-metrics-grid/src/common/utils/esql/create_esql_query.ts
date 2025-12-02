@@ -30,16 +30,13 @@ interface CreateESQLQueryParams {
 
 /**
  * Extracts the WHERE command string from an ES|QL query.
- * Reusable helper that parses the query and returns the WHERE clause if present.
- *
  * @param esqlQuery - The ES|QL query string to parse
  * @returns The printed WHERE command string if found, undefined otherwise
  */
-export function extractWhereCommand(esqlQuery: string | undefined): string | undefined {
+function extractWhereCommand(esqlQuery: string | undefined): string | undefined {
   if (!esqlQuery || esqlQuery.trim().length === 0) {
     return undefined;
   }
-
   try {
     const ast = Parser.parse(esqlQuery);
     const whereNode = Walker.find(
@@ -50,6 +47,34 @@ export function extractWhereCommand(esqlQuery: string | undefined): string | und
   } catch {
     return undefined;
   }
+}
+
+/**
+ * Applies dimension filters and optional user WHERE clause to a query.
+ * Uses accumulator pattern to track param indices across multiple filter entries.
+ */
+function applyDimensionFilters(
+  baseQuery: ComposerQuery,
+  dimensionFilters: DimensionFilters,
+  userQuery?: string
+): ComposerQuery {
+  const { query: queryWithFilters } = Object.entries(dimensionFilters).reduce(
+    (acc, [dimensionName, values]) => {
+      if (values.length === 0) {
+        return acc;
+      }
+      const paramNames = values.map((_, i) => `?value${acc.paramIdx + i}`).join(', ');
+      const whereClause = `WHERE \`${dimensionName}\`::STRING IN (${paramNames})`;
+      const newQuery = values.reduce(
+        (q, value, i) => q.setParam(`value${acc.paramIdx + i}`, value),
+        acc.query.pipe(whereClause)
+      );
+      return { query: newQuery, paramIdx: acc.paramIdx + values.length };
+    },
+    { query: baseQuery, paramIdx: 0 }
+  );
+  const whereCommand = userQuery ? extractWhereCommand(userQuery) : undefined;
+  return whereCommand ? queryWithFilters.pipe(whereCommand) : queryWithFilters;
 }
 
 const separator = '\u203A'.normalize('NFC');
@@ -79,44 +104,6 @@ function castFieldIfNeeded(fieldName: string, fieldType: string | undefined): st
     return `${fieldName}::STRING`;
   }
   return fieldName;
-}
-
-/**
- * Applies dimension filters and optional user WHERE clause to a query.
- * Reusable helper shared with buildEsqlQuery in enrich_metric_fields.ts.
- *
- * @param baseQuery - The base query to apply filters to
- * @param dimensionFilters - A map of field names to arrays of values to filter by
- * @param userQuery - Optional ES|QL query string to extract WHERE clause from
- * @returns The query with all filter WHERE clauses applied
- */
-export function applyDimensionFilters(
-  baseQuery: ComposerQuery,
-  dimensionFilters: DimensionFilters,
-  userQuery?: string
-) {
-  // Use accumulator to carry both query and param index (avoids mutable let)
-  const { query: queryWithFilters } = Object.entries(dimensionFilters).reduce(
-    (acc, [dimensionName, values]) => {
-      if (values.length === 0) {
-        return acc;
-      }
-
-      const paramNames = values.map((_, i) => `?value${acc.paramIdx + i}`).join(', ');
-      const whereClause = `WHERE \`${dimensionName}\`::STRING IN (${paramNames})`;
-
-      const newQuery = values.reduce(
-        (q, value, i) => q.setParam(`value${acc.paramIdx + i}`, value),
-        acc.query.pipe(whereClause)
-      );
-
-      return { query: newQuery, paramIdx: acc.paramIdx + values.length };
-    },
-    { query: baseQuery, paramIdx: 0 }
-  );
-
-  const whereCommand = userQuery ? extractWhereCommand(userQuery) : undefined;
-  return whereCommand ? queryWithFilters.pipe(whereCommand) : queryWithFilters;
 }
 
 /**

@@ -11,13 +11,12 @@ import { type Logger } from '@kbn/core/server';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { semconvFlat } from '@kbn/otel-semantic-conventions';
 import { dateRangeQuery } from '@kbn/es-query';
-import { applyDimensionFilters } from '@kbn/unified-metrics-grid';
-import type { ComposerQuery } from '@kbn/esql-ast';
-import { esql } from '@kbn/esql-ast';
+import { type ComposerQuery, esql } from '@kbn/esql-ast';
 import pLimit from 'p-limit';
 import { chunk } from 'lodash';
 import type { IndexFieldCapsMap, EpochTimeRange } from '../../types';
 import type { Dimension, MetricField, DimensionFilters } from '../../../common/types';
+import { applyDimensionFilters } from '../../../common/utils';
 import { extractDimensions } from '../dimensions/extract_dimensions';
 import { normalizeUnit } from './normalize_unit';
 
