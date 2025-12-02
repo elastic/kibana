@@ -59,10 +59,8 @@ export const SplitButtonWithNotification = ({
         >
           <EuiIconTip
             type="dot"
-            iconProps={{
-              color: notificationIndicatorColor,
-            }}
             size={notificationIndicatorSize}
+            color={notificationIndicatorColor}
             content={notifcationIndicatorTooltipContent}
           />
         </div>
