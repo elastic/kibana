@@ -8,7 +8,21 @@
  */
 
 import type { PublicContract, SerializableRecord } from '@kbn/utility-types';
-import { distinctUntilChanged, map, mapTo, startWith, switchMap, tap } from 'rxjs';
+import {
+  EMPTY,
+  distinctUntilChanged,
+  filter,
+  from,
+  interval,
+  map,
+  mapTo,
+  mergeMap,
+  startWith,
+  switchMap,
+  take,
+  takeUntil,
+  tap,
+} from 'rxjs';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest, merge, of, Subscription, timer } from 'rxjs';
 import type {
@@ -34,6 +48,12 @@ import type { NowProviderInternalContract } from '../../now_provider';
 import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
 import { formatSessionName } from './lib/session_name_formatter';
 import type { ISearchSessionEBTManager } from './ebt_manager';
+
+/**
+ * Polling interval for keeping completed searches alive
+ * until the user saves the session
+ */
+const KEEP_ALIVE_COMPLETED_SEARCHES_INTERVAL = 30_000;
 
 /**
  * To prevent the session ids map from growing indefinitely we can use an LRU cache - we will limit it to 30 sessions for
@@ -278,6 +298,66 @@ export class SessionService {
         })
       );
     });
+
+    // keep completed searches alive until user explicitly saves the session
+    this.subscription.add(
+      this.getSession$()
+        .pipe(
+          switchMap((sessionId) => {
+            if (!sessionId) return EMPTY;
+            if (this.isStored()) return EMPTY; // no need to keep searches alive because session and searches are already stored
+            if (!this.hasAccess()) return EMPTY; // don't need to keep searches alive if the user can't save session
+            if (!this.isSessionStorageReady()) return EMPTY; // don't need to keep searches alive if app doesn't allow saving session
+
+            const finishedStates = [
+              SearchSessionState.Completed,
+              SearchSessionState.BackgroundCompleted,
+              SearchSessionState.Restored,
+              SearchSessionState.Canceled,
+            ];
+
+            const stopOnFinishedState$ = this.state$.pipe(
+              filter((state) => finishedStates.includes(state)),
+              take(1)
+            );
+
+            const schedulePollSearches = () => {
+              return interval(KEEP_ALIVE_COMPLETED_SEARCHES_INTERVAL).pipe(
+                mergeMap(() => {
+                  const searchesToKeepAlive = this.state.get().trackedSearches.filter(
+                    (s) =>
+                      !s.searchMeta.isStored &&
+                      s.state === TrackedSearchState.Completed &&
+                      s.searchMeta.lastPollingTime.getTime() < Date.now() - 5000 // don't poll if was very recently polled
+                  );
+
+                  return from(
+                    Promise.all(
+                      searchesToKeepAlive.map((s) =>
+                        s.searchDescriptor.poll().catch((e) => {
+                          // eslint-disable-next-line no-console
+                          console.warn(
+                            `Error while polling search to keep it alive. Considering that it is no longer possible to extend a session.`,
+                            e
+                          );
+                          if (this.isCurrentSession(sessionId)) {
+                            this._disableSaveAfterSearchesExpire$.next(true);
+                          }
+                        })
+                      )
+                    )
+                  );
+                }),
+                takeUntil(this.disableSaveAfterSearchesExpire$.pipe(filter((disable) => disable))),
+                takeUntil(stopOnFinishedState$)
+              );
+            };
+
+            return schedulePollSearches();
+          })
+        )
+        .subscribe(() => {})
+    );
   }
 
   /**

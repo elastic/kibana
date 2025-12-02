@@ -182,6 +182,107 @@ describe('Session service', () => {
     });
   });
 
+  describe('Keeping searches alive', () => {
+    let dateNowSpy: jest.SpyInstance;
+    let now = Date.now();
+    const advanceTimersBy = (by: number) => {
+      now = now + by;
+      jest.advanceTimersByTime(by);
+    };
+    beforeEach(() => {
+      dateNowSpy = jest.spyOn(Date, 'now').mockImplementation(() => now);
+      now = Date.now();
+
+      sessionService.enableStorage({
+        getName: async () => 'Name',
+        getLocatorData: async () => ({
+          id: 'id',
+          initialState: {},
+          restoreState: {},
+        }),
+      });
+
+      jest.useFakeTimers();
+    });
+    afterEach(() => {
+      dateNowSpy.mockRestore();
+      jest.useRealTimers();
+    });
+
+    describe('when there is only 1 search', () => {
+      describe('when it finishes', () => {
+        it('should NOT poll the search', () => {
+          const abort = jest.fn();
+          const poll = jest.fn(() => Promise.resolve());
+
+          sessionService.start();
+
+          const searchTracker = sessionService.trackSearch({ abort, poll });
+          searchTracker.complete();
+
+          expect(poll).toHaveBeenCalledTimes(0);
+          advanceTimersBy(35_000);
+          expect(poll).toHaveBeenCalledTimes(0);
+        });
+      });
+    });
+
+    describe('when there are multiple searches', () => {
+      describe('when not all of them are is finished', () => {
+        it('should poll the finished searches', () => {
+          const search1 = {
+            poll: jest.fn(() => Promise.resolve()),
+            abort: jest.fn(),
+          };
+          const search2 = {
+            poll: jest.fn(() => Promise.resolve()),
+            abort: jest.fn(),
+          };
+
+          sessionService.start();
+
+          const searchTracker1 = sessionService.trackSearch(search1);
+          sessionService.trackSearch(search2);
+
+          searchTracker1.complete();
+
+          expect(search1.poll).toHaveBeenCalledTimes(0);
+          expect(search2.poll).toHaveBeenCalledTimes(0);
+          advanceTimersBy(35_000);
+          expect(search1.poll).toHaveBeenCalledTimes(1);
+          expect(search2.poll).toHaveBeenCalledTimes(0);
+        });
+      });
+
+      describe('when all of them are is finished', () => {
+        it('should not poll anything', () => {
+          const search1 = {
+            poll: jest.fn(() => Promise.resolve()),
+            abort: jest.fn(),
+          };
+          const search2 = {
+            poll: jest.fn(() => Promise.resolve()),
+            abort: jest.fn(),
+          };
+
+          sessionService.start();
+
+          const searchTracker1 = sessionService.trackSearch(search1);
+          const searchTracker2 = sessionService.trackSearch(search2);
+
+          searchTracker1.complete();
+          searchTracker2.complete();
+
+          expect(search1.poll).toHaveBeenCalledTimes(0);
+          expect(search2.poll).toHaveBeenCalledTimes(0);
+          advanceTimersBy(35_000);
+          expect(search1.poll).toHaveBeenCalledTimes(0);
+          expect(search2.poll).toHaveBeenCalledTimes(0);
+        });
+      });
+    });
+  });
+
   it('Can continue previous session from another app', async () => {
     sessionService.start();
     const sessionId = sessionService.getSessionId();
