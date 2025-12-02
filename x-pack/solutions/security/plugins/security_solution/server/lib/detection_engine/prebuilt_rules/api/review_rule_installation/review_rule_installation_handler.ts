@@ -52,6 +52,7 @@ export const reviewRuleInstallationHandler = async (
       currentRuleVersions.map((version) => [version.rule_id, version])
     );
 
+    // TODO: Optimize if to a single call if there's no filter
     const installableVersions = await getInstallableRuleVersions(
       ruleAssetsClient,
       mlAuthz,
