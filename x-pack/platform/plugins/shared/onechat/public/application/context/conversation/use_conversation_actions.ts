@@ -18,6 +18,7 @@ import type {
 } from '@kbn/onechat-common';
 import { isToolCallStep } from '@kbn/onechat-common';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
+import type { AttachmentInput, Attachment } from '@kbn/onechat-common/attachments';
 import type { ConversationsService } from '../../../services/conversations';
 import { queryKeys } from '../../query_keys';
 import { storageKeys } from '../../storage_keys';
@@ -26,7 +27,6 @@ import {
   createNewRound,
   newConversationId,
 } from '../../utils/new_conversation';
-import type { AttachmentInput, Attachment } from '@kbn/onechat-common/attachments';
 
 export interface ConversationActions {
   removeNewConversationQuery: () => void;
