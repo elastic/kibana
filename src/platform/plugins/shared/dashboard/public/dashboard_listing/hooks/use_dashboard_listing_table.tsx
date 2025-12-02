@@ -238,7 +238,10 @@ export const useDashboardListingTable = ({
               const canManageAccessControl =
                 isGloballyAuthorized ||
                 accessControlClient.checkUserAccessControl({
-                  accessControl: data?.accessControl,
+                  accessControl: {
+                    owner: meta?.access_control?.owner,
+                    accessMode: meta?.access_control?.access_mode,
+                  },
                   createdBy: meta.createdBy,
                   userId,
                 });
@@ -258,7 +261,7 @@ export const useDashboardListingTable = ({
                   timeRestore: Boolean(data.timeRange),
                 },
                 canManageAccessControl,
-                accessMode: data?.accessControl?.accessMode,
+                accessMode: meta?.access_control?.access_mode,
               } as DashboardSavedObjectUserContent;
             }),
           };

@@ -18,8 +18,8 @@ export function initializeAccessControlManager(
   savedObjectId$?: BehaviorSubject<string | undefined>
 ) {
   const accessControl$ = new BehaviorSubject<Partial<SavedObjectAccessControl>>({
-    owner: savedObjectResult?.meta?.accessControl?.owner,
-    accessMode: savedObjectResult?.meta?.accessControl?.accessMode,
+    owner: savedObjectResult?.meta?.access_control?.owner,
+    accessMode: savedObjectResult?.meta?.access_control?.access_mode,
   });
 
   async function changeAccessMode(accessMode: SavedObjectAccessControl['accessMode']) {

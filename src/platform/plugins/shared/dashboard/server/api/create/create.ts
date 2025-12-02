@@ -40,9 +40,9 @@ export async function create(
       references: soReferences,
       ...(createBody.id && { id: createBody.id }),
       ...(createBody.spaces && { initialNamespaces: createBody.spaces }),
-      ...(createBody.meta?.accessControl?.accessMode &&
+      ...(createBody.meta?.access_control?.access_mode &&
         isAccessControlEnabled && {
-          accessControl: { accessMode: createBody.meta.accessControl.accessMode },
+          accessControl: { accessMode: createBody.meta.access_control.access_mode },
         }),
     }
   );

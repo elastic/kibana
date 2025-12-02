@@ -30,7 +30,12 @@ export function getDashboardMeta(
       createdAt: savedObject.created_at,
       createdBy: savedObject.created_by,
     }),
-    accessControl: savedObject.accessControl,
+    ...(savedObject.accessControl && {
+      access_control: {
+        access_mode: savedObject.accessControl.accessMode,
+        owner: savedObject.accessControl.owner,
+      },
+    }),
   };
 }
 
