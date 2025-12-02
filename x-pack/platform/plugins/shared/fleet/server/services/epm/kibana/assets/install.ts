@@ -297,6 +297,15 @@ export async function installKibanaAssetsAndReferences({
         type,
       } as KibanaAssetReference)
   );
+
+  await replaceInMarkdown({
+    assets,
+    savedObjectsClient,
+    logger,
+    savedObjectsImporter,
+    kibanaAssetsArchiveIterator,
+  });
+
   installedKibanaAssetsRefs = await saveKibanaAssetsRefs(
     savedObjectsClient,
     pkgName,
@@ -595,4 +604,81 @@ export function toAssetReference({ id, type }: SavedObject) {
 
 function hasReferences(assetsToInstall: ArchiveAsset[]) {
   return assetsToInstall.some((asset) => asset.references?.length);
+}
+async function replaceInMarkdown({
+  assets,
+  savedObjectsClient,
+  logger,
+  savedObjectsImporter,
+  kibanaAssetsArchiveIterator,
+}: {
+  assets: KibanaAssetReference[];
+  savedObjectsClient: SavedObjectsClientContract;
+  logger: Logger;
+  savedObjectsImporter: ISavedObjectsImporter;
+  kibanaAssetsArchiveIterator: (
+    onEntry: (entry: {
+      path: string;
+      asset: ArchiveAsset;
+      assetType: KibanaAssetType;
+    }) => Promise<void>
+  ) => Promise<void>;
+}) {
+  const assetsWithDifferentIds = assets.filter(
+    (asset) => asset.originId && asset.originId !== asset.id
+  );
+
+  if (assetsWithDifferentIds.length === 0) {
+    return;
+  }
+
+  let assetsToInstall = [] as ArchiveAsset[];
+
+  async function flushAssetsToInstall() {
+    if (assetsToInstall.length === 0) {
+      return;
+    }
+
+    await installKibanaSavedObjectsChunk({
+      logger,
+      savedObjectsImporter,
+      kibanaAssets: assetsToInstall,
+      refresh: 'wait_for',
+    });
+
+    assetsToInstall = [];
+  }
+
+  await kibanaAssetsArchiveIterator(async ({ assetType, asset }) => {
+    if (assetType !== KibanaAssetType.dashboard && assetType !== KibanaAssetType.visualization) {
+      return;
+    }
+
+    let contentChanged = false;
+    let assetStr = JSON.stringify(asset);
+
+    for (const replacedAsset of assetsWithDifferentIds) {
+      const originId = replacedAsset.originId!;
+      const newId = replacedAsset.id;
+
+      const regex = new RegExp(`${originId}`, 'g');
+      if (regex.test(assetStr)) {
+        contentChanged = true;
+        assetStr = assetStr.replace(regex, newId);
+      }
+    }
+
+    if (contentChanged) {
+      logger.debug(`Updating references in ${assetType} [id=${asset.id}]`);
+
+      const updatedAsset = JSON.parse(assetStr);
+      assetsToInstall.push(updatedAsset);
+
+      if (assetsToInstall.length >= MAX_ASSETS_TO_INSTALL_IN_PARALLEL) {
+        await flushAssetsToInstall();
+      }
+    }
+  });
+
+  await flushAssetsToInstall();
 }
