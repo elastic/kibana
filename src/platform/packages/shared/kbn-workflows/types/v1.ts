@@ -375,10 +375,12 @@ export interface ConnectorContractBase {
   outputSchema: z.ZodType;
   summary: string | null;
   description: string | null;
+  /** Documentation URL for this API endpoint */
+  documentation?: string;
+  examples?: ConnectorExamples;
 }
 
 export interface DynamicConnectorContract extends ConnectorContractBase {
-  connectorGroup: 'dynamic';
   /** Action type ID from Kibana actions plugin */
   actionTypeId: string;
   /** Available connector instances */
@@ -406,14 +408,10 @@ export interface EnhancedInternalConnectorContract extends InternalConnectorCont
 }
 
 export interface InternalConnectorContract extends ConnectorContractBase {
-  /** Whether this is an internal connector with hardcoded endpoint details */
-  connectorGroup: 'internal';
   /** HTTP method(s) for this API endpoint */
   methods: HttpMethod[];
   /** URL pattern(s) for this API endpoint */
   patterns: string[];
-  /** Documentation URL for this API endpoint */
-  documentation: string | null;
   /** Parameter type metadata for proper request building */
   parameterTypes: {
     headerParams: string[];
@@ -421,7 +419,6 @@ export interface InternalConnectorContract extends ConnectorContractBase {
     urlParams: string[];
     bodyParams: string[];
   };
-  examples?: ConnectorExamples;
 }
 
 export interface ConnectorExamples {
@@ -429,9 +426,7 @@ export interface ConnectorExamples {
   snippet?: string;
 }
 
-export interface StaticConnectorContract extends ConnectorContractBase {
-  connectorGroup: 'static';
-}
+export type StaticConnectorContract = ConnectorContractBase;
 
 export type ConnectorContractUnion =
   | DynamicConnectorContract

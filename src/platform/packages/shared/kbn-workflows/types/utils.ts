@@ -97,7 +97,7 @@ export const isTriggerType = (type: string): type is TriggerType =>
 
 export const isInternalConnector = (
   connector: ConnectorContractUnion
-): connector is InternalConnectorContract => 'isInternal' in connector;
+): connector is InternalConnectorContract => 'methods' in connector;
 
 export const isDynamicConnector = (
   connector: ConnectorContractUnion
