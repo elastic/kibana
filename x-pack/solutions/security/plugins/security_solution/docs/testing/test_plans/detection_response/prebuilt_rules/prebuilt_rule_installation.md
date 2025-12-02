@@ -326,7 +326,7 @@ Then the number of rules shown on the page should be less than <rows_per_page>
 Given multiple prebuilt rules available for installation
 When user opens the Rule Installation page
 Then the available prebuilt rules should be shown
-And the rules shouldn't be sorted by any field
+And the rules should be sorted by the "name" field in the ASC alphabetical order
 When user clicks on a header of an unsorted <field_name> column
 Then the available prebuilt rules should be sorted by <field_name> in the ASC <order_type>
 When user clicks on a header of an ASC sorted <field_name> column
@@ -337,11 +337,11 @@ Then the available prebuilt rules should be unsorted by <field_name>
 
 **Examples:**
 
-| `<field_name>`  | `<order_type>`                                         |
-| --------------- | ------------------------------------------------------ |
-| name            | alphabetical                                           |
-| risk score      | numeric (ASC: 0 -> 100, DESC: 100 -> 0)                |
-| severity        | semantic (ASC: Low -> Critical, DESC: Critical -> Low) |
+| `<field_name>`  | `<order_type>`                                            |
+| --------------- | --------------------------------------------------------- |
+| name            | alphabetical case-insensitive (ASC: A -> Z, DESC: Z -> A) |
+| risk score      | numeric (ASC: 0 -> 100, DESC: 100 -> 0)                   |
+| severity        | semantic (ASC: Low -> Critical, DESC: Critical -> Low)    |
 
 #### **Scenario: Navigating to the next page maintains the sorting order**
 
@@ -494,9 +494,11 @@ When user opens the Rule Installation page
 Then the available prebuilt rules should be shown
 When user sets a non-default number of rows per page
 And filters the available prebuilt rules by any tag
+And sorts the results by any field (for example, severity)
 And goes to the next page
 And then removes the tag filter
-Then the first page of unfiltered available prebuilt rules should be shown again
+Then the first page of unfiltered available prebuilt rules should be shown
+And the results should remain sorted by user-selected field
 And the total number of pages should be the same as before applying the filter
 And the number of rows per page should not reset to the default value
 ```
