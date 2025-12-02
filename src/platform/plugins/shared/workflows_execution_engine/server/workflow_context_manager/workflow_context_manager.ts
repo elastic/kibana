@@ -10,7 +10,7 @@
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { KQLSyntaxError } from '@kbn/es-query';
-import type { BaseExecutionError, StackFrame, StepContext, WorkflowContext } from '@kbn/workflows';
+import type { SerializedError, StackFrame, StepContext, WorkflowContext } from '@kbn/workflows';
 import { parseJsPropertyAccess } from '@kbn/workflows/common/utils';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { buildWorkflowContext } from './build_workflow_context';
@@ -320,7 +320,7 @@ export class WorkflowContextManager {
         runStepResult: {
           input: unknown;
           output: unknown;
-          error: BaseExecutionError | undefined;
+          error: SerializedError | undefined;
         };
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         stepState: Record<string, any> | undefined;

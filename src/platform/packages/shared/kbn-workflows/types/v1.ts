@@ -9,7 +9,7 @@
 
 import type { JsonValue } from '@kbn/utility-types';
 import { z } from '@kbn/zod';
-import type { BaseExecutionError, WorkflowYaml } from '../spec/schema';
+import type { SerializedError, WorkflowYaml } from '../spec/schema';
 import { WorkflowSchema } from '../spec/schema';
 
 export enum ExecutionStatus {
@@ -58,12 +58,6 @@ export interface StackFrame {
   stepId: string;
   /** Scope entries within this frame */
   nestedScopes: ScopeEntry[];
-}
-
-export interface SerializedError {
-  type: string;
-  message: string;
-  details?: Record<string, unknown>;
 }
 
 export interface EsWorkflowExecution {
@@ -165,7 +159,7 @@ export interface WorkflowExecutionDto {
   status: ExecutionStatus;
   isTestRun: boolean;
   startedAt: string;
-  error: BaseExecutionError | null;
+  error: SerializedError | null;
   finishedAt: string;
   workflowId?: string;
   workflowName?: string;
