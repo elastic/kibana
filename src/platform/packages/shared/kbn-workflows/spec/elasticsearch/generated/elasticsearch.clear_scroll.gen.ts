@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  clear_scroll1_request,
+  clear_scroll1_response,
+  clear_scroll_request,
+  clear_scroll_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  clear_scroll_request,
-  clear_scroll_response,
-  clear_scroll1_request,
-  clear_scroll1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const CLEAR_SCROLL_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.clear_scroll',
-  connectorGroup: 'internal',
   summary: `Clear a scrolling search`,
   description: `Clear a scrolling search.
 

@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  indices_shard_stores1_request,
+  indices_shard_stores1_response,
+  indices_shard_stores_request,
+  indices_shard_stores_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  indices_shard_stores_request,
-  indices_shard_stores_response,
-  indices_shard_stores1_request,
-  indices_shard_stores1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const INDICES_SHARD_STORES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.shard_stores',
-  connectorGroup: 'internal',
   summary: `Get index shard stores`,
   description: `Get index shard stores.
 

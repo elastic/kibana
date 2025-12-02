@@ -16,17 +16,16 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { exists_source_request } from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { exists_source_request } from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const EXISTS_SOURCE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.exists_source',
-  connectorGroup: 'internal',
   summary: `Check for a document source`,
   description: `Check for a document source.
 

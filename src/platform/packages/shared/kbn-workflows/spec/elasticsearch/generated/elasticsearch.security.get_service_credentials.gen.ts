@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   security_get_service_credentials_request,
   security_get_service_credentials_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const SECURITY_GET_SERVICE_CREDENTIALS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.get_service_credentials',
-  connectorGroup: 'internal',
   summary: `Get service account credentials`,
   description: `Get service account credentials.
 

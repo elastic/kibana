@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  license_post1_request,
+  license_post1_response,
+  license_post_request,
+  license_post_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  license_post_request,
-  license_post_response,
-  license_post1_request,
-  license_post1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const LICENSE_POST_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.license.post',
-  connectorGroup: 'internal',
   summary: `Update the license`,
   description: `Update the license.
 

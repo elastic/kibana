@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  search_mvt1_request,
+  search_mvt1_response,
+  search_mvt_request,
+  search_mvt_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  search_mvt_request,
-  search_mvt_response,
-  search_mvt1_request,
-  search_mvt1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const SEARCH_MVT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.search_mvt',
-  connectorGroup: 'internal',
   summary: `Search a vector tile`,
   description: `Search a vector tile.
 

@@ -16,12 +16,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
+
 import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const PROFILING_FLAMEGRAPH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.profiling.flamegraph',
-  connectorGroup: 'internal',
   summary: null,
   description: `Returns basic information about the status of Universal Profiling.
 

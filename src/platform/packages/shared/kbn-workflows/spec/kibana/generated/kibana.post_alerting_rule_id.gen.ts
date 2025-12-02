@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   post_alerting_rule_id_request,
   post_alerting_rule_id_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const POST_ALERTING_RULE_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_alerting_rule_id',
-  connectorGroup: 'internal',
   summary: `Create a rule`,
   description: `**Spaces method and path for this operation:**
 
@@ -40,7 +39,8 @@ export const POST_ALERTING_RULE_ID_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/alerting/rule/{id}'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-alerting-rule-id',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: ['id'],

@@ -16,19 +16,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { get_agent_builder_a2a_agentid_json_request } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { get_agent_builder_a2a_agentid_json_request } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const GET_AGENT_BUILDER_A2A_AGENTID_JSON_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_agent_builder_a2a_agentid_json',
-  connectorGroup: 'internal',
   summary: `Get A2A agent card`,
   description: `**Spaces method and path for this operation:**
 
@@ -39,7 +38,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get agent discovery metadata in JSON format. Use this endpoint to provide agent information for A2A protocol integration and discovery.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
   methods: ['GET'],
   patterns: ['/api/agent_builder/a2a/{agentId}.json'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-agent-builder-a2a-agentid.json',
   parameterTypes: {
     headerParams: [],
     pathParams: ['agentId'],

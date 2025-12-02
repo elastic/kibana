@@ -16,24 +16,23 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { get_status_request, get_status_response } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { get_status_request, get_status_response } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const GET_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_status',
-  connectorGroup: 'internal',
   summary: `Get Kibana's current status`,
   description: null,
   methods: ['GET'],
   patterns: ['/api/status'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-status',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

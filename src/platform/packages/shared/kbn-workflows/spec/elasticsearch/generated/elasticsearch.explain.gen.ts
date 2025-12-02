@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  explain1_request,
+  explain1_response,
+  explain_request,
+  explain_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  explain_request,
-  explain_response,
-  explain1_request,
-  explain1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const EXPLAIN_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.explain',
-  connectorGroup: 'internal',
   summary: `Explain a document match result`,
   description: `Explain a document match result.
 

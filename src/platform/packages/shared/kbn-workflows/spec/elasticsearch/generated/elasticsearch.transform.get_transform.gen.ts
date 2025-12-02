@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  transform_get_transform1_request,
+  transform_get_transform1_response,
+  transform_get_transform_request,
+  transform_get_transform_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  transform_get_transform_request,
-  transform_get_transform_response,
-  transform_get_transform1_request,
-  transform_get_transform1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const TRANSFORM_GET_TRANSFORM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.transform.get_transform',
-  connectorGroup: 'internal',
   summary: `Get transforms`,
   description: `Get transforms.
 

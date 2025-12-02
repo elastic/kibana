@@ -16,12 +16,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
+
 import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const INDICES_DELETE_SAMPLE_CONFIGURATION_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.delete_sample_configuration',
-  connectorGroup: 'internal',
   summary: null,
   description: `Delete sampling configuration.
 

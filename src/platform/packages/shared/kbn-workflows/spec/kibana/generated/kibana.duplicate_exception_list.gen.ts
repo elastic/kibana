@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   duplicate_exception_list_request,
   duplicate_exception_list_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const DUPLICATE_EXCEPTION_LIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DuplicateExceptionList',
-  connectorGroup: 'internal',
   summary: `Duplicate an exception list`,
   description: `**Spaces method and path for this operation:**
 
@@ -42,7 +41,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Duplicate an existing exception list.`,
   methods: ['POST'],
   patterns: ['/api/exception_lists/_duplicate'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-duplicateexceptionlist',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

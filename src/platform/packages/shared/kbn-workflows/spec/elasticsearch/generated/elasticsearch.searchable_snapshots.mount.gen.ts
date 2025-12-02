@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   searchable_snapshots_mount_request,
   searchable_snapshots_mount_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const SEARCHABLE_SNAPSHOTS_MOUNT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.searchable_snapshots.mount',
-  connectorGroup: 'internal',
   summary: `Mount a snapshot`,
   description: `Mount a snapshot.
 

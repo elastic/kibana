@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   create_runtime_field_default_request,
   create_runtime_field_default_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const CREATE_RUNTIME_FIELD_DEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createRuntimeFieldDefault',
-  connectorGroup: 'internal',
   summary: `Create a runtime field`,
   description: `**Spaces method and path for this operation:**
 
@@ -40,7 +39,8 @@ export const CREATE_RUNTIME_FIELD_DEFAULT_CONTRACT: InternalConnectorContract = 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/data_views/data_view/{viewId}/runtime_field'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-createruntimefielddefault',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: ['viewId'],

@@ -16,19 +16,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { set_alert_assignees_request } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { set_alert_assignees_request } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const SET_ALERT_ASSIGNEES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.SetAlertAssignees',
-  connectorGroup: 'internal',
   summary: `Assign and unassign users from detection alerts`,
   description: `**Spaces method and path for this operation:**
 
@@ -42,7 +41,7 @@ Assign users to detection alerts, and unassign them from alerts.
 `,
   methods: ['POST'],
   patterns: ['/api/detection_engine/signals/assignees'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-setalertassignees',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

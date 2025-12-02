@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   enrich_execute_policy_request,
   enrich_execute_policy_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const ENRICH_EXECUTE_POLICY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.enrich.execute_policy',
-  connectorGroup: 'internal',
   summary: `Run an enrich policy`,
   description: `Run an enrich policy.
 

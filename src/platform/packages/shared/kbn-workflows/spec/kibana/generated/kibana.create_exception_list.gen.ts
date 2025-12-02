@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   create_exception_list_request,
   create_exception_list_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const CREATE_EXCEPTION_LIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateExceptionList',
-  connectorGroup: 'internal',
   summary: `Create an exception list`,
   description: `**Spaces method and path for this operation:**
 
@@ -45,7 +44,8 @@ An exception list groups exception items and can be associated with detection ru
 `,
   methods: ['POST'],
   patterns: ['/api/exception_lists'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-createexceptionlist',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

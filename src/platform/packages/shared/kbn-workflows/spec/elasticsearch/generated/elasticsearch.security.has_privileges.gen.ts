@@ -16,26 +16,25 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
-  security_has_privileges_request,
-  security_has_privileges_response,
   security_has_privileges1_request,
   security_has_privileges1_response,
   security_has_privileges2_request,
   security_has_privileges2_response,
   security_has_privileges3_request,
   security_has_privileges3_response,
+  security_has_privileges_request,
+  security_has_privileges_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const SECURITY_HAS_PRIVILEGES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.has_privileges',
-  connectorGroup: 'internal',
   summary: `Check user privileges`,
   description: `Check user privileges.
 

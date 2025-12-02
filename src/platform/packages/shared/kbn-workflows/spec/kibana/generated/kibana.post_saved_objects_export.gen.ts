@@ -16,19 +16,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { post_saved_objects_export_request } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { post_saved_objects_export_request } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const POST_SAVED_OBJECTS_EXPORT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_saved_objects_export',
-  connectorGroup: 'internal',
   summary: `Export saved objects`,
   description: `**Spaces method and path for this operation:**
 
@@ -43,7 +42,8 @@ Exported saved objects are not backwards compatible and cannot be imported into 
 NOTE: The \`savedObjects.maxImportExportSize\` configuration setting limits the number of saved objects which may be exported.`,
   methods: ['POST'],
   patterns: ['/api/saved_objects/_export'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-saved-objects-export',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: [],

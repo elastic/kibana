@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   inference_chat_completion_unified_request,
   inference_chat_completion_unified_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const INFERENCE_CHAT_COMPLETION_UNIFIED_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.chat_completion_unified',
-  connectorGroup: 'internal',
   summary: `Perform chat completion inference on the service`,
   description: `Perform chat completion inference on the service.
 

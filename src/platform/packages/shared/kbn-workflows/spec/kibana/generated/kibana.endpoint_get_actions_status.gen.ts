@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   endpoint_get_actions_status_request,
   endpoint_get_actions_status_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const ENDPOINT_GET_ACTIONS_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointGetActionsStatus',
-  connectorGroup: 'internal',
   summary: `Get response actions status`,
   description: `**Spaces method and path for this operation:**
 
@@ -42,7 +41,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get the status of response actions for the specified agent IDs.`,
   methods: ['GET'],
   patterns: ['/api/endpoint/action_status'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-endpointgetactionsstatus',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

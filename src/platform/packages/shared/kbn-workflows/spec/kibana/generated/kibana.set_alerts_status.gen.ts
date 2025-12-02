@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   set_alerts_status_request,
   set_alerts_status_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const SET_ALERTS_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.SetAlertsStatus',
-  connectorGroup: 'internal',
   summary: `Set a detection alert status`,
   description: `**Spaces method and path for this operation:**
 
@@ -42,7 +41,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Set the status of one or more detection alerts.`,
   methods: ['POST'],
   patterns: ['/api/detection_engine/signals/status'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-setalertsstatus',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

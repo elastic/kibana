@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   query_rules_get_ruleset_request,
   query_rules_get_ruleset_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const QUERY_RULES_GET_RULESET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.query_rules.get_ruleset',
-  connectorGroup: 'internal',
   summary: `Get a query ruleset`,
   description: `Get a query ruleset.
 

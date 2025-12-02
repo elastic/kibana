@@ -16,19 +16,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { cancel_action_request, cancel_action_response } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { cancel_action_request, cancel_action_response } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const CANCEL_ACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CancelAction',
-  connectorGroup: 'internal',
   summary: `Cancel a response action`,
   description: `**Spaces method and path for this operation:**
 
@@ -39,7 +38,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Cancel a running or pending response action (Applies only to some agent types).`,
   methods: ['POST'],
   patterns: ['/api/endpoint/action/cancel'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-cancelaction',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

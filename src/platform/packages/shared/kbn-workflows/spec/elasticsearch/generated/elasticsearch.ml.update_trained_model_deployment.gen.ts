@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   ml_update_trained_model_deployment_request,
   ml_update_trained_model_deployment_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const ML_UPDATE_TRAINED_MODEL_DEPLOYMENT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.update_trained_model_deployment',
-  connectorGroup: 'internal',
   summary: `Update a trained model deployment`,
   description: `Update a trained model deployment.
 

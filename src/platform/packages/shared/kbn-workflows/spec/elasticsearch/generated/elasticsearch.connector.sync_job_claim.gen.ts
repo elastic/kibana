@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   connector_sync_job_claim_request,
   connector_sync_job_claim_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const CONNECTOR_SYNC_JOB_CLAIM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.sync_job_claim',
-  connectorGroup: 'internal',
   summary: `Claim a connector sync job`,
   description: `Claim a connector sync job.
 

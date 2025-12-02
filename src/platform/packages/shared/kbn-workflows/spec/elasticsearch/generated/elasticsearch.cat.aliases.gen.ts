@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  cat_aliases1_request,
+  cat_aliases1_response,
+  cat_aliases_request,
+  cat_aliases_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  cat_aliases_request,
-  cat_aliases_response,
-  cat_aliases1_request,
-  cat_aliases1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const CAT_ALIASES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.aliases',
-  connectorGroup: 'internal',
   summary: `Get aliases`,
   description: `Get aliases.
 

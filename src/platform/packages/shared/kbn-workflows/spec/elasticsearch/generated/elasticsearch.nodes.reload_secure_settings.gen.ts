@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  nodes_reload_secure_settings1_request,
+  nodes_reload_secure_settings1_response,
+  nodes_reload_secure_settings_request,
+  nodes_reload_secure_settings_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  nodes_reload_secure_settings_request,
-  nodes_reload_secure_settings_response,
-  nodes_reload_secure_settings1_request,
-  nodes_reload_secure_settings1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const NODES_RELOAD_SECURE_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.nodes.reload_secure_settings',
-  connectorGroup: 'internal',
   summary: `Reload the keystore on nodes in the cluster`,
   description: `Reload the keystore on nodes in the cluster.
 

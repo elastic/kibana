@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   cluster_put_settings_request,
   cluster_put_settings_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const CLUSTER_PUT_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cluster.put_settings',
-  connectorGroup: 'internal',
   summary: `Update the cluster settings`,
   description: `Update the cluster settings.
 

@@ -16,19 +16,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { delete_note_request } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { delete_note_request } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const DELETE_NOTE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteNote',
-  connectorGroup: 'internal',
   summary: `Delete a note`,
   description: `**Spaces method and path for this operation:**
 
@@ -39,7 +38,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Delete a note from a Timeline using the note ID.`,
   methods: ['DELETE'],
   patterns: ['/api/note'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-deletenote',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   resolve_timeline_request,
   resolve_timeline_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const RESOLVE_TIMELINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ResolveTimeline',
-  connectorGroup: 'internal',
   summary: `Get an existing saved Timeline or Timeline template`,
   description: `**Spaces method and path for this operation:**
 
@@ -40,7 +39,7 @@ export const RESOLVE_TIMELINE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['GET'],
   patterns: ['/api/timeline/resolve'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-resolvetimeline',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

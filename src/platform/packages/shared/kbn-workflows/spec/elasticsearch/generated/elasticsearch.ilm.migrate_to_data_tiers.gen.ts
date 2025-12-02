@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   ilm_migrate_to_data_tiers_request,
   ilm_migrate_to_data_tiers_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const ILM_MIGRATE_TO_DATA_TIERS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ilm.migrate_to_data_tiers',
-  connectorGroup: 'internal',
   summary: `Migrate to data tiers routing`,
   description: `Migrate to data tiers routing.
 

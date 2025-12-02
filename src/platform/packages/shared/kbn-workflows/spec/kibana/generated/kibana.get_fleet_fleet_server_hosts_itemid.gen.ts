@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   get_fleet_fleet_server_hosts_itemid_request,
   get_fleet_fleet_server_hosts_itemid_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const GET_FLEET_FLEET_SERVER_HOSTS_ITEMID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_fleet_server_hosts_itemid',
-  connectorGroup: 'internal',
   summary: `Get a Fleet Server host`,
   description: `**Spaces method and path for this operation:**
 
@@ -42,7 +41,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get a Fleet Server host by ID.<br/><br/>[Required authorization] Route required privileges: fleet-settings-read.`,
   methods: ['GET'],
   patterns: ['/api/fleet/fleet_server_hosts/{itemId}'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-fleet-server-hosts-itemid',
   parameterTypes: {
     headerParams: [],
     pathParams: ['itemId'],

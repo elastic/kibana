@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  security_create_api_key1_request,
+  security_create_api_key1_response,
+  security_create_api_key_request,
+  security_create_api_key_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  security_create_api_key_request,
-  security_create_api_key_response,
-  security_create_api_key1_request,
-  security_create_api_key1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const SECURITY_CREATE_API_KEY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.create_api_key',
-  connectorGroup: 'internal',
   summary: `Create an API key`,
   description: `Create an API key.
 

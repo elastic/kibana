@@ -16,19 +16,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { delete_private_location_request } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { delete_private_location_request } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const DELETE_PRIVATE_LOCATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_private_location',
-  connectorGroup: 'internal',
   summary: `Delete a private location`,
   description: `**Spaces method and path for this operation:**
 
@@ -42,7 +41,8 @@ A location cannot be deleted if it has associated monitors in use. You must dele
 `,
   methods: ['DELETE'],
   patterns: ['/api/synthetics/private_locations/{id}'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-private-location',
   parameterTypes: {
     headerParams: [],
     pathParams: ['id'],

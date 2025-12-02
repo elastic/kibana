@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   find_list_items_request,
   find_list_items_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const FIND_LIST_ITEMS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindListItems',
-  connectorGroup: 'internal',
   summary: `Get value list items`,
   description: `**Spaces method and path for this operation:**
 
@@ -42,7 +41,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get all value list items in the specified list.`,
   methods: ['GET'],
   patterns: ['/api/lists/items/_find'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-findlistitems',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

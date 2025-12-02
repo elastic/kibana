@@ -16,26 +16,25 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { post_url_request, post_url_response } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { post_url_request, post_url_response } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const POST_URL_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_url',
-  connectorGroup: 'internal',
   summary: `Create a short URL`,
   description: `Kibana URLs may be long and cumbersome, short URLs are much easier to remember and share.
 Short URLs are created by specifying the locator ID and locator parameters. When a short URL is resolved, the locator ID and locator parameters are used to redirect user to the right Kibana page.
 `,
   methods: ['POST'],
   patterns: ['/api/short_url'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-url',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   indices_field_usage_stats_request,
   indices_field_usage_stats_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const INDICES_FIELD_USAGE_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.field_usage_stats',
-  connectorGroup: 'internal',
   summary: `Get field usage stats`,
   description: `Get field usage stats.
 

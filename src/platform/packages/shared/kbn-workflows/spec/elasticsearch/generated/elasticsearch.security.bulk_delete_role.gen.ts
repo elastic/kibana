@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   security_bulk_delete_role_request,
   security_bulk_delete_role_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const SECURITY_BULK_DELETE_ROLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.bulk_delete_role',
-  connectorGroup: 'internal',
   summary: `Bulk delete roles`,
   description: `Bulk delete roles.
 

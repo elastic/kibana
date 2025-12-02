@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   get_alerting_health_request,
   get_alerting_health_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const GET_ALERTING_HEALTH_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getAlertingHealth',
-  connectorGroup: 'internal',
   summary: `Get the alerting framework health`,
   description: `**Spaces method and path for this operation:**
 
@@ -43,7 +42,7 @@ You must have \`read\` privileges for the **Management > Stack Rules** feature o
 `,
   methods: ['GET'],
   patterns: ['/api/alerting/_health'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-getalertinghealth',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

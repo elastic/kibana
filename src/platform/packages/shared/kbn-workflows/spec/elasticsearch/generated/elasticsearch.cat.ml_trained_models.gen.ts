@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  cat_ml_trained_models1_request,
+  cat_ml_trained_models1_response,
+  cat_ml_trained_models_request,
+  cat_ml_trained_models_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  cat_ml_trained_models_request,
-  cat_ml_trained_models_response,
-  cat_ml_trained_models1_request,
-  cat_ml_trained_models1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const CAT_ML_TRAINED_MODELS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.ml_trained_models',
-  connectorGroup: 'internal',
   summary: `Get trained models`,
   description: `Get trained models.
 

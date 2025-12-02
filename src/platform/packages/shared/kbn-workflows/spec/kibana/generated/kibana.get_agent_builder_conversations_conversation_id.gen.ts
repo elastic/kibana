@@ -16,19 +16,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { get_agent_builder_conversations_conversation_id_request } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { get_agent_builder_conversations_conversation_id_request } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const GET_AGENT_BUILDER_CONVERSATIONS_CONVERSATION_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_agent_builder_conversations_conversation_id',
-  connectorGroup: 'internal',
   summary: `Get conversation by ID`,
   description: `**Spaces method and path for this operation:**
 
@@ -39,7 +38,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get a specific conversation by ID. Use this endpoint to retrieve the complete conversation history including all messages and metadata.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
   methods: ['GET'],
   patterns: ['/api/agent_builder/conversations/{conversation_id}'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-agent-builder-conversations-conversation-id',
   parameterTypes: {
     headerParams: [],
     pathParams: ['conversation_id'],

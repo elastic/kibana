@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   delete_synthetic_monitors_request,
   delete_synthetic_monitors_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const DELETE_SYNTHETIC_MONITORS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_synthetic_monitors',
-  connectorGroup: 'internal',
   summary: `Delete monitors`,
   description: `**Spaces method and path for this operation:**
 
@@ -43,7 +42,8 @@ Delete multiple monitors by sending a list of config IDs.
 `,
   methods: ['POST'],
   patterns: ['/api/synthetics/monitors/_bulk_delete'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-synthetic-monitors',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

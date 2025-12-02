@@ -16,12 +16,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
+
 import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const FLEET_DELETE_SECRET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.fleet.delete_secret',
-  connectorGroup: 'internal',
   summary: null,
   description: `Deletes a secret stored by Fleet.
 

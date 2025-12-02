@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   query_rules_delete_ruleset_request,
   query_rules_delete_ruleset_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const QUERY_RULES_DELETE_RULESET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.query_rules.delete_ruleset',
-  connectorGroup: 'internal',
   summary: `Delete a query ruleset`,
   description: `Delete a query ruleset.
 

@@ -16,26 +16,25 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
-  search_shards_request,
-  search_shards_response,
   search_shards1_request,
   search_shards1_response,
   search_shards2_request,
   search_shards2_response,
   search_shards3_request,
   search_shards3_response,
+  search_shards_request,
+  search_shards_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const SEARCH_SHARDS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.search_shards',
-  connectorGroup: 'internal',
   summary: `Get the search shards`,
   description: `Get the search shards.
 

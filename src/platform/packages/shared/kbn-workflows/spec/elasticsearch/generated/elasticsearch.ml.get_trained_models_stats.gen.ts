@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  ml_get_trained_models_stats1_request,
+  ml_get_trained_models_stats1_response,
+  ml_get_trained_models_stats_request,
+  ml_get_trained_models_stats_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  ml_get_trained_models_stats_request,
-  ml_get_trained_models_stats_response,
-  ml_get_trained_models_stats1_request,
-  ml_get_trained_models_stats1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const ML_GET_TRAINED_MODELS_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_trained_models_stats',
-  connectorGroup: 'internal',
   summary: `Get trained models usage info`,
   description: `Get trained models usage info.
 

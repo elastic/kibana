@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   slm_execute_retention_request,
   slm_execute_retention_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const SLM_EXECUTE_RETENTION_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.slm.execute_retention',
-  connectorGroup: 'internal',
   summary: `Run a retention policy`,
   description: `Run a retention policy.
 

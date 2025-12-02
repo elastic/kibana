@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   save_apm_server_schema_request,
   save_apm_server_schema_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const SAVE_APM_SERVER_SCHEMA_CONTRACT: InternalConnectorContract = {
   type: 'kibana.saveApmServerSchema',
-  connectorGroup: 'internal',
   summary: `Save APM server schema`,
   description: `**Spaces method and path for this operation:**
 
@@ -40,7 +39,8 @@ export const SAVE_APM_SERVER_SCHEMA_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/apm/fleet/apm_server_schema'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-saveapmserverschema',
   parameterTypes: {
     headerParams: ['elastic-api-version', 'kbn-xsrf'],
     pathParams: [],

@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   security_clear_api_key_cache_request,
   security_clear_api_key_cache_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const SECURITY_CLEAR_API_KEY_CACHE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.clear_api_key_cache',
-  connectorGroup: 'internal',
   summary: `Clear the API key cache`,
   description: `Clear the API key cache.
 

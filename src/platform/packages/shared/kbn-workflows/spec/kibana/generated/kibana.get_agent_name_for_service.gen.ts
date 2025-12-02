@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   get_agent_name_for_service_request,
   get_agent_name_for_service_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const GET_AGENT_NAME_FOR_SERVICE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getAgentNameForService',
-  connectorGroup: 'internal',
   summary: `Get agent name for service`,
   description: `**Spaces method and path for this operation:**
 
@@ -42,7 +41,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Retrieve \`agentName\` for a service.`,
   methods: ['GET'],
   patterns: ['/api/apm/settings/agent-configuration/agent_name'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-getagentnameforservice',
   parameterTypes: {
     headerParams: ['elastic-api-version'],
     pathParams: [],

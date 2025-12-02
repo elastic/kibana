@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  cat_count1_request,
+  cat_count1_response,
+  cat_count_request,
+  cat_count_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  cat_count_request,
-  cat_count_response,
-  cat_count1_request,
-  cat_count1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const CAT_COUNT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.count',
-  connectorGroup: 'internal',
   summary: `Get a document count`,
   description: `Get a document count.
 

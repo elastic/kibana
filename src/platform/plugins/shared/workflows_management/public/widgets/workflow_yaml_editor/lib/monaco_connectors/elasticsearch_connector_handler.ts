@@ -10,11 +10,13 @@
 import type { YAMLMap } from 'yaml';
 import { isMap, isScalar } from 'yaml';
 import type { HttpSetup, NotificationsStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import type { monaco } from '@kbn/monaco';
 import type { InternalConnectorContract } from '@kbn/workflows';
 import { isInternalConnector } from '@kbn/workflows';
 import { BaseMonacoConnectorHandler } from './base_monaco_connector_handler';
 import { getAllConnectors } from '../../../../../common/schema';
+import type { ElasticsearchRequestInfo } from '../elasticsearch_step_utils';
 import { getElasticsearchRequestInfo } from '../elasticsearch_step_utils';
 import type { ConnectorExamples, HoverContext } from '../monaco_providers/provider_interfaces';
 
@@ -63,7 +65,7 @@ export class ElasticsearchMonacoConnectorHandler extends BaseMonacoConnectorHand
       const content = [
         `**Endpoint**: \`${requestInfo.method} ${requestInfo.url}\``,
         '',
-        this.getDescription(connector),
+        this.getDescription(connector, requestInfo),
         '',
         documentationUrl
           ? `<span style="text-shadow: 0 0 6px rgba(255,165,0,0.6); opacity: 0.8;">📖</span> **Documentation** \n\n [${documentationUrl}](${documentationUrl}) (Opens in new tab)`
@@ -205,15 +207,24 @@ export class ElasticsearchMonacoConnectorHandler extends BaseMonacoConnectorHand
     if (!connector || !isInternalConnector(connector)) {
       return null;
     }
-    return connector as InternalConnectorContract;
+    return connector;
   }
 
-  private getDescription(connector: InternalConnectorContract): string | null {
+  private getDescription(
+    connector: InternalConnectorContract,
+    requestInfo: ElasticsearchRequestInfo
+  ): string | null {
     if (connector.description) {
       // Remove "Documentation: " from the description as we add it manually to hover content
       return connector.description.replace(/Documentation: .*$/, '');
     }
-    return null;
+    return i18n.translate('xpack.workflows.monaco.elasticsearch.connector.fallbackDescription', {
+      defaultMessage: 'Execute {{method}} request to {{path}}',
+      values: {
+        method: requestInfo.method,
+        path: requestInfo.url,
+      },
+    });
   }
 
   /**

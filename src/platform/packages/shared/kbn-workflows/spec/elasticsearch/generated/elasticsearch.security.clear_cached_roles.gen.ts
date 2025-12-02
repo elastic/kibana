@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   security_clear_cached_roles_request,
   security_clear_cached_roles_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const SECURITY_CLEAR_CACHED_ROLES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.clear_cached_roles',
-  connectorGroup: 'internal',
   summary: `Clear the roles cache`,
   description: `Clear the roles cache.
 

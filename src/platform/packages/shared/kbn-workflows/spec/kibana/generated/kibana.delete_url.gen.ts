@@ -16,25 +16,24 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { delete_url_request } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { delete_url_request } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const DELETE_URL_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_url',
-  connectorGroup: 'internal',
   summary: `Delete a short URL`,
   description: `Delete a Kibana short URL.
 `,
   methods: ['DELETE'],
   patterns: ['/api/short_url/{id}'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-url',
   parameterTypes: {
     headerParams: [],
     pathParams: ['id'],

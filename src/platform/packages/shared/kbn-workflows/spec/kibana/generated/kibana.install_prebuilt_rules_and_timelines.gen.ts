@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   install_prebuilt_rules_and_timelines_request,
   install_prebuilt_rules_and_timelines_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const INSTALL_PREBUILT_RULES_AND_TIMELINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.InstallPrebuiltRulesAndTimelines',
-  connectorGroup: 'internal',
   summary: `Install prebuilt detection rules and Timelines`,
   description: `**Spaces method and path for this operation:**
 
@@ -53,7 +52,8 @@ providing you with the most current and effective threat detection capabilities.
 `,
   methods: ['PUT'],
   patterns: ['/api/detection_engine/rules/prepackaged'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-installprebuiltrulesandtimelines',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

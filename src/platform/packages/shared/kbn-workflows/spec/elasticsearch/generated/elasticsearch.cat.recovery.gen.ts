@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  cat_recovery1_request,
+  cat_recovery1_response,
+  cat_recovery_request,
+  cat_recovery_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  cat_recovery_request,
-  cat_recovery_response,
-  cat_recovery1_request,
-  cat_recovery1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const CAT_RECOVERY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.recovery',
-  connectorGroup: 'internal',
   summary: `Get shard recovery information`,
   description: `Get shard recovery information.
 

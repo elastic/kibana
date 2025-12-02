@@ -16,24 +16,24 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { post_spaces_copy_saved_objects_request } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { post_spaces_copy_saved_objects_request } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const POST_SPACES_COPY_SAVED_OBJECTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_spaces_copy_saved_objects',
-  connectorGroup: 'internal',
   summary: `Copy saved objects between spaces`,
   description: `It also allows you to automatically copy related objects, so when you copy a dashboard, this can automatically copy over the associated visualizations, data views, and saved Discover sessions, as required. You can request to overwrite any objects that already exist in the target space if they share an identifier or you can use the resolve copy saved objects conflicts API to do this on a per-object basis.<br/><br/>[Required authorization] Route required privileges: copySavedObjectsToSpaces.`,
   methods: ['POST'],
   patterns: ['/api/spaces/_copy_saved_objects'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-spaces-copy-saved-objects',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: [],

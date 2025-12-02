@@ -39,6 +39,7 @@ import {
   StaticImports,
   toSnakeCase,
 } from '../shared';
+import type { OperationObjectWithOperationId } from '../shared/types';
 
 export async function run() {
   cleanGeneratedFolder();
@@ -225,7 +226,7 @@ function generateContractMetasFromPath(
       continue;
     }
     const method = key.toLowerCase();
-    const operation = pathItem[method as keyof typeof pathItem] as OpenAPIV3.OperationObject;
+    const operation = pathItem[method as keyof typeof pathItem] as OperationObjectWithOperationId;
     const operationId = operation.operationId;
     if (!operationId) {
       // eslint-disable-next-line no-continue
@@ -244,14 +245,12 @@ function generateContractMetasFromPath(
     const outputSchemaString = generateOutputSchemaString([operation], openApiDocument);
 
     contractMetas.push({
-      connectorGroup: 'internal',
       type,
       summary,
       description,
       methods: [method.toUpperCase() as HttpMethod],
       patterns: [path],
-      // Kibana OpenAPI paths has doc links in the description, so we don't extract it as a separate field
-      documentation: null,
+      documentation: getDocumentationUrl(operation),
       parameterTypes,
 
       fileName: `kibana.${toSnakeCase(camelToSnake(operationId))}.gen.ts`,
@@ -264,4 +263,15 @@ function generateContractMetasFromPath(
     });
   }
   return contractMetas;
+}
+
+function getDocumentationUrl(
+  operation: OpenAPIV3.OperationObject & { operationId: string }
+): string {
+  if (operation.externalDocs && operation.externalDocs.url) {
+    return operation.externalDocs.url;
+  }
+  return `https://www.elastic.co/docs/api/doc/kibana/operation/operation-${operation.operationId
+    .toLowerCase()
+    .replace(/\s/g, '')}`;
 }

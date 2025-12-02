@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  migration_deprecations1_request,
+  migration_deprecations1_response,
+  migration_deprecations_request,
+  migration_deprecations_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  migration_deprecations_request,
-  migration_deprecations_response,
-  migration_deprecations1_request,
-  migration_deprecations1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const MIGRATION_DEPRECATIONS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.migration.deprecations',
-  connectorGroup: 'internal',
   summary: `Get deprecation information`,
   description: `Get deprecation information.
 

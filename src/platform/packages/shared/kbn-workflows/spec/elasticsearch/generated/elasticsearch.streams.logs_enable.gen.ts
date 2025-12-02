@@ -16,12 +16,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
+
 import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const STREAMS_LOGS_ENABLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.streams.logs_enable',
-  connectorGroup: 'internal',
   summary: null,
   description: `Enable logs stream.
 

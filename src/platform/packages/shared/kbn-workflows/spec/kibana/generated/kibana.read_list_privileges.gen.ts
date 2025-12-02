@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   read_list_privileges_request,
   read_list_privileges_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const READ_LIST_PRIVILEGES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadListPrivileges',
-  connectorGroup: 'internal',
   summary: `Get value list privileges`,
   description: `**Spaces method and path for this operation:**
 
@@ -40,7 +39,8 @@ export const READ_LIST_PRIVILEGES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['GET'],
   patterns: ['/api/lists/privileges'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-readlistprivileges',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

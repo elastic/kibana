@@ -16,19 +16,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { update_list_request, update_list_response } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { update_list_request, update_list_response } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const UPDATE_LIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpdateList',
-  connectorGroup: 'internal',
   summary: `Update a value list`,
   description: `**Spaces method and path for this operation:**
 
@@ -42,7 +41,7 @@ Update a value list using the list \`id\`. The original list is replaced, and al
 `,
   methods: ['PUT'],
   patterns: ['/api/lists'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-updatelist',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

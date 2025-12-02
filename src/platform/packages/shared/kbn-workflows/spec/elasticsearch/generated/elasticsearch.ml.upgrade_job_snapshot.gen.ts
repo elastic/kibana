@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   ml_upgrade_job_snapshot_request,
   ml_upgrade_job_snapshot_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const ML_UPGRADE_JOB_SNAPSHOT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.upgrade_job_snapshot',
-  connectorGroup: 'internal',
   summary: `Upgrade a snapshot`,
   description: `Upgrade a snapshot.
 

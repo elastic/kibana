@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   delete_fleet_enrollment_api_keys_keyid_request,
   delete_fleet_enrollment_api_keys_keyid_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const DELETE_FLEET_ENROLLMENT_API_KEYS_KEYID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_fleet_enrollment_api_keys_keyid',
-  connectorGroup: 'internal',
   summary: `Revoke an enrollment API key`,
   description: `**Spaces method and path for this operation:**
 
@@ -42,7 +41,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Revoke an enrollment API key by ID by marking it as inactive.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.`,
   methods: ['DELETE'],
   patterns: ['/api/fleet/enrollment_api_keys/{keyId}'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-fleet-enrollment-api-keys-keyid',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: ['keyId'],

@@ -16,26 +16,25 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
-  mget_request,
-  mget_response,
   mget1_request,
   mget1_response,
   mget2_request,
   mget2_response,
   mget3_request,
   mget3_response,
+  mget_request,
+  mget_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const MGET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.mget',
-  connectorGroup: 'internal',
   summary: `Get multiple documents`,
   description: `Get multiple documents.
 

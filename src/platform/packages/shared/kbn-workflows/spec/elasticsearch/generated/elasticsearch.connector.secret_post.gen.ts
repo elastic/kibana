@@ -16,12 +16,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
+
 import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const CONNECTOR_SECRET_POST_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.secret_post',
-  connectorGroup: 'internal',
   summary: null,
   description: `Creates a secret for a Connector.
 

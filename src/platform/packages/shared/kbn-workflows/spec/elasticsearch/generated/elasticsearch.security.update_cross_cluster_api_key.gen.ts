@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   security_update_cross_cluster_api_key_request,
   security_update_cross_cluster_api_key_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const SECURITY_UPDATE_CROSS_CLUSTER_API_KEY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.update_cross_cluster_api_key',
-  connectorGroup: 'internal',
   summary: `Update a cross-cluster API key`,
   description: `Update a cross-cluster API key.
 

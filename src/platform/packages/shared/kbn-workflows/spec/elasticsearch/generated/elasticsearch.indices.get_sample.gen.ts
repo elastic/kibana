@@ -16,12 +16,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
+
 import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const INDICES_GET_SAMPLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.get_sample',
-  connectorGroup: 'internal',
   summary: null,
   description: `Request for a random sample of raw documents ingested into the given index or data stream.
 

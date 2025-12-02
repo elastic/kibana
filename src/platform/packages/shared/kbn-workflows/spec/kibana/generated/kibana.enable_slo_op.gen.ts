@@ -16,25 +16,24 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { enable_slo_op_request } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { enable_slo_op_request } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const ENABLE_SLO_OP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.enableSloOp',
-  connectorGroup: 'internal',
   summary: `Enable an SLO`,
   description: `You must have the \`write\` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
 `,
   methods: ['POST'],
   patterns: ['/s/{spaceId}/api/observability/slos/{sloId}/enable'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-enablesloop',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: ['spaceId', 'sloId'],

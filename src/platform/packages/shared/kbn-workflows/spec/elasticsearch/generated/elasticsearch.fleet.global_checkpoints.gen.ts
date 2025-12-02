@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   fleet_global_checkpoints_request,
   fleet_global_checkpoints_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const FLEET_GLOBAL_CHECKPOINTS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.fleet.global_checkpoints',
-  connectorGroup: 'internal',
   summary: `Get global checkpoints`,
   description: `Get global checkpoints.
 

@@ -16,26 +16,25 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
-  indices_flush_request,
-  indices_flush_response,
   indices_flush1_request,
   indices_flush1_response,
   indices_flush2_request,
   indices_flush2_response,
   indices_flush3_request,
   indices_flush3_response,
+  indices_flush_request,
+  indices_flush_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const INDICES_FLUSH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.flush',
-  connectorGroup: 'internal',
   summary: `Flush data streams or indices`,
   description: `Flush data streams or indices.
 

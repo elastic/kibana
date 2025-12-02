@@ -16,26 +16,25 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
-  indices_refresh_request,
-  indices_refresh_response,
   indices_refresh1_request,
   indices_refresh1_response,
   indices_refresh2_request,
   indices_refresh2_response,
   indices_refresh3_request,
   indices_refresh3_response,
+  indices_refresh_request,
+  indices_refresh_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const INDICES_REFRESH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.refresh',
-  connectorGroup: 'internal',
   summary: `Refresh an index`,
   description: `Refresh an index.
 

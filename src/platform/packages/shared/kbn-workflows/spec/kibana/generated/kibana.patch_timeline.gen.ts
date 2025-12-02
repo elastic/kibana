@@ -16,19 +16,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { patch_timeline_request, patch_timeline_response } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { patch_timeline_request, patch_timeline_response } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const PATCH_TIMELINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PatchTimeline',
-  connectorGroup: 'internal',
   summary: `Update a Timeline`,
   description: `**Spaces method and path for this operation:**
 
@@ -39,7 +38,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Update an existing Timeline. You can update the title, description, date range, pinned events, pinned queries, and/or pinned saved queries of an existing Timeline.`,
   methods: ['PATCH'],
   patterns: ['/api/timeline'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-patchtimeline',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

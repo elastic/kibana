@@ -16,19 +16,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { read_tags_request, read_tags_response } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { read_tags_request, read_tags_response } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const READ_TAGS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadTags',
-  connectorGroup: 'internal',
   summary: `List all detection rule tags`,
   description: `**Spaces method and path for this operation:**
 
@@ -39,7 +38,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 List all unique tags from all detection rules.`,
   methods: ['GET'],
   patterns: ['/api/detection_engine/tags'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-readtags',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

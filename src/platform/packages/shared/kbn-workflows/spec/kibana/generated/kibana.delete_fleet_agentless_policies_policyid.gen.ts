@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   delete_fleet_agentless_policies_policyid_request,
   delete_fleet_agentless_policies_policyid_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const DELETE_FLEET_AGENTLESS_POLICIES_POLICYID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_fleet_agentless_policies_policyid',
-  connectorGroup: 'internal',
   summary: `Delete an agentless policy`,
   description: `**Spaces method and path for this operation:**
 
@@ -42,7 +41,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Delete an agentless policy`,
   methods: ['DELETE'],
   patterns: ['/api/fleet/agentless_policies/{policyId}'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-fleet-agentless-policies-policyid',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: ['policyId'],

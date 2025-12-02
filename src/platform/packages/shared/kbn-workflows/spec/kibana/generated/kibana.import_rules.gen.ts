@@ -16,19 +16,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { import_rules_request, import_rules_response } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { import_rules_request, import_rules_response } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const IMPORT_RULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ImportRules',
-  connectorGroup: 'internal',
   summary: `Import detection rules`,
   description: `**Spaces method and path for this operation:**
 
@@ -55,7 +54,7 @@ Import detection rules from an \`.ndjson\` file, including actions and exception
 `,
   methods: ['POST'],
   patterns: ['/api/detection_engine/rules/_import'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-importrules',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   list_priv_mon_users_request,
   list_priv_mon_users_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const LIST_PRIV_MON_USERS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ListPrivMonUsers',
-  connectorGroup: 'internal',
   summary: `List all monitored users`,
   description: `**Spaces method and path for this operation:**
 
@@ -40,7 +39,7 @@ export const LIST_PRIV_MON_USERS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['GET'],
   patterns: ['/api/entity_analytics/monitoring/users/list'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-listprivmonusers',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

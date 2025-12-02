@@ -16,12 +16,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
+
 import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const CAPABILITIES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.capabilities',
-  connectorGroup: 'internal',
   summary: null,
   description: `Checks if the specified combination of method, API, parameters, and arbitrary capabilities are supported.
 

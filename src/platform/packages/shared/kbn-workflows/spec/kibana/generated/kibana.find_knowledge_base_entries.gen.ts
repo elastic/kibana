@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   find_knowledge_base_entries_request,
   find_knowledge_base_entries_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const FIND_KNOWLEDGE_BASE_ENTRIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindKnowledgeBaseEntries',
-  connectorGroup: 'internal',
   summary: `Finds Knowledge Base Entries that match the given query.`,
   description: `**Spaces method and path for this operation:**
 
@@ -42,7 +41,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Finds Knowledge Base Entries that match the given query.`,
   methods: ['GET'],
   patterns: ['/api/security_ai_assistant/knowledge_base/entries/_find'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-findknowledgebaseentries',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

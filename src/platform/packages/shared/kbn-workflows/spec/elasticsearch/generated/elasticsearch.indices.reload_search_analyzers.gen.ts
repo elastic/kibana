@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  indices_reload_search_analyzers1_request,
+  indices_reload_search_analyzers1_response,
+  indices_reload_search_analyzers_request,
+  indices_reload_search_analyzers_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  indices_reload_search_analyzers_request,
-  indices_reload_search_analyzers_response,
-  indices_reload_search_analyzers1_request,
-  indices_reload_search_analyzers1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const INDICES_RELOAD_SEARCH_ANALYZERS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.reload_search_analyzers',
-  connectorGroup: 'internal',
   summary: `Reload search analyzers`,
   description: `Reload search analyzers.
 

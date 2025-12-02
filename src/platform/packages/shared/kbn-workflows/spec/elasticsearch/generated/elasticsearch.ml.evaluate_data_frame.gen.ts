@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   ml_evaluate_data_frame_request,
   ml_evaluate_data_frame_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const ML_EVALUATE_DATA_FRAME_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.evaluate_data_frame',
-  connectorGroup: 'internal',
   summary: `Evaluate data frame analytics`,
   description: `Evaluate data frame analytics.
 

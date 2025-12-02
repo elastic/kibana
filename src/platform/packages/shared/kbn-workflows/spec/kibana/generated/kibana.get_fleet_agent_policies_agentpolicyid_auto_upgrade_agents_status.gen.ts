@@ -16,15 +16,15 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   get_fleet_agent_policies_agentpolicyid_auto_upgrade_agents_status_request,
   get_fleet_agent_policies_agentpolicyid_auto_upgrade_agents_status_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
@@ -32,7 +32,6 @@ import { FetcherConfigSchema } from '../../schema';
 export const GET_FLEET_AGENT_POLICIES_AGENTPOLICYID_AUTO_UPGRADE_AGENTS_STATUS_CONTRACT: InternalConnectorContract =
   {
     type: 'kibana.get_fleet_agent_policies_agentpolicyid_auto_upgrade_agents_status',
-    connectorGroup: 'internal',
     summary: `Get auto upgrade agent status`,
     description: `**Spaces method and path for this operation:**
 
@@ -43,7 +42,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get auto upgrade agent status<br/><br/>[Required authorization] Route required privileges: fleet-agents-read.`,
     methods: ['GET'],
     patterns: ['/api/fleet/agent_policies/{agentPolicyId}/auto_upgrade_agents_status'],
-    documentation: null,
+    documentation:
+      'https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-agent-policies-agentpolicyid-auto-upgrade-agents-status',
     parameterTypes: {
       headerParams: [],
       pathParams: ['agentPolicyId'],

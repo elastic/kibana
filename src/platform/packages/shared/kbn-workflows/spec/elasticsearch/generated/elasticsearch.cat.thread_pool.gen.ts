@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  cat_thread_pool1_request,
+  cat_thread_pool1_response,
+  cat_thread_pool_request,
+  cat_thread_pool_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  cat_thread_pool_request,
-  cat_thread_pool_response,
-  cat_thread_pool1_request,
-  cat_thread_pool1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const CAT_THREAD_POOL_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.thread_pool',
-  connectorGroup: 'internal',
   summary: `Get thread pool statistics`,
   description: `Get thread pool statistics.
 

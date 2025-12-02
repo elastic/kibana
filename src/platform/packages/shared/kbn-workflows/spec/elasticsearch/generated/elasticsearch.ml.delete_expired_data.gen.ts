@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  ml_delete_expired_data1_request,
+  ml_delete_expired_data1_response,
+  ml_delete_expired_data_request,
+  ml_delete_expired_data_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  ml_delete_expired_data_request,
-  ml_delete_expired_data_response,
-  ml_delete_expired_data1_request,
-  ml_delete_expired_data1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const ML_DELETE_EXPIRED_DATA_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.delete_expired_data',
-  connectorGroup: 'internal',
   summary: `Delete expired ML data`,
   description: `Delete expired ML data.
 

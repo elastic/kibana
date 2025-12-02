@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   get_fleet_cloud_connectors_cloudconnectorid_request,
   get_fleet_cloud_connectors_cloudconnectorid_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const GET_FLEET_CLOUD_CONNECTORS_CLOUDCONNECTORID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_cloud_connectors_cloudconnectorid',
-  connectorGroup: 'internal',
   summary: `Get cloud connector`,
   description: `**Spaces method and path for this operation:**
 
@@ -42,7 +41,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.`,
   methods: ['GET'],
   patterns: ['/api/fleet/cloud_connectors/{cloudConnectorId}'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-cloud-connectors-cloudconnectorid',
   parameterTypes: {
     headerParams: [],
     pathParams: ['cloudConnectorId'],

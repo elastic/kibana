@@ -16,19 +16,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { delete_synthetic_monitor_request } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { delete_synthetic_monitor_request } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const DELETE_SYNTHETIC_MONITOR_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_synthetic_monitor',
-  connectorGroup: 'internal',
   summary: `Delete a monitor`,
   description: `**Spaces method and path for this operation:**
 
@@ -41,7 +40,8 @@ You must have \`all\` privileges for the Synthetics feature in the Observability
 `,
   methods: ['DELETE'],
   patterns: ['/api/synthetics/monitors/{id}'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-synthetic-monitor',
   parameterTypes: {
     headerParams: [],
     pathParams: ['id'],

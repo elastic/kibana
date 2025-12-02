@@ -16,12 +16,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { delete_agent_builder_conversations_conversation_id_request } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { delete_agent_builder_conversations_conversation_id_request } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
@@ -29,7 +29,6 @@ import { FetcherConfigSchema } from '../../schema';
 export const DELETE_AGENT_BUILDER_CONVERSATIONS_CONVERSATION_ID_CONTRACT: InternalConnectorContract =
   {
     type: 'kibana.delete_agent_builder_conversations_conversation_id',
-    connectorGroup: 'internal',
     summary: `Delete conversation by ID`,
     description: `**Spaces method and path for this operation:**
 
@@ -40,7 +39,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Delete a conversation by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
     methods: ['DELETE'],
     patterns: ['/api/agent_builder/conversations/{conversation_id}'],
-    documentation: null,
+    documentation:
+      'https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-agent-builder-conversations-conversation-id',
     parameterTypes: {
       headerParams: ['kbn-xsrf'],
       pathParams: ['conversation_id'],

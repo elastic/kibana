@@ -2396,7 +2396,7 @@ module.exports = {
               '*legacy*',
               // Kibana has endpoint /api/spaces/_disable_legacy_url_aliases, resulting in generated file kibana.post_spaces_disable_legacy_url_aliases.gen.ts,
               // this pattern allows to import this generated file
-              '!*.gen.ts',
+              '!*.gen',
             ],
             paths: RESTRICTED_IMPORTS,
           },

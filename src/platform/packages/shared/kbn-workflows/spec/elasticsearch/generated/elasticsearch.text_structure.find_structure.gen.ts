@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   text_structure_find_structure_request,
   text_structure_find_structure_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const TEXT_STRUCTURE_FIND_STRUCTURE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.text_structure.find_structure',
-  connectorGroup: 'internal',
   summary: `Find the structure of a text file`,
   description: `Find the structure of a text file.
 

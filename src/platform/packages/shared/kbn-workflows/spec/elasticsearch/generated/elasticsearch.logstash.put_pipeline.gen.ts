@@ -16,17 +16,16 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { logstash_put_pipeline_request } from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { logstash_put_pipeline_request } from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const LOGSTASH_PUT_PIPELINE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.logstash.put_pipeline',
-  connectorGroup: 'internal',
   summary: `Create or update a Logstash pipeline`,
   description: `Create or update a Logstash pipeline.
 

@@ -16,19 +16,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { get_streams_name_significant_events_request } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { get_streams_name_significant_events_request } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const GET_STREAMS_NAME_SIGNIFICANT_EVENTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_streams_name_significant_events',
-  connectorGroup: 'internal',
   summary: `Read the significant events`,
   description: `**Spaces method and path for this operation:**
 
@@ -39,7 +38,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Read the significant events<br/><br/>[Required authorization] Route required privileges: read_stream.`,
   methods: ['GET'],
   patterns: ['/api/streams/{name}/significant_events'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-streams-name-significant-events',
   parameterTypes: {
     headerParams: [],
     pathParams: ['name'],

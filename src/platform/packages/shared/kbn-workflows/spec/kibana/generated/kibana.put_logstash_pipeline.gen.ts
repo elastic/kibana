@@ -16,26 +16,25 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { put_logstash_pipeline_request } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { put_logstash_pipeline_request } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const PUT_LOGSTASH_PIPELINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_logstash_pipeline',
-  connectorGroup: 'internal',
   summary: `Create or update a Logstash pipeline`,
   description: `Create a centrally-managed Logstash pipeline or update a pipeline.
 To use this API, you must have either the \`logstash_admin\` built-in role or a customized Logstash writer role.
 `,
   methods: ['PUT'],
   patterns: ['/api/logstash/pipeline/{id}'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/reference/logstash/secure-connection',
   parameterTypes: {
     headerParams: [],
     pathParams: ['id'],

@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   ml_get_calendar_events_request,
   ml_get_calendar_events_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const ML_GET_CALENDAR_EVENTS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_calendar_events',
-  connectorGroup: 'internal',
   summary: `Get info about events in calendars`,
   description: `Get info about events in calendars.
 

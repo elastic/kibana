@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   snapshot_repository_verify_integrity_request,
   snapshot_repository_verify_integrity_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const SNAPSHOT_REPOSITORY_VERIFY_INTEGRITY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.snapshot.repository_verify_integrity',
-  connectorGroup: 'internal',
   summary: `Verify the repository integrity`,
   description: `Verify the repository integrity.
 

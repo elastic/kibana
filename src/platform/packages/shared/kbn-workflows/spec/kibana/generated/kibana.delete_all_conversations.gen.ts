@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   delete_all_conversations_request,
   delete_all_conversations_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const DELETE_ALL_CONVERSATIONS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteAllConversations',
-  connectorGroup: 'internal',
   summary: `Delete conversations`,
   description: `**Spaces method and path for this operation:**
 
@@ -42,7 +41,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 This endpoint allows users to permanently delete all conversations.`,
   methods: ['DELETE'],
   patterns: ['/api/security_ai_assistant/current_user/conversations'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-deleteallconversations',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

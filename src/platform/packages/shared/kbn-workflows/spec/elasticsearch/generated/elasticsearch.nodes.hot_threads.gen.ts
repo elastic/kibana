@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  nodes_hot_threads1_request,
+  nodes_hot_threads1_response,
+  nodes_hot_threads_request,
+  nodes_hot_threads_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  nodes_hot_threads_request,
-  nodes_hot_threads_response,
-  nodes_hot_threads1_request,
-  nodes_hot_threads1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const NODES_HOT_THREADS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.nodes.hot_threads',
-  connectorGroup: 'internal',
   summary: `Get the hot threads for nodes`,
   description: `Get the hot threads for nodes.
 

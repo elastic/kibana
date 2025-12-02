@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   update_fields_metadata_default_request,
   update_fields_metadata_default_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const UPDATE_FIELDS_METADATA_DEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.updateFieldsMetadataDefault',
-  connectorGroup: 'internal',
   summary: `Update data view fields metadata`,
   description: `**Spaces method and path for this operation:**
 
@@ -43,7 +42,8 @@ Update fields presentation metadata such as count, customLabel, customDescriptio
 `,
   methods: ['POST'],
   patterns: ['/api/data_views/data_view/{viewId}/fields'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-updatefieldsmetadatadefault',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: ['viewId'],

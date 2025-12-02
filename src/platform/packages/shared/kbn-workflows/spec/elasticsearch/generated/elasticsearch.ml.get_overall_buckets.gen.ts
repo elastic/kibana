@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  ml_get_overall_buckets1_request,
+  ml_get_overall_buckets1_response,
+  ml_get_overall_buckets_request,
+  ml_get_overall_buckets_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  ml_get_overall_buckets_request,
-  ml_get_overall_buckets_response,
-  ml_get_overall_buckets1_request,
-  ml_get_overall_buckets1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const ML_GET_OVERALL_BUCKETS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_overall_buckets',
-  connectorGroup: 'internal',
   summary: `Get overall bucket results`,
   description: `Get overall bucket results.
 

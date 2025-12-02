@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   reindex_rethrottle_request,
   reindex_rethrottle_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const REINDEX_RETHROTTLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.reindex_rethrottle',
-  connectorGroup: 'internal',
   summary: `Throttle a reindex operation`,
   description: `Throttle a reindex operation.
 

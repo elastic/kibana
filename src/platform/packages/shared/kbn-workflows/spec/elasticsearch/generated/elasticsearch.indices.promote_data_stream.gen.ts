@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   indices_promote_data_stream_request,
   indices_promote_data_stream_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const INDICES_PROMOTE_DATA_STREAM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.promote_data_stream',
-  connectorGroup: 'internal',
   summary: `Promote a data stream`,
   description: `Promote a data stream.
 

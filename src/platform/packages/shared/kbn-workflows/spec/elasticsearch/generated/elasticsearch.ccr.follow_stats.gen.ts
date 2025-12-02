@@ -16,17 +16,16 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { ccr_follow_stats_request, ccr_follow_stats_response } from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { ccr_follow_stats_request, ccr_follow_stats_response } from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const CCR_FOLLOW_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ccr.follow_stats',
-  connectorGroup: 'internal',
   summary: `Get follower stats`,
   description: `Get follower stats.
 

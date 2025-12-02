@@ -16,17 +16,16 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { ilm_move_to_step_request, ilm_move_to_step_response } from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { ilm_move_to_step_request, ilm_move_to_step_response } from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const ILM_MOVE_TO_STEP_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ilm.move_to_step',
-  connectorGroup: 'internal',
   summary: `Move to a lifecycle step`,
   description: `Move to a lifecycle step.
 

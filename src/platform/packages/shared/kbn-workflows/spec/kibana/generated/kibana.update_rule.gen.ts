@@ -16,19 +16,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { update_rule_request, update_rule_response } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { update_rule_request, update_rule_response } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const UPDATE_RULE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpdateRule',
-  connectorGroup: 'internal',
   summary: `Update a detection rule`,
   description: `**Spaces method and path for this operation:**
 
@@ -46,7 +45,7 @@ The difference between the \`id\` and \`rule_id\` is that the \`id\` is a unique
 `,
   methods: ['PUT'],
   patterns: ['/api/detection_engine/rules'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-updaterule',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

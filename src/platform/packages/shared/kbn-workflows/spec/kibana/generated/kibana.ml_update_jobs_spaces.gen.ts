@@ -16,19 +16,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { ml_update_jobs_spaces_request } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { ml_update_jobs_spaces_request } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const ML_UPDATE_JOBS_SPACES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.mlUpdateJobsSpaces',
-  connectorGroup: 'internal',
   summary: `Update jobs spaces`,
   description: `**Spaces method and path for this operation:**
 
@@ -39,7 +38,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Update a list of jobs to add and/or remove them from given spaces.`,
   methods: ['POST'],
   patterns: ['/api/ml/saved_objects/update_jobs_spaces'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-mlupdatejobsspaces',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

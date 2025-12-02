@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   priv_mon_health_request,
   priv_mon_health_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const PRIV_MON_HEALTH_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PrivMonHealth',
-  connectorGroup: 'internal',
   summary: `Health check on Privilege Monitoring`,
   description: `**Spaces method and path for this operation:**
 
@@ -40,7 +39,7 @@ export const PRIV_MON_HEALTH_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['GET'],
   patterns: ['/api/entity_analytics/monitoring/privileges/health'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-privmonhealth',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

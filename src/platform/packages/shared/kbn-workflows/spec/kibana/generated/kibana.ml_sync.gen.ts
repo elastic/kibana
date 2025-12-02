@@ -16,19 +16,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { ml_sync_request, ml_sync_response } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { ml_sync_request, ml_sync_response } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const ML_SYNC_CONTRACT: InternalConnectorContract = {
   type: 'kibana.mlSync',
-  connectorGroup: 'internal',
   summary: `Sync saved objects in the default space`,
   description: `**Spaces method and path for this operation:**
 
@@ -40,7 +39,7 @@ Synchronizes Kibana saved objects for machine learning jobs and trained models i
 `,
   methods: ['GET'],
   patterns: ['/api/ml/saved_objects/sync'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-mlsync',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

@@ -16,28 +16,28 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   bulk_delete_status_op_request,
   bulk_delete_status_op_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const BULK_DELETE_STATUS_OP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.bulkDeleteStatusOp',
-  connectorGroup: 'internal',
   summary: `Retrieve the status of the bulk deletion`,
   description: `Retrieve the status of the bulk deletion operation for SLOs.  This endpoint returns the status of the bulk deletion operation, including whether it is completed and the results of the operation.
 `,
   methods: ['GET'],
   patterns: ['/s/{spaceId}/api/observability/slos/_bulk_delete/{taskId}'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-bulkdeletestatusop',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: ['spaceId', 'taskId'],

@@ -16,17 +16,16 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { eql_delete_request, eql_delete_response } from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { eql_delete_request, eql_delete_response } from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const EQL_DELETE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.eql.delete',
-  connectorGroup: 'internal',
   summary: `Delete an async EQL search`,
   description: `Delete an async EQL search.
 

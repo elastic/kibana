@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   post_fleet_logstash_api_keys_request,
   post_fleet_logstash_api_keys_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const POST_FLEET_LOGSTASH_API_KEYS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_logstash_api_keys',
-  connectorGroup: 'internal',
   summary: `Generate a Logstash API key`,
   description: `**Spaces method and path for this operation:**
 
@@ -42,7 +41,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-settings-all.`,
   methods: ['POST'],
   patterns: ['/api/fleet/logstash_api_keys'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-logstash-api-keys',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: [],

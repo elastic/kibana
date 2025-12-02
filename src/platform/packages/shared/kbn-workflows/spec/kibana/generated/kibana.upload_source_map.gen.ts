@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   upload_source_map_request,
   upload_source_map_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const UPLOAD_SOURCE_MAP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.uploadSourceMap',
-  connectorGroup: 'internal',
   summary: `Upload a source map`,
   description: `**Spaces method and path for this operation:**
 
@@ -44,7 +43,7 @@ The maximum payload size is \`1mb\`. If you attempt to upload a source map that 
 `,
   methods: ['POST'],
   patterns: ['/api/apm/sourcemaps'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-uploadsourcemap',
   parameterTypes: {
     headerParams: ['elastic-api-version', 'kbn-xsrf'],
     pathParams: [],

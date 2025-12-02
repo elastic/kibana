@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   transform_upgrade_transforms_request,
   transform_upgrade_transforms_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const TRANSFORM_UPGRADE_TRANSFORMS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.transform.upgrade_transforms',
-  connectorGroup: 'internal',
   summary: `Upgrade all transforms`,
   description: `Upgrade all transforms.
 

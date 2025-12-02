@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  searchable_snapshots_clear_cache1_request,
+  searchable_snapshots_clear_cache1_response,
+  searchable_snapshots_clear_cache_request,
+  searchable_snapshots_clear_cache_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  searchable_snapshots_clear_cache_request,
-  searchable_snapshots_clear_cache_response,
-  searchable_snapshots_clear_cache1_request,
-  searchable_snapshots_clear_cache1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const SEARCHABLE_SNAPSHOTS_CLEAR_CACHE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.searchable_snapshots.clear_cache',
-  connectorGroup: 'internal',
   summary: `Clear the cache`,
   description: `Clear the cache.
 

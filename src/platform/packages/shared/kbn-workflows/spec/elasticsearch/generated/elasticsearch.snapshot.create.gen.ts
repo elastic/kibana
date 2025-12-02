@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  snapshot_create1_request,
+  snapshot_create1_response,
+  snapshot_create_request,
+  snapshot_create_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  snapshot_create_request,
-  snapshot_create_response,
-  snapshot_create1_request,
-  snapshot_create1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const SNAPSHOT_CREATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.snapshot.create',
-  connectorGroup: 'internal',
   summary: `Create a snapshot`,
   description: `Create a snapshot.
 

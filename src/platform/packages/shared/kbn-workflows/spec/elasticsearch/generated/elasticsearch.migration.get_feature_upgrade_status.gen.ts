@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   migration_get_feature_upgrade_status_request,
   migration_get_feature_upgrade_status_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const MIGRATION_GET_FEATURE_UPGRADE_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.migration.get_feature_upgrade_status',
-  connectorGroup: 'internal',
   summary: `Get feature migration information`,
   description: `Get feature migration information.
 

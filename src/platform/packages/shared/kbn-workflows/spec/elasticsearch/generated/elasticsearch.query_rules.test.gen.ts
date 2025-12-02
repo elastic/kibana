@@ -16,17 +16,16 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { query_rules_test_request, query_rules_test_response } from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { query_rules_test_request, query_rules_test_response } from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const QUERY_RULES_TEST_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.query_rules.test',
-  connectorGroup: 'internal',
   summary: `Test a query ruleset`,
   description: `Test a query ruleset.
 

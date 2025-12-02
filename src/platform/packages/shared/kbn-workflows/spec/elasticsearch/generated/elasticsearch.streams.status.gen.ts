@@ -16,12 +16,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
+
 import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const STREAMS_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.streams.status',
-  connectorGroup: 'internal',
   summary: null,
   description: `Get the status of streams.
 

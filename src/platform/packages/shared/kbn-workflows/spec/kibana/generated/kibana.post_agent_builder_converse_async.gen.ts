@@ -16,19 +16,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { post_agent_builder_converse_async_request } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { post_agent_builder_converse_async_request } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const POST_AGENT_BUILDER_CONVERSE_ASYNC_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_agent_builder_converse_async',
-  connectorGroup: 'internal',
   summary: `Send chat message (streaming)`,
   description: `**Spaces method and path for this operation:**
 
@@ -215,7 +214,8 @@ A typical conversation round emits events in this sequence:
 8. \`round_complete\`<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
   methods: ['POST'],
   patterns: ['/api/agent_builder/converse/async'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-agent-builder-converse-async',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: [],

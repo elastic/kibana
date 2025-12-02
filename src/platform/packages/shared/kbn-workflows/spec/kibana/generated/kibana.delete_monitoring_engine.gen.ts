@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   delete_monitoring_engine_request,
   delete_monitoring_engine_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const DELETE_MONITORING_ENGINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteMonitoringEngine',
-  connectorGroup: 'internal',
   summary: `Delete the Privilege Monitoring Engine`,
   description: `**Spaces method and path for this operation:**
 
@@ -40,7 +39,8 @@ export const DELETE_MONITORING_ENGINE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['DELETE'],
   patterns: ['/api/entity_analytics/monitoring/engine/delete'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-deletemonitoringengine',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

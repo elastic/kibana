@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  tasks_cancel1_request,
+  tasks_cancel1_response,
+  tasks_cancel_request,
+  tasks_cancel_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  tasks_cancel_request,
-  tasks_cancel_response,
-  tasks_cancel1_request,
-  tasks_cancel1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const TASKS_CANCEL_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.tasks.cancel',
-  connectorGroup: 'internal',
   summary: `Cancel a task`,
   description: `Cancel a task.
 

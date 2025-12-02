@@ -16,14 +16,8 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
-  nodes_stats_request,
-  nodes_stats_response,
   nodes_stats1_request,
   nodes_stats1_response,
   nodes_stats2_request,
@@ -34,12 +28,17 @@ import {
   nodes_stats4_response,
   nodes_stats5_request,
   nodes_stats5_response,
+  nodes_stats_request,
+  nodes_stats_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const NODES_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.nodes.stats',
-  connectorGroup: 'internal',
   summary: `Get node statistics`,
   description: `Get node statistics.
 

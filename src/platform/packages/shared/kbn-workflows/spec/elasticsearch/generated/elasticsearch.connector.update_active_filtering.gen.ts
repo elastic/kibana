@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   connector_update_active_filtering_request,
   connector_update_active_filtering_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const CONNECTOR_UPDATE_ACTIVE_FILTERING_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.update_active_filtering',
-  connectorGroup: 'internal',
   summary: `Activate the connector draft filter`,
   description: `Activate the connector draft filter.
 

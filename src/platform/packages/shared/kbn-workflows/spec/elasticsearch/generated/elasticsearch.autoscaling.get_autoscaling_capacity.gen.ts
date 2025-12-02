@@ -16,12 +16,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
+
 import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const AUTOSCALING_GET_AUTOSCALING_CAPACITY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.autoscaling.get_autoscaling_capacity',
-  connectorGroup: 'internal',
   summary: null,
   description: `Get the autoscaling capacity.
 

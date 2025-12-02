@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   get_attack_discovery_generation_request,
   get_attack_discovery_generation_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const GET_ATTACK_DISCOVERY_GENERATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetAttackDiscoveryGeneration',
-  connectorGroup: 'internal',
   summary: `Get a single Attack discovery generation, including its discoveries and (optional) generation metadata`,
   description: `**Spaces method and path for this operation:**
 
@@ -42,7 +41,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Returns a specific Attack discovery generation, including all generated Attack discoveries and associated metadata, including execution status and statistics. \`Technical preview\``,
   methods: ['GET'],
   patterns: ['/api/attack_discovery/generations/{execution_uuid}'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-getattackdiscoverygeneration',
   parameterTypes: {
     headerParams: [],
     pathParams: ['execution_uuid'],

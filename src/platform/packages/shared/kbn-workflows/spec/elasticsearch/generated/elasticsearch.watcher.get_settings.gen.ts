@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   watcher_get_settings_request,
   watcher_get_settings_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const WATCHER_GET_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.watcher.get_settings',
-  connectorGroup: 'internal',
   summary: `Get Watcher index settings`,
   description: `Get Watcher index settings.
 

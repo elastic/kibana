@@ -16,26 +16,25 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
-  ml_preview_datafeed_request,
-  ml_preview_datafeed_response,
   ml_preview_datafeed1_request,
   ml_preview_datafeed1_response,
   ml_preview_datafeed2_request,
   ml_preview_datafeed2_response,
   ml_preview_datafeed3_request,
   ml_preview_datafeed3_response,
+  ml_preview_datafeed_request,
+  ml_preview_datafeed_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const ML_PREVIEW_DATAFEED_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.preview_datafeed',
-  connectorGroup: 'internal',
   summary: `Preview a datafeed`,
   description: `Preview a datafeed.
 

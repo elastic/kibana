@@ -16,17 +16,16 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { ccr_pause_follow_request, ccr_pause_follow_response } from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { ccr_pause_follow_request, ccr_pause_follow_response } from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const CCR_PAUSE_FOLLOW_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ccr.pause_follow',
-  connectorGroup: 'internal',
   summary: `Pause a follower`,
   description: `Pause a follower.
 

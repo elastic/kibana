@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   synonyms_get_synonym_request,
   synonyms_get_synonym_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const SYNONYMS_GET_SYNONYM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.synonyms.get_synonym',
-  connectorGroup: 'internal',
   summary: `Get a synonym set`,
   description: `Get a synonym set.
 

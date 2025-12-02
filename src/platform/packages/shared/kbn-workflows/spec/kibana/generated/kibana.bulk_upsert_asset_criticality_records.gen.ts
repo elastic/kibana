@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   bulk_upsert_asset_criticality_records_request,
   bulk_upsert_asset_criticality_records_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const BULK_UPSERT_ASSET_CRITICALITY_RECORDS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.BulkUpsertAssetCriticalityRecords',
-  connectorGroup: 'internal',
   summary: `Bulk upsert asset criticality records`,
   description: `**Spaces method and path for this operation:**
 
@@ -45,7 +44,8 @@ If asset criticality records already exist for the specified entities, those rec
 `,
   methods: ['POST'],
   patterns: ['/api/asset_criticality/bulk'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-bulkupsertassetcriticalityrecords',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

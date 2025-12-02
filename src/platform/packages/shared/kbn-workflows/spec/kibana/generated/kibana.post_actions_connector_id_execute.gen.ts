@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   post_actions_connector_id_execute_request,
   post_actions_connector_id_execute_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const POST_ACTIONS_CONNECTOR_ID_EXECUTE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_actions_connector_id_execute',
-  connectorGroup: 'internal',
   summary: `Run a connector`,
   description: `**Spaces method and path for this operation:**
 
@@ -42,7 +41,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 You can use this API to test an action that involves interaction with Kibana services or integrations with third-party systems.`,
   methods: ['POST'],
   patterns: ['/api/actions/connector/{id}/_execute'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-actions-connector-id-execute',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: ['id'],

@@ -16,24 +16,24 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { put_security_role_name_request } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { put_security_role_name_request } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const PUT_SECURITY_ROLE_NAME_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_security_role_name',
-  connectorGroup: 'internal',
   summary: `Create or update a role`,
   description: `Create a new Kibana role or update the attributes of an existing role. Kibana roles are stored in the Elasticsearch native realm.`,
   methods: ['PUT'],
   patterns: ['/api/security/role/{name}'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-security-role-name',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: ['name'],

@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   update_knowledge_base_entry_request,
   update_knowledge_base_entry_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const UPDATE_KNOWLEDGE_BASE_ENTRY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpdateKnowledgeBaseEntry',
-  connectorGroup: 'internal',
   summary: `Update a Knowledge Base Entry`,
   description: `**Spaces method and path for this operation:**
 
@@ -42,7 +41,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Update an existing Knowledge Base Entry by its unique \`id\`.`,
   methods: ['PUT'],
   patterns: ['/api/security_ai_assistant/knowledge_base/entries/{id}'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-updateknowledgebaseentry',
   parameterTypes: {
     headerParams: [],
     pathParams: ['id'],

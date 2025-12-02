@@ -16,17 +16,16 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { async_search_get_request, async_search_get_response } from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { async_search_get_request, async_search_get_response } from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const ASYNC_SEARCH_GET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.async_search.get',
-  connectorGroup: 'internal',
   summary: `Get async search results`,
   description: `Get async search results.
 

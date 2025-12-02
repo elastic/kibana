@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   create_case_default_space_request,
   create_case_default_space_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const CREATE_CASE_DEFAULT_SPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createCaseDefaultSpace',
-  connectorGroup: 'internal',
   summary: `Create a case`,
   description: `**Spaces method and path for this operation:**
 
@@ -43,7 +42,8 @@ You must have \`all\` privileges for the **Cases** feature in the **Management**
 `,
   methods: ['POST'],
   patterns: ['/api/cases'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-createcasedefaultspace',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: [],

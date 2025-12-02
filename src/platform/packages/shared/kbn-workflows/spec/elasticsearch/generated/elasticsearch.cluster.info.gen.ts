@@ -16,17 +16,16 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { cluster_info_request, cluster_info_response } from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { cluster_info_request, cluster_info_response } from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const CLUSTER_INFO_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cluster.info',
-  connectorGroup: 'internal',
   summary: `Get cluster info`,
   description: `Get cluster info.
 

@@ -16,19 +16,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { post_fleet_epm_packages_request } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { post_fleet_epm_packages_request } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const POST_FLEET_EPM_PACKAGES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_epm_packages',
-  connectorGroup: 'internal',
   summary: `Install a package by upload`,
   description: `**Spaces method and path for this operation:**
 
@@ -39,7 +38,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.`,
   methods: ['POST'],
   patterns: ['/api/fleet/epm/packages'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-epm-packages',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: [],

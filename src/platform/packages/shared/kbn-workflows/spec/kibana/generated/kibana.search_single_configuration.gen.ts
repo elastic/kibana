@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   search_single_configuration_request,
   search_single_configuration_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const SEARCH_SINGLE_CONFIGURATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.searchSingleConfiguration',
-  connectorGroup: 'internal',
   summary: `Lookup single agent configuration`,
   description: `**Spaces method and path for this operation:**
 
@@ -43,7 +42,8 @@ This endpoint enables you to search for a single agent configuration and update 
 `,
   methods: ['POST'],
   patterns: ['/api/apm/settings/agent-configuration/search'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-searchsingleconfiguration',
   parameterTypes: {
     headerParams: ['elastic-api-version', 'kbn-xsrf'],
     pathParams: [],

@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   dangling_indices_import_dangling_index_request,
   dangling_indices_import_dangling_index_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const DANGLING_INDICES_IMPORT_DANGLING_INDEX_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.dangling_indices.import_dangling_index',
-  connectorGroup: 'internal',
   summary: `Import a dangling index`,
   description: `Import a dangling index.
 

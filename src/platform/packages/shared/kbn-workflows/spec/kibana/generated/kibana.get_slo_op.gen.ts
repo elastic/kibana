@@ -16,25 +16,24 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { get_slo_op_request, get_slo_op_response } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { get_slo_op_request, get_slo_op_response } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const GET_SLO_OP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getSloOp',
-  connectorGroup: 'internal',
   summary: `Get an SLO`,
   description: `You must have the \`read\` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
 `,
   methods: ['GET'],
   patterns: ['/s/{spaceId}/api/observability/slos/{sloId}'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-getsloop',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: ['spaceId', 'sloId'],

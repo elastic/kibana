@@ -229,7 +229,6 @@ function generateContractMeta(
   const outputSchemaString = generateOutputSchemaString(operations, openApiDocument);
 
   return {
-    connectorGroup: 'internal',
     type,
     description,
     summary,

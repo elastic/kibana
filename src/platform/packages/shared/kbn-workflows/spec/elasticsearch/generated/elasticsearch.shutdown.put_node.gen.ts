@@ -16,12 +16,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
+
 import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const SHUTDOWN_PUT_NODE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.shutdown.put_node',
-  connectorGroup: 'internal',
   summary: null,
   description: `Prepare a node to be shut down.
 

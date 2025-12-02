@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   ingest_geo_ip_stats_request,
   ingest_geo_ip_stats_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const INGEST_GEO_IP_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ingest.geo_ip_stats',
-  connectorGroup: 'internal',
   summary: `Get GeoIP statistics`,
   description: `Get GeoIP statistics.
 

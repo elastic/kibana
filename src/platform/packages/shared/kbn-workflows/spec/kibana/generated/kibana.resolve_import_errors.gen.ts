@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   resolve_import_errors_request,
   resolve_import_errors_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const RESOLVE_IMPORT_ERRORS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.resolveImportErrors',
-  connectorGroup: 'internal',
   summary: `Resolve import errors`,
   description: `**Spaces method and path for this operation:**
 
@@ -47,7 +46,8 @@ To resolve errors from the Import objects API, you can:
 `,
   methods: ['POST'],
   patterns: ['/api/saved_objects/_resolve_import_errors'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-resolveimporterrors',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: [],

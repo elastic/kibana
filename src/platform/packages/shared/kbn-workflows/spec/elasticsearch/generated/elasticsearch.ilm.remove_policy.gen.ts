@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   ilm_remove_policy_request,
   ilm_remove_policy_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const ILM_REMOVE_POLICY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ilm.remove_policy',
-  connectorGroup: 'internal',
   summary: `Remove policies from an index`,
   description: `Remove policies from an index.
 

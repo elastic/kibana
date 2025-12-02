@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   import_list_items_request,
   import_list_items_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const IMPORT_LIST_ITEMS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ImportListItems',
-  connectorGroup: 'internal',
   summary: `Import value list items`,
   description: `**Spaces method and path for this operation:**
 
@@ -45,7 +44,7 @@ You can import items to a new or existing list.
 `,
   methods: ['POST'],
   patterns: ['/api/lists/items/_import'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-importlistitems',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

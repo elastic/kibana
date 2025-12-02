@@ -16,26 +16,25 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
-  ml_get_categories_request,
-  ml_get_categories_response,
   ml_get_categories1_request,
   ml_get_categories1_response,
   ml_get_categories2_request,
   ml_get_categories2_response,
   ml_get_categories3_request,
   ml_get_categories3_response,
+  ml_get_categories_request,
+  ml_get_categories_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const ML_GET_CATEGORIES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_categories',
-  connectorGroup: 'internal',
   summary: `Get anomaly detection job results for categories`,
   description: `Get anomaly detection job results for categories.
 

@@ -16,26 +16,25 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
-  field_caps_request,
-  field_caps_response,
   field_caps1_request,
   field_caps1_response,
   field_caps2_request,
   field_caps2_response,
   field_caps3_request,
   field_caps3_response,
+  field_caps_request,
+  field_caps_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const FIELD_CAPS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.field_caps',
-  connectorGroup: 'internal',
   summary: `Get the field capabilities`,
   description: `Get the field capabilities.
 

@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   post_attack_discovery_generations_dismiss_request,
   post_attack_discovery_generations_dismiss_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const POST_ATTACK_DISCOVERY_GENERATIONS_DISMISS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PostAttackDiscoveryGenerationsDismiss',
-  connectorGroup: 'internal',
   summary: `Dismiss an attack discovery generation`,
   description: `**Spaces method and path for this operation:**
 
@@ -42,7 +41,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Dismisses an attack discovery generation for the current user, indicating that it's status should not be reported in the UI. This sets the generation's status to "dismissed" and affects how the generation appears in subsequent queries. \`Technical preview\``,
   methods: ['POST'],
   patterns: ['/api/attack_discovery/generations/{execution_uuid}/_dismiss'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-postattackdiscoverygenerationsdismiss',
   parameterTypes: {
     headerParams: [],
     pathParams: ['execution_uuid'],

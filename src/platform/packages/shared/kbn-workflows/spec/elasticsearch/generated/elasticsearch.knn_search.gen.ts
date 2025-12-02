@@ -16,12 +16,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
+
 import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const KNN_SEARCH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.knn_search',
-  connectorGroup: 'internal',
   summary: null,
   description: `Run a knn search.
 

@@ -16,19 +16,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { put_fleet_epm_custom_integrations_pkgname_request } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { put_fleet_epm_custom_integrations_pkgname_request } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const PUT_FLEET_EPM_CUSTOM_INTEGRATIONS_PKGNAME_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_fleet_epm_custom_integrations_pkgname',
-  connectorGroup: 'internal',
   summary: `Update a custom integration`,
   description: `**Spaces method and path for this operation:**
 
@@ -39,7 +38,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-settings-all AND integrations-all.`,
   methods: ['PUT'],
   patterns: ['/api/fleet/epm/custom_integrations/{pkgName}'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-fleet-epm-custom-integrations-pkgname',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: ['pkgName'],

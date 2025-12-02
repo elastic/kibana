@@ -16,12 +16,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { delete_alerting_rule_ruleid_snooze_schedule_scheduleid_request } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { delete_alerting_rule_ruleid_snooze_schedule_scheduleid_request } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
@@ -29,7 +29,6 @@ import { FetcherConfigSchema } from '../../schema';
 export const DELETE_ALERTING_RULE_RULEID_SNOOZE_SCHEDULE_SCHEDULEID_CONTRACT: InternalConnectorContract =
   {
     type: 'kibana.delete_alerting_rule_ruleid_snooze_schedule_scheduleid',
-    connectorGroup: 'internal',
     summary: `Delete a snooze schedule for a rule`,
     description: `**Spaces method and path for this operation:**
 
@@ -38,7 +37,8 @@ export const DELETE_ALERTING_RULE_RULEID_SNOOZE_SCHEDULE_SCHEDULEID_CONTRACT: In
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
     methods: ['DELETE'],
     patterns: ['/api/alerting/rule/{ruleId}/snooze_schedule/{scheduleId}'],
-    documentation: null,
+    documentation:
+      'https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-alerting-rule-ruleid-snooze-schedule-scheduleid',
     parameterTypes: {
       headerParams: ['kbn-xsrf'],
       pathParams: ['ruleId', 'scheduleId'],

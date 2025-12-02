@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   alerts_migration_cleanup_request,
   alerts_migration_cleanup_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const ALERTS_MIGRATION_CLEANUP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.AlertsMigrationCleanup',
-  connectorGroup: 'internal',
   summary: `Clean up detection alert migrations`,
   description: `**Spaces method and path for this operation:**
 
@@ -49,7 +48,8 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
 `,
   methods: ['DELETE'],
   patterns: ['/api/detection_engine/signals/migration'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-alertsmigrationcleanup',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

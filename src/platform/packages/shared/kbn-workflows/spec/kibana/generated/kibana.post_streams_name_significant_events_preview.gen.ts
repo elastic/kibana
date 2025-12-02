@@ -16,19 +16,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { post_streams_name_significant_events_preview_request } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { post_streams_name_significant_events_preview_request } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const POST_STREAMS_NAME_SIGNIFICANT_EVENTS_PREVIEW_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_streams_name_significant_events_preview',
-  connectorGroup: 'internal',
   summary: `Preview significant events`,
   description: `**Spaces method and path for this operation:**
 
@@ -39,7 +38,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Preview significant event results based on a given query<br/><br/>[Required authorization] Route required privileges: read_stream.`,
   methods: ['POST'],
   patterns: ['/api/streams/{name}/significant_events/_preview'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-streams-name-significant-events-preview',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: ['name'],

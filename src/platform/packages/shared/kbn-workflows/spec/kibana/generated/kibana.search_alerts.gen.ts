@@ -16,19 +16,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { search_alerts_request, search_alerts_response } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { search_alerts_request, search_alerts_response } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const SEARCH_ALERTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.SearchAlerts',
-  connectorGroup: 'internal',
   summary: `Find and/or aggregate detection alerts`,
   description: `**Spaces method and path for this operation:**
 
@@ -39,7 +38,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Find and/or aggregate detection alerts that match the given query.`,
   methods: ['POST'],
   patterns: ['/api/detection_engine/signals/search'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-searchalerts',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

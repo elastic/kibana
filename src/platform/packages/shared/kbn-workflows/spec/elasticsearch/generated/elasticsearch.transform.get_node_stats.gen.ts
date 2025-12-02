@@ -10,32 +10,45 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Source: elasticsearch-specification repository, operations:
+ * Source: elasticsearch-specification repository, operations: transform-get-node-stats
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js
  */
 
 import { z } from '@kbn/zod/v4';
+
+import {
+  transform_get_node_stats_request,
+  transform_get_node_stats_response,
+} from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
 import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const TRANSFORM_GET_NODE_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.transform.get_node_stats',
-  connectorGroup: 'internal',
-  summary: null,
-  description: `Retrieves transform usage information for transform nodes
+  summary: `Get node stats`,
+  description: `Get node stats.
 
- Documentation: https://www.elastic.co/guide/en/elasticsearch/reference/current/get-transform-node-stats.html`,
+Get per-node information about transform usage.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-get-node-stats`,
   methods: ['GET'],
   patterns: ['_transform/_node_stats'],
   documentation:
-    'https://www.elastic.co/guide/en/elasticsearch/reference/current/get-transform-node-stats.html',
+    'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-get-node-stats',
   parameterTypes: {
     headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.optional(z.object({})),
-  outputSchema: z.optional(z.looseObject({})),
+  paramsSchema: z.object({
+    ...getShapeAt(transform_get_node_stats_request, 'body'),
+    ...getShapeAt(transform_get_node_stats_request, 'path'),
+    ...getShapeAt(transform_get_node_stats_request, 'query'),
+  }),
+  outputSchema: transform_get_node_stats_response,
 };

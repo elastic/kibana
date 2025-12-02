@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   get_maintenance_window_find_request,
   get_maintenance_window_find_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const GET_MAINTENANCE_WINDOW_FIND_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_maintenance_window_find',
-  connectorGroup: 'internal',
   summary: `Search for a maintenance window.`,
   description: `**Spaces method and path for this operation:**
 
@@ -42,7 +41,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: read-maintenance-window.`,
   methods: ['GET'],
   patterns: ['/api/maintenance_window/_find'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-maintenance-window-find',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

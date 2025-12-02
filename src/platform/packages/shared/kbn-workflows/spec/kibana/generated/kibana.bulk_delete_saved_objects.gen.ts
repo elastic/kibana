@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   bulk_delete_saved_objects_request,
   bulk_delete_saved_objects_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const BULK_DELETE_SAVED_OBJECTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.bulkDeleteSavedObjects',
-  connectorGroup: 'internal',
   summary: `Delete saved objects`,
   description: `**Spaces method and path for this operation:**
 
@@ -43,7 +42,8 @@ WARNING: When you delete a saved object, it cannot be recovered.
 `,
   methods: ['POST'],
   patterns: ['/api/saved_objects/_bulk_delete'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-bulkdeletesavedobjects',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: [],

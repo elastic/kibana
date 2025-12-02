@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   get_fleet_epm_verification_key_id_request,
   get_fleet_epm_verification_key_id_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const GET_FLEET_EPM_VERIFICATION_KEY_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_verification_key_id',
-  connectorGroup: 'internal',
   summary: `Get a package signature verification key ID`,
   description: `**Spaces method and path for this operation:**
 
@@ -42,7 +41,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.`,
   methods: ['GET'],
   patterns: ['/api/fleet/epm/verification_key_id'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-epm-verification-key-id',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

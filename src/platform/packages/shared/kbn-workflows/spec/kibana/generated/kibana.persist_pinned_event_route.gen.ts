@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   persist_pinned_event_route_request,
   persist_pinned_event_route_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const PERSIST_PINNED_EVENT_ROUTE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PersistPinnedEventRoute',
-  connectorGroup: 'internal',
   summary: `Pin/unpin an event`,
   description: `**Spaces method and path for this operation:**
 
@@ -42,7 +41,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Pin/unpin an event to/from an existing Timeline.`,
   methods: ['PATCH'],
   patterns: ['/api/pinned_event'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-persistpinnedeventroute',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

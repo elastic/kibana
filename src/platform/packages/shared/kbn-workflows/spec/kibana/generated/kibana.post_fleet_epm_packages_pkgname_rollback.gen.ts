@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   post_fleet_epm_packages_pkgname_rollback_request,
   post_fleet_epm_packages_pkgname_rollback_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const POST_FLEET_EPM_PACKAGES_PKGNAME_ROLLBACK_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_epm_packages_pkgname_rollback',
-  connectorGroup: 'internal',
   summary: `Rollback a package to previous version`,
   description: `**Spaces method and path for this operation:**
 
@@ -42,7 +41,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.`,
   methods: ['POST'],
   patterns: ['/api/fleet/epm/packages/{pkgName}/rollback'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-epm-packages-pkgname-rollback',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: ['pkgName'],

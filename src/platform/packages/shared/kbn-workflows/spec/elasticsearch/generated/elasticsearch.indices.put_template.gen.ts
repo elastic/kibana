@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  indices_put_template1_request,
+  indices_put_template1_response,
+  indices_put_template_request,
+  indices_put_template_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  indices_put_template_request,
-  indices_put_template_response,
-  indices_put_template1_request,
-  indices_put_template1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const INDICES_PUT_TEMPLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.put_template',
-  connectorGroup: 'internal',
   summary: `Create or update a legacy index template`,
   description: `Create or update a legacy index template.
 

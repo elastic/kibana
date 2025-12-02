@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   ml_stop_trained_model_deployment_request,
   ml_stop_trained_model_deployment_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const ML_STOP_TRAINED_MODEL_DEPLOYMENT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.stop_trained_model_deployment',
-  connectorGroup: 'internal',
   summary: `Stop a trained model deployment`,
   description: `Stop a trained model deployment.
 
@@ -42,7 +41,7 @@ export const ML_STOP_TRAINED_MODEL_DEPLOYMENT_CONTRACT: InternalConnectorContrac
     headerParams: [],
     pathParams: ['model_id'],
     urlParams: ['allow_no_match', 'force'],
-    bodyParams: [],
+    bodyParams: ['id', 'allow_no_match', 'force'],
   },
   paramsSchema: z.object({
     ...getShapeAt(ml_stop_trained_model_deployment_request, 'body'),

@@ -16,26 +16,25 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
-  mtermvectors_request,
-  mtermvectors_response,
   mtermvectors1_request,
   mtermvectors1_response,
   mtermvectors2_request,
   mtermvectors2_response,
   mtermvectors3_request,
   mtermvectors3_response,
+  mtermvectors_request,
+  mtermvectors_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const MTERMVECTORS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.mtermvectors',
-  connectorGroup: 'internal',
   summary: `Get multiple term vectors`,
   description: `Get multiple term vectors.
 

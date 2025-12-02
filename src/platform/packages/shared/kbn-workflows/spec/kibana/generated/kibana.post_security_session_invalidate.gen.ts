@@ -16,28 +16,28 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   post_security_session_invalidate_request,
   post_security_session_invalidate_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const POST_SECURITY_SESSION_INVALIDATE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_security_session_invalidate',
-  connectorGroup: 'internal',
   summary: `Invalidate user sessions`,
   description: `Invalidate user sessions that match a query. To use this API, you must be a superuser.
 `,
   methods: ['POST'],
   patterns: ['/api/security/session/_invalidate'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-security-session-invalidate',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: [],

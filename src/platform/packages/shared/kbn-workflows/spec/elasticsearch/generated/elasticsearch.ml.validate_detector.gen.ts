@@ -16,12 +16,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
+
 import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const ML_VALIDATE_DETECTOR_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.validate_detector',
-  connectorGroup: 'internal',
   summary: null,
   description: `Validate an anomaly detection job.
 

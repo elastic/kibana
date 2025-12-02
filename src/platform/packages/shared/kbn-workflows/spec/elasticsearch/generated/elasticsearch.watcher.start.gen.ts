@@ -16,17 +16,16 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { watcher_start_request, watcher_start_response } from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { watcher_start_request, watcher_start_response } from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const WATCHER_START_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.watcher.start',
-  connectorGroup: 'internal',
   summary: `Start the watch service`,
   description: `Start the watch service.
 

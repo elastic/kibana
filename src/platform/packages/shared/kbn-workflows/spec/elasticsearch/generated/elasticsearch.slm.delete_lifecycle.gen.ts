@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   slm_delete_lifecycle_request,
   slm_delete_lifecycle_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const SLM_DELETE_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.slm.delete_lifecycle',
-  connectorGroup: 'internal',
   summary: `Delete a policy`,
   description: `Delete a policy.
 

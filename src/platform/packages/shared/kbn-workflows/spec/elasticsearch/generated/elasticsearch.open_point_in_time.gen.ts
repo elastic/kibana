@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   open_point_in_time_request,
   open_point_in_time_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const OPEN_POINT_IN_TIME_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.open_point_in_time',
-  connectorGroup: 'internal',
   summary: `Open a point in time`,
   description: `Open a point in time.
 

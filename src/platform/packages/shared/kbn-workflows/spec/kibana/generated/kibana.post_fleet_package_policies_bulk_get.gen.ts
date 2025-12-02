@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   post_fleet_package_policies_bulk_get_request,
   post_fleet_package_policies_bulk_get_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const POST_FLEET_PACKAGE_POLICIES_BULK_GET_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_package_policies_bulk_get',
-  connectorGroup: 'internal',
   summary: `Bulk get package policies`,
   description: `**Spaces method and path for this operation:**
 
@@ -40,7 +39,8 @@ export const POST_FLEET_PACKAGE_POLICIES_BULK_GET_CONTRACT: InternalConnectorCon
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/fleet/package_policies/_bulk_get'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-package-policies-bulk-get',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: [],

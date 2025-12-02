@@ -16,12 +16,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { put_streams_streamname_attachments_attachmenttype_attachmentid_request } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { put_streams_streamname_attachments_attachmenttype_attachmentid_request } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
@@ -29,7 +29,6 @@ import { FetcherConfigSchema } from '../../schema';
 export const PUT_STREAMS_STREAMNAME_ATTACHMENTS_ATTACHMENTTYPE_ATTACHMENTID_CONTRACT: InternalConnectorContract =
   {
     type: 'kibana.put_streams_streamname_attachments_attachmenttype_attachmentid',
-    connectorGroup: 'internal',
     summary: `Link an attachment to a stream`,
     description: `**Spaces method and path for this operation:**
 
@@ -40,7 +39,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Links an attachment to a stream. Noop if the attachment is already linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
     methods: ['PUT'],
     patterns: ['/api/streams/{streamName}/attachments/{attachmentType}/{attachmentId}'],
-    documentation: null,
+    documentation:
+      'https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-streams-streamname-attachments-attachmenttype-attachmentid',
     parameterTypes: {
       headerParams: ['kbn-xsrf'],
       pathParams: ['streamName', 'attachmentType', 'attachmentId'],

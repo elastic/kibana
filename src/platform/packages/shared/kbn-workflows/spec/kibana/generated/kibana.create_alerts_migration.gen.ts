@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   create_alerts_migration_request,
   create_alerts_migration_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const CREATE_ALERTS_MIGRATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateAlertsMigration',
-  connectorGroup: 'internal',
   summary: `Initiate a detection alert migration`,
   description: `**Spaces method and path for this operation:**
 
@@ -44,7 +43,8 @@ Migrations are initiated per index. While the process is neither destructive nor
 `,
   methods: ['POST'],
   patterns: ['/api/detection_engine/signals/migration'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-createalertsmigration',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

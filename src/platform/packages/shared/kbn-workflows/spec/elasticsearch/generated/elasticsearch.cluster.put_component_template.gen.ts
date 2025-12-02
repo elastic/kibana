@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  cluster_put_component_template1_request,
+  cluster_put_component_template1_response,
+  cluster_put_component_template_request,
+  cluster_put_component_template_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  cluster_put_component_template_request,
-  cluster_put_component_template_response,
-  cluster_put_component_template1_request,
-  cluster_put_component_template1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const CLUSTER_PUT_COMPONENT_TEMPLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cluster.put_component_template',
-  connectorGroup: 'internal',
   summary: `Create or update a component template`,
   description: `Create or update a component template.
 

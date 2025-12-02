@@ -16,24 +16,24 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { post_security_role_query_request } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { post_security_role_query_request } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const POST_SECURITY_ROLE_QUERY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_security_role_query',
-  connectorGroup: 'internal',
   summary: `Query roles`,
   description: null,
   methods: ['POST'],
   patterns: ['/api/security/role/_query'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-security-role-query',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: [],

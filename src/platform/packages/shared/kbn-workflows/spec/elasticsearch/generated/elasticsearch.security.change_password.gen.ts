@@ -16,26 +16,25 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
-  security_change_password_request,
-  security_change_password_response,
   security_change_password1_request,
   security_change_password1_response,
   security_change_password2_request,
   security_change_password2_response,
   security_change_password3_request,
   security_change_password3_response,
+  security_change_password_request,
+  security_change_password_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const SECURITY_CHANGE_PASSWORD_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.change_password',
-  connectorGroup: 'internal',
   summary: `Change passwords`,
   description: `Change passwords.
 

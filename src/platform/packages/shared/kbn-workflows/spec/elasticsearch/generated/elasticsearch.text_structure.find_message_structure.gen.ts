@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  text_structure_find_message_structure1_request,
+  text_structure_find_message_structure1_response,
+  text_structure_find_message_structure_request,
+  text_structure_find_message_structure_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  text_structure_find_message_structure_request,
-  text_structure_find_message_structure_response,
-  text_structure_find_message_structure1_request,
-  text_structure_find_message_structure1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const TEXT_STRUCTURE_FIND_MESSAGE_STRUCTURE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.text_structure.find_message_structure',
-  connectorGroup: 'internal',
   summary: `Find the structure of text messages`,
   description: `Find the structure of text messages.
 

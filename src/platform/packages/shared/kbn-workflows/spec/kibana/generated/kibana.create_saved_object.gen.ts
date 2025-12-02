@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   create_saved_object_request,
   create_saved_object_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const CREATE_SAVED_OBJECT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createSavedObject',
-  connectorGroup: 'internal',
   summary: `Create a saved object`,
   description: `**Spaces method and path for this operation:**
 
@@ -42,7 +41,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Create a Kibana saved object with a randomly generated identifier.`,
   methods: ['POST'],
   patterns: ['/api/saved_objects/{type}'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-createsavedobject',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: ['type'],

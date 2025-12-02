@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   get_saved_object_request,
   get_saved_object_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const GET_SAVED_OBJECT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getSavedObject',
-  connectorGroup: 'internal',
   summary: `Get a saved object`,
   description: `**Spaces method and path for this operation:**
 
@@ -42,7 +41,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Retrieve a single Kibana saved object by identifier.`,
   methods: ['GET'],
   patterns: ['/api/saved_objects/{type}/{id}'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-getsavedobject',
   parameterTypes: {
     headerParams: [],
     pathParams: ['id', 'type'],

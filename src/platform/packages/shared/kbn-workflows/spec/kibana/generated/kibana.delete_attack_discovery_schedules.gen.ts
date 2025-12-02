@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   delete_attack_discovery_schedules_request,
   delete_attack_discovery_schedules_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const DELETE_ATTACK_DISCOVERY_SCHEDULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteAttackDiscoverySchedules',
-  connectorGroup: 'internal',
   summary: `Delete Attack discovery schedule`,
   description: `**Spaces method and path for this operation:**
 
@@ -42,7 +41,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Permanently deletes an Attack discovery schedule and all associated configuration. \`Technical preview\``,
   methods: ['DELETE'],
   patterns: ['/api/attack_discovery/schedules/{id}'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-deleteattackdiscoveryschedules',
   parameterTypes: {
     headerParams: [],
     pathParams: ['id'],

@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  cat_circuit_breaker1_request,
+  cat_circuit_breaker1_response,
+  cat_circuit_breaker_request,
+  cat_circuit_breaker_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  cat_circuit_breaker_request,
-  cat_circuit_breaker_response,
-  cat_circuit_breaker1_request,
-  cat_circuit_breaker1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const CAT_CIRCUIT_BREAKER_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.circuit_breaker',
-  connectorGroup: 'internal',
   summary: `Get circuit breakers statistics`,
   description: `Get circuit breakers statistics.
 

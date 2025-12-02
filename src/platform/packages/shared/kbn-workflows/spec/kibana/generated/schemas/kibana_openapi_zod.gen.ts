@@ -28554,7 +28554,8 @@ export const post_fleet_epm_custom_integrations_response = z.object({
                 'data_stream_ilm_policy',
                 'transform',
                 'ml_model',
-                'knowledge_base'
+                'knowledge_base',
+                'esql_view'
             ]),
             version: z.optional(z.string())
         })]))
@@ -28710,7 +28711,8 @@ export const get_fleet_epm_packages_response = z.object({
                     'data_stream_ilm_policy',
                     'transform',
                     'ml_model',
-                    'knowledge_base'
+                    'knowledge_base',
+                    'esql_view'
                 ]),
                 version: z.optional(z.string())
             })),
@@ -28866,7 +28868,8 @@ export const post_fleet_epm_packages_response = z.object({
                 'data_stream_ilm_policy',
                 'transform',
                 'ml_model',
-                'knowledge_base'
+                'knowledge_base',
+                'esql_view'
             ]),
             version: z.optional(z.string())
         })]))
@@ -28934,7 +28937,8 @@ export const post_fleet_epm_packages_bulk_response = z.object({
                             'data_stream_ilm_policy',
                             'transform',
                             'ml_model',
-                            'knowledge_base'
+                            'knowledge_base',
+                            'esql_view'
                         ]),
                         version: z.optional(z.string())
                     })]))),
@@ -29176,7 +29180,8 @@ export const delete_fleet_epm_packages_pkgname_pkgversion_response = z.object({
                 'data_stream_ilm_policy',
                 'transform',
                 'ml_model',
-                'knowledge_base'
+                'knowledge_base',
+                'esql_view'
             ]),
             version: z.optional(z.string())
         })]))
@@ -29302,7 +29307,8 @@ export const get_fleet_epm_packages_pkgname_pkgversion_response = z.object({
                     'data_stream_ilm_policy',
                     'transform',
                     'ml_model',
-                    'knowledge_base'
+                    'knowledge_base',
+                    'esql_view'
                 ]),
                 version: z.optional(z.string())
             })),
@@ -29482,7 +29488,8 @@ export const post_fleet_epm_packages_pkgname_pkgversion_response = z.object({
                 'data_stream_ilm_policy',
                 'transform',
                 'ml_model',
-                'knowledge_base'
+                'knowledge_base',
+                'esql_view'
             ]),
             version: z.optional(z.string())
         })]))
@@ -29610,7 +29617,8 @@ export const put_fleet_epm_packages_pkgname_pkgversion_response = z.object({
                     'data_stream_ilm_policy',
                     'transform',
                     'ml_model',
-                    'knowledge_base'
+                    'knowledge_base',
+                    'esql_view'
                 ]),
                 version: z.optional(z.string())
             })),
@@ -40021,7 +40029,8 @@ export const put_streams_name_request = z.object({
                     })),
                     kql: z.object({
                         query: z.string()
-                    })
+                    }),
+                    severity_score: z.optional(z.number())
                 }))),
                 rules: z.array(z.string())
             })).and(z.object({
@@ -41620,7 +41629,8 @@ export const put_streams_name_request = z.object({
                     })),
                     kql: z.object({
                         query: z.string()
-                    })
+                    }),
+                    severity_score: z.optional(z.number())
                 }))),
                 rules: z.array(z.string())
             })).and(z.object({
@@ -43081,7 +43091,8 @@ export const put_streams_name_request = z.object({
                     })),
                     kql: z.object({
                         query: z.string()
-                    })
+                    }),
+                    severity_score: z.optional(z.number())
                 }))),
                 rules: z.array(z.string())
             })).and(z.object({
@@ -44583,7 +44594,8 @@ export const put_streams_name_request = z.object({
                     })),
                     kql: z.object({
                         query: z.string()
-                    })
+                    }),
+                    severity_score: z.optional(z.number())
                 }))),
                 rules: z.array(z.string())
             })).and(z.object({
@@ -46045,7 +46057,8 @@ export const put_streams_name_request = z.object({
                 })),
                 kql: z.object({
                     query: z.string()
-                })
+                }),
+                severity_score: z.optional(z.number())
             }))),
             rules: z.array(z.string())
         })).and(z.object({
@@ -49262,7 +49275,8 @@ export const post_streams_name_queries_bulk_request = z.object({
                     })),
                     kql: z.object({
                         query: z.string()
-                    })
+                    }),
+                    severity_score: z.optional(z.number())
                 }))
             }), z.object({
                 delete: z.object({
@@ -49400,6 +49414,7 @@ export const put_streams_name_queries_queryid_request = z.object({
         kql: z.object({
             query: z.string()
         }),
+        severity_score: z.optional(z.number()),
         title: z.string().min(1)
     })),
     path: z.object({

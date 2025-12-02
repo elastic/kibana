@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  security_put_role_mapping1_request,
+  security_put_role_mapping1_response,
+  security_put_role_mapping_request,
+  security_put_role_mapping_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  security_put_role_mapping_request,
-  security_put_role_mapping_response,
-  security_put_role_mapping1_request,
-  security_put_role_mapping1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const SECURITY_PUT_ROLE_MAPPING_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.put_role_mapping',
-  connectorGroup: 'internal',
   summary: `Create or update role mappings`,
   description: `Create or update role mappings.
 

@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  ingest_get_ip_location_database1_request,
+  ingest_get_ip_location_database1_response,
+  ingest_get_ip_location_database_request,
+  ingest_get_ip_location_database_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  ingest_get_ip_location_database_request,
-  ingest_get_ip_location_database_response,
-  ingest_get_ip_location_database1_request,
-  ingest_get_ip_location_database1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const INGEST_GET_IP_LOCATION_DATABASE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ingest.get_ip_location_database',
-  connectorGroup: 'internal',
   summary: `Get IP geolocation database configurations`,
   description: `Get IP geolocation database configurations.
 

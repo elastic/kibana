@@ -16,19 +16,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { get_annotation_request, get_annotation_response } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { get_annotation_request, get_annotation_response } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const GET_ANNOTATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getAnnotation',
-  connectorGroup: 'internal',
   summary: `Search for annotations`,
   description: `**Spaces method and path for this operation:**
 
@@ -39,7 +38,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Search for annotations related to a specific service.`,
   methods: ['GET'],
   patterns: ['/api/apm/services/{serviceName}/annotation/search'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-getannotation',
   parameterTypes: {
     headerParams: ['elastic-api-version'],
     pathParams: ['serviceName'],

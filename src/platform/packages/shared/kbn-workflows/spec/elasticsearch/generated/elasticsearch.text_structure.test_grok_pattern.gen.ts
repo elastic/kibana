@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  text_structure_test_grok_pattern1_request,
+  text_structure_test_grok_pattern1_response,
+  text_structure_test_grok_pattern_request,
+  text_structure_test_grok_pattern_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  text_structure_test_grok_pattern_request,
-  text_structure_test_grok_pattern_response,
-  text_structure_test_grok_pattern1_request,
-  text_structure_test_grok_pattern1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const TEXT_STRUCTURE_TEST_GROK_PATTERN_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.text_structure.test_grok_pattern',
-  connectorGroup: 'internal',
   summary: `Test a Grok pattern`,
   description: `Test a Grok pattern.
 

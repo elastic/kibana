@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   read_privileges_request,
   read_privileges_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const READ_PRIVILEGES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadPrivileges',
-  connectorGroup: 'internal',
   summary: `Returns user privileges for the Kibana space`,
   description: `**Spaces method and path for this operation:**
 
@@ -46,7 +45,7 @@ detection engine rules.
 `,
   methods: ['GET'],
   patterns: ['/api/detection_engine/privileges'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-readprivileges',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

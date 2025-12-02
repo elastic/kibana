@@ -16,17 +16,16 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { slm_get_stats_request, slm_get_stats_response } from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { slm_get_stats_request, slm_get_stats_response } from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const SLM_GET_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.slm.get_stats',
-  connectorGroup: 'internal',
   summary: `Get snapshot lifecycle management statistics`,
   description: `Get snapshot lifecycle management statistics.
 

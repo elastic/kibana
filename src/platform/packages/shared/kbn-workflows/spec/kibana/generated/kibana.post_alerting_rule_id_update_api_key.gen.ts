@@ -16,19 +16,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { post_alerting_rule_id_update_api_key_request } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { post_alerting_rule_id_update_api_key_request } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const POST_ALERTING_RULE_ID_UPDATE_API_KEY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_alerting_rule_id_update_api_key',
-  connectorGroup: 'internal',
   summary: `Update the API key for a rule`,
   description: `**Spaces method and path for this operation:**
 
@@ -37,7 +36,8 @@ export const POST_ALERTING_RULE_ID_UPDATE_API_KEY_CONTRACT: InternalConnectorCon
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/alerting/rule/{id}/_update_api_key'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-alerting-rule-id-update-api-key',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: ['id'],

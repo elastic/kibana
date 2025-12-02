@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { OpenAPIV3 } from 'openapi-types';
 import type { InternalConnectorContract } from '../../types/latest';
 
 export interface ContractMeta
@@ -18,4 +19,8 @@ export interface ContractMeta
   outputSchemaString: string;
   schemaImports: string[];
   additionalImports?: string[];
+}
+
+export interface OperationObjectWithOperationId extends OpenAPIV3.OperationObject {
+  operationId: string;
 }

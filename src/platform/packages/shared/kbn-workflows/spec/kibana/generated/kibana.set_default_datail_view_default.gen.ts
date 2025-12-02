@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   set_default_datail_view_default_request,
   set_default_datail_view_default_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const SET_DEFAULT_DATAIL_VIEW_DEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.setDefaultDatailViewDefault',
-  connectorGroup: 'internal',
   summary: `Set the default data view`,
   description: `**Spaces method and path for this operation:**
 
@@ -40,7 +39,8 @@ export const SET_DEFAULT_DATAIL_VIEW_DEFAULT_CONTRACT: InternalConnectorContract
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/data_views/default'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-setdefaultdatailviewdefault',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: [],

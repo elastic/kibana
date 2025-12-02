@@ -16,12 +16,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
+
 import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const AUTOSCALING_PUT_AUTOSCALING_POLICY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.autoscaling.put_autoscaling_policy',
-  connectorGroup: 'internal',
   summary: null,
   description: `Create or update an autoscaling policy.
 

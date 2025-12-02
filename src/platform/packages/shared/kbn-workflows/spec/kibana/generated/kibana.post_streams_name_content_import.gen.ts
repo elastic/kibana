@@ -16,19 +16,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { post_streams_name_content_import_request } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { post_streams_name_content_import_request } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const POST_STREAMS_NAME_CONTENT_IMPORT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_streams_name_content_import',
-  connectorGroup: 'internal',
   summary: `Import content into a stream`,
   description: `**Spaces method and path for this operation:**
 
@@ -39,7 +38,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Links content objects to a stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
   methods: ['POST'],
   patterns: ['/api/streams/{name}/content/import'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-streams-name-content-import',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: ['name'],

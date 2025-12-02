@@ -16,26 +16,25 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
-  count_request,
-  count_response,
   count1_request,
   count1_response,
   count2_request,
   count2_response,
   count3_request,
   count3_response,
+  count_request,
+  count_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const COUNT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.count',
-  connectorGroup: 'internal',
   summary: `Count search results`,
   description: `Count search results.
 

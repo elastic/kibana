@@ -16,19 +16,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { upsert_entity_request, upsert_entity_response } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { upsert_entity_request, upsert_entity_response } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const UPSERT_ENTITY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpsertEntity',
-  connectorGroup: 'internal',
   summary: `Upsert an entity in Entity Store`,
   description: `**Spaces method and path for this operation:**
 
@@ -43,7 +42,7 @@ If the specified entity already exists, it is updated with the provided values. 
 `,
   methods: ['PUT'],
   patterns: ['/api/entity_store/entities/{entityType}'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-upsertentity',
   parameterTypes: {
     headerParams: [],
     pathParams: ['entityType'],

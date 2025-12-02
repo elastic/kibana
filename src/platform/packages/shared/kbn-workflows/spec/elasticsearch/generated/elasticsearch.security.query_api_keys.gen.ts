@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  security_query_api_keys1_request,
+  security_query_api_keys1_response,
+  security_query_api_keys_request,
+  security_query_api_keys_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  security_query_api_keys_request,
-  security_query_api_keys_response,
-  security_query_api_keys1_request,
-  security_query_api_keys1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const SECURITY_QUERY_API_KEYS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.query_api_keys',
-  connectorGroup: 'internal',
   summary: `Find API keys with a query`,
   description: `Find API keys with a query.
 

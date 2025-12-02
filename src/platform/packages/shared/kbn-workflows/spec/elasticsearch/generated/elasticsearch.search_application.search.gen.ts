@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  search_application_search1_request,
+  search_application_search1_response,
+  search_application_search_request,
+  search_application_search_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  search_application_search_request,
-  search_application_search_response,
-  search_application_search1_request,
-  search_application_search1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const SEARCH_APPLICATION_SEARCH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.search_application.search',
-  connectorGroup: 'internal',
   summary: `Run a search application search`,
   description: `Run a search application search.
 

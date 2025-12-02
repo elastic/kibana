@@ -16,12 +16,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
+
 import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const PROJECT_TAGS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.project.tags',
-  connectorGroup: 'internal',
   summary: null,
   description: `Get tags.
 

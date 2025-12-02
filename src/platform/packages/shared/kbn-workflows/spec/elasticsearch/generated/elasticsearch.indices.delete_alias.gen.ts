@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  indices_delete_alias1_request,
+  indices_delete_alias1_response,
+  indices_delete_alias_request,
+  indices_delete_alias_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  indices_delete_alias_request,
-  indices_delete_alias_response,
-  indices_delete_alias1_request,
-  indices_delete_alias1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const INDICES_DELETE_ALIAS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.delete_alias',
-  connectorGroup: 'internal',
   summary: `Delete an alias`,
   description: `Delete an alias.
 

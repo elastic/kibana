@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   get_source_maps_request,
   get_source_maps_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const GET_SOURCE_MAPS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getSourceMaps',
-  connectorGroup: 'internal',
   summary: `Get source maps`,
   description: `**Spaces method and path for this operation:**
 
@@ -43,7 +42,7 @@ Get an array of Fleet artifacts, including source map uploads. You must have \`r
 `,
   methods: ['GET'],
   patterns: ['/api/apm/sourcemaps'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-getsourcemaps',
   parameterTypes: {
     headerParams: ['elastic-api-version'],
     pathParams: [],

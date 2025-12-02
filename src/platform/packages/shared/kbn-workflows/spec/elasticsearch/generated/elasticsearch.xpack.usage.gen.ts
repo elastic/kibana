@@ -16,17 +16,16 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { xpack_usage_request, xpack_usage_response } from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { xpack_usage_request, xpack_usage_response } from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const XPACK_USAGE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.xpack.usage',
-  connectorGroup: 'internal',
   summary: `Get usage information`,
   description: `Get usage information.
 

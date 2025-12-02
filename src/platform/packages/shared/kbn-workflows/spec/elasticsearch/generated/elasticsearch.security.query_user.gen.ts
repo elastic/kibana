@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  security_query_user1_request,
+  security_query_user1_response,
+  security_query_user_request,
+  security_query_user_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  security_query_user_request,
-  security_query_user_response,
-  security_query_user1_request,
-  security_query_user1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const SECURITY_QUERY_USER_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.query_user',
-  connectorGroup: 'internal',
   summary: `Find users with a query`,
   description: `Find users with a query.
 

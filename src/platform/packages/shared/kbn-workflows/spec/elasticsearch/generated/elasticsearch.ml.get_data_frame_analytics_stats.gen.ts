@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  ml_get_data_frame_analytics_stats1_request,
+  ml_get_data_frame_analytics_stats1_response,
+  ml_get_data_frame_analytics_stats_request,
+  ml_get_data_frame_analytics_stats_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  ml_get_data_frame_analytics_stats_request,
-  ml_get_data_frame_analytics_stats_response,
-  ml_get_data_frame_analytics_stats1_request,
-  ml_get_data_frame_analytics_stats1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const ML_GET_DATA_FRAME_ANALYTICS_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_data_frame_analytics_stats',
-  connectorGroup: 'internal',
   summary: `Get data frame analytics job stats`,
   description: `Get data frame analytics job stats.
 

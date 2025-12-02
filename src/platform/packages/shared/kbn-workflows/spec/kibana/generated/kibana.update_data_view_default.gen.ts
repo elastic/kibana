@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   update_data_view_default_request,
   update_data_view_default_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const UPDATE_DATA_VIEW_DEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.updateDataViewDefault',
-  connectorGroup: 'internal',
   summary: `Update a data view`,
   description: `**Spaces method and path for this operation:**
 
@@ -40,7 +39,8 @@ export const UPDATE_DATA_VIEW_DEFAULT_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/data_views/data_view/{viewId}'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-updatedataviewdefault',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: ['viewId'],

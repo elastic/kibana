@@ -16,12 +16,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
+
 import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const CONNECTOR_SECRET_DELETE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.secret_delete',
-  connectorGroup: 'internal',
   summary: null,
   description: `Deletes a connector secret.
 

@@ -16,19 +16,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { delete_timelines_request } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { delete_timelines_request } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const DELETE_TIMELINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteTimelines',
-  connectorGroup: 'internal',
   summary: `Delete Timelines or Timeline templates`,
   description: `**Spaces method and path for this operation:**
 
@@ -39,7 +38,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Delete one or more Timelines or Timeline templates.`,
   methods: ['DELETE'],
   patterns: ['/api/timeline'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-deletetimelines',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

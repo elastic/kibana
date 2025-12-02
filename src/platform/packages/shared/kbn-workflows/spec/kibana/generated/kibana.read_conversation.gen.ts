@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   read_conversation_request,
   read_conversation_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const READ_CONVERSATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadConversation',
-  connectorGroup: 'internal',
   summary: `Get a conversation`,
   description: `**Spaces method and path for this operation:**
 
@@ -42,7 +41,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get the details of an existing conversation using the conversation ID. This allows users to fetch the specific conversation data by its unique ID.`,
   methods: ['GET'],
   patterns: ['/api/security_ai_assistant/current_user/conversations/{id}'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-readconversation',
   parameterTypes: {
     headerParams: [],
     pathParams: ['id'],

@@ -16,17 +16,16 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { cluster_post_voting_config_exclusions_request } from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { cluster_post_voting_config_exclusions_request } from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const CLUSTER_POST_VOTING_CONFIG_EXCLUSIONS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cluster.post_voting_config_exclusions',
-  connectorGroup: 'internal',
   summary: `Update voting configuration exclusions`,
   description: `Update voting configuration exclusions.
 

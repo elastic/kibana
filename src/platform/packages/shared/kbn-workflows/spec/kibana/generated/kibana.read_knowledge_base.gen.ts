@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   read_knowledge_base_request,
   read_knowledge_base_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const READ_KNOWLEDGE_BASE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadKnowledgeBase',
-  connectorGroup: 'internal',
   summary: `Read a KnowledgeBase for a resource`,
   description: `**Spaces method and path for this operation:**
 
@@ -42,7 +41,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Read a knowledge base with a specific resource identifier.`,
   methods: ['GET'],
   patterns: ['/api/security_ai_assistant/knowledge_base/{resource}'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-readknowledgebase',
   parameterTypes: {
     headerParams: [],
     pathParams: ['resource'],

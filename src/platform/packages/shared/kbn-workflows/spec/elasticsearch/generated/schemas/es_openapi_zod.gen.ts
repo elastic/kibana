@@ -2041,6 +2041,8 @@ export const types_specified_document = z.object({
     id: types_id
 });
 
+export const types_diversify_retriever_types = z.enum(['mmr']);
+
 export const types_sliced_scroll = z.object({
     field: z.optional(types_field),
     id: types_id,
@@ -20158,6 +20160,19 @@ export const text_structure_test_grok_pattern_matched_text = z.object({
     fields: z.optional(z.record(z.string(), z.array(text_structure_test_grok_pattern_matched_field)))
 });
 
+export const transform_get_node_stats_transform_node_stats_details = z.object({
+    registered_transform_count: z.number(),
+    peek_transform: z.optional(z.string())
+});
+
+export const transform_get_node_stats_scheduler = z.object({
+    scheduler: transform_get_node_stats_transform_node_stats_details
+});
+
+export const transform_get_node_stats_transform_node_stats = z.object({
+    total: transform_get_node_stats_scheduler
+});
+
 export const ml_types_transform_authorization = z.object({
     api_key: z.optional(ml_types_api_key_authorization),
     roles: z.optional(z.array(z.string()).register(z.globalRegistry, {
@@ -22259,6 +22274,9 @@ export const types_retriever_container = z.object({
     },
     get pinned() {
         return z.optional(z.lazy((): any => types_pinned_retriever));
+    },
+    get diversify() {
+        return z.optional(z.lazy((): any => types_diversify_retriever));
     }
 });
 
@@ -22404,6 +22422,24 @@ export const types_pinned_retriever = types_retriever_base.and(z.object({
     ids: z.optional(z.array(z.string())),
     docs: z.optional(z.array(types_specified_document)),
     rank_window_size: z.optional(z.number())
+}));
+
+export const types_diversify_retriever = types_retriever_base.and(z.object({
+    type: types_diversify_retriever_types,
+    field: z.string().register(z.globalRegistry, {
+        description: 'The document field on which to diversify results on.'
+    }),
+    retriever: types_retriever_container,
+    size: z.optional(z.number().register(z.globalRegistry, {
+        description: 'The number of top documents to return after diversification.'
+    })),
+    rank_window_size: z.optional(z.number().register(z.globalRegistry, {
+        description: 'The number of top documents from the nested retriever to consider for diversification.'
+    })),
+    query_vector: z.optional(types_query_vector),
+    lambda: z.optional(z.number().register(z.globalRegistry, {
+        description: 'Controls the trade-off between relevance and diversity for MMR. A value of 0.0 focuses solely on diversity, while a value of 1.0 focuses solely on relevance. Required for MMR'
+    }))
 }));
 
 export const types_mapping_runtime_fields = z.record(z.string(), z.lazy((): any => types_mapping_runtime_field));
@@ -40612,7 +40648,10 @@ export const ml_set_upgrade_mode_request = z.object({
 export const ml_set_upgrade_mode_response = types_acknowledged_response_base;
 
 export const ml_start_data_frame_analytics_request = z.object({
-    body: z.optional(z.never()),
+    body: z.optional(z.object({
+        id: z.optional(types_id),
+        timeout: z.optional(types_duration)
+    })),
     path: z.object({
         id: types_id
     }),
@@ -40681,7 +40720,16 @@ export const ml_start_trained_model_deployment_response = z.object({
 });
 
 export const ml_stop_data_frame_analytics_request = z.object({
-    body: z.optional(z.never()),
+    body: z.optional(z.object({
+        id: z.optional(types_id),
+        allow_no_match: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'Specifies what to do when the request:\n\n1. Contains wildcard expressions and there are no data frame analytics\njobs that match.\n2. Contains the _all string or no identifiers and there are no matches.\n3. Contains wildcard expressions and there are only partial matches.\n\nThe default value is true, which returns an empty data_frame_analytics\narray when there are no matches and the subset of results when there are\npartial matches. If this parameter is false, the request returns a 404\nstatus code when there are no matches or only partial matches.'
+        })).default(true),
+        force: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If true, the data frame analytics job is stopped forcefully.'
+        })).default(false),
+        timeout: z.optional(types_duration)
+    })),
     path: z.object({
         id: types_id
     }),
@@ -40729,7 +40777,15 @@ export const ml_stop_datafeed_response = z.object({
 });
 
 export const ml_stop_trained_model_deployment_request = z.object({
-    body: z.optional(z.never()),
+    body: z.optional(z.object({
+        id: z.optional(types_id),
+        allow_no_match: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'Specifies what to do when the request: contains wildcard expressions and there are no deployments that match;\ncontains the  `_all` string or no identifiers and there are no matches; or contains wildcard expressions and\nthere are only partial matches. By default, it returns an empty array when there are no matches and the subset of results when there are partial matches.\nIf `false`, the request returns a 404 status code when there are no matches or only partial matches.'
+        })).default(true),
+        force: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'Forcefully stops the deployment, even if it is used by ingest pipelines. You can\'t use these pipelines until you\nrestart the model deployment.'
+        })).default(false)
+    })),
     path: z.object({
         model_id: types_id
     }),
@@ -43837,6 +43893,14 @@ export const transform_delete_transform_request = z.object({
 });
 
 export const transform_delete_transform_response = types_acknowledged_response_base;
+
+export const transform_get_node_stats_request = z.object({
+    body: z.optional(z.never()),
+    path: z.optional(z.never()),
+    query: z.optional(z.never())
+});
+
+export const transform_get_node_stats_response = transform_get_node_stats_transform_node_stats;
 
 export const transform_get_transform_stats_request = z.object({
     body: z.optional(z.never()),

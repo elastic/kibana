@@ -16,17 +16,16 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { ml_close_job_request, ml_close_job_response } from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { ml_close_job_request, ml_close_job_response } from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const ML_CLOSE_JOB_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.close_job',
-  connectorGroup: 'internal',
   summary: `Close anomaly detection jobs`,
   description: `Close anomaly detection jobs.
 

@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   enable_attack_discovery_schedules_request,
   enable_attack_discovery_schedules_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const ENABLE_ATTACK_DISCOVERY_SCHEDULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EnableAttackDiscoverySchedules',
-  connectorGroup: 'internal',
   summary: `Enable Attack discovery schedule`,
   description: `**Spaces method and path for this operation:**
 
@@ -42,7 +41,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Enables a previously disabled Attack discovery schedule, allowing it to run according to its configured interval. Once enabled, the schedule will begin executing at the next scheduled time based on its interval configuration. \`Technical preview\``,
   methods: ['POST'],
   patterns: ['/api/attack_discovery/schedules/{id}/_enable'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-enableattackdiscoveryschedules',
   parameterTypes: {
     headerParams: [],
     pathParams: ['id'],

@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   endpoint_get_actions_state_request,
   endpoint_get_actions_state_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const ENDPOINT_GET_ACTIONS_STATE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointGetActionsState',
-  connectorGroup: 'internal',
   summary: `Get actions state`,
   description: `**Spaces method and path for this operation:**
 
@@ -42,7 +41,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get a response actions state, which reports whether encryption is enabled.`,
   methods: ['GET'],
   patterns: ['/api/endpoint/action/state'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-endpointgetactionsstate',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

@@ -16,19 +16,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { get_streams_streamname_attachments_request } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { get_streams_streamname_attachments_request } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const GET_STREAMS_STREAMNAME_ATTACHMENTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_streams_streamname_attachments',
-  connectorGroup: 'internal',
   summary: `Get stream attachments`,
   description: `**Spaces method and path for this operation:**
 
@@ -39,7 +38,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Fetches all attachments linked to a stream that are visible to the current user in the current space. Optionally filter by attachment type.<br/><br/>[Required authorization] Route required privileges: read_stream.`,
   methods: ['GET'],
   patterns: ['/api/streams/{streamName}/attachments'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-streams-streamname-attachments',
   parameterTypes: {
     headerParams: [],
     pathParams: ['streamName'],

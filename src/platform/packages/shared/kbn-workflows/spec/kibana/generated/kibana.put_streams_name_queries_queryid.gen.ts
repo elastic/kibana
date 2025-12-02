@@ -16,19 +16,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { put_streams_name_queries_queryid_request } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { put_streams_name_queries_queryid_request } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const PUT_STREAMS_NAME_QUERIES_QUERYID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_streams_name_queries_queryid',
-  connectorGroup: 'internal',
   summary: `Upsert a query to a stream`,
   description: `**Spaces method and path for this operation:**
 
@@ -39,12 +38,13 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Adds a query to a stream. Noop if the query is already present on the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
   methods: ['PUT'],
   patterns: ['/api/streams/{name}/queries/{queryId}'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-streams-name-queries-queryid',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: ['name', 'queryId'],
     urlParams: [],
-    bodyParams: ['feature', 'kql', 'title'],
+    bodyParams: ['feature', 'kql', 'severity_score', 'title'],
   },
   paramsSchema: z.object({
     ...getShapeAt(put_streams_name_queries_queryid_request, 'body'),

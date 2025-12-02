@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   cat_pending_tasks_request,
   cat_pending_tasks_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const CAT_PENDING_TASKS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.pending_tasks',
-  connectorGroup: 'internal',
   summary: `Get pending task information`,
   description: `Get pending task information.
 

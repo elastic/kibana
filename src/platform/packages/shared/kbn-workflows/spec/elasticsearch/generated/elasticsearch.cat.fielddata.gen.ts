@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  cat_fielddata1_request,
+  cat_fielddata1_response,
+  cat_fielddata_request,
+  cat_fielddata_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  cat_fielddata_request,
-  cat_fielddata_response,
-  cat_fielddata1_request,
-  cat_fielddata1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const CAT_FIELDDATA_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.fielddata',
-  connectorGroup: 'internal',
   summary: `Get field data cache information`,
   description: `Get field data cache information.
 

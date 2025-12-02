@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  security_enable_user_profile1_request,
+  security_enable_user_profile1_response,
+  security_enable_user_profile_request,
+  security_enable_user_profile_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  security_enable_user_profile_request,
-  security_enable_user_profile_response,
-  security_enable_user_profile1_request,
-  security_enable_user_profile1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const SECURITY_ENABLE_USER_PROFILE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.enable_user_profile',
-  connectorGroup: 'internal',
   summary: `Enable a user profile`,
   description: `Enable a user profile.
 

@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  ml_get_datafeeds1_request,
+  ml_get_datafeeds1_response,
+  ml_get_datafeeds_request,
+  ml_get_datafeeds_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  ml_get_datafeeds_request,
-  ml_get_datafeeds_response,
-  ml_get_datafeeds1_request,
-  ml_get_datafeeds1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const ML_GET_DATAFEEDS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_datafeeds',
-  connectorGroup: 'internal',
   summary: `Get datafeeds configuration info`,
   description: `Get datafeeds configuration info.
 

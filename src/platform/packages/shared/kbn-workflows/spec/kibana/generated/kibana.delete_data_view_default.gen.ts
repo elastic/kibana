@@ -16,19 +16,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { delete_data_view_default_request } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { delete_data_view_default_request } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const DELETE_DATA_VIEW_DEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteDataViewDefault',
-  connectorGroup: 'internal',
   summary: `Delete a data view`,
   description: `**Spaces method and path for this operation:**
 
@@ -40,7 +39,8 @@ WARNING: When you delete a data view, it cannot be recovered.
 `,
   methods: ['DELETE'],
   patterns: ['/api/data_views/data_view/{viewId}'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-deletedataviewdefault',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: ['viewId'],

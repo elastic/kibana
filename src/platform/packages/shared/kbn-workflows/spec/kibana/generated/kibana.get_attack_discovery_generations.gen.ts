@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   get_attack_discovery_generations_request,
   get_attack_discovery_generations_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const GET_ATTACK_DISCOVERY_GENERATIONS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetAttackDiscoveryGenerations',
-  connectorGroup: 'internal',
   summary: `Get the latest attack discovery generations metadata for the current user`,
   description: `**Spaces method and path for this operation:**
 
@@ -42,7 +41,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get the latest attack discovery generations metadata (that are not dismissed) for the current user. This endpoint retrieves generation metadata including execution status and statistics for Attack discovery generations. \`Technical preview\``,
   methods: ['GET'],
   patterns: ['/api/attack_discovery/generations'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-getattackdiscoverygenerations',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

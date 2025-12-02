@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   synonyms_delete_synonym_rule_request,
   synonyms_delete_synonym_rule_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const SYNONYMS_DELETE_SYNONYM_RULE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.synonyms.delete_synonym_rule',
-  connectorGroup: 'internal',
   summary: `Delete a synonym rule`,
   description: `Delete a synonym rule.
 

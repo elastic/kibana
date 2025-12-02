@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   license_post_start_trial_request,
   license_post_start_trial_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const LICENSE_POST_START_TRIAL_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.license.post_start_trial',
-  connectorGroup: 'internal',
   summary: `Start a trial`,
   description: `Start a trial.
 

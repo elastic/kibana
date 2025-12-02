@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   put_actions_connector_id_request,
   put_actions_connector_id_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const PUT_ACTIONS_CONNECTOR_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_actions_connector_id',
-  connectorGroup: 'internal',
   summary: `Update a connector`,
   description: `**Spaces method and path for this operation:**
 
@@ -40,7 +39,8 @@ export const PUT_ACTIONS_CONNECTOR_ID_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['PUT'],
   patterns: ['/api/actions/connector/{id}'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-actions-connector-id',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: ['id'],

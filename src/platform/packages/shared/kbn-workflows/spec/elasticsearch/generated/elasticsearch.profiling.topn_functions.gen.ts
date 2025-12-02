@@ -16,12 +16,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
+
 import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const PROFILING_TOPN_FUNCTIONS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.profiling.topn_functions',
-  connectorGroup: 'internal',
   summary: null,
   description: `Extracts a list of topN functions from Universal Profiling.
 

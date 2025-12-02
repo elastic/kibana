@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  cat_allocation1_request,
+  cat_allocation1_response,
+  cat_allocation_request,
+  cat_allocation_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  cat_allocation_request,
-  cat_allocation_response,
-  cat_allocation1_request,
-  cat_allocation1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const CAT_ALLOCATION_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.allocation',
-  connectorGroup: 'internal',
   summary: `Get shard allocation information`,
   description: `Get shard allocation information.
 

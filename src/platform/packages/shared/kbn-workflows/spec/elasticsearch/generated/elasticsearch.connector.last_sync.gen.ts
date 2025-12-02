@@ -16,12 +16,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
+
 import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const CONNECTOR_LAST_SYNC_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.last_sync',
-  connectorGroup: 'internal',
   summary: null,
   description: `Update the connector last sync stats.
 

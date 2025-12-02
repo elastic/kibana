@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   delete_list_index_request,
   delete_list_index_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const DELETE_LIST_INDEX_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteListIndex',
-  connectorGroup: 'internal',
   summary: `Delete value list data streams`,
   description: `**Spaces method and path for this operation:**
 
@@ -42,7 +41,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Delete the \`.lists\` and \`.items\` data streams.`,
   methods: ['DELETE'],
   patterns: ['/api/lists/index'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-deletelistindex',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

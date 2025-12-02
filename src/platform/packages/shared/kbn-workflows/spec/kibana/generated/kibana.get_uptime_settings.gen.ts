@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   get_uptime_settings_request,
   get_uptime_settings_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const GET_UPTIME_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_uptime_settings',
-  connectorGroup: 'internal',
   summary: `Get uptime settings`,
   description: `**Spaces method and path for this operation:**
 
@@ -43,7 +42,8 @@ You must have \`read\` privileges for the uptime feature in the Observability se
 `,
   methods: ['GET'],
   patterns: ['/api/uptime/settings'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-uptime-settings',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

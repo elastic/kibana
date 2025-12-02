@@ -16,28 +16,28 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   delete_rollup_data_op_request,
   delete_rollup_data_op_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const DELETE_ROLLUP_DATA_OP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteRollupDataOp',
-  connectorGroup: 'internal',
   summary: `Batch delete rollup and summary data`,
   description: `The deletion occurs for the specified list of \`sloId\`. You must have \`all\` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
 `,
   methods: ['POST'],
   patterns: ['/s/{spaceId}/api/observability/slos/_bulk_purge_rollup'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-deleterollupdataop',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: ['spaceId'],

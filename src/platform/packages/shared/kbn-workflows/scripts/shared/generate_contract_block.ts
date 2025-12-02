@@ -13,7 +13,6 @@ export function generateContractBlock(contract: ContractMeta): string {
   return `
     export const ${contract.contractName}: InternalConnectorContract = {
       type: '${contract.type}',
-      connectorGroup: 'internal',
       summary: ${contract.summary ? `\`${escapeString(contract.summary)}\`` : 'null'},
       description: ${contract.description ? `\`${escapeString(contract.description)}\`` : 'null'},
       methods: ${JSON.stringify(contract.methods ?? [])},

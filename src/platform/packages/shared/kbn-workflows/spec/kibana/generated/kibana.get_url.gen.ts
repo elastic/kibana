@@ -16,25 +16,24 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { get_url_request, get_url_response } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { get_url_request, get_url_response } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const GET_URL_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_url',
-  connectorGroup: 'internal',
   summary: `Get a short URL`,
   description: `Get a single Kibana short URL.
 `,
   methods: ['GET'],
   patterns: ['/api/short_url/{id}'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-url',
   parameterTypes: {
     headerParams: [],
     pathParams: ['id'],

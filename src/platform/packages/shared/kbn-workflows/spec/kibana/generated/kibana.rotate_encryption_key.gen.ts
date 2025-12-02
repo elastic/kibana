@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   rotate_encryption_key_request,
   rotate_encryption_key_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const ROTATE_ENCRYPTION_KEY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.rotateEncryptionKey',
-  connectorGroup: 'internal',
   summary: `Rotate a key for encrypted saved objects`,
   description: `Superuser role required.
 
@@ -41,7 +40,8 @@ This functionality is in technical preview and may be changed or removed in a fu
 `,
   methods: ['POST'],
   patterns: ['/api/encrypted_saved_objects/_rotate_key'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-rotateencryptionkey',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

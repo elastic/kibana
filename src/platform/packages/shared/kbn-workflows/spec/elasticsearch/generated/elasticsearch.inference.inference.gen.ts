@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  inference_inference1_request,
+  inference_inference1_response,
+  inference_inference_request,
+  inference_inference_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  inference_inference_request,
-  inference_inference_response,
-  inference_inference1_request,
-  inference_inference1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const INFERENCE_INFERENCE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.inference',
-  connectorGroup: 'internal',
   summary: `Perform inference on the service`,
   description: `Perform inference on the service.
 

@@ -16,24 +16,24 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { get_upgrade_status_request } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { get_upgrade_status_request } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const GET_UPGRADE_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_upgrade_status',
-  connectorGroup: 'internal',
   summary: `Get the upgrade readiness status`,
   description: `Check the status of your cluster.`,
   methods: ['GET'],
   patterns: ['/api/upgrade_assistant/status'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-upgrade-status',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

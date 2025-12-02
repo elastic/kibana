@@ -16,25 +16,24 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { resolve_url_request, resolve_url_response } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { resolve_url_request, resolve_url_response } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const RESOLVE_URL_CONTRACT: InternalConnectorContract = {
   type: 'kibana.resolve_url',
-  connectorGroup: 'internal',
   summary: `Resolve a short URL`,
   description: `Resolve a Kibana short URL by its slug.
 `,
   methods: ['GET'],
   patterns: ['/api/short_url/_slug/{slug}'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-resolve-url',
   parameterTypes: {
     headerParams: [],
     pathParams: ['slug'],

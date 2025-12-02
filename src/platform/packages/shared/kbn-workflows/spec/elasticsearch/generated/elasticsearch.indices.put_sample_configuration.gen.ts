@@ -16,12 +16,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
+
 import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const INDICES_PUT_SAMPLE_CONFIGURATION_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.put_sample_configuration',
-  connectorGroup: 'internal',
   summary: null,
   description: `Create or update sampling configuration.
 

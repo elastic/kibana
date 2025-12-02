@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   post_alerting_rule_id_snooze_schedule_request,
   post_alerting_rule_id_snooze_schedule_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const POST_ALERTING_RULE_ID_SNOOZE_SCHEDULE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_alerting_rule_id_snooze_schedule',
-  connectorGroup: 'internal',
   summary: `Schedule a snooze for the rule`,
   description: `**Spaces method and path for this operation:**
 
@@ -42,7 +41,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 When you snooze a rule, the rule checks continue to run but alerts will not generate actions. You can snooze for a specified period of time and schedule single or recurring downtimes.`,
   methods: ['POST'],
   patterns: ['/api/alerting/rule/{id}/snooze_schedule'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-alerting-rule-id-snooze-schedule',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: ['id'],

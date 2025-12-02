@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   add_case_file_default_space_request,
   add_case_file_default_space_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const ADD_CASE_FILE_DEFAULT_SPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.addCaseFileDefaultSpace',
-  connectorGroup: 'internal',
   summary: `Attach a file to a case`,
   description: `**Spaces method and path for this operation:**
 
@@ -45,7 +44,8 @@ Attach a file to a case. You must have \`all\` privileges for the **Cases** feat
 `,
   methods: ['POST'],
   patterns: ['/api/cases/{caseId}/files'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-addcasefiledefaultspace',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: ['caseId'],

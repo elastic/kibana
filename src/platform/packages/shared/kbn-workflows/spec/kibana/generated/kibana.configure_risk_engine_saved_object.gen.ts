@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   configure_risk_engine_saved_object_request,
   configure_risk_engine_saved_object_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const CONFIGURE_RISK_ENGINE_SAVED_OBJECT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ConfigureRiskEngineSavedObject',
-  connectorGroup: 'internal',
   summary: `Configure the Risk Engine Saved Object`,
   description: `**Spaces method and path for this operation:**
 
@@ -42,7 +41,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Configuring the Risk Engine Saved Object`,
   methods: ['PATCH'],
   patterns: ['/api/risk_score/engine/saved_object/configure'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-configureriskenginesavedobject',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

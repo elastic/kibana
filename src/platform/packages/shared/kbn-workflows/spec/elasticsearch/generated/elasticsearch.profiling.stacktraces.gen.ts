@@ -16,12 +16,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
+
 import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const PROFILING_STACKTRACES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.profiling.stacktraces',
-  connectorGroup: 'internal',
   summary: null,
   description: `Extracts raw stacktrace information from Universal Profiling.
 

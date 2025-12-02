@@ -16,17 +16,16 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { indices_create_request, indices_create_response } from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { indices_create_request, indices_create_response } from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const INDICES_CREATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.create',
-  connectorGroup: 'internal',
   summary: `Create an index`,
   description: `Create an index.
 

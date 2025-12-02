@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   get_fleet_remote_synced_integrations_status_request,
   get_fleet_remote_synced_integrations_status_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const GET_FLEET_REMOTE_SYNCED_INTEGRATIONS_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_remote_synced_integrations_status',
-  connectorGroup: 'internal',
   summary: `Get remote synced integrations status`,
   description: `**Spaces method and path for this operation:**
 
@@ -42,7 +41,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-settings-read AND integrations-read.`,
   methods: ['GET'],
   patterns: ['/api/fleet/remote_synced_integrations/status'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-remote-synced-integrations-status',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

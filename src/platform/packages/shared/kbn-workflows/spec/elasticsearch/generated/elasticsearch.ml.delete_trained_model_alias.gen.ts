@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   ml_delete_trained_model_alias_request,
   ml_delete_trained_model_alias_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const ML_DELETE_TRAINED_MODEL_ALIAS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.delete_trained_model_alias',
-  connectorGroup: 'internal',
   summary: `Delete a trained model alias`,
   description: `Delete a trained model alias.
 

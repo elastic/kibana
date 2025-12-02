@@ -16,26 +16,25 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
-  indices_put_alias_request,
-  indices_put_alias_response,
   indices_put_alias1_request,
   indices_put_alias1_response,
   indices_put_alias2_request,
   indices_put_alias2_response,
   indices_put_alias3_request,
   indices_put_alias3_response,
+  indices_put_alias_request,
+  indices_put_alias_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const INDICES_PUT_ALIAS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.put_alias',
-  connectorGroup: 'internal',
   summary: `Create or update an alias`,
   description: `Create or update an alias.
 

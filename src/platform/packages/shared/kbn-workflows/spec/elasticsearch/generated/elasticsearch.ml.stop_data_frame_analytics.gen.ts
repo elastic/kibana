@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   ml_stop_data_frame_analytics_request,
   ml_stop_data_frame_analytics_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const ML_STOP_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.stop_data_frame_analytics',
-  connectorGroup: 'internal',
   summary: `Stop data frame analytics jobs`,
   description: `Stop data frame analytics jobs.
 
@@ -45,7 +44,7 @@ throughout its lifecycle.
     headerParams: [],
     pathParams: ['id'],
     urlParams: ['allow_no_match', 'force', 'timeout'],
-    bodyParams: [],
+    bodyParams: ['id', 'allow_no_match', 'force', 'timeout'],
   },
   paramsSchema: z.object({
     ...getShapeAt(ml_stop_data_frame_analytics_request, 'body'),

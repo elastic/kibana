@@ -16,17 +16,16 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { rollup_start_job_request, rollup_start_job_response } from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { rollup_start_job_request, rollup_start_job_response } from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const ROLLUP_START_JOB_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.rollup.start_job',
-  connectorGroup: 'internal',
   summary: `Start rollup jobs`,
   description: `Start rollup jobs.
 

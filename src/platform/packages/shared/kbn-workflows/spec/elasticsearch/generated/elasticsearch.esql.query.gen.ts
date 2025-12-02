@@ -16,17 +16,16 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { esql_query_request, esql_query_response } from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { esql_query_request, esql_query_response } from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const ESQL_QUERY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.esql.query',
-  connectorGroup: 'internal',
   summary: `Run an ES|QL query`,
   description: `Run an ES|QL query.
 

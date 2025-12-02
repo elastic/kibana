@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   ccr_resume_auto_follow_pattern_request,
   ccr_resume_auto_follow_pattern_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const CCR_RESUME_AUTO_FOLLOW_PATTERN_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ccr.resume_auto_follow_pattern',
-  connectorGroup: 'internal',
   summary: `Resume an auto-follow pattern`,
   description: `Resume an auto-follow pattern.
 

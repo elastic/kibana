@@ -16,24 +16,24 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { post_spaces_get_shareable_references_request } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { post_spaces_get_shareable_references_request } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const POST_SPACES_GET_SHAREABLE_REFERENCES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_spaces_get_shareable_references',
-  connectorGroup: 'internal',
   summary: `Get shareable references`,
   description: `Collect references and space contexts for saved objects.`,
   methods: ['POST'],
   patterns: ['/api/spaces/_get_shareable_references'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-spaces-get-shareable-references',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: [],

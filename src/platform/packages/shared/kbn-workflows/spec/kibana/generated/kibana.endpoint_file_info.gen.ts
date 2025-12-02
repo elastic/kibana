@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   endpoint_file_info_request,
   endpoint_file_info_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const ENDPOINT_FILE_INFO_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointFileInfo',
-  connectorGroup: 'internal',
   summary: `Get file information`,
   description: `**Spaces method and path for this operation:**
 
@@ -43,7 +42,7 @@ Get information for the specified response action file download.
 `,
   methods: ['GET'],
   patterns: ['/api/endpoint/action/{action_id}/file/{file_id}'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-endpointfileinfo',
   parameterTypes: {
     headerParams: [],
     pathParams: ['action_id', 'file_id'],

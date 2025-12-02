@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  sql_translate1_request,
+  sql_translate1_response,
+  sql_translate_request,
+  sql_translate_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  sql_translate_request,
-  sql_translate_response,
-  sql_translate1_request,
-  sql_translate1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const SQL_TRANSLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.sql.translate',
-  connectorGroup: 'internal',
   summary: `Translate SQL into Elasticsearch queries`,
   description: `Translate SQL into Elasticsearch queries.
 

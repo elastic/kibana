@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  indices_data_streams_stats1_request,
+  indices_data_streams_stats1_response,
+  indices_data_streams_stats_request,
+  indices_data_streams_stats_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  indices_data_streams_stats_request,
-  indices_data_streams_stats_response,
-  indices_data_streams_stats1_request,
-  indices_data_streams_stats1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const INDICES_DATA_STREAMS_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.data_streams_stats',
-  connectorGroup: 'internal',
   summary: `Get data stream stats`,
   description: `Get data stream stats.
 

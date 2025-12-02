@@ -16,19 +16,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { create_rule_request, create_rule_response } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { create_rule_request, create_rule_response } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const CREATE_RULE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateRule',
-  connectorGroup: 'internal',
   summary: `Create a detection rule`,
   description: `**Spaces method and path for this operation:**
 
@@ -93,7 +92,7 @@ For detailed information on Kibana actions and alerting, and additional API call
 `,
   methods: ['POST'],
   patterns: ['/api/detection_engine/rules'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-createrule',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

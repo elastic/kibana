@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   get_fleet_uninstall_tokens_request,
   get_fleet_uninstall_tokens_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const GET_FLEET_UNINSTALL_TOKENS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_uninstall_tokens',
-  connectorGroup: 'internal',
   summary: `Get metadata for latest uninstall tokens`,
   description: `**Spaces method and path for this operation:**
 
@@ -42,7 +41,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 List the metadata for the latest uninstall tokens per agent policy.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.`,
   methods: ['GET'],
   patterns: ['/api/fleet/uninstall_tokens'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-uninstall-tokens',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

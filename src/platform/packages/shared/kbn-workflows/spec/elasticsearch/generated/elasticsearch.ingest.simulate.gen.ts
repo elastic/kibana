@@ -16,26 +16,25 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
-  ingest_simulate_request,
-  ingest_simulate_response,
   ingest_simulate1_request,
   ingest_simulate1_response,
   ingest_simulate2_request,
   ingest_simulate2_response,
   ingest_simulate3_request,
   ingest_simulate3_response,
+  ingest_simulate_request,
+  ingest_simulate_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const INGEST_SIMULATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ingest.simulate',
-  connectorGroup: 'internal',
   summary: `Simulate a pipeline`,
   description: `Simulate a pipeline.
 

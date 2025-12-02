@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   inference_put_googlevertexai_request,
   inference_put_googlevertexai_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const INFERENCE_PUT_GOOGLEVERTEXAI_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_googlevertexai',
-  connectorGroup: 'internal',
   summary: `Create a Google Vertex AI inference endpoint`,
   description: `Create a Google Vertex AI inference endpoint.
 

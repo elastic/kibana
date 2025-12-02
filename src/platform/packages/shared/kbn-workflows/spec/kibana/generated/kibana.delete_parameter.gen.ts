@@ -16,19 +16,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { delete_parameter_request } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { delete_parameter_request } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const DELETE_PARAMETER_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_parameter',
-  connectorGroup: 'internal',
   summary: `Delete a parameter`,
   description: `**Spaces method and path for this operation:**
 
@@ -41,7 +40,7 @@ You must have \`all\` privileges for the Synthetics feature in the Observability
 `,
   methods: ['DELETE'],
   patterns: ['/api/synthetics/params/{id}'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-parameter',
   parameterTypes: {
     headerParams: [],
     pathParams: ['id'],

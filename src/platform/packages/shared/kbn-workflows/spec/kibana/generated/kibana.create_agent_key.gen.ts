@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   create_agent_key_request,
   create_agent_key_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const CREATE_AGENT_KEY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createAgentKey',
-  connectorGroup: 'internal',
   summary: `Create an APM agent key`,
   description: `**Spaces method and path for this operation:**
 
@@ -45,7 +44,7 @@ After it is created, you can copy the API key (Base64 encoded) and use it to to 
 `,
   methods: ['POST'],
   patterns: ['/api/apm/agent_keys'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-createagentkey',
   parameterTypes: {
     headerParams: ['elastic-api-version', 'kbn-xsrf'],
     pathParams: [],

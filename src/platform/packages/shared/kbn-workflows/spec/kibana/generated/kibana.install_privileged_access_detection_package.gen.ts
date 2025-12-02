@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   install_privileged_access_detection_package_request,
   install_privileged_access_detection_package_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const INSTALL_PRIVILEGED_ACCESS_DETECTION_PACKAGE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.InstallPrivilegedAccessDetectionPackage',
-  connectorGroup: 'internal',
   summary: `Installs the privileged access detection package for the Entity Analytics privileged user monitoring experience`,
   description: `**Spaces method and path for this operation:**
 
@@ -40,7 +39,8 @@ export const INSTALL_PRIVILEGED_ACCESS_DETECTION_PACKAGE_CONTRACT: InternalConne
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/entity_analytics/privileged_user_monitoring/pad/install'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-installprivilegedaccessdetectionpackage',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

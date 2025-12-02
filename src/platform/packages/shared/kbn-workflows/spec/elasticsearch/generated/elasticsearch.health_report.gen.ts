@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  health_report1_request,
+  health_report1_response,
+  health_report_request,
+  health_report_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  health_report_request,
-  health_report_response,
-  health_report1_request,
-  health_report1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const HEALTH_REPORT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.health_report',
-  connectorGroup: 'internal',
   summary: `Get the cluster health`,
   description: `Get the cluster health.
 

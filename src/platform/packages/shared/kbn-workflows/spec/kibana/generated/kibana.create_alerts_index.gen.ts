@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   create_alerts_index_request,
   create_alerts_index_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const CREATE_ALERTS_INDEX_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateAlertsIndex',
-  connectorGroup: 'internal',
   summary: `Create an alerts index`,
   description: `**Spaces method and path for this operation:**
 
@@ -40,7 +39,7 @@ export const CREATE_ALERTS_INDEX_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/detection_engine/index'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-createalertsindex',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

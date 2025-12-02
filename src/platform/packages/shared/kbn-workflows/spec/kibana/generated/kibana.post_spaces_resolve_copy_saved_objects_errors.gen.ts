@@ -16,24 +16,24 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { post_spaces_resolve_copy_saved_objects_errors_request } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { post_spaces_resolve_copy_saved_objects_errors_request } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const POST_SPACES_RESOLVE_COPY_SAVED_OBJECTS_ERRORS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_spaces_resolve_copy_saved_objects_errors',
-  connectorGroup: 'internal',
   summary: `Resolve conflicts copying saved objects`,
   description: `Overwrite saved objects that are returned as errors from the copy saved objects to space API.<br/><br/>[Required authorization] Route required privileges: copySavedObjectsToSpaces.`,
   methods: ['POST'],
   patterns: ['/api/spaces/_resolve_copy_saved_objects_errors'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-spaces-resolve-copy-saved-objects-errors',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: [],

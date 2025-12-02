@@ -16,24 +16,23 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
-  security_get_service_accounts_request,
-  security_get_service_accounts_response,
   security_get_service_accounts1_request,
   security_get_service_accounts1_response,
   security_get_service_accounts2_request,
   security_get_service_accounts2_response,
+  security_get_service_accounts_request,
+  security_get_service_accounts_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const SECURITY_GET_SERVICE_ACCOUNTS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.get_service_accounts',
-  connectorGroup: 'internal',
   summary: `Get service accounts`,
   description: `Get service accounts.
 

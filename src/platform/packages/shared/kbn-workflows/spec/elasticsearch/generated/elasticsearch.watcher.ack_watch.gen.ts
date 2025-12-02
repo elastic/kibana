@@ -16,26 +16,25 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
-  watcher_ack_watch_request,
-  watcher_ack_watch_response,
   watcher_ack_watch1_request,
   watcher_ack_watch1_response,
   watcher_ack_watch2_request,
   watcher_ack_watch2_response,
   watcher_ack_watch3_request,
   watcher_ack_watch3_response,
+  watcher_ack_watch_request,
+  watcher_ack_watch_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const WATCHER_ACK_WATCH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.watcher.ack_watch',
-  connectorGroup: 'internal',
   summary: `Acknowledge a watch`,
   description: `Acknowledge a watch.
 

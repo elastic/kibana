@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  indices_rollover1_request,
+  indices_rollover1_response,
+  indices_rollover_request,
+  indices_rollover_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  indices_rollover_request,
-  indices_rollover_response,
-  indices_rollover1_request,
-  indices_rollover1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const INDICES_ROLLOVER_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.rollover',
-  connectorGroup: 'internal',
   summary: `Roll over to a new index`,
   description: `Roll over to a new index.
 

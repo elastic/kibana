@@ -16,19 +16,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { get_agent_builder_tools_toolid_request } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { get_agent_builder_tools_toolid_request } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const GET_AGENT_BUILDER_TOOLS_TOOLID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_agent_builder_tools_toolid',
-  connectorGroup: 'internal',
   summary: `Get a tool by id`,
   description: `**Spaces method and path for this operation:**
 
@@ -39,7 +38,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get a specific tool by ID. Use this endpoint to retrieve the complete tool definition including its schema and configuration requirements.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
   methods: ['GET'],
   patterns: ['/api/agent_builder/tools/{toolId}'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-agent-builder-tools-toolid',
   parameterTypes: {
     headerParams: [],
     pathParams: ['toolId'],

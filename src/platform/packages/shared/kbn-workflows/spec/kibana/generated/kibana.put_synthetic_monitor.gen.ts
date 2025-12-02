@@ -16,19 +16,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { put_synthetic_monitor_request } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { put_synthetic_monitor_request } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const PUT_SYNTHETIC_MONITOR_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_synthetic_monitor',
-  connectorGroup: 'internal',
   summary: `Update a monitor`,
   description: `**Spaces method and path for this operation:**
 
@@ -42,7 +41,8 @@ You can also partially update a monitor. This will only update the fields that a
 `,
   methods: ['PUT'],
   patterns: ['/api/synthetics/monitors/{id}'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-synthetic-monitor',
   parameterTypes: {
     headerParams: [],
     pathParams: ['id'],

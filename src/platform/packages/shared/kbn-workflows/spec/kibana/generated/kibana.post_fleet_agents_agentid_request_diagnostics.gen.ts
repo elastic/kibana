@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   post_fleet_agents_agentid_request_diagnostics_request,
   post_fleet_agents_agentid_request_diagnostics_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const POST_FLEET_AGENTS_AGENTID_REQUEST_DIAGNOSTICS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_agentid_request_diagnostics',
-  connectorGroup: 'internal',
   summary: `Request agent diagnostics`,
   description: `**Spaces method and path for this operation:**
 
@@ -42,7 +41,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agents-read.`,
   methods: ['POST'],
   patterns: ['/api/fleet/agents/{agentId}/request_diagnostics'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-agents-agentid-request-diagnostics',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: ['agentId'],

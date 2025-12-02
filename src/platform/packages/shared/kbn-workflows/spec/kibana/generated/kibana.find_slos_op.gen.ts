@@ -16,25 +16,24 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { find_slos_op_request, find_slos_op_response } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { find_slos_op_request, find_slos_op_response } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const FIND_SLOS_OP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.findSlosOp',
-  connectorGroup: 'internal',
   summary: `Get a paginated list of SLOs`,
   description: `You must have the \`read\` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
 `,
   methods: ['GET'],
   patterns: ['/s/{spaceId}/api/observability/slos'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-findslosop',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: ['spaceId'],

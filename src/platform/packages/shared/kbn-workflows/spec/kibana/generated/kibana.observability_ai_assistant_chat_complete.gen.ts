@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   observability_ai_assistant_chat_complete_request,
   observability_ai_assistant_chat_complete_response,
 } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const OBSERVABILITY_AI_ASSISTANT_CHAT_COMPLETE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.observability_ai_assistant_chat_complete',
-  connectorGroup: 'internal',
   summary: `Generate a chat completion`,
   description: `**Spaces method and path for this operation:**
 
@@ -49,7 +48,8 @@ This functionality is in technical preview and may be changed or removed in a fu
 `,
   methods: ['POST'],
   patterns: ['/api/observability_ai_assistant/chat/complete'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-observability-ai-assistant-chat-complete',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

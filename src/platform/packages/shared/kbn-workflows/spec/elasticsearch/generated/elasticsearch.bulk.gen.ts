@@ -16,26 +16,25 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
-  bulk_request,
-  bulk_response,
   bulk1_request,
   bulk1_response,
   bulk2_request,
   bulk2_response,
   bulk3_request,
   bulk3_response,
+  bulk_request,
+  bulk_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const BULK_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.bulk',
-  connectorGroup: 'internal',
   summary: `Bulk index or delete documents`,
   description: `Bulk index or delete documents.
 

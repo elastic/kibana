@@ -16,22 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import {
+  security_update_user_profile_data1_request,
+  security_update_user_profile_data1_response,
+  security_update_user_profile_data_request,
+  security_update_user_profile_data_response,
+} from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {
-  security_update_user_profile_data_request,
-  security_update_user_profile_data_response,
-  security_update_user_profile_data1_request,
-  security_update_user_profile_data1_response,
-} from './schemas/es_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const SECURITY_UPDATE_USER_PROFILE_DATA_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.update_user_profile_data',
-  connectorGroup: 'internal',
   summary: `Update user profile data`,
   description: `Update user profile data.
 

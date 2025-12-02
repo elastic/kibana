@@ -16,20 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
 import {
   security_bulk_update_api_keys_request,
   security_bulk_update_api_keys_response,
 } from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const SECURITY_BULK_UPDATE_API_KEYS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.bulk_update_api_keys',
-  connectorGroup: 'internal',
   summary: `Bulk update API keys`,
   description: `Bulk update API keys.
 

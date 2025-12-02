@@ -16,19 +16,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { post_streams_disable_request } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { post_streams_disable_request } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const POST_STREAMS_DISABLE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_streams_disable',
-  connectorGroup: 'internal',
   summary: `Disable streams`,
   description: `**Spaces method and path for this operation:**
 
@@ -39,7 +38,8 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Disables wired streams and deletes all existing stream definitions. The data of wired streams is deleted, but the data of classic streams is preserved.<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
   methods: ['POST'],
   patterns: ['/api/streams/_disable'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-streams-disable',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: [],

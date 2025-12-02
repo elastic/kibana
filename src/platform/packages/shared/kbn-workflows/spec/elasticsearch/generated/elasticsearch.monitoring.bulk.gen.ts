@@ -16,12 +16,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
+
 import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const MONITORING_BULK_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.monitoring.bulk',
-  connectorGroup: 'internal',
   summary: null,
   description: `Send monitoring data.
 

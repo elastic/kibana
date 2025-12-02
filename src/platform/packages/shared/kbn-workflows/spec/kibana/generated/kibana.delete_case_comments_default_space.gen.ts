@@ -16,19 +16,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InternalConnectorContract } from '../../../types/latest';
 
+import { delete_case_comments_default_space_request } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { delete_case_comments_default_space_request } from './schemas/kibana_openapi_zod.gen';
+import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const DELETE_CASE_COMMENTS_DEFAULT_SPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteCaseCommentsDefaultSpace',
-  connectorGroup: 'internal',
   summary: `Delete all case comments and alerts`,
   description: `**Spaces method and path for this operation:**
 
@@ -40,7 +39,8 @@ Deletes all comments and alerts from a case. You must have \`all\` privileges fo
 `,
   methods: ['DELETE'],
   patterns: ['/api/cases/{caseId}/comments'],
-  documentation: null,
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-deletecasecommentsdefaultspace',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: ['caseId'],
