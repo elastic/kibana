@@ -10,24 +10,26 @@ import React from 'react';
 import { TestProviders } from '../../common/mock';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 import { useAgentBuilderAttachment } from './use_agent_builder_attachment';
+import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
 
 const mockOpenConversationFlyout = jest.fn();
 
-const createWrapper = (onechatService: typeof mockOnechatService | null = mockOnechatService) => {
+const createWrapper = (onechatService?: OnechatPluginStart) => {
   const mockStartServices = createStartServicesMock();
   const startServices = {
     ...mockStartServices,
     onechat: onechatService ?? undefined,
   };
 
+  // eslint-disable-next-line react/display-name
   return ({ children }: { children: React.ReactNode }) => (
     <TestProviders startServices={startServices}>{children}</TestProviders>
   );
 };
 
-const mockOnechatService = {
+const mockOnechatService: OnechatPluginStart = {
   openConversationFlyout: mockOpenConversationFlyout,
-  tools: {} as any,
+  tools: {} as OnechatPluginStart['tools'],
   setConversationFlyoutActiveConfig: jest.fn(),
   clearConversationFlyoutActiveConfig: jest.fn(),
 };
@@ -99,7 +101,7 @@ describe('useAgentBuilderAttachment', () => {
 
   it('handles missing onechat service gracefully', () => {
     const { result } = renderHook(() => useAgentBuilderAttachment(defaultParams), {
-      wrapper: createWrapper(null),
+      wrapper: createWrapper(),
     });
 
     act(() => {
