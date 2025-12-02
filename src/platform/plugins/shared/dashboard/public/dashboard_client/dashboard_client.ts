@@ -95,7 +95,6 @@ export const dashboardClient = {
     });
   },
   update: async (id: string, dashboardState: DashboardState, references: Reference[]) => {
-    const { access_control: accessControl, ...restOfData } = dashboardState;
     const updateResponse = await coreServices.http.put<DashboardUpdateResponseBody>(
       `/api/dashboards/dashboard/${id}`,
       {
@@ -105,7 +104,7 @@ export const dashboardClient = {
         },
         body: JSON.stringify({
           data: {
-            ...restOfData,
+            ...dashboardState,
             references,
           },
         }),
