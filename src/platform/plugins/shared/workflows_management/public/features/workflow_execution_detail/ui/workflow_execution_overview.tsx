@@ -174,7 +174,7 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
             </div>
           </EuiFlexItem>
 
-          <EuiFlexItem css={{ overflowY: 'auto' }}>
+          <EuiFlexItem css={{ overflow: 'hidden', minHeight: 0 }}>
             <StepExecutionDataView stepExecution={stepExecution} mode="input" />
           </EuiFlexItem>
         </EuiFlexGroup>
