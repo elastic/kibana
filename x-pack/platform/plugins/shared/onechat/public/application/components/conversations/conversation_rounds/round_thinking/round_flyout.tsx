@@ -33,6 +33,7 @@ export const RoundFlyout: React.FC<RawResponseFlyoutProps> = ({ isOpen, onClose,
       onClose={onClose}
       aria-labelledby="rawResponseFlyoutTitle"
       size="m"
+      ownFocus={false}
       css={css`
         z-index: ${euiThemeVars.euiZFlyout + 4};
       `}

@@ -50,6 +50,7 @@ export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({
       onClose={onClose}
       aria-labelledby="toolResponseFlyoutTitle"
       size="m"
+      ownFocus={false}
       css={css`
         z-index: ${euiThemeVars.euiZFlyout + 4};
       `}
