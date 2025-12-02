@@ -36,7 +36,7 @@ exports[`IndicesList should change pages 1`] = `
       grow={false}
     >
       <EuiPopover
-        anchorPosition="downCenter"
+        anchorPosition="downLeft"
         button={
           <EuiButtonEmpty
             color="text"
@@ -58,7 +58,7 @@ exports[`IndicesList should change pages 1`] = `
         }
         closePopover={[Function]}
         display="inline-block"
-        hasArrow={true}
+        hasArrow={false}
         id="customizablePagination"
         isOpen={false}
         ownFocus={true}
@@ -129,7 +129,7 @@ exports[`IndicesList should change per page 1`] = `
       grow={false}
     >
       <EuiPopover
-        anchorPosition="downCenter"
+        anchorPosition="downLeft"
         button={
           <EuiButtonEmpty
             color="text"
@@ -151,7 +151,7 @@ exports[`IndicesList should change per page 1`] = `
         }
         closePopover={[Function]}
         display="inline-block"
-        hasArrow={true}
+        hasArrow={false}
         id="customizablePagination"
         isOpen={false}
         ownFocus={true}
@@ -247,7 +247,7 @@ exports[`IndicesList should highlight fully when an exact match 1`] = `
       grow={false}
     >
       <EuiPopover
-        anchorPosition="downCenter"
+        anchorPosition="downLeft"
         button={
           <EuiButtonEmpty
             color="text"
@@ -269,7 +269,7 @@ exports[`IndicesList should highlight fully when an exact match 1`] = `
         }
         closePopover={[Function]}
         display="inline-block"
-        hasArrow={true}
+        hasArrow={false}
         id="customizablePagination"
         isOpen={false}
         ownFocus={true}
@@ -355,7 +355,7 @@ exports[`IndicesList should highlight the query in the matches 1`] = `
       grow={false}
     >
       <EuiPopover
-        anchorPosition="downCenter"
+        anchorPosition="downLeft"
         button={
           <EuiButtonEmpty
             color="text"
@@ -377,7 +377,7 @@ exports[`IndicesList should highlight the query in the matches 1`] = `
         }
         closePopover={[Function]}
         display="inline-block"
-        hasArrow={true}
+        hasArrow={false}
         id="customizablePagination"
         isOpen={false}
         ownFocus={true}
@@ -456,7 +456,7 @@ exports[`IndicesList should render normally 1`] = `
       grow={false}
     >
       <EuiPopover
-        anchorPosition="downCenter"
+        anchorPosition="downLeft"
         button={
           <EuiButtonEmpty
             color="text"
@@ -478,7 +478,7 @@ exports[`IndicesList should render normally 1`] = `
         }
         closePopover={[Function]}
         display="inline-block"
-        hasArrow={true}
+        hasArrow={false}
         id="customizablePagination"
         isOpen={false}
         ownFocus={true}
@@ -621,7 +621,7 @@ exports[`IndicesList updating props should render all new indices 1`] = `
       grow={false}
     >
       <EuiPopover
-        anchorPosition="downCenter"
+        anchorPosition="downLeft"
         button={
           <EuiButtonEmpty
             color="text"
@@ -643,7 +643,7 @@ exports[`IndicesList updating props should render all new indices 1`] = `
         }
         closePopover={[Function]}
         display="inline-block"
-        hasArrow={true}
+        hasArrow={false}
         id="customizablePagination"
         isOpen={false}
         ownFocus={true}

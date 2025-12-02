@@ -12,6 +12,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
     >
       <span
         class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        id="generated-id_euiToolTipAnchor"
       >
         <div
           class="css-uf4ax2-wrapperStyles"
@@ -63,6 +64,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
           >
             <span
               class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
+              id="generated-id_euiToolTipAnchor"
             >
               <a
                 aria-describedby="main-navigation-instructions_generated-id"
@@ -104,6 +106,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
           >
             <span
               class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
+              id="generated-id_euiToolTipAnchor"
             >
               <a
                 aria-haspopup="false"
@@ -200,6 +203,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
           >
             <span
               class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
+              id="generated-id_euiToolTipAnchor"
             >
               <a
                 aria-describedby="footer-navigation-instructions_generated-id"
@@ -231,6 +235,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
           >
             <span
               class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
+              id="generated-id_euiToolTipAnchor"
             >
               <a
                 aria-haspopup="false"
@@ -299,6 +304,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
           >
             <span
               class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
+              id="generated-id_euiToolTipAnchor"
             >
               <a
                 aria-haspopup="false"
@@ -329,6 +335,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
           >
             <span
               class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
+              id="generated-id_euiToolTipAnchor"
             >
               <a
                 aria-haspopup="false"

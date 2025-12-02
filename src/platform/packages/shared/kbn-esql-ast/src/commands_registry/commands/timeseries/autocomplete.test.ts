@@ -11,7 +11,7 @@ import { autocomplete } from './autocomplete';
 import { expectSuggestions } from '../../../__tests__/autocomplete';
 import type { ICommandCallbacks } from '../../types';
 import { correctQuerySyntax, findAstPosition } from '../../../definitions/utils/ast';
-import { parse } from '../../../parser';
+import { Parser } from '../../../parser';
 import { METADATA_FIELDS } from '../../options/metadata';
 import { getRecommendedQueriesTemplatesFromExtensions } from '../../options/recommended_queries';
 
@@ -60,9 +60,10 @@ describe('TS Autocomplete', () => {
   describe('... <sources> ...', () => {
     const suggest = async (query: string) => {
       const correctedQuery = correctQuerySyntax(query);
-      const { ast } = parse(correctedQuery, { withFormatting: true });
+      const { root } = Parser.parse(correctedQuery, { withFormatting: true });
+
       const cursorPosition = query.length;
-      const { command } = findAstPosition(ast, cursorPosition);
+      const { command } = findAstPosition(root, cursorPosition);
       if (!command) {
         throw new Error('Command not found in the parsed query');
       }

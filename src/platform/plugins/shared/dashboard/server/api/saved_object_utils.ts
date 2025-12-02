@@ -56,7 +56,7 @@ export function getDashboardCRUResponseBody(
     id: savedObject.id,
     data: {
       ...dashboardState,
-      references,
+      ...(references.length && { references }),
     },
     meta: getDashboardMeta(savedObject, operation),
     spaces: savedObject.namespaces,

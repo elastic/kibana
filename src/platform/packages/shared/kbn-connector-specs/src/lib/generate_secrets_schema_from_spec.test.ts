@@ -16,6 +16,7 @@ describe('generateSecretsSchemaFromSpec', () => {
       'none',
       'basic',
       'bearer',
+      'oauth_client_credentials',
       {
         type: 'api_key_header',
         defaults: {

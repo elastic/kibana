@@ -6,8 +6,9 @@
  */
 
 import type { FieldDefinitionConfig } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { isEqual } from 'lodash';
-import type { MappedSchemaField, SchemaEditorField } from './types';
+import type { MappedSchemaField, SchemaEditorField, SchemaField } from './types';
 
 export const convertToFieldDefinitionConfig = (
   field: MappedSchemaField
@@ -47,3 +48,34 @@ export function isFieldUncommitted(field: SchemaEditorField, storedFields: Schem
     { ...fieldDefaults, ...fieldToCompare }
   );
 }
+
+export const buildSchemaSavePayload = (
+  definition: Streams.ingest.all.GetResponse,
+  fields: SchemaField[]
+): { ingest: Streams.ingest.all.GetResponse['stream']['ingest'] } => {
+  const mappedFields = fields
+    .filter((field) => field.status === 'mapped')
+    .reduce((acc, field) => {
+      acc[field.name] = convertToFieldDefinitionConfig(field as MappedSchemaField);
+      return acc;
+    }, {} as Record<string, FieldDefinitionConfig>);
+
+  return {
+    ingest: {
+      ...definition.stream.ingest,
+      ...(Streams.WiredStream.GetResponse.is(definition)
+        ? {
+            wired: {
+              ...definition.stream.ingest.wired,
+              fields: mappedFields,
+            },
+          }
+        : {
+            classic: {
+              ...definition.stream.ingest.classic,
+              field_overrides: mappedFields,
+            },
+          }),
+    },
+  };
+};

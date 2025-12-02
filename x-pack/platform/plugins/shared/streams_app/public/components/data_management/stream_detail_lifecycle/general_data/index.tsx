@@ -6,24 +6,23 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
-import React, { useState } from 'react';
-import type { IngestStreamLifecycle } from '@kbn/streams-schema';
-import type { Streams } from '@kbn/streams-schema';
-import { isIlmLifecycle } from '@kbn/streams-schema';
-import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
 import { i18n } from '@kbn/i18n';
+import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
 import { useAbortController } from '@kbn/react-hooks';
-import { useTimefilter } from '../../../../hooks/use_timefilter';
-import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_from_definition';
+import type { IngestStreamLifecycle, Streams } from '@kbn/streams-schema';
+import { isIlmLifecycle } from '@kbn/streams-schema';
+import React, { useState } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { EditLifecycleModal } from './modal';
-import { IlmSummary } from './ilm_summary';
-import { IngestionRate } from './ingestion_rate';
-import type { useDataStreamStats } from '../hooks/use_data_stream_stats';
+import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { getFormattedError } from '../../../../util/errors';
+import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_from_definition';
+import type { useDataStreamStats } from '../hooks/use_data_stream_stats';
+import { IngestionCard } from './cards/ingestion_card';
 import { RetentionCard } from './cards/retention_card';
 import { StorageSizeCard } from './cards/storage_size_card';
-import { IngestionCard } from './cards/ingestion_card';
+import { IlmSummary } from './ilm_summary';
+import { IngestionRate } from './ingestion_rate';
+import { EditLifecycleModal } from './modal';
 
 export const StreamDetailGeneralData = ({
   definition,
@@ -60,7 +59,7 @@ export const StreamDetailGeneralData = ({
     try {
       setUpdateInProgress(true);
 
-      const request = {
+      const body = {
         ingest: {
           ...definition.stream.ingest,
           lifecycle,
@@ -70,7 +69,7 @@ export const StreamDetailGeneralData = ({
       await streamsRepositoryClient.fetch('PUT /api/streams/{name}/_ingest 2023-10-31', {
         params: {
           path: { name: definition.stream.name },
-          body: request,
+          body,
         },
         signal,
       });

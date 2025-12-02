@@ -14,9 +14,13 @@ import { CloseDockedViewButton } from './close_docked_view_button';
 
 export interface ConversationRightActionsProps {
   onClose?: () => void;
+  onRenameConversation: () => void;
 }
 
-export const ConversationRightActions: React.FC<ConversationRightActionsProps> = ({ onClose }) => {
+export const ConversationRightActions: React.FC<ConversationRightActionsProps> = ({
+  onClose,
+  onRenameConversation,
+}) => {
   const { isEmbeddedContext } = useConversationContext();
 
   const labels = {
@@ -33,7 +37,7 @@ export const ConversationRightActions: React.FC<ConversationRightActionsProps> =
       aria-label={labels.container}
       responsive={false}
     >
-      <MoreActionsButton />
+      <MoreActionsButton onRenameConversation={onRenameConversation} />
       {isEmbeddedContext ? <CloseDockedViewButton onClose={onClose} /> : null}
     </EuiFlexGroup>
   );

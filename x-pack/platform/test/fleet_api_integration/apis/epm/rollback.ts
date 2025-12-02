@@ -291,19 +291,81 @@ export default function (providerContext: FtrProviderContext) {
     });
   }
 
-  describe('Package rollback', () => {
-    skipIfNoDockerRegistry(providerContext);
+  describe('Rollback APIs', () => {
+    describe('Package rollback', () => {
+      skipIfNoDockerRegistry(providerContext);
 
-    before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-      await fleetAndAgents.setup();
+      before(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+        await fleetAndAgents.setup();
+      });
+
+      after(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+      });
+
+      assertPackageRollback('multiple_versions', 'integration', '0.1.0', '0.2.0', '0.3.0');
+      assertPackageRollback('input_package_upgrade', 'input', '1.0.0', '1.1.0', '1.2.0');
     });
 
-    after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-    });
+    describe('Rollback available check', () => {
+      skipIfNoDockerRegistry(providerContext);
 
-    assertPackageRollback('multiple_versions', 'integration', '0.1.0', '0.2.0', '0.3.0');
-    assertPackageRollback('input_package_upgrade', 'input', '1.0.0', '1.1.0', '1.2.0');
+      const pkgName = 'multiple_versions';
+      const oldPkgVersion = '0.1.0';
+      const newPkgVersion = '0.2.0';
+      const policyIds = [`${pkgName}-1`, `${pkgName}-2`];
+
+      before(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+        await fleetAndAgents.setup();
+      });
+
+      after(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+      });
+
+      beforeEach(async () => {
+        await installPackage(pkgName, oldPkgVersion);
+      });
+
+      afterEach(async () => {
+        await deletePackage(pkgName, newPkgVersion);
+        await deletePackagePolicies(policyIds);
+      });
+
+      it('should return rollback available when package and policies can be rolled back', async () => {
+        await createPackagePolicies(policyIds, pkgName, oldPkgVersion);
+        await upgradePackage(pkgName, oldPkgVersion, newPkgVersion, policyIds, true);
+
+        const res = await supertest
+          .get(`/internal/fleet/epm/packages/${pkgName}/rollback/available_check`)
+          .set('kbn-xsrf', 'xxxx')
+          .set('elastic-api-version', '1')
+          .expect(200);
+
+        expect(res.body).to.eql({
+          isAvailable: true,
+        });
+      });
+
+      it('should return rollback not available when some package policies not upgraded', async () => {
+        await createPackagePolicies([policyIds[0]], pkgName, oldPkgVersion);
+        await upgradePackage(pkgName, oldPkgVersion, newPkgVersion, [policyIds[0]], true);
+        await createPackagePolicies([policyIds[1]], pkgName, oldPkgVersion);
+
+        const res = await supertest
+          .get(`/internal/fleet/epm/packages/${pkgName}/rollback/available_check`)
+          .set('kbn-xsrf', 'xxxx')
+          .set('elastic-api-version', '1')
+          .expect(200);
+
+        expect(res.body).to.eql({
+          isAvailable: false,
+          reason:
+            'Rollback not available because some integration policies are not upgraded to version 0.2.0',
+        });
+      });
+    });
   });
 }

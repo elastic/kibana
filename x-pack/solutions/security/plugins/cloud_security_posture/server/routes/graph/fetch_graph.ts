@@ -176,6 +176,8 @@ const buildEsqlQuery = ({
     .filter((indexPattern) => indexPattern.length > 0)
     .join(',')} METADATA _id, _index
 | WHERE event.action IS NOT NULL AND actor.entity.id IS NOT NULL
+| MV_EXPAND actor.entity.id
+| MV_EXPAND target.entity.id
 ${
   isEnrichPolicyExists
     ? `
@@ -187,9 +189,9 @@ ${
     "\\"id\\":\\"", actor.entity.id, "\\"",
     ",\\"type\\":\\"", "${DOCUMENT_TYPE_ENTITY}", "\\"",
     ",\\"entity\\":", "{",
-      "\\"name\\":\\"", actorEntityName, "\\"",
-      ",\\"type\\":\\"", actorEntityType, "\\"",
-      ",\\"sub_type\\":\\"", actorEntitySubType, "\\"",
+      "\\"name\\":\\"", COALESCE(actorEntityName, ""), "\\"",
+      ",\\"type\\":\\"", COALESCE(actorEntityType, ""), "\\"",
+      ",\\"sub_type\\":\\"", COALESCE(actorEntitySubType, ""), "\\"",
       CASE (
         actorHostIp IS NOT NULL,
         CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(actorHostIp), "\\"", "}"),
@@ -198,12 +200,12 @@ ${
     "}",
   "}")
 | EVAL targetDocData = CONCAT("{",
-    "\\"id\\":\\"", target.entity.id, "\\"",
+    "\\"id\\":\\"", COALESCE(target.entity.id, ""), "\\"",
     ",\\"type\\":\\"", "${DOCUMENT_TYPE_ENTITY}", "\\"",
     ",\\"entity\\":", "{",
-      "\\"name\\":\\"", targetEntityName, "\\"",
-      ",\\"type\\":\\"", targetEntityType, "\\"",
-      ",\\"sub_type\\":\\"", targetEntitySubType, "\\"",
+      "\\"name\\":\\"", COALESCE(targetEntityName, ""), "\\"",
+      ",\\"type\\":\\"", COALESCE(targetEntityType, ""), "\\"",
+      ",\\"sub_type\\":\\"", COALESCE(targetEntitySubType, ""), "\\"",
       CASE (
         targetHostIp IS NOT NULL,
         CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(targetHostIp), "\\"", "}"),
@@ -214,12 +216,14 @@ ${
 `
     : `
 // Fallback to null string with non-enriched actor
+| EVAL actorEntityName = TO_STRING(null)
 | EVAL actorEntityType = TO_STRING(null)
 | EVAL actorEntitySubType = TO_STRING(null)
 | EVAL actorHostIp = TO_STRING(null)
 | EVAL actorDocData = TO_STRING(null)
 
 // Fallback to null string with non-enriched target
+| EVAL targetEntityName = TO_STRING(null)
 | EVAL targetEntityType = TO_STRING(null)
 | EVAL targetEntitySubType = TO_STRING(null)
 | EVAL targetHostIp = TO_STRING(null)
@@ -260,63 +264,45 @@ ${
     }
   "}")
 
-// Construct actor and target entity groups
-| EVAL actorEntityGroup = CASE(
-    actorEntityType IS NOT NULL AND actorEntitySubType IS NOT NULL,
-    CONCAT(actorEntityType, ":", actorEntitySubType),
-    actorEntityType IS NOT NULL,
-    actorEntityType,
-    actor.entity.id
-  )
-| EVAL targetEntityGroup = CASE(
-    targetEntityType IS NOT NULL AND targetEntitySubType IS NOT NULL,
-    CONCAT(targetEntityType, ":", targetEntitySubType),
-    targetEntityType IS NOT NULL,
-    targetEntityType,
-    target.entity.id
-  )
-
-| EVAL actorLabel = CASE(actorEntitySubType IS NOT NULL, actorEntitySubType, actor.entity.id)
-| EVAL targetLabel = CASE(targetEntitySubType IS NOT NULL, targetEntitySubType, target.entity.id)
-| EVAL actorEntityType = CASE(
-    actorEntityType IS NOT NULL,
-    actorEntityType,
-    ""
-  )
-| EVAL targetEntityType = CASE(
-    targetEntityType IS NOT NULL,
-    targetEntityType,
-    ""
-  )
 | STATS badge = COUNT(*),
-  uniqueEventsCount = COUNT_DISTINCT(CASE(isAlert == false, event.id, null)),
-  uniqueAlertsCount = COUNT_DISTINCT(CASE(isAlert == true, event.id, null)),
+  uniqueEventsCount = COUNT_DISTINCT(CASE(isAlert == false, _id, null)),
+  uniqueAlertsCount = COUNT_DISTINCT(CASE(isAlert == true, _id, null)),
   isAlert = MV_MAX(VALUES(isAlert)),
   docs = VALUES(docData),
   sourceIps = MV_DEDUPE(VALUES(sourceIps)),
   sourceCountryCodes = MV_DEDUPE(VALUES(sourceCountryCodes)),
   // actor attributes
-  actorEntityGroup = VALUES(actorEntityGroup),
-  actorIds = VALUES(actor.entity.id),
+  actorNodeId = CASE(
+    // deterministic group IDs - use raw entity ID for single values, MD5 hash for multiple
+    MV_COUNT(VALUES(actor.entity.id)) == 1, TO_STRING(VALUES(actor.entity.id)),
+    MD5(MV_CONCAT(MV_SORT(VALUES(actor.entity.id)), ","))
+  ),
   actorIdsCount = COUNT_DISTINCT(actor.entity.id),
-  actorEntityType = VALUES(actorEntityType),
-  actorLabel = VALUES(actorLabel),
-  actorsDocData = VALUES(actorDocData),
+  actorEntityName = VALUES(actorEntityName),
   actorHostIp = VALUES(actorHostIp),
+  actorsDocData = VALUES(actorDocData),
   // target attributes
-  targetEntityGroup = VALUES(targetEntityGroup),
-  targetIds = VALUES(target.entity.id),
+  targetNodeId = CASE(
+    // deterministic group IDs - use raw entity ID for single values, MD5 hash for multiple
+    COUNT_DISTINCT(target.entity.id) == 0, null,
+    CASE(
+      MV_COUNT(VALUES(target.entity.id)) == 1, TO_STRING(VALUES(target.entity.id)),
+      MD5(MV_CONCAT(MV_SORT(VALUES(target.entity.id)), ","))
+    )
+  ),
   targetIdsCount = COUNT_DISTINCT(target.entity.id),
-  targetEntityType = VALUES(targetEntityType),
-  targetLabel = VALUES(targetLabel),
+  targetEntityName = VALUES(targetEntityName),
+  targetHostIp = VALUES(targetHostIp),
   targetsDocData = VALUES(targetDocData)
     BY action = event.action,
-      actorEntityGroup,
-      targetEntityGroup,
+      actorEntityType,
+      actorEntitySubType,
+      targetEntityType,
+      targetEntitySubType,
       isOrigin,
       isOriginAlert
 | LIMIT 1000
-| SORT action DESC, actorEntityGroup, targetEntityGroup, isOrigin`;
+| SORT action DESC, isOrigin`;
 
   return query;
 };

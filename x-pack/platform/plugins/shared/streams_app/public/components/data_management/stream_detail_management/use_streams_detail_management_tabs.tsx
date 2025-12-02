@@ -24,7 +24,7 @@ export function useStreamsDetailManagementTabs({
     isLoading,
   } = useStreamsPrivileges();
 
-  const isSignificantEventsEnabled = !!significantEvents?.available;
+  const isSignificantEventsEnabled = !!significantEvents?.enabled;
 
   return {
     isLoading,

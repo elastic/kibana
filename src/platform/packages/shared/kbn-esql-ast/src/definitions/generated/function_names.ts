@@ -31,6 +31,8 @@ export const esqlFunctionNames = [
   'ABSENT',
   'ABSENT_OVER_TIME',
   'ACOS',
+  'ALL_FIRST',
+  'ALL_LAST',
   'ASIN',
   'ATAN',
   'ATAN2',

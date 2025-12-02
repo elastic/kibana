@@ -171,6 +171,10 @@ export async function createAgentPolicyWithPackages({
   if (monitoringEnabledParams?.length && !monitoringEnabled?.length) {
     logger.info(`Disabling monitoring for agentless policy [${newPolicy.name}]`);
   }
+  if (newPolicy.supports_agentless) {
+    newPolicy.keep_monitoring_alive = true;
+    logger.info(`Enabling keep monitoring alive for agentless policy [${newPolicy.name}]`);
+  }
 
   if (withSysMonitoring) {
     packagesToInstall.push(FLEET_SYSTEM_PACKAGE);

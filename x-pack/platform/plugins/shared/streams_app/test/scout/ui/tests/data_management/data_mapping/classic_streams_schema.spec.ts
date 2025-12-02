@@ -15,8 +15,7 @@ test.describe(
   'Stream data mapping - schema editor - Classic Streams',
   { tag: ['@ess', '@svlOblt'] },
   () => {
-    test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-      await apiServices.streams.enable();
+    test.beforeAll(async ({ logsSynthtraceEsClient }) => {
       // Create a classic stream
       await generateLogsData(logsSynthtraceEsClient)({ index: CLASSIC_STREAM_NAME });
     });
@@ -29,16 +28,16 @@ test.describe(
 
       await pageObjects.streams.gotoSchemaEditorTab(CLASSIC_STREAM_NAME);
       await pageObjects.streams.verifyClassicBadge();
+      await pageObjects.streams.expectSchemaEditorTableVisible();
     });
 
     test.afterAll(async ({ logsSynthtraceEsClient }) => {
       await logsSynthtraceEsClient.clean();
     });
 
-    test('read-only user cannot add/edit fields', async ({ page, browserAuth, pageObjects }) => {
+    test('read-only user cannot add/edit fields', async ({ page, browserAuth }) => {
       await browserAuth.loginAsViewer();
-      await pageObjects.streams.gotoSchemaEditorTab(CLASSIC_STREAM_NAME);
-      await pageObjects.streams.expectSchemaEditorTableVisible();
+      await page.reload();
 
       // Verify "Add field" button is not visible for read-only user
       await expect(page.getByTestId('streamsAppContentAddFieldButton')).toBeHidden();
@@ -48,8 +47,6 @@ test.describe(
     });
 
     test('copy_to advanced parameter works', async ({ page, pageObjects }) => {
-      await pageObjects.streams.expectSchemaEditorTableVisible();
-
       // First, add a target field
       await page.getByTestId('streamsAppContentAddFieldButton').click();
       await expect(

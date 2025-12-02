@@ -105,6 +105,7 @@ import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured
 import { createSystemConnectors } from './create_system_actions';
 import { ConnectorUsageReportingTask } from './usage/connector_usage_reporting_task';
 import { ConnectorRateLimiter } from './lib/connector_rate_limiter';
+import type { GetAxiosInstanceWithAuthFnOpts } from './lib/get_axios_instance';
 import { getAxiosInstanceWithAuth } from './lib/get_axios_instance';
 
 export interface PluginSetupContract {
@@ -124,7 +125,7 @@ export interface PluginSetupContract {
     connector: SubActionConnectorType<Config, Secrets>
   ): void;
 
-  getAxiosInstanceWithAuth(validatedSecrets: Record<string, unknown>): Promise<AxiosInstance>;
+  getAxiosInstanceWithAuth(opts: GetAxiosInstanceWithAuthFnOpts): Promise<AxiosInstance>;
 
   isPreconfiguredConnector(connectorId: string): boolean;
 
@@ -383,8 +384,8 @@ export class ActionsPlugin
       configurationUtilities: actionsConfigUtils,
       logger: this.logger,
     });
-    const getAxiosInstanceWithAuthHelper = async (validatedSecrets: Record<string, unknown>) => {
-      return await getAxiosInstanceFn(validatedSecrets);
+    const getAxiosInstanceWithAuthHelper = async (opts: GetAxiosInstanceWithAuthFnOpts) => {
+      return await getAxiosInstanceFn(opts);
     };
 
     return {

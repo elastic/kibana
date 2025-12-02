@@ -16,6 +16,8 @@ import type {
   ESQLAstItem,
   ESQLCommandOption,
   ESQLAstAllCommands,
+  ESQLAstHeaderCommand,
+  ESQLAstQueryExpression,
 } from '../../types';
 import { Walker } from '../../..';
 
@@ -31,14 +33,36 @@ export function isMarkerNode(node: ESQLAstItem | undefined): boolean {
   );
 }
 
-function findCommand(ast: ESQLAstAllCommands[], offset: number) {
-  const commandIndex = ast.findIndex(
+function findCommand(ast: ESQLAstQueryExpression, offset: number) {
+  const queryCommands = ast.commands;
+  const commandIndex = queryCommands.findIndex(
     ({ location }) => location.min <= offset && location.max >= offset
   );
 
-  const command = ast[commandIndex] || ast[ast.length - 1];
+  const command = queryCommands[commandIndex] || queryCommands[queryCommands.length - 1];
+
+  if (!command) {
+    return findHeaderCommand(ast, offset);
+  }
 
   return command;
+}
+
+function findHeaderCommand(
+  ast: ESQLAstQueryExpression,
+  offset: number
+): ESQLAstHeaderCommand | undefined {
+  if (!ast.header || ast.header.length === 0) {
+    return;
+  }
+
+  const commandIndex = ast.header.findIndex(
+    ({ location }) => location.min <= offset && location.max >= offset
+  );
+
+  const targetHeader = ast.header[commandIndex] || ast.header[ast.header.length - 1];
+
+  return targetHeader.incomplete ? targetHeader : undefined;
 }
 
 export function isNotMarkerNodeOrArray(arg: ESQLAstItem) {
@@ -101,7 +125,7 @@ function findCommandSubType<T extends ESQLCommandOption>(
   }
 }
 
-export function findAstPosition(ast: ESQLAstAllCommands[], offset: number) {
+export function findAstPosition(ast: ESQLAstQueryExpression, offset: number) {
   const command = findCommand(ast, offset);
   if (!command) {
     return { command: undefined, node: undefined };

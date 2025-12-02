@@ -31,19 +31,20 @@ function mockDependencies() {
       name: `Agentless policy ${id}`,
       is_managed: true,
       revision: 10,
+      keep_monitoring_alive: true,
     })) as unknown as AgentPolicy[];
   });
 
   jest.mocked(agentPolicyService.list).mockResolvedValueOnce({
     items: [
-      { id: 'policy1', revision: 10 },
-      { id: 'policy2', revision: 10 },
-      { id: 'policy3', revision: 10 },
-      { id: 'policy4', revision: 10 },
-      { id: 'policy5', revision: 10 },
-      { id: 'policy6', revision: 10 },
-      { id: 'policy7', revision: 10 },
-      { id: 'policy8', revision: 10 },
+      { id: 'policy1', revision: 10, keep_monitoring_alive: true },
+      { id: 'policy2', revision: 10, keep_monitoring_alive: true },
+      { id: 'policy3', revision: 10, keep_monitoring_alive: true },
+      { id: 'policy4', revision: 10, keep_monitoring_alive: true },
+      { id: 'policy5', revision: 10, keep_monitoring_alive: true },
+      { id: 'policy6', revision: 10, keep_monitoring_alive: true },
+      { id: 'policy7', revision: 10, keep_monitoring_alive: true },
+      { id: 'policy8', revision: 10, keep_monitoring_alive: true },
     ] as AgentPolicy[],
     total: 0,
     page: 10,
@@ -452,6 +453,131 @@ describe('Agentless Deployment Sync', () => {
       expect(logger.info).toHaveBeenCalledWith(
         `[Agentless Deployment Sync][Dry Run] Creating deployment for policy policy8`
       );
+    });
+  });
+
+  describe('update monitoring settings', () => {
+    it('update monitoring settings if monitoring_enabled is not empty', async () => {
+      const { logger, agentlessAgentService } = mockDependencies();
+      agentlessAgentService.listAgentlessDeployments.mockResolvedValueOnce({
+        deployments: [{ policy_id: 'policy1', revision_idx: 10 }],
+      });
+
+      jest.mocked(agentPolicyService.getByIds).mockResolvedValueOnce([
+        {
+          id: 'policy1',
+          name: `Agentless policy policy1`,
+          is_managed: true,
+          revision: 10,
+          keep_monitoring_alive: true,
+          monitoring_enabled: ['logs'],
+        },
+      ] as unknown as AgentPolicy[]);
+      jest.mocked(agentPolicyService.list).mockReset();
+      jest.mocked(agentPolicyService.list).mockResolvedValueOnce({
+        items: [] as AgentPolicy[],
+        total: 0,
+        page: 10,
+        perPage: 100,
+      });
+
+      await syncAgentlessDeployments({
+        logger,
+        agentlessAgentService,
+      });
+
+      expect(agentlessAgentService.listAgentlessDeployments).toHaveBeenCalledTimes(1);
+      expect(agentPolicyService.update).toHaveBeenCalledTimes(1);
+      expect(agentPolicyService.update).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        'policy1',
+        {
+          keep_monitoring_alive: true,
+          monitoring_enabled: [],
+        }
+      );
+      expect(agentlessAgentService.createAgentlessAgent).toHaveBeenCalledTimes(0);
+      expect(agentlessAgentService.deleteAgentlessAgent).toHaveBeenCalledTimes(0);
+    });
+
+    it('update monitoring settings if keep_monitoring_alive is not set', async () => {
+      const { logger, agentlessAgentService } = mockDependencies();
+      agentlessAgentService.listAgentlessDeployments.mockResolvedValueOnce({
+        deployments: [{ policy_id: 'policy1', revision_idx: 10 }],
+      });
+
+      jest.mocked(agentPolicyService.getByIds).mockResolvedValueOnce([
+        {
+          id: 'policy1',
+          name: `Agentless policy policy1`,
+          is_managed: true,
+          revision: 10,
+          keep_monitoring_alive: false,
+          monitoring_enabled: [],
+        },
+      ] as unknown as AgentPolicy[]);
+      jest.mocked(agentPolicyService.list).mockReset();
+      jest.mocked(agentPolicyService.list).mockResolvedValueOnce({
+        items: [] as AgentPolicy[],
+        total: 0,
+        page: 10,
+        perPage: 100,
+      });
+
+      await syncAgentlessDeployments({
+        logger,
+        agentlessAgentService,
+      });
+
+      expect(agentlessAgentService.listAgentlessDeployments).toHaveBeenCalledTimes(1);
+      expect(agentPolicyService.update).toHaveBeenCalledTimes(1);
+      expect(agentPolicyService.update).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        'policy1',
+        {
+          keep_monitoring_alive: true,
+          monitoring_enabled: [],
+        }
+      );
+      expect(agentlessAgentService.createAgentlessAgent).toHaveBeenCalledTimes(0);
+      expect(agentlessAgentService.deleteAgentlessAgent).toHaveBeenCalledTimes(0);
+    });
+
+    it('does nothing if monitoring is already backfilled', async () => {
+      const { logger, agentlessAgentService } = mockDependencies();
+      agentlessAgentService.listAgentlessDeployments.mockResolvedValueOnce({
+        deployments: [{ policy_id: 'policy1', revision_idx: 10 }],
+      });
+
+      jest.mocked(agentPolicyService.getByIds).mockResolvedValueOnce([
+        {
+          id: 'policy1',
+          name: `Agentless policy policy1`,
+          is_managed: true,
+          revision: 10,
+          keep_monitoring_alive: false,
+          monitoring_enabled: [],
+        },
+      ] as unknown as AgentPolicy[]);
+      jest.mocked(agentPolicyService.list).mockReset();
+      jest.mocked(agentPolicyService.list).mockResolvedValueOnce({
+        items: [] as AgentPolicy[],
+        total: 0,
+        page: 10,
+        perPage: 100,
+      });
+
+      await syncAgentlessDeployments({
+        logger,
+        agentlessAgentService,
+      });
+
+      expect(agentlessAgentService.listAgentlessDeployments).toHaveBeenCalledTimes(1);
+      expect(agentPolicyService.update).toHaveBeenCalledTimes(1);
+      expect(agentlessAgentService.createAgentlessAgent).toHaveBeenCalledTimes(0);
+      expect(agentlessAgentService.deleteAgentlessAgent).toHaveBeenCalledTimes(0);
     });
   });
 });

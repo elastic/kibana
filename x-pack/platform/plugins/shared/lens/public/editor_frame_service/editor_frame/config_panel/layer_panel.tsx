@@ -483,6 +483,7 @@ export function LayerPanel(props: LayerPanelProps) {
             )}
             <ESQLEditor
               uiSettings={core.uiSettings}
+              http={core.http}
               isTextBasedLanguage={isTextBasedLanguage}
               framePublicAPI={framePublicAPI}
               layerId={layerId}

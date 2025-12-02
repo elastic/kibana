@@ -37,7 +37,7 @@ describe('CspConfig', () => {
         "disableEmbedding": false,
         "disableUnsafeEval": true,
         "header": "script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'",
-        "reportOnlyHeader": "form-action 'report-sample' 'self'",
+        "reportOnlyHeader": "form-action 'report-sample' 'self'; default-src 'report-sample' 'none'; font-src 'report-sample' 'self'; img-src 'report-sample' 'self' data:; connect-src 'report-sample' 'self' telemetry.elastic.co telemetry-staging.elastic.co; script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'",
         "strict": true,
         "warnLegacyBrowsers": true,
       }

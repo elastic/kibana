@@ -13,7 +13,7 @@ import {
   getTimeAndCategorizationFields,
 } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
 import type { ESQLCallbacks } from '../shared/types';
-import { getColumnsByTypeRetriever } from '../shared/columns';
+import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 import { getFromCommandHelper } from '../shared/resources_helpers';
 import type { InlineSuggestionItem } from './types';
 import { fromCache, setToCache } from './inline_suggestions_cache';

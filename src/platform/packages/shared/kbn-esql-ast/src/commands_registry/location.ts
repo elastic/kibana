@@ -55,7 +55,8 @@ const functionBasedLocations: Record<
  *
  * This is primarily around for backwards compatibility with the old system of command and option names.
  */
-const getLocationFromCommandOrOptionName = (name: string) => commandOptionNameToLocation[name];
+export const getLocationFromCommandOrOptionName = (name: string) =>
+  commandOptionNameToLocation[name];
 
 /**
  * Identifies the location ID at the given position

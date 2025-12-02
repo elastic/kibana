@@ -31,10 +31,13 @@ import {
   useGeneratedHtmlId,
   EuiText,
   EuiLink,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
+import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 
@@ -59,6 +62,7 @@ export function StreamsSettingsFlyout({
 
   const {
     ui: { manage: canManageWiredKibana },
+    features: { significantEvents },
   } = useStreamsPrivileges();
 
   const [canManageWiredElasticsearch, setCanManageWiredElasticsearch] =
@@ -138,6 +142,38 @@ export function StreamsSettingsFlyout({
       setLoading(false);
     }
   };
+
+  const [{ loading: isChangingSignificantEvents }, toggleSignificantEvents] = useAsyncFn(
+    async (event) => {
+      const isEnabled = event.target.checked;
+      try {
+        await core.uiSettings.set(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS, isEnabled);
+
+        core.notifications.toasts.addInfo(
+          isEnabled
+            ? i18n.translate('xpack.streams.streamsListView.significantEventsEnabledToast', {
+                defaultMessage: 'Significant events enabled',
+              })
+            : i18n.translate('xpack.streams.streamsListView.significantEventsDisabledToast', {
+                defaultMessage: 'Significant events disabled',
+              })
+        );
+      } catch (error) {
+        core.notifications.toasts.addError(error, {
+          title: i18n.translate(
+            'xpack.streams.streamsListView.significantEventsToggleErrorToastTitle',
+            {
+              defaultMessage: 'Error updating Significant events setting',
+            }
+          ),
+          toastMessage:
+            error?.body?.message || (error instanceof Error ? error.message : String(error)),
+          toastLifeTimeMs: 5000,
+        });
+      }
+    },
+    [core]
+  );
 
   // Shipper button group state
   const shipperButtonGroupPrefix = useGeneratedHtmlId({ prefix: 'shipperButtonGroup' });
@@ -284,6 +320,65 @@ output.elasticsearch:
               )}
             </EuiFormRow>
           </EuiDescribedFormGroup>
+
+          {significantEvents?.available && (
+            <EuiDescribedFormGroup
+              fullWidth
+              descriptionFlexItemProps={{ grow: 2 }}
+              title={
+                <h3>
+                  <EuiFlexGroup gutterSize="s">
+                    <EuiFlexItem>
+                      {i18n.translate('xpack.streams.streamsListView.significantEventsTitle', {
+                        defaultMessage: 'Significant events',
+                      })}
+                      <EuiBetaBadge
+                        label={i18n.translate('xpack.streams.streamsListView.betaBadgeLabel', {
+                          defaultMessage: 'Technical Preview',
+                        })}
+                        tooltipContent={i18n.translate(
+                          'xpack.streams.streamsListView.betaBadgeDescription',
+                          {
+                            defaultMessage:
+                              'This functionality is experimental and not supported. It may change or be removed at any time.',
+                          }
+                        )}
+                        alignment="middle"
+                        size="s"
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </h3>
+              }
+              description={
+                <p>
+                  {i18n.translate('xpack.streams.streamsListView.significantEventsDescription', {
+                    defaultMessage:
+                      "A Significant event is a single, 'interesting' log event identified by an automated rule as being important for understanding a system's behavior.",
+                  })}
+                </p>
+              }
+            >
+              <EuiFormRow fullWidth>
+                <EuiSwitch
+                  label={i18n.translate(
+                    'xpack.streams.streamsListView.enableSignificantEventsSwitchLabel',
+                    {
+                      defaultMessage: 'Enable Significant events',
+                    }
+                  )}
+                  checked={Boolean(significantEvents?.enabled)}
+                  onChange={toggleSignificantEvents}
+                  data-test-subj="streamsSignificantEventsSwitch"
+                  disabled={
+                    core.uiSettings.isOverridden(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS) ||
+                    isChangingSignificantEvents
+                  }
+                />
+              </EuiFormRow>
+            </EuiDescribedFormGroup>
+          )}
+
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiText size="xs">
               <h3>
@@ -382,6 +477,7 @@ output.elasticsearch:
                         id="xpack.streams.streamsListView.shipperConfigCurlDescription"
                         defaultMessage="Send data to the {logsEndpoint} endpoint using the {bulkApiLink}. Refer to the following example for more information:"
                         values={{
+                          // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
                           logsEndpoint: <code>/logs/</code>,
                           bulkApiLink: (
                             <EuiLink
@@ -389,6 +485,7 @@ output.elasticsearch:
                               target="_blank"
                               rel="noopener noreferrer"
                               external
+                              // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
                             >
                               Bulk API
                             </EuiLink>

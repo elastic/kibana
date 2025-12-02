@@ -20,6 +20,7 @@ interface K8sNodeDocument extends Fields {
   'host.name': string;
   'metricset.name'?: string;
   'event.dataset'?: string;
+  'event.module'?: string;
 }
 
 export class K8sNode extends Entity<K8sNodeDocument> {
@@ -57,5 +58,6 @@ export function k8sNode(name: string, podUid: string) {
     'host.hostname': name,
     'host.name': name,
     'event.dataset': 'kubernetes.node',
+    'event.module': 'kubernetes',
   });
 }

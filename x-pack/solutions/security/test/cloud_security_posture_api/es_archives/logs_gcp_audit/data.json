@@ -742,3 +742,200 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "non-enriched-single-1",
+    "index": ".ds-logs-gcp.audit-default-2024.10.07-000001",
+    "source": {
+      "@timestamp": "2024-09-01T14:00:00.000Z",
+      "actor": {
+        "entity": {
+          "id": "non-enriched-actor-123"
+        }
+      },
+      "event": {
+        "action": "test.action.non.enriched.single",
+        "id": "non-enriched-event-1",
+        "kind": "event",
+        "outcome": "success"
+      },
+      "target": {
+        "entity": {
+          "id": "non-enriched-target-456"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "non-enriched-multi-1",
+    "index": ".ds-logs-gcp.audit-default-2024.10.07-000001",
+    "source": {
+      "@timestamp": "2024-09-01T15:00:00.000Z",
+      "actor": {
+        "entity": {
+          "id": "non-enriched-actor-multi-1"
+        }
+      },
+      "event": {
+        "action": "test.action.non.enriched.multiple",
+        "id": "non-enriched-event-multi-1",
+        "kind": "event",
+        "outcome": "success"
+      },
+      "target": {
+        "entity": {
+          "id": "non-enriched-target-multi-1"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "non-enriched-multi-2",
+    "index": ".ds-logs-gcp.audit-default-2024.10.07-000001",
+    "source": {
+      "@timestamp": "2024-09-01T15:01:00.000Z",
+      "actor": {
+        "entity": {
+          "id": "non-enriched-actor-multi-2"
+        }
+      },
+      "event": {
+        "action": "test.action.non.enriched.multiple",
+        "id": "non-enriched-event-multi-2",
+        "kind": "event",
+        "outcome": "success"
+      },
+      "target": {
+        "entity": {
+          "id": "non-enriched-target-multi-2"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "non-enriched-multi-3",
+    "index": ".ds-logs-gcp.audit-default-2024.10.07-000001",
+    "source": {
+      "@timestamp": "2024-09-01T15:02:00.000Z",
+      "actor": {
+        "entity": {
+          "id": "non-enriched-actor-multi-3"
+        }
+      },
+      "event": {
+        "action": "test.action.non.enriched.multiple",
+        "id": "non-enriched-event-multi-3",
+        "kind": "event",
+        "outcome": "success"
+      },
+      "target": {
+        "entity": {
+          "id": "non-enriched-target-multi-3"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "multivalue-event-1",
+    "index": ".ds-logs-gcp.audit-default-2024.10.07-000001",
+    "source": {
+      "@timestamp": "2024-09-01T13:00:00.000Z",
+      "actor": {
+        "entity": {
+          "id": [
+            "actor-mv-1",
+            "actor-mv-2"
+          ]
+        }
+      },
+      "client": {
+        "user": {
+          "email": "multivalue@example.com"
+        }
+      },
+      "cloud": {
+        "project": {
+          "id": "your-project-id"
+        },
+        "provider": "gcp"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "test.multivalue.action",
+        "agent_id_status": "missing",
+        "category": [
+          "session",
+          "network"
+        ],
+        "id": "multivalue-event-1",
+        "ingested": "2024-10-07T17:47:35Z",
+        "kind": "event",
+        "outcome": "success",
+        "provider": "activity",
+        "type": [
+          "access",
+          "allowed"
+        ]
+      },
+      "log": {
+        "level": "NOTICE",
+        "logger": "projects/your-project-id/logs/cloudaudit.googleapis.com%2Factivity"
+      },
+      "related": {
+        "ip": [
+          "10.0.0.5"
+        ],
+        "user": [
+          "multivalue@example.com"
+        ]
+      },
+      "service": {
+        "name": "test.googleapis.com"
+      },
+      "source": {
+        "ip": "10.0.0.5"
+      },
+      "target": {
+        "entity": {
+          "id": [
+            "target-mv-1",
+            "target-mv-2",
+            "target-mv-3"
+          ]
+        }
+      },
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "Other",
+        "original": "test-client/1.0.0"
+      }
+    }
+  }
+}

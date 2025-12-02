@@ -35,5 +35,6 @@
     "@kbn/core-http-common",
     "@kbn/streams-schema",
     "@kbn/streamlang",
+    "@kbn/axe-config"
   ]
 }

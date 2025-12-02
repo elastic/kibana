@@ -181,9 +181,11 @@ main () {
   # Bootstrap Kibana
   .buildkite/scripts/bootstrap.sh
 
-  # Build ANTLR stuff
+  # Note: We run build commands directly instead of `yarn build:antlr4` to skip
+  # the prebuild:antlr4 hook which uses `brew` (macOS only). CI has antlr installed.
   cd ./src/platform/packages/shared/kbn-esql-ast
-  yarn build:antlr4
+  yarn build:antlr4:esql
+  yarn build:antlr4:promql
 
   # Make a commit
   BRANCH_NAME="esql_grammar_sync_$(date +%s)"

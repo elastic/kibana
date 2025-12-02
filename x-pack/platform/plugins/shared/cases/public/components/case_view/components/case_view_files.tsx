@@ -15,10 +15,8 @@ import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import type { CaseUI } from '../../../../common/ui/types';
 import type { CaseFilesFilteringOptions } from '../../../containers/use_get_case_files';
 
-import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import { useGetCaseFiles } from '../../../containers/use_get_case_files';
 import { FilesTable } from '../../files/files_table';
-import { CaseViewTabs } from '../case_view_tabs';
 import { FilesUtilityBar } from '../../files/files_utility_bar';
 
 interface CaseViewFilesProps {
@@ -83,7 +81,6 @@ export const CaseViewFiles = ({ caseData }: CaseViewFilesProps) => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
-        <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.FILES} />
         <EuiFlexGroup>
           <EuiFlexItem>
             <FilesUtilityBar caseId={caseData.id} onSearch={onSearchChange} />

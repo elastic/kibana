@@ -2668,6 +2668,7 @@ module.exports = {
       ],
       rules: {
         '@kbn/eslint/scout_no_describe_configure': 'error',
+        '@kbn/eslint/require_include_in_check_a11y': 'warn',
       },
     },
     {

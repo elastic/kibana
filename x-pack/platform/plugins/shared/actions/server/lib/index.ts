@@ -43,3 +43,4 @@ export { tryCatch } from './try_catch';
 export type { TelemetryMetadata } from './token_tracking/gen_ai_token_tracking';
 export { formatZodError } from './format_zod_error';
 export { createConnectorTypeFromSpec } from './single_file_connectors/create_connector_from_spec';
+export { getDeleteTokenAxiosInterceptor } from './delete_token_axios_interceptor';

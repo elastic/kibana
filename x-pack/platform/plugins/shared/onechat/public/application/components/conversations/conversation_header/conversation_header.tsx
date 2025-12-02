@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ConversationRightActions } from './conversation_actions_right';
@@ -24,16 +24,25 @@ export const ConversationHeader: React.FC<ConversationHeaderProps> = ({
   onClose,
   ariaLabelledBy,
 }) => {
+  const [isEditing, setIsEditing] = useState(false);
+
   return (
     <EuiFlexGroup alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
         <ConversationLeftActions />
       </EuiFlexItem>
       <EuiFlexItem grow={true} css={centerSectionStyles}>
-        <ConversationTitle ariaLabelledBy={ariaLabelledBy} />
+        <ConversationTitle
+          ariaLabelledBy={ariaLabelledBy}
+          isEditing={isEditing}
+          setIsEditing={setIsEditing}
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <ConversationRightActions onClose={onClose} />
+        <ConversationRightActions
+          onClose={onClose}
+          onRenameConversation={() => setIsEditing(true)}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -95,9 +95,10 @@ describe('FROM Autocomplete', () => {
     test('suggests comma or pipe after complete index name', async () => {
       const suggest = async (query: string) => {
         const correctedQuery = correctQuerySyntax(query);
-        const { ast } = Parser.parse(correctedQuery, { withFormatting: true });
+        const { root } = Parser.parse(correctedQuery, { withFormatting: true });
+
         const cursorPosition = query.length;
-        const { command } = findAstPosition(ast, cursorPosition);
+        const { command } = findAstPosition(root, cursorPosition);
 
         return autocomplete(query, command!, mockCallbacks, mockContext, cursorPosition);
       };
