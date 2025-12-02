@@ -54,26 +54,24 @@ export function StatusBar({ alert, alertStatus }: StatusBarProps) {
       </EuiFlexItem>
       <CaseLinks alert={alert} />
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="none">
+        <EuiFlexGroup gutterSize="xs">
           <EuiText size="s" color="subdued">
             <FormattedMessage
               id="xpack.observability.pages.alertDetails.pageTitle.tags"
-              defaultMessage="Tags"
+              defaultMessage="Tags:"
             />
-            :&nbsp;
           </EuiText>
           <TagsList tags={tags} ignoreEmpty color="default" />
         </EuiFlexGroup>
       </EuiFlexItem>
       {workflowTags && workflowTags.length > 0 && (
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="none">
+          <EuiFlexGroup gutterSize="xs">
             <EuiText size="s" color="subdued">
               <FormattedMessage
                 id="xpack.observability.pages.alertDetails.pageTitle.workflowTags"
-                defaultMessage="Workflow Tags"
+                defaultMessage="Workflow Tags:"
               />
-              :&nbsp;
             </EuiText>
             <TagsList tags={workflowTags} ignoreEmpty color="default" />
           </EuiFlexGroup>
@@ -81,13 +79,12 @@ export function StatusBar({ alert, alertStatus }: StatusBarProps) {
       )}
 
       <EuiFlexItem grow={false} css={{ minWidth: 100 }}>
-        <EuiFlexGroup gutterSize="none">
+        <EuiFlexGroup gutterSize="xs">
           <EuiText size="s" color="subdued">
             <FormattedMessage
               id="xpack.observability.pages.alertDetails.pageTitle.triggered"
-              defaultMessage="Triggered"
+              defaultMessage="Triggered:"
             />
-            :&nbsp;
           </EuiText>
           <EuiToolTip content={moment(Number(alert.start)).format(dateFormat)}>
             <EuiText
@@ -103,13 +100,12 @@ export function StatusBar({ alert, alertStatus }: StatusBarProps) {
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false} css={{ minWidth: 120 }}>
-        <EuiFlexGroup gutterSize="none">
+        <EuiFlexGroup gutterSize="xs">
           <EuiText size="s" color="subdued">
             <FormattedMessage
               id="xpack.observability.pages.alertDetails.pageTitle.duration"
-              defaultMessage="Duration"
+              defaultMessage="Duration:"
             />
-            :&nbsp;
           </EuiText>
           <EuiText
             css={css`
@@ -122,13 +118,12 @@ export function StatusBar({ alert, alertStatus }: StatusBarProps) {
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false} css={{ minWidth: 240 }}>
-        <EuiFlexGroup gutterSize="none">
+        <EuiFlexGroup gutterSize="xs">
           <EuiText size="s" color="subdued">
             <FormattedMessage
               id="xpack.observability.pages.alertDetails.pageTitle.lastStatusUpdate"
-              defaultMessage="Last status update"
+              defaultMessage="Last status update:"
             />
-            :&nbsp;
           </EuiText>
           <EuiToolTip content={moment(alert.fields[TIMESTAMP]).format(dateFormat)}>
             <EuiText
