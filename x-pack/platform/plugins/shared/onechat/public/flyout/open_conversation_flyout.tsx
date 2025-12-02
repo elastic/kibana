@@ -10,7 +10,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { EuiLoadingSpinner, htmlIdGenerator } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { css } from '@emotion/react/dist/emotion-react.cjs';
+import { css } from '@emotion/react';
 import type { OpenConversationFlyoutOptions } from './types';
 import type { OnechatInternalService } from '../services';
 import type { ConversationFlyoutRef } from '../types';
