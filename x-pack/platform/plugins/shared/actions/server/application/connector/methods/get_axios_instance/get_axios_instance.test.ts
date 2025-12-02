@@ -100,7 +100,7 @@ const inMemoryConnectors = [
   }),
 ];
 
-describe('execute()', () => {
+describe('getAxiosInstance()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     actionTypeRegistry = new ActionTypeRegistry({
