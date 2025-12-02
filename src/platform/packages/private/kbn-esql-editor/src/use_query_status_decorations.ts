@@ -84,6 +84,10 @@ export function useQueryStatusDecorations({
         options: {
           isWholeLine: false,
           glyphMarginClassName: 'esql-warning-glyph',
+          glyphMarginHoverMessage: {
+            value: warning.message,
+            isTrusted: true,
+          },
         },
       });
     });
