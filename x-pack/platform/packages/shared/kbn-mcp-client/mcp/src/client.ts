@@ -12,6 +12,7 @@ import {
   StreamableHTTPError,
 } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import type { ServerCapabilities } from '@modelcontextprotocol/sdk/types.js';
+import type { Logger } from '@kbn/core/server';
 import type {
   ClientDetails,
   CallToolParams,
@@ -29,12 +30,16 @@ import type {
  * listing tools, and calling tools.
  */
 export class McpClient {
-  private client: Client;
-  private transport: StreamableHTTPClientTransport;
+  private readonly client: Client;
+  private readonly transport: StreamableHTTPClientTransport;
+
+  public name: string;
+  public version: string;
 
   public connected: boolean = false;
 
   constructor(
+    private readonly logger: Logger,
     clientDetails: ClientDetails,
     {
       headers = {},
@@ -56,6 +61,9 @@ export class McpClient {
       },
     });
 
+    this.name = clientDetails.name;
+    this.version = clientDetails.version;
+
     this.client = new Client({
       name: clientDetails.name,
       version: clientDetails.version,
@@ -67,19 +75,24 @@ export class McpClient {
    */
   async connect(): Promise<{ connected: boolean; capabilities?: ServerCapabilities }> {
     if (!this.connected) {
+      this.logger.info(`Attempting to connect to MCP server ${this.name}, ${this.version}`);
       try {
         // connect() performs the initialization handshake with the MCP server as per MCP protocol
         await this.client.connect(this.transport);
         this.connected = true;
+        this.logger.info(`Connected to MCP server ${this.name}, ${this.version}`);
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
+        this.logger.error(
+          `Error connecting to MCP server ${this.name}, ${this.version}: ${message}`
+        );
         if (error instanceof StreamableHTTPError) {
           // The SDK formats the message as "Streamable HTTP error: Connection failed"
           throw new Error(`${message}`);
         } else if (error instanceof UnauthorizedError) {
           throw new Error(`Unauthorized error: ${message}`);
         } else {
-          throw new Error(`Error connecting to MCP client: ${message}`);
+          throw new Error(`Error connecting to MCP server: ${message}`);
         }
       }
     }
@@ -97,8 +110,10 @@ export class McpClient {
    */
   async disconnect(): Promise<boolean> {
     if (this.connected) {
+      this.logger.info(`Attempting to disconnect from MCP server ${this.name}, ${this.version}`);
       await this.client.close();
       this.connected = false;
+      this.logger.info(`Disconnected from MCP client ${this.name}, ${this.version}`);
     }
     return this.connected;
   }
@@ -108,6 +123,7 @@ export class McpClient {
    */
   async listTools(): Promise<ListToolsResponse> {
     if (this.connected) {
+      this.logger.info(`Listing tools from MCP server ${this.name}, ${this.version}`);
       const getNextPage = async (cursor?: string): Promise<Tool[]> => {
         const response = await this.client.listTools({
           cursor,
@@ -149,8 +165,10 @@ export class McpClient {
    */
   async callTool(params: CallToolParams): Promise<CallToolResponse> {
     if (!this.connected) {
-      throw new Error('MCP client not connected');
+      throw new Error(`MCP client not connected to ${this.name}, ${this.version}`);
     }
+
+    this.logger.info(`Calling tool ${params.name} on MCP server ${this.name}, ${this.version}`);
     const response = await this.client.callTool({
       name: params.name,
       arguments: params.arguments,

@@ -15,6 +15,7 @@ import {
 import { UnauthorizedError } from '@modelcontextprotocol/sdk/client/auth.js';
 import type { ClientDetails, CallToolParams } from './types';
 import type { ServerCapabilities } from '@modelcontextprotocol/sdk/types.js';
+import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 
 // Type definitions for SDK responses
 interface MockListToolsResult {
@@ -103,10 +104,11 @@ describe('McpClient', () => {
   };
   let mockTransport: StreamableHTTPClientTransport;
   let clientDetails: ClientDetails;
+  let mockLogger: MockedLogger;
 
   // Helper function to create a connected client
   const createConnectedClient = async (): Promise<McpClient> => {
-    const client = new McpClient(clientDetails);
+    const client = new McpClient(mockLogger, clientDetails);
     mockClient.connect.mockResolvedValue(undefined);
     mockClient.getServerCapabilities.mockReturnValue(undefined);
     await client.connect();
@@ -115,6 +117,7 @@ describe('McpClient', () => {
 
   beforeEach(() => {
     // Setup mocks
+    mockLogger = loggerMock.create();
     mockClient = {
       connect: jest.fn(),
       close: jest.fn(),
@@ -146,7 +149,7 @@ describe('McpClient', () => {
   describe('constructor', () => {
     it('creates transport with correct URL and headers', () => {
       const customHeaders = { 'X-Custom': 'value' };
-      new McpClient(clientDetails, { headers: customHeaders });
+      new McpClient(mockLogger, clientDetails, { headers: customHeaders });
 
       expect(StreamableHTTPClientTransport).toHaveBeenCalledWith(
         expect.objectContaining({ href: 'https://example.com/mcp' }),
@@ -159,7 +162,7 @@ describe('McpClient', () => {
     });
 
     it('creates transport with empty headers when customHeaders not provided', () => {
-      new McpClient(clientDetails);
+      new McpClient(mockLogger, clientDetails);
 
       expect(StreamableHTTPClientTransport).toHaveBeenCalledWith(
         expect.objectContaining({ href: 'https://example.com/mcp' }),
@@ -172,7 +175,7 @@ describe('McpClient', () => {
     });
 
     it('creates transport with reconnection options', () => {
-      new McpClient(clientDetails);
+      new McpClient(mockLogger, clientDetails);
 
       expect(StreamableHTTPClientTransport).toHaveBeenCalledWith(
         expect.anything(),
@@ -188,7 +191,7 @@ describe('McpClient', () => {
     });
 
     it('creates client with correct name and version', () => {
-      new McpClient(clientDetails);
+      new McpClient(mockLogger, clientDetails);
 
       expect(Client).toHaveBeenCalledWith({
         name: 'test-client',
@@ -199,7 +202,7 @@ describe('McpClient', () => {
 
   describe('connect', () => {
     it('connects successfully when not already connected', async () => {
-      const client = new McpClient(clientDetails);
+      const client = new McpClient(mockLogger, clientDetails);
       mockClient.connect.mockResolvedValue(undefined);
       const mockCapabilities: ServerCapabilities = {
         tools: {},
@@ -214,10 +217,16 @@ describe('McpClient', () => {
         capabilities: mockCapabilities,
       });
       expect(client.connected).toBe(true);
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        'Attempting to connect to MCP server test-client, 1.0.0'
+      );
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        'Connected to MCP server test-client, 1.0.0'
+      );
     });
 
     it('returns undefined capabilities when not available', async () => {
-      const client = new McpClient(clientDetails);
+      const client = new McpClient(mockLogger, clientDetails);
       mockClient.connect.mockResolvedValue(undefined);
       mockClient.getServerCapabilities.mockReturnValue(undefined);
 
@@ -230,7 +239,7 @@ describe('McpClient', () => {
     });
 
     it('does not reconnect if already connected', async () => {
-      const client = new McpClient(clientDetails);
+      const client = new McpClient(mockLogger, clientDetails);
       mockClient.connect.mockResolvedValue(undefined);
       mockClient.getServerCapabilities.mockReturnValue(undefined);
 
@@ -248,49 +257,73 @@ describe('McpClient', () => {
     });
 
     it('throws StreamableHTTPError with formatted message', async () => {
-      const client = new McpClient(clientDetails);
+      const client = new McpClient(mockLogger, clientDetails);
       const error = new StreamableHTTPError(500, 'Connection failed');
       mockClient.connect.mockRejectedValue(error);
 
       // The SDK formats the message as "Streamable HTTP error: Connection failed"
       // Our client just passes through the message without adding a prefix
       await expect(client.connect()).rejects.toThrow('Streamable HTTP error: Connection failed');
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        'Attempting to connect to MCP server test-client, 1.0.0'
+      );
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'Error connecting to MCP server test-client, 1.0.0: Streamable HTTP error: Connection failed'
+      );
     });
 
     it('throws UnauthorizedError with formatted message', async () => {
-      const client = new McpClient(clientDetails);
+      const client = new McpClient(mockLogger, clientDetails);
       const error = new UnauthorizedError('Unauthorized');
       mockClient.connect.mockRejectedValue(error);
 
       await expect(client.connect()).rejects.toThrow('Unauthorized error: Unauthorized');
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        'Attempting to connect to MCP server test-client, 1.0.0'
+      );
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'Error connecting to MCP server test-client, 1.0.0: Unauthorized'
+      );
     });
 
     it('throws generic error with formatted message', async () => {
-      const client = new McpClient(clientDetails);
+      const client = new McpClient(mockLogger, clientDetails);
       const error = new Error('Generic error');
       mockClient.connect.mockRejectedValue(error);
 
       await expect(client.connect()).rejects.toThrow(
-        'Error connecting to MCP client: Generic error'
+        'Error connecting to MCP server: Generic error'
+      );
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        'Attempting to connect to MCP server test-client, 1.0.0'
+      );
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'Error connecting to MCP server test-client, 1.0.0: Generic error'
       );
     });
 
     it('handles non-Error objects', async () => {
-      const client = new McpClient(clientDetails);
+      const client = new McpClient(mockLogger, clientDetails);
       mockClient.connect.mockRejectedValue('String error');
 
       await expect(client.connect()).rejects.toThrow(
-        'Error connecting to MCP client: String error'
+        'Error connecting to MCP server: String error'
+      );
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'Error connecting to MCP server test-client, 1.0.0: String error'
       );
     });
 
     it('handles error objects without message property', async () => {
-      const client = new McpClient(clientDetails);
+      const client = new McpClient(mockLogger, clientDetails);
       const error = { code: 500, status: 'error' };
       mockClient.connect.mockRejectedValue(error);
 
       await expect(client.connect()).rejects.toThrow(
-        'Error connecting to MCP client: [object Object]'
+        'Error connecting to MCP server: [object Object]'
+      );
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'Error connecting to MCP server test-client, 1.0.0: [object Object]'
       );
     });
   });
@@ -305,10 +338,16 @@ describe('McpClient', () => {
       expect(mockClient.close).toHaveBeenCalled();
       expect(result).toBe(false);
       expect(client.connected).toBe(false);
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        'Attempting to disconnect from MCP server test-client, 1.0.0'
+      );
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        'Disconnected from MCP client test-client, 1.0.0'
+      );
     });
 
     it('does nothing when not connected', async () => {
-      const client = new McpClient(clientDetails);
+      const client = new McpClient(mockLogger, clientDetails);
 
       const result = await client.disconnect();
 
@@ -352,6 +391,9 @@ describe('McpClient', () => {
         description: 'Tool 2',
         inputSchema: {},
       });
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        'Listing tools from MCP server test-client, 1.0.0'
+      );
     });
 
     it('handles pagination correctly', async () => {
@@ -440,7 +482,7 @@ describe('McpClient', () => {
     });
 
     it('throws error when not connected', async () => {
-      const client = new McpClient(clientDetails);
+      const client = new McpClient(mockLogger, clientDetails);
 
       await expect(client.listTools()).rejects.toThrow('MCP client not connected');
     });
@@ -495,6 +537,9 @@ describe('McpClient', () => {
         { type: 'text', text: 'Result 1' },
         { type: 'text', text: 'Result 2' },
       ]);
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        'Calling tool test-tool on MCP server test-client, 1.0.0'
+      );
     });
 
     it('filters out non-text content parts', async () => {
@@ -680,10 +725,10 @@ describe('McpClient', () => {
     });
 
     it('throws error when not connected', async () => {
-      const client = new McpClient(clientDetails);
+      const client = new McpClient(mockLogger, clientDetails);
 
       await expect(client.callTool({ name: 'test-tool', arguments: {} })).rejects.toThrow(
-        'MCP client not connected'
+        'MCP client not connected to test-client, 1.0.0'
       );
     });
 
