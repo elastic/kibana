@@ -71,7 +71,12 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ onConnect }) => 
           {!hasConfigurePermission && (
             <>
               <EuiSpacer size="m" />
-              <EuiText color="subdued" size="s" style={{ fontStyle: 'italic' }}>
+              <EuiText
+                color="subdued"
+                size="s"
+                style={{ fontStyle: 'italic' }}
+                data-test-subj="onboardingPermissionWarning"
+              >
                 <p>
                   <FormattedMessage
                     id="xpack.cloudConnect.onboarding.noPermissionsDescription"

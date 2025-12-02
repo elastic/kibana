@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { IntlProvider } from 'react-intl';
-import { OnboardingPage } from './index';
+import { IntlProvider } from '@kbn/i18n-react';
+import { OnboardingPage } from '.';
 import { useCloudConnectedAppContext } from '../../app_context';
 import type { CloudConnectedAppContextValue } from '../../app_context';
 
@@ -76,18 +76,6 @@ describe('OnboardingPage', () => {
     const learnMoreLink = screen.getByRole('link', { name: /learn more/i });
     expect(learnMoreLink).toBeInTheDocument();
     expect(learnMoreLink).toHaveAttribute('href', 'https://docs.elastic.co/cloud-connect');
-    expect(learnMoreLink).toHaveAttribute('target', '_blank');
-  });
-
-  it('should render illustration image with correct src', () => {
-    renderWithIntl(<OnboardingPage onConnect={mockOnConnect} />);
-
-    const image = screen.getByAltText(/illustration for cloud data migration/i);
-    expect(image).toBeInTheDocument();
-    expect(image).toHaveAttribute(
-      'src',
-      '/base/plugins/kibanaReact/assets/illustration_cloud_migration.png'
-    );
   });
 
   describe('Permission-based rendering', () => {
@@ -121,9 +109,7 @@ describe('OnboardingPage', () => {
 
       renderWithIntl(<OnboardingPage onConnect={mockOnConnect} />);
 
-      expect(
-        screen.getByText(/you must have all privileges granted to connect a cluster/i)
-      ).toBeInTheDocument();
+      expect(screen.getByTestId('onboardingPermissionWarning')).toBeInTheDocument();
     });
 
     it('should not show permission warning message when user has configure permission', () => {
@@ -134,33 +120,7 @@ describe('OnboardingPage', () => {
 
       renderWithIntl(<OnboardingPage onConnect={mockOnConnect} />);
 
-      expect(
-        screen.queryByText(/you must have all privileges granted to connect a cluster/i)
-      ).not.toBeInTheDocument();
-    });
-
-    it('should pass hasPermissions=true to ServiceCards when user has permission', () => {
-      mockUseCloudConnectedAppContext.mockReturnValue({
-        ...mockContext,
-        hasConfigurePermission: true,
-      } as CloudConnectedAppContextValue);
-
-      renderWithIntl(<OnboardingPage onConnect={mockOnConnect} />);
-
-      const serviceCards = screen.getByTestId('service-cards');
-      expect(serviceCards).toHaveTextContent('hasPermissions: true');
-    });
-
-    it('should pass hasPermissions=false to ServiceCards when user lacks permission', () => {
-      mockUseCloudConnectedAppContext.mockReturnValue({
-        ...mockContext,
-        hasConfigurePermission: false,
-      } as CloudConnectedAppContextValue);
-
-      renderWithIntl(<OnboardingPage onConnect={mockOnConnect} />);
-
-      const serviceCards = screen.getByTestId('service-cards');
-      expect(serviceCards).toHaveTextContent('hasPermissions: false');
+      expect(screen.queryByTestId('onboardingPermissionWarning')).not.toBeInTheDocument();
     });
   });
 

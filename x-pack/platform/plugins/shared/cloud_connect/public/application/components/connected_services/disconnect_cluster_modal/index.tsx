@@ -51,7 +51,7 @@ export const DisconnectClusterModal: React.FC<DisconnectClusterModalProps> = ({
   return (
     <EuiModal onClose={onClose} maxWidth={650}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle data-test-subj="disconnectClusterModalTitle">
           <FormattedMessage
             id="xpack.cloudConnect.connectedServices.disconnect.modalTitle"
             defaultMessage="Disconnect cluster"
@@ -69,6 +69,7 @@ export const DisconnectClusterModal: React.FC<DisconnectClusterModalProps> = ({
           }
           color="warning"
           iconType="warning"
+          data-test-subj="disconnectClusterWarningCallout"
         >
           <EuiText size="s">
             <p>
@@ -82,6 +83,7 @@ export const DisconnectClusterModal: React.FC<DisconnectClusterModalProps> = ({
                         e.currentTarget.blur();
                         copyToClipboard(clusterName);
                       }}
+                      data-test-subj="disconnectClusterNameLink"
                     >
                       {clusterName} <EuiIcon type="copy" />
                     </EuiLink>
@@ -115,12 +117,17 @@ export const DisconnectClusterModal: React.FC<DisconnectClusterModalProps> = ({
                 defaultMessage: 'Type the cluster ID to confirm disconnection',
               }
             )}
+            data-test-subj="disconnectClusterConfirmationInput"
           />
         </EuiFormRow>
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose} disabled={isLoading}>
+        <EuiButtonEmpty
+          onClick={onClose}
+          disabled={isLoading}
+          data-test-subj="disconnectClusterCancelButton"
+        >
           <FormattedMessage
             id="xpack.cloudConnect.connectedServices.disconnect.cancelButton"
             defaultMessage="Cancel"
@@ -132,6 +139,7 @@ export const DisconnectClusterModal: React.FC<DisconnectClusterModalProps> = ({
           onClick={handleConfirm}
           disabled={!isConfirmationValid || isLoading}
           isLoading={isLoading}
+          data-test-subj="disconnectClusterConfirmButton"
         >
           <FormattedMessage
             id="xpack.cloudConnect.connectedServices.disconnect.confirmButton"

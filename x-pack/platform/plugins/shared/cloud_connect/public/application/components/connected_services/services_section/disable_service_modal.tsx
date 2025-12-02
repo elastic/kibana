@@ -49,8 +49,9 @@ export const DisableServiceModal: React.FC<DisableServiceModalProps> = ({
       defaultFocusedButton="cancel"
       confirmButtonDisabled={isLoading}
       isLoading={isLoading}
+      data-test-subj="disableServiceModal"
     >
-      <p>
+      <p data-test-subj="disableServiceModalDescription">
         <FormattedMessage
           id="xpack.cloudConnect.services.disable.modalDescription"
           defaultMessage="Disabling this service will permanently remove all related setup and configuration from your cluster. You can re-enable it later, but your progress will be lost."

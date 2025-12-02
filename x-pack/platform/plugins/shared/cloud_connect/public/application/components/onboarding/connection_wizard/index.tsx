@@ -88,6 +88,7 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
               target="_blank"
               iconType="popout"
               iconSide="right"
+              data-test-subj="connectionWizardSignUpButton"
             >
               {SIGN_UP_BUTTON}
             </EuiButton>
@@ -98,6 +99,7 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
               target="_blank"
               iconType="popout"
               iconSide="right"
+              data-test-subj="connectionWizardLoginButton"
             >
               {LOGIN_BUTTON}
             </EuiButton>
@@ -112,7 +114,7 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
     titleSize: 'xs' as const,
     status: 'incomplete' as const,
     children: (
-      <EuiText size="s">
+      <EuiText size="s" data-test-subj="connectionWizardEncryptionWarning">
         <p>{getStep2Description(docLinks.links.kibana.secureSavedObject)}</p>
       </EuiText>
     ),
@@ -136,6 +138,7 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
               onChange={(e) => setApiKey(e.target.value)}
               fullWidth
               disabled={isLoading || !clusterConfig?.hasEncryptedSOEnabled}
+              data-test-subj="connectionWizardApiKeyInput"
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -143,6 +146,7 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
               onClick={handleConnect}
               disabled={!apiKey.trim() || isLoading || !clusterConfig?.hasEncryptedSOEnabled}
               isLoading={isLoading}
+              data-test-subj="connectionWizardConnectButton"
             >
               {CONNECT_BUTTON}
             </EuiButton>
@@ -151,7 +155,12 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
         {error && (
           <>
             <EuiSpacer size="m" />
-            <EuiCallOut title="Authentication failed" color="danger" iconType="error">
+            <EuiCallOut
+              title="Authentication failed"
+              color="danger"
+              iconType="error"
+              data-test-subj="connectionWizardError"
+            >
               <p>{error}</p>
             </EuiCallOut>
           </>

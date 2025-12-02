@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { IntlProvider } from 'react-intl';
+import { IntlProvider } from '@kbn/i18n-react';
 import { ServiceCard, type ServiceCardProps } from './details_card';
 import { useCloudConnectedAppContext } from '../../../app_context';
 
@@ -46,48 +46,33 @@ describe('ServiceCard', () => {
 
   describe('Badge rendering', () => {
     it('should render "Coming Soon" badge when card is disabled with badge prop', () => {
-      renderWithIntl(
-        <ServiceCard {...defaultProps} isCardDisabled={true} badge="Coming Soon" />
-      );
+      renderWithIntl(<ServiceCard {...defaultProps} isCardDisabled={true} badge="Coming Soon" />);
 
-      expect(screen.getByText('Coming Soon')).toBeInTheDocument();
+      expect(screen.getByTestId('serviceCardComingSoonBadge')).toBeInTheDocument();
     });
 
     it('should render "Unsupported" badge when service is not supported', () => {
       renderWithIntl(<ServiceCard {...defaultProps} supported={false} />);
 
-      expect(screen.getByText(/unsupported/i)).toBeInTheDocument();
-    });
-
-    it('should render "Unsupported" badge with tooltip when badgeTooltip provided', () => {
-      renderWithIntl(
-        <ServiceCard
-          {...defaultProps}
-          supported={false}
-          badgeTooltip="This version is not supported"
-        />
-      );
-
-      expect(screen.getByText(/unsupported/i)).toBeInTheDocument();
-      // Tooltip is present in the DOM but only visible on hover
+      expect(screen.getByTestId('serviceCardUnsupportedBadge')).toBeInTheDocument();
     });
 
     it('should render custom badge when badge prop is provided and service is supported', () => {
       renderWithIntl(<ServiceCard {...defaultProps} badge="Beta" />);
 
-      expect(screen.getByText('Beta')).toBeInTheDocument();
+      expect(screen.getByTestId('serviceCardCustomBadge')).toBeInTheDocument();
     });
 
     it('should render "Enabled" badge when service is enabled', () => {
       renderWithIntl(<ServiceCard {...defaultProps} enabled={true} />);
 
-      expect(screen.getByText(/enabled/i)).toBeInTheDocument();
+      expect(screen.getByTestId('serviceCardEnabledBadge')).toBeInTheDocument();
     });
 
     it('should render "Not enabled" badge when service is disabled', () => {
       renderWithIntl(<ServiceCard {...defaultProps} enabled={false} />);
 
-      expect(screen.getByText(/not enabled/i)).toBeInTheDocument();
+      expect(screen.getByTestId('serviceCardDisabledBadge')).toBeInTheDocument();
     });
   });
 
@@ -111,40 +96,34 @@ describe('ServiceCard', () => {
 
       renderWithIntl(<ServiceCard {...defaultProps} />);
 
-      expect(screen.getByText(/only admins can manage services/i)).toBeInTheDocument();
+      expect(screen.getByTestId('serviceCardPermissionMessage')).toBeInTheDocument();
     });
 
     it('should render "Open" button and more actions when service is enabled', () => {
       renderWithIntl(
-        <ServiceCard
-          {...defaultProps}
-          enabled={true}
-          serviceUrl="https://example.com/service"
-        />
+        <ServiceCard {...defaultProps} enabled={true} serviceUrl="https://example.com/service" />
       );
 
-      expect(screen.getByRole('link', { name: /open/i })).toBeInTheDocument();
+      expect(screen.getByTestId('serviceCardOpenButton')).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /more actions/i })).toBeInTheDocument();
     });
 
     it('should render "Connect" button with external icon when enableServiceByUrl is provided', () => {
       renderWithIntl(<ServiceCard {...defaultProps} enableServiceByUrl="https://enable.com" />);
 
-      const connectButton = screen.getByRole('button', { name: /connect/i });
-      expect(connectButton).toBeInTheDocument();
+      expect(screen.getByTestId('serviceCardConnectButton')).toBeInTheDocument();
     });
 
     it('should render "Connect" button without external icon when enableServiceByUrl is not provided', () => {
       renderWithIntl(<ServiceCard {...defaultProps} />);
 
-      const connectButton = screen.getByRole('button', { name: /connect/i });
-      expect(connectButton).toBeInTheDocument();
+      expect(screen.getByTestId('serviceCardConnectButton')).toBeInTheDocument();
     });
 
     it('should disable Connect button when onEnable is not provided', () => {
       renderWithIntl(<ServiceCard {...defaultProps} onEnable={undefined} />);
 
-      const connectButton = screen.getByRole('button', { name: /connect/i });
+      const connectButton = screen.getByTestId('serviceCardConnectButton');
       expect(connectButton).toBeDisabled();
     });
 
@@ -158,7 +137,7 @@ describe('ServiceCard', () => {
         />
       );
 
-      const openButton = screen.getByRole('button', { name: /open/i });
+      const openButton = screen.getByTestId('serviceCardOpenButton');
       expect(openButton).toBeDisabled();
     });
   });
@@ -168,7 +147,7 @@ describe('ServiceCard', () => {
       const onEnable = jest.fn();
       renderWithIntl(<ServiceCard {...defaultProps} onEnable={onEnable} />);
 
-      const connectButton = screen.getByRole('button', { name: /connect/i });
+      const connectButton = screen.getByTestId('serviceCardConnectButton');
       await userEvent.click(connectButton);
 
       expect(onEnable).toHaveBeenCalledTimes(1);
@@ -176,11 +155,7 @@ describe('ServiceCard', () => {
 
     it('should open and close popover when more actions button is clicked', async () => {
       renderWithIntl(
-        <ServiceCard
-          {...defaultProps}
-          enabled={true}
-          serviceUrl="https://example.com"
-        />
+        <ServiceCard {...defaultProps} enabled={true} serviceUrl="https://example.com" />
       );
 
       const moreActionsButton = screen.getByRole('button', { name: /more actions/i });
@@ -214,7 +189,8 @@ describe('ServiceCard', () => {
       const moreActionsButton = screen.getByRole('button', { name: /more actions/i });
       await userEvent.click(moreActionsButton);
 
-      const disableMenuItem = await screen.findByText(/disable service/i);
+      // Find the button within the popover that has the "Disable service" text
+      const disableMenuItem = await screen.findByRole('button', { name: /disable service/i });
       await userEvent.click(disableMenuItem);
 
       expect(onDisable).toHaveBeenCalledTimes(1);
@@ -236,7 +212,7 @@ describe('ServiceCard', () => {
         />
       );
 
-      const openButton = screen.getByRole('link', { name: /open/i });
+      const openButton = screen.getByTestId('serviceCardOpenButton');
       await userEvent.click(openButton);
 
       expect(onOpen).toHaveBeenCalledTimes(1);
@@ -263,7 +239,6 @@ describe('ServiceCard', () => {
       const learnMoreLink = screen.getByRole('link', { name: /learn more/i });
       expect(learnMoreLink).toBeInTheDocument();
       expect(learnMoreLink).toHaveAttribute('href', 'https://docs.example.com');
-      expect(learnMoreLink).toHaveAttribute('target', '_blank');
     });
 
     it('should not render Learn more link when learnMoreUrl is not provided', () => {

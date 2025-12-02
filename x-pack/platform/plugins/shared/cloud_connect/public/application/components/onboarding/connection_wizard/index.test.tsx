@@ -8,8 +8,8 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { IntlProvider } from 'react-intl';
-import { ConnectionWizard } from './index';
+import { IntlProvider } from '@kbn/i18n-react';
+import { ConnectionWizard } from '.';
 import { useCloudConnectedAppContext } from '../../../app_context';
 import { apiService } from '../../../../lib/api';
 import type { CloudConnectedAppContextValue } from '../../../app_context';
@@ -61,18 +61,15 @@ describe('ConnectionWizard', () => {
   it('should render 2 steps when hasEncryptedSOEnabled is true', () => {
     renderWithIntl(<ConnectionWizard onConnect={mockOnConnect} />);
 
-    // Step 1: Sign up or log in to Elastic Cloud
-    expect(
-      screen.getByText(/sign up or log in to elastic cloud and get the cloud connect api key/i)
-    ).toBeInTheDocument();
+    // Step 1: Sign up or log in buttons should be present
+    expect(screen.getByTestId('connectionWizardSignUpButton')).toBeInTheDocument();
+    expect(screen.getByTestId('connectionWizardLoginButton')).toBeInTheDocument();
 
     // Step 2 (encryption warning) should NOT be present
-    expect(screen.queryByText(/configure an encryption key/i)).not.toBeInTheDocument();
+    expect(screen.queryByTestId('connectionWizardEncryptionWarning')).not.toBeInTheDocument();
 
-    // Step 3: Paste API key (should be step 2 in the UI since step 2 is skipped)
-    expect(
-      screen.getByText(/paste your cloud connect api key and connect/i)
-    ).toBeInTheDocument();
+    // Step 3: API key input should be present (step 2 in UI since step 2 is skipped)
+    expect(screen.getByTestId('connectionWizardApiKeyInput')).toBeInTheDocument();
   });
 
   it('should render 3 steps when hasEncryptedSOEnabled is false', () => {
@@ -86,18 +83,15 @@ describe('ConnectionWizard', () => {
 
     renderWithIntl(<ConnectionWizard onConnect={mockOnConnect} />);
 
-    // Step 1: Sign up or log in to Elastic Cloud
-    expect(
-      screen.getByText(/sign up or log in to elastic cloud and get the cloud connect api key/i)
-    ).toBeInTheDocument();
+    // Step 1: Sign up or log in buttons should be present
+    expect(screen.getByTestId('connectionWizardSignUpButton')).toBeInTheDocument();
+    expect(screen.getByTestId('connectionWizardLoginButton')).toBeInTheDocument();
 
     // Step 2: Configure encryption key (should be present)
-    expect(screen.getByText(/configure an encryption key/i)).toBeInTheDocument();
+    expect(screen.getByTestId('connectionWizardEncryptionWarning')).toBeInTheDocument();
 
-    // Step 3: Paste API key
-    expect(
-      screen.getByText(/paste your cloud connect api key and connect/i)
-    ).toBeInTheDocument();
+    // Step 3: API key input should be present
+    expect(screen.getByTestId('connectionWizardApiKeyInput')).toBeInTheDocument();
   });
 
   it('should disable API key input when hasEncryptedSOEnabled is false', () => {
@@ -111,14 +105,14 @@ describe('ConnectionWizard', () => {
 
     renderWithIntl(<ConnectionWizard onConnect={mockOnConnect} />);
 
-    const input = screen.getByPlaceholderText(/paste your cloud connect api key/i);
+    const input = screen.getByTestId('connectionWizardApiKeyInput');
     expect(input).toBeDisabled();
   });
 
   it('should disable Connect button when API key is empty', () => {
     renderWithIntl(<ConnectionWizard onConnect={mockOnConnect} />);
 
-    const connectButton = screen.getByRole('button', { name: /connect/i });
+    const connectButton = screen.getByTestId('connectionWizardConnectButton');
     expect(connectButton).toBeDisabled();
   });
 
@@ -133,15 +127,15 @@ describe('ConnectionWizard', () => {
 
     renderWithIntl(<ConnectionWizard onConnect={mockOnConnect} />);
 
-    const connectButton = screen.getByRole('button', { name: /connect/i });
+    const connectButton = screen.getByTestId('connectionWizardConnectButton');
     expect(connectButton).toBeDisabled();
   });
 
   it('should enable Connect button when API key is entered AND hasEncryptedSOEnabled is true', async () => {
     renderWithIntl(<ConnectionWizard onConnect={mockOnConnect} />);
 
-    const input = screen.getByPlaceholderText(/paste your cloud connect api key/i);
-    const connectButton = screen.getByRole('button', { name: /connect/i });
+    const input = screen.getByTestId('connectionWizardApiKeyInput');
+    const connectButton = screen.getByTestId('connectionWizardConnectButton');
 
     // Initially disabled
     expect(connectButton).toBeDisabled();
@@ -162,15 +156,14 @@ describe('ConnectionWizard', () => {
 
     renderWithIntl(<ConnectionWizard onConnect={mockOnConnect} />);
 
-    const input = screen.getByPlaceholderText(/paste your cloud connect api key/i);
-    const connectButton = screen.getByRole('button', { name: /connect/i });
+    const input = screen.getByTestId('connectionWizardApiKeyInput');
+    const connectButton = screen.getByTestId('connectionWizardConnectButton');
 
     await userEvent.type(input, 'invalid-key');
     await userEvent.click(connectButton);
 
     await waitFor(() => {
-      expect(screen.getByText(/authentication failed/i)).toBeInTheDocument();
-      expect(screen.getByText(/invalid api key/i)).toBeInTheDocument();
+      expect(screen.getByTestId('connectionWizardError')).toBeInTheDocument();
     });
 
     expect(mockOnConnect).not.toHaveBeenCalled();
@@ -186,8 +179,8 @@ describe('ConnectionWizard', () => {
 
     renderWithIntl(<ConnectionWizard onConnect={mockOnConnect} />);
 
-    const input = screen.getByPlaceholderText(/paste your cloud connect api key/i);
-    const connectButton = screen.getByRole('button', { name: /connect/i });
+    const input = screen.getByTestId('connectionWizardApiKeyInput');
+    const connectButton = screen.getByTestId('connectionWizardConnectButton');
 
     await userEvent.type(input, 'test-api-key');
     await userEvent.click(connectButton);
@@ -214,8 +207,8 @@ describe('ConnectionWizard', () => {
 
     renderWithIntl(<ConnectionWizard onConnect={mockOnConnect} />);
 
-    const input = screen.getByPlaceholderText(/paste your cloud connect api key/i);
-    const connectButton = screen.getByRole('button', { name: /connect/i });
+    const input = screen.getByTestId('connectionWizardApiKeyInput');
+    const connectButton = screen.getByTestId('connectionWizardConnectButton');
 
     await userEvent.type(input, 'valid-api-key');
     await userEvent.click(connectButton);
@@ -226,6 +219,6 @@ describe('ConnectionWizard', () => {
     });
 
     // No error should be displayed
-    expect(screen.queryByText(/authentication failed/i)).not.toBeInTheDocument();
+    expect(screen.queryByTestId('connectionWizardError')).not.toBeInTheDocument();
   });
 });

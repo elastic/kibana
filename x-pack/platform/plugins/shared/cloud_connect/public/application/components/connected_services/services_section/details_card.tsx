@@ -71,12 +71,12 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
 
   const renderBadge = () => {
     if (isCardDisabled && badge) {
-      return <EuiBetaBadge size="s" label={badge} />;
+      return <EuiBetaBadge size="s" label={badge} data-test-subj="serviceCardComingSoonBadge" />;
     }
 
     if (!supported) {
       const unsupportedBadge = (
-        <EuiBadge color="hollow">
+        <EuiBadge color="hollow" data-test-subj="serviceCardUnsupportedBadge">
           <FormattedMessage
             id="xpack.cloudConnect.connectedServices.service.unsupported"
             defaultMessage="Unsupported"
@@ -92,11 +92,18 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
     }
 
     if (badge) {
-      return <EuiBadge color="hollow">{badge}</EuiBadge>;
+      return (
+        <EuiBadge color="hollow" data-test-subj="serviceCardCustomBadge">
+          {badge}
+        </EuiBadge>
+      );
     }
 
     return (
-      <EuiBadge color={enabled ? 'success' : 'subdued'}>
+      <EuiBadge
+        color={enabled ? 'success' : 'subdued'}
+        data-test-subj={enabled ? 'serviceCardEnabledBadge' : 'serviceCardDisabledBadge'}
+      >
         {enabled ? (
           <FormattedMessage
             id="xpack.cloudConnect.connectedServices.service.enabled"
@@ -120,7 +127,12 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
     // Show permission message if user doesn't have configure permission
     if (!hasConfigurePermission) {
       return (
-        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+        <EuiFlexGroup
+          gutterSize="xs"
+          alignItems="center"
+          responsive={false}
+          data-test-subj="serviceCardPermissionMessage"
+        >
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="subdued">
               <FormattedMessage
@@ -187,6 +199,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
                 onClick={onOpen}
                 disabled={isLoading}
                 isLoading={isLoading}
+                data-test-subj="serviceCardOpenButton"
               >
                 <FormattedMessage
                   id="xpack.cloudConnect.connectedServices.service.open"
@@ -202,6 +215,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
               closePopover={closePopover}
               panelPaddingSize="none"
               anchorPosition="downRight"
+              data-test-subj="serviceCardMoreActionsPopover"
             >
               <EuiContextMenuPanel items={menuItems} />
             </EuiPopover>
@@ -220,6 +234,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
           isLoading={isLoading}
           iconType="popout"
           iconSide="right"
+          data-test-subj="serviceCardConnectButton"
         >
           <FormattedMessage
             id="xpack.cloudConnect.connectedServices.service.connect"
@@ -235,6 +250,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
         onClick={onEnable}
         disabled={!onEnable || isLoading}
         isLoading={isLoading}
+        data-test-subj="serviceCardConnectButton"
       >
         <FormattedMessage
           id="xpack.cloudConnect.connectedServices.service.connect"
