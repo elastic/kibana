@@ -11,7 +11,6 @@ import {
   MAX_NESTING_LEVEL,
   Streams,
   findInheritedLifecycle,
-  findInheritedFailureStore,
   getInheritedSettings,
   getSegments,
   isInheritLifecycle,
