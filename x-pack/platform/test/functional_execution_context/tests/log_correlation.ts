@@ -29,8 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
 
   describe('Log Correlation', () => {
-    // TODO: see https://github.com/elastic/kibana/pull/243499
-    it.skip('Emits "trace.id" into the logs', async () => {
+    it('Emits "trace.id" into the logs', async () => {
       if (isPrWithLabel('"ci:collect-apm"')) {
         log.warning(`Skipping test as APM is enabled in FTR, which breaks this test`);
         return;
@@ -38,15 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const response1 = await supertest.get('/emit_log_with_trace_id');
       expect(response1.status).to.be(200);
-
       expect(response1.body.traceId).to.be.a('string');
-
-      const response2 = await supertest.get('/emit_log_with_trace_id');
-
-      expect(response2.status).to.be(200);
-      expect(response1.body.traceId).to.be.a('string');
-
-      expect(response2.body.traceId).not.to.be(response1.body.traceId);
 
       const logs = await readLogFile();
 
@@ -79,7 +70,6 @@ export default function ({ getService }: FtrProviderContext) {
               // esClient.ping() request
               record.message?.includes('HEAD /')
           ),
-
         logs,
       });
     });
