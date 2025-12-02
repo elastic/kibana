@@ -11,17 +11,17 @@ import * as esKuery from '@kbn/es-query';
  * List of fields that can be used in KQL and their associated mapping in the SO type
  */
 export const KUERY_FIELD_TO_SO_FIELD_MAP = Object.freeze({
-  id: 'attributes.id',
-  name: 'attributes.name',
-  platform: 'attributes.platform',
-  requiresInput: 'attributes.requires_input',
-  description: 'attributes.description',
-  instructions: 'attributes.instructions',
-  example: 'attributes.example',
-  pathToExecutable: 'attributes.path_to_executable',
-  createdBy: 'attributes.created_by',
+  id: 'id',
+  name: 'name',
+  platform: 'platform',
+  requiresInput: 'requires_input',
+  description: 'description',
+  instructions: 'instructions',
+  example: 'example',
+  pathToExecutable: 'path_to_executable',
+  createdBy: 'created_by',
   createdAt: 'created_at',
-  updatedBy: 'attributes.updated_by',
+  updatedBy: 'updated_by',
   updatedAt: 'updated_at',
 });
 
