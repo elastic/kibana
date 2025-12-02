@@ -104,8 +104,6 @@ export function ValueControlForm({
       ? initialState?.esqlQuery ?? INITIAL_EMPTY_STATE_QUERY
       : ''
   );
-
-  const [hasQueryResults, setHasQueryResults] = useState<boolean | null>(null);
   const [esqlQueryErrors, setEsqlQueryErrors] = useState<Error[] | undefined>();
   const [queryColumns, setQueryColumns] = useState<string[]>(
     valuesRetrieval ? [valuesRetrieval] : []
@@ -184,7 +182,6 @@ export function ValueControlForm({
           }
           const columns = results.response.columns.map((col) => col.name);
           setQueryColumns(columns);
-          setHasQueryResults(columns.length > 0);
 
           if (columns.length === 1) {
             const valuesArray = results.response.values.map((value) => value[0]);
@@ -299,7 +296,7 @@ export function ValueControlForm({
               defaultMessage: 'Values query',
             })}
           />
-          {hasQueryResults === false && (
+          {queryColumns.length === 0 && valuesQuery !== INITIAL_EMPTY_STATE_QUERY && (
             <EuiFormRow
               label={i18n.translate('esql.flyout.previewValues.placeholder', {
                 defaultMessage: 'Values preview',
