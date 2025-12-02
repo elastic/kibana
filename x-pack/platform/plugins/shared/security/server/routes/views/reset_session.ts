@@ -26,12 +26,12 @@ export function defineResetSessionRoutes({ httpResources }: RouteDefinitionParam
         authz: {
           enabled: false,
           reason:
-            'This route is opted out from authorization because it is used for anonymous access.',
+            'This route is opted out from authorization because it is used for resetting an invalid session.',
         },
         authc: {
           enabled: false,
           reason:
-            'This route is opted out from authentication because it is used for anonymous access.',
+            'This route is opted out from authentication because it is used for resetting an invalid session.',
         },
       },
     },

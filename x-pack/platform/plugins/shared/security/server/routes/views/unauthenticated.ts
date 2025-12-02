@@ -24,12 +24,12 @@ export function defineUnauthenticatedRoutes({ httpResources }: RouteDefinitionPa
         authz: {
           enabled: false,
           reason:
-            'This route is opted out from authorization because it is used for anonymous access.',
+            'This route is opted out from authorization because it is used for displaying the unauthenticated view.',
         },
         authc: {
           enabled: false,
           reason:
-            'This route is opted out from authentication because it is used for anonymous access.',
+            'This route is opted out from authentication because it is used for displaying the unauthenticated view.',
         },
       },
     },
