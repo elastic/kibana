@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import dateMath from '@kbn/datemath';
 import { MAX_OPEN_CASES, DEFAULT_MAX_OPEN_CASES } from './constants';
 import {
@@ -81,8 +82,8 @@ export const CasesGroupedAlertsSchema = schema.object({
  * The case connector does not have any configuration
  * or secrets.
  */
-export const CasesConnectorConfigSchema = schema.object({});
-export const CasesConnectorSecretsSchema = schema.object({});
+export const CasesConnectorConfigSchema = z.object({}).strict();
+export const CasesConnectorSecretsSchema = z.object({}).strict();
 
 export const CasesConnectorRunParamsSchema = schema.object({
   alerts: schema.arrayOf(AlertSchema),
@@ -106,6 +107,105 @@ export const CasesConnectorRunParamsSchema = schema.object({
   templateId: schema.nullable(schema.string()),
   internallyManagedAlerts: schema.nullable(schema.boolean({ defaultValue: false })),
 });
+
+const ZAlertSchema = z.record(z.string(), z.any()).superRefine((value, ctx) => {
+  if (!Object.hasOwn(value, '_id') || !Object.hasOwn(value, '_index')) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Alert ID and index must be defined',
+    });
+  }
+});
+
+export const ZCasesGroupedAlertsSchema = z
+  .object({
+    alerts: z.array(ZAlertSchema).max(MAX_ALERTS_PER_CASE),
+    comments: z
+      .array(z.string())
+      .max(MAX_DOCS_PER_PAGE / 2)
+      .optional(),
+    grouping: z.record(z.string(), z.any()),
+    title: z.string().max(MAX_TITLE_LENGTH).optional(),
+  })
+  .strict();
+
+const ZGroupingSchema = z.array(z.string()).min(0).max(1);
+const ZRuleSchema = z
+  .object({
+    id: z.string(),
+    name: z.string(),
+    tags: z.array(z.string()).default([]),
+    ruleUrl: z.string().nullable().default(null),
+  })
+  .strict();
+
+const ZTimeWindowSchema = z
+  .string()
+  .default('7d')
+  .superRefine((value, ctx) => {
+    /**
+     * Validates the time window.
+     * Acceptable format:
+     * - First character should be a digit from 1 to 9
+     * - All next characters should be a digit from 0 to 9
+     * - The last character should be d (day), w (week), h (hour), m (minute)
+     *
+     * Example: 20d, 2w, etc
+     */
+    const timeWindowRegex = new RegExp(CASES_CONNECTOR_TIME_WINDOW_REGEX, 'g');
+
+    if (!timeWindowRegex.test(value)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Not a valid time window',
+      });
+    }
+
+    const date = dateMath.parse(`now-${value}`);
+
+    if (!date || !date.isValid()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Not a valid time window',
+      });
+    }
+
+    const timeSize = value.slice(0, -1);
+    const timeUnit = value.slice(-1);
+    const timeSizeAsNumber = Number(timeSize);
+
+    if (timeUnit === 'm' && timeSizeAsNumber < 5) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Time window should be at least 5 minutes',
+      });
+    }
+  });
+const ZReopenClosedCasesSchema = z.boolean().default(false);
+
+export const ZCasesConnectorRunParamsSchema = z
+  .object({
+    alerts: z.array(ZAlertSchema),
+    groupedAlerts: z
+      .array(ZCasesGroupedAlertsSchema)
+      .min(0)
+      .max(MAX_OPEN_CASES)
+      .default([])
+      .nullable(),
+    groupingBy: ZGroupingSchema,
+    owner: z.string(),
+    rule: ZRuleSchema,
+    timeWindow: ZTimeWindowSchema,
+    reopenClosedCases: ZReopenClosedCasesSchema,
+    maximumCasesToOpen: z.coerce
+      .number()
+      .min(1)
+      .max(MAX_OPEN_CASES)
+      .default(DEFAULT_MAX_OPEN_CASES),
+    templateId: z.string().nullable().default(null),
+    internallyManagedAlerts: z.boolean().default(false).nullable(),
+  })
+  .strict();
 
 export const CasesConnectorRuleActionParamsSchema = schema.object({
   subAction: schema.literal('run'),

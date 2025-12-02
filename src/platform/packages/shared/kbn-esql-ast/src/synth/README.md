@@ -130,6 +130,17 @@ const node = synth.cmd`WHERE my.field == 10`;
 // { type: 'command', name: 'where', args: [ ... ]}
 ```
 
+### `synth.hdr`
+
+The `hdr` tag synthesizes a header command AST node (such as `SET`). You use it
+the same as the `exp` and `cmd` tags. The only difference is that the `hdr` tag
+creates a header command AST node.
+
+```ts
+const node = synth.hdr`SET param = "value"`;
+// { type: 'header-command', name: 'set', args: [ ... ]}
+```
+
 ### `synth.qry`
 
 The `qry` tag synthesizes a query AST node. Otherwise, it works the same as the

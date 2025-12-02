@@ -10,7 +10,7 @@ import { openAlertDetailsView } from '../../screens/alerts';
 import { closeAllToasts } from '../../tasks/toasts';
 import { toggleRuleOffAndOn, visitRuleAlerts } from '../../tasks/isolate';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
-import { ROLE, login } from '../../tasks/login';
+import { login, ROLE } from '../../tasks/login';
 import { waitForAlertsToPopulate } from '../../tasks/alerts';
 
 describe.skip(
@@ -20,9 +20,6 @@ describe.skip(
     env: {
       ftrConfig: {
         kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'sentinelOneManualHostActionsEnabled',
-          ])}`,
           `--xpack.stack_connectors.enableExperimental=${JSON.stringify([
             'sentinelOneConnectorOn',
           ])}`,

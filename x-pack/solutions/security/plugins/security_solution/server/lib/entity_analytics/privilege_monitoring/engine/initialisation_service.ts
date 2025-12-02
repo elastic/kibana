@@ -39,7 +39,6 @@ export const createInitialisationService = (
   }
 
   const IndexService = createPrivmonIndexService(dataClient);
-  const InitSourceCreationService = createInitialisationSourcesService(dataClient);
 
   const init = async (): Promise<MonitoringEngineDescriptor> => {
     const descriptorClient = new PrivilegeMonitoringEngineDescriptorClient({
@@ -51,6 +50,11 @@ export const createInitialisationService = (
       namespace: deps.namespace,
     });
 
+    const upsertSources = createInitialisationSourcesService({
+      descriptorClient: monitoringIndexSourceClient,
+      logger: deps.logger,
+      auditLogger: deps.auditLogger,
+    });
     const setupStartTime = moment().utc().toISOString();
 
     dataClient.audit(
@@ -60,9 +64,12 @@ export const createInitialisationService = (
     );
     const descriptor = await descriptorClient.init();
     dataClient.log('info', `Initialized privileged monitoring engine saved object`);
+
+    // upsert index AND integration sources
+
     try {
       dataClient.log('debug', 'Upserting privilege monitoring sources');
-      await InitSourceCreationService.upsertSources(monitoringIndexSourceClient);
+      await upsertSources(deps.namespace);
 
       dataClient.log('debug', 'Creating privilege user monitoring event.ingested pipeline');
       await IndexService.initialisePrivmonIndex();

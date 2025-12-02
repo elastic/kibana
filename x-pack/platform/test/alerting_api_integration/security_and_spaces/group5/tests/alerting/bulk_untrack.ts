@@ -29,8 +29,7 @@ export default function bulkUntrackTests({ getService }: FtrProviderContext) {
     });
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/223942
-  describe.skip('bulk untrack', () => {
+  describe('bulk untrack', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     afterEach(async () => {
@@ -174,7 +173,11 @@ export default function bulkUntrackTests({ getService }: FtrProviderContext) {
         hits: { hits: activeAlerts },
       } = await es.search({
         index: alertAsDataIndex,
-        query: { match_all: {} },
+        query: {
+          bool: {
+            filter: { term: { 'kibana.alert.rule.uuid': createdRule.id } },
+          },
+        },
       });
 
       const ids = activeAlerts.map((activeAlert: any) => activeAlert._source[ALERT_UUID]);
@@ -205,7 +208,11 @@ export default function bulkUntrackTests({ getService }: FtrProviderContext) {
           hits: { hits: alerts },
         } = await es.search({
           index: alertAsDataIndex,
-          query: { match_all: {} },
+          query: {
+            bool: {
+              filter: { term: { 'kibana.alert.rule.uuid': createdRule.id } },
+            },
+          },
         });
 
         const activeAlertsRemaining = [];

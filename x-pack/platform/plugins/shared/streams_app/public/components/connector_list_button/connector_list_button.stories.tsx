@@ -44,7 +44,7 @@ export const NotEnabled: StoryFn<{}> = () => {
         enabled: false,
         genAiConnectors: {
           loading: false,
-          reloadConnectors: noop,
+          reloadConnectors: async () => {},
           selectConnector: noop,
         } as AIFeatures['genAiConnectors'],
       }}
@@ -65,7 +65,7 @@ export const EnabledLoading: StoryFn<{}> = () => {
         enabled: true,
         genAiConnectors: {
           loading: true,
-          reloadConnectors: noop,
+          reloadConnectors: async () => {},
           selectConnector: noop,
         } as AIFeatures['genAiConnectors'],
       }}
@@ -107,7 +107,7 @@ export const EnabledEmpty: StoryFn<{}> = () => {
         genAiConnectors: {
           loading: false,
           connectors: [],
-          reloadConnectors: noop,
+          reloadConnectors: async () => {},
           selectConnector: noop,
         } as Partial<AIFeatures['genAiConnectors']> as AIFeatures['genAiConnectors'],
       }}
@@ -129,7 +129,7 @@ export const EnabledSingle: StoryFn<{}> = () => {
         genAiConnectors: {
           loading: false,
           connectors: [ElasticLLMConnector],
-          reloadConnectors: noop,
+          reloadConnectors: async () => {},
           selectConnector: noop,
         } as AIFeatures['genAiConnectors'],
       }}
@@ -150,7 +150,7 @@ export const EnabledMultiple: StoryFn<{}> = () => {
         genAiConnectors: {
           loading: false,
           connectors: [ElasticLLMConnector, OpenAIConnector],
-          reloadConnectors: noop,
+          reloadConnectors: async () => {},
           selectConnector: noop,
         } as AIFeatures['genAiConnectors'],
       }}

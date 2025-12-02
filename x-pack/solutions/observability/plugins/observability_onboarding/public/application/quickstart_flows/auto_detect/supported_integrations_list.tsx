@@ -87,7 +87,7 @@ export function SupportedIntegrationsList() {
           </EuiText>
         }
       >
-        <EuiBadge color="hollow">
+        <EuiBadge color="hollow" tabIndex={0}>
           <EuiTextColor color={colors.link}>
             {`+${SUPPORTED_INTEGRATIONS_LIST.length - FEATURED_INTEGRATIONS_LIST.length}`}
           </EuiTextColor>

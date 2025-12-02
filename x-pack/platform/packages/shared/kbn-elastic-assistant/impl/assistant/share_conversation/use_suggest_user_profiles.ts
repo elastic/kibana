@@ -6,7 +6,7 @@
  */
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import useDebounce from 'react-use/lib/useDebounce';
 import { noop } from 'lodash';
 import type { SuggestUsersResponse } from '@kbn/elastic-assistant-common';

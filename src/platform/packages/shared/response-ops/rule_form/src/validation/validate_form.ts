@@ -9,6 +9,7 @@
 
 import { isObject } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH } from '@kbn/alerting-types/rule/latest';
 import type { RuleFormData } from '../types';
 import { parseDuration, formatDuration } from '../utils';
 import {
@@ -28,7 +29,6 @@ import type {
   RuleTypeModel,
   RuleUiAction,
 } from '../common';
-import { MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH } from '../constants';
 
 export const validateAction = ({ action }: { action: RuleUiAction }): RuleFormActionsErrors => {
   const errors = {

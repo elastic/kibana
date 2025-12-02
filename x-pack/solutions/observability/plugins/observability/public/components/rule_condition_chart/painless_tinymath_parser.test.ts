@@ -370,4 +370,25 @@ describe('PainlessTinyMathParser', () => {
       'ifelse(ifelse(average(system.cpu.system.pct)==10,1,0) * ifelse(sum(system.cpu.total.pct)==10,1,0) + ifelse(average(system.cpu.user.pct)>20,1,0) * ifelse(average(system.cpu.user.pct)==20,1,0) + ifelse(average(system.cpu.cores)>20,1,0) > 0, ifelse(average(system.cpu.user.pct)==20, ifelse(average(system.cpu.total.pct)<200, ifelse(average(system.cpu.cores)>200, 300, average(system.cpu.system.pct)-average(system.cpu.cores)), average(system.cpu.user.pct)/average(system.cpu.total.pct)), 20), ifelse(average(system.cpu.system.pct)*average(system.cpu.total.pct)>average(system.cpu.total.pct)*average(system.cpu.cores), ifelse((average(system.cpu.system.pct)+average(system.cpu.user.pct))/average(system.cpu.total.pct)>100, ifelse(ifelse(average(system.cpu.cores)==20,0,1) > 0, 200, 100), 200), average(system.cpu.user.pct)/average(system.cpu.total.pct)))'
     );
   });
+
+  it('should not replace single-character metric names inside words (e.g., A in Accounts)', () => {
+    const equation = 'A + B';
+    const parser = new PainlessTinyMathParser({
+      equation,
+      aggMap: {
+        A: {
+          operationWithField: "count(kql='Logging : Audit')",
+          operation: 'count',
+          sourceField: '',
+        },
+        B: {
+          operationWithField: "count(kql='service : Accounts')",
+          operation: 'count',
+          sourceField: '',
+        },
+      },
+    });
+    // The fix ensures that 'Accounts' in the filter string doesn't get incorrectly replaced
+    expect(parser.parse()).toEqual("count(kql='Logging : Audit')+count(kql='service : Accounts')");
+  });
 });

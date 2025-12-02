@@ -9,15 +9,16 @@ import React, { useCallback, useMemo } from 'react';
 
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
+import { PageScope } from '../../../data_view_manager/constants';
 import * as i18n from './translations';
 import {
   type GetLensAttributes,
   VisualizationContextMenuActions,
 } from '../../../common/components/visualization_actions/types';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import { getCostSavingsMetricLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/cost_savings_metric';
 import { useMetricAnimation } from '../../hooks/use_metric_animation';
+import { useSignalIndexWithDefault } from '../../hooks/use_signal_index_with_default';
 
 interface Props {
   from: string;
@@ -48,7 +49,7 @@ const CostSavingsMetricComponent: React.FC<Props> = ({
     animationDurationMs: 1500,
     selector: '.echMetricText__value',
   });
-
+  const signalIndexName = useSignalIndexWithDefault();
   const timerange = useMemo(() => ({ from, to }), [from, to]);
   const getLensAttributes = useCallback<GetLensAttributes>(
     (args) =>
@@ -57,8 +58,9 @@ const CostSavingsMetricComponent: React.FC<Props> = ({
         backgroundColor: colors.backgroundBaseSuccess,
         minutesPerAlert,
         analystHourlyRate,
+        signalIndexName,
       }),
-    [analystHourlyRate, colors.backgroundBaseSuccess, minutesPerAlert]
+    [analystHourlyRate, colors.backgroundBaseSuccess, minutesPerAlert, signalIndexName]
   );
 
   return (
@@ -94,7 +96,7 @@ const CostSavingsMetricComponent: React.FC<Props> = ({
         timerange={timerange}
         id={`${ID}-metric`}
         inspectTitle={i18n.COST_SAVINGS_TREND}
-        scopeId={SourcererScopeName.detections}
+        scopeId={PageScope.alerts}
         withActions={[
           VisualizationContextMenuActions.addToExistingCase,
           VisualizationContextMenuActions.addToNewCase,

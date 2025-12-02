@@ -50,6 +50,7 @@ Array [
           >
             <EuiText
               size="s"
+              tabIndex={0}
             >
               triggered:0
             </EuiText>
@@ -79,6 +80,7 @@ Array [
           >
             <EuiText
               size="s"
+              tabIndex={0}
             >
               triggered:0
             </EuiText>
@@ -259,6 +261,7 @@ Array [
           >
             <EuiText
               size="s"
+              tabIndex={0}
             >
               triggered:0
             </EuiText>
@@ -282,6 +285,7 @@ Array [
           >
             <EuiText
               size="s"
+              tabIndex={0}
             >
               triggered:0
             </EuiText>
@@ -305,6 +309,7 @@ Array [
           >
             <EuiText
               size="s"
+              tabIndex={0}
             >
               triggered:0
             </EuiText>
@@ -334,6 +339,7 @@ Array [
           >
             <EuiText
               size="s"
+              tabIndex={0}
             >
               triggered:0
             </EuiText>
@@ -357,6 +363,7 @@ Array [
           >
             <EuiText
               size="s"
+              tabIndex={0}
             >
               triggered:0
             </EuiText>
@@ -380,6 +387,7 @@ Array [
           >
             <EuiText
               size="s"
+              tabIndex={0}
             >
               triggered:0
             </EuiText>

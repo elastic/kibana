@@ -1200,5 +1200,57 @@ describe('Per-Alert Action Scheduler', () => {
       });
       expect(alert.hasScheduledActions()).toBe(false);
     });
+
+    test('should clear lastScheduledActions', async () => {
+      const alert = new Alert<AlertInstanceState, AlertInstanceContext, 'default'>('1', {
+        state: { test: true },
+        meta: {},
+      });
+
+      const spy = jest.spyOn(alert, 'clearThrottlingLastScheduledActions');
+
+      alert.scheduleActions('default');
+
+      const onThrottleIntervalAction1: SanitizedRuleAction = {
+        id: 'action-4',
+        group: 'default',
+        actionTypeId: 'test',
+        frequency: { summary: false, notifyWhen: 'onThrottleInterval', throttle: '1h' },
+        params: {
+          foo: true,
+          contextVal: 'My {{context.value}} goes here',
+          stateVal: 'My {{state.value}} goes here',
+          alertVal:
+            'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
+        },
+        uuid: '111-111',
+      };
+      const onThrottleIntervalAction2: SanitizedRuleAction = {
+        id: 'action-4',
+        group: 'default',
+        actionTypeId: 'test',
+        frequency: { summary: false, notifyWhen: 'onThrottleInterval', throttle: '1h' },
+        params: {
+          foo: true,
+          contextVal: 'My {{context.value}} goes here',
+          stateVal: 'My {{state.value}} goes here',
+          alertVal:
+            'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
+        },
+        uuid: '222-222',
+      };
+
+      const scheduler = new PerAlertActionScheduler({
+        ...getSchedulerContext(),
+        rule: { ...rule, actions: [onThrottleIntervalAction1, onThrottleIntervalAction2] },
+      });
+
+      await scheduler.getActionsToSchedule({
+        activeAlerts: { '1': alert },
+      });
+      expect(spy).toHaveBeenCalledTimes(2); // 2 actions
+      expect(spy).nthCalledWith(1, ['111-111', '222-222']);
+      expect(spy).nthCalledWith(2, ['111-111', '222-222']);
+    });
   });
 });

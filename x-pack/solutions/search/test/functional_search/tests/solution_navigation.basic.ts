@@ -20,7 +20,9 @@ export default function searchSolutionNavigation({
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
 
-  describe('Elasticsearch Solution Navigation', () => {
+  describe('Elasticsearch Solution Navigation', function () {
+    this.tags('skipFIPS');
+
     let cleanUp: () => Promise<unknown>;
     let spaceCreated: { id: string } = { id: '' };
 
@@ -39,7 +41,7 @@ export default function searchSolutionNavigation({
     it('renders expected side nav items', async () => {
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Discover' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Dashboards' });
-      // await solutionNavigation.sidenav.expectLinkExists({ text: 'Playground' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Playground' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Developer Tools' });
       // await solutionNavigation.sidenav.expectLinkExists({ text: 'Agents' }); enable when available
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Machine Learning' });
@@ -69,17 +71,16 @@ export default function searchSolutionNavigation({
           breadcrumbs: ['Dashboards'],
           pageTestSubject: 'noDataViewsPrompt',
         },
-        // TODO: enable when available
-        // {
-        //   link: { navId: 'agent_builder' },
-        //   breadcrumbs: ['Agent Chat'],
-        //   pageTestSubject: 'onechatPageConversations',
-        // },
-        // {
-        //   link: { deepLinkId: 'searchPlayground' },
-        //   breadcrumbs: ['Build', 'Playground'],
-        //   pageTestSubject: 'playgroundsListPage',
-        // },
+        {
+          link: { navId: 'agent_builder' },
+          breadcrumbs: [],
+          pageTestSubject: 'agentBuilderWrapper',
+        },
+        {
+          link: { deepLinkId: 'searchPlayground' },
+          breadcrumbs: ['Build', 'Playground'],
+          pageTestSubject: 'playgroundsUnlicensed',
+        },
         {
           link: { deepLinkId: 'dev_tools' },
           breadcrumbs: ['Developer Tools'],
@@ -107,8 +108,8 @@ export default function searchSolutionNavigation({
           'searchHomepage',
           'discover',
           'dashboards',
-          // 'agent_builder', enabled when available
-          // 'searchPlayground',
+          'agent_builder',
+          'searchPlayground',
           'machine_learning',
           'dev_tools',
           'data_management',

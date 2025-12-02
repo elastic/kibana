@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -16,5 +16,7 @@
     "@kbn/alerting-plugin",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/shared-ux-router",
+    "@kbn/event-log-plugin",
+    "@kbn/config-schema",
   ]
 }

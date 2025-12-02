@@ -28,7 +28,7 @@ export function SloStateBadge({ slo }: Props) {
           defaultMessage: 'This SLO is disabled. Enable it to start processing data.',
         })}
       >
-        <EuiBadge color="default">
+        <EuiBadge color="default" tabIndex={0}>
           {i18n.translate('xpack.slo.sloStateBadge.disabled.label', {
             defaultMessage: 'Disabled',
           })}

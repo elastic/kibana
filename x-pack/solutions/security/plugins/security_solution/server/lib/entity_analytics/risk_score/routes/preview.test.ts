@@ -18,13 +18,18 @@ import { getRiskInputsIndex } from '../get_risk_inputs_index';
 import { riskScoreServiceFactory } from '../risk_score_service';
 import { riskScoreServiceMock } from '../risk_score_service.mock';
 import { riskScorePreviewRoute } from './preview';
+import type {
+  MockClients,
+  SecuritySolutionRequestHandlerContextMock,
+} from '../../../detection_engine/routes/__mocks__/request_context';
 
 jest.mock('../risk_score_service');
 jest.mock('../get_risk_inputs_index');
 
 describe('POST risk_engine/preview route', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let { clients, context } = requestContextMock.createTools();
+  let clients: MockClients;
+  let context: SecuritySolutionRequestHandlerContextMock;
   let logger: ReturnType<typeof loggerMock.create>;
   let mockRiskScoreService: ReturnType<typeof riskScoreServiceMock.create>;
 
@@ -44,6 +49,11 @@ describe('POST risk_engine/preview route', () => {
     (riskScoreServiceFactory as jest.Mock).mockReturnValue(mockRiskScoreService);
 
     riskScorePreviewRoute(server.router, logger);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   const buildRequest = (body: object = {}) =>
@@ -275,6 +285,45 @@ describe('POST risk_engine/preview route', () => {
         expect(response.status).toEqual(200);
         expect(mockRiskScoreService.calculateScores).toHaveBeenCalledWith(
           expect.objectContaining({ excludeAlertTags: ['tag1'] })
+        );
+      });
+    });
+
+    describe('filters', () => {
+      it('respects the provided filters', async () => {
+        const filters = [
+          { entity_types: ['host'], filter: 'agent.type: filebeat' },
+          { entity_types: ['user'], filter: 'user.name: ubuntu' },
+        ];
+        const request = buildRequest({ filters });
+
+        const response = await server.inject(request, requestContextMock.convertContext(context));
+
+        expect(response.status).toEqual(200);
+        expect(mockRiskScoreService.calculateScores).toHaveBeenCalledWith(
+          expect.objectContaining({ filters })
+        );
+      });
+
+      it('handles empty filters array', async () => {
+        const request = buildRequest({ filters: [] });
+
+        const response = await server.inject(request, requestContextMock.convertContext(context));
+
+        expect(response.status).toEqual(200);
+        expect(mockRiskScoreService.calculateScores).toHaveBeenCalledWith(
+          expect.objectContaining({ filters: [] })
+        );
+      });
+
+      it('handles undefined filters', async () => {
+        const request = buildRequest();
+
+        const response = await server.inject(request, requestContextMock.convertContext(context));
+
+        expect(response.status).toEqual(200);
+        expect(mockRiskScoreService.calculateScores).toHaveBeenCalledWith(
+          expect.objectContaining({ filters: [] })
         );
       });
     });

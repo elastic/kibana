@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import { testQueryClient } from '../test_utils/test_query_client';
 import { useScheduleReport } from './use_schedule_report';
 import * as scheduleReportApi from '../apis/schedule_report';

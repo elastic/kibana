@@ -74,7 +74,11 @@ export {
   streamQuerySchema,
 } from './src/queries';
 
-export { findInheritedLifecycle, findInheritingStreams } from './src/helpers/lifecycle';
+export {
+  findInheritedLifecycle,
+  findInheritingStreams,
+  effectiveToIngestLifecycle,
+} from './src/helpers/lifecycle';
 
 export { streamObjectNameSchema } from './src/shared/stream_object_name';
 
@@ -85,6 +89,7 @@ export {
   type IlmPolicyPhase,
   type IlmPolicyHotPhase,
   type IlmPolicyDeletePhase,
+  type IngestStreamLifecycleAll,
   type IngestStreamLifecycleILM,
   type IngestStreamLifecycleDSL,
   type IngestStreamLifecycleDisabled,
@@ -103,6 +108,15 @@ export {
   type WiredIngestStreamEffectiveSettings,
 } from './src/models/ingest/settings';
 
+export {
+  type FailureStore,
+  type EffectiveFailureStore,
+  type WiredIngestStreamEffectiveFailureStore,
+  type FailureStoreStatsResponse,
+  isEnabledFailureStore,
+  isInheritFailureStore,
+} from './src/models/ingest/failure_store';
+
 export type {
   SignificantEventsResponse,
   SignificantEventsGetResponse,
@@ -113,4 +127,13 @@ export type {
 
 export { emptyAssets } from './src/helpers/empty_assets';
 
-export { type System, systemSchema } from './src/system';
+export {
+  type Feature,
+  type SystemFeature,
+  type FeatureWithFilter,
+  type FeatureType,
+  featureSchema,
+  featureTypeSchema,
+  featureWithFilterSchema,
+  isFeatureWithFilter,
+} from './src/feature';

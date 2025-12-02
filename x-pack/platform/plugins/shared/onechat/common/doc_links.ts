@@ -10,6 +10,7 @@ import type { DocLinks } from '@kbn/doc-links';
 class AgentBuilderDocLinks {
   public agentBuilder: string = '';
   public getStarted: string = '';
+  public models: string = '';
   public chat: string = '';
   public agentBuilderAgents: string = '';
   public tools: string = '';
@@ -18,12 +19,14 @@ class AgentBuilderDocLinks {
   public mcpServer: string = '';
   public a2aServer: string = '';
   public limitationsKnownIssues: string = '';
+  public limitationsKnownIssuesConversationLengthExceeded: string = '';
 
   constructor() {}
 
   setDocLinks(newDocLinks: DocLinks) {
     this.agentBuilder = newDocLinks.agentBuilder.agentBuilder;
     this.getStarted = newDocLinks.agentBuilder.getStarted;
+    this.models = newDocLinks.agentBuilder.models;
     this.chat = newDocLinks.agentBuilder.chat;
     this.agentBuilderAgents = newDocLinks.agentBuilder.agentBuilderAgents;
     this.tools = newDocLinks.agentBuilder.tools;
@@ -32,6 +35,7 @@ class AgentBuilderDocLinks {
     this.mcpServer = newDocLinks.agentBuilder.mcpServer;
     this.a2aServer = newDocLinks.agentBuilder.a2aServer;
     this.limitationsKnownIssues = newDocLinks.agentBuilder.limitationsKnownIssues;
+    this.limitationsKnownIssuesConversationLengthExceeded = `${newDocLinks.agentBuilder.limitationsKnownIssues}#conversation-length-exceeded`;
   }
 }
 

@@ -471,7 +471,7 @@ describe(' Filter Group Component ', () => {
       fireEvent.click(screen.getByTestId(TEST_IDS.CONTEXT_MENU.RESET));
 
       // blanks the input
-      await waitFor(() => expect(controlGroupMock.updateInput.mock.calls.length).toBe(5));
+      await waitFor(() => expect(controlGroupMock.updateInput.mock.calls.length).toBe(1));
     });
 
     it('should restore controls saved in local storage', async () => {

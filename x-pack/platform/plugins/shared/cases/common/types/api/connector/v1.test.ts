@@ -23,6 +23,7 @@ describe('FindActionConnectorResponseRt', () => {
       config: { foo: 'bar' },
       isMissingSecrets: false,
       isSystemAction: false,
+      isConnectorTypeDeprecated: false,
     },
     {
       id: 'test-2',
@@ -32,6 +33,7 @@ describe('FindActionConnectorResponseRt', () => {
       isPreconfigured: false,
       isSystemAction: false,
       referencedByCount: 0,
+      isConnectorTypeDeprecated: false,
     },
   ];
 

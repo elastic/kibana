@@ -117,7 +117,7 @@ export const createAppContextStartContractMock = (
     internal?: SavedObjectsClientContract;
     withoutSpaceExtensions?: SavedObjectsClientContract;
   }> = {},
-  experimentalFeatures: ExperimentalFeatures = {} as ExperimentalFeatures
+  experimentalFeatures: Partial<ExperimentalFeatures> = {} as Partial<ExperimentalFeatures>
 ): MockedFleetAppContext => {
   const config = {
     agents: { enabled: true, elasticsearch: {} },
@@ -155,7 +155,7 @@ export const createAppContextStartContractMock = (
     securitySetup: securityMock.createSetup(),
     securityStart: securityMock.createStart(),
     logger: loggingSystemMock.create().get(),
-    experimentalFeatures,
+    experimentalFeatures: experimentalFeatures as ExperimentalFeatures,
     isProductionMode: true,
     configInitialValue: {
       agents: { enabled: true, elasticsearch: {} },
@@ -381,6 +381,7 @@ export const createFleetStartContractMock = (): DeeplyMockedKeys<FleetStartContr
     createFleetActionsClient: jest.fn((_) => fleetActionsClient),
     getPackageSpecTagId: jest.fn(getPackageSpecTagId),
     createOutputClient: jest.fn(async (_) => createOutputClientMock()),
+    runWithCache: (async (cb: any) => await cb()) as any,
   };
 
   return startContract;

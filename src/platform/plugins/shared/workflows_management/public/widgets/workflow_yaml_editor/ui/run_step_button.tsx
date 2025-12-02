@@ -8,31 +8,38 @@
  */
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useSelector } from 'react-redux';
+import { i18n } from '@kbn/i18n';
+import { selectIsYamlSyntaxValid } from '../../../entities/workflows/store/workflow_detail/selectors';
+
+const Text = {
+  run: i18n.translate('workflows.workflowDetail.yamlEditor.stepActions.runStep.tooltip', {
+    defaultMessage: 'Run step',
+  }),
+  invalid: i18n.translate('workflows.workflowDetail.yamlEditor.stepActions.runStep.disabled', {
+    defaultMessage: 'Fix errors to run the step',
+  }),
+};
+
 export interface RunStepButtonProps {
   onClick: () => void;
 }
-
-export const RunStepButton: React.FC<RunStepButtonProps> = ({ onClick }) => {
+export const RunStepButton = React.memo<RunStepButtonProps>(({ onClick }) => {
+  // To execute a single step, the yaml of the entire workflow must be parsable. Not just the step yaml.
+  const isValidSyntax = useSelector(selectIsYamlSyntaxValid);
   return (
-    <EuiToolTip
-      content={i18n.translate('workflows.workflowDetail.yamlEditor.stepActions.runStep.tooltip', {
-        defaultMessage: 'Run step',
-      })}
-    >
+    <EuiToolTip content={isValidSyntax ? Text.run : Text.invalid} disableScreenReaderOutput>
       <EuiButtonIcon
         iconType="play"
         onClick={onClick}
+        color="success"
         data-test-subj="runStep"
         iconSize="s"
-        aria-label={i18n.translate(
-          'workflows.workflowDetail.yamlEditor.stepActions.runStep.ariaLabel',
-          {
-            defaultMessage: 'Run step',
-          }
-        )}
+        aria-label={isValidSyntax ? Text.run : Text.invalid}
+        disabled={!isValidSyntax}
       />
     </EuiToolTip>
   );
-};
+});
+RunStepButton.displayName = 'RunStepButton';

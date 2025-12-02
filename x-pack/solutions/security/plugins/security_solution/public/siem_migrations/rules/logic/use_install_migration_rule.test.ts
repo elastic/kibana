@@ -11,9 +11,8 @@ import { installMigrationRules } from '../api';
 import { TestProviders } from '../../../common/mock/test_providers';
 import { migrationRules } from '../__mocks__';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { useInvalidateGetMigrationRules } from './use_get_migration_rules';
-import { useInvalidateGetMigrationTranslationStats } from './use_get_migration_translation_stats';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
+import { useQueryClient } from '@kbn/react-query';
 
 jest.mock('../api');
 jest.mock('../../../common/hooks/use_app_toasts', () => ({
@@ -22,23 +21,20 @@ jest.mock('../../../common/hooks/use_app_toasts', () => ({
     addError: jest.fn(),
   }),
 }));
-jest.mock('./use_get_migration_rules', () => ({
-  useInvalidateGetMigrationRules: jest.fn(),
-}));
-jest.mock('./use_get_migration_translation_stats', () => ({
-  useInvalidateGetMigrationTranslationStats: jest.fn(),
-}));
 jest.mock('../../../common/lib/kibana/kibana_react', () => ({
   useKibana: jest.fn(),
+}));
+jest.mock('@kbn/react-query', () => ({
+  ...jest.requireActual('@kbn/react-query'),
+  useQueryClient: jest.fn(),
 }));
 
 const mockResponse = { installed: 1 };
 const mockError = new Error('API error');
 const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
-const invalidateRules = jest.fn();
-const invalidateStats = jest.fn();
-const mockReportTranslatedRuleInstall = jest.fn();
+const mockReportTranslatedItemInstall = jest.fn();
+const mockInvalidateQueries = jest.fn();
 
 describe('useInstallMigrationRule', () => {
   beforeEach(() => {
@@ -47,14 +43,15 @@ describe('useInstallMigrationRule', () => {
       addSuccess: mockAddSuccess,
       addError: mockAddError,
     });
-    (useInvalidateGetMigrationRules as jest.Mock).mockReturnValue(invalidateRules);
-    (useInvalidateGetMigrationTranslationStats as jest.Mock).mockReturnValue(invalidateStats);
+    (useQueryClient as jest.Mock).mockReturnValue({
+      invalidateQueries: mockInvalidateQueries,
+    });
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         siemMigrations: {
           rules: {
             telemetry: {
-              reportTranslatedRuleInstall: mockReportTranslatedRuleInstall,
+              reportTranslatedItemInstall: mockReportTranslatedItemInstall,
             },
           },
         },
@@ -85,8 +82,14 @@ describe('useInstallMigrationRule', () => {
       result.current.mutate({ migrationRule: migrationRules[0], enabled: true });
 
       await waitFor(() => {
-        expect(invalidateRules).toHaveBeenCalledWith('test-migration-1');
-        expect(invalidateStats).toHaveBeenCalledWith('test-migration-1');
+        expect(mockInvalidateQueries).toHaveBeenCalledWith(
+          ['GET', '/internal/siem_migrations/rules/test-migration-1/rules'],
+          { refetchType: 'active' }
+        );
+        expect(mockInvalidateQueries).toHaveBeenCalledWith(
+          ['GET', '/internal/siem_migrations/rules/test-migration-1/translation_stats'],
+          { refetchType: 'active' }
+        );
       });
     });
   });
@@ -116,8 +119,14 @@ describe('useInstallMigrationRule', () => {
       result.current.mutate({ migrationRule: migrationRules[0], enabled: true });
 
       await waitFor(() => {
-        expect(invalidateRules).toHaveBeenCalledWith('test-migration-1');
-        expect(invalidateStats).toHaveBeenCalledWith('test-migration-1');
+        expect(mockInvalidateQueries).toHaveBeenCalledWith(
+          ['GET', '/internal/siem_migrations/rules/test-migration-1/rules'],
+          { refetchType: 'active' }
+        );
+        expect(mockInvalidateQueries).toHaveBeenCalledWith(
+          ['GET', '/internal/siem_migrations/rules/test-migration-1/translation_stats'],
+          { refetchType: 'active' }
+        );
       });
     });
   });

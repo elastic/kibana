@@ -29,18 +29,19 @@ export interface DataSourceInput {
 
 export type DataSourceParentActor = ActorRef<Snapshot<unknown>, DataSourceToParentEvent>;
 
+export type DataSourceSimulationMode = 'partial' | 'complete';
+
 export interface DataSourceContext {
   parentRef: DataSourceParentActor;
   streamName: string;
   dataSource: EnrichmentDataSourceWithUIAttributes;
   data: SampleDocument[];
-  uiAttributes: {
-    color: string;
-  };
+  simulationMode: DataSourceSimulationMode;
 }
 
 export type DataSourceEvent =
   | { type: 'dataSource.change'; dataSource: EnrichmentDataSourceWithUIAttributes }
   | { type: 'dataSource.delete' }
   | { type: 'dataSource.refresh' }
-  | { type: 'dataSource.toggleActivity' };
+  | { type: 'dataSource.enable' }
+  | { type: 'dataSource.disable' };

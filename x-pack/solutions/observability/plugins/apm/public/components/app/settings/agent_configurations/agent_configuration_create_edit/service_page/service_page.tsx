@@ -129,6 +129,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
       />
       {isAllOptionSelected && (
         <EuiCallOut
+          announceOnMount
           color="warning"
           iconType="warning"
           title={i18n.translate('xpack.apm.settings.agentConfiguration.all.option.calloutTitle', {
@@ -158,7 +159,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
             service: { name: prev.service.name, environment },
           }));
         }}
-        dataTestSubj="serviceEnviromentComboBox"
+        dataTestSubj="serviceEnvironmentComboBox"
       />
       <EuiSpacer />
       <EuiFlexGroup justifyContent="flexEnd">

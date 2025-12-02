@@ -9,8 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { FieldFormatInstanceType } from '@kbn/field-formats-plugin/common';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { TimeScaleUnit } from '@kbn/lens-common';
 import type { FormatFactory } from '../types';
-import type { TimeScaleUnit } from '../expressions/defs/time_scale';
 
 const unitSuffixes: Record<TimeScaleUnit, string> = {
   s: i18n.translate('xpack.lens.fieldFormats.suffix.s', { defaultMessage: '/s' }),

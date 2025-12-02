@@ -41,7 +41,13 @@ export function createSchemaFromParams(params: EsqlToolConfig['params']): z.ZodO
     }
 
     if (param.optional) {
-      field = field.optional();
+      if (param.defaultValue !== undefined) {
+        // Use default value instead of making it optional
+        field = field.default(param.defaultValue);
+      } else {
+        // No default value, make it optional
+        field = field.optional();
+      }
     }
 
     field = field.describe(param.description);

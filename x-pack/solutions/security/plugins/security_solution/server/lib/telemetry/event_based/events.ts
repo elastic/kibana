@@ -26,7 +26,10 @@ import type {
 } from '../diagnostic/health_diagnostic_service.types';
 
 import { SIEM_MIGRATIONS_EVENTS } from './events/siem_migrations';
-import type { RuleUpgradeTelemetry } from '../../detection_engine/prebuilt_rules/api/perform_rule_upgrade/update_rule_telemetry';
+import type {
+  RuleBulkUpgradeTelemetry,
+  RuleUpgradeTelemetry,
+} from '../../detection_engine/prebuilt_rules/api/perform_rule_upgrade/update_rule_telemetry';
 
 // Telemetry event that is sent for each rule that is upgraded during a prebuilt rule upgrade
 export const DETECTION_RULE_UPGRADE_EVENT: EventTypeOpts<RuleUpgradeTelemetry> = {
@@ -98,6 +101,139 @@ export const DETECTION_RULE_UPGRADE_EVENT: EventTypeOpts<RuleUpgradeTelemetry> =
         },
       },
       _meta: { description: 'Fields updated without conflicts' },
+    },
+  },
+};
+
+// Telemetry event that is sent for each bulk upgrade rules request
+export const DETECTION_RULE_BULK_UPGRADE_EVENT: EventTypeOpts<RuleBulkUpgradeTelemetry> = {
+  eventType: 'detection_rule_bulk_upgrade',
+  schema: {
+    successfulUpdates: {
+      properties: {
+        totalNumberOfRules: {
+          type: 'long',
+          _meta: { description: 'Number of successfully updated rules in bulk update request' },
+        },
+        numOfCustomizedRules: {
+          type: 'long',
+          _meta: {
+            description: 'Number of successfully updated customized rules in bulk update request',
+          },
+        },
+        numOfNonCustomizedRules: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of successfully updated non-customized rules in bulk update request',
+          },
+        },
+        numOfNonSolvableConflicts: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of successfully updated rules with non-solvable conflicts in bulk update request',
+          },
+        },
+        numOfSolvableConflicts: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of successfully updated rules with solvable conflicts in bulk update request',
+          },
+        },
+        numOfNoConflicts: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of successfully updated rules with no conflicts in bulk update request',
+          },
+        },
+      },
+    },
+    errorUpdates: {
+      properties: {
+        totalNumberOfRules: {
+          type: 'long',
+          _meta: { description: 'Number of rules that failed to update in bulk update request' },
+        },
+        numOfCustomizedRules: {
+          type: 'long',
+          _meta: {
+            description: 'Number of customized rules that failed to update in bulk update request',
+          },
+        },
+        numOfNonCustomizedRules: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of non-customized rules that failed to update in bulk update request',
+          },
+        },
+        numOfNonSolvableConflicts: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of rules with non-solvable conflicts that failed to update in bulk update request',
+          },
+        },
+        numOfSolvableConflicts: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of rules with solvable conflicts that failed to update in bulk update request',
+          },
+        },
+        numOfNoConflicts: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of rules with no conflicts that failed to update in bulk update request',
+          },
+        },
+      },
+    },
+    skippedUpdates: {
+      properties: {
+        totalNumberOfRules: {
+          type: 'long',
+          _meta: { description: 'Number of rules that were skipped during bulk update request' },
+        },
+        numOfCustomizedRules: {
+          type: 'long',
+          _meta: {
+            description: 'Number of customized rules that were skipped during bulk update request',
+          },
+        },
+        numOfNonCustomizedRules: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of non-customized rules that were skipped during bulk update request',
+          },
+        },
+        numOfNonSolvableConflicts: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of rules with non-solvable conflicts that were skipped during bulk update request',
+          },
+        },
+        numOfSolvableConflicts: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of rules with solvable conflicts that were skipped during bulk update request',
+          },
+        },
+        numOfNoConflicts: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of rules with no conflicts that were skipped during bulk update request',
+          },
+        },
+      },
     },
   },
 };
@@ -1303,6 +1439,7 @@ export const GAP_DETECTED_EVENT: EventTypeOpts<{
 
 export const events = [
   DETECTION_RULE_UPGRADE_EVENT,
+  DETECTION_RULE_BULK_UPGRADE_EVENT,
   RISK_SCORE_EXECUTION_SUCCESS_EVENT,
   RISK_SCORE_EXECUTION_ERROR_EVENT,
   RISK_SCORE_EXECUTION_CANCELLATION_EVENT,

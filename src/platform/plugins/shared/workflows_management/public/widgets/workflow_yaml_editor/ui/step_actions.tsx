@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useMemo } from 'react';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiContextMenuPanel,
@@ -15,37 +15,47 @@ import {
   EuiFlexItem,
   EuiPopover,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { i18n } from '@kbn/i18n';
 import { RunStepButton } from './run_step_button';
-import { selectFocusedStepInfo } from '../lib/store';
 import { CopyElasticSearchDevToolsOption, CopyWorkflowStepOption } from './step_action_options';
+import {
+  selectEditorFocusedStepInfo,
+  selectIsExecutionsTab,
+} from '../../../entities/workflows/store';
 
 export interface StepActionsProps {
   onStepActionClicked?: (params: { stepId: string; actionType: string }) => void;
 }
 
-export const StepActions: React.FC<StepActionsProps> = ({ onStepActionClicked }) => {
+export const StepActions = React.memo<StepActionsProps>(({ onStepActionClicked }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const focusedStepInfo = useSelector(selectFocusedStepInfo);
+  const focusedStepInfo = useSelector(selectEditorFocusedStepInfo);
+  const isExecutionsTab = useSelector(selectIsExecutionsTab);
 
-  const closePopover = () => {
+  const togglePopover = useCallback(() => {
+    setIsPopoverOpen((prev) => !prev);
+  }, []);
+
+  const closePopover = useCallback(() => {
     setIsPopoverOpen(false);
-  };
+  }, []);
 
-  const button = (
-    <EuiButtonIcon
-      onClick={() => {
-        setIsPopoverOpen((prev) => !prev);
-      }}
-      data-test-subj="toggleConsoleMenu"
-      aria-label={i18n.translate('console.requestOptionsButtonAriaLabel', {
-        defaultMessage: 'Request options',
-      })}
-      iconType="boxesVertical"
-      iconSize="s"
-    />
-  );
+  const menuButton = useMemo(() => {
+    return (
+      <EuiButtonIcon
+        onClick={togglePopover}
+        data-test-subj="toggleConsoleMenu"
+        aria-label={i18n.translate('console.requestOptionsButtonAriaLabel', {
+          defaultMessage: 'Request options',
+        })}
+        iconType="boxesVertical"
+        iconSize="s"
+      />
+    );
+  }, [togglePopover]);
 
   const items = useMemo(() => {
     if (!focusedStepInfo) {
@@ -60,15 +70,20 @@ export const StepActions: React.FC<StepActionsProps> = ({ onStepActionClicked })
         <CopyWorkflowStepOption key="copy-workflow-step" onClick={closePopover} />,
       ],
     ];
-  }, [focusedStepInfo]);
+  }, [focusedStepInfo, closePopover]);
 
   if (!focusedStepInfo) {
     return null;
   }
 
   return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-      {focusedStepInfo && (
+    <EuiFlexGroup
+      gutterSize="xs"
+      alignItems="center"
+      responsive={false}
+      css={componentStyles.actionsRow}
+    >
+      {focusedStepInfo && !isExecutionsTab && (
         <EuiFlexItem grow={false}>
           <RunStepButton
             onClick={() =>
@@ -84,7 +99,7 @@ export const StepActions: React.FC<StepActionsProps> = ({ onStepActionClicked })
         <EuiFlexItem grow={false}>
           <EuiPopover
             id="contextMenu"
-            button={button}
+            button={menuButton}
             isOpen={isPopoverOpen}
             closePopover={closePopover}
             panelPaddingSize="none"
@@ -96,4 +111,15 @@ export const StepActions: React.FC<StepActionsProps> = ({ onStepActionClicked })
       )}
     </EuiFlexGroup>
   );
+});
+StepActions.displayName = 'StepActions';
+
+const componentStyles = {
+  actionsRow: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: euiTheme.size.xs,
+      borderRadius: euiTheme.border.radius.small,
+      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+      backgroundColor: euiTheme.colors.backgroundBasePlain,
+    }),
 };

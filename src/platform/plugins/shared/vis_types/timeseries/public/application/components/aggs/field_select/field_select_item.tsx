@@ -50,6 +50,7 @@ export function FieldSelectItem({
       <EuiFlexItem grow={true}>
         <EuiComboBox
           placeholder={placeholder}
+          aria-label={placeholder}
           isDisabled={disabled}
           options={options}
           selectedOptions={selectedOptions}

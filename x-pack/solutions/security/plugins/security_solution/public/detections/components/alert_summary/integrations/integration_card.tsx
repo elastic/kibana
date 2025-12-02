@@ -36,7 +36,7 @@ export const LAST_ACTIVITY_VALUE_TEST_ID = '-last-activity-value';
 
 export interface IntegrationProps {
   /**
-   * Installed AI for SOC integration
+   * Installed EASE integration
    */
   integration: PackageListItem;
   /**

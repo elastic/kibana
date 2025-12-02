@@ -54,7 +54,7 @@ export const SYNC_CASE = (caseTitle: string) =>
 export const EXTRACT_OBSERVABLES = (caseTitle: string) =>
   i18n.translate('xpack.cases.containers.extractObservables', {
     values: { caseTitle },
-    defaultMessage: 'Auto-extract observables in "{caseTitle}" have been updated',
+    defaultMessage: 'Auto-extract observables setting in "{caseTitle}" have been updated',
   });
 
 export const STATUS_CHANGED_TOASTER_TEXT = i18n.translate(
@@ -98,5 +98,5 @@ export const OBSERVABLE_MAX_REACHED = (maxObservables: number) =>
   i18n.translate('xpack.cases.caseView.observables.maxReached', {
     values: { maxObservables },
     defaultMessage:
-      'The maximum number of observables is {maxObservables}. Some observables were not added.',
+      "You've reached the maximum number of observables {maxObservables} that can be added to a case. Some observables were not added.",
   });

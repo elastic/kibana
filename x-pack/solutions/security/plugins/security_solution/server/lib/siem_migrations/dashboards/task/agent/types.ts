@@ -7,6 +7,8 @@
 
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import type { RunnableConfig } from '@langchain/core/runnables';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { MigrationComments } from '../../../../../../common/siem_migrations/model/common.gen';
 import type { ParsedPanel } from '../../../../../../common/siem_migrations/parsers/types';
 import type { MigrationTranslationResult } from '../../../../../../common/siem_migrations/constants';
@@ -37,6 +39,9 @@ export interface MigrateDashboardGraphParams {
   dashboardMigrationsRetriever: DashboardMigrationsRetriever;
   logger: Logger;
   telemetryClient: DashboardMigrationTelemetryClient;
+  inference: InferenceServerStart;
+  request: KibanaRequest;
+  connectorId: string;
 }
 
 export interface ParsedOriginalDashboard {

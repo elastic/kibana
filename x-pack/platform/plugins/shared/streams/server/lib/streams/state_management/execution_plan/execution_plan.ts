@@ -20,6 +20,7 @@ import {
   upsertDataStream,
   updateDefaultIngestPipeline,
   putDataStreamsSettings,
+  updateDataStreamsFailureStore,
 } from '../../data_streams/manage_data_streams';
 import { deleteTemplate, upsertTemplate } from '../../index_templates/manage_index_templates';
 import {
@@ -51,8 +52,9 @@ import type {
   RolloverAction,
   UpdateDefaultIngestPipelineAction,
   UnlinkAssetsAction,
-  UnlinkSystemsAction,
+  UnlinkFeaturesAction,
   UpdateIngestSettingsAction,
+  UpdateFailureStoreAction,
 } from './types';
 
 /**
@@ -75,6 +77,7 @@ export class ExecutionPlan {
       delete_index_template: [],
       upsert_ingest_pipeline: [],
       delete_ingest_pipeline: [],
+      update_failure_store: [],
       append_processor_to_ingest_pipeline: [],
       delete_processor_from_ingest_pipeline: [],
       upsert_datastream: [],
@@ -87,7 +90,7 @@ export class ExecutionPlan {
       update_data_stream_mappings: [],
       delete_queries: [],
       unlink_assets: [],
-      unlink_systems: [],
+      unlink_features: [],
       update_ingest_settings: [],
     };
   }
@@ -175,9 +178,10 @@ export class ExecutionPlan {
         upsert_dot_streams_document,
         delete_dot_streams_document,
         update_data_stream_mappings,
+        update_failure_store,
         delete_queries,
         unlink_assets,
-        unlink_systems,
+        unlink_features,
         update_ingest_settings,
         ...rest
       } = this.actionsByType;
@@ -205,6 +209,7 @@ export class ExecutionPlan {
         this.updateLifecycle(update_lifecycle),
         this.updateDataStreamMappingsAndRollover(update_data_stream_mappings),
         this.updateDefaultIngestPipeline(update_default_ingest_pipeline),
+        this.updateFailureStore(update_failure_store),
       ]);
 
       await this.upsertIngestPipelines(upsert_ingest_pipeline);
@@ -218,7 +223,7 @@ export class ExecutionPlan {
         this.deleteIngestPipelines(delete_ingest_pipeline),
         this.deleteQueries(delete_queries),
         this.unlinkAssets(unlink_assets),
-        this.unlinkSystems(unlink_systems),
+        this.unlinkFeatures(unlink_features),
       ]);
 
       await this.upsertAndDeleteDotStreamsDocuments([
@@ -249,21 +254,20 @@ export class ExecutionPlan {
 
     return Promise.all(
       actions.flatMap((action) => [
-        this.dependencies.assetClient.syncAssetList(action.request.name, [], 'dashboard'),
-        this.dependencies.assetClient.syncAssetList(action.request.name, [], 'rule'),
-        this.dependencies.assetClient.syncAssetList(action.request.name, [], 'slo'),
+        this.dependencies.attachmentClient.syncAttachmentList(action.request.name, [], 'dashboard'),
+        this.dependencies.attachmentClient.syncAttachmentList(action.request.name, [], 'rule'),
       ])
     );
   }
 
-  private async unlinkSystems(actions: UnlinkSystemsAction[]) {
+  private async unlinkFeatures(actions: UnlinkFeaturesAction[]) {
     if (actions.length === 0) {
       return;
     }
 
     return Promise.all(
       actions.map((action) =>
-        this.dependencies.systemClient.syncSystemList(action.request.name, [])
+        this.dependencies.featureClient.syncFeatureList(action.request.name, [])
       )
     );
   }
@@ -395,6 +399,20 @@ export class ExecutionPlan {
     );
   }
 
+  private async updateFailureStore(actions: UpdateFailureStoreAction[]) {
+    return Promise.all(
+      actions.map((action) =>
+        updateDataStreamsFailureStore({
+          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+          logger: this.dependencies.logger,
+          failureStore: action.request.failure_store,
+          stream: action.request.definition,
+          isServerless: this.dependencies.isServerless,
+        })
+      )
+    );
+  }
+
   private async deleteIngestPipelines(actions: DeleteIngestPipelineAction[]) {
     return Promise.all(
       actions.map((action) =>
@@ -425,6 +443,7 @@ export class ExecutionPlan {
     return this.dependencies.storageClient.bulk({
       operations: actions.map(dotDocumentActionToBulkOperation),
       refresh: true,
+      throwOnFail: true,
     });
   }
 

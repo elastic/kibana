@@ -18,6 +18,7 @@ exports[`should render error for dupes 1`] = `
     </EuiFlexItem>
     <EuiFlexItem>
       <EuiSuperSelect
+        aria-label="Field type"
         compressed={true}
         fullWidth={false}
         hasDividers={false}
@@ -100,6 +101,7 @@ exports[`should render error for dupes 1`] = `
     </EuiFlexItem>
     <EuiFlexItem>
       <EuiSuperSelect
+        aria-label="Field type"
         compressed={true}
         fullWidth={false}
         hasDividers={false}
@@ -207,6 +209,7 @@ exports[`should render error for empty name 1`] = `
     </EuiFlexItem>
     <EuiFlexItem>
       <EuiSuperSelect
+        aria-label="Field type"
         compressed={true}
         fullWidth={false}
         hasDividers={false}
@@ -314,6 +317,7 @@ exports[`should render field editor 1`] = `
     </EuiFlexItem>
     <EuiFlexItem>
       <EuiSuperSelect
+        aria-label="Field type"
         compressed={true}
         fullWidth={false}
         hasDividers={false}
@@ -396,6 +400,7 @@ exports[`should render field editor 1`] = `
     </EuiFlexItem>
     <EuiFlexItem>
       <EuiSuperSelect
+        aria-label="Field type"
         compressed={true}
         fullWidth={false}
         hasDividers={false}

@@ -24,6 +24,6 @@ export const TimestampTableCell = ({ timestamp }: { timestamp: MomentInput }) =>
     css={datagridToolTipOffset}
     content={moment(timestamp).format(CSP_MOMENT_FORMAT)}
   >
-    <span>{moment(timestamp).fromNow()}</span>
+    <span tabIndex={0}>{moment(timestamp).fromNow()}</span>
   </EuiToolTip>
 );

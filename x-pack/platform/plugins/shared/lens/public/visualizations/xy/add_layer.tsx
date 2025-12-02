@@ -8,12 +8,13 @@
 import React, { useState } from 'react';
 import type { IconType } from '@elastic/eui';
 import {
-  EuiButton,
+  EuiButtonIcon,
   EuiPopover,
   EuiIcon,
   EuiContextMenu,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiToolTip,
   type UseEuiTheme,
   useEuiTheme,
 } from '@elastic/eui';
@@ -21,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { css } from '@emotion/react';
-import type { AddLayerFunction, VisualizationLayerDescription } from '../../types';
+import type { AddLayerFunction, VisualizationLayerDescription } from '@kbn/lens-common';
 import { LoadAnnotationLibraryFlyout } from './load_annotation_library_flyout';
 import type { ExtraAppendLayerArg } from './visualization';
 import type { SeriesType, XYState } from './types';
@@ -31,7 +32,7 @@ import { getDataLayers } from './visualization_helpers';
 import { ExperimentalBadge } from '../../shared_components';
 import { ChartOption } from '../../editor_frame_service/editor_frame/config_panel/chart_switch/chart_option';
 
-interface AddLayerButtonProps {
+export interface AddLayerButtonProps {
   state: XYState;
   supportedLayers: VisualizationLayerDescription[];
   addLayer: AddLayerFunction<ExtraAppendLayerArg>;
@@ -108,28 +109,32 @@ export function AddLayerButton({
 
   const firstLayerSubtype = getDataLayers(state.layers)?.[0]?.seriesType;
 
+  const buttonLabel = i18n.translate('xpack.lens.configPanel.addLayerButton', {
+    defaultMessage: 'Add layer',
+  });
+
   return (
-    <>
+    <div
+      css={css`
+        display: flex;
+        align-items: center;
+      `}
+      key="lsnLayerAdd"
+    >
       <EuiPopover
-        display="block"
         data-test-subj="lnsConfigPanel__addLayerPopover"
         button={
-          <EuiButton
-            fullWidth
-            data-test-subj="lnsLayerAddButton"
-            aria-label={i18n.translate('xpack.lens.configPanel.addLayerButton', {
-              defaultMessage: 'Add layer',
-            })}
-            fill={false}
-            color="primary"
-            size="s"
-            onClick={() => toggleLayersChoice(!showLayersChoice)}
-            iconType="layers"
-          >
-            {i18n.translate('xpack.lens.configPanel.addLayerButton', {
-              defaultMessage: 'Add layer',
-            })}
-          </EuiButton>
+          <EuiToolTip content={buttonLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              data-test-subj="lnsLayerAddButton"
+              aria-label={buttonLabel}
+              size="s"
+              onClick={() => toggleLayersChoice(!showLayersChoice)}
+              iconType="plus"
+              color="text"
+              display="base"
+            />
+          </EuiToolTip>
         }
         isOpen={showLayersChoice}
         closePopover={() => toggleLayersChoice(false)}
@@ -259,7 +264,7 @@ export function AddLayerButton({
           }}
         />
       )}
-    </>
+    </div>
   );
 }
 

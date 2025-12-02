@@ -19,7 +19,9 @@ const getEuiVersion = () => {
 
   const rawVersion = packageJson.dependencies['@elastic/eui'];
   // Remove semver prefixes like ^, ~, >=, etc. to get clean version number
-  const cleanVersion = rawVersion.replace(/^[\^~>=<]*/, '');
+  let cleanVersion = rawVersion.replace(/^[\^~>=<]*/, '');
+  // Remove additional version suffixes like -backport.0, -amsterdam.0, etc.
+  cleanVersion = cleanVersion.replace(/-[a-zA-Z]+\.\d+$/, '');
   return cleanVersion;
 };
 

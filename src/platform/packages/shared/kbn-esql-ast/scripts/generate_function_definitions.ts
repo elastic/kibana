@@ -29,7 +29,7 @@ import {
   mathOperatorsExtraSignatures,
   comparisonOperatorSignatures,
 } from './constants';
-import { extraFunctions, functionEnrichments, excludedFunctions } from './functions';
+import { extraFunctions, excludedFunctions, enrichFunctionParameters } from './functions';
 
 const convertDateTime = (s: string) => (s === 'datetime' ? 'date' : s);
 
@@ -45,9 +45,9 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
       ? defaultScalarFunctionLocations
       : defaultAggFunctionLocations;
 
-  // MATCH and QSRT has limited supported for where commands only
+  // MATCH and QSTR have limited support for WHERE, STATS_WHERE, and JOIN commands only
   if (FULL_TEXT_SEARCH_FUNCTIONS.includes(ESFunctionDefinition.name)) {
-    locationsAvailable = [Location.WHERE, Location.STATS_WHERE];
+    locationsAvailable = [Location.WHERE, Location.STATS_WHERE, Location.JOIN, Location.EVAL];
   }
 
   if (ESFunctionDefinition.type === FunctionDefinitionTypes.TIME_SERIES_AGG) {
@@ -90,11 +90,10 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
     examples: ESFunctionDefinition.examples,
   };
 
-  if (functionEnrichments[ret.name]) {
-    _.merge(ret, functionEnrichments[ret.name]);
-  }
+  // Apply specific parameter enrichments for certain functions' signatures
+  const enrichedDefinition = enrichFunctionParameters(ret as FunctionDefinition);
 
-  return ret as FunctionDefinition;
+  return enrichedDefinition;
 }
 /**
  * Elasticsearch doc exports name as 'lhs' or 'rhs' instead of 'left' or 'right'
@@ -181,6 +180,7 @@ const enrichOperators = (
         Location.STATS_BY,
         Location.COMPLETION,
         Location.RERANK,
+        Location.JOIN,
       ]);
       // Adding comparison operator signatures for ip and version types
       signatures.push(...comparisonOperatorSignatures);
@@ -197,6 +197,7 @@ const enrichOperators = (
         Location.STATS_BY,
         Location.COMPLETION,
         Location.RERANK,
+        Location.JOIN,
       ]);
 
       // taking care the `...EVAL col = @timestamp + 1 year` cases
@@ -213,6 +214,7 @@ const enrichOperators = (
         Location.STATS_WHERE,
         Location.COMPLETION,
         Location.RERANK,
+        Location.JOIN,
       ];
     }
     if (isInOperator) {

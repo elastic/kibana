@@ -15,8 +15,6 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import { observeLines } from '@kbn/stdio-dev-helpers';
 
-// import type { Result } from './kibana_worker';
-
 interface StartTSWorkerArgs extends ForkOptions {
   log: SomeDevLog;
   /** Path to worker source. Best practice to `require.resolve('../relative/paths')` */
@@ -60,7 +58,6 @@ export function startTSWorker<Message>({
     Rx.takeUntil(Rx.fromEvent(fork, 'exit')),
     Rx.map((mergedResults) => {
       const [message] = mergedResults as [Message];
-      log.debug('message received from worker', message);
       return message;
     })
   );

@@ -199,6 +199,7 @@ export function ChangeKbModel({
     if (error) {
       return (
         <EuiCallOut
+          announceOnMount
           title={i18n.translate(
             'xpack.observabilityAiAssistantManagement.knowledgeBase.errorLoadingModelsTitle',
             {
@@ -390,7 +391,13 @@ export function ChangeKbModel({
           </>
         }
       >
-        <EuiFormRow fullWidth label="aiAssistantResponseLanguage">
+        <EuiFormRow
+          fullWidth
+          label={i18n.translate(
+            'xpack.observabilityAiAssistantManagement.knowledgeBase.semanticSearchModelLabel',
+            { defaultMessage: 'Semantic search model' }
+          )}
+        >
           {selectInferenceModelDropdown}
         </EuiFormRow>
       </EuiDescribedFormGroup>

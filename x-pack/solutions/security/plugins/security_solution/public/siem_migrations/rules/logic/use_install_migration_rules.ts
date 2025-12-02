@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 import { useCallback } from 'react';
 import type { RuleMigrationTranslationStats } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import { SIEM_RULE_MIGRATION_INSTALL_PATH } from '../../../../common/siem_migrations/constants';
@@ -34,7 +34,7 @@ export const useInstallMigrationRules = (
   const reportTelemetry = useCallback(
     ({ ids, enabled = false }: InstallMigrationRulesParams, error?: Error) => {
       const count = ids?.length ?? translationStats?.rules.success.installable ?? 0;
-      telemetry.reportTranslatedRuleBulkInstall({ migrationId, enabled, count, error });
+      telemetry.reportTranslatedItemBulkInstall({ migrationId, enabled, count, error });
     },
     [migrationId, telemetry, translationStats?.rules.success.installable]
   );

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -30,5 +30,6 @@
     "@kbn/content-management-table-list-view-common",
     "@kbn/charts-theme",
     "@kbn/logging",
+    "@kbn/react-query",
   ]
 }

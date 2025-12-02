@@ -55,10 +55,12 @@ export const useRequestProfile = () => {
     }
     const { error, parsed } = checkForParseErrors(query);
     if (error) {
-      notifications.addError(error, {
+      notifications.addDanger({
+        'data-test-subj': 'jsonParseErrorToast',
         title: i18n.translate('xpack.searchProfiler.errorToastTitle', {
           defaultMessage: 'JSON parse error',
         }),
+        text: error.body?.message || error.message,
       });
       return { data: null };
     }

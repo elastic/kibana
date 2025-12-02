@@ -20,6 +20,7 @@ import type {
   UploadedLookups,
 } from '../../../../../common/components/migration_steps/types';
 import { SubSteps } from '../../../../../common/components/migration_steps';
+import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 import { getEuiStepStatus } from '../../../../../common/utils/get_eui_step_status';
 import type { DashboardMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import type { OnResourcesCreated } from '../../types';
@@ -93,6 +94,8 @@ const END = 10 as const;
 type SubStep = 1 | 2 | typeof END;
 export const LookupsDataInputSubSteps = React.memo<LookupsDataInputSubStepsProps>(
   ({ migrationStats, missingLookups, onAllLookupsCreated }) => {
+    const { telemetry } = useKibana().services.siemMigrations.dashboards;
+
     const [subStep, setSubStep] = useState<SubStep>(1);
     const [uploadedLookups, setUploadedLookups] = useState<UploadedLookups>({});
 
@@ -113,7 +116,8 @@ export const LookupsDataInputSubSteps = React.memo<LookupsDataInputSubStepsProps
     // Copy query step
     const onCopied = useCallback(() => {
       setSubStep(2);
-    }, []);
+      telemetry.reportSetupLookupNameCopied({ migrationId: migrationStats.id });
+    }, [telemetry, migrationStats.id]);
 
     const copyStep = useMissingLookupsListStep({
       status: getEuiStepStatus(1, subStep),

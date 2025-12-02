@@ -74,7 +74,7 @@ describe('useKibanaFeatureFlags', () => {
     });
   });
 
-  it('calls getBooleanValue with the expected default value (false)', async () => {
+  it('calls getBooleanValue with the expected default value (true)', async () => {
     mockGetBooleanValueFn.mockReturnValue(false);
 
     renderHook(() => useKibanaFeatureFlags(), {
@@ -84,7 +84,7 @@ describe('useKibanaFeatureFlags', () => {
     await waitFor(() => {
       expect(mockGetBooleanValueFn).toHaveBeenCalledWith(
         ATTACK_DISCOVERY_PUBLIC_API_ENABLED_FEATURE_FLAG,
-        false // <-- expected default when the feature flag is not configured
+        true // <-- expected default when the feature flag is not configured
       );
     });
   });

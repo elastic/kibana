@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
-import type { UseQueryResult } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
 
 import type { Space } from '../../../common';
 import type { SpacesManager } from '../../spaces_manager';

@@ -21,6 +21,8 @@ export const AGENT_BUILDER_SHORT_TITLE = i18n.translate('xpack.onechat.app.short
 export const uiPrivileges = {
   show: 'show',
   showManagement: 'showManagement',
+  manageTools: 'manageTools',
+  manageAgents: 'manageAgents',
 };
 
 export const apiPrivileges = {

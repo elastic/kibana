@@ -103,7 +103,10 @@ export const SeverityMappingItem = ({ severityMappingItem }: SeverityMappingItem
         content={severityMappingItem.field}
         data-test-subj={`severityOverrideField-${severityMappingItem.value}`}
       >
-        <span data-test-subj="severityOverrideField">{`${severityMappingItem.field}:`}</span>
+        <span
+          tabIndex={0}
+          data-test-subj="severityOverrideField"
+        >{`${severityMappingItem.field}:`}</span>
       </EuiToolTip>
     </OverrideColumn>
     <EuiFlexItem grow={false}>
@@ -111,7 +114,7 @@ export const SeverityMappingItem = ({ severityMappingItem }: SeverityMappingItem
         content={severityMappingItem.value}
         data-test-subj={`severityOverrideValue-${severityMappingItem.value}`}
       >
-        <OverrideValueColumn>
+        <OverrideValueColumn tabIndex={0}>
           <span data-test-subj="severityOverrideValue">
             {defaultToEmptyTag(severityMappingItem.value)}
           </span>
@@ -151,7 +154,7 @@ export const RiskScoreMappingItem = ({ riskScoreMappingItem }: RiskScoreMappingI
         content={riskScoreMappingItem.field}
         data-test-subj={`riskScoreOverrideField-${riskScoreMappingItem.value}`}
       >
-        <span data-test-subj="riskScoreOverridePropertyFieldName">
+        <span tabIndex={0} data-test-subj="riskScoreOverridePropertyFieldName">
           {riskScoreMappingItem.field}
         </span>
       </EuiToolTip>

@@ -173,6 +173,7 @@ Default value: 1024mb (1g)"
       </FlexItemSetting>
       <FlexItemSetting>
         <EuiSelect
+          aria-label="Queue max bytes units"
           data-test-subj="selectQueueMaxBytesUnits"
           onChange={[Function]}
           options={
@@ -435,6 +436,7 @@ Default value: 1024mb (1g)"
       </FlexItemSetting>
       <FlexItemSetting>
         <EuiSelect
+          aria-label="Queue max bytes units"
           data-test-subj="selectQueueMaxBytesUnits"
           onChange={[Function]}
           options={
@@ -697,6 +699,7 @@ Default value: 1024mb (1g)"
       </FlexItemSetting>
       <FlexItemSetting>
         <EuiSelect
+          aria-label="Queue max bytes units"
           data-test-subj="selectQueueMaxBytesUnits"
           onChange={[Function]}
           options={
@@ -936,6 +939,7 @@ Default value: 1024mb (1g)"
       </FlexItemSetting>
       <FlexItemSetting>
         <EuiSelect
+          aria-label="Queue max bytes units"
           data-test-subj="selectQueueMaxBytesUnits"
           onChange={[Function]}
           options={
@@ -1208,6 +1212,7 @@ Default value: 1024mb (1g)"
       </FlexItemSetting>
       <FlexItemSetting>
         <EuiSelect
+          aria-label="Queue max bytes units"
           data-test-subj="selectQueueMaxBytesUnits"
           onChange={[Function]}
           options={
@@ -1447,6 +1452,7 @@ Default value: 1024mb (1g)"
       </FlexItemSetting>
       <FlexItemSetting>
         <EuiSelect
+          aria-label="Queue max bytes units"
           data-test-subj="selectQueueMaxBytesUnits"
           onChange={[Function]}
           options={

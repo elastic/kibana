@@ -65,7 +65,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expect(response.body.items.length).to.be.greaterThan(0);
           });
 
-          it('some items have a health status set', () => {
+          it('all items have a health status set', () => {
             // Under the assumption that the loaded archive has
             // at least one APM ML job, and the time range is longer
             // than 15m, at least one items should have a health status
@@ -81,7 +81,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
             expectSnapshot(healthStatuses).toMatchInline(`
               Array [
-                undefined,
                 "healthy",
                 "healthy",
                 "healthy",

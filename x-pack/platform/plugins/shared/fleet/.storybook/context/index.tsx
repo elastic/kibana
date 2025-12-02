@@ -108,7 +108,7 @@ export const StorybookContext: React.FC<{
       settings: getSettings(),
       theme: {
         theme$: EMPTY,
-        getTheme: () => ({ darkMode: false, name: 'amsterdam' }),
+        getTheme: () => ({ darkMode: false, name: 'borealis' }),
       },
       pricing: {} as unknown as PricingServiceStart,
       security: {} as unknown as SecurityServiceStart,

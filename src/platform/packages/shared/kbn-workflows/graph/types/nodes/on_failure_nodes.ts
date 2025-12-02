@@ -8,8 +8,8 @@
  */
 
 import { z } from '@kbn/zod';
-import { WorkflowRetrySchema } from '../../../spec/schema';
 import { GraphNodeSchema } from './base';
+import { WorkflowRetrySchema } from '../../../spec/schema';
 
 export const EnterContinueNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
@@ -44,6 +44,7 @@ export const EnterTryBlockNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.literal('enter-try-block'),
   enterNormalPathNodeId: z.string(),
+  enterFallbackPathNodeId: z.string(),
   exitNodeId: z.string(),
 });
 export type EnterTryBlockNode = z.infer<typeof EnterTryBlockNodeSchema>;

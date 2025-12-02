@@ -62,7 +62,7 @@ describe('runSaveLensVisualization', () => {
        * and in the modal the user chooses to add the chart into a specific dashboard. Make sure to pass the "dashboardId" prop as well to simulate this scenario.
        * This is used to test indirectly the redirectToDashboard call
        */
-      redirectToDashboardFn: props.stateTransfer.navigateToWithEmbeddablePackage,
+      redirectToDashboardFn: props.stateTransfer.navigateToWithEmbeddablePackages,
       /**
        * This function will be called before reloading the editor after saving a a new document/new copy of the document
        */
@@ -257,14 +257,17 @@ describe('runSaveLensVisualization', () => {
           'dashboards',
           // make sure the new savedObject id is removed from the new input
           expect.objectContaining({
-            state: expect.objectContaining({
-              serializedState: expect.objectContaining({
-                rawState: expect.objectContaining({ savedObjectId: undefined }),
-                references: expect.arrayContaining([
-                  expect.objectContaining({ type: 'index-pattern' }),
-                ]),
+            state: expect.arrayContaining([
+              expect.objectContaining({
+                type: 'lens',
+                serializedState: expect.objectContaining({
+                  rawState: expect.objectContaining({ savedObjectId: undefined }),
+                  references: expect.arrayContaining([
+                    expect.objectContaining({ type: 'index-pattern' }),
+                  ]),
+                }),
               }),
-            }),
+            ]),
           })
         );
         expect(saveToLibraryFn).not.toHaveBeenCalled();
@@ -289,14 +292,17 @@ describe('runSaveLensVisualization', () => {
           'dashboards',
           // make sure the new savedObject id is passed with the new input
           expect.objectContaining({
-            state: expect.objectContaining({
-              serializedState: expect.objectContaining({
-                rawState: expect.objectContaining({ savedObjectId: '1234' }),
-                references: expect.arrayContaining([
-                  expect.objectContaining({ type: 'index-pattern' }),
-                ]),
+            state: expect.arrayContaining([
+              expect.objectContaining({
+                type: 'lens',
+                serializedState: expect.objectContaining({
+                  rawState: expect.objectContaining({ savedObjectId: '1234' }),
+                  references: expect.arrayContaining([
+                    expect.objectContaining({ type: 'index-pattern' }),
+                  ]),
+                }),
               }),
-            }),
+            ]),
           })
         );
         expect(saveToLibraryFn).toHaveBeenCalled();

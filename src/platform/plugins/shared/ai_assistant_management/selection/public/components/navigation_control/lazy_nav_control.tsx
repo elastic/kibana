@@ -10,7 +10,6 @@
 import type { CoreStart } from '@kbn/core/public';
 import { dynamic } from '@kbn/shared-ux-utility';
 import React from 'react';
-import { I18nProvider } from '@kbn/i18n-react';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { useIsNavControlVisible } from '../../hooks/use_is_nav_control_visible';
 import type { AIAssistantType } from '../../../common/ai_assistant_type';
@@ -39,13 +38,11 @@ export const NavControlInitiator = ({
   }
 
   return (
-    <I18nProvider>
-      <LazyNavControl
-        isSecurityAIAssistantEnabled={isSecurityAIAssistantEnabled}
-        isObservabilityAIAssistantEnabled={isObservabilityAIAssistantEnabled}
-        coreStart={coreStart}
-        triggerOpenChat={triggerOpenChat}
-      />
-    </I18nProvider>
+    <LazyNavControl
+      isSecurityAIAssistantEnabled={isSecurityAIAssistantEnabled}
+      isObservabilityAIAssistantEnabled={isObservabilityAIAssistantEnabled}
+      coreStart={coreStart}
+      triggerOpenChat={triggerOpenChat}
+    />
   );
 };

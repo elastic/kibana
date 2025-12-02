@@ -7,6 +7,7 @@
 
 import type { AttackDiscoverySchedule } from '../../schemas/attack_discovery/routes/public/schedules/schedules.gen';
 import type { AttackDiscoveryApiSchedule } from '../../schemas/attack_discovery/routes/public/schedules/schedules_api.gen';
+import { transformAttackDiscoveryScheduleActionsPropsFromApi } from '../transform_attack_discovery_schedule_actions_props_from_api';
 
 export const transformAttackDiscoveryScheduleFromApi = (
   api: AttackDiscoveryApiSchedule
@@ -30,21 +31,7 @@ export const transformAttackDiscoveryScheduleFromApi = (
       start: api.params.start,
     },
     schedule: api.schedule,
-    actions: api.actions.map((action) => ({
-      actionTypeId: action.action_type_id,
-      group: action.group,
-      id: action.id,
-      params: action.params,
-      uuid: action.uuid,
-      alertsFilter: action.alerts_filter,
-      frequency: action.frequency
-        ? {
-            summary: action.frequency.summary,
-            notifyWhen: action.frequency.notify_when,
-            throttle: action.frequency.throttle,
-          }
-        : undefined,
-    })),
+    actions: transformAttackDiscoveryScheduleActionsPropsFromApi(api.actions) ?? [],
     lastExecution: api.last_execution,
   };
 };

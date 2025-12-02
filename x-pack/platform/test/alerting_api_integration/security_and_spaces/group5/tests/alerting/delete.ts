@@ -6,9 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { deleteRuleById } from '../../../../common/lib/rules';
-import { getAlwaysFiringInternalRule } from '../../../../common/lib/alert_utils';
-import { UserAtSpaceScenarios } from '../../../scenarios';
+import { AlertUtils, getAlwaysFiringInternalRule } from '../../../../common/lib/alert_utils';
+import { DefaultSpace, Superuser, UserAtSpaceScenarios } from '../../../scenarios';
 import {
   getUrlPrefix,
   getTestRuleData,
@@ -374,6 +373,12 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
     describe('internally managed rule types', () => {
       const rulePayload = getAlwaysFiringInternalRule();
 
+      const alertUtils = new AlertUtils({
+        user: Superuser,
+        space: DefaultSpace,
+        supertestWithoutAuth: supertest,
+      });
+
       it('should throw 400 error when trying to delete an internally managed rule type', async () => {
         const { body: createdRule } = await supertest
           .post('/api/alerts_fixture/rule/internally_managed')
@@ -386,7 +391,9 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .expect(400);
 
-        await deleteRuleById(es, createdRule.id);
+        const res = await alertUtils.deleteInternallyManagedRule(createdRule.id);
+
+        expect(res.statusCode).to.eql(200);
       });
     });
   });

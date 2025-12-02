@@ -6,7 +6,8 @@
  */
 
 import type SuperTest from 'supertest';
-import type { LlmProxy } from '../../onechat_api_integration/utils/llm_proxy';
+import type { OneChatApiFtrProviderContext } from '../../onechat/services/api';
+import { createLlmProxy, type LlmProxy } from '../../onechat_api_integration/utils/llm_proxy';
 /**
  * Creates a basic auth connector for the LLM proxy
  */
@@ -40,4 +41,29 @@ export async function deleteConnectors(supertest: SuperTest.Agent) {
   });
 
   return Promise.all(promises);
+}
+
+/**
+ * Sets up a connector for testing
+ * @param getService
+ * @returns the LLM proxy
+ */
+export async function setupConnector(getService: OneChatApiFtrProviderContext['getService']) {
+  const supertest = getService('supertest');
+  const llmProxy = await createLlmProxy(getService('log'));
+  await createConnector(llmProxy, supertest);
+  return llmProxy;
+}
+
+/**
+ * Cleans up all created connectors
+ * @param getService
+ */
+export async function teardownConnector(
+  getService: OneChatApiFtrProviderContext['getService'],
+  llmProxy: LlmProxy
+) {
+  llmProxy.close();
+  const supertest = getService('supertest');
+  await deleteConnectors(supertest);
 }

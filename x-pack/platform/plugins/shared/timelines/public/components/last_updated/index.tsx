@@ -68,7 +68,7 @@ export const LastUpdatedAt = React.memo<LastUpdatedAtProps>(
         data-test-subj="timeline-stream-tool-tip"
         content={<Updated date={date} prefix={prefix} updatedAt={updatedAt} />}
       >
-        <EuiText color="subdued" size="xs">
+        <EuiText color="subdued" size="xs" tabIndex={0}>
           {updateText}
         </EuiText>
       </EuiToolTip>

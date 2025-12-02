@@ -26,6 +26,7 @@ import type { CaseAttachmentsWithoutOwner, ServerError } from '../types';
 import {
   CASE_ALERT_SUCCESS_SYNC_TEXT,
   CASE_ALERT_SUCCESS_OBSERVABLES_TEXT,
+  CASE_ALERT_SUCCESS_SYNC_AND_EXTRACT_TEXT,
   CASE_ALERT_SUCCESS_TOAST,
   CASE_SUCCESS_TOAST,
   VIEW_CASE,
@@ -90,7 +91,7 @@ function getToastContent({
     for (const attachment of attachments) {
       if (attachment.type === AttachmentType.alert) {
         if (theCase.settings.syncAlerts && theCase.settings.extractObservables) {
-          toastContent = `${CASE_ALERT_SUCCESS_SYNC_TEXT} ${CASE_ALERT_SUCCESS_OBSERVABLES_TEXT}`;
+          toastContent = CASE_ALERT_SUCCESS_SYNC_AND_EXTRACT_TEXT;
         } else if (theCase.settings.syncAlerts) {
           toastContent = CASE_ALERT_SUCCESS_SYNC_TEXT;
         } else if (theCase.settings.extractObservables) {

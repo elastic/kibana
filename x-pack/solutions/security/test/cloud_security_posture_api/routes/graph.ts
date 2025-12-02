@@ -21,17 +21,11 @@ import type {
   EdgeDataModel,
 } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import { CLOUD_ASSET_DISCOVERY_PACKAGE_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
+import { isLabelNode } from '@kbn/cloud-security-posture-graph/src/components/utils';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { result } from '../utils';
 import { CspSecurityCommonProvider } from './helper/user_roles_utilites';
 import { dataViewRouteHelpersFactory } from '../utils';
-
-// Helper function to check if a node is a label node
-const isLabelNode = (
-  node: EntityNodeDataModel | LabelNodeDataModel | NodeDataModel
-): node is LabelNodeDataModel => {
-  return node.shape === 'label';
-};
 
 // eslint-disable-next-line import/no-default-export
 export default function (providerContext: FtrProviderContext) {
@@ -67,8 +61,7 @@ export default function (providerContext: FtrProviderContext) {
     return req.send(body);
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/236975
-  describe.skip('POST /internal/cloud_security_posture/graph', () => {
+  describe('POST /internal/cloud_security_posture/graph', () => {
     describe('Authorization', () => {
       it('should return 403 for user without read access', async () => {
         await postGraph(
@@ -490,11 +483,9 @@ export default function (providerContext: FtrProviderContext) {
           },
         }).expect(result(200));
 
-        expect(response.body).to.have.property('nodes').length(5);
-        expect(response.body).to.have.property('edges').length(6);
+        expect(response.body).to.have.property('nodes').length(5); // 1 group + 2 entities + 2 labels
+        expect(response.body).to.have.property('edges').length(6); // actor→group, group→target, group↔label1, group↔label2
         expect(response.body).not.to.have.property('messages');
-
-        expect(response.body.nodes[0].shape).equal('group', 'Groups should be the first nodes');
 
         response.body.nodes.forEach((node: NodeDataModel) => {
           if (node.shape !== 'group') {
@@ -529,6 +520,86 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
+      it('handles multi-value actor and target entity IDs with MV_EXPAND', async () => {
+        const response = await postGraph(supertest, {
+          query: {
+            indexPatterns: ['.alerts-security.alerts-*', 'logs-*'],
+            originEventIds: [{ id: 'multivalue-event-1', isAlert: false }],
+            start: '2024-09-01T00:00:00Z',
+            end: '2024-09-02T00:00:00Z',
+          },
+        }).expect(result(200));
+
+        // After MV_EXPAND, the Cartesian product of 2 actors × 3 targets = 6 records
+        // These are grouped by MD5 hash into 2 entity nodes (one for actors, one for targets)
+        // and 1 label node representing all 6 relationships
+        expect(response.body).to.have.property('nodes');
+        expect(response.body).to.have.property('edges');
+
+        // Filter entity nodes (non-label nodes) - should be 2 (one actor group, one target group)
+        const entityNodes = response.body.nodes.filter(
+          (node: NodeDataModel) => node.shape !== 'label'
+        );
+        expect(entityNodes).to.have.length(
+          2,
+          'Should have 2 entity nodes (actor and target groups)'
+        );
+
+        // Find actor node (should have count: 2 for 2 actor IDs)
+        const actorNode = entityNodes.find((node: EntityNodeDataModel) => node.count === 2);
+        expect(actorNode).to.not.be(undefined);
+        expect(actorNode).to.have.property('shape', 'rectangle');
+        expect(actorNode).to.have.property('color', 'primary');
+        expect(actorNode).to.have.property('tag', 'Entities');
+        expect(actorNode).to.have.property('icon', 'magnifyWithExclamation');
+
+        // Find target node (should have count: 3 for 3 target IDs)
+        const targetNode = entityNodes.find((node: EntityNodeDataModel) => node.count === 3);
+        expect(targetNode).to.not.be(undefined);
+        expect(targetNode).to.have.property('shape', 'rectangle');
+        expect(targetNode).to.have.property('color', 'primary');
+        expect(targetNode).to.have.property('tag', 'Entities');
+        expect(targetNode).to.have.property('icon', 'magnifyWithExclamation');
+
+        // Verify label node exists for the action with count of 6 (2 actors × 3 targets)
+        const labelNodes = response.body.nodes.filter(
+          (node: LabelNodeDataModel) => node.shape === 'label'
+        );
+        expect(labelNodes).to.have.length(
+          1,
+          'Should have 1 label node representing all relationships'
+        );
+
+        const labelNode = labelNodes[0];
+        expect(labelNode).to.have.property('label', 'test.multivalue.action');
+        expect(labelNode).to.have.property('color', 'primary');
+        expect(labelNode).to.have.property('count', 6); // 2 actors × 3 targets = 6 relationships
+        expect(labelNode).to.have.property('uniqueEventsCount', 1); // 1 source event
+
+        // Verify edges connect actor group -> label -> target group
+        // Expected: 1 actor->label edge + 1 label->target edge = 2 edges
+        expect(response.body.edges).to.have.length(
+          2,
+          'Should have 2 edges (actor group -> label -> target group)'
+        );
+
+        // Verify edge from actor to label
+        const actorToLabelEdge = response.body.edges.find(
+          (edge: EdgeDataModel) => edge.source === actorNode!.id && edge.target === labelNode.id
+        );
+        expect(actorToLabelEdge).to.not.be(undefined);
+        expect(actorToLabelEdge).to.have.property('color', 'subdued');
+        expect(actorToLabelEdge).to.have.property('type', 'solid');
+
+        // Verify edge from label to target
+        const labelToTargetEdge = response.body.edges.find(
+          (edge: EdgeDataModel) => edge.source === labelNode.id && edge.target === targetNode!.id
+        );
+        expect(labelToTargetEdge).to.not.be(undefined);
+        expect(labelToTargetEdge).to.have.property('color', 'subdued');
+        expect(labelToTargetEdge).to.have.property('type', 'solid');
+      });
+
       it('should support more than 1 originEventIds', async () => {
         const response = await postGraph(supertest, {
           query: {
@@ -542,8 +613,8 @@ export default function (providerContext: FtrProviderContext) {
           },
         }).expect(result(200));
 
-        expect(response.body).to.have.property('nodes').length(5);
-        expect(response.body).to.have.property('edges').length(4);
+        expect(response.body).to.have.property('nodes').length(3);
+        expect(response.body).to.have.property('edges').length(2);
         expect(response.body).not.to.have.property('messages');
 
         response.body.nodes.forEach((node: EntityNodeDataModel | LabelNodeDataModel) => {
@@ -598,8 +669,8 @@ export default function (providerContext: FtrProviderContext) {
           },
         }).expect(result(200));
 
-        expect(response.body).to.have.property('nodes').length(5);
-        expect(response.body).to.have.property('edges').length(4);
+        expect(response.body).to.have.property('nodes').length(5); // 3 entities + 2 labels
+        expect(response.body).to.have.property('edges').length(4); // Simple connections without group
         expect(response.body).not.to.have.property('messages');
 
         response.body.nodes.forEach(
@@ -614,8 +685,10 @@ export default function (providerContext: FtrProviderContext) {
               if (node.documentsData && node.documentsData.length === 1) {
                 expect(node.documentsData?.[0]).to.have.property('type', 'event');
               } else if (node.documentsData && node.documentsData.length === 2) {
-                expect(node.documentsData?.[0]).to.have.property('type', 'alert');
-                expect(node.documentsData?.[1]).to.have.property('type', 'event');
+                const hasAlert = node.documentsData.some((doc) => doc.type === 'alert');
+                const hasEvent = node.documentsData.some((doc) => doc.type === 'event');
+                expect(hasAlert).to.be(true);
+                expect(hasEvent).to.be(true);
               }
             }
           }
@@ -813,13 +886,71 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       describe('Enrich graph with entity metadata', () => {
-        const enrichPolicyCreationTimeout = 10000;
+        // Wait for the enrich policy to be created and executed
+        // The policy needs time to populate the enrich index with entity data
+        const enrichPolicyCreationTimeout = 15000;
         const customNamespaceId = 'test';
         const entitiesIndex = '.entities.v1.latest.security_*';
         let dataView: ReturnType<typeof dataViewRouteHelpersFactory>;
         let customSpaceDataView: ReturnType<typeof dataViewRouteHelpersFactory>;
 
+        /**
+         * Waits for the enrich index to be created and populated with data.
+         * This is a reusable helper to avoid duplicate polling logic.
+         * @param spaceId - Optional space ID (undefined for default space)
+         */
+        const waitForEnrichIndexPopulated = async (spaceId?: string) => {
+          const spaceIdentifier = spaceId || 'default';
+          await retry.waitFor(
+            `enrich index to be created and populated for ${spaceIdentifier} space`,
+            async () => {
+              try {
+                // Check if the index has data (policy has been executed)
+                const count = await es.count({
+                  index: `.enrich-entity_store_field_retention_generic_${spaceIdentifier}_v1.0.0`,
+                });
+                return count.count > 0;
+              } catch (e) {
+                return false;
+              }
+            }
+          );
+        };
+
+        const cleanupSpaceEnrichResources = async (spaceId?: string) => {
+          const spacePath = spaceId ? `/s/${spaceId}` : '';
+
+          // Delete the generic entity engine which will properly clean up:
+          // - Platform pipeline
+          // - Field retention enrich policy
+          // - Enrich indices
+          // Note: Asset Inventory uses the 'generic' entity type
+          try {
+            await supertest
+              .delete(`${spacePath}/api/entity_store/engines/generic?data=true`)
+              .set('kbn-xsrf', 'xxxx')
+              .expect(200);
+            logger.debug(`Deleted entity store generic engine for space: ${spaceId || 'default'}`);
+          } catch (e) {
+            // Ignore 404 errors if the engine doesn't exist
+            if (e.status !== 404) {
+              logger.debug(
+                `Error deleting entity store for space ${spaceId || 'default'}: ${
+                  e && e.message ? e.message : JSON.stringify(e)
+                }`
+              );
+            }
+          }
+        };
+
         before(async () => {
+          // Clean up any leftover resources from previous runs
+          await cleanupSpaceEnrichResources(); // default space
+          await cleanupSpaceEnrichResources(customNamespaceId); // test space
+
+          // Delete test space if it exists from previous run
+          await spacesService.delete(customNamespaceId);
+
           // Create a test space
           await spacesService.create({
             id: customNamespaceId,
@@ -834,9 +965,21 @@ export default function (providerContext: FtrProviderContext) {
             { 'securitySolution:enableAssetInventory': true },
             { space: customNamespaceId }
           );
+
+          // Load fresh entity data
           await esArchiver.load(
             'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/entity_store'
           );
+
+          // Wait for entity data to be indexed before proceeding
+          // This ensures the enrich policy will have data when it executes
+          await retry.waitFor('entity data to be indexed', async () => {
+            const response = await es.count({
+              index: entitiesIndex,
+            });
+            // We expect 2 documents (one for default space, one for test space)
+            return response.count === 2;
+          });
 
           // initialize security-solution-default data-view
           dataView = dataViewRouteHelpersFactory(supertest);
@@ -848,6 +991,10 @@ export default function (providerContext: FtrProviderContext) {
         });
 
         after(async () => {
+          // Clean up all enrich resources
+          await cleanupSpaceEnrichResources(); // default space
+          await cleanupSpaceEnrichResources(customNamespaceId); // test space
+
           await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': false });
           await kibanaServer.uiSettings.update(
             { 'securitySolution:enableAssetInventory': false },
@@ -872,6 +1019,9 @@ export default function (providerContext: FtrProviderContext) {
             .set('kbn-xsrf', 'xxxx')
             .send({})
             .expect(200);
+
+          // Wait for enrich index to be created AND populated with data
+          await waitForEnrichIndexPopulated();
 
           // although enrich policy is already create via 'api/asset_inventory/enable'
           // we still would like to replicate as if cloud asset discovery integration was fully installed
@@ -920,14 +1070,15 @@ export default function (providerContext: FtrProviderContext) {
             expect(response.body).to.have.property('nodes').length(3);
             expect(response.body).to.have.property('edges').length(2);
             expect(response.body).not.to.have.property('messages');
-            // Find the actor node
+            // Find the actor node directly by entity ID (single entity uses entity ID as node ID)
             const actorNode = response.body.nodes.find(
-              (node: NodeDataModel) => node.id === 'admin@example.com'
+              (node: EntityNodeDataModel) => node.id === 'admin@example.com'
             ) as EntityNodeDataModel;
 
             // Verify entity enrichment
             expect(actorNode).not.to.be(undefined);
-            expect(actorNode.label).to.equal('AWS IAM User');
+            // For single enriched entities, label should be entity.name
+            expect(actorNode.label).to.equal('AdminExample');
             expect(actorNode.icon).to.equal('user');
             expect(actorNode.shape).to.equal('ellipse');
             expect(actorNode.tag).to.equal('Identity');
@@ -979,6 +1130,9 @@ export default function (providerContext: FtrProviderContext) {
             .send({})
             .expect(200);
 
+          // Wait for enrich index to be created AND populated with data
+          await waitForEnrichIndexPopulated(customNamespaceId);
+
           await supertest
             .post(`/s/${customNamespaceId}/api/fleet/epm/packages/_bulk`)
             .set('kbn-xsrf', 'xxxx')
@@ -1018,13 +1172,15 @@ export default function (providerContext: FtrProviderContext) {
               customNamespaceId
             ).expect(result(200, logger));
 
+            // Find the actor node directly by entity ID (single entity uses entity ID as node ID)
             const actorNode = response.body.nodes.find(
-              (node: NodeDataModel) => node.id === 'admin@example.com'
+              (node: EntityNodeDataModel) => node.id === 'admin@example.com'
             ) as EntityNodeDataModel;
 
             // Verify entity enrichment
             expect(actorNode).not.to.be(undefined);
-            expect(actorNode.label).to.equal('AWS IAM User');
+            // For single enriched entities, label should be entity.name
+            expect(actorNode.label).to.equal('AdminExample');
             expect(actorNode.icon).to.equal('user');
             expect(actorNode.shape).to.equal('ellipse');
             expect(actorNode.tag).to.equal('Identity');

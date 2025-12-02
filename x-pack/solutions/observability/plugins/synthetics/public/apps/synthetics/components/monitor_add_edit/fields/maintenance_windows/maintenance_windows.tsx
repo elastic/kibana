@@ -30,11 +30,17 @@ export const MaintenanceWindowsField = ({
       label: option.title,
     })) ?? [];
 
+  const maintenanceWindowsPlaceholder = i18n.translate(
+    'xpack.synthetics.monitorConfig.maintenanceWindows.placeholder',
+    {
+      defaultMessage: 'Select maintenance windows',
+    }
+  );
+
   return (
     <EuiComboBox<string>
-      placeholder={i18n.translate('xpack.synthetics.monitorConfig.maintenanceWindows.placeholder', {
-        defaultMessage: 'Select maintenance windows',
-      })}
+      placeholder={maintenanceWindowsPlaceholder}
+      aria-label={maintenanceWindowsPlaceholder}
       options={options}
       onChange={(newValue) => {
         onChange(newValue.map((option) => option.value as string));

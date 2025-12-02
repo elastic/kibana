@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getDataTestSubjectSelector } from '../helpers/common';
+import { getDataTestSubjectSelector, getDataTestSubjectSelectorMatch } from '../helpers/common';
 import { GLOBAL_KQL_WRAPPER } from './search_bar';
 
 // main links
@@ -24,11 +24,13 @@ export const TIMELINES = '[data-test-subj="solutionSideNavItemLink-timelines"]';
 export const EXPLORE = '[data-test-subj="solutionSideNavItemLink-explore"]';
 export const EXPLORE_PANEL_BTN = '[data-test-subj="solutionSideNavItemButton-explore"]';
 
-export const RULES_LANDING = '[data-test-subj="solutionSideNavPanelLink-rules-landing"]';
 export const RULES_PANEL_BTN = '[data-test-subj="solutionSideNavItemButton-rules-landing"]';
 
 export const SETTINGS = '[data-test-subj="solutionSideNavItemLink-administration"]';
 export const SETTINGS_PANEL_BTN = '[data-test-subj="solutionSideNavItemButton-administration"]';
+
+export const MIGRATIONS_LANDING = '[data-test-subj="solutionSideNavItemLink-siem_migrations"]';
+export const MIGRATIONS_PANEL_BTN = '[data-test-subj="solutionSideNavItemButton-siem_migrations"]';
 
 // nested links
 export const OVERVIEW = '[data-test-subj="solutionSideNavPanelLink-overview"]';
@@ -89,13 +91,16 @@ export const KQL_INPUT = (dataTestSubj: string = KQL_INPUT_TEXT_AREA) =>
 export const REFRESH_BUTTON = `${GLOBAL_KQL_WRAPPER} [data-test-subj="querySubmitButton"]`;
 
 export const LOADING_INDICATOR = '[data-test-subj="globalLoadingIndicator"]';
-export const LOADING_INDICATOR_HIDDEN = '[data-test-subj="globalLoadingIndicator-hidden"]';
 
 export const KIBANA_LOADING_ICON = '[data-test-subj="kbnLoadingMessage"]';
 
 // Siem Migrations
-export const TRANSLATED_RULES_PAGE = getDataTestSubjectSelector(
-  'solutionSideNavPanelLink-siem_migrations-rules'
+export const TRANSLATED_RULES_PAGE = Cypress.env('IS_SERVERLESS')
+  ? getDataTestSubjectSelectorMatch('nav-item-id-siem_migrations-rules')
+  : getDataTestSubjectSelector('solutionSideNavPanelLink-siem_migrations-rules');
+
+export const TRANSLATED_DASHBOARDS_PAGE = getDataTestSubjectSelector(
+  'solutionSideNavPanelLink-siem_migrations-dashboards'
 );
 
 // opens the navigation panel for a given nested link

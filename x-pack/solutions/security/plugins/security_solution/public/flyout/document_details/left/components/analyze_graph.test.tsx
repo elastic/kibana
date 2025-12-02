@@ -18,7 +18,7 @@ import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
 import { DocumentDetailsAnalyzerPanelKey } from '../../shared/constants/panel_keys';
 import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
-import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 
 jest.mock('react-router-dom', () => {
@@ -54,9 +54,7 @@ describe('<AnalyzeGraph />', () => {
   beforeEach(() => {
     mockUseWhichFlyout.mockReturnValue(FLYOUT_KEY);
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
-    (useEnableExperimental as jest.Mock).mockReturnValue({
-      newDataViewPickerEnabled: true,
-    });
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     (useSelectedPatterns as jest.Mock).mockReturnValue(['index']);
   });
 

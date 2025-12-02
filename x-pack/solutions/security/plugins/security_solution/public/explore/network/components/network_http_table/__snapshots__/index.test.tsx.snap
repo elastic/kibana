@@ -35,11 +35,11 @@ exports[`NetworkHttp Table Component rendering it renders the default NetworkHtt
 }
 
 .c4 {
-  color: #98a2b3;
+  color: #7186A8;
 }
 
 .c2 .siemSubtitle__item {
-  color: #7a7f89;
+  color: #98A8C3;
   font-size: 12px;
   line-height: 1.5;
 }
@@ -765,6 +765,7 @@ exports[`NetworkHttp Table Component rendering it renders the default NetworkHtt
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <nav
+          aria-label="Table pagination"
           class="euiPagination emotion-euiPagination"
           data-test-subj="numberedPagination"
         >

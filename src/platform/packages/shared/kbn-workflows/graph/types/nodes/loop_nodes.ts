@@ -8,8 +8,8 @@
  */
 
 import { z } from '@kbn/zod';
-import { ForEachStepSchema } from '../../../spec/schema';
 import { GraphNodeSchema } from './base';
+import { ForEachStepSchema } from '../../../spec/schema';
 
 export const EnterForeachNodeConfigurationSchema = ForEachStepSchema.omit({
   steps: true,

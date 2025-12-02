@@ -10,7 +10,7 @@ import { kqlQuery } from '@kbn/es-query';
 import { getIndexPatternsForStream, type Streams } from '@kbn/streams-schema';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import pLimit from 'p-limit';
-import { isKqlQueryValid, rangeQuery } from '../../../routes/internal/esql/query_helpers';
+import { isKqlQueryValid, rangeQuery } from '../../../../common/query_helpers';
 
 interface Query {
   title: string;

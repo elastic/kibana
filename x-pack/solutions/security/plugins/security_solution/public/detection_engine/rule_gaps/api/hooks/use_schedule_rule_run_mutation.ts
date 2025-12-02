@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { INTERNAL_ALERTING_BACKFILL_SCHEDULE_API_PATH } from '@kbn/alerting-plugin/common';
-import type { UseMutationOptions } from '@tanstack/react-query';
-import { useMutation } from '@tanstack/react-query';
+import type { UseMutationOptions } from '@kbn/react-query';
+import { useMutation } from '@kbn/react-query';
 import type { ScheduleBackfillProps } from '../../types';
 import { scheduleRuleRun } from '../api';
 import { useInvalidateFindBackfillQuery } from './use_find_backfills_for_rules';

@@ -48,6 +48,8 @@ import { useKibana } from '../../../common/lib/kibana';
 import { TabContentPadding } from '../components/rule_details/rule_details_flyout';
 
 const REVIEW_PREBUILT_RULES_UPGRADE_REFRESH_INTERVAL = 5 * 60 * 1000;
+const RULE_UPGRADE_FLYOUT_BUTTON_EVENT_VERSION = 2;
+const RULE_UPGRADE_FLYOUT_OPEN_EVENT_VERSION = 2;
 
 export const PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR = 'updatePrebuiltRulePreview';
 
@@ -364,16 +366,18 @@ export function usePrebuiltRulesUpgrade({
   );
   const closeRulePreviewAction = (rule: RuleResponse, reason: RulePreviewFlyoutCloseReason) => {
     const ruleUpgradeState = rulesUpgradeState[rule.rule_id];
-    const hasMissingBaseVersion = ruleUpgradeState.has_base_version === false;
+    const hasBaseVersion = ruleUpgradeState.has_base_version === true;
     if (reason === 'dismiss') {
       telemetry.reportEvent(RuleUpgradeEventTypes.RuleUpgradeFlyoutButtonClick, {
         type: 'dismiss',
-        hasMissingBaseVersion,
+        hasBaseVersion,
+        eventVersion: RULE_UPGRADE_FLYOUT_BUTTON_EVENT_VERSION,
       });
     } else {
       telemetry.reportEvent(RuleUpgradeEventTypes.RuleUpgradeFlyoutButtonClick, {
         type: 'update',
-        hasMissingBaseVersion,
+        hasBaseVersion,
+        eventVersion: RULE_UPGRADE_FLYOUT_BUTTON_EVENT_VERSION,
       });
     }
   };
@@ -393,9 +397,11 @@ export function usePrebuiltRulesUpgrade({
     (ruleId: string) => {
       openRulePreviewDefault(ruleId);
       const ruleUpgradeState = rulesUpgradeState[ruleId];
-      const hasMissingBaseVersion = ruleUpgradeState.has_base_version === false;
+      const hasBaseVersion = ruleUpgradeState.has_base_version === true;
+
       telemetry.reportEvent(RuleUpgradeEventTypes.RuleUpgradeFlyoutOpen, {
-        hasMissingBaseVersion,
+        hasBaseVersion,
+        eventVersion: RULE_UPGRADE_FLYOUT_OPEN_EVENT_VERSION,
       });
     },
     [openRulePreviewDefault, rulesUpgradeState, telemetry]

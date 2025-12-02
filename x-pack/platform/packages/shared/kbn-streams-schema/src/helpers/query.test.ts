@@ -12,13 +12,13 @@ import type { StreamQuery } from '../queries';
 describe('buildEsqlQuery', () => {
   const createTestQuery = (
     kqlQuery: string,
-    systemFilter: Condition = { field: 'some.field', eq: 'some value' }
+    featureFilter: Condition = { field: 'some.field', eq: 'some value' }
   ): StreamQuery => ({
     id: 'irrelevant',
     title: 'irrelevant',
-    system: {
+    feature: {
       name: 'irrelevant',
-      filter: systemFilter,
+      filter: featureFilter,
     },
     kql: {
       query: kqlQuery,
@@ -76,7 +76,7 @@ describe('buildEsqlQuery', () => {
     });
   });
 
-  it('should build query without system filter', () => {
+  it('should build query without feature filter', () => {
     const indices = ['logs.child', 'logs.child.*'];
     const query: StreamQuery = {
       id: 'irrelevant',

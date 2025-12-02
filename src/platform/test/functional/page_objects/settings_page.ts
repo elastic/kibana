@@ -224,6 +224,7 @@ export class SettingsPageObject extends FtrService {
   }
 
   async clickDeletePattern() {
+    await this.testSubjects.click('moreActionsButton');
     await this.testSubjects.click('deleteIndexPatternButton');
   }
 

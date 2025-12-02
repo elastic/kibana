@@ -13,7 +13,7 @@ import {
   fromSumMetricAPIToLensState,
   fromSumMetricLensStateToAPI,
 } from './max_min_avg_sum';
-import type { AvgIndexPatternColumn, SumIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { AvgIndexPatternColumn, SumIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiMetricOperation, LensApiSumMetricOperation } from '../../schema/metric_ops';
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from './utils';
 
@@ -38,13 +38,11 @@ describe('Max, Min, Avg, Median, Standard Deviation, Sum Transforms', () => {
         const result = fromBasicMetricAPItoLensState(input);
         expect(result).toEqual({
           customLabel: false,
-          filter: undefined,
           operationType: operation,
           sourceField: 'price',
           label: '',
           isBucketed: false,
           dataType: 'number',
-          params: {},
         });
       }
     );

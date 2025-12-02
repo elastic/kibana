@@ -48,7 +48,19 @@ export const HeaderDataCards = ({
             <EuiFlexItem grow={false}>{'ID'}</EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiCopy textToCopy={id}>
-                {(copy) => <EuiButtonIcon onClick={copy} iconType="document" color="text" />}
+                {(copy) => (
+                  <EuiButtonIcon
+                    onClick={copy}
+                    iconType="document"
+                    color="text"
+                    aria-label={i18n.translate(
+                      'xpack.securitySolution.genericEntityFlyout.flyoutHeader.headerDataBoxes.copyIdAriaLabel',
+                      {
+                        defaultMessage: 'Copy ID',
+                      }
+                    )}
+                  />
+                )}
               </EuiCopy>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -82,6 +94,7 @@ export const HeaderDataCards = ({
       {assignAssetCriticality.isError && (
         <>
           <EuiCallOut
+            announceOnMount
             onDismiss={() => {
               assignAssetCriticality.reset();
             }}

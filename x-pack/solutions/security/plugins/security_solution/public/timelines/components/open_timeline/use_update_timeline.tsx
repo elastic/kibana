@@ -8,14 +8,13 @@
 import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { isEmpty } from 'lodash/fp';
-import { useEnableExperimental } from '../../../common/hooks/use_experimental_features';
-import { DataViewManagerScopeName } from '../../../data_view_manager/constants';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { PageScope } from '../../../data_view_manager/constants';
 import { useSelectDataView } from '../../../data_view_manager/hooks/use_select_data_view';
 import type { Note } from '../../../../common/api/timeline';
 import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
 import { createNote } from '../notes/helpers';
 import { sourcererActions } from '../../../sourcerer/store';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import {
@@ -40,7 +39,7 @@ import type { UpdateTimeline } from './types';
 export const useUpdateTimeline = () => {
   const dispatch = useDispatch();
   const selectDataView = useSelectDataView();
-  const { newDataViewPickerEnabled } = useEnableExperimental();
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   return useCallback(
     // NOTE: this is only enabled for the data view picker test
@@ -69,13 +68,13 @@ export const useUpdateTimeline = () => {
         selectDataView({
           id: _timeline.dataViewId,
           fallbackPatterns: _timeline.indexNames,
-          scope: DataViewManagerScopeName.timeline,
+          scope: PageScope.timeline,
         });
       } else {
         if (!isEmpty(_timeline.indexNames) && !newDataViewPickerEnabled) {
           dispatch(
             sourcererActions.setSelectedDataView({
-              id: SourcererScopeName.timeline,
+              id: PageScope.timeline,
               selectedDataViewId: _timeline.dataViewId,
               selectedPatterns: _timeline.indexNames,
             })

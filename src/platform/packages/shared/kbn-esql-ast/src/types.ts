@@ -17,7 +17,11 @@ export type ESQLAstCommand =
   | ESQLAstJoinCommand
   | ESQLAstChangePointCommand
   | ESQLAstRerankCommand
-  | ESQLAstCompletionCommand;
+  | ESQLAstCompletionCommand
+  | ESQLAstFuseCommand
+  | ESQLAstForkCommand;
+
+export type ESQLAstAllCommands = ESQLAstCommand | ESQLAstHeaderCommand;
 
 export type ESQLAstNode = ESQLAstCommand | ESQLAstHeaderCommand | ESQLAstExpression | ESQLAstItem;
 
@@ -31,6 +35,7 @@ export type ESQLSingleAstItem =
   | ESQLFunction
   | ESQLCommandOption
   | ESQLSource
+  | ESQLParens
   | ESQLColumn
   | ESQLDatePeriodLiteral
   | ESQLTimeDurationLiteral
@@ -129,11 +134,19 @@ export interface ESQLAstCompletionCommand extends ESQLCommand<'completion'> {
   targetField?: ESQLColumn;
 }
 
+export interface ESQLAstFuseCommand extends ESQLCommand<'fuse'> {
+  fuseType?: ESQLIdentifier;
+}
+
 export interface ESQLAstRerankCommand extends ESQLCommand<'rerank'> {
   query: ESQLLiteral;
   fields: ESQLAstField[];
   targetField?: ESQLColumn;
   inferenceId: ESQLLiteral | undefined;
+}
+
+export interface ESQLAstForkCommand extends ESQLCommand<'fork'> {
+  args: ESQLForkParens[];
 }
 
 /**
@@ -234,7 +247,8 @@ export interface ESQLFunctionCallExpression extends ESQLFunction<'variadic-call'
   args: ESQLAstItem[];
 }
 
-export interface ESQLUnaryExpression extends ESQLFunction<'unary-expression'> {
+export interface ESQLUnaryExpression<Name extends string = string>
+  extends ESQLFunction<'unary-expression', Name> {
   subtype: 'unary-expression';
   args: [ESQLAstItem];
 }
@@ -365,8 +379,38 @@ export interface ESQLSource extends ESQLAstBaseItem {
   selector?: ESQLStringLiteral | undefined;
 }
 
+/**
+ * Represents any expression wrapped in parentheses.
+ *
+ * ```
+ * FROM ( <query> )
+ * ```
+ */
+export interface ESQLParens extends ESQLAstBaseItem {
+  type: 'parens';
+  child: ESQLAstExpression;
+}
+
+export interface ESQLForkParens extends ESQLParens {
+  child: ESQLAstQueryExpression;
+}
+
 export interface ESQLColumn extends ESQLAstBaseItem {
   type: 'column';
+
+  /**
+   * Optional qualifier for the column, e.g. index name or alias.
+   *
+   * @example
+   *
+   * ```esql
+   * [index].[column]
+   * [index].[nested.column.part]
+   * ```
+   *
+   * `index` is the qualifier.
+   */
+  qualifier?: ESQLIdentifier;
 
   /**
    * A ES|QL column name can be composed of multiple parts,
@@ -581,6 +625,8 @@ export interface ESQLMessage {
   text: string;
   location: ESQLLocation;
   code: string;
+  errorType?: 'semantic';
+  requiresCallback?: 'getColumnsFor' | 'getSources' | 'getPolicies' | 'getJoinIndices' | string;
 }
 
 export interface EditorError {

@@ -22,8 +22,23 @@ export const dsl = {
   isCustom(): QueryDslQueryContainer {
     return { bool: { must_not: dsl.isPrebuilt() } };
   },
-  matchTitle(title: string): QueryDslQueryContainer {
+  matchElasticTitle(title: string): QueryDslQueryContainer {
     return { match: { 'elastic_rule.title': title } };
+  },
+  matchOriginalTitle(title: string): QueryDslQueryContainer {
+    return { match: { 'original_rule.title': title } };
+  },
+  matchTitle(title: string): QueryDslQueryContainer {
+    return {
+      bool: {
+        should: [
+          // Match the translated title
+          dsl.matchElasticTitle(title),
+          // If translation failed, match the original title
+          { bool: { must: [genericDsl.isFailed(), dsl.matchOriginalTitle(title)] } },
+        ],
+      },
+    };
   },
   isInstallable(): QueryDslQueryContainer {
     return { bool: { must: [genericDsl.isFullyTranslated(), dsl.isNotInstalled()] } };

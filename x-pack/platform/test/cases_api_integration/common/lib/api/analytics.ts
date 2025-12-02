@@ -9,32 +9,29 @@ import type SuperTest from 'supertest';
 
 import {
   getCAIActivityBackfillTaskId,
-  getCAIActivitySynchronizationTaskId,
   CAI_ACTIVITY_SOURCE_INDEX,
   getActivityDestinationIndexName,
   getActivitySourceQuery,
 } from '@kbn/cases-plugin/server/cases_analytics/activity_index/constants';
 import {
   getCAIAttachmentsBackfillTaskId,
-  getCAIAttachmentsSynchronizationTaskId,
   CAI_ATTACHMENTS_SOURCE_INDEX,
   getAttachmentsDestinationIndexName,
   getAttachmentsSourceQuery,
 } from '@kbn/cases-plugin/server/cases_analytics/attachments_index/constants';
 import {
   getCAICasesBackfillTaskId,
-  getCAICasesSynchronizationTaskId,
   CAI_CASES_SOURCE_INDEX,
   getCasesDestinationIndexName,
   getCasesSourceQuery,
 } from '@kbn/cases-plugin/server/cases_analytics/cases_index/constants';
 import {
   getCAICommentsBackfillTaskId,
-  getCAICommentsSynchronizationTaskId,
   CAI_COMMENTS_SOURCE_INDEX,
   getCommentsDestinationIndexName,
   getCommentsSourceQuery,
 } from '@kbn/cases-plugin/server/cases_analytics/comments_index/constants';
+import { getSynchronizationTaskId } from '@kbn/cases-plugin/server/cases_analytics/tasks/synchronization_task';
 
 export const runCasesBackfillTask = async (supertest: SuperTest.Agent) => {
   await supertest
@@ -49,11 +46,11 @@ export const runCasesBackfillTask = async (supertest: SuperTest.Agent) => {
     .expect(200);
 };
 
-export const runCasesSynchronizationTask = async (supertest: SuperTest.Agent) => {
+export const runCAISynchronizationTask = async (supertest: SuperTest.Agent) => {
   await supertest
     .post('/api/analytics_index/synchronization/run_soon')
     .set('kbn-xsrf', 'xxx')
-    .send({ taskId: getCAICasesSynchronizationTaskId('default', 'securitySolution') })
+    .send({ taskId: getSynchronizationTaskId('default', 'securitySolution') })
     .expect(200);
 };
 
@@ -78,14 +75,6 @@ export const runSchedulerTask = async (supertest: SuperTest.Agent) => {
     .expect(200);
 };
 
-export const runAttachmentsSynchronizationTask = async (supertest: SuperTest.Agent) => {
-  await supertest
-    .post('/api/analytics_index/synchronization/run_soon')
-    .set('kbn-xsrf', 'xxx')
-    .send({ taskId: getCAIAttachmentsSynchronizationTaskId('default', 'securitySolution') })
-    .expect(200);
-};
-
 export const runCommentsBackfillTask = async (supertest: SuperTest.Agent) => {
   await supertest
     .post('/api/analytics_index/backfill/run_soon')
@@ -99,14 +88,6 @@ export const runCommentsBackfillTask = async (supertest: SuperTest.Agent) => {
     .expect(200);
 };
 
-export const runCommentsSynchronizationTask = async (supertest: SuperTest.Agent) => {
-  await supertest
-    .post('/api/analytics_index/synchronization/run_soon')
-    .set('kbn-xsrf', 'xxx')
-    .send({ taskId: getCAICommentsSynchronizationTaskId('default', 'securitySolution') })
-    .expect(200);
-};
-
 export const runActivityBackfillTask = async (supertest: SuperTest.Agent) => {
   await supertest
     .post('/api/analytics_index/backfill/run_soon')
@@ -117,13 +98,5 @@ export const runActivityBackfillTask = async (supertest: SuperTest.Agent) => {
       destIndex: getActivityDestinationIndexName('default', 'securitySolution'),
       sourceQuery: JSON.stringify(getActivitySourceQuery('default', 'securitySolution')),
     })
-    .expect(200);
-};
-
-export const runActivitySynchronizationTask = async (supertest: SuperTest.Agent) => {
-  await supertest
-    .post('/api/analytics_index/synchronization/run_soon')
-    .set('kbn-xsrf', 'xxx')
-    .send({ taskId: getCAIActivitySynchronizationTaskId('default', 'securitySolution') })
     .expect(200);
 };

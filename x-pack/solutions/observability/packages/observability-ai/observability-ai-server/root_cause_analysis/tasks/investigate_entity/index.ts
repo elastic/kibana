@@ -6,7 +6,7 @@
  */
 
 import { getEntityKuery } from '@kbn/observability-utils-common/entities/get_entity_kuery';
-import { sortAndTruncateAnalyzedFields, describeDataset } from '@kbn/ai-tools';
+import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
 import { getDataStreamsForEntity } from '@kbn/observability-utils-server/entities/get_data_streams_for_entity';
 import { getAlertsForEntity } from '@kbn/observability-utils-server/entities/signals/get_alerts_for_entity';
 import { getSlosForEntity } from '@kbn/observability-utils-server/entities/signals/get_slos_for_entity';
@@ -85,7 +85,7 @@ export async function investigateEntity(
     dataStreams,
   });
 
-  const truncatedAnalysis = sortAndTruncateAnalyzedFields(fullAnalysis);
+  const truncatedAnalysis = formatDocumentAnalysis(fullAnalysis);
 
   const kbEntries = await kbPromise;
 

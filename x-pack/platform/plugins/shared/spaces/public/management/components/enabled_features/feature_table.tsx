@@ -148,7 +148,7 @@ export class FeatureTable extends Component<Props, {}> {
               <EuiSpacer size="m" />
               {helpText && (
                 <>
-                  <EuiCallOut iconType="info" size="s">
+                  <EuiCallOut announceOnMount iconType="info" size="s">
                     {helpText}
                   </EuiCallOut>
                   <EuiSpacer size="m" />

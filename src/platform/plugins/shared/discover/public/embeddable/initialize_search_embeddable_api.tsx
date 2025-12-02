@@ -24,28 +24,40 @@ import type { DiscoverGridSettings, SavedSearch } from '@kbn/saved-search-plugin
 import type { SortOrder, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import type { DataGridDensity, DataTableColumnsMeta } from '@kbn/unified-data-table';
 
-import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import {
+  isOfAggregateQueryType,
+  type AggregateQuery,
+  type Filter,
+  type Query,
+} from '@kbn/es-query';
 import type { DiscoverServices } from '../build_services';
-import { EDITABLE_SAVED_SEARCH_KEYS } from './constants';
+import { EDITABLE_SAVED_SEARCH_KEYS } from '../../common/embeddable/constants';
 import { getSearchEmbeddableDefaults } from './get_search_embeddable_defaults';
 import type {
   PublishesWritableSavedSearch,
   SearchEmbeddableRuntimeState,
   SearchEmbeddableSerializedAttributes,
-  SearchEmbeddableSerializedState,
   SearchEmbeddableStateManager,
 } from './types';
+import { getEsqlDataView } from '../application/main/state_management/utils/get_esql_data_view';
 
 const initializeSearchSource = async (
-  dataService: DiscoverServices['data'],
+  discoverServices: DiscoverServices,
   serializedSearchSource?: SerializedSearchSourceFields
 ) => {
   const [searchSource, parentSearchSource] = await Promise.all([
-    dataService.search.searchSource.create(serializedSearchSource),
-    dataService.search.searchSource.create(),
+    discoverServices.data.search.searchSource.create(serializedSearchSource),
+    discoverServices.data.search.searchSource.create(),
   ]);
+
   searchSource.setParent(parentSearchSource);
-  const dataView = searchSource.getField('index');
+
+  const query = searchSource.getField('query');
+  let dataView = searchSource.getField('index');
+
+  if (isOfAggregateQueryType(query)) {
+    dataView = await getEsqlDataView(query, dataView, discoverServices);
+  }
 
   return { searchSource, dataView };
 };
@@ -81,11 +93,11 @@ export const initializeSearchEmbeddableApi = async (
   anyStateChange$: Observable<void>;
   comparators: StateComparators<SearchEmbeddableSerializedAttributes>;
   cleanup: () => void;
-  reinitializeState: (lastSaved?: SearchEmbeddableSerializedState) => void;
+  reinitializeState: (lastSaved?: SearchEmbeddableRuntimeState) => void;
 }> => {
   /** We **must** have a search source, so start by initializing it  */
   const { searchSource, dataView } = await initializeSearchSource(
-    discoverServices.data,
+    discoverServices,
     initialState.serializedSearchSource
   );
   const searchSource$ = new BehaviorSubject<ISearchSource>(searchSource);

@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { EuiCallOut } from '@elastic/eui';
 import type { AppMenuActionPrimary } from '@kbn/discover-utils';
 import { AppMenuActionId, AppMenuActionType } from '@kbn/discover-utils';
 import { omit } from 'lodash';
@@ -36,7 +34,7 @@ export const getShareAppMenuItem = ({
   stateContainer: DiscoverStateContainer;
   hasIntegrations: boolean;
   hasUnsavedChanges: boolean;
-  currentTab: TabState | undefined;
+  currentTab: TabState;
   persistedDiscoverSession: DiscoverSession | undefined;
 }): AppMenuActionPrimary[] => {
   if (!services.share) {
@@ -54,13 +52,12 @@ export const getShareAppMenuItem = ({
 
     const searchSourceSharingData = await getSharingData(
       stateContainer.savedSearchState.getState().searchSource,
-      stateContainer.appState.getState(),
+      currentTab.appState,
       services,
       isEsqlMode
     );
 
     const { locator, discoverFeatureFlags } = services;
-    const appState = stateContainer.appState.getState();
     const { timefilter } = services.data.query.timefilter;
     const timeRange = timefilter.getTime();
     const refreshInterval = timefilter.getRefreshInterval();
@@ -68,7 +65,7 @@ export const getShareAppMenuItem = ({
 
     // Share -> Get links -> Snapshot
     const params: DiscoverAppLocatorParams = {
-      ...omit(appState, 'dataSource'),
+      ...omit(currentTab.appState, 'dataSource'),
       ...(persistedDiscoverSession?.id ? { savedSearchId: persistedDiscoverSession.id } : {}),
       ...(dataView?.isPersisted()
         ? { dataViewId: dataView?.id }
@@ -132,24 +129,12 @@ export const getShareAppMenuItem = ({
           integration: {
             export: {
               csvReports: {
-                draftModeCallOut: (
-                  <EuiCallOut
-                    color="warning"
-                    iconType="warning"
-                    title={i18n.translate('discover.exports.csvReports.warning.title', {
-                      defaultMessage: 'Unsaved changes',
-                    })}
-                  >
-                    {i18n.translate(
-                      'discover.exports.csvReports.postURLWatcherMessage.unsavedChanges',
-                      {
-                        defaultMessage: 'URL may change if you upgrade Kibana.',
-                      }
-                    )}
-                  </EuiCallOut>
-                ),
+                draftModeCallOut: true,
               },
             },
+          },
+          link: {
+            draftModeCallOut: tabsEnabled,
           },
         },
       },

@@ -2,6 +2,8 @@
   "type": "plugin",
   "id": "@kbn/alerting-fixture-plugin",
   "owner": "@elastic/response-ops",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "alertingFixture",
     "server": true,
@@ -9,7 +11,8 @@
     "requiredPlugins": [
       "alerting",
       "triggersActionsUi",
-      "features"
+      "features",
+      "eventLog",
     ]
   }
 }

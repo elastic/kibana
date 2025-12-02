@@ -21,7 +21,13 @@ import {
 } from './translations';
 import { getTimeSizeAndUnitLabel } from '../data_management/stream_detail_lifecycle/helpers/format_size_units';
 
-export function RetentionColumn({ lifecycle }: { lifecycle: IngestStreamEffectiveLifecycle }) {
+export function RetentionColumn({
+  lifecycle,
+  dataTestSubj,
+}: {
+  lifecycle: IngestStreamEffectiveLifecycle;
+  dataTestSubj?: string;
+}) {
   const {
     dependencies: {
       start: { share },
@@ -49,7 +55,6 @@ export function RetentionColumn({ lifecycle }: { lifecycle: IngestStreamEffectiv
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiLink
-          data-test-subj="streamsAppLifecycleBadgeIlmPolicyNameLink"
           href={ilmLocator?.getRedirectUrl({
             page: 'policy_edit',
             policyName: lifecycle.ilm.policy,
@@ -65,6 +70,7 @@ export function RetentionColumn({ lifecycle }: { lifecycle: IngestStreamEffectiv
             overflow: 'hidden',
             maxWidth: '150px',
           }}
+          data-test-subj={dataTestSubj}
         >
           {lifecycle.ilm.policy}
         </EuiLink>
@@ -89,6 +95,7 @@ export function RetentionColumn({ lifecycle }: { lifecycle: IngestStreamEffectiv
             defaultMessage: 'Data retention period: {retention}',
             values: { retention: retentionValue },
           })}
+          data-test-subj={dataTestSubj}
         >
           {retentionValue}
         </span>
@@ -96,14 +103,19 @@ export function RetentionColumn({ lifecycle }: { lifecycle: IngestStreamEffectiv
     }
 
     return (
-      <span tabIndex={0} aria-label={INDEFINITE_RETENTION_ARIA_LABEL}>
+      <span tabIndex={0} aria-label={INDEFINITE_RETENTION_ARIA_LABEL} data-test-subj={dataTestSubj}>
         {INDEFINITE_RETENTION_LABEL}
       </span>
     );
   }
 
   return (
-    <EuiText color="subdued" tabIndex={0} aria-label={NO_RETENTION_LABEL}>
+    <EuiText
+      color="subdued"
+      tabIndex={0}
+      aria-label={NO_RETENTION_LABEL}
+      data-test-subj={dataTestSubj}
+    >
       {NO_DATA_SHORT_LABEL}
     </EuiText>
   );

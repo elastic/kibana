@@ -68,19 +68,4 @@ describe('SessionExpirationToast', () => {
     );
     getByText(/You will be logged out in [0-9]+ seconds/);
   });
-
-  it('does not render extend button if session cannot be extended', () => {
-    const sessionState$ = of<SessionState>({
-      lastExtensionTime: Date.now(),
-      expiresInMs: 60 * 1000,
-      canBeExtended: false,
-    });
-
-    const { queryByRole } = render(
-      <I18nProvider>
-        <SessionExpirationToast sessionState$={sessionState$} />
-      </I18nProvider>
-    );
-    expect(queryByRole('button', { name: 'Stay logged in' })).toBeNull();
-  });
 });

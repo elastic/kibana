@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -62,9 +62,12 @@ export interface EsqlPluginStart {
     taskType: InferenceTaskType
   ) => Promise<InferenceEndpointsAutocompleteResult>;
   variablesService: EsqlVariablesService;
+  isServerless: boolean;
 }
 
 export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
+  constructor(private readonly initContext: PluginInitializerContext) {}
+
   public setup(core: CoreSetup, { uiActions }: EsqlPluginSetupDependencies) {
     uiActions.registerTrigger(updateESQLQueryTrigger);
     uiActions.registerTrigger(esqlControlTrigger);
@@ -89,6 +92,8 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       share,
     }: EsqlPluginStartDependencies
   ): EsqlPluginStart {
+    const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
+
     const storage = new Storage(localStorage);
 
     // Register triggers
@@ -187,6 +192,7 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
     );
 
     const start = {
+      isServerless,
       getJoinIndicesAutocomplete,
       getTimeseriesIndicesAutocomplete,
       getEditorExtensionsAutocomplete: cachedGetEditorExtensionsAutocomplete,
@@ -195,16 +201,7 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       getLicense: async () => await licensing?.getLicense(),
     };
 
-    setKibanaServices(
-      start,
-      core,
-      dataViews,
-      data,
-      storage,
-      uiActions,
-      fieldsMetadata,
-      usageCollection
-    );
+    setKibanaServices(start, core, data, storage, uiActions, fieldsMetadata, usageCollection);
 
     return start;
   }

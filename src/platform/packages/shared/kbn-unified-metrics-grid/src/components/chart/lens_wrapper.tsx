@@ -13,15 +13,18 @@ import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import type { LensProps } from './hooks/use_lens_props';
 import { useLensExtraActions } from './hooks/use_lens_extra_actions';
 import { ChartTitle } from './chart_title';
-import { useMetricsGridState } from '../../hooks';
 
 export type LensWrapperProps = {
   lensProps: LensProps;
-  onViewDetails: () => void;
-  onCopyToDashboard: () => void;
-} & Pick<ChartSectionProps, 'services' | 'onBrushEnd' | 'onFilter' | 'abortController'>;
+  titleHighlight?: string;
+  onViewDetails?: () => void;
+  onCopyToDashboard?: () => void;
+  syncTooltips?: boolean;
+  syncCursor?: boolean;
+  abortController: AbortController | undefined;
+} & Pick<ChartSectionProps, 'services' | 'onBrushEnd' | 'onFilter'>;
 
-const DEFAULT_DISABLED_ACTIONS = ['ACTION_CUSTOMIZE_PANEL', 'ACTION_EXPORT_CSV'];
+const DEFAULT_DISABLED_ACTIONS = ['ACTION_CUSTOMIZE_PANEL', 'ACTION_EXPORT_CSV', 'alertRule'];
 
 export function LensWrapper({
   lensProps,
@@ -29,12 +32,13 @@ export function LensWrapper({
   onBrushEnd,
   onFilter,
   abortController,
+  titleHighlight,
   onViewDetails,
   onCopyToDashboard,
+  syncTooltips,
+  syncCursor,
 }: LensWrapperProps) {
   const { euiTheme } = useEuiTheme();
-
-  const { searchTerm } = useMetricsGridState();
 
   const { EmbeddableComponent } = services.lens;
 
@@ -71,13 +75,13 @@ export function LensWrapper({
   `;
 
   const extraActions = useLensExtraActions({
-    copyToDashboard: { onClick: onCopyToDashboard },
-    viewDetails: { onClick: onViewDetails },
+    copyToDashboard: onCopyToDashboard ? { onClick: onCopyToDashboard } : undefined,
+    viewDetails: onViewDetails ? { onClick: onViewDetails } : undefined,
   });
 
   return (
     <div css={chartCss}>
-      <ChartTitle searchTerm={searchTerm} title={lensProps.attributes.title} />
+      <ChartTitle highlight={titleHighlight} title={lensProps.attributes.title} />
       <EmbeddableComponent
         {...lensProps}
         title={lensProps.attributes.title}
@@ -87,6 +91,8 @@ export function LensWrapper({
         withDefaultActions
         onBrushEnd={onBrushEnd}
         onFilter={onFilter}
+        syncTooltips={syncTooltips}
+        syncCursor={syncCursor}
       />
     </div>
   );

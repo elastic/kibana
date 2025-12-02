@@ -8,11 +8,11 @@
  */
 
 import { EuiBadge, useEuiTheme } from '@elastic/eui';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
-import { useGetFormattedDateTime } from '../../../shared/ui/use_formatted_date';
 import { FormattedRelativeEnhanced } from '../../../shared/ui';
+import { useGetFormattedDateTime } from '../../../shared/ui/use_formatted_date';
 
 export interface WorkflowUnsavedChangesBadgeProps {
   hasChanges: boolean;

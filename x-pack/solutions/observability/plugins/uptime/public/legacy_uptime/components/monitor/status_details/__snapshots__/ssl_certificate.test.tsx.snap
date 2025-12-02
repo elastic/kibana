@@ -25,6 +25,7 @@ Array [
       >
         <div
           class="euiText emotion-euiText-s"
+          tabindex="0"
         >
           <span
             color="success"
