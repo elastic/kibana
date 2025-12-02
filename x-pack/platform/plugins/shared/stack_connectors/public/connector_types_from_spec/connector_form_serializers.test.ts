@@ -60,6 +60,11 @@ describe('createConnectorFormSerializer', () => {
 });
 
 describe('createConnectorFormDeserializer', () => {
+  const commonApiData = {
+    actionTypeId: 'test-connector',
+    isDeprecated: false,
+  };
+
   const createTestSchema = () => {
     return z.object({
       config: z.object({
@@ -78,6 +83,7 @@ describe('createConnectorFormDeserializer', () => {
     const schema = createTestSchema();
     const deserializer = createConnectorFormDeserializer(schema);
     const apiData = {
+      ...commonApiData,
       config: { url: 'https://example.com', authType: 'basic' },
       secrets: {},
     };
@@ -92,6 +98,7 @@ describe('createConnectorFormDeserializer', () => {
     const schema = createTestSchema();
     const deserializer = createConnectorFormDeserializer(schema);
     const apiData = {
+      ...commonApiData,
       config: { url: 'https://example.com' },
       secrets: {},
     };
@@ -106,6 +113,7 @@ describe('createConnectorFormDeserializer', () => {
     const schema = createTestSchema();
     const deserializer = createConnectorFormDeserializer(schema);
     const apiData = {
+      ...commonApiData,
       config: { url: 'https://example.com', authType: 'basic' },
       secrets: { authType: 'bearer', token: 'xyz' },
     };
@@ -123,6 +131,7 @@ describe('createConnectorFormDeserializer', () => {
     });
     const deserializer = createConnectorFormDeserializer(schema);
     const apiData = {
+      ...commonApiData,
       config: { url: 'https://example.com', authType: 'basic' },
       secrets: {},
     };
@@ -136,6 +145,7 @@ describe('createConnectorFormDeserializer', () => {
     const invalidSchema = {} as z.ZodObject<z.ZodRawShape>;
     const deserializer = createConnectorFormDeserializer(invalidSchema);
     const apiData = {
+      ...commonApiData,
       config: { url: 'https://example.com', authType: 'basic' },
       secrets: {},
     };
