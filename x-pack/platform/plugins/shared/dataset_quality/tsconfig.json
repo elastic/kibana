@@ -74,7 +74,8 @@
     "@kbn/logging-mocks",
     "@kbn/core-http-server-mocks",
     "@kbn/test-jest-helpers",
-    "@kbn/streams-schema"
+    "@kbn/streams-schema",
+    "@kbn/streams-plugin"
   ],
   "exclude": [
     "target/**/*"
