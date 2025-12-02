@@ -53,7 +53,10 @@ import type {
   ObservabilityAIAssistantServerStart,
 } from '@kbn/observability-ai-assistant-plugin/server';
 import type { OnechatPluginSetup, OnechatPluginStart } from '@kbn/onechat-plugin/server/types';
-import type { ObservabilityAgentPluginSetup } from '@kbn/observability-agent-plugin/server';
+import type {
+  ObservabilityAgentPluginSetup,
+  ObservabilityAgentPluginStart,
+} from '@kbn/observability-agent-plugin/server';
 import type {
   ObservabilityAgentPluginSetup,
   ObservabilityAgentPluginStart,
