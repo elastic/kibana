@@ -143,7 +143,6 @@ export const ControlPanel = ({
         transform: CSS.Translate.toString(transform),
       }}
       grow={Boolean(grow)}
-      data-control-id={uuid}
       data-test-subj="control-frame"
       css={css([isDragging && styles.draggingItem, styles.controlWidthStyles])}
       className={classNames({

@@ -64,12 +64,11 @@ export class DashboardPageControls extends FtrService {
   }
 
   public async getAllControlIds() {
-    const controlFrames = await this.testSubjects.findAll('control-frame');
-    const ids = await Promise.all(
-      controlFrames.map(
-        async (controlFrame) => (await controlFrame.getAttribute('data-control-id')) ?? ''
-      )
-    );
+    const controls = await this.find.allByCssSelector('[data-control-id]');
+    const ids = await Promise.all([
+      ...controls.map(async (control) => (await control.getAttribute('data-control-id')) ?? ''),
+    ]);
+
     this.log.debug('Got all control ids:', ids);
     return ids;
   }
@@ -193,14 +192,14 @@ export class DashboardPageControls extends FtrService {
     const errorText = `Control frame ${controlId} could not be found`;
     let controlElement: WebElementWrapper | undefined;
     await this.retry.try(async () => {
-      const controlFrames = await this.testSubjects.findAll('control-frame');
-      const framesWithIds = await Promise.all(
-        controlFrames.map(async (frame) => {
-          const id = await frame.getAttribute('data-control-id');
-          return { id, element: frame };
+      const controls = await this.find.allByCssSelector('[data-control-id]');
+      const controlsWithIds = await Promise.all(
+        controls.map(async (control) => {
+          const id = await control.getAttribute('data-control-id');
+          return { id, element: control };
         })
       );
-      const foundControlFrame = framesWithIds.find(({ id }) => id === controlId);
+      const foundControlFrame = controlsWithIds.find(({ id }) => id === controlId);
       if (!foundControlFrame) throw new Error(errorText);
       controlElement = foundControlFrame.element;
     });
