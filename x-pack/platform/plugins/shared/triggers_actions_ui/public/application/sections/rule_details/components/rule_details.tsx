@@ -94,7 +94,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
 }) => {
   const history = useHistory();
   const {
-    application: { capabilities, navigateToApp },
+    application: { capabilities, navigateToApp, getUrlForApp },
     ruleTypeRegistry,
     setBreadcrumbs,
     chrome,
@@ -122,7 +122,12 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
 
   // Set breadcrumb and page title
   useEffect(() => {
-    setBreadcrumbs([getAlertingSectionBreadcrumb('rules', true), { text: rule.name }]);
+    const rulesBreadcrumb = getAlertingSectionBreadcrumb('rules', true);
+    const rulesBreadcrumbWithAppPath = {
+      ...rulesBreadcrumb,
+      href: getUrlForApp('rules', { path: '/' }),
+    };
+    setBreadcrumbs([rulesBreadcrumbWithAppPath, { text: rule.name }]);
     chrome.docTitle.change(getCurrentDocTitle('rules'));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
