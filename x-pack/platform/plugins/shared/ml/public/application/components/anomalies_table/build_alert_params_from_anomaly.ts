@@ -6,22 +6,12 @@
  */
 
 import type { MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
-import { ML_ANOMALY_RESULT_TYPE } from '@kbn/ml-anomaly-utils';
+import { ML_ANOMALY_RESULT_TYPE, getEntityFieldList } from '@kbn/ml-anomaly-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { MlAnomalyDetectionAlertParams } from '../../../../common/types/alerts';
 import { escapeKueryForFieldValuePair } from '../../util/string_utils';
 
 const SEVERITY_THRESHOLD_ADJUSTMENT = 5;
-
-function addFieldFilter(
-  kqlParts: string[],
-  fieldName: string | undefined,
-  fieldValue: unknown
-): void {
-  if (fieldName && isDefined(fieldValue)) {
-    kqlParts.push(escapeKueryForFieldValuePair(fieldName, String(fieldValue)));
-  }
-}
 
 /**
  * Builds initial alert parameters from an anomaly record.
@@ -32,31 +22,14 @@ export function buildAlertParamsFromAnomaly(
 ): Partial<MlAnomalyDetectionAlertParams> {
   const kqlParts: string[] = [];
 
-  // Add partition field filter
-  addFieldFilter(
-    kqlParts,
-    anomaly.source.partition_field_name,
-    anomaly.source.partition_field_value
-  );
+  // Add entity field filters (partition, over, by fields)
+  const entityFields = getEntityFieldList(anomaly.source);
+  entityFields.forEach((field) => {
+    if (field.fieldName && isDefined(field.fieldValue)) {
+      kqlParts.push(escapeKueryForFieldValuePair(field.fieldName, String(field.fieldValue)));
+    }
+  });
 
-  // Add over field filter
-  addFieldFilter(kqlParts, anomaly.source.over_field_name, anomaly.source.over_field_value);
-
-  // Add by field filter
-  addFieldFilter(kqlParts, anomaly.source.by_field_name, anomaly.source.by_field_value);
-
-  // Add influencer filters
-  if (Array.isArray(anomaly.influencers) && anomaly.influencers.length > 0) {
-    anomaly.influencers.forEach((influencer) => {
-      addFieldFilter(
-        kqlParts,
-        influencer?.influencer_field_name,
-        influencer?.influencer_field_value
-      );
-    });
-  }
-
-  // Add actual value filter
   const actualValue = Array.isArray(anomaly.actual) ? anomaly.actual[0] : anomaly.actual;
 
   // Add actual value filter if we have a value
@@ -65,12 +38,12 @@ export function buildAlertParamsFromAnomaly(
     // Population jobs have anomalies with a causes array
     const hasCauses = Array.isArray(anomaly.source.causes) && anomaly.source.causes.length > 0;
 
-    // For population jobs (with causes), use nested query syntax: causes: {actual > value}
-    // For regular jobs, use simple comparison: actual > value
+    // For population jobs (with causes), use nested query syntax: causes: {actual >= value}
+    // For regular jobs, use simple comparison: actual >= value
     if (hasCauses) {
-      kqlParts.push(`causes: {actual > ${actualValue}}`);
+      kqlParts.push(`causes: {actual >= ${actualValue}}`);
     } else {
-      kqlParts.push(`actual > ${actualValue}`);
+      kqlParts.push(`actual >= ${actualValue}`);
     }
   }
 
