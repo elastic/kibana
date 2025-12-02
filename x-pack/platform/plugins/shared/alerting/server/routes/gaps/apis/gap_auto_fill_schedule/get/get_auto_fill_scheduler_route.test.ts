@@ -36,6 +36,8 @@ describe('getAutoFillSchedulerRoute', () => {
     createdAt: '2024-01-01T00:00:00.000Z',
     updatedAt: '2024-01-01T00:00:00.000Z',
     scheduledTaskId: 'task-id',
+    scope: ['test-space'],
+    ruleTypes: [{ type: 'test-type', consumer: 'test-consumer' }],
   };
 
   test('should call get gap fill auto scheduler with proper parameters', async () => {

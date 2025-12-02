@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { transformRequest as transformRequestV1 } from './v1';
+export { transformRequest } from './v1';
