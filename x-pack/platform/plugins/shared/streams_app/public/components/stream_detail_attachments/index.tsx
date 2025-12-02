@@ -23,7 +23,8 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
 import type { Attachment } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
 import type { Streams } from '@kbn/streams-schema';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
+import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useAttachmentsApi } from '../../hooks/use_attachments_api';
 import { useAttachmentsFetch } from '../../hooks/use_attachments_fetch';
 import { useKibana } from '../../hooks/use_kibana';
@@ -67,7 +68,6 @@ export function StreamDetailAttachments({
     name: definition.stream.name,
   });
 
-  const [isUnlinkLoading, setIsUnlinkLoading] = useState(false);
   const [attachmentsToUnlink, setAttachmentsToUnlink] = useState<Attachment[]>([]);
   const linkedAttachments = useMemo(() => {
     return attachmentsFetch.value?.attachments ?? [];
@@ -97,7 +97,7 @@ export function StreamDetailAttachments({
     setIsAddAttachmentFlyoutOpen(true);
   };
 
-  const handleLinkAttachments = useCallback(
+  const [{ loading: isLinkLoading }, handleLinkAttachments] = useAsyncFn(
     async (attachments: Attachment[]) => {
       await addAttachments(attachments);
       attachmentsFetch.refresh();
@@ -123,34 +123,29 @@ export function StreamDetailAttachments({
     [addAttachments, attachmentsFetch, notifications.toasts, definition.stream.name, core]
   );
 
-  const handleUnlinkAttachments = useCallback(
+  const [{ loading: isUnlinkLoading }, handleUnlinkAttachments] = useAsyncFn(
     async (attachments: Attachment[]) => {
-      try {
-        setIsUnlinkLoading(true);
-        await removeAttachments(attachments);
-        attachmentsFetch.refresh();
-        setSelectedAttachments([]);
-        notifications.toasts.addSuccess({
-          title: i18n.translate('xpack.streams.attachments.unlinkSuccess.title', {
-            defaultMessage: 'Attachments are unlinked',
-          }),
-          iconType: 'unlink',
-          text: toMountPoint(
-            <FormattedMessage
-              id="xpack.streams.attachments.unlinkSuccess.text"
-              defaultMessage="{count} {count, plural, one {attachment was} other {attachments were}} unlinked from the {streamName} stream."
-              values={{
-                count: attachments.length,
-                streamName: <strong>{definition.stream.name}</strong>,
-              }}
-            />,
-            core
-          ),
-        });
-      } finally {
-        setIsUnlinkLoading(false);
-        setIsSelectionPopoverOpen(false);
-      }
+      await removeAttachments(attachments);
+      attachmentsFetch.refresh();
+      setSelectedAttachments([]);
+      setIsSelectionPopoverOpen(false);
+      notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.streams.attachments.unlinkSuccess.title', {
+          defaultMessage: 'Attachments are unlinked',
+        }),
+        iconType: 'unlink',
+        text: toMountPoint(
+          <FormattedMessage
+            id="xpack.streams.attachments.unlinkSuccess.text"
+            defaultMessage="{count} {count, plural, one {attachment was} other {attachments were}} unlinked from the {streamName} stream."
+            values={{
+              count: attachments.length,
+              streamName: <strong>{definition.stream.name}</strong>,
+            }}
+          />,
+          core
+        ),
+      });
     },
     [removeAttachments, attachmentsFetch, notifications.toasts, definition.stream.name, core]
   );
@@ -305,6 +300,7 @@ export function StreamDetailAttachments({
           linkedAttachments={linkedAttachments}
           entityId={definition.stream.name}
           onAddAttachments={handleLinkAttachments}
+          isLoading={isLinkLoading}
           onClose={() => {
             setIsAddAttachmentFlyoutOpen(false);
           }}

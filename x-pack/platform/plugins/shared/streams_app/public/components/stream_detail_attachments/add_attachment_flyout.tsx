@@ -35,11 +35,13 @@ export function AddAttachmentFlyout({
   entityId,
   onAddAttachments,
   linkedAttachments,
+  isLoading,
   onClose,
 }: {
   entityId: string;
   onAddAttachments: (attachments: Attachment[]) => Promise<void>;
   linkedAttachments: Attachment[];
+  isLoading: boolean;
   onClose: () => void;
 }) {
   const {
@@ -54,7 +56,6 @@ export function AddAttachmentFlyout({
 
   const [filters, setFilters] = useState<AttachmentFiltersState>(DEFAULT_ATTACHMENT_FILTERS);
   const [selectedAttachments, setSelectedAttachments] = useState<Attachment[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
 
   const attachmentSuggestionsFetch = useStreamsAppFetch(
@@ -208,13 +209,8 @@ export function AddAttachmentFlyout({
           isLoading={isLoading}
           onCancel={() => setIsConfirmModalVisible(false)}
           onConfirm={async () => {
-            setIsLoading(true);
-            try {
-              await onAddAttachments(selectedAttachments);
-            } finally {
-              setIsLoading(false);
-              setIsConfirmModalVisible(false);
-            }
+            await onAddAttachments(selectedAttachments);
+            setIsConfirmModalVisible(false);
           }}
         />
       )}
