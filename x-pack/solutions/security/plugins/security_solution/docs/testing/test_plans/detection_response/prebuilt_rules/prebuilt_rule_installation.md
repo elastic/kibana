@@ -36,25 +36,25 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: User is notified when some prebuilt rules can be installed**](#scenario-user-is-notified-when-some-prebuilt-rules-can-be-installed)
     - [**Scenario: User is notified when both rules to install and upgrade are available**](#scenario-user-is-notified-when-both-rules-to-install-and-upgrade-are-available)
     - [**Scenario: User is notified after a prebuilt rule gets deleted**](#scenario-user-is-notified-after-a-prebuilt-rule-gets-deleted)
-  - [Add Elastic Rules table: Rule visibility](#add-elastic-rules-table-rule-visibility)
+  - [Rule Installation table: Rule visibility](#rule-installation-table-rule-visibility)
     - [**Scenario: Already installed rules are not shown in the table**](#scenario-already-installed-rules-are-not-shown-in-the-table)
     - [**Scenario: Only latest versions of each prebuilt rule are shown in the table**](#scenario-only-latest-versions-of-each-prebuilt-rule-are-shown-in-the-table)
-  - [Add Elastic Rules table: Loading and navigation](#add-elastic-rules-table-loading-and-navigation)
-    - [**Scenario: User opening the Add Elastic Rules page sees a loading skeleton until the package installation is completed**](#scenario-user-opening-the-add-elastic-rules-page-sees-a-loading-skeleton-until-the-package-installation-is-completed)
-    - [**Scenario: User can navigate from the Add Elastic Rules page to the Rule Management page via breadcrumbs**](#scenario-user-can-navigate-from-the-add-elastic-rules-page-to-the-rule-management-page-via-breadcrumbs)
-  - [Add Elastic Rules table: Pagination](#add-elastic-rules-table-pagination)
-    - [**Scenario: User can paginate over prebuilt rules on Add Elastic Rules page**](#scenario-user-can-paginate-over-prebuilt-rules-on-add-elastic-rules-page)
+  - [Rule Installation table: Loading and navigation](#rule-installation-table-loading-and-navigation)
+    - [**Scenario: User opening the Rule Installation page sees a loading skeleton until the package installation is completed**](#scenario-user-opening-the-rule-installation-page-sees-a-loading-skeleton-until-the-package-installation-is-completed)
+    - [**Scenario: User can navigate from the Rule Installation page to the Rule Management page via breadcrumbs**](#scenario-user-can-navigate-from-the-rule-installation-page-to-the-rule-management-page-via-breadcrumbs)
+  - [Rule Installation table: Pagination](#rule-installation-table-pagination)
+    - [**Scenario: User can paginate over prebuilt rules on Rule Installation page**](#scenario-user-can-paginate-over-prebuilt-rules-on-rule-installation-page)
     - [**Scenario: Last page shows correct number of rules**](#scenario-last-page-shows-correct-number-of-rules)
-  - [Add Elastic Rules table: Sorting](#add-elastic-rules-table-sorting)
-    - [**Scenario: User can sort prebuilt rules on Add Elastic Rules page**](#scenario-user-can-sort-prebuilt-rules-on-add-elastic-rules-page)
+  - [Rule Installation table: Sorting](#rule-installation-table-sorting)
+    - [**Scenario: User can sort prebuilt rules on Rule Installation page**](#scenario-user-can-sort-prebuilt-rules-on-rule-installation-page)
     - [**Scenario: Navigating to the next page maintains the sorting order**](#scenario-navigating-to-the-next-page-maintains-the-sorting-order)
     - [**Scenario: Changing sorting resets pagination to the first page**](#scenario-changing-sorting-resets-pagination-to-the-first-page)
     - [**Scenario: User can sort filtered prebuilt rules**](#scenario-user-can-sort-filtered-prebuilt-rules)
-  - [Add Elastic Rules table: Filtering](#add-elastic-rules-table-filtering)
-    - [**Scenario: User can filter prebuilt rules by rule name on the Add Elastic Rules page**](#scenario-user-can-filter-prebuilt-rules-by-rule-name-on-the-add-elastic-rules-page)
-    - [**Scenario: User can see a list of available tags on the Add Elastic Rules page**](#scenario-user-can-see-a-list-of-available-tags-on-the-add-elastic-rules-page)
-    - [**Scenario: User can filter prebuilt rules by a single tag on the Add Elastic Rules page**](#scenario-user-can-filter-prebuilt-rules-by-a-single-tag-on-the-add-elastic-rules-page)
-    - [**Scenario: User can filter prebuilt rules by multiple tags using AND logic on the Add Elastic Rules page**](#scenario-user-can-filter-prebuilt-rules-by-multiple-tags-using-and-logic-on-the-add-elastic-rules-page)
+  - [Rule Installation table: Filtering](#rule-installation-table-filtering)
+    - [**Scenario: User can filter prebuilt rules by rule name on the Rule Installation page**](#scenario-user-can-filter-prebuilt-rules-by-rule-name-on-the-rule-installation-page)
+    - [**Scenario: User can see a list of available tags on the Rule Installation page**](#scenario-user-can-see-a-list-of-available-tags-on-the-rule-installation-page)
+    - [**Scenario: User can filter prebuilt rules by a single tag on the Rule Installation page**](#scenario-user-can-filter-prebuilt-rules-by-a-single-tag-on-the-rule-installation-page)
+    - [**Scenario: User can filter prebuilt rules by multiple tags using AND logic on the Rule Installation page**](#scenario-user-can-filter-prebuilt-rules-by-multiple-tags-using-and-logic-on-the-rule-installation-page)
     - [**Scenario: User can filter prebuilt rules by name and tags at the same time**](#scenario-user-can-filter-prebuilt-rules-by-name-and-tags-at-the-same-time)
     - [**Scenario: Empty state is shown when filters match no rules**](#scenario-empty-state-is-shown-when-filters-match-no-rules)
     - [**Scenario: Removing filters resets prebuilt rules table pagination**](#scenario-removing-filters-resets-prebuilt-rules-table-pagination)
@@ -225,7 +225,7 @@ Then user should see a CTA to install prebuilt rules
 And user should see <Y> rules available to install
 ```
 
-### Add Elastic Rules table: Rule visibility
+### Rule Installation table: Rule visibility
 
 #### **Scenario: Already installed rules are not shown in the table**
 
@@ -234,7 +234,7 @@ And user should see <Y> rules available to install
 ```Gherkin
 Given there is at least one prebuilt rule installed in Kibana
 And there's a prebuilt rule asset with the same rule_id
-When user opens the Add Elastic Rules page
+When user opens the Rule Installation page
 Then the table should not show the already installed rule
 ```
 
@@ -245,41 +245,41 @@ Then the table should not show the already installed rule
 ```Gherkin
 Given there are multiple prebuilt rule assets with the same rule_id in Kibana
 And a rule with such rule_id is NOT installed
-When user opens the Add Elastic Rules page
+When user opens the Rule Installation page
 Then the table should show an entry only for the latest version of prebuilt rule asset
 ```
 
-### Add Elastic Rules table: Loading and navigation
+### Rule Installation table: Loading and navigation
 
-#### **Scenario: User opening the Add Elastic Rules page sees a loading skeleton until the package installation is completed**
+#### **Scenario: User opening the Rule Installation page sees a loading skeleton until the package installation is completed**
 
 **Automation**: 1 UI unit test.
 
 ```Gherkin
 Given prebuilt rules package is not installed
-When user opens the Add Elastic Rules page
+When user opens the Rule Installation page
 Then user should see a loading skeleton until the package installation is completed
 ```
 
-#### **Scenario: User can navigate from the Add Elastic Rules page to the Rule Management page via breadcrumbs**
+#### **Scenario: User can navigate from the Rule Installation page to the Rule Management page via breadcrumbs**
 
 **Automation**: 1 e2e test.
 
 ```Gherkin
-Given user is on the Add Elastic Rules page
+Given user is on the Rule Installation page
 When user navigates to the Rule Management page via breadcrumbs
 Then the Rule Management page should be displayed
 ```
 
-### Add Elastic Rules table: Pagination
+### Rule Installation table: Pagination
 
-#### **Scenario: User can paginate over prebuilt rules on Add Elastic Rules page**
+#### **Scenario: User can paginate over prebuilt rules on Rule Installation page**
 
 **Automation**: 1 e2e test with mock rules.
 
 ```Gherkin
 Given multiple prebuilt rules available for installation
-When user opens the Add Elastic Rules page
+When user opens the Rule Installation page
 Then prebuilt rules available for installation should be shown
 When user picks the desired number of <rows_per_page>
 Then the <rows_per_page> of the available prebuilt rules should be shown on the page
@@ -306,15 +306,15 @@ Then the number of rules shown on the page should be less than <rows_per_page>
 
 `<rows_per_page>` = 5 | 10 | 20 | 50 | 100
 
-### Add Elastic Rules table: Sorting
+### Rule Installation table: Sorting
 
-#### **Scenario: User can sort prebuilt rules on Add Elastic Rules page**
+#### **Scenario: User can sort prebuilt rules on Rule Installation page**
 
 **Automation**: 1 e2e test with mock rules (single field) + 1 API integration test with mock rules (to test each particular field)
 
 ```Gherkin
 Given multiple prebuilt rules available for installation
-When user opens the Add Elastic Rules page
+When user opens the Rule Installation page
 Then the available prebuilt rules should be shown
 And the rules shouldn't be sorted by any field
 When user clicks on a header of an unsorted <field_name> column
@@ -339,7 +339,7 @@ Then the available prebuilt rules should be unsorted by <field_name>
 
 ```Gherkin
 Given multiple prebuilt rules available for installation
-When user opens the Add Elastic Rules page
+When user opens the Rule Installation page
 And sorts the rules by <field_name>
 And navigates to the next page
 Then the available prebuilt rules should still be sorted by <field_name>
@@ -356,7 +356,7 @@ Then the available prebuilt rules should still be sorted by <field_name>
 ```Gherkin
 Given multiple prebuilt rules available for installation
 And there's more than one page of available prebuilt rules
-When user opens the Add Elastic Rules page
+When user opens the Rule Installation page
 And navigates to a non-first page
 And changes the sorting order for <field_name>
 Then the first page of available prebuilt rules should be shown
@@ -386,41 +386,41 @@ And the shown rules should be sorted by <field_name>
 `<field_name>` = name | risk_score | severity
 `<tag>` = any tag from the list of available tags
 
-### Add Elastic Rules table: Filtering
+### Rule Installation table: Filtering
 
-#### **Scenario: User can filter prebuilt rules by rule name on the Add Elastic Rules page**
+#### **Scenario: User can filter prebuilt rules by rule name on the Rule Installation page**
 
 **Automation**: 1 API integration test with mock rules.
 
 ```Gherkin
 Given multiple prebuilt rules available for installation
-When user opens the Add Elastic Rules page
+When user opens the Rule Installation page
 Then the available prebuilt rules should be shown
 When user enters <text> in the search field
 Then only available prebuilt rules that contain <text> in any part of their name should be shown
 And this matching should be case-insensitive
 ```
 
-#### **Scenario: User can see a list of available tags on the Add Elastic Rules page**
+#### **Scenario: User can see a list of available tags on the Rule Installation page**
 
 **Automation**: 1 API integration test with mock rules.
 
 ```Gherkin
 Given multiple prebuilt rules available for installation
-When user opens the Add Elastic Rules page
+When user opens the Rule Installation page
 Then there should a UI element that shows a list tags
 And this list should contain all the tags from prebuilt rules available for installation
 And this list should be sorted alphabetically
 ```
 
-#### **Scenario: User can filter prebuilt rules by a single tag on the Add Elastic Rules page**
+#### **Scenario: User can filter prebuilt rules by a single tag on the Rule Installation page**
 
 **Automation**: 1 API integration test with mock rules.
 
 ```Gherkin
 Given multiple prebuilt rules available for installation
 And at least one rule has a <tag> tag
-When user opens the Add Elastic Rules page
+When user opens the Rule Installation page
 And filters the available prebuilt rules by a <tag>
 Then only the available prebuilt rules having this tag should be shown
 ```
@@ -429,14 +429,14 @@ Then only the available prebuilt rules having this tag should be shown
 
 `<tag>` = any tag from the list of available tags
 
-#### **Scenario: User can filter prebuilt rules by multiple tags using AND logic on the Add Elastic Rules page**
+#### **Scenario: User can filter prebuilt rules by multiple tags using AND logic on the Rule Installation page**
 
 **Automation**: 1 API integration test with mock rules.
 
 ```Gherkin
 Given multiple prebuilt rules available for installation
 And at least one rule has both <tag1> and <tag2> tags
-When user opens the Add Elastic Rules page
+When user opens the Rule Installation page
 And filters the available prebuilt rules by <tag1> and <tag2> tags
 Then only available prebuilt rules having both <tag1> and <tag2> tags should be shown
 ```
@@ -452,7 +452,7 @@ Then only available prebuilt rules having both <tag1> and <tag2> tags should be 
 ```Gherkin
 Given multiple prebuilt rules available for installation
 And at least one rule has a <tag> tag and contains <text> in its name
-When user opens the Add Elastic Rules page
+When user opens the Rule Installation page
 And filters the available prebuilt rules by a <tag>
 And enters <text> in the search field
 Then only available prebuilt rules having <tag> tag and containing <text> in their name should be shown
@@ -468,7 +468,7 @@ Then only available prebuilt rules having <tag> tag and containing <text> in the
 
 ```Gherkin
 Given multiple prebuilt rules available for installation
-When user opens the Add Elastic Rules page
+When user opens the Rule Installation page
 And applies a filter that matches no rules
 Then no rules should be shown in the table
 And user should see a "no rules match your filters" message
@@ -480,7 +480,7 @@ And user should see a "no rules match your filters" message
 
 ```Gherkin
 Given multiple prebuilt rules available for installation
-When user opens the Add Elastic Rules page
+When user opens the Rule Installation page
 Then the available prebuilt rules should be shown
 When user sets a non-default number of rows per page
 And filters the available prebuilt rules by any tag
@@ -770,7 +770,7 @@ And a prebuilt rule asset with of a machine learning rule exists in Kibana
 And current user does NOT have a `machine_learning_admin` role (or its equivalent ES and Kibana privileges)
 And a prebuilt rule asset with of a machine learning rule exists in Kibana
 And this rule is not installed
-When user opens the Add Elastic Rules page
+When user opens the Rule Installation page
 Then user should NOT see this ML rule in the table
 ```
 
@@ -784,6 +784,6 @@ Then user should NOT see this ML rule in the table
 Given a Kibana instance running under a license that does NOT support machine learning
 And a prebuilt rule asset with of a machine learning rule exists in Kibana
 And this rule is not installed
-When user opens the Add Elastic Rules page
+When user opens the Rule Installation page
 Then user should NOT see this ML rule in the table
 ```
