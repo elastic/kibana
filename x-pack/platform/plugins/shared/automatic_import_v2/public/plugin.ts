@@ -14,21 +14,26 @@ import type {
 } from '@kbn/core/public';
 
 import { PLUGIN_ID, PLUGIN_NAME } from '../common/constants';
-import { getIntegrationManagementLazy } from './components/integration_management';
 import type {
   AutomaticImportPluginSetup,
   AutomaticImportPluginStart,
   AutomaticImportPluginStartDependencies,
 } from './types';
+import { Telemetry } from './services/telemetry/service';
 
 export class AutomaticImportPlugin
   implements Plugin<AutomaticImportPluginSetup, AutomaticImportPluginStart>
 {
+  private telemetry = new Telemetry();
+
   constructor(_: PluginInitializerContext) {}
 
   public setup(
     core: CoreSetup<AutomaticImportPluginStartDependencies, AutomaticImportPluginStart>
   ): AutomaticImportPluginSetup {
+    this.telemetry.setup(core.analytics);
+
+    const telemetry = this.telemetry;
     core.application.register({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
@@ -36,7 +41,12 @@ export class AutomaticImportPlugin
       async mount(params: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart, plugins] = await core.getStartServices();
-        return renderApp({ coreStart, plugins, params });
+        return renderApp({
+          coreStart,
+          plugins,
+          params,
+          telemetry: telemetry.start(),
+        });
       },
     });
 
@@ -44,19 +54,10 @@ export class AutomaticImportPlugin
   }
 
   public start(
-    core: CoreStart,
-    dependencies: AutomaticImportPluginStartDependencies
+    _core: CoreStart,
+    _dependencies: AutomaticImportPluginStartDependencies
   ): AutomaticImportPluginStart {
-    const services = {
-      ...core,
-      ...dependencies,
-    };
-
-    return {
-      components: {
-        IntegrationManagement: getIntegrationManagementLazy(services),
-      },
-    };
+    return {};
   }
 
   public stop() {}

@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export type IntegrationManagementComponent = React.ComponentType;
+import { useKibana as _useKibana } from '@kbn/kibana-react-plugin/public';
+import type { Services } from '../../services';
+
+export const useKibana = () => _useKibana<Services>();
