@@ -343,6 +343,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     return <ConnectorRulesList connector={connector} />;
   }, [connector]);
 
+  // This specific logic can be removed once inference connectors are no longer experimental. Tracked here https://github.com/elastic/kibana/issues/244985
   const isExperimental: boolean | undefined = useMemo(() => {
     if (
       connector &&
