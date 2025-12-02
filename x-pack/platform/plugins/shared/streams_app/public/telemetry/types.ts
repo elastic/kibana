@@ -130,6 +130,7 @@ interface StreamsDescriptionGeneratedProps {
 }
 
 interface StreamsProcessingSimulationSamplesFetchLatencyProps {
+  stream_name: string;
   stream_type: StreamType;
   data_source_type: EnrichmentDataSource['type'];
   duration_ms: number;

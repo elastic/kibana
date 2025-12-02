@@ -111,6 +111,7 @@ function collectKqlData({
         tap({
           subscribe: () => {
             registerFetchLatency = telemetryClient.startTrackingSimulationSamplesFetchLatency({
+              stream_name: searchParams.index,
               stream_type: streamType,
               data_source_type: dataSourceType,
             });

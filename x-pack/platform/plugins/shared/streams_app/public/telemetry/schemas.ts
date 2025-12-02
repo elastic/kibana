@@ -491,6 +491,12 @@ const streamsDescriptionGeneratedSchema: RootSchema<StreamsDescriptionGeneratedP
 
 const streamsProcessingSimulationSamplesFetchLatencySchema: RootSchema<StreamsProcessingSimulationSamplesFetchLatencyProps> =
   {
+    stream_name: {
+      type: 'keyword',
+      _meta: {
+        description: 'The name of the Stream',
+      },
+    },
     stream_type: {
       type: 'keyword',
       _meta: {

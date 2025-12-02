@@ -147,7 +147,7 @@ export class StreamsTelemetryClient {
   public startTrackingSimulationSamplesFetchLatency(
     params: Pick<
       StreamsProcessingSimulationSamplesFetchLatencyProps,
-      'stream_type' | 'data_source_type'
+      'stream_name' | 'stream_type' | 'data_source_type'
     >
   ) {
     const start = Date.now();
