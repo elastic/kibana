@@ -204,9 +204,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await unifiedTabs.getSelectedTabLabel()).to.be('unsaved');
         expect(await unifiedTabs.getTabLabels()).to.eql(['saved', 'unsaved']);
         expect(await unifiedTabs.getRecentlyClosedTabLabels()).to.eql([
-          'Untitled',
-          'saved',
-          'unsaved',
+          'Untitled\n2 minutes ago',
+          'saved\n2 minutes ago',
+          'unsaved\n2 minutes ago',
         ]);
         expect(await discover.getSavedSearchTitle()).to.be('kql');
         expect(await dataViews.isAdHoc()).to.be(true);
@@ -230,10 +230,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await unifiedTabs.getSelectedTabLabel()).to.be('saved');
         expect(await unifiedTabs.getTabLabels()).to.eql(['saved']);
         expect(await unifiedTabs.getRecentlyClosedTabLabels()).to.eql([
-          'unsaved (modified)',
-          'Untitled',
-          'saved',
-          'unsaved',
+          'unsaved (modified)\n2 minutes ago',
+          'Untitled\n2 minutes ago',
+          'saved\n2 minutes ago',
+          'unsaved\n2 minutes ago',
         ]);
         expect(await discover.getSavedSearchTitle()).to.be('kql');
         expect(await dataViews.isAdHoc()).to.be(false);
