@@ -2143,7 +2143,9 @@ export class CstToAstConverter {
       return undefined;
     }
 
-    const right = this.toStringLiteral(ctx.string_());
+    const right =
+      this.fromStringOrParameter(ctx.stringOrParameter()) ??
+      this.fromParserRuleToUnknown(ctx.stringOrParameter());
     const notCtx = ctx.NOT();
     const likeType = ctx instanceof cst.RlikeExpressionContext ? 'rlike' : 'like';
     const operator = `${notCtx ? 'not ' : ''}${likeType}` as ast.BinaryExpressionOperator;
@@ -2157,7 +2159,7 @@ export class CstToAstConverter {
       operatorNode.text = `not${operatorNode.text}`;
     }
 
-    const args: [ast.ESQLAstExpression, ast.ESQLStringLiteral] = [
+    const args: [ast.ESQLAstExpression, ast.ESQLAstExpression] = [
       left as ast.ESQLAstExpression,
       right,
     ];
@@ -2190,9 +2192,10 @@ export class CstToAstConverter {
     }
 
     // Convert the list of string patterns into a tuple list AST node
-    const stringCtxs = ctx.string__list();
-    const values: ast.ESQLStringLiteral[] = stringCtxs.map((stringCtx) =>
-      this.toStringLiteral(stringCtx)
+    const stringCtxs = ctx.stringOrParameter_list();
+    const values: ast.ESQLAstExpression[] = stringCtxs.map(
+      (stringCtx) =>
+        this.fromStringOrParameter(stringCtx) ?? this.fromParserRuleToUnknown(stringCtx)
     );
 
     const list = Builder.expression.list.tuple(
@@ -2895,6 +2898,24 @@ export class CstToAstConverter {
     return this.toNumericLiteral(ctx.decimalValue()!, 'double');
   }
 
+  private fromStringOrParameter(
+    ctx: cst.StringOrParameterContext
+  ): ast.ESQLStringLiteral | ast.ESQLParam | undefined {
+    const stringCtx = ctx.string_();
+
+    if (stringCtx) {
+      return this.toStringLiteral(stringCtx);
+    }
+
+    const paramCtx = ctx.parameter();
+
+    if (paramCtx) {
+      return this.fromParameter(paramCtx);
+    }
+
+    return undefined;
+  }
+
   private toStringLiteral(
     ctx: Pick<cst.StringContext, 'QUOTED_STRING'> & antlr.ParserRuleContext
   ): ast.ESQLStringLiteral {
@@ -2918,6 +2939,10 @@ export class CstToAstConverter {
       },
       this.getParserFields(ctx)
     );
+  }
+
+  private fromParameter(ctx: cst.ParameterContext): ast.ESQLParam | undefined {
+    return this.toParam(ctx);
   }
 
   private fromInputParameter(ctx: cst.InputParameterContext): ast.ESQLLiteral[] {
