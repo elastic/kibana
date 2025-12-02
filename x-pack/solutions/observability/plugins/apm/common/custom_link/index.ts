@@ -50,7 +50,7 @@ export function getEncodedCustomLinkUrl(url: string, transaction?: Transaction) 
       if (value) {
         const stringValue = String(value);
         // Don't encode if the value is a valid URL (http:// or https://)
-        const encodedValue = isValidUrl(stringValue) ? stringValue : encodeURIComponent(value);
+        const encodedValue = isValidUrl(stringValue) ? stringValue : encodeURIComponent(stringValue);
         set(encodedTemplateVariables, name, encodedValue);
       }
     });
