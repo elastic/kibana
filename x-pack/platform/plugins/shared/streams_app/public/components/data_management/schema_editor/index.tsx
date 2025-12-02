@@ -94,9 +94,7 @@ export function SchemaEditor({
 
   const filteredFields = React.useMemo(() => {
     const geoPointFields = new Set(
-      fields
-        .filter((f) => f.type === 'geo_point' || f.esType === 'geo_point')
-        .map((f) => f.name)
+      fields.filter((f) => f.type === 'geo_point' || f.esType === 'geo_point').map((f) => f.name)
     );
 
     return fields.filter((f) => {
