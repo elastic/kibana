@@ -29,7 +29,10 @@ module.exports = {
         ecmaVersion: 2018,
         requireConfigFile: false,
         babelOptions: {
-          presets: ['@kbn/babel-preset/node_preset']
+          presets: ['@kbn/babel-preset/node_preset'],
+          parserOpts: {
+            plugins: ['importAttributes']
+          }
         },
       },
 
