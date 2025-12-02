@@ -39,7 +39,7 @@ export class OneChatPageObject extends FtrService {
    * Type a message in the conversation input
    */
   async typeMessage(message: string) {
-    const inputElement = await this.testSubjects.find('onechatAppConversationInputFormTextArea');
+    const inputElement = await this.testSubjects.find('agentBuilderConversationInputEditor');
     await inputElement.click();
     await inputElement.type(message);
   }
@@ -48,7 +48,7 @@ export class OneChatPageObject extends FtrService {
    * Send the current message
    */
   async sendMessage() {
-    const sendButton = await this.testSubjects.find('onechatAppConversationInputFormSubmitButton');
+    const sendButton = await this.testSubjects.find('agentBuilderConversationInputSubmitButton');
     await sendButton.click();
   }
 
@@ -245,7 +245,7 @@ export class OneChatPageObject extends FtrService {
    * Get the thinking details text
    */
   async getThinkingDetails() {
-    const responseElement = await this.testSubjects.find('agentBuilderRoundResponse');
+    const responseElement = await this.testSubjects.find('agentBuilderThinkingPanel');
     return await responseElement.getVisibleText();
   }
 

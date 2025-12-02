@@ -7,10 +7,17 @@
 
 import type { SecurityService } from '@kbn/ftr-common-functional-services';
 import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common/constants';
+import type { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 
-export const testUsers: {
-  [rollName: string]: { username: string; password: string; permissions?: any };
-} = {
+interface TestUsers {
+  [key: string]: {
+    username: string;
+    password: string;
+    permissions?: any;
+  };
+}
+
+export const testUsers = {
   fleet_all_int_all: {
     permissions: {
       feature: {
@@ -175,28 +182,79 @@ export const testUsers: {
     username: 'integr_all',
     password: 'changeme',
   },
-  // for package_policy get one, bulk get with ids, get list
-  endpoint_integr_read_policy: {
+
+  // --- for package_policy get one, bulk get with ids, get list, integration with Endpoint artifacts ---
+  endpoint_integr_read_policy_for_policy_management: {
     permissions: {
       feature: {
-        fleet: ['read'],
-        [SECURITY_FEATURE_ID]: [
-          'minimal_all',
-          'trusted_applications_read',
-          'host_isolation_exceptions_read',
-          'blocklist_read',
-          'event_filters_read',
-          'policy_management_read',
-          'trusted_devices_read',
-        ],
-        securitySolutionNotes: ['all'],
-        securitySolutionTimeline: ['all'],
+        [SECURITY_FEATURE_ID]: ['minimal_read', 'policy_management_read'],
       },
       spaces: ['*'],
     },
-    username: 'endpoint_integr_read_policy',
+    username: 'endpoint_integr_read_policy_for_policy_management',
     password: 'changeme',
   },
+  endpoint_integr_read_policy_for_trusted_apps: {
+    permissions: {
+      feature: {
+        [SECURITY_FEATURE_ID]: ['minimal_read', 'trusted_applications_read'],
+      },
+      spaces: ['*'],
+    },
+    username: 'endpoint_integr_read_policy_for_trusted_apps',
+    password: 'changeme',
+  },
+  endpoint_integr_read_policy_for_trusted_devices: {
+    permissions: {
+      feature: {
+        [SECURITY_FEATURE_ID]: ['minimal_read', 'trusted_devices_read'],
+      },
+      spaces: ['*'],
+    },
+    username: 'endpoint_integr_read_policy_for_trusted_devices',
+    password: 'changeme',
+  },
+  endpoint_integr_read_policy_for_event_filters: {
+    permissions: {
+      feature: {
+        [SECURITY_FEATURE_ID]: ['minimal_read', 'event_filters_read'],
+      },
+      spaces: ['*'],
+    },
+    username: 'endpoint_integr_read_policy_for_event_filters',
+    password: 'changeme',
+  },
+  endpoint_integr_read_policy_for_host_isolation_exceptions: {
+    permissions: {
+      feature: {
+        [SECURITY_FEATURE_ID]: ['minimal_read', 'host_isolation_exceptions_read'],
+      },
+      spaces: ['*'],
+    },
+    username: 'endpoint_integr_read_policy_for_host_isolation_exceptions',
+    password: 'changeme',
+  },
+  endpoint_integr_read_policy_for_blocklist: {
+    permissions: {
+      feature: {
+        [SECURITY_FEATURE_ID]: ['minimal_read', 'blocklist_read'],
+      },
+      spaces: ['*'],
+    },
+    username: 'endpoint_integr_read_policy_for_blocklist',
+    password: 'changeme',
+  },
+  endpoint_integr_read_policy_for_endpoint_exceptions: {
+    permissions: {
+      feature: {
+        [SECURITY_FEATURE_ID]: ['minimal_all', 'endpoint_exceptions_read'],
+      },
+      spaces: ['*'],
+    },
+    username: 'endpoint_integr_read_policy_for_endpoint_exceptions',
+    password: 'changeme',
+  },
+
   // for package_policy update API
   endpoint_integr_write_policy: {
     permissions: {
@@ -252,6 +310,26 @@ export const testUsers: {
     username: 'endpoint_integr_read_only_fleet_none',
     password: 'changeme',
   },
+} satisfies TestUsers;
+
+/**
+ * Test user group for testing Endpoint artifacts. If a new artifact is added,
+ * this group and the API privileges should be updated to provide package policy
+ * access for policy-assignment features on the new artifact.
+ */
+export const endpointIntegrationTestUsers: Record<
+  'policy_management' | keyof typeof ENDPOINT_ARTIFACT_LISTS,
+  keyof typeof testUsers
+> = {
+  policy_management: 'endpoint_integr_read_policy_for_policy_management',
+
+  // Endpoint artifact lists
+  trustedApps: 'endpoint_integr_read_policy_for_trusted_apps',
+  trustedDevices: 'endpoint_integr_read_policy_for_trusted_devices',
+  eventFilters: 'endpoint_integr_read_policy_for_event_filters',
+  hostIsolationExceptions: 'endpoint_integr_read_policy_for_host_isolation_exceptions',
+  blocklists: 'endpoint_integr_read_policy_for_blocklist',
+  endpointExceptions: 'endpoint_integr_read_policy_for_endpoint_exceptions',
 };
 
 export const setupTestUsers = async (security: SecurityService, spaceAwarenessEnabled = false) => {
@@ -260,7 +338,7 @@ export const setupTestUsers = async (security: SecurityService, spaceAwarenessEn
       continue;
     }
     if (Object.hasOwn(testUsers, roleName)) {
-      const user = testUsers[roleName];
+      const user = testUsers[roleName as keyof typeof testUsers];
 
       if (user.permissions) {
         await security.role.create(roleName, {

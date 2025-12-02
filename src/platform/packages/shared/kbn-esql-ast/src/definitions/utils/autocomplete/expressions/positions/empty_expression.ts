@@ -93,13 +93,6 @@ function tryExclusiveSuggestions(
   const { functionDefinition, paramDefinitions } = functionParamContext;
   const { options } = ctx;
 
-  const suggestions: ISuggestionItem[] = [];
-
-  // Special case: COUNT function suggests "*" (e.g., "COUNT(*)")
-  if (matchesSpecialFunction(functionDefinition!.name, 'count')) {
-    suggestions.push(allStarConstant);
-  }
-
   // Enum values are exclusive - if present, return only those
   const enumItems = buildEnumValueSuggestions(
     paramDefinitions,
@@ -112,7 +105,7 @@ function tryExclusiveSuggestions(
     return enumItems;
   }
 
-  return suggestions;
+  return [];
 }
 
 /** Build composite suggestions: literals + fields + functions */
@@ -120,6 +113,7 @@ async function buildCompositeSuggestions(
   functionParamContext: FunctionParamContext,
   ctx: ExpressionContext
 ): Promise<ISuggestionItem[]> {
+  const { functionDefinition } = functionParamContext;
   const { options } = ctx;
 
   // Determine configuration
@@ -129,6 +123,11 @@ async function buildCompositeSuggestions(
   );
 
   const suggestions: ISuggestionItem[] = [];
+
+  // Special case: COUNT function suggests "*" (e.g., "COUNT(*)")
+  if (matchesSpecialFunction(functionDefinition!.name, 'count')) {
+    suggestions.push(allStarConstant);
+  }
 
   // Add literal suggestions
   suggestions.push(...buildLiteralSuggestions(functionParamContext, ctx, config));
