@@ -88,6 +88,7 @@ describe('deleteGapAutoFillScheduler()', () => {
         gapFillRange: 'now-1d',
         maxBackfills: 100,
         numRetries: 3,
+        scope: ['test-space'],
         ruleTypes: [{ type: 'test-rule-type', consumer: 'test-consumer' }],
         ruleTypeConsumerPairs: ['test-rule-type:test-consumer'],
         createdAt: new Date().toISOString(),
