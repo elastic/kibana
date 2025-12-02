@@ -28,11 +28,11 @@ type AuthSchemaType = z.infer<typeof authSchema>;
 export const PFX: AuthTypeSpec<AuthSchemaType> = {
   id: 'pfx_certificate',
   schema: authSchema,
-  configure: (
+  configure: async (
     ctx: AuthContext,
     axiosInstance: AxiosInstance,
     secret: AuthSchemaType
-  ): AxiosInstance => {
+  ): Promise<AxiosInstance> => {
     const sslOverrides: SSLSettings = {
       pfx: Buffer.from(secret.pfx, 'base64'),
       ...(isString(secret.passphrase) ? { passphrase: secret.passphrase } : {}),

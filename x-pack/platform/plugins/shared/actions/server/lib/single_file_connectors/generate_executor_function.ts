@@ -37,11 +37,20 @@ export const generateExecutorFunction = ({
   async function (
     execOptions: ConnectorTypeExecutorOptions<RecordUnknown, RecordUnknown, RecordUnknown>
   ): Promise<ConnectorTypeExecutorResult<unknown>> {
-    const { actionId, config, params, secrets, logger } = execOptions;
+    const {
+      actionId: connectorId,
+      config,
+      connectorTokenClient,
+      params,
+      secrets,
+      logger,
+    } = execOptions;
     const { subAction, subActionParams } = params as ExecutorParams;
 
     const axiosInstance = await getAxiosInstanceWithAuth({
+      connectorId,
       secrets,
+      connectorTokenClient,
     });
 
     if (!actions[subAction]) {
@@ -66,9 +75,9 @@ export const generateExecutorFunction = ({
         data = res;
       }
 
-      return { status: 'ok', data, actionId };
+      return { status: 'ok', data, actionId: connectorId };
     } catch (error) {
-      logger.error(`error on ${actionId} event: ${error}`);
-      return errorResultUnexpectedError(actionId);
+      logger.error(`error on ${connectorId} event: ${error}`);
+      return errorResultUnexpectedError(connectorId);
     }
   };

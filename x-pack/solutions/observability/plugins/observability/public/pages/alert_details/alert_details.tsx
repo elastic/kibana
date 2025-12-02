@@ -477,7 +477,6 @@ function getRelevantAlertFields(alertDetail: AlertData) {
     'kibana.alert.rule.uuid',
     'event.action',
     'event.kind',
-    'kibana.alert.rule.tags',
     'kibana.alert.maintenance_window_ids',
     'kibana.alert.consecutive_matches',
   ]);

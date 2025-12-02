@@ -10,6 +10,7 @@ import axios from 'axios';
 import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token';
 import {
   combineHeadersWithBasicAuthHeader,
+  getDeleteTokenAxiosInterceptor,
   mergeConfigHeadersWithSecretHeaders,
 } from '@kbn/actions-plugin/server/lib';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
@@ -21,7 +22,6 @@ import type {
   ConnectorTypeSecretsType,
 } from '@kbn/connector-schemas/webhook';
 import { AuthType } from '@kbn/connector-schemas/common/auth';
-import { getOauth2DeleteTokenAxiosInterceptor } from '../../../common/auth/oauth2_delete_token_axios_interceptor';
 import { buildConnectorAuth } from '../../../common/auth/utils';
 
 interface GetOAuth2AxiosConfigParams {
@@ -78,7 +78,7 @@ const getOAuth2AxiosConfig = async ({
   }
   logger.debug(`Successfully retrieved access token`);
 
-  const { onFulfilled, onRejected } = getOauth2DeleteTokenAxiosInterceptor({
+  const { onFulfilled, onRejected } = getDeleteTokenAxiosInterceptor({
     connectorTokenClient,
     connectorId,
   });

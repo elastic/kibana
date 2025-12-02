@@ -76,18 +76,27 @@ export interface ConnectorMetadata {
 // OAuth2, SSL/mTLS, AWS SigV4 → Phase 2 (see connector_rfc.ts)
 
 // Auth schemas defined in ./auth_types
+export interface GetTokenOpts {
+  tokenUrl: string;
+  scope?: string;
+  clientId: string;
+  clientSecret: string;
+  additionalFields?: Record<string, unknown>;
+}
 
 export interface AuthContext {
   getCustomHostSettings: (url: string) => CustomHostSettings | undefined;
+  getToken: (opts: GetTokenOpts) => Promise<string | null>;
   logger: Logger;
   proxySettings?: ProxySettings;
   sslSettings: SSLSettings;
 }
+
 export interface AuthTypeSpec<T extends Record<string, unknown>> {
   id: string;
   schema: z.ZodObject<Record<string, z.ZodType>>;
   normalizeSchema?: (defaults?: Record<string, unknown>) => z.ZodObject<Record<string, z.ZodType>>;
-  configure: (ctx: AuthContext, axiosInstance: AxiosInstance, secret: T) => AxiosInstance;
+  configure: (ctx: AuthContext, axiosInstance: AxiosInstance, secret: T) => Promise<AxiosInstance>;
 }
 
 export type NormalizedAuthType = AuthTypeSpec<Record<string, unknown>>;
