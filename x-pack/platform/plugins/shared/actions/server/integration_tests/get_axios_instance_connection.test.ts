@@ -108,7 +108,10 @@ describe('get preconfigured axios instance', () => {
         configurationUtilities,
         logger,
       });
-      const axiosInstance = await getAxiosInstanceFn({ secrets: { authType: 'none' } });
+      const axiosInstance = await getAxiosInstanceFn({
+        connectorId: '1',
+        secrets: { authType: 'none' },
+      });
       const res = await axiosInstance.get(url);
       expect(res.status).toBe(200);
     });
@@ -126,7 +129,10 @@ describe('get preconfigured axios instance', () => {
         logger,
       });
 
-      const axiosInstance = await getAxiosInstanceFn({ secrets: { authType: 'none' } });
+      const axiosInstance = await getAxiosInstanceFn({
+        connectorId: '1',
+        secrets: { authType: 'none' },
+      });
 
       await expect(axiosInstance.get(url)).rejects.toThrowErrorMatchingInlineSnapshot(
         `"self-signed certificate in certificate chain"`
@@ -147,7 +153,10 @@ describe('get preconfigured axios instance', () => {
         configurationUtilities,
         logger,
       });
-      const axiosInstance = await getAxiosInstanceFn({ secrets: { authType: 'none' } });
+      const axiosInstance = await getAxiosInstanceFn({
+        connectorId: '1',
+        secrets: { authType: 'none' },
+      });
       const res = await axiosInstance.get(url);
       expect(res.status).toBe(200);
     });
@@ -164,7 +173,10 @@ describe('get preconfigured axios instance', () => {
         configurationUtilities,
         logger,
       });
-      const axiosInstance = await getAxiosInstanceFn({ secrets: { authType: 'none' } });
+      const axiosInstance = await getAxiosInstanceFn({
+        connectorId: '1',
+        secrets: { authType: 'none' },
+      });
       const res = await axiosInstance.get(url);
       expect(res.status).toBe(200);
     });
@@ -181,7 +193,10 @@ describe('get preconfigured axios instance', () => {
         configurationUtilities,
         logger,
       });
-      const axiosInstance = await getAxiosInstanceFn({ secrets: { authType: 'none' } });
+      const axiosInstance = await getAxiosInstanceFn({
+        connectorId: '1',
+        secrets: { authType: 'none' },
+      });
       const res = await axiosInstance.get(url);
       expect(res.status).toBe(200);
     });
@@ -198,7 +213,10 @@ describe('get preconfigured axios instance', () => {
         configurationUtilities,
         logger,
       });
-      const axiosInstance = await getAxiosInstanceFn({ secrets: { authType: 'none' } });
+      const axiosInstance = await getAxiosInstanceFn({
+        connectorId: '1',
+        secrets: { authType: 'none' },
+      });
       await expect(axiosInstance.get(url)).rejects.toThrowErrorMatchingInlineSnapshot(
         `"self-signed certificate in certificate chain"`
       );
@@ -224,7 +242,10 @@ describe('get preconfigured axios instance', () => {
         configurationUtilities,
         logger,
       });
-      const axiosInstance = await getAxiosInstanceFn({ secrets: { authType: 'none' } });
+      const axiosInstance = await getAxiosInstanceFn({
+        connectorId: '1',
+        secrets: { authType: 'none' },
+      });
       const res = await axiosInstance.get(url);
       expect(res.status).toBe(200);
     });
@@ -251,7 +272,10 @@ describe('get preconfigured axios instance', () => {
         configurationUtilities,
         logger,
       });
-      const axiosInstance = await getAxiosInstanceFn({ secrets: { authType: 'none' } });
+      const axiosInstance = await getAxiosInstanceFn({
+        connectorId: '1',
+        secrets: { authType: 'none' },
+      });
       const res = await axiosInstance.get(url);
       expect(res.status).toBe(200);
     });
@@ -269,7 +293,10 @@ describe('get preconfigured axios instance', () => {
         configurationUtilities,
         logger,
       });
-      const axiosInstance = await getAxiosInstanceFn({ secrets: { authType: 'none' } });
+      const axiosInstance = await getAxiosInstanceFn({
+        connectorId: '1',
+        secrets: { authType: 'none' },
+      });
       await expect(axiosInstance.get(url)).rejects.toThrowErrorMatchingInlineSnapshot(
         `"self-signed certificate in certificate chain"`
       );
@@ -287,7 +314,10 @@ describe('get preconfigured axios instance', () => {
         configurationUtilities,
         logger,
       });
-      const axiosInstance = await getAxiosInstanceFn({ secrets: { authType: 'none' } });
+      const axiosInstance = await getAxiosInstanceFn({
+        connectorId: '1',
+        secrets: { authType: 'none' },
+      });
       await expect(axiosInstance.get(url)).rejects.toThrowErrorMatchingInlineSnapshot(
         `"self-signed certificate in certificate chain"`
       );
@@ -306,7 +336,10 @@ describe('get preconfigured axios instance', () => {
         configurationUtilities,
         logger,
       });
-      const axiosInstance = await getAxiosInstanceFn({ secrets: { authType: 'none' } });
+      const axiosInstance = await getAxiosInstanceFn({
+        connectorId: '1',
+        secrets: { authType: 'none' },
+      });
       await expect(axiosInstance.get(url)).rejects.toThrowErrorMatchingInlineSnapshot(
         `"self-signed certificate in certificate chain"`
       );
@@ -324,6 +357,7 @@ describe('get preconfigured axios instance', () => {
       });
 
       const axiosInstance = await getAxiosInstanceFn({
+        connectorId: '1',
         secrets: {
           authType: 'crt_certificate',
           crt: KIBANA_CRT_B64,
@@ -347,6 +381,7 @@ describe('get preconfigured axios instance', () => {
       });
 
       const axiosInstance = await getAxiosInstanceFn({
+        connectorId: '1',
         secrets: {
           authType: 'crt_certificate',
           crt: KIBANA_CRT_B64,
@@ -372,6 +407,7 @@ describe('get preconfigured axios instance', () => {
         });
 
         const axiosInstance = await getAxiosInstanceFn({
+          connectorId: '1',
           secrets: {
             authType: 'pfx_certificate',
             pfx: KIBANA_P12_B64,
@@ -395,6 +431,7 @@ describe('get preconfigured axios instance', () => {
         });
 
         const axiosInstance = await getAxiosInstanceFn({
+          connectorId: '1',
           secrets: {
             authType: 'pfx_certificate',
             pfx: KIBANA_P12_B64,
@@ -418,6 +455,7 @@ describe('get preconfigured axios instance', () => {
       });
 
       const axiosInstance = await getAxiosInstanceFn({
+        connectorId: '1',
         secrets: {
           authType: 'crt_certificate',
           crt: UNAUTHORIZED_CRT_B64,
@@ -443,6 +481,7 @@ describe('get preconfigured axios instance', () => {
       });
 
       const axiosInstance = await getAxiosInstanceFn({
+        connectorId: '1',
         secrets: {
           authType: 'none',
         },
@@ -495,7 +534,10 @@ async function basicProxyTest(opts: RunTestOptions) {
       configurationUtilities,
       logger,
     });
-    const axiosInstance = await getAxiosInstanceFn({ secrets: { authType: 'none' } });
+    const axiosInstance = await getAxiosInstanceFn({
+      connectorId: '1',
+      secrets: { authType: 'none' },
+    });
 
     const res = await axiosInstance.get(axiosDefaults.url);
     expect(res.status).toBe(200);
@@ -518,7 +560,10 @@ async function wrongTargetPasswordProxyTest(opts: RunTestOptions) {
         configurationUtilities,
         logger,
       });
-      const axiosInstance = await getAxiosInstanceFn({ secrets: { authType: 'none' } });
+      const axiosInstance = await getAxiosInstanceFn({
+        connectorId: '1',
+        secrets: { authType: 'none' },
+      });
       await axiosInstance.get(wrongUrl);
     }
   );
@@ -540,7 +585,10 @@ async function missingTargetPasswordProxyTest(opts: RunTestOptions) {
         configurationUtilities,
         logger,
       });
-      const axiosInstance = await getAxiosInstanceFn({ secrets: { authType: 'none' } });
+      const axiosInstance = await getAxiosInstanceFn({
+        connectorId: '1',
+        secrets: { authType: 'none' },
+      });
       await axiosInstance.get(anonUrl);
     }
   );
