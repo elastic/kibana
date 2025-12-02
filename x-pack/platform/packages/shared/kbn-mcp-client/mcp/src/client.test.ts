@@ -216,7 +216,8 @@ describe('McpClient', () => {
         connected: true,
         capabilities: mockCapabilities,
       });
-      expect(client.connected).toBe(true);
+      let connectStatus = await client.isConnected();
+      expect(connectStatus).toEqual(true);
       expect(mockLogger.info).toHaveBeenCalledWith(
         'Attempting to connect to MCP server test-client, 1.0.0'
       );
@@ -333,11 +334,11 @@ describe('McpClient', () => {
       const client = await createConnectedClient();
       mockClient.close.mockResolvedValue(undefined);
 
-      const result = await client.disconnect();
+      await client.disconnect();
+      let connectStatus = await client.isConnected();
 
       expect(mockClient.close).toHaveBeenCalled();
-      expect(result).toBe(false);
-      expect(client.connected).toBe(false);
+      expect(connectStatus).toEqual(false);
       expect(mockLogger.info).toHaveBeenCalledWith(
         'Attempting to disconnect from MCP server test-client, 1.0.0'
       );
@@ -349,10 +350,11 @@ describe('McpClient', () => {
     it('does nothing when not connected', async () => {
       const client = new McpClient(mockLogger, clientDetails);
 
-      const result = await client.disconnect();
+      await client.disconnect();
+      let connectStatus = await client.isConnected();
 
       expect(mockClient.close).not.toHaveBeenCalled();
-      expect(result).toBe(false);
+      expect(connectStatus).toEqual(false);
     });
 
     it('handles disconnect errors gracefully', async () => {
@@ -361,7 +363,8 @@ describe('McpClient', () => {
       mockClient.close.mockRejectedValue(error);
 
       await expect(client.disconnect()).rejects.toThrow('Disconnect failed');
-      expect(client.connected).toBe(true); // Should remain connected on error
+      let connectStatus = await client.isConnected();
+      expect(connectStatus).toEqual(true); // Should remain connected on error
     });
   });
 

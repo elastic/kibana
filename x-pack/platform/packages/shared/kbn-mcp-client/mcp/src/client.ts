@@ -33,10 +33,10 @@ export class McpClient {
   private readonly client: Client;
   private readonly transport: StreamableHTTPClientTransport;
 
+  private connected: boolean = false;
+
   public name: string;
   public version: string;
-
-  public connected: boolean = false;
 
   constructor(
     private readonly logger: Logger,
@@ -68,6 +68,13 @@ export class McpClient {
       name: clientDetails.name,
       version: clientDetails.version,
     });
+  }
+
+  /**
+   * Public getter for the connection status.
+   */
+  async isConnected(): Promise<boolean> {
+    return this.connected;
   }
 
   /**
@@ -108,53 +115,52 @@ export class McpClient {
   /**
    * Disconnect from the MCP client and return the disconnected status.
    */
-  async disconnect(): Promise<boolean> {
+  async disconnect(): Promise<void> {
     if (this.connected) {
       this.logger.info(`Attempting to disconnect from MCP server ${this.name}, ${this.version}`);
       await this.client.close();
       this.connected = false;
       this.logger.info(`Disconnected from MCP client ${this.name}, ${this.version}`);
     }
-    return this.connected;
   }
 
   /**
    * List the tools available on the MCP client.
    */
   async listTools(): Promise<ListToolsResponse> {
-    if (this.connected) {
-      this.logger.info(`Listing tools from MCP server ${this.name}, ${this.version}`);
-      const getNextPage = async (cursor?: string): Promise<Tool[]> => {
-        const response = await this.client.listTools({
-          cursor,
-        });
-
-        if (response.isError) {
-          throw new Error(`Error listing tools: ${response.error}`);
-        }
-
-        const { tools, nextCursor } = response;
-
-        return [
-          ...tools.map((tool): Tool => {
-            return {
-              description: tool.description,
-              inputSchema: tool.inputSchema,
-              name: tool.name,
-            };
-          }),
-          ...(nextCursor ? await getNextPage(nextCursor) : []),
-        ];
-      };
-
-      const tools: ListToolsResponse = {
-        tools: await getNextPage(),
-      };
-
-      return tools;
+    if (!this.connected) {
+      throw new Error(`MCP client not connected to ${this.name}, ${this.version}`);
     }
 
-    throw new Error('MCP client not connected');
+    this.logger.info(`Listing tools from MCP server ${this.name}, ${this.version}`);
+    const getNextPage = async (cursor?: string): Promise<Tool[]> => {
+      const response = await this.client.listTools({
+        cursor,
+      });
+
+      if (response.isError) {
+        throw new Error(`Error listing tools: ${response.error}`);
+      }
+
+      const { tools, nextCursor } = response;
+
+      return [
+        ...tools.map((tool): Tool => {
+          return {
+            description: tool.description,
+            inputSchema: tool.inputSchema,
+            name: tool.name,
+          };
+        }),
+        ...(nextCursor ? await getNextPage(nextCursor) : []),
+      ];
+    };
+
+    const tools: ListToolsResponse = {
+      tools: await getNextPage(),
+    };
+
+    return tools;
   }
 
   /**
