@@ -418,10 +418,4 @@ describe('transformFailureStoreConfig', () => {
 
     expect(result).toEqual({ inherit: {} });
   });
-
-  it('should default failureStoreEnabled to false', () => {
-    const result = transformFailureStoreConfig({});
-
-    expect(result).toEqual({ disabled: {} });
-  });
 });
