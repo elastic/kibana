@@ -26,3 +26,7 @@ export const getProjectType = (kbnServerArgs: string[]) => {
   const options = getopts(kbnServerArgs);
   return options.serverless as ServerlessProjectType;
 };
+
+export const getOrganizationId = (kbnServerArgs: string[]) => {
+  return getopts(kbnServerArgs)['xpack.cloud.organization_id'] as string | undefined;
+};
