@@ -26,8 +26,6 @@ import {
 import {
   getDissectProcessorWithReview,
   getReviewFields as getDissectReviewFields,
-  extractDissectPattern,
-  groupMessagesByPattern as groupMessagesByDissectPattern,
 } from '@kbn/dissect-heuristics';
 import { STREAMS_TIERED_ML_FEATURE } from '../../../../../common';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
@@ -38,9 +36,7 @@ import { handleProcessingGrokSuggestions } from '../processing/grok_suggestions_
 import { handleProcessingDissectSuggestions } from '../processing/dissect_suggestions_handler';
 
 export interface SuggestIngestPipelineParams {
-  path: {
-    name: string;
-  };
+  path: { name: string };
   body: {
     connector_id: string;
     documents: FlattenRecord[];
@@ -49,12 +45,38 @@ export interface SuggestIngestPipelineParams {
         fieldName: string;
         patternGroups: Array<{
           messages: string[];
-          patterns: string[];
+          nodes: Array<{ pattern: string } | { id: string; component: string; values: string[] }>;
         }>;
       } | null;
       dissect: {
         fieldName: string;
         messages: string[];
+        patternAst: {
+          nodes: Array<
+            | {
+                type: 'field';
+                name: string;
+                modifiers?: {
+                  rightPadding?: boolean;
+                  skip?: boolean;
+                  namedSkip?: boolean;
+                  append?: boolean;
+                };
+              }
+            | { type: 'literal'; value: string }
+          >;
+        };
+        patternFields: Array<{
+          name: string;
+          values: string[];
+          position: number;
+          modifiers?: {
+            rightPadding?: boolean;
+            skip?: boolean;
+            namedSkip?: boolean;
+            append?: boolean;
+          };
+        }>;
       } | null;
     };
   };
@@ -72,7 +94,16 @@ export const suggestIngestPipelineSchema = z.object({
           patternGroups: z.array(
             z.object({
               messages: z.array(z.string()),
-              patterns: z.array(z.string()),
+              nodes: z.array(
+                z.union([
+                  z.object({ pattern: z.string() }),
+                  z.object({
+                    id: z.string(),
+                    component: z.string(),
+                    values: z.array(z.string()),
+                  }),
+                ])
+              ),
             })
           ),
         })
@@ -81,6 +112,43 @@ export const suggestIngestPipelineSchema = z.object({
         .object({
           fieldName: z.string(),
           messages: z.array(z.string()),
+          patternAst: z.object({
+            nodes: z.array(
+              z.union([
+                z.object({
+                  type: z.literal('field'),
+                  name: z.string(),
+                  modifiers: z
+                    .object({
+                      rightPadding: z.boolean().optional(),
+                      skip: z.boolean().optional(),
+                      namedSkip: z.boolean().optional(),
+                      append: z.boolean().optional(),
+                    })
+                    .optional(),
+                }),
+                z.object({
+                  type: z.literal('literal'),
+                  value: z.string(),
+                }),
+              ])
+            ),
+          }),
+          patternFields: z.array(
+            z.object({
+              name: z.string(),
+              values: z.array(z.string()),
+              position: z.number(),
+              modifiers: z
+                .object({
+                  rightPadding: z.boolean().optional(),
+                  skip: z.boolean().optional(),
+                  namedSkip: z.boolean().optional(),
+                  append: z.boolean().optional(),
+                })
+                .optional(),
+            })
+          ),
         })
         .nullable(),
     }),
@@ -112,119 +180,137 @@ export const suggestProcessingPipelineRoute = createServerRoute({
     server,
     logger,
   }): Promise<SuggestProcessingPipelineResponse> => {
-    const isAvailableForTier = server.core.pricing.isFeatureAvailable(STREAMS_TIERED_ML_FEATURE.id);
-    if (!isAvailableForTier) {
-      throw new SecurityError('Cannot access API on the current pricing tier');
-    }
+    try {
+      logger.debug('[suggest_pipeline] Request received');
+      logger.debug(
+        `[suggest_pipeline] extracted_patterns: grok=${Boolean(
+          params.body.extracted_patterns?.grok
+        )} dissect=${Boolean(params.body.extracted_patterns?.dissect)}`
+      );
+      const isAvailableForTier = server.core.pricing.isFeatureAvailable(
+        STREAMS_TIERED_ML_FEATURE.id
+      );
+      if (!isAvailableForTier) {
+        throw new SecurityError('Cannot access API on the current pricing tier');
+      }
 
-    const { inferenceClient, scopedClusterClient, streamsClient, fieldsMetadataClient } =
-      await getScopedClients({
-        request,
+      const { inferenceClient, scopedClusterClient, streamsClient, fieldsMetadataClient } =
+        await getScopedClients({ request });
+
+      const stream = await streamsClient.getStream(params.path.name);
+      if (!Streams.ingest.all.Definition.is(stream)) {
+        throw new Error(`Stream ${stream.name} is not a valid ingest stream`);
+      }
+
+      const abortController = new AbortController();
+      let parsingProcessor: GrokProcessor | DissectProcessor | undefined;
+
+      if (params.body.extracted_patterns) {
+        const { grok, dissect } = params.body.extracted_patterns;
+        const candidatePromises: Array<
+          Promise<{
+            type: 'grok' | 'dissect';
+            processor: GrokProcessor | DissectProcessor;
+            parsedRate: number;
+          } | null>
+        > = [];
+
+        if (grok) {
+          logger.debug(
+            `[suggest_pipeline] (parallel) scheduling grok patternGroups=${grok.patternGroups.length} fieldName=${grok.fieldName}`
+          );
+          candidatePromises.push(
+            processGrokPatterns({
+              patternGroups: grok.patternGroups,
+              fieldName: grok.fieldName,
+              streamName: stream.name,
+              connectorId: params.body.connector_id,
+              documents: params.body.documents,
+              inferenceClient,
+              scopedClusterClient,
+              streamsClient,
+              fieldsMetadataClient,
+              signal: abortController.signal,
+              logger,
+            })
+          );
+        }
+        if (dissect) {
+          logger.debug(
+            `[suggest_pipeline] (parallel) scheduling dissect messages=${dissect.messages.length} fieldName=${dissect.fieldName}`
+          );
+          candidatePromises.push(
+            processDissectPattern({
+              messages: dissect.messages,
+              patternAst: dissect.patternAst,
+              patternFields: dissect.patternFields,
+              fieldName: dissect.fieldName,
+              streamName: stream.name,
+              connectorId: params.body.connector_id,
+              documents: params.body.documents,
+              inferenceClient,
+              scopedClusterClient,
+              streamsClient,
+              fieldsMetadataClient,
+              signal: abortController.signal,
+              logger,
+            })
+          );
+        }
+
+        const results = await Promise.all(candidatePromises);
+        const candidates = results.filter(
+          (
+            r
+          ): r is {
+            type: 'grok' | 'dissect';
+            processor: GrokProcessor | DissectProcessor;
+            parsedRate: number;
+          } => r !== null
+        );
+        candidates.forEach((c) =>
+          logger.debug(`[suggest_pipeline] Candidate type=${c.type} parsedRate=${c.parsedRate}`)
+        );
+        if (candidates.length > 0) {
+          candidates.sort((a, b) => b.parsedRate - a.parsedRate);
+          logger.debug(
+            `[suggest_pipeline] Selected processor type=${candidates[0].type} parsedRate=${candidates[0].parsedRate}`
+          );
+          parsingProcessor = candidates[0].processor;
+        }
+      }
+
+      const pipelinePromise = suggestProcessingPipeline({
+        definition: stream,
+        inferenceClient: inferenceClient.bindTo({ connectorId: params.body.connector_id }),
+        parsingProcessor,
+        maxSteps: undefined,
+        signal: abortController.signal,
+        documents: params.body.documents,
+        esClient: scopedClusterClient.asCurrentUser,
+        fieldsMetadataClient,
+        simulatePipeline: (pipeline: StreamlangDSL) =>
+          simulateProcessing({
+            params: {
+              path: { name: stream.name },
+              body: { processing: pipeline, documents: params.body.documents },
+            },
+            scopedClusterClient,
+            streamsClient,
+            fieldsMetadataClient,
+          }),
       });
 
-    const stream = await streamsClient.getStream(params.path.name);
-
-    if (!Streams.ingest.all.Definition.is(stream)) {
-      throw new Error(`Stream ${stream.name} is not a valid ingest stream`);
+      return from(pipelinePromise).pipe(
+        map((pipeline) => ({
+          type: 'suggested_processing_pipeline' as const,
+          pipeline,
+        }))
+      );
+    } catch (error) {
+      logger.error('Failed to generate pipeline suggestion:', error);
+      throw error;
     }
-
-    const abortController = new AbortController();
-
-    // Process extracted patterns from client to determine best parsing processor
-    let parsingProcessor: GrokProcessor | DissectProcessor | undefined;
-
-    if (params.body.extracted_patterns) {
-      const { grok, dissect } = params.body.extracted_patterns;
-      const candidates: Array<{
-        type: 'grok' | 'dissect';
-        processor: GrokProcessor | DissectProcessor;
-        parsedRate: number;
-      }> = [];
-
-      // Process grok patterns if provided
-      if (grok) {
-        try {
-          const grokProcessor = await processGrokPatterns({
-            patternGroups: grok.patternGroups,
-            fieldName: grok.fieldName,
-            streamName: stream.name,
-            connectorId: params.body.connector_id,
-            documents: params.body.documents,
-            inferenceClient,
-            scopedClusterClient,
-            streamsClient,
-            fieldsMetadataClient,
-            signal: abortController.signal,
-            logger,
-          });
-          if (grokProcessor) {
-            candidates.push(grokProcessor);
-          }
-        } catch (error) {
-          logger.warn('Grok pattern processing failed:', error);
-        }
-      }
-
-      // Process dissect pattern if provided
-      if (dissect) {
-        try {
-          const dissectProcessor = await processDissectPattern({
-            messages: dissect.messages,
-            fieldName: dissect.fieldName,
-            streamName: stream.name,
-            connectorId: params.body.connector_id,
-            documents: params.body.documents,
-            inferenceClient,
-            scopedClusterClient,
-            streamsClient,
-            fieldsMetadataClient,
-            signal: abortController.signal,
-            logger,
-          });
-          if (dissectProcessor) {
-            candidates.push(dissectProcessor);
-          }
-        } catch (error) {
-          logger.warn('Dissect pattern processing failed:', error);
-        }
-      }
-
-      // Pick the best processor based on parsed rate
-      if (candidates.length > 0) {
-        candidates.sort((a, b) => b.parsedRate - a.parsedRate);
-        parsingProcessor = candidates[0].processor;
-      }
-    }
-
-    const pipelinePromise = suggestProcessingPipeline({
-      definition: stream,
-      inferenceClient: inferenceClient.bindTo({ connectorId: params.body.connector_id }),
-      parsingProcessor,
-      maxSteps: undefined, // Allow full reasoning for pipeline generation
-      signal: abortController.signal,
-      documents: params.body.documents,
-      esClient: scopedClusterClient.asCurrentUser,
-      fieldsMetadataClient,
-      simulatePipeline: (pipeline: StreamlangDSL) =>
-        simulateProcessing({
-          params: {
-            path: { name: stream.name },
-            body: { processing: pipeline, documents: params.body.documents },
-          },
-          scopedClusterClient,
-          streamsClient,
-          fieldsMetadataClient,
-        }),
-    });
-
-    // Turn our promise into an Observable ServerSideEvent. The only reason we're streaming the
-    // response here is to avoid timeout issues prevalent with long-running requests to LLMs.
-    return from(pipelinePromise).pipe(
-      map((pipeline) => ({
-        type: 'suggested_processing_pipeline' as const,
-        pipeline,
-      }))
-    );
   },
 });
 
@@ -247,7 +333,10 @@ async function processGrokPatterns({
   signal,
   logger,
 }: {
-  patternGroups: Array<{ messages: string[]; patterns: string[] }>;
+  patternGroups: Array<{
+    messages: string[];
+    nodes: Array<{ pattern: string } | { id: string; component: string; values: string[] }>;
+  }>;
   fieldName: string;
   streamName: string;
   connectorId: string;
@@ -264,17 +353,20 @@ async function processGrokPatterns({
   // Request grok pattern reviews for each group in parallel
   const grokResults = await Promise.allSettled(
     patternGroups.map(async (group) => {
+      logger.debug(`[suggest_pipeline][grok] Reviewing group messages=${group.messages.length}`);
       // Call LLM to review patterns directly
+      const patterns = group.nodes
+        .filter((node): node is { pattern: string } => 'pattern' in node)
+        .map((node) => node.pattern);
+      logger.debug(`[suggest_pipeline][grok] Derived patterns=${patterns.length}`);
+
       const grokProcessor = await handleProcessingGrokSuggestions({
         params: {
           path: { name: streamName },
           body: {
             connector_id: connectorId,
             sample_messages: group.messages,
-            review_fields: getGrokReviewFields(
-              group.patterns.map((pattern) => ({ pattern })),
-              10
-            ),
+            review_fields: getGrokReviewFields(group.nodes as any, 10),
           },
         },
         inferenceClient,
@@ -284,10 +376,14 @@ async function processGrokPatterns({
         signal,
         logger,
       });
+      logger.debug('[suggest_pipeline][grok] LLM review response received');
 
       const grokProcessorResult = getGrokProcessor(
-        group.patterns.map((pattern) => ({ pattern })),
+        patterns.map((pattern) => ({ pattern })),
         grokProcessor
+      );
+      logger.debug(
+        `[suggest_pipeline][grok] getGrokProcessor produced patterns=${grokProcessorResult.patterns.length}`
       );
 
       return {
@@ -302,6 +398,10 @@ async function processGrokPatterns({
   const grokProcessors = grokResults.reduce<GrokProcessorResult[]>((acc, result) => {
     if (result.status === 'fulfilled') {
       acc.push(result.value);
+    } else {
+      // Re-throw the first error to fail the entire suggestion
+      logger.error('[suggest_pipeline][grok] LLM review failed:', result.reason);
+      throw result.reason;
     }
     return acc;
   }, []);
@@ -358,6 +458,8 @@ async function processGrokPatterns({
  */
 async function processDissectPattern({
   messages,
+  patternAst,
+  patternFields,
   fieldName,
   streamName,
   connectorId,
@@ -370,6 +472,22 @@ async function processDissectPattern({
   logger,
 }: {
   messages: string[];
+  patternAst: {
+    nodes: Array<
+      { type: 'field'; name: string; modifiers?: any } | { type: 'literal'; value: string }
+    >;
+  };
+  patternFields: Array<{
+    name: string;
+    values: string[];
+    position: number;
+    modifiers?: {
+      rightPadding?: boolean;
+      skip?: boolean;
+      namedSkip?: boolean;
+      append?: boolean;
+    };
+  }>;
   fieldName: string;
   streamName: string;
   connectorId: string;
@@ -382,29 +500,19 @@ async function processDissectPattern({
   logger: any;
 }): Promise<{ type: 'dissect'; processor: DissectProcessor; parsedRate: number } | null> {
   const SUGGESTED_DISSECT_PROCESSOR_ID = 'dissect-processor';
-
-  // Extract dissect pattern from messages (server-side)
-  const groupedMessages = groupMessagesByDissectPattern(messages);
-  const largestGroup = groupedMessages[0]; // Groups are sorted by probability (descending)
-
-  if (!largestGroup || largestGroup.messages.length === 0) {
+  if (messages.length === 0 || patternAst.nodes.length === 0 || patternFields.length === 0) {
     return null;
   }
-
-  const dissectPattern = extractDissectPattern(largestGroup.messages);
-
-  if (dissectPattern.fields.length === 0) {
-    return null;
-  }
-
-  // Call LLM to review and map fields to ECS
+  // Use client-provided fields directly for review & processor generation
+  const dissectPattern = { ast: patternAst, fields: patternFields };
+  const reviewFields = getDissectReviewFields(dissectPattern, 10);
   const dissectReview = await handleProcessingDissectSuggestions({
     params: {
       path: { name: streamName },
       body: {
         connector_id: connectorId,
-        sample_messages: largestGroup.messages.slice(0, 10),
-        review_fields: getDissectReviewFields(dissectPattern, 10),
+        sample_messages: messages.slice(0, 10),
+        review_fields: reviewFields,
       },
     },
     inferenceClient,
@@ -416,8 +524,13 @@ async function processDissectPattern({
   });
 
   const dissectProcessor = getDissectProcessorWithReview(dissectPattern, dissectReview, fieldName);
+  const pattern = dissectProcessor.pattern;
 
-  // Run simulation to verify dissect pattern works
+  if (!pattern || pattern.trim().length === 0) {
+    logger.debug('[suggest_pipeline][dissect] Empty pattern generated; skipping simulation');
+    return null;
+  }
+
   const simulationResult = await simulateProcessing({
     params: {
       path: { name: streamName },
@@ -429,7 +542,7 @@ async function processDissectPattern({
               action: 'dissect',
               customIdentifier: SUGGESTED_DISSECT_PROCESSOR_ID,
               from: fieldName,
-              pattern: dissectProcessor.pattern,
+              pattern,
             },
           ],
         },
@@ -448,7 +561,8 @@ async function processDissectPattern({
     processor: {
       action: 'dissect',
       from: fieldName,
-      pattern: dissectProcessor.pattern,
+      pattern,
+      append_separator: ' ',
     },
     parsedRate,
   };

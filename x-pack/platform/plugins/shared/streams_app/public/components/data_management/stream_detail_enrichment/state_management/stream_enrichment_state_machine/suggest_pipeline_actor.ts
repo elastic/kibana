@@ -16,6 +16,11 @@ import {
   extractGrokPatternDangerouslySlow,
   groupMessagesByPattern as groupMessagesByGrokPattern,
 } from '@kbn/grok-heuristics';
+import {
+  groupMessagesByPattern as groupMessagesByDissectPattern,
+  extractDissectPattern,
+  type DissectASTNode,
+} from '@kbn/dissect-heuristics';
 import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
 import { PRIORITIZED_CONTENT_FIELDS, getDefaultTextField } from '../../utils';
 import { extractMessagesFromField } from '../../steps/blocks/action/utils/pattern_suggestion_helpers';
@@ -35,19 +40,33 @@ export interface SuggestPipelineInput extends SuggestPipelineInputMinimal {
   notifications: NotificationsStart;
 }
 
+type GrokPatternNode = { pattern: string } | { id: string; component: string; values: string[] };
+
 interface ExtractedGrokPattern {
   type: 'grok';
   fieldName: string;
   patternGroups: Array<{
     messages: string[];
-    patterns: string[];
+    nodes: GrokPatternNode[];
   }>;
 }
 
 interface ExtractedDissectPattern {
   type: 'dissect';
   fieldName: string;
-  messages: string[];
+  messages: string[]; // sample messages for review
+  patternAst: { nodes: DissectASTNode[] };
+  patternFields: Array<{
+    name: string;
+    values: string[];
+    position: number;
+    modifiers?: {
+      rightPadding?: boolean;
+      skip?: boolean;
+      namedSkip?: boolean;
+      append?: boolean;
+    };
+  }>;
 }
 
 export async function suggestPipelineLogic(input: SuggestPipelineInput): Promise<StreamlangDSL> {
@@ -80,8 +99,20 @@ export async function suggestPipelineLogic(input: SuggestPipelineInput): Promise
             connector_id: input.connectorId,
             documents,
             extracted_patterns: {
-              grok: grokPatterns,
-              dissect: dissectPatterns,
+              grok: grokPatterns
+                ? {
+                    fieldName: grokPatterns.fieldName,
+                    patternGroups: grokPatterns.patternGroups,
+                  }
+                : null,
+              dissect: dissectPatterns
+                ? {
+                    fieldName: dissectPatterns.fieldName,
+                    messages: dissectPatterns.messages,
+                    patternAst: dissectPatterns.patternAst,
+                    patternFields: dissectPatterns.patternFields,
+                  }
+                : null,
             },
           },
         },
@@ -112,9 +143,7 @@ async function extractGrokPatternsClientSide(
       const grokPatternNodes = extractGrokPatternDangerouslySlow(group.messages);
       return {
         messages: group.messages.slice(0, 10), // Limit to 10 samples per group
-        patterns: grokPatternNodes
-          .filter((node): node is { pattern: string } => 'pattern' in node)
-          .map((node) => node.pattern),
+        nodes: grokPatternNodes as GrokPatternNode[], // forward full nodes with proper typing
       };
     });
 
@@ -132,22 +161,31 @@ async function extractGrokPatternsClientSide(
 
 /**
  * CLIENT-SIDE: Prepare dissect data for server-side processing
- * Just extract and group messages - pattern extraction happens server-side
+ * Full pattern extraction (AST + fields) happens client-side; server only reviews & simulates.
  */
 async function extractDissectPatternsClientSide(
   messages: string[],
   fieldName: string
 ): Promise<ExtractedDissectPattern | null> {
   try {
-    // Just return the messages and fieldName - server will do the extraction
     if (messages.length === 0) {
       return null;
     }
-
+    const grouped = groupMessagesByDissectPattern(messages);
+    if (grouped.length === 0) {
+      return null;
+    }
+    const largestGroup = grouped[0]; // already sorted by probability descending
+    const pattern = extractDissectPattern(largestGroup.messages);
+    if (!pattern.ast.nodes.length) {
+      return null;
+    }
     return {
       type: 'dissect',
       fieldName,
-      messages: messages.slice(0, 10), // Limit to 10 samples
+      messages: largestGroup.messages.slice(0, 10),
+      patternAst: { nodes: pattern.ast.nodes },
+      patternFields: pattern.fields,
     };
   } catch (error) {
     // eslint-disable-next-line no-console

@@ -53,7 +53,7 @@ export function PipelineSuggestion({
         })}
       </EuiText>
       <EuiSpacer size="m" />
-      <RootSteps stepRefs={stepRefs} />
+      <RootSteps stepRefs={stepRefs} readOnly />
       <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
         <EuiFlexItem>

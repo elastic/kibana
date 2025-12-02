@@ -34,7 +34,7 @@ import { getStepDescription } from './utils';
 
 export const ActionBlockListItem = (props: ActionBlockProps) => {
   const { euiTheme } = useEuiTheme();
-  const { stepRef, level, processorMetrics } = props;
+  const { stepRef, level, processorMetrics, readOnly = false } = props;
 
   const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
   const isUnsaved = useSelector(
@@ -137,14 +137,16 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
                       </EuiBadge>
                     </EuiFlexItem>
                   )}
-                  <EuiFlexItem>
-                    <StepContextMenu
-                      stepRef={stepRef}
-                      stepUnderEdit={props.stepUnderEdit}
-                      isFirstStepInLevel={props.isFirstStepInLevel}
-                      isLastStepInLevel={props.isLastStepInLevel}
-                    />
-                  </EuiFlexItem>
+                  {!readOnly && (
+                    <EuiFlexItem>
+                      <StepContextMenu
+                        stepRef={stepRef}
+                        stepUnderEdit={props.stepUnderEdit}
+                        isFirstStepInLevel={props.isFirstStepInLevel}
+                        isLastStepInLevel={props.isLastStepInLevel}
+                      />
+                    </EuiFlexItem>
+                  )}
                 </EuiFlexGroup>
               </EuiFlexItem>
             )}
