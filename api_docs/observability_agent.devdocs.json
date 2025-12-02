@@ -326,16 +326,77 @@
     "setup": {
       "parentPluginId": "observabilityAgent",
       "id": "def-server.ObservabilityAgentPluginSetup",
-      "type": "Type",
+      "type": "Interface",
       "tags": [],
       "label": "ObservabilityAgentPluginSetup",
       "description": [],
-      "signature": [
-        "{ [x: string]: never; }"
-      ],
       "path": "x-pack/solutions/observability/plugins/observability_agent/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "observabilityAgent",
+          "id": "def-server.ObservabilityAgentPluginSetup.registerDataProvider",
+          "type": "Function",
+          "tags": [],
+          "label": "registerDataProvider",
+          "description": [],
+          "signature": [
+            "<K extends \"apmErrors\">(id: K, provider: ObservabilityAgentDataProvider<K>) => void"
+          ],
+          "path": "x-pack/solutions/observability/plugins/observability_agent/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "observabilityAgent",
+              "id": "def-server.ObservabilityAgentPluginSetup.registerDataProvider.$1",
+              "type": "Uncategorized",
+              "tags": [],
+              "label": "id",
+              "description": [],
+              "signature": [
+                "K"
+              ],
+              "path": "x-pack/solutions/observability/plugins/observability_agent/server/data_registry.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            },
+            {
+              "parentPluginId": "observabilityAgent",
+              "id": "def-server.ObservabilityAgentPluginSetup.registerDataProvider.$2",
+              "type": "Function",
+              "tags": [],
+              "label": "provider",
+              "description": [],
+              "signature": [
+                "(context: ObservabilityAgentDataProviderDependencies) => Promise<ObservabilityAgentDataRegistryTypes[K]>"
+              ],
+              "path": "x-pack/solutions/observability/plugins/observability_agent/server/data_registry.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "returnComment": [],
+              "children": [
+                {
+                  "parentPluginId": "observabilityAgent",
+                  "id": "def-server.ObservabilityAgentPluginSetup.registerDataProvider.$2.$1",
+                  "type": "Object",
+                  "tags": [],
+                  "label": "context",
+                  "description": [],
+                  "signature": [
+                    "ObservabilityAgentDataProviderDependencies"
+                  ],
+                  "path": "x-pack/solutions/observability/plugins/observability_agent/server/data_registry.ts",
+                  "deprecated": false,
+                  "trackAdoption": false
+                }
+              ]
+            }
+          ]
+        }
+      ],
       "lifecycle": "setup",
       "initialIsOpen": true
     },
