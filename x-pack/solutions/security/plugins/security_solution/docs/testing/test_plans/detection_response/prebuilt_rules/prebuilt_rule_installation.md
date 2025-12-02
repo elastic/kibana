@@ -302,6 +302,9 @@ When user navigates to the last page
 Then the number of rules shown on the page should be less than <rows_per_page>
 ```
 
+**Examples:**
+
+`<rows_per_page>` = 5 | 10 | 20 | 50 | 100
 
 ### Add Elastic Rules table: Sorting
 
@@ -337,10 +340,14 @@ Then the available prebuilt rules should be unsorted by <field_name>
 ```Gherkin
 Given multiple prebuilt rules available for installation
 When user opens the Add Elastic Rules page
-And sorts the rules by <field>
+And sorts the rules by <field_name>
 And navigates to the next page
-Then the available prebuilt rules should still be sorted by <field>
+Then the available prebuilt rules should still be sorted by <field_name>
 ```
+
+**Examples:**
+
+`<field_name>` = name | risk_score | severity
 
 #### **Scenario: Changing sorting resets pagination to the first page**
 
@@ -351,10 +358,14 @@ Given multiple prebuilt rules available for installation
 And there's more than one page of available prebuilt rules
 When user opens the Add Elastic Rules page
 And navigates to a non-first page
-And changes the sorting order
+And changes the sorting order for <field_name>
 Then the first page of available prebuilt rules should be shown
-And the available prebuilt rules should be sorted by <field>
+And the available prebuilt rules should be sorted by <field_name>
 ```
+
+**Examples:**
+
+`<field_name>` = name | risk_score | severity
 
 #### **Scenario: User can sort filtered prebuilt rules**
 
@@ -365,10 +376,15 @@ Given multiple prebuilt rules available for installation
 And at least one rule has a <tag> tag
 When user opens the Prebuilt Rules installation page
 And filters the available prebuilt rules by a <tag>
-And sorts the filtered rules by <field>
+And sorts the filtered rules by <field_name>
 Then only available rules that have a <tag> tag should be shown
-And the shown rules should be sorted by <field>
+And the shown rules should be sorted by <field_name>
 ```
+
+**Examples:**
+
+`<field_name>` = name | risk_score | severity
+`<tag>` = any tag from the list of available tags
 
 ### Add Elastic Rules table: Filtering
 
@@ -409,6 +425,10 @@ And filters the available prebuilt rules by a <tag>
 Then only the available prebuilt rules having this tag should be shown
 ```
 
+**Examples:**
+
+`<tag>` = any tag from the list of available tags
+
 #### **Scenario: User can filter prebuilt rules by multiple tags using AND logic on the Add Elastic Rules page**
 
 **Automation**: 1 API integration test with mock rules.
@@ -420,6 +440,10 @@ When user opens the Add Elastic Rules page
 And filters the available prebuilt rules by <tag1> and <tag2> tags
 Then only available prebuilt rules having both <tag1> and <tag2> tags should be shown
 ```
+
+**Examples:**
+
+`<tag1>`, `<tag2>` = any two tags from the list of available tags
 
 #### **Scenario: User can filter prebuilt rules by name and tags at the same time**
 
@@ -433,6 +457,10 @@ And filters the available prebuilt rules by a <tag>
 And enters <text> in the search field
 Then only available prebuilt rules having <tag> tag and containing <text> in their name should be shown
 ```
+
+**Examples:**
+
+`<tag>` = any tag from the list of available tags
 
 #### **Scenario: Empty state is shown when filters match no rules**
 
