@@ -217,7 +217,7 @@ export class WorkflowsExecutionEnginePlugin
                 logger.error(`Workflow ${workflowId} not found`);
                 return;
               }
-              logger.info(`Running scheduled workflow task for workflow ${workflow.id}`);
+              logger.debug(`Running scheduled workflow task for workflow ${workflow.id}`);
 
               const { dataStreams, elasticsearch } = coreStart;
               const esClient = elasticsearch.client.asInternalUser as Client;
