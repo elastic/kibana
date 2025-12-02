@@ -88,7 +88,7 @@ export const RulesPage = () => {
 
   const renderRulesList = useCallback(() => {
     return (
-      <KibanaPageTemplate.Section paddingSize="l">
+      <KibanaPageTemplate.Section paddingSize="l" data-test-subj="rulesListWrapper">
         <RulesList
           consumers={NON_SIEM_CONSUMERS}
           rulesListKey="rules-page"
