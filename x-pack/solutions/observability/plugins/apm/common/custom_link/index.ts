@@ -31,6 +31,14 @@ export const extractTemplateVariableNames = (url: string): string[] => {
   return Array.from(uniqueVariableNames);
 };
 
+/**
+ * Checks if a value is a valid HTTP or HTTPS URL.
+ * Only URLs with http:// or https:// protocols are considered valid.
+ * Other protocols (ftp://, file://, etc.) will return false.
+ *
+ * @param value - The string value to check
+ * @returns true if the value is a valid http/https URL, false otherwise
+ */
 function isValidUrl(value: string): boolean {
   try {
     const url = new URL(value);
