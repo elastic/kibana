@@ -8,7 +8,6 @@
 import type { Subscription } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import type { MappingProperty, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import { uniqBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { FileUploadManager } from '../../../../file_upload_manager/file_manager';
 
@@ -17,6 +16,15 @@ interface MappingEdits {
   originalName: string;
   mappingProperty: MappingProperty;
   originalMappingProperty: MappingProperty;
+}
+
+interface MappingError {
+  message: string;
+  errors: Array<{
+    nameError: boolean;
+    typeError: boolean;
+    duplicateError: boolean;
+  }>;
 }
 
 const blankMappingErrorText = i18n.translate('xpack.fileUpload.mappingEditor.blankMappingError', {
@@ -34,7 +42,7 @@ export class MappingEditorService {
   private _mappings$ = new BehaviorSubject<Array<MappingEdits>>([]);
   public mappings$ = this._mappings$.asObservable();
 
-  private _mappingsError$ = new BehaviorSubject<string | null>(null);
+  private _mappingsError$ = new BehaviorSubject<MappingError | null>(null);
   public mappingsError$ = this._mappingsError$.asObservable();
 
   constructor(private readonly fileUploadManager: FileUploadManager) {
@@ -105,38 +113,61 @@ export class MappingEditorService {
   }
 
   private checkMappingsValid(mappingsArray: Array<MappingEdits>) {
-    // Check for individual mapping validity
-    const mappingPopulated = mappingsArray.every((mapping) => {
-      // Name cannot be blank/empty
-      if (!mapping.name || mapping.name.trim() === '') {
-        return false;
-      }
+    const errors: MappingError['errors'] = [];
+    const tempMappingsArray = mappingsArray.map((mapping) => ({
+      ...mapping,
+      name: mapping.name.trim(),
+    }));
 
-      // mappingProperty.type cannot be null, undefined, or empty
-      if (
-        !mapping.mappingProperty ||
-        !mapping.mappingProperty.type ||
-        mapping.mappingProperty.type.trim() === ''
-      ) {
-        return false;
-      }
+    let hasBlankError = false;
+    let hasDuplicateError = false;
 
-      return true;
+    // Check for blank names and null types
+    tempMappingsArray.forEach((mapping, index) => {
+      const nameError = !mapping.name || mapping.name === '';
+      const typeError = mapping.mappingProperty.type === null;
+
+      errors.push({ nameError, typeError, duplicateError: false });
+      hasBlankError = hasBlankError || nameError || typeError;
     });
 
-    if (!mappingPopulated) {
-      this._mappingsError$.next(blankMappingErrorText);
+    if (hasBlankError) {
+      this._mappingsError$.next({
+        message: blankMappingErrorText,
+        errors,
+      });
       return;
     }
 
-    // Check for duplicate names using lodash
-    const uniqueMappings = uniqBy(mappingsArray, (mapping) => mapping.name.trim().toLowerCase());
-    const noDuplicates = mappingsArray.length === uniqueMappings.length;
-    if (!noDuplicates) {
-      this._mappingsError$.next(duplicateMappingErrorText);
+    errors.length = 0;
+
+    const nameCounts: Record<string, number> = {};
+    tempMappingsArray.forEach((mapping) => {
+      const name = mapping.name;
+      nameCounts[name] = (nameCounts[name] ?? 0) + 1;
+    });
+
+    // Check for duplicate names
+    tempMappingsArray.forEach((mapping, index) => {
+      const name = mapping.name;
+      const duplicateError = nameCounts[name] > 1;
+      errors.push({
+        nameError: false,
+        typeError: false,
+        duplicateError,
+      });
+      hasDuplicateError = hasDuplicateError || duplicateError;
+    });
+
+    if (hasDuplicateError) {
+      this._mappingsError$.next({
+        message: duplicateMappingErrorText,
+        errors,
+      });
       return;
     }
 
+    // No errors
     this._mappingsError$.next(null);
   }
 }

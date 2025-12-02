@@ -30,6 +30,7 @@ export const MappingEditor: FC<Props> = ({ setMappingsValid }) => {
     mappingEditorService.mappingsError$,
     mappingEditorService.getMappingsError()
   );
+
   const mappings = useObservable(
     mappingEditorService.mappings$,
     mappingEditorService.getMappings()
@@ -82,12 +83,15 @@ export const MappingEditor: FC<Props> = ({ setMappingsValid }) => {
 
         {mappings.map((mapping, index) => {
           const { name, mappingProperty } = mapping;
+          const nameInvalid =
+            mappingsError?.errors[index]?.nameError || mappingsError?.errors[index]?.duplicateError;
 
           return (
             <EuiFlexItem key={index}>
               <EuiFlexGroup gutterSize="m" alignItems="center">
                 <EuiFlexItem>
                   <EuiFieldText
+                    isInvalid={nameInvalid}
                     compressed
                     value={name}
                     placeholder={i18n.translate(
@@ -112,6 +116,7 @@ export const MappingEditor: FC<Props> = ({ setMappingsValid }) => {
                       mappingEditorService.updateMapping(index, name, newType);
                     }}
                     selectedType={mappingProperty.type || null}
+                    css={{ maxWidth: '250px' }}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -124,7 +129,7 @@ export const MappingEditor: FC<Props> = ({ setMappingsValid }) => {
         <>
           <EuiSpacer size="s" />
           <EuiText size="xs" color="danger">
-            {mappingsError}
+            {mappingsError.message}
           </EuiText>
         </>
       ) : null}

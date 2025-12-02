@@ -6,6 +6,7 @@
       "jest",
       "node",
       "react",
+      "@testing-library/jest-dom",
       "@emotion/react/types/css-prop",
       "../../../../../typings/emotion.d.ts"
     ]
