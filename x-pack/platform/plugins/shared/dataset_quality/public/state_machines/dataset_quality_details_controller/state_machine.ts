@@ -9,6 +9,7 @@ import type { IToasts } from '@kbn/core-notifications-browser';
 import { getDateISORange } from '@kbn/timerange';
 import type { DoneInvokeEvent, InterpreterFrom } from 'xstate';
 import { assign, createMachine, raise } from 'xstate';
+import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import type {
   Dashboard,
   DataStreamDetails,
@@ -833,7 +834,7 @@ export interface DatasetQualityDetailsControllerStateMachineDependencies {
   plugins: DatasetQualityStartDeps;
   toasts: IToasts;
   dataStreamDetailsClient: IDataStreamDetailsClient;
-  streamsRepositoryClient?: any; // Optional streams client for classic/wired views
+  streamsRepositoryClient?: StreamsRepositoryClient; // Optional streams client for classic/wired views
   refreshDefinition?: () => void; // Optional callback to refresh stream definition
 }
 
@@ -1037,6 +1038,7 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
         const result = await streamsRepositoryClient.fetch(
           'PUT /api/streams/{name}/_ingest 2023-10-31',
           {
+            signal: null,
             params: {
               path: { name: context.dataStream },
               body: {

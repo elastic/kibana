@@ -6,7 +6,7 @@
  */
 
 import type { DoneInvokeEvent } from 'xstate';
-import type { FailureStore } from '@kbn/streams-schema';
+import type { FailureStore, Streams } from '@kbn/streams-schema';
 import type {
   Dashboard,
   DataStreamRolloverResponse,
@@ -83,7 +83,7 @@ export interface WithDefaultControllerState {
   isNonAggregatable?: boolean;
   fieldLimit?: FieldLimit;
   view: DatasetQualityView;
-  streamDefinition?: any;
+  streamDefinition?: Streams.ingest.all.GetResponse;
 }
 
 export interface WithDataStreamDetails {
