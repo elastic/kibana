@@ -63,6 +63,16 @@ import { UnsavedChangesPrompt, YamlEditor } from '../../../shared/ui';
 import { interceptMonacoYamlProvider } from '../lib/autocomplete/intercept_monaco_yaml_provider';
 import { interceptMonacoYamlHoverProvider } from '../lib/hover/intercept_monaco_yaml_hover_provider';
 import { useEnhancedMonacoYamlHoverProvider } from '../lib/hover/use_enhanced_monaco_yaml_hover_provider';
+import {
+  ElasticsearchMonacoConnectorHandler,
+  GenericMonacoConnectorHandler,
+  KibanaMonacoConnectorHandler,
+} from '../lib/monaco_connectors';
+import { CustomMonacoStepHandler } from '../lib/monaco_connectors/custom_monaco_step_handler';
+import {
+  registerMonacoConnectorHandler,
+  registerUnifiedHoverProvider,
+} from '../lib/monaco_providers';
 import { insertStepSnippet } from '../lib/snippets/insert_step_snippet';
 import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
 import { useRegisterKeyboardCommands } from '../lib/use_register_keyboard_commands';
@@ -130,7 +140,7 @@ export const WorkflowYAMLEditor = ({
   onStepRun,
 }: WorkflowYAMLEditorProps) => {
   const { euiTheme } = useEuiTheme();
-  const { notifications } = useKibana().services;
+  const { notifications, http } = useKibana().services;
 
   const saveYaml = useSaveYaml();
   const isSaving = useSelector(selectIsSavingYaml);
@@ -308,6 +318,48 @@ export const WorkflowYAMLEditor = ({
       setTimeout(() => {
         setIsEditorMounted(true);
       }, 0);
+
+      // Setup Elasticsearch step providers if we have the required services
+      if (http && notifications) {
+        // Register Elasticsearch connector handler
+        const elasticsearchHandler = new ElasticsearchMonacoConnectorHandler({
+          http,
+          notifications,
+        });
+        registerMonacoConnectorHandler(elasticsearchHandler);
+
+        // Register Kibana connector handler
+        const kibanaHandler = new KibanaMonacoConnectorHandler({
+          http,
+          notifications,
+          kibanaHost: window.location.origin,
+        });
+        registerMonacoConnectorHandler(kibanaHandler);
+
+        const customHandler = new CustomMonacoStepHandler();
+        registerMonacoConnectorHandler(customHandler);
+
+        // Monaco YAML hover is now disabled via configuration (hover: false)
+        // The unified hover provider will handle all hover content including validation errors
+
+        const genericHandler = new GenericMonacoConnectorHandler();
+        registerMonacoConnectorHandler(genericHandler);
+
+        // Create unified providers
+        const providerConfig = {
+          getYamlDocument: () => yamlDocumentRef.current || null,
+          options: {
+            http,
+            notifications,
+            esHost: 'http://localhost:9200',
+            kibanaHost: window.location.origin,
+          },
+        };
+
+        // Register the unified hover provider for API documentation and other content
+        const hoverDisposable = registerUnifiedHoverProvider(providerConfig);
+        disposablesRef.current.push(hoverDisposable);
+      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
