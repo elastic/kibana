@@ -2,17 +2,17 @@
 plugins:
   enabled:
     - apm
-    - infra
     - console
     - discover_enhanced
+    - infra
     - maps
     - observability
     - observability_onboarding
     - painless_lab
     - profiling
     - security_solution
-    - streams_app
     - slo
+    - streams_app
     - workflows_extensions
   disabled:
 
