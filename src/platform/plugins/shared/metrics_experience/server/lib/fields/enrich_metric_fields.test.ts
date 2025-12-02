@@ -16,6 +16,7 @@ import type { Logger } from '@kbn/core/server';
 import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
 import { normalizeUnit } from './normalize_unit';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { esql, type ComposerQuery } from '@kbn/esql-ast';
 
 jest.mock('../dimensions/extract_dimensions');
 jest.mock('./normalize_unit');
@@ -526,9 +527,16 @@ describe('enrichMetricFields', () => {
   });
 
   describe('buildEsqlQuery', () => {
+    let baseQuery: ComposerQuery;
+    beforeEach(() => {
+      baseQuery = esql.from(TEST_INDEX_METRICS).pipe`WHERE ??metricField IS NOT NULL`.setParam(
+        'metricField',
+        TEST_METRIC_NAME
+      );
+    });
+
     it('builds basic query without filters or user query', () => {
-      const metricField = createMetricField();
-      const query = buildEsqlQuery(metricField, {}, '');
+      const query = buildEsqlQuery(baseQuery, {}, '');
 
       expect(query).toContain('FROM metrics-*');
       expect(query).toContain(`WHERE ${TEST_METRIC_NAME} IS NOT NULL`);
@@ -536,9 +544,8 @@ describe('enrichMetricFields', () => {
     });
 
     it('builds query with single dimension filter', () => {
-      const metricField = createMetricField();
       const filters: DimensionFilters = { [TEST_HOST_FIELD]: [TEST_HOST_VALUE] };
-      const query = buildEsqlQuery(metricField, filters, '');
+      const query = buildEsqlQuery(baseQuery, filters, '');
 
       expect(query).toContain('FROM metrics-*');
       expect(query).toContain(`WHERE ${TEST_METRIC_NAME} IS NOT NULL`);
@@ -548,9 +555,8 @@ describe('enrichMetricFields', () => {
     });
 
     it('builds query with multiple dimension filter values', () => {
-      const metricField = createMetricField();
       const filters: DimensionFilters = { [TEST_HOST_FIELD]: ['host-1', 'host-2', 'host-3'] };
-      const query = buildEsqlQuery(metricField, filters, '');
+      const query = buildEsqlQuery(baseQuery, filters, '');
 
       expect(query).toContain('FROM metrics-*');
       expect(query).toContain(`WHERE ${TEST_METRIC_NAME} IS NOT NULL`);
@@ -561,9 +567,8 @@ describe('enrichMetricFields', () => {
     });
 
     it('builds query with WHERE clause from user query', () => {
-      const metricField = createMetricField();
       const userQuery = 'FROM logs-* | WHERE status == "active"';
-      const query = buildEsqlQuery(metricField, {}, userQuery);
+      const query = buildEsqlQuery(baseQuery, {}, userQuery);
 
       expect(query).toContain('FROM metrics-*');
       expect(query).toContain(`WHERE ${TEST_METRIC_NAME} IS NOT NULL`);
@@ -572,10 +577,9 @@ describe('enrichMetricFields', () => {
     });
 
     it('builds query with both dimension filters and WHERE clause', () => {
-      const metricField = createMetricField();
       const filters: DimensionFilters = { [TEST_HOST_FIELD]: [TEST_HOST_VALUE] };
       const userQuery = 'FROM logs-* | WHERE status == "active"';
-      const query = buildEsqlQuery(metricField, filters, userQuery);
+      const query = buildEsqlQuery(baseQuery, filters, userQuery);
 
       expect(query).toContain('FROM metrics-*');
       expect(query).toContain(`WHERE ${TEST_METRIC_NAME} IS NOT NULL`);
@@ -586,9 +590,8 @@ describe('enrichMetricFields', () => {
     });
 
     it('handles empty dimension filter values', () => {
-      const metricField = createMetricField();
       const filters: DimensionFilters = { [TEST_HOST_FIELD]: [] };
-      const query = buildEsqlQuery(metricField, filters, '');
+      const query = buildEsqlQuery(baseQuery, filters, '');
 
       expect(query).toContain('FROM metrics-*');
       expect(query).toContain(`WHERE ${TEST_METRIC_NAME} IS NOT NULL`);
@@ -596,9 +599,26 @@ describe('enrichMetricFields', () => {
       expect(query).toContain('LIMIT 1');
     });
 
+    it('builds query with multiple filter entries without param conflicts', () => {
+      const filters: DimensionFilters = {
+        [TEST_HOST_FIELD]: ['host-1', 'host-2'],
+        region: ['us-east'],
+      };
+      const query = buildEsqlQuery(baseQuery, filters, '');
+
+      expect(query).toContain('FROM metrics-*');
+      expect(query).toContain(`WHERE ${TEST_METRIC_NAME} IS NOT NULL`);
+      expect(query).toContain(`WHERE \`${TEST_HOST_FIELD}\`::STRING IN ("host-1", "host-2")`);
+      expect(query).toContain('WHERE region::STRING IN ("us-east")');
+      expect(query).toContain('LIMIT 1');
+    });
+
     it('properly handles field names with dots', () => {
-      const metricField = createMetricField('system.memory.usage');
-      const query = buildEsqlQuery(metricField, {}, '');
+      baseQuery = esql.from(TEST_INDEX_METRICS).pipe`WHERE ??metricField IS NOT NULL`.setParam(
+        'metricField',
+        'system.memory.usage'
+      );
+      const query = buildEsqlQuery(baseQuery, {}, '');
 
       expect(query).toContain('FROM metrics-*');
       expect(query).toContain('WHERE system.memory.usage IS NOT NULL');

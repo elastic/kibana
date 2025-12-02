@@ -11,7 +11,7 @@ import { type Logger } from '@kbn/core/server';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { semconvFlat } from '@kbn/otel-semantic-conventions';
 import { dateRangeQuery } from '@kbn/es-query';
-import { esql } from '@kbn/esql-ast';
+import { ComposerQuery, esql } from '@kbn/esql-ast';
 import pLimit from 'p-limit';
 import { chunk } from 'lodash';
 import type { IndexFieldCapsMap, EpochTimeRange } from '../../types';
@@ -99,36 +99,30 @@ function buildMetricMetadataMapFromEsql(
 }
 
 export function buildEsqlQuery(
-  metricField: MetricField,
+  baseQuery: ComposerQuery,
   dimensionFilters: DimensionFilters,
   userQuery: string
 ): string {
-  const { name: field, index } = metricField;
+  // Use accumulator to carry both query and param index (avoids mutable let)
+  const { query: queryWithFilters } = Object.entries(dimensionFilters).reduce(
+    (acc, [dimensionName, values]) => {
+      if (values.length === 0) {
+        return acc;
+      }
 
-  // Build base query with metric field filter
-  const baseQuery = esql.from(index).pipe`WHERE ??metricField IS NOT NULL`.setParam(
-    'metricField',
-    field
+      const paramNames = values.map((_, i) => `?value${acc.paramIdx + i}`).join(', ');
+      const whereClause = `WHERE \`${dimensionName}\`::STRING IN (${paramNames})`;
+
+      const newQuery = values.reduce(
+        (q, value, i) => q.setParam(`value${acc.paramIdx + i}`, value),
+        acc.query.pipe(whereClause)
+      );
+
+      return { query: newQuery, paramIdx: acc.paramIdx + values.length };
+    },
+    { query: baseQuery, paramIdx: 0 }
   );
 
-  // Apply dimension filters using reduce to avoid let reassignment
-  const queryWithFilters = Object.entries(dimensionFilters).reduce((q, [dimensionName, values]) => {
-    if (values.length === 0) {
-      return q;
-    }
-
-    // Build WHERE clause with parameter placeholders
-    const paramNames = values.map((_, i) => `?value${i}`).join(', ');
-    const whereClause = `WHERE \`${dimensionName}\`::STRING IN (${paramNames})`;
-
-    // Apply the WHERE clause and set parameters
-    return values.reduce(
-      (query, value, i) => query.setParam(`value${i}`, value),
-      q.pipe(whereClause)
-    );
-  }, baseQuery);
-
-  // Apply WHERE command from Discover query if present
   const queryWithUserFilter = userQuery
     ? (() => {
         const whereCommand = extractWhereCommand(userQuery);
@@ -158,7 +152,12 @@ async function executeEsqlQueriesForChunk(
 
   const executeQuery = async (metricField: MetricField): Promise<EsqlQueryResult> => {
     try {
-      const query = buildEsqlQuery(metricField, dimensionFilters, userQuery);
+      const { name: field, index } = metricField;
+      const baseQuery = esql.from(index).pipe`WHERE ??metricField IS NOT NULL`.setParam(
+        'metricField',
+        field
+      );
+      const query = buildEsqlQuery(baseQuery, dimensionFilters, userQuery);
       const response = await esClient.esql('sample_metrics_documents', {
         query,
         filter: dateRangeFilter,
