@@ -32,8 +32,7 @@ export function transformDashboardOut(
     timeRestore,
     timeTo,
     title,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    project_routing,
+    projectRouting,
   } = attributes;
 
   // Extract tag references
@@ -60,7 +59,8 @@ export function transformDashboardOut(
     ...((panelsJSON || sections) && {
       panels: transformPanelsOut(panelsJSON, sections, references),
     }),
-    ...(project_routing !== undefined && { project_routing }),
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    ...(projectRouting !== undefined && { project_routing: projectRouting }),
     ...(refreshInterval && {
       refreshInterval: { pause: refreshInterval.pause, value: refreshInterval.value },
     }),

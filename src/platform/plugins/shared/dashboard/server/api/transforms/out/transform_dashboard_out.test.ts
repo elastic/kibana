@@ -230,7 +230,7 @@ describe('transformDashboardOut', () => {
         kibanaSavedObjectMeta: {},
         title: 'my title',
         description: 'my description',
-        project_routing: '_alias:_origin',
+        projectRouting: '_alias:_origin',
       };
       const result = transformDashboardOut(input);
       expect(result.project_routing).toBe('_alias:_origin');
@@ -243,7 +243,7 @@ describe('transformDashboardOut', () => {
         kibanaSavedObjectMeta: {},
         title: 'my title',
         description: 'my description',
-        // project_routing is undefined
+        // projectRouting is undefined
       };
       const result = transformDashboardOut(input);
       expect(result.project_routing).toBeUndefined();

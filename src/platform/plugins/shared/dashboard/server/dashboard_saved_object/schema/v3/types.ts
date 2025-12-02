@@ -12,7 +12,7 @@ import type { SavedDashboardPanel as SavedDashboardPanelV2 } from '../v2';
 import type { dashboardAttributesSchema, gridDataSchema, sectionSchema } from './v3';
 
 export type DashboardAttributes = TypeOf<typeof dashboardAttributesSchema> & {
-  project_routing?: string;
+  projectRouting?: string;
 };
 
 export type GridData = TypeOf<typeof gridDataSchema>;

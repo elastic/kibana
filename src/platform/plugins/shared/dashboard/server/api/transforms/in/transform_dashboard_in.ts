@@ -92,7 +92,7 @@ export const transformDashboardIn = (
         ? { timeFrom: timeRange.from, timeTo: timeRange.to, timeRestore: true }
         : { timeRestore: false }),
       kibanaSavedObjectMeta: { searchSourceJSON },
-      ...(project_routing !== undefined && { project_routing }),
+      ...(project_routing !== undefined && { projectRouting: project_routing }),
     };
     return {
       attributes,
