@@ -49,14 +49,17 @@ export class IndexManagement extends AbstractPageObject {
   async clickCreateIndexSaveButton() {
     const saveButton = this.page.testSubj.locator('createIndexSaveButton');
     await saveButton.click();
-    // Wait for modal to close
-    await saveButton.waitFor({ state: 'hidden', timeout: 30000 });
+    // Wait for modal to close using web-first assertion
+    await expect(saveButton).toBeHidden({ timeout: 30000 });
   }
 
-  async indexLinkVisible(indexName: string) {
-    const indexButton = this.page.getByRole('button').getByText(indexName);
-    await indexButton.waitFor({ state: 'visible', timeout: 30000 }); // necessary since this can be slow in CI
-    return indexButton.isVisible();
+  /**
+   * Returns locator for index link - caller should use web-first assertions.
+   * Note: Consider using extended timeout as this can be slow in CI environments.
+   * Example: await expect(pageObjects.indexManagement.indexLink(name)).toBeVisible({ timeout: 30000 });
+   */
+  indexLink(indexName: string) {
+    return this.page.getByRole('button').getByText(indexName);
   }
 
   async toggleHiddenIndices() {
@@ -69,8 +72,8 @@ export class IndexManagement extends AbstractPageObject {
     // eslint-disable-next-line playwright/no-nth-methods
     await indexLinks.nth(indexOfRow).click();
 
-    // Wait for index details page to load
-    await this.page.testSubj.locator('indexDetailsHeader').waitFor({ state: 'visible' });
+    // Wait for index details page to load using web-first assertion
+    await expect(this.page.testSubj.locator('indexDetailsHeader')).toBeVisible();
   }
 
   async navigateToIndexManagementTab(
@@ -91,6 +94,12 @@ export class IndexManagement extends AbstractPageObject {
     await this.page.testSubj.locator('nextButton').click();
   }
 
+  /**
+   * Custom combobox interaction for non-clearable comboboxes.
+   * Note: Cannot use EuiComboBoxWrapper here because the fieldType combobox
+   * has isClearable={false} (in type_parameter.tsx), and EuiComboBoxWrapper.selectSingleOption()
+   * attempts to clear() first, which fails when trying to click the non-existent comboBoxClearButton.
+   */
   async setComboBox(testSubject: string, value: string) {
     const comboBox = this.page.testSubj.locator(testSubject);
     await comboBox.click();

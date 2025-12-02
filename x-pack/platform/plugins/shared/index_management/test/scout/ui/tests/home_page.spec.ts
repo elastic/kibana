@@ -58,7 +58,9 @@ test.describe('Home page', { tag: ['@ess'] }, () => {
     await pageObjects.indexManagement.setCreateIndexName(testIndexName);
     await pageObjects.indexManagement.setCreateIndexMode('Lookup');
     await pageObjects.indexManagement.clickCreateIndexSaveButton();
-    expect(await pageObjects.indexManagement.indexLinkVisible(testIndexName)).toBe(true);
+    await expect(pageObjects.indexManagement.indexLink(testIndexName)).toBeVisible({
+      timeout: 30000,
+    });
   });
 
   test('Data streams - renders the data streams tab', async ({ pageObjects, page }) => {

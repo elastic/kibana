@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect, EuiFieldTextWrapper } from '@kbn/scout';
 import { test } from '../fixtures';
 
 test.describe('Index template wizard - Mappings step', { tag: ['@ess'] }, () => {
@@ -16,9 +16,13 @@ test.describe('Index template wizard - Mappings step', { tag: ['@ess'] }, () => 
     // Click Create Template button
     await page.testSubj.locator('createTemplateButton').click();
 
-    // Fill out required fields
-    await page.testSubj.locator('nameField').locator('input').fill('test-index-template');
-    await page.testSubj.locator('indexPatternsField').locator('input').fill('test-index-pattern');
+    // Fill out required fields using EUI wrapper
+    const nameField = new EuiFieldTextWrapper(page, { dataTestSubj: 'nameField' });
+    await nameField.fill('test-index-template');
+    const indexPatternsField = new EuiFieldTextWrapper(page, {
+      dataTestSubj: 'indexPatternsField',
+    });
+    await indexPatternsField.fill('test-index-pattern');
 
     // Go to Mappings step
     await page.testSubj.locator('formWizardStep-3').click();
