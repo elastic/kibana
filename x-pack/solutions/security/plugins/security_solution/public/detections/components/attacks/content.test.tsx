@@ -40,8 +40,19 @@ describe('AttacksPageContent', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId(FILTER_BY_ASSIGNEES_BUTTON)).toBeInTheDocument();
       expect(screen.getByTestId('schedule')).toBeInTheDocument();
+    });
+  });
+
+  it('should render `Assignee` button', async () => {
+    render(
+      <TestProviders>
+        <AttacksPageContent dataView={dataView} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId(FILTER_BY_ASSIGNEES_BUTTON)).toBeInTheDocument();
     });
   });
 });
