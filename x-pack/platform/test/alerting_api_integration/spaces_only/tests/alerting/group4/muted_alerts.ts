@@ -333,31 +333,34 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
         expect(mutedAlert._source[ALERT_MUTED]).to.be(true);
       });
 
-      // Manually set the alert document to have incorrect muted state
-      await es.updateByQuery({
-        index: alertAsDataIndex,
-        conflicts: 'proceed',
-        query: {
-          bool: {
-            must: [
-              { term: { [ALERT_RULE_UUID]: ruleId } },
-              { term: { [ALERT_INSTANCE_ID]: alertInstanceId } },
-            ],
+      // Manually set the alert document to have incorrect muted state and verify it sticks
+      // Wrap in retry because concurrent updates may cause version conflicts with conflicts: 'proceed'
+      await retry.try(async () => {
+        await es.updateByQuery({
+          index: alertAsDataIndex,
+          conflicts: 'proceed',
+          query: {
+            bool: {
+              must: [
+                { term: { [ALERT_RULE_UUID]: ruleId } },
+                { term: { [ALERT_INSTANCE_ID]: alertInstanceId } },
+              ],
+            },
           },
-        },
-        script: {
-          source: `ctx._source['${ALERT_MUTED}'] = false;`,
-          lang: 'painless',
-        },
-        refresh: true,
-      });
+          script: {
+            source: `ctx._source['${ALERT_MUTED}'] = false;`,
+            lang: 'painless',
+          },
+          refresh: true,
+        });
 
-      // Verify the alert document is out of sync
-      const outOfSyncAlerts = await getAlertsByRuleId(ruleId);
-      const outOfSyncAlert: any = outOfSyncAlerts.find(
-        (alert: any) => alert._source[ALERT_INSTANCE_ID] === alertInstanceId
-      );
-      expect(outOfSyncAlert._source[ALERT_MUTED]).to.be(false);
+        // Verify the alert document is out of sync
+        const outOfSyncAlerts = await getAlertsByRuleId(ruleId);
+        const outOfSyncAlert: any = outOfSyncAlerts.find(
+          (alert: any) => alert._source[ALERT_INSTANCE_ID] === alertInstanceId
+        );
+        expect(outOfSyncAlert._source[ALERT_MUTED]).to.be(false);
+      });
 
       // Run the rule to trigger reconciliation
       await runRuleNow(ruleId);
