@@ -199,7 +199,7 @@ describe('Indices Metadata - IndicesMetadataService', () => {
     it('should initialize receiver and sender', () => {
       service.start(taskManagerStart, analytics, esClient, false);
 
-      expect(MetadataReceiver).toHaveBeenCalledWith(expect.any(Object), esClient);
+      expect(MetadataReceiver).toHaveBeenCalledWith(expect.any(Object), esClient, false);
       expect(MetadataSender).toHaveBeenCalledWith(expect.any(Object), analytics);
     });
 
