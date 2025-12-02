@@ -74,7 +74,8 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
     const LogsOverviewAIAssistant = renderAIAssistant;
     const stacktraceFields = getStacktraceFields(hit as LogDocument);
     const isStacktraceAvailable = Object.values(stacktraceFields).some(Boolean);
-    const showSimilarErrors = hasErrorFields(parsedDoc);
+    const traceId = parsedDoc[TRACE_ID_FIELD];
+    const showSimilarErrors = traceId && hasErrorFields(parsedDoc);
     const qualityIssuesSectionRef = useRef<ScrollableSectionWrapperApi>(null);
     const stackTraceSectionRef = useRef<ScrollableSectionWrapperApi>(null);
     const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
@@ -136,9 +137,9 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
           )}
           <DataSourcesProvider indexes={indexes}>
             {showSimilarErrors ? <SimilarErrors hit={hit} /> : null}
-            {parsedDoc[TRACE_ID_FIELD] && showTraceWaterfall ? (
+            {traceId && showTraceWaterfall ? (
               <TraceWaterfall
-                traceId={parsedDoc[TRACE_ID_FIELD]}
+                traceId={traceId}
                 docId={parsedDoc[TRANSACTION_ID_FIELD] || parsedDoc[SPAN_ID_FIELD]}
                 serviceName={parsedDoc[SERVICE_NAME_FIELD]}
                 dataView={dataView}

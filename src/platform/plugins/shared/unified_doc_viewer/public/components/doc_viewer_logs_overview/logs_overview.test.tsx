@@ -426,10 +426,10 @@ describe('LogsOverview SimilarErrors section', () => {
     jest.clearAllMocks();
   });
 
-  it('should render SimilarErrors section when hasErrorFields returns true', () => {
+  it('should render SimilarErrors section when traceId is present and hasErrorFields returns true', () => {
     (hasErrorFields as jest.Mock).mockReturnValue(true);
 
-    renderLogsOverview({ hit: buildHit() });
+    renderLogsOverview({ hit: buildHit({ 'trace.id': '123' }) });
 
     expect(hasErrorFields).toHaveBeenCalled();
     expect(screen.queryByTestId('docViewerSimilarErrorsSection')).toBeInTheDocument();
@@ -441,6 +441,15 @@ describe('LogsOverview SimilarErrors section', () => {
     renderLogsOverview({ hit: buildHit() });
 
     expect(hasErrorFields).toHaveBeenCalled();
+    expect(screen.queryByTestId('docViewerSimilarErrorsSection')).not.toBeInTheDocument();
+  });
+
+  it('should not render SimilarErrors section when traceId is not present', () => {
+    (hasErrorFields as jest.Mock).mockReturnValue(false);
+
+    renderLogsOverview({ hit: buildHit({ 'trace.id': undefined }) });
+
+    expect(hasErrorFields).not.toHaveBeenCalled();
     expect(screen.queryByTestId('docViewerSimilarErrorsSection')).not.toBeInTheDocument();
   });
 });
