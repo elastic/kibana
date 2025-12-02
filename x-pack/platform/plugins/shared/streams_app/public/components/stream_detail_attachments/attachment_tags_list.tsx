@@ -27,7 +27,7 @@ export function AttachmentTagsList({ tags, showAll = false }: AttachmentTagsList
   } = useKibana();
 
   const visibleTags = showAll ? tags : tags.slice(0, MAX_VISIBLE_TAGS);
-  const remainingCount = tags.length - MAX_VISIBLE_TAGS;
+  const remainingCount = Math.max(0, tags.length - MAX_VISIBLE_TAGS);
 
   return (
     <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" wrap responsive={false}>
