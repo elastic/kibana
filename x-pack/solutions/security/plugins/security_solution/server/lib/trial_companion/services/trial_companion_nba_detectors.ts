@@ -118,6 +118,19 @@ export const casesM7 = (deps: UsageCollectorDeps): DetectorF => {
   };
 };
 
+export const savedDiscoverySessionsM2 = (deps: UsageCollectorDeps): DetectorF => {
+  return async (): Promise<Milestone | undefined> => {
+    const { total } = await deps.collectorContext.soClient.find({
+      type: 'search',
+      perPage: 0,
+      page: 0,
+      filter: `search.managed:(false)`,
+    });
+
+    return total > 0 ? undefined : Milestone.M2;
+  };
+};
+
 async function fetchCollectorResults<T>(
   collectorType: string,
   { logger, collectorContext, usageCollection }: UsageCollectorDeps

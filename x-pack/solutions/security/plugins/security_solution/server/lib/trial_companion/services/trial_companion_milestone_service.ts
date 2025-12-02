@@ -16,6 +16,7 @@ import type {
 } from '@kbn/usage-collection-plugin/server';
 import type { UsageCollectorDeps } from './trial_companion_nba_detectors';
 import {
+  savedDiscoverySessionsM2,
   allSetM7,
   detectionRulesInstalledM3,
   installedPackagesM1,
@@ -75,6 +76,7 @@ export class TrialCompanionMilestoneServiceImpl implements TrialCompanionMilesto
     this.detectors.push(installedPackagesM1(this.logger, start.packageService));
     if (usageCollectorDeps) {
       this.detectors.push(
+        savedDiscoverySessionsM2(usageCollectorDeps),
         detectionRulesInstalledM3(usageCollectorDeps),
         casesM7(usageCollectorDeps)
       );
