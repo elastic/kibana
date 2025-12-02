@@ -24,7 +24,7 @@ export const profilingSetupFixture = base.extend<{}, { profilingSetup: Profiling
     async ({ kbnClient, esClient, log }, use) => {
       const checkStatus = async (): Promise<{ has_setup: boolean; has_data: boolean }> => {
         try {
-          const response = await kbnClient.admin.request({
+          const response = await kbnClient.request({
             description: 'Check profiling status',
             path: '/api/profiling/setup/es_resources',
             method: 'GET',

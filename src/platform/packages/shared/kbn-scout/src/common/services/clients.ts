@@ -19,12 +19,6 @@ interface ClientOptions {
   log: ScoutLogger;
 }
 
-export interface KbnClientProxy {
-  admin: KbnClient;
-  viewer: KbnClient;
-  editor: KbnClient;
-}
-
 function createClientUrlWithAuth({ serviceName, url, username, password, log }: ClientOptions) {
   const clientUrl = new URL(url);
   clientUrl.username = username;
@@ -36,7 +30,7 @@ function createClientUrlWithAuth({ serviceName, url, username, password, log }: 
 }
 
 let esClientInstance: EsClient | null = null;
-let kbnClientInstance: (KbnClient & KbnClientProxy) | null = null;
+let kbnClientInstance: KbnClient | null = null;
 
 export function getEsClient(config: ScoutTestConfig, log: ScoutLogger) {
   if (!esClientInstance) {
@@ -69,43 +63,7 @@ export function getKbnClient(config: ScoutTestConfig, log: ScoutLogger) {
       log,
     });
 
-    const viewerKibanaUrl = createClientUrlWithAuth({
-      serviceName: 'kbn',
-      url: config.hosts.kibana,
-      username: config.auth.username, // todo: update to viewer user when available
-      password: config.auth.password,
-      log,
-    });
-
-    const editorKibanaUrl = createClientUrlWithAuth({
-      serviceName: 'kbn',
-      url: config.hosts.kibana,
-      username: config.auth.username, // todo: update to editor user when available
-      password: config.auth.password,
-      log,
-    });
-    const handler = {
-      admin: new KbnClient({ log, url: kibanaUrl }),
-      viewer: new KbnClient({ log, url: viewerKibanaUrl }),
-      editor: new KbnClient({ log, url: editorKibanaUrl }),
-      get(target: KbnClient, prop: string) {
-        if (prop === 'admin') {
-          log.serviceMessage('kbnClient', 'admin user');
-          return this.admin;
-        }
-        if (prop === 'viewer') {
-          log.serviceMessage('kbnClient', 'viewer user');
-          return this.viewer;
-        }
-        if (prop === 'editor') {
-          log.serviceMessage('kbnClient', 'editor user');
-          return this.editor;
-        }
-        return (target as any)[prop];
-      },
-    };
-
-    kbnClientInstance = new Proxy(handler.admin, handler) as KbnClient & KbnClientProxy;
+    kbnClientInstance = new KbnClient({ log, url: kibanaUrl });
   }
 
   return kbnClientInstance;

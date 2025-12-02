@@ -26,7 +26,6 @@ import {
   createCustomRole,
   isElasticsearchRole,
 } from '../../../../common/services';
-import type { KbnClientProxy } from '../../../../common/services/clients';
 import type { ScoutTestOptions } from '../../../types';
 import type { ScoutTestConfig } from '.';
 
@@ -48,7 +47,7 @@ export interface CoreWorkerFixtures {
   config: ScoutTestConfig;
   kbnUrl: KibanaUrl;
   esClient: Client;
-  kbnClient: KbnClient & KbnClientProxy;
+  kbnClient: KbnClient;
   samlAuth: SamlAuth;
 }
 
