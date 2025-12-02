@@ -14,7 +14,6 @@ import { combineLatest, distinctUntilChanged, filter, firstValueFrom, race, swit
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getTimeDifferenceInSeconds } from '@kbn/timerange';
 import type { MultiMatchAnalysis } from '@kbn/data-plugin/common/search';
-import type { DiscoverAppStateContainer } from '../state_management/discover_app_state_container';
 import { updateVolatileSearchSource } from './update_search_source';
 import {
   checkHitCount,
@@ -42,7 +41,6 @@ import type { ScopedDiscoverEBTManager } from '../../../ebt_manager';
 export interface CommonFetchParams {
   dataSubjects: SavedSearchData;
   abortController: AbortController;
-  appStateContainer: DiscoverAppStateContainer;
   internalState: InternalStateStore;
   initialFetchStatus: FetchStatus;
   inspectorAdapters: Adapters;
@@ -51,6 +49,7 @@ export interface CommonFetchParams {
   services: DiscoverServices;
   scopedProfilesManager: ScopedProfilesManager;
   scopedEbtManager: ScopedDiscoverEBTManager;
+  getCurrentTab: () => TabState;
 }
 
 /**
@@ -63,7 +62,6 @@ export interface CommonFetchParams {
 export function fetchAll(
   params: CommonFetchParams & {
     reset: boolean;
-    getCurrentTab: () => TabState;
     onFetchRecordsComplete?: () => Promise<void>;
   }
 ): Promise<void> {
@@ -71,7 +69,6 @@ export function fetchAll(
     dataSubjects,
     reset = false,
     initialFetchStatus,
-    appStateContainer,
     services,
     scopedProfilesManager,
     scopedEbtManager,
@@ -86,7 +83,7 @@ export function fetchAll(
   try {
     const searchSource = savedSearch.searchSource.createChild();
     const dataView = searchSource.getField('index')!;
-    const { query, sort } = appStateContainer.get();
+    const { query, sort } = getCurrentTab().appState;
     const isEsqlQuery = isOfAggregateQueryType(query);
     const currentTab = getCurrentTab();
 
@@ -250,12 +247,12 @@ export function fetchAll(
 }
 
 export async function fetchMoreDocuments(params: CommonFetchParams): Promise<void> {
-  const { dataSubjects, appStateContainer, services, savedSearch } = params;
+  const { dataSubjects, services, savedSearch, getCurrentTab } = params;
 
   try {
     const searchSource = savedSearch.searchSource.createChild();
     const dataView = searchSource.getField('index')!;
-    const { query, sort } = appStateContainer.get();
+    const { query, sort } = getCurrentTab().appState;
     const isEsqlQuery = isOfAggregateQueryType(query);
 
     if (isEsqlQuery) {

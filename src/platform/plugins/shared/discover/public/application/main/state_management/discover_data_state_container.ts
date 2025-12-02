@@ -32,7 +32,6 @@ import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram/types';
 import { getTimeDifferenceInSeconds } from '@kbn/timerange';
 import type { MultiMatchAnalysis } from '@kbn/data-plugin/common/search/search_source/query_analysis_utils';
 import { getEsqlDataView } from './utils/get_esql_data_view';
-import type { DiscoverAppStateContainer } from './discover_app_state_container';
 import type { DiscoverServices } from '../../../build_services';
 import type { DiscoverSearchSessionManager } from './discover_search_session';
 import { FetchStatus } from '../../types';
@@ -150,7 +149,6 @@ export interface DiscoverDataStateContainer {
 export function getDataStateContainer({
   services,
   searchSessionManager,
-  appStateContainer,
   internalState,
   runtimeStateManager,
   savedSearchContainer,
@@ -160,7 +158,6 @@ export function getDataStateContainer({
 }: {
   services: DiscoverServices;
   searchSessionManager: DiscoverSearchSessionManager;
-  appStateContainer: DiscoverAppStateContainer;
   internalState: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
   savedSearchContainer: DiscoverSavedSearchContainer;
@@ -237,8 +234,8 @@ export function getDataStateContainer({
    */
   const { esqlFetchSubscribe, cleanupEsql } = buildEsqlFetchSubscribe({
     internalState,
-    appStateContainer,
     dataSubjects,
+    getCurrentTab,
     injectCurrentTab,
   });
 
@@ -304,11 +301,11 @@ export function getDataStateContainer({
             inspectorAdapters,
             searchSessionId,
             services,
-            appStateContainer,
             internalState,
             savedSearch: savedSearchContainer.getState(),
             scopedProfilesManager,
             scopedEbtManager,
+            getCurrentTab,
           };
 
           abortController?.abort();
@@ -358,9 +355,9 @@ export function getDataStateContainer({
 
           await scopedProfilesManager.resolveDataSourceProfile(
             {
-              dataSource: appStateContainer.get().dataSource,
+              dataSource: getCurrentTab().appState.dataSource,
               dataView: savedSearchContainer.getState().searchSource.getField('index'),
-              query: appStateContainer.get().query,
+              query: getCurrentTab().appState.query,
             },
             resetFetchChart$
           );
@@ -373,13 +370,17 @@ export function getDataStateContainer({
 
           if (preFetchStateUpdate) {
             disableNextFetchOnStateChange$.next(true);
-            await appStateContainer.replaceUrlState(preFetchStateUpdate);
+            await internalState.dispatch(
+              injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({
+                appState: preFetchStateUpdate,
+              })
+            );
             disableNextFetchOnStateChange$.next(false);
           }
 
           abortController = new AbortController();
 
-          const isEsqlQuery = isOfAggregateQueryType(appStateContainer.get().query);
+          const isEsqlQuery = isOfAggregateQueryType(getCurrentTab().appState.query);
           const latestFetchDetails: DiscoverLatestFetchDetails = {
             abortController,
           };
@@ -402,7 +403,6 @@ export function getDataStateContainer({
             ...commonFetchParams,
             reset: options.reset,
             abortController,
-            getCurrentTab,
             onFetchRecordsComplete: async () => {
               if (isEsqlQuery && !abortController.signal.aborted) {
                 // defer triggering chart fetching until after main request completes for ES|QL mode
@@ -423,7 +423,11 @@ export function getDataStateContainer({
               });
 
               if (postFetchStateUpdate) {
-                await appStateContainer.replaceUrlState(postFetchStateUpdate);
+                await internalState.dispatch(
+                  injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({
+                    appState: postFetchStateUpdate,
+                  })
+                );
               }
 
               // Clear the default profile state flags after the data fetching
@@ -469,7 +473,7 @@ export function getDataStateContainer({
   }
 
   const fetchQuery = async () => {
-    const query = appStateContainer.get().query;
+    const query = getCurrentTab().appState.query;
     const currentDataView = savedSearchContainer.getState().searchSource.getField('index');
 
     if (isOfAggregateQueryType(query)) {
