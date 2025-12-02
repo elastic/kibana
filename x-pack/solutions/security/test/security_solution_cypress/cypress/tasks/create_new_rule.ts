@@ -45,7 +45,6 @@ import {
   ALERT_SUPPRESSION_FIELDS_INPUT,
   ALERT_SUPPRESSION_LOADING,
   ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS,
-  ALERT_SUPPRESSION_READY,
   ALERTS_INDEX_BUTTON,
   ANOMALY_THRESHOLD_INPUT,
   APPLY_SELECTED_SAVED_QUERY_BUTTON,
@@ -950,10 +949,11 @@ export const enablesAndPopulatesThresholdSuppression = (
  * If there are many fields in combobox, they are might be visible only after scrolling down menu.
  */
 export const fillAlertSuppressionFields = (fields: string[], checkFieldsInComboBox?: boolean) => {
-  cy.get(ALERT_SUPPRESSION_LOADING).should('not.exist');
-  cy.get(ALERT_SUPPRESSION_READY).should('exist');
-
+  cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).should('be.visible');
   cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).should('not.be.disabled');
+
+  cy.get(ALERT_SUPPRESSION_LOADING).should('not.exist');
+
   cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).click();
   fields.forEach((field) => {
     if (checkFieldsInComboBox) {

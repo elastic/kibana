@@ -686,7 +686,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 isLoading={
                   mlRuleConfigLoading ||
                   isEsqlSuppressionLoading ||
-                  (isIndexPatternLoading && !isMlRule(ruleType) && !isEsqlRule(ruleType))
+                  (isIndexPatternLoading && !isMlRule(ruleType) && !isEsqlRule(ruleType)) ||
+                  (!isMlRule(ruleType) &&
+                    !isEsqlRule(ruleType) &&
+                    !isIndexPatternLoading &&
+                    (!indexPattern.fields || indexPattern.fields.length === 0))
                 }
               />
             )}
