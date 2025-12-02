@@ -12,14 +12,23 @@ import type { AxiosInstance } from 'axios';
 import { isString } from 'lodash';
 import { getCustomAgents, type SSLSettings } from '@kbn/actions-utils';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
+import * as i18n from './translations';
 
-const authSchema = z.object({
-  crt: z.string().meta({ sensitive: true }),
-  key: z.string().meta({ sensitive: true }),
-  passphrase: z.string().meta({ sensitive: true }).optional(),
-  ca: z.string().optional(),
-  verificationMode: z.enum(['none', 'certificate', 'full']).optional(),
-});
+const authSchema = z
+  .object({
+    crt: z.string().meta({ label: i18n.CRT_AUTH_CERT_LABEL, sensitive: true }),
+    key: z.string().meta({ label: i18n.CRT_AUTH_KEY_LABEL, sensitive: true }),
+    passphrase: z
+      .string()
+      .meta({ label: i18n.CRT_AUTH_PASSPHRASE_LABEL, sensitive: true })
+      .optional(),
+    ca: z.string().meta({ label: i18n.CRT_AUTH_CA_LABEL }).optional(),
+    verificationMode: z
+      .enum(['none', 'certificate', 'full'])
+      .meta({ label: i18n.CRT_AUTH_VERIFICATION_MODE_LABEL })
+      .optional(),
+  })
+  .meta({ label: i18n.CRT_AUTH_LABEL });
 
 type AuthSchemaType = z.infer<typeof authSchema>;
 

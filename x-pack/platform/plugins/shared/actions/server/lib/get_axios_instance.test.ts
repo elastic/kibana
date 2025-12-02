@@ -13,6 +13,8 @@ import { actionsConfigMock } from '../actions_config.mock';
 import { getCustomAgents } from './get_custom_agents';
 import { connectorTokenClientMock } from './connector_token_client.mock';
 import { requestOAuthClientCredentialsToken } from './request_oauth_client_credentials_token';
+import { PFX } from '@kbn/connector-specs/src/auth_types/pfx';
+import type { NormalizedAuthType } from '@kbn/connector-specs';
 
 jest.mock('./get_custom_agents', () => ({
   getCustomAgents: jest.fn().mockReturnValue({
@@ -34,6 +36,9 @@ describe('getAxiosInstance', () => {
   const configurationUtilities = actionsConfigMock.create();
   const authTypeRegistry = new AuthTypeRegistry();
   registerAuthTypes(authTypeRegistry);
+
+  // remove this when PFX is re-enabled in the exports
+  authTypeRegistry.register(PFX as NormalizedAuthType);
 
   beforeAll(() => {
     clock = sinon.useFakeTimers(new Date('2021-01-01T12:00:00.000Z'));
