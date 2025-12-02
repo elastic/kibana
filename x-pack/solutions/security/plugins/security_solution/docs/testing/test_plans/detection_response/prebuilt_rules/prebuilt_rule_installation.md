@@ -326,7 +326,7 @@ Then the number of rules shown on the page should be less than <rows_per_page>
 Given multiple prebuilt rules available for installation
 When user opens the Rule Installation page
 Then the available prebuilt rules should be shown
-And the rules should be sorted by the "name" field in the ASC alphabetical order
+And the rules shouldn't be sorted by any field
 When user clicks on a header of an unsorted <field_name> column
 Then the available prebuilt rules should be sorted by <field_name> in the ASC <order_type>
 When user clicks on a header of an ASC sorted <field_name> column
