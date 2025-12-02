@@ -15,6 +15,8 @@ import * as i18n from './translations';
 import { useBulkUpdateAlertTags } from '../../hooks/use_bulk_update_alert_tags';
 import { useAlertsTableContext } from '../../contexts/alerts_table_context';
 
+const OBS_STACK_ALERTS_INDEX = '.alerts-observability*,.alerts-stack*';
+
 export interface TagsActionState {
   isFlyoutOpen: boolean;
   onClose: () => void;
@@ -52,27 +54,14 @@ export const useTagsAction = ({
 
   const onSaveItems = useCallback(
     async (tagsSelection: ItemsSelectionState) => {
-      const alertsByIndex = selectedAlerts.reduce((acc, alert) => {
-        if (!acc[alert._index]) {
-          acc[alert._index] = [];
-        }
-        acc[alert._index].push(alert);
-        return acc;
-      }, {} as Record<string, Alert[]>);
-
       try {
-        await Promise.all(
-          Object.entries(alertsByIndex).map(([index, alerts]) =>
-            bulkUpdateAlertTags({
-              index,
-              alertIds: alerts.map((alert) => alert._id),
-              add: tagsSelection.selectedItems?.length ? tagsSelection.selectedItems : undefined,
-              remove: tagsSelection.unSelectedItems?.length
-                ? tagsSelection.unSelectedItems
-                : undefined,
-            })
-          )
-        );
+        await bulkUpdateAlertTags({
+          index: OBS_STACK_ALERTS_INDEX,
+          alertIds: selectedAlerts.map((alert) => alert._id),
+          add: tagsSelection.selectedItems?.length ? tagsSelection.selectedItems : undefined,
+          remove: tagsSelection.unSelectedItems?.length ? tagsSelection.unSelectedItems : undefined,
+        });
+
         onClose();
         onActionSuccess?.();
       } catch {
