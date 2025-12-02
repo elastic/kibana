@@ -43,6 +43,7 @@ import type {
 import { openConversationFlyout } from './flyout/open_conversation_flyout';
 import type { EmbeddableConversationProps } from './embeddable/types';
 import type { OpenConversationFlyoutOptions } from './flyout/types';
+import type { ConversationFlyoutRef } from './types';
 
 export class OnechatPlugin
   implements
@@ -59,6 +60,8 @@ export class OnechatPlugin
   private setupServices?: {
     navigationService: NavigationService;
   };
+  private activeFlyoutRef: ConversationFlyoutRef | null = null;
+  private updateFlyoutPropsCallback: ((props: EmbeddableConversationProps) => void) | null = null;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
@@ -156,10 +159,29 @@ export class OnechatPlugin
       },
       openConversationFlyout: (options?: OpenConversationFlyoutOptions) => {
         const config = options ?? this.conversationFlyoutActiveConfig;
-        return openConversationFlyout(config, {
+
+        // If a flyout is already open, update its props instead of creating a new one
+        if (this.activeFlyoutRef && this.updateFlyoutPropsCallback) {
+          this.updateFlyoutPropsCallback(config);
+          return { flyoutRef: this.activeFlyoutRef };
+        }
+
+        // Create new flyout and set up prop updates
+        const { flyoutRef } = openConversationFlyout(config, {
           coreStart: core,
           services: internalServices,
+          onPropsUpdate: (callback) => {
+            this.updateFlyoutPropsCallback = callback;
+          },
+          onClose: () => {
+            this.activeFlyoutRef = null;
+            this.updateFlyoutPropsCallback = null;
+          },
         });
+
+        this.activeFlyoutRef = flyoutRef;
+
+        return { flyoutRef };
       },
     };
 

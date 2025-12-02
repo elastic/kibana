@@ -11,7 +11,7 @@ import type { ESQLAstQueryExpression } from '@kbn/esql-ast';
 import { ESQL_VARIABLES_PREFIX } from '@kbn/esql-ast';
 import type { ESQLColumnData, GetColumnsByTypeFn } from '@kbn/esql-ast/src/commands_registry/types';
 import { buildFieldsDefinitionsWithMetadata } from '@kbn/esql-ast/src/definitions/utils';
-import { QueryColumns } from './resources_helpers';
+import { QueryColumns } from '../query_columns_service';
 import type { ESQLCallbacks } from './types';
 
 export type ColumnsMap = Map<string, ESQLColumnData>;

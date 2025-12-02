@@ -9,7 +9,7 @@
 
 import type { ESQLColumnData } from '@kbn/esql-ast/src/commands_registry/types';
 import { type ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
-import { type ECSMetadata, enrichFieldsWithECSInfo } from './ecs_metadata_helper';
+import { type ECSMetadata, enrichFieldsWithECSInfo } from './enrich_fields_with_ecs';
 
 describe('enrichFieldsWithECSInfo', () => {
   it('should return original columns if fieldsMetadata is not provided', async () => {
