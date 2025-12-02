@@ -40,16 +40,16 @@ export function updateWorkflowYamlFields(
   let updatedYaml = yamlString;
 
   if (workflow.name !== undefined) {
-    updatedYaml = updateYamlField(updatedYaml, ['name'], workflow.name);
+    updatedYaml = updateYamlField(updatedYaml, 'name', workflow.name);
   }
   if (workflow.enabled !== undefined && enabledValue !== undefined) {
-    updatedYaml = updateYamlField(updatedYaml, ['enabled'], enabledValue);
+    updatedYaml = updateYamlField(updatedYaml, 'enabled', enabledValue);
   }
   if (workflow.description !== undefined) {
-    updatedYaml = updateYamlField(updatedYaml, ['description'], workflow.description);
+    updatedYaml = updateYamlField(updatedYaml, 'description', workflow.description);
   }
   if (workflow.tags !== undefined) {
-    updatedYaml = updateYamlField(updatedYaml, ['tags'], workflow.tags);
+    updatedYaml = updateYamlField(updatedYaml, 'tags', workflow.tags);
   }
 
   return updatedYaml;

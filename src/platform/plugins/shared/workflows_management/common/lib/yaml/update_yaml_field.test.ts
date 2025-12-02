@@ -15,7 +15,7 @@ describe('updateYamlField', () => {
 enabled: true
 steps: []`;
 
-    const result = updateYamlField(yaml, ['enabled'], false);
+    const result = updateYamlField(yaml, 'enabled', false);
 
     expect(result).toContain('enabled: false');
     expect(result).not.toContain('enabled: true');
@@ -32,7 +32,7 @@ enabled: true
 # Steps section
 steps: []`;
 
-    const result = updateYamlField(yaml, ['enabled'], false);
+    const result = updateYamlField(yaml, 'enabled', false);
 
     expect(result).toContain('# This is a comment');
     expect(result).toContain('# Another comment');
@@ -48,7 +48,7 @@ enabled: true
 
 steps: []`;
 
-    const result = updateYamlField(yaml, ['enabled'], false);
+    const result = updateYamlField(yaml, 'enabled', false);
 
     expect(result).toContain('\n\n'); // Blank lines should be preserved
     expect(result).toContain('enabled: false');
@@ -58,7 +58,7 @@ steps: []`;
     const yaml = `name: Test Workflow
 steps: []`;
 
-    const result = updateYamlField(yaml, ['enabled'], true);
+    const result = updateYamlField(yaml, 'enabled', true);
 
     expect(result).toContain('enabled: true');
     expect(result).toContain('name: Test Workflow');
@@ -69,7 +69,7 @@ steps: []`;
     const yaml = `name: Old Name
 steps: []`;
 
-    const result = updateYamlField(yaml, ['name'], 'New Name');
+    const result = updateYamlField(yaml, 'name', 'New Name');
 
     expect(result).toContain('name: New Name');
     expect(result).not.toContain('name: Old Name');
@@ -79,7 +79,7 @@ steps: []`;
     const yaml = `name: Test Workflow
 steps: []`;
 
-    const result = updateYamlField(yaml, ['description'], 'A test workflow');
+    const result = updateYamlField(yaml, 'description', 'A test workflow');
 
     expect(result).toContain('description: A test workflow');
     expect(result).toContain('name: Test Workflow');
@@ -89,7 +89,7 @@ steps: []`;
     const yaml = `name: Test Workflow
 steps: []`;
 
-    const result = updateYamlField(yaml, ['tags'], ['tag1', 'tag2']);
+    const result = updateYamlField(yaml, 'tags', ['tag1', 'tag2']);
 
     expect(result).toContain('tags:');
     expect(result).toContain('tag1');
@@ -101,8 +101,8 @@ steps: []`;
 enabled: true
 steps: []`;
 
-    let result = updateYamlField(yaml, ['name'], 'New Name');
-    result = updateYamlField(result, ['enabled'], false);
+    let result = updateYamlField(yaml, 'name', 'New Name');
+    result = updateYamlField(result, 'enabled', false);
 
     expect(result).toContain('name: New Name');
     expect(result).toContain('enabled: false');
@@ -113,7 +113,7 @@ steps: []`;
   it('should return original YAML if parsing fails', () => {
     const invalidYaml = 'invalid: yaml: content: [';
 
-    const result = updateYamlField(invalidYaml, ['enabled'], false);
+    const result = updateYamlField(invalidYaml, 'enabled', false);
 
     // Should return original YAML as fallback
     expect(result).toBe(invalidYaml);
@@ -129,12 +129,26 @@ steps:
   - name: step1
     type: console`;
 
-    const result = updateYamlField(yaml, ['enabled'], false);
+    const result = updateYamlField(yaml, 'enabled', false);
 
     expect(result).toContain('# Comment before enabled');
     expect(result).toContain('# Step comment');
     expect(result).toContain('enabled: false');
     expect(result).toContain('steps:');
     expect(result).toContain('- name: step1');
+  });
+
+  it('should handle nested field paths with dot notation', () => {
+    const yaml = `metadata:
+  version: 1.0
+  author: Old Author
+steps: []`;
+
+    const result = updateYamlField(yaml, 'metadata.author', 'New Author');
+
+    expect(result).toContain('author: New Author');
+    expect(result).not.toContain('author: Old Author');
+    expect(result).toContain('version: 1.0');
+    expect(result).toContain('steps: []');
   });
 });

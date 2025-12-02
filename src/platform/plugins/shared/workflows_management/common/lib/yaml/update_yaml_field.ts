@@ -15,17 +15,20 @@ import { parseDocument } from 'yaml';
  * without losing user's formatting and comments.
  *
  * @param yamlString - The original YAML string
- * @param fieldPath - The path to the field to update (e.g., ['enabled'], ['name'], ['description'])
+ * @param fieldPath - The dot-notated path to the field to update (e.g., 'enabled', 'name', 'parent.child')
  * @param value - The new value for the field
  * @returns The updated YAML string with formatting preserved
  */
-export function updateYamlField(yamlString: string, fieldPath: string[], value: unknown): string {
+export function updateYamlField(yamlString: string, fieldPath: string, value: unknown): string {
   try {
     const doc = parseDocument(yamlString, { keepSourceTokens: true });
 
+    // Convert dot-notated string to array (e.g., 'parent.child' -> ['parent', 'child'])
+    const pathArray = fieldPath.split('.');
+
     // Update the field in the document
     // If the field doesn't exist, it will be added
-    doc.setIn(fieldPath, value);
+    doc.setIn(pathArray, value);
 
     // Convert back to string, preserving formatting
     return doc.toString();
