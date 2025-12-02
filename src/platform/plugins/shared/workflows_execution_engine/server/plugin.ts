@@ -126,7 +126,7 @@ export class WorkflowsExecutionEnginePlugin
                 coreStart, // TODO: move to dependencies
                 config,
                 logger,
-                fakeRequest: fakeRequest || ({} as KibanaRequest),
+                fakeRequest,
                 dependencies,
               });
             },
@@ -178,7 +178,7 @@ export class WorkflowsExecutionEnginePlugin
                 coreStart,
                 config,
                 logger,
-                fakeRequest: fakeRequest || ({} as KibanaRequest),
+                fakeRequest,
                 dependencies,
               });
             },
@@ -294,7 +294,7 @@ export class WorkflowsExecutionEnginePlugin
                 taskManager,
                 logger,
                 config,
-                fakeRequest: fakeRequest || ({} as KibanaRequest),
+                fakeRequest,
                 dependencies,
               });
 
