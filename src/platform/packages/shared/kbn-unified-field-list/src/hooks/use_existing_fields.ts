@@ -111,7 +111,6 @@ export const useExistingFieldsFetcher = (
         if (initialExistingFieldsInfoRef.current) {
           initialExistingFieldsInfoRef.current = undefined;
           onInitialExistingFieldsInfoChangeRef?.current?.(undefined);
-          // console.log('TEST Cleared initial existing fields info ref');
         }
         return;
       }
@@ -136,68 +135,70 @@ export const useExistingFieldsFetcher = (
       }
 
       const dataViewHash = getDataViewsHash([dataView]);
-      setActiveRequests((value) => value + 1);
-
-      const hasRestrictions = Boolean(dataView.getAggregationRestrictions?.());
       let info: ExistingFieldsInfo = {
         ...unknownInfo,
         numberOfFetches,
       };
+      const providedInitialInfo = initialExistingFieldsInfoRef.current;
+      if (
+        providedInitialInfo?.dataViewHash === dataViewHash &&
+        providedInitialInfo?.info?.fetchStatus === ExistenceFetchStatus.succeeded &&
+        (providedInitialInfo?.info?.hasDataViewRestrictions ||
+          (providedInitialInfo?.info?.existingFieldsByFieldNameMap &&
+            Object.keys(providedInitialInfo.info.existingFieldsByFieldNameMap).length))
+      ) {
+        // restoring from the provided initial info
+        info = {
+          ...info,
+          ...providedInitialInfo.info,
+        };
+        initialExistingFieldsInfoRef.current = undefined;
+        globalMap$.next({
+          ...globalMap$.getValue(),
+          [dataViewId]: info,
+        });
+        return;
+      }
+
+      setActiveRequests((value) => value + 1);
+
+      const hasRestrictions = Boolean(dataView.getAggregationRestrictions?.());
 
       if (hasRestrictions) {
         info.fetchStatus = ExistenceFetchStatus.succeeded;
         info.hasDataViewRestrictions = true;
       } else {
         try {
-          const providedInitialInfo = initialExistingFieldsInfoRef.current;
-          if (
-            providedInitialInfo?.dataViewHash === dataViewHash &&
-            !providedInitialInfo?.info?.hasDataViewRestrictions &&
-            providedInitialInfo?.info?.fetchStatus === ExistenceFetchStatus.succeeded &&
-            providedInitialInfo?.info?.existingFieldsByFieldNameMap &&
-            Object.keys(providedInitialInfo.info.existingFieldsByFieldNameMap).length
-          ) {
-            // restoring from the provided initial info
-            info = {
-              ...info,
-              ...providedInitialInfo.info,
-            };
-            initialExistingFieldsInfoRef.current = undefined;
-            // console.log('TEST Restored existing fields info from the provided initial info', info);
-          } else {
-            // console.log('TEST Fetching existing fields info for data view', dataView.title);
-            // overwise, fetching the data
-            const result = await loadFieldExisting({
-              dslQuery: await buildSafeEsQuery(
-                dataView,
-                query,
-                filters || [],
-                getEsQueryConfig(core.uiSettings)
-              ),
-              fromDate,
-              toDate,
-              timeFieldName: dataView.timeFieldName,
-              data,
-              uiSettingsClient: core.uiSettings,
-              dataViewsService: dataViews,
+          const result = await loadFieldExisting({
+            dslQuery: await buildSafeEsQuery(
               dataView,
-            });
+              query,
+              filters || [],
+              getEsQueryConfig(core.uiSettings)
+            ),
+            fromDate,
+            toDate,
+            timeFieldName: dataView.timeFieldName,
+            data,
+            uiSettingsClient: core.uiSettings,
+            dataViewsService: dataViews,
+            dataView,
+          });
 
-            const existingFieldNames = result?.existingFieldNames || [];
+          const existingFieldNames = result?.existingFieldNames || [];
 
-            if (
-              onNoData &&
-              numberOfFetches === 1 &&
-              !existingFieldNames.filter((fieldName) => !dataView?.metaFields?.includes(fieldName))
-                .length
-            ) {
-              onNoData(dataViewId);
-            }
-
-            info.existingFieldsByFieldNameMap = booleanMap(existingFieldNames);
-            info.newFields = result.newFields;
-            info.fetchStatus = ExistenceFetchStatus.succeeded;
+          if (
+            onNoData &&
+            numberOfFetches === 1 &&
+            !existingFieldNames.filter((fieldName) => !dataView?.metaFields?.includes(fieldName))
+              .length
+          ) {
+            onNoData(dataViewId);
           }
+
+          info.existingFieldsByFieldNameMap = booleanMap(existingFieldNames);
+          info.newFields = result.newFields;
+          info.fetchStatus = ExistenceFetchStatus.succeeded;
         } catch (error) {
           info.fetchStatus = ExistenceFetchStatus.failed;
         }
@@ -397,7 +398,9 @@ function getDataViewsHash(dataViews: DataView[]): string {
       // From Lens it's coming as IndexPattern type and not the real DataView type
       .map(
         (dataView) =>
-          `${dataView.id}:${dataView.title}:${dataView.timeFieldName || 'no-timefield'}:${
+          `${dataView.id}:${dataView.title}:${dataView.timeFieldName || 'no-timefield'}:${Boolean(
+            dataView.getAggregationRestrictions?.()
+          )}:${
             dataView.fields?.length ?? 0 // adding a field will also trigger a refetch of fields existence data
           }`
       )
