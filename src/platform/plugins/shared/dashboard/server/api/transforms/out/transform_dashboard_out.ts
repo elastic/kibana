@@ -59,7 +59,7 @@ export function transformDashboardOut(
     ...((panelsJSON || sections) && {
       panels: transformPanelsOut(panelsJSON, sections, references),
     }),
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+
     ...(projectRouting !== undefined && { project_routing: projectRouting }),
     ...(refreshInterval && {
       refreshInterval: { pause: refreshInterval.pause, value: refreshInterval.value },
