@@ -14,6 +14,7 @@ import { timeUnitsToSuggest } from '../constants';
 import { getControlSuggestion } from './autocomplete/helpers';
 import type { FunctionParameterType, SupportedDataType } from '../types';
 import { commaCompleteItem } from '../../commands_registry/complete_items';
+import { SuggestionCategory } from '../../sorting/types';
 
 export const TIME_SYSTEM_PARAMS = ['?_tstart', '?_tend'];
 export const AUTO_INTERVAL_PARAM = '?_tautointerval';
@@ -37,7 +38,8 @@ export const buildConstantsDefinitions = (
    * Whether or not to advance the cursor and open the suggestions dialog after inserting the constant.
    */
   options?: BuildConstantsOptions,
-  documentationValue?: string
+  documentationValue?: string,
+  category?: SuggestionCategory
 ): ISuggestionItem[] =>
   userConstants.map((label) => {
     const suggestion: ISuggestionItem = {
@@ -54,6 +56,7 @@ export const buildConstantsDefinitions = (
         }),
       ...(documentationValue ? { documentation: { value: documentationValue } } : {}),
       sortText: sortText ?? 'A',
+      ...(category && { category }),
     };
 
     return options?.advanceCursorAndOpenSuggestions ? withAutoSuggest(suggestion) : suggestion;
@@ -71,7 +74,8 @@ export function getDateLiterals(options?: DateLiteralsOptions) {
       // appears when the user opens the second level popover
       i18n.translate('kbn-esql-ast.esql.autocomplete.timeNamedParamDoc', {
         defaultMessage: `Use the \`?_tstart\` and \`?_tend\` parameters to bind a custom timestamp field to Kibana's time filter.`,
-      })
+      }),
+      SuggestionCategory.TIME_PARAM
     ),
     {
       label: i18n.translate('kbn-esql-ast.esql.autocomplete.chooseFromTimePickerLabel', {
@@ -83,6 +87,7 @@ export function getDateLiterals(options?: DateLiteralsOptions) {
         defaultMessage: 'Click to choose',
       }),
       sortText: '1A',
+      category: SuggestionCategory.CUSTOM_ACTION,
       command: {
         id: 'esql.timepicker.choose',
         title: i18n.translate('kbn-esql-ast.esql.autocomplete.chooseFromTimePicker', {

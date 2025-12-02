@@ -25,7 +25,6 @@ import type { ToolsServiceSetup, ToolsServiceStart } from './types';
 import { getToolTypeDefinitions } from './tool_types';
 import { createPersistedProviderFn } from './persisted';
 import { createToolRegistry } from './tool_registry';
-import { getToolTypeInfo } from './utils';
 
 export interface ToolsServiceSetupDeps {
   logger: Logger;
@@ -103,7 +102,7 @@ export class ToolsService {
 
     return {
       getRegistry,
-      getToolTypeInfo: () => getToolTypeInfo(toolTypes),
+      getToolDefinitions: () => toolTypes,
     };
   }
 }

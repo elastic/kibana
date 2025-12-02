@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Observable } from 'rxjs';
-import { BehaviorSubject, distinctUntilChanged, map } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { isEqual } from 'lodash';
 import {
   removeDropCommandsFromESQLQuery,
@@ -44,8 +43,16 @@ import type { LegendSize } from '@kbn/chart-expressions-common';
 import type { XYState as XYConfiguration } from '@kbn/lens-common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import { fieldSupportsBreakdown } from '@kbn/field-utils';
-import type { UnifiedHistogramSuggestionContext, UnifiedHistogramVisContext } from '../types';
-import { UnifiedHistogramExternalVisContextStatus, UnifiedHistogramSuggestionType } from '../types';
+import type {
+  UnifiedHistogramSuggestionContext,
+  UnifiedHistogramVisContext,
+  LensVisServiceState,
+} from '../types';
+import {
+  UnifiedHistogramExternalVisContextStatus,
+  UnifiedHistogramSuggestionType,
+  LensVisServiceStatus,
+} from '../types';
 import {
   isSuggestionShapeAndVisContextCompatible,
   deriveLensSuggestionFromLensAttributes,
@@ -57,22 +64,6 @@ import { enrichLensAttributesWithTablesData } from '../utils/lens_vis_from_table
 
 const UNIFIED_HISTOGRAM_LAYER_ID = 'unifiedHistogram';
 
-const stateSelectorFactory =
-  <S>(state$: Observable<S>) =>
-  <R>(selector: (state: S) => R, equalityFn?: (arg0: R, arg1: R) => boolean) =>
-    state$.pipe(map(selector), distinctUntilChanged(equalityFn));
-
-export enum LensVisServiceStatus {
-  'initial' = 'initial',
-  'completed' = 'completed',
-}
-
-interface LensVisServiceState {
-  status: LensVisServiceStatus;
-  currentSuggestionContext: UnifiedHistogramSuggestionContext;
-  visContext: UnifiedHistogramVisContext | undefined;
-}
-
 interface Services {
   uiSettings: IUiSettingsClient;
 }
@@ -83,19 +74,16 @@ interface LensVisServiceParams {
 }
 
 export class LensVisService {
-  private state$: BehaviorSubject<LensVisServiceState>;
+  state$: BehaviorSubject<LensVisServiceState>;
   private services: Services;
   private lensSuggestionsApi: LensSuggestionsApi;
-  status$: Observable<LensVisServiceState['status']>;
-  currentSuggestionContext$: Observable<LensVisServiceState['currentSuggestionContext']>;
-  visContext$: Observable<LensVisServiceState['visContext']>;
   prevUpdateContext:
     | {
         queryParams: QueryParams;
         timeInterval: string | undefined;
         breakdownField: DataViewField | undefined;
         table: Datatable | undefined;
-        onSuggestionContextChange: (
+        onSuggestionContextChange?: (
           suggestionContext: UnifiedHistogramSuggestionContext | undefined
         ) => void;
         onVisContextChanged?: (
@@ -109,22 +97,16 @@ export class LensVisService {
     this.services = services;
     this.lensSuggestionsApi = lensSuggestionsApi;
 
-    this.state$ = new BehaviorSubject<LensVisServiceState>({
+    const initialState = {
       status: LensVisServiceStatus.initial,
       currentSuggestionContext: {
         suggestion: undefined,
         type: UnifiedHistogramSuggestionType.unsupported,
       },
       visContext: undefined,
-    });
+    };
+    this.state$ = new BehaviorSubject<LensVisServiceState>(initialState);
 
-    const stateSelector = stateSelectorFactory(this.state$);
-    this.status$ = stateSelector((state) => state.status);
-    this.currentSuggestionContext$ = stateSelector(
-      (state) => state.currentSuggestionContext,
-      isEqual
-    );
-    this.visContext$ = stateSelector((state) => state.visContext, isEqual);
     this.prevUpdateContext = undefined;
   }
 
@@ -143,7 +125,7 @@ export class LensVisService {
     timeInterval: string | undefined;
     breakdownField: DataViewField | undefined;
     table?: Datatable;
-    onSuggestionContextChange: (
+    onSuggestionContextChange?: (
       suggestionContext: UnifiedHistogramSuggestionContext | undefined
     ) => void;
     onVisContextChanged?: (
@@ -153,7 +135,7 @@ export class LensVisService {
     getModifiedVisAttributes?: (
       attributes: TypedLensByValueInput['attributes']
     ) => TypedLensByValueInput['attributes'];
-  }) => {
+  }): LensVisServiceState => {
     const suggestionState = this.getCurrentSuggestionState({
       externalVisContext,
       queryParams,
@@ -171,17 +153,19 @@ export class LensVisService {
       getModifiedVisAttributes,
     });
 
-    onSuggestionContextChange(suggestionState.currentSuggestionContext);
+    onSuggestionContextChange?.(suggestionState.currentSuggestionContext);
     onVisContextChanged?.(
       lensAttributesState.visContext,
       lensAttributesState.externalVisContextStatus
     );
 
-    this.state$.next({
+    const nextState = {
       status: LensVisServiceStatus.completed,
       currentSuggestionContext: suggestionState.currentSuggestionContext,
       visContext: lensAttributesState.visContext,
-    });
+    };
+
+    this.state$.next(nextState);
 
     this.prevUpdateContext = {
       queryParams,
@@ -191,6 +175,8 @@ export class LensVisService {
       onSuggestionContextChange,
       onVisContextChanged,
     };
+
+    return nextState;
   };
 
   onSuggestionEdited = ({
@@ -519,6 +505,15 @@ export class LensVisService {
         )
       ) {
         // the preferred vis attributes don't contain the breakdown column, so we discard it to avoid issues
+        preferredVisAttributes = undefined;
+      }
+    }
+
+    if (preferredVisAttributes) {
+      const dataSource = preferredVisAttributes.state.datasourceStates?.textBased;
+      const layers = Object.values(dataSource?.layers ?? {});
+      if (!layers.some((layer) => layer.index === dataView.id)) {
+        // the preferred vis attributes don't contain the current data view, so we discard it to avoid issues
         preferredVisAttributes = undefined;
       }
     }

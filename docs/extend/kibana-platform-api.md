@@ -39,11 +39,9 @@ The services that core provides are:
 * [Elasticsearch service](/extend/elasticsearch-service.md)
 * [HTTP service](/extend/http-service.md)
 * [Logging service](/extend/logging-service.md)
-* [Saved Objects service](/extend/saved-objects-service.md)
+* [Saved Objects service](/extend/saved-objects.md)
 * [UI settings service](/extend/ui-settings-service.md)
 
 ::::{note}
 Core provides the {{kib}} building blocks for plugins and is implemented as a collection of [packages](/extend/core-packages.md).
 ::::
-
-
