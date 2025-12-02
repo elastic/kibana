@@ -78,6 +78,7 @@ export const createAgentGraph = ({
       const response = await researcherModel.invoke(
         getResearchAgentPrompt({
           customInstructions: configuration.research.instructions,
+          clearSystemMessage: configuration.research.replace_default_instructions,
           capabilities,
           initialMessages: state.initialMessages,
           actions: state.mainActions,
@@ -170,6 +171,7 @@ export const createAgentGraph = ({
       const response = await answeringModel.invoke(
         getAnswerAgentPrompt({
           customInstructions: configuration.answer.instructions,
+          clearSystemMessage: configuration.answer.replace_default_instructions,
           capabilities,
           initialMessages: state.initialMessages,
           actions: state.mainActions,

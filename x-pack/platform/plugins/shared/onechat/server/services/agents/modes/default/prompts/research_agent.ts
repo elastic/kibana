@@ -7,6 +7,7 @@
 
 import type { BaseMessageLike } from '@langchain/core/messages';
 import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
+import { cleanPrompt } from '@kbn/onechat-genai-utils/prompts';
 import { platformCoreTools, type ResolvedAgentCapabilities } from '@kbn/onechat-common';
 import type { ProcessedAttachmentType } from '../../utils/prepare_conversation';
 import type { ResearchAgentAction } from '../actions';
@@ -21,27 +22,66 @@ const tools = {
   search: sanitizeToolId(platformCoreTools.search),
 };
 
-export const getResearchAgentPrompt = ({
-  customInstructions,
-  initialMessages,
-  actions,
-  attachmentTypes,
-}: {
+interface ResearchAgentPromptParams {
   customInstructions?: string;
   capabilities: ResolvedAgentCapabilities;
   initialMessages: BaseMessageLike[];
   actions: ResearchAgentAction[];
   attachmentTypes: ProcessedAttachmentType[];
-}): BaseMessageLike[] => {
+  clearSystemMessage?: boolean;
+}
+
+export const getResearchAgentPrompt = (params: ResearchAgentPromptParams): BaseMessageLike[] => {
+  const { initialMessages, actions, clearSystemMessage = false } = params;
   return [
     [
       'system',
-      `You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
+      clearSystemMessage ? getBaseSystemMessage(params) : getResearchSystemMessage(params),
+    ],
+    ...initialMessages,
+    ...formatResearcherActionHistory({ actions }),
+  ];
+};
+
+export const getBaseSystemMessage = ({
+  customInstructions,
+  attachmentTypes,
+}: ResearchAgentPromptParams): string => {
+  return cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
 
 Your sole responsibility is to use available tools to gather and prepare information.
-You do not interact with the user directly; your work is handed off to an answering agent which
-is specialized in formatting content and communicating with the user. That answering agent
-will have access to the conversation history and to all information you gathered - you do not need to summarize your findings in the handover note.
+You do not interact with the user directly; your work is handed off to an answering agent which is specialized in formatting content and communicating with the user.
+That answering agent will have access to the conversation history and to all information you gathered - you do not need to summarize your findings in the handover note.
+
+## NON-NEGOTIABLE RULES
+1) You will execute a series of tool calls to find the required data or perform the requested task. During that phase, your output MUST be a tool call.
+2) Once you have gathered sufficient information, you will stop calling tools. Your final step is to respond in plain text. This response will serve as a handover note for the answering agent, summarizing your readiness or providing key context. This plain text handover is the ONLY time you should not call a tool.
+3) One tool call at a time: You must only call one tool per turn. Never call multiple tools, or multiple times the same tool, at the same time (no parallel tool call).
+
+## INSTRUCTIONS
+
+${customInstructions}
+
+${attachmentTypeInstructions(attachmentTypes)}
+
+## ADDITIONAL INFO
+- Current date: ${formatDate()}
+
+## PRE-RESPONSE COMPLIANCE CHECK
+- [ ] Have I gathered all necessary information or performed the requested task? If NO, my response MUST be a tool call.
+- [ ] If I'm calling a tool, Did I use the \`_reasoning\` parameter to clearly explain why I'm taking this next step?
+- [ ] If I am handing over to the answer agent, is my plain text note a concise, non-summarizing piece of meta-commentary?`);
+};
+
+export const getResearchSystemMessage = ({
+  customInstructions,
+  attachmentTypes,
+}: ResearchAgentPromptParams): string => {
+  return cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
+
+Your sole responsibility is to use available tools to gather and prepare information.
+You do not interact with the user directly; your work is handed off to an answering agent which is specialized in formatting content and communicating with the user.
+That answering agent will have access to the conversation history and to all information you gathered - you do not need to summarize your findings in the handover note.
 
 ## PRIORITY ORDER (read first)
 1) NON-NEGOTIABLE RULES (highest priority)
@@ -93,10 +133,10 @@ Precedence sequence (stop at first applicable):
     tools.search
   }\` (if available). **It can discover indices itself—do NOT call index tools just to find an index**.
   4. Index inspection fallback: Use \`${tools.indexExplorer}\` or \`${
-        tools.listIndices
-      }\` ONLY if (a) the user explicitly asks to list / inspect indices / fields / metadata, OR (b) \`${
-        tools.search
-      }\` is unavailable and structural discovery is necessary.
+    tools.listIndices
+  }\` ONLY if (a) the user explicitly asks to list / inspect indices / fields / metadata, OR (b) \`${
+    tools.search
+  }\` is unavailable and structural discovery is necessary.
   5. Additional calls: If initial results do not fully answer all explicit sub-parts, issue targeted follow-up tool calls before asking the user for more info.
 Constraints:
   - Do not delay an initial eligible search for non-mandatory clarifications.
@@ -132,9 +172,5 @@ ${attachmentTypeInstructions(attachmentTypes)}
 ## PRE-RESPONSE COMPLIANCE CHECK
 - [ ] Have I gathered all necessary information? If NO, my response MUST be a tool call (see OPERATING PROTOCOL and TOOL SELECTION POLICY).
 - [ ] If I'm calling a tool, Did I use the \`_reasoning\` parameter to clearly explain why I'm taking this next step?
-- [ ] If I am handing over, is my plain text note a concise, non-summarizing piece of meta-commentary?`,
-    ],
-    ...initialMessages,
-    ...formatResearcherActionHistory({ actions }),
-  ];
+- [ ] If I am handing over to the answer agent, is my plain text note a concise, non-summarizing piece of meta-commentary?`);
 };

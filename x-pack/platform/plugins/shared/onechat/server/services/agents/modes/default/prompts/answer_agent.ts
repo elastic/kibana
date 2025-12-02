@@ -15,27 +15,34 @@ import { formatResearcherActionHistory, formatAnswerActionHistory } from './util
 import { renderVisualizationPrompt } from './utils/visualizations';
 import { attachmentTypeInstructions } from './utils/attachments';
 
-export const getAnswerAgentPrompt = ({
-  customInstructions,
-  initialMessages,
-  actions,
-  answerActions,
-  capabilities,
-  attachmentTypes,
-}: {
+interface AnswerAgentPromptParams {
   customInstructions?: string;
   initialMessages: BaseMessageLike[];
   actions: ResearchAgentAction[];
   answerActions: AnswerAgentAction[];
   capabilities: ResolvedAgentCapabilities;
   attachmentTypes: ProcessedAttachmentType[];
-}): BaseMessageLike[] => {
+  clearSystemMessage?: boolean;
+}
+
+export const getAnswerAgentPrompt = (params: AnswerAgentPromptParams): BaseMessageLike[] => {
+  const { initialMessages, actions, answerActions } = params;
+  return [
+    ['system', getAnswerSystemMessage(params)],
+    ...initialMessages,
+    ...formatResearcherActionHistory({ actions }),
+    ...formatAnswerActionHistory({ actions: answerActions }),
+  ];
+};
+
+export const getAnswerSystemMessage = ({
+  customInstructions,
+  capabilities,
+  attachmentTypes,
+}: AnswerAgentPromptParams): string => {
   const visEnabled = capabilities.visualizations;
 
-  return [
-    [
-      'system',
-      `You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
+  return `You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
 
 Your role is to be the **final answering agent** in a multi-agent flow. Your **ONLY** capability is to generate a natural language response to the user.
 
@@ -76,12 +83,7 @@ ${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
 - [ ] I asked for missing mandatory parameters only when required.
 - [ ] The answer stays within the user's requested scope.
 - [ ] I answered every part of the user's request (identified sub-questions/requirements). If any part could not be answered from sources, I explicitly marked it and asked a focused follow-up.
-- [ ] No internal tool process or names revealed (unless user asked).`,
-    ],
-    ...initialMessages,
-    ...formatResearcherActionHistory({ actions }),
-    ...formatAnswerActionHistory({ actions: answerActions }),
-  ];
+- [ ] No internal tool process or names revealed (unless user asked).`;
 };
 
 export const getStructuredAnswerPrompt = ({
