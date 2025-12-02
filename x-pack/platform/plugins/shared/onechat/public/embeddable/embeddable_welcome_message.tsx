@@ -13,9 +13,7 @@ import { useKibana } from '../application/hooks/use_kibana';
 import { docLinks } from '../../common/doc_links';
 import { useConversationList } from '../application/hooks/use_conversation_list';
 import { useSendMessage } from '../application/context/send_message/send_message_context';
-
-// TODO: Replace with actual user role check
-const isAdminOrAdvancedUser = true;
+import { useHasConnectorsAllPrivileges } from '../application/hooks/use_has_connectors_all_privileges';
 
 const LOCAL_STORAGE_KEY = 'agentBuilder.embeddable.welcomeMessage.dismissed';
 
@@ -24,6 +22,7 @@ export const EmbeddableWelcomeMessage = () => {
     services: { application },
   } = useKibana();
   const { euiTheme } = useEuiTheme();
+  const hasAccessToGenAiSettings = useHasConnectorsAllPrivileges();
 
   const [showCallOut, setShowCallOut] = useState(!localStorage.getItem(LOCAL_STORAGE_KEY));
 
@@ -34,7 +33,7 @@ export const EmbeddableWelcomeMessage = () => {
 
   const { isResponseLoading } = useSendMessage();
 
-  // Dismiss the welcome message when a message has been sent
+  // Dismiss the welcome message automatically when a message has been sent
   useEffect(() => {
     if (isResponseLoading) {
       onDismiss();
@@ -58,7 +57,7 @@ export const EmbeddableWelcomeMessage = () => {
 
   const genAiSettingsLink = (
     <EuiLink
-      href={application.getUrlForApp('management', { path: '/ai/agentBuilder' })}
+      href={application.getUrlForApp('management', { path: '/ai/genAiSettings' })}
       target="_blank"
       external
     >
@@ -88,7 +87,7 @@ export const EmbeddableWelcomeMessage = () => {
         iconType="info"
         onDismiss={onDismiss}
       >
-        {isAdminOrAdvancedUser ? (
+        {hasAccessToGenAiSettings ? (
           <FormattedMessage
             id="xpack.onechat.welcomeMessage.contentAdvanced"
             defaultMessage="Based on the new <strong>Agent Builder</strong> platform, <strong>AI Agent</strong> is the new agentic chat experience for this space. Learn more in our {documentationLink} or switch back to the default experience in the {genAiSettingsLink}."

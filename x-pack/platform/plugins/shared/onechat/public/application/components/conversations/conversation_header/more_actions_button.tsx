@@ -28,6 +28,7 @@ import { appPaths } from '../../../utils/app_paths';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { DeleteConversationModal } from './delete_conversation_modal';
 import { RenameConversationModal } from './rename_conversation_modal';
+import { useHasConnectorsAllPrivileges } from '../../../hooks/use_has_connectors_all_privileges';
 
 const fullscreenLabels = {
   actions: i18n.translate('xpack.onechat.conversationActions.actions', {
@@ -72,7 +73,7 @@ const fullscreenLabels = {
   delete: i18n.translate('xpack.onechat.conversationTitle.delete', {
     defaultMessage: 'Delete',
   }),
-  agentBuilderSettings: i18n.translate('xpack.onechat.conversationActions.agentBuilderSettings', {
+  genAiSettings: i18n.translate('xpack.onechat.conversationActions.genAiSettings', {
     defaultMessage: 'Gen AI Settings',
   }),
 };
@@ -107,6 +108,7 @@ export const MoreActionsButton: React.FC = () => {
   const {
     services: { application },
   } = useKibana();
+  const hasAccessToGenAiSettings = useHasConnectorsAllPrivileges();
 
   const closePopover = () => {
     setIsPopoverOpen(false);
@@ -201,16 +203,20 @@ export const MoreActionsButton: React.FC = () => {
     >
       {fullscreenLabels.tools}
     </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="agentBuilderSettings"
-      icon="gear"
-      size="s"
-      onClick={closePopover}
-      href={application.getUrlForApp('management', { path: '/ai/agentBuilder' })}
-      data-test-subj="onechatActionsAgentBuilderSettings"
-    >
-      {fullscreenLabels.agentBuilderSettings}
-    </EuiContextMenuItem>,
+    ...(hasAccessToGenAiSettings
+      ? [
+          <EuiContextMenuItem
+            key="agentBuilderSettings"
+            icon="gear"
+            size="s"
+            onClick={closePopover}
+            href={application.getUrlForApp('management', { path: '/ai/genAiSettings' })}
+            data-test-subj="agentBuilderGenAiSettingsButton"
+          >
+            {fullscreenLabels.genAiSettings}
+          </EuiContextMenuItem>,
+        ]
+      : []),
   ];
 
   const buttonProps = {
