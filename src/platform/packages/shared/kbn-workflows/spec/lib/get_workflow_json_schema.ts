@@ -19,6 +19,7 @@ export function getWorkflowJsonSchema(zodSchema: z.ZodType): z.core.JSONSchema.J
       override: (ctx) => {
         filterRequiredFields(ctx);
         removeAdditionalPropertiesFromAllOfItems(ctx);
+        setMarkdownDescriptionIfSyntaxDetected(ctx);
       },
     });
   } catch (error) {
@@ -73,4 +74,20 @@ function removeAdditionalPropertiesFromAllOfItems(ctx: {
   ) {
     ctx.jsonSchema.additionalProperties = undefined;
   }
+}
+
+function setMarkdownDescriptionIfSyntaxDetected(ctx: {
+  zodSchema: z.core.$ZodTypes;
+  jsonSchema: z.core.JSONSchema.BaseSchema;
+  path: (string | number)[];
+}) {
+  const description = ctx.jsonSchema.description;
+  if (!description) {
+    return;
+  }
+  const isMarkdown = /[\\`*_{}[\]()#+\-.!]/g.test(description);
+  if (!isMarkdown) {
+    return;
+  }
+  ctx.jsonSchema.markdownDescription = description;
 }

@@ -134,3 +134,30 @@ describe('fixAdditionalPropertiesInSchema', () => {
     });
   });
 });
+
+describe('setMarkdownDescriptionIfSyntaxDetected', () => {
+  it('should set markdown description if markdown syntax tokens are detected', () => {
+    const zodSchema = z.object({
+      description: z.string().describe('This is a **markdown** description'),
+    });
+    const jsonSchema = getWorkflowJsonSchema(zodSchema);
+    expect(jsonSchema).toBeDefined();
+    expect((jsonSchema as any)?.properties?.description?.description).toBe(
+      'This is a **markdown** description'
+    );
+    expect((jsonSchema as any)?.properties?.description?.markdownDescription).toBe(
+      'This is a **markdown** description'
+    );
+  });
+  it('should not set markdown description if no markdown syntax tokens are detected', () => {
+    const zodSchema = z.object({
+      description: z.string().describe('This is a plain text description'),
+    });
+    const jsonSchema = getWorkflowJsonSchema(zodSchema);
+    expect(jsonSchema).toBeDefined();
+    expect((jsonSchema as any)?.properties?.description?.description).toBe(
+      'This is a plain text description'
+    );
+    expect((jsonSchema as any)?.properties?.description?.markdownDescription).toBeUndefined();
+  });
+});

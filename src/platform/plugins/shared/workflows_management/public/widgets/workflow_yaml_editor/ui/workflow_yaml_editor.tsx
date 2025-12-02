@@ -61,6 +61,8 @@ import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/
 import { useKibana } from '../../../hooks/use_kibana';
 import { UnsavedChangesPrompt, YamlEditor } from '../../../shared/ui';
 import { interceptMonacoYamlProvider } from '../lib/autocomplete/intercept_monaco_yaml_provider';
+import { interceptMonacoYamlHoverProvider } from '../lib/hover/intercept_monaco_yaml_hover_provider';
+import { useEnhancedMonacoYamlHoverProvider } from '../lib/hover/use_enhanced_monaco_yaml_hover_provider';
 import { insertStepSnippet } from '../lib/snippets/insert_step_snippet';
 import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
 import { useRegisterKeyboardCommands } from '../lib/use_register_keyboard_commands';
@@ -189,6 +191,7 @@ export const WorkflowYAMLEditor = ({
   // Initialize monkey-patch to intercept monaco-yaml's provider BEFORE it loads
   useEffect(() => {
     interceptMonacoYamlProvider();
+    interceptMonacoYamlHoverProvider();
   }, []);
 
   // Validation
@@ -268,6 +271,8 @@ export const WorkflowYAMLEditor = ({
 
   const completionProvider = useWorkflowYamlCompletionProvider();
 
+  const enhancedMonacoYamlHoverProvider = useEnhancedMonacoYamlHoverProvider();
+
   const handleEditorDidMount = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
       editorRef.current = editor;
@@ -282,6 +287,14 @@ export const WorkflowYAMLEditor = ({
         const disposable = monaco.languages.registerCompletionItemProvider(
           YAML_LANG_ID,
           completionProvider
+        );
+        disposablesRef.current.push(disposable);
+      }
+
+      if (enhancedMonacoYamlHoverProvider) {
+        const disposable = monaco.languages.registerHoverProvider(
+          YAML_LANG_ID,
+          enhancedMonacoYamlHoverProvider
         );
         disposablesRef.current.push(disposable);
       }
