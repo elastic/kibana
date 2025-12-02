@@ -8,6 +8,7 @@
 import type { RunFn } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
+import type { SupportedVmManager } from '../common/types';
 import { setupAll } from './setup';
 
 const runSetupAll: RunFn = async (cliContext) => {
@@ -20,6 +21,7 @@ const runSetupAll: RunFn = async (cliContext) => {
   const fleetServerUrl = cliContext.flags.fleetServerUrl as string;
   const version = cliContext.flags.version as string;
   const policy = cliContext.flags.policy as string;
+  const vmType = cliContext.flags.vmType as SupportedVmManager | undefined;
   const log = cliContext.log;
 
   createToolingLogger.setDefaultLogLevelFromCliFlags(cliContext.flags);
@@ -35,6 +37,7 @@ const runSetupAll: RunFn = async (cliContext) => {
     policy,
     log,
     spaceId,
+    vmType,
   });
 };
 
@@ -47,8 +50,8 @@ export const cli = () => {
       description: `
   Enrolls a new host running Elastic Agent with Fleet. It will (if necessary) first create a
   Fleet Server instance using Docker, and then it will initialize a new Ubuntu VM using
-  'multipass', install Elastic Agent and enroll it with Fleet. Can be used multiple times
-  against the same stack.`,
+  the specified VM manager (multipass, vagrant, or orbstack), install Elastic Agent and
+  enroll it with Fleet. Can be used multiple times against the same stack.`,
       flags: {
         string: [
           'kibana',
@@ -59,6 +62,7 @@ export const cli = () => {
           'policy',
           'apiKey',
           'spaceId',
+          'vmType',
         ],
         default: {
           kibanaUrl: 'http://127.0.0.1:5601',
@@ -69,6 +73,7 @@ export const cli = () => {
           version: '',
           policy: '',
           spaceId: '',
+          vmType: '',
         },
         help: `
         --version           Optional. The version of the Agent to use for enrolling the new host.
@@ -86,6 +91,9 @@ export const cli = () => {
                             space will be created if it does not exist. Default: default space.
         --kibanaUrl         Optional. The url to Kibana (Default: http://127.0.0.1:5601)
         --elasticUrl        Optional. The url to Elasticsearch (Default: http://127.0.0.1:9200)
+        --vmType            Optional. The VM manager to use for creating the host.
+                            Options: multipass, vagrant, orbstack
+                            Default: multipass (or vagrant in CI environments)
       `,
       },
     }

@@ -32,7 +32,7 @@ export interface BaseVmCreateOptions {
   memory?: string;
 }
 
-type CreateVmOptions = CreateMultipassVmOptions | CreateVagrantVmOptions;
+type CreateVmOptions = CreateMultipassVmOptions | CreateVagrantVmOptions | CreateOrbstackVmOptions;
 
 /**
  * Creates a new VM
@@ -40,6 +40,10 @@ type CreateVmOptions = CreateMultipassVmOptions | CreateVagrantVmOptions;
 export const createVm = async (options: CreateVmOptions): Promise<HostVm> => {
   if (options.type === 'multipass') {
     return createMultipassVm(options);
+  }
+
+  if (options.type === 'orbstack') {
+    return createOrbstackVm(options);
   }
 
   return createVagrantVm(options);
@@ -195,6 +199,191 @@ export const createMultipassHostVmClient = (
     start,
     stop,
   };
+};
+
+interface CreateOrbstackVmOptions extends BaseVmCreateOptions {
+  type: SupportedVmManager & 'orbstack';
+  name: string;
+  log?: ToolingLog;
+  /** Linux distribution to use for the VM. Defaults to 'ubuntu' */
+  distro?: string;
+}
+
+/**
+ * Creates a new VM using OrbStack
+ */
+const createOrbstackVm = async ({
+  name,
+  disk,
+  cpus,
+  memory,
+  distro = 'ubuntu',
+  log = createToolingLogger(),
+}: CreateOrbstackVmOptions): Promise<HostVm> => {
+  log.info(`Creating VM [${name}] using OrbStack`);
+
+  if (disk || cpus || memory) {
+    log.warning(
+      `cpu, memory, and disk options are managed by OrbStack automatically and will be ignored`
+    );
+  }
+
+  const createResponse = await execa.command(`orb create ${distro} ${name}`);
+
+  log.verbose(`VM [${name}] created successfully using OrbStack.`, createResponse);
+
+  return createOrbstackHostVmClient(name, log);
+};
+
+/**
+ * Creates a standard client for interacting with an OrbStack VM
+ * @param name
+ * @param log
+ */
+export const createOrbstackHostVmClient = (
+  name: string,
+  log: ToolingLog = createToolingLogger()
+): HostVm => {
+  const exec = async (
+    command: string,
+    options?: { silent?: boolean }
+  ): Promise<HostVmExecResponse> => {
+    // OrbStack's orb run: use -u to run as default user and cd to home directory first
+    // This ensures we're in the same directory where files are uploaded (home dir)
+    const fullCommand = `cd ~ && ${command}`;
+    const execResponse = await execa('orb', ['run', '-m', name, 'bash', '-c', fullCommand], {
+      maxBuffer: MAX_BUFFER,
+    }).catch((e) => {
+      if (!options?.silent) {
+        log.error(dump(e));
+      }
+      throw e;
+    });
+
+    log.verbose(
+      `exec response from host [${name}] for command [${command}]:\n${dump(execResponse)}`
+    );
+
+    return {
+      stdout: execResponse.stdout,
+      stderr: execResponse.stderr,
+      exitCode: execResponse.exitCode,
+    };
+  };
+
+  const destroy = async (): Promise<void> => {
+    const destroyResponse = await execa.command(`orb delete ${name}`);
+    log.verbose(`VM [${name}] was destroyed successfully`, destroyResponse);
+  };
+
+  const info = () => {
+    return `VM created using OrbStack.
+  VM Name: ${name}
+
+  Shell access: ${chalk.cyan(`orb shell -m ${name}`)}
+  Delete VM:    ${chalk.cyan(`orb delete ${name}`)}
+`;
+  };
+
+  const unmount = async (_hostVmDir: string) => {
+    // OrbStack provides automatic filesystem integration via /Volumes/OrbStack
+    // No explicit unmount needed as it's managed by OrbStack
+    log.verbose(`OrbStack handles filesystem integration automatically, no explicit unmount needed`);
+  };
+
+  const mount = async (localDir: string, hostVmDir: string) => {
+    // OrbStack automatically mounts the macOS filesystem to the VM
+    // The local directory is accessible from the VM via the OrbStack filesystem integration
+    log.verbose(
+      `OrbStack provides automatic filesystem access. Local dir [${localDir}] accessible in VM`
+    );
+
+    return {
+      hostDir: hostVmDir,
+      unmount: () => unmount(hostVmDir),
+    };
+  };
+
+  const start = async () => {
+    const response = await execa.command(`orb start ${name}`);
+    log.verbose(`OrbStack start response:\n`, response);
+  };
+
+  const stop = async () => {
+    const response = await execa.command(`orb stop ${name}`);
+    log.verbose(`OrbStack stop response:\n`, response);
+  };
+
+  const upload: HostVm['upload'] = async (localFilePath, destFilePath) => {
+    const response = await execa.command(`orb push -m ${name} ${localFilePath} ${destFilePath}`);
+    log.verbose(`Uploaded file to VM [${name}]:`, response);
+
+    return {
+      filePath: destFilePath,
+      delete: async () => {
+        return exec(`rm ${destFilePath}`);
+      },
+    };
+  };
+
+  const download: HostVm['download'] = async (vmFilePath: string, localFilePath: string) => {
+    const localFileAbsolutePath = path.resolve(localFilePath);
+    const response = await execa.command(
+      `orb pull -m ${name} ${vmFilePath} ${localFileAbsolutePath}`
+    );
+    log.verbose(`Downloaded file from VM [${name}]:`, response);
+
+    return {
+      filePath: localFileAbsolutePath,
+      delete: async () => {
+        return deleteFile(localFileAbsolutePath).then(() => {
+          return {
+            stdout: 'success',
+            stderr: '',
+            exitCode: 0,
+          };
+        });
+      },
+    };
+  };
+
+  return {
+    type: 'orbstack',
+    name,
+    exec,
+    destroy,
+    info,
+    mount,
+    unmount,
+    transfer: upload,
+    upload,
+    download,
+    start,
+    stop,
+  };
+};
+
+/**
+ * Checks if the count of VM running under OrbStack is greater than the `threshold` passed on
+ * input and if so, it will return a message indicate so. Useful to remind users of the amount of
+ * VM currently running.
+ * @param threshold
+ */
+export const getOrbstackVmCountNotice = async (threshold: number = 1): Promise<string> => {
+  const listOfVMs = await findVm('orbstack');
+
+  if (listOfVMs.data.length > threshold) {
+    return `-----------------------------------------------------------------
+${chalk.red('NOTE:')} ${chalk.bold(
+      chalk.red(`You currently have ${chalk.red(listOfVMs.data.length)} OrbStack VMs running.`)
+    )}
+      Remember to delete those no longer being used.
+      View running VMs: ${chalk.cyan('orb list')}
+  -----------------------------------------------------------------
+`;
+  }
+
+  return '';
 };
 
 /**
@@ -456,9 +645,15 @@ export const getHostVmClient = (
   vagrantFile: string = DEFAULT_VAGRANTFILE,
   log: ToolingLog = createToolingLogger()
 ): HostVm => {
-  return type === 'vagrant'
-    ? createVagrantHostVmClient(hostname, vagrantFile, log)
-    : createMultipassHostVmClient(hostname, log);
+  if (type === 'vagrant') {
+    return createVagrantHostVmClient(hostname, vagrantFile, log);
+  }
+
+  if (type === 'orbstack') {
+    return createOrbstackHostVmClient(hostname, log);
+  }
+
+  return createMultipassHostVmClient(hostname, log);
 };
 
 /**
@@ -507,6 +702,40 @@ export const findVm = async (
 
             return acc;
           }, [] as string[]),
+    };
+  }
+
+  if (type === 'orbstack') {
+    // OrbStack's `orb list` command outputs machines in a format like:
+    // NAME        STATE
+    // my-vm       running
+    const listOutput = (await execa.command(`orb list`)).stdout;
+    const lines = listOutput.split('\n').filter((line) => line.trim());
+
+    log.verbose(`OrbStack list output:`, listOutput);
+
+    // Skip header line and parse VM names
+    const vmNames: string[] = [];
+    for (let i = 1; i < lines.length; i++) {
+      const parts = lines[i].split(/\s+/);
+      if (parts.length >= 1 && parts[0]) {
+        vmNames.push(parts[0]);
+      }
+    }
+
+    if (vmNames.length === 0) {
+      return { data: [] };
+    }
+
+    return {
+      data: !name
+        ? vmNames
+        : vmNames.filter((vmName) => {
+            if (typeof name === 'string') {
+              return vmName === name;
+            }
+            return name.test(vmName);
+          }),
     };
   }
 

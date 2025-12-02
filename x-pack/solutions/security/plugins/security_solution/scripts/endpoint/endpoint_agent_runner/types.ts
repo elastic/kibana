@@ -6,6 +6,7 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
+import type { SupportedVmManager } from '../common/types';
 
 export interface StartRuntimeServicesOptions {
   kibanaUrl: string;
@@ -19,4 +20,6 @@ export interface StartRuntimeServicesOptions {
   policy?: string;
   log?: ToolingLog;
   asSuperuser?: boolean;
+  /** The type of VM manager to use. Defaults to 'multipass' (or 'vagrant' in CI) */
+  vmType?: SupportedVmManager;
 }

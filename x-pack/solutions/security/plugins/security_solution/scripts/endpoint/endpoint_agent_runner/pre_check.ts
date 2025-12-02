@@ -6,6 +6,7 @@
  */
 
 import execa from 'execa';
+import type { SupportedVmManager } from '../common/types';
 import { getRuntimeServices } from './runtime';
 
 export const checkDependencies = async () => {
@@ -34,16 +35,46 @@ const checkDocker = async () => {
 };
 
 const checkVmRunner = async () => {
-  const { log } = getRuntimeServices();
+  const {
+    log,
+    options: { vmType },
+  } = getRuntimeServices();
 
-  try {
-    const version = await execa('multipass', ['--version']);
+  // Determine the VM type to check: explicit vmType > CI default (vagrant) > multipass
+  const resolvedVmType: SupportedVmManager = vmType || (process.env.CI ? 'vagrant' : 'multipass');
 
-    log.verbose(`Using 'multipass': ${version.stdout}`);
-  } catch (err) {
-    log.verbose(err);
-    throw new Error(
-      `Mutipass not found on local machine [${err.message}]. Install it from: https://multipass.run\n\n`
-    );
+  if (resolvedVmType === 'multipass') {
+    try {
+      const version = await execa('multipass', ['--version']);
+
+      log.verbose(`Using 'multipass': ${version.stdout}`);
+    } catch (err) {
+      log.verbose(err);
+      throw new Error(
+        `Multipass not found on local machine [${err.message}]. Install it from: https://multipass.run\n\n`
+      );
+    }
+  } else if (resolvedVmType === 'orbstack') {
+    try {
+      const version = await execa('orb', ['version']);
+
+      log.verbose(`Using 'orbstack': ${version.stdout}`);
+    } catch (err) {
+      log.verbose(err);
+      throw new Error(
+        `OrbStack not found on local machine [${err.message}]. Install it from: https://orbstack.dev\n\n`
+      );
+    }
+  } else if (resolvedVmType === 'vagrant') {
+    try {
+      const version = await execa('vagrant', ['--version']);
+
+      log.verbose(`Using 'vagrant': ${version.stdout}`);
+    } catch (err) {
+      log.verbose(err);
+      throw new Error(
+        `Vagrant not found on local machine [${err.message}]. Install it from: https://www.vagrantup.com\n\n`
+      );
+    }
   }
 };

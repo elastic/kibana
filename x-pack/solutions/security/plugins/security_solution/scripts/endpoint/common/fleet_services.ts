@@ -858,7 +858,7 @@ export const enrollHostVmWithFleet = async ({
 
   log.info(`Installing Elastic Agent`);
 
-  // For multipass, we need to place the Agent archive in the VM - either mounting local cache
+  // For multipass and orbstack, we need to place the Agent archive in the VM - either mounting local cache
   // directory or downloading it directly from inside of the VM.
   // For Vagrant, the archive is already in the VM - it was done during VM creation.
   if (hostVm.type === 'multipass') {
@@ -882,6 +882,14 @@ export const enrollHostVmWithFleet = async ({
       await hostVm.exec(`tar -zxf ${agentDownload.filename}`);
       await hostVm.exec(`rm -f ${agentDownload.filename}`);
     }
+  } else if (hostVm.type === 'orbstack') {
+    // OrbStack: download and extract the agent directly in the VM
+    log.debug(`Downloading Elastic Agent to OrbStack VM`);
+    await hostVm.exec(`curl -L ${agentDownload.url} -o ${agentDownload.filename}`);
+
+    log.debug(`Extracting download archive on OrbStack VM`);
+    await hostVm.exec(`tar -zxf ${agentDownload.filename}`);
+    await hostVm.exec(`rm -f ${agentDownload.filename}`);
   }
 
   const policyId = agentPolicyId || (await getOrCreateDefaultAgentPolicy({ kbnClient, log })).id;

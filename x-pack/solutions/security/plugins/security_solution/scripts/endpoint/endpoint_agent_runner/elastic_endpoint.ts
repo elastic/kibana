@@ -21,7 +21,7 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
   const {
     log,
     kbnClient,
-    options: { version, policy },
+    options: { version, policy, vmType },
   } = getRuntimeServices();
 
   log.info(`Creating VM and enrolling Elastic Agent`);
@@ -42,7 +42,7 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
 
     vmName = generateVmName(`dev-${activeSpaceId}`);
 
-    log.info(`Creating VM named: ${vmName}`);
+    log.info(`Creating VM named: ${vmName}${vmType ? ` using ${vmType}` : ''}`);
 
     const { hostVm } = await createAndEnrollEndpointHost({
       kbnClient,
@@ -52,6 +52,7 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
       version,
       useClosestVersionMatch: false,
       disk: '8G',
+      vmType,
     });
 
     log.info(hostVm.info());
