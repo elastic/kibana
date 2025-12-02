@@ -34,7 +34,7 @@ describe('buildQueryAst', () => {
             Builder.expression.column({
               args: [Builder.identifier({ name: 'host' }), Builder.identifier({ name: 'name' })],
             }),
-            [Builder.expression.literal.string('my-host')],
+            Builder.expression.literal.string('my-host'),
           ],
         })
       )
@@ -188,7 +188,7 @@ describe('buildQueryAst', () => {
             Builder.expression.column({
               args: [Builder.identifier({ name: 'host' }), Builder.identifier({ name: 'name' })],
             }),
-            [Builder.param.named({ value: 'host' })],
+            Builder.param.named({ value: 'host' }),
           ],
         })
       )

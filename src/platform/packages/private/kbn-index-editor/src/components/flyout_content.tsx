@@ -61,6 +61,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
     coreStart.application,
     coreStart.http,
     coreStart.notifications,
+    undefined,
     // onUploadComplete
     (results: FileUploadResults | null) => {
       if (results) {

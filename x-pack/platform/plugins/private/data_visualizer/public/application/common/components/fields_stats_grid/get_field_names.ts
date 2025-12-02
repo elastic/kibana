@@ -11,6 +11,8 @@ import type { FindFileStructureResponse } from '@kbn/file-upload-common';
 import type { SupportedFieldType } from '../../../../../common/types';
 import { SUPPORTED_FIELD_TYPES } from '../../../../../common/constants';
 
+// clone of data viz code. this should be removed and the data viz code moved to a common package
+
 export function getFieldNames(results: FindFileStructureResponse) {
   const { mappings, field_stats: fieldStats, column_names: columnNames } = results;
 

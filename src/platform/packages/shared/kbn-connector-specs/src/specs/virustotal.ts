@@ -21,7 +21,6 @@
 
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../connector_spec';
-import { UISchemas } from '../connector_spec_ui';
 
 export const VirusTotalConnector: ConnectorSpec = {
   metadata: {
@@ -32,14 +31,19 @@ export const VirusTotalConnector: ConnectorSpec = {
     supportedFeatureIds: ['workflows'],
   },
 
-  schema: z.discriminatedUnion('method', [
-    z.object({
-      method: z.literal('headers'),
-      headers: z.object({
-        'x-apikey': UISchemas.secret('vt-...').describe('API Key'),
-      }),
-    }),
-  ]),
+  authTypes: [
+    {
+      type: 'api_key_header',
+      defaults: {
+        headerField: 'x-apikey',
+      },
+      overrides: {
+        meta: {
+          'x-apikey': { placeholder: 'vt-...' },
+        },
+      },
+    },
+  ],
 
   actions: {
     scanFileHash: {

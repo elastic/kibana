@@ -170,6 +170,51 @@ export function defineRoutes(
     }
   );
 
+  router.post(
+    {
+      path: '/_test/gap_auto_fill_scheduler/_delete_all',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {},
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ) => {
+      try {
+        const [{ savedObjects }] = await core.getStartServices();
+        const soClient = await savedObjects.getScopedClient(req, {
+          includedHiddenTypes: ['gap_auto_fill_scheduler', 'task'],
+        });
+        const found = await soClient.find<any>({ type: 'gap_auto_fill_scheduler', perPage: 10000 });
+        for (const so of found.saved_objects) {
+          const scheduledTaskId = (so.attributes as any)?.scheduledTaskId;
+          try {
+            await soClient.delete('gap_auto_fill_scheduler', so.id);
+          } catch (e) {
+            logger.debug(`_test delete all schedulers: delete failed for ${so.id}: ${e}`);
+          }
+          if (scheduledTaskId) {
+            try {
+              await soClient.delete('task', scheduledTaskId);
+            } catch (e) {
+              logger.debug(
+                `_test delete all schedulers: delete task failed for ${scheduledTaskId}: ${e}`
+              );
+            }
+          }
+        }
+        return res.ok({ body: { deleted: found.saved_objects.length } });
+      } catch (err) {
+        return res.customError({ statusCode: 500, body: { message: `${err}` } });
+      }
+    }
+  );
   router.put(
     {
       path: '/api/alerts_fixture/saved_object/{type}/{id}',
@@ -783,6 +828,8 @@ export function defineRoutes(
           start: schema.string(),
           end: schema.string(),
           spaceId: schema.string(),
+          markInProgress: schema.maybe(schema.boolean()),
+          updatedAt: schema.maybe(schema.string()),
         }),
       },
     },
@@ -874,6 +921,59 @@ export function defineRoutes(
           },
           { retries: 5 }
         );
+
+        // Optionally mark the just-created gap as in-progress (for testing flows)
+        if (req.body.markInProgress) {
+          const found = await eventLogClient.findEventsBySavedObjectIds(
+            'alert',
+            [req.body.ruleId],
+            {
+              filter: 'event.action: gap',
+              sort: [
+                {
+                  sort_field: '@timestamp',
+                  sort_order: 'desc',
+                },
+              ],
+              per_page: 1,
+            }
+          );
+
+          if (found.total > 0 && Array.isArray(found.data) && found.data[0]?._id) {
+            const latest = found.data[0] as any;
+            const inProgressIntervals = [
+              {
+                gte: req.body.start,
+                lte: req.body.end,
+              },
+            ];
+            const updatedAt = req.body.updatedAt ?? new Date().toISOString();
+
+            await eventLogger.updateEvents([
+              {
+                internalFields: {
+                  _id: latest._id,
+                  _index: latest._index,
+                  _seq_no: latest._seq_no,
+                  _primary_term: latest._primary_term,
+                },
+                event: {
+                  kibana: {
+                    alert: {
+                      rule: {
+                        gap: {
+                          in_progress_intervals: inProgressIntervals,
+                          updated_at: updatedAt,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            ]);
+            await eventLogClient.refreshIndex();
+          }
+        }
         return res.ok({ body: { ok: true } });
       } catch (err) {
         return res.customError({
