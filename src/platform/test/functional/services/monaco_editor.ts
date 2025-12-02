@@ -43,9 +43,9 @@ export class MonacoEditorService extends FtrService {
     return values[nthIndex] as string;
   }
 
-  public async typeCodeEditorValue(value: string, testSubjId: string) {
+  public async typeCodeEditorValue(value: string, testSubjId: string, triggerSuggest = true) {
     await this.browser.execute(
-      (id: string, text: string) => {
+      (id: string, text: string, suggest: boolean) => {
         const container = document.querySelector(`[data-test-subj="${id}"]`);
         const editor = window
           .MonacoEnvironment!.monaco.editor.getEditors()
@@ -66,10 +66,13 @@ export class MonacoEditorService extends FtrService {
             text,
           },
         ]);
-        editor.trigger('keyboard', 'editor.action.triggerSuggest', {});
+        if (suggest) {
+          editor.trigger('keyboard', 'editor.action.triggerSuggest', {});
+        }
       },
       testSubjId,
-      value
+      value,
+      triggerSuggest
     );
   }
 
@@ -109,5 +112,47 @@ export class MonacoEditorService extends FtrService {
     return this.findService.byCssSelector(
       '[data-test-subj="kbnCodeEditorEditorOverflowWidgetsContainer"] .suggest-widget'
     );
+  }
+
+  public async clearCodeEditorValue(testSubjId: string) {
+    await this.browser.execute((id: string) => {
+      const container = document.querySelector(`[data-test-subj="${id}"]`);
+      const editor = window
+        .MonacoEnvironment!.monaco.editor.getEditors()
+        .find((e: any) => container?.contains(e.getDomNode()));
+      editor?.getModel()?.setValue('');
+      editor?.focus();
+    }, testSubjId);
+  }
+
+  public async getCodeEditorValueByTestSubj(testSubjId: string): Promise<string> {
+    return await this.browser.execute((id: string) => {
+      const container = document.querySelector(`[data-test-subj="${id}"]`);
+      const editor = window
+        .MonacoEnvironment!.monaco.editor.getEditors()
+        .find((e: any) => container?.contains(e.getDomNode()));
+      return editor?.getModel()?.getValue() ?? '';
+    }, testSubjId);
+  }
+
+  public async selectAllCodeEditorValue(testSubjId: string) {
+    await this.browser.execute((id: string) => {
+      const container = document.querySelector(`[data-test-subj="${id}"]`);
+      const editor = window
+        .MonacoEnvironment!.monaco.editor.getEditors()
+        .find((e: any) => container?.contains(e.getDomNode()));
+      const model = editor?.getModel();
+      if (editor && model) {
+        const lastLine = model.getLineCount();
+        const lastColumn = model.getLineMaxColumn(lastLine);
+        editor.focus();
+        editor.setSelection({
+          startLineNumber: 1,
+          startColumn: 1,
+          endLineNumber: lastLine,
+          endColumn: lastColumn,
+        });
+      }
+    }, testSubjId);
   }
 }

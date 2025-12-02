@@ -18,6 +18,7 @@ export class ConsolePageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly common = this.ctx.getPageObject('common');
   private readonly browser = this.ctx.getService('browser');
+  private readonly monacoEditor = this.ctx.getService('monacoEditor');
 
   public async getTextArea() {
     const codeEditor = await this.testSubjects.find('consoleMonacoEditor');
@@ -37,9 +38,7 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async clearEditorText() {
-    const textArea = await this.getTextArea();
-    await textArea.clickMouseButton();
-    await textArea.clearValueWithKeyboard();
+    await this.monacoEditor.clearCodeEditorValue('consoleMonacoEditor');
   }
 
   public async focusInputEditor() {
@@ -71,9 +70,7 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async getOutputText() {
-    const outputPanel = await this.testSubjects.find('consoleMonacoOutput');
-    const outputViewDiv = await outputPanel.findByClassName('monaco-scrollable-element');
-    return await outputViewDiv.getVisibleText();
+    return await this.monacoEditor.getCodeEditorValueByTestSubj('consoleMonacoOutput');
   }
 
   public async pressEnter() {
@@ -82,8 +79,7 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async enterText(text: string) {
-    const textArea = await this.getTextArea();
-    await textArea.type(text);
+    await this.monacoEditor.typeCodeEditorValue(text, 'consoleMonacoEditor', false);
   }
 
   public async promptAutocomplete(letter = 'b') {
@@ -199,9 +195,7 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async selectAllRequests() {
-    const textArea = await this.getTextArea();
-    const selectionKey = Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
-    await textArea.pressKeys([selectionKey, 'a']);
+    await this.monacoEditor.selectAllCodeEditorValue('consoleMonacoEditor');
   }
 
   public async getEditor() {
