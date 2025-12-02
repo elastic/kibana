@@ -26,9 +26,9 @@ export function useESQLQueryStats(
       const stats = latestRequest.stats;
       if (stats) {
         const updatedStats = {
-          durationInMs: stats.queryTime.value,
-          totalDocumentsProcessed: stats.documentsProcessed.value,
-          lastRunAt: stats.requestTimestamp.value,
+          durationInMs: stats.queryTime?.value,
+          totalDocumentsProcessed: stats.documentsProcessed?.value,
+          lastRunAt: stats.requestTimestamp?.value,
         };
         setQueryStats((currentStats) => {
           if (!isEqual(currentStats, updatedStats)) {
