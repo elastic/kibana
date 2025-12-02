@@ -1579,7 +1579,7 @@
   dependencies:
     "@babel/helper-plugin-utils" "^7.24.7"
 
-"@babel/plugin-syntax-import-attributes@^7.24.7", "@babel/plugin-syntax-import-attributes@^7.27.1":
+"@babel/plugin-syntax-import-attributes@^7.24.7":
   version "7.27.1"
   resolved "https://registry.yarnpkg.com/@babel/plugin-syntax-import-attributes/-/plugin-syntax-import-attributes-7.27.1.tgz#34c017d54496f9b11b61474e7ea3dfd5563ffe07"
   integrity sha512-oFT0FrKHgF53f4vOsZGi2Hh3I35PfSmVs4IBFLFj4dnafP+hIWDLg3VyKmUHfLoLHlyxY4C7DGtmHuJgn+IGww==

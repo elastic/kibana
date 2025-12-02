@@ -21,4 +21,3 @@ dompurify
 magic-bytes.js
 @axe-core/playwright
 @opentelemetry/exporter-trace-otlp-grpc
-@babel/plugin-syntax-import-attributes

@@ -1479,7 +1479,6 @@
     "@babel/plugin-proposal-object-rest-spread": "^7.20.7",
     "@babel/plugin-proposal-optional-chaining": "^7.21.0",
     "@babel/plugin-proposal-private-methods": "^7.18.6",
-    "@babel/plugin-syntax-import-attributes": "^7.27.1",
     "@babel/plugin-transform-class-properties": "^7.24.7",
     "@babel/plugin-transform-numeric-separator": "^7.24.7",
     "@babel/plugin-transform-optional-chaining": "^7.24.8",
