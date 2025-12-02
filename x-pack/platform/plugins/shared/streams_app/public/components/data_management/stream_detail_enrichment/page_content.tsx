@@ -282,7 +282,7 @@ export function StreamDetailEnrichmentContentImpl() {
           )}
         </EuiResizableContainer>
       </EuiSplitPanel.Inner>
-      {hasChanges && !isSimulating && !interactiveModeWithStepUnderEdit && (
+      {hasChanges && (
         <ManagementBottomBar
           onCancel={resetChanges}
           onConfirm={
@@ -292,7 +292,7 @@ export function StreamDetailEnrichmentContentImpl() {
               : saveChanges
           }
           isLoading={isSavingChanges}
-          disabled={!canUpdate}
+          disabled={!canUpdate || isSimulating || interactiveModeWithStepUnderEdit}
           insufficientPrivileges={!canManage}
           isInvalid={hasDefinitionError || isInvalid}
           onViewCodeClick={onBottomBarViewCodeClick}
