@@ -8,7 +8,15 @@
  */
 
 import { regionMapStateSchema } from '../../schema';
-import { validateConverter } from '../validate';
+import { validateAPIConverter, validateConverter } from '../validate';
+import {
+  basicRegionMapWithAdHocDataView,
+  basicRegionMapWithDataView,
+  basicEsqlRegionMap,
+  comprehensiveRegionMapWithAdHocDataView,
+  comprehensiveRegionMapWithDataView,
+  comprehensiveEsqlRegionMap,
+} from './lens_api_config.mock';
 import {
   regionMapAttributes,
   regionMapAttributesWithEms,
@@ -17,7 +25,7 @@ import {
   regionmapESQLAttributesWithEms,
 } from './lens_state_config.mock';
 
-describe('Tagcloud', () => {
+describe('Region Map', () => {
   describe('validateConverter', () => {
     it('should convert a simple region map', () => {
       validateConverter(regionMapAttributes, regionMapStateSchema);
@@ -33,6 +41,31 @@ describe('Tagcloud', () => {
     });
     it('should convert an esql region map with ems', () => {
       validateConverter(regionmapESQLAttributesWithEms, regionMapStateSchema);
+    });
+  });
+  describe('validateAPIConverter', () => {
+    it('should convert a basic regionMap chart with ad hoc dataView', () => {
+      validateAPIConverter(basicRegionMapWithAdHocDataView, regionMapStateSchema);
+    });
+
+    it('should convert a basic regionMap chart with dataView', () => {
+      validateAPIConverter(basicRegionMapWithDataView, regionMapStateSchema);
+    });
+
+    it('should convert a ESQL-based regionMap chart', () => {
+      validateAPIConverter(basicEsqlRegionMap, regionMapStateSchema);
+    });
+
+    it('should convert a comprehensive regionMap chart with ad hoc data view', () => {
+      validateAPIConverter(comprehensiveRegionMapWithAdHocDataView, regionMapStateSchema);
+    });
+
+    it('should convert a comprehensive regionMap chart with data view', () => {
+      validateAPIConverter(comprehensiveRegionMapWithDataView, regionMapStateSchema);
+    });
+
+    it('should convert a comprehensive ESQL-based regionMap chart', () => {
+      validateAPIConverter(comprehensiveEsqlRegionMap, regionMapStateSchema);
     });
   });
 });
