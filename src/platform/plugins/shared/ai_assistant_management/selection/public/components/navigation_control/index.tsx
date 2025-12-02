@@ -178,9 +178,10 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                 <FormattedMessage
                   id="aiAssistantManagementSelection.headerButton.description"
                   defaultMessage={
-                    'Choose which AI Assistant version you would like to use when navigating in Analytics and Stack Management apps. You can change this later in {genAiSettings}.'
+                    'Choose which chat experience to use when navigating in solutions, Analytics and Stack Management apps. <bold>This applies to all users in this space.</bold> You can change this later in {genAiSettings}.'
                   }
                   values={{
+                    bold: (str) => <strong>{str}</strong>,
                     genAiSettings: (
                       <EuiLink
                         data-test-subj="navigateToGenAISettings"
@@ -215,7 +216,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                     title={i18n.translate(
                       'aiAssistantManagementSelection.headerButton.observabilityLabel',
                       {
-                        defaultMessage: 'Observability and Search',
+                        defaultMessage: 'Observability and Search AI Assistant',
                       }
                     )}
                     titleSize="xs"
@@ -256,7 +257,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                     title={i18n.translate(
                       'aiAssistantManagementSelection.headerButton.securityLabel',
                       {
-                        defaultMessage: 'Security',
+                        defaultMessage: 'Security AI Assistant',
                       }
                     )}
                     titleSize="xs"
@@ -269,8 +270,15 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                   <EuiFlexItem grow={1}>
                     <EuiCard
                       display="plain"
-                      // TODO: BETA on the top border
                       hasBorder
+                      betaBadgeProps={{
+                        label: i18n.translate(
+                          'aiAssistantManagementSelection.headerButton.betaLabel',
+                          {
+                            defaultMessage: 'BETA',
+                          }
+                        ),
+                      }}
                       selectable={{
                         isSelected: selectedType.chatExperience === AIChatExperience.Agents,
                         onClick: () =>

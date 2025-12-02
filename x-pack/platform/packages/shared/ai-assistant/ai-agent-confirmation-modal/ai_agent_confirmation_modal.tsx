@@ -32,7 +32,7 @@ export const AIAgentConfirmationModal: React.FC<AIAgentConfirmationModalProps> =
   return (
     <EuiConfirmModal
       title={
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexGroup gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             {i18n.translate('aiAssistantManagementSelection.agentConfirmModal.title', {
               defaultMessage: 'Switch to AI Agent',
@@ -44,6 +44,7 @@ export const AIAgentConfirmationModal: React.FC<AIAgentConfirmationModalProps> =
                 defaultMessage: 'Beta',
               })}
               size="m"
+              css={{ verticalAlign: 'middle' }}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -61,7 +62,7 @@ export const AIAgentConfirmationModal: React.FC<AIAgentConfirmationModalProps> =
       confirmButtonText={i18n.translate(
         'aiAssistantManagementSelection.agentConfirmModal.confirmButton',
         {
-          defaultMessage: 'Continue',
+          defaultMessage: 'Confirm',
         }
       )}
       defaultFocusedButton="confirm"
