@@ -7,19 +7,13 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { TestProviders } from '../../mock';
-import { MissingPrivilegesCallOut } from './missing_privileges_callout';
-import type { MissingPrivileges } from '../../hooks/use_missing_privileges';
-import { useMissingPrivileges } from '../../hooks/use_missing_privileges';
+import { TestProviders } from '../../../common/mock';
+import { MissingDetectionsPrivilegesCallOut } from './missing_detections_privileges_callout';
+import { useMissingPrivileges } from '../../../common/hooks/use_missing_privileges';
 
-jest.mock('../../hooks/use_missing_privileges');
+jest.mock('../../../common/hooks/use_missing_privileges');
 
-const missingPrivileges: MissingPrivileges = {
-  featurePrivileges: [['feature', ['read', 'write']]],
-  indexPrivileges: [['index', ['read', 'write']]],
-};
-
-describe('MissingPrivilegesCallOut', () => {
+describe('MissingDetectionsPrivilegesCallOut', () => {
   it('should show callout', () => {
     (useMissingPrivileges as jest.Mock).mockReturnValue({
       featurePrivileges: [['feature', ['read', 'write']]],
@@ -28,7 +22,7 @@ describe('MissingPrivilegesCallOut', () => {
 
     const { getByText } = render(
       <TestProviders>
-        <MissingPrivilegesCallOut namespace="detections" missingPrivileges={missingPrivileges} />
+        <MissingDetectionsPrivilegesCallOut />
       </TestProviders>
     );
 

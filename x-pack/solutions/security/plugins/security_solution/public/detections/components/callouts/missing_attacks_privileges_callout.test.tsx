@@ -7,15 +7,15 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { MissingPrivilegesCallOut } from './missing_privileges_callout';
-import { useMissingPrivileges } from '../../../../common/hooks/use_missing_privileges';
-import { useGetMissingIndexPrivileges } from '../../../../attack_discovery/pages/use_get_missing_index_privileges';
-import { TestProviders } from '../../../../common/mock/test_providers';
+import { MissingAttacksPrivilegesCallOut } from './missing_attacks_privileges_callout';
+import { useMissingPrivileges } from '../../../common/hooks/use_missing_privileges';
+import { useGetMissingIndexPrivileges } from '../../../attack_discovery/pages/use_get_missing_index_privileges';
+import { TestProviders } from '../../../common/mock/test_providers';
 
-jest.mock('../../../../common/hooks/use_missing_privileges');
-jest.mock('../../../../attack_discovery/pages/use_get_missing_index_privileges');
-jest.mock('../../../../common/components/callouts', () => {
-  const original = jest.requireActual('../../../../common/components/callouts');
+jest.mock('../../../common/hooks/use_missing_privileges');
+jest.mock('../../../attack_discovery/pages/use_get_missing_index_privileges');
+jest.mock('../../../common/components/callouts', () => {
+  const original = jest.requireActual('../../../common/components/callouts');
   return {
     ...original,
     CallOutSwitcher: jest.fn(({ message }) => (
@@ -44,7 +44,7 @@ describe('MissingPrivilegesCallOut', () => {
 
     const { container } = render(
       <TestProviders>
-        <MissingPrivilegesCallOut />
+        <MissingAttacksPrivilegesCallOut />
       </TestProviders>
     );
 
@@ -62,7 +62,7 @@ describe('MissingPrivilegesCallOut', () => {
 
     const { getByText } = render(
       <TestProviders>
-        <MissingPrivilegesCallOut />
+        <MissingAttacksPrivilegesCallOut />
       </TestProviders>
     );
 
@@ -80,7 +80,7 @@ describe('MissingPrivilegesCallOut', () => {
 
     const { getByText } = render(
       <TestProviders>
-        <MissingPrivilegesCallOut />
+        <MissingAttacksPrivilegesCallOut />
       </TestProviders>
     );
 
@@ -98,7 +98,7 @@ describe('MissingPrivilegesCallOut', () => {
 
     const { getByText } = render(
       <TestProviders>
-        <MissingPrivilegesCallOut />
+        <MissingAttacksPrivilegesCallOut />
       </TestProviders>
     );
 
@@ -116,7 +116,7 @@ describe('MissingPrivilegesCallOut', () => {
 
     const { getByText } = render(
       <TestProviders>
-        <MissingPrivilegesCallOut />
+        <MissingAttacksPrivilegesCallOut />
       </TestProviders>
     );
 
