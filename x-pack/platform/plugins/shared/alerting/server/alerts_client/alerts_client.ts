@@ -632,7 +632,7 @@ export class AlertsClient<
           }),
         ];
 
-        const [response, forkedResponse] = await Promise.all(requests);
+        const [response] = await Promise.all(requests);
         // console.log('forkedResponse:', JSON.stringify(forkedResponse));
 
         // If there were individual indexing errors, they will be returned in the success response
@@ -791,33 +791,32 @@ export class AlertsClient<
       );
 
       try {
-        console.log('bulkBody:', JSON.stringify(bulkBody, null, 2));
-        const response = await esClient.bulk({
-          // On serverless we can force a refresh to we don't wait for the longer refresh interval
-          // When too many refresh calls are done in a short period of time, they are throttled by stateless Elasticsearch
-          refresh: this.isServerless ? true : 'wait_for',
-          index: this.indexTemplateAndPattern.alias,
-          require_alias: !this.isUsingDataStreams(),
-          body: bulkBody,
-        });
-        // If there were individual indexing errors, they will be returned in the success response
-        if (response && response.errors) {
-          this.throwIfHasClusterBlockException(response);
-          await resolveAlertConflicts({
-            logger: this.options.logger,
-            esClient,
-            bulkRequest: {
-              refresh: 'wait_for',
-              index: this.indexTemplateAndPattern.alias,
-              require_alias: !this.isUsingDataStreams(),
-              operations: bulkBody,
-            },
-            bulkResponse: response,
-            ruleId: this.options.rule.id,
-            ruleName: this.options.rule.name,
-            ruleType: this.ruleType.id,
-          });
-        }
+        // const response = await esClient.bulk({
+        //   // On serverless we can force a refresh to we don't wait for the longer refresh interval
+        //   // When too many refresh calls are done in a short period of time, they are throttled by stateless Elasticsearch
+        //   refresh: this.isServerless ? true : 'wait_for',
+        //   index: this.indexTemplateAndPattern.alias,
+        //   require_alias: !this.isUsingDataStreams(),
+        //   body: bulkBody,
+        // });
+        // // If there were individual indexing errors, they will be returned in the success response
+        // if (response && response.errors) {
+        //   this.throwIfHasClusterBlockException(response);
+        //   await resolveAlertConflicts({
+        //     logger: this.options.logger,
+        //     esClient,
+        //     bulkRequest: {
+        //       refresh: 'wait_for',
+        //       index: this.indexTemplateAndPattern.alias,
+        //       require_alias: !this.isUsingDataStreams(),
+        //       operations: bulkBody,
+        //     },
+        //     bulkResponse: response,
+        //     ruleId: this.options.rule.id,
+        //     ruleName: this.options.rule.name,
+        //     ruleType: this.ruleType.id,
+        //   });
+        // }
         const forkedBulkBody = flatMap(
           alertsToIndex.map((alert: Alert & AlertData) => {
             const alertUuid = get(alert, ALERT_UUID);

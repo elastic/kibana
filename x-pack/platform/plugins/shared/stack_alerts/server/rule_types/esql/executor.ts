@@ -67,7 +67,7 @@ export async function executor(
         id: alertId,
         state: { latestTimestamp, dateStart, dateEnd },
         payload: {
-          attrs: source,
+          ...source,
         },
       });
     } else {

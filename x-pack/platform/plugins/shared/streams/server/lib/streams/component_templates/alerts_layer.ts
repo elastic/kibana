@@ -31,6 +31,12 @@ export const baseFields: FieldDefinition = {
   'attributes.rule.execution.uuid': { type: 'keyword', ignore_above: 1024 },
   'attributes.entity.key': { type: 'keyword', ignore_above: 2048 },
   'attributes.lineage.parents': { type: 'keyword', ignore_above: 1024 },
+  'resource.attributes.host.name': {
+    type: 'keyword',
+  },
+  'resource.attributes.service.name': {
+    type: 'keyword',
+  },
 };
 
 export const baseMappings: Exclude<MappingTypeMapping['properties'], undefined> = {
