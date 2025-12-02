@@ -12,17 +12,32 @@ import { i18n } from '@kbn/i18n';
 import { FieldSelect } from '@kbn/field-utils/src/components/field_select/field_select';
 import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { MappingEditorService } from './mapping_editor_service';
+import { useFileUploadContext } from '../../../use_file_upload';
+import { MappingEditorService } from './mapping_editor_service';
 
 interface Props {
-  mappingEditorService: MappingEditorService;
+  setMappingsValid: (valid: boolean) => void;
 }
 
-export const MappingEditor: FC<Props> = ({ mappingEditorService }) => {
+export const MappingEditor: FC<Props> = ({ setMappingsValid }) => {
+  const { fileUploadManager } = useFileUploadContext();
+  const mappingEditorService = useMemo(
+    () => new MappingEditorService(fileUploadManager),
+    [fileUploadManager]
+  );
+
+  const mappingsError = useObservable(
+    mappingEditorService.mappingsError$,
+    mappingEditorService.getMappingsError()
+  );
   const mappings = useObservable(
     mappingEditorService.mappings$,
     mappingEditorService.getMappings()
   );
+
+  useEffect(() => {
+    setMappingsValid(!mappingsError);
+  }, [mappingsError, setMappingsValid]);
 
   const fieldCount = useMemo(() => mappings.length, [mappings]);
 
@@ -104,6 +119,15 @@ export const MappingEditor: FC<Props> = ({ mappingEditorService }) => {
           );
         })}
       </EuiFlexGroup>
+
+      {mappingsError ? (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText size="xs" color="danger">
+            {mappingsError}
+          </EuiText>
+        </>
+      ) : null}
     </>
   );
 };

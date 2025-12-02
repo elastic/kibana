@@ -9,17 +9,15 @@ import type { EuiStepStatus } from '@elastic/eui';
 import { EuiButton, EuiSpacer, EuiSteps, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { type OpenFileUploadLiteContext } from '@kbn/file-upload-common';
 import type { GetAdditionalLinks, ResultLinks } from '@kbn/file-upload-common';
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
-import useObservable from 'react-use/lib/useObservable';
 import { STATUS, useFileUploadContext } from '../../..';
 import { FileClashWarning } from './file_clash_warning';
 import { FileStatus } from './file_status';
 import { MappingEditor } from './mapping_editor';
-import { MappingEditorService } from './mapping_editor/mapping_editor_service';
 
 interface Props {
   resultLinks?: ResultLinks;
@@ -44,25 +42,17 @@ export const FileUploadLiteLookUpView: FC<Props> = ({
   setDropzoneDisabled,
 }) => {
   const { flyoutContent } = props;
-  const { fileUploadManager, filesStatus, uploadStatus, fileClashes, onImportClick, indexName } =
+  const { filesStatus, uploadStatus, fileClashes, onImportClick, indexName } =
     useFileUploadContext();
 
-  const mappingEditorService = useMemo(
-    () => new MappingEditorService(fileUploadManager),
-    [fileUploadManager]
-  );
-
-  const mappingsError = useObservable(
-    mappingEditorService.mappingsError$,
-    mappingEditorService.getMappingsError()
-  );
-
-  const [stepsStatus, setStepsStatus] = React.useState<StepsStatus>({
+  const [stepsStatus, setStepsStatus] = useState<StepsStatus>({
     analysis: STATUS.STARTED,
     mapping: STATUS.NOT_STARTED,
     upload: STATUS.NOT_STARTED,
     finish: STATUS.NOT_STARTED,
   });
+
+  const [mappingsValid, setMappingsValid] = useState<boolean>(true);
 
   const setStep = useCallback((step: keyof StepsStatus, status: STATUS) => {
     setStepsStatus((prev) => ({
@@ -136,21 +126,12 @@ export const FileUploadLiteLookUpView: FC<Props> = ({
       children:
         stepsStatus.mapping === STATUS.STARTED ? (
           <>
-            <MappingEditor mappingEditorService={mappingEditorService} />
-
-            {mappingsError ? (
-              <>
-                <EuiSpacer size="s" />
-                <EuiText size="xs" color="danger">
-                  {mappingsError}
-                </EuiText>
-              </>
-            ) : null}
+            <MappingEditor setMappingsValid={setMappingsValid} />
 
             <EuiSpacer />
 
             <EuiButton
-              disabled={mappingsError !== null}
+              disabled={!mappingsValid}
               onClick={() => {
                 setIsSaving(true);
                 onImportClick();
