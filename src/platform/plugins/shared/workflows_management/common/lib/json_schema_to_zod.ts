@@ -93,22 +93,25 @@ function convertObjectSchema(
 
   const shape: Record<string, z.ZodType> = {};
   for (const [key, propSchema] of Object.entries(jsonSchema.properties)) {
-    const prop = propSchema as JSONSchema7;
-    let zodProp = convertRecursive(prop);
+    // Skip null/undefined schemas (can happen when YAML is partially parsed)
+    if (propSchema && typeof propSchema === 'object') {
+      const prop = propSchema as JSONSchema7;
+      let zodProp = convertRecursive(prop);
 
-    // Check if required - use the parent schema's required array
-    const isRequired = jsonSchema.required?.includes(key) ?? false;
+      // Check if required - use the parent schema's required array
+      const isRequired = jsonSchema.required?.includes(key) ?? false;
 
-    // Apply default if present (default() automatically makes the field optional)
-    if (prop.default !== undefined) {
-      zodProp = zodProp.default(prop.default);
-    } else if (!isRequired) {
-      // Only apply optional if no default and not required
-      // (default() already makes it optional, so we don't need both)
-      zodProp = zodProp.optional();
+      // Apply default if present (default() automatically makes the field optional)
+      if (prop.default !== undefined) {
+        zodProp = zodProp.default(prop.default);
+      } else if (!isRequired) {
+        // Only apply optional if no default and not required
+        // (default() already makes it optional, so we don't need both)
+        zodProp = zodProp.optional();
+      }
+
+      shape[key] = zodProp;
     }
-
-    shape[key] = zodProp;
   }
   return z.object(shape);
 }
@@ -117,12 +120,21 @@ function convertObjectSchema(
  * Recursively converts a JSON Schema object to a Zod object schema
  * This is a fallback when @n8n/json-schema-to-zod fails
  */
-function convertJsonSchemaToZodRecursive(jsonSchema: JSONSchema7): z.ZodType {
+function convertJsonSchemaToZodRecursive(jsonSchema: JSONSchema7 | null | undefined): z.ZodType {
+  // Defensive check: handle null/undefined schemas (crash prevention)
+  if (!jsonSchema || typeof jsonSchema !== 'object') {
+    return z.any();
+  }
+
   if (jsonSchema.type === 'object' && jsonSchema.properties) {
     return convertObjectSchema(jsonSchema, convertJsonSchemaToZodRecursive);
   }
 
   if (jsonSchema.type === 'array' && jsonSchema.items) {
+    // Defensive check: handle null/undefined items
+    if (!jsonSchema.items || typeof jsonSchema.items !== 'object') {
+      return z.array(z.any());
+    }
     const itemsSchema = convertJsonSchemaToZodRecursive(jsonSchema.items as JSONSchema7);
     return z.array(itemsSchema);
   }

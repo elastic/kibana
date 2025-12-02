@@ -281,5 +281,39 @@ describe('convertJsonSchemaToZod', () => {
       // Should return z.any() as fallback
       expect(zodSchema.parse('anything')).toBe('anything');
     });
+
+    it('should handle nested object with null properties gracefully', () => {
+      const jsonSchema: JSONSchema7 = {
+        type: 'object',
+        properties: {
+          ipsContainer: {
+            type: 'object',
+            properties: {
+              ip: null,
+              port: { type: 'number' },
+            },
+          },
+        },
+      } as any;
+
+      // Should not crash when properties contain null values
+      expect(() => {
+        const zodSchema = convertJsonSchemaToZod(jsonSchema);
+        expect(zodSchema).toBeDefined();
+      }).not.toThrow();
+    });
+
+    it('should handle array with null items gracefully', () => {
+      const jsonSchema: JSONSchema7 = {
+        type: 'array',
+        items: null,
+      } as any;
+
+      // Should not crash when items is null
+      expect(() => {
+        const zodSchema = convertJsonSchemaToZod(jsonSchema);
+        expect(zodSchema).toBeDefined();
+      }).not.toThrow();
+    });
   });
 });
