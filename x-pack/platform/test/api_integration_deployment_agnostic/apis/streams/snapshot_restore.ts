@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { emptyAssets, type Streams } from '@kbn/streams-schema';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
+import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
@@ -23,8 +24,6 @@ import { STREAMS_SNAPSHOT_REPO_PATH } from '../../default_configs/common_paths';
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const esClient = getService('es');
-  const config = getService('config');
-  const isServerless = !!config.get('serverless');
   const alertingApi = getService('alertingApiCommon');
   const samlAuth = getService('samlAuth');
   const kibanaServer = getService('kibanaServer');
@@ -263,8 +262,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         // Verify processing configuration on child stream
         const webAppStream = logsWebAppDefinition.stream as Streams.WiredStream.Definition;
         expect(webAppStream.ingest.processing.steps).to.have.length(2);
-        expect(webAppStream.ingest.processing.steps[0].action).to.eql('grok');
-        expect(webAppStream.ingest.processing.steps[1].action).to.eql('dissect');
+        expect(
+          (webAppStream.ingest.processing.steps[0] as StreamlangProcessorDefinition).action
+        ).to.eql('grok');
+        expect(
+          (webAppStream.ingest.processing.steps[1] as StreamlangProcessorDefinition).action
+        ).to.eql('dissect');
 
         // Verify field mappings
         expect(webAppStream.ingest.wired.fields['attributes.request_method']).to.eql({
@@ -317,8 +320,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const restoredWebAppStream =
           restoredWebAppDefinition.stream as Streams.WiredStream.Definition;
         expect(restoredWebAppStream.ingest.processing.steps).to.have.length(2);
-        expect(restoredWebAppStream.ingest.processing.steps[0].action).to.eql('grok');
-        expect(restoredWebAppStream.ingest.processing.steps[1].action).to.eql('dissect');
+        expect(
+          (restoredWebAppStream.ingest.processing.steps[0] as StreamlangProcessorDefinition).action
+        ).to.eql('grok');
+        expect(
+          (restoredWebAppStream.ingest.processing.steps[1] as StreamlangProcessorDefinition).action
+        ).to.eql('dissect');
 
         // Verify field mappings are still configured
         expect(restoredWebAppStream.ingest.wired.fields['attributes.request_method']).to.eql({
@@ -397,27 +404,28 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         // Step 11: Verify we can query the data and processing was applied to both pre and post-snapshot docs
         const searchResponse = await esClient.search({
           index: 'logs.web-app',
-          body: {
-            query: {
-              match_all: {},
-            },
-            sort: [{ '@timestamp': { order: 'asc' } }],
+          query: {
+            match_all: {},
           },
+          sort: [{ '@timestamp': { order: 'asc' } }],
         });
 
         expect(searchResponse.hits.total).to.have.property('value', 2);
 
+        const firstHit = searchResponse.hits.hits[0] as any;
+        const secondHit = searchResponse.hits.hits[1] as any;
+
         // First document (pre-snapshot) should have processing applied
-        expect(searchResponse.hits.hits[0]._source?.body?.text).to.eql('GET /api/v1/users');
-        expect(searchResponse.hits.hits[0]._source?.attributes?.request_method).to.eql('GET');
-        expect(searchResponse.hits.hits[0]._source?.attributes?.api_version).to.eql('v1');
-        expect(searchResponse.hits.hits[0]._source?.attributes?.endpoint).to.eql('users');
+        expect(firstHit._source?.body?.text).to.eql('GET /api/v1/users');
+        expect(firstHit._source?.attributes?.request_method).to.eql('GET');
+        expect(firstHit._source?.attributes?.api_version).to.eql('v1');
+        expect(firstHit._source?.attributes?.endpoint).to.eql('users');
 
         // Second document (post-restore) should also have processing applied
-        expect(searchResponse.hits.hits[1]._source?.body?.text).to.eql('POST /api/v2/orders');
-        expect(searchResponse.hits.hits[1]._source?.attributes?.request_method).to.eql('POST');
-        expect(searchResponse.hits.hits[1]._source?.attributes?.api_version).to.eql('v2');
-        expect(searchResponse.hits.hits[1]._source?.attributes?.endpoint).to.eql('orders');
+        expect(secondHit._source?.body?.text).to.eql('POST /api/v2/orders');
+        expect(secondHit._source?.attributes?.request_method).to.eql('POST');
+        expect(secondHit._source?.attributes?.api_version).to.eql('v2');
+        expect(secondHit._source?.attributes?.endpoint).to.eql('orders');
 
         // Step 12: Verify we can update the stream definition after restore
         const updatedStreamBody: Streams.WiredStream.UpsertRequest = {
@@ -514,11 +522,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           docWithNewField
         );
 
+        const processedSource = processedResult._source as any;
+
         // Verify processing still works and new field is present
-        expect(processedResult._source?.attributes?.request_method).to.eql('DELETE');
-        expect(processedResult._source?.attributes?.api_version).to.eql('v1');
-        expect(processedResult._source?.attributes?.endpoint).to.eql('sessions');
-        expect(processedResult._source?.attributes?.status_code).to.eql(200);
+        expect(processedSource?.attributes?.request_method).to.eql('DELETE');
+        expect(processedSource?.attributes?.api_version).to.eql('v1');
+        expect(processedSource?.attributes?.endpoint).to.eql('sessions');
+        expect(processedSource?.attributes?.status_code).to.eql(200);
       });
     });
   });
