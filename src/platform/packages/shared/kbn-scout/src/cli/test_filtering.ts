@@ -12,10 +12,18 @@ import { execSync } from 'child_process';
 import { getPlaywrightGrepTag } from '../playwright/utils';
 import type { CliSupportedServerModes } from '../types';
 
-export interface PlaywrightTestJson {
+/**
+ * Playwright test spec extracted from the list output
+ * A spec is a single test case (test() call) that can be run across multiple projects.
+ */
+export interface ExtractedPlaywrightSpec {
+  /** The test spec title */
   title: string;
+  /** The test spec is valid/ok (not skipped or invalid) */
   ok: boolean;
+  /** Tags inherited from the parent describe block */
   tags?: string[];
+  /** Array of test runs, one per project (e.g., local, ech, mki) */
   tests?: Array<{
     timeout: number;
     annotations?: Array<{ type?: string; [key: string]: unknown }>;
@@ -65,11 +73,11 @@ interface PlaywrightListOutput {
 /**
  * Recursively extracts all specs from nested suites structure
  */
-const extractSpecsFromSuites = (suites: PlaywrightSuite[]): PlaywrightTestJson[] => {
-  const specs: PlaywrightTestJson[] = [];
+const extractSpecsFromSuites = (suites: PlaywrightSuite[]): ExtractedPlaywrightSpec[] => {
+  const specs: ExtractedPlaywrightSpec[] = [];
 
   for (const suite of suites) {
-    // Add specs from this suite
+    // Add specs from each suite
     if (suite.specs) {
       for (const spec of suite.specs) {
         specs.push({
@@ -92,6 +100,7 @@ const extractSpecsFromSuites = (suites: PlaywrightSuite[]): PlaywrightTestJson[]
 
 /**
  * Extracts JSON content from Playwright output string
+ * Playwright outputs clean JSON, but may have error messages in it
  */
 const extractJsonFromOutput = (output: string): string | null => {
   const trimmed = output.trim();
@@ -109,88 +118,49 @@ const extractJsonFromOutput = (output: string): string | null => {
     }
   }
 
-  // Try to extract NDJSON lines (each line is a JSON object)
-  // This is the most common format for Playwright --list --reporter=json
-  const lines = trimmed.split('\n');
-  const jsonLines: string[] = [];
-
-  for (const line of lines) {
-    const trimmedLine = line.trim();
-    if (!trimmedLine) {
-      continue;
-    }
-
-    // Skip lines that are clearly not JSON (error messages, warnings, etc.)
-    if (
-      trimmedLine.startsWith('Error') ||
-      trimmedLine.startsWith('Warning') ||
-      trimmedLine.startsWith('Using') ||
-      trimmedLine.toLowerCase().includes('error:') ||
-      trimmedLine.toLowerCase().includes('warning:')
-    ) {
-      continue;
-    }
-
-    // Try to parse the line as JSON
-    if (trimmedLine.startsWith('{') || trimmedLine.startsWith('[')) {
-      try {
-        JSON.parse(trimmedLine);
-        jsonLines.push(trimmedLine);
-      } catch {
-        // Not valid JSON, skip this line
-      }
-    }
-  }
-
-  if (jsonLines.length > 0) {
-    // If we have multiple JSON objects, combine them into an array
-    if (jsonLines.length === 1 && jsonLines[0].startsWith('[')) {
-      return jsonLines[0];
-    }
-    // Combine individual JSON objects into an array
-    try {
-      const parsedLines = jsonLines.map((line) => JSON.parse(line));
-      return JSON.stringify(parsedLines);
-    } catch {
-      // If combining fails, return null
-      return null;
-    }
-  }
-
-  // Last resort: try to find JSON array or object using regex
-  // Try to find a complete JSON object by matching braces
+  // Extract JSON object/array from output that may contain error messages
+  // Find the first complete JSON object or array by matching braces/brackets
   let braceCount = 0;
+  let bracketCount = 0;
   let startIndex = -1;
+  let isObject = false;
 
   for (let i = 0; i < trimmed.length; i++) {
-    if (trimmed[i] === '{') {
+    const char = trimmed[i];
+    if (char === '{') {
       if (startIndex === -1) {
         startIndex = i;
+        isObject = true;
       }
       braceCount++;
-    } else if (trimmed[i] === '}') {
+    } else if (char === '}') {
       braceCount--;
-      if (braceCount === 0 && startIndex !== -1) {
+      if (braceCount === 0 && startIndex !== -1 && isObject) {
         const jsonCandidate = trimmed.substring(startIndex, i + 1);
         try {
           JSON.parse(jsonCandidate);
           return jsonCandidate;
         } catch {
-          // Not valid JSON, continue searching
           startIndex = -1;
         }
       }
-    }
-  }
-
-  // Try regex for JSON array
-  const jsonArrayMatch = trimmed.match(/\[[\s\S]*\]/);
-  if (jsonArrayMatch) {
-    try {
-      JSON.parse(jsonArrayMatch[0]);
-      return jsonArrayMatch[0];
-    } catch {
-      // Not valid JSON
+    } else if (char === '[') {
+      if (startIndex === -1) {
+        startIndex = i;
+        isObject = false;
+      }
+      bracketCount++;
+    } else if (char === ']') {
+      bracketCount--;
+      if (bracketCount === 0 && startIndex !== -1 && !isObject) {
+        const jsonCandidate = trimmed.substring(startIndex, i + 1);
+        try {
+          JSON.parse(jsonCandidate);
+          return jsonCandidate;
+        } catch {
+          startIndex = -1;
+        }
+      }
     }
   }
 
@@ -204,7 +174,7 @@ const parsePlaywrightOutput = (
   jsonOutput: string,
   configPath: string,
   log: ToolingLog
-): PlaywrightTestJson[] | null => {
+): ExtractedPlaywrightSpec[] | null => {
   try {
     // Extract JSON content from output (may contain non-JSON content)
     const jsonContent = extractJsonFromOutput(jsonOutput);
@@ -219,41 +189,26 @@ const parsePlaywrightOutput = (
       return null;
     }
 
-    // Parse the JSON - handle Playwright's list output format
-    let tests: PlaywrightTestJson[] = [];
-
     try {
-      const parsed = JSON.parse(jsonContent) as PlaywrightListOutput | PlaywrightTestJson[];
+      const parsed = JSON.parse(jsonContent) as PlaywrightListOutput;
 
-      // Check if it's the Playwright list output format (object with suites)
-      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed) && 'suites' in parsed) {
-        const playwrightOutput = parsed as PlaywrightListOutput;
-        if (playwrightOutput.suites && Array.isArray(playwrightOutput.suites)) {
-          // Extract all specs from nested suites structure
-          tests = extractSpecsFromSuites(playwrightOutput.suites);
-        }
-      } else if (Array.isArray(parsed)) {
-        // Standard JSON array format (legacy or alternative format)
-        tests = parsed;
-      } else if (parsed && typeof parsed === 'object' && 'title' in parsed && 'ok' in parsed) {
-        // Single test object
-        tests = [parsed as PlaywrightTestJson];
-      } else {
-        log.warning(
-          `Unexpected JSON format for ${configPath}. Expected Playwright list output or array of tests.`
-        );
-        return null;
+      // Playwright --list --reporter=json always outputs an object with 'suites'
+      if (parsed?.suites && Array.isArray(parsed.suites)) {
+        return extractSpecsFromSuites(parsed.suites);
       }
+
+      log.warning(
+        `Unexpected JSON format for ${configPath}. Expected Playwright list output with 'suites' array.`
+      );
+      return null;
     } catch (parseError) {
       log.error(
         `Failed to parse JSON for ${configPath}: ${
           parseError instanceof Error ? parseError.message : String(parseError)
-        }. JSON content preview: ${jsonContent.substring(0, 500)}`
+        }. JSON content preview: ${jsonContent.substring(0, 200)}`
       );
       return null;
     }
-
-    return tests;
   } catch (error) {
     log.error(
       `Failed to parse Playwright output for ${configPath}: ${
@@ -265,24 +220,23 @@ const parsePlaywrightOutput = (
 };
 
 /**
- * Checks if any test in the provided array has a matching tag and at least one non-skipped test
- * A test is considered runnable if it has at least one test run with expectedStatus: "passed"
+ * Checks if any spec in the provided array has a matching tag and at least one runnable test run
  */
-const hasMatchingTagInTests = (tests: PlaywrightTestJson[], tag: string): boolean => {
-  return tests.some((test) => {
-    // Check if test has the matching tag
-    if (!test.tags || !Array.isArray(test.tags) || !test.tags.includes(tag)) {
+const hasMatchingTagInSpecs = (specs: ExtractedPlaywrightSpec[], tag: string): boolean => {
+  return specs.some((spec) => {
+    // Every describe block in Scout must have tags
+    if (!spec.tags || !Array.isArray(spec.tags) || !spec.tags.includes(tag)) {
       return false;
     }
 
-    // If test has no tests array, consider it as runnable (legacy format)
-    if (!test.tests || test.tests.length === 0) {
-      return true;
+    // Spec must have a tests array with at least one runnable test run
+    if (!spec.tests || spec.tests.length === 0) {
+      return false;
     }
 
-    // Check if at least one test has expectedStatus: "passed"
-    // This indicates the test is expected to run
-    return test.tests.some((t) => t.expectedStatus === 'passed');
+    // Check if at least one test run has expectedStatus: "passed"
+    // This indicates the spec is expected to run
+    return spec.tests.some((testRun) => testRun.expectedStatus === 'passed');
   });
 };
 
@@ -364,15 +318,15 @@ export const filterConfigsWithTests = (
       }
 
       // Parse the JSON output once in memory
-      const tests = parsePlaywrightOutput(output, pwConfigPath, log);
-      if (!tests) {
+      const specs = parsePlaywrightOutput(output, pwConfigPath, log);
+      if (!specs) {
         continue;
       }
 
       // Check all tags
       const foundTags = new Set<string>();
       for (const tag of tags) {
-        const hasTag = hasMatchingTagInTests(tests, tag);
+        const hasTag = hasMatchingTagInSpecs(specs, tag);
         if (hasTag) {
           foundTags.add(tag);
         }
