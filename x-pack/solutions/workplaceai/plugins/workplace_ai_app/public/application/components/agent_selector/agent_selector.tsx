@@ -23,8 +23,8 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AGENT_BUILDER_APP_ID, AGENT_BUILDER_AGENTS_CREATE } from '@kbn/deeplinks-agent-builder';
-import { AGENT_BUILDER_AGENTS } from '../../../../common';
+import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
+import { AGENT_BUILDER_AGENTS, AGENT_BUILDER_AGENT_NEW_PATH } from '../../../../common';
 import { useAgents } from '../../hooks/use_agents';
 import { useNavigateToApp } from '../../hooks/use_navigate_to_app';
 
@@ -96,7 +96,7 @@ export const AgentSelector: React.FC<AgentSelectorProps> = ({ selectedAgentId, o
   );
 
   const handleCreateAgentClick = useCallback(() => {
-    navigateToApp(`${AGENT_BUILDER_APP_ID}:${AGENT_BUILDER_AGENTS_CREATE}`);
+    navigateToApp(AGENT_BUILDER_APP_ID, { path: AGENT_BUILDER_AGENT_NEW_PATH });
     setIsPopoverOpen(false);
   }, [navigateToApp]);
 

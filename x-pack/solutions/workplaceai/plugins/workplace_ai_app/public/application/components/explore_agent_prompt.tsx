@@ -19,6 +19,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
+import { AGENT_BUILDER_CONVERSATIONS_NEW_PATH } from '../../../common';
 import { useKibana } from '../hooks/use_kibana';
 import { useAgents } from '../hooks/use_agents';
 import { AgentSelector } from './agent_selector/agent_selector';
@@ -99,7 +100,7 @@ export const ExploreAgentPrompt: React.FC = () => {
 
     // Navigate to Agent Builder with the message, agent ID, and connector ID in location state
     application.navigateToApp(AGENT_BUILDER_APP_ID, {
-      path: '/conversations/new',
+      path: AGENT_BUILDER_CONVERSATIONS_NEW_PATH,
       state: {
         initialMessage: chatInput.trim(),
         agentId: selectedAgentId,
