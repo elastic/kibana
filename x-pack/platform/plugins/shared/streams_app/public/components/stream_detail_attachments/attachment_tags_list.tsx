@@ -4,16 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { tagListToReferenceList } from './to_reference_list';
 
+const MAX_VISIBLE_TAGS = 2;
+
 interface AttachmentTagsListProps {
   tags: string[];
+  showAll?: boolean;
 }
 
-export function AttachmentTagsList({ tags }: AttachmentTagsListProps) {
+export function AttachmentTagsList({ tags, showAll = false }: AttachmentTagsListProps) {
   const {
     dependencies: {
       start: {
@@ -22,11 +26,29 @@ export function AttachmentTagsList({ tags }: AttachmentTagsListProps) {
     },
   } = useKibana();
 
+  const visibleTags = showAll ? tags : tags.slice(0, MAX_VISIBLE_TAGS);
+  const remainingCount = tags.length - MAX_VISIBLE_TAGS;
+
   return (
-    <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" wrap>
-      <savedObjectsTaggingUi.components.TagList
-        object={{ references: tagListToReferenceList(tags) }}
-      />
+    <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" wrap responsive={false}>
+      <EuiFlexItem grow={false}>
+        <savedObjectsTaggingUi.components.TagList
+          object={{ references: tagListToReferenceList(visibleTags) }}
+        />
+      </EuiFlexItem>
+      {!showAll && remainingCount > 0 && (
+        <EuiFlexItem grow={false}>
+          <EuiBadge
+            color="hollow"
+            title={i18n.translate('xpack.streams.attachmentTagsList.moreTagsTitle', {
+              defaultMessage: '{count} more {count, plural, one {tag} other {tags}}',
+              values: { count: remainingCount },
+            })}
+          >
+            +{remainingCount}
+          </EuiBadge>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 }

@@ -123,7 +123,7 @@ export function AttachmentDetailsFlyout({
       }),
       description:
         attachment.tags.length > 0 ? (
-          <AttachmentTagsList tags={attachment.tags} />
+          <AttachmentTagsList tags={attachment.tags} showAll />
         ) : (
           <EuiText size="s">{noDataPlaceholder}</EuiText>
         ),
