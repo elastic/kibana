@@ -53,13 +53,14 @@ export function ManagementBottomBar({
         responsive={false}
         gutterSize="s"
       >
-        {!isInvalid && onViewCodeClick && (
+        {onViewCodeClick && (
           <EuiButtonEmpty
             data-test-subj="streamsAppManagementBottomBarViewRequestButton"
             color="text"
             size="s"
             iconType="editorCodeBlock"
             onClick={onViewCodeClick}
+            disabled={isInvalid}
           >
             {viewCodeButtonText}
           </EuiButtonEmpty>
