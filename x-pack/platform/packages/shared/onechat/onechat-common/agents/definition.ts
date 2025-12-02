@@ -78,7 +78,7 @@ export interface AgentConfiguration {
   /**
    * If set to true, the custom instructions will be used as a replacement for the system prompt instead of extending it.
    *
-   * This will impact bah the research and answer prompts. For custom per-step instructions, use the `research` and `answer` configuration fields instead.
+   * This will impact both the research and answer prompts. For custom per-step instructions, use the `research` and `answer` configuration fields instead.
    */
   replace_default_instructions?: boolean;
 
