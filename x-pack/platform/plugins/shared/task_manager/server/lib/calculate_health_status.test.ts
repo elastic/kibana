@@ -24,6 +24,10 @@ const config = {
   enabled: true,
   index: 'foo',
   max_attempts: 9,
+  invalidate_api_key_task: {
+    interval: '5m',
+    removalDelay: '1h',
+  },
   poll_interval: 3000,
   version_conflict_threshold: 80,
   request_capacity: 1000,

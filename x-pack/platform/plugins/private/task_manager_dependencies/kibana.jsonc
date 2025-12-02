@@ -19,5 +19,8 @@
       "taskManager",
       "encryptedSavedObjects",
     ],
+    "optionalPlugins": [
+      "security",
+    ]
   },
 }

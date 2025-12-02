@@ -652,13 +652,54 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .expect(200);
 
+      // api key should still exist
       expect(
         queryResult.body.apiKeys.filter((apiKey: { id: string }) => {
           return apiKey.id === result.userScope?.apiKeyId;
         }).length
-      ).eql(0);
+      ).eql(1);
 
-      expect(queryResult.body.apiKeys.length).eql(apiKeysLength);
+      // api_key_to_invalidate saved object should be created
+      await retry.try(async () => {
+        const response = await es.search({
+          index: '.kibana_task_manager',
+          size: 100,
+          query: {
+            term: {
+              type: 'api_key_to_invalidate',
+            },
+          },
+        });
+
+        expect(response.hits.hits.length).to.eql(1);
+        expect((response.hits?.hits?.[0]._source as any).api_key_to_invalidate?.apiKeyId).to.eql(
+          result.userScope?.apiKeyId
+        );
+      });
+
+      // run the api key invalidation task
+      await supertest
+        .post('/api/invalidate_api_key_task/run_soon')
+        .send({})
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      // api key should be invalidated
+      await retry.try(async () => {
+        queryResult = await supertest
+          .post('/internal/security/api_key/_query')
+          .send({})
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+
+        expect(
+          queryResult.body.apiKeys.filter((apiKey: { id: string }) => {
+            return apiKey.id === result.userScope?.apiKeyId;
+          }).length
+        ).eql(0);
+
+        expect(queryResult.body.apiKeys.length).eql(apiKeysLength);
+      });
     });
 
     it('should schedule tasks with fake request if request is provided', async () => {
