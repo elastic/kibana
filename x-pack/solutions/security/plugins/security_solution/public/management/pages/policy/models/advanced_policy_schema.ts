@@ -451,8 +451,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.ransomware.diagnostic',
       {
-        defaultMessage:
-          'Enable diagnostic ransomware protection. Default: true.',
+        defaultMessage: 'Enable diagnostic ransomware protection. Default: true.',
       }
     ),
   },
@@ -463,7 +462,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.device_control.filter_images',
       {
         defaultMessage:
-          "Filter out file backed images and CD-ROM volumes from consideration by device control. Default: true.",
+          'Filter out file backed images and CD-ROM volumes from consideration by device control. Default: true.',
       }
     ),
   },
@@ -473,8 +472,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.populate_file_data',
       {
-        defaultMessage:
-          'Enable collection of header bytes in file events. Default: true.',
+        defaultMessage: 'Enable collection of header bytes in file events. Default: true.',
       }
     ),
   },
@@ -962,7 +960,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.device_control.filter_images',
       {
         defaultMessage:
-          "Filter out file backed images and CD-ROM volumes from consideration by device control. Default: true.",
+          'Filter out file backed images and CD-ROM volumes from consideration by device control. Default: true.',
       }
     ),
   },
@@ -973,7 +971,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.ransomware.dump_process',
       {
         defaultMessage:
-            "Enable the generation of a memory dump of the ransomware process. This is ignored if the canary protection is off. Default: true."
+          'Enable the generation of a memory dump of the ransomware process. This is ignored if the canary protection is off. Default: true.',
       }
     ),
   },
@@ -1072,7 +1070,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.memory_protection.shellcode_enhanced_pe_parsing',
       {
         defaultMessage:
-          'Attempt to identify and extract PE metadata from injected shellcode, including Authenticode signatures and version resource information. Default: true.'
+          'Attempt to identify and extract PE metadata from injected shellcode, including Authenticode signatures and version resource information. Default: true.',
       }
     ),
   },
@@ -2359,7 +2357,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.security.event_disabled',
       {
         defaultMessage:
-            "Provide a comma-separated list of security event IDs to selectively disable. An example is '4624,4800,4801'. Default: none.",
+          "Provide a comma-separated list of security event IDs to selectively disable. An example is '4624,4800,4801'. Default: none.",
       }
     ),
   },
@@ -2523,8 +2521,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.memory_protection.scan_on_network_event',
       {
-        defaultMessage:
-          'Scan for memory threats in response to network activity. Default: true.',
+        defaultMessage: 'Scan for memory threats in response to network activity. Default: true.',
       }
     ),
   },
@@ -2534,8 +2531,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.memory_protection.scan_on_network_event',
       {
-        defaultMessage:
-          'Scan for memory threats in response to network activity. Default: true.',
+        defaultMessage: 'Scan for memory threats in response to network activity. Default: true.',
       }
     ),
   },
@@ -2545,8 +2541,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.scan_on_network_event',
       {
-        defaultMessage:
-          'Scan for memory threats in response to network activity. Default: true.',
+        defaultMessage: 'Scan for memory threats in response to network activity. Default: true.',
       }
     ),
   },
@@ -2556,8 +2551,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.scan_on_api_event',
       {
-        defaultMessage:
-          'Scan for memory threats in response to API events. Default: true.',
+        defaultMessage: 'Scan for memory threats in response to API events. Default: true.',
       }
     ),
   },
@@ -2567,8 +2561,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.scan_on_image_load_event',
       {
-        defaultMessage:
-          'Scan for memory threats in response to image loads. Default: true.',
+        defaultMessage: 'Scan for memory threats in response to image loads. Default: true.',
       }
     ),
   },
