@@ -14,7 +14,6 @@ export const sloDetailsHistoryLocatorID = 'SLO_DETAILS_HISTORY_LOCATOR';
 export const sloEditLocatorID = 'SLO_EDIT_LOCATOR';
 export const sloListLocatorID = 'SLO_LIST_LOCATOR';
 
-export const TAB_ID_URL_PARAM = 'tabId';
 export const OVERVIEW_TAB_ID = 'overview';
 export const HISTORY_TAB_ID = 'history';
 export const DEFINITION_TAB_ID = 'definition';
