@@ -6,6 +6,7 @@
  */
 
 import React, {
+  Component,
   createContext,
   useContext,
   useMemo,
@@ -13,6 +14,7 @@ import React, {
   useState,
   useEffect,
   useRef,
+  type ReactNode,
 } from 'react';
 import { useEuiTour, EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type {
@@ -63,6 +65,17 @@ interface PersistedTourState {
 }
 
 const StreamsTourContext = createContext<StreamsTourContextValue | null>(null);
+
+// Error boundary to catch tour errors and prevent app crashes
+class TourErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
+  state = { hasError: false };
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  render() {
+    return this.state.hasError ? null : this.props.children;
+  }
+}
 
 function createEnhancedTourStepProps(
   baseProps: EuiTourStepProps[],
@@ -276,7 +289,11 @@ export function StreamsTourProvider({ children }: StreamsTourProviderProps) {
     ]
   );
 
-  return <StreamsTourContext.Provider value={value}>{children}</StreamsTourContext.Provider>;
+  return (
+    <TourErrorBoundary>
+      <StreamsTourContext.Provider value={value}>{children}</StreamsTourContext.Provider>
+    </TourErrorBoundary>
+  );
 }
 
 export function useStreamsTour(): StreamsTourContextValue {
