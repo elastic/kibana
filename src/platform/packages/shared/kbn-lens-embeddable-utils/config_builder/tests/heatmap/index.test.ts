@@ -21,6 +21,10 @@ describe('Heatmap', () => {
     it('should convert a heatmap with x and y axes', () => {
       validateConverter(dslMocks.withXAndYAxes, heatmapStateSchema);
     });
+
+    it('should convert a heatmap with dynamic colors', () => {
+      validateConverter(dslMocks.withDynamicColors, heatmapStateSchema);
+    });
   });
 
   describe('ESQL', () => {
