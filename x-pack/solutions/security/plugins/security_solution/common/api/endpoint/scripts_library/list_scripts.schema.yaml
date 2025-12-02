@@ -22,12 +22,12 @@ paths:
           in: query
           required: false
           schema:
-            $ref: '#/components/schemas/PageSize'
+            $ref: '#/components/schemas/ApiPageSize'
         - name: sortField
           in: query
           required: false
           schema:
-            $ref: '#/components/schemas/SortField'
+            $ref: '#/components/schemas/ApiSortField'
         - name: sortDirection
           in: query
           required: false
@@ -54,12 +54,12 @@ paths:
                   page:
                     $ref: '../model/schema/common.schema.yaml#/components/schemas/Page'
                   pageSize:
-                    $ref: '#/components/schemas/PageSize'
+                    $ref: '#/components/schemas/ApiPageSize'
                   total:
                     type: integer
                     description: The total number of scripts matching the query
                   sortField:
-                    $ref: '#/components/schemas/SortField'
+                    $ref: '#/components/schemas/ApiSortField'
                   sortDirection:
                     $ref: '../model/schema/common.schema.yaml#/components/schemas/SortDirection'
                   data:
@@ -70,11 +70,11 @@ paths:
 
 components:
   schemas:
-    PageSize:
+    ApiPageSize:
       allOf:
         - $ref: '../model/schema/common.schema.yaml#/components/schemas/PageSize'
         - maximum: 1000
-    SortField:
+    ApiSortField:
       allOf:
         - $ref: '../model/schema/common.schema.yaml#/components/schemas/SortField'
         - enum:
