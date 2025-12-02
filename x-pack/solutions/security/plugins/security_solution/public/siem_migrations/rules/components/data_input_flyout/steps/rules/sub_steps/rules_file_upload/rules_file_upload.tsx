@@ -17,12 +17,13 @@ import { FILE_UPLOAD_ERROR } from '../../../../../../../common/translations/file
 import {
   type SplunkRow,
   useParseFileInput,
+  parseContent,
 } from '../../../../../../../common/hooks/use_parse_file_input';
 import type { CreateMigration } from '../../../../../../service/hooks/use_create_migration';
 import type { CreateRuleMigrationRulesRequestBody } from '../../../../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { OriginalRule } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
-import { MigrationSource } from '../../../../../../../common/types';
+import type { MigrationSource } from '../../../../../../../common/types';
 import { RULES_DATA_INPUT_CHECK_RESOURCES_DESCRIPTION } from '../check_resources/translations';
 import type { SPLUNK_RULES_COLUMNS } from '../../../../constants';
 
@@ -38,10 +39,6 @@ export interface RulesFileUploadProps {
   apiError: string | undefined;
 }
 
-const RULES_DATA_INPUT_FILE_UPLOAD_PROMPT: Record<MigrationSource, string> = {
-  [MigrationSource.SPLUNK]: i18n.RULES_DATA_INPUT_FILE_UPLOAD_PROMPT_SPLUNK,
-  [MigrationSource.QRADAR]: i18n.RULES_DATA_INPUT_FILE_UPLOAD_PROMPT_QRADAR,
-};
 export const RulesFileUpload = React.memo<RulesFileUploadProps>(
   ({
     createMigration,
@@ -62,8 +59,8 @@ export const RulesFileUpload = React.memo<RulesFileUploadProps>(
       }
     }, [createMigration, migrationName, migrationSource, rulesToUpload]);
 
-    const onFileParsed = useCallback((content: Array<SplunkRow<SplunkRulesResult>>) => {
-      const rules = content.map(formatRuleRow);
+    const onFileParsed = useCallback((content: string) => {
+      const rules = parseContent(content).map(formatRuleRow);
       setRulesToUpload(rules);
     }, []);
 
@@ -103,14 +100,10 @@ export const RulesFileUpload = React.memo<RulesFileUploadProps>(
               fullWidth
               initialPromptText={
                 <EuiText size="s" textAlign="center">
-                  {RULES_DATA_INPUT_FILE_UPLOAD_PROMPT[migrationSource]}
+                  {i18n.RULES_DATA_INPUT_FILE_UPLOAD_PROMPT_SPLUNK}
                 </EuiText>
               }
-              accept={
-                migrationSource === MigrationSource.SPLUNK
-                  ? 'application/json, application/x-ndjson'
-                  : '.xml'
-              }
+              accept={'application/json, application/x-ndjson'}
               onChange={onFileChange}
               display="large"
               aria-label="Upload rules file"
@@ -138,7 +131,7 @@ export const RulesFileUpload = React.memo<RulesFileUploadProps>(
 );
 RulesFileUpload.displayName = 'RulesFileUpload';
 
-const formatRuleRow = (row: SplunkRow<SplunkRulesResult>): OriginalRule => {
+export const formatRuleRow = (row: SplunkRow<SplunkRulesResult>): OriginalRule => {
   if (!isPlainObject(row.result)) {
     throw new Error(FILE_UPLOAD_ERROR.NOT_OBJECT);
   }

@@ -54,7 +54,7 @@ export const useCreateMigration = (onSuccess: OnSuccess) => {
 
           notifications.toasts.addSuccess({
             title: RULES_DATA_INPUT_CREATE_MIGRATION_SUCCESS_TITLE,
-            text: RULES_DATA_INPUT_CREATE_MIGRATION_SUCCESS_DESCRIPTION(rules.length),
+            text: RULES_DATA_INPUT_CREATE_MIGRATION_SUCCESS_DESCRIPTION(stats.items.total),
           });
           onSuccess(stats);
           dispatch({ type: 'success' });

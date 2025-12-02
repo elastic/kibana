@@ -14,9 +14,9 @@ import type {
 import { UploadFileButton } from '../../../../../../../common/components';
 import type { CreateMigration } from '../../../../../../service/hooks/use_create_migration';
 import * as i18n from './translations';
-import { MigrationSource } from '../../../../../../../common/types';
+import type { MigrationSource } from '../../../../../../../common/types';
 import { RULES_DATA_INPUT_CHECK_RESOURCES_DESCRIPTION } from '../check_resources/translations';
-import { FILE_UPLOAD_ERROR } from '../../../../../../../common/translations/file_upload_error';
+import { useParseFileInput } from '../../../../../../../common/hooks/use_parse_file_input';
 
 export interface RulesXMLFileUploadProps {
   createMigration: CreateMigration;
@@ -27,11 +27,6 @@ export interface RulesXMLFileUploadProps {
   migrationSource: MigrationSource;
   apiError: string | undefined;
 }
-
-const RULES_DATA_INPUT_FILE_UPLOAD_PROMPT: Record<MigrationSource, string> = {
-  [MigrationSource.SPLUNK]: i18n.RULES_DATA_INPUT_FILE_UPLOAD_PROMPT_SPLUNK,
-  [MigrationSource.QRADAR]: i18n.RULES_DATA_INPUT_FILE_UPLOAD_PROMPT_QRADAR,
-};
 
 export const RulesXMLFileUpload = React.memo<RulesXMLFileUploadProps>(
   ({
@@ -57,77 +52,23 @@ export const RulesXMLFileUpload = React.memo<RulesXMLFileUploadProps>(
       setRulesToUpload(content);
     }, []);
 
-    const [isParsing, setIsParsing] = useState<boolean>(false);
-    const [error, setError] = useState<string>();
+    const { parseFile, isParsing, error: fileError } = useParseFileInput(onXMLFileParsed);
 
-    const parseFile = useCallback(
+    const onFileChange = useCallback(
       (files: FileList | null) => {
-        setError(undefined);
-
-        if (!files || files.length === 0) {
-          return;
-        }
-
-        const file = files[0];
-        const reader = new FileReader();
-
-        reader.onloadstart = () => setIsParsing(true);
-        reader.onloadend = () => setIsParsing(false);
-
-        reader.onload = function (e) {
-          // We can safely cast to string since we call `readAsText` to load the file.
-          const fileContent = e.target?.result as string | undefined;
-
-          if (fileContent == null) {
-            setError(FILE_UPLOAD_ERROR.CAN_NOT_READ);
-            return;
-          }
-
-          if (fileContent === '' && e.loaded > 100000) {
-            // V8-based browsers can't handle large files and return an empty string
-            // instead of an error; see https://stackoverflow.com/a/61316641
-            setError(FILE_UPLOAD_ERROR.TOO_LARGE_TO_PARSE);
-            return;
-          }
-
-          try {
-            onXMLFileParsed(fileContent);
-          } catch (err) {
-            setError(err.message);
-          }
-        };
-
-        const handleReaderError = function () {
-          const message = reader.error?.message;
-          if (message) {
-            setError(FILE_UPLOAD_ERROR.CAN_NOT_READ_WITH_REASON(message));
-          } else {
-            setError(FILE_UPLOAD_ERROR.CAN_NOT_READ);
-          }
-        };
-
-        reader.onerror = handleReaderError;
-        reader.onabort = handleReaderError;
-
-        reader.readAsText(file);
+        setRulesToUpload(undefined);
+        onRulesFileChanged(files);
+        parseFile(files);
       },
-      [onXMLFileParsed]
+      [parseFile, onRulesFileChanged]
     );
 
     const validationError = useMemo(() => {
       if (apiError) {
         return apiError;
       }
-      return error;
-    }, [apiError, error]);
-
-    const onFileChange = useCallback(
-      (files: FileList | null) => {
-        onRulesFileChanged(files);
-        parseFile(files);
-      },
-      [parseFile, onRulesFileChanged]
-    );
+      return fileError;
+    }, [apiError, fileError]);
 
     const showLoader = isParsing || isLoading;
     const isDisabled = !migrationName || showLoader || isCreated;
@@ -147,14 +88,10 @@ export const RulesXMLFileUpload = React.memo<RulesXMLFileUploadProps>(
               fullWidth
               initialPromptText={
                 <EuiText size="s" textAlign="center">
-                  {RULES_DATA_INPUT_FILE_UPLOAD_PROMPT[migrationSource]}
+                  {i18n.RULES_DATA_INPUT_FILE_UPLOAD_PROMPT_QRADAR}
                 </EuiText>
               }
-              accept={
-                migrationSource === MigrationSource.SPLUNK
-                  ? 'application/json, application/x-ndjson'
-                  : '.xml'
-              }
+              accept={'.xml'}
               onChange={onFileChange}
               display="large"
               aria-label="Upload rules file"
