@@ -10,6 +10,7 @@
 export {
   FieldPicker,
   NameInput,
+  LinkPatternInput,
   DebouncedInput,
   ColorPicker,
   IconSelect,
