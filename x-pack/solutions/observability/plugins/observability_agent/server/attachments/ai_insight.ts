@@ -9,9 +9,11 @@ import { z } from '@kbn/zod';
 import dedent from 'dedent';
 import type { Attachment } from '@kbn/onechat-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
-import { OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID } from '../../common/constants';
+
+export const OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID = 'observability.ai_insight';
 
 const aiInsightAttachmentDataSchema = z.object({
+  context: z.string(),
   summary: z.string(),
 });
 
@@ -45,8 +47,8 @@ export const createAiInsightAttachmentType = (): AttachmentTypeDefinition => {
             throw new Error(`Invalid AI insight attachment data for attachment ${attachment.id}`);
           }
 
-          const { summary } = attachment.data;
-          const value = `AI summary:\n${summary}`;
+          const { summary, context } = attachment.data;
+          const value = [`AI summary:\n${summary}`, `Context data:\n${context}`].join('\n\n');
 
           return {
             type: 'text',

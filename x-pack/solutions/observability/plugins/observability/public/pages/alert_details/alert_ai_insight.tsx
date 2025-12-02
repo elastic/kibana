@@ -24,6 +24,7 @@ export function AlertAiInsight({ alert }: { alert: AlertData | null }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
   const [summary, setSummary] = useState<string>('');
+  const [context, setContext] = useState<string>('');
   const [lastUsedConnectorId] = useLocalStorage<string>('agentBuilder.lastUsedConnector', '');
   const onOpen = useCallback(async () => {
     if (!alert) return;
@@ -33,7 +34,7 @@ export function AlertAiInsight({ alert }: { alert: AlertData | null }) {
       const alertId = alert.formatted.fields['kibana.alert.uuid'];
       // Call new summarizer endpoint
       try {
-        const result = await http.post<{ summary: string }>(
+        const result = await http.post<{ summary: string; context: string }>(
           '/internal/observability_agent/ai_insights/alert',
           {
             body: JSON.stringify({
@@ -43,6 +44,7 @@ export function AlertAiInsight({ alert }: { alert: AlertData | null }) {
           }
         );
         setSummary(result.summary);
+        setContext(result.context);
       } catch {
         setSummary('Error fetching AI insight');
       }
@@ -78,6 +80,7 @@ export function AlertAiInsight({ alert }: { alert: AlertData | null }) {
           type: OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
           getContent: async () => ({
             summary,
+            context,
           }),
         },
         {
@@ -99,7 +102,7 @@ export function AlertAiInsight({ alert }: { alert: AlertData | null }) {
         },
       ],
     });
-  }, [alert, onechat, summary]);
+  }, [alert, onechat, summary, context]);
 
   if (!alert) return null;
 

@@ -117,11 +117,9 @@ export function registerAiInsightRoutes(
           temperature: 0.2,
         });
 
-        const summary = completion.content?.trim() ? completion.content.trim() : 'Inconclusive.';
-
         return response.ok({
           body: {
-            summary,
+            summary: completion.content ?? '',
             context: relatedContext ?? '',
           },
         });
