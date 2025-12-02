@@ -36,30 +36,14 @@ export function getGrokProcessor(
   // (where different columns are semantically grouped, like timestamp parts)
   // vs. entries that should be collapsed to GREEDYDATA
   const trueMultiColumnFields = new Set<string>();
-  reviewResult.fields.forEach((field) => {
-    if (field.columns.length >= 2) {
-      // If the last component is GREEDYDATA, all preceding patterns are redundant
-      // This should be collapsed to a single GREEDYDATA, not a custom pattern definition
-      const lastComponent = field.grok_components[field.grok_components.length - 1];
-      if (lastComponent === 'GREEDYDATA') {
-        return; // Skip this entry - will be treated as collapsible
-      }
-
-      // Otherwise, it's a true multi-column grouping (e.g., timestamp parts)
-      field.columns.forEach((col) => trueMultiColumnFields.add(col));
-    }
-  });
-
-  let rootPattern = '';
-  const patternDefinitions: Record<string, string> = {};
-  let targetDefinition: string | undefined;
-
   // Build skip ranges for collapsible multi-column groups
   // Map from field entry to range of node indices to skip
   const skipRanges: Array<{ start: number; end: number }> = [];
 
   reviewResult.fields.forEach((field) => {
     if (field.columns.length >= 2) {
+      // If the last component is GREEDYDATA, all preceding patterns are redundant
+      // This should be collapsed to a single GREEDYDATA, not a custom pattern definition
       const lastComponent = field.grok_components[field.grok_components.length - 1];
       if (lastComponent === 'GREEDYDATA') {
         // This multi-column entry should collapse - find the range to skip
@@ -72,9 +56,16 @@ export function getGrokProcessor(
           // Skip everything from firstColIndex+1 to lastColIndex (inclusive)
           skipRanges.push({ start: firstColIndex + 1, end: lastColIndex });
         }
+      } else {
+        // Otherwise, it's a true multi-column grouping (e.g., timestamp parts)
+        field.columns.forEach((col) => trueMultiColumnFields.add(col));
       }
     }
   });
+
+  let rootPattern = '';
+  const patternDefinitions: Record<string, string> = {};
+  let targetDefinition: string | undefined;
 
   const appendNode = (node: GrokPatternNode) => {
     if (targetDefinition) {
