@@ -17,13 +17,14 @@ import type { GaugeState } from './charts/gauge';
 import { gaugeStateSchema } from './charts/gauge';
 import type { TagcloudState } from './charts/tagcloud';
 import { tagcloudStateSchema } from './charts/tagcloud';
+import type { RegionMapState } from './charts/region_map';
+import { regionMapStateSchema } from './charts/region_map';
 import type {
   LensApiAllMetricOrFormulaOperations,
   LensApiStaticValueOperation,
 } from './metric_ops';
 import type { LensApiBucketOperations } from './bucket_ops';
 import { xyStateSchema } from './charts/xy';
-import { regionMapStateSchema } from './charts/region_map';
 
 /**
  * We need to break the type inference here to avoid exceeding the ts compiler serialization limit.
@@ -42,7 +43,12 @@ export const _lensApiStateSchema: any = schema.oneOf([
   regionMapStateSchema,
 ]);
 
-export type LensApiState = MetricState | LegacyMetricState | GaugeState | TagcloudState;
+export type LensApiState =
+  | MetricState
+  | LegacyMetricState
+  | GaugeState
+  | TagcloudState
+  | RegionMapState;
 
 export const lensApiStateSchema: Type<LensApiState> = _lensApiStateSchema;
 
