@@ -63,6 +63,7 @@
       "productDocBase",
       "telemetry",
       "elasticAssistantSharedState",
+      "share"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",
