@@ -10,6 +10,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type YAML from 'yaml';
+import type { Scalar, YAMLMap } from 'yaml';
 import type { monaco } from '@kbn/monaco';
 
 /**
@@ -31,7 +32,7 @@ export interface HoverContext {
   /** Step context if we're inside a workflow step */
   stepContext?: StepContext;
   /** Parameter context if we're inside a parameter */
-  parameterContext?: ParameterContext;
+  parameterContext?: ParameterContext | null;
 }
 
 /**
@@ -55,9 +56,9 @@ export interface StepContext {
   /** Whether we're inside the 'with' block */
   isInWithBlock: boolean;
   /** YAML node for the entire step */
-  stepNode: any;
+  stepNode: YAMLMap;
   /** YAML node for the type field */
-  typeNode: any;
+  typeNode: Scalar<string>;
 }
 
 /**

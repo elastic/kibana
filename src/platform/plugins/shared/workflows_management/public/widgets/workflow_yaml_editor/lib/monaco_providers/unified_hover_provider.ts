@@ -7,20 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type YAML from 'yaml';
+import { isMap, isScalar, type YAMLMap } from 'yaml';
 import { monaco } from '@kbn/monaco';
-import type { HoverContext, ProviderConfig } from './provider_interfaces';
+import type {
+  HoverContext,
+  ParameterContext,
+  ProviderConfig,
+  StepContext,
+} from './provider_interfaces';
 import { getMonacoConnectorHandler } from './provider_registry';
 import { getPathAtOffset } from '../../../../../common/lib/yaml';
 import { isYamlValidationMarkerOwner } from '../../../../features/validate_workflow_yaml/model/types';
+
+export const UNIFIED_HOVER_PROVIDER_ID = 'unified-hover-provider';
 
 /**
  * Unified hover provider that delegates to connector-specific handlers
  * Replaces individual ES/Kibana hover providers with a single extensible system
  */
 export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
+  __providerId: string = UNIFIED_HOVER_PROVIDER_ID;
+
   private readonly getYamlDocument: () => YAML.Document | null;
 
   constructor(config: ProviderConfig) {
@@ -254,7 +262,7 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
     yamlDocument: YAML.Document,
     yamlPath: (string | number)[],
     position: monaco.Position
-  ): any {
+  ): StepContext | null {
     // Look for steps in the path
     const stepsIndex = yamlPath.findIndex((segment) => segment === 'steps');
     if (stepsIndex === -1) {
@@ -277,15 +285,17 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
       }
 
       const stepNode = yamlDocument.getIn(stepPath, true);
-      if (!stepNode) {
+      if (!stepNode || !isMap(stepNode)) {
         // console.log('🔍 detectStepContext: No stepNode found for stepPath:', stepPath);
         return null;
       }
 
+      // TODO: use workflowLookup instead of parsing here
       // Extract step information
-      const stepName = (stepNode as any)?.get?.('name')?.value || `step_${stepIndex}`;
-      const typeNode = (stepNode as any)?.get?.('type', true);
-      const stepType = typeNode?.value;
+      // @ts-expect-error - stepNode is a YAMLMap
+      const stepName = (stepNode as YAMLMap)?.get?.('name')?.value || `step_${stepIndex}`;
+      const typeNode = (stepNode as YAMLMap)?.get?.('type', true);
+      const stepType = typeNode?.value as string;
 
       // console.log('🔍 detectStepContext debug:', {
       //   stepName,
@@ -296,6 +306,10 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
 
       if (!stepType) {
         // console.log('❌ No stepType found, returning null');
+        return null;
+      }
+
+      if (!isScalar<string>(typeNode)) {
         return null;
       }
 
@@ -319,7 +333,10 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
   /**
    * Detect parameter context if we're inside a parameter
    */
-  private detectParameterContext(yamlPath: (string | number)[], stepContext: any): any {
+  private detectParameterContext(
+    yamlPath: (string | number)[],
+    stepContext: StepContext
+  ): ParameterContext | null {
     if (!stepContext?.isInWithBlock) {
       return null;
     }
@@ -354,8 +371,8 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
       // If we have a step context and are hovering over the type, use the type node range
       if (context.stepContext?.typeNode && context.yamlPath.includes('type')) {
         const typeNode = context.stepContext.typeNode;
-        if (typeNode.value?.range) {
-          const [startOffset, , endOffset] = typeNode.value.range;
+        if (typeNode?.range) {
+          const [startOffset, , endOffset] = typeNode.range;
           const startPos = model.getPositionAt(startOffset);
           const endPos = model.getPositionAt(endOffset);
 
@@ -368,24 +385,7 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
         }
       }
 
-      // Default to word range at position
-      const word = model.getWordAtPosition(position);
-      if (word) {
-        return new monaco.Range(
-          position.lineNumber,
-          word.startColumn,
-          position.lineNumber,
-          word.endColumn
-        );
-      }
-
-      // Fallback to single character range
-      return new monaco.Range(
-        position.lineNumber,
-        position.column,
-        position.lineNumber,
-        position.column + 1
-      );
+      return null;
     } catch (error) {
       // console.warn('UnifiedHoverProvider: Error calculating range', error);
       return null;

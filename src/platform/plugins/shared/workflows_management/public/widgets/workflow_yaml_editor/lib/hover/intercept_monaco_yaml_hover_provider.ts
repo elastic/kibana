@@ -9,6 +9,7 @@
 
 import { monaco, YAML_LANG_ID } from '@kbn/monaco';
 import { ENHANCED_MONACO_YAML_HOVER_PROVIDER_ID } from './use_enhanced_monaco_yaml_hover_provider';
+import { UNIFIED_HOVER_PROVIDER_ID } from '../monaco_providers/unified_hover_provider';
 
 const yamlHoverProviders: monaco.languages.HoverProvider[] = [];
 
@@ -55,11 +56,13 @@ export function interceptMonacoYamlHoverProvider(): void {
 
     if (isYaml) {
       // use explicit any to access the __providerId property
-      const isEnhancedMonacoYamlHoverProvider =
+      const shouldPassThrough =
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (provider as any).__providerId === ENHANCED_MONACO_YAML_HOVER_PROVIDER_ID;
+        (provider as any).__providerId === ENHANCED_MONACO_YAML_HOVER_PROVIDER_ID ||
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (provider as any).__providerId === UNIFIED_HOVER_PROVIDER_ID;
 
-      if (isEnhancedMonacoYamlHoverProvider) {
+      if (shouldPassThrough) {
         if (!originalRegisterHoverProvider) {
           throw new Error('Original registerHoverProvider not stored');
         }
