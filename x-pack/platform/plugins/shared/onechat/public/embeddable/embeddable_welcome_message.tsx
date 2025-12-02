@@ -14,8 +14,7 @@ import { docLinks } from '../../common/doc_links';
 import { useConversationList } from '../application/hooks/use_conversation_list';
 import { useSendMessage } from '../application/context/send_message/send_message_context';
 import { useHasConnectorsAllPrivileges } from '../application/hooks/use_has_connectors_all_privileges';
-
-const LOCAL_STORAGE_KEY = 'agentBuilder.embeddable.welcomeMessage.dismissed';
+import { storageKeys } from '../application/storage_keys';
 
 export const EmbeddableWelcomeMessage = () => {
   const {
@@ -24,10 +23,12 @@ export const EmbeddableWelcomeMessage = () => {
   const { euiTheme } = useEuiTheme();
   const hasAccessToGenAiSettings = useHasConnectorsAllPrivileges();
 
-  const [showCallOut, setShowCallOut] = useState(!localStorage.getItem(LOCAL_STORAGE_KEY));
+  const [showCallOut, setShowCallOut] = useState(
+    !localStorage.getItem(storageKeys.welcomeMessageDismissed)
+  );
 
   const onDismiss = () => {
-    localStorage.setItem(LOCAL_STORAGE_KEY, 'true');
+    localStorage.setItem(storageKeys.welcomeMessageDismissed, 'true');
     setShowCallOut(false);
   };
 
