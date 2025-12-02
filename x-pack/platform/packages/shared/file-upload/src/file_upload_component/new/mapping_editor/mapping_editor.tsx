@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiPanel,
   EuiTitle,
@@ -18,24 +18,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FieldSelect } from '@kbn/field-utils/src/components/field_select/field_select';
 import useObservable from 'react-use/lib/useObservable';
-import { useFileUploadContext } from '../../../use_file_upload';
-import { MappingEditorService } from './mapping_editor_service';
+import type { MappingEditorService } from './mapping_editor_service';
 
 interface Props {
-  tt?: string;
+  mappingEditorService: MappingEditorService;
 }
 
-export const MappingEditor: FC<Props> = ({}) => {
-  // const [mappings, setMappings] = useState<Array<Record<string, string>>>([]);
-  const { fileUploadManager } = useFileUploadContext();
-
-  const mappingEditorService = useMemo(
-    () => new MappingEditorService(fileUploadManager),
-    [fileUploadManager]
-  );
-
+export const MappingEditor: FC<Props> = ({ mappingEditorService }) => {
   const mappings = useObservable(
-    mappingEditorService.getMappings$(),
+    mappingEditorService.mappings$,
     mappingEditorService.getMappings()
   );
 
@@ -112,11 +103,9 @@ export const MappingEditor: FC<Props> = ({}) => {
                 <EuiFlexItem>
                   <FieldSelect
                     onTypeChange={(newType) => {
-                      if (newType) {
-                        mappingEditorService.updateMapping(index, name, newType);
-                      }
+                      mappingEditorService.updateMapping(index, name, newType);
                     }}
-                    selectedType={mappingProperty.type!}
+                    selectedType={mappingProperty.type || null}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>

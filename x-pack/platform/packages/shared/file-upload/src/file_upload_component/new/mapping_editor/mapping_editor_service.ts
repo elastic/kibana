@@ -12,7 +12,7 @@ import type { FileUploadManager } from '../../../../file_upload_manager/file_man
 
 export class MappingEditorService {
   private mappingsSubscription: Subscription;
-  private mappings$ = new BehaviorSubject<
+  private _mappings$ = new BehaviorSubject<
     Array<{
       name: string;
       originalName: string;
@@ -21,10 +21,15 @@ export class MappingEditorService {
     }>
   >([]);
 
+  public mappings$ = this._mappings$.asObservable();
+
+  private _mappingsValid$ = new BehaviorSubject<boolean>(true);
+  public mappingsValid$ = this._mappingsValid$.asObservable();
+
   constructor(private readonly fileUploadManager: FileUploadManager) {
     this.initializeMappings();
 
-    this.mappingsSubscription = this.mappings$.subscribe((mappings) => {
+    this.mappingsSubscription = this._mappings$.subscribe((mappings) => {
       const mappingTypeMapping: MappingTypeMapping = {
         properties: mappings.reduce<Record<string, MappingProperty>>((acc, mapping) => {
           acc[mapping.name] = mapping.mappingProperty;
@@ -46,7 +51,8 @@ export class MappingEditorService {
         originalMappingProperty: fieldConfig as MappingProperty,
       }));
 
-      this.mappings$.next(mappingsArray);
+      this._mappings$.next(mappingsArray);
+      this.checkMappingsValid();
     }
   }
 
@@ -54,7 +60,7 @@ export class MappingEditorService {
     this.mappingsSubscription.unsubscribe();
 
     // Apply any pending field name changes
-    const mappings = this.mappings$.getValue();
+    const mappings = this._mappings$.getValue();
     const changes = mappings
       .filter((mapping) => mapping.name !== mapping.originalName)
       .map((mapping) => ({
@@ -68,39 +74,50 @@ export class MappingEditorService {
   }
 
   getMappings() {
-    return this.mappings$.getValue();
+    return this._mappings$.getValue();
   }
-  getMappings$() {
-    return this.mappings$.asObservable();
+  getMappingsValid() {
+    return this._mappingsValid$.getValue();
   }
 
-  // updateMappingName(index: number, newFieldName: string) {
-  //   const mappings = [...this.mappings$.getValue()];
-  //   if (mappings[index]) {
-  //     const currentType = Object.values(mappings[index])[0];
-  //     mappings[index] = { [newFieldName]: currentType };
-  //     this.mappings$.next(mappings);
-  //   }
-  // }
-
-  // updateMappingType(index: number, newType: string) {
-  //   const mappings = [...this.mappings$.getValue()];
-  //   if (mappings[index]) {
-  //     const currentFieldName = Object.keys(mappings[index])[0];
-  //     mappings[index] = { [currentFieldName]: { type: newType } as MappingProperty };
-  //     this.mappings$.next(mappings);
-  //   }
-  // }
-
-  updateMapping(index: number, fieldName: string, fieldType: string) {
-    const mappings = [...this.mappings$.getValue()];
+  updateMapping(index: number, fieldName: string, fieldType: string | null) {
+    const mappings = [...this._mappings$.getValue()];
     if (mappings[index]) {
       mappings[index] = {
         ...mappings[index],
         name: fieldName,
         mappingProperty: { type: fieldType } as MappingProperty,
       };
-      this.mappings$.next(mappings);
+      this._mappings$.next(mappings);
+      this.checkMappingsValid();
     }
+  }
+
+  private checkMappingsValid() {
+    const currentMappings = this.fileUploadManager.getMappings().json;
+
+    if (!currentMappings.properties) {
+      this._mappingsValid$.next(false);
+      return;
+    }
+
+    // Check if all mappings are valid
+    const isValid = Object.entries(currentMappings.properties).every(
+      ([fieldName, mappingConfig]) => {
+        // Field name (key) cannot be blank/empty
+        if (!fieldName || fieldName.trim() === '') {
+          return false;
+        }
+
+        // Type cannot be null, undefined, or empty
+        if (!mappingConfig?.type || mappingConfig.type.trim() === '') {
+          return false;
+        }
+
+        return true;
+      }
+    );
+
+    this._mappingsValid$.next(isValid);
   }
 }

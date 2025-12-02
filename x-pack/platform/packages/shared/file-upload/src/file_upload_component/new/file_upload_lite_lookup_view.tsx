@@ -9,15 +9,17 @@ import type { EuiStepStatus } from '@elastic/eui';
 import { EuiButton, EuiSpacer, EuiSteps, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { type OpenFileUploadLiteContext } from '@kbn/file-upload-common';
 import type { GetAdditionalLinks, ResultLinks } from '@kbn/file-upload-common';
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
+import useObservable from 'react-use/lib/useObservable';
 import { STATUS, useFileUploadContext } from '../../..';
 import { FileClashWarning } from './file_clash_warning';
 import { FileStatus } from './file_status';
 import { MappingEditor } from './mapping_editor';
+import { MappingEditorService } from './mapping_editor/mapping_editor_service';
 
 interface Props {
   resultLinks?: ResultLinks;
@@ -42,15 +44,18 @@ export const FileUploadLiteLookUpView: FC<Props> = ({
   setDropzoneDisabled,
 }) => {
   const { flyoutContent } = props;
-  const {
-    fileUploadManager,
-    filesStatus,
-    uploadStatus,
-    fileClashes,
-    mappings,
-    onImportClick,
-    indexName,
-  } = useFileUploadContext();
+  const { fileUploadManager, filesStatus, uploadStatus, fileClashes, onImportClick, indexName } =
+    useFileUploadContext();
+
+  const mappingEditorService = useMemo(
+    () => new MappingEditorService(fileUploadManager),
+    [fileUploadManager]
+  );
+
+  const mappingsValid = useObservable(
+    mappingEditorService.mappingsValid$,
+    mappingEditorService.getMappingsValid()
+  );
 
   const [stepsStatus, setStepsStatus] = React.useState<StepsStatus>({
     analysis: STATUS.STARTED,
@@ -130,19 +135,12 @@ export const FileUploadLiteLookUpView: FC<Props> = ({
       children:
         stepsStatus.mapping === STATUS.STARTED ? (
           <>
-            {/* <Mappings
-              mappings={mappings?.json ?? {}}
-              setMappings={(m) => fileUploadManager.updateMappings(m)}
-              showTitle={false}
-              fileCount={filesStatus.length}
-              showBorder={true}
-            /> */}
-
-            <MappingEditor />
+            <MappingEditor mappingEditorService={mappingEditorService} />
 
             <EuiSpacer />
 
             <EuiButton
+              disabled={!mappingsValid}
               onClick={() => {
                 setIsSaving(true);
                 onImportClick();
