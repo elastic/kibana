@@ -160,8 +160,8 @@ export const ConnectorSelector: React.FC<{}> = () => {
     inline-size: calc(${euiTheme.size.xxl} * 8);
   `;
 
-  const options = useMemo(() => {
-    const connectorOptions = connectors.map((connector) => {
+  const connectorOptions = useMemo(() => {
+    const options = connectors.map((connector) => {
       let checked: 'on' | undefined;
       if (connector.id === selectedConnectorId) {
         checked = 'on';
@@ -174,7 +174,7 @@ export const ConnectorSelector: React.FC<{}> = () => {
       };
       return option;
     });
-    return connectorOptions;
+    return options;
   }, [connectors, selectedConnectorId, defaultConnectorId]);
 
   const initialConnectorId = useDefaultConnector({
@@ -220,7 +220,7 @@ export const ConnectorSelector: React.FC<{}> = () => {
         singleSelection
         searchable
         searchProps={{ placeholder: connectorSearchPlaceholder }}
-        options={options}
+        options={connectorOptions}
         onChange={(_options, _event, changedOption) => {
           const { checked, key: connectorId } = changedOption;
           const isChecked = checked === 'on';
