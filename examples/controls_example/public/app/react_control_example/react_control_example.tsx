@@ -32,7 +32,6 @@ import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
 import type {
   PublishesDataLoading,
-  SerializedPanelState,
   ViewMode,
 } from '@kbn/presentation-publishing';
 import {
@@ -145,7 +144,7 @@ export const ReactControlExample = ({
               references: [],
             };
       },
-      setLastSavedControlGroupState: (savedState: SerializedPanelState<ControlsGroupState>) => {
+      setLastSavedControlGroupState: (savedState: ControlsGroupState) => {
         lastSavedControlGroupState$.next(savedState);
       },
     };
