@@ -12,7 +12,6 @@ import {
   EuiTitle,
   EuiTextArea,
   EuiButtonIcon,
-  EuiButtonEmpty,
   useEuiTheme,
   useEuiShadow,
   useEuiShadowHover,
@@ -23,6 +22,7 @@ import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
 import { useKibana } from '../hooks/use_kibana';
 import { useAgents } from '../hooks/use_agents';
 import { AgentSelector } from './agent_selector/agent_selector';
+import { ConnectorSelector } from './connector_selector/connector_selector';
 
 const INPUT_MIN_HEIGHT = '150px';
 
@@ -53,6 +53,7 @@ export const ExploreAgentPrompt: React.FC = () => {
   const { data: agents = [] } = useAgents();
   const [chatInput, setChatInput] = useState('');
   const [selectedAgentId, setSelectedAgentId] = useState<string | undefined>();
+  const [selectedConnectorId, setSelectedConnectorId] = useState<string | undefined>();
 
   // Set default agent when agents are loaded
   useEffect(() => {
@@ -96,12 +97,13 @@ export const ExploreAgentPrompt: React.FC = () => {
       return;
     }
 
-    // Navigate to Agent Builder with the message and agent ID in location state
+    // Navigate to Agent Builder with the message, agent ID, and connector ID in location state
     application.navigateToApp(AGENT_BUILDER_APP_ID, {
       path: '/conversations/new',
       state: {
         initialMessage: chatInput.trim(),
         agentId: selectedAgentId,
+        connectorId: selectedConnectorId,
       },
     });
   };
@@ -156,22 +158,10 @@ export const ExploreAgentPrompt: React.FC = () => {
               justifyContent="spaceBetween"
             >
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  iconSide="right"
-                  flush="both"
-                  iconType="arrowDown"
-                  data-test-subj="workplaceAIConnectorSelector"
-                  aria-label={i18n.translate(
-                    'xpack.workplaceai.exploreAgentPrompt.connectorSelectorAriaLabel',
-                    {
-                      defaultMessage: 'Select connector',
-                    }
-                  )}
-                >
-                  {i18n.translate('xpack.workplaceai.exploreAgentPrompt.openAI', {
-                    defaultMessage: 'Open AI',
-                  })}
-                </EuiButtonEmpty>
+                <ConnectorSelector
+                  selectedConnectorId={selectedConnectorId}
+                  onSelectConnector={setSelectedConnectorId}
+                />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
