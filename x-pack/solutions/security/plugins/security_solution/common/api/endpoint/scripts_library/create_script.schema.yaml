@@ -3,7 +3,7 @@ info:
   title: Create script schema
   version: '2023-10-31'
 paths:
-  /api/endpoint/action/scripts_library:
+  /api/endpoint/scripts_library:
     post:
       summary: Create script
       operationId: EndpointScriptLibraryCreateScript

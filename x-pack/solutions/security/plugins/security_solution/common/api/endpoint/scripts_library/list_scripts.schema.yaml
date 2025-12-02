@@ -3,9 +3,9 @@ info:
   title: List scripts schema
   version: '2023-10-31'
 paths:
-  /api/endpoint/action/scripts_library:
+  /api/endpoint/scripts_library:
     get:
-      summary: Create script
+      summary: Get a list of scripts
       operationId: EndpointScriptLibraryListScripts
       description: Retrieve a list of scripts
       x-codegen-enabled: false
