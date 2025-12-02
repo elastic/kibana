@@ -91,7 +91,8 @@
     "@kbn/esql-types",
     "@kbn/presentation-containers",
     "@kbn/elastic-assistant-common",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/router-utils",
   ],
   "exclude": ["target/**/*"]
 }
