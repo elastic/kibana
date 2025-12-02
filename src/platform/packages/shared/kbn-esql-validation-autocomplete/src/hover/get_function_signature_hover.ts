@@ -13,7 +13,7 @@ import {
   getFormattedFunctionSignature,
 } from '@kbn/esql-ast/src/definitions/utils';
 import { fromCache, setToCache } from './hover_cache';
-import type { ColumnsMap, GetColumnMapFn } from '../shared/columns';
+import type { ColumnsMap, GetColumnMapFn } from '../shared/columns_retrieval_helpers';
 
 export async function getFunctionSignatureHover(
   fnNode: ESQLFunction,
