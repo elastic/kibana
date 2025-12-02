@@ -1953,7 +1953,7 @@
     "eslint-traverse": "^1.0.0",
     "exit-hook": "2.2.0",
     "expect": "^29.7.0",
-    "express": "^4.21.2",
+    "express": "^4.22.0",
     "fast-glob": "^3.3.2",
     "fetch-mock": "^10.1.0",
     "file-loader": "^4.2.0",
