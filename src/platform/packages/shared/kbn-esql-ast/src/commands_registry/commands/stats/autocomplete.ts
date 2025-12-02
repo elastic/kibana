@@ -18,6 +18,7 @@ import type {
   ESQLAstItem,
   ESQLSingleAstItem,
   ESQLAstAllCommands,
+  ESQLAstQueryExpression,
 } from '../../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
 import {
@@ -469,7 +470,13 @@ function findFunctionForSuggestions(
   command: ESQLAstAllCommands,
   cursorPosition: number
 ): ESQLFunction | null {
-  const { node, containingFunction } = findAstPosition([command], cursorPosition);
+  const { node, containingFunction } = findAstPosition(
+    {
+      type: 'query' as const,
+      commands: [command],
+    } as unknown as ESQLAstQueryExpression,
+    cursorPosition
+  );
 
   if (node && node.type === 'function') {
     const fn = node as ESQLFunction;
