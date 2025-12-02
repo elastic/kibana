@@ -142,9 +142,9 @@ describe(
             .contains('Error')
             .click();
 
-          // Find and click on "Task skipped" to check it
+          // Find and click on "No gaps" to check it
           cy.get('[data-test-subj="gap-auto-fill-logs-status-filter-item"]')
-            .contains('Task skipped')
+            .contains('No gaps')
             .click();
 
           // Close the popover by clicking outside
@@ -153,9 +153,12 @@ describe(
           // Verify the filter was applied - the table should update
           cy.get(GAP_AUTO_FILL_LOGS_TABLE).should('be.visible');
 
-          // Verify that the table content is visible after filtering
-          // The table may have different row count after filtering
-          getGapAutoFillLogsTableRows().should('exist');
+          // Verify that after filtering, rows have the expected status in the status column
+          getGapAutoFillLogsTableRows()
+            .should('exist')
+            .each(($row) => {
+              cy.wrap($row).find('td').eq(1).contains('No gaps');
+            });
         });
       });
     });
