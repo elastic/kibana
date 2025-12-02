@@ -40,10 +40,7 @@ export const getMockedControlGroupApi = (
     getLastSavedStateForChild: (childId: string) => {
       return controlStateMap[childId]?.value ?? { rawState: {} };
     },
-    setLastSavedStateForChild: (
-      childId: string,
-      serializePanelState: object
-    ) => {
+    setLastSavedStateForChild: (childId: string, serializePanelState: object) => {
       if (!controlStateMap[childId]) {
         controlStateMap[childId] = new BehaviorSubject(serializePanelState);
         return;

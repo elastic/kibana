@@ -97,11 +97,7 @@ describe('layout manager', () => {
         type: 'anotherPanelType',
       },
     ];
-    const layoutManager = initializeLayoutManager(
-      incomingEmbeddables,
-      [panel1],
-      trackPanelMock
-    );
+    const layoutManager = initializeLayoutManager(incomingEmbeddables, [panel1], trackPanelMock);
 
     const layout = layoutManager.internalApi.layout$.value;
     expect(Object.keys(layout.panels).length).toBe(3);
@@ -206,26 +202,18 @@ describe('layout manager', () => {
 
   describe('canRemovePanels', () => {
     test('allows removing panels when there is no expanded panel', () => {
-      const layoutManager = initializeLayoutManager(
-        undefined,
-        [panel1],
-        {
-          ...trackPanelMock,
-          expandedPanelId$: new BehaviorSubject<string | undefined>(undefined),
-        }
-      );
+      const layoutManager = initializeLayoutManager(undefined, [panel1], {
+        ...trackPanelMock,
+        expandedPanelId$: new BehaviorSubject<string | undefined>(undefined),
+      });
       expect(layoutManager.api.canRemovePanels()).toBe(true);
     });
 
     test('does not allow removing panels when there is an expanded panel', () => {
-      const layoutManager = initializeLayoutManager(
-        undefined,
-        [panel1],
-        {
-          ...trackPanelMock,
-          expandedPanelId$: new BehaviorSubject<string | undefined>('1'),
-        }
-      );
+      const layoutManager = initializeLayoutManager(undefined, [panel1], {
+        ...trackPanelMock,
+        expandedPanelId$: new BehaviorSubject<string | undefined>('1'),
+      });
       expect(layoutManager.api.canRemovePanels()).toBe(false);
     });
   });

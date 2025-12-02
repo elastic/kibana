@@ -46,9 +46,7 @@ export interface HasLibraryTransforms<
    * @returns {ByReferenceSerializedState}
    * get by-reference serialized state from this API.
    */
-  getSerializedStateByReference: (
-    newId: string
-  ) => ByReferenceSerializedState;
+  getSerializedStateByReference: (newId: string) => ByReferenceSerializedState;
 
   /**
    *

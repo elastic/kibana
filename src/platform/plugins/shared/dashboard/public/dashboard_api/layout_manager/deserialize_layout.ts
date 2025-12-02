@@ -12,9 +12,7 @@ import { type DashboardState, isDashboardSection } from '../../../common';
 import type { DashboardPanel } from '../../../server';
 import type { DashboardChildState, DashboardLayout } from './types';
 
-export function deserializeLayout(
-  panels: DashboardState['panels'],
-) {
+export function deserializeLayout(panels: DashboardState['panels']) {
   const layout: DashboardLayout = {
     panels: {},
     sections: {},

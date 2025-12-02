@@ -11,32 +11,30 @@ import { deserializeLayout } from './deserialize_layout';
 
 describe('deserializeLayout', () => {
   test('should deserialize panels', () => {
-    const { layout, childState } = deserializeLayout(
-      [
-        {
-          grid: { x: 0, y: 0, w: 6, h: 6 },
-          config: { title: 'panel One' },
-          uid: '1',
-          type: 'testPanelType',
+    const { layout, childState } = deserializeLayout([
+      {
+        grid: { x: 0, y: 0, w: 6, h: 6 },
+        config: { title: 'panel One' },
+        uid: '1',
+        type: 'testPanelType',
+      },
+      {
+        title: 'Section One',
+        collapsed: true,
+        grid: {
+          y: 6,
         },
-        {
-          title: 'Section One',
-          collapsed: true,
-          grid: {
-            y: 6,
+        uid: 'section1',
+        panels: [
+          {
+            grid: { x: 0, y: 0, w: 6, h: 6 },
+            config: { title: 'panel Three' },
+            uid: '3',
+            type: 'testPanelType',
           },
-          uid: 'section1',
-          panels: [
-            {
-              grid: { x: 0, y: 0, w: 6, h: 6 },
-              config: { title: 'panel Three' },
-              uid: '3',
-              type: 'testPanelType',
-            },
-          ],
-        },
-      ]
-    );
+        ],
+      },
+    ]);
     expect(layout.panels).toMatchInlineSnapshot(`
       Object {
         "1": Object {

@@ -31,9 +31,7 @@ import { getSavedVisualization } from '../utils/saved_visualize_utils';
 import type { SerializedVis } from '../vis';
 import type { VisualizeRuntimeState, ExtraSavedObjectProperties } from './types';
 
-export const deserializeState = async (
-  state: VisualizeEmbeddableState | undefined
-) => {
+export const deserializeState = async (state: VisualizeEmbeddableState | undefined) => {
   if (!state)
     return {
       serializedVis: {

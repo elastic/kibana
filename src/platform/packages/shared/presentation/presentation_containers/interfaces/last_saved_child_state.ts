@@ -10,9 +10,7 @@
 import type { Observable } from 'rxjs';
 
 export interface HasLastSavedChildState<SerializedState extends object = object> {
-  lastSavedStateForChild$: (
-    childId: string
-  ) => Observable<SerializedState | undefined>;
+  lastSavedStateForChild$: (childId: string) => Observable<SerializedState | undefined>;
   getLastSavedStateForChild: (childId: string) => SerializedState | undefined;
 }
 

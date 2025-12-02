@@ -8,9 +8,7 @@
  */
 
 export interface HasSerializedChildState<State extends object = object> {
-  getSerializedStateForChild: (
-    childId: string
-  ) => State | undefined;
+  getSerializedStateForChild: (childId: string) => State | undefined;
 }
 
 export const apiHasSerializedChildState = <State extends object = object>(

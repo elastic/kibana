@@ -11,9 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { ControlsGroupState } from '@kbn/controls-schemas';
 import type { ControlGroupRuntimeState, ControlPanelsState } from '../../../common';
 
-export const deserializeControlGroup = (
-  state: ControlsGroupState
-): ControlGroupRuntimeState => {
+export const deserializeControlGroup = (state: ControlsGroupState): ControlGroupRuntimeState => {
   const initialChildControlState: ControlPanelsState = {};
   (state.controls ?? []).forEach((controlSeriailizedState) => {
     const { controlConfig, id, ...rest } = controlSeriailizedState;

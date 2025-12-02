@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  PublishesUnsavedChanges,
-  StateComparators,
-} from '@kbn/presentation-publishing';
+import type { PublishesUnsavedChanges, StateComparators } from '@kbn/presentation-publishing';
 import { areComparatorsEqual, getTitle } from '@kbn/presentation-publishing';
 import type { MaybePromise } from '@kbn/utility-types';
 import type { Observable } from 'rxjs';

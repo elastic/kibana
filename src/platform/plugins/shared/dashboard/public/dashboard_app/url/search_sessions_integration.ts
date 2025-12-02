@@ -102,6 +102,6 @@ function getLocatorParams({
         }
       : undefined,
     controlGroupInput,
-    panels: panels,
+    panels,
   };
 }

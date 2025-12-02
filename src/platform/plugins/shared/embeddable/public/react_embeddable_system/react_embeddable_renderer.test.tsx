@@ -29,8 +29,7 @@ const testEmbeddableFactory: EmbeddableFactory<{ name: string; bork: string }> =
     return {
       Component: () => (
         <div data-test-subj="superTestEmbeddable">
-          SUPER TEST COMPONENT, name: {initialState.name} bork:{' '}
-          {initialState.bork}
+          SUPER TEST COMPONENT, name: {initialState.name} bork: {initialState.bork}
         </div>
       ),
       api,
@@ -270,8 +269,7 @@ describe('reactEmbeddable phase events', () => {
           Component: () => (
             <>
               <div data-test-subj="superTestEmbeddable">
-                SUPER TEST COMPONENT, name: {initialState.name} bork:{' '}
-                {initialState.bork}
+                SUPER TEST COMPONENT, name: {initialState.name} bork: {initialState.bork}
               </div>
               <button data-test-subj="clickToStopLoading" onClick={() => dataLoading$.next(false)}>
                 Done loading

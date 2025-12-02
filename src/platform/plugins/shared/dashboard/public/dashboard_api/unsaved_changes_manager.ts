@@ -119,8 +119,7 @@ export function initializeUnsavedChangesManager({
           // Backup latest state from children that have unsaved changes
           if (hasChildrenUnsavedChanges || hasControlGroupChanges || hasLayoutChanges) {
             const panels = layoutManager.internalApi.serializeLayout();
-            const controlGroupInput =
-              controlGroupManager.internalApi.serializeControlGroup();
+            const controlGroupInput = controlGroupManager.internalApi.serializeControlGroup();
             if (hasChildrenUnsavedChanges) dashboardBackupState.panels = panels;
             if (hasControlGroupChanges) dashboardBackupState.controlGroupInput = controlGroupInput;
           }

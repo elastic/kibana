@@ -70,11 +70,7 @@ export function getDashboardApi({
     (embeddable) => embeddable.type !== CONTROLS_GROUP_TYPE
   );
 
-  const layoutManager = initializeLayoutManager(
-    restEmbeddables,
-    initialState.panels,
-    trackPanel,
-  );
+  const layoutManager = initializeLayoutManager(restEmbeddables, initialState.panels, trackPanel);
   const mergedControlGroupState = mergeControlGroupStates(
     initialState.controlGroupInput,
     incomingControlGroup
@@ -119,8 +115,7 @@ export function getDashboardApi({
       panels,
     };
 
-    const controlGroupInput =
-      controlGroupManager.internalApi.serializeControlGroup();
+    const controlGroupInput = controlGroupManager.internalApi.serializeControlGroup();
     dashboardState.controlGroupInput = controlGroupInput;
 
     return dashboardState;

@@ -62,15 +62,13 @@ import type { DashboardChildren, DashboardLayout, DashboardLayoutPanel } from '.
 export function initializeLayoutManager(
   incomingEmbeddables: EmbeddablePackageState[] | undefined,
   initialPanels: DashboardState['panels'],
-  trackPanel: ReturnType<typeof initializeTrackPanel>,
+  trackPanel: ReturnType<typeof initializeTrackPanel>
 ) {
   // --------------------------------------------------------------------------------------
   // Set up panel state manager
   // --------------------------------------------------------------------------------------
   const children$ = new BehaviorSubject<DashboardChildren>({});
-  const { layout: initialLayout, childState: initialChildState } = deserializeLayout(
-    initialPanels,
-  );
+  const { layout: initialLayout, childState: initialChildState } = deserializeLayout(initialPanels);
   const layout$ = new BehaviorSubject<DashboardLayout>(initialLayout); // layout is the source of truth for which panels are in the dashboard.
   const gridLayout$ = new BehaviorSubject(transformDashboardLayoutToGridLayout(initialLayout, {})); // source of truth for rendering
   const panelResizeSettings$: Observable<{ [panelType: string]: PanelResizeSettings }> =
