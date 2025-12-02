@@ -16,6 +16,7 @@ export const SLI_SETTINGS_TEMPLATE: ClusterPutComponentTemplateRequest = {
   template: {
     settings: {
       'sort.field': ['slo.id', 'slo.revision', 'slo.instanceId'],
+      'sort.order': ['asc', 'asc', 'asc'],
       auto_expand_replicas: '0-1',
       hidden: true,
     },
