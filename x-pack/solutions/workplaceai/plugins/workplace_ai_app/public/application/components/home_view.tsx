@@ -22,19 +22,17 @@ export const WorkplaceAIHomeView: React.FC<{}> = () => {
 
         <ExploreAgentPrompt />
 
-        <EuiSpacer size="xl" />
+        <EuiSpacer size="xxl" />
 
         <ExploreWorkplaceAI />
 
-        <EuiSpacer size="xl" />
+        <EuiSpacer size="xxl" />
 
         <SnapshotsSection />
 
-        <EuiSpacer size="xl" />
+        <EuiSpacer size="xxl" />
 
         <WorkplaceAIHomeFooter />
-
-        <EuiSpacer size="xl" />
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );
