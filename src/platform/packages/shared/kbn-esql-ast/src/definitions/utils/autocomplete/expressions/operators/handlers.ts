@@ -20,6 +20,7 @@ import { getLogicalContinuationSuggestions, shouldSuggestOpenListForOperand } fr
 import { shouldSuggestComma } from '../comma_decision_engine';
 import { buildConstantsDefinitions } from '../../../literals';
 import { SuggestionBuilder } from '../suggestion_builder';
+import { withAutoSuggest } from '../../helpers';
 
 // ============================================================================
 // eg. IN / NOT IN Operators
@@ -67,7 +68,7 @@ export async function handleListOperator(ctx: ExpressionContext): Promise<ISugge
         listHasValues: list.values && list.values.length > 0,
       })
     ) {
-      return [{ ...commaCompleteItem, text: ', ' }];
+      return [withAutoSuggest({ ...commaCompleteItem, text: ',' })];
     }
 
     // After comma or empty list: suggest values
@@ -96,6 +97,8 @@ async function getListValueSuggestions(
   await builder.addFields({
     types: argType ? [argType] : undefined,
     ignoredColumns,
+    addSpaceAfterField: true,
+    openSuggestions: true,
   });
 
   builder

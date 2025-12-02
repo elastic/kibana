@@ -444,7 +444,7 @@ describe('functions arg suggestions', () => {
       const suggestions = await suggest('FROM index | EVAL result = CASE(integerField IN /)');
       const texts = suggestions.map(({ text }) => text);
 
-      expect(texts).toContain('( $0 )');
+      expect(texts).toContain('($0)');
     });
 
     it('NOT IN operator: suggests opening parenthesis for list', async () => {
@@ -452,7 +452,7 @@ describe('functions arg suggestions', () => {
       const suggestions = await suggest('FROM index | EVAL result = CASE(integerField NOT IN /)');
       const texts = suggestions.map(({ text }) => text);
 
-      expect(texts).toContain('( $0 )');
+      expect(texts).toContain('($0)');
     });
 
     it.each([
