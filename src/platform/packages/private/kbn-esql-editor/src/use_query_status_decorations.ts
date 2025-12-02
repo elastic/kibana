@@ -8,7 +8,7 @@
  */
 
 import { useCallback, useEffect, useRef, useMemo } from 'react';
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 import { css } from '@emotion/react';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 import { useEuiTheme } from '@elastic/eui';
@@ -70,8 +70,8 @@ export function useQueryStatusDecorations({
           glyphMarginClassName: 'esql-error-glyph',
           glyphMarginHoverMessage: {
             value: error.message,
+            isTrusted: true,
           },
-          stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
         },
       });
     });
@@ -90,8 +90,8 @@ export function useQueryStatusDecorations({
           glyphMarginClassName: 'esql-warning-glyph',
           glyphMarginHoverMessage: {
             value: warning.message,
+            isTrusted: true,
           },
-          stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
         },
       });
     });
