@@ -382,6 +382,7 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
               isOpen={isPopoverOpen}
               closePopover={() => isPopoverOpen$.next(false)}
               panelPaddingSize="s"
+              data-control-id={uuid}
             >
               <TimeSliderPopoverContent
                 isAnchored={typeof isAnchored === 'boolean' ? isAnchored : false}

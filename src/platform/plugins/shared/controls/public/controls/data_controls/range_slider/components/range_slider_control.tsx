@@ -194,6 +194,7 @@ export const RangeSliderControl: FC<Props> = ({
       css={[styles.rangeSliderControl, isInvalid && styles.invalid, isEdit && styles.editMode]}
       className="rangeSliderAnchor__button"
       data-test-subj={`range-slider-control-${uuid}`}
+      data-control-id={uuid}
     >
       <EuiDualRange
         ref={rangeSliderRef}
