@@ -263,6 +263,9 @@ dependsOn:
   - '@kbn/connector-schemas'
   - '@kbn/tour-queue'
   - '@kbn/shared-ux-file-types'
+  - '@kbn/onechat-common'
+  - '@kbn/onechat-plugin'
+  - '@kbn/core-ui-settings-server-mocks'
 tags:
   - plugin
   - prod
