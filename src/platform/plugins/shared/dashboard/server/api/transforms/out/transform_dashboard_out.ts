@@ -32,8 +32,8 @@ export function transformDashboardOut(
     timeRestore,
     timeTo,
     title,
-    version,
   } = attributes;
+
   // Extract tag references
   const tags: string[] = references
     ? references.filter(({ type }) => type === tagSavedObjectTypeName).map(({ id }) => id)
@@ -63,7 +63,6 @@ export function transformDashboardOut(
     }),
     ...(tags && tags.length && { tags }),
     ...(timeRange && { time_range: timeRange }),
-    title,
-    ...(version && { version }),
+    title: title ?? '',
   };
 }

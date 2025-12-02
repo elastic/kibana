@@ -175,6 +175,5 @@ export function getDashboardStateSchema() {
     ),
     time_range: schema.maybe(timeRangeSchema),
     title: schema.string({ meta: { description: 'A human-readable title for the dashboard' } }),
-    version: schema.maybe(schema.number({ meta: { deprecated: true } })),
   });
 }
