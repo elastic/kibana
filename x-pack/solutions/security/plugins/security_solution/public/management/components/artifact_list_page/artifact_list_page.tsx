@@ -49,6 +49,7 @@ import { useMemoizedRouteState } from '../../common/hooks';
 import { BackToExternalAppSecondaryButton } from '../back_to_external_app_secondary_button';
 import { BackToExternalAppButton } from '../back_to_external_app_button';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { ArtifactImportFlyout } from './components/artifact_import_flyout';
 
 type ArtifactEntryCardType = typeof ArtifactEntryCard;
 
@@ -141,6 +142,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     >(undefined);
 
     const [exportedData, setExportedData] = useState<Blob>();
+    const [isImportFlyoutOpen, setIsImportFlyoutOpen] = useState(false);
 
     const labels = useMemo<typeof artifactListPageLabels>(() => {
       return {
@@ -276,6 +278,15 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
 
     const handleOnDownload = useCallback(() => setExportedData(undefined), []);
 
+    const handleImport = useCallback(() => setIsImportFlyoutOpen(true), []);
+
+    const handleImportFlyoutOnCancel = useCallback(() => setIsImportFlyoutOpen(false), []);
+
+    const handleImportFlyoutOnSuccess = useCallback(() => {
+      setIsImportFlyoutOpen(false);
+      refetchListData();
+    }, [refetchListData]);
+
     const description = useMemo(() => {
       const subtitleText = labels.pageAboutInfo ? (
         <span data-test-subj="header-panel-subtitle">{labels.pageAboutInfo}</span>
@@ -327,7 +338,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
                     key: 'ImportButton',
                     icon: 'importAction',
                     label: labels.pageImportButtonTitle,
-                    onClick: () => {},
+                    onClick: handleImport,
                     disabled: !allowCardCreateAction,
                   },
                   {
@@ -361,6 +372,15 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
             size={flyoutSize}
             submitHandler={onFormSubmit}
             data-test-subj={getTestId('flyout')}
+          />
+        )}
+
+        {isImportFlyoutOpen && (
+          <ArtifactImportFlyout
+            onCancel={handleImportFlyoutOnCancel}
+            onSuccess={handleImportFlyoutOnSuccess}
+            apiClient={apiClient}
+            labels={labels}
           />
         )}
 
