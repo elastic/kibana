@@ -25,6 +25,6 @@ const iconType: React.FC<SVGProps<SVGSVGElement>> = (props) => (
   </svg>
 );
 
-export const iconRobot = ({ size = 'm', ...rest }: Omit<EuiIconProps, 'type'>) => {
+export const RobotIcon = ({ size = 'm', ...rest }: Omit<EuiIconProps, 'type'>) => {
   return <EuiIcon type={iconType} size={size} {...rest} />;
 };

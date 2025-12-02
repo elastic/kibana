@@ -22,7 +22,7 @@ import type { ReactNode } from 'react';
 import React, { useState } from 'react';
 import { useNavigation } from '../../../../../hooks/use_navigation';
 import { appPaths } from '../../../../../utils/app_paths';
-import { iconRobot } from '../../../../common/icons/robot';
+import { RobotIcon } from '../../../../common/icons/robot';
 import { selectorListStyles, usePopoverButtonStyles } from '../input_actions.styles';
 import { useAgentOptions } from './use_agent_options';
 
@@ -65,7 +65,7 @@ const AgentSelectPopoverButton: React.FC<{
       color="text"
       css={popoverButtonStyles}
       iconSide="left"
-      iconType={iconRobot}
+      iconType={RobotIcon}
       onClick={onClick}
       aria-haspopup="menu"
       aria-labelledby={agentSelectId}
