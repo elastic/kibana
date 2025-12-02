@@ -102,9 +102,10 @@ const buildWiredDefinition = (): Streams.WiredStream.GetResponse => ({
   stream: {
     name: 'logs',
     description: 'Wired stream',
+    updated_at: new Date().toISOString(),
     ingest: {
       lifecycle: { dsl: { data_retention: '1d' } },
-      processing: { steps: [] },
+      processing: { steps: [], updated_at: new Date().toISOString() },
       settings: {},
       wired: {
         fields: {},
@@ -127,9 +128,10 @@ const buildClassicDefinition = (): Streams.ClassicStream.GetResponse => ({
   stream: {
     name: 'logs-classic',
     description: 'Classic stream',
+    updated_at: new Date().toISOString(),
     ingest: {
       lifecycle: { dsl: { data_retention: '1d' } },
-      processing: { steps: [] },
+      processing: { steps: [], updated_at: new Date().toISOString() },
       settings: {},
       classic: {
         field_overrides: {},
