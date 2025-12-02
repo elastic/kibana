@@ -28,6 +28,7 @@ export class DiscoverPageObject extends FtrService {
   private readonly queryBar = this.ctx.getService('queryBar');
   private readonly savedObjectsFinder = this.ctx.getService('savedObjectsFinder');
   private readonly toasts = this.ctx.getService('toasts');
+  private readonly log = this.ctx.getService('log');
   private readonly timeToVisualize = this.ctx.getPageObject('timeToVisualize');
 
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
@@ -881,5 +882,60 @@ export class DiscoverPageObject extends FtrService {
 
     await this.testSubjects.click('confirmSaveSavedObjectButton');
     await this.testSubjects.missingOrFail('confirmSaveSavedObjectButton');
+  }
+
+  private resetRequestCount = -1;
+
+  public async expectRequestCount(endpoint: string, requestCount: number) {
+    await this.retry.tryWithRetries(
+      `expect ${endpoint} request to match count ${requestCount}`,
+      async () => {
+        if (requestCount === this.resetRequestCount) {
+          await this.browser.execute(async () => {
+            performance.clearResourceTimings();
+          });
+        }
+        await this.header.waitUntilLoadingHasFinished();
+        await this.waitUntilSearchingHasFinished();
+        await this.elasticChart.canvasExists();
+        const requests = await this.browser.execute(() =>
+          performance
+            .getEntries()
+            .filter((entry: any) => ['fetch', 'xmlhttprequest'].includes(entry.initiatorType))
+        );
+        const result = requests.filter((entry) => entry.name.includes(endpoint));
+        const count = result.length;
+        if (requestCount === this.resetRequestCount) {
+          expect(count).to.be(0);
+        } else {
+          if (count !== requestCount) {
+            this.log.warning('Request count differs:', result);
+          }
+          expect(count).to.be(requestCount);
+        }
+      },
+      { retryCount: 5, retryDelay: 500 }
+    );
+  }
+
+  public async expectFieldsForWildcardRequestCount(expectedCount: number, cb: Function) {
+    const endpoint = `/internal/data_views/_fields_for_wildcard`;
+    await this.expectRequestCount(endpoint, this.resetRequestCount);
+    await cb();
+    await this.expectRequestCount(endpoint, expectedCount);
+  }
+
+  public async expectSearchRequestCount(
+    type: 'ese' | 'esql',
+    expectedCount: number,
+    cb?: Function
+  ) {
+    const searchType = type === 'esql' ? `${type}_async` : type;
+    const endpoint = `/internal/search/${searchType}`;
+    if (cb) {
+      await this.expectRequestCount(endpoint, this.resetRequestCount);
+      await cb();
+    }
+    await this.expectRequestCount(endpoint, expectedCount);
   }
 }
