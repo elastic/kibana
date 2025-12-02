@@ -30,7 +30,7 @@ export const createConnectorFormSerializer = () => {
  * connector edit.
  */
 export const createConnectorFormDeserializer = (schema: z.ZodObject<z.ZodRawShape>) => {
-  return (apiData: any) => {
+  return (apiData: { config: Record<string, unknown>; secrets: Record<string, unknown> }) => {
     if (!apiData?.config?.authType || apiData.secrets?.authType) {
       return apiData;
     }
