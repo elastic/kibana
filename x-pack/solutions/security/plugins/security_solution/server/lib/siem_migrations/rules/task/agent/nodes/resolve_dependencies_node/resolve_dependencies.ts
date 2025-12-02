@@ -22,6 +22,9 @@ export const getResolveDepsNode = ({ model }: GetCreateResolveDepsNodeParams): G
       title: state.original_rule.title,
       description: state.original_rule.description,
       query,
+      resources: {
+        lookups: state.resources.lookup,
+      },
     });
 
     const response = await modelWithTools.invoke([...resolveMessage, ...(state.messages ?? [])]);

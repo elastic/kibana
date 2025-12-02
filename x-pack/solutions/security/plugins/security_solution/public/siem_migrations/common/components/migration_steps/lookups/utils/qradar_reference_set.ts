@@ -76,7 +76,7 @@ const extractValues = (entries: QradarReferenceSetExportEntry[] | undefined): st
 const convertToCsv = (values: string[]): string => {
   const header = 'value';
   const rows = values.map((value) => escapeCsvValue(value));
-  return [header, ...rows].join('\n');
+  return [header, ...rows].join('\r\n');
 };
 
 const escapeCsvValue = (value: string): string => {

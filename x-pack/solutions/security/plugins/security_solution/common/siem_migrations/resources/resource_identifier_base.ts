@@ -76,7 +76,7 @@ export abstract class ResourceIdentifier<I> {
   public async fromResource(
     resource: SiemMigrationResourceData
   ): Promise<SiemMigrationResourceBase[]> {
-    if (resource.type === 'macro' && resource.content) {
+    if (resource.type === 'macro' && resource.content && this.vendor === 'splunk') {
       return this.identifier(resource.content);
     }
     return Promise.resolve([]);
@@ -85,6 +85,9 @@ export abstract class ResourceIdentifier<I> {
   public async fromResources(
     resources: SiemMigrationResourceData[]
   ): Promise<SiemMigrationResourceBase[]> {
+    if (this.vendor !== 'splunk') {
+      return [];
+    }
     const lookups = new Set<string>();
     const macros = new Set<string>();
     for (const resource of resources) {

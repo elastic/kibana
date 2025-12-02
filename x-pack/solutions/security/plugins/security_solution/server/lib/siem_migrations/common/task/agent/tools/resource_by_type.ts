@@ -25,7 +25,7 @@ For Splunk migrations:
 - "macro": Reusable search macros that expand to SPL queries
 
 For QRadar migrations:
-- "lookup": Reference sets containing IPs, domains, usernames, or other data
+- "lookup": Reference sets containing IPs, domains, usernames, or other data. These are stored with a single olumn named \`value\`. Match the appropriate source field (e.g., event source IP) against this column when translating rules.
 - "qidmap": QID mapping information
 - "reference_data_rules": Reference data rule definitions
 - "sensordevicetype": Sensor device type configurations
@@ -59,18 +59,21 @@ const SCHEMA = z.object({
     .describe(
       'The type of resource to retrieve. Must be one of the valid resource types for the migration vendor.'
     ),
+  names: z.array(z.string()).describe('A list of resource names to retrieve of the specified type'),
 });
 
 export const getResourceByTypeGetter =
   (migrationId: string, resourcesClient: SiemMigrationsDataResourcesClient) =>
-  async ({ type }: { type: SiemMigrationResourceType }) => {
+  async ({ type, names }: { type: SiemMigrationResourceType; names: string[] }) => {
     const response = await resourcesClient.get(migrationId, {
-      filters: { type },
+      filters: { type, names },
     });
-    return response.map((resource) => ({
-      name: resource.name,
-      content: resource.content,
-    }));
+    return {
+      result: response.map((resource) => ({
+        name: resource.name,
+        content: resource.content,
+      })),
+    };
   };
 
 export function getResourceByTypeTool(
