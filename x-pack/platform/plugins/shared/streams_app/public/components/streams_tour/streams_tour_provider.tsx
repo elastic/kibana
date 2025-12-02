@@ -32,7 +32,8 @@ import {
   DEFAULT_TOUR_STATE,
 } from './constants';
 import type { StreamsTourStepId } from './constants';
-import { getTourStepsConfig, TourStepConfig } from './tour_steps_config';
+import type { TourStepConfig } from './tour_steps_config';
+import { getTourStepsConfig } from './tour_steps_config';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 
@@ -158,9 +159,8 @@ export function StreamsTourProvider({ children }: StreamsTourProviderProps) {
     false
   );
 
-  const [persistedTourState, setPersistedTourState] = useLocalStorage<PersistedTourState>(
-    STREAMS_TOUR_STATE_KEY
-  );
+  const [persistedTourState, setPersistedTourState] =
+    useLocalStorage<PersistedTourState>(STREAMS_TOUR_STATE_KEY);
 
   const [tourStreamName, setTourStreamName] = useState<string | null>(
     persistedTourState?.tourStreamName ?? null
@@ -205,7 +205,8 @@ export function StreamsTourProvider({ children }: StreamsTourProviderProps) {
   }, [setCalloutDismissed, setPersistedTourState]);
 
   const tourStepProps = useMemo(
-    () => createEnhancedTourStepProps(baseTourStepProps, stepsConfig, actions, tourState, completeTour),
+    () =>
+      createEnhancedTourStepProps(baseTourStepProps, stepsConfig, actions, tourState, completeTour),
     [baseTourStepProps, stepsConfig, actions, tourState, completeTour]
   );
 
@@ -253,7 +254,13 @@ export function StreamsTourProvider({ children }: StreamsTourProviderProps) {
     }
 
     prevStepRef.current = currentStep;
-  }, [tourState.currentTourStep, tourState.isTourActive, tourStreamName, navigateToApp, stepsConfig]);
+  }, [
+    tourState.currentTourStep,
+    tourState.isTourActive,
+    tourStreamName,
+    navigateToApp,
+    stepsConfig,
+  ]);
 
   const value = useMemo<StreamsTourContextValue>(
     () => ({

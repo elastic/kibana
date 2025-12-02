@@ -19,10 +19,10 @@ import {
   EuiButtonIcon,
   EuiTourStep,
 } from '@elastic/eui';
-import { useStreamsTour } from '../streams_tour';
 import { css } from '@emotion/css';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import { Streams } from '@kbn/streams-schema';
+import { useStreamsTour } from '../streams_tour';
 import type { TableRow, SortableField } from './utils';
 import {
   buildStreamRows,
@@ -209,11 +209,11 @@ export function StreamsTreeTable({
       aria-label={
         allExpanded
           ? i18n.translate('xpack.streams.streamsTreeTable.collapseAll', {
-            defaultMessage: 'Collapse all',
-          })
+              defaultMessage: 'Collapse all',
+            })
           : i18n.translate('xpack.streams.streamsTreeTable.expandAll', {
-            defaultMessage: 'Expand all',
-          })
+              defaultMessage: 'Expand all',
+            })
       }
     />
   );
@@ -267,8 +267,9 @@ export function StreamsTreeTable({
                       type={isCollapsed ? 'arrowRight' : 'arrowDown'}
                       color="text"
                       size="m"
-                      data-test-subj={`${isCollapsed ? 'expand' : 'collapse'}Button-${item.stream.name
-                        }`}
+                      data-test-subj={`${isCollapsed ? 'expand' : 'collapse'}Button-${
+                        item.stream.name
+                      }`}
                       aria-label={i18n.translate(
                         isCollapsed
                           ? 'xpack.streams.streamsTreeTable.collapsedNodeAriaLabel'
