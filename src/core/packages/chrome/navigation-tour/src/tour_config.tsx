@@ -65,7 +65,7 @@ export const tourSteps: TourStep[] = [
         </p>
       </EuiText>
     ),
-    target: `[data-test-subj~="projectSideNav"] [data-test-subj~="sideNavMoreMenuItem"]`,
+    target: `[data-test-subj~="projectSideNav"] [data-test-subj~="kbnChromeNav-moreMenuTrigger"]`,
   },
   {
     id: 'sidenav-manage-data',
@@ -85,5 +85,23 @@ export const tourSteps: TourStep[] = [
       </EuiText>
     ),
     target: `[data-test-subj~="projectSideNav"] [data-test-subj*="${DATA_MANAGEMENT_NAV_ID}"]`,
+  },
+  {
+    id: 'sidenav-search-getting-started',
+    required: false, // tour will continue even if this step is not visible
+    title: i18n.translate('core.chrome.navigationTour.sidenavSearchGettingStartedTitle', {
+      defaultMessage: 'Learning content now available!',
+    }),
+    content: (
+      <EuiText size="s">
+        <p>
+          <FormattedMessage
+            id="core.chrome.navigationTour.sidenavSearchGettingStartedMessage"
+            defaultMessage="The Getting started page provides a single location for learning content to help you start building with Elasticsearch."
+          />
+        </p>
+      </EuiText>
+    ),
+    target: `[data-test-subj~="projectSideNav"] [data-test-subj*="nav-item-id-search_getting_started"]`,
   },
 ];

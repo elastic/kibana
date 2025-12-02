@@ -8,6 +8,7 @@
  */
 
 export type { ESQLCallbacks } from './src/shared/types';
+export type { ValidationOptions } from './src/validation/types';
 
 /**
  * High level functions
@@ -17,6 +18,10 @@ export type { ESQLCallbacks } from './src/shared/types';
 export { validateQuery } from './src/validation/validation';
 // Autocomplete function
 export { suggest } from './src/autocomplete/autocomplete';
+
+// Inline suggestions
+export { inlineSuggest } from './src/inline_suggestions/inline_suggest';
+
 /**
  * Some utility functions that can be useful to build more feature
  * for the ES|QL language

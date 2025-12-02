@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @typescript-eslint/no-this-alias, @typescript-eslint/no-non-null-assertion */
-
-import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type {
   CoreSetup,
   CoreStart,
@@ -21,14 +18,12 @@ import type {
 
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows/types/latest';
-import type { WorkflowsManagementConfig } from './config';
 
 import {
   getWorkflowsConnectorAdapter,
   getConnectorType as getWorkflowsConnectorType,
 } from './connectors/workflows';
 import { WorkflowsManagementFeatureConfig } from './features';
-import { createWorkflowTaskRunner } from './tasks/workflow_task_runner';
 import { WorkflowTaskScheduler } from './tasks/workflow_task_scheduler';
 import type {
   WorkflowsServerPluginSetup,
@@ -40,6 +35,7 @@ import { registerUISettings } from './ui_settings';
 import { defineRoutes } from './workflows_management/routes';
 import { WorkflowsManagementApi } from './workflows_management/workflows_management_api';
 import { WorkflowsService } from './workflows_management/workflows_management_service';
+import { stepSchemas } from '../common/step_schemas';
 // Import the workflows connector
 
 export class WorkflowsPlugin
@@ -52,16 +48,13 @@ export class WorkflowsPlugin
     >
 {
   private readonly logger: Logger;
-  private readonly config: WorkflowsManagementConfig;
   private workflowsService: WorkflowsService | null = null;
   private workflowTaskScheduler: WorkflowTaskScheduler | null = null;
-  private unsecureActionsClient: IUnsecuredActionsClient | null = null;
   private api: WorkflowsManagementApi | null = null;
   private spaces?: SpacesServiceStart | null = null;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
-    this.config = initializerContext.config.get<WorkflowsManagementConfig>();
   }
 
   public setup(
@@ -118,45 +111,6 @@ export class WorkflowsPlugin
       }
     }
 
-    // Register workflow task definition
-    if (plugins.taskManager) {
-      plugins.taskManager.registerTaskDefinitions({
-        'workflow:scheduled': {
-          title: 'Scheduled Workflow Execution',
-          description: 'Executes workflows on a scheduled basis',
-          // Set high timeout for long-running workflows.
-          // This is high value to allow long-running workflows.
-          // The workflow timeout logic defined in workflow execution engine logic is the primary control.
-          timeout: '365d',
-          maxAttempts: 3,
-          createTaskRunner: ({ taskInstance, fakeRequest }) => {
-            // Capture the plugin instance in a closure
-            const pluginInstance = this;
-            // Use a factory pattern to get dependencies when the task runs
-            return {
-              async run() {
-                // Get dependencies when the task actually runs
-                const [, pluginsStart] = await core.getStartServices();
-
-                // Create the actual task runner with dependencies
-                const taskRunner = createWorkflowTaskRunner({
-                  logger: pluginInstance.logger,
-                  workflowsService: pluginInstance.workflowsService!,
-                  workflowsExecutionEngine: pluginsStart.workflowsExecutionEngine,
-                  actionsClient: pluginInstance.unsecureActionsClient!,
-                })({ taskInstance, fakeRequest });
-
-                return taskRunner.run();
-              },
-              async cancel() {
-                // Cancel function for the task
-              },
-            };
-          },
-        },
-      });
-    }
-
     // Register the workflows management feature and its privileges
     plugins.features?.registerKibanaFeature(WorkflowsManagementFeatureConfig);
 
@@ -165,29 +119,22 @@ export class WorkflowsPlugin
 
     this.logger.debug('Workflows Management: Creating workflows service');
 
-    // Get ES client from core
-    const esClientPromise = core
-      .getStartServices()
-      .then(([coreStart]) => coreStart.elasticsearch.client.asInternalUser);
-
+    const getCoreStart = () => core.getStartServices().then(([coreStart]) => coreStart);
+    const getPluginsStart = () => core.getStartServices().then(([, pluginsStart]) => pluginsStart);
     const getWorkflowExecutionEngine = () =>
-      core.getStartServices().then(([, pluginsStart]) => pluginsStart.workflowsExecutionEngine);
+      getPluginsStart().then(({ workflowsExecutionEngine }) => workflowsExecutionEngine);
 
-    // Create function to get actions client (available after start)
-    const getActionsStart = () =>
-      core.getStartServices().then(([, pluginsStart]) => pluginsStart.actions);
+    this.workflowsService = new WorkflowsService(this.logger, getCoreStart, getPluginsStart);
 
-    this.workflowsService = new WorkflowsService(
-      esClientPromise,
-      this.logger,
-      this.config.logging.console,
-      getActionsStart
-    );
     this.api = new WorkflowsManagementApi(this.workflowsService, getWorkflowExecutionEngine);
     this.spaces = plugins.spaces?.spacesService;
 
+    if (!this.spaces) {
+      throw new Error('Spaces service not initialized');
+    }
+
     // Register server side APIs
-    defineRoutes(router, this.api, this.logger, this.spaces!);
+    defineRoutes(router, this.api, this.logger, this.spaces);
 
     return {
       management: this.api,
@@ -197,7 +144,7 @@ export class WorkflowsPlugin
   public start(core: CoreStart, plugins: WorkflowsServerPluginStartDeps) {
     this.logger.info('Workflows Management: Start');
 
-    this.unsecureActionsClient = plugins.actions.getUnsecuredActionsClient();
+    stepSchemas.initialize(plugins.workflowsExtensions);
 
     // Initialize workflow task scheduler with the start contract
     this.workflowTaskScheduler = new WorkflowTaskScheduler(this.logger, plugins.taskManager);

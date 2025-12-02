@@ -250,7 +250,18 @@ export const entityDetailsHighlightsServiceFactory = ({
       );
       return { vulnerabilitiesAnonymized, vulnerabilitiesTotal };
     },
-    getLocalReplacements() {
+    getLocalReplacements(entityField: EntityIdentifierFields, entityIdentifier: string) {
+      // Ensure the entity identifier is present in the replacements
+      const anonymizedEntityIdentifier = getAnonymizedData({
+        anonymizationFields,
+        currentReplacements: {},
+        rawData: { [entityField]: [entityIdentifier] },
+        getAnonymizedValue,
+        getAnonymizedValues,
+      });
+
+      localOnNewReplacements(anonymizedEntityIdentifier.replacements);
+
       return localReplacements;
     },
   };

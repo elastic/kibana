@@ -65,6 +65,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           settings: {},
           processing: { steps: [] },
           classic: {},
+          failure_store: { inherit: {} },
         },
       } satisfies Streams.ClassicStream.Definition);
     });

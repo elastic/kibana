@@ -39,9 +39,6 @@ import { getSentinelOneConnectorType } from './sentinelone';
 import { getCrowdstrikeConnectorType } from './crowdstrike';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
 
-export { ConnectorTypeId as XmattersConnectorTypeId } from './xmatters';
-export type { ActionParamsType as XmattersActionParams } from './xmatters';
-
 export { getConnectorType as getSwimlaneConnectorType } from './swimlane';
 
 export function registerConnectorTypes({

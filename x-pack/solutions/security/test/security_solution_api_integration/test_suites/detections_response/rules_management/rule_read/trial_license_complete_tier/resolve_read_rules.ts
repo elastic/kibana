@@ -13,7 +13,7 @@ import {
   createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
-} from '../../../../../config/services/detections_response';
+} from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 const spaceId = '714-space';

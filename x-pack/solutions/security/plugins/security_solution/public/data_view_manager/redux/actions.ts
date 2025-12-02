@@ -7,7 +7,7 @@
 
 import { createAction } from '@reduxjs/toolkit';
 
-import type { DataViewManagerScopeName } from '../constants';
+import type { PageScope } from '../constants';
 import { SLICE_PREFIX } from '../constants';
 
 export interface SelectDataViewAsyncPayload {
@@ -19,7 +19,7 @@ export interface SelectDataViewAsyncPayload {
   /**
    * Specify one or more security solution scopes where the data view selection should be applied
    */
-  scope: DataViewManagerScopeName;
+  scope: PageScope;
 }
 
 // NOTE: You should not need to dispatch any actions by yourself. Instead, use one of the hooks that we built to faciliate data view selection and retrieval based on current scope.

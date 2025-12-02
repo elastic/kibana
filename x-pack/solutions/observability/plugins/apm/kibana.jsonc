@@ -59,7 +59,8 @@
       "licenseManagement",
       "profilingDataAccess",
       "observabilityAIAssistant",
-      "share"
+      "share",
+      "onechat"
     ],
     "requiredBundles": ["fleet", "kibanaReact", "kibanaUtils", "ml", "observability", "maps"]
   }

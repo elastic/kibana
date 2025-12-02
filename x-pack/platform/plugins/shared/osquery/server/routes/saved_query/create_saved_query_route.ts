@@ -18,6 +18,7 @@ import { buildRouteValidation } from '../../utils/build_validation/route_validat
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { convertECSMappingToArray } from '../utils';
 import { createSavedQueryRequestSchema } from '../../../common/api';
+import { getUserInfo } from '../../lib/get_user_info';
 
 export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -43,7 +44,6 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
         },
       },
       async (context, request, response) => {
-        const coreContext = await context.core;
         const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
           osqueryContext,
           request
@@ -63,7 +63,12 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
           ecs_mapping,
         } = request.body;
 
-        const currentUser = coreContext.security.authc.getCurrentUser()?.username;
+        const currentUser = await getUserInfo({
+          request,
+          security: osqueryContext.security,
+          logger: osqueryContext.logFactory.get('savedQuery'),
+        });
+        const username = currentUser?.username ?? undefined;
 
         const conflictingEntries = await spaceScopedClient.find<SavedQuerySavedObject>({
           type: savedQuerySavedObjectType,
@@ -91,9 +96,9 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
               removed,
               timeout,
               ecs_mapping: convertECSMappingToArray(ecs_mapping),
-              created_by: currentUser,
+              created_by: username,
               created_at: new Date().toISOString(),
-              updated_by: currentUser,
+              updated_by: username,
               updated_at: new Date().toISOString(),
             },
             (value) => !isEmpty(value) || isBoolean(value) || isNumber(value)

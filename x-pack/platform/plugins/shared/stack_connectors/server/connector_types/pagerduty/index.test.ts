@@ -65,18 +65,9 @@ describe('validateConfig()', () => {
   test('should validate and throw error when config is invalid', () => {
     expect(() => {
       validateConfig(connectorType, { shouldNotBeHere: true }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action type config: [
-        {
-          \\"code\\": \\"unrecognized_keys\\",
-          \\"keys\\": [
-            \\"shouldNotBeHere\\"
-          ],
-          \\"path\\": [],
-          \\"message\\": \\"Unrecognized key(s) in object: 'shouldNotBeHere'\\"
-        }
-      ]"
-    `);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating connector type config: Unrecognized key(s) in object: 'shouldNotBeHere'"`
+    );
   });
 
   test('should validate and pass when the pagerduty url is added to allowedHosts', () => {
@@ -113,7 +104,7 @@ describe('validateConfig()', () => {
         { configurationUtilities: configUtils }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: error configuring pagerduty action: target url is not added to allowedHosts"`
+      `"error validating connector type config: error configuring pagerduty action: target url is not added to allowedHosts"`
     );
   });
 });
@@ -129,35 +120,15 @@ describe('validateSecrets()', () => {
   test('should validate and throw error when secrets is invalid', () => {
     expect(() => {
       validateSecrets(connectorType, { routingKey: false }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action type secrets: [
-        {
-          \\"code\\": \\"invalid_type\\",
-          \\"expected\\": \\"string\\",
-          \\"received\\": \\"boolean\\",
-          \\"path\\": [
-            \\"routingKey\\"
-          ],
-          \\"message\\": \\"Expected string, received boolean\\"
-        }
-      ]"
-    `);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating connector type secrets: Field \\"routingKey\\": Expected string, received boolean"`
+    );
 
     expect(() => {
       validateSecrets(connectorType, {}, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action type secrets: [
-        {
-          \\"code\\": \\"invalid_type\\",
-          \\"expected\\": \\"string\\",
-          \\"received\\": \\"undefined\\",
-          \\"path\\": [
-            \\"routingKey\\"
-          ],
-          \\"message\\": \\"Required\\"
-        }
-      ]"
-    `);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating connector type secrets: Field \\"routingKey\\": Required"`
+    );
   });
 });
 
@@ -182,23 +153,9 @@ describe('validateParams()', () => {
   test('should validate and throw error when params is invalid', () => {
     expect(() => {
       validateParams(connectorType, { eventAction: 'ackynollage' }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action params: [
-        {
-          \\"received\\": \\"ackynollage\\",
-          \\"code\\": \\"invalid_enum_value\\",
-          \\"options\\": [
-            \\"trigger\\",
-            \\"resolve\\",
-            \\"acknowledge\\"
-          ],
-          \\"path\\": [
-            \\"eventAction\\"
-          ],
-          \\"message\\": \\"Invalid enum value. Expected 'trigger' | 'resolve' | 'acknowledge', received 'ackynollage'\\"
-        }
-      ]"
-    `);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action params: Field \\"eventAction\\": Invalid enum value. Expected 'trigger' | 'resolve' | 'acknowledge', received 'ackynollage'"`
+    );
   });
 
   test('should validate and pass when valid timestamp has spaces', () => {
@@ -272,15 +229,9 @@ describe('validateParams()', () => {
         },
         { configurationUtilities }
       );
-    }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action params: [
-        {
-          \\"code\\": \\"invalid_date\\",
-          \\"message\\": \\"error parsing timestamp \\\\\\"1963-09-55 90:23:45\\\\\\"\\",
-          \\"path\\": []
-        }
-      ]"
-    `);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action params: error parsing timestamp \\"1963-09-55 90:23:45\\""`
+    );
   });
 
   test('should validate and throw error when dedupKey is missing on resolve', () => {
@@ -292,15 +243,9 @@ describe('validateParams()', () => {
         },
         { configurationUtilities }
       );
-    }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action params: [
-        {
-          \\"code\\": \\"custom\\",
-          \\"message\\": \\"DedupKey is required when eventAction is \\\\\\"resolve\\\\\\"\\",
-          \\"path\\": []
-        }
-      ]"
-    `);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action params: DedupKey is required when eventAction is \\"resolve\\""`
+    );
   });
 });
 

@@ -20,9 +20,9 @@ export const StatefulHeaderPromo = () => {
         defaultMessage:
           'We are thrilled to launch ELSER on ElS -- get state-of-the-art semantic search relevance without having to manage your own machine learning nodes.',
       })}
-      cta={
+      actions={[
         <HeaderCTALink
-          data-test-subj="searchHomepageSearchHomepageHeaderCTA"
+          key="10-elser-on-eis"
           // "search-promo-homepage-" is prepended to the telemetry id in HeaderCTALink
           data-telemetry-id="10-elser-on-eis"
           href="https://www.elastic.co/docs/explore-analyze/elastic-inference/eis#elser-on-eis"
@@ -30,8 +30,8 @@ export const StatefulHeaderPromo = () => {
           {i18n.translate('xpack.searchHomepage.statefulPromo.content', {
             defaultMessage: 'View docs',
           })}
-        </HeaderCTALink>
-      }
+        </HeaderCTALink>,
+      ]}
     />
   );
 };

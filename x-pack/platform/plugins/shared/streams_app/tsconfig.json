@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -30,7 +30,6 @@
     "@kbn/es-query",
     "@kbn/zod",
     "@kbn/share-plugin",
-    "@kbn/shared-ux-link-redirect-app",
     "@kbn/typed-react-router-config",
     "@kbn/i18n",
     "@kbn/code-editor",
@@ -43,6 +42,7 @@
     "@kbn/unsaved-changes-prompt",
     "@kbn/grok-ui",
     "@kbn/grok-heuristics",
+    "@kbn/dissect-heuristics",
     "@kbn/streams-plugin",
     "@kbn/search-types",
     "@kbn/xstate-utils",
@@ -50,7 +50,6 @@
     "@kbn/index-lifecycle-management-common-shared",
     "@kbn/charts-theme",
     "@kbn/index-management-shared-types",
-    "@kbn/traced-es-client",
     "@kbn/discover-plugin",
     "@kbn/content-packs-schema",
     "@kbn/dashboard-plugin",
@@ -78,7 +77,7 @@
     "@kbn/monaco",
     "@kbn/unified-doc-viewer-plugin",
     "@kbn/utility-types",
-    "@kbn/apm-synthtrace-client",
+    "@kbn/synthtrace-client",
     "@kbn/streamlang",
     "@kbn/failure-store-modal",
     "@kbn/data-quality",
@@ -92,5 +91,11 @@
     "@kbn/spaces-plugin",
     "@kbn/unified-data-table",
     "@kbn/console-plugin",
+    "@kbn/discover-contextual-components",
+    "@kbn/es-types",
+    "@kbn/esql-utils",
+    "@kbn/tooling-log",
+    "@kbn/inference-common",
+    "@kbn/core-chrome-navigation",
   ]
 }

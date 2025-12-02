@@ -9,7 +9,7 @@
 
 import type { JsonValue } from '@kbn/utility-types';
 import { z } from '@kbn/zod';
-import type { WorkflowYaml } from '../spec/schema';
+import type { SerializedError, WorkflowYaml } from '../spec/schema';
 import { WorkflowSchema } from '../spec/schema';
 
 export enum ExecutionStatus {
@@ -74,7 +74,7 @@ export interface EsWorkflowExecution {
   stepId?: string;
   scopeStack: StackFrame[];
   createdAt: string;
-  error: string | null;
+  error: SerializedError | null;
   createdBy: string;
   startedAt: string;
   finishedAt: string;
@@ -112,7 +112,7 @@ export interface EsWorkflowStepExecution {
   workflowId: string;
   status: ExecutionStatus;
   startedAt: string;
-  completedAt?: string;
+  finishedAt?: string;
   executionTimeMs?: number;
 
   /** Topological index of step in workflow graph. */
@@ -126,7 +126,7 @@ export interface EsWorkflowStepExecution {
    * There might be several instances of the same stepId if it's inside loops, retries, etc.
    */
   stepExecutionIndex: number;
-  error?: string | null;
+  error?: SerializedError;
   output?: JsonValue;
   input?: JsonValue;
 
@@ -157,16 +157,20 @@ export interface WorkflowExecutionDto {
   spaceId: string;
   id: string;
   status: ExecutionStatus;
+  isTestRun: boolean;
   startedAt: string;
+  error: SerializedError | null;
   finishedAt: string;
   workflowId?: string;
   workflowName?: string;
   workflowDefinition: WorkflowYaml;
+  /** If specified, only this step and its children were executed */
   stepId?: string | undefined;
   stepExecutions: WorkflowStepExecutionDto[];
   duration: number | null;
   triggeredBy?: string; // 'manual' or 'scheduled'
   yaml: string;
+  context?: Record<string, unknown>;
 }
 
 export type WorkflowExecutionListItemDto = Omit<
@@ -176,13 +180,9 @@ export type WorkflowExecutionListItemDto = Omit<
 
 export interface WorkflowExecutionListDto {
   results: WorkflowExecutionListItemDto[];
-  _pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    next?: string;
-    prev?: string;
-  };
+  page: number;
+  size: number;
+  total: number;
 }
 
 // TODO: convert to actual elastic document spec
@@ -197,13 +197,18 @@ export const EsWorkflowSchema = z.object({
   createdBy: z.string(),
   lastUpdatedAt: z.date(),
   lastUpdatedBy: z.string(),
-  definition: WorkflowSchema,
+  definition: WorkflowSchema.optional(),
   deleted_at: z.date().nullable().default(null),
   yaml: z.string(),
   valid: z.boolean().readonly(),
 });
 
 export type EsWorkflow = z.infer<typeof EsWorkflowSchema>;
+
+export type EsWorkflowCreate = Omit<
+  EsWorkflow,
+  'id' | 'createdAt' | 'createdBy' | 'lastUpdatedAt' | 'lastUpdatedBy' | 'yaml' | 'deleted_at'
+>;
 
 export const CreateWorkflowCommandSchema = z.object({
   yaml: z.string(),
@@ -220,8 +225,8 @@ export const UpdateWorkflowCommandSchema = z.object({
 
 export const SearchWorkflowCommandSchema = z.object({
   triggerType: z.string().optional(),
-  limit: z.number().default(100),
-  page: z.number().default(0),
+  size: z.number().default(100),
+  page: z.number().default(1),
   createdBy: z.array(z.string()).optional(),
   // bool or number transformed to boolean
   enabled: z.array(z.union([z.boolean(), z.number().transform((val) => val === 1)])).optional(),
@@ -295,13 +300,9 @@ export interface WorkflowListItemDto {
 }
 
 export interface WorkflowListDto {
-  _pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    next?: string;
-    prev?: string;
-  };
+  page: number;
+  size: number;
+  total: number;
   results: WorkflowListItemDto[];
 }
 export interface WorkflowExecutionEngineModel
@@ -366,8 +367,6 @@ export interface ConnectorTypeInfo {
   subActions: ConnectorSubAction[];
 }
 
-export type ConnectorTypeInfoMinimal = Pick<ConnectorTypeInfo, 'actionTypeId' | 'displayName'>;
-
 export interface ConnectorContract {
   type: string;
   paramsSchema: z.ZodType;
@@ -424,3 +423,11 @@ export interface EnhancedInternalConnectorContract extends InternalConnectorCont
 }
 
 export type ConnectorContractUnion = DynamicConnectorContract | EnhancedInternalConnectorContract;
+
+export interface WorkflowsSearchParams {
+  size: number;
+  page: number;
+  query?: string;
+  createdBy?: string[];
+  enabled?: boolean[];
+}

@@ -20,6 +20,7 @@ import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../common/alerti
 import { validateMetricThreshold } from './components/validation';
 import { getRuleFormat } from './rule_data_formatters';
 import type { ExpressionsProps } from './components/expression';
+import { getDescriptionFields } from '../common/get_description_fields/get_description_fields';
 
 interface InventoryMetricRuleTypeParams extends RuleTypeParams {
   criteria: InventoryMetricConditions[];
@@ -89,5 +90,6 @@ export function createInventoryMetricRuleType({
     requiresAppContext: false,
     format,
     priority: 20,
+    getDescriptionFields,
   };
 }

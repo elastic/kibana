@@ -12,7 +12,7 @@ import type {
   PackageInfo,
 } from '@kbn/fleet-plugin/common';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
-import type { CloudConnectorSecretReference } from '@kbn/fleet-plugin/public/types';
+import type { CloudConnectorSecretReference, CloudProvider } from '@kbn/fleet-plugin/public/types';
 import type { CloudConnectorVar, CloudConnectorSecretVar } from '@kbn/fleet-plugin/common/types';
 import type { UpdatePolicy } from '../types';
 import type { AWS_PROVIDER, AZURE_PROVIDER, GCP_PROVIDER } from './constants';
@@ -28,8 +28,8 @@ export interface AwsCloudConnectorCredentials extends BaseCloudConnectorCredenti
 }
 
 export interface AzureCloudConnectorCredentials extends BaseCloudConnectorCredentials {
-  tenantId?: string;
-  clientId?: string;
+  tenantId?: string | CloudConnectorSecretReference;
+  clientId?: string | CloudConnectorSecretReference;
   azure_credentials_cloud_connector_id?: string;
 }
 
@@ -51,7 +51,7 @@ export interface NewCloudConnectorFormProps {
   isEditPage?: boolean;
   hasInvalidRequiredVars: boolean;
   cloud?: CloudSetup;
-  cloudProvider?: string;
+  cloudProvider?: CloudProvider;
   templateName?: string;
   credentials?: CloudConnectorCredentials;
   setCredentials: (credentials: CloudConnectorCredentials) => void;
@@ -72,7 +72,7 @@ export interface AzureCloudConnectorOption {
   id: string;
   tenantId?: CloudConnectorSecretVar;
   clientId?: CloudConnectorSecretVar;
-  azure_credentials_cloud_connector_id?: CloudConnectorSecretVar;
+  azure_credentials_cloud_connector_id?: CloudConnectorVar;
 }
 
 // Interface for EuiComboBox options (only standard properties)
@@ -89,7 +89,7 @@ export interface CloudConnectorFormProps {
   isEditPage?: boolean;
   hasInvalidRequiredVars: boolean;
   cloud?: CloudSetup;
-  cloudProvider?: string;
+  cloudProvider?: CloudProvider;
   isOrganization?: boolean;
   templateName?: string;
   credentials?: CloudConnectorCredentials;
@@ -107,7 +107,7 @@ export type CloudSetupForCloudConnector = Pick<
 >;
 
 export interface CloudFormationCloudCredentialsGuideProps {
-  cloudProvider?: string;
+  cloudProvider?: CloudProvider;
 }
 
 export interface GetCloudConnectorRemoteRoleTemplateParams {

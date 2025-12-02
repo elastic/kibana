@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isOptionNode } from '../../../../ast/is';
+import { isOptionNode, isSubQuery } from '../../../../ast/is';
 import type {
   ESQLAstQueryExpression,
   ESQLCommand,
@@ -49,7 +49,8 @@ export const append = (command: ESQLCommand, expression: ESQLSingleAstItem): num
 
 /**
  * Searches all command arguments in the query AST node and removes the node
- * from the command's arguments list.
+ * from the command's arguments list. This function recursively searches through
+ * subqueries as well.
  *
  * @param ast The root AST node to search for command arguments.
  * @param node The argument AST node to remove.
@@ -65,9 +66,19 @@ export const remove = (
       const length = args.length;
 
       for (let i = 0; i < length; i++) {
-        if (args[i] === node) {
+        const arg = args[i];
+
+        if (arg === node) {
           args.splice(i, 1);
           return ctx.node;
+        }
+
+        if (!Array.isArray(arg) && isSubQuery(arg)) {
+          const found = remove(arg.child, node);
+
+          if (found) {
+            return found;
+          }
         }
       }
 

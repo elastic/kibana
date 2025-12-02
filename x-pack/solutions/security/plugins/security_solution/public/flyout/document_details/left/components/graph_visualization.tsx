@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useEffect } from 'react';
 import { css } from '@emotion/react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
@@ -13,18 +13,23 @@ import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import {
-  GraphGroupedNodePreviewPanelKey,
-  GROUP_PREVIEW_BANNER,
+  type EntityOrEventItem,
   getNodeDocumentMode,
   getSingleDocumentData,
-  type NodeViewModel,
+  GraphGroupedNodePreviewPanelKey,
+  GROUP_PREVIEW_BANNER,
+  groupedItemClick$,
   NETWORK_PREVIEW_BANNER,
+  type NodeViewModel,
 } from '@kbn/cloud-security-posture-graph';
 import { type NodeDocumentDataModel } from '@kbn/cloud-security-posture-common/types/graph/v1';
-import { DOCUMENT_TYPE_ENTITY } from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import {
+  DOCUMENT_TYPE_ALERT,
+  DOCUMENT_TYPE_ENTITY,
+} from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import { PageScope } from '../../../../data_view_manager/constants';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useGetScopedSourcererDataView } from '../../../../sourcerer/components/use_get_sourcerer_data_view';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { GRAPH_VISUALIZATION_TEST_ID } from './test_ids';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
@@ -57,10 +62,10 @@ const MAX_DOCUMENTS_TO_LOAD = 50;
 export const GraphVisualization: React.FC = memo(() => {
   const toasts = useToasts();
   const oldDataView = useGetScopedSourcererDataView({
-    sourcererScope: SourcererScopeName.default,
+    sourcererScope: PageScope.default,
   });
 
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.default);
+  const { dataView: experimentalDataView } = useDataView(PageScope.default);
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
@@ -100,31 +105,50 @@ export const GraphVisualization: React.FC = memo(() => {
     (node: NodeViewModel) => {
       const singleDocumentData = getSingleDocumentData(node);
       const docMode = getNodeDocumentMode(node);
+      const documentsData = (node.documentsData ?? []) as NodeDocumentDataModel[];
 
-      if ((docMode === 'single-event' || docMode === 'single-alert') && singleDocumentData) {
-        openPreviewPanel({
-          id: DocumentDetailsPreviewPanelKey,
-          params: {
-            id: singleDocumentData.id,
-            indexName: singleDocumentData.index,
-            scopeId,
-            banner: docMode === 'single-alert' ? ALERT_PREVIEW_BANNER : EVENT_PREVIEW_BANNER,
-            isPreviewMode: true,
-          },
-        });
-      } else if (docMode === 'single-entity' && singleDocumentData) {
+      const showEntityPreview = (item: { id: string; entity?: unknown }) => {
         openPreviewPanel({
           id: GenericEntityPanelKey,
           params: {
-            entityId: singleDocumentData.id,
+            entityId: item.id,
             scopeId,
             isPreviewMode: true,
             banner: GENERIC_ENTITY_PREVIEW_BANNER,
-            // TODO: Remove hardcoded value once https://github.com/elastic/kibana/issues/232226 is implemented
-            isEngineMetadataExist: true,
+            isEngineMetadataExist: !!item.entity,
           },
         });
-      } else if (docMode === 'grouped-entities' && node.documentsData) {
+      };
+
+      const showEventOrAlertPreview = (
+        item: { id: string },
+        banner: {
+          title: string;
+          backgroundColor: string;
+          textColor: string;
+        },
+        index?: string
+      ) => {
+        openPreviewPanel({
+          id: DocumentDetailsPreviewPanelKey,
+          params: {
+            id: item.id,
+            indexName: index,
+            scopeId,
+            banner,
+            isPreviewMode: true,
+          },
+        });
+      };
+      if ((docMode === 'single-event' || docMode === 'single-alert') && singleDocumentData) {
+        showEventOrAlertPreview(
+          singleDocumentData,
+          docMode === 'single-alert' ? ALERT_PREVIEW_BANNER : EVENT_PREVIEW_BANNER,
+          singleDocumentData.index
+        );
+      } else if (docMode === 'single-entity' && singleDocumentData) {
+        showEntityPreview(singleDocumentData);
+      } else if (docMode === 'grouped-entities' && documentsData.length > 0) {
         openPreviewPanel({
           id: GraphGroupedNodePreviewPanelKey,
           params: {
@@ -144,7 +168,7 @@ export const GraphVisualization: React.FC = memo(() => {
               })),
           },
         });
-      } else if (docMode === 'grouped-events' && node.documentsData) {
+      } else if (docMode === 'grouped-events' && documentsData.length > 0) {
         openPreviewPanel({
           id: GraphGroupedNodePreviewPanelKey,
           params: {
@@ -172,6 +196,37 @@ export const GraphVisualization: React.FC = memo(() => {
     },
     [toasts, openPreviewPanel, scopeId, dataViewIndexPattern]
   );
+
+  // Subscribe to grouped item click events emitted by graph package
+  useEffect(() => {
+    const sub = groupedItemClick$.subscribe((item: EntityOrEventItem) => {
+      if (item.itemType === DOCUMENT_TYPE_ENTITY) {
+        openPreviewPanel({
+          id: GenericEntityPanelKey,
+          params: {
+            entityId: item.id,
+            scopeId,
+            isPreviewMode: true,
+            banner: GENERIC_ENTITY_PREVIEW_BANNER,
+          },
+        });
+      } else {
+        // event or alert
+        openPreviewPanel({
+          id: DocumentDetailsPreviewPanelKey,
+          params: {
+            id: item.docId,
+            indexName: item.index,
+            scopeId,
+            banner:
+              item.itemType === DOCUMENT_TYPE_ALERT ? ALERT_PREVIEW_BANNER : EVENT_PREVIEW_BANNER,
+            isPreviewMode: true,
+          },
+        });
+      }
+    });
+    return () => sub.unsubscribe();
+  }, [openPreviewPanel, scopeId]);
 
   const originEventIds = eventIds.map((id) => ({ id, isAlert }));
   const { investigateInTimeline } = useInvestigateInTimeline();

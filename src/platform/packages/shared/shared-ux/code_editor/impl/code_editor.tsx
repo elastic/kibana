@@ -97,6 +97,13 @@ export interface CodeEditorProps {
   hoverProvider?: monaco.languages.HoverProvider;
 
   /**
+   * Inline completions provider for inline suggestions
+   * Documentation for the provider can be found here:
+   * https://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.InlineCompletionsProvider.html
+   */
+  inlineCompletionsProvider?: monaco.languages.InlineCompletionsProvider;
+
+  /**
    * Language config provider for bracket
    * Documentation for the provider can be found here:
    * https://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.LanguageConfiguration.html
@@ -198,10 +205,22 @@ export interface CodeEditorProps {
   htmlId?: string;
 
   /**
+   * Enables clickable links in the editor. URLs will be underlined and can be opened
+   * in a new tab using Cmd/Ctrl+Click. Disabled by default.
+   */
+  links?: boolean;
+
+  /**
    * Callbacks for when editor is focused/blurred
    */
   onFocus?: () => void;
   onBlur?: () => void;
+
+  /**
+   * Enables the suggestion widget repositioning. Enabled by default.
+   * Disabled for cases like embedded console.
+   */
+  enableSuggestWidgetRepositioning?: boolean;
 }
 
 export const CodeEditor: React.FC<CodeEditorProps> = ({
@@ -219,6 +238,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   suggestionProvider,
   signatureProvider,
   hoverProvider,
+  inlineCompletionsProvider,
   placeholder,
   languageConfiguration,
   codeActions,
@@ -239,8 +259,10 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   enableCustomContextMenu = false,
   customContextMenuActions = [],
   htmlId,
+  links = false,
   onFocus,
   onBlur,
+  enableSuggestWidgetRepositioning = true,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { registerContextMenuActions, unregisterContextMenuActions } = useContextMenuUtils();
@@ -442,6 +464,10 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           monaco.languages.registerHoverProvider(languageId, hoverProvider);
         }
 
+        if (inlineCompletionsProvider) {
+          monaco.languages.registerInlineCompletionsProvider(languageId, inlineCompletionsProvider);
+        }
+
         if (languageConfiguration) {
           monaco.languages.setLanguageConfiguration(languageId, languageConfiguration);
         }
@@ -464,6 +490,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       suggestionProvider,
       signatureProvider,
       hoverProvider,
+      inlineCompletionsProvider,
       codeActions,
       languageConfiguration,
       enableFindAction,
@@ -611,7 +638,10 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           </div>
         ) : null}
         <UseBug177756ReBroadcastMouseDown>
-          <UseBug223981FixRepositionSuggestWidget editor={_editor}>
+          <UseBug223981FixRepositionSuggestWidget
+            editor={_editor}
+            enableSuggestWidgetRepositioning={enableSuggestWidgetRepositioning}
+          >
             {accessibilityOverlayEnabled && isFullScreen && renderPrompt()}
             <MonacoEditor
               theme={theme}
@@ -645,10 +675,12 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                 fontSize: isFullScreen ? 16 : 12,
                 lineHeight: isFullScreen ? 24 : 21,
                 contextmenu: enableCustomContextMenu,
-                fixedOverflowWidgets: true,
+                fixedOverflowWidgets: enableSuggestWidgetRepositioning,
                 // @ts-expect-error, see https://github.com/microsoft/monaco-editor/issues/3829
                 'bracketPairColorization.enabled': false,
                 ...options,
+                // Explicit links prop always takes precedence over any value passed in options
+                links,
               }}
             />
           </UseBug223981FixRepositionSuggestWidget>
@@ -842,8 +874,11 @@ const useFitToContent = ({
  * @description See {@link https://github.com/elastic/kibana/issues/223981} for the rationale behind this bug fix implementation
  */
 const UseBug223981FixRepositionSuggestWidget: FC<
-  PropsWithChildren<{ editor: monaco.editor.IStandaloneCodeEditor | null }>
-> = ({ children, editor }) => {
+  PropsWithChildren<{
+    editor: monaco.editor.IStandaloneCodeEditor | null;
+    enableSuggestWidgetRepositioning: boolean;
+  }>
+> = ({ children, editor, enableSuggestWidgetRepositioning }) => {
   const { euiTheme } = useEuiTheme();
   const suggestWidgetModifierClassName = 'kibanaCodeEditor__suggestWidgetModifier';
 
@@ -851,9 +886,13 @@ const UseBug223981FixRepositionSuggestWidget: FC<
     // @ts-expect-errors -- "widget" is not part of the TS interface but does exist
     const suggestionWidget = editor?.getContribution('editor.contrib.suggestController')?.widget
       ?.value;
-
     // The "onDidShow" and "onDidHide" is not documented so we guard from possible changes in the underlying lib
-    if (suggestionWidget && suggestionWidget.onDidShow && suggestionWidget.onDidHide) {
+    if (
+      suggestionWidget &&
+      suggestionWidget.onDidShow &&
+      suggestionWidget.onDidHide &&
+      enableSuggestWidgetRepositioning
+    ) {
       let $suggestWidgetNode: HTMLElement | null = null;
 
       // add a className that hides the suggestion widget by default so we might be to correctly position the suggestion widget,
@@ -879,18 +918,20 @@ const UseBug223981FixRepositionSuggestWidget: FC<
         }
       });
     }
-  }, [editor, euiTheme.size.m]);
+  }, [editor, euiTheme.size.m, enableSuggestWidgetRepositioning]);
 
   return (
     <React.Fragment>
-      <Global
-        // @ts-expect-error -- it's necessary that we apply the important modifier
-        styles={{
-          [`.${suggestWidgetModifierClassName}`]: {
-            visibility: 'hidden !important',
-          },
-        }}
-      />
+      {enableSuggestWidgetRepositioning && (
+        <Global
+          // @ts-expect-error -- it's necessary that we apply the important modifier
+          styles={{
+            [`.${suggestWidgetModifierClassName}`]: {
+              visibility: 'hidden !important',
+            },
+          }}
+        />
+      )}
       <React.Fragment>{children}</React.Fragment>
     </React.Fragment>
   );

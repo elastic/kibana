@@ -43,12 +43,14 @@ import type { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugi
 
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { AxiosInstance } from 'axios';
 import type { ActionsConfig, EnabledConnectorTypes } from './config';
 import { AllowedHosts, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
 import { events } from './lib/event_based_telemetry';
 import { ActionsClient } from './actions_client/actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
+import { AuthTypeRegistry, registerAuthTypes } from './auth_types';
 import { createBulkExecutionEnqueuerFunction } from './create_execute_function';
 import { registerActionsUsageCollector } from './usage';
 import type { ILicenseState } from './lib';
@@ -103,6 +105,8 @@ import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured
 import { createSystemConnectors } from './create_system_actions';
 import { ConnectorUsageReportingTask } from './usage/connector_usage_reporting_task';
 import { ConnectorRateLimiter } from './lib/connector_rate_limiter';
+import type { GetAxiosInstanceWithAuthFnOpts } from './lib/get_axios_instance';
+import { getAxiosInstanceWithAuth } from './lib/get_axios_instance';
 
 export interface PluginSetupContract {
   registerType<
@@ -120,6 +124,8 @@ export interface PluginSetupContract {
   >(
     connector: SubActionConnectorType<Config, Secrets>
   ): void;
+
+  getAxiosInstanceWithAuth(opts: GetAxiosInstanceWithAuthFnOpts): Promise<AxiosInstance>;
 
   isPreconfiguredConnector(connectorId: string): boolean;
 
@@ -207,6 +213,7 @@ export class ActionsPlugin
   private readonly actionsConfig: ActionsConfig;
   private taskRunnerFactory?: TaskRunnerFactory;
   private actionTypeRegistry?: ActionTypeRegistry;
+  private authTypeRegistry?: AuthTypeRegistry;
   private actionExecutor?: ActionExecutor;
   private licenseState: ILicenseState | null = null;
   private security?: SecurityPluginSetup;
@@ -299,6 +306,9 @@ export class ActionsPlugin
     this.actionExecutor = actionExecutor;
     this.security = plugins.security;
 
+    this.authTypeRegistry = new AuthTypeRegistry();
+    registerAuthTypes(this.authTypeRegistry);
+
     setupSavedObjects(
       core.savedObjects,
       plugins.encryptedSavedObjects,
@@ -369,6 +379,15 @@ export class ActionsPlugin
       usageCounter: this.usageCounter,
     });
 
+    const getAxiosInstanceFn = getAxiosInstanceWithAuth({
+      authTypeRegistry: this.authTypeRegistry!,
+      configurationUtilities: actionsConfigUtils,
+      logger: this.logger,
+    });
+    const getAxiosInstanceWithAuthHelper = async (opts: GetAxiosInstanceWithAuthFnOpts) => {
+      return await getAxiosInstanceFn(opts);
+    };
+
     return {
       registerType: <
         Config extends ActionTypeConfig = ActionTypeConfig,
@@ -389,6 +408,7 @@ export class ActionsPlugin
       ) => {
         subActionFramework.registerConnector(connector);
       },
+      getAxiosInstanceWithAuth: getAxiosInstanceWithAuthHelper,
       isPreconfiguredConnector: (connectorId: string): boolean => {
         return !!this.inMemoryConnectors.find(
           (inMemoryConnector) =>

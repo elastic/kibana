@@ -40,7 +40,8 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       value: false,
       technicalPreview: true,
       requiresPageReload: true,
-      readonly: false,
+      readonly: true,
+      readonlyMode: 'ui',
     },
     [AGENT_BUILDER_NAV_ENABLED_SETTING_ID]: {
       description: i18n.translate('xpack.onechat.uiSettings.nav.description', {

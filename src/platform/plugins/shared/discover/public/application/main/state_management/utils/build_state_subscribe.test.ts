@@ -15,6 +15,7 @@ import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock'
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { createDataViewDataSource, DataSourceType } from '../../../../../common/data_sources';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
+import { internalStateActions } from '../redux';
 
 describe('buildStateSubscribe', () => {
   const savedSearch = savedSearchMock;
@@ -26,13 +27,13 @@ describe('buildStateSubscribe', () => {
 
   const getSubscribeFn = () => {
     return buildStateSubscribe({
-      appState: stateContainer.appState,
       savedSearchState: stateContainer.savedSearchState,
       dataState: stateContainer.dataState,
       internalState: stateContainer.internalState,
       runtimeStateManager: stateContainer.runtimeStateManager,
       services: discoverServiceMock,
       setDataView: stateContainer.actions.setDataView,
+      getCurrentTab: stateContainer.getCurrentTab,
     });
   };
 
@@ -51,14 +52,14 @@ describe('buildStateSubscribe', () => {
   });
 
   it('should not call refetch$ if nothing changes', async () => {
-    await getSubscribeFn()(stateContainer.appState.getState());
+    await getSubscribeFn()(stateContainer.getCurrentTab().appState);
 
     expect(stateContainer.dataState.refetch$.next).not.toHaveBeenCalled();
   });
 
   it('should not call refetch$ if viewMode changes', async () => {
     await getSubscribeFn()({
-      ...stateContainer.appState.getState(),
+      ...stateContainer.getCurrentTab().appState,
       dataSource: {
         type: DataSourceType.Esql,
       },
@@ -110,9 +111,13 @@ describe('buildStateSubscribe', () => {
 
     expect(stateContainer.dataState.reset).toBeCalledTimes(1);
 
-    stateContainer.appState.getPrevious = jest.fn(() => ({
-      dataSource: createDataViewDataSource({ dataViewId: dataViewComplexMock.id! }),
-    }));
+    stateContainer.internalState.dispatch(
+      stateContainer.injectCurrentTab(internalStateActions.resetAppState)({
+        appState: {
+          dataSource: createDataViewDataSource({ dataViewId: dataViewComplexMock.id! }),
+        },
+      })
+    );
 
     await getSubscribeFn()({
       dataSource: createDataViewDataSource({ dataViewId: dataViewComplexMock.id! }),
