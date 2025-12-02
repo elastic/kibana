@@ -2329,12 +2329,19 @@ describe('ScheduledReportsService', () => {
       },
     };
 
+    const mockNotification = {
+      email: {
+        to: ['test@email.com'],
+      },
+    };
+
     const defaultUpdateParams = {
       user: { username: 'somebody' },
       id: savedObjects[0].id,
       updateParams: {
         title: 'foobar',
         schedule: mockSchedule,
+        notification: mockNotification,
       } as UpdateScheduledReportParams,
     };
 
@@ -2345,6 +2352,7 @@ describe('ScheduledReportsService', () => {
       expect(soClient.update).toHaveBeenCalledWith('scheduled_report', savedObjects[0].id, {
         schedule: mockSchedule,
         title: 'foobar',
+        notification: mockNotification,
       });
 
       expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledTimes(1);
@@ -2426,6 +2434,11 @@ describe('ScheduledReportsService', () => {
       expect(soClient.update).toHaveBeenCalledWith('scheduled_report', savedObjects[0].id, {
         schedule: mockSchedule,
         title: 'foobar',
+        notification: {
+          email: {
+            to: ['test@email.com'],
+          },
+        },
       });
 
       expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledTimes(1);

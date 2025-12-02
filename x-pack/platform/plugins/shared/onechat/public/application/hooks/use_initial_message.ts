@@ -5,28 +5,24 @@
  * 2.0.
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useConversationContext } from '../context/conversation/conversation_context';
 import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useSendMessage } from '../context/send_message/send_message_context';
 
 export const useSendPredefinedInitialMessage = () => {
-  const context = useConversationContext();
+  const { initialMessage, resetInitialMessage } = useConversationContext();
   const conversationId = useConversationId();
   const { sendMessage } = useSendMessage();
-  const hasSentInitialMessage = useRef(false);
 
-  const initialMessage = context.initialMessage;
   const isNewConversation = !conversationId;
 
   useEffect(() => {
-    if (initialMessage && isNewConversation && !hasSentInitialMessage.current) {
-      hasSentInitialMessage.current = true;
+    if (initialMessage && isNewConversation) {
       sendMessage({ message: initialMessage });
+      resetInitialMessage?.();
     }
-  }, [initialMessage, isNewConversation, sendMessage]);
+  }, [initialMessage, isNewConversation, sendMessage, resetInitialMessage]);
 
-  return {
-    hasSentInitialMessage: hasSentInitialMessage.current,
-  };
+  return null;
 };
