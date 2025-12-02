@@ -12,6 +12,8 @@ src/platform/packages/shared/kbn-actions-types @elastic/response-ops
 src/platform/plugins/private/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 x-pack/platform/packages/shared/kbn-ai-assistant @elastic/search-kibana
 x-pack/platform/packages/shared/ai-assistant/common @elastic/search-kibana
+x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action @elastic/appex-sharedux
+x-pack/platform/packages/shared/ai-assistant-default-llm-setting @elastic/security-generative-ai
 x-pack/platform/packages/shared/ai-assistant/icon @elastic/appex-sharedux
 src/platform/plugins/shared/ai_assistant_management/selection @elastic/obs-ai-assistant
 x-pack/solutions/security/packages/ai-security-labs-content @elastic/security-generative-ai
@@ -51,8 +53,8 @@ src/platform/packages/shared/kbn-apm-data-view @elastic/obs-ux-infra_services-te
 x-pack/solutions/observability/plugins/apm/ftr_e2e @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/apm @elastic/obs-ux-infra_services-team
 x-pack/platform/plugins/shared/apm_sources_access @elastic/obs-ux-infra_services-team
-src/platform/packages/shared/kbn-apm-synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-onboarding-team @elastic/obs-exploration-team
-src/platform/packages/shared/kbn-apm-synthtrace-client @elastic/obs-ux-infra_services-team @elastic/obs-onboarding-team @elastic/obs-exploration-team
+src/platform/packages/shared/kbn-apm-synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-onboarding-team
+src/platform/packages/shared/kbn-apm-synthtrace-client @elastic/obs-ux-infra_services-team @elastic/obs-onboarding-team
 x-pack/platform/packages/shared/kbn-apm-types @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-apm-types-shared @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-apm-ui-shared @elastic/obs-ux-infra_services-team
@@ -442,7 +444,7 @@ x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin @elastic
 x-pack/platform/plugins/shared/entity_manager @elastic/obs-entities
 examples/error_boundary @elastic/appex-sharedux
 src/platform/packages/shared/kbn-es @elastic/kibana-operations
-src/platform/packages/shared/kbn-es-archiver @elastic/kibana-operations @elastic/appex-qa
+src/platform/packages/shared/kbn-es-archiver @elastic/appex-qa
 src/platform/packages/shared/kbn-es-errors @elastic/kibana-core
 src/platform/packages/shared/kbn-es-query @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-es-types @elastic/kibana-core @elastic/obs-knowledge-team
@@ -508,6 +510,7 @@ packages/kbn-find-used-node-modules @elastic/kibana-operations
 x-pack/platform/plugins/shared/fleet @elastic/fleet
 src/platform/packages/shared/kbn-flot-charts @elastic/kibana-operations
 x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin @elastic/kibana-security
+x-pack/platform/packages/shared/kbn-fs @elastic/kibana-security
 src/platform/plugins/private/ftr_apis @elastic/kibana-core
 src/platform/packages/shared/kbn-ftr-common-functional-services @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-ftr-common-functional-ui-services @elastic/appex-qa
@@ -583,7 +586,7 @@ src/platform/test/plugin_functional/plugins/kbn_sample_panel_action @elastic/app
 src/platform/test/plugin_functional/plugins/kbn_top_nav @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations @elastic/kibana-visualizations
 src/platform/test/interpreter_functional/plugins/kbn_tp_run_pipeline @elastic/kibana-core
-x-pack/platform/packages/shared/kbn-key-value-metadata-table @elastic/obs-ux-infra_services-team @elastic/obs-exploration-team
+x-pack/platform/packages/shared/kbn-key-value-metadata-table @elastic/obs-ux-infra_services-team @elastic/obs-onboarding-team
 x-pack/platform/packages/shared/kbn-kibana-api-cli @elastic/appex-ai-infra
 x-pack/platform/test/functional_cors/plugins/kibana_cors_test @elastic/kibana-security
 packages/kbn-kibana-manifest-schema @elastic/kibana-operations
@@ -613,7 +616,7 @@ packages/kbn-lock-manager @elastic/obs-ai-assistant
 src/platform/packages/shared/kbn-logging @elastic/kibana-core
 src/platform/packages/shared/kbn-logging-mocks @elastic/kibana-core
 x-pack/platform/plugins/shared/logs_data_access @elastic/obs-exploration-team
-x-pack/solutions/observability/plugins/logs_explorer @elastic/obs-exploration-team
+x-pack/solutions/observability/plugins/logs_explorer @elastic/obs-onboarding-team
 x-pack/platform/packages/shared/logs-overview @elastic/obs-exploration-team
 x-pack/platform/plugins/shared/logs_shared @elastic/obs-exploration-team
 x-pack/platform/plugins/private/logstash @elastic/logstash
@@ -679,6 +682,7 @@ src/platform/packages/private/kbn-mock-idp-utils @elastic/kibana-security
 src/platform/packages/shared/kbn-monaco @elastic/appex-sharedux
 x-pack/platform/plugins/private/monitoring_collection @elastic/stack-monitoring
 x-pack/platform/plugins/private/monitoring @elastic/stack-monitoring
+packages/kbn-moon @elastic/kibana-operations
 src/platform/plugins/shared/navigation @elastic/appex-sharedux
 src/platform/plugins/shared/newsfeed @elastic/kibana-core
 src/platform/test/common/plugins/newsfeed @elastic/kibana-core
@@ -1015,7 +1019,6 @@ src/platform/packages/private/kbn-test-eui-helpers @elastic/kibana-visualization
 x-pack/platform/test/licensing_plugin/plugins/test_feature_usage @elastic/kibana-security
 src/platform/packages/shared/kbn-test-jest-helpers @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-test-subj-selector @elastic/kibana-operations @elastic/appex-qa
-x-pack/test_serverless
 src/platform/test
 x-pack/solutions/observability/test
 x-pack/performance @elastic/appex-qa
@@ -1043,6 +1046,7 @@ src/platform/packages/shared/kbn-triggers-actions-ui-types @elastic/response-ops
 src/platform/packages/shared/kbn-try-in-console @elastic/search-kibana
 packages/kbn-ts-projects @elastic/kibana-operations
 packages/kbn-ts-type-check-cli @elastic/kibana-operations
+packages/kbn-tsconfig/base @elastic/kibana-operations
 src/platform/packages/shared/kbn-typed-react-router-config @elastic/obs-knowledge-team @elastic/obs-ux-management-team
 src/platform/packages/shared/kbn-ui-actions-browser @elastic/appex-sharedux
 x-pack/examples/ui_actions_enhanced_examples @elastic/appex-sharedux
@@ -1098,7 +1102,6 @@ src/platform/packages/shared/kbn-visualization-ui-components @elastic/kibana-vis
 src/platform/packages/shared/kbn-visualization-utils @elastic/kibana-visualizations
 src/platform/plugins/shared/visualizations @elastic/kibana-visualizations
 x-pack/platform/plugins/private/watcher @elastic/kibana-management
-x-pack/platform/packages/shared/kbn-fs @elastic/kibana-security
 packages/kbn-web-worker-stub @elastic/kibana-operations
 packages/kbn-whereis-pkg-cli @elastic/kibana-operations
 src/platform/packages/shared/kbn-xstate-utils @elastic/obs-onboarding-team
