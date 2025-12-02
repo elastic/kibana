@@ -6,10 +6,10 @@
  */
 
 import { z } from '@kbn/zod';
-import { NonEmptyString } from '@kbn/zod-helpers';
+import { NonEmptyOrWhitespaceString, NonEmptyString } from '@kbn/zod-helpers';
 import { createIsNarrowSchema } from '@kbn/zod-helpers';
 import type { Condition } from '../conditions';
-import { conditionSchema } from '../conditions';
+import { conditionSchema, isAlwaysCondition } from '../conditions';
 import {
   NoMustacheValue,
   NoMustacheArrayValues,
@@ -232,11 +232,17 @@ export const convertProcessorSchema = processorBaseWithWhereSchema
     type: z.enum(convertTypes),
     ignore_missing: z.optional(z.boolean()),
   })
-  .refine((obj) => (obj.where && obj.to && obj.from !== obj.to) || !obj.where, {
-    message:
-      'Convert processor must have the "to" parameter when there is a "where" condition. It should not be the same as the source field.',
-    path: ['to', 'where'],
-  }) satisfies z.Schema<ConvertProcessor>;
+  .refine(
+    (obj) =>
+      !obj.where ||
+      (obj.where && isAlwaysCondition(obj.where)) ||
+      (obj.where && obj.to && obj.from !== obj.to),
+    {
+      message:
+        'Convert processor must have the "to" parameter when there is a "where" condition. It should not be the same as the source field.',
+      path: ['to', 'where'],
+    }
+  ) satisfies z.Schema<ConvertProcessor>;
 
 /**
  * RemoveByPrefix processor
@@ -284,6 +290,28 @@ export const dropDocumentProcessorSchema = processorBaseWithWhereSchema
     message: 'where clause is required in drop_document.',
   }) satisfies z.Schema<DropDocumentProcessor>;
 
+/**
+ * Replace processor
+ */
+
+export interface ReplaceProcessor extends ProcessorBaseWithWhere {
+  action: 'replace';
+  from: string;
+  pattern: string;
+  replacement: string;
+  to?: string;
+  ignore_missing?: boolean;
+}
+
+export const replaceProcessorSchema = processorBaseWithWhereSchema.extend({
+  action: z.literal('replace'),
+  from: StreamlangSourceField,
+  pattern: NonEmptyOrWhitespaceString, // Allows space " " as valid pattern
+  replacement: z.string(), // Required, should be '' for empty replacement
+  to: z.optional(StreamlangTargetField),
+  ignore_missing: z.optional(z.boolean()),
+}) satisfies z.Schema<ReplaceProcessor>;
+
 export type StreamlangProcessorDefinition =
   | DateProcessor
   | DissectProcessor
@@ -295,6 +323,7 @@ export type StreamlangProcessorDefinition =
   | ConvertProcessor
   | RemoveByPrefixProcessor
   | RemoveProcessor
+  | ReplaceProcessor
   | ManualIngestPipelineProcessor;
 
 export const streamlangProcessorSchema = z.union([
@@ -307,6 +336,7 @@ export const streamlangProcessorSchema = z.union([
   appendProcessorSchema,
   removeByPrefixProcessorSchema,
   removeProcessorSchema,
+  replaceProcessorSchema,
   convertProcessorSchema,
   manualIngestPipelineProcessorSchema,
 ]);
@@ -323,6 +353,7 @@ export const isProcessWithIgnoreMissingOption = createIsNarrowSchema(
     grokProcessorSchema,
     dissectProcessorSchema,
     convertProcessorSchema,
+    replaceProcessorSchema,
   ])
 );
 

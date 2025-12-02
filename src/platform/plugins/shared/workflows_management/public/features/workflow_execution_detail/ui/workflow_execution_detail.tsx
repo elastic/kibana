@@ -10,6 +10,7 @@
 import { EuiPanel } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+
 import {
   ResizableLayout,
   ResizableLayoutDirection,
@@ -17,6 +18,10 @@ import {
   ResizableLayoutOrder,
 } from '@kbn/resizable-layout';
 import { WorkflowExecutionPanel } from './workflow_execution_panel';
+import {
+  buildOverviewStepExecutionFromContext,
+  buildTriggerStepExecutionFromContext,
+} from './workflow_pseudo_step_context';
 import { WorkflowStepExecutionDetails } from './workflow_step_execution_details';
 import { useWorkflowExecutionPolling } from '../../../entities/workflows/model/use_workflow_execution_polling';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
@@ -30,7 +35,7 @@ export interface WorkflowExecutionDetailProps {
 
 export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = React.memo(
   ({ executionId, onClose }) => {
-    const { workflowExecution, isLoading, error } = useWorkflowExecutionPolling(executionId);
+    const { workflowExecution, error } = useWorkflowExecutionPolling(executionId);
 
     const { activeTab, setSelectedStepExecution, selectedStepExecutionId } = useWorkflowUrlState();
     const [sidebarWidth = DefaultSidebarWidth, setSidebarWidth] = useLocalStorage(
@@ -45,11 +50,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
         executionId === workflowExecution?.id && // execution id matches (not stale execution used)
         workflowExecution?.stepExecutions?.length // step executions are loaded
       ) {
-        // Auto-select the first step execution
-        const firstStepExecutionId = workflowExecution.stepExecutions[0]?.id;
-        if (firstStepExecutionId) {
-          setSelectedStepExecution(firstStepExecutionId);
-        }
+        setSelectedStepExecution('__overview');
       }
     }, [workflowExecution, selectedStepExecutionId, setSelectedStepExecution, executionId]);
 
@@ -68,11 +69,23 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
     }, [workflowExecution]);
 
     const selectedStepExecution = useMemo(() => {
-      if (!workflowExecution?.stepExecutions?.length || !selectedStepExecutionId) {
+      if (!selectedStepExecutionId) {
+        return undefined;
+      }
+
+      if (selectedStepExecutionId === '__overview' && workflowExecution) {
+        return buildOverviewStepExecutionFromContext(workflowExecution);
+      }
+
+      if (selectedStepExecutionId === 'trigger' && workflowExecution?.context) {
+        return buildTriggerStepExecutionFromContext(workflowExecution) ?? undefined;
+      }
+
+      if (!workflowExecution?.stepExecutions?.length) {
         return undefined;
       }
       return workflowExecution.stepExecutions.find((step) => step.id === selectedStepExecutionId);
-    }, [workflowExecution?.stepExecutions, selectedStepExecutionId]);
+    }, [workflowExecution, selectedStepExecutionId]);
 
     return (
       <EuiPanel paddingSize="none" color="plain" hasShadow={false} style={{ height: '100%' }}>
@@ -96,7 +109,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
             <WorkflowStepExecutionDetails
               workflowExecutionId={executionId}
               stepExecution={selectedStepExecution}
-              isLoading={isLoading}
+              workflowExecutionDuration={workflowExecution?.duration ?? undefined}
             />
           }
           minFlexPanelSize={200}

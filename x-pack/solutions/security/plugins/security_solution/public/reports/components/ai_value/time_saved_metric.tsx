@@ -9,15 +9,16 @@ import React, { useCallback, useMemo } from 'react';
 
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
+import { PageScope } from '../../../data_view_manager/constants';
 import { useSignalIndexWithDefault } from '../../hooks/use_signal_index_with_default';
 import {
   type GetLensAttributes,
   VisualizationContextMenuActions,
 } from '../../../common/components/visualization_actions/types';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { getTimeSavedMetricLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/time_saved_metric';
 import * as i18n from './translations';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
+import { useAIValueExportContext } from '../../providers/ai_value/export_provider';
 
 interface Props {
   from: string;
@@ -36,6 +37,8 @@ const TimeSavedMetricComponent: React.FC<Props> = ({ from, to, minutesPerAlert }
   } = useEuiTheme();
   const timerange = useMemo(() => ({ from, to }), [from, to]);
   const signalIndexName = useSignalIndexWithDefault();
+  const aiValueExportContext = useAIValueExportContext();
+  const isExportMode = aiValueExportContext?.isExportMode === true;
 
   const getLensAttributes = useCallback<GetLensAttributes>(
     (args) => getTimeSavedMetricLensAttributes({ ...args, minutesPerAlert, signalIndexName }),
@@ -50,7 +53,10 @@ const TimeSavedMetricComponent: React.FC<Props> = ({ from, to, minutesPerAlert }
           height: 100% !important;
         }
         .echMetricText__icon .euiIcon {
-          fill: ${colors.vis.euiColorVis2};
+          ${isExportMode ? 'display: none;' : `fill: ${colors.vis.euiColorVis2};`}
+        }
+        .echMetricText__valueBlock {
+          grid-row-start: 3 !important;
         }
         .echMetricText {
           padding: 8px 16px 60px;
@@ -82,7 +88,7 @@ const TimeSavedMetricComponent: React.FC<Props> = ({ from, to, minutesPerAlert }
         timerange={timerange}
         id={`${ID}-metric`}
         inspectTitle={i18n.TIME_SAVED}
-        scopeId={SourcererScopeName.detections}
+        scopeId={PageScope.alerts}
         withActions={[
           VisualizationContextMenuActions.addToExistingCase,
           VisualizationContextMenuActions.addToNewCase,

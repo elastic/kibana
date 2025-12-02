@@ -5,32 +5,4 @@
  * 2.0.
  */
 
-import { lazy } from 'react';
-import type { ActionTypeModel } from '@kbn/alerts-ui-shared';
-import { type ConnectorSpec } from '@kbn/connector-specs';
-import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
-
-export function registerConnectorTypesFromSpecs({
-  connectorTypeRegistry,
-}: {
-  connectorTypeRegistry: TriggersAndActionsUIPublicPluginSetup['actionTypeRegistry'];
-}) {
-  import('@kbn/connector-specs').then(({ connectorsSpecs }) => {
-    for (const spec of Object.values(connectorsSpecs)) {
-      connectorTypeRegistry.register(createConnectorTypeFromSpec(spec));
-    }
-  });
-}
-
-function createConnectorTypeFromSpec(spec: ConnectorSpec): ActionTypeModel {
-  return {
-    id: spec.metadata.id,
-    actionTypeTitle: spec.metadata.displayName,
-    selectMessage: spec.metadata.description,
-    iconClass: spec.metadata.icon ?? 'globe',
-    // TODO: Implement the rest of the properties
-    actionConnectorFields: null,
-    actionParamsFields: lazy(() => Promise.resolve({ default: () => null })),
-    validateParams: async () => ({ errors: {} }),
-  };
-}
+export { registerConnectorTypesFromSpecs } from './register_from_spec';

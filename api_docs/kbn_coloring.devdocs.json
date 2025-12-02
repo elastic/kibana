@@ -4031,15 +4031,7 @@
         "label": "RequiredPaletteParamTypes",
         "description": [],
         "signature": [
-          "{ reverse: boolean; name: string; steps: number; rangeType: \"number\" | \"percent\"; continuity: ",
-          {
-            "pluginId": "@kbn/coloring",
-            "scope": "common",
-            "docId": "kibKbnColoringPluginApi",
-            "section": "def-common.PaletteContinuity",
-            "text": "PaletteContinuity"
-          },
-          "; progression: \"fixed\"; rangeMin: number; rangeMax: number; stops: ",
+          "{ name: string; reverse: boolean; steps: number; rangeType: \"number\" | \"percent\"; stops: ",
           {
             "pluginId": "@kbn/coloring",
             "scope": "common",
@@ -4047,7 +4039,15 @@
             "section": "def-common.ColorStop",
             "text": "ColorStop"
           },
-          "[]; colorStops: ",
+          "[]; continuity: ",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.PaletteContinuity",
+            "text": "PaletteContinuity"
+          },
+          "; progression: \"fixed\"; rangeMin: number; rangeMax: number; colorStops: ",
           {
             "pluginId": "@kbn/coloring",
             "scope": "common",

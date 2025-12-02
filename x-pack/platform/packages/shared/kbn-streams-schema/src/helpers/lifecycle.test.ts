@@ -21,6 +21,7 @@ function createMockWiredStream(
       wired: { fields: {}, routing: [] },
       processing: { steps: [] },
       settings: {},
+      failure_store: { inherit: {} },
     },
   };
 }

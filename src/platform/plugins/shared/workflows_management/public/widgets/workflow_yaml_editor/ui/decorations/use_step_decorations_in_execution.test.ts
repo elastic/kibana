@@ -104,8 +104,10 @@ const createExecution = (
   stepExecutions: WorkflowStepExecutionDto[] = []
 ): WorkflowExecutionDto => ({
   id: 'execution-1',
+  isTestRun: false,
   spaceId: 'default',
   status: ExecutionStatus.COMPLETED,
+  error: null,
   startedAt: '2023-01-01T00:00:00Z',
   finishedAt: '2023-01-01T00:01:00Z',
   workflowId: 'workflow-1',

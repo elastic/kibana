@@ -10,8 +10,8 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import type { WorkflowExecutionDto, WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
+import type { WorkflowExecutionDto, WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { TestWrapper } from '../../../../shared/test_utils/test_wrapper';
 import { WorkflowStepExecutionTree } from '../workflow_step_execution_tree';
 
@@ -138,10 +138,12 @@ describe('WorkflowStepExecutionTree', () => {
     overrides: Partial<WorkflowExecutionDto> = {}
   ): WorkflowExecutionDto => ({
     id: 'exec-123',
+    isTestRun: false,
     spaceId: 'default',
     status: ExecutionStatus.RUNNING,
     startedAt: '2024-01-01T10:00:00Z',
     finishedAt: '',
+    error: null,
     workflowId: 'workflow-123',
     workflowName: 'Test Workflow',
     workflowDefinition: {
@@ -341,7 +343,11 @@ describe('WorkflowStepExecutionTree', () => {
         </TestWrapper>
       );
 
-      expect(buildStepExecutionsTree).toHaveBeenCalledWith([stepExecution]);
+      expect(buildStepExecutionsTree).toHaveBeenCalledWith(
+        [stepExecution],
+        expect.objectContaining({}),
+        'completed'
+      );
       expect(
         screen.getByRole('list', { name: 'Workflow step execution tree' })
       ).toBeInTheDocument();
@@ -530,7 +536,11 @@ describe('WorkflowStepExecutionTree', () => {
 
       // buildStepExecutionsTree should be called with only existing step executions (no skeletons for terminal status)
       expect(buildStepExecutionsTree).toHaveBeenCalled();
-      expect(buildStepExecutionsTree).toHaveBeenCalledWith([stepExecution]);
+      expect(buildStepExecutionsTree).toHaveBeenCalledWith(
+        [stepExecution],
+        expect.objectContaining({}),
+        'completed'
+      );
       expect(isTerminalStatus).toHaveBeenCalledWith(ExecutionStatus.COMPLETED);
     });
   });

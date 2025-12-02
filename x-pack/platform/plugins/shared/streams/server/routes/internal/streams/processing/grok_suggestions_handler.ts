@@ -6,15 +6,19 @@
  */
 
 import { z } from '@kbn/zod';
-import type { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { ReviewFieldsPrompt } from '@kbn/grok-heuristics';
 import type { InferenceClient, ToolOptionsOfPrompt } from '@kbn/inference-common';
-import { Streams } from '@kbn/streams-schema';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
-import { prefixOTelField } from '@kbn/otel-semantic-conventions';
 import type { ToolCallsOfToolOptions } from '@kbn/inference-common/src/chat_complete/tools_of';
 import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
 import type { StreamsClient } from '../../../../lib/streams/client';
+import {
+  determineOtelFieldNameUsage,
+  callInferenceWithPrompt,
+  fetchFieldMetadata,
+  normalizeFieldName,
+} from './common_processing_helpers';
 
 export interface ProcessingGrokSuggestionsParams {
   path: {
@@ -40,6 +44,7 @@ export interface ProcessingGrokSuggestionsHandlerDeps {
   streamsClient: StreamsClient;
   fieldsMetadataClient: IFieldsMetadataClient;
   signal: AbortSignal;
+  logger: Logger;
 }
 
 export const processingGrokSuggestionsSchema = z.object({
@@ -67,34 +72,38 @@ export const handleProcessingGrokSuggestions = async ({
   streamsClient,
   fieldsMetadataClient,
   signal,
+  logger,
 }: ProcessingGrokSuggestionsHandlerDeps) => {
-  const stream = await streamsClient.getStream(params.path.name);
-  const isWiredStream = Streams.WiredStream.Definition.is(stream);
+  // Determine if we should use OTEL field names
+  const useOtelFieldNames = await determineOtelFieldNameUsage(streamsClient, params.path.name);
 
-  const response = await inferenceClient.prompt({
-    connectorId: params.body.connector_id,
-    prompt: ReviewFieldsPrompt,
-    input: {
-      sample_messages: params.body.sample_messages,
-      review_fields: JSON.stringify(params.body.review_fields),
-    },
-    abortSignal: signal,
-  });
-  const reviewResult = response.toolCalls[0].function.arguments;
+  try {
+    // Call LLM inference to review fields
+    const reviewResult = await callInferenceWithPrompt(
+      inferenceClient,
+      params.body.connector_id,
+      ReviewFieldsPrompt,
+      params.body.sample_messages,
+      params.body.review_fields,
+      signal
+    );
 
-  // if the stream is wired, or if it matches the logs-*.otel-* pattern, use the OTEL field names
-  const useOtelFieldNames = isWiredStream || params.path.name.match(/^logs-.*\.otel-/);
+    // Fetch field metadata for ECS/OTEL field name resolution
+    const fieldMetadata = await fetchFieldMetadata(
+      fieldsMetadataClient,
+      reviewResult.fields.map((field: { ecs_field: string }) => field.ecs_field)
+    );
 
-  const fieldMetadata = await fieldsMetadataClient
-    .find({
-      fieldNames: reviewResult.fields.map((field) => field.ecs_field),
-    })
-    .then((fieldsDictionary) => fieldsDictionary.toPlain());
-
-  return {
-    log_source: reviewResult.log_source,
-    fields: mapFields(reviewResult.fields, fieldMetadata, !!useOtelFieldNames),
-  };
+    return {
+      log_source: reviewResult.log_source,
+      fields: mapFields(reviewResult.fields, fieldMetadata, useOtelFieldNames),
+    };
+  } catch (error) {
+    logger.error(error);
+    throw new Error(
+      'Failed to generate grok suggestions due to error with the AI generation, please try again later.'
+    );
+  }
 };
 
 export function mapFields(
@@ -103,17 +112,9 @@ export function mapFields(
   useOtelFieldNames: boolean
 ) {
   return reviewResults.map((field) => {
-    // @timestamp is a special case that we want to map to custom.timestamp - if we let it overwrite @timestamp it will most likely
-    // fail because the format won't be right. I a follow-up we can extend the suggestion to also add a date format processor step
-    // to map it back correctly.
-    const name = field.ecs_field.startsWith('@timestamp')
-      ? field.ecs_field.replace('@timestamp', 'custom.timestamp')
-      : field.ecs_field;
+    const name = normalizeFieldName(field.ecs_field, fieldMetadata, useOtelFieldNames);
     return {
-      // make sure otel field names are translated/prefixed correctly
-      name: useOtelFieldNames
-        ? fieldMetadata[name]?.otel_equivalent ?? prefixOTelField(name)
-        : name,
+      name,
       columns: field.columns,
       grok_components: field.grok_components,
     };

@@ -24,6 +24,7 @@ import {
   MANAGE_PATH,
   POLICIES_PATH,
   RESPONSE_ACTIONS_HISTORY_PATH,
+  SCRIPTS_LIBRARY_PATH,
   SECURITY_FEATURE_ID,
   SecurityPageName,
   TRUSTED_APPS_PATH,
@@ -40,6 +41,7 @@ import {
   MANAGE,
   POLICIES,
   RESPONSE_ACTIONS_HISTORY,
+  SCRIPTS_LIBRARY,
   TRUSTED_APPLICATIONS,
   TRUSTED_DEVICES,
 } from '../app/translations';
@@ -76,14 +78,21 @@ const categories = [
     linkIds: [
       SecurityPageName.endpoints,
       SecurityPageName.policies,
-      SecurityPageName.endpointExceptions,
       SecurityPageName.trustedApps,
       SecurityPageName.trustedDevices,
       SecurityPageName.eventFilters,
       SecurityPageName.hostIsolationExceptions,
       SecurityPageName.blocklist,
+      SecurityPageName.endpointExceptions,
       SecurityPageName.responseActionsHistory,
+      SecurityPageName.scriptsLibrary,
     ],
+  },
+  {
+    label: i18n.translate('xpack.securitySolution.appLinks.category.cloudSecurity', {
+      defaultMessage: 'Cloud Security',
+    }),
+    linkIds: [SecurityPageName.cloudDefendPolicies],
   },
   {
     label: i18n.translate('xpack.securitySolution.appLinks.category.investigations', {
@@ -130,19 +139,6 @@ export const links: LinkItem = {
       path: POLICIES_PATH,
       skipUrlState: true,
       hideTimeline: true,
-    },
-    {
-      id: SecurityPageName.endpointExceptions,
-      title: ENDPOINT_EXCEPTIONS,
-      description: i18n.translate('xpack.securitySolution.appLinks.endpointExceptionsDescription', {
-        defaultMessage: 'Add exceptions to your hosts.',
-      }),
-      landingIcon: IconTool,
-      path: ENDPOINT_EXCEPTIONS_PATH,
-      skipUrlState: true,
-      hideTimeline: true,
-
-      experimentalKey: 'endpointExceptionsMovedUnderManagement',
     },
     {
       id: SecurityPageName.trustedApps,
@@ -208,6 +204,19 @@ export const links: LinkItem = {
       hideTimeline: true,
     },
     {
+      id: SecurityPageName.endpointExceptions,
+      title: ENDPOINT_EXCEPTIONS,
+      description: i18n.translate('xpack.securitySolution.appLinks.endpointExceptionsDescription', {
+        defaultMessage: 'Add exceptions to your hosts.',
+      }),
+      landingIcon: IconTool,
+      path: ENDPOINT_EXCEPTIONS_PATH,
+      skipUrlState: true,
+      hideTimeline: true,
+
+      experimentalKey: 'endpointExceptionsMovedUnderManagement',
+    },
+    {
       id: SecurityPageName.entityAnalyticsManagement,
       title: ENTITY_ANALYTICS_RISK_SCORE,
       description: i18n.translate('xpack.securitySolution.appLinks.entityRiskScoringDescription', {
@@ -243,6 +252,20 @@ export const links: LinkItem = {
       skipUrlState: true,
       hideTimeline: true,
     },
+    {
+      id: SecurityPageName.scriptsLibrary,
+      title: SCRIPTS_LIBRARY,
+      description: i18n.translate('xpack.securitySolution.appLinks.scriptsLibraryDescription', {
+        defaultMessage: 'View and manage your scripts library.',
+      }),
+      // TODO: Replace with a custom icon same as other links when available
+      landingIcon: 'broom',
+      path: SCRIPTS_LIBRARY_PATH,
+      skipUrlState: true,
+      hideTimeline: true,
+      experimentalKey: 'responseActionsScriptLibraryManagement',
+      licenseType: 'enterprise',
+    },
     notesLink,
   ],
 };
@@ -269,6 +292,7 @@ export const getManagementFilteredLinks = async (
     canReadEventFilters,
     canReadBlocklist,
     canReadPolicyManagement,
+    canReadScriptsLibrary,
   } =
     fleetAuthz && currentUser
       ? calculateEndpointAuthz(licenseService, fleetAuthz, currentUser.roles)
@@ -289,6 +313,7 @@ export const getManagementFilteredLinks = async (
 
   if (!canReadPolicyManagement) {
     linksToExclude.push(SecurityPageName.policies);
+    linksToExclude.push(SecurityPageName.cloudDefendPolicies);
   }
 
   if (!canReadEndpointExceptions) {
@@ -317,6 +342,10 @@ export const getManagementFilteredLinks = async (
 
   if (!canReadBlocklist) {
     linksToExclude.push(SecurityPageName.blocklist);
+  }
+
+  if (!canReadScriptsLibrary) {
+    linksToExclude.push(SecurityPageName.scriptsLibrary);
   }
 
   return excludeLinks(linksToExclude);

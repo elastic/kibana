@@ -43,6 +43,7 @@ describe('useFilteredMetricFields', () => {
   ) => {
     const defaults = {
       allFields: [],
+      isFieldsLoading: false,
       searchTerm: '',
       dimensions: [],
       valueFilters: [],
@@ -77,7 +78,7 @@ describe('useFilteredMetricFields', () => {
       'field3',
       'field4',
     ]);
-    expect(result.current.filters).toEqual([]);
+    expect(result.current.filters).toBeUndefined();
     expect(result.current.isLoading).toBe(false);
   });
 
@@ -103,7 +104,10 @@ describe('useFilteredMetricFields', () => {
       createField('field4', []),
     ];
 
-    const { result } = renderFilteredFields({ allFields, dimensions: ['foo'] });
+    const { result } = renderFilteredFields({
+      allFields,
+      dimensions: [{ name: 'foo', type: ES_FIELD_TYPES.KEYWORD }],
+    });
 
     expect(result.current.fields.map((f) => f.name)).toEqual(['field1', 'field3']);
   });
@@ -119,7 +123,7 @@ describe('useFilteredMetricFields', () => {
     const { result } = renderFilteredFields({
       allFields,
       searchTerm: 'metric',
-      dimensions: ['foo'],
+      dimensions: [{ name: 'foo', type: ES_FIELD_TYPES.KEYWORD }],
     });
 
     expect(result.current.fields.map((f) => f.name)).toEqual(['metric1', 'metric3']);
@@ -135,7 +139,7 @@ describe('useFilteredMetricFields', () => {
         fields: [],
         index: '',
         timeRange: DEFAULT_TIME_RANGE,
-        kuery: undefined,
+        filters: undefined,
         enabled: false,
       });
     });
@@ -151,7 +155,9 @@ describe('useFilteredMetricFields', () => {
         fields: ['field1', 'field2'],
         index: 'metrics-*',
         timeRange: DEFAULT_TIME_RANGE,
-        kuery: 'host.name:"server1"',
+        filters: {
+          'host.name': ['server1'],
+        },
         enabled: true,
       });
     });
@@ -175,7 +181,9 @@ describe('useFilteredMetricFields', () => {
         fields: ['metric1', 'metric2'],
         index: 'metrics-*',
         timeRange: DEFAULT_TIME_RANGE,
-        kuery: 'host.name:"server1"',
+        filters: {
+          'host.name': ['server1'],
+        },
         enabled: true,
       });
     });
@@ -192,7 +200,9 @@ describe('useFilteredMetricFields', () => {
         fields: [],
         index: '',
         timeRange: DEFAULT_TIME_RANGE,
-        kuery: 'host.name:"server1"',
+        filters: {
+          'host.name': ['server1'],
+        },
         enabled: false,
       });
     });

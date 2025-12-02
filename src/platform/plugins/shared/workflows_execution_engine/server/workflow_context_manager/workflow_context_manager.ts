@@ -9,15 +9,16 @@
 
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { StackFrame, StepContext, WorkflowContext } from '@kbn/workflows';
+import { KQLSyntaxError } from '@kbn/es-query';
+import type { SerializedError, StackFrame, StepContext, WorkflowContext } from '@kbn/workflows';
 import { parseJsPropertyAccess } from '@kbn/workflows/common/utils';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
+import { buildWorkflowContext } from './build_workflow_context';
 import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
-import type { RunStepResult } from '../step/node_implementation';
 import type { WorkflowTemplatingEngine } from '../templating_engine';
-import { buildStepExecutionId, buildWorkflowExecutionUrl, getKibanaUrl } from '../utils';
+import { buildStepExecutionId, evaluateKql } from '../utils';
 
 export interface ContextManagerInit {
   // New properties for logging
@@ -129,14 +130,51 @@ export class WorkflowContextManager {
    * // => { url: "https://api.example.com", headers: { "X-Request-Id": "exec-123" } }
    * ```
    */
-  public renderValueAccordingToContext<T>(obj: T): T {
+  public renderValueAccordingToContext<T>(obj: T, additionalContext?: Record<string, unknown>): T {
     const context = this.getContext();
-    return this.templateEngine.render(obj, context);
+    return this.templateEngine.render(obj, { ...context, ...additionalContext });
   }
 
   public evaluateExpressionInContext(template: string): unknown {
     const context = this.getContext();
     return this.templateEngine.evaluateExpression(template, context);
+  }
+
+  public evaluateBooleanExpressionInContext(
+    condition: string | boolean | undefined,
+    additionalContext?: Record<string, unknown>
+  ): boolean {
+    const renderedCondition = this.renderValueAccordingToContext(condition, additionalContext);
+
+    if (typeof renderedCondition === 'boolean') {
+      return renderedCondition;
+    }
+    if (typeof renderedCondition === 'undefined') {
+      return false;
+    }
+
+    if (typeof renderedCondition === 'string') {
+      try {
+        return evaluateKql(renderedCondition, this.getContext());
+      } catch (error) {
+        if (error instanceof KQLSyntaxError) {
+          throw new Error(
+            `Syntax error in condition "${condition}" for step ${this.node.stepId}: ${String(
+              error
+            )}`
+          );
+        }
+        throw error;
+      }
+    }
+
+    throw new Error(
+      `Invalid condition.` +
+        `Got ${JSON.stringify(
+          condition
+        )} (type: ${typeof condition}), but expected boolean or string. ` +
+        `When using templating syntax, the expression must evaluate to a boolean or string (KQL expression).`
+    );
   }
 
   public readContextPath(propertyPath: string): { pathExists: boolean; value: unknown } {
@@ -190,32 +228,7 @@ export class WorkflowContextManager {
 
   private buildWorkflowContext(): WorkflowContext {
     const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
-    const kibanaUrl = getKibanaUrl(this.coreStart, this.dependencies.cloudSetup);
-    const executionUrl = buildWorkflowExecutionUrl(
-      kibanaUrl,
-      workflowExecution.spaceId,
-      workflowExecution.workflowId,
-      workflowExecution.id
-    );
-
-    return {
-      execution: {
-        id: workflowExecution.id,
-        isTestRun: !!workflowExecution.isTestRun,
-        startedAt: new Date(workflowExecution.startedAt),
-        url: executionUrl,
-      },
-      workflow: {
-        id: workflowExecution.workflowId,
-        name: workflowExecution.workflowDefinition.name,
-        enabled: workflowExecution.workflowDefinition.enabled,
-        spaceId: workflowExecution.spaceId,
-      },
-      kibanaUrl,
-      consts: workflowExecution.workflowDefinition.consts || {},
-      event: workflowExecution.context?.event,
-      inputs: workflowExecution.context?.inputs,
-    };
+    return buildWorkflowContext(workflowExecution, this.coreStart, this.dependencies);
   }
 
   private enrichStepContextWithMockedData(stepContext: StepContext): void {
@@ -285,13 +298,30 @@ export class WorkflowContextManager {
             }
             break;
         }
+
+        if (topFrame.scopeId === 'fallback') {
+          // This is not good approach, but we can't do it better right now.
+          // The problem is that Context is dynamic depending on the step scopes (like whether the current step is inside foreach, fallback path, etc)
+          // but here we are trying to mutate the static StepContext object.
+          // Proper solution would be to have dynamic context object that would resolve properties on demand,
+          // but it requires significant changes in the codebase.
+          // So for now, we just set the error on the context when we are in fallback scope.
+          const stepContextGeneric = stepContext as Record<string, unknown>;
+          if (!stepContextGeneric.error) {
+            stepContextGeneric.error = stepExecution.state?.error;
+          }
+        }
       }
     }
   }
 
   private getStepData(stepId: string):
     | {
-        runStepResult: RunStepResult;
+        runStepResult: {
+          input: unknown;
+          output: unknown;
+          error: SerializedError | undefined;
+        };
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         stepState: Record<string, any> | undefined;
       }

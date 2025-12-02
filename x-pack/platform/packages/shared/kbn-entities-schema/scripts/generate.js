@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-require('../../../../../../src/setup_node_env');
+require('@kbn/setup-node-env');
 
 const { generateOAS } = require('./generate_oas');
 const { writeFileSync } = require('fs');
