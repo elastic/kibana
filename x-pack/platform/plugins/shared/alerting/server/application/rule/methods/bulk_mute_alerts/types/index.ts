@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type { BulkMuteAlertsParams } from './bulk_mute_alert_params_schema';
+export type { BulkMuteAlertsParams } from './bulk_mute_alert_params';
