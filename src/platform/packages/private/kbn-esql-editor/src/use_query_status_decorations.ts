@@ -68,10 +68,6 @@ export function useQueryStatusDecorations({
         options: {
           isWholeLine: false,
           glyphMarginClassName: 'esql-error-glyph',
-          glyphMarginHoverMessage: {
-            value: error.message,
-            isTrusted: true,
-          },
         },
       });
     });
@@ -88,10 +84,6 @@ export function useQueryStatusDecorations({
         options: {
           isWholeLine: false,
           glyphMarginClassName: 'esql-warning-glyph',
-          glyphMarginHoverMessage: {
-            value: warning.message,
-            isTrusted: true,
-          },
         },
       });
     });

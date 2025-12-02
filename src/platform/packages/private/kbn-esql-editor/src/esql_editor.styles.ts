@@ -45,7 +45,7 @@ export const esqlEditorStyles = (
       alignItems: 'flex-start',
       border: hasOutline ? euiTheme.border.thin : 'none',
       borderBottom: 'none',
-      overflow: 'visible',
+      overflow: 'hidden',
     },
     linesBadge: {
       position: 'absolute' as const,
