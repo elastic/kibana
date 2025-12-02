@@ -153,6 +153,9 @@ export const internalStateSlice = createSlice({
     },
 
     setProjectRouting: (state, action: PayloadAction<DiscoverInternalState['projectRouting']>) => {
+      if (state.projectRouting === action.payload) {
+        return;
+      }
       state.projectRouting = action.payload;
 
       // Mark all non-active tabs to refetch on selection
