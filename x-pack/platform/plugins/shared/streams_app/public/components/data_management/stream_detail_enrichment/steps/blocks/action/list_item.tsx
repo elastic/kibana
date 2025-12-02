@@ -119,7 +119,7 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
                 </EuiToolTip>
               </EuiFlexGroup>
             </EuiFlexItem>
-            {(processorMetrics || isUnsaved) && (
+            {(processorMetrics || isUnsaved || !readOnly) && (
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup alignItems="center" gutterSize="xs">
                   {processorMetrics && (
