@@ -11,7 +11,9 @@ This is a test plan for the workflows of:
 
 - installing single prebuilt rules one-by-one
 - installing multiple prebuilt rules in bulk
-- sorting and filtering prebuilt rules
+- finding prebuilt rules by filtering, sorting and paginating
+- user can only see the rules they are allowed to see
+- user can only install rules if they have correct permissions
 
 on the Rule Installation page.
 
@@ -23,6 +25,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 -->
 
 - [Useful information](#useful-information)
+  - [Epics](#epics)
   - [Tickets](#tickets)
   - [Terminology](#terminology)
 - [Requirements](#requirements)
@@ -82,11 +85,17 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 ## Useful information
 
+### Epics
+
+- [Granular faceted filters for detection rules](https://github.com/elastic/security-team/issues/5624)
+
 ### Tickets
 
 - [Users can Customize Prebuilt Detection Rules](https://github.com/elastic/security-team/issues/1974) (internal)
 - [Users can Customize Prebuilt Detection Rules: Milestone 2](https://github.com/elastic/kibana/issues/174167)
 - [Users can Customize Prebuilt Detection Rules: Milestone 3](https://github.com/elastic/kibana/issues/174168)
+- [Reduce response sizes of prebuilt rules _review API endpoints](https://github.com/elastic/kibana/issues/210544)
+- [Add pagination to the installation/_review endpoint](https://github.com/elastic/kibana/issues/241656)
 
 ### Terminology
 
