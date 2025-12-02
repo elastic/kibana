@@ -8,8 +8,8 @@
  */
 
 import moment from 'moment/moment';
-import { log, timerange } from '@kbn/apm-synthtrace-client';
-import type { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { log, timerange } from '@kbn/synthtrace-client';
+import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { MORE_THAN_1024_CHARS, STACKTRACE_MESSAGE } from '../const';
 
