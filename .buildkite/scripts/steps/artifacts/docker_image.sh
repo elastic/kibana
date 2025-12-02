@@ -79,7 +79,7 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
   retag_image_with_architecture "$KIBANA_IMAGE" "kibana-serverless-$BASE_VERSION-docker-image"
   retag_image_with_architecture "$KIBANA_WORKPLACE_AI_IMAGE" "kibana-serverless-workplaceai-$BASE_VERSION-docker-image"
   retag_image_with_architecture "$KIBANA_OBSERVABILITY_IMAGE" "kibana-serverless-observability-$BASE_VERSION-docker-image"
-  retag_image_with_architecture "$KIBANA_SEARCH_IMAGE" "kibana-serverless-search-$BASE_VERSION-docker-image"
+  retag_image_with_architecture "$KIBANA_SEARCH_IMAGE" "kibana-serverless-elasticsearch-$BASE_VERSION-docker-image"
   retag_image_with_architecture "$KIBANA_SECURITY_IMAGE" "kibana-serverless-security-$BASE_VERSION-docker-image"
 
   echo "--- Push images"
