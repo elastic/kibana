@@ -42,8 +42,9 @@ export interface MigrationDataInputFlyoutProps {
 }
 
 function StepRenderer<K extends DataInputStepId>({ step }: { step: Step<K> }) {
-  const Component = step.Component as React.ComponentType<typeof step.extraProps>;
-  return <Component {...step.extraProps} />;
+  const Component = step.Component as React.ComponentType<typeof step.extraProps | {}>;
+
+  return step.extraProps ? <Component {...step.extraProps} /> : <Component />;
 }
 
 const RULES_MIGRATION_DATA_INPUT_FLYOUT_TITLE = 'rulesMigrationDataInputFlyoutTitle';

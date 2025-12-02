@@ -97,67 +97,38 @@ type SubStep = 1 | 2 | 3 | 4 | typeof END;
 export const RulesDataInputSubSteps = React.memo<RulesDataInputSubStepsProps>(
   ({ migrationStats, onMigrationCreated, onMissingResourcesFetched, migrationSource }) => {
     const { telemetry } = useKibana().services.siemMigrations.rules;
-    const [subStep, setSubStep] = useState<{
-      [MigrationSource.SPLUNK]: SubStep;
-      [MigrationSource.QRADAR]: SubStep;
-    }>({
-      [MigrationSource.QRADAR]: migrationStats ? 4 : 1,
-      [MigrationSource.SPLUNK]: migrationStats ? 4 : 1,
-    });
+    const [subStep, setSubStep] = useState<SubStep>(migrationStats ? 4 : 1);
 
-    const setMigrationSubStep = useCallback(
-      (step: SubStep) => {
-        setSubStep((prev) => ({ ...prev, ...{ [migrationSource]: step } }));
-      },
-      [migrationSource]
-    );
+    const [migrationName, setMigrationName] = useState<string | undefined>(migrationStats?.name);
 
-    const [migrationName, setMigrationName] = useState<{
-      [MigrationSource.SPLUNK]: string | undefined;
-      [MigrationSource.QRADAR]: string | undefined;
-    }>({
-      [MigrationSource.SPLUNK]: migrationStats?.name,
-      [MigrationSource.QRADAR]: migrationStats?.name,
-    });
-
-    const setRulesMigrationName = useCallback(
-      (name: string) => {
-        setMigrationName((prev) => ({ ...prev, ...{ [migrationSource]: name } }));
-      },
-      [migrationSource]
-    );
     const [isRulesFileReady, setIsRuleFileReady] = useState<boolean>(false);
 
     // Migration name step
     const setName = useCallback(
       (name: string) => {
-        setRulesMigrationName(name);
+        setMigrationName(name);
         if (name) {
-          setMigrationSubStep(isRulesFileReady ? 3 : 2);
+          setSubStep(isRulesFileReady ? 3 : 2);
         } else {
-          setMigrationSubStep(1);
+          setSubStep(1);
         }
       },
-      [isRulesFileReady, setMigrationSubStep, setRulesMigrationName]
+      [isRulesFileReady]
     );
     const nameStep = useMigrationNameStep({
-      status: getEuiStepStatus(1, subStep[migrationSource]),
+      status: getEuiStepStatus(1, subStep),
       setMigrationName: setName,
-      migrationName: migrationName[migrationSource],
+      migrationName,
     });
 
     // Copy query step
     const onCopied = useCallback(() => {
-      setSubStep((currentSubStep) =>
-        currentSubStep[migrationSource] !== 1
-          ? { ...currentSubStep, [migrationSource]: 3 }
-          : currentSubStep
-      ); // Move to the next step only if step 1 was completed
+      setSubStep((currentSubStep) => (currentSubStep !== 1 ? 3 : currentSubStep)); // Move to the next step only if step 1 was completed
 
       telemetry.reportSetupQueryCopied({ migrationId: migrationStats?.id });
-    }, [telemetry, migrationStats?.id, migrationSource]);
+    }, [telemetry, migrationStats?.id]);
     const copyStep = useCopyExportQueryStep({
-      status: getEuiStepStatus(2, subStep[migrationSource]),
+      status: getEuiStepStatus(2, subStep),
       onCopied,
       migrationSource,
     });
@@ -166,33 +137,30 @@ export const RulesDataInputSubSteps = React.memo<RulesDataInputSubStepsProps>(
     const onSplunkMigrationCreatedStep = useCallback<OnMigrationCreated>(
       (stats) => {
         onMigrationCreated(stats);
-        setMigrationSubStep(4);
+        setSubStep(4);
       },
-      [onMigrationCreated, setMigrationSubStep]
+      [onMigrationCreated]
     );
     const onQradarMigrationCreatedStep = useCallback<OnMigrationCreated>(
       (stats) => {
         onMigrationCreated(stats);
-        setMigrationSubStep(END);
+        setSubStep(END);
       },
-      [onMigrationCreated, setMigrationSubStep]
+      [onMigrationCreated]
     );
-    const onRulesFileChanged = useCallback(
-      (files: FileList | null) => {
-        setIsRuleFileReady(!!files?.length);
-        setMigrationSubStep(3);
-      },
-      [setMigrationSubStep]
-    );
+    const onRulesFileChanged = useCallback((files: FileList | null) => {
+      setIsRuleFileReady(!!files?.length);
+      setSubStep(3);
+    }, []);
     const uploadStep = useRulesFileUploadStep({
-      status: getEuiStepStatus(3, subStep[migrationSource]),
+      status: getEuiStepStatus(3, subStep),
       migrationStats,
       onRulesFileChanged,
       onMigrationCreated:
         migrationSource === MigrationSource.SPLUNK
           ? onSplunkMigrationCreatedStep
           : onQradarMigrationCreatedStep,
-      migrationName: migrationName[migrationSource],
+      migrationName,
       migrationSource,
     });
 
@@ -200,12 +168,12 @@ export const RulesDataInputSubSteps = React.memo<RulesDataInputSubStepsProps>(
     const onMissingResourcesFetchedStep = useCallback<OnMissingResourcesFetched>(
       (missingResources) => {
         onMissingResourcesFetched?.(missingResources);
-        setMigrationSubStep(END);
+        setSubStep(END);
       },
-      [onMissingResourcesFetched, setMigrationSubStep]
+      [onMissingResourcesFetched]
     );
     const resourcesStep = useCheckResourcesStep({
-      status: getEuiStepStatus(4, subStep[migrationSource]),
+      status: getEuiStepStatus(4, subStep),
       migrationStats,
       onMissingResourcesFetched: onMissingResourcesFetchedStep,
     });

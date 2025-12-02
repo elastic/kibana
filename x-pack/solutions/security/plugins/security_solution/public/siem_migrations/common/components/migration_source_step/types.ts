@@ -13,17 +13,17 @@ import type { RulesDataInput } from '../../../rules/components/data_input_flyout
 interface RulesStep<T extends DataInputStepId = DataInputStepId> {
   id: T;
   Component: typeof RulesDataInput;
-  extraProps: React.ComponentProps<typeof RulesDataInput>;
+  extraProps?: React.ComponentProps<typeof RulesDataInput>;
 }
 interface MacrosStep {
   id: DataInputStepId.SplunkMacros;
   Component: typeof MacrosDataInput;
-  extraProps: React.ComponentProps<typeof MacrosDataInput>;
+  extraProps?: React.ComponentProps<typeof MacrosDataInput>;
 }
 interface LookupsStep {
   id: DataInputStepId.SplunkLookups;
   Component: typeof LookupsDataInput;
-  extraProps: React.ComponentProps<typeof LookupsDataInput>;
+  extraProps?: React.ComponentProps<typeof LookupsDataInput>;
 }
 
 export type Step<T extends DataInputStepId = DataInputStepId> =
@@ -35,10 +35,8 @@ export type Step<T extends DataInputStepId = DataInputStepId> =
     ? MacrosStep
     : LookupsStep;
 
-export type SplunkMigrationSteps = [
-  Step<DataInputStepId.SplunkRules>,
-  Step<DataInputStepId.SplunkMacros>,
-  Step<DataInputStepId.SplunkLookups>
-];
+export type SplunkStep = RulesStep | MacrosStep | LookupsStep;
 
-export type QradarMigrationSteps = [Step<DataInputStepId.QradarRules>];
+export type SplunkMigrationSteps = SplunkStep[];
+
+export type QradarMigrationSteps = Array<Step<DataInputStepId.QradarRules>>;
