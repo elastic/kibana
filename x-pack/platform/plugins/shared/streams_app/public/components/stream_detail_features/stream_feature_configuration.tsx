@@ -77,6 +77,7 @@ export function StreamFeatureConfiguration({ definition }: StreamConfigurationPr
                           setIsLoading(false);
                         });
                     }}
+                    data-test-subj="feature_identification_identify_features_button"
                   >
                     {i18n.translate(
                       'xpack.streams.streamDetailView.featureIdentificationButtonLabel',

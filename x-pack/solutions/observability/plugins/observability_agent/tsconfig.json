@@ -25,7 +25,7 @@
     "@kbn/data-views-plugin",
     "@kbn/metrics-data-access-plugin",
     "@kbn/ml-anomaly-utils",
-    "@kbn/ml-plugin"
+    "@kbn/ml-plugin",
   ],
   "exclude": ["target/**/*"]
 }

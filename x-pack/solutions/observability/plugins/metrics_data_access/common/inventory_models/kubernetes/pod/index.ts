@@ -28,4 +28,5 @@ export const pod = createInventoryModel('pod', {
     ip: 'kubernetes.pod.ip',
   },
   metrics,
+  nodeFilter: () => [{ term: { 'event.module': 'kubernetes' } }],
 });
