@@ -14,13 +14,10 @@ import {
   EuiFlyoutHeader,
   EuiHorizontalRule,
   EuiLink,
-  EuiPanel,
   EuiText,
   EuiTitle,
-  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate } from '@kbn/i18n-react';
 import type { Attachment } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
@@ -28,30 +25,10 @@ import React from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useTimefilter } from '../../hooks/use_timefilter';
+import { InfoPanel } from '../info_panel';
 import { AttachmentTagsList } from './attachment_tags_list';
 import { ATTACHMENT_TYPE_CONFIG, AttachmentTypeBadge } from './attachment_type_badge';
 import { getAttachmentUrl } from './get_attachment_url';
-
-interface InfoPanelProps {
-  title: string;
-  children: React.ReactNode;
-}
-
-function InfoPanel({ title, children }: InfoPanelProps) {
-  const { euiTheme } = useEuiTheme();
-
-  const panelStyles = css`
-    border-left: 4px solid ${euiTheme.colors.backgroundBaseSubdued};
-  `;
-
-  return (
-    <EuiPanel hasBorder css={panelStyles}>
-      <EuiText css={{ fontWeight: euiTheme.font.weight.semiBold }}>{title}</EuiText>
-      <EuiHorizontalRule margin="s" />
-      {children}
-    </EuiPanel>
-  );
-}
 
 function FormattedDateTime({ value }: { value: string }) {
   return (
