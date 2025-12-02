@@ -13,7 +13,7 @@ import yaml from 'yaml';
 import type { z } from '@kbn/zod/v4';
 import { generateYamlSchemaFromConnectors } from './generate_yaml_schema_from_connectors';
 import { getWorkflowJsonSchema } from './get_workflow_json_schema';
-import { ES_SAMPLE_STEPS } from './samples';
+import { ES_INVALID_SAMPLE_STEPS, ES_VALID_SAMPLE_STEPS } from './samples';
 import {
   getValidateWithYamlLsp,
   type ValidateWithYamlLspFunction,
@@ -40,7 +40,7 @@ describe('getWorkflowJsonSchema / elasticsearch connectors', () => {
     expect(validateAjv).toBeDefined();
   });
 
-  ES_SAMPLE_STEPS.forEach((step) => {
+  ES_VALID_SAMPLE_STEPS.forEach((step) => {
     it(`${step.type}`, async () => {
       const diagnostics = await validateWithYamlLsp(
         `test-${step.name}.yaml`,
@@ -52,6 +52,23 @@ describe('getWorkflowJsonSchema / elasticsearch connectors', () => {
         })
       );
       expect(diagnostics).toEqual([]);
+    });
+  });
+
+  ES_INVALID_SAMPLE_STEPS.forEach(({ step, diagnosticErrorMessage }) => {
+    it(`${step.type} with invalid params`, async () => {
+      const diagnostics = await validateWithYamlLsp(
+        `test-${step.name}.yaml`,
+        yaml.stringify({
+          name: 'test-workflow',
+          enabled: true,
+          triggers: [{ type: 'manual' }],
+          steps: [step],
+        })
+      );
+      expect(diagnostics.map((d) => d.message)).toContainEqual(
+        expect.stringMatching(diagnosticErrorMessage)
+      );
     });
   });
 });

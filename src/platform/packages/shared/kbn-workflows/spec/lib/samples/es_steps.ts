@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const ES_SAMPLE_STEPS = [
+export const ES_VALID_SAMPLE_STEPS = [
   {
     name: 'create-document',
     type: 'elasticsearch.search',
@@ -17,10 +17,22 @@ export const ES_SAMPLE_STEPS = [
         match: {
           // simple syntax for query
           message: 'test',
+        },
+      },
+      size: 10,
+    },
+  },
+  {
+    name: 'create-document',
+    type: 'elasticsearch.search',
+    with: {
+      index: 'test-index',
+      query: {
+        match: {
           // full syntax for query
-          // message: {
-          //   query: 'test',
-          // },
+          message: {
+            query: 'test',
+          },
         },
       },
       size: 10,
@@ -72,5 +84,22 @@ export const ES_SAMPLE_STEPS = [
     with: {
       index: 'test-index',
     },
+  },
+];
+
+export const ES_INVALID_SAMPLE_STEPS = [
+  {
+    step: {
+      name: 'create-index-with-invalid-mappings',
+      type: 'elasticsearch.indices.create',
+      with: {
+        index: 'test-index',
+        mappings: {
+          properties: [],
+        },
+      },
+    },
+    zodErrorMessage: 'Invalid input: expected record, received array',
+    diagnosticErrorMessage: /Incorrect type\. Expected "__schema\d+"\./,
   },
 ];

@@ -11,7 +11,7 @@
 // Document Operations: Create, read, update, delete documents
 // Search and Query: Execute searches and retrieve data
 // Index Operations: Create, list, delete indices
-export { ES_SAMPLE_STEPS } from './es_steps';
+export { ES_VALID_SAMPLE_STEPS, ES_INVALID_SAMPLE_STEPS } from './es_steps';
 
 // kibana
 // Alert Triage: Update alert status, assign ownership, apply tags

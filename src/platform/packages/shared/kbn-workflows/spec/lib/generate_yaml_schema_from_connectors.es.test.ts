@@ -8,7 +8,7 @@
  */
 
 import type { z } from '@kbn/zod/v4';
-import { ES_SAMPLE_STEPS } from './samples';
+import { ES_INVALID_SAMPLE_STEPS, ES_VALID_SAMPLE_STEPS } from './samples';
 import { generateYamlSchemaFromConnectors, getElasticsearchConnectors } from '../..';
 
 describe('generateYamlSchemaFromConnectors / elasticsearch connectors', () => {
@@ -24,7 +24,7 @@ describe('generateYamlSchemaFromConnectors / elasticsearch connectors', () => {
     expect(() => workflowSchema.parse({ steps: [] })).toThrow();
   });
 
-  ES_SAMPLE_STEPS.forEach((step) => {
+  ES_VALID_SAMPLE_STEPS.forEach((step) => {
     it(`${step.type}`, async () => {
       const result = workflowSchema.safeParse({
         name: 'test-workflow',
@@ -34,6 +34,20 @@ describe('generateYamlSchemaFromConnectors / elasticsearch connectors', () => {
       });
       expect(result.error).toBeUndefined();
       expect(result.success).toBe(true);
+    });
+  });
+
+  ES_INVALID_SAMPLE_STEPS.forEach(({ step, zodErrorMessage }) => {
+    it(`${step.type} with invalid params`, async () => {
+      const result = workflowSchema.safeParse({
+        name: 'test-workflow',
+        enabled: true,
+        triggers: [{ type: 'manual' }],
+        steps: [step],
+      });
+      expect(result.error).toBeDefined();
+      expect(result.success).toBe(false);
+      expect(result.error?.message).toContain(zodErrorMessage);
     });
   });
 });
