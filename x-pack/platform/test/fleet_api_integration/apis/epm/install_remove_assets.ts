@@ -9,9 +9,13 @@ import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
 import type { AssetReference } from '@kbn/fleet-plugin/common/types';
-import { FLEET_INSTALL_FORMAT_VERSION } from '@kbn/fleet-plugin/server/constants';
+import {
+  FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
+  FLEET_INSTALL_FORMAT_VERSION,
+} from '@kbn/fleet-plugin/server/constants';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
+import { cleanFleetIndices } from '../space_awareness/helpers';
 
 function checkErrorWithResponseDataOrThrow(err: any) {
   if (!err?.response?.data) {
@@ -60,6 +64,56 @@ export default function (providerContext: FtrProviderContext) {
         pkgName,
         es,
         kibanaServer,
+      });
+    });
+
+    describe('global assets', () => {
+      before(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+
+        await cleanFleetIndices(es);
+        await fleetAndAgents.setup();
+
+        // Delete all fleet component templates and pipelines to simulate missing global assets
+        const fleetIndexTemplateNames = await es.indices
+          .getIndexTemplate({ name: '*' })
+          .then((res) =>
+            res.index_templates
+              .filter((template) => template.index_template._meta?.managed_by === 'fleet')
+              .map((template) => template.name)
+          );
+        await es.indices.deleteDataStream(
+          { name: '.logs-endpoint.*,logs-*,metrics-*' },
+          {
+            ignore: [404],
+          }
+        );
+        if (fleetIndexTemplateNames.length) {
+          await es.indices.deleteIndexTemplate({ name: fleetIndexTemplateNames.join(',') });
+        }
+        await es.cluster.deleteComponentTemplate(
+          {
+            name: FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
+          },
+          {
+            ignore: [404],
+          }
+        );
+      });
+
+      after(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+
+        await cleanFleetIndices(es);
+      });
+
+      it('should install global assets if they are missing during package install', async () => {
+        await installPackage(pkgName, pkgVersion);
+        const template = await es.cluster.getComponentTemplate({
+          name: FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
+        });
+
+        expect(template.component_templates.length).to.be(1);
       });
     });
 
@@ -752,6 +806,11 @@ const expectAssetsInstalled = ({
           type: 'epm-packages-assets',
         },
         {
+          id: '4510252e-f145-5dd8-ba78-85cc8746c7f7',
+          path: 'all_assets-0.1.0/elasticsearch/esql_view/test_query.yml',
+          type: 'epm-packages-assets',
+        },
+        {
           id: 'ed5d54d5-2516-5d49-9e61-9508b0152d2b',
           path: 'all_assets-0.1.0/elasticsearch/ml_model/test/default.json',
           type: 'epm-packages-assets',
@@ -858,5 +917,14 @@ const expectAssetsInstalled = ({
       verification_status: 'unknown',
       verification_key_id: null,
     });
+  });
+
+  // TODO enable when feature flag is turned on https://github.com/elastic/kibana/issues/244655
+  it.skip('should have installed the esql views', async function () {
+    const res = (await es.transport.request({
+      method: 'GET',
+      path: `/_query/view/test_query`,
+    })) as any;
+    expect(res.views.test_query).not.to.be(undefined);
   });
 };
