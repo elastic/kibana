@@ -10,6 +10,7 @@
 import React, { type ChangeEvent, useState, useEffect } from 'react';
 import {
   EuiBadge,
+  EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
@@ -158,14 +159,28 @@ export const AccessModeContainer = ({
   return (
     <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="accessModeContainer">
       <EuiFlexItem>
-        <EuiTitle size="xs">
-          <h4>
-            <FormattedMessage
-              id="contentManagement.accessControl.accessMode.container.title"
-              defaultMessage="Permissions"
+        <EuiFlexGroup direction="row" alignItems="center" gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h4>
+                <FormattedMessage
+                  id="contentManagement.accessControl.accessMode.container.title"
+                  defaultMessage="Permissions"
+                />
+              </h4>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBetaBadge
+              color="accent"
+              label={i18n.translate(
+                'contentManagement.accessControl.accessMode.container.newBadgeLabel',
+                { defaultMessage: 'New' }
+              )}
+              size="s"
             />
-          </h4>
-        </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
