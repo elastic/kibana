@@ -162,6 +162,7 @@ describe('take action dropdown', () => {
           exceptions: { read: true, crud: true },
         },
       });
+
       wrapper = mount(
         <TestProviders>
           <TakeActionDropdown {...defaultProps} />
