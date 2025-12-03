@@ -126,6 +126,7 @@ export async function readSignificantEventsFromAlertsIndices(
           stationary: { p_value: 0, change_point: 0 },
         },
       },
+      severity_score: queryLink.query.severity_score,
     }));
   }
 

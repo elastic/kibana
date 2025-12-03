@@ -22,6 +22,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
 import { validateQuery } from '../common/validate_query';
 import { GeneratedEventPreview } from './generated_event_preview';
+import { SeverityBadge } from '../../severity_badge';
 
 interface Props {
   definition: Streams.all.Definition;
@@ -157,6 +158,16 @@ export function SignificantEventsGeneratedTable({
       }),
       render: (_, item: StreamQueryKql) => {
         return <EuiCodeBlock paddingSize="none">{JSON.stringify(item.kql?.query)}</EuiCodeBlock>;
+      },
+    },
+    {
+      width: '20%',
+      field: 'severity_score',
+      name: i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.severityScoreColumn', {
+        defaultMessage: 'Severity score',
+      }),
+      render: (score: number) => {
+        return <SeverityBadge score={score} />;
       },
     },
     {

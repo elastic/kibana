@@ -155,6 +155,7 @@ export function AddSignificantEventFlyout({
                     kql: { query: nextQuery.kql },
                     title: nextQuery.title,
                     feature: nextQuery.feature,
+                    severity_score: nextQuery.severity_score,
                   })),
               ]);
 
