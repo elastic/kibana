@@ -159,7 +159,9 @@ describe('getAxiosInstance()', () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
     await actionsClient.getAxiosInstance(defaultConnectorId);
     expect(getAxiosInstanceWithAuth).toHaveBeenCalledWith({
-      foobar: true,
+      connectorId: defaultConnectorId,
+      connectorTokenClient,
+      secrets: { foobar: true },
     });
   });
 
@@ -177,7 +179,9 @@ describe('getAxiosInstance()', () => {
       );
       await actionsClient.getAxiosInstance(inMemoryConnectorId);
       expect(getAxiosInstanceWithAuth).toHaveBeenCalledWith({
-        foobar: true,
+        connectorId: inMemoryConnectorId,
+        connectorTokenClient,
+        secrets: { foobar: true },
       });
     });
 
@@ -223,7 +227,9 @@ describe('getAxiosInstance()', () => {
       );
       await actionsClient.getAxiosInstance(inMemoryConnectorId);
       expect(getAxiosInstanceWithAuth).toHaveBeenCalledWith({
-        foobar: true,
+        connectorId: inMemoryConnectorId,
+        connectorTokenClient,
+        secrets: { foobar: true },
       });
     });
   });

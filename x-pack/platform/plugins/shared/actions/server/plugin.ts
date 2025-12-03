@@ -842,8 +842,8 @@ export class ActionsPlugin
       logger: this.logger,
     });
 
-    return async (validatedSecrets: Record<string, unknown>) => {
-      return await getAxiosInstanceFn(validatedSecrets);
+    return async (getAxiosParams: GetAxiosInstanceWithAuthFnOpts) => {
+      return await getAxiosInstanceFn(getAxiosParams);
     };
   };
 

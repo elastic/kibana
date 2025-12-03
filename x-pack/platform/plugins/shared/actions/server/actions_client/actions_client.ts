@@ -85,6 +85,7 @@ import { isSystemAction } from '../lib/is_system_action';
 import type { ConnectorExecuteParams } from '../application/connector/methods/execute/types';
 import { connectorFromInMemoryConnector } from '../application/connector/lib/connector_from_in_memory_connector';
 import { getAxiosInstance } from '../application/connector/methods/get_axios_instance';
+import { GetAxiosInstanceWithAuthFnOpts } from '../lib/get_axios_instance';
 
 export interface ConstructorOptions {
   logger: Logger;
@@ -102,7 +103,9 @@ export interface ConstructorOptions {
   usageCounter?: UsageCounter;
   connectorTokenClient: ConnectorTokenClientContract;
   getEventLogClient: () => Promise<IEventLogClient>;
-  getAxiosInstanceWithAuth: (validatedSecrets: Record<string, unknown>) => Promise<AxiosInstance>;
+  getAxiosInstanceWithAuth: (
+    getAxiosParams: GetAxiosInstanceWithAuthFnOpts
+  ) => Promise<AxiosInstance>;
   spaces?: SpacesServiceSetup;
   isESOCanEncrypt: boolean;
 }
@@ -123,7 +126,9 @@ export interface ActionsClientContext {
   usageCounter?: UsageCounter;
   connectorTokenClient: ConnectorTokenClientContract;
   getEventLogClient: () => Promise<IEventLogClient>;
-  getAxiosInstanceWithAuth: (validatedSecrets: Record<string, unknown>) => Promise<AxiosInstance>;
+  getAxiosInstanceWithAuth: (
+    getAxiosParams: GetAxiosInstanceWithAuthFnOpts
+  ) => Promise<AxiosInstance>;
   spaces?: SpacesServiceSetup;
   isESOCanEncrypt: boolean;
 }

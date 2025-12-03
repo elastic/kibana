@@ -20,7 +20,7 @@ export type GetAxiosInstanceWithAuthFn = (secrets: ValidatedSecrets) => Promise<
 
 export async function getAxiosInstance(
   context: ActionsClientContext,
-  actionId: string
+  connectorId: string
 ): Promise<AxiosInstance> {
   const {
     actionTypeRegistry,
@@ -33,27 +33,28 @@ export async function getAxiosInstance(
     request,
     spaces,
     unsecuredSavedObjectsClient,
+    connectorTokenClient,
   } = context;
 
   let actionTypeId: string | undefined;
 
   try {
-    if (isPreconfigured(context, actionId) || isSystemAction(context, actionId)) {
+    if (isPreconfigured(context, connectorId) || isSystemAction(context, connectorId)) {
       const connector = inMemoryConnectors.find(
-        (inMemoryConnector) => inMemoryConnector.id === actionId
+        (inMemoryConnector) => inMemoryConnector.id === connectorId
       );
 
       actionTypeId = connector?.actionTypeId;
     } else {
       const { attributes } = await unsecuredSavedObjectsClient.get<RawAction>(
         ACTION_SAVED_OBJECT_TYPE,
-        actionId
+        connectorId
       );
 
       actionTypeId = attributes.actionTypeId;
     }
   } catch (err) {
-    log.debug(`Failed to retrieve actionTypeId for action [${actionId}]`, err);
+    log.debug(`Failed to retrieve actionTypeId for action [${connectorId}]`, err);
     throw err;
   }
 
@@ -65,7 +66,7 @@ export async function getAxiosInstance(
 
   // check to see if it's in memory connector before fetching secrets
   const inMemoryAction = inMemoryConnectors.find(
-    (inMemoryConnector) => inMemoryConnector.id === actionId
+    (inMemoryConnector) => inMemoryConnector.id === connectorId
   );
 
   let secrets;
@@ -82,7 +83,7 @@ export async function getAxiosInstance(
     const spaceId = spaces && spaces.getSpaceId(request);
     const rawAction = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAction>(
       'action',
-      actionId,
+      connectorId,
       spaceId && spaceId !== 'default' ? { namespace: spaceId } : {}
     );
 
@@ -93,5 +94,9 @@ export async function getAxiosInstance(
   const configurationUtilities = actionTypeRegistry.getUtils();
   const validatedSecrets = validateSecrets(actionType, secrets, { configurationUtilities });
 
-  return await getAxiosInstanceWithAuth(validatedSecrets);
+  return await getAxiosInstanceWithAuth({
+    connectorId,
+    connectorTokenClient,
+    secrets: validatedSecrets,
+  });
 }
