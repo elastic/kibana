@@ -31,9 +31,9 @@ export type ScreenContextAttachment = Attachment<AttachmentType.screenContext>;
 export type EsqlAttachment = Attachment<AttachmentType.esql>;
 
 /**
- * Input version of an attachment, where the id is optional
+ * Input version of an attachment.
  */
 export type AttachmentInput<
   Type extends string = string,
   DataType = Type extends AttachmentType ? AttachmentDataOf<Type> : Record<string, unknown>
-> = Omit<Attachment<Type, DataType>, 'id'> & Partial<Pick<Attachment<Type, DataType>, 'id'>>;
+> = Attachment<Type, DataType>;
