@@ -9,15 +9,15 @@ import { uniq } from 'lodash';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { MonitoringEntitySource } from '../../../../../../../../common/api/entity_analytics';
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
-import { buildPrivilegedSearchBody } from './queries';
-import type { MonitoringEntitySyncType, PrivMonBulkUser } from '../../../../types';
+import { buildPrivilegedSearchBody } from '../queries';
+import type { MonitoringEntitySyncType, PrivMonBulkUser } from '../../../../../types';
 import { createSearchService } from '../../../../users/search';
-import { generateMonitoringLabels } from '../generate_monitoring_labels';
+import { generateMonitoringLabels } from './generate_monitoring_labels';
 import { createSyncMarkersService } from '../../sync_markers';
 import { createSyncMarkersStrategy } from '../sync_markers_strategy';
 import { isTimestampGreaterThan } from '../../utils';
-import type { AfterKey, PrivBucket, PrivMatchersAggregation, PrivTopHit } from './types';
-import { PRIV_MATCHER_MODE_CONFIG } from './types';
+import type { AfterKey, PrivBucket, PrivMatchersAggregation, PrivTopHit } from '../types';
+import { PRIV_MATCHER_MODE_CONFIG } from '../types';
 
 export const createPatternMatcherService = ({
   dataClient,

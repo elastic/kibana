@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MonitoringEntitySyncType } from '../../../../types';
+import type { MonitoringEntitySyncType } from '../../../types';
 
 export type AfterKey = Record<string, string> | undefined;
 

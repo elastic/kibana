@@ -11,8 +11,8 @@ import type {
 } from '../../../../../../../../common/api/entity_analytics';
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { createPatternMatcherService } from './privileged_status_match';
-import type { PrivMatchersAggregation } from './types';
+import { createPatternMatcherService } from './integrations/privileged_status_match';
+import type { PrivMatchersAggregation } from '../types';
 
 const mockBuildPrivilegedSearchBody = jest.fn();
 jest.mock('./queries', () => ({
@@ -23,7 +23,7 @@ const monitoringLabelsPath = '../generate_monitoring_labels';
 const syncMarkersPath = '../sync_markers/sync_markers';
 
 type GenerateMonitoringLabelsFn =
-  typeof import('../generate_monitoring_labels').generateMonitoringLabels;
+  typeof import('./generate_monitoring_labels').generateMonitoringLabels;
 const mockGenerateMonitoringLabels = jest.fn<
   MonitoringLabel[],
   Parameters<GenerateMonitoringLabelsFn>

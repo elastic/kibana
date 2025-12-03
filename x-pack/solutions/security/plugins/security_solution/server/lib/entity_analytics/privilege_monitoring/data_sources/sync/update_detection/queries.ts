@@ -11,12 +11,12 @@ import hash from 'object-hash';
 import type {
   Matcher,
   MonitoringEntitySource,
-} from '../../../../../../../../common/api/entity_analytics';
-import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
-import type { AfterKey } from './types';
-import type { PrivMonBulkUser } from '../../../../types';
-import { makeIntegrationOpsBuilder } from '../../../bulk/upsert';
-import { errorsMsg, getErrorFromBulkResponse } from '../../utils';
+} from '../../../../../../../common/api/entity_analytics';
+import type { PrivilegeMonitoringDataClient } from '../../../engine/data_client';
+import type { AfterKey } from './integrations/types';
+import type { PrivMonBulkUser } from '../../../types';
+import { makeIntegrationOpsBuilder } from '../../bulk/upsert';
+import { errorsMsg, getErrorFromBulkResponse } from '../utils';
 
 /**
  * Build painless script for matchers

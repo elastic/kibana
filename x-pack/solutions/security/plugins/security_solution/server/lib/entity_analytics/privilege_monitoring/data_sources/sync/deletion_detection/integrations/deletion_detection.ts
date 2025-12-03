@@ -8,17 +8,14 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { ErrorCause } from 'elasticsearch-8.x/lib/api/types';
-import type { MonitoringEntitySource } from '../../../../../../../../../common/api/entity_analytics';
-import type { PrivilegeMonitoringDataClient } from '../../../../../engine/data_client';
-import { createSyncMarkersService } from '../../../sync_markers';
-import { findStaleUsersFactory } from '../../stale_users';
-import { timeStampsAreValid } from './utils';
-import { createBulkUtilsService } from '../../../../bulk';
-import { getErrorFromBulkResponse } from '../../../utils';
-import {
-  buildFindUsersSearchBodyWithSyncMarkers,
-  getAllUserNamesInAggregation,
-} from '../../queries';
+import type { MonitoringEntitySource } from '../../../../../../../../common/api/entity_analytics';
+import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
+import { createSyncMarkersService } from '../../sync_markers';
+import { findStaleUsersFactory } from '../stale_users';
+import { timeStampsAreValid } from './deletion_detection/utils';
+import { createBulkUtilsService } from '../../../bulk';
+import { getErrorFromBulkResponse } from '../../utils';
+import { buildFindUsersSearchBodyWithSyncMarkers, getAllUserNamesInAggregation } from '../queries';
 
 export const createDeletionDetectionService = (
   dataClient: PrivilegeMonitoringDataClient,
