@@ -149,6 +149,7 @@ import { ENTITY_RISK_SCORE_TOOL_ID } from './assistant/tools/entity_risk_score/e
 import type { TelemetryQueryConfiguration } from './lib/telemetry/types';
 import { registerEntityStoreESQLExecuteTask } from './lib/entity_analytics/entity_store/esql_poc/kibana_task_run_cycle';
 import { EntityStoreESQLSOType } from './lib/entity_analytics/entity_store/esql_poc/entity_store_state_manager';
+import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -233,6 +234,10 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins: SecuritySolutionPluginSetupDependencies
   ): SecuritySolutionPluginSetup {
     this.logger.debug('plugin setup');
+
+    if (plugins.share) {
+      plugins.share.url.locators.create(new AIValueReportLocatorDefinition());
+    }
 
     const { appClientFactory, productFeaturesService, pluginContext, config, logger } = this;
     const experimentalFeatures = config.experimentalFeatures;
