@@ -71,9 +71,9 @@ export const useResponsiveTabs = ({
   useEvent('scroll', onScrollThrottled, tabsContainerElement);
 
   useEffect(() => {
-    onScrollThrottled();
-    // `isScrollable` added here to trigger in cases when the container width changes
-  }, [tabsContainerElement, onScrollThrottled, tabsSizeConfig.isScrollable]);
+    onScroll();
+    // `dimensions.width` added here to trigger in cases when the container width changes
+  }, [onScroll, dimensions.width]);
 
   const scrollLeft = useCallback(() => {
     if (tabsContainerElement) {
