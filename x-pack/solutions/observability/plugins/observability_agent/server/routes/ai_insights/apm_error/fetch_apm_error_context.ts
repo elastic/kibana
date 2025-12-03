@@ -28,13 +28,16 @@ export async function fetchApmErrorContext({
   end,
   errorId,
 }: FetchApmErrorContextParams): Promise<string> {
+  const startMs = parseDatemath(start);
+  const endMs = parseDatemath(end);
+
   const error =
     (await dataRegistry.getData('apmErrorById', {
       request,
       serviceName,
       serviceEnvironment: environment ?? '',
-      start: parseDatemath(start),
-      end: parseDatemath(end),
+      start: startMs,
+      end: endMs,
       errorId,
     })) ?? undefined;
 
@@ -61,6 +64,62 @@ export async function fetchApmErrorContext({
       `Culprit: ${error.error?.culprit ?? ''}`,
       `Trace ID: ${error.trace?.id ?? ''}`
     );
+  }
+
+  const traceId = error?.trace?.id;
+  if (traceId) {
+    const [traceOverview, traceErrors, logCategories] = await Promise.all([
+      dataRegistry.getData('apmTraceOverviewByTraceId', {
+        request,
+        traceId,
+        start: startMs,
+        end: endMs,
+      }),
+      dataRegistry.getData('apmTraceErrorsByTraceId', {
+        request,
+        traceId,
+        start: startMs,
+        end: endMs,
+      }),
+      dataRegistry.getData('apmLogCategoriesByService', {
+        request,
+        serviceName,
+        start,
+        end,
+      }),
+    ]);
+
+    if (traceOverview?.services?.length) {
+      contextLines.push(
+        `<TraceServices>\n${JSON.stringify(
+          traceOverview.services.slice(0, 25),
+          null,
+          2
+        )}\n</TraceServices>`
+      );
+    }
+
+    if (traceOverview?.items?.length) {
+      contextLines.push(
+        `<TraceItems>\n${JSON.stringify(traceOverview.items.slice(0, 100), null, 2)}\n</TraceItems>`
+      );
+    }
+
+    if (traceErrors?.length) {
+      contextLines.push(
+        `<TraceErrors>\n${JSON.stringify(traceErrors.slice(0, 100), null, 2)}\n</TraceErrors>`
+      );
+    }
+
+    if (logCategories?.length) {
+      contextLines.push(
+        `<LogCategories service="${serviceName}">\n${JSON.stringify(
+          logCategories.slice(0, 10),
+          null,
+          2
+        )}\n</LogCategories>`
+      );
+    }
   }
 
   if (downstreamDependencies.length > 0) {

@@ -70,6 +70,46 @@ interface APMErrorSample {
   };
 }
 
+interface TraceItemLite {
+  '@timestamp': string;
+  'service.name': string;
+  name: string;
+  type?: string;
+  'event.outcome'?: string;
+  'status.code'?: number | string;
+  'span.duration.us'?: number;
+  'transaction.duration.us'?: number;
+  'http.url'?: string;
+  'span.destination.service.resource'?: string;
+}
+
+interface TraceServiceAggregate {
+  serviceName: string;
+  count: number;
+  errorCount: number;
+  avgDurationUs?: number;
+}
+
+interface TraceOverviewResult {
+  items: TraceItemLite[];
+  services: TraceServiceAggregate[];
+}
+
+interface TraceErrorLite {
+  spanId: string;
+  timestampUs?: number;
+  type?: string;
+  message?: string;
+  culprit?: string;
+}
+
+interface LogCategoryLite {
+  errorCategory: string;
+  docCount: number;
+  sampleMessage: string;
+  downstreamServiceResource?: string;
+}
+
 export interface ObservabilityAgentDataRegistryTypes {
   apmErrors: (params: {
     request: KibanaRequest;
@@ -123,4 +163,25 @@ export interface ObservabilityAgentDataRegistryTypes {
     start: string;
     end: string;
   }) => Promise<ChangePointGrouping[]>;
+
+  apmTraceOverviewByTraceId: (params: {
+    request: KibanaRequest;
+    traceId: string;
+    start: number;
+    end: number;
+  }) => Promise<TraceOverviewResult>;
+
+  apmTraceErrorsByTraceId: (params: {
+    request: KibanaRequest;
+    traceId: string;
+    start: number;
+    end: number;
+  }) => Promise<TraceErrorLite[]>;
+
+  apmLogCategoriesByService: (params: {
+    request: KibanaRequest;
+    serviceName: string;
+    start: string;
+    end: string;
+  }) => Promise<LogCategoryLite[]>;
 }

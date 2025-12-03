@@ -115,34 +115,6 @@ export function ErrorSampleAgentBuilderAiInsight({
           end,
         },
       },
-      // TODO: move this to the server-side
-      // {
-      //   id: 'apm_error_details_instructions',
-      //   type: 'text',
-      //   getContent: () => ({
-      //     content: dedent(`
-      //       <contextual_instructions>
-      //         I'm an SRE. I am looking at an exception in the Kibana APM UI and trying to understand what it means.
-      //         Your task is to describe what the error means and what it could be caused by. Using **ONLY** the provided data produce a concise, action-oriented response.
-
-      //         Only call tools if the attachments do not contain the necessary data to analyze the error.
-      //         Prefer using attachment data if possible and only call tools to fetch any missing context (e.g., grouping key, trace, transaction, span, downstream dependencies) when required.
-      //         **DO NOT** call any tools before providing your first response as all the error details are provided in the attachments.
-
-      //         Respond using the following structure:
-      //         - Summary: One paragraph explaining what the error means and likely causes.
-      //         - Failure pinpoint: Identify whether this is application code or a dependency (e.g., network/HTTP), and name the failing component/endpoint if clear. Cite specific fields or key stack frames (function:file:line) that support your reasoning.
-      //         - Impact: Scope and severity (Reference endpoint(s)/service and time window if evident)
-      //         - Immediate actions: Ordered checklist of concrete steps to remediate or validate (e.g., config/network checks, retries/backoff, circuit breakers).
-      //         - Open questions and required data (if any): Explicit gaps and the quickest queries/tools to fill them.
-
-      //         Response format:
-      //         - Prefer Markdown. Use short headings and bullet points. Include brief code blocks only if essential.
-
-      //         Keep the answer practical and concise. Avoid repeating raw stacktraces; reference only key frames.
-      //       </contextual_instructions>`),
-      //   }),
-      // },
     ];
   }, [error, onechat, isObservabilityAgentEnabled, summary, context, environment, start, end]);
 
