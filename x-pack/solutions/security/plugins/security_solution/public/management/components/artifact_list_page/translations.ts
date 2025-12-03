@@ -85,6 +85,10 @@ export const artifactListPageLabels = Object.freeze({
     'xpack.securitySolution.artifactListPage.emptyStatePrimaryButtonLabel',
     { defaultMessage: 'Add' }
   ),
+  emptyStateImportButtonLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.emptyStateImportButtonLabel',
+    { defaultMessage: 'Import list' }
+  ),
 
   // ------------------------------
   // SEARCH BAR labels
@@ -170,6 +174,7 @@ export type ArtifactListPageRequiredLabels = Pick<
   | 'emptyStateTitle'
   | 'emptyStateInfo'
   | 'emptyStatePrimaryButtonLabel'
+  | 'emptyStateImportButtonLabel'
 >;
 
 export type ArtifactListPageOptionalLabels = Omit<IAllLabels, keyof ArtifactListPageRequiredLabels>;

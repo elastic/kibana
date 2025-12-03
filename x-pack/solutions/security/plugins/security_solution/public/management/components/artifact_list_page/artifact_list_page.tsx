@@ -398,10 +398,12 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
         {!doesDataExist ? (
           <NoDataEmptyState
             onAdd={handleOpenCreateFlyoutClick}
+            onImport={handleImport}
             titleNoEntriesLabel={labels.emptyStateTitleNoEntries}
             titleLabel={labels.emptyStateTitle}
             aboutInfo={labels.emptyStateInfo}
             primaryButtonLabel={labels.emptyStatePrimaryButtonLabel}
+            importButtonLabel={labels.emptyStateImportButtonLabel}
             backComponent={backButtonEmptyComponent}
             data-test-subj={getTestId('emptyState')}
             secondaryAboutInfo={secondaryPageInfo}

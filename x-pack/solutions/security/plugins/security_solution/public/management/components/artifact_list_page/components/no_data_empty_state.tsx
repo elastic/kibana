@@ -7,7 +7,8 @@
 
 import React, { memo } from 'react';
 import styled, { css } from 'styled-components';
-import { EuiButton, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { ManagementEmptyStateWrapper } from '../../management_empty_state_wrapper';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
@@ -19,10 +20,12 @@ const EmptyPrompt = styled(EuiEmptyPrompt)`
 
 export const NoDataEmptyState = memo<{
   onAdd: () => void;
+  onImport: () => void;
   titleLabel: string;
   titleNoEntriesLabel: string;
   aboutInfo: string;
   primaryButtonLabel: string;
+  importButtonLabel: string;
   canCreateItems?: boolean;
   /** Should the Add button be disabled */
   isAddDisabled?: boolean;
@@ -32,6 +35,7 @@ export const NoDataEmptyState = memo<{
 }>(
   ({
     onAdd,
+    onImport,
     isAddDisabled = false,
     backComponent,
     'data-test-subj': dataTestSubj,
@@ -39,9 +43,13 @@ export const NoDataEmptyState = memo<{
     titleNoEntriesLabel,
     aboutInfo,
     primaryButtonLabel,
+    importButtonLabel,
     secondaryAboutInfo,
     canCreateItems = true,
   }) => {
+    const isEndpointArtifactsExportImportEnabled = useIsExperimentalFeatureEnabled(
+      'endpointArtifactsExportImportEnabled'
+    );
     const getTestId = useTestIdGenerator(dataTestSubj);
 
     return (
@@ -63,14 +71,25 @@ export const NoDataEmptyState = memo<{
               </div>
             }
             actions={[
-              <EuiButton
-                fill
-                isDisabled={isAddDisabled}
-                onClick={onAdd}
-                data-test-subj={getTestId('addButton')}
-              >
-                {primaryButtonLabel}
-              </EuiButton>,
+              <EuiFlexGroup>
+                <EuiButton
+                  fill
+                  isDisabled={isAddDisabled}
+                  onClick={onAdd}
+                  data-test-subj={getTestId('addButton')}
+                >
+                  {primaryButtonLabel}
+                </EuiButton>
+                {isEndpointArtifactsExportImportEnabled && (
+                  <EuiButton
+                    isDisabled={isAddDisabled}
+                    onClick={onImport}
+                    data-test-subj={getTestId('importButton')}
+                  >
+                    {importButtonLabel}
+                  </EuiButton>
+                )}
+              </EuiFlexGroup>,
               ...(backComponent ? [backComponent] : []),
             ]}
           />
