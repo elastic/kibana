@@ -4,46 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import dedent from 'dedent';
+
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import type { AT_TIMESTAMP } from '@kbn/apm-types';
 import { AiInsight } from '@kbn/observability-agent-builder';
 import { OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID } from '../../../../../common/agent_builder/attachment_ids';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import type { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { getIsObservabilityAgentEnabled } from '../../../../../common/agent_builder/get_is_obs_agent_enabled';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { callApmApi } from '../../../../services/rest/create_call_apm_api';
+import { type APIReturnType, callApmApi } from '../../../../services/rest/create_call_apm_api';
 import { useLocalStorage } from '../../../../hooks/use_local_storage';
 
 export function ErrorSampleAgentBuilderAiInsight({
   error,
   transaction,
-}: {
-  error: {
-    [AT_TIMESTAMP]: string;
-    error: Pick<APMError['error'], 'log' | 'exception' | 'id'>;
-    service: {
-      name: string;
-      environment?: string;
-      language?: {
-        name?: string;
-      };
-      runtime?: {
-        name?: string;
-        version?: string;
-      };
-    };
-  };
-  transaction?: {
-    transaction: {
-      name: string;
-    };
-  };
-}) {
+}: APIReturnType<'GET /internal/apm/services/{serviceName}/errors/{groupId}/error/{errorId}'>) {
   const { onechat, core, inference } = useApmPluginContext();
   const isObservabilityAgentEnabled = getIsObservabilityAgentEnabled(core);
 
@@ -112,11 +89,11 @@ export function ErrorSampleAgentBuilderAiInsight({
       {
         id: 'apm_error_details_screen_context',
         type: 'screen_context',
-        getContent: () => ({
+        data: {
           app: 'apm',
           url: window.location.href,
           description: `APM error details page for ${serviceName}`,
-        }),
+        },
       },
       // TODO: move this to the server-side
       // {
@@ -147,22 +124,12 @@ export function ErrorSampleAgentBuilderAiInsight({
       //   }),
       // },
       {
-        id: 'apm_error_details_instructions',
-        type: 'text',
-        getContent: () => ({
-          content: dedent(`
-            <ai_insight_instructions>
-              Only call tools if the attachments do not contain the necessary data to analyze the error.
-            </ai_insight_instructions>`),
-        }),
-      },
-      {
         id: 'apm_error_ai_insight',
         type: OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
-        getContent: () => ({
+        data: {
           summary,
           context,
-        }),
+        },
       },
     ];
   }, [error, onechat, isObservabilityAgentEnabled, summary, context]);
