@@ -1394,6 +1394,7 @@ export const getSavedObjectTypes = (
           name: { type: 'keyword' },
           namespace: { type: 'keyword' },
           cloudProvider: { type: 'keyword' },
+          accountType: { type: 'keyword' },
           vars: { type: 'flattened' },
           packagePolicyCount: { type: 'integer' },
           created_at: { type: 'date' },
@@ -1413,6 +1414,16 @@ export const getSavedObjectTypes = (
                 packagePolicyCount: { type: 'integer' },
                 created_at: { type: 'date' },
                 updated_at: { type: 'date' },
+              },
+            },
+          ],
+        },
+        2: {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                accountType: { type: 'keyword' },
               },
             },
           ],

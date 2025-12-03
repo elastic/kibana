@@ -20,6 +20,14 @@ export const CreateCloudConnectorRequestSchema = {
         meta: { description: 'The cloud provider type: aws, azure, or gcp.' },
       }
     ),
+    accountType: schema.maybe(
+      schema.oneOf([schema.literal('single'), schema.literal('organization')], {
+        meta: {
+          description:
+            'The account type: single (single account/subscription) or organization (organization-wide).',
+        },
+      })
+    ),
     vars: schema.recordOf(
       schema.string({ minLength: 1, maxLength: 100 }),
       schema.oneOf([
@@ -52,6 +60,7 @@ export const CreateCloudConnectorResponseSchema = schema.object({
     name: schema.string(),
     namespace: schema.maybe(schema.string()),
     cloudProvider: schema.string(),
+    accountType: schema.maybe(schema.string()),
     vars: CloudConnectorResponseVarsSchema,
     packagePolicyCount: schema.number(),
     created_at: schema.string(),
@@ -86,6 +95,7 @@ export const GetCloudConnectorsResponseSchema = schema.object({
       name: schema.string(),
       namespace: schema.maybe(schema.string()),
       cloudProvider: schema.string(),
+      accountType: schema.maybe(schema.string()),
       vars: CloudConnectorResponseVarsSchema,
       packagePolicyCount: schema.number(),
       created_at: schema.string(),
@@ -108,6 +118,7 @@ export const GetCloudConnectorResponseSchema = schema.object({
     name: schema.string(),
     namespace: schema.maybe(schema.string()),
     cloudProvider: schema.string(),
+    accountType: schema.maybe(schema.string()),
     vars: CloudConnectorResponseVarsSchema,
     packagePolicyCount: schema.number(),
     created_at: schema.string(),
@@ -178,6 +189,7 @@ export const UpdateCloudConnectorResponseSchema = schema.object({
     name: schema.string(),
     namespace: schema.maybe(schema.string()),
     cloudProvider: schema.string(),
+    accountType: schema.maybe(schema.string()),
     vars: CloudConnectorResponseVarsSchema,
     packagePolicyCount: schema.number(),
     created_at: schema.string(),

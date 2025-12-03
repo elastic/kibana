@@ -142,6 +142,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         name,
         namespace,
         cloudProvider,
+        accountType: cloudConnector.accountType,
         vars,
         packagePolicyCount: 1,
         created_at: new Date().toISOString(),

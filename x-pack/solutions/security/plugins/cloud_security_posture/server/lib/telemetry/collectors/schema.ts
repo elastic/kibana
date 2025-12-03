@@ -247,6 +247,10 @@ export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
         type: 'keyword',
         _meta: { description: 'Cloud connector cloud provider' },
       },
+      account_type: {
+        type: 'keyword',
+        _meta: { description: 'Account type: single or organization' },
+      },
       packagePolicyIds: {
         type: 'array',
         items: {

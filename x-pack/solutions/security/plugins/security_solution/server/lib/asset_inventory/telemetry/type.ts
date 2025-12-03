@@ -43,6 +43,7 @@ export interface AssetInventoryCloudConnectorUsageStats {
   updated_at: string;
   hasCredentials: boolean;
   cloud_provider: string;
+  account_type?: 'single' | 'organization';
   packagePolicyIds: string[];
   packagePolicyCount: number;
 }

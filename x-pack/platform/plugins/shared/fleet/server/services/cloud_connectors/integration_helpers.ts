@@ -9,9 +9,72 @@ import {
   isAwsCloudConnectorVars,
   isAzureCloudConnectorVars,
 } from '../../../common/services/cloud_connector_helpers';
+import {
+  AWS_ACCOUNT_TYPE_VAR_NAME,
+  AZURE_ACCOUNT_TYPE_VAR_NAME,
+} from '../../../common/constants/cloud_connector';
 
-import type { CloudProvider, CloudConnectorVars } from '../../../common/types';
+import type { CloudProvider, CloudConnectorVars, AccountType } from '../../../common/types';
 import type { NewPackagePolicy } from '../../types';
+
+/**
+ * Extracts and normalizes the account type from package policy variables
+ *
+ * @param cloudProvider - The cloud provider (aws, azure, gcp)
+ * @param packagePolicy - The package policy containing account type vars
+ * @returns Normalized account type ('single' or 'organization') or undefined if not found
+ */
+export function extractAccountType(
+  cloudProvider: CloudProvider,
+  packagePolicy: NewPackagePolicy
+): AccountType | undefined {
+  const vars = packagePolicy.inputs.find((input) => input.enabled)?.streams[0]?.vars;
+
+  if (!vars) {
+    return undefined;
+  }
+
+  let rawAccountType: string | undefined;
+
+  if (cloudProvider === 'aws') {
+    rawAccountType = vars[AWS_ACCOUNT_TYPE_VAR_NAME]?.value;
+  } else if (cloudProvider === 'azure') {
+    rawAccountType = vars[AZURE_ACCOUNT_TYPE_VAR_NAME]?.value;
+  }
+
+  return normalizeAccountType(rawAccountType);
+}
+
+/**
+ * Normalizes account type values from different cloud providers to a common format
+ *
+ * AWS values: 'single-account' -> 'single', 'organization-account' -> 'organization'
+ * Azure values: 'single-subscription' -> 'single', 'organization-subscription' -> 'organization'
+ *
+ * @param rawAccountType - The raw account type value from package policy
+ * @returns Normalized account type or undefined if not recognized
+ */
+export function normalizeAccountType(rawAccountType: string | undefined): AccountType | undefined {
+  if (!rawAccountType) {
+    return undefined;
+  }
+
+  // Normalize AWS and Azure account types to common values
+  if (rawAccountType === 'single-account' || rawAccountType === 'single-subscription') {
+    return 'single';
+  }
+
+  if (rawAccountType === 'organization-account' || rawAccountType === 'organization-subscription') {
+    return 'organization';
+  }
+
+  // If already normalized, return as-is
+  if (rawAccountType === 'single' || rawAccountType === 'organization') {
+    return rawAccountType as AccountType;
+  }
+
+  return undefined;
+}
 
 /**
  * Updates package policy inputs with cloud connector secret references
