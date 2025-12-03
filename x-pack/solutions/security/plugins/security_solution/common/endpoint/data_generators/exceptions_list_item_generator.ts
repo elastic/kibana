@@ -13,6 +13,7 @@ import {
   ListOperatorTypeEnum,
   type ListOperatorType,
 } from '@kbn/securitysolution-io-ts-list-types';
+import type { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants';
 import { ENDPOINT_ARTIFACT_LISTS, ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { ConditionEntryField } from '@kbn/securitysolution-utils';
 import { LIST_ITEM_ENTRY_OPERATOR_TYPES } from './common/artifact_list_item_entry_values';
@@ -453,4 +454,32 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
       ...overrides,
     };
   }
+
+  generateItem = (
+    listId: (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number],
+    overrides: Partial<ExceptionListItemSchema> = {}
+  ) => {
+    switch (listId) {
+      case ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id:
+        return this.generateEndpointException(overrides);
+
+      case ENDPOINT_ARTIFACT_LISTS.blocklists.id:
+        return this.generateBlocklist(overrides);
+
+      case ENDPOINT_ARTIFACT_LISTS.eventFilters.id:
+        return this.generateEventFilter(overrides);
+
+      case ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id:
+        return this.generateHostIsolationException(overrides);
+
+      case ENDPOINT_ARTIFACT_LISTS.trustedApps.id:
+        return this.generateTrustedApp(overrides);
+
+      case ENDPOINT_ARTIFACT_LISTS.trustedDevices.id:
+        return this.generateTrustedDevice(overrides);
+
+      default:
+        throw new Error(`Unknown listId: ${listId}. Unable to generate exception list item.`);
+    }
+  };
 }
