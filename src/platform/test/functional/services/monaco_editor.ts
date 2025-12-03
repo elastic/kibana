@@ -64,7 +64,7 @@ export class MonacoEditorService extends FtrService {
   }
 
   /**
-   * Set editor value by test subject ID.
+   * Set editor value by test subject ID (replaces all content).
    * @param triggerSuggest - Whether to trigger autocomplete suggestions (default: true)
    */
   public async typeCodeEditorValue(value: string, testSubjId: string, triggerSuggest = true) {
@@ -93,6 +93,79 @@ export class MonacoEditorService extends FtrService {
       testSubjId,
       value,
       triggerSuggest
+    );
+  }
+
+  /**
+   * Simulate typing text character-by-character using Monaco's trigger API.
+   * Each character fires a separate onDidChangeModelContent event, which is needed
+   * for features like auto-escaping that listen for individual keystrokes.
+   * @param testSubjId - data-test-subj of the editor container
+   * @param text - Text to type
+   * @param charDelayMs - Delay between characters in ms (default: 10)
+   */
+  public async simulateTyping(testSubjId: string, text: string, charDelayMs = 10) {
+    await this.waitCodeEditorReady(testSubjId);
+
+    for (const char of text) {
+      await this.browser.execute(
+        (id: string, singleChar: string) => {
+          const container = document.querySelector(`[data-test-subj="${id}"]`);
+          if (!container) return;
+
+          const editors = window.MonacoEnvironment?.monaco?.editor?.getEditors() || [];
+          const editor = editors.find((e: any) => container?.contains(e.getDomNode()));
+          if (!editor) return;
+
+          editor.focus();
+          editor.trigger('keyboard', 'type', { text: singleChar });
+        },
+        testSubjId,
+        char
+      );
+      if (charDelayMs > 0) {
+        await new Promise((resolve) => setTimeout(resolve, charDelayMs));
+      }
+    }
+  }
+
+  /**
+   * Simulate pressing a key in Monaco editor (e.g., 'ArrowLeft', 'Enter', 'Backspace').
+   * @param testSubjId - data-test-subj of the editor container
+   * @param key - Key name (ArrowLeft, ArrowRight, Enter, Tab, Escape, Backspace, Delete)
+   */
+  public async simulateKeyPress(testSubjId: string, key: string) {
+    await this.browser.execute(
+      (id: string, keyName: string) => {
+        const container = document.querySelector(`[data-test-subj="${id}"]`);
+        if (!container) return;
+
+        const editor = window.MonacoEnvironment?.monaco?.editor
+          ?.getEditors()
+          ?.find((e: any) => container?.contains(e.getDomNode()));
+        if (!editor) return;
+
+        editor.focus();
+
+        // Map common key names to Monaco commands
+        const keyMap: Record<string, string> = {
+          ArrowLeft: 'cursorLeft',
+          ArrowRight: 'cursorRight',
+          ArrowUp: 'cursorUp',
+          ArrowDown: 'cursorDown',
+          Enter: 'acceptSelectedSuggestion',
+          Tab: 'acceptSelectedSuggestion',
+          Escape: 'hideSuggestWidget',
+          Backspace: 'deleteLeft',
+          Delete: 'deleteRight',
+        };
+        const command = keyMap[keyName];
+        if (command) {
+          editor.trigger('keyboard', command, {});
+        }
+      },
+      testSubjId,
+      key
     );
   }
 

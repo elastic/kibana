@@ -670,21 +670,22 @@ export function FormulaEditor({
 
   useEffect(() => {
     // Because the monaco model is owned by Lens, we need to manually attach and remove handlers
-    const { dispose: dispose1 } = monaco.languages.registerCompletionItemProvider(LANGUAGE_ID, {
+    // Note: Don't destructure dispose - Monaco 0.54.0 requires the full disposable object
+    const disposable1 = monaco.languages.registerCompletionItemProvider(LANGUAGE_ID, {
       triggerCharacters: ['.', '(', '=', ' ', ':', `'`],
       provideCompletionItems,
     });
-    const { dispose: dispose2 } = monaco.languages.registerSignatureHelpProvider(LANGUAGE_ID, {
+    const disposable2 = monaco.languages.registerSignatureHelpProvider(LANGUAGE_ID, {
       signatureHelpTriggerCharacters: ['(', '='],
       provideSignatureHelp,
     });
-    const { dispose: dispose3 } = monaco.languages.registerHoverProvider(LANGUAGE_ID, {
+    const disposable3 = monaco.languages.registerHoverProvider(LANGUAGE_ID, {
       provideHover,
     });
     return () => {
-      dispose1();
-      dispose2();
-      dispose3();
+      disposable1.dispose();
+      disposable2.dispose();
+      disposable3.dispose();
     };
   }, [provideCompletionItems, provideSignatureHelp, provideHover]);
 
@@ -801,7 +802,7 @@ export function FormulaEditor({
             </EuiFlexGroup>
           </div>
 
-          <div className="lnsFormula__editorContent">
+          <div className="lnsFormula__editorContent" data-test-subj="lnsFormulaEditor">
             <CodeEditor
               {...codeEditorOptions}
               transparentBackground={true}
