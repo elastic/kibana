@@ -6,9 +6,9 @@
  */
 
 import { ESSENTIAL_ALERT_FIELDS } from '../../common';
-import { filterAndStringifyAlertData } from './helpers';
+import { stringifyEssentialAlertData } from './helpers';
 
-describe('filterAndStringifyAlertData', () => {
+describe('stringifyEssentialAlertData', () => {
   it('filters to essential fields only', () => {
     const rawData: Record<string, string[]> = {
       [ESSENTIAL_ALERT_FIELDS[0]]: ['value1'],
@@ -17,7 +17,7 @@ describe('filterAndStringifyAlertData', () => {
       anotherNonEssential: ['shouldAlsoBeExcluded'],
     };
 
-    const result = filterAndStringifyAlertData(rawData);
+    const result = stringifyEssentialAlertData(rawData);
     const parsed = JSON.parse(result);
 
     expect(parsed).toHaveProperty(ESSENTIAL_ALERT_FIELDS[0]);
@@ -32,7 +32,7 @@ describe('filterAndStringifyAlertData', () => {
       field2: ['value2'],
     };
 
-    const result = filterAndStringifyAlertData(rawData);
+    const result = stringifyEssentialAlertData(rawData);
     const parsed = JSON.parse(result);
 
     expect(Object.keys(parsed).length).toBe(0);
@@ -43,7 +43,7 @@ describe('filterAndStringifyAlertData', () => {
       [ESSENTIAL_ALERT_FIELDS[0]]: ['value1'],
     };
 
-    const result = filterAndStringifyAlertData(rawData);
+    const result = stringifyEssentialAlertData(rawData);
 
     expect(() => JSON.parse(result)).not.toThrow();
     expect(JSON.parse(result)).toEqual({
@@ -54,7 +54,7 @@ describe('filterAndStringifyAlertData', () => {
   it('handles empty input', () => {
     const rawData: Record<string, string[]> = {};
 
-    const result = filterAndStringifyAlertData(rawData);
+    const result = stringifyEssentialAlertData(rawData);
     const parsed = JSON.parse(result);
 
     expect(parsed).toEqual({});

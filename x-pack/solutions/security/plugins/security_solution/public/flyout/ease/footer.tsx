@@ -17,7 +17,7 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 import { NewAgentBuilderAttachment } from '../../agent_builder/components/new_agent_builder_attachment';
 import { useAgentBuilderAttachment } from '../../agent_builder/hooks/use_agent_builder_attachment';
 import { getRawData } from '../../assistant/helpers';
-import { filterAndStringifyAlertData } from '../../agent_builder/helpers';
+import { stringifyEssentialAlertData } from '../../agent_builder/helpers';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { ALERT_ATTACHMENT_PROMPT } from '../../agent_builder/components/prompts';
 
@@ -45,7 +45,7 @@ export const PanelFooter = memo(() => {
 
   const alertData = useMemo(() => {
     const rawData = getRawData(dataFormattedForFieldBrowser ?? []);
-    return filterAndStringifyAlertData(rawData);
+    return stringifyEssentialAlertData(rawData);
   }, [dataFormattedForFieldBrowser]);
 
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment({

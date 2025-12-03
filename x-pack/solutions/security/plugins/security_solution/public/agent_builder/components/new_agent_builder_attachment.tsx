@@ -7,7 +7,7 @@
 
 import type { EuiButtonColor, IconType } from '@elastic/eui';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
-import React from 'react';
+import React, { memo } from 'react';
 import type { EuiButtonEmptySizes } from '@elastic/eui/src/components/button/button_empty/button_empty';
 import * as i18n from './translations';
 
@@ -35,13 +35,17 @@ export interface NewAgentBuilderAttachmentProps {
   text?: string;
 }
 
-const NewAgentBuilderAttachmentComponent: React.FC<NewAgentBuilderAttachmentProps> = ({
+/**
+ * `NewAgentBuilderAttachment` displays a button that opens the agent builder flyout
+ * with attachment data. You may optionally override the default text.
+ */
+export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment({
   color = 'primary',
   iconType = 'machineLearningApp',
   onClick,
   size = 'm',
   text = i18n.VIEW_IN_AGENT_BUILDER,
-}) => {
+}: NewAgentBuilderAttachmentProps) {
   return (
     <EuiButtonEmpty
       aria-label={text}
@@ -58,12 +62,4 @@ const NewAgentBuilderAttachmentComponent: React.FC<NewAgentBuilderAttachmentProp
       </EuiFlexGroup>
     </EuiButtonEmpty>
   );
-};
-
-NewAgentBuilderAttachmentComponent.displayName = 'NewAgentBuilderAttachmentComponent';
-
-/**
- * `NewAgentBuilderAttachment` displays a button that opens the agent builder flyout
- * with attachment data. You may optionally override the default text.
- */
-export const NewAgentBuilderAttachment = React.memo(NewAgentBuilderAttachmentComponent);
+});

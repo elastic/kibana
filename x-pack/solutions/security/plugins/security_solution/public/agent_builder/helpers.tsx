@@ -5,19 +5,14 @@
  * 2.0.
  */
 
+import { pick } from 'lodash';
+
 import { ESSENTIAL_ALERT_FIELDS } from '../../common';
 
 /**
  * Filters raw alert data to only include essential fields and stringifies the result.
  * This reduces context window usage by keeping only the most relevant information.
  */
-export const filterAndStringifyAlertData = (rawData: Record<string, string[]>): string => {
-  const filteredData = ESSENTIAL_ALERT_FIELDS.reduce((acc, key) => {
-    if (key in rawData) {
-      acc[key] = rawData[key];
-    }
-    return acc;
-  }, {} as Record<string, string[]>);
-
-  return JSON.stringify(filteredData);
+export const stringifyEssentialAlertData = (rawData: Record<string, string[]>): string => {
+  return JSON.stringify(pick(rawData, ESSENTIAL_ALERT_FIELDS));
 };
