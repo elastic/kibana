@@ -530,7 +530,10 @@ export class TaskStore {
             type: 'task',
             id: doc.id,
             version: doc.version,
-            attributes: taskInstanceToAttributes(taskInstance, doc.id),
+            attributes: {
+              ...taskInstanceToAttributes(taskInstance, doc.id),
+              ...(doc.apiKey ? { apiKey: doc.apiKey } : {}),
+            },
             mergeAttributes,
           });
         } catch (e) {
