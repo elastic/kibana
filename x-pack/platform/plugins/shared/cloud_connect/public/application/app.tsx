@@ -32,7 +32,6 @@ export const CloudConnectedAppMain: React.FC = () => {
     handleConnect,
   } = useClusterConnection();
 
-  // Show error toast for non-503 errors
   if (clusterError && clusterError.statusCode !== 503) {
     notifications.toasts.addError(clusterError as Error, {
       title: 'Failed to load cluster details',

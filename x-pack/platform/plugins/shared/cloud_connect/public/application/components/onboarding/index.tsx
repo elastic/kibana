@@ -32,7 +32,6 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ onConnect }) => 
 
   return (
     <EuiPageSection restrictWidth={1200}>
-      {/* Header Section with Title and Image */}
       <EuiFlexGroup alignItems="center" gutterSize="xl">
         <EuiFlexItem>
           <EuiTitle size="l">
@@ -105,7 +104,6 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ onConnect }) => 
 
       <EuiSpacer size="xxl" />
 
-      {/* Main Content Section */}
       <EuiFlexGroup justifyContent="spaceBetween">
         {hasConfigurePermission && (
           <EuiFlexItem grow={true}>

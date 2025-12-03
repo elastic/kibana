@@ -9,7 +9,6 @@ import type { CoreStart, AppMountParameters } from '@kbn/core/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 
-// Plugin types
 export interface CloudConnectedPluginSetup {
   cloudUrl?: string;
 }
@@ -17,7 +16,6 @@ export interface CloudConnectedPluginSetup {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CloudConnectedPluginStart {}
 
-// Config types
 export interface CloudConnectConfig {
   cloudUrl: string;
 }
@@ -40,7 +38,6 @@ export interface CloudConnectedSetupDeps {
   cloud?: CloudSetup;
 }
 
-// Application types
 export interface CloudConnectedAppComponentProps {
   chrome: CoreStart['chrome'];
   application: CoreStart['application'];
@@ -51,7 +48,6 @@ export interface CloudConnectedAppComponentProps {
   cloudUrl: string;
 }
 
-// Service types
 export interface ServiceMetadata {
   documentation_url?: string;
   service_url?: string;

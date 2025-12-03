@@ -53,13 +53,11 @@ export async function getLicenseInfo(esClient: ElasticsearchClient): Promise<Lic
 export async function getCurrentClusterData(
   esClient: ElasticsearchClient
 ): Promise<OnboardClusterRequest> {
-  // Fetch cluster and license information in parallel
   const [clusterInfo, licenseInfo] = await Promise.all([
     getClusterInfo(esClient),
     getLicenseInfo(esClient),
   ]);
 
-  // Build the cluster data object using the fetched information
   const clusterData: OnboardClusterRequest = {
     self_managed_cluster: {
       id: clusterInfo.cluster_uuid,

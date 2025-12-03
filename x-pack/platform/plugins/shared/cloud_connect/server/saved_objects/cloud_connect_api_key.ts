@@ -10,9 +10,6 @@ import type { SavedObjectsType } from '@kbn/core/server';
 import type { EncryptedSavedObjectTypeRegistration } from '@kbn/encrypted-saved-objects-plugin/server';
 import { CLOUD_CONNECT_API_KEY_TYPE } from '../../common/constants';
 
-/**
- * Schema for Cloud Connect API key saved object attributes
- */
 const cloudConnectApiKeySchema = schema.object({
   apiKey: schema.string(),
   clusterId: schema.maybe(schema.string()),
@@ -20,18 +17,15 @@ const cloudConnectApiKeySchema = schema.object({
   updatedAt: schema.maybe(schema.string()),
 });
 
-/**
- * Saved object type definition for Cloud Connect API key storage
- */
 export const CloudConnectApiKeyType: SavedObjectsType = {
   name: CLOUD_CONNECT_API_KEY_TYPE,
   hidden: true,
-  namespaceType: 'agnostic', // Space-agnostic - single key for entire instance
+  namespaceType: 'agnostic',
   mappings: {
     dynamic: false,
     properties: {
       apiKey: {
-        type: 'binary', // Encrypted fields are stored as binary
+        type: 'binary',
       },
       clusterId: {
         type: 'keyword',
@@ -45,7 +39,7 @@ export const CloudConnectApiKeyType: SavedObjectsType = {
     },
   },
   management: {
-    importableAndExportable: false, // Sensitive data should not be exported
+    importableAndExportable: false,
     displayName: 'Cloud Connect API Key',
   },
   modelVersions: {
@@ -59,11 +53,8 @@ export const CloudConnectApiKeyType: SavedObjectsType = {
   },
 };
 
-/**
- * Encryption configuration for the Cloud Connect API key saved object
- */
 export const CloudConnectApiKeyEncryptionParams: EncryptedSavedObjectTypeRegistration = {
   type: CLOUD_CONNECT_API_KEY_TYPE,
-  attributesToEncrypt: new Set(['apiKey']), // Only the API key is encrypted
-  attributesToIncludeInAAD: new Set(['clusterId']), // Additional Authenticated Data
+  attributesToEncrypt: new Set(['apiKey']),
+  attributesToIncludeInAAD: new Set(['clusterId']),
 };
