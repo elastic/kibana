@@ -20,7 +20,6 @@ import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import { getOverrideConfirmation } from './modals/override_warning_modal';
 import { EmptyPrompt } from './empty_prompt';
-// import { FilesPreview } from './file_preview';
 import type { KibanaContextExtra } from '../types';
 import { IndexEditorErrors } from '../types';
 
@@ -51,15 +50,6 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
   const { fileUploadManager, filesStatus, uploadStatus, indexName, reset } = useFileUploadContext();
   const isSaving = useObservable(indexUpdateService.isSaving$, false);
   const [dropzoneDisabled, setDropzoneDisabled] = React.useState(false);
-
-  // const isAnalyzing =
-  //   uploadStatus.analysisStatus === STATUS.STARTED &&
-  //   uploadStatus.overallImportStatus === STATUS.NOT_STARTED;
-
-  // const isUploading =
-  //   uploadStatus.overallImportStatus === STATUS.STARTED ||
-  //   (uploadStatus.overallImportStatus === STATUS.COMPLETED && isSaving);
-  // const overallImportProgress = uploadStatus.overallImportProgress;
 
   useEffect(
     function checkForErrors() {
@@ -99,7 +89,6 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
           .join('\n');
 
         indexUpdateService.setError(IndexEditorErrors.FILE_ANALYSIS_ERROR, errorDetail);
-        // move this to FileUploadManager under a flag "autoRemoveFilesOnAnalysisFailure"
         const filesToRemove = analysisErrors.map((f) => f.fileName);
         removeFilesByName(filesToRemove);
       }
@@ -187,46 +176,6 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
       cursor: 'grabbing',
     },
   ]);
-
-  // const loadingIndicator = (
-  //   <div css={[overlayBase, { cursor: 'progress' }]}>
-  //     {overallImportProgress ? (
-  //       <EuiProgress
-  //         value={overallImportProgress}
-  //         max={100}
-  //         size="s"
-  //         color="primary"
-  //         position="absolute"
-  //       />
-  //     ) : null}
-  //     <div
-  //       css={{
-  //         position: 'absolute',
-  //         top: '50%',
-  //         left: '50%',
-  //         translate: '-50% -50%',
-  //         textAlign: 'center',
-  //         pointerEvents: 'none',
-  //       }}
-  //     >
-  //       <EuiLoadingSpinner size="xl" />
-  //       <div>
-  //         {isAnalyzing ? (
-  //           <FormattedMessage
-  //             id="indexEditor.fileUpload.analyzingIndicator"
-  //             defaultMessage={'Analyzing...'}
-  //           />
-  //         ) : null}
-  //         {isUploading ? (
-  //           <FormattedMessage
-  //             id="indexEditor.fileUpload.uploadingIndicator"
-  //             defaultMessage={'Uploading...'}
-  //           />
-  //         ) : null}
-  //       </div>
-  //     </div>
-  //   </div>
-  // );
 
   const successfulPreviews = filesStatus.filter(
     (f) => f.analysisStatus === STATUS.COMPLETED && f.importStatus !== STATUS.COMPLETED

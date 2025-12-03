@@ -87,7 +87,7 @@ export const FileUploadLiteLookUpView: FC<Props> = ({
   const steps: EuiContainedStepProps[] = [
     {
       title: i18n.translate('xpack.fileUpload.lookupJoinUpload.analysis', {
-        defaultMessage: 'Analysis ',
+        defaultMessage: 'Review data',
       }),
       children:
         stepsStatus.analysis === STATUS.STARTED ? (
@@ -140,8 +140,8 @@ export const FileUploadLiteLookUpView: FC<Props> = ({
     },
     {
       title: i18n.translate('xpack.fileUpload.lookupJoinUpload.uploadingFilesToIndex', {
-        defaultMessage: 'Uploading files to index { indexName }',
-        values: { indexName },
+        defaultMessage: 'Uploading {count, plural, one {# file} other {# files}}  to {indexName}',
+        values: { count: filesStatus.length, indexName },
       }),
       children:
         stepsStatus.upload === STATUS.STARTED ? (
