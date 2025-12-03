@@ -91,7 +91,7 @@ function getRegionMapDataset(
 function getRegionMapMetric(
   layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   visualization: ChoroplethChartState
-): RegionMapState['metric'] | undefined {
+): RegionMapState['metric'] {
   if (visualization.valueAccessor == null) {
     throw new Error('Metric accessor is missing in the visualization state');
   }
@@ -107,7 +107,7 @@ function getRegionMapMetric(
 function getRegionMapRegion(
   layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   visualization: ChoroplethChartState
-): RegionMapState['region'] | undefined {
+): RegionMapState['region'] {
   if (visualization.regionAccessor == null) {
     throw new Error('Region accessor is missing in the visualization state');
   }
