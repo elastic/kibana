@@ -173,12 +173,18 @@ const createMetricField = ({
 
 /**
  * Checks if a field value is considered "present" (non-null, non-empty).
- * Handles arrays recursively and treats empty objects as absent.
+ * Optimized to check primitives first (most common case for metric values).
  */
 const hasValue = (value: unknown): boolean => {
   // Null or undefined = no value
   if (value == null) {
     return false;
+  }
+
+  // Fast path for primitives (most common case for metrics)
+  const type = typeof value;
+  if (type === 'string' || type === 'number' || type === 'boolean') {
+    return true;
   }
 
   // For arrays, at least one element must have a value
@@ -187,11 +193,11 @@ const hasValue = (value: unknown): boolean => {
   }
 
   // For objects, must have at least one key
-  if (typeof value === 'object') {
+  if (type === 'object') {
     return Object.keys(value as Record<string, unknown>).length > 0;
   }
 
-  // Primitives (strings, numbers, booleans) are considered present
+  // Fallback for any other types
   return true;
 };
 
@@ -326,20 +332,14 @@ const createMetricDefinitions = (fieldCaps: FieldCapsResponseMap) => {
 };
 
 /**
- * Extracts all field names present in a row by combining keys from both
- * `flattened` and `_source`. Returns a deduplicated array.
- */
-const getRowFieldNames = (row: DataTableRecord) => {
-  const flattenedKeys = Object.keys(row.flattened ?? {});
-  const sourceKeys = Object.keys((row.raw?._source as Record<string, unknown>) ?? {});
-  return [...new Set([...flattenedKeys, ...sourceKeys])];
-};
-
-/**
  * Builds a lookup that maps each metric (index+field) to the first row in the
- * Discover table where that metric has a concrete value. The rows are only
- * scanned until each metric has been satisfied which keeps the work proportional
- * to the number of metrics rather than the row count.
+ * Discover table where that metric has a concrete value. Optimized to only
+ * check fields that are actually metrics, avoiding unnecessary field enumeration.
+ *
+ * Performance optimizations:
+ * - Only iterates over known metric field names instead of all fields in each row
+ * - Caches field value lookups per row to avoid repeated getRowFieldValue calls
+ * - Early exits when all metrics have been found
  *
  * @param rows - The current Discover result rows
  * @param metricsByFieldName - Map of field names to their metric definitions
@@ -359,19 +359,29 @@ const createMetricRowLookup = (
   // Track which metrics we still need to find
   const remainingMetrics = new Set(metricDefinitions.map((definition) => definition.key));
 
+  // Pre-extract the set of metric field names we care about (optimization)
+  // This avoids iterating over all fields in each row
+  const metricFieldNames = Array.from(metricsByFieldName.keys());
+
   // Scan rows until all metrics are satisfied
   for (const row of rows) {
-    const fieldNames = getRowFieldNames(row);
+    // Cache field values for this row to avoid repeated lookups
+    const fieldValueCache = new Map<string, unknown>();
 
-    for (const fieldName of fieldNames) {
-      // Look up all metric definitions for this field name
+    // Only check fields that are actually metrics (optimization)
+    for (const fieldName of metricFieldNames) {
       const definitions = metricsByFieldName.get(fieldName);
       if (!definitions?.length) {
         continue;
       }
 
-      // Check if the field has a value in this row
-      const fieldValue = getRowFieldValue(row, fieldName);
+      // Check if the field has a value in this row (with caching)
+      let fieldValue = fieldValueCache.get(fieldName);
+      if (fieldValue === undefined && !fieldValueCache.has(fieldName)) {
+        fieldValue = getRowFieldValue(row, fieldName);
+        fieldValueCache.set(fieldName, fieldValue);
+      }
+
       if (!hasValue(fieldValue)) {
         continue;
       }
