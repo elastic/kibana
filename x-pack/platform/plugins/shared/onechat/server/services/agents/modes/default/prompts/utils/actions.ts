@@ -21,13 +21,13 @@ import type {
   HandoverAction,
   ResearchAgentAction,
   AnswerAgentAction,
-} from '../actions';
+} from '../../actions';
 import {
   isAgentErrorAction,
   isHandoverAction,
   isToolCallAction,
   isExecuteToolAction,
-} from '../actions';
+} from '../../actions';
 
 export const formatResearcherActionHistory = ({
   actions,
