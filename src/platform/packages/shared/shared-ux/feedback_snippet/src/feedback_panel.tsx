@@ -199,6 +199,7 @@ export const FeedbackPanel = ({
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="none"
+        justifyContent="center"
         css={css`
           gap: ${euiTheme.size.s};
         `}
