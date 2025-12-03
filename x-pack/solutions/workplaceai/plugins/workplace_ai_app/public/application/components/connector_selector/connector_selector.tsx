@@ -6,8 +6,7 @@
  */
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { EuiPopover, EuiButtonEmpty, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiPopover, EuiButtonEmpty, EuiLoadingSpinner, type UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   ConnectorSelectable,
@@ -27,6 +26,10 @@ const labels = {
   }),
 };
 
+const panelStyles = ({ euiTheme }: UseEuiTheme) => ({
+  inlineSize: `calc(${euiTheme.size.xxl} * 8)`,
+});
+
 interface ConnectorSelectorProps {
   selectedConnectorId?: string;
   onSelectConnector: (connectorId: string) => void;
@@ -38,7 +41,6 @@ export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
   onSelectConnector,
   defaultConnectorId,
 }) => {
-  const { euiTheme } = useEuiTheme();
   const navigateToApp = useNavigateToApp();
   const {
     services: { http, uiSettings },
@@ -58,10 +60,6 @@ export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
 
   const togglePopover = () => setIsPopoverOpen(!isPopoverOpen);
   const closePopover = () => setIsPopoverOpen(false);
-
-  const panelStyles = css`
-    inline-size: calc(${euiTheme.size.xxl} * 8);
-  `;
 
   const { preConfiguredConnectors, customConnectors } = useMemo(() => {
     const preConfigured: ConnectorSelectableComponentProps['preConfiguredConnectors'] = [];

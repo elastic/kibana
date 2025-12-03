@@ -7,21 +7,18 @@
 
 import React from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
 import { WorkplaceAIHomeHeader } from './workplace_ai_home_header';
 import { ExploreAgentPrompt } from './explore_agent_prompt';
 import { ExploreWorkplaceAI } from './explore_workplace_ai';
 import { SnapshotsSection } from './snapshots_section';
 import { WorkplaceAIHomeFooter } from './workplace_ai_home_footer';
 
+const sectionGapStyles = ({ euiTheme }: UseEuiTheme) => ({
+  height: euiTheme.size.xxxxl,
+});
+
 export const WorkplaceAIHomeView: React.FC<{}> = () => {
-  const { euiTheme } = useEuiTheme();
-
-  const sectionGapStyles = css`
-    height: ${euiTheme.size.xxxxl};
-  `;
-
   return (
     <KibanaPageTemplate data-test-subj="workplaceAIHomePage">
       <KibanaPageTemplate.Section restrictWidth={true} paddingSize="l">

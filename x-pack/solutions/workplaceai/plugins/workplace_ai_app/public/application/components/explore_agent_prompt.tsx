@@ -28,20 +28,49 @@ import { ConnectorSelector } from './connector_selector/connector_selector';
 
 const INPUT_MIN_HEIGHT = '150px';
 
-const titleStyles = css`
-  font-weight: 400;
-`;
+const titleStyles = { fontWeight: 400 };
 
-const getInputShadowStyles = (euiThemeContext: UseEuiTheme) => css`
-  ${euiShadow(euiThemeContext, 's')}
-  &:hover {
-    ${euiShadowHover(euiThemeContext, 's')}
-  }
-  &:focus-within {
-    ${euiShadow(euiThemeContext, 'xl')}
-    :hover {
-      ${euiShadowHover(euiThemeContext, 'xl')}
+const titleContainerStyles = { width: '100%' };
+
+const fullWidthStyles = { width: '100%' };
+
+const getInputContainerStyles = (euiThemeContext: UseEuiTheme) => {
+  const { euiTheme } = euiThemeContext;
+  return css`
+    width: 100%;
+    min-height: ${INPUT_MIN_HEIGHT};
+    padding: ${euiTheme.size.base};
+    flex-grow: 0;
+    transition: box-shadow 250ms;
+    background-color: ${euiTheme.colors.backgroundBasePlain};
+    border: none;
+
+    ${euiShadow(euiThemeContext, 's')}
+    &:hover {
+      ${euiShadowHover(euiThemeContext, 's')}
     }
+    &:focus-within {
+      ${euiShadow(euiThemeContext, 'xl')}
+      :hover {
+        ${euiShadowHover(euiThemeContext, 'xl')}
+      }
+    }
+  `;
+};
+
+const textAreaStyles = css`
+  && {
+    border: none;
+    box-shadow: none;
+    outline: none;
+    padding: 0;
+    resize: none;
+  }
+  &&:focus {
+    border: none;
+    box-shadow: none;
+    outline: none;
+    background-image: none;
   }
 `;
 
@@ -50,7 +79,6 @@ export const ExploreAgentPrompt: React.FC = () => {
     services: { application },
   } = useKibana();
   const euiThemeContext = useEuiTheme();
-  const { euiTheme } = euiThemeContext;
   const { data: agents = [] } = useAgents();
   const [chatInput, setChatInput] = useState('');
   const [selectedAgentId, setSelectedAgentId] = useState<string | undefined>();
@@ -63,35 +91,7 @@ export const ExploreAgentPrompt: React.FC = () => {
     }
   }, [agents, selectedAgentId]);
 
-  const titleContainerStyles = css`
-    width: 100%;
-  `;
-
-  const inputContainerStyles = css`
-    width: 100%;
-    min-height: ${INPUT_MIN_HEIGHT};
-    padding: ${euiTheme.size.base};
-    flex-grow: 0;
-    transition: box-shadow 250ms;
-    background-color: ${euiTheme.colors.backgroundBasePlain};
-    border: none;
-
-    ${getInputShadowStyles(euiThemeContext)}
-  `;
-
-  const textAreaStyles = css`
-    border: none !important;
-    box-shadow: none !important;
-    outline: none !important;
-    padding: 0;
-    resize: none;
-    &:focus {
-      border: none !important;
-      box-shadow: none !important;
-      outline: none !important;
-      background-image: none !important;
-    }
-  `;
+  const inputContainerStyles = getInputContainerStyles(euiThemeContext);
 
   const handleSubmit = () => {
     if (chatInput.trim() === '') {
@@ -127,7 +127,7 @@ export const ExploreAgentPrompt: React.FC = () => {
         </EuiTitle>
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false} style={{ width: '100%' }}>
+      <EuiFlexItem grow={false} css={fullWidthStyles}>
         <EuiFlexGroup
           css={inputContainerStyles}
           direction="column"

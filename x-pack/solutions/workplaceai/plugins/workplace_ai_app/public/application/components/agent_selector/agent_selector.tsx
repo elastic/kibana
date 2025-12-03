@@ -6,8 +6,7 @@
  */
 
 import React, { useState, useMemo, useCallback } from 'react';
-import type { EuiSelectableOption } from '@elastic/eui';
-import { css } from '@emotion/react';
+import type { EuiSelectableOption, UseEuiTheme } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiPopover,
@@ -19,7 +18,6 @@ import {
   EuiFlexItem,
   EuiPopoverFooter,
   EuiButton,
-  useEuiTheme,
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -29,6 +27,14 @@ import { useAgents } from '../../hooks/use_agents';
 import { useNavigateToApp } from '../../hooks/use_navigate_to_app';
 
 const AGENT_SELECT_ID = 'workplaceAIAgentSelect';
+
+const panelStyles = ({ euiTheme }: UseEuiTheme) => ({
+  inlineSize: `calc(${euiTheme.size.xxl} * 7)`,
+});
+
+const agentsTitleStyles = ({ euiTheme }: UseEuiTheme) => ({
+  fontWeight: euiTheme.font.weight.bold,
+});
 
 const labels = {
   selectAgent: i18n.translate('xpack.workplaceai.agentSelector.selectAgent', {
@@ -54,7 +60,6 @@ interface AgentSelectorProps {
 }
 
 export const AgentSelector: React.FC<AgentSelectorProps> = ({ selectedAgentId, onAgentChange }) => {
-  const { euiTheme } = useEuiTheme();
   const { data: agents = [], isLoading } = useAgents();
   const navigateToApp = useNavigateToApp();
 
@@ -96,10 +101,6 @@ export const AgentSelector: React.FC<AgentSelectorProps> = ({ selectedAgentId, o
     setIsPopoverOpen(false);
   }, [navigateToApp]);
 
-  const panelStyles = css`
-    inline-size: calc(${euiTheme.size.xxl} * 7);
-  `;
-
   const agentSelectorButton = (
     <EuiButtonEmpty
       iconSide="right"
@@ -137,12 +138,7 @@ export const AgentSelector: React.FC<AgentSelectorProps> = ({ selectedAgentId, o
             <EuiPopoverTitle paddingSize="s">
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                 <EuiFlexItem grow={false}>
-                  <EuiText
-                    css={css`
-                      font-weight: ${euiTheme.font.weight.bold};
-                    `}
-                    size="xs"
-                  >
+                  <EuiText css={agentsTitleStyles} size="xs">
                     {labels.agents}
                   </EuiText>
                 </EuiFlexItem>
