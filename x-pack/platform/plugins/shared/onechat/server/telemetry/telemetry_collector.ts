@@ -90,7 +90,7 @@ export function registerTelemetryCollector(
 
   usageCollection.registerCollector(
     usageCollection.makeUsageCollector<OnechatTelemetry>({
-      type: 'onechat',
+      type: 'agent_builder',
       isReady: () => true,
       schema: {
         custom_tools: {
@@ -489,5 +489,5 @@ export function registerTelemetryCollector(
     })
   );
 
-  logger.info('Registered telemetry collector for onechat');
+  logger.info('Registered telemetry collector for agent_buidler');
 }
