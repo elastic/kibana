@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/profiling-utils'
 type: unknown
 owners:
-  defaultOwner: '@elastic/obs-ux-infra_services-team'
+  defaultOwner: '@elastic/obs-presentation-team'
 toolchain:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   name: '@kbn/profiling-utils'
   description: Moon project for @kbn/profiling-utils
   channel: ''
-  owner: '@elastic/obs-ux-infra_services-team'
+  owner: '@elastic/obs-presentation-team'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-profiling-utils
 dependsOn: []
