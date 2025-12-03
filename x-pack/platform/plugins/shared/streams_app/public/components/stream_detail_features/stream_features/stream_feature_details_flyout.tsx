@@ -41,13 +41,13 @@ export const StreamFeatureDetailsFlyout = ({
   refreshFeatures: () => void;
 }) => {
   const [updatedFeature, setUpdatedFeature] = React.useState<Feature>(cloneDeep(feature));
-  const { upsertQuery } = useStreamFeaturesApi(definition);
+  const { upsertFeature } = useStreamFeaturesApi(definition);
   const [isUpdating, setIsUpdating] = React.useState(false);
   const [isEditingCondition, toggleIsEditingCondition] = useToggle(false);
 
   const updateFeature = () => {
     setIsUpdating(true);
-    upsertQuery(updatedFeature).finally(() => {
+    upsertFeature(updatedFeature).finally(() => {
       setIsUpdating(false);
       refreshFeatures();
       closeFlyout();
