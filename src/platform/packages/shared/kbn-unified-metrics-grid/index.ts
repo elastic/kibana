@@ -11,4 +11,3 @@ export { LazyUnifiedMetricsExperienceGrid as UnifiedMetricsExperienceGrid } from
 export { LazyTraceMetricsGrid as TraceMetricsGrid } from './src/components/trace_metrics_grid/lazy_trace_metrics_grid';
 export type { DataSource } from './src/components/trace_metrics_grid';
 export type { UnifiedMetricsGridRestorableState } from './src/restorable_state';
-export type { UnifiedMetricsExperienceGridProps } from './src/components';

@@ -12,7 +12,7 @@ import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { TraceMetricsGrid, type DataSource } from '@kbn/unified-metrics-grid';
 import React from 'react';
 import { once } from 'lodash';
-import type { ChartSectionConfigurationExtensionParams } from '../../../../types';
+import type { ChartSectionConfigurationExtensionParams } from '@kbn/unified-histogram/types';
 import type { DataSourceProfileProvider } from '../../../../profiles';
 
 export const createChartSection = (
@@ -22,6 +22,7 @@ export const createChartSection = (
   once((prev: (params: ChartSectionConfigurationExtensionParams) => ChartSectionConfiguration) =>
     once((params: ChartSectionConfigurationExtensionParams): ChartSectionConfiguration => {
       return {
+        actions: params.actions,
         ...(prev ? prev(params) : {}),
         Component: (props: ChartSectionProps) => (
           <TraceMetricsGrid {...props} dataSource={dataSource} />
