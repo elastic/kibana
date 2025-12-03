@@ -73,8 +73,8 @@ describe('ToolbarSelector', () => {
     const user = userEvent.setup();
     const onChange = jest.fn();
     const multiOptions: SelectableEntry[] = [
-      { label: 'A', value: 'a' },
-      { label: 'B', value: 'b' },
+      { label: 'A', value: 'a', key: 'key-a' },
+      { label: 'B', value: 'b', key: 'key-b' },
     ];
     render(
       <ToolbarSelector
@@ -84,6 +84,7 @@ describe('ToolbarSelector', () => {
         searchable={false}
         singleSelection={false}
         onChange={onChange}
+        selectedValues={[]}
       />
     );
     await user.click(screen.getByTestId('toolbarSelectorMultiTestButton'));
@@ -91,8 +92,8 @@ describe('ToolbarSelector', () => {
     fireEvent.click(screen.getByText('B'));
 
     expect(onChange).toHaveBeenCalledTimes(2);
-    expect(onChange).toHaveBeenNthCalledWith(1, [{ label: 'A', value: 'a', checked: 'on' }]);
-    expect(onChange).toHaveBeenNthCalledWith(2, [{ label: 'B', value: 'b', checked: 'on' }]);
+    expect(onChange).toHaveBeenNthCalledWith(1, ['key-a']);
+    expect(onChange).toHaveBeenNthCalledWith(2, ['key-b']);
   });
 
   it('renders with disabled state', () => {
@@ -124,25 +125,25 @@ describe('ToolbarSelector', () => {
     expect(screen.getByTestId('toolbarSelectorSearchSelectorSearch')).toBeInTheDocument();
   });
 
-  it('renders with searchable enabled and multi selection and preserves previously selected options', async () => {
+  it('renders with searchable enabled and multi selection adds selected key', async () => {
     const user = userEvent.setup();
     const onChange = jest.fn();
 
-    // Start with pre-selected options to test preservation
-    const optionsWithPreselected: SelectableEntry[] = [
-      { label: 'A', value: 'a', checked: 'on' },
-      { label: 'B', value: 'b', checked: 'on' },
-      { label: 'C', value: 'c' },
+    const optionsWithKeys: SelectableEntry[] = [
+      { label: 'A', value: 'a', key: 'key-a', checked: 'on' },
+      { label: 'B', value: 'b', key: 'key-b', checked: 'on' },
+      { label: 'C', value: 'c', key: 'key-c' },
     ];
 
     render(
       <ToolbarSelector
         data-test-subj="toolbarSelectorSearchBasic"
         buttonLabel="Search Test"
-        options={optionsWithPreselected}
+        options={optionsWithKeys}
         searchable={true}
         singleSelection={false}
         onChange={onChange}
+        selectedValues={['key-a', 'key-b']}
         optionMatcher={({ option, normalizedSearchValue }) =>
           option.label.toLowerCase().includes(normalizedSearchValue.toLowerCase())
         }
@@ -156,7 +157,7 @@ describe('ToolbarSelector', () => {
     expect(screen.getByText('B')).toBeInTheDocument();
     expect(screen.getByText('C')).toBeInTheDocument();
 
-    // Search for "C" which should only show C - use fireEvent for search input (EUI compatibility)
+    // Search for "C" which should only show C
     const searchInput = screen.getByTestId('toolbarSelectorSearchBasicSelectorSearch');
     await user.type(searchInput, 'C');
 
@@ -169,14 +170,8 @@ describe('ToolbarSelector', () => {
     // Select C using fireEvent for EUI selectable compatibility
     fireEvent.click(screen.getByText('C'));
 
-    // The onChange should preserve A and B (hidden but selected) + add C
-    expect(onChange).toHaveBeenCalledWith(
-      expect.arrayContaining([
-        { label: 'C', value: 'c', checked: 'on' },
-        { label: 'A', value: 'a', checked: 'on' },
-        { label: 'B', value: 'b', checked: 'on' },
-      ])
-    );
+    // The onChange should add key-c to the existing selectedValues
+    expect(onChange).toHaveBeenCalledWith(['key-a', 'key-b', 'key-c']);
   });
 
   it('renders with optional props: popoverTitle, popoverContentBelowSearch, hasArrow', async () => {

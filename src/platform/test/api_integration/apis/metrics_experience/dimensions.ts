@@ -60,6 +60,34 @@ export default function ({ getService }: FtrProviderContext) {
       expect(body.values.length).to.be.greaterThan(0);
     });
 
+    it('should filter dimension values with search parameter', async () => {
+      const searchTerm = 'station';
+      const { body, status } = await sendRequest({
+        indices: JSON.stringify(['fieldsense-station-metrics']),
+        dimensions: JSON.stringify(['station.name']),
+        from: timerange.min,
+        to: timerange.max,
+        search: searchTerm,
+      });
+
+      expect(status).to.be(200);
+      expect(body.values.length).to.be.greaterThan(0);
+      expect(body.values[0].value).to.be('FieldSense-station-01');
+    });
+
+    it('should return empty values when search does not match', async () => {
+      const { body, status } = await sendRequest({
+        indices: JSON.stringify(['fieldsense-station-metrics']),
+        dimensions: JSON.stringify(['station.name']),
+        from: timerange.min,
+        to: timerange.max,
+        search: 'nonexistent-value-xyz123',
+      });
+
+      expect(status).to.be(200);
+      expect(body.values).to.have.length(0);
+    });
+
     it('should return 400 if dimensions are missing', async () => {
       const { status } = await sendRequest({
         indices: JSON.stringify(['fieldsense-station-metrics']),
