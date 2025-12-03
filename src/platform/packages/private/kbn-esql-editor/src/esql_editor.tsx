@@ -124,6 +124,7 @@ const ESQLEditorInternal = function ESQLEditor({
   );
 
   const datePickerOpenStatusRef = useRef<boolean>(false);
+  const isFirstFocusRef = useRef<boolean>(true);
   const theme = useEuiTheme();
   const kibana = useKibana<ESQLEditorDeps>();
   const { application, core, fieldsMetadata, uiSettings, uiActions, data, usageCollection } =
@@ -1127,7 +1128,10 @@ const ESQLEditorInternal = function ESQLEditor({
                     });
 
                     editor.onDidFocusEditorText(() => {
-                      onEditorFocus({ shouldTriggerSuggestions: true });
+                      const shouldTriggerSuggestions = !isFirstFocusRef.current;
+                      isFirstFocusRef.current = false;
+
+                      onEditorFocus({ shouldTriggerSuggestions });
                     });
 
                     editor.onKeyDown(() => {
