@@ -68,6 +68,10 @@ export const BEARER_AUTH_LABEL = i18n.translate('connectorSpecs.authType.bearerA
   defaultMessage: 'Bearer token',
 });
 
+export const BEARER_TOKEN_LABEL = i18n.translate('connectorSpecs.bearerAuth.token.label', {
+  defaultMessage: 'Token',
+});
+
 export const BEARER_AUTH_REQUIRED_MESSAGE = i18n.translate(
   'connectorSpecs.bearerAuth.token.requiredMessage',
   {

@@ -21,6 +21,7 @@ export {
 } from './src/models/ingest/routing';
 
 export { isRootStreamDefinition } from './src/helpers/is_root';
+export { isOtelStream } from './src/helpers/is_otel_stream';
 export { getIndexPatternsForStream } from './src/helpers/hierarchy_helpers';
 
 export {
@@ -117,6 +118,8 @@ export {
   type FailureStoreStatsResponse,
   isEnabledFailureStore,
   isInheritFailureStore,
+  isDisabledLifecycleFailureStore,
+  isEnabledLifecycleFailureStore,
 } from './src/models/ingest/failure_store';
 
 export type {
@@ -139,3 +142,15 @@ export {
   featureWithFilterSchema,
   isFeatureWithFilter,
 } from './src/feature';
+
+export {
+  type BaseSimulationError,
+  type SimulationError,
+  type DocSimulationStatus,
+  type SimulationDocReport,
+  type ProcessorMetrics,
+  type DetectedField,
+  type WithNameAndEsType,
+  type DocumentsMetrics,
+  type ProcessingSimulationResponse,
+} from './src/models/processing_simulation';
