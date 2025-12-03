@@ -24,7 +24,7 @@ export const chatExperienceSetting: Omit<UiSettingsParams<AIChatExperience>, 'va
         'Choose which chat experience should be the default for all users in this space, between Classic Al Assistant or Al Agents. {link}',
       values: {
         // TODO: add the actual link when available
-        link: '<a href="https://www.elastic.co/guide/en/kibana/solutions/observability/observability-ai-assistant" target="_blank" rel="noopener noreferrer">Learn more</a>',
+        link: '<a href="" target="_blank" rel="noopener noreferrer" class="euiLink">Learn more</a>',
       },
     }
   ),
