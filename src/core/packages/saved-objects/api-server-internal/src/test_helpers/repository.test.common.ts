@@ -150,6 +150,11 @@ export interface TypeIdTuple {
 
 export const mappings: SavedObjectsTypeMappingDefinition = {
   properties: {
+    foo: {
+      properties: {
+        // No fields indexed
+      },
+    },
     config: {
       properties: {
         otherField: {
