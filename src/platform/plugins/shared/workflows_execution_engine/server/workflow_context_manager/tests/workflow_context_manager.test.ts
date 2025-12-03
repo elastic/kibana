@@ -51,6 +51,7 @@ describe('WorkflowContextManager', () => {
     type: 'atomic',
     stepId: 'fake_id',
     stepType: 'fake_type',
+    configuration: {},
   };
   const fakeStackFrames: StackFrame[] = [];
 
