@@ -242,7 +242,7 @@ export class SLOPlugin
 
     new BulkDeleteTask({
       core,
-      plugins: mappedPlugins,
+      taskManager: plugins.taskManager,
       logFactory: this.initContext.logger,
     });
 
