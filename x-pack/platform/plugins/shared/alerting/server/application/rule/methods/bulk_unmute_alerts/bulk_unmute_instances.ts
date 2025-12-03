@@ -10,7 +10,7 @@ import type {
   SavedObject,
   SavedObjectsBulkUpdateResponse,
 } from '@kbn/core-saved-objects-api-server';
-import { transformUnmuteRequestToRuleAttributes } from './transform_rule_unmute_instance_ids';
+import { transformUnmuteRequestToRuleAttributes } from './transforms/transform_rule_unmute_instance_ids';
 import { retryIfBulkEditConflicts } from '../../../../rules_client/common';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { bulkUnmuteAlertsParamsSchema } from './schemas/bulk_unmute_alert_params_schema';
