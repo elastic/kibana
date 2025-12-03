@@ -145,26 +145,28 @@ export class EntityStoreESQLService {
       state.config
     );
 
+    // this.logger.debug(`[Entity Store ESQL] [${type}-${this.namespace}] ${query}`);
+
     const esqlResponse = await executeEsqlQuery(this.esClient, query, this.logger);
 
     await storeEntityStoreDocs(this.esClient, type, this.namespace, esqlResponse, this.logger);
 
     // Extract last seen timestamp from columnar format
-    let lastSeenTimestamp;
-    const { columns, values } = esqlResponse;
-    if (values.length > 0) {
-      // Find @timestamp column index
-      const timestampIndex = columns.findIndex((col) => col.name === '@timestamp');
-      if (timestampIndex !== -1) {
-        // Get the last row's timestamp
-        const lastRow = values[values.length - 1];
-        lastSeenTimestamp = lastRow[timestampIndex] as string;
-      } else {
-        lastSeenTimestamp = now;
-      }
-    } else {
-      lastSeenTimestamp = now;
-    }
+    const lastSeenTimestamp = now;
+    const { values } = esqlResponse;
+    // if (values.length > 0) {
+    //   // Find @timestamp column index
+    //   const timestampIndex = columns.findIndex((col) => col.name === '@timestamp');
+    //   if (timestampIndex !== -1) {
+    //     // Get the last row's timestamp
+    //     const lastRow = values[values.length - 1];
+    //     lastSeenTimestamp = lastRow[timestampIndex] as string;
+    //   } else {
+    //     lastSeenTimestamp = now;
+    //   }
+    // } else {
+    //   lastSeenTimestamp = now;
+    // }
 
     await updateEntityStoreLastExecutionTime(
       this.soClient,

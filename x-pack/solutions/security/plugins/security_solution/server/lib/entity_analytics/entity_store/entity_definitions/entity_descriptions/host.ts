@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { collectValues as collect } from './field_utils';
+import { collectValues as collect, newestValue } from './field_utils';
 import type { EntityDescription } from '../types';
 import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './common';
 
 export const HOST_DEFINITION_VERSION = '1.0.0';
-export const HOST_IDENTITY_FIELD = 'host.name';
+export const HOST_IDENTITY_FIELD = 'host.entity.id';
 
 const HOST_ENTITY_TYPE = 'Host';
 export const hostEntityEngineDescription: EntityDescription = {
@@ -31,6 +31,7 @@ export const hostEntityEngineDescription: EntityDescription = {
     },
   ],
   fields: [
+    newestValue({ source: 'host.name' }),
     collect({ source: 'host.domain' }),
     collect({ source: 'host.hostname' }),
     collect({ source: 'host.id' }),

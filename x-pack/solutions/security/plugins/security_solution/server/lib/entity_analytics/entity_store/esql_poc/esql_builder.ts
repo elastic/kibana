@@ -39,11 +39,12 @@ export const buildESQLQuery = async (
   const latestIndex = generateLatestIndex(entityType, namespace);
 
   return `FROM ${indexPatterns.join(', ')}
-  | WHERE ${entityIdFiler(description)}
+  | WHERE ${entityIdFilter(description)}
       AND @timestamp > TO_DATETIME("${fromDateISO}")
       AND @timestamp <= TO_DATETIME("${toDateISO}")
-  | SORT @timestamp ASC
-  | LIMIT ${config.maxPageSearchSize}
+  // | SORT @timestamp ASC
+  // | LIMIT ${config.maxPageSearchSize}
+  ${generateEUID(description)}
   | RENAME
     ${description.identityField} AS ${recentData(description.identityField)}
   | STATS
@@ -59,12 +60,66 @@ export const buildESQLQuery = async (
     ${customFieldEvalLogic()}
   | KEEP ${fieldsToKeep(description)}
   | LIMIT ${config.maxPageSearchSize}
-  | SORT @timestamp ASC`;
+  // | SORT @timestamp ASC`;
 };
 
-function entityIdFiler({ identityField }: EntityDescription) {
+function entityIdFilter({ identityField, entityType }: EntityDescription) {
+  if (entityType === 'user') {
+    return `(
+              (user.entity.id IS NOT NULL AND user.entity.id != "")
+            OR (user.email IS NOT NULL AND user.email != "")
+            OR (user.name IS NOT NULL AND user.name != "")
+            OR (user.id IS NOT NULL AND user.id != "")
+          )`;
+  } else if (entityType === 'host') {
+    return `(
+              (host.entity.id IS NOT NULL AND host.entity.id != "")
+            OR (host.id IS NOT NULL AND host.id != "")
+            OR (host.mac IS NOT NULL AND host.mac != "")
+            OR (host.name IS NOT NULL AND host.name != "")
+            OR (host.hostname IS NOT NULL AND host.hostname != "")
+          )`;
+  }
+
   return `${identityField} IS NOT NULL
   AND ${identityField} != ""`;
+}
+
+function generateEUID({ entityType }: EntityDescription) {
+  if (entityType === 'user') {
+    return `| EVAL user.entity.id = COALESCE(
+                user.entity.id,
+                user.id,
+                user.email,
+                CASE(user.name IS NOT NULL AND user.name != "", 
+                    COALESCE(
+                        CASE(host.id IS NOT NULL AND host.id != "", CONCAT(user.name, "@", host.id), NULL),
+                        CASE(host.mac IS NOT NULL AND host.mac != "", CONCAT(user.name, "@", host.mac), NULL),
+                        CASE(host.name IS NOT NULL AND host.name != "", CONCAT(user.name, "@", host.name), NULL),
+                        CASE(host.hostname IS NOT NULL AND host.hostname != "", CONCAT(user.name, "@", host.hostname), NULL)
+                    ),
+                    NULL
+                ),
+                user.name
+            )`;
+  } else if (entityType === 'host') {
+    return `| EVAL host.entity.id = COALESCE(
+                host.entity.id,
+                host.id,
+                host.mac,
+                CASE(host.ip IS NOT NULL,
+                  COALESCE(
+                      CASE(host.name IS NOT NULL AND host.name != "", CONCAT(host.name, "|", TO_STRING(host.ip)), NULL),
+                      CASE(host.hostname IS NOT NULL AND host.hostname != "", CONCAT(host.hostname, "|", TO_STRING(host.ip)), NULL)
+                  ),
+                  NULL
+                ),
+                host.name,
+                host.hostname
+              )`;
+  }
+
+  return '';
 }
 
 function recentFieldStats({ fields }: EntityDescription) {

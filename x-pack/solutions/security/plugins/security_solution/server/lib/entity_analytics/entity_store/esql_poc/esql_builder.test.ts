@@ -52,16 +52,36 @@ describe('buildEsql', () => {
     expect(cleanEsql(esql)).toEqual(
       cleanEsql(`
      FROM logs-*, .entities.v1.updates.security_host_default
-      | WHERE host.name IS NOT NULL
-      AND host.name != ""
+      | WHERE (
+                  (host.entity.id IS NOT NULL AND host.entity.id != "")
+                OR (host.id IS NOT NULL AND host.id != "")
+                OR (host.mac IS NOT NULL AND host.mac != "")
+                OR (host.name IS NOT NULL AND host.name != "")
+                OR (host.hostname IS NOT NULL AND host.hostname != "")
+              )
           AND @timestamp > TO_DATETIME("${from}")
           AND @timestamp <= TO_DATETIME("${to}")
-      | SORT @timestamp ASC
-      | LIMIT 10
+      // | SORT @timestamp ASC
+      // | LIMIT 10
+      | EVAL host.entity.id = COALESCE(
+                    host.entity.id,
+                    host.id,
+                    host.mac,
+                    CASE(host.ip IS NOT NULL,
+                      COALESCE(
+                          CASE(host.name IS NOT NULL AND host.name != "", CONCAT(host.name, "|", TO_STRING(host.ip)), NULL),
+                          CASE(host.hostname IS NOT NULL AND host.hostname != "", CONCAT(host.hostname, "|", TO_STRING(host.ip)), NULL)
+                      ),
+                      NULL
+                    ),
+                    host.name,
+                    host.hostname
+                  )
       | RENAME
-        host.name AS recent.host.name
+        host.entity.id AS recent.host.entity.id
       | STATS
         recent.timestamp = MAX(@timestamp),
+        recent.host.name = LAST(host.name, @timestamp),
         recent.host.domain = MV_DEDUPE(TOP(host.domain, 10)),
         recent.host.hostname = MV_DEDUPE(TOP(host.hostname, 10)),
         recent.host.id = MV_DEDUPE(TOP(host.id, 10)),
@@ -96,12 +116,13 @@ describe('buildEsql', () => {
         recent.entity.relationships.Dependent_of = MV_DEDUPE(TOP(host.entity.relationships.Dependent_of, 10)),
         recent.entity.relationships.Owned_by = MV_DEDUPE(TOP(host.entity.relationships.Owned_by, 10)),
         recent.entity.relationships.Accessed_frequently_by = MV_DEDUPE(TOP(host.entity.relationships.Accessed_frequently_by, 10))
-        BY recent.host.name
+        BY recent.host.entity.id
       | LOOKUP JOIN .entities.v1.latest.security_host_default
-          ON recent.host.name == host.name
+          ON recent.host.entity.id == host.entity.id
       | RENAME
-        recent.host.name AS host.name
+        recent.host.entity.id AS host.entity.id
       | EVAL
+        host.name = COALESCE(recent.host.name, host.name),
         host.domain = MV_DEDUPE(COALESCE(MV_APPEND(recent.host.domain, host.domain), recent.host.domain)),
         host.hostname = MV_DEDUPE(COALESCE(MV_APPEND(recent.host.hostname, host.hostname), recent.host.hostname)),
         host.id = MV_DEDUPE(COALESCE(MV_APPEND(recent.host.id, host.id), recent.host.id)),
@@ -136,10 +157,11 @@ describe('buildEsql', () => {
         entity.relationships.Dependent_of = MV_DEDUPE(COALESCE(MV_APPEND(recent.entity.relationships.Dependent_of, entity.relationships.Dependent_of), recent.entity.relationships.Dependent_of)),
         entity.relationships.Owned_by = MV_DEDUPE(COALESCE(MV_APPEND(recent.entity.relationships.Owned_by, entity.relationships.Owned_by), recent.entity.relationships.Owned_by)),
         entity.relationships.Accessed_frequently_by = MV_DEDUPE(COALESCE(MV_APPEND(recent.entity.relationships.Accessed_frequently_by, entity.relationships.Accessed_frequently_by), recent.entity.relationships.Accessed_frequently_by)),
-        entity.id = host.name,
-            @timestamp = recent.timestamp,
+        entity.id = host.entity.id,
+        @timestamp = recent.timestamp,
         entity.name = COALESCE(entity.name, entity.id)
-          | KEEP host.domain,
+      | KEEP host.name,
+        host.domain,
         host.hostname,
         host.id,
         host.os.name,
@@ -175,9 +197,9 @@ describe('buildEsql', () => {
         entity.relationships.Accessed_frequently_by,
         @timestamp,
         entity.id,
-        host.name
+        host.entity.id
       | LIMIT 10
-      | SORT @timestamp ASC
+      // | SORT @timestamp ASC
       `)
     );
   });

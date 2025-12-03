@@ -79,6 +79,7 @@ const doRunEntityStoreCycle = async (
   const state = taskInstance.state as LatestTaskStateSchema;
   const taskId = taskInstance.id;
   const log = entityStoreTaskLogFactory(logger, taskId);
+  const logError = entityStoreErrorTaskLogFactory(logger, taskId);
   const namespace = state.namespace;
 
   log('Running cycle');
@@ -136,7 +137,7 @@ const doRunEntityStoreCycle = async (
     await service.runEntityStoreCycleForAllEntities();
     log(`Executed esql cycle execute in ${Date.now() - start}ms`);
   } catch (e) {
-    log(`Error executing esql cycle execute: ${e.message}`);
+    logError(`Error executing esql cycle execute: ${e.message}`);
   }
 
   const taskCompletionTime = moment().utc().toISOString();
@@ -155,6 +156,7 @@ export const startEntityStoreESQLExecuteTask = async (
 ) => {
   const taskId = getTaskId(namespace);
   const log = entityStoreTaskLogFactory(logger, taskId);
+  const logError = entityStoreErrorTaskLogFactory(logger, taskId);
 
   log('attempting to schedule');
   try {
@@ -169,7 +171,7 @@ export const startEntityStoreESQLExecuteTask = async (
       params: { version: ENTITY_STORE_ESQL_VERSION },
     });
   } catch (e) {
-    logger.warn(`[Entity Store]  [task ${taskId}]: error scheduling task, received ${e.message}`);
+    logError(`[Entity Store]  [task ${taskId}]: error scheduling task, received ${e.message}`);
     throw e;
   }
 };
@@ -181,14 +183,13 @@ export const removeEntityStoreESQLExecuteTask = async (
 ) => {
   const taskId = getTaskId(namespace);
   const log = entityStoreTaskLogFactory(logger, taskId);
+  const logError = entityStoreErrorTaskLogFactory(logger, taskId);
   try {
     await taskManager.remove(taskId);
     log(`Removed entity store ESQL runner namespace ${namespace}`);
   } catch (err) {
     if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
-      logger.error(
-        `[Entity Store ESQL] Failed to entity store ESQL runner namespace: ${err.message}`
-      );
+      logError(`Failed to entity store ESQL runner namespace: ${err.message}`);
       throw err;
     }
   }
@@ -198,6 +199,11 @@ const entityStoreTaskLogFactory =
   (logger: Logger, taskId: string) =>
   (message: string): void =>
     logger.info(`[Entity Store ESQL] [task ${taskId}]: ${message}`);
+
+const entityStoreErrorTaskLogFactory =
+  (logger: Logger, taskId: string) =>
+  (message: string): void =>
+    logger.error(`[Entity Store ESQL] [task ${taskId}]: ${message}`);
 
 const stateSchemaByVersion = {
   1: {
