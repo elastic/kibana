@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
-
 export const customInstructionsBlock = (instructions: string | undefined): string => {
   if (!instructions) {
     return '';
@@ -20,8 +18,4 @@ Custom Instruction:
 """
 ${instructions}
 """`;
-};
-
-export const formatDate = (date: Date = new Date()): string => {
-  return moment(date).format('YYYY/MM/DD');
 };
