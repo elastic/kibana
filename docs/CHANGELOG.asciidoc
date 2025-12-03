@@ -117,8 +117,13 @@ include::upgrade-notes.asciidoc[]
 
 [[release-notes-8.19.8]]
 == {kib} 8.19.8
+The 8.19.8 release includes the following enhancements and fixes.
 
-The 8.19.8 release includes the following fixes.
+[float]
+[[enhancement-v8.19.8]]
+=== Enhancements
+Observability::
+* Adds new sub-feature privileges for Synthetics global parameters  ({kibana-pull}243821[#243821]).
 
 [float]
 [[fixes-v8.19.8]]
