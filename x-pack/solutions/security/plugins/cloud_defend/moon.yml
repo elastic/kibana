@@ -38,6 +38,7 @@ dependsOn:
   - '@kbn/es-types'
   - '@kbn/data-views-plugin'
   - '@kbn/utility-types'
+  - '@kbn/kubernetes-security-plugin'
   - '@kbn/core-http-router-server-mocks'
   - '@kbn/code-editor'
   - '@kbn/code-editor-mock'

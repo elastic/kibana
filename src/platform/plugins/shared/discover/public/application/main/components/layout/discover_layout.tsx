@@ -37,7 +37,7 @@ import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
-import { useAppStateSelector } from '../../state_management/discover_app_state_container';
+import { useAppStateSelector } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
@@ -99,8 +99,9 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     discoverFeatureFlags,
   } = useDiscoverServices();
   const { scopedEBTManager } = useScopedServices();
+  const dispatch = useInternalStateDispatch();
+  const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const styles = useMemoCss(componentStyles);
-
   const globalQueryState = data.query.getState();
   const { main$ } = stateContainer.dataState.data$;
   const [query, savedQuery, columns, sort, grid] = useAppStateSelector((state) => [
@@ -148,9 +149,9 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
   const setAppState = useCallback<UseColumnsProps['setAppState']>(
     ({ settings, ...rest }) => {
-      stateContainer.appState.update({ ...rest, grid: settings as DiscoverGridSettings });
+      dispatch(updateAppState({ appState: { ...rest, grid: settings as DiscoverGridSettings } }));
     },
-    [stateContainer]
+    [dispatch, updateAppState]
   );
 
   const {
@@ -271,9 +272,9 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
   const onAddBreakdownField = useCallback(
     (field: DataViewField | undefined) => {
-      stateContainer.appState.update({ breakdownField: field?.name });
+      dispatch(updateAppState({ appState: { breakdownField: field?.name } }));
     },
-    [stateContainer]
+    [dispatch, updateAppState]
   );
 
   const onFieldEdited: (options: {
@@ -384,7 +385,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     stateContainer.dataState.cancel();
   }, [stateContainer.dataState]);
 
-  const dispatch = useInternalStateDispatch();
   const layoutUiState = useCurrentTabSelector((state) => state.uiState.layout);
   const setLayoutUiState = useCurrentTabAction(internalStateActions.setLayoutUiState);
   const onInitialStateChange = useCallback(
@@ -407,7 +407,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         styles.dscPage,
         css`
           ${useEuiBreakpoint(['m', 'l', 'xl'])} {
-            ${kbnFullBodyHeightCss(tabsEnabled ? '32px' : undefined)}
+            ${kbnFullBodyHeightCss(tabsEnabled ? '40px' : undefined)}
           }
         `,
       ]}
@@ -527,7 +527,7 @@ const getOperator = (fieldName: string, values: unknown, operation: '+' | '-') =
 const componentStyles = {
   dscPage: ({ euiTheme }: UseEuiTheme) =>
     css({
-      overflow: 'hidden',
+      overflow: 'visible',
       padding: 0,
       backgroundColor: euiTheme.colors.backgroundBasePlain,
     }),
