@@ -143,7 +143,7 @@ function buildFormBasedLayer(layer: RegionMapStateNoESQL): FormBasedPersistedSta
 
   addLayerColumn(defaultLayer, getAccessorName('metric'), columns);
   const breakdownColumn = fromBucketLensApiToLensState(
-    layer.region as LensApiBucketOperations,
+    layer.region,
     columns.map((col) => ({ column: col, id: getAccessorName('metric') }))
   );
   addLayerColumn(defaultLayer, getAccessorName('region'), breakdownColumn, true);
