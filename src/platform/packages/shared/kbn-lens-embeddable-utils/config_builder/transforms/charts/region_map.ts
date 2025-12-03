@@ -13,6 +13,7 @@ import type {
   ChoroplethChartState,
   PersistedIndexPatternLayer,
   TextBasedLayer,
+  TypedLensSerializedState,
 } from '@kbn/lens-common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/types';
@@ -158,7 +159,18 @@ function getValueColumns(layer: RegionMapStateESQL) {
   ];
 }
 
-export function fromAPItoLensState(config: RegionMapState): LensAttributes {
+type RegionMapAttributes = Extract<
+  TypedLensSerializedState['attributes'],
+  { visualizationType: 'lnsChoropleth' }
+>;
+
+type RegionMapAttributesWithoutFiltersAndQuery = Omit<RegionMapAttributes, 'state'> & {
+  state: Omit<RegionMapAttributes['state'], 'filters' | 'query'>;
+};
+
+export function fromAPItoLensState(
+  config: RegionMapState
+): RegionMapAttributesWithoutFiltersAndQuery {
   const _buildDataLayer = (cfg: unknown, i: number) =>
     buildFormBasedLayer(cfg as RegionMapStateNoESQL);
 
@@ -181,8 +193,6 @@ export function fromAPItoLensState(config: RegionMapState): LensAttributes {
     state: {
       datasourceStates: layers,
       internalReferences,
-      filters: [],
-      query: { language: 'kuery', query: '' },
       visualization,
       adHocDataViews: config.dataset.type === 'index' ? adHocDataViews : {},
     },
