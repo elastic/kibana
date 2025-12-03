@@ -12,6 +12,7 @@ import { EntityStoreCapability } from '@kbn/entities-schema';
 import type {
   BulkOperationContainer,
   BulkUpdateAction,
+  TransformGetTransformTransformSummary,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityContainer } from '../../../../common/api/entity_analytics/entity_store/entities/upsert_entities_bulk.gen';
 import type { EntityType as APIEntityType } from '../../../../common/api/entity_analytics/entity_store/common.gen';
@@ -28,12 +29,14 @@ import {
   DocumentVersionConflictError,
   EntityNotFoundError,
 } from './errors';
-import { getEntitiesIndexName } from './utils';
+import { getEntitiesIndexName, buildEntityDefinitionId } from './utils';
 import { buildUpdateEntityPainlessScript } from './painless/build_update_script';
 import { getEntityUpdatesDataStreamName } from './elasticsearch_assets/updates_entity_data_stream';
 import { engineDescriptionRegistry } from './installation/engine_description';
 import type { EntityDescription } from './entity_definitions/types';
 import type { FieldDescription } from './installation/types';
+import { generateLatestTransformId } from '@kbn/entityManager-plugin/server/lib/entities/helpers/generate_component_id';
+import type { EntityDefinition } from '@kbn/entities-schema';
 
 interface CustomEntityFieldsAttributesHolder {
   attributes?: Record<string, unknown>;
@@ -155,7 +158,33 @@ export class EntityStoreCrudClient {
       id: uuidv4(),
       index: getEntityUpdatesDataStreamName(type, this.namespace),
       document: buildDocumentToUpdate(type, normalizedDocToECS),
+      refresh: 'true',
     });
+
+    if (updateByQueryResp.updated === 0) {
+      const transformId = generateLatestTransformId({ id: buildEntityDefinitionId(type, this.namespace) } as EntityDefinition)
+      const transformResponse = await this.esClient.transform.getTransform({ transform_id: transformId });
+      const transformConfig = transformResponse.transforms.find(t => t.id === transformId);
+      if (!transformConfig) {
+        throw new Error(`Transform '${transformId}' not found`);
+      }
+
+      const previewTransform = await this.esClient.transform.previewTransform<{ _source: Entity, _id: string }>(
+        getPreviewTransformConfigWithEntity(transformConfig, entityTypeDescription.identityField, doc.entity.id),
+        { querystring: { 'as_index_request': true } }
+      );
+
+      const previewDoc = previewTransform.preview.find(v => v._source.entity.id === doc.entity.id)
+      if (!previewDoc) {
+        throw new EntityNotFoundError(type, doc.entity.id);
+      }
+
+      await this.esClient.create({
+        id: previewDoc._id,
+        index: getEntitiesIndexName(type, this.namespace),
+        document: buildDocumentToUpdate(type, normalizedDocToECS),
+      });
+    }
   }
 
   public async deleteEntity(type: APIEntityType, body: DeleteRequestBody) {
@@ -336,4 +365,26 @@ function getFieldDescriptions(
   }
 
   return descriptions;
+}
+
+
+function getPreviewTransformConfigWithEntity({ source, pivot, dest, settings, sync, frequency }: TransformGetTransformTransformSummary, identityField: string, id: string) {
+  return {
+    pivot, dest, settings, sync, frequency, source: {
+      ...source,
+      query: {
+        bool: {
+          must: [
+            ...(Array.isArray(source.query?.bool?.must)
+              ? source.query.bool.must
+              : source.query?.bool?.must
+                ? [source.query.bool.must]
+                : []),
+            { term: { [identityField]: id } }
+          ],
+          must_not: source.query?.bool?.must_not || [],
+        },
+      },
+    }
+  }
 }
