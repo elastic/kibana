@@ -32,7 +32,7 @@ import { SearchBarSection } from './search_bar/search_bar_section';
 import { SchedulesFlyout } from './schedule_flyout';
 import { TableSection } from './table/table_section';
 import type { AssigneesIdsSelection } from '../../../common/components/assignees/types';
-import { ConnectorFilter } from './connector_filter';
+import { ConnectorFilter } from '../../../attack_discovery/pages/results/history/search_and_filter/connector_filter';
 
 export const CONTENT_TEST_ID = 'attacks-page-content';
 export const SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID = 'attacks-page-security-solution-page-wrapper';
