@@ -201,6 +201,30 @@ describe('When using the ArtifactListPage component', () => {
         expect(importExportUi.getExportButton()).toBeEnabled();
       });
 
+      it('should display the import flyout when import is clicked', async () => {
+        await renderWithListData();
+
+        await userEvent.click(importExportUi.getMenuButton());
+        await userEvent.click(importExportUi.getImportButton());
+
+        expect(importFlyoutUi.queryImportFlyout()).toBeInTheDocument();
+      });
+
+      it('should display the import flyout if it is requested via URL param', async () => {
+        history.push('somepage?show=import');
+        await renderWithListData();
+
+        expect(importFlyoutUi.queryImportFlyout()).toBeInTheDocument();
+      });
+
+      it('should not display the import flyout if it is requested via URL param without FF enabled', async () => {
+        setExperimentalFlag({ endpointArtifactsExportImportEnabled: false });
+        history.push('somepage?show=import');
+        await renderWithListData();
+
+        expect(importFlyoutUi.queryImportFlyout()).not.toBeInTheDocument();
+      });
+
       it('should refetch list data after a successful import', async () => {
         await renderWithListData();
 
@@ -269,16 +293,19 @@ describe('When using the ArtifactListPage component', () => {
       it.each([
         ['create', 'show=create'],
         ['edit', 'show=edit&itemId=123'],
+        ['import', 'show=import'],
       ])(
         'should NOT show flyout if url has a show param of %s but the action is not allowed',
         async (_, urlParam) => {
+          setExperimentalFlag({ endpointArtifactsExportImportEnabled: true });
           history.push(`somepage?${urlParam}`);
           const { queryByTestId } = await renderWithListData({
             allowCardCreateAction: false,
             allowCardEditAction: false,
           });
 
-          expect(queryByTestId('testPage-flyout')).toBeNull();
+          expect(queryByTestId('testPage-flyout')).not.toBeInTheDocument();
+          expect(importFlyoutUi.queryImportFlyout()).not.toBeInTheDocument();
         }
       );
     });
