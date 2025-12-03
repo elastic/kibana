@@ -81,7 +81,7 @@ export const NameStreamSection = ({
 
   return (
     <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none" css={panelStyles}>
-      <EuiTitle size="xs">
+      <EuiTitle size="xxs">
         <h4>
           <FormattedMessage
             id="xpack.createClassicStreamFlyout.nameAndConfirmStep.nameTitle"
