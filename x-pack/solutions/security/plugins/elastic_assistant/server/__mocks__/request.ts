@@ -52,6 +52,7 @@ import {
   ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION,
   ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND,
   ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL_FIND,
+  ATTACK_DISCOVERY_INTERNAL_MISSING_PRIVILEGES,
 } from '@kbn/elastic-assistant-common';
 import {
   getAppendConversationMessagesSchemaMock,
@@ -330,6 +331,12 @@ export const postDefendInsightsRequest = (body: DefendInsightsPostRequestBody) =
     method: 'post',
     path: DEFEND_INSIGHTS,
     body,
+  });
+
+export const getAttackDiscoveryMissingPrivilegesRequest = () =>
+  requestMock.create({
+    method: 'get',
+    path: ATTACK_DISCOVERY_INTERNAL_MISSING_PRIVILEGES,
   });
 
 export const findAttackDiscoverySchedulesRequest = () =>
