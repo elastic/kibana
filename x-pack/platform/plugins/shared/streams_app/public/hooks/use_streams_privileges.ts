@@ -95,10 +95,7 @@ export function useStreamsPrivileges(): StreamsPrivileges {
       },
       significantEvents: license && {
         enabled: significantEventsEnabled,
-        available:
-          significantEventsEnabled &&
-          license.hasAtLeast('enterprise') &&
-          significantEventsAvailableForTier,
+        available: license.hasAtLeast('enterprise') && significantEventsAvailableForTier,
       },
       significantEventsAnalyzer: license && {
         enabled: significantEventsAnalyzerEnabled,
