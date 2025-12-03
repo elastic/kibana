@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import {
   EuiButtonIcon,
   EuiFilePicker,
@@ -46,6 +46,26 @@ export const ArgumentFileSelector = memo<
   const state = useMemo<ArgumentFileSelectorState>(() => {
     return _store ?? { isPopoverOpen: true };
   }, [_store]);
+
+  const selectedFileDisplayText = useMemo(() => {
+    // When command is initiated from console input history or from a copy/paste,
+    // the value is a string, so treat it as if no file is selected
+    if (value && value instanceof File) {
+      return valueText || INITIAL_DISPLAY_LABEL;
+    }
+
+    return INITIAL_DISPLAY_LABEL;
+  }, [value, valueText]);
+
+  const selectedFileTitleTooltip = useMemo(() => {
+    // When command is initiated from console input history or from a copy/paste,
+    // the value is a string, so treat it as if no file is selected
+    if (value && value instanceof File) {
+      return selectedFileDisplayText || NO_FILE_SELECTED;
+    }
+
+    return NO_FILE_SELECTED;
+  }, [selectedFileDisplayText, value]);
 
   const setIsPopoverOpen = useCallback(
     (newValue: boolean) => {
@@ -90,6 +110,18 @@ export const ArgumentFileSelector = memo<
     [onChange, state]
   );
 
+  useEffect(() => {
+    // If value is true, but not a File object, then reset value and valueText
+    // Will happen when user might paste teh command into the console or pick from console's input history
+    if (value && !(value instanceof File)) {
+      onChange({
+        value: undefined,
+        valueText: '',
+        store: state,
+      });
+    }
+  }, [onChange, state, value]);
+
   return (
     <div>
       <EuiPopover
@@ -100,8 +132,8 @@ export const ArgumentFileSelector = memo<
         button={
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
             <EuiFlexItem grow={false} className="eui-textTruncate" onClick={handleOpenPopover}>
-              <div className="eui-textTruncate" title={valueText || NO_FILE_SELECTED}>
-                {valueText || INITIAL_DISPLAY_LABEL}
+              <div className="eui-textTruncate" title={selectedFileTitleTooltip}>
+                {selectedFileDisplayText}
               </div>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

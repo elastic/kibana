@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await kibanaServer.importExport.load(oldColorMappingsDashboardFixture);
       await dashboard.navigateToApp();
-      await dashboard.gotoDashboardEditMode('Old Color Mappings');
+      await dashboard.loadDashboardInEditMode('Old Color Mappings');
       await elasticChart.setNewChartUiDebugFlag(true);
       await testSubjects.click('querySubmitButton');
 

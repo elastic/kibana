@@ -53,9 +53,6 @@ export function parseClientOptions(
     clientOptions.maxCompressedResponseSize = config.maxResponseSize.getValueInBytes();
   }
 
-  if (config.pingTimeout != null) {
-    clientOptions.pingTimeout = getDurationAsMs(config.pingTimeout);
-  }
   if (config.requestTimeout != null) {
     clientOptions.requestTimeout = getDurationAsMs(config.requestTimeout);
   }

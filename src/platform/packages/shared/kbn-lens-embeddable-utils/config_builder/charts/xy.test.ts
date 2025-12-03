@@ -9,7 +9,7 @@
 
 import { buildXY } from './xy';
 import { mockDataViewsService } from './mock_utils';
-import type { XYState } from '@kbn/lens-plugin/public';
+import type { XYState } from '@kbn/lens-common';
 import { LegendValue } from '@elastic/charts';
 
 test('generates xy chart config', async () => {
@@ -41,13 +41,7 @@ test('generates xy chart config', async () => {
 
   expect(result).toMatchInlineSnapshot(`
     Object {
-      "references": Array [
-        Object {
-          "id": "test",
-          "name": "indexpattern-datasource-layer-layer_0",
-          "type": "index-pattern",
-        },
-      ],
+      "references": Array [],
       "state": Object {
         "adHocDataViews": Object {
           "test": Object {},
@@ -92,7 +86,13 @@ test('generates xy chart config', async () => {
           },
         },
         "filters": Array [],
-        "internalReferences": Array [],
+        "internalReferences": Array [
+          Object {
+            "id": "test",
+            "name": "indexpattern-datasource-layer-layer_0",
+            "type": "index-pattern",
+          },
+        ],
         "query": Object {
           "language": "kuery",
           "query": "",

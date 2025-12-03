@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, merge } from 'rxjs';
 import type { ESQLControlState } from '@kbn/esql-types';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
-import { initializeStateManager } from '@kbn/presentation-publishing';
+import { initializeStateManager, type PublishingSubject } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { OptionsListSelection } from '../../../common/options_list';
@@ -115,7 +115,7 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
       });
 
       const componentStaticState = {
-        singleSelect: true,
+        singleSelect: initialState.singleSelect ?? true,
         exclude: false,
         existsSelected: false,
         requestSize: 0,
@@ -136,13 +136,31 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
         ...selections.internalApi,
         uuid,
         makeSelection(key?: string) {
-          if (key) selections.internalApi.setSelectedOptions([key]);
+          const singleSelect = selections.api.singleSelect$.value ?? true;
+          if (singleSelect && key) {
+            selections.internalApi.setSelectedOptions([key]);
+          } else if (key) {
+            // Get current selection state, not initial state
+            const current = componentApi.selectedOptions$.value || [];
+            const isSelected = current.includes(key);
+            // Don't allow empty selections until "ANY" value is supported: https://github.com/elastic/elasticsearch/issues/136735
+            if (isSelected && current.length === 1) {
+              return;
+            }
+            const newSelection = isSelected ? current.filter((k) => k !== key) : [...current, key];
+            selections.internalApi.setSelectedOptions(newSelection);
+          }
         },
         // Pass no-ops and default values for all of the features of OptionsList that ES|QL controls don't currently use
         ...componentStaticStateManager.api,
+        singleSelect$: selections.api.singleSelect$ as PublishingSubject<boolean | undefined>,
         deselectOption: () => {},
-        selectAll: () => {},
-        deselectAll: () => {},
+        selectAll: (keys: string[]) => {
+          selections.internalApi.setSelectedOptions(keys);
+        },
+        deselectAll: () => {
+          // Don't allow empty selections until "ANY" value is supported: https://github.com/elastic/elasticsearch/issues/136735
+        },
         loadMoreSubject: new BehaviorSubject<void>(undefined),
         fieldFormatter: new BehaviorSubject((v: string) => v),
       };
@@ -161,7 +179,11 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
               },
             }}
           >
-            <OptionsListControl controlPanelClassName={controlPanelClassName} />
+            <OptionsListControl
+              controlPanelClassName={controlPanelClassName}
+              // Don't allow empty selections until "ANY" value is supported: https://github.com/elastic/elasticsearch/issues/136735
+              disableMultiValueEmptySelection={true}
+            />
           </OptionsListControlContext.Provider>
         ),
       };

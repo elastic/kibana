@@ -41,6 +41,7 @@ export const ConfigurationFormControlled: React.FC<ConfigurationFormControlledPr
       {!!error && (
         <>
           <EuiCallOut
+            announceOnMount={false}
             color="danger"
             iconType="error"
             title={i18n.translate('cloud.connectionDetails.tab.apiKeys.error.title', {

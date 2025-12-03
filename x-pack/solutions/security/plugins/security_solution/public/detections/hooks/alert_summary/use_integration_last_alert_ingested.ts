@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { getESQLResults } from '@kbn/esql-utils';
 import { esqlResponseToRecords } from '../../../common/utils/esql';
 import { useKibana } from '../../../common/lib/kibana';

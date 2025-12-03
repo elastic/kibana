@@ -31,7 +31,7 @@ export const HostCharts = React.forwardRef<HTMLDivElement, Props>(
   ({ entityId, dataView, dateRange, metric, onShowAll, overview = false, schema }, ref) => {
     const { charts } = useHostCharts({
       metric,
-      dataViewId: dataView?.getIndexPattern(),
+      indexPattern: dataView?.getIndexPattern(),
       overview,
       schema,
     });
@@ -109,6 +109,7 @@ export const HostCharts = React.forwardRef<HTMLDivElement, Props>(
               dataView={dataView}
               lensAttributes={chart}
               queryField={findInventoryFields('host').id}
+              overrides={{ settings: { legendAction: 'ignore' } }}
             />
           ))}
         </ChartsGrid>

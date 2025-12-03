@@ -15,6 +15,7 @@
       "datasetQuality",
       "dataViews",
       "discoverShared",
+      "console",
       "fieldFormats",
       "fieldsMetadata",
       "licensing",
@@ -28,7 +29,7 @@
       "unifiedDocViewer",
       "dashboard",
     ],
-    "optionalPlugins": ["observabilityAIAssistant", "cloud", "spaces"],
+    "optionalPlugins": ["cloud", "spaces"],
     "requiredBundles": [
       "discover",
       "kibanaReact",

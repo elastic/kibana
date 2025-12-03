@@ -17,6 +17,7 @@ import type {
 } from '../tool_types/definitions';
 import { isDisabledDefinition } from '../tool_types/definitions';
 import { convertTool } from './converter';
+import { ToolAvailabilityCache } from './availability_cache';
 
 export const createBuiltinProviderFn =
   ({
@@ -26,8 +27,13 @@ export const createBuiltinProviderFn =
     registry: BuiltinToolRegistry;
     toolTypes: AnyToolTypeDefinition[];
   }): ToolProviderFn<true> =>
-  ({ request, space }) => {
-    return createBuiltinToolProvider({ registry, toolTypes, request, space });
+  async ({ request, space }) => {
+    return createBuiltinToolProvider({
+      registry,
+      toolTypes,
+      request,
+      space,
+    });
   };
 
 export const createBuiltinToolProvider = ({
@@ -49,6 +55,7 @@ export const createBuiltinToolProvider = ({
     }, {} as Record<ToolType, ToolTypeDefinition | BuiltinToolTypeDefinition>);
 
   const context = { spaceId: space, request };
+  const availabilityCache = new ToolAvailabilityCache();
 
   return {
     id: 'builtin',
@@ -65,7 +72,7 @@ export const createBuiltinToolProvider = ({
       if (!definition) {
         throw createBadRequestError(`Unknown type for tool '${toolId}': '${tool.type}'`);
       }
-      return convertTool({ tool, definition, context });
+      return convertTool({ tool, definition, context, cache: availabilityCache });
     },
     list() {
       const tools = registry.list();
@@ -76,7 +83,7 @@ export const createBuiltinToolProvider = ({
         })
         .map((tool) => {
           const definition = definitionMap[tool.type]!;
-          return convertTool({ tool, definition, context });
+          return convertTool({ tool, definition, context, cache: availabilityCache });
         });
     },
   };

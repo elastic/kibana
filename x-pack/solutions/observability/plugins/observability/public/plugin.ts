@@ -215,6 +215,7 @@ export class Plugin
           visibleIn: [],
         },
       ],
+      keywords: ['alerts', 'rules'],
     },
   ];
 

@@ -8,9 +8,11 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import type { DashboardApi, DashboardCreationOptions, DashboardInternalApi } from '../types';
+
 import { dataService } from '../../services/kibana_services';
+import type { DashboardApi, DashboardCreationOptions, DashboardInternalApi } from '../types';
 import { startDashboardSearchSessionIntegration } from './start_dashboard_search_session_integration';
 
 export function initializeSearchSessionManager(
@@ -22,6 +24,7 @@ export function initializeSearchSessionManager(
   const searchSessionId$ = new BehaviorSubject<string | undefined>(undefined);
 
   let stopSearchSessionIntegration: (() => void) | undefined;
+  let requestSearchSessionId: (() => Promise<string | undefined>) | undefined;
   if (searchSessionSettings) {
     const { sessionIdToRestore } = searchSessionSettings;
 
@@ -43,6 +46,20 @@ export function initializeSearchSessionManager(
         : dataService.search.session.start());
     searchSessionId$.next(initialSearchSessionId);
 
+    // `requestSearchSessionId` should be used when you need to ensure that you have the up-to-date search session ID
+    const searchSessionGenerationInProgress$ = new BehaviorSubject<boolean>(false);
+    requestSearchSessionId = async () => {
+      if (!searchSessionGenerationInProgress$.getValue()) return searchSessionId$.getValue();
+      return new Promise((resolve) => {
+        const subscription = searchSessionGenerationInProgress$.subscribe((inProgress) => {
+          if (!inProgress) {
+            resolve(searchSessionId$.getValue());
+            subscription.unsubscribe();
+          }
+        });
+      });
+    };
+
     stopSearchSessionIntegration = startDashboardSearchSessionIntegration(
       {
         ...dashboardApi,
@@ -50,12 +67,14 @@ export function initializeSearchSessionManager(
       },
       dashboardInternalApi,
       searchSessionSettings,
-      (searchSessionId: string) => searchSessionId$.next(searchSessionId)
+      (searchSessionId: string) => searchSessionId$.next(searchSessionId),
+      searchSessionGenerationInProgress$
     );
   }
   return {
     api: {
       searchSessionId$,
+      requestSearchSessionId,
     },
     cleanup: () => {
       stopSearchSessionIntegration?.();

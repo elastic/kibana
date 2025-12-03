@@ -9,158 +9,109 @@ import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { Model } from '@kbn/inference-common';
 import type { RanExperiment } from '@arizeai/phoenix-client/dist/esm/types/experiments';
 import type { Client as EsClient } from '@elastic/elasticsearch';
-import { sumBy } from 'lodash';
-import { table } from 'table';
 import chalk from 'chalk';
 import { hostname } from 'os';
 import type { KibanaPhoenixClient } from '../kibana_phoenix_client/client';
-import { EvaluationScoreRepository } from './score_repository';
 import {
-  buildEvaluationResults,
-  calculateEvaluatorStats,
-  type DatasetScoreWithStats,
-} from './evaluation_stats';
+  EvaluationScoreRepository,
+  type EvaluationScoreDocument,
+  parseScoreDocuments,
+} from './score_repository';
+import { buildEvaluationResults, calculateEvaluatorStats } from './evaluation_stats';
+import type { EvaluationReport } from '../types';
 
-export async function reportModelScore({
-  log,
+export async function buildEvaluationReport({
   phoenixClient,
-  model,
   experiments,
+  model,
+  evaluatorModel,
   repetitions,
-  esClient,
   runId,
 }: {
-  log: SomeDevLog;
   phoenixClient: KibanaPhoenixClient;
-  esClient: EsClient;
-  model: Model;
   experiments: RanExperiment[];
+  model: Model;
+  evaluatorModel: Model;
   repetitions: number;
   runId?: string;
-}): Promise<void> {
-  const { datasetScores, evaluatorNames, overallStats } = await buildEvaluationResults(
-    experiments,
-    phoenixClient
-  );
+}): Promise<EvaluationReport> {
+  const { datasetScores } = await buildEvaluationResults(experiments, phoenixClient);
 
-  // Add evaluator stats to dataset scores for table formatting
-  const datasetScoresWithStats: DatasetScoreWithStats[] = datasetScores.map((dataset) => ({
+  const datasetScoresWithStats = datasetScores.map((dataset) => ({
     ...dataset,
     evaluatorStats: new Map(
-      evaluatorNames.map((evaluatorName) => {
-        const scores = dataset.evaluatorScores.get(evaluatorName) || [];
+      Array.from(dataset.evaluatorScores.entries()).map(([evaluatorName, scores]) => {
         const stats = calculateEvaluatorStats(scores, dataset.numExamples);
         return [evaluatorName, stats];
       })
     ),
   }));
 
-  if (datasetScores.length === 0) {
-    log.error(`No dataset scores were available`);
+  const currentRunId = runId || process.env.TEST_RUN_ID;
+
+  if (!currentRunId) {
+    throw new Error(
+      'runId must be provided either as a parameter or via TEST_RUN_ID environment variable'
+    );
+  }
+
+  return {
+    datasetScoresWithStats,
+    model,
+    evaluatorModel,
+    repetitions,
+    runId: currentRunId,
+  };
+}
+
+export async function exportEvaluations(
+  report: EvaluationReport,
+  esClient: EsClient,
+  log: SomeDevLog
+): Promise<void> {
+  if (report.datasetScoresWithStats.length === 0) {
+    log.warning('No dataset scores available to export to Elasticsearch');
     return;
   }
 
-  const totalExamples = sumBy(datasetScores, (d) => d.numExamples);
-  const header = [`Model: ${model.id} (${model.family}/${model.provider})`];
+  log.info(chalk.blue('\n═══ EXPORTING TO ELASTICSEARCH ═══'));
 
-  // Create summary table with dataset-level and overall descriptive statistics
-  const createSummaryTable = () => {
-    const repetitionAwareExampleCount = (numExamples: number): string => {
-      return repetitions > 1
-        ? `${repetitions} x ${numExamples / repetitions}`
-        : numExamples.toString();
-    };
+  const exporter = new EvaluationScoreRepository(esClient, log);
 
-    const examplesHeader =
-      repetitions > 1 ? `# Examples\n${chalk.gray('(repetitions x examples)')}` : '# Examples';
+  await exporter.exportScores({
+    datasetScoresWithStats: report.datasetScoresWithStats,
+    model: report.model,
+    evaluatorModel: report.evaluatorModel,
+    runId: report.runId,
+    repetitions: report.repetitions,
+  });
 
-    const tableHeaders = ['Dataset', examplesHeader, ...evaluatorNames];
+  const modelId = report.model.id || 'unknown';
 
-    const datasetRows = datasetScoresWithStats.map((dataset) => {
-      const row = [dataset.name, repetitionAwareExampleCount(dataset.numExamples)];
+  log.info(chalk.green('✅ Model scores exported to Elasticsearch successfully!'));
+  log.info(
+    chalk.gray(
+      `You can query the data using: environment.hostname:"${hostname()}" AND model.id:"${modelId}" AND run_id:"${
+        report.runId
+      }"`
+    )
+  );
+}
 
-      evaluatorNames.forEach((evaluatorName) => {
-        const stats = dataset.evaluatorStats!.get(evaluatorName);
-        if (stats && stats.count > 0) {
-          // Combine all statistics in a single cell with multiple lines
-          const cellContent = [
-            chalk.bold.yellow(`${(stats.percentage * 100).toFixed(1)}%`),
-            chalk.cyan(`mean: ${stats.mean.toFixed(3)}`),
-            chalk.cyan(`median: ${stats.median.toFixed(3)}`),
-            chalk.cyan(`std: ${stats.stdDev.toFixed(3)}`),
-            chalk.cyan(`min: ${stats.min.toFixed(3)}`),
-            chalk.cyan(`max: ${stats.max.toFixed(3)}`),
-          ].join('\n');
-          row.push(cellContent);
-        } else {
-          row.push(chalk.gray('-'));
-        }
-      });
-
-      return row;
-    });
-
-    // Add overall statistics row
-    const overallRow = [chalk.bold.green('Overall'), repetitionAwareExampleCount(totalExamples)];
-    evaluatorNames.forEach((evaluatorName) => {
-      const stats = overallStats.get(evaluatorName);
-      if (stats && stats.count > 0) {
-        const cellContent = [
-          chalk.bold.yellow(`${(stats.percentage * 100).toFixed(1)}%`),
-          chalk.bold.green(`mean: ${stats.mean.toFixed(3)}`),
-          chalk.bold.green(`median: ${stats.median.toFixed(3)}`),
-          chalk.bold.green(`std: ${stats.stdDev.toFixed(3)}`),
-          chalk.bold.green(`min: ${stats.min.toFixed(3)}`),
-          chalk.bold.green(`max: ${stats.max.toFixed(3)}`),
-        ].join('\n');
-        overallRow.push(cellContent);
-      } else {
-        overallRow.push(chalk.bold.green('-'));
-      }
-    });
-
-    // Build column alignment configuration
-    const columnConfig: Record<number, { alignment: 'right' | 'left' }> = {
-      0: { alignment: 'left' },
-    };
-    for (let i = 1; i < tableHeaders.length; i++) {
-      columnConfig[i] = { alignment: 'right' };
-    }
-
-    return table([tableHeaders, ...datasetRows, overallRow], {
-      columns: columnConfig,
-    });
-  };
-
-  const summaryTable = createSummaryTable();
-
-  log.info(`\n\n${header[0]}`);
-  log.info(`\n${chalk.bold.blue('═══ EVALUATION RESULTS ═══')}\n${summaryTable}`);
-
-  // Export to Elasticsearch
-  try {
-    const exporter = new EvaluationScoreRepository(esClient, log);
-    const currentRunId = runId || process.env.TEST_RUN_ID || `run_${Date.now()}`;
-
-    log.info(chalk.blue('\n═══ EXPORTING TO ELASTICSEARCH ═══'));
-
-    await exporter.exportScores({
-      datasetScoresWithStats,
-      evaluatorNames,
-      model,
-      runId: currentRunId,
-      tags: ['evaluation', 'model-score'],
-    });
-
-    log.info(chalk.green('✅ Model scores exported to Elasticsearch successfully!'));
-    log.info(
-      chalk.gray(
-        `You can query the data using: environment.hostname:"${hostname()}" AND model.id:"${
-          model.id || 'unknown'
-        }" AND run_id:"${currentRunId}"`
-      )
-    );
-  } catch (error) {
-    log.warning(chalk.yellow('⚠️ Failed to export scores to Elasticsearch:'), error);
+export function formatReportData(scores: EvaluationScoreDocument[]): EvaluationReport {
+  if (scores.length === 0) {
+    throw new Error('No documents to format');
   }
+
+  const scoresWithStats = parseScoreDocuments(scores);
+
+  const repetitions = scores[0].repetitions ?? 1;
+
+  return {
+    datasetScoresWithStats: scoresWithStats,
+    model: scores[0].model as Model,
+    evaluatorModel: scores[0].evaluator_model as Model,
+    repetitions,
+    runId: scores[0].run_id,
+  };
 }

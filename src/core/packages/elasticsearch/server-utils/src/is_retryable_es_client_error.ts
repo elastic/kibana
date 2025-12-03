@@ -14,6 +14,7 @@ const DEFAULT_RETRY_STATUS_CODES = [
   410, // Gone
   429, // TooManyRequests -> ES circuit breaker
   503, // ServiceUnavailable
+  502, // BadGateway
   504, // GatewayTimeout
 ];
 

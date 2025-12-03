@@ -12,7 +12,7 @@ import { schema } from '@kbn/config-schema';
 import { esqlColumnSchema, genericOperationOptionsSchema } from '../metric_ops';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import { layerSettingsSchema, sharedPanelInfoSchema, dslOnlyPanelInfoSchema } from '../shared';
-import { applyColorToSchema, colorByValueSchema } from '../color';
+import { applyColorToSchema, colorByValueAbsolute } from '../color';
 import { horizontalAlignmentSchema, verticalAlignmentSchema } from '../alignments';
 import { mergeAllMetricsWithChartDimensionSchema } from './shared';
 
@@ -26,42 +26,46 @@ const legacyMetricStateMetricOptionsSchema = schema.object({
    * - 'xl': Extra large
    * - 'xxl': Double extra large
    */
-  size: schema.oneOf(
-    [
-      schema.literal('xs'),
-      schema.literal('s'),
-      schema.literal('m'),
-      schema.literal('l'),
-      schema.literal('xl'),
-      schema.literal('xxl'),
-    ],
-    { meta: { description: 'Font size for the label and value' }, defaultValue: 'm' }
+  size: schema.maybe(
+    schema.oneOf(
+      [
+        schema.literal('xs'),
+        schema.literal('s'),
+        schema.literal('m'),
+        schema.literal('l'),
+        schema.literal('xl'),
+        schema.literal('xxl'),
+      ],
+      { meta: { description: 'Font size for the label and value' }, defaultValue: 'm' }
+    )
   ),
   /**
    * Alignment of the label and value for the legacy metric.
    * For example, align the label to the bottom and the value to the right.
    */
-  alignments: schema.object({
-    /**
-     * Alignment for label. Possible values:
-     * - 'top': Align label to the top of the value (default)
-     * - 'bottom': Align label to the bottom of the value
-     */
-    labels: verticalAlignmentSchema({
-      meta: { description: 'Label alignment' },
-      defaultValue: 'top',
-    }),
-    /**
-     * Alignment for value. Possible values:
-     * - 'left': Align value to the left (default)
-     * - 'center': Align value to the center
-     * - 'right': Align value to the right
-     */
-    value: horizontalAlignmentSchema({
-      meta: { description: 'Value alignment' },
-      defaultValue: 'left',
-    }),
-  }),
+  alignments: schema.maybe(
+    schema.object({
+      /**
+       * Alignment for label. Possible values:
+       * - 'top': Align label to the top of the value (default)
+       * - 'bottom': Align label to the bottom of the value
+       */
+      labels: verticalAlignmentSchema({
+        meta: { description: 'Label alignment' },
+        defaultValue: 'top',
+      }),
+      /**
+       * Alignment for value. Possible values:
+       * - 'left': Align value to the left (default)
+       * - 'center': Align value to the center
+       * - 'right': Align value to the right
+       */
+      value: horizontalAlignmentSchema({
+        meta: { description: 'Value alignment' },
+        defaultValue: 'left',
+      }),
+    })
+  ),
   /**
    * Where to apply the color (background or value)
    */
@@ -69,7 +73,7 @@ const legacyMetricStateMetricOptionsSchema = schema.object({
   /**
    * Color configuration
    */
-  color: schema.maybe(colorByValueSchema),
+  color: schema.maybe(colorByValueAbsolute),
 });
 
 export const legacyMetricStateSchemaNoESQL = schema.object({

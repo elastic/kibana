@@ -66,7 +66,7 @@ export default async () => {
         port: dockerRegistryPort,
         args: dockerArgs,
         waitForLogLine: 'package manifests loaded',
-        waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
+        waitForLogLineTimeoutMs: 60 * 6 * 1000, // 6 minutes
       },
     }),
     browser: {
@@ -107,7 +107,6 @@ export default async () => {
       serverArgs: [
         `--server.restrictInternalApis=true`,
         `--server.port=${servers.kibana.port}`,
-        `--server.prototypeHardening=true`,
         '--status.allowAnonymous=true',
         `--migrations.zdt.runOnRoles=${JSON.stringify(['ui'])}`,
         // We shouldn't embed credentials into the URL since Kibana requests to Elasticsearch should

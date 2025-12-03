@@ -7,10 +7,15 @@
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ChartType, mapVisToChartType } from '@kbn/visualization-utils';
+import type {
+  DatasourceMap,
+  VisualizationMap,
+  VisualizeEditorContext,
+  Suggestion,
+  DataViewsState,
+  TypedLensByValueInput,
+} from '@kbn/lens-common';
 import { getSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
-import type { DatasourceMap, VisualizationMap, VisualizeEditorContext, Suggestion } from '../types';
-import type { DataViewsState } from '../state_management';
-import type { TypedLensByValueInput } from '../react_embeddable/types';
 import { mergeSuggestionWithVisContext, switchVisualizationType } from './helpers';
 
 interface SuggestionsApiProps {
@@ -130,7 +135,7 @@ export const suggestionsApi = ({
     suggestions: newSuggestions,
     targetTypeId: chartType,
     familyType: 'lnsXY',
-    shouldSwitch: ['area', 'line'].some((type) => chartType?.includes(type)),
+    forceSwitch: ['area', 'line'].some((type) => chartType?.includes(type)),
   });
   if (xyResult) return xyResult;
 
@@ -140,7 +145,7 @@ export const suggestionsApi = ({
     suggestions: newSuggestions,
     targetTypeId: chartType,
     familyType: 'lnsPie',
-    shouldSwitch: preferredChartType === ChartType.Donut,
+    forceSwitch: preferredChartType === ChartType.Donut,
   });
   if (pieResult) return pieResult;
 

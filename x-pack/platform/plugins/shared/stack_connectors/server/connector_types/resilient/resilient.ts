@@ -6,11 +6,10 @@
  */
 
 import type { AxiosError } from 'axios';
-import { omitBy, isNil } from 'lodash/fp';
+import { omitBy, isNil, isObject } from 'lodash/fp';
 import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { CaseConnector, getBasicAuthHeader } from '@kbn/actions-plugin/server';
-import type { Type } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { getErrorMessage } from '@kbn/actions-plugin/server/lib/axios_utils';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type {
@@ -23,10 +22,10 @@ import type {
   ResilientConfig,
   ResilientSecrets,
   UpdateIncidentParams,
-} from './types';
-import * as i18n from './translations';
-import { SUB_ACTION } from './constants';
+  ResilientFieldMeta,
+} from '@kbn/connector-schemas/resilient';
 import {
+  SUB_ACTION,
   ExecutorSubActionCommonFieldsParamsSchema,
   ExecutorSubActionGetIncidentTypesParamsSchema,
   ExecutorSubActionGetSeverityParamsSchema,
@@ -34,8 +33,9 @@ import {
   GetIncidentTypesResponseSchema,
   GetSeverityResponseSchema,
   GetIncidentResponseSchema,
-  type ResilientFieldMeta,
-} from './schema';
+  CONNECTOR_NAME,
+} from '@kbn/connector-schemas/resilient';
+import * as i18n from './translations';
 import { formatUpdateRequest, prepareAdditionalFieldsForCreation } from './utils';
 
 const VIEW_INCIDENT_URL = `#incidents`;
@@ -55,7 +55,7 @@ export class ResilientConnector extends CaseConnector<
 
   constructor(
     params: ServiceParams<ResilientConfig, ResilientSecrets>,
-    pushToServiceParamsExtendedSchema: Record<string, Type<unknown>>
+    pushToServiceParamsExtendedSchema: Record<string, z.ZodType<unknown>>
   ) {
     super(params, pushToServiceParamsExtendedSchema);
 
@@ -75,6 +75,9 @@ export class ResilientConnector extends CaseConnector<
     }
     if (error.response.status === 401) {
       return i18n.UNAUTHORIZED_API_ERROR;
+    }
+    if (isObject(error.response?.data) && 'message' in error.response.data) {
+      return `API Error: ${error.response.data.message}`;
     }
     return `API Error: ${error.response?.statusText}`;
   }
@@ -172,13 +175,12 @@ export class ResilientConnector extends CaseConnector<
           method: 'POST',
           data,
           headers: this.getAuthHeaders(),
-          responseSchema: schema.object(
-            {
-              id: schema.number(),
-              create_date: schema.number(),
-            },
-            { unknowns: 'allow' }
-          ),
+          responseSchema: z
+            .object({
+              id: z.coerce.number(),
+              create_date: z.coerce.number(),
+            })
+            .passthrough(),
         },
         connectorUsageCollector
       );
@@ -193,7 +195,7 @@ export class ResilientConnector extends CaseConnector<
       };
     } catch (error) {
       throw new Error(
-        getErrorMessage(i18n.NAME, `Unable to create incident. Error: ${error.message}.`)
+        getErrorMessage(CONNECTOR_NAME, `Unable to create incident. Error: ${error.message}.`)
       );
     }
   }
@@ -220,10 +222,9 @@ export class ResilientConnector extends CaseConnector<
           url: `${this.urls.incident}/${incidentId}`,
           data,
           headers: this.getAuthHeaders(),
-          responseSchema: schema.object(
-            { success: schema.boolean(), message: schema.nullable(schema.string()) },
-            { unknowns: 'allow' }
-          ),
+          responseSchema: z
+            .object({ success: z.boolean(), message: z.string().nullable().default(null) })
+            .passthrough(),
         },
         connectorUsageCollector
       );
@@ -243,7 +244,7 @@ export class ResilientConnector extends CaseConnector<
     } catch (error) {
       throw new Error(
         getErrorMessage(
-          i18n.NAME,
+          CONNECTOR_NAME,
           `Unable to update incident with id ${incidentId}. Error: ${error.message}.`
         )
       );
@@ -261,14 +262,14 @@ export class ResilientConnector extends CaseConnector<
           url: this.urls.comment.replace('{inc_id}', incidentId),
           data: { text: { format: 'text', content: comment } },
           headers: this.getAuthHeaders(),
-          responseSchema: schema.object({}, { unknowns: 'allow' }),
+          responseSchema: z.object({}).passthrough(),
         },
         connectorUsageCollector
       );
     } catch (error) {
       throw new Error(
         getErrorMessage(
-          i18n.NAME,
+          CONNECTOR_NAME,
           `Unable to create comment at incident with id ${incidentId}. Error: ${error.message}.`
         )
       );
@@ -296,7 +297,10 @@ export class ResilientConnector extends CaseConnector<
       return res.data;
     } catch (error) {
       throw new Error(
-        getErrorMessage(i18n.NAME, `Unable to get incident with id ${id}. Error: ${error.message}.`)
+        getErrorMessage(
+          CONNECTOR_NAME,
+          `Unable to get incident with id ${id}. Error: ${error.message}.`
+        )
       );
     }
   }
@@ -324,7 +328,7 @@ export class ResilientConnector extends CaseConnector<
       }));
     } catch (error) {
       throw new Error(
-        getErrorMessage(i18n.NAME, `Unable to get incident types. Error: ${error.message}.`)
+        getErrorMessage(CONNECTOR_NAME, `Unable to get incident types. Error: ${error.message}.`)
       );
     }
   }
@@ -351,7 +355,7 @@ export class ResilientConnector extends CaseConnector<
       }));
     } catch (error) {
       throw new Error(
-        getErrorMessage(i18n.NAME, `Unable to get severity. Error: ${error.message}.`)
+        getErrorMessage(CONNECTOR_NAME, `Unable to get severity. Error: ${error.message}.`)
       );
     }
   }
@@ -385,7 +389,9 @@ export class ResilientConnector extends CaseConnector<
 
       return fields;
     } catch (error) {
-      throw new Error(getErrorMessage(i18n.NAME, `Unable to get fields. Error: ${error.message}.`));
+      throw new Error(
+        getErrorMessage(CONNECTOR_NAME, `Unable to get fields. Error: ${error.message}.`)
+      );
     }
   }
 }

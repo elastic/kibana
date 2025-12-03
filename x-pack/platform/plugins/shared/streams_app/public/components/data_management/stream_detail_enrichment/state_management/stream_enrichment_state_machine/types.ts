@@ -60,6 +60,7 @@ export type StreamEnrichmentEvent =
   | { type: 'simulation.viewDataPreview' }
   | { type: 'simulation.viewDetectedFields' }
   | { type: 'dataSources.add'; dataSource: EnrichmentDataSource }
+  | { type: 'dataSources.select'; id: string }
   | { type: 'dataSources.closeManagement' }
   | { type: 'dataSources.openManagement' }
   | { type: 'simulation.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }

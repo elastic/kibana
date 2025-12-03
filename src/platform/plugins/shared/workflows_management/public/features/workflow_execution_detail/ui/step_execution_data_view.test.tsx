@@ -7,9 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
+import React from 'react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { StepExecutionDataView } from './step_execution_data_view';
+
+// Helper function to render with I18n provider
+const renderWithIntl = (component: React.ReactElement) => {
+  return render(component, { wrapper: I18nProvider });
+};
 
 // Mock the JSONDataView component
 const mockJSONDataView = jest.fn();
@@ -35,7 +41,7 @@ describe('StepExecutionDataView', () => {
   });
 
   it('renders input data correctly', () => {
-    render(<StepExecutionDataView stepExecution={baseStepExecution as any} mode="input" />);
+    renderWithIntl(<StepExecutionDataView stepExecution={baseStepExecution as any} mode="input" />);
 
     expect(mockJSONDataView).toHaveBeenCalledWith({
       data: { param1: 'value1', param2: 2 },
@@ -45,7 +51,9 @@ describe('StepExecutionDataView', () => {
   });
 
   it('renders output data correctly', () => {
-    render(<StepExecutionDataView stepExecution={baseStepExecution as any} mode="output" />);
+    renderWithIntl(
+      <StepExecutionDataView stepExecution={baseStepExecution as any} mode="output" />
+    );
 
     expect(mockJSONDataView).toHaveBeenCalledWith({
       data: { result: 'ok', details: { field: 'abc' } },
@@ -62,7 +70,9 @@ describe('StepExecutionDataView', () => {
         code: 'ERROR_CODE',
       },
     };
-    render(<StepExecutionDataView stepExecution={errorStepExecution as any} mode="output" />);
+    renderWithIntl(
+      <StepExecutionDataView stepExecution={errorStepExecution as any} mode="output" />
+    );
 
     expect(mockJSONDataView).toHaveBeenCalledWith({
       data: { error: { message: 'Something went wrong', code: 'ERROR_CODE' } },
@@ -71,45 +81,48 @@ describe('StepExecutionDataView', () => {
     });
   });
 
-  it('wraps primitive data in an object', () => {
+  it('passes primitive data as-is', () => {
     const primitiveStepExecution = {
       ...baseStepExecution,
       input: 123,
     };
-    render(<StepExecutionDataView stepExecution={primitiveStepExecution as any} mode="input" />);
+    renderWithIntl(
+      <StepExecutionDataView stepExecution={primitiveStepExecution as any} mode="input" />
+    );
 
     expect(mockJSONDataView).toHaveBeenCalledWith({
-      data: { value: 123 },
+      data: 123,
       title: 'Input',
       fieldPathActionsPrefix: undefined,
     });
   });
 
-  it('renders empty state gracefully with empty input', () => {
+  it('renders empty state message when input is undefined', () => {
     const emptyStepExecution = {
       ...baseStepExecution,
       input: undefined,
     };
-    render(<StepExecutionDataView stepExecution={emptyStepExecution as any} mode="input" />);
+    const { getByText } = renderWithIntl(
+      <StepExecutionDataView stepExecution={emptyStepExecution as any} mode="input" />
+    );
 
-    expect(mockJSONDataView).toHaveBeenCalledWith({
-      data: {},
-      title: 'Input',
-      fieldPathActionsPrefix: undefined,
-    });
+    expect(mockJSONDataView).not.toHaveBeenCalled();
+    expect(getByText(/no input data/i)).toBeInTheDocument();
   });
 
-  it('sets fieldPathActionsPrefix for array output data', () => {
+  it('passes array output data as-is without flattening', () => {
     const arrayStepExecution = {
       ...baseStepExecution,
       output: [{ item: 'first' }, { item: 'second' }],
     };
-    render(<StepExecutionDataView stepExecution={arrayStepExecution as any} mode="output" />);
+    renderWithIntl(
+      <StepExecutionDataView stepExecution={arrayStepExecution as any} mode="output" />
+    );
 
     expect(mockJSONDataView).toHaveBeenCalledWith({
-      data: { item: 'first' },
+      data: [{ item: 'first' }, { item: 'second' }],
       title: 'Output',
-      fieldPathActionsPrefix: 'steps.my-step.output[0]',
+      fieldPathActionsPrefix: 'steps.my-step.output',
     });
   });
 });

@@ -16,44 +16,38 @@ import { z } from '@kbn/zod';
 
 // Swimlane connector parameter schemas for different sub-actions
 export const SwimlaneCreateRecordParamsSchema = z.object({
-  subAction: z.literal('pushToService'),
-  subActionParams: z.object({
-    incident: z.object({
-      ruleName: z.string(),
-      alertId: z.string(),
-      severity: z.string().optional(),
-      description: z.string().optional(),
-    }),
-    comments: z
-      .array(
-        z.object({
-          comment: z.string(),
-          commentId: z.string(),
-        })
-      )
-      .optional(),
+  incident: z.object({
+    ruleName: z.string(),
+    alertId: z.string(),
+    severity: z.string().optional(),
+    description: z.string().optional(),
   }),
+  comments: z
+    .array(
+      z.object({
+        comment: z.string(),
+        commentId: z.string(),
+      })
+    )
+    .optional(),
 });
 
 export const SwimlaneUpdateRecordParamsSchema = z.object({
-  subAction: z.literal('pushToService'),
-  subActionParams: z.object({
-    incident: z.object({
-      ruleName: z.string(),
-      alertId: z.string(),
-      severity: z.string().optional(),
-      description: z.string().optional(),
-    }),
-    incidentId: z.string(),
-    comments: z
-      .array(
-        z.object({
-          comment: z.string(),
-          commentId: z.string(),
-        })
-      )
-      .optional(),
+  incident: z.object({
+    ruleName: z.string(),
+    alertId: z.string(),
+    severity: z.string().optional(),
+    description: z.string().optional(),
   }),
+  incidentId: z.string(),
+  comments: z
+    .array(
+      z.object({
+        comment: z.string(),
+        commentId: z.string(),
+      })
+    )
+    .optional(),
 });
 
 // Swimlane connector response schema

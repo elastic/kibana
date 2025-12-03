@@ -6,7 +6,7 @@
  */
 
 import type { FindAlertSummaryResponse } from '@kbn/elastic-assistant-common/impl/schemas';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL_FIND,

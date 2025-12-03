@@ -42,6 +42,25 @@ const generateField = (input: InputType) => {
     case 'choice':
       field = z.enum(input.options as [string, ...string[]]);
       break;
+    case 'array': {
+      const arraySchemas = [z.array(z.string()), z.array(z.number()), z.array(z.boolean())];
+      const { minItems, maxItems } = input;
+      const applyConstraints = (schema: z.ZodArray<z.ZodString | z.ZodNumber | z.ZodBoolean>) => {
+        let s = schema;
+        if (minItems != null) s = s.min(minItems);
+        if (maxItems != null) s = s.max(maxItems);
+        return s;
+      };
+      const arr = z.union(
+        arraySchemas.map(applyConstraints) as [
+          z.ZodArray<z.ZodString>,
+          z.ZodArray<z.ZodNumber>,
+          z.ZodArray<z.ZodBoolean>
+        ]
+      );
+      field = input.required ? arr : arr.optional();
+      break;
+    }
     default:
       field = z.any();
       break;

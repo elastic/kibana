@@ -14,6 +14,7 @@ import { buildFieldsDefinitions } from '../../../definitions/utils/functions';
 import { handleFragment } from '../../../definitions/utils/autocomplete/helpers';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 import { isColumn, isOptionNode } from '../../../ast/is';
+import { SuggestionCategory } from '../../../sorting/types';
 
 export const METADATA_FIELDS = [
   '_version',
@@ -32,7 +33,8 @@ export const metadataSuggestion: ISuggestionItem = withAutoSuggest({
   detail: i18n.translate('kbn-esql-ast.esql.definitions.metadataDoc', {
     defaultMessage: 'Metadata',
   }),
-  sortText: '1',
+  sortText: 'C',
+  category: SuggestionCategory.VALUE,
 });
 
 export const getMetadataSuggestions = (command: ESQLAstAllCommands, queryText: string) => {

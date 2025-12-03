@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { VisParams } from '@kbn/visualizations-common';
 import type { SerializedVis } from './vis';
-import type { VisParams } from '../common';
 
 export const createVisAsync = async <TVisParams extends VisParams = VisParams>(
   visType: string,

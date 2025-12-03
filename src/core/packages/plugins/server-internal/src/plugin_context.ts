@@ -214,6 +214,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       legacy: deps.elasticsearch.legacy,
       publicBaseUrl: deps.elasticsearch.publicBaseUrl,
       setUnauthorizedErrorHandler: deps.elasticsearch.setUnauthorizedErrorHandler,
+      setCpsFeatureFlag: deps.elasticsearch.setCpsFeatureFlag,
     },
     executionContext: {
       withContext: deps.executionContext.withContext,
@@ -408,7 +409,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
       getContainer: () => deps.injection.getContainer(plugin.opaqueId),
     },
     dataStreams: {
-      getClient: (dataStream) => deps.dataStreams.getClient(dataStream),
+      initializeClient: (dataStream) => deps.dataStreams.initializeClient(dataStream),
     },
   };
 }

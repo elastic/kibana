@@ -19,6 +19,7 @@ import type {
   SolutionId,
 } from '@kbn/core-chrome-browser';
 import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import {
   Subject,
   BehaviorSubject,
@@ -46,7 +47,6 @@ import type {
 } from '@kbn/core-chrome-browser';
 import type { Logger } from '@kbn/logging';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
-import { getSideNavVersion } from '@kbn/core-chrome-layout-feature-flags';
 import { NavigationTourManager } from '@kbn/core-chrome-navigation-tour';
 
 import { findActiveNodes, flattenNav, parseNavigationTree, stripQueryParams } from './utils';
@@ -60,12 +60,14 @@ interface StartDeps {
   chromeBreadcrumbs$: Observable<ChromeBreadcrumb[]>;
   logger: Logger;
   featureFlags: FeatureFlagsStart;
+  uiSettings: IUiSettingsClient;
 }
 
 export class ProjectNavigationService {
   private logger: Logger | undefined;
   private projectHome$ = new BehaviorSubject<string | undefined>(undefined);
-  private projectName$ = new BehaviorSubject<string | undefined>(undefined);
+  private kibanaName$ = new BehaviorSubject<string | undefined>(undefined);
+  private feedbackUrlParams$ = new BehaviorSubject<URLSearchParams | undefined>(undefined);
   private navigationTree$ = new BehaviorSubject<ChromeProjectNavigationNode[] | undefined>(
     undefined
   );
@@ -74,10 +76,6 @@ export class ProjectNavigationService {
   // The navigation tree for the Side nav UI that still contains layout information (body, footer, etc.)
   private navigationTreeUi$ = new BehaviorSubject<NavigationTreeDefinitionUI | null>(null);
   private activeNodes$ = new BehaviorSubject<ChromeProjectNavigationNode[][]>([]);
-  // Keep a reference to the nav node selected when the navigation panel is opened
-  private readonly panelSelectedNode$ = new BehaviorSubject<ChromeProjectNavigationNode | null>(
-    null
-  );
 
   private projectBreadcrumbs$ = new BehaviorSubject<{
     breadcrumbs: ChromeBreadcrumb[];
@@ -95,9 +93,9 @@ export class ProjectNavigationService {
   private deepLinksMap$: Observable<Record<string, ChromeNavLink>> = of({});
   private cloudLinks$ = new BehaviorSubject<CloudLinks>({});
   private application?: InternalApplicationStart;
-  private featureFlags?: FeatureFlagsStart;
   private navLinksService?: ChromeNavLinks;
   private _http?: InternalHttpStart;
+  private uiSettings?: IUiSettingsClient;
   private navigationChangeSubscription?: Subscription;
   private unlistenHistory?: () => void;
 
@@ -109,13 +107,14 @@ export class ProjectNavigationService {
     http,
     chromeBreadcrumbs$,
     logger,
-    featureFlags,
+    uiSettings,
   }: StartDeps) {
     this.application = application;
-    this.featureFlags = featureFlags;
     this.navLinksService = navLinksService;
     this._http = http;
     this.logger = logger;
+    this.uiSettings = uiSettings;
+
     this.onHistoryLocationChange(application.history.location);
     this.unlistenHistory = application.history.listen(this.onHistoryLocationChange.bind(this));
 
@@ -134,19 +133,22 @@ export class ProjectNavigationService {
     return {
       setProjectHome: this.setProjectHome.bind(this),
       getProjectHome$: () => {
-        return this.projectHome$.asObservable();
+        return this.projectHome$.pipe(map((home) => this.uiSettings?.get('defaultRoute') || home));
       },
       setCloudUrls: (cloudUrls: CloudURLs) => {
-        // Cloud links never change, so we only need to parse them once
-        if (Object.keys(this.cloudLinks$.getValue()).length > 0) return;
-
         this.cloudLinks$.next(getCloudLinks(cloudUrls));
       },
-      setProjectName: (projectName: string) => {
-        this.projectName$.next(projectName);
+      setFeedbackUrlParams: (feedbackUrlParams: URLSearchParams) => {
+        this.feedbackUrlParams$.next(feedbackUrlParams);
       },
-      getProjectName$: () => {
-        return this.projectName$.asObservable();
+      setKibanaName: (kibanaName: string) => {
+        this.kibanaName$.next(kibanaName);
+      },
+      getKibanaName$: () => {
+        return this.kibanaName$.asObservable();
+      },
+      getFeedbackUrlParams$: () => {
+        return this.feedbackUrlParams$.asObservable();
       },
       initNavigation: <LinkId extends AppDeepLinkId = AppDeepLinkId>(
         id: SolutionId,
@@ -173,12 +175,12 @@ export class ProjectNavigationService {
           this.projectBreadcrumbs$,
           this.activeNodes$,
           chromeBreadcrumbs$,
-          this.projectName$,
+          this.kibanaName$,
           this.cloudLinks$,
         ]).pipe(
-          map(([projectBreadcrumbs, activeNodes, chromeBreadcrumbs, projectName, cloudLinks]) => {
+          map(([projectBreadcrumbs, activeNodes, chromeBreadcrumbs, kibanaName, cloudLinks]) => {
             return buildBreadcrumbs({
-              projectName,
+              kibanaName,
               projectBreadcrumbs,
               activeNodes,
               chromeBreadcrumbs,
@@ -198,8 +200,6 @@ export class ProjectNavigationService {
       getActiveSolutionNavDefinition$: this.getActiveSolutionNavDefinition$.bind(this),
       /** In stateful Kibana, get the id of the active solution navigation */
       getActiveSolutionNavId$: () => this.activeSolutionNavDefinitionId$.asObservable(),
-      getPanelSelectedNode$: () => this.panelSelectedNode$.asObservable(),
-      setPanelSelectedNode: this.setPanelSelectedNode.bind(this),
       getActiveDataTestSubj$: () => this.activeDataTestSubj$.asObservable(),
       tourManager: new NavigationTourManager(),
     };
@@ -242,7 +242,6 @@ export class ProjectNavigationService {
           return parseNavigationTree(id, def, {
             deepLinks: deepLinksMap,
             cloudLinks,
-            sideNavVersion: getSideNavVersion(this.featureFlags!),
           });
         })
       )
@@ -430,34 +429,6 @@ export class ProjectNavigationService {
         ...solutionNavs,
       });
     }
-  }
-
-  private setPanelSelectedNode = (_node: string | ChromeProjectNavigationNode | null) => {
-    const node = typeof _node === 'string' ? this.findNodeById(_node) : _node;
-    this.panelSelectedNode$.next(node);
-  };
-
-  private findNodeById(id: string): ChromeProjectNavigationNode | null {
-    const allNodes = this.navigationTree$.getValue();
-    if (!allNodes) return null;
-
-    const find = (nodes: ChromeProjectNavigationNode[]): ChromeProjectNavigationNode | null => {
-      // Recursively search for the node with the given id
-      for (const node of nodes) {
-        if (node.id === id) {
-          return node;
-        }
-        if (node.children) {
-          const found = find(node.children);
-          if (found) {
-            return found;
-          }
-        }
-      }
-      return null;
-    };
-
-    return find(allNodes);
   }
 
   private get http() {

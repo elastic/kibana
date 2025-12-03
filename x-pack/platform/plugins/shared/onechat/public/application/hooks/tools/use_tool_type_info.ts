@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { ToolType } from '@kbn/onechat-common';
 import { queryKeys } from '../../query_keys';
 import { useOnechatServices } from '../use_onechat_service';

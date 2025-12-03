@@ -152,6 +152,7 @@ export const RetentionSettingsUpdateModalProvider: React.FunctionComponent<Props
           {saveError && (
             <Fragment>
               <EuiCallOut
+                announceOnMount
                 title={
                   <FormattedMessage
                     id="xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionErrorTitle"

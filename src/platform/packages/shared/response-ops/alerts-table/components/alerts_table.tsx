@@ -30,7 +30,7 @@ import {
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_RULE_UUID,
 } from '@kbn/rule-data-utils';
-import { QueryClientProvider, useQueryClient } from '@tanstack/react-query';
+import { QueryClientProvider, useQueryClient } from '@kbn/react-query';
 import { useSearchAlertsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_search_alerts_query';
 import { DEFAULT_ALERTS_PAGE_SIZE } from '@kbn/alerts-ui-shared/src/common/constants';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
@@ -454,7 +454,9 @@ const AlertsTableContent = typedForwardRef(
       if (lastReloadRequestTime) {
         refresh();
       }
-    }, [lastReloadRequestTime, refresh]);
+      // Purposefully not including `refresh` to avoid refreshing when it changes
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [lastReloadRequestTime]);
 
     useImperativeHandle(ref, () => ({
       refresh,

@@ -63,13 +63,6 @@ type PolicyPartialUpdate = Pick<LogsEndpointAction, 'originSpaceId'> & {
 export const migrateEndpointDataToSupportSpaces = async (
   endpointService: EndpointAppContextService
 ): Promise<void> => {
-  const logger = endpointService.createLogger(LOGGER_KEY);
-
-  if (!endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
-    logger.debug('Space awareness feature flag is disabled. Nothing to do.');
-    return;
-  }
-
   await Promise.all([
     migrateArtifactsToSpaceAware(endpointService),
     migrateResponseActionsToSpaceAware(endpointService),

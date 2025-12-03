@@ -15,7 +15,7 @@ export const CODE_OWNER_AREAS = [
   'search',
   'observability',
   'security',
-  'workplace_ai',
+  'workplaceai',
 ] as const;
 export type CodeOwnerArea = (typeof CODE_OWNER_AREAS)[number];
 
@@ -59,7 +59,7 @@ export const CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/obs-entities',
     'elastic/obs-knowledge-team',
     'elastic/obs-ux-infra_services-team',
-    'elastic/obs-ux-logs-team',
+    'elastic/obs-onboarding-team',
     'elastic/obs-ux-management-team',
     'elastic/observability-design',
     'elastic/observability-ui',
@@ -85,7 +85,7 @@ export const CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/security-threat-hunting-explore',
     'elastic/security-threat-hunting-investigations',
   ],
-  workplace_ai: ['elastic/search-kibana'],
+  workplaceai: ['elastic/search-kibana'],
 };
 
 /**

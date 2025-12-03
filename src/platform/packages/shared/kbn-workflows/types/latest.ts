@@ -12,6 +12,7 @@ export type {
   CreateWorkflowCommand,
   // elasticsearch documents types
   EsWorkflow,
+  EsWorkflowCreate,
   EsWorkflowExecution,
   EsWorkflowStepExecution,
   // execution engine
@@ -41,11 +42,12 @@ export type {
   // enums
   ExecutionStatusUnion,
   ExecutionTypeUnion,
+  // api types
+  WorkflowsSearchParams,
   // connector types
   ConnectorSubAction,
   ConnectorInstance,
   ConnectorTypeInfo,
-  ConnectorTypeInfoMinimal,
   ConnectorContractUnion,
   EnhancedInternalConnectorContract,
   InternalConnectorContract,

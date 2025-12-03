@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import type {
   ChromeStart,
   ChromeBreadcrumb,
@@ -35,9 +36,7 @@ export interface InternalChromeStart extends ChromeStart {
    *
    * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
    */
-  getLegacyHeaderComponentForFixedLayout(opts?: {
-    projectSideNavVersion: 'v1' | 'v2';
-  }): JSX.Element;
+  getLegacyHeaderComponentForFixedLayout(): JSX.Element;
 
   /**
    * Used only by the rendering service to render the header UI
@@ -62,16 +61,14 @@ export interface InternalChromeStart extends ChromeStart {
    * It doesn't include the banner or the chromeless header state, which are rendered separately by the layout service.
    * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
    */
-  getProjectHeaderComponentForGridLayout(opts: {
-    includeSideNav: 'v1' | 'v2' | false;
-  }): JSX.Element;
+  getProjectHeaderComponentForGridLayout(): JSX.Element;
 
   /**
    * Used only by the rendering service to render the new project side navigation UI
    *
    * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
    */
-  getProjectSideNavV2ComponentForGridLayout(): JSX.Element;
+  getProjectSideNavComponentForGridLayout(): JSX.Element;
 
   /**
    * Used only by the rendering service to render the header banner UI
@@ -111,6 +108,12 @@ export interface InternalChromeStart extends ChromeStart {
   getBodyClasses$(): Observable<string[]>;
 
   /**
+   * Used only by the rendering service to render the global footer UI (devbar)
+   * @internal
+   */
+  getGlobalFooter$(): Observable<ReactNode>;
+
+  /**
    * Used only by the serverless plugin to customize project-style chrome.
    * @internal
    */
@@ -130,10 +133,16 @@ export interface InternalChromeStart extends ChromeStart {
     setCloudUrls(cloudUrls: CloudURLs): void;
 
     /**
-     * Sets the project name.
-     * @param projectName
+     * Sets the feedback URL parameters.
+     * @param feedbackUrlParams
      */
-    setProjectName(projectName: string): void;
+    setFeedbackUrlParams(feedbackUrlParams: URLSearchParams): void;
+
+    /**
+     * Sets the Kibana name - project name for serverless, deployment name for ECH.
+     * @param kibanaName
+     */
+    setKibanaName(kibanaName: string): void;
 
     initNavigation<
       LinkId extends AppDeepLinkId = AppDeepLinkId,

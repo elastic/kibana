@@ -14,7 +14,7 @@ import { tinymathFunctions } from '@kbn/lens-formula-docs';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { createMockedIndexPattern } from '../../../../mocks';
 import type { GenericOperationDefinition } from '../..';
-import type { OperationMetadata, IndexPatternField } from '../../../../../../types';
+import type { OperationMetadata, IndexPatternField } from '@kbn/lens-common';
 import {
   getSignatureHelp,
   getHover,

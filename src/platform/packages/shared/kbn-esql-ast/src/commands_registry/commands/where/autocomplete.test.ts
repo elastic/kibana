@@ -15,12 +15,19 @@ import {
   getFieldNamesByType,
   getFunctionSignaturesByReturnType,
   mockFieldsWithTypes,
+  getOperatorSuggestions,
 } from '../../../__tests__/autocomplete';
+import {
+  logicalOperators,
+  patternMatchOperators,
+  inOperators,
+  nullCheckOperators,
+} from '../../../definitions/all_operators';
 import type { ICommandCallbacks } from '../../types';
 import { ESQL_COMMON_NUMERIC_TYPES } from '../../../definitions/types';
 import { getDateLiterals } from '../../../definitions/utils';
 import { correctQuerySyntax, findAstPosition } from '../../../definitions/utils/ast';
-import { parse } from '../../../parser';
+import { Parser } from '../../../parser';
 
 const allEvalFns = getFunctionSignaturesByReturnType(Location.WHERE, 'any', {
   scalar: true,
@@ -72,9 +79,10 @@ describe('WHERE Autocomplete', () => {
   describe('within the expression', () => {
     const suggest = async (query: string) => {
       const correctedQuery = correctQuerySyntax(query);
-      const { ast } = parse(correctedQuery, { withFormatting: true });
+      const { root } = Parser.parse(correctedQuery, { withFormatting: true });
+
       const cursorPosition = query.length;
-      const { command } = findAstPosition(ast, cursorPosition);
+      const { command } = findAstPosition(root, cursorPosition);
       if (!command) {
         throw new Error('Command not found in the parsed query');
       }
@@ -84,13 +92,17 @@ describe('WHERE Autocomplete', () => {
       'after a field name (%s)',
       async (query) => {
         await whereExpectSuggestions(query, [
-          ...getFunctionSignaturesByReturnType(
-            Location.WHERE,
-            'boolean',
-            { operators: true },
-            undefined,
-            ['and', 'or', 'not']
-          ),
+          '!= $0',
+          '< $0',
+          '<= $0',
+          '== $0',
+          '> $0',
+          '>= $0',
+          ...getOperatorSuggestions([
+            ...patternMatchOperators,
+            ...inOperators,
+            ...nullCheckOperators,
+          ]),
         ]);
       }
     );
@@ -222,38 +234,45 @@ describe('WHERE Autocomplete', () => {
 
     test('suggests boolean and numeric operators after a numeric function result', async () => {
       await whereExpectSuggestions('from a | where log10(doubleField) ', [
-        ...getFunctionSignaturesByReturnType(Location.WHERE, 'double', { operators: true }, [
+        ...getFunctionSignaturesByReturnType(
+          Location.WHERE,
           'double',
-        ]),
-        ...getFunctionSignaturesByReturnType(Location.WHERE, 'boolean', { operators: true }, [
-          'double',
-        ]),
+          { operators: true, skipAssign: true },
+          ['double']
+        ),
+        ...getFunctionSignaturesByReturnType(
+          Location.WHERE,
+          'boolean',
+          { operators: true, skipAssign: true },
+          ['double']
+        ),
       ]);
     });
 
     test('suggestions after IS', async () => {
-      await whereExpectSuggestions('from index | WHERE keywordField IS ', [
-        'IS NULL',
-        'IS NOT NULL',
-      ]);
+      await whereExpectSuggestions(
+        'from index | WHERE keywordField IS ',
+        getOperatorSuggestions(nullCheckOperators)
+      );
 
       await whereExpectSuggestions('from index | WHERE keywordField IS NU', ['IS NULL']);
     });
 
     test('suggestions after NOT', async () => {
-      await whereExpectSuggestions('from index | WHERE keywordField not ', [
-        'LIKE $0',
-        'RLIKE $0',
-        'IN $0',
-      ]);
-      await whereExpectSuggestions('from index | WHERE keywordField NOT ', [
-        'LIKE $0',
-        'RLIKE $0',
-        'IN $0',
-      ]);
+      await whereExpectSuggestions(
+        'from index | WHERE keywordField not ',
+        getOperatorSuggestions(
+          [...patternMatchOperators, ...inOperators].filter((op) => !op.name.startsWith('not '))
+        )
+      );
+      await whereExpectSuggestions(
+        'from index | WHERE keywordField NOT ',
+        getOperatorSuggestions(
+          [...patternMatchOperators, ...inOperators].filter((op) => !op.name.startsWith('not '))
+        )
+      );
       await whereExpectSuggestions('FROM index | WHERE NOT ENDS_WITH(keywordField, "foo") ', [
-        'AND $0',
-        'OR $0',
+        ...getOperatorSuggestions(logicalOperators),
         '| ',
       ]);
       await whereExpectSuggestions('from index | WHERE keywordField IS NOT ', ['IS NOT NULL']);
@@ -261,8 +280,8 @@ describe('WHERE Autocomplete', () => {
     });
 
     test('suggestions after IN', async () => {
-      await whereExpectSuggestions('from index | WHERE doubleField in ', ['( $0 )']);
-      await whereExpectSuggestions('from index | WHERE doubleField not in ', ['( $0 )']);
+      await whereExpectSuggestions('from index | WHERE doubleField in ', ['($0)']);
+      await whereExpectSuggestions('from index | WHERE doubleField not in ', ['($0)']);
       const expectedFields = getFieldNamesByType(['double']);
       mockFieldsWithTypes(mockCallbacks, expectedFields);
       await whereExpectSuggestions(
@@ -284,12 +303,15 @@ describe('WHERE Autocomplete', () => {
     });
 
     test('suggestions after IS (NOT) NULL', async () => {
-      await whereExpectSuggestions('FROM index | WHERE tags.keyword IS NULL ', ['AND $0', 'OR $0']);
+      await whereExpectSuggestions(
+        'FROM index | WHERE tags.keyword IS NULL ',
+        getOperatorSuggestions(logicalOperators)
+      );
 
-      await whereExpectSuggestions('FROM index | WHERE tags.keyword IS NOT NULL ', [
-        'AND $0',
-        'OR $0',
-      ]);
+      await whereExpectSuggestions(
+        'FROM index | WHERE tags.keyword IS NOT NULL ',
+        getOperatorSuggestions(logicalOperators)
+      );
     });
 
     test('suggestions after an arithmetic expression', async () => {

@@ -10,7 +10,7 @@
 import type { LayerValue, SeriesIdentifier, TooltipValue } from '@elastic/charts';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 import type { ValueClickContext } from '@kbn/embeddable-plugin/public';
-import { getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { getFormatByAccessor } from '@kbn/chart-expressions-common';
 import type { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
 import type { BucketColumns, PartitionVisParams, Dimensions } from '../../common/types';
 

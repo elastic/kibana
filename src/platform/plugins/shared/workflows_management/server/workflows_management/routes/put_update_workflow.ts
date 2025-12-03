@@ -9,10 +9,10 @@
 
 import { schema } from '@kbn/config-schema';
 import { UpdateWorkflowCommandSchema } from '@kbn/workflows';
-import type { RouteDependencies } from './types';
 import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
-import { WORKFLOW_UPDATE_SECURITY } from './route_security';
 import { handleRouteError } from './route_error_handlers';
+import { WORKFLOW_UPDATE_SECURITY } from './route_security';
+import type { RouteDependencies } from './types';
 
 export function registerPutUpdateWorkflowRoute({ router, api, logger, spaces }: RouteDependencies) {
   router.put(

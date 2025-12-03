@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// TODO: Remove the eslint-disable comments to use the proper types.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import type { JSONSchema7 } from 'json-schema';
 import { useMemo } from 'react';
 import { getJsonSchemaFromYamlSchema } from '@kbn/workflows';
-import type { JSONSchema7 } from 'json-schema';
-import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
 import { getWorkflowZodSchema, getWorkflowZodSchemaLoose } from '../../../../common/schema';
+import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
 
 const WorkflowSchemaUriStrict = 'file:///workflow-schema.json';
 const WorkflowSchemaUriStrictWithDynamicConnectors =
@@ -21,7 +24,10 @@ const WorkflowSchemaUriLooseWithDynamicConnectors =
   'file:///workflow-schema-loose-with-dynamic-connectors.json';
 
 interface UseWorkflowJsonSchemaOptions {
-  loose: boolean;
+  /**
+   * @deprecated use WorkflowSchemaForAutocomplete instead
+   */
+  loose?: boolean;
 }
 
 interface UseWorkflowJsonSchemaResult {
@@ -29,10 +35,10 @@ interface UseWorkflowJsonSchemaResult {
   uri: string | null;
 }
 
-export const useWorkflowJsonSchema = (
-  options: UseWorkflowJsonSchemaOptions
-): UseWorkflowJsonSchemaResult => {
-  const { data: connectorsData } = useAvailableConnectors();
+export const useWorkflowJsonSchema = ({
+  loose = false,
+}: UseWorkflowJsonSchemaOptions = {}): UseWorkflowJsonSchemaResult => {
+  const connectorsData = useAvailableConnectors();
 
   // TODO: download from server instead of generating on client
 
@@ -40,13 +46,13 @@ export const useWorkflowJsonSchema = (
   // Now uses lazy loading to keep large generated files out of main bundle
   return useMemo(() => {
     try {
-      let uri = options.loose ? WorkflowSchemaUriLoose : WorkflowSchemaUriStrict;
+      let uri = loose ? WorkflowSchemaUriLoose : WorkflowSchemaUriStrict;
       if (connectorsData?.connectorTypes) {
-        uri = options.loose
+        uri = loose
           ? WorkflowSchemaUriLooseWithDynamicConnectors
           : WorkflowSchemaUriStrictWithDynamicConnectors;
       }
-      const zodSchema = options.loose
+      const zodSchema = loose
         ? getWorkflowZodSchemaLoose(connectorsData?.connectorTypes ?? {})
         : getWorkflowZodSchema(connectorsData?.connectorTypes ?? {}); // TODO: remove this once we move the schema generation up to detail page or some wrapper component
       const jsonSchema = getJsonSchemaFromYamlSchema(zodSchema);
@@ -65,7 +71,7 @@ export const useWorkflowJsonSchema = (
         uri: null,
       };
     }
-  }, [connectorsData, options.loose]);
+  }, [connectorsData, loose]);
 };
 
 /**

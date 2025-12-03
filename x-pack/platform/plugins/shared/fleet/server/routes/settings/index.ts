@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parseExperimentalConfigValue } from '../../../common/experimental_features';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { API_VERSIONS } from '../../../common/constants';
 import type { FleetAuthzRouter } from '../../services/security';
 import { SETTINGS_API_ROUTES } from '../../constants';
@@ -19,7 +19,6 @@ import {
   SettingsResponseSchema,
   GetEnrollmentSettingsResponseSchema,
 } from '../../types';
-import type { FleetConfigType } from '../../config';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 import { genericErrorResponse, notFoundResponse } from '../schema/errors';
 
@@ -32,11 +31,10 @@ import {
   putSpaceSettingsHandler,
 } from './settings_handler';
 
-export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
-  const experimentalFeatures = parseExperimentalConfigValue(
-    config.enableExperimental || [],
-    config.experimentalFeatures || {}
-  );
+export const registerRoutes = (
+  router: FleetAuthzRouter,
+  experimentalFeatures: ExperimentalFeatures
+) => {
   if (experimentalFeatures.useSpaceAwareness) {
     router.versioned
       // @ts-ignore https://github.com/elastic/kibana/issues/203170
@@ -65,6 +63,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
             request: GetSpaceSettingsRequestSchema,
             response: {
               200: {
+                description: 'OK: A successful request.',
                 body: () => SpaceSettingsResponseSchema,
               },
             },
@@ -96,6 +95,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
             request: PutSpaceSettingsRequestSchema,
             response: {
               200: {
+                description: 'OK: A successful request.',
                 body: () => SpaceSettingsResponseSchema,
               },
             },
@@ -125,12 +125,15 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           request: GetSettingsRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => SettingsResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
             404: {
+              description: 'Not found.',
               body: notFoundResponse,
             },
           },
@@ -158,12 +161,15 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           request: PutSettingsRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => SettingsResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
             404: {
+              description: 'Not found.',
               body: notFoundResponse,
             },
           },
@@ -191,9 +197,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           request: GetEnrollmentSettingsRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetEnrollmentSettingsResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },

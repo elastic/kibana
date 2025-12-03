@@ -8,6 +8,9 @@
 export const ELASTIC_AI_ASSISTANT_URL = '/api/security_ai_assistant';
 export const ELASTIC_AI_ASSISTANT_INTERNAL_URL = '/internal/elastic_assistant';
 
+export const UPDATE_ANONYMIZATION_FIELDS_URL =
+  `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/update_anonymization_fields` as const;
+
 export const POST_ACTIONS_CONNECTOR_EXECUTE =
   `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/actions/connector/{connectorId}/_execute` as const;
 
@@ -102,9 +105,13 @@ export const ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE =
   `${ATTACK_DISCOVERY_SCHEDULES}/{id}/_disable` as const;
 export const ATTACK_DISCOVERY_SCHEDULES_FIND = `${ATTACK_DISCOVERY_SCHEDULES}/_find` as const;
 
-// Attack discovery internal API (depreciated)
+// Attack discovery internal API
 export const ATTACK_DISCOVERY_INTERNAL =
   `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/attack_discovery` as const;
+export const ATTACK_DISCOVERY_INTERNAL_MISSING_PRIVILEGES =
+  `${ATTACK_DISCOVERY_INTERNAL}/_missing_privileges` as const;
+
+// Attack discovery internal API (depreciated)
 export const ATTACK_DISCOVERY_INTERNAL_BULK = `${ATTACK_DISCOVERY_INTERNAL}/_bulk` as const;
 export const ATTACK_DISCOVERY_INTERNAL_FIND = `${ATTACK_DISCOVERY_INTERNAL}/_find` as const;
 export const ATTACK_DISCOVERY_GENERATIONS_INTERNAL =
@@ -164,3 +171,6 @@ export const INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG =
 
 export const ELASTIC_AI_ASSISTANT_CHECKPOINT_SAVER_ENABLED_FEATURE_FLAG =
   'elasticAssistant.checkpointSaverEnabled' as const;
+
+export const ASSISTANT_INTERRUPTS_ENABLED_FEATURE_FLAG =
+  'securitySolution.assistantInterruptsEnabled' as const;

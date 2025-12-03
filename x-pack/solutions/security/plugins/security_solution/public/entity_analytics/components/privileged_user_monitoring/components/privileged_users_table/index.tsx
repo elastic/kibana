@@ -96,6 +96,7 @@ export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId })
         />
         {hasError && (
           <EuiCallOut
+            announceOnMount
             title={i18n.translate(
               'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedUsersTable.error',
               {

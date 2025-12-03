@@ -10,6 +10,7 @@ import { entityStoreDataClientMock } from './entity_store_data_client.mock';
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import {
   BadCRUDRequestError,
+  EntityNotFoundError,
   EngineNotRunningError,
   CapabilityNotEnabledError,
   DocumentVersionConflictError,
@@ -29,6 +30,82 @@ describe('EntityStoreCrudClient', () => {
     namespace: 'default',
     logger: loggerMock,
     dataClient: dataClientMock,
+  });
+
+  describe('delete single entity', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      jest.useRealTimers();
+    });
+
+    it('when Entity Store disabled throw error', async () => {
+      dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(false));
+
+      await expect(async () => client.deleteEntity('user', { id: 'x' })).rejects.toThrow(
+        new EngineNotRunningError('user')
+      );
+
+      expect(dataClientMock.isEngineRunning).toBeCalledWith('user');
+    });
+
+    it('when Entity Store enabled but CRUD API not in place throw error', async () => {
+      dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
+      dataClientMock.isCapabilityEnabled.mockReturnValueOnce(Promise.resolve(false));
+
+      await expect(async () => client.deleteEntity('user', { id: 'x' })).rejects.toThrow(
+        new CapabilityNotEnabledError(EntityStoreCapability.CRUD_API)
+      );
+
+      expect(dataClientMock.isEngineRunning).toBeCalledWith('user');
+      expect(dataClientMock.isCapabilityEnabled).toBeCalledWith(
+        'user',
+        EntityStoreCapability.CRUD_API
+      );
+    });
+
+    it('when not found throw', async () => {
+      dataClientMock.isCapabilityEnabled.mockReturnValueOnce(Promise.resolve(true));
+      dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
+      esClientMock.deleteByQuery.mockReturnValueOnce(Promise.resolve({ deleted: 0 }));
+
+      await expect(async () =>
+        client.deleteEntity('host', { id: 'does-not-exist' })
+      ).rejects.toThrow(new EntityNotFoundError('host', 'does-not-exist'));
+    });
+
+    it('when version conflicts throw', async () => {
+      dataClientMock.isCapabilityEnabled.mockReturnValueOnce(Promise.resolve(true));
+      dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
+      esClientMock.deleteByQuery.mockReturnValueOnce(Promise.resolve({ version_conflicts: 1 }));
+
+      await expect(async () =>
+        client.deleteEntity('host', { id: 'does-not-exist' })
+      ).rejects.toThrow(new DocumentVersionConflictError());
+    });
+
+    it('when successful responds OK', async () => {
+      dataClientMock.isCapabilityEnabled.mockReturnValueOnce(Promise.resolve(true));
+      dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
+      esClientMock.deleteByQuery.mockReturnValueOnce(Promise.resolve({ deleted: 1 }));
+
+      const response = await client.deleteEntity('service', { id: 'entity-id' });
+      expect(response).toStrictEqual({ deleted: true });
+
+      expect(dataClientMock.isEngineRunning).toBeCalledWith('service');
+      expect(dataClientMock.isCapabilityEnabled).toBeCalledWith(
+        'service',
+        EntityStoreCapability.CRUD_API
+      );
+      expect(esClientMock.deleteByQuery).toBeCalledWith({
+        conflicts: 'proceed',
+        index: '.entities.v1.latest.security_service_default',
+        query: {
+          term: {
+            'entity.id': 'entity-id',
+          },
+        },
+      });
+    });
   });
 
   describe('update single entity', () => {

@@ -5,6 +5,16 @@
  * 2.0.
  */
 
+import {
+  EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSelect,
+  EuiSwitch,
+} from '@elastic/eui';
+import { CodeEditor } from '@kbn/code-editor';
+import { i18n } from '@kbn/i18n';
 import type { Condition } from '@kbn/streamlang';
 import {
   type FilterCondition,
@@ -14,38 +24,28 @@ import {
   type OperatorKeys,
 } from '@kbn/streamlang';
 import type { RoutingStatus } from '@kbn/streams-schema';
+import React, { useMemo } from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import {
-  EuiCodeBlock,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSelect,
-  EuiSwitch,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { CodeEditor } from '@kbn/code-editor';
-import React, { useMemo } from 'react';
-import {
   alwaysToEmptyEquals,
+  conditionNeedsValueField,
   emptyEqualsToAlways,
   isConditionEditableInUi,
 } from '../../../util/condition';
-import type { FieldSuggestion } from './field_selector';
-import { FieldSelector } from './field_selector';
+import type { Suggestion } from './autocomplete_selector';
+import { AutocompleteSelector } from './autocomplete_selector';
 import { OperatorSelector } from './operator_selector';
-import { conditionNeedsValueField } from '../../../util/condition';
 
 export interface ConditionEditorProps {
   condition: Condition;
   status: RoutingStatus;
   onConditionChange: (condition: Condition) => void;
-  fieldSuggestions?: FieldSuggestion[];
+  fieldSuggestions?: Suggestion[];
+  valueSuggestions?: Suggestion[];
 }
 
 export function ConditionEditor(props: ConditionEditorProps) {
-  const { status, onConditionChange, fieldSuggestions = [] } = props;
+  const { status, onConditionChange, fieldSuggestions = [], valueSuggestions = [] } = props;
 
   const isInvalidCondition = !isCondition(props.condition);
 
@@ -109,6 +109,7 @@ export function ConditionEditor(props: ConditionEditorProps) {
           condition={condition as FilterCondition}
           onConditionChange={handleConditionChange}
           fieldSuggestions={fieldSuggestions}
+          valueSuggestions={valueSuggestions}
         />
       ) : (
         <EuiCodeBlock language="json" paddingSize="m" isCopyable>
@@ -123,9 +124,10 @@ function FilterConditionForm(props: {
   condition: FilterCondition;
   disabled: boolean;
   onConditionChange: (condition: FilterCondition) => void;
-  fieldSuggestions?: FieldSuggestion[];
+  fieldSuggestions?: Suggestion[];
+  valueSuggestions?: Suggestion[];
 }) {
-  const { condition, disabled, onConditionChange, fieldSuggestions } = props;
+  const { condition, disabled, onConditionChange, fieldSuggestions, valueSuggestions } = props;
 
   const operator = useMemo(() => {
     return getFilterOperator(condition);
@@ -154,7 +156,7 @@ function FilterConditionForm(props: {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="streamsAppConditionEditor">
       <EuiFlexItem grow={2}>
-        <FieldSelector
+        <AutocompleteSelector
           value={condition.field}
           onChange={(fieldValue) => handleConditionChange({ field: fieldValue })}
           placeholder={i18n.translate('xpack.streams.filter.fieldPlaceholder', {
@@ -164,6 +166,7 @@ function FilterConditionForm(props: {
           compressed
           disabled={disabled}
           dataTestSubj="streamsAppConditionEditorFieldText"
+          showIcon={true}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={showValueField ? 1 : 2}>
@@ -179,18 +182,19 @@ function FilterConditionForm(props: {
         {showValueField ? (
           <>
             {typeof value === 'string' ? (
-              <EuiFieldText
+              <AutocompleteSelector
                 aria-label={i18n.translate('xpack.streams.filter.value', {
                   defaultMessage: 'Value',
                 })}
                 placeholder={i18n.translate('xpack.streams.filter.valuePlaceholder', {
                   defaultMessage: 'Value',
                 })}
+                suggestions={valueSuggestions}
                 compressed
                 value={value}
-                data-test-subj="streamsAppConditionEditorValueText"
-                onChange={(e) => {
-                  handleValueChange(e.target.value);
+                dataTestSubj="streamsAppConditionEditorValueText"
+                onChange={(newValue) => {
+                  handleValueChange(newValue);
                 }}
                 disabled={disabled}
               />

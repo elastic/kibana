@@ -67,15 +67,19 @@ export function createEditLookupIndexContentAction(
       const existingIndexName = doesIndexExist ? indexName : null;
 
       const fileManager = new FileUploadManager(
-        fileUpload,
-        coreStart.http,
-        data,
-        coreStart.notifications,
+        {
+          analytics: coreStart.analytics,
+          data,
+          fileUpload,
+          http: coreStart.http,
+          notifications: coreStart.notifications,
+        },
         null,
         false,
         true,
         existingIndexName,
         { index: { mode: 'lookup' } },
+        'lookup-index-editor',
         // On index searchable
         undefined,
         // On all docs searchable

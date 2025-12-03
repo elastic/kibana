@@ -34,7 +34,7 @@ export const getShareAppMenuItem = ({
   stateContainer: DiscoverStateContainer;
   hasIntegrations: boolean;
   hasUnsavedChanges: boolean;
-  currentTab: TabState | undefined;
+  currentTab: TabState;
   persistedDiscoverSession: DiscoverSession | undefined;
 }): AppMenuActionPrimary[] => {
   if (!services.share) {
@@ -52,13 +52,12 @@ export const getShareAppMenuItem = ({
 
     const searchSourceSharingData = await getSharingData(
       stateContainer.savedSearchState.getState().searchSource,
-      stateContainer.appState.getState(),
+      currentTab.appState,
       services,
       isEsqlMode
     );
 
     const { locator, discoverFeatureFlags } = services;
-    const appState = stateContainer.appState.getState();
     const { timefilter } = services.data.query.timefilter;
     const timeRange = timefilter.getTime();
     const refreshInterval = timefilter.getRefreshInterval();
@@ -66,7 +65,7 @@ export const getShareAppMenuItem = ({
 
     // Share -> Get links -> Snapshot
     const params: DiscoverAppLocatorParams = {
-      ...omit(appState, 'dataSource'),
+      ...omit(currentTab.appState, 'dataSource'),
       ...(persistedDiscoverSession?.id ? { savedSearchId: persistedDiscoverSession.id } : {}),
       ...(dataView?.isPersisted()
         ? { dataViewId: dataView?.id }
@@ -133,6 +132,9 @@ export const getShareAppMenuItem = ({
                 draftModeCallOut: true,
               },
             },
+          },
+          link: {
+            draftModeCallOut: tabsEnabled,
           },
         },
       },

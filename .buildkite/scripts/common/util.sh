@@ -32,39 +32,27 @@ check_for_changed_files() {
   C_RESET='\033[0m' # Reset color
 
   SHOULD_AUTO_COMMIT_CHANGES="${2:-}"
-  CUSTOM_FIX_MESSAGE="${3:-}"
+  CUSTOM_FIX_MESSAGE="${3:-Changes from $1}"
   GIT_CHANGES="$(git status --porcelain -- . ':!:config/node.options' ':!config/kibana.yml')"
 
   if [ "$GIT_CHANGES" ]; then
     if ! is_auto_commit_disabled && [[ "$SHOULD_AUTO_COMMIT_CHANGES" == "true" && "${BUILDKITE_PULL_REQUEST:-false}" != "false" ]]; then
-      NEW_COMMIT_MESSAGE="[CI] Auto-commit changed files from '$1'"
-      PREVIOUS_COMMIT_MESSAGE="$(git log -1 --pretty=%B)"
-
-      if [[ "$NEW_COMMIT_MESSAGE" == "$PREVIOUS_COMMIT_MESSAGE" ]]; then
-        echo -e "\n${RED}ERROR: '$1' caused changes to the following files:${C_RESET}\n"
-        echo -e "$GIT_CHANGES\n"
-        echo -e "CI already attempted to commit these changes, but the file(s) seem to have changed again."
-        echo -e "Please review and fix manually."
-        exit 1
-      fi
-
       echo "'$1' caused changes to the following files:"
       echo "$GIT_CHANGES"
       echo ""
-      echo "Auto-committing these changes now. A new build should start soon if successful."
+      echo "Auto-committing & pushing these changes now."
 
       git config --global user.name kibanamachine
       git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
       gh pr checkout "${BUILDKITE_PULL_REQUEST}"
       git add -A -- . ':!config/node.options' ':!config/kibana.yml'
 
-      git commit -m "$NEW_COMMIT_MESSAGE"
+      git commit -m "$CUSTOM_FIX_MESSAGE"
       git push
 
-      # After the git push, the new commit will trigger a new build within a few seconds and this build should get cancelled
-      # So, let's just sleep to give the build time to cancel itself without an error
-      # If it doesn't get cancelled for some reason, then exit with an error, because we don't want this build to be green (we just don't want it to generate an error either)
+      # Wait to ensure all commits arrive before we terminate the build
       sleep 300
+      # Still exit with error to fail the current build, a new build should be started after the push
       exit 1
     else
       echo -e "\n${RED}ERROR: '$1' caused changes to the following files:${C_RESET}\n"

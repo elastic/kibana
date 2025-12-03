@@ -7,7 +7,7 @@
 
 import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
 import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useEffect } from 'react';
 import { queryKeys } from '../../query_keys';
 import { labels } from '../../utils/i18n';

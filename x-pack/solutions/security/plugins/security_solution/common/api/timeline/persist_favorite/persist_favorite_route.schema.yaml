@@ -44,7 +44,7 @@ paths:
         '403':
           description: Indicates the user does not have the required permissions to persist the favorite status.
           content:
-            application:json:
+            application/json:
               schema:
                 type: object
                 properties:

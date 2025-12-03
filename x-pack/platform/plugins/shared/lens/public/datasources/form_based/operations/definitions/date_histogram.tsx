@@ -35,28 +35,20 @@ import {
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
-import type { DateRange } from '../../../../../common/types';
-import type { IndexPattern } from '../../../../types';
+import type {
+  DateHistogramIndexPatternColumn,
+  DateRange,
+  IndexPattern,
+  FormBasedLayer,
+} from '@kbn/lens-common';
 import { updateColumnParam } from '../layer_helpers';
 import type { FieldBasedOperationErrorMessage, OperationDefinition, ParamEditorProps } from '.';
-import type { FieldBasedIndexPatternColumn } from './column_types';
 import { getInvalidFieldMessage, getSafeName } from './helpers';
-import type { FormBasedLayer } from '../../types';
 import { TIME_SHIFT_MULTIPLE_DATE_HISTOGRAMS } from '../../../../user_messages_ids';
 
 const { isValidInterval } = search.aggs;
 const autoInterval = 'auto';
 const calendarOnlyIntervals = new Set(['w', 'M', 'q', 'y']);
-
-export interface DateHistogramIndexPatternColumn extends FieldBasedIndexPatternColumn {
-  operationType: 'date_histogram';
-  params: {
-    interval: string;
-    ignoreTimeRange?: boolean;
-    includeEmptyRows?: boolean;
-    dropPartials?: boolean;
-  };
-}
 
 function getMultipleDateHistogramsErrorMessage(
   layer: FormBasedLayer,

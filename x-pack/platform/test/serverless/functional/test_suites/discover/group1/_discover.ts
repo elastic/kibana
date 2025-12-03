@@ -109,8 +109,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const time = await PageObjects.timePicker.getTimeConfig();
         // TODO: The Serverless sidebar causes `PageObjects.discover.clickHistogramBar()`
         // to click a different range in the histogram, resulting in a different duration
-        expect(time.start).to.be('Sep 19, 2015 @ 06:31:44.000');
-        expect(time.end).to.be('Sep 23, 2015 @ 18:31:44.000');
+        expect(time.start).to.be('Sep 21, 2015 @ 09:00:00.000');
+        expect(time.end).to.be('Sep 21, 2015 @ 12:00:00.000');
         await retry.waitForWithTimeout(
           'table to contain the right search result',
           3000,
@@ -119,7 +119,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             log.debug(`The first timestamp value in doc table: ${rowData}`);
             // TODO: The Serverless sidebar causes `PageObjects.discover.clickHistogramBar()`
             // to click a different range in the histogram, resulting in a different timestamp
-            return rowData.includes('Sep 22, 2015 @ 23:50:13.253');
+            return rowData.includes('Sep 21, 2015 @ 11:59:22.316');
           }
         );
       });

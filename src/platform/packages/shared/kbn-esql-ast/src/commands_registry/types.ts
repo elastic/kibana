@@ -18,6 +18,7 @@ import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type { ESQLLocation } from '../types';
 import type { FieldType, SupportedDataType } from '../definitions/types';
 import type { EditorExtensions } from './options/recommended_queries';
+import type { SuggestionCategory } from '../sorting/types';
 
 // This is a subset of the Monaco's editor CompletitionItemKind type
 export type ItemKind =
@@ -66,11 +67,16 @@ export interface ISuggestionItem {
    */
   sortText?: string;
   /**
+   * The category of the suggestion, used for sorting and prioritization
+   */
+  category?: SuggestionCategory;
+  /**
    * Suggestions can trigger a command by id. This is useful to trigger specific actions in some contexts
    */
   command?: {
     title: string;
     id: string;
+    arguments?: { [key: string]: string }[];
   };
   /**
    * The range that should be replaced when the suggestion is applied
@@ -142,6 +148,7 @@ export interface ICommandCallbacks {
   hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean;
   getJoinIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
   canCreateLookupIndex?: (indexName: string) => Promise<boolean>;
+  isServerless?: boolean;
 }
 
 export interface ICommandContext {
@@ -156,6 +163,7 @@ export interface ICommandContext {
   supportsControls?: boolean;
   histogramBarTarget?: number;
   activeProduct?: PricingProduct | undefined;
+  isCursorInSubquery?: boolean;
 }
 /**
  * This is a list of locations within an ES|QL query.

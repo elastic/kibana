@@ -5,19 +5,21 @@
  * 2.0.
  */
 
+import type { FeatureType } from '@kbn/streams-schema';
+
 type StreamType = 'wired' | 'classic' | 'unknown';
 
-interface StreamsAssetCountProps {
+interface StreamsAttachmentCountProps {
   name: string;
   dashboards: number;
   slos?: number;
   rules?: number;
 }
 
-interface StreamsAssetClickEventProps {
+interface StreamsAttachmentClickEventProps {
   name: string;
-  asset_type: 'dashboard' | 'slo' | 'rule';
-  asset_id: string;
+  attachment_type: 'dashboard' | 'slo' | 'rule';
+  attachment_id: string;
 }
 
 interface StreamsAIGrokSuggestionLatencyProps {
@@ -30,6 +32,23 @@ interface StreamsAIGrokSuggestionLatencyProps {
 }
 
 interface StreamsAIGrokSuggestionAcceptedProps {
+  name: string;
+  field: string;
+  connector_id: string;
+  match_rate: number;
+  detected_fields: number;
+}
+
+interface StreamsAIDissectSuggestionLatencyProps {
+  name: string;
+  field: string;
+  connector_id: string;
+  suggestion_count: number;
+  duration_ms: number;
+  match_rate: number[];
+}
+
+interface StreamsAIDissectSuggestionAcceptedProps {
   name: string;
   field: string;
   connector_id: string;
@@ -62,19 +81,60 @@ interface StreamsSchemaUpdatedProps {
 
 interface StreamsSignificantEventsSuggestionsGeneratedEventProps {
   duration_ms: number;
+  input_tokens_used: number;
+  output_tokens_used: number;
+  count: number;
+  count_by_feature_type: Record<FeatureType, number>;
+  features_selected: number;
+  features_total: number;
+  stream_name: string;
   stream_type: StreamType;
 }
 
 interface StreamsSignificantEventsCreatedProps {
   count: number;
+  count_by_feature_type: Record<FeatureType, number>;
+  stream_name: string;
   stream_type: StreamType;
 }
 
+interface StreamsFeatureIdentificationIdentifiedProps {
+  count: number;
+  count_by_type: Record<string, number>;
+  input_tokens_used: number;
+  output_tokens_used: number;
+  stream_name: string;
+  stream_type: StreamType;
+}
+
+interface StreamsFeatureIdentificationSavedProps {
+  count: number;
+  count_by_type: Record<string, number>;
+  stream_name: string;
+  stream_type: StreamType;
+}
+
+interface StreamsFeatureIdentificationDeletedProps {
+  count: number;
+  count_by_type: Record<string, number>;
+  stream_name: string;
+  stream_type: StreamType;
+}
+
+interface StreamsDescriptionGeneratedProps {
+  stream_name: string;
+  stream_type: StreamType;
+  input_tokens_used: number;
+  output_tokens_used: number;
+}
+
 export {
-  type StreamsAssetCountProps,
-  type StreamsAssetClickEventProps,
+  type StreamsAttachmentCountProps,
+  type StreamsAttachmentClickEventProps,
   type StreamsAIGrokSuggestionLatencyProps,
   type StreamsAIGrokSuggestionAcceptedProps,
+  type StreamsAIDissectSuggestionLatencyProps,
+  type StreamsAIDissectSuggestionAcceptedProps,
   type StreamsRetentionChangedProps,
   type StreamsProcessingSavedProps,
   type StreamsChildStreamCreatedProps,
@@ -82,4 +142,8 @@ export {
   type StreamsSignificantEventsSuggestionsGeneratedEventProps,
   type StreamsSignificantEventsCreatedProps,
   type WiredStreamsStatusChangedProps,
+  type StreamsFeatureIdentificationSavedProps,
+  type StreamsFeatureIdentificationIdentifiedProps,
+  type StreamsFeatureIdentificationDeletedProps,
+  type StreamsDescriptionGeneratedProps,
 };

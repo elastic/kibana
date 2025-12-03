@@ -17,8 +17,8 @@ paths:
       x-labels: [ess, serverless]
       operationId: AttackDiscoveryFind
       x-state: Technical Preview; added in 9.2.0
-      summary: Finds Attack discoveries that match the search criteria
-      description: Finds Attack discoveries that match the search criteria. Supports free text search, filtering, pagination, and sorting. `Technical preview`
+      summary: Find Attack discoveries that match the search criteria
+      description: Find Attack discoveries that match the search criteria. Supports free text search, filtering, pagination, and sorting. `Technical preview`
       parameters:
         - name: 'alert_ids'
           description: Filter results to Attack discoveries that include any of the provided alert IDs

@@ -1036,7 +1036,7 @@
           },
           "<Option> extends Pick<",
           "EuiSelectableProps",
-          "<{}>, \"data-test-subj\" | \"height\" | \"errorMessage\" | \"singleSelection\" | \"loadingMessage\" | \"noMatchesMessage\" | \"emptyMessage\">"
+          "<{}>, \"data-test-subj\" | \"errorMessage\" | \"height\" | \"singleSelection\" | \"loadingMessage\" | \"noMatchesMessage\" | \"emptyMessage\">"
         ],
         "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_selectable.tsx",
         "deprecated": false,
@@ -1617,7 +1617,7 @@
         "label": "DarkModeValue",
         "description": [],
         "signature": [
-          "\"light\" | \"dark\" | \"system\" | \"space_default\""
+          "\"system\" | \"light\" | \"dark\" | \"space_default\""
         ],
         "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
         "deprecated": false,

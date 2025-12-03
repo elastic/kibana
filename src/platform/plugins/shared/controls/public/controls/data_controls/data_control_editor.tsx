@@ -282,6 +282,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
             >
               {dataViewListError ? (
                 <EuiCallOut
+                  announceOnMount
                   color="danger"
                   iconType="error"
                   title={DataControlEditorStrings.manageControl.dataSource.getDataViewListErrorTitle()}
@@ -310,6 +311,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
           <EuiFormRow label={DataControlEditorStrings.manageControl.dataSource.getFieldTitle()}>
             {fieldListError ? (
               <EuiCallOut
+                announceOnMount
                 color="danger"
                 iconType="error"
                 title={DataControlEditorStrings.manageControl.dataSource.getFieldListErrorTitle()}

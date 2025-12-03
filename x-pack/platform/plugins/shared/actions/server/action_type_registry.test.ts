@@ -7,10 +7,10 @@
 
 import { TaskCost } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import type { ActionTypeRegistryOpts } from './action_type_registry';
 import { ActionTypeRegistry } from './action_type_registry';
-import type { ActionType, ExecutorType } from './types';
+import type { ActionType } from './types';
 import type { ILicenseState } from './lib';
 import { ActionExecutionSourceType, ActionExecutor, TaskRunnerFactory } from './lib';
 import { actionsConfigMock } from './actions_config.mock';
@@ -19,6 +19,7 @@ import type { ActionsConfigurationUtilities } from './actions_config';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
 import { ConnectorRateLimiter } from './lib/connector_rate_limiter';
+import { getConnectorType } from './fixtures';
 import { createMockInMemoryConnector } from './application/connector/mocks';
 
 const mockTaskManager = taskManagerMock.createSetup();
@@ -26,6 +27,14 @@ const inMemoryMetrics = inMemoryMetricsMock.create();
 let mockedLicenseState: jest.Mocked<ILicenseState>;
 let mockedActionsConfig: jest.Mocked<ActionsConfigurationUtilities>;
 let actionTypeRegistryParams: ActionTypeRegistryOpts;
+
+const fooActionType: ActionType = getConnectorType({
+  id: 'foo',
+  name: 'Foo',
+  executor: async (options: { actionId: string }) => {
+    return { status: 'ok', actionId: options.actionId };
+  },
+});
 
 describe('actionTypeRegistry', () => {
   beforeEach(() => {
@@ -63,211 +72,119 @@ describe('actionTypeRegistry', () => {
     };
   });
 
-  const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
-    return { status: 'ok', actionId: options.actionId };
-  };
-
   describe('register()', () => {
-    test('able to register action types', () => {
+    test('able to register connector types', () => {
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-      actionTypeRegistry.register<{}, {}, {}, void>({
-        id: 'my-action-type',
-        name: 'My action type',
-        minimumLicenseRequired: 'gold',
-        supportedFeatureIds: ['alerting'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        executor,
-      });
-      expect(actionTypeRegistry.has('my-action-type')).toEqual(true);
+      actionTypeRegistry.register<{}, {}, {}, void>(
+        getConnectorType({
+          minimumLicenseRequired: 'gold',
+        })
+      );
+      expect(actionTypeRegistry.has('my-connector-type')).toEqual(true);
       expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
       expect(mockTaskManager.registerTaskDefinitions.mock.calls[0]).toEqual(
         expect.objectContaining([
           {
-            'actions:my-action-type': {
+            'actions:my-connector-type': {
               createTaskRunner: expect.any(Function),
               maxAttempts: 3,
               cost: TaskCost.Tiny,
-              title: 'My action type',
+              title: 'My connector type',
             },
           },
         ])
       );
       expect(actionTypeRegistryParams.licensing.featureUsage.register).toHaveBeenCalledWith(
-        'Connector: My action type',
+        'Connector: My connector type',
         'gold'
       );
     });
 
-    test('shallow clones the given action type', () => {
-      const myType: ActionType = {
-        id: 'my-action-type',
-        name: 'My action type',
-        minimumLicenseRequired: 'basic',
-        supportedFeatureIds: ['alerting'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        executor,
-      };
+    test('shallow clones the given connector type', () => {
+      const myType = getConnectorType();
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
       actionTypeRegistry.register(myType);
       myType.name = 'Changed';
-      expect(actionTypeRegistry.get('my-action-type').name).toEqual('My action type');
+      expect(actionTypeRegistry.get('my-connector-type').name).toEqual('My connector type');
     });
 
-    test('throws error if action type already registered', () => {
+    test('throws error if connector type already registered', () => {
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-      actionTypeRegistry.register({
-        id: 'my-action-type',
-        name: 'My action type',
-        minimumLicenseRequired: 'basic',
-        supportedFeatureIds: ['alerting'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        executor,
-      });
+      actionTypeRegistry.register(getConnectorType());
       expect(() =>
-        actionTypeRegistry.register({
-          id: 'my-action-type',
-          name: 'My action type',
-          minimumLicenseRequired: 'basic',
-          supportedFeatureIds: ['alerting'],
-          validate: {
-            config: { schema: schema.object({}) },
-            secrets: { schema: schema.object({}) },
-            params: { schema: schema.object({}) },
-          },
-          executor,
-        })
+        actionTypeRegistry.register(getConnectorType())
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Action type \\"my-action-type\\" is already registered."`
+        `"Action type \\"my-connector-type\\" is already registered."`
       );
     });
 
     test('throws if empty supported feature ids provided', () => {
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
       expect(() =>
-        actionTypeRegistry.register({
-          id: 'my-action-type',
-          name: 'My action type',
-          minimumLicenseRequired: 'basic',
-          supportedFeatureIds: [],
-          validate: {
-            config: { schema: schema.object({}) },
-            secrets: { schema: schema.object({}) },
-            params: { schema: schema.object({}) },
-          },
-          executor,
-        })
+        actionTypeRegistry.register(
+          getConnectorType({
+            supportedFeatureIds: [],
+          })
+        )
       ).toThrowErrorMatchingInlineSnapshot(
-        `"At least one \\"supportedFeatureId\\" value must be supplied for connector type \\"my-action-type\\"."`
+        `"At least one \\"supportedFeatureId\\" value must be supplied for connector type \\"my-connector-type\\"."`
       );
     });
 
     test('throws if invalid feature ids provided', () => {
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
       expect(() =>
-        actionTypeRegistry.register({
-          id: 'my-action-type',
-          name: 'My action type',
-          minimumLicenseRequired: 'basic',
-          supportedFeatureIds: ['foo'],
-          validate: {
-            config: { schema: schema.object({}) },
-            secrets: { schema: schema.object({}) },
-            params: { schema: schema.object({}) },
-          },
-          executor,
-        })
+        actionTypeRegistry.register(
+          getConnectorType({
+            supportedFeatureIds: ['foo'],
+          })
+        )
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid feature ids \\"foo\\" for connector type \\"my-action-type\\"."`
+        `"Invalid feature ids \\"foo\\" for connector type \\"my-connector-type\\"."`
       );
     });
 
-    test('registers gold+ action types to the licensing feature usage API', () => {
+    test('registers gold+ connector types to the licensing feature usage API', () => {
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-      actionTypeRegistry.register({
-        id: 'my-action-type',
-        name: 'My action type',
-        minimumLicenseRequired: 'gold',
-        supportedFeatureIds: ['alerting'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        executor,
-      });
+      actionTypeRegistry.register(
+        getConnectorType({
+          minimumLicenseRequired: 'gold',
+        })
+      );
       expect(actionTypeRegistryParams.licensing.featureUsage.register).toHaveBeenCalledWith(
-        'Connector: My action type',
+        'Connector: My connector type',
         'gold'
       );
     });
 
-    test(`doesn't register basic action types to the licensing feature usage API`, () => {
+    test(`doesn't register basic connector types to the licensing feature usage API`, () => {
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-      actionTypeRegistry.register({
-        id: 'my-action-type',
-        name: 'My action type',
-        minimumLicenseRequired: 'basic',
-        supportedFeatureIds: ['alerting'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        executor,
-      });
+      actionTypeRegistry.register(getConnectorType());
       expect(actionTypeRegistryParams.licensing.featureUsage.register).not.toHaveBeenCalled();
     });
 
-    test('allows registering system actions', () => {
+    test('allows registering system connector', () => {
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
 
       expect(() =>
-        actionTypeRegistry.register({
-          id: 'my-action-type',
-          name: 'My action type',
-          minimumLicenseRequired: 'basic',
-          supportedFeatureIds: ['alerting'],
-          isSystemActionType: true,
-          validate: {
-            config: { schema: schema.object({}) },
-            secrets: { schema: schema.object({}) },
-            params: { schema: schema.object({}) },
-          },
-          executor,
-        })
+        actionTypeRegistry.register(
+          getConnectorType({
+            isSystemActionType: true,
+          })
+        )
       ).not.toThrow();
     });
 
-    test('throws if the kibana privileges are defined but the action type is not a system action type or sub-feature type', () => {
+    test('throws if the kibana privileges are defined but the connector type is not a system connector type or sub-feature type', () => {
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
 
       expect(() =>
-        actionTypeRegistry.register({
-          id: 'my-action-type',
-          name: 'My action type',
-          minimumLicenseRequired: 'basic',
-          supportedFeatureIds: ['alerting'],
-          getKibanaPrivileges: jest.fn(),
-          isSystemActionType: false,
-          validate: {
-            config: { schema: schema.object({}) },
-            secrets: { schema: schema.object({}) },
-            params: { schema: schema.object({}) },
-          },
-          executor,
-        })
+        actionTypeRegistry.register(
+          getConnectorType({
+            isSystemActionType: false,
+            getKibanaPrivileges: jest.fn(),
+          })
+        )
       ).toThrowErrorMatchingInlineSnapshot(
         `"Kibana privilege authorization is only supported for system actions and action types that are registered under a sub-feature"`
       );
@@ -275,64 +192,42 @@ describe('actionTypeRegistry', () => {
   });
 
   describe('get()', () => {
-    test('returns action type', () => {
+    test('returns connector type', () => {
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-      actionTypeRegistry.register({
-        id: 'my-action-type',
-        name: 'My action type',
-        minimumLicenseRequired: 'basic',
-        supportedFeatureIds: ['alerting'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        executor,
-      });
-      const { validate, ...rest } = actionTypeRegistry.get('my-action-type');
+      actionTypeRegistry.register(getConnectorType());
+      const { validate, ...rest } = actionTypeRegistry.get('my-connector-type');
       expect(validate).toBeDefined();
       expect(rest).toMatchInlineSnapshot(`
-              Object {
-                "executor": [Function],
-                "id": "my-action-type",
-                "minimumLicenseRequired": "basic",
-                "name": "My action type",
-                "supportedFeatureIds": Array [
-                  "alerting",
-                ],
-              }
-          `);
+        Object {
+          "executor": [Function],
+          "id": "my-connector-type",
+          "minimumLicenseRequired": "basic",
+          "name": "My connector type",
+          "supportedFeatureIds": Array [
+            "alerting",
+          ],
+        }
+      `);
     });
 
-    test(`throws an error when action type doesn't exist`, () => {
+    test(`throws an error when connector type doesn't exist`, () => {
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-      expect(() => actionTypeRegistry.get('my-action-type')).toThrowErrorMatchingInlineSnapshot(
-        `"Action type \\"my-action-type\\" is not registered."`
+      expect(() => actionTypeRegistry.get('my-connector-type')).toThrowErrorMatchingInlineSnapshot(
+        `"Action type \\"my-connector-type\\" is not registered."`
       );
     });
   });
 
   describe('list()', () => {
-    test('returns list of action types', () => {
+    test('returns list of connector types', () => {
       mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-      actionTypeRegistry.register({
-        id: 'my-action-type',
-        name: 'My action type',
-        minimumLicenseRequired: 'basic',
-        supportedFeatureIds: ['alerting'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        executor,
-      });
+      actionTypeRegistry.register(getConnectorType());
       const actionTypes = actionTypeRegistry.list();
       expect(actionTypes).toEqual([
         {
-          id: 'my-action-type',
-          name: 'My action type',
+          id: 'my-connector-type',
+          name: 'My connector type',
           enabled: true,
           enabledInConfig: true,
           enabledInLicense: true,
@@ -349,45 +244,41 @@ describe('actionTypeRegistry', () => {
     test('returns list of connector types with parameter schema', () => {
       mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
       const connectorTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-      connectorTypeRegistry.register({
-        id: 'my-connector-type',
-        name: 'My connector type',
-        minimumLicenseRequired: 'basic',
-        supportedFeatureIds: ['alerting'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: {
-            schema: schema.object({
-              text: schema.string({ minLength: 1 }),
-            }),
-          },
-        },
-        executor,
-      });
-      connectorTypeRegistry.register({
-        id: 'my-connector-type-with-subaction',
-        name: 'My connector type with subaction',
-        minimumLicenseRequired: 'basic',
-        supportedFeatureIds: ['alerting'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: {
-            schema: schema.oneOf([
-              schema.object({
-                subAction: schema.literal('subaction1'),
-                subActionParams: schema.object({ value: schema.number({ min: 5 }) }),
+      connectorTypeRegistry.register(
+        getConnectorType({
+          validate: {
+            config: { schema: z.object({}) },
+            secrets: { schema: z.object({}) },
+            params: {
+              schema: z.object({
+                text: z.string().min(1),
               }),
-              schema.object({
-                subAction: schema.literal('subaction2'),
-                subActionParams: schema.object({ message: schema.string({ minLength: 5 }) }),
-              }),
-            ]),
+            },
           },
-        },
-        executor,
-      });
+        })
+      );
+      connectorTypeRegistry.register(
+        getConnectorType({
+          id: 'my-connector-type-with-subaction',
+          name: 'My connector type with subaction',
+          validate: {
+            config: { schema: z.object({}) },
+            secrets: { schema: z.object({}) },
+            params: {
+              schema: z.union([
+                z.object({
+                  subAction: z.literal('subaction1'),
+                  subActionParams: z.object({ value: z.number().min(5) }),
+                }),
+                z.object({
+                  subAction: z.literal('subaction2'),
+                  subActionParams: z.object({ message: z.string().min(5) }),
+                }),
+              ]),
+            },
+          },
+        })
+      );
       const connectorTypes = connectorTypeRegistry.list({ exposeValidation: true });
       expect(connectorTypes).toEqual([
         {
@@ -418,41 +309,118 @@ describe('actionTypeRegistry', () => {
 
       // check that validation works
       try {
-        connectorTypes[0].validate?.params.schema.validate({ text: '' });
+        connectorTypes[0].validate?.params.schema.parse({ text: '' });
       } catch (err) {
-        expect(err.message).toMatchInlineSnapshot(
-          `"[text]: value has length [0] but it must have a minimum length of [1]."`
-        );
+        expect(err.message).toMatchInlineSnapshot(`
+          "[
+            {
+              \\"code\\": \\"too_small\\",
+              \\"minimum\\": 1,
+              \\"type\\": \\"string\\",
+              \\"inclusive\\": true,
+              \\"exact\\": false,
+              \\"message\\": \\"String must contain at least 1 character(s)\\",
+              \\"path\\": [
+                \\"text\\"
+              ]
+            }
+          ]"
+        `);
       }
       try {
-        connectorTypes[0].validate?.params.schema.validate({ another_field: 'test_message' });
+        connectorTypes[0].validate?.params.schema.parse({ another_field: 'test_message' });
       } catch (err) {
-        expect(err.message).toMatchInlineSnapshot(
-          `"[text]: expected value of type [string] but got [undefined]"`
-        );
+        expect(err.message).toMatchInlineSnapshot(`
+          "[
+            {
+              \\"code\\": \\"invalid_type\\",
+              \\"expected\\": \\"string\\",
+              \\"received\\": \\"undefined\\",
+              \\"path\\": [
+                \\"text\\"
+              ],
+              \\"message\\": \\"Required\\"
+            }
+          ]"
+        `);
       }
       try {
-        connectorTypes[1].validate?.params.schema.validate({
+        connectorTypes[1].validate?.params.schema.parse({
           subAction: 'subaction1',
           subActionParams: { value: 3 },
         });
       } catch (err) {
         expect(err.message).toMatchInlineSnapshot(`
-          "types that failed validation:
-          - [0.subActionParams.value]: Value must be equal to or greater than [5].
-          - [1.subAction]: expected value to equal [subaction2]"
+          "[
+            {
+              \\"code\\": \\"too_small\\",
+              \\"minimum\\": 5,
+              \\"type\\": \\"number\\",
+              \\"inclusive\\": true,
+              \\"exact\\": false,
+              \\"message\\": \\"Number must be greater than or equal to 5\\",
+              \\"path\\": [
+                \\"subActionParams\\",
+                \\"value\\"
+              ]
+            }
+          ]"
         `);
       }
       try {
-        connectorTypes[1].validate?.params.schema.validate({
+        connectorTypes[1].validate?.params.schema.parse({
           subAction: 'subaction4',
           subActionParams: { value: 10 },
         });
       } catch (err) {
         expect(err.message).toMatchInlineSnapshot(`
-          "types that failed validation:
-          - [0.subAction]: expected value to equal [subaction1]
-          - [1.subAction]: expected value to equal [subaction2]"
+          "[
+            {
+              \\"code\\": \\"invalid_union\\",
+              \\"unionErrors\\": [
+                {
+                  \\"issues\\": [
+                    {
+                      \\"received\\": \\"subaction4\\",
+                      \\"code\\": \\"invalid_literal\\",
+                      \\"expected\\": \\"subaction1\\",
+                      \\"path\\": [
+                        \\"subAction\\"
+                      ],
+                      \\"message\\": \\"Invalid literal value, expected \\\\\\"subaction1\\\\\\"\\"
+                    }
+                  ],
+                  \\"name\\": \\"ZodError\\"
+                },
+                {
+                  \\"issues\\": [
+                    {
+                      \\"received\\": \\"subaction4\\",
+                      \\"code\\": \\"invalid_literal\\",
+                      \\"expected\\": \\"subaction2\\",
+                      \\"path\\": [
+                        \\"subAction\\"
+                      ],
+                      \\"message\\": \\"Invalid literal value, expected \\\\\\"subaction2\\\\\\"\\"
+                    },
+                    {
+                      \\"code\\": \\"invalid_type\\",
+                      \\"expected\\": \\"string\\",
+                      \\"received\\": \\"undefined\\",
+                      \\"path\\": [
+                        \\"subActionParams\\",
+                        \\"message\\"
+                      ],
+                      \\"message\\": \\"Required\\"
+                    }
+                  ],
+                  \\"name\\": \\"ZodError\\"
+                }
+              ],
+              \\"path\\": [],
+              \\"message\\": \\"Invalid input\\"
+            }
+          ]"
         `);
       }
       expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
@@ -462,35 +430,18 @@ describe('actionTypeRegistry', () => {
     test('returns list of connector types filtered by feature id if provided', () => {
       mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-      actionTypeRegistry.register({
-        id: 'my-action-type',
-        name: 'My action type',
-        minimumLicenseRequired: 'basic',
-        supportedFeatureIds: ['alerting'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        executor,
-      });
-      actionTypeRegistry.register({
-        id: 'another-action-type',
-        name: 'My action type',
-        minimumLicenseRequired: 'basic',
-        supportedFeatureIds: ['cases'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        executor,
-      });
-      const actionTypes = actionTypeRegistry.list({ featureId: 'alerting' });
-      expect(actionTypes).toEqual([
+      actionTypeRegistry.register(getConnectorType());
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: 'another-connector-type',
+          supportedFeatureIds: ['cases'],
+        })
+      );
+      const connectorTypes = actionTypeRegistry.list({ featureId: 'alerting' });
+      expect(connectorTypes).toEqual([
         {
-          id: 'my-action-type',
-          name: 'My action type',
+          id: 'my-connector-type',
+          name: 'My connector type',
           enabled: true,
           enabledInConfig: true,
           enabledInLicense: true,
@@ -504,27 +455,22 @@ describe('actionTypeRegistry', () => {
       expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalled();
     });
 
-    test('sets the isSystemActionType correctly for system actions', () => {
+    test('sets the isSystemActionType correctly for system connector', () => {
       mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
 
-      actionTypeRegistry.register({
-        id: 'test.system-action',
-        name: 'Cases',
-        minimumLicenseRequired: 'platinum',
-        supportedFeatureIds: ['alerting'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        isSystemActionType: true,
-        executor,
-      });
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: 'test.system-action',
+          name: 'Cases',
+          minimumLicenseRequired: 'platinum',
+          isSystemActionType: true,
+        })
+      );
 
-      const actionTypes = actionTypeRegistry.list();
+      const connectorTypes = actionTypeRegistry.list();
 
-      expect(actionTypes).toEqual([
+      expect(connectorTypes).toEqual([
         {
           id: 'test.system-action',
           name: 'Cases',
@@ -539,33 +485,29 @@ describe('actionTypeRegistry', () => {
       ]);
     });
 
-    test('sets the subFeature correctly for sub-feature type actions', () => {
+    test('sets the subFeature correctly for sub-feature type connectors', () => {
       mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
 
-      actionTypeRegistry.register({
-        id: 'test.sub-feature-action',
-        name: 'Test',
-        minimumLicenseRequired: 'platinum',
-        supportedFeatureIds: ['siem'],
-        getKibanaPrivileges: () => ['test/create-sub-feature'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        subFeature: 'endpointSecurity',
-        executor,
-      });
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: 'test.sub-feature-connector',
+          name: 'Test',
+          minimumLicenseRequired: 'platinum',
+          supportedFeatureIds: ['siem'],
+          getKibanaPrivileges: () => ['test/create-sub-feature'],
+          subFeature: 'endpointSecurity',
+        })
+      );
 
-      const actionTypes = actionTypeRegistry.list();
+      const connectorTypes = actionTypeRegistry.list();
 
-      expect(actionTypes).toEqual([
+      expect(connectorTypes).toEqual([
         {
           enabled: true,
           enabledInConfig: true,
           enabledInLicense: true,
-          id: 'test.sub-feature-action',
+          id: 'test.sub-feature-connector',
           isSystemActionType: false,
           minimumLicenseRequired: 'platinum',
           name: 'Test',
@@ -578,51 +520,25 @@ describe('actionTypeRegistry', () => {
   });
 
   describe('has()', () => {
-    test('returns false for unregistered action types', () => {
+    test('returns false for unregistered connector types', () => {
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-      expect(actionTypeRegistry.has('my-action-type')).toEqual(false);
+      expect(actionTypeRegistry.has('my-connector-type')).toEqual(false);
     });
 
-    test('returns true after registering an action type', () => {
+    test('returns true after registering an connector type', () => {
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-      actionTypeRegistry.register({
-        id: 'my-action-type',
-        name: 'My action type',
-        minimumLicenseRequired: 'basic',
-        supportedFeatureIds: ['alerting'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        executor,
-      });
-      expect(actionTypeRegistry.has('my-action-type'));
+      actionTypeRegistry.register(getConnectorType());
+      expect(actionTypeRegistry.has('my-connector-type'));
     });
   });
 
   describe('isActionTypeEnabled', () => {
     let actionTypeRegistry: ActionTypeRegistry;
 
-    const fooActionType: ActionType = {
-      id: 'foo',
-      name: 'Foo',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor: async (options) => {
-        return { status: 'ok', actionId: options.actionId };
-      },
-    };
-
     const systemActionType: ActionType = {
       ...fooActionType,
-      id: 'system-action-type',
-      name: 'System action type',
+      id: 'system-connector-type',
+      name: 'System connector type',
       isSystemActionType: true,
     };
 
@@ -658,7 +574,7 @@ describe('actionTypeRegistry', () => {
       expect(
         actionTypeRegistry.isActionExecutable(
           'system-connector-test.system-action',
-          'system-action-type'
+          'system-connector-type'
         )
       ).toEqual(true);
     });
@@ -697,20 +613,6 @@ describe('actionTypeRegistry', () => {
 
   describe('ensureActionTypeEnabled', () => {
     let actionTypeRegistry: ActionTypeRegistry;
-    const fooActionType: ActionType = {
-      id: 'foo',
-      name: 'Foo',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor: async (options) => {
-        return { status: 'ok', actionId: options.actionId };
-      },
-    };
 
     beforeEach(() => {
       actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
@@ -748,20 +650,6 @@ describe('actionTypeRegistry', () => {
 
   describe('isActionExecutable()', () => {
     let actionTypeRegistry: ActionTypeRegistry;
-    const fooActionType: ActionType = {
-      id: 'foo',
-      name: 'Foo',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor: async (options) => {
-        return { status: 'ok', actionId: options.actionId };
-      },
-    };
 
     beforeEach(() => {
       actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
@@ -844,20 +732,7 @@ describe('actionTypeRegistry', () => {
     test('should return list of registered type ids', () => {
       mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
       const registry = new ActionTypeRegistry(actionTypeRegistryParams);
-      registry.register({
-        id: 'foo',
-        name: 'Foo',
-        minimumLicenseRequired: 'basic',
-        supportedFeatureIds: ['alerting'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        executor: async (options) => {
-          return { status: 'ok', actionId: options.actionId };
-        },
-      });
+      registry.register(fooActionType);
       const result = registry.getAllTypes();
       expect(result).toEqual(['foo']);
     });
@@ -867,19 +742,14 @@ describe('actionTypeRegistry', () => {
     it('should return true if the action type is a system action type', () => {
       const registry = new ActionTypeRegistry(actionTypeRegistryParams);
 
-      registry.register({
-        id: 'test.system-action',
-        name: 'Cases',
-        minimumLicenseRequired: 'platinum',
-        supportedFeatureIds: ['alerting'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        isSystemActionType: true,
-        executor,
-      });
+      registry.register(
+        getConnectorType({
+          id: 'test.system-action',
+          name: 'Cases',
+          minimumLicenseRequired: 'platinum',
+          isSystemActionType: true,
+        })
+      );
 
       const result = registry.isSystemActionType('test.system-action');
       expect(result).toBe(true);
@@ -890,18 +760,7 @@ describe('actionTypeRegistry', () => {
 
       const registry = new ActionTypeRegistry(actionTypeRegistryParams);
 
-      registry.register({
-        id: 'foo',
-        name: 'Foo',
-        minimumLicenseRequired: 'basic',
-        supportedFeatureIds: ['alerting'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        executor,
-      });
+      registry.register(getConnectorType({ id: 'foo', name: 'Foo' }));
 
       const allTypes = registry.getAllTypes();
       expect(allTypes.length).toBe(1);
@@ -925,20 +784,16 @@ describe('actionTypeRegistry', () => {
     it('should return true if the action type has a sub-feature type', () => {
       const registry = new ActionTypeRegistry(actionTypeRegistryParams);
 
-      registry.register({
-        id: 'test.sub-feature-action',
-        name: 'Test',
-        minimumLicenseRequired: 'platinum',
-        supportedFeatureIds: ['siem'],
-        getKibanaPrivileges: () => ['test/create-sub-feature'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        subFeature: 'endpointSecurity',
-        executor,
-      });
+      registry.register(
+        getConnectorType({
+          id: 'test.sub-feature-action',
+          name: 'Test',
+          minimumLicenseRequired: 'platinum',
+          supportedFeatureIds: ['siem'],
+          getKibanaPrivileges: () => ['test/create-sub-feature'],
+          subFeature: 'endpointSecurity',
+        })
+      );
 
       const result = registry.hasSubFeature('test.sub-feature-action');
       expect(result).toBe(true);
@@ -949,18 +804,7 @@ describe('actionTypeRegistry', () => {
 
       const registry = new ActionTypeRegistry(actionTypeRegistryParams);
 
-      registry.register({
-        id: 'foo',
-        name: 'Foo',
-        minimumLicenseRequired: 'basic',
-        supportedFeatureIds: ['alerting'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        executor,
-      });
+      registry.register(fooActionType);
 
       const allTypes = registry.getAllTypes();
       expect(allTypes.length).toBe(1);
@@ -984,34 +828,25 @@ describe('actionTypeRegistry', () => {
     it('should get the kibana privileges correctly', () => {
       const registry = new ActionTypeRegistry(actionTypeRegistryParams);
 
-      registry.register({
-        id: 'test.system-action',
-        name: 'Cases',
-        minimumLicenseRequired: 'platinum',
-        supportedFeatureIds: ['alerting'],
-        getKibanaPrivileges: () => ['test/create'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        isSystemActionType: true,
-        executor,
-      });
-      registry.register({
-        id: 'test.sub-feature-action',
-        name: 'Test',
-        minimumLicenseRequired: 'platinum',
-        supportedFeatureIds: ['siem'],
-        getKibanaPrivileges: () => ['test/create-sub-feature'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        subFeature: 'endpointSecurity',
-        executor,
-      });
+      registry.register(
+        getConnectorType({
+          id: 'test.system-action',
+          name: 'Cases',
+          minimumLicenseRequired: 'platinum',
+          getKibanaPrivileges: () => ['test/create'],
+          isSystemActionType: true,
+        })
+      );
+      registry.register(
+        getConnectorType({
+          id: 'test.sub-feature-action',
+          name: 'Test',
+          minimumLicenseRequired: 'platinum',
+          supportedFeatureIds: ['siem'],
+          getKibanaPrivileges: () => ['test/create-sub-feature'],
+          subFeature: 'endpointSecurity',
+        })
+      );
 
       let result = registry.getActionKibanaPrivileges('test.system-action');
       expect(result).toEqual(['test/create']);
@@ -1022,32 +857,23 @@ describe('actionTypeRegistry', () => {
     it('should return an empty array if the action type does not define any kibana privileges', () => {
       const registry = new ActionTypeRegistry(actionTypeRegistryParams);
 
-      registry.register({
-        id: 'test.system-action',
-        name: 'Cases',
-        minimumLicenseRequired: 'platinum',
-        supportedFeatureIds: ['alerting'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        isSystemActionType: true,
-        executor,
-      });
-      registry.register({
-        id: 'test.sub-feature-action',
-        name: 'Test',
-        minimumLicenseRequired: 'platinum',
-        supportedFeatureIds: ['siem'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        subFeature: 'endpointSecurity',
-        executor,
-      });
+      registry.register(
+        getConnectorType({
+          id: 'test.system-action',
+          name: 'Cases',
+          minimumLicenseRequired: 'platinum',
+          isSystemActionType: true,
+        })
+      );
+      registry.register(
+        getConnectorType({
+          id: 'test.sub-feature-action',
+          name: 'Test',
+          minimumLicenseRequired: 'platinum',
+          supportedFeatureIds: ['siem'],
+          subFeature: 'endpointSecurity',
+        })
+      );
 
       let result = registry.getActionKibanaPrivileges('test.system-action');
       expect(result).toEqual([]);
@@ -1058,18 +884,7 @@ describe('actionTypeRegistry', () => {
     it('should return an empty array if the action type is not a system action or a sub-feature type action', () => {
       const registry = new ActionTypeRegistry(actionTypeRegistryParams);
 
-      registry.register({
-        id: 'foo',
-        name: 'Foo',
-        minimumLicenseRequired: 'basic',
-        supportedFeatureIds: ['alerting'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        executor,
-      });
+      registry.register(fooActionType);
 
       const result = registry.getActionKibanaPrivileges('foo');
       expect(result).toEqual([]);
@@ -1079,20 +894,15 @@ describe('actionTypeRegistry', () => {
       const registry = new ActionTypeRegistry(actionTypeRegistryParams);
       const getKibanaPrivileges = jest.fn().mockReturnValue(['test/create']);
 
-      registry.register({
-        id: 'test.system-action',
-        name: 'Cases',
-        minimumLicenseRequired: 'platinum',
-        supportedFeatureIds: ['alerting'],
-        getKibanaPrivileges,
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        isSystemActionType: true,
-        executor,
-      });
+      registry.register(
+        getConnectorType({
+          id: 'test.system-action',
+          name: 'Cases',
+          minimumLicenseRequired: 'platinum',
+          getKibanaPrivileges,
+          isSystemActionType: true,
+        })
+      );
 
       registry.getActionKibanaPrivileges(
         'test.system-action',
@@ -1110,20 +920,15 @@ describe('actionTypeRegistry', () => {
     it('should return true if the action type is deprecated', () => {
       const registry = new ActionTypeRegistry(actionTypeRegistryParams);
 
-      registry.register({
-        id: 'test.action',
-        name: 'Cases',
-        minimumLicenseRequired: 'platinum',
-        supportedFeatureIds: ['alerting'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        isSystemActionType: false,
-        isDeprecated: true,
-        executor,
-      });
+      registry.register(
+        getConnectorType({
+          id: 'test.action',
+          name: 'Cases',
+          minimumLicenseRequired: 'platinum',
+          isSystemActionType: false,
+          isDeprecated: true,
+        })
+      );
 
       const result = registry.isDeprecated('test.action');
       expect(result).toBe(true);

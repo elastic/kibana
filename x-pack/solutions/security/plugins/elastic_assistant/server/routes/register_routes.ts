@@ -68,6 +68,8 @@ import { enableAttackDiscoverySchedulesInternalRoute } from './attack_discovery/
 import type { ConfigSchema } from '../config_schema';
 import { deleteAllConversationsRoute } from './user_conversations/delete_all_route';
 import { suggestUsersRoute } from './users/suggest';
+import { updateAnonymizationFieldsRoute } from './test_internal/update_anonymization_fields_route';
+import { getMissingIndexPrivilegesInternalRoute } from './attack_discovery/privileges/get_missing_privileges';
 
 export const registerRoutes = (
   router: ElasticAssistantPluginRouter,
@@ -146,6 +148,8 @@ export const registerRoutes = (
   postAttackDiscoveryGenerateRoute(router);
   postAttackDiscoveryInternalRoute(router);
 
+  getMissingIndexPrivilegesInternalRoute(router);
+
   // Attack Discovery Schedules
   createAttackDiscoverySchedulesRoute(router);
   createAttackDiscoverySchedulesInternalRoute(router);
@@ -176,4 +180,7 @@ export const registerRoutes = (
   getDefendInsightRoute(router);
   getDefendInsightsRoute(router);
   postDefendInsightsRoute(router);
+
+  // Test Internal
+  updateAnonymizationFieldsRoute(router);
 };

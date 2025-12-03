@@ -36,6 +36,7 @@ import type {
   RollbackPackageResponse,
   AssetSOObject,
   PackageSpecCategory,
+  RollbackAvailableCheckResponse,
 } from '../../../common/types';
 import type {
   GetCategoriesRequestSchema,
@@ -88,7 +89,11 @@ import {
   packagePolicyService,
 } from '../../services';
 import { getPackageUsageStats } from '../../services/epm/packages/get';
-import { rollbackInstallation } from '../../services/epm/packages/rollback';
+import {
+  isIntegrationRollbackTTLExpired,
+  rollbackAvailableCheck,
+  rollbackInstallation,
+} from '../../services/epm/packages/rollback';
 import { updatePackage } from '../../services/epm/packages/update';
 import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
 import type {
@@ -704,6 +709,7 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
       latest_executed_state: attributes.latest_executed_state,
       previous_version: attributes.previous_version,
       rolled_back: attributes.rolled_back,
+      is_rollback_ttl_expired: isIntegrationRollbackTTLExpired(attributes.install_started_at),
     };
 
     return {
@@ -742,5 +748,20 @@ export const rollbackPackageHandler: FleetRequestHandler<
   } catch (error) {
     error.message = `Failed to roll back package ${pkgName}: ${error.message}`;
     throw error;
+  }
+};
+
+export const rollbackAvailableCheckHandler: FleetRequestHandler<
+  TypeOf<typeof RollbackPackageRequestSchema.params>
+> = async (context, request, response) => {
+  const { pkgName } = request.params;
+
+  try {
+    const body: RollbackAvailableCheckResponse = await rollbackAvailableCheck(pkgName);
+    return response.ok({ body });
+  } catch (error) {
+    const reason = `Failed to check if rollback is available for ${pkgName} integration`;
+    appContextService.getLogger().warn(`${reason}: ${error}`);
+    return response.ok({ body: { isAvailable: false, reason } });
   }
 };

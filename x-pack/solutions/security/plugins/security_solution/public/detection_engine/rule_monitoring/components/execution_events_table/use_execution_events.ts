@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
 import type { GetRuleExecutionEventsResponse } from '../../../../../common/api/detection_engine/rule_monitoring';

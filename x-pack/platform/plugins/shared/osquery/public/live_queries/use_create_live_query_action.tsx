@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 import type { AgentSelection } from '@kbn/osquery-io-ts-types';
 import type { CreateLiveQueryRequestBodySchema } from '../../common/api';
 import { API_VERSIONS } from '../../common/constants';

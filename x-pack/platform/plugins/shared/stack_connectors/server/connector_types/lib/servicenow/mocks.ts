@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ExecutorSubActionAddEventParams } from '@kbn/connector-schemas/servicenow_itom';
 import type {
   ExternalService,
   ExecutorSubActionPushParams,
@@ -12,8 +13,8 @@ import type {
   ExternalServiceSIR,
   Observable,
   ExternalServiceITOM,
-  ExecutorSubActionAddEventParams,
 } from './types';
+
 import { ObservableTypes } from './types';
 
 export const serviceNowCommonFields = [

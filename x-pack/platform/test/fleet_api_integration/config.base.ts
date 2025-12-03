@@ -49,7 +49,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
           port: registryPort,
           args: dockerArgs,
           waitForLogLine: 'package manifests loaded',
-          waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
+          waitForLogLineTimeoutMs: 60 * 6 * 1000, // 6 minutes
         },
       })
     : undefined;
@@ -89,6 +89,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
         `--xpack.fleet.experimentalFeatures=${JSON.stringify({
           enablePackageRollback: true,
           enableAgentPrivilegeLevelChange: true,
+          enableFleetPolicyRevisionsCleanupTask: false,
         })}`,
         `--xpack.fleet.agentless.enabled=true`,
         `--xpack.fleet.agentless.api.url=http://localhost:8089/agentless-api`,
