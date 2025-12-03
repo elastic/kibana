@@ -52,3 +52,4 @@ export type {
   GroundTruthExtractor,
   RetrievedDoc,
 } from './src/evaluators/rag/types';
+export { createEsqlEquivalenceEvaluator } from './src/evaluators/esql';

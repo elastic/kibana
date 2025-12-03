@@ -41,7 +41,7 @@ interface ToolResult {
   type?: string;
 }
 
-function createEvaluateDataset({
+function createEvaluateEsqlDataset({
   phoenixClient,
   chatClient,
   inferenceClient,
@@ -89,6 +89,8 @@ function createEvaluateDataset({
     const esqlEquivalenceEvaluator = createEsqlEquivalenceEvaluator({
       inferenceClient,
       log,
+      predictionExtractor: (output) => (output as { esql?: string }).esql ?? '',
+      groundTruthExtractor: (expected) => (expected as { query?: string })?.query ?? '',
     });
 
     await phoenixClient.runExperiment(
@@ -105,7 +107,7 @@ const evaluate = base.extend<{ evaluateDataset: EvaluateDataset }, {}>({
   evaluateDataset: [
     ({ chatClient, phoenixClient, inferenceClient, log }, use) => {
       use(
-        createEvaluateDataset({
+        createEvaluateEsqlDataset({
           chatClient,
           phoenixClient,
           inferenceClient,
@@ -120,7 +122,7 @@ evaluate.describe('ES|QL tool evaluation', { tag: '@svlSearch' }, () => {
   evaluate('analytical queries', async ({ evaluateDataset }) => {
     await evaluateDataset({
       dataset: {
-        name: 'onechat: default-agent-analytical-queries',
+        name: 'esql: analytical queries',
         description: 'Dataset containing Analytical queries',
         examples: [
           {
