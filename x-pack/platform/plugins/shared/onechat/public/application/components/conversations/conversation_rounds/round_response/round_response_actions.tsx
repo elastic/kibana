@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import copy from 'copy-to-clipboard';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { RoundModelUsageStats } from '@kbn/onechat-common';
 import { useToasts } from '../../../../hooks/use_toasts';
 
 const labels = {
@@ -23,11 +24,13 @@ const labels = {
 
 interface RoundResponseActionsProps {
   content: string;
+  modelUsage: RoundModelUsageStats;
   isVisible: boolean;
 }
 
 export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
   content,
+  modelUsage,
   isVisible,
 }) => {
   const { addSuccessToast } = useToasts();
@@ -40,19 +43,27 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
   }, [content, addSuccessToast]);
 
   return (
-    <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs" responsive={false}>
+    <EuiFlexGroup
+      direction="row"
+      justifyContent="spaceBetween"
+      gutterSize="xs"
+      responsive={false}
+      css={css`
+        opacity: ${isVisible ? 1 : 0};
+        transition: opacity 0.2s ease;
+      `}
+    >
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
           iconType="copyClipboard"
           aria-label={labels.copy}
           onClick={handleCopy}
           color="text"
-          css={css`
-            opacity: ${isVisible ? 1 : 0};
-            transition: opacity 0.2s ease;
-          `}
           data-test-subj="roundResponseCopyButton"
         />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText size="xs">{`Input tokens: ${modelUsage.input_tokens} / Output tokens: ${modelUsage.output_tokens}`}</EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
