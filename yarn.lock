@@ -6124,6 +6124,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/dashboard-agent-plugin@link:x-pack/platform/plugins/shared/dashboard_agent":
+  version "0.0.0"
+  uid ""
+
 "@kbn/dashboard-enhanced-plugin@link:x-pack/platform/plugins/shared/dashboard_enhanced":
   version "0.0.0"
   uid ""
