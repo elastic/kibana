@@ -60,9 +60,16 @@ export const SECURITY_DEFAULT_DATA_VIEW_ID = 'security-solution-default';
 
 export const CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN =
   'logs-cloud_security_posture.vulnerabilities_latest-default';
+// Alias uses the old index name for backward compatibility
+export const CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_ALIAS =
+  'logs-cloud_security_posture.vulnerabilities_latest-default';
+export const CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_LATEST =
+  'security_solution-cloud_security_posture.vulnerability_latest-v1';
+export const CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN_V1 =
+  'security_solution-cloud_security_posture.vulnerability_latest-*';
 export const CDR_LATEST_THIRD_PARTY_VULNERABILITIES_INDEX_PATTERN =
   'security_solution-*.vulnerability_latest';
-export const CDR_VULNERABILITIES_INDEX_PATTERN = `${CDR_LATEST_THIRD_PARTY_VULNERABILITIES_INDEX_PATTERN},${CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN}`;
+export const CDR_VULNERABILITIES_INDEX_PATTERN = `${CDR_LATEST_THIRD_PARTY_VULNERABILITIES_INDEX_PATTERN},${CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_ALIAS}`;
 export const LATEST_VULNERABILITIES_RETENTION_POLICY = '3d';
 
 export const CDR_VULNERABILITIES_DATA_VIEW_NAME = 'Latest Cloud Security Vulnerabilities';
