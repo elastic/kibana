@@ -61,7 +61,7 @@ export const CaseViewAttachments = ({
   caseData: CaseUI;
   activeTab: CASE_VIEW_PAGE_TABS;
 }>) => {
-  const caseViewTabs = useCaseAttachmentTabs({ caseData, activeTab });
+  const { tabs: caseViewTabs } = useCaseAttachmentTabs({ caseData, activeTab });
   const { navigateToCaseView } = useCaseViewNavigation();
 
   const tabAsSelectableOptions = useMemo(() => {
