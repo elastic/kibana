@@ -64,6 +64,14 @@
       "onechat",
       "inference"
     ],
-    "requiredBundles": ["fleet", "kibanaReact", "kibanaUtils", "ml", "observability", "maps"]
+    "requiredBundles": [
+      "fleet",
+      "kibanaReact",
+      "kibanaUtils",
+      "ml",
+      "observability",
+      "maps",
+      "onechat"
+    ]
   }
 }

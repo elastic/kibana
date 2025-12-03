@@ -9,13 +9,13 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { AiInsight } from '@kbn/observability-agent-builder';
+import { useConnectorSelection } from '@kbn/onechat-plugin/public';
 import { OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID } from '../../../../../common/agent_builder/attachment_ids';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getIsObservabilityAgentEnabled } from '../../../../../common/agent_builder/get_is_obs_agent_enabled';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { type APIReturnType, callApmApi } from '../../../../services/rest/create_call_apm_api';
-import { useLocalStorage } from '../../../../hooks/use_local_storage';
 
 export function ErrorSampleAgentBuilderAiInsight({
   error,
@@ -36,7 +36,9 @@ export function ErrorSampleAgentBuilderAiInsight({
   const [summary, setSummary] = useState('');
   const [context, setContext] = useState('');
 
-  const [lastUsedConnectorId] = useLocalStorage('agentBuilder.lastUsedConnector', '');
+  const { selectedConnector, defaultConnectorId } = useConnectorSelection();
+  console.log('selectedConnector', selectedConnector);
+  console.log('defaultConnectorId', defaultConnectorId);
 
   const fetchAiInsights = async () => {
     // TODO: display the error and disable the start conversation button if there is an error
@@ -61,7 +63,7 @@ export function ErrorSampleAgentBuilderAiInsight({
             end,
             environment,
             kuery,
-            connectorId: lastUsedConnectorId,
+            connectorId: selectedConnector ?? defaultConnectorId ?? '',
           },
         },
         signal: null,
