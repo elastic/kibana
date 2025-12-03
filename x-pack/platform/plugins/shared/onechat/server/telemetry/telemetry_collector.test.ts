@@ -61,7 +61,7 @@ describe('telemetry_collector', () => {
 
       expect(mockUsageCollection.makeUsageCollector).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: 'onechat',
+          type: 'agent_builder',
         })
       );
     });
@@ -75,7 +75,7 @@ describe('telemetry_collector', () => {
     it('logs info message on successful registration', () => {
       registerTelemetryCollector(mockUsageCollection, logger);
 
-      expect(logger.info).toHaveBeenCalledWith('Registered telemetry collector for onechat');
+      expect(logger.info).toHaveBeenCalledWith('Registered telemetry collector for agent_builder');
     });
 
     it('registers collector with usageCollection', () => {

@@ -18,7 +18,7 @@ import {
 describe('usage_counters', () => {
   describe('ONECHAT_USAGE_DOMAIN', () => {
     it('has the correct value', () => {
-      expect(ONECHAT_USAGE_DOMAIN).toBe('onechat');
+      expect(ONECHAT_USAGE_DOMAIN).toBe('agent_builder');
     });
   });
 
@@ -58,7 +58,7 @@ describe('usage_counters', () => {
       trackToolCall(mockUsageCounter, 'default_agent');
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: 'onechat_tool_call_default_agent',
+        counterName: 'agent_builder_tool_call_default_agent',
         counterType: 'count',
         incrementBy: 1,
       });
@@ -68,7 +68,7 @@ describe('usage_counters', () => {
       trackToolCall(mockUsageCounter, 'custom_agent');
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: 'onechat_tool_call_custom_agent',
+        counterName: 'agent_builder_tool_call_custom_agent',
         counterType: 'count',
         incrementBy: 1,
       });
@@ -78,7 +78,7 @@ describe('usage_counters', () => {
       trackToolCall(mockUsageCounter, 'mcp');
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: 'onechat_tool_call_mcp',
+        counterName: 'agent_builder_tool_call_mcp',
         counterType: 'count',
         incrementBy: 1,
       });
@@ -88,7 +88,7 @@ describe('usage_counters', () => {
       trackToolCall(mockUsageCounter, 'api');
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: 'onechat_tool_call_api',
+        counterName: 'agent_builder_tool_call_api',
         counterType: 'count',
         incrementBy: 1,
       });
@@ -98,7 +98,7 @@ describe('usage_counters', () => {
       trackToolCall(mockUsageCounter, 'a2a');
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: 'onechat_tool_call_a2a',
+        counterName: 'agent_builder_tool_call_a2a',
         counterType: 'count',
         incrementBy: 1,
       });
@@ -123,12 +123,12 @@ describe('usage_counters', () => {
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(2);
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: 'onechat_llm_provider_openai',
+        counterName: 'agent_builder_llm_provider_openai',
         counterType: 'count',
         incrementBy: 1,
       });
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: 'onechat_llm_model_gpt-4',
+        counterName: 'agent_builder_llm_model_gpt-4',
         counterType: 'count',
         incrementBy: 1,
       });
@@ -138,12 +138,12 @@ describe('usage_counters', () => {
       trackLLMUsage(mockUsageCounter, 'bedrock', 'claude-3');
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: 'onechat_llm_provider_bedrock',
+        counterName: 'agent_builder_llm_provider_bedrock',
         counterType: 'count',
         incrementBy: 1,
       });
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: 'onechat_llm_model_claude-3',
+        counterName: 'agent_builder_llm_model_claude-3',
         counterType: 'count',
         incrementBy: 1,
       });
@@ -169,7 +169,7 @@ describe('usage_counters', () => {
         trackConversationRound(mockUsageCounter, round);
 
         expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-          counterName: 'onechat_rounds_1-5',
+          counterName: 'agent_builder_rounds_1-5',
           counterType: 'count',
           incrementBy: 1,
         });
@@ -182,7 +182,7 @@ describe('usage_counters', () => {
         trackConversationRound(mockUsageCounter, round);
 
         expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-          counterName: 'onechat_rounds_6-10',
+          counterName: 'agent_builder_rounds_6-10',
           counterType: 'count',
           incrementBy: 1,
         });
@@ -195,7 +195,7 @@ describe('usage_counters', () => {
         trackConversationRound(mockUsageCounter, round);
 
         expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-          counterName: 'onechat_rounds_11-20',
+          counterName: 'agent_builder_rounds_11-20',
           counterType: 'count',
           incrementBy: 1,
         });
@@ -208,7 +208,7 @@ describe('usage_counters', () => {
         trackConversationRound(mockUsageCounter, round);
 
         expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-          counterName: 'onechat_rounds_21-50',
+          counterName: 'agent_builder_rounds_21-50',
           counterType: 'count',
           incrementBy: 1,
         });
@@ -221,7 +221,7 @@ describe('usage_counters', () => {
         trackConversationRound(mockUsageCounter, round);
 
         expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-          counterName: 'onechat_rounds_51+',
+          counterName: 'agent_builder_rounds_51+',
           counterType: 'count',
           incrementBy: 1,
         });
@@ -248,7 +248,7 @@ describe('usage_counters', () => {
         trackQueryToResultTime(mockUsageCounter, duration);
 
         expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-          counterName: 'onechat_query_to_result_time_<1s',
+          counterName: 'agent_builder_query_to_result_time_<1s',
           counterType: 'count',
           incrementBy: 1,
         });
@@ -261,7 +261,7 @@ describe('usage_counters', () => {
         trackQueryToResultTime(mockUsageCounter, duration);
 
         expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-          counterName: 'onechat_query_to_result_time_1-5s',
+          counterName: 'agent_builder_query_to_result_time_1-5s',
           counterType: 'count',
           incrementBy: 1,
         });
@@ -274,7 +274,7 @@ describe('usage_counters', () => {
         trackQueryToResultTime(mockUsageCounter, duration);
 
         expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-          counterName: 'onechat_query_to_result_time_5-10s',
+          counterName: 'agent_builder_query_to_result_time_5-10s',
           counterType: 'count',
           incrementBy: 1,
         });
@@ -287,7 +287,7 @@ describe('usage_counters', () => {
         trackQueryToResultTime(mockUsageCounter, duration);
 
         expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-          counterName: 'onechat_query_to_result_time_10-30s',
+          counterName: 'agent_builder_query_to_result_time_10-30s',
           counterType: 'count',
           incrementBy: 1,
         });
@@ -300,7 +300,7 @@ describe('usage_counters', () => {
         trackQueryToResultTime(mockUsageCounter, duration);
 
         expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-          counterName: 'onechat_query_to_result_time_30s+',
+          counterName: 'agent_builder_query_to_result_time_30s+',
           counterType: 'count',
           incrementBy: 1,
         });

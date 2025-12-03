@@ -489,5 +489,5 @@ export function registerTelemetryCollector(
     })
   );
 
-  logger.info('Registered telemetry collector for agent_buidler');
+  logger.info('Registered telemetry collector for agent_builder');
 }
