@@ -12,8 +12,8 @@ import type {
   TaskManagerSetupContract,
 } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
-import type { SLOConfig, SLOPluginStartDependencies } from '../../types';
-import { CleanUpTempSummary } from '../management/clean_up_temp_summary';
+import type { SLOConfig, SLOPluginStartDependencies } from '../../../types';
+import { CleanUpTempSummary } from './clean_up_temp_summary';
 
 export const TYPE = 'slo:temp-summary-cleanup-task';
 export const VERSION = '1.0.0';
