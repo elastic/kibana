@@ -199,6 +199,7 @@ const dashboardEditModeConfig: TopNavMenuConfigBeta = {
             order: 4,
             label: 'settings',
             testId: 'settingButton',
+            seperator: 'above',
           },
         ],
       },
@@ -338,7 +339,6 @@ export const DashboardEditModeConfig: Story = {
   name: 'Dashboard edit mode',
   args: {
     config: dashboardEditModeConfig,
-    visible: true,
   },
 };
 
@@ -349,6 +349,5 @@ export const DiscoverConfig: Story = {
   name: 'Discover',
   args: {
     config: discoverConfig,
-    visible: true,
   },
 };

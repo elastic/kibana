@@ -99,6 +99,7 @@ export type TopNavMenuPopoverItemBeta = Omit<
   'iconType' | 'hidden' | 'popoverWidth'
 > & {
   iconType?: IconType;
+  seperator?: 'above' | 'below';
 };
 
 export type TopNavMenuActionItemBeta = TopNavMenuItemCommonBeta;

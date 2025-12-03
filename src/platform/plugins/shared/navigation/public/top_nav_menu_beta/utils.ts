@@ -8,7 +8,12 @@
  */
 
 import { isFunction, upperFirst } from 'lodash';
-import type { EuiButtonColor, EuiThemeComputed, EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import type {
+  EuiButtonColor,
+  EuiThemeComputed,
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
+} from '@elastic/eui';
 import type {
   TopNavMenuConfigBeta,
   TopNavMenuItemCommonBeta,
@@ -101,10 +106,15 @@ export const hasNoItems = (config: TopNavMenuConfigBeta) =>
   !config.items?.length && !config?.primaryActionItem && !config?.secondaryActionItem;
 
 const mapTopNavItemToPanelItem = (item: TopNavMenuPopoverItemBeta, childPanelId?: number) => {
+  const { content, title } = getTooltip({
+    tooltipContent: item?.tooltipContent,
+    tooltipTitle: item?.tooltipTitle,
+  });
+
   return {
     key: item.id,
     name: upperFirst(item.label),
-    icon: item.iconType,
+    icon: item?.iconType,
     onClick:
       item?.href || childPanelId !== undefined
         ? undefined
@@ -114,8 +124,13 @@ const mapTopNavItemToPanelItem = (item: TopNavMenuPopoverItemBeta, childPanelId?
     href: item?.href,
     target: item?.target,
     disabled: isDisabled(item?.disableButton),
+    'data-test-subj': item?.testId,
+    toolTipContent: content,
+    toolTipProps: {
+      title,
+    },
     ...(childPanelId !== undefined && { panel: childPanelId }),
-  };
+  } as EuiContextMenuPanelItemDescriptor;
 };
 
 /**
@@ -133,15 +148,32 @@ export const getPopoverPanels = (
     panelId: number,
     parentTitle?: string
   ) => {
-    const panelItems = itemsToProcess.map((item) => {
+    const panelItems: EuiContextMenuPanelItemDescriptor[] = [];
+
+    itemsToProcess.forEach((item) => {
+      if (item.seperator === 'above') {
+        panelItems.push({
+          isSeparator: true,
+          key: `separator-${item.id}`,
+        } as EuiContextMenuPanelItemDescriptor);
+      }
+
       if (item.items && item.items.length > 0) {
         currentPanelId++;
         const childPanelId = currentPanelId;
 
         processItems(item.items, childPanelId, item.label);
-        return mapTopNavItemToPanelItem(item, childPanelId);
+        panelItems.push(mapTopNavItemToPanelItem(item, childPanelId));
+      } else {
+        panelItems.push(mapTopNavItemToPanelItem(item));
       }
-      return mapTopNavItemToPanelItem(item);
+
+      if (item.seperator === 'below') {
+        panelItems.push({
+          isSeparator: true,
+          key: `separator-${item.id}`,
+        } as EuiContextMenuPanelItemDescriptor);
+      }
     });
 
     panels.push({
