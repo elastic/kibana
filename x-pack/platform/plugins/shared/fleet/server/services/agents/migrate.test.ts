@@ -39,10 +39,6 @@ jest.mock('..', () => {
     licenseService: {
       hasAtLeast: jest.fn(),
     },
-    appContextService: {
-      getLogger: jest.fn(),
-      getTelemetryEventsSender: jest.fn(),
-    },
   };
 });
 

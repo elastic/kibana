@@ -104,7 +104,7 @@ export function useInstalledIntegrations(
           const validSearchTerms = filters.q ? searchResults.find((s) => s.id === item.id) : true;
 
           const validCustomIntegrations = filters.customIntegrations
-            ? item.categories?.includes('custom')
+            ? item?.installationInfo?.install_source === 'custom'
             : true;
 
           return validInstalationStatus && validSearchTerms && validCustomIntegrations;
@@ -124,10 +124,10 @@ export function useInstalledIntegrations(
   }, [internalInstalledPackagesFiltered]);
 
   const customIntegrationsCount = useMemo(() => {
-    return internalInstalledPackages.reduce((acc, item) => {
-      return item.categories?.includes('custom') ? acc + 1 : acc;
+    return internalInstalledPackagesFiltered.reduce((acc, item) => {
+      return item?.installationInfo?.install_source === 'custom' ? acc + 1 : acc;
     }, 0);
-  }, [internalInstalledPackages]);
+  }, [internalInstalledPackagesFiltered]);
 
   const installedPackages: InstalledPackageUIPackageListItem[] = useMemo(() => {
     // Pagination

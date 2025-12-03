@@ -1877,7 +1877,7 @@ describe('CloudConnectorService', () => {
         const [[type, createCall]] = mockSoClient.create.mock.calls;
         expect(type).toBe(CLOUD_CONNECTOR_SAVED_OBJECT_TYPE);
         expect(createCall).toMatchObject({
-          name: 'actual-connector-name', // Should use azure_credentials_cloud_connector_id.value
+          name: 'actual-connector-name', // Custom name is independent from azure_credentials_cloud_connector_id.value
           cloudProvider: 'azure',
           namespace: '*',
           vars: azureRequest.vars,

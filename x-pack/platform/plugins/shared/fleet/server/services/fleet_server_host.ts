@@ -6,7 +6,6 @@
  */
 
 import { omit } from 'lodash';
-import pMap from 'p-map';
 
 import type {
   ElasticsearchClient,
@@ -14,7 +13,6 @@ import type {
   SavedObject,
   KibanaRequest,
 } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { normalizeHostsForAgents } from '../../common/services';
 import {
@@ -350,30 +348,29 @@ class FleetServerHostService {
     if (ids.length === 0) {
       return [];
     }
-    const decryptedSavedObjects = await pMap(
-      ids,
-      async (id) => {
-        try {
-          const decryptedSo =
-            await this.encryptedSoClient.getDecryptedAsInternalUser<FleetServerHostSOAttributes>(
-              FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
-              id
-            );
-          return savedObjectToFleetServerHost(decryptedSo);
-        } catch (error: any) {
-          if (ignoreNotFound && SavedObjectsErrorHelpers.isNotFoundError(error)) {
-            return undefined;
-          }
-          throw error;
-        }
-      },
-      { concurrency: 50 } // Match the concurrency used in x-pack/platform/plugins/shared/encrypted_saved_objects/server/saved_objects/index.ts#L172
+
+    const res = await this.soClient.bulkGet<FleetServerHostSOAttributes>(
+      ids.map((id) => ({
+        id,
+        type: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+      }))
     );
 
-    return decryptedSavedObjects.filter(
-      (fleetServerHostOrUndefined): fleetServerHostOrUndefined is FleetServerHost =>
-        typeof fleetServerHostOrUndefined !== 'undefined'
-    );
+    return res.saved_objects
+      .map((so) => {
+        if (so.error) {
+          if (!ignoreNotFound || so.error.statusCode !== 404) {
+            throw so.error;
+          }
+          return undefined;
+        }
+
+        return savedObjectToFleetServerHost(so);
+      })
+      .filter(
+        (fleetServerHostOrUndefined): fleetServerHostOrUndefined is FleetServerHost =>
+          typeof fleetServerHostOrUndefined !== 'undefined'
+      );
   }
 
   /**

@@ -47,7 +47,6 @@ import {
   PackagePolicyNotFoundError,
   PackagePolicyRequestError,
   CustomPackagePolicyNotAllowedForAgentlessError,
-  FleetError,
 } from '../../errors';
 import {
   getInstallation,
@@ -236,16 +235,6 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   let wasPackageAlreadyInstalled = false;
 
   const spaceId = fleetContext.spaceId;
-
-  if (
-    appContextService.getExperimentalFeatures().disableAgentlessLegacyAPI &&
-    request.body.supports_agentless
-  ) {
-    throw new FleetError(
-      'To create agentless package policies, use the Fleet agentless policies API.'
-    );
-  }
-
   try {
     let newPackagePolicy: NewPackagePolicy;
     if (isSimplifiedCreatePackagePolicyRequest(newPolicy)) {

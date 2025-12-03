@@ -83,7 +83,6 @@ export const getFileHandler: FleetRequestHandler<
       });
     }
 
-    // @ts-expect-error upgrade typescript v5.9.3
     buffer = sanitize(contentType, buffer);
 
     return response.custom({

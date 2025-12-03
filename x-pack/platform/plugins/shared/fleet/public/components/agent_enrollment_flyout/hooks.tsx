@@ -58,7 +58,6 @@ export function useAgentPolicyWithPackagePolicies(policyId?: string) {
   useEffect(() => {
     async function loadPolicy(policyIdToLoad?: string) {
       if (!policyIdToLoad) {
-        setAgentPolicy(null);
         return;
       }
       try {

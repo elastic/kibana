@@ -108,7 +108,6 @@ describe.skip('Fleet setup preconfiguration with multiple instances Kibana', () 
     }
     roots = [];
 
-    // @ts-expect-error upgrade typescript v5.9.3
     if (esServer) {
       await esServer.stop();
     }

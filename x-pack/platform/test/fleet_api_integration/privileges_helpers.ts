@@ -20,6 +20,7 @@ interface PrivilegeTestRoute {
   method: string;
   path: string | (() => string);
   send?: any;
+  getSend?: () => any;
   beforeEach?: () => any;
   afterEach?: () => any;
   scenarios: PrivilegeTestScenario[];
@@ -59,6 +60,7 @@ export function runPrivilegeTests(
         };
         it(`should return a ${scenario.statusCode} for user: ${scenario.user.username}`, async () => {
           const path = typeof route.path === 'function' ? route.path() : route.path;
+          const sendData = route.getSend ? route.getSend() : route.send;
           if (route.method === 'GET') {
             return supertestWithoutAuth
               .get(path)
@@ -69,7 +71,7 @@ export function runPrivilegeTests(
               .put(path)
               .set('kbn-xsrf', 'xx')
               .auth(scenario.user.username, scenario.user.password)
-              .send(route.send)
+              .send(sendData)
               .expect(expectFn);
           } else if (route.method === 'DELETE') {
             return supertestWithoutAuth
@@ -82,7 +84,7 @@ export function runPrivilegeTests(
               .post(path)
               .set('kbn-xsrf', 'xx')
               .auth(scenario.user.username, scenario.user.password)
-              .send(route.send)
+              .send(sendData)
               .expect(expectFn);
           } else {
             throw new Error('not implemented');

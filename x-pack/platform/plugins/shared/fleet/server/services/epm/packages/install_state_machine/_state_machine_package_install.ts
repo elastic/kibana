@@ -62,7 +62,6 @@ import {
 import type { StateMachineDefinition, StateMachineStates } from './state_machine';
 import { handleState } from './state_machine';
 import { stepCreateAlertingRules } from './steps/step_create_alerting_rules';
-import { cleanupEsqlViewsStep, stepInstallEsqlViews } from './steps/step_install_esql_views';
 
 export interface InstallContext extends StateContext<StateNames> {
   savedObjectsClient: SavedObjectsClientContract;
@@ -99,12 +98,6 @@ const regularStatesDefinition: StateMachineStates<StateNames> = {
   },
   install_precheck: {
     onTransition: stepInstallPrecheck,
-    nextState: INSTALL_STATES.INSTALL_ESQL_VIEWS,
-    onPostTransition: updateLatestExecutedState,
-  },
-  install_esql_views: {
-    onPreTransition: cleanupEsqlViewsStep,
-    onTransition: stepInstallEsqlViews,
     nextState: INSTALL_STATES.INSTALL_KIBANA_ASSETS,
     onPostTransition: updateLatestExecutedState,
   },

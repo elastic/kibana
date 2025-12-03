@@ -46,7 +46,6 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
   agentPolicy,
   agentPolicies,
   selectedPolicy,
-  selectedPolicyId,
   setSelectedPolicyId,
   refreshAgentPolicies,
   mode,
@@ -77,7 +76,6 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
       ? [
           AgentPolicySelectionStep({
             selectedPolicy,
-            selectedPolicyId,
             agentPolicies,
             selectedApiKeyId,
             setSelectedAPIKeyId,
@@ -126,7 +124,6 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
     selectedApiKeyId,
     setSelectedAPIKeyId,
     setSelectedPolicyId,
-    selectedPolicyId,
     refreshAgentPolicies,
     selectionType,
     isK8s,
@@ -151,7 +148,6 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   agentPolicy,
   agentPolicies,
   selectedPolicy,
-  selectedPolicyId,
   setSelectedPolicyId,
   selectedApiKeyId,
   setSelectedAPIKeyId,
@@ -206,7 +202,6 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
       ? [
           AgentPolicySelectionStep({
             selectedPolicy,
-            selectedPolicyId,
             agentPolicies,
             selectedApiKeyId,
             setSelectedAPIKeyId,
@@ -305,7 +300,6 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     selectedApiKeyId,
     setSelectedAPIKeyId,
     setSelectedPolicyId,
-    selectedPolicyId,
     refreshAgentPolicies,
     selectionType,
     cloudSecurityIntegration,

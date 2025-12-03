@@ -70,7 +70,6 @@ export interface FlyOutProps extends BaseProps {
 export interface InstructionProps extends BaseProps {
   agentPolicies: AgentPolicy[];
   selectedPolicy: AgentPolicy | undefined;
-  selectedPolicyId?: string;
   setSelectedPolicyId: (policyId?: string) => void;
   refreshAgentPolicies: () => void;
   isLoadingAgentPolicies?: boolean;

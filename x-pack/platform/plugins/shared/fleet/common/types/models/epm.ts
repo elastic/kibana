@@ -102,7 +102,6 @@ export enum ElasticsearchAssetType {
   transform = 'transform',
   mlModel = 'ml_model',
   knowledgeBase = 'knowledge_base',
-  esqlView = 'esql_view',
 }
 
 export type FleetElasticsearchAssetType = Exclude<
@@ -657,7 +656,6 @@ export interface CustomAssetFailedAttempt extends FailedAttempt {
 export enum INSTALL_STATES {
   CREATE_RESTART_INSTALLATION = 'create_restart_installation',
   INSTALL_PRECHECK = 'install_precheck',
-  INSTALL_ESQL_VIEWS = 'install_esql_views',
   INSTALL_KIBANA_ASSETS = 'install_kibana_assets',
   INSTALL_ILM_POLICIES = 'install_ilm_policies',
   CREATE_ALERTING_RULES = 'create_alerting_rules',

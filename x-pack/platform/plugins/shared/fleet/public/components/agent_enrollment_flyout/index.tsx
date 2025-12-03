@@ -218,7 +218,6 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
             downloadSource={downloadSource}
             downloadSourceProxy={downloadSourceProxy}
             setSelectedPolicyId={setSelectedPolicyId}
-            selectedPolicyId={selectedPolicyId}
             agentPolicy={agentPolicy}
             selectedPolicy={selectedPolicy}
             agentPolicies={agentPolicies}

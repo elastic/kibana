@@ -15,11 +15,8 @@ import { getCurrentNamespace } from '../spaces/get_current_namespace';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 
-import { appContextService, licenseService } from '..';
+import { licenseService } from '..';
 import { LICENSE_FOR_AGENT_MIGRATION } from '../../../common/constants';
-
-import type { AgentActionEvent } from '../action_sender';
-import { sendActionTelemetryEvents } from '../action_sender';
 
 import { createAgentAction } from './actions';
 import type { GetAgentsOptions } from './crud';
@@ -77,22 +74,7 @@ export async function migrateSingleAgent(
       secrets: { enrollment_token: options.enrollment_token },
     }),
   });
-
-  sendTelemetryEvent(1);
-
   return { actionId: response.id };
-}
-
-function sendTelemetryEvent(agentCount: number) {
-  const actionTelemetry: AgentActionEvent = {
-    eventType: 'MIGRATE',
-    agentCount,
-  };
-  sendActionTelemetryEvents(
-    appContextService.getLogger(),
-    appContextService.getTelemetryEventsSender(),
-    actionTelemetry
-  );
 }
 
 export async function bulkMigrateAgents(
@@ -116,14 +98,12 @@ export async function bulkMigrateAgents(
 
   if ('agentIds' in options) {
     const givenAgents = await getAgents(esClient, soClient, options);
-    const response = await bulkMigrateAgentsBatch(esClient, soClient, givenAgents, {
+    return await bulkMigrateAgentsBatch(esClient, soClient, givenAgents, {
       enrollment_token: options.enrollment_token,
       uri: options.uri,
       settings: options.settings,
       spaceId: currentSpaceId,
     });
-    sendTelemetryEvent(options.agentIds.length);
-    return response;
   }
 
   const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
@@ -136,16 +116,14 @@ export async function bulkMigrateAgents(
     perPage: batchSize,
   });
   if (res.total <= batchSize) {
-    const response = await bulkMigrateAgentsBatch(esClient, soClient, res.agents, {
+    return await bulkMigrateAgentsBatch(esClient, soClient, res.agents, {
       enrollment_token: options.enrollment_token,
       uri: options.uri,
       settings: options.settings,
       spaceId: currentSpaceId,
     });
-    sendTelemetryEvent(res.total);
-    return response;
   } else {
-    const response = await new MigrateActionRunner(
+    return await new MigrateActionRunner(
       esClient,
       soClient,
       {
@@ -156,7 +134,5 @@ export async function bulkMigrateAgents(
       },
       { pitId: await openPointInTime(esClient) }
     ).runActionAsyncTask();
-    sendTelemetryEvent(res.total);
-    return response;
   }
 }

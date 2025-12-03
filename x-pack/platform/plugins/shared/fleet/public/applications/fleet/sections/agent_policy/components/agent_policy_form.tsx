@@ -147,7 +147,6 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
                 agentPolicy={agentPolicy}
                 updateAgentPolicy={updateAgentPolicy}
                 validation={validation}
-                setInvalidSpaceError={setInvalidSpaceError}
               />
               <>
                 <EuiSpacer size="xl" />
@@ -174,7 +173,6 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
               agentPolicy={agentPolicy}
               updateAgentPolicy={updateAgentPolicy}
               validation={validation}
-              setInvalidSpaceError={setInvalidSpaceError}
               disabled={isDisabled}
             />
             <>
