@@ -31,7 +31,7 @@ import { getFieldConfig } from '../../../lib';
 import { useAppContext } from '../../../../../app_context';
 import { useLoadInferenceEndpoints } from '../../../../../services/api';
 import { UseField } from '../../../shared_imports';
-import { TokenConsumptionCostTour } from './ml_vcu_usage_cost_tour';
+import { TokenConsumptionCostTour } from './token_consumption_cost_tour';
 const InferenceFlyoutWrapper = lazy(() => import('@kbn/inference-endpoint-ui-common'));
 export interface SelectInferenceIdProps {
   'data-test-subj'?: string;
