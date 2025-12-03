@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Class } from 'utility-types';
+
 import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 
@@ -28,9 +30,9 @@ export function getLensBuilder(): LensConfigBuilder | null {
   return builder;
 }
 
-type BuilderImportType =
-  typeof import('/Users/nickpartridge/Documents/repos/kibana-blue/src/platform/packages/shared/kbn-lens-embeddable-utils/index');
-let resultPromise: Promise<BuilderImportType> | null = null;
+let resultPromise: Promise<{
+  LensConfigBuilder: Class<LensConfigBuilder>;
+}> | null = null;
 
 export async function setLensBuilder(
   useApiFormat: LensFeatureFlags['apiFormat']
