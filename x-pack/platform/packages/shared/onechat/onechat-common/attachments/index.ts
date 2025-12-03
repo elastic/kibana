@@ -18,9 +18,7 @@ export {
   textAttachmentDataSchema,
   esqlAttachmentDataSchema,
   screenContextAttachmentDataSchema,
-  productReferenceAttachmentDataSchema,
   type TextAttachmentData,
   type ScreenContextAttachmentData,
   type EsqlAttachmentData,
-  type ProductReferenceAttachmentData,
 } from './attachment_types';
