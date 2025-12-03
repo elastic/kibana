@@ -94,6 +94,24 @@ export async function syncAgentlessDeployments(
                 });
             }
           } else if (
+            !agentPolicy.keep_monitoring_alive ||
+            (agentPolicy.monitoring_enabled?.length ?? 0) > 0
+          ) {
+            const esClient = appContextService.getInternalUserESClient();
+            const spacedScoppedSoClient = appContextService.getInternalUserSOClientForSpaceId(
+              agentPolicy.namespace || undefined
+            );
+            logger.info(
+              `[Agentless Deployment Sync]${dryRunTag(
+                opts?.dryRun
+              )} Updating agentless policy monitoring settings ${agentPolicy.id}`
+            );
+            await agentPolicyService.update(spacedScoppedSoClient, esClient, agentPolicy.id, {
+              // Ensure agentless policies keep monitoring alive so http monitoring server continue to work even without monitoring enabled
+              keep_monitoring_alive: true,
+              monitoring_enabled: [],
+            });
+          } else if (
             deployment.revision_idx === undefined ||
             deployment.revision_idx < agentPolicy.revision
           ) {
