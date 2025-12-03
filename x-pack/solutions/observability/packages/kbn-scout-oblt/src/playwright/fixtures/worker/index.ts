@@ -9,6 +9,3 @@ export { sloDataFixture } from './slo_data';
 export type { SloDataFixture } from './slo_data';
 export { profilingSetupFixture } from './profiling';
 export type { ProfilingSetupFixture } from './profiling';
-
-export { roleBasedApiClientFixture } from './role_based_api_client';
-export type { RoleBasedApiClientFixture } from './role_based_api_client';
