@@ -14,7 +14,7 @@ import React from 'react';
 import { ExecutionStatus } from '@kbn/workflows';
 import { getStepIconType } from './get_step_icon_type';
 import { useKibana } from '../../../hooks/use_kibana';
-import { getExecutionStatusColors } from '../status_badge';
+import { getExecutionStatusColors, getExecutionStatusIcon } from '../status_badge';
 
 interface StepIconProps extends Omit<EuiIconProps, 'type'> {
   stepType: string;
@@ -25,7 +25,13 @@ interface StepIconProps extends Omit<EuiIconProps, 'type'> {
 export const StepIcon = React.memo(
   ({ stepType, executionStatus, onClick, ...rest }: StepIconProps) => {
     const { euiTheme } = useEuiTheme();
-    const { actionTypeRegistry } = useKibana().services.triggersActionsUi;
+    const { triggersActionsUi, workflowsExtensions } = useKibana().services;
+    const { actionTypeRegistry } = triggersActionsUi;
+
+    // For Overview pseudo-step, show the execution status icon
+    if (stepType === '__overview' && executionStatus) {
+      return getExecutionStatusIcon(euiTheme, executionStatus);
+    }
 
     const shouldApplyColorToIcon = executionStatus !== undefined;
     if (executionStatus === ExecutionStatus.RUNNING) {
@@ -39,6 +45,11 @@ export const StepIcon = React.memo(
     if (actionTypeRegistry.has(actionTypeId)) {
       const actionType = actionTypeRegistry.get(actionTypeId);
       return <EuiIcon type={actionType.iconClass} size="m" />;
+    }
+
+    const stepDefinition = workflowsExtensions.getStepDefinition(stepType);
+    if (stepDefinition?.icon) {
+      return <EuiIcon type={stepDefinition.icon} size="m" />;
     }
 
     const iconType = getStepIconType(stepType);
