@@ -437,6 +437,7 @@ export const ScheduledReportForm = ({
                 showTimeInSummary
                 compressed
                 readOnly={readOnly}
+                initialRecurringSchedule={scheduledReport.recurringSchedule}
               />
             </ResponsiveFormGroup>
             <ResponsiveFormGroup

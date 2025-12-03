@@ -13,6 +13,7 @@ import { EmbeddableConversationsProvider } from '../application/context/conversa
 import { Conversation } from '../application/components/conversations/conversation';
 import { ConversationHeader } from '../application/components/conversations/conversation_header/conversation_header';
 import { conversationBackgroundStyles } from '../application/components/conversations/conversation.styles';
+import { EmbeddableWelcomeMessage } from './embeddable_welcome_message';
 
 export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInternalProps> = (
   props
@@ -64,6 +65,7 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
         <EuiFlyoutHeader css={headerStyles}>
           <ConversationHeader onClose={onClose} ariaLabelledBy={ariaLabelledBy} />
         </EuiFlyoutHeader>
+        <EmbeddableWelcomeMessage />
         <EuiFlyoutBody css={bodyStyles}>
           <Conversation />
         </EuiFlyoutBody>
