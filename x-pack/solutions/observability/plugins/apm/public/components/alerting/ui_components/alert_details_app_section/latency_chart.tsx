@@ -42,7 +42,7 @@ import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_prefe
 import { CHART_SETTINGS, DEFAULT_DATE_FORMAT } from './constants';
 import { TransactionTypeSelect } from './transaction_type_select';
 import { ViewInAPMButton } from './view_in_apm_button';
-import { OpenInDiscoverButton } from './open_in_discover_button';
+import { AlertChartType, OpenInDiscoverButton } from './open_in_discover_button';
 
 function LatencyChart({
   alert,
@@ -237,13 +237,13 @@ function LatencyChart({
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
               <EuiFlexItem grow={false}>
                 <OpenInDiscoverButton
+                  chartType={AlertChartType.LATENCY}
                   serviceName={serviceName}
                   environment={environment}
                   transactionType={transactionType}
                   transactionName={transactionName}
-                  start={start}
-                  end={end}
-                  chartType="latency"
+                  rangeFrom={start}
+                  rangeTo={end}
                   kuery={kuery}
                 />
               </EuiFlexItem>

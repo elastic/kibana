@@ -35,7 +35,7 @@ import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_prefe
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { TransactionTypeSelect } from './transaction_type_select';
 import { ViewInAPMButton } from './view_in_apm_button';
-import { OpenInDiscoverButton } from './open_in_discover_button';
+import { AlertChartType, OpenInDiscoverButton } from './open_in_discover_button';
 
 type ErrorRate =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate'>;
@@ -201,13 +201,13 @@ function FailedTransactionChart({
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
               <EuiFlexItem grow={false}>
                 <OpenInDiscoverButton
+                  chartType={AlertChartType.FAILED_TRANSACTION_RATE}
                   serviceName={serviceName}
                   environment={environment}
                   transactionType={transactionType}
                   transactionName={transactionName}
-                  start={start}
-                  end={end}
-                  chartType="failedTransactionRate"
+                  rangeFrom={start}
+                  rangeTo={end}
                   kuery={kuery}
                 />
               </EuiFlexItem>

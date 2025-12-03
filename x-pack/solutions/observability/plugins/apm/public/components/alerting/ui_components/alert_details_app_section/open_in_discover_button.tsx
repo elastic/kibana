@@ -10,11 +10,19 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { from, sort, keep, limit, SortOrder } from '@kbn/esql-composer';
 import {
+  TRANSACTION_DURATION,
+  TRACE_ID,
+  TRANSACTION_ID,
+  EVENT_OUTCOME,
+  AT_TIMESTAMP,
   SERVICE_NAME,
-  SERVICE_ENVIRONMENT,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
+  SERVICE_ENVIRONMENT,
+  EXCEPTION_MESSAGE,
+  EXCEPTION_TYPE,
 } from '@kbn/apm-types';
 import type { ApmIndexSettingsResponse } from '@kbn/apm-sources-access-plugin/server/routes/settings';
 import type { ObservabilityPublicPluginsStart } from '@kbn/observability-plugin/public';
@@ -23,17 +31,28 @@ import {
   ENVIRONMENT_ALL_VALUE,
   ENVIRONMENT_NOT_DEFINED_VALUE,
 } from '../../../../../common/environment_filter_values';
+import {
+  filterByEnvironment,
+  filterByKuery,
+  filterByServiceName,
+  filterByTransactionNameOrSpanName,
+  filterByTransactionType,
+} from '../../../../../common/utils/esql/filters';
 
-type ChartType = 'latency' | 'throughput' | 'failedTransactionRate';
+export enum AlertChartType {
+  LATENCY = 'latency',
+  THROUGHPUT = 'throughput',
+  FAILED_TRANSACTION_RATE = 'failedTransactionRate',
+}
 
 interface OpenInDiscoverButtonProps {
+  chartType: AlertChartType;
   serviceName: string;
   environment: string;
   transactionType: string;
   transactionName?: string;
-  start: string;
-  end: string;
-  chartType: ChartType;
+  rangeFrom: string;
+  rangeTo: string;
   kuery?: string;
 }
 
@@ -46,7 +65,7 @@ const getESQLQueryForChart = ({
   transactionName,
   kuery,
 }: {
-  chartType: ChartType;
+  chartType: AlertChartType;
   indexSettings: ApmIndexSettingsResponse['apmIndexSettings'];
   serviceName: string;
   environment: string;
@@ -58,99 +77,75 @@ const getESQLQueryForChart = ({
     return null;
   }
 
-  // Get transaction index
   const transactionIndex = indexSettings.find(
     (setting) => setting.configurationName === 'transaction'
   );
+
   const index = transactionIndex?.savedValue ?? transactionIndex?.defaultValue;
 
   if (!index) return null;
 
-  // Build base filters
-  const filters: string[] = [];
+  const baseFilters = [];
 
-  filters.push(`${SERVICE_NAME} == "${serviceName}"`);
-  filters.push(`${TRANSACTION_TYPE} == "${transactionType}"`);
+  baseFilters.push(filterByServiceName(serviceName));
+  baseFilters.push(filterByTransactionType(transactionType));
 
   if (
     environment &&
     environment !== ENVIRONMENT_ALL_VALUE &&
     environment !== ENVIRONMENT_NOT_DEFINED_VALUE
   ) {
-    filters.push(`${SERVICE_ENVIRONMENT} == "${environment}"`);
+    baseFilters.push(filterByEnvironment(environment));
   }
 
   if (transactionName) {
-    filters.push(`${TRANSACTION_NAME} == "${transactionName}"`);
+    baseFilters.push(filterByTransactionNameOrSpanName(transactionName, undefined));
   }
 
-  // Add kuery filter using KQL() function
   if (kuery && kuery.trim()) {
-    // Escape quotes and normalize whitespace for KQL embedding
-    const escapedKuery = kuery
-      .trim()
-      .replaceAll('"', '\\"')
-      .replaceAll(/\s+/g, ' ')
-      .replaceAll(/\n+/g, ' ');
-    filters.push(`KQL("${escapedKuery}")`);
+    baseFilters.push(filterByKuery(kuery));
   }
 
-  // Chart-specific query construction
-  const whereClause = filters.join(' AND ');
+  const commonFields = [
+    AT_TIMESTAMP,
+    SERVICE_NAME,
+    TRANSACTION_NAME,
+    TRANSACTION_TYPE,
+    TRACE_ID,
+    TRANSACTION_ID,
+    SERVICE_ENVIRONMENT,
+  ];
 
   switch (chartType) {
-    case 'latency':
-      // For latency: show slowest transactions first
-      return [
-        `FROM ${index}`,
-        `| WHERE ${whereClause}`,
-        `| KEEP @timestamp,`,
-        `       service.name,`,
-        `       transaction.name,`,
-        `       transaction.type,`,
-        `       transaction.duration.us,`,
-        `       trace.id,`,
-        `       transaction.id,`,
-        `       service.environment`,
-        `| SORT transaction.duration.us DESC`,
-        `| LIMIT 100`,
-      ].join('\n');
+    case AlertChartType.LATENCY:
+      return from(index)
+        .pipe(
+          ...baseFilters,
+          keep(...commonFields, TRANSACTION_DURATION),
+          sort({ [TRANSACTION_DURATION]: SortOrder.Desc }),
+          limit(100)
+        )
+        .toString();
 
-    case 'throughput':
-      // For throughput: show recent transactions for context
-      return [
-        `FROM ${index}`,
-        `| WHERE ${whereClause}`,
-        `| KEEP @timestamp,`,
-        `       service.name,`,
-        `       transaction.name,`,
-        `       transaction.type,`,
-        `       trace.id,`,
-        `       transaction.id,`,
-        `       service.environment`,
-        `| SORT @timestamp DESC`,
-        `| LIMIT 500`,
-      ].join('\n');
+    case AlertChartType.THROUGHPUT:
+      return from(index)
+        .pipe(
+          ...baseFilters,
+          keep(...commonFields),
+          sort({ [AT_TIMESTAMP]: SortOrder.Desc }),
+          limit(500)
+        )
+        .toString();
 
-    case 'failedTransactionRate':
-      // For failed transaction rate: show ONLY failed transactions
-      return [
-        `FROM ${index}`,
-        `| WHERE ${whereClause}`,
-        `  AND event.outcome == "failure"`,
-        `| KEEP @timestamp,`,
-        `       service.name,`,
-        `       transaction.name,`,
-        `       transaction.type,`,
-        `       event.outcome,`,
-        `       trace.id,`,
-        `       transaction.id,`,
-        `       error.exception.message,`,
-        `       error.exception.type,`,
-        `       service.environment`,
-        `| SORT @timestamp DESC`,
-        `| LIMIT 100`,
-      ].join('\n');
+    case AlertChartType.FAILED_TRANSACTION_RATE:
+      return from(index)
+        .pipe(
+          ...baseFilters,
+          keep(...commonFields, EVENT_OUTCOME, EXCEPTION_MESSAGE, EXCEPTION_TYPE),
+          sort({ [AT_TIMESTAMP]: SortOrder.Desc }),
+          limit(100)
+        )
+        .toString();
 
     default:
       return null;
@@ -158,19 +153,18 @@ const getESQLQueryForChart = ({
 };
 
 export function OpenInDiscoverButton({
+  chartType,
   serviceName,
   environment,
   transactionType,
   transactionName,
-  start,
-  end,
-  chartType,
+  rangeFrom,
+  rangeTo,
   kuery,
 }: OpenInDiscoverButtonProps) {
   const { services } = useKibana<ObservabilityPublicPluginsStart>();
   const { share, apmSourcesAccess } = services;
 
-  // Fetch APM index settings
   const { data: indexSettingsData, status: indexSettingsStatus } = useFetcher(
     async (_, signal) => {
       if (!apmSourcesAccess) return { apmIndexSettings: [] };
@@ -193,38 +187,28 @@ export function OpenInDiscoverButton({
 
   const discoverHref = share?.url?.locators?.get(DISCOVER_APP_LOCATOR)?.getRedirectUrl({
     timeRange: {
-      from: start,
-      to: end,
+      from: rangeFrom,
+      to: rangeTo,
     },
     query: {
       esql: esqlQuery,
     },
   });
 
-  const labels = {
-    latency: i18n.translate('xpack.apm.alertDetails.latencyChart.openInDiscover', {
-      defaultMessage: 'Open in Discover',
-    }),
-    throughput: i18n.translate('xpack.apm.alertDetails.throughputChart.openInDiscover', {
-      defaultMessage: 'Open in Discover',
-    }),
-    failedTransactionRate: i18n.translate(
-      'xpack.apm.alertDetails.failedTransactionRate.openInDiscover',
-      {
-        defaultMessage: 'Open in Discover',
-      }
-    ),
-  };
-
   return (
     <EuiButtonEmpty
       data-test-subj={`alertDetails-${chartType}-openInDiscover`}
+      aria-label={i18n.translate('xpack.apm.alertDetails.openInDiscoverButton.ariaLabel', {
+        defaultMessage: 'Open in Discover',
+      })}
       iconType="discoverApp"
       href={discoverHref}
       isDisabled={!esqlQuery || indexSettingsStatus !== FETCH_STATUS.SUCCESS}
       isLoading={indexSettingsStatus === FETCH_STATUS.LOADING}
     >
-      {labels[chartType]}
+      {i18n.translate('xpack.apm.alertDetails.openInDiscoverButton.label', {
+        defaultMessage: 'Open in Discover',
+      })}
     </EuiButtonEmpty>
   );
 }
