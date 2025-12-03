@@ -514,8 +514,8 @@ export default function createGapAutoFillSchedulerTests({ getService }: FtrProvi
               expect(finalGapResponse.body.total).to.eql(2);
               const gaps = finalGapResponse.body.data;
 
-              const failedGap = gaps.find((g) => g.failed_auto_fill_attempts === 4);
-              const filledGap = gaps.find((g) => g.failed_auto_fill_attempts === 0);
+              const failedGap = gaps.find((g: any) => g.failed_auto_fill_attempts === 4);
+              const filledGap = gaps.find((g: any) => g.failed_auto_fill_attempts === 0);
 
               expect(failedGap.status).to.eql('unfilled');
               expect(filledGap.status).to.eql('filled');
