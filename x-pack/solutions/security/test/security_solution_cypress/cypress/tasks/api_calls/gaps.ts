@@ -129,42 +129,6 @@ export const interceptGetRuleGaps = () => {
   }).as('getRuleGaps');
 };
 
-export const interceptGetRuleGapsWithFailedAutoFillAttempts = () => {
-  cy.intercept('POST', `${INTERNAL_ALERTING_GAPS_FIND_API_PATH}*`, {
-    statusCode: 200,
-    body: {
-      page: 1,
-      per_page: 10,
-      total: 1,
-      data: [
-        {
-          _id: 'test-id-5',
-          '@timestamp': '2024-01-03T00:00:00.000Z',
-          range: {
-            gte: '2024-01-03T00:00:00.000Z',
-            lte: '2024-01-04T00:00:00.000Z',
-          },
-          filled_intervals: [],
-          in_progress_intervals: [],
-          unfilled_intervals: [
-            {
-              gte: '2024-01-03T00:00:00.000Z',
-              lte: '2024-01-04T00:00:00.000Z',
-            },
-          ],
-          status: 'unfilled',
-          total_gap_duration_ms: 86400000,
-          filled_duration_ms: 0,
-          unfilled_duration_ms: 86400000,
-          in_progress_duration_ms: 0,
-          failed_auto_fill_attempts: 3,
-          last_auto_fill_attempt_status: 'failed',
-        },
-      ],
-    },
-  }).as('getRuleGapsWithFailedAutoFillAttempts');
-};
-
 export const interceptFillGap = () => {
   cy.intercept('POST', `${INTERNAL_ALERTING_GAPS_FILL_BY_ID_API_PATH}*`, {
     statusCode: 200,

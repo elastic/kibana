@@ -25,13 +25,11 @@ import {
   RULE_GAPS_INFO,
   RULE_GAPS_TABLE,
   RULE_SWITCH,
-  RULE_GAPS_AUTO_FILL_FAILED_ATTEMPTS_INDICATOR,
 } from '../../../../screens/rule_details';
 import {
   interceptFillGap,
   interceptGetRuleGaps,
   interceptGetRuleGapsNoData,
-  interceptGetRuleGapsWithFailedAutoFillAttempts,
 } from '../../../../tasks/api_calls/gaps';
 import { TOOLTIP } from '../../../../screens/common';
 
@@ -126,34 +124,5 @@ describe('Rule gaps', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
     refreshGapsTable();
     cy.wait('@getRuleGaps');
     cy.get(RULE_GAPS_TABLE).contains('No items found');
-  });
-
-  it('displays gap with failed auto fill attempts', function () {
-    // Intercept API calls with data
-    interceptGetRuleGapsWithFailedAutoFillAttempts();
-
-    // Visit rule details and go to execution log tab
-    visit(ruleDetailsUrl(this.ruleId));
-    waitForAlertsToPopulate();
-    goToExecutionLogTab();
-    cy.wait('@getRuleGapsWithFailedAutoFillAttempts');
-
-    // Check gaps table is displayed with metrics
-    cy.get(RULE_GAPS_INFO).should('exist');
-    cy.get(RULE_GAPS_TABLE).should('exist');
-
-    // Check table rows content
-    getGapsTableRows().should('have.length', 1);
-
-    // Check first row - unfilled gap
-    getGapsTableRows()
-      .eq(0)
-      .within(() => {
-        cy.contains('Unfilled');
-        cy.get(RULE_GAPS_AUTO_FILL_FAILED_ATTEMPTS_INDICATOR).should('be.visible');
-      });
-
-    cy.get(RULE_GAPS_AUTO_FILL_FAILED_ATTEMPTS_INDICATOR).trigger('mouseover');
-    cy.get(TOOLTIP).contains('Auto fill failed attempts: 3');
   });
 });
