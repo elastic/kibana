@@ -18,7 +18,10 @@ import {
   selectEditorWorkflowGraph,
 } from '../../../../entities/workflows/store';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { getElasticsearchRequestInfo } from '../../lib/elasticsearch_step_utils';
+import {
+  getElasticsearchRequestInfo,
+  isElasticsearchStep,
+} from '../../lib/elasticsearch_step_utils';
 
 export interface CopyElasticSearchDevToolsOptionProps {
   onClick: () => void;
@@ -55,7 +58,10 @@ export const CopyElasticSearchDevToolsOption: React.FC<CopyElasticSearchDevTools
       const stepGraph = workflowGraph.getStepGraph(focusedStepInfo.stepId);
       const elasticSearchNode = stepGraph
         .getAllNodes()
-        .find((node) => node.type.startsWith('kibana')) as ElasticsearchGraphNode;
+        .find((node): node is ElasticsearchGraphNode => isElasticsearchStep(node.stepType));
+      if (!elasticSearchNode) {
+        return;
+      }
       const stepType = elasticSearchNode.stepType;
       const requestInfo = getElasticsearchRequestInfo(
         stepType,
