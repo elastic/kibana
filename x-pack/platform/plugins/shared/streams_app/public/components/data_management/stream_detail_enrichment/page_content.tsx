@@ -282,22 +282,23 @@ export function StreamDetailEnrichmentContentImpl() {
           )}
         </EuiResizableContainer>
       </EuiSplitPanel.Inner>
-      {hasChanges && (
-        <ManagementBottomBar
-          onCancel={resetChanges}
-          onConfirm={
-            schemaEditorFields.length > 0 &&
-            getChanges(schemaEditorFields, definitionFields).length > 0
-              ? openConfirmationModal
-              : saveChanges
-          }
-          isLoading={isSavingChanges}
-          disabled={!canUpdate || isSimulating || interactiveModeWithStepUnderEdit}
-          insufficientPrivileges={!canManage}
-          isInvalid={hasDefinitionError || isInvalid}
-          onViewCodeClick={onBottomBarViewCodeClick}
-        />
-      )}
+      {hasChanges ||
+        (interactiveModeWithStepUnderEdit && (
+          <ManagementBottomBar
+            onCancel={resetChanges}
+            onConfirm={
+              schemaEditorFields.length > 0 &&
+              getChanges(schemaEditorFields, definitionFields).length > 0
+                ? openConfirmationModal
+                : saveChanges
+            }
+            isLoading={isSavingChanges}
+            disabled={!canUpdate || isSimulating || interactiveModeWithStepUnderEdit}
+            insufficientPrivileges={!canManage}
+            isInvalid={hasDefinitionError || isInvalid}
+            onViewCodeClick={onBottomBarViewCodeClick}
+          />
+        ))}
       {isRequestPreviewFlyoutOpen && (
         <RequestPreviewFlyout
           codeContent={requestPreviewFlyoutCodeContent}
