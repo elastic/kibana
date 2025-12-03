@@ -445,29 +445,20 @@ export class SearchInterceptor {
    * @throws `AbortError` | `ErrorLike`
    */
   private runSearch(
-    request: IKibanaSearchRequest,
+    { params, ...request }: IKibanaSearchRequest,
     options?: ISearchOptions
   ): Promise<IKibanaSearchResponse> {
     const { abortSignal } = options || {};
 
-    const requestHash = request.params
-      ? createRequestHashForBackgroundSearches(request.params)
-      : undefined;
-
-    if (request.id) {
-      // just polling an existing search, no need to send the body, just the hash
-
-      const { params, ...requestWithoutParams } = request;
-      if (params) {
-        const { body, ...paramsWithoutBody } = params;
-        request = {
-          ...requestWithoutParams,
-          params: paramsWithoutBody,
-        };
-      }
-    }
+    const requestHash = params ? createRequestHashForBackgroundSearches(params) : undefined;
 
     const { executionContext, strategy, ...searchOptions } = this.getSerializableOptions(options);
+
+    // FIXME: the dropNullColumns param shouldn't be needed during polling
+    // once https://github.com/elastic/elasticsearch/issues/138439 is resolved
+    // at that point, exclude all params when request.id is defined (polling phase)
+    const paramsToUse = request.id ? { dropNullColumns: params?.dropNullColumns } : params || {};
+
     return this.deps.http
       .post<IKibanaSearchResponse | ErrorResponseBase>(
         `/internal/search/${strategy}${request.id ? `/${request.id}` : ''}`,
@@ -476,7 +467,7 @@ export class SearchInterceptor {
           signal: abortSignal,
           context: this.deps.executionContext.withGlobalContext(executionContext),
           body: JSON.stringify({
-            ...request,
+            ...{ ...request, params: paramsToUse },
             ...searchOptions,
             requestHash,
             stream:

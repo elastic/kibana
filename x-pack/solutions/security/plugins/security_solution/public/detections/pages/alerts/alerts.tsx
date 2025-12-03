@@ -18,7 +18,7 @@ import { UserUnauthenticatedEmptyPage } from '../../components/alerts/empty_page
 import * as i18n from './translations';
 import { useSignalHelpers } from '../../../sourcerer/containers/use_signal_helpers';
 import { NeedAdminForUpdateRulesCallOut } from '../../../detection_engine/rule_management/components/callouts/need_admin_for_update_rules_callout';
-import { MissingPrivilegesCallOut } from '../../../common/components/missing_privileges';
+import { MissingDetectionsPrivilegesCallOut } from '../../components/callouts/missing_detections_privileges_callout';
 import { NoPrivileges } from '../../../common/components/no_privileges';
 import { HeaderPage } from '../../../common/components/header_page';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
@@ -89,7 +89,7 @@ export const AlertsPage = memo(() => {
     <>
       <NoApiIntegrationKeyCallOut />
       <NeedAdminForUpdateRulesCallOut />
-      <MissingPrivilegesCallOut />
+      <MissingDetectionsPrivilegesCallOut />
       {privilegesRequired ? (
         <NoPrivileges
           pageName={i18n.PAGE_TITLE.toLowerCase()}
