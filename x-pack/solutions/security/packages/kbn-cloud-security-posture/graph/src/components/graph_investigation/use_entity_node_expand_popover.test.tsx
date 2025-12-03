@@ -46,7 +46,7 @@ jest.mock('./use_node_expand_graph_popover', () => ({
 }));
 
 const createMockNode = (
-  docMode: 'single-entity' | 'grouped-entities' | 'na',
+  docMode: 'single-entity' | 'grouped-entities',
   entityFieldNamespace?: string,
   hasEntityField: boolean = true
 ): NodeProps => {
@@ -71,7 +71,7 @@ const createMockNode = (
     },
   } as NodeProps;
 
-  if (docMode === 'single-entity' || docMode === 'na') {
+  if (docMode === 'single-entity') {
     const docData: Record<string, unknown> = {
       id: 'entity-123',
       type: 'entity' as const,
@@ -265,26 +265,6 @@ describe('useEntityNodeExpandPopover', () => {
     });
   });
 
-  describe('itemsFn - na mode', () => {
-    it('should treat na mode (which returns na) as single-entity', () => {
-      const node = createMockNode('na');
-      renderHook(() =>
-        useEntityNodeExpandPopover(
-          mockSetSearchFilters,
-          dataViewId,
-          searchFilters,
-          mockOnShowEntityDetailsClick
-        )
-      );
-
-      expect(capturedItemsFn).not.toBeNull();
-      const items = capturedItemsFn!(node);
-
-      // no-data mode returns 'na' from getNodeDocumentMode, which is treated as single-entity
-      expect(items).toHaveLength(5); // 4 items + 1 separator
-    });
-  });
-
   describe('shouldDisableEntityDetailsListItem', () => {
     it('should disable entity details when onShowEntityDetailsClick is undefined', () => {
       const node = createMockNode('single-entity', 'user');
@@ -349,24 +329,6 @@ describe('useEntityNodeExpandPopover', () => {
       expect(entityDetailsItem).toMatchObject({
         disabled: false,
       });
-    });
-
-    it('should treat no-data mode (which returns na) as single-entity even if onShowEntityDetailsClick is provided', () => {
-      const node = createMockNode('na');
-      renderHook(() =>
-        useEntityNodeExpandPopover(
-          mockSetSearchFilters,
-          dataViewId,
-          searchFilters,
-          mockOnShowEntityDetailsClick
-        )
-      );
-
-      expect(capturedItemsFn).not.toBeNull();
-      const items = capturedItemsFn!(node);
-
-      // no-data mode returns 'na' from getNodeDocumentMode, which is treated as single-entity
-      expect(items).toHaveLength(5); // 4 items + 1 separator
     });
 
     it('should disable entity details when documentsData does not contain entity field', () => {

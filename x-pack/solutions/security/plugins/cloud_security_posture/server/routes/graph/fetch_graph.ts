@@ -246,9 +246,9 @@ ${
 | EVAL actorEntityField = CASE(
     actorEntityName IS NOT NULL OR actorEntityType IS NOT NULL OR actorEntitySubType IS NOT NULL,
     CONCAT(",\\"entity\\":", "{",
-      "\\"name\\":\\"", actorEntityName, "\\"",
-      ",\\"type\\":\\"", actorEntityType, "\\"",
-      ",\\"sub_type\\":\\"", actorEntitySubType, "\\"",
+      "\\"name\\":\\"", COALESCE(actorEntityName, "undefined"), "\\"",
+      ",\\"type\\":\\"", COALESCE(actorEntityType, "undefined"), "\\"",
+      ",\\"sub_type\\":\\"", COALESCE(actorEntitySubType, "undefined"), "\\"",
       CASE(
         actorHostIp IS NOT NULL,
         CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(actorHostIp), "\\"", "}"),
@@ -260,9 +260,9 @@ ${
 | EVAL targetEntityField = CASE(
     targetEntityName IS NOT NULL OR targetEntityType IS NOT NULL OR targetEntitySubType IS NOT NULL,
     CONCAT(",\\"entity\\":", "{",
-      "\\"name\\":\\"", targetEntityName, "\\"",
-      ",\\"type\\":\\"", targetEntityType, "\\"",
-      ",\\"sub_type\\":\\"", targetEntitySubType, "\\"",
+      "\\"name\\":\\"", COALESCE(targetEntityName, "undefined"), "\\"",
+      ",\\"type\\":\\"", COALESCE(targetEntityType, "undefined"), "\\"",
+      ",\\"sub_type\\":\\"", COALESCE(targetEntitySubType, "undefined"), "\\"",
       CASE(
         targetHostIp IS NOT NULL,
         CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(targetHostIp), "\\"", "}"),
@@ -271,6 +271,23 @@ ${
     "}"),
     ""
   )
+`
+    : `
+| EVAL actorEntityField = ""
+| EVAL targetEntityField = ""
+// Fallback to null string with non-enriched entity metadata
+| EVAL actorEntityName = TO_STRING(null)
+| EVAL actorEntityType = TO_STRING(null)
+| EVAL actorEntitySubType = TO_STRING(null)
+| EVAL actorHostIp = TO_STRING(null)
+| EVAL targetEntityName = TO_STRING(null)
+| EVAL targetEntityType = TO_STRING(null)
+| EVAL targetEntitySubType = TO_STRING(null)
+| EVAL targetHostIp = TO_STRING(null)
+`
+}
+// Create actor and target data with entityFieldNamespace
+
 | EVAL actorDocData = CONCAT("{",
     "\\"id\\":\\"", actorEntityId, "\\"",
     ",\\"type\\":\\"", "${DOCUMENT_TYPE_ENTITY}", "\\"",
@@ -283,31 +300,7 @@ ${
     ",\\"entityFieldNamespace\\":\\"", targetEntityFieldHint, "\\"",
     targetEntityField,
   "}")
-`
-    : `
-// Fallback to null string with non-enriched entity metadata
-| EVAL actorEntityName = TO_STRING(null)
-| EVAL actorEntityType = TO_STRING(null)
-| EVAL actorEntitySubType = TO_STRING(null)
-| EVAL actorHostIp = TO_STRING(null)
-| EVAL targetEntityName = TO_STRING(null)
-| EVAL targetEntityType = TO_STRING(null)
-| EVAL targetEntitySubType = TO_STRING(null)
-| EVAL targetHostIp = TO_STRING(null)
 
-// Create minimal actor and target data with entityFieldNamespace even without enrichment
-| EVAL actorDocData = CONCAT("{",
-    "\\"id\\":\\"", actorEntityId, "\\"",
-    ",\\"type\\":\\"", "${DOCUMENT_TYPE_ENTITY}", "\\"",
-    ",\\"entityFieldNamespace\\":\\"", actorEntityFieldHint, "\\"",
-  "}")
-| EVAL targetDocData = CONCAT("{",
-    "\\"id\\":\\"", COALESCE(targetEntityId, ""), "\\"",
-    ",\\"type\\":\\"", "${DOCUMENT_TYPE_ENTITY}", "\\"",
-    ",\\"entityFieldNamespace\\":\\"", targetEntityFieldHint, "\\"",
-  "}")
-`
-}
 // Map host and source values to enriched contextual data
 | EVAL sourceIps = source.ip
 | EVAL sourceCountryCodes = source.geo.country_iso_code

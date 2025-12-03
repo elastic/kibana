@@ -181,8 +181,8 @@ export const useEntityNodeExpandPopover = (
         ] satisfies Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps>;
       }
 
-      // For 'single-entity' or 'na', show all items
-      if (docMode === 'single-entity' || docMode === 'na') {
+      // For 'single-entity'
+      if (docMode === 'single-entity') {
         return [
           {
             type: 'item',
