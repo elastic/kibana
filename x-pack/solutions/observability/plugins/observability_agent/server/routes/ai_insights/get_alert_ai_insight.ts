@@ -21,7 +21,7 @@ export interface AlertDocForInsight {
 }
 
 interface GetAlertAiInsightParams {
-  alertDoc: AlertDocForInsight | undefined;
+  alertDoc: AlertDocForInsight;
   inferenceClient: InferenceClient;
   connectorId: string | undefined;
   dataRegistry: ObservabilityAgentDataRegistry;
@@ -63,7 +63,7 @@ async function fetchAlertContext({
   const transactionName = alertDoc?.['transaction.name'];
   const alertStartedAt = alertDoc?.['kibana.alert.start'];
 
-  const alertTime = alertStartedAt ? new Date(String(alertStartedAt)).getTime() : Date.now();
+  const alertTime = new Date(String(alertStartedAt)).getTime();
   const alertEnd = new Date(alertTime).toISOString();
 
   // Time ranges for different data providers

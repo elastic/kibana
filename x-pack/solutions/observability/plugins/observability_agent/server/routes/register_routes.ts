@@ -8,7 +8,7 @@
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { apiPrivileges } from '@kbn/onechat-plugin/common/features';
-import { getAlertAiInsight, type AlertDocForInsight } from './ai_insights/get_alert_ai_insight';
+import { getAlertAiInsight } from './ai_insights/get_alert_ai_insight';
 import type {
   ObservabilityAgentPluginStart,
   ObservabilityAgentPluginStartDependencies,
@@ -46,17 +46,8 @@ export function registerAiInsightRoutes(
         const [, pluginsStart] = await core.getStartServices();
         const { inference, ruleRegistry } = pluginsStart;
 
-        let alertDoc: AlertDocForInsight | undefined;
-        try {
-          const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
-          alertDoc = (await alertsClient.get({ id: alertId })) as AlertDocForInsight;
-        } catch (err) {
-          logger.error(
-            `AI insight: error fetching alert ${alertId}: ${
-              err instanceof Error ? err.message : String(err)
-            }`
-          );
-        }
+        const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
+        const alertDoc = await alertsClient.get({ id: alertId });
 
         const inferenceClient = inference.getClient({ request });
         const { summary, context: relatedContext } = await getAlertAiInsight({
