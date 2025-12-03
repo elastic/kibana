@@ -36,7 +36,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const REPO_PATH = STREAMS_SNAPSHOT_REPO_PATH;
 
   describe('Snapshot and Restore', function () {
-    this.tags(['skipCloud', 'skipMKI', 'skipSvlOblt']);
+    this.tags(['skipCloud', 'skipMKI', 'skipServerless']);
 
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
