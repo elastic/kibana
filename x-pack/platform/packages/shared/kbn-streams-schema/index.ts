@@ -80,6 +80,8 @@ export {
   effectiveToIngestLifecycle,
 } from './src/helpers/lifecycle';
 
+export { findInheritedFailureStore } from './src/helpers/failure_store';
+
 export { streamObjectNameSchema } from './src/shared/stream_object_name';
 
 export {
@@ -115,6 +117,8 @@ export {
   type FailureStoreStatsResponse,
   isEnabledFailureStore,
   isInheritFailureStore,
+  isDisabledLifecycleFailureStore,
+  isEnabledLifecycleFailureStore,
 } from './src/models/ingest/failure_store';
 
 export type {
