@@ -33,9 +33,10 @@ describe('EditLifecycleModal', () => {
       stream: {
         name: streamName,
         description: '',
+        updated_at: new Date().toISOString(),
         ingest: {
           lifecycle: ingestLifecycle,
-          processing: { steps: [] },
+          processing: { steps: [], updated_at: new Date().toISOString() },
           settings: {},
           wired: { fields: {}, routing: [] },
           failure_store: { inherit: {} },
