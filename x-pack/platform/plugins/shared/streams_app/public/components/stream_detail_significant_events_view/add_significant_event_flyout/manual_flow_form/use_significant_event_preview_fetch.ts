@@ -6,8 +6,7 @@
  */
 
 import { calculateAuto } from '@kbn/calculate-auto';
-import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
-import type { TimeState } from '@kbn/es-query';
+import type { AbsoluteTimeRange } from '@kbn/es-query';
 import type { AbortableAsyncState } from '@kbn/react-hooks';
 import type { Condition } from '@kbn/streamlang';
 import type { SignificantEventsPreviewResponse } from '@kbn/streams-schema';
@@ -20,7 +19,7 @@ export function useSignificantEventPreviewFetch({
   name,
   feature,
   kqlQuery,
-  timeState,
+  timeRange,
   isQueryValid,
   noOfBuckets = 10,
 }: {
@@ -28,7 +27,7 @@ export function useSignificantEventPreviewFetch({
   name: string;
   kqlQuery: string;
   feature?: { name: string; filter: Condition };
-  timeState: TimeState;
+  timeRange: AbsoluteTimeRange;
   isQueryValid: boolean;
 }): AbortableAsyncState<Promise<SignificantEventsPreviewResponse>> {
   const {
@@ -43,10 +42,8 @@ export function useSignificantEventPreviewFetch({
         return Promise.resolve(undefined);
       }
 
-      const { from, to } = getAbsoluteTimeRange(timeState.timeRange);
-
       const bucketSize = calculateAuto
-        .near(noOfBuckets, moment.duration(moment(to).diff(from)))
+        .near(noOfBuckets, moment.duration(moment(timeRange.to).diff(timeRange.from)))
         ?.asSeconds()!;
 
       const effectiveFeature = feature && feature.name === NO_FEATURE.name ? undefined : feature;
@@ -61,13 +58,16 @@ export function useSignificantEventPreviewFetch({
             },
             query: {
               bucketSize: `${bucketSize}s`,
-              from,
-              to,
+              from: timeRange.from,
+              to: timeRange.to,
             },
             body: {
               query: {
                 kql: { query: kqlQuery },
-                feature: effectiveFeature,
+                feature: effectiveFeature && {
+                  name: effectiveFeature.name,
+                  filter: effectiveFeature.filter,
+                },
               },
             },
           },
@@ -76,7 +76,8 @@ export function useSignificantEventPreviewFetch({
     },
     [
       isQueryValid,
-      timeState.timeRange,
+      timeRange.from,
+      timeRange.to,
       noOfBuckets,
       feature,
       streams.streamsRepositoryClient,
