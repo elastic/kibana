@@ -49,7 +49,7 @@ export const DEFAULT_STATE: SearchState = {
 
 export function useUrlSearchState(): {
   state: SearchState;
-  onStateChange: (state: Partial<SearchState>) => void;
+  onStateChange: (state: Partial<SearchState>, options?: { replace?: boolean }) => void;
 } {
   const [state, setState] = useState<SearchState>(DEFAULT_STATE);
   const history = useHistory();
@@ -67,9 +67,9 @@ export function useUrlSearchState(): {
     const sub = urlStateStorage.current
       ?.change$<SearchState>(SLO_LIST_SEARCH_URL_STORAGE_KEY)
       .subscribe((newSearchState) => {
-        if (newSearchState) {
-          setState(newSearchState);
-        }
+        // When URL has no search params, newSearchState will be null/undefined
+        // In that case, reset to DEFAULT_STATE
+        setState(newSearchState ?? DEFAULT_STATE);
       });
 
     setState(
@@ -84,12 +84,14 @@ export function useUrlSearchState(): {
   }, [urlStateStorage, sessionStorage]);
 
   const onStateChange = useCallback(
-    (newState: Partial<SearchState>) => {
+    (newState: Partial<SearchState>, options?: { replace?: boolean }) => {
       const updatedState = { ...state, page: 0, ...newState };
       setState(() => updatedState);
 
+      // Use push (replace: false) by default to create new history entries
+      // This allows back button to work properly
       urlStateStorage.current?.set(SLO_LIST_SEARCH_URL_STORAGE_KEY, updatedState, {
-        replace: true,
+        replace: options?.replace ?? false,
       });
 
       // Discard search itself from session storage. Keep only view preferences

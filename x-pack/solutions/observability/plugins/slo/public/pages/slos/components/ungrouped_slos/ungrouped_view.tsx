@@ -33,12 +33,12 @@ export function UngroupedView({ sloList, loading, error, view }: Props) {
             pageCount={Math.ceil(total / perPage)}
             activePage={page}
             onChangePage={(newPage) => {
-              onStateChange({ page: newPage });
+              onStateChange({ page: newPage }, { replace: true });
             }}
             itemsPerPage={perPage}
             itemsPerPageOptions={[10, 25, 50, 100]}
             onChangeItemsPerPage={(newPerPage) => {
-              onStateChange({ perPage: newPerPage, page: 0 });
+              onStateChange({ perPage: newPerPage, page: 0 }, { replace: true });
             }}
           />
         </EuiFlexItem>

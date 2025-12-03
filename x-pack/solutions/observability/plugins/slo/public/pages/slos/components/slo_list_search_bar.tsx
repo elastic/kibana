@@ -6,10 +6,9 @@
  */
 
 import { css } from '@emotion/react';
-import type { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { observabilityAppId } from '@kbn/observability-plugin/public';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useSloCrudLoading } from '../hooks/use_crud_loading';
 import { useSloSummaryDataView } from '../hooks/use_summary_dataview';
@@ -18,7 +17,6 @@ import { QuickFilters } from './common/quick_filters';
 
 export function SloListSearchBar() {
   const {
-    data: { query },
     unifiedSearch: {
       ui: { SearchBar },
     },
@@ -29,18 +27,6 @@ export function SloListSearchBar() {
 
   const { isLoading: isDataViewLoading, data: dataView } = useSloSummaryDataView();
 
-  useEffect(() => {
-    const sub = query.state$.subscribe(() => {
-      const queryState = query.getState();
-      onStateChange({
-        kqlQuery: String((queryState.query as Query).query),
-        filters: queryState.filters,
-      });
-    });
-
-    return () => sub.unsubscribe();
-  }, [onStateChange, query]);
-
   return (
     <div
       css={css`
@@ -50,12 +36,14 @@ export function SloListSearchBar() {
       `}
     >
       <SearchBar
+        key={`${state.kqlQuery}-${JSON.stringify(state.filters)}`}
         appName={observabilityAppId}
         placeholder={PLACEHOLDER}
         indexPatterns={dataView ? [dataView] : []}
         isDisabled={isSloCrudLoading}
         renderQueryInputAppend={() => (
           <QuickFilters
+            key={`quick-filters-${state.tagsFilter?.meta?.key}-${state.statusFilter?.meta?.key}`}
             dataView={dataView}
             initialState={state}
             loading={isSloCrudLoading || isDataViewLoading}

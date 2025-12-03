@@ -44,6 +44,9 @@ export function OverviewItem({
             }
             onStateChange({
               kqlQuery: query,
+              filters: [],
+              tagsFilter: undefined,
+              statusFilter: undefined,
             });
           }}
           css={{
