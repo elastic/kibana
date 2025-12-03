@@ -11,10 +11,22 @@ import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../connector_spec';
 import { getSchemaForAuthType } from '.';
 
-export const generateSecretsSchemaFromSpec = (authTypes: ConnectorSpec['authTypes']) => {
+interface GenerateOptions {
+  pfxEnabled: boolean;
+}
+
+export const generateSecretsSchemaFromSpec = (
+  authTypes: ConnectorSpec['authTypes'],
+  { pfxEnabled }: GenerateOptions = { pfxEnabled: true }
+) => {
   const secretSchemas: z.core.$ZodTypeDiscriminable[] = [];
   for (const authType of authTypes || []) {
-    secretSchemas.push(getSchemaForAuthType(authType));
+    const schema = getSchemaForAuthType(authType);
+    if (schema.id === 'pfx_certificate' && !pfxEnabled) {
+      continue;
+    }
+
+    secretSchemas.push(schema.schema);
   }
   return secretSchemas.length > 0
     ? // to make zod types happy
