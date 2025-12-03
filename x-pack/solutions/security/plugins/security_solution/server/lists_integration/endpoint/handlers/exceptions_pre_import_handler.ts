@@ -15,55 +15,74 @@ import {
   GLOBAL_ARTIFACT_TAG,
 } from '../../../../common/endpoint/service/artifacts/constants';
 import { EndpointArtifactExceptionValidationError } from '../validators/errors';
+import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 
 export const getExceptionsPreImportHandler = (
   endpointAppContextService: EndpointAppContextService
 ): ExceptionsListPreImportServerExtension['callback'] => {
-  const logger = endpointAppContextService.createLogger('listsPreImportExtensionPoint');
-
   return async ({ data }) => {
-    const hasEndpointArtifactListOrListItems = [...data.lists, ...data.items].some((item) => {
-      if ('list_id' in item) {
-        const NON_IMPORTABLE_ENDPOINT_ARTIFACT_IDS = ALL_ENDPOINT_ARTIFACT_LIST_IDS.filter(
-          (listId) => listId !== ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
-        ) as string[];
-
-        return NON_IMPORTABLE_ENDPOINT_ARTIFACT_IDS.includes(item.list_id);
-      }
-
-      return false;
-    });
-
-    if (hasEndpointArtifactListOrListItems) {
-      throw new EndpointArtifactExceptionValidationError(
-        'Import is not supported for Endpoint artifact exceptions'
-      );
-    }
-
-    // Temporary Work-around:
-    // v9.1.0 introduced support for spaces, which also now requires that each endpoint exception
-    // have the `global` tag, or else they will not be returned via API. Since Endpoint
-    // Exceptions continue to be global only in v9.1, we add the global tag to them here if it is
-    // missing
-    const adjustedImportItems: PromiseFromStreams['items'] = [];
-
-    for (const item of data.items) {
-      if (
-        !(item instanceof Error) &&
-        item.list_id === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id &&
-        item.tags?.includes(GLOBAL_ARTIFACT_TAG) === false
-      ) {
-        item.tags = item.tags ?? [];
-        item.tags.push(GLOBAL_ARTIFACT_TAG);
-        adjustedImportItems.push(item);
-      }
-    }
-
-    if (adjustedImportItems.length > 0) {
-      logger.debug(`The following Endpoint Exceptions item imports were adjusted to include the Global artifact tag:
-${stringify(adjustedImportItems)}`);
-    }
+    validateCanEndpointArtifactsBeImported(data, endpointAppContextService.experimentalFeatures);
+    provideSpaceAwarenessCompatibilityForOldEndpointExceptions(data, endpointAppContextService);
 
     return data;
   };
+};
+
+const validateCanEndpointArtifactsBeImported = (
+  data: PromiseFromStreams,
+  experimentalFeatures: ExperimentalFeatures
+) => {
+  if (experimentalFeatures.endpointArtifactsExportImportEnabled) {
+    return;
+  }
+
+  const hasEndpointArtifactListOrListItems = [...data.lists, ...data.items].some((item) => {
+    if ('list_id' in item) {
+      const NON_IMPORTABLE_ENDPOINT_ARTIFACT_IDS = ALL_ENDPOINT_ARTIFACT_LIST_IDS.filter(
+        (listId) => listId !== ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+      ) as string[];
+
+      return NON_IMPORTABLE_ENDPOINT_ARTIFACT_IDS.includes(item.list_id);
+    }
+
+    return false;
+  });
+
+  if (hasEndpointArtifactListOrListItems) {
+    throw new EndpointArtifactExceptionValidationError(
+      'Import is not supported for Endpoint artifact exceptions'
+    );
+  }
+};
+
+/** Temporary Work-around:
+ * v9.1.0 introduced support for spaces, which also now requires that each endpoint exception
+ * have the `global` tag, or else they will not be returned via API. Since Endpoint
+ * Exceptions continue to be global only in v9.1, we add the global tag to them here if it is
+ * missing
+ */
+const provideSpaceAwarenessCompatibilityForOldEndpointExceptions = (
+  data: PromiseFromStreams,
+  endpointAppContextService: EndpointAppContextService
+) => {
+  const logger = endpointAppContextService.createLogger('listsPreImportExtensionPoint');
+
+  const adjustedImportItems: PromiseFromStreams['items'] = [];
+
+  for (const item of data.items) {
+    if (
+      !(item instanceof Error) &&
+      item.list_id === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id &&
+      item.tags?.includes(GLOBAL_ARTIFACT_TAG) === false
+    ) {
+      item.tags = item.tags ?? [];
+      item.tags.push(GLOBAL_ARTIFACT_TAG);
+      adjustedImportItems.push(item);
+    }
+  }
+
+  if (adjustedImportItems.length > 0) {
+    logger.debug(`The following Endpoint Exceptions item imports were adjusted to include the Global artifact tag:
+ ${stringify(adjustedImportItems)}`);
+  }
 };
