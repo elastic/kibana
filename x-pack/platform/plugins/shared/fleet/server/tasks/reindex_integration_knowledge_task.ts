@@ -82,7 +82,12 @@ async function reindexIntegrationKnowledgeForInstalledPackages() {
   await pMap(
     installedPackages.saved_objects,
     async ({ attributes: installation }) => {
-      // TODO archiveIterator is different if `install_source !== 'registry'`
+      if (installation.install_source !== 'registry') {
+        logger.debug(
+          `Skipping reindexing knowledge base for package ${installation.name}@${installation.version} - install source ${installation.install_source}`
+        );
+        return;
+      }
       const { archiveIterator } = await Registry.getPackage(
         installation.name,
         installation.version,
@@ -100,16 +105,6 @@ async function reindexIntegrationKnowledgeForInstalledPackages() {
           `Failed reindexing knowledge base for package ${installation.name}@${installation.version}: ${error}`
         );
       });
-
-      // await reinstallPackageForInstallation({
-      //     soClient,
-      //     esClient,
-      //     installation,
-      // }).catch((err) => {
-      //     logger.error(
-      //     `Package needs to be manually reinstalled ${installation.name} after enabling integration knowledge: ${err.message}`
-      //     );
-      // });
     },
     { concurrency: MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS }
   );

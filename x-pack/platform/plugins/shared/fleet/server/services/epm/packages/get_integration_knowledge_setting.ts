@@ -22,13 +22,6 @@ export async function getIntegrationKnowledgeSetting(
     const { integration_knowledge_enabled: integrationKnowledgeEnabled } = await getSettings(
       savedObjectsClient
     );
-    appContextService
-      .getLogger()
-      .debug(
-        `getIntegrationKnowledgeSetting returns ${
-          integrationKnowledgeEnabled ?? integrationKnowledgeConfig
-        }`
-      );
     return integrationKnowledgeEnabled ?? integrationKnowledgeConfig;
   } catch (err) {
     appContextService

@@ -134,7 +134,9 @@ export async function indexKnowledgeBase(
     packageInfo.version
   );
 
-  logger.debug(`Knowledge base step: Found ${knowledgeBaseItems.length} items to process`);
+  logger.debug(
+    `Knowledge base step: Found ${knowledgeBaseItems.length} items to process for package ${packageInfo.name}@${packageInfo.version}`
+  );
 
   // Save knowledge base content if present
   if (knowledgeBaseItems && knowledgeBaseItems.length > 0) {
