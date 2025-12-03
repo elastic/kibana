@@ -6,15 +6,11 @@
  */
 
 import { expect, tags } from '@kbn/scout';
+import type { RoleApiCredentials } from '@kbn/scout';
 import type { PostTransformsPreviewRequestSchema } from '../../../../server/routes/api_schemas/transforms';
-import {
-  createTransformRoles,
-  createTransformUsers,
-  cleanTransformRoles,
-  cleanTransformUsers,
-} from '../helpers/transform_users';
 import { generateTransformConfig } from '../helpers/transform_config';
-import { transformApiTest as apiTest } from '../fixtures/transform_test_fixture';
+import { transformApiTest as apiTest } from '../fixtures';
+import { COMMON_HEADERS } from './constants';
 
 function getTransformPreviewConfig(): PostTransformsPreviewRequestSchema {
   // Generate config without dest field for preview
@@ -23,13 +19,12 @@ function getTransformPreviewConfig(): PostTransformsPreviewRequestSchema {
 }
 
 apiTest.describe('/internal/transform/transforms/_preview', { tag: tags.ESS_ONLY }, () => {
-  apiTest.beforeAll(async ({ esArchiver, kbnClient, esClient, transformApi }) => {
-    // Set Kibana timezone to UTC
-    await transformApi.setKibanaTimeZoneToUTC();
+  let transformAdminApiCredentials: RoleApiCredentials;
+  let transformUserApiCredentials: RoleApiCredentials;
 
-    // Create transform roles and users
-    await createTransformRoles(kbnClient);
-    await createTransformUsers(kbnClient);
+  apiTest.beforeAll(async ({ requestAuth, esClient }) => {
+    transformAdminApiCredentials = await requestAuth.loginAsTransformAdminUser();
+    transformUserApiCredentials = await requestAuth.loginAsTransformUser();
 
     // Wait for ft_farequote index to exist
     let retries = 30;
@@ -47,21 +42,16 @@ apiTest.describe('/internal/transform/transforms/_preview', { tag: tags.ESS_ONLY
     }
   });
 
-  apiTest.afterAll(async ({ kbnClient, transformApi }) => {
-    // Clean transform users and roles
-    await cleanTransformUsers(kbnClient);
-    await cleanTransformRoles(kbnClient);
+  apiTest.afterAll(async () => {});
 
-    // Reset Kibana timezone
-    await transformApi.resetKibanaTimeZone();
-  });
-
-  apiTest('should return a transform preview', async ({ makeTransformRequest }) => {
-    const { statusCode, body } = await makeTransformRequest<any>({
-      method: 'post',
-      path: 'internal/transform/transforms/_preview',
-      role: 'poweruser',
+  apiTest('should return a transform preview', async ({ apiClient }) => {
+    const { statusCode, body } = await apiClient.post('internal/transform/transforms/_preview', {
+      headers: {
+        ...COMMON_HEADERS,
+        ...transformAdminApiCredentials.apiKeyHeader,
+      },
       body: getTransformPreviewConfig(),
+      responseType: 'json',
     });
 
     expect(statusCode).toBe(200);
@@ -70,36 +60,37 @@ apiTest.describe('/internal/transform/transforms/_preview', { tag: tags.ESS_ONLY
     expect(typeof body.generated_dest_index).toBe('object');
   });
 
-  apiTest(
-    'should return a correct error for transform preview',
-    async ({ makeTransformRequest }) => {
-      const { statusCode, body } = await makeTransformRequest<any>({
-        method: 'post',
-        path: 'internal/transform/transforms/_preview',
-        role: 'poweruser',
-        body: {
-          ...getTransformPreviewConfig(),
-          pivot: {
-            group_by: { airline: { terms: { field: 'airline' } } },
-            aggregations: {
-              '@timestamp.value_count': { value_countt: { field: '@timestamp' } },
-            },
+  apiTest('should return a correct error for transform preview', async ({ apiClient }) => {
+    const { statusCode, body } = await apiClient.post('internal/transform/transforms/_preview', {
+      headers: {
+        ...COMMON_HEADERS,
+        ...transformAdminApiCredentials.apiKeyHeader,
+      },
+      body: {
+        ...getTransformPreviewConfig(),
+        pivot: {
+          group_by: { airline: { terms: { field: 'airline' } } },
+          aggregations: {
+            '@timestamp.value_count': { value_countt: { field: '@timestamp' } },
           },
         },
-      });
+      },
+      responseType: 'json',
+    });
 
-      expect(statusCode).toBe(400);
+    expect(statusCode).toBe(400);
 
-      expect(body.message).toContain('Unknown aggregation type [value_countt]');
-    }
-  );
+    expect(body.message).toContain('Unknown aggregation type [value_countt]');
+  });
 
-  apiTest('should return 403 for transform view-only user', async ({ makeTransformRequest }) => {
-    const { statusCode } = await makeTransformRequest({
-      method: 'post',
-      path: 'internal/transform/transforms/_preview',
-      role: 'viewer',
+  apiTest('should return 403 for transform view-only user', async ({ apiClient }) => {
+    const { statusCode } = await apiClient.post('internal/transform/transforms/_preview', {
+      headers: {
+        ...COMMON_HEADERS,
+        ...transformUserApiCredentials.apiKeyHeader,
+      },
       body: getTransformPreviewConfig(),
+      responseType: 'json',
     });
 
     expect(statusCode).toBe(403);

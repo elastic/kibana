@@ -190,7 +190,6 @@ apiTest.describe('/internal/transform/transforms', { tag: tags.ESS_ONLY }, () =>
     await transformApi.cleanTransformIndices();
     await cleanTransformUsers(kbnClient);
     await cleanTransformRoles(kbnClient);
-    await transformApi.resetKibanaTimeZone();
   });
 
   apiTest('should return a list of transforms', async ({ makeTransformRequest }) => {

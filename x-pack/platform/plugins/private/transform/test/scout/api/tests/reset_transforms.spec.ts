@@ -6,37 +6,32 @@
  */
 
 import { expect, tags } from '@kbn/scout';
+import type { RoleApiCredentials } from '@kbn/scout';
 import type { ResetTransformsRequestSchema } from '../../../../server/routes/api_schemas/reset_transforms';
 import { TRANSFORM_STATE } from '../../../../common/constants';
-import {
-  createTransformRoles,
-  createTransformUsers,
-  cleanTransformRoles,
-  cleanTransformUsers,
-} from '../helpers/transform_users';
 import { generateTransformConfig } from '../helpers/transform_config';
-import { transformApiTest as apiTest } from '../fixtures/transform_test_fixture';
+import { transformApiTest as apiTest } from '../fixtures';
+import { COMMON_HEADERS } from './constants';
 
 apiTest.describe('/internal/transform/reset_transforms', { tag: tags.ESS_ONLY }, () => {
-  apiTest.beforeAll(async ({ kbnClient, transformApi }) => {
-    await transformApi.setKibanaTimeZoneToUTC();
-    await createTransformRoles(kbnClient);
-    await createTransformUsers(kbnClient);
+  let transformAdminApiCredentials: RoleApiCredentials;
+  let transformUserApiCredentials: RoleApiCredentials;
+
+  apiTest.beforeAll(async ({ requestAuth }) => {
+    transformAdminApiCredentials = await requestAuth.loginAsTransformAdminUser();
+    transformUserApiCredentials = await requestAuth.loginAsTransformUser();
   });
 
-  apiTest.afterAll(async ({ kbnClient, transformApi }) => {
-    await transformApi.cleanTransformIndices();
-    await cleanTransformUsers(kbnClient);
-    await cleanTransformRoles(kbnClient);
-    await transformApi.resetKibanaTimeZone();
+  apiTest.afterAll(async ({ apiServices }) => {
+    // await apiServices.transform.cleanTransformIndices();
   });
 
   apiTest.describe('single transform reset', () => {
     const transformId = 'transform-test-reset';
 
-    apiTest.beforeEach(async ({ esClient, transformApi }) => {
+    apiTest.beforeEach(async ({ esClient, apiServices }) => {
       const config = generateTransformConfig(transformId);
-      await transformApi.createTransform(transformId, config);
+      // await apiServices.transform.createTransform(transformId, config);
       await esClient.transform.startTransform({ transform_id: transformId });
       // Wait a bit for transform to process some data
       await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -46,34 +41,38 @@ apiTest.describe('/internal/transform/reset_transforms', { tag: tags.ESS_ONLY },
       });
     });
 
-    apiTest.afterEach(async ({ transformApi }) => {
-      await transformApi.cleanTransformIndices();
+    apiTest.afterEach(async ({ apiServices }) => {
+      // await apiServices.transform.cleanTransformIndices();
     });
 
-    apiTest('should reset transform by transformId', async ({ makeTransformRequest }) => {
+    apiTest('should reset transform by transformId', async ({ apiClient }) => {
       const reqBody: ResetTransformsRequestSchema = {
         transformsInfo: [{ id: transformId, state: TRANSFORM_STATE.STOPPED }],
       };
-      const { statusCode, body } = await makeTransformRequest<any>({
-        method: 'post',
-        path: 'internal/transform/reset_transforms',
-        role: 'poweruser',
+      const { statusCode, body } = await apiClient.post('internal/transform/reset_transforms', {
+        headers: {
+          ...COMMON_HEADERS,
+          ...transformAdminApiCredentials.apiKeyHeader,
+        },
         body: reqBody,
+        responseType: 'json',
       });
 
       expect(statusCode).toBe(200);
       expect(body[transformId].transformReset.success).toBe(true);
     });
 
-    apiTest('should return 403 for unauthorized user', async ({ makeTransformRequest }) => {
+    apiTest('should return 403 for unauthorized user', async ({ apiClient }) => {
       const reqBody: ResetTransformsRequestSchema = {
         transformsInfo: [{ id: transformId, state: TRANSFORM_STATE.STOPPED }],
       };
-      const { statusCode } = await makeTransformRequest<any>({
-        method: 'post',
-        path: 'internal/transform/reset_transforms',
-        role: 'viewer',
+      const { statusCode } = await apiClient.post('internal/transform/reset_transforms', {
+        headers: {
+          ...COMMON_HEADERS,
+          ...transformUserApiCredentials.apiKeyHeader,
+        },
         body: reqBody,
+        responseType: 'json',
       });
 
       expect(statusCode).toBe(403);
@@ -83,15 +82,17 @@ apiTest.describe('/internal/transform/reset_transforms', { tag: tags.ESS_ONLY },
   apiTest.describe('single transform reset with invalid transformId', () => {
     apiTest(
       'should return 200 with error in response if invalid transformId',
-      async ({ makeTransformRequest }) => {
+      async ({ apiClient }) => {
         const reqBody: ResetTransformsRequestSchema = {
           transformsInfo: [{ id: 'invalid_transform_id', state: TRANSFORM_STATE.STOPPED }],
         };
-        const { statusCode, body } = await makeTransformRequest<any>({
-          method: 'post',
-          path: 'internal/transform/reset_transforms',
-          role: 'poweruser',
+        const { statusCode, body } = await apiClient.post('internal/transform/reset_transforms', {
+          headers: {
+            ...COMMON_HEADERS,
+            ...transformAdminApiCredentials.apiKeyHeader,
+          },
           body: reqBody,
+          responseType: 'json',
         });
 
         expect(statusCode).toBe(200);
@@ -104,10 +105,10 @@ apiTest.describe('/internal/transform/reset_transforms', { tag: tags.ESS_ONLY },
   apiTest.describe('bulk reset', () => {
     const transformIds = ['bulk_reset_test_1', 'bulk_reset_test_2'];
 
-    apiTest.beforeEach(async ({ esClient, transformApi }) => {
+    apiTest.beforeEach(async ({ esClient, apiServices }) => {
       for (const id of transformIds) {
         const config = generateTransformConfig(id);
-        await transformApi.createTransform(id, config);
+        // await apiServices.transform.createTransform(id, config);
         await esClient.transform.startTransform({ transform_id: id });
       }
       await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -116,33 +117,32 @@ apiTest.describe('/internal/transform/reset_transforms', { tag: tags.ESS_ONLY },
       }
     });
 
-    apiTest.afterEach(async ({ transformApi }) => {
-      await transformApi.cleanTransformIndices();
+    apiTest.afterEach(async ({ apiServices }) => {
+      // await apiServices.transform.cleanTransformIndices();
+    });
+
+    apiTest('should reset multiple transforms by transformIds', async ({ apiClient }) => {
+      const reqBody: ResetTransformsRequestSchema = {
+        transformsInfo: transformIds.map((id) => ({ id, state: TRANSFORM_STATE.STOPPED })),
+      };
+      const { statusCode, body } = await apiClient.post('internal/transform/reset_transforms', {
+        headers: {
+          ...COMMON_HEADERS,
+          ...transformAdminApiCredentials.apiKeyHeader,
+        },
+        body: reqBody,
+        responseType: 'json',
+      });
+
+      expect(statusCode).toBe(200);
+      for (const id of transformIds) {
+        expect(body[id].transformReset.success).toBe(true);
+      }
     });
 
     apiTest(
-      'should reset multiple transforms by transformIds',
-      async ({ makeTransformRequest }) => {
-        const reqBody: ResetTransformsRequestSchema = {
-          transformsInfo: transformIds.map((id) => ({ id, state: TRANSFORM_STATE.STOPPED })),
-        };
-        const { statusCode, body } = await makeTransformRequest<any>({
-          method: 'post',
-          path: 'internal/transform/reset_transforms',
-          role: 'poweruser',
-          body: reqBody,
-        });
-
-        expect(statusCode).toBe(200);
-        for (const id of transformIds) {
-          expect(body[id].transformReset.success).toBe(true);
-        }
-      }
-    );
-
-    apiTest(
       'should reset multiple transforms by transformIds, even if one of the transformIds is invalid',
-      async ({ makeTransformRequest }) => {
+      async ({ apiClient }) => {
         const invalidTransformId = 'invalid_transform_id';
         const reqBody: ResetTransformsRequestSchema = {
           transformsInfo: [
@@ -150,11 +150,13 @@ apiTest.describe('/internal/transform/reset_transforms', { tag: tags.ESS_ONLY },
             { id: invalidTransformId, state: TRANSFORM_STATE.STOPPED },
           ],
         };
-        const { statusCode, body } = await makeTransformRequest<any>({
-          method: 'post',
-          path: 'internal/transform/reset_transforms',
-          role: 'poweruser',
+        const { statusCode, body } = await apiClient.post('internal/transform/reset_transforms', {
+          headers: {
+            ...COMMON_HEADERS,
+            ...transformAdminApiCredentials.apiKeyHeader,
+          },
           body: reqBody,
+          responseType: 'json',
         });
 
         expect(statusCode).toBe(200);

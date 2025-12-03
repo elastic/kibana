@@ -6,15 +6,10 @@
  */
 
 import { expect, tags } from '@kbn/scout';
-import type { GetTransformsResponseSchema } from '../../../../server/routes/api_schemas/transforms';
-import {
-  createTransformRoles,
-  createTransformUsers,
-  cleanTransformRoles,
-  cleanTransformUsers,
-} from '../helpers/transform_users';
+import type { RoleApiCredentials } from '@kbn/scout';
 import { generateTransformConfig } from '../helpers/transform_config';
-import { transformApiTest as apiTest } from '../fixtures/transform_test_fixture';
+import { transformApiTest as apiTest } from '../fixtures';
+import { COMMON_HEADERS } from './constants';
 
 const TRANSFORM_ID = 'transform-test-update-1';
 
@@ -42,38 +37,32 @@ apiTest.describe(
   '/internal/transform/transforms/{transformId}/_update',
   { tag: tags.ESS_ONLY },
   () => {
-    apiTest.beforeAll(async ({ kbnClient, transformApi }) => {
-      // Set Kibana timezone to UTC
-      await transformApi.setKibanaTimeZoneToUTC();
+    let transformAdminApiCredentials: RoleApiCredentials;
+    let transformUserApiCredentials: RoleApiCredentials;
 
-      // Create transform roles and users
-      await createTransformRoles(kbnClient);
-      await createTransformUsers(kbnClient);
+    apiTest.beforeAll(async ({ requestAuth, apiServices }) => {
+      transformAdminApiCredentials = await requestAuth.loginAsTransformAdminUser();
+      transformUserApiCredentials = await requestAuth.loginAsTransformUser();
 
-      // Create transform
       const config = generateTransformConfig(TRANSFORM_ID);
-      await transformApi.createTransform(TRANSFORM_ID, config);
+      await apiServices.transform.createTransform(TRANSFORM_ID, config);
     });
 
-    apiTest.afterAll(async ({ kbnClient, transformApi }) => {
-      // Clean transform indices
-      await transformApi.cleanTransformIndices();
-
-      // Clean transform users and roles
-      await cleanTransformUsers(kbnClient);
-      await cleanTransformRoles(kbnClient);
-
-      // Reset Kibana timezone
-      await transformApi.resetKibanaTimeZone();
+    apiTest.afterAll(async ({ apiServices }) => {
+      await apiServices.transform.cleanTransformIndices();
     });
 
-    apiTest('should update a transform', async ({ makeTransformRequest }) => {
-      // Get original transform config
-      const originalResponse = await makeTransformRequest<GetTransformsResponseSchema>({
-        method: 'get',
-        path: `internal/transform/transforms/${TRANSFORM_ID}`,
-        role: 'poweruser',
-      });
+    apiTest('should update a transform', async ({ apiClient }) => {
+      const originalResponse = await apiClient.get(
+        `internal/transform/transforms/${TRANSFORM_ID}`,
+        {
+          headers: {
+            ...COMMON_HEADERS,
+            ...transformAdminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+        }
+      );
 
       expect(originalResponse.statusCode).toBe(200);
 
@@ -89,13 +78,17 @@ apiTest.describe(
       expect(originalConfig.description).toBeUndefined();
       expect(originalConfig.settings).toEqual({});
 
-      // Update the transform
-      const updateResponse = await makeTransformRequest<any>({
-        method: 'post',
-        path: `internal/transform/transforms/${TRANSFORM_ID}/_update`,
-        role: 'poweruser',
-        body: getTransformUpdateConfig(),
-      });
+      const updateResponse = await apiClient.post(
+        `internal/transform/transforms/${TRANSFORM_ID}/_update`,
+        {
+          headers: {
+            ...COMMON_HEADERS,
+            ...transformAdminApiCredentials.apiKeyHeader,
+          },
+          body: getTransformUpdateConfig(),
+          responseType: 'json',
+        }
+      );
 
       expect(updateResponse.statusCode).toBe(200);
 
@@ -109,10 +102,12 @@ apiTest.describe(
       expect(updateResponse.body.settings).toEqual({});
 
       // Verify the update persisted
-      const verifyResponse = await makeTransformRequest<GetTransformsResponseSchema>({
-        method: 'get',
-        path: `internal/transform/transforms/${TRANSFORM_ID}`,
-        role: 'poweruser',
+      const verifyResponse = await apiClient.get(`internal/transform/transforms/${TRANSFORM_ID}`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...transformAdminApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
       });
 
       expect(verifyResponse.statusCode).toBe(200);
@@ -130,13 +125,18 @@ apiTest.describe(
       expect(verifiedConfig.settings).toEqual({});
     });
 
-    apiTest('should return 403 for transform view-only user', async ({ makeTransformRequest }) => {
-      const { statusCode } = await makeTransformRequest({
-        method: 'post',
-        path: `internal/transform/transforms/${TRANSFORM_ID}/_update`,
-        role: 'viewer',
-        body: getTransformUpdateConfig(),
-      });
+    apiTest('should return 403 for transform view-only user', async ({ apiClient }) => {
+      const { statusCode } = await apiClient.post(
+        `internal/transform/transforms/${TRANSFORM_ID}/_update`,
+        {
+          headers: {
+            ...COMMON_HEADERS,
+            ...transformUserApiCredentials.apiKeyHeader,
+          },
+          body: getTransformUpdateConfig(),
+          responseType: 'json',
+        }
+      );
 
       expect(statusCode).toBe(403);
     });

@@ -6,49 +6,39 @@
  */
 
 import { expect, tags } from '@kbn/scout';
-import {
-  createTransformRoles,
-  createTransformUsers,
-  cleanTransformRoles,
-  cleanTransformUsers,
-} from '../helpers/transform_users';
+import type { RoleApiCredentials } from '@kbn/scout';
 import { generateTransformConfig, generateDestIndex } from '../helpers/transform_config';
-import { transformApiTest as apiTest } from '../fixtures/transform_test_fixture';
+import { transformApiTest as apiTest } from '../fixtures';
+import { COMMON_HEADERS } from './constants';
 
 apiTest.describe(
   '/internal/transform/transforms/{transformId}/ create',
   { tag: tags.ESS_ONLY },
   () => {
-    apiTest.beforeAll(async ({ kbnClient, transformApi }) => {
-      // Set Kibana timezone to UTC
-      await transformApi.setKibanaTimeZoneToUTC();
+    let transformAdminApiCredentials: RoleApiCredentials;
 
-      // Create transform roles and users
-      await createTransformRoles(kbnClient);
-      await createTransformUsers(kbnClient);
+    apiTest.beforeAll(async ({ requestAuth }) => {
+      transformAdminApiCredentials = await requestAuth.loginAsTransformAdminUser();
     });
 
-    apiTest.afterAll(async ({ kbnClient, transformApi }) => {
-      // Clean transform indices
-      await transformApi.cleanTransformIndices();
-
-      // Clean transform users and roles
-      await cleanTransformUsers(kbnClient);
-      await cleanTransformRoles(kbnClient);
-
-      // Reset Kibana timezone
-      await transformApi.resetKibanaTimeZone();
+    apiTest.afterAll(async ({ apiServices }) => {
+      await apiServices.transform.cleanTransformIndices();
     });
 
-    apiTest('should create a transform', async ({ makeTransformRequest }) => {
+    apiTest('should create a transform', async ({ apiClient }) => {
       const transformId = 'test_transform_id_create';
 
-      const { statusCode, body } = await makeTransformRequest<any>({
-        method: 'put',
-        path: `internal/transform/transforms/${transformId}`,
-        role: 'poweruser',
-        body: generateTransformConfig(transformId),
-      });
+      const { statusCode, body } = await apiClient.put(
+        `internal/transform/transforms/${transformId}`,
+        {
+          headers: {
+            ...COMMON_HEADERS,
+            ...transformAdminApiCredentials.apiKeyHeader,
+          },
+          body: generateTransformConfig(transformId),
+          responseType: 'json',
+        }
+      );
 
       expect(statusCode).toBe(200);
 
@@ -64,47 +54,54 @@ apiTest.describe(
       });
     });
 
-    apiTest(
-      'should create a transform with data view',
-      async ({ makeTransformRequest, transformApi }) => {
-        const transformId = 'test_transform_id_create_with_data_view';
-        const destinationIndex = generateDestIndex(transformId);
+    apiTest('should create a transform with data view', async ({ apiClient, apiServices }) => {
+      const transformId = 'test_transform_id_create_with_data_view';
+      const destinationIndex = generateDestIndex(transformId);
 
-        const { statusCode, body } = await makeTransformRequest<any>({
-          method: 'put',
-          path: `internal/transform/transforms/${transformId}?createDataView=true`,
-          role: 'poweruser',
-          body: generateTransformConfig(transformId),
-        });
-
-        expect(statusCode).toBe(200);
-
-        expect(body.dataViewsCreated).toHaveLength(1);
-        expect(body.dataViewsErrors).toHaveLength(0);
-        expect(body.errors).toHaveLength(0);
-        expect(body.transformsCreated).toEqual([
-          {
-            transform: transformId,
+      const { statusCode, body } = await apiClient.put(
+        `internal/transform/transforms/${transformId}?createDataView=true`,
+        {
+          headers: {
+            ...COMMON_HEADERS,
+            ...transformAdminApiCredentials.apiKeyHeader,
           },
-        ]);
+          body: generateTransformConfig(transformId),
+          responseType: 'json',
+        }
+      );
 
-        // Clean up data view
-        await transformApi.deleteDataViewByTitle(destinationIndex);
-      }
-    );
+      expect(statusCode).toBe(200);
+
+      expect(body.dataViewsCreated).toHaveLength(1);
+      expect(body.dataViewsErrors).toHaveLength(0);
+      expect(body.errors).toHaveLength(0);
+      expect(body.transformsCreated).toEqual([
+        {
+          transform: transformId,
+        },
+      ]);
+
+      // Clean up data view
+      await apiServices.transform.deleteDataViewByTitle(destinationIndex);
+    });
 
     apiTest(
       'should create a transform with data view and time field',
-      async ({ makeTransformRequest, transformApi }) => {
+      async ({ apiClient, apiServices }) => {
         const transformId = 'test_transform_id_create_with_data_view_and_time_field';
         const destinationIndex = generateDestIndex(transformId);
 
-        const { statusCode, body } = await makeTransformRequest<any>({
-          method: 'put',
-          path: `internal/transform/transforms/${transformId}?createDataView=true&timeFieldName=@timestamp`,
-          role: 'poweruser',
-          body: generateTransformConfig(transformId),
-        });
+        const { statusCode, body } = await apiClient.put(
+          `internal/transform/transforms/${transformId}?createDataView=true&timeFieldName=@timestamp`,
+          {
+            headers: {
+              ...COMMON_HEADERS,
+              ...transformAdminApiCredentials.apiKeyHeader,
+            },
+            body: generateTransformConfig(transformId),
+            responseType: 'json',
+          }
+        );
 
         expect(statusCode).toBe(200);
 
@@ -118,27 +115,32 @@ apiTest.describe(
         ]);
 
         // Clean up data view
-        await transformApi.deleteDataViewByTitle(destinationIndex);
+        await apiServices.transform.deleteDataViewByTitle(destinationIndex);
       }
     );
 
     apiTest(
       'should not allow pivot and latest configs in same transform',
-      async ({ makeTransformRequest }) => {
+      async ({ apiClient }) => {
         const transformId = 'test_transform_id_fail';
 
-        const { statusCode, body } = await makeTransformRequest<any>({
-          method: 'put',
-          path: `internal/transform/transforms/${transformId}`,
-          role: 'poweruser',
-          body: {
-            ...generateTransformConfig(transformId),
-            latest: {
-              unique_key: ['country', 'gender'],
-              sort: 'infected',
+        const { statusCode, body } = await apiClient.put(
+          `internal/transform/transforms/${transformId}`,
+          {
+            headers: {
+              ...COMMON_HEADERS,
+              ...transformAdminApiCredentials.apiKeyHeader,
             },
-          },
-        });
+            body: {
+              ...generateTransformConfig(transformId),
+              latest: {
+                unique_key: ['country', 'gender'],
+                sort: 'infected',
+              },
+            },
+            responseType: 'json',
+          }
+        );
 
         expect(statusCode).toBe(400);
 
@@ -146,17 +148,22 @@ apiTest.describe(
       }
     );
 
-    apiTest('should ensure if pivot or latest is provided', async ({ makeTransformRequest }) => {
+    apiTest('should ensure if pivot or latest is provided', async ({ apiClient }) => {
       const transformId = 'test_transform_id_fail';
 
       const { pivot, ...config } = generateTransformConfig(transformId);
 
-      const { statusCode, body } = await makeTransformRequest<any>({
-        method: 'put',
-        path: `internal/transform/transforms/${transformId}`,
-        role: 'poweruser',
-        body: config,
-      });
+      const { statusCode, body } = await apiClient.put(
+        `internal/transform/transforms/${transformId}`,
+        {
+          headers: {
+            ...COMMON_HEADERS,
+            ...transformAdminApiCredentials.apiKeyHeader,
+          },
+          body: config,
+          responseType: 'json',
+        }
+      );
 
       expect(statusCode).toBe(400);
 

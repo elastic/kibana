@@ -5,10 +5,19 @@
  * 2.0.
  */
 
-import { expect, apiTest, tags } from '@kbn/scout';
+import { expect, tags } from '@kbn/scout';
+import type { RoleApiCredentials } from '@kbn/scout';
+
+import { transformApiTest as apiTest } from '../fixtures';
+import { COMMON_HEADERS } from './constants';
 
 apiTest.describe('/internal/transform/reauthorize_transforms', { tag: tags.ESS_ONLY }, () => {
-  apiTest.beforeAll(async ({ kbnClient }) => {
+  let transformAdminApiCredentials: RoleApiCredentials;
+  let transformUserApiCredentials: RoleApiCredentials;
+
+  apiTest.beforeAll(async ({ requestAuth, kbnClient }) => {
+    transformAdminApiCredentials = await requestAuth.loginAsTransformAdminUser();
+    transformUserApiCredentials = await requestAuth.loginAsTransformUser();
     // TODO: Implement test setup
     // 2. Set Kibana timezone to UTC
     // 3. Create transform roles and users
@@ -19,9 +28,8 @@ apiTest.describe('/internal/transform/reauthorize_transforms', { tag: tags.ESS_O
   apiTest.afterAll(async ({ kbnClient }) => {
     // TODO: Implement cleanup
     // 1. Clear all transform API keys
-    // 2. Clean transform users and roles
-    // 3. Unload ES archive
-    // 4. Reset Kibana timezone
+    // 2. Unload ES archive
+    // 3. Reset Kibana timezone
   });
 
   apiTest.describe('single transform reauthorize_transforms', () => {

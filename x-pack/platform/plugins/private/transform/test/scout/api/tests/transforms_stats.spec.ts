@@ -6,56 +6,36 @@
  */
 
 import { expect, tags } from '@kbn/scout';
+import type { RoleApiCredentials } from '@kbn/scout';
 import { TRANSFORM_STATE } from '../../../../common/constants';
-import type { GetTransformsStatsResponseSchema } from '../../../../server/routes/api_schemas/transforms_stats';
-import {
-  createTransformRoles,
-  createTransformUsers,
-  cleanTransformRoles,
-  cleanTransformUsers,
-} from '../helpers/transform_users';
-import { generateTransformConfig } from '../helpers/transform_config';
-import { transformApiTest as apiTest } from '../fixtures/transform_test_fixture';
+import { transformApiTest as apiTest } from '../fixtures';
+import { COMMON_HEADERS } from './constants';
 
 const TRANSFORM_1_ID = 'transform-test-stats-1';
 const TRANSFORM_2_ID = 'transform-test-stats-2';
 
 apiTest.describe('/internal/transform/transforms/_stats', { tag: tags.ESS_ONLY }, () => {
-  apiTest.beforeAll(async ({ kbnClient, transformApi }) => {
-    // Set Kibana timezone to UTC
-    await transformApi.setKibanaTimeZoneToUTC();
+  let transformAdminApiCredentials: RoleApiCredentials;
+  let transformUserApiCredentials: RoleApiCredentials;
 
-    // Create transform roles and users
-    await createTransformRoles(kbnClient);
-    await createTransformUsers(kbnClient);
-
-    // Create test transforms
-    const config1 = generateTransformConfig(TRANSFORM_1_ID);
-    const config2 = generateTransformConfig(TRANSFORM_2_ID);
-
-    await transformApi.createTransform(TRANSFORM_1_ID, config1);
-    await transformApi.createTransform(TRANSFORM_2_ID, config2);
+  apiTest.beforeAll(async ({ requestAuth }) => {
+    transformAdminApiCredentials = await requestAuth.loginAsTransformAdminUser();
+    transformUserApiCredentials = await requestAuth.loginAsTransformUser();
   });
 
-  apiTest.afterAll(async ({ kbnClient, transformApi }) => {
-    // Clean transform indices
-    await transformApi.cleanTransformIndices();
-
-    // Clean transform users and roles
-    await cleanTransformUsers(kbnClient);
-    await cleanTransformRoles(kbnClient);
-
-    // Reset Kibana timezone
-    await transformApi.resetKibanaTimeZone();
+  apiTest.afterAll(async ({ apiServices }) => {
+    // await apiServices.transform.cleanTransformIndices();
   });
 
   apiTest(
-    'should return a list of transforms statistics for super-user',
-    async ({ makeTransformRequest }) => {
-      const { statusCode, body } = await makeTransformRequest<GetTransformsStatsResponseSchema>({
-        method: 'get',
-        path: 'internal/transform/transforms/_stats',
-        role: 'poweruser',
+    'should return a list of transforms statistics for transform admin',
+    async ({ apiClient }) => {
+      const { statusCode, body } = await apiClient.get('internal/transform/transforms/_stats', {
+        headers: {
+          ...COMMON_HEADERS,
+          ...transformAdminApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
       });
 
       expect(statusCode).toBe(200);
@@ -82,13 +62,18 @@ apiTest.describe('/internal/transform/transforms/_stats', { tag: tags.ESS_ONLY }
   );
 
   apiTest(
-    'should return statistics for a single transform for super-user',
-    async ({ makeTransformRequest }) => {
-      const { statusCode, body } = await makeTransformRequest<GetTransformsStatsResponseSchema>({
-        method: 'get',
-        path: `internal/transform/transforms/${TRANSFORM_1_ID}/_stats`,
-        role: 'poweruser',
-      });
+    'should return statistics for a single transform for transform admin',
+    async ({ apiClient }) => {
+      const { statusCode, body } = await apiClient.get(
+        `internal/transform/transforms/${TRANSFORM_1_ID}/_stats`,
+        {
+          headers: {
+            ...COMMON_HEADERS,
+            ...transformAdminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+        }
+      );
 
       expect(statusCode).toBe(200);
 
@@ -104,12 +89,14 @@ apiTest.describe('/internal/transform/transforms/_stats', { tag: tags.ESS_ONLY }
   );
 
   apiTest(
-    'should return a list of transforms statistics view-only user',
-    async ({ makeTransformRequest }) => {
-      const { statusCode, body } = await makeTransformRequest<GetTransformsStatsResponseSchema>({
-        method: 'get',
-        path: 'internal/transform/transforms/_stats',
-        role: 'viewer',
+    'should return a list of transforms statistics for transform user',
+    async ({ apiClient }) => {
+      const { statusCode, body } = await apiClient.get('internal/transform/transforms/_stats', {
+        headers: {
+          ...COMMON_HEADERS,
+          ...transformUserApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
       });
 
       expect(statusCode).toBe(200);
@@ -128,13 +115,18 @@ apiTest.describe('/internal/transform/transforms/_stats', { tag: tags.ESS_ONLY }
   );
 
   apiTest(
-    'should return statistics for a single transform for view-only user',
-    async ({ makeTransformRequest }) => {
-      const { statusCode, body } = await makeTransformRequest<GetTransformsStatsResponseSchema>({
-        method: 'get',
-        path: `internal/transform/transforms/${TRANSFORM_2_ID}/_stats`,
-        role: 'viewer',
-      });
+    'should return statistics for a single transform for transform user',
+    async ({ apiClient }) => {
+      const { statusCode, body } = await apiClient.get(
+        `internal/transform/transforms/${TRANSFORM_2_ID}/_stats`,
+        {
+          headers: {
+            ...COMMON_HEADERS,
+            ...transformUserApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+        }
+      );
 
       expect(statusCode).toBe(200);
 

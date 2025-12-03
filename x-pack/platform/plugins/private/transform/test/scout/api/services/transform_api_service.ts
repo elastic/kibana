@@ -85,8 +85,8 @@ export function getTransformApiService(
           await esClient.transform.deleteTransform({
             transform_id: transform.id,
           });
-        } catch {
-          // Continue with next transform if this one fails
+        } catch (error) {
+          throw new Error(`Failed to delete transform ${transform.id}: ${error}`);
         }
       }
 

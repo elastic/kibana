@@ -68,6 +68,7 @@ const USERS = [
   },
 ];
 
+/*
 export async function createTransformRoles(kbnClient: KbnClient) {
   for (const role of ROLES) {
     await kbnClient.request({
@@ -79,7 +80,7 @@ export async function createTransformRoles(kbnClient: KbnClient) {
     });
   }
 }
-
+*/
 export function getTransformPoweruserRoleDescriptor(): KibanaRole {
   return {
     kibana: [
@@ -131,6 +132,7 @@ export function getTransformUnauthorizedRoleDescriptor(): KibanaRole {
   };
 }
 
+/*
 export async function createTransformUsers(kbnClient: KbnClient) {
   for (const user of USERS) {
     await kbnClient.request({
@@ -171,3 +173,4 @@ export async function cleanTransformUsers(kbnClient: KbnClient) {
     }
   }
 }
+*/

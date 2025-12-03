@@ -6,49 +6,46 @@
  */
 
 import { expect, tags } from '@kbn/scout';
+import type { RoleApiCredentials } from '@kbn/scout';
 import type { StartTransformsRequestSchema } from '../../../../server/routes/api_schemas/start_transforms';
-import {
-  createTransformRoles,
-  createTransformUsers,
-  cleanTransformRoles,
-  cleanTransformUsers,
-} from '../helpers/transform_users';
 import { generateTransformConfig } from '../helpers/transform_config';
-import { transformApiTest as apiTest } from '../fixtures/transform_test_fixture';
+import { transformApiTest as apiTest } from '../fixtures';
+import { COMMON_HEADERS } from './constants';
 
 apiTest.describe('/internal/transform/start_transforms', { tag: tags.ESS_ONLY }, () => {
-  apiTest.beforeAll(async ({ kbnClient, transformApi }) => {
-    await transformApi.setKibanaTimeZoneToUTC();
-    await createTransformRoles(kbnClient);
-    await createTransformUsers(kbnClient);
+  let transformAdminApiCredentials: RoleApiCredentials;
+  let transformUserApiCredentials: RoleApiCredentials;
+
+  apiTest.beforeAll(async ({ requestAuth }) => {
+    transformAdminApiCredentials = await requestAuth.loginAsTransformAdminUser();
+    transformUserApiCredentials = await requestAuth.loginAsTransformUser();
   });
 
-  apiTest.afterAll(async ({ kbnClient, transformApi }) => {
-    await transformApi.cleanTransformIndices();
-    await cleanTransformUsers(kbnClient);
-    await cleanTransformRoles(kbnClient);
-    await transformApi.resetKibanaTimeZone();
+  apiTest.afterAll(async ({ apiServices }) => {
+    await apiServices.transform.cleanTransformIndices();
   });
 
   apiTest.describe('single transform start', () => {
     const transformId = 'transform-test-start';
 
-    apiTest.beforeEach(async ({ esClient, kbnClient, transformApi }) => {
+    apiTest.beforeEach(async ({ apiServices }) => {
       const config = generateTransformConfig(transformId);
-      await transformApi.createTransform(transformId, config);
+      await apiServices.transform.createTransform(transformId, config);
     });
 
-    apiTest.afterEach(async ({ esClient, kbnClient, transformApi }) => {
-      await transformApi.cleanTransformIndices();
+    apiTest.afterEach(async ({ apiServices }) => {
+      await apiServices.transform.cleanTransformIndices();
     });
 
-    apiTest('should start the transform by transformId', async ({ makeTransformRequest }) => {
+    apiTest('should start the transform by transformId', async ({ apiClient }) => {
       const reqBody: StartTransformsRequestSchema = [{ id: transformId }];
-      const { statusCode, body } = await makeTransformRequest<any>({
-        method: 'post',
-        path: 'internal/transform/start_transforms',
-        role: 'poweruser',
+      const { statusCode, body } = await apiClient.post('internal/transform/start_transforms', {
+        headers: {
+          ...COMMON_HEADERS,
+          ...transformAdminApiCredentials.apiKeyHeader,
+        },
         body: reqBody,
+        responseType: 'json',
       });
 
       expect(statusCode).toBe(200);
@@ -57,35 +54,36 @@ apiTest.describe('/internal/transform/start_transforms', { tag: tags.ESS_ONLY },
       expect(body[transformId].error).toBeUndefined();
     });
 
-    apiTest(
-      'should return 200 with success:false for unauthorized user',
-      async ({ makeTransformRequest }) => {
-        const reqBody: StartTransformsRequestSchema = [{ id: transformId }];
-        const { statusCode, body } = await makeTransformRequest<any>({
-          method: 'post',
-          path: 'internal/transform/start_transforms',
-          role: 'viewer',
-          body: reqBody,
-        });
+    apiTest('should return 200 with success:false for unauthorized user', async ({ apiClient }) => {
+      const reqBody: StartTransformsRequestSchema = [{ id: transformId }];
+      const { statusCode, body } = await apiClient.post('internal/transform/start_transforms', {
+        headers: {
+          ...COMMON_HEADERS,
+          ...transformUserApiCredentials.apiKeyHeader,
+        },
+        body: reqBody,
+        responseType: 'json',
+      });
 
-        expect(statusCode).toBe(200);
+      expect(statusCode).toBe(200);
 
-        expect(body[transformId].success).toBe(false);
-        expect(typeof body[transformId].error).toBe('object');
-      }
-    );
+      expect(body[transformId].success).toBe(false);
+      expect(typeof body[transformId].error).toBe('object');
+    });
   });
 
   apiTest.describe('single transform start with invalid transformId', () => {
     apiTest(
       'should return 200 with error in response if invalid transformId',
-      async ({ makeTransformRequest }) => {
+      async ({ apiClient }) => {
         const reqBody: StartTransformsRequestSchema = [{ id: 'invalid_transform_id' }];
-        const { statusCode, body } = await makeTransformRequest<any>({
-          method: 'post',
-          path: 'internal/transform/start_transforms',
-          role: 'poweruser',
+        const { statusCode, body } = await apiClient.post('internal/transform/start_transforms', {
+          headers: {
+            ...COMMON_HEADERS,
+            ...transformAdminApiCredentials.apiKeyHeader,
+          },
           body: reqBody,
+          responseType: 'json',
         });
 
         expect(statusCode).toBe(200);
@@ -99,50 +97,51 @@ apiTest.describe('/internal/transform/start_transforms', { tag: tags.ESS_ONLY },
   apiTest.describe('bulk start', () => {
     const transformIds = ['bulk_start_test_1', 'bulk_start_test_2'];
 
-    apiTest.beforeEach(async ({ esClient, kbnClient, transformApi }) => {
+    apiTest.beforeEach(async ({ apiServices }) => {
       for (const id of transformIds) {
         const config = generateTransformConfig(id);
-        await transformApi.createTransform(id, config);
+        await apiServices.transform.createTransform(id, config);
       }
     });
 
-    apiTest.afterEach(async ({ esClient, kbnClient, transformApi }) => {
-      await transformApi.cleanTransformIndices();
+    apiTest.afterEach(async ({ apiServices }) => {
+      await apiServices.transform.cleanTransformIndices();
     });
 
-    apiTest(
-      'should start multiple transforms by transformIds',
-      async ({ makeTransformRequest }) => {
-        const reqBody: StartTransformsRequestSchema = transformIds.map((id) => ({ id }));
-        const { statusCode, body } = await makeTransformRequest<any>({
-          method: 'post',
-          path: 'internal/transform/start_transforms',
-          role: 'poweruser',
-          body: reqBody,
-        });
+    apiTest('should start multiple transforms by transformIds', async ({ apiClient }) => {
+      const reqBody: StartTransformsRequestSchema = transformIds.map((id) => ({ id }));
+      const { statusCode, body } = await apiClient.post('internal/transform/start_transforms', {
+        headers: {
+          ...COMMON_HEADERS,
+          ...transformAdminApiCredentials.apiKeyHeader,
+        },
+        body: reqBody,
+        responseType: 'json',
+      });
 
-        expect(statusCode).toBe(200);
+      expect(statusCode).toBe(200);
 
-        for (const id of transformIds) {
-          expect(body[id].success).toBe(true);
-        }
+      for (const id of transformIds) {
+        expect(body[id].success).toBe(true);
       }
-    );
+    });
 
     apiTest(
       'should start multiple transforms by transformIds, even if one of the transformIds is invalid',
-      async ({ makeTransformRequest }) => {
+      async ({ apiClient }) => {
         const invalidTransformId = 'invalid_transform_id';
         const reqBody: StartTransformsRequestSchema = [
           { id: transformIds[0] },
           { id: invalidTransformId },
           { id: transformIds[1] },
         ];
-        const { statusCode, body } = await makeTransformRequest<any>({
-          method: 'post',
-          path: 'internal/transform/start_transforms',
-          role: 'poweruser',
+        const { statusCode, body } = await apiClient.post('internal/transform/start_transforms', {
+          headers: {
+            ...COMMON_HEADERS,
+            ...transformAdminApiCredentials.apiKeyHeader,
+          },
           body: reqBody,
+          responseType: 'json',
         });
 
         expect(statusCode).toBe(200);
