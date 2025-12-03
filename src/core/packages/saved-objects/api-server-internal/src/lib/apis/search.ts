@@ -64,6 +64,17 @@ export async function performSearch<T extends SavedObjectsRawDocSource, A = unkn
     );
   }
 
+  const rootFields = getRootFields();
+
+  const forbiddenRuntimeMappings = Object.keys(esOptions.runtime_mappings ?? {}).filter((key) =>
+    rootFields.includes(key)
+  );
+  if (forbiddenRuntimeMappings.length > 0) {
+    throw SavedObjectsErrorHelpers.createBadRequestError(
+      `'runtime_mappings' contains forbidden fields: ${forbiddenRuntimeMappings.join(', ')}`
+    );
+  }
+
   const types = castArray(type).filter((t) => allowedTypes.includes(t));
   if (types.length === 0) {
     return createEmptySearchResponse();
@@ -113,18 +124,9 @@ export async function performSearch<T extends SavedObjectsRawDocSource, A = unkn
     getNamespacesBoolFilter({ namespaces, registry, types, typeToNamespacesMap })
   );
 
-  const rootFields = getRootFields();
-  const runtimeMappings: estypes.MappingRuntimeFields | undefined = esOptions.runtime_mappings
-    ? Object.fromEntries(
-        Object.entries(esOptions.runtime_mappings).filter(([key]) => !rootFields.includes(key))
-      )
-    : undefined;
-
   const result = await client.search<T, A>(
     {
       ...esOptions,
-      // Filter out forbidden fields from runtime_mappings
-      ...(runtimeMappings ? { runtime_mappings: runtimeMappings } : {}),
       // If `pit` is provided, we drop the `index`, otherwise ES returns 400.
       index: esOptions.pit ? undefined : commonHelper.getIndicesForTypes(types),
       query,

@@ -183,24 +183,23 @@ describe('SOR - search API', () => {
     });
     expect(namespaceASearch.hits.total).toHaveProperty('value', 2);
 
-    // Demonstrate vulnerability: runtime mappings can override/circumvent namespace filter
-    const runtimeOverrideAttempt = await savedObjectsRepository.search({
-      type: 'test-type',
-      namespaces: ['default'],
-      runtime_mappings: {
-        namespaces: {
-          type: 'keyword',
-          script: {
-            source: 'emit("default")', // Make all docs appear in 'default' namespace
+    // Attempt to override namespace filter using runtime mappings should throw an error
+    await expect(
+      savedObjectsRepository.search({
+        type: 'test-type',
+        namespaces: ['default'],
+        runtime_mappings: {
+          namespaces: {
+            type: 'keyword',
+            script: {
+              source: 'emit("default")', // Attempt to make all docs appear in 'default' namespace
+            },
           },
         },
-      },
-      query: {
-        match_all: {},
-      },
-    });
-
-    // If successful, attack will return all 7 documents including the ones from namespaceA
-    expect(runtimeOverrideAttempt.hits.total).toHaveProperty('value', 5);
+        query: {
+          match_all: {},
+        },
+      })
+    ).rejects.toThrow("'runtime_mappings' contains forbidden fields: namespaces");
   });
 });
