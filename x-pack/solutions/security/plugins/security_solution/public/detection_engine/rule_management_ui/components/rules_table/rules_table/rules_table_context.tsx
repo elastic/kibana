@@ -212,7 +212,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     enabled: savedFilter?.enabled,
     ruleExecutionStatus:
       savedFilter?.ruleExecutionStatus ?? DEFAULT_FILTER_OPTIONS.ruleExecutionStatus,
-    gapFillStatuses: savedFilter?.gapFillStatuses ?? DEFAULT_FILTER_OPTIONS.gapFillStatuses,
+    gapFillStatuses: DEFAULT_FILTER_OPTIONS.gapFillStatuses,
   });
 
   const [sortingOptions, setSortingOptions] = useState<SortingOptions>({

@@ -6,7 +6,6 @@
  */
 
 import * as z from '@kbn/zod';
-import { gapFillStatus } from '@kbn/alerting-plugin/common';
 import { RuleExecutionStatus } from '../../../../../../common/api/detection_engine';
 import { PaginationOptions, SortingOptions } from '../../../../rule_management/logic';
 
@@ -22,7 +21,6 @@ export const RulesTableSavedFilter = z
     tags: z.array(z.string()),
     enabled: z.boolean(),
     ruleExecutionStatus: RuleExecutionStatus,
-    gapFillStatuses: z.array(z.nativeEnum(gapFillStatus)).min(1),
   })
   .partial();
 

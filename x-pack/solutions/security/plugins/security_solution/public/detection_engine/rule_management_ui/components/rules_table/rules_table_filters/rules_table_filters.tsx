@@ -15,6 +15,7 @@ import { RULES_TABLE_ACTIONS } from '../../../../../common/lib/apm/user_actions'
 import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
 import * as i18n from '../../../../common/translations';
 import { useRulesTableContext } from '../rules_table/rules_table_context';
+import { AllRulesTabs } from '../rules_table_toolbar';
 import { TagsFilterPopover } from './tags_filter_popover';
 import { RuleExecutionStatusSelector } from './rule_execution_status_selector';
 import { RuleSearchField } from './rule_search_field';
@@ -25,11 +26,15 @@ const FilterWrapper = styled(EuiFlexGroup)`
   margin-bottom: ${({ theme }) => theme.eui.euiSizeXS};
 `;
 
+interface RulesTableFiltersProps {
+  selectedTab: AllRulesTabs;
+}
+
 /**
  * Collection of filters for filtering data within the RulesTable. Contains search bar, Elastic/Custom
  * Rules filter button toggle, and tag selection
  */
-const RulesTableFiltersComponent = () => {
+const RulesTableFiltersComponent = ({ selectedTab }: RulesTableFiltersProps) => {
   const { startTransaction } = useStartTransaction();
   const {
     state: { filterOptions },
@@ -122,14 +127,16 @@ const RulesTableFiltersComponent = () => {
         </EuiFilterGroup>
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <EuiFilterGroup>
-          <GapFillStatusSelector
-            selectedStatuses={gapFillStatuses ?? []}
-            onSelectedStatusesChanged={handleSelectedGapStatuses}
-          />
-        </EuiFilterGroup>
-      </EuiFlexItem>
+      {selectedTab === AllRulesTabs.monitoring && (
+        <EuiFlexItem grow={false}>
+          <EuiFilterGroup>
+            <GapFillStatusSelector
+              selectedStatuses={gapFillStatuses ?? []}
+              onSelectedStatusesChanged={handleSelectedGapStatuses}
+            />
+          </EuiFilterGroup>
+        </EuiFlexItem>
+      )}
 
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>

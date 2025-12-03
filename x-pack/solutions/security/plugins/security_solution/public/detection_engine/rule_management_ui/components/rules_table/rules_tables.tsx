@@ -14,7 +14,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Loader } from '../../../../common/components/loader';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { PrePackagedRulesPrompt } from '../pre_packaged_rules/load_empty_prompt';
@@ -96,7 +96,14 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
       selectedRuleIds,
       sortingOptions,
     },
-    actions: { setIsAllSelected, setPage, setPerPage, setSelectedRuleIds, setSortingOptions },
+    actions: {
+      setFilterOptions,
+      setIsAllSelected,
+      setPage,
+      setPerPage,
+      setSelectedRuleIds,
+      setSortingOptions,
+    },
   } = rulesTableContext;
 
   const [isDeleteConfirmationVisible, showDeleteConfirmation, hideDeleteConfirmation] =
@@ -246,6 +253,12 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
 
   const shouldShowRulesTable = !isLoading && !isTableEmpty;
 
+  useEffect(() => {
+    if (selectedTab !== AllRulesTabs.monitoring) {
+      setFilterOptions({ gapFillStatuses: undefined });
+    }
+  }, [filterOptions.gapFillStatuses, selectedTab, setFilterOptions]);
+
   let tableProps;
   switch (selectedTab) {
     case AllRulesTabs.management:
@@ -369,7 +382,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
               <EuiSpacer />
             </>
           )}
-          <RulesTableFilters />
+          <RulesTableFilters selectedTab={selectedTab} />
           <RulesTableUtilityBar
             canBulkEdit={hasPermissions}
             onGetBulkItemsPopoverContent={getBulkItemsPopoverContent}

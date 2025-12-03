@@ -79,11 +79,6 @@ export function useSyncRulesTableSavedState(): void {
       storageStateToSave.ruleExecutionStatus = state.filterOptions.ruleExecutionStatus;
     }
 
-    if (state.filterOptions.gapFillStatuses?.length) {
-      urlStateToSave.gapFillStatuses = state.filterOptions.gapFillStatuses;
-      storageStateToSave.gapFillStatuses = state.filterOptions.gapFillStatuses;
-    }
-
     const hasUrlStateToSave = Object.keys(urlStateToSave).length > 0;
     const hasStorageStateToSave = Object.keys(storageStateToSave).length > 0;
 
