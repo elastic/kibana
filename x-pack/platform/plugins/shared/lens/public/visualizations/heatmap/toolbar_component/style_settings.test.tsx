@@ -501,13 +501,32 @@ describe('heatmap style settings', () => {
 
     it('should maintain correct predicates when switching between X and Y axis settings', async () => {
       const setStateMock = jest.fn();
-      renderComponent({
-        state: {
-          ...defaultProps.state,
-          xAccessor: 'x',
-          yAccessor: 'y',
-        },
-        setState: setStateMock,
+      let currentState: Props['state'] = {
+        ...defaultProps.state,
+        xAccessor: 'x',
+        yAccessor: 'y',
+      } as Props['state'];
+
+      const setStateWrapper: Props['setState'] = (newState) => {
+        setStateMock(newState);
+        // Update currentState to simulate re-render with new state
+        currentState = newState as Props['state'];
+        rerender(
+          <HeatmapStyleSettings
+            {...defaultProps}
+            state={currentState}
+            setState={setStateWrapper}
+            frame={{
+              ...defaultProps.frame,
+              activeData: testData,
+            }}
+          />
+        );
+      };
+
+      const { rerender } = renderComponent({
+        state: currentState,
+        setState: setStateWrapper,
         frame: {
           ...defaultProps.frame,
           activeData: testData,
