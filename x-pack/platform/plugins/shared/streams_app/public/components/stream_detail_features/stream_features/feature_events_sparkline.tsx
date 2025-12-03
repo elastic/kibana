@@ -12,9 +12,13 @@ import { PreviewDataSparkPlot } from '../../stream_detail_significant_events_vie
 export const FeatureEventsSparkline = ({
   feature,
   definition,
+  hideAxis = true,
+  height = 100,
 }: {
   feature: Feature;
   definition: Streams.all.Definition;
+  hideAxis?: boolean;
+  height?: number;
 }) => {
   const query = useMemo(
     () => ({
@@ -35,8 +39,8 @@ export const FeatureEventsSparkline = ({
       definition={definition}
       isQueryValid={true}
       query={query}
-      hideAxis={true}
-      height={100}
+      hideAxis={hideAxis}
+      height={height}
     />
   );
 };
