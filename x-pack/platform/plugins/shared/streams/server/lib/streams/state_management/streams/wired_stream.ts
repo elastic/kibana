@@ -168,16 +168,18 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
 
     const parentId = getParentId(this._definition.name);
     const cascadingChanges: StreamChange[] = [];
+    const now = new Date().toISOString();
+
     if (parentId && !desiredState.has(parentId)) {
       cascadingChanges.push({
         type: 'upsert',
         definition: {
           name: parentId,
           description: '',
-          updated_at: new Date().toISOString(),
+          updated_at: now,
           ingest: {
             lifecycle: { inherit: {} },
-            processing: { steps: [], updated_at: new Date().toISOString() },
+            processing: { steps: [], updated_at: now },
             settings: {},
             wired: {
               fields: {},
@@ -207,10 +209,10 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
             definition: {
               name: routeTarget,
               description: '',
-              updated_at: new Date().toISOString(),
+              updated_at: now,
               ingest: {
                 lifecycle: { inherit: {} },
-                processing: { steps: [], updated_at: new Date().toISOString() },
+                processing: { steps: [], updated_at: now },
                 settings: {},
                 wired: {
                   fields: {},
@@ -239,7 +241,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
             definition: {
               name: parentId,
               description: '',
-              updated_at: new Date().toISOString(),
+              updated_at: now,
               ingest: {
                 ...parentStream.definition.ingest,
                 wired: {

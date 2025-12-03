@@ -330,13 +330,14 @@ export class StreamsClient {
       throw new StatusError(`Child stream ${name} already exists`, 409);
     }
 
+    const now = new Date().toISOString();
     await State.attemptChanges(
       [
         {
           type: 'upsert',
           definition: {
             ...parentDefinition,
-            updated_at: new Date().toISOString(),
+            updated_at: now,
             ingest: {
               ...parentDefinition.ingest,
               wired: {
@@ -355,10 +356,10 @@ export class StreamsClient {
           definition: {
             name,
             description: '',
-            updated_at: new Date().toISOString(),
+            updated_at: now,
             ingest: {
               lifecycle: { inherit: {} },
-              processing: { steps: [], updated_at: new Date().toISOString() },
+              processing: { steps: [], updated_at: now },
               settings: {},
               wired: {
                 fields: {},
@@ -586,13 +587,15 @@ export class StreamsClient {
   private getDataStreamAsIngestStream(
     dataStream: IndicesDataStream
   ): Streams.ClassicStream.Definition {
+    const now = new Date().toISOString();
+
     const definition: Streams.ClassicStream.Definition = {
       name: dataStream.name,
       description: '',
-      updated_at: new Date().toISOString(),
+      updated_at: now,
       ingest: {
         lifecycle: { inherit: {} },
-        processing: { steps: [], updated_at: new Date().toISOString() },
+        processing: { steps: [], updated_at: now },
         settings: {},
         classic: {},
         failure_store: { inherit: {} },
@@ -673,13 +676,15 @@ export class StreamsClient {
       throw e;
     }
 
+    const now = new Date().toISOString();
+
     return response.data_streams.map((dataStream) => ({
       name: dataStream.name,
       description: '',
-      updated_at: new Date().toISOString(),
+      updated_at: now,
       ingest: {
         lifecycle: { inherit: {} },
-        processing: { steps: [], updated_at: new Date().toISOString() },
+        processing: { steps: [], updated_at: now },
         settings: {},
         classic: {},
         failure_store: { inherit: {} },

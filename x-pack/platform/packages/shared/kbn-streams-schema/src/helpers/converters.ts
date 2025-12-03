@@ -21,11 +21,13 @@ export const convertUpsertRequestIntoDefinition = (
   name: string,
   request: Streams.all.UpsertRequest
 ): Streams.all.Definition => {
+  const now = new Date().toISOString();
+
   if (Streams.GroupStream.UpsertRequest.is(request)) {
     return {
       ...request.stream,
       name,
-      updated_at: new Date().toISOString(),
+      updated_at: now,
     };
   }
 
@@ -33,12 +35,12 @@ export const convertUpsertRequestIntoDefinition = (
     return {
       ...request.stream,
       name,
-      updated_at: new Date().toISOString(),
+      updated_at: now,
       ingest: {
         ...request.stream.ingest,
         processing: {
           ...request.stream.ingest.processing,
-          updated_at: new Date().toISOString(),
+          updated_at: now,
         },
       },
     };
@@ -48,12 +50,12 @@ export const convertUpsertRequestIntoDefinition = (
     return {
       ...request.stream,
       name,
-      updated_at: new Date().toISOString(),
+      updated_at: now,
       ingest: {
         ...request.stream.ingest,
         processing: {
           ...request.stream.ingest.processing,
-          updated_at: new Date().toISOString(),
+          updated_at: now,
         },
       },
     };
