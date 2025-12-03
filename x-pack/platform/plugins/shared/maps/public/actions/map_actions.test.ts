@@ -339,6 +339,9 @@ describe('map_actions', () => {
       require('../selectors/map_selectors').getSearchSessionMapBuffer = () => {
         return undefined;
       };
+      require('../selectors/map_selectors').getProjectRouting = () => {
+        return undefined;
+      };
       require('../selectors/map_selectors').getMapSettings = () => {
         return {
           autoFitToDataBounds: false,
