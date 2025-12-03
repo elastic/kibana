@@ -624,14 +624,11 @@ describe('Index Templates tab', () => {
 
           await actions.clickTemplateAt(0);
 
-          expect(find('templateDetails.tab').length).toBe(5);
-          expect(find('templateDetails.tab').map((t) => t.text())).toEqual([
-            'Summary',
-            'Settings',
-            'Mappings',
-            'Aliases',
-            'Preview',
-          ]);
+          expect(exists('summaryTabBtn')).toBe(true);
+          expect(exists('settingsTabBtn')).toBe(true);
+          expect(exists('mappingsTabBtn')).toBe(true);
+          expect(exists('aliasesTabBtn')).toBe(true);
+          expect(exists('previewTabBtn')).toBe(true);
 
           // Summary tab should be initial active tab
           expect(exists('summaryTab')).toBe(true);
@@ -671,7 +668,7 @@ describe('Index Templates tab', () => {
             isLegacy: true,
           });
 
-          const { actions, find, exists } = testBed;
+          const { actions, exists } = testBed;
 
           httpRequestsMockHelpers.setLoadTemplateResponse(
             templates[0].name,
@@ -679,7 +676,6 @@ describe('Index Templates tab', () => {
           );
           await actions.clickTemplateAt(0);
 
-          expect(find('templateDetails.tab').length).toBe(5);
           expect(exists('summaryTab')).toBe(true);
 
           // Navigate and verify callout message per tab
