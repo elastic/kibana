@@ -392,7 +392,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   );
   const onInitialExistingFieldsInfoChange = useCallback(
     (newUiState: UnifiedFieldListSidebarContainerProps['initialExistingFieldsInfo']) => {
-      console.log('onInitialExistingFieldsInfoChange', newUiState);
       dispatch(
         setFieldListExistingFieldsInfoUiState({
           fieldListExistingFieldsInfo: newUiState,
