@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/lazy-require'
 type: unknown
 owners:
-  defaultOwner: '@elastic/streams-program-team'
+  defaultOwner: '@elastic/observability-ui'
 toolchain:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   name: '@kbn/lazy-require'
   description: Moon project for @kbn/lazy-require
   channel: ''
-  owner: '@elastic/streams-program-team'
+  owner: '@elastic/observability-ui'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-lazy-require
 dependsOn: []
