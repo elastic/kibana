@@ -185,6 +185,10 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
       }
     }, [selectedItem]);
 
+    const onDragStart = useCallback(() => {
+      setHoveredTabId(null);
+    }, []);
+
     const onDragEnd = useCallback(
       ({ source, destination }: DropResult) => {
         if (source && destination) {
@@ -288,7 +292,11 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
                   When false, it renders a plain flex container with consistent styling.
                   This eliminates conditional rendering logic from this file.
                 */}
-                <OptionalDroppable disableDragAndDrop={disableDragAndDrop} onDragEnd={onDragEnd}>
+                <OptionalDroppable
+                  disableDragAndDrop={disableDragAndDrop}
+                  onDragStart={onDragStart}
+                  onDragEnd={onDragEnd}
+                >
                   {/* Render each tab, optionally wrapped with drag functionality */}
                   {items.map((item, index) => {
                     const nextItem = items[index + 1];

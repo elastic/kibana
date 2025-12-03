@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FC } from 'react';
+import React, { useCallback, useMemo, useState, type FC } from 'react';
 import { css } from '@emotion/react';
 
-import type { DropResult } from '@elastic/eui';
+import type { DragStart, DropResult } from '@elastic/eui';
 import { EuiDragDropContext, EuiDroppable, useEuiTheme } from '@elastic/eui';
 
 /** Unique identifier for the droppable zone containing tabs */
@@ -31,6 +31,8 @@ interface DroppableWrapperProps {
   children: React.ReactNode;
   /** When false, wraps children with drag-drop context; when true, renders as plain div */
   disableDragAndDrop: boolean;
+  /** Callback fired when a drag operation starts */
+  onDragStart: (start: DragStart) => void;
   /** Callback fired when a drag operation completes with new ordering */
   onDragEnd: (result: DropResult) => void;
 }
@@ -46,19 +48,44 @@ interface DroppableWrapperProps {
 export const OptionalDroppable: FC<DroppableWrapperProps> = ({
   children,
   disableDragAndDrop,
-  onDragEnd,
+  onDragStart: originalOnDragStart,
+  onDragEnd: originalOnDragEnd,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const [isDragging, setIsDragging] = useState(false);
 
-  const draggingCss = css`
-    .unifiedTabs__tabWithBackground:not(.unifiedTabs__tabWithBackground--selected) {
-      background-color: transparent;
-
-      &::before {
-        background-color: ${euiTheme.colors.accentSecondary};
+  const draggingCss = useMemo(
+    () => css`
+      .unifiedTabs__tabWithBackground {
+        pointer-events: none;
       }
-    }
-  `;
+
+      .unifiedTabs__tabWithBackground:not(.unifiedTabs__tabWithBackground--selected) {
+        background-color: transparent;
+
+        &::before {
+          background-color: ${euiTheme.colors.accentSecondary};
+        }
+      }
+    `,
+    [euiTheme.colors.accentSecondary]
+  );
+
+  const onDragStart = useCallback(
+    (start: DragStart) => {
+      setIsDragging(true);
+      originalOnDragStart(start);
+    },
+    [originalOnDragStart]
+  );
+
+  const onDragEnd = useCallback(
+    (result: DropResult) => {
+      setIsDragging(false);
+      originalOnDragEnd(result);
+    },
+    [originalOnDragEnd]
+  );
 
   // When drag-and-drop is disabled, render children in a plain flex container
   if (disableDragAndDrop) {
@@ -71,23 +98,15 @@ export const OptionalDroppable: FC<DroppableWrapperProps> = ({
 
   // When enabled, provide drag-drop context and droppable zone
   return (
-    <EuiDragDropContext onDragEnd={onDragEnd}>
+    <EuiDragDropContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
       <EuiDroppable
         droppableId={DROPPABLE_ID}
         direction="horizontal"
-        css={droppableCss}
+        css={[droppableCss, isDragging && draggingCss]}
         grow
         data-test-subj="unifiedTabs_droppable_enabled"
       >
-        {(provided, snapshot) => (
-          <div
-            {...provided.droppableProps}
-            ref={provided.innerRef}
-            css={[droppableCss, snapshot.isDraggingOver && draggingCss]}
-          >
-            {children}
-          </div>
-        )}
+        {() => <>{children}</>}
       </EuiDroppable>
     </EuiDragDropContext>
   );
