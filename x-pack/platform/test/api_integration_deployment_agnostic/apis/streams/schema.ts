@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { RoutingStatus } from '@kbn/streams-schema';
+import { emptyAssets, type RoutingStatus } from '@kbn/streams-schema';
 import { disableStreams, enableStreams, forkStream, indexDocument } from './helpers/requests';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
@@ -55,6 +55,65 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           'attributes.lastField',
           'attributes.some.field',
         ]);
+      });
+
+      describe('Geo point subfield filtering', () => {
+        const CLASSIC_STREAM_NAME = 'logs-geoschema-default';
+
+        before(async () => {
+          await indexDocument(esClient, CLASSIC_STREAM_NAME, {
+            '@timestamp': '2024-01-01T00:00:20.000Z',
+            'location.lat': 40.7128,
+            'location.lon': -74.006,
+            'other.field': 'value',
+          });
+
+          await apiClient
+            .fetch('PUT /api/streams/{name}', {
+              params: {
+                path: { name: CLASSIC_STREAM_NAME },
+                body: {
+                  ...emptyAssets,
+                  stream: {
+                    description: '',
+                    ingest: {
+                      lifecycle: { inherit: {} },
+                      processing: { steps: [] },
+                      settings: {},
+                      classic: {
+                        field_overrides: {
+                          location: { type: 'geo_point' },
+                        },
+                      },
+                      failure_store: { inherit: {} },
+                    },
+                  },
+                },
+              },
+            })
+            .expect(200);
+        });
+
+        after(async () => {
+          await esClient.indices.deleteDataStream({ name: CLASSIC_STREAM_NAME });
+        });
+
+        it('hides .lat/.lon subfields when parent is mapped as geo_point', async () => {
+          const response = await apiClient
+            .fetch('GET /internal/streams/{name}/schema/unmapped_fields', {
+              params: {
+                path: { name: CLASSIC_STREAM_NAME },
+              },
+            })
+            .expect(200);
+
+          // Regular unmapped fields should still be returned
+          expect(response.body.unmappedFields).to.contain('other.field');
+
+          // .lat/.lon subfields should be hidden when parent is geo_point
+          expect(response.body.unmappedFields).not.to.contain('location.lat');
+          expect(response.body.unmappedFields).not.to.contain('location.lon');
+        });
       });
     });
 
