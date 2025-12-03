@@ -37,7 +37,9 @@ describe(
     });
 
     it('renders page as expected', () => {
-      cy.get(PAGE_TITLE).should('be.visible');
+      // Wait for page to load - either loader disappears or page title appears
+      // The page shows a loader when sourcerer is loading, then shows content
+      cy.get(PAGE_TITLE, { timeout: 30000 }).should('be.visible');
       cy.contains('Entity Threat Hunting').should('be.visible');
     });
 

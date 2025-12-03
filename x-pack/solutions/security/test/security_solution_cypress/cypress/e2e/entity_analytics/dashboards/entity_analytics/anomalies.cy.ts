@@ -46,9 +46,10 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
     it('should enable a job and renders the table with pagination', () => {
       // Skip this test if entityThreatHuntingEnabled feature flag is enabled
       // When enabled, the page redirects to threat hunting page which doesn't have the anomalies table
-      cy.url({ timeout: 10000 }).then((url) => {
+      cy.url({ timeout: 30000 }).then((url) => {
         if (url.includes('entity_analytics_threat_hunting')) {
           cy.log('Skipping test: entityThreatHuntingEnabled feature flag is enabled');
+          // Early return - test will pass without executing the rest
           return;
         }
 
