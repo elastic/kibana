@@ -887,9 +887,9 @@ export class FileUploadManager {
 
     // Update pipeline configurations for all files
     const files = this.getFiles();
-    files.forEach((file) => {
+    for (const file of files) {
       file.renameTargetFields(actualChanges);
-    });
+    }
   }
 
   private sendTelemetryProvider(

@@ -9,6 +9,7 @@ import type { Subscription } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import type { MappingProperty, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
+import { cloneDeep } from 'lodash';
 import type { FileUploadManager } from '../../../../file_upload_manager/file_manager';
 
 interface MappingEdits {
@@ -52,7 +53,7 @@ export class MappingEditorService {
 
   constructor(private readonly fileUploadManager: FileUploadManager) {
     const originalMappings = this.fileUploadManager.getMappings().json;
-    this.originalMappingJSON = originalMappings;
+    this.originalMappingJSON = cloneDeep(originalMappings);
     this.initializeMappings(originalMappings);
 
     this.mappingsSubscription = this._mappings$.subscribe((mappings) => {

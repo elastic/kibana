@@ -122,7 +122,7 @@ export const FileUploadLiteLookUpView: FC<Props> = ({
             <EuiSpacer />
           </>
         ) : null,
-      status: generateStatus([stepsStatus.analysis]),
+      status: generateStatus(stepsStatus.analysis),
     },
     {
       title: i18n.translate('xpack.fileUpload.lookupJoinUpload.reviewMapping', {
@@ -136,7 +136,7 @@ export const FileUploadLiteLookUpView: FC<Props> = ({
             <EuiSpacer />
           </>
         ) : null,
-      status: generateStatus([stepsStatus.mapping]),
+      status: generateStatus(stepsStatus.mapping),
     },
     {
       title: i18n.translate('xpack.fileUpload.lookupJoinUpload.uploadingFilesToIndex', {
@@ -152,7 +152,7 @@ export const FileUploadLiteLookUpView: FC<Props> = ({
             <EuiSpacer />
           </>
         ) : null,
-      status: generateStatus([uploadStatus.overallImportStatus]),
+      status: generateStatus(uploadStatus.overallImportStatus),
     },
     {
       title: i18n.translate('xpack.fileUpload.lookupJoinUpload.finish', {
@@ -181,19 +181,25 @@ export const FileUploadLiteLookUpView: FC<Props> = ({
             </EuiButton>
           </>
         ) : null,
-      status: generateStatus([stepsStatus.finish]),
+      status: generateStatus(
+        stepsStatus.finish === STATUS.COMPLETED
+          ? uploadStatus.allDocsSearchable === true
+            ? STATUS.COMPLETED
+            : STATUS.STARTED
+          : stepsStatus.finish
+      ),
     },
   ];
 
   return <EuiSteps steps={steps} titleSize="xxs" css={css} />;
 };
 
-function generateStatus(statuses: STATUS[]): EuiStepStatus {
-  if (statuses.includes(STATUS.STARTED)) {
+function generateStatus(status: STATUS): EuiStepStatus {
+  if (status === STATUS.STARTED) {
     return 'current';
-  } else if (statuses.includes(STATUS.FAILED) || statuses.includes(STATUS.ABORTED)) {
+  } else if (status === STATUS.FAILED || status === STATUS.ABORTED) {
     return 'danger';
-  } else if (statuses.every((status) => status === STATUS.COMPLETED)) {
+  } else if (status === STATUS.COMPLETED) {
     return 'complete';
   } else {
     return 'incomplete';

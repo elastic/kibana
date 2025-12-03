@@ -401,7 +401,7 @@ export class FileWrapper {
       return;
     }
 
-    // Create a Map for quick lookup
+    // Create a Map of changes
     const renameMap = new Map<string, string>();
     changes.forEach((change) => {
       if (change.oldName !== change.newName) {
@@ -413,10 +413,12 @@ export class FileWrapper {
     pipeline.processors.forEach((processor) => {
       if (Array.isArray(processor?.csv?.target_fields)) {
         processor.csv.target_fields = (processor.csv.target_fields as string[]).map((fieldName) => {
-          return renameMap.has(fieldName) ? renameMap.get(fieldName)! : fieldName;
+          const newName = renameMap.get(fieldName);
+          return newName !== undefined ? newName : fieldName;
         });
       }
     });
+
     this.setPipeline(pipeline);
   }
 
