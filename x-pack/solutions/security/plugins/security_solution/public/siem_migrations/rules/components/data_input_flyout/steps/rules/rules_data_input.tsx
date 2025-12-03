@@ -17,16 +17,10 @@ import { QradarDataInputStep, SplunkDataInputStep } from '../constants';
 import { useCopyExportQueryStep } from './sub_steps/copy_export_query';
 import { useRulesFileUploadStep } from './sub_steps/rules_file_upload';
 import { useCheckResourcesStep } from './sub_steps/check_resources';
-import type { RuleMigrationStats } from '../../../../types';
 import { MigrationSource } from '../../../../../common/types';
+import type { RulesDataInputSubStepsProps } from '../../../../../common/components/migration_source_step/types';
 
-interface RulesDataInputSubStepsProps {
-  migrationStats?: RuleMigrationStats;
-  onMigrationCreated: OnMigrationCreated;
-  onMissingResourcesFetched?: OnMissingResourcesFetched;
-  migrationSource: MigrationSource;
-}
-interface RulesDataInputProps extends RulesDataInputSubStepsProps {
+interface RulesDataInputProps extends Omit<RulesDataInputSubStepsProps, 'dataInputStep'> {
   dataInputStep: SplunkDataInputStep | QradarDataInputStep;
 }
 export const RulesDataInput = React.memo<RulesDataInputProps>(
@@ -78,6 +72,7 @@ export const RulesDataInput = React.memo<RulesDataInputProps>(
           {dataInputStatus === 'current' && (
             <EuiFlexItem>
               <RulesDataInputSubSteps
+                dataInputStep={dataInputStep}
                 migrationSource={migrationSource}
                 migrationStats={migrationStats}
                 onMigrationCreated={onMigrationCreated}

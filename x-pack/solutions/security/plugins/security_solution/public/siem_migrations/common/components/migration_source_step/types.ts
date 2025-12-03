@@ -5,10 +5,17 @@
  * 2.0.
  */
 
-import type { DataInputStepId } from '../../../rules/components/data_input_flyout/steps/constants';
+import type {
+  DataInputStepId,
+  QradarDataInputStep,
+  SplunkDataInputStep,
+} from '../../../rules/components/data_input_flyout/steps/constants';
 import type { LookupsDataInput } from '../../../rules/components/data_input_flyout/steps/lookups/lookups_data_input';
 import type { MacrosDataInput } from '../../../rules/components/data_input_flyout/steps/macros/macros_data_input';
 import type { RulesDataInput } from '../../../rules/components/data_input_flyout/steps/rules/rules_data_input';
+import type { OnMissingResourcesFetched } from '../../../rules/components/data_input_flyout/types';
+import type { RuleMigrationStats } from '../../../rules/types';
+import type { MigrationSource } from '../../types';
 
 interface RulesStep<T extends DataInputStepId = DataInputStepId> {
   id: T;
@@ -40,3 +47,11 @@ export type SplunkStep = RulesStep | MacrosStep | LookupsStep;
 export type SplunkMigrationSteps = SplunkStep[];
 
 export type QradarMigrationSteps = Array<Step<DataInputStepId.QradarRules>>;
+
+export interface RulesDataInputSubStepsProps {
+  dataInputStep: SplunkDataInputStep | QradarDataInputStep;
+  migrationSource: MigrationSource;
+  migrationStats?: RuleMigrationStats;
+  onMigrationCreated: (createdMigrationStats: RuleMigrationStats) => void;
+  onMissingResourcesFetched?: OnMissingResourcesFetched;
+}

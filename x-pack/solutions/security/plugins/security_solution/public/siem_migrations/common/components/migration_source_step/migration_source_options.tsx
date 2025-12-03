@@ -15,9 +15,30 @@ import type {
 } from '../../../rules/components/data_input_flyout/steps/constants';
 import { SplunkDataInputStep } from '../../../rules/components/data_input_flyout/steps/constants';
 import type { SiemMigrationResourceBase } from '../../../../../common/siem_migrations/model/common.gen';
-import type { RuleMigrationStats } from '../../../rules/types';
-import type { QradarMigrationSteps, SplunkMigrationSteps } from './types';
+import type {
+  QradarMigrationSteps,
+  RulesDataInputSubStepsProps,
+  SplunkMigrationSteps,
+} from './types';
 import { STEP_COMPONENTS } from '../migration_steps/configs';
+
+interface MissingResourcesIndexed {
+  macros: string[];
+  lookups: string[];
+}
+
+type UseMigrationStepsProps = Omit<RulesDataInputSubStepsProps, 'dataInputStep'> & {
+  dataInputStep: DataInputStep;
+  setMigrationDataInputStep: (step: SplunkDataInputStep | QradarDataInputStep) => void;
+};
+
+interface UseSplunkMigrationSteps extends Omit<UseMigrationStepsProps, 'dataInputStep'> {
+  dataInputStep: SplunkDataInputStep;
+}
+
+interface UseQradarMigrationSteps extends Omit<UseMigrationStepsProps, 'dataInputStep'> {
+  dataInputStep: QradarDataInputStep;
+}
 
 export const MIGRATIONSOURCE_OPTIONS: Array<EuiSuperSelectOption<MigrationSource>> = [
   {
@@ -35,24 +56,13 @@ export const MIGRATIONSOURCE_OPTIONS: Array<EuiSuperSelectOption<MigrationSource
   },
 ];
 
-interface MissingResourcesIndexed {
-  macros: string[];
-  lookups: string[];
-}
-
 export const useSplunkMigrationSteps = ({
-  setDataInputStep,
+  setMigrationDataInputStep,
   dataInputStep,
   migrationSource,
   migrationStats,
   onMigrationCreated,
-}: {
-  setDataInputStep: (step: SplunkDataInputStep) => void;
-  dataInputStep: SplunkDataInputStep;
-  migrationSource: MigrationSource;
-  migrationStats?: RuleMigrationStats;
-  onMigrationCreated: (createdMigrationStats: RuleMigrationStats) => void;
-}): SplunkMigrationSteps | null => {
+}: UseSplunkMigrationSteps): SplunkMigrationSteps | null => {
   const [missingResourcesIndexed, setMissingResourcesIndexed] = useState<
     MissingResourcesIndexed | undefined
   >();
@@ -72,21 +82,21 @@ export const useSplunkMigrationSteps = ({
       );
       setMissingResourcesIndexed(newMissingResourcesIndexed);
       if (newMissingResourcesIndexed.macros.length) {
-        setDataInputStep(SplunkDataInputStep.Macros);
+        setMigrationDataInputStep(SplunkDataInputStep.Macros);
         return;
       }
       if (newMissingResourcesIndexed.lookups.length) {
-        setDataInputStep(SplunkDataInputStep.Lookups);
+        setMigrationDataInputStep(SplunkDataInputStep.Lookups);
         return;
       }
-      setDataInputStep(SplunkDataInputStep.End);
+      setMigrationDataInputStep(SplunkDataInputStep.End);
     },
-    [setDataInputStep]
+    [setMigrationDataInputStep]
   );
 
   const onAllLookupsCreated = useCallback(() => {
-    setDataInputStep(SplunkDataInputStep.End);
-  }, [setDataInputStep]);
+    setMigrationDataInputStep(SplunkDataInputStep.End);
+  }, [setMigrationDataInputStep]);
 
   const SPLUNK_MIGRATION_STEPS: SplunkMigrationSteps = useMemo(
     () =>
@@ -123,12 +133,7 @@ export const useQradarMigrationSteps = ({
   dataInputStep,
   migrationSource,
   migrationStats,
-}: {
-  onMigrationCreated: (createdMigrationStats: RuleMigrationStats) => void;
-  dataInputStep: QradarDataInputStep;
-  migrationSource: MigrationSource;
-  migrationStats?: RuleMigrationStats;
-}): QradarMigrationSteps | null => {
+}: UseQradarMigrationSteps): QradarMigrationSteps | null => {
   const QRADAR_MIGRATION_STEPS: QradarMigrationSteps = useMemo(
     () =>
       STEP_COMPONENTS[MigrationSource.QRADAR].map(({ id, Component }) => ({
@@ -147,34 +152,17 @@ export const useQradarMigrationSteps = ({
   return migrationSource === MigrationSource.QRADAR ? QRADAR_MIGRATION_STEPS : null;
 };
 
-interface UseMigrationStepsParams {
-  onMigrationCreated: (createdMigrationStats: RuleMigrationStats) => void;
-  dataInputStep: DataInputStep;
-  migrationSource: MigrationSource;
-  migrationStats?: RuleMigrationStats;
-  setMigrationDataInputStep: (step: SplunkDataInputStep | QradarDataInputStep) => void;
-}
-
-export const useMigrationSteps = ({
-  onMigrationCreated,
-  dataInputStep,
-  migrationSource,
-  migrationStats,
-  setMigrationDataInputStep: setDataInputStep,
-}: UseMigrationStepsParams): SplunkMigrationSteps | QradarMigrationSteps | null => {
+export const useMigrationSteps = (
+  props: UseMigrationStepsProps
+): SplunkMigrationSteps | QradarMigrationSteps | null => {
   const splunkMigrationSteps: SplunkMigrationSteps | null = useSplunkMigrationSteps({
-    setDataInputStep,
-    dataInputStep: dataInputStep[MigrationSource.SPLUNK],
-    migrationSource,
-    migrationStats,
-    onMigrationCreated,
+    ...props,
+    dataInputStep: props.dataInputStep[MigrationSource.SPLUNK],
   });
 
   const qradarMigrationSteps: QradarMigrationSteps | null = useQradarMigrationSteps({
-    dataInputStep: dataInputStep[MigrationSource.QRADAR],
-    migrationSource,
-    migrationStats,
-    onMigrationCreated,
+    ...props,
+    dataInputStep: props.dataInputStep[MigrationSource.QRADAR],
   });
 
   return splunkMigrationSteps ?? qradarMigrationSteps;
