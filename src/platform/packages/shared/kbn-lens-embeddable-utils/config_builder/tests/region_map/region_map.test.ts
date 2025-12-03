@@ -39,7 +39,7 @@ describe('Region Map', () => {
     it('should convert an esql region map', () => {
       validateConverter(regionMapESQLAttributes, regionMapStateSchema);
     });
-    it('should convert an esql region map with ems', () => {
+    it('should convert an esql region map with full config', () => {
       validateConverter(regionmapESQLAttributesWithEms, regionMapStateSchema);
     });
   });
