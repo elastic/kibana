@@ -171,7 +171,7 @@ describe('TabsBarMenu', () => {
 
     render(<TabsBarMenu {...propsWithTimestamps} />);
 
-    const menuButton = await screen.findByTestId(tabsBarMenuButtonTestId);
+    const menuButton = screen.getByTestId(tabsBarMenuButtonTestId);
     await user.click(menuButton);
 
     expect(await screen.findByText('Recently closed')).toBeInTheDocument();
