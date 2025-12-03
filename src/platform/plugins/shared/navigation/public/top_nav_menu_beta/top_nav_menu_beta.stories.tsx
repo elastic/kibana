@@ -274,12 +274,30 @@ const discoverConfig: TopNavMenuConfigBeta = {
       iconType: 'share',
     },
     {
-      run: action('alerts-clicked'),
       id: 'alerts',
       order: 4,
       label: 'alerts',
       testId: 'alertsButton',
       iconType: 'warning',
+      popoverWidth: 250,
+      items: [
+        {
+          run: () => action('create-search-threshold-rule-clicked'),
+          id: 'createSearchThresholdRule',
+          order: 1,
+          label: 'create search threshold rule',
+          iconType: 'bell',
+          testId: 'createSearchThresholdRuleButton',
+        },
+        {
+          run: () => action('manage-rules-and-connectors-clicked'),
+          id: 'manageRulesAndConnectors',
+          order: 2,
+          label: 'manage rules and connectors',
+          iconType: 'tableOfContents',
+          testId: 'manageRulesAndConnectorsButton',
+        },
+      ],
     },
     {
       run: action('datasets-clicked'),

@@ -81,14 +81,17 @@ interface TopNavItemBase {
   href?: string;
   tooltipContent?: string | (() => string | undefined);
   tooltipTitle?: string | (() => string | undefined);
-  hidden?: EuiHideForProps['sizes'];
-  popoverWidth?: number;
 }
 
 export type TopNavMenuItemCommonBeta =
   // If `items` is provided then `run` shouldn't be, as having items means the button opens a popover
-  | (TopNavItemBase & { run: () => void; items?: undefined })
-  | (TopNavItemBase & { run?: never; items: TopNavMenuPopoverItemBeta[] });
+  | (TopNavItemBase & { run: () => void; items?: undefined; popoverWidth?: never; hidden?: never })
+  | (TopNavItemBase & {
+      run?: never;
+      items: TopNavMenuPopoverItemBeta[];
+      popoverWidth?: number;
+      hidden?: EuiHideForProps['sizes'];
+    });
 
 export type TopNavMenuItemBetaType = TopNavMenuItemCommonBeta & {
   order: number;
