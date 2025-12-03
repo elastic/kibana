@@ -15,7 +15,7 @@ import type {
 import type { PrivilegeMonitoringDataClient } from '../../../engine/data_client';
 import type { AfterKey } from './integrations/types';
 import type { PrivMonBulkUser } from '../../../types';
-import { makeIntegrationOpsBuilder } from '../../bulk/upsert';
+import { makeOpsBuilder } from '../../bulk/upsert';
 import { errorsMsg, getErrorFromBulkResponse } from '../utils';
 
 /**
@@ -77,7 +77,7 @@ export const buildPrivilegedSearchBody = (
 ): Omit<estypes.SearchRequest, 'index'> => {
   // this will get called multiple times with the same matchers during pagination
   const script = memoize(buildMatcherScript, (v) => hash(v))(matchers);
-  const hasTimeField = Boolean(timeGte); // TODO: will change later, the bulk ops for index does include timestamp field for LATER ops.
+  const hasTimeFilter = Boolean(timeGte);
   return {
     size: 0,
     query: buildQueryForTimeRange(timeGte),
@@ -92,10 +92,10 @@ export const buildPrivilegedSearchBody = (
           latest_doc_for_user: {
             top_hits: {
               size: 1,
-              sort: buildSortForTimeField(hasTimeField),
+              sort: buildSortForTimeField(hasTimeFilter),
               script_fields: { 'user.is_privileged': { script } },
               _source: {
-                includes: buildSourceIncludes(hasTimeField, matchers),
+                includes: buildSourceIncludes(hasTimeFilter, matchers),
               },
             },
           },
@@ -118,7 +118,7 @@ export const applyPrivilegedUpdates = async ({
 
   const chunkSize = 500;
   const esClient = dataClient.deps.clusterClient.asCurrentUser;
-  const operationsBuilder = makeIntegrationOpsBuilder(dataClient);
+  const operationsBuilder = makeOpsBuilder(dataClient);
   try {
     for (let start = 0; start < users.length; start += chunkSize) {
       const chunk = users.slice(start, start + chunkSize);
