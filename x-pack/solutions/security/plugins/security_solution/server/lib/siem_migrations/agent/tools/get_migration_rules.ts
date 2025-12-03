@@ -67,13 +67,13 @@ export function createGetMigrationRulesTool(
           },
           elastic_rule: rule.elastic_rule
             ? {
-              title: rule.elastic_rule.title,
-              query: rule.elastic_rule.query,
-              query_language: rule.elastic_rule.query_language,
-              description: rule.elastic_rule.description,
-              severity: rule.elastic_rule.severity,
-              prebuilt_rule_id: rule.elastic_rule.prebuilt_rule_id,
-            }
+                title: rule.elastic_rule.title,
+                query: rule.elastic_rule.query,
+                query_language: rule.elastic_rule.query_language,
+                description: rule.elastic_rule.description,
+                severity: rule.elastic_rule.severity,
+                prebuilt_rule_id: rule.elastic_rule.prebuilt_rule_id,
+              }
             : null,
           comments: rule.comments,
         }));

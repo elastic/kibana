@@ -36,7 +36,7 @@ export function createUpdateMigrationRuleTool(
     id: SIEM_MIGRATION_UPDATE_RULE_TOOL_ID,
     type: ToolType.builtin,
     description:
-      'Update a migrated rule\'s ES|QL query or other properties. ' +
+      "Update a migrated rule's ES|QL query or other properties. " +
       'Use this after the user confirms they are happy with the modified query. ' +
       'The rule_id is required, along with the new query. ' +
       'Optionally update the title, description, and add a comment explaining the changes.',
@@ -101,4 +101,3 @@ export function createUpdateMigrationRuleTool(
     },
   };
 }
-
