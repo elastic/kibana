@@ -1,0 +1,26 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "index.ts",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "test/**/*",
+    "../../../../../typings/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/workflows",
+    "@kbn/zod",
+    "@kbn/config-schema",
+    "@kbn/crypto",
+    "@kbn/scout"
+  ],
+  "exclude": [
+    "target/**/*"
+  ]
+}
+
