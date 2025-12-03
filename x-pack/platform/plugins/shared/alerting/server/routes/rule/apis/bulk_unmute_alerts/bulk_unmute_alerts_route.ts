@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import pMap from 'p-map';
 import type { IRouter } from '@kbn/core/server';
 
 import type { ILicenseState } from '../../../../lib';
@@ -42,16 +41,11 @@ export const bulkUnmuteAlertsRoute = (
         const rulesClient = await alertingContext.getRulesClient();
         const body: BulkMuteUnmuteAlertsRequestBodyV1 = req.body;
 
-        const alertsToUnmuteByRule = transformBulkMuteUnmuteAlertsBodyV1(body);
+        const args = transformBulkMuteUnmuteAlertsBodyV1(body);
 
         try {
-          await pMap(
-            Object.entries(alertsToUnmuteByRule),
-            async ([ruleId, alertInstanceIds]) => {
-              await rulesClient.bulkUnmuteInstances({ ruleId, alertInstanceIds });
-            },
-            { concurrency: 10 }
-          );
+          await rulesClient.bulkUnmuteInstances({ rules: args });
+
           return res.noContent();
         } catch (e) {
           if (e instanceof RuleTypeDisabledError) {
