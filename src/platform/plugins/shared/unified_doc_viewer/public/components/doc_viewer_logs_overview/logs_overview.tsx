@@ -126,17 +126,17 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
             onRemoveColumn={onRemoveColumn}
             dataView={dataView}
           />
-          <div>{renderFlyoutStreamField && renderFlyoutStreamField({ dataView, doc: hit })}</div>
-          <LogsOverviewDegradedFields ref={qualityIssuesSectionRef} rawDoc={hit.raw} />
-          {isStacktraceAvailable && (
-            <LogsOverviewStacktraceSection
-              ref={stackTraceSectionRef}
-              hit={hit}
-              dataView={dataView}
-            />
-          )}
           <DataSourcesProvider indexes={indexes}>
             {showSimilarErrors ? <SimilarErrors hit={hit} /> : null}
+            <div>{renderFlyoutStreamField && renderFlyoutStreamField({ dataView, doc: hit })}</div>
+            <LogsOverviewDegradedFields ref={qualityIssuesSectionRef} rawDoc={hit.raw} />
+            {isStacktraceAvailable && (
+              <LogsOverviewStacktraceSection
+                ref={stackTraceSectionRef}
+                hit={hit}
+                dataView={dataView}
+              />
+            )}
             {traceId && showTraceWaterfall ? (
               <TraceWaterfall
                 traceId={traceId}
