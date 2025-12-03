@@ -26,7 +26,7 @@ export async function generateErrorAiInsight({
 
   if (!connectorId) {
     const defaultConnector = await inferenceStart.getDefaultConnector(request);
-    connectorId = (defaultConnector as any)?.id ?? (defaultConnector as any)?.connectorId;
+    connectorId = defaultConnector?.connectorId;
   }
 
   if (!connectorId) {

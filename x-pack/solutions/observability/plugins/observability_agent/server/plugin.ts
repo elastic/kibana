@@ -65,7 +65,12 @@ export class ObservabilityAgentPlugin
           this.logger.error(`Error registering observability tools: ${error}`);
         });
 
-        registerAttachments({ plugins }).catch((error) => {
+        registerAttachments({
+          core,
+          plugins,
+          logger: this.logger,
+          dataRegistry: this.dataRegistry,
+        }).catch((error) => {
           this.logger.error(`Error registering observability attachments: ${error}`);
         });
 

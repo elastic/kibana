@@ -10,7 +10,10 @@ import React, { useMemo, useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { AiInsight } from '@kbn/observability-agent-builder';
 import { useConnectorSelection } from '@kbn/onechat-plugin/public';
-import { OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID } from '../../../../../common/agent_builder/attachment_ids';
+import {
+  OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
+  OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID,
+} from '../../../../../common/agent_builder/attachment_ids';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getIsObservabilityAgentEnabled } from '../../../../../common/agent_builder/get_is_obs_agent_enabled';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
@@ -82,16 +85,34 @@ export function ErrorSampleAgentBuilderAiInsight({
       return [];
     }
 
-    const serviceName = error.service.name;
-
     return [
       {
-        id: 'apm_error_details_screen_context',
+        id: 'apm_error_details_screen_context_attachment',
         type: 'screen_context',
         data: {
           app: 'apm',
           url: window.location.href,
-          description: `APM error details page for ${serviceName}`,
+          description: `APM error details page for ${error.service.name}`,
+        },
+        hidden: true,
+      },
+      {
+        id: 'apm_error_details_ai_insight_attachment',
+        type: OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
+        data: {
+          summary,
+          context,
+        },
+      },
+      {
+        id: 'apm_error_details_error_attachment',
+        type: OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID,
+        data: {
+          errorId: error.error.id,
+          serviceName: error.service.name,
+          environment,
+          start,
+          end,
         },
       },
       // TODO: move this to the server-side
@@ -122,16 +143,8 @@ export function ErrorSampleAgentBuilderAiInsight({
       //       </contextual_instructions>`),
       //   }),
       // },
-      {
-        id: 'apm_error_ai_insight',
-        type: OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
-        data: {
-          summary,
-          context,
-        },
-      },
     ];
-  }, [error, onechat, isObservabilityAgentEnabled, summary, context]);
+  }, [error, onechat, isObservabilityAgentEnabled, summary, context, environment, start, end]);
 
   if (!onechat || !isObservabilityAgentEnabled || !inference) {
     return <></>;
