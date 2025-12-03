@@ -92,7 +92,7 @@ export class OrphanSummaryCleanupTask {
         taskType: TYPE,
         scope: ['observability', 'slo'],
         schedule: {
-          interval: '1m',
+          interval: '1h',
         },
         state: {},
         params: {},
