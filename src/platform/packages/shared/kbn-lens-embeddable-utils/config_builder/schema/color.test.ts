@@ -20,21 +20,9 @@ describe('Color Schema', () => {
           type: 'dynamic',
           range,
           steps: [
-            {
-              from: 0,
-              to: 50,
-              color: '#ff0000',
-            },
-            {
-              from: 50,
-              to: 75,
-              color: '#00ff00',
-            },
-            {
-              from: 75,
-              to: 100,
-              color: '#0000ff',
-            },
+            { from: 0, to: 50, color: '#ff0000' },
+            { from: 50, to: 75, color: '#00ff00' },
+            { from: 75, to: 100, color: '#0000ff' },
           ],
         });
 

@@ -16,18 +16,22 @@ const colorByValueStepsSchema = schema.arrayOf(
     /**
      * The value from which this color applies (inclusive).
      */
-    from: schema.maybe(
-      schema.number({
-        meta: { description: 'The value from which this color applies (inclusive).' },
-      })
+    from: schema.nullable(
+      schema.maybe(
+        schema.number({
+          meta: { description: 'The value from which this color applies (inclusive).' },
+        })
+      )
     ),
     /**
      * The value up to which this color applies (inclusive).
      */
-    to: schema.maybe(
-      schema.number({
-        meta: { description: 'The value up to which this color applies (inclusive).' },
-      })
+    to: schema.nullable(
+      schema.maybe(
+        schema.number({
+          meta: { description: 'The value up to which this color applies (exclusive).' },
+        })
+      )
     ),
     /**
      * The color to use for this step.
@@ -157,6 +161,7 @@ export const allColoringTypeSchema = schema.oneOf([
 
 export type StaticColorType = TypeOf<typeof staticColorSchema>;
 export type ColorByValueType = TypeOf<typeof colorByValueSchema>;
+export type ColorByValueStep = TypeOf<typeof colorByValueStepsSchema>[number];
 export type ColorMappingType = TypeOf<typeof colorMappingSchema>;
 export type ColorMappingCategoricalType = TypeOf<typeof categoricalColorMappingSchema>;
 export type ColorMappingGradientType = TypeOf<typeof gradientColorMappingSchema>;

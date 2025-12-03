@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ColorMapping, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import type { ColorMapping, ColorStop, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+
 import type {
+  ColorByValueStep,
   ColorByValueType,
   ColorMappingColorDefType,
   ColorMappingType,
   StaticColorType,
-} from '../schema/color';
-import type { SerializableValueType } from '../schema/serializedValue';
+} from '../../schema/color';
+import type { SerializableValueType } from '../../schema/serializedValue';
 
 const LENS_COLOR_BY_VALUE_RANGE_TYPE = 'absolute';
 const LENS_DEFAULT_COLOR_MAPPING_PALETTE = 'default';
@@ -30,82 +32,94 @@ const API_TO_LEGACY_RANGE_NAMES: Record<'percentage' | 'absolute', 'percent' | '
 };
 
 export function fromColorByValueAPIToLensState(
-  color: ColorByValueType | undefined
+  config?: ColorByValueType | undefined
 ): PaletteOutput<CustomPaletteParams> | undefined {
-  if (!color) {
-    return;
-  }
-  const stops = color.steps.map((step) => {
-    if (step.type === 'from') {
-      return { color: step.color, stop: step.from };
-    }
-    if (step.type === 'to') {
-      return { color: step.color, stop: step.to };
-    }
-    return {
-      color: step.color,
-      stop: step.value,
-    };
-  });
+  if (!config) return;
+
+  const stops = config.steps.map(
+    ({ to, color }): ColorStop => ({
+      color,
+      stop: to ?? null, // we need to implicitly set this value to the domain max in client code
+    })
+  );
+  const colorStops = config.steps.map(
+    ({ from, color }): ColorStop => ({
+      color,
+      stop: from ?? null,
+    })
+  );
+
+  const rangeMin = colorStops.at(0)?.stop ?? null;
+  const rangeMax = stops.at(-1)?.stop ?? null;
+
   return {
     type: 'palette',
     name: 'custom',
     params: {
       name: 'custom',
-      ...(color.range === 'percentage' ? { rangeMin: color.min, rangeMax: color.max } : {}),
-      rangeType: color.range
-        ? API_TO_LEGACY_RANGE_NAMES[color.range]
+      reverse: false, // always applied to steps during transform
+      rangeMin,
+      rangeMax,
+      rangeType: config.range
+        ? API_TO_LEGACY_RANGE_NAMES[config.range]
         : API_TO_LEGACY_RANGE_NAMES.absolute,
       stops,
-      colorStops: stops,
+      colorStops,
+      continuity:
+        rangeMin === null && rangeMax === null
+          ? 'all'
+          : rangeMax === null
+          ? 'above'
+          : rangeMin === null
+          ? 'below'
+          : 'none',
+      steps: stops.length,
+      maxSteps: Math.max(5, stops.length), // TODO: point this to a constant or a common default
     },
   };
 }
 
 export function fromColorByValueLensStateToAPI(
-  color: PaletteOutput<CustomPaletteParams> | undefined
+  config: PaletteOutput<CustomPaletteParams> | undefined
 ): ColorByValueType | undefined {
-  if (!color || !color.params) {
-    return;
-  }
-  const rangeType = color.params.rangeType
-    ? LEGACY_TO_API_RANGE_NAMES[color.params.rangeType]
-    : LENS_COLOR_BY_VALUE_RANGE_TYPE;
-  if (rangeType === 'absolute') {
-    return {
-      type: 'dynamic',
-      range: rangeType,
-      steps:
-        color.params.stops?.map((step, index) => {
-          const isFirst = index === 0;
-          if (isFirst) {
-            return { type: 'from', color: step.color, from: step.stop };
-          }
-          const isLast = index === (color.params?.stops?.length ?? 0) - 1;
-          if (isLast) {
-            return { type: 'to', color: step.color, to: step.stop };
-          }
-          return { type: 'exact', color: step.color, value: step.stop };
-        }) ?? [],
-    };
-  }
+  const colorParams = config?.params;
+
+  if (!colorParams) return;
+
+  const { stops = [], rangeType } = colorParams;
+
+  // TODO: handle reverse
+
   return {
     type: 'dynamic',
-    min: color.params.rangeMin!,
-    max: color.params.rangeMax!,
-    range: rangeType,
-    steps:
-      color.params.stops?.map((step, index) => {
-        const isFirst = index === 0;
-        if (isFirst) {
-          return { type: 'from', color: step.color, from: step.stop };
-        }
-        const isLast = index === (color.params?.stops?.length ?? 0) - 1;
-        if (isLast) {
-          return { type: 'to', color: step.color, to: step.stop };
-        }
-        return { type: 'exact', color: step.color, value: step.stop };
-      }) ?? [],
+    range: rangeType ? LEGACY_TO_API_RANGE_NAMES[rangeType] : LENS_COLOR_BY_VALUE_RANGE_TYPE,
+    steps: stops.map((step, i): ColorByValueStep => {
+      const { stop: currentStop, color } = step;
+      if (i === 0) {
+        return {
+          ...(colorParams.rangeMin ? { from: colorParams.rangeMin } : {}),
+          to: currentStop,
+          color,
+        };
+      }
+
+      const prevStop = stops[i - 1].stop ?? undefined;
+
+      if (i === stops.length - 1) {
+        return {
+          from: prevStop,
+          // ignores stop value, current logic sets last stop to max domain not user defined rangeMax
+          ...(colorParams.rangeMax ? { to: colorParams.rangeMax } : {}),
+          color,
+        };
+      }
+
+      return {
+        from: prevStop,
+        to: currentStop,
+        color,
+      };
+    }),
   };
 }
 
