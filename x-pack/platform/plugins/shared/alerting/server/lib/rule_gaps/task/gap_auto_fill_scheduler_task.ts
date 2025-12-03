@@ -229,7 +229,7 @@ export async function processGapsForRules({
         searchAfter,
         pitId,
         hasUnfilledIntervals: true,
-        failedAutoFillAttemptsLessThan: numRetries,
+        failedAutoFillAttemptsLessThan: numRetries + 1,
       },
     });
 
