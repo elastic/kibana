@@ -171,9 +171,18 @@ module.exports = (_, argv) => {
       hints: false,
     },
 
-    cache: {
-      type: 'filesystem',
+    // the gist of the change, making Webpack listen to `node_modules/@elastic/eui` change
+    watchOptions: {
+      ignored: /[\\/]node_modules[\\/](?!@elastic($|[\\/]$|[\\/]eui([\\/]|$)))/,
     },
+
+    // snapshot: {
+    //  managedPaths: [/^(.+?[\\/]node_modules[\\/])(?!@elastic[\\/]eui)/],
+    // },
+
+    // so far only disabling cache worked but we should re-enable it for better performance
+    // and make `node_modules/@elastic/eui` work at the same time
+    cache: false,
 
     plugins: [
       new NodeLibsBrowserPlugin(),
@@ -192,6 +201,11 @@ module.exports = (_, argv) => {
         entryOnly: false,
         path: Path.resolve(outputPath, '[name]-manifest.json'),
         name: '__kbnSharedDeps_npm__',
+      }),
+      // adds a useful comment at the top of the DLL for debugging
+      new webpack.BannerPlugin({
+        banner: `/* Build: ${new Date().toLocaleString()} */`,
+        raw: true,
       }),
     ],
   };
