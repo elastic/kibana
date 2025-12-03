@@ -92,6 +92,7 @@ test.describe('Stream data routing - AI suggestions interactions', { tag: ['@ess
     await expect(page.getByTestId('streamsAppReviewPartitioningSuggestionsCallout')).toBeVisible();
   });
 
+  // TODO - the message just changed but how to get the LLM to work in the test
   test('should update suggestion name when editing and accepting', async ({ page }) => {
     const originalStreamName = getStreamName(MOCK_SUGGESTIONS_MULTIPLE[0].name);
     await clickSuggestionEditButton(page, originalStreamName);

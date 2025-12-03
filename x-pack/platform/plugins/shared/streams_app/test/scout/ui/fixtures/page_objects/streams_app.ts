@@ -236,6 +236,8 @@ export class StreamsApp {
 
   async fillRoutingRuleName(name: string) {
     await this.page.getByTestId('streamsAppRoutingStreamEntryNameField').fill(name);
+    // eslint-disable-next-line playwright/no-wait-for-timeout
+    await this.page.waitForTimeout(300); // accommodates the input debounce delay, explicit waits are not a best practice
   }
 
   async clickEditRoutingRule(streamName: string) {
@@ -248,6 +250,14 @@ export class StreamsApp {
 
   async saveRoutingRule() {
     await this.page.testSubj.locator('streamsAppStreamDetailRoutingSaveButton').click();
+  }
+
+  async confirmSaveRoutingRuleDisabled() {
+    await expect(this.page.getByTestId('streamsAppStreamDetailRoutingSaveButton')).toBeDisabled();
+  }
+
+  async confirmDuplicateNameErrorVisible() {
+    await expect(this.page.getByText('A stream with this name already exists')).toBeVisible();
   }
 
   async updateRoutingRule() {

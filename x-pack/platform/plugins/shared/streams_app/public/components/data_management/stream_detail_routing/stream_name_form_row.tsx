@@ -74,7 +74,7 @@ export const getErrorMessage = (
 ): ReactNode | string | undefined => {
   if (containsUpperCaseChars) {
     return i18n.translate('xpack.streams.streamDetailRouting.uppercaseCharsError', {
-      defaultMessage: 'Stream name cannot contain uppercase characters',
+      defaultMessage: 'Stream name cannot contain uppercase characters.',
     });
   }
   if (isDuplicatedName) {

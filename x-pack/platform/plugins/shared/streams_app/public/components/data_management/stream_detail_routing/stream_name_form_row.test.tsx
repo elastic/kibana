@@ -126,7 +126,7 @@ describe('StreamNameFormRow', () => {
   describe('getErrorMessage', () => {
     it('should return uppercase chars error message when stream name contains uppercase characters', () => {
       const result = getErrorMessage(true, false, false, false, 'logs.', 'linux', mockRouter);
-      expect(result).toBe('Stream name cannot contain uppercase characters');
+      expect(result).toBe('Stream name cannot contain uppercase characters.');
     });
 
     it('should return name conflict error message when stream name is duplicated', () => {
