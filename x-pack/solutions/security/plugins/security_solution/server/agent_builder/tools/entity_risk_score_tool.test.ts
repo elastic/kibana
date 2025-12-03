@@ -42,6 +42,18 @@ describe('entityRiskScoreTool', () => {
       expect(result.success).toBe(true);
     });
 
+    it('validates schema with optional limit parameter', () => {
+      const validInput = {
+        identifierType: 'user',
+        identifier: '*',
+        limit: 5,
+      };
+
+      const result = tool.schema.safeParse(validInput);
+
+      expect(result.success).toBe(true);
+    });
+
     it('rejects invalid identifierType', () => {
       const invalidInput = {
         identifierType: 'invalid',
@@ -57,6 +69,30 @@ describe('entityRiskScoreTool', () => {
       const invalidInput = {
         identifierType: 'host',
         identifier: '',
+      };
+
+      const result = tool.schema.safeParse(invalidInput);
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects limit below minimum', () => {
+      const invalidInput = {
+        identifierType: 'host',
+        identifier: '*',
+        limit: 0,
+      };
+
+      const result = tool.schema.safeParse(invalidInput);
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects limit above maximum', () => {
+      const invalidInput = {
+        identifierType: 'host',
+        identifier: '*',
+        limit: 101,
       };
 
       const result = tool.schema.safeParse(invalidInput);
@@ -110,14 +146,21 @@ describe('entityRiskScoreTool', () => {
     it('successfully fetches risk score with valid identifierType and identifier', async () => {
       const mockGetRiskScores = jest.fn().mockResolvedValue([
         {
-          id: 'risk-1',
+          '@timestamp': '2023-01-01T00:00:00Z',
+          id_field: 'host.name',
+          id_value: 'hostname-1',
           calculated_score_norm: 75,
+          calculated_level: 'High',
+          calculated_score: 150,
+          category_1_score: 75,
+          category_1_count: 5,
+          notes: [],
           inputs: [
             {
               id: 'alert-1',
               risk_score: 50,
               contribution_score: 25,
-              category: 'alerts',
+              category: 'category_1',
             },
           ],
         },
@@ -149,6 +192,13 @@ describe('entityRiskScoreTool', () => {
       expect(result.results[0].type).toBe(ToolResultType.other);
       if (result.results[0].type === ToolResultType.other) {
         expect(result.results[0].data).toHaveProperty('riskScore');
+        const riskScore = result.results[0].data.riskScore as Record<string, unknown>;
+        // Verify calculated_score_norm is prioritized (first field)
+        expect(Object.keys(riskScore)[0]).toBe('calculated_score_norm');
+        expect(riskScore.calculated_score_norm).toBe(75);
+        // Verify category scores/counts are NOT included
+        expect(riskScore).not.toHaveProperty('category_1_score');
+        expect(riskScore).not.toHaveProperty('category_1_count');
       }
       expect(mockGetRiskScores).toHaveBeenCalledWith({
         entityType: 'host',
@@ -175,14 +225,21 @@ describe('entityRiskScoreTool', () => {
     it('enhances inputs with alert data', async () => {
       const mockGetRiskScores = jest.fn().mockResolvedValue([
         {
-          id: 'risk-1',
+          '@timestamp': '2023-01-01T00:00:00Z',
+          id_field: 'host.name',
+          id_value: 'hostname-1',
           calculated_score_norm: 75,
+          calculated_level: 'High',
+          calculated_score: 150,
+          category_1_score: 75,
+          category_1_count: 5,
+          notes: [],
           inputs: [
             {
               id: 'alert-1',
               risk_score: 50,
               contribution_score: 25,
-              category: 'alerts',
+              category: 'category_1',
             },
           ],
         },
@@ -217,6 +274,133 @@ describe('entityRiskScoreTool', () => {
           _source: expect.any(Array),
         })
       );
+    });
+
+    it('handles wildcard query with identifier "*"', async () => {
+      const mockRiskScores = [
+        {
+          '@timestamp': '2023-01-01T00:00:00Z',
+          id_field: 'user.name',
+          id_value: 'user1',
+          calculated_score_norm: 90,
+          calculated_level: 'Critical',
+          calculated_score: 200,
+          category_1_score: 90,
+          category_1_count: 10,
+          notes: [],
+          inputs: [],
+        },
+        {
+          '@timestamp': '2023-01-01T00:00:00Z',
+          id_field: 'user.name',
+          id_value: 'user2',
+          calculated_score_norm: 75,
+          calculated_level: 'High',
+          calculated_score: 150,
+          category_1_score: 75,
+          category_1_count: 5,
+          notes: [],
+          inputs: [],
+        },
+      ];
+
+      mockEsClient.asCurrentUser.search.mockResolvedValue({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: {
+          hits: mockRiskScores.map((score) => ({
+            _id: `risk-${score.id_value}`,
+            _index: 'test-index',
+            _source: {
+              user: {
+                name: score.id_value,
+                risk: score,
+              },
+            },
+          })),
+          total: { value: 2, relation: 'eq' },
+        },
+      });
+
+      const result = await tool.handler(
+        { identifierType: 'user', identifier: '*', limit: 10 },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      );
+
+      expect(result.results).toHaveLength(1);
+      expect(result.results[0].type).toBe(ToolResultType.other);
+      if (result.results[0].type === ToolResultType.other) {
+        expect(result.results[0].data).toHaveProperty('riskScores');
+        const riskScores = result.results[0].data.riskScores as Array<Record<string, unknown>>;
+        expect(riskScores).toHaveLength(2);
+        // Verify calculated_score_norm is prioritized (first field)
+        expect(Object.keys(riskScores[0])[0]).toBe('calculated_score_norm');
+        expect(riskScores[0].calculated_score_norm).toBe(90);
+        // Verify category scores/counts are NOT included
+        expect(riskScores[0]).not.toHaveProperty('category_1_score');
+        expect(riskScores[0]).not.toHaveProperty('category_1_count');
+        // Verify inputs are NOT included
+        expect(riskScores[0]).not.toHaveProperty('inputs');
+        // Verify calculated_score is NOT included (user removed it)
+        expect(riskScores[0]).not.toHaveProperty('calculated_score');
+      }
+      expect(mockEsClient.asCurrentUser.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: getRiskIndex('default', true),
+          size: 10,
+          sort: expect.arrayContaining([
+            expect.objectContaining({
+              'user.risk.calculated_score_norm': expect.objectContaining({ order: 'desc' }),
+            }),
+          ]),
+        })
+      );
+    });
+
+    it('handles wildcard query with custom limit', async () => {
+      mockEsClient.asCurrentUser.search.mockResolvedValue({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: {
+          hits: [],
+          total: { value: 0, relation: 'eq' },
+        },
+      });
+
+      const result = await tool.handler(
+        { identifierType: 'host', identifier: '*', limit: 5 },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      );
+
+      expect(mockEsClient.asCurrentUser.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          size: 5,
+        })
+      );
+    });
+
+    it('returns error when wildcard query finds no results', async () => {
+      mockEsClient.asCurrentUser.search.mockResolvedValue({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: {
+          hits: [],
+          total: { value: 0, relation: 'eq' },
+        },
+      });
+
+      const result = await tool.handler(
+        { identifierType: 'user', identifier: '*' },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      );
+
+      expect(result.results).toHaveLength(1);
+      const errorResult = result.results[0] as ErrorResult;
+      expect(errorResult.type).toBe(ToolResultType.error);
+      expect(errorResult.data.message).toContain('No risk scores found for user entities');
     });
 
     it('handles ES client failures', async () => {
