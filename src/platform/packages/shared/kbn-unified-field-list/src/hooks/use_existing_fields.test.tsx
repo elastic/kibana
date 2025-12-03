@@ -583,6 +583,17 @@ describe('UnifiedFieldList useExistingFields', () => {
   });
 
   describe('initialExistingFieldsInfo', () => {
+    const fetchedExistingFieldsInfo = {
+      dataViewId: 'logstash-*',
+      dataViewHash: 'logstash-*:logstash-*:time:false:28',
+      info: {
+        fetchStatus: ExistenceFetchStatus.succeeded,
+        existingFieldsByFieldNameMap: { [dataView.fields[0].name]: true },
+        numberOfFetches: 1,
+        newFields: undefined,
+      },
+    };
+
     it('should use initialExistingFieldsInfo instead of fetching', async () => {
       const dataViewId = dataView.id!;
       (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(async () => {
@@ -601,16 +612,7 @@ describe('UnifiedFieldList useExistingFields', () => {
           toDate: '2020-01-01',
           query: { query: '', language: 'lucene' },
           filters: [],
-          initialExistingFieldsInfo: {
-            dataViewId: 'logstash-*',
-            dataViewHash: 'logstash-*:logstash-*:time:false:28',
-            info: {
-              fetchStatus: ExistenceFetchStatus.succeeded,
-              existingFieldsByFieldNameMap: { [dataView.fields[0].name]: true },
-              numberOfFetches: 1,
-              newFields: undefined,
-            },
-          },
+          initialExistingFieldsInfo: fetchedExistingFieldsInfo,
           onInitialExistingFieldsInfoChange,
         },
       });
@@ -636,166 +638,77 @@ describe('UnifiedFieldList useExistingFields', () => {
       expect(hookReader.result.current.getNewFields(dataViewId)).toStrictEqual([]);
     });
 
-    it('should not use initialExistingFieldsInfo if hash is different', async () => {
-      (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(async () => {
-        return {
-          existingFieldNames: [dataView.fields[0].name],
-        };
-      });
-
-      const onInitialExistingFieldsInfoChange = jest.fn();
-
-      renderHook(useExistingFieldsFetcher, {
-        initialProps: {
-          dataViews: [dataView],
-          services: mockedServices,
-          fromDate: '2019-01-01',
-          toDate: '2020-01-01',
-          query: { query: '', language: 'lucene' },
-          filters: [],
-          initialExistingFieldsInfo: {
-            dataViewId: 'logstash-*',
-            dataViewHash: 'logstash-*:logstash-*:time:false:999', // different hash
-            info: {
-              fetchStatus: ExistenceFetchStatus.succeeded,
-              existingFieldsByFieldNameMap: { [dataView.fields[0].name]: true },
-              numberOfFetches: 1,
-              newFields: undefined,
-            },
+    it.each([
+      [
+        'hash is different',
+        {
+          ...fetchedExistingFieldsInfo,
+          dataViewHash: 'logstash-*:logstash-*:time:false:999',
+        },
+      ],
+      [
+        'no fields',
+        {
+          ...fetchedExistingFieldsInfo,
+          info: {
+            ...fetchedExistingFieldsInfo.info,
+            existingFieldsByFieldNameMap: {},
           },
-          onInitialExistingFieldsInfoChange,
         },
-      });
-
-      await waitFor(() => new Promise((resolve) => resolve(null)));
-
-      expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledWith(
-        expect.objectContaining({
-          fromDate: '2019-01-01',
-          toDate: '2020-01-01',
-          dslQuery,
-          dataView,
-          timeFieldName: dataView.timeFieldName,
-        })
-      );
-      expect(onInitialExistingFieldsInfoChange).toHaveBeenCalledWith({
-        dataViewId: 'logstash-*',
-        dataViewHash: 'logstash-*:logstash-*:time:false:28',
-        info: {
-          fetchStatus: 'succeeded',
-          existingFieldsByFieldNameMap: { bytes: true },
-          numberOfFetches: 1,
-          newFields: undefined,
-        },
-      });
-    });
-
-    it('should not use initialExistingFieldsInfo if empty', async () => {
-      (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(async () => {
-        return {
-          existingFieldNames: [dataView.fields[0].name],
-        };
-      });
-
-      const onInitialExistingFieldsInfoChange = jest.fn();
-
-      renderHook(useExistingFieldsFetcher, {
-        initialProps: {
-          dataViews: [dataView],
-          services: mockedServices,
-          fromDate: '2019-01-01',
-          toDate: '2020-01-01',
-          query: { query: '', language: 'lucene' },
-          filters: [],
-          initialExistingFieldsInfo: {
-            dataViewId: 'logstash-*',
-            dataViewHash: 'logstash-*:logstash-*:time:false:28',
-            info: {
-              fetchStatus: ExistenceFetchStatus.succeeded,
-              existingFieldsByFieldNameMap: {},
-              numberOfFetches: 1,
-              newFields: undefined,
-            },
+      ],
+      [
+        'previous fetch failed',
+        {
+          ...fetchedExistingFieldsInfo,
+          info: {
+            ...fetchedExistingFieldsInfo.info,
+            fetchStatus: ExistenceFetchStatus.failed,
           },
-          onInitialExistingFieldsInfoChange,
         },
-      });
+      ],
+      ['esql', fetchedExistingFieldsInfo],
+    ])(
+      'should not use initialExistingFieldsInfo if "%s"',
+      async (type, initialExistingFieldsInfo) => {
+        (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(async () => {
+          return {
+            existingFieldNames: [dataView.fields[0].name],
+          };
+        });
 
-      await waitFor(() => new Promise((resolve) => resolve(null)));
+        const onInitialExistingFieldsInfoChange = jest.fn();
 
-      expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledWith(
-        expect.objectContaining({
-          fromDate: '2019-01-01',
-          toDate: '2020-01-01',
-          dslQuery,
-          dataView,
-          timeFieldName: dataView.timeFieldName,
-        })
-      );
-      expect(onInitialExistingFieldsInfoChange).toHaveBeenCalledWith({
-        dataViewId: 'logstash-*',
-        dataViewHash: 'logstash-*:logstash-*:time:false:28',
-        info: {
-          fetchStatus: 'succeeded',
-          existingFieldsByFieldNameMap: { bytes: true },
-          numberOfFetches: 1,
-          newFields: undefined,
-        },
-      });
-    });
-
-    it('should not use initialExistingFieldsInfo if failed', async () => {
-      (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(async () => {
-        return {
-          existingFieldNames: [dataView.fields[0].name],
-        };
-      });
-
-      const onInitialExistingFieldsInfoChange = jest.fn();
-
-      renderHook(useExistingFieldsFetcher, {
-        initialProps: {
-          dataViews: [dataView],
-          services: mockedServices,
-          fromDate: '2019-01-01',
-          toDate: '2020-01-01',
-          query: { query: '', language: 'lucene' },
-          filters: [],
-          initialExistingFieldsInfo: {
-            dataViewId: 'logstash-*',
-            dataViewHash: 'logstash-*:logstash-*:time:false:28',
-            info: {
-              fetchStatus: ExistenceFetchStatus.failed,
-              existingFieldsByFieldNameMap: { bytes: true },
-              numberOfFetches: 1,
-              newFields: undefined,
-            },
+        renderHook(useExistingFieldsFetcher, {
+          initialProps: {
+            dataViews: type === 'esql' ? [] : [dataView],
+            services: mockedServices,
+            fromDate: '2019-01-01',
+            toDate: '2020-01-01',
+            query: { query: '', language: 'lucene' },
+            filters: [],
+            initialExistingFieldsInfo,
+            onInitialExistingFieldsInfoChange,
           },
-          onInitialExistingFieldsInfoChange,
-        },
-      });
+        });
 
-      await waitFor(() => new Promise((resolve) => resolve(null)));
+        await waitFor(() => new Promise((resolve) => resolve(null)));
 
-      expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledWith(
-        expect.objectContaining({
-          fromDate: '2019-01-01',
-          toDate: '2020-01-01',
-          dslQuery,
-          dataView,
-          timeFieldName: dataView.timeFieldName,
-        })
-      );
-      expect(onInitialExistingFieldsInfoChange).toHaveBeenCalledWith({
-        dataViewId: 'logstash-*',
-        dataViewHash: 'logstash-*:logstash-*:time:false:28',
-        info: {
-          fetchStatus: 'succeeded',
-          existingFieldsByFieldNameMap: { bytes: true },
-          numberOfFetches: 1,
-          newFields: undefined,
-        },
-      });
-    });
+        if (type === 'esql') {
+          expect(ExistingFieldsServiceApi.loadFieldExisting).not.toHaveBeenCalled();
+          expect(onInitialExistingFieldsInfoChange).toHaveBeenCalledWith(undefined);
+        } else {
+          expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledWith(
+            expect.objectContaining({
+              fromDate: '2019-01-01',
+              toDate: '2020-01-01',
+              dslQuery,
+              dataView,
+              timeFieldName: dataView.timeFieldName,
+            })
+          );
+          expect(onInitialExistingFieldsInfoChange).toHaveBeenCalledWith(fetchedExistingFieldsInfo);
+        }
+      }
+    );
   });
 });

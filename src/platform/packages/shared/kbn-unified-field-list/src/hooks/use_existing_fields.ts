@@ -92,6 +92,7 @@ export const useExistingFieldsFetcher = (
       : undefined
   );
   const onInitialExistingFieldsInfoChangeRef = useLatest(onInitialExistingFieldsInfoChange);
+  const latestInitialExistingFieldsInfoRef = useLatest(initialExistingFieldsInfo);
 
   const fetchFieldsExistenceInfo = useCallback(
     async ({
@@ -108,10 +109,6 @@ export const useExistingFieldsFetcher = (
       fetchId: string;
     }): Promise<void> => {
       if (!dataViewId || !query || !fromDate || !toDate) {
-        if (initialExistingFieldsInfoRef.current) {
-          initialExistingFieldsInfoRef.current = undefined;
-          onInitialExistingFieldsInfoChangeRef?.current?.(undefined);
-        }
         return;
       }
 
@@ -282,6 +279,13 @@ export const useExistingFieldsFetcher = (
       refetchFieldsExistenceInfo();
     }
   }, [refetchFieldsExistenceInfo, params.disableAutoFetching]);
+
+  useEffect(() => {
+    if (!params.dataViews.length && latestInitialExistingFieldsInfoRef.current?.dataViewId) {
+      // after switching to ES|QL mode, reset the initial info
+      onInitialExistingFieldsInfoChangeRef.current?.(undefined);
+    }
+  }, [params.dataViews, latestInitialExistingFieldsInfoRef, onInitialExistingFieldsInfoChangeRef]);
 
   useEffect(() => {
     return () => {
