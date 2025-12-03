@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BoundInferenceClient } from '@kbn/inference-common';
+import type { BoundInferenceClient, ToolChoice } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import pRetry from 'p-retry';
 import type { Evaluator } from '../../types';
@@ -25,7 +25,7 @@ function shouldRunGroundednessAnalysis() {
 
   return (
     // Default to running qualitative analysis if no specific evaluators are selected
-    !evaluatorSelection ||
+    evaluatorSelection.length === 0 ||
     evaluatorSelection.includes(QUALITATIVE_EVALUATOR_NAME) ||
     evaluatorSelection.includes(QUANTITATIVE_EVALUATOR_NAME)
   );
@@ -57,6 +57,10 @@ export function createGroundednessAnalysisEvaluator({
             agent_response: `${latestMessage}`,
             tool_call_history: JSON.stringify(steps),
           },
+          // toolChoice must be specified in the API call, as `createPrompt` currently discards it from the prompt definition
+          toolChoice: {
+            function: 'analyze',
+          } as ToolChoice,
         });
 
         // Extract the groundedness evaluation from the tool call

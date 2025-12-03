@@ -88,13 +88,11 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     if (!monitorAbortController.signal.aborted) {
       runStepPromise = nodeImplementation
         .run()
-        .finally(() => stepExecutionRuntime && handleExecutionDelay(params, stepExecutionRuntime))
-        .finally(() => monitorAbortController?.abort());
+        .then(() => stepExecutionRuntime && handleExecutionDelay(params, stepExecutionRuntime));
     }
 
     await Promise.race([runMonitorPromise, runStepPromise]);
     params.workflowRuntime.enterScope();
-    monitorAbortController.abort();
   } catch (error) {
     params.workflowRuntime.setWorkflowError(error);
   } finally {

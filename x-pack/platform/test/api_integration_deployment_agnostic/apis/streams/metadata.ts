@@ -40,6 +40,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               fields: {},
               routing: [],
             },
+            failure_store: { inherit: {} },
           },
         },
       };
@@ -62,6 +63,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               fields: {},
               routing: [],
             },
+            failure_store: { inherit: {} },
           },
         },
       };

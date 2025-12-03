@@ -17,3 +17,5 @@ xml-formatter
 @tanstack/react-table
 @tanstack/react-virtual
 @storybook/addon-docs
+dompurify
+magic-bytes.js

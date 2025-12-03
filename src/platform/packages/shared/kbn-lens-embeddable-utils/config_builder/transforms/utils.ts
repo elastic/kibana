@@ -84,7 +84,7 @@ export const operationFromColumn = (columnId: string, layer: FormBasedLayer) => 
   return getMetricApiColumnFromLensState(column, typedLayer.columns);
 };
 
-function isTextBasedLayer(
+export function isTextBasedLayer(
   layer: LensApiState | FormBasedLayer | TextBasedLayer
 ): layer is TextBasedLayer {
   return 'index' in layer && 'query' in layer;

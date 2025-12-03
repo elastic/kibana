@@ -1,0 +1,67 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`generateSchema generates schema with config and secrets 1`] = `
+Object {
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": Object {
+    "secrets": Object {
+      "anyOf": Array [
+        Object {
+          "additionalProperties": false,
+          "properties": Object {
+            "authType": Object {
+              "const": "basic",
+              "type": "string",
+            },
+            "password": Object {
+              "description": "Password",
+              "sensitive": true,
+              "type": "string",
+            },
+            "username": Object {
+              "description": "Username",
+              "sensitive": true,
+              "type": "string",
+            },
+          },
+          "required": Array [
+            "username",
+            "password",
+            "authType",
+          ],
+          "type": "object",
+        },
+        Object {
+          "additionalProperties": false,
+          "properties": Object {
+            "authType": Object {
+              "const": "api_key_header",
+              "type": "string",
+            },
+            "custom-api-key-field": Object {
+              "description": "API Key",
+              "sensitive": true,
+              "type": "string",
+            },
+          },
+          "required": Array [
+            "custom-api-key-field",
+            "authType",
+          ],
+          "type": "object",
+        },
+      ],
+    },
+    "url": Object {
+      "minLength": 1,
+      "type": "string",
+    },
+  },
+  "required": Array [
+    "url",
+    "secrets",
+  ],
+  "type": "object",
+}
+`;

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { IScopedClusterClient } from '@kbn/core/server';
 import type {
   FindSLODefinitionsParams,
   FindSLODefinitionsResponse,
@@ -15,10 +16,10 @@ import {
   findSloDefinitionsResponseSchema,
   findSloDefinitionsWithHealthResponseSchema,
 } from '@kbn/slo-schema';
-import type { IScopedClusterClient } from '@kbn/core/server';
+import { keyBy } from 'lodash';
 import { IllegalArgumentError } from '../errors';
-import type { SLORepository } from './slo_repository';
 import { GetSLOHealth } from './get_slo_health';
+import type { SLORepository } from './slo_repository';
 
 const MAX_PER_PAGE = 1000;
 const DEFAULT_PER_PAGE = 100;
@@ -33,30 +34,30 @@ export class FindSLODefinitions {
   public async execute(
     params: FindSLODefinitionsParams
   ): Promise<FindSLODefinitionsResponse | FindSLODefinitionsWithHealthResponse> {
-    const requestTags: string[] = params.tags?.split(',') ?? [];
+    const tags: string[] = params.tags?.split(',') ?? [];
 
-    const result = await this.repository.search(params.search ?? '', toPagination(params), {
-      includeOutdatedOnly: !!params.includeOutdatedOnly,
-      tags: requestTags,
-    });
+    const { results: definitions, ...result } = await this.repository.search(
+      params.search ?? '',
+      toPagination(params),
+      { includeOutdatedOnly: !!params.includeOutdatedOnly, tags }
+    );
 
     if (params.includeHealth) {
       const getSLOHealth = new GetSLOHealth(this.scopedClusterClient, this.repository);
 
       const healthResponses = await getSLOHealth.execute({
-        list: result.results.map((item) => ({
-          sloId: item.id,
+        list: definitions.map((definition) => ({
+          sloId: definition.id,
           sloInstanceId: '*',
-          sloRevision: item.revision,
-          sloName: item.name,
         })),
       });
 
-      const resultsWithHealth = result.results.map((slo) => {
-        const healthInfo = healthResponses.find((health) => health.sloId === slo.id);
+      const healthBySloId = keyBy(healthResponses, 'sloId');
+      const resultsWithHealth = definitions.map((definition) => {
         return {
-          ...slo,
-          health: healthInfo?.health,
+          ...definition,
+          state: healthBySloId[definition.id]?.state,
+          health: healthBySloId[definition.id]?.health,
         };
       });
 
@@ -72,7 +73,7 @@ export class FindSLODefinitions {
       page: result.page,
       perPage: result.perPage,
       total: result.total,
-      results: result.results,
+      results: definitions,
     });
   }
 }

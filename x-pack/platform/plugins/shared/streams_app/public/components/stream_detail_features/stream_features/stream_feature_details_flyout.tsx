@@ -20,7 +20,8 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import type { Streams, Feature } from '@kbn/streams-schema';
+import { type Streams, type Feature, isFeatureWithFilter } from '@kbn/streams-schema';
+import type { Condition } from '@kbn/streamlang';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import useToggle from 'react-use/lib/useToggle';
@@ -42,19 +43,18 @@ export const StreamFeatureDetailsFlyout = ({
   const [featureDescription, setFeatureDescription] = React.useState(feature.description);
   const { upsertQuery } = useStreamFeaturesApi(definition);
   const [isUpdating, setIsUpdating] = React.useState(false);
-  const [featureFilter, setFeatureFilter] = React.useState(feature.filter);
+  const [featureFilter, setFeatureFilter] = React.useState<Condition>(feature.filter);
   const [isEditingCondition, toggleIsEditingCondition] = useToggle(false);
 
   const updateFeature = () => {
     setIsUpdating(true);
-    upsertQuery(feature.name, {
-      description: featureDescription,
-      filter: featureFilter,
-    }).finally(() => {
-      setIsUpdating(false);
-      refreshFeatures();
-      closeFlyout();
-    });
+    upsertQuery({ ...feature, description: featureDescription, filter: featureFilter }).finally(
+      () => {
+        setIsUpdating(false);
+        refreshFeatures();
+        closeFlyout();
+      }
+    );
   };
 
   return (
@@ -117,14 +117,16 @@ export const StreamFeatureDetailsFlyout = ({
                 )}
               />
             </EuiFlexGroup>
-            <EditableConditionPanel
-              condition={featureFilter}
-              isEditingCondition={isEditingCondition}
-              setCondition={setFeatureFilter}
-            />
+            {featureFilter && (
+              <EditableConditionPanel
+                condition={featureFilter}
+                isEditingCondition={isEditingCondition}
+                setCondition={setFeatureFilter}
+              />
+            )}
           </EuiFlexGroup>
           <EuiSpacer size="m" />
-          <FeatureEventsData feature={feature} />
+          {isFeatureWithFilter(feature) && <FeatureEventsData feature={feature} />}
         </div>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

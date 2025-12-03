@@ -67,6 +67,19 @@ export const request = async <T = unknown>({
     headers,
   });
 
+  function beforeRedirect(options: Record<string, unknown>) {
+    const hostname = options.hostname;
+    if (hostname == null) {
+      throw new Error('redirect hostname not provided by axios');
+    }
+
+    if (typeof hostname !== 'string') {
+      throw new Error('redirect hostname provided by axios was not a string');
+    }
+
+    configurationUtilities.ensureHostnameAllowed(hostname);
+  }
+
   try {
     const result = await axios(url, {
       ...restConfig,
@@ -79,6 +92,7 @@ export const request = async <T = unknown>({
       proxy: false,
       maxContentLength,
       timeout: Math.max(settingsTimeout, timeout ?? 0),
+      beforeRedirect,
     });
 
     if (connectorUsageCollector) {

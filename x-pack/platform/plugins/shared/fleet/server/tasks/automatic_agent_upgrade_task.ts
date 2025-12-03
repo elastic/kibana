@@ -41,7 +41,7 @@ import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../common/services';
 
 export const TYPE = 'fleet:automatic-agent-upgrade-task';
-export const VERSION = '1.0.2';
+export const VERSION = '1.0.3';
 const TITLE = 'Fleet Automatic agent upgrades';
 const SCOPE = ['fleet'];
 const DEFAULT_INTERVAL = '30m';
@@ -367,6 +367,12 @@ export class AutomaticAgentUpgradeTask {
     return res.total;
   }
 
+  private updatingQuery(version: string) {
+    const stuckInUpdatingKuery = `(NOT upgrade_details:* AND status:updating AND NOT upgraded_at:* AND upgrade_started_at < now-2h)`; // agents without upgrade_details
+    const updateFailedKuery = `(upgrade_details.target_version:${version} AND upgrade_details.state:UPG_FAILED)`;
+    return `(${stuckInUpdatingKuery} OR ${updateFailedKuery})`;
+  }
+
   private async processRequiredVersion(
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
@@ -412,10 +418,12 @@ export class AutomaticAgentUpgradeTask {
     //     As an imperfect alternative, sort agents by version. Since versions sort alphabetically, this will not always result in ascending semver sorting.
     const statusKuery =
       '(status:online OR status:offline OR status:enrolling OR status:degraded OR status:error OR status:orphaned)'; // active status except updating
-    const oldStuckInUpdatingKuery = `(NOT upgrade_details:* AND status:updating AND NOT upgraded_at:* AND upgrade_started_at < now-2h)`; // agents pre 8.12.0 (without upgrade_details)
-    const newStuckInUpdatingKuery = `(upgrade_details.target_version:${requiredVersion.version} AND upgrade_details.state:UPG_FAILED)`;
     const agentsFetcher = await fetchAllAgentsByKuery(esClient, soClient, {
-      kuery: `policy_id:${agentPolicy.id} AND (NOT upgrade_attempts:*) AND (${statusKuery} OR ${oldStuckInUpdatingKuery} OR ${newStuckInUpdatingKuery})`,
+      kuery: `policy_id:${
+        agentPolicy.id
+      } AND (NOT upgrade_attempts:*) AND (${statusKuery} OR ${this.updatingQuery(
+        requiredVersion.version
+      )})`,
       perPage: AGENTS_BATCHSIZE,
       sortField: 'agent.version',
       sortOrder: 'asc',
@@ -467,7 +475,9 @@ export class AutomaticAgentUpgradeTask {
     let retriedAgentsCounter = 0;
 
     const retryingAgentsFetcher = await fetchAllAgentsByKuery(esClient, soClient, {
-      kuery: `policy_id:${agentPolicy.id} AND upgrade_details.target_version:${version} AND upgrade_details.state:UPG_FAILED AND upgrade_attempts:*`,
+      kuery: `policy_id:${agentPolicy.id} AND upgrade_attempts:* AND ${this.updatingQuery(
+        version
+      )}`,
       perPage: AGENTS_BATCHSIZE,
       sortField: 'agent.version',
       sortOrder: 'asc',
@@ -491,6 +501,7 @@ export class AutomaticAgentUpgradeTask {
           version,
           spaceIds: agentPolicy.space_ids,
           ...this.getUpgradeDurationSeconds(agentsReadyForRetry.length),
+          force: true, // to restart agents stuck in updating
         });
       }
     }
