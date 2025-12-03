@@ -424,13 +424,6 @@ export const ReportSchedulesTable = () => {
     setQueryParams((oldParams) => ({ ...oldParams, search: searchText, page: 1 }));
   }, []);
 
-  const onSearchFieldBlur = useCallback(
-    (event: React.FocusEvent<HTMLInputElement>) => {
-      updateSearch(event.target.value);
-    },
-    [updateSearch]
-  );
-
   const refresh = useCallback(() => {
     refreshScheduledReports();
   }, [refreshScheduledReports]);
@@ -456,7 +449,6 @@ export const ReportSchedulesTable = () => {
                 }
               )}
               onSearch={updateSearch}
-              onBlur={onSearchFieldBlur}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
