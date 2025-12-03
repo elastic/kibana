@@ -367,7 +367,7 @@ export interface ConnectorTypeInfo {
   subActions: ConnectorSubAction[];
 }
 
-export interface ConnectorContractBase {
+export interface BaseConnectorContract {
   type: string;
   paramsSchema: z.ZodType;
   connectorIdRequired?: boolean;
@@ -376,11 +376,11 @@ export interface ConnectorContractBase {
   summary: string | null;
   description: string | null;
   /** Documentation URL for this API endpoint */
-  documentation?: string;
+  documentation?: string | null;
   examples?: ConnectorExamples;
 }
 
-export interface DynamicConnectorContract extends ConnectorContractBase {
+export interface DynamicConnectorContract extends BaseConnectorContract {
   /** Action type ID from Kibana actions plugin */
   actionTypeId: string;
   /** Available connector instances */
@@ -407,7 +407,7 @@ export interface EnhancedInternalConnectorContract extends InternalConnectorCont
   examples: ConnectorExamples;
 }
 
-export interface InternalConnectorContract extends ConnectorContractBase {
+export interface InternalConnectorContract extends BaseConnectorContract {
   /** HTTP method(s) for this API endpoint */
   methods: HttpMethod[];
   /** URL pattern(s) for this API endpoint */
@@ -426,11 +426,9 @@ export interface ConnectorExamples {
   snippet?: string;
 }
 
-export type StaticConnectorContract = ConnectorContractBase;
-
 export type ConnectorContractUnion =
   | DynamicConnectorContract
-  | StaticConnectorContract
+  | BaseConnectorContract
   | InternalConnectorContract;
 
 export interface WorkflowsSearchParams {

@@ -16,7 +16,6 @@ import { parseWorkflowYamlToJSON } from './parse_workflow_yaml_to_json';
 describe('parseWorkflowYamlToJSON', () => {
   const mockConnectors: ConnectorContractUnion[] = [
     {
-      connectorGroup: 'static',
       summary: 'Noop',
       description: 'Noop',
       type: 'noop',

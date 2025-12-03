@@ -58,7 +58,16 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
       const handlerContext = this.createHandlerContext(input);
       const result = await this.stepDefinition.handler(handlerContext);
 
-      return { input, output: result.output, error: result.error?.toString() };
+      return {
+        input,
+        output: result.output,
+        error: result.error
+          ? {
+              type: result.error.name,
+              message: result.error.message,
+            }
+          : undefined,
+      };
     } catch (error) {
       return { input, output: undefined, error: error.toString() };
     }

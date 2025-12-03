@@ -51,7 +51,7 @@ export type {
   ConnectorContractUnion,
   InternalConnectorContract,
   DynamicConnectorContract,
-  StaticConnectorContract,
+  BaseConnectorContract,
   HttpMethod,
 } from './v1';
 

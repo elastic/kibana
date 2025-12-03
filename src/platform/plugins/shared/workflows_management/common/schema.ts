@@ -7,16 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  ConnectorContractUnion,
-  ConnectorTypeInfo,
-  DynamicConnectorContract,
-} from '@kbn/workflows';
+import type { ConnectorContractUnion, ConnectorTypeInfo } from '@kbn/workflows';
 import {
   generateYamlSchemaFromConnectors,
   getElasticsearchConnectors,
   getKibanaConnectors,
 } from '@kbn/workflows';
+import type { BaseConnectorContract } from '@kbn/workflows/types/v1';
 import { z } from '@kbn/zod/v4';
 
 // Import connector schemas from the organized structure
@@ -82,25 +79,31 @@ function getSubActionOutputSchema(actionTypeId: string, subActionName: string): 
 }
 
 /**
- * Convert dynamic connector data from actions client to ConnectorContract format
+ * Get registered step definitions from workflowExtensions, converted to BaseConnectorContract
  */
-function getRegisteredStepDefinitions(): DynamicConnectorContract[] {
+function getRegisteredStepDefinitions(): BaseConnectorContract[] {
   return stepSchemas.getAllRegisteredStepDefinitions().map((stepDefinition) => {
-    const extra: Partial<DynamicConnectorContract> = {};
     if (stepSchemas.isPublicStepDefinition(stepDefinition)) {
-      extra.summary = stepDefinition.description;
-      extra.description = stepDefinition.label;
-      extra.documentation = stepDefinition.documentation?.url;
-      if (stepDefinition.documentation?.examples) {
-        extra.examples = { snippet: stepDefinition.documentation?.examples.join('\n') };
-      }
+      // Only public step definitions have documentation and examples
+      return {
+        type: stepDefinition.id,
+        paramsSchema: stepDefinition.inputSchema,
+        outputSchema: stepDefinition.outputSchema,
+        summary: stepDefinition.label ?? null,
+        description: stepDefinition.description ?? null,
+        documentation: stepDefinition.documentation?.url,
+        examples: stepDefinition.documentation?.examples
+          ? { snippet: stepDefinition.documentation?.examples.join('\n') }
+          : undefined,
+      };
     }
     return {
       type: stepDefinition.id,
-      connectorGroup: 'dynamic',
       paramsSchema: stepDefinition.inputSchema,
       outputSchema: stepDefinition.outputSchema,
-      ...extra,
+      summary: null,
+      description: null,
+      documentation: undefined,
     };
   });
 }

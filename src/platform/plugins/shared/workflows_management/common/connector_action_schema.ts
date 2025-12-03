@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { StaticConnectorContract } from '@kbn/workflows';
+import type { BaseConnectorContract } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 
 import {
@@ -431,9 +431,8 @@ export const ConnectorActionOutputSchemas = new Map<string, Record<string, z.Zod
  * Static connectors used for schema generation
  */
 
-export const staticConnectors: StaticConnectorContract[] = [
+export const staticConnectors: BaseConnectorContract[] = [
   {
-    connectorGroup: 'static',
     type: 'console',
     summary: 'Console',
     paramsSchema: z
@@ -449,7 +448,6 @@ export const staticConnectors: StaticConnectorContract[] = [
   // Note: inference sub-actions are now generated dynamically
   // Generic request types for raw API calls
   {
-    connectorGroup: 'static',
     type: 'elasticsearch.request',
     summary: 'Elasticsearch Request',
     connectorIdRequired: false,
@@ -466,7 +464,6 @@ export const staticConnectors: StaticConnectorContract[] = [
     }),
   },
   {
-    connectorGroup: 'static',
     type: 'kibana.request',
     summary: 'Kibana Request',
     connectorIdRequired: false,
