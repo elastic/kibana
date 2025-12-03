@@ -139,7 +139,7 @@ test.describe('Rules Page - Logs Tab', { tag: ['@ess', '@svlOblt'] }, () => {
 test.describe('Rules Page - Rules Tab', { tag: ['@ess', '@svlOblt'] }, () => {
   let createdRule: CreateRuleResponse['data'];
   test.beforeAll(async ({ apiServices }) => {
-    createdRule = (await createRule(apiServices)).data;
+    createdRule = (await createRule(apiServices, { name: 'Viewer Test Rule' })).data;
   });
 
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -158,5 +158,25 @@ test.describe('Rules Page - Rules Tab', { tag: ['@ess', '@svlOblt'] }, () => {
   test('should see a non-editable rule in the Rules Table', async ({ pageObjects }) => {
     const nonEditableRules = pageObjects.rulesPage.getNonEditableRules();
     await expect(nonEditableRules.filter({ hasText: createdRule.name })).toHaveCount(1);
+  });
+
+  test('should not show the edit action button for a rule when logged in as viewer', async ({
+    pageObjects,
+  }) => {
+    // As a viewer, rules appear as non-editable
+    const nonEditableRules = pageObjects.rulesPage.getNonEditableRules();
+    const ruleRow = nonEditableRules.filter({ hasText: createdRule.name });
+
+    // Verify the rule row is visible (rule exists in table)
+    await expect(ruleRow).toBeVisible();
+    await ruleRow.hover();
+
+    // Verify the edit action (ruleSidebarEditAction) is NOT visible for viewers
+    const editActionContainer = pageObjects.rulesPage.getRuleSidebarEditAction(ruleRow);
+    await expect(editActionContainer).toBeHidden({ timeout: 5000 });
+
+    // Verify the edit button is also NOT visible
+    const editButton = pageObjects.rulesPage.getEditActionButton(ruleRow);
+    await expect(editButton).toBeHidden();
   });
 });

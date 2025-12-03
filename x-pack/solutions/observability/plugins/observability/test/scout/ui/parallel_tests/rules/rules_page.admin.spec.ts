@@ -72,4 +72,21 @@ test.describe('Rules Page - Rules Tab', { tag: ['@ess', '@svlOblt'] }, () => {
     const editableRules = pageObjects.rulesPage.getEditableRules();
     await expect(editableRules.filter({ hasText: createdRule.name })).toHaveCount(1);
   });
+
+  test('should show the edit action button for an editable rule', async ({ pageObjects }) => {
+    const editableRules = pageObjects.rulesPage.getEditableRules();
+    const ruleRow = editableRules.filter({ hasText: createdRule.name });
+
+    // Verify the rule row exists & that the edit button visible on hover
+    await expect(ruleRow).toBeVisible();
+    await ruleRow.hover();
+
+    // Verify the rule edit action (ruleSidebarEditAction) is visible
+    const editActionContainer = pageObjects.rulesPage.getRuleSidebarEditAction(ruleRow);
+    await expect(editActionContainer).toBeVisible({ timeout: 5000 });
+
+    // Verify the edit button is also visible
+    const editButton = pageObjects.rulesPage.getEditActionButton(ruleRow);
+    await expect(editButton).toBeVisible();
+  });
 });

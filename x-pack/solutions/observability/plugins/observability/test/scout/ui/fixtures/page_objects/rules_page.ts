@@ -196,6 +196,44 @@ export class RulesPage {
     return this.page.testSubj.locator(RULES_SETTINGS_TEST_SUBJECTS.RULE_ROW);
   }
 
+  /**
+   * Gets the rule sidebar edit action locator for a specific rule
+   * Pass the rule row locator to find the edit button within that row
+   */
+  public getRuleSidebarEditAction(ruleRow: ReturnType<typeof this.page.testSubj.locator>) {
+    return ruleRow.locator(
+      `[data-test-subj="${RULES_SETTINGS_TEST_SUBJECTS.RULE_SIDEBAR_EDIT_ACTION}"]`
+    );
+  }
+
+  /**
+   * Gets the edit action hover button locator for a specific rule
+   */
+  public getEditActionButton(ruleRow: ReturnType<typeof this.page.testSubj.locator>) {
+    return ruleRow.locator(
+      `[data-test-subj="${RULES_SETTINGS_TEST_SUBJECTS.EDIT_ACTION_HOVER_BUTTON}"]`
+    );
+  }
+
+  /**
+   * Verifies that the edit action button is visible for a specific rule
+   */
+  async expectEditActionVisible(ruleName: string) {
+    const editableRules = this.getEditableRules();
+    const ruleRow = editableRules.filter({ hasText: ruleName });
+
+    // Hover over the rule row to make the edit button visible
+    await ruleRow.hover();
+
+    // Verify the edit action container is present
+    const editActionContainer = this.getRuleSidebarEditAction(ruleRow);
+    await expect(editActionContainer).toBeVisible();
+
+    // Verify the edit button itself is visible
+    const editButton = this.getEditActionButton(ruleRow);
+    await expect(editButton).toBeVisible();
+  }
+
   // Logs Tab methods
   /**
    * Gets the logs tab button locator
