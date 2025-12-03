@@ -11,7 +11,6 @@ export type {
   TextAttachment,
   ScreenContextAttachment,
   EsqlAttachment,
-  ProductReferenceAttachment,
 } from './attachments';
 export {
   AttachmentType,
