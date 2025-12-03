@@ -13,7 +13,11 @@ import { useCaseViewNavigation } from '../../common/navigation';
 import { ACTIVITY_TAB, ATTACHMENTS_TAB, SIMILAR_CASES_TAB } from './translations';
 import { type CaseUI } from '../../../common';
 import type { CaseViewTab } from './use_case_attachment_tabs';
-import { SimilarCasesBadge, useCaseAttachmentTabs } from './use_case_attachment_tabs';
+import {
+  AttachmentsBadge,
+  SimilarCasesBadge,
+  useCaseAttachmentTabs,
+} from './use_case_attachment_tabs';
 import { useGetSimilarCases } from '../../containers/use_get_similar_cases';
 import { useCasesFeatures } from '../../common/use_cases_features';
 
@@ -24,7 +28,7 @@ export interface CaseViewTabsProps {
 
 export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab }) => {
   const { navigateToCaseView } = useCaseViewNavigation();
-  const attachmentTabs = useCaseAttachmentTabs({ caseData, activeTab });
+  const { tabs: attachmentTabs, totalAttachments } = useCaseAttachmentTabs({ caseData, activeTab });
 
   const { euiTheme } = useEuiTheme();
 
@@ -38,6 +42,11 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
     enabled: canShowObservableTabs && isObservablesFeatureEnabled,
   });
 
+  const isAttachmentsTabActive = useMemo(
+    () => !!attachmentTabs.find((attachmentTab) => attachmentTab.id === activeTab),
+    [activeTab, attachmentTabs]
+  );
+
   const tabs: CaseViewTab[] = useMemo(
     () => [
       {
@@ -47,6 +56,13 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
       {
         id: CASE_VIEW_PAGE_TABS.ATTACHMENTS,
         name: ATTACHMENTS_TAB,
+        badge: (
+          <AttachmentsBadge
+            isActive={isAttachmentsTabActive}
+            euiTheme={euiTheme}
+            count={totalAttachments}
+          />
+        ),
       },
       {
         id: CASE_VIEW_PAGE_TABS.SIMILAR_CASES,
@@ -60,7 +76,7 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
         ),
       },
     ],
-    [activeTab, euiTheme, similarCasesData?.total]
+    [activeTab, euiTheme, isAttachmentsTabActive, similarCasesData?.total, totalAttachments]
   );
 
   const renderTabs = useCallback(() => {
@@ -76,15 +92,14 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
         }
         isSelected={
           tab.id === activeTab ||
-          (tab.id === CASE_VIEW_PAGE_TABS.ATTACHMENTS &&
-            !!attachmentTabs.find((attachmentTab) => attachmentTab.id === activeTab))
+          (tab.id === CASE_VIEW_PAGE_TABS.ATTACHMENTS && isAttachmentsTabActive)
         }
       >
         {tab.name}
         {tab.badge ?? null}
       </EuiTab>
     ));
-  }, [activeTab, caseData.id, attachmentTabs, navigateToCaseView, tabs]);
+  }, [tabs, activeTab, isAttachmentsTabActive, navigateToCaseView, caseData.id]);
 
   return <EuiTabs data-test-subj="case-view-tabs">{renderTabs()}</EuiTabs>;
 });
