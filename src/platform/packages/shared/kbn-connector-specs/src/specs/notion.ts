@@ -72,7 +72,21 @@ export const NotionConnector: ConnectorSpec = {
         return response.data;
       },
     },
-    // getDataSource: {},
+
+    // https://developers.notion.com/reference/retrieve-a-data-source
+    getDataSource: {
+      isTool: true,
+      input: z.object({ dataSourceId: z.string() }),
+      handler: async (ctx, input) => {
+        const typedInput = input as { dataSourceId: string };
+        const response = await ctx.client.get(
+          `https://api.notion.com/v1/data_sources/${typedInput.dataSourceId}`,
+          {}
+          // { headers: { 'Notion-Version': '2025-09-03' } }
+        );
+        return response.data;
+      },
+    },
     // queryDataSource: {},
   },
 
