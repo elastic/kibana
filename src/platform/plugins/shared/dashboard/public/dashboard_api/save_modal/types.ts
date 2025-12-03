@@ -16,6 +16,7 @@ export interface DashboardSaveOptions {
   newDescription: string;
   newCopyOnSave: boolean;
   newTimeRestore: boolean;
+  newProjectRoutingRestore: boolean;
   onTitleDuplicate: () => void;
   isTitleDuplicateConfirmed: boolean;
 }

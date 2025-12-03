@@ -8,7 +8,7 @@
  */
 
 import type { monaco } from '@kbn/monaco';
-import { z } from '@kbn/zod';
+import { getShape } from '@kbn/workflows/common/utils/zod';
 import { wrapAsMonacoSuggestion } from './wrap_as_monaco_suggestion';
 import { getDetailedTypeDescription } from '../../../../../../../common/lib/zod';
 import type { AutocompleteContext } from '../../context/autocomplete.types';
@@ -60,17 +60,6 @@ function isValidPath(
   return !(segmentDiff > 1 || (segmentDiff === 1 && lastPathSegment === null));
 }
 
-/**
- * Validates if the schema is a valid ZodObject with shape
- */
-function isValidSchema(schema: z.ZodType): schema is z.ZodObject<z.ZodRawShape> {
-  return (
-    schema instanceof z.ZodObject &&
-    schema.shape !== undefined &&
-    Object.keys(schema.shape).length > 0
-  );
-}
-
 export function getVariableSuggestions(autocompleteContext: AutocompleteContext) {
   const {
     triggerCharacter,
@@ -113,12 +102,14 @@ export function getVariableSuggestions(autocompleteContext: AutocompleteContext)
     return [];
   }
 
-  if (!isValidSchema(contextSchema)) {
-    return [];
-  }
+  const shape = getShape(contextSchema);
 
   // Get all keys from the current schema
-  const keys = Object.keys(contextSchema.shape);
+  const keys = Object.keys(shape);
+
+  if (keys.length === 0) {
+    return [];
+  }
 
   // Filter keys based on lastPathSegment if it exists
   const filteredKeys =
@@ -127,7 +118,7 @@ export function getVariableSuggestions(autocompleteContext: AutocompleteContext)
       : keys;
 
   for (const key of filteredKeys) {
-    const keySchema = contextSchema.shape[key];
+    const keySchema = shape[key];
     const propertyTypeName = getDetailedTypeDescription(keySchema, { singleLine: true });
 
     suggestions.push(

@@ -15,13 +15,23 @@ import type {
   ViewMode,
 } from '@kbn/presentation-publishing';
 import { apiHasSerializableState } from '@kbn/presentation-publishing';
-import { BehaviorSubject, combineLatest, debounceTime, map, skipWhile, switchMap, tap } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  debounceTime,
+  map,
+  of,
+  skipWhile,
+  switchMap,
+  tap,
+} from 'rxjs';
 import type { DashboardBackupState } from '../services/dashboard_backup_service';
 import { getDashboardBackupService } from '../services/dashboard_backup_service';
 import type { initializeLayoutManager } from './layout_manager';
 import type { initializeSettingsManager } from './settings_manager';
 import type { DashboardState } from '../../common';
 import type { initializeUnifiedSearchManager } from './unified_search_manager';
+import type { initializeProjectRoutingManager } from './project_routing_manager';
 import type { initializeControlGroupManager } from './control_group_manager';
 import { CONTROL_GROUP_EMBEDDABLE_ID } from './control_group_manager';
 
@@ -36,6 +46,7 @@ export function initializeUnsavedChangesManager({
   storeUnsavedChanges,
   controlGroupManager,
   unifiedSearchManager,
+  projectRoutingManager,
 }: {
   lastSavedState: DashboardState;
   storeUnsavedChanges?: boolean;
@@ -45,6 +56,7 @@ export function initializeUnsavedChangesManager({
   viewMode$: PublishingSubject<ViewMode>;
   settingsManager: ReturnType<typeof initializeSettingsManager>;
   unifiedSearchManager: ReturnType<typeof initializeUnifiedSearchManager>;
+  projectRoutingManager?: ReturnType<typeof initializeProjectRoutingManager>;
 }): {
   api: {
     hasUnsavedChanges$: PublishingSubject<boolean>;
@@ -79,9 +91,10 @@ export function initializeUnsavedChangesManager({
     settingsManager.internalApi.startComparing$(lastSavedState$),
     unifiedSearchManager.internalApi.startComparing$(lastSavedState$),
     layoutManager.internalApi.startComparing$(lastSavedState$),
+    projectRoutingManager?.internalApi.startComparing$(lastSavedState$) ?? of({}),
   ]).pipe(
-    map(([settings, unifiedSearch, panels]) => {
-      return { ...settings, ...unifiedSearch, ...panels };
+    map(([settings, unifiedSearch, panels, projectRouting]) => {
+      return { ...settings, ...unifiedSearch, ...panels, ...projectRouting };
     })
   );
 
@@ -145,6 +158,7 @@ export function initializeUnsavedChangesManager({
         const savedState = lastSavedState$.value;
         layoutManager.internalApi.reset();
         unifiedSearchManager.internalApi.reset(savedState);
+        projectRoutingManager?.internalApi.reset(savedState);
         settingsManager.internalApi.reset(savedState);
 
         await controlGroupManager.api.controlGroupApi$.value?.resetUnsavedChanges();
