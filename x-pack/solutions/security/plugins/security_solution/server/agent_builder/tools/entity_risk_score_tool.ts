@@ -11,6 +11,7 @@ import { ToolType, ToolResultType } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/onechat-server';
 import { getToolResultId } from '@kbn/onechat-server/tools';
 import { IdentifierType } from '../../../common/api/entity_analytics/common/common.gen';
+import type { EntityRiskScoreRecord } from '../../../common/api/entity_analytics/common';
 import { createGetRiskScores } from '../../lib/entity_analytics/risk_score/get_risk_score';
 import type { EntityType } from '../../../common/entity_analytics/types';
 import { DEFAULT_ALERTS_INDEX, ESSENTIAL_ALERT_FIELDS } from '../../../common/constants';
@@ -23,10 +24,66 @@ const entityRiskScoreSchema = z.object({
   identifier: z
     .string()
     .min(1)
-    .describe('The value that identifies the entity (e.g., hostname, username)'),
+    .describe(
+      'The value that identifies the entity (e.g., hostname, username). Use "*" to get all entities of the specified type, sorted by risk score (highest first).'
+    ),
+  limit: z
+    .number()
+    .int()
+    .min(1)
+    .max(100)
+    .optional()
+    .describe('Maximum number of results to return when using wildcard queries (default: 10)'),
 });
 
 export const SECURITY_ENTITY_RISK_SCORE_TOOL_ID = securityTool('entity_risk_score');
+
+/**
+ * Queries the risk index directly for wildcard queries, returning entities sorted by calculated_score_norm
+ */
+const queryRiskIndexForWildcard = async ({
+  esClient,
+  spaceId,
+  entityType,
+  limit = 10,
+}: {
+  esClient: ElasticsearchClient;
+  spaceId: string;
+  entityType: EntityType;
+  limit: number;
+}): Promise<EntityRiskScoreRecord[]> => {
+  const riskIndex = getRiskIndex(spaceId, true);
+  const riskField = `${entityType}.risk.calculated_score_norm`;
+
+  const response = await esClient.search<Record<EntityType, { risk: EntityRiskScoreRecord }>>({
+    index: riskIndex,
+    ignore_unavailable: true,
+    allow_no_indices: true,
+    size: limit,
+    query: {
+      bool: {
+        filter: [
+          {
+            exists: {
+              field: `${entityType}.risk`,
+            },
+          },
+        ],
+      },
+    },
+    sort: [
+      {
+        [riskField]: {
+          order: 'desc',
+        },
+      },
+    ],
+  });
+
+  return response.hits.hits
+    .map((hit) => (hit._source ? hit._source[entityType]?.risk : undefined))
+    .filter((risk): risk is EntityRiskScoreRecord => risk !== undefined);
+};
 
 /**
  * Fetches alerts by their IDs, returning only essential fields for risk score context
@@ -71,7 +128,7 @@ export const entityRiskScoreTool = (
   return {
     id: SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
     type: ToolType.builtin,
-    description: `Call this tool to get the latest entity risk score and the inputs that contributed to the calculation for a specific entity (host, user, service, or generic). The risk score is sorted by 'kibana.alert.risk_score'. When reporting the risk score value, use the normalized field 'calculated_score_norm' which ranges from 0-100.`,
+    description: `Call this tool to get the latest entity risk score and the inputs that contributed to the calculation for a specific entity (host, user, service, or generic). Use identifier "*" to get all entities of the specified type sorted by risk score. IMPORTANT: Always use 'calculated_score_norm' (0-100) when reporting risk scores, NOT 'calculated_score' which is a raw value. The 'calculated_score_norm' field is the normalized score suitable for comparison between entities.`,
     schema: entityRiskScoreSchema,
     availability: {
       cacheMode: 'space',
@@ -103,23 +160,88 @@ export const entityRiskScoreTool = (
         }
       },
     },
-    handler: async ({ identifierType, identifier }, { request, esClient, logger }) => {
+    handler: async ({ identifierType, identifier, limit = 10 }, { request, esClient, logger }) => {
       const spaceId = getSpaceIdFromRequest(request);
       const alertsIndexPattern = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
+      const entityType = identifierType as EntityType;
 
       logger.debug(
         `${SECURITY_ENTITY_RISK_SCORE_TOOL_ID} tool called with identifierType: ${identifierType}, identifier: ${identifier}`
       );
 
       try {
+        let riskScores: EntityRiskScoreRecord[];
+
+        // Handle wildcard queries by querying the risk index directly
+        if (identifier === '*') {
+          riskScores = await queryRiskIndexForWildcard({
+            esClient: esClient.asCurrentUser,
+            spaceId,
+            entityType,
+            limit,
+          });
+
+          if (riskScores.length === 0) {
+            return {
+              results: [
+                {
+                  tool_result_id: getToolResultId(),
+                  type: ToolResultType.error,
+                  data: {
+                    message: `No risk scores found for ${identifierType} entities`,
+                  },
+                },
+              ],
+            };
+          }
+
+          // For wildcard queries, return all results without alert details (inputs) to avoid excessive data
+          // Reorder fields to prioritize calculated_score_norm
+          return {
+            results: [
+              {
+                tool_result_id: getToolResultId(),
+                type: ToolResultType.other,
+                data: {
+                  riskScores: riskScores.map((score) => {
+                    // Exclude inputs and category details to reduce payload size when returning multiple entities
+                    // Only include calculated_score_norm for clear prioity
+                    return {
+                      calculated_score_norm: score.calculated_score_norm,
+                      calculated_level: score.calculated_level,
+                      id_value: score.id_value,
+                      id_field: score.id_field,
+                      '@timestamp': score['@timestamp'],
+                      ...(score.notes.length > 0 && { notes: score.notes }),
+                      ...(score.criticality_modifier !== undefined && {
+                        criticality_modifier: score.criticality_modifier,
+                      }),
+                      ...(score.criticality_level !== undefined && {
+                        criticality_level: score.criticality_level,
+                      }),
+                      ...(score.is_privileged_user !== undefined && {
+                        is_privileged_user: score.is_privileged_user,
+                      }),
+                      ...(score.privileged_user_modifier !== undefined && {
+                        privileged_user_modifier: score.privileged_user_modifier,
+                      }),
+                    };
+                  }),
+                },
+              },
+            ],
+          };
+        }
+
+        // Handle specific entity queries
         const getRiskScore = createGetRiskScores({
           logger,
           esClient: esClient.asCurrentUser,
           spaceId,
         });
 
-        const riskScores = await getRiskScore({
-          entityType: identifierType as EntityType,
+        riskScores = await getRiskScore({
+          entityType,
           entityIdentifier: identifier,
           pagination: { querySize: 1, cursorStart: 0 },
         });
@@ -156,9 +278,30 @@ export const entityRiskScoreTool = (
           alert_contribution: alertsById[input.id] || null,
         }));
 
+        // Prioritize calculated_score_norm in the response structure
         const riskScoreData = {
-          ...latestRiskScore,
+          // Put calculated_score_norm first to emphasize its importance
+          calculated_score_norm: latestRiskScore.calculated_score_norm,
+          calculated_level: latestRiskScore.calculated_level,
+          id_value: latestRiskScore.id_value,
+          id_field: latestRiskScore.id_field,
+          // Include calculated_score but after normalized score
+          calculated_score: latestRiskScore.calculated_score,
           inputs: enhancedInputs,
+          '@timestamp': latestRiskScore['@timestamp'],
+          ...(latestRiskScore.notes.length > 0 && { notes: latestRiskScore.notes }),
+          ...(latestRiskScore.criticality_modifier !== undefined && {
+            criticality_modifier: latestRiskScore.criticality_modifier,
+          }),
+          ...(latestRiskScore.criticality_level !== undefined && {
+            criticality_level: latestRiskScore.criticality_level,
+          }),
+          ...(latestRiskScore.is_privileged_user !== undefined && {
+            is_privileged_user: latestRiskScore.is_privileged_user,
+          }),
+          ...(latestRiskScore.privileged_user_modifier !== undefined && {
+            privileged_user_modifier: latestRiskScore.privileged_user_modifier,
+          }),
         };
 
         return {
