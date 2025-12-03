@@ -12,7 +12,7 @@ import { css } from '@emotion/react';
 import { STATUS, useFileUploadContext } from '@kbn/file-upload';
 import { FileUploadLiteLookUpView } from '@kbn/file-upload/src/file_upload_component/new/file_upload_lite_lookup_view';
 import type { PropsWithChildren } from 'react';
-import React, { type FC, useCallback, useEffect } from 'react';
+import React, { type FC, useCallback, useEffect, useState } from 'react';
 import type { FileRejection } from 'react-dropzone';
 import { useDropzone } from 'react-dropzone';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -49,7 +49,8 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
   const { indexUpdateService } = services;
   const { fileUploadManager, filesStatus, uploadStatus, indexName, reset } = useFileUploadContext();
   const isSaving = useObservable(indexUpdateService.isSaving$, false);
-  const [dropzoneDisabled, setDropzoneDisabled] = React.useState(false);
+  const [dropzoneDisabled, setDropzoneDisabled] = useState(false);
+  const [fileUploadActive, setFileUploadActive] = useState(false);
 
   useEffect(
     function checkForErrors() {
@@ -184,7 +185,7 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
 
   let content: React.ReactNode = children;
 
-  if (noResults && !showFilePreview && !isSaving) {
+  if (noResults && !showFilePreview && !isSaving && !fileUploadActive) {
     content = (
       <EuiFlexGroup direction="column" gutterSize="s" css={{ height: '100%' }}>
         <EuiFlexItem grow={false}>{content}</EuiFlexItem>
@@ -193,10 +194,10 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
     );
-  } else if (showFilePreview || isSaving) {
+  } else if (showFilePreview || fileUploadActive) {
     content = (
       <FileUploadLiteLookUpView
-        setIsSaving={(saving: boolean) => indexUpdateService.setIsSaving(saving)}
+        setFileUploadActive={setFileUploadActive}
         setDropzoneDisabled={setDropzoneDisabled}
         onClose={async () => {
           await indexUpdateService.onFileUploadFinished(indexName);

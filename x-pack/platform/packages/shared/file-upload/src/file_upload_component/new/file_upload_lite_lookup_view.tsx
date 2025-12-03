@@ -22,7 +22,7 @@ interface Props {
   resultLinks?: ResultLinks;
   getAdditionalLinks?: GetAdditionalLinks;
   onClose?: () => void;
-  setIsSaving: (saving: boolean) => void;
+  setFileUploadActive: (active: boolean) => void;
   setDropzoneDisabled?: (disabled: boolean) => void;
 }
 
@@ -35,8 +35,8 @@ interface StepsStatus {
 
 export const FileUploadLiteLookUpView: FC<Props> = ({
   onClose,
-  setIsSaving,
   setDropzoneDisabled,
+  setFileUploadActive,
 }) => {
   const { filesStatus, uploadStatus, fileClashes, onImportClick, indexName } =
     useFileUploadContext();
@@ -65,12 +65,18 @@ export const FileUploadLiteLookUpView: FC<Props> = ({
     setDropzoneDisabled?.(stepsStatus.analysis !== STATUS.STARTED);
   }, [stepsStatus.analysis, setDropzoneDisabled]);
 
+  useEffect(() => {
+    setFileUploadActive(true);
+    return () => {
+      setFileUploadActive(false);
+    };
+  }, [setFileUploadActive]);
+
   const importClick = useCallback(() => {
-    setIsSaving(true);
     onImportClick();
     setStep('mapping', STATUS.COMPLETED);
     setStep('upload', STATUS.STARTED);
-  }, [onImportClick, setIsSaving, setStep]);
+  }, [onImportClick, setStep]);
 
   if (indexName === null) {
     return null;
@@ -168,7 +174,6 @@ export const FileUploadLiteLookUpView: FC<Props> = ({
             <EuiButton
               disabled={uploadStatus.allDocsSearchable === false}
               onClick={() => {
-                setIsSaving(false);
                 onClose?.();
               }}
             >
