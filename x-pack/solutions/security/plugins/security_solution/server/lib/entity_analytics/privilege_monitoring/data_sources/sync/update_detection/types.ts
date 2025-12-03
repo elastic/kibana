@@ -6,8 +6,7 @@
  */
 
 import type { MonitoringEntitySyncType } from '../../../types';
-
-export type AfterKey = Record<string, string> | undefined;
+import type { AfterKey } from '../types';
 
 export interface PrivTopHitSource {
   '@timestamp'?: string;

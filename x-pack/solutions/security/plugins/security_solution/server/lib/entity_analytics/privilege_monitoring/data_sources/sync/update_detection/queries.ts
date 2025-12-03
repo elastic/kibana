@@ -13,10 +13,10 @@ import type {
   MonitoringEntitySource,
 } from '../../../../../../../common/api/entity_analytics';
 import type { PrivilegeMonitoringDataClient } from '../../../engine/data_client';
-import type { AfterKey } from './integrations/types';
 import type { PrivMonBulkUser } from '../../../types';
 import { makeOpsBuilder } from '../../bulk/upsert';
 import { errorsMsg, getErrorFromBulkResponse } from '../utils';
+import type { AfterKey } from '../types';
 
 /**
  * Build painless script for matchers
