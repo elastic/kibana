@@ -22,6 +22,14 @@ import { getShouldMatchOrNotExistFilter } from '../../utils/get_should_match_or_
 import { timeRangeFilter } from '../../utils/dsl_filters';
 import { parseDatemath } from '../../utils/time';
 
+export interface GetLogCategoriesToolResult {
+  type: ToolResultType.other;
+  data: {
+    highSeverityCategories: Awaited<ReturnType<typeof getFilteredLogCategories>>;
+    lowSeverityCategories: Awaited<ReturnType<typeof getFilteredLogCategories>>;
+  };
+}
+
 export const OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID = 'observability.get_log_categories';
 
 const getLogsSchema = z.object({
@@ -154,7 +162,7 @@ async function getFilteredLogCategories({
   const totalHits = getHitsTotal(countResponse);
   if (totalHits === 0) {
     logger.debug('No log documents found for the given query.');
-    return [];
+    return undefined;
   }
 
   // Calculate sampling probability to get ~10,000 samples
