@@ -37,7 +37,6 @@ import { css } from '@emotion/react';
 import { omit } from 'lodash';
 import { usePageReady } from '@kbn/ebt-tools';
 import moment from 'moment';
-import { OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-plugin/common/constants';
 import { ObsCasesContext } from './components/obs_cases_context';
 import { RelatedAlerts } from './components/related_alerts/related_alerts';
 import type { AlertDetailsSource, TabId } from './types';
@@ -78,6 +77,9 @@ export const ALERT_DETAILS_PAGE_ID = 'alert-details-o11y';
 const defaultBreadcrumb = i18n.translate('xpack.observability.breadcrumbs.alertDetails', {
   defaultMessage: 'Alert details',
 });
+
+// avoiding circular dependency by having the attachment id here
+const OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID = 'observability.alert';
 
 export const LOG_DOCUMENT_COUNT_RULE_TYPE_ID = 'logs.alert.document.count';
 export const METRIC_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.threshold';
