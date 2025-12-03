@@ -7,28 +7,17 @@
 
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
-import { ObjectRemover } from '../../../lib/object_remover';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const browser = getService('browser');
-  const supertest = getService('supertest');
   const retry = getService('retry');
-  const objectRemover = new ObjectRemover(supertest);
 
   describe('Create Rule Flow', () => {
-    let createdRule: { name: string; id: string };
-
     before(async () => {
       await pageObjects.common.navigateToApp('rules');
       await pageObjects.header.waitUntilLoadingHasFinished();
-    });
-
-    after(async () => {
-      if (createdRule) {
-        await objectRemover.removeAll();
-      }
     });
 
     it('create rule button is visible and enabled', async () => {
@@ -102,4 +91,3 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
   });
 };
-
