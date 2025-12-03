@@ -14,6 +14,7 @@ import { z } from '@kbn/zod';
  */
 export enum AttachmentType {
   screenContext = 'screen_context',
+  timeRange = 'time_range',
   text = 'text',
   esql = 'esql',
 }
@@ -22,6 +23,25 @@ interface AttachmentDataMap {
   [AttachmentType.esql]: EsqlAttachmentData;
   [AttachmentType.text]: TextAttachmentData;
   [AttachmentType.screenContext]: ScreenContextAttachmentData;
+  [AttachmentType.timeRange]: TimerangeAttachmentData;
+}
+
+export const timeRangeAttachmentDataSchema = z.object({
+  start: z.string(),
+  end: z.string(),
+  description: z.string().optional(),
+});
+
+/**
+ * Data for an esql attachment.
+ */
+export interface TimerangeAttachmentData {
+  /** start of the timerange in ISO format */
+  start: string;
+  /** end of the timerange in ISO format */
+  end: string;
+  /** optional description of what the timerange is for */
+  description?: string;
 }
 
 export const esqlAttachmentDataSchema = z.object({

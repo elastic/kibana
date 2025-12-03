@@ -12,7 +12,7 @@ import type { AttachmentType, AttachmentDataOf } from './attachment_types';
  */
 export interface Attachment<
   Type extends string = string,
-  DataType = Type extends AttachmentType ? AttachmentDataOf<Type> : Record<string, unknown>
+  DataType = Type extends AttachmentType ? AttachmentDataOf<Type> : object
 > {
   /** Unique identifier for the attachment */
   id: string;
@@ -29,6 +29,7 @@ export interface Attachment<
 export type TextAttachment = Attachment<AttachmentType.text>;
 export type ScreenContextAttachment = Attachment<AttachmentType.screenContext>;
 export type EsqlAttachment = Attachment<AttachmentType.esql>;
+export type TimerangeAttachment = Attachment<AttachmentType.timeRange>;
 
 /**
  * Input version of an attachment, where the id is optional
