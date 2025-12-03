@@ -20,7 +20,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState, useEffect } from 'react';
-import type { Attachment } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
+import type {
+  Attachment,
+  AttachmentType,
+} from '@kbn/streams-plugin/server/lib/streams/attachments/types';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import {
@@ -58,20 +61,25 @@ export function AddAttachmentFlyout({
 
   const attachmentSuggestionsFetch = useStreamsAppFetch(
     ({ signal }) => {
+      // Build query params object, only including defined values
+      const queryParams: {
+        query?: string;
+        attachmentTypes?: AttachmentType[];
+        tags?: string[];
+      } = {};
+
+      if (filters.debouncedQuery) queryParams.query = filters.debouncedQuery;
+      if (filters.types.length > 0) queryParams.attachmentTypes = filters.types;
+      if (filters.tags.length > 0) queryParams.tags = filters.tags;
+
       return streamsRepositoryClient
-        .fetch('POST /internal/streams/{streamName}/attachments/_suggestions', {
+        .fetch('GET /internal/streams/{streamName}/attachments/_suggestions', {
           signal,
           params: {
             path: {
               streamName: entityId,
             },
-            query: {
-              query: filters.debouncedQuery,
-              attachmentType: filters.type,
-            },
-            body: {
-              tags: filters.tags,
-            },
+            query: queryParams,
           },
         })
         .then(({ suggestions }) => {
@@ -88,7 +96,7 @@ export function AddAttachmentFlyout({
       streamsRepositoryClient,
       entityId,
       filters.debouncedQuery,
-      filters.type,
+      filters.types,
       filters.tags,
       linkedAttachments,
     ]

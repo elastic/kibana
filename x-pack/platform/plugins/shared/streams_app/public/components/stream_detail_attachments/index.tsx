@@ -62,7 +62,9 @@ export function StreamDetailAttachments({
 
   const attachmentsFetch = useAttachmentsFetch({
     name: definition.stream.name,
-    attachmentType: filters.type,
+    ...(filters.debouncedQuery && { query: filters.debouncedQuery }),
+    ...(filters.types.length > 0 && { attachmentTypes: filters.types }),
+    ...(filters.tags.length > 0 && { tags: filters.tags }),
   });
   const { addAttachments, removeAttachments } = useAttachmentsApi({
     name: definition.stream.name,
@@ -73,15 +75,6 @@ export function StreamDetailAttachments({
     return attachmentsFetch.value?.attachments ?? [];
   }, [attachmentsFetch.value?.attachments]);
 
-  const filteredAttachments = useMemo(() => {
-    return linkedAttachments.filter((attachment) => {
-      const matchesQuery = attachment.title.toLowerCase().includes(filters.query.toLowerCase());
-      const matchesTags =
-        filters.tags.length === 0 || filters.tags.some((tagId) => attachment.tags?.includes(tagId));
-      return matchesQuery && matchesTags;
-    });
-  }, [linkedAttachments, filters.query, filters.tags]);
-
   const [selectedAttachments, setSelectedAttachments] = useState<Attachment[]>([]);
 
   const selectionPopoverId = useGeneratedHtmlId({
@@ -89,7 +82,7 @@ export function StreamDetailAttachments({
   });
 
   const hasFiltersApplied =
-    filters.type !== undefined || filters.tags.length > 0 || filters.query !== '';
+    filters.types.length > 0 || filters.tags.length > 0 || filters.debouncedQuery !== '';
   const hasNoAttachments =
     !attachmentsFetch.loading && linkedAttachments.length === 0 && !hasFiltersApplied;
 
@@ -198,7 +191,7 @@ export function StreamDetailAttachments({
                 <EuiText size="s">
                   {i18n.translate('xpack.streams.streamDetailAttachments.attachmentCount', {
                     defaultMessage: '{count} Attachments',
-                    values: { count: filteredAttachments.length },
+                    values: { count: linkedAttachments.length },
                   })}
                 </EuiText>
               </EuiFlexItem>
@@ -279,7 +272,7 @@ export function StreamDetailAttachments({
           <EuiFlexItem>
             <AttachmentsTable
               entityId={definition?.stream.name}
-              attachments={filteredAttachments}
+              attachments={linkedAttachments}
               loading={attachmentsFetch.loading}
               selectedAttachments={selectedAttachments}
               setSelectedAttachments={canLinkAttachments ? setSelectedAttachments : undefined}

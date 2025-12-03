@@ -10,10 +10,14 @@ import { useStreamsAppFetch } from './use_streams_app_fetch';
 
 export const useAttachmentsFetch = ({
   name,
-  attachmentType,
+  query,
+  attachmentTypes,
+  tags,
 }: {
   name: string;
-  attachmentType?: AttachmentType;
+  query?: string;
+  attachmentTypes?: AttachmentType[];
+  tags?: string[];
 }) => {
   const {
     services: { telemetryClient },
@@ -26,6 +30,17 @@ export const useAttachmentsFetch = ({
 
   const attachmentsFetch = useStreamsAppFetch(
     async ({ signal }) => {
+      // Build query params object, only including defined values
+      const queryParams: {
+        query?: string;
+        attachmentTypes?: AttachmentType[];
+        tags?: string[];
+      } = {};
+      
+      if (query) queryParams.query = query;
+      if (attachmentTypes && attachmentTypes.length > 0) queryParams.attachmentTypes = attachmentTypes;
+      if (tags && tags.length > 0) queryParams.tags = tags;
+
       const response = await streamsRepositoryClient.fetch(
         'GET /api/streams/{streamName}/attachments 2023-10-31',
         {
@@ -34,9 +49,7 @@ export const useAttachmentsFetch = ({
             path: {
               streamName: name,
             },
-            query: {
-              attachmentType,
-            },
+            query: queryParams,
           },
         }
       );
@@ -59,7 +72,7 @@ export const useAttachmentsFetch = ({
 
       return response;
     },
-    [name, attachmentType, streamsRepositoryClient, telemetryClient]
+    [name, query, attachmentTypes, tags, streamsRepositoryClient, telemetryClient]
   );
 
   return attachmentsFetch;

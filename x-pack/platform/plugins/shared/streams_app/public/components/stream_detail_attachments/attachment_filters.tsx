@@ -31,14 +31,14 @@ const ATTACHMENT_TYPE_OPTIONS = Object.entries(ATTACHMENT_TYPE_CONFIG).map(([typ
 export interface AttachmentFiltersState {
   query: string;
   debouncedQuery: string;
-  type: AttachmentType | undefined;
+  types: AttachmentType[];
   tags: string[];
 }
 
 export const DEFAULT_ATTACHMENT_FILTERS: AttachmentFiltersState = {
   query: '',
   debouncedQuery: '',
-  type: undefined,
+  types: [],
   tags: [],
 };
 
@@ -72,7 +72,7 @@ export function AttachmentFilters({
     () =>
       debounce((query: string) => {
         onFiltersChange((prev) => ({ ...prev, debouncedQuery: query }));
-      }, 150),
+      }, 300),
     [onFiltersChange]
   );
 
@@ -96,8 +96,8 @@ export function AttachmentFilters({
       onClick={() => setIsTypePopoverOpen(!isTypePopoverOpen)}
       isSelected={isTypePopoverOpen}
       numFilters={ATTACHMENT_TYPE_OPTIONS.length}
-      hasActiveFilters={filters.type !== undefined}
-      numActiveFilters={filters.type !== undefined ? 1 : 0}
+      hasActiveFilters={filters.types.length > 0}
+      numActiveFilters={filters.types.length}
     >
       {i18n.translate('xpack.streams.attachmentFilters.typeFilterButtonLabel', {
         defaultMessage: 'Type',
@@ -146,26 +146,35 @@ export function AttachmentFilters({
             panelPaddingSize="none"
           >
             <EuiSelectable
-              singleSelection
+              allowExclusions
+              searchable
+              searchProps={{
+                placeholder: i18n.translate('xpack.streams.attachmentFilters.searchTypesLabel', {
+                  defaultMessage: 'Search types',
+                }),
+                compressed: true,
+              }}
               options={ATTACHMENT_TYPE_OPTIONS.map((option) => ({
                 label: option.label,
-                checked: filters.type === option.value ? 'on' : undefined,
+                checked: filters.types.includes(option.value) ? 'on' : undefined,
                 value: option.value,
               }))}
               onChange={(newOptions) => {
-                const selected = newOptions.find((opt) => opt.checked === 'on');
                 onFiltersChange((prev) => ({
                   ...prev,
-                  type: selected ? selected.value : undefined,
+                  types: newOptions
+                    .filter((opt) => opt.checked === 'on')
+                    .map(({ value }) => value as AttachmentType),
                 }));
               }}
             >
-              {(list) => (
+              {(list, search) => (
                 <div
                   css={css`
-                    min-width: 200px;
+                    min-width: 300px;
                   `}
                 >
+                  <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
                   {list}
                 </div>
               )}

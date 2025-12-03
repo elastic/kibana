@@ -87,7 +87,7 @@ export class AttachmentClient {
     rule: async ({ query, tags, perPage }) => {
       const { data } = await this.clients.rulesClient.find({
         options: {
-          search: query,
+          search: query ? `${query}*` : undefined,
           perPage,
           ...(tags && tags.length > 0
             ? {
@@ -499,13 +499,16 @@ export class AttachmentClient {
   }
 
   /**
-   * Retrieves all attachments associated with a stream.
+   * Retrieves all attachments associated with a stream, optionally filtered by type, query, and tags.
    *
    * Fetches attachment documents from storage and enriches them with full entity details
    * by querying the appropriate services.
    *
    * @param streamName - The name of the stream to get attachments for
-   * @param attachmentType - Optional filter to only return attachments of a specific type
+   * @param options - Optional filters
+   * @param options.query - Search query string to match against attachment titles
+   * @param options.attachmentTypes - Array of attachment types to filter (e.g., ['dashboard', 'rule'])
+   * @param options.tags - Array of tag strings to filter by
    * @returns A promise that resolves with an array of attachments with full entity details
    *
    * @example
@@ -513,14 +516,29 @@ export class AttachmentClient {
    * // Get all attachments
    * const allAttachments = await attachmentClient.getAttachments('my-stream');
    *
-   * // Get only attachments of a specific type
-   * const dashboards = await attachmentClient.getAttachments('my-stream', 'dashboard');
+   * // Get only attachments of specific types
+   * const filtered = await attachmentClient.getAttachments('my-stream', {
+   *   attachmentTypes: ['dashboard', 'rule']
+   * });
+   *
+   * // Search with query and tags
+   * const searched = await attachmentClient.getAttachments('my-stream', {
+   *   query: 'security',
+   *   tags: ['production']
+   * });
    * ```
    */
-  async getAttachments(streamName: string, attachmentType?: AttachmentType): Promise<Attachment[]> {
+  async getAttachments(
+    streamName: string,
+    options?: {
+      query?: string;
+      attachmentTypes?: AttachmentType[];
+      tags?: string[];
+    }
+  ): Promise<Attachment[]> {
     const filter: QueryDslQueryContainer[] = [{ terms: { [STREAM_NAMES]: [streamName] } }];
-    if (attachmentType) {
-      filter.push({ terms: { [ATTACHMENT_TYPE]: [attachmentType] } });
+    if (options?.attachmentTypes && options.attachmentTypes.length > 0) {
+      filter.push({ terms: { [ATTACHMENT_TYPE]: options.attachmentTypes } });
     }
     const attachmentsResponse = await this.clients.storageClient.search({
       size: 10_000,
@@ -544,8 +562,24 @@ export class AttachmentClient {
 
     const attachments = await this.fetchAttachments(attachmentLinks);
 
+    // Apply client-side filtering for query and tags
+    let filteredAttachments = attachments;
+
+    if (options?.query) {
+      const queryLower = options.query.toLowerCase();
+      filteredAttachments = filteredAttachments.filter((attachment) =>
+        attachment.title.toLowerCase().includes(queryLower)
+      );
+    }
+
+    if (options?.tags && options.tags.length > 0) {
+      filteredAttachments = filteredAttachments.filter((attachment) =>
+        options.tags!.some((tag) => attachment.tags?.includes(tag))
+      );
+    }
+
     // Enrich attachments with stream names
-    return attachments.map((attachment) => ({
+    return filteredAttachments.map((attachment) => ({
       ...attachment,
       streamNames: streamNamesById.get(attachment.id) ?? [],
     }));

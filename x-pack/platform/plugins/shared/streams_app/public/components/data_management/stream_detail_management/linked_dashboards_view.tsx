@@ -28,7 +28,7 @@ export function LinkedDashboardsView({ definition }: { definition: Streams.all.G
   const context = useKibana();
   const attachmentsFetch = useAttachmentsFetch({
     name: definition.stream.name,
-    attachmentType: 'dashboard',
+    attachmentTypes: ['dashboard'],
   });
   const dashboardsLocator =
     context.dependencies.start.share.url.locators.get(DASHBOARD_APP_LOCATOR);

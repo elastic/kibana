@@ -132,9 +132,16 @@ export const getSuggestedSo = async ({
   tags?: string[];
   perPage: number;
 }): Promise<AttachmentData[]> => {
+  // Different saved object types use different field names for their title
+  const searchFieldsByType: Record<typeof attachmentType, string[]> = {
+    dashboard: ['title'],
+    slo: ['name'],
+  };
+
   const searchOptions: SavedObjectsFindOptions = {
     type: attachmentType,
-    search: query,
+    search: query ? `${query}*` : undefined,
+    searchFields: searchFieldsByType[attachmentType],
     perPage,
     ...(tags
       ? {
