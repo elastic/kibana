@@ -13,8 +13,9 @@ import {
   EuiTextArea,
   EuiButtonIcon,
   useEuiTheme,
-  useEuiShadow,
-  useEuiShadowHover,
+  euiShadow,
+  euiShadowHover,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -31,26 +32,25 @@ const titleStyles = css`
   font-weight: 400;
 `;
 
-const useInputShadowStyles = () => {
-  return css`
-    ${useEuiShadow('s')}
-    &:hover {
-      ${useEuiShadowHover('s')}
+const getInputShadowStyles = (euiThemeContext: UseEuiTheme) => css`
+  ${euiShadow(euiThemeContext, 's')}
+  &:hover {
+    ${euiShadowHover(euiThemeContext, 's')}
+  }
+  &:focus-within {
+    ${euiShadow(euiThemeContext, 'xl')}
+    :hover {
+      ${euiShadowHover(euiThemeContext, 'xl')}
     }
-    &:focus-within {
-      ${useEuiShadow('xl')}
-      :hover {
-        ${useEuiShadowHover('xl')}
-      }
-    }
-  `;
-};
+  }
+`;
 
 export const ExploreAgentPrompt: React.FC = () => {
   const {
     services: { application },
   } = useKibana();
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
   const { data: agents = [] } = useAgents();
   const [chatInput, setChatInput] = useState('');
   const [selectedAgentId, setSelectedAgentId] = useState<string | undefined>();
@@ -76,7 +76,7 @@ export const ExploreAgentPrompt: React.FC = () => {
     background-color: ${euiTheme.colors.backgroundBasePlain};
     border: none;
 
-    ${useInputShadowStyles()}
+    ${getInputShadowStyles(euiThemeContext)}
   `;
 
   const textAreaStyles = css`
