@@ -56,9 +56,7 @@ export class TrialCompanionMilestoneServiceImpl implements TrialCompanionMilesto
     this.logger.info(`Setting up TrialCompanionMilestoneService: ${setup.enabled}`);
     this.enabled = setup.enabled;
     this.usageCollection = setup.usageCollection;
-    if (this.enabled) {
-      this.registerTask(setup.taskManager);
-    }
+    this.registerTask(setup.taskManager);
   }
 
   public async start(start: TrialCompanionMilestoneServiceStart) {
