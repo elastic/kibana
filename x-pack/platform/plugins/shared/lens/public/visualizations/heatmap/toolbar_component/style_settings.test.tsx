@@ -12,6 +12,7 @@ import userEvent from '@testing-library/user-event';
 import { LegendSize } from '@kbn/chart-expressions-common';
 import type { FramePublicAPI, HeatmapVisualizationState } from '@kbn/lens-common';
 import type { HeatmapGridConfigResult } from '@kbn/expression-heatmap-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { HeatmapStyleSettings } from './style_settings';
 
 type Props = ComponentProps<typeof HeatmapStyleSettings>;
@@ -213,5 +214,328 @@ describe('heatmap style settings', () => {
 
     const yAxisSortSelect = screen.getByTestId('lnsHeatmapYAxisSortOrder') as HTMLSelectElement;
     expect(yAxisSortSelect.value).toBe('dataIndex');
+  });
+
+  describe('functional test: sort predicate changes and data sorting order', () => {
+    const testData: Record<string, Datatable> = {
+      '1': {
+        type: 'datatable',
+        columns: [
+          { id: 'x', name: 'X Axis', meta: { type: 'string' as const } },
+          { id: 'y', name: 'Y Axis', meta: { type: 'number' as const } },
+          { id: 'value', name: 'Value', meta: { type: 'number' as const } },
+        ],
+        rows: [
+          { x: 'Zebra', y: 10, value: 5 },
+          { x: 'Apple', y: 5, value: 3 },
+          { x: 'Banana', y: 20, value: 8 },
+          { x: 'Delta', y: 15, value: 7 },
+        ],
+      },
+    };
+
+    it('should correctly set predicates for X-axis string column sorting (ascending and descending)', async () => {
+      const setStateMock = jest.fn();
+      renderComponent({
+        state: {
+          ...defaultProps.state,
+          xAccessor: 'x',
+        },
+        setState: setStateMock,
+        frame: {
+          ...defaultProps.frame,
+          activeData: testData,
+        },
+      });
+
+      const xAxisSortSelect = screen.getByTestId('lnsHeatmapXAxisSortOrder');
+
+      // Test ascending sort for string column
+      await userEvent.selectOptions(xAxisSortSelect, 'asc');
+      expect(setStateMock).toHaveBeenLastCalledWith({
+        ...defaultProps.state,
+        xAccessor: 'x',
+        gridConfig: {
+          ...defaultProps.state.gridConfig,
+          xSortPredicate: 'alphaAsc',
+        },
+      });
+
+      // Test descending sort for string column
+      await userEvent.selectOptions(xAxisSortSelect, 'desc');
+      expect(setStateMock).toHaveBeenLastCalledWith({
+        ...defaultProps.state,
+        xAccessor: 'x',
+        gridConfig: {
+          ...defaultProps.state.gridConfig,
+          xSortPredicate: 'alphaDesc',
+        },
+      });
+    });
+
+    it('should correctly set predicates for X-axis numeric column sorting (ascending and descending)', async () => {
+      const numericTestData: Record<string, Datatable> = {
+        '1': {
+          type: 'datatable',
+          columns: [
+            { id: 'x', name: 'X Axis', meta: { type: 'number' as const } },
+            { id: 'y', name: 'Y Axis', meta: { type: 'string' as const } },
+            { id: 'value', name: 'Value', meta: { type: 'number' as const } },
+          ],
+          rows: [
+            { x: 100, y: 'A', value: 5 },
+            { x: 50, y: 'B', value: 3 },
+            { x: 200, y: 'C', value: 8 },
+            { x: 150, y: 'D', value: 7 },
+          ],
+        },
+      };
+
+      const setStateMock = jest.fn();
+      renderComponent({
+        state: {
+          ...defaultProps.state,
+          xAccessor: 'x',
+        },
+        setState: setStateMock,
+        frame: {
+          ...defaultProps.frame,
+          activeData: numericTestData,
+        },
+      });
+
+      const xAxisSortSelect = screen.getByTestId('lnsHeatmapXAxisSortOrder');
+
+      // Test ascending sort for numeric column
+      await userEvent.selectOptions(xAxisSortSelect, 'asc');
+      expect(setStateMock).toHaveBeenLastCalledWith({
+        ...defaultProps.state,
+        xAccessor: 'x',
+        gridConfig: {
+          ...defaultProps.state.gridConfig,
+          xSortPredicate: 'numAsc',
+        },
+      });
+
+      // Test descending sort for numeric column
+      await userEvent.selectOptions(xAxisSortSelect, 'desc');
+      expect(setStateMock).toHaveBeenLastCalledWith({
+        ...defaultProps.state,
+        xAccessor: 'x',
+        gridConfig: {
+          ...defaultProps.state.gridConfig,
+          xSortPredicate: 'numDesc',
+        },
+      });
+    });
+
+    it('should correctly set predicates for Y-axis sorting with different options', async () => {
+      const setStateMock = jest.fn();
+      renderComponent({
+        state: {
+          ...defaultProps.state,
+          yAccessor: 'y',
+        },
+        setState: setStateMock,
+        frame: {
+          ...defaultProps.frame,
+          activeData: testData,
+        },
+      });
+
+      const yAxisSortSelect = screen.getByTestId('lnsHeatmapYAxisSortOrder');
+
+      // Test dataIndex predicate
+      await userEvent.selectOptions(yAxisSortSelect, 'dataIndex');
+      expect(setStateMock).toHaveBeenLastCalledWith({
+        ...defaultProps.state,
+        yAccessor: 'y',
+        gridConfig: {
+          ...defaultProps.state.gridConfig,
+          ySortPredicate: 'dataIndex',
+        },
+      });
+
+      // Test ascending sort for numeric Y-axis column
+      await userEvent.selectOptions(yAxisSortSelect, 'asc');
+      expect(setStateMock).toHaveBeenLastCalledWith({
+        ...defaultProps.state,
+        yAccessor: 'y',
+        gridConfig: {
+          ...defaultProps.state.gridConfig,
+          ySortPredicate: 'numAsc',
+        },
+      });
+
+      // Test descending sort for numeric Y-axis column
+      await userEvent.selectOptions(yAxisSortSelect, 'desc');
+      expect(setStateMock).toHaveBeenLastCalledWith({
+        ...defaultProps.state,
+        yAccessor: 'y',
+        gridConfig: {
+          ...defaultProps.state.gridConfig,
+          ySortPredicate: 'numDesc',
+        },
+      });
+
+      // Test Auto (undefined predicate)
+      await userEvent.selectOptions(yAxisSortSelect, '');
+      expect(setStateMock).toHaveBeenLastCalledWith({
+        ...defaultProps.state,
+        yAccessor: 'y',
+        gridConfig: {
+          ...defaultProps.state.gridConfig,
+          ySortPredicate: undefined,
+        },
+      });
+    });
+
+    it('should correctly handle switching between different X-axis predicates', async () => {
+      const setStateMock = jest.fn();
+      renderComponent({
+        state: {
+          ...defaultProps.state,
+          xAccessor: 'x',
+          gridConfig: {
+            ...defaultProps.state.gridConfig,
+            xSortPredicate: 'alphaAsc',
+          } as HeatmapGridConfigResult,
+        },
+        setState: setStateMock,
+        frame: {
+          ...defaultProps.frame,
+          activeData: testData,
+        },
+      });
+
+      const xAxisSortSelect = screen.getByTestId('lnsHeatmapXAxisSortOrder');
+
+      // Switch from alphaAsc to alphaDesc
+      await userEvent.selectOptions(xAxisSortSelect, 'desc');
+      expect(setStateMock).toHaveBeenLastCalledWith({
+        ...defaultProps.state,
+        xAccessor: 'x',
+        gridConfig: {
+          ...defaultProps.state.gridConfig,
+          xSortPredicate: 'alphaDesc',
+        },
+      });
+
+      // Switch to dataIndex
+      await userEvent.selectOptions(xAxisSortSelect, 'dataIndex');
+      expect(setStateMock).toHaveBeenLastCalledWith({
+        ...defaultProps.state,
+        xAccessor: 'x',
+        gridConfig: {
+          ...defaultProps.state.gridConfig,
+          xSortPredicate: 'dataIndex',
+        },
+      });
+
+      // Switch back to Auto
+      await userEvent.selectOptions(xAxisSortSelect, '');
+      expect(setStateMock).toHaveBeenLastCalledWith({
+        ...defaultProps.state,
+        xAccessor: 'x',
+        gridConfig: {
+          ...defaultProps.state.gridConfig,
+          xSortPredicate: undefined,
+        },
+      });
+    });
+
+    it('should correctly handle Y-axis string column sorting', async () => {
+      const stringYTestData: Record<string, Datatable> = {
+        '1': {
+          type: 'datatable',
+          columns: [
+            { id: 'x', name: 'X Axis', meta: { type: 'number' as const } },
+            { id: 'y', name: 'Y Axis', meta: { type: 'string' as const } },
+            { id: 'value', name: 'Value', meta: { type: 'number' as const } },
+          ],
+          rows: [
+            { x: 1, y: 'Zebra', value: 5 },
+            { x: 2, y: 'Apple', value: 3 },
+            { x: 3, y: 'Banana', value: 8 },
+          ],
+        },
+      };
+
+      const setStateMock = jest.fn();
+      renderComponent({
+        state: {
+          ...defaultProps.state,
+          yAccessor: 'y',
+        },
+        setState: setStateMock,
+        frame: {
+          ...defaultProps.frame,
+          activeData: stringYTestData,
+        },
+      });
+
+      const yAxisSortSelect = screen.getByTestId('lnsHeatmapYAxisSortOrder');
+
+      // Test ascending sort for string Y-axis column
+      await userEvent.selectOptions(yAxisSortSelect, 'asc');
+      expect(setStateMock).toHaveBeenLastCalledWith({
+        ...defaultProps.state,
+        yAccessor: 'y',
+        gridConfig: {
+          ...defaultProps.state.gridConfig,
+          ySortPredicate: 'alphaAsc',
+        },
+      });
+
+      // Test descending sort for string Y-axis column
+      await userEvent.selectOptions(yAxisSortSelect, 'desc');
+      expect(setStateMock).toHaveBeenLastCalledWith({
+        ...defaultProps.state,
+        yAccessor: 'y',
+        gridConfig: {
+          ...defaultProps.state.gridConfig,
+          ySortPredicate: 'alphaDesc',
+        },
+      });
+    });
+
+    it('should maintain correct predicates when switching between X and Y axis settings', async () => {
+      const setStateMock = jest.fn();
+      renderComponent({
+        state: {
+          ...defaultProps.state,
+          xAccessor: 'x',
+          yAccessor: 'y',
+        },
+        setState: setStateMock,
+        frame: {
+          ...defaultProps.frame,
+          activeData: testData,
+        },
+      });
+
+      // Set X-axis to alphaDesc
+      const xAxisSortSelect = screen.getByTestId('lnsHeatmapXAxisSortOrder');
+      await userEvent.selectOptions(xAxisSortSelect, 'desc');
+      expect(setStateMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          gridConfig: expect.objectContaining({
+            xSortPredicate: 'alphaDesc',
+          }),
+        })
+      );
+
+      // Set Y-axis to numAsc
+      const yAxisSortSelect = screen.getByTestId('lnsHeatmapYAxisSortOrder');
+      await userEvent.selectOptions(yAxisSortSelect, 'asc');
+      expect(setStateMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          gridConfig: expect.objectContaining({
+            ySortPredicate: 'numAsc',
+            xSortPredicate: 'alphaDesc', // Should preserve X-axis predicate
+          }),
+        })
+      );
+    });
   });
 });
