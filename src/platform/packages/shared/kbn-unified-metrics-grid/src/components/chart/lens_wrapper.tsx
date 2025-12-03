@@ -84,17 +84,21 @@ export function LensWrapper({
     () =>
       onExploreInDiscoverTab?.({
         query: lensProps.attributes.state.query,
+        tabLabel: lensProps.attributes.title,
         timeRange: lensProps.timeRange,
       }),
-    [lensProps.attributes.state.query, lensProps.timeRange, onExploreInDiscoverTab]
+    [
+      lensProps.attributes.state.query,
+      lensProps.attributes.title,
+      lensProps.timeRange,
+      onExploreInDiscoverTab,
+    ]
   );
 
   const extraActions = useLensExtraActions({
     copyToDashboard: onCopyToDashboard ? { onClick: onCopyToDashboard } : undefined,
     viewDetails: onViewDetails ? { onClick: onViewDetails } : undefined,
-    exploreInDiscoverTab: onExploreInDiscoverTab
-      ? { onClick: handleExploreInDiscoverTab }
-      : undefined,
+    exploreInDiscoverTab: { onClick: handleExploreInDiscoverTab },
   });
 
   return (
