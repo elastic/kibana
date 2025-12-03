@@ -86,7 +86,7 @@ describe('useAgentBuilderAttachment', () => {
         {
           id: 'alert-1234567890',
           type: 'alert',
-          alert: 'test alert data',
+          data: { alert: 'test alert data' },
         },
       ],
       sessionTag: 'security',
