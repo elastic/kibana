@@ -11,9 +11,11 @@ import React from 'react';
 import type { Attachment } from '@kbn/onechat-common/attachments';
 import type { AttachmentType } from '@kbn/onechat-common/attachments';
 import { AttachmentPill } from './attachment_pill';
+import { useConversationContext } from '../../../context/conversation/conversation_context';
 
 export interface AttachmentPillsRowProps {
   attachments: Attachment[];
+  removable?: boolean;
 }
 
 const labels = {
@@ -22,7 +24,12 @@ const labels = {
   }),
 };
 
-export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({ attachments }) => {
+export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
+  attachments,
+  removable = false,
+}) => {
+  const { removeAttachment } = useConversationContext();
+
   if (attachments.length === 0) {
     return null;
   }
@@ -39,6 +46,7 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({ attachme
           key={attachment.id}
           id={attachment.id}
           type={attachment.type as AttachmentType}
+          onRemoveAttachment={removable ? () => removeAttachment?.(attachment.id) : undefined}
         />
       ))}
     </EuiBadgeGroup>

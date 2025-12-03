@@ -148,6 +148,18 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     setCurrentProps({ ...currentProps, attachments: undefined });
   }, [currentProps]);
 
+  const removeAttachment = useCallback(
+    (attachmentId: string) => {
+      setCurrentProps({
+        ...currentProps,
+        attachments: currentProps.attachments?.filter(
+          (attachment) => attachment.id !== attachmentId
+        ),
+      });
+    },
+    [currentProps]
+  );
+
   const conversationContextValue = useMemo(
     () => ({
       conversationId,
@@ -161,6 +173,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       setConversationId,
       attachments: currentProps.attachments,
       resetAttachments,
+      removeAttachment,
       conversationActions,
     }),
     [
@@ -173,6 +186,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       resetInitialMessage,
       setConversationId,
       resetAttachments,
+      removeAttachment,
       conversationActions,
     ]
   );

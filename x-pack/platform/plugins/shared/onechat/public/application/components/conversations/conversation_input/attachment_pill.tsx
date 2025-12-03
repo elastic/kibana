@@ -10,9 +10,14 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { AttachmentType } from '@kbn/onechat-common/attachments';
 
+const removeAriaLabel = i18n.translate('xpack.onechat.attachmentPill.removeAriaLabel', {
+  defaultMessage: 'Remove attachment',
+});
+
 export interface AttachmentPillProps {
   id: string;
   type: AttachmentType;
+  onRemoveAttachment?: () => void;
 }
 
 const getAttachmentIcon = (type: AttachmentType): string => {
@@ -47,15 +52,20 @@ const getAttachmentDisplayName = (type: AttachmentType): string => {
   }
 };
 
-export const AttachmentPill: React.FC<AttachmentPillProps> = ({ id, type }) => {
+export const AttachmentPill: React.FC<AttachmentPillProps> = ({ id, type, onRemoveAttachment }) => {
   const displayName = getAttachmentDisplayName(type);
-  const iconType = getAttachmentIcon(type);
+  const canRemoveAttachment = Boolean(onRemoveAttachment);
+  const iconType = canRemoveAttachment ? 'cross' : getAttachmentIcon(type);
 
   return (
     <EuiBadge
       color="default"
       iconType={iconType}
-      iconSide="left"
+      iconSide={canRemoveAttachment ? 'right' : 'left'}
+      iconOnClick={() => {
+        onRemoveAttachment?.();
+      }}
+      iconOnClickAriaLabel={canRemoveAttachment ? removeAriaLabel : undefined}
       data-test-subj={`onechatAttachmentPill-${id}`}
     >
       {displayName}
