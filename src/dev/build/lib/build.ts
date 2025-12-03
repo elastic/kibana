@@ -24,32 +24,28 @@ export class Build {
   }
 
   resolvePathForPlatform(platform: Platform, ...args: string[]) {
-    const variant = platform.getVariant() ? `-${platform.getVariant()}` : '';
-    const solution = platform.getSolution() ? `-${platform.getSolution()}` : '';
     return this.config.resolveFromRepo(
       'build',
       'default',
-      `kibana${variant}${solution}-${this.config.getBuildVersion()}-${platform.getBuildName()}`,
+      `kibana${platform.getVariantSuffix()}${platform.getSolutionSuffix()}-${this.config.getBuildVersion()}-${platform.getBuildName()}`,
       ...args
     );
   }
 
   getPlatformArchivePath(platform: Platform) {
     const ext = platform.isWindows() ? 'zip' : 'tar.gz';
-    const variant = platform.getVariant() ? `-${platform.getVariant()}` : '';
-    const solution = platform.getSolution() ? `-${platform.getSolution()}` : '';
     return this.config.resolveFromRepo(
       'target',
       `${
         this.name
-      }${variant}${solution}-${this.config.getBuildVersion()}-${platform.getBuildName()}.${ext}`
+      }${platform.getVariantSuffix()}${platform.getSolutionSuffix()}-${this.config.getBuildVersion()}-${platform.getBuildName()}.${ext}`
     );
   }
 
   getRootDirectory(platform: Platform) {
-    const variant = platform.getVariant() ? `-${platform.getVariant()}` : '';
-    const solution = platform.getSolution() ? `-${platform.getSolution()}` : '';
-    return `${this.name}${variant}${solution}-${this.config.getBuildVersion()}`;
+    return `${
+      this.name
+    }${platform.getVariantSuffix()}${platform.getSolutionSuffix()}-${this.config.getBuildVersion()}`;
   }
 
   getName() {
