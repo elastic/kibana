@@ -21,6 +21,7 @@ import { SloManagementTable } from './components/slo_management_table';
 import { ActionModalProvider } from '../../context/action_modal';
 import { BulkOperationProvider } from './context/bulk_operation';
 import { LoadingPage } from '../loading_page';
+import { HeaderControl } from './components/header_control/header_control';
 
 export function SloManagementPage() {
   const {
@@ -77,6 +78,13 @@ export function SloManagementPage() {
         pageTitle: i18n.translate('xpack.slo.managementPage.pageTitle', {
           defaultMessage: 'SLO Management',
         }),
+        rightSideItems: !isLoading
+          ? [
+              <ActionModalProvider>
+                <HeaderControl />
+              </ActionModalProvider>,
+            ]
+          : undefined,
       }}
     >
       <HeaderMenu />
