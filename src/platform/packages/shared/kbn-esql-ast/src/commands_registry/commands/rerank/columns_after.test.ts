@@ -18,7 +18,7 @@ describe('RERANK columnsAfter', () => {
   ];
 
   it('should add a "_score" column if target field is not specified', () => {
-    const command = cmd`RERANK "query" ON field` as ESQLAstRerankCommand;
+    const command = cmd`RERANK "query" ON field` as unknown as ESQLAstRerankCommand;
     const result = columnsAfter(command, previousColumns);
     expect(result).toEqual([
       ...previousColumns,
@@ -31,7 +31,7 @@ describe('RERANK columnsAfter', () => {
   });
 
   it('should add a new column for the target field', () => {
-    const command = cmd`RERANK rerankScore = "query" ON field` as ESQLAstRerankCommand;
+    const command = cmd`RERANK rerankScore = "query" ON field` as unknown as ESQLAstRerankCommand;
     const result = columnsAfter(command, previousColumns);
     const newColumn = result.find((c) => c.name === 'rerankScore');
 
@@ -42,7 +42,7 @@ describe('RERANK columnsAfter', () => {
   });
 
   it('should not add a duplicate column if one already exists', () => {
-    const command = cmd`RERANK col1 = "query" ON field` as ESQLAstRerankCommand;
+    const command = cmd`RERANK col1 = "query" ON field` as unknown as ESQLAstRerankCommand;
     const result = columnsAfter(command, previousColumns);
     expect(result).toEqual(previousColumns);
     const col1 = result.find((c) => c.name === 'col1');
