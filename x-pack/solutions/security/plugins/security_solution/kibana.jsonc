@@ -81,7 +81,8 @@
       "automaticImport",
       "serverless",
       "agentBuilder",
-      "llmTasks"
+      "llmTasks",
+      "onechat"
     ],
     "requiredBundles": [
       "esUiShared",

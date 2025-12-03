@@ -47,6 +47,7 @@ import type { ElasticAssistantPluginStart } from '@kbn/elastic-assistant-plugin/
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
+import type { OnechatPluginSetup } from '@kbn/onechat-plugin/server/types';
 import type { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import type { ExperimentalFeatures } from '../common';
 
@@ -61,6 +62,7 @@ export interface SecuritySolutionPluginSetupDependencies {
   features: FeaturesPluginSetup;
   lists?: ListPluginSetup;
   ml?: MlPluginSetup;
+  onechat?: OnechatPluginSetup;
   ruleRegistry: RuleRegistryPluginSetup;
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginSetup;
@@ -108,7 +110,7 @@ export interface SecuritySolutionPluginSetup {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SecuritySolutionPluginStart {}
+export interface SecuritySolutionPluginStart { }
 
 export type SecuritySolutionPluginCoreSetupDependencies = CoreSetup<
   SecuritySolutionPluginStartDependencies,
