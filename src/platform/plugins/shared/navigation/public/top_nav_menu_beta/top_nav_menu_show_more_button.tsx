@@ -67,6 +67,7 @@ export const TopNavMenuShowMoreButton = ({
         defaultMessage: 'More',
       })}
       isOpen={isPopoverOpen}
+      popoverWidth={200}
       onClose={onPopoverClose}
     />
   );

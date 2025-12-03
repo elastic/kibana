@@ -79,6 +79,7 @@ const dashboardEditModeConfig: TopNavMenuConfigBeta = {
       label: 'export',
       testId: 'exportButton',
       iconType: 'exportAction',
+      popoverWidth: 150,
       items: [
         {
           run: () => action('export-pdf-clicked'),
@@ -138,6 +139,7 @@ const dashboardEditModeConfig: TopNavMenuConfigBeta = {
     iconType: 'plusInCircle',
     color: 'success',
     minWidth: false,
+    popoverWidth: 200,
     items: [
       {
         run: () => action('create-visualization-clicked'),
@@ -216,6 +218,7 @@ const dashboardEditModeConfig: TopNavMenuConfigBeta = {
     label: 'save',
     testId: 'saveButton',
     iconType: 'save',
+    popoverWidth: 150,
     splitButtonProps: {
       secondaryButtonAriaLabel: 'Save options',
       secondaryButtonIcon: 'arrowDown',
@@ -300,6 +303,7 @@ const discoverConfig: TopNavMenuConfigBeta = {
     label: 'Save',
     testId: 'saveButton',
     iconType: 'save',
+    popoverWidth: 150,
     splitButtonProps: {
       secondaryButtonAriaLabel: 'Save options',
       secondaryButtonIcon: 'arrowDown',

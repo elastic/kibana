@@ -82,6 +82,7 @@ interface TopNavItemBase {
   tooltipContent?: string | (() => string | undefined);
   tooltipTitle?: string | (() => string | undefined);
   hidden?: EuiHideForProps['sizes'];
+  popoverWidth?: number;
 }
 
 export type TopNavMenuItemCommonBeta =
@@ -93,7 +94,10 @@ export type TopNavMenuItemBetaType = TopNavMenuItemCommonBeta & {
   order: number;
 };
 
-export type TopNavMenuPopoverItemBeta = Omit<TopNavMenuItemBetaType, 'iconType' | 'hidden'> & {
+export type TopNavMenuPopoverItemBeta = Omit<
+  TopNavMenuItemBetaType,
+  'iconType' | 'hidden' | 'popoverWidth'
+> & {
   iconType?: IconType;
 };
 

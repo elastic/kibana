@@ -36,6 +36,7 @@ export const TopNavMenuItemBeta = ({
   items,
   isPopoverOpen,
   hidden,
+  popoverWidth,
   onPopoverToggle,
   onPopoverClose,
 }: TopNavMenuItemBetaProps) => {
@@ -110,8 +111,10 @@ export const TopNavMenuItemBeta = ({
       <TopNavMenuPopover
         items={items}
         anchorElement={button}
-        tooltipContent={tooltipContent}
+        tooltipContent={content}
+        tooltipTitle={title}
         isOpen={isPopoverOpen}
+        popoverWidth={popoverWidth}
         onClose={onPopoverClose}
       />
     );

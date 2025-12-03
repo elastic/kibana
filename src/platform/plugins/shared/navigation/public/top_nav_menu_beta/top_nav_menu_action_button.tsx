@@ -47,6 +47,7 @@ export const TopNavMenuActionButton = (props: TopNavMenuActionButtonProps) => {
     tooltipTitle,
     isPopoverOpen,
     hidden,
+    popoverWidth,
     onPopoverToggle,
     onPopoverClose,
   } = props;
@@ -179,10 +180,11 @@ export const TopNavMenuActionButton = (props: TopNavMenuActionButtonProps) => {
       <TopNavMenuPopover
         // For split button, only allow popover behavior on the split part of the split button
         items={hasSplitItems ? splitButtonItems : items ?? []}
-        tooltipContent={tooltipContent}
-        tooltipTitle={tooltipTitle}
+        tooltipContent={content}
+        tooltipTitle={title}
         anchorElement={button}
         isOpen={isPopoverOpen}
+        popoverWidth={popoverWidth}
         onClose={onPopoverClose}
       />
     );

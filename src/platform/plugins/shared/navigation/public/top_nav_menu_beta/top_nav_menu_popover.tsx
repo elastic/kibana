@@ -18,6 +18,7 @@ interface TopNavContextMenuProps {
   anchorElement: ReactElement;
   items: TopNavMenuPopoverItemBeta[];
   isOpen: boolean;
+  popoverWidth?: number;
   onClose: () => void;
 }
 
@@ -27,6 +28,7 @@ export const TopNavMenuPopover = ({
   tooltipContent,
   tooltipTitle,
   isOpen,
+  popoverWidth,
   onClose,
 }: TopNavContextMenuProps) => {
   const panels = useMemo(() => getPopoverPanels(items), [items]);
@@ -49,6 +51,9 @@ export const TopNavMenuPopover = ({
       panelPaddingSize="none"
       hasArrow={false}
       anchorPosition="upLeft"
+      panelStyle={{
+        width: popoverWidth,
+      }}
     >
       <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>
