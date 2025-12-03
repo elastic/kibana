@@ -34,3 +34,13 @@ export class EndpointAuthorizationError extends EndpointError {
     super(ENDPOINT_AUTHZ_ERROR_MESSAGE, meta);
   }
 }
+
+export class EndpointHttpError extends EndpointError {
+  constructor(
+    message: string,
+    public readonly statusCode: number = 500,
+    public readonly meta?: unknown
+  ) {
+    super(message, meta);
+  }
+}

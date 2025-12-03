@@ -22,11 +22,10 @@ import type {
 import { Telemetry } from './services/telemetry/service';
 
 export class AutomaticImportPlugin
-  implements Plugin<AutomaticImportPluginSetup, AutomaticImportPluginStart>
-{
+  implements Plugin<AutomaticImportPluginSetup, AutomaticImportPluginStart> {
   private telemetry = new Telemetry();
 
-  constructor(_: PluginInitializerContext) {}
+  constructor(_: PluginInitializerContext) { }
 
   public setup(
     core: CoreSetup<AutomaticImportPluginStartDependencies, AutomaticImportPluginStart>
@@ -60,5 +59,5 @@ export class AutomaticImportPlugin
     return {};
   }
 
-  public stop() {}
+  public stop() { }
 }
