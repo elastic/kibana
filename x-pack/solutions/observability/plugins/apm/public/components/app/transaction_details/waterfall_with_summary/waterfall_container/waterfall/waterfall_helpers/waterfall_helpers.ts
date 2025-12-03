@@ -9,12 +9,12 @@ import { euiPaletteColorBlind } from '@elastic/eui';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { Dictionary } from 'lodash';
 import { first, flatten, groupBy, isEmpty, sortBy, uniq } from 'lodash';
+import type { Error } from '@kbn/apm-types';
 import type { IWaterfallLegend } from '../../../../../../../../common/waterfall/legend';
 import { WaterfallLegendType } from '../../../../../../../../common/waterfall/legend';
 import { isOpenTelemetryAgentName } from '../../../../../../../../common/agent_name';
 import type { CriticalPathSegment } from '../../../../../../../../common/critical_path/types';
 import type {
-  WaterfallError,
   WaterfallSpan,
   WaterfallTransaction,
 } from '../../../../../../../../common/waterfall/typings';
@@ -78,7 +78,7 @@ interface IWaterfallItemBase<TDocument, TDoctype> {
 }
 
 export type IWaterfallError = Omit<
-  IWaterfallItemBase<WaterfallError, 'error'>,
+  IWaterfallItemBase<Error, 'error'>,
   'duration' | 'legendValues' | 'spanLinksCount'
 >;
 
@@ -158,7 +158,7 @@ export function getSpanItem(span: WaterfallSpan, linkedChildrenCount: number = 0
 }
 
 function getErrorItem(
-  error: WaterfallError,
+  error: Error,
   items: IWaterfallItem[],
   entryWaterfallTransaction?: IWaterfallTransaction
 ): IWaterfallError {
@@ -170,7 +170,7 @@ function getErrorItem(
   const errorItem: IWaterfallError = {
     docType: 'error',
     doc: error,
-    id: error.error.id,
+    id: error.error.id ?? error.id,
     parent,
     parentId: parent?.id,
     offset: error.timestamp.us - entryTimestamp,

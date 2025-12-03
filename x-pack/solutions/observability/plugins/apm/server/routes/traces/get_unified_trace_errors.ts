@@ -7,37 +7,29 @@
 
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
-import { existsQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import type { FlattenedApmEvent } from '@kbn/apm-data-access-plugin/server/utils/utility_types';
+import { existsQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import type { Error } from '@kbn/apm-types';
 import {
   EXCEPTION_MESSAGE,
   EXCEPTION_TYPE,
   ID,
-  SPAN_ID,
-  TRACE_ID,
-  TRANSACTION_ID,
   OTEL_EVENT_NAME,
-  TIMESTAMP_US,
   PROCESSOR_EVENT,
-  ERROR_EXC_MESSAGE,
-  ERROR_EXC_TYPE,
-  ERROR_EXC_HANDLED,
-  ERROR_GROUP_ID,
-  ERROR_CULPRIT,
-  ERROR_ID,
+  SERVICE_NAME,
+  SPAN_ID,
+  TIMESTAMP_US,
+  TRACE_ID,
 } from '../../../common/es_fields/apm';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
-import type { LogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
-import type { TimestampUs } from '../../../typings/es_schemas/raw/fields/timestamp_us';
 import type { Exception } from '../../../typings/es_schemas/raw/error_raw';
-import {
-  getApmTraceErrorQuery,
-  requiredFields as requiredApmFields,
-} from './get_apm_trace_error_query';
+import type { TimestampUs } from '../../../typings/es_schemas/raw/fields/timestamp_us';
+import type { LogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
 import { compactMap } from '../../utils/compact_map';
+import { getApmTraceError } from './get_trace_items';
 
 export interface UnifiedTraceErrors {
-  apmErrors: Awaited<ReturnType<typeof getUnifiedApmTraceError>>;
+  apmErrors: Awaited<ReturnType<typeof getApmTraceError>>;
   unprocessedOtelErrors: Awaited<ReturnType<typeof getUnprocessedOtelErrors>>;
   totalErrors: number;
 }
@@ -60,7 +52,7 @@ export async function getUnifiedTraceErrors({
   const commonParams = { traceId, docId, start, end };
 
   const [apmErrors, unprocessedOtelErrors] = await Promise.all([
-    getUnifiedApmTraceError({ apmEventClient, ...commonParams }),
+    getApmTraceError({ apmEventClient, ...commonParams }),
     getUnprocessedOtelErrors({ logsClient, ...commonParams }),
   ]);
 
@@ -71,11 +63,15 @@ export async function getUnifiedTraceErrors({
   };
 }
 
-export const requiredOtelFields = asMutableArray([SPAN_ID, ID] as const);
+export const requiredOtelFields = asMutableArray([
+  SPAN_ID,
+  ID,
+  TIMESTAMP_US,
+  SERVICE_NAME,
+] as const);
 export const optionalOtelFields = asMutableArray([
   EXCEPTION_TYPE,
   EXCEPTION_MESSAGE,
-  TIMESTAMP_US,
   OTEL_EVENT_NAME,
 ] as const);
 
@@ -93,48 +89,6 @@ export interface UnifiedError {
       message: string;
     };
   };
-}
-
-async function getUnifiedApmTraceError(params: {
-  apmEventClient: APMEventClient;
-  traceId: string;
-  docId?: string;
-  start: number;
-  end: number;
-}) {
-  const response = await getApmTraceErrorQuery(params);
-
-  return compactMap(response.hits.hits, (hit) => {
-    const errorSource = 'error' in hit._source ? hit._source : undefined;
-    const event = hit.fields
-      ? accessKnownApmEventFields(hit.fields).requireFields(requiredApmFields)
-      : undefined;
-
-    const spanId = event?.[TRANSACTION_ID] ?? event?.[SPAN_ID];
-
-    if (!event || !spanId) {
-      return null;
-    }
-
-    const error: UnifiedError = {
-      id: event[ID],
-      spanId,
-      timestamp: { us: event[TIMESTAMP_US] },
-      error: {
-        id: event[ERROR_ID],
-        grouping_key: event[ERROR_GROUP_ID],
-        log: errorSource?.error.log,
-        culprit: event[ERROR_CULPRIT],
-        exception: errorSource?.error.exception?.[0] ?? {
-          type: event[ERROR_EXC_TYPE],
-          message: event[ERROR_EXC_MESSAGE],
-          handled: event[ERROR_EXC_HANDLED],
-        },
-      },
-    };
-
-    return error;
-  });
 }
 
 async function getUnprocessedOtelErrors({
@@ -179,13 +133,13 @@ async function getUnprocessedOtelErrors({
 
     if (!event) return null;
 
-    const timestamp = event[TIMESTAMP_US];
-
-    const error: UnifiedError = {
+    const error: Error = {
       id: event[ID],
-      spanId: event[SPAN_ID],
-      timestamp: timestamp != null ? { us: timestamp } : undefined,
+      span: { id: event[SPAN_ID] },
+      trace: { id: traceId },
+      timestamp: { us: event[TIMESTAMP_US] },
       eventName: event[OTEL_EVENT_NAME],
+      service: { name: event[SERVICE_NAME] },
       error: {
         exception: {
           type: event[EXCEPTION_TYPE],

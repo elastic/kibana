@@ -6,6 +6,7 @@
  */
 
 import React, { createContext, useContext, useMemo } from 'react';
+import type { Error } from '@kbn/apm-types';
 import type { IWaterfallGetRelatedErrorsHref } from '../../../../common/waterfall/typings';
 import type { IWaterfallLegend } from '../../../../common/waterfall/legend';
 import { WaterfallLegendType } from '../../../../common/waterfall/legend';
@@ -14,6 +15,7 @@ import { TOGGLE_BUTTON_WIDTH } from './toggle_accordion_button';
 import { ACCORDION_PADDING_LEFT } from './trace_item_row';
 import { TraceDataState, type TraceWaterfallItem } from './use_trace_waterfall';
 import { useTraceWaterfall } from './use_trace_waterfall';
+import type { ErrorMark } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_error_marks';
 
 export interface TraceWaterfallContextProps {
   duration: number;
@@ -34,6 +36,7 @@ export interface TraceWaterfallContextProps {
   showLegend: boolean;
   serviceName?: string;
   message?: string;
+  errorMarks: ErrorMark[];
 }
 
 export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
@@ -49,6 +52,7 @@ export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
   colorBy: WaterfallLegendType.ServiceName,
   showLegend: false,
   serviceName: '',
+  errorMarks: [],
 });
 
 export type OnNodeClick = (id: string) => void;
@@ -72,6 +76,7 @@ interface Props {
   showLegend: boolean;
   serviceName?: string;
   isFiltered?: boolean;
+  errors?: Error[];
 }
 
 export function TraceWaterfallContextProvider({
@@ -87,12 +92,24 @@ export function TraceWaterfallContextProvider({
   showLegend,
   serviceName,
   isFiltered,
+  errors,
 }: Props) {
-  const { duration, traceWaterfall, maxDepth, rootItem, legends, colorBy, traceState, message } =
-    useTraceWaterfall({
-      traceItems,
-      isFiltered,
-    });
+  const {
+    duration,
+    traceWaterfall,
+    maxDepth,
+    rootItem,
+    legends,
+    colorBy,
+    traceState,
+    message,
+    errorMarks,
+  } = useTraceWaterfall({
+    traceItems,
+    isFiltered,
+    errors,
+    onErrorClick,
+  });
 
   const left = TOGGLE_BUTTON_WIDTH + ACCORDION_PADDING_LEFT * maxDepth;
   const right = 40;
@@ -120,6 +137,7 @@ export function TraceWaterfallContextProvider({
         showLegend,
         serviceName,
         message,
+        errorMarks,
       }}
     >
       {children}

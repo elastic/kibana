@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import { EuiPopover, EuiText, useEuiTheme } from '@elastic/eui';
-import React, { useState } from 'react';
+import { EuiButtonEmpty, EuiPopover, EuiText, useEuiTheme } from '@elastic/eui';
 import styled from '@emotion/styled';
-import { useAnyOfApmParams } from '../../../../../hooks/use_apm_params';
-import { TRACE_ID, TRANSACTION_ID } from '../../../../../../common/es_fields/apm';
+import type { TypeOf } from '@kbn/typed-react-router-config';
+import React, { useState } from 'react';
 import { asDuration } from '../../../../../../common/utils/formatters';
 import type { ErrorMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_error_marks';
+import type { ApmRoutes } from '../../../../routing/apm_route_config';
 import { ErrorDetailLink } from '../../../links/apm/error_detail_link';
 import { Legend, Shape } from '../legend';
 
 interface Props {
   mark: ErrorMark;
+  query?: TypeOf<ApmRoutes, '/services/{serviceName}/errors/{groupId}'>['query'];
 }
 
 const Popover = styled.div`
@@ -49,19 +50,9 @@ function truncateMessage(errorMessage?: string) {
   }
 }
 
-export function ErrorMarker({ mark }: Props) {
+export function ErrorMarker({ mark, query }: Props) {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, showPopover] = useState(false);
-  const { query } = useAnyOfApmParams(
-    '/services/{serviceName}/overview',
-    '/services/{serviceName}/errors',
-    '/services/{serviceName}/transactions/view',
-    '/mobile-services/{serviceName}/overview',
-    '/mobile-services/{serviceName}/transactions/view',
-    '/mobile-services/{serviceName}/errors-and-crashes',
-    '/traces/explorer/waterfall',
-    '/dependencies/operation'
-  );
 
   const togglePopover = () => showPopover(!isPopoverOpen);
 
@@ -76,18 +67,8 @@ export function ErrorMarker({ mark }: Props) {
   );
 
   const { error } = mark;
-  const serviceGroup = 'serviceGroup' in query ? query.serviceGroup : '';
 
-  const queryParam = {
-    ...query,
-    serviceGroup,
-    kuery: [
-      ...(error.trace?.id ? [`${TRACE_ID} : "${error.trace?.id}"`] : []),
-      ...(error.transaction?.id ? [`${TRANSACTION_ID} : "${error.transaction?.id}"`] : []),
-    ].join(' and '),
-  };
-
-  const errorMessage = error.error.log?.message || error.error.exception?.[0]?.message;
+  const errorMessage = error.error.log?.message || error.error.exception?.message;
   const truncatedErrorMessage = truncateMessage(errorMessage);
 
   return (
@@ -110,15 +91,29 @@ export function ErrorMarker({ mark }: Props) {
           indicator={<span />}
         />
         <EuiText size="s">
-          <ErrorLink
-            data-test-subj="errorLink"
-            serviceName={error.service.name}
-            errorGroupId={error.error.grouping_key}
-            query={queryParam}
-            title={errorMessage}
-          >
-            {truncatedErrorMessage}
-          </ErrorLink>
+          {mark.onClick === undefined && error.error.grouping_key && query ? (
+            <ErrorLink
+              data-test-subj="errorLink"
+              serviceName={error.service.name}
+              errorGroupId={error.error.grouping_key}
+              query={query}
+              title={errorMessage}
+            >
+              {truncatedErrorMessage}
+            </ErrorLink>
+          ) : mark.onClick ? (
+            <EuiButtonEmpty
+              data-test-subj="apmErrorMarkerButton"
+              onClick={() => {
+                togglePopover();
+                mark.onClick?.();
+              }}
+            >
+              {truncatedErrorMessage}
+            </EuiButtonEmpty>
+          ) : (
+            truncatedErrorMessage
+          )}
         </EuiText>
       </Popover>
     </EuiPopover>

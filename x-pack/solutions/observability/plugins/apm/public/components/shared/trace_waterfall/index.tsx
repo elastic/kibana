@@ -12,6 +12,7 @@ import { AutoSizer, WindowScroller } from 'react-virtualized';
 import type { ListChildComponentProps } from 'react-window';
 import { VariableSizeList as List, areEqual } from 'react-window';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
+import type { Error } from '@kbn/apm-types';
 import type { IWaterfallGetRelatedErrorsHref } from '../../../../common/waterfall/typings';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import { TimelineAxisContainer, VerticalLinesContainer } from '../charts/timeline';
@@ -24,6 +25,7 @@ import { WaterfallLegends } from './waterfall_legends';
 
 export interface Props {
   traceItems: TraceItem[];
+  errors?: Error[];
   showAccordion?: boolean;
   highlightedTraceId?: string;
   onClick?: OnNodeClick;
@@ -38,6 +40,7 @@ export interface Props {
 
 export function TraceWaterfall({
   traceItems,
+  errors,
   showAccordion = true,
   highlightedTraceId,
   onClick,
@@ -62,6 +65,7 @@ export function TraceWaterfall({
       showLegend={showLegend}
       serviceName={serviceName}
       isFiltered={isFiltered}
+      errors={errors}
     >
       <TraceWarning>
         <TraceWaterfallComponent />
@@ -80,6 +84,7 @@ function TraceWaterfallComponent() {
     colorBy,
     showLegend,
     serviceName,
+    errorMarks,
   } = useTraceWaterfallContext();
 
   return (
@@ -110,6 +115,7 @@ function TraceWaterfallComponent() {
                 bottom: 0,
               }}
               numberOfTicks={3}
+              marks={errorMarks}
             />
           </div>
           <VerticalLinesContainer
@@ -120,6 +126,7 @@ function TraceWaterfallComponent() {
               right,
               bottom: 0,
             }}
+            marks={errorMarks}
           />
           <div
             css={css`

@@ -62,6 +62,7 @@ export function TraceWaterfallEmbeddable({
   return (
     <TraceWaterfall
       traceItems={data.traceItems}
+      errors={data.errors}
       onClick={onNodeClick}
       scrollElement={scrollElement}
       getRelatedErrorsHref={getRelatedErrorsHref}
