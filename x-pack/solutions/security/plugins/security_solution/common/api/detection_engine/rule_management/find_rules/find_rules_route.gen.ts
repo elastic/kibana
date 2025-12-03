@@ -84,7 +84,7 @@ Filters the returned results according to the value of the specified field, usin
    */
   gaps_range_end: z.string().optional(),
   /**
-   * Aggregated gap fill statuses
+   * Gap fill statuses
    */
   gap_fill_statuses: ArrayFromString(GapFillStatus).optional(),
 });

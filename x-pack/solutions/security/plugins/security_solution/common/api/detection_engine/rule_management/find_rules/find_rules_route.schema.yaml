@@ -79,7 +79,7 @@ paths:
             type: string
         - name: gap_fill_statuses
           in: query
-          description: Aggregated gap fill statuses
+          description: Gap fill statuses
           required: false
           schema:
             type: array

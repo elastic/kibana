@@ -133,7 +133,7 @@ Only valid when query property is undefined.
    */
   gaps_range_end: z.string().optional(),
   /**
-   * Aggregated gap fill statuses to filter rules with gaps by status (used together with gaps_range_*).
+   * Gap fill statuses to filter rules with gaps by status (used together with gaps_range_*).
    */
   gap_fill_statuses: z.array(GapFillStatus).optional(),
 });
