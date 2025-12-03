@@ -27,7 +27,7 @@ import { environmentQuery } from '../../../../common/utils/environment_query';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
-import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
+import { getErrorName } from '../../../lib/helpers/get_error_name';
 
 export interface ErrorGroupMainStatisticsResponse {
   errorGroups: Array<{
@@ -176,7 +176,7 @@ export async function getErrorGroupMainStatistics({
         type: event[ERROR_EXC_TYPE],
       };
 
-      const errorName = event[ERROR_LOG_MESSAGE] || exception.message || NOT_AVAILABLE_LABEL;
+      const errorName = getErrorName(event, exception);
 
       return {
         groupId: bucket.key as string,
