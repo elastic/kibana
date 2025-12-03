@@ -51,7 +51,8 @@
       "embeddableEnhanced",
       "apmSourcesAccess",
       "fileUpload",
-      "metricsExperience"
+      "metricsExperience",
+      "cps"
     ],
     "requiredBundles": [
       "kibanaUtils",

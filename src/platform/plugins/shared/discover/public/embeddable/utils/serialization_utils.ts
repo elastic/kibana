@@ -44,11 +44,15 @@ export const deserializeState = async ({
     const { get } = discoverServices.savedSearch;
     const so = await get(savedObjectId, true);
 
+    // what is this??
     const rawSavedObjectAttributes = pick(so, EDITABLE_SAVED_SEARCH_KEYS);
     const savedObjectOverride = pick(serializedState.rawState, EDITABLE_SAVED_SEARCH_KEYS);
+    // Filter out null projectRouting for type safety (runtime already filtered by fromSavedSearchAttributes)
+    const { projectRouting, ...soWithoutTimeRangeAndProjectRouting } = omit(so, 'timeRange');
     return {
-      // ignore the time range from the saved object - only global time range + panel time range matter
-      ...omit(so, 'timeRange'),
+      ...soWithoutTimeRangeAndProjectRouting,
+      // Only include projectRouting if it's not null (SearchEmbeddableRuntimeState doesn't allow null)
+      ...(projectRouting !== null && projectRouting !== undefined && { projectRouting }),
       savedObjectId,
       savedObjectTitle: so.title,
       savedObjectDescription: so.description,
@@ -67,8 +71,12 @@ export const deserializeState = async ({
       serializedState.rawState as SearchEmbeddableByValueState,
       true
     );
+    // Filter out null projectRouting for type safety (runtime already filtered by fromSavedSearchAttributes)
+    const { projectRouting, ...savedSearchWithoutProjectRouting } = savedSearch;
     return {
-      ...savedSearch,
+      ...savedSearchWithoutProjectRouting,
+      // Only include projectRouting if it's not null (SearchEmbeddableRuntimeState doesn't allow null)
+      ...(projectRouting !== null && projectRouting !== undefined && { projectRouting }),
       ...panelState,
       nonPersistedDisplayOptions: serializedState.rawState.nonPersistedDisplayOptions,
     };

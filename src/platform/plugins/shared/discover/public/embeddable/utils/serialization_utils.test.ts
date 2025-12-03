@@ -62,33 +62,66 @@ describe('Serialization utils', () => {
     ],
   };
 
+  const serializedByValueState: SerializedPanelState<SearchEmbeddableState> = {
+    rawState: {
+      attributes: mockedSavedSearchAttributes,
+      title: 'test panel title',
+    },
+    references: [
+      {
+        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        id: dataViewMock.id ?? 'test-id',
+        type: 'index-pattern',
+      },
+    ],
+  };
+
   describe('deserialize state', () => {
     test('by value', async () => {
-      const serializedState: SerializedPanelState<SearchEmbeddableState> = {
-        rawState: {
-          attributes: mockedSavedSearchAttributes,
-          title: 'test panel title',
-        },
-        references: [
-          {
-            name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-            id: dataViewMock.id ?? 'test-id',
-            type: 'index-pattern',
-          },
-        ],
-      };
-
       const deserializedState = await deserializeState({
-        serializedState,
+        serializedState: serializedByValueState,
         discoverServices: discoverServiceMock,
       });
 
       expect(discoverServiceMock.savedSearch.byValueToSavedSearch).toBeCalledWith(
-        serializedState.rawState,
+        serializedByValueState.rawState,
         true // should be serializable
       );
       expect(Object.keys(deserializedState)).toContain('serializedSearchSource');
       expect(deserializedState.title).toEqual('test panel title');
+    });
+
+    test('by value with null projectRouting should transform to undefined', async () => {
+      (serializedByValueState.rawState as SearchEmbeddableByValueState)!.attributes.projectRouting =
+        null;
+
+      const deserializedState = await deserializeState({
+        serializedState: serializedByValueState,
+        discoverServices: discoverServiceMock,
+      });
+
+      expect(deserializedState.projectRouting).toBeUndefined();
+      expect('projectRouting' in deserializedState).toBe(false);
+    });
+
+    test('by value with projectRouting should preserve it', async () => {
+      // Mock byValueToSavedSearch to return projectRouting
+      discoverServiceMock.savedSearch.byValueToSavedSearch = jest.fn().mockResolvedValue({
+        projectRouting: 'project1',
+        serializedSearchSource: {},
+        title: 'test',
+        tabs: mockedSavedSearchAttributes.tabs,
+      });
+
+      (serializedByValueState.rawState as SearchEmbeddableByValueState)!.attributes.projectRouting =
+        'test1';
+
+      const deserializedState = await deserializeState({
+        serializedState: serializedByValueState,
+        discoverServices: discoverServiceMock,
+      });
+
+      expect(deserializedState.projectRouting).toBe('project1');
     });
 
     test('by reference', async () => {
@@ -120,6 +153,65 @@ describe('Serialization utils', () => {
       expect(deserializedState.title).toEqual('test panel title');
       expect(deserializedState.sort).toEqual([['order_date', 'asc']]);
     });
+
+    test('by reference with null projectRouting should transform to undefined', async () => {
+      const baseSearch = await discoverServiceMock.savedSearch.byValueToSavedSearch(
+        {
+          attributes: mockedSavedSearchAttributes,
+        },
+        true
+      );
+
+      discoverServiceMock.savedSearch.get = jest.fn().mockResolvedValue({
+        ...baseSearch,
+        savedObjectId: 'savedSearch',
+        projectRouting: null,
+      });
+
+      const serializedState: SerializedPanelState<SearchEmbeddableState> = {
+        rawState: {
+          savedObjectId: 'savedSearch',
+        },
+        references: [],
+      };
+
+      const deserializedState = await deserializeState({
+        serializedState,
+        discoverServices: discoverServiceMock,
+      });
+
+      expect(deserializedState.projectRouting).toBeUndefined();
+      expect('projectRouting' in deserializedState).toBe(false);
+    });
+
+    test('by reference with projectRouting should preserve it', async () => {
+      const baseSearch = await discoverServiceMock.savedSearch.byValueToSavedSearch(
+        {
+          attributes: mockedSavedSearchAttributes,
+        },
+        true
+      );
+
+      discoverServiceMock.savedSearch.get = jest.fn().mockResolvedValue({
+        ...baseSearch,
+        savedObjectId: 'savedSearch',
+        projectRouting: 'ALL',
+      });
+
+      const serializedState: SerializedPanelState<SearchEmbeddableState> = {
+        rawState: {
+          savedObjectId: 'savedSearch',
+        },
+        references: [],
+      };
+
+      const deserializedState = await deserializeState({
+        serializedState,
+        discoverServices: discoverServiceMock,
+      });
+
+      expect(deserializedState.projectRouting).toBe('ALL');
+    });
   });
 
   describe('serialize state', () => {
@@ -137,6 +229,7 @@ describe('Serialization utils', () => {
         uuid,
         initialState: {
           ...mockedSavedSearchAttributes,
+          projectRouting: undefined,
           serializedSearchSource: {} as SerializedSearchSourceFields,
         },
         savedSearch,

@@ -51,6 +51,7 @@ const initialState: DiscoverInternalState = {
   userId: undefined,
   spaceId: undefined,
   persistedDiscoverSession: undefined,
+  projectRouting: undefined,
   hasUnsavedChanges: false,
   defaultProfileAdHocDataViewIds: [],
   savedDataViews: [],
@@ -149,6 +150,21 @@ export const internalStateSlice = createSlice({
 
     setTabsBarVisibility: (state, action: PayloadAction<TabsBarVisibility>) => {
       state.tabsBarVisibility = action.payload;
+    },
+
+    setProjectRouting: (state, action: PayloadAction<DiscoverInternalState['projectRouting']>) => {
+      if (state.projectRouting === action.payload) {
+        return;
+      }
+      state.projectRouting = action.payload;
+
+      // Mark all non-active tabs to refetch on selection
+      const currentTabId = state.tabs.unsafeCurrentId;
+      state.tabs.allIds.forEach((tabId) => {
+        if (tabId !== currentTabId && state.tabs.byId[tabId]) {
+          state.tabs.byId[tabId].forceFetchOnSelect = true;
+        }
+      });
     },
 
     setExpandedDoc: (
@@ -395,6 +411,21 @@ const createMiddleware = (options: InternalStateDependencies) => {
     actionCreator: internalStateSlice.actions.discardFlyoutsOnTabChange,
     effect: () => {
       dismissFlyouts([DiscoverFlyouts.lensEdit, DiscoverFlyouts.metricInsights]);
+    },
+  });
+
+  startListening({
+    actionCreator: initializeTabs.fulfilled,
+    effect: (action, listenerApi) => {
+      const { services } = listenerApi.extra;
+      const persistedSession = action.payload.persistedDiscoverSession;
+
+      // Initialize CPS manager with session-level projectRouting after state is updated
+      if (services.cps?.cpsManager) {
+        const projectRouting =
+          persistedSession?.projectRouting ?? services.cps.cpsManager.getDefaultProjectRouting();
+        services.cps.cpsManager.setProjectRouting(projectRouting);
+      }
     },
   });
 

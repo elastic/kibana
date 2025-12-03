@@ -61,6 +61,18 @@ export const selectHasUnsavedChanges = (
     });
   }
 
+  // If the persisted session has projectRouting compare it with current projectRouting
+  const persistedProjectRouting = persistedDiscoverSession.projectRouting;
+  const projectRoutingChanged =
+    persistedProjectRouting !== undefined && persistedProjectRouting !== state.projectRouting;
+
+  if (projectRoutingChanged) {
+    addLog('[DiscoverSession] difference between initial and changed version: projectRouting', {
+      before: persistedProjectRouting,
+      after: state.projectRouting,
+    });
+  }
+
   const unsavedTabIds: string[] = [];
 
   for (const tabId of currentTabsIds) {
@@ -106,7 +118,7 @@ export const selectHasUnsavedChanges = (
     }
   }
 
-  const hasUnsavedChanges = tabIdsChanged || unsavedTabIds.length > 0;
+  const hasUnsavedChanges = tabIdsChanged || projectRoutingChanged || unsavedTabIds.length > 0;
 
   if (!hasUnsavedChanges) {
     addLog('[DiscoverSession] no difference between initial and changed version');

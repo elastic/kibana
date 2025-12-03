@@ -68,6 +68,7 @@ export function fetchAll(
     dataSubjects,
     reset = false,
     initialFetchStatus,
+    internalState,
     services,
     scopedProfilesManager,
     scopedEbtManager,
@@ -97,6 +98,7 @@ export function fetchAll(
         services,
         sort: sort as SortOrder[],
         inputTimeRange: currentTab.dataRequestParams.timeRangeAbsolute,
+        projectRouting: internalState.getState().projectRouting,
       });
     }
 
@@ -120,6 +122,7 @@ export function fetchAll(
           timeRange: currentTab.dataRequestParams.timeRangeAbsolute,
           esqlVariables: currentTab.esqlVariables,
           searchSessionId: params.searchSessionId,
+          projectRouting: internalState.getState().projectRouting,
         })
       : fetchDocuments(searchSource, params);
     const fetchType = isEsqlQuery ? 'fetchTextBased' : 'fetchDocuments';
@@ -228,7 +231,7 @@ export function fetchAll(
 }
 
 export async function fetchMoreDocuments(params: CommonFetchParams): Promise<void> {
-  const { dataSubjects, services, savedSearch, getCurrentTab } = params;
+  const { dataSubjects, services, savedSearch, internalState, getCurrentTab } = params;
 
   try {
     const searchSource = savedSearch.searchSource.createChild();
@@ -258,6 +261,7 @@ export async function fetchMoreDocuments(params: CommonFetchParams): Promise<voi
       dataView,
       services,
       sort: sort as SortOrder[],
+      projectRouting: internalState.getState().projectRouting,
     });
 
     // Fetch more documents

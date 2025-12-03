@@ -71,6 +71,7 @@ export const onSaveDiscoverSession = async ({
     newTitle,
     newCopyOnSave,
     newTimeRestore,
+    newProjectRoutingRestore,
     newDescription,
     newTags,
     isTitleDuplicateConfirmed,
@@ -86,6 +87,7 @@ export const onSaveDiscoverSession = async ({
           internalStateActions.saveDiscoverSession({
             newTitle,
             newTimeRestore,
+            newProjectRoutingRestore,
             newCopyOnSave,
             newDescription,
             newTags,
@@ -143,6 +145,8 @@ export const onSaveDiscoverSession = async ({
       managed={persistedDiscoverSession?.managed ?? false}
       onSave={onSave}
       onClose={onClose ?? (() => {})}
+      showStoreProjectRoutingOnSave={Boolean(services.cps?.cpsManager)}
+      projectRoutingRestore={persistedDiscoverSession?.projectRouting !== undefined}
     />
   );
 
