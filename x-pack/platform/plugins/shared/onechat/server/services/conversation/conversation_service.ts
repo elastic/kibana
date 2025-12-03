@@ -12,10 +12,10 @@ import type {
   ElasticsearchServiceStart,
 } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { getUserFromRequest } from '../utils';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { ConversationClient } from './client';
 import { createClient } from './client';
-import { getUserFromRequest } from '@kbn/onechat-plugin/server/services/utils';
 
 export interface ConversationService {
   getScopedClient(options: { request: KibanaRequest }): Promise<ConversationClient>;
