@@ -15,6 +15,7 @@ import { RedirectTo } from '../components/redirect_to';
 import { StreamListView } from '../components/stream_list_view';
 import { StreamDetailRoot } from '../components/stream_root';
 import { StreamDetailManagement } from '../components/data_management/stream_detail_management';
+import { SignificantEventsAnalyzerPage } from '../components/significant_events_analyzer/page';
 
 /**
  * The array of route definitions to be used when the application
@@ -37,6 +38,9 @@ const streamsAppRoutes = {
     children: {
       '/': {
         element: <StreamListView />,
+      },
+      '/_analyzer': {
+        element: <SignificantEventsAnalyzerPage />,
       },
       '/{key}': {
         element: (
