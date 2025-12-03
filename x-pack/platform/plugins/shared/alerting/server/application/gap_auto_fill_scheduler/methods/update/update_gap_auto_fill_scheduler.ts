@@ -26,16 +26,11 @@ const toRuleTypeKey = (ruleType: { type: string; consumer: string }) =>
 
 const buildRuleTypeUnion = (
   existing: Array<{ type: string; consumer: string }>,
-  incoming?: Array<{ type: string; consumer: string }>
+  incoming: Array<{ type: string; consumer: string }> = []
 ) => {
   const map = new Map<string, { type: string; consumer: string }>();
-  for (const ruleType of existing) {
+  for (const ruleType of [...existing, ...incoming]) {
     map.set(toRuleTypeKey(ruleType), ruleType);
-  }
-  if (incoming) {
-    for (const ruleType of incoming) {
-      map.set(toRuleTypeKey(ruleType), ruleType);
-    }
   }
   return Array.from(map.values());
 };
@@ -76,6 +71,7 @@ export async function updateGapAutoFillScheduler(
   const updatedRuleTypes = params.ruleTypes ?? existingRuleTypes;
   const uniqueRuleTypeIds = new Set(updatedRuleTypes.map(({ type }) => type));
 
+  // Throw error if a rule type is not registered
   for (const ruleTypeId of uniqueRuleTypeIds) {
     context.ruleTypeRegistry.get(ruleTypeId);
   }
