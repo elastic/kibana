@@ -15,8 +15,6 @@ export const SUMMARY_SETTINGS_TEMPLATE: ClusterPutComponentTemplateRequest = {
   name: SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME,
   template: {
     settings: {
-      'sort.field': ['slo.id'],
-      'sort.order': ['asc'],
       auto_expand_replicas: '0-1',
       hidden: true,
     },
