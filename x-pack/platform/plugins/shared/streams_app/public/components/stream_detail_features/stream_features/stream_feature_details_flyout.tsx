@@ -22,7 +22,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { type Streams, type Feature, isFeatureWithFilter } from '@kbn/streams-schema';
-import type { Condition } from '@kbn/streamlang';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import useToggle from 'react-use/lib/useToggle';
@@ -42,10 +41,8 @@ export const StreamFeatureDetailsFlyout = ({
   refreshFeatures: () => void;
 }) => {
   const [updatedFeature, setUpdatedFeature] = React.useState<Feature>(cloneDeep(feature));
-  const [featureDescription, setFeatureDescription] = React.useState(feature.description);
   const { upsertQuery } = useStreamFeaturesApi(definition);
   const [isUpdating, setIsUpdating] = React.useState(false);
-  const [featureFilter, setFeatureFilter] = React.useState<Condition>(feature.filter);
   const [isEditingCondition, toggleIsEditingCondition] = useToggle(false);
 
   const updateFeature = () => {
@@ -122,7 +119,7 @@ export const StreamFeatureDetailsFlyout = ({
                 }
               />
             </EuiFlexGroup>
-            {featureFilter && (
+            {isFeatureWithFilter(updatedFeature) && (
               <EditableConditionPanel
                 condition={updatedFeature.filter}
                 isEditingCondition={isEditingCondition}
