@@ -42,7 +42,6 @@
     "@kbn/i18n-react",
     "@kbn/expressions-plugin",
     "@kbn/field-formats-plugin",
-    "@kbn/test-jest-helpers",
     "@kbn/core-application-browser",
     "@kbn/ebt-tools",
     "@kbn/shared-ux-button-exit-full-screen",
@@ -102,7 +101,8 @@
     "@kbn/content-management-access-control-server",
     "@kbn/react-query",
     "@kbn/core-http-server",
-    "@kbn/core-chrome-layout-utils"
+    "@kbn/core-chrome-layout-utils",
+    "@kbn/cps"
   ],
   "exclude": ["target/**/*"]
 }

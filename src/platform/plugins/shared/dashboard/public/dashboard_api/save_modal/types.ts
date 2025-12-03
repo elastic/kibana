@@ -19,6 +19,7 @@ export interface DashboardSaveOptions {
   newCopyOnSave: boolean;
   newTimeRestore: boolean;
   newAccessMode?: SavedObjectAccessControl['accessMode'];
+  newProjectRoutingRestore: boolean;
   onTitleDuplicate: () => void;
   isTitleDuplicateConfirmed: boolean;
 }

@@ -19,6 +19,7 @@ import { transformPanels } from './transform_panels';
 import { getUserAccessControlData } from './get_user_access_control_data';
 import { dashboardClient } from '../../dashboard_client';
 import { DEFAULT_DASHBOARD_STATE } from '../default_dashboard_state';
+import { DASHBOARD_DURATION_START_MARK } from '../performance/dashboard_duration_start_mark';
 
 export async function loadDashboardApi({
   getCreationOptions,
@@ -27,7 +28,6 @@ export async function loadDashboardApi({
   getCreationOptions?: () => Promise<DashboardCreationOptions>;
   savedObjectId?: string;
 }) {
-  const creationStartTime = performance.now();
   const creationOptions = await getCreationOptions?.();
   const incomingEmbeddables = creationOptions?.getIncomingEmbeddables?.();
   const [readResult, user, isAccessControlEnabled] = savedObjectId
@@ -77,7 +77,8 @@ export async function loadDashboardApi({
 
   const performanceSubscription = startQueryPerformanceTracking(api, {
     firstLoad: true,
-    creationStartTime,
+    creationStartTime: performance.getEntriesByName(DASHBOARD_DURATION_START_MARK, 'mark')[0]
+      ?.startTime,
   });
 
   if (savedObjectId && !incomingEmbeddables?.length) {

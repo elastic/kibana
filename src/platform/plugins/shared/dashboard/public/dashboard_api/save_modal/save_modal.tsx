@@ -39,8 +39,9 @@ interface DashboardSaveModalProps {
     newCopyOnSave,
     newTags,
     newTimeRestore,
-    newAccessMode,
+    newProjectRoutingRestore,
     isTitleDuplicateConfirmed,
+    newAccessMode,
     onTitleDuplicate,
   }: DashboardSaveOptions) => Promise<SaveResult>;
   onClose: () => void;
@@ -48,8 +49,10 @@ interface DashboardSaveModalProps {
   description: string;
   tags?: string[];
   timeRestore: boolean;
+  projectRoutingRestore: boolean;
   showCopyOnSave: boolean;
   showStoreTimeOnSave?: boolean;
+  showStoreProjectRoutingOnSave?: boolean;
   customModalTitle?: string;
   accessControl?: Partial<SavedObjectAccessControl>;
   isDuplicateAction?: boolean;
@@ -70,14 +73,18 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
   onSave,
   showCopyOnSave,
   showStoreTimeOnSave = true,
+  showStoreProjectRoutingOnSave = true,
   tags,
   title,
   timeRestore,
+  projectRoutingRestore,
   accessControl,
   isDuplicateAction,
 }) => {
   const [selectedTags, setSelectedTags] = React.useState<string[]>(tags ?? []);
   const [persistSelectedTimeInterval, setPersistSelectedTimeInterval] = React.useState(timeRestore);
+  const [persistSelectedProjectRouting, setPersistSelectedProjectRouting] =
+    React.useState(projectRoutingRestore);
   const [selectedAccessMode, setSelectedAccessMode] = React.useState(
     accessControl?.accessMode ?? 'default'
   );
@@ -95,12 +102,19 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
         newDescription,
         newCopyOnSave,
         newTimeRestore: persistSelectedTimeInterval,
-        newAccessMode: selectedAccessMode,
+        newProjectRoutingRestore: persistSelectedProjectRouting,
         isTitleDuplicateConfirmed,
         onTitleDuplicate,
         newTags: selectedTags,
+        newAccessMode: selectedAccessMode,
       }),
-    [onSave, persistSelectedTimeInterval, selectedTags, selectedAccessMode]
+    [
+      onSave,
+      persistSelectedTimeInterval,
+      persistSelectedProjectRouting,
+      selectedTags,
+      selectedAccessMode,
+    ]
   );
 
   const renderDashboardSaveOptions = useCallback(() => {
@@ -150,6 +164,38 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
             </EuiFlexGroup>
           </EuiFormRow>
         ) : null}
+        {showStoreProjectRoutingOnSave ? (
+          <EuiFormRow>
+            <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiSwitch
+                  data-test-subj="storeProjectRoutingWithDashboard"
+                  checked={persistSelectedProjectRouting}
+                  onChange={(event) => {
+                    setPersistSelectedProjectRouting(event.target.checked);
+                  }}
+                  label={
+                    <FormattedMessage
+                      id="dashboard.topNav.saveModal.storeProjectRoutingWithDashboardFormRowLabel"
+                      defaultMessage="Store project routing with dashboard"
+                    />
+                  }
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  content={
+                    <FormattedMessage
+                      id="dashboard.topNav.saveModal.storeProjectRoutingWithDashboardFormRowHelpText"
+                      defaultMessage="This changes the project routing to the currently selected project each time this dashboard is loaded."
+                    />
+                  }
+                  position="top"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFormRow>
+        ) : null}
         {!isDuplicateAction && (
           <>
             <EuiSpacer size="l" />
@@ -167,8 +213,10 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
     );
   }, [
     persistSelectedTimeInterval,
+    persistSelectedProjectRouting,
     selectedTags,
     showStoreTimeOnSave,
+    showStoreProjectRoutingOnSave,
     accessControl,
     isDuplicateAction,
   ]);
