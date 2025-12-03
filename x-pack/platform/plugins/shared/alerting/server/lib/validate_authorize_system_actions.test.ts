@@ -150,7 +150,7 @@ describe('validateAndAuthorizeSystemActions', () => {
 
     registry.register(connectorAdapter);
 
-    actionsClient.isSystemAction.mockReturnValue(false);
+    actionsClient.isSystemAction.mockReturnValue(true);
     actionsClient.listTypes.mockResolvedValue([
       {
         id: '.test',
@@ -174,7 +174,9 @@ describe('validateAndAuthorizeSystemActions', () => {
         actionsAuthorization,
         rule: { consumer: 'stackAlerts', producer: 'alerts' },
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Cannot use the same system action twice"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Cannot use action system_action-id more than once for this rule"`
+    );
   });
 
   it('should allow multiple instances of the same system action if allowMultipleSystemActions is true', async () => {
