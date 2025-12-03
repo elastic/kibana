@@ -25,7 +25,7 @@ import type {
   WorkflowsServices,
 } from './types';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
-// Lazy import to avoid bundling connector dependencies in main plugin
+import { stepSchemas } from '../common/step_schemas';
 
 export class WorkflowsPlugin
   implements
@@ -87,7 +87,13 @@ export class WorkflowsPlugin
     return {};
   }
 
-  public start(core: CoreStart): WorkflowsPublicPluginStart {
+  public start(
+    _core: CoreStart,
+    plugins: WorkflowsPublicPluginStartDependencies
+  ): WorkflowsPublicPluginStart {
+    // Initialize StepSchemas singleton with workflowExtensions
+    stepSchemas.initialize(plugins.workflowsExtensions);
+
     return {};
   }
 
