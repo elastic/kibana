@@ -18,4 +18,5 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 export type { DataSourcesRegistryPluginSetup, DataSourcesRegistryPluginStart } from './types';
 export type { DataCatalog } from './data_catalog';
 // Export interface (not just type) so that it can be implemented by consumers.
+// @ts-expect-error: Re-exporting type with isolatedModules
 export { DataTypeDefinition } from './data_catalog';
