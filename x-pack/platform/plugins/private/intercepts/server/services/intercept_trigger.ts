@@ -116,6 +116,11 @@ export class InterceptTriggerService {
             return result;
           })
           .catch((err) => {
+            if (SavedObjectsErrorHelpers.isConflictError(err)) {
+              this.logger?.debug(`Conflict error creating registered task: ${err.message}`);
+              return null;
+            }
+
             this.counter?.errorCounter(contextName);
             throw err;
           });
@@ -144,6 +149,7 @@ export class InterceptTriggerService {
 
       // Nothing to do if the trigger interval is the same
     } catch (err) {
+      this.logger?.error(`Error registering trigger definition: ${err.message}`);
       apm.captureError(err);
     }
   }

@@ -171,8 +171,6 @@ export class InterceptPrompter {
                 try {
                   const interceptConfig = await intercept.config();
                   this.queueIntercept?.({ id: intercept.id, runId: nextRunId, ...interceptConfig });
-                  // Reset the timer start record, so the next interval starts fresh
-                  // this.clearInterceptTimerStartRecord(intercept.id);
                   nextRunId++;
                 } catch (err) {
                   apm.captureError(err, {
