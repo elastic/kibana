@@ -17,6 +17,7 @@ import { PROCESSOR_EVENT, TRACE_ID } from '../../../../common/es_fields/apm';
 import { getTypedSearch } from '../../../utils/create_typed_es_client';
 import { getDownstreamServiceResource } from '../get_observability_alert_details_context/get_downstream_dependency_name';
 import { getShouldMatchOrNotExistFilter } from '../utils/get_should_match_or_not_exist_filter';
+import { asKeyValuePairs } from '../utils/as_key_value_pair';
 
 export interface LogCategory {
   errorCategory: string;
@@ -152,10 +153,6 @@ export async function getLogCategories({
 
   return {
     logCategories: await Promise.all(promises ?? []),
-    entities: event
-      ? Object.keys(event)
-          .sort()
-          .map((key) => ({ key, value: event[key] }))
-      : [],
+    entities: asKeyValuePairs(event),
   };
 }
