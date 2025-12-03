@@ -26,7 +26,7 @@ describe('getColumns', () => {
   const docId = 'span-456';
   const errorId = 'error-789';
 
-  const mockErrorItem: ErrorsByTraceId['traceErrors'][0] = {
+  const mockErrorItem = {
     error: {
       id: errorId,
       exception: {
@@ -36,9 +36,9 @@ describe('getColumns', () => {
       grouping_key: 'group-123',
     },
     timestamp: { us: 1234567890 },
-  };
+  } as unknown as ErrorsByTraceId['traceErrors'][0];
 
-  const mockErrorItemWithLog: ErrorsByTraceId['traceErrors'][0] = {
+  const mockErrorItemWithLog = {
     error: {
       id: errorId,
       log: {
@@ -47,16 +47,16 @@ describe('getColumns', () => {
       culprit: 'test-culprit',
     },
     timestamp: { us: 1234567890 },
-  };
+  } as unknown as ErrorsByTraceId['traceErrors'][0];
 
-  const mockUnprocessedOtelErrorItem: ErrorsByTraceId['traceErrors'][0] = {
+  const mockUnprocessedOtelErrorItem = {
     error: {
       id: errorId,
       exception: {
         type: 'Error',
       },
     },
-  };
+  } as unknown as ErrorsByTraceId['traceErrors'][0];
 
   beforeEach(() => {
     jest.clearAllMocks();

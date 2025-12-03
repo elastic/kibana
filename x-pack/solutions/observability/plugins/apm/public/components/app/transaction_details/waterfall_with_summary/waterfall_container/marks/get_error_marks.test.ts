@@ -21,6 +21,7 @@ describe('getErrorMarks', () => {
         docType: 'error',
         offset: 10,
         skew: 5,
+        id: 1,
         doc: { error: { id: 1 }, service: { name: 'opbeans-java' } },
         color: 'red',
       } as unknown,
@@ -28,6 +29,7 @@ describe('getErrorMarks', () => {
         docType: 'error',
         offset: 50,
         skew: 0,
+        id: 2,
         doc: { error: { id: 2 }, service: { name: 'opbeans-node' } },
         color: 'blue',
       } as unknown,
@@ -40,6 +42,7 @@ describe('getErrorMarks', () => {
         id: 1,
         error: { error: { id: 1 }, service: { name: 'opbeans-java' } },
         serviceColor: 'red',
+        withLink: true,
       },
       {
         type: 'errorMark',
@@ -48,6 +51,7 @@ describe('getErrorMarks', () => {
         id: 2,
         error: { error: { id: 2 }, service: { name: 'opbeans-node' } },
         serviceColor: 'blue',
+        withLink: true,
       },
     ]);
   });
@@ -58,6 +62,7 @@ describe('getErrorMarks', () => {
         docType: 'error',
         offset: 10,
         skew: 5,
+        id: 1,
         doc: { error: { id: 1 }, service: { name: 'opbeans-java' } },
         color: '',
       } as unknown,
@@ -65,6 +70,7 @@ describe('getErrorMarks', () => {
         docType: 'error',
         offset: 50,
         skew: 0,
+        id: 2,
         doc: { error: { id: 2 }, service: { name: 'opbeans-node' } },
         color: '',
       } as unknown,
@@ -77,6 +83,7 @@ describe('getErrorMarks', () => {
         id: 1,
         error: { error: { id: 1 }, service: { name: 'opbeans-java' } },
         serviceColor: '',
+        withLink: true,
       },
       {
         type: 'errorMark',
@@ -85,6 +92,7 @@ describe('getErrorMarks', () => {
         id: 2,
         error: { error: { id: 2 }, service: { name: 'opbeans-node' } },
         serviceColor: '',
+        withLink: true,
       },
     ]);
   });
