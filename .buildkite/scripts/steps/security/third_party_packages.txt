@@ -17,6 +17,7 @@ xml-formatter
 @tanstack/react-table
 @tanstack/react-virtual
 @storybook/addon-docs
+@babel/plugin-transform-class-static-block
 dompurify
 magic-bytes.js
 @axe-core/playwright

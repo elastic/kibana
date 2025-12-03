@@ -906,7 +906,7 @@ const ESQLEditorInternal = function ESQLEditor({
       // this becomes confusing with multiple markers, so quick fixes
       // will be proposed only within the tooltip
       lightbulb: {
-        enabled: false,
+        enabled: monaco.editor.ShowLightbulbIconMode.Off,
       },
       lineDecorationsWidth: 20,
       lineNumbers: 'on',

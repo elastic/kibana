@@ -17,6 +17,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
   const comboBox = getService('comboBox');
   const retry = getService('retry');
   const toasts = getService('toasts');
+  const monacoEditor = getService('monacoEditor');
   const selectIndex = async () => {
     await testSubjects.existOrFail('addDataSourcesButton');
     await testSubjects.click('addDataSourcesButton');
@@ -689,11 +690,10 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
 
       async expectCanEditElasticsearchQuery(newQuery: string) {
         await testSubjects.existOrFail('ViewElasticsearchQueryResult');
-        const codeEditor = await testSubjects.find('ViewElasticsearchQueryResult');
-        const editorTextArea = await codeEditor.findByTagName('textarea');
-        await editorTextArea.clickMouseButton();
-        await editorTextArea.clearValueWithKeyboard();
-        await editorTextArea.type(newQuery);
+        await monacoEditor.setCodeEditorValueByCssSelector(
+          '[data-test-subj="ViewElasticsearchQueryResult"]',
+          newQuery
+        );
         await this.expectQueryCodeToBe(newQuery);
       },
 
