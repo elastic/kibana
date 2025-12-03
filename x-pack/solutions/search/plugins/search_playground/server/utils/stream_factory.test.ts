@@ -88,6 +88,7 @@ describe('streamFactory', () => {
     // @ts-ignore
     responseWithHeaders.body.write = jest.fn((chunk, callback) => {
       setImmediate(() => {
+        // @ts-expect-error
         if (callback) callback(null);
         responseWithHeaders.body.emit('drain');
       });
