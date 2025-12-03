@@ -7,34 +7,29 @@
 
 import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin/server';
 import { SupportedOAuthProvider } from '@kbn/data-sources-registry-plugin/server/data_catalog/data_type';
-import type {
-  OAuthConfiguration,
-  StackConnectorConfig,
-  WorkflowInfo,
-} from '@kbn/data-sources-registry-plugin/server/data_catalog/data_type';
 import { generateQueryWorkflow, generateSearchWorkflow } from './workflows';
 
-export class NotionDataSource implements DataTypeDefinition {
-  readonly id = 'notion';
-  readonly name = 'Notion';
-  description = 'Connect to Notion to pull data from your workspace.';
+export const notionDataSource: DataTypeDefinition = {
+  id: 'notion',
+  name: 'Notion',
+  description: 'Connect to Notion to pull data from your workspace.',
 
-  oauthConfiguration: OAuthConfiguration = {
+  oauthConfiguration: {
     provider: SupportedOAuthProvider.NOTION,
     initiatePath: '/oauth/start/notion',
     fetchSecretsPath: '/oauth/fetch_request_secrets',
     oauthBaseUrl: 'https://localhost:8052',
-  };
+  },
 
-  stackConnector: StackConnectorConfig = {
+  stackConnector: {
     type: '.notion',
     config: {},
-  };
+  },
 
-  generateWorkflows(stackConnectorId: string): WorkflowInfo[] {
+  generateWorkflows(stackConnectorId: string) {
     return [
       { content: generateQueryWorkflow(stackConnectorId), shouldGenerateABTool: true },
       { content: generateSearchWorkflow(stackConnectorId), shouldGenerateABTool: false },
     ];
-  }
-}
+  },
+};

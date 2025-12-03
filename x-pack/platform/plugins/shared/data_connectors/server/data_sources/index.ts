@@ -5,9 +5,8 @@
  * 2.0.
  */
 import type { DataSourcesRegistryPluginSetup } from '@kbn/data-sources-registry-plugin/server';
-import { NotionDataSource } from './notion';
+import { notionDataSource } from './notion';
 
 export function registerDataSources(dataSourcesRegistry: DataSourcesRegistryPluginSetup) {
-  const ds = new NotionDataSource();
-  dataSourcesRegistry.register(ds);
+  dataSourcesRegistry.register(notionDataSource);
 }
