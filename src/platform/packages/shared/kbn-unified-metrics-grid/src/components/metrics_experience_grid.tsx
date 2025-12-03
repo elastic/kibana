@@ -18,9 +18,10 @@ import { MetricsGridWrapper } from './metrics_grid_wrapper';
 import { EmptyState } from './empty_state/empty_state';
 import { useToolbarActions } from './toolbar/hooks/use_toolbar_actions';
 import { SearchButton } from './toolbar/right_side_actions/search_button';
-import { useMetricFieldsQuery } from '../hooks';
+import { useMetricFieldsCaps } from '../hooks';
 import { MetricsExperienceGridContent } from './metrics_experience_grid_content';
 import type { UnifiedMetricsGridProps } from '../types';
+import { generateMetricFields } from '../utils';
 
 export const MetricsExperienceGrid = ({
   renderToggleActions,
@@ -40,10 +41,22 @@ export const MetricsExperienceGrid = ({
     useMetricsExperienceState();
 
   const indexPattern = useMemo(() => dataView?.getIndexPattern() ?? 'metrics-*', [dataView]);
-  const { data: fields = [], isFetching: isFetchingAllFields } = useMetricFieldsQuery({
+  // const { data: _fields = [], isFetching: isFetchingAllFields } = useMetricFieldsQuery({
+  //   index: indexPattern,
+  //   timeRange,
+  // });
+
+  const { data: fieldCaps = {}, isFetching: isFetchingAllFields } = useMetricFieldsCaps({
     index: indexPattern,
     timeRange,
   });
+
+  const metricFieldsFromResults = useMemo(
+    () => generateMetricFields(fieldCaps, results),
+    [fieldCaps, results]
+  );
+
+  const fields = metricFieldsFromResults;
 
   const { toggleActions, leftSideActions, rightSideActions } = useToolbarActions({
     fields,

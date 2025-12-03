@@ -66,6 +66,16 @@ export function createMetricsExperienceClient(core: CoreStart | CoreSetup) {
         },
         signal,
       }),
+    getFieldCaps: (
+      params: MetricsExperienceAPIClientRequestParamsOf<'GET /internal/metrics_experience/field_caps'>['params']['query'],
+      signal?: AbortSignal | null
+    ) =>
+      request('GET /internal/metrics_experience/field_caps', {
+        params: {
+          query: params,
+        },
+        signal,
+      }),
     searchFields: (
       params: MetricsExperienceAPIClientRequestParamsOf<'POST /internal/metrics_experience/fields/_search'>['params']['body'],
       signal?: AbortSignal | null

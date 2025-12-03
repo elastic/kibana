@@ -36,6 +36,7 @@ import type { ResizableLayoutProps } from '@kbn/resizable-layout';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
 import type { ControlPanelsState } from '@kbn/controls-plugin/common';
+import type { DataTableRecord } from '@kbn/discover-utils';
 
 /**
  * The fetch status of a Unified Histogram request
@@ -312,6 +313,10 @@ export interface ChartSectionProps {
    * Observable for fetching the histogram data
    */
   fetch$: UnifiedHistogramFetch$;
+  /**
+   * The current query results
+   */
+  results?: { rows?: DataTableRecord[]; columns?: DatatableColumn[] };
   /**
    * Flag indicating that the chart is currently loading
    */

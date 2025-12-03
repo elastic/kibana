@@ -16,6 +16,7 @@ export { useEsqlQueryInfo } from './use_esql_query_info';
 export { usePagination } from './use_pagination';
 export { useMetricsGridFullScreen } from './use_metrics_grid_fullscreen';
 export { useGridNavigation } from './use_grid_navigation';
+export { useMetricFieldsCaps } from './use_metric_fields_caps';
 export {
   METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS,
   METRICS_GRID_FULL_SCREEN_CLASS,
