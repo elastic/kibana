@@ -141,11 +141,11 @@ export function AttachmentsTable({
           'data-test-subj': 'streamsAppAttachmentGoToAction',
         },
         {
-          name: i18n.translate('xpack.streams.attachmentTable.unlinkActionTitle', {
-            defaultMessage: 'Unlink attachment',
+          name: i18n.translate('xpack.streams.attachmentTable.removeActionTitle', {
+            defaultMessage: 'Remove attachment',
           }),
-          description: i18n.translate('xpack.streams.attachmentTable.unlinkActionDescription', {
-            defaultMessage: 'Unlink this attachment from stream',
+          description: i18n.translate('xpack.streams.attachmentTable.removeActionDescription', {
+            defaultMessage: 'Remove this attachment from stream',
           }),
           type: 'icon',
           icon: 'unlink',

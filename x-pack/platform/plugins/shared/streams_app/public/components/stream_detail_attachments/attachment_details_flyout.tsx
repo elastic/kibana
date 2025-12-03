@@ -186,8 +186,8 @@ export function AttachmentDetailsFlyout({
                 color="danger"
                 onClick={onUnlink}
               >
-                {i18n.translate('xpack.streams.attachmentDetailsFlyout.unlinkButtonLabel', {
-                  defaultMessage: 'Unlink attachment',
+                {i18n.translate('xpack.streams.attachmentDetailsFlyout.removeButtonLabel', {
+                  defaultMessage: 'Remove attachment',
                 })}
               </EuiButtonEmpty>
             </EuiFlexItem>

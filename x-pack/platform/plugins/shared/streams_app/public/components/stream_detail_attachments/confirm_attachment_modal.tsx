@@ -53,23 +53,23 @@ export function ConfirmAttachmentModal({
   });
 
   const subtitle = isUnlink
-    ? i18n.translate('xpack.streams.confirmAttachmentModal.unlinkSubtitle', {
+    ? i18n.translate('xpack.streams.confirmAttachmentModal.removeSubtitle', {
         defaultMessage:
-          'Are you sure you want to unlink {count, plural, one {this attachment} other {these attachments}}?',
+          'Are you sure you want to remove {count, plural, one {this attachment} other {these attachments}}?',
         values: { count: attachments.length },
       })
-    : i18n.translate('xpack.streams.confirmAttachmentModal.linkSubtitle', {
+    : i18n.translate('xpack.streams.confirmAttachmentModal.addSubtitle', {
         defaultMessage:
-          'Are you sure you want to link {count, plural, one {this attachment} other {these attachments}}?',
+          'Are you sure you want to add {count, plural, one {this attachment} other {these attachments}}?',
         values: { count: attachments.length },
       });
 
   const confirmButtonText = isUnlink
-    ? i18n.translate('xpack.streams.confirmAttachmentModal.unlinkButton', {
-        defaultMessage: 'Unlink from stream',
+    ? i18n.translate('xpack.streams.confirmAttachmentModal.removeButton', {
+        defaultMessage: 'Remove from stream',
       })
-    : i18n.translate('xpack.streams.confirmAttachmentModal.linkButton', {
-        defaultMessage: 'Link to stream',
+    : i18n.translate('xpack.streams.confirmAttachmentModal.addButton', {
+        defaultMessage: 'Add to stream',
       });
 
   const columns = useMemo(

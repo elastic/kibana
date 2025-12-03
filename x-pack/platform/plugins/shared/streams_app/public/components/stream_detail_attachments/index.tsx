@@ -103,14 +103,14 @@ export function StreamDetailAttachments({
       attachmentsFetch.refresh();
       setIsAddAttachmentFlyoutOpen(false);
       notifications.toasts.addSuccess({
-        title: i18n.translate('xpack.streams.attachments.linkSuccess.title', {
+        title: i18n.translate('xpack.streams.attachments.addSuccess.title', {
           defaultMessage: 'Attachments added successfully',
         }),
         iconType: 'cheer',
         text: toMountPoint(
           <FormattedMessage
-            id="xpack.streams.attachments.linkSuccess.text"
-            defaultMessage="{count} {count, plural, one {attachment was} other {attachments were}} linked to the {streamName} stream."
+            id="xpack.streams.attachments.addSuccess.text"
+            defaultMessage="{count} {count, plural, one {attachment was} other {attachments were}} added to the {streamName} stream."
             values={{
               count: attachments.length,
               streamName: <strong>{definition.stream.name}</strong>,
@@ -130,14 +130,14 @@ export function StreamDetailAttachments({
       setSelectedAttachments([]);
       setIsSelectionPopoverOpen(false);
       notifications.toasts.addSuccess({
-        title: i18n.translate('xpack.streams.attachments.unlinkSuccess.title', {
-          defaultMessage: 'Attachments are unlinked',
+        title: i18n.translate('xpack.streams.attachments.removeSuccess.title', {
+          defaultMessage: 'Attachments removed',
         }),
         iconType: 'unlink',
         text: toMountPoint(
           <FormattedMessage
-            id="xpack.streams.attachments.unlinkSuccess.text"
-            defaultMessage="{count} {count, plural, one {attachment was} other {attachments were}} unlinked from the {streamName} stream."
+            id="xpack.streams.attachments.removeSuccess.text"
+            defaultMessage="{count} {count, plural, one {attachment was} other {attachments were}} removed from the {streamName} stream."
             values={{
               count: attachments.length,
               streamName: <strong>{definition.stream.name}</strong>,
@@ -248,9 +248,9 @@ export function StreamDetailAttachments({
                           }}
                         >
                           {i18n.translate(
-                            'xpack.streams.streamDetailAttachments.unlinkAttachmentsLabel',
+                            'xpack.streams.streamDetailAttachments.removeAttachmentsLabel',
                             {
-                              defaultMessage: 'Unlink attachments',
+                              defaultMessage: 'Remove attachments',
                             }
                           )}
                         </EuiContextMenuItem>,
