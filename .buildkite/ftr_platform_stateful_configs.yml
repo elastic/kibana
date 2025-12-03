@@ -48,6 +48,7 @@ disabled:
 
   # Gen AI suites, running with their own pipeline
   - x-pack/platform/test/functional_gen_ai/inference/config.ts
+  - x-pack/platform/test/onechat/smoke_tests/config.stateful.ts
 
 defaultQueue: 'n2-4-spot'
 enabled:
@@ -332,6 +333,7 @@ enabled:
   - x-pack/platform/test/security_functional/user_profiles.config.ts
   - x-pack/platform/test/security_functional/expired_session.config.ts
   - x-pack/solutions/security/test/session_view/basic/config.ts
+  - x-pack/solutions/security/test/kubernetes_security/basic/config.ts
   - x-pack/platform/test/spaces_api_integration/security_and_spaces/config_basic.ts
   - x-pack/platform/test/spaces_api_integration/security_and_spaces/config_trial.ts
   - x-pack/platform/test/spaces_api_integration/spaces_only/config.ts

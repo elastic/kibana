@@ -31,6 +31,7 @@ import type { CasesPublicStart, CasesPublicSetup } from '@kbn/cases-plugin/publi
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { SessionViewStart } from '@kbn/session-view-plugin/public';
+import type { KubernetesSecurityStart } from '@kbn/kubernetes-security-plugin/public';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
 import type { OsqueryPluginStart } from '@kbn/osquery-plugin/public';
 import type { LicensingPluginStart, LicensingPluginSetup } from '@kbn/licensing-plugin/public';
@@ -38,6 +39,7 @@ import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import type { CloudDefendPluginStart } from '@kbn/cloud-defend-plugin/public';
 import type { CspClientPluginStart } from '@kbn/cloud-security-posture-plugin/public';
 import type { ApmBase } from '@elastic/apm-rum';
 import type {
@@ -63,11 +65,13 @@ import type { AutomaticImportPluginStart } from '@kbn/automatic-import-plugin/pu
 import type { ProductFeatureKeys } from '@kbn/security-solution-features';
 import type { ElasticAssistantSharedStatePublicPluginStart } from '@kbn/elastic-assistant-shared-state-plugin/public';
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
 import type { Cases } from './cases';
 import type { Exceptions } from './exceptions';
+import type { Kubernetes } from './kubernetes';
 import type { Onboarding } from './onboarding';
 import type { Overview } from './overview';
 import type { Reports } from './reports';
@@ -75,6 +79,7 @@ import type { Rules } from './rules';
 import type { Timelines } from './timelines';
 import type { Management } from './management';
 import type { CloudSecurityPosture } from './cloud_security_posture';
+import type { CloudDefend } from './cloud_defend';
 import type { ThreatIntelligence } from './threat_intelligence';
 import type { SecuritySolutionTemplateWrapper } from './app/home/template_wrapper';
 import type { AssetInventory } from './asset_inventory';
@@ -99,6 +104,7 @@ import type { SiemMigrationsService } from './siem_migrations/service';
 export interface SetupPlugins {
   cloud?: CloudSetup;
   home?: HomePublicPluginSetup;
+  share?: SharePluginSetup;
   licensing: LicensingPluginSetup;
   management: ManagementSetup;
   security: SecurityPluginSetup;
@@ -127,6 +133,7 @@ export interface StartPlugins {
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
   fleet?: FleetStart;
+  kubernetesSecurity: KubernetesSecurityStart;
   lens: LensPublicStart;
   lists?: ListsPluginStart;
   licensing: LicensingPluginStart;
@@ -142,6 +149,7 @@ export interface StartPlugins {
   osquery: OsqueryPluginStart;
   security: SecurityPluginStart;
   cloud?: CloudStart;
+  cloudDefend: CloudDefendPluginStart;
   cloudSecurityPosture: CspClientPluginStart;
   dataViews: DataViewsServicePublic;
   fieldFormats: FieldFormatsStartCommon;
@@ -158,6 +166,7 @@ export interface StartPlugins {
   productDocBase: ProductDocBasePluginStart;
   elasticAssistantSharedState: ElasticAssistantSharedStatePublicPluginStart;
   inference: InferencePublicStart;
+  share?: SharePluginStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {
@@ -232,10 +241,12 @@ export interface SubPlugins {
   alerts: Detections;
   assetInventory: AssetInventory;
   attackDiscovery: AttackDiscovery;
+  cloudDefend: CloudDefend;
   cloudSecurityPosture: CloudSecurityPosture;
   dashboards: Dashboards;
   exceptions: Exceptions;
   explore: Explore;
+  kubernetes: Kubernetes;
   management: Management;
   onboarding: Onboarding;
   overview: Overview;
@@ -255,10 +266,12 @@ export interface StartedSubPlugins {
   alerts: Awaited<ReturnType<Detections['start']>>;
   assetInventory: Awaited<ReturnType<AssetInventory['start']>>;
   attackDiscovery: ReturnType<AttackDiscovery['start']>;
+  cloudDefend: ReturnType<CloudDefend['start']>;
   cloudSecurityPosture: ReturnType<CloudSecurityPosture['start']>;
   dashboards: ReturnType<Dashboards['start']>;
   exceptions: ReturnType<Exceptions['start']>;
   explore: ReturnType<Explore['start']>;
+  kubernetes: ReturnType<Kubernetes['start']>;
   management: ReturnType<Management['start']>;
   onboarding: ReturnType<Onboarding['start']>;
   overview: ReturnType<Overview['start']>;

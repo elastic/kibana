@@ -8,32 +8,16 @@
  */
 import { i18n } from '@kbn/i18n';
 import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
-import type { ESQLAstAllCommands, ESQLCommand } from '../../../types';
+import type {
+  ESQLAstAllCommands,
+  ESQLAstForkCommand,
+  ESQLAstQueryExpression,
+} from '../../../types';
 import { pipeCompleteItem, getCommandAutocompleteDefinitions } from '../../complete_items';
 import { pipePrecedesCurrentWord } from '../../../definitions/utils/shared';
 import type { ICommandCallbacks } from '../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
 import { esqlCommandRegistry } from '../..';
-
-// ToDo: this is hardcoded, we should find a better way to take care of the fork commands
-const FORK_AVAILABLE_COMMANDS = [
-  'limit',
-  'sort',
-  'where',
-  'dissect',
-  'stats',
-  'eval',
-  'completion',
-  'grok',
-  'change_point',
-  'mv_expand',
-  'keep',
-  'drop',
-  'rename',
-  'sample',
-  'join',
-  'enrich',
-];
 
 export async function autocomplete(
   query: string,
@@ -42,12 +26,14 @@ export async function autocomplete(
   context?: ICommandContext,
   cursorPosition: number = query.length
 ): Promise<ISuggestionItem[]> {
+  const forkCommand = command as ESQLAstForkCommand;
+
   const innerText = query.substring(0, cursorPosition);
   if (/FORK\s+$/i.test(innerText)) {
     return [newBranchSuggestion];
   }
 
-  const activeBranch = getActiveBranch(command);
+  const activeBranch = getActiveBranch(forkCommand);
   const withinActiveBranch =
     activeBranch &&
     activeBranch.location.min <= innerText.length &&
@@ -55,7 +41,7 @@ export async function autocomplete(
 
   if (!withinActiveBranch && /\)\s+$/i.test(innerText)) {
     const suggestions = [newBranchSuggestion];
-    if (command.args.length > 1) {
+    if (forkCommand.args.length > 1) {
       suggestions.push(pipeCompleteItem);
     }
     return suggestions;
@@ -63,7 +49,11 @@ export async function autocomplete(
 
   // within a branch
   if (activeBranch?.commands.length === 0 || pipePrecedesCurrentWord(innerText)) {
-    return getCommandAutocompleteDefinitions(FORK_AVAILABLE_COMMANDS);
+    const forkCommands = esqlCommandRegistry
+      .getProcessingCommandNames()
+      .filter((cmd) => cmd !== 'fork');
+
+    return getCommandAutocompleteDefinitions(forkCommands);
   }
 
   const subCommand = activeBranch?.commands[activeBranch.commands.length - 1];
@@ -74,13 +64,7 @@ export async function autocomplete(
 
   const subCommandMethods = esqlCommandRegistry.getCommandMethods(subCommand.name);
   return (
-    subCommandMethods?.autocomplete(
-      innerText,
-      subCommand as ESQLCommand,
-      callbacks,
-      context,
-      cursorPosition
-    ) || []
+    subCommandMethods?.autocomplete(innerText, subCommand, callbacks, context, cursorPosition) || []
   );
 }
 
@@ -96,13 +80,12 @@ const newBranchSuggestion: ISuggestionItem = withAutoSuggest({
   asSnippet: true,
 });
 
-const getActiveBranch = (command: ESQLAstAllCommands) => {
+const getActiveBranch = (command: ESQLAstForkCommand): ESQLAstQueryExpression | undefined => {
   const finalBranch = command.args[command.args.length - 1];
 
-  if (Array.isArray(finalBranch) || finalBranch.type !== 'query') {
-    // should never happen
+  if (!finalBranch) {
     return;
   }
 
-  return finalBranch;
+  return finalBranch.child;
 };

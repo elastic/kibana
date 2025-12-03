@@ -16,7 +16,6 @@
     "@kbn/esql-types",
     "@kbn/core-pricing-common",
     "@kbn/licensing-types",
-    "@kbn/core-ui-settings-common",
   ],
   "exclude": [
     "target/**/*",

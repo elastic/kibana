@@ -80,6 +80,8 @@ export {
   effectiveToIngestLifecycle,
 } from './src/helpers/lifecycle';
 
+export { findInheritedFailureStore } from './src/helpers/failure_store';
+
 export { streamObjectNameSchema } from './src/shared/stream_object_name';
 
 export {
@@ -108,6 +110,17 @@ export {
   type WiredIngestStreamEffectiveSettings,
 } from './src/models/ingest/settings';
 
+export {
+  type FailureStore,
+  type EffectiveFailureStore,
+  type WiredIngestStreamEffectiveFailureStore,
+  type FailureStoreStatsResponse,
+  isEnabledFailureStore,
+  isInheritFailureStore,
+  isDisabledLifecycleFailureStore,
+  isEnabledLifecycleFailureStore,
+} from './src/models/ingest/failure_store';
+
 export type {
   SignificantEventsResponse,
   SignificantEventsGetResponse,
@@ -118,4 +131,13 @@ export type {
 
 export { emptyAssets } from './src/helpers/empty_assets';
 
-export { type Feature, featureSchema } from './src/feature';
+export {
+  type Feature,
+  type SystemFeature,
+  type FeatureWithFilter,
+  type FeatureType,
+  featureSchema,
+  featureTypeSchema,
+  featureWithFilterSchema,
+  isFeatureWithFilter,
+} from './src/feature';

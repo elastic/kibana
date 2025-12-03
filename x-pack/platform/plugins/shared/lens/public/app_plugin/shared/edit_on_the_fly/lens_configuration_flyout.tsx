@@ -13,7 +13,6 @@ import {
   EuiTitle,
   EuiAccordion,
   useEuiTheme,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
   euiScrollBarStyles,
@@ -35,6 +34,8 @@ import { useApplicationUserMessages } from '../../get_application_user_messages'
 import { trackSaveUiCounterEvents } from '../../../lens_ui_telemetry';
 import { useCurrentAttributes } from './use_current_attributes';
 import { deleteUserChartTypeFromSessionStorage } from '../../../chart_type_session_storage';
+import { LayerTabsWrapper } from './layer_tabs';
+import { useAddLayerButton } from './use_add_layer_button';
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -96,7 +97,10 @@ export function LensEditConfigurationFlyout({
             previousAttrs.state.datasourceStates[datasourceId],
             previousAttrs.references,
             datasourceStates[datasourceId].state,
-            attributes.references
+            // Extract references from the current state as they contain resolved data view IDs
+            // We cannot use attributes.references because they may contain stale data view IDs from when the panel was initially loaded
+            datasourceMap[datasourceId].getPersistableState(datasourceStates[datasourceId].state)
+              .references
           )
         : false;
 
@@ -268,6 +272,14 @@ export function LensEditConfigurationFlyout({
     getUserMessages,
   ]);
 
+  const addLayerButton = useAddLayerButton(
+    framePublicAPI,
+    coreStart,
+    startDependencies.dataViews,
+    startDependencies.uiActions,
+    setIsInlineFlyoutVisible
+  );
+
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.key === keys.ESCAPE) {
       closeFlyout?.();
@@ -278,6 +290,25 @@ export function LensEditConfigurationFlyout({
   };
 
   if (isLoading) return null;
+
+  const toolbar = (
+    <>
+      <EuiFlexItem grow={false} data-test-subj="lnsVisualizationToolbar">
+        <VisualizationToolbarWrapper framePublicAPI={framePublicAPI} isInlineEditing={true} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{addLayerButton}</EuiFlexItem>
+    </>
+  );
+
+  const layerTabs = (
+    <LayerTabsWrapper
+      attributes={attributes}
+      coreStart={coreStart}
+      uiActions={startDependencies.uiActions}
+      framePublicAPI={framePublicAPI}
+    />
+  );
+
   // Example is the Discover editing where we dont want to render the text based editor on the panel, neither the suggestions (for now)
   if (!canEditTextBasedQuery && hidesSuggestions) {
     return (
@@ -294,9 +325,8 @@ export function LensEditConfigurationFlyout({
           isSaveable={isSaveable}
           isReadOnly={isReadOnly}
           applyButtonLabel={applyButtonLabel}
-          toolbar={
-            <VisualizationToolbarWrapper framePublicAPI={framePublicAPI} isInlineEditing={true} />
-          }
+          toolbar={toolbar}
+          layerTabs={layerTabs}
         >
           <LayerConfiguration
             // TODO: remove this once we support switching to any chart in Discover
@@ -336,9 +366,8 @@ export function LensEditConfigurationFlyout({
         isNewPanel={isNewPanel}
         isReadOnly={isReadOnly}
         applyButtonLabel={applyButtonLabel}
-        toolbar={
-          <VisualizationToolbarWrapper framePublicAPI={framePublicAPI} isInlineEditing={true} />
-        }
+        toolbar={toolbar}
+        layerTabs={layerTabs}
       >
         <EuiFlexGroup
           css={css`
@@ -453,7 +482,6 @@ export function LensEditConfigurationFlyout({
                   canEditTextBasedQuery={canEditTextBasedQuery}
                   editorContainer={editorContainer.current || undefined}
                 />
-                <EuiSpacer />
               </>
             </EuiAccordion>
           </EuiFlexItem>

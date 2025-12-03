@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TheHiveSeverity, TheHiveTLP, SUB_ACTION } from '../../../common/thehive/constants';
+import { TheHiveSeverity, TheHiveTLP, SUB_ACTION } from '@kbn/connector-schemas/thehive/constants';
 
 export const eventActionOptions = [
   {

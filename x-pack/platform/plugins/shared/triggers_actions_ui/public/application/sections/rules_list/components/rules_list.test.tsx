@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { MAINTENANCE_WINDOW_FEATURE_ID, parseDuration } from '@kbn/alerting-plugin/common';
+import { parseDuration } from '@kbn/alerting-plugin/common';
+import { MAINTENANCE_WINDOW_FEATURE_ID } from '@kbn/maintenance-windows-plugin/common';
 import { fetchActiveMaintenanceWindows } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/api';
 import { RUNNING_MAINTENANCE_WINDOW_1 } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/mock';
 import type { IToasts } from '@kbn/core/public';
@@ -1323,7 +1324,7 @@ describe('rules_list with show only capability', () => {
       await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
 
       expect(await screen.findAllByTestId('rulesList')).toHaveLength(1);
-      expect(await screen.findAllByTestId('rule-row')).toHaveLength(2);
+      expect(await screen.findAllByTestId('rule-row-isNotEditable')).toHaveLength(2);
       expect(screen.queryByTestId('deleteActionHoverButton')).not.toBeInTheDocument();
 
       hasAllPrivilege.mockReturnValue(true);
