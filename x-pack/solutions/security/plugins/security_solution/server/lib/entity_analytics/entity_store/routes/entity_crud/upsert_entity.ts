@@ -21,8 +21,14 @@ import {
   DocumentVersionConflictError,
 } from '../../errors';
 import { CapabilityNotEnabledError } from '../../errors/capability_not_enabled_error';
+import type { ITelemetryEventsSender } from '../../../telemetry/sender';
+import { ENTITY_STORE_API_CALL_EVENT } from '../../../telemetry/event_based/events';
 
-export const upsertEntity = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
+export const upsertEntity = (
+  router: EntityAnalyticsRoutesDeps['router'],
+  telemetry: ITelemetryEventsSender,
+  logger: Logger
+) => {
   router.versioned
     .put({
       access: 'public',
@@ -51,6 +57,10 @@ export const upsertEntity = (router: EntityAnalyticsRoutesDeps['router'], logger
       },
       async (context, request, response): Promise<IKibanaResponse<UpsertEntityResponse>> => {
         const secSol = await context.securitySolution;
+
+        telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+          endpoint: request.route.path,
+        });
 
         try {
           await secSol

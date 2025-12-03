@@ -591,6 +591,8 @@ export const ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT: EventTypeOpts<{
 
 export const ENTITY_ENGINE_INITIALIZATION_EVENT: EventTypeOpts<{
   duration: number;
+  entityType: string;
+  namespace: string;
 }> = {
   eventType: 'entity_engine_initialization',
   schema: {
@@ -598,6 +600,46 @@ export const ENTITY_ENGINE_INITIALIZATION_EVENT: EventTypeOpts<{
       type: 'long',
       _meta: {
         description: 'Duration (in seconds) of the entity engine initialization',
+      },
+    },
+    entityType: {
+      type: 'keyword',
+      _meta: {
+        description: 'Type of entities stored (e.g. "host")',
+      },
+    },
+    namespace: {
+      type: 'keyword',
+      _meta: {
+        description: 'Namespace where the entities are stored (e.g. "default")',
+      },
+    },
+  },
+};
+
+export const ENTITY_ENGINE_DELETION_EVENT: EventTypeOpts<{
+  duration: number;
+  entityType: string;
+  namespace: string;
+}> = {
+  eventType: 'entity_engine_deletion',
+  schema: {
+    duration: {
+      type: 'long',
+      _meta: {
+        description: 'Duration (in seconds) of the entity engine deletion',
+      },
+    },
+    entityType: {
+      type: 'keyword',
+      _meta: {
+        description: 'Type of entities stored (e.g. "host")',
+      },
+    },
+    namespace: {
+      type: 'keyword',
+      _meta: {
+        description: 'Namespace where the entities are stored (e.g. "default")',
       },
     },
   },
@@ -626,6 +668,20 @@ export const ENTITY_STORE_USAGE_EVENT: EventTypeOpts<{
       type: 'keyword',
       _meta: {
         description: 'Namespace where the entities are stored (e.g. "default")',
+      },
+    },
+  },
+};
+
+export const ENTITY_STORE_API_CALL_EVENT: EventTypeOpts<{
+  endpoint: string;
+}> = {
+  eventType: 'entity_store_api_call',
+  schema: {
+    endpoint: {
+      type: 'keyword',
+      _meta: {
+        description: 'Name of the endpoint called',
       },
     },
   },
@@ -1648,6 +1704,7 @@ export const events = [
   ENTITY_STORE_HEALTH_REPORT_EVENT,
   ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
   ENTITY_ENGINE_INITIALIZATION_EVENT,
+  ENTITY_ENGINE_DELETION_EVENT,
   ENTITY_STORE_USAGE_EVENT,
   PRIVMON_ENGINE_INITIALIZATION_EVENT,
   PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT,

@@ -13,9 +13,12 @@ import type { ListEntityEnginesResponse } from '../../../../../common/api/entity
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import type { ITelemetryEventsSender } from '../../../telemetry/sender';
+import { ENTITY_STORE_API_CALL_EVENT } from '../../../telemetry/event_based/events';
 
 export const listEntityEnginesRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
+  telemetry: ITelemetryEventsSender,
   logger: Logger
 ) => {
   router.versioned
@@ -36,6 +39,10 @@ export const listEntityEnginesRoute = (
 
       async (context, request, response): Promise<IKibanaResponse<ListEntityEnginesResponse>> => {
         const siemResponse = buildSiemResponse(response);
+
+        telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+          endpoint: request.route.path,
+        });
 
         try {
           const secSol = await context.securitySolution;

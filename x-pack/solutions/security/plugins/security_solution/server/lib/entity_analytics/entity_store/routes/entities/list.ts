@@ -25,10 +25,16 @@ import type { ListEntitiesResponse } from '../../../../../../common/api/entity_a
 import { ListEntitiesRequestQuery } from '../../../../../../common/api/entity_analytics/entity_store/entities/list_entities.gen';
 import { APP_ID } from '../../../../../../common';
 import { API_VERSIONS } from '../../../../../../common/entity_analytics/constants';
+import type { ITelemetryEventsSender } from '../../../telemetry/sender';
+import { ENTITY_STORE_API_CALL_EVENT } from '../../../telemetry/event_based/events';
 
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 
-export const listEntitiesRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
+export const listEntitiesRoute = (
+  router: EntityAnalyticsRoutesDeps['router'],
+  telemetry: ITelemetryEventsSender,
+  logger: Logger
+) => {
   router.versioned
     .get({
       access: 'public',
@@ -51,6 +57,10 @@ export const listEntitiesRoute = (router: EntityAnalyticsRoutesDeps['router'], l
 
       async (context, request, response): Promise<IKibanaResponse<ListEntitiesResponse>> => {
         const siemResponse = buildSiemResponse(response);
+
+        telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+          endpoint: request.route.path,
+        });
 
         try {
           const {

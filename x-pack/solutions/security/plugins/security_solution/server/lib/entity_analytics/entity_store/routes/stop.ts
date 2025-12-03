@@ -16,9 +16,12 @@ import { StopEntityEngineRequestParams } from '../../../../../common/api/entity_
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { ENGINE_STATUS } from '../constants';
+import type { ITelemetryEventsSender } from '../../../telemetry/sender';
+import { ENTITY_STORE_API_CALL_EVENT } from '../../../telemetry/event_based/events';
 
 export const stopEntityEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
+  telemetry: ITelemetryEventsSender,
   logger: Logger
 ) => {
   router.versioned
@@ -43,6 +46,10 @@ export const stopEntityEngineRoute = (
 
       async (context, request, response): Promise<IKibanaResponse<StopEntityEngineResponse>> => {
         const siemResponse = buildSiemResponse(response);
+
+        telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+          endpoint: request.route.path,
+        });
 
         try {
           const secSol = await context.securitySolution;

@@ -14,9 +14,12 @@ import { APP_ID, API_VERSIONS } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 import { buildIndexPatterns } from '../utils';
+import type { ITelemetryEventsSender } from '../../../telemetry/sender';
+import { ENTITY_STORE_API_CALL_EVENT } from '../../../telemetry/event_based/events';
 
 export const entityStoreInternalPrivilegesRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
+  telemetry: ITelemetryEventsSender,
   logger: Logger,
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
 ) => {
@@ -43,6 +46,10 @@ export const entityStoreInternalPrivilegesRoute = (
         const siemResponse = buildSiemResponse(response);
         try {
           const { getSpaceId, getAppClient, getDataViewsService } = await context.securitySolution;
+
+          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+            endpoint: request.route.path,
+          });
 
           const securitySolution = await context.securitySolution;
           securitySolution.getAuditLogger()?.log({

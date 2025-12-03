@@ -119,6 +119,7 @@ import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
 import type { EntityRecord, EntityStoreConfig } from './types';
 import {
   ENTITY_ENGINE_INITIALIZATION_EVENT,
+  ENTITY_ENGINE_DELETION_EVENT,
   ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
 } from '../../telemetry/event_based/events';
 import { CRITICALITY_VALUES } from '../asset_criticality/constants';
@@ -565,6 +566,8 @@ export class EntityStoreDataClient {
       const duration = moment(setupEndTime).diff(moment(setupStartTime), 'seconds');
       this.options.telemetry?.reportEvent(ENTITY_ENGINE_INITIALIZATION_EVENT.eventType, {
         duration,
+        namespace,
+        entityType,
       });
 
       // this task will report Entity Store state as telemetry events
@@ -738,6 +741,7 @@ export class EntityStoreDataClient {
   ) {
     const { namespace, logger, appClient, dataViewsService, config } = this.options;
     const { deleteData, deleteEngine } = options;
+    const deletionStartTime = moment.utc().toISOString();
 
     const descriptor = await this.engineClient.maybeGet(entityType);
     const defaultIndexPatterns = await buildIndexPatternsByEngine(
@@ -854,7 +858,16 @@ export class EntityStoreDataClient {
         );
       }
 
-      logger.info(`[Entity Store] In namespace ${namespace}: Deleted store for ${entityType}`);
+      const deletionEndTime = moment.utc().toISOString();
+      const duration = moment(deletionEndTime).diff(moment(deletionStartTime), 'seconds');
+      logger.info(
+        `[Entity Store] In namespace ${namespace}: Deleted store for ${entityType} in ${duration} seconds`
+      );
+      this.options.telemetry?.reportEvent(ENTITY_ENGINE_DELETION_EVENT.eventType, {
+        duration,
+        namespace,
+        entityType,
+      });
       return { deleted: true };
     } catch (err) {
       this.log(`error`, entityType, `Error deleting entity store: ${err.message}`);

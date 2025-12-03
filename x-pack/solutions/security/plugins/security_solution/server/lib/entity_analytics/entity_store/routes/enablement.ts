@@ -16,10 +16,13 @@ import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { checkAndInitAssetCriticalityResources } from '../../asset_criticality/check_and_init_asset_criticality_resources';
 import { InitEntityStoreRequestBody } from '../../../../../common/api/entity_analytics/entity_store/enable.gen';
 import { checkAndInitPrivilegeMonitoringResources } from '../../privilege_monitoring/check_and_init_privmon_resources';
+import type { ITelemetryEventsSender } from '../../../telemetry/sender';
+import { ENTITY_STORE_API_CALL_EVENT } from '../../../telemetry/event_based/events';
 
 export const enableEntityStoreRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger,
+  telemetry: ITelemetryEventsSender,
   config: EntityAnalyticsRoutesDeps['config']
 ) => {
   router.versioned
@@ -49,6 +52,10 @@ export const enableEntityStoreRoute = (
 
         await checkAndInitAssetCriticalityResources(context, logger);
         await checkAndInitPrivilegeMonitoringResources(context, logger);
+
+        telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+          endpoint: request.route.path,
+        });
 
         try {
           const body: InitEntityStoreResponse = await secSol

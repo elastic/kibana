@@ -11,9 +11,12 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type { ApplyEntityEngineDataviewIndicesResponse } from '../../../../../common/api/entity_analytics/entity_store/engine/apply_dataview_indices.gen';
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import type { ITelemetryEventsSender } from '../../../telemetry/sender';
+import { ENTITY_STORE_API_CALL_EVENT } from '../../../telemetry/event_based/events';
 
 export const applyDataViewIndicesEntityEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
+  telemetry: ITelemetryEventsSender,
   logger: Logger
 ) => {
   router.versioned
@@ -36,10 +39,14 @@ export const applyDataViewIndicesEntityEngineRoute = (
 
       async (
         context,
-        _,
+        request,
         response
       ): Promise<IKibanaResponse<ApplyEntityEngineDataviewIndicesResponse>> => {
         const siemResponse = buildSiemResponse(response);
+
+        telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+          endpoint: request.route.path,
+        });
 
         try {
           const secSol = await context.securitySolution;

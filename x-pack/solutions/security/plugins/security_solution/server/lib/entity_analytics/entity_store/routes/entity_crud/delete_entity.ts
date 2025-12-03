@@ -21,8 +21,14 @@ import {
   EntityNotFoundError,
 } from '../../errors';
 import { CapabilityNotEnabledError } from '../../errors/capability_not_enabled_error';
+import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
+import { ENTITY_STORE_API_CALL_EVENT } from '../../../../telemetry/event_based/events';
 
-export const deleteEntity = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
+export const deleteEntity = (
+  router: EntityAnalyticsRoutesDeps['router'],
+  telemetry: ITelemetryEventsSender,
+  logger: Logger
+) => {
   router.versioned
     .delete({
       access: 'public',
@@ -51,6 +57,10 @@ export const deleteEntity = (router: EntityAnalyticsRoutesDeps['router'], logger
       },
       async (context, request, response): Promise<IKibanaResponse<DeleteSingleEntityResponse>> => {
         const secSol = await context.securitySolution;
+
+        telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+          endpoint: request.route.path,
+        });
 
         try {
           await secSol
