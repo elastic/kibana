@@ -19,7 +19,7 @@ import type { BulkEnsureAuthorizedOpts } from '../../../../authorization';
 import { AlertingAuthorizationEntity, WriteOperations } from '../../../../authorization';
 import { RuleAuditAction, ruleAuditEvent } from '../../../../rules_client/common/audit_events';
 import type { RulesClientContext } from '../../../../rules_client/types';
-import { transformMuteRequestToRuleAttributes } from './transform_rule_mute_instance_ids';
+import { transformMuteRequestToRuleAttributes } from './transforms/transform_rule_mute_instance_ids';
 import type { RawRule } from '../../../../saved_objects/schemas/raw_rule';
 
 export async function bulkMuteInstances(

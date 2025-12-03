@@ -6,9 +6,9 @@
  */
 
 import type { SavedObjectsBulkResponse } from '@kbn/core-saved-objects-api-server';
-import type { UpdateRuleSoParams } from '../../../../data/rule/methods/bulk_update_rule_so';
-import type { RawRule } from '../../../../saved_objects/schemas/raw_rule';
-import type { BulkMuteAlertsParams } from './types';
+import type { UpdateRuleSoParams } from '../../../../../data/rule/methods/bulk_update_rule_so';
+import type { RawRule } from '../../../../../saved_objects/schemas/raw_rule';
+import type { BulkMuteAlertsParams } from '../types';
 
 export const transformMuteRequestToRuleAttributes = ({
   paramRules,
