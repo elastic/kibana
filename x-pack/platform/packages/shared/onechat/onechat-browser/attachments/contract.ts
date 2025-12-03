@@ -42,7 +42,7 @@ export interface AttachmentServiceStartContract {
    * @param attachmentType - The type identifier to look up
    * @returns The UI definition if registered, undefined otherwise
    */
-  getAttachmentUiDefinition: <TAttachment extends AnyAttachment = AnyAttachment>(
+  getAttachmentUiDefinition: <TAttachment extends UnknownAttachment = UnknownAttachment>(
     attachmentType: string
   ) => AttachmentUIDefinition<TAttachment> | undefined;
 }
