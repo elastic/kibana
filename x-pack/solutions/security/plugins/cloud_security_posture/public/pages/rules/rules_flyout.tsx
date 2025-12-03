@@ -202,7 +202,10 @@ const ruleState = (rule: CspBenchmarkRulesWithStates, switchRuleStates: () => Pr
             onChange={switchRuleStates}
             data-test-subj={RULES_FLYOUT_SWITCH_BUTTON}
             label=" "
-            aria-label="Enabled"
+            aria-label={i18n.translate(
+              'xpack.csp.rules.rulesFlyout.ruleStateSwitchTitle',
+              { defaultMessage: 'Enabled' }
+            )}
           />
         </>
       ),
