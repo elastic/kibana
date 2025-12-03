@@ -136,7 +136,7 @@ export class SecurityTelemetryTask {
         params: { version: this.config.version },
       });
     } catch (error) {
-      this.logger.error('Error scheduling task', { error });
+      this.logger.error('Error scheduling task', { error, error_message: error.message });
     }
   };
 

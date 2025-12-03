@@ -124,8 +124,9 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
         log.debug('Task executed', { length: detectionRuleExceptionsJson.length } as LogMeta);
 
         return detectionRuleExceptionsJson.length;
-      } catch (err) {
-        await taskMetricsService.end(trace, err);
+      } catch (error) {
+        log.warn('Error running detection rule task', { error, error_message: error.message });
+        await taskMetricsService.end(trace, error);
         return 0;
       }
     },

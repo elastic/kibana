@@ -296,7 +296,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
     try {
       this.analytics.reportEvent(eventTypeOpts.eventType, eventData as object);
     } catch (error) {
-      this.logger.warn('Error sending EBT', { error });
+      this.logger.warn('Error sending EBT', { error, error_message: error.message });
     }
   }
 
@@ -312,7 +312,11 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
 
         return enabled && isDueForExecution(lastExecutedAt, now, scheduleCron);
       } catch (error) {
-        this.logger.warn('Error processing health query', { error, name: query.name });
+        this.logger.warn('Error processing health query', {
+          error,
+          error_message: error.message,
+          name: query.name,
+        });
         return false;
       }
     });
@@ -323,7 +327,10 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
       const artifact = await artifactService.getArtifact(QUERY_ARTIFACT_ID);
       return parseDiagnosticQueries(artifact.data);
     } catch (error) {
-      this.logger.warn(`Error getting health diagnostic queries: ${error.message}`, { error });
+      this.logger.warn('Error getting health diagnostic queries', {
+        error,
+        error_message: error.message,
+      });
       return [];
     }
   }

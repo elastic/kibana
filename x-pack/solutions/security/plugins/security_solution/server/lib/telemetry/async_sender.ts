@@ -133,7 +133,10 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
           }
         },
         error: (error) => {
-          this.logger.warn('Unexpected error sending events to channel', { error });
+          this.logger.warn('Unexpected error sending events to channel', {
+            error,
+            error_message: error.message,
+          });
         },
         complete: () => {
           this.logger.debug('Shutting down');
@@ -379,7 +382,7 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
             channel
           );
 
-          this.logger.warn('Runtime error', { error });
+          this.logger.warn('Runtime error', { error, error_message: error.message });
           throw newFailure(`Error posting events: ${error}`, channel, events.length);
         });
     } catch (err: unknown) {

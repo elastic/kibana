@@ -55,7 +55,10 @@ export function createTelemetryFilterListArtifactTaskConfig() {
         await taskMetricsService.end(trace);
         return 0;
       } catch (error) {
-        log.warn('Failed to set telemetry filterlist artifact', { error });
+        log.warn('Failed to set telemetry filterlist artifact', {
+          error,
+          error_message: error.message,
+        });
         filterList.resetAllToDefault();
         await taskMetricsService.end(trace, error);
         return 0;

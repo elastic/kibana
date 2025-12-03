@@ -146,8 +146,12 @@ export function createTelemetryCustomResponseActionRulesTaskConfig(maxTelemetryB
         } as LogMeta);
 
         return totalCount;
-      } catch (err) {
-        await taskMetricsService.end(trace, err);
+      } catch (error) {
+        log.warn('Error running custom response actions rule task', {
+          error,
+          error_message: error.message,
+        });
+        await taskMetricsService.end(trace, error);
         return 0;
       }
     },

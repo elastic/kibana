@@ -84,6 +84,7 @@ export function createIngestStatsTaskConfig() {
       } catch (error) {
         log.warn(`Error running ingest stats task`, {
           error,
+          error_message: error.message,
           elapsed: performance.now() - start,
         });
         await taskMetricsService.end(trace, error);

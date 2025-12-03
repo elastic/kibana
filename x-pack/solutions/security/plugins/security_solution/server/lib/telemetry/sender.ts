@@ -284,7 +284,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
 
       return false;
     } catch (error) {
-      this.logger.warn('Error pinging telemetry services', { error });
+      this.logger.warn('Error pinging telemetry services', { error, error_message: error.message });
 
       return false;
     }
@@ -347,8 +347,11 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
         licenseInfo?.uid,
         axiosInstance
       );
-    } catch (err) {
-      this.logger.warn(`Error sending telemetry events data: ${err}`);
+    } catch (error) {
+      this.logger.warn('Error sending telemetry events data', {
+        error,
+        error_message: error.message,
+      });
       this.queue = [];
     }
     this.isSending = false;
@@ -394,8 +397,11 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
         licenseInfo?.uid,
         axiosInstance
       );
-    } catch (err) {
-      this.logger.warn(`Error sending telemetry events data: ${err}`);
+    } catch (error) {
+      this.logger.warn('Error sending telemetry events data', {
+        error,
+        error_message: error.message,
+      });
     }
   }
 
@@ -496,7 +502,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
       });
       this.logger.debug('Events sent!. Response', { status: resp.status } as LogMeta);
     } catch (error) {
-      this.logger.warn('Error sending events', { error });
+      this.logger.warn('Error sending events', { error, error_message: error.message });
       const errorStatus = error?.response?.status;
       if (errorStatus !== undefined && errorStatus !== null) {
         this.telemetryUsageCounter?.incrementCounter({

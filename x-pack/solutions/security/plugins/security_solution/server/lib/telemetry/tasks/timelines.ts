@@ -93,7 +93,7 @@ export function createTelemetryTimelineTaskConfig() {
 
         return counter;
       } catch (error) {
-        logger.error('could not complete task', { error });
+        logger.error('could not complete task', { error, error_message: error.message });
         await taskMetricsService.end(trace, error);
         return 0;
       }

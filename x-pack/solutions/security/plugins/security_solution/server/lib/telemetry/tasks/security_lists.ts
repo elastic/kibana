@@ -159,8 +159,9 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
         }
         await taskMetricsService.end(trace);
         return trustedApplicationsCount + endpointExceptionsCount + endpointEventFiltersCount;
-      } catch (err) {
-        await taskMetricsService.end(trace, err);
+      } catch (error) {
+        log.warn('Error running security lists task', { error, error_message: error.message });
+        await taskMetricsService.end(trace, error);
         return 0;
       }
     },

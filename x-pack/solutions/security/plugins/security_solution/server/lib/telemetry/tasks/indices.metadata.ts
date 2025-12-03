@@ -238,7 +238,7 @@ export function createTelemetryIndicesMetadataTaskConfig() {
 
         return indicesCount;
       } catch (error) {
-        log.warn(`Error running indices metadata task`, { error });
+        log.warn(`Error running indices metadata task`, { error, error_message: error.message });
         await taskMetricsService.end(trace, error);
         return 0;
       }

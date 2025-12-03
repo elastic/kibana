@@ -69,8 +69,9 @@ export function createTelemetryDiagnosticsTaskConfig() {
 
         await taskMetricsService.end(trace);
         return alertCount;
-      } catch (err) {
-        await taskMetricsService.end(trace, err);
+      } catch (error) {
+        log.warn('Error running diagnostic task', { error, error_message: error.message });
+        await taskMetricsService.end(trace, error);
         return 0;
       }
     },

@@ -98,7 +98,10 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
 
         return documents.length;
       } catch (error) {
-        log.warn(`Error running endpoint alert telemetry task`, { error });
+        log.warn(`Error running endpoint alert telemetry task`, {
+          error,
+          error_message: error.message,
+        });
         await taskMetricsService.end(trace, error);
         return 0;
       }
@@ -142,7 +145,10 @@ class EndpointMetadataProcessor {
         return policies;
       })
       .catch((error) => {
-        this.logger.warn('Error fetching fleet agents, using an empty value', { error });
+        this.logger.warn('Error fetching fleet agents, using an empty value', {
+          error,
+          error_message: error.message,
+        });
         return new Map();
       });
     const endpointPolicyById = await this.endpointPolicies(policyIdByFleetAgentId.values());
@@ -159,7 +165,10 @@ class EndpointMetadataProcessor {
         return response;
       })
       .catch((error) => {
-        this.logger.warn('Error fetching policy responses, using an empty value', { error });
+        this.logger.warn('Error fetching policy responses, using an empty value', {
+          error,
+          error_message: error.message,
+        });
         return new Map();
       });
 
@@ -175,7 +184,10 @@ class EndpointMetadataProcessor {
         return response;
       })
       .catch((error) => {
-        this.logger.warn('Error fetching endpoint metadata, using an empty value', { error });
+        this.logger.warn('Error fetching endpoint metadata, using an empty value', {
+          error,
+          error_message: error.message,
+        });
         return new Map();
       });
 
@@ -210,6 +222,7 @@ class EndpointMetadataProcessor {
       // whole execution
       this.logger.warn('Error fetching endpoint metrics by id', {
         error,
+        error_message: error.message,
       });
     }
 
@@ -235,8 +248,11 @@ class EndpointMetadataProcessor {
     const endpointPolicyCache = new Map<string, PolicyData>();
     for (const policyId of policies) {
       if (!endpointPolicyCache.has(policyId)) {
-        const agentPolicy = await this.receiver.fetchPolicyConfigs(policyId).catch((e) => {
-          this.logger.warn(`error fetching policy config due to ${e?.message}`);
+        const agentPolicy = await this.receiver.fetchPolicyConfigs(policyId).catch((error) => {
+          this.logger.warn('error fetching policy config', {
+            error,
+            error_message: error?.message,
+          });
           return null;
         });
 
