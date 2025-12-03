@@ -89,33 +89,35 @@ export function useStreamDocCountsFetch({
         throw new Error('Abort controller not set');
       }
 
-      const commonQueryParams = {
-        start: timeState.start.toString(),
-        end: timeState.end.toString(),
-      };
-
       const countPromise = streamsRepositoryClient.fetch('GET /internal/streams/doc_counts/total', {
-        params: {
-          query: commonQueryParams,
-        },
         signal: abortController.signal,
       });
 
       const failedCountPromise = canReadFailureStore
-        ? streamsRepositoryClient.fetch('GET /internal/streams/doc_counts/failed', {
-            params: {
-              query: commonQueryParams,
-            },
+        ? executeEsqlQuery({
+            query: 'FROM *::failures | STATS failed_count = COUNT(*) BY stream = document.index',
+            search: data.search.search,
             signal: abortController.signal,
+            start: timeState.start,
+            end: timeState.end,
+          }).then((response) => {
+            const streamIndex = response.columns.findIndex((col) => col.name === 'stream');
+            const countIndex = response.columns.findIndex((col) => col.name === 'failed_count');
+
+            if (streamIndex === -1 || countIndex === -1) {
+              return [] as StreamDocsStat[];
+            }
+
+            return response.values.map((row) => ({
+              stream: row[streamIndex] as string,
+              count: Number(row[countIndex]),
+            }));
           })
         : Promise.reject(new Error('Cannot read failed doc count, insufficient privileges'));
 
       const degradedCountPromise = streamsRepositoryClient.fetch(
         'GET /internal/streams/doc_counts/degraded',
         {
-          params: {
-            query: commonQueryParams,
-          },
           signal: abortController.signal,
         }
       );

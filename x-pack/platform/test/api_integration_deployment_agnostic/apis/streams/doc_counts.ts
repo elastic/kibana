@@ -161,17 +161,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           refresh: 'wait_for',
         });
 
-        const start = new Date(now - 3600000).toISOString();
-        const end = new Date(now + 60000).toISOString();
-
-        const response = await viewerApiClient.fetch('GET /internal/streams/doc_counts/total', {
-          params: {
-            query: {
-              start,
-              end,
-            },
-          },
-        });
+        const response = await viewerApiClient.fetch('GET /internal/streams/doc_counts/total');
 
         expect(response.status).to.eql(200);
         expect(response.body).to.be.an('array');
@@ -187,43 +177,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(stream1Count?.count).to.eql(2);
         expect(stream2Count).to.not.be(undefined);
         expect(stream2Count?.count).to.eql(1);
-      });
-
-      it('returns empty array for streams with no documents in time range', async () => {
-        await putStream(apiClient, 'logs.test-stream-1', {
-          ...emptyAssets,
-          stream: {
-            description: '',
-            ingest: {
-              lifecycle: { inherit: {} },
-              processing: { steps: [] },
-              settings: {},
-              wired: {
-                fields: {},
-                routing: [],
-              },
-              failure_store: { disabled: {} },
-            },
-          },
-        });
-
-        // Use a time range in the past where no documents exist
-        const pastTime = Date.now() - 86400000;
-        const start = new Date(pastTime - 3600000).toISOString();
-        const end = new Date(pastTime).toISOString();
-
-        const response = await viewerApiClient.fetch('GET /internal/streams/doc_counts/total', {
-          params: {
-            query: {
-              start,
-              end,
-            },
-          },
-        });
-
-        expect(response.status).to.eql(200);
-        expect(response.body).to.be.an('array');
-        expect(response.body).to.have.length(0);
       });
     });
 
@@ -313,18 +266,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           refresh: 'wait_for',
         });
 
-        const now = Date.now();
-        const start = new Date(now - 3600000).toISOString();
-        const end = new Date(now + 60000).toISOString();
-
-        const response = await viewerApiClient.fetch('GET /internal/streams/doc_counts/degraded', {
-          params: {
-            query: {
-              start,
-              end,
-            },
-          },
-        });
+        const response = await viewerApiClient.fetch('GET /internal/streams/doc_counts/degraded');
 
         expect(response.status).to.eql(200);
         expect(response.body).to.be.an('array');
@@ -396,119 +338,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           refresh: 'wait_for',
         });
 
-        const now = Date.now();
-        const start = new Date(now - 3600000).toISOString();
-        const end = new Date(now + 60000).toISOString();
-
-        const response = await viewerApiClient.fetch('GET /internal/streams/doc_counts/degraded', {
-          params: {
-            query: {
-              start,
-              end,
-            },
-          },
-        });
+        const response = await viewerApiClient.fetch('GET /internal/streams/doc_counts/degraded');
 
         expect(response.status).to.eql(200);
         expect(response.body).to.be.an('array');
-      });
-    });
-
-    describe('GET /internal/streams/doc_counts/failed', () => {
-      it('returns failed document counts from failure store', async () => {
-        await putStream(apiClient, 'logs.test-stream-1', {
-          ...emptyAssets,
-          stream: {
-            description: '',
-            ingest: {
-              lifecycle: { inherit: {} },
-              processing: { steps: [] },
-              settings: {},
-              wired: {
-                fields: {},
-                routing: [],
-              },
-              failure_store: { disabled: {} },
-            },
-          },
-        });
-
-        const now = Date.now();
-        const start = new Date(now - 3600000).toISOString();
-        const end = new Date(now + 60000).toISOString();
-
-        const response = await viewerApiClient.fetch('GET /internal/streams/doc_counts/failed', {
-          params: {
-            query: {
-              start,
-              end,
-            },
-          },
-        });
-
-        expect(response.status).to.eql(200);
-        expect(response.body).to.be.an('array');
-        if (response.body.length > 0) {
-          expect(response.body[0]).to.have.property('stream');
-          expect(response.body[0]).to.have.property('count');
-          expect(response.body[0].stream).to.not.contain('::failures');
-        }
-      });
-
-      it('strips ::failures suffix from stream names in response', async () => {
-        await putStream(apiClient, 'logs.test-stream-1', {
-          ...emptyAssets,
-          stream: {
-            description: '',
-            ingest: {
-              lifecycle: { inherit: {} },
-              processing: { steps: [] },
-              settings: {},
-              wired: {
-                fields: {},
-                routing: [],
-              },
-              failure_store: { disabled: {} },
-            },
-          },
-        });
-
-        const now = Date.now();
-        const start = new Date(now - 3600000).toISOString();
-        const end = new Date(now + 60000).toISOString();
-
-        const response = await viewerApiClient.fetch('GET /internal/streams/doc_counts/failed', {
-          params: {
-            query: {
-              start,
-              end,
-            },
-          },
-        });
-
-        expect(response.status).to.eql(200);
-        expect(response.body).to.be.an('array');
-
-        response.body.forEach((stat: any) => {
-          expect(stat.stream).to.not.contain('::failures');
-        });
       });
     });
 
     describe('Authorization', () => {
       it('allows viewer role to access doc counts endpoints', async () => {
-        const now = Date.now();
-        const start = new Date(now - 3600000).toISOString();
-        const end = new Date(now).toISOString();
-
-        const response = await viewerApiClient.fetch('GET /internal/streams/doc_counts/total', {
-          params: {
-            query: {
-              start,
-              end,
-            },
-          },
-        });
+        const response = await viewerApiClient.fetch('GET /internal/streams/doc_counts/total');
 
         expect(response.status).to.eql(200);
       });
