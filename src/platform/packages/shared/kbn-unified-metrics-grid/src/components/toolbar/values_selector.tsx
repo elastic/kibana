@@ -62,7 +62,7 @@ export const ValuesSelector = ({
 
   const {
     data: values = [],
-    isLoading: isValuesLoading,
+    isFetching: isValuesFetching,
     error,
   } = useDimensionsQuery({
     dimensions: selectedDimensionNames,
@@ -119,7 +119,7 @@ export const ValuesSelector = ({
     [onChange]
   );
 
-  const isLoading = isValuesLoading || isFieldsLoading;
+  const isLoading = isValuesFetching || isFieldsLoading;
 
   const buttonLabel = useMemo(() => {
     const count = selectedValues.length;

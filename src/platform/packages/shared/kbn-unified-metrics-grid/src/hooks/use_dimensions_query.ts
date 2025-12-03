@@ -37,5 +37,6 @@ export const useDimensionsQuery = (params: {
     },
     enabled: params.dimensions.length > 0, // Only fetch when dimensions are selected
     staleTime: 5 * 60 * 1000, // 5 minutes - dimension values change more frequently than fields
+    keepPreviousData: !!params.search, // Preserve previous results while loading new data for ValuesSelector autocomplete
   });
 };
