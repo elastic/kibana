@@ -145,7 +145,11 @@ async function fetchAlertContext({
       });
       if (serviceChangePoints && serviceChangePoints.length > 0) {
         contextParts.push(
-          `Service Change Points:\n${JSON.stringify(serviceChangePoints, null, 2)}`
+          `<ServiceChangePoints>\n${JSON.stringify(
+            serviceChangePoints,
+            null,
+            2
+          )}\n</ServiceChangePoints>`
         );
       }
     } catch (err) {
@@ -163,7 +167,11 @@ async function fetchAlertContext({
       });
       if (exitSpanChangePoints && exitSpanChangePoints.length > 0) {
         contextParts.push(
-          `Exit Span Change Points:\n${JSON.stringify(exitSpanChangePoints, null, 2)}`
+          `<ExitSpanChangePoints>\n${JSON.stringify(
+            exitSpanChangePoints,
+            null,
+            2
+          )}\n</ExitSpanChangePoints>`
         );
       }
     } catch (err) {
@@ -213,7 +221,6 @@ async function generateAlertSummary({
   `);
 
   const userPrompt = dedent(`
-    Context:
     <AlertContext>
     ${context}
     </AlertContext>
