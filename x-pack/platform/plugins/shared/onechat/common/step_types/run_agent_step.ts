@@ -22,6 +22,10 @@ export const InputSchema = z.object({
    */
   agent_id: z.string().optional(),
   /**
+   * output schema for the run agent step, if provided agent will return structured output
+   */
+  schema: z.string().optional(),
+  /**
    * The user input message to send to the agent.
    */
   input: z.string(),
@@ -34,7 +38,7 @@ export const OutputSchema = z.object({
   /**
    * The agent's response message.
    */
-  output: z.string(),
+  output: z.union([z.string(), z.any()]),
 });
 
 export type RunAgentStepInputSchema = typeof InputSchema;

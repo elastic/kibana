@@ -21,7 +21,7 @@ export const runAgentStepDefinition = createServerStepDefinition({
   ...runAgentStepCommonDefinition,
   handler: async (context) => {
     try {
-      const { agent_id: agentId, input } = context.input as RunAgentStepInput;
+      const { agent_id: agentId, input, schema } = context.input as RunAgentStepInput;
 
       context.logger.debug('onechat.runAgent step started');
       const request = context.contextManager.getFakeRequest();
@@ -40,6 +40,8 @@ export const runAgentStepDefinition = createServerStepDefinition({
         request,
         abortSignal: context.abortSignal,
         agentParams: {
+          structuredOutput: !!schema,
+          outputSchema: schema ? JSON.parse(schema) : undefined,
           nextInput: {
             message: input,
           },
@@ -48,7 +50,9 @@ export const runAgentStepDefinition = createServerStepDefinition({
 
       context.logger.debug('onechat.runAgent step completed successfully');
 
-      const outputMessage = result.round.response.message ?? '';
+      const outputMessage = schema
+        ? result.round.response.structured_output
+        : result.round.response.message ?? '';
 
       return {
         output: {
