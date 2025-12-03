@@ -190,16 +190,15 @@ describe('entityRiskScoreTool', () => {
 
       expect(result.results).toHaveLength(1);
       expect(result.results[0].type).toBe(ToolResultType.other);
-      if (result.results[0].type === ToolResultType.other) {
-        expect(result.results[0].data).toHaveProperty('riskScore');
-        const riskScore = result.results[0].data.riskScore as Record<string, unknown>;
-        // Verify calculated_score_norm is prioritized (first field)
-        expect(Object.keys(riskScore)[0]).toBe('calculated_score_norm');
-        expect(riskScore.calculated_score_norm).toBe(75);
-        // Verify category scores/counts are NOT included
-        expect(riskScore).not.toHaveProperty('category_1_score');
-        expect(riskScore).not.toHaveProperty('category_1_count');
-      }
+      const otherResult = result.results[0] as OtherResult;
+      expect(otherResult.data).toHaveProperty('riskScore');
+      const riskScore = (otherResult.data as { riskScore: Record<string, unknown> }).riskScore;
+      // Verify calculated_score_norm is prioritized (first field)
+      expect(Object.keys(riskScore)[0]).toBe('calculated_score_norm');
+      expect(riskScore.calculated_score_norm).toBe(75);
+      // Verify category scores/counts are NOT included
+      expect(riskScore).not.toHaveProperty('category_1_score');
+      expect(riskScore).not.toHaveProperty('category_1_count');
       expect(mockGetRiskScores).toHaveBeenCalledWith({
         entityType: 'host',
         entityIdentifier: 'hostname-1',
@@ -330,21 +329,21 @@ describe('entityRiskScoreTool', () => {
 
       expect(result.results).toHaveLength(1);
       expect(result.results[0].type).toBe(ToolResultType.other);
-      if (result.results[0].type === ToolResultType.other) {
-        expect(result.results[0].data).toHaveProperty('riskScores');
-        const riskScores = result.results[0].data.riskScores as Array<Record<string, unknown>>;
-        expect(riskScores).toHaveLength(2);
-        // Verify calculated_score_norm is prioritized (first field)
-        expect(Object.keys(riskScores[0])[0]).toBe('calculated_score_norm');
-        expect(riskScores[0].calculated_score_norm).toBe(90);
-        // Verify category scores/counts are NOT included
-        expect(riskScores[0]).not.toHaveProperty('category_1_score');
-        expect(riskScores[0]).not.toHaveProperty('category_1_count');
-        // Verify inputs are NOT included
-        expect(riskScores[0]).not.toHaveProperty('inputs');
-        // Verify calculated_score is NOT included (user removed it)
-        expect(riskScores[0]).not.toHaveProperty('calculated_score');
-      }
+      const otherResult = result.results[0] as OtherResult;
+      expect(otherResult.data).toHaveProperty('riskScores');
+      const riskScores = (otherResult.data as { riskScores: Array<Record<string, unknown>> })
+        .riskScores;
+      expect(riskScores).toHaveLength(2);
+      // Verify calculated_score_norm is prioritized (first field)
+      expect(Object.keys(riskScores[0])[0]).toBe('calculated_score_norm');
+      expect(riskScores[0].calculated_score_norm).toBe(90);
+      // Verify category scores/counts are NOT included
+      expect(riskScores[0]).not.toHaveProperty('category_1_score');
+      expect(riskScores[0]).not.toHaveProperty('category_1_count');
+      // Verify inputs are NOT included
+      expect(riskScores[0]).not.toHaveProperty('inputs');
+      // Verify calculated_score is NOT included (user removed it)
+      expect(riskScores[0]).not.toHaveProperty('calculated_score');
       expect(mockEsClient.asCurrentUser.search).toHaveBeenCalledWith(
         expect.objectContaining({
           index: getRiskIndex('default', true),
@@ -369,7 +368,7 @@ describe('entityRiskScoreTool', () => {
         },
       });
 
-      const result = await tool.handler(
+      await tool.handler(
         { identifierType: 'host', identifier: '*', limit: 5 },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
