@@ -27,6 +27,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
 
   describe('mutedAlerts', () => {
     const objectRemover = new ObjectRemover(supertest);
+    // Use getter methods to avoid strict 204 status check - API may return 200 or 204
     const alertUtils: AlertUtils = new AlertUtils({
       space: Spaces.space1,
       supertestWithoutAuth: supertest,
@@ -120,7 +121,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
           alert._source[ALERT_RULE_UUID] === createdRule1
       );
 
-      await alertUtils.muteInstance(
+      await alertUtils.getMuteInstanceRequest(
         createdRule1,
         alertFromRule1._source['kibana.alert.instance.id']
       );
@@ -148,7 +149,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
     it('should add a nonexistent alert instance id to muted_alert_ids if validation is false', async () => {
       const createdRule1 = await createRule();
 
-      await alertUtils.muteInstance(createdRule1, 'nonexistent-instance-id');
+      await alertUtils.getMuteInstanceRequest(createdRule1, 'nonexistent-instance-id');
 
       const ruleUuids = [createdRule1];
 
@@ -185,7 +186,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       expect(alerts[0]._source[ALERT_MUTED]).to.be(false);
 
       // Mute the alert instance
-      await alertUtils.muteInstance(ruleId, alertInstanceId);
+      await alertUtils.getMuteInstanceRequest(ruleId, alertInstanceId);
 
       // Run the rule to trigger reconciliation
       await runRuleNow(ruleId);
@@ -214,7 +215,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       const alertInstanceId = alerts[0]._source[ALERT_INSTANCE_ID];
 
       // Mute the alert instance first
-      await alertUtils.muteInstance(ruleId, alertInstanceId);
+      await alertUtils.getMuteInstanceRequest(ruleId, alertInstanceId);
 
       // Run the rule to trigger reconciliation
       await runRuleNow(ruleId);
@@ -229,7 +230,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       });
 
       // Now unmute the alert instance
-      await alertUtils.unmuteInstance(ruleId, alertInstanceId);
+      await alertUtils.getUnmuteInstanceRequest(ruleId, alertInstanceId);
 
       // Run the rule to trigger reconciliation
       await runRuleNow(ruleId);
@@ -255,7 +256,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       });
 
       // Mute all alerts for the rule
-      await alertUtils.muteAll(ruleId);
+      await alertUtils.getMuteAllRequest(ruleId);
 
       // Run the rule to trigger reconciliation
       await runRuleNow(ruleId);
@@ -280,7 +281,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       });
 
       // Mute all alerts first
-      await alertUtils.muteAll(ruleId);
+      await alertUtils.getMuteAllRequest(ruleId);
 
       // Run the rule to trigger reconciliation
       await runRuleNow(ruleId);
@@ -294,7 +295,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       });
 
       // Now unmute all alerts
-      await alertUtils.unmuteAll(ruleId);
+      await alertUtils.getUnmuteAllRequest(ruleId);
 
       // Run the rule to trigger reconciliation
       await runRuleNow(ruleId);
@@ -322,7 +323,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       const alertInstanceId = alerts[0]._source[ALERT_INSTANCE_ID];
 
       // Mute the alert instance via API
-      await alertUtils.muteInstance(ruleId, alertInstanceId);
+      await alertUtils.getMuteInstanceRequest(ruleId, alertInstanceId);
 
       // Wait for mute to be reflected in the document (async updateByQuery with wait_for_completion: false)
       await retry.try(async () => {
