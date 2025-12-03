@@ -5,16 +5,6 @@
  * 2.0.
  */
 
-export interface SiemReadinessTask {
-  task_id: string;
-  status: 'completed' | 'incomplete';
-  meta?: Record<string, unknown>;
-}
-
-export interface TaskSource extends SiemReadinessTask {
-  '@timestamp': string;
-}
-
 export interface IndexInfo {
   indexName: string;
   docs: number;
