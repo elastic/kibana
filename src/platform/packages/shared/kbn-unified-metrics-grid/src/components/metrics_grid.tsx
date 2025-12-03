@@ -29,7 +29,7 @@ import { useChartLayers } from './chart/hooks/use_chart_layers';
 
 export type MetricsGridProps = Pick<
   ChartSectionProps,
-  'services' | 'onBrushEnd' | 'onFilter' | 'fetchParams'
+  'services' | 'onBrushEnd' | 'onFilter' | 'onExploreInDiscoverTab' | 'fetchParams'
 > & {
   filters?: DimensionFilters;
   dimensions: Dimension[];
@@ -46,6 +46,7 @@ export const MetricsGrid = ({
   fields,
   onBrushEnd,
   onFilter,
+  onExploreInDiscoverTab,
   dimensions,
   services,
   columns,
@@ -164,6 +165,7 @@ export const MetricsGrid = ({
                   services={services}
                   onBrushEnd={onBrushEnd}
                   onFilter={onFilter}
+                  onExploreInDiscoverTab={onExploreInDiscoverTab}
                   fetchParams={fetchParams}
                   discoverFetch$={discoverFetch$}
                   rowIndex={rowIndex}
@@ -191,7 +193,10 @@ export const MetricsGrid = ({
 };
 
 interface ChartItemProps
-  extends Pick<ChartSectionProps, 'services' | 'onBrushEnd' | 'onFilter' | 'fetchParams'> {
+  extends Pick<
+    ChartSectionProps,
+    'services' | 'onBrushEnd' | 'onFilter' | 'onExploreInDiscoverTab' | 'fetchParams'
+  > {
   id: string;
   metric: MetricField;
   index: number;
@@ -220,6 +225,7 @@ const ChartItem = React.memo(
         services,
         onBrushEnd,
         onFilter,
+        onExploreInDiscoverTab,
         fetchParams,
         discoverFetch$,
         rowIndex,
@@ -273,6 +279,7 @@ const ChartItem = React.memo(
             services={services}
             onBrushEnd={onBrushEnd}
             onFilter={onFilter}
+            onExploreInDiscoverTab={onExploreInDiscoverTab}
             onViewDetails={handleViewDetailsCallback}
             title={metric.name}
             chartLayers={chartLayers}

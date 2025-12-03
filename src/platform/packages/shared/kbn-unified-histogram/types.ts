@@ -321,12 +321,50 @@ export interface ChartSectionProps {
    * Controls whether or not the chart is visible (used for Show and Hide toggle)
    */
   isComponentVisible: boolean;
+
+  onExploreInDiscoverTab?: ChartSectionConfigurationExtensionParams['actions']['openInNewTab'];
 }
+
+/**
+ * Parameters passed to the open in new tab action
+ */
+export interface OpenInNewTabParams {
+  /**
+   * The query to open in the new tab
+   */
+  query?: Query | AggregateQuery;
+  /**
+   * The label of the new tab
+   */
+  tabLabel?: string;
+  /**
+   * The time range to open in the new tab
+   */
+  timeRange?: TimeRange;
+}
+
+export interface ChartSectionConfigurationExtensionParams {
+  /**
+   * Available actions for the chart section configuration
+   */
+  actions: {
+    /**
+     * Opens a new tab
+     * @param params The parameters for the open in new tab action
+     */
+    openInNewTab?: (params: OpenInNewTabParams) => void;
+    /**
+     * Updates the current ES|QL query
+     */
+    updateESQLQuery?: (queryOrUpdater: string | ((prevQuery: string) => string)) => void;
+  };
+}
+
 /**
  * Supports customizing the chart (UnifiedHistogram) section in Discover
  */
 export type ChartSectionConfiguration<T extends object = object> =
-  | {
+  | ({
       /**
        * The component to render for the chart section
        */
@@ -343,7 +381,7 @@ export type ChartSectionConfiguration<T extends object = object> =
        * The default chart section height
        */
       defaultTopPanelHeight?: UnifiedHistogramTopPanelHeightContext;
-    }
+    } & ChartSectionConfigurationExtensionParams)
   | {
       replaceDefaultChart: false;
     };

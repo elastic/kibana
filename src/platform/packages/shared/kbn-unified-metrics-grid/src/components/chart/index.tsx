@@ -24,11 +24,8 @@ export const ChartSizes = {
 };
 
 export type ChartSize = keyof typeof ChartSizes;
-export type ChartProps = Pick<ChartSectionProps, 'fetchParams'> &
-  Omit<
-    LensWrapperProps,
-    'lensProps' | 'onViewDetails' | 'onCopyToDashboard' | 'description' | 'abortController'
-  > & {
+export type ChartProps = Pick<ChartSectionProps, 'fetchParams' | 'onExploreInDiscoverTab'> &
+  Omit<LensWrapperProps, 'lensProps' | 'onViewDetails' | 'description' | 'abortController'> & {
     size?: ChartSize;
     discoverFetch$: ChartSectionProps['fetch$'];
     onViewDetails?: () => void;
@@ -44,6 +41,7 @@ export const Chart = ({
   onBrushEnd,
   onFilter,
   onViewDetails,
+  onExploreInDiscoverTab,
   fetchParams,
   discoverFetch$,
   titleHighlight,
@@ -98,6 +96,7 @@ export const Chart = ({
             abortController={fetchParams.abortController}
             onViewDetails={onViewDetails}
             onCopyToDashboard={toggleSaveModalVisible}
+            onExploreInDiscoverTab={onExploreInDiscoverTab}
             syncCursor={syncCursor}
             titleHighlight={titleHighlight}
             syncTooltips={syncTooltips}

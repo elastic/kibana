@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { createAction, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
-import { map } from 'rxjs';
+import { combineLatest, map, of } from 'rxjs';
 import type { LensApi } from '@kbn/lens-common-2';
 import type { DiscoverAppLocator } from './open_in_discover_helpers';
 
@@ -41,6 +41,11 @@ export const createOpenInDiscoverAction = (
       });
     },
     isCompatible: async (context: EmbeddableApiContext) => {
+      const lensApi = context.embeddable as LensApi;
+      if (lensApi.disabledActionIds$?.getValue()?.includes(ACTION_OPEN_IN_DISCOVER)) {
+        return false;
+      }
+
       const { isCompatible } = await getDiscoverHelpersAsync();
       return await isCompatible({
         hasDiscoverAccess,
@@ -55,8 +60,13 @@ export const createOpenInDiscoverAction = (
       return hasDiscoverAccess && Boolean((embeddable as LensApi).canViewUnderlyingData$);
     },
     getCompatibilityChangesSubject: ({ embeddable }: EmbeddableApiContext) => {
-      if (!typeof (embeddable as LensApi).canViewUnderlyingData$) return;
-      return (embeddable as LensApi).canViewUnderlyingData$.pipe(map(() => undefined));
+      const lensApi = embeddable as LensApi;
+      if (!lensApi.canViewUnderlyingData$) return;
+
+      return combineLatest([
+        lensApi.canViewUnderlyingData$,
+        lensApi.disabledActionIds$ ?? of(undefined),
+      ]).pipe(map(() => undefined));
     },
     execute: async (context: EmbeddableApiContext) => {
       const { execute } = await getDiscoverHelpersAsync();

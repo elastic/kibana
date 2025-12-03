@@ -9,13 +9,15 @@
 
 import React from 'react';
 import { UnifiedMetricsExperienceGrid } from '@kbn/unified-metrics-grid';
-import type { ChartSectionConfiguration } from '@kbn/unified-histogram';
 import type { MetricsExperienceClient } from '@kbn/metrics-experience-plugin/public';
 import { once } from 'lodash';
-import type { ChartSectionProps } from '@kbn/unified-histogram/types';
+import type {
+  ChartSectionProps,
+  ChartSectionConfiguration,
+  ChartSectionConfigurationExtensionParams,
+} from '@kbn/unified-histogram/types';
 import type { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
 import type { DataSourceProfileProvider } from '../../../../profiles';
-import type { ChartSectionConfigurationExtensionParams } from '../../../../types';
 
 export const createChartSection = (
   metricsExperienceClient?: MetricsExperienceClient
@@ -24,6 +26,7 @@ export const createChartSection = (
   once((prev: (params: ChartSectionConfigurationExtensionParams) => ChartSectionConfiguration) =>
     once((params: ChartSectionConfigurationExtensionParams): ChartSectionConfiguration => {
       return {
+        actions: params.actions,
         ...(prev ? prev(params) : {}),
         Component: (props: ChartSectionProps) => {
           // This will prevent the filter being added to the query for multi-dimensional breakdowns when the user clicks on a data point on the series.

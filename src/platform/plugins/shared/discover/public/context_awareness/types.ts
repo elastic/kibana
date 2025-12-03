@@ -24,12 +24,15 @@ import type { OmitIndexSignature } from 'type-fest';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
 import type { FunctionComponent, PropsWithChildren } from 'react';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import type { ChartSectionConfiguration } from '@kbn/unified-histogram/types';
+import type {
+  ChartSectionConfiguration,
+  ChartSectionConfigurationExtensionParams,
+  OpenInNewTabParams,
+} from '@kbn/unified-histogram/types';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/redux';
 import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
-import type { TabState } from '../application/main/state_management/redux';
 
 /**
  * Supports extending the Discover app menu
@@ -97,23 +100,6 @@ export interface AppMenuExtensionParams {
    * The authorized alerting rule type IDs for the current user
    */
   authorizedRuleTypeIds: string[];
-}
-
-export interface ChartSectionConfigurationExtensionParams {
-  /**
-   * Available actions for the chart section configuration
-   */
-  actions: {
-    /**
-     * Opens a new tab
-     * @param params The parameters for the open in new tab action
-     */
-    openInNewTab?: (params: OpenInNewTabParams) => void;
-    /**
-     * Updates the current ES|QL query
-     */
-    updateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
-  };
 }
 
 /**
@@ -361,24 +347,6 @@ export interface AdditionalCellAction {
    * @param context The current cell action context
    */
   execute: (context: AdditionalCellActionContext) => void | Promise<void>;
-}
-
-/**
- * Parameters passed to the open in new tab action
- */
-export interface OpenInNewTabParams {
-  /**
-   * The query to open in the new tab
-   */
-  query?: TabState['appState']['query'];
-  /**
-   * The label of the new tab
-   */
-  tabLabel?: string;
-  /**
-   * The time range to open in the new tab
-   */
-  timeRange?: TabState['globalState']['timeRange'];
 }
 
 /**

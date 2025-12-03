@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
@@ -22,9 +22,14 @@ export type LensWrapperProps = {
   syncTooltips?: boolean;
   syncCursor?: boolean;
   abortController: AbortController | undefined;
-} & Pick<ChartSectionProps, 'services' | 'onBrushEnd' | 'onFilter'>;
+} & Pick<ChartSectionProps, 'services' | 'onBrushEnd' | 'onFilter' | 'onExploreInDiscoverTab'>;
 
-const DEFAULT_DISABLED_ACTIONS = ['ACTION_CUSTOMIZE_PANEL', 'ACTION_EXPORT_CSV', 'alertRule'];
+const DEFAULT_DISABLED_ACTIONS = [
+  'ACTION_CUSTOMIZE_PANEL',
+  'ACTION_EXPORT_CSV',
+  'ACTION_OPEN_IN_DISCOVER',
+  'alertRule',
+];
 
 export function LensWrapper({
   lensProps,
@@ -35,6 +40,7 @@ export function LensWrapper({
   titleHighlight,
   onViewDetails,
   onCopyToDashboard,
+  onExploreInDiscoverTab,
   syncTooltips,
   syncCursor,
 }: LensWrapperProps) {
@@ -74,9 +80,21 @@ export function LensWrapper({
     }
   `;
 
+  const handleExploreInDiscoverTab = useCallback(
+    () =>
+      onExploreInDiscoverTab?.({
+        query: lensProps.attributes.state.query,
+        timeRange: lensProps.timeRange,
+      }),
+    [lensProps.attributes.state.query, lensProps.timeRange, onExploreInDiscoverTab]
+  );
+
   const extraActions = useLensExtraActions({
     copyToDashboard: onCopyToDashboard ? { onClick: onCopyToDashboard } : undefined,
     viewDetails: onViewDetails ? { onClick: onViewDetails } : undefined,
+    exploreInDiscoverTab: onExploreInDiscoverTab
+      ? { onClick: handleExploreInDiscoverTab }
+      : undefined,
   });
 
   return (

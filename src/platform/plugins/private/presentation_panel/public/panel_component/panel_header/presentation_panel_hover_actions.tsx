@@ -77,6 +77,8 @@ const QUICK_ACTION_IDS = {
     'ACTION_VIEW_SAVED_SEARCH',
     'openInspector',
     'togglePanel',
+    // equivalent to ACTION_OPEN_IN_DISCOVER but exclusive to Metrics Experience in Discover
+    'ACTION_METRICS_EXPERIENCE_EXPLORE_IN_DISCOVER_TAB',
   ],
 } as const;
 

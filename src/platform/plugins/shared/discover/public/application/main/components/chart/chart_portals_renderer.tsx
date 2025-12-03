@@ -12,15 +12,13 @@ import { createHtmlPortalNode, type HtmlPortalNode, InPortal } from 'react-rever
 import type {
   ChartSectionConfiguration,
   UnifiedHistogramPartialLayoutProps,
+  ChartSectionConfigurationExtensionParams,
 } from '@kbn/unified-histogram';
 import { UnifiedHistogramChart, useUnifiedHistogram } from '@kbn/unified-histogram';
 import { useChartStyles } from '@kbn/unified-histogram/components/chart/hooks/use_chart_styles';
 import { useServicesBootstrap } from '@kbn/unified-histogram/hooks/use_services_bootstrap';
 import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-metrics-grid';
-import {
-  type ChartSectionConfigurationExtensionParams,
-  useProfileAccessor,
-} from '../../../../context_awareness';
+import { useProfileAccessor } from '../../../../context_awareness';
 import { DiscoverCustomizationProvider } from '../../../../customizations';
 import {
   CurrentTabProvider,
@@ -300,6 +298,7 @@ const CustomChartSectionWrapper = ({
       {...unifiedHistogramProps}
       initialState={metricsGridState}
       onInitialStateChange={onInitialStateChange}
+      onExploreInDiscoverTab={chartSectionConfig.actions.openInNewTab}
     />
   );
 };

@@ -96,6 +96,7 @@ describe('MetricsExperienceGridContent', () => {
       fetchParams,
       onBrushEnd: jest.fn(),
       onFilter: jest.fn(),
+      onExploreInDiscoverTab: jest.fn(),
       histogramCss: { name: '', styles: '' },
     };
 
