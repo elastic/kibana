@@ -27,13 +27,13 @@ import {
   AgentBuilderAccessChecker,
   AgentService,
   AttachmentsService,
-  createPublicAttachmentContract,
   ChatService,
   ConversationsService,
   NavigationService,
   ToolsService,
   type OnechatInternalService,
 } from './services';
+import { createPublicAttachmentContract } from './services/attachments';
 import { createPublicToolContract } from './services/tools';
 import type {
   ConfigSchema,

@@ -33,7 +33,6 @@ export class AgentBuilderPlatformPlugin
   start(coreStart: CoreStart, startDeps: PluginStartDependencies): AgentBuilderPlatformPluginStart {
     const { onechat } = startDeps;
 
-    // Register built-in attachment UI definitions
     registerAttachmentUiDefinitions({
       attachments: onechat.attachments,
     });
