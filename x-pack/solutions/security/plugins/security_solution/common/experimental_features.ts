@@ -203,6 +203,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Entity Analytics Watchlist feature.
    */
   entityAnalyticsWatchlistEnabled: false,
+
+  /**
+   * Enables the Trial Companion feature.
+   */
+  trialCompanionEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

@@ -43,6 +43,7 @@ export class TrialCompanionMilestoneServiceImpl implements TrialCompanionMilesto
   private readonly logger: Logger;
   private repo?: TrialCompanionMilestoneRepository | null;
   private usageCollection?: UsageCollectionSetup;
+  private enabled: boolean = false;
 
   private detectors: DetectorF[] = [];
 
@@ -52,13 +53,20 @@ export class TrialCompanionMilestoneServiceImpl implements TrialCompanionMilesto
   }
 
   public setup(setup: TrialCompanionMilestoneServiceSetup) {
-    this.logger.debug('Setting up health diagnostic service');
+    this.logger.info(`Setting up TrialCompanionMilestoneService: ${setup.enabled}`);
+    this.enabled = setup.enabled;
     this.usageCollection = setup.usageCollection;
-    this.registerTask(setup.taskManager);
+    if (this.enabled) {
+      this.registerTask(setup.taskManager);
+    }
   }
 
   public async start(start: TrialCompanionMilestoneServiceStart) {
-    this.logger.debug('Starting health diagnostic service');
+    this.logger.info('Starting TrialCompanionMilestoneService');
+    if (!this.enabled) {
+      this.logger.info('TrialCompanionMilestoneService is disabled, skipping start');
+      return;
+    }
     const soClient = start.savedObjects.getUnsafeInternalClient();
 
     const usageCollectorDeps: UsageCollectorDeps | undefined = this.usageCollection

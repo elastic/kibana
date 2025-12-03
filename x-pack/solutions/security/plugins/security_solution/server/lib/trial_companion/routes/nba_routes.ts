@@ -19,11 +19,9 @@ import { type Either, left, match, right } from 'fp-ts/Either';
 import { pipe } from 'fp-ts/function';
 import type { TrialCompanionUserNBAService } from '../services/trial_companion_user_nba_service.types';
 import { TRIAL_COMPANION_NBA_URL } from '../../../../common/trial_companion/constants';
-import type {
-  SecuritySolutionPluginRouter,
-  SecuritySolutionRequestHandlerContext,
-} from '../../../types';
+import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 import { TrialCompanionUserNBAServiceImpl } from '../services/trial_companion_user_nba_service';
+import type { TrialCompanionRoutesDeps } from '../types';
 
 // TODO: think about dependency injection of saved objects (internal) client. Currently, we get it from context.core.savedObjects
 // TODO: if we need internal client - add user milestone service in x-pack/solutions/security/plugins/security_solution/server/request_context_factory.ts
@@ -42,7 +40,17 @@ const NBARouteSchema = {
 
 type NBASeenRouteRequestBody = TypeOf<typeof NBARouteSchema.body>;
 
-export const registerGetNBARoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
+const notFound: RequestHandler<never, never, never, SecuritySolutionRequestHandlerContext> = async (
+  context,
+  request,
+  response
+) => {
+  return response.notFound({
+    body: 'disabled',
+  });
+};
+
+export const registerGetNBARoute = ({ router, logger, enabled }: TrialCompanionRoutesDeps) => {
   router.versioned
     .get({
       path: TRIAL_COMPANION_NBA_URL,
@@ -62,11 +70,11 @@ export const registerGetNBARoute = (router: SecuritySolutionPluginRouter, logger
         version: '1',
         validate: false, // TODO: help needed here - do we need to validate something?
       },
-      getCurrentNBAForUser(logger)
+      enabled ? getCurrentNBAForUser(logger) : notFound
     );
 };
 
-export const registerPostNBASeenRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
+export const registerPostNBASeenRoute = ({ router, logger, enabled }: TrialCompanionRoutesDeps) => {
   router.versioned
     .post({
       path: TRIAL_COMPANION_NBA_URL,
@@ -88,14 +96,15 @@ export const registerPostNBASeenRoute = (router: SecuritySolutionPluginRouter, l
           request: NBARouteSchema,
         },
       },
-      postNBAUserSeen(logger)
+      enabled ? postNBAUserSeen(logger) : notFound
     );
 };
 
-export const registerPostNBAActionRoute = (
-  router: SecuritySolutionPluginRouter,
-  logger: Logger
-) => {
+export const registerPostNBAActionRoute = ({
+  router,
+  logger,
+  enabled,
+}: TrialCompanionRoutesDeps) => {
   // TODO: TBD - use TRIAL_COMPANION_NBA_ACTION_URL
 };
 

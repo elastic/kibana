@@ -445,6 +445,12 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.alerting.registerType(securityRuleTypeWrapper(createThresholdAlertType()));
     plugins.alerting.registerType(securityRuleTypeWrapper(createNewTermsAlertType()));
 
+    const trialCompanionDeps: TrialCompanionRouterDeps = {
+      router,
+      logger,
+      enabled: config.experimentalFeatures.trialCompanionEnabled && plugins.cloud?.isInTrial(),
+    };
+
     // TODO We need to get the endpoint routes inside of initRoutes
     initRoutes(
       router,
@@ -462,7 +468,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.telemetryReceiver,
       this.isServerless,
       core.docLinks,
-      this.endpointContext
+      this.endpointContext,
+      trialCompanionDeps
     );
 
     registerEndpointRoutes(router, this.endpointContext);
@@ -614,6 +621,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.trialCompanionMilestoneService.setup({
         taskManager: plugins.taskManager,
         usageCollection: plugins.usageCollection,
+        enabled: trialCompanionDeps.enabled,
       });
     } else {
       this.logger.warn('Task Manager not available, health diagnostic task not registered.');

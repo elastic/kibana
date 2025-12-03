@@ -17,6 +17,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 export interface TrialCompanionMilestoneServiceSetup {
   taskManager: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
+  enabled: boolean;
 }
 
 export interface TrialCompanionMilestoneServiceStart {

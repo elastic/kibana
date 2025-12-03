@@ -54,6 +54,7 @@ import { registerEntityAnalyticsRoutes } from '../lib/entity_analytics/register_
 import { registerSiemMigrationsRoutes } from '../lib/siem_migrations/routes';
 import { registerAssetInventoryRoutes } from '../lib/asset_inventory/routes';
 import { registerSiemReadinessRoutes } from '../lib/siem_readiness';
+import type { TrialCompanionRoutesDeps } from '../lib/trial_companion/types';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -71,7 +72,8 @@ export const initRoutes = (
   previewTelemetryReceiver: ITelemetryReceiver,
   isServerless: boolean,
   docLinks: DocLinksServiceSetup,
-  endpointContext: EndpointAppContext
+  endpointContext: EndpointAppContext,
+  trailCompanionDeps: TrialCompanionRoutesDeps
 ) => {
   registerFleetIntegrationsRoutes(router, logger);
   registerLegacyRuleActionsRoutes(router, logger);
@@ -145,5 +147,5 @@ export const initRoutes = (
 
   registerSiemReadinessRoutes({ router, logger });
 
-  registerTrialCompanionRoutes({ router, logger });
+  registerTrialCompanionRoutes(trailCompanionDeps);
 };

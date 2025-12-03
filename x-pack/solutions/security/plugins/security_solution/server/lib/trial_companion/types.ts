@@ -12,6 +12,7 @@ import type { Milestone } from '../../../common/trial_companion/types';
 export interface TrialCompanionRoutesDeps {
   router: SecuritySolutionPluginRouter;
   logger: Logger;
+  enabled: boolean;
 }
 
 export interface NBAMilestone {

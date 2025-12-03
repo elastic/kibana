@@ -15,19 +15,35 @@ import { useGetNBA } from './hooks/use_get_nba';
 import { postNBAUserSeen } from './api';
 import { ALL_NBA } from '../../common/trial_companion/constants';
 import type { Milestone, NBA, NBAAction } from '../../common/trial_companion/types';
+import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface Props {}
 
 export const TrialCompanion: React.FC<Props> = () => {
+  const { ...startServices } = useKibana().services;
+  const trialCompanionEnabled = useIsExperimentalFeatureEnabled('trialCompanionEnabled');
+  window.console.log(
+    'Is in trial: ',
+    startServices.cloud?.isInTrial(),
+    ', trial companion enabled: ',
+    trialCompanionEnabled
+  );
+  if (!startServices.cloud?.isInTrial() || !trialCompanionEnabled) {
+    return null;
+  }
+  return <TrialCompanionImpl />;
+};
+
+const TrialCompanionImpl: React.FC<Props> = () => {
   const { overlays, ...startServices } = useKibana().services;
   const bannerId = useRef<string | undefined>();
   const [count, setCount] = useState(0);
   const [previousMilestone, setPreviousMilestone] = useState<Milestone | undefined>(undefined);
-
   const { value, error, loading } = useGetNBA([count]);
+
   window.console.log('TrialNotification useGetNotification:', error, loading, value); // TODO: remove
-  const milestoneId = value?.milestoneId; // no milestoneId means nothing to show
+  const milestoneId = value?.milestoneId; // no milestoneId means anything to show
 
   useInterval(() => {
     setCount((c) => c + 1);

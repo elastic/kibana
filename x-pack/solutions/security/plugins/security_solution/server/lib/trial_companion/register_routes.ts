@@ -12,8 +12,8 @@ import {
   registerPostNBASeenRoute,
 } from './routes/nba_routes';
 
-export const registerTrialCompanionRoutes = ({ router, logger }: TrialCompanionRoutesDeps) => {
-  registerGetNBARoute(router, logger);
-  registerPostNBASeenRoute(router, logger);
-  registerPostNBAActionRoute(router, logger);
+export const registerTrialCompanionRoutes = (deps: TrialCompanionRoutesDeps) => {
+  registerGetNBARoute(deps);
+  registerPostNBASeenRoute(deps);
+  registerPostNBAActionRoute(deps);
 };
