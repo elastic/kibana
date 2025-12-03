@@ -65,13 +65,14 @@ evaluate('the model should answer truthfully', async ({ inferenceClient, phoenix
 
 ### Available fixtures
 
-| Fixture                     | Description                                                                                                                                   |
-| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `inferenceClient`           | Bound to the connector declared by the active Playwright project.                                                                             |
-| `phoenixClient`             | Client for the Phoenix API (to run experiments)                                                                                               |
-| `evaluationAnalysisService` | Service for analyzing and comparing evaluation results across different models and datasets                                                   |
-| `reportModelScore`          | Function that displays evaluation results (can be overridden for custom reporting)                                                            |
-| `traceEsClient`             | Dedicated ES client for querying traces. Defaults to `esClient` Scout fixture. See [Trace-Based Evaluators](#trace-based-evaluators-optional) |
+| Fixture                     | Description                                                                                                                                                                                       |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `inferenceClient`           | Bound to the connector declared by the active Playwright project.                                                                                                                                 |
+| `phoenixClient`             | Client for the Phoenix API (to run experiments)                                                                                                                                                   |
+| `evaluationAnalysisService` | Service for analyzing and comparing evaluation results across different models and datasets                                                                                                       |
+| `reportModelScore`          | Function that displays evaluation results (can be overridden for custom reporting)                                                                                                                |
+| `traceEsClient`             | Dedicated ES client for querying traces. Defaults to `esClient` Scout fixture. See [Trace-Based Evaluators](#trace-based-evaluators-optional)                                                     |
+| `evaluationsEsClient`       | Dedicated ES client for storing evaluation results. Defaults to `esClient` Scout fixture. See [Using a Separate Cluster for Evaluation Results](#using-a-separate-cluster-for-evaluation-results) |
 
 ## Running the suite
 
@@ -221,6 +222,16 @@ RAG_EVAL_K=5 node scripts/playwright test --config ...
 ```
 
 The environment variable takes priority over the value passed to `createRagEvaluators()`.
+
+#### Using a Separate Cluster for Evaluation Results
+
+If you want to store evaluation results (exported to `.kibana-evaluations` datastream) in a different Elasticsearch cluster than your test environment, specify the cluster URL with the `EVALUATIONS_ES_URL` environment variable:
+
+```bash
+EVALUATIONS_ES_URL=http://elastic:changeme@localhost:9200 node scripts/playwright test --config x-pack/platform/packages/shared/<my-dir-name>/playwright.config.ts
+```
+
+This creates a dedicated `evaluationsEsClient` that connects to your evaluations cluster while `esClient` continues to use your test environment cluster.
 
 ## Customizing Report Display
 
