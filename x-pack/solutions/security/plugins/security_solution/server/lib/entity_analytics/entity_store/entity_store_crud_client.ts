@@ -14,6 +14,8 @@ import type {
   BulkUpdateAction,
   TransformGetTransformTransformSummary,
 } from '@elastic/elasticsearch/lib/api/types';
+import { generateLatestTransformId } from '@kbn/entityManager-plugin/server/lib/entities/helpers/generate_component_id';
+import type { EntityDefinition } from '@kbn/entities-schema';
 import type { EntityContainer } from '../../../../common/api/entity_analytics/entity_store/entities/upsert_entities_bulk.gen';
 import type { EntityType as APIEntityType } from '../../../../common/api/entity_analytics/entity_store/common.gen';
 import { EntityType } from '../../../../common/entity_analytics/types';
@@ -35,8 +37,6 @@ import { getEntityUpdatesDataStreamName } from './elasticsearch_assets/updates_e
 import { engineDescriptionRegistry } from './installation/engine_description';
 import type { EntityDescription } from './entity_definitions/types';
 import type { FieldDescription } from './installation/types';
-import { generateLatestTransformId } from '@kbn/entityManager-plugin/server/lib/entities/helpers/generate_component_id';
-import type { EntityDefinition } from '@kbn/entities-schema';
 
 interface CustomEntityFieldsAttributesHolder {
   attributes?: Record<string, unknown>;
@@ -162,19 +162,31 @@ export class EntityStoreCrudClient {
     });
 
     if (updateByQueryResp.updated === 0) {
-      const transformId = generateLatestTransformId({ id: buildEntityDefinitionId(type, this.namespace) } as EntityDefinition)
-      const transformResponse = await this.esClient.transform.getTransform({ transform_id: transformId });
-      const transformConfig = transformResponse.transforms.find(t => t.id === transformId);
+      const transformId = generateLatestTransformId({
+        id: buildEntityDefinitionId(type, this.namespace),
+      } as EntityDefinition);
+      const transformResponse = await this.esClient.transform.getTransform({
+        transform_id: transformId,
+      });
+      const transformConfig = transformResponse.transforms.find((t) => t.id === transformId);
       if (!transformConfig) {
         throw new Error(`Transform '${transformId}' not found`);
       }
 
-      const previewTransform = await this.esClient.transform.previewTransform<{ _source: Entity, _id: string }>(
-        getPreviewTransformConfigWithEntity(transformConfig, entityTypeDescription.identityField, doc.entity.id),
-        { querystring: { 'as_index_request': true } }
+      const previewTransform = await this.esClient.transform.previewTransform<{
+        _source: Entity;
+        _id: string;
+      }>(
+        getPreviewTransformConfigWithEntity(
+          transformConfig,
+          entityTypeDescription.identityField,
+          doc.entity.id
+        ),
+        { querystring: { as_index_request: true } }
       );
-
-      const previewDoc = previewTransform.preview.find(v => v._source.entity.id === doc.entity.id)
+      const previewDoc = previewTransform.preview.find(
+        (v) => v._source.entity.id === doc.entity.id
+      );
       if (!previewDoc) {
         throw new EntityNotFoundError(type, doc.entity.id);
       }
@@ -367,10 +379,18 @@ function getFieldDescriptions(
   return descriptions;
 }
 
-
-function getPreviewTransformConfigWithEntity({ source, pivot, dest, settings, sync, frequency }: TransformGetTransformTransformSummary, identityField: string, id: string) {
+function getPreviewTransformConfigWithEntity(
+  { source, pivot, dest, settings, sync, frequency }: TransformGetTransformTransformSummary,
+  identityField: string,
+  id: string
+) {
   return {
-    pivot, dest, settings, sync, frequency, source: {
+    pivot,
+    dest,
+    settings,
+    sync,
+    frequency,
+    source: {
       ...source,
       query: {
         bool: {
@@ -378,13 +398,13 @@ function getPreviewTransformConfigWithEntity({ source, pivot, dest, settings, sy
             ...(Array.isArray(source.query?.bool?.must)
               ? source.query.bool.must
               : source.query?.bool?.must
-                ? [source.query.bool.must]
-                : []),
-            { term: { [identityField]: id } }
+              ? [source.query.bool.must]
+              : []),
+            { term: { [identityField]: id } },
           ],
           must_not: source.query?.bool?.must_not || [],
         },
       },
-    }
-  }
+    },
+  };
 }
