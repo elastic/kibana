@@ -205,12 +205,20 @@ describe('GroupedAlertsTable', () => {
     expect(queryByTestId('group-selector-dropdown')).not.toBeInTheDocument();
     expect(getByTestId('alerts-table')).toBeInTheDocument();
 
-    expect(mockDispatch).toHaveBeenCalledTimes(2);
+    expect(mockDispatch).toHaveBeenCalledTimes(4);
     expect(mockDispatch.mock.calls[0][0].payload).toEqual({
-      options: mockOptions,
+      settings: undefined,
       tableId: testProps.tableId,
     });
     expect(mockDispatch.mock.calls[1][0].payload).toEqual({
+      options: mockOptions,
+      tableId: testProps.tableId,
+    });
+    expect(mockDispatch.mock.calls[2][0].payload).toEqual({
+      activeGroups: ['none'],
+      tableId: testProps.tableId,
+    });
+    expect(mockDispatch.mock.calls[3][0].payload).toEqual({
       activeGroups: ['none'],
       tableId: testProps.tableId,
     });
@@ -594,5 +602,26 @@ describe('GroupedAlertsTable', () => {
         tableId: testProps.tableId,
       }
     );
+  });
+
+  it('updates group settings on mount', () => {
+    const settings = {
+      hideNoneOption: true,
+      hideCustomFieldOption: true,
+      hideOptionsTitle: true,
+      popoverButtonLabel: 'Custom Label',
+    };
+
+    render(
+      <TestProviders store={createMockStore()}>
+        <GroupedAlertsTable {...testProps} settings={settings} />
+      </TestProviders>
+    );
+
+    expect(mockDispatch).toHaveBeenCalledTimes(3);
+    expect(mockDispatch.mock.calls[0][0].payload).toEqual({
+      settings,
+      tableId: testProps.tableId,
+    });
   });
 });

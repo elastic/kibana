@@ -186,4 +186,37 @@ describe('group selector', () => {
       });
     });
   });
+
+  describe('custom settings', () => {
+    it('Does not present the "none" option when `hideNoneOption` is true', () => {
+      const { getByTestId, queryByTestId } = render(
+        <GroupSelector {...testProps} settings={{ hideNoneOption: true }} />
+      );
+      fireEvent.click(getByTestId('group-selector-dropdown'));
+      expect(queryByTestId('panel-none')).toBeNull();
+    });
+
+    it('Does not present the "Custom field" option when `hideCustomFieldOption` is true', () => {
+      const { getByTestId, queryByTestId } = render(
+        <GroupSelector {...testProps} settings={{ hideCustomFieldOption: true }} />
+      );
+      fireEvent.click(getByTestId('group-selector-dropdown'));
+      expect(queryByTestId('panel-custom')).toBeNull();
+    });
+
+    it('Renders custom button label when `popoverButtonLabel` is provided', () => {
+      const { getByTestId } = render(
+        <GroupSelector {...testProps} settings={{ popoverButtonLabel: 'Custom Label' }} />
+      );
+      expect(getByTestId('group-selector-dropdown').textContent).toBe('Custom Label');
+    });
+
+    it('Does not present the title in the dropdown when `hideOptionsTitle` is true', () => {
+      const { getByTestId, queryByTestId } = render(
+        <GroupSelector {...testProps} settings={{ hideOptionsTitle: true }} />
+      );
+      fireEvent.click(getByTestId('group-selector-dropdown'));
+      expect(queryByTestId('contextMenuPanelTitle')).not.toBeInTheDocument();
+    });
+  });
 });

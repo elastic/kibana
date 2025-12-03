@@ -11,6 +11,7 @@ import { getGroupingQuery, isNoneGroup, useGrouping } from './src';
 import type {
   DynamicGroupingProps,
   GroupOption,
+  GroupSettings,
   GroupingAggregation,
   NamedAggregation,
   RawBucket,
@@ -22,6 +23,7 @@ export { getGroupingQuery, isNoneGroup, useGrouping };
 export type {
   DynamicGroupingProps,
   GroupOption,
+  GroupSettings,
   GroupingAggregation,
   NamedAggregation,
   RawBucket,

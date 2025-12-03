@@ -12,7 +12,6 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useGroupTakeActionsItems } from '../../../hooks/alerts_table/use_group_take_action_items';
 import {
-  defaultGroupingOptions,
   defaultGroupStatsAggregations,
   defaultGroupStatsRenderer,
   defaultGroupTitleRenderers,
@@ -29,6 +28,7 @@ import {
 } from '../../alerts_table/default_config';
 import { GroupedAlertsTable } from '../../alerts_table/alerts_grouping';
 import { AlertsTable } from '../../alerts_table';
+import { groupingOptions, groupingSettings } from './grouping_configs';
 
 export const TABLE_SECTION_TEST_ID = 'attacks-page-table-section';
 
@@ -115,7 +115,7 @@ export const TableSection = React.memo(({ dataView }: TableSectionProps) => {
         dataView={dataView}
         dataViewSpec={dataViewSpec}
         defaultFilters={defaultFilters}
-        defaultGroupingOptions={defaultGroupingOptions}
+        defaultGroupingOptions={groupingOptions}
         from={from}
         globalFilters={globalFilters}
         globalQuery={query}
@@ -125,6 +125,7 @@ export const TableSection = React.memo(({ dataView }: TableSectionProps) => {
         tableId={TableId.alertsOnAttacksPage}
         to={to}
         pageScope={PageScope.attacks} // allow filtering and grouping by attack fields
+        settings={groupingSettings}
       />
     </div>
   );

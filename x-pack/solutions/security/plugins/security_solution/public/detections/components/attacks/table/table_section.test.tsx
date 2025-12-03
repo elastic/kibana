@@ -13,15 +13,20 @@ import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { TABLE_SECTION_TEST_ID, TableSection } from './table_section';
 import { useUserData } from '../../user_info';
 import { useListsConfig } from '../../../containers/detection_engine/lists/use_lists_config';
+import { GroupedAlertsTable } from '../../alerts_table/alerts_grouping';
+import { groupingOptions, groupingSettings } from './grouping_configs';
 
 jest.mock('../../user_info');
 jest.mock('../../../containers/detection_engine/lists/use_lists_config');
+jest.mock('../../alerts_table/alerts_grouping', () => ({
+  GroupedAlertsTable: jest.fn(() => <div data-test-subj="grouped-alerts-table" />),
+}));
 
 const dataViewSpec: DataViewSpec = { title: '.alerts-security.alerts-default' };
 const dataView: DataView = createStubDataView({ spec: dataViewSpec });
 
 describe('<TableSection />', () => {
-  it('should render correctly', async () => {
+  beforeEach(() => {
     (useUserData as jest.Mock).mockReturnValue([
       {
         loading: false,
@@ -30,7 +35,12 @@ describe('<TableSection />', () => {
     (useListsConfig as jest.Mock).mockReturnValue({
       loading: false,
     });
+  });
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
+  it('should render correctly', async () => {
     const { getByTestId } = render(
       <TestProviders>
         <TableSection dataView={dataView} />
@@ -39,7 +49,22 @@ describe('<TableSection />', () => {
 
     await waitFor(() => {
       expect(getByTestId(TABLE_SECTION_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId('internalAlertsPageLoading')).toBeInTheDocument();
+      expect(getByTestId('grouped-alerts-table')).toBeInTheDocument();
+    });
+  });
+
+  it('should pass groupingOptions and groupingSettings to GroupedAlertsTable', async () => {
+    render(
+      <TestProviders>
+        <TableSection dataView={dataView} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(GroupedAlertsTable).toHaveBeenCalled();
+      const [props] = (GroupedAlertsTable as unknown as jest.Mock).mock.calls[0];
+      expect(props.defaultGroupingOptions).toEqual(groupingOptions);
+      expect(props.settings).toEqual(groupingSettings);
     });
   });
 
@@ -53,14 +78,15 @@ describe('<TableSection />', () => {
       loading: false,
     });
 
-    const { queryByTestId } = render(
+    render(
       <TestProviders>
         <TableSection dataView={dataView} />
       </TestProviders>
     );
 
     await waitFor(() => {
-      expect(queryByTestId('internalAlertsPageLoading')).not.toBeInTheDocument();
+      const [props] = (GroupedAlertsTable as unknown as jest.Mock).mock.calls[0];
+      expect(props.loading).toBe(true);
     });
   });
 
@@ -74,14 +100,15 @@ describe('<TableSection />', () => {
       loading: true,
     });
 
-    const { queryByTestId } = render(
+    render(
       <TestProviders>
         <TableSection dataView={dataView} />
       </TestProviders>
     );
 
     await waitFor(() => {
-      expect(queryByTestId('internalAlertsPageLoading')).not.toBeInTheDocument();
+      const [props] = (GroupedAlertsTable as unknown as jest.Mock).mock.calls[0];
+      expect(props.loading).toBe(true);
     });
   });
 });

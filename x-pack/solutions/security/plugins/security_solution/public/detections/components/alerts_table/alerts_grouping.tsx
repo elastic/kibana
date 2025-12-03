@@ -16,6 +16,7 @@ import {
   type NamedAggregation,
   type RawBucket,
   useGrouping,
+  type GroupSettings,
 } from '@kbn/grouping';
 import { isEmpty, isEqual } from 'lodash/fp';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -89,6 +90,7 @@ export interface AlertsTableComponentProps {
   renderChildComponent: (groupingFilters: Filter[]) => React.ReactElement;
   tableId: TableIdLiteral;
   to: string;
+  settings?: GroupSettings;
 }
 
 const DEFAULT_PAGE_SIZE = 25;
@@ -185,6 +187,15 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
     [dispatch, props.tableId]
   );
 
+  useEffect(() => {
+    dispatch(
+      updateGroups({
+        tableId: props.tableId,
+        settings: props.settings,
+      })
+    );
+  }, [dispatch, props.tableId, props.settings]);
+
   const fields = useMemo(
     () =>
       newDataViewPickerEnabled
@@ -241,6 +252,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
     onGroupChange,
     onOptionsChange,
     tracker: track,
+    settings: props.settings,
   });
   const groupId = useMemo(() => groupIdSelector(), []);
   const groupInRedux = useDeepEqualSelector((state) => groupId(state, props.tableId));
