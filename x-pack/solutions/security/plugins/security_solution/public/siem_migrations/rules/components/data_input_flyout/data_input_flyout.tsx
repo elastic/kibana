@@ -28,12 +28,12 @@ import { QradarDataInputStep, SplunkDataInputStep } from './steps/constants';
 import { useStartRulesMigrationModal } from '../../hooks/use_start_rules_migration_modal';
 import type { RuleMigrationSettings, RuleMigrationStats } from '../../types';
 import { useStartMigration } from '../../logic/use_start_migration';
-import { useMigrationSourceStep } from '../../../common/components/migration_source_step';
+import { useMigrationSourceStep } from '../../../common/components/migration_source_step/use_migration_source_step';
 import { MigrationSourceDropdown } from '../../../common/components/migration_source_step/migration_source_dropdown';
 import { CenteredLoadingSpinner } from '../../../../common/components/centered_loading_spinner';
-import { useMigrationSteps } from '../../../common/components/migration_source_step/migration_source_options';
 import type { Step } from '../../../common/components/migration_source_step/types';
 import { MigrationSource } from '../../../common/types';
+import { useMigrationSteps } from '../../../common/components/migration_steps/use_migration_steps';
 
 export interface MigrationDataInputFlyoutProps {
   onClose: () => void;
@@ -42,9 +42,9 @@ export interface MigrationDataInputFlyoutProps {
 }
 
 function StepRenderer<K extends DataInputStepId>({ step }: { step: Step<K> }) {
-  const Component = step.Component as React.ComponentType<typeof step.extraProps | {}>;
+  const Component = step.Component as React.ComponentType<typeof step.props | {}>;
 
-  return step.extraProps ? <Component {...step.extraProps} /> : <Component />;
+  return step.props ? <Component {...step.props} /> : <Component />;
 }
 
 const RULES_MIGRATION_DATA_INPUT_FLYOUT_TITLE = 'rulesMigrationDataInputFlyoutTitle';
@@ -64,6 +64,7 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
       setMigrationSource,
       migrationSourceDisabled,
       setMigrationSourceDisabled,
+      migrationSourceOptions,
     } = useMigrationSourceStep(initialMigrationSource);
 
     const [migrationStats, setMigrationStats] = useState<RuleMigrationStats | undefined>(
@@ -153,6 +154,7 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
                   migrationSource={migrationSource}
                   setMigrationSource={setMigrationSource}
                   disabled={migrationSourceDisabled}
+                  migrationSourceOptions={migrationSourceOptions}
                 />
               </EuiFlexItem>
               <>

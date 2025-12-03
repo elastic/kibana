@@ -4,30 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo, useState } from 'react';
-import type { EuiSuperSelectOption } from '@elastic/eui';
-import { EuiIcon } from '@elastic/eui';
-import { MigrationSource } from '../../types';
-import * as i18n from './translations';
+import { useCallback, useMemo, useState } from 'react';
+
+import type { SiemMigrationResourceBase } from '../../../../../common/siem_migrations/model/common.gen';
+
 import type {
   DataInputStep,
   QradarDataInputStep,
 } from '../../../rules/components/data_input_flyout/steps/constants';
 import { SplunkDataInputStep } from '../../../rules/components/data_input_flyout/steps/constants';
-import type { SiemMigrationResourceBase } from '../../../../../common/siem_migrations/model/common.gen';
+
+import { STEP_COMPONENTS } from './configs';
 import type {
   QradarMigrationSteps,
   RulesDataInputSubStepsProps,
   SplunkMigrationSteps,
-} from './types';
-import { STEP_COMPONENTS } from '../migration_steps/configs';
+} from '../migration_source_step/types';
+import { MigrationSource } from '../../types';
 
-interface MissingResourcesIndexed {
-  macros: string[];
-  lookups: string[];
-}
-
-type UseMigrationStepsProps = Omit<RulesDataInputSubStepsProps, 'dataInputStep'> & {
+export type UseMigrationStepsProps = Omit<RulesDataInputSubStepsProps, 'dataInputStep'> & {
   dataInputStep: DataInputStep;
   setMigrationDataInputStep: (step: SplunkDataInputStep | QradarDataInputStep) => void;
 };
@@ -40,23 +35,12 @@ interface UseQradarMigrationSteps extends Omit<UseMigrationStepsProps, 'dataInpu
   dataInputStep: QradarDataInputStep;
 }
 
-export const MIGRATIONSOURCE_OPTIONS: Array<EuiSuperSelectOption<MigrationSource>> = [
-  {
-    value: MigrationSource.SPLUNK,
-    inputDisplay: <span>{i18n.MIGRATION_SOURCE_DROPDOWN_OPTION_SPLUNK}</span>,
-  },
-  {
-    value: MigrationSource.QRADAR,
-    inputDisplay: (
-      <span>
-        {i18n.MIGRATION_SOURCE_DROPDOWN_OPTION_QRADAR}
-        <EuiIcon type="flask" />
-      </span>
-    ),
-  },
-];
+interface MissingResourcesIndexed {
+  macros: string[];
+  lookups: string[];
+}
 
-export const useSplunkMigrationSteps = ({
+const useSplunkMigrationSteps = ({
   setMigrationDataInputStep,
   dataInputStep,
   migrationSource,
@@ -103,7 +87,7 @@ export const useSplunkMigrationSteps = ({
       STEP_COMPONENTS[MigrationSource.SPLUNK].map(({ id, Component }) => ({
         id,
         Component,
-        extraProps: {
+        props: {
           dataInputStep,
           migrationSource,
           migrationStats,
@@ -128,7 +112,7 @@ export const useSplunkMigrationSteps = ({
   return migrationSource === MigrationSource.SPLUNK ? SPLUNK_MIGRATION_STEPS : null;
 };
 
-export const useQradarMigrationSteps = ({
+const useQradarMigrationSteps = ({
   onMigrationCreated,
   dataInputStep,
   migrationSource,
@@ -139,7 +123,7 @@ export const useQradarMigrationSteps = ({
       STEP_COMPONENTS[MigrationSource.QRADAR].map(({ id, Component }) => ({
         id,
         Component,
-        extraProps: {
+        props: {
           dataInputStep,
           migrationSource,
           migrationStats,

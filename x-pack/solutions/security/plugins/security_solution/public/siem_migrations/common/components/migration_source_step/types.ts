@@ -20,17 +20,17 @@ import type { MigrationSource } from '../../types';
 interface RulesStep<T extends DataInputStepId = DataInputStepId> {
   id: T;
   Component: typeof RulesDataInput;
-  extraProps?: React.ComponentProps<typeof RulesDataInput>;
+  props?: React.ComponentProps<typeof RulesDataInput>;
 }
 interface MacrosStep {
   id: DataInputStepId.SplunkMacros;
   Component: typeof MacrosDataInput;
-  extraProps?: React.ComponentProps<typeof MacrosDataInput>;
+  props?: React.ComponentProps<typeof MacrosDataInput>;
 }
 interface LookupsStep {
   id: DataInputStepId.SplunkLookups;
   Component: typeof LookupsDataInput;
-  extraProps?: React.ComponentProps<typeof LookupsDataInput>;
+  props?: React.ComponentProps<typeof LookupsDataInput>;
 }
 
 export type Step<T extends DataInputStepId = DataInputStepId> =

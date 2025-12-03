@@ -6,15 +6,28 @@
  */
 
 import { useState } from 'react';
+import type { EuiSuperSelectOption } from '@elastic/eui';
 import type { MigrationSource } from '../../types';
+import { useMigrationSourceOptions } from './use_migration_source_options';
+
+export interface MigrationSourceDropdownProps {
+  migrationSource: MigrationSource;
+  setMigrationSource: (migrationSource: MigrationSource) => void;
+  disabled: boolean;
+  migrationSourceOptions: Array<EuiSuperSelectOption<MigrationSource>>;
+}
 
 export const useMigrationSourceStep = (initialMigrationSource: MigrationSource) => {
+  const migrationSourceOptions = useMigrationSourceOptions();
   const [migrationSource, setMigrationSource] = useState<MigrationSource>(initialMigrationSource);
-  const [migrationSourceDisabled, setMigrationSourceDisabled] = useState<boolean>(false);
+  const [migrationSourceDisabled, setMigrationSourceDisabled] = useState<boolean>(
+    migrationSourceOptions.length <= 1
+  );
   return {
     migrationSource,
     setMigrationSource,
     migrationSourceDisabled,
     setMigrationSourceDisabled,
+    migrationSourceOptions,
   };
 };
