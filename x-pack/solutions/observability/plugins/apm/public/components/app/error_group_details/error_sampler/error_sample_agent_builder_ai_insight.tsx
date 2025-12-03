@@ -37,8 +37,6 @@ export function ErrorSampleAgentBuilderAiInsight({
   const [context, setContext] = useState('');
 
   const { selectedConnector, defaultConnectorId } = useConnectorSelection();
-  console.log('selectedConnector', selectedConnector);
-  console.log('defaultConnectorId', defaultConnectorId);
 
   const fetchAiInsights = async () => {
     // TODO: display the error and disable the start conversation button if there is an error
