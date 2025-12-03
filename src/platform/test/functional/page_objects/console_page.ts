@@ -231,9 +231,11 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async copyRequestsToClipboard() {
-    const textArea = await this.getTextArea();
-    await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], 'a']);
-    await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], 'c']);
+    // Get content via Monaco API and write to clipboard
+    const content = await this.monacoEditor.getCodeEditorValueByTestSubj('consoleMonacoEditor');
+    await this.browser.execute((text: string) => {
+      navigator.clipboard.writeText(text);
+    }, content);
   }
 
   public async isA11yOverlayVisible() {
