@@ -1,0 +1,34 @@
+{
+  "lastModified": "2025-12-03T19:03:41.370Z",
+  "sha1": "e628a886b96bfe0af1d7122b4cef0457f38dbb82",
+  "tests": [
+    {
+      "id": "1f9c91634ae4e39-f2cd2d3cdc77643",
+      "title": "Ingest data to Elasticsearch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global_setup.ts",
+        "line": 10,
+        "column": 16
+      }
+    },
+    {
+      "id": "d1550ceb9b2efd9-25aa9590269dd52",
+      "title": "Infrastructure Inventory Page should load",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
+        "line": 12,
+        "column": 7
+      }
+    }
+  ]
+}
