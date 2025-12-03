@@ -212,6 +212,7 @@ export const CaseViewActivity = ({
         `}
       >
         <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.ACTIVITY} />
+        <EuiSpacer size="l" />
         <Description
           isLoadingDescription={isLoadingDescription}
           caseData={caseData}
