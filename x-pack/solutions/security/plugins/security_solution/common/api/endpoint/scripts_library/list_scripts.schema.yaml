@@ -9,9 +9,9 @@ paths:
       operationId: EndpointScriptLibraryListScripts
       description: Retrieve a list of scripts
       x-codegen-enabled: false
-#      x-labels: []
+      x-labels: []
 #      TODO: When feature flag is enable, remove empty `x-labels` and un-comment the line below.
-      x-labels: [ ess, serverless ]
+#      x-labels: [ ess, serverless ]
       parameters:
         - name: page
           in: query
