@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 
 /**
  * Common step definition fields shared between server and public.
  * Input and output types are automatically inferred from the schemas.
  */
 export interface CommonStepDefinition<
-  TInputSchema extends z.ZodTypeAny = z.ZodTypeAny,
-  TOutputSchema extends z.ZodTypeAny = z.ZodTypeAny
+  TInputSchema extends z.ZodType = z.ZodType,
+  TOutputSchema extends z.ZodType = z.ZodType
 > {
   /**
    * Unique identifier for this step type.
@@ -43,7 +43,7 @@ export interface CommonStepDefinition<
  */
 export type InferStepInput<T extends CommonStepDefinition> = T extends CommonStepDefinition<
   infer TInputSchema,
-  z.ZodTypeAny
+  z.ZodType
 >
   ? z.infer<TInputSchema>
   : unknown;
@@ -52,7 +52,7 @@ export type InferStepInput<T extends CommonStepDefinition> = T extends CommonSte
  * Helper type to infer output type from a CommonStepDefinition's outputSchema
  */
 export type InferStepOutput<T extends CommonStepDefinition> = T extends CommonStepDefinition<
-  z.ZodTypeAny,
+  z.ZodType,
   infer TOutputSchema
 >
   ? z.infer<TOutputSchema>
