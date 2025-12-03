@@ -942,13 +942,13 @@ export default function ({ getService }: FtrProviderContext) {
           .get('/authentication/app/auth_flow?statusCode=401')
           .set('Cookie', sessionCookie)
           .expect(401);
-        expect(authFlow401ResponseText).to.contain('We hit an authentication error');
+        expect(authFlow401ResponseText).to.contain('<h1>Unauthenticated</h1>');
 
         const { text: authFlow500ResponseText } = await supertest
           .get('/authentication/app/auth_flow?statusCode=500')
           .set('Cookie', sessionCookie)
           .expect(500);
-        expect(authFlow500ResponseText).to.contain('We hit an authentication error');
+        expect(authFlow500ResponseText).to.contain('<h1>Unauthenticated</h1>');
       });
     });
   });
