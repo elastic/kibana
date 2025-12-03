@@ -6,7 +6,7 @@
  */
 
 import expect from 'expect';
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AutomaticImportService } from './automatic_import_service';
@@ -28,7 +28,6 @@ jest.mock('./samples_index/index_service', () => {
 describe('AutomaticImportSetupService', () => {
   let service: AutomaticImportService;
   let mockLoggerFactory: ReturnType<typeof loggerMock.create>;
-  let mockEsClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let mockSavedObjectsSetup: jest.Mocked<SavedObjectsServiceSetup>;
   let mockSavedObjectsClient: SavedObjectsClient;
   let mockTaskManagerSetup: jest.Mocked<TaskManagerSetupContract>;
@@ -37,7 +36,6 @@ describe('AutomaticImportSetupService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockLoggerFactory = loggerMock.create();
-    mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
     mockSavedObjectsSetup = savedObjectsServiceMock.createSetupContract();
     mockSavedObjectsClient = savedObjectsClientMock.create() as unknown as SavedObjectsClient;
 
@@ -55,7 +53,6 @@ describe('AutomaticImportSetupService', () => {
 
     service = new AutomaticImportService(
       mockLoggerFactory,
-      Promise.resolve(mockEsClient),
       mockSavedObjectsSetup,
       mockTaskManagerSetup
     );
@@ -67,7 +64,7 @@ describe('AutomaticImportSetupService', () => {
         './samples_index/index_service'
       );
 
-      expect(MockedService).toHaveBeenCalledWith(mockLoggerFactory, expect.any(Promise));
+      expect(MockedService).toHaveBeenCalledWith(mockLoggerFactory);
     });
 
     it('should initialize the pluginStop$ subject', () => {
@@ -173,7 +170,7 @@ describe('AutomaticImportSetupService', () => {
       );
 
       // Verify constructor was called
-      expect(MockedService).toHaveBeenCalledWith(mockLoggerFactory, expect.any(Promise));
+      expect(MockedService).toHaveBeenCalledWith(mockLoggerFactory);
 
       expect(mockSavedObjectsSetup.registerType).toHaveBeenCalledTimes(2);
       await service.initialize(mockSavedObjectsClient, mockTaskManagerStart);
@@ -192,14 +189,14 @@ describe('AutomaticImportSetupService', () => {
       expect(pluginStop$Before).toBe(pluginStop$After);
     });
 
-    it('should pass ES client promises to samples index service', () => {
+    it('should initialize samples index service with logger factory only', () => {
       const { AutomaticImportSamplesIndexService: MockedService } = jest.requireMock(
         './samples_index/index_service'
       );
 
       const constructorCall = MockedService.mock.calls[0];
       expect(constructorCall[0]).toBe(mockLoggerFactory);
-      expect(constructorCall[1]).toBeInstanceOf(Promise);
+      expect(constructorCall).toHaveLength(1); // Only one parameter now
     });
 
     it('should complete full lifecycle: construct -> initialize -> stop', async () => {
