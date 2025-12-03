@@ -154,6 +154,7 @@ dependsOn:
   - '@kbn/onechat-server'
   - '@kbn/onechat-common'
   - '@kbn/onechat-plugin'
+  - '@kbn/observability-agent-plugin'
 tags:
   - plugin
   - prod
