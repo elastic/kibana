@@ -11,7 +11,6 @@ import { css } from '@emotion/react';
 import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
 
 import { NewChat } from '@kbn/elastic-assistant';
-import { AttachmentType } from '@kbn/onechat-common/attachments';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import type { RuleExecutionStatus } from '../../../../../common/api/detection_engine/rule_monitoring';
 import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
@@ -21,6 +20,7 @@ import { useAssistantAvailability } from '../../../../assistant/use_assistant_av
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
 import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
+import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
 
 interface RuleStatusFailedCallOutProps {
   ruleNameForChat: string;
@@ -64,7 +64,7 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
     [message, ruleName, dataSources]
   );
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
-    attachmentType: AttachmentType.product_reference,
+    attachmentType: SecurityAgentBuilderAttachments.rule,
     attachmentData,
     attachmentPrompt: i18n.ASK_ASSISTANT_USER_PROMPT,
   });

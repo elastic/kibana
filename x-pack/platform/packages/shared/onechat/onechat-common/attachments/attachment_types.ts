@@ -79,16 +79,4 @@ export interface ScreenContextAttachmentData {
   additional_data?: Record<string, string>;
 }
 
-export const productReferenceAttachmentDataSchema = z.object({
-  text: z.string(),
-});
-
-/**
- * Data for a product reference attachment.
- */
-export interface ProductReferenceAttachmentData {
-  /** Text content describing the product reference or query */
-  text: string;
-}
-
 export type AttachmentDataOf<Type extends AttachmentType> = AttachmentDataMap[Type];

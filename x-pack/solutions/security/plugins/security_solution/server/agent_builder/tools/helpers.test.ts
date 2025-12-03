@@ -40,3 +40,4 @@ describe('getSpaceIdFromRequest', () => {
     expect(spaceId).toBe(DEFAULT_SPACE_ID);
   });
 });
+

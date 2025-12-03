@@ -718,5 +718,5 @@ export const ESSENTIAL_ALERT_FIELDS: string[] = [
 export enum SecurityAgentBuilderAttachments {
   alert = 'security.alert',
   entity = 'security.entity',
-  query_help = 'security.query_help',
+  rule = 'security.rule',
 }

@@ -6,9 +6,9 @@
  */
 
 import type { OnechatPluginSetup } from '@kbn/onechat-plugin/server';
+import { createRuleAttachmentType } from './rule';
 import { createAlertAttachmentType } from './alert';
 import { createEntityAttachmentType } from './entity';
-import { createQueryHelpAttachmentType } from './query_help';
 
 /**
  * Registers all security agent builder attachments with the onechat plugin
@@ -16,5 +16,5 @@ import { createQueryHelpAttachmentType } from './query_help';
 export const registerAttachments = async (onechat: OnechatPluginSetup) => {
   onechat.attachments.registerType(createAlertAttachmentType());
   onechat.attachments.registerType(createEntityAttachmentType());
-  onechat.attachments.registerType(createQueryHelpAttachmentType());
+  onechat.attachments.registerType(createRuleAttachmentType());
 };
