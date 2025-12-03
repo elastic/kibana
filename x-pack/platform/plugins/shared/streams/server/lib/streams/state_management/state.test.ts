@@ -40,29 +40,34 @@ describe('State', () => {
     const wiredStream: Streams.WiredStream.Definition = {
       name: 'wired_stream',
       description: '',
+      updated_at: new Date().toISOString(),
       ingest: {
         lifecycle: { inherit: {} },
-        processing: { steps: [] },
+        processing: { steps: [], updated_at: new Date().toISOString() },
         settings: {},
         wired: {
           fields: {},
           routing: [],
         },
+        failure_store: { inherit: {} },
       },
     };
     const classicStream: Streams.ClassicStream.Definition = {
       name: 'classic_stream',
       description: '',
+      updated_at: new Date().toISOString(),
       ingest: {
         lifecycle: { inherit: {} },
-        processing: { steps: [] },
+        processing: { steps: [], updated_at: new Date().toISOString() },
         settings: {},
         classic: {},
+        failure_store: { inherit: {} },
       },
     };
     const groupStream: Streams.GroupStream.Definition = {
       name: 'group_stream',
       description: '',
+      updated_at: new Date().toISOString(),
       group: {
         metadata: {},
         tags: [],
@@ -127,6 +132,7 @@ describe('State', () => {
               definition: {
                 description: '',
                 name: 'whatever',
+                updated_at: new Date().toISOString(),
                 group: {
                   metadata: {},
                   tags: [],
@@ -161,6 +167,7 @@ describe('State', () => {
               definition: {
                 description: '',
                 name: 'new_group_stream',
+                updated_at: new Date().toISOString(),
                 group: {
                   metadata: {},
                   tags: [],
@@ -195,6 +202,7 @@ describe('State', () => {
               definition: {
                 name: 'stream_that_fails',
                 description: 'Something went wrong',
+                updated_at: new Date().toISOString(),
                 group: {
                   metadata: {},
                   tags: [],
@@ -313,6 +321,7 @@ function streamThatCascadesTooMuch(stateDependenciesMock: any) {
             definition: {
               name: 'and_another',
               description: '',
+              updated_at: new Date().toISOString(),
               group: {
                 metadata: {},
                 tags: [],

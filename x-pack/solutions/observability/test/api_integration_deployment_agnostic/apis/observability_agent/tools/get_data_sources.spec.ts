@@ -6,14 +6,19 @@
  */
 
 import expect from '@kbn/expect';
-import type { ApmSynthtraceEsClient, LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient, LogsSynthtraceEsClient } from '@kbn/synthtrace';
 import { isOtherResult } from '@kbn/onechat-common/tools';
 import type { ToolResult, OtherResult } from '@kbn/onechat-common';
 import type { LlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
 import { createLlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
 import { OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID } from '@kbn/observability-agent-plugin/server/tools';
 import { OBSERVABILITY_AGENT_ID } from '@kbn/observability-agent-plugin/server/agent/register_observability_agent';
+import {
+  LLM_PROXY_HANDOVER_INTERCEPTOR,
+  LLM_PROXY_FINAL_MESSAGE,
+} from '../utils/llm_proxy/constants';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import type { AgentBuilderApiClient } from '../utils/agent_builder_client';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
 import { setupToolCallThenAnswer } from '../utils/llm_proxy/scenarios';
 import { createSyntheticLogsData, createSyntheticApmData } from '../utils/synthtrace_scenarios';
@@ -35,7 +40,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     let llmProxy: LlmProxy;
     let connectorId: string;
-    let agentBuilderApiClient: ReturnType<typeof createAgentBuilderApiClient>;
+    let agentBuilderApiClient: AgentBuilderApiClient;
 
     describe('POST /api/agent_builder/converse', () => {
       let toolResponseContent: { results: ToolResult[] };
@@ -65,10 +70,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
         const responseMessage = body.response.message;
-        expect(responseMessage).to.be('final');
+        expect(responseMessage).to.be(LLM_PROXY_FINAL_MESSAGE);
 
         const handoverRequest = llmProxy.interceptedRequests.find(
-          (r) => r.matchingInterceptorName === 'handover-to-answer'
+          (r) => r.matchingInterceptorName === LLM_PROXY_HANDOVER_INTERCEPTOR
         )!.requestBody;
 
         const toolResponseMessage = handoverRequest.messages[handoverRequest.messages.length - 1]!;
@@ -118,7 +123,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             indexPatterns: ['logs-*-*', 'logs-*', 'filebeat-*'],
           },
           metrics: {
-            indexPatterns: ['metrics-*'],
+            indexPatterns: ['metrics-*', 'metricbeat-*'],
           },
           alerts: {
             indexPattern: ['alerts-observability-*'],

@@ -109,9 +109,9 @@ export function UnmanagedElasticsearchAssets({
 
   return (
     <>
-      <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexGroup direction="column" gutterSize="l">
         <EuiFlexItem>
-          {significantEvents?.available && (
+          {significantEvents?.enabled && (
             <StreamFeatureConfiguration definition={definition.stream} />
           )}
         </EuiFlexItem>

@@ -11,8 +11,8 @@ import Boom from '@hapi/boom';
 import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core-saved-objects-api-server';
 import type { Reference } from '@kbn/content-management-utils';
 import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
-import type { DashboardState } from '../content_management';
-import { transformDashboardOut, transformReferencesOut } from '../content_management/v1/transforms';
+import type { DashboardState } from './types';
+import { transformDashboardOut, transformReferencesOut } from './transforms';
 
 export function getDashboardMeta(
   savedObject:
@@ -56,7 +56,7 @@ export function getDashboardCRUResponseBody(
     id: savedObject.id,
     data: {
       ...dashboardState,
-      references,
+      ...(references.length && { references }),
     },
     meta: getDashboardMeta(savedObject, operation),
     spaces: savedObject.namespaces,

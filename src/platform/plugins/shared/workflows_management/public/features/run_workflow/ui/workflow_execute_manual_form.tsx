@@ -11,10 +11,11 @@ import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@e
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
-import type { WorkflowInputChoiceSchema, WorkflowInputSchema, WorkflowYaml } from '@kbn/workflows';
-import { z } from '@kbn/zod';
+import type { WorkflowInput, WorkflowInputChoice, WorkflowYaml } from '@kbn/workflows';
+import { z } from '@kbn/zod/v4';
+import { WORKFLOWS_MONACO_EDITOR_THEME } from '../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
 
-const makeWorkflowInputsValidator = (inputs: Array<z.infer<typeof WorkflowInputSchema>>) => {
+const makeWorkflowInputsValidator = (inputs: Array<WorkflowInput>) => {
   return z.object(
     inputs.reduce((acc, input) => {
       switch (input.type) {
@@ -74,23 +75,22 @@ type WorkflowInputPlaceholder =
   | string[]
   | number[]
   | boolean[]
-  | ((input: z.infer<typeof WorkflowInputSchema>) => string);
+  | ((input: WorkflowInput) => string);
 
 const defaultWorkflowInputsMappings: Record<string, WorkflowInputPlaceholder> = {
   string: 'Enter a string',
   number: 0,
   boolean: false,
-  choice: (input: z.infer<typeof WorkflowInputSchema>) =>
-    `Select an option: ${(input as z.infer<typeof WorkflowInputChoiceSchema>).options.join(', ')}`,
-  array: (input: z.infer<typeof WorkflowInputSchema>) =>
-    'Enter array of strings, numbers or booleans',
+  choice: (input: WorkflowInput) =>
+    `Select an option: ${(input as WorkflowInputChoice).options.join(', ')}`,
+  array: (input: WorkflowInput) => 'Enter array of strings, numbers or booleans',
 };
 
 const getDefaultWorkflowInput = (definition: WorkflowYaml): string => {
   const inputPlaceholder: Record<string, WorkflowInputPlaceholder> = {};
 
   if (definition.inputs) {
-    definition.inputs.forEach((input: z.infer<typeof WorkflowInputSchema>) => {
+    definition.inputs.forEach((input: WorkflowInput) => {
       let placeholder: WorkflowInputPlaceholder = defaultWorkflowInputsMappings[input.type];
       if (typeof placeholder === 'function') {
         placeholder = placeholder(input);
@@ -121,11 +121,7 @@ export const WorkflowExecuteManualForm = ({
         try {
           const res = inputsValidator.safeParse(JSON.parse(data));
           if (!res.success) {
-            setErrors(
-              res.error.issues
-                .map((e: z.ZodIssue) => `${e.path.join('.')}: ${e.message}`)
-                .join(', ')
-            );
+            setErrors(res.error.issues.map((e) => `${e.path.join('.')}: ${e.message}`).join(', '));
           } else {
             setErrors(null);
           }
@@ -206,7 +202,7 @@ export const WorkflowExecuteManualForm = ({
               renderWhitespace: 'all',
               wordWrapColumn: 80,
               wrappingIndent: 'indent',
-              theme: 'vs-light',
+              theme: WORKFLOWS_MONACO_EDITOR_THEME,
               formatOnType: true,
               quickSuggestions: false,
               suggestOnTriggerCharacters: false,

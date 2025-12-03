@@ -35,11 +35,13 @@ export const WorkflowDetailTestModal = () => {
   const workflowId = useSelector(selectWorkflowId);
 
   const testWorkflow = useAsyncThunk(testWorkflowThunk);
+
   const handleRunWorkflow = useCallback(
     async (inputs: Record<string, unknown>) => {
-      const result = await testWorkflow({ inputs });
-      if (result) {
-        setSelectedExecution(result.workflowExecutionId);
+      const executionId = await testWorkflow({ inputs });
+
+      if (executionId) {
+        setSelectedExecution(executionId.workflowExecutionId);
       }
     },
     [testWorkflow, setSelectedExecution]
@@ -77,6 +79,7 @@ export const WorkflowDetailTestModal = () => {
 
   return (
     <WorkflowExecuteModal
+      isTestRun={true}
       definition={definition}
       workflowId={workflowId}
       onClose={closeModal}
