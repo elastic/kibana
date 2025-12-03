@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiI18nNumber } from '@elastic/eui';
 import { css } from '@emotion/react';
 import copy from 'copy-to-clipboard';
 import React, { useCallback } from 'react';
@@ -69,8 +69,8 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
             id="xpack.onechat.roundResponseActions.tokenUsage"
             defaultMessage="Input tokens: {inputTokens} / Output tokens: {outputTokens}"
             values={{
-              inputTokens: modelUsage.input_tokens.toLocaleString(),
-              outputTokens: modelUsage.output_tokens.toLocaleString(),
+              inputTokens: <EuiI18nNumber value={modelUsage.input_tokens} />,
+              outputTokens: <EuiI18nNumber value={modelUsage.output_tokens} />,
             }}
           />
         </EuiText>
