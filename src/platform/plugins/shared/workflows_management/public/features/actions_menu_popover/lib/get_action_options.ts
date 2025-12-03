@@ -9,12 +9,17 @@
 
 import type { UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isDynamicConnector } from '@kbn/workflows';
+import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
 import { getAllConnectors } from '../../../../common/schema';
 import { getStepIconType } from '../../../shared/ui/step_icons/get_step_icon_type';
 import type { ActionConnectorGroup, ActionOptionData } from '../types';
 import { isActionGroup } from '../types';
 
-export function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptionData[] {
+export function getActionOptions(
+  euiTheme: UseEuiTheme['euiTheme'],
+  workflowsExtensions: WorkflowsExtensionsPublicPluginStart
+): ActionOptionData[] {
   const connectors = getAllConnectors();
   const triggersGroup: ActionOptionData = {
     iconType: 'bolt',
@@ -157,7 +162,15 @@ export function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptio
   const baseTypeInstancesCount: Record<string, number> = {};
 
   for (const connector of connectors) {
-    if (connector.type.startsWith('elasticsearch.')) {
+    const customStepDefinition = workflowsExtensions.getStepDefinition(connector.type);
+    if (customStepDefinition) {
+      kibanaGroup.options.push({
+        id: customStepDefinition.id,
+        label: customStepDefinition.label,
+        description: customStepDefinition.description,
+        iconType: customStepDefinition.icon ?? 'plugs',
+      });
+    } else if (connector.type.startsWith('elasticsearch.')) {
       elasticSearchGroup.options.push({
         id: connector.type,
         label: connector.description || connector.type,
@@ -171,7 +184,7 @@ export function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptio
         description: connector.type,
         iconType: 'logoKibana',
       });
-    } else {
+    } else if (isDynamicConnector(connector)) {
       const [baseType, subtype] = connector.type.split('.');
       let groupOption = externalGroup;
       if (subtype) {
