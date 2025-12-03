@@ -32,10 +32,9 @@ export function AlertAiInsight({ alert }: { alert: AlertData | null }) {
     setError(undefined);
     try {
       const alertId = alert.formatted.fields['kibana.alert.uuid'];
-      // Call new summarizer endpoint
       try {
         const result = await http.post<{ summary: string; context: string }>(
-          '/internal/observability_agent/ai_insights/alert',
+          '/internal/observability_agent_builder/ai_insights/alert',
           {
             body: JSON.stringify({
               alertId,

@@ -22,7 +22,7 @@ export function registerAiInsightRoutes(
 
   router.post(
     {
-      path: '/internal/observability_agent/ai_insights/alert',
+      path: '/internal/observability_agent_builder/ai_insights/alert',
       validate: {
         body: schema.object({
           alertId: schema.string(),
@@ -184,8 +184,6 @@ export function registerAiInsightRoutes(
 
         const relatedContext =
           contextParts.length > 0 ? contextParts.join('\n\n') : 'No related signals available.';
-
-          console.log('relatedContext', relatedContext);
 
         const inferenceClient = inference.getClient({ request });
 
