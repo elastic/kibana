@@ -20,7 +20,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { usePager } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { JsonArray, JsonObject } from '@kbn/utility-types';
+import type { JsonValue } from '@kbn/utility-types';
 import { FieldName } from './field_name';
 import { formatValueAsElement } from './format_value';
 import { inferFieldType } from './infer_field_type';
@@ -33,15 +33,25 @@ const MAX_NAME_COLUMN_WIDTH = 300;
 
 interface JSONDataTableRecord {
   field: string;
-  value: string | number | boolean | null;
+  value: JsonValue;
   displayValue: string | React.ReactElement;
   fieldType: string;
   searchableValue: string;
 }
 
+const isPrimitive = (data: JsonValue): data is string | number | boolean | null => {
+  if (data == null) {
+    return true;
+  }
+  if (Array.isArray(data) || typeof data === 'object') {
+    return false;
+  }
+  return true;
+};
+
 export interface JSONDataTableProps {
   /** The JSON data object to display as a table */
-  data: JsonArray | JsonObject;
+  data: JsonValue;
   /** Optional title for the data view. Defaults to 'JSON Data' */
   title?: string;
   /** Optional search term to filter the data */
@@ -50,7 +60,7 @@ export interface JSONDataTableProps {
   fieldPathActionsPrefix?: string;
 }
 export const JSONDataTable = React.memo<JSONDataTableProps>(
-  ({ data: jsonObject, title = 'JSON Data', searchTerm, fieldPathActionsPrefix }) => {
+  ({ data, title = 'JSON Data', searchTerm, fieldPathActionsPrefix }) => {
     const styles = useMemoCss(componentStyles);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const dataGridRef = useRef<EuiDataGridRefProps | null>(null);
@@ -58,8 +68,25 @@ export const JSONDataTable = React.memo<JSONDataTableProps>(
 
     // Create DataTableRecord from JSON - each field becomes a row
     const records = useMemo((): JSONDataTableRecord[] => {
+      // primitive value
+      if (isPrimitive(data)) {
+        return [
+          {
+            field: 'value',
+            value: data,
+            displayValue: formatValueAsElement(data),
+            fieldType: typeof data === 'string' ? 'string' : 'number',
+            searchableValue: `${String(data).toLowerCase()}`,
+          },
+        ];
+      }
+      // empty object or array, do not display anything
+      if (Object.keys(data).length === 0) {
+        return [];
+      }
+
       // Flatten nested objects for better display
-      const flattened = flattenKeyPaths(jsonObject);
+      const flattened = flattenKeyPaths(data);
 
       // Create a row for each field-value pair
       return Object.keys(flattened).map((fieldPath) => {
@@ -79,7 +106,7 @@ export const JSONDataTable = React.memo<JSONDataTableProps>(
           searchableValue: `${fieldPath.toLowerCase()} ${textValue.toLowerCase()}`,
         };
       });
-    }, [jsonObject, getFormattedDateTime]);
+    }, [data, getFormattedDateTime]);
 
     const filteredRecords = useMemo(() => {
       if (!searchTerm) {
@@ -108,9 +135,10 @@ export const JSONDataTable = React.memo<JSONDataTableProps>(
     }, [filteredRecords, fieldPathActionsPrefix]);
 
     // Grid columns configuration
-    const gridColumns: EuiDataGridProps['columns'] = useMemo(
-      () => [
-        {
+    const gridColumns: EuiDataGridProps['columns'] = useMemo(() => {
+      const columns: EuiDataGridProps['columns'] = [];
+      if (!isPrimitive(data)) {
+        columns.push({
           id: 'name',
           displayAsText: 'Field',
           initialWidth: Math.min(
@@ -119,15 +147,15 @@ export const JSONDataTable = React.memo<JSONDataTableProps>(
           ),
           actions: false,
           cellActions: fieldCellActions,
-        },
-        {
-          id: 'value',
-          displayAsText: 'Value',
-          actions: false,
-        },
-      ],
-      [containerWidth, fieldCellActions]
-    );
+        });
+      }
+      columns.push({
+        id: 'value',
+        displayAsText: 'Value',
+        actions: false,
+      });
+      return columns;
+    }, [data, containerWidth, fieldCellActions]);
 
     // Cell renderer for the data grid
     const renderCellValue: EuiDataGridProps['renderCellValue'] = useMemo(() => {
