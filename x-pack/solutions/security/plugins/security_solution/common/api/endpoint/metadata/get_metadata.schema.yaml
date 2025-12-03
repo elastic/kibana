@@ -7,7 +7,7 @@ paths:
     get:
       summary: Get a metadata list
       operationId: GetEndpointMetadataList
-      x-codegen-enabled: true
+      x-codegen-enabled: false
       x-labels: [ess, serverless]
       parameters:
         - name: page

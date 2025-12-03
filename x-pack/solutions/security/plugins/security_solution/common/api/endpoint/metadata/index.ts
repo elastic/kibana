@@ -6,7 +6,5 @@
  */
 
 export * from './get_metadata';
-export * from './get_metadata.gen';
-
 export * from './list_metadata';
 export * from './list_metadata.gen';
