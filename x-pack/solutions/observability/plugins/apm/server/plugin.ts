@@ -52,6 +52,7 @@ import type {
   APMPluginStartDependencies,
 } from './types';
 import { registerAgentTools } from './agent_tools';
+import { registerDataProviders } from './observability_agent/register_data_providers';
 
 export class APMPlugin
   implements Plugin<APMPluginSetup, void, APMPluginSetupDependencies, APMPluginStartDependencies>
@@ -259,6 +260,12 @@ export class APMPlugin
 
       this.logger?.debug('Successfully registered observability agent APM tools');
     }
+
+    registerDataProviders({
+      core,
+      plugins,
+      logger: this.logger!.get('observabilityAgent'),
+    });
 
     registerDeprecations({
       core,
