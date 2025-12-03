@@ -20,9 +20,6 @@ jest.mock('../utils', () => ({
 }));
 
 describe('buildEsql', () => {
-  let mockAppClient: jest.Mocked<AppClient>;
-  let mockDataViewsService: jest.Mocked<DataViewsService>;
-
   beforeEach(() => {
     const arbitraryIndexPatterns = ['logs-*', '.entities.v1.updates.security_host_default'];
     (utils.buildIndexPatternsByEngine as jest.Mock).mockResolvedValue(arbitraryIndexPatterns);
@@ -39,11 +36,13 @@ describe('buildEsql', () => {
     const esql = await buildESQLQuery(
       'default',
       'host',
-      mockAppClient,
-      mockDataViewsService,
+      {} as AppClient,
+      {} as DataViewsService,
       from,
       to,
-      { maxPageSearchSize: 10 }
+      {
+        maxPageSearchSize: 10,
+      }
     );
 
     expect(utils.buildIndexPatternsByEngine).toHaveBeenCalled();
