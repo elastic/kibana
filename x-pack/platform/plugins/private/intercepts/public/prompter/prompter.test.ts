@@ -103,8 +103,38 @@ describe('ProductInterceptPrompter', () => {
         onProgress: jest.fn(),
       };
 
+      beforeAll(() => {
+        // create mock for requestIdleCallback
+        // that will be to provided mock overrides
+        Object.defineProperty(window, 'requestIdleCallback', {
+          value: jest.fn(),
+          writable: true,
+          configurable: true,
+        });
+        Object.defineProperty(window, 'cancelIdleCallback', {
+          value: jest.fn(),
+          writable: true,
+          configurable: true,
+        });
+      });
+
       beforeEach(() => {
-        jest.useFakeTimers();
+        jest.useFakeTimers({
+          // we do not want to fake requestIdleCallback and cancelIdleCallback,
+          // it's implementation in jest which is from sinon is wrong see https://github.com/sinonjs/fake-timers/issues/358
+          doNotFake: ['requestIdleCallback', 'cancelIdleCallback'],
+        });
+
+        // roll our own implementation of requestIdleCallback and cancelIdleCallback for the purpose of this test
+        // Using timeout of 1ms to simulate the browser being idle almost immediately, avoiding the need to
+        // advance timers by the configured idle callback timeout in every test.
+        jest.spyOn(window, 'requestIdleCallback').mockImplementation((callback) => {
+          return setTimeout(() => callback({} as IdleDeadline), 1) as unknown as number;
+        });
+
+        jest.spyOn(window, 'cancelIdleCallback').mockImplementation((id) => {
+          clearTimeout(id);
+        });
 
         interceptDialogServiceStartFnSpy.mockImplementation(() => {
           return {
@@ -309,7 +339,9 @@ describe('ProductInterceptPrompter', () => {
           // simulate the passage of time beyond the next trigger
           await jest.advanceTimersByTimeAsync(triggerInfo.triggerIntervalInMs);
 
-          expect(mockQueueInterceptFn).toHaveBeenCalled();
+          await waitFor(() => {
+            expect(mockQueueInterceptFn).toHaveBeenCalled();
+          });
 
           subscription.unsubscribe();
         });
@@ -375,9 +407,11 @@ describe('ProductInterceptPrompter', () => {
 
           // advance time ever slightly forward so that timer can kick off, but not beyond the next trigger
           // so we can validate that the localstorage record indeed triggered the intercept to be queued
-          await jest.advanceTimersByTimeAsync(timeTillNextRun / 3);
+          await jest.advanceTimersByTimeAsync(Math.max(timeTillNextRun / 3));
 
-          expect(mockQueueInterceptFn).toHaveBeenCalled();
+          await waitFor(() => {
+            expect(mockQueueInterceptFn).toHaveBeenCalled();
+          });
 
           // once when the intercept is queued, because we started off with an existing value in localstorage
           expect(localStorageSetItemSpy).toHaveBeenCalledTimes(1);
@@ -443,12 +477,14 @@ describe('ProductInterceptPrompter', () => {
           // simulate the passage of time beyond the next trigger
           await jest.advanceTimersByTimeAsync(triggerInfo.triggerIntervalInMs);
 
-          expect(mockQueueInterceptFn).toHaveBeenCalledWith(
-            expect.objectContaining({
-              id: intercept.id,
-              runId: triggerRuns + 1,
-            })
-          );
+          await waitFor(() => {
+            expect(mockQueueInterceptFn).toHaveBeenCalledWith(
+              expect.objectContaining({
+                id: intercept.id,
+                runId: triggerRuns + 1,
+              })
+            );
+          });
 
           subscription.unsubscribe();
         });
@@ -566,12 +602,14 @@ describe('ProductInterceptPrompter', () => {
           // advance time to point in time when next run should happen
           await jest.advanceTimersByTimeAsync(triggerInfo.triggerIntervalInMs);
 
-          expect(mockQueueInterceptFn).toHaveBeenCalledWith(
-            expect.objectContaining({
-              id: _intercept.id,
-              runId: triggerRuns + 1,
-            })
-          );
+          await waitFor(() => {
+            expect(mockQueueInterceptFn).toHaveBeenCalledWith(
+              expect.objectContaining({
+                id: _intercept.id,
+                runId: triggerRuns + 1,
+              })
+            );
+          });
 
           // advance to next run and wait for all promises to resolve
           await jest.advanceTimersByTimeAsync(triggerInfo.triggerIntervalInMs * 2);
@@ -643,12 +681,14 @@ describe('ProductInterceptPrompter', () => {
           // advance time to point in time when next run should happen
           await jest.advanceTimersByTimeAsync(triggerInfo.triggerIntervalInMs);
 
-          expect(mockQueueInterceptFn).toHaveBeenCalledWith(
-            expect.objectContaining({
-              id: intercept.id,
-              runId: triggerRuns + 1,
-            })
-          );
+          await waitFor(() => {
+            expect(mockQueueInterceptFn).toHaveBeenCalledWith(
+              expect.objectContaining({
+                id: intercept.id,
+                runId: triggerRuns + 1,
+              })
+            );
+          });
 
           subscription.unsubscribe();
         });
@@ -797,13 +837,15 @@ describe('ProductInterceptPrompter', () => {
           // simulate the passage of time beyond the next trigger
           await jest.advanceTimersByTimeAsync(triggerInfo.triggerIntervalInMs);
 
-          expect(mockQueueInterceptFn).toHaveBeenCalledWith(
-            expect.objectContaining({
-              id: intercept.id,
-              // the next run id is the current run id plus 2 because the page was hidden for a portion of the time for which the intercept ought to have displayed
-              runId: triggerRuns + 2,
-            })
-          );
+          await waitFor(() => {
+            expect(mockQueueInterceptFn).toHaveBeenCalledWith(
+              expect.objectContaining({
+                id: intercept.id,
+                // the next run id is the current run id plus 2 because the page was hidden for a portion of the time for which the intercept ought to have displayed
+                runId: triggerRuns + 2,
+              })
+            );
+          });
 
           subscription.unsubscribe();
         });

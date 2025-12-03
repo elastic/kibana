@@ -27,6 +27,9 @@ type ProductInterceptPrompterStartDeps = Omit<
 export class InterceptPrompter {
   public static readonly CLIENT_STORAGE_KEY = 'intercepts.prompter.clientCache';
 
+  // Timeout for the idle callback, used to wait for the page to be idle before processing the intercept
+  public static readonly IDLE_CALLBACK_TIMEOUT = 10 * 30 * 1000; // 10 minutes in milliseconds
+
   private userInterceptRunPersistenceService = new UserInterceptRunPersistenceService();
   private interceptDialogService = new InterceptDialogService();
   private queueIntercept?: ReturnType<InterceptDialogService['start']>['add'];
@@ -144,12 +147,20 @@ export class InterceptPrompter {
                   if (timeElapsedSinceTimerStart >= response.triggerIntervalInMs) {
                     // Reset the timer start record, so the next interval starts fresh
                     this.clearInterceptTimerStartRecord(intercept.id);
+
+                    const triggerData$ =
+                      timerIterationCount === 0
+                        ? // if it's the first timer iteration it's safe to return the user trigger data we'd requested because it has a low chance of being stale just yet
+                          Rx.of(userTriggerData)
+                        : getUserTriggerData$(intercept.id);
+
                     // Time has elapsed for the next trigger
                     // Return user trigger data to check if they've already interacted with this run
-                    return timerIterationCount === 0
-                      ? // if it's the first timer iteration it's safe to return the user trigger data we'd requested because it has a low chance of being stale just yet
-                        Rx.of(userTriggerData)
-                      : getUserTriggerData$(intercept.id);
+                    return triggerData$.pipe(
+                      Rx.switchMap((triggerData) =>
+                        this.emitWhenIdle$(triggerData, InterceptPrompter.IDLE_CALLBACK_TIMEOUT)
+                      )
+                    );
                   } else {
                     // Not yet time, return EMPTY to skip this iteration
                     return Rx.EMPTY;
@@ -208,6 +219,23 @@ export class InterceptPrompter {
       timeTillNextRun,
       nextRunId,
     };
+  }
+
+  private emitWhenIdle$<T>(value: T, timeout: number): Rx.Observable<T> {
+    return new Rx.Observable((subscriber) => {
+      const idleCallbackId = requestIdleCallback(
+        () => {
+          subscriber.next(value);
+          subscriber.complete();
+        },
+        { timeout }
+      );
+
+      // Cleanup on unsubscription
+      return () => {
+        cancelIdleCallback(idleCallbackId);
+      };
+    });
   }
 
   private markInterceptTimerStart(interceptId: Intercept['id']) {
