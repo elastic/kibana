@@ -34,7 +34,7 @@ const cloudDefendSecuritySolutionContext: CloudDefendSecuritySolutionContext = {
 const CloudDefend = () => {
   const { cloudDefend, cloud } = useKibana().services;
   const CloudDefendRouter = cloudDefend.getCloudDefendRouter();
-  const isServerless: boolean = cloud?.isServerlessEnabled;
+  const isServerless: boolean = cloud?.isServerlessEnabled ?? false;
 
   // Remove this once Cloud Defend Billing works
   if (isServerless) {
@@ -55,7 +55,7 @@ const CloudDefend = () => {
               title={
                 <h2>
                   <FormattedMessage
-                    id="xpack.cloudDefend.serverlessNotOfferedTitle"
+                    id="xpack.securitySolution.cloudDefend.serverlessNotOfferedTitle"
                     defaultMessage="Page Unavailable"
                   />
                 </h2>
@@ -63,7 +63,7 @@ const CloudDefend = () => {
               body={
                 <p>
                   <FormattedMessage
-                    id="xpack.cloudDefend.serverlessNotOfferedBodyMessage"
+                    id="xpack.securitySolution.cloudDefend.serverlessNotOfferedBodyMessage"
                     defaultMessage="Cloud defend is not enabled in serverless"
                   />
                 </p>
