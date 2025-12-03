@@ -210,6 +210,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
         setIsEdit(true);
       }
 
+      onClose();
       return updatedConnector;
     } else {
       setShowFormErrors(true);
@@ -221,6 +222,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     connector.id,
     updateConnector,
     onFormModifiedChange,
+    onClose,
   ]);
 
   useEffect(() => {
