@@ -48,17 +48,17 @@ src/platform/packages/private/analytics/utils/analytics_collection_utils @elasti
 src/platform/test/analytics/plugins/analytics_ftr_helpers @elastic/kibana-core
 src/platform/test/analytics/plugins/analytics_plugin_a @elastic/kibana-core
 src/platform/packages/private/kbn-apm-config-loader @elastic/kibana-core @vigneshshanmugam
-x-pack/solutions/observability/plugins/apm_data_access @elastic/obs-ux-infra_services-team
-src/platform/packages/shared/kbn-apm-data-view @elastic/obs-ux-infra_services-team
-x-pack/solutions/observability/plugins/apm/ftr_e2e @elastic/obs-ux-infra_services-team
-x-pack/solutions/observability/plugins/apm @elastic/obs-ux-infra_services-team
-x-pack/platform/plugins/shared/apm_sources_access @elastic/obs-ux-infra_services-team
-src/platform/packages/shared/kbn-apm-synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-onboarding-team
-src/platform/packages/shared/kbn-apm-synthtrace-client @elastic/obs-ux-infra_services-team @elastic/obs-onboarding-team
-x-pack/platform/packages/shared/kbn-apm-types @elastic/obs-ux-infra_services-team
-src/platform/packages/shared/kbn-apm-types-shared @elastic/obs-ux-infra_services-team
-src/platform/packages/shared/kbn-apm-ui-shared @elastic/obs-ux-infra_services-team
-src/platform/packages/shared/kbn-apm-utils @elastic/obs-ux-infra_services-team
+x-pack/solutions/observability/plugins/apm_data_access @elastic/obs-presentation-team
+src/platform/packages/shared/kbn-apm-data-view @elastic/obs-presentation-team
+x-pack/solutions/observability/plugins/apm/ftr_e2e @elastic/obs-presentation-team
+x-pack/solutions/observability/plugins/apm @elastic/obs-presentation-team
+x-pack/platform/plugins/shared/apm_sources_access @elastic/obs-presentation-team
+src/platform/packages/shared/kbn-apm-synthtrace @elastic/obs-presentation-team @elastic/obs-onboarding-team
+src/platform/packages/shared/kbn-apm-synthtrace-client @elastic/obs-presentation-team @elastic/obs-onboarding-team
+x-pack/platform/packages/shared/kbn-apm-types @elastic/obs-presentation-team
+src/platform/packages/shared/kbn-apm-types-shared @elastic/obs-presentation-team
+src/platform/packages/shared/kbn-apm-ui-shared @elastic/obs-presentation-team
+src/platform/packages/shared/kbn-apm-utils @elastic/obs-presentation-team
 src/platform/test/plugin_functional/plugins/app_link_test @elastic/kibana-core
 x-pack/platform/test/usage_collection/plugins/application_usage_test @elastic/kibana-core
 x-pack/platform/test/security_api_integration/plugins/audit_log @elastic/kibana-security
@@ -474,10 +474,10 @@ src/platform/plugins/private/event_annotation_listing @elastic/kibana-visualizat
 src/platform/plugins/private/event_annotation @elastic/kibana-visualizations
 x-pack/platform/test/plugin_api_integration/plugins/event_log @elastic/response-ops
 x-pack/platform/plugins/shared/event_log @elastic/response-ops
-x-pack/platform/packages/shared/kbn-event-stacktrace @elastic/obs-ux-infra_services-team @elastic/obs-exploration-team
+x-pack/platform/packages/shared/kbn-event-stacktrace @elastic/obs-presentation-team @elastic/obs-exploration-team
 x-pack/solutions/security/packages/expandable-flyout @elastic/security-threat-hunting-investigations
 src/platform/packages/shared/kbn-expect @elastic/kibana-operations @elastic/appex-qa
-x-pack/examples/exploratory_view_example @elastic/obs-ux-infra_services-team
+x-pack/examples/exploratory_view_example @elastic/obs-presentation-team
 x-pack/solutions/observability/plugins/exploratory_view @elastic/obs-ux-management-team
 src/platform/plugins/shared/chart_expressions/expression_gauge @elastic/kibana-visualizations
 src/platform/plugins/shared/chart_expressions/expression_heatmap @elastic/kibana-visualizations
@@ -565,7 +565,7 @@ x-pack/platform/plugins/shared/inference @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-inference-tracing @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-inference-tracing-config @elastic/appex-ai-infra
 x-pack/platform/packages/private/kbn-infra-forge @elastic/obs-ux-management-team
-x-pack/solutions/observability/plugins/infra @elastic/obs-exploration-team @elastic/obs-ux-infra_services-team
+x-pack/solutions/observability/plugins/infra @elastic/obs-exploration-team @elastic/obs-presentation-team
 x-pack/platform/plugins/shared/ingest_pipelines @elastic/kibana-management
 src/platform/plugins/private/input_control_vis @elastic/kibana-presentation
 src/platform/plugins/shared/inspector @elastic/kibana-presentation
@@ -586,7 +586,7 @@ src/platform/test/plugin_functional/plugins/kbn_sample_panel_action @elastic/app
 src/platform/test/plugin_functional/plugins/kbn_top_nav @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations @elastic/kibana-visualizations
 src/platform/test/interpreter_functional/plugins/kbn_tp_run_pipeline @elastic/kibana-core
-x-pack/platform/packages/shared/kbn-key-value-metadata-table @elastic/obs-ux-infra_services-team @elastic/obs-onboarding-team
+x-pack/platform/packages/shared/kbn-key-value-metadata-table @elastic/obs-presentation-team @elastic/obs-onboarding-team
 x-pack/platform/packages/shared/kbn-kibana-api-cli @elastic/appex-ai-infra
 x-pack/platform/test/functional_cors/plugins/kibana_cors_test @elastic/kibana-security
 packages/kbn-kibana-manifest-schema @elastic/kibana-operations
@@ -598,7 +598,7 @@ x-pack/solutions/security/plugins/kubernetes_security @elastic/kibana-cloud-secu
 x-pack/platform/packages/shared/kbn-langchain @elastic/security-generative-ai
 src/platform/packages/private/kbn-language-documentation @elastic/kibana-esql
 x-pack/examples/lens_config_builder_example @elastic/kibana-visualizations
-src/platform/packages/shared/kbn-lens-embeddable-utils @elastic/obs-ux-infra_services-team @elastic/kibana-visualizations
+src/platform/packages/shared/kbn-lens-embeddable-utils @elastic/obs-presentation-team @elastic/kibana-visualizations
 src/platform/packages/private/kbn-lens-formula-docs @elastic/kibana-visualizations
 x-pack/examples/lens_embeddable_inline_editing_example @elastic/kibana-visualizations
 x-pack/platform/plugins/shared/lens @elastic/kibana-visualizations
@@ -643,7 +643,7 @@ x-pack/examples/third_party_maps_source_example @elastic/kibana-gis
 src/platform/plugins/private/maps_ems @elastic/kibana-presentation
 x-pack/platform/plugins/shared/maps @elastic/kibana-presentation
 x-pack/platform/packages/private/maps/vector_tile_utils @elastic/kibana-gis
-x-pack/solutions/observability/plugins/metrics_data_access @elastic/obs-ux-infra_services-team
+x-pack/solutions/observability/plugins/metrics_data_access @elastic/obs-presentation-team
 x-pack/platform/packages/private/ml/agg_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/anomaly_utils @elastic/ml-ui
 x-pack/platform/packages/private/ml/cancellable_search @elastic/ml-ui
@@ -711,7 +711,7 @@ x-pack/solutions/observability/packages/utils-browser @elastic/observability-ui
 x-pack/solutions/observability/packages/utils-common @elastic/observability-ui
 x-pack/solutions/observability/packages/utils-server @elastic/observability-ui
 x-pack/platform/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
-src/platform/test/common/plugins/otel_metrics @elastic/obs-ux-infra_services-team
+src/platform/test/common/plugins/otel_metrics @elastic/obs-presentation-team
 src/platform/packages/shared/kbn-openapi-bundler @elastic/security-detection-rule-management
 src/platform/packages/shared/kbn-openapi-common @elastic/security-detection-rule-management
 src/platform/packages/shared/kbn-openapi-generator @elastic/security-detection-rule-management
@@ -743,9 +743,9 @@ x-pack/platform/plugins/shared/ai_infra/product_doc_base @elastic/appex-ai-infra
 x-pack/platform/packages/shared/ai-infra/product-doc-common @elastic/appex-ai-infra
 x-pack/platform/plugins/private/product_intercept @elastic/appex-sharedux
 x-pack/platform/packages/shared/kbn-profiler-cli @elastic/obs-knowledge-team
-x-pack/solutions/observability/plugins/profiling_data_access @elastic/obs-ux-infra_services-team
-x-pack/solutions/observability/plugins/profiling @elastic/obs-ux-infra_services-team
-src/platform/packages/shared/kbn-profiling-utils @elastic/obs-ux-infra_services-team
+x-pack/solutions/observability/plugins/profiling_data_access @elastic/obs-presentation-team
+x-pack/solutions/observability/plugins/profiling @elastic/obs-presentation-team
+src/platform/packages/shared/kbn-profiling-utils @elastic/obs-presentation-team
 x-pack/platform/packages/private/kbn-random-sampling @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-react-field @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-react-hooks @elastic/obs-onboarding-team
@@ -919,7 +919,7 @@ x-pack/solutions/security/plugins/session_view @elastic/kibana-cloud-security-po
 packages/kbn-set-map @elastic/kibana-operations
 examples/share_examples @elastic/appex-sharedux
 src/platform/plugins/shared/share @elastic/appex-sharedux
-src/platform/packages/shared/kbn-shared-svg @elastic/obs-ux-infra_services-team
+src/platform/packages/shared/kbn-shared-svg @elastic/obs-presentation-team
 src/platform/packages/shared/shared-ux/avatar/solution @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/button/exit_full_screen @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/button_toolbar @elastic/appex-sharedux
@@ -2765,7 +2765,7 @@ x-pack/solutions/security/plugins/security_solution/server/lib/security_integrat
 x-pack/platform/plugins/private/translations/translations
 
 # Profiling cypress tests
-x-pack/solutions/observability/test/profiling_cypress @elastic/obs-ux-infra_services-team
+x-pack/solutions/observability/test/profiling_cypress @elastic/obs-presentation-team
 
 # Profiling api integration testing
 x-pack/solutions/observability/test/api_integration/profiling @elastic/obs-presentation-team
