@@ -17,12 +17,12 @@ import { parseDatemath } from '../../utils/time';
 export const OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID = 'observability.run_log_rate_analysis';
 
 const dateRangeSchema = z.object({
-  from: z
+  start: z
     .string()
     .describe(
       'Start of the time window expressed with Elasticsearch date math. Example: `now-15m`'
     ),
-  to: z
+  end: z
     .string()
     .describe('End of the time window expressed with Elasticsearch date math. Example: `now`.'),
 });
@@ -72,10 +72,10 @@ export function createRunLogRateAnalysisTool({
         const esClient = context.esClient.asCurrentUser;
 
         const windowParameters: WindowParameters = {
-          baselineMin: parseDatemath(baseline.from),
-          baselineMax: parseDatemath(baseline.to, { roundUp: true }),
-          deviationMin: parseDatemath(deviation.from),
-          deviationMax: parseDatemath(deviation.to, { roundUp: true }),
+          baselineMin: parseDatemath(baseline.start),
+          baselineMax: parseDatemath(baseline.end, { roundUp: true }),
+          deviationMin: parseDatemath(deviation.start),
+          deviationMax: parseDatemath(deviation.end, { roundUp: true }),
         };
 
         const response = await runLogRateAnalysis({
