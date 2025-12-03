@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type { statusSchema } from '@kbn/slo-schema';
-import type { OutputOf } from 'io-ts';
-
-type Status = OutputOf<typeof statusSchema>;
+import type { Status } from '@kbn/slo-schema';
 
 export function isSloFailed(status: Status): boolean {
   return status === 'DEGRADING' || status === 'VIOLATED';
