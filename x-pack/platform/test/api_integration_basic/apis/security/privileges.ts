@@ -61,6 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
             siemV4: ['all', 'read', 'minimal_all', 'minimal_read'],
             siemV5: ['all', 'read', 'minimal_all', 'minimal_read'],
             securitySolutionRulesV1: ['all', 'read', 'minimal_all', 'minimal_read'],
+            securitySolutionRulesV2: ['all', 'read', 'minimal_all', 'minimal_read'],
             securitySolutionAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
             securitySolutionAttackDiscovery: ['all', 'read', 'minimal_all', 'minimal_read'],
             securitySolutionCases: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -399,6 +400,14 @@ export default function ({ getService }: FtrProviderContext) {
               'minimal_read',
             ],
             securitySolutionRulesV1: ['all', 'read', 'minimal_all', 'minimal_read'],
+            securitySolutionRulesV2: [
+              'all',
+              'read',
+              'minimal_all',
+              'minimal_read',
+              'securitySolutionExceptionsAll',
+              'securitySolutionExceptionsRead',
+            ],
             securitySolutionAssistant: [
               'all',
               'read',
