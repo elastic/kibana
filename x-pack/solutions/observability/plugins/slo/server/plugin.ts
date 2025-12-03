@@ -16,10 +16,11 @@ import type {
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES, SavedObjectsClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { AlertsLocatorDefinition, sloFeatureId } from '@kbn/observability-plugin/common';
-import { SLO_BURN_RATE_RULE_TYPE_ID, DEPRECATED_ALERTING_CONSUMERS } from '@kbn/rule-data-utils';
-import { mapValues } from 'lodash';
 import { LockAcquisitionError, LockManagerService } from '@kbn/lock-manager';
+import { AlertsLocatorDefinition, sloFeatureId } from '@kbn/observability-plugin/common';
+import { DEPRECATED_ALERTING_CONSUMERS, SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { mapValues } from 'lodash';
+import { LOCK_ID_RESOURCE_INSTALLER } from '../common/constants';
 import { getSloClientWithRequest } from './client';
 import { registerSloUsageCollector } from './lib/collectors/register';
 import { registerBurnRateRule } from './lib/rules/register_burn_rate_rule';
@@ -36,7 +37,7 @@ import {
 } from './services';
 import { DefaultSummaryTransformGenerator } from './services/summary_transform_generator/summary_transform_generator';
 import { BulkDeleteTask } from './services/tasks/bulk_delete/bulk_delete_task';
-import { SloOrphanSummaryCleanupTask } from './services/tasks/orphan_summary_cleanup_task/orphan_summary_cleanup_task';
+import { OrphanSummaryCleanupTask } from './services/tasks/orphan_summary_cleanup_task/orphan_summary_cleanup_task';
 import { TempSummaryCleanupTask } from './services/tasks/temp_summary_cleanup_task/temp_summary_cleanup_task';
 import { createTransformGenerators } from './services/transform_generators';
 import type {
@@ -46,7 +47,6 @@ import type {
   SLOServerSetup,
   SLOServerStart,
 } from './types';
-import { LOCK_ID_RESOURCE_INSTALLER } from '../common/constants';
 
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
 
@@ -58,7 +58,7 @@ export class SLOPlugin
   private readonly config: SLOConfig;
   private readonly isServerless: boolean;
   private readonly isDev: boolean;
-  private sloOrphanCleanupTask?: SloOrphanSummaryCleanupTask;
+  private orphanSummaryCleanupTask?: OrphanSummaryCleanupTask;
   private tempSummaryCleanupTask?: TempSummaryCleanupTask;
 
   constructor(private readonly initContext: PluginInitializerContext) {
@@ -227,11 +227,12 @@ export class SLOPlugin
         }
       });
 
-    this.sloOrphanCleanupTask = new SloOrphanSummaryCleanupTask(
-      plugins.taskManager,
-      this.logger,
-      this.config
-    );
+    this.orphanSummaryCleanupTask = new OrphanSummaryCleanupTask({
+      core,
+      taskManager: plugins.taskManager,
+      logFactory: this.initContext.logger,
+      config: this.config,
+    });
 
     this.tempSummaryCleanupTask = new TempSummaryCleanupTask({
       core,
@@ -250,13 +251,9 @@ export class SLOPlugin
   }
 
   public start(core: CoreStart, plugins: SLOPluginStartDependencies): SLOServerStart {
-    const internalSoClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
     const internalEsClient = core.elasticsearch.client.asInternalUser;
 
-    this.sloOrphanCleanupTask
-      ?.start(plugins.taskManager, internalSoClient, internalEsClient)
-      .catch(() => {});
-
+    this.orphanSummaryCleanupTask?.start(plugins).catch(() => {});
     this.tempSummaryCleanupTask?.start(plugins).catch(() => {});
 
     return {

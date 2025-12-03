@@ -11,7 +11,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { times } from 'lodash';
 import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../../common/constants';
-import { getDeleteQueryFilter, SloOrphanSummaryCleanupTask } from './orphan_summary_cleanup_task';
+import { getDeleteQueryFilter, OrphanSummaryCleanupTask } from './orphan_summary_cleanup_task';
 
 const taskManagerSetup = taskManagerMock.createSetup();
 const taskManagerStart = taskManagerMock.createStart();
@@ -25,7 +25,7 @@ describe('SloSummaryCleanupTask', () => {
   });
 
   it('should run for empty', async function () {
-    const task = new SloOrphanSummaryCleanupTask(taskManagerSetup, logger, {} as any);
+    const task = new OrphanSummaryCleanupTask(taskManagerSetup, logger, {} as any);
     await task.start(taskManagerStart, soClient, esClient);
 
     task.fetchSloSummariesIds = jest.fn().mockReturnValue({ sloSummaryIds: [] });
@@ -35,7 +35,7 @@ describe('SloSummaryCleanupTask', () => {
   });
 
   it('should run some slos', async function () {
-    const task = new SloOrphanSummaryCleanupTask(taskManagerSetup, logger, {} as any);
+    const task = new OrphanSummaryCleanupTask(taskManagerSetup, logger, {} as any);
     task.findSloDefinitions = jest.fn().mockResolvedValue([
       { id: '1', revision: 1 },
       { id: '2', revision: 1 },
@@ -76,7 +76,7 @@ describe('SloSummaryCleanupTask', () => {
   });
 
   it('should run lots of slos', async function () {
-    const task = new SloOrphanSummaryCleanupTask(taskManagerSetup, logger, {} as any);
+    const task = new OrphanSummaryCleanupTask(taskManagerSetup, logger, {} as any);
     task.findSloDefinitions = jest.fn().mockResolvedValue(
       times(10000, (i) => ({
         id: `${i}`,
@@ -119,7 +119,7 @@ describe('SloSummaryCleanupTask', () => {
   });
 
   it('should run when lots of slo defs are there', async function () {
-    const task = new SloOrphanSummaryCleanupTask(taskManagerSetup, logger, {} as any);
+    const task = new OrphanSummaryCleanupTask(taskManagerSetup, logger, {} as any);
     task.findSloDefinitions = jest.fn().mockResolvedValue(
       times(10000, (i) => ({
         id: `${i}`,
@@ -197,7 +197,7 @@ describe('SloSummaryCleanupTask', () => {
   });
 
   it('should run when summaries are way more then defs', async function () {
-    const task = new SloOrphanSummaryCleanupTask(taskManagerSetup, logger, {} as any);
+    const task = new OrphanSummaryCleanupTask(taskManagerSetup, logger, {} as any);
     task.findSloDefinitions = jest.fn().mockResolvedValue(
       times(100, (i) => ({
         id: `${i}`,
@@ -273,7 +273,7 @@ describe('SloSummaryCleanupTask', () => {
   });
 
   it('should run when there are no Slo defs', async function () {
-    const task = new SloOrphanSummaryCleanupTask(taskManagerSetup, logger, {} as any);
+    const task = new OrphanSummaryCleanupTask(taskManagerSetup, logger, {} as any);
     task.findSloDefinitions = jest.fn().mockResolvedValue([]);
     task.fetchSloSummariesIds = jest.fn().mockImplementation(async (searchKey) => {
       if (!searchKey) {

@@ -5,58 +5,43 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { errors } from '@elastic/elasticsearch';
+import {
+  SavedObjectsClient,
+  type CoreSetup,
+  type Logger,
+  type LoggerFactory,
+} from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
-  TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { AggregationsCompositeAggregateKey } from '@elastic/elasticsearch/lib/api/types';
-import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
-import type { StoredSLODefinition } from '../../../domain/models';
-import { SO_SLO_TYPE } from '../../../saved_objects';
-import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../../common/constants';
-import type { SLOConfig } from '../../../types';
+import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
+import type { SLOConfig, SLOPluginStartDependencies } from '../../../types';
+import { cleanupOrphanSummaries } from './cleanup_orphan_summary';
 
-export const TASK_TYPE = 'SLO:ORPHAN_SUMMARIES-CLEANUP-TASK';
+export const TYPE = 'slo:orphan-summary-cleanup-task';
 
-export const getDeleteQueryFilter = (
-  sloSummaryIdsToDelete: Array<{ id: string; revision: number }>
-) => {
-  return sloSummaryIdsToDelete.map(({ id, revision }) => {
-    return {
-      bool: {
-        must: [
-          {
-            term: {
-              'slo.id': id,
-            },
-          },
-          {
-            term: {
-              'slo.revision': Number(revision),
-            },
-          },
-        ],
-      },
-    };
-  });
-};
+interface TaskSetupContract {
+  taskManager: TaskManagerSetupContract;
+  core: CoreSetup;
+  logFactory: LoggerFactory;
+  config: SLOConfig;
+}
 
-export class SloOrphanSummaryCleanupTask {
+export class OrphanSummaryCleanupTask {
   private logger: Logger;
-  private taskManager?: TaskManagerStartContract;
-  private soClient?: SavedObjectsClientContract;
-  private esClient?: ElasticsearchClient;
   private config: SLOConfig;
+  private wasStarted: boolean = false;
 
-  constructor(taskManager: TaskManagerSetupContract, logger: Logger, config: SLOConfig) {
-    this.logger = logger;
+  constructor(setupContract: TaskSetupContract) {
+    const { core, config, taskManager, logFactory } = setupContract;
+    this.logger = logFactory.get(this.taskId);
     this.config = config;
 
     taskManager.registerTaskDefinitions({
-      [TASK_TYPE]: {
-        title: 'SLO Definitions Cleanup Task',
+      [TYPE]: {
+        title: 'SLO orphan summary cleanup task',
         timeout: '3m',
         maxAttempts: 1,
         createTaskRunner: ({
@@ -68,7 +53,7 @@ export class SloOrphanSummaryCleanupTask {
         }) => {
           return {
             run: async () => {
-              return this.runTask(abortController);
+              return this.runTask(taskInstance, core, abortController);
             },
             cancel: async () => {},
           };
@@ -77,181 +62,85 @@ export class SloOrphanSummaryCleanupTask {
     });
   }
 
-  public async runTask(abortController: AbortController) {
-    if (!this.soClient || !this.esClient) {
-      return;
-    }
-
-    let searchAfterKey: AggregationsCompositeAggregateKey | undefined;
-
-    do {
-      const { sloSummaryIds, searchAfter } = await this.fetchSloSummariesIds(searchAfterKey);
-
-      if (sloSummaryIds.length === 0) {
-        return;
-      }
-
-      searchAfterKey = searchAfter;
-
-      const ids = sloSummaryIds.map(({ id }) => id);
-
-      const sloDefinitions = await this.findSloDefinitions(ids);
-
-      const sloSummaryIdsToDelete = sloSummaryIds.filter(
-        ({ id, revision }) =>
-          !sloDefinitions.find(
-            (attributes) => attributes.id === id && attributes.revision === revision
-          )
-      );
-
-      if (sloSummaryIdsToDelete.length > 0) {
-        this.logger.debug(
-          `[SLO] Deleting ${sloSummaryIdsToDelete.length} SLO Summary documents from the summary index`
-        );
-
-        await this.esClient.deleteByQuery({
-          index: SUMMARY_DESTINATION_INDEX_PATTERN,
-          wait_for_completion: false,
-          conflicts: 'proceed',
-          slices: 'auto',
-          query: {
-            bool: {
-              should: getDeleteQueryFilter(sloSummaryIdsToDelete.sort()),
-            },
-          },
-        });
-      }
-    } while (searchAfterKey);
-  }
-
-  fetchSloSummariesIds = async (
-    searchAfter?: AggregationsCompositeAggregateKey
-  ): Promise<{
-    searchAfter?: AggregationsCompositeAggregateKey;
-    sloSummaryIds: Array<{ id: string; revision: number }>;
-  }> => {
-    this.logger.debug(`[TASK] Fetching SLO Summary ids after ${searchAfter}`);
-    if (!this.esClient) {
-      return {
-        searchAfter: undefined,
-        sloSummaryIds: [],
-      };
-    }
-
-    const size = 1000;
-
-    const result = await this.esClient.search<
-      unknown,
-      {
-        slos: {
-          after_key: AggregationsCompositeAggregateKey;
-          buckets: Array<{
-            key: {
-              id: string;
-              revision: number;
-            };
-          }>;
-        };
-      }
-    >({
-      size: 0,
-      index: SUMMARY_DESTINATION_INDEX_PATTERN,
-      aggs: {
-        slos: {
-          composite: {
-            size,
-            sources: [
-              {
-                id: {
-                  terms: {
-                    field: 'slo.id',
-                  },
-                },
-              },
-              {
-                revision: {
-                  terms: {
-                    field: 'slo.revision',
-                  },
-                },
-              },
-            ],
-            after: searchAfter,
-          },
-        },
-      },
-    });
-
-    const aggBuckets = result.aggregations?.slos.buckets ?? [];
-    if (aggBuckets.length === 0) {
-      return {
-        searchAfter: undefined,
-        sloSummaryIds: [],
-      };
-    }
-
-    const newSearchAfter =
-      aggBuckets.length < size ? undefined : result.aggregations?.slos.after_key;
-
-    const sloSummaryIds = aggBuckets.map(({ key }) => {
-      return {
-        id: String(key.id),
-        revision: Number(key.revision),
-      };
-    });
-
-    return {
-      searchAfter: newSearchAfter,
-      sloSummaryIds,
-    };
-  };
-
-  findSloDefinitions = async (ids: string[]) => {
-    const sloDefinitions = await this.soClient?.find<Pick<StoredSLODefinition, 'id' | 'revision'>>({
-      type: SO_SLO_TYPE,
-      page: 1,
-      perPage: ids.length,
-      filter: `slo.attributes.id:(${ids.join(' or ')})`,
-      namespaces: [ALL_SPACES_ID],
-      fields: ['id', 'revision'],
-    });
-
-    return sloDefinitions?.saved_objects.map(({ attributes }) => attributes) ?? [];
-  };
-
   private get taskId() {
-    return `${TASK_TYPE}:1.0.0`;
+    return `${TYPE}:1.0.0`;
   }
 
-  public async start(
-    taskManager: TaskManagerStartContract,
-    soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient
-  ) {
-    this.taskManager = taskManager;
-    this.soClient = soClient;
-    this.esClient = esClient;
-
-    if (!taskManager) {
-      this.logger.debug(
-        'Missing required service during startup, skipping orphan-slo-summary-cleanup task.'
-      );
+  public async start(plugins: SLOPluginStartDependencies) {
+    const hasCorrectLicense = (await plugins.licensing.getLicense()).hasAtLeast('platinum');
+    if (!hasCorrectLicense) {
+      this.logger.debug('Platinum license is required');
       return;
     }
 
-    if (this.config.sloOrphanSummaryCleanUpTaskEnabled) {
-      await this.taskManager.ensureScheduled({
+    if (!plugins.taskManager) {
+      this.logger.debug('Missing required service during start');
+      return;
+    }
+
+    if (!this.config.sloOrphanSummaryCleanUpTaskEnabled) {
+      this.logger.debug('Unscheduling task');
+      return await plugins.taskManager.removeIfExists(this.taskId);
+    }
+
+    this.logger.debug('Scheduling task with [1h] interval');
+    this.wasStarted = true;
+
+    try {
+      await plugins.taskManager.ensureScheduled({
         id: this.taskId,
-        taskType: TASK_TYPE,
-        schedule: {
-          interval: '1h',
-        },
+        taskType: TYPE,
         scope: ['observability', 'slo'],
+        schedule: {
+          interval: '1m',
+        },
         state: {},
         params: {},
       });
-    } else {
-      await this.taskManager.removeIfExists(this.taskId);
+    } catch (e) {
+      this.logger.error(`Error scheduling task, error: ${e}`);
+    }
+  }
+
+  public async runTask(
+    taskInstance: ConcreteTaskInstance,
+    core: CoreSetup,
+    abortController: AbortController
+  ) {
+    if (!this.wasStarted) {
+      this.logger.debug('runTask Aborted. Task not started yet');
+      return;
+    }
+
+    if (taskInstance.id !== this.taskId) {
+      this.logger.debug(
+        `Outdated task version: Got [${taskInstance.id}], current version is [${this.taskId}]`
+      );
+      return getDeleteTaskRunResult();
+    }
+
+    this.logger.debug(`runTask started`);
+
+    const [coreStart] = await core.getStartServices();
+    const esClient = coreStart.elasticsearch.client.asInternalUser;
+    const internalSoClient = new SavedObjectsClient(
+      coreStart.savedObjects.createInternalRepository()
+    );
+
+    try {
+      await cleanupOrphanSummaries({
+        esClient,
+        soClient: internalSoClient,
+        logger: this.logger,
+        abortController,
+      });
+    } catch (err) {
+      if (err instanceof errors.RequestAbortedError) {
+        this.logger.warn(`Request aborted due to timeout: ${err}`);
+
+        return;
+      }
+      this.logger.debug(`Error: ${err}`);
     }
   }
 }
