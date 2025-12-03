@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { EuiPopover, EuiButtonEmpty, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -14,7 +14,7 @@ import {
   type ConnectorSelectableComponentProps,
 } from '@kbn/ai-assistant-connector-selector-action';
 import { useLoadConnectors } from '@kbn/elastic-assistant';
-import { DATA_CONNECTORS_APP_ID } from '@kbn/deeplinks-data-connectors';
+import { STACK_CONNECTORS_MANAGEMENT_ID } from '../../../../common';
 import { useKibana } from '../../hooks/use_kibana';
 import { useNavigateToApp } from '../../hooks/use_navigate_to_app';
 
@@ -43,7 +43,7 @@ export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
   const {
     services: { http, uiSettings },
   } = useKibana();
-  const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const { data: dataConnectors, isLoading } = useLoadConnectors({
     http,
@@ -86,7 +86,7 @@ export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
   // Auto-select first connector if none selected
   useEffect(() => {
     if (!isLoading && connectors.length > 0 && !selectedConnectorId) {
-      const firstConnector = defaultConnectorId || connectors[0]?.id;
+      const firstConnector = defaultConnectorId || connectors[0].id;
       if (firstConnector) {
         onSelectConnector(firstConnector);
       }
@@ -97,7 +97,7 @@ export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
   const selectedConnectorName = selectedConnector?.name || selectedConnectorId;
   const buttonLabel = selectedConnectorName || labels.noConnector;
 
-  const button = (
+  const connectorSelectorButton = (
     <EuiButtonEmpty
       iconType={isLoading ? undefined : 'arrowDown'}
       iconSide="right"
@@ -115,7 +115,7 @@ export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
   return (
     <EuiPopover
       panelProps={{ css: panelStyles }}
-      button={button}
+      button={connectorSelectorButton}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       panelPaddingSize="none"
@@ -132,7 +132,7 @@ export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
         defaultConnectorId={defaultConnectorId}
         data-test-subj="workplaceAIConnectorSelector"
         onAddConnectorClick={() => {
-          navigateToApp(DATA_CONNECTORS_APP_ID);
+          navigateToApp(STACK_CONNECTORS_MANAGEMENT_ID);
           closePopover();
         }}
       />

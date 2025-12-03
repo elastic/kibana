@@ -174,9 +174,9 @@ export const SnapshotsSection: React.FC = () => {
                     const toolCount =
                       configuration?.tools?.reduce(
                         (count: number, selection: ToolSelection) =>
-                          count + ('tool_ids' in selection ? selection.tool_ids.length : 0),
+                          count + (selection.tool_ids?.length ?? 0),
                         0
-                      ) || 0;
+                      ) ?? 0;
                     return toolCount;
                   },
                 },

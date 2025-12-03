@@ -28,7 +28,7 @@ import { AGENT_BUILDER_AGENTS, AGENT_BUILDER_AGENT_NEW_PATH } from '../../../../
 import { useAgents } from '../../hooks/use_agents';
 import { useNavigateToApp } from '../../hooks/use_navigate_to_app';
 
-const agentSelectId = 'workplaceAIAgentSelect';
+const AGENT_SELECT_ID = 'workplaceAIAgentSelect';
 
 const labels = {
   selectAgent: i18n.translate('xpack.workplaceai.agentSelector.selectAgent', {
@@ -86,14 +86,10 @@ export const AgentSelector: React.FC<AgentSelectorProps> = ({ selectedAgentId, o
     [onAgentChange]
   );
 
-  const handleManageAgentsClick = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      navigateToApp(`${AGENT_BUILDER_APP_ID}:${AGENT_BUILDER_AGENTS}`);
-      setIsPopoverOpen(false);
-    },
-    [navigateToApp]
-  );
+  const handleManageAgentsClick = useCallback(() => {
+    navigateToApp(`${AGENT_BUILDER_APP_ID}:${AGENT_BUILDER_AGENTS}`);
+    setIsPopoverOpen(false);
+  }, [navigateToApp]);
 
   const handleCreateAgentClick = useCallback(() => {
     navigateToApp(AGENT_BUILDER_APP_ID, { path: AGENT_BUILDER_AGENT_NEW_PATH });
@@ -104,14 +100,14 @@ export const AgentSelector: React.FC<AgentSelectorProps> = ({ selectedAgentId, o
     inline-size: calc(${euiTheme.size.xxl} * 7);
   `;
 
-  const button = (
+  const agentSelectorButton = (
     <EuiButtonEmpty
       iconSide="right"
       flush="both"
       iconType={isLoading ? undefined : 'arrowDown'}
       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
       aria-haspopup="menu"
-      aria-labelledby={agentSelectId}
+      aria-labelledby={AGENT_SELECT_ID}
       data-test-subj="workplaceAIAgentSelectorButton"
       disabled={isLoading || agents.length === 0}
     >
@@ -123,13 +119,13 @@ export const AgentSelector: React.FC<AgentSelectorProps> = ({ selectedAgentId, o
     <EuiPopover
       panelProps={{ css: panelStyles }}
       panelPaddingSize="none"
-      button={button}
+      button={agentSelectorButton}
       isOpen={isPopoverOpen}
       anchorPosition="upRight"
       closePopover={() => setIsPopoverOpen(false)}
     >
       <EuiSelectable
-        id={agentSelectId}
+        id={AGENT_SELECT_ID}
         aria-label={labels.selectAgent}
         searchable={false}
         options={options}
