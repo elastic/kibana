@@ -27,11 +27,8 @@ import type {
 import React, { useMemo } from 'react';
 import { AttachmentTypeBadge } from './attachment_type_badge';
 
-type ConfirmAttachmentAction = 'link' | 'unlink';
-
 interface ConfirmAttachmentModalProps {
   attachments: Attachment[];
-  action: ConfirmAttachmentAction;
   onConfirm: () => void;
   onCancel: () => void;
   isLoading?: boolean;
@@ -39,38 +36,25 @@ interface ConfirmAttachmentModalProps {
 
 export function ConfirmAttachmentModal({
   attachments,
-  action,
   onConfirm,
   onCancel,
   isLoading = false,
 }: ConfirmAttachmentModalProps) {
   const { euiTheme } = useEuiTheme();
 
-  const isUnlink = action === 'unlink';
-
   const title = i18n.translate('xpack.streams.confirmAttachmentModal.title', {
     defaultMessage: 'Confirm changes',
   });
 
-  const subtitle = isUnlink
-    ? i18n.translate('xpack.streams.confirmAttachmentModal.removeSubtitle', {
-        defaultMessage:
-          'Are you sure you want to remove {count, plural, one {this attachment} other {these attachments}}?',
-        values: { count: attachments.length },
-      })
-    : i18n.translate('xpack.streams.confirmAttachmentModal.addSubtitle', {
-        defaultMessage:
-          'Are you sure you want to add {count, plural, one {this attachment} other {these attachments}}?',
-        values: { count: attachments.length },
-      });
+  const subtitle = i18n.translate('xpack.streams.confirmAttachmentModal.removeSubtitle', {
+    defaultMessage:
+      'Are you sure you want to remove {count, plural, one {this attachment} other {these attachments}}?',
+    values: { count: attachments.length },
+  });
 
-  const confirmButtonText = isUnlink
-    ? i18n.translate('xpack.streams.confirmAttachmentModal.removeButton', {
-        defaultMessage: 'Remove from stream',
-      })
-    : i18n.translate('xpack.streams.confirmAttachmentModal.addButton', {
-        defaultMessage: 'Add to stream',
-      });
+  const confirmButtonText = i18n.translate('xpack.streams.confirmAttachmentModal.removeButton', {
+    defaultMessage: 'Remove from stream',
+  });
 
   const columns = useMemo(
     () => [
@@ -113,25 +97,20 @@ export function ConfirmAttachmentModal({
       <EuiModalBody>
         <EuiText>{subtitle}</EuiText>
         <EuiSpacer size="m" />
-        {isUnlink && (
-          <>
-            <EuiCallOut
-              announceOnMount
-              color="warning"
-              iconType="warning"
-              title={i18n.translate('xpack.streams.confirmAttachmentModal.unlinkWarning', {
-                defaultMessage:
-                  'Removing an attachment only removes its connection to the stream. It does not delete the underlying object.',
-              })}
-            />
-            <EuiSpacer size="m" />
-          </>
-        )}
+        <EuiCallOut
+          announceOnMount
+          color="warning"
+          iconType="warning"
+          title={i18n.translate('xpack.streams.confirmAttachmentModal.unlinkWarning', {
+            defaultMessage:
+              'Removing an attachment only removes its connection to the stream. It does not delete the underlying object.',
+          })}
+        />
+        <EuiSpacer size="m" />
         <EuiBasicTable
           css={tableContainerStyles}
           tableCaption={i18n.translate('xpack.streams.confirmAttachmentModal.tableCaption', {
-            defaultMessage: 'List of attachments to {action}',
-            values: { action },
+            defaultMessage: 'List of attachments to remove',
           })}
           items={attachments}
           columns={columns}

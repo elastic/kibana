@@ -322,7 +322,6 @@ export function StreamDetailAttachments({
       {attachmentsToUnlink.length > 0 && (
         <ConfirmAttachmentModal
           attachments={attachmentsToUnlink}
-          action="unlink"
           isLoading={isUnlinkLoading}
           onCancel={() => setAttachmentsToUnlink([])}
           onConfirm={async () => {

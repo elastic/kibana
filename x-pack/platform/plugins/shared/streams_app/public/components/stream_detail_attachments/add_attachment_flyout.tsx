@@ -29,7 +29,6 @@ import {
   type AttachmentFiltersState,
 } from './attachment_filters';
 import { AttachmentsTable } from './attachment_table';
-import { ConfirmAttachmentModal } from './confirm_attachment_modal';
 
 export function AddAttachmentFlyout({
   entityId,
@@ -56,7 +55,6 @@ export function AddAttachmentFlyout({
 
   const [filters, setFilters] = useState<AttachmentFiltersState>(DEFAULT_ATTACHMENT_FILTERS);
   const [selectedAttachments, setSelectedAttachments] = useState<Attachment[]>([]);
-  const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
 
   const attachmentSuggestionsFetch = useStreamsAppFetch(
     ({ signal }) => {
@@ -157,6 +155,7 @@ export function AddAttachmentFlyout({
             loading={attachmentSuggestionsFetch.loading}
             selectedAttachments={selectedAttachments}
             setSelectedAttachments={setSelectedAttachments}
+            selectionDisabled={isLoading}
             dataTestSubj="streamsAppAddAttachmentFlyoutAttachmentsTable"
           />
         </EuiFlexGroup>
@@ -191,7 +190,7 @@ export function AddAttachmentFlyout({
                   isLoading={isLoading}
                   disabled={selectedAttachments.length === 0}
                   data-test-subj="streamsAppAddAttachmentFlyoutAddAttachmentsButton"
-                  onClick={() => setIsConfirmModalVisible(true)}
+                  onClick={() => onAddAttachments(selectedAttachments)}
                 >
                   {i18n.translate('xpack.streams.addAttachmentFlyout.addToStreamButtonLabel', {
                     defaultMessage: 'Add to stream',
@@ -202,18 +201,6 @@ export function AddAttachmentFlyout({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
-      {isConfirmModalVisible && (
-        <ConfirmAttachmentModal
-          attachments={selectedAttachments}
-          action="link"
-          isLoading={isLoading}
-          onCancel={() => setIsConfirmModalVisible(false)}
-          onConfirm={async () => {
-            await onAddAttachments(selectedAttachments);
-            setIsConfirmModalVisible(false);
-          }}
-        />
-      )}
     </EuiFlyout>
   );
 }

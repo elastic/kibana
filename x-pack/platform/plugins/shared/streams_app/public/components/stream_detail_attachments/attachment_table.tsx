@@ -29,6 +29,7 @@ interface BaseAttachmentsTableProps {
   setSelectedAttachments?: (attachments: Attachment[]) => void;
   onUnlinkAttachment?: (attachment: Attachment) => void;
   dataTestSubj?: string;
+  selectionDisabled?: boolean;
 }
 
 interface WithActionsProps extends BaseAttachmentsTableProps {
@@ -54,6 +55,7 @@ export function AttachmentsTable({
   loading,
   entityId,
   dataTestSubj,
+  selectionDisabled = false,
 }: AttachmentsTableProps) {
   const {
     core: { application },
@@ -238,7 +240,11 @@ export function AttachmentsTable({
       loading={loading}
       selection={
         setSelectedAttachments
-          ? { onSelectionChange: setSelectedAttachments, selected: selectedAttachments }
+          ? {
+              onSelectionChange: setSelectedAttachments,
+              selected: selectedAttachments,
+              selectable: selectionDisabled ? () => false : undefined,
+            }
           : undefined
       }
     />
