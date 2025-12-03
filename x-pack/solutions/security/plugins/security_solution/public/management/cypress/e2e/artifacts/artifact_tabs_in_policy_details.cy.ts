@@ -72,6 +72,7 @@ describe(
         kbnServerArgs: [
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'endpointExceptionsMovedUnderManagement',
+            'endpointArtifactsExportImportEnabled',
           ])}`,
         ],
       },
@@ -132,6 +133,7 @@ describe(
               cy.getByTestSubj('policy-artifacts-empty-unexisting').should('exist');
 
               cy.getByTestSubj('unexisting-manage-artifacts-button').should('not.exist');
+              cy.getByTestSubj('unexisting-manage-artifacts-import-button').should('not.exist');
             }
           );
 
@@ -140,6 +142,7 @@ describe(
             visitArtifactTab(testData.tabId);
 
             cy.getByTestSubj('policy-artifacts-empty-unexisting').should('exist');
+            cy.getByTestSubj('unexisting-manage-artifacts-import-button').should('exist');
 
             cy.getByTestSubj('unexisting-manage-artifacts-button').should('exist').click();
 
