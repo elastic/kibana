@@ -633,6 +633,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     if (plugins.onechat) {
       registerSiemMigrationAgent({
         onechat: plugins.onechat,
+        core,
+        siemMigrationsService: this.siemMigrationsService,
         logger: this.logger.get('siemMigrationAgent'),
       }).catch((error) => {
         this.logger.error(`Error registering SIEM Migration Agent: ${error}`);

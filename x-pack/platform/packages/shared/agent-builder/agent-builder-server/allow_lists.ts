@@ -38,6 +38,11 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   `${internalNamespaces.security}.attack_discovery_search`,
   `${internalNamespaces.security}.security_labs_search`,
   `${internalNamespaces.security}.alerts`,
+
+  // Security - SIEM Migration
+  `${internalNamespaces.security}.siem_migration.get_migrations`,
+  `${internalNamespaces.security}.siem_migration.get_migration_rules`,
+  `${internalNamespaces.security}.siem_migration.update_migration_rule`,
 ];
 
 /**

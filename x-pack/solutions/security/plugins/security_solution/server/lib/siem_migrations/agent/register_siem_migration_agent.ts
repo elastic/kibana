@@ -5,13 +5,26 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { CoreSetup, Logger } from '@kbn/core/server';
 import { platformCoreTools } from '@kbn/onechat-common';
 import type { OnechatPluginSetup } from '@kbn/onechat-plugin/server/types';
+import type { SiemMigrationsService } from '../siem_migrations_service';
+import type {
+  SecuritySolutionPluginStart,
+  SecuritySolutionPluginStartDependencies,
+} from '../../../plugin_contract';
+import {
+  createSiemMigrationsClientFactory,
+  createGetMigrationsTool,
+  createGetMigrationRulesTool,
+  createUpdateMigrationRuleTool,
+  SIEM_MIGRATION_TOOL_IDS,
+} from './tools';
 
 export const SIEM_MIGRATION_AGENT_ID = 'security.siem_migration';
 
-const SIEM_MIGRATION_AGENT_TOOL_IDS = [
+// Platform tools that are useful for SIEM migration tasks
+const PLATFORM_TOOL_IDS = [
   platformCoreTools.search,
   platformCoreTools.listIndices,
   platformCoreTools.getIndexMapping,
@@ -20,13 +33,40 @@ const SIEM_MIGRATION_AGENT_TOOL_IDS = [
   platformCoreTools.executeEsql,
 ];
 
+// All tools available to the SIEM Migration Agent
+const SIEM_MIGRATION_AGENT_TOOL_IDS = [...PLATFORM_TOOL_IDS, ...SIEM_MIGRATION_TOOL_IDS];
+
 export async function registerSiemMigrationAgent({
   onechat,
+  core,
+  siemMigrationsService,
   logger,
 }: {
   onechat: OnechatPluginSetup;
+  core: CoreSetup<SecuritySolutionPluginStartDependencies, SecuritySolutionPluginStart>;
+  siemMigrationsService: SiemMigrationsService;
   logger: Logger;
 }) {
+  // Create client factory that tools will use to get scoped clients
+  const getClient = createSiemMigrationsClientFactory({
+    core,
+    siemMigrationsService,
+  });
+
+  // Register SIEM migration tools
+  const tools = [
+    createGetMigrationsTool(getClient),
+    createGetMigrationRulesTool(getClient),
+    createUpdateMigrationRuleTool(getClient),
+  ];
+
+  for (const tool of tools) {
+    onechat.tools.register(tool);
+  }
+
+  logger.debug(`Registered ${tools.length} SIEM migration tools`);
+
+  // Register the SIEM Migration Agent
   onechat.agents.register({
     id: SIEM_MIGRATION_AGENT_ID,
     name: 'SIEM Migration Agent',
@@ -42,16 +82,30 @@ export async function registerSiemMigrationAgent({
         '(such as Splunk and IBM QRadar) to Elastic Security.\n' +
         '\n' +
         '### CAPABILITIES\n' +
+        '- List all available rule migrations and their status\n' +
+        '- Fetch and display rules from a specific migration\n' +
         '- Understand SPL (Splunk Processing Language) and AQL (Ariel Query Language) queries\n' +
-        '- Translate detection rules to ES|QL (Elastic Query Language)\n' +
+        '- Translate and modify detection rules to ES|QL (Elastic Query Language)\n' +
         '- Help users understand the mapping between source and target rule formats\n' +
-        '- Provide guidance on Elastic Security detection rules best practices\n' +
-        '- Search and explore indices to help with field mapping\n' +
+        '- Update migrated rules with improved ES|QL queries\n' +
+        '- Test ES|QL queries before saving changes\n' +
+        '\n' +
+        '### WORKFLOW FOR MODIFYING RULES\n' +
+        '1. Use get_migrations tool to list available migrations\n' +
+        '2. Use get_migration_rules tool to find the specific rule the user wants to modify\n' +
+        '3. Show the current original query and translated ES|QL query\n' +
+        '4. Discuss what changes the user wants to make\n' +
+        '5. Use generate_esql tool to create the modified query\n' +
+        '6. Optionally use execute_esql tool to test the query\n' +
+        '7. Ask for user confirmation before saving\n' +
+        '8. Use update_migration_rule tool to save the changes\n' +
         '\n' +
         '### OUTPUT STYLE\n' +
-        '- When providing translated rules, format them clearly with ES|QL syntax highlighting\n' +
+        '- When displaying rules, show both the original query and the ES|QL translation\n' +
+        '- Format ES|QL queries with proper syntax highlighting in code blocks\n' +
         '- Explain any differences or limitations between the original and translated rule\n' +
-        '- Suggest improvements or optimizations for the translated rules when applicable',
+        '- Always ask for confirmation before updating a rule\n' +
+        '- Provide a summary of changes made after updating',
       tools: [
         {
           tool_ids: SIEM_MIGRATION_AGENT_TOOL_IDS,
