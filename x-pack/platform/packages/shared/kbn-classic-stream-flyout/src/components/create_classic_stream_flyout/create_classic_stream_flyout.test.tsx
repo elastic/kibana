@@ -102,110 +102,6 @@ describe('CreateClassicStreamFlyout', () => {
     });
   });
 
-  describe('empty state', () => {
-    it('renders empty state when there are no templates', () => {
-      const onCreateTemplate = jest.fn();
-      const { getByText, getByTestId } = renderFlyout({ templates: [], onCreateTemplate });
-
-      expect(getByText('No index templates detected')).toBeInTheDocument();
-      expect(
-        getByText(/Classic streams require an index template to set their initial settings/i)
-      ).toBeInTheDocument();
-      expect(getByTestId('createTemplateButton')).toBeInTheDocument();
-    });
-
-    it('calls onCreateTemplate when Create index template button is clicked', () => {
-      const onCreateTemplate = jest.fn();
-      const { getByTestId } = renderFlyout({ templates: [], onCreateTemplate });
-
-      fireEvent.click(getByTestId('createTemplateButton'));
-
-      expect(onCreateTemplate).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('error state', () => {
-    it('renders error state when hasErrorLoadingTemplates is true', () => {
-      const { getByTestId, getByText } = renderFlyout({
-        hasErrorLoadingTemplates: true,
-      });
-
-      expect(getByTestId('errorLoadingTemplates')).toBeInTheDocument();
-      expect(getByText("We couldn't fetch your index templates")).toBeInTheDocument();
-    });
-
-    it('calls onRetryLoadTemplates when Retry button is clicked', () => {
-      const onRetryLoadTemplates = jest.fn();
-      const { getByTestId } = renderFlyout({
-        hasErrorLoadingTemplates: true,
-        onRetryLoadTemplates,
-      });
-
-      fireEvent.click(getByTestId('retryLoadTemplatesButton'));
-
-      expect(onRetryLoadTemplates).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('select template step', () => {
-    it('renders template search and list', () => {
-      const { getByTestId } = renderFlyout();
-
-      expect(getByTestId('templateSearch')).toBeInTheDocument();
-    });
-
-    it('disables next step and Next button when no template is selected', () => {
-      const { getByTestId } = renderFlyout();
-
-      const nextStep = getByTestId('createClassicStreamStep-nameAndConfirm');
-      expect(nextStep).toBeDisabled();
-
-      const nextButton = getByTestId('nextButton');
-      expect(nextButton).toBeDisabled();
-    });
-
-    it('enables next step and Next button when a template is selected', () => {
-      const { getByTestId } = renderFlyout();
-
-      // Select a template
-      fireEvent.click(getByTestId('template-option-template-1'));
-
-      const nextStep = getByTestId('createClassicStreamStep-nameAndConfirm');
-      expect(nextStep).toBeEnabled();
-
-      const nextButton = getByTestId('nextButton');
-      expect(nextButton).toBeEnabled();
-    });
-
-    it('displays ILM badge for templates with ILM policy', () => {
-      const { getAllByText, getByText } = renderFlyout();
-
-      // template-1 has ilmPolicy: { name: '30d' }, template-2 has ilmPolicy: { name: '90d' }
-      // Both should display ILM badge
-      const ilmBadges = getAllByText('ILM');
-      expect(ilmBadges.length).toBeGreaterThanOrEqual(2);
-      expect(getByText('90d')).toBeInTheDocument();
-    });
-
-    it('displays lifecycle data retention for templates without ILM policy', () => {
-      const { getByTestId } = renderFlyout();
-
-      // template-3 has lifecycle: { enabled: true, value: 30, unit: 'd' } but no ILM
-      // Should display the retention period in the template option
-      const templateOption = getByTestId('template-option-template-3');
-      expect(templateOption).toBeInTheDocument();
-    });
-
-    it('renders all template options including managed templates', () => {
-      const { getByTestId } = renderFlyout();
-
-      // Verify all templates are rendered, including managed template-2
-      expect(getByTestId('template-option-template-1')).toBeInTheDocument();
-      expect(getByTestId('template-option-template-2')).toBeInTheDocument();
-      expect(getByTestId('template-option-template-3')).toBeInTheDocument();
-    });
-  });
-
   describe('navigation', () => {
     it('navigates to second step when clicking Next button with selected template', () => {
       const { getByTestId, queryByTestId } = renderFlyout();
@@ -345,6 +241,122 @@ describe('CreateClassicStreamFlyout', () => {
     });
   });
 
+  describe('select template step', () => {
+    it('renders the select template step', () => {
+      const { getByTestId } = renderFlyout();
+
+      // Check that the select template step is rendered
+      expect(getByTestId('selectTemplateStep')).toBeInTheDocument();
+
+      // Check that the template search is rendered
+      expect(getByTestId('templateSearch')).toBeInTheDocument();
+
+      // Check that the template options are rendered
+      expect(getByTestId('template-option-template-1')).toBeInTheDocument();
+      expect(getByTestId('template-option-template-2')).toBeInTheDocument();
+      expect(getByTestId('template-option-template-3')).toBeInTheDocument();
+      expect(getByTestId('template-option-multi-pattern-template')).toBeInTheDocument();
+      expect(getByTestId('template-option-very-long-pattern-template')).toBeInTheDocument();
+    });
+
+    describe('empty state', () => {
+      it('renders empty state when there are no templates', () => {
+        const onCreateTemplate = jest.fn();
+        const { getByText, getByTestId } = renderFlyout({ templates: [], onCreateTemplate });
+
+        expect(getByText('No index templates detected')).toBeInTheDocument();
+        expect(
+          getByText(/Classic streams require an index template to set their initial settings/i)
+        ).toBeInTheDocument();
+        expect(getByTestId('createTemplateButton')).toBeInTheDocument();
+      });
+
+      it('calls onCreateTemplate when Create index template button is clicked', () => {
+        const onCreateTemplate = jest.fn();
+        const { getByTestId } = renderFlyout({ templates: [], onCreateTemplate });
+
+        fireEvent.click(getByTestId('createTemplateButton'));
+
+        expect(onCreateTemplate).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('error state', () => {
+      it('renders error state when hasErrorLoadingTemplates is true', () => {
+        const { getByTestId, getByText } = renderFlyout({
+          hasErrorLoadingTemplates: true,
+        });
+
+        expect(getByTestId('errorLoadingTemplates')).toBeInTheDocument();
+        expect(getByText("We couldn't fetch your index templates")).toBeInTheDocument();
+      });
+
+      it('calls onRetryLoadTemplates when Retry button is clicked', () => {
+        const onRetryLoadTemplates = jest.fn();
+        const { getByTestId } = renderFlyout({
+          hasErrorLoadingTemplates: true,
+          onRetryLoadTemplates,
+        });
+
+        fireEvent.click(getByTestId('retryLoadTemplatesButton'));
+
+        expect(onRetryLoadTemplates).toHaveBeenCalledTimes(1);
+      });
+    });
+    describe('template selection', () => {
+      it('disables next step and Next button when no template is selected', () => {
+        const { getByTestId } = renderFlyout();
+
+        const nextStep = getByTestId('createClassicStreamStep-nameAndConfirm');
+        expect(nextStep).toBeDisabled();
+
+        const nextButton = getByTestId('nextButton');
+        expect(nextButton).toBeDisabled();
+      });
+
+      it('enables next step and Next button when a template is selected', () => {
+        const { getByTestId } = renderFlyout();
+
+        // Select a template
+        fireEvent.click(getByTestId('template-option-template-1'));
+
+        const nextStep = getByTestId('createClassicStreamStep-nameAndConfirm');
+        expect(nextStep).toBeEnabled();
+
+        const nextButton = getByTestId('nextButton');
+        expect(nextButton).toBeEnabled();
+      });
+
+      it('displays ILM badge for templates with ILM policy', () => {
+        const { getAllByText, getByText } = renderFlyout();
+
+        // template-1 has ilmPolicy: { name: '30d' }, template-2 has ilmPolicy: { name: '90d' }
+        // Both should display ILM badge
+        const ilmBadges = getAllByText('ILM');
+        expect(ilmBadges.length).toBeGreaterThanOrEqual(2);
+        expect(getByText('90d')).toBeInTheDocument();
+      });
+
+      it('displays lifecycle data retention for templates without ILM policy', () => {
+        const { getByTestId } = renderFlyout();
+
+        // template-3 has lifecycle: { enabled: true, value: 30, unit: 'd' } but no ILM
+        // Should display the retention period in the template option
+        const templateOption = getByTestId('template-option-template-3');
+        expect(templateOption).toBeInTheDocument();
+      });
+
+      it('renders all template options including managed templates', () => {
+        const { getByTestId } = renderFlyout();
+
+        // Verify all templates are rendered, including managed template-2
+        expect(getByTestId('template-option-template-1')).toBeInTheDocument();
+        expect(getByTestId('template-option-template-2')).toBeInTheDocument();
+        expect(getByTestId('template-option-template-3')).toBeInTheDocument();
+      });
+    });
+  });
+
   describe('name and confirm step', () => {
     it('renders the name and confirm step', () => {
       const { getByTestId, getByText } = renderFlyout();
@@ -388,174 +400,174 @@ describe('CreateClassicStreamFlyout', () => {
       fireEvent.change(streamNameInput, { target: { value: 'my-stream' } });
       expect(streamNameInput).toHaveValue('my-stream');
     });
-  });
 
-  describe('multiple index patterns', () => {
-    it('shows index pattern selector when template has multiple patterns', () => {
-      const { getByTestId } = renderFlyout();
+    describe('multiple index patterns', () => {
+      it('shows index pattern selector when template has multiple patterns', () => {
+        const { getByTestId } = renderFlyout();
 
-      // Select template and navigate to second step
-      selectTemplateAndGoToStep2(getByTestId, 'multi-pattern-template');
+        // Select template and navigate to second step
+        selectTemplateAndGoToStep2(getByTestId, 'multi-pattern-template');
 
-      // Should show index pattern selector
-      expect(getByTestId('indexPatternSelect')).toBeInTheDocument();
-    });
-
-    it('does not show index pattern selector when template has single pattern', () => {
-      const { getByTestId, queryByTestId } = renderFlyout();
-
-      // Select template and navigate to second step
-      selectTemplateAndGoToStep2(getByTestId, 'template-1');
-
-      // Should NOT show index pattern selector
-      expect(queryByTestId('indexPatternSelect')).not.toBeInTheDocument();
-    });
-
-    it('updates stream name input when index pattern is changed', () => {
-      const { getByTestId, queryByTestId, getByText } = renderFlyout();
-
-      // Select template and navigate to second step
-      selectTemplateAndGoToStep2(getByTestId, 'multi-pattern-template');
-
-      // Default pattern is '*-logs-*-*' which has 3 wildcards
-      expect(getByTestId('streamNameInput-wildcard-0')).toBeInTheDocument();
-      expect(getByTestId('streamNameInput-wildcard-1')).toBeInTheDocument();
-      expect(getByTestId('streamNameInput-wildcard-2')).toBeInTheDocument();
-
-      // Change to 'metrics-*' which has only 1 wildcard
-      const patternSelect = getByTestId('indexPatternSelect');
-      fireEvent.change(patternSelect, { target: { value: 'metrics-*' } });
-
-      // Should now have only 1 editable input
-      expect(getByTestId('streamNameInput-wildcard-0')).toBeInTheDocument();
-      expect(queryByTestId('streamNameInput-wildcard-1')).not.toBeInTheDocument();
-
-      // Should have static prefix 'metrics-' as prepend text
-      expect(getByText('metrics-')).toBeInTheDocument();
-    });
-  });
-
-  describe('stream name reset on template change', () => {
-    it('resets stream name inputs when going back and selecting a different template', () => {
-      const { getByTestId } = renderFlyout();
-
-      // Select template-1 and navigate to second step
-      selectTemplateAndGoToStep2(getByTestId, 'template-1');
-
-      // Fill in the stream name
-      const streamNameInput = getByTestId('streamNameInput-wildcard-0');
-      fireEvent.change(streamNameInput, { target: { value: 'my-value' } });
-      expect(streamNameInput).toHaveValue('my-value');
-
-      // Go back
-      fireEvent.click(getByTestId('backButton'));
-
-      // Select a different template
-      fireEvent.click(getByTestId('template-option-template-2'));
-
-      // Navigate to second step again
-      fireEvent.click(getByTestId('nextButton'));
-
-      // The input should be reset (empty)
-      const newInput = getByTestId('streamNameInput-wildcard-0');
-      expect(newInput).toHaveValue('');
-    });
-  });
-
-  describe('validation', () => {
-    it('shows validation error when trying to create with empty wildcard', async () => {
-      const onCreate = jest.fn();
-      const { getByTestId, getByText } = renderFlyout({ onCreate });
-
-      // Select template and navigate to second step
-      selectTemplateAndGoToStep2(getByTestId, 'template-1');
-
-      // Click Create without filling in the wildcard
-      fireEvent.click(getByTestId('createButton'));
-
-      // Should show validation error
-      await waitFor(() => {
-        expect(
-          getByText(/Please supply a valid text string for all wildcards/i)
-        ).toBeInTheDocument();
+        // Should show index pattern selector
+        expect(getByTestId('indexPatternSelect')).toBeInTheDocument();
       });
 
-      // onCreate should not be called
-      expect(onCreate).not.toHaveBeenCalled();
-    });
+      it('does not show index pattern selector when template has single pattern', () => {
+        const { getByTestId, queryByTestId } = renderFlyout();
 
-    it('calls onValidate when provided and local validation passes', async () => {
-      const onCreate = jest.fn();
-      const onValidate = jest.fn().mockResolvedValue({ errorType: null });
-      const { getByTestId } = renderFlyout({ onCreate, onValidate });
+        // Select template and navigate to second step
+        selectTemplateAndGoToStep2(getByTestId, 'template-1');
 
-      // Select template and navigate to second step
-      selectTemplateAndGoToStep2(getByTestId, 'template-1');
+        // Should NOT show index pattern selector
+        expect(queryByTestId('indexPatternSelect')).not.toBeInTheDocument();
+      });
 
-      // Fill in the stream name
-      const streamNameInput = getByTestId('streamNameInput-wildcard-0');
-      fireEvent.change(streamNameInput, { target: { value: 'mystream' } });
+      it('updates stream name input when index pattern is changed', () => {
+        const { getByTestId, queryByTestId, getByText } = renderFlyout();
 
-      // Click Create
-      fireEvent.click(getByTestId('createButton'));
+        // Select template and navigate to second step
+        selectTemplateAndGoToStep2(getByTestId, 'multi-pattern-template');
 
-      // Wait for validation
-      await waitFor(() => {
-        expect(onValidate).toHaveBeenCalledWith('logs-template-1-mystream');
-        expect(onCreate).toHaveBeenCalledWith('logs-template-1-mystream');
+        // Default pattern is '*-logs-*-*' which has 3 wildcards
+        expect(getByTestId('streamNameInput-wildcard-0')).toBeInTheDocument();
+        expect(getByTestId('streamNameInput-wildcard-1')).toBeInTheDocument();
+        expect(getByTestId('streamNameInput-wildcard-2')).toBeInTheDocument();
+
+        // Change to 'metrics-*' which has only 1 wildcard
+        const patternSelect = getByTestId('indexPatternSelect');
+        fireEvent.change(patternSelect, { target: { value: 'metrics-*' } });
+
+        // Should now have only 1 editable input
+        expect(getByTestId('streamNameInput-wildcard-0')).toBeInTheDocument();
+        expect(queryByTestId('streamNameInput-wildcard-1')).not.toBeInTheDocument();
+
+        // Should have static prefix 'metrics-' as prepend text
+        expect(getByText('metrics-')).toBeInTheDocument();
       });
     });
 
-    it('shows duplicate error from onValidate', async () => {
-      const onCreate = jest.fn();
-      const onValidate = jest.fn().mockResolvedValue({ errorType: 'duplicate' });
-      const { getByTestId, getByText } = renderFlyout({ onCreate, onValidate });
+    describe('stream name reset on template change', () => {
+      it('resets stream name inputs when going back and selecting a different template', () => {
+        const { getByTestId } = renderFlyout();
 
-      // Select template and navigate to second step
-      selectTemplateAndGoToStep2(getByTestId, 'template-1');
+        // Select template-1 and navigate to second step
+        selectTemplateAndGoToStep2(getByTestId, 'template-1');
 
-      // Fill in the stream name
-      const streamNameInput = getByTestId('streamNameInput-wildcard-0');
-      fireEvent.change(streamNameInput, { target: { value: 'existing' } });
+        // Fill in the stream name
+        const streamNameInput = getByTestId('streamNameInput-wildcard-0');
+        fireEvent.change(streamNameInput, { target: { value: 'my-value' } });
+        expect(streamNameInput).toHaveValue('my-value');
 
-      // Click Create
-      fireEvent.click(getByTestId('createButton'));
+        // Go back
+        fireEvent.click(getByTestId('backButton'));
 
-      // Should show duplicate error
-      await waitFor(() => {
-        expect(getByText(/This stream name already exists/i)).toBeInTheDocument();
+        // Select a different template
+        fireEvent.click(getByTestId('template-option-template-2'));
+
+        // Navigate to second step again
+        fireEvent.click(getByTestId('nextButton'));
+
+        // The input should be reset (empty)
+        const newInput = getByTestId('streamNameInput-wildcard-0');
+        expect(newInput).toHaveValue('');
       });
-
-      // onCreate should not be called
-      expect(onCreate).not.toHaveBeenCalled();
     });
 
-    it('shows higher priority error from onValidate', async () => {
-      const onCreate = jest.fn();
-      const onValidate = jest.fn().mockResolvedValue({
-        errorType: 'higherPriority',
-        conflictingIndexPattern: 'logs-*',
-      });
-      const { getByTestId, getByText } = renderFlyout({ onCreate, onValidate });
+    describe('validation', () => {
+      it('shows validation error when trying to create with empty wildcard', async () => {
+        const onCreate = jest.fn();
+        const { getByTestId, getByText } = renderFlyout({ onCreate });
 
-      // Select template and navigate to second step
-      selectTemplateAndGoToStep2(getByTestId, 'template-1');
+        // Select template and navigate to second step
+        selectTemplateAndGoToStep2(getByTestId, 'template-1');
 
-      // Fill in the stream name
-      const streamNameInput = getByTestId('streamNameInput-wildcard-0');
-      fireEvent.change(streamNameInput, { target: { value: 'conflict' } });
+        // Click Create without filling in the wildcard
+        fireEvent.click(getByTestId('createButton'));
 
-      // Click Create
-      fireEvent.click(getByTestId('createButton'));
+        // Should show validation error
+        await waitFor(() => {
+          expect(
+            getByText(/Please supply a valid text string for all wildcards/i)
+          ).toBeInTheDocument();
+        });
 
-      // Should show higher priority error
-      await waitFor(() => {
-        expect(getByText(/matches a higher priority index template/i)).toBeInTheDocument();
-        expect(getByText('logs-*')).toBeInTheDocument();
+        // onCreate should not be called
+        expect(onCreate).not.toHaveBeenCalled();
       });
 
-      // onCreate should not be called
-      expect(onCreate).not.toHaveBeenCalled();
+      it('calls onValidate when provided and local validation passes', async () => {
+        const onCreate = jest.fn();
+        const onValidate = jest.fn().mockResolvedValue({ errorType: null });
+        const { getByTestId } = renderFlyout({ onCreate, onValidate });
+
+        // Select template and navigate to second step
+        selectTemplateAndGoToStep2(getByTestId, 'template-1');
+
+        // Fill in the stream name
+        const streamNameInput = getByTestId('streamNameInput-wildcard-0');
+        fireEvent.change(streamNameInput, { target: { value: 'mystream' } });
+
+        // Click Create
+        fireEvent.click(getByTestId('createButton'));
+
+        // Wait for validation
+        await waitFor(() => {
+          expect(onValidate).toHaveBeenCalledWith('logs-template-1-mystream');
+          expect(onCreate).toHaveBeenCalledWith('logs-template-1-mystream');
+        });
+      });
+
+      it('shows duplicate error from onValidate', async () => {
+        const onCreate = jest.fn();
+        const onValidate = jest.fn().mockResolvedValue({ errorType: 'duplicate' });
+        const { getByTestId, getByText } = renderFlyout({ onCreate, onValidate });
+
+        // Select template and navigate to second step
+        selectTemplateAndGoToStep2(getByTestId, 'template-1');
+
+        // Fill in the stream name
+        const streamNameInput = getByTestId('streamNameInput-wildcard-0');
+        fireEvent.change(streamNameInput, { target: { value: 'existing' } });
+
+        // Click Create
+        fireEvent.click(getByTestId('createButton'));
+
+        // Should show duplicate error
+        await waitFor(() => {
+          expect(getByText(/This stream name already exists/i)).toBeInTheDocument();
+        });
+
+        // onCreate should not be called
+        expect(onCreate).not.toHaveBeenCalled();
+      });
+
+      it('shows higher priority error from onValidate', async () => {
+        const onCreate = jest.fn();
+        const onValidate = jest.fn().mockResolvedValue({
+          errorType: 'higherPriority',
+          conflictingIndexPattern: 'logs-*',
+        });
+        const { getByTestId, getByText } = renderFlyout({ onCreate, onValidate });
+
+        // Select template and navigate to second step
+        selectTemplateAndGoToStep2(getByTestId, 'template-1');
+
+        // Fill in the stream name
+        const streamNameInput = getByTestId('streamNameInput-wildcard-0');
+        fireEvent.change(streamNameInput, { target: { value: 'conflict' } });
+
+        // Click Create
+        fireEvent.click(getByTestId('createButton'));
+
+        // Should show higher priority error
+        await waitFor(() => {
+          expect(getByText(/matches a higher priority index template/i)).toBeInTheDocument();
+          expect(getByText('logs-*')).toBeInTheDocument();
+        });
+
+        // onCreate should not be called
+        expect(onCreate).not.toHaveBeenCalled();
+      });
     });
   });
 });
