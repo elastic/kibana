@@ -140,7 +140,7 @@ export const FileUploadLiteLookUpView: FC<Props> = ({
     },
     {
       title: i18n.translate('xpack.fileUpload.lookupJoinUpload.uploadingFilesToIndex', {
-        defaultMessage: 'Uploading {count, plural, one {# file} other {# files}}  to {indexName}',
+        defaultMessage: 'Upload {count, plural, one {# file} other {# files}}  to {indexName}',
         values: { count: filesStatus.length, indexName },
       }),
       children:
