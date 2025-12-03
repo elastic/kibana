@@ -233,7 +233,13 @@ export const mappings: SavedObjectsTypeMappingDefinition = {
 export const authRecord: Record<string, AuthorizationTypeEntry> = {
   find: { authorizedSpaces: ['bar'] },
 };
-export const authMap = Object.freeze(new Map([['foo', authRecord]]));
+export const authMap = Object.freeze(
+  new Map([
+    ['foo', authRecord],
+    // The user is authorized to read hidden types but tests will confirm that repositories without that hidden type listed, won't show this as authorized.
+    [HIDDEN_TYPE, authRecord],
+  ])
+);
 
 export const checkAuthError = SavedObjectsErrorHelpers.createBadRequestError(
   'Failed to check authorization'
@@ -344,6 +350,7 @@ export const createType = (
 
 export const createRegistry = () => {
   const registry = new SavedObjectTypeRegistry();
+  registry.registerType(createType('foo'));
   registry.registerType(createType('config'));
   registry.registerType(createType('index-pattern'));
   registry.registerType(
