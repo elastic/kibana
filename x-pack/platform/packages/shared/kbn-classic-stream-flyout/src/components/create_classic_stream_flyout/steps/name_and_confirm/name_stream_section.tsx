@@ -10,7 +10,7 @@ import { EuiFormRow, EuiPanel, EuiSpacer, EuiTitle, EuiSelect, useEuiTheme } fro
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { StreamNameInput } from '../../../stream_name_input.tsx';
+import { StreamNameInput } from '../../../stream_name_input';
 
 export type ValidationErrorType = 'empty' | 'duplicate' | 'higherPriority' | null;
 
