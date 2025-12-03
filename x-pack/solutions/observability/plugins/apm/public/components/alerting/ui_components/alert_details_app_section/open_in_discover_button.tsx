@@ -89,9 +89,9 @@ const getESQLQueryForChart = ({
     // Escape quotes and normalize whitespace for KQL embedding
     const escapedKuery = kuery
       .trim()
-      .replace(/"/g, '\\"')
-      .replace(/\s+/g, ' ')
-      .replace(/\n+/g, ' ');
+      .replaceAll('"', '\\"')
+      .replaceAll(/\s+/g, ' ')
+      .replaceAll(/\n+/g, ' ');
     filters.push(`KQL("${escapedKuery}")`);
   }
 
