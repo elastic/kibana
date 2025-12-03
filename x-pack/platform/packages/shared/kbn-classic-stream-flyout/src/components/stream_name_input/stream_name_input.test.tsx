@@ -195,9 +195,21 @@ describe('StreamNameInput', () => {
   });
 
   describe('validation state', () => {
-    it('shows invalid state on all inputs when isInvalid is true', () => {
+    it('does not show invalid state when validationError is null', () => {
       const { getByTestId } = render(
-        <StreamNameInput {...defaultProps} indexPattern="*-logs-*" isInvalid />
+        <StreamNameInput {...defaultProps} indexPattern="*-logs-*" validationError={null} />
+      );
+
+      const input0 = getByTestId('streamNameInput-wildcard-0');
+      const input1 = getByTestId('streamNameInput-wildcard-1');
+
+      expect(input0).not.toHaveAttribute('aria-invalid', 'true');
+      expect(input1).not.toHaveAttribute('aria-invalid', 'true');
+    });
+
+    it('shows invalid state on all inputs when validationError is duplicate', () => {
+      const { getByTestId } = render(
+        <StreamNameInput {...defaultProps} indexPattern="*-logs-*" validationError="duplicate" />
       );
 
       const input0 = getByTestId('streamNameInput-wildcard-0');
@@ -207,16 +219,63 @@ describe('StreamNameInput', () => {
       expect(input1).toHaveAttribute('aria-invalid', 'true');
     });
 
-    it('does not show invalid state when isInvalid is false', () => {
+    it('shows invalid state on all inputs when validationError is higherPriority', () => {
       const { getByTestId } = render(
-        <StreamNameInput {...defaultProps} indexPattern="*-logs-*" isInvalid={false} />
+        <StreamNameInput
+          {...defaultProps}
+          indexPattern="*-logs-*"
+          validationError="higherPriority"
+        />
       );
 
       const input0 = getByTestId('streamNameInput-wildcard-0');
       const input1 = getByTestId('streamNameInput-wildcard-1');
 
+      expect(input0).toHaveAttribute('aria-invalid', 'true');
+      expect(input1).toHaveAttribute('aria-invalid', 'true');
+    });
+
+    it('shows invalid state only on empty inputs when validationError is empty', () => {
+      const { getByTestId } = render(
+        <StreamNameInput {...defaultProps} indexPattern="*-logs-*" validationError="empty" />
+      );
+
+      // Initially all inputs are empty, so all should be invalid
+      const input0 = getByTestId('streamNameInput-wildcard-0');
+      const input1 = getByTestId('streamNameInput-wildcard-1');
+
+      expect(input0).toHaveAttribute('aria-invalid', 'true');
+      expect(input1).toHaveAttribute('aria-invalid', 'true');
+
+      // Fill in the first input
+      fireEvent.change(input0, { target: { value: 'filled' } });
+
+      // Now only the second input should be invalid
       expect(input0).not.toHaveAttribute('aria-invalid', 'true');
+      expect(input1).toHaveAttribute('aria-invalid', 'true');
+    });
+
+    it('clears invalid state on input when filled (empty validation error)', () => {
+      const { getByTestId } = render(
+        <StreamNameInput {...defaultProps} indexPattern="*-logs-*-data-*" validationError="empty" />
+      );
+
+      const input0 = getByTestId('streamNameInput-wildcard-0');
+      const input1 = getByTestId('streamNameInput-wildcard-1');
+      const input2 = getByTestId('streamNameInput-wildcard-2');
+
+      // All empty initially
+      expect(input0).toHaveAttribute('aria-invalid', 'true');
+      expect(input1).toHaveAttribute('aria-invalid', 'true');
+      expect(input2).toHaveAttribute('aria-invalid', 'true');
+
+      // Fill in the middle input
+      fireEvent.change(input1, { target: { value: 'filled' } });
+
+      // Only first and third should be invalid now
+      expect(input0).toHaveAttribute('aria-invalid', 'true');
       expect(input1).not.toHaveAttribute('aria-invalid', 'true');
+      expect(input2).toHaveAttribute('aria-invalid', 'true');
     });
   });
 });

@@ -8,6 +8,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { ValidationErrorType } from '../../utils';
 
 /*
  * PatternSegment is a segment of the index pattern that is either a static text or a wildcard.
@@ -116,8 +117,11 @@ export interface StreamNameInputProps {
   indexPattern: string;
   /** Callback when the stream name changes */
   onChange: (streamName: string) => void;
-  /** Whether the input is in an invalid state */
-  isInvalid?: boolean;
+  /**
+   * Validation error type. When 'empty', only empty inputs are highlighted.
+   * For other error types, all inputs are highlighted.
+   */
+  validationError?: ValidationErrorType;
   /** Test subject prefix for the inputs */
   'data-test-subj'?: string;
 }
@@ -125,7 +129,7 @@ export interface StreamNameInputProps {
 export const StreamNameInput = ({
   indexPattern,
   onChange,
-  isInvalid = false,
+  validationError = null,
   'data-test-subj': dataTestSubj = 'streamNameInput',
 }: StreamNameInputProps) => {
   const { euiTheme } = useEuiTheme();
@@ -160,6 +164,20 @@ export const StreamNameInput = ({
   }, []);
 
   const hasMultipleWildcards = wildcardCount > 1;
+
+  // Determine if a specific input should be marked as invalid
+  const isInputInvalid = useCallback(
+    (wildcardIndex: number): boolean => {
+      if (!validationError) return false;
+      if (validationError === 'empty') {
+        // Only highlight empty inputs
+        return !parts[wildcardIndex]?.trim();
+      }
+      // For other errors (duplicate, higherPriority), highlight all inputs
+      return true;
+    },
+    [validationError, parts]
+  );
 
   const getConnectedInputStyles = (isFirst: boolean, isLast: boolean) => {
     return css`
@@ -198,7 +216,7 @@ export const StreamNameInput = ({
         onChange={(e) => handleWildcardChange(group.wildcardIndex, e.target.value)}
         placeholder="*"
         fullWidth
-        isInvalid={isInvalid}
+        isInvalid={isInputInvalid(group.wildcardIndex)}
         prepend={group.prepend}
         append={group.append}
         data-test-subj={`${dataTestSubj}-wildcard-${group.wildcardIndex}`}
@@ -229,7 +247,7 @@ export const StreamNameInput = ({
               onChange={(e) => handleWildcardChange(group.wildcardIndex, e.target.value)}
               placeholder="*"
               fullWidth
-              isInvalid={isInvalid}
+              isInvalid={isInputInvalid(group.wildcardIndex)}
               prepend={group.prepend}
               append={group.append}
               data-test-subj={`${dataTestSubj}-wildcard-${group.wildcardIndex}`}

@@ -33,11 +33,16 @@ export const hasEmptyWildcards = (streamName: string): boolean => {
 };
 
 /**
+ * Validation error types for stream name validation
+ */
+export type ValidationErrorType = 'empty' | 'duplicate' | 'higherPriority' | null;
+
+/**
  * Result from stream name validation
  */
 export interface StreamNameValidationResult {
   /** The type of error, or null if valid */
-  errorType: 'empty' | 'duplicate' | 'higherPriority' | null;
+  errorType: ValidationErrorType;
   /** For higherPriority errors, the conflicting index pattern */
   conflictingIndexPattern?: string;
 }

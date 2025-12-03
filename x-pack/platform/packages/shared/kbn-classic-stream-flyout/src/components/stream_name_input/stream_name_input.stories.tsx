@@ -10,6 +10,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { EuiFormRow, EuiPanel, EuiSpacer, EuiText, EuiCode } from '@elastic/eui';
 
+import type { ValidationErrorType } from '../../utils';
 import { StreamNameInput } from './stream_name_input';
 
 const meta: Meta<typeof StreamNameInput> = {
@@ -32,10 +33,10 @@ type Story = StoryObj<typeof StreamNameInput>;
  */
 const StreamNameInputWithPreview = ({
   indexPattern,
-  isInvalid,
+  validationError,
 }: {
   indexPattern: string;
-  isInvalid?: boolean;
+  validationError?: ValidationErrorType;
 }) => {
   const [streamName, setStreamName] = useState('');
 
@@ -45,7 +46,7 @@ const StreamNameInputWithPreview = ({
         label="Stream name"
         helpText="Name your classic stream by filling in the wildcard (*) portions of the index pattern."
         fullWidth
-        isInvalid={isInvalid}
+        isInvalid={validationError !== null && validationError !== undefined}
       >
         <StreamNameInput
           indexPattern={indexPattern}
@@ -53,7 +54,7 @@ const StreamNameInputWithPreview = ({
             setStreamName(name);
             action('onChange')(name);
           }}
-          isInvalid={isInvalid}
+          validationError={validationError}
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
@@ -70,22 +71,21 @@ const StreamNameInputWithPreview = ({
 export const Default: Story = {
   args: {
     indexPattern: '*-logs-*-*',
-    isInvalid: false,
+    validationError: null,
   },
   argTypes: {
     indexPattern: {
       control: 'text',
-      description: 'Index pattern with wildcards (*)',
     },
-    isInvalid: {
-      control: 'boolean',
-      description: 'Whether the input is in an invalid state',
+    validationError: {
+      control: 'select',
+      options: ['empty', 'duplicate', 'higherPriority', null],
     },
   },
   render: (args) => (
     <StreamNameInputWithPreview
       indexPattern={args.indexPattern ?? '*-logs-*-*'}
-      isInvalid={args.isInvalid}
+      validationError={args.validationError}
     />
   ),
 };
@@ -121,8 +121,29 @@ export const LongStaticSegments: Story = {
 };
 
 /**
- * Invalid state - shows error styling on inputs
+ * Empty validation error - only empty inputs are highlighted.
+ * Fill in some inputs and leave others empty to see the difference.
  */
-export const InvalidState: Story = {
-  render: () => <StreamNameInputWithPreview indexPattern="logs-*-data-*" isInvalid />,
+export const EmptyValidationError: Story = {
+  render: () => (
+    <StreamNameInputWithPreview indexPattern="*-logs-*-data-*" validationError="empty" />
+  ),
+};
+
+/**
+ * Duplicate validation error - all inputs are highlighted
+ */
+export const DuplicateValidationError: Story = {
+  render: () => (
+    <StreamNameInputWithPreview indexPattern="logs-*-data-*" validationError="duplicate" />
+  ),
+};
+
+/**
+ * Higher priority validation error - all inputs are highlighted
+ */
+export const HigherPriorityValidationError: Story = {
+  render: () => (
+    <StreamNameInputWithPreview indexPattern="logs-*-data-*" validationError="higherPriority" />
+  ),
 };
