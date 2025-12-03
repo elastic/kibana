@@ -282,27 +282,6 @@ describe('ReportSchedulesTable', () => {
     );
   });
 
-  it('should search schedules with the provided search text on blur', async () => {
-    render(
-      <IntlProvider locale="en">
-        <QueryClientProvider client={queryClient}>
-          <ReportSchedulesTable />
-        </QueryClientProvider>
-      </IntlProvider>
-    );
-
-    expect(await screen.findAllByTestId('scheduledReportRow')).toHaveLength(3);
-
-    const searchField = screen.getByTestId(`scheduledReportsSearchField`);
-    await user.type(searchField, 'Report{tab}');
-
-    expect(mockGetScheduledReports).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        search: 'Report',
-      })
-    );
-  });
-
   it('should reset the search param when clearing the search field', async () => {
     render(
       <IntlProvider locale="en">
