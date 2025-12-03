@@ -131,8 +131,8 @@ export const getFieldStatsChartEmbeddableFactory = (
         fieldFormats,
         ...startServices,
       };
-      const timeRangeManager = initializeTimeRangeManager(initialState.rawState);
-      const titleManager = initializeTitleManager(initialState.rawState);
+      const timeRangeManager = initializeTimeRangeManager(initialState);
+      const titleManager = initializeTitleManager(initialState);
 
       const deserializeState = (
         state: SerializedPanelState<FieldStatisticsTableEmbeddableState>
