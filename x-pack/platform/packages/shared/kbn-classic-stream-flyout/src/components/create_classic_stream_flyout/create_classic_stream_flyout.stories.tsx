@@ -421,7 +421,7 @@ const createMockValidator = (
   };
 };
 
-export const Primary: Story = {
+export const Default: Story = {
   render: () => (
     <CreateClassicStreamFlyout
       onClose={action('onClose')}

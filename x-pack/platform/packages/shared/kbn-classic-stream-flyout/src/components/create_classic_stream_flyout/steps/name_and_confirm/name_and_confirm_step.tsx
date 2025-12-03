@@ -8,9 +8,8 @@
 import React from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
-import type { ValidationErrorType } from './stream_name_input';
 import type { IlmPolicyFetcher } from '../../../../utils';
-import { NameStreamSection } from './name_stream_section';
+import { NameStreamSection, type ValidationErrorType } from './name_stream_section';
 import { ConfirmTemplateDetailsSection } from './confirm_template_details_section';
 
 export type { ValidationErrorType };

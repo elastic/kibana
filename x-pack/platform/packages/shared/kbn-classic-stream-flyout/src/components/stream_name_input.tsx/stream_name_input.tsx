@@ -110,15 +110,13 @@ const buildStreamName = (pattern: string, parts: string[]): string => {
   return result;
 };
 
-export type ValidationErrorType = 'empty' | 'duplicate' | 'higherPriority' | null;
-
 export interface StreamNameInputProps {
   /** The index pattern containing wildcards (e.g., "*-logs-*-*") */
   indexPattern: string;
   /** Callback when the stream name changes */
   onChange: (streamName: string) => void;
-  /** Validation error type - shows error state on all wildcard inputs when not null */
-  validationError?: ValidationErrorType;
+  /** Whether the input is in an invalid state */
+  isInvalid?: boolean;
   /** Test subject prefix for the inputs */
   'data-test-subj'?: string;
 }
@@ -126,7 +124,7 @@ export interface StreamNameInputProps {
 export const StreamNameInput = ({
   indexPattern,
   onChange,
-  validationError = null,
+  isInvalid = false,
   'data-test-subj': dataTestSubj = 'streamNameInput',
 }: StreamNameInputProps) => {
   const { euiTheme } = useEuiTheme();
@@ -160,7 +158,6 @@ export const StreamNameInput = ({
     });
   }, []);
 
-  const hasError = validationError !== null;
   const hasMultipleWildcards = wildcardCount > 1;
 
   const getConnectedInputStyles = (isFirst: boolean, isLast: boolean) => {
@@ -200,7 +197,7 @@ export const StreamNameInput = ({
         onChange={(e) => handleWildcardChange(group.wildcardIndex, e.target.value)}
         placeholder="*"
         fullWidth
-        isInvalid={hasError}
+        isInvalid={isInvalid}
         prepend={group.prepend}
         append={group.append}
         data-test-subj={`${dataTestSubj}-wildcard-${group.wildcardIndex}`}
@@ -231,7 +228,7 @@ export const StreamNameInput = ({
               onChange={(e) => handleWildcardChange(group.wildcardIndex, e.target.value)}
               placeholder="*"
               fullWidth
-              isInvalid={hasError}
+              isInvalid={isInvalid}
               prepend={group.prepend}
               append={group.append}
               data-test-subj={`${dataTestSubj}-wildcard-${group.wildcardIndex}`}

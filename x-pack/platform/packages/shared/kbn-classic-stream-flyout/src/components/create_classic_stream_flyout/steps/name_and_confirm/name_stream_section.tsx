@@ -10,7 +10,9 @@ import { EuiFormRow, EuiPanel, EuiSpacer, EuiTitle, EuiSelect, useEuiTheme } fro
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { StreamNameInput, type ValidationErrorType } from './stream_name_input';
+import { StreamNameInput } from '../../../stream_name_input.tsx';
+
+export type ValidationErrorType = 'empty' | 'duplicate' | 'higherPriority' | null;
 
 const getValidationErrorMessage = (
   validationError: ValidationErrorType,
@@ -133,7 +135,7 @@ export const NameStreamSection = ({
         <StreamNameInput
           indexPattern={currentPattern}
           onChange={onStreamNameChange}
-          validationError={validationError}
+          isInvalid={validationError !== null}
           data-test-subj="streamNameInput"
         />
       </EuiFormRow>
