@@ -7,6 +7,8 @@
 
 import { EuiFlexGroup } from '@elastic/eui';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SloTabId } from '@kbn/deeplinks-observability';
+import { ALERTS_TAB_ID, DEFINITION_TAB_ID, HISTORY_TAB_ID } from '@kbn/deeplinks-observability';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { BurnRatePanel } from './burn_rate_panel/burn_rate_panel';
@@ -18,18 +20,6 @@ import { SloDetailsAlerts } from './slo_detail_alerts';
 import { SloHealthCallout } from './slo_health_callout';
 import { SloRemoteCallout } from './slo_remote_callout';
 import { ActionModalProvider } from '../../../context/action_modal';
-
-export const TAB_ID_URL_PARAM = 'tabId';
-export const OVERVIEW_TAB_ID = 'overview';
-export const HISTORY_TAB_ID = 'history';
-export const DEFINITION_TAB_ID = 'definition';
-export const ALERTS_TAB_ID = 'alerts';
-
-export type SloTabId =
-  | typeof OVERVIEW_TAB_ID
-  | typeof ALERTS_TAB_ID
-  | typeof HISTORY_TAB_ID
-  | typeof DEFINITION_TAB_ID;
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -58,7 +48,7 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId }: Props) {
   }, [isAutoRefreshing]);
 
   if (selectedTabId === HISTORY_TAB_ID) {
-    return <SloDetailsHistory slo={slo} isAutoRefreshing={isAutoRefreshing} />;
+    return <SloDetailsHistory slo={slo} />;
   }
 
   if (selectedTabId === DEFINITION_TAB_ID) {
