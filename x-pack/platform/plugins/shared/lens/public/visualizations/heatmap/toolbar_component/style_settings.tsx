@@ -21,6 +21,42 @@ import {
 import type { Orientation } from '../../../shared_components';
 import type { HeatmapVisualizationState } from '../types';
 
+const sortOptions = [
+  {
+    value: '',
+    text: i18n.translate('xpack.lens.heatmap.sortOrder.auto', {
+      defaultMessage: 'Auto',
+    }),
+  },
+  {
+    value: 'asc',
+    text: i18n.translate('xpack.lens.heatmap.sortOrder.ascending', {
+      defaultMessage: 'Ascending',
+    }),
+  },
+  {
+    value: 'desc',
+    text: i18n.translate('xpack.lens.heatmap.sortOrder.descending', {
+      defaultMessage: 'Descending',
+    }),
+  },
+  {
+    value: 'dataIndex',
+    text: i18n.translate('xpack.lens.heatmap.sortOrder.original', {
+      defaultMessage: 'Original order',
+    }),
+  },
+];
+
+// Convert current predicate to display value for the select
+function getDisplayValue(predicate: string | undefined): string {
+  if (!predicate) return '';
+  if (predicate === 'dataIndex') return 'dataIndex';
+  if (predicate === 'numAsc' || predicate === 'alphaAsc') return 'asc';
+  if (predicate === 'numDesc' || predicate === 'alphaDesc') return 'desc';
+  return '';
+}
+
 /**
  * Determines the appropriate sort predicate based on column data type and sort direction
  */
@@ -114,42 +150,6 @@ export function HeatmapVerticalAxisSettings({
   setState,
   frame,
 }: VisualizationToolbarProps<HeatmapVisualizationState>) {
-  const sortOptions = [
-    {
-      value: '',
-      text: i18n.translate('xpack.lens.heatmap.sortOrder.auto', {
-        defaultMessage: 'Auto',
-      }),
-    },
-    {
-      value: 'asc',
-      text: i18n.translate('xpack.lens.heatmap.sortOrder.ascending', {
-        defaultMessage: 'Ascending',
-      }),
-    },
-    {
-      value: 'desc',
-      text: i18n.translate('xpack.lens.heatmap.sortOrder.descending', {
-        defaultMessage: 'Descending',
-      }),
-    },
-    {
-      value: 'dataIndex',
-      text: i18n.translate('xpack.lens.heatmap.sortOrder.original', {
-        defaultMessage: 'Original order',
-      }),
-    },
-  ];
-
-  // Convert current predicate to display value for the select
-  const getDisplayValue = (predicate: string | undefined): string => {
-    if (!predicate) return '';
-    if (predicate === 'dataIndex') return 'dataIndex';
-    if (predicate === 'numAsc' || predicate === 'alphaAsc') return 'asc';
-    if (predicate === 'numDesc' || predicate === 'alphaDesc') return 'desc';
-    return '';
-  };
-
   return (
     <>
       <ToolbarTitleSettings
@@ -237,42 +237,6 @@ export function HeatmapHorizontalAxisSettings({
   frame,
 }: VisualizationToolbarProps<HeatmapVisualizationState>) {
   const isXAxisLabelVisible = state?.gridConfig.isXAxisLabelVisible;
-
-  const sortOptions = [
-    {
-      value: '',
-      text: i18n.translate('xpack.lens.heatmap.sortOrder.auto', {
-        defaultMessage: 'Auto',
-      }),
-    },
-    {
-      value: 'asc',
-      text: i18n.translate('xpack.lens.heatmap.sortOrder.ascending', {
-        defaultMessage: 'Ascending',
-      }),
-    },
-    {
-      value: 'desc',
-      text: i18n.translate('xpack.lens.heatmap.sortOrder.descending', {
-        defaultMessage: 'Descending',
-      }),
-    },
-    {
-      value: 'dataIndex',
-      text: i18n.translate('xpack.lens.heatmap.sortOrder.original', {
-        defaultMessage: 'Original order',
-      }),
-    },
-  ];
-
-  // Convert current predicate to display value for the select
-  const getDisplayValue = (predicate: string | undefined): string => {
-    if (!predicate) return '';
-    if (predicate === 'dataIndex') return 'dataIndex';
-    if (predicate === 'numAsc' || predicate === 'alphaAsc') return 'asc';
-    if (predicate === 'numDesc' || predicate === 'alphaDesc') return 'desc';
-    return '';
-  };
 
   return (
     <>
