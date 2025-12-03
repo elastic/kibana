@@ -90,7 +90,7 @@ export function registerTelemetryCollector(
 
   usageCollection.registerCollector(
     usageCollection.makeUsageCollector<OnechatTelemetry>({
-      type: 'agent_builder',
+      type: 'onechat',
       isReady: () => true,
       schema: {
         custom_tools: {
@@ -340,21 +340,26 @@ export function registerTelemetryCollector(
 
           const queryTimeCounters = await queryUtils.getCountersByPrefix(
             ONECHAT_USAGE_DOMAIN,
-            'query_to_result_time_'
+            `${ONECHAT_USAGE_DOMAIN}_query_to_result_time_`
           );
-          const queryToResultTime = queryUtils.calculatePercentilesFromBuckets(queryTimeCounters);
+          const queryToResultTime = queryUtils.calculatePercentilesFromBuckets(
+            queryTimeCounters,
+            ONECHAT_USAGE_DOMAIN
+          );
 
           const toolCallCounters = await queryUtils.getCountersByPrefix(
             ONECHAT_USAGE_DOMAIN,
-            'tool_call_'
+            `${ONECHAT_USAGE_DOMAIN}_tool_call_`
           );
 
           const toolCallsBySource = {
-            default_agent: toolCallCounters.get('tool_call_default_agent') || 0,
-            custom_agent: toolCallCounters.get('tool_call_custom_agent') || 0,
-            mcp: toolCallCounters.get('tool_call_mcp') || 0,
-            api: toolCallCounters.get('tool_call_api') || 0,
-            a2a: toolCallCounters.get('tool_call_a2a') || 0,
+            default_agent:
+              toolCallCounters.get(`${ONECHAT_USAGE_DOMAIN}_tool_call_default_agent`) || 0,
+            custom_agent:
+              toolCallCounters.get(`${ONECHAT_USAGE_DOMAIN}_tool_call_custom_agent`) || 0,
+            mcp: toolCallCounters.get(`${ONECHAT_USAGE_DOMAIN}_tool_call_mcp`) || 0,
+            api: toolCallCounters.get(`${ONECHAT_USAGE_DOMAIN}_tool_call_api`) || 0,
+            a2a: toolCallCounters.get(`${ONECHAT_USAGE_DOMAIN}_tool_call_a2a`) || 0,
           };
           const totalToolCalls = Object.values(toolCallsBySource).reduce(
             (sum, count) => sum + count,
@@ -390,7 +395,7 @@ export function registerTelemetryCollector(
 
           const errorCounters = await queryUtils.getCountersByPrefix(
             ONECHAT_USAGE_DOMAIN,
-            'error_'
+            `${ONECHAT_USAGE_DOMAIN}_error_`
           );
 
           const totalErrors = errorCounters.get(`${ONECHAT_USAGE_DOMAIN}_error_total`) || 0;
@@ -484,5 +489,5 @@ export function registerTelemetryCollector(
     })
   );
 
-  logger.info('Registered telemetry collector for agent_builder');
+  logger.info('Registered telemetry collector for onechat');
 }
