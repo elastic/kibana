@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type {
-  AllConnectorsResponse,
+  GetAllConnectorsResponse,
   ConnectorResponse,
 } from '@kbn/actions-plugin/common/routes/connector/response';
 import { DEFEND_INSIGHTS } from '@kbn/elastic-assistant-common';
@@ -38,7 +38,7 @@ export const createBedrockAIConnector = (connectorName?: string) =>
   });
 
 export const getConnectors = () =>
-  request<AllConnectorsResponse[]>({
+  request<GetAllConnectorsResponse>({
     method: 'GET',
     url: 'api/actions/connectors',
   });

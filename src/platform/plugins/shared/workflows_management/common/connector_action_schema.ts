@@ -8,8 +8,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ConnectorContractUnion } from '@kbn/workflows';
-import { z } from '@kbn/zod';
+import type { BaseConnectorContract } from '@kbn/workflows';
+import { z } from '@kbn/zod/v4';
 
 import {
   BedrockParamsSchema,
@@ -431,7 +431,7 @@ export const ConnectorActionOutputSchemas = new Map<string, Record<string, z.Zod
  * Static connectors used for schema generation
  */
 
-export const staticConnectors: ConnectorContractUnion[] = [
+export const staticConnectors: BaseConnectorContract[] = [
   {
     type: 'console',
     summary: 'Console',
