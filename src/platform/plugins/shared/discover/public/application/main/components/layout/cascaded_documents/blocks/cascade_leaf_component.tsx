@@ -187,7 +187,9 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
           <div
             css={customCascadeGridBodyStyle.virtualizerInner}
             style={{
-              transform: `translateY(${items[0]?.start - virtualizer.options.scrollMargin ?? 0}px)`,
+              transform: `translateY(${
+                items[0]?.start - (virtualizer.options.scrollMargin ?? 0)
+              }px)`,
             }}
           >
             {items.map((virtualRow) => (
