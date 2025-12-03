@@ -244,7 +244,8 @@
     {
       "groupName": "axe-core",
       "matchDepNames": [
-        "axe-core"
+        "axe-core",
+        "@axe-core/playwright"
       ],
       "reviewers": [
         "team:appex-qa"
@@ -2431,8 +2432,7 @@
       "matchDepNames": [
         "@a2a-js/sdk",
         "@modelcontextprotocol/sdk",
-        "@n8n/json-schema-to-zod",
-        "expr-eval"
+        "@n8n/json-schema-to-zod"
       ],
       "reviewers": [
         "team:search-kibana"
@@ -4056,7 +4056,7 @@
         "cytoscape-dagre"
       ],
       "reviewers": [
-        "team:obs-ux-infra_services-team"
+        "team:obs-presentation-team"
       ],
       "matchBaseBranches": [
         "main"
@@ -4074,7 +4074,7 @@
         "hdr-histogram-js"
       ],
       "reviewers": [
-        "team:obs-ux-infra_services-team"
+        "team:obs-presentation-team"
       ],
       "matchBaseBranches": [
         "main"
@@ -4110,7 +4110,6 @@
       "matchDepNames": [
         "langchain",
         "@langchain/aws",
-        "@langchain/community",
         "@langchain/core",
         "@langchain/google-common",
         "@langchain/google-genai",
