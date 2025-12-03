@@ -3033,7 +3033,7 @@ paths:
           required: false
           schema:
             type: string
-        - description: Aggregated gap fill statuses
+        - description: Gap fill statuses
           in: query
           name: gap_fill_statuses
           required: false
@@ -4785,8 +4785,8 @@ components:
           type: string
         gap_fill_statuses:
           description: >-
-            Aggregated gap fill statuses to filter rules with gaps by status
-            (used together with gaps_range_*).
+            Gap fill statuses to filter rules with gaps by status (used together
+            with gaps_range_*).
           items:
             $ref: '#/components/schemas/GapFillStatus'
           type: array
@@ -4820,8 +4820,8 @@ components:
           type: string
         gap_fill_statuses:
           description: >-
-            Aggregated gap fill statuses to filter rules with gaps by status
-            (used together with gaps_range_*).
+            Gap fill statuses to filter rules with gaps by status (used together
+            with gaps_range_*).
           items:
             $ref: '#/components/schemas/GapFillStatus'
           type: array
@@ -4868,8 +4868,8 @@ components:
             - include_expired_exceptions
         gap_fill_statuses:
           description: >-
-            Aggregated gap fill statuses to filter rules with gaps by status
-            (used together with gaps_range_*).
+            Gap fill statuses to filter rules with gaps by status (used together
+            with gaps_range_*).
           items:
             $ref: '#/components/schemas/GapFillStatus'
           type: array
@@ -4983,8 +4983,8 @@ components:
           type: array
         gap_fill_statuses:
           description: >-
-            Aggregated gap fill statuses to filter rules with gaps by status
-            (used together with gaps_range_*).
+            Gap fill statuses to filter rules with gaps by status (used together
+            with gaps_range_*).
           items:
             $ref: '#/components/schemas/GapFillStatus'
           type: array
@@ -5023,8 +5023,8 @@ components:
           type: string
         gap_fill_statuses:
           description: >-
-            Aggregated gap fill statuses to filter rules with gaps by status
-            (used together with gaps_range_*).
+            Gap fill statuses to filter rules with gaps by status (used together
+            with gaps_range_*).
           items:
             $ref: '#/components/schemas/GapFillStatus'
           type: array
@@ -5060,8 +5060,8 @@ components:
           type: string
         gap_fill_statuses:
           description: >-
-            Aggregated gap fill statuses to filter rules with gaps by status
-            (used together with gaps_range_*).
+            Gap fill statuses to filter rules with gaps by status (used together
+            with gaps_range_*).
           items:
             $ref: '#/components/schemas/GapFillStatus'
           type: array
@@ -5114,8 +5114,8 @@ components:
             - end_date
         gap_fill_statuses:
           description: >-
-            Aggregated gap fill statuses to filter rules with gaps by status
-            (used together with gaps_range_*).
+            Gap fill statuses to filter rules with gaps by status (used together
+            with gaps_range_*).
           items:
             $ref: '#/components/schemas/GapFillStatus'
           type: array
@@ -5150,8 +5150,8 @@ components:
           type: string
         gap_fill_statuses:
           description: >-
-            Aggregated gap fill statuses to filter rules with gaps by status
-            (used together with gaps_range_*).
+            Gap fill statuses to filter rules with gaps by status (used together
+            with gaps_range_*).
           items:
             $ref: '#/components/schemas/GapFillStatus'
           type: array
