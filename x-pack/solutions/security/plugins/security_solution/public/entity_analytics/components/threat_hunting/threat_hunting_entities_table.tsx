@@ -424,9 +424,9 @@ export const ThreatHuntingEntitiesTable: React.FC<ThreatHuntingEntitiesTableProp
     direction: Direction.desc,
   });
   const entityTypes = useEntityStoreTypes();
-  const [selectedSeverities, setSelectedSeverities] = useState<RiskSeverity[]>([]);
-  const [selectedCriticalities, setSelectedCriticalities] = useState<CriticalityLevels[]>([]);
-  const [selectedSources, setSelectedSources] = useState<EntitySourceTag[]>([]);
+  const [selectedSeverities, _setSelectedSeverities] = useState<RiskSeverity[]>([]);
+  const [selectedCriticalities, _setSelectedCriticalities] = useState<CriticalityLevels[]>([]);
+  const [selectedSources, _setSelectedSources] = useState<EntitySourceTag[]>([]);
 
   const filter = useEntitiesListFilters({
     selectedSeverities,

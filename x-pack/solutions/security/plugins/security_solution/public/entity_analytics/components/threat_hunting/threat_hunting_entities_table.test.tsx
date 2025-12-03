@@ -49,8 +49,16 @@ const responseData: ListEntitiesResponse = {
       user: {
         name: 'test-entity',
         risk: {
-          calculated_score_norm: 75,
+          '@timestamp': '2021-08-02T14:00:00.000Z',
+          id_field: 'user.name',
+          id_value: 'test-entity',
           calculated_level: 'High',
+          calculated_score: 75,
+          calculated_score_norm: 75,
+          category_1_score: 50,
+          category_1_count: 5,
+          inputs: [],
+          notes: [],
         },
       },
       entity: {
