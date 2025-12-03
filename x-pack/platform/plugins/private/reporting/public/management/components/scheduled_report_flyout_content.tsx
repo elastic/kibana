@@ -392,7 +392,7 @@ export const ScheduledReportFlyoutContent = ({
                     showTimeInSummary
                     compressed
                     initialRecurringSchedule={scheduledReport.recurringSchedule}
-              />
+                  />
                 </>
               )}
             </ResponsiveFormGroup>
