@@ -14,15 +14,11 @@ import {
   type EsqlAttachment,
 } from '@kbn/onechat-common/attachments';
 
-/**
- * Registers the built-in attachment UI definitions for text, screen context, and ES|QL types.
- */
 export const registerAttachmentUiDefinitions = ({
   attachments,
 }: {
   attachments: AttachmentServiceStartContract;
 }) => {
-  // Text attachment
   attachments.addAttachmentType<TextAttachment>(AttachmentType.text, {
     getLabel: () =>
       i18n.translate('xpack.agentBuilderPlatform.attachments.text.label', {
@@ -31,7 +27,6 @@ export const registerAttachmentUiDefinitions = ({
     getIcon: () => 'document',
   });
 
-  // Screen context attachment
   attachments.addAttachmentType<ScreenContextAttachment>(AttachmentType.screenContext, {
     getLabel: () =>
       i18n.translate('xpack.agentBuilderPlatform.attachments.screenContext.label', {
@@ -40,7 +35,6 @@ export const registerAttachmentUiDefinitions = ({
     getIcon: () => 'inspect',
   });
 
-  // ES|QL attachment
   attachments.addAttachmentType<EsqlAttachment>(AttachmentType.esql, {
     getLabel: () =>
       i18n.translate('xpack.agentBuilderPlatform.attachments.esql.label', {

@@ -7,8 +7,8 @@
 
 export type {
   Attachment,
+  UnknownAttachment,
   AttachmentInput,
-  AnyAttachment,
   TextAttachment,
   ScreenContextAttachment,
   EsqlAttachment,

@@ -26,9 +26,8 @@ export interface Attachment<
 
 /**
  * Attachment type that accepts any attachment.
- * Use this as a constraint when you need to accept any attachment type.
  */
-export type AnyAttachment = Attachment<string, unknown>;
+export type UnknownAttachment = Attachment<string, unknown>;
 
 // Strongly typed sub-types for known attachment types
 

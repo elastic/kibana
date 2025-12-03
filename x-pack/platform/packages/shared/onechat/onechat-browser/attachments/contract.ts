@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { AnyAttachment } from '@kbn/onechat-common/attachments';
+import type { UnknownAttachment } from '@kbn/onechat-common/attachments';
 
 /**
  * UI definition for rendering attachments of a specific type.
  */
-export interface AttachmentUIDefinition<TAttachment extends AnyAttachment = AnyAttachment> {
+export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = UnknownAttachment> {
   /**
    * Returns a human-readable label for the attachment.
    */
@@ -31,7 +31,7 @@ export interface AttachmentServiceStartContract {
    * @param attachmentType - The unique identifier for the attachment type
    * @param definition - The UI definition for rendering this attachment type
    */
-  addAttachmentType: <TAttachment extends AnyAttachment = AnyAttachment>(
+  addAttachmentType: <TAttachment extends UnknownAttachment = UnknownAttachment>(
     attachmentType: string,
     definition: AttachmentUIDefinition<TAttachment>
   ) => void;

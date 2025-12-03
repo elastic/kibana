@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AnyAttachment } from '@kbn/onechat-common/attachments';
+import type { UnknownAttachment } from '@kbn/onechat-common/attachments';
 import type { AttachmentUIDefinition } from '@kbn/onechat-browser';
 
 /**
@@ -22,7 +22,7 @@ export class AttachmentsService {
    * @param definition - The UI definition for rendering this attachment type
    * @throws Error if the attachment type is already registered
    */
-  addAttachmentType<TAttachment extends AnyAttachment = AnyAttachment>(
+  addAttachmentType<TAttachment extends UnknownAttachment = UnknownAttachment>(
     attachmentType: string,
     definition: AttachmentUIDefinition<TAttachment>
   ): void {
@@ -38,7 +38,7 @@ export class AttachmentsService {
    * @param attachmentType - The type identifier to look up
    * @returns The UI definition if registered, undefined otherwise
    */
-  getAttachmentUiDefinition<TAttachment extends AnyAttachment = AnyAttachment>(
+  getAttachmentUiDefinition<TAttachment extends UnknownAttachment = UnknownAttachment>(
     attachmentType: string
   ): AttachmentUIDefinition<TAttachment> | undefined {
     return this.registry.get(attachmentType) as AttachmentUIDefinition<TAttachment> | undefined;
