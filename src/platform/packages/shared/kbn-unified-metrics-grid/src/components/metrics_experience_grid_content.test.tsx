@@ -227,15 +227,6 @@ describe('MetricsExperienceGridContent', () => {
     expect(getByTestId('unifiedMetricsExperienceGrid')).toBeInTheDocument();
   });
 
-  it('renders the technical preview badge', () => {
-    const { getByText, getByTestId } = render(<MetricsExperienceGridContent {...defaultProps} />, {
-      wrapper: IntlProvider,
-    });
-
-    expect(getByTestId('metricsExperienceTechnicalPreviewBadge')).toBeInTheDocument();
-    expect(getByText('Technical preview')).toBeInTheDocument();
-  });
-
   it('renders the loading state when Discover is reloading', () => {
     const { getByTestId } = render(
       <MetricsExperienceGridContent {...defaultProps} isDiscoverLoading />,
