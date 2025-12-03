@@ -59,7 +59,6 @@ describe('transformScheduledReport', () => {
     );
   });
 
-
   it('handles freq=DAILY and no weekdays', () => {
     const report = {
       ...baseReport,
