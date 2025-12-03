@@ -168,6 +168,82 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           message: 'Group is not defined in action test-id',
         });
       });
+
+      it('should throw 400 when bulk editing a rule to use the same system action twice', async () => {
+        const { body: rule } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData())
+          .expect(200);
+
+        objectRemover.add(Spaces.space1.id, rule.id, 'rule', 'alerting');
+
+        const payload = {
+          ids: [rule.id],
+          operations: [
+            {
+              operation: 'add',
+              field: 'actions',
+              value: [systemAction, systemAction],
+            },
+          ],
+        };
+
+        await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_bulk_edit`)
+          .set('kbn-xsrf', 'foo')
+          .send(payload)
+          .expect(400);
+      });
+
+      it('should allow bulk editing a rule with multiple instances of the same system action if allowMultipleSystemActions is true', async () => {
+        const multipleSystemAction = {
+          id: 'system-connector-test.system-action-allow-multiple',
+          uuid: '123',
+          params: {},
+        };
+
+        const { body: rule } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData())
+          .expect(200);
+
+        objectRemover.add(Spaces.space1.id, rule.id, 'rule', 'alerting');
+
+        const payload = {
+          ids: [rule.id],
+          operations: [
+            {
+              operation: 'add',
+              field: 'actions',
+              value: [multipleSystemAction, multipleSystemAction],
+            },
+          ],
+        };
+
+        const response = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_bulk_edit`)
+          .set('kbn-xsrf', 'foo')
+          .send(payload);
+
+        expect(response.status).to.eql(200);
+        expect(response.body.rules[0].actions.length).to.eql(2);
+
+        const action1 = response.body.rules[0].actions[0];
+        const action2 = response.body.rules[0].actions[1];
+
+        expect(action1.id).to.eql('system-connector-test.system-action-allow-multiple');
+        expect(action1.connector_type_id).to.eql('test.system-action-allow-multiple');
+        expect(action1.uuid).to.not.be(undefined);
+
+        expect(action2.id).to.eql('system-connector-test.system-action-allow-multiple');
+        expect(action2.connector_type_id).to.eql('test.system-action-allow-multiple');
+        expect(action2.uuid).to.not.be(undefined);
+
+        // UUIDs should be different
+        expect(action1.uuid).to.not.eql(action2.uuid);
+      });
     });
   });
 }
