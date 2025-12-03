@@ -28,12 +28,14 @@ export function VisualizationErrorPanel({
     <>
       <Global
         styles={css`
-          /** Overwrite the default embeddable error handling */
-          .embPanel__content--hidden {
-            display: block !important;
-          }
-          .embeddableError {
-            display: none !important;
+          /** Overwrite the default embeddable error handling for uses outside of Dashboard */
+          .kbnBody:not(:has(.dashboardViewport)) {
+            .embPanel__content--hidden {
+              display: block !important;
+            }
+            .embeddableError {
+              display: none !important;
+            }
           }
         `}
       />
