@@ -7,103 +7,128 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { freeze, produce } from 'immer';
+
 import { allColoringTypeSchema, type ColorByValueType, type ColorMappingType } from './color';
 
 describe('Color Schema', () => {
   describe('colorByValue schema', () => {
-    it('validates a valid dynamic absolute color configuration', () => {
-      const input: ColorByValueType = {
-        type: 'dynamic',
-        range: 'absolute',
-        steps: [
-          {
-            type: 'from',
-            from: 0,
-            color: '#ff0000',
-          },
-          {
-            type: 'exact',
-            value: 50,
-            color: '#0000ff',
-          },
-          {
-            type: 'to',
-            to: 75,
-            color: '#00ff00',
-          },
-        ],
-      };
+    describe.each<ColorByValueType['range']>(['absolute', 'percentage'])(
+      'range type - %s',
+      (range) => {
+        const baseConfig = freeze<ColorByValueType>({
+          type: 'dynamic',
+          range,
+          steps: [
+            {
+              from: 0,
+              to: 50,
+              color: '#ff0000',
+            },
+            {
+              from: 50,
+              to: 75,
+              color: '#00ff00',
+            },
+            {
+              from: 75,
+              to: 100,
+              color: '#0000ff',
+            },
+          ],
+        });
 
-      const validated = allColoringTypeSchema.validate(input);
-      expect(validated).toEqual(input);
-    });
+        it('should validate complete step ranges', () => {
+          const validated = allColoringTypeSchema.validate(baseConfig);
+          expect(validated).toEqual(baseConfig);
+        });
 
-    it('validates percentage range type', () => {
-      const input: ColorByValueType = {
-        type: 'dynamic',
-        min: 0,
-        max: 100,
-        range: 'percentage',
-        steps: [
-          {
-            type: 'from',
-            from: 0,
-            color: '#ff0000',
-          },
-          {
-            type: 'exact',
-            value: 50,
-            color: '#0000ff',
-          },
-          {
-            type: 'to',
-            to: 75,
-            color: '#00ff00',
-          },
-        ],
-      };
+        it('should validate with implicit lower and upper bounds', () => {
+          const config = produce(baseConfig, (base) => {
+            base.steps[0].from = undefined;
+            base.steps[2].to = undefined;
+          });
+          const validated = allColoringTypeSchema.validate(config);
+          expect(validated).toEqual(config);
+        });
 
-      const validated = allColoringTypeSchema.validate(input);
-      expect(validated).toEqual(input);
-    });
+        it('should validate with implicit lower bound', () => {
+          const config = produce(baseConfig, (base) => {
+            base.steps[0].from = undefined;
+          });
+          const validated = allColoringTypeSchema.validate(config);
+          expect(validated).toEqual(config);
+        });
 
-    it('throw on invalid steps sorting order', () => {
-      const input: ColorByValueType = {
-        type: 'dynamic',
-        range: 'absolute',
-        steps: [
-          {
-            type: 'from',
-            from: 0,
-            color: '#ff0000',
-          },
-          {
-            type: 'to',
-            to: 50,
-            color: '#00ff00',
-          },
-          {
-            type: 'exact',
-            value: 75,
-            color: '#0000ff',
-          },
-        ],
-      };
+        it('should validate with implicit upper bound', () => {
+          const config = produce(baseConfig, (base) => {
+            base.steps[2].to = undefined;
+          });
+          const validated = allColoringTypeSchema.validate(config);
+          expect(validated).toEqual(config);
+        });
 
-      expect(() => allColoringTypeSchema.validate(input)).toThrow();
-    });
+        describe('validation errors', () => {
+          it('should invalidate empty steps', () => {
+            const config = produce(baseConfig, (base) => {
+              base.steps = [];
+            });
+            expect(() => allColoringTypeSchema.validate(config)).toThrow();
+          });
 
-    it('throws on invalid range type', () => {
-      const input = {
-        type: 'dynamic',
-        min: 0,
-        max: 100,
-        range: 'invalid',
-        steps: [],
-      };
+          it('should invalidate implicit from on middle step', () => {
+            const config = produce(baseConfig, (base) => {
+              base.steps[1].from = undefined;
+            });
+            expect(() => allColoringTypeSchema.validate(config)).toThrow();
+          });
 
-      expect(() => allColoringTypeSchema.validate(input)).toThrow();
-    });
+          it('should invalidate implicit from on last step', () => {
+            const config = produce(baseConfig, (base) => {
+              base.steps[2].from = undefined;
+            });
+            expect(() => allColoringTypeSchema.validate(config)).toThrow();
+          });
+
+          it('should invalidate implicit to on middle step', () => {
+            const config = produce(baseConfig, (base) => {
+              base.steps[1].to = undefined;
+            });
+            expect(() => allColoringTypeSchema.validate(config)).toThrow();
+          });
+
+          it('should invalidate implicit from on first step', () => {
+            const config = produce(baseConfig, (base) => {
+              base.steps[0].to = undefined;
+            });
+            expect(() => allColoringTypeSchema.validate(config)).toThrow();
+          });
+
+          it('should invalidate discontinuous step ranges', () => {
+            const config = produce(baseConfig, (base) => {
+              base.steps[1].from = base.steps[1].from! + 1;
+            });
+            expect(() => allColoringTypeSchema.validate(config)).toThrow();
+          });
+
+          it('should invalidate overlapping step ranges', () => {
+            const config = produce(baseConfig, (base) => {
+              base.steps[0].to = base.steps[1].from! + 1;
+            });
+            expect(() => allColoringTypeSchema.validate(config)).toThrow();
+          });
+
+          it('should invalidate inverted range', () => {
+            const config = produce(baseConfig, (base) => {
+              const { from, to } = base.steps[1];
+              base.steps[1].to = from;
+              base.steps[1].from = to;
+            });
+            expect(() => allColoringTypeSchema.validate(config)).toThrow();
+          });
+        });
+      }
+    );
   });
 
   describe('staticColor schema', () => {
@@ -115,6 +140,17 @@ describe('Color Schema', () => {
 
       const validated = allColoringTypeSchema.validate(input);
       expect(validated).toEqual(input);
+    });
+
+    describe('validation errors', () => {
+      it('throws on invalid color format in static configuration', () => {
+        const input = {
+          type: 'static',
+          palette: 'not-a-color',
+        };
+
+        expect(() => allColoringTypeSchema.validate(input)).toThrow();
+      });
     });
   });
 
@@ -251,68 +287,6 @@ describe('Color Schema', () => {
       const validated = allColoringTypeSchema.validate(input);
       expect(validated).toEqual(input);
     });
-  });
-
-  describe('validation errors', () => {
-    it('throws on missing required fields in dynamic configuration', () => {
-      const input = {
-        type: 'dynamic',
-        min: 0,
-        // missing max
-        range: 'percentage',
-        steps: [],
-      };
-
-      expect(() => allColoringTypeSchema.validate(input)).toThrow();
-    });
-
-    it('throws on invalid color format in static configuration', () => {
-      const input = {
-        type: 'static',
-        palette: 'not-a-color',
-      };
-
-      expect(() => allColoringTypeSchema.validate(input)).toThrow();
-    });
-
-    it('throws on invalid mode in color mapping', () => {
-      const input = {
-        palette: 'kibana_palette',
-        mode: 'invalid',
-        colorMapping: {
-          values: ['value1'],
-        },
-        otherColors: {},
-      };
-
-      expect(() => allColoringTypeSchema.validate(input)).toThrow();
-    });
-
-    it('throws on empty values array in categorical mapping', () => {
-      const input = {
-        palette: 'kibana_palette',
-        mode: 'categorical',
-        colorMapping: {
-          values: [],
-        },
-        otherColors: {},
-      };
-
-      expect(() => allColoringTypeSchema.validate(input)).toThrow();
-    });
-  });
-
-  describe('edge cases', () => {
-    it('validates dynamic configuration with minimum required fields', () => {
-      const input = {
-        type: 'dynamic',
-        range: 'absolute',
-        steps: [],
-      };
-
-      const validated = allColoringTypeSchema.validate(input);
-      expect(validated).toEqual(input);
-    });
 
     it('validates color mapping with minimal otherColors', () => {
       const input: ColorMappingType = {
@@ -323,6 +297,34 @@ describe('Color Schema', () => {
 
       const validated = allColoringTypeSchema.validate(input);
       expect(validated).toEqual(input);
+    });
+
+    describe('validation errors', () => {
+      it('throws on invalid mode in color mapping', () => {
+        const input = {
+          palette: 'kibana_palette',
+          mode: 'invalid',
+          colorMapping: {
+            values: ['value1'],
+          },
+          otherColors: {},
+        };
+
+        expect(() => allColoringTypeSchema.validate(input)).toThrow();
+      });
+
+      it('throws on empty values array in categorical mapping', () => {
+        const input = {
+          palette: 'kibana_palette',
+          mode: 'categorical',
+          colorMapping: {
+            values: [],
+          },
+          otherColors: {},
+        };
+
+        expect(() => allColoringTypeSchema.validate(input)).toThrow();
+      });
     });
   });
 });
