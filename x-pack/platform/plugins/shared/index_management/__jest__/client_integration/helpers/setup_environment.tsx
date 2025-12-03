@@ -22,11 +22,14 @@ import {
   fatalErrorsServiceMock,
   httpServiceMock,
   chromeServiceMock,
+  i18nServiceMock,
+  analyticsServiceMock,
 } from '@kbn/core/public/mocks';
 
 import { GlobalFlyout } from '@kbn/es-ui-shared-plugin/public';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { MAJOR_VERSION } from '../../../common';
@@ -51,7 +54,7 @@ const { GlobalFlyoutProvider } = GlobalFlyout;
 export const services = {
   extensionsService: new ExtensionsService(),
   uiMetricService: new UiMetricService('index_management'),
-  notificationService: notificationServiceMock.createSetupContract(),
+  notificationService,
 };
 
 services.uiMetricService.setup({ reportUiCounter() {} } as any);
@@ -114,6 +117,13 @@ const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
   },
 });
 
+// Services required for KibanaRenderContextProvider (provides i18n, theme, analytics)
+const startServicesMock = {
+  i18n: i18nServiceMock.createStartContract(),
+  theme: themeServiceMock.createStartContract(),
+  analytics: analyticsServiceMock.createAnalyticsServiceStart(),
+};
+
 export const setupEnvironment = () => {
   breadcrumbService.setup(() => undefined);
   documentationService.setup(docLinksServiceMock.createStartContract());
@@ -134,16 +144,18 @@ export const WithAppDependencies =
       overridingDependencies
     );
     return (
-      <KibanaReactContextProvider>
-        <AppContextProvider value={mergedDependencies}>
-          <MappingsEditorProvider>
-            <ComponentTemplatesProvider value={componentTemplatesMockDependencies(httpSetup)}>
-              <GlobalFlyoutProvider>
-                <Comp {...props} />
-              </GlobalFlyoutProvider>
-            </ComponentTemplatesProvider>
-          </MappingsEditorProvider>
-        </AppContextProvider>
-      </KibanaReactContextProvider>
+      <KibanaRenderContextProvider {...startServicesMock}>
+        <KibanaReactContextProvider>
+          <AppContextProvider value={mergedDependencies}>
+            <MappingsEditorProvider>
+              <ComponentTemplatesProvider value={componentTemplatesMockDependencies(httpSetup)}>
+                <GlobalFlyoutProvider>
+                  <Comp {...props} />
+                </GlobalFlyoutProvider>
+              </ComponentTemplatesProvider>
+            </MappingsEditorProvider>
+          </AppContextProvider>
+        </KibanaReactContextProvider>
+      </KibanaRenderContextProvider>
     );
   };
