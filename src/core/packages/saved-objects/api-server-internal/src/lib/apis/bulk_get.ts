@@ -8,7 +8,6 @@
  */
 
 import type { Payload } from '@hapi/boom';
-import Boom from '@hapi/boom';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import type {
   DecoratedError,
@@ -32,6 +31,7 @@ import {
   left,
   right,
   rawDocExistsInNamespaces,
+  isForbiddenSpacesError,
 } from './utils';
 import type { ApiExecutionContext } from './types';
 
@@ -69,7 +69,7 @@ export const performBulkGet = async <T>(
       availableSpacesPromise = spacesExtension!
         .getSearchableNamespaces([ALL_NAMESPACES_STRING])
         .catch((err) => {
-          if (Boom.isBoom(err) && err.output.payload.statusCode === 403) {
+          if (isForbiddenSpacesError(err)) {
             // the user doesn't have access to any spaces; return the current space ID and allow the SOR authZ check to fail
             return [SavedObjectsUtils.namespaceIdToString(namespace)];
           } else {
