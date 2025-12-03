@@ -58,11 +58,10 @@ export const SimulationPlayground = ({
     state ? state.matches({ enabled: 'loadingData' }) : false
   );
 
+  const dataSourceContext = useDataSourceSelector(activeDataSourceRef, (state) => state?.context);
+
   const hasOutdatedDocuments = useStreamEnrichmentSelector((state) =>
-    selectWhetherThereAreOutdatedDocumentsInSimulation(
-      state.context,
-      activeDataSourceRef?.getSnapshot().context
-    )
+    selectWhetherThereAreOutdatedDocumentsInSimulation(state.context, dataSourceContext)
   );
 
   const detectedFields = useSimulatorSelector((state) => state.context.detectedSchemaFields);
