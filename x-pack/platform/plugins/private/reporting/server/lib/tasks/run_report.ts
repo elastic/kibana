@@ -535,7 +535,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
           }
 
           const { jobtype: jobType, attempts } = report;
-          const logger = this.logger.get(jobId);
+          const logger = this.logger.get(jobId); // jobId is here
 
           const maxAttempts = this.getMaxAttempts();
           if (maxAttempts) {
