@@ -33,9 +33,8 @@ export const useTabLabelWidth = ({
     const indicatorWidth = euiTheme.base * 1.25;
     const textWithIndicatorWidth = textWidth + indicatorWidth;
     const tabPaddingWidth = euiTheme.base;
-    const tabBorderWidth = parseInt(String(euiTheme.border.width.thin), 10);
-    const maxLabelWidth = tabsSizeConfig.regularTabMaxWidth - tabPaddingWidth - tabBorderWidth;
-    const minLabelWidth = tabsSizeConfig.regularTabMinWidth - tabPaddingWidth - tabBorderWidth;
+    const maxLabelWidth = tabsSizeConfig.regularTabMaxWidth - tabPaddingWidth;
+    const minLabelWidth = tabsSizeConfig.regularTabMinWidth - tabPaddingWidth;
     const resolvedLabelWidth = Math.max(
       Math.min(textWithIndicatorWidth, maxLabelWidth),
       minLabelWidth
@@ -47,7 +46,6 @@ export const useTabLabelWidth = ({
     };
   }, [
     euiTheme.base,
-    euiTheme.border.width.thin,
     item.label,
     tabsSizeConfig.regularTabMaxWidth,
     tabsSizeConfig.regularTabMinWidth,
