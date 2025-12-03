@@ -29,7 +29,6 @@ export interface ObservabilityAgentPluginSetup {
   registerDataProvider: ObservabilityAgentDataRegistry['registerDataProvider'];
 }
 
-export type ObservabilityAgentPluginSetup = Record<string, never>;
 export type ObservabilityAgentPluginStart = Record<string, never>;
 
 export interface ObservabilityAgentPluginSetupDependencies {

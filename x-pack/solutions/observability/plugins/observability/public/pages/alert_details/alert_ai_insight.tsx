@@ -72,21 +72,21 @@ export function AlertAiInsight({ alert }: { alert: AlertData | null }) {
     };
     onechat.openConversationFlyout({
       newConversation: true,
-      // agentId: 'observability.agent',
+      agentId: 'observability.agent',
       sessionTag: `alert:${alertId}`,
       attachments: [
         {
           id: `ai_insight-${alertId}`,
           type: OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
-          getContent: async () => ({
+          data: {
             summary,
             context,
-          }),
+          },
         },
         {
           id: `alert-${alertId}`,
           type: OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
-          getContent: async () => ({
+          data: {
             alert: {
               ruleName: fields?.['kibana.alert.rule.name'],
               startedAt: new Date(alert.formatted.start).toISOString(),
@@ -98,7 +98,7 @@ export function AlertAiInsight({ alert }: { alert: AlertData | null }) {
               status,
             },
             entities,
-          }),
+          },
         },
       ],
     });

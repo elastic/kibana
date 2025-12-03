@@ -69,7 +69,7 @@ export class ObservabilityAgentPlugin
           this.logger.error(`Error registering observability attachments: ${error}`);
         });
 
-        registerAiInsightRoutes(core, this.logger);
+        registerAiInsightRoutes(core, this.logger, this.dataRegistry);
       })
       .catch((error) => {
         this.logger.error(`Error checking whether the observability agent is enabled: ${error}`);
