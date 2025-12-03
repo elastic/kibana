@@ -125,10 +125,10 @@ export function ErrorSampleAgentBuilderAiInsight({
   return (
     <>
       <AiInsight
-        title={i18n.translate('xpack.apm.errorGroupAiInsight.explainErrorTitle', {
+        title={i18n.translate('xpack.apm.errorAiInsight.titleLabel', {
           defaultMessage: "What's this error?",
         })}
-        description={i18n.translate('xpack.apm.errorGroupAiInsight.explainErrorDescription', {
+        description={i18n.translate('xpack.apm.errorAiInsight.descriptionLabel', {
           defaultMessage: 'Get helpful insights from our Elastic AI Agent',
         })}
         content={summary}
