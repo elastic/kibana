@@ -76,7 +76,6 @@ export const convertGraphEvents = ({
 
     return streamEvents$.pipe(
       mergeMap((event) => {
-        console.log(event)
         if (!matchGraphName(event, graphName)) {
           return EMPTY;
         }
@@ -107,10 +106,6 @@ export const convertGraphEvents = ({
           }
           const action = processResearchResponse(lastMessage);
           const nextAction = action
-
-          console.log("nextAction");
-          console.log(messages);
-          console.log(nextAction);
 
           if (isToolCallAction(nextAction)) {
             const { tool_calls: toolCalls, message: messageText } = nextAction;

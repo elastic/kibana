@@ -12,6 +12,7 @@ import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ResolvedAgentCapabilities } from '@kbn/onechat-common';
 import type { AgentEventEmitter, ToolHandlerContext } from '@kbn/onechat-server';
 import { createDeepAgent, createSkillsMiddleware } from '@kbn/securitysolution-deep-agent';
+import type { AgentMiddleware } from 'langchain';
 import { getSkillsRegistry } from '@kbn/onechat-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ResolvedConfiguration } from '../types';
@@ -38,7 +39,7 @@ export const createAgentGraph = ({
   request?: KibanaRequest;
   toolHandlerContext?: ToolHandlerContext;
 }) => {
-  const middleware = [
+  const middleware: AgentMiddleware[] = [
     createResearchMiddleware(events),
     createReasoningEventMiddleware(events),
     createAnswerMiddleware(events),

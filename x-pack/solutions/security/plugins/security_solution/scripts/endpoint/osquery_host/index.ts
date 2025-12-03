@@ -9,15 +9,17 @@ import { run, type RunFn } from '@kbn/dev-cli-runner';
 import { ok } from 'assert';
 import { userInfo } from 'os';
 import type { AgentPolicy } from '@kbn/fleet-plugin/common';
-import type { HostVm } from '../common/types';
+import type { HostVm, SupportedVmManager } from '../common/types';
 import { createKbnClient } from '../common/stack_services';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import {
   getMultipassVmCountNotice,
+  getOrbstackVmCountNotice,
   createVm,
   generateVmName,
   findVm,
   createMultipassHostVmClient,
+  createOrbstackHostVmClient,
 } from '../common/vm_services';
 import {
   createAgentPolicy,
@@ -64,7 +66,7 @@ To add more VMs, simply increase --vmCount (e.g., from 2 to 5 creates 3 more).
 Fleet Server starts automatically if not running.
 Use --verbose to see detailed logs for every operation.`,
     flags: {
-      string: ['kibanaUrl', 'username', 'password', 'version', 'vmName', 'apiKey'],
+      string: ['kibanaUrl', 'username', 'password', 'version', 'vmName', 'apiKey', 'vmType'],
       number: ['vmCount'],
       boolean: ['verbose'],
       default: {
@@ -74,6 +76,7 @@ Use --verbose to see detailed logs for every operation.`,
         password: 'changeme',
         apiKey: '',
         verbose: false,
+        vmType: 'multipass',
       },
       help: `
       --vmCount           Optional. Number of VMs to manage (Default: 2)
@@ -93,6 +96,9 @@ Use --verbose to see detailed logs for every operation.`,
                           VM names, policy IDs, and detailed operation logs.
       --apiKey            Optional. A Kibana API key to use for authz. When defined, 'username'
                           and 'password' arguments are ignored.
+      --vmType            Optional. The VM manager to use for creating hosts.
+                          Options: multipass, orbstack
+                          Default: multipass
       `,
     },
   });
@@ -107,6 +113,12 @@ const runCli: RunFn = async ({ log, flags }) => {
   const verbose = flags.verbose as boolean;
   const version = flags.version as string | undefined;
   const vmNamePrefix = flags.vmName as string | undefined;
+  const vmType = (flags.vmType as SupportedVmManager) || 'multipass';
+
+  // Validate vmType
+  if (vmType !== 'multipass' && vmType !== 'orbstack') {
+    throw new Error(`Invalid vmType: ${vmType}. Supported values: multipass, orbstack`);
+  }
 
   createToolingLogger.setDefaultLogLevelFromCliFlags(flags);
 
@@ -147,8 +159,7 @@ const runCli: RunFn = async ({ log, flags }) => {
 
     // Phase 2: VM Management and Discovery
     log.info(`${EMOJIS.VM} --- Phase 2: VM Discovery and Management ---`);
-    // Note: This script currently only supports multipass VMs
-    const vmType: 'multipass' = 'multipass';
+    log.info(`${EMOJIS.INFO} Using VM type: ${vmType}`);
     const existingVms: HostVm[] = [];
 
     log.info(`${EMOJIS.CLOCK} Checking for existing Osquery VMs...`);
@@ -166,7 +177,11 @@ const runCli: RunFn = async ({ log, flags }) => {
         }
       }
       for (const vmName of matchingVmNames) {
-        existingVms.push(await createMultipassHostVmClient(vmName, log));
+        const vmClient =
+          vmType === 'orbstack'
+            ? createOrbstackHostVmClient(vmName, log)
+            : createMultipassHostVmClient(vmName, log);
+        existingVms.push(vmClient);
       }
       if (verbose) {
         log.info(`${EMOJIS.INFO} These VMs will be reused\n`);
@@ -583,7 +598,10 @@ const runCli: RunFn = async ({ log, flags }) => {
     log.info(`   2. Check Fleet UI to see your enrolled agents`);
     log.info(`   3. Default test queries are already configured in the integration`);
 
-    const vmNotice = await getMultipassVmCountNotice(vms.length);
+    const vmNotice =
+      vmType === 'orbstack'
+        ? await getOrbstackVmCountNotice(vms.length)
+        : await getMultipassVmCountNotice(vms.length);
     if (vmNotice) {
       log.info(`\n${EMOJIS.WARNING} ${vmNotice}`);
     }
@@ -600,8 +618,10 @@ const runCli: RunFn = async ({ log, flags }) => {
     log.error(`\n${EMOJIS.WARNING} Troubleshooting tips:`);
     log.error(`   1. ${EMOJIS.INFO} Ensure Kibana and Elasticsearch are running`);
     log.error(
-      `   2. ${EMOJIS.VM} Check that multipass is installed (macOS: brew install multipass)`
+      `   2. ${EMOJIS.VM} Check that your VM manager is installed:`
     );
+    log.error(`      - multipass: brew install multipass (https://multipass.run)`);
+    log.error(`      - orbstack: https://orbstack.dev`);
     log.error(`   3. ${EMOJIS.INFO} Verify network connectivity to Kibana and Fleet Server`);
     log.error(`   4. ${EMOJIS.INFO} Check Kibana logs for additional error details`);
     log.error(
@@ -610,7 +630,8 @@ const runCli: RunFn = async ({ log, flags }) => {
     log.error(
       `   6. ${EMOJIS.VM} Try running with --forceNewVms to recreate VMs if reuse is causing issues`
     );
-    log.error(`   7. ${EMOJIS.INFO} Check system resources (CPU, memory, disk) for multipass`);
+    log.error(`   7. ${EMOJIS.INFO} Check system resources (CPU, memory, disk) for your VM manager`);
+    log.error(`   8. ${EMOJIS.VM} Try --vmType orbstack if multipass is causing issues`);
     throw error;
   }
 };

@@ -35,9 +35,18 @@ export function createGetAlertsSkill({ coreSetup }: { coreSetup: CoreSetup<any, 
     category: 'observability',
     inputSchema: getAlertsSchema,
     examples: [
-      'Get active alerts from the last hour',
-      'Find alerts related to high CPU usage',
-      'Show recovered alerts from yesterday',
+      // Get all alerts (default limit of 10)
+      'tool("invoke_skill", {"skillId":"observability.get_alerts","params":{}})',
+      // Get active alerts only
+      'tool("invoke_skill", {"skillId":"observability.get_alerts","params":{"status":"active"}})',
+      // Get recovered alerts
+      'tool("invoke_skill", {"skillId":"observability.get_alerts","params":{"status":"recovered"}})',
+      // Search alerts with a query
+      'tool("invoke_skill", {"skillId":"observability.get_alerts","params":{"query":"high CPU usage","limit":20}})',
+      // Get alerts from a time range
+      'tool("invoke_skill", {"skillId":"observability.get_alerts","params":{"timeRange":{"from":"2024-01-01T00:00:00Z","to":"2024-01-02T00:00:00Z"}}})',
+      // Search for active alerts related to a service
+      'tool("invoke_skill", {"skillId":"observability.get_alerts","params":{"query":"service-name","status":"active","limit":50}})',
     ],
     handler: async (params, context) => {
       const { query, timeRange, status, limit = 10 } = params;

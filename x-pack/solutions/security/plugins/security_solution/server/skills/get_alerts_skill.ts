@@ -39,9 +39,20 @@ export function createGetAlertsSkill({ coreSetup }: { coreSetup: CoreSetup<any, 
     category: 'security',
     inputSchema: getAlertsSchema,
     examples: [
-      'Get critical alerts from the last 24 hours',
-      'Find open alerts related to malware',
-      'Show high severity alerts that are acknowledged',
+      // Get all alerts (default limit of 10)
+      'tool("invoke_skill", {"skillId":"security.get_alerts","params":{}})',
+      // Get critical severity alerts
+      'tool("invoke_skill", {"skillId":"security.get_alerts","params":{"severity":"critical"}})',
+      // Get high severity alerts that are open
+      'tool("invoke_skill", {"skillId":"security.get_alerts","params":{"severity":"high","workflowStatus":"open"}})',
+      // Search alerts with a natural language query
+      'tool("invoke_skill", {"skillId":"security.get_alerts","params":{"query":"malware","limit":20}})',
+      // Get alerts from a specific time range
+      'tool("invoke_skill", {"skillId":"security.get_alerts","params":{"timeRange":{"from":"2024-01-01T00:00:00Z","to":"2024-01-02T00:00:00Z"}}})',
+      // Get acknowledged alerts with high severity
+      'tool("invoke_skill", {"skillId":"security.get_alerts","params":{"severity":"high","workflowStatus":"acknowledged","limit":50}})',
+      // Search for ransomware-related open alerts
+      'tool("invoke_skill", {"skillId":"security.get_alerts","params":{"query":"ransomware","workflowStatus":"open"}})',
     ],
     handler: async (params, context) => {
       const { query, timeRange, severity, workflowStatus, limit = 10 } = params;

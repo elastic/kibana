@@ -50,6 +50,8 @@ import { initUiSettings } from './ui_settings';
 import { registerDeprecations } from './deprecations';
 import { registerSkill } from '@kbn/onechat-server';
 import { createGetAlertsSkill } from './skills/get_alerts_skill';
+import { createFleetManagementSkill } from './skills/fleet_management_skill';
+import { createWaitForActionSkill } from './skills/wait_for_action_skill';
 import {
   APP_ID,
   APP_UI_ID,
@@ -240,6 +242,31 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.logger.info('Registered security.get_alerts skill');
     } catch (error) {
       this.logger.error(`Error registering get_alerts skill: ${error}`);
+    }
+
+    // Register fleet_management skill for endpoint response actions
+    try {
+      const fleetManagementSkill = createFleetManagementSkill({
+        coreSetup: core,
+        getEndpointAppContextService: () => this.endpointAppContextService,
+        logger: this.logger.get('fleet_management_skill'),
+      });
+      registerSkill(fleetManagementSkill);
+      this.logger.info('Registered security.fleet_management skill');
+    } catch (error) {
+      this.logger.error(`Error registering fleet_management skill: ${error}`);
+    }
+
+    // Register wait_for_action skill to poll for action completion
+    try {
+      const waitForActionSkill = createWaitForActionSkill({
+        getEndpointAppContextService: () => this.endpointAppContextService,
+        logger: this.logger.get('wait_for_action_skill'),
+      });
+      registerSkill(waitForActionSkill);
+      this.logger.info('Registered security.wait_for_action skill');
+    } catch (error) {
+      this.logger.error(`Error registering wait_for_action skill: ${error}`);
     }
 
     const { appClientFactory, productFeaturesService, pluginContext, config, logger } = this;

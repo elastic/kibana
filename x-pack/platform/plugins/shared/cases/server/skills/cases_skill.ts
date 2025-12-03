@@ -108,9 +108,14 @@ export function createCasesSkills({
     category: 'cases',
     inputSchema: createCaseSchema,
     examples: [
-      'Create a security case for investigating suspicious activity',
-      'Create an observability case for a service outage',
-      'Create a case with high severity and assign it to a user',
+      // Create a basic security case
+      'tool("invoke_skill", {"skillId":"cases.create_case","params":{"title":"Suspicious login activity","description":"Multiple failed login attempts detected","owner":"securitySolution"}})',
+      // Create an observability case
+      'tool("invoke_skill", {"skillId":"cases.create_case","params":{"title":"Service outage","description":"API service is not responding","owner":"observability"}})',
+      // Create a case with severity and tags
+      'tool("invoke_skill", {"skillId":"cases.create_case","params":{"title":"Critical incident","description":"Production database unavailable","owner":"securitySolution","severity":"critical","tags":["incident","production"]}})',
+      // Create a case with assignees
+      'tool("invoke_skill", {"skillId":"cases.create_case","params":{"title":"Investigate malware","description":"Potential malware detected on endpoint","owner":"securitySolution","severity":"high","assignees":[{"uid":"<user_uid>"}]}})',
     ],
     handler: async (params, context) => {
       const request = 'request' in context ? context.request : (context as any).request;
@@ -132,9 +137,16 @@ export function createCasesSkills({
     category: 'cases',
     inputSchema: searchCasesSchema,
     examples: [
-      'Find all open security cases',
-      'Search for cases with high severity assigned to a specific user',
-      'Get cases tagged with "incident" from the last week',
+      // Search all cases with default pagination
+      'tool("invoke_skill", {"skillId":"cases.search_cases","params":{}})',
+      // Search for open security cases
+      'tool("invoke_skill", {"skillId":"cases.search_cases","params":{"owner":"securitySolution","status":"open"}})',
+      // Search for high severity cases
+      'tool("invoke_skill", {"skillId":"cases.search_cases","params":{"severity":"high","perPage":20}})',
+      // Search cases by tags
+      'tool("invoke_skill", {"skillId":"cases.search_cases","params":{"tags":["incident"],"sortField":"created_at","sortOrder":"desc"}})',
+      // Search cases assigned to a user
+      'tool("invoke_skill", {"skillId":"cases.search_cases","params":{"assignees":["<user_uid>"],"status":"in-progress"}})',
     ],
     handler: async (params, context) => {
       const request = 'request' in context ? context.request : (context as any).request;
@@ -154,7 +166,10 @@ export function createCasesSkills({
     description: 'Retrieve a specific case by its ID with all details including comments, attachments, and metadata.',
     category: 'cases',
     inputSchema: getCaseSchema,
-    examples: ['Get case details by ID', 'Retrieve a specific case for review'],
+    examples: [
+      // Get a case by ID
+      'tool("invoke_skill", {"skillId":"cases.get_case","params":{"id":"<case_id>"}})',
+    ],
     handler: async (params, context) => {
       const request = 'request' in context ? context.request : (context as any).request;
       if (!request) {
@@ -175,10 +190,16 @@ export function createCasesSkills({
     category: 'cases',
     inputSchema: updateCaseSchema,
     examples: [
-      'Update case status to in-progress',
-      'Change case severity to critical',
-      'Add tags to a case',
-      'Assign users to a case',
+      // Update case status to in-progress
+      'tool("invoke_skill", {"skillId":"cases.update_case","params":{"id":"<case_id>","version":"<case_version>","status":"in-progress"}})',
+      // Update case severity to critical
+      'tool("invoke_skill", {"skillId":"cases.update_case","params":{"id":"<case_id>","version":"<case_version>","severity":"critical"}})',
+      // Add tags to a case
+      'tool("invoke_skill", {"skillId":"cases.update_case","params":{"id":"<case_id>","version":"<case_version>","tags":["incident","high-priority"]}})',
+      // Close a case
+      'tool("invoke_skill", {"skillId":"cases.update_case","params":{"id":"<case_id>","version":"<case_version>","status":"closed"}})',
+      // Assign users to a case
+      'tool("invoke_skill", {"skillId":"cases.update_case","params":{"id":"<case_id>","version":"<case_version>","assignees":[{"uid":"<user_uid>"}]}})',
     ],
     handler: async (params, context) => {
       const request = 'request' in context ? context.request : (context as any).request;
@@ -206,7 +227,12 @@ export function createCasesSkills({
     description: 'Delete one or more cases by their IDs. This will also delete all comments and attachments associated with the cases.',
     category: 'cases',
     inputSchema: deleteCaseSchema,
-    examples: ['Delete a case by ID', 'Delete multiple cases'],
+    examples: [
+      // Delete a single case
+      'tool("invoke_skill", {"skillId":"cases.delete_case","params":{"ids":["<case_id>"]}})',
+      // Delete multiple cases
+      'tool("invoke_skill", {"skillId":"cases.delete_case","params":{"ids":["<case_id_1>","<case_id_2>"]}})',
+    ],
     handler: async (params, context) => {
       const request = 'request' in context ? context.request : (context as any).request;
       if (!request) {
