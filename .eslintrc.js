@@ -2392,7 +2392,12 @@ module.exports = {
             // prevents code from importing files that contain the name "legacy" within their name. This is a mechanism
             // to help deprecation and prevent accidental re-use/continued use of code we plan on removing. If you are
             // finding yourself turning this off a lot for "new code" consider renaming the file and functions if it is has valid uses.
-            patterns: ['*legacy*'],
+            patterns: [
+              '*legacy*',
+              // Kibana has endpoint /api/spaces/_disable_legacy_url_aliases, resulting in generated file kibana.post_spaces_disable_legacy_url_aliases.gen.ts,
+              // this pattern allows to import this generated file
+              '!*.gen',
+            ],
             paths: RESTRICTED_IMPORTS,
           },
         ],
