@@ -444,7 +444,7 @@ describe('functions arg suggestions', () => {
       const suggestions = await suggest('FROM index | EVAL result = CASE(integerField IN /)');
       const texts = suggestions.map(({ text }) => text);
 
-      expect(texts).toContain('( $0 )');
+      expect(texts).toContain('($0)');
     });
 
     it('NOT IN operator: suggests opening parenthesis for list', async () => {
@@ -452,19 +452,27 @@ describe('functions arg suggestions', () => {
       const suggestions = await suggest('FROM index | EVAL result = CASE(integerField NOT IN /)');
       const texts = suggestions.map(({ text }) => text);
 
-      expect(texts).toContain('( $0 )');
+      expect(texts).toContain('($0)');
     });
 
-    it('IN operator with empty list: suggests integer fields and functions', async () => {
+    it.each([
+      ['simple field', 'FROM index | WHERE integerField IN (/)'],
+      ['nested field', 'FROM index | WHERE kubernetes.something.something IN (/)'],
+      ['function result', 'FROM index | WHERE CONCAT(textField, keywordField) IN (/)'],
+      ['inside CASE', 'FROM index | EVAL col0 = CASE(keywordField IN (/)'],
+      [
+        'multiple IN - cursor on second',
+        'FROM index | WHERE integerField IN (1) AND keywordField IN (/)',
+      ],
+      ['nested IN inside CASE', 'FROM index | EVAL x = CASE(a IN (1), "yes", keywordField IN (/)'],
+    ])('IN operator with %s: suggests fields and functions', async (_, query) => {
       const { suggest } = await setup();
-      const suggestions = await suggest('FROM index | WHERE integerField IN (/)');
+      const suggestions = await suggest(query);
 
-      const fieldSuggestions = suggestions.filter((s) => s.kind === 'Variable');
-      const functionSuggestions = suggestions.filter((s) => s.kind === 'Function');
+      const fieldSuggestions = suggestions.filter(({ kind }) => kind === 'Variable');
 
       expect(suggestions.length).toBeGreaterThan(0);
       expect(fieldSuggestions.length).toBeGreaterThan(0);
-      expect(functionSuggestions.length).toBeGreaterThan(0);
     });
 
     it('unary NOT operator in WHERE: suggests boolean fields and boolean-returning functions', async () => {

@@ -161,9 +161,12 @@ export function getDashboardStateSchema() {
     description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
     filters: schema.maybe(schema.arrayOf(asCodeFilterSchema)),
     options: schema.maybe(optionsSchema),
-    panels: schema.arrayOf(schema.oneOf([getPanelSchema(), getSectionSchema()]), {
-      defaultValue: [],
-    }),
+    panels: schema.maybe(
+      schema.arrayOf(schema.oneOf([getPanelSchema(), getSectionSchema()]), {
+        defaultValue: [],
+      })
+    ),
+    project_routing: schema.maybe(schema.string()),
     query: schema.maybe(querySchema),
     refreshInterval: schema.maybe(refreshIntervalSchema),
     tags: schema.maybe(
@@ -173,6 +176,5 @@ export function getDashboardStateSchema() {
     ),
     timeRange: schema.maybe(timeRangeSchema),
     title: schema.string({ meta: { description: 'A human-readable title for the dashboard' } }),
-    version: schema.maybe(schema.number({ meta: { deprecated: true } })),
   });
 }

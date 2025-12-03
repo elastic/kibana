@@ -24,8 +24,6 @@ import { registerOnechatHandlerContext } from './request_handler_context';
 import { createOnechatUsageCounter } from './telemetry/usage_counters';
 import { TrackingService } from './telemetry/tracking_service';
 import { registerTelemetryCollector } from './telemetry/telemetry_collector';
-import { registerBuiltinTools } from './services/tools';
-import { registerAttachmentTypes } from './services/attachments';
 
 export class OnechatPlugin
   implements
@@ -77,16 +75,6 @@ export class OnechatPlugin
 
     registerOnechatHandlerContext({ coreSetup });
 
-    registerBuiltinTools({
-      registry: serviceSetups.tools,
-      coreSetup,
-      setupDeps,
-    });
-
-    registerAttachmentTypes({
-      registry: serviceSetups.attachments,
-    });
-
     const router = coreSetup.http.createRouter<OnechatHandlerContext>();
     registerRoutes({
       router,
@@ -131,10 +119,13 @@ export class OnechatPlugin
       trackingService: this.trackingService,
     });
 
-    const { tools, runnerFactory } = startServices;
+    const { tools, agents, runnerFactory } = startServices;
     const runner = runnerFactory.getRunner();
 
     return {
+      agents: {
+        runAgent: agents.execute.bind(agents),
+      },
       tools: {
         getRegistry: ({ request }) => tools.getRegistry({ request }),
         execute: runner.runTool.bind(runner),

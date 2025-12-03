@@ -14,7 +14,7 @@ import type { AlertingEventLogger } from '../../alerting_event_logger/alerting_e
 import type { Gap } from '../gap';
 import type { BackfillSchedule } from '../../../application/backfill/result/types';
 import type { ScheduledItem } from './utils';
-import { findOverlappingIntervals, toScheduledItem } from './utils';
+import { findOverlappingIntervals, toScheduledItem, prepareGapsForUpdate } from './utils';
 import { updateGapsInEventLog } from './update_gaps_in_event_log';
 import { applyScheduledBackfillsToGap } from './apply_scheduled_backfills_to_gap';
 
@@ -69,16 +69,13 @@ export const updateGapsBatch = async ({
         });
       }
     });
+    // Set updated_at timestamp on all gaps
+    const now = new Date().toISOString();
+    for (const gap of gapsToUpdate) {
+      gap.setUpdatedAt(now);
+    }
     // Convert gaps to the format expected by updateDocuments
-    return gapsToUpdate
-      .map((gap) => {
-        if (!gap.internalFields) return null;
-        return {
-          gap: gap.toObject(),
-          internalFields: gap.internalFields,
-        };
-      })
-      .filter((gap): gap is NonNullable<typeof gap> => gap !== null);
+    return prepareGapsForUpdate(gapsToUpdate);
   };
 
   return updateGapsInEventLog({

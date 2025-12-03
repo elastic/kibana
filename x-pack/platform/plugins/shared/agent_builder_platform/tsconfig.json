@@ -1,0 +1,34 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "../../../../../typings/**/*",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*"
+  ],
+  "exclude": [
+    "target/**/*",
+    ".storybook/**/*.js"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/logging",
+    "@kbn/config-schema",
+    "@kbn/workflows-management-plugin",
+    "@kbn/onechat-server",
+    "@kbn/lens-embeddable-utils",
+    "@kbn/onechat-genai-utils",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/onechat-common",
+    "@kbn/zod",
+    "@kbn/management-settings-ids",
+    "@kbn/onechat-plugin",
+    "@kbn/core-lifecycle-server",
+    "@kbn/esql-validation-autocomplete",
+    "@kbn/inference-common",
+    "@kbn/llm-tasks-plugin",
+  ]
+}
