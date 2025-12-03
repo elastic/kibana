@@ -31,7 +31,7 @@ import { getFieldConfig } from '../../../lib';
 import { useAppContext } from '../../../../../app_context';
 import { useLoadInferenceEndpoints } from '../../../../../services/api';
 import { UseField } from '../../../shared_imports';
-import { MlVcuUsageCostTour } from './ml_vcu_usage_cost_tour';
+import { TokenConsumptionCostTour } from './ml_vcu_usage_cost_tour';
 const InferenceFlyoutWrapper = lazy(() => import('@kbn/inference-endpoint-ui-common'));
 export interface SelectInferenceIdProps {
   'data-test-subj'?: string;
@@ -332,7 +332,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
       <EuiFlexGroup data-test-subj="selectInferenceId" alignItems="flexEnd">
         <EuiFlexItem grow={false}>
           {cloud?.isServerlessEnabled ? (
-            <MlVcuUsageCostTour children={inferencePopover()} />
+            <TokenConsumptionCostTour children={inferencePopover()} />
           ) : (
             inferencePopover()
           )}
