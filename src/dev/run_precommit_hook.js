@@ -15,7 +15,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import * as Eslint from './eslint';
 import * as Stylelint from './stylelint';
 import { getFilesForCommit, checkFileCasing } from './precommit_hook';
-import { load as yamlLoad } from 'js-yaml';
+import { loadAll as yamlLoadAll } from 'js-yaml';
 import { readFile } from 'fs/promises';
 import { extname } from 'path';
 
@@ -119,7 +119,7 @@ class YamlLintCheck extends PrecommitCheck {
     for (const file of yamlFiles) {
       try {
         const content = await readFile(file.getAbsolutePath(), 'utf8');
-        yamlLoad(content, {
+        yamlLoadAll(content, {
           filename: file.getRelativePath(),
         });
       } catch (error) {
