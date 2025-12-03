@@ -19,13 +19,16 @@ jest.mock('./queries', () => ({
   buildPrivilegedSearchBody: (...args: unknown[]) => mockBuildPrivilegedSearchBody(...args),
 }));
 
+const monitoringLabelsPath = '../generate_monitoring_labels';
+const syncMarkersPath = '../sync_markers/sync_markers';
+
 type GenerateMonitoringLabelsFn =
-  typeof import('../../generate_monitoring_labels').generateMonitoringLabels;
+  typeof import('../generate_monitoring_labels').generateMonitoringLabels;
 const mockGenerateMonitoringLabels = jest.fn<
   MonitoringLabel[],
   Parameters<GenerateMonitoringLabelsFn>
 >(() => []);
-jest.mock('../../generate_monitoring_labels', () => ({
+jest.mock(monitoringLabelsPath, () => ({
   generateMonitoringLabels: (...args: Parameters<GenerateMonitoringLabelsFn>) =>
     mockGenerateMonitoringLabels(...args),
 }));
@@ -41,7 +44,7 @@ const mockSyncMarkersService = {
   getLastProcessedMarker: jest.fn(),
   updateLastProcessedMarker: jest.fn(),
 };
-jest.mock('../sync_markers/sync_markers', () => ({
+jest.mock(syncMarkersPath, () => ({
   createSyncMarkersService: () => mockSyncMarkersService,
 }));
 

@@ -16,7 +16,7 @@ import { createSearchService } from '../../users/search';
 
 import { MonitoringEntitySourceDescriptorClient } from '../../saved_objects';
 import { createBulkUtilsService } from '../bulk';
-import { findStaleUsersFactory } from './stale_users';
+import { findStaleUsersFactory } from './deletion_detection/stale_users';
 import { getErrorFromBulkResponse } from './utils';
 
 export type IndexSyncService = ReturnType<typeof createIndexSyncService>;

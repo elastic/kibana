@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { MonitoringEntitySource } from '../../../../../../common/api/entity_analytics';
-import type { createSyncMarkersService } from './integrations/sync_markers/sync_markers';
-import { isTimestampGreaterThan } from './utils';
+import type { MonitoringEntitySource } from '../../../../../../../common/api/entity_analytics';
+import type { createSyncMarkersService } from '../sync_markers';
+import { isTimestampGreaterThan } from '../utils';
 
 interface SyncMarkersStrategy {
   getLastProcessedMarker: (source: MonitoringEntitySource) => Promise<string | undefined>;

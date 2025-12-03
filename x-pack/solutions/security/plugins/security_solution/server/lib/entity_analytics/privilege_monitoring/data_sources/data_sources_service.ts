@@ -11,7 +11,7 @@ import type { PrivilegeMonitoringDataClient } from '../engine/data_client';
 import { PRIVILEGED_MONITOR_IMPORT_USERS_INDEX_MAPPING } from '../engine/elasticsearch/mappings';
 import { createIndexSyncService } from './sync/index_sync';
 import { createIntegrationsSyncService } from './sync/integrations/integrations_sync';
-import { createIndexSyncServiceWiP } from './sync/index/index_sync_WIP';
+import { createIndexSyncServiceWiP } from './sync/update_detection/index/index_sync_WIP';
 
 export const createDataSourcesService = (
   dataClient: PrivilegeMonitoringDataClient,
