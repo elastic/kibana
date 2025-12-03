@@ -51,17 +51,19 @@ export const upsertEntitiesBulk = (
       async (context, request, response): Promise<IKibanaResponse> => {
         const secSol = await context.securitySolution;
 
-        telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
-          endpoint: request.route.path,
-        });
-
         try {
           await secSol
             .getEntityStoreCrudClient()
             .upsertEntitiesBulk(request.body.entities, request.query.force);
-
+          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+            endpoint: request.route.path,
+          });
           return response.ok();
         } catch (error) {
+          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+            endpoint: request.route.path,
+            error: (error as Error).message,
+          });
           if (
             error instanceof EngineNotRunningError ||
             error instanceof CapabilityNotEnabledError

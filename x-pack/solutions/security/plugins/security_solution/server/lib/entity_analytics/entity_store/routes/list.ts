@@ -40,18 +40,20 @@ export const listEntityEnginesRoute = (
       async (context, request, response): Promise<IKibanaResponse<ListEntityEnginesResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
-        telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
-          endpoint: request.route.path,
-        });
-
         try {
           const secSol = await context.securitySolution;
           const body = await secSol.getEntityStoreDataClient().list();
-
+          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+            endpoint: request.route.path,
+          });
           return response.ok({ body });
         } catch (e) {
           logger.error('Error in ListEntityEngines:', e);
           const error = transformError(e);
+          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+            endpoint: request.route.path,
+            error: error.message,
+          });
           return siemResponse.error({
             statusCode: error.statusCode,
             body: error.message,

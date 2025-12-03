@@ -44,10 +44,6 @@ export const applyDataViewIndicesEntityEngineRoute = (
       ): Promise<IKibanaResponse<ApplyEntityEngineDataviewIndicesResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
-        telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
-          endpoint: request.route.path,
-        });
-
         try {
           const secSol = await context.securitySolution;
           const { errors, successes } = await secSol
@@ -69,6 +65,9 @@ export const applyDataViewIndicesEntityEngineRoute = (
           await apiKeyManager.generate();
 
           if (errors.length === 0) {
+            telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+              endpoint: request.route.path,
+            });
             return response.ok({
               body: {
                 success: true,
@@ -76,6 +75,10 @@ export const applyDataViewIndicesEntityEngineRoute = (
               },
             });
           } else {
+            telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+              endpoint: request.route.path,
+              error: errorMessages.join('; '),
+            });
             return response.multiStatus({
               body: {
                 success: false,
@@ -87,6 +90,10 @@ export const applyDataViewIndicesEntityEngineRoute = (
         } catch (e) {
           logger.error(`Error in ApplyEntityEngineDataViewIndices: ${e.message}`);
           const error = transformError(e);
+          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+            endpoint: request.route.path,
+            error: error.message,
+          });
           return siemResponse.error({
             statusCode: error.statusCode,
             body: error.message,

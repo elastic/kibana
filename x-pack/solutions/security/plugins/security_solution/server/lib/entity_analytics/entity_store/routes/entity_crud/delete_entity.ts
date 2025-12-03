@@ -58,21 +58,23 @@ export const deleteEntity = (
       async (context, request, response): Promise<IKibanaResponse<DeleteSingleEntityResponse>> => {
         const secSol = await context.securitySolution;
 
-        telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
-          endpoint: request.route.path,
-        });
-
         try {
           await secSol
             .getEntityStoreCrudClient()
             .deleteEntity(request.params.entityType, request.body);
-
+          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+            endpoint: request.route.path,
+          });
           return response.ok({
             body: {
               deleted: true,
             },
           });
         } catch (error) {
+          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+            endpoint: request.route.path,
+            error: (error as Error).message,
+          });
           if (
             error instanceof EngineNotRunningError ||
             error instanceof CapabilityNotEnabledError

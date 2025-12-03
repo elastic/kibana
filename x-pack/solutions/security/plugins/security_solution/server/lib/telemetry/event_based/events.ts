@@ -675,6 +675,7 @@ export const ENTITY_STORE_USAGE_EVENT: EventTypeOpts<{
 
 export const ENTITY_STORE_API_CALL_EVENT: EventTypeOpts<{
   endpoint: string;
+  error?: string;
 }> = {
   eventType: 'entity_store_api_call',
   schema: {
@@ -682,6 +683,13 @@ export const ENTITY_STORE_API_CALL_EVENT: EventTypeOpts<{
       type: 'keyword',
       _meta: {
         description: 'Name of the endpoint called',
+      },
+    },
+    error: {
+      type: 'keyword',
+      _meta: {
+        optional: true,
+        description: 'Contains error message in case the call failed',
       },
     },
   },

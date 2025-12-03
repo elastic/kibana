@@ -58,10 +58,6 @@ export const listEntitiesRoute = (
       async (context, request, response): Promise<IKibanaResponse<ListEntitiesResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
-        telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
-          endpoint: request.route.path,
-        });
-
         try {
           const {
             page = 1,
@@ -83,6 +79,9 @@ export const listEntitiesRoute = (
             sortOrder,
           });
 
+          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+            endpoint: request.route.path,
+          });
           return response.ok({
             body: {
               records,
@@ -95,6 +94,10 @@ export const listEntitiesRoute = (
         } catch (e) {
           logger.error(e);
           const error = transformError(e);
+          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+            endpoint: request.route.path,
+            error: error.message,
+          });
           return siemResponse.error({
             statusCode: error.statusCode,
             body: error.message,

@@ -63,10 +63,6 @@ export const initEntityEngineRoute = (
         const { getSpaceId, getAppClient, getDataViewsService } = await context.securitySolution;
         const entityStoreClient = secSol.getEntityStoreDataClient();
 
-        telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
-          endpoint: request.route.path,
-        });
-
         try {
           const securitySolutionIndices = await buildIndexPatternsByEngine(
             getSpaceId(),
@@ -101,10 +97,17 @@ export const initEntityEngineRoute = (
             }
           );
 
+          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+            endpoint: request.route.path,
+          });
           return response.ok({ body });
         } catch (e) {
           const error = transformError(e);
           logger.error(`Error initialising entity engine: ${error.message}`);
+          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+            endpoint: request.route.path,
+            error: error.message,
+          });
           return siemResponse.error({
             statusCode: error.statusCode,
             body: error.message,

@@ -62,19 +62,21 @@ export const getEntityStoreStatusRoute = (
         await checkAndInitAssetCriticalityResources(context, logger);
         await checkAndInitPrivilegeMonitoringResources(context, logger);
 
-        telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
-          endpoint: request.route.path,
-        });
-
         try {
           const body: GetEntityStoreStatusResponse = await secSol
             .getEntityStoreDataClient()
             .status(request.query);
-
+          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+            endpoint: request.route.path,
+          });
           return response.ok({ body });
         } catch (e) {
           const error = transformError(e);
           logger.error(`Error initialising entity store: ${error.message}`);
+          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+            endpoint: request.route.path,
+            error: error.message,
+          });
           return siemResponse.error({
             statusCode: error.statusCode,
             body: error.message,

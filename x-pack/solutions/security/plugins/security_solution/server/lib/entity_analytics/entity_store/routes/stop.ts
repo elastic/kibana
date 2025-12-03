@@ -47,20 +47,22 @@ export const stopEntityEngineRoute = (
       async (context, request, response): Promise<IKibanaResponse<StopEntityEngineResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
-        telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
-          endpoint: request.route.path,
-        });
-
         try {
           const secSol = await context.securitySolution;
           const engine = await secSol
             .getEntityStoreDataClient()
             .stop(EntityType[request.params.entityType]);
-
+          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+            endpoint: request.route.path,
+          });
           return response.ok({ body: { stopped: engine.status === ENGINE_STATUS.STOPPED } });
         } catch (e) {
           logger.error(`Error in StopEntityEngine: ${e.message}`);
           const error = transformError(e);
+          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+            endpoint: request.route.path,
+            error: error.message,
+          });
           return siemResponse.error({
             statusCode: error.statusCode,
             body: error.message,

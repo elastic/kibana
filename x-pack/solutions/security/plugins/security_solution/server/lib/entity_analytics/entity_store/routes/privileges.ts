@@ -47,10 +47,6 @@ export const entityStoreInternalPrivilegesRoute = (
         try {
           const { getSpaceId, getAppClient, getDataViewsService } = await context.securitySolution;
 
-          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
-            endpoint: request.route.path,
-          });
-
           const securitySolution = await context.securitySolution;
           securitySolution.getAuditLogger()?.log({
             message: 'User checked if they have the required privileges to use the Entity Store',
@@ -72,9 +68,17 @@ export const entityStoreInternalPrivilegesRoute = (
             .getEntityStoreDataClient()
             .getEntityStoreInitPrivileges(securitySolutionIndices);
 
+          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+            endpoint: request.route.path,
+          });
           return response.ok({ body });
         } catch (e) {
           const error = transformError(e);
+
+          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+            endpoint: request.route.path,
+            error: error.message,
+          });
 
           return siemResponse.error({
             statusCode: error.statusCode,
