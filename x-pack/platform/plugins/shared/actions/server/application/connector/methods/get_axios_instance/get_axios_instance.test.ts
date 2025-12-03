@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import z from '@kbn/zod/v4';
+import { z } from '@kbn/zod/v4';
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { ActionTypeRegistry } from '../../../../action_type_registry';
