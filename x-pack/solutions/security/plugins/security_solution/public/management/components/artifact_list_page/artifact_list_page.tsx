@@ -50,6 +50,7 @@ import { BackToExternalAppSecondaryButton } from '../back_to_external_app_second
 import { BackToExternalAppButton } from '../back_to_external_app_button';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { ArtifactImportFlyout } from './components/artifact_import_flyout';
+import { useIsImportFlyoutOpened } from './hooks/use_is_import_flyout_opened';
 
 type ArtifactEntryCardType = typeof ArtifactEntryCard;
 
@@ -97,6 +98,9 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     allowCardDeleteAction = true,
     CardDecorator,
   }) => {
+    const isExportImportFFEnabled = useIsExperimentalFeatureEnabled(
+      'endpointArtifactsExportImportEnabled'
+    );
     const { services } = useKibana();
     const { http } = services;
     const { state: routeState } = useLocation<ListPageRouteState | undefined>();
@@ -104,14 +108,13 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     const toasts = useToasts();
     const isMounted = useIsMounted();
     const isFlyoutOpened = useIsFlyoutOpened(allowCardEditAction, allowCardCreateAction);
+    const isImportFlyoutOpened =
+      useIsImportFlyoutOpened(allowCardCreateAction) && isExportImportFFEnabled;
     const setUrlParams = useSetUrlParams();
     const {
       urlParams: { filter, includedPolicies },
     } = useUrlParams<ArtifactListPageUrlParams>();
     const { exportExceptionList } = useApi(http);
-    const isExportImportFFEnabled = useIsExperimentalFeatureEnabled(
-      'endpointArtifactsExportImportEnabled'
-    );
 
     const {
       isPageInitializing,
@@ -142,7 +145,6 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     >(undefined);
 
     const [exportedData, setExportedData] = useState<Blob>();
-    const [isImportFlyoutOpen, setIsImportFlyoutOpen] = useState(false);
 
     const labels = useMemo<typeof artifactListPageLabels>(() => {
       return {
@@ -278,14 +280,14 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
 
     const handleOnDownload = useCallback(() => setExportedData(undefined), []);
 
-    const handleImport = useCallback(() => setIsImportFlyoutOpen(true), []);
+    const handleImport = useCallback(() => setUrlParams({ show: 'import' }), [setUrlParams]);
 
-    const handleImportFlyoutOnCancel = useCallback(() => setIsImportFlyoutOpen(false), []);
+    const closeImportFlyout = useCallback(() => setUrlParams({ show: undefined }), [setUrlParams]);
 
     const handleImportFlyoutOnSuccess = useCallback(() => {
-      setIsImportFlyoutOpen(false);
+      closeImportFlyout();
       refetchListData();
-    }, [refetchListData]);
+    }, [closeImportFlyout, refetchListData]);
 
     const description = useMemo(() => {
       const subtitleText = labels.pageAboutInfo ? (
@@ -375,9 +377,9 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
           />
         )}
 
-        {isImportFlyoutOpen && (
+        {isImportFlyoutOpened && (
           <ArtifactImportFlyout
-            onCancel={handleImportFlyoutOnCancel}
+            onCancel={closeImportFlyout}
             onSuccess={handleImportFlyoutOnSuccess}
             apiClient={apiClient}
             labels={labels}
