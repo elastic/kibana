@@ -55,7 +55,7 @@ export const useStreamDescriptionApi = ({
           queries: definition.queries,
           rules: definition.rules,
           stream: {
-            ...omit(definition.stream, 'name'),
+            ...omit(definition.stream, ['name', 'updated_at']),
             description: nextDescription,
           },
         })
