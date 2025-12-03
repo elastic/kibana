@@ -150,6 +150,7 @@ import type { TelemetryQueryConfiguration } from './lib/telemetry/types';
 import type { TrialCompanionMilestoneService } from './lib/trial_companion/services/trial_companion_milestone_service.types';
 import { TrialCompanionMilestoneServiceImpl } from './lib/trial_companion/services/trial_companion_milestone_service';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
+import type { TrialCompanionRoutesDeps } from './lib/trial_companion/types';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -445,7 +446,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.alerting.registerType(securityRuleTypeWrapper(createThresholdAlertType()));
     plugins.alerting.registerType(securityRuleTypeWrapper(createNewTermsAlertType()));
 
-    const trialCompanionDeps: TrialCompanionRouterDeps = {
+    const trialCompanionDeps: TrialCompanionRoutesDeps = {
       router,
       logger,
       enabled: config.experimentalFeatures.trialCompanionEnabled && plugins.cloud?.isInTrial(),
