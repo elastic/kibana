@@ -81,13 +81,6 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       return alerts;
     };
 
-    const runRuleNow = async (ruleId: string) => {
-      await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
-        .set('kbn-xsrf', 'foo')
-        .expect(204);
-    };
-
     afterEach(async () => {
       await es.deleteByQuery({
         index: alertAsDataIndex,
@@ -189,7 +182,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       await alertUtils.getMuteInstanceRequest(ruleId, alertInstanceId);
 
       // Run the rule to trigger reconciliation
-      await runRuleNow(ruleId);
+      await alertUtils.runSoon(ruleId);
 
       // Wait for alert document to be updated
       await retry.try(async () => {
@@ -218,7 +211,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       await alertUtils.getMuteInstanceRequest(ruleId, alertInstanceId);
 
       // Run the rule to trigger reconciliation
-      await runRuleNow(ruleId);
+      await alertUtils.runSoon(ruleId);
 
       // Wait for alert to be muted
       await retry.try(async () => {
@@ -233,7 +226,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       await alertUtils.getUnmuteInstanceRequest(ruleId, alertInstanceId);
 
       // Run the rule to trigger reconciliation
-      await runRuleNow(ruleId);
+      await alertUtils.runSoon(ruleId);
 
       // Wait for alert document to be updated
       await retry.try(async () => {
@@ -259,7 +252,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       await alertUtils.getMuteAllRequest(ruleId);
 
       // Run the rule to trigger reconciliation
-      await runRuleNow(ruleId);
+      await alertUtils.runSoon(ruleId);
 
       // Wait for all alert documents to be updated
       await retry.try(async () => {
@@ -284,7 +277,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       await alertUtils.getMuteAllRequest(ruleId);
 
       // Run the rule to trigger reconciliation
-      await runRuleNow(ruleId);
+      await alertUtils.runSoon(ruleId);
 
       // Wait for alerts to be muted
       await retry.try(async () => {
@@ -298,7 +291,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       await alertUtils.getUnmuteAllRequest(ruleId);
 
       // Run the rule to trigger reconciliation
-      await runRuleNow(ruleId);
+      await alertUtils.runSoon(ruleId);
 
       // Wait for all alert documents to be updated
       await retry.try(async () => {
@@ -364,7 +357,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       });
 
       // Run the rule to trigger reconciliation
-      await runRuleNow(ruleId);
+      await alertUtils.runSoon(ruleId);
 
       // Wait for reconciliation to fix the muted state
       await retry.try(async () => {
