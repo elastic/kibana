@@ -19,6 +19,8 @@ export interface CommaContext {
   hasMoreMandatoryArgs?: boolean;
   functionType?: FunctionDefinitionTypes;
   isCursorFollowedByComma?: boolean;
+  /** True if position is ambiguous in repeating signature (positions 2, 4, 6...) */
+  isAmbiguousPosition?: boolean;
   functionSignatures?: Array<{
     params: Array<{ type: SupportedDataType | 'any' | 'unknown'; name?: string }>;
     minParams?: number;
@@ -30,8 +32,8 @@ export interface CommaContext {
   isLiteral?: boolean;
   hasMoreParams?: boolean;
   isVariadic?: boolean;
-  firstArgumentType?: SupportedDataType | 'unknown';
-  shouldSuggestOperators?: boolean;
+  /** Type of the current expression (used to distinguish condition vs value in CASE) */
+  expressionType?: SupportedDataType | 'unknown';
   innerText?: string;
   listHasValues?: boolean;
 }
@@ -63,7 +65,14 @@ export function shouldSuggestComma(context: CommaContext): boolean {
 }
 
 function handleAfterComplete(context: CommaContext, isExpressionHeavy: boolean): boolean {
-  const { typeMatches, hasMoreParams, isVariadic } = context;
+  const { typeMatches, hasMoreParams, isVariadic, isAmbiguousPosition, expressionType } = context;
+
+  // Repeating signatures (eg. CASE): positions 2, 4, 6... are ambiguous
+  // - If expression is boolean → it's a condition → suggest comma for next value
+  // - If expression is NOT boolean → could be default value → no comma
+  if (isAmbiguousPosition && expressionType !== 'boolean') {
+    return false;
+  }
 
   if (!hasMoreParams) {
     return false;

@@ -69,6 +69,19 @@ export const allStarConstant: ISuggestionItem = {
   sortText: '1',
 };
 
+export const valuePlaceholderConstant: ISuggestionItem = withAutoSuggest({
+  label: i18n.translate('kbn-esql-ast.esql.autocomplete.valuePlaceholderLabel', {
+    defaultMessage: 'Add a value and let autocomplete "value"',
+  }),
+  text: '"${0:value}"',
+  asSnippet: true,
+  kind: 'Constant',
+  detail: i18n.translate('kbn-esql-ast.esql.autocomplete.valuePlaceholderDetail', {
+    defaultMessage: 'Insert a value placeholder',
+  }),
+  category: SuggestionCategory.CONSTANT_VALUE,
+});
+
 export const commaCompleteItem = buildCharCompleteItem(
   ',',
   i18n.translate('kbn-esql-ast.esql.autocomplete.commaDoc', {

@@ -1087,20 +1087,62 @@ describe('function validation', () => {
     });
   });
 
-  describe('CASE function validation', () => {
-    it('rejects CASE with non-boolean first argument', async () => {
-      const { expectErrors } = await setup();
-      await expectErrors('FROM index | EVAL result = CASE(textField, keywordField)', [
-        getNoValidCallSignatureError('case', ['text', 'keyword']),
-      ]);
+  describe('conditional function validation', () => {
+    beforeEach(() => {
+      const definitions: FunctionDefinition[] = [
+        {
+          name: 'conditional_mock',
+          type: FunctionDefinitionTypes.SCALAR,
+          description: 'Mock function with isSignatureRepeating',
+          locationsAvailable: [Location.EVAL],
+          signatures: [
+            {
+              params: [
+                { name: 'condition', type: 'boolean' },
+                { name: 'value', type: 'any' },
+              ],
+              returnType: 'unknown',
+              minParams: 2,
+              isSignatureRepeating: true,
+            },
+          ],
+        },
+      ];
+
+      setTestFunctions(definitions);
     });
 
-    it('rejects CASE with non-boolean third argument (condition position)', async () => {
+    it('accepts compatible value types (text + keyword)', async () => {
       const { expectErrors } = await setup();
+
       await expectErrors(
-        'FROM index | EVAL result = CASE(booleanField, textField, textField, keywordField)',
-        [getNoValidCallSignatureError('case', ['boolean', 'text', 'text', 'keyword'])]
+        'FROM index | EVAL result = CONDITIONAL_MOCK(booleanField, textField, booleanField, keywordField)',
+        []
       );
+    });
+
+    it('rejects incompatible value types', async () => {
+      const { expectErrors } = await setup();
+
+      await expectErrors(
+        'FROM index | EVAL result = CONDITIONAL_MOCK(booleanField, longField, booleanField, "d")',
+        [
+          getNoValidCallSignatureError('conditional_mock', [
+            'boolean',
+            'long',
+            'boolean',
+            'keyword',
+          ]),
+        ]
+      );
+    });
+
+    it('rejects string literal at condition position', async () => {
+      const { expectErrors } = await setup();
+
+      await expectErrors('FROM index | EVAL result = CONDITIONAL_MOCK("string", keywordField)', [
+        getNoValidCallSignatureError('conditional_mock', ['keyword', 'keyword']),
+      ]);
     });
   });
 });
