@@ -18,7 +18,7 @@ export const createDataSourcesService = (
   soClient: SavedObjectsClientContract,
   maxUsersAllowed: number // TODO: remove this and use a const instead
 ) => {
-  const newIndexSync = dataClient.deps.experimentalFeatures?.newIndexSyncUpdateDetectionEnabled;
+  const newIndexSync = dataClient.deps.experimentalFeatures?.privilegedMonitoringNewIndexSyncUpdateDetectionEnabled;
   const esClient = dataClient.deps.clusterClient.asCurrentUser;
   const integrationsSyncService = createIntegrationsSyncService(dataClient, soClient);
   let indexSyncService;
