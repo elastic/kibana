@@ -10,7 +10,7 @@
 import { z } from '@kbn/zod/v4';
 import type { AxiosInstance } from 'axios';
 import { isString } from 'lodash';
-import type { AuthTypeSpec } from '../connector_spec';
+import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 import * as i18n from './translations';
 
 const HEADER_FIELD_DEFAULT = 'Api-Key';
@@ -57,7 +57,11 @@ export const ApiKeyHeaderAuth: AuthTypeSpec<AuthSchemaType> = {
 
     return schemaToUse.meta(existingMeta);
   },
-  configure: (axiosInstance: AxiosInstance, secret: NormalizedAuthSchemaType): AxiosInstance => {
+  configure: async (
+    _: AuthContext,
+    axiosInstance: AxiosInstance,
+    secret: NormalizedAuthSchemaType
+  ): Promise<AxiosInstance> => {
     // set global defaults
     Object.keys(secret)
       .filter((key) => key !== 'authType')

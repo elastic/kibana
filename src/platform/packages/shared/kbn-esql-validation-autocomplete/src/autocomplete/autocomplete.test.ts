@@ -34,7 +34,7 @@ import {
 } from './__tests__/helpers';
 import { suggest } from './autocomplete';
 import { editorExtensions } from '../__tests__/helpers';
-import { mapRecommendedQueriesFromExtensions } from './utils/recommended_queries_helpers';
+import { mapRecommendedQueriesFromExtensions } from './recommended_queries_helpers';
 
 const getRecommendedQueriesSuggestionsFromTemplates = (
   fromCommand: string,
@@ -1045,7 +1045,7 @@ describe('autocomplete', () => {
   });
 
   describe('IN operator with lists', () => {
-    testSuggestions('FROM a | WHERE integerField IN (doubleField /', [{ text: ', ' }]);
+    testSuggestions('FROM a | WHERE integerField IN (doubleField /', [{ text: ',' }]);
   });
 
   describe('Replacement ranges are attached when needed', () => {
