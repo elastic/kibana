@@ -84,7 +84,7 @@ export const suggestionsApi = ({
   } as unknown as DataViewsState;
 
   const initialVisualization = visualizationMap?.[Object.keys(visualizationMap)[0]] || null;
-  const isSubTypeForInitial = preferredChartType
+  const isInitialSubTypeSupported = preferredChartType
     ? initialVisualization?.isSubtypeSupported?.(preferredChartType.toLowerCase())
     : undefined;
 
@@ -96,7 +96,7 @@ export const suggestionsApi = ({
     activeVisualization: initialVisualization,
     visualizationState: undefined,
     visualizeTriggerFieldContext: context,
-    subVisualizationId: isSubTypeForInitial ? preferredChartType : undefined,
+    subVisualizationId: isInitialSubTypeSupported ? preferredChartType : undefined,
     dataViews,
   });
   if (!suggestions.length) return [];
