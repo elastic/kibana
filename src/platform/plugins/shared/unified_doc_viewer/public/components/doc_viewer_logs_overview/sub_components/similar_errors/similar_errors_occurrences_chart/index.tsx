@@ -18,7 +18,6 @@ import {
 import type { LensAttributes } from '@kbn/lens-embeddable-utils/config_builder';
 import { EuiCallOut, EuiLoadingChart, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/common/constants';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { ContentFrameworkChart } from '../../../../content_framework/chart';
@@ -160,11 +159,7 @@ export function SimilarErrorsOccurrencesChart({
 
     return (
       <div style={{ height: '120px', width: '100%' }}>
-        <EmbeddableRenderer
-          type={LENS_EMBEDDABLE_TYPE}
-          getParentApi={getParentApi}
-          hidePanelChrome
-        />
+        <EmbeddableRenderer type={'lens'} getParentApi={getParentApi} hidePanelChrome />
       </div>
     );
   }, [getParentApi, lensAttributes]);
