@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import type {
   Action,
   ActionExecutionMeta,
@@ -14,7 +13,7 @@ import type {
 } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import React, { useState } from 'react';
-import { EuiPopover, EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
+import { EuiPopover, EuiText, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiPublishesProjectRouting, apiHasParentApi } from '@kbn/presentation-publishing';
@@ -58,23 +57,9 @@ export class CpsUsageOverridesBadge
     }
 
     const overrideValue = embeddable.projectRouting$.value;
-    const dashboardValue =
-      apiHasParentApi(embeddable) && apiPublishesProjectRouting(embeddable.parentApi)
-        ? embeddable.parentApi.projectRouting$.value
-        : undefined;
-
     const badgeLabel = i18n.translate('presentationPanel.badge.cpsUsageOverrides.label', {
       defaultMessage: 'CPS overrides',
     });
-
-    const formatProjectRoutingValue = (value: string | undefined) => {
-      if (value === 'ALL') {
-        return i18n.translate('presentationPanel.badge.cpsUsageOverrides.popover.allProjects', {
-          defaultMessage: 'All projects',
-        });
-      }
-      return value;
-    };
 
     const handleEditClick = async () => {
       setIsPopoverOpen(false);
@@ -97,64 +82,42 @@ export class CpsUsageOverridesBadge
 
     return (
       <EuiPopover
-        button={
-          <button
-            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-            style={{ cursor: 'pointer' }}
-            data-test-subj="cpsUsageOverridesBadgeButton"
-          >
-            {badgeLabel}
-          </button>
-        }
+        button={<button onClick={() => setIsPopoverOpen(!isPopoverOpen)}>{badgeLabel}</button>}
         isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(false)}
         anchorPosition="downCenter"
+        panelStyle={{ minWidth: 250 }}
       >
-        <EuiText size="s" style={{ maxWidth: '300px' }}>
-          <p>
-            <strong>
-              {i18n.translate('presentationPanel.badge.cpsUsageOverrides.popover.title', {
-                defaultMessage: 'CPS Scope Override',
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiText size="s">
+              <strong>
+                {i18n.translate('presentationPanel.badge.cpsUsageOverrides.popover.title', {
+                  defaultMessage: 'CPS Override',
+                })}
+              </strong>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              onClick={handleEditClick}
+              size="s"
+              data-test-subj="cpsUsageOverridesEditButton"
+              flush="right"
+            >
+              {i18n.translate('presentationPanel.badge.cpsUsageOverrides.popover.editButton', {
+                defaultMessage: 'Edit',
               })}
-            </strong>
-          </p>
-          <p>
-            <strong>
-              {i18n.translate('presentationPanel.badge.cpsUsageOverrides.popover.panelScope', {
-                defaultMessage: 'Panel scope:',
-              })}
-            </strong>
-            {formatProjectRoutingValue(overrideValue)}
-            <br />
-            <strong>
-              {i18n.translate('presentationPanel.badge.cpsUsageOverrides.popover.dashboardScope', {
-                defaultMessage: 'Dashboard scope:',
-              })}
-            </strong>{' '}
-            {formatProjectRoutingValue(dashboardValue) ??
-              i18n.translate('presentationPanel.badge.cpsUsageOverrides.popover.notSet', {
-                defaultMessage: 'Not set',
-              })}
-          </p>
-          <p>
-            {i18n.translate('presentationPanel.badge.cpsUsageOverrides.popover.description', {
-              defaultMessage:
-                "To use the dashboard's CPS scope, remove the override from panel settings.",
-            })}
-          </p>
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiText size="s">
+          {overrideValue === 'ALL'
+            ? i18n.translate('presentationPanel.badge.cpsUsageOverrides.popover.allProjects', {
+                defaultMessage: 'All projects',
+              })
+            : overrideValue}
         </EuiText>
-        <EuiSpacer size="s" />
-        <EuiButton
-          onClick={handleEditClick}
-          size="s"
-          fullWidth
-          iconType="pencil"
-          data-test-subj="cpsUsageOverridesEditButton"
-        >
-          {i18n.translate('presentationPanel.badge.cpsUsageOverrides.popover.editButton', {
-            defaultMessage: 'Edit panel configuration',
-          })}
-        </EuiButton>
       </EuiPopover>
     );
   };
