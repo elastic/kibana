@@ -33,31 +33,13 @@ function getCypressConfigPath(): string {
   // Try to get from process.argv
   const configFileArgIndex = process.argv.findIndex((arg) => arg === '--config-file');
   if (configFileArgIndex !== -1 && process.argv[configFileArgIndex + 1]) {
-    return path.resolve(REPO_ROOT, process.argv[configFileArgIndex + 1]);
+    return process.argv[configFileArgIndex + 1];
   }
 
   // Try to get from environment variable (set by start_cypress_parallel script)
   if (process.env.CYPRESS_CONFIG_FILE) {
-    return path.resolve(REPO_ROOT, process.env.CYPRESS_CONFIG_FILE);
+    return process.env.CYPRESS_CONFIG_FILE;
   }
-
-  // Fallback to checking common config file names in order of precedence
-  const commonConfigFiles = ['cypress.config.ts', 'cypress.config.js', 'cypress.json'];
-
-  for (const configFile of commonConfigFiles) {
-    const configPath = path.join(process.cwd(), configFile);
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      if (require('fs').existsSync(configPath)) {
-        return configPath;
-      }
-    } catch {
-      // Continue to next option
-    }
-  }
-
-  // Return empty string if no config found
-  return '';
 }
 
 function getReportingOptionOverrides(options?: Cypress.ConfigOptions): Record<string, any> {
@@ -75,11 +57,27 @@ function getReportingOptionOverrides(options?: Cypress.ConfigOptions): Record<st
   // this is the list of reporters that should be enabled through the multi-reporter plugin
   let enabledReporters: string[] = [];
   let reporterOptions: Record<string, any> = options?.reporterOptions ?? {};
+  let counter = 0;
 
   if (reporterOptions.configFile) {
     // Load reporter options from file
     // not sure if path is relative to process.cwd() will test it
-    reporterOptions = JSON.parse(readFileSync(reporterOptions.configFile, 'utf8'));
+    const workDir = path.join(process.cwd(), '../');
+    try {
+      reporterOptions = JSON.parse(
+        readFileSync(path.join(workDir, reporterOptions.configFile), 'utf8')
+      );
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.log('The initial process.cwd is on a different location');
+      counter++;
+      if (counter > 1) {
+        throw e;
+      }
+    }
+  }
+
+  if (reporterOptions.reporterEnabled) {
     enabledReporters = reporterOptions.reporterEnabled.split(',').map((r: string) => r.trim());
   }
 
@@ -107,6 +105,7 @@ function getReportingOptionOverrides(options?: Cypress.ConfigOptions): Record<st
   return { reporter, reporterOptions };
 }
 
+export function defineCypressConfig(options?: Cypress.ConfigOptions<any>) {
   return defineConfig({
     ...options,
     ...getReportingOptionOverrides(options),
