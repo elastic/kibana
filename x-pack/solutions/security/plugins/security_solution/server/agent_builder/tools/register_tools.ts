@@ -17,7 +17,7 @@ import { alertsTool } from './alerts_tool';
  */
 export const registerTools = async (onechat: OnechatPluginSetup, core: CoreSetup) => {
   onechat.tools.register(entityRiskScoreTool(core));
-  onechat.tools.register(attackDiscoverySearchTool());
+  onechat.tools.register(attackDiscoverySearchTool(core));
   onechat.tools.register(securityLabsSearchTool(core));
   onechat.tools.register(alertsTool());
 };

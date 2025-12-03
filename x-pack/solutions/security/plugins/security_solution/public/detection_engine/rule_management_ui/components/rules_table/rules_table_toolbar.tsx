@@ -8,7 +8,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { NewChat } from '@kbn/elastic-assistant';
-import { AttachmentType } from '@kbn/onechat-common/attachments';
 import { useUserData } from '../../../../detections/components/user_info';
 import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
 import { usePrebuiltRulesStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_status';
@@ -21,6 +20,7 @@ import * as i18nAssistant from '../../../common/translations';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
 import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
+import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
 
 export enum AllRulesTabs {
   management = 'management',
@@ -107,7 +107,7 @@ export const RulesTableToolbar = React.memo(() => {
     [selectedRules]
   );
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
-    attachmentType: AttachmentType.product_reference,
+    attachmentType: SecurityAgentBuilderAttachments.rule,
     attachmentData,
     attachmentPrompt: i18nAssistant.EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS,
   });

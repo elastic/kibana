@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import type { UiAttachment } from '@kbn/onechat-plugin/public/embeddable/types';
+import type { AttachmentInput } from '@kbn/onechat-common/attachments';
 import { useKibana } from '../../common/lib/kibana/use_kibana';
 
 export interface UseAgentBuilderAttachmentParams {
@@ -51,10 +51,10 @@ export const useAgentBuilderAttachment = ({
     const attachmentId = `${attachmentType}-${Date.now()}`;
 
     // Create the UiAttachment object
-    const attachment: UiAttachment = {
+    const attachment: AttachmentInput = {
       id: attachmentId,
       type: attachmentType,
-      getContent: async () => attachmentData,
+      data: attachmentData,
     };
 
     // Open the conversation flyout with attachment and prefilled message

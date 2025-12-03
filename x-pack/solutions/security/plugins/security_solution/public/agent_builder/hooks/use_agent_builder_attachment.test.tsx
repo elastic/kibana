@@ -12,7 +12,16 @@ import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mo
 import { useAgentBuilderAttachment } from './use_agent_builder_attachment';
 import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
 
-const mockOpenConversationFlyout = jest.fn();
+const mockFlyoutRef = {
+  close: jest.fn(),
+};
+
+const mockOpenConversationFlyout = jest.fn<
+  unknown,
+  Parameters<OnechatPluginStart['openConversationFlyout']>
+>(() => ({
+  flyoutRef: mockFlyoutRef,
+}));
 
 const createWrapper = (onechatService?: OnechatPluginStart) => {
   const mockStartServices = createStartServicesMock();
@@ -28,7 +37,8 @@ const createWrapper = (onechatService?: OnechatPluginStart) => {
 };
 
 const mockOnechatService: OnechatPluginStart = {
-  openConversationFlyout: mockOpenConversationFlyout,
+  openConversationFlyout:
+    mockOpenConversationFlyout as OnechatPluginStart['openConversationFlyout'],
   tools: {} as OnechatPluginStart['tools'],
   setConversationFlyoutActiveConfig: jest.fn(),
   clearConversationFlyoutActiveConfig: jest.fn(),
@@ -52,7 +62,7 @@ describe('useAgentBuilderAttachment', () => {
 
   it('returns openAgentBuilderFlyout function', () => {
     const { result } = renderHook(() => useAgentBuilderAttachment(defaultParams), {
-      wrapper: createWrapper(),
+      wrapper: createWrapper(mockOnechatService),
     });
 
     expect(result.current.openAgentBuilderFlyout).toBeDefined();
@@ -61,7 +71,7 @@ describe('useAgentBuilderAttachment', () => {
 
   it('opens flyout with correct attachment data and prompt', () => {
     const { result } = renderHook(() => useAgentBuilderAttachment(defaultParams), {
-      wrapper: createWrapper(),
+      wrapper: createWrapper(mockOnechatService),
     });
 
     act(() => {
@@ -76,7 +86,7 @@ describe('useAgentBuilderAttachment', () => {
         {
           id: 'alert-1234567890',
           type: 'alert',
-          getContent: expect.any(Function),
+          data: { alert: 'test alert data' },
         },
       ],
       sessionTag: 'security',
@@ -85,7 +95,7 @@ describe('useAgentBuilderAttachment', () => {
 
   it('opens flyout with correct sessionTag', () => {
     const { result } = renderHook(() => useAgentBuilderAttachment(defaultParams), {
-      wrapper: createWrapper(),
+      wrapper: createWrapper(mockOnechatService),
     });
 
     act(() => {
@@ -112,11 +122,17 @@ describe('useAgentBuilderAttachment', () => {
   });
 
   it('handles missing openConversationFlyout method gracefully', () => {
+    const partialOnechatService: Partial<OnechatPluginStart> &
+      Pick<
+        OnechatPluginStart,
+        'tools' | 'setConversationFlyoutActiveConfig' | 'clearConversationFlyoutActiveConfig'
+      > = {
+      ...mockOnechatService,
+      openConversationFlyout: undefined,
+    };
+
     const { result } = renderHook(() => useAgentBuilderAttachment(defaultParams), {
-      wrapper: createWrapper({
-        ...mockOnechatService,
-        openConversationFlyout: undefined,
-      } as Partial<typeof mockOnechatService> as typeof mockOnechatService),
+      wrapper: createWrapper(partialOnechatService as OnechatPluginStart),
     });
 
     act(() => {
@@ -128,7 +144,7 @@ describe('useAgentBuilderAttachment', () => {
 
   it('generates attachment ID with timestamp', async () => {
     const { result } = renderHook(() => useAgentBuilderAttachment(defaultParams), {
-      wrapper: createWrapper(),
+      wrapper: createWrapper(mockOnechatService),
     });
 
     act(() => {
@@ -136,25 +152,9 @@ describe('useAgentBuilderAttachment', () => {
     });
 
     const callArgs = mockOpenConversationFlyout.mock.calls[0][0];
-    const attachment = callArgs.attachments[0];
+    const attachment = callArgs?.attachments?.length ? callArgs?.attachments[0] : { id: '' };
 
     expect(attachment.id).toBe('alert-1234567890');
     expect(attachment.id).toMatch(/^alert-\d+$/);
-  });
-
-  it('attachment getContent returns correct data', async () => {
-    const { result } = renderHook(() => useAgentBuilderAttachment(defaultParams), {
-      wrapper: createWrapper(),
-    });
-
-    act(() => {
-      result.current.openAgentBuilderFlyout();
-    });
-
-    const callArgs = mockOpenConversationFlyout.mock.calls[0][0];
-    const attachment = callArgs.attachments[0];
-    const content = await attachment.getContent();
-
-    expect(content).toEqual({ alert: 'test alert data' });
   });
 });

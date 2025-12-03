@@ -95,6 +95,5 @@
     "@kbn/core-notifications-browser",
     "@kbn/deeplinks-agent-builder",
     "@kbn/ui-theme",
-    "@kbn/cases-plugin"
   ]
 }
