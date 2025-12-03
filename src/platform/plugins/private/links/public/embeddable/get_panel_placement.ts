@@ -7,25 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SerializedPanelState } from '@kbn/presentation-publishing';
 import { DASHBOARD_GRID_COLUMN_COUNT, PanelPlacementStrategy } from '@kbn/dashboard-plugin/public';
 import { LINKS_HORIZONTAL_LAYOUT } from '../../common/content_management';
 import type { LinksEmbeddableState } from '../../common';
-import type { LinksState } from '../../server';
+import type { LinksByReferenceState, LinksByValueState } from '../../server';
 import { loadFromLibrary } from '../content_management/load_from_library';
 
-export async function getPanelPlacement(
-  serializedState?: SerializedPanelState<LinksEmbeddableState>
-) {
+export async function getPanelPlacement(serializedState?: LinksEmbeddableState) {
   if (!serializedState) return {};
 
   let layout = LINKS_HORIZONTAL_LAYOUT;
   let numLinks = 1;
   try {
-    const savedObjectId = (serializedState.rawState as { savedObjectId?: string }).savedObjectId;
+    const savedObjectId = (serializedState as LinksByReferenceState).savedObjectId;
     const linksState = savedObjectId
       ? await loadFromLibrary(savedObjectId)
-      : (serializedState.rawState as LinksState);
+      : (serializedState as LinksByValueState);
     if (linksState.layout) layout = linksState.layout;
     if (linksState.links) numLinks = linksState.links.length;
   } catch (error) {

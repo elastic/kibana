@@ -120,9 +120,7 @@ async function buildLinksEmbeddable(state: LinksEmbeddableState) {
   const parentApi = getMockLinksParentApi(state);
   const uuid = '1234';
   return await factory.buildEmbeddable({
-    initialState: {
-      rawState: state,
-    },
+    initialState: state,
     finalizeApi: (api) => {
       return {
         ...api,
