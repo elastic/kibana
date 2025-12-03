@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { from, stats, sort } from '@kbn/esql-composer';
 import {
@@ -16,7 +16,8 @@ import {
   type LensSeriesLayer,
 } from '@kbn/lens-embeddable-utils/config_builder';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils/config_builder';
-import { EuiLoadingChart, EuiFlexGroup, EuiCallOut, EuiFlexItem } from '@elastic/eui';
+import { EuiCallOut, EuiLoadingChart, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { ContentFrameworkChart } from '../../../../content_framework/chart';
@@ -74,15 +75,10 @@ export interface SimilarErrorsOccurrencesChartProps {
 export function SimilarErrorsOccurrencesChart({
   baseEsqlQuery,
 }: SimilarErrorsOccurrencesChartProps) {
-  const { data, discoverShared } = getUnifiedDocViewerServices();
+  const { data } = getUnifiedDocViewerServices();
   const { indexes } = useDataSourcesContext();
   const [lensAttributes, setLensAttributes] = useState<LensAttributes | undefined>(undefined);
   const [hasError, setHasError] = useState<boolean>(false);
-  const lensFeature = useMemo(
-    () => discoverShared.features.registry.getById('lens-embeddable-component'),
-    [discoverShared]
-  );
-  const EmbeddableComponent = lensFeature?.EmbeddableComponent;
   const timeRange = useMemo(
     () => data.query.timefilter.timefilter.getTime(),
     [data.query.timefilter.timefilter]
@@ -101,6 +97,19 @@ export function SimilarErrorsOccurrencesChart({
       )
       .toString();
   }, [baseEsqlQuery, indexes.logs]);
+
+  const getParentApi = useCallback(() => {
+    return {
+      getSerializedStateForChild: () => ({
+        rawState: {
+          attributes: lensAttributes,
+          viewMode: 'view',
+          timeRange,
+          esqlVariables: [],
+        },
+      }),
+    };
+  }, [lensAttributes, timeRange]);
 
   useEffect(() => {
     if (!chartEsqlQuery || !data.dataViews) {
@@ -138,7 +147,7 @@ export function SimilarErrorsOccurrencesChart({
   }, [chartEsqlQuery, data.dataViews]);
 
   const content = useMemo(() => {
-    if (!lensAttributes || !EmbeddableComponent) {
+    if (!lensAttributes) {
       return (
         <EuiFlexGroup style={{ height: 120 }} justifyContent="center" alignItems="center">
           <EuiFlexItem grow={false}>
@@ -149,17 +158,11 @@ export function SimilarErrorsOccurrencesChart({
     }
 
     return (
-      <EmbeddableComponent
-        id="similar-errors-chart"
-        attributes={lensAttributes}
-        timeRange={timeRange}
-        esqlVariables={[]}
-        viewMode="view"
-        noPadding={true}
-        style={{ height: 120 }}
-      />
+      <div style={{ height: '120px', width: '100%' }}>
+        <EmbeddableRenderer type={'lens'} getParentApi={getParentApi} hidePanelChrome />
+      </div>
     );
-  }, [lensAttributes, EmbeddableComponent, timeRange]);
+  }, [getParentApi, lensAttributes]);
 
   if (hasError) {
     return <EuiCallOut color="danger" announceOnMount size="s" title={errorMessage} />;
