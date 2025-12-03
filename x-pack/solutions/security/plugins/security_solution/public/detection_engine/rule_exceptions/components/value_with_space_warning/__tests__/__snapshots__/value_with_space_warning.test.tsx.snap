@@ -16,6 +16,7 @@ exports[`ValueWithSpaceWarning should render if showSpaceWarning is truthy 1`] =
   >
     <span
       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+      id="generated-id-wrapper"
     >
       <span
         color="warning"
