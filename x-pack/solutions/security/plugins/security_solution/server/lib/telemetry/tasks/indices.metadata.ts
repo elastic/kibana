@@ -195,7 +195,7 @@ export function createTelemetryIndicesMetadataTaskConfig() {
             return names;
           })
           .catch((error) => {
-            log.warn(`Error getting ILM stats`, { error });
+            log.warn(`Error getting ILM stats`, withErrorMessage(error));
             incrementCounter(TelemetryCounter.RUNTIME_ERROR, 'ilm-stats', 1);
             return new Set<string>();
           });

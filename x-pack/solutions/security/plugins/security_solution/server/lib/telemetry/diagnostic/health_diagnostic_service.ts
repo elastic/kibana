@@ -165,7 +165,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
                 message: error.message,
                 reason: error instanceof ValidationError ? error.result : undefined,
               };
-              this.logger.error('Error running query', { error });
+              this.logger.error('Error running query', withErrorMessage(error));
               resolve({
                 ...queryStats,
                 failure,
