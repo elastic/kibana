@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';
 import { OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID } from '@kbn/observability-agent-plugin/server/tools';
 import type { GetLogCategoriesToolResult } from '@kbn/observability-agent-plugin/server/tools/get_log_categories/get_log_categories';
