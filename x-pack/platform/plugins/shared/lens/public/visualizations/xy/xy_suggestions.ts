@@ -23,7 +23,7 @@ import { visualizationSubtypes, defaultSeriesType } from './types';
 import { flipSeriesType, getIconForSeries } from './state_helpers';
 import { getDataLayers, isDataLayer } from './visualization_helpers';
 
-const columnSortOrder = {
+const COLUMN_SORT_ORDER = {
   document: 0,
   date: 1,
   string: 2,
@@ -56,7 +56,7 @@ export function getSuggestions({
     !table.isMultiRow ||
     table.columns.length <= 1 ||
     table.columns.every((col) => col.operation.dataType !== 'number') ||
-    table.columns.some((col) => !Object.hasOwn(columnSortOrder, col.operation.dataType));
+    table.columns.some((col) => !Object.hasOwn(COLUMN_SORT_ORDER, col.operation.dataType));
 
   if (
     (incompleteTable && state && !subVisualizationId) ||
@@ -134,10 +134,7 @@ function getBucketMappings(table: TableSuggestion, currentState?: XYState) {
     getDataLayers(currentState.layers).find(({ layerId }) => layerId === table.layerId);
 
   const buckets = table.columns.filter((col) => col.operation.isBucketed);
-  // reverse the buckets before prioritization to always use the most inner
-  // bucket of the highest-prioritized group as x value (don't use nested
-  // buckets as split series)
-  const prioritizedBuckets = prioritizeColumns([...buckets].reverse());
+  const prioritizedBuckets = prioritizeColumns([...buckets]);
 
   if (!currentLayer || table.changeType === 'initial') {
     return prioritizedBuckets;
@@ -177,10 +174,10 @@ function getBucketMappings(table: TableSuggestion, currentState?: XYState) {
 
 // This shuffles columns around so that the left-most column defualts to:
 // date, string, boolean, then number, in that priority. We then use this
-// order to pluck out the x column, and the split / stack column.
+// order to pluck out the x column, and the split / stack columns.
 function prioritizeColumns(columns: TableSuggestionColumn[]) {
-  return [...columns].sort(
-    (a, b) => columnSortOrder[a.operation.dataType] - columnSortOrder[b.operation.dataType]
+  return columns.toSorted(
+    (a, b) => COLUMN_SORT_ORDER[a.operation.dataType] - COLUMN_SORT_ORDER[b.operation.dataType]
   );
 }
 
