@@ -116,7 +116,9 @@ export const registerSiemRuleMigrationsCreateQRadarRulesRoute = (
             // Identify reference sets from rule data and create resource records without content
             // This allows tracking missing resources that need to be uploaded
             const resourceIdentifier = new RuleResourceIdentifier('qradar');
-            const extractedResources = await resourceIdentifier.fromOriginals(originalRules);
+            const extractedResources = await resourceIdentifier.fromOriginals(
+              rulesToBeCreated.map((r) => r.original_rule)
+            );
             logger.info(`Identified ${extractedResources.length} QRadar resources from rules`);
 
             const referenceSetResources = extractedResources.map((resource) => ({
