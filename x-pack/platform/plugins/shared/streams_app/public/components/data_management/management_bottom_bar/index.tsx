@@ -16,8 +16,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useDiscardConfirm } from '../../../hooks/use_discard_confirm';
-import { selectStreamType } from '../stream_detail_enrichment/state_management/stream_enrichment_state_machine/selectors';
-import { useStreamEnrichmentSelector } from '../stream_detail_enrichment/state_management/stream_enrichment_state_machine';
 
 interface ManagementBottomBarProps {
   confirmButtonText?: string;
@@ -25,6 +23,7 @@ interface ManagementBottomBarProps {
   insufficientPrivileges?: boolean;
   isLoading?: boolean;
   isInvalid?: boolean;
+  streamType?: 'classic' | 'wired' | 'unknown';
   onCancel: () => void;
   onConfirm: () => void;
   onViewCodeClick?: () => void;
@@ -36,12 +35,11 @@ export function ManagementBottomBar({
   isLoading = false,
   insufficientPrivileges = false,
   isInvalid = false,
+  streamType,
   onCancel,
   onConfirm,
   onViewCodeClick,
 }: ManagementBottomBarProps) {
-  const streamType = useStreamEnrichmentSelector((snapshot) => selectStreamType(snapshot.context));
-
   const handleCancel = useDiscardConfirm(onCancel, {
     title: discardUnsavedChangesTitle,
     message: discardUnsavedChangesMessage,
