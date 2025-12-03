@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { formatOnechatErrorMessage } from './base/errors';
-export type { ToolServiceStartContract, ExecuteToolParams, ExecuteToolReturn } from './tools';
-export type { AgentsServiceStartContract } from './agents';
+export type { AgentsServiceStartContract } from './contract';

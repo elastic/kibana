@@ -33,6 +33,7 @@ import {
   type OnechatInternalService,
 } from './services';
 import { createPublicToolContract } from './services/tools';
+import { createPublicAgentsContract } from './services/agents';
 import type {
   ConfigSchema,
   OnechatPluginSetup,
@@ -150,6 +151,7 @@ export class OnechatPlugin
     );
 
     const onechatService: OnechatPluginStart = {
+      agents: createPublicAgentsContract({ agentService }),
       tools: createPublicToolContract({ toolsService }),
       setConversationFlyoutActiveConfig: (config: EmbeddableConversationProps) => {
         // set config until flyout is next opened
