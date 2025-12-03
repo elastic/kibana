@@ -8,7 +8,10 @@
  */
 
 import type { WorkflowYaml } from '@kbn/workflows';
-import { getWorkflowContextSchema } from './get_workflow_context_schema';
+import {
+  getWorkflowContextSchema,
+  type WorkflowDefinitionForContext,
+} from './get_workflow_context_schema';
 import { getSchemaAtPath } from '../../../../common/lib/zod/zod_utils';
 
 describe('getWorkflowContextSchema - Nested Objects', () => {

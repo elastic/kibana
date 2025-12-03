@@ -17,7 +17,7 @@ import { convertJsonSchemaToZod } from '../../../../common/lib/json_schema_to_zo
 import { inferZodType } from '../../../../common/lib/zod';
 
 // Type that accepts both WorkflowYaml (transformed) and raw definition (may have legacy inputs)
-type WorkflowDefinitionForContext =
+export type WorkflowDefinitionForContext =
   | WorkflowYaml
   | (Omit<WorkflowYaml, 'inputs'> & {
       inputs?:
