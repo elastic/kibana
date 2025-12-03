@@ -169,6 +169,8 @@ export function StreamDetailEnrichmentContentImpl() {
 
   const hasChanges = useStreamEnrichmentSelector((state) => state.context.hasChanges);
 
+  const showManagementBar = hasChanges && !interactiveModeWithStepUnderEdit;
+
   const {
     isRequestPreviewFlyoutOpen,
     requestPreviewFlyoutCodeContent,
@@ -244,7 +246,14 @@ export function StreamDetailEnrichmentContentImpl() {
                 paddingSize="l"
                 css={verticalFlexCss}
               >
-                <EuiFlexGroup direction="column" gutterSize="m" style={{ height: '100%' }}>
+                <EuiFlexGroup
+                  direction="column"
+                  gutterSize="m"
+                  css={css`
+                    padding-bottom: ${showManagementBar ? '65px' : undefined};
+                    height: 100%;
+                  `}
+                >
                   <EuiFlexItem grow={false}>
                     <EuiFlexGroup
                       gutterSize="s"
@@ -282,7 +291,7 @@ export function StreamDetailEnrichmentContentImpl() {
           )}
         </EuiResizableContainer>
       </EuiSplitPanel.Inner>
-      {hasChanges && !interactiveModeWithStepUnderEdit && (
+      {showManagementBar && (
         <ManagementBottomBar
           onCancel={resetChanges}
           onConfirm={
