@@ -38,3 +38,4 @@ export type {
 
 export { parseSelectedEvaluators, selectEvaluators } from './src/evaluators/filter';
 export { createSpanLatencyEvaluator } from './src/evaluators/trace_based';
+export { createEsqlEquivalenceEvaluator } from './src/evaluators/esql';
