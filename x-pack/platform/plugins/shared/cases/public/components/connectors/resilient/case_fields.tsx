@@ -7,7 +7,14 @@
 
 import React, { useMemo } from 'react';
 import type { EuiComboBoxOptionOption, EuiSelectOption } from '@elastic/eui';
-import { EuiComboBox, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import {
+  EuiComboBox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiHorizontalRule,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import {
   getFieldValidityAndErrorMessage,
@@ -16,146 +23,143 @@ import {
 import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { useKibana } from '../../../common/lib/kibana';
 import type { ConnectorFieldsProps } from '../types';
-import { useGetIncidentTypes } from './use_get_incident_types';
-import { useGetSeverity } from './use_get_severity';
+import { useGetFields } from './use_get_fields';
 
 import * as i18n from './translations';
 import { generateJSONValidator } from '../validate_json';
-import { JsonEditorField } from '../json_editor_field';
+import { AdditionalFormFields } from './additional_form_fields';
 
-const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({ connector }) => {
+const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({
+  connector,
+  isInSidebarForm,
+}) => {
   const { http } = useKibana().services;
 
   const {
-    isLoading: isLoadingIncidentTypesData,
-    isFetching: isFetchingIncidentTypesData,
-    data: allIncidentTypesData,
-  } = useGetIncidentTypes({
+    isLoading: isLoadingFields,
+    isFetching: isFetchingFields,
+    data: fieldsData,
+  } = useGetFields({
     http,
     connector,
   });
 
-  const {
-    isLoading: isLoadingSeverityData,
-    isFetching: isFetchingSeverityData,
-    data: severityData,
-  } = useGetSeverity({
-    http,
-    connector,
-  });
+  const allIncidentTypes = useMemo<EuiComboBoxOptionOption<string>[]>(() => {
+    const incidentTypesField = fieldsData?.data?.fieldsObj.incident_type_ids;
+    if (incidentTypesField == null || !Array.isArray(incidentTypesField.values)) {
+      return [];
+    }
+    return incidentTypesField.values.map((choice) => ({
+      id: choice.value.toString(),
+      label: choice.label,
+    }));
+  }, [fieldsData]);
 
-  const allIncidentTypes = allIncidentTypesData?.data;
-  const severity = severityData?.data;
-  const isLoadingIncidentTypes = isLoadingIncidentTypesData || isFetchingIncidentTypesData;
-  const isLoadingSeverity = isLoadingSeverityData || isFetchingSeverityData;
+  const severity = useMemo<EuiSelectOption[]>(() => {
+    const severityField = fieldsData?.data?.fieldsObj.severity_code;
+    if (severityField == null || !Array.isArray(severityField.values)) {
+      return [];
+    }
+    return severityField.values.map((choice) => ({
+      value: choice.value.toString(),
+      text: choice.label,
+    }));
+  }, [fieldsData]);
 
-  const severitySelectOptions: EuiSelectOption[] = useMemo(
-    () =>
-      (severity ?? []).map((s) => ({
-        value: s.id.toString(),
-        text: s.name,
-      })),
-    [severity]
-  );
+  const isLoading = isLoadingFields || isFetchingFields;
 
-  const incidentTypesComboBoxOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(
-    () =>
-      allIncidentTypes
-        ? allIncidentTypes.map((type: { id: number; name: string }) => ({
-            label: type.name,
-            value: type.id.toString(),
-          }))
-        : [],
-    [allIncidentTypes]
-  );
+  const additionalFieldsProps = useMemo(() => {
+    return {
+      componentProps: { connector, isInSidebarForm },
+      config: {
+        defaultValue: '',
+        validations: [
+          {
+            validator: generateJSONValidator({ maxAdditionalFields: 50 }),
+          },
+        ],
+      },
+    };
+  }, [connector, isInSidebarForm]);
 
   return (
     <span data-test-subj={'connector-fields-resilient'}>
-      <UseField<string[]> path="fields.incidentTypes" config={{ defaultValue: [] }}>
-        {(field) => {
-          const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <UseField<string[]> path="fields.incidentTypes" config={{ defaultValue: [] }}>
+            {(field) => {
+              const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
-          const onChangeComboBox = (changedOptions: Array<EuiComboBoxOptionOption<string>>) => {
-            field.setValue(changedOptions.map((option) => option.value as string));
-          };
+              const onChangeComboBox = (changedOptions: Array<EuiComboBoxOptionOption<string>>) => {
+                field.setValue(changedOptions.map((option) => option.id as string));
+              };
 
-          const selectedOptions =
-            field.value && allIncidentTypes?.length
-              ? field.value.map((incidentType) => ({
-                  value: incidentType,
-                  label:
-                    allIncidentTypes.find((type) => incidentType === type.id.toString())?.name ??
-                    '',
-                }))
-              : [];
+              const selectedOptions =
+                field.value && allIncidentTypes?.length
+                  ? field.value.map((incidentType) => {
+                      const matchedOption = allIncidentTypes.find(
+                        (option) => option.id === incidentType
+                      );
+                      return matchedOption ?? { label: incidentType, id: incidentType };
+                    })
+                  : [];
 
-          return (
-            <EuiFormRow
-              id="indexConnectorSelectSearchBox"
-              fullWidth
-              label={i18n.INCIDENT_TYPES_LABEL}
-              isInvalid={isInvalid}
-              error={errorMessage}
-            >
-              <EuiComboBox
-                isInvalid={isInvalid}
-                data-test-subj="incidentTypeComboBox"
-                fullWidth
-                isClearable={true}
-                isDisabled={isLoadingIncidentTypes}
-                isLoading={isLoadingIncidentTypes}
-                onChange={onChangeComboBox}
-                options={incidentTypesComboBoxOptions}
-                placeholder={i18n.INCIDENT_TYPES_PLACEHOLDER}
-                selectedOptions={selectedOptions}
-              />
-            </EuiFormRow>
-          );
-        }}
-      </UseField>
-      <EuiSpacer size="m" />
-      <UseField
-        path="fields.severityCode"
-        component={SelectField}
-        config={{
-          label: i18n.SEVERITY_LABEL,
-        }}
-        componentProps={{
-          euiFieldProps: {
-            'data-test-subj': 'severitySelect',
-            options: severitySelectOptions,
-            hasNoInitialSelection: true,
-            fullWidth: true,
-            disabled: isLoadingSeverity,
-            isLoading: isLoadingSeverity,
-          },
-        }}
-      />
-
-      <UseField
-        path="fields.additionalFields"
-        component={JsonEditorField}
-        config={{
-          label: i18n.ADDITIONAL_FIELDS_LABEL,
-          validations: [
-            {
-              validator: generateJSONValidator({ maxAdditionalFields: 50 }),
-            },
-          ],
-        }}
-        componentProps={{
-          euiCodeEditorProps: {
-            fullWidth: true,
-            height: '200px',
-            options: {
-              fontSize: '12px',
-              renderValidationDecorations: 'off',
-            },
-          },
-          dataTestSubj: 'additionalFieldsEditor',
-        }}
-      />
-
+              return (
+                <EuiFormRow
+                  id="indexConnectorSelectSearchBox"
+                  fullWidth
+                  label={i18n.INCIDENT_TYPES_LABEL}
+                  isInvalid={isInvalid}
+                  error={errorMessage}
+                >
+                  <EuiComboBox
+                    isInvalid={isInvalid}
+                    data-test-subj="incidentTypeComboBox"
+                    fullWidth
+                    isClearable={true}
+                    isDisabled={isLoading}
+                    isLoading={isLoading}
+                    onChange={onChangeComboBox}
+                    options={allIncidentTypes}
+                    placeholder={i18n.INCIDENT_TYPES_PLACEHOLDER}
+                    selectedOptions={selectedOptions}
+                  />
+                </EuiFormRow>
+              );
+            }}
+          </UseField>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <UseField
+            path="fields.severityCode"
+            component={SelectField}
+            config={{
+              label: i18n.SEVERITY_LABEL,
+            }}
+            componentProps={{
+              euiFieldProps: {
+                'data-test-subj': 'severitySelect',
+                options: severity,
+                hasNoInitialSelection: true,
+                fullWidth: true,
+                disabled: isLoading,
+                isLoading,
+              },
+            }}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiHorizontalRule margin="m" />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <UseField
+            path="fields.additionalFields"
+            config={additionalFieldsProps.config}
+            component={AdditionalFormFields}
+            componentProps={additionalFieldsProps.componentProps}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="m" />
     </span>
   );
