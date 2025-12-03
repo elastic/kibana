@@ -238,13 +238,13 @@ export async function getServiceMetadataDetails({
 
   const kubernetes = event.containsFields('kubernetes');
   const container = event.containsFields('container');
-  const host = event[HOST_OS_PLATFORM];
+  const hostOsPlatform = event[HOST_OS_PLATFORM];
 
   const containerDetails =
-    host || kubernetes || totalNumberInstances || container
+    hostOsPlatform || kubernetes || totalNumberInstances || container
       ? {
           type: (kubernetes ? 'Kubernetes' : 'Docker') as ContainerType,
-          os: host,
+          os: hostOsPlatform,
           totalNumberInstances,
           ids: aggregations?.containerIds.buckets.map((bucket) => bucket.key as string),
         }
