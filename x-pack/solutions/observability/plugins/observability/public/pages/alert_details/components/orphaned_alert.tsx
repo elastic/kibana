@@ -12,14 +12,14 @@ import { ALERT_STATUS_UNTRACKED, ALERT_UUID } from '@kbn/rule-data-utils';
 import type { TopAlert } from '../../../typings/alerts';
 import { useBulkUntrackAlerts } from '../hooks/use_bulk_untrack_alerts';
 
-interface UntrackedAlertProps {
+interface OrphanedAlertProps {
   alert: TopAlert;
   alertStatus: string | undefined;
   onUntrackAlert: () => void;
 }
 
-function UntrackedAlert({ alert, alertStatus, onUntrackAlert }: UntrackedAlertProps) {
-  const isUntracked = useMemo(() => {
+function OrphanedAlert({ alert, alertStatus, onUntrackAlert }: OrphanedAlertProps) {
+  const isOrphaned = useMemo(() => {
     return alertStatus === ALERT_STATUS_UNTRACKED;
   }, [alertStatus]);
 
@@ -37,11 +37,11 @@ function UntrackedAlert({ alert, alertStatus, onUntrackAlert }: UntrackedAlertPr
 
   return (
     <>
-      {isUntracked && (
+      {isOrphaned && (
         <EuiCallOut
           announceOnMount
-          data-test-subj="o11yAlertDetailsUntrackedAlertCallout"
-          title={i18n.translate('xpack.observability.alertDetails.untrackedAlertCallout.title', {
+          data-test-subj="o11yAlertDetailsOrphanedAlertCallout"
+          title={i18n.translate('xpack.observability.alertDetails.orphanedAlertCallout.title', {
             defaultMessage: 'This alert is orphaned',
           })}
           color="warning"
@@ -76,4 +76,4 @@ function UntrackedAlert({ alert, alertStatus, onUntrackAlert }: UntrackedAlertPr
 }
 
 // eslint-disable-next-line import/no-default-export
-export default UntrackedAlert;
+export default OrphanedAlert;

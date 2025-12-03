@@ -11,7 +11,7 @@ import { alert } from '../mock/alert';
 import { useKibana } from '../../../utils/kibana_react';
 import { kibanaStartMock } from '../../../utils/kibana_react.mock';
 import { useBulkUntrackAlerts } from '../hooks/use_bulk_untrack_alerts';
-import UntrackedAlert from './untracked_alert';
+import UntrackedAlert from './orphaned_alert';
 import type { TopAlert } from '../../../typings/alerts';
 
 jest.mock('../../../utils/kibana_react');
