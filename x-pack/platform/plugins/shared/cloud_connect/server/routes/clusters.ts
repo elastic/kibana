@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger, StartServicesAccessor } from '@kbn/core/server';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import { i18n } from '@kbn/i18n';
 import axios from 'axios';
 import { CloudConnectClient } from '../services/cloud_connect_client';
 import { createStorageService } from '../lib/create_storage_service';
@@ -369,9 +370,29 @@ export const registerClustersRoute = ({
           const status = error.response?.status || 500;
           const errorData = error.response?.data;
 
+          // Extract error code from Cloud Connect API error format
+          // API returns: { "errors": [{ "code": "...", "message": "..." }] }
+          const errorCode = errorData?.errors?.[0]?.code;
+
+          // Check for specific error codes and return user-friendly messages
+          let errorMessage;
+          if (errorCode === 'clusters.patch_cluster.invalid_state') {
+            errorMessage = i18n.translate('xpack.cloudConnect.clusterUpdate.invalidState', {
+              defaultMessage: 'The API is still completing an operation, please try again later',
+            });
+          } else {
+            errorMessage =
+              errorData?.errors?.[0]?.message ||
+              errorData?.message ||
+              'An error occurred while updating cluster services';
+          }
+
           return response.customError({
             statusCode: status,
-            body: errorData || { message: 'An error occurred while updating cluster services' },
+            body: {
+              message: errorMessage,
+              ...(errorCode && { code: errorCode }),
+            },
           });
         }
 
