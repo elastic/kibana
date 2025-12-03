@@ -10,7 +10,7 @@
 import { useCallback, useState } from 'react';
 import type YAML from 'yaml';
 import type { monaco } from '@kbn/monaco';
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import { filterMonacoYamlMarkers } from './filter_monaco_yaml_markers';
 import { formatMonacoYamlMarker } from './format_monaco_yaml_marker';
 import type { MarkerSeverity } from '../../../widgets/workflow_yaml_editor/lib/utils';
