@@ -88,9 +88,7 @@ export function useUrlSearchState(): {
       const updatedState = { ...state, page: 0, ...newState };
       setState(() => updatedState);
 
-      urlStateStorage.current?.set(SLO_LIST_SEARCH_URL_STORAGE_KEY, updatedState, {
-        replace: false,
-      });
+      urlStateStorage.current?.set(SLO_LIST_SEARCH_URL_STORAGE_KEY, updatedState);
 
       // Discard search itself from session storage. Keep only view preferences
       sessionStorage.current?.set(
