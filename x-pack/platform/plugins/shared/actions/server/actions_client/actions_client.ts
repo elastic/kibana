@@ -85,7 +85,7 @@ import { isSystemAction } from '../lib/is_system_action';
 import type { ConnectorExecuteParams } from '../application/connector/methods/execute/types';
 import { connectorFromInMemoryConnector } from '../application/connector/lib/connector_from_in_memory_connector';
 import { getAxiosInstance } from '../application/connector/methods/get_axios_instance';
-import { GetAxiosInstanceWithAuthFnOpts } from '../lib/get_axios_instance';
+import type { GetAxiosInstanceWithAuthFnOpts } from '../lib/get_axios_instance';
 
 export interface ConstructorOptions {
   logger: Logger;
