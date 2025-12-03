@@ -92,10 +92,10 @@ export function SloDetailsHistory({ slo }: Props) {
 
       <HistoricalDataCharts
         slo={slo}
-        hideMetadata={true}
         isAutoRefreshing={false}
         range={state.range}
         onBrushed={onBrushed}
+        hideHeaderDurationLabel={true}
       />
 
       <EventsChartPanel
