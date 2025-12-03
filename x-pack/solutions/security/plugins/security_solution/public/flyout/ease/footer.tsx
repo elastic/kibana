@@ -40,14 +40,14 @@ export const PanelFooter = memo(() => {
     dataFormattedForFieldBrowser,
     isAlert,
   });
-  // TODO enable agent builder for EASE roles
+
   const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
 
   const alertData = useMemo(() => {
     const rawData = getRawData(dataFormattedForFieldBrowser ?? []);
     return filterAndStringifyAlertData(rawData);
   }, [dataFormattedForFieldBrowser]);
-  // This will not work until we add permissions to EASE roles for read_onechat
+
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
     attachmentType: SecurityAgentBuilderAttachments.alert,
     attachmentData: { alert: alertData },
