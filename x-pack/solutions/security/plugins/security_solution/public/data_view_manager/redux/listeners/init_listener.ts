@@ -9,6 +9,7 @@ import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { RootState } from '../reducer';
 import { sharedDataViewManagerSlice } from '../slices';
 import { PageScope } from '../../constants';
@@ -41,6 +42,7 @@ export const createInitListener = (
     uiSettings: CoreStart['uiSettings'];
     dataViews: DataViewsServicePublic;
     spaces: SpacesPluginStart;
+    storage: Storage;
   },
   attacksAlertsAlignmentEnabled: boolean
 ) => {
@@ -119,13 +121,29 @@ export const createInitListener = (
                 })
               );
             }
-
-            listenerApi.dispatch(
-              selectDataViewAsync({
-                id: defaultDataView.id,
-                scope,
-              })
-            );
+            const storedDataViewId = dependencies.storage.get(
+              `securitySolution.dataViewManager.selectedDataView.${scope}`
+            ) as string | null | undefined;
+            const state = listenerApi.getState();
+            if (
+              storedDataViewId &&
+              !state.dataViewManager[scope].dataViewId &&
+              typeof storedDataViewId === 'string'
+            ) {
+              return listenerApi.dispatch(
+                selectDataViewAsync({
+                  id: storedDataViewId,
+                  scope,
+                })
+              );
+            } else {
+              return listenerApi.dispatch(
+                selectDataViewAsync({
+                  id: defaultDataView.id,
+                  scope,
+                })
+              );
+            }
           });
 
         // NOTE: if there is a list of data views to preload other than default one (eg. coming in from the url storage)
