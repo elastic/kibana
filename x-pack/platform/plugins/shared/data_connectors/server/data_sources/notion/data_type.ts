@@ -7,7 +7,12 @@
 
 import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin/server';
 import { SupportedOAuthProvider } from '@kbn/data-sources-registry-plugin/server/data_catalog/data_type';
-import { generateQueryWorkflow, generateSearchWorkflow } from './workflows';
+import {
+  generateGetDataSourceWorkflow,
+  generateGetPageWorkflow,
+  generateQueryWorkflow,
+  generateSearchWorkflow,
+} from './workflows';
 
 export const notionDataSource: DataTypeDefinition = {
   id: 'notion',
@@ -29,7 +34,9 @@ export const notionDataSource: DataTypeDefinition = {
   generateWorkflows(stackConnectorId: string) {
     return [
       { content: generateQueryWorkflow(stackConnectorId), shouldGenerateABTool: true },
-      { content: generateSearchWorkflow(stackConnectorId), shouldGenerateABTool: false },
+      { content: generateSearchWorkflow(stackConnectorId), shouldGenerateABTool: true },
+      { content: generateGetPageWorkflow(stackConnectorId), shouldGenerateABTool: true },
+      { content: generateGetDataSourceWorkflow(stackConnectorId), shouldGenerateABTool: true },
     ];
   },
 };

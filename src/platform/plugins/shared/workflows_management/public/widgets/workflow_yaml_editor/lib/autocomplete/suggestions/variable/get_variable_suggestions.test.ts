@@ -9,7 +9,7 @@
 
 import { Document, Scalar } from 'yaml';
 import { monaco } from '@kbn/monaco';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { getVariableSuggestions } from './get_variable_suggestions';
 import type { StepPropInfo } from '../../../../../../entities/workflows/store';
 import type { AutocompleteContext } from '../../context/autocomplete.types';
