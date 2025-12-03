@@ -73,7 +73,9 @@ export default ({ getService }: FtrProviderContext): void => {
     });
   };
 
-  const doTests = () => {
+  describe('@ess @serverless @serverlessQA Risk Scoring Entity Calculation API', function () {
+    this.tags(['esGate']);
+
     context('with auditbeat data', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,
@@ -242,11 +244,5 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
     });
-  };
-
-  describe('@ess @serverless @serverlessQA Risk Scoring Entity Calculation API', function () {
-    this.tags(['esGate']);
-
-    doTests();
   });
 };

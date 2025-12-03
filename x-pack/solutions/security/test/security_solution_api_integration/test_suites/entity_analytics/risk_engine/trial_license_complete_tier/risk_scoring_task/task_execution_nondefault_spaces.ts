@@ -25,7 +25,7 @@ export default ({ getService }: FtrProviderContextWithSpaces): void => {
   const es = getService('es');
   const log = getService('log');
 
-  const doTests = () => {
+  describe('@ess Risk Scoring Task in non-default space', () => {
     describe('with alerts in a non-default space', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,
@@ -113,9 +113,5 @@ export default ({ getService }: FtrProviderContextWithSpaces): void => {
         );
       });
     });
-  };
-
-  describe('@ess Risk Scoring Task in non-default space', () => {
-    doTests();
   });
 };
