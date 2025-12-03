@@ -226,6 +226,11 @@ export class AutomaticImportSavedObjectService {
         });
       return integrationsResponse.saved_objects.map((integration) => integration.attributes);
     } catch (error) {
+      // Return empty array if index doesn't exist yet
+      if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+        this.logger.debug('No integrations index found, returning empty array');
+        return [];
+      }
       this.logger.error(`Failed to get all integrations: ${error}`);
       throw error;
     }

@@ -401,8 +401,20 @@ describe('integration schemas', () => {
 
     it('accepts an array with multiple integrations', () => {
       const payload = [
-        createValidIntegrationResponse({ integrationId: 'integration-1' }),
-        createValidIntegrationResponse({ integrationId: 'integration-2', logo: 'logo-data' }),
+        {
+          integrationId: 'integration-1',
+          title: 'Test Integration',
+          totalDataStreamCount: 1,
+          successfulDataStreamCount: 0,
+          status: 'pending' as const,
+        },
+        {
+          integrationId: 'integration-2',
+          title: 'Test Integration',
+          totalDataStreamCount: 1,
+          successfulDataStreamCount: 1,
+          status: 'completed' as const,
+        },
       ];
 
       const result = GetAllAutoImportIntegrationsResponse.safeParse(payload);
@@ -413,9 +425,9 @@ describe('integration schemas', () => {
       const payload = [
         {
           title: 'Integration 1',
-          description: 'First integration',
-          status: 'pending',
-          dataStreams: [],
+          totalDataStreamCount: 0,
+          successfulDataStreamCount: 0,
+          status: 'pending' as const,
         },
       ];
 
@@ -743,17 +755,20 @@ describe('integration schemas', () => {
 
         // Step 3: GET ALL - Retrieve all integrations
         const getAllResponse = [
-          createValidIntegrationResponse({
+          {
             integrationId: 'apache-001',
             title: 'Apache Logs',
-            description: 'Apache web server logs integration',
-          }),
-          createValidIntegrationResponse({
+            totalDataStreamCount: 1,
+            successfulDataStreamCount: 0,
+            status: 'pending' as const,
+          },
+          {
             integrationId: 'mysql-001',
             title: 'MySQL Logs',
-            description: 'MySQL database logs integration',
-            logo: 'data:image/png;base64,mysql=',
-          }),
+            totalDataStreamCount: 1,
+            successfulDataStreamCount: 0,
+            status: 'pending' as const,
+          },
         ];
         const getAllResponseResult = GetAllAutoImportIntegrationsResponse.safeParse(getAllResponse);
         expectParseSuccess(getAllResponseResult);
@@ -766,12 +781,13 @@ describe('integration schemas', () => {
 
         // Step 5: GET ALL - Verify only Apache remains
         const finalGetAllResponse = [
-          createValidIntegrationResponse({
+          {
             integrationId: 'apache-001',
             title: 'Apache Logs',
-            description: 'Comprehensive Apache web server logs integration',
-            logo: 'data:image/png;base64,apache-logo=',
-          }),
+            totalDataStreamCount: 1,
+            successfulDataStreamCount: 0,
+            status: 'pending' as const,
+          },
         ];
         const finalGetAllResponseResult =
           GetAllAutoImportIntegrationsResponse.safeParse(finalGetAllResponse);

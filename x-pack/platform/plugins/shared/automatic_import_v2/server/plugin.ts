@@ -26,6 +26,7 @@ import type {
 import { RequestContextFactory } from './request_context_factory';
 import { AutomaticImportService } from './services';
 import { AUTOMATIC_IMPORT_FEATURE } from './feature';
+import { registerRoutes } from './routes/register_routes';
 import {
   INTEGRATION_SAVED_OBJECT_TYPE,
   DATA_STREAM_SAVED_OBJECT_TYPE,
@@ -89,6 +90,10 @@ export class AutomaticImportV2Plugin
       AutomaticImportV2PluginRequestHandlerContext,
       'automaticImportv2'
     >('automaticImportv2', (context, request) => requestContextFactory.create(context, request));
+
+    const router = core.http.createRouter<AutomaticImportV2PluginRequestHandlerContext>();
+    registerRoutes(router, this.logger);
+
     return {
       actions: plugins.actions,
     };

@@ -167,3 +167,29 @@ components:
             status:
               description: The status of the integration
               $ref: "#/components/schemas/TaskStatus"
+    AllIntegrationsResponseIntegration:
+      description: The integration object with its settings.
+      allOf:
+        - type: object
+          required:
+            - integrationId
+            - title
+            - totalDataStreamCount
+            - successfulDataStreamCount
+            - status
+          properties:
+            integrationId:
+              description: The ID of the integration
+              $ref: "../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+            title:
+              description: The title of the integration
+              $ref: "../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+            totalDataStreamCount:
+              description: The number of data streams of the integration
+              type: integer
+            successfulDataStreamCount:
+              description: The number of successful data streams of the integration
+              type: integer
+            status:
+              description: The status of the integration
+              $ref: "#/components/schemas/TaskStatus"

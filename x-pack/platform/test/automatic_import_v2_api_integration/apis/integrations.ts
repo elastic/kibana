@@ -31,17 +31,18 @@ export default function ({ getService }: AutomaticImportV2ApiFtrProviderContext)
 
         const integrationId = createResponse.integration_id;
         expect(integrationId).to.be.a('string');
-        expect(integrationId).to.eql('test-integration');
+        expect(integrationId).to.eql('test_integration');
 
         // Get all integrations
         const allIntegrations = await automaticImportV2Client.getAllIntegrations();
         expect(allIntegrations).to.be.an('array');
         expect(allIntegrations.length).to.be.greaterThan(0);
 
-        const integration = allIntegrations.find((i) => i.integration_id === integrationId);
+        const integration = allIntegrations.find((i) => i.integrationId === integrationId);
         expect(integration).to.be.ok();
         expect(integration?.title).to.eql('Test Integration');
-        expect(integration?.description).to.eql('A test integration');
+        expect(integration?.totalDataStreamCount).to.eql(0);
+        expect(integration?.successfulDataStreamCount).to.eql(0);
       });
     });
 
@@ -61,11 +62,11 @@ export default function ({ getService }: AutomaticImportV2ApiFtrProviderContext)
 
         // Get the integration by id
         const response = await automaticImportV2Client.getIntegrationById(integrationId);
-        expect(response.integration).to.be.ok();
-        expect(response.integration.integration_id).to.eql(integrationId);
-        expect(response.integration.title).to.eql('Get By Id Test');
-        expect(response.integration.description).to.eql('Testing get by id');
-        expect(response.integration.logo).to.eql('data:image/png;base64,test');
+        expect(response.integrationResponse).to.be.ok();
+        expect(response.integrationResponse.integrationId).to.eql(integrationId);
+        expect(response.integrationResponse.title).to.eql('Get By Id Test');
+        expect(response.integrationResponse.description).to.eql('Testing get by id');
+        expect(response.integrationResponse.logo).to.eql('data:image/png;base64,test');
       });
 
       it('should return error for non-existent integration', async function () {
@@ -74,7 +75,7 @@ export default function ({ getService }: AutomaticImportV2ApiFtrProviderContext)
           .set('kbn-xsrf', 'true')
           .set('x-elastic-internal-origin', 'automatic-import-v2-test')
           .set(ELASTIC_HTTP_VERSION_HEADER, '1');
-        expect(res.status).to.be(500);
+        expect(res.status).to.be(404);
       });
     });
 
@@ -88,7 +89,7 @@ export default function ({ getService }: AutomaticImportV2ApiFtrProviderContext)
 
         const response = await automaticImportV2Client.createIntegration(integrationData);
         expect(response.integration_id).to.be.a('string');
-        expect(response.integration_id).to.eql('new-integration');
+        expect(response.integration_id).to.eql('new_integration');
       });
     });
   });

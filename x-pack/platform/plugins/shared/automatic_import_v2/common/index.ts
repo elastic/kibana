@@ -27,4 +27,5 @@ export type {
   TaskStatus,
   IntegrationResponse,
   DataStreamResponse,
+  AllIntegrationsResponseIntegration,
 } from './model/common_attributes.gen';

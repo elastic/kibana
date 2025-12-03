@@ -10,7 +10,7 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type {
   CreateAutoImportIntegrationRequestBody,
   CreateAutoImportIntegrationResponse,
-  GetAutoImportIntegrationsResponse,
+  GetAllAutoImportIntegrationsResponse,
   GetAutoImportIntegrationResponse,
 } from '@kbn/automatic-import-v2-plugin/common';
 
@@ -19,12 +19,13 @@ export function createAutomaticImportV2ApiClient(supertest: Agent) {
     /**
      * Get all integrations
      */
-    async getAllIntegrations(): Promise<GetAutoImportIntegrationsResponse> {
+    async getAllIntegrations(): Promise<GetAllAutoImportIntegrationsResponse> {
       const res = await supertest
         .get('/api/automatic_import_v2/integrations')
         .set('kbn-xsrf', 'true')
         .set('x-elastic-internal-origin', 'automatic-import-v2-test')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1');
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .expect(200);
       return res.body;
     },
 
@@ -36,7 +37,8 @@ export function createAutomaticImportV2ApiClient(supertest: Agent) {
         .get(`/api/automatic_import_v2/integrations/${integrationId}`)
         .set('kbn-xsrf', 'true')
         .set('x-elastic-internal-origin', 'automatic-import-v2-test')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1');
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .expect(200);
       return res.body;
     },
 
@@ -51,7 +53,8 @@ export function createAutomaticImportV2ApiClient(supertest: Agent) {
         .set('kbn-xsrf', 'true')
         .set('x-elastic-internal-origin', 'automatic-import-v2-test')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send(payload);
+        .send(payload)
+        .expect(200);
       return res.body;
     },
   };

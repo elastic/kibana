@@ -6,12 +6,14 @@
  */
 
 import type { IRouter, Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { AutomaticImportV2PluginRequestHandlerContext } from '../types';
 import type {
   CreateAutoImportIntegrationResponse,
   GetAllAutoImportIntegrationsResponse,
   GetAutoImportIntegrationResponse,
+  AllIntegrationsResponseIntegration,
   IntegrationResponse,
 } from '../../common';
 import {
@@ -56,9 +58,17 @@ const getAllIntegrationsRoute = (
           const automaticImportService = automaticImportv2.automaticImportService;
           const integrationResponses: IntegrationResponse[] =
             await automaticImportService.getAllIntegrations();
-          const body: GetAllAutoImportIntegrationsResponse = {
-            ...integrationResponses,
-          };
+          const body: GetAllAutoImportIntegrationsResponse = integrationResponses.map(
+            (integration) => ({
+              integrationId: integration.integrationId,
+              title: integration.title,
+              totalDataStreamCount: integration.dataStreams.length,
+              successfulDataStreamCount: integration.dataStreams.filter(
+                (dataStream) => dataStream.status === 'completed'
+              ).length,
+              status: integration.status,
+            })
+          ) as AllIntegrationsResponseIntegration[];
           return response.ok({ body });
         } catch (err) {
           logger.error(`registerIntegrationRoutes: Caught error:`, err);
@@ -105,8 +115,9 @@ const getIntegrationByIdRoute = (
         } catch (err) {
           logger.error(`getIntegrationByIdRoute: Caught error:`, err);
           const automaticImportResponse = buildAutomaticImportResponse(response);
+          const statusCode = SavedObjectsErrorHelpers.isNotFoundError(err) ? 404 : 500;
           return automaticImportResponse.error({
-            statusCode: 500,
+            statusCode,
             body: err,
           });
         }

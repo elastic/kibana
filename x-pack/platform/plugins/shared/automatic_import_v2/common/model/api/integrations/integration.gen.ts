@@ -17,7 +17,12 @@
 import { z } from '@kbn/zod';
 
 import { NonEmptyString } from '../../primitive.gen';
-import { DataStream, IntegrationResponse, InputType } from '../../common_attributes.gen';
+import {
+  DataStream,
+  AllIntegrationsResponseIntegration,
+  InputType,
+  IntegrationResponse,
+} from '../../common_attributes.gen';
 
 export type CreateAutoImportIntegrationRequestBody = z.infer<
   typeof CreateAutoImportIntegrationRequestBody
@@ -74,7 +79,7 @@ export type DeleteAutoImportIntegrationRequestParamsInput = z.input<
 export type GetAllAutoImportIntegrationsResponse = z.infer<
   typeof GetAllAutoImportIntegrationsResponse
 >;
-export const GetAllAutoImportIntegrationsResponse = z.array(IntegrationResponse);
+export const GetAllAutoImportIntegrationsResponse = z.array(AllIntegrationsResponseIntegration);
 
 export type GetAutoImportIntegrationRequestParams = z.infer<
   typeof GetAutoImportIntegrationRequestParams

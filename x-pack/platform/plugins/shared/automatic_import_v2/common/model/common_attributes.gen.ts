@@ -171,3 +171,30 @@ export const IntegrationResponse = z.object({
    */
   status: TaskStatus,
 });
+
+/**
+ * The integration object with its settings.
+ */
+export type AllIntegrationsResponseIntegration = z.infer<typeof AllIntegrationsResponseIntegration>;
+export const AllIntegrationsResponseIntegration = z.object({
+  /**
+   * The ID of the integration
+   */
+  integrationId: NonEmptyString,
+  /**
+   * The title of the integration
+   */
+  title: NonEmptyString,
+  /**
+   * The number of data streams of the integration
+   */
+  totalDataStreamCount: z.number().int(),
+  /**
+   * The number of successful data streams of the integration
+   */
+  successfulDataStreamCount: z.number().int(),
+  /**
+   * The status of the integration
+   */
+  status: TaskStatus,
+});
