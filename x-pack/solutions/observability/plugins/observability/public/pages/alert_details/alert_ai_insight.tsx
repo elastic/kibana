@@ -57,22 +57,11 @@ export function AlertAiInsight({ alert }: { alert: AlertData | null }) {
 
   const onStartConversation = useCallback(() => {
     if (!alert || !onechat?.openConversationFlyout) return;
-    const alertId = alert.formatted.fields['kibana.alert.uuid'];
-    // const startedAt = alert.formatted.start;
-    const fields = alert.formatted.fields as Record<string, unknown> | undefined;
-    const status: 'active' | 'recovered' = alert.formatted.active ? 'active' : 'recovered';
-    const entities = {
-      'service.name': fields?.['service.name'],
-      'service.environment': fields?.['service.environment'],
-      'transaction.type': fields?.['transaction.type'],
-      'transaction.name': fields?.['transaction.name'],
-      'host.name': fields?.['host.name'],
-      'container.id': fields?.['container.id'],
-      'kubernetes.pod.name': fields?.['kubernetes.pod.name'],
-    };
+    const alertId = alert.formatted.fields['kibana.alert.uuid'] as string;
+
     onechat.openConversationFlyout({
       newConversation: true,
-      agentId: 'observability.agent',
+      // agentId: 'observability.agent',
       sessionTag: `alert:${alertId}`,
       attachments: [
         {
@@ -84,20 +73,10 @@ export function AlertAiInsight({ alert }: { alert: AlertData | null }) {
           },
         },
         {
-          id: `alert-${alertId}`,
+          id: alertId,
           type: OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
           data: {
-            alert: {
-              ruleName: fields?.['kibana.alert.rule.name'],
-              startedAt: new Date(alert.formatted.start).toISOString(),
-              reason: alert.formatted.reason,
-              endedAt:
-                status === 'recovered'
-                  ? new Date(alert.formatted.lastUpdated).toISOString()
-                  : undefined,
-              status,
-            },
-            entities,
+            alertId,
           },
         },
       ],
