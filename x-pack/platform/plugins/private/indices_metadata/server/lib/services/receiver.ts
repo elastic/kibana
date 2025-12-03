@@ -175,25 +175,22 @@ export class MetadataReceiver {
         for (const [indexName, stats] of Object.entries(response.indices ?? {})) {
           const meteringData = meteringStats?.get(indexName);
 
-          let docsCountPrimaries = stats.primaries?.docs?.count;
-          let sizeInBytesPrimaries = stats.primaries?.store?.size_in_bytes;
+          let docsCount = stats.primaries?.docs?.count;
+          let sizeInBytes = stats.primaries?.store?.size_in_bytes;
 
           if (meteringData) {
-            if (
-              meteringData.num_docs !== docsCountPrimaries ||
-              meteringData.size_in_bytes !== sizeInBytesPrimaries
-            ) {
+            if (meteringData.num_docs !== docsCount || meteringData.size_in_bytes !== sizeInBytes) {
               this.logger.debug('Metering stats differ from regular stats', {
                 index: indexName,
                 metering: {
                   num_docs: meteringData.num_docs,
                   size_in_bytes: meteringData.size_in_bytes,
                 },
-                regular: { docs_count: docsCountPrimaries, size_in_bytes: sizeInBytesPrimaries },
+                regular: { docs_count: docsCount, size_in_bytes: sizeInBytes },
               } as LogMeta);
             }
-            docsCountPrimaries = meteringData.num_docs;
-            sizeInBytesPrimaries = meteringData.size_in_bytes;
+            docsCount = meteringData.num_docs;
+            sizeInBytes = meteringData.size_in_bytes;
           }
 
           yield {
@@ -201,17 +198,17 @@ export class MetadataReceiver {
             query_total: stats.total?.search?.query_total,
             query_time_in_millis: stats.total?.search?.query_time_in_millis,
 
-            docs_count: stats.primaries?.docs?.count,
+            docs_count: docsCount,
             docs_deleted: stats.total?.docs?.deleted,
-            docs_total_size_in_bytes: stats.total?.store?.size_in_bytes,
+            docs_total_size_in_bytes: sizeInBytes,
 
             index_failed: stats.total?.indexing?.index_failed,
             index_failed_due_to_version_conflict: (stats.total?.indexing as any)
               ?.index_failed_due_to_version_conflict,
 
-            docs_count_primaries: docsCountPrimaries,
+            docs_count_primaries: docsCount,
             docs_deleted_primaries: stats.primaries?.docs?.deleted,
-            docs_total_size_in_bytes_primaries: sizeInBytesPrimaries,
+            docs_total_size_in_bytes_primaries: sizeInBytes,
           } as IndexStats;
         }
       } catch (error) {
