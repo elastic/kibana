@@ -89,8 +89,15 @@ const ServiceNowITSMFieldsPreviewComponent: React.FunctionComponent<
     [choicesFormatted.subcategory, category]
   );
 
-  const listItems = useMemo(
-    () => [
+  const listItems = useMemo(() => {
+    let additionalFieldsParsed: Record<string, string> = {};
+    try {
+      additionalFieldsParsed = additionalFields ? JSON.parse(additionalFields) : {};
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error parsing additional fields:', error, { additionalFields });
+    }
+    return [
       ...(urgency != null && urgency.length > 0
         ? [
             {
@@ -136,29 +143,25 @@ const ServiceNowITSMFieldsPreviewComponent: React.FunctionComponent<
           ]
         : []),
       ...(additionalFields != null && additionalFields.length > 0
-        ? [
-            {
-              title: i18n.ADDITIONAL_FIELDS_LABEL,
-              description: additionalFields,
-              displayAsCodeBlock: true,
-            },
-          ]
+        ? Object.keys(additionalFieldsParsed).map((key) => ({
+            title: key,
+            description: additionalFieldsParsed[key],
+          }))
         : []),
-    ],
-    [
-      additionalFields,
-      category,
-      categoryOptions,
-      impact,
-      impactOptions,
-      severity,
-      severityOptions,
-      subcategory,
-      subcategoryOptions,
-      urgency,
-      urgencyOptions,
-    ]
-  );
+    ];
+  }, [
+    additionalFields,
+    category,
+    categoryOptions,
+    impact,
+    impactOptions,
+    severity,
+    severityOptions,
+    subcategory,
+    subcategoryOptions,
+    urgency,
+    urgencyOptions,
+  ]);
 
   return (
     <>
