@@ -93,7 +93,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enabled new index sync update detection logic
    */
-  newIndexSyncUpdateDetectionEnabled: false,
+  privilegedMonitoringNewIndexSyncUpdateDetectionEnabled: false,
 
   /**
    * disables ES|QL rules
