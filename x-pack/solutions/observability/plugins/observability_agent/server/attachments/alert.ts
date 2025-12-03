@@ -49,7 +49,7 @@ export function createAlertAttachmentType({
         }),
         getBoundedTools: () => [
           {
-            id: `get_alert_details_${alertId}`,
+            id: `get_alert_details`,
             type: ToolType.builtin,
             description: `Fetch full details for alert ${alertId} including rule info, status, reason, and related entities.`,
             schema: z.object({}),
