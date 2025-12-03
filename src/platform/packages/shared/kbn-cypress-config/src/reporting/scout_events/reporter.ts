@@ -9,8 +9,12 @@
 
 import path from 'node:path';
 import { ToolingLog } from '@kbn/tooling-log';
-import type { ScoutTestRunConfigCategory } from '@kbn/scout-info';
-import { SCOUT_REPORT_OUTPUT_ROOT, SCOUT_TARGET_MODE, SCOUT_TARGET_TYPE } from '@kbn/scout-info';
+import {
+  ScoutTestRunConfigCategory,
+  SCOUT_REPORT_OUTPUT_ROOT,
+  SCOUT_TARGET_MODE,
+  SCOUT_TARGET_TYPE,
+} from '@kbn/scout-info';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ScoutFileInfo } from '@kbn/scout-reporting';
 import {
@@ -35,7 +39,7 @@ import {
 export interface ScoutCypressReporterOptions {
   name?: string;
   outputPath?: string;
-  config: {
+  config?: {
     path: string;
     category: ScoutTestRunConfigCategory;
   };
@@ -70,10 +74,17 @@ export class ScoutCypressReporter {
         type: SCOUT_TARGET_TYPE,
         mode: SCOUT_TARGET_MODE,
       },
-      config: {
-        file: this.getScoutFileInfoForPath(path.relative(REPO_ROOT, reporterOptions.config.path)),
-        category: reporterOptions.config.category,
-      },
+      config: reporterOptions.config
+        ? {
+            file: this.getScoutFileInfoForPath(
+              path.relative(REPO_ROOT, reporterOptions.config.path)
+            ),
+            category: reporterOptions.config.category,
+          }
+        : {
+            file: this.getScoutFileInfoForPath('unknown'),
+            category: ScoutTestRunConfigCategory.UI_TEST,
+          },
     };
 
     // Register event listeners

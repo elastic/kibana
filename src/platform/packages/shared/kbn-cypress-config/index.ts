@@ -40,6 +40,7 @@ function getCypressConfigPath(): string {
   if (process.env.CYPRESS_CONFIG_FILE) {
     return process.env.CYPRESS_CONFIG_FILE;
   }
+  return '';
 }
 
 function getReportingOptionOverrides(options?: Cypress.ConfigOptions): Record<string, any> {
@@ -89,13 +90,16 @@ function getReportingOptionOverrides(options?: Cypress.ConfigOptions): Record<st
 
   if (SCOUT_REPORTER_ENABLED) {
     enabledReporters.push(SCOUT_CYPRESS_REPORTER_PATH);
+    const configPath = getCypressConfigPath();
     reporterOptions[`${camelCase(SCOUT_CYPRESS_REPORTER_PATH)}ReporterOptions`] = {
       name: 'cypress',
       outputPath: SCOUT_REPORT_OUTPUT_ROOT,
-      config: {
-        path: getCypressConfigPath(),
-        category: ScoutTestRunConfigCategory.UI_TEST,
-      },
+      config: configPath
+        ? {
+            path: configPath,
+            category: ScoutTestRunConfigCategory.UI_TEST,
+          }
+        : undefined,
     };
   }
 
