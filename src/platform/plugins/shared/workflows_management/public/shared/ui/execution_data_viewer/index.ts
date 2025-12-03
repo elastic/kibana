@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { JSONDataView, type JSONDataViewProps } from './json_data_view';
+export { ExecutionDataViewer, type ExecutionDataViewerProps } from './execution_data_viewer';
