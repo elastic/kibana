@@ -1962,6 +1962,27 @@
       "enabled": true
     },
     {
+      "groupName": "workflow-yaml",
+      "matchDepNames": [
+        "@hey-api/openapi-ts", 
+        "vscode-languageserver-textdocument",
+        "yaml-language-server"
+      ],
+      "reviewers": [
+        "team:workflows-eng"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:One Workflow", 
+        "backport:all-open", 
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
       "groupName": "normalize-path",
       "matchDepNames": [
         "normalize-path",
@@ -4055,7 +4076,7 @@
         "cytoscape-dagre"
       ],
       "reviewers": [
-        "team:obs-ux-infra_services-team"
+        "team:obs-presentation-team"
       ],
       "matchBaseBranches": [
         "main"
@@ -4073,7 +4094,7 @@
         "hdr-histogram-js"
       ],
       "reviewers": [
-        "team:obs-ux-infra_services-team"
+        "team:obs-presentation-team"
       ],
       "matchBaseBranches": [
         "main"
