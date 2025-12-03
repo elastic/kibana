@@ -22,6 +22,7 @@ export enum SupportedChartType {
   Metric = 'metric',
   Gauge = 'gauge',
   Tagcloud = 'tagcloud',
+  XY = 'xy',
 }
 
 interface ToolResultMixin<TType extends ToolResultType, TData extends Object> {
