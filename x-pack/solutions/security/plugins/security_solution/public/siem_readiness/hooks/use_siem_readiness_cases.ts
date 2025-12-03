@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
-import { useKibana } from '../../common/lib/kibana';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { i18n } from '@kbn/i18n';
 
 interface CaseFlyoutParams {
   title: string;
@@ -15,22 +15,27 @@ interface CaseFlyoutParams {
 
 export const useSiemReadinessCases = () => {
   const { services } = useKibana();
+  const { useCasesAddToNewCaseFlyout } = services.cases.hooks;
 
-  const createNewSiemReadinessCaseFlyout = useCallback(
-    ({ title, description }: CaseFlyoutParams) => {
-      const caseFlyout = services.cases.hooks.useCasesAddToNewCaseFlyout({
-        initialValue: {
-          title,
-          description,
-        },
-      });
-
-      caseFlyout.open();
+  const genericCase = useCasesAddToNewCaseFlyout({
+    initialValue: {
+      title: i18n.translate(
+        'xpack.securitySolution.siemReadiness.coverage.dataCoverage.caseTitle',
+        {
+          defaultMessage: 'Data Coverage Issue',
+        }
+      ),
+      description: i18n.translate(
+        'xpack.securitySolution.siemReadiness.coverage.dataCoverage.caseDescription',
+        {
+          defaultMessage:
+            "We've identified a data coverage gap that may impact detection capabilities...",
+        }
+      ),
     },
-    [services.cases]
-  );
+  });
 
   return {
-    createNewSiemReadinessCaseFlyout,
+    openGenericCaseFlyout: genericCase.open,
   };
 };

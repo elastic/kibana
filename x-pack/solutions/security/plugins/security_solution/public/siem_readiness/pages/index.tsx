@@ -18,7 +18,7 @@ const VALID_TABS: VisibilityTabId[] = ['coverage', 'quality', 'continuity', 'ret
 const DEFAULT_TAB: VisibilityTabId = 'coverage';
 
 const SiemReadinessDashboard = () => {
-  const { getReadinessCategories } = useReadinessTasks();
+  const { getReadinessCategories, getInstalledIntegrations } = useReadinessTasks();
   const history = useHistory();
   const { tab } = useParams<{ tab?: string }>();
 
@@ -45,6 +45,13 @@ const SiemReadinessDashboard = () => {
       console.log('Main Categories Map:', getReadinessCategories.data.mainCategoriesMap);
     }
   }, [getReadinessCategories.data]);
+
+  useEffect(() => {
+    if (getInstalledIntegrations.data) {
+      // eslint-disable-next-line no-console
+      console.log('Installed Integrations:', getInstalledIntegrations.data);
+    }
+  }, [getInstalledIntegrations.data]);
 
   return (
     <div>
