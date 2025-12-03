@@ -10,7 +10,6 @@ import { EuiButton, EuiSpacer, EuiSteps, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { useState, useCallback, useEffect } from 'react';
-import { type OpenFileUploadLiteContext } from '@kbn/file-upload-common';
 import type { GetAdditionalLinks, ResultLinks } from '@kbn/file-upload-common';
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
@@ -22,7 +21,6 @@ import { MappingEditor } from './mapping_editor';
 interface Props {
   resultLinks?: ResultLinks;
   getAdditionalLinks?: GetAdditionalLinks;
-  props: OpenFileUploadLiteContext;
   onClose?: () => void;
   setIsSaving: (saving: boolean) => void;
   setDropzoneDisabled?: (disabled: boolean) => void;
@@ -36,12 +34,10 @@ interface StepsStatus {
 }
 
 export const FileUploadLiteLookUpView: FC<Props> = ({
-  props,
   onClose,
   setIsSaving,
   setDropzoneDisabled,
 }) => {
-  const { flyoutContent } = props;
   const { filesStatus, uploadStatus, fileClashes, onImportClick, indexName } =
     useFileUploadContext();
 
@@ -97,7 +93,6 @@ export const FileUploadLiteLookUpView: FC<Props> = ({
                 key={i}
                 index={i}
                 lite={true}
-                showFileContentPreview={flyoutContent?.showFileContentPreview}
                 showOverrideButton={false}
                 showExplanationButton={false}
                 showSettingsButton={false}

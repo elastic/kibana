@@ -196,9 +196,6 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
   } else if (showFilePreview || isSaving) {
     content = (
       <FileUploadLiteLookUpView
-        props={{
-          location: '',
-        }}
         setIsSaving={(saving: boolean) => indexUpdateService.setIsSaving(saving)}
         setDropzoneDisabled={setDropzoneDisabled}
         onClose={async () => {
