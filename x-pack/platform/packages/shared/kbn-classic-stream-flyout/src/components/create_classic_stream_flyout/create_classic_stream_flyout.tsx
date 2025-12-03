@@ -27,7 +27,7 @@ import { i18n } from '@kbn/i18n';
 import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
 import { css } from '@emotion/react';
 import { SelectTemplateStep, NameAndConfirmStep, type ValidationErrorType } from './steps';
-import { validateStreamName, type StreamNameValidator, type IlmPolicyFetcher } from '../../utils';
+import { validateStreamName, type StreamNameValidator } from '../../utils';
 
 const VALIDATION_DEBOUNCE_MS = 300;
 
@@ -71,11 +71,6 @@ interface CreateClassicStreamFlyoutProps {
    * Should check for duplicate names and higher priority template conflicts.
    */
   onValidate?: StreamNameValidator;
-  /**
-   * Async callback to fetch ILM policy details by name.
-   * If provided, ILM policy details will be displayed in the template details section.
-   */
-  getIlmPolicy?: IlmPolicyFetcher;
 }
 
 export const CreateClassicStreamFlyout = ({
@@ -86,7 +81,6 @@ export const CreateClassicStreamFlyout = ({
   hasErrorLoadingTemplates = false,
   onRetryLoadTemplates,
   onValidate,
-  getIlmPolicy,
 }: CreateClassicStreamFlyoutProps) => {
   const [currentStep, setCurrentStep] = useState<ClassicStreamStep>(
     ClassicStreamStep.SELECT_TEMPLATE
@@ -224,7 +218,6 @@ export const CreateClassicStreamFlyout = ({
             onStreamNameChange={setStreamName}
             validationError={validationError}
             conflictingIndexPattern={conflictingIndexPattern}
-            getIlmPolicy={getIlmPolicy}
           />
         );
       }

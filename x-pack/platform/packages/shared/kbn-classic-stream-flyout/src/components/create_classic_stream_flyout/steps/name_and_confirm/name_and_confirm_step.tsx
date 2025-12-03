@@ -8,9 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
-import type { IlmPolicyFetcher } from '../../../../utils';
 import { NameStreamSection, type ValidationErrorType } from './name_stream_section';
-import { ConfirmTemplateDetailsSection } from './confirm_template_details_section';
 
 export type { ValidationErrorType };
 
@@ -21,7 +19,6 @@ interface NameAndConfirmStepProps {
   onStreamNameChange: (streamName: string) => void;
   validationError: ValidationErrorType;
   conflictingIndexPattern?: string;
-  getIlmPolicy?: IlmPolicyFetcher;
 }
 
 export const NameAndConfirmStep = ({
@@ -31,7 +28,6 @@ export const NameAndConfirmStep = ({
   onStreamNameChange,
   validationError = null,
   conflictingIndexPattern,
-  getIlmPolicy,
 }: NameAndConfirmStepProps) => {
   const indexPatterns = template.indexPatterns ?? [];
 
@@ -45,8 +41,6 @@ export const NameAndConfirmStep = ({
         validationError={validationError}
         conflictingIndexPattern={conflictingIndexPattern}
       />
-
-      <ConfirmTemplateDetailsSection template={template} getIlmPolicy={getIlmPolicy} />
     </EuiFlexGroup>
   );
 };
