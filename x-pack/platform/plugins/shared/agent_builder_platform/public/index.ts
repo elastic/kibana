@@ -12,7 +12,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new AgentBuilderPlatformPlugin();
 }
 
-export type {
-  AgentBuilderPlatformPluginSetup,
-  AgentBuilderPlatformPluginStart,
-} from './types';
+export type { AgentBuilderPlatformPluginSetup, AgentBuilderPlatformPluginStart } from './types';
