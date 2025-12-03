@@ -208,8 +208,9 @@ async function generateAlertSummary({
 
   const userPrompt = dedent(`
     Context:
+    <AlertContext
     ${context}
-
+    </AlertContext>
     Task:
     Summarize likely cause, impact, and immediate next checks for this alert using the format above. Tie related signals to the alert scope; ignore unrelated noise. If signals are weak or conflicting, mark Assessment "Inconclusive" and propose the safest next diagnostic step.
   `);
