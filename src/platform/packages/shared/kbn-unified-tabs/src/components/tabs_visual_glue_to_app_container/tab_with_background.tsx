@@ -44,7 +44,7 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
           transition: background ${euiTheme.animation.fast};
           margin: ${euiTheme.size.xs};
           margin-bottom: 0;
-          padding-bottom: ${euiTheme.size.xs};
+          padding-bottom: ${isDragging ? '0' : euiTheme.size.xs};
 
           ${isSelected
             ? `
@@ -67,7 +67,7 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
           &::before {
             content: '';
             position: absolute;
-            right: ${euiTheme.size.xs};
+            right: -${euiTheme.size.xs};
             top: calc(
               50% - ${euiTheme.size.xs} / 2
             ); // 50% is the tab height midpoint, we want it centered in the middle of the whole tab bar
