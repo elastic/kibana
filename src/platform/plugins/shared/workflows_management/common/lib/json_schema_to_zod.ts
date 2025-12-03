@@ -85,7 +85,7 @@ function convertNumberSchema(jsonSchema: JSONSchema7): z.ZodType {
  */
 function convertObjectSchema(
   jsonSchema: JSONSchema7,
-  convertRecursive: (schema: JSONSchema7) => z.ZodType
+  convertRecursive: (schema: JSONSchema7 | null | undefined) => z.ZodType
 ): z.ZodType {
   if (!jsonSchema.properties) {
     return z.object({});
