@@ -9,13 +9,22 @@ import React from 'react';
 import { screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { sloFeatureId } from '@kbn/observability-plugin/common';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import '@testing-library/jest-dom';
 import { SloHealthCallout } from './slo_health_callout';
 import { useFetchSloHealth } from '../../../hooks/use_fetch_slo_health';
 import { useRepairSlo } from '../../../hooks/use_repair_slo';
 import { usePermissions } from '../../../hooks/use_permissions';
 import { render } from '../../../utils/test_helper';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useKibana } from '../../../hooks/use_kibana';
+import { cloneDeep } from 'lodash';
+import { baseSlo } from '../../../data/slo';
+import {
+  aConflictingTransformHealth,
+  aHealthyTransformHealth,
+  aMissingTransformHealth,
+  anUnhealthyTransformHealth,
+} from '../../../data/slo/health';
 
 jest.mock('../../../hooks/use_fetch_slo_health');
 jest.mock('../../../hooks/use_repair_slo');
@@ -27,33 +36,11 @@ const mockUseRepairSlo = useRepairSlo as jest.MockedFunction<typeof useRepairSlo
 const mockUsePermissions = usePermissions as jest.MockedFunction<typeof usePermissions>;
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
-const mockSlo: SLOWithSummaryResponse = {
+const mockSlo: SLOWithSummaryResponse = cloneDeep({
+  ...baseSlo,
   id: 'test-slo-id',
   name: 'Test SLO',
-  revision: 1,
-  instanceId: '*',
-  enabled: true,
-  budgetingMethod: 'occurrences',
-  objective: { target: 0.99 },
-  timeWindow: { duration: '30d', type: 'rolling' },
-  indicator: {
-    type: 'sli.kql.custom',
-    params: {
-      index: 'test-index',
-      good: 'status: 200',
-      total: '*',
-    },
-  },
-  summary: {
-    sliValue: 0.95,
-    errorBudget: {
-      initial: 0.01,
-      consumed: 0.5,
-      remaining: 0.5,
-    },
-    status: 'HEALTHY',
-  },
-} as SLOWithSummaryResponse;
+});
 
 const mockRepairSlo = jest.fn();
 
@@ -143,31 +130,21 @@ describe('SloHealthCallout', () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it('should not render when SLO health is healthy', () => {
+  it('should not render when SLO health is not problematic', () => {
     mockUseFetchSloHealth.mockReturnValue({
       isLoading: false,
       isError: false,
       data: [
         {
-          sloId: 'test-slo-id',
-          sloInstanceId: 'irrelevant',
-          sloRevision: 1,
-          sloName: 'Test SLO',
+          id: 'test-slo-id',
+          instanceId: 'irrelevant',
+          revision: 1,
+          name: 'Test SLO',
           health: {
-            overall: 'healthy',
-            rollup: {
-              status: 'healthy',
-              transformState: 'started',
-              match: true,
-            },
-            summary: {
-              status: 'healthy',
-              transformState: 'started',
-              match: true,
-            },
-            enabled: true,
+            isProblematic: false,
+            rollup: aHealthyTransformHealth,
+            summary: aHealthyTransformHealth,
           },
-          state: 'running',
         },
       ],
     });
@@ -182,25 +159,15 @@ describe('SloHealthCallout', () => {
       isError: false,
       data: [
         {
-          sloId: 'test-slo-id',
-          sloInstanceId: 'irrelevant',
-          sloRevision: 1,
-          sloName: 'Test SLO',
+          id: 'test-slo-id',
+          instanceId: 'irrelevant',
+          revision: 1,
+          name: 'Test SLO',
           health: {
-            overall: 'unhealthy',
-            rollup: {
-              status: 'unhealthy',
-              transformState: 'started',
-              match: false,
-            },
-            summary: {
-              status: 'healthy',
-              transformState: 'started',
-              match: true,
-            },
-            enabled: true,
+            isProblematic: true,
+            rollup: anUnhealthyTransformHealth,
+            summary: aHealthyTransformHealth,
           },
-          state: 'running',
         },
       ],
     });
@@ -217,25 +184,15 @@ describe('SloHealthCallout', () => {
       isError: false,
       data: [
         {
-          sloId: 'test-slo-id',
-          sloInstanceId: 'irrelevant',
-          sloRevision: 1,
-          sloName: 'Test SLO',
+          id: 'test-slo-id',
+          instanceId: 'irrelevant',
+          revision: 1,
+          name: 'Test SLO',
           health: {
-            overall: 'unhealthy',
-            rollup: {
-              status: 'missing',
-              transformState: 'missing',
-              match: false,
-            },
-            summary: {
-              status: 'healthy',
-              transformState: 'started',
-              match: true,
-            },
-            enabled: true,
+            isProblematic: true,
+            rollup: aMissingTransformHealth,
+            summary: aHealthyTransformHealth,
           },
-          state: 'running',
         },
       ],
     });
@@ -246,31 +203,49 @@ describe('SloHealthCallout', () => {
     expect(screen.getByTestId('sloSloHealthCalloutRepairButton')).toBeInTheDocument();
   });
 
+  it('should render callout with conflicting state for rollup transform', () => {
+    mockUseFetchSloHealth.mockReturnValue({
+      isLoading: false,
+      isError: false,
+      data: [
+        {
+          id: 'test-slo-id',
+          instanceId: 'irrelevant',
+          revision: 1,
+          name: 'Test SLO',
+          health: {
+            isProblematic: true,
+            rollup: aConflictingTransformHealth,
+            summary: aHealthyTransformHealth,
+          },
+        },
+      ],
+    });
+
+    renderComponent();
+
+    expect(screen.getByText('This SLO has issues with its transforms')).toBeInTheDocument();
+    expect(
+      screen.getByText(/slo-test-slo-id-1 \((conflicting state: should be started)\)/)
+    ).toBeInTheDocument();
+    expect(screen.getByText('Inspect')).toBeInTheDocument();
+  });
+
   it('should render callout with unhealthy summary transform', () => {
     mockUseFetchSloHealth.mockReturnValue({
       isLoading: false,
       isError: false,
       data: [
         {
-          sloId: 'test-slo-id',
-          sloInstanceId: 'irrelevant',
-          sloRevision: 1,
-          sloName: 'Test SLO',
+          id: 'test-slo-id',
+          instanceId: 'irrelevant',
+          revision: 1,
+          name: 'Test SLO',
           health: {
-            overall: 'unhealthy',
-            rollup: {
-              status: 'healthy',
-              transformState: 'started',
-              match: true,
-            },
-            summary: {
-              status: 'unhealthy',
-              transformState: 'started',
-              match: false,
-            },
-            enabled: true,
+            isProblematic: true,
+            rollup: aHealthyTransformHealth,
+            summary: anUnhealthyTransformHealth,
           },
-          state: 'running',
         },
       ],
     });
@@ -287,25 +262,15 @@ describe('SloHealthCallout', () => {
       isError: false,
       data: [
         {
-          sloId: 'test-slo-id',
-          sloInstanceId: 'irrelevant',
-          sloRevision: 1,
-          sloName: 'Test SLO',
+          id: 'test-slo-id',
+          instanceId: 'irrelevant',
+          revision: 1,
+          name: 'Test SLO',
           health: {
-            overall: 'unhealthy',
-            rollup: {
-              status: 'healthy',
-              transformState: 'started',
-              match: true,
-            },
-            summary: {
-              status: 'missing',
-              transformState: 'missing',
-              match: false,
-            },
-            enabled: true,
+            isProblematic: true,
+            rollup: aHealthyTransformHealth,
+            summary: aMissingTransformHealth,
           },
-          state: 'running',
         },
       ],
     });
@@ -316,31 +281,49 @@ describe('SloHealthCallout', () => {
     expect(screen.getByTestId('sloSloHealthCalloutRepairButton')).toBeInTheDocument();
   });
 
+  it('should render callout with conflicting state for summary transform', () => {
+    mockUseFetchSloHealth.mockReturnValue({
+      isLoading: false,
+      isError: false,
+      data: [
+        {
+          id: 'test-slo-id',
+          instanceId: 'irrelevant',
+          revision: 1,
+          name: 'Test SLO',
+          health: {
+            isProblematic: true,
+            rollup: aHealthyTransformHealth,
+            summary: aConflictingTransformHealth,
+          },
+        },
+      ],
+    });
+
+    renderComponent();
+
+    expect(screen.getByText('This SLO has issues with its transforms')).toBeInTheDocument();
+    expect(
+      screen.getByText(/slo-summary-test-slo-id-1 \((conflicting state: should be started)\)/)
+    ).toBeInTheDocument();
+    expect(screen.getByText('Inspect')).toBeInTheDocument();
+  });
+
   it('should render callout with both unhealthy and missing transforms - rollup unhealthy, summary missing', () => {
     mockUseFetchSloHealth.mockReturnValue({
       isLoading: false,
       isError: false,
       data: [
         {
-          sloId: 'test-slo-id',
-          sloInstanceId: 'irrelevant',
-          sloRevision: 1,
-          sloName: 'Test SLO',
+          id: 'test-slo-id',
+          instanceId: 'irrelevant',
+          revision: 1,
+          name: 'Test SLO',
           health: {
-            overall: 'unhealthy',
-            rollup: {
-              status: 'unhealthy',
-              transformState: 'started',
-              match: false,
-            },
-            summary: {
-              status: 'missing',
-              transformState: 'missing',
-              match: false,
-            },
-            enabled: true,
+            isProblematic: true,
+            rollup: anUnhealthyTransformHealth,
+            summary: aMissingTransformHealth,
           },
-          state: 'running',
         },
       ],
     });
@@ -357,25 +340,15 @@ describe('SloHealthCallout', () => {
       isError: false,
       data: [
         {
-          sloId: 'test-slo-id',
-          sloInstanceId: 'irrelevant',
-          sloRevision: 1,
-          sloName: 'Test SLO',
+          id: 'test-slo-id',
+          instanceId: 'irrelevant',
+          revision: 1,
+          name: 'Test SLO',
           health: {
-            overall: 'unhealthy',
-            rollup: {
-              status: 'missing',
-              transformState: 'missing',
-              match: false,
-            },
-            summary: {
-              status: 'unhealthy',
-              transformState: 'started',
-              match: false,
-            },
-            enabled: true,
+            isProblematic: true,
+            rollup: aMissingTransformHealth,
+            summary: anUnhealthyTransformHealth,
           },
-          state: 'running',
         },
       ],
     });
@@ -392,25 +365,15 @@ describe('SloHealthCallout', () => {
       isError: false,
       data: [
         {
-          sloId: 'test-slo-id',
-          sloInstanceId: 'irrelevant',
-          sloRevision: 1,
-          sloName: 'Test SLO',
+          id: 'test-slo-id',
+          instanceId: 'irrelevant',
+          revision: 1,
+          name: 'Test SLO',
           health: {
-            overall: 'unhealthy',
-            rollup: {
-              status: 'unhealthy',
-              transformState: 'started',
-              match: false,
-            },
-            summary: {
-              status: 'unhealthy',
-              transformState: 'started',
-              match: false,
-            },
-            enabled: true,
+            isProblematic: true,
+            rollup: anUnhealthyTransformHealth,
+            summary: anUnhealthyTransformHealth,
           },
-          state: 'running',
         },
       ],
     });
@@ -427,25 +390,15 @@ describe('SloHealthCallout', () => {
       isError: false,
       data: [
         {
-          sloId: 'test-slo-id',
-          sloInstanceId: 'irrelevant',
-          sloRevision: 1,
-          sloName: 'Test SLO',
+          id: 'test-slo-id',
+          instanceId: 'irrelevant',
+          revision: 1,
+          name: 'Test SLO',
           health: {
-            overall: 'unhealthy',
-            rollup: {
-              status: 'missing',
-              transformState: 'missing',
-              match: false,
-            },
-            summary: {
-              status: 'missing',
-              transformState: 'missing',
-              match: false,
-            },
-            enabled: true,
+            isProblematic: true,
+            rollup: aMissingTransformHealth,
+            summary: aMissingTransformHealth,
           },
-          state: 'running',
         },
       ],
     });
@@ -462,25 +415,15 @@ describe('SloHealthCallout', () => {
       isError: false,
       data: [
         {
-          sloId: 'test-slo-id',
-          sloInstanceId: 'irrelevant',
-          sloRevision: 1,
-          sloName: 'Test SLO',
+          id: 'test-slo-id',
+          instanceId: 'irrelevant',
+          revision: 1,
+          name: 'Test SLO',
           health: {
-            overall: 'unhealthy',
-            rollup: {
-              status: 'missing',
-              transformState: 'missing',
-              match: false,
-            },
-            summary: {
-              status: 'healthy',
-              transformState: 'started',
-              match: true,
-            },
-            enabled: true,
+            isProblematic: true,
+            rollup: aMissingTransformHealth,
+            summary: aHealthyTransformHealth,
           },
-          state: 'running',
         },
       ],
     });
@@ -496,10 +439,15 @@ describe('SloHealthCallout', () => {
     expect(mockRepairSlo).toHaveBeenCalledWith({
       list: [
         {
-          sloId: mockSlo.id,
-          sloInstanceId: mockSlo.instanceId,
-          sloEnabled: mockSlo.enabled,
-          sloRevision: mockSlo.revision,
+          id: 'test-slo-id',
+          instanceId: 'irrelevant',
+          revision: 1,
+          name: 'Test SLO',
+          health: {
+            isProblematic: true,
+            rollup: anUnhealthyTransformHealth,
+            summary: aHealthyTransformHealth,
+          },
         },
       ],
     });

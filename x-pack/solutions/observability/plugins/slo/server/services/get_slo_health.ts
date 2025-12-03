@@ -19,18 +19,18 @@ export class GetSLOHealth {
   ) {}
 
   public async execute(params: FetchSLOHealthParams): Promise<FetchSLOHealthResponse> {
-    const sloIds = uniq(map(params.list, 'sloId'));
+    const sloIds = uniq(map(params.list, (item) => item.id));
     const definitions = await this.repository.findAllByIds(sloIds);
-    const definitionById = keyBy(definitions, 'id');
+    const definitionById = keyBy(definitions, (definition) => definition.id);
 
     const list = params.list
-      .filter((item) => !!definitionById[item.sloId])
+      .filter((item) => !!definitionById[item.id])
       .map((item) => ({
-        id: item.sloId,
-        instanceId: item.sloInstanceId,
-        revision: definitionById[item.sloId].revision,
-        name: definitionById[item.sloId].name,
-        enabled: definitionById[item.sloId].enabled,
+        id: item.id,
+        instanceId: item.instanceId,
+        revision: definitionById[item.id].revision,
+        name: definitionById[item.id].name,
+        enabled: definitionById[item.id].enabled,
       }));
 
     const results = await computeHealth(list, { scopedClusterClient: this.scopedClusterClient });

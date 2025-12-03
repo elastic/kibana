@@ -214,5 +214,30 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
         .send({ list })
         .expect(204);
     },
+
+    async purgeInstances(
+      params: { list?: string[]; staleDuration?: string; force?: boolean },
+      roleAuthc: RoleCredentials
+    ) {
+      const { body } = await supertestWithoutAuth
+        .post(`/api/observability/slos/_purge_instances`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send(params)
+        .expect(200);
+
+      return body;
+    },
+
+    async purgeInstancesStatus(taskId: string, roleAuthc: RoleCredentials) {
+      const { body } = await supertestWithoutAuth
+        .get(`/api/observability/slos/_purge_instances/${taskId}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(200);
+
+      return body;
+    },
   };
 }

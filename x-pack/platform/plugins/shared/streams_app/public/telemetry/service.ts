@@ -20,6 +20,11 @@ import {
   streamsSignificantEventsCreatedEventType,
   streamsSignificantEventsSuggestionsGeneratedEventType,
   wiredStreamsStatusChangedEventType,
+  streamsFeatureIdentificationIdentifiedEventType,
+  streamsFeatureIdentificationSavedEventType,
+  streamsFeatureIdentificationDeletedEventType,
+  streamsDescriptionGeneratedEventType,
+  streamsProcessingSimulationSamplesFetchLatencyEventType,
 } from './events';
 import { StreamsTelemetryClient } from './client';
 
@@ -43,6 +48,11 @@ export class StreamsTelemetryService {
     this.analytics.registerEventType(streamsSignificantEventsSuggestionsGeneratedEventType);
     this.analytics.registerEventType(streamsSignificantEventsCreatedEventType);
     this.analytics.registerEventType(wiredStreamsStatusChangedEventType);
+    this.analytics.registerEventType(streamsFeatureIdentificationIdentifiedEventType);
+    this.analytics.registerEventType(streamsFeatureIdentificationSavedEventType);
+    this.analytics.registerEventType(streamsFeatureIdentificationDeletedEventType);
+    this.analytics.registerEventType(streamsDescriptionGeneratedEventType);
+    this.analytics.registerEventType(streamsProcessingSimulationSamplesFetchLatencyEventType);
   }
 
   public getClient() {

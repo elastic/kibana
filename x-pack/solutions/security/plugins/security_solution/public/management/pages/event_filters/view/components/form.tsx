@@ -152,11 +152,9 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     );
 
     const [areConditionsValid, setAreConditionsValid] = useState(!!exception.entries.length);
-    // compute this for initial render only
-    const existingComments = useMemo<ExceptionListItemSchema['comments']>(
-      () => (exception as ExceptionListItemSchema)?.comments,
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      []
+
+    const [existingComments, _] = useState<ExceptionListItemSchema['comments']>(
+      (exception as ExceptionListItemSchema)?.comments
     );
 
     const showAssignmentSection = useCanAssignArtifactPerPolicy(exception, mode, hasFormChanged);

@@ -12,11 +12,13 @@ describe('isRootStreamDefinition', () => {
     const validWired = {
       name: 'logs',
       description: '',
+      updated_at: new Date().toISOString(),
       ingest: {
         lifecycle: { inherit: {} },
-        processing: { steps: [] },
+        processing: { steps: [], updated_at: new Date().toISOString() },
         settings: {},
         wired: { fields: {}, routing: [] },
+        failure_store: { inherit: {} },
       },
     };
     expect(isRootStreamDefinition(validWired)).toBe(true);
@@ -26,11 +28,13 @@ describe('isRootStreamDefinition', () => {
     const nonRootWired = {
       name: 'logs.bar',
       description: '',
+      updated_at: new Date().toISOString(),
       ingest: {
         lifecycle: { inherit: {} },
-        processing: { steps: [] },
+        processing: { steps: [], updated_at: new Date().toISOString() },
         settings: {},
         wired: { fields: {}, routing: [] },
+        failure_store: { inherit: {} },
       },
     };
     expect(isRootStreamDefinition(nonRootWired)).toBe(false);
@@ -40,11 +44,13 @@ describe('isRootStreamDefinition', () => {
     const classic = {
       name: 'logs-test-default',
       description: '',
+      updated_at: new Date().toISOString(),
       ingest: {
         lifecycle: { inherit: {} },
-        processing: { steps: [] },
+        processing: { steps: [], updated_at: new Date().toISOString() },
         settings: {},
         classic: {},
+        failure_store: { inherit: {} },
       },
     };
     expect(isRootStreamDefinition(classic)).toBe(false);

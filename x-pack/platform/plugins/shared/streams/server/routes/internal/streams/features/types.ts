@@ -5,15 +5,16 @@
  * 2.0.
  */
 
+import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
 import type { Feature } from '@kbn/streams-schema';
 
 export type IdentifiedFeaturesEvent = ServerSentEventBase<
   'identified_features',
-  { features: Feature[] }
+  { features: Feature[]; tokensUsed: ChatCompletionTokenCount }
 >;
 
 export type StreamDescriptionEvent = ServerSentEventBase<
   'stream_description',
-  { description: string }
+  { description: string; tokensUsed: ChatCompletionTokenCount }
 >;

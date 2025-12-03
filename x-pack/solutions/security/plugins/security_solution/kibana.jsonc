@@ -33,6 +33,7 @@
       "fieldFormats",
       "inference",
       "inspector",
+      "kubernetesSecurity",
       "lens",
       "licensing",
       "maps",
@@ -62,6 +63,7 @@
       "productDocBase",
       "telemetry",
       "elasticAssistantSharedState",
+      "share"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",

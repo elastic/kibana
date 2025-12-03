@@ -6,11 +6,12 @@
  */
 
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
+import { i18n } from '@kbn/i18n';
 import kbnRison from '@kbn/rison';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import React from 'react';
+
 import { useFetchSloHealth } from '../../../hooks/use_fetch_slo_health';
 import { useRepairSlo } from '../../../hooks/use_repair_slo';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -82,19 +83,18 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
     return null;
   }
 
-  if (health?.overall === 'healthy') {
+  if (!health.isProblematic) {
     return null;
   }
 
   // Show repair button if any transform is missing or is out of sync with SLO
   // Only show if user has edit SLO capabilities
   const showRepairButton =
-    !!health &&
     !!permissions?.hasAllWriteRequested &&
-    (health?.summary.transformState === 'missing' ||
-      health?.rollup.transformState === 'missing' ||
-      !health?.rollup.alignedWithSLO ||
-      !health?.summary.alignedWithSLO);
+    (health.rollup.missing ||
+      health.summary.missing ||
+      !health.rollup.stateMatches ||
+      !health.summary.stateMatches);
 
   return (
     <EuiCallOut

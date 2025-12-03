@@ -5,125 +5,74 @@
  * 2.0.
  */
 
-import type { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock, type ScopedClusterClientMock } from '@kbn/core/server/mocks';
-import type { FindSLODefinitionsWithHealthResponse } from '@kbn/slo-schema';
-import { getSLOSummaryTransformId, getSLOTransformId } from '../../common/constants';
+import * as computeHealth from '../domain/services/compute_health';
+import { FindSLODefinitions } from './find_slo_definitions';
 import { createSLO } from './fixtures/slo';
-import { aHitFromSummaryIndex, aSummaryDocument } from './fixtures/summary_search_document';
 import { createSLORepositoryMock } from './mocks';
 import type { SLORepository } from './slo_repository';
-import { FindSLODefinitions } from './find_slo_definitions';
+
+jest.spyOn(computeHealth, 'computeHealth');
 
 describe('FindSLODefinitions with Health validation', () => {
   let mockRepository: jest.Mocked<SLORepository>;
   let findSLODefinitions: FindSLODefinitions;
   let mockScopedClusterClient: ScopedClusterClientMock;
 
-  const generateSearchResponse = (hits: any[]) => ({
-    took: 0,
-    timed_out: false,
-    _shards: {
-      total: hits.length,
-      successful: hits.length,
-      skipped: 0,
-      failed: 0,
-    },
-    hits: {
-      total: {
-        value: 1,
-        relation: 'eq' as const,
-      },
-      max_score: 1,
-      hits,
-    },
-  });
-
-  const slo = createSLO();
   beforeEach(() => {
     mockRepository = createSLORepositoryMock();
     mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     findSLODefinitions = new FindSLODefinitions(mockRepository, mockScopedClusterClient);
   });
 
-  const results = {
-    page: 1,
-    perPage: 10,
-    total: 1,
-    results: [slo],
-  };
+  describe('default behavior', () => {
+    it('calls the repository with the correct parameters', async () => {
+      const slo = createSLO();
+      mockRepository.search.mockResolvedValueOnce({
+        results: [slo],
+        total: 1,
+        page: 1,
+        perPage: 100,
+      });
 
-  describe('validate health response', () => {
-    it('calls the repository with includeHealth', async () => {
-      mockRepository.search.mockResolvedValueOnce(results);
-      // Mock the search response for computeHealth which uses asCurrentUser.search
+      await findSLODefinitions.execute({
+        search: 'some search',
+        page: '2',
+        perPage: '50',
+        includeOutdatedOnly: false,
+        tags: 'tag1,tag2',
+      });
 
-      const searchResponse = generateSearchResponse([
-        aHitFromSummaryIndex(aSummaryDocument(slo)),
-        aHitFromSummaryIndex(aSummaryDocument(slo)),
-      ]);
-      mockScopedClusterClient.asCurrentUser.search.mockResolvedValue(searchResponse); // Mock the transform stats response with healthy transforms
+      expect(mockRepository.search).toHaveBeenCalledWith(
+        'some search',
+        { page: 2, perPage: 50 },
+        { includeOutdatedOnly: false, tags: ['tag1', 'tag2'] }
+      );
+      expect(computeHealth.computeHealth).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('with includeHealth', () => {
+    it('calls computeHealth with the correct parameters', async () => {
+      const slo = createSLO();
+      mockRepository.search.mockResolvedValueOnce({
+        results: [slo],
+        total: 1,
+        page: 1,
+        perPage: 100,
+      });
       mockScopedClusterClient.asSecondaryAuthUser.transform.getTransformStats.mockResolvedValue({
-        transforms: [
-          {
-            id: getSLOTransformId(slo.id, slo.revision),
-            health: { status: 'green' },
-            state: 'started',
-          } as TransformGetTransformStatsTransformStats,
-          {
-            id: getSLOSummaryTransformId(slo.id, slo.revision),
-            health: { status: 'green' },
-            state: 'started',
-          } as TransformGetTransformStatsTransformStats,
-        ],
-      } as any);
+        transforms: [],
+        count: 0,
+      });
 
-      const result: FindSLODefinitionsWithHealthResponse = await findSLODefinitions.execute({
+      await findSLODefinitions.execute({
         includeHealth: true,
       });
 
-      expect(mockRepository.search).toHaveBeenCalledWith(
-        '',
-        { page: 1, perPage: 100 },
-        {
-          includeOutdatedOnly: false,
-          tags: [],
-        }
-      );
-
-      expect(result.results[0].health).toEqual({
-        overall: 'healthy',
-        rollup: {
-          status: 'healthy',
-          alignedWithSLO: true,
-          transformState: 'started',
-        },
-        summary: {
-          status: 'healthy',
-          alignedWithSLO: true,
-          transformState: 'started',
-        },
+      expect(computeHealth.computeHealth).toHaveBeenCalledWith([slo], {
+        scopedClusterClient: mockScopedClusterClient,
       });
-    });
-
-    it('does not call computeHealth without includeHealth', async () => {
-      mockRepository.search.mockResolvedValueOnce(results);
-
-      const result: FindSLODefinitionsWithHealthResponse = await findSLODefinitions.execute({
-        includeHealth: false,
-      });
-
-      expect(mockScopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
-      expect(mockRepository.search).toHaveBeenCalledWith(
-        '',
-        { page: 1, perPage: 100 },
-        {
-          includeOutdatedOnly: false,
-          tags: [],
-        }
-      );
-
-      expect(result.results[0].health).toEqual(undefined);
     });
   });
 });

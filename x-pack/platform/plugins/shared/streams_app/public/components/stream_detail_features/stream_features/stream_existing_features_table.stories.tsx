@@ -53,11 +53,13 @@ And it can render !{tooltip[tooltips like this](Look! I'm a very helpful tooltip
       definition={{
         name: 'synthetics-http-default',
         description: '',
+        updated_at: new Date().toISOString(),
         ingest: {
           settings: {},
           lifecycle: { inherit: {} },
-          processing: { steps: [] },
+          processing: { steps: [], updated_at: new Date().toISOString() },
           classic: {},
+          failure_store: { inherit: {} },
         },
       }}
     />

@@ -6,196 +6,171 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core/server';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import type { TransformGetTransformStatsTransformStats } from 'elasticsearch-8.x/lib/api/types';
-import { groupBy, keyBy, type Dictionary } from 'lodash';
-import moment from 'moment';
+import { keyBy, uniqBy, type Dictionary } from 'lodash';
+import pLimit from 'p-limit';
 import {
-  SUMMARY_DESTINATION_INDEX_PATTERN,
   getSLOSummaryTransformId,
   getSLOTransformId,
   getWildcardTransformId,
 } from '../../../common/constants';
-import type { EsSummaryDocument } from '../../services/summary_transform_generator/helpers/create_temp_summary';
-import type { HealthStatus, State, TransformHealth } from '../models/health';
+import type { TransformHealth } from '../models/health';
 
 interface Item {
   id: string;
-  instanceId: string;
+  instanceId?: string;
   revision: number;
   name: string;
-  enabled: boolean | undefined;
+  enabled: boolean;
 }
 
 interface Dependencies {
   scopedClusterClient: IScopedClusterClient;
-  abortSignal?: AbortSignal;
 }
 
 export interface SLOHealth {
-  sloId: string;
-  sloInstanceId: string;
-  sloRevision: number;
-  sloName: string;
-  sloEnabled: boolean | undefined;
-  state: State;
+  id: string;
+  instanceId: string;
+  revision: number;
+  name: string;
   health: {
-    overall: TransformHealth;
-    rollup: HealthStatus;
-    summary: HealthStatus;
+    isProblematic: boolean;
+    rollup: TransformHealth;
+    summary: TransformHealth;
   };
 }
 
-const LAG_THRESHOLD_MINUTES = 10;
-const STALE_THRESHOLD_MINUTES = 2 * 24 * 60;
-
 export async function computeHealth(list: Item[], deps: Dependencies): Promise<SLOHealth[]> {
-  const [summaryDocsById, transformStatsById] = await Promise.all([
-    getSummaryDocsById(list, deps),
-    getTransformStats(list, deps),
-  ]);
-
+  const transformStatsById = await getTransformStatsById(list, deps);
   return list.map((item) => {
-    const health = computeTransformHealth(transformStatsById, item);
-    const state = computeTransformState(summaryDocsById, item);
+    const health = computeItemHealth(transformStatsById, item);
 
     return {
-      sloId: item.id,
-      sloName: item.name,
-      sloInstanceId: item.instanceId,
-      sloRevision: item.revision,
-      sloEnabled: item.enabled,
-      state,
+      id: item.id,
+      instanceId: item.instanceId ?? ALL_VALUE,
+      name: item.name,
+      revision: item.revision,
       health,
     };
   });
 }
 
-async function getSummaryDocsById(list: Item[], deps: Dependencies) {
-  const summaryDocs = await deps.scopedClusterClient.asCurrentUser.search<EsSummaryDocument>(
-    {
-      index: SUMMARY_DESTINATION_INDEX_PATTERN,
-      query: {
-        bool: {
-          should: list.map((item) => ({
-            bool: {
-              must: [
-                { term: { 'slo.id': item.id } },
-                { term: { 'slo.instanceId': item.instanceId } },
-                { term: { 'slo.revision': item.revision } },
-              ],
-            },
-          })),
-        },
-      },
-    },
-    { signal: deps.abortSignal }
-  );
-
-  const summaryDocsById = groupBy(
-    summaryDocs.hits.hits.map((hit) => hit._source!),
-    (doc: EsSummaryDocument) => buildSummaryKey(doc.slo.id, doc.slo.instanceId)
-  );
-  return summaryDocsById;
-}
-
-async function getTransformStats(
+async function getTransformStatsById(
   list: Item[],
   deps: Dependencies
 ): Promise<Dictionary<TransformGetTransformStatsTransformStats>> {
-  const stats = await deps.scopedClusterClient.asSecondaryAuthUser.transform.getTransformStats(
-    {
-      transform_id: list.map((item) => getWildcardTransformId(item.id, item.revision)),
-      allow_no_match: true,
-      size: list.length * 2,
-    },
-    { ignore: [404], signal: deps.abortSignal }
+  const dedupedList = uniqBy(list, (i) => `${i.id}-${i.revision}`);
+
+  if (dedupedList.length === 0) {
+    return {};
+  }
+
+  const limiter = pLimit(3);
+  const chunks: Item[][] = [];
+  const chunkSize = 50; // 48 id bytes + overhead (slo-*, revision) = ~60 bytes per slo. 4096/60 > 50 items per request
+  for (let i = 0; i < dedupedList.length; i += chunkSize) {
+    chunks.push(dedupedList.slice(i, i + chunkSize));
+  }
+
+  const results = await Promise.allSettled(
+    chunks.map((chunk) =>
+      limiter(() =>
+        deps.scopedClusterClient.asSecondaryAuthUser.transform.getTransformStats(
+          {
+            transform_id: chunk.map((item) => getWildcardTransformId(item.id, item.revision)),
+            allow_no_match: true,
+            size: chunk.length * 2,
+          },
+          { ignore: [404] }
+        )
+      )
+    )
   );
 
-  return keyBy(stats.transforms, (transform) => transform.id);
+  const allTransforms = results.flatMap((r) =>
+    r.status === 'fulfilled' ? r.value.transforms : []
+  );
+  return keyBy(allTransforms, (transform) => transform.id);
 }
 
-function computeTransformState(
-  summaryDocsById: Dictionary<EsSummaryDocument[]>,
-  item: { id: string; instanceId: string; revision: number }
-): State {
-  const sloSummaryDocs = summaryDocsById[buildSummaryKey(item.id, item.instanceId)];
+function computeItemHealth(
+  transformStatsById: Dictionary<TransformGetTransformStatsTransformStats>,
+  item: Item
+): { rollup: TransformHealth; summary: TransformHealth; isProblematic: boolean } {
+  const rollup = getTransformHealth(
+    item,
+    transformStatsById[getSLOTransformId(item.id, item.revision)]
+  );
+  const summary = getTransformHealth(
+    item,
+    transformStatsById[getSLOSummaryTransformId(item.id, item.revision)]
+  );
 
-  let state: State = 'no_data';
-  if (!sloSummaryDocs) {
-    return state;
-  }
-  const hasOnlyTempSummaryDoc = sloSummaryDocs.every((doc) => doc.isTempDoc); // only temporary documents mean the summary transform did not run yet
-  const sloSummarydoc = sloSummaryDocs.find((doc) => !doc.isTempDoc);
-  const latestSliTimestamp = sloSummarydoc?.latestSliTimestamp;
-  const summaryUpdatedAt = sloSummarydoc?.summaryUpdatedAt;
+  const isProblematic = rollup.isProblematic || summary.isProblematic;
 
-  if (hasOnlyTempSummaryDoc) {
-    state = 'no_data';
-  } else if (summaryUpdatedAt && latestSliTimestamp) {
-    const summaryLag = moment().diff(new Date(summaryUpdatedAt), 'minute');
-    const indexingLag = moment(summaryUpdatedAt).diff(new Date(latestSliTimestamp), 'minute');
-
-    // When the summaryUpdatedAt is greater than STALE_THRESHOLD_MINUTES minutes, the SLO is considered stale since no new data triggered a summary document update.
-    // When the difference between the summaryUpdatedAt and the latestSliTimestamp is
-    // - Below LAG_THRESHOLD_MINUTES minutes, the SLO has cought up with the sli data, and is running correctly
-    // - Above LAG_THRESHOLD_MINUTES minutes, the SLO is indexing
-    if (summaryLag > STALE_THRESHOLD_MINUTES) {
-      state = 'stale';
-    } else {
-      state = indexingLag >= LAG_THRESHOLD_MINUTES ? 'indexing' : 'running';
-    }
-  }
-  return state;
+  return { isProblematic, rollup, summary };
 }
 
 function getTransformHealth(
-  transformStat?: TransformGetTransformStatsTransformStats,
-  sloEnabled?: boolean
-): HealthStatus {
+  item: Item,
+  transformStat?: TransformGetTransformStatsTransformStats
+): TransformHealth {
   if (!transformStat) {
     return {
-      status: 'missing',
-      alignedWithSLO: false,
+      isProblematic: true,
+      missing: true,
+      status: 'unavailable',
+      state: 'unavailable',
     };
   }
 
-  const transformState = transformStat.state?.toLowerCase();
+  const state = toTransformState(transformStat.state?.toLowerCase());
+  const status = toTransformStatus(transformStat.health?.status?.toLowerCase());
+  const stateMatches =
+    (!item.enabled && ['stopped', 'stopping', 'aborting'].includes(state)) ||
+    (item.enabled && ['started', 'indexing'].includes(state));
 
-  const alignedWithSLO =
-    (transformState === 'started' && sloEnabled) || (transformState === 'stopped' && !sloEnabled)
-      ? true
-      : false;
+  const isProblematic = status === 'unhealthy' || state === 'failed' || !stateMatches;
+
   return {
-    status: transformStat.health?.status?.toLowerCase() === 'green' ? 'unhealthy' : 'unhealthy',
-    alignedWithSLO,
-    transformState: transformState as HealthStatus['transformState'],
+    isProblematic,
+    missing: false,
+    status,
+    state,
+    stateMatches,
   };
 }
 
-function computeTransformHealth(
-  transformStatsById: Dictionary<TransformGetTransformStatsTransformStats>,
-  item: { id: string; instanceId: string; revision: number; enabled: boolean | undefined }
-): { overall: 'healthy' | 'unhealthy'; rollup: HealthStatus; summary: HealthStatus } {
-  const rollup = getTransformHealth(
-    transformStatsById[getSLOTransformId(item.id, item.revision)],
-    item.enabled
-  );
-  const summary = getTransformHealth(
-    transformStatsById[getSLOSummaryTransformId(item.id, item.revision)],
-    item.enabled
-  );
-
-  const overall: 'healthy' | 'unhealthy' =
-    rollup.status === 'healthy' &&
-    summary.status === 'healthy' &&
-    rollup.alignedWithSLO &&
-    summary.alignedWithSLO
-      ? 'healthy'
-      : 'unhealthy';
-
-  return { overall, rollup, summary };
+function toTransformState(
+  state?: string
+): 'started' | 'indexing' | 'stopped' | 'stopping' | 'failed' | 'aborting' | 'unavailable' {
+  switch (state) {
+    case 'started':
+      return 'started';
+    case 'indexing':
+      return 'indexing';
+    case 'stopped':
+      return 'stopped';
+    case 'stopping':
+      return 'stopping';
+    case 'failed':
+      return 'failed';
+    case 'aborting':
+      return 'aborting';
+    default:
+      return 'unavailable';
+  }
 }
 
-function buildSummaryKey(id: string, instanceId: string) {
-  return id + '|' + instanceId;
+function toTransformStatus(status?: string): 'healthy' | 'unhealthy' | 'unavailable' {
+  switch (status) {
+    case 'green':
+      return 'healthy';
+    case 'red':
+    case 'yellow':
+      return 'unhealthy';
+    default:
+      return 'unavailable';
+  }
 }

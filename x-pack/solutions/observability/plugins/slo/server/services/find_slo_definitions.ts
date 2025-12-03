@@ -13,7 +13,7 @@ import type {
 } from '@kbn/slo-schema';
 import { findSloDefinitionsResponseSchema } from '@kbn/slo-schema';
 import { keyBy } from 'lodash';
-import { computeHealth, type SLOHealth } from '../domain/services';
+import { computeHealth } from '../domain/services';
 import { IllegalArgumentError } from '../errors';
 import type { SLORepository } from './slo_repository';
 
@@ -37,32 +37,14 @@ export class FindSLODefinitions {
     );
 
     if (params.includeHealth) {
-      let healthResults: SLOHealth[] = [];
-      try {
-        healthResults = await computeHealth(
-          definitions.map((definition) => ({
-            id: definition.id,
-            instanceId: '*',
-            name: definition.name,
-            revision: definition.revision,
-            enabled: definition.enabled,
-          })),
-          {
-            scopedClusterClient: this.scopedClusterClient,
-            abortSignal: AbortSignal.timeout(2),
-          }
-        );
-      } catch (err) {
-        if (err.name !== 'RequestAbortedError') {
-          throw err;
-        }
-      }
+      const healthResults = await computeHealth(definitions, {
+        scopedClusterClient: this.scopedClusterClient,
+      });
 
-      const healthBySloId = keyBy(healthResults, 'sloId');
-      const resultsWithHealth = definitions.map((definition) => {
+      const healthBySloId = keyBy(healthResults, (health) => health.id);
+      const definitionsWithHealth = definitions.map((definition) => {
         return {
           ...definition,
-          state: healthBySloId[definition.id]?.state,
           health: healthBySloId[definition.id]?.health,
         };
       });
@@ -71,7 +53,7 @@ export class FindSLODefinitions {
         page: result.page,
         perPage: result.perPage,
         total: result.total,
-        results: resultsWithHealth,
+        results: definitionsWithHealth,
       });
     }
 
@@ -94,6 +76,6 @@ function toPagination(params: FindSLODefinitionsParams): Pagination {
 
   return {
     page: !isNaN(page) && page >= 1 ? page : DEFAULT_PAGE,
-    perPage: !isNaN(perPage) && perPage >= 1 ? perPage : DEFAULT_PER_PAGE,
+    perPage: !isNaN(perPage) && perPage >= 0 ? perPage : DEFAULT_PER_PAGE,
   };
 }
