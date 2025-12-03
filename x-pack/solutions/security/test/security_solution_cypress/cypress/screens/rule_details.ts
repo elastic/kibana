@@ -180,6 +180,8 @@ export const RULE_GAPS_FILL_BUTTON =
 export const RULE_GAPS_DATE_PICKER = '[data-test-subj="rule-gaps-date-picker"]';
 export const RULE_GAPS_DATE_PICKER_APPLY_REFRESH = `${RULE_GAPS_DATE_PICKER} .euiSuperUpdateButton`;
 export const RULE_FILL_ALL_GAPS_BUTTON = '[data-test-subj="fill-rule-gaps-button"]';
+export const RULE_GAPS_AUTO_FILL_FAILED_ATTEMPTS_INDICATOR =
+  '[data-test-subj="auto-fill-failed-attempts-indicator"]';
 export const MODIFIED_PREBUILT_RULE_BADGE = '[data-test-subj="modified-prebuilt-rule-badge"]';
 export const MODIFIED_PREBUILT_RULE_BADGE_NO_BASE_VERSION =
   '[data-test-subj="modified-prebuilt-rule-badge-no-base-version"]';
