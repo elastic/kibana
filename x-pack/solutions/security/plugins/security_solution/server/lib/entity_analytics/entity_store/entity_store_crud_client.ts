@@ -16,6 +16,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import { generateLatestTransformId } from '@kbn/entityManager-plugin/server/lib/entities/helpers/generate_component_id';
 import type { EntityDefinition } from '@kbn/entities-schema';
+import castArray from 'lodash/castArray';
 import type { EntityContainer } from '../../../../common/api/entity_analytics/entity_store/entities/upsert_entities_bulk.gen';
 import type { EntityType as APIEntityType } from '../../../../common/api/entity_analytics/entity_store/common.gen';
 import { EntityType } from '../../../../common/entity_analytics/types';
@@ -195,6 +196,7 @@ export class EntityStoreCrudClient {
         id: previewDoc._id,
         index: getEntitiesIndexName(type, this.namespace),
         document: buildDocumentToUpdate(type, normalizedDocToECS),
+        refresh: 'true',
       });
     }
   }
@@ -394,14 +396,7 @@ function getPreviewTransformConfigWithEntity(
       ...source,
       query: {
         bool: {
-          must: [
-            ...(Array.isArray(source.query?.bool?.must)
-              ? source.query.bool.must
-              : source.query?.bool?.must
-              ? [source.query.bool.must]
-              : []),
-            { term: { [identityField]: id } },
-          ],
+          must: [...castArray(source.query?.bool?.must ?? []), { term: { [identityField]: id } }],
           must_not: source.query?.bool?.must_not || [],
         },
       },
