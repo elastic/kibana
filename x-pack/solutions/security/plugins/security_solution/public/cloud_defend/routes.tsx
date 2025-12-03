@@ -10,7 +10,10 @@ import type {
   CloudDefendPageId,
   CloudDefendSecuritySolutionContext,
 } from '@kbn/cloud-defend-plugin/public';
+import { css } from '@emotion/react';
 import { CLOUD_DEFEND_BASE_PATH } from '@kbn/cloud-defend-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiEmptyPrompt, EuiFlexGroup } from '@elastic/eui';
 import type { SecurityPageName, SecuritySubPluginRoutes } from '../app/types';
 import { useKibana } from '../common/lib/kibana';
 import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
@@ -29,8 +32,48 @@ const cloudDefendSecuritySolutionContext: CloudDefendSecuritySolutionContext = {
 };
 
 const CloudDefend = () => {
-  const { cloudDefend } = useKibana().services;
+  const { cloudDefend, cloud } = useKibana().services;
   const CloudDefendRouter = cloudDefend.getCloudDefendRouter();
+  const isServerless: boolean = cloud?.isServerlessEnabled;
+
+  // Remove this once Cloud Defend Billing works
+  if (isServerless) {
+    return (
+      <PluginTemplateWrapper>
+        <SecuritySolutionPageWrapper noPadding noTimeline>
+          <EuiFlexGroup
+            css={css`
+              // 250px is roughly the Kibana chrome with a page title and tabs
+              min-height: calc(100vh - 250px);
+            `}
+            justifyContent="center"
+            alignItems="center"
+            direction="column"
+          >
+            <EuiEmptyPrompt
+              color="plain"
+              title={
+                <h2>
+                  <FormattedMessage
+                    id="xpack.cloudDefend.serverlessNotOfferedTitle"
+                    defaultMessage="Page Unavailable"
+                  />
+                </h2>
+              }
+              body={
+                <p>
+                  <FormattedMessage
+                    id="xpack.cloudDefend.serverlessNotOfferedBodyMessage"
+                    defaultMessage="Cloud defend is not enabled in serverless"
+                  />
+                </p>
+              }
+            />
+          </EuiFlexGroup>
+        </SecuritySolutionPageWrapper>
+      </PluginTemplateWrapper>
+    );
+  }
 
   return (
     <PluginTemplateWrapper>
