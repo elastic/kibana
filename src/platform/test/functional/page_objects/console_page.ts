@@ -82,6 +82,10 @@ export class ConsolePageObject extends FtrService {
     await this.monacoEditor.typeCodeEditorValue(text, 'consoleMonacoEditor', false);
   }
 
+  public async appendText(text: string) {
+    await this.monacoEditor.appendToCodeEditor('consoleMonacoEditor', text);
+  }
+
   public async promptAutocomplete(letter = 'b') {
     await this.monacoEditor.typeCodeEditorValue(letter, 'consoleMonacoEditor', true);
     await this.retry.waitFor(

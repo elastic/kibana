@@ -97,6 +97,30 @@ export class MonacoEditorService extends FtrService {
   }
 
   /**
+   * Append text to an existing editor value (atomic operation, no interleaving).
+   */
+  public async appendToCodeEditor(testSubjId: string, text: string) {
+    await this.waitCodeEditorReady(testSubjId);
+    await this.browser.execute(
+      (id: string, textToAppend: string) => {
+        const container = document.querySelector(`[data-test-subj="${id}"]`);
+        const editor = window.MonacoEnvironment?.monaco?.editor
+          ?.getEditors()
+          ?.find((e: any) => container?.contains(e.getDomNode()));
+        const model = editor?.getModel();
+        if (!editor || !model) return;
+
+        model.setValue(model.getValue() + textToAppend);
+        const lastLine = model.getLineCount();
+        editor.setPosition({ lineNumber: lastLine, column: model.getLineMaxColumn(lastLine) });
+        editor.focus();
+      },
+      testSubjId,
+      text
+    );
+  }
+
+  /**
    * Simulate typing text character-by-character using Monaco's trigger API.
    * Each character fires a separate onDidChangeModelContent event, which is needed
    * for features like auto-escaping that listen for individual keystrokes.

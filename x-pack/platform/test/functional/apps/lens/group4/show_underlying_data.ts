@@ -20,7 +20,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
   const browser = getService('browser');
 
   describe('show underlying data', () => {
@@ -180,10 +179,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         keepOpen: true,
       });
 
-      const input = await find.activeElement();
-      await input.type(`bytes > 2000`);
-      // the tooltip seems to be there as long as the focus is in the query string
-      await input.pressKeys(browser.keys.RIGHT);
+      await lens.simulateTypingInFormula(`bytes > 2000`);
+      await lens.simulateKeyInFormula('ArrowRight');
 
       await lens.closeDimensionEditor();
 
