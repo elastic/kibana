@@ -101,7 +101,7 @@ const getScriptsLibraryClientMock = (): jest.Mocked<ScriptsLibraryClientInterfac
         pageSize = ENDPOINT_DEFAULT_PAGE_SIZE,
         sortField = 'name',
         sortDirection = 'asc',
-      }: ListScriptsRequestQuery) => {
+      }: ListScriptsRequestQuery = {}) => {
         return {
           data: [generateScriptEntryMock()],
           total: 1,
