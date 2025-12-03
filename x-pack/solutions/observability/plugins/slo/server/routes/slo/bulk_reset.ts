@@ -11,8 +11,8 @@ import { createSloServerRoute } from '../create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
 import { TYPE } from '../../services/tasks/types/task_types';
 
-export const bulkDeleteSLORoute = createSloServerRoute({
-  endpoint: 'POST /api/observability/slos/_bulk_delete 2023-10-31',
+export const bulkResetSLORoute = createSloServerRoute({
+  endpoint: 'POST /api/observability/slos/_bulk_reset 2023-10-31',
   options: { access: 'public' },
   security: {
     authz: {
@@ -28,7 +28,7 @@ export const bulkDeleteSLORoute = createSloServerRoute({
     await taskManager.ensureScheduled(
       {
         id: taskId,
-        taskType: TYPE.DELETE,
+        taskType: TYPE.RESET,
         scope: ['observability', 'slo'],
         state: {},
         runAt: new Date(Date.now() + 3 * 1000),
@@ -41,8 +41,8 @@ export const bulkDeleteSLORoute = createSloServerRoute({
   },
 });
 
-export const getBulkDeleteStatusRoute = createSloServerRoute({
-  endpoint: 'GET /api/observability/slos/_bulk_delete/{taskId} 2023-10-31',
+export const getBulkResetStatusRoute = createSloServerRoute({
+  endpoint: 'GET /api/observability/slos/_bulk_reset/{taskId} 2023-10-31',
   options: { access: 'public' },
   security: {
     authz: {
