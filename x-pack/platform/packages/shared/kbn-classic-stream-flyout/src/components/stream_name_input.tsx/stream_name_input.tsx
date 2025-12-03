@@ -102,12 +102,13 @@ const countWildcards = (pattern: string): number => {
 };
 
 const buildStreamName = (pattern: string, parts: string[]): string => {
-  let result = pattern;
-  parts.forEach((part) => {
+  let partIndex = 0;
+  return pattern.replace(/\*/g, () => {
     // Keep * if the part is empty, so validation can detect unfilled wildcards
-    result = result.replace('*', part || '*');
+    const part = parts[partIndex] || '*';
+    partIndex++;
+    return part;
   });
-  return result;
 };
 
 export interface StreamNameInputProps {
