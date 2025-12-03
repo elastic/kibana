@@ -148,17 +148,12 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     setCurrentProps({ ...currentProps, attachments: undefined });
   }, [currentProps]);
 
-  const removeAttachment = useCallback(
-    (attachmentId: string) => {
-      setCurrentProps({
-        ...currentProps,
-        attachments: currentProps.attachments?.filter(
-          (attachment) => attachment.id !== attachmentId
-        ),
-      });
-    },
-    [currentProps]
-  );
+  const removeAttachment = useCallback((attachmentIndex: number) => {
+    setCurrentProps((prevProps) => ({
+      ...prevProps,
+      attachments: prevProps.attachments?.filter((_, index) => index !== attachmentIndex),
+    }));
+  }, []);
 
   const conversationContextValue = useMemo(
     () => ({

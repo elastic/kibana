@@ -41,12 +41,12 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
       aria-label={labels.attachments}
       data-test-subj="onechatAttachmentPillsRow"
     >
-      {attachments.map((attachment: Attachment) => (
+      {attachments.map((attachment: Attachment, index: number) => (
         <AttachmentPill
-          key={attachment.id}
+          key={attachment.id ?? `${attachment.type}-${index}`}
           id={attachment.id}
           type={attachment.type as AttachmentType}
-          onRemoveAttachment={removable ? () => removeAttachment?.(attachment.id) : undefined}
+          onRemoveAttachment={removable ? () => removeAttachment?.(index) : undefined}
         />
       ))}
     </EuiBadgeGroup>

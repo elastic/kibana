@@ -7,7 +7,7 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import type { BrowserApiToolDefinition } from '@kbn/onechat-browser/tools/browser_api_tool';
-import type { Attachment } from '@kbn/onechat-common/attachments';
+import type { AttachmentInput } from '@kbn/onechat-common/attachments';
 import type { OnechatInternalService } from '../services';
 
 export interface EmbeddableConversationDependencies {
@@ -59,7 +59,7 @@ export interface EmbeddableConversationProps {
    * Content will be fetched when starting a new conversation round.
    * It will be appended only if it has changed since previous conversation round.
    */
-  attachments?: Attachment[];
+  attachments?: AttachmentInput[];
 
   /**
    * Browser API tools that the agent can use to interact with the page.

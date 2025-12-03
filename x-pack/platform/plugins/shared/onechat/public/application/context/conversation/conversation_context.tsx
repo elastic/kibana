@@ -7,7 +7,7 @@
 
 import { createContext, useContext } from 'react';
 import type { BrowserApiToolDefinition } from '@kbn/onechat-browser/tools/browser_api_tool';
-import type { Attachment } from '@kbn/onechat-common/attachments';
+import type { AttachmentInput } from '@kbn/onechat-common/attachments';
 import type { ConversationActions } from './use_conversation_actions';
 
 interface ConversationContextValue {
@@ -18,9 +18,9 @@ interface ConversationContextValue {
   agentId?: string;
   initialMessage?: string;
   resetInitialMessage?: () => void;
-  attachments?: Attachment[];
+  attachments?: AttachmentInput[];
   resetAttachments?: () => void;
-  removeAttachment?: (attachmentId: string) => void;
+  removeAttachment?: (attachmentIndex: number) => void;
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
   setConversationId?: (conversationId?: string) => void;
   conversationActions: ConversationActions;
