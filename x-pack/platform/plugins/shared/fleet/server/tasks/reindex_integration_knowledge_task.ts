@@ -15,7 +15,7 @@ import { v4 as uuidv4 } from 'uuid';
 import pMap from 'p-map';
 
 import * as Registry from '../services/epm/registry';
-import { getInstallations } from '../services/epm/packages';
+import { getInstallations, reinstallPackageForInstallation } from '../services/epm/packages';
 import { appContextService, licenseService } from '../services';
 import { MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS } from '../constants';
 import { indexKnowledgeBase } from '../services/epm/packages/install_state_machine/steps';
@@ -82,6 +82,19 @@ async function reindexIntegrationKnowledgeForInstalledPackages() {
   await pMap(
     installedPackages.saved_objects,
     async ({ attributes: installation }) => {
+      if (installation.install_source === 'bundled') {
+        await reinstallPackageForInstallation({
+          soClient,
+          esClient,
+          installation,
+        }).catch((err) => {
+          logger.error(
+            `Package needs to be manually reinstalled ${installation.name} after enabling integration knowledge: ${err.message}`
+          );
+        });
+        return;
+      }
+
       if (installation.install_source !== 'registry') {
         logger.debug(
           `Skipping reindexing knowledge base for package ${installation.name}@${installation.version} - install source ${installation.install_source}`
