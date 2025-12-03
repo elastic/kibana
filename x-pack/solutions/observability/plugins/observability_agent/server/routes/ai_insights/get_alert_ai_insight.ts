@@ -11,8 +11,6 @@ import { MessageRole } from '@kbn/inference-common';
 import dedent from 'dedent';
 import type { ObservabilityAgentDataRegistry } from '../../data_registry/data_registry';
 
-// Minimal shape of the alert document for AI insights.
-// This works for any alert that happens to have these fields populated.
 export interface AlertDocForInsight {
   'service.name'?: string;
   'service.environment'?: string;
@@ -173,7 +171,7 @@ async function generateAlertSummary({
   connectorId,
   context,
 }: {
-  inferenceClient: any;
+  inferenceClient: InferenceClient;
   connectorId: string | undefined;
   context: string;
 }): Promise<string> {
