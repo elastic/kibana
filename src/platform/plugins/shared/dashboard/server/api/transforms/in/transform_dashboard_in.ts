@@ -44,6 +44,8 @@ export const transformDashboardIn = (
       time_range,
       // eslint-disable-next-line @typescript-eslint/naming-convention
       refresh_interval,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      project_routing,
       ...rest
     } = dashboardState;
 
@@ -95,6 +97,7 @@ export const transformDashboardIn = (
         ? { timeFrom: time_range.from, timeTo: time_range.to, timeRestore: true }
         : { timeRestore: false }),
       kibanaSavedObjectMeta: { searchSourceJSON },
+      ...(project_routing !== undefined && { projectRouting: project_routing }),
     };
     return {
       attributes,

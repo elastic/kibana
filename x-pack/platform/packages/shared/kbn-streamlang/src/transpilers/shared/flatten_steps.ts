@@ -50,7 +50,7 @@ export function flattenSteps(
         {
           ...rest,
           where: combinedCondition,
-        },
+        } as StreamlangProcessorDefinition,
       ];
     }
 
@@ -58,8 +58,8 @@ export function flattenSteps(
     const processorCopy = { ...processor };
     if ('where' in processorCopy) delete processorCopy.where;
     if (parentCondition) {
-      return [{ ...processorCopy, where: parentCondition }];
+      return [{ ...processorCopy, where: parentCondition } as StreamlangProcessorDefinition];
     }
-    return [processorCopy];
+    return [processorCopy as StreamlangProcessorDefinition];
   });
 }

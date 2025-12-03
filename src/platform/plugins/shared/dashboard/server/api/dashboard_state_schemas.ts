@@ -166,6 +166,7 @@ export function getDashboardStateSchema() {
         defaultValue: [],
       })
     ),
+    project_routing: schema.maybe(schema.string()),
     query: schema.maybe(querySchema),
     refresh_interval: schema.maybe(refreshIntervalSchema),
     tags: schema.maybe(
