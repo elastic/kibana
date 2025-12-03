@@ -6,3 +6,4 @@
  */
 
 export * from './create_script';
+export * from './list_scripts';
