@@ -136,8 +136,8 @@ export const useResponsiveTabs = ({
         mask-image: linear-gradient(
           to right,
           rgba(255, 0, 0, 0.1) 0%,
-          rgb(255, 0, 0) ${euiTheme.size.l},
-          rgb(255, 0, 0) calc(100% - ${euiTheme.size.l}),
+          rgb(255, 0, 0) ${euiTheme.size.s},
+          rgb(255, 0, 0) calc(100% - ${euiTheme.size.s}),
           rgba(255, 0, 0, 0.1) 100%
         );
       `;
@@ -146,14 +146,14 @@ export const useResponsiveTabs = ({
         mask-image: linear-gradient(
           to right,
           rgba(255, 0, 0, 0.1) 0%,
-          rgb(255, 0, 0) ${euiTheme.size.l}
+          rgb(255, 0, 0) ${euiTheme.size.s}
         );
       `;
     } else if (scrollState?.isScrollableRight) {
       overflowGradient = `
         mask-image: linear-gradient(
           to right,
-          rgb(255, 0, 0) calc(100% - ${euiTheme.size.l}),
+          rgb(255, 0, 0) calc(100% - ${euiTheme.size.s}),
           rgba(255, 0, 0, 0.1) 100%
         );
       `;
@@ -172,7 +172,7 @@ export const useResponsiveTabs = ({
       transform: translateZ(0);
       ${overflowGradient}
     `;
-  }, [scrollState, euiTheme.size.l, euiTheme.size.xs]);
+  }, [scrollState, euiTheme.size.s, euiTheme.size.xs]);
 
   return {
     tabsSizeConfig,
