@@ -8,6 +8,10 @@
 export const PAGE_TITLE = '[data-test-subj="threatHuntingPage"]';
 export const COMBINED_RISK_DONUT_CHART = '[data-test-subj="risk-score-donut-chart"]';
 export const ANOMALIES_PLACEHOLDER_PANEL = '[data-test-subj="anomalies-placeholder-panel"]';
+// The table wrapper can be in loading-true or loading-false state
 export const THREAT_HUNTING_ENTITIES_TABLE =
-  '[data-test-subj="asset-inventory-test-subj-grid-wrapper"]';
+  '[data-test-subj*="threat-hunting-entities-table-loading"]';
+// Table when fully loaded (no longer loading)
+export const THREAT_HUNTING_ENTITIES_TABLE_LOADED =
+  '[data-test-subj="threat-hunting-entities-table-loading-false"]';
 export const TIMELINE_ICON = '[data-test-subj="threat-hunting-timeline-icon"]';

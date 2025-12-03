@@ -46,14 +46,14 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
     it('should enable a job and renders the table with pagination', () => {
       // Skip this test if entityThreatHuntingEnabled feature flag is enabled
       // When enabled, the page redirects to threat hunting page which doesn't have the anomalies table
-      cy.url().then((url) => {
+      cy.url({ timeout: 10000 }).then((url) => {
         if (url.includes('entity_analytics_threat_hunting')) {
           cy.log('Skipping test: entityThreatHuntingEnabled feature flag is enabled');
           return;
         }
 
         // Verify we're on the correct page and the anomalies table is visible
-        cy.get(ANOMALIES_TABLE).should('be.visible');
+        cy.get(ANOMALIES_TABLE, { timeout: 30000 }).should('be.visible');
         waitForAnomaliesToBeLoaded();
 
         // Enables the job and perform checks

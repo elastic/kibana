@@ -500,6 +500,7 @@ export const ThreatHuntingEntitiesTable: React.FC<ThreatHuntingEntitiesTableProp
   return (
     <PaginatedTable
       id={THREAT_HUNTING_TABLE_ID}
+      dataTestSubj="threat-hunting-entities-table"
       activePage={activePage}
       columns={columns}
       headerCount={data?.total ?? 0}
