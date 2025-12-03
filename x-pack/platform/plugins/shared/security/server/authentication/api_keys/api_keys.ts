@@ -26,6 +26,7 @@ import { isCreateRestAPIKeyParams } from '@kbn/security-plugin-types-server';
 
 import { getFakeKibanaRequest } from './fake_kibana_request';
 import type { SecurityLicense } from '../../../common';
+import { getScopedClient } from '../../elasticsearch';
 import { transformPrivilegesToElasticsearchPrivileges, validateKibanaPrivileges } from '../../lib';
 import type { UpdateAPIKeyParams, UpdateAPIKeyResult } from '../../routes/api_keys';
 import { isUiamCredential, type UiamServicePublic } from '../../uiam';
@@ -162,7 +163,7 @@ export class APIKeys implements NativeAPIKeysType {
       return null;
     }
     const { type, expiration, name, metadata } = createParams;
-    const scopedClusterClient = this.getScopedClient(request);
+    const scopedClusterClient = getScopedClient(request, this.clusterClient, this.uiam);
 
     this.logger.debug('Trying to create an API key');
 
@@ -217,7 +218,7 @@ export class APIKeys implements NativeAPIKeysType {
     }
 
     const { type, id, metadata } = updateParams;
-    const scopedClusterClient = this.getScopedClient(request);
+    const scopedClusterClient = getScopedClient(request, this.clusterClient, this.uiam);
 
     this.logger.debug('Trying to edit an API key');
 
@@ -281,6 +282,7 @@ export class APIKeys implements NativeAPIKeysType {
     // client credentials that might have been provided. Otherwise, try to extract optional Elasticsearch client
     // credentials from `es-client-authentication` HTTP header (currently only used by JWT).
     let clientAuthentication: ClientAuthentication | undefined;
+
     if (this.uiam && isUiamCredential(authorizationHeader)) {
       clientAuthentication = this.uiam.getClientAuthentication();
     } else {
@@ -288,6 +290,7 @@ export class APIKeys implements NativeAPIKeysType {
         request,
         ELASTICSEARCH_CLIENT_AUTHENTICATION_HEADER
       );
+
       if (clientAuthorizationHeader) {
         clientAuthentication = {
           scheme: clientAuthorizationHeader.scheme,
@@ -338,7 +341,11 @@ export class APIKeys implements NativeAPIKeysType {
     let result: InvalidateAPIKeyResult;
     try {
       // User needs `manage_api_key` privilege to use this API
-      result = await this.getScopedClient(request).asCurrentUser.security.invalidateApiKey({
+      result = await getScopedClient(
+        request,
+        this.clusterClient,
+        this.uiam
+      ).asCurrentUser.security.invalidateApiKey({
         ids: params.ids,
       });
       this.logger.debug(
@@ -398,7 +405,11 @@ export class APIKeys implements NativeAPIKeysType {
 
     this.logger.debug(`Trying to validate an API key`);
     try {
-      await this.getScopedClient(fakeRequest).asCurrentUser.security.authenticate();
+      await getScopedClient(
+        fakeRequest,
+        this.clusterClient,
+        this.uiam
+      ).asCurrentUser.security.authenticate();
       this.logger.debug(`API key was validated successfully`);
       return true;
     } catch (e) {
