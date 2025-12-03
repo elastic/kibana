@@ -16,14 +16,12 @@ export enum AttachmentType {
   screenContext = 'screen_context',
   text = 'text',
   esql = 'esql',
-  product_reference = 'product_reference',
 }
 
 interface AttachmentDataMap {
   [AttachmentType.esql]: EsqlAttachmentData;
   [AttachmentType.text]: TextAttachmentData;
   [AttachmentType.screenContext]: ScreenContextAttachmentData;
-  [AttachmentType.product_reference]: ProductReferenceAttachmentData;
 }
 
 export const esqlAttachmentDataSchema = z.object({
