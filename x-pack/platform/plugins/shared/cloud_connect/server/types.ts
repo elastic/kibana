@@ -48,6 +48,10 @@ export interface ServiceConfig {
   };
 }
 
+export interface SubscriptionResponse {
+  state: string;
+}
+
 export interface OnboardClusterResponse {
   id: string;
   name: string;
@@ -55,6 +59,7 @@ export interface OnboardClusterResponse {
     created_at: string;
     created_by: string;
     organization_id: string;
+    subscription?: string;
   };
   self_managed_cluster: SelfManagedCluster;
   license: SelfManagedClusterLicense;

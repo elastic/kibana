@@ -13,6 +13,7 @@ import type {
   OnboardClusterRequest,
   OnboardClusterResponse,
   ApiKeyValidationResult,
+  SubscriptionResponse,
 } from '../types';
 
 export class CloudConnectClient {
@@ -243,6 +244,39 @@ export class CloudConnectClient {
       this.logger.debug(`Successfully deleted cluster from Cloud API: ${clusterId}`);
     } catch (error) {
       this.logger.error(`Failed to delete cluster from Cloud API: ${clusterId}`, { error });
+      throw error;
+    }
+  }
+
+  /**
+   * Gets subscription information for an organization
+   * Returns the subscription state (trial, active, or inactive)
+   */
+  async getOrganizationSubscription(
+    apiKey: string,
+    organizationId: string
+  ): Promise<SubscriptionResponse> {
+    try {
+      this.logger.debug(`Fetching subscription for organization ID: ${organizationId}`);
+
+      const response = await this.axiosInstance.get<SubscriptionResponse>(
+        `/cloud-connected/organizations/${organizationId}/subscription`,
+        {
+          headers: {
+            Authorization: `apiKey ${apiKey}`,
+          },
+        }
+      );
+
+      this.logger.debug(
+        `Successfully fetched subscription for organization: ${organizationId}, state: ${response.data.state}`
+      );
+
+      return response.data;
+    } catch (error) {
+      this.logger.error(`Failed to fetch subscription for organization ID: ${organizationId}`, {
+        error,
+      });
       throw error;
     }
   }

@@ -73,9 +73,35 @@ export const registerClustersRoute = ({
 
         logger.debug(`Successfully retrieved cluster details: ${clusterDetails.id}`);
 
-        return response.ok({
-          body: clusterDetails,
-        });
+        // Fetch subscription state for the organization
+        try {
+          const subscription = await cloudConnectClient.getOrganizationSubscription(
+            apiKeyData.apiKey,
+            clusterDetails.metadata.organization_id
+          );
+
+          // Include subscription state in the response
+          return response.ok({
+            body: {
+              ...clusterDetails,
+              metadata: {
+                ...clusterDetails.metadata,
+                subscription: subscription.state,
+              },
+            },
+          });
+        } catch (subscriptionError) {
+          // Log the error but return cluster details without subscription
+          logger.warn(
+            `Failed to fetch subscription for organization ${clusterDetails.metadata.organization_id}`,
+            { error: subscriptionError }
+          );
+
+          // Return cluster details without subscription field
+          return response.ok({
+            body: clusterDetails,
+          });
+        }
       } catch (error) {
         logger.error('Failed to retrieve cluster details', { error });
 

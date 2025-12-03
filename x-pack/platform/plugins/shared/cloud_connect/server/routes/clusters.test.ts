@@ -48,6 +48,7 @@ describe('Clusters Routes', () => {
       onboardClusterWithKeyGeneration: jest.fn(),
       updateClusterServices: jest.fn(),
       deleteCluster: jest.fn(),
+      getOrganizationSubscription: jest.fn(),
     } as any;
 
     // Mock the CloudConnectClient constructor to return our mock instance
@@ -110,7 +111,7 @@ describe('Clusters Routes', () => {
       routeHandler = getCall![1];
     });
 
-    it('should return cluster details on happy path', async () => {
+    it('should return cluster details with subscription state on happy path', async () => {
       mockStorageService.getApiKey.mockResolvedValue({
         apiKey: 'test-api-key-123',
         clusterId: 'cluster-uuid-456',
@@ -140,7 +141,12 @@ describe('Clusters Routes', () => {
         },
       };
 
+      const mockSubscription = {
+        state: 'active',
+      };
+
       mockCloudConnectInstance.getClusterDetails.mockResolvedValue(mockClusterDetails);
+      mockCloudConnectInstance.getOrganizationSubscription.mockResolvedValue(mockSubscription);
 
       mockRequest = {};
 
@@ -151,8 +157,18 @@ describe('Clusters Routes', () => {
         'test-api-key-123',
         'cluster-uuid-456'
       );
+      expect(mockCloudConnectInstance.getOrganizationSubscription).toHaveBeenCalledWith(
+        'test-api-key-123',
+        'org-123'
+      );
       expect(mockResponse.ok).toHaveBeenCalledWith({
-        body: mockClusterDetails,
+        body: {
+          ...mockClusterDetails,
+          metadata: {
+            ...mockClusterDetails.metadata,
+            subscription: 'active',
+          },
+        },
       });
     });
 
@@ -276,6 +292,59 @@ describe('Clusters Routes', () => {
 
       expect(mockResponse.badRequest).toHaveBeenCalledWith({
         body: { message: 'Bad request' },
+      });
+    });
+
+    it('should return cluster details without subscription when subscription fetch fails', async () => {
+      mockStorageService.getApiKey.mockResolvedValue({
+        apiKey: 'test-api-key-123',
+        clusterId: 'cluster-uuid-456',
+        createdAt: '2024-01-01T00:00:00.000Z',
+        updatedAt: '2024-01-01T00:00:00.000Z',
+      });
+
+      const mockClusterDetails = {
+        id: 'cluster-uuid-456',
+        name: 'my-cluster',
+        metadata: {
+          created_at: '2024-01-01',
+          created_by: 'user@example.com',
+          organization_id: 'org-123',
+        },
+        self_managed_cluster: {
+          id: 'es-cluster-uuid',
+          name: 'my-cluster',
+          version: '8.15.0',
+        },
+        license: {
+          type: 'platinum',
+          uid: 'license-uid',
+        },
+        services: {
+          eis: { enabled: false, supported: true },
+        },
+      };
+
+      mockCloudConnectInstance.getClusterDetails.mockResolvedValue(mockClusterDetails);
+      mockCloudConnectInstance.getOrganizationSubscription.mockRejectedValue(
+        new Error('Subscription API unavailable')
+      );
+
+      mockRequest = {};
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(mockCloudConnectInstance.getClusterDetails).toHaveBeenCalledWith(
+        'test-api-key-123',
+        'cluster-uuid-456'
+      );
+      expect(mockCloudConnectInstance.getOrganizationSubscription).toHaveBeenCalledWith(
+        'test-api-key-123',
+        'org-123'
+      );
+      // Should return cluster details without subscription field
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: mockClusterDetails,
       });
     });
 
