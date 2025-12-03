@@ -77,7 +77,7 @@ async function fetchAlertContext({
   if (serviceName) {
     // APM Service Summary
     try {
-      const summary = await dataRegistry.getData('apmServiceSummary', {
+      const apmServiceSummary = await dataRegistry.getData('apmServiceSummary', {
         request,
         serviceName,
         serviceEnvironment,
@@ -85,8 +85,8 @@ async function fetchAlertContext({
         end: alertEnd,
         transactionType,
       });
-      if (summary) {
-        contextParts.push(`Service Summary:\n${JSON.stringify(summary, null, 2)}`);
+      if (apmServiceSummary) {
+        contextParts.push(`Service Summary:\n${JSON.stringify(apmServiceSummary, null, 2)}`);
       }
     } catch (err) {
       logger.debug(`AI insight: apmServiceSummary failed: ${err}`);
@@ -94,15 +94,17 @@ async function fetchAlertContext({
 
     // APM Downstream Dependencies
     try {
-      const downstream = await dataRegistry.getData('apmDownstreamDependencies', {
+      const apmDownstreamDependencies = await dataRegistry.getData('apmDownstreamDependencies', {
         request,
         serviceName,
         serviceEnvironment,
         start: downstreamStart,
         end: alertEnd,
       });
-      if (downstream && downstream.length > 0) {
-        contextParts.push(`Downstream Dependencies:\n${JSON.stringify(downstream, null, 2)}`);
+      if (apmDownstreamDependencies && apmDownstreamDependencies.length > 0) {
+        contextParts.push(
+          `Downstream Dependencies:\n${JSON.stringify(apmDownstreamDependencies, null, 2)}`
+        );
       }
     } catch (err) {
       logger.debug(`AI insight: apmDownstreamDependencies failed: ${err}`);
@@ -110,15 +112,15 @@ async function fetchAlertContext({
 
     // APM Errors
     try {
-      const errors = await dataRegistry.getData('apmErrors', {
+      const apmErrors = await dataRegistry.getData('apmErrors', {
         request,
         serviceName,
         serviceEnvironment,
         start: errorsStart,
         end: alertEnd,
       });
-      if (errors && errors.length > 0) {
-        contextParts.push(`APM Errors:\n${JSON.stringify(errors, null, 2)}`);
+      if (apmErrors && apmErrors.length > 0) {
+        contextParts.push(`APM Errors:\n${JSON.stringify(apmErrors, null, 2)}`);
       }
     } catch (err) {
       logger.debug(`AI insight: apmErrors failed: ${err}`);
@@ -175,7 +177,7 @@ async function generateAlertSummary({
   connectorId: string | undefined;
   context: string;
 }): Promise<string> {
-  const system = dedent(`
+  const systemPrompt = dedent(`
     You are an SRE assistant. Help an SRE quickly understand likely cause, impact, and next actions for this alert using the provided context.
 
     Output shape (plain text):
@@ -204,7 +206,7 @@ async function generateAlertSummary({
     - If inconclusive or signals skew Indirect/Unrelated, state that the alert may be unrelated/noisy and suggest targeted traces/logging for the suspected path.
   `);
 
-  const prompt = dedent(`
+  const userPrompt = dedent(`
     Context:
     ${context}
 
@@ -214,8 +216,8 @@ async function generateAlertSummary({
 
   const completion = await inferenceClient.chatComplete({
     connectorId: connectorId ?? '',
-    system,
-    messages: [{ role: MessageRole.User, content: prompt }],
+    system: systemPrompt,
+    messages: [{ role: MessageRole.User, content: userPrompt }],
   });
 
   return completion.content ?? '';
