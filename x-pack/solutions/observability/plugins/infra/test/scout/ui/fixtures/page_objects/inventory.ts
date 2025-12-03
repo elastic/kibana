@@ -12,6 +12,6 @@ export class InventoryPage {
 
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('metrics')}/inventory`);
-    return this.page.waitForLoadingIndicatorHidden();
+    await this.page.testSubj.waitForSelector('infraMetricsPage');
   }
 }
