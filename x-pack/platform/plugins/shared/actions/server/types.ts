@@ -19,6 +19,7 @@ import type {
   ISavedObjectsRepository,
   IScopedClusterClient,
 } from '@kbn/core/server';
+import type { AxiosHeaderValue } from 'axios';
 import type { SubActionConnector } from './sub_action_framework/sub_action_connector';
 import type { ServiceParams } from './sub_action_framework/types';
 import type { ActionTypeRegistry } from './action_type_registry';
@@ -88,6 +89,7 @@ export interface ActionTypeExecutorOptions<
   secrets: Secrets;
   params: Params;
   logger: Logger;
+  globalAuthHeaders?: Record<string, AxiosHeaderValue>;
   taskInfo?: TaskInfo;
   configurationUtilities: ActionsConfigurationUtilities;
   source?: ActionExecutionSource<unknown>;
@@ -215,6 +217,8 @@ export interface ActionType<
     params?: Params;
     source?: ActionExecutionSourceType;
   }) => string[];
+  // Headers that should be added to every Axios request made by this action type
+  globalAuthHeaders?: Record<string, AxiosHeaderValue>;
   renderParameterTemplates?: RenderParameterTemplates<Params>;
   executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
   getService?: (params: ServiceParams<Config, Secrets>) => SubActionConnector<Config, Secrets>;
