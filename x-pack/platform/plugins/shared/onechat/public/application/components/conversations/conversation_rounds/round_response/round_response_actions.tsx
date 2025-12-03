@@ -69,8 +69,8 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
             id="xpack.onechat.roundResponseActions.tokenUsage"
             defaultMessage="Input tokens: {inputTokens} / Output tokens: {outputTokens}"
             values={{
-              inputTokens: modelUsage.input_tokens,
-              outputTokens: modelUsage.output_tokens,
+              inputTokens: modelUsage.input_tokens.toLocaleString(),
+              outputTokens: modelUsage.output_tokens.toLocaleString(),
             }}
           />
         </EuiText>
