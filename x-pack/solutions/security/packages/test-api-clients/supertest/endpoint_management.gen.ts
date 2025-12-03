@@ -255,14 +255,6 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
-  getEndpointMetadataList(props: GetEndpointMetadataListProps, kibanaSpace: string = 'default') {
-    return supertest
-      .get(getRouteUrlForSpace('/api/endpoint/metadata', kibanaSpace))
-      .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .query(props.query);
-  },
   getEndpointSuggestions(props: GetEndpointSuggestionsProps, kibanaSpace: string = 'default') {
     return supertest
       .post(
@@ -388,9 +380,6 @@ export interface EndpointSuspendProcessActionProps {
 }
 export interface EndpointUnisolateActionProps {
   body: EndpointUnisolateActionRequestBodyInput;
-}
-export interface GetEndpointMetadataListProps {
-  query: GetEndpointMetadataListRequestQueryInput;
 }
 export interface GetEndpointSuggestionsProps {
   params: GetEndpointSuggestionsRequestParamsInput;
