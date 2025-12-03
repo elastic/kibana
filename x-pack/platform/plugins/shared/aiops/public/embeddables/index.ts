@@ -21,6 +21,10 @@ export const registerEmbeddables = (
     const { getChangePointChartEmbeddableFactory } = await import('./change_point_chart');
     return getChangePointChartEmbeddableFactory(core.getStartServices);
   });
+  embeddable.registerLegacyURLTransform(EMBEDDABLE_CHANGE_POINT_CHART_TYPE, async () => {
+    const { transformOut } = await import('./change_point_chart');
+    return transformOut as (storedState: object, references?: Reference[]) => object;
+  });
   embeddable.registerReactEmbeddableFactory(EMBEDDABLE_PATTERN_ANALYSIS_TYPE, async () => {
     const { getPatternAnalysisEmbeddableFactory } = await import('./pattern_analysis');
     return getPatternAnalysisEmbeddableFactory(core.getStartServices);
