@@ -7,13 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
-import { getRouterLinkProps } from '@kbn/router-utils';
-import { TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR } from '@kbn/deeplinks-observability';
-import { getUnifiedDocViewerServices } from '../../../../plugin';
-import { TraceDataState } from '../../../../../../../../../../x-pack/solutions/observability/plugins/apm/public/components/shared/trace_waterfall/use_trace_waterfall';
-import { useTraceStateContext } from '../../../../hooks/use_trace_state';
+import { useDataSourcesContext } from '../hooks/use_data_sources';
+import { useGetGenerateDiscoverLink } from '../hooks/use_get_generate_discover_link';
 
 interface TraceIdLinkProps {
   traceId: string;
@@ -26,51 +23,28 @@ export function TraceIdLink({
   formattedTraceId,
   'data-test-subj': dataTestSubj,
 }: TraceIdLinkProps) {
-  const {
-    share: { url: urlService },
-    core,
-    data: dataService,
-  } = getUnifiedDocViewerServices();
-  const traceStateContext = useTraceStateContext();
-  const traceState = traceStateContext ? traceStateContext.traceState : undefined;
-  console.log('TRACE_LINK traceStateContext', traceStateContext);
-
-  const canViewApm = core.application.capabilities.apm?.show || false;
-  const { from: timeRangeFrom, to: timeRangeTo } =
-    dataService.query.timefilter.timefilter.getTime();
-
-  const apmLinkToTransactionByTraceIdLocator = urlService.locators.get<{
-    traceId: string;
-    rangeFrom: string;
-    rangeTo: string;
-  }>(TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR);
-
-  const href = apmLinkToTransactionByTraceIdLocator?.getRedirectUrl({
-    traceId,
-    rangeFrom: timeRangeFrom,
-    rangeTo: timeRangeTo,
+  const { indexes } = useDataSourcesContext();
+  const tracesIndexPattern = indexes?.apm?.traces;
+  const { generateDiscoverLink } = useGetGenerateDiscoverLink({
+    indexPattern: tracesIndexPattern,
   });
-  const routeLinkProps = href
-    ? getRouterLinkProps({
-        href,
-        onClick: () => {
-          apmLinkToTransactionByTraceIdLocator?.navigate({
-            traceId,
-            rangeFrom: timeRangeFrom,
-            rangeTo: timeRangeTo,
-          });
-        },
-      })
-    : undefined;
+
+  const discoverUrl = useMemo(() => {
+    if (!tracesIndexPattern) {
+      return undefined;
+    }
+    return generateDiscoverLink({ 'trace.id': traceId });
+  }, [generateDiscoverLink, traceId, tracesIndexPattern]);
 
   return (
     <>
-      {canViewApm &&
-      routeLinkProps &&
-      traceState &&
-      traceState !== TraceDataState.Empty &&
-      traceState !== TraceDataState.Invalid ? (
-        <EuiLink {...routeLinkProps} data-test-subj={dataTestSubj}>
+      {discoverUrl ? (
+        <EuiLink
+          href={discoverUrl}
+          data-test-subj={dataTestSubj}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           {formattedTraceId}
         </EuiLink>
       ) : (

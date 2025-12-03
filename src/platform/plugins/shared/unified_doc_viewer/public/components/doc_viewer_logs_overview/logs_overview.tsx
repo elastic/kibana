@@ -102,7 +102,7 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
         onAddColumn={onAddColumn}
         onRemoveColumn={onRemoveColumn}
       >
-        <TraceStateProvider>
+        <DataSourcesProvider indexes={indexes}>
           <div
             ref={setContainerRef}
             css={
@@ -136,18 +136,16 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
               />
             )}
             {parsedDoc[TRACE_ID_FIELD] && showTraceWaterfall ? (
-              <DataSourcesProvider indexes={indexes}>
-                <TraceWaterfall
-                  traceId={parsedDoc[TRACE_ID_FIELD]}
-                  docId={parsedDoc[TRANSACTION_ID_FIELD] || parsedDoc[SPAN_ID_FIELD]}
-                  serviceName={parsedDoc[SERVICE_NAME_FIELD]}
-                  dataView={dataView}
-                />
-              </DataSourcesProvider>
+              <TraceWaterfall
+                traceId={parsedDoc[TRACE_ID_FIELD]}
+                docId={parsedDoc[TRANSACTION_ID_FIELD] || parsedDoc[SPAN_ID_FIELD]}
+                serviceName={parsedDoc[SERVICE_NAME_FIELD]}
+                dataView={dataView}
+              />
             ) : null}
             {LogsOverviewAIAssistant && <LogsOverviewAIAssistant doc={hit} />}
           </div>
-        </TraceStateProvider>
+        </DataSourcesProvider>
       </FieldActionsProvider>
     );
   }
