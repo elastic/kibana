@@ -681,6 +681,7 @@ export interface ESQLSearchParams {
   // time_zone?: string;
   query: string;
   filter?: unknown;
+  project_routing?: string;
   locale?: string;
   include_execution_metadata?: boolean;
   dropNullColumns?: boolean;

@@ -19,7 +19,7 @@ const EmptyPrompt = styled(EuiEmptyPrompt)`
 EmptyPrompt.displayName = 'EmptyPrompt';
 
 const PrePackagedRulesPromptComponent = () => {
-  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
+  const canReadRules = useUserPrivileges().rulesPrivileges.rules.read;
   return (
     <EmptyPrompt
       data-test-subj="rulesEmptyPrompt"
@@ -29,7 +29,7 @@ const PrePackagedRulesPromptComponent = () => {
         <EuiFlexGroup justifyContent="center">
           <EuiFlexItem grow={false}>
             <AddElasticRulesButton
-              isDisabled={!canEditRules}
+              isDisabled={!canReadRules}
               fill={true}
               data-test-subj="add-elastc-rules-empty-empty-prompt-button"
               showBadge={false}

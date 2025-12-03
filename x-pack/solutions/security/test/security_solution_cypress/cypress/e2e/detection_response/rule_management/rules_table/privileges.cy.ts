@@ -6,6 +6,7 @@
  */
 
 import {
+  ADD_ELASTIC_RULES_BTN,
   CREATE_NEW_RULE_BTN,
   ENABLE_RULE_TOGGLE,
 } from '../../../../screens/alerts_detection_rules';
@@ -137,6 +138,10 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
 
     it(`should not be able to "Enable/Disable" a rule`, () => {
       cy.get(ENABLE_RULE_TOGGLE).should('not.be.enabled');
+    });
+
+    it(`should be able to "Add" a prebuilt rule`, () => {
+      cy.get(ADD_ELASTIC_RULES_BTN).should('be.enabled');
     });
   });
 
