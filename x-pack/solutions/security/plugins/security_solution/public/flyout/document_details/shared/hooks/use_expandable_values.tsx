@@ -10,10 +10,20 @@ import { useCallback, useMemo, useState } from 'react';
 const EMPTY_ARRAY: string[] = [];
 
 interface UseExpandableValuesOptions {
+  /**
+   * List of values to display - when the list exceeds the display limit, extra values are hidden
+   */
   values: string[] | null | undefined;
+  /**
+   * Max number of values shown before collapsing - defaults to 2
+   */
   displayValuesLimit?: number;
 }
 
+/**
+ * Hook that manages "Show more / Show less" behavior for lists of values.
+ * Returns the visible values, hidden values, and expansion state.
+ */
 export const useExpandableValues = ({
   values,
   displayValuesLimit = 2,
