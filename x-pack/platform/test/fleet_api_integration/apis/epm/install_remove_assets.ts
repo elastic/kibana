@@ -740,6 +740,10 @@ const expectAssetsInstalled = ({
           type: 'ingest_pipeline',
         },
         {
+          id: 'all_assets-README.md',
+          type: 'knowledge_base',
+        },
+        {
           id: 'default',
           type: 'ml_model',
         },

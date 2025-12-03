@@ -13,6 +13,7 @@ import { saveKnowledgeBaseContentToIndex } from '../../knowledge_base_index';
 import type { InstallContext } from '../_state_machine_package_install';
 
 import { stepSaveKnowledgeBase, cleanupKnowledgeBaseStep } from './step_save_knowledge_base';
+import { getIntegrationKnowledgeSetting } from '../../get_integration_knowledge_setting';
 
 // Mock the app context service
 jest.mock('../../../../app_context', () => ({
@@ -22,9 +23,6 @@ jest.mock('../../../../app_context', () => ({
       warn: jest.fn(),
       info: jest.fn(),
       debug: jest.fn(),
-    }),
-    getExperimentalFeatures: jest.fn().mockReturnValue({
-      installIntegrationsKnowledge: true,
     }),
   },
 }));
@@ -47,6 +45,10 @@ jest.mock('../../../../license', () => ({
   licenseService: {
     isEnterprise: jest.fn().mockReturnValue(true),
   },
+}));
+
+jest.mock('../../get_integration_knowledge_setting', () => ({
+  getIntegrationKnowledgeSetting: jest.fn().mockResolvedValue(true),
 }));
 
 let esClient: jest.Mocked<ElasticsearchClient>;
@@ -698,11 +700,7 @@ describe('stepSaveKnowledgeBase', () => {
     });
 
     it('should skip knowledge base processing when installIntegrationsKnowledge feature flag is disabled', async () => {
-      // Mock app context service to return experimental features with flag disabled
-      const { appContextService } = jest.requireMock('../../../../app_context');
-      appContextService.getExperimentalFeatures.mockReturnValue({
-        installIntegrationsKnowledge: false,
-      });
+      (getIntegrationKnowledgeSetting as jest.Mock).mockResolvedValueOnce(false);
 
       const entries: ArchiveEntry[] = [
         {
@@ -722,20 +720,9 @@ describe('stepSaveKnowledgeBase', () => {
       // Verify that updateEsAssetReferences was NOT called
       const { updateEsAssetReferences } = jest.requireMock('../../es_assets_reference');
       expect(updateEsAssetReferences).not.toHaveBeenCalled();
-
-      // Reset the mock back to enabled for other tests
-      appContextService.getExperimentalFeatures.mockReturnValue({
-        installIntegrationsKnowledge: true,
-      });
     });
 
     it('should process knowledge base when installIntegrationsKnowledge feature flag is enabled', async () => {
-      // Ensure app context service returns experimental features with flag enabled
-      const { appContextService } = jest.requireMock('../../../../app_context');
-      appContextService.getExperimentalFeatures.mockReturnValue({
-        installIntegrationsKnowledge: true,
-      });
-
       const entries: ArchiveEntry[] = [
         {
           path: 'test-package-1.0.0/docs/knowledge_base/guide.md',
