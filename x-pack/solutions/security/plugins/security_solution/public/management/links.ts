@@ -46,6 +46,7 @@ import {
 import { licenseService } from '../common/hooks/use_license';
 import type { LinkItem } from '../common/links/types';
 import type { StartPlugins } from '../types';
+import { cloudDefendLink } from '../cloud_defend/links';
 import { links as notesLink } from '../notes/links';
 import { IconConsole } from '../common/icons/console';
 import { IconShield } from '../common/icons/shield';
@@ -249,6 +250,7 @@ export const links: LinkItem = {
       skipUrlState: true,
       hideTimeline: true,
     },
+    cloudDefendLink,
     notesLink,
   ],
 };

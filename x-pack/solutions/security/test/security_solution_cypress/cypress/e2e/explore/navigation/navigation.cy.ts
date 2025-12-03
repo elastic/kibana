@@ -62,6 +62,7 @@ import {
   DISCOVER_URL,
   RULES_COVERAGE_URL,
   OSQUERY_URL,
+  CLOUD_DEFEND_URL,
   HOSTS_URL,
 } from '../../../urls/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
@@ -329,5 +330,9 @@ describe('Serverless side navigation links', { tags: '@serverless' }, () => {
     ServerlessHeaders.showMoreItems();
     navigateFromHeaderTo(ServerlessHeaders.ENDPOINTS, true);
     cy.url().should('include', ENDPOINTS_URL);
+  });
+  it('navigates to the Cloud defend page', () => {
+    navigateFromHeaderTo(ServerlessHeaders.CLOUD_DEFEND, true);
+    cy.url().should('include', CLOUD_DEFEND_URL);
   });
 });

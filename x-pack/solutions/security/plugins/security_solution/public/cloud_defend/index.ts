@@ -6,11 +6,12 @@
  */
 
 import type { SecuritySubPlugin } from '../app/types';
+import { routes } from './routes';
 
 export class CloudDefend {
   public setup() {}
 
   public start(): SecuritySubPlugin {
-    return { routes: [] };
+    return { routes };
   }
 }
