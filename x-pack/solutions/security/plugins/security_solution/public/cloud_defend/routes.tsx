@@ -64,7 +64,7 @@ const CloudDefend = () => {
                 <p>
                   <FormattedMessage
                     id="xpack.securitySolution.cloudDefend.serverlessNotOfferedBodyMessage"
-                    defaultMessage="Cloud defend is not enabled in serverless"
+                    defaultMessage="Defend for containers integration is not enabled in serverless"
                   />
                 </p>
               }
