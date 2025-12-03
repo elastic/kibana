@@ -66,7 +66,16 @@ export function createGetLogCategoriesTool({
           { exists: { field: 'message' } },
         ];
 
-        const lowSeverityLogLevels = [{ terms: { 'log.level': ['trace', 'debug', 'info'] } }];
+        const lowSeverityLogLevels = [
+          {
+            terms: {
+              'log.level': ['trace', 'debug', 'info'].flatMap((level) => [
+                level.toLowerCase(),
+                level.toUpperCase(),
+              ]),
+            },
+          },
+        ];
 
         const [highSeverityCategories, lowSeverityCategories] = await Promise.all([
           getFilteredLogCategories({
