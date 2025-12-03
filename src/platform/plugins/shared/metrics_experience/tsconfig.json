@@ -21,6 +21,5 @@
     "@kbn/core-chrome-browser",
     "@kbn/data-plugin",
     "@kbn/esql-ast",
-    "@kbn/unified-metrics-grid"
   ]
 }
