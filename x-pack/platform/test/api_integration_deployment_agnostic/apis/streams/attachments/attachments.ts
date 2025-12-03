@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS } from '@kbn/management-settings-ids';
 import {
   disableStreams,
@@ -790,6 +790,189 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: 'logs',
           type: 'dashboard',
           id: SEARCH_DASHBOARD_ID,
+          spaceId: TEST_SPACE_ID,
+        });
+      });
+    });
+
+    describe('Space ownership validation for unlink operations', () => {
+      const TEST_SPACE_ID = 'test-space-unlink-validation';
+
+      before(async () => {
+        // Create a new space
+        await spaces.create({
+          id: TEST_SPACE_ID,
+          name: 'Test Space Unlink Validation',
+          disabledFeatures: [],
+        });
+
+        // Enable attachments setting for the test space
+        await kibanaServer.uiSettings.update(
+          {
+            [OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS]: true,
+          },
+          { space: TEST_SPACE_ID }
+        );
+
+        // Load dashboards and rules only in test space
+        // The tests will link from test space and try to unlink from default space
+        await loadDashboards(kibanaServer, DASHBOARD_ARCHIVES, TEST_SPACE_ID);
+        await kibanaServer.importExport.load(RULE_ARCHIVE, { space: TEST_SPACE_ID });
+      });
+
+      after(async () => {
+        await unloadDashboards(kibanaServer, DASHBOARD_ARCHIVES, TEST_SPACE_ID);
+        await kibanaServer.importExport.unload(RULE_ARCHIVE, { space: TEST_SPACE_ID });
+        await spaces.delete(TEST_SPACE_ID);
+      });
+
+      it('should prevent unlinking dashboard from different space', async () => {
+        // Link dashboard in test space (where it exists)
+        await linkAttachment({
+          apiClient,
+          stream: 'logs',
+          type: 'dashboard',
+          id: SEARCH_DASHBOARD_ID,
+          spaceId: TEST_SPACE_ID,
+        });
+
+        // Try to unlink from default space - should fail with 403
+        await unlinkAttachment({
+          apiClient,
+          stream: 'logs',
+          type: 'dashboard',
+          id: SEARCH_DASHBOARD_ID,
+          expectedStatusCode: 403,
+        });
+
+        // Clean up - unlink from test space
+        await unlinkAttachment({
+          apiClient,
+          stream: 'logs',
+          type: 'dashboard',
+          id: SEARCH_DASHBOARD_ID,
+          spaceId: TEST_SPACE_ID,
+        });
+      });
+
+      it('should prevent unlinking rule from different space', async () => {
+        // Link rule in test space (where it exists)
+        await linkAttachment({
+          apiClient,
+          stream: 'logs',
+          type: 'rule',
+          id: FIRST_RULE_ID,
+          spaceId: TEST_SPACE_ID,
+        });
+
+        // Try to unlink from default space - should fail with 403
+        await unlinkAttachment({
+          apiClient,
+          stream: 'logs',
+          type: 'rule',
+          id: FIRST_RULE_ID,
+          expectedStatusCode: 403,
+        });
+
+        // Clean up - unlink from test space
+        await unlinkAttachment({
+          apiClient,
+          stream: 'logs',
+          type: 'rule',
+          id: FIRST_RULE_ID,
+          spaceId: TEST_SPACE_ID,
+        });
+      });
+
+      it('should allow unlinking dashboard from current space', async () => {
+        // Link dashboard in test space (where it exists)
+        await linkAttachment({
+          apiClient,
+          stream: 'logs',
+          type: 'dashboard',
+          id: SEARCH_DASHBOARD_ID,
+          spaceId: TEST_SPACE_ID,
+        });
+
+        // Unlink from test space - should succeed
+        const response = await unlinkAttachment({
+          apiClient,
+          stream: 'logs',
+          type: 'dashboard',
+          id: SEARCH_DASHBOARD_ID,
+          spaceId: TEST_SPACE_ID,
+        });
+
+        expect(response.acknowledged).to.eql(true);
+      });
+
+      it('should allow unlinking deleted dashboard', async () => {
+        // Link dashboard in test space (where it exists)
+        await linkAttachment({
+          apiClient,
+          stream: 'logs',
+          type: 'dashboard',
+          id: SEARCH_DASHBOARD_ID,
+          spaceId: TEST_SPACE_ID,
+        });
+
+        // Verify the link was created
+        const linkedAttachments = await getAttachments({
+          apiClient,
+          stream: 'logs',
+          type: 'dashboard',
+          spaceId: TEST_SPACE_ID,
+        });
+        expect(linkedAttachments.attachments.length).to.eql(1);
+
+        // Delete the dashboard
+        await unloadDashboards(kibanaServer, DASHBOARD_ARCHIVES, TEST_SPACE_ID);
+
+        // Unlink should succeed even though dashboard is deleted
+        const unlinkResponse = await unlinkAttachment({
+          apiClient,
+          stream: 'logs',
+          type: 'dashboard',
+          id: SEARCH_DASHBOARD_ID,
+          spaceId: TEST_SPACE_ID,
+        });
+        expect(unlinkResponse.acknowledged).to.eql(true);
+
+        // Restore dashboards for subsequent tests
+        await loadDashboards(kibanaServer, DASHBOARD_ARCHIVES, TEST_SPACE_ID);
+      });
+
+      it('should prevent bulk unlink from different space', async () => {
+        // Link dashboards in test space (where they exist)
+        await bulkAttachments({
+          apiClient,
+          stream: 'logs',
+          operations: [
+            { index: { type: 'dashboard', id: SEARCH_DASHBOARD_ID } },
+            { index: { type: 'dashboard', id: BASIC_DASHBOARD_ID } },
+          ],
+          spaceId: TEST_SPACE_ID,
+        });
+
+        // Try to bulk unlink from default space - should fail with 403
+        await bulkAttachments({
+          apiClient,
+          stream: 'logs',
+          operations: [
+            { delete: { type: 'dashboard', id: SEARCH_DASHBOARD_ID } },
+            { delete: { type: 'dashboard', id: BASIC_DASHBOARD_ID } },
+          ],
+          expectedStatusCode: 403,
+        });
+
+        // Clean up - unlink from test space
+        await bulkAttachments({
+          apiClient,
+          stream: 'logs',
+          operations: [
+            { delete: { type: 'dashboard', id: SEARCH_DASHBOARD_ID } },
+            { delete: { type: 'dashboard', id: BASIC_DASHBOARD_ID } },
+          ],
           spaceId: TEST_SPACE_ID,
         });
       });
