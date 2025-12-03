@@ -15,6 +15,9 @@ import {
   getCloudConnectorRemoteRoleTemplate,
   getKibanaComponentId,
   getDeploymentIdFromUrl,
+  getCloudConnectorNameError,
+  isCloudConnectorNameValid,
+  CLOUD_CONNECTOR_NAME_MAX_LENGTH,
 } from './utils';
 import { getMockPolicyAWS, getMockPackageInfoAWS } from './test/mock';
 import type {
