@@ -1,0 +1,46 @@
+rules:
+  - name: 'ES|QL rule - layer 1'
+    id: 'esql-parent-id'
+    rule_type_id: '.esql'
+    enabled: true
+    tags: ['parent']
+    schedule: '1m'
+    # # We previously called this group key or entity key
+    # identify_by: []
+    params:
+      outcome: 'failure'
+    esql: |
+      FROM kbn-data-forge-fake_stack.message_processor-*
+      | STATS 
+          failure = COUNT(*) WHERE processor.outcome == 'failure',
+          total = COUNT(*)
+        BY host.name
+      | EVAL failure_rate = (failure * 100  / total)
+      | WHERE failure_rate > 50
+      | EVAL status = "active"
+      | KEEP host.name, status, failure_rate
+    timeField: '@timestamp'
+    lookbackWindow: '5m'
+    track:
+      recovery:
+        enabled: true
+        schedule: '1m'
+        lookbackWindow: '5m'
+      flapping:
+        enabled: true
+        schedule: '30m'
+        lookbackWindow: '15m'
+        recovery_count: 3
+    notification_policies:
+      active:
+        workflowId: someId
+        policies:
+          - reference some policy
+      flapping:
+        workflow:
+          somespec: hello
+        policies:
+          - reference some policy
+      recovered:
+        policies:
+          - reference some policy
