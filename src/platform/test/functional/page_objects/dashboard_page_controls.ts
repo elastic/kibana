@@ -128,12 +128,18 @@ export class DashboardPageControls extends FtrService {
     this.log.debug('Delete all pinned controls');
     if ((await this.getControlsCount()) === 0) return;
 
-    const controls = await this.testSubjects.findAll('control-frame');
-    await asyncForEach(controls, async (control) => {
-      const controlId = await control.getAttribute('data-control-id');
-      if (controlId !== null) await this.removeExistingControl(controlId);
-    });
-    expect(await this.getControlsCount()).to.be(0);
+    const controlIds = await this.getAllControlIds();
+    let expectedRemainingPanelControls = 0;
+    for (const controlId of controlIds) {
+      this.hideHoverActions();
+      // Ensure this control ID is in a control frame, and not just an embeddable panel
+      const controlFrame = await this.find.byCssSelector(
+        `[data-test-subj='control-frame']:has([data-control-id='${controlId}'])`
+      );
+      if (controlFrame !== null) await this.removeExistingControl(controlId);
+      else expectedRemainingPanelControls++;
+    }
+    expect(await this.getControlsCount()).to.be(expectedRemainingPanelControls);
   }
 
   public async setPinnedControlWidth(controlId: string, width: ControlWidth) {
@@ -255,6 +261,7 @@ export class DashboardPageControls extends FtrService {
     const elementToHover = await this.getControlElementById(controlId);
     await this.retry.try(async () => {
       await elementToHover.moveMouseTo();
+      await elementToHover.focus();
       await this.testSubjects.existOrFail(`control-action-${controlId}-deletePanel`);
     });
   }
