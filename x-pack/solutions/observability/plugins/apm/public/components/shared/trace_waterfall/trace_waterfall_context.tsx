@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 import type { IWaterfallGetRelatedErrorsHref } from '../../../../common/waterfall/typings';
 import type { IWaterfallLegend } from '../../../../common/waterfall/legend';
 import { WaterfallLegendType } from '../../../../common/waterfall/legend';
@@ -14,7 +14,6 @@ import { TOGGLE_BUTTON_WIDTH } from './toggle_accordion_button';
 import { ACCORDION_PADDING_LEFT } from './trace_item_row';
 import { TraceDataState, type TraceWaterfallItem } from './use_trace_waterfall';
 import { useTraceWaterfall } from './use_trace_waterfall';
-import { useTraceStateContext } from '../../../../../../../../../src/platform/plugins/shared/unified_doc_viewer/public/hooks/use_trace_state';
 
 export interface TraceWaterfallContextProps {
   duration: number;

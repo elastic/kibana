@@ -36,7 +36,6 @@ import {
 } from '../doc_viewer_source/get_height';
 import { TraceWaterfall } from '../observability/traces/components/trace_waterfall';
 import { DataSourcesProvider } from '../observability/traces/hooks/use_data_sources';
-import { TraceStateProvider } from '../../hooks/use_trace_state';
 
 export type LogsOverviewProps = DocViewRenderProps & {
   renderAIAssistant?: ObservabilityLogsAIAssistantFeature['render'];
