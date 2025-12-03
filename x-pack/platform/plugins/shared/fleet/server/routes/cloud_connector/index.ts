@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import path from 'path';
+
 import type { FleetAuthzRouter } from '../../services/security';
 
 import { API_VERSIONS, CLOUD_CONNECTOR_API_ROUTES } from '../../../common/constants';
@@ -289,6 +291,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_cloud_connector_usage.yaml'),
+        },
         validate: {
           request: GetCloudConnectorUsageRequestSchema,
           response: {
