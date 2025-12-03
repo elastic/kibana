@@ -1399,6 +1399,13 @@ describe('TaskStore', () => {
     });
     test('bulk update task with API key when available', async () => {
       const mockApiKey = Buffer.from('apiKeyId:apiKey').toString('base64');
+
+      const mockUserScope = {
+        apiKeyId: 'apiKeyId',
+        apiKeyCreatedByUser: false,
+        spaceId: 'testSpace',
+      };
+
       savedObjectsClient.bulkUpdate.mockResolvedValue({
         saved_objects: [
           {
@@ -1407,6 +1414,7 @@ describe('TaskStore', () => {
             attributes: {
               ...bulkUpdateTask,
               apiKey: mockApiKey,
+              userScope: mockUserScope,
               state: '{"foo":"bar"}',
               params: '{"hello":"world"}',
             },
@@ -1416,25 +1424,16 @@ describe('TaskStore', () => {
         ],
       });
 
-      const mockUserScope = {
-        apiKeyId: 'apiKeyId',
-        apiKeyCreatedBy: 'testUser',
-        spaceId: 'testSpace',
-      };
-
-      const apiKeyAndUserScopeMap = new Map();
-      apiKeyAndUserScopeMap.set('id', {
-        apiKey: mockApiKey,
-        userScope: mockUserScope,
-      });
-
-      await store.bulkUpdate([{ ...bulkUpdateTask, apiKey: mockApiKey }], {
-        validate: false,
-        mergeAttributes: false,
-      });
+      await store.bulkUpdate(
+        [{ ...bulkUpdateTask, apiKey: mockApiKey, userScope: mockUserScope }],
+        {
+          validate: false,
+          mergeAttributes: false,
+        }
+      );
 
       expect(mockGetValidatedTaskInstanceForUpdating).toHaveBeenCalledWith(
-        { ...bulkUpdateTask, apiKey: mockApiKey },
+        { ...bulkUpdateTask, apiKey: mockApiKey, userScope: mockUserScope },
         {
           validate: false,
         }
@@ -1450,6 +1449,7 @@ describe('TaskStore', () => {
             attributes: {
               ...taskInstanceToAttributes(bulkUpdateTask, bulkUpdateTask.id),
               apiKey: mockApiKey,
+              userScope: mockUserScope,
             },
           },
         ],

@@ -533,6 +533,7 @@ export class TaskStore {
             attributes: {
               ...taskInstanceToAttributes(taskInstance, doc.id),
               ...(doc.apiKey ? { apiKey: doc.apiKey } : {}),
+              ...(doc.userScope ? { userScope: doc.userScope } : {}),
             },
             mergeAttributes,
           });
