@@ -95,14 +95,13 @@ describe(
         // Now login with read-only user in preparation for test
         loadPageAsReadOnlyUser(RULES_MANAGEMENT_URL);
 
-        // Check that Add Elastic Rules button is disabled
-        cy.get(ADD_ELASTIC_RULES_BTN).should('be.disabled');
+        // Check that Add Elastic Rules button is enabled
+        cy.get(ADD_ELASTIC_RULES_BTN).should('be.enabled');
 
-        // Navigate to Add Elastic Rules page anyways via URL
-        // and assert that rules cannot be selected and all
-        // installation buttons are disabled
+        // Navigate to Add Elastic Rules page via URL
+        // and assert that page can be accessed
         cy.visit(`${APP_PATH}${RULES_ADD_PATH}`);
-        cy.get(NOT_FOUND).should('exist');
+        cy.get(NOT_FOUND).should('not.exist');
       });
 
       it('should not be able to upgrade prebuilt rules', () => {
@@ -114,20 +113,20 @@ describe(
         // Now login with read-only user in preparation for test
         loadPageAsReadOnlyUser(RULES_MANAGEMENT_URL);
 
-        // Check that Rule Update tab is not shown
-        cy.get(RULES_UPDATES_TAB).should('not.exist');
+        // Check that Rule Update tab is shown
+        cy.get(RULES_UPDATES_TAB).should('exist');
 
         // Navigate to Rule Update tab anyways via URL
         cy.visit(`${APP_PATH}${RULES_UPDATES}`);
 
-        // Check that upgrade buttons are not visible
-        cy.get(UPGRADE_ALL_RULES_BUTTON).should('not.exist');
+        // Check that upgrade buttons are disabled
+        cy.get(UPGRADE_ALL_RULES_BUTTON).should('be.disabled');
         cy.get(getUpgradeSingleRuleButtonByRuleId(OUTDATED_RULE_1['security-rule'].rule_id)).should(
-          'not.exist'
+          'be.disabled'
         );
 
-        // Check that rule selection checkbox is not visible
-        cy.get(RULE_CHECKBOX).should('not.exist');
+        // Check that rule selection checkbox is visible
+        cy.get(RULE_CHECKBOX).should('exist');
       });
     });
 

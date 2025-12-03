@@ -51,6 +51,13 @@ const getRulesSubRoutes = (capabilities: Capabilities) => [
           main: RulesPage,
           exact: true,
         },
+        {
+          path: '/rules/add_rules',
+          main: withSecurityRoutePageWrapper(AddRulesPage, SecurityPageName.rulesAdd, {
+            omitSpyRoute: true,
+          }),
+          exact: true,
+        },
       ]
     : []),
   ...(hasCapabilities(capabilities, RULES_UI_EDIT_PRIVILEGE)
@@ -63,13 +70,6 @@ const getRulesSubRoutes = (capabilities: Capabilities) => [
         {
           path: '/rules/create',
           main: withSecurityRoutePageWrapper(CreateRulePage, SecurityPageName.rulesCreate, {
-            omitSpyRoute: true,
-          }),
-          exact: true,
-        },
-        {
-          path: '/rules/add_rules',
-          main: withSecurityRoutePageWrapper(AddRulesPage, SecurityPageName.rulesAdd, {
             omitSpyRoute: true,
           }),
           exact: true,

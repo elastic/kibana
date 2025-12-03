@@ -47,7 +47,7 @@ const RulesPageComponent: React.FC = () => {
 
   const [{ loading: userInfoLoading, isSignalIndexExists, isAuthenticated, hasEncryptionKey }] =
     useUserData();
-  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
+  const { edit: canEditRules, read: canReadRules } = useUserPrivileges().rulesPrivileges;
   const {
     loading: listsConfigLoading,
     canWriteIndex: canWriteListsIndex,
@@ -100,7 +100,7 @@ const RulesPageComponent: React.FC = () => {
           <HeaderPage title={i18n.PAGE_TITLE}>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
               <EuiFlexItem grow={false}>
-                <AddElasticRulesButton isDisabled={!canEditRules || loading} />
+                <AddElasticRulesButton isDisabled={!canReadRules || loading} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiToolTip
