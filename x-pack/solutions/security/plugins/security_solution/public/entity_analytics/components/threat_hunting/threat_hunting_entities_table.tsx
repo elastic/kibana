@@ -436,9 +436,7 @@ export const ThreatHuntingEntitiesTable: React.FC<ThreatHuntingEntitiesTableProp
 
   const [querySkip, setQuerySkip] = useState(isInitializing || !toggleStatus);
   useEffect(() => {
-    if (!isInitializing) {
-      setQuerySkip(isInitializing || !toggleStatus);
-    }
+    setQuerySkip(isInitializing || !toggleStatus);
   }, [isInitializing, toggleStatus]);
 
   const onSort = useCallback(

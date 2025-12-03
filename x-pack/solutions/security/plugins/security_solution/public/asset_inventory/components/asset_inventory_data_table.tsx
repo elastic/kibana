@@ -131,10 +131,6 @@ export interface AssetInventoryDataTableProps {
   state: AssetInventoryURLStateResult;
   height?: number;
   groupSelectorComponent?: JSX.Element;
-  /**
-   * Optional additional custom cell renderers to extend the default ones
-   * This is a function that takes rows and returns a CustomCellRenderer object
-   */
   additionalCustomRenderers?: (rows: DataTableRecord[]) => CustomCellRenderer;
 }
 
