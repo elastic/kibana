@@ -58,6 +58,7 @@ export const RuleSettingsModal: React.FC<RuleSettingsModalProps> = ({ isOpen, on
   }, [isOpen, query.data]);
 
   const isSaving = createMutation.isLoading || updateMutation.isLoading;
+  const isLoadingGapAutoFillScheduler = query.isLoading;
 
   const onSave = async () => {
     try {
@@ -77,7 +78,9 @@ export const RuleSettingsModal: React.FC<RuleSettingsModalProps> = ({ isOpen, on
 
   if (!canAccessGapAutoFill) return null;
 
-  const isSaveBtnDisabled = !canEditGapAutoFill || (!enabled && !gapAutoFillScheduler) || isSaving;
+  const isFormElementDisabled = isSaving || isLoadingGapAutoFillScheduler || !canEditGapAutoFill;
+
+  const isSaveBtnDisabled = (!enabled && !gapAutoFillScheduler) || isFormElementDisabled;
 
   return (
     <div>
@@ -107,7 +110,7 @@ export const RuleSettingsModal: React.FC<RuleSettingsModalProps> = ({ isOpen, on
                 label={i18n.GAP_AUTO_FILL_TOGGLE_LABEL}
                 checked={enabled}
                 onChange={(e) => setEnabled(e.target.checked)}
-                disabled={isSaving || !canEditGapAutoFill}
+                disabled={isSaving || !canEditGapAutoFill || isLoadingGapAutoFillScheduler}
               />
             </EuiFormRow>
             <EuiSpacer size="m" />
