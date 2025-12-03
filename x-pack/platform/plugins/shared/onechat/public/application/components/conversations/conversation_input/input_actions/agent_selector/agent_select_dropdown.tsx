@@ -20,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 import type { AgentDefinition } from '@kbn/onechat-common';
 import type { ReactNode } from 'react';
 import React, { useState } from 'react';
+import { useHasActiveConversation } from '../../../../../hooks/use_conversation';
 import { useNavigation } from '../../../../../hooks/use_navigation';
 import { appPaths } from '../../../../../utils/app_paths';
 import { RobotIcon } from '../../../../common/icons/robot';
@@ -59,14 +60,21 @@ const AgentSelectPopoverButton: React.FC<{
   selectedAgentName?: string;
   onClick: () => void;
 }> = ({ isPopoverOpen, selectedAgentName, onClick }) => {
-  const popoverButtonStyles = usePopoverButtonStyles({ open: isPopoverOpen });
+  const hasActiveConversation = useHasActiveConversation();
+  const disabled = hasActiveConversation;
+  const popoverButtonStyles = usePopoverButtonStyles({ open: isPopoverOpen, disabled });
   return (
     <EuiButton
       color="text"
       css={popoverButtonStyles}
       iconSide="left"
       iconType={RobotIcon}
-      onClick={onClick}
+      onClick={() => {
+        if (!disabled) {
+          onClick();
+        }
+      }}
+      disabled={disabled}
       aria-haspopup="menu"
       aria-labelledby={agentSelectId}
       data-test-subj="agentBuilderAgentSelectorButton"
