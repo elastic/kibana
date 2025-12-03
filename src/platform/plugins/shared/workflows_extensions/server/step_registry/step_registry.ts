@@ -21,7 +21,7 @@ export class ServerStepRegistry {
    * @param definition - The step definition to register
    * @throws Error if a step with the same ID is already registered
    */
-  public register<D extends ServerStepDefinition>(definition: D): void {
+  public register(definition: ServerStepDefinition): void {
     const stepTypeId = String(definition.id);
     if (this.registry.has(stepTypeId)) {
       throw new Error(

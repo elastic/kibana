@@ -8,7 +8,6 @@
  */
 
 import type { ServerStepDefinition } from './step_registry/types';
-import type { CommonStepDefinition } from '../common';
 import type { WorkflowsExtensionsStartContract } from '../common/types';
 
 /**
@@ -23,11 +22,9 @@ export interface WorkflowsExtensionsServerPluginSetup {
    * @param definition - The step server-side definition
    * @throws Error if definition for the same step type ID is already registered
    */
-
-  registerStepDefinition(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    definition: ServerStepDefinition<CommonStepDefinition<any, any>>
-  ): void;
+  // Accept any input and output types to avoid type inference issues within the plugin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  registerStepDefinition(definition: ServerStepDefinition<any, any>): void;
 }
 
 /**
