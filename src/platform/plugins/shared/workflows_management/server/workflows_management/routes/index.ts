@@ -42,6 +42,7 @@ export function defineRoutes(
   const deps: RouteDependencies = { router, api, logger, spaces };
 
   // Register all routes
+  registerGetWorkflowJsonSchemaRoute(deps);
   registerGetWorkflowStatsRoute(deps);
   registerGetWorkflowAggsRoute(deps);
   registerGetWorkflowByIdRoute(deps);
@@ -60,5 +61,4 @@ export function defineRoutes(
   registerPostCancelWorkflowExecutionRoute(deps);
   registerGetWorkflowExecutionLogsRoute(deps);
   registerGetStepExecutionRoute(deps);
-  registerGetWorkflowJsonSchemaRoute(deps);
 }
