@@ -10,6 +10,8 @@
 import type { IUiSettingsClient, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import type { LocatorServicesDeps as Services } from '.';
@@ -48,6 +50,14 @@ let mockDataView: DataView;
 let mockPayload: Array<{ params: DiscoverAppLocatorParams }>;
 
 beforeAll(async () => {
+  mockDataView = createStubDataView({
+    spec: {
+      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      title: 'logs-*',
+      timeFieldName: '@timestamp',
+    },
+  });
+
   const dataStartMock = dataPluginMock.createStartContract();
   const request = httpServerMock.createKibanaRequest();
   soClient = coreStart.savedObjects.getScopedClient(request);

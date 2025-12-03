@@ -336,7 +336,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   };
 
   const scheduleCsvWithNotification = async (
-    job: JobParamsCSV,
+    job: JobParamsCsvV2,
     username = 'elastic',
     password = process.env.TEST_KIBANA_PASS || 'changeme',
     schedule: RruleSchedule = { rrule: { freq: 1, interval: 1, tzid: 'UTC' } },
@@ -348,7 +348,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       ? { rrule: { ...schedule.rrule, dtstart: startedAt } }
       : schedule;
     return await supertestWithoutAuth
-      .post(`/internal/reporting/schedule/csv_searchsource`)
+      .post(`/internal/reporting/schedule/csv_v2`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
       .send({ jobParams, schedule: scheduleToUse, notification });

@@ -6,9 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import type { JobParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
-import type { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
+import type { JobParamsCsvV2 } from '@kbn/reporting-export-types-csv-common';
 import type { JobParamsPNGV2 } from '@kbn/reporting-export-types-png-common';
 import type { SerializedConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
 import type { FtrProviderContext } from '../ftr_provider_context';
@@ -22,16 +21,20 @@ const pdfPayload: JobParamsPDFV2 = {
   version: '7.14.0',
 };
 
-const csvPayload: JobParamsCSV = {
+const csvPayload: JobParamsCsvV2 = {
   browserTimezone: 'UTC',
   title: 'allowed search',
   objectType: 'search',
-  searchSource: {
-    version: true,
-    fields: [{ field: '*', include_unmapped: true }],
-    index: '5193f870-d861-11e9-a311-0fa548c5f953',
-  } as unknown as SerializedSearchSourceFields,
-  columns: [],
+  locatorParams: [
+    {
+      id: 'DISCOVER_APP_LOCATOR',
+      version: '7.13.0',
+      params: {
+        dataViewId: '5193f870-d861-11e9-a311-0fa548c5f953',
+        columns: [],
+      },
+    },
+  ],
   version: '7.13.0',
 };
 
