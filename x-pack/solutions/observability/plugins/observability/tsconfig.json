@@ -139,7 +139,10 @@
     "@kbn/observability-nav-icons",
     "@kbn/react-query",
     "@kbn/content-management-utils",
-    "@kbn/maintenance-windows-plugin"
+    "@kbn/maintenance-windows-plugin",
+    "@kbn/observability-agent-builder",
+    "@kbn/observability-agent-plugin",
+    "@kbn/onechat-plugin"
   ],
   "exclude": ["target/**/*"]
 }
