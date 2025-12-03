@@ -57,7 +57,21 @@ export const NotionConnector: ConnectorSpec = {
         return response.data;
       },
     },
-    // getPage: {},
+
+    // https://developers.notion.com/reference/retrieve-a-page
+    getPage: {
+      isTool: true,
+      input: z.object({ pageId: z.string() }),
+      handler: async (ctx, input) => {
+        const typedInput = input as { pageId: string };
+        const response = await ctx.client.get(
+          `https://api.notion.com/v1/pages/${typedInput.pageId}`,
+          {}
+          // { headers: { 'Notion-Version': '2025-09-03' } }
+        );
+        return response.data;
+      },
+    },
     // getDataSource: {},
     // queryDataSource: {},
   },
