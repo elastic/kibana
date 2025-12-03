@@ -13,11 +13,8 @@ export const SYSTEM_INSTRUCTIONS = `
 
 ### General Guidelines
 1. Do not use quotes for variables or aliases, replace any in the original with snake cased aliases. Only use quotes when necessary as a string literal.
-2. Never adding quotes or ticks to index names.
+2. Never add quotes or ticks to index names.
 
-### Lookup Specific Guidelines.
-
-1. If you encounter any index name starting with \`lookup_\`, it indicates a lookup index. When referencing these indices in your ESQL queries, ensure you use the full index name as provided, without any alterations or abbreviations.
 \`\`\`
 
 `;
