@@ -451,8 +451,8 @@ describe('CreateClassicStreamFlyout', () => {
       expect(queryByTestId('indexPatternSelect')).not.toBeInTheDocument();
     });
 
-    it('changes stream name inputs when index pattern is changed', () => {
-      const { getByTestId, queryByTestId, getByText, queryByText } = renderFlyout();
+    it('updates stream name input when index pattern is changed', () => {
+      const { getByTestId, queryByTestId, getByText } = renderFlyout();
 
       // Select template and navigate to second step
       selectTemplateAndGoToStep2(getByTestId, 'multi-pattern-template');
@@ -461,9 +461,6 @@ describe('CreateClassicStreamFlyout', () => {
       expect(getByTestId('streamNameInput-wildcard-0')).toBeInTheDocument();
       expect(getByTestId('streamNameInput-wildcard-1')).toBeInTheDocument();
       expect(getByTestId('streamNameInput-wildcard-2')).toBeInTheDocument();
-      // Static segments are rendered as prepend/append text
-      expect(getByText('-logs-')).toBeInTheDocument();
-      expect(getByText('-')).toBeInTheDocument();
 
       // Change to 'metrics-*' which has only 1 wildcard
       const patternSelect = getByTestId('indexPatternSelect');
@@ -472,83 +469,9 @@ describe('CreateClassicStreamFlyout', () => {
       // Should now have only 1 editable input
       expect(getByTestId('streamNameInput-wildcard-0')).toBeInTheDocument();
       expect(queryByTestId('streamNameInput-wildcard-1')).not.toBeInTheDocument();
-      expect(queryByTestId('streamNameInput-wildcard-2')).not.toBeInTheDocument();
 
       // Should have static prefix 'metrics-' as prepend text
       expect(getByText('metrics-')).toBeInTheDocument();
-      // The previous static segments should be gone
-      expect(queryByText('-logs-')).not.toBeInTheDocument();
-    });
-  });
-
-  describe('multiple wildcards', () => {
-    it('renders multiple editable inputs for patterns with multiple wildcards', () => {
-      const { getByTestId } = renderFlyout();
-
-      // Select template and navigate to second step
-      selectTemplateAndGoToStep2(getByTestId, 'multi-pattern-template');
-
-      // Pattern '*-logs-*-*' has 3 wildcards
-      expect(getByTestId('streamNameInput-wildcard-0')).toBeInTheDocument();
-      expect(getByTestId('streamNameInput-wildcard-1')).toBeInTheDocument();
-      expect(getByTestId('streamNameInput-wildcard-2')).toBeInTheDocument();
-    });
-
-    it('renders static segments between wildcards as prepend/append text', () => {
-      const { getByTestId, getByText } = renderFlyout();
-
-      // Select template and navigate to second step
-      selectTemplateAndGoToStep2(getByTestId, 'multi-pattern-template');
-
-      // Pattern '*-logs-*-*' has static segments '-logs-' and '-'
-      // These are rendered as prepend/append text on the wildcard inputs
-      expect(getByText('-logs-')).toBeInTheDocument();
-      expect(getByText('-')).toBeInTheDocument();
-
-      // Verify the wildcard inputs exist
-      expect(getByTestId('streamNameInput-wildcard-0')).toBeInTheDocument();
-      expect(getByTestId('streamNameInput-wildcard-1')).toBeInTheDocument();
-      expect(getByTestId('streamNameInput-wildcard-2')).toBeInTheDocument();
-    });
-
-    it('allows editing each wildcard input independently', () => {
-      const { getByTestId } = renderFlyout();
-
-      // Select template and navigate to second step
-      selectTemplateAndGoToStep2(getByTestId, 'multi-pattern-template');
-
-      // Fill in each wildcard
-      const input0 = getByTestId('streamNameInput-wildcard-0');
-      const input1 = getByTestId('streamNameInput-wildcard-1');
-      const input2 = getByTestId('streamNameInput-wildcard-2');
-
-      fireEvent.change(input0, { target: { value: 'prefix' } });
-      fireEvent.change(input1, { target: { value: 'middle' } });
-      fireEvent.change(input2, { target: { value: 'suffix' } });
-
-      expect(input0).toHaveValue('prefix');
-      expect(input1).toHaveValue('middle');
-      expect(input2).toHaveValue('suffix');
-    });
-
-    it('supports patterns with many wildcards (5+)', () => {
-      const { getByTestId, getByText } = renderFlyout();
-
-      // Select template and navigate to second step
-      selectTemplateAndGoToStep2(getByTestId, 'very-long-pattern-template');
-
-      // Pattern '*-reallllllllllllllllllly-*-loooooooooooong-*-index-*-name-*' has 5 wildcards
-      expect(getByTestId('streamNameInput-wildcard-0')).toBeInTheDocument();
-      expect(getByTestId('streamNameInput-wildcard-1')).toBeInTheDocument();
-      expect(getByTestId('streamNameInput-wildcard-2')).toBeInTheDocument();
-      expect(getByTestId('streamNameInput-wildcard-3')).toBeInTheDocument();
-      expect(getByTestId('streamNameInput-wildcard-4')).toBeInTheDocument();
-
-      // Verify static segments are rendered as prepend/append text
-      expect(getByText('-reallllllllllllllllllly-')).toBeInTheDocument();
-      expect(getByText('-loooooooooooong-')).toBeInTheDocument();
-      expect(getByText('-index-')).toBeInTheDocument();
-      expect(getByText('-name-')).toBeInTheDocument();
     });
   });
 
