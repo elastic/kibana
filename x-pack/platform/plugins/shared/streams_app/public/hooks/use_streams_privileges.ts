@@ -10,6 +10,7 @@ import {
   OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
   OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS,
+  OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_ANALYZER,
 } from '@kbn/management-settings-ids';
 import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '@kbn/streams-plugin/common';
 import type { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
@@ -21,6 +22,10 @@ export interface StreamsFeatures {
     enabled: boolean;
   };
   significantEvents?: {
+    available: boolean;
+    enabled: boolean;
+  };
+  significantEventsAnalyzer?: {
     available: boolean;
     enabled: boolean;
   };
@@ -66,6 +71,10 @@ export function useStreamsPrivileges(): StreamsPrivileges {
     OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
     false // Default to false if the setting is not defined or not available
   );
+  const significantEventsAnalyzerEnabled = uiSettings.get<boolean>(
+    OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_ANALYZER,
+    false
+  );
 
   const significantEventsAvailableForTier = pricing.isFeatureAvailable(
     STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE.id
@@ -86,6 +95,10 @@ export function useStreamsPrivileges(): StreamsPrivileges {
       },
       significantEvents: license && {
         enabled: significantEventsEnabled,
+        available: license.hasAtLeast('enterprise') && significantEventsAvailableForTier,
+      },
+      significantEventsAnalyzer: license && {
+        enabled: significantEventsAnalyzerEnabled,
         available: license.hasAtLeast('enterprise') && significantEventsAvailableForTier,
       },
       groupStreams: {

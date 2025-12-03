@@ -128,6 +128,14 @@ interface StreamsDescriptionGeneratedProps {
   output_tokens_used: number;
 }
 
+interface StreamsSignificantEventsSummaryGeneratedEventProps {
+  input_tokens_used: number;
+  output_tokens_used: number;
+  number_of_streams: number;
+  number_of_queries: number;
+  number_of_events: number;
+}
+
 export {
   type StreamsAttachmentCountProps,
   type StreamsAttachmentClickEventProps,
@@ -146,4 +154,5 @@ export {
   type StreamsFeatureIdentificationIdentifiedProps,
   type StreamsFeatureIdentificationDeletedProps,
   type StreamsDescriptionGeneratedProps,
+  type StreamsSignificantEventsSummaryGeneratedEventProps,
 };

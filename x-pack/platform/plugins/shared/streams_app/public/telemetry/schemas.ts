@@ -25,6 +25,7 @@ import type {
   StreamsFeatureIdentificationSavedProps,
   StreamsFeatureIdentificationDeletedProps,
   StreamsDescriptionGeneratedProps,
+  StreamsSignificantEventsSummaryGeneratedEventProps,
 } from './types';
 
 const streamsAttachmentCountSchema: RootSchema<StreamsAttachmentCountProps> = {
@@ -488,6 +489,40 @@ const streamsDescriptionGeneratedSchema: RootSchema<StreamsDescriptionGeneratedP
   },
 };
 
+const streamsSignificantEventsSummaryGeneratedSchema: RootSchema<StreamsSignificantEventsSummaryGeneratedEventProps> =
+  {
+    input_tokens_used: {
+      type: 'long',
+      _meta: {
+        description: 'The number of input tokens used to generate the summary',
+      },
+    },
+    output_tokens_used: {
+      type: 'long',
+      _meta: {
+        description: 'The number of output tokens used to generate the summary',
+      },
+    },
+    number_of_streams: {
+      type: 'long',
+      _meta: {
+        description: 'The number of streams reviewed',
+      },
+    },
+    number_of_queries: {
+      type: 'long',
+      _meta: {
+        description: 'The number of queries reviewed',
+      },
+    },
+    number_of_events: {
+      type: 'long',
+      _meta: {
+        description: 'The number of events reviewed',
+      },
+    },
+  };
+
 export {
   streamsAttachmentCountSchema,
   streamsAttachmentClickEventSchema,
@@ -506,4 +541,5 @@ export {
   streamsFeatureIdentificationSavedSchema,
   streamsFeatureIdentificationDeletedSchema,
   streamsDescriptionGeneratedSchema,
+  streamsSignificantEventsSummaryGeneratedSchema,
 };
