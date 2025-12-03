@@ -12,7 +12,6 @@ import { MappingEditor } from './mapping_editor';
 import { MappingEditorService } from './mapping_editor_service';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
-// Mock the dependencies
 jest.mock('../../../use_file_upload', () => ({
   useFileUploadContext: () => ({
     fileUploadManager: {
@@ -31,7 +30,13 @@ jest.mock('../../../use_file_upload', () => ({
 }));
 
 jest.mock('@kbn/field-utils/src/components/field_select/field_select', () => ({
-  FieldSelect: ({ selectedType, onTypeChange }: any) => {
+  FieldSelect: ({
+    selectedType,
+    onTypeChange,
+  }: {
+    selectedType: string | null;
+    onTypeChange: (type: string) => void;
+  }) => {
     return (
       // eslint-disable-next-line jsx-a11y/no-onchange
       <select
@@ -59,10 +64,10 @@ const MockMappingEditorService = MappingEditorService as jest.MockedClass<
 
 describe('MappingEditor', () => {
   let mockService: jest.Mocked<MappingEditorService>;
-  let setMappingsValid: jest.Mock;
+  let onImportClick: jest.MockedFunction<() => void>;
 
   beforeEach(() => {
-    setMappingsValid = jest.fn();
+    onImportClick = jest.fn();
 
     const mockMappings = [
       {
@@ -82,11 +87,14 @@ describe('MappingEditor', () => {
     mockService = {
       mappings$: new BehaviorSubject(mockMappings).asObservable(),
       mappingsError$: new BehaviorSubject<string | null>(null).asObservable(),
+      mappingsEdited$: new BehaviorSubject<boolean>(false).asObservable(),
       getMappings: jest.fn(() => mockMappings),
       getMappingsError: jest.fn(() => null),
+      getMappingsEdited: jest.fn(() => false),
       updateMapping: jest.fn(),
+      reset: jest.fn(),
       destroy: jest.fn(),
-    } as any;
+    } as Partial<MappingEditorService> as jest.Mocked<MappingEditorService>;
 
     MockMappingEditorService.mockImplementation(() => mockService);
   });
@@ -98,7 +106,7 @@ describe('MappingEditor', () => {
   it('renders field count and mappings correctly', () => {
     render(
       <IntlProvider locale="en">
-        <MappingEditor setMappingsValid={setMappingsValid} />
+        <MappingEditor onImportClick={onImportClick} />
       </IntlProvider>
     );
 
@@ -110,40 +118,10 @@ describe('MappingEditor', () => {
     expect(screen.getByDisplayValue('field2')).toBeInTheDocument();
   });
 
-  it('calls setMappingsValid with true when no error', () => {
-    render(
-      <IntlProvider locale="en">
-        <MappingEditor setMappingsValid={setMappingsValid} />
-      </IntlProvider>
-    );
-
-    expect(setMappingsValid).toHaveBeenCalledWith(true);
-  });
-
-  it('calls setMappingsValid with false when there is an error', () => {
-    const errorObj = {
-      message: 'Duplicate field names are not allowed',
-      errors: [{ index: 0, nameError: true, typeError: false }],
-    };
-    // @ts-expect-error
-    mockService.mappingsError$ = new BehaviorSubject(errorObj).asObservable();
-    // @ts-expect-error
-    mockService.getMappingsError = jest.fn(() => errorObj);
-
-    render(
-      <IntlProvider locale="en">
-        <MappingEditor setMappingsValid={setMappingsValid} />
-      </IntlProvider>
-    );
-
-    expect(setMappingsValid).toHaveBeenCalledWith(false);
-    expect(screen.getByText('Duplicate field names are not allowed')).toBeInTheDocument();
-  });
-
   it('updates field name when input changes', () => {
     render(
       <IntlProvider locale="en">
-        <MappingEditor setMappingsValid={setMappingsValid} />
+        <MappingEditor onImportClick={onImportClick} />
       </IntlProvider>
     );
 
@@ -156,7 +134,7 @@ describe('MappingEditor', () => {
   it('updates field type when select changes', () => {
     render(
       <IntlProvider locale="en">
-        <MappingEditor setMappingsValid={setMappingsValid} />
+        <MappingEditor onImportClick={onImportClick} />
       </IntlProvider>
     );
 
@@ -171,14 +149,12 @@ describe('MappingEditor', () => {
       message: 'Mapping name and type cannot be blank',
       errors: [{ index: 1, nameError: false, typeError: true }],
     };
-    // @ts-expect-error
-    mockService.mappingsError$ = new BehaviorSubject(errorObj).asObservable();
-    // @ts-expect-error
-    mockService.getMappingsError = jest.fn(() => errorObj);
+    (mockService.mappingsError$ as any) = new BehaviorSubject(errorObj).asObservable();
+    (mockService.getMappingsError as jest.Mock).mockReturnValue(errorObj);
 
     render(
       <IntlProvider locale="en">
-        <MappingEditor setMappingsValid={setMappingsValid} />
+        <MappingEditor onImportClick={onImportClick} />
       </IntlProvider>
     );
 
@@ -190,7 +166,7 @@ describe('MappingEditor', () => {
   it('does not display error message when mappingsError is null', () => {
     render(
       <IntlProvider locale="en">
-        <MappingEditor setMappingsValid={setMappingsValid} />
+        <MappingEditor onImportClick={onImportClick} />
       </IntlProvider>
     );
 
@@ -200,7 +176,7 @@ describe('MappingEditor', () => {
   it('destroys service on unmount', () => {
     const { unmount } = render(
       <IntlProvider locale="en">
-        <MappingEditor setMappingsValid={setMappingsValid} />
+        <MappingEditor onImportClick={onImportClick} />
       </IntlProvider>
     );
 
@@ -212,7 +188,7 @@ describe('MappingEditor', () => {
   it('renders field name placeholders correctly', () => {
     render(
       <IntlProvider locale="en">
-        <MappingEditor setMappingsValid={setMappingsValid} />
+        <MappingEditor onImportClick={onImportClick} />
       </IntlProvider>
     );
 
@@ -226,7 +202,7 @@ describe('MappingEditor', () => {
 
     render(
       <IntlProvider locale="en">
-        <MappingEditor setMappingsValid={setMappingsValid} />
+        <MappingEditor onImportClick={onImportClick} />
       </IntlProvider>
     );
 
@@ -244,14 +220,12 @@ describe('MappingEditor', () => {
       },
     ]);
 
-    // @ts-expect-error
-    mockService.mappings$ = mappingsSubject.asObservable();
-    // @ts-expect-error
-    mockService.getMappings = jest.fn(() => mappingsSubject.getValue());
+    (mockService.mappings$ as any) = mappingsSubject.asObservable();
+    (mockService.getMappings as jest.Mock).mockImplementation(() => mappingsSubject.getValue());
 
     render(
       <IntlProvider locale="en">
-        <MappingEditor setMappingsValid={setMappingsValid} />
+        <MappingEditor onImportClick={onImportClick} />
       </IntlProvider>
     );
 
@@ -272,5 +246,137 @@ describe('MappingEditor', () => {
     await waitFor(() => {
       expect(screen.getByDisplayValue('updatedField')).toBeInTheDocument();
     });
+  });
+
+  it('renders reset button and calls reset method when clicked', async () => {
+    // Set up mappings with edited state
+    const mappingsEditedSubject = new BehaviorSubject(true);
+    (mockService.mappingsEdited$ as any) = mappingsEditedSubject.asObservable();
+    (mockService.getMappingsEdited as jest.Mock).mockReturnValue(true);
+
+    render(
+      <IntlProvider locale="en">
+        <MappingEditor onImportClick={onImportClick} />
+      </IntlProvider>
+    );
+
+    // Find the reset button by role and name
+    const resetButton = screen.getByRole('button', { name: 'Reset to default' });
+    expect(resetButton).toBeInTheDocument();
+
+    // Button should be enabled when mappings are edited
+    expect(resetButton).toBeEnabled();
+
+    // Click the reset button
+    fireEvent.click(resetButton);
+
+    // Verify that the reset method was called
+    expect(mockService.reset).toHaveBeenCalledTimes(1);
+  });
+
+  it('disables reset button when mappings are not edited', () => {
+    // Set up mappings with no edits
+    const mappingsEditedSubject = new BehaviorSubject(false);
+    (mockService.mappingsEdited$ as any) = mappingsEditedSubject.asObservable();
+    (mockService.getMappingsEdited as jest.Mock).mockReturnValue(false);
+
+    render(
+      <IntlProvider locale="en">
+        <MappingEditor onImportClick={onImportClick} />
+      </IntlProvider>
+    );
+
+    // Find the reset button by role and name
+    const resetButton = screen.getByRole('button', { name: 'Reset to default' });
+    expect(resetButton).toBeInTheDocument();
+
+    // Button should be disabled when mappings are not edited
+    expect(resetButton).toBeDisabled();
+
+    // Verify that reset method is not called when button is disabled
+    fireEvent.click(resetButton);
+    expect(mockService.reset).not.toHaveBeenCalled();
+  });
+
+  it('resets fields to initial values when reset button is clicked after editing', async () => {
+    const initialMappings = [
+      {
+        name: 'originalField1',
+        originalName: 'originalField1',
+        mappingProperty: { type: 'text' },
+        originalMappingProperty: { type: 'text' },
+      },
+      {
+        name: 'originalField2',
+        originalName: 'originalField2',
+        mappingProperty: { type: 'keyword' },
+        originalMappingProperty: { type: 'keyword' },
+      },
+    ];
+
+    const mappingsSubject = new BehaviorSubject(initialMappings);
+    const mappingsEditedSubject = new BehaviorSubject(false);
+
+    (mockService.mappings$ as any) = mappingsSubject.asObservable();
+    (mockService.mappingsEdited$ as any) = mappingsEditedSubject.asObservable();
+    (mockService.getMappings as jest.Mock).mockImplementation(() => mappingsSubject.getValue());
+    (mockService.getMappingsEdited as jest.Mock).mockImplementation(() =>
+      mappingsEditedSubject.getValue()
+    );
+
+    render(
+      <IntlProvider locale="en">
+        <MappingEditor onImportClick={onImportClick} />
+      </IntlProvider>
+    );
+
+    expect(screen.getByDisplayValue('originalField1')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('originalField2')).toBeInTheDocument();
+
+    const firstFieldInput = screen.getByDisplayValue('originalField1');
+    fireEvent.change(firstFieldInput, { target: { value: 'editedField1' } });
+
+    const editedMappings = [
+      {
+        name: 'editedField1',
+        originalName: 'originalField1',
+        mappingProperty: { type: 'text' },
+        originalMappingProperty: { type: 'text' },
+      },
+      {
+        name: 'originalField2',
+        originalName: 'originalField2',
+        mappingProperty: { type: 'keyword' },
+        originalMappingProperty: { type: 'keyword' },
+      },
+    ];
+
+    mappingsSubject.next(editedMappings);
+    mappingsEditedSubject.next(true);
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('editedField1')).toBeInTheDocument();
+    });
+
+    const resetButton = screen.getByRole('button', { name: 'Reset to default' });
+    expect(resetButton).toBeEnabled();
+
+    (mockService.reset as jest.Mock).mockImplementation(() => {
+      mappingsSubject.next(initialMappings);
+      mappingsEditedSubject.next(false);
+    });
+
+    fireEvent.click(resetButton);
+
+    expect(mockService.reset).toHaveBeenCalledTimes(1);
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('originalField1')).toBeInTheDocument();
+      expect(screen.getByDisplayValue('originalField2')).toBeInTheDocument();
+    });
+
+    expect(screen.queryByDisplayValue('editedField1')).not.toBeInTheDocument();
+
+    expect(resetButton).toBeDisabled();
   });
 });
