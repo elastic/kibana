@@ -13,7 +13,7 @@ import { debounce } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { i18n } from '@kbn/i18n';
-import type { JsonArray, JsonObject, JsonValue } from '@kbn/utility-types';
+import type { JsonValue } from '@kbn/utility-types';
 import { JsonDataCode } from './json_data_code';
 import { JSONDataTable } from './json_data_table';
 
@@ -35,12 +35,8 @@ const ViewModeOptions: EuiButtonGroupOptionProps[] = [
     iconType: 'code',
   },
 ];
-const TableDisabledTooltip = i18n.translate(
-  'workflows.jsonDataTable.viewMode.tableDisabledTooltip',
-  { defaultMessage: 'Primitive data cannot be rendered in a table view' }
-);
 
-export interface JSONDataViewProps {
+export interface ExecutionDataViewerProps {
   /**
    * The JSON data to display. Can be a single object, an array of objects, or any serializable value.
    * If an array is provided, only the first object will be displayed.
@@ -53,7 +49,7 @@ export interface JSONDataViewProps {
   fieldPathActionsPrefix?: string;
 }
 
-export const JSONDataView = React.memo<JSONDataViewProps>(
+export const ExecutionDataViewer = React.memo<ExecutionDataViewerProps>(
   ({ data, title, fieldPathActionsPrefix }) => {
     const [selectedViewMode, setSelectedViewMode] = useState<'table' | 'json'>('table');
 
@@ -78,35 +74,6 @@ export const JSONDataView = React.memo<JSONDataViewProps>(
       [setStoredSearchTermDebounced]
     );
 
-    // This prevents data from being displayed as a table if it is not tabular.
-    const tabularData = useMemo<JsonArray | JsonObject | undefined>(() => {
-      if (data == null) {
-        return undefined;
-      }
-      if (Array.isArray(data) || typeof data === 'object') {
-        return data;
-      }
-      return undefined; // Data cannot be displayed as a table, so return undefined.
-    }, [data]);
-
-    const viewModeOptions = useMemo<EuiButtonGroupOptionProps[]>(() => {
-      if (tabularData) {
-        return ViewModeOptions;
-      }
-      // Data cannot be displayed as a table, so disable the table view mode and show a tooltip.
-      return ViewModeOptions.map<EuiButtonGroupOptionProps>((option) => ({
-        ...option,
-        ...(option.id === 'table' && { disabled: true, toolTipContent: TableDisabledTooltip }),
-      }));
-    }, [tabularData]);
-
-    const viewMode = useMemo(() => {
-      if (selectedViewMode === 'table' && tabularData) {
-        return 'table';
-      }
-      return 'json';
-    }, [selectedViewMode, tabularData]);
-
     return (
       <EuiFlexGroup
         data-test-subj={'jsonDataTable'}
@@ -117,7 +84,7 @@ export const JSONDataView = React.memo<JSONDataViewProps>(
       >
         <EuiFlexItem grow={false}>
           <EuiFlexGroup responsive={false} gutterSize="s">
-            {viewMode === 'table' && (
+            {selectedViewMode === 'table' && (
               <EuiFlexItem>
                 <EuiFieldSearch
                   compressed
@@ -144,12 +111,12 @@ export const JSONDataView = React.memo<JSONDataViewProps>(
                 buttonSize="compressed"
                 color="primary"
                 type="single"
-                idSelected={viewMode}
+                idSelected={selectedViewMode}
                 legend={i18n.translate('workflows.jsonDataTable.viewMode', {
                   defaultMessage: 'View mode',
                 })}
                 onChange={handleViewModeChange}
-                options={viewModeOptions}
+                options={ViewModeOptions}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -157,18 +124,18 @@ export const JSONDataView = React.memo<JSONDataViewProps>(
 
         <EuiFlexItem grow={true} css={{ overflow: 'hidden', minHeight: 0 }}>
           <EuiSpacer size="s" />
-          {viewMode === 'table' && tabularData && (
+          {selectedViewMode === 'table' && data && (
             <JSONDataTable
-              data={tabularData}
+              data={data}
               title={title}
               searchTerm={searchTerm}
               fieldPathActionsPrefix={fieldPathActionsPrefix}
             />
           )}
-          {viewMode === 'json' && <JsonDataCode json={data} />}
+          {selectedViewMode === 'json' && <JsonDataCode json={data} />}
         </EuiFlexItem>
       </EuiFlexGroup>
     );
   }
 );
-JSONDataView.displayName = 'JSONDataView';
+ExecutionDataViewer.displayName = 'ExecutionDataViewer';
