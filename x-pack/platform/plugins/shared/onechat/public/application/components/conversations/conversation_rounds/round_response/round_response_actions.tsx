@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import copy from 'copy-to-clipboard';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { RoundModelUsageStats } from '@kbn/onechat-common';
 import { useToasts } from '../../../../hooks/use_toasts';
 
@@ -63,7 +64,16 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiText size="xs">{`Input tokens: ${modelUsage.input_tokens} / Output tokens: ${modelUsage.output_tokens}`}</EuiText>
+        <EuiText size="xs">
+          <FormattedMessage
+            id="xpack.onechat.roundResponseActions.tokenUsage"
+            defaultMessage="Input tokens: {inputTokens} / Output tokens: {outputTokens}"
+            values={{
+              inputTokens: modelUsage.input_tokens,
+              outputTokens: modelUsage.output_tokens,
+            }}
+          />
+        </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
