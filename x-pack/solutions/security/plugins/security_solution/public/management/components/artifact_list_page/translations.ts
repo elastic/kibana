@@ -59,6 +59,12 @@ export const artifactListPageLabels = Object.freeze({
       defaultMessage: 'Artifact list import failed',
     }
   ),
+  importFlyoutImportSubmitButtonLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importFlyoutImportSubmitButtonLabel',
+    {
+      defaultMessage: 'Import list',
+    }
+  ),
 
   // ------------------------------
   // EMPTY state labels
