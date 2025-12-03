@@ -13,6 +13,7 @@ import type { ServerStepDefinition, StepHandlerContext } from '@kbn/workflows-ex
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
 import type { ConnectorExecutor } from '../connector_executor';
+import { ExecutionError } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
@@ -58,18 +59,15 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
       const handlerContext = this.createHandlerContext(input);
       const result = await this.stepDefinition.handler(handlerContext);
 
-      return {
-        input,
-        output: result.output,
-        error: result.error
-          ? {
-              type: result.error.name,
-              message: result.error.message,
-            }
-          : undefined,
-      };
-    } catch (error) {
-      return { input, output: undefined, error: error.toString() };
+      // TODO: Return execution error from the handler
+      const stepResult: RunStepResult = { input, output: result.output, error: undefined };
+      if (result.error) {
+        stepResult.error = ExecutionError.fromError(result.error).toSerializableObject();
+      }
+      return stepResult;
+    } catch (err) {
+      const error = ExecutionError.fromError(err).toSerializableObject();
+      return { input, output: undefined, error };
     }
   }
 
