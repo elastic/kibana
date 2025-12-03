@@ -155,7 +155,7 @@ export function SloManagementTable() {
       }),
       'data-test-subj': 'sloActionsPurge',
       enabled: () => !!permissions?.hasAllWriteRequested,
-      onClick: (slo: SLODefinitionResponse) => triggerAction({ item: slo, type: 'purge' }),
+      onClick: (slo: SLODefinitionResponse) => triggerAction({ item: slo, type: 'purge_rollup' }),
     },
     {
       type: 'icon',
