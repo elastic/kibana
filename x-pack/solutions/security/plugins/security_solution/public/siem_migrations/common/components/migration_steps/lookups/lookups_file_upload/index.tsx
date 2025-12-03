@@ -15,7 +15,6 @@ import { UploadFileButton } from '../..';
 import { FILE_UPLOAD_ERROR } from '../../../../translations/file_upload_error';
 import type { SiemMigrationResourceData } from '../../../../../../../common/siem_migrations/model/common.gen';
 import * as i18n from './translations';
-import { convertQradarReferenceSetToLookup } from '../utils';
 
 export interface LookupsFileUploadProps {
   createResources: (resources: SiemMigrationResourceData[]) => void;
@@ -58,12 +57,6 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
               reader.onload = function (e) {
                 // We can safely cast to string since we call `readAsText` to load the file.
                 const content = e.target?.result as string | undefined;
-                const lookupObj = convertQradarReferenceSetToLookup({
-                  fileContent: content ?? '',
-                  fallbackName: file.name,
-                });
-
-                resolve(lookupObj);
 
                 if (content == null) {
                   addError(FILE_UPLOAD_ERROR.CAN_NOT_READ);
