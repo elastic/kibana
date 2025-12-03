@@ -86,7 +86,9 @@ async function fetchAlertContext({
         transactionType,
       });
       if (apmServiceSummary) {
-        contextParts.push(`Service Summary:\n${JSON.stringify(apmServiceSummary, null, 2)}`);
+        contextParts.push(
+          `<APMServiceSummary>\n${JSON.stringify(apmServiceSummary, null, 2)}\n</APMServiceSummary>`
+        );
       }
     } catch (err) {
       logger.debug(`AI insight: apmServiceSummary failed: ${err}`);
@@ -103,7 +105,11 @@ async function fetchAlertContext({
       });
       if (apmDownstreamDependencies && apmDownstreamDependencies.length > 0) {
         contextParts.push(
-          `Downstream Dependencies:\n${JSON.stringify(apmDownstreamDependencies, null, 2)}`
+          `<APMDownstreamDependencies>\n${JSON.stringify(
+            apmDownstreamDependencies,
+            null,
+            2
+          )}\n</APMDownstreamDependencies>`
         );
       }
     } catch (err) {
@@ -120,7 +126,7 @@ async function fetchAlertContext({
         end: alertEnd,
       });
       if (apmErrors && apmErrors.length > 0) {
-        contextParts.push(`APM Errors:\n${JSON.stringify(apmErrors, null, 2)}`);
+        contextParts.push(`<APMErrors>\n${JSON.stringify(apmErrors, null, 2)}\n</APMErrors>`);
       }
     } catch (err) {
       logger.debug(`AI insight: apmErrors failed: ${err}`);
@@ -208,7 +214,7 @@ async function generateAlertSummary({
 
   const userPrompt = dedent(`
     Context:
-    <AlertContext
+    <AlertContext>
     ${context}
     </AlertContext>
     Task:
