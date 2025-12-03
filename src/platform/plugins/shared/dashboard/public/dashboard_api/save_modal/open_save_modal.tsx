@@ -95,7 +95,7 @@ export async function openSaveModal({
             setTimeRestore(newTimeRestore);
             const dashboardState = serializeState();
             setProjectRoutingRestore(newProjectRoutingRestore);
-            
+
             const dashboardStateToSave: DashboardState = {
               ...dashboardState,
               title: newTitle,

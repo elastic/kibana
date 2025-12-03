@@ -9,10 +9,7 @@
 
 import { omit, pick } from 'lodash';
 import deepEqual from 'react-fast-compare';
-import {
-  type SerializedTimeRange,
-  type SerializedTitles,
-} from '@kbn/presentation-publishing';
+import { type SerializedTimeRange, type SerializedTitles } from '@kbn/presentation-publishing';
 import { toSavedSearchAttributes, type SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import { EDITABLE_SAVED_SEARCH_KEYS } from '../../../common/embeddable/constants';
@@ -125,5 +122,5 @@ export const serializeState = ({
     ...serializeTimeRange(),
     ...serializeDynamicActions?.(),
     ...state,
-};
+  };
 };
