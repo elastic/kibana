@@ -20,6 +20,7 @@ describe('When showing the Empty State in ArtifactListPage', () => {
   ) => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let history: AppContextTestRender['history'];
+  let setExperimentalFlag: AppContextTestRender['setExperimentalFlag'];
   let mockedApi: ReturnType<typeof trustedAppsAllHttpMocks>;
   let getLastFormComponentProps: ReturnType<
     typeof getFormComponentMock
@@ -29,7 +30,7 @@ describe('When showing the Empty State in ArtifactListPage', () => {
   beforeEach(() => {
     const renderSetup = getArtifactListPageRenderingSetup();
 
-    ({ history, mockedApi, getLastFormComponentProps } = renderSetup);
+    ({ history, mockedApi, getLastFormComponentProps, setExperimentalFlag } = renderSetup);
 
     originalListApiResponseProvider =
       mockedApi.responseProvider.trustedAppsList.getMockImplementation()!;
@@ -62,7 +63,9 @@ describe('When showing the Empty State in ArtifactListPage', () => {
   });
 
   describe('and user is allowed to Create entries', () => {
-    it('should show title, about info and add button', async () => {
+    it('should show title, about info, add and import buttons', async () => {
+      setExperimentalFlag({ endpointArtifactsExportImportEnabled: true });
+
       const { getByTestId, queryByTestId } = render();
 
       await waitFor(async () => {
@@ -79,7 +82,24 @@ describe('When showing the Empty State in ArtifactListPage', () => {
         artifactListPageLabels.emptyStatePrimaryButtonLabel
       );
 
+      expect(getByTestId('testPage-emptyState-importButton').textContent).toEqual(
+        artifactListPageLabels.emptyStateImportButtonLabel
+      );
+
       expect(queryByTestId('testPage-emptyState-title-no-entries')).toBeNull();
+    });
+
+    it('should not show import button when experimental flag is disabled', async () => {
+      setExperimentalFlag({ endpointArtifactsExportImportEnabled: false });
+
+      const { getByTestId, queryByTestId } = render();
+
+      await waitFor(async () => {
+        expect(getByTestId('testPage-emptyState'));
+      });
+
+      expect(getByTestId('testPage-emptyState-addButton')).toBeInTheDocument();
+      expect(queryByTestId('testPage-emptyState-importButton')).not.toBeInTheDocument();
     });
 
     it('should open create flyout when primary button is clicked', async () => {
@@ -90,6 +110,18 @@ describe('When showing the Empty State in ArtifactListPage', () => {
 
       expect(renderResult.getByTestId('testPage-flyout')).toBeTruthy();
       expect(history.location.search).toMatch(/show=create/);
+    });
+
+    it('should open import flyout when import button is clicked', async () => {
+      setExperimentalFlag({ endpointArtifactsExportImportEnabled: true });
+
+      render();
+      const importButton = await renderResult.findByTestId('testPage-emptyState-importButton');
+
+      await userEvent.click(importButton);
+
+      expect(renderResult.getByTestId('artifactImportFlyout')).toBeTruthy();
+      // todo expect(history.location.search).toMatch(/show=import/);
     });
 
     describe('and the first item is created', () => {
@@ -125,16 +157,21 @@ describe('When showing the Empty State in ArtifactListPage', () => {
   });
 
   describe('and user is not allowed to Create entries', () => {
-    it('should hide title, about info and add button promoting entry creation', async () => {
+    it('should hide title, about info and add/import buttons promoting entry creation', async () => {
+      setExperimentalFlag({ endpointArtifactsExportImportEnabled: true });
+
       render({ allowCardCreateAction: false });
 
       await waitFor(async () => {
         expect(renderResult.getByTestId('testPage-emptyState'));
       });
 
-      expect(renderResult.queryByTestId('testPage-emptyState-title')).toBeNull();
-      expect(renderResult.queryByTestId('testPage-emptyState-aboutInfo')).toBeNull();
-      expect(renderResult.queryByTestId('testPage-emptyState-addButton')).toBeNull();
+      expect(renderResult.queryByTestId('testPage-emptyState-title')).not.toBeInTheDocument();
+      expect(renderResult.queryByTestId('testPage-emptyState-aboutInfo')).not.toBeInTheDocument();
+      expect(renderResult.queryByTestId('testPage-emptyState-addButton')).not.toBeInTheDocument();
+      expect(
+        renderResult.queryByTestId('testPage-emptyState-importButton')
+      ).not.toBeInTheDocument();
     });
 
     it('should show title indicating there are no entries', async () => {

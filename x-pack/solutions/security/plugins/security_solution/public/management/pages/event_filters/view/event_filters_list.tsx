@@ -171,6 +171,10 @@ const EVENT_FILTERS_PAGE_LABELS: ArtifactListPageLabels = {
     'xpack.securitySolution.eventFilters.emptyStatePrimaryButtonLabel',
     { defaultMessage: 'Add event filter' }
   ),
+  emptyStateImportButtonLabel: i18n.translate(
+    'xpack.securitySolution.eventFilters.emptyStateImportButtonLabel',
+    { defaultMessage: 'Import event filter list' }
+  ),
   searchPlaceholderInfo: i18n.translate(
     'xpack.securitySolution.eventFilters.searchPlaceholderInfo',
     {

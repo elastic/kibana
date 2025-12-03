@@ -143,6 +143,10 @@ const HOST_ISOLATION_EXCEPTIONS_LABELS: ArtifactListPageLabels = Object.freeze({
     'xpack.securitySolution.hostIsolationExceptions.emptyStatePrimaryButtonLabel',
     { defaultMessage: 'Add host isolation exception' }
   ),
+  emptyStateImportButtonLabel: i18n.translate(
+    'xpack.securitySolution.hostIsolationExceptions.emptyStateImportButtonLabel',
+    { defaultMessage: 'Import host isolation exception list' }
+  ),
   searchPlaceholderInfo: i18n.translate(
     'xpack.securitySolution.hostIsolationExceptions.searchPlaceholderInfo',
     {
