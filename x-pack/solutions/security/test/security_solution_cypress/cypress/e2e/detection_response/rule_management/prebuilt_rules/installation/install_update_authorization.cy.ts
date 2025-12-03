@@ -119,10 +119,10 @@ describe(
         // Navigate to Rule Update tab anyways via URL
         cy.visit(`${APP_PATH}${RULES_UPDATES}`);
 
-        // Check that upgrade buttons are disabled
+        // Check that upgrade buttons are disabled/hidden
         cy.get(UPGRADE_ALL_RULES_BUTTON).should('be.disabled');
         cy.get(getUpgradeSingleRuleButtonByRuleId(OUTDATED_RULE_1['security-rule'].rule_id)).should(
-          'be.disabled'
+          'not.exist'
         );
 
         // Check that rule selection checkbox is visible
