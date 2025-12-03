@@ -173,7 +173,7 @@ export const comprehensiveRegionMapWithDataView = {
 } satisfies RegionMapState;
 
 /**
- * Comprehensive ESQL-based region_map chart
+ * Comprehensive ESQL-based region map chart
  */
 export const comprehensiveEsqlRegionMap = {
   title: 'Comprehensive Test Region Map',
