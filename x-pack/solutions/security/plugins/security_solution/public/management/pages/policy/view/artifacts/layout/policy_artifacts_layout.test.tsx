@@ -39,6 +39,7 @@ let policyItem: ImmutableObject<PolicyData>;
 const generator = new EndpointDocGenerator();
 let mockedApi: ReturnType<typeof eventFiltersListQueryHttpMock>;
 let history: AppContextTestRender['history'];
+let setExperimentalFlag: AppContextTestRender['setExperimentalFlag'];
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 
 const getEventFiltersLabels = () => ({
@@ -61,7 +62,7 @@ describe('Policy artifacts layout', () => {
     mockedApi = eventFiltersListQueryHttpMock(mockedContext.coreStart.http);
     mockedApi.responseProvider.eventFiltersList.mockClear();
     policyItem = generator.generatePolicyPackagePolicy();
-    ({ history } = mockedContext);
+    ({ history, setExperimentalFlag } = mockedContext);
 
     useUserPrivilegesMock.mockReturnValue({
       endpointPrivileges: {
@@ -107,12 +108,35 @@ describe('Policy artifacts layout', () => {
   });
 
   it('should render layout with no assigned artifacts data when there are no artifacts', async () => {
+    setExperimentalFlag({ endpointArtifactsExportImportEnabled: true });
     mockedApi.responseProvider.eventFiltersList.mockReturnValue(
       getFoundExceptionListItemSchemaMock(0)
     );
 
     await render();
-    expect(await renderResult.findByTestId('policy-artifacts-empty-unexisting')).not.toBeNull();
+    expect(
+      await renderResult.findByTestId('policy-artifacts-empty-unexisting')
+    ).toBeInTheDocument();
+    expect(renderResult.queryByTestId('unexisting-manage-artifacts-button')).toBeInTheDocument();
+    expect(
+      renderResult.queryByTestId('unexisting-manage-artifacts-import-button')
+    ).toBeInTheDocument();
+  });
+
+  it('should not render import button when experimental flag is disabled', async () => {
+    setExperimentalFlag({ endpointArtifactsExportImportEnabled: false });
+    mockedApi.responseProvider.eventFiltersList.mockReturnValue(
+      getFoundExceptionListItemSchemaMock(0)
+    );
+
+    await render();
+    expect(
+      await renderResult.findByTestId('policy-artifacts-empty-unexisting')
+    ).toBeInTheDocument();
+    expect(renderResult.queryByTestId('unexisting-manage-artifacts-button')).toBeInTheDocument();
+    expect(
+      renderResult.queryByTestId('unexisting-manage-artifacts-import-button')
+    ).not.toBeInTheDocument();
   });
 
   it('should render layout with no assigned artifacts data when there are artifacts', async () => {
@@ -127,6 +151,8 @@ describe('Policy artifacts layout', () => {
     await render();
 
     expect(await renderResult.findByTestId('policy-artifacts-empty-unassigned')).not.toBeNull();
+    expect(renderResult.queryByTestId('unassigned-assign-artifacts-button')).toBeInTheDocument();
+    expect(renderResult.queryByTestId('unassigned-manage-artifacts-button')).toBeInTheDocument();
   });
 
   it('should render layout with data', async () => {
@@ -198,6 +224,7 @@ describe('Policy artifacts layout', () => {
       await render(false);
       expect(renderResult.queryByTestId('artifacts-assign-button')).toBeNull();
     });
+
     it('should not display assign and manage artifacts buttons on empty state when there are artifacts', async () => {
       mockedApi.responseProvider.eventFiltersList.mockImplementation((args?: MockedAPIArgs) => {
         if (!isFilteredByPolicyQuery(args)) {
@@ -211,13 +238,23 @@ describe('Policy artifacts layout', () => {
       expect(renderResult.queryByTestId('unassigned-assign-artifacts-button')).toBeNull();
       expect(renderResult.queryByTestId('unassigned-manage-artifacts-button')).toBeNull();
     });
+
     it('should not display manage artifacts button on empty state when there are no artifacts', async () => {
       mockedApi.responseProvider.eventFiltersList.mockReturnValue(
         getFoundExceptionListItemSchemaMock(0)
       );
+
       await render(false);
-      expect(await renderResult.findByTestId('policy-artifacts-empty-unexisting')).not.toBeNull();
-      expect(renderResult.queryByTestId('unexisting-manage-artifacts-button')).toBeNull();
+
+      expect(
+        await renderResult.findByTestId('policy-artifacts-empty-unexisting')
+      ).toBeInTheDocument();
+      expect(
+        renderResult.queryByTestId('unexisting-manage-artifacts-button')
+      ).not.toBeInTheDocument();
+      expect(
+        renderResult.queryByTestId('unexisting-manage-artifacts-import-button')
+      ).not.toBeInTheDocument();
     });
   });
 });
