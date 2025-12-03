@@ -44,12 +44,27 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       return createdRule.id;
     };
 
-    const getAlerts = async () => {
+    const getAlerts = async (ruleIds?: string[]) => {
+      const query: any =
+        ruleIds && ruleIds.length > 0
+          ? {
+              bool: {
+                must: [
+                  {
+                    terms: {
+                      'kibana.alert.rule.uuid': ruleIds,
+                    },
+                  },
+                ],
+              },
+            }
+          : { match_all: {} };
+
       const {
         hits: { hits: alerts },
       } = await es.search({
         index: alertAsDataIndex,
-        query: { match_all: {} },
+        query,
       });
 
       return alerts;
@@ -72,7 +87,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       const createdRule2 = await createRule();
 
       await retry.try(async () => {
-        const alerts = await getAlerts();
+        const alerts = await getAlerts([createdRule1, createdRule2]);
 
         expect(alerts.length).eql(4);
         alerts.forEach((activeAlert: any) => {
@@ -89,7 +104,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
         })
         .expect(200);
 
-      const alerts = await getAlerts();
+      const alerts = await getAlerts([createdRule1, createdRule2]);
 
       expect(alerts.length).eql(4);
       alerts.forEach((untrackedAlert: any) => {
@@ -102,7 +117,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       const createdRule2 = await createRule();
 
       await retry.try(async () => {
-        const alerts = await getAlerts();
+        const alerts = await getAlerts([createdRule1, createdRule2]);
 
         expect(alerts.length).eql(4);
         alerts.forEach((activeAlert: any) => {
@@ -119,7 +134,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
         })
         .expect(200);
 
-      const alerts = await getAlerts();
+      const alerts = await getAlerts([createdRule1, createdRule2]);
 
       expect(alerts.length).eql(4);
       alerts.forEach((activeAlert: any) => {
