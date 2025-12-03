@@ -12,19 +12,27 @@ import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { getIsSelectedColor } from './utils';
-import type { TopNavMenuItemBetaType } from './types';
+import type {
+  TopNavMenuItemType,
+  TopNavMenuPrimaryActionItem,
+  TopNavMenuSecondaryActionItem,
+} from './types';
 import { TopNavMenuPopover } from './top_nav_menu_popover';
 
 interface TopNavMenuShowMoreButtonProps {
-  items: TopNavMenuItemBetaType[];
+  items: TopNavMenuItemType[];
   isPopoverOpen: boolean;
+  primaryActionItem?: TopNavMenuPrimaryActionItem;
+  secondaryActionItem?: TopNavMenuSecondaryActionItem;
   onPopoverToggle: () => void;
   onPopoverClose: () => void;
 }
 
-export const TopNavMenuShowMoreButton = ({
+export const TopNavMenuOverflowButton = ({
   items,
   isPopoverOpen,
+  primaryActionItem,
+  secondaryActionItem,
   onPopoverToggle,
   onPopoverClose,
 }: TopNavMenuShowMoreButtonProps) => {
@@ -68,6 +76,8 @@ export const TopNavMenuShowMoreButton = ({
       })}
       isOpen={isPopoverOpen}
       popoverWidth={200}
+      primaryActionItem={primaryActionItem}
+      secondaryActionItem={secondaryActionItem}
       onClose={onPopoverClose}
     />
   );

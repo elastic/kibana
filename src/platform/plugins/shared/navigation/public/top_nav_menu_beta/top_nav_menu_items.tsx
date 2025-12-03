@@ -1,0 +1,123 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React, { useState } from 'react';
+import { EuiHeaderLinks, useIsWithinBreakpoints } from '@elastic/eui';
+import { getTopNavItems, hasNoItems } from './utils';
+import type { TopNavMenuConfigBeta } from './types';
+import { TopNavMenuActionButton } from './top_nav_menu_action_button';
+import { TopNavMenuItem } from './top_nav_menu_item';
+import { TopNavMenuOverflowButton } from './top_nav_menu_overflow_button';
+
+interface TopNavMenuItemsProps {
+  config?: TopNavMenuConfigBeta;
+}
+
+export const TopNavMenuItems = ({ config }: TopNavMenuItemsProps) => {
+  const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
+  const isBetweenMandXlBreakpoint = useIsWithinBreakpoints(['m', 'l']);
+  const isAtXlBreakpoint = useIsWithinBreakpoints(['xl']);
+
+  if (!config || hasNoItems(config)) {
+    return null;
+  }
+
+  const primaryActionItem = config?.primaryActionItem;
+  const secondaryActionItem = config?.secondaryActionItem;
+  const showMoreButtonId = 'show-more';
+
+  const { displayedItems, overflowItems, shouldOverflow } = getTopNavItems({
+    config,
+  });
+
+  const primaryActionComponent = primaryActionItem ? (
+    <TopNavMenuActionButton
+      {...primaryActionItem}
+      isPopoverOpen={openPopoverId === primaryActionItem.id}
+      onPopoverToggle={() => {
+        setOpenPopoverId(openPopoverId === primaryActionItem.id ? null : primaryActionItem.id);
+      }}
+      onPopoverClose={() => setOpenPopoverId(null)}
+    />
+  ) : undefined;
+
+  const secondaryActionComponent = secondaryActionItem ? (
+    <TopNavMenuActionButton
+      {...secondaryActionItem}
+      isPopoverOpen={openPopoverId === secondaryActionItem.id}
+      onPopoverToggle={() => {
+        setOpenPopoverId(openPopoverId === secondaryActionItem.id ? null : secondaryActionItem.id);
+      }}
+      onPopoverClose={() => setOpenPopoverId(null)}
+    />
+  ) : undefined;
+
+  const handlePopoverToggle = (id: string) => {
+    setOpenPopoverId(openPopoverId === id ? null : id);
+  };
+
+  const handleOnPopoverClose = () => {
+    setOpenPopoverId(null);
+  };
+
+  if (isBetweenMandXlBreakpoint) {
+    return (
+      <EuiHeaderLinks data-test-subj="top-nav" gutterSize="xs" popoverBreakpoints="none">
+        <TopNavMenuOverflowButton
+          items={[...displayedItems, ...overflowItems]}
+          isPopoverOpen={openPopoverId === showMoreButtonId}
+          onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
+          onPopoverClose={handleOnPopoverClose}
+        />
+        {secondaryActionComponent}
+        {primaryActionComponent}
+      </EuiHeaderLinks>
+    );
+  }
+
+  if (isAtXlBreakpoint) {
+    return (
+      <EuiHeaderLinks data-test-subj="top-nav" gutterSize="xs" popoverBreakpoints="none">
+        {displayedItems?.length > 0 &&
+          displayedItems.map((menuItem) => (
+            <TopNavMenuItem
+              key={menuItem.id}
+              {...menuItem}
+              isPopoverOpen={openPopoverId === menuItem.id}
+              onPopoverToggle={() => handlePopoverToggle(menuItem.id)}
+              onPopoverClose={handleOnPopoverClose}
+            />
+          ))}
+        {shouldOverflow && (
+          <TopNavMenuOverflowButton
+            items={overflowItems}
+            isPopoverOpen={openPopoverId === showMoreButtonId}
+            onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
+            onPopoverClose={handleOnPopoverClose}
+          />
+        )}
+        {secondaryActionComponent}
+        {primaryActionComponent}
+      </EuiHeaderLinks>
+    );
+  }
+
+  return (
+    <EuiHeaderLinks data-test-subj="top-nav" gutterSize="xs" popoverBreakpoints="none">
+      <TopNavMenuOverflowButton
+        items={[...displayedItems, ...overflowItems]}
+        isPopoverOpen={openPopoverId === showMoreButtonId}
+        secondaryActionItem={secondaryActionItem}
+        primaryActionItem={primaryActionItem}
+        onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
+        onPopoverClose={handleOnPopoverClose}
+      />
+    </EuiHeaderLinks>
+  );
+};

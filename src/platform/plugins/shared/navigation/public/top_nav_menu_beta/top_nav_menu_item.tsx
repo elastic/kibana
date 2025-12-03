@@ -12,16 +12,16 @@ import { EuiHeaderLink, EuiHideFor, EuiToolTip, useEuiTheme } from '@elastic/eui
 import { upperFirst } from 'lodash';
 import { css } from '@emotion/react';
 import { getIsSelectedColor, getTooltip, isDisabled } from './utils';
-import type { TopNavMenuItemBetaType } from './types';
+import type { TopNavMenuItemType } from './types';
 import { TopNavMenuPopover } from './top_nav_menu_popover';
 
-type TopNavMenuItemBetaProps = TopNavMenuItemBetaType & {
+type TopNavMenuItemBetaProps = TopNavMenuItemType & {
   isPopoverOpen: boolean;
   onPopoverToggle: () => void;
   onPopoverClose: () => void;
 };
 
-export const TopNavMenuItemBeta = ({
+export const TopNavMenuItem = ({
   run,
   htmlId,
   label,

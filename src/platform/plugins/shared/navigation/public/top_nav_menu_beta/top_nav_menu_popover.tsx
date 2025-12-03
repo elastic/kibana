@@ -10,15 +10,21 @@
 import React, { useMemo, type ReactElement } from 'react';
 import { EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { getPopoverPanels, getTooltip } from './utils';
-import type { TopNavMenuPopoverItemBeta } from './types';
+import type {
+  TopNavMenuPopoverItem,
+  TopNavMenuPrimaryActionItem,
+  TopNavMenuSecondaryActionItem,
+} from './types';
 
 interface TopNavContextMenuProps {
   tooltipContent?: string | (() => string | undefined);
   tooltipTitle?: string | (() => string | undefined);
   anchorElement: ReactElement;
-  items: TopNavMenuPopoverItemBeta[];
+  items: TopNavMenuPopoverItem[];
   isOpen: boolean;
   popoverWidth?: number;
+  primaryActionItem?: TopNavMenuPrimaryActionItem;
+  secondaryActionItem?: TopNavMenuSecondaryActionItem;
   onClose: () => void;
 }
 
@@ -29,9 +35,14 @@ export const TopNavMenuPopover = ({
   tooltipTitle,
   isOpen,
   popoverWidth,
+  primaryActionItem,
+  secondaryActionItem,
   onClose,
 }: TopNavContextMenuProps) => {
-  const panels = useMemo(() => getPopoverPanels(items), [items]);
+  const panels = useMemo(
+    () => getPopoverPanels({ menuItems: items, primaryActionItem, secondaryActionItem }),
+    [items, primaryActionItem, secondaryActionItem]
+  );
   const { content, title } = getTooltip({ tooltipContent, tooltipTitle });
   const showTooltip = Boolean(content || title);
 

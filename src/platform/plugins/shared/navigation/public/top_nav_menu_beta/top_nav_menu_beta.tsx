@@ -15,7 +15,7 @@ import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { TopNavMenuPropsBeta } from './types';
 import { hasNoItems } from './utils';
 import { TopNavMenuBadges } from '../top_nav_menu/top_nav_menu_badges';
-import { TopNavMenuItemsBeta } from './top_nav_menu_items_beta';
+import { TopNavMenuItems } from './top_nav_menu_items';
 
 const styles = {
   badgeWrapper: css`
@@ -44,7 +44,7 @@ export function TopNavMenuBeta<QT extends AggregateQuery | Query = Query>({
 
   const badgesComponent = <TopNavMenuBadges badges={badges} />;
   const menuComponent = (
-    <TopNavMenuItemsBeta config={config} data-test-subj="kbn-top-nav-menu-wrapper" />
+    <TopNavMenuItems config={config} data-test-subj="kbn-top-nav-menu-wrapper" />
   );
 
   const renderSearchBar = (): ReactElement | null => {

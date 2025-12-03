@@ -15,16 +15,13 @@ import { EuiButton, EuiHideFor, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getIsSelectedColor, getTooltip, isDisabled } from './utils';
 import type {
-  TopNavMenuPrimaryActionItemBeta,
-  TopNavMenuSecondaryActionItemBeta,
+  TopNavMenuPrimaryActionItem,
+  TopNavMenuSecondaryActionItem,
   TopNavMenuSplitButtonProps,
 } from './types';
 import { TopNavMenuPopover } from './top_nav_menu_popover';
 
-type TopNavMenuActionButtonProps = (
-  | TopNavMenuPrimaryActionItemBeta
-  | TopNavMenuSecondaryActionItemBeta
-) & {
+type TopNavMenuActionButtonProps = (TopNavMenuPrimaryActionItem | TopNavMenuSecondaryActionItem) & {
   isPopoverOpen: boolean;
   onPopoverToggle: () => void;
   onPopoverClose: () => void;

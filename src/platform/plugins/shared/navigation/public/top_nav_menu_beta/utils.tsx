@@ -7,18 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import { isFunction, upperFirst } from 'lodash';
-import type {
-  EuiButtonColor,
-  EuiThemeComputed,
-  EuiContextMenuPanelDescriptor,
-  EuiContextMenuPanelItemDescriptor,
+import {
+  type EuiButtonColor,
+  type EuiThemeComputed,
+  type EuiContextMenuPanelDescriptor,
+  type EuiContextMenuPanelItemDescriptor,
+  EuiFlexGroup,
 } from '@elastic/eui';
-import type {
-  TopNavMenuConfigBeta,
-  TopNavMenuItemCommonBeta,
-  TopNavMenuPopoverItemBeta,
-} from './types';
+import { css } from '@emotion/react';
+import { TopNavMenuActionButton } from './top_nav_menu_action_button';
+import type { TopNavMenuConfigBeta, TopNavMenuItemCommon, TopNavMenuPopoverItem } from './types';
 import { TOP_NAV_MENU_ITEM_LIMIT } from './constants';
 
 /**
@@ -83,15 +83,15 @@ export const getTopNavItems = ({ config }: { config: TopNavMenuConfigBeta }) => 
   };
 };
 
-export const isDisabled = (disableButton: TopNavMenuItemCommonBeta['disableButton']) =>
+export const isDisabled = (disableButton: TopNavMenuItemCommon['disableButton']) =>
   Boolean(isFunction(disableButton) ? disableButton() : disableButton);
 
 export const getTooltip = ({
   tooltipContent,
   tooltipTitle,
 }: {
-  tooltipContent?: TopNavMenuItemCommonBeta['tooltipContent'];
-  tooltipTitle?: TopNavMenuItemCommonBeta['tooltipTitle'];
+  tooltipContent?: TopNavMenuItemCommon['tooltipContent'];
+  tooltipTitle?: TopNavMenuItemCommon['tooltipTitle'];
 }) => {
   const content = isFunction(tooltipContent) ? tooltipContent() : tooltipContent;
   const title = isFunction(tooltipTitle) ? tooltipTitle() : tooltipTitle;
@@ -105,7 +105,7 @@ export const getTooltip = ({
 export const hasNoItems = (config: TopNavMenuConfigBeta) =>
   !config.items?.length && !config?.primaryActionItem && !config?.secondaryActionItem;
 
-const mapTopNavItemToPanelItem = (item: TopNavMenuPopoverItemBeta, childPanelId?: number) => {
+const mapTopNavItemToPanelItem = (item: TopNavMenuPopoverItem, childPanelId?: number) => {
   const { content, title } = getTooltip({
     tooltipContent: item?.tooltipContent,
     tooltipTitle: item?.tooltipTitle,
@@ -136,15 +136,27 @@ const mapTopNavItemToPanelItem = (item: TopNavMenuPopoverItemBeta, childPanelId?
 /**
  * Recursively generate EUI context menu panels from the provided menu items.
  */
-export const getPopoverPanels = (
-  menuItems: TopNavMenuPopoverItemBeta[],
-  startPanelId: number = 0
-): EuiContextMenuPanelDescriptor[] => {
+export const getPopoverPanels = ({
+  menuItems,
+  primaryActionItem,
+  secondaryActionItem,
+}: {
+  menuItems: TopNavMenuPopoverItem[];
+  primaryActionItem?: Omit<TopNavMenuItemCommon, 'items'> & { splitButtonProps?: any };
+  secondaryActionItem?: TopNavMenuItemCommon & {
+    color?: EuiButtonColor;
+    isFilled?: boolean;
+    minWidth?: any;
+  };
+  startPanelId?: number;
+}): EuiContextMenuPanelDescriptor[] => {
   const panels: EuiContextMenuPanelDescriptor[] = [];
+  const hasActionItems = Boolean(primaryActionItem || secondaryActionItem);
+  const startPanelId = 0;
   let currentPanelId = startPanelId;
 
   const processItems = (
-    itemsToProcess: TopNavMenuPopoverItemBeta[],
+    itemsToProcess: TopNavMenuPopoverItem[],
     panelId: number,
     parentTitle?: string
   ) => {
@@ -178,12 +190,59 @@ export const getPopoverPanels = (
 
     panels.push({
       id: panelId,
-      ...(parentTitle && { title: parentTitle }),
+      ...(parentTitle && { title: upperFirst(parentTitle) }),
       items: panelItems,
     });
   };
 
   processItems(menuItems, startPanelId);
+  if (hasActionItems) {
+    const mainPanel = panels.find((panel) => panel.id === startPanelId);
+    if (!mainPanel) return panels;
+
+    const actionItemCss = css`
+      margin: 12px;
+    `;
+
+    const actionItems: EuiContextMenuPanelItemDescriptor[] = [
+      { isSeparator: true, key: 'actions-separator' } as EuiContextMenuPanelItemDescriptor,
+    ];
+
+    if (secondaryActionItem) {
+      actionItems.push({
+        key: 'secondaryActionItem',
+        renderItem: () => (
+          <EuiFlexGroup justifyContent="center" css={actionItemCss}>
+            <TopNavMenuActionButton
+              {...secondaryActionItem}
+              isPopoverOpen={false}
+              onPopoverToggle={() => {}}
+              onPopoverClose={() => {}}
+            />
+          </EuiFlexGroup>
+        ),
+      } as EuiContextMenuPanelItemDescriptor);
+    }
+
+    if (primaryActionItem) {
+      actionItems.push({
+        key: 'primaryActionItem',
+        renderItem: () => (
+          <EuiFlexGroup justifyContent="center" css={actionItemCss}>
+            <TopNavMenuActionButton
+              {...primaryActionItem}
+              isPopoverOpen={false}
+              onPopoverToggle={() => {}}
+              onPopoverClose={() => {}}
+            />
+          </EuiFlexGroup>
+        ),
+      } as EuiContextMenuPanelItemDescriptor);
+    }
+    mainPanel.items = [...(mainPanel.items as EuiContextMenuPanelItemDescriptor[]), ...actionItems];
+
+    return panels;
+  }
   return panels;
 };
 

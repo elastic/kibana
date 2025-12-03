@@ -7,22 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { TopNavMenuItemsBeta } from './top_nav_menu_items_beta';
+export { TopNavMenuItems } from './top_nav_menu_items';
 export { TopNavMenuActionButton } from './top_nav_menu_action_button';
-export { TopNavMenuItemBeta } from './top_nav_menu_item_beta';
-export { TopNavMenuShowMoreButton } from './top_nav_menu_show_more_button';
+export { TopNavMenuItem } from './top_nav_menu_item';
+export { TopNavMenuOverflowButton } from './top_nav_menu_overflow_button';
 export { TopNavMenuBeta } from './top_nav_menu_beta';
 export { TopNavMenuPopover } from './top_nav_menu_popover';
 
 export type {
   TopNavMenuPropsBeta,
   TopNavMenuSplitButtonProps,
-  TopNavMenuItemBetaType,
-  TopNavMenuActionItemBeta,
-  TopNavMenuSecondaryActionItemBeta,
-  TopNavMenuPrimaryActionItemBeta,
+  TopNavMenuItemType,
+  TopNavMenuSecondaryActionItem,
+  TopNavMenuPrimaryActionItem,
   TopNavMenuConfigBeta,
-  TopNavMenuPopoverItemBeta as TopNavPopoverItemBeta,
+  TopNavMenuPopoverItem,
   RegisteredTopNavMenuDataBeta,
 } from './types';
 

@@ -67,7 +67,7 @@ type BaseSplitProps = Pick<
 export type TopNavMenuSplitButtonProps =
   // If `items` is provided then `run` shouldn't be, as having items means the button opens a popover
   | (BaseSplitProps & { items?: undefined; run: () => void })
-  | (BaseSplitProps & { items: TopNavMenuPopoverItemBeta[]; run?: never });
+  | (BaseSplitProps & { items: TopNavMenuPopoverItem[]; run?: never });
 
 interface TopNavItemBase {
   id: string;
@@ -83,46 +83,44 @@ interface TopNavItemBase {
   tooltipTitle?: string | (() => string | undefined);
 }
 
-export type TopNavMenuItemCommonBeta =
+export type TopNavMenuItemCommon =
   // If `items` is provided then `run` shouldn't be, as having items means the button opens a popover
   | (TopNavItemBase & { run: () => void; items?: undefined; popoverWidth?: never; hidden?: never })
   | (TopNavItemBase & {
       run?: never;
-      items: TopNavMenuPopoverItemBeta[];
+      items: TopNavMenuPopoverItem[];
       popoverWidth?: number;
       hidden?: EuiHideForProps['sizes'];
     });
 
-export type TopNavMenuItemBetaType = TopNavMenuItemCommonBeta & {
+export type TopNavMenuItemType = TopNavMenuItemCommon & {
   order: number;
 };
 
-export type TopNavMenuPopoverItemBeta = Omit<
-  TopNavMenuItemBetaType,
+export type TopNavMenuPopoverItem = Omit<
+  TopNavMenuItemType,
   'iconType' | 'hidden' | 'popoverWidth'
 > & {
   iconType?: IconType;
   seperator?: 'above' | 'below';
 };
 
-export type TopNavMenuActionItemBeta = TopNavMenuItemCommonBeta;
-
-export type TopNavMenuSecondaryActionItemBeta = TopNavMenuActionItemBeta & {
+export type TopNavMenuSecondaryActionItem = TopNavMenuItemCommon & {
   color?: EuiButtonColor;
   isFilled?: boolean;
   minWidth?: EuiButtonProps['minWidth'];
 };
 
-export type TopNavMenuPrimaryActionItemBeta = Omit<TopNavMenuActionItemBeta, 'items'> & {
+export type TopNavMenuPrimaryActionItem = Omit<TopNavMenuItemCommon, 'items'> & {
   splitButtonProps?: TopNavMenuSplitButtonProps;
 };
 
 export interface TopNavMenuConfigBeta {
-  items?: TopNavMenuItemBetaType[];
-  secondaryActionItem?: TopNavMenuSecondaryActionItemBeta;
-  primaryActionItem?: TopNavMenuPrimaryActionItemBeta;
+  items?: TopNavMenuItemType[];
+  secondaryActionItem?: TopNavMenuSecondaryActionItem;
+  primaryActionItem?: TopNavMenuPrimaryActionItem;
 }
 
-export type RegisteredTopNavMenuDataBeta = TopNavMenuItemBetaType & {
+export type RegisteredTopNavMenuDataBeta = TopNavMenuItemType & {
   appName?: string;
 };

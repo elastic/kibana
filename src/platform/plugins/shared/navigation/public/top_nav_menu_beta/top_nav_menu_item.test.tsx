@@ -9,9 +9,9 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { TopNavMenuItemBeta } from './top_nav_menu_item_beta';
+import { TopNavMenuItem } from './top_nav_menu_item';
 
-describe('TopNavMenuItemBeta', () => {
+describe('TopNavMenuItem', () => {
   const defaultProps = {
     label: 'elastic',
     run: jest.fn(),
@@ -28,13 +28,13 @@ describe('TopNavMenuItemBeta', () => {
   });
 
   it('renders basic item', () => {
-    render(<TopNavMenuItemBeta {...defaultProps} testId="test-button" />);
+    render(<TopNavMenuItem {...defaultProps} testId="test-button" />);
     expect(screen.getByTestId('test-button')).toBeInTheDocument();
     expect(screen.getByText('Elastic')).toBeInTheDocument();
   });
 
   it('renders as link when href is provided', () => {
-    render(<TopNavMenuItemBeta {...defaultProps} href="http://elastic.co" testId="test-link" />);
+    render(<TopNavMenuItem {...defaultProps} href="http://elastic.co" testId="test-link" />);
     const link = screen.getByTestId('test-link');
     expect(link).toHaveAttribute('href', 'http://elastic.co');
   });
