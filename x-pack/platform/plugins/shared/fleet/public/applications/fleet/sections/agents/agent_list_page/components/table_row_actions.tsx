@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { EuiContextMenuItem } from '@elastic/eui';
+import React, { useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { LICENSE_FOR_AGENT_MIGRATION } from '../../../../../../../common/constants';
@@ -21,8 +20,9 @@ import { isStuckInUpdating } from '../../../../../../../common/services/agent_st
 import type { Agent, AgentPolicy } from '../../../../types';
 import { useLink } from '../../../../hooks';
 import { useAuthz } from '../../../../../../hooks/use_authz';
-import { ContextMenuActions } from '../../../../components';
 import { isAgentUpgradeable } from '../../../../services';
+import { HierarchicalMenu } from '../../components';
+import type { MenuItem } from '../../components';
 
 export const TableRowActions: React.FunctionComponent<{
   agent: Agent;
@@ -51,77 +51,193 @@ export const TableRowActions: React.FunctionComponent<{
   const authz = useAuthz();
   const licenseService = useLicense();
   const isUnenrolling = agent.status === 'unenrolling';
+  const isAgentUpdating = isStuckInUpdating(agent);
   const agentPrivilegeLevelChangeEnabled =
     ExperimentalFeaturesService.get().enableAgentPrivilegeLevelChange;
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const menuItems = [
-    <EuiContextMenuItem
-      icon="inspect"
-      href={getHref('agent_details', { agentId: agent.id })}
-      key="viewAgent"
-    >
-      <FormattedMessage id="xpack.fleet.agentList.viewActionText" defaultMessage="View agent" />
-    </EuiContextMenuItem>,
-  ];
 
-  if (authz.fleet.allAgents && isAgentEligibleForMigration(agent, agentPolicy)) {
-    menuItems.push(
-      <EuiContextMenuItem
-        icon="cluster"
-        onClick={() => {
+  // Build hierarchical menu items
+  const menuItems: MenuItem[] = useMemo(() => {
+    const items: MenuItem[] = [];
+
+    // View agent - always available
+    items.push({
+      id: 'view-agent',
+      name: (
+        <FormattedMessage id="xpack.fleet.agentList.viewActionText" defaultMessage="View agent" />
+      ),
+      icon: 'inspect',
+      onClick: () => {
+        window.location.href = getHref('agent_details', { agentId: agent.id });
+      },
+    });
+
+    // Top-level items (only if has privileges and not managed)
+    if (authz.fleet.allAgents && agentPolicy?.is_managed === false) {
+      items.push(
+        {
+          id: 'tags',
+          name: (
+            <FormattedMessage
+              id="xpack.fleet.agentList.addRemoveTagsActionText"
+              defaultMessage="Add / remove tags"
+            />
+          ),
+          icon: 'tag',
+          disabled: !agent.active,
+          onClick: (event) => {
+            onAddRemoveTagsClick((event.target as Element).closest('button')!);
+          },
+        },
+        {
+          id: 'reassign',
+          name: (
+            <FormattedMessage
+              id="xpack.fleet.agentList.reassignActionText"
+              defaultMessage="Assign to new policy"
+            />
+          ),
+          icon: 'pencil',
+          disabled: !agent.active || agentPolicy?.supports_agentless === true,
+          onClick: () => {
+            onReassignClick();
+          },
+        },
+        {
+          id: 'upgrade',
+          name: (
+            <FormattedMessage
+              id="xpack.fleet.agentList.upgradeOneButton"
+              defaultMessage="Upgrade agent"
+            />
+          ),
+          icon: 'refresh',
+          disabled: !isAgentUpgradeable(agent) || agentPolicy?.supports_agentless === true,
+          onClick: () => {
+            onUpgradeClick();
+          },
+          'data-test-subj': 'upgradeBtn',
+        }
+      );
+    }
+
+    // Upgrade management submenu (only show if agent is stuck in updating)
+    if (authz.fleet.allAgents && isAgentUpdating) {
+      items.push({
+        id: 'upgrade-management',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.agentList.upgradeManagement"
+            defaultMessage="Upgrade management"
+          />
+        ),
+        panelTitle: 'Upgrade management',
+        children: [
+          {
+            id: 'restart-upgrade',
+            name: (
+              <FormattedMessage
+                id="xpack.fleet.agentList.restartUpgradeOneButton"
+                defaultMessage="Restart upgrade"
+              />
+            ),
+            icon: 'refresh',
+            onClick: () => {
+              onUpgradeClick();
+            },
+            'data-test-subj': 'restartUpgradeBtn',
+          },
+        ],
+      });
+    }
+
+    // Maintenance and diagnostics submenu
+    const maintenanceChildren: MenuItem[] = [];
+
+    // Migrate agent
+    if (authz.fleet.allAgents && isAgentEligibleForMigration(agent, agentPolicy)) {
+      maintenanceChildren.push({
+        id: 'migrate',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.agentList.migrateAgentActionText"
+            defaultMessage="Migrate agent"
+          />
+        ),
+        icon: 'cluster',
+        disabled: !agent.active || !licenseService.hasAtLeast(LICENSE_FOR_AGENT_MIGRATION),
+        onClick: () => {
           onMigrateAgentClick();
-          setIsMenuOpen(false);
-        }}
-        disabled={!agent.active || !licenseService.hasAtLeast(LICENSE_FOR_AGENT_MIGRATION)}
-        key="migrateAgent"
-        data-test-subj="migrateAgentMenuItem"
-      >
-        <FormattedMessage
-          id="xpack.fleet.agentList.migrateAgentActionText"
-          defaultMessage="Migrate agent"
-        />
-      </EuiContextMenuItem>
-    );
-  }
+        },
+        'data-test-subj': 'migrateAgentMenuItem',
+      });
+    }
 
-  if (authz.fleet.allAgents && agentPolicy?.is_managed === false) {
-    menuItems.push(
-      <EuiContextMenuItem
-        icon="tag"
-        onClick={(event) => {
-          onAddRemoveTagsClick((event.target as Element).closest('button')!);
-        }}
-        disabled={!agent.active}
-        key="addRemoveTags"
-      >
-        <FormattedMessage
-          id="xpack.fleet.agentList.addRemoveTagsActionText"
-          defaultMessage="Add / remove tags"
-        />
-      </EuiContextMenuItem>,
-      <EuiContextMenuItem
-        icon="pencil"
-        onClick={() => {
-          onReassignClick();
-        }}
-        disabled={!agent.active || agentPolicy?.supports_agentless === true}
-        key="reassignPolicy"
-      >
-        <FormattedMessage
-          id="xpack.fleet.agentList.reassignActionText"
-          defaultMessage="Assign to new policy"
-        />
-      </EuiContextMenuItem>,
-      <EuiContextMenuItem
-        key="agentUnenrollBtn"
-        disabled={!agent.active || agentPolicy?.supports_agentless === true}
-        icon="trash"
-        onClick={() => {
-          onUnenrollClick();
-        }}
-      >
-        {isUnenrolling ? (
+    // Request diagnostics
+    if (authz.fleet.readAgents) {
+      maintenanceChildren.push({
+        id: 'diagnostics',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.agentList.diagnosticsOneButton"
+            defaultMessage="Request diagnostics .zip"
+          />
+        ),
+        icon: 'download',
+        disabled: !isAgentRequestDiagnosticsSupported(agent),
+        onClick: () => {
+          onRequestDiagnosticsClick();
+        },
+        'data-test-subj': 'requestAgentDiagnosticsBtn',
+      });
+    }
+
+    if (maintenanceChildren.length > 0) {
+      items.push({
+        id: 'maintenance',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.agentList.maintenanceAndDiagnostics"
+            defaultMessage="Maintenance and diagnostics"
+          />
+        ),
+        panelTitle: 'Maintenance and diagnostics',
+        children: maintenanceChildren,
+      });
+    }
+
+    // Security and removal submenu
+    const securityChildren: MenuItem[] = [];
+
+    // Remove root privilege
+    if (
+      authz.fleet.allAgents &&
+      isAgentEligibleForPrivilegeLevelChange(agent, agentPolicy) &&
+      agentPrivilegeLevelChangeEnabled
+    ) {
+      securityChildren.push({
+        id: 'remove-root',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.agentList.changeAgentPrivilegeLevelActionText"
+            defaultMessage="Remove root privilege"
+          />
+        ),
+        icon: 'lock',
+        disabled: !agent.active,
+        onClick: () => {
+          onChangeAgentPrivilegeLevelClick();
+        },
+        'data-test-subj': 'changeAgentPrivilegeLevelMenuItem',
+      });
+    }
+
+    // Unenroll agent
+    if (authz.fleet.allAgents && agentPolicy?.is_managed === false) {
+      securityChildren.push({
+        id: 'unenroll',
+        name: isUnenrolling ? (
           <FormattedMessage
             id="xpack.fleet.agentList.forceUnenrollOneButton"
             defaultMessage="Force unenroll"
@@ -131,111 +247,76 @@ export const TableRowActions: React.FunctionComponent<{
             id="xpack.fleet.agentList.unenrollOneButton"
             defaultMessage="Unenroll agent"
           />
-        )}
-      </EuiContextMenuItem>,
-      <EuiContextMenuItem
-        key="agentUpgradeBtn"
-        icon="refresh"
-        disabled={!isAgentUpgradeable(agent) || agentPolicy?.supports_agentless === true}
-        onClick={() => {
-          onUpgradeClick();
-        }}
-        data-test-subj="upgradeBtn"
-      >
-        <FormattedMessage
-          id="xpack.fleet.agentList.upgradeOneButton"
-          defaultMessage="Upgrade agent"
-        />
-      </EuiContextMenuItem>
-    );
+        ),
+        icon: 'trash',
+        disabled: !agent.active || agentPolicy?.supports_agentless === true,
+        onClick: () => {
+          onUnenrollClick();
+        },
+        'data-test-subj': 'agentUnenrollBtn',
+      });
 
-    if (authz.fleet.allAgents && isStuckInUpdating(agent)) {
-      menuItems.push(
-        <EuiContextMenuItem
-          key="agentRestartUpgradeBtn"
-          icon="refresh"
-          onClick={() => {
-            onUpgradeClick();
-          }}
-          data-test-subj="restartUpgradeBtn"
-        >
-          <FormattedMessage
-            id="xpack.fleet.agentList.restartUpgradeOneButton"
-            defaultMessage="Restart upgrade"
-          />
-        </EuiContextMenuItem>
-      );
-    }
-
-    if (authz.fleet.allAgents && agent.policy_id && !agentPolicy?.supports_agentless) {
-      menuItems.push(
-        <EuiContextMenuItem
-          icon="minusInCircle"
-          onClick={() => {
+      // Uninstall agent
+      if (authz.fleet.allAgents && agent.policy_id && !agentPolicy?.supports_agentless) {
+        securityChildren.push({
+          id: 'uninstall',
+          name: (
+            <FormattedMessage
+              id="xpack.fleet.agentList.getUninstallCommand"
+              defaultMessage="Uninstall agent"
+            />
+          ),
+          icon: 'minusInCircle',
+          disabled: !agent.active,
+          onClick: () => {
             onGetUninstallCommandClick();
-            setIsMenuOpen(false);
-          }}
-          disabled={!agent.active}
-          key="getUninstallCommand"
-          data-test-subj="uninstallAgentMenuItem"
-        >
-          <FormattedMessage
-            id="xpack.fleet.agentList.getUninstallCommand"
-            defaultMessage="Uninstall agent"
-          />
-        </EuiContextMenuItem>
-      );
+          },
+          'data-test-subj': 'uninstallAgentMenuItem',
+        });
+      }
     }
-  }
 
-  if (
-    authz.fleet.allAgents &&
-    isAgentEligibleForPrivilegeLevelChange(agent, agentPolicy) &&
-    agentPrivilegeLevelChangeEnabled
-  ) {
-    menuItems.push(
-      <EuiContextMenuItem
-        icon="lock"
-        onClick={() => {
-          onChangeAgentPrivilegeLevelClick();
-          setIsMenuOpen(false);
-        }}
-        disabled={!agent.active}
-        key="changeAgentPrivilegeLevel"
-        data-test-subj="changeAgentPrivilegeLevelMenuItem"
-      >
-        <FormattedMessage
-          id="xpack.fleet.agentList.changeAgentPrivilegeLevelActionText"
-          defaultMessage="Remove root privilege"
-        />
-      </EuiContextMenuItem>
-    );
-  }
+    if (securityChildren.length > 0) {
+      items.push({
+        id: 'security',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.agentList.securityAndRemoval"
+            defaultMessage="Security and removal"
+          />
+        ),
+        panelTitle: 'Security and removal',
+        children: securityChildren,
+      });
+    }
 
-  if (authz.fleet.readAgents) {
-    menuItems.push(
-      <EuiContextMenuItem
-        key="requestAgentDiagnosticsBtn"
-        icon="download"
-        data-test-subj="requestAgentDiagnosticsBtn"
-        disabled={!isAgentRequestDiagnosticsSupported(agent)}
-        onClick={() => {
-          onRequestDiagnosticsClick();
-        }}
-      >
-        <FormattedMessage
-          id="xpack.fleet.agentList.diagnosticsOneButton"
-          defaultMessage="Request diagnostics .zip"
-        />
-      </EuiContextMenuItem>
-    );
-  }
+    return items;
+  }, [
+    agent,
+    agentPolicy,
+    authz.fleet.allAgents,
+    authz.fleet.readAgents,
+    isAgentUpdating,
+    isUnenrolling,
+    agentPrivilegeLevelChangeEnabled,
+    licenseService,
+    getHref,
+    onAddRemoveTagsClick,
+    onReassignClick,
+    onUpgradeClick,
+    onMigrateAgentClick,
+    onRequestDiagnosticsClick,
+    onChangeAgentPrivilegeLevelClick,
+    onUnenrollClick,
+    onGetUninstallCommandClick,
+  ]);
 
   return (
-    <ContextMenuActions
-      isOpen={isMenuOpen}
-      onChange={(isOpen) => setIsMenuOpen(isOpen)}
+    <HierarchicalMenu
       items={menuItems}
+      isOpen={isMenuOpen}
+      onToggle={setIsMenuOpen}
+      data-test-subj="agentActionsBtn"
     />
   );
 };
