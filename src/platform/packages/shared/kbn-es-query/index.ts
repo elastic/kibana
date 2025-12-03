@@ -146,12 +146,3 @@ export {
 } from './src/utils';
 
 export type { ExecutionContextSearch } from './src/expressions/types';
-
-// As Code Filters
-export {
-  // Conversion utilities
-  fromStoredFilter,
-  fromStoredFilters,
-  toStoredFilter,
-  toStoredFilters,
-} from './src/as_code_filters';

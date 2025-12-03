@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AsCodeFilter } from '@kbn/es-query-server';
+import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
 import { FilterStateStore } from '@kbn/es-query-constants';
 import { fromStoredFilter } from './from_stored_filter';
 import {
@@ -16,7 +16,7 @@ import {
   isDSLFilter,
   isRangeConditionFilter,
 } from './type_guards';
-import { spatialFilterFixture } from '../__fixtures__/spatial_filter';
+import { spatialFilterFixture } from './__fixtures__/spatial_filter';
 
 describe('fromStoredFilter', () => {
   describe('Input validation', () => {

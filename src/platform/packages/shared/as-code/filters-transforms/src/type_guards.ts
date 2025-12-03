@@ -16,9 +16,9 @@ import type {
   AsCodeConditionFilter,
   AsCodeGroupFilter,
   AsCodeDSLFilter,
-} from '@kbn/es-query-server';
+} from '@kbn/as-code-filters-schema';
+import { FILTERS } from '@kbn/es-query';
 import type { StoredFilter } from './types';
-import { FILTERS } from '../filters';
 
 /**
  * Legacy filter interface for legacy Kibana filter format

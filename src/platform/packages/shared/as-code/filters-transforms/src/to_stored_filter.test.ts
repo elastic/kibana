@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AsCodeFilter } from '@kbn/es-query-server';
+import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
 import type { StoredFilter } from './types';
 import { toStoredFilter } from './to_stored_filter';
 import { fromStoredFilter } from './from_stored_filter';
 import { isRangeConditionFilter } from './type_guards';
-import { FilterStateStore } from '../..';
-import { spatialFilterFixture } from '../__fixtures__/spatial_filter';
+import { FilterStateStore } from '@kbn/es-query-constants';
+import { spatialFilterFixture } from './__fixtures__/spatial_filter';
 
 describe('toStoredFilter', () => {
   describe('main conversion function', () => {

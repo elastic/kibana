@@ -16,12 +16,12 @@ import type {
   AsCodeConditionFilter,
   AsCodeGroupFilter,
   AsCodeDSLFilter,
-} from '@kbn/es-query-server';
+} from '@kbn/as-code-filters-schema';
 import type { Logger } from '@kbn/logging';
 import { ASCODE_FILTER_OPERATOR } from '@kbn/es-query-constants';
+import { FILTERS } from '@kbn/es-query';
 import { FilterConversionError } from './errors';
 import type { StoredFilter } from './types';
-import { FILTERS } from '../filters';
 import {
   isConditionFilter,
   isGroupFilter,

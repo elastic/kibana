@@ -11,7 +11,7 @@ import type {
   AsCodeConditionFilter,
   AsCodeGroupFilter,
   AsCodeDSLFilter,
-} from '@kbn/es-query-server';
+} from '@kbn/as-code-filters-schema';
 import { isConditionFilter, isGroupFilter, isDSLFilter, isNestedFilterGroup } from './type_guards';
 
 describe('Type Guards', () => {
