@@ -68,8 +68,7 @@ export const createAlertAttachmentType = (): AttachmentTypeDefinition => {
       SECURITY_ALERTS_TOOL_ID,
       platformCoreTools.cases,
       platformCoreTools.generateEsql,
-      // TODO use once product_documentation tool is merged
-      // 'platformCoreTools.productDocumentation',
+      platformCoreTools.productDocumentation,
     ],
     getAgentDescription: () => {
       const description = `You have access to security alert data. To provide a comprehensive analysis, you MUST gather enriched context by querying for related information.
