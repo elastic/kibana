@@ -87,7 +87,10 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       setPendingMessage(message);
       removeError();
       messageControllerRef.current = new AbortController();
-      conversationActions.addOptimisticRound({ userMessage: message });
+      conversationActions.addOptimisticRound({
+        userMessage: message,
+        attachments: attachments ?? [],
+      });
       if (isNewConversation) {
         if (!agentId) {
           throw new Error('Agent id must be defined for a new conversation');
