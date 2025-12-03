@@ -8,6 +8,7 @@
 import { getGeoPointSuggestion, buildSchemaSavePayload } from './utils';
 import type { SchemaEditorField, SchemaField } from './types';
 import type { Streams } from '@kbn/streams-schema';
+import { omit } from 'lodash';
 
 describe('buildSchemaSavePayload', () => {
   it('builds payload for wired streams by updating wired.fields', () => {
@@ -41,6 +42,7 @@ describe('buildSchemaSavePayload', () => {
     expect(payload).toEqual({
       ingest: {
         ...mockDefinition.stream.ingest,
+        processing: omit(mockDefinition.stream.ingest.processing, 'updated_at'),
         wired: {
           ...mockDefinition.stream.ingest.wired,
           fields: {
@@ -75,6 +77,7 @@ describe('buildSchemaSavePayload', () => {
     expect(payload).toEqual({
       ingest: {
         ...mockDefinition.stream.ingest,
+        processing: omit(mockDefinition.stream.ingest.processing, 'updated_at'),
         classic: {
           ...mockDefinition.stream.ingest.classic,
           field_overrides: {
