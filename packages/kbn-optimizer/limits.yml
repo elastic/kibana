@@ -122,7 +122,7 @@ pageLoadAssetSize:
   observabilityLogsExplorer: 4918
   observabilityOnboarding: 12872
   observabilityShared: 75115
-  onechat: 22883
+  onechat: 25223
   osquery: 47422
   painlessLab: 6299
   presentationPanel: 11418
@@ -156,7 +156,7 @@ pageLoadAssetSize:
   searchQueryRules: 6689
   searchSynonyms: 6371
   security: 79627
-  securitySolution: 119378
+  securitySolution: 186285
   securitySolutionEss: 43319
   securitySolutionServerless: 62689
   serverless: 7852
@@ -203,5 +203,6 @@ pageLoadAssetSize:
   visTypeXy: 32342
   visualizations: 38375
   watcher: 10485
-  workflowsManagement: 7163
+  workflowsExtensions: 2554
+  workflowsManagement: 8545
   workplaceAIApp: 6454
