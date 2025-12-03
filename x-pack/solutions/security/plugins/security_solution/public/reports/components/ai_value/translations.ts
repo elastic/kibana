@@ -207,6 +207,13 @@ export const CHANGE_RATE = i18n.translate('xpack.securitySolution.reports.aiValu
   defaultMessage: 'Change rate in advanced settings',
 });
 
+export const CHANGE_RATE_EXPORT_MODE = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.exportMode.changeRate',
+  {
+    defaultMessage: 'Value report rates configured in advanced settings.',
+  }
+);
+
 export const EDIT_TITLE = i18n.translate('xpack.securitySolution.reports.aiValue.editTitle', {
   defaultMessage: 'Edit title inline',
 });
