@@ -384,9 +384,7 @@ export const canDataSourceTypeBeOutdated = (
     case 'latest-samples':
     case 'kql-samples':
       return true;
-    case 'custom-samples':
-      return false;
     default:
-      throw new Error(`Invalid data source type: ${dataSourceType}`);
+      return false;
   }
 };
