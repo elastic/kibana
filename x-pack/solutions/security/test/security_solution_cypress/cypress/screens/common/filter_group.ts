@@ -15,7 +15,7 @@ export const OPTION_LIST_LABELS = '.controlPanel--label';
 
 export const OPTION_LIST_VALUES = (idx: number) => `[data-test-subj="optionsList-control-${idx}"]`;
 
-export const OPTION_LIST_CLEAR_BTN = '.presentationUtil__floatingActions [aria-label="Clear"]';
+export const OPTION_LIST_CLEAR_BTN = '[data-test-subj$="clearControl"]';
 
 export const OPTION_LISTS_LOADING = '.optionsList--filterBtnWrapper .euiLoadingSpinner';
 
