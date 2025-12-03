@@ -25,9 +25,13 @@ export const fullWidthAndHeightStyles = css`
 
 const ROUNDED_BORDER_RADIUS = '6px';
 export const ROUNDED_BORDER_RADIUS_LARGE = '12px';
+const ROUNDED_BORDER_RADIUS_EXTRA_LARGE = '16px';
 
 export const roundedBorderRadiusStyles = css`
   border-radius: ${ROUNDED_BORDER_RADIUS};
+`;
+export const borderRadiusXlStyles = css`
+  border-radius: ${ROUNDED_BORDER_RADIUS_EXTRA_LARGE};
 `;
 
 export const conversationBackgroundStyles = (euiTheme: EuiThemeComputed<{}>) => css`
