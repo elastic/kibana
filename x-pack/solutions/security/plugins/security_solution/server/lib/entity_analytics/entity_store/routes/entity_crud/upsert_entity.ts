@@ -21,8 +21,8 @@ import {
   DocumentVersionConflictError,
 } from '../../errors';
 import { CapabilityNotEnabledError } from '../../errors/capability_not_enabled_error';
-import type { ITelemetryEventsSender } from '../../../telemetry/sender';
-import { ENTITY_STORE_API_CALL_EVENT } from '../../../telemetry/event_based/events';
+import { ENTITY_STORE_API_CALL_EVENT } from '../../../../telemetry/event_based/events';
+import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
 
 export const upsertEntity = (
   router: EntityAnalyticsRoutesDeps['router'],

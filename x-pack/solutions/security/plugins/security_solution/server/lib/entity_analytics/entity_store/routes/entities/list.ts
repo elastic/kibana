@@ -25,8 +25,8 @@ import type { ListEntitiesResponse } from '../../../../../../common/api/entity_a
 import { ListEntitiesRequestQuery } from '../../../../../../common/api/entity_analytics/entity_store/entities/list_entities.gen';
 import { APP_ID } from '../../../../../../common';
 import { API_VERSIONS } from '../../../../../../common/entity_analytics/constants';
-import type { ITelemetryEventsSender } from '../../../telemetry/sender';
-import { ENTITY_STORE_API_CALL_EVENT } from '../../../telemetry/event_based/events';
+import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
+import { ENTITY_STORE_API_CALL_EVENT } from '../../../../telemetry/event_based/events';
 
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 
