@@ -23,10 +23,7 @@ pageLoadAssetSize:
   contentConnectors: 33014
   contentManagement: 8350
   controls: 12234
-
-
   core: 564938
-
   cps: 5918
   crossClusterReplication: 12662
   customIntegrations: 11715
@@ -160,10 +157,7 @@ pageLoadAssetSize:
   searchQueryRules: 6689
   searchSynonyms: 6371
   security: 79627
-
-
   securitySolution: 187862
-
   securitySolutionEss: 38689
   securitySolutionServerless: 52082
   serverless: 7451
