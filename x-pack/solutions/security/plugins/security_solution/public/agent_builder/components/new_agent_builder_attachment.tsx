@@ -9,6 +9,7 @@ import type { EuiButtonColor, IconType } from '@elastic/eui';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import React, { memo } from 'react';
 import type { EuiButtonEmptySizes } from '@elastic/eui/src/components/button/button_empty/button_empty';
+import { onechatIconType } from '@kbn/onechat-plugin/public';
 import * as i18n from './translations';
 
 export interface NewAgentBuilderAttachmentProps {
@@ -41,7 +42,7 @@ export interface NewAgentBuilderAttachmentProps {
  */
 export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment({
   color = 'primary',
-  iconType = 'machineLearningApp',
+  iconType = onechatIconType,
   onClick,
   size = 'm',
   text = i18n.VIEW_IN_AGENT_BUILDER,
