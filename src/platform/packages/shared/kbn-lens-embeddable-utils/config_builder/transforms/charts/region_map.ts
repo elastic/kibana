@@ -116,7 +116,7 @@ function getRegionMapRegion(
     ...(isTextBasedLayer(layer)
       ? getValueApiColumn(visualization.regionAccessor, layer)
       : (operationFromColumn(visualization.regionAccessor, layer) as LensApiBucketOperations)),
-    ...(visualization.emsLayerId
+    ...(visualization.emsLayerId && visualization.emsField
       ? { ems: { boundaries: visualization.emsLayerId, join: visualization.emsField } }
       : {}),
   };

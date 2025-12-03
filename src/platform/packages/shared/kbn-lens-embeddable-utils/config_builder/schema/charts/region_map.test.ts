@@ -113,27 +113,6 @@ describe('Region Map Schema', () => {
       const validated = regionMapStateSchema.validate(input);
       expect(validated).toEqual({ ...defaultValues, ...input });
     });
-
-    it('validates with ems boundaries', () => {
-      const input: RegionMapWithoutDefaultsConfig = {
-        ...baseRegionMapConfig,
-        metric: {
-          operation: 'average',
-          field: 'bytes',
-        },
-        region: {
-          operation: 'terms',
-          fields: ['location'],
-          size: 5,
-          ems: {
-            boundaries: 'world_countries',
-          },
-        },
-      };
-
-      const validated = regionMapStateSchema.validate(input);
-      expect(validated).toEqual({ ...defaultValues, ...input });
-    });
   });
 
   describe('validation errors', () => {

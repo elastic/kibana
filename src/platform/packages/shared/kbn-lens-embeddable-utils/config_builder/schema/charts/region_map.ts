@@ -30,7 +30,7 @@ const regionMapStateRegionOptionsSchema = schema.object({
   ems: schema.maybe(
     schema.object({
       boundaries: schema.string({ meta: { description: 'EMS boundaries' } }),
-      join: schema.maybe(schema.string({ meta: { description: 'EMS join field' } })),
+      join: schema.string({ meta: { description: 'EMS join field' } }),
     })
   ),
 });
