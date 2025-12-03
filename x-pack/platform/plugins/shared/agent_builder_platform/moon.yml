@@ -34,6 +34,8 @@ dependsOn:
   - '@kbn/esql-validation-autocomplete'
   - '@kbn/inference-common'
   - '@kbn/llm-tasks-plugin'
+  - '@kbn/i18n'
+  - '@kbn/onechat-browser'
 tags:
   - plugin
   - prod
