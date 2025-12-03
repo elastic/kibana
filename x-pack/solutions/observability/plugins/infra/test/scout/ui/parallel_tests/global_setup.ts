@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Feature } from '@kbn/streams-schema';
+import { globalSetupHook } from '@kbn/scout-oblt';
 
-export const useStreamFeatureEventsData = (feature: Feature) => {
-  return [];
-};
+globalSetupHook('Ingest data to Elasticsearch', { tag: ['@ess', '@svlOblt'] }, async ({}) => {
+  return;
+});
