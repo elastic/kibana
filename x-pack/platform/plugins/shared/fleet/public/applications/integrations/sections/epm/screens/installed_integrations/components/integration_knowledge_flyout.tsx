@@ -62,6 +62,11 @@ export const IntegrationKnowledgeFlyout: React.FunctionComponent<{
         if (res.error) {
           throw res.error;
         }
+        notifications.toasts.addSuccess({
+          title: i18n.translate('xpack.fleet.integrationKnowledgeFlyout.successUpdatingSettings', {
+            defaultMessage: 'Integration knowledge setting updated successfully',
+          }),
+        });
       } catch (error) {
         setIntegrationKnowledgeSetting(!integrationKnowledgeEnabled);
         notifications.toasts.addError(error, {
