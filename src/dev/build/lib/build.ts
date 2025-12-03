@@ -11,6 +11,7 @@ import chalk from 'chalk';
 
 import type { Config } from './config';
 import type { Platform } from './platform';
+import { dashSuffix } from './util';
 
 export class Build {
   private buildDesc: string = '';
@@ -27,7 +28,9 @@ export class Build {
     return this.config.resolveFromRepo(
       'build',
       'default',
-      `kibana${platform.getVariantSuffix()}${platform.getSolutionSuffix()}-${this.config.getBuildVersion()}-${platform.getBuildName()}`,
+      `kibana${dashSuffix(platform.getVariant())}${dashSuffix(
+        platform.getSolutionArtifact()
+      )}-${this.config.getBuildVersion()}-${platform.getBuildName()}`,
       ...args
     );
   }
@@ -36,16 +39,16 @@ export class Build {
     const ext = platform.isWindows() ? 'zip' : 'tar.gz';
     return this.config.resolveFromRepo(
       'target',
-      `${
-        this.name
-      }${platform.getVariantSuffix()}${platform.getSolutionSuffix()}-${this.config.getBuildVersion()}-${platform.getBuildName()}.${ext}`
+      `${this.name}${dashSuffix(platform.getVariant())}${dashSuffix(
+        platform.getSolutionArtifact()
+      )}-${this.config.getBuildVersion()}-${platform.getBuildName()}.${ext}`
     );
   }
 
   getRootDirectory(platform: Platform) {
-    return `${
-      this.name
-    }${platform.getVariantSuffix()}${platform.getSolutionSuffix()}-${this.config.getBuildVersion()}`;
+    return `${this.name}${dashSuffix(platform.getVariant())}${dashSuffix(
+      platform.getSolutionArtifact()
+    )}-${this.config.getBuildVersion()}`;
   }
 
   getName() {

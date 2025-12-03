@@ -8,6 +8,7 @@
  */
 
 import type { KibanaSolution } from '@kbn/projects-solutions-groups';
+import { dashSuffix } from './util';
 
 export type PlatformName = 'win32' | 'darwin' | 'linux';
 export type PlatformArchitecture = 'x64' | 'arm64';
@@ -55,16 +56,12 @@ export class Platform {
     return this.variant;
   }
 
-  getVariantSuffix() {
-    return this.variant ? `-${this.variant}` : '';
-  }
-
   getSolutionId() {
     return this.solution?.id;
   }
 
-  getSolutionSuffix() {
-    return this.solution ? `-${this.solution.artifact}` : '';
+  getSolutionArtifact() {
+    return this.solution?.artifact;
   }
 
   isWindows() {
@@ -84,7 +81,9 @@ export class Platform {
   }
 
   toString() {
-    return `${this.name}-${this.architecture}${this.getVariantSuffix()}${this.getSolutionSuffix()}`;
+    return `${this.name}-${this.architecture}${dashSuffix(this.getVariant())}${dashSuffix(
+      this.getSolutionArtifact()
+    )}`;
   }
 }
 

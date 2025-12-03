@@ -73,24 +73,15 @@ describe('getSolutionId()', () => {
   });
 });
 
-describe('getVariantSuffix()', () => {
-  it('returns the variant suffix or empty string', () => {
-    expect(new Platform('linux', 'x64', 'test').getVariantSuffix()).toBe('');
-    expect(new Platform('linux', 'x64', 'test', 'serverless').getVariantSuffix()).toBe(
-      '-serverless'
-    );
-  });
-});
-
-describe('getSolutionSuffix()', () => {
-  it('returns the solution suffix or empty string', () => {
-    expect(new Platform('linux', 'x64', 'test').getSolutionSuffix()).toBe('');
+describe('getSolutionArtifact()', () => {
+  it('returns the solution artifact or undefined', () => {
+    expect(new Platform('linux', 'x64', 'test').getSolutionArtifact()).toBeUndefined();
     expect(
       new Platform('linux', 'x64', 'test', 'serverless', {
         id: 'search',
         artifact: 'elasticsearch',
-      }).getSolutionSuffix()
-    ).toBe('-elasticsearch');
+      }).getSolutionArtifact()
+    ).toBe('elasticsearch');
   });
 });
 
