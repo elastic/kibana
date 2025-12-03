@@ -10,19 +10,19 @@
 import { REPO_ROOT } from '@kbn/repo-info';
 import { removePackagesFromPackageMap } from '@kbn/repo-packages';
 import { KIBANA_SOLUTIONS } from '@kbn/projects-solutions-groups';
-import type { KibanaSolution } from '@kbn/projects-solutions-groups';
 import { resolve, join } from 'path';
 import { scanCopy, deleteAll, copyAll } from '../lib';
-import type { Task, Platform } from '../lib';
+import type { Task, Platform, Solution } from '../lib';
 import { getNodeDownloadInfo } from './nodejs';
 
 export const CreateArchivesSources: Task = {
   description: 'Creating platform-specific archive source directories',
   async run(config, log, build) {
-    async function removeSolutions(solutionsToRemove: KibanaSolution[], platform: Platform) {
+    async function removeSolutions(solutionsToRemove: Solution[], platform: Platform) {
       const solutionPluginNames: string[] = [];
 
       for (const solution of solutionsToRemove) {
+        if (!solution) continue;
         const solutionPlugins = config.getPrivateSolutionPackagesFromRepo(solution);
         solutionPluginNames.push(...solutionPlugins.map((p) => p.name));
       }
@@ -81,7 +81,7 @@ export const CreateArchivesSources: Task = {
 
           // Copy solution config.yml
           const WORKPLACE_AI_CONFIGS = ['serverless.workplaceai.yml'];
-          const SEARCH_CONFIGS = ['serverless.es.yml'];
+          const ELASTICSEARCH_CONFIGS = ['serverless.es.yml'];
           const OBSERVABILITY_CONFIGS = [
             'serverless.oblt.yml',
             'serverless.oblt.{logs_essentials,complete}.yml',
@@ -95,8 +95,8 @@ export const CreateArchivesSources: Task = {
             case 'workplaceai':
               configFiles.push(...WORKPLACE_AI_CONFIGS);
               break;
-            case 'search':
-              configFiles.push(...SEARCH_CONFIGS);
+            case 'elasticsearch':
+              configFiles.push(...ELASTICSEARCH_CONFIGS);
               break;
             case 'observability':
               configFiles.push(...OBSERVABILITY_CONFIGS);
@@ -107,7 +107,7 @@ export const CreateArchivesSources: Task = {
             default:
               configFiles.push(
                 ...WORKPLACE_AI_CONFIGS,
-                ...SEARCH_CONFIGS,
+                ...ELASTICSEARCH_CONFIGS,
                 ...OBSERVABILITY_CONFIGS,
                 ...SECURITY_CONFIGS
               );
@@ -123,8 +123,11 @@ export const CreateArchivesSources: Task = {
 
           // Remove non-target solutions
           const targetSolution = platform.getSolution();
-          if (targetSolution && KIBANA_SOLUTIONS.includes(targetSolution)) {
-            const solutionsToRemove = KIBANA_SOLUTIONS.filter((s) => s !== targetSolution);
+          const ARTIFACT_SOLUTIONS = KIBANA_SOLUTIONS.map((s) =>
+            s === 'search' ? 'elasticsearch' : s
+          );
+          if (targetSolution && ARTIFACT_SOLUTIONS.includes(targetSolution)) {
+            const solutionsToRemove = ARTIFACT_SOLUTIONS.filter((s) => s !== targetSolution);
             await removeSolutions(solutionsToRemove, platform);
           }
         } else if (config.isRelease) {
