@@ -25,6 +25,11 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getOverrideConfirmation } from './modals/override_warning_modal';
 import { IndexEditorErrors } from '../types';
 
+// Mock child components
+jest.mock('./empty_prompt', () => ({
+  EmptyPrompt: () => <div>EmptyPrompt</div>,
+}));
+
 // Mock hooks and modules
 jest.mock('@kbn/file-upload');
 jest.mock('@kbn/kibana-react-plugin/public');
