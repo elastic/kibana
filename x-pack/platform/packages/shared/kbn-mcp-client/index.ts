@@ -17,4 +17,7 @@ export type {
   ListToolsResponse,
   Tool,
   ToolProviderMetadata,
+  TextPart,
+  NonTextPart,
+  McpClientOptions,
 } from './mcp/src/types';

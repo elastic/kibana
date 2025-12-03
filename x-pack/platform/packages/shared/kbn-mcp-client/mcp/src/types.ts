@@ -5,12 +5,19 @@
  * 2.0.
  */
 
+/**
+ * Details about the MCP client.
+ */
 export interface ClientDetails {
   name: string;
   version: string;
   url: string;
 }
 
+/**
+ * Options for the MCP client.
+ * These map to reconnection options for the StreamableHTTPClientTransport.
+ */
 export interface McpClientOptions {
   headers?: Record<string, string>;
   maxRetries?: number;
@@ -19,16 +26,25 @@ export interface McpClientOptions {
   maxReconnectionDelay?: number;
 }
 
+/**
+ * Parameters for calling a tool on the MCP client.
+ */
 export interface CallToolParams {
   name: string;
   arguments?: Record<string, unknown>;
 }
 
+/**
+ * Non-text content as part of a tool call response.
+ */
 export interface NonTextPart {
   type: string;
   [key: string]: unknown;
 }
 
+/**
+ * A text content as part of a tool call response.
+ */
 export interface TextPart {
   type: 'text';
   text: string;
@@ -46,6 +62,9 @@ export function isTextPart(part: ContentPart | null | undefined): part is TextPa
   );
 }
 
+/**
+ * Response from calling a tool on the MCP client.
+ */
 export interface CallToolResponse {
   content: ContentPart[];
   /**
@@ -82,6 +101,9 @@ export interface ToolProviderMetadata {
   description?: string;
 }
 
+/**
+ * A tool available on the MCP client.
+ */
 export interface Tool {
   name: string;
   description?: string;
@@ -93,6 +115,12 @@ export interface Tool {
   provider?: ToolProviderMetadata;
 }
 
+/**
+ * Response from listing the tools available on the MCP client.
+ */
 export interface ListToolsResponse {
+  /**
+   * The tools available on the MCP client.
+   */
   tools: Tool[];
 }

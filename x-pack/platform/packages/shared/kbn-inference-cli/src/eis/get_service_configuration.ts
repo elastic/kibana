@@ -89,6 +89,6 @@ export async function getServiceConfigurationFromYaml<T>(
 
   return {
     config,
-    version: versionMap[versionKey],
+    version: '01d1b0c3dd7d',
   };
 }
