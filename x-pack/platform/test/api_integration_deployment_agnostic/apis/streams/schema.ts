@@ -69,7 +69,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
 
           await apiClient
-            .fetch('PUT /api/streams/{name}', {
+            .fetch('PUT /api/streams/{name} 2023-10-31', {
               params: {
                 path: { name: CLASSIC_STREAM_NAME },
                 body: {
