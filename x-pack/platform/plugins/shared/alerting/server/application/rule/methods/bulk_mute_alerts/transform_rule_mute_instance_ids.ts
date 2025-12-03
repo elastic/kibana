@@ -10,7 +10,7 @@ import type { UpdateRuleSoParams } from '../../../../data/rule/methods/bulk_upda
 import type { RawRule } from '../../../../saved_objects/schemas/raw_rule';
 import type { BulkMuteAlertsParams } from './types';
 
-export const transformRequestToRuleAttributes = ({
+export const transformMuteRequestToRuleAttributes = ({
   paramRules,
   savedRules,
 }: {
