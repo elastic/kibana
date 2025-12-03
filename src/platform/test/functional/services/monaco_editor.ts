@@ -276,6 +276,19 @@ export class MonacoEditorService extends FtrService {
 
   // --- Methods that accept CSS selectors (for editors without data-test-subj) ---
 
+  public async waitCodeEditorReadyByCssSelector(cssSelector: string): Promise<void> {
+    await this.retry.waitFor('editor ready', async () => {
+      const isReady = await this.browser.execute((selector: string) => {
+        const container = document.querySelector(selector);
+        const editor = window.MonacoEnvironment?.monaco?.editor
+          ?.getEditors()
+          ?.find((e: any) => container?.contains(e.getDomNode()));
+        return !!editor;
+      }, cssSelector);
+      return isReady;
+    });
+  }
+
   public async focusCodeEditorByCssSelector(cssSelector: string) {
     await this.browser.execute((selector: string) => {
       const container = document.querySelector(selector);
@@ -327,6 +340,7 @@ export class MonacoEditorService extends FtrService {
   }
 
   public async setCodeEditorValueByCssSelector(cssSelector: string, value: string) {
+    await this.waitCodeEditorReadyByCssSelector(cssSelector);
     await this.browser.execute(
       (selector: string, text: string) => {
         const container = document.querySelector(selector);
