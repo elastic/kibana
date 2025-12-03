@@ -20,6 +20,7 @@ import {
   formatValueListMetaData,
   createUsageCounterLabel,
   newTelemetryLogger,
+  withErrorMessage,
 } from '../helpers';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
@@ -160,7 +161,7 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
         await taskMetricsService.end(trace);
         return trustedApplicationsCount + endpointExceptionsCount + endpointEventFiltersCount;
       } catch (error) {
-        log.warn('Error running security lists task', { error, error_message: error.message });
+        log.warn('Error running security lists task', withErrorMessage(error));
         await taskMetricsService.end(trace, error);
         return 0;
       }

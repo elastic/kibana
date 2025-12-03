@@ -21,7 +21,7 @@ import { type Nullable, TelemetryChannel, TelemetryCounter } from './types';
 import * as collections from './collections_helpers';
 import { CachedSubject, retryOnError$ } from './rxjs_helpers';
 import { SenderUtils } from './sender_helpers';
-import { copyLicenseFields, newTelemetryLogger } from './helpers';
+import { copyLicenseFields, newTelemetryLogger, withErrorMessage } from './helpers';
 import { type TelemetryLogger } from './telemetry_logger';
 
 export const DEFAULT_QUEUE_CONFIG: QueueConfig = {
@@ -133,10 +133,7 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
           }
         },
         error: (error) => {
-          this.logger.warn('Unexpected error sending events to channel', {
-            error,
-            error_message: error.message,
-          });
+          this.logger.warn('Unexpected error sending events to channel', withErrorMessage(error));
         },
         complete: () => {
           this.logger.debug('Shutting down');
@@ -382,7 +379,7 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
             channel
           );
 
-          this.logger.warn('Runtime error', { error, error_message: error.message });
+          this.logger.warn('Runtime error', withErrorMessage(error));
           throw newFailure(`Error posting events: ${error}`, channel, events.length);
         });
     } catch (err: unknown) {

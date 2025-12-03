@@ -23,7 +23,12 @@ import type { ExperimentalFeatures } from '../../../common';
 import type { ITelemetryReceiver } from './receiver';
 import { copyAllowlistedFields, filterList } from './filterlists';
 import { createTelemetryTaskConfigs } from './tasks';
-import { copyLicenseFields, createUsageCounterLabel, newTelemetryLogger } from './helpers';
+import {
+  copyLicenseFields,
+  createUsageCounterLabel,
+  newTelemetryLogger,
+  withErrorMessage,
+} from './helpers';
 import { type TelemetryLogger } from './telemetry_logger';
 import type { TelemetryChannel, TelemetryEvent } from './types';
 import type { SecurityTelemetryTaskConfig } from './task';
@@ -284,7 +289,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
 
       return false;
     } catch (error) {
-      this.logger.warn('Error pinging telemetry services', { error, error_message: error.message });
+      this.logger.warn('Error pinging telemetry services', withErrorMessage(error));
 
       return false;
     }
@@ -348,10 +353,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
         axiosInstance
       );
     } catch (error) {
-      this.logger.warn('Error sending telemetry events data', {
-        error,
-        error_message: error.message,
-      });
+      this.logger.warn('Error sending telemetry events data', withErrorMessage(error));
       this.queue = [];
     }
     this.isSending = false;
@@ -398,10 +400,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
         axiosInstance
       );
     } catch (error) {
-      this.logger.warn('Error sending telemetry events data', {
-        error,
-        error_message: error.message,
-      });
+      this.logger.warn('Error sending telemetry events data', withErrorMessage(error));
     }
   }
 
@@ -502,7 +501,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
       });
       this.logger.debug('Events sent!. Response', { status: resp.status } as LogMeta);
     } catch (error) {
-      this.logger.warn('Error sending events', { error, error_message: error.message });
+      this.logger.warn('Error sending events', withErrorMessage(error));
       const errorStatus = error?.response?.status;
       if (errorStatus !== undefined && errorStatus !== null) {
         this.telemetryUsageCounter?.incrementCounter({
