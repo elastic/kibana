@@ -140,7 +140,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
   ],
   phoenixClient: [
     async (
-      { log, connector, evaluationConnector, repetitions, esClient, reportModelScore },
+      { log, connector, evaluationConnector, repetitions, evaluationsEsClient, reportModelScore },
       use
     ) => {
       const config = getPhoenixConfig();
@@ -188,7 +188,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       });
 
       try {
-        await exportEvaluations(report, esClient, log);
+        await exportEvaluations(report, evaluationsEsClient, log);
       } catch (error) {
         log.error(
           new Error(
@@ -199,7 +199,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         throw error;
       }
 
-      const scoreRepository = new EvaluationScoreRepository(esClient, log);
+      const scoreRepository = new EvaluationScoreRepository(evaluationsEsClient, log);
       await reportModelScore(scoreRepository, report.runId, log);
     },
     {
@@ -263,12 +263,27 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
   ],
   traceEsClient: [
     async ({ esClient }, use) => {
-      const traceEsClient = process.env.TRACING_ES_URL
+      const esUrl = process.env.TRACING_ES_URL;
+      const traceEsClient = esUrl
         ? createEsClientForTesting({
-            esUrl: process.env.TRACING_ES_URL,
+            esUrl,
+            isCloud: esUrl.includes('elastic-cloud.com'),
           })
         : esClient;
       await use(traceEsClient);
+    },
+    { scope: 'worker' },
+  ],
+  evaluationsEsClient: [
+    async ({ esClient }, use) => {
+      const esUrl = process.env.EVALUATIONS_ES_URL;
+      const evaluationsEsClient = esUrl
+        ? createEsClientForTesting({
+            esUrl,
+            isCloud: esUrl.includes('elastic-cloud.com'),
+          })
+        : esClient;
+      await use(evaluationsEsClient);
     },
     { scope: 'worker' },
   ],
@@ -281,8 +296,8 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     { scope: 'worker' },
   ],
   evaluationAnalysisService: [
-    async ({ esClient, log }, use) => {
-      const scoreRepository = new EvaluationScoreRepository(esClient, log);
+    async ({ evaluationsEsClient, log }, use) => {
+      const scoreRepository = new EvaluationScoreRepository(evaluationsEsClient, log);
       const helper = new EvaluationAnalysisService(scoreRepository, log);
       await use(helper);
     },
