@@ -125,7 +125,7 @@ export const ArtifactImportFlyout: React.FC<ArtifactImportFlyoutProps> = ({
             isLoading={isLoading}
             data-test-subj={getTestId('importButton')}
           >
-            {labels.pageImportButtonTitle}
+            {labels.importFlyoutImportSubmitButtonLabel}
           </EuiButton>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
