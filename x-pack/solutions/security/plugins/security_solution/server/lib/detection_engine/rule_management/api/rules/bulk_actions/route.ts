@@ -99,7 +99,7 @@ const validateBulkAction = (
   return undefined;
 };
 
-const getGapParams = ({
+const prepareGapParams = ({
   gapFillStatuses,
   gapsRangeStart,
   gapsRangeEnd,
@@ -218,7 +218,7 @@ export const performBulkActionRoute = (
           });
 
           const query = body.query !== '' ? body.query : undefined;
-          const gapParams = getGapParams({
+          const gapParams = prepareGapParams({
             gapFillStatuses: body.gap_fill_statuses,
             gapsRangeStart: body.gaps_range_start,
             gapsRangeEnd: body.gaps_range_end,
