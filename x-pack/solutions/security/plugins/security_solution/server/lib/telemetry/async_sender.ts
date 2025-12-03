@@ -113,7 +113,7 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
             this.logger.warn('Failure! Unable to send events to channel', {
               events: result.events,
               channel: result.channel,
-              error: result.message,
+              error_message: result.message,
             } as LogMeta);
             this.senderUtils?.incrementCounter(
               TelemetryCounter.DOCS_LOST,
