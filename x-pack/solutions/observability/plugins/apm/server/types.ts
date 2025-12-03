@@ -55,6 +55,10 @@ import type {
 import type { OnechatPluginSetup, OnechatPluginStart } from '@kbn/onechat-plugin/server/types';
 import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
 import type {
+  ObservabilityAgentPluginSetup,
+  ObservabilityAgentPluginStart,
+} from '@kbn/observability-agent-plugin/server';
+import type {
   ProfilingDataAccessPluginSetup,
   ProfilingDataAccessPluginStart,
 } from '@kbn/profiling-data-access-plugin/server';
@@ -77,6 +81,7 @@ export interface APMPluginSetupDependencies {
   share: SharePluginSetup;
   logsDataAccess: LogsDataAccessPluginSetup;
   // optional dependencies
+  observabilityAgent?: ObservabilityAgentPluginSetup;
   observabilityAIAssistant?: ObservabilityAIAssistantServerSetup;
   onechat?: OnechatPluginSetup;
   inference?: InferenceServerSetup;
@@ -106,6 +111,7 @@ export interface APMPluginStartDependencies {
   share: undefined;
   logsDataAccess: LogsDataAccessPluginStart;
   // optional dependencies
+  observabilityAgent?: ObservabilityAgentPluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantServerStart;
   onechat?: OnechatPluginStart;
   inference?: InferenceServerStart;
