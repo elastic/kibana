@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import type {
-  PluginInitializerContext,
-  CoreStart,
-  Plugin,
-  Logger,
-  ElasticsearchClient,
-} from '@kbn/core/server';
+import type { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 
 import { ReplaySubject, type Subject } from 'rxjs';
@@ -66,14 +60,8 @@ export class AutomaticImportV2Plugin
 
     plugins.features.registerKibanaFeature(AUTOMATIC_IMPORT_FEATURE);
 
-    const coreStartServices = core.getStartServices().then(([coreStart]) => ({
-      esClient: coreStart.elasticsearch.client.asInternalUser as ElasticsearchClient,
-    }));
-    const esClientPromise = coreStartServices.then(({ esClient }) => esClient);
-
     this.automaticImportService = new AutomaticImportService(
       this.logger,
-      esClientPromise,
       core.savedObjects,
       plugins.taskManager
     );

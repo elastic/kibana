@@ -173,11 +173,13 @@ const createIntegrationRoute = (
                 metadata: { createdAt: new Date().toISOString() },
               })
             );
+            const esClient = automaticImportv2.esClient;
             await Promise.all(
               dataStreamsParams.map((dataStreamParams) =>
                 automaticImportService.createDataStream({
                   authenticatedUser,
                   dataStreamParams,
+                  esClient,
                 })
               )
             );

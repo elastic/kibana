@@ -57,7 +57,7 @@ describe('AutomaticImportSamplesIndexService', () => {
   let mockLoggerFactory: ReturnType<typeof loggerMock.create>;
   let mockUser: AuthenticatedUser;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     jest.clearAllMocks();
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
     mockLoggerFactory = loggerMock.create();
@@ -68,13 +68,7 @@ describe('AutomaticImportSamplesIndexService', () => {
       profile_uid: 'test-profile',
     } as unknown as AuthenticatedUser;
 
-    service = new AutomaticImportSamplesIndexService(
-      mockLoggerFactory,
-      Promise.resolve(mockEsClient)
-    );
-
-    // Wait for initialization
-    await new Promise((resolve) => setTimeout(resolve, 10));
+    service = new AutomaticImportSamplesIndexService(mockLoggerFactory);
   });
 
   describe('addSamplesToDataStream', () => {
@@ -85,6 +79,7 @@ describe('AutomaticImportSamplesIndexService', () => {
         rawSamples: ['Sample log line 1', 'Sample log line 2', 'Sample log line 3'],
         originalSource: { sourceType: 'file', sourceValue: 'logs.txt' },
         authenticatedUser: mockUser,
+        esClient: mockEsClient,
       };
 
       await service.addSamplesToDataStream(params);
@@ -116,6 +111,7 @@ describe('AutomaticImportSamplesIndexService', () => {
         rawSamples: ['Sample log line 1'],
         originalSource: { sourceType: 'file', sourceValue: 'logs.txt' },
         authenticatedUser: mockUser,
+        esClient: mockEsClient,
       };
 
       await service.addSamplesToDataStream(params);
@@ -144,6 +140,7 @@ describe('AutomaticImportSamplesIndexService', () => {
         rawSamples: ['Sample log'],
         originalSource: { sourceType: 'file', sourceValue: 'logs.txt' },
         authenticatedUser: mockUser,
+        esClient: mockEsClient,
       };
 
       await service.addSamplesToDataStream(params);
@@ -165,6 +162,7 @@ describe('AutomaticImportSamplesIndexService', () => {
         rawSamples: ['Sample log'],
         originalSource: { sourceType: 'file', sourceValue: 'logs.txt' },
         authenticatedUser: mockUser,
+        esClient: mockEsClient,
       };
 
       await service.addSamplesToDataStream(params);
@@ -190,6 +188,7 @@ describe('AutomaticImportSamplesIndexService', () => {
         rawSamples: [],
         originalSource: { sourceType: 'file', sourceValue: 'logs.txt' },
         authenticatedUser: mockUser,
+        esClient: mockEsClient,
       };
 
       await service.addSamplesToDataStream(params);
@@ -210,6 +209,7 @@ describe('AutomaticImportSamplesIndexService', () => {
         rawSamples: ['Log with "quotes" and \\backslashes\\ and \nnewlines'],
         originalSource: { sourceType: 'file', sourceValue: 'logs with spaces.txt' },
         authenticatedUser: mockUser,
+        esClient: mockEsClient,
       };
 
       await service.addSamplesToDataStream(params);
@@ -224,30 +224,15 @@ describe('AutomaticImportSamplesIndexService', () => {
       expect(document.log_data).toBe('Log with "quotes" and \\backslashes\\ and \nnewlines');
       expect(document.original_source).toBe('logs with spaces.txt');
     });
-
-    it('should throw error when samplesIndexAdapter is not initialized', async () => {
-      const uninitializedService = new AutomaticImportSamplesIndexService(
-        mockLoggerFactory,
-        new Promise(() => {}) // Never resolves
-      );
-
-      const params: AddSamplesToDataStreamParams = {
-        integrationId: 'integration-123',
-        dataStreamId: 'data-stream-456',
-        rawSamples: ['Sample log'],
-        originalSource: { sourceType: 'file', sourceValue: 'logs.txt' },
-        authenticatedUser: mockUser,
-      };
-
-      await expect(uninitializedService.addSamplesToDataStream(params)).rejects.toThrow(
-        'Samples index adapter not initialized'
-      );
-    });
   });
 
   describe('getSamplesForDataStream', () => {
     it('should retrieve samples for a data stream', async () => {
-      const samples = await service.getSamplesForDataStream('integration-123', 'data-stream-456');
+      const samples = await service.getSamplesForDataStream(
+        'integration-123',
+        'data-stream-456',
+        mockEsClient
+      );
 
       const { createIndexAdapter } = jest.requireMock('./storage');
       const adapterInstance = createIndexAdapter.mock.results[0].value;
@@ -269,24 +254,10 @@ describe('AutomaticImportSamplesIndexService', () => {
 
       expect(samples).toEqual(['sample log 1', 'sample log 2']);
     });
-
-    it('should throw error when samplesIndexAdapter is not initialized', async () => {
-      const uninitializedService = new AutomaticImportSamplesIndexService(
-        mockLoggerFactory,
-        new Promise(() => {}) // Never resolves
-      );
-
-      await expect(
-        uninitializedService.getSamplesForDataStream('integration-123', 'data-stream-456')
-      ).rejects.toThrow('Samples index adapter not initialized');
-    });
   });
 
   describe('constructor', () => {
-    it('should initialize with logger factory and ES client promise', () => {
-      const { createIndexAdapter } = jest.requireMock('./storage');
-
-      expect(createIndexAdapter).toHaveBeenCalled();
+    it('should initialize with logger factory', () => {
       expect(mockLoggerFactory.get).toHaveBeenCalledWith('samplesIndexService');
     });
   });

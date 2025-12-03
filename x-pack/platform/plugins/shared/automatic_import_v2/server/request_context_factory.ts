@@ -51,6 +51,8 @@ export class RequestContextFactory implements IRequestContextFactory {
       startPlugins.spaces?.spacesService?.getSpaceId(request) || DEFAULT_NAMESPACE_STRING;
 
     const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
     return {
       core: coreContext,
       actions: startPlugins.actions,
@@ -77,6 +79,7 @@ export class RequestContextFactory implements IRequestContextFactory {
       automaticImportService: this.options.automaticImportService,
       inference: startPlugins.inference,
       savedObjectsClient,
+      esClient,
     };
   }
 }

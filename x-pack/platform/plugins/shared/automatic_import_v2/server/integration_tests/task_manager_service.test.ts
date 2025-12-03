@@ -50,17 +50,11 @@ describe('TaskManagerService Integration Tests', () => {
       await kbnRoot.preboot();
       const coreSetup = await kbnRoot.setup();
 
-      let resolveEsClient: (client: ElasticsearchClient) => void;
-      const esClientPromise = new Promise<ElasticsearchClient>((resolve) => {
-        resolveEsClient = resolve;
-      });
-
       expect(taskManagerSetupSpy).toHaveBeenCalled();
       taskManagerSetup = taskManagerSetupSpy.mock.results[0].value;
 
       automaticImportService = new AutomaticImportService(
         kbnRoot.logger,
-        esClientPromise,
         coreSetup.savedObjects,
         taskManagerSetup
       );
@@ -72,7 +66,6 @@ describe('TaskManagerService Integration Tests', () => {
       taskManagerStart = taskManagerStartSpy.mock.results[0].value;
 
       esClient = coreStart.elasticsearch.client.asInternalUser;
-      resolveEsClient!(esClient);
 
       expect(taskManagerStartSpy).toHaveBeenCalled();
       taskManagerStart = taskManagerStartSpy.mock.results[0].value;

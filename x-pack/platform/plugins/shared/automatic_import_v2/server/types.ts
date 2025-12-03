@@ -14,6 +14,7 @@ import type {
   CoreRequestHandlerContext,
   CoreSetup,
   CustomRequestHandlerContext,
+  ElasticsearchClient,
   IRouter,
   Logger,
   SavedObjectsClientContract,
@@ -68,6 +69,7 @@ export interface AutomaticImportV2PluginApiRequestHandlerContext {
   savedObjectsClient: SavedObjectsClientContract;
   getSpaceId: () => string;
   automaticImportService: AutomaticImportService;
+  esClient: ElasticsearchClient;
 }
 
 /**

@@ -8,7 +8,6 @@
 import assert from 'assert';
 import { ReplaySubject, type Subject } from 'rxjs';
 import type {
-  ElasticsearchClient,
   LoggerFactory,
   SavedObject,
   SavedObjectsDeleteOptions,
@@ -46,14 +45,13 @@ export class AutomaticImportService {
 
   constructor(
     logger: LoggerFactory,
-    esClientPromise: Promise<ElasticsearchClient>,
     savedObjectsServiceSetup: SavedObjectsServiceSetup,
     taskManagerSetup: TaskManagerSetupContract
   ) {
     this.pluginStop$ = new ReplaySubject(1);
     this.logger = logger;
     this.savedObjectsServiceSetup = savedObjectsServiceSetup;
-    this.samplesIndexService = new AutomaticImportSamplesIndexService(logger, esClientPromise);
+    this.samplesIndexService = new AutomaticImportSamplesIndexService(logger);
 
     this.savedObjectsServiceSetup.registerType(integrationSavedObjectType);
     this.savedObjectsServiceSetup.registerType(dataStreamSavedObjectType);
@@ -172,7 +170,7 @@ export class AutomaticImportService {
 
   public async createDataStream(params: CreateDataStreamParams): Promise<void> {
     assert(this.savedObjectService, 'Saved Objects service not initialized.');
-    const { authenticatedUser, dataStreamParams } = params;
+    const { authenticatedUser, dataStreamParams, esClient } = params;
 
     // Add samples to samples index
     const samplesToDataStreamParams: SamplesToDataStreamParams = {
@@ -181,6 +179,7 @@ export class AutomaticImportService {
       rawSamples: dataStreamParams.rawSamples,
       originalSource: dataStreamParams.originalSource,
       authenticatedUser,
+      esClient,
     };
     await this.samplesIndexService.addSamplesToDataStream(samplesToDataStreamParams);
 
