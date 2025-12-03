@@ -18,14 +18,13 @@ import { StringOutputParser } from '@langchain/core/output_parsers';
 import {
   createUIMessageStream,
   JsonToSseTransformStream,
-  type InferUIMessageChunk,
   type UIMessage,
   type UIMessageStreamWriter,
 } from 'ai';
 import { toUIMessageStream } from '@ai-sdk/langchain';
 import type { BaseLanguageModel } from '@langchain/core/language_models/base';
-import type { BaseMessage } from '@langchain/core/messages';
 import { HumanMessage, AIMessage } from '@langchain/core/messages';
+import type { BaseMessage, AIMessageChunk } from '@langchain/core/messages';
 import type { ChatMessage, ElasticsearchRetrieverContentField } from '../types';
 import { ElasticsearchRetriever } from './elasticsearch_retriever';
 import { renderTemplate } from '../utils/render_template';
@@ -121,6 +120,15 @@ const messageContentToString = (content: BaseMessage['content']): string => {
   return '';
 };
 
+const isAIMessageChunk = (chunk: any): chunk is AIMessageChunk => {
+  return Boolean(
+    chunk &&
+      typeof chunk === 'object' &&
+      'constructor' in chunk &&
+      (chunk as { constructor: { name?: string } }).constructor?.name === 'AIMessageChunk'
+  );
+};
+
 export function contextLimitCheck(
   modelLimit: number | undefined,
   prompt: ChatPromptTemplate
@@ -141,12 +149,18 @@ export function contextLimitCheck(
 }
 
 interface RetrievedDocumentsAnnotation {
-  type: 'retrieved_docs' | 'citations';
+  type: 'retrieved_docs';
+  documents: Document[];
+}
+
+interface CitationsAnnotation {
+  type: 'citations';
   documents: Document[];
 }
 
 type PlaygroundAnnotation =
   | RetrievedDocumentsAnnotation
+  | CitationsAnnotation
   | { type: 'context_token_count'; count: number }
   | { type: 'prompt_token_count'; count: number }
   | { type: 'search_query'; question: string };
@@ -158,7 +172,6 @@ interface PlaygroundDataTypes {
 
 type PlaygroundUIMessage = UIMessage<unknown, PlaygroundDataTypes>;
 type PlaygroundStreamWriter = UIMessageStreamWriter<PlaygroundUIMessage>;
-type PlaygroundMessageChunk = InferUIMessageChunk<PlaygroundUIMessage>;
 
 const writeAnnotations = (
   writer: PlaygroundStreamWriter,
@@ -168,7 +181,7 @@ const writeAnnotations = (
   writer.write({
     type: 'data-message_annotations',
     data,
-  } as PlaygroundMessageChunk);
+  });
 };
 
 export function registerContextTokenCounts(writer: PlaygroundStreamWriter) {
@@ -313,18 +326,14 @@ class ConversationalChainFn {
                   retrievedDocs.push(...documents);
                   writeAnnotations(writer, {
                     type: 'retrieved_docs',
-                    documents: documents as Document[],
+                    documents,
                   });
                 },
-                handleChainEnd(outputs, runId, parentRunId) {
-                  if (outputs?.constructor?.name === 'AIMessageChunk') {
+                handleChainEnd(outputs) {
+                  if (isAIMessageChunk(outputs)) {
                     writeAnnotations(writer, {
                       type: 'citations',
-                      documents: getCitations(
-                        outputs.content as string,
-                        'inline',
-                        retrievedDocs
-                      ) as Document[],
+                      documents: getCitations(outputs.content as string, 'inline', retrievedDocs),
                     });
                   }
                 },
