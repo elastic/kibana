@@ -15,7 +15,7 @@ const removeAriaLabel = i18n.translate('xpack.onechat.attachmentPill.removeAriaL
 });
 
 export interface AttachmentPillProps {
-  id: string;
+  dataTestSubj?: string;
   type: AttachmentType;
   onRemoveAttachment?: () => void;
 }
@@ -64,7 +64,11 @@ const getAttachmentDisplayName = (type: AttachmentType): string => {
   }
 };
 
-export const AttachmentPill: React.FC<AttachmentPillProps> = ({ id, type, onRemoveAttachment }) => {
+export const AttachmentPill: React.FC<AttachmentPillProps> = ({
+  dataTestSubj,
+  type,
+  onRemoveAttachment,
+}) => {
   const [isHovered, setIsHovered] = useState(false);
 
   const displayName = getAttachmentDisplayName(type);
@@ -86,7 +90,7 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({ id, type, onRemo
         onRemoveAttachment?.();
       }}
       iconOnClickAriaLabel={canRemoveAttachment ? removeAriaLabel : undefined}
-      data-test-subj={`onechatAttachmentPill-${id}`}
+      data-test-subj={dataTestSubj}
     >
       {displayName}
     </EuiBadge>

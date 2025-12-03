@@ -8,13 +8,13 @@
 import { EuiBadgeGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { Attachment } from '@kbn/onechat-common/attachments';
+import type { Attachment, AttachmentInput } from '@kbn/onechat-common/attachments';
 import type { AttachmentType } from '@kbn/onechat-common/attachments';
 import { AttachmentPill } from './attachment_pill';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 
 export interface AttachmentPillsRowProps {
-  attachments: Attachment[];
+  attachments: AttachmentInput[] | Attachment[];
   removable?: boolean;
 }
 
@@ -41,14 +41,17 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
       aria-label={labels.attachments}
       data-test-subj="onechatAttachmentPillsRow"
     >
-      {attachments.map((attachment: Attachment, index: number) => (
-        <AttachmentPill
-          key={attachment.id ?? `${attachment.type}-${index}`}
-          id={attachment.id}
-          type={attachment.type as AttachmentType}
-          onRemoveAttachment={removable ? () => removeAttachment?.(index) : undefined}
-        />
-      ))}
+      {attachments.map((attachment, index) => {
+        const attachmentKey = attachment.id ?? `${attachment.type}-${index}`;
+        return (
+          <AttachmentPill
+            key={attachmentKey}
+            dataTestSubj={`onechatAttachmentPill-${attachmentKey}`}
+            type={attachment.type as AttachmentType}
+            onRemoveAttachment={removable ? () => removeAttachment?.(index) : undefined}
+          />
+        );
+      })}
     </EuiBadgeGroup>
   );
 };
