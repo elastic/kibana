@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * As Code Filter API
- *
- * This module provides utilities for working with As Code filters in Kibana's
- * as Code API endpoints.
- */
+import type { TypeOf } from '@kbn/config-schema';
+import type { Writable } from '@kbn/utility-types';
+import type { storedFilterSchema } from '@kbn/es-query-server';
 
-// Conversion utilities
-export { fromStoredFilter, fromStoredFilters } from './from_stored_filter';
-export { toStoredFilter, toStoredFilters } from './to_stored_filter';
+/**
+ * Local type definition for stored filters
+ * Inferred from the storedFilterSchema in @kbn/es-query-server
+ */
+export type StoredFilter = Writable<TypeOf<typeof storedFilterSchema>>;

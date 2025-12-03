@@ -23,13 +23,14 @@ import type {
   AsCodeConditionFilter,
   AsCodeGroupFilter,
   AsCodeDSLFilter,
-} from '@kbn/es-query-server';
+} from '@kbn/as-code-filters-schema';
 import type { Logger } from '@kbn/logging';
-import { ASCODE_FILTER_OPERATOR, FilterStateStore } from '@kbn/es-query-constants';
+import { FilterStateStore } from '@kbn/es-query-constants';
+import { ASCODE_FILTER_OPERATOR } from '@kbn/as-code-filters-constants';
+import { migrateFilter } from '@kbn/es-query';
+import { FILTERS } from '@kbn/es-query';
 import type { StoredFilter } from './types';
-import { migrateFilter } from '../es_query/migrate_filter';
 import { FilterConversionError } from './errors';
-import { FILTERS } from '../filters/build_filters/types';
 import {
   isLegacyFilter,
   hasTermQuery,

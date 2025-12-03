@@ -15,7 +15,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ASCODE_FILTER_OPERATOR } from '@kbn/es-query-constants';
+import { ASCODE_FILTER_OPERATOR } from '@kbn/as-code-filters-constants';
 
 // ====================================================================
 // CORE FILTER OPERATOR AND VALUE SCHEMAS
@@ -267,7 +267,7 @@ export const asCodeConditionFilterSchema = schema.oneOf(
  * Uses lazy schema to handle recursive references
  * Note: Uses basePropertiesWithNegateSchema to allow negating entire group
  */
-const GROUP_FILTER_ID = '@kbn/es-query-server_groupFilter'; // package prefix for global uniqueness in OAS specs
+const GROUP_FILTER_ID = '@kbn/as-code-filters-schema_groupFilter'; // package prefix for global uniqueness in OAS specs
 export const asCodeGroupFilterSchema = basePropertiesWithNegateSchema.extends(
   {
     group: schema.object(
