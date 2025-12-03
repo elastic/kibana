@@ -6,7 +6,6 @@
  */
 
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React from 'react';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { DocumentDetailsContext } from '../../shared/context';
@@ -107,27 +106,7 @@ describe('TableFieldValueCell', () => {
       );
     });
 
-    it('should render only limited values initially and all values after clicking "Show more"', async () => {
-      const user = userEvent.setup();
-
-      const visibleInitially = hostIpValues.slice(0, 2);
-      const hiddenInitially = hostIpValues.slice(2);
-
-      // initial: only first two values visible
-      visibleInitially.forEach((value) => {
-        expect(screen.getByText(value)).toBeInTheDocument();
-      });
-      hiddenInitially.forEach((value) => {
-        expect(screen.queryByText(value)).not.toBeInTheDocument();
-      });
-
-      // show more button should be present
-      const showMoreButton = screen.getByTestId('event-field-toggle-show-more-button');
-      expect(showMoreButton).toBeInTheDocument();
-
-      // after click -> all values visible
-      await user.click(showMoreButton);
-
+    it('should render each of the expected values when `fieldFromBrowserField` is undefined', () => {
       hostIpValues.forEach((value) => {
         expect(screen.getByText(value)).toBeInTheDocument();
       });
@@ -219,34 +198,11 @@ describe('TableFieldValueCell', () => {
       );
     });
 
-    it('should render preview link buttons for visible host ip addresses', async () => {
-      const user = userEvent.setup();
-
-      // Initially only 2 preview links are visible (due to the limit)
-      const previewLinksInitially = screen.getAllByTestId(
-        new RegExp(`^${FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID}-`)
-      );
-      expect(previewLinksInitially.length).toBe(2);
-
-      // Show more button should exist
-      const showMoreButton = screen.getByTestId('event-field-toggle-show-more-button');
-      expect(showMoreButton).toBeInTheDocument();
-
-      // After expanding, all preview links should be rendered
-      await user.click(showMoreButton);
-
-      const allPreviewLinks = screen.getAllByTestId(
-        new RegExp(`^${FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID}-`)
-      );
-      expect(allPreviewLinks.length).toBe(hostIpValues.length);
+    it('should render link buttons for each of the host ip addresses', () => {
+      expect(screen.getAllByRole('button').length).toBe(hostIpValues.length);
     });
 
-    it('should render each of the expected values when `fieldFromBrowserField` is provided (after expanding)', async () => {
-      const user = userEvent.setup();
-
-      const showMoreButton = screen.getByTestId('event-field-toggle-show-more-button');
-      await user.click(showMoreButton);
-
+    it('should render each of the expected values when `fieldFromBrowserField` is provided', () => {
       hostIpValues.forEach((value) => {
         expect(screen.getByText(value)).toBeInTheDocument();
       });
