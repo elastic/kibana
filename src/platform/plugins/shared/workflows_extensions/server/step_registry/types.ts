@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { StepContext } from '@kbn/workflows';
 import type { z } from '@kbn/zod';
 import type { CommonStepDefinition, InferStepInput, InferStepOutput } from '../../common';
@@ -120,6 +120,11 @@ export interface StepHandlerContext<TInput = unknown> {
      * Evaluate a template string using the workflow context
      */
     renderInputTemplate<T>(input: T): T;
+
+    /**
+     * Get the fake request from task manager for Kibana API authentication
+     */
+    getFakeRequest(): KibanaRequest | undefined;
   };
 
   /**

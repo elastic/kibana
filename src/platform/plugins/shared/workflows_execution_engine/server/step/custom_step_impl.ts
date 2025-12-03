@@ -80,6 +80,9 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
         renderInputTemplate: (value) => {
           return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(value);
         },
+        getFakeRequest: () => {
+          return this.stepExecutionRuntime.contextManager.getFakeRequest();
+        },
       },
       logger: {
         debug: (message, meta) => this.workflowLogger.logDebug(message, meta),
