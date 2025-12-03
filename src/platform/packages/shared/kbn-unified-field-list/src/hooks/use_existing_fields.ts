@@ -261,6 +261,10 @@ export const useExistingFieldsFetcher = (
         duration: window.performance.now() - startTime,
         meta: { dataViewsCount: params.dataViews.length },
       });
+      if (!params.dataViews.length && latestInitialExistingFieldsInfoRef.current?.dataViewId) {
+        // after switching to ES|QL mode, reset the initial info
+        onInitialExistingFieldsInfoChangeRef.current?.(undefined);
+      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
@@ -279,13 +283,6 @@ export const useExistingFieldsFetcher = (
       refetchFieldsExistenceInfo();
     }
   }, [refetchFieldsExistenceInfo, params.disableAutoFetching]);
-
-  useEffect(() => {
-    if (!params.dataViews.length && latestInitialExistingFieldsInfoRef.current?.dataViewId) {
-      // after switching to ES|QL mode, reset the initial info
-      onInitialExistingFieldsInfoChangeRef.current?.(undefined);
-    }
-  }, [params.dataViews, latestInitialExistingFieldsInfoRef, onInitialExistingFieldsInfoChangeRef]);
 
   useEffect(() => {
     return () => {
