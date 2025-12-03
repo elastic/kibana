@@ -307,11 +307,7 @@ export class ActionsPlugin
     this.security = plugins.security;
 
     this.authTypeRegistry = new AuthTypeRegistry();
-    registerAuthTypes({
-      configUtils: actionsConfigUtils,
-      logger: this.logger,
-      registry: this.authTypeRegistry,
-    });
+    registerAuthTypes(this.authTypeRegistry);
 
     setupSavedObjects(
       core.savedObjects,
