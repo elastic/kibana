@@ -224,8 +224,8 @@ const TAB_COMPARATORS: TabComparators = {
   visContext: visContextComparator,
   controlGroupJson: (a, b) => {
     // ignore the order of keys when comparing JSON strings
-    const testA = JSON.parse(a ?? '');
-    const testB = JSON.parse(b ?? '');
+    const testA = JSON.parse(a ?? '{}');
+    const testB = JSON.parse(b ?? '{}');
     return fieldComparator('controlGroupJson', '{}')(
       JSON.stringify(testA, sortJsonKeys),
       JSON.stringify(testB, sortJsonKeys)
