@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import type { FeatureType, Streams } from '@kbn/streams-schema';
+import type { FeatureType } from '@kbn/streams-schema';
 import type { EnrichmentDataSource } from '../../common/url_schema';
 
 type StreamType = 'wired' | 'classic' | 'unknown';
-
-// extract privileges type from Streams
-type IngestStreamPrivileges = Streams.ingest.all.GetResponse['privileges'];
 
 interface StreamsAttachmentCountProps {
   name: string;
@@ -143,7 +140,16 @@ interface StreamsTabVisitedProps {
   stream_name: string;
   stream_type: StreamType;
   tab_name: string;
-  privileges: IngestStreamPrivileges;
+  privileges: {
+    manage: boolean;
+    monitor: boolean;
+    view_index_metadata: boolean;
+    lifecycle: boolean;
+    simulate: boolean;
+    text_structure: boolean;
+    read_failure_store: boolean;
+    manage_failure_store: boolean;
+  };
 }
 
 export {
