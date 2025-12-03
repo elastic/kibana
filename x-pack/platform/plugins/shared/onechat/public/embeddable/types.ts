@@ -14,6 +14,7 @@ export interface EmbeddableConversationDependencies {
   services: OnechatInternalService;
   coreStart: CoreStart;
 }
+
 export interface EmbeddableConversationProps {
   /**
    * Force starting a new conversation, ignoring any stored conversation IDs.
