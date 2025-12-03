@@ -11,23 +11,24 @@ import { AiInsight } from '@kbn/observability-agent-builder';
 import {
   OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
+  OBSERVABILITY_AGENT_FEATURE_FLAG,
+  OBSERVABILITY_AGENT_FEATURE_FLAG_DEFAULT,
 } from '@kbn/observability-agent-plugin/common/constants';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { AlertData } from '../../hooks/use_fetch_alert_detail';
 import { useKibana } from '../../utils/kibana_react';
 
-export function AlertAiInsight({ alert }: { alert: AlertData | null }) {
+export function AlertAiInsight({ alert }: { alert: AlertData }) {
   const {
-    services: { onechat, http },
+    services: { onechat, http, featureFlags },
   } = useKibana();
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
-  const [summary, setSummary] = useState<string>('');
-  const [context, setContext] = useState<string>('');
-  const [lastUsedConnectorId] = useLocalStorage<string>('agentBuilder.lastUsedConnector', '');
+  const [summary, setSummary] = useState('');
+  const [context, setContext] = useState('');
+  const [lastUsedConnectorId] = useLocalStorage('agentBuilder.lastUsedConnector', '');
   const onOpen = useCallback(async () => {
-    if (!alert) return;
     setIsLoading(true);
     setError(undefined);
     try {
@@ -55,12 +56,11 @@ export function AlertAiInsight({ alert }: { alert: AlertData | null }) {
   }, [alert, http, lastUsedConnectorId]);
 
   const onStartConversation = useCallback(() => {
-    if (!alert || !onechat?.openConversationFlyout) return;
-    const alertId = alert.formatted.fields['kibana.alert.uuid'] as string;
+    if (!onechat?.openConversationFlyout) return;
+    const alertId = alert.formatted.fields['kibana.alert.uuid'];
 
     onechat.openConversationFlyout({
       newConversation: true,
-      // agentId: 'observability.agent',
       sessionTag: `alert:${alertId}`,
       attachments: [
         {
@@ -82,7 +82,14 @@ export function AlertAiInsight({ alert }: { alert: AlertData | null }) {
     });
   }, [alert, onechat, summary, context]);
 
-  if (!alert) return null;
+  const isObservabilityAgentEnabled = featureFlags.getBooleanValue(
+    OBSERVABILITY_AGENT_FEATURE_FLAG,
+    OBSERVABILITY_AGENT_FEATURE_FLAG_DEFAULT
+  );
+
+  if (!onechat || !isObservabilityAgentEnabled) {
+    return null;
+  }
 
   return (
     <AiInsight
