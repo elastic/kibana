@@ -7,13 +7,14 @@ pageLoadAssetSize:
   apm: 38573
   apmSourcesAccess: 2278
   automaticImport: 12162
+  automaticImportVTwo: 4694
   banners: 4087
   canvas: 15142
   cases: 153204
   charts: 40269
   cloud: 10648
   cloudDataMigration: 5687
-  cloudDefend: 7718
+  cloudDefend: 8146
   cloudExperiments: 103984
   cloudFullStory: 4752
   cloudLinks: 36333
@@ -103,7 +104,7 @@ pageLoadAssetSize:
   logsDataAccess: 7900
   logsShared: 101273
   logstash: 15882
-  maintenanceWindows: 3883
+  maintenanceWindows: 3905
   management: 12951
   maps: 45917
   mapsEms: 6734
@@ -115,7 +116,7 @@ pageLoadAssetSize:
   navigation: 14703
   newsfeed: 12371
   noDataPage: 1749
-  observability: 107798
+  observability: 107797
   observabilityAIAssistant: 52556
   observabilityAIAssistantApp: 16012
   observabilityAiAssistantManagement: 6438
@@ -156,9 +157,9 @@ pageLoadAssetSize:
   searchQueryRules: 6689
   searchSynonyms: 6371
   security: 79627
-  securitySolution: 186285
-  securitySolutionEss: 38783
-  securitySolutionServerless: 52185
+  securitySolution: 187862
+  securitySolutionEss: 38689
+  securitySolutionServerless: 52082
   serverless: 7451
   serverlessObservability: 19472
   serverlessSearch: 26393
