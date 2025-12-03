@@ -28,10 +28,6 @@ export const ALERT_SUPPRESSION_FIELDS_INPUT = `${ALERT_SUPPRESSION_FIELDS_COMBO_
 
 export const ALERT_SUPPRESSION_WARNING = '[data-test-subj="alertSuppressionWarning"]';
 
-export const ALERT_SUPPRESSION_LOADING = '[data-test-subj="alertSuppressionLoading"]';
-
-export const ALERT_SUPPRESSION_READY = '[data-test-subj="alertSuppressionReady"]';
-
 export const ALERT_SUPPRESSION_DURATION_OPTIONS =
   '[data-test-subj="alertSuppressionDuration"] [data-test-subj="alertSuppressionDurationOptions"]';
 

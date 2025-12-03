@@ -43,7 +43,6 @@ import {
   ALERT_SUPPRESSION_FIELDS,
   ALERT_SUPPRESSION_FIELDS_COMBO_BOX,
   ALERT_SUPPRESSION_FIELDS_INPUT,
-  ALERT_SUPPRESSION_LOADING,
   ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS,
   ALERTS_INDEX_BUTTON,
   ANOMALY_THRESHOLD_INPUT,
@@ -949,10 +948,16 @@ export const enablesAndPopulatesThresholdSuppression = (
  * If there are many fields in combobox, they are might be visible only after scrolling down menu.
  */
 export const fillAlertSuppressionFields = (fields: string[], checkFieldsInComboBox?: boolean) => {
-  cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).should('be.visible');
-  cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).should('not.be.disabled');
+  cy.get(ALERT_SUPPRESSION_FIELDS, { timeout: 60000 }).within(() => {
+    cy.get('[data-test-subj="input"]', { timeout: 60000 })
+      .should('be.visible')
+      .should('not.have.attr', 'disabled')
+      .should('not.have.class', 'euiComboBox-isDisabled');
+  });
 
-  cy.get(ALERT_SUPPRESSION_LOADING).should('not.exist');
+  cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX, { timeout: 60000 })
+    .should('be.visible')
+    .should('not.be.disabled');
 
   cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).click();
   fields.forEach((field) => {

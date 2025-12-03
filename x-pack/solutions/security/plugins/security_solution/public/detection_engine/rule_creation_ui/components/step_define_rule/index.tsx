@@ -683,15 +683,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 }
                 disabled={isSuppressionGroupByDisabled}
                 disabledText={suppressionGroupByDisabledText}
-                isLoading={
-                  mlRuleConfigLoading ||
-                  isEsqlSuppressionLoading ||
-                  (isIndexPatternLoading && !isMlRule(ruleType) && !isEsqlRule(ruleType)) ||
-                  (!isMlRule(ruleType) &&
-                    !isEsqlRule(ruleType) &&
-                    !isIndexPatternLoading &&
-                    (!indexPattern.fields || indexPattern.fields.length === 0))
-                }
               />
             )}
           </RuleTypeEuiFormRow>
