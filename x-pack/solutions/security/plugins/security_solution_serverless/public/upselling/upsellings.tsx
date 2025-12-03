@@ -78,9 +78,9 @@ export const upsellingPages: UpsellingPages = [
   },
   {
     pageName: SecurityPageName.exceptions,
-    pli: ProductFeatureKey.endpointExceptions,
+    pli: ProductFeatureKey.exceptionLists,
     component: () => (
-      <EndpointExceptionsDetailsUpsellingLazy requiredPLI={ProductFeatureKey.endpointExceptions} />
+      <EndpointExceptionsDetailsUpsellingLazy requiredPLI={ProductFeatureKey.exceptionLists} />
     ),
   },
   {
