@@ -24,10 +24,8 @@ export const runAgentStepDefinition = createServerStepDefinition({
       const { agent_id: agentId, input } = context.input as RunAgentStepInput;
 
       context.logger.debug('onechat.runAgent step started');
-      console.log('onechat.runAgent step started');
       const request = context.contextManager.getFakeRequest();
       if (!request) {
-        console.log('No request available in workflow context');
         throw new Error('No request available in workflow context');
       }
 
@@ -52,14 +50,12 @@ export const runAgentStepDefinition = createServerStepDefinition({
 
       const outputMessage = result.round.response.message ?? '';
 
-      console.log('onechat.runAgent step completed successfully', { outputMessage });
       return {
         output: {
           output: outputMessage,
         },
       };
     } catch (error) {
-      console.log('onechat.runAgent step failed', error);
       context.logger.error(
         'onechat.runAgent step failed',
         error instanceof Error ? error : new Error(String(error))
