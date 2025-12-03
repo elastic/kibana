@@ -28,7 +28,7 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import type { Observable } from 'rxjs';
 import { distinctUntilChanged, from, map, merge, skip } from 'rxjs';
-import { getInitialESQLQuery } from '@kbn/esql-utils';
+import { getESQLStatsQueryMeta, getInitialESQLQuery } from '@kbn/esql-utils';
 import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import { FilterStateStore, isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
 import { isEqual, isFunction } from 'lodash';
@@ -544,6 +544,26 @@ export function getDiscoverStateContainer({
             dataSource: savedSearchDataView?.id
               ? createDataViewDataSource({ dataViewId: savedSearchDataView.id })
               : undefined,
+          },
+        })
+      );
+    }
+
+    if (
+      isOfAggregateQueryType(appState.query) &&
+      services.discoverFeatureFlags.getCascadeLayoutEnabled()
+    ) {
+      // on first load if the data cascade layout feature flag is enabled,
+      // we need to set the available cascade groups from the user's query and selected cascade groups
+      const availableCascadeGroups = getESQLStatsQueryMeta(
+        (appState.query as AggregateQuery).esql
+      ).groupByFields.map((group) => group.field);
+
+      internalState.dispatch(
+        injectCurrentTab(internalStateActions.setCascadeUiState)({
+          cascadeUiState: {
+            availableCascadeGroups,
+            selectedCascadeGroups: [availableCascadeGroups[0]].filter(Boolean),
           },
         })
       );
