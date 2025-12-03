@@ -35,9 +35,22 @@ export default function ({ getService }: FtrProviderContext) {
         return;
       }
 
-      const response1 = await supertest.get('/emit_log_with_trace_id');
+      const traceId1 = '4bf92f3577b34da6a3ce929d0e0e4736';
+      const traceparent1 = `00-${traceId1}-00f067aa0ba902b7-01`;
+
+      const response1 = await supertest
+        .get('/emit_log_with_trace_id')
+        .set('traceparent', traceparent1);
       expect(response1.status).to.be(200);
-      expect(response1.body.traceId).to.be.a('string');
+      expect(response1.body.traceId).to.be(traceId1);
+
+      const traceId2 = 'a1b2c3d4e5f6789012345678901234ab';
+      const traceparent2 = `00-${traceId2}-10f067aa0ba902b7-01`;
+      const response2 = await supertest
+        .get('/emit_log_with_trace_id')
+        .set('traceparent', traceparent2);
+      expect(response2.status).to.be(200);
+      expect(response2.body.traceId).to.be(traceId2);
 
       const logs = await readLogFile();
 
