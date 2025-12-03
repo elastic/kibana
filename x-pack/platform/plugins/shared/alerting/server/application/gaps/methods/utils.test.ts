@@ -13,7 +13,7 @@ import {
   type GapDurationBucket,
 } from './utils';
 
-jest.mock('../../../../lib/rule_gaps/build_gaps_filter', () => ({
+jest.mock('../../../lib/rule_gaps/build_gaps_filter', () => ({
   buildGapsFilter: jest.fn(() => 'mocked_filter'),
 }));
 

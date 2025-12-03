@@ -18,7 +18,7 @@ import {
 import type { RulesClientContext } from '../../../../rules_client';
 import type { GetRuleIdsWithGapsParams, GetRuleIdsWithGapsResponse } from './types';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import { hasMatchedGapFillStatus, RULE_GAP_AGGREGATIONS, type GapDurationBucket } from './utils';
+import { hasMatchedGapFillStatus, RULE_GAP_AGGREGATIONS, type GapDurationBucket } from '../utils';
 export const RULE_SAVED_OBJECT_TYPE = 'alert';
 import { buildGapsFilter } from '../../../../lib/rule_gaps/build_gaps_filter';
 

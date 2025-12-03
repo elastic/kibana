@@ -22,9 +22,9 @@ import {
 import {
   extractGapDurationSums,
   calculateHighestPriorityGapFillStatus,
-  RULE_GAP_AGGREGATIONS,
   type GapDurationBucket,
-} from '../get_rule_ids_with_gaps/utils';
+  RULE_GAP_AGGREGATIONS,
+} from '../utils';
 import { buildGapsFilter } from '../../../../lib/rule_gaps/build_gaps_filter';
 
 export async function getGapsSummaryByRuleIds(

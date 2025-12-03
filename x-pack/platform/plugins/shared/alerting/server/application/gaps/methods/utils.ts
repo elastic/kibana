@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { AggregationsSumAggregate } from '@elastic/elasticsearch/lib/api/types';
-import type { GapFillStatus } from '../../../../../common/constants/gap_status';
+import type { GapFillStatus } from '../../../../common';
 export interface GapDurationSums {
   totalUnfilledDurationMs: number;
   totalInProgressDurationMs: number;
