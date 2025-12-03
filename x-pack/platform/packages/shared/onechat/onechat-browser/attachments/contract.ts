@@ -5,16 +5,20 @@
  * 2.0.
  */
 
-import type { Attachment } from '@kbn/onechat-common/attachments';
+import type { AnyAttachment } from '@kbn/onechat-common/attachments';
 
 /**
  * UI definition for rendering attachments of a specific type.
  */
-export interface AttachmentUIDefinition<TAttachment extends Attachment = Attachment> {
+export interface AttachmentUIDefinition<TAttachment extends AnyAttachment = AnyAttachment> {
   /**
    * Returns a human-readable label for the attachment.
    */
   getLabel: (attachment: TAttachment) => string;
+  /**
+   * Returns the icon type to display for the attachment.
+   */
+  getIcon?: () => string;
 }
 
 /**
@@ -27,7 +31,7 @@ export interface AttachmentServiceStartContract {
    * @param attachmentType - The unique identifier for the attachment type
    * @param definition - The UI definition for rendering this attachment type
    */
-  addAttachmentType: <TAttachment extends Attachment = Attachment>(
+  addAttachmentType: <TAttachment extends AnyAttachment = AnyAttachment>(
     attachmentType: string,
     definition: AttachmentUIDefinition<TAttachment>
   ) => void;
@@ -38,7 +42,7 @@ export interface AttachmentServiceStartContract {
    * @param attachmentType - The type identifier to look up
    * @returns The UI definition if registered, undefined otherwise
    */
-  getAttachmentUiDefinition: <TAttachment extends Attachment = Attachment>(
+  getAttachmentUiDefinition: <TAttachment extends AnyAttachment = AnyAttachment>(
     attachmentType: string
   ) => AttachmentUIDefinition<TAttachment> | undefined;
 }

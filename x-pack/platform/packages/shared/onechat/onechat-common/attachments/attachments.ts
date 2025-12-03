@@ -24,6 +24,12 @@ export interface Attachment<
   hidden?: boolean;
 }
 
+/**
+ * Attachment type that accepts any attachment.
+ * Use this as a constraint when you need to accept any attachment type.
+ */
+export type AnyAttachment = Attachment<string, unknown>;
+
 // Strongly typed sub-types for known attachment types
 
 export type TextAttachment = Attachment<AttachmentType.text>;

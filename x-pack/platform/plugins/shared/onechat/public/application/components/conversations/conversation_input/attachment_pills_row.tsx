@@ -9,7 +9,6 @@ import { EuiBadgeGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { Attachment } from '@kbn/onechat-common/attachments';
-import type { AttachmentType } from '@kbn/onechat-common/attachments';
 import { AttachmentPill } from './attachment_pill';
 
 export interface AttachmentPillsRowProps {
@@ -35,11 +34,7 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({ attachme
       data-test-subj="onechatAttachmentPillsRow"
     >
       {attachments.map((attachment: Attachment) => (
-        <AttachmentPill
-          key={attachment.id}
-          id={attachment.id}
-          type={attachment.type as AttachmentType}
-        />
+        <AttachmentPill key={attachment.id} attachment={attachment} />
       ))}
     </EuiBadgeGroup>
   );

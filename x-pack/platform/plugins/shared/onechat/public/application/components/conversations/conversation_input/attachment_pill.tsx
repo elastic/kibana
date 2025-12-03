@@ -6,57 +6,29 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { AttachmentType } from '@kbn/onechat-common/attachments';
+import type { Attachment } from '@kbn/onechat-common/attachments';
+import { useOnechatServices } from '../../../hooks/use_onechat_service';
 
 export interface AttachmentPillProps {
-  id: string;
-  type: AttachmentType;
+  attachment: Attachment;
 }
 
-const getAttachmentIcon = (type: AttachmentType): string => {
-  switch (type) {
-    case AttachmentType.text:
-      return 'document';
-    case AttachmentType.screenContext:
-      return 'inspect';
-    case AttachmentType.esql:
-      return 'editorCodeBlock';
-    default:
-      return 'document';
-  }
-};
+const DEFAULT_ICON = 'document';
 
-const getAttachmentDisplayName = (type: AttachmentType): string => {
-  switch (type) {
-    case AttachmentType.text:
-      return i18n.translate('xpack.onechat.attachmentPill.textAttachment', {
-        defaultMessage: 'Text',
-      });
-    case AttachmentType.screenContext:
-      return i18n.translate('xpack.onechat.attachmentPill.screenContextAttachment', {
-        defaultMessage: 'Screen context',
-      });
-    case AttachmentType.esql:
-      return i18n.translate('xpack.onechat.attachmentPill.esqlAttachment', {
-        defaultMessage: 'ES|QL query',
-      });
-    default:
-      return type;
-  }
-};
+export const AttachmentPill: React.FC<AttachmentPillProps> = ({ attachment }) => {
+  const { attachmentsService } = useOnechatServices();
+  const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
 
-export const AttachmentPill: React.FC<AttachmentPillProps> = ({ id, type }) => {
-  const displayName = getAttachmentDisplayName(type);
-  const iconType = getAttachmentIcon(type);
+  const displayName = uiDefinition?.getLabel(attachment) ?? attachment.type;
+  const iconType = uiDefinition?.getIcon?.() ?? DEFAULT_ICON;
 
   return (
     <EuiBadge
       color="default"
       iconType={iconType}
       iconSide="left"
-      data-test-subj={`onechatAttachmentPill-${id}`}
+      data-test-subj={`onechatAttachmentPill-${attachment.id}`}
     >
       {displayName}
     </EuiBadge>
