@@ -231,9 +231,9 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
             >
               <EuiSwitch
                 data-test-subj="storeProjectRoutingWithDashboard"
-                checked={localSettings.projectRoutingRestore}
+                checked={localSettings.project_routing_restore}
                 onChange={(event) =>
-                  updateDashboardSetting({ projectRoutingRestore: event.target.checked })
+                  updateDashboardSetting({ project_routing_restore: event.target.checked })
                 }
                 label={
                   <FormattedMessage

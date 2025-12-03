@@ -110,7 +110,7 @@ describe('initializeSettingsManager', () => {
       const settingsManager = initializeSettingsManager(state);
       const settings = settingsManager.api.getSettings();
 
-      expect(settings.projectRoutingRestore).toBe(false);
+      expect(settings.project_routing_restore).toBe(false);
     });
 
     test('Should set projectRoutingRestore to true when project_routing is a string', () => {
@@ -121,7 +121,7 @@ describe('initializeSettingsManager', () => {
       const settingsManager = initializeSettingsManager(state);
       const settings = settingsManager.api.getSettings();
 
-      expect(settings.projectRoutingRestore).toBe(true);
+      expect(settings.project_routing_restore).toBe(true);
     });
   });
 });
