@@ -31,6 +31,7 @@ export interface ExportModalShareOpts {
   apiClient: ReportingAPIClient;
   startServices$: Rx.Observable<StartServices>;
   csvConfig?: ClientConfigType['csv'];
+  isServerless?: boolean;
 }
 
 export interface ExportPanelShareOpts {

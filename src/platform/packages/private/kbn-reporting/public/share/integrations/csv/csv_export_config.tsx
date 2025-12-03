@@ -57,7 +57,7 @@ export const getCsvReportParams: ReportParamsGetter<
  * @description Returns config for the CSV export integration
  */
 export const getShareMenuItems =
-  ({ apiClient, startServices$, csvConfig }: ExportModalShareOpts) =>
+  ({ apiClient, startServices$, csvConfig, isServerless = false }: ExportModalShareOpts) =>
   ({
     objectType,
     sharingData,
@@ -187,10 +187,11 @@ export const getShareMenuItems =
               iconType="warning"
             >
               <EuiText component="p" size="s">
-                {i18n.translate('reporting.share.csv.reporting.totalHitsSizeWarning.message', {
-                  defaultMessage:
-                    'This limit can be configured in kibana.yml, but increasing it may impact performance.',
-                })}
+                {!isServerless &&
+                  i18n.translate('reporting.share.csv.reporting.totalHitsSizeWarning.message', {
+                    defaultMessage:
+                      'This limit can be configured in kibana.yml, but increasing it may impact performance.',
+                  })}
               </EuiText>
             </EuiCallOut>
           );

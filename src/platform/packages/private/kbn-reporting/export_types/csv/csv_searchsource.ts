@@ -101,7 +101,8 @@ export class CsvSearchSourceExportType extends ExportType<
       dependencies,
       cancellationToken,
       logger,
-      stream
+      stream,
+      this.isServerless
     );
     return await csv.generateData();
   };

@@ -67,7 +67,8 @@ export class CsvGenerator {
     private dependencies: Dependencies,
     private cancellationToken: CancellationToken,
     private logger: Logger,
-    private stream: Writable
+    private stream: Writable,
+    private isServerless: boolean = false
   ) {}
   /*
    * Load field formats for each field in the list
@@ -434,7 +435,11 @@ export class CsvGenerator {
         // current number of rows is >= the max row limit
         if (currentRecord >= maxRows - 1) {
           this.logger.warn(
-            `Your requested export includes ${totalRecords} rows, which has exceeded the recommended row limit (${maxRows}). This limit can be configured in kibana.yml, but increasing it may impact performance.`
+            `Your requested export includes ${totalRecords} rows, which has exceeded the recommended row limit (${maxRows}).${
+              this.isServerless
+                ? ''
+                : ' This limit can be configured in kibana.yml, but increasing it may impact performance.'
+            }`
           );
           this.maxRowsReached = true;
           break;
@@ -469,7 +474,13 @@ export class CsvGenerator {
     logger.info(`Finished generating. Row count: ${this.csvRowCount}.`);
 
     if (this.maxRowsReached) {
-      warnings.push(i18nTexts.csvMaxRowsWarning({ maxRows, expected: totalRecords ?? 0 }));
+      warnings.push(
+        i18nTexts.csvMaxRowsWarning({
+          isServerless: this.isServerless,
+          maxRows,
+          expected: totalRecords ?? 0,
+        })
+      );
       userError = true;
     } else if (!this.maxSizeReached && !this.maxRowsReached && this.csvRowCount !== totalRecords) {
       logger.warn(

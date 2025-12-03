@@ -15,13 +15,14 @@ export const reportingCsvExportShareIntegration = ({
   apiClient,
   startServices$,
   csvConfig,
+  isServerless,
 }: ExportModalShareOpts): RegisterShareIntegrationArgs<ExportShare> => {
   return {
     id: 'csvReports',
     groupId: 'export',
     getShareIntegrationConfig: async (...args) => {
       const { getShareMenuItems } = await import('./csv_export_config');
-      return getShareMenuItems({ apiClient, startServices$, csvConfig })(...args);
+      return getShareMenuItems({ apiClient, startServices$, csvConfig, isServerless })(...args);
     },
     prerequisiteCheck: ({ license, capabilities }) => {
       if (!license) {

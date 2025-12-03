@@ -571,21 +571,11 @@ describe('CsvESQLGenerator', () => {
 
     it('adds maxRows limit to the query', async () => {
       const query = {
-        esql: 'FROM custom-metrics | WHERE event.ingested >= ?_tstart AND event.ingested <= ?_tend',
+        esql: 'FROM custom-metrics',
       };
-      const filters = [
-        {
-          meta: {},
-          query: {
-            range: {
-              'event.ingested': { format: 'strict_date_optional_time', gte: 'now-15m', lte: 'now' },
-            },
-          },
-        },
-      ];
 
       const generateCsv = new CsvESQLGenerator(
-        createMockJob({ query, filters }),
+        createMockJob({ query }),
         mockConfig,
         mockTaskInstanceFields,
         {
@@ -602,34 +592,9 @@ describe('CsvESQLGenerator', () => {
       expect(mockDataClient.search).toHaveBeenCalledWith(
         {
           params: {
-            filter: {
-              bool: {
-                filter: [
-                  {
-                    range: {
-                      'event.ingested': {
-                        format: 'strict_date_optional_time',
-                        gte: 'now-15m',
-                        lte: 'now',
-                      },
-                    },
-                  },
-                ],
-                must: [],
-                must_not: [],
-                should: [],
-              },
-            },
-            params: expect.arrayContaining([
-              expect.objectContaining({
-                _tstart: expect.any(String),
-              }),
-              expect.objectContaining({
-                _tend: expect.any(String),
-              }),
-            ]),
+            filter: undefined,
             locale: 'en',
-            query: `${query.esql} | limit 500`,
+            query: 'FROM custom-metrics | limit 500',
           },
         },
         {
