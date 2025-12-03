@@ -60,4 +60,3 @@ describe('filterAndStringifyAlertData', () => {
     expect(parsed).toEqual({});
   });
 });
-
