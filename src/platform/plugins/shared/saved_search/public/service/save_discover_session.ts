@@ -24,7 +24,6 @@ export type SaveDiscoverSessionParams = Pick<
   'title' | 'description' | 'tabs' | 'tags'
 > &
   Partial<Pick<DiscoverSession, 'id'>> & {
-    // projectRouting can be undefined (not provided), a value, or null (to explicitly clear)
     projectRouting?: DiscoverSession['projectRouting'] | null;
   };
 

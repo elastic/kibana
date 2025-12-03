@@ -213,15 +213,8 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
       description: newDescription,
       tabs: updatedTabs,
       tags: services.savedObjectsTagging ? newTags : state.persistedDiscoverSession?.tags,
+      projectRouting: newProjectRoutingRestore ? state.projectRouting : undefined,
     };
-
-    // Handle projectRouting: only include if toggle is ON, or if we need to explicitly clear it
-    if (newProjectRoutingRestore) {
-      saveParams.projectRouting = state.projectRouting;
-    } else if (state.persistedDiscoverSession?.projectRouting !== undefined) {
-      // Explicitly clear if it existed before
-      saveParams.projectRouting = null;
-    }
 
     const saveOptions: SaveDiscoverSessionOptions = {
       onTitleDuplicate,

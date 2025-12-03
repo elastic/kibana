@@ -44,10 +44,10 @@ export const deserializeState = async ({
     const { get } = discoverServices.savedSearch;
     const so = await get(savedObjectId, true);
 
-    // what is this??
     const rawSavedObjectAttributes = pick(so, EDITABLE_SAVED_SEARCH_KEYS);
     const savedObjectOverride = pick(serializedState.rawState, EDITABLE_SAVED_SEARCH_KEYS);
     return {
+      // ignore the time range from the saved object - only global time range + panel time range matter
       ...omit(so, 'timeRange'),
       savedObjectId,
       savedObjectTitle: so.title,

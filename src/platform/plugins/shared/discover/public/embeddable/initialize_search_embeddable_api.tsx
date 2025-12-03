@@ -90,7 +90,7 @@ export const initializeSearchEmbeddableApi = async (
 ): Promise<{
   api: PublishesWritableSavedSearch &
     PublishesWritableDataViews &
-    PublishesProjectRouting &
+    Partial<PublishesProjectRouting> &
     Partial<PublishesWritableUnifiedSearch>;
   stateManager: SearchEmbeddableStateManager;
   anyStateChange$: Observable<void>;
@@ -118,9 +118,9 @@ export const initializeSearchEmbeddableApi = async (
   const density$ = new BehaviorSubject<DataGridDensity | undefined>(initialState.density);
   const sort$ = new BehaviorSubject<SortOrder[] | undefined>(initialState.sort);
   const savedSearchViewMode$ = new BehaviorSubject<VIEW_MODE | undefined>(initialState.viewMode);
-  const projectRouting$ = new BehaviorSubject<ProjectRouting | undefined>(
-    initialState.projectRouting ?? undefined
-  );
+  const projectRouting$ = discoverServices.cps?.cpsManager
+    ? new BehaviorSubject<ProjectRouting | undefined>(initialState.projectRouting ?? undefined)
+    : undefined;
 
   /**
    * This is the state that comes from the search source that needs individual publishing subjects for the API
@@ -223,7 +223,7 @@ export const initializeSearchEmbeddableApi = async (
       setQuery,
       canEditUnifiedSearch,
       setColumns,
-      projectRouting$,
+      ...(projectRouting$ ? { projectRouting$ } : {}),
     },
     stateManager,
     anyStateChange$: onAnyStateChange.pipe(map(() => undefined)),
@@ -250,7 +250,7 @@ export const initializeSearchEmbeddableApi = async (
       headerRowHeight$.next(lastSaved?.headerRowHeight);
       savedSearchViewMode$.next(lastSaved?.viewMode);
       density$.next(lastSaved?.density);
-      projectRouting$.next(lastSaved?.projectRouting ?? undefined);
+      projectRouting$?.next(lastSaved?.projectRouting ?? undefined);
     },
   };
 };
