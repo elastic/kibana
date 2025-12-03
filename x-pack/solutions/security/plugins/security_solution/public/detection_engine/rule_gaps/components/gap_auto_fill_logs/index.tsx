@@ -48,7 +48,7 @@ const statuses: GapAutoFillStatus[] = [
 ];
 
 export const GapAutoFillLogsFlyout = ({ isOpen, onClose }: GapAutoFillLogsFlyoutProps) => {
-  const { data: scheduler } = useGetGapAutoFillScheduler();
+  const { data: scheduler } = useGetGapAutoFillScheduler({ enabled: isOpen });
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([
@@ -62,6 +62,7 @@ export const GapAutoFillLogsFlyout = ({ isOpen, onClose }: GapAutoFillLogsFlyout
     statuses: selectedStatuses,
     sortField: '@timestamp',
     sortDirection: 'desc',
+    enabled: isOpen,
   });
 
   type SchedulerLog = GapAutoFillSchedulerLogsResponseBodyV1['data'][number];

@@ -14,10 +14,10 @@ import * as i18n from './translations';
 import { RuleSettingsModal } from '../rule_settings_modal';
 import { useGapAutoFillCapabilities } from '../../logic/use_gap_auto_fill_capabilities';
 
-export const GapAutoFillStatus = () => {
-  const { canAccessGapAutoFill } = useGapAutoFillCapabilities();
+export const GapAutoFillStatus = React.memo(() => {
+  const { canAccessGapAutoFill, loading } = useGapAutoFillCapabilities();
   const { data: gapAutoFillScheduler, isLoading: isGapAutoFillSchedulerLoading } =
-    useGetGapAutoFillScheduler({ enabled: canAccessGapAutoFill });
+    useGetGapAutoFillScheduler({ enabled: canAccessGapAutoFill && !loading });
   const [isRuleSettingsModalOpen, openRuleSettingsModal, closeRuleSettingsModal] = useBoolState();
   const isStatusLoading = isGapAutoFillSchedulerLoading && !gapAutoFillScheduler;
   const isEnabled = gapAutoFillScheduler?.enabled ?? false;
@@ -63,4 +63,6 @@ export const GapAutoFillStatus = () => {
       )}
     </EuiFlexGroup>
   );
-};
+});
+
+GapAutoFillStatus.displayName = 'GapAutoFillStatus';

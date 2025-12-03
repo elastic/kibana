@@ -63,7 +63,7 @@ export const useGetGapAutoFillScheduler = (options?: { enabled?: boolean }) => {
       const response = await getGapAutoFillScheduler({ id: schedulerId, signal });
       return transformGapAutoFillSchedulerResponseBody(response);
     },
-    { enabled }
+    { enabled, refetchOnWindowFocus: false, retry: false }
   );
 };
 
@@ -121,12 +121,14 @@ export const useGetGapAutoFillSchedulerLogs = ({
   sortField,
   sortDirection,
   statuses,
+  enabled,
 }: {
   page: number;
   perPage: number;
   sortField: string;
   sortDirection: string;
   statuses: string[];
+  enabled: boolean;
 }) => {
   const spaceId = useSpaceId();
   const schedulerId = getSchedulerId(spaceId);
@@ -174,6 +176,9 @@ export const useGetGapAutoFillSchedulerLogs = ({
         page: response.page,
         perPage: response.per_page,
       };
+    },
+    {
+      enabled,
     }
   );
 };

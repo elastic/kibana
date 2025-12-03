@@ -16,7 +16,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_exper
  */
 export const useGapAutoFillCapabilities = () => {
   const license = useLicense();
-  const [{ canUserCRUD }] = useUserData();
+  const [{ canUserCRUD, loading }] = useUserData();
   const gapAutoFillSchedulerEnabled = useIsExperimentalFeatureEnabled(
     'gapAutoFillSchedulerEnabled'
   );
@@ -25,11 +25,12 @@ export const useGapAutoFillCapabilities = () => {
 
   return useMemo(
     () => ({
+      loading,
       hasEnterpriseLicense,
       hasCrudPrivileges,
       canAccessGapAutoFill: gapAutoFillSchedulerEnabled && hasEnterpriseLicense,
       canEditGapAutoFill: gapAutoFillSchedulerEnabled && hasEnterpriseLicense && hasCrudPrivileges,
     }),
-    [gapAutoFillSchedulerEnabled, hasEnterpriseLicense, hasCrudPrivileges]
+    [gapAutoFillSchedulerEnabled, hasEnterpriseLicense, hasCrudPrivileges, loading]
   );
 };
