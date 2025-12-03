@@ -161,13 +161,13 @@ export class LicenseState {
       );
     }
 
-    if (!this.license.hasAtLeast('platinum')) {
+    if (!this.license.hasAtLeast('enterprise')) {
       throw Boom.forbidden(
         i18n.translate(
           'xpack.alerting.serverSideErrors.gapAutoFillScheduler.invalidLicenseErrorMessage',
           {
             defaultMessage:
-              'Gap auto fill scheduler is disabled because it requires a platinum license. Go to License Management to view upgrade options.',
+              'Gap auto fill scheduler is disabled because it requires an enterprise license. Go to License Management to view upgrade options.',
           }
         )
       );

@@ -20,16 +20,16 @@ export const useGapAutoFillCapabilities = () => {
   const gapAutoFillSchedulerEnabled = useIsExperimentalFeatureEnabled(
     'gapAutoFillSchedulerEnabled'
   );
-  const hasPlatinumLicense = license.isPlatinumPlus();
+  const hasEnterpriseLicense = license.isEnterprise();
   const hasCrudPrivileges = hasUserCRUDPermission(canUserCRUD);
 
   return useMemo(
     () => ({
-      hasPlatinumLicense,
+      hasEnterpriseLicense,
       hasCrudPrivileges,
-      canAccessGapAutoFill: gapAutoFillSchedulerEnabled && hasPlatinumLicense,
-      canEditGapAutoFill: gapAutoFillSchedulerEnabled && hasPlatinumLicense && hasCrudPrivileges,
+      canAccessGapAutoFill: gapAutoFillSchedulerEnabled && hasEnterpriseLicense,
+      canEditGapAutoFill: gapAutoFillSchedulerEnabled && hasEnterpriseLicense && hasCrudPrivileges,
     }),
-    [gapAutoFillSchedulerEnabled, hasPlatinumLicense, hasCrudPrivileges]
+    [gapAutoFillSchedulerEnabled, hasEnterpriseLicense, hasCrudPrivileges]
   );
 };

@@ -29,7 +29,7 @@ describe('useGapAutoFillCapabilities', () => {
     jest.clearAllMocks();
     mockUseUserData.mockReturnValue([{ canUserCRUD: true }, jest.fn()]);
     mockUseLicense.mockReturnValue({
-      isPlatinumPlus: () => true,
+      isEnterprise: () => true,
     });
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
   });
@@ -41,9 +41,9 @@ describe('useGapAutoFillCapabilities', () => {
     expect(result.current.canEditGapAutoFill).toBe(true);
   });
 
-  it('denies access when license is below platinum', () => {
+  it('denies access when license is below enterprise', () => {
     mockUseLicense.mockReturnValue({
-      isPlatinumPlus: () => false,
+      isEnterprise: () => false,
     });
 
     const { result } = renderHook(() => useGapAutoFillCapabilities());
@@ -52,9 +52,9 @@ describe('useGapAutoFillCapabilities', () => {
     expect(result.current.canEditGapAutoFill).toBe(false);
   });
 
-  it('denies edit rights when license is platinum but user lacks CRUD', () => {
+  it('denies edit rights when license is enterprise but user lacks CRUD', () => {
     mockUseLicense.mockReturnValue({
-      isPlatinumPlus: () => true,
+      isEnterprise: () => true,
     });
     mockUseUserData.mockReturnValue([{ canUserCRUD: false }, jest.fn()]);
 
