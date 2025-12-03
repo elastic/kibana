@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-import type { Feature } from '@kbn/streams-schema';
-
-export const useStreamFeatureEventsData = (feature: Feature) => {
-  return [];
-};
+export * from './v4';
