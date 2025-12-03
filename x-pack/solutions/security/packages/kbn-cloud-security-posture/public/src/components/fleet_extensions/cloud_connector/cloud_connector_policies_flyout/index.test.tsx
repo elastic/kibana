@@ -40,6 +40,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
     cloudConnectorName: 'Test Connector',
     cloudConnectorVars: {
       role_arn: { value: 'arn:aws:iam::123456789012:role/TestRole' },
+      external_id: { value: { isSecretRef: true, id: 'secret-ref-id-123' } },
     },
     provider: 'aws' as const,
     onClose: mockOnClose,
