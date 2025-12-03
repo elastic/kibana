@@ -77,6 +77,8 @@ export const RuleSettingsModal: React.FC<RuleSettingsModalProps> = ({ isOpen, on
 
   if (!canAccessGapAutoFill) return null;
 
+  const isSaveBtnDisabled = !canEditGapAutoFill || (!enabled && !gapAutoFillScheduler) || isSaving;
+
   return (
     <div>
       {isModalOpen && (
@@ -141,7 +143,7 @@ export const RuleSettingsModal: React.FC<RuleSettingsModalProps> = ({ isOpen, on
               onClick={onSave}
               fill
               isLoading={isSaving}
-              isDisabled={!canEditGapAutoFill}
+              isDisabled={isSaveBtnDisabled}
               data-test-subj="rule-settings-save"
             >
               {i18n.RULE_SETTINGS_MODAL_SAVE}
