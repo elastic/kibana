@@ -92,7 +92,9 @@
     "@kbn/react-query",
     "@kbn/core-http-server",
     "@kbn/core-chrome-layout-utils",
-    "@kbn/cps"
+    "@kbn/cps",
+    "@kbn/as-code-filters-schema",
+    "@kbn/as-code-filters-transforms"
   ],
   "exclude": ["target/**/*"]
 }

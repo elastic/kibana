@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { toStoredFilters } from '@kbn/es-query';
+import { toStoredFilters } from '@kbn/as-code-filters-transforms';
 import { extractReferences } from '@kbn/data-plugin/common';
 import type { DashboardState } from '../../types';
 import { logger } from '../../../kibana_services';

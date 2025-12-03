@@ -11,13 +11,9 @@ import type { ControlGroupApi } from '@kbn/controls-plugin/public';
 import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
 import { connectToQueryState, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import {
-  COMPARE_ALL_OPTIONS,
-  compareFilters,
-  fromStoredFilters,
-  isFilterPinned,
-  toStoredFilters,
-} from '@kbn/es-query';
+import { COMPARE_ALL_OPTIONS, compareFilters, isFilterPinned } from '@kbn/es-query';
+import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
+import { toStoredFilters, fromStoredFilters } from '@kbn/as-code-filters-transforms';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import { diffComparators } from '@kbn/presentation-publishing';
@@ -40,7 +36,6 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
-import type { AsCodeFilter } from '@kbn/es-query-server';
 import { dataService } from '../services/kibana_services';
 import { logger } from '../services/logger';
 import { GLOBAL_STATE_STORAGE_KEY } from '../utils/urls';
