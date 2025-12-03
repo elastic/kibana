@@ -23,7 +23,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_exper
 import { NewAgentBuilderAttachment } from '../../../agent_builder/components/new_agent_builder_attachment';
 import { useAgentBuilderAttachment } from '../../../agent_builder/hooks/use_agent_builder_attachment';
 import { getRawData } from '../../../assistant/helpers';
-import { filterAndStringifyAlertData } from '../../../agent_builder/helpers';
+import { stringifyEssentialAlertData } from '../../../agent_builder/helpers';
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 
 export const ASK_AI_ASSISTANT = i18n.translate(
@@ -54,7 +54,7 @@ export const PanelFooter: FC<PanelFooterProps> = ({ isRulePreview }) => {
 
   const alertData = useMemo(() => {
     const rawData = getRawData(dataFormattedForFieldBrowser ?? []);
-    return filterAndStringifyAlertData(rawData);
+    return stringifyEssentialAlertData(rawData);
   }, [dataFormattedForFieldBrowser]);
 
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
