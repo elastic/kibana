@@ -95,17 +95,6 @@ export function TraceWaterfallContextProvider({
       isFiltered,
     });
 
-  const traceStateContext = useTraceStateContext();
-  const setTraceState = traceStateContext?.setTraceState;
-
-  console.log('WATERFALL traceStateContext', traceStateContext);
-  useEffect(() => {
-    console.log('WATERFALL setTraceState', traceState);
-    if (setTraceState) {
-      setTraceState(traceState);
-    }
-  }, [traceState, setTraceState]);
-
   const left = TOGGLE_BUTTON_WIDTH + ACCORDION_PADDING_LEFT * maxDepth;
   const right = 40;
 
