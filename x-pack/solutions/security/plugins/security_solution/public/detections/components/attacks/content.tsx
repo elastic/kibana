@@ -19,6 +19,7 @@ import { useGlobalFullScreen } from '../../../common/containers/use_full_screen'
 import { Display } from '../../../explore/hosts/pages/display';
 import { SearchBarSection } from './search_bar/search_bar_section';
 import { SchedulesFlyout } from './schedule_flyout';
+import { TableSection } from './table/table_section';
 
 export const CONTENT_TEST_ID = 'attacks-page-content';
 export const SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID = 'attacks-page-security-solution-page-wrapper';
@@ -69,6 +70,8 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
           <EuiHorizontalRule margin="none" />
           <EuiSpacer size="l" />
         </Display>
+
+        <TableSection dataView={dataView} />
 
         {showFlyout && <SchedulesFlyout onClose={onClose} />}
       </SecuritySolutionPageWrapper>

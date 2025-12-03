@@ -8,6 +8,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import type {
   BaseLogsParams,
   ExecutionLogsParams,
@@ -18,18 +19,18 @@ import type {
   WorkflowEventLoggerContext,
 } from './types';
 import { WorkflowEventLogger } from './workflow_event_logger';
-import type {
-  LogSearchResult,
-  LogsRepository,
-  SearchLogsParams,
-} from '../repositories/logs_repository';
+import type { LogSearchResult, SearchLogsParams } from '../repositories/logs_repository';
+import { LogsRepository } from '../repositories/logs_repository';
 
 export class WorkflowEventLoggerService implements IWorkflowEventLoggerService {
+  private logsRepository: LogsRepository;
   constructor(
-    private readonly logsRepository: LogsRepository,
+    dataStreams: DataStreamsStart,
     private readonly logger: Logger,
     private readonly enableConsoleLogging: boolean = false
-  ) {}
+  ) {
+    this.logsRepository = new LogsRepository(dataStreams);
+  }
 
   public createLogger(context: WorkflowEventLoggerContext): IWorkflowEventLogger {
     return new WorkflowEventLogger(this.logsRepository, this.logger, context, {

@@ -1,10 +1,7 @@
 {
   "type": "shared-browser",
   "id": "@kbn/event-stacktrace",
-  "owner": [
-    "@elastic/obs-ux-infra_services-team",
-    "@elastic/obs-exploration-team"
-  ],
+  "owner": ["@elastic/obs-presentation-team", "@elastic/obs-exploration-team"],
   "group": "platform",
   "visibility": "shared"
 }

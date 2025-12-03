@@ -28,6 +28,7 @@ import type { ValueMetrics } from './metrics';
 import { TimeSaved } from './time_saved';
 import { FilteringRate } from './filtering_rate';
 import { ThreatsDetected } from './threats_detected';
+import { useAIValueExportContext } from '../../providers/ai_value/export_provider';
 
 interface Props {
   attackAlertIds: string[];
@@ -69,6 +70,8 @@ export const ExecutiveSummary: React.FC<Props> = ({
     },
     [updateTitle]
   );
+  const aiValueExportContext = useAIValueExportContext();
+  const isExportMode = aiValueExportContext?.isExportMode === true;
   const subtitle = useMemo(() => {
     const fromDate = new Date(from);
     const toDate = new Date(to);
@@ -105,6 +108,7 @@ export const ExecutiveSummary: React.FC<Props> = ({
       `}
     >
       <EuiInlineEditTitle
+        isReadOnly={isExportMode}
         className="executiveSummaryTitle"
         data-test-subj="executiveSummaryTitle"
         size="l"
@@ -134,7 +138,7 @@ export const ExecutiveSummary: React.FC<Props> = ({
           data-test-subj="executiveSummaryMainInfo"
         >
           <span>
-            <EuiText size="s">
+            <EuiText size="s" color="subdued">
               {isLoading ? (
                 <EuiSkeletonText lines={3} size="s" isLoading={true} />
               ) : hasAttackDiscoveries ? (

@@ -46,6 +46,7 @@ export type DatasetQualityDetailsPublicStateUpdate = Partial<
     | 'selectedFields'
     | 'expandedQualityIssue'
     | 'qualityIssuesChart'
+    | 'streamDefinition'
   >
 > & {
   dataStream: string;

@@ -302,6 +302,7 @@ export const item: GetInfoResponse['item'] = {
       transform: [],
       ml_model: [],
       knowledge_base: [],
+      esql_view: [],
     },
   },
   policy_templates: [

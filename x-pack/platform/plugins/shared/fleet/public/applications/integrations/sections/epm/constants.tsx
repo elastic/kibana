@@ -130,6 +130,9 @@ export const AssetTitleMap: Record<
   alert: i18n.translate('xpack.fleet.epm.assetTitles.rules', {
     defaultMessage: 'Rules',
   }),
+  esql_view: i18n.translate('xpack.fleet.epm.assetTitles.esqlViews', {
+    defaultMessage: 'ES|QL views',
+  }),
 };
 
 export const ServiceTitleMap: Record<ServiceName, string> = {

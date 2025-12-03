@@ -22,6 +22,7 @@ import {
 import type { ToolCallStep } from '@kbn/onechat-common';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { codeblockStyles } from './codeblock.styles';
 
 const labels = {
   parameters: i18n.translate('xpack.onechat.round.thinking.steps.thinkingItemLayout.parameters', {
@@ -70,7 +71,7 @@ const Accordion = ({ children, accordionContent }: AccordionProps) => {
             </EuiText>
           </EuiSplitPanel.Inner>
           <EuiSplitPanel.Inner paddingSize="none">
-            <EuiCodeBlock isCopyable paddingSize="m" lineNumbers>
+            <EuiCodeBlock isCopyable paddingSize="m" lineNumbers css={codeblockStyles}>
               {JSON.stringify(accordionContent, null, 2)}
             </EuiCodeBlock>
           </EuiSplitPanel.Inner>

@@ -76,6 +76,7 @@ export const AlertProcessingKeyInsight: React.FC<Props> = ({ isLoading, valueMet
             css={css`
               line-height: 1.6em;
             `}
+            color="subdued"
           >
             <ul>
               <li

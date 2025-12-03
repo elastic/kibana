@@ -192,36 +192,22 @@ export const WithNotificationIndicator = {
   args: {
     showNotificationIndicator: true,
     notifcationIndicatorTooltipContent: 'You have unsaved changes',
+    notificationIndicatorColor: 'primary',
+    notificationIndicatorSize: 'l',
     size: 'm',
   },
   render: (args: {
     showNotificationIndicator: boolean;
     notifcationIndicatorTooltipContent: string;
-    size: React.ComponentProps<typeof SplitButton>['size'];
-  }) => (
-    <SplitButtonWithNotification secondaryButtonIcon={DEFAULT_SECONDARY_ICON} {...args}>
-      Save
-    </SplitButtonWithNotification>
-  ),
-};
-
-export const WithCustomColorIndicator = {
-  name: 'With custom color indicator',
-  args: {
-    showNotificationIndicator: true,
-    notificationIndicatorColor: 'success',
-    notifcationIndicatorTooltipContent: 'You have unsaved changes',
-    size: 'm',
-  },
-  render: (args: {
-    showNotificationIndicator: boolean;
     notificationIndicatorColor: React.ComponentProps<
       typeof SplitButtonWithNotification
     >['notificationIndicatorColor'];
-    notifcationIndicatorTooltipContent: string;
+    notificationIndicatorSize: React.ComponentProps<
+      typeof SplitButtonWithNotification
+    >['notificationIndicatorSize'];
     size: React.ComponentProps<typeof SplitButton>['size'];
   }) => (
-    <SplitButtonWithNotification secondaryButtonIcon={DEFAULT_SECONDARY_ICON} {...args}>
+    <SplitButtonWithNotification secondaryButtonIcon="arrowDown" {...args}>
       Save
     </SplitButtonWithNotification>
   ),

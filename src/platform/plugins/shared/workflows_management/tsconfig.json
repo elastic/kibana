@@ -72,7 +72,8 @@
     "@kbn/core-http-server-mocks",
     "@kbn/core-elasticsearch-server",
     "@kbn/safer-lodash-set",
-    "@kbn/connector-specs"
+    "@kbn/connector-specs",
+    "@kbn/workflows-extensions"
   ],
   "exclude": ["target/**/*"]
 }

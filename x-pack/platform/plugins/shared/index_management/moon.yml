@@ -72,6 +72,7 @@ dependsOn:
   - '@kbn/upgrade-assistant-pkg-common'
   - '@kbn/failure-store-modal'
   - '@kbn/react-query'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod

@@ -9071,11 +9071,11 @@
           },
           {
             "plugin": "@kbn/esql-validation-autocomplete",
-            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/get_query_for_fields.test.ts"
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/get_query_for_fields.test.ts"
           },
           {
             "plugin": "@kbn/esql-validation-autocomplete",
-            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/get_query_for_fields.test.ts"
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/get_query_for_fields.test.ts"
           }
         ],
         "children": [

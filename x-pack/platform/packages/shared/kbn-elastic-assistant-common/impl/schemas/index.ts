@@ -32,6 +32,7 @@ export * from './attack_discovery/routes/internal/get/get_attack_discovery_gener
 export * from './attack_discovery/routes/internal/post/post_attack_discovery_generations_dismiss.route.gen';
 export * from './attack_discovery/routes/internal/schedules/find_attack_discovery_schedules_route.gen';
 export * from './attack_discovery/routes/internal/schedules/schedules.gen';
+export * from './attack_discovery/routes/internal/privileges/get_missing_privileges.gen';
 
 export { AttackDiscoveryApiSchedule } from './attack_discovery/routes/public/schedules/schedules_api.gen';
 

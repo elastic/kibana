@@ -674,7 +674,11 @@
             "ZodString",
             "; }, \"strip\", ",
             "ZodTypeAny",
-            ", { query: string; }, { query: string; }>; }, \"strip\", ",
+            ", { query: string; }, { query: string; }>; severity_score: ",
+            "ZodOptional",
+            "<",
+            "ZodNumber",
+            ">; }, \"strip\", ",
             "ZodTypeAny",
             ", { title: string; kql: { query: string; }; feature?: { name: string; filter: ",
             {
@@ -684,7 +688,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; } | undefined; }, { title: string; kql: { query: string; }; feature?: { name: string; filter: ",
+            "; } | undefined; severity_score?: number | undefined; }, { title: string; kql: { query: string; }; feature?: { name: string; filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -692,7 +696,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; } | undefined; }>; }, \"strip\", ",
+            "; } | undefined; severity_score?: number | undefined; }>; }, \"strip\", ",
             "ZodTypeAny",
             ", { path: { name: string; queryId: string; }; body: { title: string; kql: { query: string; }; feature?: { name: string; filter: ",
             {
@@ -702,7 +706,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; } | undefined; }; }, { path: { name: string; queryId: string; }; body: { title: string; kql: { query: string; }; feature?: { name: string; filter: ",
+            "; } | undefined; severity_score?: number | undefined; }; }, { path: { name: string; queryId: string; }; body: { title: string; kql: { query: string; }; feature?: { name: string; filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -710,7 +714,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; } | undefined; }; }>, ",
+            "; } | undefined; severity_score?: number | undefined; }; }>, ",
             "StreamsRouteHandlerResources",
             ", ",
             "UpsertQueryResponse",
@@ -2224,27 +2228,11 @@
               "section": "def-common.SystemFeature",
               "text": "SystemFeature"
             },
-            "; }, undefined>; \"GET /internal/streams/{name}/failure_store/default_retention\": ",
-            {
-              "pluginId": "@kbn/server-route-repository-utils",
-              "scope": "common",
-              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-              "section": "def-common.ServerRoute",
-              "text": "ServerRoute"
-            },
-            "<\"GET /internal/streams/{name}/failure_store/default_retention\", ",
-            "ZodObject",
-            "<{ path: ",
-            "ZodObject",
-            "<{ name: ",
-            "ZodString",
-            "; }, \"strip\", ",
-            "ZodTypeAny",
-            ", { name: string; }, { name: string; }>; }, \"strip\", ",
-            "ZodTypeAny",
-            ", { path: { name: string; }; }, { path: { name: string; }; }>, ",
+            "; }, undefined>; \"GET /internal/streams/failure_store/default_retention\": { endpoint: \"GET /internal/streams/failure_store/default_retention\"; handler: ServerRouteHandler<",
             "StreamsRouteHandlerResources",
-            ", { default_retention: string | undefined; }, undefined>; \"GET /internal/streams/{name}/failure_store/stats\": ",
+            ", undefined, { default_retention: string | undefined; }>; security: ",
+            "RouteSecurity",
+            "; }; \"GET /internal/streams/{name}/failure_store/stats\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -3256,7 +3244,11 @@
           "ZodString",
           "; }, \"strip\", ",
           "ZodTypeAny",
-          ", { query: string; }, { query: string; }>; }, \"strip\", ",
+          ", { query: string; }, { query: string; }>; severity_score: ",
+          "ZodOptional",
+          "<",
+          "ZodNumber",
+          ">; }, \"strip\", ",
           "ZodTypeAny",
           ", { title: string; kql: { query: string; }; feature?: { name: string; filter: ",
           {
@@ -3266,7 +3258,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; } | undefined; }, { title: string; kql: { query: string; }; feature?: { name: string; filter: ",
+          "; } | undefined; severity_score?: number | undefined; }, { title: string; kql: { query: string; }; feature?: { name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3274,7 +3266,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; } | undefined; }>; }, \"strip\", ",
+          "; } | undefined; severity_score?: number | undefined; }>; }, \"strip\", ",
           "ZodTypeAny",
           ", { path: { name: string; queryId: string; }; body: { title: string; kql: { query: string; }; feature?: { name: string; filter: ",
           {
@@ -3284,7 +3276,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; } | undefined; }; }, { path: { name: string; queryId: string; }; body: { title: string; kql: { query: string; }; feature?: { name: string; filter: ",
+          "; } | undefined; severity_score?: number | undefined; }; }, { path: { name: string; queryId: string; }; body: { title: string; kql: { query: string; }; feature?: { name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3292,7 +3284,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; } | undefined; }; }>, ",
+          "; } | undefined; severity_score?: number | undefined; }; }>, ",
           "StreamsRouteHandlerResources",
           ", ",
           "UpsertQueryResponse",
@@ -4806,27 +4798,11 @@
             "section": "def-common.SystemFeature",
             "text": "SystemFeature"
           },
-          "; }, undefined>; \"GET /internal/streams/{name}/failure_store/default_retention\": ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"GET /internal/streams/{name}/failure_store/default_retention\", ",
-          "ZodObject",
-          "<{ path: ",
-          "ZodObject",
-          "<{ name: ",
-          "ZodString",
-          "; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { name: string; }, { name: string; }>; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { path: { name: string; }; }, { path: { name: string; }; }>, ",
+          "; }, undefined>; \"GET /internal/streams/failure_store/default_retention\": { endpoint: \"GET /internal/streams/failure_store/default_retention\"; handler: ServerRouteHandler<",
           "StreamsRouteHandlerResources",
-          ", { default_retention: string | undefined; }, undefined>; \"GET /internal/streams/{name}/failure_store/stats\": ",
+          ", undefined, { default_retention: string | undefined; }>; security: ",
+          "RouteSecurity",
+          "; }; \"GET /internal/streams/{name}/failure_store/stats\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",

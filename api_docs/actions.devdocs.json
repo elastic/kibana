@@ -4202,7 +4202,9 @@
           "label": "getAxiosInstanceWithAuth",
           "description": [],
           "signature": [
-            "(validatedSecrets: Record<string, unknown>) => Promise<",
+            "(opts: ",
+            "GetAxiosInstanceWithAuthFnOpts",
+            ") => Promise<",
             "AxiosInstance",
             ">"
           ],
@@ -4215,10 +4217,10 @@
               "id": "def-server.PluginSetupContract.getAxiosInstanceWithAuth.$1",
               "type": "Object",
               "tags": [],
-              "label": "validatedSecrets",
+              "label": "opts",
               "description": [],
               "signature": [
-                "Record<string, unknown>"
+                "GetAxiosInstanceWithAuthFnOpts"
               ],
               "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
               "deprecated": false,

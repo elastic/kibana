@@ -8,19 +8,27 @@
  */
 
 import React from 'react';
-import { EuiIconTip, euiButtonSizeMap, useEuiTheme, type IconColor } from '@elastic/eui';
+import {
+  EuiIconTip,
+  euiButtonSizeMap,
+  useEuiTheme,
+  type IconColor,
+  type IconSize,
+} from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { SplitButton, type SplitButtonProps } from './split_button';
 
 export type SplitButtonWithNotificationProps = SplitButtonProps & {
   showNotificationIndicator?: boolean;
   notificationIndicatorColor?: IconColor;
+  notificationIndicatorSize?: IconSize;
   notifcationIndicatorTooltipContent?: string;
 };
 
 export const SplitButtonWithNotification = ({
   showNotificationIndicator = false,
-  notificationIndicatorColor,
+  notificationIndicatorColor = 'primary',
+  notificationIndicatorSize = 'l',
   notifcationIndicatorTooltipContent,
   ...splitButtonProps
 }: SplitButtonWithNotificationProps) => {
@@ -34,9 +42,7 @@ export const SplitButtonWithNotification = ({
    * */
   const size = splitButtonProps?.size ?? 'm';
   const buttonSizes = euiButtonSizeMap(euiThemeContext);
-  const secondaryButtonWidth = buttonSizes[size].height;
-
-  const notificationColor = notificationIndicatorColor || euiThemeContext.euiTheme.colors.primary;
+  const secondaryButtonWidth = buttonSizes[size]?.height;
 
   return (
     <div css={styles.buttonWrapper}>
@@ -53,10 +59,8 @@ export const SplitButtonWithNotification = ({
         >
           <EuiIconTip
             type="dot"
-            iconProps={{
-              color: notificationColor,
-            }}
-            size="l"
+            size={notificationIndicatorSize}
+            color={notificationIndicatorColor}
             content={notifcationIndicatorTooltipContent}
           />
         </div>

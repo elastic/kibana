@@ -96,10 +96,10 @@ test.describe(
       // Click the "Add field" button
       await page.getByTestId('streamsAppContentAddFieldButton').click();
 
-      // Verify the add field flyout opens
-      await expect(
-        page.getByTestId('streamsAppSchemaEditorAddFieldFlyoutCloseButton')
-      ).toBeVisible();
+      // Wait `/fields_metadata` so that we are sure the ECS/Otel mapping recommendations are available
+      await page.waitForResponse(
+        (response) => response.url().includes('/fields_metadata') && response.ok()
+      );
 
       // Add an Otel field that should have type recommendation (IP type)
       const ecsFieldName = 'resource.attributes.host.ip';
@@ -108,11 +108,7 @@ test.describe(
       await page.keyboard.press('Enter');
 
       // Wait for ECS/Otel recommendation to load and field type to be pre-selected
-      await expect
-        .poll(async () => await pageObjects.streams.fieldTypeSuperSelect.getSelectedValue(), {
-          timeout: 2000,
-        })
-        .toBe('ip');
+      await expect(pageObjects.streams.fieldTypeSuperSelect.valueInputLocator).toHaveValue('ip');
 
       await page.getByTestId('streamsAppSchemaEditorAddFieldButton').click();
       await expect(

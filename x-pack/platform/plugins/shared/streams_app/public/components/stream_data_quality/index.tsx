@@ -13,12 +13,14 @@ import { useDatasetQualityController } from '../../hooks/use_dataset_quality_con
 
 export function StreamDetailDataQuality({
   definition,
+  refreshDefinition,
 }: {
   definition: Streams.ingest.all.GetResponse;
+  refreshDefinition?: () => void;
 }) {
   const { datasetQuality } = useKibana().dependencies.start;
 
-  const controller = useDatasetQualityController(definition);
+  const controller = useDatasetQualityController(definition, true, refreshDefinition);
 
   return controller ? (
     <datasetQuality.DatasetQualityDetails controller={controller} />

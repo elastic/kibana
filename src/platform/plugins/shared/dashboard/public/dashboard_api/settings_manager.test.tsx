@@ -100,4 +100,28 @@ describe('initializeSettingsManager', () => {
       });
     });
   });
+
+  describe('projectRoutingRestore deserialization', () => {
+    test('Should set projectRoutingRestore to false when projectRouting is undefined', () => {
+      const state: DashboardState = {
+        ...getSampleDashboardState(),
+        // projectRouting is undefined
+      };
+      const settingsManager = initializeSettingsManager(state);
+      const settings = settingsManager.api.getSettings();
+
+      expect(settings.projectRoutingRestore).toBe(false);
+    });
+
+    test('Should set projectRoutingRestore to true when project_routing is a string', () => {
+      const state: DashboardState = {
+        ...getSampleDashboardState(),
+        project_routing: '_alias:_origin',
+      };
+      const settingsManager = initializeSettingsManager(state);
+      const settings = settingsManager.api.getSettings();
+
+      expect(settings.projectRoutingRestore).toBe(true);
+    });
+  });
 });

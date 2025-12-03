@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { createPortal } from 'react-dom';
-import { EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
@@ -280,6 +281,7 @@ function InnerESQLEditor({
   runQuery,
   esqlVariables,
 }: InnerEditorProps) {
+  const { euiTheme } = useEuiTheme();
   const { onSaveControl, onCancelControl } = useESQLVariables({
     parentApi,
     panelId,
@@ -290,39 +292,46 @@ function InnerESQLEditor({
   const hideTimeFilterInfo = false;
   return (
     <EuiFlexItem grow={false} data-test-subj="InlineEditingESQLEditor">
-      <ESQLLangEditor
-        query={query}
-        onTextLangQueryChange={setQuery}
-        detectedTimestamp={adHocDataViews?.[0]?.timeFieldName}
-        hideTimeFilterInfo={hideTimeFilterInfo}
-        errors={errors}
-        warning={
-          suggestsLimitedColumns
-            ? i18n.translate('xpack.lens.config.configFlyoutCallout', {
-                defaultMessage:
-                  'Displaying a limited portion of the available fields. Add more from the configuration panel.',
-              })
-            : undefined
-        }
-        editorIsInline
-        hideRunQueryText
-        onTextLangQuerySubmit={async (q, a) => {
-          // do not run the suggestions if the query is the same as the previous one
-          if (q && !isEqual(q, prevQuery.current)) {
-            setIsVisualizationLoading(true);
-            await runQuery(q, a);
+      <div
+        css={css`
+          border-top: ${euiTheme.border.thin};
+          background-color: ${euiTheme.colors.backgroundBaseHighlighted};
+        `}
+      >
+        <ESQLLangEditor
+          query={query}
+          onTextLangQueryChange={setQuery}
+          detectedTimestamp={adHocDataViews?.[0]?.timeFieldName}
+          hideTimeFilterInfo={hideTimeFilterInfo}
+          errors={errors}
+          warning={
+            suggestsLimitedColumns
+              ? i18n.translate('xpack.lens.config.configFlyoutCallout', {
+                  defaultMessage:
+                    'Displaying a limited portion of the available fields. Add more from the configuration panel.',
+                })
+              : undefined
           }
-        }}
-        isDisabled={false}
-        allowQueryCancellation
-        isLoading={isVisualizationLoading}
-        controlsContext={{
-          supportsControls: parentApi !== undefined,
-          onSaveControl,
-          onCancelControl,
-        }}
-        esqlVariables={esqlVariables}
-      />
+          editorIsInline
+          hideRunQueryText
+          onTextLangQuerySubmit={async (q, a) => {
+            // do not run the suggestions if the query is the same as the previous one
+            if (q && !isEqual(q, prevQuery.current)) {
+              setIsVisualizationLoading(true);
+              await runQuery(q, a);
+            }
+          }}
+          isDisabled={false}
+          allowQueryCancellation
+          isLoading={isVisualizationLoading}
+          controlsContext={{
+            supportsControls: parentApi !== undefined,
+            onSaveControl,
+            onCancelControl,
+          }}
+          esqlVariables={esqlVariables}
+        />
+      </div>
     </EuiFlexItem>
   );
 }

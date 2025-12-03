@@ -74,6 +74,13 @@ export const convertFromMaintenanceWindowToForm = (
     }
   }
 
+  if (frequency === Frequency.DAILY && rRule.byweekday) {
+    recurringSchedule.byweekday = getInitialByWeekday(
+      rRule.byweekday as string[],
+      moment(startDate)
+    );
+  }
+
   form.recurringSchedule = recurringSchedule;
 
   return form;
@@ -83,10 +90,6 @@ const isCustom = (rRule: RRuleParams) => {
   const freq = rRule.freq;
   // interval is greater than 1
   if (rRule.interval && rRule.interval > 1) {
-    return true;
-  }
-  // frequency is daily and no weekdays are selected
-  if (freq && freq === Frequency.DAILY && !rRule.byweekday) {
     return true;
   }
   // frequency is weekly and there are multiple weekdays selected

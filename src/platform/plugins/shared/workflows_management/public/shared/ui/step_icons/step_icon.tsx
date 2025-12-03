@@ -25,7 +25,8 @@ interface StepIconProps extends Omit<EuiIconProps, 'type'> {
 export const StepIcon = React.memo(
   ({ stepType, executionStatus, onClick, ...rest }: StepIconProps) => {
     const { euiTheme } = useEuiTheme();
-    const { actionTypeRegistry } = useKibana().services.triggersActionsUi;
+    const { triggersActionsUi, workflowsExtensions } = useKibana().services;
+    const { actionTypeRegistry } = triggersActionsUi;
 
     // For Overview pseudo-step, show the execution status icon
     if (stepType === '__overview' && executionStatus) {
@@ -44,6 +45,11 @@ export const StepIcon = React.memo(
     if (actionTypeRegistry.has(actionTypeId)) {
       const actionType = actionTypeRegistry.get(actionTypeId);
       return <EuiIcon type={actionType.iconClass} size="m" />;
+    }
+
+    const stepDefinition = workflowsExtensions.getStepDefinition(stepType);
+    if (stepDefinition?.icon) {
+      return <EuiIcon type={stepDefinition.icon} size="m" />;
     }
 
     const iconType = getStepIconType(stepType);

@@ -66,6 +66,7 @@ import {
   GenericMonacoConnectorHandler,
   KibanaMonacoConnectorHandler,
 } from '../lib/monaco_connectors';
+import { CustomMonacoStepHandler } from '../lib/monaco_connectors/custom_monaco_step_handler';
 import {
   registerMonacoConnectorHandler,
   registerUnifiedHoverProvider,
@@ -321,6 +322,9 @@ export const WorkflowYAMLEditor = ({
           kibanaHost: window.location.origin,
         });
         registerMonacoConnectorHandler(kibanaHandler);
+
+        const customHandler = new CustomMonacoStepHandler();
+        registerMonacoConnectorHandler(customHandler);
 
         // Monaco YAML hover is now disabled via configuration (hover: false)
         // The unified hover provider will handle all hover content including validation errors

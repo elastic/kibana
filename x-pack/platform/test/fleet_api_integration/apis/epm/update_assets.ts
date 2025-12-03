@@ -620,6 +620,11 @@ export default function (providerContext: FtrProviderContext) {
             path: 'all_assets-0.2.0/data_stream/test_logs/fields/fields.yml',
             type: 'epm-packages-assets',
           },
+          {
+            id: 'f8da8ce3-77bb-5fa9-ad05-9f362684d494',
+            path: 'all_assets-0.2.0/elasticsearch/esql_view/test_query.yml',
+            type: 'epm-packages-assets',
+          },
         ],
         name: 'all_assets',
         version: '0.2.0',

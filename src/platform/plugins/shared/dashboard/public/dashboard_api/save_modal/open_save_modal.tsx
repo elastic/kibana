@@ -14,7 +14,11 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { DashboardSaveOptions, SaveDashboardReturn } from './types';
-import { coreServices, savedObjectsTaggingService } from '../../services/kibana_services';
+import {
+  coreServices,
+  cpsService,
+  savedObjectsTaggingService,
+} from '../../services/kibana_services';
 import type { DashboardState } from '../../../common';
 import { SAVED_OBJECT_POST_TIME } from '../../utils/telemetry_constants';
 import { extractTitleAndCount } from '../../utils/extract_title_and_count';
@@ -33,8 +37,10 @@ export async function openSaveModal({
   lastSavedId,
   serializeState,
   setTimeRestore,
+  setProjectRoutingRestore,
   tags,
   timeRestore,
+  projectRoutingRestore,
   title,
   viewMode,
 }: {
@@ -43,8 +49,10 @@ export async function openSaveModal({
   lastSavedId: string | undefined;
   serializeState: () => { dashboardState: DashboardState; references: Reference[] };
   setTimeRestore: (timeRestore: boolean) => void;
+  setProjectRoutingRestore: (projectRoutingRestore: boolean) => void;
   tags?: string[];
   timeRestore: boolean;
+  projectRoutingRestore: boolean;
   title: string;
   viewMode: ViewMode;
 }) {
@@ -61,6 +69,7 @@ export async function openSaveModal({
           newDescription,
           newCopyOnSave,
           newTimeRestore,
+          newProjectRoutingRestore,
           onTitleDuplicate,
           isTitleDuplicateConfirmed,
         }: DashboardSaveOptions): Promise<SaveDashboardReturn> => {
@@ -85,6 +94,7 @@ export async function openSaveModal({
             }
 
             setTimeRestore(newTimeRestore);
+            setProjectRoutingRestore(newProjectRoutingRestore);
             const { dashboardState, references } = serializeState();
 
             const dashboardStateToSave: DashboardState = {
@@ -132,7 +142,9 @@ export async function openSaveModal({
             title={saveAsTitle}
             onClose={() => resolve(undefined)}
             timeRestore={timeRestore}
+            projectRoutingRestore={projectRoutingRestore}
             showStoreTimeOnSave={!lastSavedId}
+            showStoreProjectRoutingOnSave={!lastSavedId && Boolean(cpsService?.cpsManager)}
             description={description ?? ''}
             showCopyOnSave={false}
             onSave={onSaveAttempt}

@@ -66,6 +66,7 @@ import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachmen
 import { isSecuritySolutionAccessible } from './helpers_access';
 import { generateAttachmentType } from './threat_intelligence/modules/cases/utils/attachments';
 import { defaultDeepLinks } from './app/links/default_deep_links';
+import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -104,8 +105,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   ): PluginSetup {
     this.services.setup(core, plugins);
 
-    const { home, usageCollection, management, cases } = plugins;
+    const { home, usageCollection, management, cases, share } = plugins;
     const { productFeatureKeys$ } = this.contract;
+    if (share) {
+      share.url.locators.create(new AIValueReportLocatorDefinition());
+    }
 
     // Lazily instantiate subPlugins and initialize services
     const mountDependencies = async (params?: AppMountParameters) => {

@@ -94,7 +94,13 @@ export const NoMatch = ({
           />
         </p>
       }
-      actions={<CreateIndexButton loadIndices={loadIndices} share={share} />}
+      actions={
+        <CreateIndexButton
+          loadIndices={loadIndices}
+          share={share}
+          dataTestSubj="createIndexButtonEmptyList"
+        />
+      }
     />
   );
 };

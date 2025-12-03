@@ -24,7 +24,7 @@ import type {
   ObservabilityAgentPluginStartDependencies,
 } from './types';
 
-import { ObservabilityAgentDataRegistry } from './data_registry';
+import { ObservabilityAgentDataRegistry } from './data_registry/data_registry';
 
 export class ObservabilityAgentPlugin
   implements

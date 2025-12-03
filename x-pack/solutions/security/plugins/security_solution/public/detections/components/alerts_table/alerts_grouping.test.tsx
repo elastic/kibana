@@ -257,6 +257,7 @@ describe('GroupedAlertsTable', () => {
       </TestProviders>
     );
     expect(mockUseQueryAlerts).toHaveBeenLastCalledWith({
+      fetchMethod: expect.any(Function),
       indexName: 'test',
       query: getQuery('kibana.alert.rule.name', 'SuperUniqueValue-test-uuid', mockDate),
       queryName: 'securitySolutionUI fetchAlerts grouping',

@@ -806,6 +806,11 @@ const expectAssetsInstalled = ({
           type: 'epm-packages-assets',
         },
         {
+          id: '4510252e-f145-5dd8-ba78-85cc8746c7f7',
+          path: 'all_assets-0.1.0/elasticsearch/esql_view/test_query.yml',
+          type: 'epm-packages-assets',
+        },
+        {
           id: 'ed5d54d5-2516-5d49-9e61-9508b0152d2b',
           path: 'all_assets-0.1.0/elasticsearch/ml_model/test/default.json',
           type: 'epm-packages-assets',
@@ -912,5 +917,14 @@ const expectAssetsInstalled = ({
       verification_status: 'unknown',
       verification_key_id: null,
     });
+  });
+
+  // TODO enable when feature flag is turned on https://github.com/elastic/kibana/issues/244655
+  it.skip('should have installed the esql views', async function () {
+    const res = (await es.transport.request({
+      method: 'GET',
+      path: `/_query/view/test_query`,
+    })) as any;
+    expect(res.views.test_query).not.to.be(undefined);
   });
 };

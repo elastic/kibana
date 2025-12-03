@@ -14,7 +14,6 @@ import type {
 } from '@kbn/core/server';
 
 import { SECURITY_PROJECT_SETTINGS } from '@kbn/serverless-security-settings';
-import { getDefaultValueReportSettings } from '@kbn/security-solution-plugin/server/ui_settings';
 import { getEnabledProductFeatures } from '../common/pli/pli_features';
 
 import type { ServerlessSecurityConfig } from './config';
@@ -89,11 +88,6 @@ export class SecuritySolutionServerlessPlugin
 
     // Setup project uiSettings whitelisting
     pluginsSetup.serverless.setupProjectSettings(projectSettings);
-
-    // Serverless Advanced Settings setup
-    coreSetup.uiSettings.register({
-      ...getDefaultValueReportSettings(),
-    });
 
     // Tasks
     this.cloudSecurityUsageReportingTask = new SecurityUsageReportingTask({

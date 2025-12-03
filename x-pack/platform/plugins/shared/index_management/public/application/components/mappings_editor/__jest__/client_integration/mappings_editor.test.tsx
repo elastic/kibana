@@ -166,12 +166,10 @@ describe('Mappings editor: core', () => {
 
     test('should have 4 tabs (fields, runtime, template, advanced settings)', () => {
       const { find } = testBed;
-      const tabs = find('formTab').map((wrapper) => wrapper.text());
-
-      expect(tabs).toEqual([
-        'Mapped fields',
-        'Runtime fields',
-        'Dynamic templates',
+      expect(find('fieldsTab').map((wrapper) => wrapper.text())).toEqual(['Mapped fields']);
+      expect(find('runtimeTab').map((wrapper) => wrapper.text())).toEqual(['Runtime fields']);
+      expect(find('templatesTab').map((wrapper) => wrapper.text())).toEqual(['Dynamic templates']);
+      expect(find('advancedOptionsTab').map((wrapper) => wrapper.text())).toEqual([
         'Advanced options',
       ]);
     });
