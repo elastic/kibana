@@ -62,7 +62,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     >
       {/* Input Message */}
       <EuiFlexItem grow={false}>
-        <RoundInput input={input.message} />
+        <RoundInput input={input.message} attachments={input.attachments} />
       </EuiFlexItem>
 
       {/* Thinking */}
