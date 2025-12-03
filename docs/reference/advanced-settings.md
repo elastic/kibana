@@ -590,6 +590,9 @@ $$$security-solution-excluded-data-tiers-for-rule-execution$$$`securitySolution:
 $$$security-solution-enable-privileged-user-monitoring$$$`securitySolution:enablePrivilegedUserMonitoring` {applies_to}`stack: preview` {applies_to}`serverless: unavailable`
 :   Enables the privileged user monitoring dashboard and onboarding experience, which are in technical preview. `true` by default.
 
+$$$security-solution-enable-esql-risk-scoring$$$`securitySolution:enableEsqlRiskScoring` {applies_to}`stack: preview 9.0, removed 9.3` {applies_to}`serverless: unavailable`
+:   Enables risk scoring based on {{esql}} queries. Disabling this reverts to using scripted metrics. `true` by default.
+
 $$$security-solution-default-ai-connector$$$`securitySolution:defaultAIConnector` {applies_to}`stack: unavailable` {applies_to}`security: ga`
 :   Default AI connector for serverless AI features (Elastic AI SOC Engine). `Elastic Managed LLM` by default.
 
