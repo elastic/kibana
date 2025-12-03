@@ -64,7 +64,7 @@ export function AlertAiInsight({ alert }: { alert: AlertData }) {
       sessionTag: `alert:${alertId}`,
       attachments: [
         {
-          id: `ai_insight-${alertId}`,
+          id: `ai_insight`,
           type: OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
           data: {
             summary,
