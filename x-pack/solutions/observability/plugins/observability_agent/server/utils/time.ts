@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import datemath from '@kbn/datemath';
+
 // converts microseconds to milliseconds
 export function toMilliseconds(us: number | null): number | undefined {
   if (us) {
@@ -17,4 +19,8 @@ export function toISOString(epoch: number | null) {
   if (epoch) {
     return new Date(epoch).toISOString();
   }
+}
+
+export function parseDatemath(value: string, options?: Parameters<typeof datemath.parse>[1]) {
+  return datemath.parse(value, options)?.valueOf() ?? 0;
 }

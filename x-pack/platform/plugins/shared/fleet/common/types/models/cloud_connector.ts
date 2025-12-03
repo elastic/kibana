@@ -52,4 +52,5 @@ export interface CloudConnectorListOptions {
   page?: number;
   perPage?: number;
   kuery?: string;
+  fields?: string[];
 }
