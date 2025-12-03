@@ -49,10 +49,15 @@ export const StepExecutionDataView = React.memo<StepExecutionDataViewProps>(
     }, [mode, stepExecution]);
 
     const fieldPathActionsPrefix: string | undefined = useMemo(() => {
+      const isOverviewStep = stepExecution.stepType === '__overview';
       const isTriggerStep = stepExecution.stepType?.startsWith('trigger_');
       const triggerType = isTriggerStep
         ? stepExecution.stepType?.replace('trigger_', '')
         : undefined;
+
+      if (isOverviewStep) {
+        return ''; // overview context: paths like "<fieldPath>"
+      }
 
       if (!isTriggerStep) {
         if (mode !== 'output' || stepExecution.error) {
