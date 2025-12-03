@@ -24,23 +24,13 @@ export const useDataView = (indexPattern?: string) => {
       if (!indexPattern) {
         throw new Error('Index pattern is required');
       }
+      const [dataView] = await dataViews.find(indexPattern);
 
-      // Try to get by ID first (faster if it's a data view ID)
-      // If it fails, fallback to searching by title/name
-      try {
-        return await dataViews.get(indexPattern, false);
-      } catch (getError) {
-        // If get fails, try find as fallback (searches by title/name)
-        const foundDataViews = await dataViews.find(indexPattern);
-        const dataView = foundDataViews[0];
-
-        if (dataView) {
-          return dataView;
-        }
-
-        // Neither method succeeded, throw the original get error
-        throw getError;
+      if (!dataView) {
+        throw new Error(`Data view not found [${indexPattern}]`);
       }
+
+      return dataView;
     },
     {
       retry: false,
