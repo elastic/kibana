@@ -63,13 +63,15 @@ export class AIAssistantManagementSelectionPlugin
           value: this.config.preferredAIAssistantType ?? AIAssistantType.Default,
         },
       });
-      core.uiSettings.register({
-        [PREFERRED_CHAT_EXPERIENCE_SETTING_KEY]: {
-          ...chatExperienceSetting,
-          value: this.config.preferredChatExperience ?? AIChatExperience.Classic,
-        },
-      });
     }
+
+    // Register chat experience setting for both stateful and serverless
+    core.uiSettings.register({
+      [PREFERRED_CHAT_EXPERIENCE_SETTING_KEY]: {
+        ...chatExperienceSetting,
+        value: this.config.preferredChatExperience ?? AIChatExperience.Classic,
+      },
+    });
   }
 
   public start(core: CoreStart) {
