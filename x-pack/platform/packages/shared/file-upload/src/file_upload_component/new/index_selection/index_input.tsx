@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiTitle } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import useMountedState from 'react-use/lib/useMountedState';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { STATUS } from '../../../..';
 import { useFileUploadKibana } from '../../kibana_context';
 
@@ -99,9 +100,16 @@ export const IndexInput: FC<Props> = ({
 
   return (
     <EuiFormRow
-      label={i18n.translate('xpack.fileUpload.importView.indexNameLabel', {
-        defaultMessage: 'New index name',
-      })}
+      label={
+        <EuiTitle size="xxxs">
+          <h6>
+            <FormattedMessage
+              id="xpack.dataVisualizer.file.importView.indexNameLabel"
+              defaultMessage="Index name"
+            />
+          </h6>
+        </EuiTitle>
+      }
       isInvalid={indexNameError !== ''}
       error={indexNameError}
       fullWidth
@@ -121,7 +129,7 @@ export const IndexInput: FC<Props> = ({
         placeholder={i18n.translate(
           'xpack.fileUpload.importView.indexNameContainsIllegalCharactersErrorMessage',
           {
-            defaultMessage: 'Add name to index',
+            defaultMessage: 'Enter an index name',
           }
         )}
       />

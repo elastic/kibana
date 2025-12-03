@@ -112,7 +112,8 @@ async function handleInfixOperator(
     return dispatchOperators({ ...context, innerText: text });
   }
 
-  const syntheticNode = createSyntheticNode(operatorName, text, expressionRoot);
+  const leftOperand = expressionRoot?.type === 'column' ? expressionRoot : undefined;
+  const syntheticNode = createSyntheticNode(operatorName, text, leftOperand);
 
   return dispatchOperators({
     ...context,
