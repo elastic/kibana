@@ -35,7 +35,8 @@ export const isIndexNotFoundError = (error: unknown): boolean => {
     castError.attributes?.error?.caused_by?.type === 'index_not_found_exception' ||
     castError.meta?.body?.error?.type === 'index_not_found_exception' ||
     castError.meta?.body?.error?.caused_by?.type === 'index_not_found_exception' ||
-    (typeof castError.message === 'string' && castError.message.includes('index_not_found_exception'))
+    (typeof castError.message === 'string' &&
+      castError.message.includes('index_not_found_exception'))
   );
 };
 

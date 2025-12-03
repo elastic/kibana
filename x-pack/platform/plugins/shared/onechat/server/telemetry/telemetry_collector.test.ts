@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { MockedLogger } from '@kbn/logging-mocks';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { registerTelemetryCollector, OnechatTelemetry } from './telemetry_collector';
+import type { OnechatTelemetry } from './telemetry_collector';
+import { registerTelemetryCollector } from './telemetry_collector';
 import { ONECHAT_USAGE_DOMAIN } from './usage_counters';
 
 // Mock the QueryUtils class
@@ -104,10 +105,14 @@ describe('telemetry_collector', () => {
       expect(registeredCollector.schema.conversations).toBeDefined();
       expect(registeredCollector.schema.conversations.total.type).toBe('long');
       expect(registeredCollector.schema.conversations.total_rounds.type).toBe('long');
-      expect(registeredCollector.schema.conversations.avg_rounds_per_conversation.type).toBe('float');
+      expect(registeredCollector.schema.conversations.avg_rounds_per_conversation.type).toBe(
+        'float'
+      );
       expect(registeredCollector.schema.conversations.rounds_distribution.type).toBe('array');
       expect(registeredCollector.schema.conversations.tokens_used.type).toBe('long');
-      expect(registeredCollector.schema.conversations.average_tokens_per_conversation.type).toBe('float');
+      expect(registeredCollector.schema.conversations.average_tokens_per_conversation.type).toBe(
+        'float'
+      );
     });
 
     it('defines query_to_result_time schema', () => {
@@ -150,8 +155,8 @@ describe('telemetry_collector', () => {
     let mockQueryUtils: any;
 
     beforeEach(() => {
-      // Reset the mock for QueryUtils
-      const { QueryUtils } = require('./query_utils');
+      // Reset the mock for QueryUtils - using require since jest.mock hoists
+      const { QueryUtils } = jest.requireMock('./query_utils');
       mockQueryUtils = {
         getCustomToolsMetrics: jest.fn().mockResolvedValue({
           total: 10,

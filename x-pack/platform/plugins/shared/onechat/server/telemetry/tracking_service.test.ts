@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { MockedLogger } from '@kbn/logging-mocks';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { createOnechatError, OnechatErrorCode } from '@kbn/onechat-common';
 import { AgentExecutionErrorCode } from '@kbn/onechat-common/agents';
@@ -101,9 +101,7 @@ describe('TrackingService', () => {
     it('logs debug message on success', () => {
       trackingService.trackToolCall('my-tool', ToolCallSource.DEFAULT_AGENT);
 
-      expect(logger.debug).toHaveBeenCalledWith(
-        'Tracked tool call: my-tool from default_agent'
-      );
+      expect(logger.debug).toHaveBeenCalledWith('Tracked tool call: my-tool from default_agent');
     });
 
     it('logs error when incrementCounter throws', () => {
@@ -222,9 +220,7 @@ describe('TrackingService', () => {
     it('logs debug message on success', () => {
       trackingService.trackConversationRound('conv-123', 5);
 
-      expect(logger.debug).toHaveBeenCalledWith(
-        'Tracked conversation round: conv-123 round 5'
-      );
+      expect(logger.debug).toHaveBeenCalledWith('Tracked conversation round: conv-123 round 5');
     });
 
     it('logs error when incrementCounter throws', () => {
@@ -235,7 +231,9 @@ describe('TrackingService', () => {
 
       trackingService.trackConversationRound('conv-1', 1);
 
-      expect(logger.error).toHaveBeenCalledWith('Failed to track conversation round: Counter error');
+      expect(logger.error).toHaveBeenCalledWith(
+        'Failed to track conversation round: Counter error'
+      );
     });
   });
 
@@ -255,8 +253,7 @@ describe('TrackingService', () => {
     });
 
     it('logs debug message on trackQueryStart', () => {
-      const requestId = trackingService.trackQueryStart('req-123');
-
+      trackingService.trackQueryStart('req-123');
       expect(logger.debug).toHaveBeenCalledWith('Tracked query start: req-123');
     });
 
@@ -359,7 +356,9 @@ describe('TrackingService', () => {
     it('logs warning when no start time found', () => {
       trackingService.trackQueryEnd('unknown-request-id');
 
-      expect(logger.warn).toHaveBeenCalledWith('No start time found for request: unknown-request-id');
+      expect(logger.warn).toHaveBeenCalledWith(
+        'No start time found for request: unknown-request-id'
+      );
       expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
     });
 
@@ -470,9 +469,7 @@ describe('TrackingService', () => {
     it('logs debug message on success', () => {
       trackingService.trackLLMUsage('openai', 'gpt-4');
 
-      expect(logger.debug).toHaveBeenCalledWith(
-        'Tracked LLM usage: provider=openai, model=gpt-4'
-      );
+      expect(logger.debug).toHaveBeenCalledWith('Tracked LLM usage: provider=openai, model=gpt-4');
     });
 
     it('logs error when incrementCounter throws', () => {

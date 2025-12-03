@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { MockedLogger } from '@kbn/logging-mocks';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { QueryUtils, isIndexNotFoundError } from './query_utils';
 
@@ -125,6 +125,7 @@ describe('query_utils', () => {
                 count: 10,
               },
               references: [],
+              score: 1,
             },
             {
               id: '2',
@@ -136,6 +137,7 @@ describe('query_utils', () => {
                 count: 5,
               },
               references: [],
+              score: 1,
             },
           ],
           total: 2,
@@ -186,9 +188,7 @@ describe('query_utils', () => {
         const result = await queryUtils.getCountersByDomain('onechat');
 
         expect(result).toEqual([]);
-        expect(logger.error).toHaveBeenCalledWith(
-          'Failed to query usage counters: Database error'
-        );
+        expect(logger.error).toHaveBeenCalledWith('Failed to query usage counters: Database error');
       });
     });
 
@@ -206,6 +206,7 @@ describe('query_utils', () => {
                 count: 10,
               },
               references: [],
+              score: 1,
             },
             {
               id: '2',
@@ -217,6 +218,7 @@ describe('query_utils', () => {
                 count: 5,
               },
               references: [],
+              score: 1,
             },
             {
               id: '3',
@@ -228,6 +230,7 @@ describe('query_utils', () => {
                 count: 2,
               },
               references: [],
+              score: 1,
             },
           ],
           total: 3,
@@ -256,6 +259,7 @@ describe('query_utils', () => {
                 count: 2,
               },
               references: [],
+              score: 1,
             },
           ],
           total: 1,
@@ -275,9 +279,7 @@ describe('query_utils', () => {
 
         expect(result.size).toBe(0);
         // The error is logged in getCountersByDomain which is called internally
-        expect(logger.error).toHaveBeenCalledWith(
-          'Failed to query usage counters: Database error'
-        );
+        expect(logger.error).toHaveBeenCalledWith('Failed to query usage counters: Database error');
       });
     });
 
@@ -369,9 +371,7 @@ describe('query_utils', () => {
           total: 0,
           by_type: [],
         });
-        expect(logger.warn).toHaveBeenCalledWith(
-          'Failed to fetch custom tools counts: ES error'
-        );
+        expect(logger.warn).toHaveBeenCalledWith('Failed to fetch custom tools counts: ES error');
       });
 
       it('does not log warning for index_not_found_exception', async () => {
@@ -419,9 +419,7 @@ describe('query_utils', () => {
         const result = await queryUtils.getCustomAgentsMetrics();
 
         expect(result).toBe(0);
-        expect(logger.warn).toHaveBeenCalledWith(
-          'Failed to fetch custom agents count: ES error'
-        );
+        expect(logger.warn).toHaveBeenCalledWith('Failed to fetch custom agents count: ES error');
       });
 
       it('does not log warning for index_not_found_exception', async () => {
@@ -486,9 +484,7 @@ describe('query_utils', () => {
           hits: { total: 50, hits: [] },
           aggregations: {
             rounds_distribution: {
-              buckets: [
-                { key: '1-5', doc_count: 50 },
-              ],
+              buckets: [{ key: '1-5', doc_count: 50 }],
             },
             total_tokens: {
               value: 10000,
@@ -560,9 +556,7 @@ describe('query_utils', () => {
           tokens_used: 0,
           average_tokens_per_conversation: 0,
         });
-        expect(logger.warn).toHaveBeenCalledWith(
-          'Failed to fetch conversation metrics: ES error'
-        );
+        expect(logger.warn).toHaveBeenCalledWith('Failed to fetch conversation metrics: ES error');
       });
     });
 
@@ -583,9 +577,7 @@ describe('query_utils', () => {
       });
 
       it('calculates percentiles for single bucket', () => {
-        const buckets = new Map<string, number>([
-          ['onechat_query_to_result_time_<1s', 100],
-        ]);
+        const buckets = new Map<string, number>([['onechat_query_to_result_time_<1s', 100]]);
 
         const result = queryUtils.calculatePercentilesFromBuckets(buckets, 'onechat');
 
@@ -635,8 +627,8 @@ describe('query_utils', () => {
 
       it('calculates weighted mean for multiple buckets', () => {
         const buckets = new Map<string, number>([
-          ['onechat_query_to_result_time_<1s', 50],   // midpoint 500, weight 50
-          ['onechat_query_to_result_time_1-5s', 50],  // midpoint 3000, weight 50
+          ['onechat_query_to_result_time_<1s', 50], // midpoint 500, weight 50
+          ['onechat_query_to_result_time_1-5s', 50], // midpoint 3000, weight 50
         ]);
 
         const result = queryUtils.calculatePercentilesFromBuckets(buckets, 'onechat');
@@ -646,9 +638,7 @@ describe('query_utils', () => {
       });
 
       it('handles only high duration buckets', () => {
-        const buckets = new Map<string, number>([
-          ['onechat_query_to_result_time_30s+', 10],
-        ]);
+        const buckets = new Map<string, number>([['onechat_query_to_result_time_30s+', 10]]);
 
         const result = queryUtils.calculatePercentilesFromBuckets(buckets, 'onechat');
 
@@ -658,9 +648,7 @@ describe('query_utils', () => {
       });
 
       it('uses default domain prefix when not specified', () => {
-        const buckets = new Map<string, number>([
-          ['onechat_query_to_result_time_<1s', 100],
-        ]);
+        const buckets = new Map<string, number>([['onechat_query_to_result_time_<1s', 100]]);
 
         // Call without second parameter - should use 'onechat' as default
         const result = queryUtils.calculatePercentilesFromBuckets(buckets);

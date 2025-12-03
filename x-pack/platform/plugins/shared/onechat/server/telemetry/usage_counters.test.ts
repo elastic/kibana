@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import {
   createOnechatUsageCounter,
   trackToolCall,
