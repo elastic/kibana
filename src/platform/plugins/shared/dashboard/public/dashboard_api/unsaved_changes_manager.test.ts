@@ -19,6 +19,7 @@ import { isDashboardSection } from '../../common';
 import type { DashboardSettings } from './settings_manager';
 import { initializeSettingsManager } from './settings_manager';
 import type { initializeUnifiedSearchManager } from './unified_search_manager';
+import type { initializeProjectRoutingManager } from './project_routing_manager';
 import type { DashboardPanel } from '../../server';
 import { getSampleDashboardState } from '../mocks';
 
@@ -74,6 +75,12 @@ const unifiedSearchManagerMock = {
       >({}),
   },
 } as unknown as ReturnType<typeof initializeUnifiedSearchManager>;
+const projectRoutingManagerMock = {
+  internalApi: {
+    startComparing$: () =>
+      new BehaviorSubject<Partial<Pick<DashboardState, 'project_routing'>>>({}),
+  },
+} as unknown as ReturnType<typeof initializeProjectRoutingManager>;
 const getReferences = () => [];
 const savedObjectId$ = new BehaviorSubject<string | undefined>('dashboard1234');
 const viewMode$ = new BehaviorSubject<ViewMode>('edit');
@@ -83,6 +90,7 @@ const setBackupStateMock = jest.fn();
 describe('unsavedChangesManager', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    setBackupStateMock.mockReset();
 
     layoutUnsavedChanges$.next({});
 
@@ -105,6 +113,7 @@ describe('unsavedChangesManager', () => {
           savedObjectId$,
           settingsManager,
           unifiedSearchManager: unifiedSearchManagerMock,
+          projectRoutingManager: projectRoutingManagerMock,
           getReferences,
         });
 
@@ -130,6 +139,7 @@ describe('unsavedChangesManager', () => {
           savedObjectId$,
           settingsManager: settingsManagerMock,
           unifiedSearchManager: unifiedSearchManagerMock,
+          projectRoutingManager: projectRoutingManagerMock,
           getReferences,
         });
 
@@ -169,6 +179,74 @@ describe('unsavedChangesManager', () => {
           ],
         });
       });
+    });
+  });
+
+  describe('projectRouting changes', () => {
+    it('should detect projectRouting changes as unsaved changes', (done) => {
+      const projectRoutingChanges$ = new BehaviorSubject<
+        Partial<Pick<DashboardState, 'project_routing'>>
+      >({});
+      const customProjectRoutingManagerMock = {
+        internalApi: {
+          startComparing$: () => projectRoutingChanges$,
+        },
+      } as unknown as ReturnType<typeof initializeProjectRoutingManager>;
+
+      const unsavedChangesManager = initializeUnsavedChangesManager({
+        viewMode$,
+        controlGroupManager: controlGroupManagerMock,
+        lastSavedState: getSampleDashboardState(),
+        layoutManager: layoutManagerMock,
+        savedObjectId$,
+        settingsManager: settingsManagerMock,
+        unifiedSearchManager: unifiedSearchManagerMock,
+        projectRoutingManager: customProjectRoutingManagerMock,
+        getReferences,
+      });
+
+      unsavedChangesManager.api.hasUnsavedChanges$.pipe(skip(1)).subscribe((hasChanges) => {
+        expect(hasChanges).toBe(true);
+        done();
+      });
+
+      // Simulate projectRouting change
+      projectRoutingChanges$.next({ project_routing: '_alias:_origin' });
+    });
+
+    it('should have unsaved changes when projectRouting is different from saved value', (done) => {
+      const lastSavedState = {
+        ...getSampleDashboardState(),
+        projectRouting: '_alias:_origin',
+      };
+      const projectRoutingChanges$ = new BehaviorSubject<
+        Partial<Pick<DashboardState, 'project_routing'>>
+      >({});
+      const customProjectRoutingManagerMock = {
+        internalApi: {
+          startComparing$: () => projectRoutingChanges$,
+        },
+      } as unknown as ReturnType<typeof initializeProjectRoutingManager>;
+
+      const unsavedChangesManager = initializeUnsavedChangesManager({
+        viewMode$,
+        controlGroupManager: controlGroupManagerMock,
+        lastSavedState,
+        layoutManager: layoutManagerMock,
+        savedObjectId$,
+        settingsManager: settingsManagerMock,
+        unifiedSearchManager: unifiedSearchManagerMock,
+        projectRoutingManager: customProjectRoutingManagerMock,
+        getReferences,
+      });
+
+      unsavedChangesManager.api.hasUnsavedChanges$.pipe(skip(1)).subscribe((hasChanges) => {
+        expect(hasChanges).toBe(true);
+        done();
+      });
+
+      // Change to different value
+      projectRoutingChanges$.next({ project_routing: 'ALL' });
     });
   });
 });
