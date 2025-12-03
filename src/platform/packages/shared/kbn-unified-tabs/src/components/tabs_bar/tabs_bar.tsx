@@ -275,7 +275,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
         alignItems="center"
         gutterSize="s"
         css={css`
-          padding-right: ${euiTheme.size.base};
+          padding-right: ${euiTheme.size.s};
         `}
       >
         <EuiFlexItem ref={setTabsContainerWithPlusElement} grow css={growingFlexItemCss}>
