@@ -4326,6 +4326,21 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.ATTACK_DISCOVERY_INTERNAL_MISSING_PRIVILEGES",
+        "type": "string",
+        "tags": [],
+        "label": "ATTACK_DISCOVERY_INTERNAL_MISSING_PRIVILEGES",
+        "description": [],
+        "signature": [
+          "\"/internal/elastic_assistant/attack_discovery/_missing_privileges\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.ATTACK_DISCOVERY_INTERNAL_SCHEDULES",
         "type": "string",
         "tags": [],
@@ -4777,6 +4792,21 @@
           "{} & { [k: string]: unknown; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/attack_discovery/routes/internal/schedules/crud_attack_discovery_schedules_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.AttackDiscoveryMissingPrivileges",
+        "type": "Type",
+        "tags": [],
+        "label": "AttackDiscoveryMissingPrivileges",
+        "description": [],
+        "signature": [
+          "{ privileges: string[]; index_name: string; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/attack_discovery/routes/internal/privileges/get_missing_privileges.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -9475,6 +9505,23 @@
           "{ generations: { start: string; status: \"succeeded\" | \"failed\" | \"started\" | \"canceled\" | \"dismissed\"; connector_id: string; execution_uuid: string; discoveries: number; loading_message: string; reason?: string | undefined; end?: string | undefined; alerts_context_count?: number | undefined; connector_stats?: { average_successful_duration_nanoseconds?: number | undefined; successful_generations?: number | undefined; } | undefined; }[]; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/attack_discovery/routes/public/get/get_attack_discovery_generations_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.GetAttackDiscoveryMissingPrivilegesInternalResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "GetAttackDiscoveryMissingPrivilegesInternalResponse",
+        "description": [
+          "\nThe missing index privileges required for Attack discovery"
+        ],
+        "signature": [
+          "{ privileges: string[]; index_name: string; }[]"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/attack_discovery/routes/internal/privileges/get_missing_privileges.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -17696,6 +17743,30 @@
           ", \"strip\">>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/attack_discovery/routes/internal/schedules/crud_attack_discovery_schedules_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.AttackDiscoveryMissingPrivileges",
+        "type": "Object",
+        "tags": [],
+        "label": "AttackDiscoveryMissingPrivileges",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ index_name: ",
+          "ZodString",
+          "; privileges: ",
+          "ZodArray",
+          "<",
+          "ZodString",
+          ", \"many\">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { privileges: string[]; index_name: string; }, { privileges: string[]; index_name: string; }>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/attack_discovery/routes/internal/privileges/get_missing_privileges.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -40874,6 +40945,32 @@
           ", { generations: { start: string; status: \"succeeded\" | \"failed\" | \"started\" | \"canceled\" | \"dismissed\"; connector_id: string; execution_uuid: string; discoveries: number; loading_message: string; reason?: string | undefined; end?: string | undefined; alerts_context_count?: number | undefined; connector_stats?: { average_successful_duration_nanoseconds?: number | undefined; successful_generations?: number | undefined; } | undefined; }[]; }, { generations: { start: string; status: \"succeeded\" | \"failed\" | \"started\" | \"canceled\" | \"dismissed\"; connector_id: string; execution_uuid: string; discoveries: number; loading_message: string; reason?: string | undefined; end?: string | undefined; alerts_context_count?: number | undefined; connector_stats?: { average_successful_duration_nanoseconds?: number | undefined; successful_generations?: number | undefined; } | undefined; }[]; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/attack_discovery/routes/public/get/get_attack_discovery_generations_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.GetAttackDiscoveryMissingPrivilegesInternalResponse",
+        "type": "Object",
+        "tags": [],
+        "label": "GetAttackDiscoveryMissingPrivilegesInternalResponse",
+        "description": [],
+        "signature": [
+          "ZodArray",
+          "<",
+          "ZodObject",
+          "<{ index_name: ",
+          "ZodString",
+          "; privileges: ",
+          "ZodArray",
+          "<",
+          "ZodString",
+          ", \"many\">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { privileges: string[]; index_name: string; }, { privileges: string[]; index_name: string; }>, \"many\">"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/attack_discovery/routes/internal/privileges/get_missing_privileges.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
