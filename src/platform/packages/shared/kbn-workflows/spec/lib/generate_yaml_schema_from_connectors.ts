@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
-import type { ConnectorContractUnion } from '../..';
+import { z } from '@kbn/zod/v4';
+import { type ConnectorContractUnion } from '../..';
 import {
   BaseConnectorStepSchema,
   getForEachStepSchema,
@@ -22,16 +22,30 @@ import {
   WorkflowSchema,
 } from '../schema';
 
-function generateStepSchemaForConnector(
-  connector: ConnectorContractUnion,
-  stepSchema: z.ZodType,
+export function getStepId(stepName: string): string {
+  // Using step name as is, don't do any escaping to match the workflow engine behavior
+  // Leaving this function in case we'd to change behaviour in future.
+  return stepName;
+}
+
+export function generateYamlSchemaFromConnectors(
+  connectors: ConnectorContractUnion[],
+  /**
+   * @deprecated use WorkflowSchemaForAutocomplete instead
+   */
   loose: boolean = false
 ) {
-  return BaseConnectorStepSchema.extend({
-    type: z.literal(connector.type),
-    'connector-id': connector.connectorIdRequired ? z.string() : z.string().optional(),
-    with: connector.paramsSchema,
-    'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
+  const recursiveStepSchema = createRecursiveStepSchema(connectors, loose);
+
+  if (loose) {
+    return WorkflowSchema.partial().extend({
+      steps: z.array(recursiveStepSchema).optional(),
+    });
+  }
+
+  return WorkflowSchema.extend({
+    settings: getWorkflowSettingsSchema(recursiveStepSchema, loose).optional(),
+    steps: z.array(recursiveStepSchema),
   });
 }
 
@@ -70,29 +84,17 @@ function createRecursiveStepSchema(
   return stepSchema;
 }
 
-export function generateYamlSchemaFromConnectors(
-  connectors: ConnectorContractUnion[],
-  /**
-   * @deprecated use WorkflowSchemaForAutocomplete instead
-   */
+function generateStepSchemaForConnector(
+  connector: ConnectorContractUnion,
+  stepSchema: z.ZodType,
   loose: boolean = false
 ) {
-  const recursiveStepSchema = createRecursiveStepSchema(connectors, loose);
-
-  if (loose) {
-    return WorkflowSchema.partial().extend({
-      steps: z.array(recursiveStepSchema).optional(),
-    });
-  }
-
-  return WorkflowSchema.extend({
-    settings: getWorkflowSettingsSchema(recursiveStepSchema, loose).optional(),
-    steps: z.array(recursiveStepSchema),
+  return BaseConnectorStepSchema.extend({
+    type: connector.description
+      ? z.literal(connector.type).describe(connector.description)
+      : z.literal(connector.type),
+    'connector-id': connector.connectorIdRequired ? z.string() : z.string().optional(),
+    with: connector.paramsSchema,
+    'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
   });
-}
-
-export function getStepId(stepName: string): string {
-  // Using step name as is, don't do any escaping to match the workflow engine behavior
-  // Leaving this function in case we'd to change behaviour in future.
-  return stepName;
 }
