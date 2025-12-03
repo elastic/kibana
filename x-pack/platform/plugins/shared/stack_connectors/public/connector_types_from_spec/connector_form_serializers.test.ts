@@ -38,7 +38,7 @@ describe('createConnectorFormSerializer', () => {
     expect(result.config.authType).toBeUndefined();
   });
 
-  it('should preserve existing config.authType if secrets.authType exists', () => {
+  it('should overwrite existing config.authType if secrets.authType exists', () => {
     const serializer = createConnectorFormSerializer();
     const formData = {
       config: { url: 'https://example.com', authType: 'old' },

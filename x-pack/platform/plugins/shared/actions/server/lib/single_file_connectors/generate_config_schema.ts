@@ -13,7 +13,7 @@ import type { ActionTypeConfig, ValidatorType } from '../../types';
 export const generateConfigSchema = (
   schema: ConnectorSpec['schema']
 ): ValidatorType<ActionTypeConfig> => {
-  const authType = z.string();
+  const authType = z.string().optional();
   const configSchema = schema ? schema.extend({ authType }) : z.object({ authType });
   return { schema: configSchema };
 };
