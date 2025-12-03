@@ -21,7 +21,7 @@ import type { Agent, AgentPolicy } from '../../../../types';
 import { useLink } from '../../../../hooks';
 import { useAuthz } from '../../../../../../hooks/use_authz';
 import { isAgentUpgradeable } from '../../../../services';
-import { HierarchicalMenu } from '../../components';
+import { HierarchicalActionsMenu } from '../../components';
 import type { MenuItem } from '../../components';
 
 export const TableRowActions: React.FunctionComponent<{
@@ -312,7 +312,7 @@ export const TableRowActions: React.FunctionComponent<{
   ]);
 
   return (
-    <HierarchicalMenu
+    <HierarchicalActionsMenu
       items={menuItems}
       isOpen={isMenuOpen}
       onToggle={setIsMenuOpen}

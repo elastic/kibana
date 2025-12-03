@@ -15,7 +15,7 @@ import {
   AgentReassignAgentPolicyModal,
   AgentUnenrollAgentModal,
   AgentUpgradeAgentModal,
-  HierarchicalMenu,
+  HierarchicalActionsMenu,
 } from '../../components';
 import type { MenuItem } from '../../components';
 import { useAuthz, useLicense } from '../../../../hooks';
@@ -453,7 +453,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
       )}
       <EuiFlexGroup gutterSize="m" alignItems="center">
         <EuiFlexItem grow={false}>
-          <HierarchicalMenu
+          <HierarchicalActionsMenu
             items={menuItems}
             isOpen={isMenuOpen}
             anchorPosition="downLeft"

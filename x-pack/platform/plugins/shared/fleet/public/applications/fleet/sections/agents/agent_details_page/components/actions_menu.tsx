@@ -23,7 +23,7 @@ import {
   AgentUnenrollAgentModal,
   AgentReassignAgentPolicyModal,
   AgentUpgradeAgentModal,
-  HierarchicalMenu,
+  HierarchicalActionsMenu,
 } from '../../components';
 import type { MenuItem } from '../../components';
 import { useAgentRefresh } from '../hooks';
@@ -401,7 +401,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
             />
           </EuiPortal>
         )}
-        <HierarchicalMenu
+        <HierarchicalActionsMenu
           items={menuItems}
           isOpen={isMenuOpen}
           onToggle={onMenuToggle}

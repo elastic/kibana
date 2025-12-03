@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { EuiContextMenuPanelDescriptor, IconType } from '@elastic/eui';
 
 /**
- * Recursive menu item interface that supports infinite nesting.
+ * Recursive menu item interface that supports infinite nesting using EUI's ContextMenu component.
  * If `children` is provided, the item will render as a submenu trigger.
  * If `onClick` is provided (and no children), the item is an action.
  */
@@ -34,12 +34,12 @@ export interface MenuItem {
   panelTitle?: string;
 }
 
-export interface HierarchicalMenuProps {
+export interface HierarchicalActionsMenuProps {
   /** The menu items to render */
   items: MenuItem[];
   /** Whether the popover is open (controlled) */
   isOpen?: boolean;
-  /**Where the popover should be anchored */
+  /** Where the popover should be anchored. Defaults to downRight. */
   anchorPosition?: 'downRight' | 'downLeft' | 'upRight' | 'upLeft';
   /** Callback when open state changes (controlled) */
   onToggle?: (isOpen: boolean) => void;
@@ -61,7 +61,7 @@ export interface HierarchicalMenuProps {
  * A reusable hierarchical context menu component that supports infinite nesting.
  * Uses EUI's EuiContextMenu with slide-in panels for nested items.
  */
-export const HierarchicalMenu: React.FC<HierarchicalMenuProps> = ({
+export const HierarchicalActionsMenu: React.FC<HierarchicalActionsMenuProps> = ({
   items,
   isOpen: controlledIsOpen,
   anchorPosition = 'downRight',
