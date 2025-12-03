@@ -174,11 +174,17 @@ export const internalStateSlice = createSlice({
         tab.dataRequestParams = action.payload.dataRequestParams;
       }),
 
+    /**
+     * Set the tab global state, overwriting existing state and pushing to URL history
+     */
     setGlobalState: (state, action: TabAction<Pick<TabState, 'globalState'>>) =>
       withTab(state, action, (tab) => {
         tab.globalState = action.payload.globalState;
       }),
 
+    /**
+     * Set the tab app state, overwriting existing state and pushing to URL history
+     */
     setAppState: (state, action: TabAction<Pick<TabState, 'appState'>>) =>
       withTab(state, action, (tab) => {
         let appState = action.payload.appState;
@@ -192,6 +198,9 @@ export const internalStateSlice = createSlice({
         tab.appState = appState;
       }),
 
+    /**
+     * Set the tab app state and previous app state, overwriting existing state and pushing to URL history
+     */
     resetAppState: (state, action: TabAction<Pick<TabState, 'appState'>>) =>
       withTab(state, action, (tab) => {
         tab.previousAppState = action.payload.appState;

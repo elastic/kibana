@@ -17,7 +17,7 @@ import {
 import type { AggregateQuery } from '@kbn/es-query';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { useProfileAccessor } from '../../context_awareness';
-import type { DiscoverAppState } from '../../application/main/state_management/discover_app_state_container';
+import type { DiscoverAppState } from '../../application/main/state_management/redux';
 import type { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
 import { useGroupBySelectorRenderer } from '../../application/main/components/layout/cascaded_documents';
 import { type CascadedDocumentsRestorableState } from '../../application/main/components/layout/cascaded_documents/cascaded_documents_restorable_state';

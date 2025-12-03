@@ -33,7 +33,7 @@ export const DocumentViewModeToggle = ({
   isEsqlMode: boolean;
   prepend?: ReactElement;
   stateContainer: DiscoverStateContainer;
-  setDiscoverViewMode: (viewMode: VIEW_MODE) => Promise<VIEW_MODE>;
+  setDiscoverViewMode: (viewMode: VIEW_MODE, replace?: boolean) => Promise<VIEW_MODE>;
   patternCount?: number;
   dataView: DataView;
   hitCounterLabel?: string;
@@ -86,7 +86,7 @@ export const DocumentViewModeToggle = ({
   useEffect(() => {
     if (showPatternAnalysisTab === false && viewMode === VIEW_MODE.PATTERN_LEVEL) {
       // switch to document view if no text fields are available
-      setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL);
+      setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL, true);
     }
   }, [showPatternAnalysisTab, viewMode, setDiscoverViewMode]);
 
@@ -105,7 +105,7 @@ export const DocumentViewModeToggle = ({
 
   useEffect(() => {
     if (viewMode === VIEW_MODE.AGGREGATED_LEVEL && isEsqlMode) {
-      setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL);
+      setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL, true);
     }
   }, [viewMode, isEsqlMode, setDiscoverViewMode]);
 

@@ -33,6 +33,10 @@ export const aiValueLinks: LinkItem = {
     i18n.translate('xpack.securitySolution.appLinks.aiValue', {
       defaultMessage: 'AI Value',
     }),
+    i18n.translate('xpack.securitySolution.appLinks.valueReport', {
+      defaultMessage: 'Value report',
+    }),
   ],
-  globalNavPosition: 8,
+  globalNavPosition: 12,
+  hideTimeline: true,
 };

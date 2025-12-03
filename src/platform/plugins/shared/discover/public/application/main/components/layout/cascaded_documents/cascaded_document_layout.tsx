@@ -24,8 +24,7 @@ import type { ESQLStatsQueryMeta } from '@kbn/esql-utils/src/utils/cascaded_docu
 import { getStatsCommandToOperateOn } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
 import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
 import { useScopedServices } from '../../../../../components/scoped_services_provider/scoped_services_provider';
-import { useAppStateSelector } from '../../../state_management/discover_app_state_container';
-import { useCurrentTabSelector } from '../../../state_management/redux';
+import { useCurrentTabSelector, useAppStateSelector } from '../../../state_management/redux';
 import {
   useEsqlDataCascadeRowHeaderComponents,
   useEsqlDataCascadeHeaderComponent,
