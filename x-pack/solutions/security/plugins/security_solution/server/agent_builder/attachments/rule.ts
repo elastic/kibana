@@ -44,7 +44,7 @@ export const createRuleAttachmentType = (): AttachmentTypeDefinition => {
       }
       return {
         getRepresentation: () => {
-          return { type: 'text', value: formatProductReferenceData(attachment.data) };
+          return { type: 'text', value: formatRuleData(data) };
         },
       };
     },
@@ -61,6 +61,6 @@ export const createRuleAttachmentType = (): AttachmentTypeDefinition => {
   };
 };
 
-const formatProductReferenceData = (data: RuleAttachmentData): string => {
+const formatRuleData = (data: RuleAttachmentData): string => {
   return data.text;
 };
