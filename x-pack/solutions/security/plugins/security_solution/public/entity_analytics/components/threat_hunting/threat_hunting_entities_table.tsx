@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
-import type { Filter } from '@kbn/es-query';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -15,30 +14,49 @@ import {
   useEuiTheme,
   EuiBadge,
   EuiText,
+  EuiIcon,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { CustomCellRenderer } from '@kbn/unified-data-table';
-import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
-import { AssetInventoryDataTable } from '../../../asset_inventory/components/asset_inventory_data_table';
-import type { AssetInventoryURLStateResult } from '../../../asset_inventory/hooks/use_asset_inventory_url_state/use_asset_inventory_url_state';
-import { ASSET_FIELDS, DEFAULT_TABLE_SECTION_HEIGHT } from '../../../asset_inventory/constants';
-import type { GenericEntityRecord } from '../../../asset_inventory/types/generic_entity_record';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { noop, get } from 'lodash/fp';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useErrorToast } from '../../../common/hooks/use_error_toast';
+import { useQueryInspector } from '../../../common/components/page/manage_query';
+import { Direction } from '../../../../common/search_strategy/common';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
+import type { Criteria, Columns } from '../../../explore/components/paginated_table';
+import { PaginatedTable } from '../../../explore/components/paginated_table';
 import { EntityType, EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
+import {
+  EntityTypeToLevelField,
+  EntityTypeToScoreField,
+  RiskSeverity,
+} from '../../../../common/search_strategy';
 import { useInvestigateInTimeline } from '../../../common/hooks/timeline/use_investigate_in_timeline';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { createDataProviders } from '../../../app/actions/add_to_timeline/data_provider';
 import { formatRiskScoreWholeNumber } from '../../common/utils';
-import { RiskSeverity } from '../../../../common/search_strategy';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
-import { useAssetInventoryGrouping } from '../../../asset_inventory/components/grouping/use_asset_inventory_grouping';
-import { GroupWrapper } from '../../../asset_inventory/components/grouping/asset_inventory_grouping';
+import { useEntitiesListQuery } from '../entity_store/hooks/use_entities_list_query';
+import { useEntitiesListFilters } from '../entity_store/hooks/use_entities_list_filters';
+import { useEntityStoreTypes } from '../../hooks/use_enabled_entity_types';
+import type { Entity } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
+import type { CriticalityLevels } from '../../../../common/constants';
+import type { EntitySourceTag } from '../entity_store/types';
+import { EntityIconByType, getEntityType, sourceFieldToText } from '../entity_store/helpers';
+import { CRITICALITY_LEVEL_TITLE } from '../asset_criticality/translations';
+import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
+import { RiskScoreLevel } from '../severity/common';
+import {
+  EntityPanelKeyByType,
+  EntityPanelParamByType,
+} from '../../../flyout/entity_details/shared/constants';
 
 const THREAT_HUNTING_TABLE_ID = 'threat-hunting-table';
 
 interface ThreatHuntingEntitiesTableProps {
-  state: AssetInventoryURLStateResult;
   height?: number;
 }
 
@@ -46,7 +64,7 @@ interface ThreatHuntingEntitiesTableProps {
  * Creates data providers for timeline investigation based on entity type and name
  */
 const createEntityDataProviders = (
-  entityType: string | undefined,
+  entityType: EntityType | undefined,
   entityName: string | undefined,
   entityId: string | undefined
 ) => {
@@ -92,567 +110,442 @@ const getRiskLevelFromScore = (score: number): RiskSeverity => {
 };
 
 /**
- * Helper to get risk score from entity-specific fields
+ * Helper function to get risk score colors based on risk level
  */
-const getEntitySpecificRiskScore = (
-  entityType: string | undefined,
-  record: DataTableRecord,
-  source: GenericEntityRecord | undefined
-): number | undefined => {
-  if (!entityType) return undefined;
-
-  if (entityType === EntityType.user) {
-    const userRisk = record.flattened['user.risk.calculated_score_norm'];
-    if (userRisk != null && typeof userRisk === 'number') {
-      return userRisk;
-    }
-    // Access through index signature since GenericEntityRecord has [key: string]: unknown
-    const user = source?.user as { risk?: { calculated_score_norm?: number } } | undefined;
-    return user?.risk?.calculated_score_norm;
+const getRiskScoreColors = (
+  level: RiskSeverity,
+  euiTheme: ReturnType<typeof useEuiTheme>['euiTheme']
+): { background: string; text: string } => {
+  switch (level) {
+    case RiskSeverity.Unknown:
+      return {
+        background: euiTheme.colors.backgroundBaseSubdued,
+        text: euiTheme.colors.textSubdued,
+      };
+    case RiskSeverity.Low:
+      return {
+        background: euiTheme.colors.backgroundBaseNeutral,
+        text: euiTheme.colors.textNeutral,
+      };
+    case RiskSeverity.Moderate:
+      return {
+        background: euiTheme.colors.backgroundLightWarning,
+        text: euiTheme.colors.textWarning,
+      };
+    case RiskSeverity.High:
+      return {
+        background: euiTheme.colors.backgroundLightRisk,
+        text: euiTheme.colors.textRisk,
+      };
+    case RiskSeverity.Critical:
+      return {
+        background: euiTheme.colors.backgroundLightDanger,
+        text: euiTheme.colors.textDanger,
+      };
+    default:
+      return {
+        background: euiTheme.colors.backgroundBaseSubdued,
+        text: euiTheme.colors.textSubdued,
+      };
   }
-
-  if (entityType === EntityType.host) {
-    const hostRisk = record.flattened['host.risk.calculated_score_norm'];
-    if (hostRisk != null && typeof hostRisk === 'number') {
-      return hostRisk;
-    }
-    const host = source?.host as { risk?: { calculated_score_norm?: number } } | undefined;
-    return host?.risk?.calculated_score_norm;
-  }
-
-  if (entityType === EntityType.service) {
-    const serviceRisk = record.flattened['service.risk.calculated_score_norm'];
-    if (serviceRisk != null && typeof serviceRisk === 'number') {
-      return serviceRisk;
-    }
-    const service = source?.service as { risk?: { calculated_score_norm?: number } } | undefined;
-    return service?.risk?.calculated_score_norm;
-  }
-
-  return undefined;
 };
 
-/**
- * Helper to get risk level from various sources
- */
-const getRiskLevelFromSources = (
-  entityType: string | undefined,
-  record: DataTableRecord,
-  source: GenericEntityRecord | undefined
-): RiskSeverity | undefined => {
-  const entityLevel =
-    record.flattened['entity.risk_level'] ||
-    (source?.entity as { risk?: { calculated_level?: RiskSeverity } } | undefined)?.risk
-      ?.calculated_level;
-  if (entityLevel) return entityLevel as RiskSeverity;
+export type ThreatHuntingEntitiesColumns = [
+  Columns<Entity>,
+  Columns<string, Entity>,
+  Columns<string | undefined, Entity>,
+  Columns<CriticalityLevels, Entity>,
+  Columns<Entity>,
+  Columns<Entity>,
+  Columns<string, Entity>
+];
 
-  if (entityType === EntityType.user) {
-    const userLevel = record.flattened['user.risk.calculated_level'];
-    if (userLevel) return userLevel as RiskSeverity;
-    const user = source?.user as { risk?: { calculated_level?: RiskSeverity } } | undefined;
-    return user?.risk?.calculated_level;
-  }
-  if (entityType === EntityType.host) {
-    const hostLevel = record.flattened['host.risk.calculated_level'];
-    if (hostLevel) return hostLevel as RiskSeverity;
-    const host = source?.host as { risk?: { calculated_level?: RiskSeverity } } | undefined;
-    return host?.risk?.calculated_level;
-  }
-  if (entityType === EntityType.service) {
-    const serviceLevel = record.flattened['service.risk.calculated_level'];
-    if (serviceLevel) return serviceLevel as RiskSeverity;
-    const service = source?.service as { risk?: { calculated_level?: RiskSeverity } } | undefined;
-    return service?.risk?.calculated_level;
-  }
-
-  return undefined;
-};
-
-/**
- * Custom cell renderer for Risk Score column with color scheme matching Privileged User Monitoring
- */
-const RiskScoreCellRenderer = ({
-  rowIndex,
-  rows,
-}: EuiDataGridCellValueElementProps & { rows: DataTableRecord[] }) => {
+const useThreatHuntingColumns = (): ThreatHuntingEntitiesColumns => {
   const { euiTheme } = useEuiTheme();
-  const record = rows[rowIndex];
-  const source = record.raw._source as GenericEntityRecord | undefined;
-  const entityType = source?.entity?.EngineMetadata?.Type;
-
-  // Get risk score - try multiple sources in order of preference
-  // 1. Try flattened entity.risk (primary field used by asset inventory)
-  const entityRiskFlattened = record.flattened[ASSET_FIELDS.ENTITY_RISK];
-  let riskScore: number | undefined =
-    entityRiskFlattened != null && typeof entityRiskFlattened === 'number'
-      ? entityRiskFlattened
-      : undefined;
-
-  // 2. Try raw source entity.risk.calculated_score_norm
-  if (riskScore === undefined) {
-    const entityRisk = (source?.entity as { risk?: { calculated_score_norm?: number } } | undefined)
-      ?.risk?.calculated_score_norm;
-    if (entityRisk != null) {
-      riskScore = entityRisk;
-    }
-  }
-
-  // 3. Try entity-specific fields based on entity type
-  if (riskScore === undefined) {
-    riskScore = getEntitySpecificRiskScore(entityType, record, source);
-  }
-
-  // Get risk level
-  const riskLevel = getRiskLevelFromSources(entityType, record, source);
-
-  // If we have neither risk score nor risk level, show empty
-  // Note: riskScore can be 0, which is a valid score, so we check for undefined/null specifically
-  if ((riskScore === undefined || riskScore === null) && !riskLevel) {
-    return getEmptyTagValue();
-  }
-
-  // Determine risk level from risk score if not directly available
-  const level =
-    riskLevel || (riskScore != null ? getRiskLevelFromScore(riskScore) : RiskSeverity.Unknown);
-
-  const colors: { background: string; text: string } = (() => {
-    switch (level) {
-      case RiskSeverity.Unknown:
-        return {
-          background: euiTheme.colors.backgroundBaseSubdued,
-          text: euiTheme.colors.textSubdued,
-        };
-      case RiskSeverity.Low:
-        return {
-          background: euiTheme.colors.backgroundBaseNeutral,
-          text: euiTheme.colors.textNeutral,
-        };
-      case RiskSeverity.Moderate:
-        return {
-          background: euiTheme.colors.backgroundLightWarning,
-          text: euiTheme.colors.textWarning,
-        };
-      case RiskSeverity.High:
-        return {
-          background: euiTheme.colors.backgroundLightRisk,
-          text: euiTheme.colors.textRisk,
-        };
-      case RiskSeverity.Critical:
-        return {
-          background: euiTheme.colors.backgroundLightDanger,
-          text: euiTheme.colors.textDanger,
-        };
-      default:
-        return {
-          background: euiTheme.colors.backgroundBaseSubdued,
-          text: euiTheme.colors.textSubdued,
-        };
-    }
-  })();
-
-  return (
-    <EuiBadge color={colors.background}>
-      <EuiText
-        css={css`
-          font-weight: ${euiTheme.font.weight.semiBold};
-        `}
-        size={'s'}
-        color={colors.text}
-      >
-        {riskScore !== undefined && riskScore !== null
-          ? formatRiskScoreWholeNumber(riskScore)
-          : i18n.translate('xpack.securitySolution.entityAnalytics.threatHunting.riskScore.na', {
-              defaultMessage: 'N/A',
-            })}
-      </EuiText>
-    </EuiBadge>
-  );
-};
-
-/**
- * Custom cell renderer for Entity Name with Timeline icon
- */
-const EntityNameWithTimelineRenderer = ({
-  rowIndex,
-  rows,
-}: EuiDataGridCellValueElementProps & { rows: DataTableRecord[] }) => {
   const { investigateInTimeline } = useInvestigateInTimeline();
   const {
     timelinePrivileges: { read: canUseTimeline },
   } = useUserPrivileges();
+  const { openRightPanel } = useExpandableFlyoutApi();
 
-  const record = rows[rowIndex];
-  const source = record.raw._source as GenericEntityRecord | undefined;
-  const entityName = source?.entity?.name;
-  const entityType = source?.entity?.EngineMetadata?.Type;
-  const entityId = source?.entity?.id;
-  const displayName = (entityName ||
-    (record.flattened[ASSET_FIELDS.ENTITY_NAME] as string | undefined) ||
-    '') as string;
+  return [
+    {
+      name: (
+        <FormattedMessage
+          id="xpack.securitySolution.entityAnalytics.threatHunting.actionsColumn.title"
+          defaultMessage="Actions"
+        />
+      ),
+      render: (record: Entity) => {
+        const entityType = getEntityType(record);
+        const entityName = record.entity.name;
+        const entityId = record.entity.id;
 
-  const handleTimelineClick = useCallback(() => {
-    const dataProviders = createEntityDataProviders(entityType, entityName, entityId);
-    if (dataProviders && dataProviders.length > 0) {
-      investigateInTimeline({
-        dataProviders,
-      });
-    }
-  }, [entityType, entityName, entityId, investigateInTimeline]);
+        const handleFlyoutClick = () => {
+          const id = EntityPanelKeyByType[entityType];
 
-  return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-      {canUseTimeline && entityName && (
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            content={i18n.translate(
-              'xpack.securitySolution.entityAnalytics.threatHunting.investigateInTimeline',
-              {
-                defaultMessage: 'Investigate in timeline',
-              }
+          if (id && entityName) {
+            openRightPanel({
+              id,
+              params: {
+                [EntityPanelParamByType[entityType] ?? '']: entityName,
+                contextID: THREAT_HUNTING_TABLE_ID,
+                scopeId: THREAT_HUNTING_TABLE_ID,
+              },
+            });
+          }
+        };
+
+        const handleTimelineClick = () => {
+          const dataProviders = createEntityDataProviders(entityType, entityName, entityId);
+          if (dataProviders && dataProviders.length > 0) {
+            investigateInTimeline({
+              dataProviders,
+            });
+          }
+        };
+
+        if (!entityName) {
+          return null;
+        }
+
+        return (
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            {EntityPanelKeyByType[entityType] && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.securitySolution.entityAnalytics.threatHunting.entityPreview.tooltip',
+                    {
+                      defaultMessage: 'Preview entity',
+                    }
+                  )}
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    iconType="expand"
+                    onClick={handleFlyoutClick}
+                    aria-label={i18n.translate(
+                      'xpack.securitySolution.entityAnalytics.threatHunting.entityPreview.ariaLabel',
+                      {
+                        defaultMessage: 'Preview entity with name {name}',
+                        values: { name: entityName },
+                      }
+                    )}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
             )}
-            disableScreenReaderOutput
-          >
-            <EuiButtonIcon
-              iconType="timeline"
-              size="s"
-              color="text"
-              onClick={handleTimelineClick}
-              aria-label={i18n.translate(
-                'xpack.securitySolution.entityAnalytics.threatHunting.investigateInTimeline',
-                {
-                  defaultMessage: 'Investigate in timeline',
-                }
-              )}
-              data-test-subj="threat-hunting-timeline-icon"
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      )}
-      <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
-        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {displayName}
-        </span>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
-
-// Create custom cell renderers that extend the base ones
-const createThreatHuntingCustomRenderers = (): ((
-  rows: DataTableRecord[]
-) => CustomCellRenderer) => {
-  return (rows: DataTableRecord[]): CustomCellRenderer => ({
-    // Override entity name to include timeline icon
-    [ASSET_FIELDS.ENTITY_NAME]: (props: EuiDataGridCellValueElementProps) => (
-      <EntityNameWithTimelineRenderer {...props} rows={rows} />
-    ),
-    // Override risk score to use Privileged User Monitoring color scheme
-    [ASSET_FIELDS.ENTITY_RISK]: (props: EuiDataGridCellValueElementProps) => (
-      <RiskScoreCellRenderer {...props} rows={rows} />
-    ),
-  });
-};
-
-interface GroupWithURLPaginationProps {
-  state: AssetInventoryURLStateResult;
-  selectedGroup: string;
-  selectedGroupOptions: string[];
-  groupSelectorComponent?: JSX.Element;
-  additionalCustomRenderers?: (rows: DataTableRecord[]) => CustomCellRenderer;
-  height?: number;
-}
-
-const GroupWithURLPagination = ({
-  state,
-  selectedGroup,
-  selectedGroupOptions,
-  groupSelectorComponent,
-  additionalCustomRenderers,
-  height,
-}: GroupWithURLPaginationProps) => {
-  const { groupData, grouping, isFetching } = useAssetInventoryGrouping({
-    state: {
-      ...state,
-      pageIndex: state.pageIndex ?? 0,
-      pageSize: state.pageSize ?? 10,
+            {canUseTimeline && entityName && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.securitySolution.entityAnalytics.threatHunting.investigateInTimeline',
+                    {
+                      defaultMessage: 'Investigate in timeline',
+                    }
+                  )}
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    iconType="timeline"
+                    size="s"
+                    color="text"
+                    onClick={handleTimelineClick}
+                    aria-label={i18n.translate(
+                      'xpack.securitySolution.entityAnalytics.threatHunting.investigateInTimeline',
+                      {
+                        defaultMessage: 'Investigate in timeline',
+                      }
+                    )}
+                    data-test-subj="threat-hunting-timeline-icon"
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        );
+      },
+      width: '5%',
     },
-    selectedGroup,
-    groupFilters: [],
-  });
-
-  useEffect(() => {
-    state.onChangePage(0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedGroup]);
-
-  return (
-    <GroupWrapper
-      data={groupData}
-      grouping={grouping}
-      renderChildComponent={(currentGroupFilters) => (
-        <GroupContent
-          currentGroupFilters={currentGroupFilters}
-          state={state}
-          groupingLevel={1}
-          selectedGroupOptions={selectedGroupOptions}
-          groupSelectorComponent={groupSelectorComponent}
-          additionalCustomRenderers={additionalCustomRenderers}
-          height={height}
+    {
+      field: 'entity.name',
+      name: (
+        <FormattedMessage
+          id="xpack.securitySolution.entityAnalytics.threatHunting.nameColumn.title"
+          defaultMessage="Name"
         />
-      )}
-      activePageIndex={state.pageIndex}
-      pageSize={state.pageSize}
-      onChangeGroupsPage={state.onChangePage}
-      onChangeGroupsItemsPerPage={state.onChangeItemsPerPage}
-      isFetching={isFetching}
-      selectedGroup={selectedGroup}
-      groupingLevel={0}
-      groupSelectorComponent={groupSelectorComponent}
-    />
-  );
+      ),
+      sortable: true,
+      truncateText: { lines: 2 },
+      render: (_: string, record: Entity) => {
+        const entityType = getEntityType(record);
+        const entityName = record.entity.name;
+
+        return (
+          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <EuiIcon type={EntityIconByType[entityType]} />
+            <span css={{ paddingLeft: euiTheme.size.s }}>{entityName}</span>
+          </span>
+        );
+      },
+      width: '25%',
+    },
+    {
+      field: 'entity.source',
+      name: (
+        <FormattedMessage
+          id="xpack.securitySolution.entityAnalytics.threatHunting.sourceColumn.title"
+          defaultMessage="Source"
+        />
+      ),
+      width: '25%',
+      truncateText: { lines: 2 },
+      render: (source: string | undefined) => {
+        if (source != null) {
+          return sourceFieldToText(source);
+        }
+        return getEmptyTagValue();
+      },
+    },
+    {
+      field: 'asset.criticality',
+      name: (
+        <FormattedMessage
+          id="xpack.securitySolution.entityAnalytics.threatHunting.criticalityColumn.title"
+          defaultMessage="Criticality"
+        />
+      ),
+      width: '10%',
+      render: (criticality: CriticalityLevels) => {
+        if (criticality != null) {
+          return <span>{CRITICALITY_LEVEL_TITLE[criticality]}</span>;
+        }
+        return getEmptyTagValue();
+      },
+    },
+    {
+      name: (
+        <FormattedMessage
+          id="xpack.securitySolution.entityAnalytics.threatHunting.riskScoreColumn.title"
+          defaultMessage="Risk score"
+        />
+      ),
+      width: '10%',
+      render: (entity: Entity) => {
+        const entityType = getEntityType(entity);
+
+        // Get risk score using EntityTypeToScoreField
+        const riskScore = get(EntityTypeToScoreField[entityType], entity) as number | undefined;
+
+        // Get risk level using EntityTypeToLevelField
+        const riskLevel = get(EntityTypeToLevelField[entityType], entity) as
+          | RiskSeverity
+          | undefined;
+
+        // If we have neither risk score nor risk level, show empty
+        if ((riskScore === undefined || riskScore === null) && !riskLevel) {
+          return getEmptyTagValue();
+        }
+
+        // Determine risk level from risk score if not directly available
+        const level =
+          riskLevel ||
+          (riskScore != null ? getRiskLevelFromScore(riskScore) : RiskSeverity.Unknown);
+
+        const colors = getRiskScoreColors(level, euiTheme);
+
+        return (
+          <EuiBadge color={colors.background}>
+            <EuiText
+              css={css`
+                font-weight: ${euiTheme.font.weight.semiBold};
+              `}
+              size={'s'}
+              color={colors.text}
+            >
+              {riskScore !== undefined && riskScore !== null
+                ? formatRiskScoreWholeNumber(riskScore)
+                : i18n.translate(
+                    'xpack.securitySolution.entityAnalytics.threatHunting.riskScore.na',
+                    {
+                      defaultMessage: 'N/A',
+                    }
+                  )}
+            </EuiText>
+          </EuiBadge>
+        );
+      },
+    },
+    {
+      name: (
+        <FormattedMessage
+          id="xpack.securitySolution.entityAnalytics.threatHunting.riskLevelColumn.title"
+          defaultMessage="Risk Level"
+        />
+      ),
+      width: '10%',
+      render: (entity: Entity) => {
+        const entityType = getEntityType(entity);
+        const riskLevel = get(EntityTypeToLevelField[entityType], entity) as
+          | RiskSeverity
+          | undefined;
+
+        if (riskLevel != null) {
+          return <RiskScoreLevel severity={riskLevel} />;
+        }
+        return getEmptyTagValue();
+      },
+    },
+    {
+      field: '@timestamp',
+      name: (
+        <FormattedMessage
+          id="xpack.securitySolution.entityAnalytics.threatHunting.lastUpdateColumn.title"
+          defaultMessage="Last Update"
+        />
+      ),
+      sortable: true,
+      render: (lastUpdate: string) => {
+        return <FormattedRelativePreferenceDate value={lastUpdate} />;
+      },
+      width: '15%',
+    },
+  ];
 };
 
-interface GroupContentProps {
-  currentGroupFilters: Filter[];
-  state: AssetInventoryURLStateResult;
-  groupingLevel: number;
-  selectedGroupOptions: string[];
-  parentGroupFilters?: string;
-  groupSelectorComponent?: JSX.Element;
-  additionalCustomRenderers?: (rows: DataTableRecord[]) => CustomCellRenderer;
-  height?: number;
-}
+export const ThreatHuntingEntitiesTable: React.FC<ThreatHuntingEntitiesTableProps> = () => {
+  const { deleteQuery, setQuery, isInitializing, from, to } = useGlobalTime();
+  const [activePage, setActivePage] = useState(0);
+  const [limit, setLimit] = useState(10);
+  const { toggleStatus } = useQueryToggle(THREAT_HUNTING_TABLE_ID);
+  const [sorting, setSorting] = useState({
+    field: '@timestamp',
+    direction: Direction.desc,
+  });
+  const entityTypes = useEntityStoreTypes();
+  const [selectedSeverities, setSelectedSeverities] = useState<RiskSeverity[]>([]);
+  const [selectedCriticalities, setSelectedCriticalities] = useState<CriticalityLevels[]>([]);
+  const [selectedSources, setSelectedSources] = useState<EntitySourceTag[]>([]);
 
-const groupFilterMap = (filter: Filter | null): Filter | null => {
-  const query = filter?.query;
-  if (query?.bool?.should?.[0]?.bool?.must_not?.exists?.field === ASSET_FIELDS.ASSET_CRITICALITY) {
-    return {
-      meta: filter?.meta ?? { alias: null, disabled: false, negate: false },
-      query: {
+  const filter = useEntitiesListFilters({
+    selectedSeverities,
+    selectedCriticalities,
+    selectedSources,
+  });
+
+  const [querySkip, setQuerySkip] = useState(isInitializing || !toggleStatus);
+  useEffect(() => {
+    if (!isInitializing) {
+      setQuerySkip(isInitializing || !toggleStatus);
+    }
+  }, [isInitializing, toggleStatus]);
+
+  const onSort = useCallback(
+    (criteria: Criteria) => {
+      if (criteria.sort != null) {
+        const newSort = criteria.sort;
+        if (newSort.direction !== sorting.direction || newSort.field !== sorting.field) {
+          setSorting(newSort);
+        }
+      }
+    },
+    [setSorting, sorting]
+  );
+
+  const searchParams = useMemo(
+    () => ({
+      entityTypes,
+      page: activePage + 1,
+      perPage: limit,
+      sortField: sorting.field,
+      sortOrder: sorting.direction,
+      skip: querySkip,
+      filterQuery: JSON.stringify({
         bool: {
-          filter: {
-            bool: {
-              should: [
-                { term: { [ASSET_FIELDS.ASSET_CRITICALITY]: 'deleted' } },
-                { bool: { must_not: { exists: { field: ASSET_FIELDS.ASSET_CRITICALITY } } } },
-              ],
-              minimum_should_match: 1,
-            },
-          },
+          filter,
         },
-      },
-    };
-  }
-  return query?.match_phrase || query?.bool?.should || query?.bool?.filter ? filter : null;
-};
-
-const filterTypeGuard = (filter: Filter | null): filter is Filter => filter !== null;
-
-const mergeCurrentAndParentFilters = (
-  currentGroupFilters: Filter[],
-  parentGroupFilters: string | undefined
-) => {
-  return [...currentGroupFilters, ...(parentGroupFilters ? JSON.parse(parentGroupFilters) : [])];
-};
-
-const GroupContent = ({
-  currentGroupFilters,
-  state,
-  groupingLevel,
-  selectedGroupOptions,
-  parentGroupFilters,
-  groupSelectorComponent,
-  additionalCustomRenderers,
-  height,
-}: GroupContentProps) => {
-  if (groupingLevel < selectedGroupOptions.length) {
-    const nextGroupingLevel = groupingLevel + 1;
-
-    const newParentGroupFilters = mergeCurrentAndParentFilters(
-      currentGroupFilters,
-      parentGroupFilters
-    )
-      .map(groupFilterMap)
-      .filter(filterTypeGuard);
-
-    return (
-      <GroupWithLocalPagination
-        state={state}
-        groupingLevel={nextGroupingLevel}
-        selectedGroup={selectedGroupOptions[groupingLevel]}
-        selectedGroupOptions={selectedGroupOptions}
-        parentGroupFilters={JSON.stringify(newParentGroupFilters)}
-        groupSelectorComponent={groupSelectorComponent}
-        additionalCustomRenderers={additionalCustomRenderers}
-        height={height}
-      />
-    );
-  }
-
-  return (
-    <DataTableWithLocalPagination
-      state={state}
-      currentGroupFilters={currentGroupFilters}
-      parentGroupFilters={parentGroupFilters}
-      additionalCustomRenderers={additionalCustomRenderers}
-      height={height}
-    />
+      }),
+    }),
+    [entityTypes, activePage, limit, sorting.field, sorting.direction, querySkip, filter]
   );
-};
+  const { data, isLoading, isRefetching, refetch, error } = useEntitiesListQuery(searchParams);
 
-interface GroupWithLocalPaginationProps extends GroupWithURLPaginationProps {
-  groupingLevel: number;
-  parentGroupFilters?: string;
-}
-
-const GroupWithLocalPagination = ({
-  state,
-  groupingLevel,
-  parentGroupFilters,
-  selectedGroup,
-  selectedGroupOptions,
-  groupSelectorComponent,
-  additionalCustomRenderers,
-  height,
-}: GroupWithLocalPaginationProps) => {
-  const [subgroupPageIndex, setSubgroupPageIndex] = useState(0);
-  const [subgroupPageSize, setSubgroupPageSize] = useState(10);
-
-  const groupFilters = parentGroupFilters ? JSON.parse(parentGroupFilters) : [];
-
-  const { groupData, grouping, isFetching } = useAssetInventoryGrouping({
-    state: { ...state, pageIndex: subgroupPageIndex, pageSize: subgroupPageSize },
-    selectedGroup,
-    groupFilters,
+  useQueryInspector({
+    queryId: THREAT_HUNTING_TABLE_ID,
+    loading: isLoading || isRefetching,
+    refetch,
+    setQuery,
+    deleteQuery,
+    inspect: data?.inspect ?? null,
   });
 
+  // Reset the active page when the search criteria changes
   useEffect(() => {
-    setSubgroupPageIndex(0);
-  }, [selectedGroup]);
+    setActivePage(0);
+  }, [sorting, limit, filter]);
+
+  const columns = useThreatHuntingColumns();
+
+  // Force a refetch when "refresh" button is clicked.
+  useEffect(() => {
+    refetch();
+  }, [from, to, refetch]);
+
+  useErrorToast(
+    i18n.translate('xpack.securitySolution.entityAnalytics.threatHunting.queryError', {
+      defaultMessage: 'There was an error loading the entities list',
+    }),
+    error
+  );
 
   return (
-    <GroupWrapper
-      data={groupData}
-      grouping={grouping}
-      renderChildComponent={(currentGroupFilters) => (
-        <GroupContent
-          currentGroupFilters={currentGroupFilters.map(groupFilterMap).filter(filterTypeGuard)}
-          state={state}
-          groupingLevel={groupingLevel}
-          selectedGroupOptions={selectedGroupOptions}
-          groupSelectorComponent={groupSelectorComponent}
-          parentGroupFilters={JSON.stringify(groupFilters)}
-          additionalCustomRenderers={additionalCustomRenderers}
-          height={height}
-        />
+    <PaginatedTable
+      id={THREAT_HUNTING_TABLE_ID}
+      activePage={activePage}
+      columns={columns}
+      headerCount={data?.total ?? 0}
+      titleSize="s"
+      headerTitle={i18n.translate(
+        'xpack.securitySolution.entityAnalytics.threatHunting.tableTitle',
+        {
+          defaultMessage: 'Entities',
+        }
       )}
-      activePageIndex={subgroupPageIndex}
-      pageSize={subgroupPageSize}
-      onChangeGroupsPage={setSubgroupPageIndex}
-      onChangeGroupsItemsPerPage={setSubgroupPageSize}
-      isFetching={isFetching}
-      selectedGroup={selectedGroup}
-      groupingLevel={groupingLevel}
-      groupSelectorComponent={groupSelectorComponent}
-    />
-  );
-};
-
-interface DataTableWithLocalPagination {
-  state: AssetInventoryURLStateResult;
-  currentGroupFilters: Filter[];
-  parentGroupFilters?: string;
-  additionalCustomRenderers?: (rows: DataTableRecord[]) => CustomCellRenderer;
-  height?: number;
-}
-
-const getDataGridFilter = (filter: Filter | null) => {
-  if (!filter) return null;
-  return {
-    ...(filter?.query ?? {}),
-  };
-};
-
-const DataTableWithLocalPagination = ({
-  state,
-  currentGroupFilters,
-  parentGroupFilters,
-  additionalCustomRenderers,
-  height,
-}: DataTableWithLocalPagination) => {
-  const [tablePageIndex, setTablePageIndex] = useState(0);
-  const [tablePageSize, setTablePageSize] = useState(10);
-
-  const combinedFilters = mergeCurrentAndParentFilters(currentGroupFilters, parentGroupFilters)
-    .map(groupFilterMap)
-    .filter(filterTypeGuard)
-    .map(getDataGridFilter)
-    .filter((filter): filter is NonNullable<Filter['query']> => Boolean(filter));
-
-  const newState: AssetInventoryURLStateResult = {
-    ...state,
-    query: {
-      ...state.query,
-      bool: {
-        ...state.query.bool,
-        filter: [...state.query.bool.filter, ...combinedFilters],
-      },
-    },
-    pageIndex: tablePageIndex,
-    pageSize: tablePageSize,
-    onChangePage: setTablePageIndex,
-    onChangeItemsPerPage: setTablePageSize,
-  };
-
-  return (
-    <AssetInventoryDataTable
-      state={newState}
-      height={height ?? DEFAULT_TABLE_SECTION_HEIGHT}
-      additionalCustomRenderers={additionalCustomRenderers}
-    />
-  );
-};
-
-export const ThreatHuntingEntitiesTable: React.FC<ThreatHuntingEntitiesTableProps> = ({
-  state,
-  height,
-}) => {
-  // Get grouping functionality for "Group assets by" feature
-  const { grouping } = useAssetInventoryGrouping({
-    state: {
-      ...state,
-      // Ensure pageIndex and pageSize are defined to prevent null values in grouping query
-      pageIndex: state.pageIndex ?? 0,
-      pageSize: state.pageSize ?? 10,
-    },
-  });
-
-  const selectedGroup = grouping.selectedGroups[0];
-
-  // Create custom cell renderers that extend the base ones
-  const additionalCustomRenderers = useMemo(() => createThreatHuntingCustomRenderers(), []);
-
-  // When no group is selected, show plain table with group selector
-  if (selectedGroup === 'none') {
-    return (
-      <AssetInventoryDataTable
-        state={state}
-        height={height}
-        additionalCustomRenderers={additionalCustomRenderers}
-        groupSelectorComponent={grouping.groupSelector}
-      />
-    );
-  }
-
-  // When a group is selected, show grouped view
-  return (
-    <GroupWithURLPagination
-      state={state}
-      selectedGroup={selectedGroup}
-      selectedGroupOptions={grouping.selectedGroups}
-      groupSelectorComponent={grouping.groupSelector}
-      additionalCustomRenderers={additionalCustomRenderers}
-      height={height}
+      headerTooltip={i18n.translate(
+        'xpack.securitySolution.entityAnalytics.threatHunting.tableTooltip',
+        {
+          defaultMessage: 'Entity data can take a couple of minutes to appear',
+        }
+      )}
+      limit={limit}
+      loading={isLoading || isRefetching}
+      isInspect={false}
+      updateActivePage={setActivePage}
+      loadPage={noop}
+      pageOfItems={data?.records ?? []}
+      setQuerySkip={setQuerySkip}
+      showMorePagesIndicator={false}
+      updateLimitPagination={setLimit}
+      totalCount={data?.total ?? 0}
+      itemsPerRow={[
+        {
+          text: i18n.translate('xpack.securitySolution.entityAnalytics.threatHunting.rows', {
+            values: { numRows: 10 },
+            defaultMessage: '{numRows} {numRows, plural, =0 {rows} =1 {row} other {rows}}',
+          }),
+          numberOfRow: 10,
+        },
+        {
+          text: i18n.translate('xpack.securitySolution.entityAnalytics.threatHunting.rows', {
+            values: { numRows: 25 },
+            defaultMessage: '{numRows} {numRows, plural, =0 {rows} =1 {row} other {rows}}',
+          }),
+          numberOfRow: 25,
+        },
+      ]}
+      sorting={sorting}
+      onChange={onSort}
     />
   );
 };

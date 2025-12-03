@@ -36,19 +36,6 @@ jest.mock('../../data_view_manager/hooks/use_data_view', () => ({
   })),
 }));
 
-jest.mock('../../asset_inventory/hooks/use_data_view', () => ({
-  useDataView: jest.fn(() => ({
-    data: { id: 'asset-inventory-test' },
-    isLoading: false,
-    isRefetching: false,
-    refetch: jest.fn(),
-  })),
-}));
-
-jest.mock('../../common/hooks/use_space_id', () => ({
-  useSpaceId: jest.fn(() => 'default'),
-}));
-
 jest.mock('../components/threat_hunting/combined_risk_donut_chart', () => ({
   CombinedRiskDonutChart: () => (
     <div data-test-subj="combined-risk-donut-chart">{'Donut Chart'}</div>

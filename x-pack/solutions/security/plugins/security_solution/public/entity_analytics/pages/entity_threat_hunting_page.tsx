@@ -24,27 +24,6 @@ import { PageScope } from '../../data_view_manager/constants';
 import { CombinedRiskDonutChart } from '../components/threat_hunting/combined_risk_donut_chart';
 import { AnomaliesPlaceholderPanel } from '../components/threat_hunting/anomalies_placeholder_panel';
 import { ThreatHuntingEntitiesTable } from '../components/threat_hunting/threat_hunting_entities_table';
-import {
-  useAssetInventoryURLState,
-  type AssetsBaseURLQuery,
-  type URLQuery,
-} from '../../asset_inventory/hooks/use_asset_inventory_url_state/use_asset_inventory_url_state';
-import { useSpaceId } from '../../common/hooks/use_space_id';
-import { useDataView as useAssetInventoryDataView } from '../../asset_inventory/hooks/use_data_view';
-import { DataViewContext } from '../../asset_inventory/hooks/data_view_context';
-import {
-  ASSET_INVENTORY_DATA_VIEW_ID_PREFIX,
-  LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY,
-} from '../../asset_inventory/constants';
-import { DataViewNotFound } from '../../asset_inventory/components/errors/data_view_not_found';
-const THREAT_HUNTING_COLUMNS_KEY = 'threat-hunting:columns';
-
-const getDefaultQuery = ({ query, filters, pageFilters }: AssetsBaseURLQuery): URLQuery => ({
-  query,
-  filters,
-  pageFilters,
-  sort: [['@timestamp', 'desc']],
-});
 
 export const EntityThreatHuntingPage = () => {
   const {
@@ -54,7 +33,6 @@ export const EntityThreatHuntingPage = () => {
   } = useSourcererDataView();
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { dataView, status } = useDataView(PageScope.explore);
-  const spaceId = useSpaceId();
 
   const isSourcererLoading = useMemo(
     () => (newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading),
@@ -68,11 +46,6 @@ export const EntityThreatHuntingPage = () => {
 
   const showEmptyPrompt = !indicesExist;
 
-  // Asset Inventory Data View for the entities table
-  const assetInventoryDataViewQuery = useAssetInventoryDataView(
-    spaceId ? `${ASSET_INVENTORY_DATA_VIEW_ID_PREFIX}-${spaceId}` : undefined
-  );
-
   if (newDataViewPickerEnabled && status === 'pristine') {
     return <PageLoader />;
   }
@@ -80,29 +53,6 @@ export const EntityThreatHuntingPage = () => {
   if (showEmptyPrompt) {
     return <EmptyPrompt onSkip={() => {}} />;
   }
-
-  if (assetInventoryDataViewQuery.isLoading) {
-    return <PageLoader />;
-  }
-
-  if (assetInventoryDataViewQuery.isError) {
-    return (
-      <SecuritySolutionPageWrapper>
-        <DataViewNotFound refetchDataView={assetInventoryDataViewQuery.refetch} />
-      </SecuritySolutionPageWrapper>
-    );
-  }
-
-  if (!assetInventoryDataViewQuery.data) {
-    return <PageLoader />;
-  }
-
-  const dataViewContextValue = {
-    dataView: assetInventoryDataViewQuery.data,
-    dataViewRefetch: assetInventoryDataViewQuery.refetch,
-    dataViewIsLoading: assetInventoryDataViewQuery.isLoading,
-    dataViewIsRefetching: assetInventoryDataViewQuery.isRefetching,
-  };
 
   return (
     <>
@@ -144,9 +94,7 @@ export const EntityThreatHuntingPage = () => {
 
             {/* Entities Table */}
             <EuiFlexItem>
-              <DataViewContext.Provider value={dataViewContextValue}>
-                <EntityThreatHuntingContent />
-              </DataViewContext.Provider>
+              <ThreatHuntingEntitiesTable />
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
@@ -155,14 +103,4 @@ export const EntityThreatHuntingPage = () => {
       <SpyRoute pageName={SecurityPageName.entityAnalyticsThreatHunting} />
     </>
   );
-};
-
-const EntityThreatHuntingContent = () => {
-  const tableState = useAssetInventoryURLState({
-    paginationLocalStorageKey: LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY,
-    columnsLocalStorageKey: THREAT_HUNTING_COLUMNS_KEY,
-    defaultQuery: getDefaultQuery,
-  });
-
-  return <ThreatHuntingEntitiesTable state={tableState} />;
 };

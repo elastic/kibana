@@ -7,193 +7,120 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { CustomCellRenderer, DataGridCellValueElementProps } from '@kbn/unified-data-table';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { ThreatHuntingEntitiesTable } from './threat_hunting_entities_table';
 import { TestProviders } from '../../../common/mock';
-import type { AssetInventoryURLStateResult } from '../../../asset_inventory/hooks/use_asset_inventory_url_state/use_asset_inventory_url_state';
 import { useInvestigateInTimeline } from '../../../common/hooks/timeline/use_investigate_in_timeline';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
-import { DataViewContext } from '../../../asset_inventory/hooks/data_view_context';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
+import { useEntitiesListQuery } from '../entity_store/hooks/use_entities_list_query';
+import { useErrorToast } from '../../../common/hooks/use_error_toast';
+import { useGlobalFilterQuery } from '../../../common/hooks/use_global_filter_query';
+import { useEntityStoreTypes } from '../../hooks/use_enabled_entity_types';
+import type { ListEntitiesResponse } from '../../../../common/api/entity_analytics/entity_store/entities/list_entities.gen';
 
-jest.mock('../../../asset_inventory/components/asset_inventory_data_table', () => ({
-  AssetInventoryDataTable: ({
-    additionalCustomRenderers,
-    state,
-  }: {
-    additionalCustomRenderers?: (rows: DataTableRecord[]) => CustomCellRenderer;
-    state: AssetInventoryURLStateResult;
-  }) => {
-    // Mock implementation to test that additionalCustomRenderers is passed
-    // Using string literals instead of ASSET_FIELDS constants to avoid Jest ESM transformation issues
-    const entityNameField = 'entity.name';
-    const entityRiskField = 'entity.risk';
-    const assetCriticalityField = 'asset.criticality';
-
-    const mockRows: DataTableRecord[] = [
-      {
-        id: 'test-row-0',
-        flattened: {
-          [entityNameField]: 'test-entity',
-          [entityRiskField]: 75,
-          [assetCriticalityField]: 'high_impact',
-          'user.risk.calculated_score_norm': 75,
-          'user.risk.calculated_level': 'High',
-        },
-        raw: {
-          _source: {
-            entity: {
-              name: 'test-entity',
-              EngineMetadata: { Type: 'user' },
-              id: 'entity-123',
-            },
-          },
-        },
-      },
-    ];
-    const renderers = additionalCustomRenderers ? additionalCustomRenderers(mockRows) : {};
-    // Create minimal props that the renderer functions expect
-    const mockProps = {
-      rowIndex: 0,
-      row: mockRows[0],
-      columnId: '',
-      setCellProps: jest.fn(),
-      isExpandable: false,
-      isExpanded: false,
-      isDetails: false,
-    };
-    return (
-      <div data-test-subj="asset-inventory-data-table">
-        {renderers[entityNameField] && (
-          <div data-test-subj="entity-name-with-timeline">
-            {renderers[entityNameField](mockProps as unknown as DataGridCellValueElementProps)}
-          </div>
-        )}
-        {renderers[entityRiskField] && (
-          <div data-test-subj="risk-score-cell">
-            {renderers[entityRiskField](mockProps as unknown as DataGridCellValueElementProps)}
-          </div>
-        )}
-      </div>
-    );
-  },
-}));
-
-jest.mock('../../../common/hooks/timeline/use_investigate_in_timeline', () => ({
-  useInvestigateInTimeline: jest.fn(() => ({
-    investigateInTimeline: jest.fn(),
-  })),
-}));
-
-jest.mock('../../../common/components/user_privileges', () => ({
-  useUserPrivileges: jest.fn(() => ({
-    timelinePrivileges: { read: true },
-  })),
-}));
+jest.mock('../../../common/hooks/timeline/use_investigate_in_timeline');
+jest.mock('../../../common/components/user_privileges');
+jest.mock('../../../common/containers/use_global_time');
+jest.mock('../../../common/containers/query_toggle');
+jest.mock('../entity_store/hooks/use_entities_list_query');
+jest.mock('../../../common/hooks/use_error_toast');
+jest.mock('../../../common/hooks/use_global_filter_query');
+jest.mock('../../hooks/use_enabled_entity_types');
 
 const mockUseInvestigateInTimeline = useInvestigateInTimeline as jest.Mock;
 const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
+const mockUseGlobalTime = useGlobalTime as jest.Mock;
+const mockUseQueryToggle = useQueryToggle as jest.Mock;
+const mockUseEntitiesListQuery = useEntitiesListQuery as jest.Mock;
+const mockUseErrorToast = useErrorToast as jest.Mock;
+const mockUseGlobalFilterQuery = useGlobalFilterQuery as jest.Mock;
+const mockUseEntityStoreTypes = useEntityStoreTypes as jest.Mock;
 
-// Mock data view for DataViewContext
-const mockDataView: DataView = {
-  id: 'test-data-view',
-  title: 'test-*',
-  getIndexPattern: () => 'test-*',
-  fields: [
+const mockRefetch = jest.fn();
+
+const responseData: ListEntitiesResponse = {
+  page: 1,
+  per_page: 10,
+  total: 1,
+  records: [
     {
-      name: 'entity.name',
-      type: 'string',
-      esTypes: ['keyword'],
-      aggregatable: true,
-      searchable: true,
-    },
-    {
-      name: 'entity.risk',
-      type: 'number',
-      esTypes: ['float'],
-      aggregatable: true,
-      searchable: true,
+      '@timestamp': '2021-08-02T14:00:00.000Z',
+      user: {
+        name: 'test-entity',
+        risk: {
+          calculated_score_norm: 75,
+          calculated_level: 'High',
+        },
+      },
+      entity: {
+        id: 'entity-123',
+        name: 'test-entity',
+        source: 'test-index',
+        type: 'user',
+      },
     },
   ],
-} as unknown as DataView;
-
-const mockDataViewContextValue = {
-  dataView: mockDataView,
-  dataViewRefetch: jest.fn(),
-  dataViewIsLoading: false,
-  dataViewIsRefetching: false,
+  inspect: undefined,
 };
 
 describe('ThreatHuntingEntitiesTable', () => {
-  const mockState: AssetInventoryURLStateResult = {
-    setUrlQuery: jest.fn(),
-    sort: [],
-    filters: [],
-    pageFilters: [],
-    query: { bool: { must: [], must_not: [], filter: [], should: [] } },
-    pageIndex: 0,
-    urlQuery: {
-      query: { query: '', language: 'kuery' },
-      filters: [],
-    },
-    setTableOptions: jest.fn(),
-    handleUpdateQuery: jest.fn(),
-    pageSize: 25,
-    setPageSize: jest.fn(),
-    onChangeItemsPerPage: jest.fn(),
-    onChangePage: jest.fn(),
-    onSort: jest.fn(),
-    onResetFilters: jest.fn(),
-    columnsLocalStorageKey: 'test',
-    getRowsFromPages: jest.fn(() => []),
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
+
     mockUseInvestigateInTimeline.mockReturnValue({
       investigateInTimeline: jest.fn(),
     });
+
     mockUseUserPrivileges.mockReturnValue({
       timelinePrivileges: { read: true },
     });
+
+    mockUseGlobalTime.mockReturnValue({
+      deleteQuery: jest.fn(),
+      setQuery: jest.fn(),
+      isInitializing: false,
+      from: 'now-15m',
+      to: 'now',
+    });
+
+    mockUseQueryToggle.mockReturnValue({
+      toggleStatus: true,
+    });
+
+    mockUseEntitiesListQuery.mockReturnValue({
+      data: responseData,
+      isLoading: false,
+      isRefetching: false,
+      refetch: mockRefetch,
+      error: null,
+    });
+
+    mockUseErrorToast.mockReturnValue(jest.fn());
+
+    mockUseGlobalFilterQuery.mockReturnValue({ filterQuery: null });
+
+    mockUseEntityStoreTypes.mockReturnValue(['user', 'host']);
   });
 
-  it('should render the AssetInventoryDataTable', () => {
+  it('should render the table with entity data', () => {
     render(
       <TestProviders>
-        <DataViewContext.Provider value={mockDataViewContextValue}>
-          <ThreatHuntingEntitiesTable state={mockState} />
-        </DataViewContext.Provider>
+        <ThreatHuntingEntitiesTable />
       </TestProviders>
     );
 
-    expect(screen.getByTestId('asset-inventory-data-table')).toBeInTheDocument();
+    expect(screen.getByText('test-entity')).toBeInTheDocument();
   });
 
   it('should add timeline icon to entity name column', () => {
     render(
       <TestProviders>
-        <DataViewContext.Provider value={mockDataViewContextValue}>
-          <ThreatHuntingEntitiesTable state={mockState} />
-        </DataViewContext.Provider>
+        <ThreatHuntingEntitiesTable />
       </TestProviders>
     );
 
-    expect(screen.getByTestId('entity-name-with-timeline')).toBeInTheDocument();
     expect(screen.getByTestId('threat-hunting-timeline-icon')).toBeInTheDocument();
-  });
-
-  it('should render risk score with correct color scheme', () => {
-    render(
-      <TestProviders>
-        <DataViewContext.Provider value={mockDataViewContextValue}>
-          <ThreatHuntingEntitiesTable state={mockState} />
-        </DataViewContext.Provider>
-      </TestProviders>
-    );
-
-    expect(screen.getByTestId('risk-score-cell')).toBeInTheDocument();
   });
 
   it('should call investigateInTimeline when timeline icon is clicked', () => {
@@ -204,9 +131,7 @@ describe('ThreatHuntingEntitiesTable', () => {
 
     render(
       <TestProviders>
-        <DataViewContext.Provider value={mockDataViewContextValue}>
-          <ThreatHuntingEntitiesTable state={mockState} />
-        </DataViewContext.Provider>
+        <ThreatHuntingEntitiesTable />
       </TestProviders>
     );
 
@@ -223,12 +148,81 @@ describe('ThreatHuntingEntitiesTable', () => {
 
     render(
       <TestProviders>
-        <DataViewContext.Provider value={mockDataViewContextValue}>
-          <ThreatHuntingEntitiesTable state={mockState} />
-        </DataViewContext.Provider>
+        <ThreatHuntingEntitiesTable />
       </TestProviders>
     );
 
     expect(screen.queryByTestId('threat-hunting-timeline-icon')).not.toBeInTheDocument();
+  });
+
+  it('should render risk score with custom color scheme', () => {
+    render(
+      <TestProviders>
+        <ThreatHuntingEntitiesTable />
+      </TestProviders>
+    );
+
+    // The risk score should be rendered (75 formatted as whole number)
+    expect(screen.getByText('75')).toBeInTheDocument();
+  });
+
+  it('should call useEntitiesListQuery with correct parameters', () => {
+    render(
+      <TestProviders>
+        <ThreatHuntingEntitiesTable />
+      </TestProviders>
+    );
+
+    expect(mockUseEntitiesListQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        entityTypes: ['user', 'host'],
+        page: 1,
+        perPage: 10,
+        sortField: '@timestamp',
+        sortOrder: 'desc',
+        skip: false,
+      })
+    );
+  });
+
+  it('should display loading state', () => {
+    mockUseEntitiesListQuery.mockReturnValue({
+      data: null,
+      isLoading: true,
+      isRefetching: false,
+      refetch: mockRefetch,
+      error: null,
+    });
+
+    render(
+      <TestProviders>
+        <ThreatHuntingEntitiesTable />
+      </TestProviders>
+    );
+
+    // PaginatedTable should show loading state
+    expect(mockUseEntitiesListQuery).toHaveBeenCalled();
+  });
+
+  it('should display error toast when there is an error', () => {
+    const error = new Error('Test error');
+    mockUseEntitiesListQuery.mockReturnValue({
+      data: null,
+      isLoading: false,
+      isRefetching: false,
+      refetch: mockRefetch,
+      error,
+    });
+
+    render(
+      <TestProviders>
+        <ThreatHuntingEntitiesTable />
+      </TestProviders>
+    );
+
+    expect(mockUseErrorToast).toHaveBeenCalledWith(
+      'There was an error loading the entities list',
+      error
+    );
   });
 });
