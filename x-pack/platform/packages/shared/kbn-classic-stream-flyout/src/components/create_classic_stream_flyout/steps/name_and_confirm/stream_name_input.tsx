@@ -9,10 +9,28 @@ import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
+/*
+ * PatternSegment is a segment of the index pattern that is either a static text or a wildcard.
+ * It is used to create the input groups.
+ */
 interface PatternSegment {
   type: 'static' | 'wildcard';
   value: string;
   index?: number;
+}
+
+/**
+ * Groups segments into input groups where each group has:
+ * - prepend: static text before the wildcard (if any)
+ * - wildcardIndex: the index of the wildcard
+ * - append: static text after the wildcard (if any, and only if it's the last wildcard)
+ */
+interface InputGroup {
+  prepend?: string;
+  wildcardIndex: number;
+  append?: string;
+  isFirst: boolean;
+  isLast: boolean;
 }
 
 const parseIndexPattern = (pattern: string): PatternSegment[] => {
@@ -41,6 +59,42 @@ const parseIndexPattern = (pattern: string): PatternSegment[] => {
   }
 
   return segments;
+};
+
+const createInputGroups = (segments: PatternSegment[]): InputGroup[] => {
+  const groups: InputGroup[] = [];
+  let pendingPrepend: string | undefined;
+  const wildcardCount = segments.filter((s) => s.type === 'wildcard').length;
+  let currentWildcardNum = 0;
+
+  for (let i = 0; i < segments.length; i++) {
+    const segment = segments[i];
+
+    if (segment.type === 'static') {
+      // Check if next segment is a wildcard
+      const nextSegment = segments[i + 1];
+      if (nextSegment?.type === 'wildcard') {
+        // This static text becomes the prepend for the next wildcard
+        pendingPrepend = segment.value;
+      } else {
+        // This is trailing static text - append to the last group
+        if (groups.length > 0) {
+          groups[groups.length - 1].append = segment.value;
+        }
+      }
+    } else if (segment.type === 'wildcard') {
+      currentWildcardNum++;
+      groups.push({
+        prepend: pendingPrepend,
+        wildcardIndex: segment.index ?? 0,
+        isFirst: currentWildcardNum === 1,
+        isLast: currentWildcardNum === wildcardCount,
+      });
+      pendingPrepend = undefined;
+    }
+  }
+
+  return groups;
 };
 
 const countWildcards = (pattern: string): number => {
@@ -78,6 +132,7 @@ export const StreamNameInput = ({
   const { euiTheme } = useEuiTheme();
 
   const segments = useMemo(() => parseIndexPattern(indexPattern), [indexPattern]);
+  const inputGroups = useMemo(() => createInputGroups(segments), [segments]);
   const wildcardCount = useMemo(() => countWildcards(indexPattern), [indexPattern]);
 
   // Internal state for wildcard values
@@ -105,66 +160,81 @@ export const StreamNameInput = ({
     });
   }, []);
 
-  const inputGroupStyles = css`
-    row-gap: ${euiTheme.size.xs};
-  `;
+  const hasError = validationError !== null;
+  const hasMultipleWildcards = wildcardCount > 1;
 
-  const getInputStyles = (isFirst: boolean, isLast: boolean) => {
-    const borderRadius = euiTheme.border.radius.medium;
-    const firstRadiusStyle = `border-top-left-radius: ${borderRadius}; border-bottom-left-radius: ${borderRadius};`;
-    const lastRadiusStyle = `border-top-right-radius: ${borderRadius}; border-bottom-right-radius: ${borderRadius};`;
-
+  const getConnectedInputStyles = (isFirst: boolean, isLast: boolean) => {
     return css`
-      border-radius: 0;
-      ${isFirst ? firstRadiusStyle : ''}
-      ${isLast ? lastRadiusStyle : ''}
+      flex: 1 1 0%;
+
+      /* Ensure the wildcard input is at least 100px wide */
+      .euiFormControlLayout__childrenWrapper {
+        min-width: 100px;
+      }
+
+      /* Remove border radius on connected sides */
+      .euiFormControlLayout,
+      .euiFieldText {
+        ${!isLast ? 'border-top-right-radius: 0 ; border-bottom-right-radius: 0 ;' : ''}
+        ${!isFirst ? 'border-top-left-radius: 0 ; border-bottom-left-radius: 0 ;' : ''}
+      }
+
+      /* Prevent truncation on labels */
+      .euiFormControlLayout__prepend,
+      .euiFormControlLayout__append {
+        max-width: none;
+      }
     `;
   };
 
+  const getInputGroupStyles = () => css`
+    row-gap: ${euiTheme.size.xs};
+  `;
+
+  // For single wildcard, use simple prepend/append
+  if (!hasMultipleWildcards && inputGroups.length === 1) {
+    const group = inputGroups[0];
+    return (
+      <EuiFieldText
+        value={parts[group.wildcardIndex] ?? ''}
+        onChange={(e) => handleWildcardChange(group.wildcardIndex, e.target.value)}
+        placeholder="*"
+        fullWidth
+        isInvalid={hasError}
+        prepend={group.prepend}
+        append={group.append}
+        data-test-subj={`${dataTestSubj}-wildcard-${group.wildcardIndex}`}
+      />
+    );
+  }
+
+  // For multiple wildcards, use flex layout with prepend/append on each input
   return (
     <EuiFlexGroup
       gutterSize="none"
       responsive={false}
       wrap
-      css={inputGroupStyles}
+      css={getInputGroupStyles()}
       data-test-subj={dataTestSubj}
     >
-      {segments.map((segment, idx) => {
-        const isFirst = idx === 0;
-        const isLast = idx === segments.length - 1;
-
-        if (segment.type === 'static') {
-          return (
-            <EuiFlexItem key={`static-${idx}`} grow={1}>
-              <EuiFieldText
-                value={segment.value}
-                readOnly
-                data-test-subj={`${dataTestSubj}-static-${idx}`}
-                css={getInputStyles(isFirst, isLast)}
-              />
-            </EuiFlexItem>
-          );
-        }
-
-        const wildcardIdx = segment.index ?? 0;
-        const hasError = validationError !== null;
+      {inputGroups.map((group, index) => {
+        const isFirst = index === 0;
+        const isLast = index === inputGroups.length - 1;
 
         return (
           <EuiFlexItem
-            key={`wildcard-${wildcardIdx}`}
-            grow={2}
-            css={css`
-              min-width: 100px;
-            `}
+            key={`wildcard-${group.wildcardIndex}`}
+            css={getConnectedInputStyles(isFirst, isLast)}
           >
             <EuiFieldText
-              value={parts[wildcardIdx] ?? ''}
-              onChange={(e) => handleWildcardChange(wildcardIdx, e.target.value)}
+              value={parts[group.wildcardIndex] ?? ''}
+              onChange={(e) => handleWildcardChange(group.wildcardIndex, e.target.value)}
               placeholder="*"
               fullWidth
               isInvalid={hasError}
-              data-test-subj={`${dataTestSubj}-wildcard-${wildcardIdx}`}
-              css={getInputStyles(isFirst, isLast)}
+              prepend={group.prepend}
+              append={group.append}
+              data-test-subj={`${dataTestSubj}-wildcard-${group.wildcardIndex}`}
             />
           </EuiFlexItem>
         );

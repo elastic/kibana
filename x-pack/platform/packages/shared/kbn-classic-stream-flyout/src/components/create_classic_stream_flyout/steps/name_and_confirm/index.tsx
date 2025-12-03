@@ -6,4 +6,3 @@
  */
 
 export * from './name_and_confirm_step';
-export * from './stream_name_input';
