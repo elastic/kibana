@@ -199,7 +199,7 @@ export function ErrorGroupDetails() {
     });
   }, [observabilityAIAssistant, errorSamplesData.occurrencesCount, groupId]);
 
-  // Configure agent builder global flyout with the current error attachment (top nav)
+  // Configure agent builder global flyout with the error attachment
   useEffect(() => {
     if (!onechat || !errorId) {
       return;
