@@ -6,7 +6,7 @@
  */
 
 import {
-  EuiButtonEmpty,
+  EuiButton,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -61,7 +61,7 @@ const AgentSelectPopoverButton: React.FC<{
 }> = ({ isPopoverOpen, selectedAgentName, onClick }) => {
   const popoverButtonStyles = usePopoverButtonStyles({ open: isPopoverOpen });
   return (
-    <EuiButtonEmpty
+    <EuiButton
       color="text"
       css={popoverButtonStyles}
       iconSide="left"
@@ -72,7 +72,7 @@ const AgentSelectPopoverButton: React.FC<{
       data-test-subj="agentBuilderAgentSelectorButton"
     >
       {selectedAgentName}
-    </EuiButtonEmpty>
+    </EuiButton>
   );
 };
 

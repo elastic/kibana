@@ -8,7 +8,7 @@
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiBadge,
-  EuiButtonEmpty,
+  EuiButton,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -64,7 +64,7 @@ const ConnectorPopoverButton: React.FC<{
 }> = ({ isPopoverOpen, onClick, disabled }) => {
   const popoverButtonStyles = usePopoverButtonStyles({ open: isPopoverOpen });
   return (
-    <EuiButtonEmpty
+    <EuiButton
       css={popoverButtonStyles}
       color="text"
       iconType="sparkles"
@@ -79,7 +79,7 @@ const ConnectorPopoverButton: React.FC<{
         id="xpack.onechat.conversationInput.connectorSelector.buttonLabel"
         defaultMessage="LLM"
       />
-    </EuiButtonEmpty>
+    </EuiButton>
   );
 };
 
