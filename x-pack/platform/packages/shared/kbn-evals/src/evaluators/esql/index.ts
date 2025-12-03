@@ -16,6 +16,8 @@ import type { EsqlEquivalenceAnalysis } from './types';
 type EsqlPredicitonExtractor<T = unknown> = (output: T) => string;
 type EsqlGroundTruthExtractor<T = unknown> = (expected: T) => string;
 
+export const ESQL_EQUIVALENCE_EVALUATOR_NAME = 'ES|QL Functional Equivalence';
+
 export function createEsqlEquivalenceEvaluator({
   inferenceClient,
   log,
@@ -111,6 +113,6 @@ export function createEsqlEquivalenceEvaluator({
       };
     },
     kind: 'LLM',
-    name: 'ES|QL Functional Equivalence',
+    name: ESQL_EQUIVALENCE_EVALUATOR_NAME,
   };
 }
