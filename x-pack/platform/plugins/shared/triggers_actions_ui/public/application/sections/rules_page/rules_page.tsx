@@ -125,7 +125,7 @@ export const RulesPage = () => {
       restrictWidth={false}
       panelled
       pageHeader={{
-        paddingSize: 'none',
+        paddingSize: 'xl',
         bottomBorder: true,
         pageTitle: (
           <span data-test-subj="rulesPageTitle">
