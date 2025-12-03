@@ -92,6 +92,22 @@ export function SchemaEditor({
     [fields, fieldsMetadata, notifications.toasts, onFieldSelection, onFieldUpdate]
   );
 
+  const filteredFields = React.useMemo(() => {
+    const geoPointFields = new Set(
+      fields.filter((f) => f.type === 'geo_point' || f.esType === 'geo_point').map((f) => f.name)
+    );
+
+    return fields.filter((f) => {
+      const latMatch = f.name.match(/^(.*)\.lat$/);
+      const lonMatch = f.name.match(/^(.*)\.lon$/);
+
+      if (latMatch && geoPointFields.has(latMatch[1])) return false;
+      if (lonMatch && geoPointFields.has(lonMatch[1])) return false;
+
+      return true;
+    });
+  }, [fields]);
+
   const toolbarVisibility = React.useMemo(() => {
     if (!withToolbar) {
       return false;
@@ -171,11 +187,12 @@ export function SchemaEditor({
 
   return (
     <SchemaEditorContextProvider
-      fields={fields}
+      fields={filteredFields}
       onFieldSelection={onFieldSelection}
       fieldSelection={fieldSelection}
       isLoading={isLoading}
       onFieldUpdate={onFieldUpdate}
+      onAddField={onAddField}
       stream={stream}
       withControls={withControls}
       withFieldSimulation={withFieldSimulation}
@@ -210,7 +227,7 @@ export function SchemaEditor({
           controls={controls}
           withToolbar={toolbarVisibility}
           defaultColumns={defaultColumns}
-          fields={fields}
+          fields={filteredFields}
           stream={stream}
           withTableActions={withTableActions}
           selectedFields={fieldSelection}
