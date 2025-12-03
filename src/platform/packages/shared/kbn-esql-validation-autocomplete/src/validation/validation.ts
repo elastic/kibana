@@ -17,11 +17,11 @@ import { getMessageFromId } from '@kbn/esql-ast/src/definitions/utils';
 import type { LicenseType } from '@kbn/licensing-types';
 
 import type { ESQLAstAllCommands } from '@kbn/esql-ast/src/types';
-import { QueryColumns } from '../shared/resources_helpers';
+import { QueryColumns } from '../query_columns_service';
 import type { ESQLCallbacks } from '../shared/types';
 import { retrievePolicies, retrieveSources } from './resources';
 import type { ReferenceMaps, ValidationOptions, ValidationResult } from './types';
-import { getSubqueriesToValidate } from './helpers';
+import { getSubqueriesToValidate } from './subqueries';
 
 /**
  * ES|QL validation public API
