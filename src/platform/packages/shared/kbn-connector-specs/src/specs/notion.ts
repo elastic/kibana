@@ -22,6 +22,8 @@ export const NotionConnector: ConnectorSpec = {
   // https://developers.notion.com/docs/authorization#making-api-requests-with-an-internal-integration
   authTypes: ['bearer'],
 
+  // TODO: check if we need `schema` attribute / what for
+
   actions: {
     // https://developers.notion.com/reference/post-search
     searchPageOrDSByTitle: {
@@ -127,10 +129,22 @@ export const NotionConnector: ConnectorSpec = {
   },
 
   test: {
-    description: 'Fetch metadata about given data source',
+    description: 'Verifies Notion connection by fetching metadata about given data source',
+    // TODO: might need to accept some input here in order to pass to the API endpoint to test
+    // if listing all users feels a bit too much
     handler: async (ctx) => {
       ctx.log.debug('Notion test handler');
-      return { ok: true };
+
+      try {
+        const response = await ctx.client.get('https://api.notion.com/v1/users');
+        const numOfUsers = response.data.results.length;
+        return {
+          ok: true,
+          message: `Successfully connected to Notion API: found ${numOfUsers} users`,
+        };
+      } catch (error) {
+        return { ok: false, message: error.message };
+      }
     },
   },
 };
