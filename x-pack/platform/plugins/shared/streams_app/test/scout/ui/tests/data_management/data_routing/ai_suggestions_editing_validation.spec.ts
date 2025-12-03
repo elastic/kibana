@@ -67,7 +67,6 @@ test.describe('Stream data routing - AI suggestions editing validation', { tag: 
     await expect(page.getByText('Stream name is required', { exact: false })).toBeVisible();
   });
 
-  // TODO - the message just changed but how to get the LLM to work in the test
   test('should show error when editing suggestion with name containing dots', async ({ page }) => {
     const streamName = getStreamName(MOCK_SUGGESTION_INFO.name);
     await clickSuggestionEditButton(page, streamName);
@@ -78,7 +77,9 @@ test.describe('Stream data routing - AI suggestions editing validation', { tag: 
     await nameInput.fill('test.name');
 
     await expect(
-      page.getByText('Stream name cannot contain the "." character', { exact: false })
+      page.getByText('The child stream logs.test does not exist. Please create it first.', {
+        exact: false,
+      })
     ).toBeVisible();
   });
 
