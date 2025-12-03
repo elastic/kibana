@@ -9,11 +9,15 @@ import { Readable } from 'stream';
 import { createFileClientMock, createFileMock } from '@kbn/files-plugin/server/mocks';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { ListScriptsRequestQuery } from '../../../../common/api/endpoint/scripts_library/list_scripts';
 import type { ScriptsLibrarySavedObjectAttributes, ScriptsLibraryClientInterface } from './types';
 import { SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE } from '../../lib/scripts_library';
 import { createHapiReadableStreamMock } from '../actions/mocks';
 import type { CreateScriptRequestBody } from '../../../../common/api/endpoint/scripts_library';
-import { SCRIPTS_LIBRARY_ITEM_DOWNLOAD_ROUTE } from '../../../../common/endpoint/constants';
+import {
+  ENDPOINT_DEFAULT_PAGE_SIZE,
+  SCRIPTS_LIBRARY_ITEM_DOWNLOAD_ROUTE,
+} from '../../../../common/endpoint/constants';
 import type { EndpointScript } from '../../../../common/endpoint/types';
 
 const generateScriptEntryMock = (overrides: Partial<EndpointScript> = {}): EndpointScript => {
@@ -89,7 +93,23 @@ const getScriptsLibraryClientMock = (): jest.Mocked<ScriptsLibraryClientInterfac
     create: jest.fn().mockResolvedValue(generateScriptEntryMock()),
     update: jest.fn().mockResolvedValue(generateScriptEntryMock()),
     get: jest.fn().mockResolvedValue(generateScriptEntryMock()),
-    list: jest.fn().mockResolvedValue([generateScriptEntryMock()]),
+    list: jest.fn(
+      async ({
+        page = 1,
+        pageSize = ENDPOINT_DEFAULT_PAGE_SIZE,
+        sortField = 'name',
+        sortDirection = 'asc',
+      }: ListScriptsRequestQuery) => {
+        return {
+          data: [generateScriptEntryMock()],
+          total: 1,
+          page,
+          pageSize,
+          sortField,
+          sortDirection,
+        };
+      }
+    ),
     delete: jest.fn().mockResolvedValue(null),
     download: jest.fn(async (_) => {
       return {
