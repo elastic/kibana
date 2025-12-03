@@ -56,6 +56,7 @@ import {
   RESIZABLE_CONTAINER_INITIAL_HEIGHT,
   esqlEditorStyles,
 } from './esql_editor.styles';
+import { useQueryStatusDecorations } from './use_query_status_decorations';
 import { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
 import {
   clearCacheWhenOld,
@@ -89,7 +90,6 @@ const ESQLEditorInternal = function ESQLEditor({
   query,
   onTextLangQueryChange,
   onTextLangQuerySubmit,
-  detectedTimestamp,
   errors: serverErrors,
   warning: serverWarning,
   isLoading,
@@ -100,7 +100,6 @@ const ESQLEditorInternal = function ESQLEditor({
   disableSubmitAction,
   dataTestSubj,
   allowQueryCancellation,
-  hideTimeFilterInfo,
   hideQueryHistory,
   hasOutline,
   displayDocumentationAsFlyout,
@@ -113,6 +112,7 @@ const ESQLEditorInternal = function ESQLEditor({
   formLabel,
   mergeExternalMessages,
   hideQuickSearch,
+  queryStats,
 }: ESQLEditorPropsInternal) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -187,6 +187,15 @@ const ESQLEditorInternal = function ESQLEditor({
     errors: serverErrors ? parseErrors(serverErrors, code) : [],
     warnings: serverWarning ? parseWarning(serverWarning) : [],
   });
+
+  const { cleanupQueryStatusDecorations, queryStatusDecorationsStyles } = useQueryStatusDecorations(
+    {
+      editor: editorRef.current,
+      errors: editorMessages.errors,
+      warnings: editorMessages.warnings,
+      dataErrorsControl,
+    }
+  );
   const onQueryUpdate = useCallback(
     (value: string) => {
       onTextLangQueryChange({ esql: value } as AggregateQuery);
@@ -841,19 +850,6 @@ const ESQLEditorInternal = function ESQLEditor({
     return ESQLLang.getInlineCompletionsProvider?.(esqlCallbacks);
   }, [esqlCallbacks]);
 
-  const onErrorClick = useCallback(({ startLineNumber, startColumn }: MonacoMessage) => {
-    if (!editorRef.current) {
-      return;
-    }
-
-    editorRef.current.focus();
-    editorRef.current.setPosition({
-      lineNumber: startLineNumber,
-      column: startColumn,
-    });
-    editorRef.current.revealLine(startLineNumber);
-  }, []);
-
   // Clean up the monaco editor and DOM on unmount
   useEffect(() => {
     const disposablesMap = editorCommandDisposables.current;
@@ -869,13 +865,13 @@ const ESQLEditorInternal = function ESQLEditor({
           disposablesMap.delete(currentEditor);
         }
       }
-
+      cleanupQueryStatusDecorations();
       editorModel.current?.dispose();
       editorRef.current?.dispose();
       editorModel.current = undefined;
       editorRef.current = undefined;
     };
-  }, []);
+  }, [cleanupQueryStatusDecorations]);
 
   // When the layout changes, and the editor is not focused, we want to
   // recalculate the visible code so it fills up the available space. We
@@ -903,14 +899,13 @@ const ESQLEditorInternal = function ESQLEditor({
       folding: false,
       fontSize: 14,
       hideCursorInOverviewRuler: true,
-      // this becomes confusing with multiple markers, so quick fixes
-      // will be proposed only within the tooltip
       lightbulb: {
         enabled: false,
       },
-      lineDecorationsWidth: 20,
+      lineDecorationsWidth: 15,
       lineNumbers: 'on',
-      lineNumbersMinChars: 3,
+      lineNumbersMinChars: 1,
+      glyphMargin: true,
       minimap: { enabled: false },
       overviewRulerLanes: 0,
       overviewRulerBorder: false,
@@ -947,7 +942,12 @@ const ESQLEditorInternal = function ESQLEditor({
   const [labelInFocus, setLabelInFocus] = useState(false);
   const editorPanel = (
     <>
-      <Global styles={lookupIndexBadgeStyle} />
+      <Global
+        styles={css`
+          ${lookupIndexBadgeStyle}
+          ${queryStatusDecorationsStyles}
+        `}
+      />
       {Boolean(editorIsInline) && (
         <EuiFlexGroup
           gutterSize="none"
@@ -1086,15 +1086,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     // Add Tab keybinding rules for inline suggestions
                     addTabKeybindingRules();
 
-                    // this is fixing a bug between the EUIPopover and the monaco editor
-                    // when the user clicks the editor, we force it to focus and the onDidFocusEditorText
-                    // to fire, the timeout is needed because otherwise it refocuses on the popover icon
-                    // and the user needs to click again the editor.
-                    // IMPORTANT: The popover needs to be wrapped with the EuiOutsideClickDetector component.
                     editor.onMouseDown(() => {
-                      setTimeout(() => {
-                        editor.focus();
-                      }, 100);
                       if (datePickerOpenStatusRef.current) {
                         setPopoverPosition({});
                       }
@@ -1182,21 +1174,16 @@ const ESQLEditorInternal = function ESQLEditor({
         />
       )}
       <EditorFooter
-        lines={editorModel.current?.getLineCount() || 1}
         styles={{
           bottomContainer: styles.bottomContainer,
           historyContainer: styles.historyContainer,
         }}
         code={code}
-        onErrorClick={onErrorClick}
         onUpdateAndSubmitQuery={onUpdateAndSubmitQuery}
         updateQuery={onQueryUpdate}
-        detectedTimestamp={detectedTimestamp}
         hideRunQueryText={hideRunQueryText}
         editorIsInline={editorIsInline}
         isSpaceReduced={isSpaceReduced}
-        hideTimeFilterInfo={hideTimeFilterInfo}
-        {...editorMessages}
         isHistoryOpen={isHistoryOpen}
         setIsHistoryOpen={onClickQueryHistory}
         isLanguageComponentOpen={isLanguageComponentOpen}
@@ -1209,6 +1196,7 @@ const ESQLEditorInternal = function ESQLEditor({
         dataErrorsControl={dataErrorsControl}
         toggleVisor={() => setIsVisorOpen(!isVisorOpen)}
         hideQuickSearch={hideQuickSearch}
+        queryStats={queryStats}
       />
       {createPortal(
         Object.keys(popoverPosition).length !== 0 && popoverPosition.constructor === Object && (

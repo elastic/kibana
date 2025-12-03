@@ -20,19 +20,10 @@ import type {
   IndicesAutocompleteResult,
   RecommendedQuery,
   RecommendedField,
+  ESQLQueryStats,
+  ESQLControlsContext,
 } from '@kbn/esql-types';
 import type { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
-
-export interface ControlsContext {
-  /** The editor supports the creation of controls,
-   * This flag should be set to true to display the "Create control" suggestion
-   **/
-  supportsControls: boolean;
-  /** Function to be called after the control creation **/
-  onSaveControl: (controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>;
-  /** Function to be called after cancelling the control creation **/
-  onCancelControl: () => void;
-}
 
 export interface DataErrorsControl {
   enabled: boolean;
@@ -49,11 +40,6 @@ export interface ESQLEditorProps {
     query?: AggregateQuery,
     abortController?: AbortController
   ) => Promise<void>;
-  /** If it is true, the editor displays the message @timestamp found
-   * The text based queries are relying on adhoc dataviews which
-   * can have an @timestamp timefield or nothing
-   */
-  detectedTimestamp?: string;
   /** Array of errors */
   errors?: Error[];
   /** Warning string as it comes from ES */
@@ -78,8 +64,6 @@ export interface ESQLEditorProps {
   disableSubmitAction?: boolean;
   /** when set to true enables query cancellation **/
   allowQueryCancellation?: boolean;
-  /** hide @timestamp info **/
-  hideTimeFilterInfo?: boolean;
   /** hide query history **/
   hideQueryHistory?: boolean;
   /** hide quick search **/
@@ -91,7 +75,7 @@ export interface ESQLEditorProps {
   /** The component by default focuses on the editor when it is mounted, this flag disables it**/
   disableAutoFocus?: boolean;
   /** Enables the creation of controls from the editor **/
-  controlsContext?: ControlsContext;
+  controlsContext?: ESQLControlsContext;
   /** Opens the given query in a new Discover tab **/
   onOpenQueryInNewTab?: (tabName: string, esqlQuery: string) => Promise<void>;
   /** The available ESQL variables from the page context this editor was opened in */
@@ -104,6 +88,8 @@ export interface ESQLEditorProps {
   formLabel?: string;
   /** Whether to merge external messages into the editor's message list */
   mergeExternalMessages?: boolean;
+  /** Stats about the last request made */
+  queryStats?: ESQLQueryStats;
 }
 
 interface ESQLVariableService {
