@@ -87,7 +87,43 @@ export const NotionConnector: ConnectorSpec = {
         return response.data;
       },
     },
-    // queryDataSource: {},
+
+    // https://developers.notion.com/reference/query-a-data-source
+    queryDataSource: {
+      isTool: true,
+      input: z.object({
+        dataSourceId: z.string(),
+        filter: z.string().optional(),
+        startCursor: z.string().optional(),
+        pageSize: z.number().optional(),
+      }),
+      handler: async (ctx, input) => {
+        const typedInput = input as {
+          dataSourceId: string;
+          filter?: string;
+          startCursor?: string;
+          pageSize?: number;
+        };
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let requestData: Record<string, any> = {
+          page_size: typedInput.pageSize,
+          start_cursor: typedInput.startCursor,
+        };
+        if (typedInput.filter) {
+          requestData = { ...requestData, filter: JSON.parse(typedInput.filter) };
+        }
+
+        // TODO: check if there's error handling for free from the framework
+        // or if we still need to add some of our own
+        const response = await ctx.client.post(
+          `https://api.notion.com/v1/data_sources/${typedInput.dataSourceId}/query`,
+          requestData,
+          { headers: { 'Notion-Version': '2025-09-03' } }
+        );
+        return response.data;
+      },
+    },
   },
 
   test: {
