@@ -285,9 +285,6 @@ export const ACTION_METADATA_MAP: Record<string, ActionMetadata> = {
       },
     ],
     tips: [
-      i18n.translate('xpack.streamlang.actionMetadata.convert.tips.auto', {
-        defaultMessage: 'Use "auto" type to automatically detect the best type',
-      }),
       i18n.translate('xpack.streamlang.actionMetadata.convert.tips.ignoreFailure', {
         defaultMessage: 'Enable ignore_failure to keep documents when conversion fails',
       }),
