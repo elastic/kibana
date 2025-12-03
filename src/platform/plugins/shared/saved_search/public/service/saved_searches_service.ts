@@ -39,15 +39,27 @@ export interface SavedSearchesServiceDeps {
 export class SavedSearchesService {
   constructor(private deps: SavedSearchesServiceDeps) {}
 
-  get = <Serialized extends boolean = false>(
+  get = async <Serialized extends boolean = false>(
     savedSearchId: string,
     serialized?: Serialized
   ): Promise<Serialized extends true ? SerializableSavedSearch : SavedSearch> => {
-    return getSavedSearch(savedSearchId, createGetSavedSearchDeps(this.deps), serialized);
+    const result = await getSavedSearch(
+      savedSearchId,
+      createGetSavedSearchDeps(this.deps),
+      serialized
+    );
+    return {
+      ...result,
+      projectRouting: result.projectRouting ?? undefined,
+    } as Serialized extends true ? SerializableSavedSearch : SavedSearch;
   };
 
-  getDiscoverSession = (discoverSessionId: string) => {
-    return getDiscoverSession(discoverSessionId, createGetSavedSearchDeps(this.deps));
+  getDiscoverSession = async (discoverSessionId: string) => {
+    const result = await getDiscoverSession(discoverSessionId, createGetSavedSearchDeps(this.deps));
+    return {
+      ...result,
+      projectRouting: result.projectRouting ?? undefined,
+    };
   };
 
   getAll = async () => {
@@ -90,11 +102,12 @@ export class SavedSearchesService {
     );
   };
 
-  saveDiscoverSession = (
+  saveDiscoverSession = async (
     discoverSession: SaveDiscoverSessionParams,
     options: SaveDiscoverSessionOptions = {}
   ) => {
     const { contentManagement, savedObjectsTaggingOss } = this.deps;
+
     return saveDiscoverSession(
       discoverSession,
       options,
@@ -114,7 +127,7 @@ export class SavedSearchesService {
     });
   };
 
-  byValueToSavedSearch = <Serialized extends boolean = false>(
+  byValueToSavedSearch = async <Serialized extends boolean = false>(
     result: SavedSearchUnwrapResult,
     serialized?: Serialized
   ): Promise<Serialized extends true ? SerializableSavedSearch : SavedSearch> => {

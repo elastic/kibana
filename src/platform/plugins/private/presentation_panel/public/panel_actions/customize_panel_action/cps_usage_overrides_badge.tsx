@@ -33,8 +33,6 @@ export class CpsUsageOverridesBadge
   public order = 8;
 
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
-    if (!this.hasOverride(embeddable)) throw new IncompatibleActionError();
-
     if (!apiPublishesProjectRouting(embeddable)) {
       throw new IncompatibleActionError();
     }
@@ -100,13 +98,13 @@ export class CpsUsageOverridesBadge
     return (
       <EuiPopover
         button={
-          <span
+          <button
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
             style={{ cursor: 'pointer' }}
             data-test-subj="cpsUsageOverridesBadgeButton"
           >
             {badgeLabel}
-          </span>
+          </button>
         }
         isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(false)}
@@ -196,20 +194,9 @@ export class CpsUsageOverridesBadge
   }
 
   private hasOverride(embeddable: unknown): boolean {
-    if (
-      !apiPublishesProjectRouting(embeddable) ||
-      !apiHasParentApi(embeddable) ||
-      !apiPublishesProjectRouting(embeddable.parentApi)
-    ) {
+    if (!apiPublishesProjectRouting(embeddable)) {
       return false;
     }
-
-    const embeddableProjectRouting = embeddable.projectRouting$.value;
-    const parentProjectRouting = embeddable.parentApi.projectRouting$.value;
-
-    // Only show badge if embeddable has an explicit (non-undefined) override that differs from dashboard
-    return (
-      embeddableProjectRouting !== undefined && embeddableProjectRouting !== parentProjectRouting
-    );
+    return embeddable.projectRouting$.value !== undefined;
   }
 }

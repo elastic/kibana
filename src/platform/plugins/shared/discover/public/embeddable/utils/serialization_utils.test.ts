@@ -153,65 +153,6 @@ describe('Serialization utils', () => {
       expect(deserializedState.title).toEqual('test panel title');
       expect(deserializedState.sort).toEqual([['order_date', 'asc']]);
     });
-
-    test('by reference with null projectRouting should transform to undefined', async () => {
-      const baseSearch = await discoverServiceMock.savedSearch.byValueToSavedSearch(
-        {
-          attributes: mockedSavedSearchAttributes,
-        },
-        true
-      );
-
-      discoverServiceMock.savedSearch.get = jest.fn().mockResolvedValue({
-        ...baseSearch,
-        savedObjectId: 'savedSearch',
-        projectRouting: null,
-      });
-
-      const serializedState: SerializedPanelState<SearchEmbeddableState> = {
-        rawState: {
-          savedObjectId: 'savedSearch',
-        },
-        references: [],
-      };
-
-      const deserializedState = await deserializeState({
-        serializedState,
-        discoverServices: discoverServiceMock,
-      });
-
-      expect(deserializedState.projectRouting).toBeUndefined();
-      expect('projectRouting' in deserializedState).toBe(false);
-    });
-
-    test('by reference with projectRouting should preserve it', async () => {
-      const baseSearch = await discoverServiceMock.savedSearch.byValueToSavedSearch(
-        {
-          attributes: mockedSavedSearchAttributes,
-        },
-        true
-      );
-
-      discoverServiceMock.savedSearch.get = jest.fn().mockResolvedValue({
-        ...baseSearch,
-        savedObjectId: 'savedSearch',
-        projectRouting: 'ALL',
-      });
-
-      const serializedState: SerializedPanelState<SearchEmbeddableState> = {
-        rawState: {
-          savedObjectId: 'savedSearch',
-        },
-        references: [],
-      };
-
-      const deserializedState = await deserializeState({
-        serializedState,
-        discoverServices: discoverServiceMock,
-      });
-
-      expect(deserializedState.projectRouting).toBe('ALL');
-    });
   });
 
   describe('serialize state', () => {
@@ -223,6 +164,7 @@ describe('Serialization utils', () => {
         ...mockedSavedSearchAttributes,
         managed: false,
         searchSource,
+        projectRouting: undefined,
       };
 
       const serializedState = serializeState({
@@ -269,6 +211,7 @@ describe('Serialization utils', () => {
         ...mockedSavedSearchAttributes,
         managed: false,
         searchSource,
+        projectRouting: undefined,
       };
 
       test('equal state', () => {

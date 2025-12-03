@@ -53,8 +53,7 @@ const setup = ({
         ...discoverSession,
         id: discoverSession.id ?? 'new-session',
         managed: false,
-        projectRouting:
-          discoverSession.projectRouting === null ? undefined : discoverSession.projectRouting,
+        projectRouting: discoverSession.projectRouting ?? undefined,
       })
     );
   const dataViewCreateSpy = jest.spyOn(services.dataViews, 'create');

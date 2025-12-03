@@ -98,6 +98,7 @@ export type SavedSearch = Partial<SavedSearchAttributes> & {
     aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
     errorJSON?: string;
   };
+  projectRouting?: ProjectRouting;
 };
 
 /** @internal **/

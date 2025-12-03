@@ -47,12 +47,8 @@ export const deserializeState = async ({
     // what is this??
     const rawSavedObjectAttributes = pick(so, EDITABLE_SAVED_SEARCH_KEYS);
     const savedObjectOverride = pick(serializedState.rawState, EDITABLE_SAVED_SEARCH_KEYS);
-    // Filter out null projectRouting for type safety (runtime already filtered by fromSavedSearchAttributes)
-    const { projectRouting, ...soWithoutTimeRangeAndProjectRouting } = omit(so, 'timeRange');
     return {
-      ...soWithoutTimeRangeAndProjectRouting,
-      // Only include projectRouting if it's not null (SearchEmbeddableRuntimeState doesn't allow null)
-      ...(projectRouting !== null && projectRouting !== undefined && { projectRouting }),
+      ...omit(so, 'timeRange'),
       savedObjectId,
       savedObjectTitle: so.title,
       savedObjectDescription: so.description,
@@ -71,12 +67,8 @@ export const deserializeState = async ({
       serializedState.rawState as SearchEmbeddableByValueState,
       true
     );
-    // Filter out null projectRouting for type safety (runtime already filtered by fromSavedSearchAttributes)
-    const { projectRouting, ...savedSearchWithoutProjectRouting } = savedSearch;
     return {
-      ...savedSearchWithoutProjectRouting,
-      // Only include projectRouting if it's not null (SearchEmbeddableRuntimeState doesn't allow null)
-      ...(projectRouting !== null && projectRouting !== undefined && { projectRouting }),
+      ...savedSearch,
       ...panelState,
       nonPersistedDisplayOptions: serializedState.rawState.nonPersistedDisplayOptions,
     };

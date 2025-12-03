@@ -52,7 +52,8 @@ export const toSavedSearchAttributes = (
     timeRestore: savedSearch.timeRestore ?? false,
     timeRange: savedSearch.timeRange ? pick(savedSearch.timeRange, ['from', 'to']) : undefined,
     refreshInterval: savedSearch.refreshInterval,
-    projectRouting: savedSearch.projectRouting ?? undefined,
+    // Convert undefined to null for storage (null explicitly signals "no value" in saved objects)
+    projectRouting: savedSearch.projectRouting ?? null,
     rowsPerPage: savedSearch.rowsPerPage,
     sampleSize: savedSearch.sampleSize,
     density: savedSearch.density,

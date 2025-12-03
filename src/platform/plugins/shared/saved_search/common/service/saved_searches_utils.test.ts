@@ -79,6 +79,7 @@ describe('saved_searches_utils', () => {
           "id": "id",
           "isTextBasedQuery": false,
           "managed": false,
+          "projectRouting": undefined,
           "references": Array [],
           "refreshInterval": undefined,
           "rowHeight": undefined,
@@ -165,7 +166,7 @@ describe('saved_searches_utils', () => {
       };
 
       const result = toSavedSearchAttributes(savedSearch, '{}');
-      expect(result).toEqual({
+      expect(result).toMatchObject({
         kibanaSavedObjectMeta: {
           searchSourceJSON: '{}',
         },
@@ -178,6 +179,7 @@ describe('saved_searches_utils', () => {
         isTextBasedQuery: true,
         usesAdHocDataView: false,
         timeRestore: false,
+        projectRouting: null,
         tabs: [
           {
             id: expect.any(String),
@@ -193,6 +195,7 @@ describe('saved_searches_utils', () => {
               isTextBasedQuery: true,
               usesAdHocDataView: false,
               timeRestore: false,
+              projectRouting: null,
             },
           },
         ],

@@ -50,8 +50,7 @@ export const fromSavedSearchAttributes = <
     visContext: attributes.visContext,
     controlGroupJson: attributes.controlGroupJson,
     density: attributes.density,
-    // Only include projectRouting if it's not null/undefined (saved state allows null, runtime doesn't)
-    ...(projectRouting !== null && projectRouting !== undefined && { projectRouting }),
+    projectRouting: projectRouting ?? undefined,
     tabs,
     managed,
   } as ReturnType;
