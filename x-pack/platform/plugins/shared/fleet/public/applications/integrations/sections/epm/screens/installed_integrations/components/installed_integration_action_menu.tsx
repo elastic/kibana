@@ -20,19 +20,17 @@ import { useInstalledIntegrationsActions } from '../hooks/use_installed_integrat
 import { ExperimentalFeaturesService } from '../../../../../services';
 import { useLicense } from '../../../../../hooks';
 
+import { IntegrationKnowledgeFlyout } from './integration_knowledge_flyout';
+
 export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
   selectedItems: InstalledPackageUIPackageListItem[];
 }> = ({ selectedItems }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [showIntegrationKnowledgeFlyout, setShowIntegrationKnowledgeFlyout] = useState(false);
   const { enablePackageRollback } = ExperimentalFeaturesService.get();
   const licenseService = useLicense();
   const button = (
-    <EuiButton
-      iconType="arrowDown"
-      disabled={selectedItems.length === 0}
-      iconSide="right"
-      onClick={() => setIsOpen((s) => !s)}
-    >
+    <EuiButton iconType="arrowDown" iconSide="right" onClick={() => setIsOpen((s) => !s)}>
       <FormattedMessage
         id="xpack.fleet.epmInstalledIntegrations.actionButton"
         defaultMessage="Actions"
@@ -63,6 +61,11 @@ export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
     return bulkRollbackIntegrationsWithConfirmModal(selectedItems);
   }, [selectedItems, bulkRollbackIntegrationsWithConfirmModal]);
 
+  const openManageIntegrationKnowledgeFlyout = useCallback(() => {
+    setIsOpen(false);
+    setShowIntegrationKnowledgeFlyout(true);
+  }, []);
+
   const items = useMemo(() => {
     const hasUpgreadableIntegrations = selectedItems.some(
       (item) =>
@@ -80,78 +83,99 @@ export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
         !!item.installationInfo?.previous_version && !item.installationInfo?.is_rollback_ttl_expired
     );
 
-    return [
+    const menuItems = [
       <EuiContextMenuItem
-        key="upgrade"
-        icon="refresh"
-        disabled={!hasUpgreadableIntegrations}
-        onClick={openUpgradeModal}
+        key="integrationKnowledge"
+        icon="gear"
+        onClick={openManageIntegrationKnowledgeFlyout}
       >
         <FormattedMessage
-          id="xpack.fleet.epmInstalledIntegrations.bulkUpgradeButton"
-          defaultMessage={'Upgrade {count, plural, one {# integration} other {# integrations}}'}
-          values={{
-            count: selectedItems.length,
-          }}
+          id="xpack.fleet.epmInstalledIntegrations.manageIntegrationKnowledgeButton"
+          defaultMessage={'Manage integration knowledge'}
         />
       </EuiContextMenuItem>,
-      <EuiContextMenuItem
-        key="uninstall"
-        icon="trash"
-        disabled={hasUninstallableIntegrations}
-        onClick={openUninstallModal}
-      >
-        {hasUninstallableIntegrations ? (
-          <EuiToolTip
-            position="right"
-            content={
-              <FormattedMessage
-                id="xpack.fleet.epmInstalledIntegrations.uninstallDisabledTooltip"
-                defaultMessage="Can't uninstall integrations that are attached to agent policies"
-              />
-            }
+    ];
+
+    if (selectedItems.length > 0) {
+      menuItems.push(
+        ...[
+          <EuiContextMenuItem
+            key="upgrade"
+            icon="refresh"
+            disabled={!hasUpgreadableIntegrations}
+            onClick={openUpgradeModal}
           >
             <FormattedMessage
-              id="xpack.fleet.epmInstalledIntegrations.bulkUninstallButton"
-              defaultMessage={
-                'Uninstall {count, plural, one {# integration} other {# integrations}}'
-              }
+              id="xpack.fleet.epmInstalledIntegrations.bulkUpgradeButton"
+              defaultMessage={'Upgrade {count, plural, one {# integration} other {# integrations}}'}
               values={{
                 count: selectedItems.length,
               }}
             />
-          </EuiToolTip>
-        ) : (
-          <FormattedMessage
-            id="xpack.fleet.epmInstalledIntegrations.bulkUninstallButton"
-            defaultMessage={'Uninstall {count, plural, one {# integration} other {# integrations}}'}
-            values={{
-              count: selectedItems.length,
-            }}
-          />
-        )}
-      </EuiContextMenuItem>,
-      ...(enablePackageRollback
-        ? [
-            <EuiContextMenuItem
-              key="rollback"
-              icon="returnKey"
-              disabled={!hasRollbackableIntegrations || !licenseService.isEnterprise()}
-              onClick={openRollbackModal}
-            >
+          </EuiContextMenuItem>,
+          <EuiContextMenuItem
+            key="uninstall"
+            icon="trash"
+            disabled={hasUninstallableIntegrations}
+            onClick={openUninstallModal}
+          >
+            {hasUninstallableIntegrations ? (
+              <EuiToolTip
+                position="right"
+                content={
+                  <FormattedMessage
+                    id="xpack.fleet.epmInstalledIntegrations.uninstallDisabledTooltip"
+                    defaultMessage="Can't uninstall integrations that are attached to agent policies"
+                  />
+                }
+              >
+                <FormattedMessage
+                  id="xpack.fleet.epmInstalledIntegrations.bulkUninstallButton"
+                  defaultMessage={
+                    'Uninstall {count, plural, one {# integration} other {# integrations}}'
+                  }
+                  values={{
+                    count: selectedItems.length,
+                  }}
+                />
+              </EuiToolTip>
+            ) : (
               <FormattedMessage
-                id="xpack.fleet.epmInstalledIntegrations.bulkRollbackButton"
+                id="xpack.fleet.epmInstalledIntegrations.bulkUninstallButton"
                 defaultMessage={
-                  'Rollback {count, plural, one {# integration} other {# integrations}}'
+                  'Uninstall {count, plural, one {# integration} other {# integrations}}'
                 }
                 values={{
                   count: selectedItems.length,
                 }}
               />
-            </EuiContextMenuItem>,
-          ]
-        : []),
-    ];
+            )}
+          </EuiContextMenuItem>,
+          ...(enablePackageRollback
+            ? [
+                <EuiContextMenuItem
+                  key="rollback"
+                  icon="returnKey"
+                  disabled={!hasRollbackableIntegrations || !licenseService.isEnterprise()}
+                  onClick={openRollbackModal}
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.epmInstalledIntegrations.bulkRollbackButton"
+                    defaultMessage={
+                      'Rollback {count, plural, one {# integration} other {# integrations}}'
+                    }
+                    values={{
+                      count: selectedItems.length,
+                    }}
+                  />
+                </EuiContextMenuItem>,
+              ]
+            : []),
+        ]
+      );
+    }
+
+    return menuItems;
   }, [
     selectedItems,
     openUninstallModal,
@@ -159,18 +183,24 @@ export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
     openRollbackModal,
     enablePackageRollback,
     licenseService,
+    openManageIntegrationKnowledgeFlyout,
   ]);
 
   return (
-    <EuiPopover
-      id="fleet.epmInstalledIntegrations.bulkActionPopover"
-      button={button}
-      isOpen={isOpen}
-      closePopover={() => setIsOpen(false)}
-      panelPaddingSize="none"
-      anchorPosition="downLeft"
-    >
-      <EuiContextMenuPanel size="s" items={items} />
-    </EuiPopover>
+    <>
+      <EuiPopover
+        id="fleet.epmInstalledIntegrations.bulkActionPopover"
+        button={button}
+        isOpen={isOpen}
+        closePopover={() => setIsOpen(false)}
+        panelPaddingSize="none"
+        anchorPosition="downLeft"
+      >
+        <EuiContextMenuPanel size="s" items={items} />
+      </EuiPopover>
+      {showIntegrationKnowledgeFlyout && (
+        <IntegrationKnowledgeFlyout onClose={() => setShowIntegrationKnowledgeFlyout(false)} />
+      )}
+    </>
   );
 };

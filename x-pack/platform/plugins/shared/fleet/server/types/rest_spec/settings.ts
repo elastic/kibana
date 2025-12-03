@@ -59,6 +59,7 @@ export const PutSettingsRequestSchema = {
         is_preconfigured: schema.boolean(),
       })
     ),
+    integration_knowledge_enabled: schema.maybe(schema.boolean()),
   }),
 };
 
@@ -101,8 +102,12 @@ export const SettingsSchemaV5 = schema.object({
   ),
 });
 
+export const SettingsSchemaV6 = SettingsSchemaV5.extends({
+  integration_knowledge_enabled: schema.maybe(schema.boolean()),
+});
+
 export const SettingsResponseSchema = schema.object({
-  item: SettingsSchemaV5,
+  item: SettingsSchemaV6,
 });
 
 export const PutSpaceSettingsRequestSchema = {
