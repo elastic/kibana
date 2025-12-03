@@ -7,6 +7,11 @@
 
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { chatSystemIndex } from '@kbn/onechat-server';
+import {
+  connectorToInference,
+  getConnectorModel,
+  isSupportedConnector,
+} from '@kbn/inference-common';
 
 export const isIndexNotFoundError = (error: unknown): boolean => {
   const castError = error as {
@@ -425,12 +430,76 @@ export class QueryUtils {
   }
 
   /**
-   * Get latency breakdown by connector (which maps to provider/model)
-   * Returns TTFT and TTLT p50/p95 for each connector_id
+   * Get connector info and map connector_id to model
+   * @param connectorIds - List of connector IDs to look up
+   * @returns Map of connector_id to model name
    */
-  async getLatencyByConnector(): Promise<
+  private async getConnectorIdToModelMap(connectorIds: string[]): Promise<Map<string, string>> {
+    const connectorIdToModel = new Map<string, string>();
+
+    if (connectorIds.length === 0) {
+      return connectorIdToModel;
+    }
+
+    try {
+      // Load connectors from saved objects
+      const connectorResults = await this.soClient.bulkGet<{
+        actionTypeId: string;
+        name: string;
+        config?: Record<string, any>;
+      }>(
+        connectorIds.map((id) => ({
+          type: 'action',
+          id,
+        }))
+      );
+
+      for (const result of connectorResults.saved_objects) {
+        if (result.error) {
+          // Connector not found or access denied - use connectorId_unknown
+          connectorIdToModel.set(result.id, `${result.id}_unknown`);
+          continue;
+        }
+
+        const rawConnector = {
+          id: result.id,
+          actionTypeId: result.attributes.actionTypeId,
+          name: result.attributes.name,
+          config: result.attributes.config,
+        };
+
+        try {
+          if (isSupportedConnector(rawConnector)) {
+            const inferenceConnector = connectorToInference(rawConnector);
+            const model = getConnectorModel(inferenceConnector) || 'unknown';
+            // Use format: connectorId_model to differentiate connectors with same model
+            connectorIdToModel.set(result.id, `${result.id}_${model}`);
+          } else {
+            connectorIdToModel.set(result.id, `${result.id}_unknown`);
+          }
+        } catch (e) {
+          connectorIdToModel.set(result.id, `${result.id}_unknown`);
+        }
+      }
+    } catch (error) {
+      this.logger.warn(`Failed to load connectors for model mapping: ${error.message}`);
+      // If we can't load connectors, map all to connectorId_unknown
+      for (const id of connectorIds) {
+        connectorIdToModel.set(id, `${id}_unknown`);
+      }
+    }
+
+    return connectorIdToModel;
+  }
+
+  /**
+   * Get latency breakdown by model
+   * Returns TTFT and TTLT p50/p95 for each model
+   * Maps connector_id to model at runtime
+   */
+  async getLatencyByModel(): Promise<
     Array<{
-      connector_id: string;
+      model: string;
       ttft_p50: number;
       ttft_p95: number;
       ttlt_p50: number;
@@ -452,7 +521,7 @@ export class QueryUtils {
               by_connector: {
                 terms: {
                   field: 'conversation_rounds.model_usage.connector_id',
-                  size: 20,
+                  size: 50,
                 },
                 aggs: {
                   ttft_percentiles: {
@@ -475,19 +544,55 @@ export class QueryUtils {
       });
 
       const aggs = response.aggregations?.all_rounds as any;
-      const buckets = aggs?.by_connector?.buckets || [];
+      const connectorBuckets = aggs?.by_connector?.buckets || [];
 
-      return buckets.map((bucket: any) => ({
-        connector_id: bucket.key,
-        ttft_p50: Math.round(bucket.ttft_percentiles?.values?.['50.0'] || 0),
-        ttft_p95: Math.round(bucket.ttft_percentiles?.values?.['95.0'] || 0),
-        ttlt_p50: Math.round(bucket.ttlt_percentiles?.values?.['50.0'] || 0),
-        ttlt_p95: Math.round(bucket.ttlt_percentiles?.values?.['95.0'] || 0),
-        sample_count: bucket.doc_count || 0,
-      }));
+      if (connectorBuckets.length === 0) {
+        return [];
+      }
+
+      // Get unique connector IDs and map them to models
+      const connectorIds = connectorBuckets.map((bucket: any) => bucket.key as string);
+      const connectorIdToModel = await this.getConnectorIdToModelMap(connectorIds);
+
+      // Map each connector to its model identifier (format: connectorId_modelName)
+      const results: Array<{
+        model: string;
+        ttft_p50: number;
+        ttft_p95: number;
+        ttlt_p50: number;
+        ttlt_p95: number;
+        sample_count: number;
+      }> = [];
+
+      for (const bucket of connectorBuckets) {
+        const connectorId = bucket.key as string;
+        const model = connectorIdToModel.get(connectorId) || `${connectorId}_unknown`;
+
+        const ttftp50 = bucket.ttft_percentiles?.values?.['50.0'] || 0;
+        const ttftp95 = bucket.ttft_percentiles?.values?.['95.0'] || 0;
+        const ttltp50 = bucket.ttlt_percentiles?.values?.['50.0'] || 0;
+        const ttltp95 = bucket.ttlt_percentiles?.values?.['95.0'] || 0;
+        const sampleCount = bucket.doc_count || 0;
+
+        if (sampleCount === 0) continue;
+
+        results.push({
+          model,
+          ttft_p50: Math.round(ttftp50),
+          ttft_p95: Math.round(ttftp95),
+          ttlt_p50: Math.round(ttltp50),
+          ttlt_p95: Math.round(ttltp95),
+          sample_count: sampleCount,
+        });
+      }
+
+      // Sort by sample count descending
+      results.sort((a, b) => b.sample_count - a.sample_count);
+
+      return results;
     } catch (error) {
       if (!isIndexNotFoundError(error)) {
-        this.logger.warn(`Failed to fetch latency by connector: ${error.message}`);
+        this.logger.warn(`Failed to fetch latency by model: ${error.message}`);
       }
       return [];
     }

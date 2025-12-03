@@ -72,9 +72,9 @@ export interface OnechatTelemetry {
   };
   time_to_first_token: TimingPercentiles;
   time_to_last_token: TimingPercentiles;
-  latency_by_connector: Array<
+  latency_by_model: Array<
     {
-      connector_id: string;
+      model: string;
     } & LatencyStats
   >;
   latency_by_agent_type: Array<
@@ -337,43 +337,43 @@ export function registerTelemetryCollector(
             },
           },
         },
-        latency_by_connector: {
+        latency_by_model: {
           type: 'array',
           items: {
-            connector_id: {
+            model: {
               type: 'keyword',
               _meta: {
-                description: 'Connector ID (maps to LLM provider/model)',
+                description: 'Model identifier (e.g., gpt-4o, claude-3-sonnet)',
               },
             },
             ttft_p50: {
               type: 'long',
               _meta: {
-                description: '50th percentile TTFT for this connector',
+                description: '50th percentile TTFT for this model',
               },
             },
             ttft_p95: {
               type: 'long',
               _meta: {
-                description: '95th percentile TTFT for this connector',
+                description: '95th percentile TTFT for this model',
               },
             },
             ttlt_p50: {
               type: 'long',
               _meta: {
-                description: '50th percentile TTLT for this connector',
+                description: '50th percentile TTLT for this model',
               },
             },
             ttlt_p95: {
               type: 'long',
               _meta: {
-                description: '95th percentile TTLT for this connector',
+                description: '95th percentile TTLT for this model',
               },
             },
             sample_count: {
               type: 'long',
               _meta: {
-                description: 'Number of samples for this connector',
+                description: 'Number of samples for this model',
               },
             },
           },
@@ -553,7 +553,7 @@ export function registerTelemetryCollector(
           // Fetch TTFT/TTLT metrics from conversation data
           const timeToFirstToken = await queryUtils.getTTFTMetrics();
           const timeToLastToken = await queryUtils.getTTLTMetrics();
-          const latencyByConnector = await queryUtils.getLatencyByConnector();
+          const latencyByModel = await queryUtils.getLatencyByModel();
           const latencyByAgentType = await queryUtils.getLatencyByAgentType();
 
           const toolCallCounters = await queryUtils.getCountersByPrefix(
@@ -633,7 +633,7 @@ export function registerTelemetryCollector(
             query_to_result_time: queryToResultTime,
             time_to_first_token: timeToFirstToken,
             time_to_last_token: timeToLastToken,
-            latency_by_connector: latencyByConnector,
+            latency_by_model: latencyByModel,
             latency_by_agent_type: latencyByAgentType,
             tool_calls: {
               total: totalToolCalls,
@@ -692,7 +692,7 @@ export function registerTelemetryCollector(
               mean: 0,
               total_samples: 0,
             },
-            latency_by_connector: [],
+            latency_by_model: [],
             latency_by_agent_type: [],
             tool_calls: {
               total: 0,
