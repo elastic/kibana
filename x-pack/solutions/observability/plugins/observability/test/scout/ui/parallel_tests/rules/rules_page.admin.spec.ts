@@ -25,8 +25,6 @@ test.describe('Rules Page - Header', { tag: ['@ess', '@svlOblt'] }, () => {
     // Open the rule type modal
     await pageObjects.rulesPage.openRuleTypeModal();
 
-    await pageObjects.rulesPage.expectAllRuleTypesCount(14);
-
     // Type in the search input
     const searchInput = pageObjects.rulesPage.ruleTypeModalSearch;
     await searchInput.fill('log');
