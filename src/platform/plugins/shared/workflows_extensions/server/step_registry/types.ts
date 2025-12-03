@@ -105,27 +105,7 @@ export interface StepHandlerContext<TInput = unknown> {
   /**
    * Runtime context manager for accessing workflow state, context, and template evaluation
    */
-  contextManager: {
-    /**
-     * Get the full context
-     */
-    getContext(): StepContext;
-
-    /**
-     * Get the scoped Elasticsearch client
-     */
-    getScopedEsClient(): ElasticsearchClient;
-
-    /**
-     * Evaluate a template string using the workflow context
-     */
-    renderInputTemplate<T>(input: T): T;
-
-    /**
-     * Returns the fake request
-     */
-    getFakeRequest(): KibanaRequest;
-  };
+  contextManager: ContextManager;
 
   /**
    * Logger scoped to this step execution
@@ -151,6 +131,31 @@ export interface StepHandlerContext<TInput = unknown> {
    * Current step's type
    */
   stepType: string;
+}
+
+/**
+ * Context manager for accessing step execution runtime services
+ */
+export interface ContextManager {
+  /**
+   * Get the full context
+   */
+  getContext(): StepContext;
+
+  /**
+   * Get the scoped Elasticsearch client
+   */
+  getScopedEsClient(): ElasticsearchClient;
+
+  /**
+   * Evaluate a template string using the workflow context
+   */
+  renderInputTemplate<T>(input: T): T;
+
+  /**
+   * Returns the fake request
+   */
+  getFakeRequest(): KibanaRequest;
 }
 
 /**
