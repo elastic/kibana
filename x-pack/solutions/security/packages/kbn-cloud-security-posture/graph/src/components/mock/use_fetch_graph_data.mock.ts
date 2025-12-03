@@ -36,6 +36,13 @@ export const useFetchGraphData = (params: UseFetchGraphDataParams) => {
             color: 'primary',
             shape: 'ellipse',
             icon: 'user',
+            documentsData: [
+              {
+                id: 'admin@example.com',
+                type: DOCUMENT_TYPE_ENTITY,
+                entityFieldNamespace: 'user',
+              },
+            ],
           },
           {
             id: 'projects/your-project-id/roles/customRole',
@@ -44,8 +51,9 @@ export const useFetchGraphData = (params: UseFetchGraphDataParams) => {
             icon: 'question',
             documentsData: [
               {
-                id: '1',
+                id: 'projects/your-project-id/roles/customRole',
                 type: DOCUMENT_TYPE_ENTITY,
+                entityFieldNamespace: 'entity',
                 entity: {
                   name: 'Custom Role',
                   type: 'role',

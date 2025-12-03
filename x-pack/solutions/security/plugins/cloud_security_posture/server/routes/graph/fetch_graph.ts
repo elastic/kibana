@@ -351,7 +351,6 @@ ${
   actorEntityName = VALUES(actorEntityName),
   actorHostIp = VALUES(actorHostIp),
   actorsDocData = VALUES(actorDocData),
-  actorEntityFieldHint = VALUES(actorEntityFieldHint),
   // target attributes
   targetNodeId = CASE(
     // deterministic group IDs - use raw entity ID for single values, MD5 hash for multiple
@@ -364,8 +363,7 @@ ${
   targetIdsCount = COUNT_DISTINCT(targetEntityId),
   targetEntityName = VALUES(targetEntityName),
   targetHostIp = VALUES(targetHostIp),
-  targetsDocData = VALUES(targetDocData),
-  targetEntityFieldHint = VALUES(targetEntityFieldHint)
+  targetsDocData = VALUES(targetDocData)
     BY action = event.action,
       actorEntityType,
       actorEntitySubType,

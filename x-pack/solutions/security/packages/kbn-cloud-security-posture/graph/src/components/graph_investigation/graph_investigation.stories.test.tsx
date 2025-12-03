@@ -484,9 +484,9 @@ describe('GraphInvestigation Component', () => {
               {
                 meta: {
                   controlledBy: 'graph-investigation',
-                  field: 'actor.entity.id',
+                  field: 'user.entity.id',
                   index: '1235',
-                  key: 'actor.entity.id',
+                  key: 'user.entity.id',
                   negate: false,
                   params: {
                     query: entityIdFilter,
@@ -495,7 +495,7 @@ describe('GraphInvestigation Component', () => {
                 },
                 query: {
                   match_phrase: {
-                    'actor.entity.id': entityIdFilter,
+                    'user.entity.id': entityIdFilter,
                   },
                 },
               },
@@ -565,9 +565,9 @@ describe('GraphInvestigation Component', () => {
               {
                 meta: {
                   controlledBy: 'graph-investigation',
-                  field: 'actor.entity.id',
+                  field: 'user.entity.id',
                   index: '1235',
-                  key: 'actor.entity.id',
+                  key: 'user.entity.id',
                   negate: false,
                   params: {
                     query: entityIdFilter,
@@ -576,7 +576,7 @@ describe('GraphInvestigation Component', () => {
                 },
                 query: {
                   match_phrase: {
-                    'actor.entity.id': entityIdFilter,
+                    'user.entity.id': entityIdFilter,
                   },
                 },
               },
@@ -708,8 +708,8 @@ describe('GraphInvestigation Component', () => {
             index: '1235',
             negate: false,
             controlledBy: 'graph-investigation',
-            field: 'actor.entity.id',
-            key: 'actor.entity.id',
+            field: 'user.entity.id',
+            key: 'user.entity.id',
             params: {
               query: entityIdFilter,
             },
@@ -717,7 +717,7 @@ describe('GraphInvestigation Component', () => {
           }),
           query: {
             match_phrase: {
-              'actor.entity.id': entityIdFilter,
+              'user.entity.id': entityIdFilter,
             },
           },
         },
@@ -766,8 +766,8 @@ describe('GraphInvestigation Component', () => {
             index: '1235',
             negate: false,
             controlledBy: 'graph-investigation',
-            field: 'actor.entity.id',
-            key: 'actor.entity.id',
+            field: 'user.entity.id',
+            key: 'user.entity.id',
             params: {
               query: entityIdFilter,
             },
@@ -775,7 +775,7 @@ describe('GraphInvestigation Component', () => {
           }),
           query: {
             match_phrase: {
-              'actor.entity.id': entityIdFilter,
+              'user.entity.id': entityIdFilter,
             },
           },
         },

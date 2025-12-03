@@ -1307,8 +1307,6 @@ describe('parseRecords', () => {
             '{"id":"service2","type":"entity","entityFieldNamespace":"service", "entity":{"name":"Service 2","type":"service","sub_type":"Service Instance"}}',
             '{"id":"service3","type":"entity","entityFieldNamespace":"service", "entity":{"name":"Service 3","type":"service","sub_type":"Service Instance"}}',
           ],
-          actorEntityFieldHint: 'user',
-          targetEntityFieldHint: 'service',
           badge: 1,
           uniqueEventsCount: 1,
           uniqueAlertsCount: 0,
