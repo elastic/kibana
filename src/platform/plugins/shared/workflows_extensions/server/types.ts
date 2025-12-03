@@ -23,8 +23,10 @@ export interface WorkflowsExtensionsServerPluginSetup {
    * @param definition - The step server-side definition
    * @throws Error if definition for the same step type ID is already registered
    */
-  registerStepDefinition<TCommon extends CommonStepDefinition>(
-    definition: ServerStepDefinition<TCommon>
+
+  registerStepDefinition(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    definition: ServerStepDefinition<CommonStepDefinition<any, any>>
   ): void;
 }
 

@@ -15,7 +15,7 @@ import type { WorkflowsExtensionsStartContract } from '../common/types';
  * Exposes methods for other plugins to register public-side step definition.
  */
 
-export interface WorkflowsExtensionsSetupContract {
+export interface WorkflowsExtensionsPublicPluginSetup {
   /**
    * Register user-facing definition for a workflow step.
    * This should be called during the plugin's setup phase.
