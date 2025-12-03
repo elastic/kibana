@@ -216,24 +216,6 @@ export class RulesPage {
   }
 
   /**
-   * Clicks the edit action button for a specific rule
-   */
-  async clickRuleEditAction(ruleName: string) {
-    const editableRules = this.getEditableRules();
-    const ruleRow = editableRules.filter({ hasText: ruleName });
-
-    // Hover over the rule row to make the edit button visible
-    await ruleRow.hover();
-
-    // Wait for the edit button to be visible
-    const editButton = this.getEditActionButton(ruleRow);
-    await expect(editButton).toBeVisible({ timeout: 5000 });
-
-    // Click the edit button
-    await editButton.click();
-  }
-
-  /**
    * Verifies that the edit action button is visible for a specific rule
    */
   async expectEditActionVisible(ruleName: string) {
