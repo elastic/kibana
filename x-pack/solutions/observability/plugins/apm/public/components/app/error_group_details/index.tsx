@@ -29,6 +29,7 @@ import { maybe } from '../../../../common/utils/maybe';
 import { fromQuery, toQuery } from '../../shared/links/url_helpers';
 import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { getIsObservabilityAgentEnabled } from '../../../../common/agent_builder/get_is_obs_agent_enabled';
 
 type ErrorSamplesAPIResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/{groupId}/samples'>;
@@ -85,7 +86,8 @@ export function ErrorGroupDetails() {
   const apmRouter = useApmRouter();
   const history = useHistory();
   const { onPageReady } = usePerformanceContext();
-  const { observabilityAIAssistant, onechat } = useApmPluginContext();
+  const { observabilityAIAssistant, onechat, core } = useApmPluginContext();
+  const isObservabilityAgentEnabled = getIsObservabilityAgentEnabled(core);
 
   const {
     path: { groupId },
@@ -201,7 +203,7 @@ export function ErrorGroupDetails() {
 
   // Configure agent builder global flyout with the error attachment
   useEffect(() => {
-    if (!onechat || !errorId) {
+    if (!onechat || !errorId || !isObservabilityAgentEnabled) {
       return;
     }
 
@@ -225,7 +227,7 @@ export function ErrorGroupDetails() {
     return () => {
       onechat.clearConversationFlyoutActiveConfig();
     };
-  }, [onechat, errorId, serviceName, environment, start, end]);
+  }, [onechat, errorId, serviceName, environment, start, end, isObservabilityAgentEnabled]);
 
   return (
     <>
