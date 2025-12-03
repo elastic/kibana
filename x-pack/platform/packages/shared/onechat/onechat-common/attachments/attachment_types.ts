@@ -13,7 +13,7 @@ import { z } from '@kbn/zod';
  * The list is not fixed, as contributors can add their own attachment types.
  */
 export enum AttachmentType {
-  screenContext = 'screen_context',
+  applicationContext = 'application_context',
   timeRange = 'time_range',
   text = 'text',
   esql = 'esql',
@@ -22,7 +22,7 @@ export enum AttachmentType {
 interface AttachmentDataMap {
   [AttachmentType.esql]: EsqlAttachmentData;
   [AttachmentType.text]: TextAttachmentData;
-  [AttachmentType.screenContext]: ScreenContextAttachmentData;
+  [AttachmentType.applicationContext]: ApplicationContextAttachmentData;
   [AttachmentType.timeRange]: TimerangeAttachmentData;
 }
 
@@ -71,30 +71,27 @@ export interface TextAttachmentData {
   content: string;
 }
 
-export const screenContextAttachmentDataSchema = z
+export const applicationContextAttachmentDataSchema = z
   .object({
-    url: z.string().optional(),
-    app: z.string().optional(),
+    location: z.string().optional(),
+    app_id: z.string().optional(),
     description: z.string().optional(),
-    additional_data: z.record(z.string()).optional(),
   })
   .refine((data) => {
     // at least one of the fields must be present
-    return data.url || data.app || data.description || data.additional_data;
+    return data.location || data.app_id || data.description;
   });
 
 /**
  * Data for a screen context attachment.
  */
-export interface ScreenContextAttachmentData {
-  /** current url */
-  url?: string;
+export interface ApplicationContextAttachmentData {
+  /** current location */
+  location?: string;
   /** kibana app name */
-  app?: string;
+  app_id?: string;
   /** app description */
   description?: string;
-  /** arbitrary additional context data */
-  additional_data?: Record<string, string>;
 }
 
 export type AttachmentDataOf<Type extends AttachmentType> = AttachmentDataMap[Type];

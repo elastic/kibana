@@ -6,15 +6,31 @@
  */
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { Attachment, TimerangeAttachment } from '@kbn/onechat-common/attachments';
+import type { ApplicationStart } from '@kbn/core/public';
+import type {
+  Attachment,
+  ApplicationContextAttachment,
+  TimerangeAttachment,
+} from '@kbn/onechat-common/attachments';
 import { AttachmentType } from '@kbn/onechat-common/attachments';
 
 interface ContextServiceDeps {
+  application: ApplicationStart;
   data: DataPublicPluginStart;
 }
 
 export class ContextService {
-  constructor(private readonly deps: ContextServiceDeps) {}
+  private currentLocation: string = '';
+  private currentAppId: string | undefined;
+
+  constructor(private readonly deps: ContextServiceDeps) {
+    deps.application.currentLocation$.subscribe((location) => {
+      this.currentLocation = location;
+    });
+    deps.application.currentAppId$.subscribe((appId) => {
+      this.currentAppId = appId;
+    });
+  }
 
   getContextualAttachments(): Attachment[] {
     const timeRange = this.deps.data.query.timefilter.timefilter.getAbsoluteTime();
@@ -30,6 +46,15 @@ export class ContextService {
       hidden: true,
     };
 
-    return [timerangeAttachment];
+    const appContext: ApplicationContextAttachment = {
+      id: 'kibana_context',
+      type: AttachmentType.applicationContext,
+      data: {
+        location: this.currentLocation,
+        app_id: this.currentAppId,
+      },
+    };
+
+    return [timerangeAttachment, appContext];
   }
 }

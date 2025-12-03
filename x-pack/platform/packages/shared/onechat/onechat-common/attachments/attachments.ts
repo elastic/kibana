@@ -27,7 +27,7 @@ export interface Attachment<
 // Strongly typed sub-types for known attachment types
 
 export type TextAttachment = Attachment<AttachmentType.text>;
-export type ScreenContextAttachment = Attachment<AttachmentType.screenContext>;
+export type ApplicationContextAttachment = Attachment<AttachmentType.applicationContext>;
 export type EsqlAttachment = Attachment<AttachmentType.esql>;
 export type TimerangeAttachment = Attachment<AttachmentType.timeRange>;
 

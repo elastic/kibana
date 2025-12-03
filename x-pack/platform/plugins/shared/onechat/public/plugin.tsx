@@ -113,7 +113,7 @@ export class OnechatPlugin
   }
 
   start(core: CoreStart, startDependencies: OnechatStartDependencies): OnechatPluginStart {
-    const { http } = core;
+    const { http, application } = core;
     const { licensing, inference, data } = startDependencies;
     docLinks.setDocLinks(core.docLinks.links);
 
@@ -122,7 +122,7 @@ export class OnechatPlugin
     const conversationsService = new ConversationsService({ http });
     const toolsService = new ToolsService({ http });
     const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
-    const contextService = new ContextService({ data });
+    const contextService = new ContextService({ data, application });
 
     if (!this.setupServices) {
       throw new Error('plugin start called before plugin setup');

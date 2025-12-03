@@ -9,7 +9,7 @@ export type {
   Attachment,
   AttachmentInput,
   TextAttachment,
-  ScreenContextAttachment,
+  ApplicationContextAttachment,
   EsqlAttachment,
   TimerangeAttachment,
 } from './attachments';
@@ -17,10 +17,10 @@ export {
   AttachmentType,
   textAttachmentDataSchema,
   esqlAttachmentDataSchema,
-  screenContextAttachmentDataSchema,
+  applicationContextAttachmentDataSchema,
   timeRangeAttachmentDataSchema,
   type TextAttachmentData,
-  type ScreenContextAttachmentData,
+  type ApplicationContextAttachmentData,
   type EsqlAttachmentData,
   type TimerangeAttachmentData,
 } from './attachment_types';

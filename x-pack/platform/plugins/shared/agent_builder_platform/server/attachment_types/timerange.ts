@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { generateXmlTree } from '@kbn/onechat-genai-utils/tools/utils/formatting';
 import { AttachmentType, timeRangeAttachmentDataSchema } from '@kbn/onechat-common/attachments';
 import type { TimerangeAttachmentData } from '@kbn/onechat-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
@@ -42,12 +41,10 @@ export const createTimerangeAttachmentType = (): AttachmentTypeDefinition<
 };
 
 const formatTimerange = (data: TimerangeAttachmentData): string => {
-  return generateXmlTree({
-    tagName: 'time_range',
-    attributes: {
-      from: data.start,
-      to: data.end,
-      description: data.description,
-    },
-  });
+  let formatted = '';
+  if (data.description) {
+    formatted += `description: ${data.description}\n`;
+  }
+  formatted += `From: ${data.start}\nTo: ${data.end}\n`;
+  return formatted;
 };
