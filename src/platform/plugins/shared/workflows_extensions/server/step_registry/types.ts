@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { StepContext } from '@kbn/workflows';
 import type { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition, InferStepInput, InferStepOutput } from '../../common';
@@ -73,8 +73,8 @@ export type ServerStepDefinition<TCommon extends CommonStepDefinition = CommonSt
  * ```
  */
 export function createServerStepDefinition<
-  TInputSchema extends z.ZodTypeAny,
-  TOutputSchema extends z.ZodTypeAny
+  TInputSchema extends z.ZodType,
+  TOutputSchema extends z.ZodType
 >(
   definition: ServerStepDefinition<CommonStepDefinition<TInputSchema, TOutputSchema>>
 ): ServerStepDefinition<CommonStepDefinition<TInputSchema, TOutputSchema>> {
@@ -120,6 +120,11 @@ export interface StepHandlerContext<TInput = unknown> {
      * Evaluate a template string using the workflow context
      */
     renderInputTemplate<T>(input: T): T;
+
+    /**
+     * Returns the fake request
+     */
+    getFakeRequest(): KibanaRequest;
   };
 
   /**
