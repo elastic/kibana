@@ -17,7 +17,7 @@ import { registerTools } from './tools/register_tools';
 import { registerAttachments } from './attachments/register_attachments';
 import { getIsObservabilityAgentEnabled } from './utils/get_is_obs_agent_enabled';
 import { OBSERVABILITY_AGENT_FEATURE_FLAG } from '../common/constants';
-import { registerAiInsightRoutes } from './routes/ai_insights/register_routes';
+import { registerAiInsightRoutes } from './routes/register_routes';
 import type {
   ObservabilityAgentPluginSetup,
   ObservabilityAgentPluginSetupDependencies,
