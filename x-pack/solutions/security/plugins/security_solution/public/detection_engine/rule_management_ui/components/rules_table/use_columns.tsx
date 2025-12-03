@@ -532,7 +532,7 @@ export const useGapStatusColumn = (): TableColumn => {
         const totalUnfilledDurationMs = gapInfo.total_unfilled_duration_ms;
         const totalFilledDurationMs = gapInfo.total_filled_duration_ms;
 
-         const byStatus: Record<GapFillStatus, { color: string; label: string }> = {
+        const byStatus: Record<GapFillStatus, { color: string; label: string }> = {
           [gapFillStatus.IN_PROGRESS]: {
             color: euiTheme.colors.backgroundBaseWarning,
             label: GAP_STATUS_IN_PROGRESS_LABEL,
