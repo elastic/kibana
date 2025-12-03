@@ -195,7 +195,7 @@ const dashboardEditModeConfig: TopNavMenuConfigBeta = {
             run: () => action('setting-clicked'),
             id: 'settings',
             order: 4,
-            label: 'setting',
+            label: 'settings',
             testId: 'settingButton',
           },
         ],

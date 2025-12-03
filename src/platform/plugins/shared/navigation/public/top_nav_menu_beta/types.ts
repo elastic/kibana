@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiButtonColor, EuiButtonProps, IconType } from '@elastic/eui';
+import type { EuiButtonColor, EuiButtonProps, EuiHideForProps, IconType } from '@elastic/eui';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { SplitButtonWithNotificationProps } from '@kbn/split-button';
 import type {
@@ -81,6 +81,7 @@ interface TopNavItemBase {
   href?: string;
   tooltipContent?: string | (() => string | undefined);
   tooltipTitle?: string | (() => string | undefined);
+  hidden?: EuiHideForProps['sizes'];
 }
 
 export type TopNavMenuItemCommonBeta =
@@ -92,7 +93,7 @@ export type TopNavMenuItemBetaType = TopNavMenuItemCommonBeta & {
   order: number;
 };
 
-export type TopNavMenuPopoverItemBeta = Omit<TopNavMenuItemBetaType, 'iconType'> & {
+export type TopNavMenuPopoverItemBeta = Omit<TopNavMenuItemBetaType, 'iconType' | 'hidden'> & {
   iconType?: IconType;
 };
 

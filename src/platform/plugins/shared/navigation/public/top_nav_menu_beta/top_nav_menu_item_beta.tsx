@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiHeaderLink, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiHeaderLink, EuiHideFor, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { upperFirst } from 'lodash';
 import { css } from '@emotion/react';
 import { getIsSelectedColor, getTooltip, isDisabled } from './utils';
@@ -35,6 +35,7 @@ export const TopNavMenuItemBeta = ({
   tooltipTitle,
   items,
   isPopoverOpen,
+  hidden,
   onPopoverToggle,
   onPopoverClose,
 }: TopNavMenuItemBetaProps) => {
@@ -67,25 +68,27 @@ export const TopNavMenuItemBeta = ({
   `;
 
   const buttonComponent = (
-    <EuiHeaderLink
-      onClick={href ? undefined : handleClick}
-      id={htmlId}
-      data-test-subj={testId}
-      iconType={iconType}
-      isDisabled={isDisabled(disableButton)}
-      href={href}
-      target={href ? target : undefined}
-      isLoading={isLoading}
-      size="s"
-      iconSide="left"
-      iconSize="m"
-      color="text"
-      aria-haspopup={hasItems ? 'menu' : undefined}
-      isSelected={hasItems ? isPopoverOpen : undefined}
-      css={buttonCss}
-    >
-      {itemText}
-    </EuiHeaderLink>
+    <EuiHideFor sizes={hidden ?? 'none'}>
+      <EuiHeaderLink
+        onClick={href ? undefined : handleClick}
+        id={htmlId}
+        data-test-subj={testId}
+        iconType={iconType}
+        isDisabled={isDisabled(disableButton)}
+        href={href}
+        target={href ? target : undefined}
+        isLoading={isLoading}
+        size="s"
+        iconSide="left"
+        iconSize="m"
+        color="text"
+        aria-haspopup={hasItems ? 'menu' : undefined}
+        isSelected={hasItems ? isPopoverOpen : undefined}
+        css={buttonCss}
+      >
+        {itemText}
+      </EuiHeaderLink>
+    </EuiHideFor>
   );
 
   /**

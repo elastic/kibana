@@ -11,7 +11,7 @@ import React from 'react';
 import { SplitButtonWithNotification } from '@kbn/split-button';
 import { upperFirst } from 'lodash';
 import type { EuiButtonColor } from '@elastic/eui';
-import { EuiButton, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiHideFor, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getIsSelectedColor, getTooltip, isDisabled } from './utils';
 import type {
@@ -46,6 +46,7 @@ export const TopNavMenuActionButton = (props: TopNavMenuActionButtonProps) => {
     tooltipContent,
     tooltipTitle,
     isPopoverOpen,
+    hidden,
     onPopoverToggle,
     onPopoverClose,
   } = props;
@@ -128,31 +129,35 @@ export const TopNavMenuActionButton = (props: TopNavMenuActionButtonProps) => {
   `;
 
   const buttonComponent = splitButtonProps ? (
-    <SplitButtonWithNotification
-      {...otherSplitButtonProps}
-      {...commonProps}
-      secondaryButtonFill={false}
-      onSecondaryButtonClick={handleSecondaryButtonClick}
-      color="text"
-      aria-haspopup={hasSplitItems ? 'menu' : undefined}
-      isSelected={isPopoverOpen}
-      css={splitButtonCss}
-    >
-      {itemText}
-    </SplitButtonWithNotification>
+    <EuiHideFor sizes={hidden ?? 'none'}>
+      <SplitButtonWithNotification
+        {...otherSplitButtonProps}
+        {...commonProps}
+        secondaryButtonFill={false}
+        onSecondaryButtonClick={handleSecondaryButtonClick}
+        color="text"
+        aria-haspopup={hasSplitItems ? 'menu' : undefined}
+        isSelected={isPopoverOpen}
+        css={splitButtonCss}
+      >
+        {itemText}
+      </SplitButtonWithNotification>
+    </EuiHideFor>
   ) : (
-    <EuiButton
-      {...commonProps}
-      iconSide="left"
-      aria-haspopup={hasItems ? 'menu' : undefined}
-      isSelected={isPopoverOpen}
-      css={buttonCss}
-      color={colorProp}
-      minWidth={minWidthProp}
-      fill={isFilledProp}
-    >
-      {itemText}
-    </EuiButton>
+    <EuiHideFor sizes={hidden ?? 'none'}>
+      <EuiButton
+        {...commonProps}
+        iconSide="left"
+        aria-haspopup={hasItems ? 'menu' : undefined}
+        isSelected={isPopoverOpen}
+        css={buttonCss}
+        color={colorProp}
+        minWidth={minWidthProp}
+        fill={isFilledProp}
+      >
+        {itemText}
+      </EuiButton>
+    </EuiHideFor>
   );
 
   /**
