@@ -29,6 +29,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import type { CloudConnectorVars } from '@kbn/fleet-plugin/common/types';
 import { CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS } from '@kbn/cloud-security-posture-common';
 import type { CloudProviders } from '../types';
 import { useCloudConnectorUsage } from '../hooks/use_cloud_connector_usage';
@@ -43,8 +44,7 @@ import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
 interface CloudConnectorPoliciesFlyoutProps {
   cloudConnectorId: string;
   cloudConnectorName: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  cloudConnectorVars: Record<string, any>;
+  cloudConnectorVars: CloudConnectorVars;
   provider: CloudProviders;
   onClose: () => void;
 }
@@ -88,11 +88,9 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
 
   // Extract ARN or Subscription ID based on provider
   const identifier = useMemo(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if (isAwsCloudConnectorVars(cloudConnectorVars as any, provider)) {
+    if (isAwsCloudConnectorVars(cloudConnectorVars, provider)) {
       return cloudConnectorVars.role_arn?.value || '';
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } else if (isAzureCloudConnectorVars(cloudConnectorVars as any, provider)) {
+    } else if (isAzureCloudConnectorVars(cloudConnectorVars, provider)) {
       return cloudConnectorVars.azure_credentials_cloud_connector_id?.value || '';
     }
     return '';
