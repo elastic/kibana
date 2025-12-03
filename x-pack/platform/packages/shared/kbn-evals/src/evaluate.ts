@@ -31,6 +31,7 @@ import {
   createOutputTokensEvaluator,
   createToolCallsEvaluator,
 } from './evaluators/trace_based';
+import { ESQL_EQUIVALENCE_EVALUATOR_NAME } from './evaluators/esql';
 
 /**
  * Test type for evaluations. Loads an inference client and a
@@ -115,6 +116,10 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
           [
             latency.name,
             { unitSuffix: 's', statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
+          ],
+          [
+            ESQL_EQUIVALENCE_EVALUATOR_NAME,
+            { decimalPlaces: 2, statsToInclude: ['mean', 'stdDev'] },
           ],
         ]),
         evaluatorDisplayGroups: [
