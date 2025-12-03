@@ -702,7 +702,10 @@ export function resolveEsArgs(
       return esProjectTypeFromKbn.get(options.projectType);
     }
   };
-  esArgs.set('serverless.project_type', getEsProjectTypeValue()!);
+  const esProjectTypeValue = getEsProjectTypeValue();
+  if (esProjectTypeValue) {
+    esArgs.set('serverless.project_type', esProjectTypeValue);
+  }
 
   const javaOptions = esArgs.get('ES_JAVA_OPTS');
   if (javaOptions) {
