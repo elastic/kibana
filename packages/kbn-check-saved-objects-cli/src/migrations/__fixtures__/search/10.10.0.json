@@ -1,0 +1,50 @@
+{
+  "10.9.0": [
+    {
+      "title": "Test Search",
+      "description": "Test saved search",
+      "tabs": [
+        {
+          "id": "tab-1",
+          "label": "Main Tab",
+          "attributes": {
+            "columns": ["field1", "field2"],
+            "sort": [["@timestamp", "desc"]],
+            "grid": {},
+            "hideChart": false,
+            "isTextBasedQuery": false,
+            "kibanaSavedObjectMeta": {
+              "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+            },
+            "rowHeight": 3,
+            "density": "normal"
+          }
+        }
+      ]
+    }
+  ],
+  "10.10.0": [
+    {
+      "title": "Test Search",
+      "description": "Test saved search",
+      "tabs": [
+        {
+          "id": "tab-1",
+          "label": "Main Tab",
+          "attributes": {
+            "columns": ["field1", "field2"],
+            "sort": [["@timestamp", "desc"]],
+            "grid": {},
+            "hideChart": false,
+            "isTextBasedQuery": false,
+            "kibanaSavedObjectMeta": {
+              "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+            },
+            "rowHeight": 3,
+            "density": "normal"
+          }
+        }
+      ]
+    }
+  ]
+}
