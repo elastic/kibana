@@ -20,7 +20,6 @@ export function ActionsOpsgenieServiceProvider(
   common: ActionsCommon
 ) {
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
   const browser = getService('browser');
 
   return {
