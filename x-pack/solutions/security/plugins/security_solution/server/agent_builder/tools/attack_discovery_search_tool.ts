@@ -7,8 +7,9 @@
 
 import { z } from '@kbn/zod';
 import { ToolType, ToolResultType } from '@kbn/onechat-common';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
+import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/onechat-server';
 import { executeEsql } from '@kbn/onechat-genai-utils';
+import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import { getSpaceIdFromRequest } from './helpers';
 import { securityTool } from './constants';
 
@@ -22,14 +23,43 @@ const attackDiscoverySearchSchema = z.object({
 
 export const SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID = securityTool('attack_discovery_search');
 
-export const attackDiscoverySearchTool = (): BuiltinToolDefinition<
-  typeof attackDiscoverySearchSchema
-> => {
+export const attackDiscoverySearchTool = (
+  core: CoreSetup
+): BuiltinToolDefinition<typeof attackDiscoverySearchSchema> => {
   return {
     id: SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
     type: ToolType.builtin,
     description: `Search and analyze attack discoveries. Use this tool to find attack discoveries related to specific alerts by providing alert IDs. The tool searches the kibana.alert.attack_discovery.alert_ids field. Automatically queries both scheduled and ad-hoc attack discovery indices for the current space. Limits results to 5 attack discoveries.`,
     schema: attackDiscoverySearchSchema,
+    availability: {
+      cacheMode: 'space',
+      handler: async ({ spaceId }: ToolAvailabilityContext) => {
+        try {
+          const [coreStart] = await core.getStartServices();
+          const esClient = coreStart.elasticsearch.client.asInternalUser;
+          const index = `.alerts-security.attack.discovery.alerts-${spaceId}*,.adhoc.alerts-security.attack.discovery.alerts-${spaceId}`;
+
+          const indexExists = await esClient.indices.exists({
+            index,
+          });
+          if (indexExists) {
+            return { status: 'available' };
+          }
+
+          return {
+            status: 'unavailable',
+            reason: 'Attack discovery index does not exist for this space',
+          };
+        } catch (error) {
+          return {
+            status: 'unavailable',
+            reason: `Failed to check attack discovery index availability: ${
+              error instanceof Error ? error.message : 'Unknown error'
+            }`,
+          };
+        }
+      },
+    },
     handler: async ({ alertIds }, { request, esClient, logger }) => {
       const spaceId = getSpaceIdFromRequest(request);
 
