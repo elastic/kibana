@@ -10,6 +10,7 @@ import React, { useCallback } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
+import { PresentationPanelQuickActionContext } from '@kbn/presentation-panel-plugin/public';
 import type { LensProps } from './hooks/use_lens_props';
 import { useLensExtraActions } from './hooks/use_lens_extra_actions';
 import { ChartTitle } from './chart_title';
@@ -103,19 +104,23 @@ export function LensWrapper({
 
   return (
     <div css={chartCss}>
-      <ChartTitle highlight={titleHighlight} title={lensProps.attributes.title} />
-      <EmbeddableComponent
-        {...lensProps}
-        title={lensProps.attributes.title}
-        extraActions={extraActions}
-        abortController={abortController}
-        disabledActions={DEFAULT_DISABLED_ACTIONS}
-        withDefaultActions
-        onBrushEnd={onBrushEnd}
-        onFilter={onFilter}
-        syncTooltips={syncTooltips}
-        syncCursor={syncCursor}
-      />
+      <PresentationPanelQuickActionContext.Provider
+        value={{ view: ['ACTION_METRICS_EXPERIENCE_EXPLORE_IN_DISCOVER_TAB', 'openInspector'] }}
+      >
+        <ChartTitle highlight={titleHighlight} title={lensProps.attributes.title} />
+        <EmbeddableComponent
+          {...lensProps}
+          title={lensProps.attributes.title}
+          extraActions={extraActions}
+          abortController={abortController}
+          disabledActions={DEFAULT_DISABLED_ACTIONS}
+          withDefaultActions
+          onBrushEnd={onBrushEnd}
+          onFilter={onFilter}
+          syncTooltips={syncTooltips}
+          syncCursor={syncCursor}
+        />
+      </PresentationPanelQuickActionContext.Provider>
     </div>
   );
 }
