@@ -131,7 +131,7 @@ export class DashboardPageControls extends FtrService {
     const controlIds = await this.getAllControlIds();
     let expectedRemainingPanelControls = 0;
     for (const controlId of controlIds) {
-      this.hideHoverActions();
+      await this.hideHoverActions();
       // Ensure this control ID is in a control frame, and not just an embeddable panel
       const controlFrame = await this.find.byCssSelector(
         `[data-test-subj='control-frame']:has([data-control-id='${controlId}'])`
