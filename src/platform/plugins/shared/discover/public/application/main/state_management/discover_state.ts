@@ -569,15 +569,15 @@ export function getDiscoverStateContainer({
     );
 
     // Subscribe to CPS projectRouting changes (global subscription affects all tabs)
-    const cpsProjectRoutingSubscription = services.cps?.cpsManager?.getProjectRouting$().subscribe(
-      (cpsProjectRouting) => {
+    const cpsProjectRoutingSubscription = services.cps?.cpsManager
+      ?.getProjectRouting$()
+      .subscribe((cpsProjectRouting) => {
         const currentProjectRouting = internalState.getState().projectRouting;
 
         if (cpsProjectRouting !== currentProjectRouting) {
           internalState.dispatch(internalStateActions.setProjectRouting(cpsProjectRouting));
         }
-      }
-    );
+      });
 
     const { start: startSyncingGlobalStateWithUrl, stop: stopSyncingGlobalStateWithUrl } =
       syncState({
