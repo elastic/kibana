@@ -37,13 +37,10 @@ export function SloGroupBy({ onStateChange, state, loading }: Props) {
     settings && (settings.useAllRemoteClusters || settings.selectedRemoteClusters.length > 0);
 
   const handleChangeGroupBy = (value: GroupByField) => {
-    onStateChange(
-      {
-        page: 0,
-        groupBy: value,
-      },
-      { replace: true }
-    );
+    onStateChange({
+      page: 0,
+      groupBy: value,
+    });
   };
   const groupByOptions: Option[] = [
     {

@@ -55,7 +55,7 @@ export function GroupView({
 
   const { results = [], total = 0 } = data ?? {};
   const handlePageClick = (pageNumber: number) => {
-    onStateChange({ page: pageNumber }, { replace: true });
+    onStateChange({ page: pageNumber });
   };
 
   if (isLoading || isRefetching) {
@@ -101,7 +101,7 @@ export function GroupView({
             itemsPerPage={perPage}
             itemsPerPageOptions={[10, 25, 50, 100]}
             onChangeItemsPerPage={(newPerPage) => {
-              onStateChange({ perPage: newPerPage, page: 0 }, { replace: true });
+              onStateChange({ perPage: newPerPage, page: 0 });
             }}
           />
         </EuiFlexItem>

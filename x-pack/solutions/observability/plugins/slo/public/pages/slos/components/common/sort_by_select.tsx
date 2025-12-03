@@ -32,13 +32,10 @@ export function SLOSortBy({ state, onStateChange, loading }: Props) {
   const sortBy = state.sort.by;
 
   const handleChangeSortBy = ({ value, label }: { value: SortField; label: string }) => {
-    onStateChange(
-      {
-        page: 0,
-        sort: { by: value, direction: state.sort.direction },
-      },
-      { replace: true }
-    );
+    onStateChange({
+      page: 0,
+      sort: { by: value, direction: state.sort.direction },
+    });
   };
 
   const sortByOptions: Option[] = [
