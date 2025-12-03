@@ -31,6 +31,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     after(async () => {
       await esClient.indices.deleteDataStream({ name: 'logs-invalid_pipeline-default' });
+      await esClient.indices.deleteDataStream({ name: TEST_STREAM_NAME });
     });
 
     describe('Classic streams processing', () => {
