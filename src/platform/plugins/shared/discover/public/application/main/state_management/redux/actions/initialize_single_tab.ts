@@ -111,8 +111,7 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
         cleanupUrlState(urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY), services.uiSettings)),
     };
 
-    const initialQuery =
-      urlAppState?.query ?? persistedTabSavedSearch?.searchSource.getField('query');
+    const initialQuery = urlAppState?.query ?? persistedTab?.serializedSearchSource.query;
     const isEsqlMode = isOfAggregateQueryType(initialQuery);
 
     const initialDataViewIdOrSpec = tabInitialInternalState?.serializedSearchSource?.index;

@@ -128,6 +128,7 @@ export function getDiscoverInternalStateMock({
         name: spec.name ?? spec.title,
         type: spec.type,
         timeFieldName: spec.timeFieldName,
+        isPersisted: false,
       })
     )
   );

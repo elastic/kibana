@@ -11,13 +11,14 @@ import type { DiscoverStateContainer } from './discover_state';
 import { createSearchSessionRestorationDataProvider } from './discover_state';
 import {
   fromSavedSearchToSavedObjectTab,
+  fromTabStateToSavedObjectTab,
   internalStateActions,
   selectHasUnsavedChanges,
   selectTabRuntimeState,
 } from './redux';
 import type { History } from 'history';
 import { createBrowserHistory, createMemoryHistory } from 'history';
-import { createSearchSourceMock, dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import {
   savedSearchAdHoc,
@@ -38,10 +39,18 @@ import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { mockCustomizationContext } from '../../../customizations/__mocks__/customization_context';
 import { createDataViewDataSource, createEsqlDataSource } from '../../../../common/data_sources';
 import { createRuntimeStateManager } from './redux';
-import type { HistoryLocationState } from '../../../build_services';
-import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
+import type { DiscoverServices, HistoryLocationState } from '../../../build_services';
+import {
+  getDiscoverInternalStateMock,
+  getDiscoverStateMock,
+} from '../../../__mocks__/discover_state.mock';
 import { updateSavedSearch } from './utils/update_saved_search';
 import { getConnectedCustomizationService } from '../../../customizations';
+import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
+import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
+import type { TimeRange } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { getTabStateMock } from './redux/__mocks__/internal_state.mocks';
 
 let mockServices = createDiscoverServicesMock();
 let savedSearchMock = copySavedSearch(originalSavedSearchMock);
@@ -300,72 +309,90 @@ describe('Discover state', () => {
   });
 
   describe('Test createSearchSessionRestorationDataProvider', () => {
-    let mockSavedSearch: SavedSearch = {} as unknown as SavedSearch;
-    const history = createBrowserHistory<HistoryLocationState>();
-    const mockDataPlugin = dataPluginMock.createStartContract();
-    const state = getDiscoverStateMock({ history });
-    const { currentDataView$ } = selectTabRuntimeState(
-      state.runtimeStateManager,
-      state.getCurrentTab().id
-    );
-    state.internalState.dispatch(
-      state.injectCurrentTab(internalStateActions.updateAppState)({
-        appState: {
-          dataSource: createDataViewDataSource({
-            dataViewId: currentDataView$.getValue()?.id!,
-          }),
-        },
-      })
-    );
-    const searchSessionInfoProvider = createSearchSessionRestorationDataProvider({
-      data: mockDataPlugin,
-      getCurrentTab: () => state.getCurrentTab(),
-      getSavedSearch: () => mockSavedSearch,
-    });
+    const setupSearchSessionInfoProvider = async ({
+      persistedDiscoverSession,
+      persistedDataViews,
+      services = createDiscoverServicesMock(),
+    }: {
+      persistedDiscoverSession?: DiscoverSession;
+      persistedDataViews?: DataView[];
+      services?: DiscoverServices;
+    } = {}) => {
+      const {
+        internalState,
+        runtimeStateManager,
+        initializeTabs,
+        initializeSingleTab,
+        getCurrentTab,
+      } = getDiscoverInternalStateMock({
+        persistedDataViews,
+        services,
+      });
+
+      await initializeTabs({ persistedDiscoverSession });
+      await initializeSingleTab({ tabId: getCurrentTab().id });
+
+      return createSearchSessionRestorationDataProvider({
+        data: services.data,
+        getPersistedDiscoverSession: () => internalState.getState().persistedDiscoverSession,
+        getCurrentTab,
+        getCurrentTabRuntimeState: () =>
+          selectTabRuntimeState(runtimeStateManager, getCurrentTab().id),
+      });
+    };
 
     describe('session name', () => {
       test('No persisted saved search returns default name', async () => {
+        const searchSessionInfoProvider = await setupSearchSessionInfoProvider();
         expect(await searchSessionInfoProvider.getName()).toBe('Discover');
       });
 
       test('Saved Search with a title returns saved search title', async () => {
-        mockSavedSearch = { id: 'id', title: 'Name' } as unknown as SavedSearch;
+        const persistedDiscoverSession = createDiscoverSessionMock({ id: 'id', title: 'Name' });
+        const searchSessionInfoProvider = await setupSearchSessionInfoProvider({
+          persistedDiscoverSession,
+        });
         expect(await searchSessionInfoProvider.getName()).toBe('Name');
       });
 
       test('Saved Search without a title returns default name', async () => {
-        mockSavedSearch = { id: 'id', title: undefined } as unknown as SavedSearch;
+        const persistedDiscoverSession = createDiscoverSessionMock({ id: 'id', title: '' });
+        const searchSessionInfoProvider = await setupSearchSessionInfoProvider({
+          persistedDiscoverSession,
+        });
         expect(await searchSessionInfoProvider.getName()).toBe('Discover');
       });
     });
 
     describe('session state', () => {
       test('restoreState has sessionId and initialState has not', async () => {
-        mockSavedSearch = savedSearchMock;
+        const services = createDiscoverServicesMock();
         const searchSessionId = 'id';
-        (mockDataPlugin.search.session.getSessionId as jest.Mock).mockReturnValue(searchSessionId);
+        jest.mocked(services.data.search.session.getSessionId).mockReturnValue(searchSessionId);
+        const searchSessionInfoProvider = await setupSearchSessionInfoProvider({ services });
         const { initialState, restoreState } = await searchSessionInfoProvider.getLocatorData();
         expect(initialState.searchSessionId).toBeUndefined();
         expect(restoreState.searchSessionId).toBe(searchSessionId);
       });
 
       test('restoreState has absoluteTimeRange', async () => {
-        mockSavedSearch = savedSearchMock;
+        const services = createDiscoverServicesMock();
         const relativeTime = 'relativeTime';
         const absoluteTime = 'absoluteTime';
-        (mockDataPlugin.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue(
-          relativeTime
-        );
-        (mockDataPlugin.query.timefilter.timefilter.getAbsoluteTime as jest.Mock).mockReturnValue(
-          absoluteTime
-        );
+        jest
+          .mocked(services.data.query.timefilter.timefilter.getTime)
+          .mockReturnValue(relativeTime as unknown as TimeRange);
+        jest
+          .mocked(services.data.query.timefilter.timefilter.getAbsoluteTime)
+          .mockReturnValue(absoluteTime as unknown as TimeRange);
+        const searchSessionInfoProvider = await setupSearchSessionInfoProvider({ services });
         const { initialState, restoreState } = await searchSessionInfoProvider.getLocatorData();
         expect(initialState.timeRange).toBe(relativeTime);
         expect(restoreState.timeRange).toBe(absoluteTime);
       });
 
       test('restoreState has paused autoRefresh', async () => {
-        mockSavedSearch = savedSearchMock;
+        const searchSessionInfoProvider = await setupSearchSessionInfoProvider();
         const { initialState, restoreState } = await searchSessionInfoProvider.getLocatorData();
         expect(initialState.refreshInterval).toBe(undefined);
         expect(restoreState.refreshInterval).toEqual({
@@ -375,18 +402,57 @@ describe('Discover state', () => {
       });
 
       test('restoreState has persisted data view', async () => {
-        mockSavedSearch = savedSearchMock;
+        const services = createDiscoverServicesMock();
+        const persistedDiscoverSession = createDiscoverSessionMock({
+          id: 'id',
+          tabs: [
+            fromTabStateToSavedObjectTab({
+              tab: getTabStateMock({
+                id: 'persisted-tab',
+                initialInternalState: {
+                  serializedSearchSource: { index: dataViewMock.id },
+                },
+              }),
+              timeRestore: false,
+              services,
+            }),
+          ],
+        });
+        const searchSessionInfoProvider = await setupSearchSessionInfoProvider({
+          persistedDiscoverSession,
+          persistedDataViews: [dataViewMock],
+          services,
+        });
         const { initialState, restoreState } = await searchSessionInfoProvider.getLocatorData();
         expect(initialState.dataViewSpec).toEqual(undefined);
         expect(restoreState.dataViewSpec).toEqual(undefined);
-        expect(initialState.dataViewId).toEqual(savedSearchMock.searchSource.getField('index')?.id);
+        expect(initialState.dataViewId).toEqual(dataViewMock.id);
       });
 
       test('restoreState has temporary data view', async () => {
-        mockSavedSearch = savedSearchAdHoc;
+        const services = createDiscoverServicesMock();
+        const persistedDiscoverSession = createDiscoverSessionMock({
+          id: 'id',
+          tabs: [
+            fromTabStateToSavedObjectTab({
+              tab: getTabStateMock({
+                id: 'adhoc-tab',
+                initialInternalState: {
+                  serializedSearchSource: { index: dataViewAdHoc.toSpec() },
+                },
+              }),
+              timeRestore: false,
+              services,
+            }),
+          ],
+        });
+        const searchSessionInfoProvider = await setupSearchSessionInfoProvider({
+          persistedDiscoverSession,
+          services,
+        });
         const { initialState, restoreState } = await searchSessionInfoProvider.getLocatorData();
-        expect(initialState.dataViewSpec).toEqual({});
-        expect(restoreState.dataViewSpec).toEqual({});
+        expect(initialState.dataViewSpec).toEqual(dataViewAdHoc.toMinimalSpec());
+        expect(restoreState.dataViewSpec).toEqual(dataViewAdHoc.toMinimalSpec());
       });
     });
   });

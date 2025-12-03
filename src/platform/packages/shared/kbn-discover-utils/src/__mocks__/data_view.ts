@@ -136,7 +136,7 @@ export const buildDataViewMock = ({
     isTimeNanosBased: () => false,
     isPersisted: () => isPersisted,
     toSpec: () => ({ id, title, name }),
-    toMinimalSpec: () => ({}),
+    toMinimalSpec: () => ({ id, title, name }),
     getTimeField: () => {
       return dataViewFields.find((field) => field.name === timeFieldName);
     },

@@ -32,6 +32,7 @@ import { getInitialESQLQuery } from '@kbn/esql-utils';
 import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import { FilterStateStore, isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
 import { isEqual, isFunction } from 'lodash';
+import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { DiscoverServices } from '../../..';
 import { FetchStatus } from '../../types';
 import { changeDataView } from './utils/change_data_view';
@@ -42,7 +43,7 @@ import { getDataStateContainer } from './discover_data_state_container';
 import type { DiscoverSearchSessionManager } from './discover_search_session';
 import type { DiscoverAppLocatorParams } from '../../../../common';
 import { APP_STATE_URL_KEY, DISCOVER_APP_LOCATOR } from '../../../../common';
-import type { DiscoverAppState } from './redux';
+import type { DiscoverAppState, ReactiveTabRuntimeState } from './redux';
 import { getCurrentUrlState } from './utils/cleanup_url_state';
 import { updateFiltersReferences } from './utils/update_filter_references';
 import type { DiscoverCustomizationContext } from '../../../customizations';
@@ -521,20 +522,21 @@ export function getDiscoverStateContainer({
     }
 
     const { data } = services;
-    const savedSearchDataView = currentSavedSearch.searchSource.getField('index');
+    const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+    const currentDataView = currentDataView$.getValue();
     const appState = appStateContainer.get();
     const setDataViewFromSavedSearch =
       !appState.dataSource ||
       (isDataSourceType(appState.dataSource, DataSourceType.DataView) &&
-        appState.dataSource.dataViewId !== savedSearchDataView?.id);
+        appState.dataSource.dataViewId !== currentDataView?.id);
 
     if (setDataViewFromSavedSearch) {
       // used data view is different from the given by url/state which is invalid
       internalState.dispatch(
         injectCurrentTab(internalStateActions.updateAppState)({
           appState: {
-            dataSource: savedSearchDataView?.id
-              ? createDataViewDataSource({ dataViewId: savedSearchDataView.id })
+            dataSource: currentDataView?.id
+              ? createDataViewDataSource({ dataViewId: currentDataView.id })
               : undefined,
           },
         })
@@ -686,8 +688,9 @@ export function getDiscoverStateContainer({
     services.data.search.session.enableStorage(
       createSearchSessionRestorationDataProvider({
         data: services.data,
+        getPersistedDiscoverSession: () => internalState.getState().persistedDiscoverSession,
         getCurrentTab,
-        getSavedSearch: () => savedSearchContainer.getState(),
+        getCurrentTabRuntimeState: () => selectTabRuntimeState(runtimeStateManager, tabId),
       }),
       {
         isDisabled: () =>
@@ -821,15 +824,14 @@ export function getDiscoverStateContainer({
 
 export function createSearchSessionRestorationDataProvider(deps: {
   data: DataPublicPluginStart;
+  getPersistedDiscoverSession: () => DiscoverSession | undefined;
   getCurrentTab: () => TabState;
-  getSavedSearch: () => SavedSearch;
+  getCurrentTabRuntimeState: () => ReactiveTabRuntimeState;
 }): SearchSessionInfoProvider {
-  const getSavedSearch = () => deps.getSavedSearch();
   return {
     getName: async () => {
-      const savedSearch = deps.getSavedSearch();
       return (
-        (savedSearch.id && savedSearch.title) ||
+        deps.getPersistedDiscoverSession()?.title ||
         i18n.translate('discover.discoverDefaultSearchSessionName', {
           defaultMessage: 'Discover',
         })
@@ -840,12 +842,10 @@ export function createSearchSessionRestorationDataProvider(deps: {
         id: DISCOVER_APP_LOCATOR,
         initialState: createUrlGeneratorState({
           ...deps,
-          getSavedSearch,
           shouldRestoreSearchSession: false,
         }),
         restoreState: createUrlGeneratorState({
           ...deps,
-          getSavedSearch,
           shouldRestoreSearchSession: true,
         }),
       };
@@ -855,22 +855,24 @@ export function createSearchSessionRestorationDataProvider(deps: {
 
 function createUrlGeneratorState({
   data,
+  getPersistedDiscoverSession,
   getCurrentTab,
-  getSavedSearch,
+  getCurrentTabRuntimeState,
   shouldRestoreSearchSession,
 }: {
   data: DataPublicPluginStart;
+  getPersistedDiscoverSession: () => DiscoverSession | undefined;
   getCurrentTab: () => TabState;
-  getSavedSearch: () => SavedSearch;
+  getCurrentTabRuntimeState: () => ReactiveTabRuntimeState;
   shouldRestoreSearchSession: boolean;
 }): DiscoverAppLocatorParams {
   const appState = getCurrentTab().appState;
-  const dataView = getSavedSearch().searchSource.getField('index');
+  const dataView = getCurrentTabRuntimeState().currentDataView$.getValue();
   return {
     filters: data.query.filterManager.getFilters(),
     dataViewId: dataView?.id,
     query: appState.query,
-    savedSearchId: getSavedSearch().id,
+    savedSearchId: getPersistedDiscoverSession()?.id,
     timeRange: shouldRestoreSearchSession
       ? data.query.timefilter.timefilter.getAbsoluteTime()
       : data.query.timefilter.timefilter.getTime(),

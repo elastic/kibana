@@ -15,7 +15,7 @@ import type {
   SerializedSearchSourceFields,
 } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
-import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
+import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   getSortForSearchSource,
@@ -30,7 +30,7 @@ import { isEqualFilters } from '../application/main/state_management/utils/state
  */
 export async function getSharingData(
   currentSearchSource: ISearchSource,
-  state: DiscoverAppState | SavedSearch,
+  state: DiscoverAppState,
   services: { uiSettings: IUiSettingsClient; data: DataPublicPluginStart },
   isEsqlMode?: boolean
 ) {
