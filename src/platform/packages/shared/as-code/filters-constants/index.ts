@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { FilterStateStore } from './src/constants';
+export { ASCODE_FILTER_OPERATOR } from './src/constants';

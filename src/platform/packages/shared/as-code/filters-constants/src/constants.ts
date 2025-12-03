@@ -7,4 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { FilterStateStore } from './src/constants';
+/**
+ * As Code Filter operator constants
+ * These operators are used in SimpleFilterCondition to specify how to match field values
+ */
+export const ASCODE_FILTER_OPERATOR = {
+  IS: 'is',
+  IS_NOT: 'is_not',
+  IS_ONE_OF: 'is_one_of',
+  IS_NOT_ONE_OF: 'is_not_one_of',
+  EXISTS: 'exists',
+  NOT_EXISTS: 'not_exists',
+  RANGE: 'range',
+} as const;

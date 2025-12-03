@@ -25,7 +25,8 @@ import type {
   AsCodeDSLFilter,
 } from '@kbn/as-code-filters-schema';
 import type { Logger } from '@kbn/logging';
-import { ASCODE_FILTER_OPERATOR, FilterStateStore } from '@kbn/es-query-constants';
+import { FilterStateStore } from '@kbn/es-query-constants';
+import { ASCODE_FILTER_OPERATOR } from '@kbn/as-code-filters-constants';
 import { migrateFilter } from '@kbn/es-query';
 import { FILTERS } from '@kbn/es-query';
 import type { StoredFilter } from './types';

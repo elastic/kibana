@@ -15,7 +15,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ASCODE_FILTER_OPERATOR } from '@kbn/es-query-constants';
+import { ASCODE_FILTER_OPERATOR } from '@kbn/as-code-filters-constants';
 
 // ====================================================================
 // CORE FILTER OPERATOR AND VALUE SCHEMAS

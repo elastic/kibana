@@ -18,7 +18,7 @@ import type {
   AsCodeDSLFilter,
 } from '@kbn/as-code-filters-schema';
 import type { Logger } from '@kbn/logging';
-import { ASCODE_FILTER_OPERATOR } from '@kbn/es-query-constants';
+import { ASCODE_FILTER_OPERATOR } from '@kbn/as-code-filters-constants';
 import { FILTERS } from '@kbn/es-query';
 import { FilterConversionError } from './errors';
 import type { StoredFilter } from './types';
