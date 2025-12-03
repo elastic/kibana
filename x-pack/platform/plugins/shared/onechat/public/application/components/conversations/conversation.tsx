@@ -76,7 +76,6 @@ export const Conversation: React.FC<{}> = () => {
 
   const scrollableStyles = css`
     ${useEuiScrollBar()}
-    overflow-y: auto;
     ${useEuiOverflowScroll('y', isEmbeddedContext ? false : true)}
   `;
 
