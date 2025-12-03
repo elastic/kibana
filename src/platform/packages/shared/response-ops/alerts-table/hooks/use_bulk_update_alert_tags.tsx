@@ -44,7 +44,7 @@ export const useBulkUpdateAlertTags = ({
         });
         return http.post(`${BASE_RAC_ALERTS_API_PATH}/tags`, { body });
       } catch (e) {
-        throw new Error(`Unable to parse update tag params: ${e}`);
+        throw new Error(`Unable to update tags: ${e.message}`);
       }
     },
     {

@@ -470,7 +470,7 @@ describe('bulk action hooks', () => {
         .mockReturnValue({ create: true, read: true });
     });
 
-    it('appends the case and untrack bulk actions', async () => {
+    it('appends the internal bulk actions correctly for non siem rule types', async () => {
       const { result } = renderHook(
         () =>
           useBulkActions({

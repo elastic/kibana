@@ -108,6 +108,19 @@ describe('useTagsAction', () => {
     await waitFor(() => {
       expect(result.current.isFlyoutOpen).toBe(false);
     });
+
+    await waitFor(() => {
+      expect(http.post).toHaveBeenCalled();
+    });
+
+    expect(http.post).toHaveBeenCalledWith('/internal/rac/alerts/tags', {
+      body: JSON.stringify({
+        index: '.alerts-observability*,.alerts-stack*',
+        alertIds: ['alert-1'],
+        add: ['one'],
+        remove: ['pepsi'],
+      }),
+    });
   });
 
   it('opens and closes the flyout correctly', async () => {
@@ -165,6 +178,19 @@ describe('useTagsAction', () => {
     await waitFor(() => {
       expect(result.current.isFlyoutOpen).toBe(false);
     });
+
+    await waitFor(() => {
+      expect(http.post).toHaveBeenCalled();
+    });
+
+    expect(http.post).toHaveBeenCalledWith('/internal/rac/alerts/tags', {
+      body: JSON.stringify({
+        index: '.alerts-observability*,.alerts-stack*',
+        alertIds: ['alert-1', 'alert-2'],
+        add: ['one', 'two'],
+        remove: ['pepsi'],
+      }),
+    });
   });
 
   it('handles multiple alerts from different indices', async () => {
@@ -201,6 +227,19 @@ describe('useTagsAction', () => {
 
     await waitFor(() => {
       expect(result.current.isFlyoutOpen).toBe(false);
+    });
+
+    await waitFor(() => {
+      expect(http.post).toHaveBeenCalled();
+    });
+
+    expect(http.post).toHaveBeenCalledWith('/internal/rac/alerts/tags', {
+      body: JSON.stringify({
+        index: '.alerts-observability*,.alerts-stack*',
+        alertIds: ['alert-1', 'alert-2', 'alert-3'],
+        add: ['one', 'two'],
+        remove: ['pepsi'],
+      }),
     });
   });
 });
