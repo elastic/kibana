@@ -42,6 +42,7 @@ export interface BaseToolbarProps {
   hasArrow?: boolean;
   disabled?: boolean;
   fullWidth?: boolean;
+  selectedValues?: string[];
 }
 
 export interface ToolbarSingleSelectorProps {
@@ -51,7 +52,7 @@ export interface ToolbarSingleSelectorProps {
 
 export interface ToolbarMultiSelectorProps {
   singleSelection: false;
-  onChange?: (c?: SelectableEntry[]) => void;
+  onChange?: (c?: string[]) => void;
 }
 
 export type ToolbarSelectorProps = BaseToolbarProps &
@@ -72,6 +73,7 @@ export const ToolbarSelector = ({
   hasArrow = true,
   disabled = false,
   fullWidth = false,
+  selectedValues,
 }: ToolbarSelectorProps) => {
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -138,29 +140,23 @@ export const ToolbarSelector = ({
   const onSelectionChange = useCallback<
     NonNullable<EuiSelectableProps<SelectableEntry>['onChange']>
   >(
-    (newOptions) => {
+    (_newOptions, _event, changedOption) => {
+      const isSelected = changedOption.checked === 'on';
+
       if (singleSelection === false) {
-        // For multi-selection, we need to preserve previously selected options
-        const currentlyVisibleSelected = newOptions.filter(({ checked }) => checked === 'on');
-        const currentlyVisibleValues = new Set(newOptions.map((option) => option.value));
-
-        // Find previously selected options that are not currently visible (filtered out)
-        const previouslySelectedButHidden = options.filter(
-          (option) => option.checked === 'on' && !currentlyVisibleValues.has(option.value)
-        );
-
-        const allSelected = [...currentlyVisibleSelected, ...previouslySelectedButHidden];
-        onChange?.(allSelected);
+        const currentValues = selectedValues ?? [];
+        const newSelectedValues = isSelected
+          ? [...currentValues, changedOption.key!]
+          : currentValues.filter((v) => v !== changedOption.key);
+        onChange?.(newSelectedValues);
       } else {
-        const chosenOption = newOptions.find(({ checked }) => checked === 'on');
-        onChange?.(
-          chosenOption?.value && chosenOption?.value !== EMPTY_OPTION ? chosenOption : undefined
-        );
+        const isValidSelection = isSelected && changedOption.value !== EMPTY_OPTION;
+        onChange?.(isValidSelection ? changedOption : undefined);
         closePopover();
         disableLabelPopover();
       }
     },
-    [closePopover, disableLabelPopover, onChange, singleSelection, options]
+    [closePopover, disableLabelPopover, onChange, singleSelection, selectedValues]
   );
 
   const searchProps: EuiSelectableProps['searchProps'] = useMemo(

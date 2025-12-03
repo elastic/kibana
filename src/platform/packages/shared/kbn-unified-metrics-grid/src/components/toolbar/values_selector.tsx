@@ -107,11 +107,7 @@ export const ValuesSelector = ({
   }, [groupedValues, selectedValues]);
 
   const handleChange = useCallback(
-    (chosenOption?: SelectableEntry[]) => {
-      const newSelectedValues = chosenOption
-        ?.filter((option) => !option.isGroupLabel && option.key)
-        .map((option: SelectableEntry) => option.key!);
-
+    (newSelectedValues?: string[]) => {
       // Enforce the maximum limit
       const limitedSelection = (newSelectedValues ?? []).slice(0, MAX_VALUES_SELECTIONS);
       onChange(limitedSelection);
@@ -220,6 +216,7 @@ export const ValuesSelector = ({
       disabled={disabled}
       popoverContentBelowSearch={popoverContentBelowSearch}
       fullWidth={fullWidth}
+      selectedValues={selectedValues}
     />
   );
 };
