@@ -21,7 +21,6 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/data-forge'
   - '@kbn/test'
-  - '@kbn/server-route-repository'
 tags:
   - test-helper
   - package
