@@ -236,9 +236,8 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
   ): Promise<UpdateResponse<ReportDocument>> {
     const message = `Saving execution error for ${report.jobtype} job ${report._id}`;
     const errorParsed = parseError(failedToExecuteErr);
-    const logger = this.logger.get(report._id);
     // log the error
-    errorLogger(logger, message, failedToExecuteErr);
+    errorLogger(this.logger, message, failedToExecuteErr, [report._id]);
 
     // update the report in the store
     const store = await this.opts.reporting.getStore();
@@ -276,8 +275,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     output: CompletedReportOutput,
     message: string
   ): Promise<UpdateResponse<ReportDocument>> {
-    const logger = this.logger.get(report._id);
-    logger.warn(message);
+    this.logger.warn(message, { tags: [report._id] });
 
     // update the report in the store
     const store = await this.opts.reporting.getStore();
@@ -435,9 +433,8 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     output: CompletedReportOutput
   ): Promise<SavedReport> {
     let docId = `/${report._index}/_doc/${report._id}`;
-    const logger = this.logger.get(report._id);
 
-    logger.debug(`Saving ${report.jobtype} to ${docId}.`);
+    this.logger.debug(`Saving ${report.jobtype} to ${docId}.`, { tags: [report._id] });
 
     const completedTime = moment();
     const docOutput = this.formatOutput(output);
@@ -451,7 +448,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
 
     const resp = await store.setReportCompleted(report, doc);
 
-    logger.info(`Saved ${report.jobtype} job ${docId}`);
+    this.logger.info(`Saved ${report.jobtype} job ${docId}`, { tags: [report._id] });
     report._seq_no = resp._seq_no!;
     report._primary_term = resp._primary_term!;
 

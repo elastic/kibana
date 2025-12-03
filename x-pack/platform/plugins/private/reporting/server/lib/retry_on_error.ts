@@ -52,7 +52,8 @@ export const retryOnError = async ({
           report._id
         }] after [${retryDelaySec}s] due to error: ${err.toString()} ${
           err.stack
-        } - attempt ${retryCount} of ${retries + 1} failed.`
+        } - attempt ${retryCount} of ${retries + 1} failed.`,
+        { tags: [report._id] }
       );
 
       // delay with some randomness
@@ -66,7 +67,7 @@ export const retryOnError = async ({
         `No retries left for report generation for report[${
           report._id
         }]. No report generated after ${retries + 1} attempts due to error: ${err.toString()}`,
-        { error: { stack_trace: err.stack } }
+        { error: { stack_trace: err.stack }, tags: [report._id] }
       );
     }
 
