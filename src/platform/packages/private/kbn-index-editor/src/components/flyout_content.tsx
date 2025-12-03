@@ -27,7 +27,6 @@ import React, { lazy, useCallback, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import type { FileUploadResults } from '@kbn/file-upload-common';
 import { i18n } from '@kbn/i18n';
 import { ErrorCallout } from './error_callout';
 import { UnsavedChangesModal } from './modals/unsaved_changes_modal';
@@ -71,13 +70,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
         true,
         existingIndex,
         { index: { mode: 'lookup' } },
-        'lookup-index-editor',
-        // On index searchable
-        undefined,
-        // On all docs searchable
-        (index) => {
-          // indexUpdateService.onFileUploadFinished(index);
-        }
+        'lookup-index-editor'
       );
     },
     [coreStart.analytics, coreStart.http, coreStart.notifications, deps.data, deps.fileUpload]
@@ -101,19 +94,9 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
     coreStart.http,
     coreStart.notifications,
     undefined,
-    // onUploadComplete
-    (results: FileUploadResults | null) => {
-      // if (results) {
-      //   fileUploadContextValue.setExistingIndexName(results.index);
-      //   results.files.forEach((_, index) => {
-      //     fileUploadManager.removeFile(index);
-      //   });
-      // }
-    },
+    undefined,
     reset
   );
-
-  // console.log(222222222);
 
   const rowsWithValues = rows?.some((row) => Object.keys(row.flattened).length > 0);
 

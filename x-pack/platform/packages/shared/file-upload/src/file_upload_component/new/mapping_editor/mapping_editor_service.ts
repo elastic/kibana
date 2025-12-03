@@ -45,8 +45,15 @@ export class MappingEditorService {
   private _mappingsError$ = new BehaviorSubject<MappingError | null>(null);
   public mappingsError$ = this._mappingsError$.asObservable();
 
+  private originalMappingJSON: MappingTypeMapping;
+
+  private _mappingsEdited$ = new BehaviorSubject<boolean>(false);
+  public mappingsEdited$ = this._mappingsEdited$.asObservable();
+
   constructor(private readonly fileUploadManager: FileUploadManager) {
-    this.initializeMappings();
+    const originalMappings = this.fileUploadManager.getMappings().json;
+    this.originalMappingJSON = originalMappings;
+    this.initializeMappings(originalMappings);
 
     this.mappingsSubscription = this._mappings$.subscribe((mappings) => {
       const mappingTypeMapping: MappingTypeMapping = {
@@ -60,8 +67,7 @@ export class MappingEditorService {
     });
   }
 
-  private initializeMappings() {
-    const mappings = this.fileUploadManager.getMappings().json;
+  private initializeMappings(mappings: MappingTypeMapping) {
     if (mappings.properties) {
       const mappingsArray = Object.entries(mappings.properties).map(([fieldName, fieldConfig]) => ({
         name: fieldName,
@@ -98,6 +104,9 @@ export class MappingEditorService {
   getMappingsError() {
     return this._mappingsError$.getValue();
   }
+  getMappingsEdited() {
+    return this._mappingsEdited$.getValue();
+  }
 
   updateMapping(index: number, fieldName: string, fieldType: string | null) {
     const mappings = [...this._mappings$.getValue()];
@@ -109,6 +118,7 @@ export class MappingEditorService {
       };
       this._mappings$.next(mappings);
       this.checkMappingsValid(mappings);
+      this._mappingsEdited$.next(true);
     }
   }
 
@@ -169,5 +179,12 @@ export class MappingEditorService {
 
     // No errors
     this._mappingsError$.next(null);
+  }
+
+  public reset() {
+    const mappings = this.originalMappingJSON;
+    this.fileUploadManager.updateMappings(mappings);
+    this.initializeMappings(mappings);
+    this._mappingsEdited$.next(false);
   }
 }

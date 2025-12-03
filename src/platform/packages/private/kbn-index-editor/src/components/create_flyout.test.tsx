@@ -57,7 +57,7 @@ describe('createFlyout', () => {
     share: {} as any,
     fileUpload: {} as any,
     storage: {} as any,
-    fileManager: {} as any,
+    existingIndexName: undefined,
   };
 
   beforeEach(() => {

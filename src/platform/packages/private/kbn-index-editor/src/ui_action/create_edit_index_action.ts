@@ -30,7 +30,7 @@ export function createEditLookupIndexContentAction(
         defaultMessage: 'Open lookup index editor UI',
       }),
     async execute(context: EditLookupIndexContentContext) {
-      const { coreStart, data, fileUpload } = dependencies;
+      const { coreStart, data } = dependencies;
 
       const indexEditorTelemetryService = new IndexEditorTelemetryService(
         coreStart.analytics,

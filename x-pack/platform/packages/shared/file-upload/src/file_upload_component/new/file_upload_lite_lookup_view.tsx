@@ -52,8 +52,6 @@ export const FileUploadLiteLookUpView: FC<Props> = ({
     finish: STATUS.NOT_STARTED,
   });
 
-  const [mappingsValid, setMappingsValid] = useState<boolean>(true);
-
   const setStep = useCallback((step: keyof StepsStatus, status: STATUS) => {
     setStepsStatus((prev) => ({
       ...prev,
@@ -70,6 +68,13 @@ export const FileUploadLiteLookUpView: FC<Props> = ({
   useEffect(() => {
     setDropzoneDisabled?.(stepsStatus.analysis !== STATUS.STARTED);
   }, [stepsStatus.analysis, setDropzoneDisabled]);
+
+  const importClick = useCallback(() => {
+    setIsSaving(true);
+    onImportClick();
+    setStep('mapping', STATUS.COMPLETED);
+    setStep('upload', STATUS.STARTED);
+  }, [onImportClick, setIsSaving, setStep]);
 
   if (indexName === null) {
     return null;
@@ -126,21 +131,7 @@ export const FileUploadLiteLookUpView: FC<Props> = ({
       children:
         stepsStatus.mapping === STATUS.STARTED ? (
           <>
-            <MappingEditor setMappingsValid={setMappingsValid} />
-
-            <EuiSpacer />
-
-            <EuiButton
-              disabled={!mappingsValid}
-              onClick={() => {
-                setIsSaving(true);
-                onImportClick();
-                setStep('mapping', STATUS.COMPLETED);
-                setStep('upload', STATUS.STARTED);
-              }}
-            >
-              <FormattedMessage id="xpack.fileUpload.import" defaultMessage="Import" />
-            </EuiButton>
+            <MappingEditor onImportClick={importClick} />
 
             <EuiSpacer />
           </>

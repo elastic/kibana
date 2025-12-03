@@ -7,7 +7,15 @@
 
 import type { FC } from 'react';
 import React, { useEffect, useMemo } from 'react';
-import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiText } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFieldText,
+  EuiText,
+  EuiButton,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FieldSelect } from '@kbn/field-utils/src/components/field_select/field_select';
 import useObservable from 'react-use/lib/useObservable';
@@ -16,10 +24,10 @@ import { useFileUploadContext } from '../../../use_file_upload';
 import { MappingEditorService } from './mapping_editor_service';
 
 interface Props {
-  setMappingsValid: (valid: boolean) => void;
+  onImportClick: () => void;
 }
 
-export const MappingEditor: FC<Props> = ({ setMappingsValid }) => {
+export const MappingEditor: FC<Props> = ({ onImportClick }) => {
   const { fileUploadManager } = useFileUploadContext();
   const mappingEditorService = useMemo(
     () => new MappingEditorService(fileUploadManager),
@@ -31,14 +39,15 @@ export const MappingEditor: FC<Props> = ({ setMappingsValid }) => {
     mappingEditorService.getMappingsError()
   );
 
+  const mappingsEdited = useObservable(
+    mappingEditorService.mappingsEdited$,
+    mappingEditorService.getMappingsEdited()
+  );
+
   const mappings = useObservable(
     mappingEditorService.mappings$,
     mappingEditorService.getMappings()
   );
-
-  useEffect(() => {
-    setMappingsValid(!mappingsError);
-  }, [mappingsError, setMappingsValid]);
 
   const fieldCount = useMemo(() => mappings.length, [mappings]);
 
@@ -133,6 +142,38 @@ export const MappingEditor: FC<Props> = ({ setMappingsValid }) => {
           </EuiText>
         </>
       ) : null}
+
+      <EuiSpacer />
+
+      <EuiFlexGroup gutterSize="none">
+        <EuiFlexItem grow={true}>
+          <EuiFlexGroup gutterSize="none">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                disabled={mappingsError !== null}
+                onClick={() => onImportClick()}
+                fullWidth={false}
+              >
+                <FormattedMessage id="xpack.fileUpload.import" defaultMessage="Import" />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={true}>
+          <div css={{ width: '255px', textAlign: 'right' }}>
+            <EuiButtonEmpty
+              flush="right"
+              disabled={mappingsEdited === false}
+              onClick={() => {
+                mappingEditorService.reset();
+              }}
+            >
+              <FormattedMessage id="xpack.fileUpload.reset" defaultMessage="Reset to default" />
+            </EuiButtonEmpty>
+          </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 };
