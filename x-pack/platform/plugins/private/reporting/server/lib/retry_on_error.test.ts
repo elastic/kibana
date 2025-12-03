@@ -165,7 +165,7 @@ describe('retryOnError', () => {
       `No retries left for report generation for report[${
         report._id
       }]. No report generated after 4 attempts due to error: ${error.toString()}`,
-      { error: { stack_trace: error.stack, tags: [report._id] } }
+      { error: { stack_trace: error.stack }, tags: [report._id] }
     );
   });
 });
