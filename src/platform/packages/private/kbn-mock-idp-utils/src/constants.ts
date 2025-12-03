@@ -14,8 +14,11 @@ export const MOCK_IDP_LOGOUT_PATH = '/mock_idp/logout';
 export const MOCK_IDP_UIAM_SIGNING_SECRET = 'MnpT2a582F/LiRbocLHLnSF2SYElqTUdmQvBpVn+51Q=';
 export const MOCK_IDP_UIAM_SHARED_SECRET = 'Dw7eRt5yU2iO9pL3aS4dF6gH8jK0lZ1xC2vB3nM4qW5=';
 
-export const MOCK_IDP_UIAM_ORGANIZATION_ID = '1234567890';
+export const MOCK_IDP_UIAM_ORGANIZATION_ID = 'org1234567890';
 export const MOCK_IDP_UIAM_PROJECT_ID = 'abcde1234567890';
+
+export const MOCK_IDP_UIAM_SERVICE_INTERNAL_URL = 'http://uiam:8080';
+export const MOCK_IDP_UIAM_SERVICE_URL = 'http://localhost:8080';
 
 export const MOCK_IDP_REALM_NAME = 'cloud-saml-kibana';
 export const MOCK_IDP_REALM_TYPE = 'saml';

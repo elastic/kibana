@@ -72,6 +72,7 @@ export enum SecurityPageName {
   rulesCreate = 'rules-create',
   rulesLanding = 'rules-landing',
   rulesManagement = 'rules-management',
+  scriptsLibrary = 'scripts_library',
   siemReadiness = 'siem_readiness',
   siemMigrationsLanding = 'siem_migrations',
   siemMigrationsRules = 'siem_migrations-rules',
