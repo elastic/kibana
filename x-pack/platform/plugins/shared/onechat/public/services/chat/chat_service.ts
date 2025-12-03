@@ -11,7 +11,7 @@ import type { HttpSetup } from '@kbn/core-http-browser';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
 import type { ChatEvent, AgentCapabilities } from '@kbn/onechat-common';
 import { getKibanaDefaultAgentCapabilities } from '@kbn/onechat-common/agents';
-import type { AttachmentInput } from '@kbn/onechat-common/attachments';
+import type { Attachment } from '@kbn/onechat-common/attachments';
 import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
 import { publicApiPath } from '../../../common/constants';
 import type { ChatRequestBodyPayload } from '../../../common/http_api/chat';
@@ -24,7 +24,7 @@ export interface ChatParams {
   conversationId?: string;
   capabilities?: AgentCapabilities;
   input: string;
-  attachments?: AttachmentInput[];
+  attachments?: Attachment[];
   browserApiTools?: BrowserApiToolMetadata[];
 }
 
