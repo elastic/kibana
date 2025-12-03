@@ -542,44 +542,44 @@
             }
           }
         },
-        "latency_by_connector": {
+        "latency_by_model": {
           "type": "array",
           "items": {
             "properties": {
-              "connector_id": {
+              "model": {
                 "type": "keyword",
                 "_meta": {
-                  "description": "Connector ID (maps to LLM provider/model)"
+                  "description": "Model identifier (e.g., gpt-4o, claude-3-sonnet)"
                 }
               },
               "ttft_p50": {
                 "type": "long",
                 "_meta": {
-                  "description": "50th percentile TTFT for this connector"
+                  "description": "50th percentile TTFT for this model"
                 }
               },
               "ttft_p95": {
                 "type": "long",
                 "_meta": {
-                  "description": "95th percentile TTFT for this connector"
+                  "description": "95th percentile TTFT for this model"
                 }
               },
               "ttlt_p50": {
                 "type": "long",
                 "_meta": {
-                  "description": "50th percentile TTLT for this connector"
+                  "description": "50th percentile TTLT for this model"
                 }
               },
               "ttlt_p95": {
                 "type": "long",
                 "_meta": {
-                  "description": "95th percentile TTLT for this connector"
+                  "description": "95th percentile TTLT for this model"
                 }
               },
               "sample_count": {
                 "type": "long",
                 "_meta": {
-                  "description": "Number of samples for this connector"
+                  "description": "Number of samples for this model"
                 }
               }
             }
