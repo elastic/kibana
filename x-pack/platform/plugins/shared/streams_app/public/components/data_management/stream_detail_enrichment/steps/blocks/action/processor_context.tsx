@@ -11,16 +11,15 @@ interface ProcessorContextValue {
   processorId: string;
 }
 
-const ProcessorContext = createContext<ProcessorContextValue | undefined>(undefined);
+const ProcessorContext = createContext<ProcessorContextValue | null>(null);
 
 export const ProcessorContextProvider: React.FC<React.PropsWithChildren<ProcessorContextValue>> = ({
-  children,
   processorId,
+  children,
 }) => {
   return <ProcessorContext.Provider value={{ processorId }}>{children}</ProcessorContext.Provider>;
 };
 
 export const useProcessorContext = () => {
-  const context = useContext(ProcessorContext);
-  return context;
+  return useContext(ProcessorContext);
 };

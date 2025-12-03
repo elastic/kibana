@@ -15,6 +15,7 @@ import type {
   StreamlangProcessorDefinition,
   StreamlangStepWithUIAttributes,
   StreamlangValidationError,
+  FieldType,
 } from '@kbn/streamlang';
 import type { StreamlangWhereBlock } from '@kbn/streamlang/types/streamlang';
 import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
@@ -50,7 +51,7 @@ export interface StreamEnrichmentContextType {
   simulatorRef: SimulationActorRef;
   urlState: EnrichmentUrlState;
   validationErrors: Map<string, StreamlangValidationError[]>;
-  fieldTypesByProcessor: Map<string, Map<string, import('@kbn/streamlang').FieldType>>;
+  fieldTypesByProcessor: Map<string, Map<string, FieldType>>;
 }
 
 export type StreamEnrichmentEvent =

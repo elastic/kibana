@@ -290,7 +290,7 @@ function getProcessorOutputType(
               ) {
                 return 'number';
               }
-              if (explicitType === 'boolean' || explicitType === 'bool') {
+              if (explicitType === 'boolean') {
                 return 'boolean';
               }
               // Unknown type suffix defaults to string
@@ -416,24 +416,16 @@ function getExpectedInputType(
  * mixed types (the original type + the new type).
  *
  * @param flattenedSteps - The flattened processor steps
- * @param initialTypes - Initial field types (e.g., from parent stream)
  * @returns Object containing the final field type map and any type errors
  */
-function trackFieldTypesAndValidate(
-  flattenedSteps: StreamlangProcessorDefinition[],
-  initialTypes: FieldTypeMap = new Map()
-): {
+function trackFieldTypesAndValidate(flattenedSteps: StreamlangProcessorDefinition[]): {
   fieldTypes: FieldTypeMap;
   errors: StreamlangValidationError[];
   fieldTypesByProcessor: Map<string, FieldTypeMap>;
 } {
-  const fieldTypes = new Map(initialTypes);
+  const fieldTypes = new Map<string, FieldType>();
   // Track all possible types a field can have (across different execution paths)
   const potentialFieldTypes = new Map<string, Set<FieldType>>();
-  // Initialize potential types with initial types
-  for (const [field, type] of initialTypes) {
-    potentialFieldTypes.set(field, new Set([type]));
-  }
   const errors: StreamlangValidationError[] = [];
   // Track field types available at each processor (BEFORE the processor runs)
   const fieldTypesByProcessor = new Map<string, FieldTypeMap>();
@@ -526,7 +518,7 @@ function trackFieldTypesAndValidate(
           if (typeModifier) {
             if (['int', 'long', 'float', 'double'].includes(typeModifier)) {
               occurrenceType = 'number';
-            } else if (['boolean', 'bool'].includes(typeModifier)) {
+            } else if (typeModifier === 'boolean') {
               occurrenceType = 'boolean';
             } else {
               occurrenceType = 'string';
@@ -638,21 +630,6 @@ function trackFieldTypesAndValidate(
 }
 
 /**
- * Track field types through the DSL pipeline (convenience wrapper).
- * This function builds a map of field names to their types by analyzing each processor.
- *
- * @param flattenedSteps - The flattened processor steps
- * @param initialTypes - Initial field types (e.g., from parent stream)
- * @returns Map of field names to their inferred types
- */
-export function trackFieldTypes(
-  flattenedSteps: StreamlangProcessorDefinition[],
-  initialTypes: FieldTypeMap = new Map()
-): FieldTypeMap {
-  return trackFieldTypesAndValidate(flattenedSteps, initialTypes).fieldTypes;
-}
-
-/**
  * Validates a Streamlang DSL for wired stream requirements, reserved field usage, and type safety.
  *
  * This validates that:
@@ -677,7 +654,7 @@ export function validateStreamlang(
   const flattenedSteps = flattenSteps(streamlangDSL.steps);
 
   // Track field types and validate type usage
-  const typeResult = trackFieldTypesAndValidate(flattenedSteps, new Map());
+  const typeResult = trackFieldTypesAndValidate(flattenedSteps);
   // Add type validation errors
   errors.push(...typeResult.errors);
   // Capture field types at each processor
