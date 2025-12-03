@@ -55,6 +55,21 @@ interface APMError {
   traceId: string | undefined;
 }
 
+interface APMErrorSample {
+  processor?: {
+    event?: string;
+  };
+  error?: {
+    id?: string;
+    culprit?: string;
+    grouping_key?: string;
+    exception?: Array<{ type?: string }>;
+  };
+  trace?: {
+    id?: string;
+  };
+}
+
 export interface ObservabilityAgentDataRegistryTypes {
   apmErrors: (params: {
     request: KibanaRequest;
@@ -63,6 +78,16 @@ export interface ObservabilityAgentDataRegistryTypes {
     start: string;
     end: string;
   }) => Promise<APMError[]>;
+
+  apmErrorById: (params: {
+    request: KibanaRequest;
+    errorId: string;
+    serviceName: string;
+    serviceEnvironment: string;
+    start: number;
+    end: number;
+    kuery?: string;
+  }) => Promise<APMErrorSample | undefined>;
 
   apmServiceSummary: (params: {
     request: KibanaRequest;

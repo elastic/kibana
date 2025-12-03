@@ -10,6 +10,7 @@ import { getRandomSampler } from '../lib/helpers/get_random_sampler';
 import { getApmServiceSummary } from '../routes/assistant_functions/get_apm_service_summary';
 import { getApmDownstreamDependencies } from '../routes/assistant_functions/get_apm_downstream_dependencies';
 import { getApmErrors } from '../routes/assistant_functions/get_observability_alert_details_context/get_apm_errors';
+import { getErrorSampleDetails } from '../routes/errors/get_error_groups/get_error_sample_details';
 import {
   getExitSpanChangePoints,
   getServiceChangePoints,
@@ -83,6 +84,25 @@ export function registerDataProviders({
     async ({ request, serviceName, serviceEnvironment, start, end }) => {
       const { apmEventClient } = await buildApmToolResources({ core, plugins, request, logger });
       return getApmErrors({ apmEventClient, serviceName, serviceEnvironment, start, end });
+    }
+  );
+
+  observabilityAgent.registerDataProvider(
+    'apmErrorById',
+    async ({ request, errorId, serviceName, serviceEnvironment, start, end, kuery = '' }) => {
+      const { apmEventClient } = await buildApmToolResources({ core, plugins, request, logger });
+
+      const { error } = await getErrorSampleDetails({
+        apmEventClient,
+        errorId,
+        serviceName,
+        start,
+        end,
+        environment: serviceEnvironment ?? '',
+        kuery,
+      });
+
+      return error;
     }
   );
 

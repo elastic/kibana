@@ -43,7 +43,6 @@ import { timeRangeMetadataRoute } from '../time_range_metadata/route';
 import { traceRouteRepository } from '../traces/route';
 import { transactionRouteRepository } from '../transactions/route';
 import { spanLatencyDistributionRouteRepository } from '../span_latency_distribution/route';
-import { observabilityAgentBuilderRouteRepository } from '../agent_builder/route';
 
 function getTypedGlobalApmServerRouteRepository() {
   const repository = {
@@ -84,7 +83,6 @@ function getTypedGlobalApmServerRouteRepository() {
     ...profilingRouteRepository,
     ...profilingHostsRouteRepository,
     ...serviceDashboardsRouteRepository,
-    ...observabilityAgentBuilderRouteRepository,
   };
 
   return repository;

@@ -15,7 +15,7 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import { getIsObservabilityAgentEnabled } from '../../../../../common/agent_builder/get_is_obs_agent_enabled';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { type APIReturnType, callApmApi } from '../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 
 export function ErrorSampleAgentBuilderAiInsight({
   error,
@@ -52,9 +52,10 @@ export function ErrorSampleAgentBuilderAiInsight({
 
     setIsLoading(true);
     try {
-      const response = await callApmApi('POST /internal/apm/agent_builder/ai_insights/error', {
-        params: {
-          body: {
+      const response = await core.http.post<{ summary: string; context: string }>(
+        '/internal/observability_agent_builder/ai_insights/error',
+        {
+          body: JSON.stringify({
             serviceName: error.service.name,
             errorId: error.error.id,
             start,
@@ -62,13 +63,12 @@ export function ErrorSampleAgentBuilderAiInsight({
             environment,
             kuery,
             connectorId: selectedConnector ?? defaultConnectorId ?? '',
-          },
-        },
-        signal: null,
-      });
+          }),
+        }
+      );
 
       setSummary(response?.summary ?? '');
-      setContext(response?.context);
+      setContext(response?.context ?? '');
     } catch (e) {
       setSummary('');
       setContext('');
@@ -83,7 +83,6 @@ export function ErrorSampleAgentBuilderAiInsight({
     }
 
     const serviceName = error.service.name;
-    // context and summary now come from the API response
 
     return [
       {
