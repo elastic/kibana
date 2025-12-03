@@ -9,7 +9,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { StepContext } from '@kbn/workflows';
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition, InferStepInput, InferStepOutput } from '../../common';
 
 /**
