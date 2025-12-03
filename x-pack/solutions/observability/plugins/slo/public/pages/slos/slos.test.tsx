@@ -16,20 +16,26 @@ import React from 'react';
 import Router from 'react-router-dom';
 import { paths } from '../../../common/locators/paths';
 import { historicalSummaryData } from '../../data/slo/historical_summary_data';
-import { emptySloList, sloList } from '../../data/slo/slo';
+import {
+  emptySloDefinitionList,
+  emptySloList,
+  sloDefinitionList,
+  sloList,
+} from '../../data/slo/slo';
 import { useCreateDataView } from '../../hooks/use_create_data_view';
 import { useCreateSlo } from '../../hooks/use_create_slo';
 import { useDeleteSlo } from '../../hooks/use_delete_slo';
 import { useDeleteSloInstance } from '../../hooks/use_delete_slo_instance';
 import { useFetchHistoricalSummary } from '../../hooks/use_fetch_historical_summary';
+import { useFetchSloDefinitions } from '../../hooks/use_fetch_slo_definitions';
 import { useFetchSloList } from '../../hooks/use_fetch_slo_list';
+import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
 import { usePermissions } from '../../hooks/use_permissions';
-import { useKibana } from '../../hooks/use_kibana';
 import { render } from '../../utils/test_helper';
+import { transformSloToCloneState } from '../slo_edit/helpers/transform_slo_to_clone_state';
 import { useGetSettings } from '../slo_settings/hooks/use_get_settings';
 import { SlosPage } from './slos';
-import { transformSloToCloneState } from '../slo_edit/helpers/transform_slo_to_clone_state';
 
 const mockHistoryReplace = jest.fn();
 const mockUseHistory = jest.fn();
@@ -44,6 +50,7 @@ jest.mock('@kbn/observability-shared-plugin/public');
 jest.mock('../../hooks/use_kibana');
 jest.mock('../../hooks/use_license');
 jest.mock('../../hooks/use_fetch_slo_list');
+jest.mock('../../hooks/use_fetch_slo_definitions');
 jest.mock('../../hooks/use_create_slo');
 jest.mock('../slo_settings/hooks/use_get_settings');
 jest.mock('../../hooks/use_delete_slo');
@@ -57,6 +64,7 @@ const useGetSettingsMock = useGetSettings as jest.Mock;
 const useKibanaMock = useKibana as jest.Mock;
 const useLicenseMock = useLicense as jest.Mock;
 const useFetchSloListMock = useFetchSloList as jest.Mock;
+const useFetchSloDefinitionsMock = useFetchSloDefinitions as jest.Mock;
 const useCreateSloMock = useCreateSlo as jest.Mock;
 const useDeleteSloMock = useDeleteSlo as jest.Mock;
 const useDeleteSloInstanceMock = useDeleteSloInstance as jest.Mock;
@@ -195,6 +203,11 @@ describe('SLOs Page', () => {
   describe('when the incorrect license is found', () => {
     beforeEach(() => {
       useFetchSloListMock.mockReturnValue({ isLoading: false, data: emptySloList });
+      useFetchSloDefinitionsMock.mockReturnValue({
+        isLoading: false,
+        data: emptySloDefinitionList,
+      });
+      useFetchSloListMock.mockReturnValue({ isLoading: false, sloList: emptySloList });
       useLicenseMock.mockReturnValue({ hasAtLeast: () => false });
       useFetchHistoricalSummaryMock.mockReturnValue({
         isLoading: false,
@@ -219,6 +232,10 @@ describe('SLOs Page', () => {
     });
 
     it('redirects to the SLOs Welcome Page when the API has finished loading and there are no results', async () => {
+      useFetchSloDefinitionsMock.mockReturnValue({
+        isLoading: false,
+        data: emptySloDefinitionList,
+      });
       useFetchSloListMock.mockReturnValue({ isLoading: false, data: emptySloList });
       useFetchHistoricalSummaryMock.mockReturnValue({
         isLoading: false,
@@ -235,6 +252,7 @@ describe('SLOs Page', () => {
     });
 
     it('redirects to the SLOs Welcome Page when the user does not have the required read permissions', async () => {
+      useFetchSloDefinitionsMock.mockReturnValue({ isLoading: false, data: sloDefinitionList });
       useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
       useFetchHistoricalSummaryMock.mockReturnValue({
         isLoading: false,
@@ -255,6 +273,7 @@ describe('SLOs Page', () => {
     });
 
     it('should have a create new SLO button', async () => {
+      useFetchSloDefinitionsMock.mockReturnValue({ isLoading: false, data: sloDefinitionList });
       useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
       useFetchHistoricalSummaryMock.mockReturnValue({
         isLoading: false,
@@ -270,6 +289,7 @@ describe('SLOs Page', () => {
 
     describe('when API has returned results', () => {
       it('renders the SLO list with SLO items', async () => {
+        useFetchSloDefinitionsMock.mockReturnValue({ isLoading: false, data: sloDefinitionList });
         useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
 
         useFetchHistoricalSummaryMock.mockReturnValue({
@@ -293,6 +313,7 @@ describe('SLOs Page', () => {
       });
 
       it('allows editing an SLO', async () => {
+        useFetchSloDefinitionsMock.mockReturnValue({ isLoading: false, data: sloDefinitionList });
         useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
 
         useFetchHistoricalSummaryMock.mockReturnValue({
@@ -327,6 +348,7 @@ describe('SLOs Page', () => {
       });
 
       it('allows creating a new rule for an SLO', async () => {
+        useFetchSloDefinitionsMock.mockReturnValue({ isLoading: false, data: sloDefinitionList });
         useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
 
         useFetchHistoricalSummaryMock.mockReturnValue({
@@ -361,6 +383,7 @@ describe('SLOs Page', () => {
       });
 
       it('allows managing rules for an SLO', async () => {
+        useFetchSloDefinitionsMock.mockReturnValue({ isLoading: false, data: sloDefinitionList });
         useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
 
         useFetchHistoricalSummaryMock.mockReturnValue({
@@ -395,6 +418,7 @@ describe('SLOs Page', () => {
       });
 
       it('allows deleting an SLO', async () => {
+        useFetchSloDefinitionsMock.mockReturnValue({ isLoading: false, data: sloDefinitionList });
         useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
 
         useFetchHistoricalSummaryMock.mockReturnValue({
@@ -437,6 +461,7 @@ describe('SLOs Page', () => {
       });
 
       it('allows cloning an SLO', async () => {
+        useFetchSloDefinitionsMock.mockReturnValue({ isLoading: false, data: sloDefinitionList });
         useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
 
         useFetchHistoricalSummaryMock.mockReturnValue({

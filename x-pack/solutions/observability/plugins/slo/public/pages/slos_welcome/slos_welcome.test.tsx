@@ -6,18 +6,18 @@
  */
 
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
+import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { screen, waitFor, act } from '@testing-library/react';
 import React from 'react';
 import Router from 'react-router-dom';
 import { paths } from '../../../common/locators/paths';
-import { emptySloList, sloList } from '../../data/slo/slo';
-import { usePermissions } from '../../hooks/use_permissions';
-import { useFetchSloList } from '../../hooks/use_fetch_slo_list';
-import { useLicense } from '../../hooks/use_license';
+import { emptySloDefinitionList, sloDefinitionList } from '../../data/slo/slo';
+import { useFetchSloDefinitions } from '../../hooks/use_fetch_slo_definitions';
 import { useKibana } from '../../hooks/use_kibana';
+import { useLicense } from '../../hooks/use_license';
+import { usePermissions } from '../../hooks/use_permissions';
 import { render } from '../../utils/test_helper';
 import { SlosWelcomePage } from './slos_welcome';
-import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 
 const mockHistoryReplace = jest.fn();
 const mockUseHistory = jest.fn();
@@ -32,6 +32,7 @@ jest.mock('@kbn/observability-shared-plugin/public');
 jest.mock('../../hooks/use_kibana');
 jest.mock('../../hooks/use_license');
 jest.mock('../../hooks/use_fetch_slo_list');
+jest.mock('../../hooks/use_fetch_slo_definitions');
 jest.mock('../../hooks/use_permissions');
 
 const HeaderMenuPortalMock = HeaderMenuPortal as jest.Mock;
@@ -39,7 +40,7 @@ HeaderMenuPortalMock.mockReturnValue(<div>Portal node</div>);
 
 const useKibanaMock = useKibana as jest.Mock;
 const useLicenseMock = useLicense as jest.Mock;
-const useFetchSloListMock = useFetchSloList as jest.Mock;
+const useFetchSloDefinitionsMock = useFetchSloDefinitions as jest.Mock;
 const usePermissionsMock = usePermissions as jest.Mock;
 
 const mockNavigate = jest.fn();
@@ -89,7 +90,10 @@ describe('SLOs Welcome Page', () => {
 
   describe('when the incorrect license is found', () => {
     it('renders the welcome message with subscription buttons', async () => {
-      useFetchSloListMock.mockReturnValue({ isLoading: false, data: emptySloList });
+      useFetchSloDefinitionsMock.mockReturnValue({
+        isLoading: false,
+        data: emptySloDefinitionList,
+      });
       useLicenseMock.mockReturnValue({ hasAtLeast: () => false });
       usePermissionsMock.mockReturnValue({
         isLoading: false,
@@ -103,9 +107,9 @@ describe('SLOs Welcome Page', () => {
         render(<SlosWelcomePage />);
       });
 
-      expect(screen.queryByTestId('slosPageWelcomePrompt')).toBeTruthy();
-      expect(screen.queryByTestId('slosPageWelcomePromptSignupForCloudButton')).toBeTruthy();
-      expect(screen.queryByTestId('slosPageWelcomePromptSignupForLicenseButton')).toBeTruthy();
+      expect(screen.queryByTestId('sloWelcomePage')).toBeTruthy();
+      expect(screen.queryByTestId('sloWelcomePageSignupForCloudButton')).toBeTruthy();
+      expect(screen.queryByTestId('sloWelcomePageSignupForLicenseButton')).toBeTruthy();
     });
   });
 
@@ -123,7 +127,10 @@ describe('SLOs Welcome Page', () => {
 
     describe('when loading is done and no results are found', () => {
       beforeEach(() => {
-        useFetchSloListMock.mockReturnValue({ isLoading: false, data: emptySloList });
+        useFetchSloDefinitionsMock.mockReturnValue({
+          isLoading: false,
+          data: emptySloDefinitionList,
+        });
       });
 
       it('disables the create slo button when no write capabilities', async () => {
@@ -139,7 +146,7 @@ describe('SLOs Welcome Page', () => {
           render(<SlosWelcomePage />);
         });
 
-        expect(screen.queryByTestId('slosPageWelcomePrompt')).toBeTruthy();
+        expect(screen.queryByTestId('sloWelcomePage')).toBeTruthy();
 
         const createNewSloButton = screen.queryByTestId('o11ySloListWelcomePromptCreateSloButton');
 
@@ -158,7 +165,7 @@ describe('SLOs Welcome Page', () => {
         await act(async () => {
           render(<SlosWelcomePage />);
         });
-        expect(screen.queryByTestId('slosPageWelcomePrompt')).toBeTruthy();
+        expect(screen.queryByTestId('sloWelcomePage')).toBeTruthy();
 
         const createNewSloButton = screen.queryByTestId('o11ySloListWelcomePromptCreateSloButton');
         expect(createNewSloButton).toBeDisabled();
@@ -176,7 +183,7 @@ describe('SLOs Welcome Page', () => {
         await act(async () => {
           render(<SlosWelcomePage />);
         });
-        expect(screen.queryByTestId('slosPageWelcomePrompt')).toBeTruthy();
+        expect(screen.queryByTestId('sloWelcomePage')).toBeTruthy();
 
         const createNewSloButton = screen.queryByTestId('o11ySloListWelcomePromptCreateSloButton');
         expect(createNewSloButton).toBeTruthy();
@@ -193,7 +200,7 @@ describe('SLOs Welcome Page', () => {
 
     describe('when loading is done and results are found', () => {
       beforeEach(() => {
-        useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
+        useFetchSloDefinitionsMock.mockReturnValue({ isLoading: false, data: sloDefinitionList });
         usePermissionsMock.mockReturnValue({
           isLoading: false,
           data: {
@@ -203,11 +210,10 @@ describe('SLOs Welcome Page', () => {
         });
       });
 
-      it('should redirect to the SLO List page using history.replace', async () => {
+      it('should navigate to the SLO List page', async () => {
         await act(async () => {
           render(<SlosWelcomePage />);
         });
-
         await waitFor(() => {
           expect(mockHistoryReplace).toHaveBeenCalledWith('/');
         });
