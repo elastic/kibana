@@ -80,7 +80,7 @@ export function createEsqlEquivalenceEvaluator({
           if (isLastAttempt) {
             log.error(
               new Error(
-                `Failed to retrieve groundedness analysis after ${error.attemptNumber} attempts (no valid tool call or malformed response)`,
+                `Failed to retrieve ES|QL equivalence analysis after ${error.attemptNumber} attempts (no valid tool call or malformed response)`,
                 {
                   cause: error,
                 }
@@ -89,7 +89,7 @@ export function createEsqlEquivalenceEvaluator({
           } else {
             log.warning(
               new Error(
-                `Groundedness analysis returned an invalid or missing tool call on attempt ${error.attemptNumber}; retrying...`,
+                `ES|QL equivalence analysis returned an invalid or missing tool call on attempt ${error.attemptNumber}; retrying...`,
                 {
                   cause: error,
                 }
