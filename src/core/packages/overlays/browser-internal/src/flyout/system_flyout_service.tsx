@@ -37,6 +37,7 @@ interface SystemFlyoutStartDeps {
 export class SystemFlyoutService {
   private targetDomElement: Element | null = null;
   private activeFlyouts = new Map<string, SystemFlyoutRef>();
+  private idCounter = 0;
 
   public start({
     analytics,
@@ -52,7 +53,7 @@ export class SystemFlyoutService {
         content: React.ReactElement,
         { session = 'start', title, ...options }: OverlaySystemFlyoutOpenOptions = {}
       ): OverlayRef => {
-        const flyoutId = `system-flyout-${Date.now()}`;
+        const flyoutId = `system-flyout-${++this.idCounter}`;
 
         // Create a container for this flyout within the main React tree
         const flyoutContainer = document.createElement('div');

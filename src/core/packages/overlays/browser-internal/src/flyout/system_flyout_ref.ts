@@ -19,6 +19,7 @@ export class SystemFlyoutRef implements OverlayRef {
   public readonly onClose: Promise<void>;
   private closeSubject = new Subject<void>();
   private container: HTMLElement;
+  private isClosed = false;
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -26,7 +27,8 @@ export class SystemFlyoutRef implements OverlayRef {
   }
 
   public close(): Promise<void> {
-    if (!this.closeSubject.closed) {
+    if (!this.isClosed) {
+      this.isClosed = true;
       unmountComponentAtNode(this.container);
       this.container.remove();
 
