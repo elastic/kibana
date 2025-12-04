@@ -13,11 +13,13 @@ import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
 import type { FlattenRecord } from '@kbn/streams-schema';
+import { validationErrorTypeLabels } from '@kbn/streamlang';
 import {
   useSimulatorSelector,
   useStreamEnrichmentSelector,
   useStreamEnrichmentEvents,
 } from './state_management/stream_enrichment_state_machine';
+import { selectValidationErrors } from './state_management/stream_enrichment_state_machine/selectors';
 import { hasValidMessageFieldsForSuggestion } from './utils';
 import { NoStepsEmptyPrompt } from './empty_prompts';
 import { RootSteps } from './steps/root_steps';
@@ -29,38 +31,20 @@ import { SuggestPipelineLoadingPrompt } from './pipeline_suggestions/suggest_pip
 import { SuggestPipelinePanel } from './pipeline_suggestions/suggest_pipeline_panel';
 import { getActiveDataSourceRef } from './state_management/stream_enrichment_state_machine/utils';
 
-export const StepsEditor = React.memo(() => {
-  const stepRefs = useStreamEnrichmentSelector((state) => state.context.stepRefs);
+interface ErrorPanelsProps {
+  showBottomBar: boolean;
+}
+
+const ErrorPanels = React.memo<ErrorPanelsProps>(({ showBottomBar }) => {
   const simulation = useSimulatorSelector((snapshot) => snapshot.context.simulation);
-  const samples = useSimulatorSelector((snapshot) => snapshot.context.samples);
-  const isLoadingSamples = useStreamEnrichmentSelector((state) =>
-    getActiveDataSourceRef(state.context.dataSourcesRefs)
-      ?.getSnapshot()
-      .matches({ enabled: 'loadingData' })
+
+  const validationErrors = useStreamEnrichmentSelector((state) =>
+    selectValidationErrors(state.context)
   );
 
-  // Pipeline suggestion state
-  const isLoadingSuggestion = useStreamEnrichmentSelector((snapshot) =>
-    snapshot.matches({ ready: { enrichment: { pipelineSuggestion: 'generatingSuggestion' } } })
-  );
-  const suggestedPipeline = useStreamEnrichmentSelector(
-    (snapshot) => snapshot.context.suggestedPipeline
-  );
-  const isViewingSuggestion = useStreamEnrichmentSelector((snapshot) =>
-    snapshot.matches({ ready: { enrichment: { pipelineSuggestion: 'viewingSuggestion' } } })
-  );
-
-  // Pipeline suggestion events
-  const { suggestPipeline, clearSuggestedSteps, cancelSuggestion, acceptSuggestion } =
-    useStreamEnrichmentEvents();
-
-  // Check if samples have valid message fields for pipeline suggestion
-  const hasValidMessageFields = useMemo(() => {
-    const flattenedSamples = samples.map(
-      (sample) => flattenObjectNestedLast(sample.document) as FlattenRecord
-    );
-    return hasValidMessageFieldsForSuggestion(flattenedSamples);
-  }, [samples]);
+  const allValidationErrors = useMemo(() => {
+    return Array.from(validationErrors.values()).flat();
+  }, [validationErrors]);
 
   const errors = useMemo(() => {
     if (!simulation) {
@@ -91,74 +75,57 @@ export const StepsEditor = React.memo(() => {
     };
   }, [simulation]);
 
-  const hasSteps = !isEmpty(stepRefs);
+  const hasValidationErrors = !isEmpty(allValidationErrors);
+  const hasSimulationErrors =
+    !isEmpty(errors.ignoredFields) || !isEmpty(errors.mappingFailures) || errors.definition_error;
+  const hasAnyErrors = hasValidationErrors || hasSimulationErrors;
 
-  const aiFeatures = useAIFeatures();
-  const {
-    definition: { stream },
-  } = useStreamDetail();
-
-  const canUsePipelineSuggestions = aiFeatures && aiFeatures.enabled && hasValidMessageFields;
-  const canUsePipelineSuggestionsPending = !aiFeatures || (aiFeatures.enabled && isLoadingSamples);
-
-  if (aiFeatures && aiFeatures.enabled) {
-    if (isLoadingSuggestion) {
-      return (
-        <SuggestPipelineLoadingPrompt
-          onCancel={() => {
-            cancelSuggestion();
-          }}
-        />
-      );
-    }
-
-    if (suggestedPipeline && isViewingSuggestion) {
-      return (
-        <PipelineSuggestion
-          aiFeatures={aiFeatures}
-          onAccept={() => {
-            // Just hide the suggestion panel, keep the steps
-            acceptSuggestion();
-          }}
-          onDismiss={() => {
-            // Remove suggested steps and hide panel
-            clearSuggestedSteps();
-          }}
-          onRegenerate={(connectorId) => {
-            // Remove current suggested steps before regenerating
-            clearSuggestedSteps();
-            suggestPipeline({ connectorId, streamName: stream.name });
-          }}
-        />
-      );
-    }
+  if (!hasAnyErrors) {
+    return null;
   }
 
   return (
-    <>
-      {hasSteps ? (
-        <RootSteps stepRefs={stepRefs} />
-      ) : // hold off rendering empty prompt while there is a chance we will show the pipeline suggestion prompt
-      !canUsePipelineSuggestions && canUsePipelineSuggestionsPending ? null : (
-        <NoStepsEmptyPrompt>
-          {canUsePipelineSuggestions && (
-            <SuggestPipelinePanel>
-              <GenerateSuggestionButton
-                aiFeatures={aiFeatures}
-                isLoading={isLoadingSuggestion}
-                onClick={(connectorId) => suggestPipeline({ connectorId, streamName: stream.name })}
-              >
-                {i18n.translate('xpack.streams.stepsEditor.suggestPipelineButtonLabel', {
-                  defaultMessage: 'Suggest a pipeline',
-                })}
-              </GenerateSuggestionButton>
-            </SuggestPipelinePanel>
-          )}
-        </NoStepsEmptyPrompt>
+    <div
+      css={css`
+        ${showBottomBar ? 'margin-bottom: 30px;' : ''}
+      `}
+    >
+      {hasValidationErrors && (
+        <EuiPanel paddingSize="m" hasShadow={false} grow={false}>
+          <EuiPanel paddingSize="s" hasShadow={false} grow={false} color="danger">
+            <EuiAccordion
+              id="validation-errors-accordion"
+              initialIsOpen
+              buttonContent={
+                <strong>
+                  {i18n.translate(
+                    'xpack.streams.streamDetailView.managementTab.enrichment.validationErrors.title',
+                    {
+                      defaultMessage:
+                        '{count, plural, one {# validation error} other {# validation errors}}',
+                      values: { count: allValidationErrors.length },
+                    }
+                  )}
+                </strong>
+              }
+            >
+              <EuiText size="s">
+                <ul>
+                  {allValidationErrors.map((error, idx) => {
+                    const errorTypeLabel = validationErrorTypeLabels[error.type];
+                    return (
+                      <li key={idx}>
+                        <strong>{errorTypeLabel}:</strong> {error.message}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </EuiText>
+            </EuiAccordion>
+          </EuiPanel>
+        </EuiPanel>
       )}
-      {(!isEmpty(errors.ignoredFields) ||
-        !isEmpty(errors.mappingFailures) ||
-        errors.definition_error) && (
+      {hasSimulationErrors && (
         <EuiPanel paddingSize="m" hasShadow={false} grow={false}>
           {errors.definition_error && (
             <EuiPanel paddingSize="s" hasShadow={false} grow={false} color="danger">
@@ -191,7 +158,7 @@ export const StepsEditor = React.memo(() => {
                   <p>
                     <FormattedMessage
                       id="xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.fieldsList"
-                      defaultMessage="Some fields are malformed and won’t be stored correctly: {fields}"
+                      defaultMessage="Some fields are malformed and won't be stored correctly: {fields}"
                       values={{
                         fields: errors.ignoredFields.map((field) => (
                           <>
@@ -257,6 +224,111 @@ export const StepsEditor = React.memo(() => {
           )}
         </EuiPanel>
       )}
+    </div>
+  );
+});
+
+export const StepsEditor = React.memo(() => {
+  const stepRefs = useStreamEnrichmentSelector((state) => state.context.stepRefs);
+  const samples = useSimulatorSelector((snapshot) => snapshot.context.samples);
+  const isLoadingSamples = useStreamEnrichmentSelector((state) =>
+    getActiveDataSourceRef(state.context.dataSourcesRefs)
+      ?.getSnapshot()
+      .matches({ enabled: 'loadingData' })
+  );
+
+  // Pipeline suggestion state
+  const isLoadingSuggestion = useStreamEnrichmentSelector((snapshot) =>
+    snapshot.matches({ ready: { enrichment: { pipelineSuggestion: 'generatingSuggestion' } } })
+  );
+  const suggestedPipeline = useStreamEnrichmentSelector(
+    (snapshot) => snapshot.context.suggestedPipeline
+  );
+  const isViewingSuggestion = useStreamEnrichmentSelector((snapshot) =>
+    snapshot.matches({ ready: { enrichment: { pipelineSuggestion: 'viewingSuggestion' } } })
+  );
+
+  // Pipeline suggestion events
+  const { suggestPipeline, clearSuggestedSteps, cancelSuggestion, acceptSuggestion } =
+    useStreamEnrichmentEvents();
+
+  // Check if samples have valid message fields for pipeline suggestion
+  const hasValidMessageFields = useMemo(() => {
+    const flattenedSamples = samples.map(
+      (sample) => flattenObjectNestedLast(sample.document) as FlattenRecord
+    );
+    return hasValidMessageFieldsForSuggestion(flattenedSamples);
+  }, [samples]);
+
+  const hasSteps = !isEmpty(stepRefs);
+  const canUpdate = useStreamEnrichmentSelector((state) => state.can({ type: 'stream.update' }));
+  const isSimulating = useSimulatorSelector((state) => state.matches('runningSimulation'));
+  const hasChanges = canUpdate && !isSimulating;
+
+  const aiFeatures = useAIFeatures();
+  const {
+    definition: { stream },
+  } = useStreamDetail();
+
+  const canUsePipelineSuggestions = aiFeatures && aiFeatures.enabled && hasValidMessageFields;
+  const canUsePipelineSuggestionsPending = !aiFeatures || (aiFeatures.enabled && isLoadingSamples);
+
+  if (aiFeatures && aiFeatures.enabled) {
+    if (isLoadingSuggestion) {
+      return (
+        <SuggestPipelineLoadingPrompt
+          onCancel={() => {
+            cancelSuggestion();
+          }}
+        />
+      );
+    }
+
+    if (suggestedPipeline && isViewingSuggestion) {
+      return (
+        <PipelineSuggestion
+          aiFeatures={aiFeatures}
+          onAccept={() => {
+            // Just hide the suggestion panel, keep the steps
+            acceptSuggestion();
+          }}
+          onDismiss={() => {
+            // Remove suggested steps and hide panel
+            clearSuggestedSteps();
+          }}
+          onRegenerate={(connectorId) => {
+            // Remove current suggested steps before regenerating
+            clearSuggestedSteps();
+            suggestPipeline({ connectorId, streamName: stream.name });
+          }}
+        />
+      );
+    }
+  }
+
+  return (
+    <>
+      {hasSteps ? (
+        <RootSteps stepRefs={stepRefs} />
+      ) : // hold off rendering empty prompt while there is a chance we will show the pipeline suggestion prompt
+      !canUsePipelineSuggestions && canUsePipelineSuggestionsPending ? null : (
+        <NoStepsEmptyPrompt>
+          {canUsePipelineSuggestions && (
+            <SuggestPipelinePanel>
+              <GenerateSuggestionButton
+                aiFeatures={aiFeatures}
+                isLoading={isLoadingSuggestion}
+                onClick={(connectorId) => suggestPipeline({ connectorId, streamName: stream.name })}
+              >
+                {i18n.translate('xpack.streams.stepsEditor.suggestPipelineButtonLabel', {
+                  defaultMessage: 'Suggest a pipeline',
+                })}
+              </GenerateSuggestionButton>
+            </SuggestPipelinePanel>
+          )}
+        </NoStepsEmptyPrompt>
+      )}
+      <ErrorPanels showBottomBar={hasChanges} />
     </>
   );
 });
