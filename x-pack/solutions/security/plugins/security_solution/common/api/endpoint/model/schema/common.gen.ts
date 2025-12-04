@@ -78,7 +78,19 @@ export const SortDirectionEnum = SortDirection.enum;
  * Determines which field is used to sort the results.
  */
 export type SortField = z.infer<typeof SortField>;
-export const SortField = z.string();
+export const SortField = z.enum([
+  'enrolled_at',
+  'metadata.host.hostname',
+  'host_status',
+  'metadata.Endpoint.policy.applied.name',
+  'metadata.Endpoint.policy.applied.status',
+  'metadata.host.os.name',
+  'metadata.host.ip',
+  'metadata.agent.version',
+  'last_checkin',
+]);
+export type SortFieldEnum = typeof SortField.enum;
+export const SortFieldEnum = SortField.enum;
 
 /**
  * A list of agent IDs. Max of 50.

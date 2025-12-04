@@ -170,6 +170,10 @@ import type {
   EndpointGetActionsStatusResponse,
 } from './endpoint/actions/status/status.gen';
 import type {
+  GetEndpointMetadataListRequestQueryInput,
+  GetEndpointMetadataListResponse,
+} from './endpoint/metadata/get_metadata.gen';
+import type {
   GetPolicyResponseRequestQueryInput,
   GetPolicyResponseResponse,
 } from './endpoint/policy/policy_response.gen';
@@ -1731,6 +1735,20 @@ finalize it.
     return this.kbnClient
       .request<GetDraftTimelinesResponse>({
         path: '/api/timeline/_draft',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async getEndpointMetadataList(props: GetEndpointMetadataListProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetEndpointMetadataList`);
+    return this.kbnClient
+      .request<GetEndpointMetadataListResponse>({
+        path: '/api/endpoint/metadata',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -3411,6 +3429,9 @@ export interface GetDashboardMigrationStatsProps {
 }
 export interface GetDraftTimelinesProps {
   query: GetDraftTimelinesRequestQueryInput;
+}
+export interface GetEndpointMetadataListProps {
+  query: GetEndpointMetadataListRequestQueryInput;
 }
 export interface GetEndpointSuggestionsProps {
   params: GetEndpointSuggestionsRequestParamsInput;
