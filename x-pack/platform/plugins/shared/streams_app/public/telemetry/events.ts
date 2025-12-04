@@ -23,6 +23,7 @@ import {
   STREAMS_FEATURE_IDENTIFICATION_SAVED_EVENT_TYPE,
   STREAMS_FEATURE_IDENTIFICATION_DELETED_EVENT_TYPE,
   STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE,
+  STREAMS_PROCESSING_SIMULATION_SAMPLES_FETCH_LATENCY_EVENT_TYPE,
 } from './constants';
 import {
   streamsAIGrokSuggestionAcceptedSchema,
@@ -42,6 +43,7 @@ import {
   streamsFeatureIdentificationSavedSchema,
   streamsFeatureIdentificationDeletedSchema,
   streamsDescriptionGeneratedSchema,
+  streamsProcessingSimulationSamplesFetchLatencySchema,
 } from './schemas';
 
 const streamsAttachmentCountEventType = {
@@ -129,6 +131,11 @@ const wiredStreamsStatusChangedEventType = {
   schema: wiredStreamsStatusChangedSchema,
 };
 
+const streamsProcessingSimulationSamplesFetchLatencyEventType = {
+  eventType: STREAMS_PROCESSING_SIMULATION_SAMPLES_FETCH_LATENCY_EVENT_TYPE,
+  schema: streamsProcessingSimulationSamplesFetchLatencySchema,
+};
+
 export {
   streamsAttachmentCountEventType,
   streamsAttachmentClickEventType,
@@ -147,4 +154,5 @@ export {
   streamsFeatureIdentificationSavedEventType,
   streamsFeatureIdentificationDeletedEventType,
   streamsDescriptionGeneratedEventType,
+  streamsProcessingSimulationSamplesFetchLatencyEventType,
 };

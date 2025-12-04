@@ -257,6 +257,9 @@ describe('mappingFromFieldMap', () => {
                 last_detected: {
                   type: 'date',
                 },
+                muted: {
+                  type: 'boolean',
+                },
                 pending_recovered_count: {
                   type: 'long',
                 },
