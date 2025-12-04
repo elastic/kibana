@@ -105,7 +105,7 @@ export function StreamDetailView() {
                 <LifecycleBadge lifecycle={definition.effective_lifecycle} />
               </EuiBadgeGroup>
             </EuiFlexGroup>
-            <FeedbackButton />
+            <FeedbackButton />           
           </EuiFlexGroup>
         }
         tabs={Object.entries(tabs ?? {}).map(([tabName, { label, href }]) => {

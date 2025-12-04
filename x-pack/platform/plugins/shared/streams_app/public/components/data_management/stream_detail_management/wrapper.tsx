@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiPageHeader, useEuiTheme, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiPageHeader, useEuiTheme, EuiFlexItem, EuiButton } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 import { Streams } from '@kbn/streams-schema';
@@ -106,7 +106,7 @@ export function Wrapper({
           <EuiFlexGroup
             direction="row"
             gutterSize="s"
-            alignItems="baseline"
+            alignItems="center"
             justifyContent="spaceBetween"
             wrap
           >
@@ -115,9 +115,7 @@ export function Wrapper({
               <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
                 <EuiFlexItem grow={true}>
                   <EuiFlexGroup alignItems="center" gutterSize="s">
-                    {Streams.ingest.all.GetResponse.is(definition) && (
-                      <DiscoverBadgeButton definition={definition} />
-                    )}
+    
                     {Streams.ClassicStream.GetResponse.is(definition) && <ClassicStreamBadge />}
                     {Streams.WiredStream.GetResponse.is(definition) && <WiredStreamBadge />}
                     {Streams.ingest.all.GetResponse.is(definition) && (
@@ -139,6 +137,9 @@ export function Wrapper({
                 )}
               </EuiFlexGroup>
             </EuiFlexGroup>
+            {Streams.ingest.all.GetResponse.is(definition) && (
+              <DiscoverBadgeButton definition={definition} />
+            )}
             <FeedbackButton />
           </EuiFlexGroup>
         }
