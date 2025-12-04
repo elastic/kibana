@@ -6,11 +6,11 @@
  */
 
 import type {
-  CatIndicesIndicesRecord,
   IndicesGetDataStreamResponse,
   IndicesStatsIndicesStats,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { getDataStreamsMeteringStats } from '@kbn/dataset-quality-plugin/server/routes/data_streams/get_data_streams_metering_stats';
 import type { StreamDocsStat } from '../../../../common';
 
 /**
@@ -23,15 +23,46 @@ import type { StreamDocsStat } from '../../../../common';
  */
 export async function getDocCountsForStreams(options: {
   esClient: ElasticsearchClient;
+  /**
+   * When available (serverless), this client should be used to call the
+   * _metering/stats API as a secondary auth user to ensure proper permissions.
+   */
+  esClientAsSecondaryAuthUser?: ElasticsearchClient;
   streamNames: string[];
   // Kept for backwards compatibility with the existing route schema, but ignored.
   start?: string;
   end?: string;
 }): Promise<StreamDocsStat[]> {
-  const { esClient, streamNames } = options;
+  const { esClient, esClientAsSecondaryAuthUser, streamNames } = options;
 
   if (!streamNames.length) {
     return [];
+  }
+
+  // Prefer _metering/stats for serverless when a secondary auth user client is available.
+  if (esClientAsSecondaryAuthUser) {
+    try {
+      const meteringStatsByStream = await getDataStreamsMeteringStats({
+        esClient: esClientAsSecondaryAuthUser,
+        dataStreams: streamNames,
+      });
+
+      const meteringResults: StreamDocsStat[] = [];
+      for (const streamName of streamNames) {
+        const stats = meteringStatsByStream[streamName];
+        const totalDocs = stats?.totalDocs ?? 0;
+        if (totalDocs > 0) {
+          meteringResults.push({
+            stream: streamName,
+            count: totalDocs,
+          });
+        }
+      }
+
+      return meteringResults;
+    } catch {
+      // Fallback to indices.stats API
+    }
   }
 
   const dataStreamsByName = await getDataStreamsByName({ esClient });
@@ -53,7 +84,6 @@ export async function getDocCountsForStreams(options: {
     return [];
   }
 
-  // Try the indices.stats API first (Stateful-only API)
   try {
     const statsResponse = await esClient.indices.stats({
       index: allBackingIndices,
@@ -81,52 +111,7 @@ export async function getDocCountsForStreams(options: {
 
     return results;
   } catch (e) {
-    // If indices stats are not available (e.g. limited serverless environments),
-    // fall back to the cat indices API, which is more widely available.
-    try {
-      const catResponse = await esClient.cat.indices({
-        index: allBackingIndices,
-        h: ['index', 'docs.count'],
-        format: 'json',
-      });
-
-      const docsCountByIndex = new Map<string, number>();
-
-      for (const row of catResponse as CatIndicesIndicesRecord[]) {
-        const indexName = row.index;
-        const rawDocsCount =
-          (row['docs.count'] as string | undefined) ??
-          // Some client aliases use docsCount instead of docs.count
-          (row as unknown as { docsCount?: string }).docsCount ??
-          undefined;
-
-        if (!indexName) continue;
-
-        const parsed = rawDocsCount != null ? Number(rawDocsCount) : 0;
-        const docsCount = Number.isFinite(parsed) ? parsed : 0;
-        docsCountByIndex.set(indexName, docsCount);
-      }
-
-      const results: StreamDocsStat[] = [];
-
-      for (const [streamName, indices] of backingIndicesByStream.entries()) {
-        const totalDocs = indices.reduce((sum, indexName) => {
-          return sum + (docsCountByIndex.get(indexName) ?? 0);
-        }, 0);
-
-        if (totalDocs > 0) {
-          results.push({
-            stream: streamName,
-            count: totalDocs,
-          });
-        }
-      }
-
-      return results;
-    } catch {
-      // If cat indices is also unavailable, return an empty result instead of failing the request.
-      return [];
-    }
+    return [];
   }
 }
 
