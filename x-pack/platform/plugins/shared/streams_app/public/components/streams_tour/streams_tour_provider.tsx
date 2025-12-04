@@ -157,7 +157,8 @@ export function StreamsTourProvider({ children }: StreamsTourProviderProps) {
   const { features } = useStreamsPrivileges();
 
   const streamsLocator = useMemo(
-    () => share.url.locators.get<StreamsAppLocatorParams>(STREAMS_APP_LOCATOR_ID) as StreamsAppLocator,
+    () =>
+      share.url.locators.get<StreamsAppLocatorParams>(STREAMS_APP_LOCATOR_ID) as StreamsAppLocator,
     [share.url.locators]
   );
   const attachmentsEnabled = features.attachments?.enabled ?? false;
@@ -273,7 +274,13 @@ export function StreamsTourProvider({ children }: StreamsTourProviderProps) {
     }
 
     prevStepRef.current = currentStep;
-  }, [tourState.currentTourStep, tourState.isTourActive, tourStreamName, streamsLocator, stepsConfig]);
+  }, [
+    tourState.currentTourStep,
+    tourState.isTourActive,
+    tourStreamName,
+    streamsLocator,
+    stepsConfig,
+  ]);
 
   const value = useMemo<StreamsTourContextValue>(
     () => ({
