@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/logging'
   - '@kbn/utility-types'
   - '@kbn/config-schema'
+  - '@kbn/as-code-filters-constants'
 tags:
   - shared-common
   - package

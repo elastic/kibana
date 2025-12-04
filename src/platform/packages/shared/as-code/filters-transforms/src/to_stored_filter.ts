@@ -73,10 +73,18 @@ export function toStoredFilter(filter: AsCodeFilter, logger?: Logger): StoredFil
         ...(filter.label !== undefined ? { alias: filter.label } : {}),
         ...(filter.disabled !== undefined ? { disabled: filter.disabled } : {}),
         ...('negate' in filter && filter.negate !== undefined ? { negate: filter.negate } : {}),
-        ...(filter.controlledBy !== undefined ? { controlledBy: filter.controlledBy } : {}),
-        ...(filter.dataViewId !== undefined ? { index: filter.dataViewId } : {}),
-        ...(filter.isMultiIndex !== undefined ? { isMultiIndex: filter.isMultiIndex } : {}),
-        ...(filter.filterType !== undefined ? { type: filter.filterType } : {}),
+        ...('controlled_by' in filter && filter.controlled_by !== undefined
+          ? { controlledBy: filter.controlled_by }
+          : {}),
+        ...('data_view_id' in filter && filter.data_view_id !== undefined
+          ? { index: filter.data_view_id }
+          : {}),
+        ...('is_multi_index' in filter && filter.is_multi_index !== undefined
+          ? { isMultiIndex: filter.is_multi_index }
+          : {}),
+        ...('filter_type' in filter && filter.filter_type !== undefined
+          ? { type: filter.filter_type }
+          : {}),
         ...(filter.key !== undefined ? { key: filter.key } : {}),
         ...(filter.value !== undefined ? { value: filter.value } : {}),
       },
