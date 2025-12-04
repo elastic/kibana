@@ -29,8 +29,7 @@ export const usePaneStyles = () => {
     bottom: var(--kbn-layout--application-bottom, 0px);
     // TODO EUI: add color with transparency
     background: ${transparentize(euiTheme.colors.ink, 0.5)};
-    z-index: ${(euiTheme.levels.flyout as number) +
-    2}; // this z-index needs to be between the documentFlyout (set at 1001) and the timelineFlyout (set at 1003)
+    z-index: ${euiTheme.levels.maskBelowHeader};
 
     ${euiCanAnimate} {
       animation: ${euiAnimFadeIn} ${euiTheme.animation.fast} ease-in;
