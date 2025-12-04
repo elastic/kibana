@@ -832,7 +832,7 @@ export class FileUploadManager {
         if (pipeline === undefined) {
           return;
         }
-        pipeline.processors.push({
+        pipeline.processors!.push({
           set: {
             field: 'content',
             copy_from: 'attachment.content',

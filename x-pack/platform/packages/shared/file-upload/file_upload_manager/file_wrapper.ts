@@ -470,9 +470,7 @@ export class FileWrapper {
         newDateProcessors.push({
           date: {
             field: fieldName,
-            formats: Array.isArray(fieldMapping.format)
-              ? fieldMapping.format
-              : [fieldMapping.format],
+            formats: [fieldMapping.format],
           },
         });
       }
