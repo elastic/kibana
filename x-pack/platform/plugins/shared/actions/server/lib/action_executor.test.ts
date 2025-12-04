@@ -128,6 +128,22 @@ const connectorType: jest.Mocked<ConnectorType> = {
   executor: jest.fn(),
 };
 
+const connectorTypeWithGlobalHeaders: jest.Mocked<ConnectorType> = {
+  id: 'test-with-global-headers',
+  name: 'Test with Global Headers',
+  minimumLicenseRequired: 'basic',
+  supportedFeatureIds: ['alerting'],
+  validate: {
+    config: { schema: z.object({ bar: z.boolean() }) },
+    secrets: { schema: z.object({ baz: z.boolean() }) },
+    params: { schema: z.object({ foo: z.boolean() }) },
+  },
+  executor: jest.fn(),
+  globalAuthHeaders: {
+    'x-custom-header': 'custom-header-value',
+  },
+};
+
 const systemConnectorType: jest.Mocked<ConnectorType> = {
   id: '.cases',
   name: 'Cases',
@@ -352,6 +368,38 @@ describe('Action Executor', () => {
 
       expect(mockRateLimiterLog).toHaveBeenCalledTimes(1);
       expect(mockRateLimiterLog).toBeCalledWith('test');
+    });
+
+    test(`successfully  ${label} with any defined auth headers`, async () => {
+      mockGetRequestBodyByte.mockReturnValue(300);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        connectorSavedObject
+      );
+      connectorTypeRegistry.get.mockReturnValueOnce(connectorTypeWithGlobalHeaders);
+
+      if (executeUnsecure) {
+        await actionExecutor.executeUnsecured(executeUnsecuredParams);
+      } else {
+        await actionExecutor.execute(executeParams);
+      }
+
+      expect(connectorTypeWithGlobalHeaders.executor).toHaveBeenCalledWith({
+        actionId: CONNECTOR_ID,
+        services: expect.anything(),
+        config: {
+          bar: true,
+        },
+        secrets: {
+          baz: true,
+        },
+        params: { foo: true },
+        logger: loggerMock,
+        connectorUsageCollector: expect.any(ConnectorUsageCollector),
+        globalAuthHeaders: {
+          'x-custom-header': 'custom-header-value',
+        },
+        ...(executeUnsecure ? {} : { source: SOURCE }),
+      });
     });
 
     for (const executionSource of [

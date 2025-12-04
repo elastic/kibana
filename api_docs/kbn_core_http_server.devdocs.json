@@ -3457,10 +3457,6 @@
                 "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/routes/installation.ts"
               },
               {
-                "plugin": "banners",
-                "path": "x-pack/platform/plugins/private/banners/server/routes/info.ts"
-              },
-              {
                 "plugin": "globalSearch",
                 "path": "x-pack/platform/plugins/shared/global_search/server/routes/get_searchable_types.ts"
               },
@@ -3475,6 +3471,10 @@
               {
                 "plugin": "console",
                 "path": "src/platform/plugins/shared/console/server/routes/api/console/autocomplete_entities/index.ts"
+              },
+              {
+                "plugin": "banners",
+                "path": "x-pack/platform/plugins/private/banners/server/routes/info.ts"
               },
               {
                 "plugin": "indexManagement",
@@ -3819,6 +3819,10 @@
               {
                 "plugin": "watcher",
                 "path": "x-pack/platform/plugins/private/watcher/server/routes/api/register_load_history_route.ts"
+              },
+              {
+                "plugin": "workflowsExtensions",
+                "path": "src/platform/plugins/shared/workflows_extensions/server/routes/get_step_definitions.ts"
               },
               {
                 "plugin": "workflowsManagement",
@@ -6245,6 +6249,10 @@
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/get_gaps_summary_by_rule_ids/get_gaps_summary_by_rule_ids_route.ts"
               },
               {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/gap_auto_fill_schedule/create/create_auto_fill_scheduler_route.ts"
+              },
+              {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/pagerduty_simulation.ts"
               },
@@ -7006,6 +7014,10 @@
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/task_manager_fixture/server/plugin.ts"
               },
               {
@@ -7039,14 +7051,6 @@
               {
                 "plugin": "@kbn/search-api-keys-server",
                 "path": "x-pack/solutions/search/packages/kbn-search-api-keys-server/src/routes/routes.ts"
-              },
-              {
-                "plugin": "@kbn/workplaceai-api-keys-server",
-                "path": "x-pack/solutions/workplaceai/packages/kbn-workplaceai-api-keys-server/src/routes/routes.ts"
-              },
-              {
-                "plugin": "@kbn/workplaceai-api-keys-server",
-                "path": "x-pack/solutions/workplaceai/packages/kbn-workplaceai-api-keys-server/src/routes/routes.ts"
               },
               {
                 "plugin": "esql",
@@ -7982,6 +7986,22 @@
               },
               {
                 "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/gap_auto_fill_schedule/create/create_auto_fill_scheduler_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/gap_auto_fill_schedule/create/create_auto_fill_scheduler_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/gap_auto_fill_schedule/create/create_auto_fill_scheduler_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/gap_auto_fill_schedule/create/create_auto_fill_scheduler_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/snooze/external/snooze_rule_route.test.ts"
               },
               {
@@ -8717,6 +8737,10 @@
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/routes.ts"
               },
               {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/lookup_index.ts"
+              },
+              {
                 "plugin": "observability",
                 "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
               },
@@ -9055,6 +9079,10 @@
               {
                 "plugin": "reporting",
                 "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/scheduled_reports/bulk_disable/index.ts"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/scheduled_reports/bulk_enable/index.ts"
               },
               {
                 "plugin": "reporting",
@@ -12446,10 +12474,6 @@
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/security_api_integration/plugins/oidc_provider/server/init_routes.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/security_api_integration/plugins/saml_provider/server/init_routes.ts"
               },
               {
@@ -15178,6 +15202,10 @@
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/schedules/public/get/find.ts"
               },
               {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/privileges/get_missing_privileges.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_cluster_health/get_cluster_health_route.ts"
               },
@@ -15732,6 +15760,10 @@
               {
                 "plugin": "cloudSecurityPosture",
                 "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/benchmarks/benchmarks.test.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/privileges/get_missing_privileges.test.ts"
               },
               {
                 "plugin": "elasticAssistant",
@@ -16884,6 +16916,10 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/api/create_legacy_notification/route.ts"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/scripts_library/create_script.ts"
+              },
+              {
                 "plugin": "elasticAssistant",
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/public/post/post_attack_discovery_generate.ts"
               },
@@ -17218,6 +17254,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/rules/create.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/rules/enhance.ts"
               },
               {
                 "plugin": "securitySolution",

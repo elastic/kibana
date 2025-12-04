@@ -48,7 +48,7 @@ import type {
   ExecutionLogsParams,
   StepLogsParams,
 } from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 
 import { getWorkflowExecution } from './lib/get_workflow_execution';
 import { searchStepExecutions } from './lib/search_step_executions';
@@ -68,7 +68,8 @@ import {
 } from '../../common/lib/errors';
 
 import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
-import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml';
+import { parseWorkflowYamlToJSON, updateWorkflowYamlFields } from '../../common/lib/yaml';
+import { affectsYamlMetadata } from '../../common/lib/yaml/update_workflow_yaml_fields';
 import { getWorkflowZodSchema } from '../../common/schema';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { hasScheduledTriggers } from '../lib/schedule_utils';
@@ -192,10 +193,12 @@ export class WorkflowsService {
     );
     if (parsedYaml.success) {
       // The type of parsedYaml.data is validated by getWorkflowZodSchema (strict mode), so this assertion is safe.
-      workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
+      workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(
+        parsedYaml.data as unknown as WorkflowYaml
+      );
 
       // Validate step name uniqueness
-      const stepValidation = validateStepNameUniqueness(parsedYaml.data as WorkflowYaml);
+      const stepValidation = validateStepNameUniqueness(parsedYaml.data as unknown as WorkflowYaml);
       if (!stepValidation.isValid) {
         workflowToCreate.valid = false;
         workflowToCreate.definition = undefined;
@@ -251,6 +254,7 @@ export class WorkflowsService {
     return this.transformStorageDocumentToWorkflowDto(id, workflowData);
   }
 
+  // eslint-disable-next-line complexity
   public async updateWorkflow(
     id: string,
     workflow: Partial<EsWorkflow>,
@@ -324,7 +328,9 @@ export class WorkflowsService {
           shouldUpdateScheduler = true;
         } else {
           // Validate step name uniqueness
-          const stepValidation = validateStepNameUniqueness(parsedYaml.data as WorkflowYaml);
+          const stepValidation = validateStepNameUniqueness(
+            parsedYaml.data as unknown as WorkflowYaml
+          );
           if (!stepValidation.isValid) {
             updatedData.definition = undefined;
             updatedData.enabled = false;
@@ -333,7 +339,7 @@ export class WorkflowsService {
             shouldUpdateScheduler = true;
           } else {
             const workflowDef = transformWorkflowYamlJsontoEsWorkflow(
-              parsedYaml.data as WorkflowYaml
+              parsedYaml.data as unknown as WorkflowYaml
             );
             // Update all fields from the transformed YAML, not just definition
             updatedData.definition = workflowDef.definition;
@@ -349,12 +355,12 @@ export class WorkflowsService {
       }
 
       // Handle individual field updates only when YAML is not being updated
-      if (!workflow.yaml) {
-        let yamlUpdated = false;
+      if (affectsYamlMetadata(workflow)) {
+        const existingYaml = existingDocument._source?.yaml;
 
+        // Update metadata fields
         if (workflow.name !== undefined) {
           updatedData.name = workflow.name;
-          yamlUpdated = true;
         }
         if (workflow.enabled !== undefined) {
           // If enabling a workflow, ensure it has a valid definition
@@ -363,27 +369,29 @@ export class WorkflowsService {
           } else if (!workflow.enabled) {
             updatedData.enabled = false;
           }
-          yamlUpdated = true;
         }
         if (workflow.description !== undefined) {
           updatedData.description = workflow.description;
-          yamlUpdated = true;
         }
         if (workflow.tags !== undefined) {
           updatedData.tags = workflow.tags;
-          yamlUpdated = true;
         }
 
-        // If any individual fields were updated, regenerate the YAML content
-        if (yamlUpdated && existingDocument._source?.definition) {
-          const updatedWorkflowDefinition = {
-            ...existingDocument._source.definition,
-            ...(workflow.name !== undefined && { name: workflow.name }),
-            ...(workflow.enabled !== undefined && { enabled: updatedData.enabled }),
-            ...(workflow.description !== undefined && { description: workflow.description }),
-            ...(workflow.tags !== undefined && { tags: workflow.tags }),
-          };
-          updatedData.yaml = stringifyWorkflowDefinition(updatedWorkflowDefinition);
+        // Update the YAML in place to preserve formatting
+        if (existingYaml) {
+          updatedData.yaml = updateWorkflowYamlFields(existingYaml, workflow, updatedData.enabled);
+
+          // Also update the definition object to keep it in sync
+          if (existingDocument._source?.definition) {
+            const updatedWorkflowDefinition = {
+              ...existingDocument._source.definition,
+              ...(workflow.name !== undefined && { name: workflow.name }),
+              ...(workflow.enabled !== undefined && { enabled: updatedData.enabled }),
+              ...(workflow.description !== undefined && { description: workflow.description }),
+              ...(workflow.tags !== undefined && { tags: workflow.tags }),
+            };
+            updatedData.definition = updatedWorkflowDefinition;
+          }
         }
       }
 
@@ -422,19 +430,19 @@ export class WorkflowsService {
                   spaceId,
                   request
                 );
-                this.logger.info(`Updated scheduled tasks for workflow ${id}`);
+                this.logger.debug(`Updated scheduled tasks for workflow ${id}`);
               }
             } else {
               // No scheduled triggers, remove any existing scheduled tasks
               await this.taskScheduler.unscheduleWorkflowTasks(id);
-              this.logger.info(
+              this.logger.debug(
                 `Removed scheduled tasks for workflow ${id} (no scheduled triggers)`
               );
             }
           } else {
             // If workflow is invalid or disabled, remove all scheduled tasks
             await this.taskScheduler.unscheduleWorkflowTasks(id);
-            this.logger.info(
+            this.logger.debug(
               `Removed all scheduled tasks for workflow ${id} (workflow disabled or invalid)`
             );
           }
