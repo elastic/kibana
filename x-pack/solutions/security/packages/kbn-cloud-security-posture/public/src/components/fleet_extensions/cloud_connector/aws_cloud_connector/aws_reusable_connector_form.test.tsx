@@ -10,6 +10,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { CloudProvider } from '@kbn/fleet-plugin/public';
+import { AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ } from '@kbn/cloud-security-posture-common';
 import { AWSReusableConnectorForm } from './aws_reusable_connector_form';
 import type { AwsCloudConnectorCredentials } from '../types';
 
@@ -87,17 +88,17 @@ describe('AWSReusableConnectorForm', () => {
       expect(screen.getByText(/To streamline your AWS integration process/i)).toBeInTheDocument();
 
       // Verify the combo box label is present
-      expect(screen.getByText('Role ARN')).toBeInTheDocument();
+      expect(screen.getByText('Cloud Connector Name')).toBeInTheDocument();
 
       // Verify combo box is rendered
-      const comboBox = screen.getByRole('combobox');
+      const comboBox = screen.getByTestId(AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ);
       expect(comboBox).toBeInTheDocument();
     });
 
     it('renders combo box with available connectors as options', async () => {
       renderWithIntl(<AWSReusableConnectorForm {...defaultProps} />);
 
-      const comboBox = screen.getByRole('combobox');
+      const comboBox = screen.getByTestId(AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ);
 
       // Click to open options
       await userEvent.click(comboBox);
@@ -118,7 +119,7 @@ describe('AWSReusableConnectorForm', () => {
       renderWithIntl(<AWSReusableConnectorForm {...defaultProps} />);
 
       // Combo box should still render
-      expect(screen.getByRole('combobox')).toBeInTheDocument();
+      expect(screen.getByTestId(AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ)).toBeInTheDocument();
     });
 
     it('renders with selected connector when cloudConnectorId is provided', async () => {
@@ -157,15 +158,12 @@ describe('AWSReusableConnectorForm', () => {
     it('calls setCredentials with correct values when a connector is selected', async () => {
       renderWithIntl(<AWSReusableConnectorForm {...defaultProps} />);
 
-      const comboBox = screen.getByRole('combobox');
+      const comboBox = screen.getByTestId(AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ);
       await userEvent.click(comboBox);
 
-      // Select first connector
-      await waitFor(() => {
-        expect(screen.getByText('AWS Connector 1')).toBeInTheDocument();
-      });
-
-      await userEvent.click(screen.getByText('AWS Connector 1'));
+      // Wait for the dropdown to be fully interactive
+      const connectorOption = await screen.findByText('AWS Connector 1');
+      await userEvent.click(connectorOption);
 
       // Verify setCredentials was called with correct values
       expect(mockSetCredentials).toHaveBeenCalledWith({
@@ -178,7 +176,7 @@ describe('AWSReusableConnectorForm', () => {
     it('calls setCredentials with second connector values when selected', async () => {
       renderWithIntl(<AWSReusableConnectorForm {...defaultProps} />);
 
-      const comboBox = screen.getByRole('combobox');
+      const comboBox = screen.getByTestId(AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ);
       await userEvent.click(comboBox);
 
       // Select second connector
@@ -193,31 +191,6 @@ describe('AWSReusableConnectorForm', () => {
         roleArn: 'arn:aws:iam::123456789012:role/Role2',
         externalId: 'external-id-456',
         cloudConnectorId: 'connector-2',
-      });
-    });
-
-    it('clears credentials when selection is removed', async () => {
-      const propsWithSelection = {
-        ...defaultProps,
-        cloudConnectorId: 'connector-1',
-      };
-
-      renderWithIntl(<AWSReusableConnectorForm {...propsWithSelection} />);
-
-      // Wait for initial selection to render
-      await waitFor(() => {
-        expect(screen.getByText('AWS Connector 1')).toBeInTheDocument();
-      });
-
-      // Find and click the clear button (close icon)
-      const clearButton = screen.getByRole('button', { name: /clear/i });
-      await userEvent.click(clearButton);
-
-      // Verify setCredentials was called to clear values
-      expect(mockSetCredentials).toHaveBeenCalledWith({
-        roleArn: undefined,
-        externalId: undefined,
-        cloudConnectorId: undefined,
       });
     });
   });
@@ -238,7 +211,7 @@ describe('AWSReusableConnectorForm', () => {
 
       renderWithIntl(<AWSReusableConnectorForm {...defaultProps} />);
 
-      const comboBox = screen.getByRole('combobox');
+      const comboBox = screen.getByTestId(AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ);
       await userEvent.click(comboBox);
 
       // Should show "No options found" or similar empty state
