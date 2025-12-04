@@ -81,11 +81,13 @@ export function registerSetupRoute({
           esClient,
           request,
           useDefaultAuth: true,
+          uiSettings: core.uiSettings.client,
         });
         const clientWithProfilingAuth = createProfilingEsClient({
           esClient,
           request,
           useDefaultAuth: false,
+          uiSettings: core.uiSettings.client,
         });
 
         const commonSetupParams: ProfilingSetupOptions = {

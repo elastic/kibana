@@ -40,7 +40,7 @@ export const initProcessListRoute = (libs: InfraBackendLibs) => {
         fold(throwErrors(Boom.badRequest), identity)
       );
 
-      const client = createSearchClient(requestContext, framework);
+      const client = await createSearchClient(requestContext, framework);
       const soClient = (await requestContext.core).savedObjects.client;
 
       const { configuration } = await libs.sources.getSourceConfiguration(
@@ -70,7 +70,7 @@ export const initProcessListRoute = (libs: InfraBackendLibs) => {
         fold(throwErrors(Boom.badRequest), identity)
       );
 
-      const client = createSearchClient(requestContext, framework);
+      const client = await createSearchClient(requestContext, framework);
       const processListResponse = await getProcessListChart(client, options);
 
       return response.ok({

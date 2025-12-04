@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import type { KibanaRequest } from '@kbn/core/server';
 import { unwrapEsResponse } from '@kbn/observability-plugin/server';
+import {
+  getExcludedDataTiers,
+  applyDataTierFilterToQuery,
+  applyDataTierFilterToSearchRequest,
+} from '@kbn/observability-shared-plugin/common';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   AggregationField,
@@ -67,20 +72,26 @@ export interface ProfilingESClient {
 export function createProfilingEsClient({
   request,
   esClient,
+  uiSettings,
 }: {
   request: KibanaRequest;
   esClient: ElasticsearchClient;
+  uiSettings?: IUiSettingsClient;
 }): ProfilingESClient {
   return {
-    search<TDocument = unknown, TSearchRequest extends ESSearchRequest = ESSearchRequest>(
+    async search<TDocument = unknown, TSearchRequest extends ESSearchRequest = ESSearchRequest>(
       operationName: string,
       searchRequest: TSearchRequest
     ): Promise<InferSearchResponseOf<TDocument, TSearchRequest>> {
       const controller = new AbortController();
 
+      // Apply data tier filter
+      const excludedDataTiers = await getExcludedDataTiers(uiSettings);
+      const filteredRequest = applyDataTierFilterToSearchRequest(searchRequest, excludedDataTiers);
+
       const promise = withProfilingSpan(operationName, () => {
         return cancelEsRequestOnAbort(
-          esClient.search(searchRequest, {
+          esClient.search(filteredRequest, {
             signal: controller.signal,
             meta: true,
           }) as unknown as Promise<{
@@ -93,8 +104,12 @@ export function createProfilingEsClient({
 
       return unwrapEsResponse(promise);
     },
-    profilingStacktraces({ query, sampleSize, durationSeconds }) {
+    async profilingStacktraces({ query, sampleSize, durationSeconds }) {
       const controller = new AbortController();
+
+      // Apply data tier filter
+      const excludedDataTiers = await getExcludedDataTiers(uiSettings);
+      const filteredQuery = applyDataTierFilterToQuery(query, excludedDataTiers as any);
 
       const promise = withProfilingSpan('_profiling/stacktraces', () => {
         return cancelEsRequestOnAbort(
@@ -103,7 +118,7 @@ export function createProfilingEsClient({
               method: 'POST',
               path: encodeURI('/_profiling/stacktraces'),
               body: {
-                query,
+                query: filteredQuery,
                 sample_size: sampleSize,
                 requested_duration: durationSeconds,
               },
@@ -147,8 +162,12 @@ export function createProfilingEsClient({
     getEsClient() {
       return esClient;
     },
-    profilingFlamegraph({ query, sampleSize }) {
+    async profilingFlamegraph({ query, sampleSize }) {
       const controller = new AbortController();
+
+      // Apply data tier filter
+      const excludedDataTiers = await getExcludedDataTiers(uiSettings);
+      const filteredQuery = applyDataTierFilterToQuery(query, excludedDataTiers as any);
 
       const promise = withProfilingSpan('_profiling/flamegraph', () => {
         return esClient.transport.request(
@@ -156,7 +175,7 @@ export function createProfilingEsClient({
             method: 'POST',
             path: encodeURI('/_profiling/flamegraph'),
             body: {
-              query,
+              query: filteredQuery,
               sample_size: sampleSize,
             },
           },
@@ -168,7 +187,7 @@ export function createProfilingEsClient({
       });
       return unwrapEsResponse(promise) as Promise<BaseFlameGraph>;
     },
-    topNFunctions({
+    async topNFunctions({
       query,
       aggregationField,
       indices,
@@ -185,13 +204,17 @@ export function createProfilingEsClient({
     }) {
       const controller = new AbortController();
 
+      // Apply data tier filter
+      const excludedDataTiers = await getExcludedDataTiers(uiSettings);
+      const filteredQuery = applyDataTierFilterToQuery(query, excludedDataTiers as any);
+
       const promise = withProfilingSpan('_profiling/topn/functions', () => {
         return esClient.transport.request(
           {
             method: 'POST',
             path: encodeURI('/_profiling/topn/functions'),
             body: {
-              query,
+              query: filteredQuery,
               sample_size: sampleSize,
               limit,
               indices,

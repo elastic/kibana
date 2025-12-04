@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { getExcludedDataTiers, mergeDataTierFilter } from '@kbn/observability-shared-plugin/common';
 import type { InfraPluginRequestHandlerContext } from '../types';
 import type { CallWithRequestParams, InfraDatabaseSearchResponse } from './adapters/framework';
 import type { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
@@ -16,7 +17,28 @@ export const createSearchClient =
     framework: KibanaFramework,
     request?: KibanaRequest
   ) =>
-  <Hit = {}, Aggregation = undefined>(
+  async <Hit = {}, Aggregation = undefined>(
     opts: CallWithRequestParams
-  ): Promise<InfraDatabaseSearchResponse<Hit, Aggregation>> =>
-    framework.callWithRequest(requestContext, 'search', opts, request);
+  ): Promise<InfraDatabaseSearchResponse<Hit, Aggregation>> => {
+    // Get excluded data tiers from UI settings
+    const { uiSettings } = await requestContext.core;
+    const excludedDataTiers = await getExcludedDataTiers(uiSettings.client);
+
+    // Apply data tier filter if configured
+    const mustNot = mergeDataTierFilter(opts.body?.query?.bool?.must_not, excludedDataTiers);
+    const searchOpts: CallWithRequestParams = {
+      ...opts,
+      body: {
+        ...opts.body,
+        query: {
+          ...opts.body?.query,
+          bool: {
+            ...opts.body?.query?.bool,
+            must_not: mustNot,
+          },
+        },
+      },
+    };
+
+    return framework.callWithRequest(requestContext, 'search', searchOpts, request);
+  };

@@ -6,14 +6,17 @@
  */
 
 import type { ESSearchResponse } from '@kbn/es-types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { DataPublicPluginStart, isRunningResponse } from '@kbn/data-plugin/public';
 import { IKibanaSearchRequest } from '@kbn/search-types';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import {
   FetchDataParams,
   HasDataParams,
   UxFetchDataResponse,
   UXHasDataResponse,
 } from '@kbn/observability-plugin/public';
+import { getExcludedDataTiers, mergeDataTierFilter } from '@kbn/observability-shared-plugin/common';
 import type { UXMetrics } from '@kbn/observability-shared-plugin/public';
 import { inpQuery, transformINPResponse } from '../../../services/data/inp_query';
 import {
@@ -26,34 +29,83 @@ import { formatHasRumResult, hasRumDataQuery } from '../../../services/data/has_
 
 export { createCallApmApi } from '../../../services/rest/create_call_apm_api';
 
-type WithDataPlugin<T> = T & { dataStartPlugin: DataPublicPluginStart };
+type WithDataPlugin<T> = T & {
+  dataStartPlugin: DataPublicPluginStart;
+  uiSettingsClient?: IUiSettingsClient;
+};
+
+function applyDataTierFilter<T extends { params?: { body?: { query?: QueryDslQueryContainer } } }>(
+  params: T,
+  excludedDataTiers: string[]
+): T {
+  if (excludedDataTiers.length === 0) {
+    return params;
+  }
+
+  const mustNot = mergeDataTierFilter(
+    params.params?.body?.query?.bool?.must_not,
+    excludedDataTiers as any
+  );
+
+  return {
+    ...params,
+    params: {
+      ...params.params,
+      body: {
+        ...params.params?.body,
+        query: {
+          ...params.params?.body?.query,
+          bool: {
+            ...params.params?.body?.query?.bool,
+            must_not: mustNot,
+          },
+        },
+      },
+    },
+  };
+}
 
 async function getCoreWebVitalsResponse({
   absoluteTime,
   serviceName,
   dataStartPlugin,
+  uiSettingsClient,
 }: WithDataPlugin<FetchDataParams>) {
   const dataViewResponse = await callApmApi('GET /internal/apm/data_view/index_pattern', {
     signal: null,
   });
 
+  const excludedDataTiers = await getExcludedDataTiers(uiSettingsClient);
+
   return await Promise.all([
-    esQuery<ReturnType<typeof coreWebVitalsQuery>>(dataStartPlugin, {
-      params: {
-        index: dataViewResponse.apmDataViewIndexPattern,
-        ...coreWebVitalsQuery(absoluteTime.start, absoluteTime.end, undefined, {
-          serviceName: serviceName ? [serviceName] : undefined,
-        }),
-      },
-    }),
-    esQuery<ReturnType<typeof inpQuery>>(dataStartPlugin, {
-      params: {
-        index: dataViewResponse.apmDataViewIndexPattern,
-        ...inpQuery(absoluteTime.start, absoluteTime.end, undefined, {
-          serviceName: serviceName ? [serviceName] : undefined,
-        }),
-      },
-    }),
+    esQuery<ReturnType<typeof coreWebVitalsQuery>>(
+      dataStartPlugin,
+      applyDataTierFilter(
+        {
+          params: {
+            index: dataViewResponse.apmDataViewIndexPattern,
+            ...coreWebVitalsQuery(absoluteTime.start, absoluteTime.end, undefined, {
+              serviceName: serviceName ? [serviceName] : undefined,
+            }),
+          },
+        },
+        excludedDataTiers
+      )
+    ),
+    esQuery<ReturnType<typeof inpQuery>>(
+      dataStartPlugin,
+      applyDataTierFilter(
+        {
+          params: {
+            index: dataViewResponse.apmDataViewIndexPattern,
+            ...inpQuery(absoluteTime.start, absoluteTime.end, undefined, {
+              serviceName: serviceName ? [serviceName] : undefined,
+            }),
+          },
+        },
+        excludedDataTiers
+      )
+    ),
   ]);
 }
 
@@ -90,17 +142,22 @@ export async function hasRumData(
     signal: null,
   });
 
+  const excludedDataTiers = await getExcludedDataTiers(params.uiSettingsClient);
+
   const esQueryResponse = await esQuery<ReturnType<typeof hasRumDataQuery>>(
     params.dataStartPlugin,
-    {
-      params: {
-        index: dataViewResponse.apmDataViewIndexPattern,
-        ...hasRumDataQuery({
-          start: params?.absoluteTime?.start,
-          end: params?.absoluteTime?.end,
-        }),
+    applyDataTierFilter(
+      {
+        params: {
+          index: dataViewResponse.apmDataViewIndexPattern,
+          ...hasRumDataQuery({
+            start: params?.absoluteTime?.start,
+            end: params?.absoluteTime?.end,
+          }),
+        },
       },
-    }
+      excludedDataTiers
+    )
   );
 
   return formatHasRumResult(esQueryResponse, dataViewResponse.apmDataViewIndexPattern);

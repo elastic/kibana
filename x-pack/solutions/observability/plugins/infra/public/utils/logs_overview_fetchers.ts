@@ -6,11 +6,17 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import type {
   FetchData,
   FetchDataParams,
   LogsFetchDataResponse,
 } from '@kbn/observability-plugin/public';
+import {
+  getExcludedDataTiers,
+  applyDataTierFilterToQuery,
+} from '@kbn/observability-shared-plugin/common';
 import { DEFAULT_LOG_VIEW, getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
 import { TIMESTAMP_FIELD } from '../../common/constants';
 import type { InfraClientStartDeps, InfraClientStartServicesAccessor } from '../types';
@@ -57,7 +63,7 @@ export function getLogsOverviewDataFetcher(
   getStartServices: InfraClientStartServicesAccessor
 ): FetchData<LogsFetchDataResponse> {
   return async (params) => {
-    const [, { data, logsShared, share }] = await getStartServices();
+    const [coreStart, { data, logsShared, share }] = await getStartServices();
     const resolvedLogView = await logsShared.logViews.client.getResolvedLogView(DEFAULT_LOG_VIEW);
 
     const { stats, series } = await fetchLogsOverview(
@@ -65,7 +71,8 @@ export function getLogsOverviewDataFetcher(
         index: resolvedLogView.indices,
       },
       params,
-      data
+      data,
+      coreStart.uiSettings
     );
     const { logsLocator } = getLogsLocatorsFromUrlService(share.url);
     const timeSpanInMinutes = (params.absoluteTime.end - params.absoluteTime.start) / (1000 * 60);
@@ -88,8 +95,13 @@ export function getLogsOverviewDataFetcher(
 async function fetchLogsOverview(
   logParams: LogParams,
   params: FetchDataParams,
-  dataPlugin: InfraClientStartDeps['data']
+  dataPlugin: InfraClientStartDeps['data'],
+  uiSettings: IUiSettingsClient
 ): Promise<StatsAndSeries> {
+  const excludedDataTiers = await getExcludedDataTiers(uiSettings);
+  const baseQuery = buildLogOverviewQuery(logParams, params);
+  const filteredQuery = applyDataTierFilterToQuery(baseQuery, excludedDataTiers);
+
   return new Promise((resolve, reject) => {
     let esResponse: estypes.SearchResponse<any> | undefined;
 
@@ -99,7 +111,7 @@ async function fetchLogsOverview(
           index: logParams.index,
           body: {
             size: 0,
-            query: buildLogOverviewQuery(logParams, params),
+            query: filteredQuery,
             aggs: buildLogOverviewAggregations(logParams, params),
           },
         },
@@ -118,7 +130,10 @@ async function fetchLogsOverview(
   });
 }
 
-function buildLogOverviewQuery(logParams: LogParams, params: FetchDataParams) {
+function buildLogOverviewQuery(
+  logParams: LogParams,
+  params: FetchDataParams
+): QueryDslQueryContainer {
   return {
     range: {
       [TIMESTAMP_FIELD]: {

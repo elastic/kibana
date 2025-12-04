@@ -6,9 +6,13 @@
  */
 
 import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, IUiSettingsClient } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { entitiesAliasPattern, ENTITY_LATEST } from '@kbn/entities-schema';
+import {
+  getExcludedDataTiers,
+  applyDataTierFilterToSearchRequest,
+} from '@kbn/observability-shared-plugin/common';
 import { unwrapEsResponse } from '@kbn/observability-shared-plugin/common/utils/unwrap_es_response';
 // import { withApmSpan } from '../../utils/with_apm_span';
 
@@ -39,21 +43,30 @@ export interface EntitiesESClient {
 export function createEntitiesESClient({
   request,
   esClient,
+  uiSettings,
 }: {
   request: KibanaRequest;
   esClient: ElasticsearchClient;
+  uiSettings?: IUiSettingsClient;
 }) {
-  function search<TDocument = unknown, TSearchRequest extends ESSearchRequest = ESSearchRequest>(
+  async function search<
+    TDocument = unknown,
+    TSearchRequest extends ESSearchRequest = ESSearchRequest
+  >(
     indexName: string,
     operationName: string,
     searchRequest: TSearchRequest
   ): Promise<InferSearchResponseOf<TDocument, TSearchRequest>> {
     const controller = new AbortController();
 
+    // Apply data tier filter
+    const excludedDataTiers = await getExcludedDataTiers(uiSettings);
+    const filteredRequest = applyDataTierFilterToSearchRequest(searchRequest, excludedDataTiers);
+
     const promise = // withApmSpan(operationName, () => {
       cancelEsRequestOnAbort(
         esClient.search(
-          { ...searchRequest, index: [indexName], ignore_unavailable: true },
+          { ...filteredRequest, index: [indexName], ignore_unavailable: true },
           {
             signal: controller.signal,
             meta: true,

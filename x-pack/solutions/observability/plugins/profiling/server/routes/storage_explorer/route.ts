@@ -49,8 +49,12 @@ export function registerStorageExplorerRoute({
     },
     async (context, request, response) => {
       const { timeFrom, timeTo, kuery, indexLifecyclePhase } = request.query;
-      const client = await getClient(context);
-      const profilingClient = createProfilingEsClient({ request, esClient: client });
+      const [client, core] = await Promise.all([getClient(context), context.core]);
+      const profilingClient = createProfilingEsClient({
+        request,
+        esClient: client,
+        uiSettings: core.uiSettings.client,
+      });
       const profilingEsClient = profilingClient.getEsClient();
 
       const [
@@ -135,8 +139,12 @@ export function registerStorageExplorerRoute({
       },
     },
     async (context, request, response) => {
-      const client = await getClient(context);
-      const profilingClient = createProfilingEsClient({ request, esClient: client });
+      const [client, core] = await Promise.all([getClient(context), context.core]);
+      const profilingClient = createProfilingEsClient({
+        request,
+        esClient: client,
+        uiSettings: core.uiSettings.client,
+      });
 
       const { timeFrom, timeTo, kuery, indexLifecyclePhase } = request.query;
       const [hostDetailsTimeseries, hostDetails] = await Promise.all([
@@ -180,8 +188,12 @@ export function registerStorageExplorerRoute({
       },
     },
     async (context, request, response) => {
-      const client = await getClient(context);
-      const profilingClient = createProfilingEsClient({ request, esClient: client });
+      const [client, core] = await Promise.all([getClient(context), context.core]);
+      const profilingClient = createProfilingEsClient({
+        request,
+        esClient: client,
+        uiSettings: core.uiSettings.client,
+      });
       const profilingEsClient = profilingClient.getEsClient();
       const { indexLifecyclePhase } = request.query;
 
