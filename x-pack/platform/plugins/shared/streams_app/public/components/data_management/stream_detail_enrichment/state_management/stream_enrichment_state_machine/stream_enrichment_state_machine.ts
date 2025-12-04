@@ -112,7 +112,8 @@ export const streamEnrichmentMachine = setup({
       return {
         nextStreamlangDSL: params.dsl,
         isNextStreamlangDSLValid: isValid,
-        hasChanges: JSON.stringify(params.dsl) !== JSON.stringify(context.previousStreamlangDSL),
+        hasChanges:
+          JSON.stringify(params.dsl.steps) !== JSON.stringify(context.previousStreamlangDSL.steps),
       };
     }),
     /* Mode machine spawning */
