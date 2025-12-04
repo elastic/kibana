@@ -56,7 +56,7 @@ This section provides a complete guide for contributors who want to add custom s
 Create a shared definition file (e.g., `common/step_types/my_step.ts`) that contains the step ID and schemas:
 
 ```typescript
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 
 /**
@@ -289,6 +289,21 @@ const myStepHandler: StepHandler = async (context) => {
   };
 };
 ```
+
+### Step Handler Context
+
+The `context` parameter provides access to runtime services and step information:
+
+- **`context.input`**: Validated input (type inferred from `inputSchema`)
+- **`context.contextManager`**: Access to workflow state and services:
+  - `getContext()`: Full workflow context
+  - `getScopedEsClient()`: Scoped Elasticsearch client
+  - `renderInputTemplate()`: Evaluate template strings
+  - `getFakeRequest()`: Fake KibanaRequest for other services
+- **`context.logger`**: Scoped logger (`debug`, `info`, `warn`, `error`)
+- **`context.abortSignal`**: AbortSignal for cancellation support
+- **`context.stepId`**: Current step instance identifier
+- **`context.stepType`**: Step type identifier (e.g., `'myPlugin.myCustomStep'`)
 
 ### Public-Side Definition Requirements
 
