@@ -18,7 +18,6 @@ import {
   euiDragDropReorder,
   EuiSpacer,
   useEuiTheme,
-  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
@@ -42,6 +41,8 @@ import { useReviewSuggestionsForm } from './review_suggestions_form/use_review_s
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { useAIFeatures } from '../../../hooks/use_ai_features';
 import { NoDataEmptyPrompt } from './empty_prompt';
+import { SuggestPartitionPanel } from './partition_suggestions/suggest_partition_panel';
+import { SuggestionLoadingPrompt } from '../shared/suggestion_loading_prompt';
 
 function getReasonDisabledCreateButton(canManageRoutingRules: boolean, maxNestingLevel: boolean) {
   if (maxNestingLevel) {
@@ -86,10 +87,10 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
     routingSnapshot.matches({ ready: 'editingRule' }) ||
     routingSnapshot.matches({ ready: 'reorderingRules' });
 
+  // This isRefreshing tracks async gap between operation completion and server data arrival
   const { isRefreshing } = routingSnapshot.context;
 
-  const hasData =
-    routing.length > 0 || (aiFeatures && aiFeatures.enabled && suggestions) || isRefreshing;
+  const hasData = routing.length > 0 || (aiFeatures && aiFeatures.enabled && suggestions);
 
   const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
     if (source && destination) {
@@ -121,7 +122,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
           `}
           wrap
         >
-          {aiFeatures && aiFeatures.enabled && !suggestions && (
+          {aiFeatures && aiFeatures.enabled && !isLoadingSuggestions && !suggestions && (
             <EuiFlexItem grow={false}>
               <GenerateSuggestionButton
                 size="s"
@@ -171,14 +172,27 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
     >
       <CurrentStreamEntry definition={definition} />
 
-      {!hasData ? (
-        <NoDataEmptyPrompt
-          aiFeatures={aiFeatures}
-          getSuggestionsForStream={getSuggestionsForStream}
-          isLoadingSuggestions={isLoadingSuggestions}
-          isEditingOrReorderingStreams={isEditingOrReorderingStreams}
-          createNewRule={createNewRule}
-        />
+      {!hasData && !isLoadingSuggestions && !isRefreshing ? (
+        <NoDataEmptyPrompt createNewRule={createNewRule}>
+          {aiFeatures && aiFeatures.enabled && (
+            <SuggestPartitionPanel>
+              <GenerateSuggestionButton
+                size="s"
+                onClick={getSuggestionsForStream}
+                isLoading={isLoadingSuggestions}
+                isDisabled={isEditingOrReorderingStreams}
+                aiFeatures={aiFeatures}
+              >
+                {i18n.translate(
+                  'xpack.streams.streamDetailView.routingTab.noDataEmptyPrompt.cardButton',
+                  {
+                    defaultMessage: 'Suggest partitions',
+                  }
+                )}
+              </GenerateSuggestionButton>
+            </SuggestPartitionPanel>
+          )}
+        </NoDataEmptyPrompt>
       ) : (
         <>
           {/* Scrollable routing rules container */}
@@ -191,12 +205,6 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
               max-height: calc(100% - 80px);
             `}
           >
-            {/* Loading state while waiting for refresh - there's a delay between the state change and the data being available, noticeable now with the empty state */}
-            {isRefreshing && routing.length === 0 && (
-              <EuiFlexGroup justifyContent="center" alignItems="center" style={{ padding: 24 }}>
-                <EuiLoadingSpinner size="l" />
-              </EuiFlexGroup>
-            )}
             {routing.length > 0 && (
               <EuiDragDropContext onDragEnd={handlerItemDrag}>
                 <EuiDroppable droppableId="routing_children_reordering" spacing="none">
@@ -250,7 +258,14 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
             {aiFeatures && aiFeatures.enabled && shouldDisplayCreateButton && (
               <div ref={scrollToSuggestions}>
                 <EuiSpacer size="m" />
-                {suggestions ? (
+                {isLoadingSuggestions && (
+                  <SuggestionLoadingPrompt
+                    onCancel={() => {
+                      resetForm();
+                    }}
+                  />
+                )}
+                {!isLoadingSuggestions && suggestions ? (
                   isEmpty(suggestions) ? (
                     <NoSuggestionsCallout
                       aiFeatures={aiFeatures}
