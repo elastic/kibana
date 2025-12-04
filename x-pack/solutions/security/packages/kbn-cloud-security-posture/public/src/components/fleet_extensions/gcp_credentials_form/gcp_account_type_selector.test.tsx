@@ -16,8 +16,8 @@ import type {
 import {
   GCP_ORGANIZATION_ACCOUNT_TEST_SUBJ,
   GCP_SINGLE_ACCOUNT_TEST_SUBJ,
-  GCP_ORGANIZATION_ACCOUNT,
 } from '@kbn/cloud-security-posture-common';
+import { ORGANIZATION_ACCOUNT } from '@kbn/fleet-plugin/common';
 import { GcpAccountTypeSelect } from './gcp_account_type_selector';
 import type { UpdatePolicy } from '../types';
 
@@ -179,7 +179,7 @@ describe('GcpAccountTypeSelect', () => {
           {
             ...mockInput.streams[0],
             vars: {
-              'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
+              'gcp.account_type': { value: ORGANIZATION_ACCOUNT },
             },
           },
         ],
@@ -237,7 +237,7 @@ describe('GcpAccountTypeSelect', () => {
                 expect.objectContaining({
                   vars: expect.objectContaining({
                     'gcp.account_type': expect.objectContaining({
-                      value: GCP_ORGANIZATION_ACCOUNT,
+                      value: ORGANIZATION_ACCOUNT,
                     }),
                   }),
                 }),
@@ -296,7 +296,7 @@ describe('GcpAccountTypeSelect', () => {
           {
             ...mockInput.streams[0],
             vars: {
-              'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
+              'gcp.account_type': { value: ORGANIZATION_ACCOUNT },
             },
           },
         ],

@@ -6,7 +6,7 @@
  */
 export type CloudProvider = 'aws' | 'azure' | 'gcp';
 
-export type AccountType = 'single' | 'organization';
+export type AccountType = 'single-account' | 'organization-account';
 
 export interface CloudConnectorSecretReference {
   isSecretRef: boolean;

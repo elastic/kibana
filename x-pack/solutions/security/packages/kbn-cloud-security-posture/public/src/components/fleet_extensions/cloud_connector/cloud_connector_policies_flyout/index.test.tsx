@@ -13,6 +13,8 @@ import { CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS } from '@kbn/cloud-securi
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { UseQueryResult } from '@kbn/react-query';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { AccountType } from '@kbn/fleet-plugin/common/types';
+import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from '@kbn/fleet-plugin/common';
 import { CloudConnectorPoliciesFlyout } from '.';
 import type { CloudConnectorUsageItem } from '../hooks/use_cloud_connector_usage';
 import { useCloudConnectorUsage } from '../hooks/use_cloud_connector_usage';
@@ -42,7 +44,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
       role_arn: { value: 'arn:aws:iam::123456789012:role/TestRole' },
       external_id: { value: { isSecretRef: true, id: 'secret-ref-id-123' } },
     },
-    accountType: 'single' as const,
+    accountType: SINGLE_ACCOUNT as AccountType,
     provider: 'aws' as const,
     onClose: mockOnClose,
   };
@@ -478,14 +480,14 @@ describe('CloudConnectorPoliciesFlyout', () => {
   });
 
   describe('AccountBadge rendering', () => {
-    it('should render Single Account badge in flyout header when accountType is single', () => {
-      renderFlyout({ accountType: 'single' });
+    it('should render Single Account badge in flyout header when accountType is single-account', () => {
+      renderFlyout({ accountType: SINGLE_ACCOUNT });
 
       expect(screen.getByText('Single Account')).toBeInTheDocument();
     });
 
-    it('should render Organization badge in flyout header when accountType is organization', () => {
-      renderFlyout({ accountType: 'organization' });
+    it('should render Organization badge in flyout header when accountType is organization-account', () => {
+      renderFlyout({ accountType: ORGANIZATION_ACCOUNT });
 
       expect(screen.getByText('Organization')).toBeInTheDocument();
     });
@@ -498,7 +500,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
     });
 
     it('should render badge with default color variant in flyout', () => {
-      const { container } = renderFlyout({ accountType: 'single' });
+      const { container } = renderFlyout({ accountType: SINGLE_ACCOUNT });
 
       const badge = container.querySelector('.euiBadge');
       expect(badge?.className).toMatch(/euiBadge-default/);

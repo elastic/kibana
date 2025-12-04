@@ -12,17 +12,19 @@ import {
 import {
   AWS_ACCOUNT_TYPE_VAR_NAME,
   AZURE_ACCOUNT_TYPE_VAR_NAME,
+  SINGLE_ACCOUNT,
+  ORGANIZATION_ACCOUNT,
 } from '../../../common/constants/cloud_connector';
 
 import type { CloudProvider, CloudConnectorVars, AccountType } from '../../../common/types';
 import type { NewPackagePolicy } from '../../types';
 
 /**
- * Extracts and normalizes the account type from package policy variables
+ * Extracts the account type from package policy variables
  *
  * @param cloudProvider - The cloud provider (aws, azure, gcp)
  * @param packagePolicy - The package policy containing account type vars
- * @returns Normalized account type ('single' or 'organization') or undefined if not found
+ * @returns Account type ('single-account' or 'organization-account') or undefined if not found
  */
 export function extractAccountType(
   cloudProvider: CloudProvider,
@@ -42,35 +44,25 @@ export function extractAccountType(
     rawAccountType = vars[AZURE_ACCOUNT_TYPE_VAR_NAME]?.value;
   }
 
-  return normalizeAccountType(rawAccountType);
+  return validateAccountType(rawAccountType);
 }
 
 /**
- * Normalizes account type values from different cloud providers to a common format
+ * Validates that the account type value is one of the standardized values
  *
- * AWS values: 'single-account' -> 'single', 'organization-account' -> 'organization'
- * Azure values: 'single-subscription' -> 'single', 'organization-subscription' -> 'organization'
+ * All cloud providers use the same standardized values: 'single-account' or 'organization-account'
  *
- * @param rawAccountType - The raw account type value from package policy
- * @returns Normalized account type or undefined if not recognized
+ * @param accountType - The account type value from package policy
+ * @returns Valid account type or undefined if not recognized
  */
-export function normalizeAccountType(rawAccountType: string | undefined): AccountType | undefined {
-  if (!rawAccountType) {
+export function validateAccountType(accountType: string | undefined): AccountType | undefined {
+  if (!accountType) {
     return undefined;
   }
 
-  // Normalize AWS and Azure account types to common values
-  if (rawAccountType === 'single-account' || rawAccountType === 'single-subscription') {
-    return 'single';
-  }
-
-  if (rawAccountType === 'organization-account' || rawAccountType === 'organization-subscription') {
-    return 'organization';
-  }
-
-  // If already normalized, return as-is
-  if (rawAccountType === 'single' || rawAccountType === 'organization') {
-    return rawAccountType as AccountType;
+  // Validate against standardized values
+  if (accountType === SINGLE_ACCOUNT || accountType === ORGANIZATION_ACCOUNT) {
+    return accountType as AccountType;
   }
 
   return undefined;

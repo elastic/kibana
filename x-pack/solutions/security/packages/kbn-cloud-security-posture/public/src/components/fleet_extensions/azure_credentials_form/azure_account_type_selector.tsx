@@ -13,9 +13,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   AZURE_ORGANIZATION_ACCOUNT_TEST_SUBJ,
   AZURE_SINGLE_ACCOUNT_TEST_SUBJ,
-  AZURE_ORGANIZATION_ACCOUNT,
-  AZURE_SINGLE_ACCOUNT,
 } from '@kbn/cloud-security-posture-common';
+import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from '@kbn/fleet-plugin/common';
 import { updatePolicyWithInputs } from '../utils';
 import type { CspRadioGroupProps } from '../../csp_boxed_radio_group';
 import { RadioGroup } from '../../csp_boxed_radio_group';
@@ -26,7 +25,7 @@ const getAzureAccountTypeOptions = (
   isAzureOrganizationDisabled: boolean
 ): CspRadioGroupProps['options'] => [
   {
-    id: AZURE_ORGANIZATION_ACCOUNT,
+    id: ORGANIZATION_ACCOUNT,
     label: i18n.translate(
       'securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.accountType.azureOrganizationLabel',
       {
@@ -45,7 +44,7 @@ const getAzureAccountTypeOptions = (
       : undefined,
   },
   {
-    id: AZURE_SINGLE_ACCOUNT,
+    id: SINGLE_ACCOUNT,
     label: i18n.translate(
       'securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.accountType.singleAccountLabel',
       {
@@ -78,11 +77,11 @@ export const AzureAccountTypeSelect = ({
 
   const accountType = getAzureAccountType(input);
 
-  if (!accountType || (accountType === AZURE_ORGANIZATION_ACCOUNT && organizationDisabled)) {
+  if (!accountType || (accountType === ORGANIZATION_ACCOUNT && organizationDisabled)) {
     updatePolicy({
       updatedPolicy: updatePolicyWithInputs(newPolicy, azurePolicyType, {
         'azure.account_type': {
-          value: organizationDisabled ? AZURE_SINGLE_ACCOUNT : AZURE_ORGANIZATION_ACCOUNT,
+          value: organizationDisabled ? SINGLE_ACCOUNT : ORGANIZATION_ACCOUNT,
           type: 'text',
         },
       }),
@@ -115,7 +114,7 @@ export const AzureAccountTypeSelect = ({
         size="m"
         name="azureAccountType"
       />
-      {getAzureAccountType(input) === AZURE_ORGANIZATION_ACCOUNT && (
+      {getAzureAccountType(input) === ORGANIZATION_ACCOUNT && (
         <>
           <EuiSpacer size="l" />
           <EuiText color="subdued" size="s">
@@ -126,7 +125,7 @@ export const AzureAccountTypeSelect = ({
           </EuiText>
         </>
       )}
-      {getAzureAccountType(input) === AZURE_SINGLE_ACCOUNT && (
+      {getAzureAccountType(input) === SINGLE_ACCOUNT && (
         <>
           <EuiSpacer size="l" />
           <EuiText color="subdued" size="s">

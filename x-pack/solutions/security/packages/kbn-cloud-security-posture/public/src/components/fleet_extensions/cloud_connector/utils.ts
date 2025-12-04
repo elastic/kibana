@@ -38,8 +38,7 @@ import {
   CLOUD_CONNECTOR_AZURE_ASSET_INVENTORY_REUSABLE_MIN_VERSION,
   AWS_PROVIDER,
   AZURE_PROVIDER,
-  AWS_SINGLE_ACCOUNT,
-  AZURE_SINGLE_ACCOUNT,
+  SINGLE_ACCOUNT,
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
   TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR,
   AZURE_ACCOUNT_TYPE_INPUT_VAR_NAME,
@@ -191,13 +190,10 @@ const getAccountTypeFromInput = (
 ): string | undefined => {
   switch (provider) {
     case AWS_PROVIDER:
-      return (
-        input?.streams?.[0]?.vars?.[AWS_ACCOUNT_TYPE_INPUT_VAR_NAME]?.value ?? AWS_SINGLE_ACCOUNT
-      );
+      return input?.streams?.[0]?.vars?.[AWS_ACCOUNT_TYPE_INPUT_VAR_NAME]?.value ?? SINGLE_ACCOUNT;
     case AZURE_PROVIDER:
       return (
-        input?.streams?.[0]?.vars?.[AZURE_ACCOUNT_TYPE_INPUT_VAR_NAME]?.value ??
-        AZURE_SINGLE_ACCOUNT
+        input?.streams?.[0]?.vars?.[AZURE_ACCOUNT_TYPE_INPUT_VAR_NAME]?.value ?? SINGLE_ACCOUNT
       );
   }
   return undefined;

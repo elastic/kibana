@@ -11,6 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from '@kbn/fleet-plugin/common';
 import {
   AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ,
   getCloudConnectorEditIconTestSubj,
@@ -35,7 +36,7 @@ describe('CloudConnectorSelector', () => {
       id: 'connector-1',
       name: 'AWS Connector 1',
       cloudProvider: 'aws',
-      accountType: 'single' as const,
+      accountType: SINGLE_ACCOUNT,
       vars: {
         role_arn: { value: 'arn:aws:iam::123456789012:role/Role1' },
         external_id: { value: 'external-id-1' },
@@ -48,7 +49,7 @@ describe('CloudConnectorSelector', () => {
       id: 'connector-2',
       name: 'AWS Connector 2',
       cloudProvider: 'aws',
-      accountType: 'organization' as const,
+      accountType: ORGANIZATION_ACCOUNT,
       vars: {
         role_arn: { value: 'arn:aws:iam::123456789012:role/Role2' },
         external_id: { value: 'external-id-2' },

@@ -6,45 +6,36 @@
  */
 
 import type { NewPackagePolicy } from '../../types';
-import { extractAccountType, normalizeAccountType } from './integration_helpers';
+
+import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from '../../../common/constants/cloud_connector';
+
+import { extractAccountType, validateAccountType } from './integration_helpers';
 
 describe('cloud connector integration helpers', () => {
-  describe('normalizeAccountType', () => {
-    it('should normalize AWS single-account to single', () => {
-      expect(normalizeAccountType('single-account')).toBe('single');
+  describe('validateAccountType', () => {
+    it('should validate and return single-account', () => {
+      expect(validateAccountType(SINGLE_ACCOUNT)).toBe(SINGLE_ACCOUNT);
     });
 
-    it('should normalize AWS organization-account to organization', () => {
-      expect(normalizeAccountType('organization-account')).toBe('organization');
-    });
-
-    it('should normalize Azure single-subscription to single', () => {
-      expect(normalizeAccountType('single-subscription')).toBe('single');
-    });
-
-    it('should normalize Azure organization-subscription to organization', () => {
-      expect(normalizeAccountType('organization-subscription')).toBe('organization');
-    });
-
-    it('should pass through already normalized single value', () => {
-      expect(normalizeAccountType('single')).toBe('single');
-    });
-
-    it('should pass through already normalized organization value', () => {
-      expect(normalizeAccountType('organization')).toBe('organization');
+    it('should validate and return organization-account', () => {
+      expect(validateAccountType(ORGANIZATION_ACCOUNT)).toBe(ORGANIZATION_ACCOUNT);
     });
 
     it('should return undefined for undefined input', () => {
-      expect(normalizeAccountType(undefined)).toBeUndefined();
+      expect(validateAccountType(undefined)).toBeUndefined();
     });
 
     it('should return undefined for empty string', () => {
-      expect(normalizeAccountType('')).toBeUndefined();
+      expect(validateAccountType('')).toBeUndefined();
     });
 
     it('should return undefined for unrecognized values', () => {
-      expect(normalizeAccountType('unknown-type')).toBeUndefined();
-      expect(normalizeAccountType('other')).toBeUndefined();
+      expect(validateAccountType('unknown-type')).toBeUndefined();
+      expect(validateAccountType('other')).toBeUndefined();
+      expect(validateAccountType('single')).toBeUndefined();
+      expect(validateAccountType('organization')).toBeUndefined();
+      expect(validateAccountType('single-subscription')).toBeUndefined();
+      expect(validateAccountType('organization-subscription')).toBeUndefined();
     });
   });
 
@@ -72,20 +63,20 @@ describe('cloud connector integration helpers', () => {
     });
 
     describe('AWS account type extraction', () => {
-      it('should extract and normalize AWS single-account', () => {
+      it('should extract and validate AWS single-account', () => {
         const packagePolicy = createMockPackagePolicy({
-          'aws.account_type': { value: 'single-account' },
+          'aws.account_type': { value: SINGLE_ACCOUNT },
         });
 
-        expect(extractAccountType('aws', packagePolicy)).toBe('single');
+        expect(extractAccountType('aws', packagePolicy)).toBe(SINGLE_ACCOUNT);
       });
 
-      it('should extract and normalize AWS organization-account', () => {
+      it('should extract and validate AWS organization-account', () => {
         const packagePolicy = createMockPackagePolicy({
-          'aws.account_type': { value: 'organization-account' },
+          'aws.account_type': { value: ORGANIZATION_ACCOUNT },
         });
 
-        expect(extractAccountType('aws', packagePolicy)).toBe('organization');
+        expect(extractAccountType('aws', packagePolicy)).toBe(ORGANIZATION_ACCOUNT);
       });
 
       it('should return undefined when aws.account_type is not present', () => {
@@ -96,20 +87,20 @@ describe('cloud connector integration helpers', () => {
     });
 
     describe('Azure account type extraction', () => {
-      it('should extract and normalize Azure single-subscription', () => {
+      it('should extract and validate Azure single-account', () => {
         const packagePolicy = createMockPackagePolicy({
-          'azure.account_type': { value: 'single-subscription' },
+          'azure.account_type': { value: SINGLE_ACCOUNT },
         });
 
-        expect(extractAccountType('azure', packagePolicy)).toBe('single');
+        expect(extractAccountType('azure', packagePolicy)).toBe(SINGLE_ACCOUNT);
       });
 
-      it('should extract and normalize Azure organization-subscription', () => {
+      it('should extract and validate Azure organization-account', () => {
         const packagePolicy = createMockPackagePolicy({
-          'azure.account_type': { value: 'organization-subscription' },
+          'azure.account_type': { value: ORGANIZATION_ACCOUNT },
         });
 
-        expect(extractAccountType('azure', packagePolicy)).toBe('organization');
+        expect(extractAccountType('azure', packagePolicy)).toBe(ORGANIZATION_ACCOUNT);
       });
 
       it('should return undefined when azure.account_type is not present', () => {
@@ -156,7 +147,7 @@ describe('cloud connector integration helpers', () => {
                 {
                   enabled: true,
                   data_stream: { type: 'logs', dataset: 'test' },
-                  vars: { 'aws.account_type': { value: 'single-account' } },
+                  vars: { 'aws.account_type': { value: SINGLE_ACCOUNT } },
                 },
               ],
             },
@@ -191,4 +182,3 @@ describe('cloud connector integration helpers', () => {
     });
   });
 });
-

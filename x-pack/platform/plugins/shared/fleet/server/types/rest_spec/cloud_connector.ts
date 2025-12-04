@@ -21,10 +21,10 @@ export const CreateCloudConnectorRequestSchema = {
       }
     ),
     accountType: schema.maybe(
-      schema.oneOf([schema.literal('single'), schema.literal('organization')], {
+      schema.oneOf([schema.literal('single-account'), schema.literal('organization-account')], {
         meta: {
           description:
-            'The account type: single (single account/subscription) or organization (organization-wide).',
+            'The account type: single-account (single account/subscription) or organization-account (organization-wide).',
         },
       })
     ),

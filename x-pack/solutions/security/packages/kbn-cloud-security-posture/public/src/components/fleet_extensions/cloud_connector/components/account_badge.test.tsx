@@ -9,6 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { AccountType } from '@kbn/fleet-plugin/common/types';
+import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from '@kbn/fleet-plugin/common';
 import { AccountBadge } from './account_badge';
 
 describe('AccountBadge', () => {
@@ -21,13 +22,13 @@ describe('AccountBadge', () => {
   };
 
   describe('rendering with different account types', () => {
-    it('renders "Single Account" badge when accountType is "single"', () => {
-      renderBadge('single');
+    it('renders "Single Account" badge when accountType is "single-account"', () => {
+      renderBadge(SINGLE_ACCOUNT);
       expect(screen.getByText('Single Account')).toBeInTheDocument();
     });
 
-    it('renders "Organization" badge when accountType is "organization"', () => {
-      renderBadge('organization');
+    it('renders "Organization" badge when accountType is "organization-account"', () => {
+      renderBadge(ORGANIZATION_ACCOUNT);
       expect(screen.getByText('Organization')).toBeInTheDocument();
     });
 
@@ -39,19 +40,19 @@ describe('AccountBadge', () => {
 
   describe('variant prop behavior', () => {
     it('uses color="default" when variant is "flyout"', () => {
-      const { container } = renderBadge('single', 'flyout');
+      const { container } = renderBadge(SINGLE_ACCOUNT, 'flyout');
       const badge = container.querySelector('.euiBadge');
       expect(badge?.className).toMatch(/euiBadge-default/);
     });
 
     it('uses color="hollow" when variant is "default"', () => {
-      const { container } = renderBadge('single', 'default');
+      const { container } = renderBadge(SINGLE_ACCOUNT, 'default');
       const badge = container.querySelector('.euiBadge');
       expect(badge?.className).toMatch(/euiBadge-hollow/);
     });
 
     it('uses color="hollow" when no variant is provided', () => {
-      const { container } = renderBadge('single');
+      const { container } = renderBadge(SINGLE_ACCOUNT);
       const badge = container.querySelector('.euiBadge');
       expect(badge?.className).toMatch(/euiBadge-hollow/);
     });
@@ -59,13 +60,13 @@ describe('AccountBadge', () => {
 
   describe('badge content', () => {
     it('displays correct label for single account type with default variant', () => {
-      renderBadge('single', 'default');
+      renderBadge(SINGLE_ACCOUNT, 'default');
       const badge = screen.getByText('Single Account');
       expect(badge).toBeInTheDocument();
     });
 
     it('displays correct label for organization account type with flyout variant', () => {
-      renderBadge('organization', 'flyout');
+      renderBadge(ORGANIZATION_ACCOUNT, 'flyout');
       const badge = screen.getByText('Organization');
       expect(badge).toBeInTheDocument();
     });
