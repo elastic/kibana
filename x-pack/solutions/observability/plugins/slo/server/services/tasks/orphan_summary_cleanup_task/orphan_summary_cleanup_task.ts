@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { errors } from '@elastic/elasticsearch';
 import {
   SavedObjectsClient,
   type CoreSetup,
@@ -119,28 +118,42 @@ export class OrphanSummaryCleanupTask {
       return getDeleteTaskRunResult();
     }
 
-    this.logger.debug(`runTask started`);
-
     const [coreStart] = await core.getStartServices();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     const internalSoClient = new SavedObjectsClient(
       coreStart.savedObjects.createInternalRepository()
     );
 
+    this.logger.debug(`Task started with previous state: ${JSON.stringify(taskInstance.state)}`);
+
+    const params = this.parseTaskInstanceState(taskInstance);
+
     try {
-      await cleanupOrphanSummaries({
+      const result = await cleanupOrphanSummaries(params, {
         esClient,
         soClient: internalSoClient,
         logger: this.logger,
         abortController,
       });
-    } catch (err) {
-      if (err instanceof errors.RequestAbortedError) {
-        this.logger.warn(`Request aborted due to timeout: ${err}`);
 
-        return;
+      if (result.aborted) {
+        this.logger.debug(`Task aborted, will start from last state next run`);
+        return {
+          state: result.nextState,
+        };
       }
+
+      this.logger.debug(`Task completed successfully`);
+    } catch (err) {
       this.logger.debug(`Error: ${err}`);
     }
+  }
+
+  private parseTaskInstanceState(taskInstance: ConcreteTaskInstance) {
+    const state = taskInstance.state || {};
+
+    return {
+      searchAfter: state.searchAfter,
+    };
   }
 }

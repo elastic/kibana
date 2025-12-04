@@ -45,8 +45,12 @@ describe('cleanupOrphanSummaries', () => {
   it('should do nothing when summary index is empty', async () => {
     esClient.search.mockResolvedValueOnce(createMockAggregationResponse([]));
 
-    await cleanupOrphanSummaries({ esClient, soClient: soClient as any, logger, abortController });
+    const result = await cleanupOrphanSummaries(
+      {},
+      { esClient, soClient: soClient as any, logger, abortController }
+    );
 
+    expect(result).toEqual({ aborted: false, completed: true });
     expect(esClient.search).toHaveBeenCalledTimes(1);
     expect(soClient.find).not.toHaveBeenCalled();
     expect(esClient.deleteByQuery).not.toHaveBeenCalled();
@@ -72,8 +76,12 @@ describe('cleanupOrphanSummaries', () => {
       per_page: 3,
     } as any);
 
-    await cleanupOrphanSummaries({ esClient, soClient: soClient as any, logger, abortController });
+    const result = await cleanupOrphanSummaries(
+      {},
+      { esClient, soClient: soClient as any, logger, abortController }
+    );
 
+    expect(result).toEqual({ aborted: false, completed: true });
     expect(esClient.search).toHaveBeenCalledTimes(1);
     expect(soClient.find).toHaveBeenCalledTimes(1);
     expect(esClient.deleteByQuery).not.toHaveBeenCalled();
@@ -101,8 +109,12 @@ describe('cleanupOrphanSummaries', () => {
       per_page: 5,
     } as any);
 
-    await cleanupOrphanSummaries({ esClient, soClient: soClient as any, logger, abortController });
+    const result = await cleanupOrphanSummaries(
+      {},
+      { esClient, soClient: soClient as any, logger, abortController }
+    );
 
+    expect(result).toEqual({ aborted: false, completed: true });
     expect(esClient.deleteByQuery).toHaveBeenCalledWith({
       index: SUMMARY_DESTINATION_INDEX_PATTERN,
       wait_for_completion: false,
@@ -142,8 +154,12 @@ describe('cleanupOrphanSummaries', () => {
       per_page: 2,
     } as any);
 
-    await cleanupOrphanSummaries({ esClient, soClient: soClient as any, logger, abortController });
+    const result = await cleanupOrphanSummaries(
+      {},
+      { esClient, soClient: soClient as any, logger, abortController }
+    );
 
+    expect(result).toEqual({ aborted: false, completed: true });
     expect(esClient.deleteByQuery).toHaveBeenCalledWith({
       index: SUMMARY_DESTINATION_INDEX_PATTERN,
       wait_for_completion: false,
@@ -169,48 +185,44 @@ describe('cleanupOrphanSummaries', () => {
   });
 
   it('should paginate through summaries using after_key', async () => {
-    // Generate 1000 buckets for the first page (CHUNK_SIZE = 1000)
-    // Include slo-orphan-1 as an orphan (no matching definition)
-    const firstPageBuckets = Array.from({ length: 1000 }, (_, i) => ({
-      key: { id: i === 0 ? 'slo-orphan-1' : `slo-${i}`, revision: 1 },
-    }));
-
     // First batch with after_key indicating more results (full page triggers pagination)
     esClient.search.mockResolvedValueOnce(
-      createMockAggregationResponse(firstPageBuckets, { id: 'slo-999', revision: 1 })
+      createMockAggregationResponse(
+        [
+          { key: { id: 'slo-orphan-1', revision: 1 } }, // orphan
+          { key: { id: 'slo-1', revision: 1 } },
+        ],
+        { id: 'slo-1', revision: 1 }
+      )
     );
 
-    // Second batch without after_key (last page, fewer than CHUNK_SIZE)
+    // Second batch without after_key (last page, fewer than chunkSize)
     esClient.search.mockResolvedValueOnce(
-      createMockAggregationResponse([
-        { key: { id: 'slo-1000', revision: 1 } },
-        { key: { id: 'slo-orphan-2', revision: 1 } }, // orphan
-      ])
+      createMockAggregationResponse([{ key: { id: 'slo-orphan-2', revision: 1 } }]) // orphan
     );
 
-    // First batch: return all except slo-orphan-1
-    soClient.find.mockResolvedValueOnce({
-      total: 999,
-      saved_objects: firstPageBuckets
-        .filter((b) => b.key.id !== 'slo-orphan-1')
-        .map((b, i) => ({
-          id: `so-${i}`,
-          attributes: { id: b.key.id, revision: b.key.revision },
-        })),
-      page: 1,
-      per_page: 1000,
-    } as any);
-
-    // Second batch: slo-1000 exists, slo-orphan-2 is orphan
+    // First batch: return only slo-1
     soClient.find.mockResolvedValueOnce({
       total: 1,
-      saved_objects: [{ id: 'so-1000', attributes: { id: 'slo-1000', revision: 1 } }],
+      saved_objects: [{ id: 'so-1', attributes: { id: 'slo-1', revision: 1 } }],
       page: 1,
       per_page: 2,
     } as any);
 
-    await cleanupOrphanSummaries({ esClient, soClient: soClient as any, logger, abortController });
+    // Second batch: no definitions found
+    soClient.find.mockResolvedValueOnce({
+      total: 0,
+      saved_objects: [],
+      page: 1,
+      per_page: 1,
+    } as any);
 
+    const result = await cleanupOrphanSummaries(
+      { chunkSize: 2 },
+      { esClient, soClient: soClient as any, logger, abortController }
+    );
+
+    expect(result).toEqual({ aborted: false, completed: true });
     expect(esClient.search).toHaveBeenCalledTimes(2);
     expect(soClient.find).toHaveBeenCalledTimes(2);
     expect(esClient.deleteByQuery).toHaveBeenCalledTimes(2);
@@ -255,30 +267,34 @@ describe('cleanupOrphanSummaries', () => {
   });
 
   it('should pass the after_key to subsequent search calls', async () => {
-    const afterKey = { id: 'slo-1000', revision: 1 };
-
-    // Generate 1000 buckets to trigger pagination (CHUNK_SIZE = 1000)
-    const fullPageBuckets = Array.from({ length: 1000 }, (_, i) => ({
-      key: { id: `slo-${i + 1}`, revision: 1 },
-    }));
+    const afterKey = { id: 'slo-2', revision: 1 };
 
     esClient.search
-      .mockResolvedValueOnce(createMockAggregationResponse(fullPageBuckets, afterKey))
+      .mockResolvedValueOnce(
+        createMockAggregationResponse(
+          [{ key: { id: 'slo-1', revision: 1 } }, { key: { id: 'slo-2', revision: 1 } }],
+          afterKey
+        )
+      )
       .mockResolvedValueOnce(createMockAggregationResponse([]));
 
     // Return all definitions as existing (no orphans to delete)
     soClient.find.mockResolvedValueOnce({
-      total: 1000,
-      saved_objects: fullPageBuckets.map((b, i) => ({
-        id: `so-${i + 1}`,
-        attributes: { id: b.key.id, revision: b.key.revision },
-      })),
+      total: 2,
+      saved_objects: [
+        { id: 'so-1', attributes: { id: 'slo-1', revision: 1 } },
+        { id: 'so-2', attributes: { id: 'slo-2', revision: 1 } },
+      ],
       page: 1,
-      per_page: 1000,
+      per_page: 2,
     } as any);
 
-    await cleanupOrphanSummaries({ esClient, soClient: soClient as any, logger, abortController });
+    const result = await cleanupOrphanSummaries(
+      { chunkSize: 2 },
+      { esClient, soClient: soClient as any, logger, abortController }
+    );
 
+    expect(result).toEqual({ aborted: false, completed: true });
     // Second call should include the after_key
     expect(esClient.search).toHaveBeenNthCalledWith(
       2,
@@ -298,11 +314,99 @@ describe('cleanupOrphanSummaries', () => {
   it('should use abort controller signal in search calls', async () => {
     esClient.search.mockResolvedValueOnce(createMockAggregationResponse([]));
 
-    await cleanupOrphanSummaries({ esClient, soClient: soClient as any, logger, abortController });
+    await cleanupOrphanSummaries(
+      {},
+      { esClient, soClient: soClient as any, logger, abortController }
+    );
 
     expect(esClient.search).toHaveBeenCalledWith(
       expect.any(Object),
       expect.objectContaining({ signal: abortController.signal })
+    );
+  });
+
+  it('should stop after maxRuns iterations and return aborted result with nextState', async () => {
+    // Set up mock responses for 3 iterations with pagination
+    esClient.search
+      .mockResolvedValueOnce(
+        createMockAggregationResponse([{ key: { id: 'slo-1', revision: 1 } }], {
+          id: 'slo-1',
+          revision: 1,
+        })
+      )
+      .mockResolvedValueOnce(
+        createMockAggregationResponse([{ key: { id: 'slo-2', revision: 1 } }], {
+          id: 'slo-2',
+          revision: 1,
+        })
+      )
+      .mockResolvedValueOnce(
+        createMockAggregationResponse([{ key: { id: 'slo-3', revision: 1 } }], {
+          id: 'slo-3',
+          revision: 1,
+        })
+      );
+
+    // All definitions exist (no orphans to delete)
+    soClient.find
+      .mockResolvedValueOnce({
+        total: 1,
+        saved_objects: [{ id: 'so-1', attributes: { id: 'slo-1', revision: 1 } }],
+        page: 1,
+        per_page: 1,
+      } as any)
+      .mockResolvedValueOnce({
+        total: 1,
+        saved_objects: [{ id: 'so-2', attributes: { id: 'slo-2', revision: 1 } }],
+        page: 1,
+        per_page: 1,
+      } as any);
+
+    const result = await cleanupOrphanSummaries(
+      { chunkSize: 1, maxRuns: 2 },
+      { esClient, soClient: soClient as any, logger, abortController }
+    );
+
+    expect(result).toEqual({
+      aborted: true,
+      completed: false,
+      nextState: { searchAfter: { id: 'slo-2', revision: 1 } },
+    });
+    expect(esClient.search).toHaveBeenCalledTimes(2);
+    expect(soClient.find).toHaveBeenCalledTimes(2);
+  });
+
+  it('should resume from searchAfter state', async () => {
+    const searchAfter = { id: 'slo-previous', revision: 1 };
+
+    esClient.search.mockResolvedValueOnce(
+      createMockAggregationResponse([{ key: { id: 'slo-next', revision: 1 } }])
+    );
+
+    soClient.find.mockResolvedValueOnce({
+      total: 1,
+      saved_objects: [{ id: 'so-next', attributes: { id: 'slo-next', revision: 1 } }],
+      page: 1,
+      per_page: 1,
+    } as any);
+
+    const result = await cleanupOrphanSummaries(
+      { searchAfter },
+      { esClient, soClient: soClient as any, logger, abortController }
+    );
+
+    expect(result).toEqual({ aborted: false, completed: true });
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        aggs: expect.objectContaining({
+          id_revision: expect.objectContaining({
+            composite: expect.objectContaining({
+              after: searchAfter,
+            }),
+          }),
+        }),
+      }),
+      expect.any(Object)
     );
   });
 });

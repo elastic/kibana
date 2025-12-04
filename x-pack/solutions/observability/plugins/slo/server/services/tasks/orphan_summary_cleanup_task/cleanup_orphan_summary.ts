@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import type { AggregationsCompositeAggregateKey } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger, SavedObjectsClient } from '@kbn/core/server';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
@@ -19,6 +20,27 @@ interface Dependencies {
   abortController: AbortController;
 }
 
+interface RunParams {
+  searchAfter?: AggregationsCompositeAggregateKey;
+  chunkSize?: number;
+  maxRuns?: number;
+}
+
+interface AbortedRunResult {
+  aborted: true;
+  completed: false;
+  nextState: {
+    searchAfter: AggregationsCompositeAggregateKey | undefined;
+  };
+}
+
+interface CompletedRunResult {
+  completed: true;
+  aborted: false;
+}
+
+type RunResult = AbortedRunResult | CompletedRunResult;
+
 interface SLO {
   id: string;
   revision: number;
@@ -26,70 +48,112 @@ interface SLO {
 
 type SLOKey = `${SLO['id']}:::${SLO['revision']}`;
 
-const CHUNK_SIZE = 1000;
+const DEFAULT_CHUNK_SIZE = 1000;
+const DEFAULT_MAX_RUNS = 10;
 
-export async function cleanupOrphanSummaries(dependencies: Dependencies) {
+export async function cleanupOrphanSummaries(
+  params: RunParams,
+  dependencies: Dependencies
+): Promise<RunResult> {
   const { esClient, logger } = dependencies;
-  let searchAfter: AggregationsCompositeAggregateKey | undefined;
+  const chunkSize = params.chunkSize ?? DEFAULT_CHUNK_SIZE;
+  const maxRuns = params.maxRuns ?? DEFAULT_MAX_RUNS;
+  let searchAfter = params.searchAfter;
+  let currentRun = 0;
 
-  do {
-    const { list, nextSearchAfter } = await fetchUniqueSloFromSummary(searchAfter, dependencies);
-    searchAfter = nextSearchAfter;
+  try {
+    do {
+      currentRun++;
 
-    if (list.length === 0) {
-      logger.debug(`No more SLO summary items to process`);
-      return;
-    }
-
-    const existingDefinitionSet = await findSloDefinitionSet(list, dependencies);
-
-    const nextDelete = list.filter((item) => !existingDefinitionSet.has(getKey(item)));
-
-    if (nextDelete.length > 0) {
-      logger.debug(
-        `Deleting ${nextDelete.length} SLO ids from the summary index (including all their instances)`
+      const { list, nextSearchAfter } = await fetchUniqueSloFromSummary(
+        searchAfter,
+        chunkSize,
+        dependencies
       );
+      searchAfter = nextSearchAfter;
 
-      await esClient.deleteByQuery({
-        index: SUMMARY_DESTINATION_INDEX_PATTERN,
-        wait_for_completion: false,
-        conflicts: 'proceed',
-        slices: 'auto',
-        query: {
-          bool: {
-            should: nextDelete.map(({ id, revision }) => {
-              return {
-                bool: {
-                  must: [
-                    {
-                      term: {
-                        'slo.id': id,
+      if (list.length === 0) {
+        logger.debug(`No more SLO summary items to process`);
+        return { aborted: false, completed: true };
+      }
+
+      const existingDefinitionSet = await findSloDefinitionSet(list, dependencies);
+      const nextDelete = list.filter((item) => !existingDefinitionSet.has(getKey(item)));
+
+      if (nextDelete.length > 0) {
+        logger.debug(
+          `Deleting ${nextDelete.length} SLO ids from the summary index (including all their instances)`
+        );
+
+        await esClient.deleteByQuery({
+          index: SUMMARY_DESTINATION_INDEX_PATTERN,
+          wait_for_completion: false,
+          conflicts: 'proceed',
+          slices: 'auto',
+          query: {
+            bool: {
+              should: nextDelete.map(({ id, revision }) => {
+                return {
+                  bool: {
+                    must: [
+                      {
+                        term: {
+                          'slo.id': id,
+                        },
                       },
-                    },
-                    {
-                      term: {
-                        'slo.revision': revision,
+                      {
+                        term: {
+                          'slo.revision': revision,
+                        },
                       },
-                    },
-                  ],
-                },
-              };
-            }),
+                    ],
+                  },
+                };
+              }),
+            },
           },
-        },
-      });
+        });
+      }
+
+      if (currentRun >= maxRuns) {
+        logger.debug(
+          `Reached maximum number of runs (${maxRuns}), stopping here to avoid long running tasks`
+        );
+        return {
+          aborted: true,
+          completed: false,
+          nextState: { searchAfter },
+        };
+      }
+    } while (searchAfter);
+  } catch (error) {
+    if (error instanceof errors.RequestAbortedError) {
+      logger.debug(`Task aborted during execution`);
+
+      return {
+        aborted: true,
+        completed: false,
+        nextState: { searchAfter },
+      };
     }
-  } while (searchAfter);
+  }
+
+  return { aborted: false, completed: true };
 }
 
 async function fetchUniqueSloFromSummary(
   searchAfter: AggregationsCompositeAggregateKey | undefined,
+  chunkSize: number,
   { logger, esClient, abortController }: Dependencies
 ): Promise<{
   nextSearchAfter: AggregationsCompositeAggregateKey | undefined;
   list: Array<SLO>;
 }> {
-  logger.debug(`Fetching unique SLO (id, revision) tuples from summary index after ${searchAfter}`);
+  logger.debug(
+    `Fetching unique SLO (id, revision) tuples from summary index after ${JSON.stringify(
+      searchAfter
+    )}`
+  );
 
   const result = await esClient.search<
     unknown,
@@ -111,7 +175,7 @@ async function fetchUniqueSloFromSummary(
       aggs: {
         id_revision: {
           composite: {
-            size: CHUNK_SIZE,
+            size: chunkSize,
             sources: [
               {
                 id: {
@@ -146,7 +210,7 @@ async function fetchUniqueSloFromSummary(
 
   return {
     nextSearchAfter:
-      buckets.length < CHUNK_SIZE ? undefined : result.aggregations?.id_revision.after_key,
+      buckets.length < chunkSize ? undefined : result.aggregations?.id_revision.after_key,
     list: buckets.map(({ key }) => ({
       id: String(key.id),
       revision: Number(key.revision),
