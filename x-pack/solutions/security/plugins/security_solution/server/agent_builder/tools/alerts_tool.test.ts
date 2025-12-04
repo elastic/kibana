@@ -6,7 +6,6 @@
  */
 
 import { ToolResultType } from '@kbn/onechat-common';
-import type { ToolHandlerContext } from '@kbn/onechat-server/tools';
 import { runSearchTool } from '@kbn/onechat-genai-utils/tools';
 import { DEFAULT_ALERTS_INDEX, ESSENTIAL_ALERT_FIELDS } from '../../../common/constants';
 import {
@@ -247,4 +246,3 @@ describe('alertsTool', () => {
     });
   });
 });
-
