@@ -5,15 +5,8 @@
  * 2.0.
  */
 import type { DataSourcesRegistryPluginSetup } from '@kbn/data-sources-registry-plugin/server';
+import { notionDataSource } from './notion';
 
-/* eslint-disable @typescript-eslint/no-empty-interface */
-
-export interface DataConnectorsServerSetup {}
-
-export interface DataConnectorsServerStart {}
-
-export interface DataConnectorsServerSetupDependencies {
-  dataSourcesRegistry: DataSourcesRegistryPluginSetup;
+export function registerDataSources(dataSourcesRegistry: DataSourcesRegistryPluginSetup) {
+  dataSourcesRegistry.register(notionDataSource);
 }
-
-export interface DataConnectorsServerStartDependencies {}
