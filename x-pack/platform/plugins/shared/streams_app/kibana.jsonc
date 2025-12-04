@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/streams-app-plugin",
-  "owner": "@elastic/obs-onboarding-team @elastic/obs-ux-management-team",
+  "owner": "@elastic/obs-onboarding-team @elastic/actionable-obs-team",
   "group": "platform",
   "visibility": "shared",
   "plugin": {
