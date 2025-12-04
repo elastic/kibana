@@ -100,18 +100,16 @@ export const AddColumnPopover = ({
   }, [validationError, columnName]);
 
   const returnFocus = useCallback(() => {
-    if (columnIndex !== undefined) {
-      requestAnimationFrame(() => {
-        const headerWrapper = findElementBySelectorOrRef(`[${COLUMN_INDEX_PROP}="${columnIndex}"]`);
-
-        if (headerWrapper) {
-          headerWrapper.focus();
-        }
-      });
-      return false;
-    } else {
+    if (columnIndex === undefined) {
       return true;
     }
+
+    requestAnimationFrame(() => {
+      const headerWrapper = findElementBySelectorOrRef(`[${COLUMN_INDEX_PROP}="${columnIndex}"]`);
+      headerWrapper?.focus();
+    });
+
+    return false;
   }, [columnIndex]);
 
   return (
