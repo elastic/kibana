@@ -242,6 +242,18 @@ Object {
       },
     },
     Object {
+      "math": Object {
+        "expression": "price * quantity",
+        "to": "total",
+      },
+    },
+    Object {
+      "math": Object {
+        "expression": "attributes.price * attributes.quantity + attributes.tax",
+        "to": "attributes.total",
+      },
+    },
+    Object {
       "grok": Object {
         "ecs_compatibility": "v1",
         "field": "body.message",

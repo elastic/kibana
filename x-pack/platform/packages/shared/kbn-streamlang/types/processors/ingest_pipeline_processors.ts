@@ -13,6 +13,7 @@ import type {
   RenameProcessor,
   SetProcessor,
   ManualIngestPipelineProcessor,
+  MathProcessor,
   AppendProcessor,
   ConvertProcessor,
   RemoveByPrefixProcessor,
@@ -98,11 +99,18 @@ export type IngestPipelineManualIngestPipelineProcessor = RenameFieldsAndRemoveA
   { where: 'if' }
 >;
 
+// Math (uses script processor internally)
+export type IngestPipelineMathProcessor = RenameFieldsAndRemoveAction<
+  MathProcessor,
+  { where: 'if' }
+>;
+
 export type IngestPipelineProcessor =
   | IngestPipelineGrokProcessor
   | IngestPipelineDissectProcessor
   | IngestPipelineDateProcessor
   | IngestPipelineDropProcessor
+  | IngestPipelineMathProcessor
   | IngestPipelineRenameProcessor
   | IngestPipelineSetProcessor
   | IngestPipelineAppendProcessor

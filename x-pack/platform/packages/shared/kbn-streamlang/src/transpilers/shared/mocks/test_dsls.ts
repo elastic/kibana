@@ -12,6 +12,7 @@ import type {
   DissectProcessor,
   GrokProcessor,
   ManualIngestPipelineProcessor,
+  MathProcessor,
   RenameProcessor,
   SetProcessor,
   DropDocumentProcessor,
@@ -63,6 +64,18 @@ export const comprehensiveTestDSL: StreamlangDSL = {
       to: 'attributes.status',
       value: 'active',
     } as SetProcessor,
+    // Math processor - simple arithmetic
+    {
+      action: 'math',
+      expression: 'price * quantity',
+      to: 'total',
+    } as MathProcessor,
+    // Math processor - with dotted field paths
+    {
+      action: 'math',
+      expression: 'attributes.price * attributes.quantity + attributes.tax',
+      to: 'attributes.total',
+    } as MathProcessor,
     // Grok parsing
     {
       action: 'grok',

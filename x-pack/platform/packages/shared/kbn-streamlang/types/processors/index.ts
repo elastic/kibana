@@ -312,11 +312,30 @@ export const replaceProcessorSchema = processorBaseWithWhereSchema.extend({
   ignore_missing: z.optional(z.boolean()),
 }) satisfies z.Schema<ReplaceProcessor>;
 
+/**
+ * Math processor
+ */
+
+export interface MathProcessor extends ProcessorBaseWithWhere {
+  action: 'math';
+  expression: string; // TinyMath expression, e.g., "attributes.price * attributes.quantity"
+  to: string; // Target field for the result
+  ignore_missing?: boolean; // If true, skip processing if any of the referenced fields in the expression is missing
+}
+
+export const mathProcessorSchema = processorBaseWithWhereSchema.extend({
+  action: z.literal('math'),
+  expression: NonEmptyString,
+  to: StreamlangTargetField,
+  ignore_missing: z.optional(z.boolean()),
+}) satisfies z.Schema<MathProcessor>;
+
 export type StreamlangProcessorDefinition =
   | DateProcessor
   | DissectProcessor
   | DropDocumentProcessor
   | GrokProcessor
+  | MathProcessor
   | RenameProcessor
   | SetProcessor
   | AppendProcessor
@@ -331,6 +350,7 @@ export const streamlangProcessorSchema = z.union([
   dissectProcessorSchema,
   dateProcessorSchema,
   dropDocumentProcessorSchema,
+  mathProcessorSchema,
   renameProcessorSchema,
   setProcessorSchema,
   appendProcessorSchema,
@@ -354,6 +374,7 @@ export const isProcessWithIgnoreMissingOption = createIsNarrowSchema(
     dissectProcessorSchema,
     convertProcessorSchema,
     replaceProcessorSchema,
+    mathProcessorSchema,
   ])
 );
 
