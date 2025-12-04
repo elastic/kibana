@@ -60,15 +60,10 @@ const createThreatMatchRule = ({
   name = 'Query with a rule id',
   index = ['auditbeat-*'],
   query = '*:*',
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   rule_id = 'rule-1',
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   threat_indicator_path = 'threat.indicator',
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   threat_query = 'source.ip: "188.166.120.93"', // narrow things down with a query to a specific source ip
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   threat_index = ['auditbeat-*'],
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   threat_mapping = [
     // We match host.name against host.name
     {

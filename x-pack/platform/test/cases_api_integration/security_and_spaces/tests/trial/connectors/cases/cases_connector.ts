@@ -1871,7 +1871,6 @@ const generateId = ({
 const removeServerGeneratedData = (
   theCase: Case
 ): Omit<Case, 'created_at' | 'updated_at' | 'version'> => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { created_at, updated_at, version, ...restCase } = theCase;
 
   return restCase;

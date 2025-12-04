@@ -124,7 +124,6 @@ export const tasks: TelemetryTask[] = [
         expected_metric_document_count: number;
         ratio: number;
       }> {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         let { expected_metric_document_count } = prevResult ?? {
           transaction_count: 0,
           expected_metric_document_count: 0,

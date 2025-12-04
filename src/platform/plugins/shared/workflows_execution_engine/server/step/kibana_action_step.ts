@@ -210,10 +210,9 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
       const { Agent } = await import('undici');
 
       const {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        skip_ssl_verification, // eslint-disable-next-line @typescript-eslint/naming-convention
-        follow_redirects, // eslint-disable-next-line @typescript-eslint/naming-convention
-        max_redirects, // eslint-disable-next-line @typescript-eslint/naming-convention
+        skip_ssl_verification,
+        follow_redirects,
+        max_redirects,
         keep_alive,
         ...otherOptions
       } = fetcherOptions;

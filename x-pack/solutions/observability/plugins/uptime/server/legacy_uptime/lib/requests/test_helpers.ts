@@ -35,7 +35,6 @@ export const setupMockEsCompositeQuery = <K, C, I>(
 ): ElasticsearchClientMock => {
   const esMock = elasticsearchServiceMock.createElasticsearchClient();
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   criteria.forEach(({ after_key, bucketCriteria }) => {
     const mockResponse = {
       aggregations: {

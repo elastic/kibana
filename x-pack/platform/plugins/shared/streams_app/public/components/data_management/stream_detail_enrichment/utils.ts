@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import { htmlIdGenerator } from '@elastic/eui';
 import { DraftGrokExpression } from '@kbn/grok-ui';
 import type {

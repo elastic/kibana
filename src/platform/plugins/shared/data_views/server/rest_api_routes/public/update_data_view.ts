@@ -199,10 +199,7 @@ const updateDataViewRouteFactory =
             );
             const id = req.params.id;
 
-            const {
-              // eslint-disable-next-line @typescript-eslint/naming-convention
-              refresh_fields = true,
-            } = req.body;
+            const { refresh_fields = true } = req.body;
 
             const spec = req.body[serviceKey] as DataViewSpec;
 
