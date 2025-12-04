@@ -41,3 +41,23 @@ export interface UpdateCloudConnectorResponse {
 export interface DeleteCloudConnectorResponse {
   id: string;
 }
+
+export interface CloudConnectorUsageItem {
+  id: string;
+  name: string;
+  package?: {
+    name: string;
+    title: string;
+    version: string;
+  };
+  policy_ids: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GetCloudConnectorUsageResponse {
+  items: CloudConnectorUsageItem[];
+  total: number;
+  page: number;
+  perPage: number;
+}
