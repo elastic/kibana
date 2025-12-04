@@ -31,7 +31,7 @@ import {
   LISTS_API_SUMMARY,
   RULES_API_ALL,
   RULES_API_READ,
-  RULES_FEATURE_ID,
+  RULES_FEATURE_ID_V1,
   RULES_FEATURE_ID_V2,
   RULES_UI_EDIT,
   RULES_UI_READ,
@@ -69,13 +69,13 @@ export const getRulesBaseKibanaFeature = (
       {
         defaultMessage: 'The {currentId} permissions are deprecated, please see {latestId}.',
         values: {
-          currentId: RULES_FEATURE_ID,
+          currentId: RULES_FEATURE_ID_V1,
           latestId: RULES_FEATURE_ID_V2,
         },
       }
     ),
   },
-  id: RULES_FEATURE_ID,
+  id: RULES_FEATURE_ID_V1,
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionRolesTitle',
     {
@@ -84,7 +84,7 @@ export const getRulesBaseKibanaFeature = (
   ),
   order: 1100,
   category: DEFAULT_APP_CATEGORIES.security,
-  app: [RULES_FEATURE_ID, 'kibana'],
+  app: [RULES_FEATURE_ID_V1, 'kibana'],
   catalogue: [APP_ID],
   alerting: alertingFeatures,
   management: {
@@ -101,7 +101,7 @@ export const getRulesBaseKibanaFeature = (
           },
         ],
       },
-      app: [RULES_FEATURE_ID, 'kibana'],
+      app: [RULES_FEATURE_ID_V1, 'kibana'],
       catalogue: [APP_ID],
       savedObject: {
         all: params.savedObjects,
@@ -140,7 +140,7 @@ export const getRulesBaseKibanaFeature = (
           },
         ],
       },
-      app: [RULES_FEATURE_ID, 'kibana'],
+      app: [RULES_FEATURE_ID_V1, 'kibana'],
       catalogue: [APP_ID],
       savedObject: {
         all: [],
