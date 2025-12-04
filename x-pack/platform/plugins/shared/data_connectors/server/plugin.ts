@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import type {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+} from '@kbn/core/server';
+import { registerRoutes } from './routes';
 import { registerDataSources } from './data_sources';
 import type {
   DataConnectorsServerSetup,
@@ -24,7 +31,11 @@ export class DataConnectorsServerPlugin
       DataConnectorsServerStartDependencies
     >
 {
-  constructor(context: PluginInitializerContext) {}
+  private readonly logger: Logger;
+
+  constructor(context: PluginInitializerContext) {
+    this.logger = context.logger.get();
+  }
 
   setup(
     core: CoreSetup,
@@ -37,6 +48,10 @@ export class DataConnectorsServerPlugin
     registerDataSources(dataSourcesRegistry);
 
     registerUISettings({ uiSettings });
+
+    // Register HTTP routes
+    const router = core.http.createRouter();
+    registerRoutes(router, this.logger);
 
     return {};
   }
