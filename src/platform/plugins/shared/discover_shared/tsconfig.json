@@ -13,6 +13,5 @@
     "@kbn/apm-types",
     "@kbn/apm-types-shared",
     "@kbn/data-views-plugin",
-    "@kbn/lens-common"
   ]
 }
