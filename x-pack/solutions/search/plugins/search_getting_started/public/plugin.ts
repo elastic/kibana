@@ -10,7 +10,6 @@ import { BehaviorSubject, type Subscription } from 'rxjs';
 import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { AppStatus, DEFAULT_APP_CATEGORIES, type AppUpdater } from '@kbn/core/public';
 import { QueryClient } from '@kbn/react-query';
-import { SEARCH_GETTING_STARTED_FEATURE_FLAG } from '@kbn/search-shared-ui/src/constants';
 import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_PATH } from '../common';
 
 import type {
@@ -79,18 +78,6 @@ export class SearchGettingStartedPlugin
         this.appUpdater$.next(() => ({
           status: AppStatus.inaccessible,
         }));
-      } else {
-        // Subscribe to feature flag changes (only matters if not a viewer)
-        this.featureFlagSubscription = core.featureFlags
-          .getBooleanValue$(SEARCH_GETTING_STARTED_FEATURE_FLAG, true)
-          .subscribe((featureFlagEnabled) => {
-            const status: AppStatus = featureFlagEnabled
-              ? AppStatus.accessible
-              : AppStatus.inaccessible;
-            this.appUpdater$.next(() => ({
-              status,
-            }));
-          });
       }
     });
 

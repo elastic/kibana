@@ -82,6 +82,11 @@ export default function searchSolutionNavigation({
           pageTestSubject: 'playgroundsUnlicensed',
         },
         {
+          link: { navId: 'gettingStarted' },
+          breadcrumbs: ['Getting started'],
+          pageTestSubject: 'gettingStartedHeader',
+        },
+        {
           link: { deepLinkId: 'dev_tools' },
           breadcrumbs: ['Developer Tools'],
           pageTestSubject: 'console',

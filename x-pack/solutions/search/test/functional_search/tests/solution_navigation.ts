@@ -80,6 +80,11 @@ export default function searchSolutionNavigation({
           pageTestSubject: 'playgroundsListPage',
         },
         {
+          link: { navId: 'gettingStarted' },
+          breadcrumbs: ['Getting started'],
+          pageTestSubject: 'gettingStartedHeader',
+        },
+        {
           link: { deepLinkId: 'dev_tools' },
           breadcrumbs: ['Developer Tools'],
           pageTestSubject: 'console',
@@ -104,6 +109,7 @@ export default function searchSolutionNavigation({
       await solutionNavigation.sidenav.expectOnlyDefinedLinks(
         [
           'searchHomepage',
+          'gettingStarted',
           'agent_builder',
           'discover',
           'dashboards',

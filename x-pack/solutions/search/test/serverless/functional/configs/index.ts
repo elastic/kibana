@@ -22,5 +22,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('../test_suites/rules/rule_details'));
     loadTestFile(require.resolve('../test_suites/ml'));
     loadTestFile(require.resolve('../test_suites/custom_role_access'));
+    loadTestFile(require.resolve('../test_suites/search_getting_started'));
   });
 }
