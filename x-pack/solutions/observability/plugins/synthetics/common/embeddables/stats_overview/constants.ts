@@ -5,15 +5,4 @@
  * 2.0.
  */
 
-interface Option {
-  label: string;
-  value: string;
-}
-
-export interface MonitorFilters {
-  projects: Option[];
-  tags: Option[];
-  monitorIds: Option[];
-  monitorTypes: Option[];
-  locations: Option[];
-}
+export const SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE = 'SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE';
