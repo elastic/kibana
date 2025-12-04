@@ -242,6 +242,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         return true;
       });
 
+      await sloApi.disable({ sloId }, adminRoleAuthc);
+
       // Repair the SLO with sloEnabled: false (simulating that the SLO should be disabled)
       await sloApi.repair([sloId], adminRoleAuthc);
 
