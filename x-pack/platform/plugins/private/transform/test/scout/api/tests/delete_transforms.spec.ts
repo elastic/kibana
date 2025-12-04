@@ -23,7 +23,7 @@ apiTest.describe('/internal/transform/delete_transforms', { tag: tags.ESS_ONLY }
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
-    // await apiServices.transform.cleanTransformIndices();
+    await apiServices.transform.cleanTransformIndices();
   });
 
   apiTest.describe('single transform deletion', () => {
@@ -32,7 +32,7 @@ apiTest.describe('/internal/transform/delete_transforms', { tag: tags.ESS_ONLY }
 
     apiTest.beforeEach(async ({ esClient, apiServices }) => {
       const config = generateTransformConfig(transformId);
-      // await apiServices.transform.createTransform(transformId, config);
+      await apiServices.transform.createTransform(transformId, config);
       await esClient.indices.create({ index: destinationIndex });
     });
 
@@ -108,7 +108,7 @@ apiTest.describe('/internal/transform/delete_transforms', { tag: tags.ESS_ONLY }
     apiTest.beforeEach(async ({ esClient, apiServices }) => {
       for (let i = 0; i < transformIds.length; i++) {
         const config = generateTransformConfig(transformIds[i]);
-        // await apiServices.transform.createTransform(transformIds[i], config);
+        await apiServices.transform.createTransform(transformIds[i], config);
         await esClient.indices.create({ index: destinationIndices[i] });
       }
     });
@@ -117,7 +117,11 @@ apiTest.describe('/internal/transform/delete_transforms', { tag: tags.ESS_ONLY }
       for (const index of destinationIndices) {
         try {
           await esClient.indices.delete({ index });
-        } catch {}
+        } catch (error) {
+          throw new Error(
+            `Failed to delete destination index ${index} in afterEach hook: ${error}`
+          );
+        }
       }
     });
 
@@ -184,7 +188,9 @@ apiTest.describe('/internal/transform/delete_transforms', { tag: tags.ESS_ONLY }
     apiTest.afterAll(async ({ esClient }) => {
       try {
         await esClient.indices.delete({ index: destinationIndex });
-      } catch {}
+      } catch (error) {
+        throw new Error(`Failed to delete destination index in afterAll hook: ${error}`);
+      }
     });
 
     apiTest('should delete transform and destination index', async ({ apiClient }) => {

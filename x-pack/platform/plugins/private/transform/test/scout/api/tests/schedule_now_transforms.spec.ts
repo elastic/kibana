@@ -22,7 +22,7 @@ apiTest.describe('/internal/transform/schedule_now_transforms', { tag: tags.ESS_
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
-    // await apiServices.transform.cleanTransformIndices();
+    await apiServices.transform.cleanTransformIndices();
   });
 
   apiTest.describe('single transform _schedule_now', () => {
@@ -30,12 +30,12 @@ apiTest.describe('/internal/transform/schedule_now_transforms', { tag: tags.ESS_
 
     apiTest.beforeEach(async ({ esClient, apiServices }) => {
       const config = generateTransformConfig(transformId, true);
-      // await apiServices.transform.createTransform(transformId, config);
+      await apiServices.transform.createTransform(transformId, config);
       await esClient.transform.startTransform({ transform_id: transformId });
     });
 
     apiTest.afterEach(async ({ apiServices }) => {
-      // await apiServices.transform.cleanTransformIndices();
+      await apiServices.transform.cleanTransformIndices();
     });
 
     apiTest('should schedule the transform by transformId', async ({ apiClient }) => {
@@ -107,13 +107,13 @@ apiTest.describe('/internal/transform/schedule_now_transforms', { tag: tags.ESS_
     apiTest.beforeEach(async ({ esClient, apiServices }) => {
       for (const id of transformIds) {
         const config = generateTransformConfig(id, true);
-        // await apiServices.transform.createTransform(id, config);
+        await apiServices.transform.createTransform(id, config);
         await esClient.transform.startTransform({ transform_id: id });
       }
     });
 
     apiTest.afterEach(async ({ apiServices }) => {
-      // await apiServices.transform.cleanTransformIndices();
+      await apiServices.transform.cleanTransformIndices();
     });
 
     apiTest('should schedule multiple transforms by transformIds', async ({ apiClient }) => {

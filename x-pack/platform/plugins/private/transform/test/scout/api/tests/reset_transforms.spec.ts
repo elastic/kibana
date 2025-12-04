@@ -23,7 +23,7 @@ apiTest.describe('/internal/transform/reset_transforms', { tag: tags.ESS_ONLY },
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
-    // await apiServices.transform.cleanTransformIndices();
+    await apiServices.transform.cleanTransformIndices();
   });
 
   apiTest.describe('single transform reset', () => {
@@ -31,7 +31,7 @@ apiTest.describe('/internal/transform/reset_transforms', { tag: tags.ESS_ONLY },
 
     apiTest.beforeEach(async ({ esClient, apiServices }) => {
       const config = generateTransformConfig(transformId);
-      // await apiServices.transform.createTransform(transformId, config);
+      await apiServices.transform.createTransform(transformId, config);
       await esClient.transform.startTransform({ transform_id: transformId });
       // Wait a bit for transform to process some data
       await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -42,7 +42,7 @@ apiTest.describe('/internal/transform/reset_transforms', { tag: tags.ESS_ONLY },
     });
 
     apiTest.afterEach(async ({ apiServices }) => {
-      // await apiServices.transform.cleanTransformIndices();
+      await apiServices.transform.cleanTransformIndices();
     });
 
     apiTest('should reset transform by transformId', async ({ apiClient }) => {
@@ -108,7 +108,7 @@ apiTest.describe('/internal/transform/reset_transforms', { tag: tags.ESS_ONLY },
     apiTest.beforeEach(async ({ esClient, apiServices }) => {
       for (const id of transformIds) {
         const config = generateTransformConfig(id);
-        // await apiServices.transform.createTransform(id, config);
+        await apiServices.transform.createTransform(id, config);
         await esClient.transform.startTransform({ transform_id: id });
       }
       await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -118,7 +118,7 @@ apiTest.describe('/internal/transform/reset_transforms', { tag: tags.ESS_ONLY },
     });
 
     apiTest.afterEach(async ({ apiServices }) => {
-      // await apiServices.transform.cleanTransformIndices();
+      await apiServices.transform.cleanTransformIndices();
     });
 
     apiTest('should reset multiple transforms by transformIds', async ({ apiClient }) => {
