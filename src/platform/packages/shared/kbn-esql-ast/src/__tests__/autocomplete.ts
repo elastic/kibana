@@ -33,7 +33,7 @@ import {
   inOperators,
   nullCheckOperators,
 } from '../definitions/all_operators';
-import { parse } from '../parser';
+import { Parser } from '../parser';
 import type { ESQLAstAllCommands } from '../types';
 import type {
   FieldType,
@@ -83,12 +83,12 @@ export const suggest = (
 ): Promise<ISuggestionItem[]> => {
   const innerText = query.substring(0, offset ?? query.length);
   const correctedQuery = correctQuerySyntax(innerText);
-  const { ast, root } = parse(correctedQuery, { withFormatting: true });
+  const { root } = Parser.parse(correctedQuery, { withFormatting: true });
   const headerConstruction = root?.header?.find((cmd) => cmd.name === commandName);
 
   const cursorPosition = offset ?? query.length;
 
-  const command = headerConstruction ?? findAstPosition(ast, cursorPosition).command;
+  const command = headerConstruction ?? findAstPosition(root, cursorPosition).command;
 
   if (!command) {
     throw new Error(`${commandName.toUpperCase()} command not found in the parsed query`);

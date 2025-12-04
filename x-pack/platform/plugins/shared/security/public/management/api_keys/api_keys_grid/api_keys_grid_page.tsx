@@ -135,7 +135,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
   };
 
   const onSearchChange = (args: EuiSearchBarOnChangeArgs) => {
-    if (!args.error) {
+    if (!args.error && args.query) {
       const newState = {
         ...tableState,
         query: args.query,
@@ -343,9 +343,8 @@ export const APIKeysGridPage: FunctionComponent = () => {
                   query={tableState.query}
                   queryFilters={tableState.filters}
                   onDelete={(apiKeysToDelete) =>
-                    invalidateApiKeyPrompt(
-                      apiKeysToDelete.map(({ name, id }) => ({ name, id })),
-                      () => queryApiKeysAndAggregations(tableState)
+                    invalidateApiKeyPrompt(apiKeysToDelete, () =>
+                      queryApiKeysAndAggregations(tableState)
                     )
                   }
                   currentUser={currentUser}

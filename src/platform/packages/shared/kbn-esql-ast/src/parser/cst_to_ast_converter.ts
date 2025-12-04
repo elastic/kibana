@@ -2143,7 +2143,9 @@ export class CstToAstConverter {
       return undefined;
     }
 
-    const right = this.toStringLiteral(ctx.string_());
+    const right =
+      this.fromStringOrParameter(ctx.stringOrParameter()) ??
+      this.fromParserRuleToUnknown(ctx.stringOrParameter());
     const notCtx = ctx.NOT();
     const likeType = ctx instanceof cst.RlikeExpressionContext ? 'rlike' : 'like';
     const operator = `${notCtx ? 'not ' : ''}${likeType}` as ast.BinaryExpressionOperator;
@@ -2157,7 +2159,7 @@ export class CstToAstConverter {
       operatorNode.text = `not${operatorNode.text}`;
     }
 
-    const args: [ast.ESQLAstExpression, ast.ESQLStringLiteral] = [
+    const args: [ast.ESQLAstExpression, ast.ESQLAstExpression] = [
       left as ast.ESQLAstExpression,
       right,
     ];
@@ -2190,9 +2192,10 @@ export class CstToAstConverter {
     }
 
     // Convert the list of string patterns into a tuple list AST node
-    const stringCtxs = ctx.string__list();
-    const values: ast.ESQLStringLiteral[] = stringCtxs.map((stringCtx) =>
-      this.toStringLiteral(stringCtx)
+    const stringCtxs = ctx.stringOrParameter_list();
+    const values: ast.ESQLAstExpression[] = stringCtxs.map(
+      (stringCtx) =>
+        this.fromStringOrParameter(stringCtx) ?? this.fromParserRuleToUnknown(stringCtx)
     );
 
     const list = Builder.expression.list.tuple(
@@ -2425,6 +2428,20 @@ export class CstToAstConverter {
     return column;
   }
 
+  private fromQualifiedName(ctx: cst.QualifiedNameContext): ast.ESQLColumn {
+    const node = this.toColumn(ctx);
+    const qualifierToken = ctx._qualifier;
+
+    if (qualifierToken) {
+      const qualifierNode = this.toIdentifierFromToken(qualifierToken);
+
+      node.qualifier = qualifierNode;
+      node.args = [qualifierNode, ...node.args];
+    }
+
+    return node;
+  }
+
   private fromQualifiedNamePattern(
     ctx: cst.QualifiedNamePatternContext
   ): ast.ESQLColumn | ast.ESQLParam | ast.ESQLIdentifier {
@@ -2477,6 +2494,15 @@ export class CstToAstConverter {
         incomplete: Boolean(ctx.exception || text === ''),
       }
     );
+
+    const qualifierToken = ctx._qualifier;
+
+    if (qualifierToken) {
+      const qualifierNode = this.toIdentifierFromToken(qualifierToken);
+
+      column.qualifier = qualifierNode;
+      column.args = [qualifierNode, ...column.args];
+    }
 
     column.name = text;
     column.quoted = hasQuotes;
@@ -2554,8 +2580,9 @@ export class CstToAstConverter {
 
   private fromField(ctx: cst.FieldContext): ast.ESQLAstField | undefined {
     const qualifiedNameCtx = ctx.qualifiedName();
-    if (qualifiedNameCtx) {
-      const left = this.toColumn(qualifiedNameCtx!);
+
+    if (qualifiedNameCtx && ctx.ASSIGN()) {
+      const left = this.fromQualifiedName(qualifiedNameCtx);
       const right = this.fromBooleanExpressionToExpressionOrUnknown(ctx.booleanExpression());
       const args = [
         left,
@@ -2563,6 +2590,7 @@ export class CstToAstConverter {
         //       should be probably fixed in a standalone PR.
         [right],
       ] as ast.ESQLBinaryExpression['args'];
+
       const assignment = this.toFunction(
         '=',
         ctx,
@@ -2870,6 +2898,24 @@ export class CstToAstConverter {
     return this.toNumericLiteral(ctx.decimalValue()!, 'double');
   }
 
+  private fromStringOrParameter(
+    ctx: cst.StringOrParameterContext
+  ): ast.ESQLStringLiteral | ast.ESQLParam | undefined {
+    const stringCtx = ctx.string_();
+
+    if (stringCtx) {
+      return this.toStringLiteral(stringCtx);
+    }
+
+    const paramCtx = ctx.parameter();
+
+    if (paramCtx) {
+      return this.fromParameter(paramCtx);
+    }
+
+    return undefined;
+  }
+
   private toStringLiteral(
     ctx: Pick<cst.StringContext, 'QUOTED_STRING'> & antlr.ParserRuleContext
   ): ast.ESQLStringLiteral {
@@ -2893,6 +2939,10 @@ export class CstToAstConverter {
       },
       this.getParserFields(ctx)
     );
+  }
+
+  private fromParameter(ctx: cst.ParameterContext): ast.ESQLParam | undefined {
+    return this.toParam(ctx);
   }
 
   private fromInputParameter(ctx: cst.InputParameterContext): ast.ESQLLiteral[] {

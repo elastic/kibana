@@ -45,6 +45,8 @@ dependsOn:
   - '@kbn/esql-utils'
   - '@kbn/test-jest-helpers'
   - '@kbn/esql-types'
+  - '@kbn/field-types'
+  - '@kbn/field-utils'
 tags:
   - shared-browser
   - package
