@@ -137,6 +137,9 @@ export const TopNavMenuActionButton = (props: TopNavMenuActionButtonProps) => {
         aria-haspopup={hasSplitItems ? 'menu' : undefined}
         isSelected={isPopoverOpen}
         css={splitButtonCss}
+        notificationIndicatorPosition={{ top: 2, left: 25 }}
+        notificationIndicatorSize="m"
+        notificationIndicatorColor="primary"
       >
         {itemText}
       </SplitButtonWithNotification>
