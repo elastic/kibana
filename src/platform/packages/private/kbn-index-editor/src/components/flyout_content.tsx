@@ -135,6 +135,16 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
                 padding-top: ${euiTheme.size.base};
               }
             `}
+            onKeyDown={(e: React.KeyboardEvent) => {
+              // This prevents the flyout from closing when hitting escape in the rows checkboxes.
+              if (
+                e.key === 'Escape' &&
+                e.target instanceof HTMLElement &&
+                e.target.nodeName === 'INPUT'
+              ) {
+                e.stopPropagation();
+              }
+            }}
           >
             <FileDropzone noResults={noResults}>
               {dataView && dataViewColumns ? (
