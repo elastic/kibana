@@ -21,8 +21,15 @@ export const injectLensReferences = (
     return clonedState;
   }
 
+  const panelReferences = references.filter((reference) => {
+    return !reference.name.match(/.+?:.+?/);
+  });
+
   // TODO: find a way to cull erroneous dashboard references
-  const combinedReferences = uniqBy([...references, ...clonedState.attributes.references], 'name');
+  const combinedReferences = uniqBy(
+    [...panelReferences, ...clonedState.attributes.references],
+    'name'
+  );
 
   clonedState.attributes.references = combinedReferences;
 
