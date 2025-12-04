@@ -389,6 +389,7 @@ export const ScheduledReportFlyoutContent = ({
                     minFrequency={Frequency.MONTHLY}
                     showTimeInSummary
                     compressed
+                    initialRecurringSchedule={scheduledReport.recurringSchedule}
                   />
                 </>
               )}
