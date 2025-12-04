@@ -19,6 +19,7 @@ import type {
   MetricsDataPluginStart,
 } from '@kbn/metrics-data-access-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { AgentSkillsPluginSetup } from '@kbn/agent-skills-plugin/server';
 export type ObservabilityAgentPluginSetup = Record<string, never>;
 export type ObservabilityAgentPluginStart = Record<string, never>;
 
@@ -28,6 +29,7 @@ export interface ObservabilityAgentPluginSetupDependencies {
   logsDataAccess: LogsDataAccessPluginSetup;
   metricsDataAccess: MetricsDataPluginSetup;
   security: SecurityPluginSetup;
+  agentSkills?: AgentSkillsPluginSetup;
 }
 
 export interface ObservabilityAgentPluginStartDependencies {

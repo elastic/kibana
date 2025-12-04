@@ -23,6 +23,19 @@ import type {
   WritableToolResultStore,
   AttachmentsService,
 } from '../runner';
+import type { Skill } from '@kbn/agent-skills-common';
+
+/**
+ * Interface for accessing agent skills.
+ * This matches the contract provided by the agent-skills plugin.
+ */
+export interface AgentSkillsService {
+  /**
+   * Get all registered skills.
+   * @returns Array of all registered skills
+   */
+  getSkills(): Skill[];
+}
 
 export type AgentHandlerFn = (
   params: AgentHandlerParams,
@@ -71,6 +84,10 @@ export interface AgentHandlerContext {
    * Attachment service to interact with attachments.
    */
   attachments: AttachmentsService;
+  /**
+   * Agent skills service for accessing registered skills.
+   */
+  agentSkills?: AgentSkillsService;
   /**
    * Result store to access and add tool results during execution.
    */

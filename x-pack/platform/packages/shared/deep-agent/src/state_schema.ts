@@ -12,12 +12,14 @@ const FileDataSchema = z3.object({
   content: z3.array(z3.string()),
   created_at: z3.string(),
   modified_at: z3.string(),
+  description: z3.string().optional(),
 });
 
 export interface FileData {
   content: string[];
   created_at: string;
   modified_at: string;
+  description?: string;
 }
 
 /**

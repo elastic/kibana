@@ -26,6 +26,7 @@ import type { AgentsServiceStart } from '../agents';
 import type { AttachmentServiceStart } from '../attachments';
 import type { ModelProviderFactoryFn } from './model_provider';
 import type { TrackingService } from '../../telemetry';
+import type { AgentSkillsPluginStart } from '@kbn/agent-skills-plugin/server';
 import { createEmptyRunContext } from './utils/run_context';
 import { createResultStore } from './tool_result_store';
 import { runTool } from './run_tool';
@@ -40,6 +41,7 @@ export interface CreateScopedRunnerDeps {
   toolsService: ToolsServiceStart;
   agentsService: AgentsServiceStart;
   attachmentsService: AttachmentServiceStart;
+  agentSkills?: AgentSkillsPluginStart;
   trackingService?: TrackingService;
   // other deps
   logger: Logger;
@@ -106,13 +108,13 @@ export const createScopedRunner = (deps: CreateScopedRunnerDeps): ScopedRunner =
 };
 
 export const createRunner = (deps: CreateRunnerDeps): Runner => {
-  const { modelProviderFactory, ...runnerDeps } = deps;
+  const { modelProviderFactory, agentSkills, ...runnerDeps } = deps;
   return {
     runTool: (runToolParams) => {
       const { request, defaultConnectorId, ...otherParams } = runToolParams;
       const resultStore = createResultStore();
       const modelProvider = modelProviderFactory({ request, defaultConnectorId });
-      const allDeps = { ...runnerDeps, modelProvider, request, defaultConnectorId, resultStore };
+      const allDeps = { ...runnerDeps, agentSkills, modelProvider, request, defaultConnectorId, resultStore };
       const runner = createScopedRunner(allDeps);
       return runner.runTool(otherParams);
     },
@@ -120,7 +122,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       const { request, defaultConnectorId, ...otherParams } = params;
       const resultStore = createResultStore(params.agentParams.conversation?.rounds);
       const modelProvider = modelProviderFactory({ request, defaultConnectorId });
-      const allDeps = { ...runnerDeps, modelProvider, request, defaultConnectorId, resultStore };
+      const allDeps = { ...runnerDeps, agentSkills, modelProvider, request, defaultConnectorId, resultStore };
       const runner = createScopedRunner(allDeps);
       return runner.runAgent(otherParams);
     },

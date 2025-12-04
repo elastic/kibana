@@ -11,6 +11,7 @@ import { isStreamEvent, toolsToLangchain } from '@kbn/onechat-genai-utils/langch
 import type { ChatAgentEvent, RoundInput } from '@kbn/onechat-common';
 import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
 import type { AgentHandlerContext, AgentEventEmitterFn, ToolHandlerContext } from '@kbn/onechat-server';
+import type { Skill } from '@kbn/agent-skills-common';
 import {
   addRoundCompleteEvent,
   extractRound,
@@ -27,6 +28,7 @@ import { browserToolsToLangchain } from '../../../tools/browser_tool_adapter';
 import { createToolEventEmitter } from '../../../runner/utils/events';
 import type { InternalToolProgressEvent } from '@kbn/onechat-server/runner';
 import { ChatEventType } from '@kbn/onechat-common';
+import { FileDataType } from '@kbn/securitysolution-deep-agent/src';
 
 const chatAgentGraphName = 'onechat-deep-agent';
 
@@ -55,7 +57,7 @@ export const runDeepAgentMode: RunChatAgentFn = async (
     browserApiTools,
     startTime = new Date(),
   },
-  { logger, request, modelProvider, toolProvider, attachments, events, esClient, runner, resultStore }
+  { logger, request, modelProvider, toolProvider, attachments, agentSkills, events, esClient, runner, resultStore }
 ) => {
   const model = await modelProvider.getDefaultModel();
   const resolvedCapabilities = resolveCapabilities(capabilities);
@@ -146,8 +148,32 @@ export const runDeepAgentMode: RunChatAgentFn = async (
 
   logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);
 
+  // Fetch all registered skills and organize them into a map of filePath -> content
+  const skills: Record<string, FileDataType> = {};
+
+  if (agentSkills) {
+    try {
+      const registeredSkills: Skill[] = agentSkills.getSkills();
+      logger.debug(`Found ${registeredSkills.length} registered skills`);
+      
+      for (const skill of registeredSkills) {
+        logger.debug(`Processing skill: ${skill.id} (${skill.name}) at ${skill.filePath}`);
+        skills[skill.filePath] = {
+          content: [skill.content],
+          created_at: new Date().toISOString(),
+          modified_at: new Date().toISOString(),
+          description: skill.shortDescription,
+        };
+      }
+    } catch (error) {
+      logger.error(`Error fetching skills: ${error}`);
+    }
+  } else {
+    logger.debug('agentSkills plugin not available');
+  }
+
   const eventStream = agentGraph.streamEvents(
-    { messages: initialMessages, cycleLimit },
+    { messages: initialMessages, files: skills },
     {
       version: 'v2',
       signal: abortSignal,

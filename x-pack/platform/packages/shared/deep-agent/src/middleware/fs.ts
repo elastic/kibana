@@ -420,9 +420,29 @@ export function createFilesystemMiddleware(
     wrapModelCall: systemPrompt
       ? async (request, handler: any) => {
           const currentSystemPrompt = request.systemPrompt || "";
+          
+          // Build filesystem overview from state files
+          let filesystemOverview = "";
+          const state = request.state as { files?: Record<string, FileData> } | undefined;
+          const files = state?.files;
+          
+          if (files && Object.keys(files).length > 0) {
+            const fileEntries: string[] = [];
+            for (const [filePath, fileData] of Object.entries(files)) {
+              const description = fileData.description 
+                ? ` - ${fileData.description}`
+                : "";
+              fileEntries.push(`  ${filePath}${description}`);
+            }
+            
+            if (fileEntries.length > 0) {
+              filesystemOverview = `\n\nFilesystem Overview:\nThe following files are available in the virtual filesystem:\n${fileEntries.join("\n")}`;
+            }
+          }
+          
           const newSystemPrompt = currentSystemPrompt
-            ? `${currentSystemPrompt}\n\n${systemPrompt}`
-            : systemPrompt;
+            ? `${currentSystemPrompt}\n\n${systemPrompt}${filesystemOverview}`
+            : `${systemPrompt}${filesystemOverview}`;
           return handler({ ...request, systemPrompt: newSystemPrompt });
         }
       : undefined,

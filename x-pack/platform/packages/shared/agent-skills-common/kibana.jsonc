@@ -1,0 +1,15 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/agent-skills-common",
+  "owner": [
+    "@elastic/security-generative-ai"
+  ],
+  "group": "platform",
+  "visibility": "private"
+}
+
+
+
+
+
+

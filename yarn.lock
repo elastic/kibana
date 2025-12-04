@@ -4460,6 +4460,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/agent-skills-common@link:x-pack/platform/packages/shared/agent-skills-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/agent-skills-plugin@link:x-pack/platform/plugins/shared/agent_skills":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ai-assistant-common@link:x-pack/platform/packages/shared/ai-assistant/common":
   version "0.0.0"
   uid ""

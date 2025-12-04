@@ -49,6 +49,8 @@ export interface FileData {
   created_at: string;
   /** ISO format timestamp of last modification */
   modified_at: string;
+  /** Description of the file */
+  description?: string;
 }
 
 /**

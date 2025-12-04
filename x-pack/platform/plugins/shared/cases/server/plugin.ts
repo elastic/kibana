@@ -51,6 +51,7 @@ import { registerSavedObjects } from './saved_object_types';
 import type { ServerlessProjectType } from '../common/constants/types';
 import { registerSkill } from '@kbn/onechat-server';
 import { createCasesSkills } from './skills/cases_skill';
+import { Skill } from '@kbn/agent-skills-common';
 
 import { IncrementalIdTaskManager } from './tasks/incremental_id/incremental_id_task_manager';
 import { createCasesAnalyticsIndexes, registerCasesAnalyticsIndexesTasks } from './cases_analytics';
@@ -201,6 +202,167 @@ export class CasePlugin
       getSpaceId,
       serverlessProjectType,
     });
+
+    // Register Cases skill
+    if (plugins.agentSkills) {
+      try {
+        class CasesSkill extends Skill {
+          readonly id = 'cases.cases';
+          readonly name = 'Cases';
+          readonly shortDescription = 'Always read this guide before using cases to manage incidents';
+          readonly content = `Cases provide a centralized way to track, manage, and resolve security and operational incidents. Cases can be associated with alerts, have assignees, tags, severity levels, and custom fields.
+
+=== cases.create_case ===
+
+Create a new case for tracking and managing issues. Cases can be associated with alerts, have assignees, tags, severity levels, and custom fields.
+
+Parameters:
+- title (string, required): Title of the case (1-160 characters)
+- description (string, required): Description of the case (1-30000 characters)
+- owner (string, required): The owner/plugin identifier (e.g., "securitySolution", "observability")
+- tags (array of strings, optional): Tags to associate with the case
+- severity (enum, optional): Severity level - 'low', 'medium', 'high', or 'critical'
+- category (string, optional): Category of the case
+- assignees (array of objects, optional): Users assigned to the case. Each object contains:
+  - uid (string, required): User UID
+- customFields (array of objects, optional): Custom field values. Each object contains:
+  - key (string, required): Custom field key
+  - type (string, required): Custom field type
+  - value (any, required): Custom field value
+- connector (object, optional): External connector configuration. Contains:
+  - id (string, required): Connector ID
+  - name (string, required): Connector name
+  - type (string, required): Connector type
+  - fields (object, optional): Connector-specific fields
+- settings (object, optional): Case settings. Contains:
+  - syncAlerts (boolean, optional): Whether to sync alerts with the case
+
+Example usage:
+1. Create a basic security case:
+   tool("invoke_skill", {"skillId":"cases.create_case","params":{"title":"Suspicious login activity","description":"Multiple failed login attempts detected","owner":"securitySolution"}})
+
+2. Create an observability case:
+   tool("invoke_skill", {"skillId":"cases.create_case","params":{"title":"Service outage","description":"API service is not responding","owner":"observability"}})
+
+3. Create a case with severity and tags:
+   tool("invoke_skill", {"skillId":"cases.create_case","params":{"title":"Critical incident","description":"Production database unavailable","owner":"securitySolution","severity":"critical","tags":["incident","production"]}})
+
+4. Create a case with assignees:
+   tool("invoke_skill", {"skillId":"cases.create_case","params":{"title":"Investigate malware","description":"Potential malware detected on endpoint","owner":"securitySolution","severity":"high","assignees":[{"uid":"<user_uid>"}]}})
+
+Response format:
+Returns a case object with id, title, description, owner, status, severity, tags, assignees, and other metadata.
+
+=== cases.search_cases ===
+
+Search and filter cases by various criteria including owner, tags, status, severity, assignees, and more.
+
+Parameters:
+- owner (string, optional): Filter by owner/plugin identifier
+- tags (array of strings, optional): Filter by tags
+- status (enum, optional): Filter by status - 'open', 'in-progress', or 'closed'
+- severity (enum, optional): Filter by severity - 'low', 'medium', 'high', or 'critical'
+- assignees (array of strings, optional): Filter by assignee UIDs
+- reporters (array of strings, optional): Filter by reporter UIDs
+- category (string, optional): Filter by category
+- page (number, optional): Page number for pagination
+- perPage (number, optional): Number of results per page
+- sortField (string, optional): Field to sort by
+- sortOrder (enum, optional): Sort order - 'asc' or 'desc'
+
+Example usage:
+1. Search all cases with default pagination:
+   tool("invoke_skill", {"skillId":"cases.search_cases","params":{}})
+
+2. Search for open security cases:
+   tool("invoke_skill", {"skillId":"cases.search_cases","params":{"owner":"securitySolution","status":"open"}})
+
+3. Search for high severity cases:
+   tool("invoke_skill", {"skillId":"cases.search_cases","params":{"severity":"high","perPage":20}})
+
+4. Search cases by tags:
+   tool("invoke_skill", {"skillId":"cases.search_cases","params":{"tags":["incident"],"sortField":"created_at","sortOrder":"desc"}})
+
+5. Search cases assigned to a user:
+   tool("invoke_skill", {"skillId":"cases.search_cases","params":{"assignees":["<user_uid>"],"status":"in-progress"}})
+
+Response format:
+Returns a paginated result object with cases array, total count, page, and perPage information.
+
+=== cases.get_case ===
+
+Retrieve a specific case by its ID with all details including comments, attachments, and metadata.
+
+Parameters:
+- id (string, required): Case ID to retrieve
+
+Example usage:
+1. Get a case by ID:
+   tool("invoke_skill", {"skillId":"cases.get_case","params":{"id":"<case_id>"}})
+
+Response format:
+Returns a complete case object with all details including comments, attachments, and metadata.
+
+=== cases.update_case ===
+
+Update an existing case. Requires the case version for optimistic concurrency control. Can update title, description, status, severity, tags, assignees, and category.
+
+Parameters:
+- id (string, required): Case ID to update
+- version (string, required): Case version (required for optimistic concurrency control)
+- title (string, optional): Updated title
+- description (string, optional): Updated description
+- status (enum, optional): Updated status - 'open', 'in-progress', or 'closed'
+- severity (enum, optional): Updated severity - 'low', 'medium', 'high', or 'critical'
+- tags (array of strings, optional): Updated tags
+- assignees (array of objects, optional): Updated assignees. Each object contains:
+  - uid (string, required): User UID
+- category (string, optional): Updated category
+
+Example usage:
+1. Update case status to in-progress:
+   tool("invoke_skill", {"skillId":"cases.update_case","params":{"id":"<case_id>","version":"<case_version>","status":"in-progress"}})
+
+2. Update case severity to critical:
+   tool("invoke_skill", {"skillId":"cases.update_case","params":{"id":"<case_id>","version":"<case_version>","severity":"critical"}})
+
+3. Add tags to a case:
+   tool("invoke_skill", {"skillId":"cases.update_case","params":{"id":"<case_id>","version":"<case_version>","tags":["incident","high-priority"]}})
+
+4. Close a case:
+   tool("invoke_skill", {"skillId":"cases.update_case","params":{"id":"<case_id>","version":"<case_version>","status":"closed"}})
+
+5. Assign users to a case:
+   tool("invoke_skill", {"skillId":"cases.update_case","params":{"id":"<case_id>","version":"<case_version>","assignees":[{"uid":"<user_uid>"}]}})
+
+Response format:
+Returns the updated case object.
+
+=== cases.delete_case ===
+
+Delete one or more cases by their IDs. This will also delete all comments and attachments associated with the cases.
+
+Parameters:
+- ids (array of strings, required): Array of case IDs to delete
+
+Example usage:
+1. Delete a single case:
+   tool("invoke_skill", {"skillId":"cases.delete_case","params":{"ids":["<case_id>"]}})
+
+2. Delete multiple cases:
+   tool("invoke_skill", {"skillId":"cases.delete_case","params":{"ids":["<case_id_1>","<case_id_2>"]}})
+
+Response format:
+Returns an object with success status and deletedIds array.`;
+          readonly filePath = '/skills/cases/cases.md';
+        }
+
+        plugins.agentSkills.registerSkill(new CasesSkill());
+        this.logger.info('Registered cases.cases skill');
+      } catch (error) {
+        this.logger.error(`Error registering cases skill: ${error}`);
+      }
+    }
 
     return {
       attachmentFramework: {

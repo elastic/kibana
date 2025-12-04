@@ -9,7 +9,7 @@
     "browser": false,
     "server": true,
     "requiredPlugins": ["onechat", "apmDataAccess", "logsDataAccess", "metricsDataAccess", "security"],
-    "optionalPlugins": [],
+    "optionalPlugins": ["agentSkills"],
     "requiredBundles": [],
     "extraPublicDirs": []
   }

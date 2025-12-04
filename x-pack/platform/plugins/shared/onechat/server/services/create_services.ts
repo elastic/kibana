@@ -56,6 +56,7 @@ export class ServiceManager {
     spaces,
     elasticsearch,
     inference,
+    agentSkills,
     uiSettings,
     savedObjects,
     trackingService,
@@ -99,6 +100,7 @@ export class ServiceManager {
       toolsService: tools,
       agentsService: agents,
       attachmentsService: attachments,
+      agentSkills,
       trackingService,
     });
     runner = runnerFactory.getRunner();
@@ -117,6 +119,7 @@ export class ServiceManager {
       agentService: agents,
       uiSettings,
       savedObjects,
+      agentSkills,
       trackingService,
     });
 
@@ -127,6 +130,7 @@ export class ServiceManager {
       conversations,
       runnerFactory,
       chat,
+      agentSkills,
     };
 
     return this.internalStart;

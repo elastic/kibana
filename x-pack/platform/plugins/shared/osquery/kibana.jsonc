@@ -26,6 +26,7 @@
       "security"
     ],
     "optionalPlugins": [
+      "agentSkills",
       "fleet",
       "home",
       "lens",

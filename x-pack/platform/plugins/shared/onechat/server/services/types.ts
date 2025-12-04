@@ -13,6 +13,7 @@ import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { AgentSkillsPluginStart } from '@kbn/agent-skills-plugin/server';
 import type { ToolsServiceSetup, ToolsServiceStart } from './tools';
 import type { RunnerFactory } from './runner';
 import type { AgentsServiceSetup, AgentsServiceStart } from './agents';
@@ -34,6 +35,7 @@ export interface InternalStartServices {
   conversations: ConversationService;
   chat: ChatService;
   runnerFactory: RunnerFactory;
+  agentSkills?: AgentSkillsPluginStart;
 }
 
 export interface ServiceSetupDeps {
@@ -52,5 +54,6 @@ export interface ServicesStartDeps {
   // plugin deps
   inference: InferenceServerStart;
   spaces?: SpacesPluginStart;
+  agentSkills?: AgentSkillsPluginStart;
   trackingService?: TrackingService;
 }

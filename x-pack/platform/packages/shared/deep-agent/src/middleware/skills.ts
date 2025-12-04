@@ -202,7 +202,7 @@ export function createSkillsMiddleware(options: SkillsMiddlewareOptions): Return
 
   return createMiddleware({
     name: 'skillsMiddleware',
-    tools: [discoverSkillsTool, invokeSkillTool],
+    tools: [invokeSkillTool],
   });
 }
 

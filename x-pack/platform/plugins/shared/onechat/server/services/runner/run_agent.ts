@@ -30,6 +30,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     modelProvider,
     toolsService,
     attachmentsService,
+    agentSkills,
     resultStore,
     logger,
   } = manager.deps;
@@ -46,6 +47,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     }),
     resultStore,
     attachments: attachmentsService,
+    agentSkills,
     events: createAgentEventEmitter({ eventHandler: onEvent, context: manager.context }),
   };
 };

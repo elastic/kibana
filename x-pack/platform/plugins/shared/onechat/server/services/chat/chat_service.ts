@@ -18,6 +18,7 @@ import { withConverseSpan } from '../../tracing';
 import type { ConversationService } from '../conversation';
 import type { ConversationClient } from '../conversation';
 import type { AgentsServiceStart } from '../agents';
+import type { AgentSkillsPluginStart } from '@kbn/agent-skills-plugin/server';
 import {
   generateTitle,
   handleCancellation,
@@ -40,6 +41,7 @@ interface ChatServiceDeps {
   agentService: AgentsServiceStart;
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
+  agentSkills?: AgentSkillsPluginStart;
   trackingService?: TrackingService;
 }
 

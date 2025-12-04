@@ -93,6 +93,8 @@
     "@kbn/maps-plugin",
     "@kbn/shared-ux-utility",
     "@kbn/usage-collection-plugin",
-    "@kbn/core-notifications-browser"
+    "@kbn/core-notifications-browser",
+    "@kbn/agent-skills-plugin",
+    "@kbn/agent-skills-common"
   ]
 }

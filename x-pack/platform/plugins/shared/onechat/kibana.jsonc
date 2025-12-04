@@ -34,6 +34,7 @@
       "kibanaReact"
     ],
     "optionalPlugins": [
+      "agentSkills",
       "cloud",
       "licenseManagement",
       "workflowsManagement",
