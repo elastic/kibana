@@ -26,12 +26,14 @@ import { OnechatNavControlInitiator } from './components/nav_control/lazy_onecha
 import {
   AgentBuilderAccessChecker,
   AgentService,
+  AttachmentsService,
   ChatService,
   ConversationsService,
   NavigationService,
   ToolsService,
   type OnechatInternalService,
 } from './services';
+import { createPublicAttachmentContract } from './services/attachments';
 import { createPublicToolContract } from './services/tools';
 import type {
   ConfigSchema,
@@ -117,6 +119,7 @@ export class OnechatPlugin
     docLinks.setDocLinks(core.docLinks.links);
 
     const agentService = new AgentService({ http });
+    const attachmentsService = new AttachmentsService();
     const chatService = new ChatService({ http });
     const conversationsService = new ConversationsService({ http });
     const toolsService = new ToolsService({ http });
@@ -130,6 +133,7 @@ export class OnechatPlugin
 
     const internalServices: OnechatInternalService = {
       agentService,
+      attachmentsService,
       chatService,
       conversationsService,
       navigationService,
@@ -150,6 +154,7 @@ export class OnechatPlugin
     );
 
     const onechatService: OnechatPluginStart = {
+      attachments: createPublicAttachmentContract({ attachmentsService }),
       tools: createPublicToolContract({ toolsService }),
       setConversationFlyoutActiveConfig: (config: EmbeddableConversationProps) => {
         // set config until flyout is next opened
