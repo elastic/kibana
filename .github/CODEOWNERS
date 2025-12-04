@@ -2478,6 +2478,8 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/automatic_import @elastic/integration-experience
 /x-pack/solutions/security/plugins/security_solution/public/configurations @elastic/security-generative-ai
 /x-pack/solutions/security/plugins/security_solution_serverless/public/navigation/ai_soc @elastic/security-solution @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/agent_builder @elastic/security-generative-ai
+/x-pack/solutions/security/plugins/security_solution/server/agent_builder @elastic/security-generative-ai
 
 # AI4DSOC in Security Solution
 /x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/ai4dsoc @elastic/security-engineering-productivity
