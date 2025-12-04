@@ -31,7 +31,9 @@ import { initializeLogsRepositoryDataStream } from './repositories/logs_reposito
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import type {
   CancelWorkflowExecution,
-  ExecuteWorkflowStepResponse,
+  ExecuteWorkflow,
+  ExecuteWorkflowStep,
+  ScheduleWorkflow,
   WorkflowsExecutionEnginePluginSetup,
   WorkflowsExecutionEnginePluginSetupDeps,
   WorkflowsExecutionEnginePluginStart,
@@ -363,11 +365,7 @@ export class WorkflowsExecutionEnginePlugin
       };
     };
 
-    const executeWorkflow = async (
-      workflow: WorkflowExecutionEngineModel,
-      context: Record<string, unknown>,
-      request?: KibanaRequest | undefined
-    ) => {
+    const executeWorkflow: ExecuteWorkflow = async (workflow, context, request) => {
       // AUTO-DETECT: Check if we're already running in a Task Manager context
       // We can determine this from context and request before creating the execution
       const isRunningInTaskManager =
@@ -397,7 +395,7 @@ export class WorkflowsExecutionEnginePlugin
           taskAbortController: new AbortController(), // TODO: We need to think how to pass this properly from outer task
           logger: this.logger,
           config: this.config,
-          fakeRequest: request || ({} as KibanaRequest), // In TaskManager context, request may be undefined
+          fakeRequest: request,
           dependencies,
         });
       } else {
@@ -413,11 +411,7 @@ export class WorkflowsExecutionEnginePlugin
       };
     };
 
-    const scheduleWorkflow = async (
-      workflow: WorkflowExecutionEngineModel,
-      context: Record<string, unknown>,
-      request: KibanaRequest
-    ) => {
+    const scheduleWorkflow: ScheduleWorkflow = async (workflow, context, request) => {
       const { workflowExecution } = await createAndPersistWorkflowExecution(
         workflow,
         context,
@@ -440,12 +434,12 @@ export class WorkflowsExecutionEnginePlugin
       };
     };
 
-    const executeWorkflowStep = async (
-      workflow: WorkflowExecutionEngineModel,
-      stepId: string,
-      contextOverride: Record<string, unknown>,
-      request?: KibanaRequest | undefined
-    ): Promise<ExecuteWorkflowStepResponse> => {
+    const executeWorkflowStep: ExecuteWorkflowStep = async (
+      workflow,
+      stepId,
+      contextOverride,
+      request
+    ) => {
       // Check if request is required before creating execution
       // Workflow steps require user context to run with proper permissions
       if (!request) {
@@ -458,11 +452,11 @@ export class WorkflowsExecutionEnginePlugin
       const esClient = coreStart.elasticsearch.client.asInternalUser;
       const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
       const context: Record<string, unknown> = {
-        ...contextOverride,
+        contextOverride,
       };
 
       const triggeredBy = (context.triggeredBy as string | undefined) || 'manual'; // 'manual' or 'scheduled'
-      const workflowExecution: Partial<EsWorkflowExecution> = {
+      const workflowExecution = {
         id: generateUuid(),
         spaceId: workflow.spaceId,
         stepId,
