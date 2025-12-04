@@ -11,9 +11,9 @@ import type { CSSProperties } from 'react';
 import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-
+import type { ESQLCallbacks } from '@kbn/esql-types';
 import { CodeEditor } from '@kbn/code-editor/code_editor';
-import type { ESQLCallbacks, monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, ConsoleLang } from '@kbn/monaco';
 
 import { i18n } from '@kbn/i18n';

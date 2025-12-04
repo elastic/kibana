@@ -28,17 +28,19 @@ import type { CodeEditorProps } from '@kbn/code-editor';
 import { CodeEditor } from '@kbn/code-editor';
 import type { CoreStart } from '@kbn/core/public';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
-import { type FieldType } from '@kbn/esql-ast';
-import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
-import type { ESQLTelemetryCallbacks } from '@kbn/esql-types';
-import type { ESQLControlVariable, IndicesAutocompleteResult } from '@kbn/esql-types';
+import type { ESQLTelemetryCallbacks, ESQLFieldWithMetadata, EsqlFieldType } from '@kbn/esql-types';
+import type {
+  ESQLControlVariable,
+  IndicesAutocompleteResult,
+  ESQLCallbacks,
+} from '@kbn/esql-types';
 import { fixESQLQueryWithVariables, getRemoteClustersFromESQLQuery } from '@kbn/esql-utils';
 import { FavoritesClient } from '@kbn/content-management-favorites-public';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ILicense } from '@kbn/licensing-types';
-import { ESQLLang, ESQL_LANG_ID, monaco, type ESQLCallbacks } from '@kbn/monaco';
+import { ESQLLang, ESQL_LANG_ID, monaco } from '@kbn/monaco';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 import type { ComponentProps } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -537,7 +539,7 @@ const ESQLEditorInternal = function ESQLEditor({
               columns.map((c) => {
                 return {
                   name: c.name,
-                  type: c.meta.esType as FieldType,
+                  type: c.meta.esType as EsqlFieldType,
                   hasConflict: c.meta.type === KBN_FIELD_TYPES.CONFLICT,
                   userDefined: false,
                 };

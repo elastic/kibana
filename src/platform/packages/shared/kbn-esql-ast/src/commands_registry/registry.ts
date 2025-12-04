@@ -7,13 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { LicenseType } from '@kbn/licensing-types';
+import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
 import type { ESQLMessage, ESQLCommand, ESQLAstAllCommands } from '../types';
-import type {
-  ISuggestionItem,
-  ICommandCallbacks,
-  ESQLColumnData,
-  ESQLFieldWithMetadata,
-} from './types';
+import type { ISuggestionItem, ICommandCallbacks, ESQLColumnData } from './types';
 
 /**
  * Interface defining the methods that each ES|QL command should register.

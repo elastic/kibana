@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLFieldWithMetadata } from '../../types';
+import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
 import { columnsAfter } from './columns_after';
 
 describe('TS columnsAfter', () => {

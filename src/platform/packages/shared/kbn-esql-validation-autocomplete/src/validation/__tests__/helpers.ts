@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { EditorError, ESQLMessage } from '@kbn/esql-ast';
-import type { ESQLCallbacks } from '../../shared/types';
+import type { ESQLCallbacks } from '@kbn/esql-types';
 import { getCallbackMocks } from '../../__tests__/helpers';
 import { validateQuery } from '../validation';
 

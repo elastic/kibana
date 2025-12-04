@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLCallbacks } from '../shared/types';
+import type { ESQLCallbacks } from '@kbn/esql-types';
 import { getPolicyHelper, getSourcesHelper } from '../shared/resources_helpers';
 
 export const getCommandContext = async (

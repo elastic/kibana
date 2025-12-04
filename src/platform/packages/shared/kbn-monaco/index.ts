@@ -11,8 +11,6 @@ import './src/register_globals';
 
 export { monaco } from './src/monaco_imports';
 
-export type { ESQLCallbacks } from '@kbn/esql-validation-autocomplete';
-
 /* eslint-disable-next-line @kbn/eslint/module_migration */
 import * as BarePluginApi from 'monaco-editor/esm/vs/editor/editor.api';
 

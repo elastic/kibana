@@ -14,6 +14,7 @@
  */
 import { uniq } from 'lodash';
 import type { LicenseType } from '@kbn/licensing-types';
+import type { EsqlFieldType } from '@kbn/esql-types';
 import type {
   ICommandCallbacks,
   ISuggestionItem,
@@ -36,7 +37,6 @@ import {
 import { Parser } from '../parser';
 import type { ESQLAstAllCommands } from '../types';
 import type {
-  FieldType,
   FunctionParameterType,
   FunctionReturnType,
   SupportedDataType,
@@ -131,7 +131,7 @@ export const expectSuggestions = async (
 };
 
 export function getFieldNamesByType(
-  _requestedType: Readonly<FieldType | 'any' | Array<FieldType | 'any'>>,
+  _requestedType: Readonly<EsqlFieldType | 'any' | Array<EsqlFieldType | 'any'>>,
   excludeUserDefined: boolean = false
 ) {
   const columnMap = mockContext.columns;
