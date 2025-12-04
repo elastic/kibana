@@ -62,7 +62,7 @@ export class ScoutCypressReporter {
       writeTo: process.stdout,
     });
 
-    this.name = this.reporterOptions.name || 'ftr';
+    this.name = this.reporterOptions.name || 'cypress';
     this.runId = generateTestRunId();
     this.log.info(`Scout test run ID: ${this.runId}`);
 
@@ -123,7 +123,7 @@ export class ScoutCypressReporter {
    */
   public get reportRootPath(): string {
     const outputPath = this.reporterOptions.outputPath || SCOUT_REPORT_OUTPUT_ROOT;
-    return path.join(outputPath, `scout-ftr-${this.runId}`);
+    return path.join(outputPath, `scout-cypress-${this.runId}`);
   }
 
   onRunStart = () => {
@@ -134,7 +134,7 @@ export class ScoutCypressReporter {
       ...datasources.environmentMetadata,
       reporter: {
         name: this.name,
-        type: 'ftr',
+        type: 'cypress',
       },
       test_run: this.baseTestRunInfo,
       event: {
@@ -151,7 +151,7 @@ export class ScoutCypressReporter {
       ...datasources.environmentMetadata,
       reporter: {
         name: this.name,
-        type: 'ftr',
+        type: 'cypress',
       },
       test_run: this.baseTestRunInfo,
       suite: {
@@ -180,7 +180,7 @@ export class ScoutCypressReporter {
       ...datasources.environmentMetadata,
       reporter: {
         name: this.name,
-        type: 'ftr',
+        type: 'cypress',
       },
       test_run: this.baseTestRunInfo,
       suite: {
@@ -219,7 +219,7 @@ export class ScoutCypressReporter {
       ...datasources.environmentMetadata,
       reporter: {
         name: this.name,
-        type: 'ftr',
+        type: 'cypress',
       },
       test_run: {
         ...this.baseTestRunInfo,
