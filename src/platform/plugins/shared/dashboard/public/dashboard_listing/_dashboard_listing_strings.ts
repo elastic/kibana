@@ -48,7 +48,8 @@ export const dashboardListingTableStrings = {
     }),
   getReadOnlyVisualizationMessage: () =>
     i18n.translate('dashboard.listing.table.readOnlyVisualizationMessage', {
-      defaultMessage: "These details can't be edited because this visualization is no longer supported.",
+      defaultMessage:
+        "These details can't be edited because this visualization is no longer supported.",
     }),
 };
 
