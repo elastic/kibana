@@ -18,12 +18,12 @@ export function getSanitizedError(error: Error) {
   return sanitizedError;
 }
 
-axios.interceptors.response.use(
+axios.interceptors?.response.use(
   (response) => response,
   (error) => Promise.reject(getSanitizedError(error))
 );
 
-axios.interceptors.request.use(
+axios.interceptors?.request.use(
   (config) => config,
   (error) => Promise.reject(getSanitizedError(error))
 );
