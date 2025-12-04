@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useEffect, useRef } from 'react';
+import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiPanel } from '@elastic/eui';
 import styled from '@emotion/styled';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import { TryItButton } from '../../../../components/try_it_button';
+import type { DataSchemaFormat, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
 import type { InfraFormatter } from '../../../../common/inventory/types';
 import { Timeline } from './timeline/timeline';
+import { useTimeRangeMetadataContext } from '../../../../hooks/use_time_range_metadata';
+import { KubernetesButton } from '../../../../components/kubernetes_dashboard_promotion';
+import { OtelKubernetesButton } from '../../../../components/otel_kubernetes_dashboard_promotion';
+import { useInstalledIntegration } from '../../../../hooks/use_installed_integration';
 
 const showHistory = i18n.translate('xpack.infra.showHistory', {
   defaultMessage: 'Show history',
@@ -31,38 +33,19 @@ interface Props {
   nodeType: InventoryItemType;
 }
 
-const LOCAL_STORAGE_KEY = 'inventoryUI:k8sDashboardClicked';
-const KubernetesButton = () => {
-  const [clicked, setClicked] = useLocalStorage<boolean>(LOCAL_STORAGE_KEY, false);
-  const clickedRef = useRef<boolean | undefined>(clicked);
-  return (
-    <TryItButton
-      color={clickedRef.current ? 'primary' : 'accent'}
-      label={i18n.translate('xpack.infra.bottomDrawer.kubernetesDashboardsLink', {
-        defaultMessage: 'Kubernetes dashboards',
-      })}
-      data-test-subj="inventory-kubernetesDashboard-link"
-      link={{
-        app: 'dashboards',
-        hash: '/list',
-        search: {
-          _g: '()',
-          s: 'kubernetes tag:(Managed)',
-        },
-      }}
-      onClick={() => {
-        if (!clickedRef.current) {
-          setClicked(true);
-        }
-      }}
-      hideBadge={clickedRef.current}
-    />
-  );
-};
 export const BottomDrawer = ({ interval, formatter, view, nodeType }: Props) => {
   const { timelineOpen, changeTimelineOpen } = useWaffleOptionsContext();
-
+  const { data: timeRangeMetadata } = useTimeRangeMetadataContext();
   const [isOpen, setIsOpen] = useState(Boolean(timelineOpen));
+  const schemas: DataSchemaFormat[] = useMemo(
+    () => timeRangeMetadata?.schemas || [],
+    [timeRangeMetadata?.schemas]
+  );
+
+  const hasElasticSchema = schemas.includes('ecs');
+  const hasK8sIntegration = useInstalledIntegration('kubernetes');
+  const hasSemconvSchema = schemas.includes('semconv');
+  const hasOtelK8sIntegration = useInstalledIntegration('kubernetes_otel');
 
   useEffect(() => {
     if (isOpen !== timelineOpen) setIsOpen(Boolean(timelineOpen));
@@ -78,7 +61,8 @@ export const BottomDrawer = ({ interval, formatter, view, nodeType }: Props) => 
   if (view === 'table') {
     return nodeType === 'pod' ? (
       <BottomPanel hasBorder={false} hasShadow={false} borderRadius="none" paddingSize="s">
-        <KubernetesButton />
+        {hasElasticSchema && hasK8sIntegration && <KubernetesButton />}
+        {hasSemconvSchema && hasOtelK8sIntegration && <OtelKubernetesButton />}
       </BottomPanel>
     ) : null;
   }
@@ -99,7 +83,8 @@ export const BottomDrawer = ({ interval, formatter, view, nodeType }: Props) => 
           </EuiFlexItem>
           {nodeType === 'pod' && (
             <EuiFlexItem grow={false}>
-              <KubernetesButton />
+              {hasElasticSchema && hasK8sIntegration && <KubernetesButton />}
+              {hasSemconvSchema && hasOtelK8sIntegration && <OtelKubernetesButton />}
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

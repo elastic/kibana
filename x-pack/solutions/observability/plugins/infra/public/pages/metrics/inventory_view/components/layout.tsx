@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import useInterval from 'react-use/lib/useInterval';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from '@emotion/styled';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import type { InventoryView } from '../../../../../common/inventory_views';
 import type { SnapshotNode } from '../../../../../common/http_api';
 import { AutoSizer } from '../../../../components/auto_sizer';
@@ -28,7 +29,9 @@ import { createInventoryMetricFormatter } from '../lib/create_inventory_metric_f
 import { createLegend } from '../lib/create_legend';
 import { BottomDrawer } from './bottom_drawer';
 import { LegendControls } from './waffle/legend_controls';
-
+import { useTimeRangeMetadataContext } from '../../../../hooks/use_time_range_metadata';
+import { KubernetesDashboardCard } from '../../../../components/kubernetes_dashboard_promotion';
+import { OtelKubernetesDashboardCard } from '../../../../components/otel_kubernetes_dashboard_promotion';
 interface Props {
   currentView?: InventoryView | null;
   interval: string;
@@ -60,11 +63,18 @@ export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
   } = useWaffleOptionsContext();
   const { currentTime, jumpToTime, isAutoReloading } = useWaffleTimeContext();
   const { applyFilterQuery } = useWaffleFiltersContext();
+  const { data: timeRangeMetadata } = useTimeRangeMetadataContext();
   const legendPalette = legend?.palette ?? DEFAULT_LEGEND.palette;
   const legendSteps = legend?.steps ?? DEFAULT_LEGEND.steps;
   const legendReverseColors = legend?.reverseColors ?? DEFAULT_LEGEND.reverseColors;
 
   const AUTO_REFRESH_INTERVAL = 5 * 1000;
+  const schemas: DataSchemaFormat[] = useMemo(
+    () => timeRangeMetadata?.schemas || [],
+    [timeRangeMetadata?.schemas]
+  );
+  const hasElasticIntegration = schemas.includes('ecs');
+  const hasOtelIntegration = schemas.includes('semconv');
 
   const options = {
     formatter: InfraFormatterType.percent,
@@ -155,6 +165,16 @@ export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
               </EuiFlexGroup>
             </EuiFlexGroup>
           </TopActionContainer>
+          {nodeType === 'pod' && (hasElasticIntegration || hasOtelIntegration) && (
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                {hasElasticIntegration && <KubernetesDashboardCard />}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                {hasOtelIntegration && <OtelKubernetesDashboardCard />}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
           <EuiFlexItem
             grow={false}
             css={css`

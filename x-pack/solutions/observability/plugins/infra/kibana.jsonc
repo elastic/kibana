@@ -59,7 +59,8 @@
       "kibanaUtils",
       "kibanaReact",
       "ml",
-      "controls"
+      "controls",
+      "fleet"
     ]
   }
 }

@@ -106,7 +106,8 @@ export const NodesOverview = ({
 
   const noData = !loading && nodes && nodes.length === 0;
 
-  const hasDataOnAnotherSchema = schemas.length === 1 && preferredSchema !== schemas[0];
+  const hasDataOnAnotherSchema =
+    schemas.length === 1 && preferredSchema !== schemas[0] && nodeType === 'host';
   const refetchProps = hasDataOnAnotherSchema
     ? {}
     : {
