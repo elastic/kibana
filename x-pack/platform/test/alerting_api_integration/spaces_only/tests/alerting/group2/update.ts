@@ -593,5 +593,79 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           .expect(400);
       });
     });
+
+    describe('system actions', () => {
+      const systemAction = {
+        id: 'system-connector-test.system-action',
+        params: {},
+      };
+
+      it('should throw 400 when updating a rule to use the same system action twice', async () => {
+        const { body: createdAlert } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData())
+          .expect(200);
+
+        objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+
+        await supertest
+          .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdAlert.id}`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'Updated rule',
+            tags: [],
+            schedule: { interval: '12s' },
+            throttle: null,
+            params: {},
+            actions: [systemAction, systemAction],
+          })
+          .expect(400);
+      });
+
+      it('should allow updating a rule with multiple instances of the same system action if allowMultipleSystemActions is true', async () => {
+        const multipleSystemAction = {
+          id: 'system-connector-test.system-action-allow-multiple',
+          params: {},
+        };
+
+        const { body: createdAlert } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData())
+          .expect(200);
+
+        objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+
+        const response = await supertest
+          .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdAlert.id}`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'Updated rule',
+            tags: [],
+            schedule: { interval: '12s' },
+            throttle: null,
+            params: {},
+            actions: [multipleSystemAction, multipleSystemAction],
+          });
+
+        expect(response.status).to.eql(200);
+        expect(response.body.actions.length).to.eql(2);
+
+        const action1 = response.body.actions[0];
+        const action2 = response.body.actions[1];
+
+        expect(action1.id).to.eql('system-connector-test.system-action-allow-multiple');
+        expect(action1.connector_type_id).to.eql('test.system-action-allow-multiple');
+        expect(action1.uuid).to.not.be(undefined);
+
+        expect(action2.id).to.eql('system-connector-test.system-action-allow-multiple');
+        expect(action2.connector_type_id).to.eql('test.system-action-allow-multiple');
+        expect(action2.uuid).to.not.be(undefined);
+
+        // UUIDs should be different
+        expect(action1.uuid).to.not.eql(action2.uuid);
+      });
+    });
   });
 }

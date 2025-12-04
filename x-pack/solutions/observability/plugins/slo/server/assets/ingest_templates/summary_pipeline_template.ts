@@ -251,16 +251,17 @@ export const getSummaryPipelineTemplate = (
       },
       {
         pipeline: {
+          description: 'Global custom pipeline for all SLO summary data',
           ignore_missing_pipeline: true,
           ignore_failure: true,
-          name: `slo-${slo.id}@custom`,
+          name: 'slo-summary-global@custom',
         },
       },
       {
         pipeline: {
           ignore_missing_pipeline: true,
           ignore_failure: true,
-          name: 'slo-summary-global@custom',
+          name: `slo-summary-${slo.id}@custom`,
         },
       },
     ],
