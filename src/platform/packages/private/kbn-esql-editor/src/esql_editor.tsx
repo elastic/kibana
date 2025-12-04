@@ -522,15 +522,16 @@ const ESQLEditorInternal = function ESQLEditor({
           // Check if there's a stale entry and clear it
           clearCacheWhenOld(esqlFieldsCache, `${queryToExecute} | limit 0`);
           const timeRange = data.query.timefilter.timefilter.getTime();
-          const columns = await memoizedFieldsFromESQL({
-            esqlQuery: queryToExecute,
-            search: data.search.search,
-            timeRange,
-            signal: abortController.signal,
-            variables: variablesService?.esqlVariables,
-            dropNullColumns: true,
-          }).result;
-          return columns;
+          return (
+            (await memoizedFieldsFromESQL({
+              esqlQuery: queryToExecute,
+              search: data.search.search,
+              timeRange,
+              signal: abortController.signal,
+              variables: variablesService?.esqlVariables,
+              dropNullColumns: true,
+            }).result) || []
+          );
         }
         return [];
       },
@@ -564,8 +565,7 @@ const ESQLEditorInternal = function ESQLEditor({
         };
       },
       getInferenceEndpoints: async (taskType: InferenceTaskType) => {
-        const endpoints = await getInferenceEndpoints(core.http, taskType);
-        return endpoints;
+        return (await getInferenceEndpoints(core.http, taskType)) || [];
       },
       getLicense: async () => {
         const ls = await kibana.services?.esql?.getLicense();

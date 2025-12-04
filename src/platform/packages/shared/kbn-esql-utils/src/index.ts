@@ -62,10 +62,4 @@ export {
 } from './utils/cascaded_documents_helpers';
 
 // Callback functions
-export { getESQLSources } from './utils/callbacks/sources';
-export { getEsqlColumns } from './utils/callbacks/columns';
-export { getEsqlPolicies } from './utils/callbacks/policies';
-export { getJoinIndices } from './utils/callbacks/lookup_indices';
-export { getTimeseriesIndices } from './utils/callbacks/timeseries_indices';
-export { getInferenceEndpoints } from './utils/callbacks/inference';
-export { getEditorExtensions } from './utils/callbacks/extensions';
+export * from './utils/callbacks';
