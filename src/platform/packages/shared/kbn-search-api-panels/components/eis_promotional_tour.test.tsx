@@ -18,7 +18,7 @@ import { EIS_PROMO_TOUR_TITLE, EIS_PROMO_TOUR_CTA } from '../translations';
 jest.mock('../hooks/use_show_eis_promotional_content');
 
 describe('EisPromotionalTour', () => {
-  const promoId = 'testPromo';
+  const promoId = 'eisInferenceEndpoint';
   const dataId = `${promoId}-eis-promo-tour`;
   const childTestId = 'tourChild';
 

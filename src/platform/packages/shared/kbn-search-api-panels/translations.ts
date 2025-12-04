@@ -35,8 +35,15 @@ export const EIS_PROMO_CALLOUT_CTA = i18n.translate('searchApiPanels.eisPromotio
   defaultMessage: 'Get started',
 });
 
+export const EIS_ENDPOINT_PROMO_TOUR_TITLE = i18n.translate(
+  'searchApiPanels.eisPromotion.inferenceEndpoint.tour.title',
+  {
+    defaultMessage: 'Elastic Inference Service endpoints available',
+  }
+);
+
 export const EIS_PROMO_TOUR_TITLE = i18n.translate('searchApiPanels.eisPromotion.tour.title', {
-  defaultMessage: 'Elastic Inference Service endpoints available',
+  defaultMessage: 'Elastic Inference Service now available',
 });
 
 export const EIS_PROMO_TOUR_DESCRIPTION = i18n.translate(
@@ -53,3 +60,10 @@ export const EIS_PROMO_TOUR_CTA = i18n.translate('searchApiPanels.eisPromotion.t
 export const EIS_PROMO_TOUR_CLOSE = i18n.translate('searchApiPanels.eisPromotion.tour.close', {
   defaultMessage: 'Close',
 });
+
+export const EIS_INFERENCE_FLYOUT_PROMO_TOUR_DESCRIPTION = i18n.translate(
+  'searchApiPanels.eisPromotion.inferenceFlyout.tour.description',
+  {
+    defaultMessage: 'Enable GPU-powered Elastic models through our new Elastic Inference Service.',
+  }
+);
