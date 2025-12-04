@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { IconType, EuiBetaBadgeProps } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
 import { EuiBetaBadge, EuiThemeProvider, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -24,7 +24,6 @@ interface BetaBadgeProps {
 interface BadgeConfig {
   iconType?: IconType;
   label: string;
-  color?: EuiBetaBadgeProps['color'];
 }
 
 /**
