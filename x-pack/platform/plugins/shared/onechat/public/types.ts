@@ -13,7 +13,10 @@ import type {
 } from '@kbn/data-views-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import type { ToolServiceStartContract } from '@kbn/onechat-browser';
+import type {
+  AttachmentServiceStartContract,
+  ToolServiceStartContract,
+} from '@kbn/onechat-browser';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -60,6 +63,10 @@ export interface OnechatPluginSetup {}
  * Public start contract for the browser-side onechat plugin.
  */
 export interface OnechatPluginStart {
+  /**
+   * Attachment service contract, can be used to register and retrieve attachment UI definitions.
+   */
+  attachments: AttachmentServiceStartContract;
   /**
    * Tool service contract, can be used to list or execute tools.
    */

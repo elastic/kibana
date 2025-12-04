@@ -1628,3 +1628,10 @@ export const COLUMN_TOTAL_UNFILLED_GAPS_DURATION_TOOLTIP = i18n.translate(
     defaultMessage: 'Sum of remaining unfilled or partially filled gaps',
   }
 );
+
+export const CHAT_IN_AGENT_BUILDER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.chatInAgentBuilder',
+  {
+    defaultMessage: 'Chat in Agent Builder',
+  }
+);

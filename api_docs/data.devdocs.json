@@ -8737,6 +8737,22 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-public.SearchSourceFields.projectRouting",
+            "type": "string",
+            "tags": [],
+            "label": "projectRouting",
+            "description": [
+              "\n{@link ProjectRouting}"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/data/common/search/search_source/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-public.SearchSourceFields.parent",
             "type": "Object",
             "tags": [],
@@ -10021,7 +10037,15 @@
           },
           " | undefined; searchAfter?: ",
           "SortResults",
-          " | undefined; timeout?: string | undefined; terminate_after?: number | undefined; parent?: ",
+          " | undefined; timeout?: string | undefined; terminate_after?: number | undefined; projectRouting?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.ProjectRouting",
+            "text": "ProjectRouting"
+          },
+          "; parent?: ",
           {
             "pluginId": "data",
             "scope": "common",

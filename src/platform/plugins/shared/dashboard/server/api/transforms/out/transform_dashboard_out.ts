@@ -32,6 +32,7 @@ export function transformDashboardOut(
     timeRestore,
     timeTo,
     title,
+    projectRouting,
   } = attributes;
 
   // Extract tag references
@@ -58,11 +59,13 @@ export function transformDashboardOut(
     ...((panelsJSON || sections) && {
       panels: transformPanelsOut(panelsJSON, sections, references),
     }),
+
+    ...(projectRouting !== undefined && { project_routing: projectRouting }),
     ...(refreshInterval && {
-      refreshInterval: { pause: refreshInterval.pause, value: refreshInterval.value },
+      refresh_interval: { pause: refreshInterval.pause, value: refreshInterval.value },
     }),
     ...(tags && tags.length && { tags }),
-    ...(timeRange && { timeRange }),
+    ...(timeRange && { time_range: timeRange }),
     title: title ?? '',
   };
 }
