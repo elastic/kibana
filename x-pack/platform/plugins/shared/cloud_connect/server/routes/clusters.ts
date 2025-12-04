@@ -81,23 +81,12 @@ export const registerClustersRoute = ({
             clusterDetails.metadata.organization_id
           );
 
-          // Include subscription state in the response
           return response.ok({
             body: {
               ...clusterDetails,
               metadata: {
                 ...clusterDetails.metadata,
                 subscription: subscription.state,
-                // subscription: 'inactive'
-              },
-              services: {
-                auto_ops: {
-                  ...clusterDetails.services.auto_ops,
-                },
-                eis: {
-                  ...clusterDetails.services.eis,
-                  // enabled: false
-                },
               },
             },
           });
