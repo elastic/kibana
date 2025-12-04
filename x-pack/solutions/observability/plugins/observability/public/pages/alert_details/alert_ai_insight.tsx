@@ -91,15 +91,12 @@ export function AlertAiInsight({ alert }: { alert: AlertData }) {
 
   return (
     <AiInsight
-      title={i18n.translate('xpack.observability.alertAiInsight.aiInsight.alertInsightTitleLabel', {
+      title={i18n.translate('xpack.observability.alertAiInsight.titleLabel', {
         defaultMessage: 'Help me understand this alert',
       })}
-      description={i18n.translate(
-        'xpack.observability.alertAiInsight.aiInsight.alertInsightDescriptionLabel',
-        {
-          defaultMessage: 'Get helpful insights from our Elastic AI Agent',
-        }
-      )}
+      description={i18n.translate('xpack.observability.alertAiInsight.descriptionLabel', {
+        defaultMessage: 'Get helpful insights from our Elastic AI Agent.',
+      })}
       content={summary}
       isLoading={isLoading}
       error={error}
