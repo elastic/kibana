@@ -62,7 +62,9 @@ test.describe('Rules Page - Rules Tab', { tag: ['@ess', '@svlOblt'] }, () => {
     await expect(editableRules.filter({ hasText: createdRule.name })).toHaveCount(1);
   });
 
-  test('should show the edit action button for an editable rule', async ({ pageObjects }) => {
+  test('should show the edit action button for an editable rule & open the edit rule flyout', async ({
+    pageObjects,
+  }) => {
     const editableRules = pageObjects.rulesPage.getEditableRules();
     const ruleRow = editableRules.filter({ hasText: createdRule.name });
 
@@ -77,5 +79,18 @@ test.describe('Rules Page - Rules Tab', { tag: ['@ess', '@svlOblt'] }, () => {
     // Verify the edit button is also visible
     const editButton = pageObjects.rulesPage.getEditActionButton(ruleRow);
     await expect(editButton).toBeVisible();
+
+    // Verify the edit button is clickable and opens the edit rule flyout
+    await editButton.click();
+    await pageObjects.rulesPage.expectEditRuleFlyoutVisible();
+
+    // Verify the edit rule flyout is visible with expected elements
+    await expect(pageObjects.rulesPage.editRuleFlyout).toBeVisible();
+    await expect(pageObjects.rulesPage.editRuleFlyoutCancelButton).toBeVisible();
+    await expect(pageObjects.rulesPage.editRuleFlyoutSaveButton).toBeVisible();
+
+    // Close the edit rule flyout & verify the edit rule flyout is closed
+    await pageObjects.rulesPage.closeEditRuleFlyout();
+    await expect(pageObjects.rulesPage.editRuleFlyout).toBeHidden({ timeout: 10000 });
   });
 });
