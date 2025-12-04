@@ -8,7 +8,7 @@
 /**
  * OAuth providers supported by EARS
  */
-export enum SupportedOAuthProvider {
+export enum EARSSupportedOAuthProvider {
   GITHUB = 'github',
   GOOGLE = 'google',
   NOTION = 'notion',
@@ -25,14 +25,20 @@ export interface WorkflowInfo {
 }
 
 /**
- * Configuration for OAuth authentication
+ * Configuration for OAuth authentication using EARS (Elastic-owned OAuth apps)
  */
-export interface OAuthConfiguration {
-  provider: SupportedOAuthProvider;
+export interface EARSOAuthConfiguration {
+  provider: EARSSupportedOAuthProvider;
   scopes?: string[];
   initiatePath: string;
   fetchSecretsPath: string;
   oauthBaseUrl: string;
+}
+
+// This is subject to change once we know more about custom OAuth apps
+export interface CustomOAuthConfiguration {
+  initiatePath: string;
+  fetchSecretsPath: string;
 }
 
 /**
@@ -72,5 +78,5 @@ export interface DataTypeDefinition {
   stackConnector: StackConnectorConfig;
 
   /** OAuth configuration for authentication */
-  oauthConfiguration?: OAuthConfiguration;
+  oauthConfiguration?: EARSOAuthConfiguration | CustomOAuthConfiguration;
 }
