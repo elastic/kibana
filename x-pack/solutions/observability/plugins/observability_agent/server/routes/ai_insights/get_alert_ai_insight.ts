@@ -42,10 +42,15 @@ export async function getAlertAiInsight({
   request,
   logger,
 }: GetAlertAiInsightParams): Promise<AlertAiInsightResult> {
-  const context = await fetchAlertContext({ alertDoc, dataRegistry, request, logger });
-  const summary = await generateAlertSummary({ inferenceClient, connectorId, context });
+  const relatedContext = await fetchAlertContext({ alertDoc, dataRegistry, request, logger });
+  const summary = await generateAlertSummary({
+    inferenceClient,
+    connectorId,
+    alertDoc,
+    context: relatedContext,
+  });
 
-  return { summary, context };
+  return { summary, context: relatedContext };
 }
 
 async function fetchAlertContext({
@@ -185,10 +190,12 @@ async function fetchAlertContext({
 async function generateAlertSummary({
   inferenceClient,
   connectorId,
+  alertDoc,
   context,
 }: {
   inferenceClient: InferenceClient;
   connectorId: string | undefined;
+  alertDoc: AlertDocForInsight;
   context: string;
 }): Promise<string> {
   const systemPrompt = dedent(`
@@ -220,10 +227,15 @@ async function generateAlertSummary({
     - If inconclusive or signals skew Indirect/Unrelated, state that the alert may be unrelated/noisy and suggest targeted traces/logging for the suspected path.
   `);
 
+  const alertDetails = JSON.stringify(alertDoc, null, 2)};
+
   const userPrompt = dedent(`
-    <AlertContext>
+    <AlertDetails>
+    ${alertDetails}
+    </AlertDetails>
+    <RelatedAlertContext>
     ${context}
-    </AlertContext>
+    </RelatedAlertContext>
     Task:
     Summarize likely cause, impact, and immediate next checks for this alert using the format above. Tie related signals to the alert scope; ignore unrelated noise. If signals are weak or conflicting, mark Assessment "Inconclusive" and propose the safest next diagnostic step.
   `);
@@ -234,5 +246,5 @@ async function generateAlertSummary({
     messages: [{ role: MessageRole.User, content: userPrompt }],
   });
 
-  return completion.content ?? '';
+  return completion.content;
 }
