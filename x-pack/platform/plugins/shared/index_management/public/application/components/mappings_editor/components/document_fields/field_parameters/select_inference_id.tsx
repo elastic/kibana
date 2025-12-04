@@ -32,7 +32,7 @@ import { EisTokenCostTour } from '@kbn/search-api-panels';
 import { getFieldConfig } from '../../../lib';
 import { useAppContext } from '../../../../../app_context';
 import { useLoadInferenceEndpoints } from '../../../../../services/api';
-import { UseField } from '../../../shared_imports';
+import { documentationService, UseField } from '../../../shared_imports';
 
 const InferenceFlyoutWrapper = lazy(() => import('@kbn/inference-endpoint-ui-common'));
 export interface SelectInferenceIdProps {
@@ -218,7 +218,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
                 <EuiSpacer size="xs" />
                 <EisTokenCostTour
                   promoId="tokenConsumptionCost"
-                  ctaLink={docLinks.links.enterpriseSearch.elasticInferenceService}
+                  ctaLink={documentationService.getEisDocumentationLink()}
                   isCloudEnabled={cloud?.isCloudEnabled ?? false}
                   isReady={isSelectInferenceIdOpen}
                 >
