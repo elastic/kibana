@@ -7,8 +7,8 @@
 
 import type { MaybePromise } from '@kbn/utility-types';
 import type { Attachment } from '@kbn/onechat-common/attachments';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AttachmentBoundedTool } from './tools';
-import { KibanaRequest } from '@kbn/core-http-server';
 
 /**
  * Server-side definition of an attachment type.
