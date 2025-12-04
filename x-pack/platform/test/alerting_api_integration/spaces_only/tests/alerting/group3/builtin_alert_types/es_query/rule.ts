@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 
@@ -30,6 +30,7 @@ import { createDataStream, deleteDataStream } from '../../../create_test_data';
 
 export default function ruleTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const log = getService('log');
   const indexPatterns = getService('indexPatterns');
   const {
     es,
@@ -256,6 +257,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           /Document count is \d+.?\d* in the last 30s in kibana-alerting-test-data (?:index|data view). Alert when greater than -1./;
 
         const docs = await waitForDocs(2);
+        log.info(`Docs ${JSON.stringify(docs)}`);
         for (let i = 0; i < docs.length; i++) {
           const doc = docs[i];
           const { previousTimestamp, hits } = doc._source;
