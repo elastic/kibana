@@ -22,6 +22,7 @@ export type LayoutProperty =
   | 'right'
   | 'height'
   | 'width'
+  | 'marginLeft'
   | 'marginBottom'
   | 'marginRight';
 

@@ -46,6 +46,7 @@ const layoutConfigs: { classic: ChromeLayoutConfig; project: ChromeLayoutConfig 
 
     applicationMarginRight: 8,
     applicationMarginBottom: 8,
+    applicationMarginLeft: 8,
 
     /** for debug for now */
     sidebarWidth: 48,
