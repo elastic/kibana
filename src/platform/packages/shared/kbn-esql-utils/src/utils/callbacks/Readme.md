@@ -51,20 +51,28 @@ The callbacks in this directory are designed to:
 
 ```typescript
 import { getESQLSources, getEsqlColumns, getJoinIndices } from '@kbn/esql-utils';
+import { validateQuery } from '@kbn/esql-validation-autocomplete';
 
-// Get available data sources
-const sources = await getESQLSources(core, getLicense);
+// Usage for validating FROM sources and columns
+  const esqlCallbacks: ESQLCallbacks = useMemo(() => {
+    const callbacks: ESQLCallbacks = {
+      getSources: async () => {
+        const getLicense = licensing?.getLicense;
+        return await getESQLSources({ application, http }, getLicense);
+      },
+      getColumnsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
+        const columns = await getEsqlColumns({
+          query: queryToExecute,
+          search: searchService,
+          timeRange: { from: 'now-1h', to: 'now' }
+        });
+        return columns;
+      },
 
-// Get columns for a query
-const columns = await getEsqlColumns({
-  query: 'FROM logs-*',
-  search: searchService,
-  timeRange: { from: 'now-1h', to: 'now' }
-});
+    };
+    return callbacks;
+  }, [licensing, application, http, data?.search?.search]);
 
-// Get indices available for joins
-const joinIndices = await getJoinIndices(
-  'FROM logs-*',
-  http,
-);
+  const { errors, warnings } = await validateQuery("from index | stats avg(myColumn)", esqlCallbacks);
+
 ```
