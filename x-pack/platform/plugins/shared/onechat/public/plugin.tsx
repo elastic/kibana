@@ -152,7 +152,13 @@ export class OnechatPlugin
     const onechatService: OnechatPluginStart = {
       tools: createPublicToolContract({ toolsService }),
       setConversationFlyoutActiveConfig: (config: EmbeddableConversationProps) => {
+        // set config until flyout is next opened
         this.conversationFlyoutActiveConfig = config;
+        // if there is already an active flyout, update its props
+        if (this.activeFlyoutRef && this.updateFlyoutPropsCallback) {
+          this.updateFlyoutPropsCallback(config);
+          return { flyoutRef: this.activeFlyoutRef };
+        }
       },
       clearConversationFlyoutActiveConfig: () => {
         this.conversationFlyoutActiveConfig = {};
