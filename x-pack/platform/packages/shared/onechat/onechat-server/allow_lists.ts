@@ -29,6 +29,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   `${internalNamespaces.security}.entity_risk_score`,
   `${internalNamespaces.security}.attack_discovery_search`,
   `${internalNamespaces.security}.security_labs_search`,
+  `${internalNamespaces.security}.alerts`,
 ];
 
 /**
