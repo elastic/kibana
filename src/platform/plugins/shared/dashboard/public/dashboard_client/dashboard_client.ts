@@ -12,7 +12,11 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { DeleteResult } from '@kbn/content-management-plugin/common';
 import type { Reference } from '@kbn/content-management-utils';
 import type { DashboardSearchRequestBody, DashboardSearchResponseBody } from '../../server';
-import { DASHBOARD_API_PATH, DASHBOARD_API_VERSION, DASHBOARD_SAVED_OBJECT_TYPE } from '../../common/constants';
+import {
+  DASHBOARD_API_PATH,
+  DASHBOARD_API_VERSION,
+  DASHBOARD_SAVED_OBJECT_TYPE,
+} from '../../common/constants';
 import type {
   DashboardCreateResponseBody,
   DashboardReadResponseBody,
@@ -80,13 +84,16 @@ export const dashboardClient = {
     return result;
   },
   search: async (searchBody: DashboardSearchRequestBody) => {
-    return await coreServices.http.post<DashboardSearchResponseBody>(`${DASHBOARD_API_PATH}/search`, {
-      version: DASHBOARD_API_VERSION,
-      body: JSON.stringify({
-        ...searchBody,
-        search: searchBody.search ? `${searchBody.search}*` : undefined,
-      }),
-    });
+    return await coreServices.http.post<DashboardSearchResponseBody>(
+      `${DASHBOARD_API_PATH}/search`,
+      {
+        version: DASHBOARD_API_VERSION,
+        body: JSON.stringify({
+          ...searchBody,
+          search: searchBody.search ? `${searchBody.search}*` : undefined,
+        }),
+      }
+    );
   },
   update: async (id: string, dashboardState: DashboardState, references: Reference[]) => {
     const updateResponse = await coreServices.http.put<DashboardUpdateResponseBody>(
