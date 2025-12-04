@@ -144,6 +144,7 @@ export const runDeepAgentMode: RunChatAgentFn = async (
     capabilities: resolvedCapabilities,
     request,
     toolHandlerContext,
+    agentSkills,
   });
 
   logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);
@@ -157,13 +158,15 @@ export const runDeepAgentMode: RunChatAgentFn = async (
       logger.debug(`Found ${registeredSkills.length} registered skills`);
       
       for (const skill of registeredSkills) {
-        logger.debug(`Processing skill: ${skill.id} (${skill.name}) at ${skill.filePath}`);
-        skills[skill.filePath] = {
-          content: [skill.content],
-          created_at: new Date().toISOString(),
-          modified_at: new Date().toISOString(),
-          description: skill.shortDescription,
-        };
+        for (const file of skill.files) {
+          logger.debug(`Processing skill: ${skill.id} (${skill.name}) at ${file.filePath}`);
+          skills[file.filePath] = {
+            content: [file.content],
+            created_at: new Date().toISOString(),
+            modified_at: new Date().toISOString(),
+            description: file.shortDescription,
+          };
+        }
       }
     } catch (error) {
       logger.error(`Error fetching skills: ${error}`);

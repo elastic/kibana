@@ -16,9 +16,7 @@ import { registerObservabilityAgent } from './agent/register_observability_agent
 import { registerTools } from './tools/register_tools';
 import { getIsObservabilityAgentEnabled } from './utils/get_is_obs_agent_enabled';
 import { OBSERVABILITY_AGENT_FEATURE_FLAG } from '../common/constants';
-import { registerSkill } from '@kbn/onechat-server';
-import { createGetAlertsSkill } from './skills/get_alerts_skill';
-import { Skill } from '@kbn/agent-skills-common';
+import { Skill, type SkillTool } from '@kbn/agent-skills-common';
 import type {
   ObservabilityAgentPluginSetup,
   ObservabilityAgentPluginSetupDependencies,
@@ -45,14 +43,6 @@ export class ObservabilityAgentPlugin
     core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>,
     plugins: ObservabilityAgentPluginSetupDependencies
   ): ObservabilityAgentPluginSetup {
-    // Register get_alerts skill synchronously
-    try {
-      const getAlertsSkill = createGetAlertsSkill({ coreSetup: core });
-      registerSkill(getAlertsSkill);
-      this.logger.info('Registered observability.get_alerts skill');
-    } catch (error) {
-      this.logger.error(`Error registering get_alerts skill: ${error}`);
-    }
 
     // Register Observability Alerts skill
     if (plugins.agentSkills) {
@@ -61,7 +51,12 @@ export class ObservabilityAgentPlugin
           readonly id = 'observability.observability_alerts';
           readonly name = 'Observability Alerts';
           readonly shortDescription = 'Always read this guide before using observability alerts';
-          readonly content = `Observability alerts provide insights into issues across APM, Infrastructure, Logs, Uptime, and SLO services. Use this skill to search and retrieve alerts based on various criteria.
+          readonly files = [
+            {
+              id: 'observability.get_alerts',
+              name: 'Observability Alerts Guide',
+              shortDescription: 'Guide for using observability alerts',
+              content: `Observability alerts provide insights into issues across APM, Infrastructure, Logs, Uptime, and SLO services. Use this skill to search and retrieve alerts based on various criteria.
 
 === observability.get_alerts ===
 
@@ -109,8 +104,11 @@ Returns an array of alert objects, each containing:
 - Alert reason and message
 - Timestamp and status
 - Associated host, service, or container information
-- Alert severity and other metadata`;
-          readonly filePath = '/skills/observability/get_alerts.md';
+- Alert severity and other metadata`,
+              filePath: '/skills/observability/get_alerts.md',
+            },
+          ];
+          readonly tools: SkillTool[] = [];
         }
 
         plugins.agentSkills.registerSkill(new ObservabilityAlertsSkill());

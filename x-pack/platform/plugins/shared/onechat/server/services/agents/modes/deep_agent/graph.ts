@@ -13,8 +13,8 @@ import type { ResolvedAgentCapabilities } from '@kbn/onechat-common';
 import type { AgentEventEmitter, ToolHandlerContext } from '@kbn/onechat-server';
 import { createDeepAgent, createSkillsMiddleware } from '@kbn/securitysolution-deep-agent';
 import type { AgentMiddleware } from 'langchain';
-import { getSkillsRegistry } from '@kbn/onechat-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { AgentSkillsPluginStart } from '@kbn/agent-skills-plugin/server';
 import type { ResolvedConfiguration } from '../types';
 import { createReasoningEventMiddleware } from './middlewares/reasoningEventMiddleware';
 import { createAnswerMiddleware } from './middlewares/answerMiddleware';
@@ -29,6 +29,7 @@ export const createAgentGraph = ({
   events,
   request,
   toolHandlerContext,
+  agentSkills,
 }: {
   chatModel: InferenceChatModel;
   tools: StructuredTool[];
@@ -38,6 +39,7 @@ export const createAgentGraph = ({
   events: AgentEventEmitter;
   request?: KibanaRequest;
   toolHandlerContext?: ToolHandlerContext;
+  agentSkills?: AgentSkillsPluginStart;
 }) => {
   const middleware: AgentMiddleware[] = [
     createResearchMiddleware(events),
@@ -45,11 +47,11 @@ export const createAgentGraph = ({
     createAnswerMiddleware(events),
   ];
 
-  // Add skills middleware if request and toolHandlerContext are available
-  if (request && toolHandlerContext) {
+  // Add skills middleware if request, toolHandlerContext, and agentSkills are available
+  if (request && toolHandlerContext && agentSkills) {
     middleware.push(
       createSkillsMiddleware({
-        getSkillsRegistry: async () => getSkillsRegistry(),
+        getSkills: () => agentSkills.getSkills(),
         getRequest: () => request,
         getToolHandlerContext: () => toolHandlerContext,
       })

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { Skill } from './src';
+export { Skill, type SkillFile, type SkillTool } from './src';
 
 
 

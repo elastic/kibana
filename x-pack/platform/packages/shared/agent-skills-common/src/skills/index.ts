@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { Skill } from './skills';
+export { Skill, SkillFile, SkillTool } from './skills';

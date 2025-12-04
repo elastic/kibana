@@ -27,7 +27,7 @@ type ResponseActionCommand =
   | 'execute'
   | 'scan';
 
-const VALID_COMMANDS: ResponseActionCommand[] = [
+export const VALID_COMMANDS: ResponseActionCommand[] = [
   'isolate',
   'release',
   'status',
@@ -39,7 +39,7 @@ const VALID_COMMANDS: ResponseActionCommand[] = [
   'scan',
 ];
 
-const fleetManagementSchema = z.object({
+export const fleetManagementSchema = z.object({
   command_string: z
     .string()
     .describe(
@@ -56,7 +56,7 @@ const fleetManagementSchema = z.object({
     .describe('The agent type. Defaults to "endpoint"'),
 });
 
-interface ParsedCommand {
+export interface ParsedCommand {
   action: ResponseActionCommand;
   comment?: string;
   path?: string;
@@ -70,7 +70,7 @@ interface ParsedCommand {
  * Parse a command string like "execute --command ps -aux --comment testing"
  * into structured parameters
  */
-function parseCommandString(commandString: string): ParsedCommand {
+export function parseCommandString(commandString: string): ParsedCommand {
   const trimmed = commandString.trim();
   
   // Extract the action (first word)
@@ -151,7 +151,7 @@ interface FleetManagementSkillDeps {
   logger: Logger;
 }
 
-async function getResponseActionsClientFromContext(
+export async function getResponseActionsClientFromContext(
   context: ToolHandlerContext | { request: KibanaRequest },
   deps: FleetManagementSkillDeps,
   agentType: ResponseActionAgentType = 'endpoint'
@@ -217,7 +217,7 @@ async function getResponseActionsClientFromContext(
   return { client, spaceId };
 }
 
-async function getHostStatus(
+export async function getHostStatus(
   endpointIds: string[],
   deps: FleetManagementSkillDeps,
   spaceId: string

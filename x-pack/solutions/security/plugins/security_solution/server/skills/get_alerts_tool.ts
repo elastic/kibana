@@ -5,53 +5,34 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
 import type { CoreSetup } from '@kbn/core/server';
-import type { ToolHandlerContext, SkillDefinition } from '@kbn/onechat-server';
+import type { Logger } from '@kbn/core/server';
+import type { ToolHandlerContext } from '@kbn/onechat-server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { SkillTool } from '@kbn/agent-skills-common';
+import { getAlertsSchema } from './get_alerts_skill';
 
-export const getAlertsSchema = z.object({
-  query: z.string().optional().describe('Natural language query to search for security alerts'),
-  timeRange: z
-    .object({
-      from: z.string().describe('Start time in ISO 8601 format (e.g., "2024-01-01T00:00:00Z")'),
-      to: z.string().describe('End time in ISO 8601 format (e.g., "2024-01-02T00:00:00Z")'),
-    })
-    .optional()
-    .describe('Time range filter for alerts'),
-  severity: z
-    .enum(['low', 'medium', 'high', 'critical'])
-    .optional()
-    .describe('Filter alerts by severity level'),
-  workflowStatus: z
-    .enum(['open', 'acknowledged', 'closed'])
-    .optional()
-    .describe('Filter alerts by workflow status'),
-  limit: z.number().int().min(1).max(100).optional().default(10).describe('Maximum number of alerts to return'),
-});
+interface GetAlertsToolDeps {
+  coreSetup: CoreSetup<any, any>;
+  logger: Logger;
+}
 
-export function createGetAlertsSkill({ coreSetup }: { coreSetup: CoreSetup<any, any> }): SkillDefinition {
+export function getSecurityAlertsSkillTool(deps: GetAlertsToolDeps): SkillTool<typeof getAlertsSchema> {
   return {
     id: 'security.get_alerts',
     name: 'Get Security Alerts',
-    description:
+    shortDescription: 'Search and retrieve security detection alerts',
+    fullDescription:
       'Search and retrieve security detection alerts. Supports filtering by time range, severity, workflow status, and natural language queries.',
-    category: 'security',
+    categories: ['security'],
     inputSchema: getAlertsSchema,
     examples: [
-      // Get all alerts (default limit of 10)
       'tool("invoke_skill", {"skillId":"security.get_alerts","params":{}})',
-      // Get critical severity alerts
       'tool("invoke_skill", {"skillId":"security.get_alerts","params":{"severity":"critical"}})',
-      // Get high severity alerts that are open
       'tool("invoke_skill", {"skillId":"security.get_alerts","params":{"severity":"high","workflowStatus":"open"}})',
-      // Search alerts with a natural language query
       'tool("invoke_skill", {"skillId":"security.get_alerts","params":{"query":"malware","limit":20}})',
-      // Get alerts from a specific time range
       'tool("invoke_skill", {"skillId":"security.get_alerts","params":{"timeRange":{"from":"2024-01-01T00:00:00Z","to":"2024-01-02T00:00:00Z"}}})',
-      // Get acknowledged alerts with high severity
       'tool("invoke_skill", {"skillId":"security.get_alerts","params":{"severity":"high","workflowStatus":"acknowledged","limit":50}})',
-      // Search for ransomware-related open alerts
       'tool("invoke_skill", {"skillId":"security.get_alerts","params":{"query":"ransomware","workflowStatus":"open"}})',
     ],
     handler: async (params, context) => {
@@ -65,10 +46,10 @@ export function createGetAlertsSkill({ coreSetup }: { coreSetup: CoreSetup<any, 
       } else {
         // Fallback: use coreSetup if only request is available
         const { request } = context as { request: import('@kbn/core-http-server').KibanaRequest };
-        const [coreStart] = await coreSetup.getStartServices();
+        const [coreStart] = await deps.coreSetup.getStartServices();
         esClient = coreStart.elasticsearch.client.asScoped(request);
-        logger = coreSetup.logger.get('get_alerts_skill');
-        events = { emit: () => {}, reportProgress: () => {} }; // Noop events for fallback
+        logger = deps.logger;
+        events = { reportProgress: () => {} }; // Noop events for fallback
       }
 
       const mustClauses: QueryDslQueryContainer[] = [];

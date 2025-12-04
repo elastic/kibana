@@ -5,47 +5,26 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
 import type { Logger } from '@kbn/core/server';
-import type { ToolHandlerContext, SkillDefinition } from '@kbn/onechat-server';
+import type { ToolHandlerContext } from '@kbn/onechat-server';
+import type { SkillTool } from '@kbn/agent-skills-common';
 import type { EndpointAppContextService } from '../endpoint/endpoint_app_context_services';
+import { waitForActionSchema, sleep } from './wait_for_action_skill';
 import { getActionDetailsById } from '../endpoint/services/actions/action_details_by_id';
 
-export const waitForActionSchema = z.object({
-  action_id: z.string().describe('The action ID returned from a fleet management command'),
-  endpoint_id: z
-    .string()
-    .optional()
-    .describe('Optional endpoint ID to filter results for a specific endpoint'),
-  timeout_seconds: z
-    .number()
-    .optional()
-    .default(300)
-    .describe('Maximum time to wait for the action to complete (default: 300 seconds / 5 minutes)'),
-  poll_interval_seconds: z
-    .number()
-    .optional()
-    .default(5)
-    .describe('How often to check action status (default: 5 seconds)'),
-});
-
-interface WaitForActionSkillDeps {
+interface WaitForActionToolDeps {
   getEndpointAppContextService: () => EndpointAppContextService;
   logger: Logger;
 }
 
-/**
- * Sleep for a specified number of milliseconds
- */
-export function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-export function createWaitForActionSkill(deps: WaitForActionSkillDeps): SkillDefinition {
+export function getWaitForActionSkillTool(
+  deps: WaitForActionToolDeps
+): SkillTool<typeof waitForActionSchema> {
   return {
     id: 'security.wait_for_action',
     name: 'Wait for Response Action Completion',
-    description: `Wait for a fleet management response action to complete and return the results.
+    shortDescription: 'Wait for a fleet management response action to complete',
+    fullDescription: `Wait for a fleet management response action to complete and return the results.
 
 This skill should be called after executing a response action (like execute, get-file, processes, etc.) 
 to wait for the action to complete and retrieve the output.
@@ -57,18 +36,13 @@ Parameters:
 - poll_interval_seconds: (Optional) Polling interval, default 5 seconds
 
 The skill will poll the action status until it completes, fails, or times out.`,
-    category: 'security',
+    categories: ['security'],
     inputSchema: waitForActionSchema,
     examples: [
-      // Wait for an action to complete with default timeout (5 minutes)
       'tool("invoke_skill", {"skillId":"security.wait_for_action","params":{"action_id":"<action_uuid>"}})',
-      // Wait for an action with a shorter timeout (60 seconds)
       'tool("invoke_skill", {"skillId":"security.wait_for_action","params":{"action_id":"<action_uuid>","timeout_seconds":60}})',
-      // Wait for an action and filter output to a specific endpoint
       'tool("invoke_skill", {"skillId":"security.wait_for_action","params":{"action_id":"<action_uuid>","endpoint_id":"<endpoint_uuid>"}})',
-      // Wait with custom timeout and poll interval
       'tool("invoke_skill", {"skillId":"security.wait_for_action","params":{"action_id":"<action_uuid>","timeout_seconds":120,"poll_interval_seconds":10}})',
-      // Typical flow: after executing a command, wait for results
       'tool("invoke_skill", {"skillId":"security.wait_for_action","params":{"action_id":"<action_id_from_fleet_management_skill>","timeout_seconds":60}})',
     ],
     handler: async (params, context) => {
@@ -77,10 +51,10 @@ The skill will poll the action status until it completes, fails, or times out.`,
         endpoint_id,
         timeout_seconds = 300,
         poll_interval_seconds = 5,
-      } = params as z.infer<typeof waitForActionSchema>;
+      } = params;
 
-      // Use logger from context if available, otherwise from deps
-      const logger = 'logger' in context ? (context as ToolHandlerContext).logger : deps.logger;
+      const logger =
+        'logger' in context ? (context as ToolHandlerContext).logger : deps.logger;
 
       const endpointService = deps.getEndpointAppContextService();
       const spaceId = 'default';

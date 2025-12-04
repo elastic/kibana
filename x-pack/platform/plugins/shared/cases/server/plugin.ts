@@ -49,9 +49,7 @@ import type { ConfigType } from './config';
 import { registerConnectorTypes } from './connectors';
 import { registerSavedObjects } from './saved_object_types';
 import type { ServerlessProjectType } from '../common/constants/types';
-import { registerSkill } from '@kbn/onechat-server';
-import { createCasesSkills } from './skills/cases_skill';
-import { Skill } from '@kbn/agent-skills-common';
+import { Skill, type SkillTool } from '@kbn/agent-skills-common';
 
 import { IncrementalIdTaskManager } from './tasks/incremental_id/incremental_id_task_manager';
 import { createCasesAnalyticsIndexes, registerCasesAnalyticsIndexesTasks } from './cases_analytics';
@@ -210,7 +208,12 @@ export class CasePlugin
           readonly id = 'cases.cases';
           readonly name = 'Cases';
           readonly shortDescription = 'Always read this guide before using cases to manage incidents';
-          readonly content = `Cases provide a centralized way to track, manage, and resolve security and operational incidents. Cases can be associated with alerts, have assignees, tags, severity levels, and custom fields.
+          readonly files = [
+            {
+              id: 'cases.cases',
+              name: 'Cases Guide',
+              shortDescription: 'Guide for using cases',
+              content: `Cases provide a centralized way to track, manage, and resolve security and operational incidents. Cases can be associated with alerts, have assignees, tags, severity levels, and custom fields.
 
 === cases.create_case ===
 
@@ -353,8 +356,11 @@ Example usage:
    tool("invoke_skill", {"skillId":"cases.delete_case","params":{"ids":["<case_id_1>","<case_id_2>"]}})
 
 Response format:
-Returns an object with success status and deletedIds array.`;
-          readonly filePath = '/skills/cases/cases.md';
+Returns an object with success status and deletedIds array.`,
+              filePath: '/skills/cases/cases.md',
+            },
+          ];
+          readonly tools: SkillTool[] = [];
         }
 
         plugins.agentSkills.registerSkill(new CasesSkill());
@@ -446,18 +452,6 @@ Returns an object with success status and deletedIds array.`;
       config: this.caseConfig,
     };
 
-    // Register cases skills
-    try {
-      const casesSkills = createCasesSkills({
-        casesPluginStart: casesServerStart,
-      });
-      casesSkills.forEach((skill) => {
-        registerSkill(skill);
-        this.logger.info(`Registered ${skill.id} skill`);
-      });
-    } catch (error) {
-      this.logger.error(`Error registering cases skills: ${error}`);
-    }
 
     return casesServerStart;
   }

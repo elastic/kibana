@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import type { CoreSetup } from '@kbn/core/server';
-import type { SkillDefinition } from '@kbn/onechat-server';
+import type { SkillTool } from '@kbn/agent-skills-common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import { lastValueFrom, zip } from 'rxjs';
 import type { OsqueryAppContext } from '../lib/osquery_app_context_services';
@@ -106,13 +106,14 @@ export function createLiveQueriesSkills({
 }: {
   coreSetup: CoreSetup<any, any>;
   osqueryContext: OsqueryAppContext;
-}): SkillDefinition[] {
-  const createLiveQuerySkill: SkillDefinition = {
+}): SkillTool[] {
+  const createLiveQuerySkill: SkillTool = {
     id: 'osquery.create_live_query',
     name: 'Create Live Query',
-    description:
+    shortDescription: 'Create and execute an Osquery live query on selected agents',
+    fullDescription:
       'Create and execute an Osquery live query on selected agents. Osquery allows you to query endpoint data using SQL-like syntax.',
-    category: 'osquery',
+    categories: ['osquery'],
     inputSchema: createLiveQuerySchema,
     examples: [
       // Run a simple query on all agents
@@ -168,10 +169,11 @@ export function createLiveQueriesSkills({
     },
   };
 
-  const getLiveQueryResultsSkill: SkillDefinition = {
+  const getLiveQueryResultsSkill: SkillTool = {
     id: 'osquery.get_live_query_results',
     name: 'Get Live Query Results',
-    description: `Retrieve results from a previously executed live query. 
+    shortDescription: 'Retrieve results from a previously executed live query',
+    fullDescription: `Retrieve results from a previously executed live query. 
     
 This skill will wait for all queries to complete before returning results by default.
 
@@ -183,7 +185,7 @@ Parameters:
 - wait_for_completion: Set to false to return immediately without waiting
 
 The query_action_ids can be obtained from the 'queries' array in the create_live_query response.`,
-    category: 'osquery',
+    categories: ['osquery'],
     inputSchema: getLiveQueryResultsSchema,
     examples: [
       // Wait for results from a single query
@@ -548,11 +550,12 @@ The query_action_ids can be obtained from the 'queries' array in the create_live
     },
   };
 
-  const findLiveQueriesSkill: SkillDefinition = {
+  const findLiveQueriesSkill: SkillTool = {
     id: 'osquery.find_live_queries',
     name: 'Find Live Queries',
-    description: 'Search and list live queries with optional filters.',
-    category: 'osquery',
+    shortDescription: 'Search and list live queries with optional filters',
+    fullDescription: 'Search and list live queries with optional filters.',
+    categories: ['osquery'],
     inputSchema: findLiveQueriesSchema,
     examples: [
       // List all live queries with default pagination
@@ -580,4 +583,14 @@ The query_action_ids can be obtained from the 'queries' array in the create_live
   };
 
   return [createLiveQuerySkill, getLiveQueryResultsSkill, findLiveQueriesSkill];
+}
+
+export function getLiveQueriesSkillTools({
+  coreSetup,
+  osqueryContext,
+}: {
+  coreSetup: CoreSetup<any, any>;
+  osqueryContext: OsqueryAppContext;
+}): SkillTool[] {
+  return createLiveQueriesSkills({ coreSetup, osqueryContext });
 }

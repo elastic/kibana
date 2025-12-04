@@ -48,9 +48,8 @@ import { createDataViews } from './create_data_views';
 import { registerFeatures } from './utils/register_features';
 import { CASE_ATTACHMENT_TYPE_ID } from '../common/constants';
 import { createActionService } from './handlers/action/create_action_service';
-import { registerSkill } from '@kbn/onechat-server';
-import { createLiveQueriesSkills } from './skills/live_queries_skill';
-import { Skill } from '@kbn/agent-skills-common';
+import { getLiveQueriesSkillTools } from './skills/live_queries_skill';
+import { Skill, type SkillTool } from '@kbn/agent-skills-common';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private readonly logger: Logger;
@@ -110,28 +109,24 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
     plugins.cases?.attachmentFramework.registerExternalReference({ id: CASE_ATTACHMENT_TYPE_ID });
 
-    // Register live queries skills
-    try {
-      const liveQueriesSkills = createLiveQueriesSkills({
-        coreSetup: core,
-        osqueryContext,
-      });
-      liveQueriesSkills.forEach((skill) => {
-        registerSkill(skill);
-        this.logger.info(`Registered ${skill.id} skill`);
-      });
-    } catch (error) {
-      this.logger.error(`Error registering live queries skills: ${error}`);
-    }
-
     // Register osQuery skill
     if (plugins.agentSkills) {
       try {
+        const tools = getLiveQueriesSkillTools({
+          coreSetup: core,
+          osqueryContext,
+        });
+
         class OsQuerySkill extends Skill {
           readonly id = 'osquery.osquery';
           readonly name = 'osQuery';
           readonly shortDescription = 'Always, read this guide before using osquery to execute commands';
-          readonly content = `osQuery is a powerful SQL-based operating system instrumentation framework that allows you to query system information and events using SQL-like syntax. It provides a unified interface to access low-level operating system data across different platforms (Windows, macOS, Linux).
+          readonly files = [
+            {
+              id: 'osquery.osquery',
+              name: 'osQuery Guide',
+              shortDescription: 'Always call this before using osquery to execute commands',
+              content: `osQuery is a powerful SQL-based operating system instrumentation framework that allows you to query system information and events using SQL-like syntax. It provides a unified interface to access low-level operating system data across different platforms (Windows, macOS, Linux).
 
 With osQuery, you can:
 - Query system information like running processes, installed software, network connections, and file system details
@@ -263,8 +258,13 @@ IMPORTANT WORKFLOW:
 
 The get_live_query_results skill will automatically wait for all agents to respond and verify that results are indexed before returning data. You can customize the timeout and polling interval if needed, or set wait_for_completion to false to return immediately.
 
-osQuery queries are executed on endpoints and return structured data that can be analyzed, stored, and used for security monitoring, compliance, and system administration.`;
-          readonly filePath = '/skills/osquery/osquery.md';
+osQuery queries are executed on endpoints and return structured data that can be analyzed, stored, and used for security monitoring, compliance, and system administration.`,
+              filePath: '/skills/osquery/osquery.md',
+            },
+          ];
+          get tools(): SkillTool[] {
+            return tools;
+          }
         }
 
         plugins.agentSkills.registerSkill(new OsQuerySkill());

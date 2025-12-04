@@ -48,11 +48,15 @@ import type { ConfigType } from './config';
 import { createConfig } from './config';
 import { initUiSettings } from './ui_settings';
 import { registerDeprecations } from './deprecations';
-import { registerSkill } from '@kbn/onechat-server';
-import { createGetAlertsSkill } from './skills/get_alerts_skill';
-import { createFleetManagementSkill } from './skills/fleet_management_skill';
-import { createWaitForActionSkill } from './skills/wait_for_action_skill';
-import { Skill } from '@kbn/agent-skills-common';
+import { getSecurityGetAlertsFile } from './skills/get_alerts_file';
+import { getSecurityAlertsSkillTool } from './skills/get_alerts_tool';
+import { getFleetManagementFile } from './skills/fleet_management_file';
+import { getFleetManagementSkillTool } from './skills/fleet_management_tool';
+import { getWaitForActionSkillTool } from './skills/wait_for_action_tool';
+import { fleetManagementSchema } from './skills/fleet_management_skill';
+import { waitForActionSchema } from './skills/wait_for_action_skill';
+import { getAlertsSchema } from './skills/get_alerts_skill';
+import { Skill, SkillTool } from '@kbn/agent-skills-common';
 import {
   APP_ID,
   APP_UI_ID,
@@ -236,104 +240,21 @@ export class Plugin implements ISecuritySolutionPlugin {
   ): SecuritySolutionPluginSetup {
     this.logger.debug('plugin setup');
 
-    // Register get_alerts skill
-    try {
-      const getAlertsSkill = createGetAlertsSkill({ coreSetup: core });
-      registerSkill(getAlertsSkill);
-      this.logger.info('Registered security.get_alerts skill');
-    } catch (error) {
-      this.logger.error(`Error registering get_alerts skill: ${error}`);
-    }
-
-    // Register fleet_management skill for endpoint response actions
-    try {
-      const fleetManagementSkill = createFleetManagementSkill({
-        coreSetup: core,
-        getEndpointAppContextService: () => this.endpointAppContextService,
-        logger: this.logger.get('fleet_management_skill'),
-      });
-      registerSkill(fleetManagementSkill);
-      this.logger.info('Registered security.fleet_management skill');
-    } catch (error) {
-      this.logger.error(`Error registering fleet_management skill: ${error}`);
-    }
-
-    // Register wait_for_action skill to poll for action completion
-    try {
-      const waitForActionSkill = createWaitForActionSkill({
-        getEndpointAppContextService: () => this.endpointAppContextService,
-        logger: this.logger.get('wait_for_action_skill'),
-      });
-      registerSkill(waitForActionSkill);
-      this.logger.info('Registered security.wait_for_action skill');
-    } catch (error) {
-      this.logger.error(`Error registering wait_for_action skill: ${error}`);
-    }
-
     // Register Security Alerts skill
     if (plugins.agentSkills) {
       try {
+        const getAlertsLogger = this.logger.get('get_alerts_skill');
         class SecurityAlertsSkill extends Skill {
           readonly id = 'security.security_alerts';
           readonly name = 'Security Alerts';
           readonly shortDescription = 'Always read this guide before using security alerts';
-          readonly content = `Security alerts provide detection and response capabilities for security threats. Use this skill to search and retrieve security detection alerts based on various criteria.
-
-=== security.get_alerts ===
-
-Search and retrieve security detection alerts. Supports filtering by time range, severity, workflow status, and natural language queries.
-
-Parameters:
-- query (string, optional): Natural language query to search for security alerts. Searches across:
-  - Alert rule names (weighted 3x)
-  - Alert rule descriptions (weighted 2x)
-  - Alert reasons
-  - Messages
-  - Tags
-- timeRange (object, optional): Time range filter for alerts. Contains:
-  - from (string, required): Start time in ISO 8601 format (e.g., "2024-01-01T00:00:00Z")
-  - to (string, required): End time in ISO 8601 format (e.g., "2024-01-02T00:00:00Z")
-- severity (enum, optional): Filter alerts by severity level:
-  - 'low': Low severity alerts
-  - 'medium': Medium severity alerts
-  - 'high': High severity alerts
-  - 'critical': Critical severity alerts
-- workflowStatus (enum, optional): Filter alerts by workflow status:
-  - 'open': Alerts that are open and need attention
-  - 'acknowledged': Alerts that have been acknowledged
-  - 'closed': Alerts that have been closed
-- limit (number, optional): Maximum number of alerts to return (default: 10, max: 100)
-
-Example usage:
-1. Get all alerts (default limit of 10):
-   tool("invoke_skill", {"skillId":"security.get_alerts","params":{}})
-
-2. Get critical severity alerts:
-   tool("invoke_skill", {"skillId":"security.get_alerts","params":{"severity":"critical"}})
-
-3. Get high severity alerts that are open:
-   tool("invoke_skill", {"skillId":"security.get_alerts","params":{"severity":"high","workflowStatus":"open"}})
-
-4. Search alerts with a natural language query:
-   tool("invoke_skill", {"skillId":"security.get_alerts","params":{"query":"malware","limit":20}})
-
-5. Get alerts from a specific time range:
-   tool("invoke_skill", {"skillId":"security.get_alerts","params":{"timeRange":{"from":"2024-01-01T00:00:00Z","to":"2024-01-02T00:00:00Z"}}})
-
-6. Get acknowledged alerts with high severity:
-   tool("invoke_skill", {"skillId":"security.get_alerts","params":{"severity":"high","workflowStatus":"acknowledged","limit":50}})
-
-7. Search for ransomware-related open alerts:
-   tool("invoke_skill", {"skillId":"security.get_alerts","params":{"query":"ransomware","workflowStatus":"open"}})
-
-Response format:
-Returns an array of alert objects, each containing:
-- Alert ID, rule name, rule description
-- Alert reason and message
-- Timestamp, severity, and workflow status
-- Tags and other metadata`;
-
-          readonly filePath = '/skills/security/get_alerts.md';
+          readonly files = [getSecurityGetAlertsFile()];
+          readonly tools: SkillTool<typeof getAlertsSchema>[] = [
+            getSecurityAlertsSkillTool({
+              coreSetup: core,
+              logger: getAlertsLogger,
+            }),
+          ];
         }
 
         plugins.agentSkills.registerSkill(new SecurityAlertsSkill());
@@ -346,125 +267,28 @@ Returns an array of alert objects, each containing:
     // Register Fleet Management and Wait for Action skill (combined)
     if (plugins.agentSkills) {
       try {
+        const getEndpointAppContextService = () => this.endpointAppContextService;
+        const fleetManagementLogger = this.logger.get('fleet_management_skill');
+        const waitForActionLogger = this.logger.get('wait_for_action_skill');
         class FleetManagementAndWaitSkill extends Skill {
           readonly id = 'security.fleet_management_and_wait';
           readonly name = 'Fleet Management Response Actions';
           readonly shortDescription = 'Always read this guide before running fleet actions';
-          readonly content = `Fleet Management provides endpoint response actions for managing and securing endpoints. This guide covers both executing response actions and waiting for their completion.
-
-=== security.fleet_management ===
-
-Execute endpoint response actions on managed hosts using console-style command strings.
-
-Parameters:
-- command_string (string, required): The full command string to execute, following console command syntax. Examples:
-  - "isolate --comment Suspicious activity"
-  - "execute --command ps -aux --comment checking processes"
-  - "get-file --path /etc/passwd --comment retrieving file"
-- endpoint_ids (array of strings, required): Array of endpoint IDs (agent IDs) to execute the action on. Must contain at least one endpoint ID.
-- agent_type (enum, optional): The agent type. Defaults to 'endpoint'. Valid values:
-  - 'endpoint': Elastic Endpoint
-  - 'sentinel_one': SentinelOne
-  - 'crowdstrike': CrowdStrike
-  - 'microsoft_defender_endpoint': Microsoft Defender Endpoint
-
-Available commands and their flags:
-- isolate [--comment <text>]: Isolate the host from the network. Prevents the endpoint from communicating with other systems.
-- release [--comment <text>]: Release the host from isolation. Restores network connectivity.
-- status: Show host status information. Returns current endpoint status without executing an action.
-- processes [--comment <text>]: List all running processes on the endpoint.
-- kill-process --entityId <id> | --pid <number> [--comment <text>]: Terminate a process. Use either entityId or pid to identify the process.
-- suspend-process --entityId <id> | --pid <number> [--comment <text>]: Suspend a process temporarily. Use either entityId or pid to identify the process.
-- get-file --path <filepath> [--comment <text>]: Retrieve a file from the host. Specify the full path to the file.
-- upload --file [--overwrite] [--comment <text>]: Upload a file to the host. The --file flag specifies the file to upload. Use --overwrite to overwrite existing files.
-- execute --command <shell_command> [--timeout <ms>] [--comment <text>]: Execute a shell command on the endpoint. Optional timeout in milliseconds.
-- scan --path <filepath> [--comment <text>]: Scan a path for malware. Specify the directory or file path to scan.
-
-Example usage:
-1. Execute a shell command on an endpoint:
-   tool("invoke_skill", {"skillId":"security.fleet_management","params":{"command_string":"execute --command whoami","endpoint_ids":["<endpoint_uuid>"]}})
-
-2. Execute ps -aux with a comment:
-   tool("invoke_skill", {"skillId":"security.fleet_management","params":{"command_string":"execute --command ps -aux --comment checking processes","endpoint_ids":["<endpoint_uuid>"]}})
-
-3. Isolate a host:
-   tool("invoke_skill", {"skillId":"security.fleet_management","params":{"command_string":"isolate --comment Investigating suspicious activity","endpoint_ids":["<endpoint_uuid>"]}})
-
-4. Release a host from isolation:
-   tool("invoke_skill", {"skillId":"security.fleet_management","params":{"command_string":"release --comment Investigation complete","endpoint_ids":["<endpoint_uuid>"]}})
-
-5. Get host status:
-   tool("invoke_skill", {"skillId":"security.fleet_management","params":{"command_string":"status","endpoint_ids":["<endpoint_uuid>"]}})
-
-6. List running processes:
-   tool("invoke_skill", {"skillId":"security.fleet_management","params":{"command_string":"processes","endpoint_ids":["<endpoint_uuid>"]}})
-
-7. Kill a process by entity ID:
-   tool("invoke_skill", {"skillId":"security.fleet_management","params":{"command_string":"kill-process --entityId <process_entity_id>","endpoint_ids":["<endpoint_uuid>"]}})
-
-8. Kill a process by PID:
-   tool("invoke_skill", {"skillId":"security.fleet_management","params":{"command_string":"kill-process --pid 1234","endpoint_ids":["<endpoint_uuid>"]}})
-
-9. Get a file from the host:
-   tool("invoke_skill", {"skillId":"security.fleet_management","params":{"command_string":"get-file --path /etc/passwd --comment retrieving file","endpoint_ids":["<endpoint_uuid>"]}})
-
-10. Upload a file to the host:
-    tool("invoke_skill", {"skillId":"security.fleet_management","params":{"command_string":"upload --file --comment uploading script","endpoint_ids":["<endpoint_uuid>"]}})
-
-11. Upload a file with overwrite enabled:
-    tool("invoke_skill", {"skillId":"security.fleet_management","params":{"command_string":"upload --file --overwrite --comment replacing existing file","endpoint_ids":["<endpoint_uuid>"]}})
-
-12. Scan a path for malware:
-    tool("invoke_skill", {"skillId":"security.fleet_management","params":{"command_string":"scan --path /var/log --comment scanning logs","endpoint_ids":["<endpoint_uuid>"]}})
-
-Response format:
-Returns an object containing:
-- action_id: The action ID (use this with security.wait_for_action to retrieve results)
-- Other action metadata
-
-=== security.wait_for_action ===
-
-Wait for a fleet management response action to complete and return the results. This skill should be called after executing a response action using security.fleet_management.
-
-IMPORTANT WORKFLOW:
-1. First, use security.fleet_management to execute a response action. This returns an action_id.
-2. Then, use security.wait_for_action with the action_id to wait for the action to complete and retrieve the output.
-
-Parameters:
-- action_id (string, required): The action ID returned from security.fleet_management
-- endpoint_id (string, optional): Optional endpoint ID to filter results for a specific endpoint
-- timeout_seconds (number, optional): Maximum time to wait for the action to complete in seconds (default: 300 seconds / 5 minutes)
-- poll_interval_seconds (number, optional): How often to check action status in seconds (default: 5 seconds)
-
-The skill will poll the action status until it completes, fails, or times out.
-
-Example usage:
-1. Wait for an action to complete with default timeout (5 minutes):
-   tool("invoke_skill", {"skillId":"security.wait_for_action","params":{"action_id":"<action_uuid>"}})
-
-2. Wait for an action with a shorter timeout (60 seconds):
-   tool("invoke_skill", {"skillId":"security.wait_for_action","params":{"action_id":"<action_uuid>","timeout_seconds":60}})
-
-3. Wait for an action and filter output to a specific endpoint:
-   tool("invoke_skill", {"skillId":"security.wait_for_action","params":{"action_id":"<action_uuid>","endpoint_id":"<endpoint_uuid>"}})
-
-4. Wait with custom timeout and poll interval:
-   tool("invoke_skill", {"skillId":"security.wait_for_action","params":{"action_id":"<action_uuid>","timeout_seconds":120,"poll_interval_seconds":10}})
-
-5. Typical workflow: after executing a command, wait for results:
-   Step 1: Execute command
-   tool("invoke_skill", {"skillId":"security.fleet_management","params":{"command_string":"execute --command ps -aux","endpoint_ids":["<endpoint_uuid>"]}})
-   
-   Step 2: Wait for results (use action_id from step 1)
-   tool("invoke_skill", {"skillId":"security.wait_for_action","params":{"action_id":"<action_id_from_fleet_management>","timeout_seconds":60}})
-
-Response format:
-Returns an object containing:
-- Action status and completion information
-- Results/output from the action (if available)
-- Endpoint-specific results (if endpoint_id was specified)`;
-
-          readonly filePath = '/skills/security/fleet_management.md';
+          readonly files = [getFleetManagementFile()];
+          readonly tools: [
+            SkillTool<typeof fleetManagementSchema>,
+            SkillTool<typeof waitForActionSchema>,
+          ] = [
+            getFleetManagementSkillTool({
+              coreSetup: core,
+              getEndpointAppContextService: getEndpointAppContextService,
+              logger: fleetManagementLogger,
+            }),
+            getWaitForActionSkillTool({
+              getEndpointAppContextService: getEndpointAppContextService,
+              logger: waitForActionLogger,
+            }),
+          ];
         }
 
         plugins.agentSkills.registerSkill(new FleetManagementAndWaitSkill());

@@ -8,16 +8,17 @@
 import { createMiddleware, tool } from 'langchain';
 import { z as z3 } from 'zod/v3';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ToolHandlerContext, SkillDefinition, SkillsRegistry } from '@kbn/onechat-server';
+import type { ToolHandlerContext } from '@kbn/onechat-server';
+import type { Skill, SkillTool } from '@kbn/agent-skills-common';
 
 /**
  * Options for creating the skills middleware
  */
 export interface SkillsMiddlewareOptions {
   /**
-   * Function to get the skills registry for a given request
+   * Function to get all registered skills from the agent_skills plugin
    */
-  getSkillsRegistry: (request: KibanaRequest) => Promise<SkillsRegistry> | SkillsRegistry;
+  getSkills: () => Skill[];
   /**
    * Function to get the current request
    */
@@ -29,29 +30,69 @@ export interface SkillsMiddlewareOptions {
 }
 
 /**
+ * Helper function to extract all SkillTool objects from Skill objects
+ */
+function getAllSkillTools(skills: Skill[]): SkillTool[] {
+  const allTools: SkillTool[] = [];
+  for (const skill of skills) {
+    allTools.push(...skill.tools);
+  }
+  return allTools;
+}
+
+/**
+ * Helper function to search SkillTool objects
+ */
+function searchSkillTools(tools: SkillTool[], query: string, category?: string): SkillTool[] {
+  let filtered = tools;
+
+  // Filter by category if provided
+  if (category) {
+    filtered = filtered.filter(
+      (tool) => tool.categories && tool.categories.includes(category)
+    );
+  }
+
+  // If query is empty or '*', return all
+  if (!query || query === '*') {
+    return filtered;
+  }
+
+  const lowerQuery = query.toLowerCase();
+  return filtered.filter((tool) => {
+    return (
+      tool.id.toLowerCase().includes(lowerQuery) ||
+      tool.name.toLowerCase().includes(lowerQuery) ||
+      tool.shortDescription.toLowerCase().includes(lowerQuery) ||
+      tool.fullDescription.toLowerCase().includes(lowerQuery) ||
+      tool.examples?.some((example) => example.toLowerCase().includes(lowerQuery)) ||
+      tool.categories?.some((cat) => cat.toLowerCase().includes(lowerQuery))
+    );
+  });
+}
+
+/**
  * Create middleware that provides discover_skills and invoke_skill tools
  */
 export function createSkillsMiddleware(options: SkillsMiddlewareOptions): ReturnType<typeof createMiddleware> {
-  const { getSkillsRegistry, getRequest, getToolHandlerContext } = options;
+  const { getSkills, getRequest: _getRequest, getToolHandlerContext } = options;
 
   const discoverSkillsTool = tool(
     async (input) => {
       const { query = '*', category } = input;
-      const request = getRequest();
-      const registry = await getSkillsRegistry(request);
-      const skills = registry.search(query, category);
+      const skills = getSkills();
+      const allTools = getAllSkillTools(skills);
+      const matchingTools = searchSkillTools(allTools, query, category);
 
-      if (skills.length === 0) {
+      if (matchingTools.length === 0) {
         return `No skills found matching "${query}"${category ? ` in category "${category}"` : ''}.`;
       }
 
       return JSON.stringify(
-        skills.map((skill) => ({
-          id: skill.id,
-          name: skill.name,
-          description: skill.description,
-          category: skill.category,
-          examples: skill.examples,
+        matchingTools.map((tool) => ({
+          id: tool.id,
+          name: tool.name,
+          shortDescription: tool.shortDescription,
         })),
         null,
         2
@@ -70,82 +111,51 @@ export function createSkillsMiddleware(options: SkillsMiddlewareOptions): Return
   const invokeSkillTool = tool(
     async (input) => {
       const { skillId, params = {} } = input;
-      const request = getRequest();
-      const registry = await getSkillsRegistry(request);
-      const skill = registry.get(skillId);
+      const skills = getSkills();
+      const allTools = getAllSkillTools(skills);
+      
+      // Find the tool by ID
+      let skillTool = allTools.find((tool) => tool.id === skillId);
 
-      if (!skill) {
-        const allSkills = await registry.list();
+      if (!skillTool) {
         // Try to find a skill with similar ID (replace underscores with dots, or vice versa)
         const normalizedSkillId = skillId.replace(/_/g, '.');
         const reverseNormalized = skillId.replace(/\./g, '_');
 
-        const foundSkill = allSkills.find(
-          (s) =>
-            s.id === normalizedSkillId ||
-            s.id === reverseNormalized ||
-            s.id.toLowerCase() === skillId.toLowerCase() ||
-            s.id.replace(/\./g, '_') === skillId ||
-            s.id.replace(/_/g, '.') === skillId
+        skillTool = allTools.find(
+          (tool: SkillTool) =>
+            tool.id === normalizedSkillId ||
+            tool.id === reverseNormalized ||
+            tool.id.toLowerCase() === skillId.toLowerCase() ||
+            tool.id.replace(/\./g, '_') === skillId ||
+            tool.id.replace(/_/g, '.') === skillId
         );
 
-        if (!foundSkill) {
+        if (!skillTool) {
           // Find skills with similar names or IDs
-          const similarSkills = allSkills.filter(
-            (s) =>
-              s.id.toLowerCase().includes(skillId.toLowerCase()) ||
-              skillId.toLowerCase().includes(s.id.toLowerCase()) ||
-              s.name.toLowerCase().includes(skillId.toLowerCase())
+          const similarTools = allTools.filter(
+            (tool: SkillTool) =>
+              tool.id.toLowerCase().includes(skillId.toLowerCase()) ||
+              skillId.toLowerCase().includes(tool.id.toLowerCase()) ||
+              tool.name.toLowerCase().includes(skillId.toLowerCase())
           );
 
           let errorMessage = `Error: Skill with id "${skillId}" not found.\n\n`;
-          if (similarSkills.length > 0) {
-            errorMessage += `Did you mean one of these?\n${similarSkills
-              .map((s) => `- "${s.id}" (${s.name})`)
+          if (similarTools.length > 0) {
+            errorMessage += `Did you mean one of these?\n${similarTools
+              .map((tool: SkillTool) => `- "${tool.id}" (${tool.name})`)
               .join('\n')}\n\n`;
           }
-          errorMessage += `Use discover_skills to find available skills.`;
+          //errorMessage += `Use discover_skills to find available skills.`;
           return errorMessage;
-        }
-
-        // Use the found skill
-        const context = getToolHandlerContext();
-        const result = await foundSkill.handler(params, context);
-        if (Array.isArray(result) && result.length === 0) {
-          return 'No results';
-        }
-        // Ensure we always return a string that, when parsed, creates a plain object
-        if (typeof result === 'string') {
-          // If it's already a string, try to parse and re-stringify to ensure it's valid JSON
-          // that will create a plain object when parsed
-          try {
-            const parsed = JSON.parse(result);
-            // Re-stringify to ensure it's a plain object structure
-            return JSON.stringify(parsed, null, 2);
-          } catch {
-            // If it's not valid JSON, return as-is
-            return result;
-          }
-        }
-        if (result === null || result === undefined) {
-          return 'No results';
-        }
-        try {
-          // Use JSON.parse(JSON.stringify()) to ensure we create a plain object structure
-          // This removes any methods, getters, setters, etc.
-          const plainObject = JSON.parse(JSON.stringify(result));
-          return JSON.stringify(plainObject, null, 2);
-        } catch (e) {
-          // Fallback for objects that can't be stringified (circular refs, etc.)
-          return `Result: ${String(result)}`;
         }
       }
 
       try {
         // Validate params against skill's input schema if it exists
         let validatedParams = params;
-        if (skill.inputSchema) {
-          const validationResult = skill.inputSchema.safeParse(params);
+        if (skillTool.inputSchema) {
+          const validationResult = skillTool.inputSchema.safeParse(params);
           if (!validationResult.success) {
             return `Error: Invalid parameters for skill "${skillId}": ${validationResult.error.message}`;
           }
@@ -154,7 +164,7 @@ export function createSkillsMiddleware(options: SkillsMiddlewareOptions): Return
 
         // Execute the skill handler
         const context = getToolHandlerContext();
-        const result = await skill.handler(validatedParams, context);
+        const result = await skillTool.handler(validatedParams, context);
 
         // If result is an empty array, return a user-friendly message
         if (Array.isArray(result) && result.length === 0) {
