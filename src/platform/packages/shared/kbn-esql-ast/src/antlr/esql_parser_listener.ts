@@ -51,6 +51,7 @@ import { InputNamedOrPositionalParamContext } from "./esql_parser.js";
 import { InputDoubleParamsContext } from "./esql_parser.js";
 import { InputNamedOrPositionalDoubleParamsContext } from "./esql_parser.js";
 import { IdentifierOrParameterContext } from "./esql_parser.js";
+import { StringOrParameterContext } from "./esql_parser.js";
 import { LimitCommandContext } from "./esql_parser.js";
 import { SortCommandContext } from "./esql_parser.js";
 import { OrderExpressionContext } from "./esql_parser.js";
@@ -558,6 +559,16 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitIdentifierOrParameter?: (ctx: IdentifierOrParameterContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.stringOrParameter`.
+	 * @param ctx the parse tree
+	 */
+	enterStringOrParameter?: (ctx: StringOrParameterContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.stringOrParameter`.
+	 * @param ctx the parse tree
+	 */
+	exitStringOrParameter?: (ctx: StringOrParameterContext) => void;
 	/**
 	 * Enter a parse tree produced by `esql_parser.limitCommand`.
 	 * @param ctx the parse tree
