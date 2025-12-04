@@ -211,11 +211,16 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
     <EuiFlexGroup
       justifyContent="flexEnd"
       alignItems="flexStart"
-      gutterSize="xl"
+      gutterSize="l"
       data-test-subj="epmList.integrationCards"
     >
       <EuiFlexItem>
-        <SideBar />
+        <SideBar
+          isLoading={isLoading}
+          categories={mainCategories}
+          selectedCategory={selectedCategory}
+          onCategoryChange={onCategoryChange}
+        />
       </EuiFlexItem>
       <EuiFlexItem
         grow={5}
