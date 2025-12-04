@@ -12,12 +12,12 @@ import type { ActionTypeSecrets, ValidatorType } from '../../types';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
 
 export const generateSecretsSchema = (
-  authTypes: ConnectorSpec['authTypes'],
+  authSpec: ConnectorSpec['auth'],
   configUtils: ActionsConfigurationUtilities
 ): ValidatorType<ActionTypeSecrets> => {
   const settings = configUtils.getWebhookSettings();
   const pfxEnabled = settings.ssl.pfx.enabled;
   return {
-    schema: generateSecretsSchemaFromSpec(authTypes, { pfxEnabled }),
+    schema: generateSecretsSchemaFromSpec(authSpec, { pfxEnabled }),
   };
 };

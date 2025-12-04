@@ -16,16 +16,15 @@ interface GenerateOptions {
 }
 
 export const generateSecretsSchemaFromSpec = (
-  authTypes: ConnectorSpec['authTypes'],
+  authSpec: ConnectorSpec['auth'],
   { pfxEnabled }: GenerateOptions = { pfxEnabled: true }
 ) => {
   const secretSchemas: z.core.$ZodTypeDiscriminable[] = [];
-  for (const authType of authTypes || []) {
+  for (const authType of authSpec?.types || []) {
     const schema = getSchemaForAuthType(authType);
     if (schema.id === 'pfx_certificate' && !pfxEnabled) {
       continue;
     }
-
     secretSchemas.push(schema.schema);
   }
   return secretSchemas.length > 0
