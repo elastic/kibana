@@ -44,6 +44,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
 
   return {
     request,
+    spaceId,
     logger,
     modelProvider,
     esClient: elasticsearch.client.asScoped(request),

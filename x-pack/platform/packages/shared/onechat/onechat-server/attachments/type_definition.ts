@@ -8,6 +8,7 @@
 import type { MaybePromise } from '@kbn/utility-types';
 import type { Attachment } from '@kbn/onechat-common/attachments';
 import type { AttachmentBoundedTool } from './tools';
+import { KibanaRequest } from '@kbn/core-http-server';
 
 /**
  * Server-side definition of an attachment type.
@@ -24,7 +25,10 @@ export interface AttachmentTypeDefinition<TType extends string = string, TConten
   /**
    * format the attachment to presented to the LLM
    */
-  format: (attachment: Attachment<TType, TContent>) => MaybePromise<AgentFormattedAttachment>;
+  format: (
+    attachment: Attachment<TType, TContent>,
+    context: AttachmentFormatContext
+  ) => MaybePromise<AgentFormattedAttachment>;
   /**
    * should return the list of tools from the registry which should be exposed to the agent
    * when attachments of that type are present in the conversation.
@@ -40,6 +44,14 @@ export interface AttachmentTypeDefinition<TType extends string = string, TConten
    * are present in the conversation.
    */
   getAgentDescription?: () => string;
+}
+
+/**
+ * Context passed to the {@link AttachmentTypeDefinition.format} function.
+ */
+export interface AttachmentFormatContext {
+  request: KibanaRequest;
+  spaceId: string;
 }
 
 /**
