@@ -8,7 +8,7 @@
 import { useEffect, useState } from 'react';
 import { combineLatest } from 'rxjs';
 import { DEFAULT_APP_CATEGORIES, type PublicAppInfo } from '@kbn/core/public';
-import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
+import { AIAssistantType, AIChatExperience } from '@kbn/ai-assistant-management-plugin/public';
 import type { Space } from '@kbn/spaces-plugin/common';
 import { useKibana } from '../../context/typed_kibana_context/typed_kibana_context';
 
@@ -16,9 +16,16 @@ function getVisibility(
   appId: string | undefined,
   applications: ReadonlyMap<string, PublicAppInfo>,
   preferredAssistantType: AIAssistantType,
+  chatExperience: AIChatExperience,
   space: Space,
   isServerless?: boolean
 ) {
+  // If AI Agents are enabled, hide the nav control
+  // OnechatNavControl will be used instead
+  if (chatExperience === AIChatExperience.Agents) {
+    return false;
+  }
+
   // If the app itself is enabled, always show the control in the solution view or serverless.
   if (space.solution === 'security' || isServerless) {
     return true;
@@ -55,11 +62,19 @@ export function useIsNavControlVisible(isServerless?: boolean) {
       currentAppId$,
       applications$,
       aiAssistantManagementSelection.aiAssistantType$,
+      aiAssistantManagementSelection.chatExperience$,
       space$,
     ]).subscribe({
-      next: ([appId, applications, preferredAssistantType, space]) => {
+      next: ([appId, applications, preferredAssistantType, chatExperience, space]) => {
         setIsVisible(
-          getVisibility(appId, applications, preferredAssistantType, space, isServerless)
+          getVisibility(
+            appId,
+            applications,
+            preferredAssistantType,
+            chatExperience,
+            space,
+            isServerless
+          )
         );
       },
     });
@@ -69,6 +84,7 @@ export function useIsNavControlVisible(isServerless?: boolean) {
     currentAppId$,
     applications$,
     aiAssistantManagementSelection.aiAssistantType$,
+    aiAssistantManagementSelection.chatExperience$,
     space$,
     isServerless,
   ]);

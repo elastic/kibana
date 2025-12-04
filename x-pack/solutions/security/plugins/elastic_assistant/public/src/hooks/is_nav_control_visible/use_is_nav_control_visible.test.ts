@@ -33,6 +33,7 @@ describe('isNavControlVisible', () => {
         },
         aiAssistantManagementSelection: {
           aiAssistantType$: of(AIAssistantType.Default),
+          chatExperience$: of('classic'),
         },
         spaces: {
           getActiveSpace$: () => of({} as unknown as Space),
@@ -55,6 +56,7 @@ describe('isNavControlVisible', () => {
         },
         aiAssistantManagementSelection: {
           aiAssistantType$: of(AIAssistantType.Default),
+          chatExperience$: of('classic'),
         },
         spaces: {
           getActiveSpace$: () => of({} as unknown as Space),
@@ -77,6 +79,7 @@ describe('isNavControlVisible', () => {
         },
         aiAssistantManagementSelection: {
           aiAssistantType$: of(AIAssistantType.Security),
+          chatExperience$: of('classic'),
         },
         spaces: {
           getActiveSpace$: () => of({} as unknown as Space),
@@ -99,6 +102,7 @@ describe('isNavControlVisible', () => {
         },
         aiAssistantManagementSelection: {
           aiAssistantType$: of(AIAssistantType.Security),
+          chatExperience$: of('classic'),
         },
         spaces: {
           getActiveSpace$: () => of({} as unknown as Space),
@@ -121,6 +125,7 @@ describe('isNavControlVisible', () => {
         },
         aiAssistantManagementSelection: {
           aiAssistantType$: of(AIAssistantType.Observability),
+          chatExperience$: of('classic'),
         },
         spaces: {
           getActiveSpace$: () => of({} as unknown as Space),
@@ -143,6 +148,7 @@ describe('isNavControlVisible', () => {
         },
         aiAssistantManagementSelection: {
           aiAssistantType$: of(AIAssistantType.Never),
+          chatExperience$: of('classic'),
         },
         spaces: {
           getActiveSpace$: () => of({} as unknown as Space),
@@ -165,6 +171,7 @@ describe('isNavControlVisible', () => {
         },
         aiAssistantManagementSelection: {
           aiAssistantType$: of(AIAssistantType.Never),
+          chatExperience$: of('classic'),
         },
         spaces: {
           getActiveSpace$: () => of({ solution: 'security' } as unknown as Space),
@@ -174,5 +181,28 @@ describe('isNavControlVisible', () => {
 
     const { result } = renderHook(() => useIsNavControlVisible(false));
     expect(result.current.isVisible).toEqual(true);
+  });
+
+  it('returns false when chat experience is set to Agents (OnechatNavControl will be used instead)', () => {
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        application: {
+          currentAppId$: of('security'),
+          applications$: of(
+            new Map([['security', { id: 'security', category: { id: 'securitySolution' } }]])
+          ),
+        },
+        aiAssistantManagementSelection: {
+          aiAssistantType$: of(AIAssistantType.Default),
+          chatExperience$: of('agents'),
+        },
+        spaces: {
+          getActiveSpace$: () => of({} as unknown as Space),
+        },
+      },
+    });
+
+    const { result } = renderHook(() => useIsNavControlVisible());
+    expect(result.current.isVisible).toEqual(false);
   });
 });
