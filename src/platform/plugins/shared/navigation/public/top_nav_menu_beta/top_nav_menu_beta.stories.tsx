@@ -76,9 +76,17 @@ const TopNavMenuBetaWrapper = ({ showTabs = false, ...props }: TopNavMenuBetaWra
       alignItems="center"
       wrap={false}
       responsive={false}
-      justifyContent="spaceBetween"
+      css={css`
+        width: 100%;
+      `}
     >
-      <EuiFlexItem grow={true}>
+      <EuiFlexItem
+        grow={true}
+        css={css`
+          min-width: 0;
+          overflow: hidden;
+        `}
+      >
         <UnifiedTabs
           items={tabsState.managedItems}
           selectedItemId={tabsState.managedSelectedItemId}
@@ -98,10 +106,20 @@ const TopNavMenuBetaWrapper = ({ showTabs = false, ...props }: TopNavMenuBetaWra
           onEBTEvent={action('tabs-ebt-event')}
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem
+        grow={false}
+        css={css`
+          flex-shrink: 0;
+        `}
+      >
         <VerticalRule />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem
+        grow={false}
+        css={css`
+          flex-shrink: 0;
+        `}
+      >
         <TopNavMenuBeta {...props} />
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -119,9 +137,13 @@ const TopNavMenuBetaWrapper = ({ showTabs = false, ...props }: TopNavMenuBetaWra
           : undefined
       }
     >
-      <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-        {content}
-      </EuiFlexGroup>
+      {showTabs ? (
+        content
+      ) : (
+        <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+          {content}
+        </EuiFlexGroup>
+      )}
     </EuiHeader>
   );
 };
