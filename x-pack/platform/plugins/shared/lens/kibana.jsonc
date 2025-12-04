@@ -48,7 +48,6 @@
       "serverless",
       "licensing",
       "fieldsMetadata",
-      "discoverShared",
     ],
     "requiredBundles": [
       "unifiedSearch",

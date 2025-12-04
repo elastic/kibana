@@ -147,7 +147,6 @@ dependsOn:
   - '@kbn/react-kibana-context-common'
   - '@kbn/unified-tabs'
   - '@kbn/esql-composer'
-  - '@kbn/discover-shared-plugin'
 tags:
   - plugin
   - prod

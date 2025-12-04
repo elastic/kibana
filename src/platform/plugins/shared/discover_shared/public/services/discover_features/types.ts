@@ -20,7 +20,6 @@ import type {
 import type { ProcessorEvent } from '@kbn/apm-types-shared';
 import type { HistogramItem } from '@kbn/apm-types-shared';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { LensRendererProps } from '@kbn/lens-common';
 import type React from 'react';
 import type { FeaturesRegistry } from '../../../common';
 
@@ -218,16 +217,6 @@ export type ObservabilityTracesFeature =
 
 /** ****************************************************************************************/
 
-/**
- * Lens
- */
-export interface LensEmbeddableComponentFeature {
-  id: 'lens-embeddable-component';
-  EmbeddableComponent: React.ComponentType<LensRendererProps>;
-}
-
-/** ****************************************************************************************/
-
 // This should be a union of all the available client features.
 export type DiscoverFeature =
   | ObservabilityStreamsFeature
@@ -236,8 +225,7 @@ export type DiscoverFeature =
   | ObservabilityLogEventsFeature
   | ObservabilityTracesFeature
   | ObservabilityLogsFetchDocumentByIdFeature
-  | SecuritySolutionFeature
-  | LensEmbeddableComponentFeature;
+  | SecuritySolutionFeature;
 
 /**
  * Service types
