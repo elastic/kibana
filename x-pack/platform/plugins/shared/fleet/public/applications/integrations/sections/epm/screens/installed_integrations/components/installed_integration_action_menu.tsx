@@ -163,7 +163,7 @@ export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
                   <FormattedMessage
                     id="xpack.fleet.epmInstalledIntegrations.bulkRollbackButton"
                     defaultMessage={
-                      'Rollback {count, plural, one {# integration} other {# integrations}}'
+                      'Roll back {count, plural, one {# integration} other {# integrations}}'
                     }
                     values={{
                       count: selectedItems.length,
