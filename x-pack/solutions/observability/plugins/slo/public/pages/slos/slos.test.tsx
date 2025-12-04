@@ -38,6 +38,7 @@ import { useGetSettings } from '../slo_settings/hooks/use_get_settings';
 import { SlosPage } from './slos';
 
 const mockHistoryReplace = jest.fn();
+const mockHistoryPush = jest.fn();
 const mockUseHistory = jest.fn();
 
 jest.mock('react-router-dom', () => ({
@@ -172,8 +173,10 @@ describe('SLOs Page', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockHistoryReplace.mockClear();
+    mockHistoryPush.mockClear();
     mockUseHistory.mockReturnValue({
       replace: mockHistoryReplace,
+      push: mockHistoryPush,
       createHref: (location: any) => {
         if (typeof location === 'string') return location;
         return location.pathname || '/';
