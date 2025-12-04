@@ -25,6 +25,7 @@ import type {
   StreamsFeatureIdentificationSavedProps,
   StreamsFeatureIdentificationDeletedProps,
   StreamsDescriptionGeneratedProps,
+  StreamsProcessingSimulationSamplesFetchLatencyProps,
 } from './types';
 
 const streamsAttachmentCountSchema: RootSchema<StreamsAttachmentCountProps> = {
@@ -488,6 +489,35 @@ const streamsDescriptionGeneratedSchema: RootSchema<StreamsDescriptionGeneratedP
   },
 };
 
+const streamsProcessingSimulationSamplesFetchLatencySchema: RootSchema<StreamsProcessingSimulationSamplesFetchLatencyProps> =
+  {
+    stream_name: {
+      type: 'keyword',
+      _meta: {
+        description: 'The name of the Stream',
+      },
+    },
+    stream_type: {
+      type: 'keyword',
+      _meta: {
+        description: 'The type of the stream: wired or classic',
+      },
+    },
+    data_source_type: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'The type of data source used for fetching simulation samples: latest-samples or kql-samples',
+      },
+    },
+    duration_ms: {
+      type: 'long',
+      _meta: {
+        description: 'The time (in milliseconds) it took to fetch simulation samples',
+      },
+    },
+  };
+
 export {
   streamsAttachmentCountSchema,
   streamsAttachmentClickEventSchema,
@@ -506,4 +536,5 @@ export {
   streamsFeatureIdentificationSavedSchema,
   streamsFeatureIdentificationDeletedSchema,
   streamsDescriptionGeneratedSchema,
+  streamsProcessingSimulationSamplesFetchLatencySchema,
 };

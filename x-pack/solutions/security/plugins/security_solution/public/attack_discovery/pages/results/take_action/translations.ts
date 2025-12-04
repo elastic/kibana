@@ -55,3 +55,10 @@ export const VIEW_IN_AI_ASSISTANT = i18n.translate(
     defaultMessage: 'View in AI Assistant',
   }
 );
+
+export const VIEW_IN_AGENT_BUILDER = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.attackDiscoveryPanel.actions.takeAction.viewInAgentBuilderButtonLabel',
+  {
+    defaultMessage: 'View in Agent Builder',
+  }
+);
