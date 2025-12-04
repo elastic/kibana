@@ -543,7 +543,7 @@ const streamsTabVisitedSchema: RootSchema<StreamsTabVisitedProps> = {
       manage: {
         type: 'boolean',
         _meta: {
-          description: 'Whether the can manage/change the stream',
+          description: 'Whether the user can manage/change the stream',
         },
       },
       monitor: {

@@ -7,9 +7,8 @@
 
 import { EuiFlexGroup, EuiPageHeader, useEuiTheme, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Streams } from '@kbn/streams-schema';
-import { useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { DatasetQualityIndicator } from '@kbn/dataset-quality-plugin/public';
