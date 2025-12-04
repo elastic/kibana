@@ -104,6 +104,7 @@ export const dataSourceMachine = setup({
     data: [],
     dataSource: input.dataSource,
     streamName: input.streamName,
+    streamType: input.streamType,
     simulationMode: getSimulationModeByDataSourceType(input.dataSource.type),
   }),
   initial: 'determining',
@@ -151,6 +152,7 @@ export const dataSourceMachine = setup({
             input: ({ context }) => ({
               dataSource: context.dataSource,
               streamName: context.streamName,
+              streamType: context.streamType,
             }),
             onSnapshot: {
               guard: {
@@ -211,9 +213,10 @@ export const dataSourceMachine = setup({
 export const createDataSourceMachineImplementations = ({
   data,
   toasts,
+  telemetryClient,
 }: DataSourceMachineDeps): MachineImplementationsFrom<typeof dataSourceMachine> => ({
   actors: {
-    collectData: createDataCollectorActor({ data }),
+    collectData: createDataCollectorActor({ data, telemetryClient }),
   },
   actions: {
     notifyDataCollectionFailure: createDataCollectionFailureNotifier({ toasts }),
