@@ -26,7 +26,6 @@ import { Global, css } from '@emotion/react';
 import { getESQLQueryColumns, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { CodeEditorProps } from '@kbn/code-editor';
 import { CodeEditor } from '@kbn/code-editor';
-import { APP_WRAPPER_CLASS } from '@kbn/core-application-common';
 import type { CoreStart } from '@kbn/core/public';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import { type FieldType } from '@kbn/esql-ast';
@@ -400,33 +399,23 @@ const ESQLEditorInternal = function ESQLEditor({
     setLabelInFocus(true);
   }, [showSuggestionsIfEmptyQuery]);
 
-  // const triggerSignatureHelpIfInsideParentheses = useCallback(
-  //   (e: monaco.editor.ICursorPositionChangedEvent) => {
-  //     if (!editorModel.current) {
-  //       return;
-  //     }
+  const triggerSignatureHelpIfInsideParentheses = useCallback(
+    (e: monaco.editor.ICursorPositionChangedEvent) => {
+      if (!editorModel.current) {
+        return;
+      }
 
-  //     const position = e.position;
-  //     const line = editorModel.current.getLineContent(position.lineNumber);
-  //     const charBefore = line[position.column - 2];
-  //     const charAfter = line[position.column - 1];
+      const position = e.position;
+      const line = editorModel.current.getLineContent(position.lineNumber);
+      const charBefore = line[position.column - 2];
+      const charAfter = line[position.column - 1];
 
-  //     if (charBefore === '(' && charAfter === ')') {
-  //       editorRef.current?.trigger('esql', 'editor.action.triggerParameterHints', {});
-  //       // Apply height limits after Monaco renders the widget
-  //       const widget = document.querySelector('.parameter-hints-widget');
-
-  //       if (widget) {
-  //         const phwrapper = widget.querySelector('.phwrapper') as HTMLElement;
-  //         if (phwrapper) {
-  //           phwrapper.style.maxHeight = '150px';
-  //           phwrapper.style.overflow = 'auto';
-  //         }
-  //       }
-  //     }
-  //   },
-  //   []
-  // );
+      if (charBefore === '(' && charAfter === ')') {
+        editorRef.current?.trigger('esql', 'editor.action.triggerParameterHints', {});
+      }
+    },
+    []
+  );
 
   const { cache: esqlFieldsCache, memoizedFieldsFromESQL } = useMemo(() => {
     // need to store the timing of the first request so we can atomically clear the cache per query
@@ -986,18 +975,9 @@ const ESQLEditorInternal = function ESQLEditor({
   const htmlId = useGeneratedHtmlId({ prefix: 'esql-editor' });
   const [labelInFocus, setLabelInFocus] = useState(false);
 
-  // TEMP WORKAROUND (NO A SOLUTION): Style for signature help widget
-  // Set z-index on app wrapper (top container) to ensure widget appears above Kibana header
-  const signatureHelpWidgetStyle = css`
-    .${APP_WRAPPER_CLASS} {
-      z-index: 1001;
-    }
-  `;
-
   const editorPanel = (
     <>
       <Global styles={lookupIndexBadgeStyle} />
-      <Global styles={signatureHelpWidgetStyle} />
       {Boolean(editorIsInline) && (
         <EuiFlexGroup
           gutterSize="none"
@@ -1187,7 +1167,7 @@ const ESQLEditorInternal = function ESQLEditor({
                       showSuggestionsIfEmptyQuery();
                     });
 
-                    // editor.onDidChangeCursorPosition(triggerSignatureHelpIfInsideParentheses);
+                    editor.onDidChangeCursorPosition(triggerSignatureHelpIfInsideParentheses);
 
                     // Auto-focus the editor and move the cursor to the end.
                     if (!disableAutoFocus) {

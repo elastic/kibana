@@ -409,6 +409,15 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
     .suggest-details > .monaco-scrollable-element > .body > .header > .type {
       white-space: normal !important;
     }
+
+    // Helps positioning the signature help popup at the top of the editor.'
+    .parameter-hints-widget {
+      z-index: 1010 !important;
+    }
+    .parameter-hints-widget > .phwrapper {
+      max-height: 85px !important;
+      overflow: auto;
+    }
   `;
 };
 
