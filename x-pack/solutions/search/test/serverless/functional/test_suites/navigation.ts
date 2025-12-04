@@ -6,7 +6,7 @@
  */
 
 import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 const archiveEmptyIndex =
