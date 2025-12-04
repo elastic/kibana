@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { FieldDefinition } from '@kbn/streams-schema';
-import { Streams } from '@kbn/streams-schema';
-import type { ErrorActorEvent } from 'xstate5';
-import { fromPromise } from 'xstate5';
 import type { errors as esErrors } from '@elastic/elasticsearch';
-import type { APIReturnType } from '@kbn/streams-plugin/public/api';
 import type { IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
-import { convertUIStepsToDSL, isActionBlock } from '@kbn/streamlang';
-import { getStreamTypeFromDefinition } from '../../../../../util/get_stream_type_from_definition';
+import { isActionBlock } from '@kbn/streamlang';
+import type { APIReturnType } from '@kbn/streams-plugin/public/api';
+import type { FieldDefinition, Streams } from '@kbn/streams-schema';
+import type { ErrorActorEvent } from 'xstate5';
+import { fromPromise } from 'xstate5';
 import { getFormattedError } from '../../../../../util/errors';
+import { getStreamTypeFromDefinition } from '../../../../../util/get_stream_type_from_definition';
+import { buildUpsertStreamRequestPayload } from '../../utils';
 import type { StreamEnrichmentServiceDependencies } from './types';
 
 export type UpsertStreamResponse = APIReturnType<'PUT /api/streams/{name}/_ingest 2023-10-31'>;
@@ -32,6 +32,8 @@ export function createUpsertStreamActor({
   telemetryClient,
 }: Pick<StreamEnrichmentServiceDependencies, 'streamsRepositoryClient' | 'telemetryClient'>) {
   return fromPromise<UpsertStreamResponse, UpsertStreamInput>(async ({ input, signal }) => {
+    const body = buildUpsertStreamRequestPayload(input.definition, input.steps, input.fields);
+
     const response = await streamsRepositoryClient.fetch(
       `PUT /api/streams/{name}/_ingest 2023-10-31`,
       {
@@ -40,28 +42,7 @@ export function createUpsertStreamActor({
           path: {
             name: input.definition.stream.name,
           },
-          body: Streams.WiredStream.GetResponse.is(input.definition)
-            ? {
-                ingest: {
-                  ...input.definition.stream.ingest,
-                  processing: convertUIStepsToDSL(input.steps),
-                  ...(input.fields && {
-                    wired: { ...input.definition.stream.ingest.wired, fields: input.fields },
-                  }),
-                },
-              }
-            : {
-                ingest: {
-                  ...input.definition.stream.ingest,
-                  processing: convertUIStepsToDSL(input.steps),
-                  ...(input.fields && {
-                    classic: {
-                      ...input.definition.stream.ingest.classic,
-                      field_overrides: input.fields,
-                    },
-                  }),
-                },
-              },
+          body,
         },
       }
     );
