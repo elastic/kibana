@@ -6,6 +6,7 @@
  */
 
 import { platformCoreTools } from '@kbn/onechat-common/tools';
+import { internalNamespaces } from '@kbn/onechat-common/base/namespaces';
 
 /**
  * This is a manually maintained list of all built-in tools registered in Agent Builder.
@@ -18,12 +19,18 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   'observability.get_data_sources',
   'observability.get_anomaly_detection_jobs',
   'observability.run_log_rate_analysis',
+  'observability.get_log_categories',
   'observability.get_alerts',
   'observability.get_services',
   'observability.get_downstream_dependencies',
   // Dashboards
   'platform.dashboard.create_dashboard',
   'platform.dashboard.update_dashboard',
+  // Security Solution
+  `${internalNamespaces.security}.entity_risk_score`,
+  `${internalNamespaces.security}.attack_discovery_search`,
+  `${internalNamespaces.security}.security_labs_search`,
+  `${internalNamespaces.security}.alerts`,
 ];
 
 /**
@@ -33,6 +40,8 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
 export const AGENT_BUILDER_BUILTIN_AGENTS: string[] = [
   'observability.agent',
   'platform.dashboard.dashboard_agent',
+  `${internalNamespaces.security}.alerts`,
+  `${internalNamespaces.security}.entity`,
 ];
 
 export const isAllowedBuiltinTool = (toolName: string) => {
