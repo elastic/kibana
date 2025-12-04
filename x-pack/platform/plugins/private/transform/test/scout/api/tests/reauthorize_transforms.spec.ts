@@ -7,123 +7,266 @@
 
 import { expect, tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
-
+import type { ReauthorizeTransformsRequestSchema } from '../../../../server/routes/api_schemas/reauthorize_transforms';
+import { TRANSFORM_STATE } from '../../../../common/constants';
+import { generateTransformConfig, generateDestIndex } from '../helpers/transform_config';
 import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from './constants';
 
+async function expectUnauthorizedTransform(
+  transformId: string,
+  createdByUserCredentials: RoleApiCredentials,
+  apiServices: any
+) {
+  const transformInfo = await apiServices.transform.getTransform(transformId);
+  const expectedApiKeyId = createdByUserCredentials.apiKey.id;
+
+  expect(typeof transformInfo.authorization.api_key).toBe('object');
+  expect(transformInfo.authorization.api_key.id).toBe(expectedApiKeyId);
+
+  const stats = await apiServices.transform.getTransformStats(transformId);
+  expect(stats.state).toBe(TRANSFORM_STATE.STOPPED);
+  expect(stats.health?.status).toBe('red');
+  expect(stats.health?.issues![0].type).toBe('privileges_check_failed');
+}
+
+async function expectAuthorizedTransform(
+  transformId: string,
+  createdByUserCredentials: RoleApiCredentials,
+  apiServices: any
+) {
+  const transformInfo = await apiServices.transform.getTransform(transformId);
+  const expectedApiKeyId = createdByUserCredentials.apiKey.id;
+
+  expect(transformInfo.authorization.api_key.id).not.toBe(expectedApiKeyId);
+
+  const stats = await apiServices.transform.getTransformStats(transformId);
+  expect(stats.health?.status).toBe('green');
+}
+
+// If transform was created with sufficient permissions -> should create and start
+// If transform was created with insufficient permissions -> should create but not start
 apiTest.describe('/internal/transform/reauthorize_transforms', { tag: tags.ESS_ONLY }, () => {
   let transformPowerUserApiCredentials: RoleApiCredentials;
   let transformViewerUserApiCredentials: RoleApiCredentials;
+  let transformUnauthorizedUserApiCredentials: RoleApiCredentials;
 
-  apiTest.beforeAll(async ({ requestAuth, kbnClient }) => {
+  function getTransformIdByUser(username: string) {
+    return `transform-by-${username}`;
+  }
+
+  apiTest.beforeAll(async ({ requestAuth }) => {
     transformPowerUserApiCredentials = await requestAuth.loginAsTransformPowerUser();
     transformViewerUserApiCredentials = await requestAuth.loginAsTransformViewerUser();
-    // TODO: Implement test setup
-    // 2. Set Kibana timezone to UTC
-    // 3. Create transform roles and users
-    // 4. Create API keys for transform users (TRANSFORM_VIEWER, TRANSFORM_POWERUSER)
-    // 5. Store API keys in a map for later use
-  });
-
-  apiTest.afterAll(async ({ kbnClient }) => {
-    // TODO: Implement cleanup
-    // 1. Clear all transform API keys
-    // 2. Unload ES archive
-    // 3. Reset Kibana timezone
+    transformUnauthorizedUserApiCredentials = await requestAuth.loginAsTransformUnauthorizedUser();
   });
 
   apiTest.describe('single transform reauthorize_transforms', () => {
-    apiTest.beforeEach(async ({ apiClient, kbnClient }) => {
-      // TODO: Implement test setup
-      // 1. Create transform 'transform-by-transform_viewer' using API key for TRANSFORM_VIEWER
-      // 2. Use header: 'es-secondary-authorization': `ApiKey ${encoded_api_key}`
-      // 3. Set deferValidation: true
+    const transformCreatedByViewerId = getTransformIdByUser('transform_viewer');
+
+    apiTest.beforeEach(async ({ apiClient }) => {
+      await apiClient.put(`internal/transform/transforms/${transformCreatedByViewerId}`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...transformPowerUserApiCredentials.apiKeyHeader,
+        },
+        body: generateTransformConfig(transformCreatedByViewerId),
+        responseType: 'json',
+      });
+
+      /*
+      await apiServices.transform.createTransformWithSecondaryAuth(
+        transformCreatedByViewerId,
+        config,
+        transformViewerUserApiCredentials.apiKey.encoded,
+        true
+      );
+      */
     });
 
-    apiTest.afterEach(async ({ kbnClient }) => {
-      // TODO: Implement cleanup
-      // 1. Clean transform indices
-      // 2. Delete destination index
+    apiTest.afterEach(async ({ apiServices }) => {
+      await apiServices.transform.cleanTransformIndices();
+      await apiServices.transform.deleteIndices(generateDestIndex(transformCreatedByViewerId));
     });
 
     apiTest(
       'should not reauthorize transform created by transform_viewer for transform_unauthorized',
-      async ({ apiClient, requestAuth }) => {
-        // TODO: Implement test for endpoint POST /internal/transform/reauthorize_transforms
-        // 1. Get API credentials for TRANSFORM_UNAUTHORIZED
-        // 2. POST request with body: [{ id: 'transform-by-transform_viewer' }]
-        // 3. Assert response status 200
-        // 4. Assert body[transformId].success equals false
-        // 5. Assert body[transformId].error is object
-        // 6. Verify transform is unauthorized: state='stopped', health.status='red', health.issues[0].type='privileges_check_failed'
+      async ({ apiClient, apiServices }) => {
+        const reqBody: ReauthorizeTransformsRequestSchema = [{ id: transformCreatedByViewerId }];
+        const { statusCode, body } = await apiClient.post(
+          'internal/transform/reauthorize_transforms',
+          {
+            headers: {
+              ...COMMON_HEADERS,
+              ...transformUnauthorizedUserApiCredentials.apiKeyHeader,
+            },
+            body: reqBody,
+            responseType: 'json',
+          }
+        );
+
+        expect(statusCode).toBe(200);
+        expect(body[transformCreatedByViewerId].success).toBe(false);
+        expect(typeof body[transformCreatedByViewerId].error).toBe('object');
+
+        await expectUnauthorizedTransform(
+          transformCreatedByViewerId,
+          transformViewerUserApiCredentials,
+          apiServices
+        );
       }
     );
 
     apiTest(
       'should not reauthorize transform created by transform_viewer for transform_viewer',
-      async ({ apiClient, requestAuth }) => {
-        // TODO: Implement test for endpoint POST /internal/transform/reauthorize_transforms
-        // 1. Get API credentials for TRANSFORM_VIEWER
-        // 2. POST request with body: [{ id: 'transform-by-transform_viewer' }]
-        // 3. Assert response status 200
-        // 4. Assert body[transformId].success equals false
-        // 5. Assert body[transformId].error is object
-        // 6. Verify transform is still unauthorized
+      async ({ apiClient, apiServices }) => {
+        const reqBody: ReauthorizeTransformsRequestSchema = [{ id: transformCreatedByViewerId }];
+        const { statusCode, body } = await apiClient.post(
+          'internal/transform/reauthorize_transforms',
+          {
+            headers: {
+              ...COMMON_HEADERS,
+              ...transformViewerUserApiCredentials.apiKeyHeader,
+            },
+            body: reqBody,
+            responseType: 'json',
+          }
+        );
+
+        expect(statusCode).toBe(200);
+        expect(body[transformCreatedByViewerId].success).toBe(false);
+        expect(typeof body[transformCreatedByViewerId].error).toBe('object');
+
+        await expectUnauthorizedTransform(
+          transformCreatedByViewerId,
+          transformViewerUserApiCredentials,
+          apiServices
+        );
       }
     );
 
     apiTest(
       'should reauthorize transform created by transform_viewer with new api key of poweruser and start the transform',
-      async ({ apiClient, requestAuth }) => {
-        // TODO: Implement test for endpoint POST /internal/transform/reauthorize_transforms
-        // 1. Get API credentials for TRANSFORM_POWERUSER
-        // 2. POST request with body: [{ id: 'transform-by-transform_viewer' }]
-        // 3. Assert response status 200
-        // 4. Assert body[transformId].success equals true
-        // 5. Assert body[transformId].error is undefined
-        // 6. Wait for transform state to be 'started'
-        // 7. Verify transform is authorized: api_key.id is different, health.status='green'
+      async ({ apiClient, apiServices }) => {
+        const reqBody: ReauthorizeTransformsRequestSchema = [{ id: transformCreatedByViewerId }];
+        const { statusCode, body } = await apiClient.post(
+          'internal/transform/reauthorize_transforms',
+          {
+            headers: {
+              ...COMMON_HEADERS,
+              ...transformPowerUserApiCredentials.apiKeyHeader,
+            },
+            body: reqBody,
+            responseType: 'json',
+          }
+        );
+
+        expect(statusCode).toBe(200);
+        expect(body[transformCreatedByViewerId].success).toBe(true);
+        expect(typeof body[transformCreatedByViewerId].error).toBe('undefined');
+
+        await apiServices.transform.waitForTransformState(
+          transformCreatedByViewerId,
+          TRANSFORM_STATE.STARTED
+        );
+
+        await expectAuthorizedTransform(
+          transformCreatedByViewerId,
+          transformViewerUserApiCredentials,
+          apiServices
+        );
       }
     );
   });
 
-  apiTest.describe('single transform reauthorize_transforms with invalid transformId', () => {
-    apiTest(
-      'should return 200 with error in response if invalid transformId',
-      async ({ apiClient, requestAuth }) => {
-        // TODO: Implement test for endpoint POST /internal/transform/reauthorize_transforms
-        // 1. Get API credentials for TRANSFORM_POWERUSER
-        // 2. POST request with body: [{ id: 'invalid_transform_id' }]
-        // 3. Assert response status 200
-        // 4. Assert body.invalid_transform_id.success equals false
-        // 5. Assert body.invalid_transform_id has property 'error'
-      }
-    );
-  });
+  // single transform reauthorize_transforms with invalid transformId
+  apiTest(
+    'should return 200 with error in response if invalid transformId',
+    async ({ apiClient }) => {
+      const reqBody: ReauthorizeTransformsRequestSchema = [{ id: 'invalid_transform_id' }];
+      const { statusCode, body } = await apiClient.post(
+        'internal/transform/reauthorize_transforms',
+        {
+          headers: {
+            ...COMMON_HEADERS,
+            ...transformPowerUserApiCredentials.apiKeyHeader,
+          },
+          body: reqBody,
+          responseType: 'json',
+        }
+      );
+
+      expect(statusCode).toBe(200);
+      expect(body.invalid_transform_id.success).toBe(false);
+      expect(body.invalid_transform_id.error).toBeDefined();
+    }
+  );
 
   apiTest.describe('bulk reauthorize_transforms', () => {
-    apiTest.beforeEach(async ({ apiClient, kbnClient }) => {
-      // TODO: Implement test setup
-      // 1. Create transform 'transform-by-transform_viewer' using API key for TRANSFORM_VIEWER
-      // 2. Create transform 'transform-by-transform_poweruser' using API key for TRANSFORM_POWERUSER
+    const transformCreatedByViewerId = getTransformIdByUser('transform_viewer');
+    const transformCreatedByPoweruserId = getTransformIdByUser('transform_poweruser');
+
+    apiTest.beforeEach(async ({ apiServices }) => {
+      const viewerConfig = generateTransformConfig(transformCreatedByViewerId, true);
+      await apiServices.transform.createTransformWithSecondaryAuth(
+        transformCreatedByViewerId,
+        viewerConfig,
+        transformViewerUserApiCredentials.apiKey.encoded,
+        true
+      );
+
+      const poweruserConfig = generateTransformConfig(transformCreatedByPoweruserId, true);
+      await apiServices.transform.createTransformWithSecondaryAuth(
+        transformCreatedByPoweruserId,
+        poweruserConfig,
+        transformPowerUserApiCredentials.apiKey.encoded,
+        true
+      );
     });
 
-    apiTest.afterEach(async ({ kbnClient }) => {
-      // TODO: Implement cleanup
-      // 1. Clean transform indices
-      // 2. Delete destination indices for both transforms
+    apiTest.afterEach(async ({ apiServices }) => {
+      await apiServices.transform.cleanTransformIndices();
+      await apiServices.transform.deleteIndices(generateDestIndex(transformCreatedByViewerId));
+      await apiServices.transform.deleteIndices(generateDestIndex(transformCreatedByPoweruserId));
     });
 
     apiTest(
       'should reauthorize multiple transforms for transform_poweruser, even if one of the transformIds is invalid',
-      async ({ apiClient, requestAuth }) => {
-        // TODO: Implement test for endpoint POST /internal/transform/reauthorize_transforms
-        // 1. Get API credentials for TRANSFORM_POWERUSER
-        // 2. POST request with body including both transforms and 'invalid_transform_id'
-        // 3. Assert response status 200
-        // 4. Verify 'transform-by-transform_viewer' is authorized
-        // 5. Verify 'transform-by-transform_poweruser' is authorized
-        // 6. Assert invalid_transform_id.success equals false with error
+      async ({ apiClient, apiServices }) => {
+        const invalidTransformId = 'invalid_transform_id';
+        const reqBody: ReauthorizeTransformsRequestSchema = [
+          { id: transformCreatedByViewerId },
+          { id: transformCreatedByPoweruserId },
+          { id: invalidTransformId },
+        ];
+
+        const { statusCode, body } = await apiClient.post(
+          'internal/transform/reauthorize_transforms',
+          {
+            headers: {
+              ...COMMON_HEADERS,
+              ...transformPowerUserApiCredentials.apiKeyHeader,
+            },
+            body: reqBody,
+            responseType: 'json',
+          }
+        );
+
+        expect(statusCode).toBe(200);
+
+        await expectAuthorizedTransform(
+          transformCreatedByViewerId,
+          transformViewerUserApiCredentials,
+          apiServices
+        );
+        await expectAuthorizedTransform(
+          transformCreatedByPoweruserId,
+          transformPowerUserApiCredentials,
+          apiServices
+        );
+
+        expect(body[invalidTransformId].success).toBe(false);
+        expect(body[invalidTransformId].error).toBeDefined();
       }
     );
   });

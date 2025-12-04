@@ -55,13 +55,6 @@ export const TRANSFORM_USERS = {
     },
   } as KibanaRole,
 
-  /**
-   * Transform User role with read-only transform capabilities
-   * - Can view and monitor transforms
-   * - Has read access to source indices
-   * - Cluster privilege: monitor_transform
-   * - Cannot create or modify transforms
-   */
   transformViewerUser: {
     kibana: [
       {
@@ -88,6 +81,20 @@ export const TRANSFORM_USERS = {
           privileges: ['view_index_metadata', 'read'],
         },
       ],
+    },
+  } as KibanaRole,
+
+  transformUnauthorizedUser: {
+    kibana: [
+      {
+        base: ['all'],
+        feature: {},
+        spaces: ['*'],
+      },
+    ],
+    elasticsearch: {
+      cluster: [],
+      indices: [],
     },
   } as KibanaRole,
 };

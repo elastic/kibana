@@ -47,6 +47,14 @@ export interface TransformRequestAuthFixture {
    * - Cluster privilege: monitor_transform
    */
   loginAsTransformViewerUser: () => Promise<RoleApiCredentials>;
+
+  /**
+   * Get API credentials for Transform Unauthorized User role
+   * - No transform capabilities
+   * - No cluster privileges
+   * - Used for testing unauthorized access scenarios
+   */
+  loginAsTransformUnauthorizedUser: () => Promise<RoleApiCredentials>;
 }
 
 /**
@@ -91,10 +99,14 @@ export const transformApiTest = apiTest.extend<{
     const loginAsTransformViewerUser = async () =>
       requestAuth.getApiKeyForCustomRole(TRANSFORM_USERS.transformViewerUser);
 
+    const loginAsTransformUnauthorizedUser = async () =>
+      requestAuth.getApiKeyForCustomRole(TRANSFORM_USERS.transformUnauthorizedUser);
+
     const extendedAuth: TransformRequestAuthFixture = {
       ...requestAuth,
       loginAsTransformPowerUser,
       loginAsTransformViewerUser,
+      loginAsTransformUnauthorizedUser,
     };
     await use(extendedAuth);
   },
