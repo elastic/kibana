@@ -10,7 +10,6 @@ import { screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { sloFeatureId } from '@kbn/observability-plugin/common';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import '@testing-library/jest-dom';
 import { SloHealthCallout } from './slo_health_callout';
 import { useFetchSloHealth } from '../../../hooks/use_fetch_slo_health';
 import { useRepairSlo } from '../../../hooks/use_repair_slo';
@@ -175,7 +174,8 @@ describe('SloHealthCallout', () => {
     renderComponent();
 
     expect(screen.getByText('This SLO has issues with its transforms')).toBeInTheDocument();
-    expect(screen.getByTestId('sloSloHealthCalloutRepairButton')).toBeInTheDocument();
+    expect(screen.getByText(/slo-test-slo-id-1 \(unhealthy\)/)).toBeInTheDocument();
+    expect(screen.getByText('Inspect')).toBeInTheDocument();
   });
 
   it('should render callout with missing rollup transform', () => {
@@ -225,10 +225,7 @@ describe('SloHealthCallout', () => {
     renderComponent();
 
     expect(screen.getByText('This SLO has issues with its transforms')).toBeInTheDocument();
-    expect(
-      screen.getByText(/slo-test-slo-id-1 \((conflicting state: should be started)\)/)
-    ).toBeInTheDocument();
-    expect(screen.getByText('Inspect')).toBeInTheDocument();
+    expect(screen.getByTestId('sloSloHealthCalloutRepairButton')).toBeInTheDocument();
   });
 
   it('should render callout with unhealthy summary transform', () => {
@@ -253,7 +250,8 @@ describe('SloHealthCallout', () => {
     renderComponent();
 
     expect(screen.getByText('This SLO has issues with its transforms')).toBeInTheDocument();
-    expect(screen.getByTestId('sloSloHealthCalloutRepairButton')).toBeInTheDocument();
+    expect(screen.getByText(/slo-summary-test-slo-id-1 \(unhealthy\)/)).toBeInTheDocument();
+    expect(screen.getByText('Inspect')).toBeInTheDocument();
   });
 
   it('should render callout with missing summary transform', () => {
@@ -303,10 +301,7 @@ describe('SloHealthCallout', () => {
     renderComponent();
 
     expect(screen.getByText('This SLO has issues with its transforms')).toBeInTheDocument();
-    expect(
-      screen.getByText(/slo-summary-test-slo-id-1 \((conflicting state: should be started)\)/)
-    ).toBeInTheDocument();
-    expect(screen.getByText('Inspect')).toBeInTheDocument();
+    expect(screen.getByTestId('sloSloHealthCalloutRepairButton')).toBeInTheDocument();
   });
 
   it('should render callout with both unhealthy and missing transforms - rollup unhealthy, summary missing', () => {
@@ -381,7 +376,9 @@ describe('SloHealthCallout', () => {
     renderComponent();
 
     expect(screen.getByText('This SLO has issues with its transforms')).toBeInTheDocument();
-    expect(screen.getByTestId('sloSloHealthCalloutRepairButton')).toBeInTheDocument();
+    expect(screen.getByText(/slo-test-slo-id-1 \(unhealthy\)/)).toBeInTheDocument();
+    expect(screen.getByText(/slo-summary-test-slo-id-1 \(unhealthy\)/)).toBeInTheDocument();
+    expect(screen.getAllByText('Inspect')).toHaveLength(2);
   });
 
   it('should render callout with both transforms missing', () => {
@@ -437,19 +434,7 @@ describe('SloHealthCallout', () => {
     fireEvent.click(repairButton);
 
     expect(mockRepairSlo).toHaveBeenCalledWith({
-      list: [
-        {
-          id: 'test-slo-id',
-          instanceId: 'irrelevant',
-          revision: 1,
-          name: 'Test SLO',
-          health: {
-            isProblematic: true,
-            rollup: anUnhealthyTransformHealth,
-            summary: aHealthyTransformHealth,
-          },
-        },
-      ],
+      list: ['test-slo-id'],
     });
   });
 });
