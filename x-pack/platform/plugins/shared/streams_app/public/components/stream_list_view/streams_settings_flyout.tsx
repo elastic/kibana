@@ -31,7 +31,6 @@ import {
   useGeneratedHtmlId,
   EuiText,
   EuiLink,
-  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
