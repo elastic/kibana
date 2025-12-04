@@ -1,6 +1,6 @@
 {
-  "lastModified": "2025-12-03T19:03:32.568Z",
-  "sha1": "c5cd43d311011a9384a2e48bb402064fd0872779",
+  "lastModified": "2025-12-04T11:34:01.425Z",
+  "sha1": "8294e3e6c806a036ffbc65627dcce61724c0639a",
   "tests": [
     {
       "id": "3cc9409cebf2cef-744ce32675c025c",
@@ -504,6 +504,104 @@
       }
     },
     {
+      "id": "05b81aec1f98f3d-dd598a15fe81173",
+      "title": "Stream data processing - outdated documents with outdated documents - should display warning tip for latest samples datasource",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
+        "line": 75,
+        "column": 7
+      }
+    },
+    {
+      "id": "05b81aec1f98f3d-323ec71ba169a53",
+      "title": "Stream data processing - outdated documents with outdated documents - should display warning tip for kql samples datasource",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
+        "line": 83,
+        "column": 7
+      }
+    },
+    {
+      "id": "05b81aec1f98f3d-bc1e52d3cb3934c",
+      "title": "Stream data processing - outdated documents with up to date documents - should not display warning tip for latest samples datasource",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
+        "line": 98,
+        "column": 7
+      }
+    },
+    {
+      "id": "05b81aec1f98f3d-5006ed16bffd22d",
+      "title": "Stream data processing - outdated documents with up to date documents - should not display warning tip for kql samples datasource",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
+        "line": 106,
+        "column": 7
+      }
+    },
+    {
+      "id": "05b81aec1f98f3d-7df840cbf9f1acf",
+      "title": "Stream data processing - outdated documents with empty samples - should not display warning tip for latest samples datasource",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
+        "line": 121,
+        "column": 7
+      }
+    },
+    {
+      "id": "05b81aec1f98f3d-b1d187bdc22846e",
+      "title": "Stream data processing - outdated documents with empty samples - should not display warning tip for kql samples datasource",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
+        "line": 129,
+        "column": 7
+      }
+    },
+    {
+      "id": "05b81aec1f98f3d-c7ab9991a959935",
+      "title": "Stream data processing - outdated documents should never display warning tip for custom samples datasource",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
+        "line": 143,
+        "column": 7
+      }
+    },
+    {
       "id": "8431b9ecd24de8b-5410dfb47f53d9f",
       "title": "Stream data processing - simulation preview should display default samples when no processors are configured",
       "expectedStatus": "passed",
@@ -972,7 +1070,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/ilm_policy_retention.spec.ts",
-        "line": 48,
+        "line": 50,
         "column": 7
       }
     },
@@ -985,7 +1083,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/ilm_policy_retention.spec.ts",
-        "line": 54,
+        "line": 56,
         "column": 7
       }
     },
@@ -998,7 +1096,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/ilm_policy_retention.spec.ts",
-        "line": 72,
+        "line": 74,
         "column": 7
       }
     },
@@ -1011,7 +1109,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/ilm_policy_retention.spec.ts",
-        "line": 88,
+        "line": 90,
         "column": 7
       }
     },
@@ -1025,7 +1123,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_display_values.spec.ts",
-        "line": 54,
+        "line": 56,
         "column": 7
       }
     },
@@ -1039,7 +1137,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_display_values.spec.ts",
-        "line": 69,
+        "line": 71,
         "column": 7
       }
     },
@@ -1053,7 +1151,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_display_values.spec.ts",
-        "line": 77,
+        "line": 79,
         "column": 7
       }
     },
@@ -1067,7 +1165,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_display_values.spec.ts",
-        "line": 85,
+        "line": 87,
         "column": 7
       }
     },
@@ -1081,7 +1179,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_display_values.spec.ts",
-        "line": 94,
+        "line": 96,
         "column": 7
       }
     },
@@ -1095,7 +1193,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_inheritance.spec.ts",
-        "line": 46,
+        "line": 48,
         "column": 7
       }
     },
@@ -1109,7 +1207,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_inheritance.spec.ts",
-        "line": 67,
+        "line": 69,
         "column": 7
       }
     },
@@ -1123,7 +1221,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_inheritance.spec.ts",
-        "line": 88,
+        "line": 90,
         "column": 7
       }
     },
@@ -1137,7 +1235,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_inheritance.spec.ts",
-        "line": 113,
+        "line": 115,
         "column": 7
       }
     },
@@ -1151,7 +1249,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_inheritance.spec.ts",
-        "line": 137,
+        "line": 139,
         "column": 7
       }
     },
@@ -1165,7 +1263,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_inheritance.spec.ts",
-        "line": 159,
+        "line": 161,
         "column": 7
       }
     },
@@ -1179,7 +1277,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_modal_interactions.spec.ts",
-        "line": 52,
+        "line": 54,
         "column": 7
       }
     },
@@ -1193,7 +1291,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_modal_interactions.spec.ts",
-        "line": 61,
+        "line": 63,
         "column": 7
       }
     },
@@ -1207,7 +1305,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_mode_switching.spec.ts",
-        "line": 51,
+        "line": 53,
         "column": 7
       }
     },
@@ -1221,7 +1319,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_mode_switching.spec.ts",
-        "line": 71,
+        "line": 73,
         "column": 7
       }
     },
@@ -1235,7 +1333,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_mode_switching.spec.ts",
-        "line": 96,
+        "line": 98,
         "column": 7
       }
     },
@@ -1249,7 +1347,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_mode_switching.spec.ts",
-        "line": 108,
+        "line": 110,
         "column": 7
       }
     },
@@ -1263,7 +1361,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_mode_switching.spec.ts",
-        "line": 120,
+        "line": 122,
         "column": 7
       }
     },
@@ -1277,7 +1375,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_storage_metrics.spec.ts",
-        "line": 53,
+        "line": 55,
         "column": 9
       }
     },
@@ -1291,7 +1389,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_storage_metrics.spec.ts",
-        "line": 66,
+        "line": 68,
         "column": 9
       }
     },
