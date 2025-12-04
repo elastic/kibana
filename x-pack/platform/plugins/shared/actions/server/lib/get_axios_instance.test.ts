@@ -149,6 +149,77 @@ describe('getAxiosInstance', () => {
     expect(getCustomAgents).toHaveBeenCalledWith(configurationUtilities, logger, 'http://test3');
   });
 
+  test('returns axios instance configured for api_key_header auth and additional headers', async () => {
+    const getAxios = getAxiosInstanceWithAuth({
+      authTypeRegistry,
+      configurationUtilities,
+      logger,
+    });
+    const result = await getAxios({
+      additionalHeaders: {
+        'X-Custom-Header': 'i-am-a-custom-header-string',
+        'X-Version': '1.0.0',
+      },
+      connectorId: '1',
+      secrets: {
+        authType: 'api_key_header',
+        'X-Custom-Auth': 'i-am-a-custom-auth-string',
+      },
+    });
+
+    expect(result).not.toBeUndefined();
+    expect(result!.defaults.auth).toBeUndefined();
+    expect(result!.defaults.headers.common).toEqual(
+      expect.objectContaining({
+        'X-Custom-Header': 'i-am-a-custom-header-string',
+        'X-Version': '1.0.0',
+        'X-Custom-Auth': 'i-am-a-custom-auth-string',
+      })
+    );
+
+    // @ts-expect-error
+    expect(result!.interceptors.request.handlers.length).toBe(1);
+
+    // @ts-expect-error
+    const result2 = result!.interceptors.request.handlers[0].fulfilled({ url: 'http://test3' });
+    expect(getCustomAgents).toHaveBeenCalledWith(configurationUtilities, logger, 'http://test3');
+  });
+
+  test('auth type configured headers take precedence over additional headers', async () => {
+    const getAxios = getAxiosInstanceWithAuth({
+      authTypeRegistry,
+      configurationUtilities,
+      logger,
+    });
+    const result = await getAxios({
+      additionalHeaders: {
+        'X-Custom-Auth': 'place-holder-value',
+        'X-Version': '1.0.0',
+      },
+      connectorId: '1',
+      secrets: {
+        authType: 'api_key_header',
+        'X-Custom-Auth': 'i-am-a-custom-auth-string',
+      },
+    });
+
+    expect(result).not.toBeUndefined();
+    expect(result!.defaults.auth).toBeUndefined();
+    expect(result!.defaults.headers.common).toEqual(
+      expect.objectContaining({
+        'X-Version': '1.0.0',
+        'X-Custom-Auth': 'i-am-a-custom-auth-string',
+      })
+    );
+
+    // @ts-expect-error
+    expect(result!.interceptors.request.handlers.length).toBe(1);
+
+    // @ts-expect-error
+    const result2 = result!.interceptors.request.handlers[0].fulfilled({ url: 'http://test3' });
+    expect(getCustomAgents).toHaveBeenCalledWith(configurationUtilities, logger, 'http://test3');
+  });
+
   test('returns axios instance configured for oauth client credentials auth when connector token client is undefined', async () => {
     (requestOAuthClientCredentialsToken as jest.Mock).mockResolvedValueOnce({
       tokenType: 'Bearer',
