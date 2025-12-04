@@ -6,21 +6,26 @@
  */
 import type { SVGProps } from 'react';
 import React from 'react';
-export const IconTool: React.FC<SVGProps<SVGSVGElement>> = ({ ...props }) => (
+export const IconPolicies: React.FC<SVGProps<SVGSVGElement>> = ({ ...props }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width={16}
-    height={16}
     fill="none"
     viewBox="0 0 32 32"
+    width={16}
+    height={16}
     {...props}
   >
     <path
+      fill="#101c3f"
       fillRule="evenodd"
+      d="M1 0h19a7 7 0 0 1 6.326 4H29a3 3 0 0 1 3 3v3a3 3 0 0 1-3 3h-2v12a7 7 0 0 1-7 7H1zm24 13V7a5 5 0 0 0-5-5H3v28h17a5 5 0 0 0 5-5zm2-2h2a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-2v5m2 4v6h2v-6zm0 9v6h2v-6z"
       clipRule="evenodd"
-      d="M16 28H14V19.508L14.6 19.246C17.88 17.812 20 14.575 20 11C20 7.963 18.471 5.171 16 3.521V11H6V3.521C3.529 5.171 2 7.963 2 11C2 14.575 4.12 17.812 7.4 19.246L8 19.508V28H6V20.795C2.334 18.924 0 15.148 0 11C0 6.63 2.591 2.674 6.6 0.921998L8 0.309998V9H14V0.309998L15.4 0.921998C19.409 2.674 22 6.63 22 11C22 15.148 19.666 18.924 16 20.795V28Z"
-      fill="#535766"
     />
-    <path fillRule="evenodd" clipRule="evenodd" d="M6 32H16V30H6V32Z" fill="#00BFB3" />
+    <path
+      fill="#0b64dd"
+      fillRule="evenodd"
+      d="M7 9h3V7H7zm5 0h9V7h-9zm0 6h9v-2h-9zm9 6h-9v-2h9zm-9 5.5h9v-2h-9zM10 15H7v-2h3zm-3 6h3v-2H7zm3 5.5H7v-2h3z"
+      clipRule="evenodd"
+    />
   </svg>
 );

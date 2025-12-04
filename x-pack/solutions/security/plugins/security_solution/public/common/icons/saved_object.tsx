@@ -6,35 +6,28 @@
  */
 import type { SVGProps } from 'react';
 import React from 'react';
-export const IconSavedObject: React.FC<SVGProps<SVGSVGElement>> = ({ ...props }) => (
+export const IconHostIsolationExceptions: React.FC<SVGProps<SVGSVGElement>> = ({ ...props }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width={16}
-    height={16}
     fill="none"
     viewBox="0 0 32 32"
+    width={16}
+    height={16}
     {...props}
   >
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <g clipPath="url(#clip0_1334_337834)">
-        <path
-          fillRule="evenodd"
-          clipRule="evenodd"
-          d="M15.0002 0V9.92L11.6252 7.219L10.3752 8.781L16.0002 13.28L21.6252 8.781L20.3752 7.219L17.0002 9.92V0H15.0002Z"
-          fill="#00BFB3"
-        />
-        <path
-          fillRule="evenodd"
-          clipRule="evenodd"
-          d="M19.9468 1.83246L29.1968 8.00046L15.9998 16.7975L2.80276 8.00046L12.0548 1.83246L10.9448 0.168457L-0.000244141 7.46446V20.5355L15.9998 31.2025L32.0008 20.5355V7.46446L21.0558 0.168457L19.9468 1.83246ZM16.9998 18.5355L29.9998 9.86846V19.4655L16.9998 28.1305V18.5355ZM1.99976 19.4655V9.86846L15.0008 18.5355V28.1305L1.99976 19.4655Z"
-          fill="#535766"
-        />
-      </g>
-      <defs>
-        <clipPath id="clip0_1334_337834">
-          <rect width="32" height="32" fill="white" />
-        </clipPath>
-      </defs>
-    </svg>
+    <path
+      fill="#101c3f"
+      fillRule="evenodd"
+      d="M12 23.989V23h2v.989A6 6 0 0 1 12.463 28h7.075A6 6 0 0 1 18 23.989V23h2v.989a4 4 0 0 0 1.23 2.886L24.486 30H7.515l3.255-3.125A4 4 0 0 0 12 23.989"
+      clipRule="evenodd"
+    />
+    <path fill="#101c3f" fillRule="evenodd" d="M3 3H2v21h18v-2H4V5h24v8h2V3H3" clipRule="evenodd" />
+    <path
+      fill="#101c3f"
+      fillRule="evenodd"
+      d="m24.526 13.273 5.426 2.087v2.774a7.88 7.88 0 0 1-5.048 7.351l-.004.001-.376.143-.375-.144a7.88 7.88 0 0 1-5.05-7.35V15.36zm-3.426 3.46v1.401a5.88 5.88 0 0 0 3.426 5.341 5.88 5.88 0 0 0 3.426-5.34v-1.402l-3.426-1.317z"
+      clipRule="evenodd"
+    />
+    <path stroke="#0b64dd" strokeWidth="2" d="M8 17h7M8 13h10M8 9h16" />
   </svg>
 );

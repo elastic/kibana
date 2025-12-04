@@ -6,26 +6,32 @@
  */
 import type { SVGProps } from 'react';
 import React from 'react';
-export const IconDeviceControl: React.FC<SVGProps<SVGSVGElement>> = ({ ...props }) => (
-  <svg
-    width="16"
-    height="16"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 32 32"
-    {...props}
-  >
+export const IconTrustedDevices: React.FC<SVGProps<SVGSVGElement>> = ({ ...props }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width={16} height={16} {...props}>
     <path
-      d="M26.25 0C27.216 0 28 .776 28 1.733v15.6c0 .957-.784 1.733-1.75 1.733H17.5l1.75 5.2h2.625c.483 0 .875.39.875.868a.87.87 0 0 1-.875.866H15v-1.733h2.5l-1.75-5.2H15v-1.734h11.25v-15.6H1.75v15.6H4v1.733H1.75c-.966 0-1.75-.776-1.75-1.733v-15.6C0 .776.784 0 1.75 0h24.5z"
-      fill="#535766"
+      fill="#0b64dd"
+      fillRule="evenodd"
+      d="m9.233 5.724 8.569 6.93-2.56 1.478 1 1.732-1.733 1-1-1.732-2.56 1.478zm3.238 7.698 1.809-1.045-2.262-1.828z"
+      clipRule="evenodd"
     />
     <path
-      d="M12.071 13A1.94 1.94 0 0 1 14 14.95v9.1A1.94 1.94 0 0 1 12.071 26H6.93A1.94 1.94 0 0 1 5 24.05v-9.1A1.94 1.94 0 0 1 6.929 13h5.142zm-5.37 1.6c-.387 0-.701.28-.701.626v8.75c0 .345.314.625.7.625h5.6c.386 0 .7-.28.7-.625v-8.75c0-.346-.314-.625-.7-.625H6.7z"
-      fill="#16C5C0"
+      fill="#101c3f"
+      fillRule="evenodd"
+      d="M5 1a2 2 0 0 0-2 2v19h18v-2H5V3h22v9h2V3a2 2 0 0 0-2-2z"
+      clipRule="evenodd"
     />
     <path
-      d="M12 9a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h5zm-5 4h5v-3H7v3z"
-      fill="#16C5C0"
+      fill="#101c3f"
+      fillRule="evenodd"
+      d="M21 20H0v1.25A4.75 4.75 0 0 0 4.75 26H21v-2H4.75a2.75 2.75 0 0 1-2.646-2H21z"
+      clipRule="evenodd"
     />
+    <path
+      fill="#101c3f"
+      fillRule="evenodd"
+      d="M20 14a3 3 0 0 1 3-3h6a3 3 0 0 1 3 3v14a3 3 0 0 1-3 3h-6a3 3 0 0 1-3-3zm3-1a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V14a1 1 0 0 0-1-1z"
+      clipRule="evenodd"
+    />
+    <path fill="#0b64dd" fillRule="evenodd" d="M22 15h8v2h-8zM25 26h2v2h-2z" clipRule="evenodd" />
   </svg>
 );
