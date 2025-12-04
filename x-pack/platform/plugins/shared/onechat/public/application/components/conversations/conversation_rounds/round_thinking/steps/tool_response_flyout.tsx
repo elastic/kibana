@@ -14,6 +14,8 @@ import {
   EuiText,
   EuiSpacer,
 } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
 const toolResponseFlyoutTitle = i18n.translate(
@@ -44,7 +46,15 @@ export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({
   if (!isOpen) return null;
 
   return (
-    <EuiFlyout onClose={onClose} aria-labelledby="toolResponseFlyoutTitle" size="m">
+    <EuiFlyout
+      onClose={onClose}
+      aria-labelledby="toolResponseFlyoutTitle"
+      size="m"
+      ownFocus={false}
+      css={css`
+        z-index: ${euiThemeVars.euiZFlyout + 4};
+      `}
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id="toolResponseFlyoutTitle">{toolResponseFlyoutTitle}</h2>
