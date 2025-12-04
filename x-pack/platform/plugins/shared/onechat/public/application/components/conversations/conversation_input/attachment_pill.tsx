@@ -7,15 +7,32 @@
 
 import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useState } from 'react';
 import { AttachmentType } from '@kbn/onechat-common/attachments';
 
+const removeAriaLabel = i18n.translate('xpack.onechat.attachmentPill.removeAriaLabel', {
+  defaultMessage: 'Remove attachment',
+});
+
 export interface AttachmentPillProps {
-  id: string;
+  dataTestSubj?: string;
   type: AttachmentType;
+  onRemoveAttachment?: () => void;
 }
 
-const getAttachmentIcon = (type: AttachmentType): string => {
+const getAttachmentIcon = ({
+  type,
+  isHovered,
+  canRemoveAttachment,
+}: {
+  type: AttachmentType;
+  isHovered: boolean;
+  canRemoveAttachment: boolean;
+}): string => {
+  if (canRemoveAttachment && isHovered) {
+    return 'cross';
+  }
+
   switch (type) {
     case AttachmentType.text:
       return 'document';
@@ -47,16 +64,33 @@ const getAttachmentDisplayName = (type: AttachmentType): string => {
   }
 };
 
-export const AttachmentPill: React.FC<AttachmentPillProps> = ({ id, type }) => {
+export const AttachmentPill: React.FC<AttachmentPillProps> = ({
+  dataTestSubj,
+  type,
+  onRemoveAttachment,
+}) => {
+  const [isHovered, setIsHovered] = useState(false);
+
   const displayName = getAttachmentDisplayName(type);
-  const iconType = getAttachmentIcon(type);
+  const canRemoveAttachment = Boolean(onRemoveAttachment);
+  const iconType = getAttachmentIcon({ type, isHovered, canRemoveAttachment });
 
   return (
     <EuiBadge
+      onMouseEnter={() => {
+        setIsHovered(true);
+      }}
+      onMouseLeave={() => {
+        setIsHovered(false);
+      }}
       color="default"
       iconType={iconType}
       iconSide="left"
-      data-test-subj={`onechatAttachmentPill-${id}`}
+      iconOnClick={() => {
+        onRemoveAttachment?.();
+      }}
+      iconOnClickAriaLabel={canRemoveAttachment ? removeAriaLabel : undefined}
+      data-test-subj={dataTestSubj}
     >
       {displayName}
     </EuiBadge>

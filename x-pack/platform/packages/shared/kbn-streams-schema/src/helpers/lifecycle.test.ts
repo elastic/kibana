@@ -16,10 +16,11 @@ function createMockWiredStream(
   return {
     name,
     description: name,
+    updated_at: new Date().toISOString(),
     ingest: {
       lifecycle,
       wired: { fields: {}, routing: [] },
-      processing: { steps: [] },
+      processing: { steps: [], updated_at: new Date().toISOString() },
       settings: {},
       failure_store: { inherit: {} },
     },
