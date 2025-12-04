@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect, useCallback, useRef, useState } from 'react';
+import React, { useMemo, useEffect, useCallback, useState, useRef } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -148,6 +148,13 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     setCurrentProps({ ...currentProps, attachments: undefined });
   }, [currentProps]);
 
+  const removeAttachment = useCallback((attachmentIndex: number) => {
+    setCurrentProps((prevProps) => ({
+      ...prevProps,
+      attachments: prevProps.attachments?.filter((_, index) => index !== attachmentIndex),
+    }));
+  }, []);
+
   const conversationContextValue = useMemo(
     () => ({
       conversationId,
@@ -161,6 +168,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       setConversationId,
       attachments: currentProps.attachments,
       resetAttachments,
+      removeAttachment,
       conversationActions,
     }),
     [
@@ -173,6 +181,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       resetInitialMessage,
       setConversationId,
       resetAttachments,
+      removeAttachment,
       conversationActions,
     ]
   );
