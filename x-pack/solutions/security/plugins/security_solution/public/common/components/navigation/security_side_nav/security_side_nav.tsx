@@ -13,10 +13,7 @@ import {
   type SolutionSideNavItem,
 } from '@kbn/security-solution-side-nav';
 import useObservable from 'react-use/lib/useObservable';
-import {
-  SecurityGroupName,
-  SecurityPageName,
-} from '@kbn/security-solution-navigation';
+import { SecurityGroupName, SecurityPageName } from '@kbn/security-solution-navigation';
 import { i18nStrings } from '@kbn/security-solution-navigation/links';
 import { ATTACKS_ALERTS_ALIGNMENT_ENABLED } from '../../../../../common/constants';
 import type { NavigationLink } from '../../../links';
@@ -82,9 +79,8 @@ const formatLaunchpadItem = (
 ): SolutionSideNavItem => {
   // Find landing link once for reuse (only non-disabled links)
   const landingLink =
-    launchpadNavLinks.find(
-      (link) => link.id === SecurityPageName.landing && !link.disabled
-    ) ?? launchpadNavLinks.find((link) => !link.disabled);
+    launchpadNavLinks.find((link) => link.id === SecurityPageName.landing && !link.disabled) ??
+    launchpadNavLinks.find((link) => !link.disabled);
 
   if (!landingLink) {
     // Fallback: return minimal item if no valid (non-disabled) links
@@ -101,14 +97,14 @@ const formatLaunchpadItem = (
 
   const landingLinkProps = getSecuritySolutionLinkProps({ deepLinkId: landingLink.id });
 
-  // Format children, excluding disabled links and icon for landing item
+  // Format children, excluding disabled links
   const children = launchpadNavLinks
     .filter((link) => !link.disabled)
     .map((link) => ({
       id: link.id,
       label: link.title,
-      // Don't show icon for Get started (landing) item
-      ...(link.id !== SecurityPageName.landing && link.sideNavIcon && { iconType: link.sideNavIcon }),
+      ...(link.id !== SecurityPageName.landing &&
+        link.sideNavIcon && { iconType: link.sideNavIcon }),
       ...getSecuritySolutionLinkProps({ deepLinkId: link.id }),
     }));
 
@@ -182,7 +178,9 @@ const useSolutionSideNavItems = () => {
 
     // Add Launchpad item before other bottom items (so it appears above Manage)
     if (launchpadNavLinks.length > 0) {
-      bottomFormattedItems.unshift(formatLaunchpadItem(launchpadNavLinks, getSecuritySolutionLinkProps));
+      bottomFormattedItems.unshift(
+        formatLaunchpadItem(launchpadNavLinks, getSecuritySolutionLinkProps)
+      );
     }
 
     return [...topFormattedItems, ...bottomFormattedItems];
