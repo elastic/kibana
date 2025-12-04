@@ -26,9 +26,14 @@ import {
 import { StreamableHTTPError } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { UnauthorizedError } from '@modelcontextprotocol/sdk/client/auth.js';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
-import { MCP_CLIENT_VERSION, MAX_RETRIES } from '@kbn/connector-schemas/mcp/constants';
+import {
+  MCP_CLIENT_VERSION,
+  MAX_RETRIES,
+  DEFAULT_INACTIVITY_TIMEOUT_MS,
+} from '@kbn/connector-schemas/mcp/constants';
 import { buildHeadersFromSecrets } from './auth_helpers';
 import { retryWithRecovery, type RetryOptions } from './retry_utils';
+import { McpConnectionLifecycleManager } from './lifecycle_management';
 import {
   MCP_CONNECTOR_TOOLS_SAVED_OBJECT_TYPE,
   type McpConnectorToolsAttributes,
@@ -42,11 +47,12 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
  * - The connector maintains a single MCP Client instance per connector instance.
  * - Connections are established automatically on-demand (lazy connection):
  *   - When calling listTools() or callTool(), the connector will auto-connect if not already connected.
- * - Connector instances are short-lived (created per execution) and connections are disconnected
- *   after each operation completes to ensure proper cleanup.
+ * - Connections remain open after operations and are automatically disconnected after
+ *   a period of inactivity (default: 10 minutes) to optimize performance while managing resources.
  */
 export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConnectorSecrets> {
   private mcpClient: McpClient;
+  private lifecycleManager: McpConnectionLifecycleManager;
 
   constructor(params: ServiceParams<MCPConnectorConfig, MCPConnectorSecrets>) {
     super(params);
@@ -69,6 +75,13 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
 
     // Initialize the single MCP Client instance for this connector
     this.mcpClient = new McpClient(this.logger, clientDetails, clientOptions);
+
+    // Initialize lifecycle manager for connection timeout management
+    this.lifecycleManager = new McpConnectionLifecycleManager(
+      this.mcpClient,
+      this.logger,
+      DEFAULT_INACTIVITY_TIMEOUT_MS
+    );
 
     this.registerSubActions();
   }
@@ -96,6 +109,7 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
   /**
    * Test the connector by attempting to connect to the MCP server.
    * Disconnects after the test to clean up resources.
+   * Note: Test operations always disconnect to ensure clean test state.
    */
   public async testConnector(
     _params: z.infer<typeof TestConnectorRequestSchema>,
@@ -122,8 +136,10 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
       );
       throw error;
     } finally {
-      // Always disconnect after test to clean up
+      // Always disconnect after test to clean up (test operations should clean up)
       await this.safeDisconnect('test');
+      // Clean up lifecycle manager for test operations
+      this.lifecycleManager.cleanup();
     }
   }
 
@@ -139,6 +155,7 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
 
     try {
       await this.mcpClient.disconnect();
+      this.lifecycleManager.reset();
     } catch (disconnectError) {
       const operationContext = operationName ? ` after ${operationName}` : '';
       this.logger.debug(
@@ -188,6 +205,9 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     };
 
     await retryWithRecovery(() => this.mcpClient.connect(), retryOptions);
+
+    // Record activity after successful connection
+    this.lifecycleManager.recordActivity();
   }
 
   /**
@@ -252,7 +272,6 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
    * List all available tools from the MCP server.
    * Automatically connects if not already connected.
    * Handles connection failures with automatic recovery.
-   * Disconnects after the operation completes.
    */
   public async listTools(
     params: z.infer<typeof ListToolsRequestSchema>,
@@ -268,6 +287,10 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
 
       const result = await this.mcpClient.listTools();
       this.logger.debug(`Listed ${result.tools.length} tools from MCP server`);
+
+      // Record activity after successful operation
+      this.lifecycleManager.recordActivity();
+
       // Save tools to a saved object
       await this.saveTools(result);
       return result;
@@ -275,9 +298,6 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
       // On error, ensure connection state is cleaned up
       await this.handleConnectionError(error, 'listTools');
       throw error;
-    } finally {
-      // Always disconnect after operation to clean up
-      await this.safeDisconnect('listTools');
     }
   }
 
@@ -285,7 +305,6 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
    * Call a tool on the MCP server.
    * Automatically connects if not already connected.
    * Handles connection failures with automatic recovery.
-   * Disconnects after the operation completes.
    */
   public async callTool(
     params: z.infer<typeof CallToolRequestSchema>,
@@ -304,14 +323,15 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
 
       const result = await this.mcpClient.callTool(callParams);
       this.logger.debug(`Successfully called tool: ${params.name}`);
+
+      // Record activity after successful operation
+      this.lifecycleManager.recordActivity();
+
       return result;
     } catch (error) {
       // On error, ensure connection state is cleaned up
       await this.handleConnectionError(error, `callTool(${params.name})`);
       throw error;
-    } finally {
-      // Always disconnect after operation to clean up
-      await this.safeDisconnect('callTool');
     }
   }
   /**
@@ -334,6 +354,8 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
       );
       try {
         await this.mcpClient.disconnect();
+        // Reset lifecycle state after error disconnection
+        this.lifecycleManager.reset();
       } catch (cleanupError) {
         // Log but don't throw - we're already handling an error
         this.logger.debug(
@@ -345,7 +367,7 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     }
   }
 
-  protected getResponseErrorMessage(error: AxiosError | Error): string {
+  protected getResponseErrorMessage(error: AxiosError): string {
     // Handle MCP-specific errors
     if (error instanceof StreamableHTTPError) {
       return `MCP Connection Error: ${error.message}`;
