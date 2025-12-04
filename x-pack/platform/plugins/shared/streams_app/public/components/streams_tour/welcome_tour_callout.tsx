@@ -63,7 +63,7 @@ export function WelcomeTourCallout({
                   <h4>
                     {i18n.translate('xpack.streams.welcomeCallout.title', {
                       defaultMessage:
-                        'Welcome to Streams, our next-generation model to manage your data in a single place',
+                        'Welcome to streams, our next-generation model to manage your data in a single place',
                     })}
                   </h4>
                 </EuiTitle>
