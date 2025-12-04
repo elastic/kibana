@@ -73,7 +73,6 @@ import { handleSystemColorModeChange } from './handle_system_colormode_change';
 import { AppMenuBar } from './ui/project/app_menu';
 import { GridLayoutProjectSideNav } from './ui/project/sidenav/grid_layout_sidenav';
 import { FixedLayoutProjectSideNav } from './ui/project/sidenav/fixed_layout_sidenav';
-import { SideNavCollapseButton } from './ui/project/sidenav/collapse_button';
 import type { NavigationProps } from './ui/project/sidenav/types';
 
 const IS_SIDENAV_COLLAPSED_KEY = 'core.chrome.isSideNavCollapsed';
@@ -472,7 +471,7 @@ export class ChromeService {
         kibanaVersion={injectedMetadata.getKibanaVersion()}
         prependBasePath={http.basePath.prepend}
       >
-        {includeSideNav ? (
+        {includeSideNav && (
           <Router history={application.history}>
             <FixedLayoutProjectSideNav
               isCollapsed$={this.isSideNavCollapsed$}
@@ -480,11 +479,6 @@ export class ChromeService {
               navProps={navProps}
             />
           </Router>
-        ) : (
-          <SideNavCollapseButton
-            isCollapsed={this.isSideNavCollapsed$}
-            toggle={setIsSideNavCollapsed}
-          />
         )}
       </ProjectHeader>
     );
@@ -543,7 +537,11 @@ export class ChromeService {
 
     const getProjectSideNavComponentForGridLayout = () => {
       return (
-        <GridLayoutProjectSideNav isCollapsed$={this.isSideNavCollapsed$} navProps={navProps} />
+        <GridLayoutProjectSideNav
+          isCollapsed$={this.isSideNavCollapsed$}
+          toggle={setIsSideNavCollapsed}
+          navProps={navProps}
+        />
       );
     };
 

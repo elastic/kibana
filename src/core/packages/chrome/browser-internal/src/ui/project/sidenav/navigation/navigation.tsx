@@ -54,6 +54,9 @@ export interface ChromeNavigationProps {
   dataTestSubj$?: Observable<string | undefined>;
 
   feedbackUrlParams$: Observable<URLSearchParams | undefined>;
+
+  // collapse button
+  collapseButton?: React.ReactNode;
 }
 
 export const Navigation = (props: ChromeNavigationProps) => {
@@ -88,6 +91,7 @@ export const Navigation = (props: ChromeNavigationProps) => {
         isCollapsed={props.isCollapsed}
         setWidth={props.setWidth}
         activeItemId={activeItemId}
+        collapseButton={props.collapseButton}
         data-test-subj={classnames(dataTestSubj, 'projectSideNav', 'projectSideNavV2')}
       />
     </KibanaSectionErrorBoundary>
