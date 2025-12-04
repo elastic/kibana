@@ -32,7 +32,9 @@ export async function create(
     throw Boom.badRequest(`Invalid data. ${transformInError.message}`);
   }
 
-  const isAccessControlEnabled = core.savedObjects.typeRegistry.isAccessControlEnabled();
+  const isAccessControlEnabled =
+    !!core.security.authc.getCurrentUser() &&
+    core.savedObjects.typeRegistry.isAccessControlEnabled();
 
   const savedObject = await core.savedObjects.client.create<DashboardSavedObjectAttributes>(
     DASHBOARD_SAVED_OBJECT_TYPE,
