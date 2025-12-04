@@ -57,7 +57,7 @@ export const buildESQLQuery = async (
     ${recentData(description.identityField)} AS ${description.identityField}
   | EVAL
     ${mergedFieldStats(description)},
-    ${customFieldEvalLogic()}
+    ${customFieldEvalLogic(description)}
   | KEEP ${fieldsToKeep(description)}
   | LIMIT ${config.maxPageSearchSize}
   // | SORT @timestamp ASC`;
@@ -186,11 +186,16 @@ function fieldsToKeep({ fields, identityField }: EntityDescription) {
     .join(',\n ');
 }
 
-function customFieldEvalLogic() {
-  return [
-    `@timestamp = ${recentData('timestamp')}`,
-    `entity.name = COALESCE(entity.name, entity.id)`,
-  ].join(',\n ');
+function customFieldEvalLogic({ entityType }: EntityDescription) {
+  let entityNameEval = `entity.name = COALESCE(entity.name, entity.id)`;
+
+  if (entityType === 'host') {
+    entityNameEval = `entity.name = COALESCE(entity.name, host.name, entity.id)`;
+  } else if (entityType === 'user') {
+    entityNameEval = `entity.name = COALESCE(entity.name, user.name, entity.id)`;
+  }
+
+  return [`@timestamp = ${recentData('timestamp')}`, entityNameEval].join(',\n ');
 }
 
 function filterFields(fields: FieldDescription[]) {
