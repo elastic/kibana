@@ -43,13 +43,5 @@ export const getNavCategories = (
       type: LinkCategoryType.separator,
       linkIds: [SecurityPageName.assetInventory],
     },
-    {
-      type: LinkCategoryType.separator,
-      linkIds: [SecurityPageName.siemReadiness],
-    },
-    {
-      type: LinkCategoryType.separator,
-      linkIds: [SecurityPageName.aiValue],
-    },
   ];
 };

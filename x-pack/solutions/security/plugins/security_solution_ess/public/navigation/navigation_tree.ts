@@ -8,6 +8,7 @@
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import {
   ATTACKS_ALERTS_ALIGNMENT_ENABLED,
+  SecurityGroupName,
   SecurityPageName,
 } from '@kbn/security-solution-navigation';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
@@ -80,7 +81,7 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
   ],
   footer: [
     {
-      id: 'launchpad',
+      id: SecurityGroupName.launchpad,
       title: i18nStrings.launchPad.title,
       renderAs: 'panelOpener',
       icon: 'launch',
