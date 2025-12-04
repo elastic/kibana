@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,8 +21,10 @@ import { isEqual } from 'lodash';
 import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
 import type { Filter } from '@kbn/es-query';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
-import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
+import { dataTableSelectors, tableDefaults, TableId } from '@kbn/securitysolution-data-table';
 import { useKibana } from '../../../common/lib/kibana';
+import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { Schedule } from '../../../attack_discovery/pages/header/schedule';
 import { FilterByAssigneesPopover } from '../../../common/components/filter_by_assignees_popover/filter_by_assignees_popover';
 import { PAGE_TITLE } from '../../pages/attacks/translations';
@@ -99,6 +101,19 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
   const [statusFilter, setStatusFilter] = useState<Status[]>([]);
   const [pageFilters, setPageFilters] = useState<Filter[]>();
   const [pageFilterHandler, setPageFilterHandler] = useState<FilterGroupHandler | undefined>();
+
+  const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
+  const isTableLoading = useShallowEqualSelector(
+    (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).isLoading
+  );
+
+  useEffect(() => {
+    if (!pageFilterHandler) return;
+    // if the table is reloaded because of action by the user
+    // (e.g. closed and alert)
+    // We want reload the values in the detection Page filters
+    if (!isTableLoading) pageFilterHandler.reload();
+  }, [isTableLoading, pageFilterHandler]);
 
   return (
     <StyledFullHeightContainer data-test-subj={CONTENT_TEST_ID} ref={containerElement}>
