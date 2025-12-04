@@ -55,7 +55,6 @@ export const FileDataVisualizerLite: FC<Props> = ({
         autoAddInference ?? null,
         autoCreateDataView,
         true,
-        false,
         existingIndex ?? null,
         indexSettings,
         location

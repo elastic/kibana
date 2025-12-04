@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiSpacer,
   EuiFlexGroup,
@@ -50,12 +50,6 @@ export const MappingEditor: FC<Props> = ({ onImportClick }) => {
   );
 
   const fieldCount = useMemo(() => mappings.length, [mappings]);
-
-  useEffect(() => {
-    return () => {
-      mappingEditorService.destroy();
-    };
-  }, [mappingEditorService]);
 
   return (
     <>
@@ -152,7 +146,10 @@ export const MappingEditor: FC<Props> = ({ onImportClick }) => {
               <EuiButton
                 data-test-subj="fileUploadLiteLookupImportButton"
                 disabled={mappingsError !== null}
-                onClick={() => onImportClick()}
+                onClick={() => {
+                  mappingEditorService.applyChanges();
+                  onImportClick();
+                }}
                 fullWidth={false}
               >
                 <FormattedMessage id="xpack.fileUpload.import" defaultMessage="Import" />

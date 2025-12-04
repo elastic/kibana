@@ -167,7 +167,6 @@ export class FileUploadManager {
     private autoAddInferenceEndpointName: string | null = null,
     private autoCreateDataView: boolean = true,
     private removePipelinesAfterImport: boolean = true,
-    private removeConvertProcessors: boolean = false,
     existingIndexName: string | null = null,
     indexSettingsOverride: IndicesIndexSettings | undefined = undefined,
     location: string | null = null,
@@ -319,8 +318,7 @@ export class FileUploadManager {
       this.fileUpload,
       this.data,
       this.fileUploadTelemetryService,
-      this.uploadSessionId,
-      this.removeConvertProcessors
+      this.uploadSessionId
     );
     const files = this.getFiles();
     files.push(f);
@@ -889,6 +887,13 @@ export class FileUploadManager {
     const files = this.getFiles();
     for (const file of files) {
       file.renameTargetFields(actualChanges);
+    }
+  }
+
+  public removeConvertProcessors() {
+    const files = this.getFiles();
+    for (const file of files) {
+      file.removeConvertProcessors();
     }
   }
 

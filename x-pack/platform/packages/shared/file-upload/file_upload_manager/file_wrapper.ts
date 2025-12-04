@@ -110,8 +110,7 @@ export class FileWrapper {
     private fileUpload: FileUploadPluginStartApi,
     private data: DataPublicPluginStart,
     private fileUploadTelemetryService: FileUploadTelemetryService,
-    private uploadSessionId: string,
-    private autoRemoveConvertProcessors: boolean = false
+    private uploadSessionId: string
   ) {
     this.fileId = Math.random().toString(36).substring(2, 15);
     this.fileSizeChecker = new FileSizeChecker(fileUpload, file);
@@ -164,12 +163,7 @@ export class FileWrapper {
         supportedFormat,
       });
 
-      const tempPipeline =
-        this.autoRemoveConvertProcessors && analysisResults.results?.ingest_pipeline
-          ? this.removeConvertProcessors(analysisResults.results.ingest_pipeline)
-          : analysisResults.results?.ingest_pipeline;
-
-      this.setPipeline(tempPipeline);
+      this.setPipeline(analysisResults.results?.ingest_pipeline);
 
       this.analyzeFileTelemetry(analysisResults, overrides, new Date().getTime() - startTime);
     });
@@ -383,11 +377,16 @@ export class FileWrapper {
     }
   }
 
-  private removeConvertProcessors(pipeline: IngestPipeline) {
-    return {
+  public removeConvertProcessors() {
+    const pipeline = this.getPipeline();
+    if (pipeline?.processors === undefined) {
+      return;
+    }
+    const tempPipeline = {
       ...pipeline,
       processors: pipeline.processors.filter((processor) => processor.convert === undefined),
     };
+    this.setPipeline(tempPipeline);
   }
 
   public renameTargetFields(

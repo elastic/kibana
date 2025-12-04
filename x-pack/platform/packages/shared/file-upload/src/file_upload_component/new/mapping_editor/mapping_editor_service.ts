@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Subscription } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import type { MappingProperty, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
@@ -39,7 +38,7 @@ const duplicateMappingErrorText = i18n.translate(
 );
 
 export class MappingEditorService {
-  private mappingsSubscription: Subscription;
+  // private mappingsSubscription: Subscription;
   private _mappings$ = new BehaviorSubject<Array<MappingEdits>>([]);
   public mappings$ = this._mappings$.asObservable();
 
@@ -55,17 +54,6 @@ export class MappingEditorService {
     const originalMappings = this.fileUploadManager.getMappings().json;
     this.originalMappingJSON = cloneDeep(originalMappings);
     this.initializeMappings(originalMappings);
-
-    this.mappingsSubscription = this._mappings$.subscribe((mappings) => {
-      const mappingTypeMapping: MappingTypeMapping = {
-        properties: mappings.reduce<Record<string, MappingProperty>>((acc, mapping) => {
-          acc[mapping.name] = mapping.mappingProperty;
-          return acc;
-        }, {}),
-      };
-
-      this.fileUploadManager.updateMappings(mappingTypeMapping);
-    });
   }
 
   private initializeMappings(mappings: MappingTypeMapping) {
@@ -82,10 +70,7 @@ export class MappingEditorService {
     }
   }
 
-  public destroy() {
-    this.mappingsSubscription.unsubscribe();
-
-    // Apply any pending field name changes
+  public applyChanges() {
     const mappings = this._mappings$.getValue();
     const changes = mappings
       .filter((mapping) => mapping.name !== mapping.originalName)
@@ -95,6 +80,15 @@ export class MappingEditorService {
       }));
 
     if (changes.length > 0) {
+      const mappingTypeMapping: MappingTypeMapping = {
+        properties: mappings.reduce<Record<string, MappingProperty>>((acc, mapping) => {
+          acc[mapping.name] = mapping.mappingProperty;
+          return acc;
+        }, {}),
+      };
+
+      this.fileUploadManager.updateMappings(mappingTypeMapping);
+      this.fileUploadManager.removeConvertProcessors();
       this.fileUploadManager.renamePipelineTargetFields(changes);
     }
   }
@@ -184,7 +178,6 @@ export class MappingEditorService {
 
   public reset() {
     const mappings = this.originalMappingJSON;
-    this.fileUploadManager.updateMappings(mappings);
     this.initializeMappings(mappings);
     this._mappingsEdited$.next(false);
   }
