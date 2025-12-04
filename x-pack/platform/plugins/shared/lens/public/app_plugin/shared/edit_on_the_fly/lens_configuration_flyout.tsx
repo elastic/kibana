@@ -362,7 +362,6 @@ export function LensEditConfigurationFlyout({
         onApply={onApply}
         isSaveable={isSaveable}
         isScrollable
-        language={textBasedMode ? getLanguageDisplayName('esql') : ''}
         isNewPanel={isNewPanel}
         isReadOnly={isReadOnly}
         applyButtonLabel={applyButtonLabel}
