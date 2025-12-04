@@ -5,13 +5,23 @@
  * 2.0.
  */
 
+import deepMerge from 'deepmerge';
+import { bytePartition } from '@kbn/std';
+import { isEmpty } from 'lodash';
 import type {
   IndicesGetDataStreamResponse,
   IndicesStatsIndicesStats,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { getDataStreamsMeteringStats } from '@kbn/dataset-quality-plugin/server/routes/data_streams/get_data_streams_metering_stats';
 import type { StreamDocsStat } from '../../../../common';
+
+interface MeteringStatsResponse {
+  datastreams: Array<{
+    name: string;
+    num_docs: number;
+    size_in_bytes: number;
+  }>;
+}
 
 /**
  * Fetches total document counts for multiple streams.
@@ -22,6 +32,7 @@ import type { StreamDocsStat } from '../../../../common';
  * 3) falls back to the indices.stats docs metric (stateful) when _metering/stats is unavailable
  */
 export async function getDocCountsForStreams(options: {
+  isServerless: boolean;
   esClient: ElasticsearchClient;
   /**
    * When available (serverless), this client should be used to call the
@@ -29,18 +40,15 @@ export async function getDocCountsForStreams(options: {
    */
   esClientAsSecondaryAuthUser?: ElasticsearchClient;
   streamNames: string[];
-  // Kept for backwards compatibility with the existing route schema, but ignored.
-  start?: string;
-  end?: string;
 }): Promise<StreamDocsStat[]> {
-  const { esClient, esClientAsSecondaryAuthUser, streamNames } = options;
+  const { isServerless, esClient, esClientAsSecondaryAuthUser, streamNames } = options;
 
   if (!streamNames.length) {
     return [];
   }
 
-  // Prefer _metering/stats for serverless when a secondary auth user client is available.
-  if (esClientAsSecondaryAuthUser) {
+  // Use _metering/stats API for serverless when a secondary auth user client is available.
+  if (isServerless && esClientAsSecondaryAuthUser) {
     try {
       const meteringStatsByStream = await getDataStreamsMeteringStats({
         esClient: esClientAsSecondaryAuthUser,
@@ -61,7 +69,7 @@ export async function getDocCountsForStreams(options: {
 
       return meteringResults;
     } catch {
-      // Fallback to indices.stats API
+      return [];
     }
   }
 
@@ -75,44 +83,35 @@ export async function getDocCountsForStreams(options: {
     return [];
   }
 
-  const backingIndicesByStream = getBackingIndicesByStream(streams);
-  const allBackingIndices = Array.from(
-    new Set(Array.from(backingIndicesByStream.values()).flatMap((indices) => indices))
-  );
+  const lastBackingIndexByStream = getLastBackingIndexByStream(streams);
+  const allBackingIndices = Array.from(new Set(lastBackingIndexByStream.values()));
 
   if (!allBackingIndices.length) {
     return [];
   }
 
-  try {
-    const statsResponse = await esClient.indices.stats({
-      index: allBackingIndices,
-      metric: ['docs'],
-    });
+  const statsResponse = await esClient.indices.stats({
+    index: allBackingIndices,
+    metric: ['docs'],
+  });
 
-    const indicesStats = statsResponse.indices;
+  const indicesStats = statsResponse.indices;
 
-    const results: StreamDocsStat[] = [];
+  const results: StreamDocsStat[] = [];
 
-    for (const [streamName, indices] of backingIndicesByStream.entries()) {
-      const totalDocs = indices.reduce((sum, indexName) => {
-        const stats: IndicesStatsIndicesStats | undefined = indicesStats?.[indexName];
-        const docsCount = stats?.primaries?.docs?.count ?? 0;
-        return sum + docsCount;
-      }, 0);
+  for (const [streamName, indexName] of lastBackingIndexByStream.entries()) {
+    const stats: IndicesStatsIndicesStats | undefined = indicesStats?.[indexName];
+    const docsCount = stats?.primaries?.docs?.count ?? 0;
 
-      if (totalDocs > 0) {
-        results.push({
-          stream: streamName,
-          count: totalDocs,
-        });
-      }
+    if (docsCount > 0) {
+      results.push({
+        stream: streamName,
+        count: docsCount,
+      });
     }
-
-    return results;
-  } catch (e) {
-    return [];
   }
+
+  return results;
 }
 
 /**
@@ -143,37 +142,69 @@ export async function getDegradedDocCountsForStreams(options: {
     return [];
   }
 
+  // Build the list of (stream, last backing index) pairs we want to query.
+  const queries = streams
+    .map((stream) => {
+      const indices = stream.indices;
+      const lastBackingIndex = indices[indices.length - 1]?.index_name;
+      if (!lastBackingIndex) {
+        return null;
+      }
+      return { streamName: stream.name, index: lastBackingIndex };
+    })
+    .filter(
+      (q): q is { streamName: string; index: string } =>
+        q != null && Boolean(q.streamName) && Boolean(q.index)
+    );
+
+  if (!queries.length) {
+    return [];
+  }
+
   const results: StreamDocsStat[] = [];
+  const chunkSize = 100;
 
-  for (const stream of streams) {
-    const indices = stream.indices;
-    const lastBackingIndex = indices[indices.length - 1]?.index_name;
-    if (!lastBackingIndex) {
-      continue;
-    }
+  for (let i = 0; i < queries.length; i += chunkSize) {
+    const chunk = queries.slice(i, i + chunkSize);
 
-    const response = await esClient.search({
-      index: lastBackingIndex,
-      size: 0,
-      track_total_hits: true,
-      query: {
-        exists: {
-          field: '_ignored',
+    // Each request in msearch is a pair of header/body lines.
+    const body = chunk.flatMap(({ index }) => [
+      { index },
+      {
+        size: 0,
+        track_total_hits: true,
+        query: {
+          exists: {
+            field: '_ignored',
+          },
         },
       },
+    ]);
+
+    const { responses } = await esClient.msearch<{ _ignored?: string[] }>({
+      body,
     });
 
-    const totalHits =
-      typeof response.hits.total === 'number'
-        ? response.hits.total
-        : response.hits.total?.value ?? 0;
+    responses.forEach((response: any, idx: number) => {
+      const { streamName } = chunk[idx];
 
-    if (totalHits > 0) {
-      results.push({
-        stream: stream.name,
-        count: totalHits,
-      });
-    }
+      // Skip errored responses.
+      if (!response || response.error) {
+        return;
+      }
+
+      const totalHits =
+        typeof response.hits.total === 'number'
+          ? response.hits.total
+          : response.hits.total?.value ?? 0;
+
+      if (totalHits > 0) {
+        results.push({
+          stream: streamName,
+          count: totalHits,
+        });
+      }
+    });
   }
 
   return results;
@@ -189,17 +220,61 @@ async function getDataStreamsByName({
   return new Map(dataStreams.map((ds) => [ds.name, ds] as const));
 }
 
-function getBackingIndicesByStream(
+function getLastBackingIndexByStream(
   dataStreams: IndicesGetDataStreamResponse['data_streams']
-): Map<string, string[]> {
-  const backingIndicesByStream = new Map<string, string[]>();
+): Map<string, string> {
+  const lastBackingIndexByStream = new Map<string, string>();
 
   for (const dataStream of dataStreams) {
-    backingIndicesByStream.set(
-      dataStream.name,
-      dataStream.indices.map((index) => index.index_name)
-    );
+    const indices = dataStream.indices;
+    const lastBackingIndex = indices[indices.length - 1]?.index_name;
+
+    if (lastBackingIndex) {
+      lastBackingIndexByStream.set(dataStream.name, lastBackingIndex);
+    }
   }
 
-  return backingIndicesByStream;
+  return lastBackingIndexByStream;
+}
+
+async function getDataStreamsMeteringStats({
+  esClient,
+  dataStreams,
+}: {
+  esClient: ElasticsearchClient;
+  dataStreams: string[];
+}): Promise<Record<string, { size?: string; sizeBytes: number; totalDocs: number }>> {
+  if (!dataStreams.length) {
+    return {};
+  }
+
+  const chunks = bytePartition(dataStreams);
+
+  if (isEmpty(chunks)) {
+    return {};
+  }
+
+  const chunkResults = await Promise.all(
+    chunks.map((dataStreamsChunk) =>
+      esClient.transport.request<MeteringStatsResponse>({
+        method: 'GET',
+        path: `/_metering/stats/` + dataStreamsChunk.join(','),
+      })
+    )
+  );
+
+  const { datastreams: dataStreamsStats } = chunkResults.reduce((result, chunkResult) =>
+    deepMerge(result, chunkResult)
+  );
+
+  return dataStreamsStats.reduce(
+    (acc, dataStream) => ({
+      ...acc,
+      [dataStream.name]: {
+        sizeBytes: dataStream.size_in_bytes,
+        totalDocs: dataStream.num_docs,
+      },
+    }),
+    {} as Record<string, { size?: string; sizeBytes: number; totalDocs: number }>
+  );
 }

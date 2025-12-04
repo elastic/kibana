@@ -20,11 +20,9 @@ const degradedDocCountsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  handler: async ({ getScopedClients, request, context }): Promise<StreamDocsStat[]> => {
+  handler: async ({ getScopedClients, request }): Promise<StreamDocsStat[]> => {
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
     const esClient = scopedClusterClient.asCurrentUser;
-    const coreContext = await context.core;
-    const esClientAsSecondaryAuthUser = coreContext.elasticsearch.client.asSecondaryAuthUser;
 
     const streams = await streamsClient.listStreams();
     const streamNames = streams
@@ -48,7 +46,7 @@ const totalDocCountsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  handler: async ({ getScopedClients, request }): Promise<StreamDocsStat[]> => {
+  handler: async ({ getScopedClients, request, server }): Promise<StreamDocsStat[]> => {
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
 
     // Fetch all streams server-side
@@ -58,6 +56,7 @@ const totalDocCountsRoute = createServerRoute({
       .map((stream) => stream.name);
 
     return await getDocCountsForStreams({
+      isServerless: server.isServerless,
       esClient: scopedClusterClient.asCurrentUser,
       esClientAsSecondaryAuthUser: scopedClusterClient.asSecondaryAuthUser,
       streamNames,
