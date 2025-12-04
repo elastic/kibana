@@ -31,6 +31,7 @@ import { useShowEisPromotionalContent } from '../hooks/use_show_eis_promotional_
  *
  * @property {boolean} [isReady=true]
  *   If false, the tour will not render even if promo is visible. Use to delay showing until parent is ready.
+ *   Ensures the tour renders in the correct place when there is animation on the parent.
  *
  * @property {React.ReactElement} children
  *   The anchor element for the tour step. The tour wraps this element.
@@ -88,18 +89,22 @@ export const EisTokenCostTour = ({
         >
           {i18n.EIS_TOUR_DISMISS}
         </EuiButtonEmpty>,
-        <EuiButton
-          fullWidth={false}
-          color="primary"
-          size="s"
-          href={ctaLink}
-          data-test-subj="eisCostsTourCtaBtn"
-          target="_blank"
-          iconSide="right"
-          iconType="popout"
-        >
-          {i18n.EIS_TOUR_CTA}
-        </EuiButton>,
+        ...(ctaLink
+          ? [
+              <EuiButton
+                fullWidth={false}
+                color="primary"
+                size="s"
+                href={ctaLink}
+                data-test-subj="eisCostsTourCtaBtn"
+                target="_blank"
+                iconSide="right"
+                iconType="popout"
+              >
+                {i18n.EIS_TOUR_CTA}
+              </EuiButton>,
+            ]
+          : []),
       ]}
     >
       {children}

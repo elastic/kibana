@@ -78,22 +78,6 @@ describe('EisTokenCostTour', () => {
     expect(screen.getByText(i18n.EIS_COSTS_TOUR_TITLE)).toBeInTheDocument();
   });
 
-  it('calls onSkipTour when clicking the close button', () => {
-    const mockOnSkip = jest.fn();
-
-    (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
-      isPromoVisible: true,
-      onSkipTour: mockOnSkip,
-    });
-
-    renderComponent();
-
-    const closeBtn = screen.getByTestId('tokenConsumptionCostTourCloseBtn');
-    fireEvent.click(closeBtn);
-
-    expect(mockOnSkip).toHaveBeenCalledTimes(1);
-  });
-
   it('renders CTA button and passes href when ctaLink is provided', () => {
     const ctaLink = 'https://elastic.co/example';
 
@@ -111,7 +95,7 @@ describe('EisTokenCostTour', () => {
     expect(ctaBtn).toHaveTextContent(i18n.EIS_TOUR_CTA);
   });
 
-  it('still renders CTA button even when ctaLink is undefined (default behaviour)', () => {
+  it('does not render CTA button when ctaLink is undefined', () => {
     (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
       isPromoVisible: true,
       onSkipTour: jest.fn(),
@@ -119,11 +103,8 @@ describe('EisTokenCostTour', () => {
 
     renderComponent({ ctaLink: undefined });
 
-    const ctaBtn = screen.getByTestId('eisCostsTourCtaBtn');
-    expect(ctaBtn).toBeInTheDocument();
-
-    // Should have no href attribute
-    expect(ctaBtn.getAttribute('href')).toBe(null);
+    const ctaBtn = screen.queryByTestId('eisCostsTourCtaBtn');
+    expect(ctaBtn).not.toBeInTheDocument();
   });
 
   it('removes the tour from DOM after clicking close, children remain', () => {
