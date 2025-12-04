@@ -25,6 +25,7 @@ import type {
 } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { i18n } from '@kbn/i18n';
+import { STREAMS_APP_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import {
   STREAMS_TOUR_CALLOUT_DISMISSED_KEY,
   STREAMS_TOUR_STATE_KEY,
@@ -34,8 +35,9 @@ import {
 import type { StreamsTourStepId } from './constants';
 import type { TourStepConfig } from './tour_steps_config';
 import { getTourStepsConfig } from './tour_steps_config';
-import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
+import { useKibana } from '../../hooks/use_kibana';
+import type { StreamsAppLocator, StreamsAppLocatorParams } from '../../../common/locators';
 
 export type StreamsTourStepProps = Omit<EuiTourStepProps, 'children' | 'anchor'> & {
   stepId: StreamsTourStepId;
@@ -81,7 +83,8 @@ function createEnhancedTourStepProps(
   stepsConfig: TourStepConfig[],
   actions: EuiTourActions,
   tourState: EuiTourState,
-  onCompleteTour: () => void
+  onCompleteTour: () => void,
+  onNavigateToList: () => void
 ): StreamsTourStepProps[] {
   const stepsTotal = stepsConfig.length;
 
@@ -98,6 +101,7 @@ function createEnhancedTourStepProps(
         onClick={() => {
           actions.finishTour();
           onCompleteTour();
+          onNavigateToList();
         }}
         data-test-subj="streamsTourStartExploringButton"
       >
@@ -146,12 +150,16 @@ function createEnhancedTourStepProps(
 
 export function StreamsTourProvider({ children }: StreamsTourProviderProps) {
   const {
-    core: {
-      application: { navigateToApp },
+    dependencies: {
+      start: { share },
     },
   } = useKibana();
-
   const { features } = useStreamsPrivileges();
+
+  const streamsLocator = useMemo(
+    () => share.url.locators.get<StreamsAppLocatorParams>(STREAMS_APP_LOCATOR_ID) as StreamsAppLocator,
+    [share.url.locators]
+  );
   const attachmentsEnabled = features.attachments?.enabled ?? false;
 
   const [isCalloutDismissed = false, setCalloutDismissed] = useLocalStorage(
@@ -204,10 +212,21 @@ export function StreamsTourProvider({ children }: StreamsTourProviderProps) {
     setPersistedTourState(undefined);
   }, [setCalloutDismissed, setPersistedTourState]);
 
+  const navigateToList = useCallback(() => {
+    streamsLocator?.navigate({});
+  }, [streamsLocator]);
+
   const tourStepProps = useMemo(
     () =>
-      createEnhancedTourStepProps(baseTourStepProps, stepsConfig, actions, tourState, completeTour),
-    [baseTourStepProps, stepsConfig, actions, tourState, completeTour]
+      createEnhancedTourStepProps(
+        baseTourStepProps,
+        stepsConfig,
+        actions,
+        tourState,
+        completeTour,
+        navigateToList
+      ),
+    [baseTourStepProps, stepsConfig, actions, tourState, completeTour, navigateToList]
   );
 
   const getStepPropsByStepId = useCallback(
@@ -231,7 +250,7 @@ export function StreamsTourProvider({ children }: StreamsTourProviderProps) {
     const currentStep = tourState.currentTourStep;
     const prevStep = prevStepRef.current;
 
-    if (!tourState.isTourActive || currentStep === prevStep || !tourStreamName) {
+    if (!tourState.isTourActive || currentStep === prevStep || !tourStreamName || !streamsLocator) {
       prevStepRef.current = currentStep;
       return;
     }
@@ -245,22 +264,16 @@ export function StreamsTourProvider({ children }: StreamsTourProviderProps) {
     const tab = STEP_ID_TO_TAB[currentStepConfig.stepId];
 
     if (currentStepConfig.stepId === 'streams_list') {
-      navigateToApp('streams', { path: '/', replace: false });
+      streamsLocator.navigate({});
     } else if (tab) {
-      navigateToApp('streams', {
-        path: `/${tourStreamName}/management/${tab}`,
-        replace: false,
+      streamsLocator.navigate({
+        name: tourStreamName,
+        managementTab: tab,
       });
     }
 
     prevStepRef.current = currentStep;
-  }, [
-    tourState.currentTourStep,
-    tourState.isTourActive,
-    tourStreamName,
-    navigateToApp,
-    stepsConfig,
-  ]);
+  }, [tourState.currentTourStep, tourState.isTourActive, tourStreamName, streamsLocator, stepsConfig]);
 
   const value = useMemo<StreamsTourContextValue>(
     () => ({
