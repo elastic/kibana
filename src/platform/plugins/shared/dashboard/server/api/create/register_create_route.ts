@@ -10,15 +10,16 @@
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { commonRouteConfig, INTERNAL_API_VERSION, PUBLIC_API_PATH } from '../constants';
+import { commonRouteConfig, INTERNAL_API_VERSION } from '../constants';
 import { getCreateRequestBodySchema, getCreateResponseBodySchema } from './schemas';
 import { create } from './create';
 import { allowUnmappedKeysSchema } from '../dashboard_state_schemas';
 import { throwOnUnmappedKeys } from '../scope_tooling';
+import { DASHBOARD_API_PATH } from '../../../common/constants';
 
 export function registerCreateRoute(router: VersionedRouter<RequestHandlerContext>) {
   const createRoute = router.post({
-    path: PUBLIC_API_PATH,
+    path: DASHBOARD_API_PATH,
     summary: 'Create a dashboard',
     ...commonRouteConfig,
   });
