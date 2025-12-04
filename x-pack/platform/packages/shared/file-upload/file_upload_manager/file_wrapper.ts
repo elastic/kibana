@@ -421,6 +421,77 @@ export class FileWrapper {
     this.setPipeline(pipeline);
   }
 
+  public updateDateField(mappings: MappingTypeMapping) {
+    const pipeline = this.getPipeline();
+    if (pipeline?.processors === undefined || !mappings.properties) {
+      return;
+    }
+
+    // Remove date processors where the field is no longer of type date or has different format
+    pipeline.processors = pipeline.processors.filter((processor) => {
+      if (processor.date) {
+        const fieldName = processor.date.field;
+        const fieldMapping = mappings.properties![fieldName];
+
+        // Remove if field doesn't exist in mappings or is not of type date
+        if (!fieldMapping || fieldMapping.type !== 'date') {
+          return false;
+        }
+
+        // Remove if formats don't match
+        const processorFormats: string[] = processor.date.formats;
+        const mappingFormat = fieldMapping.format;
+
+        if (processorFormats && mappingFormat) {
+          const hasMatchingFormat = processorFormats.some(
+            (format) => mappingFormat === format || mappingFormat.includes(format)
+          );
+          if (!hasMatchingFormat) {
+            return false;
+          }
+        }
+      }
+
+      return true;
+    });
+
+    // Find date fields in mappings that have formats and add processors for them
+    const existingDateFields = new Set(
+      pipeline.processors.filter((p) => p.date).map((p) => p.date!.field)
+    );
+
+    const newDateProcessors = [];
+    for (const [fieldName, fieldMapping] of Object.entries(mappings.properties)) {
+      if (
+        fieldMapping.type === 'date' &&
+        fieldMapping.format &&
+        !existingDateFields.has(fieldName)
+      ) {
+        newDateProcessors.push({
+          date: {
+            field: fieldName,
+            formats: Array.isArray(fieldMapping.format)
+              ? fieldMapping.format
+              : [fieldMapping.format],
+          },
+        });
+      }
+    }
+
+    // Insert new date processors before the last processor
+    if (newDateProcessors.length > 0 && pipeline.processors.length > 0) {
+      const lastProcessor = pipeline.processors.pop();
+      pipeline.processors.push(...newDateProcessors);
+      if (lastProcessor) {
+        pipeline.processors.push(lastProcessor);
+      }
+    } else if (newDateProcessors.length > 0) {
+      pipeline.processors.push(...newDateProcessors);
+    }
+
+    this.setPipeline(pipeline);
+  }
+
   private analyzeFileTelemetry(
     analysisResults: AnalysisResults | undefined,
     overrides: InputOverrides,

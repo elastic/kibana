@@ -897,6 +897,13 @@ export class FileUploadManager {
     }
   }
 
+  public updateDateFields(mappings: MappingTypeMapping) {
+    const files = this.getFiles();
+    for (const file of files) {
+      file.updateDateField(mappings);
+    }
+  }
+
   private sendTelemetryProvider(
     files: FileWrapper[],
     startTime: number,

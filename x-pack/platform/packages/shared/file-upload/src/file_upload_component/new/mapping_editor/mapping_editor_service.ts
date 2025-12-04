@@ -72,14 +72,20 @@ export class MappingEditorService {
 
   public applyChanges() {
     const mappings = this._mappings$.getValue();
-    const changes = mappings
+    const nameChanges = mappings
       .filter((mapping) => mapping.name !== mapping.originalName)
       .map((mapping) => ({
         oldName: mapping.originalName,
         newName: mapping.name,
       }));
 
-    if (changes.length > 0) {
+    const hasTypeChanges = mappings.some(
+      (mapping) =>
+        mapping.mappingProperty.type !== mapping.originalMappingProperty.type ||
+        JSON.stringify(mapping.mappingProperty) !== JSON.stringify(mapping.originalMappingProperty)
+    );
+
+    if (nameChanges.length > 0 || hasTypeChanges) {
       const mappingTypeMapping: MappingTypeMapping = {
         properties: mappings.reduce<Record<string, MappingProperty>>((acc, mapping) => {
           acc[mapping.name] = mapping.mappingProperty;
@@ -88,9 +94,12 @@ export class MappingEditorService {
       };
 
       this.fileUploadManager.updateMappings(mappingTypeMapping);
-      this.fileUploadManager.removeConvertProcessors();
-      this.fileUploadManager.renamePipelineTargetFields(changes);
+      if (nameChanges.length > 0) {
+        this.fileUploadManager.renamePipelineTargetFields(nameChanges);
+      }
+      this.fileUploadManager.updateDateFields(mappingTypeMapping);
     }
+    this.fileUploadManager.removeConvertProcessors();
   }
 
   getMappings() {
@@ -106,11 +115,18 @@ export class MappingEditorService {
   updateMapping(index: number, fieldName: string, fieldType: string | null) {
     const mappings = [...this._mappings$.getValue()];
     if (mappings[index]) {
-      mappings[index] = {
-        ...mappings[index],
+      const currentMapping = mappings[index];
+      const updatedMapping = {
+        ...currentMapping,
         name: fieldName,
-        mappingProperty: { type: fieldType } as MappingProperty,
       };
+
+      // Only update mappingProperty if the type has changed
+      if (currentMapping.mappingProperty.type !== fieldType) {
+        updatedMapping.mappingProperty = { type: fieldType } as MappingProperty;
+      }
+
+      mappings[index] = updatedMapping;
       this._mappings$.next(mappings);
       this.checkMappingsValid(mappings);
       this._mappingsEdited$.next(true);
