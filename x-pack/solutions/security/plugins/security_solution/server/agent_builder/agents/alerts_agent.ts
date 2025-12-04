@@ -8,8 +8,11 @@
 import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
 import { internalNamespaces } from '@kbn/onechat-common/base/namespaces';
 import { platformCoreTools } from '@kbn/onechat-common';
-import { SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID, SECURITY_LABS_SEARCH_TOOL_ID } from '../tools';
-import { SECURITY_ALERTS_TOOL_ID } from '../tools/alerts_tool';
+import {
+  SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
+  SECURITY_LABS_SEARCH_TOOL_ID,
+  SECURITY_ALERTS_TOOL_ID,
+} from '../tools';
 
 export const ALERTS_AGENT_ID = `${internalNamespaces.security}.alerts`;
 export const createAlertsAgent = (): BuiltInAgentDefinition => {

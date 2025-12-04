@@ -12,8 +12,8 @@ import {
   SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
   SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
   SECURITY_LABS_SEARCH_TOOL_ID,
+  SECURITY_ALERTS_TOOL_ID,
 } from '../tools';
-import { SECURITY_ALERTS_TOOL_ID } from '../tools/alerts_tool';
 
 export const ENTITY_AGENT_ID = `${internalNamespaces.security}.entity`;
 
