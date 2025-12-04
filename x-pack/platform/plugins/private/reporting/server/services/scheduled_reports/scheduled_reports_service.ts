@@ -64,6 +64,7 @@ export class ScheduledReportsService {
     private userCanManageReporting: Boolean,
     private esClient: IClusterClient,
     private logger: Logger,
+    private request: KibanaRequest,
     private responseFactory: KibanaResponseFactory,
     private savedObjectsClient: SavedObjectsClientContract,
     private taskManager: TaskManagerStartContract
@@ -91,6 +92,7 @@ export class ScheduledReportsService {
       userCanManageReporting,
       esClient,
       logger,
+      request,
       responseFactory,
       savedObjectsClient,
       taskManager
@@ -486,7 +488,8 @@ export class ScheduledReportsService {
     id,
     schedule,
   }: { id: string } & UpdateScheduledReportParams) {
-    if (schedule) await this.taskManager.bulkUpdateSchedules([id], schedule);
+    if (schedule)
+      await this.taskManager.bulkUpdateSchedules([id], schedule, { request: this.request });
   }
 
   private async _canUpdateReport({
