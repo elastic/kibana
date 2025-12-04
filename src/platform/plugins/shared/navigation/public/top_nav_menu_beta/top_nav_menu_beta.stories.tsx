@@ -37,6 +37,7 @@ const VerticalRule = () => {
 };
 
 const TopNavMenuBetaWrapper = ({ showTabs = false, ...props }: TopNavMenuBetaWrapperProps) => {
+  const { euiTheme } = useEuiTheme();
   const { getNewTabDefaultProps } = useNewTabProps({ numberOfInitialItems: 0 });
 
   const [tabsState, setTabsState] = useState<{
@@ -69,11 +70,7 @@ const TopNavMenuBetaWrapper = ({ showTabs = false, ...props }: TopNavMenuBetaWra
     return states[index % states.length];
   };
 
-  if (!showTabs) {
-    return <TopNavMenuBeta {...props} />;
-  }
-
-  return (
+  const content = showTabs ? (
     <EuiFlexGroup
       gutterSize="s"
       alignItems="center"
@@ -108,6 +105,24 @@ const TopNavMenuBetaWrapper = ({ showTabs = false, ...props }: TopNavMenuBetaWra
         <TopNavMenuBeta {...props} />
       </EuiFlexItem>
     </EuiFlexGroup>
+  ) : (
+    <TopNavMenuBeta {...props} />
+  );
+
+  return (
+    <EuiHeader
+      css={
+        showTabs
+          ? css`
+              background-color: ${euiTheme.colors.lightestShade};
+            `
+          : undefined
+      }
+    >
+      <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+        {content}
+      </EuiFlexGroup>
+    </EuiHeader>
   );
 };
 
@@ -122,21 +137,10 @@ const meta: Meta<TopNavMenuBetaWrapperProps> = {
     },
   },
   decorators: [
-    (Story, { args }) => {
-      const { euiTheme } = useEuiTheme();
-      const headerBackground = args.showTabs
-        ? css`
-            background-color: ${euiTheme.colors.lightestShade};
-          `
-        : undefined;
-
+    (Story) => {
       return (
         <EuiPageTemplate>
-          <EuiHeader css={headerBackground}>
-            <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-              <Story />
-            </EuiFlexGroup>
-          </EuiHeader>
+          <Story />
         </EuiPageTemplate>
       );
     },

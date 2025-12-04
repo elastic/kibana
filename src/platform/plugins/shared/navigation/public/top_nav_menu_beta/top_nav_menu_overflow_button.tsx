@@ -55,7 +55,7 @@ export const TopNavMenuOverflowButton = ({
   const button = (
     <EuiButtonIcon
       iconType="boxesHorizontal" // Change to "ellipsis" when available in EUI
-      size="s"
+      size="xs"
       aria-label={i18n.translate('navigation.topNavMenu.showMoreButtonLabel', {
         defaultMessage: 'More',
       })}
