@@ -23,12 +23,12 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { isEqual, memoize } from 'lodash';
 import { Global, css } from '@emotion/react';
-import { getESQLQueryColumns, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery, getESQLSources, getEsqlColumns } from '@kbn/esql-utils';
 import type { CodeEditorProps } from '@kbn/code-editor';
 import { CodeEditor } from '@kbn/code-editor';
 import type { CoreStart } from '@kbn/core/public';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
-import type { ESQLTelemetryCallbacks, ESQLFieldWithMetadata, EsqlFieldType } from '@kbn/esql-types';
+import type { ESQLTelemetryCallbacks } from '@kbn/esql-types';
 import type {
   ESQLControlVariable,
   IndicesAutocompleteResult,
@@ -36,7 +36,6 @@ import type {
 } from '@kbn/esql-types';
 import { fixESQLQueryWithVariables, getRemoteClustersFromESQLQuery } from '@kbn/esql-utils';
 import { FavoritesClient } from '@kbn/content-management-favorites-public';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ILicense } from '@kbn/licensing-types';
@@ -62,7 +61,6 @@ import { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
 import {
   clearCacheWhenOld,
   filterDataErrors,
-  getESQLSources,
   getEditorOverwrites,
   onKeyDownResizeHandler,
   onMouseDownResizeHandler,
@@ -417,7 +415,7 @@ const ESQLEditorInternal = function ESQLEditor({
         ]
       ) => ({
         timestamp: Date.now(),
-        result: getESQLQueryColumns(...args),
+        result: getEsqlColumns(...args),
       }),
       ({ esqlQuery }) => esqlQuery
     );
@@ -526,29 +524,15 @@ const ESQLEditorInternal = function ESQLEditor({
           // Check if there's a stale entry and clear it
           clearCacheWhenOld(esqlFieldsCache, `${queryToExecute} | limit 0`);
           const timeRange = data.query.timefilter.timefilter.getTime();
-          try {
-            const columns = await memoizedFieldsFromESQL({
-              esqlQuery: queryToExecute,
-              search: data.search.search,
-              timeRange,
-              signal: abortController.signal,
-              variables: variablesService?.esqlVariables,
-              dropNullColumns: true,
-            }).result;
-            const columnsWithMetadata: ESQLFieldWithMetadata[] =
-              columns.map((c) => {
-                return {
-                  name: c.name,
-                  type: c.meta.esType as EsqlFieldType,
-                  hasConflict: c.meta.type === KBN_FIELD_TYPES.CONFLICT,
-                  userDefined: false,
-                };
-              }) || [];
-
-            return columnsWithMetadata;
-          } catch (e) {
-            // no action yet
-          }
+          const columns = await memoizedFieldsFromESQL({
+            esqlQuery: queryToExecute,
+            search: data.search.search,
+            timeRange,
+            signal: abortController.signal,
+            variables: variablesService?.esqlVariables,
+            dropNullColumns: true,
+          }).result;
+          return columns;
         }
         return [];
       },

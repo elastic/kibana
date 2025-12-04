@@ -60,3 +60,6 @@ export {
   mutateQueryStatsGrouping,
   appendFilteringWhereClauseForCascadeLayout,
 } from './utils/cascaded_documents_helpers';
+
+export { getESQLSources } from './utils/callbacks/sources';
+export { getEsqlColumns } from './utils/callbacks/columns';

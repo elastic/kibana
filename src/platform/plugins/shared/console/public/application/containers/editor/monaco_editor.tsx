@@ -17,10 +17,7 @@ import type { monaco } from '@kbn/monaco';
 import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, ConsoleLang } from '@kbn/monaco';
 
 import { i18n } from '@kbn/i18n';
-import { getESQLSources } from '@kbn/esql-editor/src/helpers';
-import { getESQLQueryColumns } from '@kbn/esql-utils';
-import type { FieldType } from '@kbn/esql-ast/src/definitions/types';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { getESQLSources, getEsqlColumns } from '@kbn/esql-utils';
 import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
 import type { EditorRequest } from './types';
 import {
@@ -190,28 +187,11 @@ export const MonacoEditor = ({
         return await getESQLSources({ application, http }, getLicense);
       },
       getColumnsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
-        if (queryToExecute) {
-          try {
-            const columns = await getESQLQueryColumns({
-              esqlQuery: queryToExecute,
-              search: data?.search?.search,
-            });
-            return (
-              columns?.map((c) => {
-                return {
-                  name: c.name,
-                  type: c.meta.esType as FieldType,
-                  hasConflict: c.meta.type === KBN_FIELD_TYPES.CONFLICT,
-                  userDefined: false,
-                };
-              }) || []
-            );
-          } catch (error) {
-            // Handle error
-            return [];
-          }
-        }
-        return [];
+        const columns = await getEsqlColumns({
+          query: queryToExecute,
+          search: data?.search?.search,
+        });
+        return columns;
       },
     };
     return callbacks;
