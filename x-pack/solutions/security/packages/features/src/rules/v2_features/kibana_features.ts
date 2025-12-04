@@ -34,6 +34,7 @@ import {
   RULES_FEATURE_ID_V2,
   RULES_UI_EDIT,
   RULES_UI_READ,
+  SECURITY_SOLUTION_RULES_APP_ID,
   SERVER_APP_ID,
   USERS_API_READ,
 } from '../../constants';
@@ -69,7 +70,7 @@ export const getRulesV2BaseKibanaFeature = (
   ),
   order: 1100,
   category: DEFAULT_APP_CATEGORIES.security,
-  app: [RULES_FEATURE_ID_V2, 'kibana'],
+  app: [SECURITY_SOLUTION_RULES_APP_ID, 'kibana'],
   catalogue: [APP_ID],
   alerting: alertingFeatures,
   management: {
@@ -77,7 +78,7 @@ export const getRulesV2BaseKibanaFeature = (
   },
   privileges: {
     all: {
-      app: [RULES_FEATURE_ID_V2, 'kibana'],
+      app: [SECURITY_SOLUTION_RULES_APP_ID, 'kibana'],
       catalogue: [APP_ID],
       savedObject: {
         all: params.savedObjects.filter((so) => so !== EXCEPTION_LIST_NAMESPACE),
@@ -105,7 +106,7 @@ export const getRulesV2BaseKibanaFeature = (
       ],
     },
     read: {
-      app: [RULES_FEATURE_ID_V2, 'kibana'],
+      app: [SECURITY_SOLUTION_RULES_APP_ID, 'kibana'],
       catalogue: [APP_ID],
       savedObject: {
         all: [],

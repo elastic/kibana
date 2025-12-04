@@ -39,6 +39,8 @@ import {
   EXCEPTIONS_API_ALL,
   EXCEPTIONS_API_READ,
   USERS_API_READ,
+  EXCEPTIONS_SUBFEATURE_ID_ALL,
+  EXCEPTIONS_SUBFEATURE_ID_READ,
 } from '../../constants';
 import type { SecurityFeatureParams } from '../types';
 import type { BaseKibanaFeatureConfig } from '../../types';
@@ -106,7 +108,10 @@ export const getSecurityV3BaseKibanaFeature = ({
         ],
         minimal: [
           { feature: SECURITY_FEATURE_ID_V5, privileges: ['minimal_all'] },
-          { feature: RULES_FEATURE_ID_V2, privileges: ['minimal_all'] },
+          {
+            feature: RULES_FEATURE_ID_V2,
+            privileges: ['minimal_all', EXCEPTIONS_SUBFEATURE_ID_ALL],
+          },
         ],
       },
       app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
@@ -147,7 +152,10 @@ export const getSecurityV3BaseKibanaFeature = ({
         ],
         minimal: [
           { feature: SECURITY_FEATURE_ID_V5, privileges: ['minimal_read'] },
-          { feature: RULES_FEATURE_ID_V2, privileges: ['minimal_read'] },
+          {
+            feature: RULES_FEATURE_ID_V2,
+            privileges: ['minimal_read', EXCEPTIONS_SUBFEATURE_ID_READ],
+          },
         ],
       },
       app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],

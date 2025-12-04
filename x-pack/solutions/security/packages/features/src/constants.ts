@@ -46,6 +46,7 @@ export const TIMELINE_FEATURE_ID = 'securitySolutionTimeline' as const;
 export const NOTES_FEATURE_ID = 'securitySolutionNotes' as const;
 export const SIEM_MIGRATIONS_FEATURE_ID = 'securitySolutionSiemMigrations' as const;
 
+export const SECURITY_SOLUTION_RULES_APP_ID = 'securitySolutionRules' as const;
 export const RULES_FEATURE_ID_V1 = 'securitySolutionRulesV1' as const;
 export const RULES_FEATURE_ID_V2 = 'securitySolutionRulesV2' as const;
 
