@@ -95,7 +95,7 @@ export const IntegrationKnowledgeFlyout: React.FunctionComponent<{
           <h2>
             <FormattedMessage
               id="xpack.fleet.integrationKnowledgeFlyout.title"
-              defaultMessage="Integration Knowledge"
+              defaultMessage="Integration knowledge"
             />
           </h2>
         </EuiTitle>
