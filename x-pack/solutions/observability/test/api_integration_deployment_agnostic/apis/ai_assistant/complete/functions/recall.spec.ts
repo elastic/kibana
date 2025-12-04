@@ -95,15 +95,3 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     return body.entries;
   }
 }
-
-function formatScore(score: number) {
-  if (score > 0.5) {
-    return 'high';
-  }
-
-  if (score > 0.1) {
-    return 'medium';
-  }
-
-  return 'low';
-}
