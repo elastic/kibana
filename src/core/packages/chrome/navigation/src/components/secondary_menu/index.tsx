@@ -44,9 +44,7 @@ const SecondaryMenuBase = forwardRef<HTMLDivElement, SecondaryMenuProps>(
 
     const titleStyles = css`
       ${headerStyle}
-      background: ${isPanel
-        ? euiTheme.colors.backgroundBaseSubdued
-        : euiTheme.colors.backgroundBasePlain};
+      background: ${isPanel ? 'transparent' : euiTheme.colors.backgroundBasePlain};
       border-radius: ${euiTheme.border.radius.medium};
     `;
 
