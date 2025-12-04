@@ -21,13 +21,19 @@ import {
   type CallToolParams,
   type CallToolResponse,
   type ClientDetails,
+  type ListToolsResponse,
 } from '@kbn/mcp-client';
 import { StreamableHTTPError } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { UnauthorizedError } from '@modelcontextprotocol/sdk/client/auth.js';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
-import { MCP_CLIENT_VERSION } from '@kbn/connector-schemas/mcp/constants';
+import { MCP_CLIENT_VERSION, MAX_RETRIES } from '@kbn/connector-schemas/mcp/constants';
 import { buildHeadersFromSecrets } from './auth_helpers';
 import { retryWithRecovery, type RetryOptions } from './retry_utils';
+import {
+  MCP_CONNECTOR_TOOLS_SAVED_OBJECT_TYPE,
+  type McpConnectorToolsAttributes,
+} from '../../saved_objects';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 /**
  * MCP Connector for Kibana Stack Connectors.
@@ -96,11 +102,13 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<{ connected: boolean; capabilities?: unknown }> {
     try {
-      connectorUsageCollector.addRequestBodyBytes(undefined, { action: 'test' });
       const result = await this.mcpClient.connect();
 
       if (result.connected) {
         this.logger.info(`MCP connector test successful. Connected: ${result.connected}`);
+        // After successful connection, get tools and save them
+        const toolsResult = await this.mcpClient.listTools();
+        await this.saveTools(toolsResult);
       } else {
         this.logger.warn(
           `MCP connector test completed but connection failed. Connected: ${result.connected}`
@@ -151,7 +159,7 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     }
 
     const retryOptions: RetryOptions = {
-      maxAttempts: 2, // One retry attempt
+      maxAttempts: MAX_RETRIES,
       initialDelayMs: 100,
       isRetryableError: (error) => {
         // Retry on connection-related errors
@@ -183,6 +191,64 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
   }
 
   /**
+   * Saves the tools list to a saved object if it doesn't already exist.
+   * This is called after the first successful connection to persist the tools list.
+   * @param toolsResult - The tools list result from listTools() or connect()
+   */
+  private async saveTools(toolsResult: ListToolsResponse): Promise<void> {
+    try {
+      // Check if tools have already been saved
+      try {
+        await this.savedObjectsClient.get<McpConnectorToolsAttributes>(
+          MCP_CONNECTOR_TOOLS_SAVED_OBJECT_TYPE,
+          this.connector.id
+        );
+        // Tools already saved, skip
+        this.logger.debug(`Tools already saved for connector ${this.connector.id}, skipping save`);
+        return;
+      } catch (error) {
+        // If the saved object doesn't exist, get() will throw a 404 error
+        if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
+          // For other errors, log and continue to try saving
+          this.logger.debug(
+            `Error checking for saved tools: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        }
+        // If it's a 404, continue to save the tools
+      }
+
+      const now = new Date().toISOString();
+
+      // Save the tools to a saved object
+      await this.savedObjectsClient.create<McpConnectorToolsAttributes>(
+        MCP_CONNECTOR_TOOLS_SAVED_OBJECT_TYPE,
+        {
+          connectorId: this.connector.id,
+          tools: toolsResult.tools,
+          createdAt: now,
+          updatedAt: now,
+        },
+        {
+          id: this.connector.id,
+        }
+      );
+
+      this.logger.info(
+        `Saved ${toolsResult.tools.length} tools for MCP connector ${this.connector.id}`
+      );
+    } catch (error) {
+      // Log the error but don't throw - saving tools is not critical for operation
+      this.logger.warn(
+        `Failed to save tools for connector ${this.connector.id}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  }
+
+  /**
    * List all available tools from the MCP server.
    * Automatically connects if not already connected.
    * Handles connection failures with automatic recovery.
@@ -202,6 +268,8 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
 
       const result = await this.mcpClient.listTools();
       this.logger.debug(`Listed ${result.tools.length} tools from MCP server`);
+      // Save tools to a saved object
+      await this.saveTools(result);
       return result;
     } catch (error) {
       // On error, ensure connection state is cleaned up

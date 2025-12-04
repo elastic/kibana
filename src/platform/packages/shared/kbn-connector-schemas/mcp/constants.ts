@@ -24,3 +24,5 @@ export const DEFAULT_INACTIVITY_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
  * MCP client version used by the connector.
  */
 export const MCP_CLIENT_VERSION = '1.0.0';
+
+export const MAX_RETRIES = 3; // Three total retries (1 initial attempt + 2 retries)
