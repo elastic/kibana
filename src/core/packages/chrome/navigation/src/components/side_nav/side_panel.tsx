@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { layoutVar } from '@kbn/core-chrome-layout-constants';
 
 import type { MenuItem } from '../../../types';
 import { SIDE_PANEL_WIDTH } from '../../hooks/use_layout_width';
@@ -33,6 +34,8 @@ const getWrapperStyles = (theme: UseEuiTheme['euiTheme']) => css`
   flex-direction: column;
   width: ${SIDE_PANEL_WIDTH}px;
   border-left: ${theme.border.width.thin} solid ${theme.colors.borderBaseSubdued};
+
+  margin-bottom: ${layoutVar('sidebar.marginBottom', '0px')};
 `;
 
 export interface SidePanelIds {

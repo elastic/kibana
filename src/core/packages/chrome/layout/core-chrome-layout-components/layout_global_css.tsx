@@ -80,6 +80,7 @@ export const LayoutGlobalCSS = () => {
       100vh - ${layoutVar('sidebar.top')} - ${layoutVar('sidebar.bottom')}
     );
     ${layoutVarName('sidebar.width')}: ${sidebarWidth}px;
+    ${layoutVarName('sidebar.marginBottom')}: ${applicationMarginBottom}px;
   `;
 
   const application = css`
