@@ -15,7 +15,10 @@ import {
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { decodeRequestVersion } from '@kbn/core-saved-objects-base-server-internal';
-import type { SavedObjectsCreateOptions } from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObjectAccessControl,
+  SavedObjectsCreateOptions,
+} from '@kbn/core-saved-objects-api-server';
 import type { CreateRequest } from '@elastic/elasticsearch/lib/api/types';
 import { type IndexRequest } from '@elastic/elasticsearch/lib/api/types';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
@@ -106,26 +109,27 @@ export const performCreate = async <T>(
 
   const accessMode = options.accessControl?.accessMode;
   const typeSupportsAccessControl = registry.supportsAccessControl(type);
+  let accessControlToWrite: SavedObjectAccessControl | undefined;
+  if (securityExtension) {
+    if (!typeSupportsAccessControl && accessMode) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        `Cannot create a saved object of type ${type} with an access mode because the type does not support access control`
+      );
+    }
 
-  if (!typeSupportsAccessControl && accessMode) {
-    throw SavedObjectsErrorHelpers.createBadRequestError(
-      `Cannot create a saved object of type ${type} with an access mode because the type does not support access control`
-    );
+    if (!createdBy && accessMode) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        `Cannot create a saved object of type ${type} with an access mode because Kibana could not determine the user profile ID for the caller. Access control requires an identifiable user profile`
+      );
+    }
+    accessControlToWrite =
+      preflightResult?.existingDocument?._source?.accessControl ??
+      setAccessControl({
+        typeSupportsAccessControl,
+        createdBy,
+        accessMode,
+      });
   }
-
-  if (!createdBy && accessMode) {
-    throw SavedObjectsErrorHelpers.createBadRequestError(
-      `Cannot create a saved object of type ${type} with an access mode because Kibana could not determine the user profile ID for the caller. Access control requires an identifiable user profile`
-    );
-  }
-
-  const accessControlToWrite =
-    preflightResult?.existingDocument?._source?.accessControl ??
-    setAccessControl({
-      typeSupportsAccessControl,
-      createdBy,
-      accessMode,
-    });
 
   const authorizationResult = await securityExtension?.authorizeCreate({
     namespace,

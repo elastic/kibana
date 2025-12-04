@@ -194,10 +194,11 @@ export const performBulkUpdate = async <T>(
       attributes: documentToSave[type] as SavedObject<T>,
     });
 
-    const accessControl = registry.supportsAccessControl(type)
-      ? // @ts-expect-error MultiGetHit._source is optional
-        preflightResult._source?.accessControl
-      : undefined;
+    const accessControl =
+      registry.supportsAccessControl(type) && securityExtension
+        ? // @ts-expect-error MultiGetHit._source is optional
+          preflightResult._source?.accessControl
+        : undefined;
 
     if (registry.isMultiNamespace(type)) {
       return {

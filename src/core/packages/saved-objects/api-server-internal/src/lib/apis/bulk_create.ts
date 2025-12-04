@@ -117,43 +117,45 @@ export const performBulkCreate = async <T>(
     const typeSupportsAccessControl = registry.supportsAccessControl(type);
     const paramsIncludeAccessControl =
       !!object.accessControl?.accessMode || !!options.accessControl?.accessMode;
+    let accessControlToWrite: SavedObjectAccessControl | undefined;
+    if (securityExtension) {
+      if (!typeSupportsAccessControl && paramsIncludeAccessControl) {
+        return left({
+          id,
+          type,
+          error: {
+            ...errorContent(
+              SavedObjectsErrorHelpers.createBadRequestError(
+                `Cannot create a saved object of type ${type} with an access mode because the type does not support access control`
+              )
+            ),
+          },
+        });
+      }
 
-    if (!typeSupportsAccessControl && paramsIncludeAccessControl) {
-      return left({
-        id,
-        type,
-        error: {
-          ...errorContent(
-            SavedObjectsErrorHelpers.createBadRequestError(
-              `Cannot create a saved object of type ${type} with an access mode because the type does not support access control`
-            )
-          ),
-        },
+      if (!createdBy && typeSupportsAccessControl && paramsIncludeAccessControl) {
+        return left({
+          id,
+          type,
+          error: {
+            ...errorContent(
+              SavedObjectsErrorHelpers.createBadRequestError(
+                `Cannot create a saved object of type ${type} with an access mode because Kibana could not determine the user profile ID for the caller. Access control requires an identifiable user profile`
+              )
+            ),
+          },
+        });
+      }
+
+      const accessMode =
+        object.accessControl?.accessMode ?? options.accessControl?.accessMode ?? 'default';
+
+      accessControlToWrite = setAccessControl({
+        typeSupportsAccessControl,
+        createdBy,
+        accessMode,
       });
     }
-
-    if (!createdBy && typeSupportsAccessControl && paramsIncludeAccessControl) {
-      return left({
-        id,
-        type,
-        error: {
-          ...errorContent(
-            SavedObjectsErrorHelpers.createBadRequestError(
-              `Cannot create a saved object of type ${type} with an access mode because Kibana could not determine the user profile ID for the caller. Access control requires an identifiable user profile`
-            )
-          ),
-        },
-      });
-    }
-
-    const accessMode =
-      object.accessControl?.accessMode ?? options.accessControl?.accessMode ?? 'default';
-
-    const accessControlToWrite = setAccessControl({
-      typeSupportsAccessControl,
-      createdBy,
-      accessMode,
-    });
 
     return right({
       method,
