@@ -12,12 +12,12 @@ import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from './constants';
 
 apiTest.describe('/internal/transform/reauthorize_transforms', { tag: tags.ESS_ONLY }, () => {
-  let transformAdminApiCredentials: RoleApiCredentials;
-  let transformUserApiCredentials: RoleApiCredentials;
+  let transformPowerUserApiCredentials: RoleApiCredentials;
+  let transformViewerUserApiCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth, kbnClient }) => {
-    transformAdminApiCredentials = await requestAuth.loginAsTransformAdminUser();
-    transformUserApiCredentials = await requestAuth.loginAsTransformUser();
+    transformPowerUserApiCredentials = await requestAuth.loginAsTransformPowerUser();
+    transformViewerUserApiCredentials = await requestAuth.loginAsTransformViewerUser();
     // TODO: Implement test setup
     // 2. Set Kibana timezone to UTC
     // 3. Create transform roles and users

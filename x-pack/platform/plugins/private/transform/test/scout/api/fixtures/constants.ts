@@ -26,18 +26,8 @@ export function getCommonHeaders(additionalHeaders: Record<string, string> = {})
   };
 }
 
-/**
- * Transform-specific role definitions
- * Based on the built-in transform_admin and transform_user roles
- */
-export const TRANSFORM_ROLES = {
-  /**
-   * Transform Admin role with full transform management capabilities
-   * - Can create, update, delete, and manage transforms
-   * - Has access to source and destination indices
-   * - Cluster privilege: manage_transform
-   */
-  transformAdmin: {
+export const TRANSFORM_USERS = {
+  transformPowerUser: {
     kibana: [
       {
         base: [],
@@ -49,12 +39,12 @@ export const TRANSFORM_ROLES = {
       },
     ],
     elasticsearch: {
-      cluster: ['manage_transform'],
+      cluster: ['manage_transform', 'monitor', 'read_pipeline'],
       indices: [
         // Source index privileges
-        { names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] },
+        { names: ['*'], privileges: ['read', 'view_index_metadata'] },
         // Destination index privileges
-        { names: ['df-*'], privileges: ['index', 'create_index'] },
+        { names: ['user-*'], privileges: ['read', 'index', 'manage', 'delete'] },
         // Transform notifications indices
         {
           names: [
@@ -75,7 +65,7 @@ export const TRANSFORM_ROLES = {
    * - Cluster privilege: monitor_transform
    * - Cannot create or modify transforms
    */
-  transformUser: {
+  transformViewerUser: {
     kibana: [
       {
         base: [],

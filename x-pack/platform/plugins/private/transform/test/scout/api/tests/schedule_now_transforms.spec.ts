@@ -13,12 +13,12 @@ import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from './constants';
 
 apiTest.describe('/internal/transform/schedule_now_transforms', { tag: tags.ESS_ONLY }, () => {
-  let transformAdminApiCredentials: RoleApiCredentials;
-  let transformUserApiCredentials: RoleApiCredentials;
+  let transformPowerUserApiCredentials: RoleApiCredentials;
+  let transformViewerUserApiCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth }) => {
-    transformAdminApiCredentials = await requestAuth.loginAsTransformAdminUser();
-    transformUserApiCredentials = await requestAuth.loginAsTransformUser();
+    transformPowerUserApiCredentials = await requestAuth.loginAsTransformPowerUser();
+    transformViewerUserApiCredentials = await requestAuth.loginAsTransformViewerUser();
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
@@ -45,7 +45,7 @@ apiTest.describe('/internal/transform/schedule_now_transforms', { tag: tags.ESS_
         {
           headers: {
             ...COMMON_HEADERS,
-            ...transformAdminApiCredentials.apiKeyHeader,
+            ...transformPowerUserApiCredentials.apiKeyHeader,
           },
           body: reqBody,
           responseType: 'json',
@@ -64,7 +64,7 @@ apiTest.describe('/internal/transform/schedule_now_transforms', { tag: tags.ESS_
         {
           headers: {
             ...COMMON_HEADERS,
-            ...transformUserApiCredentials.apiKeyHeader,
+            ...transformViewerUserApiCredentials.apiKeyHeader,
           },
           body: reqBody,
           responseType: 'json',
@@ -87,7 +87,7 @@ apiTest.describe('/internal/transform/schedule_now_transforms', { tag: tags.ESS_
           {
             headers: {
               ...COMMON_HEADERS,
-              ...transformAdminApiCredentials.apiKeyHeader,
+              ...transformPowerUserApiCredentials.apiKeyHeader,
             },
             body: reqBody,
             responseType: 'json',
@@ -123,7 +123,7 @@ apiTest.describe('/internal/transform/schedule_now_transforms', { tag: tags.ESS_
         {
           headers: {
             ...COMMON_HEADERS,
-            ...transformAdminApiCredentials.apiKeyHeader,
+            ...transformPowerUserApiCredentials.apiKeyHeader,
           },
           body: reqBody,
           responseType: 'json',
@@ -150,7 +150,7 @@ apiTest.describe('/internal/transform/schedule_now_transforms', { tag: tags.ESS_
           {
             headers: {
               ...COMMON_HEADERS,
-              ...transformAdminApiCredentials.apiKeyHeader,
+              ...transformPowerUserApiCredentials.apiKeyHeader,
             },
             body: reqBody,
             responseType: 'json',

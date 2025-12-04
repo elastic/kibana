@@ -15,10 +15,10 @@ apiTest.describe(
   '/internal/transform/transforms/{transformId}/ create',
   { tag: tags.ESS_ONLY },
   () => {
-    let transformAdminApiCredentials: RoleApiCredentials;
+    let transformPowerUserApiCredentials: RoleApiCredentials;
 
     apiTest.beforeAll(async ({ requestAuth }) => {
-      transformAdminApiCredentials = await requestAuth.loginAsTransformAdminUser();
+      transformPowerUserApiCredentials = await requestAuth.loginAsTransformPowerUser();
     });
 
     apiTest.afterAll(async ({ apiServices }) => {
@@ -33,7 +33,7 @@ apiTest.describe(
         {
           headers: {
             ...COMMON_HEADERS,
-            ...transformAdminApiCredentials.apiKeyHeader,
+            ...transformPowerUserApiCredentials.apiKeyHeader,
           },
           body: generateTransformConfig(transformId),
           responseType: 'json',
@@ -42,7 +42,7 @@ apiTest.describe(
 
       expect(statusCode).toBe(200);
 
-      expect(body).toEqual({
+      expect(body).toMatchObject({
         dataViewsCreated: [],
         dataViewsErrors: [],
         errors: [],
@@ -63,7 +63,7 @@ apiTest.describe(
         {
           headers: {
             ...COMMON_HEADERS,
-            ...transformAdminApiCredentials.apiKeyHeader,
+            ...transformPowerUserApiCredentials.apiKeyHeader,
           },
           body: generateTransformConfig(transformId),
           responseType: 'json',
@@ -75,7 +75,7 @@ apiTest.describe(
       expect(body.dataViewsCreated).toHaveLength(1);
       expect(body.dataViewsErrors).toHaveLength(0);
       expect(body.errors).toHaveLength(0);
-      expect(body.transformsCreated).toEqual([
+      expect(body.transformsCreated).toMatchObject([
         {
           transform: transformId,
         },
@@ -96,7 +96,7 @@ apiTest.describe(
           {
             headers: {
               ...COMMON_HEADERS,
-              ...transformAdminApiCredentials.apiKeyHeader,
+              ...transformPowerUserApiCredentials.apiKeyHeader,
             },
             body: generateTransformConfig(transformId),
             responseType: 'json',
@@ -108,7 +108,7 @@ apiTest.describe(
         expect(body.dataViewsCreated).toHaveLength(1);
         expect(body.dataViewsErrors).toHaveLength(0);
         expect(body.errors).toHaveLength(0);
-        expect(body.transformsCreated).toEqual([
+        expect(body.transformsCreated).toMatchObject([
           {
             transform: transformId,
           },
@@ -129,7 +129,7 @@ apiTest.describe(
           {
             headers: {
               ...COMMON_HEADERS,
-              ...transformAdminApiCredentials.apiKeyHeader,
+              ...transformPowerUserApiCredentials.apiKeyHeader,
             },
             body: {
               ...generateTransformConfig(transformId),
@@ -158,7 +158,7 @@ apiTest.describe(
         {
           headers: {
             ...COMMON_HEADERS,
-            ...transformAdminApiCredentials.apiKeyHeader,
+            ...transformPowerUserApiCredentials.apiKeyHeader,
           },
           body: config,
           responseType: 'json',

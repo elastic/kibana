@@ -65,7 +65,7 @@ export function getTransformApiService(
           transform_id: transformId,
         });
       } catch (error) {
-        // Ignore errors if transform doesn't exist
+        throw new Error(`Failed to delete transform ${transformId}: ${error}`);
       }
     },
 
@@ -104,8 +104,8 @@ export function getTransformApiService(
             ignore_unavailable: true,
           });
         }
-      } catch {
-        // Ignore errors if no notification indices exist
+      } catch (error) {
+        throw new Error(`Failed to delete transform notification indices: ${error}`);
       }
     },
 
@@ -126,8 +126,8 @@ export function getTransformApiService(
             path: `/api/data_views/data_view/${dataView.id}`,
           });
         }
-      } catch {
-        // Ignore errors if data view doesn't exist
+      } catch (error) {
+        throw new Error(`Failed to delete data view with title ${title}: ${error}`);
       }
     },
   };

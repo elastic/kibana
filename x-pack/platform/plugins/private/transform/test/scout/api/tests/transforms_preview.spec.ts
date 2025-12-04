@@ -19,27 +19,12 @@ function getTransformPreviewConfig(): PostTransformsPreviewRequestSchema {
 }
 
 apiTest.describe('/internal/transform/transforms/_preview', { tag: tags.ESS_ONLY }, () => {
-  let transformAdminApiCredentials: RoleApiCredentials;
-  let transformUserApiCredentials: RoleApiCredentials;
+  let transformPowerUserApiCredentials: RoleApiCredentials;
+  let transformViewerUserApiCredentials: RoleApiCredentials;
 
-  apiTest.beforeAll(async ({ requestAuth, esClient }) => {
-    transformAdminApiCredentials = await requestAuth.loginAsTransformAdminUser();
-    transformUserApiCredentials = await requestAuth.loginAsTransformUser();
-
-    // Wait for ft_farequote index to exist
-    let retries = 30;
-    while (retries > 0) {
-      try {
-        await esClient.indices.get({ index: 'ft_farequote' });
-        break;
-      } catch {
-        retries--;
-        if (retries === 0) {
-          throw new Error('ft_farequote index was not created after waiting');
-        }
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-      }
-    }
+  apiTest.beforeAll(async ({ requestAuth }) => {
+    transformPowerUserApiCredentials = await requestAuth.loginAsTransformPowerUser();
+    transformViewerUserApiCredentials = await requestAuth.loginAsTransformViewerUser();
   });
 
   apiTest.afterAll(async () => {});
@@ -48,7 +33,7 @@ apiTest.describe('/internal/transform/transforms/_preview', { tag: tags.ESS_ONLY
     const { statusCode, body } = await apiClient.post('internal/transform/transforms/_preview', {
       headers: {
         ...COMMON_HEADERS,
-        ...transformAdminApiCredentials.apiKeyHeader,
+        ...transformPowerUserApiCredentials.apiKeyHeader,
       },
       body: getTransformPreviewConfig(),
       responseType: 'json',
@@ -64,7 +49,7 @@ apiTest.describe('/internal/transform/transforms/_preview', { tag: tags.ESS_ONLY
     const { statusCode, body } = await apiClient.post('internal/transform/transforms/_preview', {
       headers: {
         ...COMMON_HEADERS,
-        ...transformAdminApiCredentials.apiKeyHeader,
+        ...transformPowerUserApiCredentials.apiKeyHeader,
       },
       body: {
         ...getTransformPreviewConfig(),
@@ -87,7 +72,7 @@ apiTest.describe('/internal/transform/transforms/_preview', { tag: tags.ESS_ONLY
     const { statusCode } = await apiClient.post('internal/transform/transforms/_preview', {
       headers: {
         ...COMMON_HEADERS,
-        ...transformUserApiCredentials.apiKeyHeader,
+        ...transformViewerUserApiCredentials.apiKeyHeader,
       },
       body: getTransformPreviewConfig(),
       responseType: 'json',

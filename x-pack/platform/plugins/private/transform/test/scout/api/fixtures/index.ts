@@ -14,7 +14,7 @@ import type {
 } from '@kbn/scout';
 import type { TransformApiService } from '../services/transform_api_service';
 import { getTransformApiService } from '../services/transform_api_service';
-import { TRANSFORM_ROLES } from './constants';
+import { TRANSFORM_USERS } from './constants';
 
 /**
  * Extended RequestAuth fixture with Transform-specific helper methods
@@ -33,20 +33,20 @@ export interface TransformRequestAuthFixture {
   ) => Promise<RoleApiCredentials>;
 
   /**
-   * Get API credentials for Transform Admin role
+   * Get API credentials for Transform Poweruser role
    * - Full transform management capabilities (create, update, delete)
    * - Access to source and destination indices
    * - Cluster privilege: manage_transform
    */
-  loginAsTransformAdminUser: () => Promise<RoleApiCredentials>;
+  loginAsTransformPowerUser: () => Promise<RoleApiCredentials>;
 
   /**
-   * Get API credentials for Transform User role
+   * Get API credentials for Transform Viewer User role
    * - Read-only transform capabilities (view, monitor)
    * - Access to source indices only
    * - Cluster privilege: monitor_transform
    */
-  loginAsTransformUser: () => Promise<RoleApiCredentials>;
+  loginAsTransformViewerUser: () => Promise<RoleApiCredentials>;
 }
 
 /**
@@ -60,8 +60,8 @@ export interface TransformApiServicesFixture extends ApiServicesFixture {
  * Transform API test fixture with extended requestAuth and apiServices
  *
  * This extends the base apiTest with Transform-specific utilities:
- * - requestAuth.loginAsTransformAdminUser(): Get credentials for full transform management
- * - requestAuth.loginAsTransformUser(): Get credentials for read-only transform access
+ * - requestAuth.loginAsTransformPowerUser(): Get credentials for full transform management
+ * - requestAuth.loginAsTransformViewerUser(): Get credentials for read-only transform access
  * - apiServices.transform: Transform API service for setup/teardown operations
  *
  * @example
@@ -69,7 +69,7 @@ export interface TransformApiServicesFixture extends ApiServicesFixture {
  * import { transformApiTest as apiTest } from '../fixtures';
  *
  * apiTest('should get transforms as admin', async ({ requestAuth, apiClient }) => {
- *   const credentials = await requestAuth.loginAsTransformAdminUser();
+ *   const credentials = await requestAuth.loginAsTransformPowerUser();
  *   const response = await apiClient.get('internal/transform/transforms', {
  *     headers: {
  *       ...COMMON_HEADERS,
@@ -85,17 +85,18 @@ export const transformApiTest = apiTest.extend<{
   apiServices: TransformApiServicesFixture;
 }>({
   requestAuth: async ({ requestAuth }, use) => {
-    const loginAsTransformAdminUser = async () =>
-      requestAuth.getApiKeyForCustomRole(TRANSFORM_ROLES.transformAdmin);
+    const loginAsTransformPowerUser = async () =>
+      requestAuth.getApiKeyForCustomRole(TRANSFORM_USERS.transformPowerUser);
 
-    const loginAsTransformUser = async () =>
-      requestAuth.getApiKeyForCustomRole(TRANSFORM_ROLES.transformUser);
+    const loginAsTransformViewerUser = async () =>
+      requestAuth.getApiKeyForCustomRole(TRANSFORM_USERS.transformViewerUser);
 
-    await use({
+    const extendedAuth: TransformRequestAuthFixture = {
       ...requestAuth,
-      loginAsTransformAdminUser,
-      loginAsTransformUser,
-    });
+      loginAsTransformPowerUser,
+      loginAsTransformViewerUser,
+    };
+    await use(extendedAuth);
   },
 
   /**
@@ -108,5 +109,5 @@ export const transformApiTest = apiTest.extend<{
   },
 });
 
-export { TRANSFORM_ROLES } from './constants';
+export { TRANSFORM_USERS } from './constants';
 export { COMMON_API_HEADERS } from './constants';

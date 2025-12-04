@@ -15,12 +15,12 @@ const TRANSFORM_1_ID = 'transform-test-get-1';
 const TRANSFORM_2_ID = 'transform-test-get-2';
 
 apiTest.describe('/internal/transform/transforms', { tag: tags.ESS_ONLY }, () => {
-  let transformAdminApiCredentials: RoleApiCredentials;
-  let transformUserApiCredentials: RoleApiCredentials;
+  let transformPowerUserApiCredentials: RoleApiCredentials;
+  let transformViewerUserApiCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth, apiServices }) => {
-    transformAdminApiCredentials = await requestAuth.loginAsTransformAdminUser();
-    transformUserApiCredentials = await requestAuth.loginAsTransformUser();
+    transformPowerUserApiCredentials = await requestAuth.loginAsTransformPowerUser();
+    transformViewerUserApiCredentials = await requestAuth.loginAsTransformViewerUser();
 
     const config1 = generateTransformConfig(TRANSFORM_1_ID);
     const config2 = generateTransformConfig(TRANSFORM_2_ID);
@@ -38,7 +38,7 @@ apiTest.describe('/internal/transform/transforms', { tag: tags.ESS_ONLY }, () =>
       const { body, statusCode } = await apiClient.get('internal/transform/transforms', {
         headers: {
           ...COMMON_HEADERS,
-          ...transformAdminApiCredentials.apiKeyHeader,
+          ...transformPowerUserApiCredentials.apiKeyHeader,
         },
         responseType: 'json',
       });
@@ -69,7 +69,7 @@ apiTest.describe('/internal/transform/transforms', { tag: tags.ESS_ONLY }, () =>
       const { body, statusCode } = await apiClient.get('internal/transform/transforms', {
         headers: {
           ...COMMON_HEADERS,
-          ...transformUserApiCredentials.apiKeyHeader,
+          ...transformViewerUserApiCredentials.apiKeyHeader,
         },
         responseType: 'json',
       });
@@ -96,7 +96,7 @@ apiTest.describe('/internal/transform/transforms', { tag: tags.ESS_ONLY }, () =>
           {
             headers: {
               ...COMMON_HEADERS,
-              ...transformAdminApiCredentials.apiKeyHeader,
+              ...transformPowerUserApiCredentials.apiKeyHeader,
             },
             responseType: 'json',
           }
@@ -123,7 +123,7 @@ apiTest.describe('/internal/transform/transforms', { tag: tags.ESS_ONLY }, () =>
           {
             headers: {
               ...COMMON_HEADERS,
-              ...transformUserApiCredentials.apiKeyHeader,
+              ...transformViewerUserApiCredentials.apiKeyHeader,
             },
             responseType: 'json',
           }
@@ -146,7 +146,7 @@ apiTest.describe('/internal/transform/transforms', { tag: tags.ESS_ONLY }, () =>
         {
           headers: {
             ...COMMON_HEADERS,
-            ...transformUserApiCredentials.apiKeyHeader,
+            ...transformViewerUserApiCredentials.apiKeyHeader,
           },
           responseType: 'json',
         }

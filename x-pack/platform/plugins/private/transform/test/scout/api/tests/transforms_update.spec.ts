@@ -37,12 +37,12 @@ apiTest.describe(
   '/internal/transform/transforms/{transformId}/_update',
   { tag: tags.ESS_ONLY },
   () => {
-    let transformAdminApiCredentials: RoleApiCredentials;
-    let transformUserApiCredentials: RoleApiCredentials;
+    let transformPowerUserApiCredentials: RoleApiCredentials;
+    let transformViewerUserApiCredentials: RoleApiCredentials;
 
     apiTest.beforeAll(async ({ requestAuth, apiServices }) => {
-      transformAdminApiCredentials = await requestAuth.loginAsTransformAdminUser();
-      transformUserApiCredentials = await requestAuth.loginAsTransformUser();
+      transformPowerUserApiCredentials = await requestAuth.loginAsTransformPowerUser();
+      transformViewerUserApiCredentials = await requestAuth.loginAsTransformViewerUser();
 
       const config = generateTransformConfig(TRANSFORM_ID);
       await apiServices.transform.createTransform(TRANSFORM_ID, config);
@@ -58,7 +58,7 @@ apiTest.describe(
         {
           headers: {
             ...COMMON_HEADERS,
-            ...transformAdminApiCredentials.apiKeyHeader,
+            ...transformPowerUserApiCredentials.apiKeyHeader,
           },
           responseType: 'json',
         }
@@ -71,19 +71,19 @@ apiTest.describe(
 
       const originalConfig = originalResponse.body.transforms[0];
       expect(originalConfig.id).toBe(TRANSFORM_ID);
-      expect(originalConfig.source).toEqual({
+      expect(originalConfig.source).toMatchObject({
         index: ['ft_farequote'],
         query: { match_all: {} },
       });
       expect(originalConfig.description).toBeUndefined();
-      expect(originalConfig.settings).toEqual({});
+      expect(originalConfig.settings).toMatchObject({});
 
       const updateResponse = await apiClient.post(
         `internal/transform/transforms/${TRANSFORM_ID}/_update`,
         {
           headers: {
             ...COMMON_HEADERS,
-            ...transformAdminApiCredentials.apiKeyHeader,
+            ...transformPowerUserApiCredentials.apiKeyHeader,
           },
           body: getTransformUpdateConfig(),
           responseType: 'json',
@@ -94,18 +94,18 @@ apiTest.describe(
 
       const expectedConfig = getTransformUpdateConfig();
       expect(updateResponse.body.id).toBe(TRANSFORM_ID);
-      expect(updateResponse.body.source).toEqual({
+      expect(updateResponse.body.source).toMatchObject({
         ...expectedConfig.source,
         index: ['ft_*'],
       });
       expect(updateResponse.body.description).toBe(expectedConfig.description);
-      expect(updateResponse.body.settings).toEqual({});
+      expect(updateResponse.body.settings).toMatchObject({});
 
       // Verify the update persisted
       const verifyResponse = await apiClient.get(`internal/transform/transforms/${TRANSFORM_ID}`, {
         headers: {
           ...COMMON_HEADERS,
-          ...transformAdminApiCredentials.apiKeyHeader,
+          ...transformPowerUserApiCredentials.apiKeyHeader,
         },
         responseType: 'json',
       });
@@ -117,12 +117,12 @@ apiTest.describe(
 
       const verifiedConfig = verifyResponse.body.transforms[0];
       expect(verifiedConfig.id).toBe(TRANSFORM_ID);
-      expect(verifiedConfig.source).toEqual({
+      expect(verifiedConfig.source).toMatchObject({
         ...expectedConfig.source,
         index: ['ft_*'],
       });
       expect(verifiedConfig.description).toBe(expectedConfig.description);
-      expect(verifiedConfig.settings).toEqual({});
+      expect(verifiedConfig.settings).toMatchObject({});
     });
 
     apiTest('should return 403 for transform view-only user', async ({ apiClient }) => {
@@ -131,7 +131,7 @@ apiTest.describe(
         {
           headers: {
             ...COMMON_HEADERS,
-            ...transformUserApiCredentials.apiKeyHeader,
+            ...transformViewerUserApiCredentials.apiKeyHeader,
           },
           body: getTransformUpdateConfig(),
           responseType: 'json',

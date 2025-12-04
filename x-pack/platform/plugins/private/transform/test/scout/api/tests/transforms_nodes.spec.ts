@@ -7,18 +7,17 @@
 
 import { expect, tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
-import type { GetTransformNodesResponseSchema } from '../../../../server/routes/api_schemas/transforms';
 import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from './constants';
 
 apiTest.describe('/internal/transform/transforms/_nodes', { tag: tags.ESS_ONLY }, () => {
-  let transformAdminApiCredentials: RoleApiCredentials;
-  let transformUserApiCredentials: RoleApiCredentials;
+  let transformPowerUserApiCredentials: RoleApiCredentials;
+  let transformViewerUserApiCredentials: RoleApiCredentials;
   let unauthorizedApiCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth }) => {
-    transformAdminApiCredentials = await requestAuth.loginAsTransformAdminUser();
-    transformUserApiCredentials = await requestAuth.loginAsTransformUser();
+    transformPowerUserApiCredentials = await requestAuth.loginAsTransformPowerUser();
+    transformViewerUserApiCredentials = await requestAuth.loginAsTransformViewerUser();
     unauthorizedApiCredentials = await requestAuth.getApiKeyForCustomRole({
       kibana: [
         {
@@ -34,15 +33,13 @@ apiTest.describe('/internal/transform/transforms/_nodes', { tag: tags.ESS_ONLY }
     });
   });
 
-  apiTest.afterAll(async () => {});
-
   apiTest(
     'should return the number of available transform nodes for a power user',
     async ({ apiClient }) => {
       const { statusCode, body } = await apiClient.get('internal/transform/transforms/_nodes', {
         headers: {
           ...COMMON_HEADERS,
-          ...transformAdminApiCredentials.apiKeyHeader,
+          ...transformPowerUserApiCredentials.apiKeyHeader,
         },
         responseType: 'json',
       });
@@ -59,7 +56,7 @@ apiTest.describe('/internal/transform/transforms/_nodes', { tag: tags.ESS_ONLY }
       const { statusCode, body } = await apiClient.get('internal/transform/transforms/_nodes', {
         headers: {
           ...COMMON_HEADERS,
-          ...transformUserApiCredentials.apiKeyHeader,
+          ...transformViewerUserApiCredentials.apiKeyHeader,
         },
         responseType: 'json',
       });

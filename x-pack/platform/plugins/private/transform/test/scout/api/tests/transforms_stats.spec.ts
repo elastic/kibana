@@ -10,21 +10,28 @@ import type { RoleApiCredentials } from '@kbn/scout';
 import { TRANSFORM_STATE } from '../../../../common/constants';
 import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from './constants';
+import { generateTransformConfig } from '../helpers/transform_config';
 
 const TRANSFORM_1_ID = 'transform-test-stats-1';
 const TRANSFORM_2_ID = 'transform-test-stats-2';
 
 apiTest.describe('/internal/transform/transforms/_stats', { tag: tags.ESS_ONLY }, () => {
-  let transformAdminApiCredentials: RoleApiCredentials;
-  let transformUserApiCredentials: RoleApiCredentials;
+  let transformPowerUserApiCredentials: RoleApiCredentials;
+  let transformViewerUserApiCredentials: RoleApiCredentials;
 
-  apiTest.beforeAll(async ({ requestAuth }) => {
-    transformAdminApiCredentials = await requestAuth.loginAsTransformAdminUser();
-    transformUserApiCredentials = await requestAuth.loginAsTransformUser();
+  apiTest.beforeAll(async ({ requestAuth, apiServices }) => {
+    transformPowerUserApiCredentials = await requestAuth.loginAsTransformPowerUser();
+    transformViewerUserApiCredentials = await requestAuth.loginAsTransformViewerUser();
+
+    const config1 = generateTransformConfig(TRANSFORM_1_ID);
+    const config2 = generateTransformConfig(TRANSFORM_2_ID);
+
+    await apiServices.transform.createTransform(TRANSFORM_1_ID, config1);
+    await apiServices.transform.createTransform(TRANSFORM_2_ID, config2);
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
-    // await apiServices.transform.cleanTransformIndices();
+    await apiServices.transform.cleanTransformIndices();
   });
 
   apiTest(
@@ -33,11 +40,12 @@ apiTest.describe('/internal/transform/transforms/_stats', { tag: tags.ESS_ONLY }
       const { statusCode, body } = await apiClient.get('internal/transform/transforms/_stats', {
         headers: {
           ...COMMON_HEADERS,
-          ...transformAdminApiCredentials.apiKeyHeader,
+          ...transformPowerUserApiCredentials.apiKeyHeader,
         },
         responseType: 'json',
       });
 
+      console.log('Response body:', JSON.stringify(body, null, 2));
       expect(statusCode).toBe(200);
 
       expect(body.count).toBe(2);
@@ -69,7 +77,7 @@ apiTest.describe('/internal/transform/transforms/_stats', { tag: tags.ESS_ONLY }
         {
           headers: {
             ...COMMON_HEADERS,
-            ...transformAdminApiCredentials.apiKeyHeader,
+            ...transformPowerUserApiCredentials.apiKeyHeader,
           },
           responseType: 'json',
         }
@@ -94,7 +102,7 @@ apiTest.describe('/internal/transform/transforms/_stats', { tag: tags.ESS_ONLY }
       const { statusCode, body } = await apiClient.get('internal/transform/transforms/_stats', {
         headers: {
           ...COMMON_HEADERS,
-          ...transformUserApiCredentials.apiKeyHeader,
+          ...transformViewerUserApiCredentials.apiKeyHeader,
         },
         responseType: 'json',
       });
@@ -122,7 +130,7 @@ apiTest.describe('/internal/transform/transforms/_stats', { tag: tags.ESS_ONLY }
         {
           headers: {
             ...COMMON_HEADERS,
-            ...transformUserApiCredentials.apiKeyHeader,
+            ...transformViewerUserApiCredentials.apiKeyHeader,
           },
           responseType: 'json',
         }
