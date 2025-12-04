@@ -531,35 +531,43 @@ export class AlertsService implements IAlertsService {
 
   private async _updateMuteState({
     muted,
-    ruleId,
-    alertInstanceId,
+    targets,
     indices,
     logger,
   }: {
     muted: boolean;
-    ruleId: string;
-    alertInstanceId?: string;
+    targets: Array<{ ruleId: string; alertInstanceId?: string }>;
     indices: string[];
     logger: Logger;
   }) {
     if (!indices || indices.length === 0) {
       throw new Error(
-        `Unable to update mute state for rule ${ruleId} - no alert indices available`
+        `Unable to update mute state for rules (example: ${JSON.stringify(
+          targets[0]
+        )}) - no alert indices available`
       );
+    }
+    if (targets.length === 0) {
+      return;
     }
 
     const esClient = await this.options.elasticsearchClientPromise;
 
-    const mustClauses: QueryDslQueryContainer[] = [
-      { term: { [ALERT_RULE_UUID]: ruleId } },
-      { term: { [ALERT_STATUS]: ALERT_STATUS_ACTIVE } },
-    ];
+    const shouldClauses: QueryDslQueryContainer[] = targets.map((target) => {
+      const must: QueryDslQueryContainer[] = [{ term: { [ALERT_RULE_UUID]: target.ruleId } }];
+      if (target.alertInstanceId) {
+        must.push({ term: { [ALERT_INSTANCE_ID]: target.alertInstanceId } });
+      }
+      return { bool: { must } };
+    });
 
-    if (alertInstanceId) {
-      mustClauses.push({ term: { [ALERT_INSTANCE_ID]: alertInstanceId } });
-    }
-
-    const query = { bool: { must: mustClauses } };
+    const query: QueryDslQueryContainer = {
+      bool: {
+        must: [{ term: { [ALERT_STATUS]: ALERT_STATUS_ACTIVE } }],
+        should: shouldClauses,
+        minimum_should_match: 1,
+      },
+    };
 
     try {
       await esClient.updateByQuery({
@@ -577,7 +585,9 @@ export class AlertsService implements IAlertsService {
       });
     } catch (error) {
       logger.error(
-        `Error updating muted field to ${muted} for rule ID ${ruleId} and alert instance ID ${alertInstanceId} - ${error.message}`
+        `Error updating muted field to ${muted} for ${
+          targets.length
+        } targets (example: ${JSON.stringify(targets[0])}) - ${error.message}`
       );
       throw error;
     }
@@ -596,8 +606,7 @@ export class AlertsService implements IAlertsService {
   }) {
     return this._updateMuteState({
       muted: true,
-      ruleId,
-      alertInstanceId,
+      targets: [{ ruleId, alertInstanceId }],
       indices,
       logger,
     });
@@ -616,8 +625,7 @@ export class AlertsService implements IAlertsService {
   }) {
     return this._updateMuteState({
       muted: false,
-      ruleId,
-      alertInstanceId,
+      targets: [{ ruleId, alertInstanceId }],
       indices,
       logger,
     });
@@ -634,7 +642,7 @@ export class AlertsService implements IAlertsService {
   }) {
     return this._updateMuteState({
       muted: true,
-      ruleId,
+      targets: [{ ruleId }],
       indices,
       logger,
     });
@@ -651,7 +659,7 @@ export class AlertsService implements IAlertsService {
   }) {
     return this._updateMuteState({
       muted: false,
-      ruleId,
+      targets: [{ ruleId }],
       indices,
       logger,
     });

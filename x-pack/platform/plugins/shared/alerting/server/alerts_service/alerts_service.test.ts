@@ -2621,7 +2621,7 @@ describe('Alerts Service', () => {
               logger,
             })
           ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Unable to update mute state for rule rule-1 - no alert indices available"`
+            `"Unable to update mute state for rules (example: {\\"ruleId\\":\\"rule-1\\",\\"alertInstanceId\\":\\"alert-1\\"}) - no alert indices available"`
           );
         });
 
@@ -2651,10 +2651,17 @@ describe('Alerts Service', () => {
             ignore_unavailable: true,
             query: {
               bool: {
-                must: [
-                  { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
-                  { term: { 'kibana.alert.status': 'active' } },
-                  { term: { 'kibana.alert.instance.id': 'alert-1' } },
+                minimum_should_match: 1,
+                must: [{ term: { 'kibana.alert.status': 'active' } }],
+                should: [
+                  {
+                    bool: {
+                      must: [
+                        { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
+                        { term: { 'kibana.alert.instance.id': 'alert-1' } },
+                      ],
+                    },
+                  },
                 ],
               },
             },
@@ -2709,7 +2716,7 @@ describe('Alerts Service', () => {
               logger,
             })
           ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Unable to update mute state for rule rule-1 - no alert indices available"`
+            `"Unable to update mute state for rules (example: {\\"ruleId\\":\\"rule-1\\",\\"alertInstanceId\\":\\"alert-1\\"}) - no alert indices available"`
           );
         });
 
@@ -2739,10 +2746,17 @@ describe('Alerts Service', () => {
             ignore_unavailable: true,
             query: {
               bool: {
-                must: [
-                  { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
-                  { term: { 'kibana.alert.status': 'active' } },
-                  { term: { 'kibana.alert.instance.id': 'alert-1' } },
+                minimum_should_match: 1,
+                must: [{ term: { 'kibana.alert.status': 'active' } }],
+                should: [
+                  {
+                    bool: {
+                      must: [
+                        { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
+                        { term: { 'kibana.alert.instance.id': 'alert-1' } },
+                      ],
+                    },
+                  },
                 ],
               },
             },
@@ -2796,7 +2810,7 @@ describe('Alerts Service', () => {
               logger,
             })
           ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Unable to update mute state for rule rule-1 - no alert indices available"`
+            `"Unable to update mute state for rules (example: {\\"ruleId\\":\\"rule-1\\"}) - no alert indices available"`
           );
         });
 
@@ -2825,9 +2839,14 @@ describe('Alerts Service', () => {
             ignore_unavailable: true,
             query: {
               bool: {
-                must: [
-                  { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
-                  { term: { 'kibana.alert.status': 'active' } },
+                minimum_should_match: 1,
+                must: [{ term: { 'kibana.alert.status': 'active' } }],
+                should: [
+                  {
+                    bool: {
+                      must: [{ term: { 'kibana.alert.rule.uuid': 'rule-1' } }],
+                    },
+                  },
                 ],
               },
             },
@@ -2880,7 +2899,7 @@ describe('Alerts Service', () => {
               logger,
             })
           ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Unable to update mute state for rule rule-1 - no alert indices available"`
+            `"Unable to update mute state for rules (example: {\\"ruleId\\":\\"rule-1\\"}) - no alert indices available"`
           );
         });
 
@@ -2909,9 +2928,14 @@ describe('Alerts Service', () => {
             ignore_unavailable: true,
             query: {
               bool: {
-                must: [
-                  { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
-                  { term: { 'kibana.alert.status': 'active' } },
+                minimum_should_match: 1,
+                must: [{ term: { 'kibana.alert.status': 'active' } }],
+                should: [
+                  {
+                    bool: {
+                      must: [{ term: { 'kibana.alert.rule.uuid': 'rule-1' } }],
+                    },
+                  },
                 ],
               },
             },
