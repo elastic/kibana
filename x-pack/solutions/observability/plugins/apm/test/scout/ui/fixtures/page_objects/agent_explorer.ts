@@ -16,9 +16,9 @@ export class AgentExplorerPage {
         'apm'
       )}/settings/agent-explorer?kuery=&agentLanguage=&serviceName=&comparisonEnabled=true&environment=ENVIRONMENT_ALL`
     );
-    await this.page.waitForLoadingIndicatorHidden();
-    this.page.getByRole('heading', { name: 'Settings', level: 1 });
+    await this.page.testSubj.waitForSelector('apmMainContainer');
 
-    return this.page;
+    // Wait for the page content to load
+    await this.page.getByRole('heading', { name: 'Settings', level: 1 }).waitFor();
   }
 }

@@ -439,6 +439,20 @@
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.BoundsRequestMeta.projectRouting",
+            "type": "string",
+            "tags": [],
+            "label": "projectRouting",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -19235,6 +19249,14 @@
           },
           " | undefined; executionContext: ",
           "KibanaExecutionContext",
+          "; projectRouting?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.ProjectRouting",
+            "text": "ProjectRouting"
+          },
           "; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/common/descriptor_types/data_request_descriptor_types.ts",

@@ -214,7 +214,7 @@ export class WorkflowsExecutionEnginePlugin
                 logger.error(`Workflow ${workflowId} not found`);
                 return;
               }
-              logger.info(`Running scheduled workflow task for workflow ${workflow.id}`);
+              logger.debug(`Running scheduled workflow task for workflow ${workflow.id}`);
 
               // Guard check: Check if there's already a scheduled workflow execution in non-terminal state
               const wasSkipped = await checkAndSkipIfExistingScheduledExecution(
