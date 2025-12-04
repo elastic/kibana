@@ -8,7 +8,8 @@
  */
 
 import type { z } from '@kbn/zod';
-import type { ConfigSchema, SecretsSchema } from '../schemas/v1';
+import type { CallToolParamsSchema, ConfigSchema, SecretsSchema } from '../schemas/v1';
 
 export type Config = z.input<typeof ConfigSchema>;
 export type Secrets = z.infer<typeof SecretsSchema>;
+export type CallToolParams = z.infer<typeof CallToolParamsSchema>;

@@ -13,3 +13,9 @@ export const CONNECTOR_ID = '.mcp';
 export const CONNECTOR_NAME = i18n.translate('connectors.mcp.title', {
   defaultMessage: 'MCP',
 });
+
+export enum SUB_ACTION {
+  INITIALIZE = 'initialize',
+  LIST_TOOLS = 'listTools',
+  CALL_TOOL = 'callTool',
+}

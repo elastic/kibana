@@ -9,21 +9,24 @@
 
 import { z } from '@kbn/zod';
 
+const HeadersSchema = z.record(z.string(), z.string());
+
 export const ConfigSchema = z
   .object({
     serverUrl: z.string(),
-    tools: z.array(
-      // TODO: determine if we want to store all tools or just the enabled ones
-      z.object({
-        name: z.string(),
-        enabled: z.boolean(),
-      })
-    ),
+    headers: HeadersSchema.optional(),
   })
   .strict();
 
 export const SecretsSchema = z
   .object({
-    headers: z.string().optional(), // JSON string (will likely change)
+    secretHeaders: HeadersSchema.optional(),
+  })
+  .strict();
+
+export const CallToolParamsSchema = z
+  .object({
+    name: z.string(),
+    arguments: z.record(z.string(), z.any()).optional(),
   })
   .strict();

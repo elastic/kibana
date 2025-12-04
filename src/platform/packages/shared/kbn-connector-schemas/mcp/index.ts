@@ -9,5 +9,5 @@
 
 export * from './constants';
 
-export { ConfigSchema, SecretsSchema } from './schemas/latest';
-export type { Config, Secrets } from './types/latest';
+export { ConfigSchema, SecretsSchema, CallToolParamsSchema } from './schemas/latest';
+export type { Config, Secrets, CallToolParams } from './types/latest';
