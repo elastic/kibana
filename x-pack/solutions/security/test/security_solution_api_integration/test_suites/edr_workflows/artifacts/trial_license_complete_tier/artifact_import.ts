@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getRegistryUrl as getRegistryUrlFromIngest } from '@kbn/fleet-plugin/server';
-import { isServerlessKibanaFlavor } from '@kbn/security-solution-plugin/common/endpoint/utils/kibana_status';
 import type TestAgent from 'supertest/lib/agent';
 import expect from '@kbn/expect';
 import {
@@ -27,114 +25,72 @@ import { ROLE } from '../../../../config/services/security_solution_edr_workflow
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 import { createSupertestErrorLogger } from '../../utils';
 
-export default function endpointAPIIntegrationTests(providerContext: FtrProviderContext) {
-  const { getService } = providerContext;
+export default function artifactImportAPIIntegrationTests({ getService }: FtrProviderContext) {
+  const log = getService('log');
+  const endpointPolicyTestResources = getService('endpointPolicyTestResources');
+  const endpointArtifactTestResources = getService('endpointArtifactTestResources');
+  const utils = getService('securitySolutionUtils');
 
-  describe('endpointArtifactsExportImportEnabled feature flag enabled', function () {
-    const ingestManager = getService('ingestManager');
-    const rolesUsersProvider = getService('rolesUsersProvider');
-    const kbnClient = getService('kibanaServer');
-    const log = getService('log');
-    const endpointRegistryHelpers = getService('endpointRegistryHelpers');
+  describe('@ess @serverless @skipInServerlessMKI Import Endpoint artifacts API', function () {
+    let fleetEndpointPolicy: PolicyTestResourceInfo;
+    let endpointOpsAnalystSupertest: TestAgent;
 
-    const roles = Object.values(ROLE);
     before(async () => {
-      try {
-        if (!endpointRegistryHelpers.isRegistryEnabled()) {
-          log.warning('These tests are being run with an external package registry');
-        }
+      endpointOpsAnalystSupertest = await utils.createSuperTest(ROLE.endpoint_operations_analyst);
 
-        const registryUrl =
-          endpointRegistryHelpers.getRegistryUrlFromTestEnv() ?? getRegistryUrlFromIngest();
-        log.info(`Package registry URL for tests: ${registryUrl}`);
-        await ingestManager.setup();
-      } catch (err) {
-        log.warning(`Error setting up ingestManager: ${err}`);
-      }
-
-      if (!(await isServerlessKibanaFlavor(kbnClient))) {
-        // create role/user
-        for (const role of roles) {
-          await rolesUsersProvider.createRole({ predefinedRole: role });
-          await rolesUsersProvider.createUser({ name: role, roles: [role] });
-        }
-      }
+      // Create an endpoint policy in fleet we can work with
+      fleetEndpointPolicy = await endpointPolicyTestResources.createPolicy();
     });
 
     after(async () => {
-      if (!(await isServerlessKibanaFlavor(kbnClient))) {
-        // delete role/user
-        await rolesUsersProvider.deleteUsers(roles);
-        await rolesUsersProvider.deleteRoles(roles);
+      if (fleetEndpointPolicy) {
+        await fleetEndpointPolicy.cleanup();
       }
     });
 
-    /**
-     * This test suite can be moved to its own file(s) once the feature flag is removed.
-     */
-    describe('@ess @serverless @skipInServerlessMKI Import Endpoint artifacts', () => {
-      const endpointPolicyTestResources = getService('endpointPolicyTestResources');
-      const endpointArtifactTestResources = getService('endpointArtifactTestResources');
-      const utils = getService('securitySolutionUtils');
-
-      let fleetEndpointPolicy: PolicyTestResourceInfo;
-
-      let endpointOpsAnalystSupertest: TestAgent;
-
-      before(async () => {
-        endpointOpsAnalystSupertest = await utils.createSuperTest(ROLE.endpoint_operations_analyst);
-
-        // Create an endpoint policy in fleet we can work with
-        fleetEndpointPolicy = await endpointPolicyTestResources.createPolicy();
+    const buildImportBuffer = (
+      listId: (typeof ALL_ENDPOINT_ARTIFACT_LIST_IDS)[number],
+      tags: string[] = []
+    ): Buffer => {
+      const generator = new ExceptionsListItemGenerator();
+      const listInfo = Object.values(ENDPOINT_ARTIFACT_LISTS).find((listDefinition) => {
+        return listDefinition.id === listId;
       });
 
-      after(async () => {
-        if (fleetEndpointPolicy) {
-          await fleetEndpointPolicy.cleanup();
-        }
-      });
+      if (!listInfo) {
+        throw new Error(`Unknown listId: ${listId}. Unable to generate exception list item.`);
+      }
 
-      const buildImportBuffer = (
-        listId: (typeof ALL_ENDPOINT_ARTIFACT_LIST_IDS)[number]
-      ): Buffer => {
-        const generator = new ExceptionsListItemGenerator();
-        const listInfo = Object.values(ENDPOINT_ARTIFACT_LISTS).find((listDefinition) => {
-          return listDefinition.id === listId;
-        });
+      const details: ExportExceptionDetails = {
+        exported_exception_list_count: 1,
+        exported_exception_list_item_count: 3,
+        missing_exception_list_item_count: 0,
+        missing_exception_list_items: [],
+        missing_exception_lists: [],
+        missing_exception_lists_count: 0,
+      };
 
-        if (!listInfo) {
-          throw new Error(`Unknown listId: ${listId}. Unable to generate exception list item.`);
-        }
+      const item1 = generator.generateItem(listId, { tags });
+      const item2 = generator.generateItem(listId, { tags });
+      const item3 = generator.generateItem(listId, { tags });
 
-        const details: ExportExceptionDetails = {
-          exported_exception_list_count: 1,
-          exported_exception_list_item_count: 3,
-          missing_exception_list_item_count: 0,
-          missing_exception_list_items: [],
-          missing_exception_lists: [],
-          missing_exception_lists_count: 0,
-        };
-
-        const item1 = generator.generateItem(listId, { tags: [GLOBAL_ARTIFACT_TAG] });
-        const item2 = generator.generateItem(listId, { tags: [GLOBAL_ARTIFACT_TAG] });
-        const item3 = generator.generateItem(listId, { tags: [GLOBAL_ARTIFACT_TAG] });
-
-        return Buffer.from(
-          `
+      return Buffer.from(
+        `
       {"_version":"WzEsMV0=","created_at":"2025-08-21T14:20:07.012Z","created_by":"kibana","description":"${
         listInfo.description
       }","id":"${listId}","immutable":false,"list_id":"${listId}","name":"${
-            listInfo.name
-          }","namespace_type":"agnostic","os_types":[],"tags":[],"tie_breaker_id":"034d07f4-fa33-43bb-adfa-6f6bda7921ce","type":"endpoint","updated_at":"2025-08-21T14:20:07.012Z","updated_by":"kibana","version":1}
+          listInfo.name
+        }","namespace_type":"agnostic","os_types":[],"tags":[],"tie_breaker_id":"034d07f4-fa33-43bb-adfa-6f6bda7921ce","type":"endpoint","updated_at":"2025-08-21T14:20:07.012Z","updated_by":"kibana","version":1}
       ${JSON.stringify(item1)}
       ${JSON.stringify(item2)}
       ${JSON.stringify(item3)}
       ${JSON.stringify(details)}
       `,
-          'utf8'
-        );
-      };
+        'utf8'
+      );
+    };
 
+    describe('Endpoint exceptions move feature flag enabled', () => {
       ALL_ENDPOINT_ARTIFACT_LIST_IDS.forEach((listId) => {
         it(`should import ${listId} artifacts`, async () => {
           await endpointArtifactTestResources.deleteList(listId);
@@ -153,7 +109,7 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
             .post(`${EXCEPTION_LIST_URL}/_import`)
             .set('kbn-xsrf', 'true')
             .on('error', createSupertestErrorLogger(log))
-            .attach('file', buildImportBuffer(listId), 'import_data.ndjson')
+            .attach('file', buildImportBuffer(listId, [GLOBAL_ARTIFACT_TAG]), 'import_data.ndjson')
             .expect(200)
             .expect(expectedResponse);
 
@@ -172,10 +128,6 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
 
           await endpointArtifactTestResources.deleteList(listId);
         });
-      });
-
-      it('should fail', () => {
-        expect(2).to.eql(3);
       });
     });
   });
