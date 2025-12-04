@@ -58,7 +58,7 @@ export default ({ getService }: FtrProviderContext) => {
         const apis = getAttackDiscoverySchedulesApis({ supertest });
         const allSchedules = await apis.find({ query: {} });
 
-        const results = await apis.find({ query: { page: 1, perPage: 2 } });
+        const results = await apis.find({ query: { page: 1, per_page: 2 } });
         expect(results).toEqual({
           data: expect.arrayContaining(allSchedules.data.slice(2, 4)),
           total: schedulesCount,

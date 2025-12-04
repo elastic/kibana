@@ -79,7 +79,7 @@ export const deleteAllAttackDiscoverySchedules = async ({
         });
 
       const { data, total } = await attackApis.find({
-        query: { page: 0, perPage: 100 },
+        query: { page: 0, per_page: 100 },
         kibanaSpace,
       });
 
