@@ -57,7 +57,7 @@ $$$kibana-216558$$$
 
 % **Details**<br> In 9.1.0, API keys are used for authenticating report generation requests, instead of session cookies that are based on user credentials.
 
-If you have a cross-cluster search environment and want to generate reports from remote clusters, you must have the appropriate cluster and index privileges on the remote cluster and local cluster. For example, if requests are authenticated with an API key, the API key requires certain privileges on the local cluster that contains the local index, instead of the remote. For more information and examples, refer to [Configure roles and users for remote clusters](../deploy-manage/remote-clusters/remote-clusters-cert.md#remote-clusters-privileges-cert).
+If you have a cross-cluster search environment and want to generate reports from remote clusters, you must have the appropriate cluster and index privileges on the remote cluster and local cluster. For example, if requests are authenticated with an API key, the API key requires certain privileges on the local cluster that contains the local index, instead of the remote. For more information and examples, refer to [Configure roles and users for remote clusters](docs-content://deploy-manage/remote-clusters/remote-clusters-cert.md#remote-clusters-privileges-cert)
 
 View [#216558]({{kib-pull}}216558).
 ::::
