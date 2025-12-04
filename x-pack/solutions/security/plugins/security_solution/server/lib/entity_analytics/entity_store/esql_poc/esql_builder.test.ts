@@ -65,11 +65,17 @@ describe('buildEsql', () => {
       | EVAL host.entity.id = COALESCE(
                     host.entity.id,
                     host.id,
-                    host.mac,
-                    CASE(host.ip IS NOT NULL,
+                    CASE(host.domain IS NOT NULL,
                       COALESCE(
-                          CASE(host.name IS NOT NULL AND host.name != "", CONCAT(host.name, "|", TO_STRING(host.ip)), NULL),
-                          CASE(host.hostname IS NOT NULL AND host.hostname != "", CONCAT(host.hostname, "|", TO_STRING(host.ip)), NULL)
+                          CASE(host.name IS NOT NULL AND host.name != "", CONCAT(host.name, ".", TO_STRING(host.domain)), NULL),
+                          CASE(host.hostname IS NOT NULL AND host.hostname != "", CONCAT(host.hostname, ".", TO_STRING(host.domain)), NULL)
+                      ),
+                    NULL
+                    ),
+                    CASE(host.mac IS NOT NULL,
+                      COALESCE(
+                          CASE(host.name IS NOT NULL AND host.name != "", CONCAT(host.name, "|", TO_STRING(host.mac)), NULL),
+                          CASE(host.hostname IS NOT NULL AND host.hostname != "", CONCAT(host.hostname, "|", TO_STRING(host.mac)), NULL)
                       ),
                       NULL
                     ),
@@ -158,7 +164,7 @@ describe('buildEsql', () => {
         entity.relationships.Accessed_frequently_by = MV_DEDUPE(COALESCE(MV_APPEND(recent.entity.relationships.Accessed_frequently_by, entity.relationships.Accessed_frequently_by), recent.entity.relationships.Accessed_frequently_by)),
         entity.id = host.entity.id,
         @timestamp = recent.timestamp,
-        entity.name = COALESCE(entity.name, entity.id)
+        entity.name = COALESCE(entity.name, host.name, entity.id)
       | KEEP host.name,
         host.domain,
         host.hostname,
