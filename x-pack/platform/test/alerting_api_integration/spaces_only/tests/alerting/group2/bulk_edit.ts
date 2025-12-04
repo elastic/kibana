@@ -204,7 +204,6 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       it('should allow bulk editing a rule with multiple instances of the same system action if allowMultipleSystemActions is true', async () => {
         const multipleSystemAction = {
           id: 'system-connector-test.system-action-allow-multiple',
-          uuid: '123',
           params: {},
         };
 
