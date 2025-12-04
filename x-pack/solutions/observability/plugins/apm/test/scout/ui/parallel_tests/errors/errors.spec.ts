@@ -21,7 +21,7 @@ test.describe('Errors', { tag: ['@ess', '@svlOblt'] }, () => {
     await browserAuth.loginAsViewer();
   });
 
-  test('errors page user flow - service with no errors shows empty message', async ({
+  test('shows "No errors found" message when a service has no errors', async ({
     page,
     pageObjects: { errorsPage },
   }) => {
@@ -37,7 +37,7 @@ test.describe('Errors', { tag: ['@ess', '@svlOblt'] }, () => {
     });
   });
 
-  test('errors page user flow - service with errors', async ({
+  test('shows errors charts and table when a service has errors', async ({
     page,
     pageObjects: { errorsPage },
   }) => {
@@ -83,9 +83,17 @@ test.describe('Errors', { tag: ['@ess', '@svlOblt'] }, () => {
       expect(page.url()).toContain('sortField=lastSeen');
       expect(page.url()).toContain('sortDirection=asc');
     });
+
+    await test.step('navigates to error detail page when clicking on an error in the list', async () => {
+      await page.getByRole('link', { name: ERROR_MESSAGE }).click();
+      await expect(page.getByText(`Error group ${ERROR_GROUPING_KEY_SHORT}`)).toBeVisible();
+      expect(page.url()).toContain(
+        'services/opbeans-java/errors/00000000000000000[MockError]%20Foo'
+      );
+    });
   });
 
-  test('error details page user flow', async ({ page, pageObjects: { errorsPage } }) => {
+  test('shows error details page', async ({ page, pageObjects: { errorsPage } }) => {
     await errorsPage.gotoErrorDetailsPage(
       'opbeans-java',
       ERROR_GROUPING_KEY,
@@ -124,7 +132,7 @@ test.describe('Errors', { tag: ['@ess', '@svlOblt'] }, () => {
     });
   });
 
-  test('error details - open in discover redirects correctly', async ({
+  test('redirects to Discover when clicking "Open in Discover" button', async ({
     page,
     pageObjects: { errorsPage },
   }) => {
@@ -141,7 +149,7 @@ test.describe('Errors', { tag: ['@ess', '@svlOblt'] }, () => {
     });
   });
 
-  test('error details - shows zero occurrences for non-existent error', async ({
+  test('shows zero occurrences for non-existent error', async ({
     page,
     pageObjects: { errorsPage },
   }) => {
@@ -159,7 +167,7 @@ test.describe('Errors', { tag: ['@ess', '@svlOblt'] }, () => {
     });
   });
 
-  test('navigating from errors page to error details', async ({
+  test('redirects to error details page when clicking on an error in the list', async ({
     page,
     pageObjects: { errorsPage },
   }) => {
@@ -178,7 +186,10 @@ test.describe('Errors', { tag: ['@ess', '@svlOblt'] }, () => {
     });
   });
 
-  test('errors table search filters results', async ({ page, pageObjects: { errorsPage } }) => {
+  test('filters errors table results when typing in the search input', async ({
+    page,
+    pageObjects: { errorsPage },
+  }) => {
     await errorsPage.gotoServiceErrorsPage(
       'opbeans-java',
       testData.OPBEANS_START_DATE,
@@ -202,7 +213,7 @@ test.describe('Errors', { tag: ['@ess', '@svlOblt'] }, () => {
       await expect(page.getByText('No errors found')).toBeVisible();
     });
 
-    await test.step('clearing search shows all errors again', async () => {
+    await test.step('clearing the search input shows all errors again', async () => {
       await errorsPage.tableSearchInput.clear();
       await expect(page.getByText(ERROR_MESSAGE)).toBeVisible();
     });
