@@ -535,18 +535,20 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
           }
 
           const { jobtype: jobType, attempts } = report;
-          const logger = this.logger.get(jobId); // jobId is here
 
           const maxAttempts = this.getMaxAttempts();
           if (maxAttempts) {
-            logger.debug(
-              `Starting ${jobType} report ${jobId}: attempt ${attempts} of ${maxAttempts.maxTaskAttempts}.`
+            this.logger.debug(
+              `Starting ${jobType} report ${jobId}: attempt ${attempts} of ${maxAttempts.maxTaskAttempts}.`,
+              { tags: [jobId] }
             );
           } else {
-            logger.debug(`Starting ${jobType} report ${jobId}.`);
+            this.logger.debug(`Starting ${jobType} report ${jobId}.`, { tags: [jobId] });
           }
 
-          logger.debug(`Reports running: ${this.opts.reporting.countConcurrentReports()}.`);
+          this.logger.debug(`Reports running: ${this.opts.reporting.countConcurrentReports()}.`, {
+            tags: [jobId],
+          });
 
           const eventLog = this.opts.reporting.getEventLogger(
             new Report({ ...task, _id: task.id, _index: task.index })
@@ -595,9 +597,11 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
 
                 stream.end();
 
-                logger.debug(`Begin waiting for the stream's pending callbacks...`);
+                logger.debug(`Begin waiting for the stream's pending callbacks...`, {
+                  tags: [jobId],
+                });
                 await finishedWithNoPendingCallbacks(stream);
-                logger.info(`The stream's pending callbacks have completed.`);
+                logger.info(`The stream's pending callbacks have completed.`, { tags: [jobId] });
 
                 rep._seq_no = stream.getSeqNo()!;
                 rep._primary_term = stream.getPrimaryTerm()!;
@@ -606,7 +610,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
                 eventLog.logExecutionComplete({ ...(output.result.metrics ?? {}), byteSize });
 
                 if (output.result) {
-                  logger.debug(`Job output size: ${byteSize} bytes.`);
+                  logger.debug(`Job output size: ${byteSize} bytes.`, { tags: [jobId] });
                   // Update the job status to "completed"
                   report = await this.completeJob(rep, isNumber(atmpts) ? atmpts : rep.attempts, {
                     ...output.result,
@@ -623,7 +627,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
                   );
                 }
 
-                logger.debug(`Stopping ${jobId}.`);
+                logger.debug(`Stopping ${jobId}.`, { tags: [jobId] });
               },
             });
           } catch (failedToExecuteErr) {
@@ -632,7 +636,12 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
 
             await this.saveExecutionError(report, failedToExecuteErr, isLastAttempt).catch(
               (failedToSaveError) => {
-                errorLogger(logger, `Error in saving execution error ${jobId}`, failedToSaveError);
+                errorLogger(
+                  this.logger,
+                  `Error in saving execution error ${jobId}`,
+                  failedToSaveError,
+                  [jobId]
+                );
               }
             );
 
@@ -642,11 +651,13 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
 
             if (isLastAttempt) {
               this.logger.info(
-                `Job ${jobId} failed on its last attempt and will not be retried. Error: ${failedToExecuteErr.message}.`
+                `Job ${jobId} failed on its last attempt and will not be retried. Error: ${failedToExecuteErr.message}.`,
+                { tags: [jobId] }
               );
             } else {
               this.logger.info(
-                `Job ${jobId} failed, but will be retried. Error: ${failedToExecuteErr.message}.`
+                `Job ${jobId} failed, but will be retried. Error: ${failedToExecuteErr.message}.`,
+                { tags: [jobId] }
               );
             }
 
@@ -662,7 +673,9 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
           } finally {
             // untrack the report for concurrency awareness
             this.opts.reporting.untrackReport(jobId);
-            logger.debug(`Reports running: ${this.opts.reporting.countConcurrentReports()}.`);
+            this.logger.debug(`Reports running: ${this.opts.reporting.countConcurrentReports()}.`, {
+              tags: [jobId],
+            });
           }
         },
 
@@ -672,7 +685,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
          */
         cancel: async () => {
           if (jobId) {
-            this.logger.get(jobId).warn(`Cancelling job ${jobId}...`);
+            this.logger.warn(`Cancelling job ${jobId}...`, { tags: [jobId] });
           }
           if (cancellationToken) {
             cancellationToken.cancel();

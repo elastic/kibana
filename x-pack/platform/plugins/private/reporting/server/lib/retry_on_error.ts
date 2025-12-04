@@ -33,7 +33,8 @@ export const retryOnError = async ({
 
     if (attempt > 0) {
       logger.info(
-        `Report generation for report[${report._id}] succeeded on attempt ${attempt + 1}.`
+        `Report generation for report[${report._id}] succeeded on attempt ${attempt + 1}.`,
+        { tags: [report._id] }
       );
     }
     return result;

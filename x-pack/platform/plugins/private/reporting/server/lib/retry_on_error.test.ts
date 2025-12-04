@@ -61,7 +61,8 @@ describe('retryOnError', () => {
       }] after [2s] due to error: ${error.toString()} - attempt 1 of 4 failed.`
     );
     expect(logger.info).toHaveBeenCalledWith(
-      `Report generation for report[290357209345723095] succeeded on attempt 2.`
+      `Report generation for report[290357209345723095] succeeded on attempt 2.`,
+      { tags: [report._id] }
     );
     // initial attempt + 1 retry
     expect(operationMock).toHaveBeenCalledTimes(2);
@@ -126,7 +127,8 @@ describe('retryOnError', () => {
       }] after [8s] due to error: ${error.toString()} - attempt 3 of 4 failed.`
     );
     expect(logger.info).toHaveBeenCalledWith(
-      `Report generation for report[290357209345723095] succeeded on attempt 4.`
+      `Report generation for report[290357209345723095] succeeded on attempt 4.`,
+      { tags: [report._id] }
     );
   });
 
