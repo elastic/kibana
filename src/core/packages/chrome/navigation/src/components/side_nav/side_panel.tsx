@@ -8,9 +8,17 @@
  */
 
 import React, { type ReactNode, useMemo } from 'react';
-import { EuiScreenReaderOnly, EuiSplitPanel, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiScreenReaderOnly,
+  euiShadow,
+  EuiSplitPanel,
+  useEuiTheme,
+  useGeneratedHtmlId,
+  type UseEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { layoutVar } from '@kbn/core-chrome-layout-constants';
 
 import type { MenuItem } from '../../../types';
 import { SIDE_PANEL_WIDTH } from '../../hooks/use_layout_width';
@@ -20,12 +28,17 @@ import { updateTabIndices } from '../../utils/update_tab_indices';
 import { useScroll } from '../../hooks/use_scroll';
 import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 
-const getPanelWrapperStyles = () => css`
+const getWrapperStyles = (euiThemeContext: UseEuiTheme) => css`
   box-sizing: border-box;
   position: relative;
   display: flex;
   flex-direction: column;
   width: ${SIDE_PANEL_WIDTH}px;
+  margin-bottom: ${layoutVar('sidebar.marginBottom', '0px')};
+  background-color: ${euiThemeContext.euiTheme.colors.backgroundBasePlain};
+  border-radius: ${euiThemeContext.euiTheme.border.radius.medium};
+  border: ${euiThemeContext.colorMode === 'DARK' ? euiThemeContext.euiTheme.border.thin : 'none'};
+  ${euiShadow(euiThemeContext, 'xs', { border: 'none' })};
 `;
 
 export interface SidePanelIds {
@@ -45,8 +58,9 @@ export interface SidePanelProps {
  * Shows only in expanded mode.
  */
 export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX.Element => {
+  const euiThemeContext = useEuiTheme();
   const scrollStyles = useScroll();
-  const wrapperStyles = useMemo(() => getPanelWrapperStyles(), []);
+  const wrapperStyles = useMemo(() => getWrapperStyles(euiThemeContext), [euiThemeContext]);
   const secondaryNavigationInstructionsId = useGeneratedHtmlId({
     prefix: 'secondary-navigation-instructions',
   });
