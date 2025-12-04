@@ -5,12 +5,18 @@
  * 2.0.
  */
 
+import type { SavedObject } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+
+import { ALL_SPACES_ID } from '../../../common/constants';
+
 import { appContextService } from '../app_context';
 import {
   getIsSpaceAwarenessEnabledCache,
   setIsSpaceAwarenessEnabledCache,
 } from '../epm/packages/cache';
 import { getSettingsOrUndefined } from '../settings';
+import type { AgentPolicy, AgentPolicySOAttributes } from '../../types';
 
 export const PENDING_MIGRATION_TIMEOUT = 60 * 60 * 1000;
 /**
@@ -53,4 +59,18 @@ export async function isSpaceAwarenessMigrationPending(): Promise<boolean> {
     return true;
   }
   return false;
+}
+
+export function getSpaceForAgentPolicy(agentPolicy: Pick<AgentPolicy, 'space_ids'>): string {
+  const space = agentPolicy.space_ids?.[0];
+
+  return space && space !== ALL_SPACES_ID ? space : DEFAULT_SPACE_ID;
+}
+
+export function getSpaceForAgentPolicySO(
+  agentPolicySO: Pick<SavedObject<AgentPolicySOAttributes>, 'namespaces'>
+): string {
+  const space = agentPolicySO.namespaces?.[0];
+
+  return space && space !== ALL_SPACES_ID ? space : DEFAULT_SPACE_ID;
 }
