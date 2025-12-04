@@ -14,8 +14,10 @@ import type {
   ConfigSchema,
 } from './types';
 import { OnechatPlugin } from './plugin';
+import { onechatIconType } from './components/nav_control/onechat_nav_control';
 
 export type { OnechatPluginSetup, OnechatPluginStart };
+export { onechatIconType };
 
 export const plugin: PluginInitializer<
   OnechatPluginSetup,
