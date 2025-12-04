@@ -59,7 +59,7 @@ export async function runDockerGenerator(
   if (flags.ironbank) imageFlavor += '-ironbank';
   if (flags.cloud) imageFlavor += '-cloud';
   if (flags.serverless) imageFlavor += '-serverless';
-  if (flags.solution) imageFlavor += `-${flags.solution}`;
+  if (flags.solution) imageFlavor += `-${flags.solution.artifact}`;
   if (flags.fips) {
     imageFlavor += '-fips';
     baseImageName =
@@ -80,7 +80,7 @@ export async function runDockerGenerator(
   let artifactVariant = '';
   let artifactSolution = '';
   if (flags.serverless) artifactVariant = '-serverless';
-  if (flags.solution) artifactSolution = `-${flags.solution}`;
+  if (flags.solution) artifactSolution = `-${flags.solution.artifact}`;
   const artifactPrefix = `kibana${artifactVariant}${artifactSolution}-${version}-linux`;
   const artifactTarball = `${artifactPrefix}-${artifactArchitecture}.tar.gz`;
   const beatsArchitecture = flags.architecture === 'aarch64' ? 'arm64' : 'x86_64';
