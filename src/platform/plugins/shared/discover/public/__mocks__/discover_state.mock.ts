@@ -383,7 +383,8 @@ export function getDiscoverStateMock({
       tabId: internalState.getState().tabs.unsafeCurrentId,
       appState: getInitialAppState({
         initialUrlState: getCurrentUrlState(stateStorageContainer, services),
-        savedSearch: finalSavedSearch,
+        persistedTab: persistedDiscoverSession?.tabs[0],
+        dataView: finalSavedSearch?.searchSource.getField('index'),
         services,
       }),
     })

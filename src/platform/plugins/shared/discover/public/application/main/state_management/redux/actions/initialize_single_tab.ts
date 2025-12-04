@@ -207,8 +207,8 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
     // then get an updated copy of the saved search with the applied initial state
     const initialAppState = getInitialAppState({
       initialUrlState: urlAppState,
-      savedSearch: persistedTabSavedSearch,
-      overrideDataView: dataView,
+      persistedTab,
+      dataView,
       services,
     });
     const savedSearch = updateSavedSearch({

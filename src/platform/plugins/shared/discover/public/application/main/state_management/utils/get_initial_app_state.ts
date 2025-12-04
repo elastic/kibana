@@ -8,8 +8,8 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverAppState } from '../redux';
 import { isEsqlSource, createEsqlDataSource } from '../../../../../common/data_sources';
@@ -18,18 +18,18 @@ import { getStateDefaults } from './get_state_defaults';
 
 export function getInitialAppState({
   initialUrlState,
-  savedSearch,
-  overrideDataView,
+  persistedTab,
+  dataView,
   services,
 }: {
   initialUrlState: DiscoverAppState | undefined;
-  savedSearch: SavedSearch | undefined;
-  overrideDataView?: DataView | undefined;
+  persistedTab: DiscoverSessionTab | undefined;
+  dataView: DataView | undefined;
   services: DiscoverServices;
 }) {
   const defaultAppState = getStateDefaults({
-    savedSearch,
-    overrideDataView,
+    persistedTab,
+    dataView,
     services,
   });
   const mergedState = { ...defaultAppState, ...initialUrlState };

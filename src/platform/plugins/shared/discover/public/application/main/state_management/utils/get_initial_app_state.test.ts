@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { Filter } from '@kbn/es-query';
-import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { getInitialAppState } from './get_initial_app_state';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
+import { getTabStateMock } from '../redux/__mocks__/internal_state.mocks';
+import { fromTabStateToSavedObjectTab } from '../redux';
 
 describe('getInitialAppState', () => {
   const customQuery = {
@@ -49,33 +49,41 @@ describe('getInitialAppState', () => {
     },
   } as Filter;
 
-  const localSavedSearchMock = {
-    id: 'the-saved-search-id',
-    title: 'A saved search',
-    breakdownField: 'customBreakDownField',
-    searchSource: createSearchSourceMock({
-      index: dataViewMock,
-      filter: [customFilter],
-      query: customQuery,
-    }),
-    hideChart: true,
-    rowsPerPage: 250,
-    hideAggregatedPreview: true,
-    managed: false,
-  } as SavedSearch;
-
   test('should return correct output', () => {
+    const services = createDiscoverServicesMock();
+    const persistedTab = fromTabStateToSavedObjectTab({
+      tab: getTabStateMock({
+        id: 'the-saved-search-id',
+        label: 'A saved search',
+        appState: {
+          breakdownField: 'customBreakDownField',
+          hideChart: true,
+          rowsPerPage: 250,
+          hideAggregatedPreview: true,
+        },
+        initialInternalState: {
+          serializedSearchSource: {
+            index: dataViewMock.id,
+            filter: [customFilter],
+            query: customQuery,
+          },
+        },
+      }),
+      timeRestore: false,
+      services,
+    });
     const appState = getInitialAppState({
       initialUrlState: undefined,
-      savedSearch: localSavedSearchMock,
-      services: createDiscoverServicesMock(),
+      persistedTab,
+      dataView: dataViewMock,
+      services,
     });
     expect(appState).toMatchObject(
       expect.objectContaining({
         breakdownField: 'customBreakDownField',
         columns: ['default_column'],
         filters: [customFilter],
-        grid: undefined,
+        grid: {},
         hideChart: true,
         dataSource: createDataViewDataSource({ dataViewId: 'the-data-view-id' }),
         interval: 'auto',
@@ -94,19 +102,25 @@ describe('getInitialAppState', () => {
   test('should return default query if query is undefined', () => {
     const services = createDiscoverServicesMock();
     services.data.query.queryString.getDefaultQuery = jest.fn().mockReturnValue(defaultQuery);
-    const newSavedSearchMock = {
-      id: 'new-saved-search-id',
-      title: 'A saved search',
-      searchSource: createSearchSourceMock({
-        index: dataViewMock,
-        filter: [customFilter],
-        query: undefined,
+    const persistedTab = fromTabStateToSavedObjectTab({
+      tab: getTabStateMock({
+        id: 'new-saved-search-id',
+        label: 'A saved search',
+        initialInternalState: {
+          serializedSearchSource: {
+            index: dataViewMock.id,
+            filter: [customFilter],
+            query: undefined,
+          },
+        },
       }),
-      managed: false,
-    };
+      timeRestore: false,
+      services,
+    });
     const appState = getInitialAppState({
       initialUrlState: undefined,
-      savedSearch: newSavedSearchMock,
+      persistedTab,
+      dataView: dataViewMock,
       services,
     });
     expect(appState).toMatchObject(
@@ -114,8 +128,8 @@ describe('getInitialAppState', () => {
         breakdownField: undefined,
         columns: ['default_column'],
         filters: [customFilter],
-        grid: undefined,
-        hideChart: undefined,
+        grid: {},
+        hideChart: false,
         dataSource: createDataViewDataSource({ dataViewId: 'the-data-view-id' }),
         interval: 'auto',
         query: defaultQuery,

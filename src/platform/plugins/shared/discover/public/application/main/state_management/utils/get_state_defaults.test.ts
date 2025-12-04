@@ -8,20 +8,22 @@
  */
 
 import { getStateDefaults } from './get_state_defaults';
-import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
-import { savedSearchMock, savedSearchMockWithESQL } from '../../../../__mocks__/saved_search';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { discoverServiceMock } from '../../../../__mocks__/services';
+import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { createDataViewDataSource, createEsqlDataSource } from '../../../../../common/data_sources';
+import type { DiscoverServices } from '../../../../build_services';
+import { fromTabStateToSavedObjectTab } from '../redux';
+import { getTabStateMock } from '../redux/__mocks__/internal_state.mocks';
 
 describe('getStateDefaults', () => {
   test('data view with timefield', () => {
-    savedSearchMock.searchSource = createSearchSourceMock({ index: dataViewWithTimefieldMock });
+    const services = createDiscoverServicesMock();
     const actual = getStateDefaults({
-      services: discoverServiceMock,
-      savedSearch: savedSearchMock,
+      persistedTab: undefined,
+      dataView: dataViewWithTimefieldMock,
+      services,
     });
     expect(actual).toMatchInlineSnapshot(`
       Object {
@@ -57,11 +59,11 @@ describe('getStateDefaults', () => {
   });
 
   test('data view without timefield', () => {
-    savedSearchMock.searchSource = createSearchSourceMock({ index: dataViewMock });
-
+    const services = createDiscoverServicesMock();
     const actual = getStateDefaults({
-      services: discoverServiceMock,
-      savedSearch: savedSearchMock,
+      persistedTab: undefined,
+      dataView: dataViewMock,
+      services,
     });
     expect(actual).toMatchInlineSnapshot(`
       Object {
@@ -91,77 +93,95 @@ describe('getStateDefaults', () => {
     `);
   });
 
+  const getPersistedTab = ({ services }: { services: DiscoverServices }) =>
+    fromTabStateToSavedObjectTab({
+      tab: getTabStateMock({ id: 'mock-tab' }),
+      timeRestore: false,
+      services,
+    });
+
   test('should set view mode correctly', () => {
+    const services = createDiscoverServicesMock();
     const actualForUndefinedViewMode = getStateDefaults({
-      services: discoverServiceMock,
-      savedSearch: {
-        ...savedSearchMockWithESQL,
+      persistedTab: {
+        ...getPersistedTab({ services }),
         viewMode: undefined,
       },
+      dataView: dataViewMock,
+      services,
     });
     expect(actualForUndefinedViewMode.viewMode).toBeUndefined();
 
     const actualForEsqlWithAggregatedViewMode = getStateDefaults({
-      services: discoverServiceMock,
-      savedSearch: {
-        ...savedSearchMockWithESQL,
+      services,
+      persistedTab: {
+        ...getPersistedTab({ services }),
         viewMode: VIEW_MODE.AGGREGATED_LEVEL,
+        serializedSearchSource: { query: { esql: 'FROM test' } },
       },
+      dataView: undefined,
     });
     expect(actualForEsqlWithAggregatedViewMode.viewMode).toBe(VIEW_MODE.AGGREGATED_LEVEL);
 
     const actualForEsqlWithInvalidPatternLevelViewMode = getStateDefaults({
-      services: discoverServiceMock,
-      savedSearch: {
-        ...savedSearchMockWithESQL,
+      services,
+      persistedTab: {
+        ...getPersistedTab({ services }),
         viewMode: VIEW_MODE.PATTERN_LEVEL,
+        serializedSearchSource: { query: { esql: 'FROM test' } },
       },
+      dataView: undefined,
     });
     expect(actualForEsqlWithInvalidPatternLevelViewMode.viewMode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
 
     const actualForEsqlWithValidViewMode = getStateDefaults({
-      services: discoverServiceMock,
-      savedSearch: {
-        ...savedSearchMockWithESQL,
+      services,
+      persistedTab: {
+        ...getPersistedTab({ services }),
         viewMode: VIEW_MODE.DOCUMENT_LEVEL,
+        serializedSearchSource: { query: { esql: 'FROM test' } },
       },
+      dataView: undefined,
     });
     expect(actualForEsqlWithValidViewMode.viewMode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
     expect(actualForEsqlWithValidViewMode.dataSource).toEqual(createEsqlDataSource());
 
     const actualForWithValidAggLevelViewMode = getStateDefaults({
-      services: discoverServiceMock,
-      savedSearch: {
-        ...savedSearchMock,
+      services,
+      persistedTab: {
+        ...getPersistedTab({ services }),
         viewMode: VIEW_MODE.AGGREGATED_LEVEL,
       },
+      dataView: dataViewMock,
     });
     expect(actualForWithValidAggLevelViewMode.viewMode).toBe(VIEW_MODE.AGGREGATED_LEVEL);
     expect(actualForWithValidAggLevelViewMode.dataSource).toEqual(
-      createDataViewDataSource({
-        dataViewId: savedSearchMock.searchSource.getField('index')?.id!,
-      })
+      createDataViewDataSource({ dataViewId: dataViewMock.id! })
     );
 
     const actualForWithValidPatternLevelViewMode = getStateDefaults({
-      services: discoverServiceMock,
-      savedSearch: {
-        ...savedSearchMock,
+      services,
+      persistedTab: {
+        ...getPersistedTab({ services }),
         viewMode: VIEW_MODE.PATTERN_LEVEL,
       },
+      dataView: dataViewMock,
     });
     expect(actualForWithValidPatternLevelViewMode.viewMode).toBe(VIEW_MODE.PATTERN_LEVEL);
     expect(actualForWithValidPatternLevelViewMode.dataSource).toEqual(
-      createDataViewDataSource({
-        dataViewId: savedSearchMock.searchSource.getField('index')?.id!,
-      })
+      createDataViewDataSource({ dataViewId: dataViewMock.id! })
     );
   });
 
   test('should return expected dataSource', () => {
+    const services = createDiscoverServicesMock();
     const actualForEsql = getStateDefaults({
-      services: discoverServiceMock,
-      savedSearch: savedSearchMockWithESQL,
+      services,
+      persistedTab: {
+        ...getPersistedTab({ services }),
+        serializedSearchSource: { query: { esql: 'FROM test' } },
+      },
+      dataView: undefined,
     });
     expect(actualForEsql.dataSource).toMatchInlineSnapshot(`
       Object {
@@ -169,8 +189,9 @@ describe('getStateDefaults', () => {
       }
     `);
     const actualForDataView = getStateDefaults({
-      services: discoverServiceMock,
-      savedSearch: savedSearchMock,
+      services,
+      persistedTab: getPersistedTab({ services }),
+      dataView: dataViewMock,
     });
     expect(actualForDataView.dataSource).toMatchInlineSnapshot(`
       Object {
