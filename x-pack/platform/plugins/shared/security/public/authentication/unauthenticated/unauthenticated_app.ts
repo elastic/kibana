@@ -12,6 +12,7 @@ import type {
   StartServicesAccessor,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { parseNextURL } from '@kbn/std';
 
 import type { PluginStartDependencies } from '../../plugin';
 
@@ -39,9 +40,7 @@ export const unauthenticatedApp = Object.freeze({
         ]);
 
         // Get the original URL from query parameters
-        const urlParams = new URLSearchParams(window.location.search);
-        const originalURL = urlParams.get('next') || '/';
-        const loginUrl = http.basePath.prepend(`/login?next=${encodeURIComponent(originalURL)}`);
+        const loginUrl = parseNextURL(window.location.href, http.basePath.serverBasePath);
 
         return renderUnauthenticatedPage(
           coreStart,
