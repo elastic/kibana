@@ -10,12 +10,12 @@ import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/onechat-server';
 import { ToolType } from '@kbn/onechat-common';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
-import { timeRangeSchema } from './utils/tool_schemas';
-import { buildApmToolResources } from './utils/build_apm_tool_resources';
-import { getApmToolAvailability } from './utils/get_apm_tool_availability';
-import { getApmDownstreamDependencies } from '../routes/assistant_functions/get_apm_downstream_dependencies';
-import { OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID } from '../../common/observability_agent/agent_tool_ids';
-import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../types';
+import { timeRangeSchema } from '../utils/tool_schemas';
+import { buildApmToolResources } from '../utils/build_apm_tool_resources';
+import { getApmToolAvailability } from '../utils/get_apm_tool_availability';
+import { getApmDownstreamDependencies } from '../../routes/assistant_functions/get_apm_downstream_dependencies';
+import { OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID } from '../../../common/observability_agent/agent_tool_ids';
+import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
 
 const getDownstreamDependenciesToolSchema = z.object({
   ...timeRangeSchema.shape,
@@ -41,7 +41,7 @@ export function createDownstreamDependenciesTool({
     id: OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
     type: ToolType.builtin,
     description:
-      'Get downstream dependencies (services or uninstrumented backends) for a given service and time range.',
+      'Identifies downstream dependencies (other services, databases, external APIs) for a specific service within a time range. Critical for mapping service architecture and troubleshooting dependency-related issues.',
     schema: getDownstreamDependenciesToolSchema,
     tags: ['observability', 'apm', 'dependencies'],
     availability: {
