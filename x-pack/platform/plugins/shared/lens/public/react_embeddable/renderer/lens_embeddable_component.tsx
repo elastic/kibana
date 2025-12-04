@@ -12,7 +12,7 @@ import type { LensApi } from '@kbn/lens-common-2';
 import { ExpressionWrapper } from '../expression_wrapper';
 import { UserMessages } from '../user_messages/container';
 import { useMessages, useDispatcher } from './hooks';
-import { getViewMode, getRenderMode } from '../helper';
+import { getViewMode } from '../helper';
 import { addLog } from '../logger';
 
 export function LensEmbeddableComponent({
