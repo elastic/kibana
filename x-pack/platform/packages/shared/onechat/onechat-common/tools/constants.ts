@@ -24,7 +24,9 @@ export const platformCoreTools = {
   generateEsql: platformCoreTool('generate_esql'),
   executeEsql: platformCoreTool('execute_esql'),
   createVisualization: platformCoreTool('create_visualization'),
-  task: platformCoreTool('task'),
+  getWorkflowExecutionStatus: platformCoreTool('get_workflow_execution_status'),
+  productDocumentation: platformCoreTool('product_documentation'),
+  cases: platformCoreTool('cases'),
 } as const;
 
 /**
@@ -41,6 +43,7 @@ export const defaultAgentToolIds = [
   platformCoreTools.listIndices,
   platformCoreTools.getIndexMapping,
   platformCoreTools.getDocumentById,
+  platformCoreTools.getWorkflowExecutionStatus,
 ];
 
 /**

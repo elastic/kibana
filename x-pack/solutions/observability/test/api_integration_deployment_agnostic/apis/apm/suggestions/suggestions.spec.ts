@@ -11,7 +11,7 @@ import {
   TRANSACTION_TYPE,
 } from '@kbn/apm-plugin/common/es_fields/apm';
 import expect from '@kbn/expect';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { generateData } from './generate_data';
 
