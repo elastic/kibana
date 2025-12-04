@@ -91,7 +91,6 @@ export function LensEmbeddableComponent({
       {expressionParams == null || blockingErrors.length ? null : (
         <ExpressionWrapper
           {...expressionParams}
-          renderMode={getRenderMode(api)}
           syncColors={syncColors}
           syncCursor={syncCursor}
           syncTooltips={syncTooltips}
