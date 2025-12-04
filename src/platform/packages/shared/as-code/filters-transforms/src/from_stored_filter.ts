@@ -460,16 +460,15 @@ function extractBaseProperties(storedFilter: StoredFilter): Partial<AsCodeFilter
   const meta = storedFilter.meta;
 
   return {
-    disabled: meta?.disabled === true ? true : meta?.disabled === false ? false : undefined,
-    controlledBy: meta?.controlledBy ?? undefined,
-    dataViewId: meta?.index ?? undefined,
-    negate: meta?.negate === true ? true : meta?.negate === false ? false : undefined,
-    label: meta?.alias ?? undefined,
-    isMultiIndex:
-      meta?.isMultiIndex === true ? true : meta?.isMultiIndex === false ? false : undefined,
-    filterType: meta?.type ?? undefined,
-    key: meta?.key ?? undefined,
-    value: meta?.value ?? undefined,
+    ...(meta?.disabled !== undefined ? { disabled: meta.disabled } : {}),
+    ...(meta?.controlledBy !== undefined ? { controlledBy: meta.controlledBy } : {}),
+    ...(meta?.index !== undefined ? { dataViewId: meta.index } : {}),
+    ...(meta?.negate !== undefined ? { negate: meta.negate } : {}),
+    ...(meta?.alias != null ? { label: meta.alias } : {}),
+    ...(meta?.isMultiIndex !== undefined ? { isMultiIndex: meta.isMultiIndex } : {}),
+    ...(meta?.type !== undefined ? { filterType: meta.type } : {}),
+    ...(meta?.key !== undefined ? { key: meta.key } : {}),
+    ...(meta?.value !== undefined ? { value: meta.value } : {}),
   };
 }
 
