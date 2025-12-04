@@ -15,7 +15,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AIAssistantType } from '../../../common/ai_assistant_type';
 
-jest.mock('../../utils/get_is_ai_agents_enabled');
+jest.mock('@kbn/ai-assistant-common/src/utils/get_is_ai_agents_enabled');
 jest.mock('@kbn/ai-assistant-icon', () => ({
   RobotIcon: ({ size }: { size: string }) => <div data-testid="robot-icon" data-size={size} />,
 }));
@@ -23,7 +23,9 @@ jest.mock('../../icons/assistant_icon/assistant_icon', () => ({
   AssistantIcon: 'assistant-icon',
 }));
 
-const { getIsAiAgentsEnabled } = jest.requireMock('../../utils/get_is_ai_agents_enabled');
+const { getIsAiAgentsEnabled } = jest.requireMock(
+  '@kbn/ai-assistant-common/src/utils/get_is_ai_agents_enabled'
+);
 
 describe('AIAssistantHeaderButton', () => {
   const mockCoreStart = coreMock.createStart();

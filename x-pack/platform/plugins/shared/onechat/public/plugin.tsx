@@ -14,10 +14,9 @@ import {
 import type { Logger } from '@kbn/logging';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {
-  AGENT_BUILDER_ENABLED_SETTING_ID,
-  AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
-} from '@kbn/management-settings-ids';
+import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import { getIsAiAgentsEnabled } from '@kbn/ai-assistant-common/src/utils/get_is_ai_agents_enabled';
+
 import { docLinks } from '../common/doc_links';
 import { ONECHAT_FEATURE_ID, uiPrivileges } from '../common/features';
 import { registerLocators } from './locator/register_locators';
@@ -137,15 +136,6 @@ export class OnechatPlugin
 
     this.internalServices = internalServices;
 
-    const isAgentBuilderEnabled = core.settings.client.get<boolean>(
-      AGENT_BUILDER_ENABLED_SETTING_ID,
-      true
-    );
-    const isAgentBuilderNavEnabled = core.settings.client.get<boolean>(
-      AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
-      false
-    );
-
     const onechatService: OnechatPluginStart = {
       tools: createPublicToolContract({ toolsService }),
       setConversationFlyoutActiveConfig: (config: EmbeddableConversationProps) => {
@@ -163,27 +153,40 @@ export class OnechatPlugin
       },
     };
 
-    if (isAgentBuilderEnabled && isAgentBuilderNavEnabled) {
-      core.chrome.navControls.registerRight({
-        mount: (element) => {
-          ReactDOM.render(
-            <OnechatNavControlInitiator
-              coreStart={core}
-              pluginsStart={startDependencies}
-              onechatService={onechatService}
-            />,
-            element,
-            () => {}
+    getIsAiAgentsEnabled(core)
+      .then((flagEnabled) => {
+        if (!flagEnabled) {
+          this.logger.debug(
+            `Skipping Onechat nav control registration: feature flag AI_AGENTS_FEATURE_FLAG disabled`
           );
+          return;
+        }
 
-          return () => {
-            ReactDOM.unmountComponentAtNode(element);
-          };
-        },
-        // right before the user profile
-        order: 1001,
+        core.chrome.navControls.registerRight({
+          mount: (element) => {
+            ReactDOM.render(
+              <OnechatNavControlInitiator
+                coreStart={core}
+                pluginsStart={startDependencies}
+                onechatService={onechatService}
+              />,
+              element,
+              () => {}
+            );
+
+            return () => {
+              ReactDOM.unmountComponentAtNode(element);
+            };
+          },
+          // right before the user profile
+          order: 1001,
+        });
+      })
+      .catch((error) => {
+        this.logger.debug(
+          `Skipping Onechat nav control registration: feature flag read failed (${String(error)})`
+        );
       });
-    }
 
     return onechatService;
   }

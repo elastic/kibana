@@ -8,11 +8,11 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { FieldRow, FieldRowProvider } from '@kbn/management-settings-components-field-row';
 import { AI_ASSISTANT_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import { AIChatExperience } from '@kbn/ai-assistant-common';
-import { AIAgentConfirmationModal } from '@kbn/ai-agent-confirmation-modal';
+import { AIChatExperience } from '@kbn/ai-assistant-common/src/types/chat_experience';
+import { AIAgentConfirmationModal } from '@kbn/ai-agent-confirmation-modal/ai_agent_confirmation_modal';
+import { getIsAiAgentsEnabled } from '@kbn/ai-assistant-common/src/utils/get_is_ai_agents_enabled';
 import { useSettingsContext } from '../../contexts/settings_context';
 import { useKibana } from '../../hooks/use_kibana';
-import { getIsAiAgentsEnabled } from '../../utils/get_is_ai_agents_enabled';
 
 export const ChatExperience: React.FC = () => {
   const { fields, handleFieldChange, unsavedChanges } = useSettingsContext();

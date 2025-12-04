@@ -31,13 +31,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { RobotIcon } from '@kbn/ai-assistant-icon';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AIAgentConfirmationModal } from '@kbn/ai-agent-confirmation-modal';
+import { getIsAiAgentsEnabled } from '@kbn/ai-assistant-common/src/utils/get_is_ai_agents_enabled';
 import {
   PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
   PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,
 } from '../../../common/ui_setting_keys';
 import { AIAssistantType } from '../../../common/ai_assistant_type';
 import { AssistantIcon } from '../../icons/assistant_icon/assistant_icon';
-import { getIsAiAgentsEnabled } from '../../utils/get_is_ai_agents_enabled';
 
 interface AIAssistantHeaderButtonProps {
   coreStart: CoreStart;

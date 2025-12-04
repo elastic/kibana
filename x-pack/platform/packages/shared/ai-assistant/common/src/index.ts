@@ -8,3 +8,4 @@
 export * from './types';
 export * from './utils';
 export * from './constants/feature_flags';
+export { getIsAiAgentsEnabled } from './utils/get_is_ai_agents_enabled';

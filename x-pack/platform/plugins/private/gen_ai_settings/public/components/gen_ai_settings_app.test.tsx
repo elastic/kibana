@@ -14,7 +14,7 @@ import { GenAiSettingsApp } from './gen_ai_settings_app';
 import { useEnabledFeatures } from '../contexts/enabled_features_context';
 import { SettingsContextProvider } from '../contexts/settings_context';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { AIChatExperience } from '@kbn/ai-assistant-common/src/types/chat_experience';
 import {
   AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE,
   AI_ASSISTANT_CHAT_EXPERIENCE_TYPE,

@@ -11,7 +11,7 @@ import {
   AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE,
   AI_ASSISTANT_CHAT_EXPERIENCE_TYPE,
 } from '@kbn/management-settings-ids';
-import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { AIChatExperience } from '@kbn/ai-assistant-common/src/types/chat_experience';
 import { useSettingsContext } from '../../contexts/settings_context';
 import { useKibana } from '../../hooks/use_kibana';
 
