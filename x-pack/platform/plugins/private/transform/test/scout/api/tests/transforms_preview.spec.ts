@@ -27,8 +27,6 @@ apiTest.describe('/internal/transform/transforms/_preview', { tag: tags.ESS_ONLY
     transformViewerUserApiCredentials = await requestAuth.loginAsTransformViewerUser();
   });
 
-  apiTest.afterAll(async () => {});
-
   apiTest('should return a transform preview', async ({ apiClient }) => {
     const { statusCode, body } = await apiClient.post('internal/transform/transforms/_preview', {
       headers: {

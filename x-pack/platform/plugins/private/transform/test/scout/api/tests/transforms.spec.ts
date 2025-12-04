@@ -87,62 +87,38 @@ apiTest.describe('/internal/transform/transforms', { tag: tags.ESS_ONLY }, () =>
     });
   });
 
-  apiTest.describe('/transforms/{transformId}', () => {
-    apiTest(
-      'should return a specific transform configuration for transform admin',
-      async ({ apiClient }) => {
-        const { statusCode, body } = await apiClient.get(
-          `internal/transform/transforms/${TRANSFORM_1_ID}`,
-          {
-            headers: {
-              ...COMMON_HEADERS,
-              ...transformPowerUserApiCredentials.apiKeyHeader,
-            },
-            responseType: 'json',
-          }
-        );
+  apiTest(
+    'should return a specific transform configuration for transform admin',
+    async ({ apiClient }) => {
+      const { statusCode, body } = await apiClient.get(
+        `internal/transform/transforms/${TRANSFORM_1_ID}`,
+        {
+          headers: {
+            ...COMMON_HEADERS,
+            ...transformPowerUserApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+        }
+      );
 
-        expect(statusCode).toBe(200);
+      expect(statusCode).toBe(200);
 
-        expect(body.count).toBe(1);
-        expect(body.transforms).toHaveLength(1);
+      expect(body.count).toBe(1);
+      expect(body.transforms).toHaveLength(1);
 
-        const transform = body.transforms[0];
-        expect(transform.id).toBe(TRANSFORM_1_ID);
-        expect(transform.dest.index).toBe('user-transform-test-get-1');
-        expect(typeof transform.version).toBe('string');
-        expect(typeof transform.create_time).toBe('number');
-      }
-    );
+      const transform = body.transforms[0];
+      expect(transform.id).toBe(TRANSFORM_1_ID);
+      expect(transform.dest.index).toBe('user-transform-test-get-1');
+      expect(typeof transform.version).toBe('string');
+      expect(typeof transform.create_time).toBe('number');
+    }
+  );
 
-    apiTest(
-      'should return a specific transform configuration for transform user',
-      async ({ apiClient }) => {
-        const { statusCode, body } = await apiClient.get(
-          `internal/transform/transforms/${TRANSFORM_1_ID}`,
-          {
-            headers: {
-              ...COMMON_HEADERS,
-              ...transformViewerUserApiCredentials.apiKeyHeader,
-            },
-            responseType: 'json',
-          }
-        );
-
-        expect(statusCode).toBe(200);
-
-        expect(body.count).toBe(1);
-        expect(body.transforms).toHaveLength(1);
-
-        const transform = body.transforms[0];
-        expect(transform.id).toBe(TRANSFORM_1_ID);
-        expect(transform.dest.index).toBe('user-transform-test-get-1');
-      }
-    );
-
-    apiTest('should report 404 for a non-existing transform', async ({ apiClient }) => {
-      const { statusCode } = await apiClient.get(
-        'internal/transform/transforms/the-non-existing-transform',
+  apiTest(
+    'should return a specific transform configuration for transform user',
+    async ({ apiClient }) => {
+      const { statusCode, body } = await apiClient.get(
+        `internal/transform/transforms/${TRANSFORM_1_ID}`,
         {
           headers: {
             ...COMMON_HEADERS,
@@ -152,7 +128,29 @@ apiTest.describe('/internal/transform/transforms', { tag: tags.ESS_ONLY }, () =>
         }
       );
 
-      expect(statusCode).toBe(404);
-    });
+      expect(statusCode).toBe(200);
+
+      expect(body.count).toBe(1);
+      expect(body.transforms).toHaveLength(1);
+
+      const transform = body.transforms[0];
+      expect(transform.id).toBe(TRANSFORM_1_ID);
+      expect(transform.dest.index).toBe('user-transform-test-get-1');
+    }
+  );
+
+  apiTest('should report 404 for a non-existing transform', async ({ apiClient }) => {
+    const { statusCode } = await apiClient.get(
+      'internal/transform/transforms/the-non-existing-transform',
+      {
+        headers: {
+          ...COMMON_HEADERS,
+          ...transformViewerUserApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+      }
+    );
+
+    expect(statusCode).toBe(404);
   });
 });
