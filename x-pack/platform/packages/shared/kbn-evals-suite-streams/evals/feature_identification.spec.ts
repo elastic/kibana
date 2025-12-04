@@ -10,7 +10,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { identifySystemFeatures } from '@kbn/streams-ai';
 import kbnDatemath from '@kbn/datemath';
 import type { ScoutTestConfig } from '@kbn/scout';
-import { uniq } from 'lodash';
+import { omit, uniq } from 'lodash';
 import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
 import { conditionToQueryDsl } from '@kbn/streamlang';
 import type { WiredIngest } from '@kbn/streams-schema';
@@ -117,6 +117,7 @@ evaluate.describe('Streams feature identification', { tag: '@svlOblt' }, () => {
           await apiServices.streams.updateStream(stream.name, {
             ingest: {
               ...stream.ingest,
+              processing: omit(stream.ingest.processing, ['updated_at']),
               wired: {
                 ...(stream.ingest as WiredIngest).wired,
                 fields: {

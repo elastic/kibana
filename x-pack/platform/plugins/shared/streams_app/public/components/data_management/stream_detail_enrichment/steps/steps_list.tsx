@@ -23,6 +23,7 @@ export interface StepConfigurationProps {
   stepsProcessingSummaryMap?: StepsProcessingSummaryMap;
   isFirstStepInLevel: boolean;
   isLastStepInLevel: boolean;
+  readOnly?: boolean;
 }
 
 export const StepsListItem = (props: StepConfigurationProps) => {
