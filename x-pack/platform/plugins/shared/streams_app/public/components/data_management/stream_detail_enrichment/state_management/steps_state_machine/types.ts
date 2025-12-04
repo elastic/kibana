@@ -24,6 +24,7 @@ export interface StepInput {
   parentRef: StepParentActor;
   step: StreamlangStepWithUIAttributes;
   isNew?: boolean;
+  isUpdated?: boolean;
 }
 
 export type StepParentActor = ActorRef<Snapshot<unknown>, StepToParentEvent>;
