@@ -7,10 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const SERVERLESS_ONLY = ['@svlSecurity', '@svlSecurityEssentials','@svlSecurityEase', '@svlOblt', '@svlSearch', '@svlChat'];
+const SERVERLESS_ONLY = [
+  '@svlSecurity',
+  '@svlSecurityEssentials',
+  '@svlSecurityEase',
+  '@svlOblt',
+  '@svlSearch',
+  '@svlChat',
+];
 const ESS_ONLY = ['@ess'];
 // svlChat is truly serverless only and doesn't have a stateful counterpart
-const DEPLOYMENT_AGNOSTIC = ['@ess', '@svlSecurity', '@svlSecurityEssentials','@svlSecurityEase', '@svlOblt', '@svlSearch'];
+const DEPLOYMENT_AGNOSTIC = [
+  '@ess',
+  '@svlSecurity',
+  '@svlSecurityEssentials',
+  '@svlSecurityEase',
+  '@svlOblt',
+  '@svlSearch',
+];
 const PERFORMANCE = ['@perf'];
 
 export const tags = {
