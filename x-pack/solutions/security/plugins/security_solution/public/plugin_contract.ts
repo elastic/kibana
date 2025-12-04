@@ -62,7 +62,7 @@ export class PluginContract {
       getComponents$: this.componentsService.getComponents$.bind(this.componentsService),
       upselling: this.upsellingService,
       onboarding: this.onboardingService,
-      productFeatureKeys$: this.productFeatureKeys$,
+      productFeatureKeys$: this.productFeatureKeys$.asObservable(),
     };
   }
 }
