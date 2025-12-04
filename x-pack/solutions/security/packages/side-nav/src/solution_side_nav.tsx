@@ -235,7 +235,8 @@ const SolutionSideNavItem: React.FC<SolutionSideNavItemProps> = React.memo(
     const { euiTheme } = useEuiTheme();
     const { tracker } = useTelemetryContext();
 
-    const { id, href, label, items, onClick, iconType, panelOpenerIconType, appendSeparator } = item;
+    const { id, href, label, items, onClick, iconType, panelOpenerIconType, appendSeparator } =
+      item;
 
     const solutionSideNavItemStyles = SolutionSideNavItemStyles(euiTheme);
     const itemClassNames = classNames(
