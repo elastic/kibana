@@ -68,6 +68,28 @@ describe('validateAndAuthorizeSystemActions', () => {
     registry.register(connectorAdapter);
 
     actionsClient.isSystemAction.mockReturnValue(false);
+    actionsClient.getBulk.mockResolvedValue([
+      createMockConnector({
+        id: 'not-exist',
+        actionTypeId: '.test',
+        name: 'not system action',
+        isSystemAction: false,
+      }),
+    ]);
+    actionsClient.listTypes.mockResolvedValue([
+      {
+        id: '.test',
+        name: 'Test',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'basic' as const,
+        supportedFeatureIds: ['alerting'],
+        isSystemActionType: true,
+        isDeprecated: false,
+        allowMultipleSystemActions: false,
+      },
+    ]);
 
     await expect(() =>
       validateAndAuthorizeSystemActions({
@@ -93,6 +115,21 @@ describe('validateAndAuthorizeSystemActions', () => {
     registry.register(connectorAdapter);
 
     actionsClient.isSystemAction.mockReturnValue(true);
+    actionsClient.getBulk.mockResolvedValue([]); // Override beforeEach mock - action not found
+    actionsClient.listTypes.mockResolvedValue([
+      {
+        id: '.test',
+        name: 'Test',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'basic' as const,
+        supportedFeatureIds: ['alerting'],
+        isSystemActionType: true,
+        isDeprecated: false,
+        allowMultipleSystemActions: false,
+      },
+    ]);
 
     await expect(() =>
       validateAndAuthorizeSystemActions({
@@ -118,6 +155,20 @@ describe('validateAndAuthorizeSystemActions', () => {
     registry.register(connectorAdapter);
 
     actionsClient.isSystemAction.mockReturnValue(true);
+    actionsClient.listTypes.mockResolvedValue([
+      {
+        id: '.test',
+        name: 'Test',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'basic' as const,
+        supportedFeatureIds: ['alerting'],
+        isSystemActionType: true,
+        isDeprecated: false,
+        allowMultipleSystemActions: false,
+      },
+    ]);
 
     await expect(() =>
       validateAndAuthorizeSystemActions({
@@ -261,6 +312,20 @@ describe('validateAndAuthorizeSystemActions', () => {
     registry.register(connectorAdapter);
 
     actionsClient.isSystemAction.mockReturnValue(true);
+    actionsClient.listTypes.mockResolvedValue([
+      {
+        id: '.test',
+        name: 'Test',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'basic' as const,
+        supportedFeatureIds: ['alerting'],
+        isSystemActionType: true,
+        isDeprecated: false,
+        allowMultipleSystemActions: false,
+      },
+    ]);
 
     const res = await validateAndAuthorizeSystemActions({
       connectorAdapterRegistry: registry,
@@ -321,6 +386,32 @@ describe('validateAndAuthorizeSystemActions', () => {
     });
 
     actionsClient.isSystemAction.mockReturnValue(true);
+    actionsClient.listTypes.mockResolvedValue([
+      {
+        id: '.test',
+        name: 'Test',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'basic' as const,
+        supportedFeatureIds: ['alerting'],
+        isSystemActionType: true,
+        isDeprecated: false,
+        allowMultipleSystemActions: false,
+      },
+      {
+        id: '.test-2',
+        name: 'Test 2',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'basic' as const,
+        supportedFeatureIds: ['alerting'],
+        isSystemActionType: true,
+        isDeprecated: false,
+        allowMultipleSystemActions: false,
+      },
+    ]);
 
     await validateAndAuthorizeSystemActions({
       connectorAdapterRegistry: registry,
