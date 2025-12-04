@@ -7,7 +7,14 @@
 
 import React, { useEffect } from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  useEuiTheme,
+  EuiTitle,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { css } from '@emotion/react';
 import { ConnectToElasticsearch } from './connect_to_elasticsearch';
@@ -19,6 +26,7 @@ import { AnalyticsEvents } from '../analytics/constants';
 import { GetStartedWithElasticsearch } from './get_started_with_elasticsearch';
 import { CloudServerlessPromo } from './cloud_serverless_promo/cloud_serverless_promo';
 import { useKibana } from '../hooks/use_kibana';
+import { i18n } from '@kbn/i18n';
 
 export const SearchHomepageBody = () => {
   const usageTracker = useUsageTracker();
@@ -47,34 +55,34 @@ export const SearchHomepageBody = () => {
         <EuiFlexItem css={itemPadding}>
           <GetStartedWithElasticsearch />
         </EuiFlexItem>
-        {!isCloudEnabled && (
-          <>
-            <EuiFlexItem>
-              <EuiHorizontalRule />
-            </EuiFlexItem>
-            <EuiFlexItem css={itemPadding}>
-              <CloudServerlessPromo />
-            </EuiFlexItem>
-          </>
-        )}
         <EuiFlexItem>
           <EuiHorizontalRule />
         </EuiFlexItem>
         <EuiFlexItem css={itemPadding}>
-          <DiveDeeperWithElasticsearch />
+          <EuiTitle size="s">
+            <h3>
+              {i18n.translate('xpack.searchHomepage.getStarted.title', {
+                defaultMessage: 'Explore additional solutions',
+              })}
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="xl" />
+
+          <EuiFlexItem>
+            {!isCloudEnabled && (
+              <>
+                <CloudServerlessPromo />
+                <EuiSpacer size="xl" />
+                <EuiSpacer size="xl" />
+              </>
+            )}
+            <AlternateSolutions />
+            <EuiSpacer size="xl" />
+            <EuiHorizontalRule margin="xxl" />
+            <DiveDeeperWithElasticsearch />
+          </EuiFlexItem>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiHorizontalRule />
-        </EuiFlexItem>
-        <EuiFlexItem css={itemPadding}>
-          <AlternateSolutions />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiHorizontalRule />
-        </EuiFlexItem>
-        <EuiFlexItem css={itemPadding}>
-          <Footer />
-        </EuiFlexItem>
+
       </EuiFlexGroup>
     </KibanaPageTemplate.Section>
   );
