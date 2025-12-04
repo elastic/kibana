@@ -18,11 +18,11 @@ import type { SLODefinition } from '../domain/models/slo';
 import type { SLORepository } from './slo_repository';
 
 interface RepairAction {
-  sloId: string;
-  sloRevision: number;
+  id: string;
+  revision: number;
   action: 'recreate-transform' | 'start-transform' | 'stop-transform';
   transformType: 'rollup' | 'summary';
-  sloEnabled: boolean | undefined;
+  enabled: boolean | undefined;
 }
 
 export class RepairSLO {
@@ -54,7 +54,7 @@ export class RepairSLO {
               scopedClusterClient: this.scopedClusterClient,
             });
 
-            const repairActions = this.identifyRepairActions(health[0]);
+            const repairActions = this.identifyRepairActions(health[0], definition.enabled);
             this.logger.debug(`Identified ${repairActions.length} repair actions needed`);
 
             if (repairActions.length === 0) {
@@ -64,7 +64,7 @@ export class RepairSLO {
 
             const actionsBySloId = new Map<string, RepairAction[]>();
             for (const action of repairActions) {
-              const key = `${action.sloId}-${action.sloRevision}`;
+              const key = `${action.id}-${action.revision}`;
               if (!actionsBySloId.has(key)) {
                 actionsBySloId.set(key, []);
               }
@@ -110,7 +110,7 @@ export class RepairSLO {
                       return { id: sloId, success: true };
                     } catch (err) {
                       this.logger.error(
-                        `Failed to execute repair action [${action.action}] for SLO [${action.sloId}] transform [${action.transformType}]: ${err}`
+                        `Failed to execute repair action [${action.action}] for SLO [${action.id}] transform [${action.transformType}]: ${err}`
                       );
                       errorCount++;
                       return {
@@ -156,46 +156,46 @@ export class RepairSLO {
     }
   }
 
-  private identifyRepairActions(healthData: SLOHealth): RepairAction[] {
+  private identifyRepairActions(healthData: SLOHealth, enabled: boolean): RepairAction[] {
     const actions: RepairAction[] = [];
 
-    const { sloId, sloRevision, health, sloEnabled } = healthData;
+    const { id, revision, health } = healthData;
 
     // check rollup transform
-    if (health.rollup.status === 'missing') {
+    if (health.rollup.missing) {
       actions.push({
-        sloId,
-        sloRevision,
+        id,
+        revision,
         action: 'recreate-transform',
         transformType: 'rollup',
-        sloEnabled,
+        enabled,
       });
-    } else if (health.rollup.alignedWithSLO === false) {
+    } else if (health.rollup.stateMatches === false) {
       actions.push({
-        sloId,
-        sloRevision,
-        action: sloEnabled ? 'start-transform' : 'stop-transform',
+        id,
+        revision,
+        action: enabled ? 'start-transform' : 'stop-transform',
         transformType: 'rollup',
-        sloEnabled,
+        enabled,
       });
     }
 
     // Check summary transform
-    if (health.summary.status === 'missing') {
+    if (health.summary.missing) {
       actions.push({
-        sloId,
-        sloRevision,
+        id,
+        revision,
         action: 'recreate-transform',
         transformType: 'summary',
-        sloEnabled,
+        enabled,
       });
-    } else if (health.summary.alignedWithSLO === false) {
+    } else if (health.summary.stateMatches === false) {
       actions.push({
-        sloId,
-        sloRevision,
-        action: sloEnabled ? 'start-transform' : 'stop-transform',
+        id,
+        revision,
+        action: enabled ? 'start-transform' : 'stop-transform',
         transformType: 'summary',
-        sloEnabled,
+        enabled,
       });
     }
 
@@ -210,31 +210,31 @@ export class RepairSLO {
   ): Promise<void> {
     const transformId =
       action.transformType === 'rollup'
-        ? getSLOTransformId(action.sloId, action.sloRevision)
-        : getSLOSummaryTransformId(action.sloId, action.sloRevision);
+        ? getSLOTransformId(action.id, action.revision)
+        : getSLOSummaryTransformId(action.id, action.revision);
 
     const manager = action.transformType === 'rollup' ? transformManager : summaryTransformManager;
 
     switch (action.action) {
       case 'recreate-transform':
         this.logger.info(
-          `Recreating ${action.transformType} transform [${transformId}] for SLO [${action.sloId}]`
+          `Recreating ${action.transformType} transform [${transformId}] for SLO [${action.id}]`
         );
         await manager.install(slo);
-        if (action.sloEnabled) {
+        if (action.enabled) {
           return manager.start(transformId);
         }
         return Promise.resolve();
 
       case 'start-transform':
         this.logger.info(
-          `Starting ${action.transformType} transform [${transformId}] for SLO [${action.sloId}]`
+          `Starting ${action.transformType} transform [${transformId}] for SLO [${action.id}]`
         );
         return manager.start(transformId);
 
       case 'stop-transform':
         this.logger.info(
-          `Stopping ${action.transformType} transform [${transformId}] for SLO [${action.sloId}]`
+          `Stopping ${action.transformType} transform [${transformId}] for SLO [${action.id}]`
         );
         return manager.stop(transformId);
     }

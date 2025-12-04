@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { FindSLODefinitionsWithHealthResponse } from '@kbn/slo-schema';
+import type { FindSLODefinitionsResponse } from '@kbn/slo-schema';
 import { useQuery } from '@kbn/react-query';
 import { sloKeys } from './query_key_factory';
 import { usePluginContext } from './use_plugin_context';
 
 export interface UseFetchSloDefinitionsResponse {
-  data: FindSLODefinitionsWithHealthResponse | undefined;
+  data: FindSLODefinitionsResponse | undefined;
   isLoading: boolean;
   isSuccess: boolean;
   isError: boolean;

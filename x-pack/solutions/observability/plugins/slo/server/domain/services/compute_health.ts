@@ -166,7 +166,7 @@ function toTransformState(
 function toTransformStatus(status?: string): 'healthy' | 'unhealthy' | 'unavailable' {
   switch (status) {
     case 'green':
-      return 'healthy';
+      return 'unhealthy';
     case 'red':
     case 'yellow':
       return 'unhealthy';
