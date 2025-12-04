@@ -9,10 +9,12 @@
 import { i18n } from '@kbn/i18n';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { useMemo } from 'react';
+import {
+  ACTION_COPY_TO_DASHBOARD,
+  ACTION_VIEW_DETAILS,
+  ACTION_EXPLORE_IN_DISCOVER_TAB,
+} from '../../../common/constants';
 
-export const ACTION_COPY_TO_DASHBOARD = 'ACTION_METRICS_EXPERIENCE_COPY_TO_DASHBOARD';
-export const ACTION_VIEW_DETAILS = 'ACTION_METRICS_EXPERIENCE_VIEW_DETAILS';
-export const ACTION_EXPLORE_IN_DISCOVER_TAB = 'ACTION_METRICS_EXPERIENCE_EXPLORE_IN_DISCOVER_TAB';
 interface ActionEventHandler {
   onClick: () => void;
 }

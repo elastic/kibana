@@ -12,10 +12,8 @@ import { css } from '@emotion/react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { PresentationPanelQuickActionContext } from '@kbn/presentation-panel-plugin/public';
 import type { LensProps } from './hooks/use_lens_props';
-import {
-  useLensExtraActions,
-  ACTION_EXPLORE_IN_DISCOVER_TAB,
-} from './hooks/use_lens_extra_actions';
+import { useLensExtraActions } from './hooks/use_lens_extra_actions';
+import { ACTION_EXPLORE_IN_DISCOVER_TAB } from '../../common/constants';
 import { ChartTitle } from './chart_title';
 
 export type LensWrapperProps = {
@@ -32,7 +30,6 @@ export type LensWrapperProps = {
 } & Pick<ChartSectionProps, 'services' | 'onBrushEnd' | 'onFilter'>;
 
 const DEFAULT_DISABLED_ACTIONS = ['ACTION_CUSTOMIZE_PANEL', 'ACTION_EXPORT_CSV', 'alertRule'];
-
 export function LensWrapper({
   lensProps,
   services,
