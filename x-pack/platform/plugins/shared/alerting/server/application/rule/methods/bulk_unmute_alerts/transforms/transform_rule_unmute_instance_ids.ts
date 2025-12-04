@@ -8,13 +8,13 @@
 import type { SavedObjectsBulkResponse } from '@kbn/core-saved-objects-api-server';
 import type { UpdateRuleSoParams } from '../../../../../data/rule/methods/bulk_update_rule_so';
 import type { RawRule } from '../../../../../saved_objects/schemas/raw_rule';
-import type { BulkUnmuteAlertsParams } from '../types';
+import type { BulkMuteUnmuteAlertsParams } from '../../../types';
 
 export const transformUnmuteRequestToRuleAttributes = ({
   paramRules,
   savedRules,
 }: {
-  paramRules: BulkUnmuteAlertsParams['rules'];
+  paramRules: BulkMuteUnmuteAlertsParams['rules'];
   savedRules: SavedObjectsBulkResponse<RawRule>['saved_objects'];
 }) => {
   return (

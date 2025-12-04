@@ -6,6 +6,6 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { bulkMuteAlertsParamsSchema } from '../schemas';
+import type { bulkMuteUnmuteAlertsParamsSchema } from '../schemas';
 
-export type BulkMuteAlertsParams = TypeOf<typeof bulkMuteAlertsParamsSchema>;
+export type BulkMuteUnmuteAlertsParams = TypeOf<typeof bulkMuteUnmuteAlertsParamsSchema>;

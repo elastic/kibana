@@ -69,8 +69,7 @@ import { muteAll } from '../application/rule/methods/mute_all';
 import { unmuteInstance } from '../application/rule/methods/unmute_alert/unmute_instance';
 import { bulkMuteInstances } from '../application/rule/methods/bulk_mute_alerts/bulk_mute_instances';
 import { bulkUnmuteInstances } from '../application/rule/methods/bulk_unmute_alerts/bulk_unmute_instances';
-import type { BulkMuteAlertsParams } from '../application/rule/methods/bulk_mute_alerts/types';
-import type { BulkUnmuteAlertsParams } from '../application/rule/methods/bulk_unmute_alerts/types';
+import type { BulkMuteUnmuteAlertsParams } from '../application/rule/types';
 import type { RunSoonParams } from '../application/rule/methods/run_soon';
 import { runSoon } from '../application/rule/methods/run_soon';
 import { listRuleTypes } from '../application/rule/methods/rule_types/rule_types';
@@ -212,11 +211,12 @@ export class RulesClient {
   public unsnooze = (options: UnsnoozeParams) => unsnoozeRule(this.context, options);
 
   public muteAll = (options: { id: string }) => muteAll(this.context, options);
-  public unmuteAll = (options: { id: string }) => unmuteAll(this.context, options);public muteInstance = (options: { params: MuteAlertParams; query: MuteAlertQuery }) =>
+  public unmuteAll = (options: { id: string }) => unmuteAll(this.context, options);
+  public muteInstance = (options: { params: MuteAlertParams; query: MuteAlertQuery }) =>
     muteInstance(this.context, options);
-  public bulkMuteInstances = (options: BulkMuteAlertsParams) =>
+  public bulkMuteInstances = (options: BulkMuteUnmuteAlertsParams) =>
     bulkMuteInstances(this.context, options);
-  public bulkUnmuteInstances = (options: BulkUnmuteAlertsParams) =>
+  public bulkUnmuteInstances = (options: BulkMuteUnmuteAlertsParams) =>
     bulkUnmuteInstances(this.context, options);
   public unmuteInstance = (options: UnmuteAlertParams) => unmuteInstance(this.context, options);
 

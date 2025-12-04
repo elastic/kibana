@@ -13,8 +13,8 @@ import type {
 import { transformUnmuteRequestToRuleAttributes } from './transforms/transform_rule_unmute_instance_ids';
 import { retryIfBulkEditConflicts } from '../../../../rules_client/common';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { bulkUnmuteAlertsParamsSchema } from './schemas/bulk_unmute_alert_params_schema';
-import type { BulkUnmuteAlertsParams } from './types';
+import { bulkMuteUnmuteAlertsParamsSchema } from '../../schemas/bulk_mute_unmute_schema';
+import type { BulkMuteUnmuteAlertsParams } from '../../types';
 import type { RawRule } from '../../../../types';
 import {
   AlertingAuthorizationEntity,
@@ -26,13 +26,14 @@ import type { RulesClientContext } from '../../../../rules_client/types';
 import { bulkGetRulesSo } from '../../../../data/rule';
 import type { BulkEditOperationResult } from '../../../../rules_client/common/bulk_edit';
 import { bulkUpdateRuleSo } from '../../../../data/rule/methods/bulk_update_rule_so';
+import { transformParamsRulesToAlertInstances } from '@kbn/alerting-plugin/server/application/rule/transforms/transform_bulk_mute_unmute_rules_to_alert_instances';
 
 export async function bulkUnmuteInstances(
   context: RulesClientContext,
-  params: BulkUnmuteAlertsParams
+  params: BulkMuteUnmuteAlertsParams
 ): Promise<void> {
   try {
-    bulkUnmuteAlertsParamsSchema.validate(params);
+    bulkMuteUnmuteAlertsParamsSchema.validate(params);
   } catch (error) {
     throw Boom.badRequest(`Failed to validate params: ${error.message}`);
   }
@@ -46,7 +47,7 @@ export async function bulkUnmuteInstances(
 
 async function bulkUnmuteInstancesWithOCC(
   context: RulesClientContext,
-  params: BulkUnmuteAlertsParams
+  params: BulkMuteUnmuteAlertsParams
 ): Promise<BulkEditOperationResult> {
   let bulkUpdateRes: SavedObjectsBulkUpdateResponse<RawRule>;
   const rules = await bulkGetRulesSo({
@@ -55,19 +56,22 @@ async function bulkUnmuteInstancesWithOCC(
   });
 
   try {
-    const ruleTypeIdConsumersPairs: BulkEnsureAuthorizedOpts['ruleTypeIdConsumersPairs'] = [];
     const rulesSavedObjects: Array<SavedObject<RawRule>> = [];
+    const ruleTypeIdConsumersPairs: BulkEnsureAuthorizedOpts['ruleTypeIdConsumersPairs'] = [];
+    const ruleTypeIds = new Set<string>();
     rules.saved_objects.forEach((rule) => {
       if (rule.error) {
         return;
       }
 
       rulesSavedObjects.push(rule);
+      ruleTypeIds.add(rule.attributes.alertTypeId);
       ruleTypeIdConsumersPairs.push({
         ruleTypeId: rule.attributes.alertTypeId,
         consumers: [rule.attributes.consumer],
       });
     });
+    const indices = context.getAlertIndicesAlias(Array.from(ruleTypeIds), context.spaceId);
 
     await context.authorization.bulkEnsureAuthorized({
       ruleTypeIdConsumersPairs,
@@ -94,6 +98,14 @@ async function bulkUnmuteInstancesWithOCC(
       savedObjectsClient: context.unsecuredSavedObjectsClient,
       rules: rulesToUpdate,
     });
+
+    if (indices && indices.length > 0) {
+      await context.alertsService?.unmuteAlertInstances({
+        targets: transformParamsRulesToAlertInstances(params.rules),
+        indices,
+        logger: context.logger,
+      });
+    }
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({

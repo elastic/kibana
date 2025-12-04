@@ -81,6 +81,9 @@ export interface CreateAlertsClientParams extends LegacyAlertsClientParams {
   namespace: string;
   rule: AlertRuleData;
 }
+
+export type MuteInstances = Array<{ ruleId: string; alertInstanceId?: string }>;
+
 interface IAlertsService {
   /**
    * Register solution specific resources. If common resource initialization is
@@ -536,7 +539,7 @@ export class AlertsService implements IAlertsService {
     logger,
   }: {
     muted: boolean;
-    targets: Array<{ ruleId: string; alertInstanceId?: string }>;
+    targets: MuteInstances;
     indices: string[];
     logger: Logger;
   }) {
@@ -660,6 +663,40 @@ export class AlertsService implements IAlertsService {
     return this._updateMuteState({
       muted: false,
       targets: [{ ruleId }],
+      indices,
+      logger,
+    });
+  }
+
+  public async muteAlertInstances({
+    targets,
+    indices,
+    logger,
+  }: {
+    targets: MuteInstances;
+    indices: string[];
+    logger: Logger;
+  }) {
+    return this._updateMuteState({
+      muted: true,
+      targets,
+      indices,
+      logger,
+    });
+  }
+
+  public async unmuteAlertInstances({
+    targets,
+    indices,
+    logger,
+  }: {
+    targets: MuteInstances;
+    indices: string[];
+    logger: Logger;
+  }) {
+    return this._updateMuteState({
+      muted: false,
+      targets,
       indices,
       logger,
     });
