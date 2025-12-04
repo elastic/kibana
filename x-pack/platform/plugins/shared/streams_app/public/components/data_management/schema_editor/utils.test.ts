@@ -8,6 +8,7 @@
 import { getGeoPointSuggestion, buildSchemaSavePayload } from './utils';
 import type { SchemaEditorField, SchemaField } from './types';
 import type { Streams } from '@kbn/streams-schema';
+import { omit } from 'lodash';
 
 describe('buildSchemaSavePayload', () => {
   it('builds payload for wired streams by updating wired.fields', () => {
@@ -41,6 +42,7 @@ describe('buildSchemaSavePayload', () => {
     expect(payload).toEqual({
       ingest: {
         ...mockDefinition.stream.ingest,
+        processing: omit(mockDefinition.stream.ingest.processing, 'updated_at'),
         wired: {
           ...mockDefinition.stream.ingest.wired,
           fields: {
@@ -75,6 +77,7 @@ describe('buildSchemaSavePayload', () => {
     expect(payload).toEqual({
       ingest: {
         ...mockDefinition.stream.ingest,
+        processing: omit(mockDefinition.stream.ingest.processing, 'updated_at'),
         classic: {
           ...mockDefinition.stream.ingest.classic,
           field_overrides: {
@@ -102,9 +105,10 @@ const buildWiredDefinition = (): Streams.WiredStream.GetResponse => ({
   stream: {
     name: 'logs',
     description: 'Wired stream',
+    updated_at: new Date().toISOString(),
     ingest: {
       lifecycle: { dsl: { data_retention: '1d' } },
-      processing: { steps: [] },
+      processing: { steps: [], updated_at: new Date().toISOString() },
       settings: {},
       wired: {
         fields: {},
@@ -127,9 +131,10 @@ const buildClassicDefinition = (): Streams.ClassicStream.GetResponse => ({
   stream: {
     name: 'logs-classic',
     description: 'Classic stream',
+    updated_at: new Date().toISOString(),
     ingest: {
       lifecycle: { dsl: { data_retention: '1d' } },
-      processing: { steps: [] },
+      processing: { steps: [], updated_at: new Date().toISOString() },
       settings: {},
       classic: {
         field_overrides: {},

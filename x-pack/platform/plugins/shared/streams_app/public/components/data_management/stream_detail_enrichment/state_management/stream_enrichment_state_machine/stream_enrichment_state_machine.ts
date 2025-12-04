@@ -807,7 +807,11 @@ export const createStreamEnrichmentMachineImplementations = ({
     setupGrokCollection: setupGrokCollectionActor(),
     stepMachine,
     dataSourceMachine: dataSourceMachine.provide(
-      createDataSourceMachineImplementations({ data, toasts: core.notifications.toasts })
+      createDataSourceMachineImplementations({
+        data,
+        toasts: core.notifications.toasts,
+        telemetryClient,
+      })
     ),
     simulationMachine: simulationMachine.provide(
       createSimulationMachineImplementations({
