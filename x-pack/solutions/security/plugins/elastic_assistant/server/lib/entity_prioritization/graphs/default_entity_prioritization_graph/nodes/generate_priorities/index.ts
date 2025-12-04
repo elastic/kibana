@@ -12,7 +12,7 @@ import { ChatPromptTemplate } from '@langchain/core/prompts';
 
 import type { ThreatHuntingPrioritiesGraphState } from '../../../../state';
 import { getThreatHuntingPrioritiesGenerationSchema } from '../../schemas';
-import type { CombinedPrompts } from '../../index';
+import type { CombinedPrompts } from '../..';
 import { extractJson } from '../../../../../langchain/output_chunking/nodes/helpers/extract_json';
 
 /**
@@ -115,7 +115,13 @@ export const getGeneratePrioritiesNode = ({
   ): Promise<ThreatHuntingPrioritiesGraphState> => {
     logger?.debug(() => '---GENERATE PRIORITIES---');
 
-    const { selectedCandidateIds, generationAttempts, hallucinationFailures, maxGenerationAttempts, maxHallucinationFailures } = state;
+    const {
+      selectedCandidateIds,
+      generationAttempts,
+      hallucinationFailures,
+      maxGenerationAttempts,
+      maxHallucinationFailures,
+    } = state;
 
     if (selectedCandidateIds.length === 0) {
       logger?.warn(() => 'No selected candidates to generate priorities from');
@@ -128,7 +134,8 @@ export const getGeneratePrioritiesNode = ({
     // Check if we've exceeded max attempts
     if (generationAttempts >= maxGenerationAttempts) {
       logger?.warn(
-        () => `Max generation attempts (${maxGenerationAttempts}) reached, returning empty priorities`
+        () =>
+          `Max generation attempts (${maxGenerationAttempts}) reached, returning empty priorities`
       );
       return {
         ...state,
@@ -169,7 +176,7 @@ Create a prioritized list of threat hunting priorities. Each priority can includ
 - Byline: A single sentence expanding on the threat and providing context (e.g., "Multiple hosts showing signs of unauthorized lateral movement between critical systems")
 - Description: A more detailed explanation of why this is a priority, what threats are indicated, and what investigation steps should be taken
 - Entities: Array of entities (with type, idField like "host.name" or "user.name", and idValue) associated with this priority
-- Tags: Array of tags including key themes (e.g., "Lateral Movement", "Credential Theft") and MITRE ATT&CK techniques/tactics (e.g., "T1021", "Lateral Movement", "Credential Access")
+- Tags: Array of tags including key themes (e.g., "Lateral Movement", "Credential Theft") and MITRE ATT&CK techniques/tactics (e.g. "Lateral Movement", "Credential Access")
 - Priority: A score from 1-10 based on threat level, asset criticality, and urgency
 - Chat Recommendations: Array of 3-5 short questions the user could ask the chat agent to continue investigating. Focus on Elasticsearch-related topics like:
   * Risk scores: "What is the risk score history for [entity] over the last [time period]?"
@@ -186,7 +193,6 @@ Consider when grouping entities:
 
 Consider for tags:
 - MITRE ATT&CK tactics: Reconnaissance, Resource Development, Initial Access, Execution, Persistence, Privilege Escalation, Defense Evasion, Credential Access, Discovery, Lateral Movement, Collection, Command and Control, Exfiltration, Impact
-- MITRE ATT&CK techniques: Use technique IDs like T1021, T1078, etc.
 - Key themes: Lateral Movement, Credential Theft, Data Exfiltration, Ransomware, APT Activity, etc.
 
 ${formatInstructions}`;
@@ -219,10 +225,7 @@ ${formatInstructions}`;
           generationAttempts: generationAttempts + 1,
           hallucinationFailures: hallucinationFailures + 1,
           priorities: null,
-          errors: [
-            ...(state.errors || []),
-            'Hallucination detected in generated priorities',
-          ],
+          errors: [...(state.errors || []), 'Hallucination detected in generated priorities'],
         };
       }
 
@@ -251,4 +254,3 @@ ${formatInstructions}`;
 
   return generatePriorities;
 };
-
