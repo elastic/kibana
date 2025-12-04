@@ -37,7 +37,7 @@ import {
 import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { get, isEqual } from 'lodash';
 import React, { useEffect, useMemo, useRef } from 'react';
-import { BehaviorSubject, combineLatest, map, merge, skip, switchMap } from 'rxjs';
+import { BehaviorSubject, map, merge, switchMap } from 'rxjs';
 import { useErrorTextStyle } from '@kbn/react-hooks';
 import { VISUALIZE_APP_NAME, VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
 import type { VisualizeEmbeddableState } from '../../common/embeddable/types';
@@ -118,21 +118,6 @@ export const getVisualizeEmbeddableFactory: (deps: {
     const expressionParams$ = new BehaviorSubject<ExpressionRendererParams>({
       expression: '',
     });
-    // Track sync settings separately to avoid full expression re-execution
-    // Initialize with current parent API values
-    const initialSyncColors = apiPublishesSettings(parentApi)
-      ? parentApi.settings.syncColors$.getValue()
-      : undefined;
-    const initialSyncCursor = apiPublishesSettings(parentApi)
-      ? parentApi.settings.syncCursor$.getValue()
-      : undefined;
-    const initialSyncTooltips = apiPublishesSettings(parentApi)
-      ? parentApi.settings.syncTooltips$.getValue()
-      : undefined;
-
-    const syncColors$ = new BehaviorSubject<boolean | undefined>(initialSyncColors);
-    const syncCursor$ = new BehaviorSubject<boolean | undefined>(initialSyncCursor);
-    const syncTooltips$ = new BehaviorSubject<boolean | undefined>(initialSyncTooltips);
 
     const expressionAbortController$ = new BehaviorSubject<AbortController>(new AbortController());
     let getExpressionParams: () => ReturnType<typeof getExpressionRendererProps> = async () => ({
@@ -329,6 +314,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
       },
       getSerializedStateByValue: () => serializeVisualizeEmbeddable(undefined, false),
       getSerializedStateByReference: (libraryId) => serializeVisualizeEmbeddable(libraryId, true),
+      settings: apiPublishesSettings(parentApi) ? parentApi.settings : {},
     });
 
     const fetchSubscription = fetch$(api)
@@ -461,33 +447,21 @@ export const getVisualizeEmbeddableFactory: (deps: {
         expressionAbortController$.next(abortController);
       });
 
-    const settingsSubscription = apiPublishesSettings(parentApi)
-      ? combineLatest([
-          parentApi.settings.syncColors$,
-          parentApi.settings.syncCursor$,
-          parentApi.settings.syncTooltips$,
-        ])
-          .pipe(skip(1)) // Skip initial values (handled in fetch$)
-          .subscribe(([syncColors, syncCursor, syncTooltips]) => {
-            syncColors$.next(syncColors);
-            syncCursor$.next(syncCursor);
-            syncTooltips$.next(syncTooltips);
-          })
-      : undefined;
-
     return {
       api,
       Component: () => {
         const expressionParams = useStateFromPublishingSubject(expressionParams$);
-        const syncColors = useStateFromPublishingSubject(syncColors$);
-        const syncCursor = useStateFromPublishingSubject(syncCursor$);
-        const syncTooltips = useStateFromPublishingSubject(syncTooltips$);
         const renderCount = useStateFromPublishingSubject(renderCount$);
         const hasRendered = useStateFromPublishingSubject(hasRendered$);
         const [hideTitle, title, defaultTitle] = useBatchedPublishingSubjects(
           api.hideTitle$,
           api.title$,
           api.defaultTitle$
+        );
+        const [syncColors, syncCursor, syncTooltips] = useBatchedPublishingSubjects(
+          api.settings.syncColors$,
+          api.settings.syncCursor$,
+          api.settings.syncTooltips$
         );
         const domNode = useRef<HTMLDivElement>(null);
         const { error, isLoading } = useExpressionRenderer(domNode, {
@@ -507,7 +481,6 @@ export const getVisualizeEmbeddableFactory: (deps: {
           return () => {
             fetchSubscription.unsubscribe();
             serializedVisSubscription.unsubscribe();
-            settingsSubscription?.unsubscribe();
             maybeStopDynamicActions?.stopDynamicActions();
           };
         }, []);

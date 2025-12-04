@@ -12,6 +12,7 @@ import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plu
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
+import type { PublishesSettings } from '@kbn/presentation-containers';
 import type {
   HasEditCapabilities,
   HasLibraryTransforms,
@@ -60,6 +61,7 @@ export type VisualizeApi = Partial<HasEditCapabilities> &
   PublishesDataLoading &
   PublishesRendered &
   Required<PublishesTitle> &
+  PublishesSettings &
   HasVisualizeConfig &
   HasInspectorAdapters &
   HasSupportedTriggers &
