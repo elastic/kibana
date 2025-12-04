@@ -11,18 +11,19 @@ import { i18n } from '@kbn/i18n';
 
 // TITLES
 
-export const EIS_PROMO_CALLOUT_TITLE = i18n.translate(
-  'searchApiPanels.eisPromotion.callout.title',
-  {
-    defaultMessage: 'Elastic Inference Service',
-  }
-);
+export const EIS_CALLOUT_TITLE = i18n.translate('searchApiPanels.eisPromotion.callout.title', {
+  defaultMessage: 'Elastic Inference Service',
+});
 
 export const EIS_PROMO_TOUR_TITLE = i18n.translate('searchApiPanels.eisPromotion.tour.title', {
   defaultMessage: 'Elastic Inference Service endpoints available',
 });
 
 export const EIS_COSTS_TOUR_TITLE = i18n.translate('searchApiPanels.eisCosts.tour.title', {
+  defaultMessage: 'Elastic Inference Service (EIS) now available',
+});
+
+export const EIS_UPDATE_CALLOUT_TITLE = i18n.translate('searchApiPanels.eisUpdate.callout.title', {
   defaultMessage: 'Elastic Inference Service (EIS) now available',
 });
 
@@ -51,14 +52,29 @@ export const EIS_COSTS_TOUR_DESCRIPTION = i18n.translate(
   }
 );
 
+export const EIS_UPDATE_CALLOUT_DESCRIPTION = i18n.translate(
+  'searchApiPanels.eisUpdate.callout.description',
+  {
+    defaultMessage:
+      'Explore how to start using inference models from the Elastic Inference Service.',
+  }
+);
+
 // CALL TO ACTIONS
 
-export const EIS_PROMO_CALLOUT_CTA = i18n.translate('searchApiPanels.eisPromotion.callout.cta', {
-  defaultMessage: 'Get started',
-});
+export const EIS_CALLOUT_DOCUMENTATION_BTN = i18n.translate(
+  'searchApiPanels.eisPromotion.callout.documentation.button',
+  {
+    defaultMessage: 'View documentation',
+  }
+);
 
 export const EIS_TOUR_CTA = i18n.translate('searchApiPanels.eis.tour.cta', {
   defaultMessage: 'Learn more',
+});
+
+export const EIS_UPDATE_CALLOUT_CTA = i18n.translate('searchApiPanels.eisUpdate.callout.cta', {
+  defaultMessage: 'Update to ELSER on EIS',
 });
 
 // DISMISS BUTTON
@@ -74,7 +90,7 @@ export const EIS_COSTS_TOUR_DISMISS_ARIA = i18n.translate(
   }
 );
 
-export const EIS_PROMO_CALLOUT_DISMISS_ARIA = i18n.translate(
+export const EIS_CALLOUT_DISMISS_ARIA = i18n.translate(
   'searchApiPanels.eisPromotion.callout.dismiss.aria',
   {
     defaultMessage: 'Dismiss the Elastic Inference Service callout',
@@ -83,9 +99,9 @@ export const EIS_PROMO_CALLOUT_DISMISS_ARIA = i18n.translate(
 
 // ICON ALT TAGS
 
-export const EIS_PROMO_CALLOUT_ICON_ALT = i18n.translate(
+export const EIS_CALLOUT_ICON_ALT = i18n.translate(
   'searchApiPanels.eisPromotion.callout.icon.alt',
   {
-    defaultMessage: 'EIS promotional banner icon',
+    defaultMessage: 'Rocket icon',
   }
 );
