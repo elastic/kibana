@@ -461,12 +461,12 @@ function extractBaseProperties(storedFilter: StoredFilter): Partial<AsCodeFilter
 
   return {
     ...(meta?.disabled !== undefined ? { disabled: meta.disabled } : {}),
-    ...(meta?.controlledBy !== undefined ? { controlledBy: meta.controlledBy } : {}),
-    ...(meta?.index !== undefined ? { dataViewId: meta.index } : {}),
+    ...(meta?.controlledBy !== undefined ? { controlled_by: meta.controlledBy } : {}),
+    ...(meta?.index !== undefined ? { data_view_id: meta.index } : {}),
     ...(meta?.negate !== undefined ? { negate: meta.negate } : {}),
     ...(meta?.alias != null ? { label: meta.alias } : {}),
-    ...(meta?.isMultiIndex !== undefined ? { isMultiIndex: meta.isMultiIndex } : {}),
-    ...(meta?.type !== undefined ? { filterType: meta.type } : {}),
+    ...(meta?.isMultiIndex !== undefined ? { is_multi_index: meta.isMultiIndex } : {}),
+    ...(meta?.type !== undefined ? { filter_type: meta.type } : {}),
     ...(meta?.key !== undefined ? { key: meta.key } : {}),
     ...(meta?.value !== undefined ? { value: meta.value } : {}),
   };

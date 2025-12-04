@@ -69,14 +69,14 @@ const commonBasePropertiesSchema = schema.object({
       meta: { description: 'Whether the filter is disabled' },
     })
   ),
-  controlledBy: schema.maybe(
+  controlled_by: schema.maybe(
     schema.string({
       meta: {
         description: 'Optional identifier for the component/plugin managing this filter',
       },
     })
   ),
-  dataViewId: schema.maybe(
+  data_view_id: schema.maybe(
     schema.string({
       meta: { description: 'Data view ID that this filter applies to' },
     })
@@ -86,12 +86,12 @@ const commonBasePropertiesSchema = schema.object({
       meta: { description: 'Human-readable label for the filter' },
     })
   ),
-  isMultiIndex: schema.maybe(
+  is_multi_index: schema.maybe(
     schema.boolean({
       meta: { description: 'Whether this filter can be applied to multiple indices' },
     })
   ),
-  filterType: schema.maybe(
+  filter_type: schema.maybe(
     schema.string({
       meta: {
         description:

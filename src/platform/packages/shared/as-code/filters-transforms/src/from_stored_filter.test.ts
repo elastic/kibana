@@ -247,7 +247,7 @@ describe('fromStoredFilter', () => {
           operator: 'range',
           value: { gte: 1000, lte: 5000 },
         });
-        expect(result!.dataViewId).toBe('test-index');
+        expect(result!.data_view_id).toBe('test-index');
       }
     });
   });
@@ -617,14 +617,14 @@ describe('fromStoredFilter', () => {
       }
     });
 
-    it('should preserve isMultiIndex property in meta for spatial filters', () => {
+    it('should preserve is_multi_index property in meta for spatial filters', () => {
       const spatialFilter = spatialFilterFixture;
 
       const result = fromStoredFilter(spatialFilter) as AsCodeFilter;
 
-      // Verify isMultiIndex is extracted from meta
+      // Verify is_multi_index is extracted from meta
       expect(isDSLFilter(result)).toBe(true);
-      expect(result.isMultiIndex).toBe(true);
+      expect(result.is_multi_index).toBe(true);
     });
   });
 
