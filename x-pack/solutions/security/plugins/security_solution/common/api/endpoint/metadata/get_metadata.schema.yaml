@@ -73,7 +73,6 @@ paths:
         - name: id
           in: path
           required: true
-          description: The ID of the metadata record.
           schema:
             type: string
             example: 'ed518850-681a-4d60-bb98-e22640cae2a8'
