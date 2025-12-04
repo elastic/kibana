@@ -77,7 +77,7 @@ export function SloManagementBulkActions({ items, setSelectedItems }: Props) {
           },
           name: i18n.translate(
             'xpack.slo.sloManagementTable.sloSloManagementTableBulkPurgeButtonLabel',
-            { defaultMessage: 'Purge Rollup Data' }
+            { defaultMessage: 'Purge rollup data' }
           ),
         },
       ],
