@@ -20,10 +20,14 @@ export function getSanitizedError(error: Error) {
 
 axios.interceptors?.response.use(
   (response) => response,
-  (error) => Promise.reject(getSanitizedError(error))
+  (error) => {
+    throw getSanitizedError(error);
+  }
 );
 
 axios.interceptors?.request.use(
   (config) => config,
-  (error) => Promise.reject(getSanitizedError(error))
+  (error) => {
+    throw getSanitizedError(error);
+  }
 );
