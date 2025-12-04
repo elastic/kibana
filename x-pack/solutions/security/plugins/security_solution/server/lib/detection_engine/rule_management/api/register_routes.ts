@@ -22,6 +22,7 @@ import { readRuleRoute } from './rules/read_rule/route';
 import { updateRuleRoute } from './rules/update_rule/route';
 import { readTagsRoute } from './tags/read_tags/route';
 import { getCoverageOverviewRoute } from './rules/coverage_overview/route';
+import { getRuleHistoryRoute } from './rules/rule_history/route';
 
 export const registerRuleManagementRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -54,4 +55,7 @@ export const registerRuleManagementRoutes = (
 
   // Rules coverage overview
   getCoverageOverviewRoute(router);
+
+  // Rule history
+  getRuleHistoryRoute(router, logger);
 };

@@ -1,0 +1,98 @@
+openapi: 3.0.0
+info:
+  title: Rule History API endpoint
+  version: '2023-10-31'
+paths:
+  /api/detection_engine/rules/_history:
+    get:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: RuleHistory
+      summary: List historical revisions for a detection rule
+      description: Retrieve a paginated list of historical rule revisions. By default, the first page is returned, with 20 results per page.
+      tags:
+        - Rules API
+      parameters:
+        - name: id
+          in: query
+          required: false
+          description: The rule's `id` value.
+          schema:
+            $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleObjectId'
+        - name: 'page'
+          in: query
+          description: Page number
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: 'per_page'
+          in: query
+          description: Rules per page
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 20
+      x-codeSamples:
+        - lang: cURL
+          source: |
+            curl -X GET "localhost:5601/api/detection_engine/rules/_history?id=6399a03a-9ec2-4c42-8e2a-9e622683cfcd&per_page=5" -H 'kbn-xsrf: true'
+      responses:
+        '200':
+          description: |
+            Successful response
+            > info
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page:
+                    type: integer
+                  perPage:
+                    type: integer
+                  total:
+                    type: integer
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RuleHistoryResult'
+                required:
+                  - page
+                  - perPage
+                  - total
+                  - items
+              examples:
+                example1:
+                  value:
+                    page: 1
+                    perPage: 5
+                    total: 4
+                    items:
+                      - timestamp: '2025-07-02T10:05:19.613Z'
+                        userId: 'bobpurton'
+                        message: 'Rule installed'
+                        revision: 256
+                        changedFields:
+                          - 'alert.name'
+                          - 'alert.tags'
+
+components:
+  schemas:
+    RuleHistoryResult:
+      type: object
+      properties:
+        timestamp:
+          type: string
+        userId:
+          type: string
+        revision:
+          type: integer
+        message:
+          type: string
+        changedFields:
+          type: array
+          items:
+            type: string

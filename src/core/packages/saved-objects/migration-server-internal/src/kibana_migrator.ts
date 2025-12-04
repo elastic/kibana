@@ -276,9 +276,9 @@ export class KibanaMigrator implements IKibanaMigrator {
     const exists = await this.client.indices.exists({ index });
     if (exists) {
       this.log.debug(`Index [${index}] exists. Skipping creation..`);
-      // return;
+      return;
       // Recreate the snapshot index for POC while testing/debugging.
-      await this.client.indices.delete({ index });
+      // await this.client.indices.delete({ index });
     }
 
     const mappings: MappingTypeMapping =
