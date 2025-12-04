@@ -116,7 +116,7 @@ export const IntegrationKnowledgeFlyout: React.FunctionComponent<{
                 <p>
                   <FormattedMessage
                     id="xpack.fleet.integrationKnowledgeFlyout.howItWorksDescription"
-                    defaultMessage="Integration documentation and metadata are processed through Elastic Inference Service to create embeddings that enhance AI Assistant understanding your environment."
+                    defaultMessage="Integration documentation and metadata are processed through Elastic Inference Service to create embeddings that enhance AI Assistant's understanding of your environment."
                   />
                 </p>
                 <h3>
