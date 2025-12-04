@@ -43,6 +43,8 @@ dependsOn:
   - '@kbn/licensing-plugin'
   - '@kbn/management-settings-components-field-row'
   - '@kbn/react-query'
+  - '@kbn/ai-assistant-common'
+  - '@kbn/ai-agent-confirmation-modal'
 tags:
   - plugin
   - prod
