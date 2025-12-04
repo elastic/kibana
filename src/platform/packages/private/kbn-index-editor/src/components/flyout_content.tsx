@@ -17,6 +17,7 @@ import {
   EuiToolTip,
   EuiBetaBadge,
   EuiSkeletonText,
+  useEuiTheme,
 } from '@elastic/eui';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { FileUploadContext, useFileUpload } from '@kbn/file-upload';
@@ -45,6 +46,7 @@ const DataGridLazy = withSuspense(lazy(() => import('./data_grid')));
 
 export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
   const { coreStart, ...restDeps } = deps;
+  const { euiTheme } = useEuiTheme();
 
   const dataView = useObservable(deps.indexUpdateService.dataView$);
   const dataViewColumns = useObservable(deps.indexUpdateService.dataTableColumns$);
@@ -130,7 +132,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
             css={css`
               .euiFlyoutBody__overflowContent {
                 height: 100%;
-                padding-top: 0;
+                padding-top: ${euiTheme.size.base};
               }
             `}
           >

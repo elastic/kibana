@@ -29,7 +29,7 @@ export const getGridToolbar =
         justifyContent="spaceBetween"
         alignItems="center"
         gutterSize="s"
-        css={{ margin: euiTheme.size.m }}
+        css={{ marginBottom: euiTheme.size.m }}
       >
         <EuiFlexGroup gutterSize="l" alignItems="center">
           <EuiFlexItem grow={false}>
