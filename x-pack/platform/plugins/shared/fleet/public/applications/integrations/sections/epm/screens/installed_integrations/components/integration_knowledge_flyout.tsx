@@ -110,7 +110,7 @@ export const IntegrationKnowledgeFlyout: React.FunctionComponent<{
                 <h3>
                   <FormattedMessage
                     id="xpack.fleet.integrationKnowledgeFlyout.howItWorksTitle"
-                    defaultMessage="How it works?"
+                    defaultMessage="How does it work?"
                   />
                 </h3>
                 <p>
