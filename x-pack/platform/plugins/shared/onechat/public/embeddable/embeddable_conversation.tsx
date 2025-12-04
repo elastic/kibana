@@ -40,7 +40,6 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
   `;
   const bodyStyles = css`
     flex: 1;
-    padding: 0 ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.base};
     min-height: 0;
 
     .euiFlyoutBody__overflow {
