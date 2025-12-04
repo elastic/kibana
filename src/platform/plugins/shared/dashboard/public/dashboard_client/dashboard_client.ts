@@ -80,7 +80,7 @@ export const dashboardClient = {
     return result;
   },
   search: async (searchBody: DashboardSearchRequestBody) => {
-    return await coreServices.http.post<DashboardSearchResponseBody>(`/api/dashboards/search`, {
+    return await coreServices.http.post<DashboardSearchResponseBody>(`${DASHBOARD_API_PATH}/search`, {
       version: DASHBOARD_API_VERSION,
       body: JSON.stringify({
         ...searchBody,
