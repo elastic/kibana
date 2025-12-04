@@ -25,7 +25,7 @@ import type {
   IInterpreterRenderHandlers,
   IInterpreterRenderUpdateParams,
   RenderMode,
-  RenderParams,
+  SyncParams,
 } from '../common';
 
 import { getRenderersRegistry } from './services';
@@ -50,7 +50,7 @@ export class ExpressionRenderHandler {
   render$: Observable<number>;
   update$: Observable<UpdateValue | null>;
   events$: Observable<ExpressionRendererEvent>;
-  syncParamsUpdate$: Observable<RenderParams>;
+  syncParamsUpdate$: Observable<SyncParams>;
 
   private element: HTMLElement;
   private destroyFn?: Function;
@@ -58,8 +58,7 @@ export class ExpressionRenderHandler {
   private renderSubject: Rx.BehaviorSubject<number | null>;
   private eventsSubject: Rx.Subject<unknown>;
   private updateSubject: Rx.Subject<UpdateValue | null>;
-  private syncParamsUpdateSubject: Rx.Subject<RenderParams>;
-  private renderMode: RenderMode;
+  private syncParamsUpdateSubject: Rx.Subject<SyncParams>;
   private syncColors: boolean;
   private syncCursor: boolean;
   private syncTooltips: boolean;
@@ -96,7 +95,6 @@ export class ExpressionRenderHandler {
     this.syncParamsUpdateSubject = new Rx.Subject();
     this.syncParamsUpdate$ = this.syncParamsUpdateSubject.asObservable();
 
-    this.renderMode = renderMode || 'view';
     this.syncColors = syncColors ?? false;
     this.syncCursor = syncCursor ?? true;
     this.syncTooltips = syncTooltips ?? false;
@@ -122,7 +120,7 @@ export class ExpressionRenderHandler {
         this.eventsSubject.next(data);
       },
       getRenderMode: () => {
-        return this.renderMode;
+        return renderMode || 'view';
       },
       isSyncColorsEnabled: () => {
         return this.syncColors;
@@ -184,13 +182,9 @@ export class ExpressionRenderHandler {
     }
   };
 
-  updateSyncParams = (params: RenderParams) => {
-    const changes: RenderParams = {};
+  updateSyncParams = (params: SyncParams) => {
+    const changes: SyncParams = {};
 
-    if (params.renderMode && this.renderMode !== params.renderMode) {
-      this.renderMode = params.renderMode;
-      changes.renderMode = params.renderMode;
-    }
     if (params.syncColors !== undefined && this.syncColors !== params.syncColors) {
       this.syncColors = params.syncColors;
       changes.syncColors = params.syncColors;

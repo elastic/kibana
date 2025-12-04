@@ -69,8 +69,7 @@ export type RenderMode = 'edit' | 'preview' | 'view';
 /**
  * Parameters that can be updated on a rendered expression without re executing the expression
  */
-export interface RenderParams {
-  renderMode?: RenderMode;
+export interface SyncParams {
   syncColors?: boolean;
   syncCursor?: boolean;
   syncTooltips?: boolean;
@@ -111,10 +110,10 @@ export interface IInterpreterRenderHandlers {
   isSyncTooltipsEnabled(): boolean;
 
   /**
-   * Observable that emits when render parameters (renderMode, syncColors, syncCursor, syncTooltips) change.
+   * Observable that emits when the sync parameters (syncColors, syncCursor, syncTooltips) change.
    * Renderers can subscribe to this to update without re-executing the expression.
    */
-  syncParamsUpdate$: Observable<RenderParams>;
+  syncParamsUpdate$: Observable<SyncParams>;
 
   /**
    * This uiState interface is actually `PersistedState` from the visualizations plugin,
