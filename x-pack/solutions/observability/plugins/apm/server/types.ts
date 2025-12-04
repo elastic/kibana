@@ -58,10 +58,6 @@ import type {
   ObservabilityAgentPluginStart,
 } from '@kbn/observability-agent-plugin/server';
 import type {
-  ObservabilityAgentPluginSetup,
-  ObservabilityAgentPluginStart,
-} from '@kbn/observability-agent-plugin/server';
-import type {
   ProfilingDataAccessPluginSetup,
   ProfilingDataAccessPluginStart,
 } from '@kbn/profiling-data-access-plugin/server';

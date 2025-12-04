@@ -227,7 +227,7 @@ async function generateAlertSummary({
     - If inconclusive or signals skew Indirect/Unrelated, state that the alert may be unrelated/noisy and suggest targeted traces/logging for the suspected path.
   `);
 
-  const alertDetails = JSON.stringify(alertDoc, null, 2)};
+  const alertDetails = JSON.stringify(alertDoc, null, 2);
 
   const userPrompt = dedent(`
     <AlertDetails>
