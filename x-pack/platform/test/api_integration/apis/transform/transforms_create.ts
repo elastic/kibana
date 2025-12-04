@@ -70,8 +70,6 @@ export default ({ getService }: FtrProviderContext) => {
           ...generateTransformConfig(transformId),
         });
 
-      console.log('HELLO WORLD CESARE!!!!!!!!!', body);
-
       transform.api.assertResponseStatusCode(200, status, body);
 
       // The data view id will be returned as a non-deterministic uuid
@@ -106,8 +104,6 @@ export default ({ getService }: FtrProviderContext) => {
         .send({
           ...generateTransformConfig(transformId),
         });
-
-      console.log('HELLO WORLD CESARE!!!!!!!!!', body);
 
       transform.api.assertResponseStatusCode(200, status, body);
 
