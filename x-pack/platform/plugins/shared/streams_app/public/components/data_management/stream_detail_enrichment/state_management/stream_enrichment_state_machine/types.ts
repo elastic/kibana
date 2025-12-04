@@ -16,6 +16,8 @@ import type {
   StreamlangProcessorDefinition,
   StreamlangDSL,
   StreamlangStepWithUIAttributes,
+  StreamlangValidationError,
+  FieldType,
 } from '@kbn/streamlang';
 import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
 import type { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
@@ -70,6 +72,8 @@ export interface StreamEnrichmentContextType {
   previousStreamlangDSL: StreamlangDSL;
   // Whether there are unsaved changes (diff of nextStreamlangDSL vs previousStreamlangDSL)
   hasChanges: boolean;
+  validationErrors: Map<string, StreamlangValidationError[]>;
+  fieldTypesByProcessor: Map<string, Map<string, FieldType>>;
 }
 
 export type StreamEnrichmentEvent =

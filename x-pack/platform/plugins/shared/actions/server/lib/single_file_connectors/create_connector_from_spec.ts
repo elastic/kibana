@@ -36,9 +36,10 @@ export const createConnectorTypeFromSpec = (
     supportedFeatureIds: spec.metadata.supportedFeatureIds,
     validate: {
       config: generateConfigSchema(spec.schema),
-      secrets: generateSecretsSchema(spec.authTypes),
+      secrets: generateSecretsSchema(spec.auth),
       params: generateParamsSchema(spec.actions),
     },
     executor,
+    globalAuthHeaders: spec.auth?.headers,
   };
 };

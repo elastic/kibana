@@ -20,6 +20,15 @@ export const selectIsInteractiveMode = (state: StreamEnrichmentActorSnapshot) =>
   return state.matches({ ready: { enrichment: { managingProcessors: 'interactive' } } });
 };
 
+/**
+ * Selects validation errors for all processors.
+ * Returns a Map of step customIdentifier to validation errors.
+ * Validation errors are computed in the state machine and stored in context.
+ */
+export const selectValidationErrors = (context: StreamEnrichmentContextType) => {
+  return context.validationErrors;
+};
+
 export const selectWhetherThereAreOutdatedDocumentsInSimulation = createSelector(
   [
     (streamEnrichmentContext: StreamEnrichmentContextType) =>
