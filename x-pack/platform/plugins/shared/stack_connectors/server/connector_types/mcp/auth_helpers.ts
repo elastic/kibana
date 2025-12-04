@@ -28,7 +28,7 @@ export function buildHeadersFromSecrets(
 
     case 'bearer':
       if (secrets.authType === 'bearer' && secrets.token) {
-        headers['Authorization'] = `Bearer ${secrets.token}`;
+        headers.Authorization = `Bearer ${secrets.token}`;
       }
       break;
 
@@ -43,8 +43,10 @@ export function buildHeadersFromSecrets(
       if (secrets.authType === 'basic' && secrets.username && secrets.password) {
         // Basic auth is handled by the MCP client transport, but we can set it here if needed
         // For now, we'll encode it as a header
-        const credentials = Buffer.from(`${secrets.username}:${secrets.password}`).toString('base64');
-        headers['Authorization'] = `Basic ${credentials}`;
+        const credentials = Buffer.from(`${secrets.username}:${secrets.password}`).toString(
+          'base64'
+        );
+        headers.Authorization = `Basic ${credentials}`;
       }
       break;
 
@@ -63,4 +65,3 @@ export function buildHeadersFromSecrets(
 
   return headers;
 }
-

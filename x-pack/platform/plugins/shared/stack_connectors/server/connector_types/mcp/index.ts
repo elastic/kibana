@@ -50,7 +50,10 @@ export const getMcpConnectorType = (): SubActionConnectorType<
     WorkflowsConnectorFeatureId,
   ],
   minimumLicenseRequired: 'enterprise' as const,
-  postDeleteHook: async ({ config, logger }: PostDeleteConnectorHookParams<MCPConnectorConfig, MCPConnectorSecrets>) => {
+  postDeleteHook: async ({
+    config,
+    logger,
+  }: PostDeleteConnectorHookParams<MCPConnectorConfig, MCPConnectorSecrets>) => {
     // Note: The connector instance is short-lived (created per execution),
     // so we don't need to clean up a persistent connection here.
     // However, if there were any persistent resources, they would be cleaned up here.

@@ -52,13 +52,14 @@ export interface RetryOptions {
 /**
  * Default retry options.
  */
-const DEFAULT_RETRY_OPTIONS: Required<Omit<RetryOptions, 'logger' | 'operationName' | 'onRetry'>> = {
-  maxAttempts: 1,
-  initialDelayMs: 0,
-  backoffMultiplier: 1, // 1 = constant delay, undefined = no delay
-  maxDelayMs: Infinity,
-  isRetryableError: () => true,
-};
+const DEFAULT_RETRY_OPTIONS: Required<Omit<RetryOptions, 'logger' | 'operationName' | 'onRetry'>> =
+  {
+    maxAttempts: 1,
+    initialDelayMs: 0,
+    backoffMultiplier: 1, // 1 = constant delay, undefined = no delay
+    maxDelayMs: Infinity,
+    isRetryableError: () => true,
+  };
 
 /**
  * Retries an async operation with configurable attempts, delays, and error filtering.
@@ -145,7 +146,9 @@ export async function retryWithRecovery<T>(
             );
           } else {
             logger.warn(
-              `${operationName ? `[${operationName}] ` : ''}Max retry attempts (${maxAttempts}) reached. Last error: ${
+              `${
+                operationName ? `[${operationName}] ` : ''
+              }Max retry attempts (${maxAttempts}) reached. Last error: ${
                 error instanceof Error ? error.message : String(error)
               }`
             );
@@ -167,7 +170,9 @@ export async function retryWithRecovery<T>(
           // Log recovery error but continue with retry
           if (logger) {
             logger.debug(
-              `${operationName ? `[${operationName}] ` : ''}Error during recovery before retry attempt ${attempt}: ${
+              `${
+                operationName ? `[${operationName}] ` : ''
+              }Error during recovery before retry attempt ${attempt}: ${
                 recoveryError instanceof Error ? recoveryError.message : String(recoveryError)
               }`
             );
@@ -179,7 +184,9 @@ export async function retryWithRecovery<T>(
       if (logger) {
         const delayMsg = delayMs > 0 ? ` after ${delayMs}ms delay` : '';
         logger.warn(
-          `${operationName ? `[${operationName}] ` : ''}Retry attempt ${attempt}/${maxAttempts}${delayMsg}. Previous error: ${
+          `${
+            operationName ? `[${operationName}] ` : ''
+          }Retry attempt ${attempt}/${maxAttempts}${delayMsg}. Previous error: ${
             error instanceof Error ? error.message : String(error)
           }`
         );
@@ -195,4 +202,3 @@ export async function retryWithRecovery<T>(
   // This should never be reached, but TypeScript needs it
   throw lastError;
 }
-
