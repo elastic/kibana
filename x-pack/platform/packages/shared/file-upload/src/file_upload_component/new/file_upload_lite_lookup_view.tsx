@@ -111,6 +111,7 @@ export const FileUploadLiteLookUpView: FC<Props> = ({
             <EuiSpacer />
 
             <EuiButton
+              data-test-subj="fileUploadLiteLookupReviewButton"
               disabled={fileClashes || uploadStatus.analysisStatus !== STATUS.COMPLETED}
               onClick={() => {
                 setStep('analysis', STATUS.COMPLETED);
@@ -172,6 +173,7 @@ export const FileUploadLiteLookUpView: FC<Props> = ({
             <EuiSpacer />
 
             <EuiButton
+              data-test-subj="fileUploadLiteLookupFinishButton"
               disabled={uploadStatus.allDocsSearchable === false}
               onClick={() => {
                 onClose?.();
@@ -191,7 +193,9 @@ export const FileUploadLiteLookUpView: FC<Props> = ({
     },
   ];
 
-  return <EuiSteps steps={steps} titleSize="xxs" css={css} />;
+  return (
+    <EuiSteps data-test-subj="fileUploadLiteLookupSteps" steps={steps} titleSize="xxs" css={css} />
+  );
 };
 
 function generateStatus(status: STATUS): EuiStepStatus {

@@ -137,7 +137,7 @@ export const MappingEditor: FC<Props> = ({ onImportClick }) => {
       {mappingsError ? (
         <>
           <EuiSpacer size="s" />
-          <EuiText size="xs" color="danger">
+          <EuiText size="xs" color="danger" data-test-subj="fileUploadLiteLookupErrorMessage">
             {mappingsError.message}
           </EuiText>
         </>
@@ -150,6 +150,7 @@ export const MappingEditor: FC<Props> = ({ onImportClick }) => {
           <EuiFlexGroup gutterSize="none">
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="fileUploadLiteLookupImportButton"
                 disabled={mappingsError !== null}
                 onClick={() => onImportClick()}
                 fullWidth={false}
@@ -163,6 +164,7 @@ export const MappingEditor: FC<Props> = ({ onImportClick }) => {
         <EuiFlexItem grow={true}>
           <div css={{ width: '255px', textAlign: 'right' }}>
             <EuiButtonEmpty
+              data-test-subj="fileUploadLiteLookupResetButton"
               flush="right"
               disabled={mappingsEdited === false}
               onClick={() => {
