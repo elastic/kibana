@@ -50,9 +50,7 @@ export const transformDashboardIn = (
 
     const controlGroupReferences = (incomingReferences ?? []).filter(isLegacyControlGroupReference);
     if (incomingReferences && controlGroupReferences.length !== incomingReferences.length) {
-      throw new Error(
-        `References are only supported for controlGroupInput.`
-      );
+      throw new Error(`References are only supported for controlGroupInput.`);
     }
 
     const tagReferences = transformTagsIn(tags);

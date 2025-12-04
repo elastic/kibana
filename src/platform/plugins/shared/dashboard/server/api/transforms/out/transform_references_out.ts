@@ -13,9 +13,6 @@ export function isLegacyControlGroupReference(reference: SavedObjectReference) {
   return reference.name.startsWith('controlGroup_');
 }
 
-export function transformReferencesOut(
-  references: SavedObjectReference[]
-): SavedObjectReference[] {
-  return references
-    .filter(isLegacyControlGroupReference);
+export function transformReferencesOut(references: SavedObjectReference[]): SavedObjectReference[] {
+  return references.filter(isLegacyControlGroupReference);
 }
