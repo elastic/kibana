@@ -32,11 +32,13 @@ const ERROR_AI_INSIGHT_SYSTEM_PROMPT = dedent(`
   - Conciseness: Use bullet points. Avoid flowery language. Be direct and technical.
 
   Available context tags:
-  - <TraceServices>: service aggregates with counts, errorCount, avgDurationUs
-  - <TraceItems>: span/transaction samples with service, name, type, outcome, status.code, duration, http.url, downstream resource
-  - <TraceErrors>: related errors within the trace (type, message, culprit, spanId, timestampUs)
-  - <LogCategories>: categorized log patterns (errorCategory, docCount, sampleMessage, downstreamServiceResource)
-  - Downstream dependencies line (if present)
+  - <ErrorDetails>: Full error document (exception, message, stacktrace, labels)
+  - <TransactionDetails>: Transaction linked to the error (if present)
+  - <APMDownstreamDependencies>: Downstream dependencies for the erroring service
+  - <TraceItems>: Span/transaction samples with service, name, type, eventOutcome, statusCode, duration, httpUrl, downstreamServiceResource
+  - <TraceErrors>: Related errors within the trace (type, message, culprit, spanId, timestampUs)
+  - <TraceServices>: Service aggregates for the trace (serviceName, count, errorCount)
+  - <TraceLogCategories>: Categorized log patterns tied to the trace (errorCategory, docCount, sampleMessage)
 `);
 
 const buildUserPrompt = (errorContext: string) => {
