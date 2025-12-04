@@ -7,7 +7,7 @@
 
 import type { ESFilter } from '@kbn/es-types';
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { maybe } from '../../../../common/utils/maybe';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
@@ -20,6 +20,7 @@ import {
   getProcessorEventForTransactions,
 } from '../../../lib/helpers/transactions';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { compactMap } from '../../../utils/compact_map';
 
 export async function getDerivedServiceAnnotations({
   apmEventClient,
@@ -71,50 +72,55 @@ export async function getDerivedServiceAnnotations({
 
   const requiredFields = asMutableArray([AT_TIMESTAMP] as const);
   const annotations = await Promise.all(
-    versions.map(async (version) => {
-      const response = await apmEventClient.search('get_first_seen_of_version', {
-        apm: {
-          events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
-        },
-        track_total_hits: false,
-        size: 1,
-        query: {
-          bool: {
-            filter: [...filter, { term: { [SERVICE_VERSION]: version } }],
-          },
-        },
-        sort: {
-          '@timestamp': 'asc',
-        },
-        fields: requiredFields,
-      });
-
-      const event = unflattenKnownApmEventFields(
-        maybe(response.hits.hits[0])?.fields,
-        requiredFields
-      );
-
-      const timestamp = event?.[AT_TIMESTAMP];
-      if (!timestamp) {
-        throw new Error('First seen for version was unexpectedly undefined or null.');
-      }
-
-      const firstSeen = new Date(timestamp).getTime();
-      if (!isFiniteNumber(firstSeen)) {
-        throw new Error('First seen for version was unexpectedly undefined or null.');
-      }
-
-      if (firstSeen < start || firstSeen > end) {
-        return null;
-      }
-
-      return {
-        type: AnnotationType.VERSION,
-        id: version,
-        [AT_TIMESTAMP]: firstSeen,
-        text: version,
-      };
-    })
+    versions.map(
+      async (version) =>
+        [
+          version,
+          await apmEventClient.search('get_first_seen_of_version', {
+            apm: {
+              events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
+            },
+            track_total_hits: false,
+            size: 1,
+            query: {
+              bool: {
+                filter: [...filter, { term: { [SERVICE_VERSION]: version } }],
+              },
+            },
+            sort: {
+              '@timestamp': 'asc',
+            },
+            fields: requiredFields,
+          }),
+        ] as const
+    )
   );
-  return annotations.filter(Boolean) as Annotation[];
+
+  return compactMap(annotations, ([version, response]) => {
+    const fields = maybe(response.hits.hits[0])?.fields;
+
+    const event = fields && accessKnownApmEventFields(fields).requireFields(requiredFields);
+
+    if (!event) {
+      return null;
+    }
+
+    const timestamp = event[AT_TIMESTAMP];
+
+    const firstSeen = new Date(timestamp).getTime();
+    if (!isFiniteNumber(firstSeen)) {
+      throw new Error('First seen for version was unexpectedly undefined or null.');
+    }
+
+    if (firstSeen < start || firstSeen > end) {
+      return null;
+    }
+
+    return {
+      type: AnnotationType.VERSION,
+      id: `${version}`,
+      [AT_TIMESTAMP]: firstSeen,
+      text: `${version}`,
+    } satisfies Annotation;
+  });
 }
