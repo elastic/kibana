@@ -8,6 +8,7 @@
 import { createSelector } from 'reselect';
 import { isActionBlock } from '@kbn/streamlang';
 import moment from 'moment';
+import { getStreamTypeFromDefinition } from '../../../../../util/get_stream_type_from_definition';
 import type { StreamEnrichmentContextType } from './types';
 import { isStepUnderEdit } from '../steps_state_machine';
 import { canDataSourceTypeBeOutdated } from './utils';
@@ -108,5 +109,12 @@ export const selectWhetherThereAreOutdatedDocumentsInSimulation = createSelector
     const streamProcessingTimestamp = new Date(processingUpdatedAt).getTime();
 
     return oldestDocumentTimestamp < streamProcessingTimestamp;
+  }
+);
+
+export const selectStreamType = createSelector(
+  [(context: StreamEnrichmentContextType) => context.definition],
+  (definition) => {
+    return getStreamTypeFromDefinition(definition.stream);
   }
 );

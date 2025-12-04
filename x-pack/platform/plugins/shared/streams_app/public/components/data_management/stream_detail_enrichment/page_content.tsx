@@ -38,6 +38,7 @@ import {
 } from './state_management/stream_enrichment_state_machine/utils';
 import { StepsEditor } from './steps_editor';
 import { buildUpsertStreamRequestPayload } from './utils';
+import { selectStreamType } from './state_management/stream_enrichment_state_machine/selectors';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
 
@@ -157,6 +158,8 @@ export function StreamDetailEnrichmentContentImpl() {
     state.matches({ ready: { stream: 'updating' } })
   );
 
+  const streamType = useStreamEnrichmentSelector((snapshot) => selectStreamType(snapshot.context));
+
   const hasChanges = canUpdate && !isSimulating;
   const isLoadingSuggestion = useStreamEnrichmentSelector((snapshot) =>
     snapshot.matches({ ready: { enrichment: { pipelineSuggestion: 'generatingSuggestion' } } })
@@ -270,6 +273,7 @@ export function StreamDetailEnrichmentContentImpl() {
           insufficientPrivileges={!canManage}
           isInvalid={hasDefinitionError || hasValidationErrors}
           onViewCodeClick={onBottomBarViewCodeClick}
+          streamType={streamType}
         />
       )}
       {isRequestPreviewFlyoutOpen && (
