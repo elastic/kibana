@@ -7,6 +7,7 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -24,6 +25,7 @@ import type {
   Attachment,
   AttachmentType,
 } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
+import { ATTACHMENT_SUGGESTIONS_LIMIT } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import {
@@ -82,13 +84,14 @@ export function AddAttachmentFlyout({
             query: queryParams,
           },
         })
-        .then(({ suggestions }) => {
+        .then(({ suggestions, hasMore }) => {
           return {
             attachments: suggestions.filter((attachment) => {
               return !linkedAttachments.find(
                 (linkedAttachment) => linkedAttachment.id === attachment.id
               );
             }),
+            hasMore,
           };
         });
     },
@@ -137,6 +140,18 @@ export function AddAttachmentFlyout({
               }
             )}
           />
+          {attachmentSuggestionsFetch.value?.hasMore && (
+            <EuiCallOut
+              announceOnMount
+              size="s"
+              color="primary"
+              title={i18n.translate('xpack.streams.addAttachmentFlyout.hasMoreResultsMessage', {
+                defaultMessage:
+                  'Showing first {limit} results. Use filters to narrow down your search.',
+                values: { limit: ATTACHMENT_SUGGESTIONS_LIMIT },
+              })}
+            />
+          )}
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiText size="s">

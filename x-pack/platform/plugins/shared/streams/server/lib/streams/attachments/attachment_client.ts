@@ -612,22 +612,21 @@ export class AttachmentClient {
     query,
     attachmentTypes,
     tags,
+    limit,
   }: {
     query: string;
     attachmentTypes?: AttachmentType[];
     tags?: string[];
-  }): Promise<Attachment[]> {
-    // TODO: Implement pagination
-    const perPage = 1000;
-
+    limit: number;
+  }): Promise<{ suggestions: Attachment[]; hasMore: boolean }> {
     // Search all types if none specified, otherwise only search the requested types
-    const typesToSearch = attachmentTypes || [...ATTACHMENT_TYPES];
+    const typesToSearch = attachmentTypes || ATTACHMENT_TYPES;
 
     const suggestionsPromises = typesToSearch.map((type) =>
       this.getSuggestedEntitiesMap[type]({
         query,
         tags,
-        perPage,
+        perPage: limit,
       })
     );
 
@@ -638,10 +637,18 @@ export class AttachmentClient {
     const streamNamesById = await this.getStreamNamesForAttachments(attachments.map((a) => a.id));
 
     // Enrich attachments with stream names (empty array if not linked to any stream)
-    return attachments.map((attachment) => ({
+    const enrichedAttachments = attachments.map((attachment) => ({
       ...attachment,
       streamNames: streamNamesById.get(attachment.id) ?? [],
     }));
+
+    // Check if there are more results than the limit
+    const hasMore = enrichedAttachments.length > limit;
+
+    return {
+      suggestions: enrichedAttachments.slice(0, limit),
+      hasMore,
+    };
   }
 
   /**

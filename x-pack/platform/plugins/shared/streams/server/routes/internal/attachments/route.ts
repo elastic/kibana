@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+import { ATTACHMENT_SUGGESTIONS_LIMIT, STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import type { Attachment } from '../../../lib/streams/attachments/types';
 import { ATTACHMENT_TYPES } from '../../../lib/streams/attachments/types';
@@ -16,6 +16,7 @@ const attachmentTypeSchema = z.enum(ATTACHMENT_TYPES);
 
 export interface SuggestAttachmentsResponse {
   suggestions: Attachment[];
+  hasMore: boolean;
 }
 
 const suggestAttachmentsRoute = createServerRoute({
@@ -59,14 +60,16 @@ const suggestAttachmentsRoute = createServerRoute({
 
     const tags = query?.tags ? (Array.isArray(query.tags) ? query.tags : [query.tags]) : undefined;
 
-    const suggestions = await attachmentClient.getSuggestions({
+    const { suggestions, hasMore } = await attachmentClient.getSuggestions({
       attachmentTypes,
       query: query?.query || '',
       tags,
+      limit: ATTACHMENT_SUGGESTIONS_LIMIT,
     });
 
     return {
       suggestions,
+      hasMore,
     };
   },
 });
