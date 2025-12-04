@@ -11,6 +11,7 @@ import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
+import { useRenderParams } from '@kbn/expressions-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { VisualizationContainer } from '@kbn/visualizations-common';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
@@ -65,17 +66,26 @@ export const getVegaVisRenderer: (
 
     const [startServices] = await deps.core.getStartServices();
 
-    render(
-      <KibanaRenderContextProvider {...startServices}>
+    // Wrapper component that uses useRenderParams hook for reactive param updates
+    const VegaWrapper = () => {
+      const { renderMode } = useRenderParams(handlers);
+
+      return (
         <VisualizationContainer handlers={handlers}>
           <LazyVegaVisComponent
             deps={deps}
             fireEvent={handlers.event}
             renderComplete={renderComplete}
-            renderMode={handlers.getRenderMode()}
+            renderMode={renderMode}
             visData={visData}
           />
         </VisualizationContainer>
+      );
+    };
+
+    render(
+      <KibanaRenderContextProvider {...startServices}>
+        <VegaWrapper />
       </KibanaRenderContextProvider>,
       domNode
     );

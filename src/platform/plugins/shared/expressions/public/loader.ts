@@ -78,7 +78,6 @@ export class ExpressionLoader {
     });
 
     this.data$.subscribe(({ result }) => {
-      this.data = result;
       this.render(result);
     });
 
@@ -122,16 +121,37 @@ export class ExpressionLoader {
     return this.execution?.inspect() as Adapters;
   }
 
-  updateParams(params: {
+  updateRenderParams(params: {
     renderMode?: RenderMode;
     syncColors?: boolean;
     syncCursor?: boolean;
     syncTooltips?: boolean;
   }): void {
-    this.setParams(params);
-    // re-render without executing the expression
-    if (this.data) {
-      this.render(this.data);
+    const changedParams: {
+      renderMode?: RenderMode;
+      syncColors?: boolean;
+      syncCursor?: boolean;
+      syncTooltips?: boolean;
+    } = {};
+
+    if (params.renderMode && params.renderMode !== this.params.renderMode) {
+      this.params.renderMode = params.renderMode;
+      changedParams.renderMode = params.renderMode;
+    }
+    if (params.syncColors !== undefined && params.syncColors !== this.params.syncColors) {
+      this.params.syncColors = params.syncColors;
+      changedParams.syncColors = params.syncColors;
+    }
+    if (params.syncCursor !== undefined && params.syncCursor !== this.params.syncCursor) {
+      this.params.syncCursor = params.syncCursor;
+      changedParams.syncCursor = params.syncCursor;
+    }
+    if (params.syncTooltips !== undefined && params.syncTooltips !== this.params.syncTooltips) {
+      this.params.syncTooltips = params.syncTooltips;
+      changedParams.syncTooltips = params.syncTooltips;
+    }
+    if (Object.keys(changedParams).length > 0) {
+      this.renderHandler.updateRenderParams(changedParams);
     }
   }
 
@@ -210,33 +230,6 @@ export class ExpressionLoader {
       this.execution?.inspect()) as Adapters;
 
     this.params.executionContext = params.executionContext;
-
-    const changedParams: {
-      renderMode?: RenderMode;
-      syncColors?: boolean;
-      syncCursor?: boolean;
-      syncTooltips?: boolean;
-    } = {};
-
-    if (params.renderMode && params.renderMode !== this.params.renderMode) {
-      this.params.renderMode = params.renderMode;
-      changedParams.renderMode = params.renderMode;
-    }
-    if (params.syncColors != null && params.syncColors !== this.params.syncColors) {
-      this.params.syncColors = params.syncColors;
-      changedParams.syncColors = params.syncColors;
-    }
-    if (params.syncCursor != null && params.syncCursor !== this.params.syncCursor) {
-      this.params.syncCursor = params.syncCursor;
-      changedParams.syncCursor = params.syncCursor;
-    }
-    if (params.syncTooltips != null && params.syncTooltips !== this.params.syncTooltips) {
-      this.params.syncTooltips = params.syncTooltips;
-      changedParams.syncTooltips = params.syncTooltips;
-    }
-    if (Object.keys(changedParams).length > 0) {
-      this.renderHandler.updateParams(changedParams);
-    }
   }
 }
 

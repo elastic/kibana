@@ -147,30 +147,6 @@ export function useExpressionRenderer(
     };
   }, [debouncedLoaderParams.onRenderError, debouncedLoaderParams.interactive]);
 
-  // Handle renderMode and sync params changes separately without triggering full update
-  useUpdateEffect(() => {
-    if (expressionLoaderRef.current) {
-      const params: Record<string, unknown> = {};
-
-      if (debouncedRenderMode !== undefined) {
-        params.renderMode = debouncedRenderMode;
-      }
-      if (debouncedSyncColors !== undefined) {
-        params.syncColors = debouncedSyncColors;
-      }
-      if (debouncedSyncCursor !== undefined) {
-        params.syncCursor = debouncedSyncCursor;
-      }
-      if (debouncedSyncTooltips !== undefined) {
-        params.syncTooltips = debouncedSyncTooltips;
-      }
-
-      if (Object.keys(params).length > 0) {
-        expressionLoaderRef.current.updateParams(params);
-      }
-    }
-  }, [debouncedRenderMode, debouncedSyncColors, debouncedSyncCursor, debouncedSyncTooltips]);
-
   useEffect(() => {
     const subscription = onEvent && expressionLoaderRef.current?.events$.subscribe(onEvent);
 
@@ -219,6 +195,16 @@ export function useExpressionRenderer(
   useUpdateEffect(() => {
     expressionLoaderRef.current?.update(debouncedExpression, debouncedLoaderParams);
   }, [debouncedExpression, debouncedLoaderParams]);
+
+  // Handle renderMode and sync params changes separately without triggering full update
+  useUpdateEffect(() => {
+    expressionLoaderRef.current?.updateRenderParams({
+      renderMode: debouncedRenderMode,
+      syncColors: debouncedSyncColors,
+      syncCursor: debouncedSyncCursor,
+      syncTooltips: debouncedSyncTooltips,
+    });
+  }, [debouncedRenderMode, debouncedSyncColors, debouncedSyncCursor, debouncedSyncTooltips]);
 
   // call expression loader's done() handler when finished rendering custom error state
   useLayoutEffect(() => {

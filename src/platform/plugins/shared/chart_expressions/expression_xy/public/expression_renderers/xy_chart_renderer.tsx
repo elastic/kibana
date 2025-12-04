@@ -26,6 +26,7 @@ import type {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common';
+import { useRenderParams } from '@kbn/expressions-plugin/public';
 import type { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
@@ -281,8 +282,11 @@ export const getXyChartRenderer = ({
 
     performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_START);
 
-    ReactDOM.render(
-      <KibanaRenderContextProvider {...deps.startServices}>
+    // Wrapper component that uses useRenderParams hook for reactive param updates
+    const XYChartWrapper = () => {
+      const { renderMode, syncColors, syncCursor, syncTooltips } = useRenderParams(handlers);
+
+      return (
         <div css={chartContainerStyle} data-test-subj="xyVisChart">
           <XYChartReportable
             {...config}
@@ -301,15 +305,21 @@ export const getXyChartRenderer = ({
             onCreateAlertRule={onCreateAlertRule}
             layerCellValueActions={layerCellValueActions}
             onSelectRange={onSelectRange}
-            renderMode={handlers.getRenderMode()}
-            syncColors={handlers.isSyncColorsEnabled()}
-            syncTooltips={handlers.isSyncTooltipsEnabled()}
-            syncCursor={handlers.isSyncCursorEnabled()}
+            renderMode={renderMode}
+            syncColors={syncColors}
+            syncTooltips={syncTooltips}
+            syncCursor={syncCursor}
             uiState={handlers.uiState as PersistedState}
             renderComplete={renderComplete}
             setChartSize={setChartSize}
           />
         </div>
+      );
+    };
+
+    ReactDOM.render(
+      <KibanaRenderContextProvider {...deps.startServices}>
+        <XYChartWrapper />
       </KibanaRenderContextProvider>,
       domNode
     );

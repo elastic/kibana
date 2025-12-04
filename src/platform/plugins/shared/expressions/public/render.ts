@@ -25,6 +25,7 @@ import type {
   IInterpreterRenderHandlers,
   IInterpreterRenderUpdateParams,
   RenderMode,
+  RenderParams,
 } from '../common';
 
 import { getRenderersRegistry } from './services';
@@ -49,6 +50,7 @@ export class ExpressionRenderHandler {
   render$: Observable<number>;
   update$: Observable<UpdateValue | null>;
   events$: Observable<ExpressionRendererEvent>;
+  renderParamsUpdate$: Observable<RenderParams>;
 
   private element: HTMLElement;
   private destroyFn?: Function;
@@ -56,6 +58,7 @@ export class ExpressionRenderHandler {
   private renderSubject: Rx.BehaviorSubject<number | null>;
   private eventsSubject: Rx.Subject<unknown>;
   private updateSubject: Rx.Subject<UpdateValue | null>;
+  private renderParamsUpdateSubject: Rx.Subject<RenderParams>;
   private renderMode: RenderMode;
   private syncColors: boolean;
   private syncCursor: boolean;
@@ -89,6 +92,9 @@ export class ExpressionRenderHandler {
 
     this.updateSubject = new Rx.Subject();
     this.update$ = this.updateSubject.asObservable();
+
+    this.renderParamsUpdateSubject = new Rx.Subject();
+    this.renderParamsUpdate$ = this.renderParamsUpdateSubject.asObservable();
 
     this.renderMode = renderMode || 'view';
     this.syncColors = syncColors ?? false;
@@ -130,6 +136,7 @@ export class ExpressionRenderHandler {
       isInteractive: () => {
         return interactive ?? true;
       },
+      renderParamsUpdate$: this.renderParamsUpdate$,
       hasCompatibleActions,
       getCompatibleCellValueActions,
     };
@@ -171,39 +178,34 @@ export class ExpressionRenderHandler {
     this.renderSubject.complete();
     this.eventsSubject.complete();
     this.updateSubject.complete();
+    this.renderParamsUpdateSubject.complete();
     if (this.destroyFn) {
       this.destroyFn();
     }
   };
 
-  updateParams = (params: {
-    renderMode?: RenderMode;
-    syncColors?: boolean;
-    syncCursor?: boolean;
-    syncTooltips?: boolean;
-  }) => {
-    const changes: {
-      renderMode?: RenderMode;
-      syncColors?: boolean;
-      syncCursor?: boolean;
-      syncTooltips?: boolean;
-    } = {};
+  updateRenderParams = (params: RenderParams) => {
+    const changes: RenderParams = {};
 
     if (params.renderMode && this.renderMode !== params.renderMode) {
       this.renderMode = params.renderMode;
       changes.renderMode = params.renderMode;
     }
-    if (params.syncColors != null && this.syncColors !== params.syncColors) {
+    if (params.syncColors !== undefined && this.syncColors !== params.syncColors) {
       this.syncColors = params.syncColors;
       changes.syncColors = params.syncColors;
     }
-    if (params.syncCursor != null && this.syncCursor !== params.syncCursor) {
+    if (params.syncCursor !== undefined && this.syncCursor !== params.syncCursor) {
       this.syncCursor = params.syncCursor;
       changes.syncCursor = params.syncCursor;
     }
-    if (params.syncTooltips != null && this.syncTooltips !== params.syncTooltips) {
+    if (params.syncTooltips !== undefined && this.syncTooltips !== params.syncTooltips) {
       this.syncTooltips = params.syncTooltips;
       changes.syncTooltips = params.syncTooltips;
+    }
+
+    if (Object.keys(changes).length > 0) {
+      this.renderParamsUpdateSubject.next(changes);
     }
   };
 
