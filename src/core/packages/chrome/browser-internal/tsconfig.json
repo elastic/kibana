@@ -66,6 +66,8 @@
     "@kbn/shared-ux-feedback-snippet",
     "@kbn/core-chrome-navigation-tour",
     "@kbn/shared-ux-error-boundary",
+    "@kbn/core-chrome-sidebar",
+    "@kbn/shared-ux-utility",
   ],
   "exclude": [
     "target/**/*",
