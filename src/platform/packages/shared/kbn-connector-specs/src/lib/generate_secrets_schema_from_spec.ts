@@ -21,5 +21,5 @@ export const generateSecretsSchemaFromSpec = (authTypes: ConnectorSpec['authType
       z
         .discriminatedUnion('authType', [secretSchemas[0], ...secretSchemas.slice(1)])
         .meta({ label: 'Authentication' })
-    : z.object({}).default({});
+    : z.object({});
 };

@@ -71,6 +71,7 @@ export function SecuritySolutionEndpointRegistryHelpers() {
           args,
           waitForLogLine: 'package manifests loaded',
           waitForLogLineTimeoutMs: 60 * 6 * 1000, // 6 minutes,
+          preferCached: true,
         },
       });
     },

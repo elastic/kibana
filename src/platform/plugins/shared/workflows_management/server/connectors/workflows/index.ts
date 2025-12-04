@@ -72,6 +72,7 @@ export function getConnectorType(
     executor: (execOptions) => executor(execOptions, deps),
     supportedFeatureIds: [AlertingConnectorFeatureId, SecurityConnectorFeatureId],
     isSystemActionType: true,
+    allowMultipleSystemActions: true,
   };
 }
 
