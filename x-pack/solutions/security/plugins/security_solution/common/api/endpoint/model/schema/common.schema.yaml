@@ -61,7 +61,16 @@ components:
       type: string
       description: Determines which field is used to sort the results.
       example: enrolled_at
-
+      enum:
+        - enrolled_at
+        - metadata.host.hostname
+        - host_status
+        - metadata.Endpoint.policy.applied.name
+        - metadata.Endpoint.policy.applied.status
+        - metadata.host.os.name
+        - metadata.host.ip
+        - metadata.agent.version
+        - last_checkin
     AgentIds:
       oneOf:
         - type: array

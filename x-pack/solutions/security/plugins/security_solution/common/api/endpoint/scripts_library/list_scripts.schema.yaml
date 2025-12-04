@@ -90,12 +90,12 @@ components:
         - $ref: '../model/schema/common.schema.yaml#/components/schemas/PageSize'
         - maximum: 1000
     ApiSortField:
-      allOf:
-        - $ref: '../model/schema/common.schema.yaml#/components/schemas/SortField'
-        - enum:
-            - name
-            - createdAt
-            - createdBy
-            - updatedAt
-            - updatedBy
-        - example: name
+      type: string
+      description: Determines which field is used to sort the results.
+      example: updatedAt
+      enum:
+        - name
+        - createdAt
+        - createdBy
+        - updatedAt
+        - updatedBy
