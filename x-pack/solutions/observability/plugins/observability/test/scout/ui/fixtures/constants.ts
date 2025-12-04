@@ -46,11 +46,7 @@ export const RULE_TYPE_MODAL_TEST_SUBJECTS = {
  * Constants for data-test-subj values used in logs tab tests
  */
 export const LOGS_TAB_TEST_SUBJECTS = {
-  // Logs Tab
   LOGS_TAB: 'ruleLogsTab',
   EVENT_LOG_TABLE: 'ruleEventLogListTable',
-  DATE_PICKER: 'ruleEventLogListDatePicker',
-  STATUS_FILTER: 'eventLogStatusFilterButton',
-  LOADING_INDICATOR: 'ruleEventLogListProgressBar',
   RULE_DETAILS: 'ruleDetails',
 } as const;

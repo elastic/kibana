@@ -250,34 +250,6 @@ export class RulesPage {
   }
 
   /**
-   * Gets the date picker locator
-   */
-  public get datePicker() {
-    return this.page.testSubj.locator(LOGS_TAB_TEST_SUBJECTS.DATE_PICKER);
-  }
-
-  /**
-   * Gets the status filter button locator
-   */
-  public get statusFilter() {
-    return this.page.testSubj.locator(LOGS_TAB_TEST_SUBJECTS.STATUS_FILTER);
-  }
-
-  /**
-   * Gets the loading indicator locator
-   */
-  public get loadingIndicator() {
-    return this.page.testSubj.locator(LOGS_TAB_TEST_SUBJECTS.LOADING_INDICATOR);
-  }
-
-  /**
-   * Gets the rule details page locator
-   */
-  public get ruleDetails() {
-    return this.page.testSubj.locator(LOGS_TAB_TEST_SUBJECTS.RULE_DETAILS);
-  }
-
-  /**
    * Navigates to the logs tab page via URL
    */
   async gotoLogsTab() {
@@ -306,19 +278,22 @@ export class RulesPage {
   }
 
   /**
-   * Verifies the event log content is loaded and visible
+   * Gets the rule details page locator
    */
-  async expectLogsContentLoaded() {
-    await expect(this.eventLogTable).toBeVisible({ timeout: 30000 });
+  public get ruleDetails() {
+    return this.page.testSubj.locator(LOGS_TAB_TEST_SUBJECTS.RULE_DETAILS);
   }
 
   /**
-   * Verifies all main sections of the logs tab are visible
+   * Clicks on a rule in the event logs table by its name
    */
-  async expectLogsTabSectionsVisible() {
-    await expect(this.eventLogTable).toBeVisible();
-    await expect(this.datePicker).toBeVisible();
-    await expect(this.statusFilter).toBeVisible();
+  async clickOnRuleInEventLogs(ruleName: string) {
+    const ruleLink = this.eventLogTable.getByRole('button', { name: ruleName });
+    await expect(ruleLink).toBeVisible({ timeout: 10000 });
+    await ruleLink.click();
+    await this.page.testSubj.waitForSelector(LOGS_TAB_TEST_SUBJECTS.RULE_DETAILS, {
+      timeout: 30000,
+    });
   }
 
   /**

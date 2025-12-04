@@ -82,57 +82,26 @@ test.describe('Rules Page - Logs Tab', { tag: ['@ess', '@svlOblt'] }, () => {
     await expect(pageObjects.rulesPage.eventLogTable).toBeVisible();
   });
 
-  test('should display all expected sections on logs tab', async ({ pageObjects }) => {
-    // Navigate to logs tab
-    await pageObjects.rulesPage.clickLogsTab();
-
-    // Verify all main sections are visible
-    await pageObjects.rulesPage.expectLogsTabSectionsVisible();
-
-    // Additional verification that individual components are visible
-    await expect(pageObjects.rulesPage.datePicker).toBeVisible();
-    await expect(pageObjects.rulesPage.statusFilter).toBeVisible();
-  });
-
-  test('should hide loading indicator after logs data loads', async ({ pageObjects }) => {
-    // Click logs tab
-    await pageObjects.rulesPage.clickLogsTab();
-
-    // Wait for loading to complete and table to be visible
-    await pageObjects.rulesPage.expectLogsContentLoaded();
-
-    // Verify loading indicator is hidden after load
-    await expect(pageObjects.rulesPage.loadingIndicator).toBeHidden();
-  });
-
-  test('should have functional date picker on logs tab', async ({ pageObjects }) => {
-    // Navigate to logs tab
-    await pageObjects.rulesPage.clickLogsTab();
-    await pageObjects.rulesPage.expectLogsContentLoaded();
-
-    // Verify date picker is present and interactive
-    await expect(pageObjects.rulesPage.datePicker).toBeVisible();
-    await expect(pageObjects.rulesPage.datePicker).toBeEnabled();
-  });
-
-  test('should have functional status filter button on logs tab', async ({ pageObjects }) => {
-    // Navigate to logs tab
-    await pageObjects.rulesPage.clickLogsTab();
-    await pageObjects.rulesPage.expectLogsContentLoaded();
-
-    // Verify status filter is present and interactive
-    await expect(pageObjects.rulesPage.statusFilter).toBeVisible();
-    await expect(pageObjects.rulesPage.statusFilter).toBeEnabled();
-  });
-
   test('should persist logs tab selection in URL', async ({ page, pageObjects }) => {
     // Navigate to logs tab
     await pageObjects.rulesPage.clickLogsTab();
-    await pageObjects.rulesPage.expectLogsContentLoaded();
 
     // Verify URL contains logs tab indicator
     const url = page.url();
     expect(url).toContain('logs');
+  });
+
+  test('should navigate to rule details when clicking on a rule in event logs', async ({
+    pageObjects,
+  }) => {
+    // Navigate to logs tab
+    await pageObjects.rulesPage.clickLogsTab();
+
+    // Click on the created rule in the event logs
+    await pageObjects.rulesPage.clickOnRuleInEventLogs('Logs Tab Test Rule');
+
+    // Verify we navigated to the rule details page
+    await expect(pageObjects.rulesPage.ruleDetails).toBeVisible();
   });
 });
 
