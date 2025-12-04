@@ -5,22 +5,18 @@
  * 2.0.
  */
 
+import { EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
-import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
-import { useOnechatAgents } from '../../../hooks/agents/use_agents';
-import { useHasActiveConversation } from '../../../hooks/use_conversation';
-import { useConversationContext } from '../../../context/conversation/conversation_context';
+import { useConversationContext } from '../../../../../context/conversation/conversation_context';
+import { useOnechatAgents } from '../../../../../hooks/agents/use_agents';
 import { AgentSelectDropdown } from './agent_select_dropdown';
 
-interface ConversationAgentSelectorProps {
+interface AgentSelectorProps {
   agentId?: string;
 }
 
-export const ConversationAgentSelector: React.FC<ConversationAgentSelectorProps> = ({
-  agentId,
-}) => {
+export const AgentSelector: React.FC<AgentSelectorProps> = ({ agentId }) => {
   const { agents, isLoading: isLoadingAgents } = useOnechatAgents();
-  const hasActiveConversation = useHasActiveConversation();
   const { conversationActions } = useConversationContext();
 
   const handleAgentChange = (newAgentId: string) => {
@@ -33,11 +29,7 @@ export const ConversationAgentSelector: React.FC<ConversationAgentSelectorProps>
 
   const currentAgent = agents.find((agent) => agent.id === agentId);
 
-  return hasActiveConversation ? (
-    <EuiText color="subdued" size="s">
-      {currentAgent?.name}
-    </EuiText>
-  ) : (
+  return (
     <AgentSelectDropdown
       selectedAgent={currentAgent}
       onAgentChange={handleAgentChange}

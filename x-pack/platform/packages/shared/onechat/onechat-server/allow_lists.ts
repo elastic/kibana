@@ -29,6 +29,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   `${internalNamespaces.security}.entity_risk_score`,
   `${internalNamespaces.security}.attack_discovery_search`,
   `${internalNamespaces.security}.security_labs_search`,
+  `${internalNamespaces.security}.alerts`,
 ];
 
 /**
@@ -38,6 +39,8 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
 export const AGENT_BUILDER_BUILTIN_AGENTS: string[] = [
   'observability.agent',
   'platform.dashboard.dashboard_agent',
+  `${internalNamespaces.security}.alerts`,
+  `${internalNamespaces.security}.entity`,
 ];
 
 export const isAllowedBuiltinTool = (toolName: string) => {

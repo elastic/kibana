@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useSendMessage } from '../../../context/send_message/send_message_context';
+import { useSendMessage } from '../../../../context/send_message/send_message_context';
 
 interface ConversationActionButtonProps {
   onSubmit: () => void;
