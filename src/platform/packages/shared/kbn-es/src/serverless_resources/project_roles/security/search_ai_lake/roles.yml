@@ -55,6 +55,7 @@ _search_ai_lake_analyst:
         - "feature_savedQueryManagement.read"
         - "feature_indexPatterns.read"
         - "feature_fleetv2.read"
+        - "feature_agentBuilder.all"
       resources: "*"
 
 _search_ai_lake_soc_manager:
@@ -134,4 +135,5 @@ _search_ai_lake_soc_manager:
         - "feature_ml.all"
         - "feature_fleetv2.all"
         - "feature_advancedSettings.all"
+        - "feature_agentBuilder.all"
       resources: "*"

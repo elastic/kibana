@@ -32,6 +32,7 @@ import {
   REMOVE_DESCRIPTION_MENU_LABEL,
 } from './action/translations';
 import type { StepConfigurationProps } from '../steps_list';
+import { selectStreamType } from '../../state_management/stream_enrichment_state_machine/selectors';
 
 const moveUpItemText = i18n.translate(
   'xpack.streams.streamDetailView.managementTab.enrichment.moveUpItemButtonText',
@@ -96,6 +97,8 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
   const stepRefs = useStreamEnrichmentSelector((snapshot) => snapshot.context.stepRefs);
 
   const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
+
+  const streamType = useStreamEnrichmentSelector((snapshot) => selectStreamType(snapshot.context));
 
   const isWhere = isWhereBlock(step);
   const hasCustomDescription =
@@ -210,6 +213,7 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
       : []),
     <EuiContextMenuItem
       data-test-subj="stepContextMenuEditItem"
+      data-stream-type={streamType}
       key="editItem"
       icon="pencil"
       disabled={!canEdit}
@@ -224,6 +228,7 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
       ? [
           <EuiContextMenuItem
             data-test-subj="stepContextMenuDuplicateItem"
+            data-stream-type={streamType}
             key="duplicateStep"
             icon="copy"
             disabled={!canDuplicate}
@@ -238,6 +243,7 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
       : []),
     <EuiContextMenuItem
       data-test-subj="stepContextMenuDeleteItem"
+      data-stream-type={streamType}
       key="deleteStep"
       icon="trash"
       disabled={!canDelete}
@@ -259,6 +265,7 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
         }
       )}
       data-test-subj="streamsAppStreamDetailEnrichmentStepContextMenuButton"
+      data-stream-type={streamType}
       disabled={!!stepUnderEdit}
       size="xs"
       iconType="boxesVertical"
