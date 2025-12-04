@@ -6,6 +6,7 @@
  */
 
 import { platformCoreTools } from '@kbn/onechat-common/tools';
+import { internalNamespaces } from '@kbn/onechat-common/base/namespaces';
 
 /**
  * This is a manually maintained list of all built-in tools registered in Agent Builder.
@@ -24,6 +25,10 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   // Dashboards
   'platform.dashboard.create_dashboard',
   'platform.dashboard.update_dashboard',
+  // Security Solution
+  `${internalNamespaces.security}.entity_risk_score`,
+  `${internalNamespaces.security}.attack_discovery_search`,
+  `${internalNamespaces.security}.security_labs_search`,
 ];
 
 /**
