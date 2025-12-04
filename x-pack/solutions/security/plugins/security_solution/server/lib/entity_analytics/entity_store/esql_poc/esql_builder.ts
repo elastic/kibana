@@ -57,7 +57,7 @@ export const buildESQLQuery = async (
     ${recentData(description.identityField)} AS ${description.identityField}
   | EVAL
     ${mergedFieldStats(description)},
-    ${customFieldEvalLogic()}
+    ${customFieldEvalLogic(description)}
   | KEEP ${fieldsToKeep(description)}
   | LIMIT ${config.maxPageSearchSize}
   // | SORT @timestamp ASC`;
@@ -93,8 +93,22 @@ function generateEUID({ entityType }: EntityDescription) {
                 user.email,
                 CASE(user.name IS NOT NULL AND user.name != "", 
                     COALESCE(
+                        CASE(user.domain IS NOT NULL AND user.domain != "", CONCAT(user.name, "@", user.domain), NULL),
                         CASE(host.id IS NOT NULL AND host.id != "", CONCAT(user.name, "@", host.id), NULL),
-                        CASE(host.mac IS NOT NULL AND host.mac != "", CONCAT(user.name, "@", host.mac), NULL),
+                        CASE(host.domain IS NOT NULL,
+                          COALESCE(
+                              CASE(host.name IS NOT NULL AND host.name != "", CONCAT(user.name, "@", host.name, ".", TO_STRING(host.domain)), NULL),
+                              CASE(host.hostname IS NOT NULL AND host.hostname != "", CONCAT(user.name, "@", host.hostname, ".", TO_STRING(host.domain)), NULL)
+                          ),
+                        NULL
+                        ),
+                        CASE(host.mac IS NOT NULL,
+                          COALESCE(
+                              CASE(host.name IS NOT NULL AND host.name != "", CONCAT(user.name, "@", host.name, "|", TO_STRING(host.mac)), NULL),
+                              CASE(host.hostname IS NOT NULL AND host.hostname != "", CONCAT(user.name, "@", host.hostname, "|", TO_STRING(host.mac)), NULL)
+                          ),
+                          NULL
+                        ),
                         CASE(host.name IS NOT NULL AND host.name != "", CONCAT(user.name, "@", host.name), NULL),
                         CASE(host.hostname IS NOT NULL AND host.hostname != "", CONCAT(user.name, "@", host.hostname), NULL)
                     ),
@@ -106,11 +120,17 @@ function generateEUID({ entityType }: EntityDescription) {
     return `| EVAL host.entity.id = COALESCE(
                 host.entity.id,
                 host.id,
-                host.mac,
-                CASE(host.ip IS NOT NULL,
+                CASE(host.domain IS NOT NULL,
                   COALESCE(
-                      CASE(host.name IS NOT NULL AND host.name != "", CONCAT(host.name, "|", TO_STRING(host.ip)), NULL),
-                      CASE(host.hostname IS NOT NULL AND host.hostname != "", CONCAT(host.hostname, "|", TO_STRING(host.ip)), NULL)
+                      CASE(host.name IS NOT NULL AND host.name != "", CONCAT(host.name, ".", TO_STRING(host.domain)), NULL),
+                      CASE(host.hostname IS NOT NULL AND host.hostname != "", CONCAT(host.hostname, ".", TO_STRING(host.domain)), NULL)
+                  ),
+                NULL
+                ),
+                CASE(host.mac IS NOT NULL,
+                  COALESCE(
+                      CASE(host.name IS NOT NULL AND host.name != "", CONCAT(host.name, "|", TO_STRING(host.mac)), NULL),
+                      CASE(host.hostname IS NOT NULL AND host.hostname != "", CONCAT(host.hostname, "|", TO_STRING(host.mac)), NULL)
                   ),
                   NULL
                 ),
@@ -166,11 +186,16 @@ function fieldsToKeep({ fields, identityField }: EntityDescription) {
     .join(',\n ');
 }
 
-function customFieldEvalLogic() {
-  return [
-    `@timestamp = ${recentData('timestamp')}`,
-    `entity.name = COALESCE(entity.name, entity.id)`,
-  ].join(',\n ');
+function customFieldEvalLogic({ entityType }: EntityDescription) {
+  let entityNameEval = `entity.name = COALESCE(entity.name, entity.id)`;
+
+  if (entityType === 'host') {
+    entityNameEval = `entity.name = COALESCE(entity.name, host.name, entity.id)`;
+  } else if (entityType === 'user') {
+    entityNameEval = `entity.name = COALESCE(entity.name, user.name, entity.id)`;
+  }
+
+  return [`@timestamp = ${recentData('timestamp')}`, entityNameEval].join(',\n ');
 }
 
 function filterFields(fields: FieldDescription[]) {
