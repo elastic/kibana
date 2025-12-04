@@ -18,7 +18,7 @@ export const ruleAttachmentDataSchema = z.object({
 type RuleAttachmentData = z.infer<typeof ruleAttachmentDataSchema>;
 
 /**
- * Type guard to narrow attachment data to AlertAttachmentData
+ * Type guard to narrow attachment data to RuleAttachmentData
  */
 const isRuleAttachmentData = (data: unknown): data is RuleAttachmentData => {
   return ruleAttachmentDataSchema.safeParse(data).success;
