@@ -31,6 +31,7 @@ import {
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
+import { selectValidationErrors } from './state_management/stream_enrichment_state_machine/selectors';
 import {
   getConfiguredSteps,
   getUpsertFields,
@@ -84,6 +85,10 @@ export function StreamDetailEnrichmentContentImpl() {
   const isReady = useStreamEnrichmentSelector((state) => state.matches('ready'));
   const definition = useStreamEnrichmentSelector((state) => state.context.definition);
   const canUpdate = useStreamEnrichmentSelector((state) => state.can({ type: 'stream.update' }));
+  const validationErrors = useStreamEnrichmentSelector((state) =>
+    selectValidationErrors(state.context)
+  );
+  const hasValidationErrors = Array.from(validationErrors.values()).flat().length > 0;
   const detectedFields = useSimulatorSelector((state) => state.context.detectedSchemaFields);
   const isSimulating = useSimulatorSelector((state) => state.matches('runningSimulation'));
   const definitionFields = React.useMemo(() => getDefinitionFields(definition), [definition]);
@@ -266,7 +271,7 @@ export function StreamDetailEnrichmentContentImpl() {
           isLoading={isSavingChanges}
           disabled={!hasChanges}
           insufficientPrivileges={!canManage}
-          isInvalid={hasDefinitionError}
+          isInvalid={hasDefinitionError || hasValidationErrors}
           onViewCodeClick={onBottomBarViewCodeClick}
           streamType={streamType}
         />
