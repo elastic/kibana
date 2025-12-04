@@ -9,6 +9,7 @@ import { renderHook } from '@testing-library/react';
 import { useCopyExportQueryStep } from '.';
 import type { CopyExportQueryStepProps } from '.';
 import { TestProviders } from '../../../../../../../../common/mock';
+import { MigrationSource } from '../../../../../../../common/types';
 
 const renderCopyExportQueryStep = (props: CopyExportQueryStepProps) => {
   const { result } = renderHook(() => useCopyExportQueryStep(props), {
@@ -20,6 +21,7 @@ const renderCopyExportQueryStep = (props: CopyExportQueryStepProps) => {
 describe('useCopyExportQueryStep', () => {
   it('returns step props with "incomplete" status', () => {
     const result = renderCopyExportQueryStep({
+      migrationSource: MigrationSource.SPLUNK,
       status: 'incomplete',
       onCopied: jest.fn(),
     });
@@ -32,6 +34,7 @@ describe('useCopyExportQueryStep', () => {
 
   it('returns step props with "complete" status', () => {
     const result = renderCopyExportQueryStep({
+      migrationSource: MigrationSource.SPLUNK,
       status: 'complete',
       onCopied: jest.fn(),
     });
@@ -44,6 +47,7 @@ describe('useCopyExportQueryStep', () => {
 
   it('returns step props with "disabled" status', () => {
     const result = renderCopyExportQueryStep({
+      migrationSource: MigrationSource.SPLUNK,
       status: 'disabled',
       onCopied: jest.fn(),
     });
@@ -56,6 +60,7 @@ describe('useCopyExportQueryStep', () => {
 
   it('returns step props with "loading" status', () => {
     const result = renderCopyExportQueryStep({
+      migrationSource: MigrationSource.SPLUNK,
       status: 'loading',
       onCopied: jest.fn(),
     });
@@ -68,6 +73,7 @@ describe('useCopyExportQueryStep', () => {
 
   it('returns step props with "warning" status', () => {
     const result = renderCopyExportQueryStep({
+      migrationSource: MigrationSource.SPLUNK,
       status: 'warning',
       onCopied: jest.fn(),
     });
@@ -80,6 +86,7 @@ describe('useCopyExportQueryStep', () => {
 
   it('returns step props with "danger" status', () => {
     const result = renderCopyExportQueryStep({
+      migrationSource: MigrationSource.SPLUNK,
       status: 'danger',
       onCopied: jest.fn(),
     });
@@ -92,6 +99,7 @@ describe('useCopyExportQueryStep', () => {
 
   it('returns step props with "current" status', () => {
     const result = renderCopyExportQueryStep({
+      migrationSource: MigrationSource.SPLUNK,
       status: 'current',
       onCopied: jest.fn(),
     });

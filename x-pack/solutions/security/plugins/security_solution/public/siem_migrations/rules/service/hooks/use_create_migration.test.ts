@@ -8,6 +8,7 @@
 import { renderHook, act } from '@testing-library/react';
 import { useCreateMigration } from './use_create_migration';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import { MigrationSource } from '../../../common/types';
 
 jest.mock('../../../../common/lib/kibana/kibana_react', () => ({
   useKibana: jest.fn(),
@@ -51,7 +52,11 @@ describe('useCreateMigration', () => {
     const { result } = renderHook(() => useCreateMigration(onSuccess));
 
     await act(async () => {
-      await result.current.createMigration('test-migration', []);
+      await result.current.createMigration({
+        rules: [],
+        migrationName: 'test-migration',
+        migrationSource: MigrationSource.SPLUNK,
+      });
     });
 
     expect(createRuleMigration).toHaveBeenCalledWith([], 'test-migration');
@@ -68,7 +73,11 @@ describe('useCreateMigration', () => {
     const { result } = renderHook(() => useCreateMigration(onSuccess));
 
     await act(async () => {
-      await result.current.createMigration('test-migration', []);
+      await result.current.createMigration({
+        migrationName: 'test-migration',
+        rules: [],
+        migrationSource: MigrationSource.SPLUNK,
+      });
     });
 
     expect(addError).toHaveBeenCalledWith(error, {
