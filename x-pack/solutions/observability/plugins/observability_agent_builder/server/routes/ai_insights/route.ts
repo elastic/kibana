@@ -9,7 +9,7 @@ import { createObservabilityAgentBuilderServerRoute } from '../create_observabil
 
 export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
   const exampleRoute = createObservabilityAgentBuilderServerRoute({
-    endpoint: 'GET /internal/observability_agent_builder/example',
+    endpoint: 'GET /internal/observability_agent_builder/ai_insights/example',
     options: {
       access: 'internal',
     },
