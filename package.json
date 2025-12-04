@@ -72,7 +72,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "engines": {
-    "node": "22.17.1",
+    "node": "22.21.1",
     "yarn": "^1.22.19"
   },
   "resolutions": {
@@ -80,7 +80,7 @@
     "**/@hello-pangea/dnd": "18.0.1",
     "**/@langchain/core": "^0.3.57",
     "**/@langchain/google-common": "^0.1.8",
-    "**/@types/node": "22.15.3",
+    "**/@types/node": "22.19.1",
     "**/@typescript-eslint/utils": "8.16.0",
     "**/chokidar": "^3.5.3",
     "**/d3-scale/**/d3-color": "npm:@elastic/kibana-d3-color@2.0.1",
