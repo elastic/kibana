@@ -5,31 +5,34 @@
  * 2.0.
  */
 
-import type * as z3 from '@kbn/zod';
-import type * as z4 from '@kbn/zod/v4';
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { LicenseType } from '@kbn/licensing-types';
 import type {
-  KibanaRequest,
-  SavedObjectsClientContract,
-  SavedObjectAttributes,
-  ElasticsearchClient,
   CustomRequestHandlerContext,
-  Logger,
+  ElasticsearchClient,
   ISavedObjectsRepository,
   IScopedClusterClient,
+  KibanaRequest,
+  Logger,
+  SavedObjectAttributes,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
-import type { SubActionConnector } from './sub_action_framework/sub_action_connector';
-import type { ServiceParams } from './sub_action_framework/types';
-import type { ActionTypeRegistry } from './action_type_registry';
-import type { PluginSetupContract, PluginStartContract } from './plugin';
-import type { ActionsClient } from './actions_client';
+import type { AxiosHeaderValue } from 'axios';
+import type { LicenseType } from '@kbn/licensing-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type * as z3 from '@kbn/zod';
+import type * as z4 from '@kbn/zod/v4';
 import type { ActionTypeExecutorResult, SubFeature } from '../common';
+import type { ActionTypeRegistry } from './action_type_registry';
+import type { ActionsClient } from './actions_client';
+import type { ActionsConfigurationUtilities } from './actions_config';
 import type { TaskInfo } from './lib/action_executor';
 import type { ConnectorTokenClient } from './lib/connector_token_client';
-import type { ActionsConfigurationUtilities } from './actions_config';
+import type { PluginSetupContract, PluginStartContract } from './plugin';
+import type { SubActionConnector } from './sub_action_framework/sub_action_connector';
+import type { ServiceParams } from './sub_action_framework/types';
 
-export type { ActionTypeExecutorResult, ActionTypeExecutorRawResult } from '../common';
+export type { ActionTypeExecutorRawResult, ActionTypeExecutorResult } from '../common';
+export { ActionExecutionSourceType } from './lib';
+export { ConnectorUsageCollector } from './usage';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: KibanaRequest) => Services;
 export type GetUnsecuredServicesFunction = () => UnsecuredServices;
@@ -42,9 +45,7 @@ export type ConnectorTokenClientContract = PublicMethodsOf<ConnectorTokenClient>
 
 import type { Connector, ConnectorWithExtraFindData } from './application/connector/types';
 import type { ActionExecutionSource, ActionExecutionSourceType } from './lib';
-export { ActionExecutionSourceType } from './lib';
 import type { ConnectorUsageCollector } from './usage';
-export { ConnectorUsageCollector } from './usage';
 
 export interface Services {
   savedObjectsClient: SavedObjectsClientContract;
@@ -88,6 +89,7 @@ export interface ActionTypeExecutorOptions<
   secrets: Secrets;
   params: Params;
   logger: Logger;
+  globalAuthHeaders?: Record<string, AxiosHeaderValue>;
   taskInfo?: TaskInfo;
   configurationUtilities: ActionsConfigurationUtilities;
   source?: ActionExecutionSource<unknown>;
@@ -201,6 +203,13 @@ export interface ActionType<
   subFeature?: SubFeature;
   isDeprecated?: boolean;
   /**
+   * Allows multiple instances of the same system action in a single rule.
+   * By default, system actions can only be used once per rule.
+   * Set to true to allow the same system action connector to be used multiple times.
+   * Only applies to system actions (isSystemActionType: true).
+   */
+  allowMultipleSystemActions?: boolean;
+  /**
    * Additional Kibana privileges to be checked by the actions framework.
    * Use it if you want to perform extra authorization checks based on a Kibana feature.
    * For example, you can define the privileges a users needs to have to execute
@@ -215,6 +224,8 @@ export interface ActionType<
     params?: Params;
     source?: ActionExecutionSourceType;
   }) => string[];
+  // Headers that should be added to every Axios request made by this action type
+  globalAuthHeaders?: Record<string, AxiosHeaderValue>;
   renderParameterTemplates?: RenderParameterTemplates<Params>;
   executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
   getService?: (params: ServiceParams<Config, Secrets>) => SubActionConnector<Config, Secrets>;

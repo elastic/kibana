@@ -199,7 +199,7 @@ describe('logs_layer', () => {
               routing: [],
             },
             lifecycle: { inherit: {} },
-            processing: { steps: [] },
+            processing: { steps: [], updated_at: new Date().toISOString() },
             settings: {},
             failure_store: { inherit: {} },
           },
