@@ -16,7 +16,7 @@ export async function getIntegrationKnowledgeSetting(
   const config = appContextService.getConfig();
 
   const integrationKnowledgeConfig: boolean =
-    config?.experimentalFeatures?.integrationKnowledge ||
+    config?.experimentalFeatures?.integrationKnowledge ??
     appContextService.getExperimentalFeatures().installIntegrationsKnowledge;
   try {
     const { integration_knowledge_enabled: integrationKnowledgeEnabled } = await getSettings(

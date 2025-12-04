@@ -84,7 +84,7 @@ export async function settingsSetup(soClient: SavedObjectsClientContract) {
       updatedSettings.prerelease_integrations_enabled = config?.prereleaseEnabledByDefault;
     }
     if (
-      (config?.experimentalFeatures?.integrationKnowledge ||
+      (config?.experimentalFeatures?.integrationKnowledge ??
         appContextService.getExperimentalFeatures().installIntegrationsKnowledge) &&
       settings.integration_knowledge_enabled === undefined
     ) {
@@ -196,7 +196,7 @@ export function createDefaultSettings(): BaseSettings {
   }
 
   if (
-    config?.experimentalFeatures?.integrationKnowledge ||
+    config?.experimentalFeatures?.integrationKnowledge ??
     appContextService.getExperimentalFeatures().installIntegrationsKnowledge
   ) {
     settings.integration_knowledge_enabled = true;
