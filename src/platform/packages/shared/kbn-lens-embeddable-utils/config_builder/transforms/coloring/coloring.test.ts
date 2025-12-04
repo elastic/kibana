@@ -280,6 +280,40 @@ describe('Color util transforms', () => {
         steps: [],
       });
     });
+
+    it('should reverse palette stops to API format', () => {
+      const palette: PaletteOutput<CustomPaletteParams> = {
+        type: 'palette',
+        name: 'custom',
+        params: {
+          name: 'custom',
+          reverse: true,
+          rangeType: 'number',
+          stops: [
+            { color: 'red', stop: 0 },
+            { color: 'green', stop: 50 },
+            { color: 'blue', stop: 100 },
+          ],
+          colorStops: [
+            { color: 'red', stop: null },
+            { color: 'green', stop: 0 },
+            { color: 'blue', stop: 50 },
+          ],
+        },
+      };
+
+      const result = fromColorByValueLensStateToAPI(palette);
+
+      expect(result).toMatchObject({
+        type: 'dynamic',
+        range: 'absolute',
+        steps: [
+          { color: 'blue', to: 0 },
+          { color: 'green', from: 0, to: 50 },
+          { color: 'red', from: 50 },
+        ],
+      });
+    });
   });
 
   describe('fromStaticColorLensStateToAPI', () => {

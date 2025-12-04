@@ -89,9 +89,16 @@ export function fromColorByValueLensStateToAPI(
 
   if (!colorParams) return;
 
-  const { stops = [], rangeType } = colorParams;
-
-  // TODO: handle reverse
+  const { stops: originalStops = [], rangeType, reverse } = colorParams;
+  const stops = !reverse
+    ? originalStops
+    : originalStops
+        .slice()
+        .reverse()
+        .map(({ color }, i) => ({
+          ...originalStops[i],
+          color,
+        }));
 
   return {
     type: 'dynamic',
