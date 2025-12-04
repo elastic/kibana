@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export { formatOnechatErrorMessage } from './base/errors';
-export type { ToolServiceStartContract, ExecuteToolParams, ExecuteToolReturn } from './tools';
-export type { AttachmentUIDefinition, AttachmentServiceStartContract } from './attachments';
+export { AttachmentsService } from './attachements_service';
+export { createPublicAttachmentContract } from './create_public_attachment_contract';
