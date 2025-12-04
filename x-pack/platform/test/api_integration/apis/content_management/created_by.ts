@@ -16,7 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
       const supertest = getService('supertest');
       it('created_by is empty', async () => {
         const { body, status } = await supertest
-          .post('/api/dashboards/dashboard')
+          .post('/api/dashboards')
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '1')
           .send({
@@ -46,7 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('created_by is with profile_id', async () => {
         const createResponse = await supertest
-          .post('/api/dashboards/dashboard')
+          .post('/api/dashboards')
           .set(interactiveUser.headers)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '1')

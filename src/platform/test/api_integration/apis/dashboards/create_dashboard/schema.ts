@@ -30,12 +30,12 @@ export default function ({ getService }: FtrProviderContext) {
      */
     it('Registered embeddable schemas have not changed', async () => {
       const response = await supertest
-        .get('/api/oas?pathStartsWith=/api/dashboards/dashboard&access=internal&version=1')
+        .get('/api/oas?pathStartsWith=/api/dashboards&access=internal&version=1')
         .send();
 
       expect(response.status).to.be(200);
       const createBodySchema =
-        response.body.paths['/api/dashboards/dashboard'].post.requestBody.content[
+        response.body.paths['/api/dashboards'].post.requestBody.content[
           'application/json; Elastic-Api-Version=1'
         ].schema;
       const panelsSchema = createBodySchema.properties.data.properties.panels;

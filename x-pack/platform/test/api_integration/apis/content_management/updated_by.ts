@@ -16,7 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
       const supertest = getService('supertest');
       it('updated_by is empty', async () => {
         const createResponse = await supertest
-          .post('/api/dashboards/dashboard')
+          .post('/api/dashboards')
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '1')
           .send({
@@ -30,7 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(createResponse.body.meta).to.not.have.key('updatedBy');
 
         const updateResponse = await supertest
-          .put(`/api/dashboards/dashboard/${createResponse.body.id}`)
+          .put(`/api/dashboards/${createResponse.body.id}`)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '1')
           .send({
@@ -58,7 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       beforeEach(async () => {
         createResponse = await supertestWithoutAuth
-          .post('/api/dashboards/dashboard')
+          .post('/api/dashboards')
           .set(interactiveUser.headers)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '1')
@@ -82,7 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('updated_by is empty after update with non interactive user', async () => {
         const updateResponse = await supertestWithAuth
-          .put(`/api/dashboards/dashboard/${createResponse.body.id}`)
+          .put(`/api/dashboards${createResponse.body.id}`)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '1')
           .send({
@@ -94,7 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(updateResponse.status).to.be(200);
 
         const getResponse = await supertestWithAuth
-          .get(`/api/dashboards/dashboard/${createResponse.body.id}`)
+          .get(`/api/dashboards/${createResponse.body.id}`)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '1')
           .send();
@@ -118,7 +118,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         const updateResponse = await supertestWithoutAuth
-          .put(`/api/dashboards/dashboard/${createResponse.body.id}`)
+          .put(`/api/dashboards/${createResponse.body.id}`)
           .set(interactiveUser2.headers)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '1')
@@ -131,7 +131,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(updateResponse.status).to.be(200);
 
         const getResponse = await supertestWithAuth
-          .get(`/api/dashboards/dashboard/${createResponse.body.id}`)
+          .get(`/api/dashboards/${createResponse.body.id}`)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '1')
           .send();

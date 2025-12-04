@@ -57,7 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it(`returns content summary for ${ATestSpace} space`, async () => {
       await supertest
-        .post(`/s/${ATestSpace}/api/dashboards/dashboard`)
+        .post(`/s/${ATestSpace}/api/dashboards`)
         .set('kbn-xsrf', 'xxx')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .set('elastic-api-version', '1')
@@ -68,7 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
       await supertest
-        .post(`/s/${ATestSpace}/api/dashboards/dashboard`)
+        .post(`/s/${ATestSpace}/api/dashboards`)
         .set('kbn-xsrf', 'xxx')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .set('elastic-api-version', '1')
@@ -99,7 +99,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it(`returns content summary for ${BTestSpace} space`, async () => {
       await supertest
-        .post(`/s/${BTestSpace}/api/dashboards/dashboard`)
+        .post(`/s/${BTestSpace}/api/dashboards`)
         .set('kbn-xsrf', 'xxx')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .set('elastic-api-version', '1')
