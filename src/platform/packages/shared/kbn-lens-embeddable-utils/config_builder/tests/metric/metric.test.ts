@@ -12,6 +12,7 @@ import { validateConverter } from '../validate';
 import { simpleMetricAttributes } from './simple.mock';
 import { breakdownMetricAttributes } from './breakdown.mock';
 import { complexMetricAttributes } from './complex.mock';
+import { dynamicColorsMetricAttributes } from './dynamic_colors.mock';
 
 describe('Metric', () => {
   it('should convert a simple metric', () => {
@@ -24,5 +25,9 @@ describe('Metric', () => {
 
   it('should convert a breakdown-by metric', () => {
     validateConverter(breakdownMetricAttributes, metricStateSchema);
+  });
+
+  it('should convert a dynamic colors metric', () => {
+    validateConverter(dynamicColorsMetricAttributes, metricStateSchema);
   });
 });
