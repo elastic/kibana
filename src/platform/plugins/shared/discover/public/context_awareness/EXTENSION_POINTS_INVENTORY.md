@@ -90,9 +90,6 @@ A concise, non-technical map of the Discover Profile extension points (what they
 
 **Returns:** `ChartSectionConfiguration` (can use `actions.openInNewTab`, `actions.updateESQLQuery`)
 
-**Screenshot:**
-<!-- ![Chart section configuration example](./docs/extension_points/get_chart_section_configuration.png) -->
-
 **Implementation examples:**
 - [Metrics data source profile](profile_providers/common/metrics_data_source_profile/accessor/chart_section.tsx)
 - [Traces data source profile](profile_providers/observability/traces_data_source_profile/accessors/chart_session.tsx)
@@ -269,9 +266,5 @@ A concise, non-technical map of the Discover Profile extension points (what they
 
 **Returns:** `CellAction`
 
-**Screenshot:**
-<!-- ![Cell actions integration example](./docs/extension_points/discover_cell_actions_trigger.png) -->
-
 **Implementation examples:**
 - See [types.ts](./types.ts) for `DISCOVER_CELL_ACTIONS_TRIGGER` and `DiscoverCellAction` definitions
-
