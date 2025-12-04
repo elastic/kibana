@@ -308,7 +308,7 @@
             "label": "searchGettingStarted",
             "description": [],
             "signature": [
-              "{ readonly visitSearchLabs: string; readonly notebooksExamples: string; }"
+              "{ readonly visitSearchLabs: string; readonly notebooksExamples: string; readonly elasticTraining: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -778,7 +778,7 @@
             "label": "security",
             "description": [],
             "signature": [
-              "{ readonly apiKeyServiceSettings: string; readonly clusterPrivileges: string; readonly definingRoles: string; readonly elasticsearchSettings: string; readonly elasticsearchEnableSecurity: string; readonly elasticsearchEnableApiKeys: string; readonly indicesPrivileges: string; readonly kibanaTLS: string; readonly kibanaPrivileges: string; readonly mappingRoles: string; readonly mappingRolesFieldRules: string; readonly runAsPrivilege: string; readonly enableElasticSearchSecurityFeatures: string; }"
+              "{ readonly apiKeyServiceSettings: string; readonly clusterPrivileges: string; readonly definingRoles: string; readonly elasticsearchSettings: string; readonly elasticsearchEnableSecurity: string; readonly elasticsearchEnableApiKeys: string; readonly indicesPrivileges: string; readonly kibanaTLS: string; readonly kibanaPrivileges: string; readonly mappingRoles: string; readonly mappingRolesFieldRules: string; readonly roles: string; readonly runAsPrivilege: string; readonly enableElasticSearchSecurityFeatures: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -1129,6 +1129,20 @@
             "description": [],
             "signature": [
               "{ readonly agentBuilder: string; readonly getStarted: string; readonly models: string; readonly chat: string; readonly agentBuilderAgents: string; readonly tools: string; readonly programmaticAccess: string; readonly kibanaApi: string; readonly mcpServer: string; readonly a2aServer: string; readonly limitationsKnownIssues: string; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-common.DocLinks.indexManagement",
+            "type": "Object",
+            "tags": [],
+            "label": "indexManagement",
+            "description": [],
+            "signature": [
+              "{ readonly componentTemplate: string; readonly indexAlias: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "deprecated": false,

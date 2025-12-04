@@ -58,7 +58,7 @@ export function PreviewDataSparkPlot({
     name: definition.name,
     feature: query.feature,
     kqlQuery: query.kql.query,
-    timeState,
+    timeRange: timeState.asAbsoluteTimeRange,
     isQueryValid,
     noOfBuckets,
   });
@@ -183,6 +183,7 @@ export function PreviewDataSparkPlot({
                 iconType="discoverApp"
                 href={discoverLink}
                 target="_blank"
+                data-test-subj="significant_events_preview_open_in_discover_button"
               >
                 {openInDiscoverLabel}
               </EuiButtonEmpty>

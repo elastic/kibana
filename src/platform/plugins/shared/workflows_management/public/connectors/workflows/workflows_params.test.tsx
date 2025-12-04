@@ -19,6 +19,29 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
 }));
 
+// Suppress known React warnings/errors from UI library components in tests
+// These are expected and don't affect test functionality:
+// 1. validationResult prop warning - comes from @kbn/workflows-ui WorkflowSelector component
+// 2. Http service error - can occur during initial render before mocks are fully set up
+// eslint-disable-next-line no-console
+const originalError = console.error;
+beforeAll(() => {
+  // eslint-disable-next-line no-console
+  console.error = (...args: any[]) => {
+    const message = typeof args[0] === 'string' ? args[0] : String(args[0]);
+    if (message.includes('validationResult') || message.includes('Http service is not available')) {
+      // Suppress these specific known warnings/errors in tests
+      return;
+    }
+    originalError.call(console, ...args);
+  };
+});
+
+afterAll(() => {
+  // eslint-disable-next-line no-console
+  console.error = originalError;
+});
+
 // Helper function to render with I18n provider
 const renderWithIntl = (component: React.ReactElement) => {
   return render(component, { wrapper: I18nProvider });

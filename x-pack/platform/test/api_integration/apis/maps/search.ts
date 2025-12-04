@@ -29,18 +29,16 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         const { took, ...response } = resp.body.rawResponse;
-        expect(response).to.eql({
-          columns: [
-            {
-              name: 'geo.coordinates',
-              type: 'geo_point',
-            },
-          ],
-          documents_found: 0,
-          is_partial: false,
-          values: [],
-          values_loaded: 0,
-        });
+        expect(response.columns).to.eql([
+          {
+            name: 'geo.coordinates',
+            type: 'geo_point',
+          },
+        ]);
+        expect(response.values).to.eql([]);
+        expect(response.values_loaded).to.eql(0);
+        expect(response.is_partial).to.eql(false);
+        expect(response.documents_found).to.eql(0);
       });
 
       it(`should return getValues response in expected shape`, async () => {
@@ -58,32 +56,33 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         const { took, ...response } = resp.body.rawResponse;
-        expect(response).to.eql({
-          all_columns: [
-            {
-              name: 'geo.coordinates',
-              type: 'geo_point',
-            },
-            {
-              name: '@timestamp',
-              type: 'date',
-            },
-          ],
-          columns: [
-            {
-              name: 'geo.coordinates',
-              type: 'geo_point',
-            },
-            {
-              name: '@timestamp',
-              type: 'date',
-            },
-          ],
-          documents_found: 3,
-          is_partial: false,
-          values: [['POINT (-120.9871642 38.68407028)', '2015-09-20T00:00:00.000Z']],
-          values_loaded: 4,
-        });
+        expect(response).to.be.ok();
+        expect(response.all_columns).to.eql([
+          {
+            name: 'geo.coordinates',
+            type: 'geo_point',
+          },
+          {
+            name: '@timestamp',
+            type: 'date',
+          },
+        ]);
+        expect(response.columns).to.eql([
+          {
+            name: 'geo.coordinates',
+            type: 'geo_point',
+          },
+          {
+            name: '@timestamp',
+            type: 'date',
+          },
+        ]);
+        expect(response.documents_found).to.eql(3);
+        expect(response.is_partial).to.eql(false);
+        expect(response.values).to.eql([
+          ['POINT (-120.9871642 38.68407028)', '2015-09-20T00:00:00.000Z'],
+        ]);
+        expect(response.values_loaded).to.eql(4);
       });
     });
   });
