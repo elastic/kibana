@@ -123,10 +123,10 @@ describe('Workflows Service', () => {
         mockRequest
       );
 
-      expect(mockLogger.info).toHaveBeenCalledWith(
+      expect(mockLogger.debug).toHaveBeenCalledWith(
         'Attempting to run workflow test-workflow-id via internal service'
       );
-      expect(mockLogger.info).toHaveBeenCalledWith(
+      expect(mockLogger.debug).toHaveBeenCalledWith(
         'Successfully started workflow test-workflow-id, run ID: workflow-run-123'
       );
     });
@@ -163,7 +163,7 @@ describe('Workflows Service', () => {
         'Workflows service not available. This connector requires workflows management plugin to be enabled.'
       );
 
-      expect(mockLogger.info).toHaveBeenCalledWith(
+      expect(mockLogger.debug).toHaveBeenCalledWith(
         'Attempting to run workflow test-workflow-id via internal service'
       );
     });
