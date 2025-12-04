@@ -303,10 +303,10 @@ export class RulesPage {
     await expect(editButton).toBeVisible();
   }
   /**
-   * Gets the rules settings flyout locator
+   * Gets the rules edit flyout locator
    */
   public get editRuleFlyout() {
-    return this.page.testSubj.locator(RULE_LIST_TEST_SUBJECTS.RULE_FORM_FLYOUT);
+    return this.page.getByText('Edit Rule');
   }
 
   /**

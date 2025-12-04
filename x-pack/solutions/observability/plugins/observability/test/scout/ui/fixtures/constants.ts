@@ -27,7 +27,6 @@ export const RULE_LIST_TEST_SUBJECTS = {
   // Rule Actions
   RULE_SIDEBAR_EDIT_ACTION: 'ruleSidebarEditAction',
   EDIT_ACTION_HOVER_BUTTON: 'editActionHoverButton',
-  RULE_FORM_FLYOUT: 'ruleSidebarEditAction',
 } as const;
 
 /**

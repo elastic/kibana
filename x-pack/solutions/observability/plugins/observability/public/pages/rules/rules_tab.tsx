@@ -121,7 +121,6 @@ export function RulesTab({ setRefresh, stateRefresh }: RulesTabProps) {
         <RuleFormFlyout
           plugins={{ ...services, ruleTypeRegistry, actionTypeRegistry }}
           id={ruleIdToEdit}
-          data-test-subj="ruleSidebarEditAction"
           onCancel={() => {
             setRuleConditionsFlyoutOpen(false);
             setRuleIdToEdit(null);
