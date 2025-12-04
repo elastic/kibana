@@ -159,6 +159,8 @@ export function SimilarErrorsOccurrencesChart({
 
     return (
       <div style={{ height: '120px', width: '100%' }}>
+        {/* TODO update the string with LENS_EMBEDDABLE_TYPE once is moved to @kbn/lens-common
+        https://github.com/elastic/kibana/issues/245192 */}
         <EmbeddableRenderer type={'lens'} getParentApi={getParentApi} hidePanelChrome />
       </div>
     );
