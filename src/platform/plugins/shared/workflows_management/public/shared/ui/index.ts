@@ -10,7 +10,7 @@
 export { StatusBadge, getExecutionStatusColors, getExecutionStatusIcon } from './status_badge';
 export { useFormattedDate, useFormattedDateTime } from './use_formatted_date';
 export { YamlEditor, type YamlEditorProps } from './yaml_editor';
-export { JSONDataTable, type JSONDataTableProps } from './json_data_view/json_data_table';
+export { JSONDataTable, type JSONDataTableProps } from './execution_data_viewer/json_data_table';
 export { UnsavedChangesPrompt } from './unsaved_changes_prompt';
 export { WorkflowStatus } from './workflow_status';
 export {
