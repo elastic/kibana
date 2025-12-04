@@ -158,6 +158,9 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
       this.lifecycleManager.reset();
     } catch (disconnectError) {
       const operationContext = operationName ? ` after ${operationName}` : '';
+
+      this.lifecycleManager.reset();
+
       this.logger.debug(
         `Error disconnecting${operationContext}: ${
           disconnectError instanceof Error ? disconnectError.message : String(disconnectError)
