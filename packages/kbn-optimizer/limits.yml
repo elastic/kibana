@@ -7,7 +7,7 @@ pageLoadAssetSize:
   apm: 38573
   apmSourcesAccess: 2278
   automaticImport: 12162
-  automaticImportVTwo: 4694
+  automaticImportVTwo: 4662
   banners: 4087
   canvas: 15142
   cases: 153204
@@ -89,7 +89,7 @@ pageLoadAssetSize:
   inputControlVis: 7660
   inspectComponent: 4900
   inspector: 17954
-  interactiveSetup: 36654
+  interactiveSetup: 36524
   intercepts: 19011
   kibanaOverview: 6339
   kibanaReact: 22503
@@ -205,5 +205,5 @@ pageLoadAssetSize:
   visualizations: 38375
   watcher: 10485
   workflowsExtensions: 2554
-  workflowsManagement: 8545
-  workplaceAIApp: 6454
+  workflowsManagement: 8497
+  workplaceAIApp: 6135
