@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ChartSectionConfiguration } from '@kbn/unified-histogram';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { TraceMetricsGrid, type DataSource } from '@kbn/unified-metrics-grid';
 import React from 'react';
 import { once } from 'lodash';
-import type { ChartSectionConfigurationExtensionParams } from '@kbn/unified-histogram/types';
 import type { DataSourceProfileProvider } from '../../../../profiles';
-
+import type {
+  ChartSectionConfigurationExtensionParams,
+  ChartSectionConfiguration,
+} from '../../../../types';
 export const createChartSection = (
   dataSource: DataSource
 ): DataSourceProfileProvider['profile']['getChartSectionConfiguration'] =>

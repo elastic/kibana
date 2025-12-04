@@ -9,11 +9,7 @@
 
 import React, { type PropsWithChildren, useEffect, useRef, useMemo, useCallback } from 'react';
 import { createHtmlPortalNode, type HtmlPortalNode, InPortal } from 'react-reverse-portal';
-import type {
-  ChartSectionConfiguration,
-  UnifiedHistogramPartialLayoutProps,
-  ChartSectionConfigurationExtensionParams,
-} from '@kbn/unified-histogram';
+import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram';
 import { UnifiedHistogramChart, useUnifiedHistogram } from '@kbn/unified-histogram';
 import { useChartStyles } from '@kbn/unified-histogram/components/chart/hooks/use_chart_styles';
 import { useServicesBootstrap } from '@kbn/unified-histogram/hooks/use_services_bootstrap';
@@ -38,6 +34,10 @@ import type { DiscoverStateContainer } from '../../state_management/discover_sta
 import { ScopedServicesProvider } from '../../../../components/scoped_services_provider';
 import { useUnifiedHistogramRuntimeState } from './use_unified_histogram_runtime_state';
 import { useUnifiedHistogramCommon } from './use_unified_histogram_common';
+import type {
+  ChartSectionConfigurationExtensionParams,
+  ChartSectionConfiguration,
+} from '../../../../context_awareness/types';
 
 export type ChartPortalNode = HtmlPortalNode;
 export type ChartPortalNodes = Record<string, ChartPortalNode>;

@@ -34,7 +34,6 @@ import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { SerializedStyles } from '@emotion/serialize';
 import type { ResizableLayoutProps } from '@kbn/resizable-layout';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import type { RestorableStateProviderProps } from '@kbn/restorable-state';
 import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
 import type { ControlPanelsState } from '@kbn/controls-plugin/common';
 
@@ -278,6 +277,15 @@ export interface UnifiedHistogramFetch$Arguments {
 
 export type UnifiedHistogramFetch$ = ReplaySubject<UnifiedHistogramFetch$Arguments>;
 
+// define the actions for the chart section supported by the Discover app
+interface ChartSectionActions {
+  openInNewTab?: (params: {
+    query?: Query | AggregateQuery;
+    tabLabel?: string;
+    timeRange?: TimeRange;
+  }) => void;
+  updateESQLQuery?: (queryOrUpdater: string | ((prevQuery: string) => string)) => void;
+}
 // A shared interface for communication between Discover and custom components.
 export interface ChartSectionProps {
   /**
@@ -322,66 +330,5 @@ export interface ChartSectionProps {
    */
   isComponentVisible: boolean;
 
-  actions: ChartSectionConfigurationExtensionParams['actions'];
+  actions: ChartSectionActions;
 }
-
-/**
- * Parameters passed to the open in new tab action
- */
-export interface OpenInNewTabParams {
-  /**
-   * The query to open in the new tab
-   */
-  query?: Query | AggregateQuery;
-  /**
-   * The label of the new tab
-   */
-  tabLabel?: string;
-  /**
-   * The time range to open in the new tab
-   */
-  timeRange?: TimeRange;
-}
-
-export interface ChartSectionConfigurationExtensionParams {
-  /**
-   * Available actions for the chart section configuration
-   */
-  actions: {
-    /**
-     * Opens a new tab
-     * @param params The parameters for the open in new tab action
-     */
-    openInNewTab?: (params: OpenInNewTabParams) => void;
-    /**
-     * Updates the current ES|QL query
-     */
-    updateESQLQuery?: (queryOrUpdater: string | ((prevQuery: string) => string)) => void;
-  };
-}
-
-/**
- * Supports customizing the chart (UnifiedHistogram) section in Discover
- */
-export type ChartSectionConfiguration<T extends object = object> =
-  | ({
-      /**
-       * The component to render for the chart section
-       */
-      Component: React.ComponentType<ChartSectionProps & RestorableStateProviderProps<T>>;
-      /**
-       * Controls whether or not to replace the default histogram and activate the custom chart
-       */
-      replaceDefaultChart: true;
-      /**
-       * Prefix for the local storage key used to store the chart section state, when not set, it will use the default Discover key
-       */
-      localStorageKeyPrefix?: string;
-      /**
-       * The default chart section height
-       */
-      defaultTopPanelHeight?: UnifiedHistogramTopPanelHeightContext;
-    } & ChartSectionConfigurationExtensionParams)
-  | {
-      replaceDefaultChart: false;
-    };

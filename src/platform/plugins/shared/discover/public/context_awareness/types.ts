@@ -25,11 +25,11 @@ import type { Trigger } from '@kbn/ui-actions-plugin/public';
 import type { FunctionComponent, PropsWithChildren } from 'react';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type {
-  ChartSectionConfiguration,
-  ChartSectionConfigurationExtensionParams,
-  OpenInNewTabParams,
+  ChartSectionProps,
+  UnifiedHistogramTopPanelHeightContext,
 } from '@kbn/unified-histogram/types';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { RestorableStateProviderProps } from '@kbn/restorable-state';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/redux';
 import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
@@ -101,6 +101,72 @@ export interface AppMenuExtensionParams {
    */
   authorizedRuleTypeIds: string[];
 }
+
+/**
+ * Parameters passed to the open in new tab action
+ */
+export interface OpenInNewTabParams {
+  /**
+   * The query to open in the new tab
+   */
+  query?: Query | AggregateQuery;
+  /**
+   * The label of the new tab
+   */
+  tabLabel?: string;
+  /**
+   * The time range to open in the new tab
+   */
+  timeRange?: TimeRange;
+}
+
+export interface ChartSectionConfigurationExtensionParams {
+  /**
+   * Available actions for the chart section configuration
+   */
+  actions: {
+    /**
+     * Opens a new tab
+     * @param params The parameters for the open in new tab action
+     */
+    openInNewTab?: (params: OpenInNewTabParams) => void;
+    /**
+     * Updates the current ES|QL query
+     */
+    updateESQLQuery?: (queryOrUpdater: string | ((prevQuery: string) => string)) => void;
+  };
+}
+
+/**
+ * Supports customizing the chart (UnifiedHistogram) section in Discover
+ */
+export type ChartSectionConfiguration<T extends object = object> =
+  | {
+      /**
+       * The component to render for the chart section
+       */
+      Component: React.ComponentType<ChartSectionProps & RestorableStateProviderProps<T>>;
+      /**
+       * Controls whether or not to replace the default histogram and activate the custom chart
+       */
+      replaceDefaultChart: true;
+      /**
+       * Prefix for the local storage key used to store the chart section state, when not set, it will use the default Discover key
+       */
+      localStorageKeyPrefix?: string;
+      /**
+       * The default chart section height
+       */
+      defaultTopPanelHeight?: UnifiedHistogramTopPanelHeightContext;
+
+      /** *
+       * The actions for the chart section
+       */
+      actions: ChartSectionConfigurationExtensionParams['actions'];
+    }
+  | {
+      replaceDefaultChart: false;
+    };
 
 /**
  * Supports customizing the Discover document viewer flyout

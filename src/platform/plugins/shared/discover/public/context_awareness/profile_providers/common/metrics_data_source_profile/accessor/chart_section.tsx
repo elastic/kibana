@@ -11,13 +11,13 @@ import React from 'react';
 import { UnifiedMetricsExperienceGrid } from '@kbn/unified-metrics-grid';
 import type { MetricsExperienceClient } from '@kbn/metrics-experience-plugin/public';
 import { once } from 'lodash';
-import type {
-  ChartSectionProps,
-  ChartSectionConfiguration,
-  ChartSectionConfigurationExtensionParams,
-} from '@kbn/unified-histogram/types';
+import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import type { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
 import type { DataSourceProfileProvider } from '../../../../profiles';
+import type {
+  ChartSectionConfigurationExtensionParams,
+  ChartSectionConfiguration,
+} from '../../../../types';
 
 export const createChartSection = (
   metricsExperienceClient?: MetricsExperienceClient
