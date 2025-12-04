@@ -41,10 +41,12 @@ export const createNavigationTree = ({
   streamsAvailable,
   overviewAvailable = true,
   isCasesAvailable = true,
+  showAiAssistant = true,
 }: {
   streamsAvailable?: boolean;
   overviewAvailable?: boolean;
   isCasesAvailable?: boolean;
+  showAiAssistant?: boolean;
 }): NavigationTreeDefinition => {
   return {
     body: [
@@ -191,13 +193,17 @@ export const createNavigationTree = ({
           },
         ],
       },
-      {
-        link: 'observabilityAIAssistant',
-        title: i18n.translate('xpack.serverlessObservability.nav.aiAssistant', {
-          defaultMessage: 'AI Assistant',
-        }),
-        icon: 'sparkles',
-      },
+      ...(showAiAssistant
+        ? [
+            {
+              link: 'observabilityAIAssistant' as const,
+              title: i18n.translate('xpack.serverlessObservability.nav.aiAssistant', {
+                defaultMessage: 'AI Assistant',
+              }),
+              icon: 'sparkles',
+            },
+          ]
+        : []),
       ...filterForFeatureAvailability(
         {
           id: 'machine_learning-landing',
