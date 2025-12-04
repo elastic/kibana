@@ -32,12 +32,7 @@ import { useMetricsExperienceState } from '../context/metrics_experience_state_p
 export interface MetricsExperienceGridContentProps
   extends Pick<
     ChartSectionProps,
-    | 'services'
-    | 'fetchParams'
-    | 'onBrushEnd'
-    | 'onFilter'
-    | 'onExploreInDiscoverTab'
-    | 'histogramCss'
+    'services' | 'fetchParams' | 'onBrushEnd' | 'onFilter' | 'actions' | 'histogramCss'
   > {
   discoverFetch$: ChartSectionProps['fetch$'];
   fields: MetricField[];
@@ -52,7 +47,7 @@ export const MetricsExperienceGridContent = ({
   fetchParams,
   onBrushEnd,
   onFilter,
-  onExploreInDiscoverTab,
+  actions,
   histogramCss,
   isFieldsLoading = false,
   isDiscoverLoading = false,
@@ -175,7 +170,7 @@ export const MetricsExperienceGridContent = ({
           services={services}
           fields={currentPageFields}
           onBrushEnd={onBrushEnd}
-          onExploreInDiscoverTab={onExploreInDiscoverTab}
+          actions={actions}
           onFilter={onFilter}
           discoverFetch$={discoverFetch$}
           fetchParams={fetchParams}

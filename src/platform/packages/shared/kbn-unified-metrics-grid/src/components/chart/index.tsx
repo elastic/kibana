@@ -24,11 +24,10 @@ export const ChartSizes = {
 };
 
 export type ChartSize = keyof typeof ChartSizes;
-export type ChartProps = Pick<ChartSectionProps, 'fetchParams' | 'onExploreInDiscoverTab'> &
-  Omit<LensWrapperProps, 'lensProps' | 'onViewDetails' | 'description' | 'abortController'> & {
+export type ChartProps = Pick<ChartSectionProps, 'fetchParams'> &
+  Omit<LensWrapperProps, 'lensProps' | 'description' | 'abortController'> & {
     size?: ChartSize;
     discoverFetch$: ChartSectionProps['fetch$'];
-    onViewDetails?: () => void;
     esqlQuery: string;
     title: string;
     chartLayers: LensSeriesLayer[];
@@ -52,6 +51,7 @@ export const Chart = ({
   syncCursor,
   syncTooltips,
   yBounds,
+  extraDisabledActions,
 }: ChartProps) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
@@ -100,6 +100,7 @@ export const Chart = ({
             syncCursor={syncCursor}
             titleHighlight={titleHighlight}
             syncTooltips={syncTooltips}
+            extraDisabledActions={extraDisabledActions}
           />
           {isSaveModalVisible && (
             <SaveModalComponent

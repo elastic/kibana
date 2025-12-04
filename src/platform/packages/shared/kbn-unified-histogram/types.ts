@@ -322,7 +322,7 @@ export interface ChartSectionProps {
    */
   isComponentVisible: boolean;
 
-  onExploreInDiscoverTab?: ChartSectionConfigurationExtensionParams['actions']['openInNewTab'];
+  actions: ChartSectionConfigurationExtensionParams['actions'];
 }
 
 /**

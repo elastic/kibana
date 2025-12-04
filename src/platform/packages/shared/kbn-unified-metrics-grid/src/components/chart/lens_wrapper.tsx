@@ -23,17 +23,15 @@ export type LensWrapperProps = {
   titleHighlight?: string;
   onViewDetails?: () => void;
   onCopyToDashboard?: () => void;
+  onExploreInDiscoverTab?: ChartSectionProps['actions']['openInNewTab'];
   syncTooltips?: boolean;
   syncCursor?: boolean;
   abortController: AbortController | undefined;
-} & Pick<ChartSectionProps, 'services' | 'onBrushEnd' | 'onFilter' | 'onExploreInDiscoverTab'>;
+  disabledActions?: string[];
+  extraDisabledActions?: string[];
+} & Pick<ChartSectionProps, 'services' | 'onBrushEnd' | 'onFilter'>;
 
-const DEFAULT_DISABLED_ACTIONS = [
-  'ACTION_CUSTOMIZE_PANEL',
-  'ACTION_EXPORT_CSV',
-  'ACTION_OPEN_IN_DISCOVER',
-  'alertRule',
-];
+const DEFAULT_DISABLED_ACTIONS = ['ACTION_CUSTOMIZE_PANEL', 'ACTION_EXPORT_CSV', 'alertRule'];
 
 export function LensWrapper({
   lensProps,
@@ -47,6 +45,7 @@ export function LensWrapper({
   onExploreInDiscoverTab,
   syncTooltips,
   syncCursor,
+  extraDisabledActions = [],
 }: LensWrapperProps) {
   const { euiTheme } = useEuiTheme();
 
@@ -102,8 +101,12 @@ export function LensWrapper({
   const extraActions = useLensExtraActions({
     copyToDashboard: onCopyToDashboard ? { onClick: onCopyToDashboard } : undefined,
     viewDetails: onViewDetails ? { onClick: onViewDetails } : undefined,
-    exploreInDiscoverTab: { onClick: handleExploreInDiscoverTab },
+    exploreInDiscoverTab: onExploreInDiscoverTab
+      ? { onClick: handleExploreInDiscoverTab }
+      : undefined,
   });
+
+  const disabledActions = [...DEFAULT_DISABLED_ACTIONS, ...extraDisabledActions];
 
   return (
     <div css={chartCss}>
@@ -116,7 +119,7 @@ export function LensWrapper({
           title={lensProps.attributes.title}
           extraActions={extraActions}
           abortController={abortController}
-          disabledActions={DEFAULT_DISABLED_ACTIONS}
+          disabledActions={disabledActions}
           withDefaultActions
           onBrushEnd={onBrushEnd}
           onFilter={onFilter}

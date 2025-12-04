@@ -298,7 +298,7 @@ const CustomChartSectionWrapper = ({
       {...unifiedHistogramProps}
       initialState={metricsGridState}
       onInitialStateChange={onInitialStateChange}
-      onExploreInDiscoverTab={chartSectionConfig.actions.openInNewTab}
+      actions={chartSectionConfig.actions}
     />
   );
 };
