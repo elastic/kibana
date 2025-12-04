@@ -204,6 +204,68 @@ describe('updateGapAutoFillScheduler()', () => {
     );
   });
 
+  test('updates ruleTypes and ruleTypeConsumerPairs when rule types change', async () => {
+    const existingSo = setupSchedulerSo();
+
+    const updatedRuleTypes: GapAutoFillSchedulerSO['ruleTypes'] = [
+      { type: 'another-rule-type', consumer: 'another-consumer' },
+    ];
+    const updatedRuleTypePairs = ['another-rule-type:another-consumer'];
+
+    const updatedSo: SavedObject<GapAutoFillSchedulerSO> = {
+      ...existingSo,
+      attributes: {
+        ...existingSo.attributes,
+        ruleTypes: updatedRuleTypes,
+        ruleTypeConsumerPairs: updatedRuleTypePairs,
+      },
+    };
+
+    unsecuredSavedObjectsClient.update.mockResolvedValue(updatedSo);
+    unsecuredSavedObjectsClient.get.mockResolvedValue(existingSo);
+
+    const params = getParams({ ruleTypes: updatedRuleTypes });
+    await rulesClient.updateGapAutoFillScheduler(params);
+
+    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith({
+      type: GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+      perPage: 2,
+      filter:
+        '(' +
+        updatedRuleTypePairs
+          .map(
+            (pair) =>
+              `${GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE}.attributes.ruleTypeConsumerPairs: "${pair}"`
+          )
+          .join(' or ') +
+        ')',
+    });
+
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+      GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+      params.id,
+      expect.objectContaining({
+        ruleTypes: updatedRuleTypes,
+        ruleTypeConsumerPairs: updatedRuleTypePairs,
+      })
+    );
+
+    // Authorization is checked for both existing and new rule types
+    expect(authorization.ensureAuthorized).toHaveBeenCalledTimes(2);
+    expect(authorization.ensureAuthorized).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ruleTypeId: 'another-rule-type',
+        consumer: 'another-consumer',
+      })
+    );
+    expect(authorization.ensureAuthorized).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ruleTypeId: 'test-rule-type',
+        consumer: 'test-consumer',
+      })
+    );
+  });
+
   test('validates params and throws on invalid payload', async () => {
     expect.assertions(2);
 
