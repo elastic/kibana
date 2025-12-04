@@ -154,7 +154,7 @@ export const IntegrationKnowledgeFlyout: React.FunctionComponent<{
                 <p>
                   <FormattedMessage
                     id="xpack.fleet.integrationKnowledgeFlyout.costDescription"
-                    defaultMessage="Indexing uses Elastic Inference Service and incurs minimal per token charges."
+                    defaultMessage="Indexing uses Elastic Inference Service and incurs minimal per-token costs."
                   />
                 </p>
               </EuiText>
