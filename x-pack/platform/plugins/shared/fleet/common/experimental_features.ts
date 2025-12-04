@@ -11,7 +11,6 @@ const _allowedExperimentalValues = {
   enableAutomaticAgentUpgrades: true,
   enableSyncIntegrationsOnRemote: true,
   enableSSLSecrets: false,
-  installedIntegrationsTabularUI: true,
   enabledUpgradeAgentlessDeploymentsTask: true,
   enablePackageRollback: true,
   enableAutoInstallContentPackages: true,
@@ -19,6 +18,11 @@ const _allowedExperimentalValues = {
   enableAgentStatusAlerting: true,
   enableAgentPrivilegeLevelChange: false,
   installIntegrationsKnowledge: false,
+  enableFleetPolicyRevisionsCleanupTask: true,
+  agentlessPoliciesAPI: true, // When enabled, agentless policies API will be enabled.
+  useAgentlessAPIInUI: true, // When enabled, Fleet UI will use agentless policies API to create agentless policies.
+  disableAgentlessLegacyAPI: false, // When enabled, it will disable creating agentless policies via agent or package policies API.
+  enableEsqlViewInstall: false,
 };
 
 /**

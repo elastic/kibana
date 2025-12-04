@@ -82,6 +82,7 @@ import {
   ALERT_TIME_RANGE,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
+  ALERT_MUTED,
   SPACE_IDS,
   TAGS,
   VERSION,
@@ -513,6 +514,7 @@ describe('Ad Hoc Task Runner', () => {
           [ALERT_ACTION_GROUP]: 'default',
           [ALERT_DURATION]: 0,
           [ALERT_FLAPPING]: false,
+          [ALERT_MUTED]: false,
           [ALERT_FLAPPING_HISTORY]: [true],
           [ALERT_INSTANCE_ID]: '1',
           [ALERT_SEVERITY_IMPROVING]: false,
@@ -1408,7 +1410,7 @@ describe('Ad Hoc Task Runner', () => {
         backfillRunAt: schedule1.runAt,
         backfillInterval: schedule1.interval,
       });
-      expect(logger.debug).toHaveBeenCalledTimes(5);
+      expect(logger.debug).toHaveBeenCalledTimes(6);
       expect(logger.debug).nthCalledWith(
         1,
         `Executing ad hoc run for rule test:rule-id for runAt ${schedule1.runAt}`
@@ -1427,7 +1429,11 @@ describe('Ad Hoc Task Runner', () => {
       );
       expect(logger.debug).nthCalledWith(
         5,
-        `skipping updating alerts with maintenance windows for rule test:rule-id: 'test': rule execution has been cancelled.`
+        `no scheduling of actions for rule test:rule-id: 'test': rule execution has been cancelled.`
+      );
+      expect(logger.debug).nthCalledWith(
+        6,
+        `skipping updating alerts for rule test:rule-id: 'test': rule execution has been cancelled.`
       );
       expect(logger.error).not.toHaveBeenCalled();
     });
@@ -1494,7 +1500,7 @@ describe('Ad Hoc Task Runner', () => {
         backfillRunAt: schedule2.runAt,
         backfillInterval: schedule2.interval,
       });
-      expect(logger.debug).toHaveBeenCalledTimes(5);
+      expect(logger.debug).toHaveBeenCalledTimes(6);
       expect(logger.debug).nthCalledWith(
         1,
         `Executing ad hoc run for rule test:rule-id for runAt ${schedule2.runAt}`
@@ -1513,7 +1519,11 @@ describe('Ad Hoc Task Runner', () => {
       );
       expect(logger.debug).nthCalledWith(
         5,
-        `skipping updating alerts with maintenance windows for rule test:rule-id: 'test': rule execution has been cancelled.`
+        `no scheduling of actions for rule test:rule-id: 'test': rule execution has been cancelled.`
+      );
+      expect(logger.debug).nthCalledWith(
+        6,
+        `skipping updating alerts for rule test:rule-id: 'test': rule execution has been cancelled.`
       );
       expect(logger.error).not.toHaveBeenCalled();
     });

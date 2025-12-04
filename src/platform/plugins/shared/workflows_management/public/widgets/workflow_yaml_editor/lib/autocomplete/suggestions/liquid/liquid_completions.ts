@@ -171,6 +171,21 @@ export const LIQUID_FILTERS = [
       '{{ products | group_by_exp: "item.price > 100" }} => [{"name": "true", "items": [...]}, {"name": "false", "items": [...]}]',
   },
   {
+    name: 'has',
+    description:
+      'Checks if an array of objects contains an object with a property (one param) or a specific property value (two params)',
+    insertText: 'has: "${1:property}", "${2:value}"',
+    example:
+      '{{ products | has: "type" }} => true if any product has "type" property\n{{ products | has: "type", "book" }} => true if any product has type="book"',
+  },
+  {
+    name: 'has_exp',
+    description: 'Checks if an array contains an item that matches an expression',
+    insertText: 'has_exp: "${1:itemName}", "${2:expression}"',
+    example:
+      '{{ products | has_exp: "item", "item.price > 100" }} => true if any product has price > 100',
+  },
+  {
     name: 'join',
     description: 'Combines the items in an array into a single string',
     insertText: 'join: "${1:separator}"',

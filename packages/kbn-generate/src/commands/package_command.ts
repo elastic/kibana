@@ -95,10 +95,6 @@ export const PackageCommand: GenerateCommand = {
     let group = flags.group as KibanaGroup | undefined;
     let visibility = flags.visibility as 'private' | 'shared' | undefined;
 
-    if (group !== 'platform') {
-      visibility = 'private';
-    }
-
     const license = flags.license as 'oss' | 'x-pack' | undefined;
     let calculatedPackageDir: string;
 
@@ -156,6 +152,10 @@ export const PackageCommand: GenerateCommand = {
             message: `What group is this package part of?`,
           })
         ).group;
+
+      if (group !== 'platform') {
+        visibility = 'private';
+      }
 
       let xpack: boolean;
 

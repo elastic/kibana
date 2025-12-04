@@ -85,7 +85,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('get and list', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/240922
+    describe.skip('get and list', () => {
       before(async () => {
         await utils.initEntityEngineForEntityTypesAndWait(['host', 'user']);
       });
@@ -147,7 +148,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('start and stop', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/236432
+    describe.skip('start and stop', () => {
       before(async () => {
         await utils.initEntityEngineForEntityTypesAndWait(['host']);
       });

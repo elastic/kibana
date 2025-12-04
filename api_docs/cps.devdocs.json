@@ -61,6 +61,42 @@
       ],
       "lifecycle": "setup",
       "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "cps",
+      "id": "def-public.CPSPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "CPSPluginStart",
+      "description": [],
+      "path": "src/platform/plugins/shared/cps/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "cps",
+          "id": "def-public.CPSPluginStart.cpsManager",
+          "type": "Object",
+          "tags": [],
+          "label": "cpsManager",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "@kbn/cps-utils",
+              "scope": "public",
+              "docId": "kibKbnCpsUtilsPluginApi",
+              "section": "def-public.ICPSManager",
+              "text": "ICPSManager"
+            },
+            " | undefined"
+          ],
+          "path": "src/platform/plugins/shared/cps/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
     }
   },
   "server": {

@@ -9,6 +9,14 @@
 
 export const REGISTRY_EXTENSIONS_ROUTE = '/internal/esql_registry/extensions/';
 export const SOURCES_AUTOCOMPLETE_ROUTE = '/internal/esql/autocomplete/sources/';
+export const TIMEFIELD_ROUTE = '/internal/esql/get_timefield/';
+
+const LOOKUP_INDEX_ROUTE = '/internal/esql/lookup_index';
+export const LOOKUP_INDEX_CREATE_ROUTE = `${LOOKUP_INDEX_ROUTE}/create`;
+export const LOOKUP_INDEX_UPDATE_ROUTE = `${LOOKUP_INDEX_ROUTE}/update`;
+export const LOOKUP_INDEX_RECREATE_ROUTE = `${LOOKUP_INDEX_ROUTE}/recreate`;
+export const LOOKUP_INDEX_PRIVILEGES_ROUTE = `${LOOKUP_INDEX_ROUTE}/privileges`;
+export const LOOKUP_INDEX_UPDATE_MAPPINGS_ROUTE = `${LOOKUP_INDEX_ROUTE}/update_mappings`;
 
 export enum SOURCES_TYPES {
   INDEX = 'Index',

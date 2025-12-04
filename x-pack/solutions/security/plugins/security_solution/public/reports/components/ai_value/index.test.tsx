@@ -7,6 +7,10 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import {
+  SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES,
+  SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE,
+} from '@kbn/management-settings-ids';
 import { AIValueMetrics } from '.';
 import { useKibana } from '../../../common/lib/kibana';
 import { useValueMetrics } from '../../hooks/use_value_metrics';
@@ -14,11 +18,8 @@ import { ExecutiveSummary } from './executive_summary';
 import { AlertProcessing } from './alert_processing';
 import { CostSavingsTrend } from './cost_savings_trend';
 import { ValueReportSettings } from './value_report_settings';
-import {
-  DEFAULT_VALUE_REPORT_MINUTES,
-  DEFAULT_VALUE_REPORT_RATE,
-} from '../../../../common/constants';
 import type { StartServices } from '../../../types';
+import { useAIValueExportContext } from '../../providers/ai_value/export_provider';
 
 // Mock dependencies
 jest.mock('../../../common/lib/kibana', () => ({
@@ -45,8 +46,13 @@ jest.mock('./value_report_settings', () => ({
   ValueReportSettings: jest.fn(() => <div data-test-subj="mock-value-report-settings" />),
 }));
 
+jest.mock('../../providers/ai_value/export_provider', () => ({
+  useAIValueExportContext: jest.fn(),
+}));
+
 const mockUseKibana = useKibana as jest.Mock;
 const mockUseValueMetrics = useValueMetrics as jest.MockedFunction<typeof useValueMetrics>;
+const useAIValueExportContextMock = useAIValueExportContext as jest.Mock;
 
 const defaultProps = {
   setHasAttackDiscoveries: jest.fn(),
@@ -80,8 +86,8 @@ describe('AIValueMetrics', () => {
       services: {
         uiSettings: {
           get: jest.fn((key: string) => {
-            if (key === DEFAULT_VALUE_REPORT_MINUTES) return 10;
-            if (key === DEFAULT_VALUE_REPORT_RATE) return 50;
+            if (key === SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES) return 10;
+            if (key === SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE) return 50;
             return null;
           }),
         },
@@ -91,6 +97,7 @@ describe('AIValueMetrics', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    useAIValueExportContextMock.mockReturnValue(undefined);
     mockUseKibana.mockReturnValue(createMockKibanaServices());
 
     mockUseValueMetrics.mockReturnValue({
@@ -196,14 +203,51 @@ describe('AIValueMetrics', () => {
     });
   });
 
+  it('uses the specified timerange when exporting the report', () => {
+    const timeRange = {
+      to: '2025-11-18T13:18:59.691Z',
+      from: '2025-10-18T12:18:59.691Z',
+    };
+    useAIValueExportContextMock.mockReturnValue({
+      forwardedState: {
+        timeRange,
+      },
+    });
+
+    render(<AIValueMetrics {...defaultProps} />);
+
+    expect(mockUseValueMetrics).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ...timeRange,
+      })
+    );
+  });
+
+  it('should set the report input in the export context when the data is loaded', () => {
+    const setReportInputMock = jest.fn();
+    useAIValueExportContextMock.mockReturnValue({
+      setReportInput: setReportInputMock,
+    });
+
+    render(<AIValueMetrics {...defaultProps} />);
+
+    expect(setReportInputMock).toHaveBeenCalledWith({
+      attackAlertIds: ['alert-1', 'alert-2'],
+      analystHourlyRate: 50,
+      minutesPerAlert: 10,
+      valueMetrics: mockValueMetrics,
+      valueMetricsCompare: mockValueMetricsCompare,
+    });
+  });
+
   it('handles different uiSettings values correctly', () => {
     mockUseKibana.mockReturnValue(
       createMockKibanaServices({
         uiSettings: {
           // @ts-ignore
           get: jest.fn((key: string) => {
-            if (key === DEFAULT_VALUE_REPORT_MINUTES) return 5;
-            if (key === DEFAULT_VALUE_REPORT_RATE) return 75;
+            if (key === SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES) return 5;
+            if (key === SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE) return 75;
             return null;
           }),
         },

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import React from 'react';
 import { type AppMountParameters, type CoreStart } from '@kbn/core/public';
 import {
@@ -45,16 +44,14 @@ export function AppRoot({
 
   return (
     <StreamsAppContextProvider context={context}>
-      <RedirectAppLinks coreStart={coreStart}>
-        {/* @ts-expect-error upgrade typescript v5.4.5 */}
-        <RouterProvider history={history} router={streamsAppRouter}>
-          <KbnUrlStateStorageFromRouterProvider>
-            <BreadcrumbsContextProvider>
-              <RouteRenderer />
-            </BreadcrumbsContextProvider>
-          </KbnUrlStateStorageFromRouterProvider>
-        </RouterProvider>
-      </RedirectAppLinks>
+      {/* @ts-expect-error upgrade typescript v5.4.5 */}
+      <RouterProvider history={history} router={streamsAppRouter}>
+        <KbnUrlStateStorageFromRouterProvider>
+          <BreadcrumbsContextProvider>
+            <RouteRenderer />
+          </BreadcrumbsContextProvider>
+        </KbnUrlStateStorageFromRouterProvider>
+      </RouterProvider>
     </StreamsAppContextProvider>
   );
 }

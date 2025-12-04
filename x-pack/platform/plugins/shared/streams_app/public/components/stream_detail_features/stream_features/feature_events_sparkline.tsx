@@ -6,16 +6,19 @@
  */
 
 import type { Streams, Feature } from '@kbn/streams-schema';
-
 import React, { useMemo } from 'react';
 import { PreviewDataSparkPlot } from '../../stream_detail_significant_events_view/add_significant_event_flyout/common/preview_data_spark_plot';
 
 export const FeatureEventsSparkline = ({
   feature,
   definition,
+  hideAxis = true,
+  height = 100,
 }: {
   feature: Feature;
   definition: Streams.all.Definition;
+  hideAxis?: boolean;
+  height?: number;
 }) => {
   const query = useMemo(
     () => ({
@@ -29,14 +32,15 @@ export const FeatureEventsSparkline = ({
     }),
     [feature.name, feature.filter]
   );
+
   return (
     <PreviewDataSparkPlot
       showTitle={false}
       definition={definition}
       isQueryValid={true}
       query={query}
-      hideAxis={true}
-      height={100}
+      hideAxis={hideAxis}
+      height={height}
     />
   );
 };

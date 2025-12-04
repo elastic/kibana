@@ -33,6 +33,8 @@ import {
   SPACE_SETTINGS_SAVED_OBJECT_TYPE,
 } from '../constants';
 
+import { SettingsSchemaV5 } from '../types';
+
 import { migrateSyntheticsPackagePolicyToV8120 } from './migrations/synthetics/to_v8_12_0';
 
 import {
@@ -173,6 +175,10 @@ export const getSavedObjectTypes = (
             },
           },
           action_secret_storage_requirements_met: { type: 'boolean' },
+          ilm_migration_status: {
+            dynamic: false,
+            properties: {},
+          },
         },
       },
       migrations: {
@@ -217,6 +223,23 @@ export const getSavedObjectTypes = (
               },
             },
           ],
+        },
+        5: {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                ilm_migration_status: {
+                  dynamic: false,
+                  properties: {},
+                },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: SettingsSchemaV5.extends({}, { unknowns: 'ignore' }),
+            create: SettingsSchemaV5,
+          },
         },
       },
     },

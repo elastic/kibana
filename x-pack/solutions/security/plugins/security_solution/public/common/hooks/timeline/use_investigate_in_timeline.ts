@@ -8,10 +8,10 @@
 import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { Filter, Query } from '@kbn/es-query';
+import { PageScope } from '../../../data_view_manager/constants';
 import { useSelectDataView } from '../../../data_view_manager/hooks/use_select_data_view';
 import { useCreateTimeline } from '../../../timelines/hooks/use_create_timeline';
 import { applyKqlFilterQuery, setFilters, updateProviders } from '../../../timelines/store/actions';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import type { DataProvider } from '../../../../common/types';
 import { sourcererSelectors } from '../../store';
 import { inputsActions } from '../../store/inputs';
@@ -131,14 +131,14 @@ export const useInvestigateInTimeline = () => {
         if (!keepDataView) {
           if (newDataViewPickerEnabled) {
             setSelectedDataView({
-              scope: SourcererScopeName.timeline,
+              scope: PageScope.timeline,
               id: defaultDataView.id,
               fallbackPatterns: [signalIndexName || ''],
             });
           } else {
             dispatch(
               sourcererActions.setSelectedDataView({
-                id: SourcererScopeName.timeline,
+                id: PageScope.timeline,
                 selectedDataViewId: defaultDataView.id,
                 selectedPatterns: [signalIndexName || ''],
               })

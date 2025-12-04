@@ -13,6 +13,7 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { GrokCollection } from '@kbn/grok-ui';
 import type {
   StreamlangProcessorDefinition,
+  StreamlangDSL,
   StreamlangStepWithUIAttributes,
 } from '@kbn/streamlang';
 import type { StreamlangWhereBlock } from '@kbn/streamlang/types/streamlang';
@@ -48,6 +49,7 @@ export interface StreamEnrichmentContextType {
   grokCollection: GrokCollection;
   simulatorRef: SimulationActorRef;
   urlState: EnrichmentUrlState;
+  suggestedPipeline?: StreamlangDSL;
 }
 
 export type StreamEnrichmentEvent =
@@ -60,6 +62,7 @@ export type StreamEnrichmentEvent =
   | { type: 'simulation.viewDataPreview' }
   | { type: 'simulation.viewDetectedFields' }
   | { type: 'dataSources.add'; dataSource: EnrichmentDataSource }
+  | { type: 'dataSources.select'; id: string }
   | { type: 'dataSources.closeManagement' }
   | { type: 'dataSources.openManagement' }
   | { type: 'simulation.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
@@ -84,5 +87,11 @@ export type StreamEnrichmentEvent =
       options?: { parentId: StreamlangStepWithUIAttributes['parentId'] };
     }
   | { type: 'step.reorder'; stepId: string; direction: 'up' | 'down' }
+  | { type: 'step.resetSteps'; steps: StreamlangDSL['steps'] }
   | { type: 'url.initialized'; urlState: EnrichmentUrlState }
-  | { type: 'url.sync' };
+  | { type: 'url.sync' }
+  | { type: 'suggestion.generate'; connectorId: string }
+  | { type: 'suggestion.cancel' }
+  | { type: 'suggestion.accept' }
+  | { type: 'suggestion.dismiss' }
+  | { type: 'suggestion.regenerate'; connectorId: string };

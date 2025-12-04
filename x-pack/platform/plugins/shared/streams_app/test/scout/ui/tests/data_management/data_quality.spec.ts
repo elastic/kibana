@@ -9,14 +9,8 @@ import { expect } from '@kbn/scout';
 import { test } from '../../fixtures';
 
 test.describe('Stream data quality', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeAll(async ({ apiServices }) => {
-    await apiServices.streams.enable();
-  });
-
   test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
-    // Clear existing rules
-    await apiServices.streams.clearStreamChildren('logs');
     // Create a test stream with routing rules first
     await apiServices.streams.forkStream('logs', 'logs.nginx', {
       field: 'service.name',
@@ -26,11 +20,12 @@ test.describe('Stream data quality', { tag: ['@ess', '@svlOblt'] }, () => {
     await pageObjects.streams.gotoDataQualityTab('logs.nginx');
   });
 
-  test.afterAll(async ({ apiServices }) => {
-    await apiServices.streams.disable();
+  test.afterEach(async ({ apiServices }) => {
+    // Clear existing rules
+    await apiServices.streams.clearStreamChildren('logs');
   });
 
-  test('should show data quality metrics', async ({ page, pageObjects }) => {
+  test('should show data quality metrics', async ({ page }) => {
     // Degraded and failed documents metrics should be visible
     await expect(
       page.getByTestId('datasetQualityDetailsSummaryKpiCard-Degraded documents')
@@ -41,16 +36,13 @@ test.describe('Stream data quality', { tag: ['@ess', '@svlOblt'] }, () => {
 
     // Edit failure store button should not be visible for wired streams
     await page.getByTestId('datasetQualityDetailsSummaryKpiCard-Failed documents').click();
-    await expect(page.getByTestId('datasetQualityDetailsEditFailureStore')).not.toBeVisible();
+    await expect(page.getByTestId('datasetQualityDetailsEditFailureStore')).toBeVisible();
 
     // Quality issues table should be visible
     await expect(page.getByTestId('datasetQualityDetailsDegradedFieldTable')).toBeVisible();
   });
 
-  test('date picker should show same time range as Streams Main page', async ({
-    page,
-    pageObjects,
-  }) => {
+  test('date picker should show same time range as Streams Main page', async ({ pageObjects }) => {
     // Go to Main page
     await pageObjects.streams.gotoStreamMainPage();
     const mainTimeRange = {
@@ -67,7 +59,6 @@ test.describe('Stream data quality', { tag: ['@ess', '@svlOblt'] }, () => {
   });
 
   test('changing time range should also update date picker on Streams Main page', async ({
-    page,
     pageObjects,
   }) => {
     const dataQualityTimeRange = {
@@ -77,8 +68,29 @@ test.describe('Stream data quality', { tag: ['@ess', '@svlOblt'] }, () => {
     // Change date picker
     await pageObjects.datePicker.setAbsoluteRange(dataQualityTimeRange);
 
-    // Go to Data Quality tab
-    await pageObjects.streams.clickGoBackToStreams();
+    // Go to Streams main page
+    await pageObjects.streams.clickRootBreadcrumb();
     await pageObjects.streams.verifyDatePickerTimeRange(dataQualityTimeRange);
+  });
+
+  test('should edit failure store for wired stream from data quality tab', async ({ page }) => {
+    // Click on the Failed documents card to expand it
+    await page.getByTestId('datasetQualityDetailsSummaryKpiCard-Failed documents').click();
+
+    // Click the edit button to open the failure store modal
+    await page.getByTestId('datasetQualityDetailsEditFailureStore').click();
+
+    // Modal should be visible
+    await expect(page.getByTestId('editFailureStoreModal')).toBeVisible();
+
+    // Inherit failure store switch should be visible for wired streams
+    await expect(page.getByTestId('inheritFailureStoreSwitch')).toBeVisible();
+
+    // Toggle the inherit failure store switch
+    await page.getByTestId('inheritFailureStoreSwitch').click();
+    await page.getByTestId('failureStoreModalSaveButton').click();
+
+    // Verify the modal is closed
+    await expect(page.getByTestId('editFailureStoreModal')).toBeHidden();
   });
 });

@@ -11,6 +11,7 @@ class ESDocLinks {
   public visitSearchLabs: string = '';
   public notebooksExamples: string = '';
   public elasticsearchDocs: string = '';
+  public elasticTraining: string = '';
 
   constructor() {}
 
@@ -18,6 +19,7 @@ class ESDocLinks {
     this.elasticsearchDocs = newDocLinks.elasticsearch.gettingStarted;
     this.visitSearchLabs = newDocLinks.searchGettingStarted.visitSearchLabs;
     this.notebooksExamples = newDocLinks.searchGettingStarted.notebooksExamples;
+    this.elasticTraining = newDocLinks.searchGettingStarted.elasticTraining;
   }
 }
 

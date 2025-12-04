@@ -9,9 +9,11 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { ToolbarSelector, type SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
 import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
+import { css } from '@emotion/react';
+import type { Dimension } from '@kbn/metrics-experience-plugin/common/types';
 import {
   MAX_DIMENSIONS_SELECTIONS,
   METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ,
@@ -20,24 +22,34 @@ import {
 interface DimensionsFilterProps {
   fields: Array<{
     name: string;
-    dimensions: Array<{ name: string; type: string; description?: string }>;
+    dimensions: Dimension[];
   }>;
-  selectedDimensions: string[];
-  onChange: (dimensions: string[]) => void;
-  onClear: () => void;
+  selectedDimensions: Dimension[];
+  fullWidth?: boolean;
+  onChange: (dimensions: Dimension[]) => void;
   singleSelection?: boolean;
+  isLoading?: boolean;
 }
 
 export const DimensionsSelector = ({
   fields,
   selectedDimensions,
   onChange,
-  onClear,
+  fullWidth = false,
   singleSelection = false,
+  isLoading = false,
 }: DimensionsFilterProps) => {
+  const selectedDimensionNames = useMemo(
+    () => selectedDimensions.map((d) => d.name),
+    [selectedDimensions]
+  );
+
+  // Create Set once for reuse in multiple memos
+  const selectedNamesSet = useMemo(() => new Set(selectedDimensionNames), [selectedDimensionNames]);
+
   // Extract all unique dimensions from fields that match the search term
   const allDimensions = useMemo(() => {
-    const dimensionMap = new Map<string, { name: string; type: string; description?: string }>();
+    const dimensionMap = new Map<string, Dimension>();
 
     fields
       .flatMap((field) => field.dimensions)
@@ -59,17 +71,15 @@ export const DimensionsSelector = ({
     }
 
     const fieldDimensionSets = fields.map((f) => new Set(f.dimensions.map((d) => d.name)));
-    const selectedSet = new Set(selectedDimensions);
-
     const result = new Set<string>();
 
     for (const dimSet of fieldDimensionSets) {
-      if (dimSet.size < selectedSet.size) {
+      if (dimSet.size < selectedNamesSet.size) {
         continue;
       }
 
       let matches = true;
-      for (const sel of selectedSet) {
+      for (const sel of selectedNamesSet) {
         if (!dimSet.has(sel)) {
           matches = false;
           break;
@@ -81,12 +91,12 @@ export const DimensionsSelector = ({
       }
     }
     return result;
-  }, [fields, selectedDimensions, allDimensions]);
+  }, [fields, selectedNamesSet, selectedDimensions.length, allDimensions]);
 
   const options: SelectableEntry[] = useMemo(() => {
     const isAtMaxLimit = selectedDimensions.length >= MAX_DIMENSIONS_SELECTIONS;
     return allDimensions.map<SelectableEntry>((dimension) => {
-      const isSelected = selectedDimensions.includes(dimension.name);
+      const isSelected = selectedNamesSet.has(dimension.name);
       const isIntersecting = intersectingDimensions.has(dimension.name);
       const isDisabledByLimit = singleSelection ? false : !isSelected && isAtMaxLimit;
 
@@ -99,55 +109,74 @@ export const DimensionsSelector = ({
         key: dimension.name,
       };
     });
-  }, [allDimensions, selectedDimensions, intersectingDimensions, singleSelection]);
+  }, [
+    allDimensions,
+    selectedNamesSet,
+    selectedDimensions.length,
+    intersectingDimensions,
+    singleSelection,
+  ]);
 
   const handleChange = useCallback(
     (chosenOption?: SelectableEntry | SelectableEntry[]) => {
       const opts =
         chosenOption == null ? [] : Array.isArray(chosenOption) ? chosenOption : [chosenOption];
-      const newSelection = opts.map((p) => p.value);
+      const selectedValues = new Set(opts.map((p) => p.value));
+      const newSelection = allDimensions.filter((d) => selectedValues.has(d.name));
       // Enforce the maximum limit
       const limitedSelection = newSelection.slice(0, MAX_DIMENSIONS_SELECTIONS);
       onChange(limitedSelection);
     },
-    [onChange]
+    [onChange, allDimensions]
   );
 
   const buttonLabel = useMemo(() => {
     const count = selectedDimensions.length;
-    const dimensionLabel = selectedDimensions[0];
-    if (count === 0) {
-      return (
-        <FormattedMessage
-          id="metricsExperience.dimensionsSelector.breakdownFieldButtonLabel"
-          defaultMessage="No {maxDimensions, plural, one {dimension} other {dimensions}} selected"
-          values={{ maxDimensions: MAX_DIMENSIONS_SELECTIONS }}
-        />
-      );
-    }
+    const dimensionLabel = selectedDimensions[0]?.name;
+
     return (
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <FormattedMessage
-            id="metricsExperience.dimensionsSelector.breakdownFieldButtonLabelWithSelection"
-            defaultMessage="Breakdown by {dimensionLabel}"
-            values={{ dimensionLabel }}
-          />
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            align-items: flex-start;
+          `}
+        >
+          {count === 0 ? (
+            <FormattedMessage
+              id="metricsExperience.dimensionsSelector.breakdownFieldButtonLabel"
+              defaultMessage="No {maxDimensions, plural, one {dimension} other {dimensions}} selected"
+              values={{ maxDimensions: MAX_DIMENSIONS_SELECTIONS }}
+            />
+          ) : (
+            <FormattedMessage
+              id="metricsExperience.dimensionsSelector.breakdownFieldButtonLabelWithSelection"
+              defaultMessage="Breakdown by {dimensionLabel}"
+              values={{ dimensionLabel }}
+            />
+          )}
         </EuiFlexItem>
+        {isLoading && (
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="m" />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     );
-  }, [selectedDimensions]);
+  }, [selectedDimensions, isLoading]);
 
   return (
     <ToolbarSelector
       data-test-subj={METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}
-      data-selected-value={selectedDimensions}
+      data-selected-value={selectedDimensionNames}
       searchable
       buttonLabel={buttonLabel}
       optionMatcher={comboBoxFieldOptionMatcher}
       options={options}
       singleSelection={singleSelection}
       onChange={handleChange}
+      fullWidth={fullWidth}
+      hasArrow={!isLoading}
     />
   );
 };

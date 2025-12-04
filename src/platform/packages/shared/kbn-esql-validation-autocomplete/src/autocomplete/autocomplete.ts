@@ -18,6 +18,7 @@ import {
   type ESQLAstItem,
   type ESQLCommandOption,
   type ESQLFunction,
+  SuggestionOrderingEngine,
 } from '@kbn/esql-ast';
 import { getRecommendedQueriesSuggestionsFromStaticTemplates } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
 import type {
@@ -27,30 +28,41 @@ import type {
 } from '@kbn/esql-ast/src/commands_registry/types';
 import { getControlSuggestionIfSupported } from '@kbn/esql-ast/src/definitions/utils';
 import { correctQuerySyntax } from '@kbn/esql-ast/src/definitions/utils/ast';
-import { ESQLVariableType } from '@kbn/esql-types';
+import { ControlTriggerSource, ESQLVariableType } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLAstAllCommands } from '@kbn/esql-ast/src/types';
-import { getAstContext } from '../shared/context';
-import { isHeaderCommandSuggestion, isSourceCommandSuggestion } from '../shared/helpers';
-import { getSourcesHelper } from '../shared/resources_helpers';
+import { getCursorContext } from '../shared/get_cursor_context';
+import { getFromCommandHelper } from '../shared/resources_helpers';
 import type { ESQLCallbacks } from '../shared/types';
 import { getCommandContext } from './get_command_context';
-import { mapRecommendedQueriesFromExtensions } from './utils/recommended_queries_helpers';
-import { getQueryForFields } from './get_query_for_fields';
-import type { GetColumnMapFn } from '../shared/columns';
-import { getColumnsByTypeRetriever } from '../shared/columns';
+import { mapRecommendedQueriesFromExtensions } from './recommended_queries_helpers';
+import { getQueryForFields } from '../shared/get_query_for_fields';
+import type { GetColumnMapFn } from '../shared/columns_retrieval_helpers';
+import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
+
+function isSourceCommandSuggestion({ label }: { label: string }) {
+  const sourceCommands = esqlCommandRegistry
+    .getSourceCommandNames()
+    .map((cmd) => cmd.toUpperCase());
+
+  return sourceCommands.includes(label);
+}
+function isHeaderCommandSuggestion({ label }: { label: string }) {
+  return label === 'SET';
+}
+
+const orderingEngine = new SuggestionOrderingEngine();
 
 export async function suggest(
   fullText: string,
   offset: number,
   resourceRetriever?: ESQLCallbacks
 ): Promise<ISuggestionItem[]> {
-  // Partition out to inner ast / ast context for the latest command
   const innerText = fullText.substring(0, offset);
   const correctedQuery = correctQuerySyntax(innerText);
   const { root } = parse(correctedQuery, { withFormatting: true });
 
-  const astContext = getAstContext(innerText, root, offset);
+  const astContext = getCursorContext(innerText, root, offset);
 
   if (astContext.type === 'comment') {
     return [];
@@ -58,7 +70,7 @@ export async function suggest(
 
   // Use the appropriate AST context for field retrieval
   // When in a subquery, use the subquery's AST to get only its fields
-  const astForFields = astContext.isCursorInSubquery ? astContext.astForContext : root;
+  const astForFields = astContext.astForContext;
 
   const { getColumnsByType, getColumnMap } = getColumnsByTypeRetriever(
     getQueryForFields(correctedQuery, astForFields),
@@ -68,7 +80,6 @@ export async function suggest(
 
   const supportsControls = resourceRetriever?.canSuggestVariables?.() ?? false;
   const getVariables = resourceRetriever?.getVariables;
-  const getSources = getSourcesHelper(resourceRetriever);
 
   const activeProduct = resourceRetriever?.getActiveProduct?.();
   const licenseInstance = await resourceRetriever?.getLicense?.();
@@ -116,38 +127,30 @@ export async function suggest(
 
       // Root level empty state: show source commands + recommended queries
       const recommendedQueriesSuggestions: ISuggestionItem[] = [];
-      if (getSources) {
-        let fromCommand = '';
-        const sources = await getSources();
-        const visibleSources = sources.filter((source) => !source.hidden);
-        if (visibleSources.find((source) => source.name.startsWith('logs'))) {
-          fromCommand = 'FROM logs*';
-        } else if (visibleSources.length) {
-          fromCommand = `FROM ${visibleSources[0].name}`;
-        }
+      const fromCommand = await getFromCommandHelper(resourceRetriever);
 
-        const { getColumnsByType: getColumnsByTypeEmptyState } = getColumnsByTypeRetriever(
-          EsqlQuery.fromSrc(fromCommand).ast,
-          innerText,
-          resourceRetriever
-        );
-        const editorExtensions = (await resourceRetriever?.getEditorExtensions?.('from *')) ?? {
-          recommendedQueries: [],
-        };
-        const recommendedQueriesSuggestionsFromExtensions = mapRecommendedQueriesFromExtensions(
-          editorExtensions.recommendedQueries
-        );
+      const { getColumnsByType: getColumnsByTypeEmptyState } = getColumnsByTypeRetriever(
+        EsqlQuery.fromSrc(fromCommand).ast,
+        innerText,
+        resourceRetriever
+      );
+      const editorExtensions = (await resourceRetriever?.getEditorExtensions?.('from *')) ?? {
+        recommendedQueries: [],
+      };
+      const recommendedQueriesSuggestionsFromExtensions = mapRecommendedQueriesFromExtensions(
+        editorExtensions.recommendedQueries
+      );
 
-        const recommendedQueriesSuggestionsFromStaticTemplates =
-          await getRecommendedQueriesSuggestionsFromStaticTemplates(
-            getColumnsByTypeEmptyState,
-            fromCommand
-          );
-        recommendedQueriesSuggestions.push(
-          ...recommendedQueriesSuggestionsFromExtensions,
-          ...recommendedQueriesSuggestionsFromStaticTemplates
+      const recommendedQueriesSuggestionsFromStaticTemplates =
+        await getRecommendedQueriesSuggestionsFromStaticTemplates(
+          getColumnsByTypeEmptyState,
+          fromCommand
         );
-      }
+      recommendedQueriesSuggestions.push(
+        ...recommendedQueriesSuggestionsFromExtensions,
+        ...recommendedQueriesSuggestionsFromStaticTemplates
+      );
+
       const sourceCommandsSuggestions = suggestions.filter(isSourceCommandSuggestion);
       const headerCommandsSuggestions = suggestions.filter(isHeaderCommandSuggestion);
       return [
@@ -169,11 +172,12 @@ export async function suggest(
     controlSuggestions = getControlSuggestionIfSupported(
       Boolean(supportsControls),
       ESQLVariableType.VALUES,
+      ControlTriggerSource.QUESTION_MARK,
       getVariables?.(),
       false
     );
 
-    return controlSuggestions;
+    return orderingEngine.sort(controlSuggestions, { command: '' });
   }
 
   if (astContext.type === 'expression') {
@@ -270,5 +274,11 @@ async function getSuggestionsWithinCommandExpression(
     offset
   );
 
-  return suggestions;
+  // Apply context-aware ordering
+  const orderedSuggestions = orderingEngine.sort(suggestions, {
+    command: astContext.command.name.toUpperCase(),
+    location: astContext.option?.name.toUpperCase(),
+  });
+
+  return orderedSuggestions;
 }

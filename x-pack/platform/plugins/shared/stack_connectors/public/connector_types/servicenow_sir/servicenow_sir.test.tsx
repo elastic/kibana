@@ -34,7 +34,7 @@ describe('servicenow action params validation', () => {
       subActionParams: { incident: { short_description: 'some title {{test}}' }, comments: [] },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         ['subActionParams.incident.short_description']: [],
         ['subActionParams.incident.additional_fields']: [],
@@ -48,7 +48,7 @@ describe('servicenow action params validation', () => {
       subActionParams: { incident: { short_description: '' }, comments: [] },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         ['subActionParams.incident.short_description']: ['Short description is required.'],
         ['subActionParams.incident.additional_fields']: [],
@@ -64,7 +64,7 @@ describe('servicenow action params validation', () => {
       },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'subActionParams.incident.short_description': [],
         'subActionParams.incident.additional_fields': ['Invalid JSON.'],
@@ -87,7 +87,7 @@ describe('servicenow action params validation', () => {
       },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'subActionParams.incident.short_description': [],
         ['subActionParams.incident.additional_fields']: [

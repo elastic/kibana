@@ -21,8 +21,8 @@ import type { ViewMode } from '@kbn/presentation-publishing';
 import { asyncMap } from '@kbn/std';
 import type { DashboardSearchAPIResult } from '../../../server/content_management';
 import { DASHBOARD_APP_ID } from '../../../common/constants';
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import {
-  DASHBOARD_CONTENT_ID,
   SAVED_OBJECT_DELETE_TIME,
   SAVED_OBJECT_LOADED_TIME,
 } from '../../utils/telemetry_constants';
@@ -167,7 +167,7 @@ export const useDashboardListingTable = ({
       if (dashboard.status === 'error') {
         return;
       }
-      const { references, spaces, namespaces, ...currentState } = dashboard.attributes;
+      const { references, ...currentState } = dashboard.attributes;
       await dashboardClient.update(
         id,
         {
@@ -375,28 +375,43 @@ export const useDashboardListingTable = ({
       return findService
         .search({
           search: searchTerm,
-          size: listingLimit,
-          hasReference: references,
-          hasNoReference: referencesToExclude,
-          options: {
-            // include only tags references in the response to save bandwidth
-            includeReferences: ['tag'],
-            fields: ['title', 'description', 'timeRange'],
+          per_page: listingLimit,
+          tags: {
+            included: (references ?? []).map(({ id }) => id),
+            excluded: (referencesToExclude ?? []).map(({ id }) => id),
           },
         })
-        .then(({ total, hits }) => {
+        .then(({ total, dashboards }) => {
           const searchEndTime = window.performance.now();
           const searchDuration = searchEndTime - searchStartTime;
           reportPerformanceMetricEvent(coreServices.analytics, {
             eventName: SAVED_OBJECT_LOADED_TIME,
             duration: searchDuration,
             meta: {
-              saved_object_type: DASHBOARD_CONTENT_ID,
+              saved_object_type: DASHBOARD_SAVED_OBJECT_TYPE,
             },
           });
+          const tagApi = savedObjectsTaggingService?.getTaggingApi();
           return {
             total,
-            hits: hits.map(toTableListViewSavedObject),
+            hits: dashboards.map(
+              ({ id, data, meta }) =>
+                ({
+                  type: 'dashboard',
+                  id,
+                  updatedAt: meta.updatedAt!,
+                  createdAt: meta.createdAt,
+                  createdBy: meta.createdBy,
+                  updatedBy: meta.updatedBy,
+                  references: tagApi && data.tags ? data.tags.map(tagApi.ui.tagIdToReference) : [],
+                  managed: meta.managed,
+                  attributes: {
+                    title: data.title,
+                    description: data.description,
+                    timeRestore: Boolean(data.timeRange),
+                  },
+                } as DashboardSavedObjectUserContent)
+            ),
           };
         });
     },

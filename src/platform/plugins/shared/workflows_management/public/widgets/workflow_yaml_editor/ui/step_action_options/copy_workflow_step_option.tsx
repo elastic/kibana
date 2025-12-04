@@ -10,18 +10,19 @@
 import { EuiContextMenuItem } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
+import yaml from 'yaml';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { selectFocusedStepInfo } from '../../../../entities/workflows/store';
+import { selectEditorFocusedStepInfo } from '../../../../entities/workflows/store';
 
 export interface CopyWorkflowStepOption {
   onClick: () => void;
 }
 
 export const CopyWorkflowStepOption: React.FC<CopyWorkflowStepOption> = ({ onClick }) => {
-  const focusedStepInfo = useSelector(selectFocusedStepInfo);
+  const focusedStepInfo = useSelector(selectEditorFocusedStepInfo);
   const {
     services: { notifications },
   } = useKibana<CoreStart>();
@@ -33,7 +34,7 @@ export const CopyWorkflowStepOption: React.FC<CopyWorkflowStepOption> = ({ onCli
 
     try {
       // Get the entire step YAML
-      await navigator.clipboard.writeText(focusedStepInfo.stepYamlNode.toString());
+      await navigator.clipboard.writeText(yaml.stringify(focusedStepInfo.stepYamlNode));
 
       if (notifications) {
         notifications.toasts.addSuccess({
@@ -69,13 +70,13 @@ export const CopyWorkflowStepOption: React.FC<CopyWorkflowStepOption> = ({ onCli
   return (
     <EuiContextMenuItem
       data-test-subj={`actionButton-copy-step`}
-      key="elasticsearch-copy-as-console"
+      key="copy-step-as-yaml"
       onClick={copy}
       icon="copy"
     >
       <FormattedMessage
         id="plugins.workflowsManagement.copyWorkflowStepToClipboard.buttonLabel"
-        defaultMessage="Copy workflow step"
+        defaultMessage="Copy as YAML"
       />
     </EuiContextMenuItem>
   );

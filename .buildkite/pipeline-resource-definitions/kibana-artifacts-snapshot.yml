@@ -44,3 +44,4 @@ spec:
           access_level: MANAGE_BUILD_AND_READ
       tags:
         - kibana
+        - ':kibana: Kibana release path'

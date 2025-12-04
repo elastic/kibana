@@ -5,87 +5,69 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-import type { TestBed } from '@kbn/test-jest-helpers';
-import { createFormToggleAction } from './form_toggle_action';
+import { screen, fireEvent, within, waitForElementToBeRemoved } from '@testing-library/react';
 import { createFormSetValueAction } from './form_set_value_action';
 
-const createSetPrimaryShardSizeAction =
-  (testBed: TestBed) => async (value: string, units?: string) => {
-    const { find, component } = testBed;
-
-    await act(async () => {
-      find('hot-selectedMaxPrimaryShardSize').simulate('change', { target: { value } });
-    });
-    component.update();
-
-    if (units) {
-      act(() => {
-        find('hot-selectedMaxPrimaryShardSize.show-filters-button').simulate('click');
-      });
-      component.update();
-
-      act(() => {
-        find(`hot-selectedMaxPrimaryShardSize.filter-option-${units}`).simulate('click');
-      });
-      component.update();
-    }
-  };
-
-const createSetMaxAgeAction = (testBed: TestBed) => async (value: string, units?: string) => {
-  const { find, component } = testBed;
-
-  await act(async () => {
-    find('hot-selectedMaxAge').simulate('change', { target: { value } });
-  });
-  component.update();
+const setMaxPrimaryShardSize = async (value: string, units?: string) => {
+  const input = screen.getByTestId<HTMLInputElement>('hot-selectedMaxPrimaryShardSize');
+  fireEvent.change(input, { target: { value } });
+  fireEvent.blur(input);
 
   if (units) {
-    act(() => {
-      find('hot-selectedMaxAgeUnits.show-filters-button').simulate('click');
-    });
-    component.update();
+    const popover = screen.getByTestId('hot-selectedMaxPrimaryShardSizeUnits');
+    const filterButton = within(popover).getByTestId('show-filters-button');
+    fireEvent.click(filterButton);
 
-    act(() => {
-      find(`hot-selectedMaxAgeUnits.filter-option-${units}`).simulate('click');
-    });
-    component.update();
+    const filterOption = await screen.findByTestId(`filter-option-${units}`);
+    fireEvent.click(filterOption);
+    await waitForElementToBeRemoved(filterOption);
   }
 };
 
-const createSetMaxSizeAction = (testBed: TestBed) => async (value: string, units?: string) => {
-  const { find, component } = testBed;
-
-  await act(async () => {
-    find('hot-selectedMaxSizeStored').simulate('change', { target: { value } });
-  });
-  component.update();
+const setMaxAge = async (value: string, units?: string) => {
+  const input = screen.getByTestId<HTMLInputElement>('hot-selectedMaxAge');
+  fireEvent.change(input, { target: { value } });
+  fireEvent.blur(input);
 
   if (units) {
-    act(() => {
-      find('hot-selectedMaxSizeStoredUnits.show-filters-button').simulate('click');
-    });
-    component.update();
+    const popover = screen.getByTestId('hot-selectedMaxAgeUnits');
+    const filterButton = within(popover).getByTestId('show-filters-button');
+    fireEvent.click(filterButton);
 
-    act(() => {
-      find(`hot-selectedMaxSizeStoredUnits.filter-option-${units}`).simulate('click');
-    });
-    component.update();
+    const filterOption = await screen.findByTestId(`filter-option-${units}`);
+    fireEvent.click(filterOption);
+    await waitForElementToBeRemoved(filterOption);
   }
 };
 
-export const createRolloverActions = (testBed: TestBed) => {
-  const { exists } = testBed;
+const setMaxSize = async (value: string, units?: string) => {
+  const input = screen.getByTestId<HTMLInputElement>('hot-selectedMaxSizeStored');
+  fireEvent.change(input, { target: { value } });
+  fireEvent.blur(input);
+
+  if (units) {
+    const popover = screen.getByTestId('hot-selectedMaxSizeStoredUnits');
+    const filterButton = within(popover).getByTestId('show-filters-button');
+    fireEvent.click(filterButton);
+
+    const filterOption = await screen.findByTestId(`filter-option-${units}`);
+    fireEvent.click(filterOption);
+    await waitForElementToBeRemoved(filterOption);
+  }
+};
+
+export const createRolloverActions = () => {
   return {
     rollover: {
-      toggle: createFormToggleAction(testBed, 'rolloverSwitch'),
-      toggleDefault: createFormToggleAction(testBed, 'useDefaultRolloverSwitch'),
-      setMaxPrimaryShardSize: createSetPrimaryShardSizeAction(testBed),
-      setMaxPrimaryShardDocs: createFormSetValueAction(testBed, 'hot-selectedMaxPrimaryShardDocs'),
-      setMaxDocs: createFormSetValueAction(testBed, 'hot-selectedMaxDocuments'),
-      setMaxAge: createSetMaxAgeAction(testBed),
-      setMaxSize: createSetMaxSizeAction(testBed),
-      hasSettingRequiredCallout: (): boolean => exists('rolloverSettingsRequired'),
+      toggle: () => fireEvent.click(screen.getByTestId('rolloverSwitch')),
+      toggleDefault: () => fireEvent.click(screen.getByTestId('useDefaultRolloverSwitch')),
+      setMaxPrimaryShardSize,
+      setMaxPrimaryShardDocs: createFormSetValueAction('hot-selectedMaxPrimaryShardDocs'),
+      setMaxDocs: createFormSetValueAction('hot-selectedMaxDocuments'),
+      setMaxAge,
+      setMaxSize,
+      hasSettingRequiredCallout: (): boolean =>
+        Boolean(screen.queryByTestId('rolloverSettingsRequired')),
     },
   };
 };
