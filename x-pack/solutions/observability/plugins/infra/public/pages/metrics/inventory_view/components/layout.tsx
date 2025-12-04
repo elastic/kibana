@@ -67,14 +67,20 @@ export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
   const legendPalette = legend?.palette ?? DEFAULT_LEGEND.palette;
   const legendSteps = legend?.steps ?? DEFAULT_LEGEND.steps;
   const legendReverseColors = legend?.reverseColors ?? DEFAULT_LEGEND.reverseColors;
-
   const AUTO_REFRESH_INTERVAL = 5 * 1000;
   const schemas: DataSchemaFormat[] = useMemo(
     () => timeRangeMetadata?.schemas || [],
     [timeRangeMetadata?.schemas]
   );
-  const hasElasticIntegration = schemas.includes('ecs');
-  const hasOtelIntegration = schemas.includes('semconv');
+
+  const hasElasticSchema = schemas.includes('ecs');
+  const hasOtelSchema = schemas.includes('semconv');
+
+  const [k8sCardDismissed, setK8sCardDismissed] = useState(false);
+  const [otelK8sCardDismissed, setOtelK8sCardDismissed] = useState(false);
+
+  const showKubernetesDashboardCard = hasElasticSchema && !k8sCardDismissed;
+  const showOtelKubernetesDashboardCard = hasOtelSchema && !otelK8sCardDismissed;
 
   const options = {
     formatter: InfraFormatterType.percent,
@@ -165,16 +171,21 @@ export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
               </EuiFlexGroup>
             </EuiFlexGroup>
           </TopActionContainer>
-          {nodeType === 'pod' && (hasElasticIntegration || hasOtelIntegration) && (
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                {hasElasticIntegration && <KubernetesDashboardCard />}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                {hasOtelIntegration && <OtelKubernetesDashboardCard />}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
+          {nodeType === 'pod' &&
+            (showKubernetesDashboardCard || showOtelKubernetesDashboardCard) && (
+              <EuiFlexGroup css={{ flexGrow: 0 }} direction="row">
+                {showKubernetesDashboardCard && (
+                  <EuiFlexItem>
+                    <KubernetesDashboardCard onClose={() => setK8sCardDismissed(true)} />
+                  </EuiFlexItem>
+                )}
+                {showOtelKubernetesDashboardCard && (
+                  <EuiFlexItem>
+                    <OtelKubernetesDashboardCard onClose={() => setOtelK8sCardDismissed(true)} />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            )}
           <EuiFlexItem
             grow={false}
             css={css`

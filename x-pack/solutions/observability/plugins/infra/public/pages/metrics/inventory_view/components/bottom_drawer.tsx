@@ -43,9 +43,12 @@ export const BottomDrawer = ({ interval, formatter, view, nodeType }: Props) => 
   );
 
   const hasElasticSchema = schemas.includes('ecs');
-  const hasK8sIntegration = useInstalledIntegration('kubernetes');
+  const { isInstalled: hasK8sIntegration } = useInstalledIntegration('kubernetes');
   const hasSemconvSchema = schemas.includes('semconv');
-  const hasOtelK8sIntegration = useInstalledIntegration('kubernetes_otel');
+  const { isInstalled: hasOtelK8sIntegration } = useInstalledIntegration('kubernetes_otel');
+
+  const showKubernetesButton = hasElasticSchema && hasK8sIntegration;
+  const showOtelKubernetesButton = hasSemconvSchema && hasOtelK8sIntegration;
 
   useEffect(() => {
     if (isOpen !== timelineOpen) setIsOpen(Boolean(timelineOpen));
@@ -59,10 +62,20 @@ export const BottomDrawer = ({ interval, formatter, view, nodeType }: Props) => 
   }, [isOpen, trackDrawerOpen, changeTimelineOpen]);
 
   if (view === 'table') {
-    return nodeType === 'pod' ? (
+    return nodeType === 'pod' && (showKubernetesButton || showOtelKubernetesButton) ? (
       <BottomPanel hasBorder={false} hasShadow={false} borderRadius="none" paddingSize="s">
-        {hasElasticSchema && hasK8sIntegration && <KubernetesButton />}
-        {hasSemconvSchema && hasOtelK8sIntegration && <OtelKubernetesButton />}
+        <EuiFlexGroup responsive={false} justifyContent="flexStart" alignItems="center">
+          {showKubernetesButton && (
+            <EuiFlexItem grow={false}>
+              <KubernetesButton />
+            </EuiFlexItem>
+          )}
+          {showOtelKubernetesButton && (
+            <EuiFlexItem grow={false}>
+              <OtelKubernetesButton />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       </BottomPanel>
     ) : null;
   }
@@ -81,11 +94,19 @@ export const BottomDrawer = ({ interval, formatter, view, nodeType }: Props) => 
               {isOpen ? hideHistory : showHistory}
             </EuiButtonEmpty>
           </EuiFlexItem>
-          {nodeType === 'pod' && (
-            <EuiFlexItem grow={false}>
-              {hasElasticSchema && hasK8sIntegration && <KubernetesButton />}
-              {hasSemconvSchema && hasOtelK8sIntegration && <OtelKubernetesButton />}
-            </EuiFlexItem>
+          {nodeType === 'pod' && (showKubernetesButton || showOtelKubernetesButton) && (
+            <>
+              {showKubernetesButton && (
+                <EuiFlexItem grow={false}>
+                  <KubernetesButton />
+                </EuiFlexItem>
+              )}
+              {showOtelKubernetesButton && (
+                <EuiFlexItem grow={false}>
+                  <OtelKubernetesButton />
+                </EuiFlexItem>
+              )}
+            </>
           )}
         </EuiFlexGroup>
       </StickyPanel>

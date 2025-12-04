@@ -7,25 +7,133 @@
 
 import React, { useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCard } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiText,
+  EuiButtonEmpty,
+  EuiImage,
+} from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { TryItButton } from './try_it_button';
 import { useInstalledIntegration } from '../hooks/use_installed_integration';
 
-export const OtelKubernetesDashboardCard = () => {
+export const OtelKubernetesDashboardCard = ({ onClose }: { onClose: () => void }) => {
   const { isInstalled } = useInstalledIntegration('kubernetes_otel');
+
+  const handleClose = () => {
+    onClose();
+  };
+
   return (
-    <EuiCard
-      title={i18n.translate(
-        'xpack.infra.otelKubernetesDashboardCard.euiCard.otelKubernetesDashboardLabel',
-        { defaultMessage: 'Otel Kubernetes Dashboard' }
-      )}
-      description={
-        isInstalled
-          ? 'View your Otel Kubernetes dashboard'
-          : 'Install the Otel Kubernetes integration to view your Otel Kubernetes dashboard'
-      }
-    />
+    <EuiPanel hasBorder={true} paddingSize="m" color="subdued" grow={false} borderRadius="m">
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiImage
+            src="https://images.unsplash.com/photo-1650253618249-fb0d32d3865c?w=900&h=900&fit=crop&q=60"
+            alt="Kubernetes OpenTelemetry Dashboards"
+            size="s"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="xs">
+            <EuiFlexItem>
+              <EuiTitle size="xs">
+                <h4>
+                  {isInstalled
+                    ? i18n.translate(
+                        'xpack.infra.inventoryUI.otelKubernetesPodsDashboard.integrationInstalledTitle',
+                        {
+                          defaultMessage: 'View Kubernetes OpenTelemetry Dashboards',
+                        }
+                      )
+                    : i18n.translate(
+                        'xpack.infra.inventoryUI.otelKubernetesPodsDashboard.integrationNotInstalledTitle',
+                        {
+                          defaultMessage: 'Install Kubernetes OpenTelemetry Dashboards',
+                        }
+                      )}
+                </h4>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText size="s" color="subdued">
+                {isInstalled
+                  ? i18n.translate(
+                      'xpack.infra.inventoryUI.otelKubernetesPodsDashboard.integrationInstalledDescription',
+                      { defaultMessage: 'View your Kubernetes OpenTelemetry Dashboards' }
+                    )
+                  : i18n.translate(
+                      'xpack.infra.inventoryUI.otelKubernetesPodsDashboard.integrationNotInstalledDescription',
+                      {
+                        defaultMessage:
+                          'Install the Kubernetes OpenTelemetry Dashboards integration to view your Kubernetes OpenTelemetry Dashboards.',
+                      }
+                    )}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFlexGroup direction="row" gutterSize="xs" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="s"
+                    data-test-subj={
+                      isInstalled
+                        ? 'infraOtelKubernetesDashboardCardLink'
+                        : 'infraOtelKubernetesDashboardCardInstallLink'
+                    }
+                    href={
+                      isInstalled
+                        ? 'https://www.elastic.co/guide/en/observability/current/kubernetes-otel-dashboards.html'
+                        : 'https://www.elastic.co/guide/en/observability/current/kubernetes-otel-dashboards.html'
+                    }
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    {isInstalled
+                      ? i18n.translate(
+                          'xpack.infra.inventoryUI.otelKubernetesPodsDashboard.viewDashboardLink',
+                          {
+                            defaultMessage: 'View Dashboard',
+                          }
+                        )
+                      : i18n.translate(
+                          'xpack.infra.inventoryUI.otelKubernetesPodsDashboard.installDashboardLink',
+                          {
+                            defaultMessage: 'View Integration',
+                          }
+                        )}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiButtonEmpty
+                    data-test-subj="infraOtelKubernetesDashboardCardHideThisButton"
+                    color="text"
+                    size="s"
+                    onClick={handleClose}
+                    aria-label={i18n.translate(
+                      'xpack.infra.inventoryUI.otelKubernetesPodsDashboard.dismissCard',
+                      {
+                        defaultMessage: 'Dismiss card',
+                      }
+                    )}
+                  >
+                    {i18n.translate(
+                      'xpack.infra.inventoryUI.otelKubernetesPodsDashboard.hideCard',
+                      {
+                        defaultMessage: 'Hide this',
+                      }
+                    )}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
   );
 };
 const LOCAL_STORAGE_KEY = 'inventoryUI:otelK8sDashboardClicked';
