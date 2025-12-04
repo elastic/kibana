@@ -12,6 +12,7 @@ import type { ForwardRefExoticComponent, ReactNode, RefAttributes } from 'react'
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiHorizontalRule,
   EuiScreenReaderOnly,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -24,25 +25,41 @@ import { handleRovingIndex } from '../../utils/handle_roving_index';
 import { updateTabIndices } from '../../utils/update_tab_indices';
 import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 
-const getWrapperStyles = (theme: UseEuiTheme['euiTheme'], isCollapsed: boolean) => css`
-  align-items: center;
-  display: flex;
-  position: relative;
-  flex-direction: column;
-  gap: ${theme.size.xs};
-  justify-content: center;
-  padding-top: ${isCollapsed ? theme.size.s : theme.size.m};
+const getWrapperStyles = (theme: UseEuiTheme['euiTheme'], isCollapsed: boolean) => ({
+  root: css`
+    align-items: center;
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    gap: ${theme.size.xs};
+    justify-content: center;
+    padding-top: ${isCollapsed ? theme.size.s : theme.size.m};
 
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 8px;
-    right: 8px;
-    height: ${theme.border.width.thin};
-    background-color: ${theme.colors.borderBaseSubdued};
-  }
-`;
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 8px;
+      right: 8px;
+      height: ${theme.border.width.thin};
+      background-color: ${theme.colors.borderBaseSubdued};
+    }
+  `,
+  collapseDivider: css`
+    position: relative;
+    background-color: transparent;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 8px;
+      right: 8px;
+      height: ${theme.border.width.thin};
+      background-color: ${theme.colors.borderBaseSubdued};
+    }
+  `,
+});
 
 export interface FooterIds {
   footerNavigationInstructionsId: string;
@@ -109,12 +126,13 @@ const FooterBase = forwardRef<HTMLElement, FooterProps>(
           aria-label={i18n.translate('core.ui.chrome.sideNavigation.footerAriaLabel', {
             defaultMessage: 'Side navigation',
           })}
-          css={wrapperStyles}
+          css={wrapperStyles.root}
           onKeyDown={handleRovingIndex}
           ref={handleRef}
           data-test-subj={`${NAVIGATION_SELECTOR_PREFIX}-footer`}
         >
           {renderChildren()}
+          <EuiHorizontalRule margin="xs" css={wrapperStyles.collapseDivider} />
           {collapseButton}
         </footer>
       </>
