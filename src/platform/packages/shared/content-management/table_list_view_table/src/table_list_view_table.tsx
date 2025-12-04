@@ -992,35 +992,39 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     dispatch({ type: 'onItemsDeleted' });
   }, [deleteItems, entityName, fetchItems, isDeletingItems, notifyError, selectedItems]);
 
-  const renderCreateButton = useCallback(() => {
-    if (createItem) {
-      // Dynamic button label based on active tab
-      let buttonLabel = entityName;
-      if (contentTypeTabsEnabled && tableFilter.contentTypeTab && contentTypeEntityNames) {
-        buttonLabel = contentTypeEntityNames[tableFilter.contentTypeTab]?.singular || entityName;
-      }
+  const renderCreateButton = useCallback(
+    (fill: boolean = false) => {
+      if (createItem) {
+        // Dynamic button label based on active tab
+        let buttonLabel = entityName;
+        if (contentTypeTabsEnabled && tableFilter.contentTypeTab && contentTypeEntityNames) {
+          buttonLabel = contentTypeEntityNames[tableFilter.contentTypeTab]?.singular || entityName;
+        }
 
-      return (
-        <EuiButton
-          onClick={() => createItem(tableFilter.contentTypeTab)}
-          data-test-subj="newItemButton"
-          iconType="plusInCircleFilled"
-        >
-          <FormattedMessage
-            id="contentManagement.tableList.listing.createNewItemButtonLabel"
-            defaultMessage="Create {entityName}"
-            values={{ entityName: buttonLabel }}
-          />
-        </EuiButton>
-      );
-    }
-  }, [
-    createItem,
-    entityName,
-    tableFilter.contentTypeTab,
-    contentTypeTabsEnabled,
-    contentTypeEntityNames,
-  ]);
+        return (
+          <EuiButton
+            onClick={() => createItem(tableFilter.contentTypeTab)}
+            data-test-subj="newItemButton"
+            iconType="plusInCircleFilled"
+            fill={fill}
+          >
+            <FormattedMessage
+              id="contentManagement.tableList.listing.createNewItemButtonLabel"
+              defaultMessage="Create {entityName}"
+              values={{ entityName: buttonLabel }}
+            />
+          </EuiButton>
+        );
+      }
+    },
+    [
+      createItem,
+      entityName,
+      tableFilter.contentTypeTab,
+      contentTypeTabsEnabled,
+      contentTypeEntityNames,
+    ]
+  );
 
   const renderNoItemsMessage = useCallback(() => {
     if (emptyPrompt) {

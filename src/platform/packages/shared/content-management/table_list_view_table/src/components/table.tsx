@@ -80,7 +80,7 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   customSortingOptions?: CustomSortingOptions;
   deleteItems: TableListViewTableProps<T>['deleteItems'];
   tableItemsRowActions: TableItemsRowActions;
-  renderCreateButton: () => React.ReactElement | undefined;
+  renderCreateButton: (fill?: boolean) => React.ReactElement | undefined;
   onSortChange: (column: SortColumnField, direction: Direction) => void;
   onTableChange: (criteria: CriteriaWithPagination<T>) => void;
   onFilterChange: (filter: Partial<State<T>['tableFilter']>) => void;
@@ -176,7 +176,7 @@ export function Table<T extends UserContentCommonSchema>({
 
   // Dynamic create button for toolbar (changes based on active tab)
   const renderDynamicCreateButton = useCallback(() => {
-    return renderCreateButton();
+    return renderCreateButton(true);
   }, [renderCreateButton]);
 
   const selection = useMemo<EuiTableSelectionType<T> | undefined>(() => {
@@ -372,7 +372,7 @@ export function Table<T extends UserContentCommonSchema>({
   }, [contentTypeTabsEnabled, tableFilter.contentTypeTab]);
 
   const emptyPromptActions = useMemo(() => {
-    return renderCreateButton();
+    return renderCreateButton(false);
   }, [renderCreateButton]);
 
   const { data: favorites, isError: favoritesError } = useFavorites({ enabled: favoritesEnabled });
