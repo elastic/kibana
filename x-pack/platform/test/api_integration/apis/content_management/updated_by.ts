@@ -27,7 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(createResponse.status).to.be(200);
         expect(createResponse.body.data).to.be.ok();
-        expect(createResponse.body.meta).to.not.have.key('updatedBy');
+        expect(createResponse.body.meta).to.not.have.key('updated_by');
 
         const updateResponse = await supertest
           .put(`/api/dashboards/dashboard/${createResponse.body.id}`)
@@ -41,7 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(updateResponse.status).to.be(200);
         expect(updateResponse.body.data).to.be.ok();
-        expect(updateResponse.body.meta).to.not.have.key('updatedBy');
+        expect(updateResponse.body.meta).to.not.have.key('updated_by');
       });
     });
 
@@ -76,8 +76,8 @@ export default function ({ getService }: FtrProviderContext) {
       it('updated_by is with profile_id', async () => {
         expect(createResponse.status).to.be(200);
         expect(createResponse.body.data).to.be.ok();
-        expect(createResponse.body.meta).to.have.key('updatedBy');
-        expect(createResponse.body.meta.updatedBy).to.be(interactiveUser.uid);
+        expect(createResponse.body.meta).to.have.key('updated_by');
+        expect(createResponse.body.meta.updated_by).to.be(interactiveUser.uid);
       });
 
       it('updated_by is empty after update with non interactive user', async () => {
@@ -105,10 +105,10 @@ export default function ({ getService }: FtrProviderContext) {
         const createdMeta = createResponse.body.meta;
         const getMeta = getResponse.body.meta;
 
-        expect(getMeta).to.not.have.key('updatedBy');
-        expect(getMeta.createdBy).to.eql(createdMeta.createdBy);
-        expect(getMeta.createdAt).to.eql(createdMeta.createdAt);
-        expect(getMeta.updatedAt).to.be.greaterThan(createdMeta.updatedAt);
+        expect(getMeta).to.not.have.key('updated_by');
+        expect(getMeta.created_by).to.eql(createdMeta.created_by);
+        expect(getMeta.created_at).to.eql(createdMeta.created_at);
+        expect(getMeta.updated_at).to.be.greaterThan(createdMeta.updated_at);
       });
 
       it('updated_by is with profile_id of another user after update', async () => {
@@ -142,12 +142,12 @@ export default function ({ getService }: FtrProviderContext) {
         const createdMeta = createResponse.body.meta;
         const getMeta = getResponse.body.meta;
 
-        expect(getMeta).to.have.key('updatedBy');
-        expect(getMeta.updatedBy).to.not.eql(createdMeta.updatedBy);
-        expect(getMeta.createdBy).to.eql(interactiveUser.uid);
-        expect(getMeta.updatedBy).to.eql(interactiveUser2.uid);
-        expect(getMeta.createdAt).to.eql(createdMeta.createdAt);
-        expect(getMeta.updatedAt).to.be.greaterThan(createdMeta.updatedAt);
+        expect(getMeta).to.have.key('updated_by');
+        expect(getMeta.updated_by).to.not.eql(createdMeta.updated_by);
+        expect(getMeta.created_by).to.eql(interactiveUser.uid);
+        expect(getMeta.updated_by).to.eql(interactiveUser2.uid);
+        expect(getMeta.created_at).to.eql(createdMeta.created_at);
+        expect(getMeta.updated_at).to.be.greaterThan(createdMeta.updated_at);
       });
     });
   });

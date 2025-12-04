@@ -33,7 +33,7 @@ jest.mock('../../containers/user_profiles/use_suggest_user_profiles');
 jest.mock('../../containers/configure/use_get_case_configuration');
 
 const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
-
+const MORE_FILTERS_TEST_ID = 'options-filter-popover-button-more-filters';
 const onFilterChanged = jest.fn();
 
 const props: CasesTableFiltersProps = {
@@ -45,6 +45,7 @@ const props: CasesTableFiltersProps = {
   availableSolutions: [],
   isLoading: false,
   currentUserProfile: undefined,
+  deselectCases: jest.fn(),
 };
 
 describe('CasesTableFilters ', () => {
@@ -160,6 +161,7 @@ describe('CasesTableFilters ', () => {
         ],
         "category": Array [],
         "customFields": Object {},
+        "from": "now-30d",
         "owner": Array [],
         "reporters": Array [],
         "search": "",
@@ -171,6 +173,7 @@ describe('CasesTableFilters ', () => {
         "severity": Array [],
         "status": Array [],
         "tags": Array [],
+        "to": "now",
       }
     `);
   });
@@ -262,6 +265,7 @@ describe('CasesTableFilters ', () => {
         ],
         "category": Array [],
         "customFields": Object {},
+        "from": "now-30d",
         "owner": Array [],
         "reporters": Array [],
         "search": "",
@@ -273,6 +277,7 @@ describe('CasesTableFilters ', () => {
         "severity": Array [],
         "status": Array [],
         "tags": Array [],
+        "to": "now",
       }
     `);
   });
@@ -329,7 +334,7 @@ describe('CasesTableFilters ', () => {
         { wrapperProps: { owner: [SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER] } }
       );
 
-      await userEvent.click(screen.getByRole('button', { name: 'More' }));
+      await userEvent.click(screen.getByTestId(MORE_FILTERS_TEST_ID));
       await waitForEuiPopoverOpen();
       await userEvent.click(screen.getByRole('option', { name: 'Solution' }));
 
@@ -406,7 +411,7 @@ describe('CasesTableFilters ', () => {
       });
 
       // deactivate the assignees filter
-      await userEvent.click(screen.getByRole('button', { name: 'More' }));
+      await userEvent.click(screen.getByTestId(MORE_FILTERS_TEST_ID));
       await waitForEuiPopoverOpen();
       await userEvent.click(screen.getByRole('option', { name: 'Assignees' }));
 
@@ -583,7 +588,7 @@ describe('CasesTableFilters ', () => {
       };
       renderWithTestingProviders(<CasesTableFilters {...customProps} />);
 
-      await userEvent.click(await screen.findByTestId('options-filter-popover-button-filters'));
+      await userEvent.click(await screen.findByTestId(MORE_FILTERS_TEST_ID));
       await userEvent.click(await screen.findByRole('option', { name: 'Toggle' }));
 
       expect(onFilterChanged).toHaveBeenCalledWith({
@@ -618,14 +623,14 @@ describe('CasesTableFilters ', () => {
 
     it('should not render the more button when in selector view', async () => {
       renderWithTestingProviders(<CasesTableFilters {...props} isSelectorView />);
-      expect(screen.queryByRole('button', { name: 'More' })).not.toBeInTheDocument();
+      expect(screen.queryByTestId(MORE_FILTERS_TEST_ID)).not.toBeInTheDocument();
     });
 
     it('should render all options in the popover, including custom fields', async () => {
       renderWithTestingProviders(<CasesTableFilters {...props} />);
 
-      expect(screen.getByRole('button', { name: 'More' })).toBeInTheDocument();
-      await userEvent.click(screen.getByRole('button', { name: 'More' }));
+      expect(screen.getByTestId(MORE_FILTERS_TEST_ID)).toBeInTheDocument();
+      await userEvent.click(screen.getByTestId(MORE_FILTERS_TEST_ID));
       await waitFor(() => expect(screen.getAllByRole('option')).toHaveLength(5));
 
       expect(await screen.findByTestId('options-filter-popover-item-status')).toBeInTheDocument();
@@ -637,7 +642,7 @@ describe('CasesTableFilters ', () => {
     it('should not add text type custom fields', async () => {
       renderWithTestingProviders(<CasesTableFilters {...props} />);
 
-      await userEvent.click(screen.getByRole('button', { name: 'More' }));
+      await userEvent.click(screen.getByTestId(MORE_FILTERS_TEST_ID));
       await waitForEuiPopoverOpen();
 
       expect(screen.queryByTestId('options-filter-popover-item-text')).not.toBeInTheDocument();
@@ -646,14 +651,14 @@ describe('CasesTableFilters ', () => {
     it('when a filter gets activated, it should be rendered at the end of the list', async () => {
       renderWithTestingProviders(<CasesTableFilters {...props} />);
 
-      await userEvent.click(screen.getByRole('button', { name: 'More' }));
+      await userEvent.click(screen.getByTestId(MORE_FILTERS_TEST_ID));
       await waitFor(() => expect(screen.getAllByRole('option')).toHaveLength(5));
 
       await userEvent.click(screen.getByRole('option', { name: 'Toggle' }));
 
       const filterBar = await screen.findByTestId('cases-table-filters');
       const allFilters = within(filterBar).getAllByRole('button');
-      const orderedFilterLabels = ['Severity', 'Status', 'Tags', 'Categories', 'Toggle', 'More'];
+      const orderedFilterLabels = ['Severity', 'Status', 'Tags', 'Categories', 'Toggle'];
       orderedFilterLabels.forEach((label, index) => {
         expect(allFilters[index]).toHaveTextContent(label);
       });
@@ -662,7 +667,7 @@ describe('CasesTableFilters ', () => {
     it('when a filter gets activated, it should be updated in the local storage', async () => {
       renderWithTestingProviders(<CasesTableFilters {...props} />);
 
-      await userEvent.click(screen.getByRole('button', { name: 'More' }));
+      await userEvent.click(screen.getByTestId(MORE_FILTERS_TEST_ID));
       await waitFor(() => expect(screen.getAllByRole('option')).toHaveLength(5));
 
       await userEvent.click(screen.getByRole('option', { name: 'Toggle' }));
@@ -699,7 +704,7 @@ describe('CasesTableFilters ', () => {
     it('when a filter gets deactivated, it should be removed from the list', async () => {
       renderWithTestingProviders(<CasesTableFilters {...props} />);
 
-      await userEvent.click(screen.getByRole('button', { name: 'More' }));
+      await userEvent.click(screen.getByTestId(MORE_FILTERS_TEST_ID));
       await waitFor(() => expect(screen.getAllByRole('option')).toHaveLength(5));
 
       expect(await screen.findByTestId('options-filter-popover-button-status')).toBeInTheDocument();
@@ -707,7 +712,7 @@ describe('CasesTableFilters ', () => {
 
       const filterBar = await screen.findByTestId('cases-table-filters');
       const allFilters = within(filterBar).getAllByRole('button');
-      const orderedFilterLabels = ['Severity', 'Tags', 'Categories', 'More'];
+      const orderedFilterLabels = ['Severity', 'Tags', 'Categories'];
       orderedFilterLabels.forEach((label, index) => {
         expect(allFilters[index]).toHaveTextContent(label);
       });
@@ -723,7 +728,7 @@ describe('CasesTableFilters ', () => {
       };
       renderWithTestingProviders(<CasesTableFilters {...customProps} />);
 
-      await userEvent.click(await screen.findByRole('button', { name: 'More' }));
+      await userEvent.click(await screen.findByTestId(MORE_FILTERS_TEST_ID));
       await userEvent.click(await screen.findByRole('option', { name: 'Status' }));
 
       expect(onFilterChanged).toHaveBeenCalledWith({
@@ -741,7 +746,7 @@ describe('CasesTableFilters ', () => {
     it('when a filter gets deactivated, it should be updated in the local storage', async () => {
       renderWithTestingProviders(<CasesTableFilters {...props} />);
 
-      await userEvent.click(screen.getByRole('button', { name: 'More' }));
+      await userEvent.click(screen.getByTestId(MORE_FILTERS_TEST_ID));
       await waitFor(() => expect(screen.getAllByRole('option')).toHaveLength(5));
 
       await userEvent.click(screen.getByRole('option', { name: 'Status' }));
@@ -798,10 +803,10 @@ describe('CasesTableFilters ', () => {
       let allFilters: HTMLElement[];
       await waitFor(() => {
         allFilters = within(filterBar).getAllByRole('button');
-        expect(allFilters).toHaveLength(4);
+        expect(allFilters).toHaveLength(7);
       });
 
-      const orderedFilterLabels = ['Toggle', 'Tags', 'Severity', 'More'];
+      const orderedFilterLabels = ['Toggle', 'Tags', 'Severity'];
       orderedFilterLabels.forEach((label, index) => {
         expect(allFilters[index]).toHaveTextContent(label);
       });
@@ -828,10 +833,10 @@ describe('CasesTableFilters ', () => {
       let allFilters: HTMLElement[];
       await waitFor(() => {
         allFilters = within(filterBar).getAllByRole('button');
-        expect(allFilters).toHaveLength(4);
+        expect(allFilters).toHaveLength(7);
       });
 
-      const orderedFilterLabels = ['Severity', 'Tags', 'Toggle', 'More'];
+      const orderedFilterLabels = ['Severity', 'Tags', 'Toggle'];
       orderedFilterLabels.forEach((label, index) => {
         expect(allFilters[index]).toHaveTextContent(label);
       });
@@ -854,7 +859,7 @@ describe('CasesTableFilters ', () => {
 
       renderWithTestingProviders(<CasesTableFilters {...props} />);
 
-      await userEvent.click(screen.getByRole('button', { name: 'More' }));
+      await userEvent.click(screen.getByTestId(MORE_FILTERS_TEST_ID));
       await waitFor(() => {
         expect(screen.getAllByRole('option')).toHaveLength(9);
       });
@@ -882,20 +887,20 @@ describe('CasesTableFilters ', () => {
 
       const filterBar = await screen.findByTestId('cases-table-filters');
       let allFilters = within(filterBar).getAllByRole('button');
-      let orderedFilterLabels = ['Severity', 'Status', 'Tags', 'Categories', 'More'];
+      let orderedFilterLabels = ['Severity', 'Status', 'Tags', 'Categories'];
       orderedFilterLabels.forEach((label, index) => {
         expect(allFilters[index]).toHaveTextContent(label);
       });
 
       expect(await screen.findByTestId('options-filter-popover-button-status')).toBeInTheDocument();
-      await userEvent.click(await screen.findByTestId('options-filter-popover-button-filters'));
+      await userEvent.click(await screen.findByTestId(MORE_FILTERS_TEST_ID));
       await userEvent.click(await screen.findByRole('option', { name: 'Status' }));
 
-      await userEvent.click(await screen.findByTestId('options-filter-popover-button-filters'));
+      await userEvent.click(await screen.findByTestId(MORE_FILTERS_TEST_ID));
       await userEvent.click(await screen.findByRole('option', { name: 'Status' }));
 
       allFilters = within(filterBar).getAllByRole('button');
-      orderedFilterLabels = ['Severity', 'Tags', 'Categories', 'Status', 'More'];
+      orderedFilterLabels = ['Severity', 'Tags', 'Categories', 'Status'];
       orderedFilterLabels.forEach((label, index) => {
         expect(allFilters[index]).toHaveTextContent(label);
       });
@@ -919,15 +924,15 @@ describe('CasesTableFilters ', () => {
       let allFilters: HTMLElement[];
       await waitFor(() => {
         allFilters = within(filterBar).getAllByRole('button');
-        expect(allFilters).toHaveLength(5);
+        expect(allFilters).toHaveLength(8);
       });
 
-      const orderedFilterLabels = ['Severity', 'Status', 'Tags', 'Categories', 'More'];
+      const orderedFilterLabels = ['Severity', 'Status', 'Tags', 'Categories'];
       orderedFilterLabels.forEach((label, index) => {
         expect(allFilters[index]).toHaveTextContent(label);
       });
 
-      await userEvent.click(screen.getByRole('button', { name: 'More' }));
+      await userEvent.click(screen.getByTestId(MORE_FILTERS_TEST_ID));
       let allOptions: HTMLElement[];
       await waitFor(() => {
         allOptions = screen.getAllByRole('option');
@@ -952,7 +957,7 @@ describe('CasesTableFilters ', () => {
 
       renderWithTestingProviders(<CasesTableFilters {...props} />);
 
-      await userEvent.click(screen.getByRole('button', { name: 'More' }));
+      await userEvent.click(screen.getByTestId(MORE_FILTERS_TEST_ID));
       // we need any user action to trigger the filter config update
       await userEvent.click(await screen.findByRole('option', { name: 'Toggle' }));
 
@@ -1034,8 +1039,8 @@ describe('CasesTableFilters ', () => {
       await waitForComponentToUpdate();
 
       const totalFilters = await screen.findAllByRole('button');
-      // plus the more button
-      expect(totalFilters.length).toBe(filters.length + 1);
+      // plus the more button, time range buttons (2), refresh button
+      expect(totalFilters.length).toBe(filters.length + 4);
 
       for (const filter of filters) {
         const button = await screen.findByTestId(filter.testId);
@@ -1082,8 +1087,8 @@ describe('CasesTableFilters ', () => {
       await waitForComponentToUpdate();
 
       const totalFilters = await screen.findAllByRole('button');
-      // plus the more button
-      expect(totalFilters.length).toBe(filters.length + 1);
+      // plus the more button, time range buttons (2), refresh button
+      expect(totalFilters.length).toBe(filters.length + 4);
 
       for (const filter of filters) {
         const button = await screen.findByTestId(filter.testId);

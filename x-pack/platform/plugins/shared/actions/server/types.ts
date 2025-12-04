@@ -15,6 +15,7 @@ import type {
   SavedObjectAttributes,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import type { AxiosHeaderValue } from 'axios';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type * as z3 from '@kbn/zod';
@@ -88,6 +89,7 @@ export interface ActionTypeExecutorOptions<
   secrets: Secrets;
   params: Params;
   logger: Logger;
+  globalAuthHeaders?: Record<string, AxiosHeaderValue>;
   taskInfo?: TaskInfo;
   configurationUtilities: ActionsConfigurationUtilities;
   source?: ActionExecutionSource<unknown>;
@@ -222,6 +224,8 @@ export interface ActionType<
     params?: Params;
     source?: ActionExecutionSourceType;
   }) => string[];
+  // Headers that should be added to every Axios request made by this action type
+  globalAuthHeaders?: Record<string, AxiosHeaderValue>;
   renderParameterTemplates?: RenderParameterTemplates<Params>;
   executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
   getService?: (params: ServiceParams<Config, Secrets>) => SubActionConnector<Config, Secrets>;

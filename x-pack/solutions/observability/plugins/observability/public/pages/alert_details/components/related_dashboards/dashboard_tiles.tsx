@@ -32,7 +32,7 @@ export function DashboardTiles({
   isLoadingDashboards: boolean;
   dashboards?: Array<RelatedDashboard & { actionButtonProps?: ActionButtonProps }>;
   dataTestSubj: string;
-  timeRange: NonNullable<DashboardLocatorParams['timeRange']>;
+  timeRange: NonNullable<DashboardLocatorParams['time_range']>;
 }) {
   const wrapWithHeader = (component: React.ReactNode) => {
     return (

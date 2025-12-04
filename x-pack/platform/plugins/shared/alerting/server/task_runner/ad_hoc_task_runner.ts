@@ -75,6 +75,7 @@ export class AdHocTaskRunner implements CancellableTask {
 
   private adHocRunSchedule: AdHocRunSchedule[] = [];
   private adHocRange: { start: string; end: string | undefined } | null = null;
+  private adHocRunData: AdHocRun | null = null;
   private alertingEventLogger: AlertingEventLogger;
   private cancelled = false;
   private logger: Logger;
@@ -378,6 +379,7 @@ export class AdHocTaskRunner implements CancellableTask {
 
       const { rule, apiKeyToUse, schedule, start, end } = adHocRunData;
       this.apiKeyToUse = apiKeyToUse;
+      this.adHocRunData = adHocRunData;
 
       let ruleType: UntypedNormalizedRuleType;
       try {
@@ -687,6 +689,7 @@ export class AdHocTaskRunner implements CancellableTask {
       savedObjectsRepository: this.internalSavedObjectsRepository,
       backfillClient: this.context.backfillClient,
       actionsClient,
+      initiator: this.adHocRunData?.initiator,
     });
   }
 
