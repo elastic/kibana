@@ -65,6 +65,11 @@ export const useMessageEditor = (): MessageEditorInstance => {
         if (ref.current) {
           ref.current.textContent = text;
           syncIsEmpty();
+          // Set caret position at the end of the text
+          const selection = window.getSelection();
+          if (selection && ref.current.firstChild) {
+            selection.setPosition(ref.current.firstChild, text.length);
+          }
         }
       },
       clear: () => {
