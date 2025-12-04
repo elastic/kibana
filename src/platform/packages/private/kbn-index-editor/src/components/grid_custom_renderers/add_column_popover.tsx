@@ -116,7 +116,7 @@ export const AddColumnPopover = ({
     <EuiPopover
       button={triggerButton}
       isOpen={isPopoverOpen}
-      closePopover={() => closePopover()}
+      closePopover={closePopover}
       focusTrapProps={{
         noIsolation: false,
         clickOutsideDisables: false,
@@ -181,7 +181,7 @@ export const AddColumnPopover = ({
               gutterSize="m"
               css={{ marginTop: euiTheme.size.l }}
             >
-              <EuiButton color="text" size="s" onClick={() => closePopover()}>
+              <EuiButton color="text" size="s" onClick={closePopover}>
                 <EuiText size="xs">
                   <FormattedMessage
                     id="indexEditor.flyout.grid.columnHeader.cancelButton"
