@@ -50,7 +50,7 @@ export function createGetServicesTool({
   const toolDefinition: BuiltinToolDefinition<typeof getServicesSchema> = {
     id: OBSERVABILITY_GET_SERVICES_TOOL_ID,
     type: ToolType.builtin,
-    description: 'Get the list of monitored services, their health status, and alerts.',
+    description: 'Retrieves a list of monitored APM services, including their health status, environment, and active alert counts. Useful for high-level system overview and identifying unhealthy services.',
     schema: getServicesSchema,
     tags: ['observability', 'services'],
     availability: {

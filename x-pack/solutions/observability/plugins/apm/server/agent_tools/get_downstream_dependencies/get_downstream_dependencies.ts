@@ -41,7 +41,7 @@ export function createDownstreamDependenciesTool({
     id: OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
     type: ToolType.builtin,
     description:
-      'Get downstream dependencies (services or uninstrumented backends) for a given service and time range.',
+      'Identifies downstream dependencies (other services, databases, external APIs) for a specific service within a time range. Critical for mapping service architecture and troubleshooting dependency-related issues.',
     schema: getDownstreamDependenciesToolSchema,
     tags: ['observability', 'apm', 'dependencies'],
     availability: {

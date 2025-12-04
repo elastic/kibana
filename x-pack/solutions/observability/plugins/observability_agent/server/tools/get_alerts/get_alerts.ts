@@ -95,7 +95,7 @@ export function createGetAlertsTool({
   const toolDefinition: BuiltinToolDefinition<typeof getAlertsSchema> = {
     id: OBSERVABILITY_GET_ALERTS_TOOL_ID,
     type: ToolType.builtin,
-    description: `Retrieve Observability alerts and relevant fields for a given time range. Defaults to active alerts (set includeRecovered to true to include recovered alerts).`,
+    description: `Retrieves Observability alerts within a specified time range. Supports filtering by status (active/recovered) and KQL queries to find specific alert instances.`,
     schema: getAlertsSchema,
     tags: ['observability', 'alerts'],
     handler: async (

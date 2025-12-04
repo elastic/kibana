@@ -64,7 +64,7 @@ export function createGetLogCategoriesTool({
   const toolDefinition: BuiltinToolDefinition<typeof getLogsSchema> = {
     id: OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID,
     type: ToolType.builtin,
-    description: `Retrieve distinct log patterns for a given time range using categorize_text aggregation. Returns categorized log messages with their patterns, counts, and sample documents.`,
+    description: `Retrieves and categorizes log messages into distinct patterns for a specified time range, providing counts and samples for each category. Useful for identifying high-volume or recurring log events.`,
     schema: getLogsSchema,
     tags: ['observability', 'logs'],
     handler: async (

@@ -53,7 +53,7 @@ export function createRunLogRateAnalysisTool({
   const toolDefinition: BuiltinToolDefinition<typeof logRateAnalysisSchema> = {
     id: OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID,
     type: ToolType.builtin,
-    description: `Identify significant changes in log rates for a given index between two time windows (baseline vs deviation) to help explain spikes or dips in log volume.`,
+    description: `Analyzes log rate changes by comparing a baseline time window to a deviation time window. Identifies significant spikes or dips in log volume and correlates them with specific field values.`,
     schema: logRateAnalysisSchema,
     tags: ['observability', 'logs'],
     handler: async (
