@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import { secondsFromNow } from '../lib/intervals';
+import { secondsFromNow, secondsFromDate } from '../lib/intervals';
 import { asOk, asErr } from '../lib/result_type';
 import {
   createTaskRunError,
@@ -47,6 +47,7 @@ import { configMock } from '../config.mock';
 const baseDelay = 5 * 60 * 1000;
 const executionContext = executionContextServiceMock.createSetupContract();
 const minutesFromNow = (mins: number): Date => secondsFromNow(mins * 60);
+const minutesFromDate = (date: Date, mins: number): Date => secondsFromDate(date, mins * 60);
 const getNextRunAtSpy = jest.spyOn(nextRunAtUtils, 'getNextRunAt');
 
 jest.mock('uuid', () => ({
@@ -1774,6 +1775,54 @@ describe('TaskManagerRunner', () => {
       expect(instance.attempts).toBe(0);
       expect(logger.warn).not.toHaveBeenCalled();
       expect(result).toEqual(asOk({ state: { foo: 'bar' } }));
+    });
+
+    test('updates retryAt on an interval for long running tasks', async () => {
+      const { runner, store, logger } = await readyToRunStageSetup({
+        instance: {
+          status: TaskStatus.Running,
+          startedAt: new Date(),
+          enabled: true,
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            timeout: `365d`,
+            createTaskRunner: () => ({
+              async run() {
+                const promise = new Promise((r) => setTimeout(r, 20000));
+                jest.advanceTimersByTime(20000);
+                await promise;
+                return { state: {} };
+              },
+            }),
+          },
+        },
+      });
+      const now = new Date();
+      await runner.run();
+
+      expect(store.partialUpdate).toHaveBeenCalledTimes(1);
+
+      const instance = store.partialUpdate.mock.calls[0][0];
+      expect(instance.retryAt?.getTime()).toBeGreaterThan(minutesFromDate(now, 1).getTime());
+      expect(instance.retryAt?.getTime()).toBeLessThan(minutesFromDate(now, 2).getTime());
+
+      expect(logger.info).toHaveBeenCalledTimes(2);
+      expect(logger.info).toHaveBeenNthCalledWith(
+        1,
+        'Starting interval to update retryAt for long running task: foo',
+        {
+          tags: ['foo', 'bar'],
+        }
+      );
+      expect(logger.info).toHaveBeenNthCalledWith(
+        2,
+        'Stopping interval to update retryAt for long running task: foo',
+        {
+          tags: ['foo', 'bar'],
+        }
+      );
     });
 
     describe('TaskEvents', () => {

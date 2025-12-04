@@ -960,7 +960,7 @@ export class TaskManagerRunner implements TaskRunner {
           this.instance = asReadyToRun(
             (await this.bufferedTaskStore.partialUpdate(
               {
-                id: this.instance.task.id,
+                id: taskInstance.id,
                 retryAt: updatedRetryAt,
               },
               { validate: false, doc: taskInstance }
@@ -968,24 +968,25 @@ export class TaskManagerRunner implements TaskRunner {
           );
         } catch (e) {
           this.logger.warn(
-            `Unable to update retryAt for long running task: ${this.instance.task.id} - ${e.message}`
+            `Unable to update retryAt for long running task: ${this.id} - ${e.message}`,
+            { tags: [this.id, this.taskType] }
           );
         }
         timer = setTimeout(updateRetryAt, UPDATE_RETRY_AT_INTERVAL);
       }
     };
 
-    this.logger.info(
-      `Starting interval to update retryAt for long running task: ${this.instance.task.id}`
-    );
+    this.logger.info(`Starting interval to update retryAt for long running task: ${this.id}`, {
+      tags: [this.id, this.taskType],
+    });
     let timer = setTimeout(updateRetryAt, UPDATE_RETRY_AT_INTERVAL);
 
     return () => {
       stopped = true;
       clearTimeout(timer);
-      this.logger.info(
-        `Stopping interval to update retryAt for long running task: ${this.instance.task.id}`
-      );
+      this.logger.info(`Stopping interval to update retryAt for long running task: ${this.id}`, {
+        tags: [this.id, this.taskType],
+      });
     };
   }
 }
