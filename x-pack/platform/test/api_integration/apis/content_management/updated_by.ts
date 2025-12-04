@@ -95,7 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(updateResponse.status).to.be(200);
 
         const getResponse = await supertestWithAuth
-          .get(`${DASHBOARD_API_PATH}${createResponse.body.id}`)
+          .get(`${DASHBOARD_API_PATH}/${createResponse.body.id}`)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '1')
           .send();
