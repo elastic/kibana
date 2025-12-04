@@ -18,8 +18,8 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AttachmentType } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
-import { debounce } from 'lodash';
-import React, { useEffect, useMemo, useState } from 'react';
+import { useBoolean, useDebounceFn } from '@kbn/react-hooks';
+import React from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { ATTACHMENT_TYPE_CONFIG } from './attachment_constants';
 
@@ -55,8 +55,10 @@ export function AttachmentFilters({
   onFiltersChange,
   searchPlaceholder,
 }: AttachmentFiltersProps) {
-  const [isTypePopoverOpen, setIsTypePopoverOpen] = useState(false);
-  const [isTagsPopoverOpen, setIsTagsPopoverOpen] = useState(false);
+  const [isTypePopoverOpen, { toggle: toggleTypePopover, off: closeTypePopover }] =
+    useBoolean(false);
+  const [isTagsPopoverOpen, { toggle: toggleTagsPopover, off: closeTagsPopover }] =
+    useBoolean(false);
 
   const {
     dependencies: {
@@ -68,19 +70,12 @@ export function AttachmentFilters({
 
   const tagList = savedObjectsTaggingUi.getTagList();
 
-  const updateDebouncedQuery = useMemo(
-    () =>
-      debounce((query: string) => {
-        onFiltersChange((prev) => ({ ...prev, debouncedQuery: query }));
-      }, 300),
-    [onFiltersChange]
+  const { run: updateDebouncedQuery } = useDebounceFn(
+    (query: string) => {
+      onFiltersChange((prev) => ({ ...prev, debouncedQuery: query }));
+    },
+    { wait: 300 }
   );
-
-  useEffect(() => {
-    return () => {
-      updateDebouncedQuery.cancel();
-    };
-  }, [updateDebouncedQuery]);
 
   const typePopoverId = useGeneratedHtmlId({
     prefix: 'typePopover',
@@ -93,7 +88,7 @@ export function AttachmentFilters({
   const typeFilterButton = (
     <EuiFilterButton
       iconType="arrowDown"
-      onClick={() => setIsTypePopoverOpen(!isTypePopoverOpen)}
+      onClick={toggleTypePopover}
       isSelected={isTypePopoverOpen}
       numFilters={ATTACHMENT_TYPE_OPTIONS.length}
       hasActiveFilters={filters.types.length > 0}
@@ -109,7 +104,7 @@ export function AttachmentFilters({
     <EuiFilterButton
       iconType="arrowDown"
       badgeColor="accent"
-      onClick={() => setIsTagsPopoverOpen(!isTagsPopoverOpen)}
+      onClick={toggleTagsPopover}
       isSelected={isTagsPopoverOpen}
       numFilters={tagList.length}
       hasActiveFilters={filters.tags.length > 0}
@@ -142,7 +137,7 @@ export function AttachmentFilters({
             id={typePopoverId}
             button={typeFilterButton}
             isOpen={isTypePopoverOpen}
-            closePopover={() => setIsTypePopoverOpen(false)}
+            closePopover={closeTypePopover}
             panelPaddingSize="none"
           >
             <EuiSelectable
@@ -184,7 +179,7 @@ export function AttachmentFilters({
             id={tagsPopoverId}
             button={tagsFilterButton}
             isOpen={isTagsPopoverOpen}
-            closePopover={() => setIsTagsPopoverOpen(false)}
+            closePopover={closeTagsPopover}
             panelPaddingSize="none"
           >
             <EuiSelectable
