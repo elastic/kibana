@@ -136,17 +136,19 @@ export function getDiscoverInternalStateMock({
   const originalSearchSourceCreate = services.data.search.searchSource.create;
 
   services.data.search.searchSource.create = jest.fn((fields) => {
-    if (typeof fields?.index === 'string') {
-      const dataView = persistedDataViews?.find((dv) => dv.id === fields.index);
-
-      if (dataView) {
-        return Promise.resolve(
-          createSearchSourceMock({ ...omit(fields, 'parent'), index: dataView })
-        );
-      }
+    if (typeof fields?.index !== 'string') {
+      return originalSearchSourceCreate(fields);
     }
 
-    return originalSearchSourceCreate(fields);
+    const dataView = persistedDataViews?.find((dv) => dv.id === fields.index);
+
+    if (!dataView) {
+      throw new Error(
+        `Data view with ID "${fields.index}" not found in provided persistedDataViews mock array`
+      );
+    }
+
+    return Promise.resolve(createSearchSourceMock({ ...omit(fields, 'parent'), index: dataView }));
   });
 
   jest.spyOn(services.savedSearch, 'saveDiscoverSession').mockImplementation((discoverSession) =>

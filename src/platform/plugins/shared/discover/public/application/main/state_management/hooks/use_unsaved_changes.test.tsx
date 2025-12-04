@@ -24,6 +24,7 @@ import { getTabStateMock } from '../redux/__mocks__/internal_state.mocks';
 import type { AppLeaveActionFactory } from '@kbn/core-application-browser';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 
 const mockSelectHasUnsavedChanges = jest.mocked(selectHasUnsavedChanges);
 
@@ -43,9 +44,6 @@ describe('useUnsavedChanges', () => {
         initialInternalState: {
           serializedSearchSource: { index: dataViewWithTimefieldMock.id },
         },
-        // TODO: This reveals a bug, we need to refactor getInitialAppState to accept
-        // a DiscoverSessionTab and use it in redux/selectors/unsaved_changes.ts
-        appState: { columns: ['default_column'] },
       }),
       timeRestore: false,
       services,
@@ -74,7 +72,7 @@ describe('useUnsavedChanges', () => {
       saveDiscoverSession,
     } = getDiscoverInternalStateMock({
       services,
-      persistedDataViews: [dataViewWithTimefieldMock],
+      persistedDataViews: [dataViewMock, dataViewWithTimefieldMock],
     });
 
     await initializeTabs({ persistedDiscoverSession: getPersistedDiscoverSession({ services }) });
@@ -101,6 +99,7 @@ describe('useUnsavedChanges', () => {
       stateContainer,
       services,
       initializeTabs,
+      initializeSingleTab,
       addNewTab,
       getCurrentTab,
       saveDiscoverSession,
@@ -138,19 +137,21 @@ describe('useUnsavedChanges', () => {
   });
 
   it('should detect changes when tabs change', async () => {
-    const { internalState, addNewTab } = await setup();
+    const { internalState, initializeSingleTab, addNewTab } = await setup();
     expect(internalState.getState().hasUnsavedChanges).toBe(false);
     expect(internalState.getState().tabs.unsavedIds).toEqual([]);
     await addNewTab({ tab: newTab });
+    await initializeSingleTab({ tabId: newTab.id });
     expect(internalState.getState().hasUnsavedChanges).toBe(true);
     expect(internalState.getState().tabs.unsavedIds).toEqual([newTab.id]);
   });
 
   it('should detect changes when persisted discover session changes', async () => {
-    const { internalState, addNewTab, saveDiscoverSession } = await setup();
+    const { internalState, initializeSingleTab, addNewTab, saveDiscoverSession } = await setup();
     expect(internalState.getState().hasUnsavedChanges).toBe(false);
     expect(internalState.getState().tabs.unsavedIds).toEqual([]);
     await addNewTab({ tab: newTab });
+    await initializeSingleTab({ tabId: newTab.id });
     expect(internalState.getState().hasUnsavedChanges).toBe(true);
     expect(internalState.getState().tabs.unsavedIds).toEqual([newTab.id]);
     await saveDiscoverSession();

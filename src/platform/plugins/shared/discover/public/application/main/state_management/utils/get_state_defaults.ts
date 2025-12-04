@@ -23,7 +23,7 @@ import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import type { DiscoverAppState } from '../redux';
 import type { DiscoverServices } from '../../../../build_services';
 import { getValidViewMode } from '../../utils/get_valid_view_mode';
-import { createDataViewDataSource, createEsqlDataSource } from '../../../../../common/data_sources';
+import { createDataSource } from '../../../../../common/data_sources';
 
 function getDefaultColumns(
   persistedTab: DiscoverSessionTab | undefined,
@@ -48,14 +48,15 @@ export function getStateDefaults({
   const query =
     persistedTab?.serializedSearchSource.query || data.query.queryString.getDefaultQuery();
   const isEsqlQuery = isOfAggregateQueryType(query);
-  const sort = dataView ? getSortArray(persistedTab?.sort ?? [], dataView, isEsqlQuery) : [];
+  const sort = dataView
+    ? getSortArray(persistedTab?.sort ?? [], dataView, isEsqlQuery)
+    : persistedTab?.sort ?? [];
   const columns = getDefaultColumns(persistedTab, uiSettings);
   const chartHidden = getChartHidden(storage, 'discover');
-  const dataSource = isEsqlQuery
-    ? createEsqlDataSource()
-    : dataView?.id
-    ? createDataViewDataSource({ dataViewId: dataView.id })
-    : undefined;
+  const dataSource = createDataSource({
+    dataView: dataView ?? persistedTab?.serializedSearchSource.index,
+    query,
+  });
 
   const defaultState: DiscoverAppState = {
     query,
