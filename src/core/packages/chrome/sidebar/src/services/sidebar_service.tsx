@@ -16,8 +16,7 @@ export interface SidebarServiceSetup {
   registerApp: SidebarRegistryServiceApi['registerApp'];
 }
 
-export type SidebarServiceStart = Pick<SidebarRegistryServiceApi, 'apps$' | 'getApps' | 'hasApp'> &
-  SidebarStateServiceApi;
+export type SidebarServiceStart = SidebarStateServiceApi;
 
 /**
  * Composite service for sidebar functionality

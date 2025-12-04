@@ -9,7 +9,7 @@
 
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import type { ReactNode } from 'react';
+import type { ComponentType } from 'react';
 
 /**
  * Button configuration for a sidebar app
@@ -24,7 +24,7 @@ export interface SidebarAppButton {
  */
 export interface SidebarAppContent {
   title: string;
-  children?: ReactNode;
+  loadComponent: () => Promise<ComponentType<{}>>;
   order?: number;
 }
 
@@ -47,6 +47,7 @@ export interface SidebarRegistryServiceApi {
   apps$: Observable<SidebarApp[]>;
   getApps: () => SidebarApp[];
   registerApp: (app: SidebarApp) => void;
+  getApp(appId: string): SidebarApp | undefined;
   hasApp: (appId: string) => boolean;
 }
 
@@ -67,6 +68,10 @@ export class SidebarRegistryService implements SidebarRegistryServiceApi {
 
   getApps(): SidebarApp[] {
     return this._apps$.getValue();
+  }
+
+  getApp(appId: string): SidebarApp | undefined {
+    return this.registeredApps.get(appId);
   }
 
   hasApp(appId: string): boolean {

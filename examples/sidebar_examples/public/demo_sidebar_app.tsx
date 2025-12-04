@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { SidebarServiceProvider } from './sidebar_provider';
-export type { SidebarProviderProps } from './sidebar_provider';
-export { useSidebar } from './use_sidebar';
-export type { UseSidebarHook } from './use_sidebar';
-export { Sidebar } from './sidebar';
-export type { SidebarProps } from './sidebar';
-export { SidebarAppRenderer } from './sidebar_app_renderer';
+import React from 'react';
+
+export function DemoSidebarApp() {
+  return <div>This is a basic sidebar example app.</div>;
+}

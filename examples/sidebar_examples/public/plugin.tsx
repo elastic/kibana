@@ -22,11 +22,10 @@ export class SidebarExamplesPlugin implements Plugin<void, void, SetupDeps> {
       appId: 'sidebarExampleBasic',
       button: {
         iconType: 'logoKibana',
-        title: 'Basic sidebar example',
       },
       app: {
         title: 'Basic sidebar example',
-        children: <div>This is a basic sidebar example app.</div>,
+        loadComponent: () => import('./demo_sidebar_app').then((m) => m.DemoSidebarApp),
       },
     });
 

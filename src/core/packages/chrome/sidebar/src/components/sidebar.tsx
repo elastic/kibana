@@ -8,18 +8,41 @@
  */
 
 import React from 'react';
+import { useObservable } from '@kbn/shared-ux-utility';
 import { SidebarPanel } from './sidebar_panel';
 import { useSidebar } from './use_sidebar';
+import { useSidebarService } from './sidebar_provider';
+import { SidebarAppRenderer } from './sidebar_app_renderer';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SidebarProps {}
 
 export function Sidebar(props: SidebarProps) {
-  const { close } = useSidebar();
+  const { close, isOpen } = useSidebar();
+  const sidebarService = useSidebarService();
+
+  const currentAppId = useObservable(
+    sidebarService.state.currentAppId$,
+    sidebarService.state.getCurrentAppId()
+  );
+
+  if (!isOpen) {
+    return null;
+  }
+
+  if (!currentAppId) {
+    return null;
+  }
+
+  const currentApp = sidebarService.registry.getApp(currentAppId);
+
+  if (!currentApp) {
+    return null;
+  }
 
   return (
-    <SidebarPanel title={'Sidebar App Title'} onClose={close}>
-      Sidebar Content
+    <SidebarPanel title={currentApp.app.title} onClose={close}>
+      <SidebarAppRenderer key={currentAppId} loadComponent={currentApp.app.loadComponent} />
     </SidebarPanel>
   );
 }
