@@ -107,12 +107,17 @@ export const ValuesSelector = ({
   }, [groupedValues, selectedValues]);
 
   const handleChange = useCallback(
-    (newSelectedValues?: string[]) => {
+    (newOption?: SelectableEntry) => {
+      // only multi-selection mode (singleSelection = false)
+      const isSelected = newOption?.checked === 'on';
+      const newSelection = isSelected
+        ? [...selectedValues, newOption.key!]
+        : selectedValues.filter((v) => v !== newOption?.key);
       // Enforce the maximum limit
-      const limitedSelection = (newSelectedValues ?? []).slice(0, MAX_VALUES_SELECTIONS);
+      const limitedSelection = newSelection.slice(0, MAX_VALUES_SELECTIONS);
       onChange(limitedSelection);
     },
-    [onChange]
+    [onChange, selectedValues]
   );
 
   const isLoading = isValuesFetching || isFieldsLoading;
@@ -216,7 +221,6 @@ export const ValuesSelector = ({
       disabled={disabled}
       popoverContentBelowSearch={popoverContentBelowSearch}
       fullWidth={fullWidth}
-      selectedValues={selectedValues}
     />
   );
 };

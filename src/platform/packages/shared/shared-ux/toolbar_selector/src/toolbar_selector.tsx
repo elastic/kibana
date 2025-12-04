@@ -29,7 +29,7 @@ export const EMPTY_OPTION = '__EMPTY_SELECTOR_OPTION__';
 
 export type SelectableEntry = EuiSelectableOption<{ value: string }>;
 
-export interface BaseToolbarProps {
+export interface ToolbarProps {
   'data-test-subj': string;
   'data-selected-value'?: string | string[];
   buttonLabel: ReactElement | string;
@@ -42,21 +42,9 @@ export interface BaseToolbarProps {
   hasArrow?: boolean;
   disabled?: boolean;
   fullWidth?: boolean;
-  selectedValues?: string[];
-}
-
-export interface ToolbarSingleSelectorProps {
-  singleSelection?: true;
+  singleSelection?: boolean;
   onChange?: (c?: SelectableEntry) => void;
 }
-
-export interface ToolbarMultiSelectorProps {
-  singleSelection: false;
-  onChange?: (c?: string[]) => void;
-}
-
-export type ToolbarSelectorProps = BaseToolbarProps &
-  (ToolbarSingleSelectorProps | ToolbarMultiSelectorProps);
 
 export const ToolbarSelector = ({
   'data-test-subj': dataTestSubj,
@@ -73,8 +61,7 @@ export const ToolbarSelector = ({
   hasArrow = true,
   disabled = false,
   fullWidth = false,
-  selectedValues,
-}: ToolbarSelectorProps) => {
+}: ToolbarProps) => {
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [labelPopoverDisabled, setLabelPopoverDisabled] = useState(false);
@@ -141,22 +128,14 @@ export const ToolbarSelector = ({
     NonNullable<EuiSelectableProps<SelectableEntry>['onChange']>
   >(
     (_newOptions, _event, changedOption) => {
-      const isSelected = changedOption.checked === 'on';
+      onChange?.(changedOption);
 
-      if (singleSelection === false) {
-        const currentValues = selectedValues ?? [];
-        const newSelectedValues = isSelected
-          ? [...currentValues, changedOption.key!]
-          : currentValues.filter((v) => v !== changedOption.key);
-        onChange?.(newSelectedValues);
-      } else {
-        const isValidSelection = isSelected && changedOption.value !== EMPTY_OPTION;
-        onChange?.(isValidSelection ? changedOption : undefined);
+      if (singleSelection !== false) {
         closePopover();
         disableLabelPopover();
       }
     },
-    [closePopover, disableLabelPopover, onChange, singleSelection, selectedValues]
+    [closePopover, disableLabelPopover, onChange, singleSelection]
   );
 
   const searchProps: EuiSelectableProps['searchProps'] = useMemo(

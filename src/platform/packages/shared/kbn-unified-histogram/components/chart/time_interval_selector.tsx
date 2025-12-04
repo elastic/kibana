@@ -25,9 +25,9 @@ export const TimeIntervalSelector: React.FC<TimeIntervalSelectorProps> = ({
 }) => {
   const onChange = useCallback(
     (chosenOption?: SelectableEntry) => {
-      const selectedOption = chosenOption?.value;
-      if (selectedOption) {
-        onTimeIntervalChange(selectedOption);
+      const isSelected = chosenOption?.checked === 'on';
+      if (isSelected) {
+        onTimeIntervalChange(chosenOption.value);
       }
     },
     [onTimeIntervalChange]

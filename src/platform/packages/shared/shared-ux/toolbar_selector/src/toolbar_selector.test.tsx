@@ -84,7 +84,6 @@ describe('ToolbarSelector', () => {
         searchable={false}
         singleSelection={false}
         onChange={onChange}
-        selectedValues={[]}
       />
     );
     await user.click(screen.getByTestId('toolbarSelectorMultiTestButton'));
@@ -92,8 +91,18 @@ describe('ToolbarSelector', () => {
     fireEvent.click(screen.getByText('B'));
 
     expect(onChange).toHaveBeenCalledTimes(2);
-    expect(onChange).toHaveBeenNthCalledWith(1, ['key-a']);
-    expect(onChange).toHaveBeenNthCalledWith(2, ['key-b']);
+    expect(onChange).toHaveBeenNthCalledWith(1, {
+      label: 'A',
+      value: 'a',
+      key: 'key-a',
+      checked: 'on',
+    });
+    expect(onChange).toHaveBeenNthCalledWith(2, {
+      label: 'B',
+      value: 'b',
+      key: 'key-b',
+      checked: 'on',
+    });
   });
 
   it('renders with disabled state', () => {
@@ -143,7 +152,6 @@ describe('ToolbarSelector', () => {
         searchable={true}
         singleSelection={false}
         onChange={onChange}
-        selectedValues={['key-a', 'key-b']}
         optionMatcher={({ option, normalizedSearchValue }) =>
           option.label.toLowerCase().includes(normalizedSearchValue.toLowerCase())
         }
@@ -170,8 +178,8 @@ describe('ToolbarSelector', () => {
     // Select C using fireEvent for EUI selectable compatibility
     fireEvent.click(screen.getByText('C'));
 
-    // The onChange should add key-c to the existing selectedValues
-    expect(onChange).toHaveBeenCalledWith(['key-a', 'key-b', 'key-c']);
+    // The onChange should be called with the selected entry
+    expect(onChange).toHaveBeenCalledWith({ label: 'C', value: 'c', key: 'key-c', checked: 'on' });
   });
 
   it('renders with optional props: popoverTitle, popoverContentBelowSearch, hasArrow', async () => {

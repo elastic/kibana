@@ -94,7 +94,8 @@ export const BreakdownFieldSelector = ({
 
   const onChange = useCallback(
     (chosenOption?: SelectableEntry) => {
-      const breakdownField = chosenOption?.value
+      const isSelected = chosenOption?.checked === 'on' && chosenOption.value !== EMPTY_OPTION;
+      const breakdownField = isSelected
         ? fields.find((currentField) => currentField.name === chosenOption.value)
         : undefined;
       onBreakdownFieldChange?.(breakdownField);

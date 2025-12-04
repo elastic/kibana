@@ -118,16 +118,22 @@ export const DimensionsSelector = ({
   ]);
 
   const handleChange = useCallback(
-    (chosenOption?: SelectableEntry | SelectableEntry[]) => {
-      const opts =
-        chosenOption == null ? [] : Array.isArray(chosenOption) ? chosenOption : [chosenOption];
-      const selectedValues = new Set(opts.map((p) => p.value));
-      const newSelection = allDimensions.filter((d) => selectedValues.has(d.name));
-      // Enforce the maximum limit
-      const limitedSelection = newSelection.slice(0, MAX_DIMENSIONS_SELECTIONS);
-      onChange(limitedSelection);
+    (chosenOption?: SelectableEntry) => {
+      const isSelected = chosenOption?.checked === 'on';
+
+      if (singleSelection !== false) {
+        onChange(isSelected ? [allDimensions.find((d) => d.name === chosenOption.value)!] : []);
+      } else {
+        const newSelection = isSelected
+          ? [...selectedDimensions, allDimensions.find((d) => d.name === chosenOption.value)!]
+          : selectedDimensions.filter((d) => d.name !== chosenOption?.value);
+
+        // Enforce the maximum limit
+        const limitedSelection = newSelection.slice(0, MAX_DIMENSIONS_SELECTIONS);
+        onChange(limitedSelection);
+      }
     },
-    [onChange, allDimensions]
+    [onChange, allDimensions, singleSelection, selectedDimensions]
   );
 
   const buttonLabel = useMemo(() => {
