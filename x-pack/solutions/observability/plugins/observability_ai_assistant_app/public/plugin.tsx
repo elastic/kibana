@@ -20,6 +20,9 @@ import { AI_ASSISTANT_APP_ID } from '@kbn/deeplinks-observability';
 import type { AIAssistantAppService } from '@kbn/ai-assistant';
 import { createAppService } from '@kbn/ai-assistant';
 import { withSuspense } from '@kbn/shared-ux-utility';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { observabilityAppId } from '@kbn/observability-plugin/common';
+import { AI_ASSISTANT_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type {
   ObservabilityAIAssistantAppPluginSetupDependencies,
   ObservabilityAIAssistantAppPluginStartDependencies,
@@ -74,13 +77,20 @@ export class ObservabilityAIAssistantAppPlugin
         },
       ],
       mount: async (appMountParameters: AppMountParameters<unknown>) => {
-        // Load application bundle and Get start services
-        const [{ Application }, [coreStart, pluginsStart]] = await Promise.all([
-          import('./application'),
-          coreSetup.getStartServices() as Promise<
-            [CoreStart, ObservabilityAIAssistantAppPluginStartDependencies, unknown]
-          >,
-        ]);
+        const [coreStart, pluginsStart] = await coreSetup.getStartServices();
+
+        // Restrict access when the chat experience is set to AI Agents
+        const currentExperience = coreStart.settings.client.get<AIChatExperience>(
+          AI_ASSISTANT_CHAT_EXPERIENCE_TYPE,
+          AIChatExperience.Classic
+        );
+
+        if (currentExperience === AIChatExperience.Agents) {
+          coreStart.application.navigateToApp(observabilityAppId, { path: '/' });
+          return () => {};
+        }
+
+        const { Application } = await import('./application');
 
         ReactDOM.render(
           <Application
