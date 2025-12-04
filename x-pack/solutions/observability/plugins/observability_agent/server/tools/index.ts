@@ -7,3 +7,4 @@
 
 export { OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID } from './get_data_sources/get_data_sources';
 export { OBSERVABILITY_GET_ALERTS_TOOL_ID, defaultFields } from './get_alerts/get_alerts';
+export { OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID } from './get_log_categories/get_log_categories';

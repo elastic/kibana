@@ -219,7 +219,7 @@ export function CasesTableServiceProvider(
     },
 
     async refreshTable() {
-      await testSubjects.click('all-cases-refresh-link-icon');
+      await testSubjects.click('superDatePickerApplyTimeButton');
     },
 
     async openRowActions(index: number) {
