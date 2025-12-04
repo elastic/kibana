@@ -65,17 +65,52 @@ describe('scripts library client', () => {
 
     it('should create a file record and upload file content to it', async () => {
       await scriptsClient.create(createBodyMock);
+      const scriptSoId = (
+        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient().create as jest.Mock
+      ).mock.calls[0][2].id;
 
       expect(filesPluginClient.create).toHaveBeenCalledWith({
         metadata: {
           mime: 'application/text',
           name: 'foo.txt',
+          meta: { scriptId: scriptSoId },
         },
       });
 
       expect(fileMock.uploadContent).toHaveBeenCalledWith(expect.any(Readable), undefined, {
         transforms: [expect.any(Transform)],
       });
+    });
+
+    it('should create a script entry (SO) with expected content', async () => {
+      await scriptsClient.create(createBodyMock);
+      const soClientMock = endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient();
+      const scriptSoId = (soClientMock.create as jest.Mock).mock.calls[0][2].id;
+
+      expect(
+        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient().create
+      ).toHaveBeenCalledWith(
+        SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE,
+        {
+          description: 'does some stuff',
+          example: 'bash -c script_one.sh',
+          path_to_executable: undefined,
+          file_hash_sha256: 'e5441eb2bb',
+          file_id: '123',
+          file_name: 'test.txt',
+          file_size: 1234,
+          id: scriptSoId,
+          instructions: 'just execute it',
+          name: 'script one',
+          platform: ['linux', 'macos'],
+          requires_input: false,
+          created_by: 'elastic',
+          created_at: expect.any(String),
+          updated_by: 'elastic',
+          updated_at: expect.any(String),
+        },
+        { id: scriptSoId }
+      );
     });
 
     it('should delete the file record if upload of file content failed', async () => {

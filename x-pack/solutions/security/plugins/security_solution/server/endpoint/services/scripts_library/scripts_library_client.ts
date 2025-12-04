@@ -214,6 +214,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
         metadata: {
           name: fileStream.hapi.filename ?? scriptDefinition.name.replace(/\D\W/g, '_'),
           mime: fileStream.hapi.headers['content-type'] ?? 'application/octet-stream',
+          meta: { scriptId },
         },
       })
       .catch((error) => {
