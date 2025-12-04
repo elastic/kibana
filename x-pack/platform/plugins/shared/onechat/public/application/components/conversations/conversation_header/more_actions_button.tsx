@@ -28,6 +28,7 @@ import { appPaths } from '../../../utils/app_paths';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { DeleteConversationModal } from './delete_conversation_modal';
 import { useHasConnectorsAllPrivileges } from '../../../hooks/use_has_connectors_all_privileges';
+import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 
 const fullscreenLabels = {
   actions: i18n.translate('xpack.onechat.conversationActions.actions', {
@@ -107,6 +108,8 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
   const isAgentReadOnly = useIsAgentReadOnly(agentId);
   const { createOnechatUrl } = useNavigation();
   const { euiTheme } = useEuiTheme();
+  const { manageAgents } = useUiPrivileges();
+
   const {
     services: { application },
   } = useKibana();
@@ -161,7 +164,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
       key="edit-current-agent"
       icon="pencil"
       size="s"
-      disabled={isAgentReadOnly}
+      disabled={isAgentReadOnly || !manageAgents}
       onClick={closePopover}
       href={agentId ? createOnechatUrl(appPaths.agents.edit({ agentId })) : undefined}
     >
@@ -171,7 +174,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
       key="clone-agent"
       icon="copy"
       size="s"
-      disabled={!agentId}
+      disabled={!agentId || !manageAgents}
       onClick={closePopover}
       href={
         agentId

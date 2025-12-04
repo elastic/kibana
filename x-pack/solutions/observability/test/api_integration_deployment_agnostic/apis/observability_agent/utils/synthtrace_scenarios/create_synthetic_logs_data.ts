@@ -19,7 +19,7 @@ export async function createSyntheticLogsData({
   dataset?: string;
 }): Promise<{ logsSynthtraceEsClient: LogsSynthtraceEsClient }> {
   const synthtrace = getService('synthtrace');
-  const logsSynthtraceEsClient = await synthtrace.createLogsSynthtraceEsClient();
+  const logsSynthtraceEsClient = synthtrace.createLogsSynthtraceEsClient();
 
   const range = timerange('now-15m', 'now');
 

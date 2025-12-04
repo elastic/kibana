@@ -18,6 +18,8 @@ export const AllCasesURLQueryParamsRt = rt.exact(
     category: rt.array(rt.string),
     assignees: rt.array(rt.union([rt.string, rt.null])),
     customFields: rt.record(rt.string, rt.array(rt.string)),
+    from: rt.string,
+    to: rt.string,
     sortOrder: rt.union([rt.literal('asc'), rt.literal('desc')]),
     sortField: rt.union([
       rt.literal('closedAt'),
