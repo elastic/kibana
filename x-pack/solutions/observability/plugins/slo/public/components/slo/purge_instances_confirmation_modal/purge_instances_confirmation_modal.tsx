@@ -59,7 +59,7 @@ export function PurgeInstancesConfirmationModal({ items, onCancel, onConfirm }: 
       confirmButtonDisabled={!isFormValid}
       data-test-subj="purgeInstancesConfirmationModal"
       title={i18n.translate('xpack.slo.purgeInstancesConfirmationModal.title', {
-        defaultMessage: 'Purge stale instances?',
+        defaultMessage: 'Purge stale instances',
       })}
       cancelButtonText={i18n.translate(
         'xpack.slo.purgeInstancesConfirmationModal.cancelButtonLabel',
@@ -85,13 +85,13 @@ export function PurgeInstancesConfirmationModal({ items, onCancel, onConfirm }: 
                 'xpack.slo.purgeInstancesConfirmationModal.descriptionTextWithSelection',
                 {
                   defaultMessage:
-                    'This action will permanently delete stale instances from the {count, plural, one {selected SLO} other {# selected SLOs}} based on the stale duration threshold defined in your settings. You can override this threshold below.',
+                    'Permanently remove all stale instances from the selected SLOs based on the Stale SLOs threshold setting. Override this setting by updating the following Stale threshold.',
                   values: { count: items.length },
                 }
               )
             : i18n.translate('xpack.slo.purgeInstancesConfirmationModal.descriptionText', {
                 defaultMessage:
-                  'This action will permanently delete all stale SLO instances based on the stale duration threshold defined in your settings. You can override this threshold below.',
+                  'Permanently delete all stale SLO instances based on the Stale SLOs threshold setting. Override this setting by updating the following Stale threshold.',
               })}
         </EuiText>
 
@@ -129,7 +129,7 @@ export function PurgeInstancesConfirmationModal({ items, onCancel, onConfirm }: 
               setOverride(e.target.checked);
             }}
             label={i18n.translate('xpack.slo.purgeInstancesConfirmationModal.forcePurge', {
-              defaultMessage: 'Override stale threshold settings',
+              defaultMessage: 'Override the Stale SLOs threshold setting',
             })}
           />
         </EuiFormRow>

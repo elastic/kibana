@@ -32,10 +32,6 @@ export function SloPurgeRollupConfirmationModal({ item, onCancel, onConfirm }: P
     <PurgeRollupConfirmationModal
       onCancel={onCancel}
       onConfirm={onClickConfirm}
-      modalTitle={i18n.translate('xpack.slo.purgeConfirmationModal.title', {
-        defaultMessage: 'Purge {name}',
-        values: { name: item.name },
-      })}
       purgePolicyHelpText={i18n.translate('xpack.slo.purgeConfirmationModal.descriptionText', {
         defaultMessage:
           'Rollup data for {name} will be purged according to the policy provided below.',
