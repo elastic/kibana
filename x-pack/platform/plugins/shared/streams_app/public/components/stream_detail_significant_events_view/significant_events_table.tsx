@@ -66,6 +66,7 @@ export function SignificantEventsTable({
             href={discoverLocator.getRedirectUrl(
               buildDiscoverParams(record.query, definition, timeState)
             )}
+            data-test-subj="significant_events_table_discover_link"
           >
             {record.query.title}
           </EuiLink>
@@ -104,6 +105,7 @@ export function SignificantEventsTable({
                 defaultMessage: 'Open feature details',
               }
             )}
+            data-test-subj="significant_events_table_feature_badge"
           >
             {query.feature?.name ?? '--'}
           </EuiBadge>
@@ -163,6 +165,7 @@ export function SignificantEventsTable({
             discoverLocator?.navigate(buildDiscoverParams(item.query, definition, timeState));
           },
           isPrimary: true,
+          'data-test-subj': 'significant_events_table_open_in_discover_action',
         },
         {
           icon: 'pencil',
@@ -180,6 +183,7 @@ export function SignificantEventsTable({
           onClick: (item) => {
             onEditClick?.(item);
           },
+          'data-test-subj': 'significant_events_table_edit_query_action',
         },
         {
           icon: 'trash',
@@ -229,6 +233,7 @@ export function SignificantEventsTable({
       )}
       {isDeleteModalVisible && selectedDeleteItem && (
         <EuiConfirmModal
+          data-test-subj="significant_events_table_delete_confirm_modal"
           aria-labelledby={'deleteSignificantModal'}
           title={i18n.translate(
             'xpack.streams.significantEventsTable.euiConfirmModal.deleteSignificantEventLabel',

@@ -1501,6 +1501,7 @@ instanceStateValue: true
                             maintenance_window_names: [],
                             pending_recovered_count: 0,
                             severity_improving: false,
+                            muted: false,
                             rule: {
                               parameters: {
                                 index: 'kibana-alerting-test-data',
@@ -1547,6 +1548,7 @@ instanceStateValue: true
                             maintenance_window_names: [],
                             pending_recovered_count: 0,
                             severity_improving: false,
+                            muted: false,
                             rule: {
                               parameters: {
                                 index: 'kibana-alerting-test-data',
@@ -1609,6 +1611,7 @@ instanceStateValue: true
                             maintenance_window_names: [],
                             pending_recovered_count: 0,
                             previous_action_group: 'default',
+                            muted: false,
                             rule: {
                               parameters: {
                                 index: 'kibana-alerting-test-data',
@@ -1655,6 +1658,7 @@ instanceStateValue: true
                             maintenance_window_names: [],
                             pending_recovered_count: 0,
                             previous_action_group: 'default',
+                            muted: false,
                             rule: {
                               parameters: {
                                 index: 'kibana-alerting-test-data',
@@ -1765,6 +1769,7 @@ instanceStateValue: true
                       maintenance_window_names: [],
                       pending_recovered_count: 0,
                       severity_improving: false,
+                      muted: false,
                       rule: {
                         parameters: {
                           index: 'kibana-alerting-test-data',
@@ -1811,6 +1816,7 @@ instanceStateValue: true
                       maintenance_window_names: [],
                       pending_recovered_count: 0,
                       severity_improving: false,
+                      muted: false,
                       rule: {
                         parameters: {
                           index: 'kibana-alerting-test-data',

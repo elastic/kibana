@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { ConnectorContractUnion } from '../..';
 import { generateYamlSchemaFromConnectors } from '../..';
 
@@ -16,6 +16,8 @@ describe('generateYamlSchemaFromConnectors', () => {
     it('should generate a valid YAML schema from connectors', () => {
       const connectors: ConnectorContractUnion[] = [
         {
+          summary: 'Console',
+          description: 'Console',
           type: 'console',
           paramsSchema: z.object({
             message: z.string(),

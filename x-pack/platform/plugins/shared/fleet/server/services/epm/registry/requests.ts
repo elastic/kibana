@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import type { Agent as HttpAgent } from 'http';
+
+import type { Agent as HttpsAgent } from 'https';
+
 import fetch, { FetchError } from 'node-fetch';
 import type { RequestInit, Response } from 'node-fetch';
 import pRetry from 'p-retry';
@@ -165,6 +169,6 @@ export function getFetchOptions(targetUrl: string): RequestInit | undefined {
   const logger = appContextService.getLogger();
   logger.debug(`Using ${proxyUrl} as proxy for ${targetUrl}`);
 
-  options.agent = getProxyAgent({ proxyUrl, targetUrl });
+  options.agent = getProxyAgent({ proxyUrl, targetUrl }) as unknown as HttpAgent | HttpsAgent;
   return options;
 }

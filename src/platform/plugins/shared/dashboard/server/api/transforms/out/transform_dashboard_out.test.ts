@@ -41,7 +41,23 @@ describe('transformDashboardOut', () => {
     },
   ];
 
-  test('should not supply defaults for missing properties', () => {
+  test('should not supply defaults for optional top level properties', () => {
+    const input: DashboardSavedObjectAttributes = {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{}',
+      },
+      optionsJSON: '{}',
+      panelsJSON: '',
+      timeRestore: false,
+      title: 'my title',
+    };
+    expect(transformDashboardOut(input)).toEqual<DashboardState>({
+      title: 'my title',
+    });
+  });
+
+  test('should not supply defaults for optional nested properties', () => {
     const input: DashboardSavedObjectAttributes = {
       controlGroupInput: {
         panelsJSON: JSON.stringify({ foo: controlGroupInputControlsSo }),
@@ -203,6 +219,35 @@ describe('transformDashboardOut', () => {
         to: 'now',
       },
       title: 'title',
+    });
+  });
+
+  describe('project_routing', () => {
+    test('should include project_routing when it is a string', () => {
+      const input: DashboardSavedObjectAttributes = {
+        panelsJSON: JSON.stringify([]),
+        optionsJSON: JSON.stringify({}),
+        kibanaSavedObjectMeta: {},
+        title: 'my title',
+        description: 'my description',
+        projectRouting: '_alias:_origin',
+      };
+      const result = transformDashboardOut(input);
+      expect(result.project_routing).toBe('_alias:_origin');
+    });
+
+    test('should not include project_routing when it is undefined', () => {
+      const input: DashboardSavedObjectAttributes = {
+        panelsJSON: JSON.stringify([]),
+        optionsJSON: JSON.stringify({}),
+        kibanaSavedObjectMeta: {},
+        title: 'my title',
+        description: 'my description',
+        // projectRouting is undefined
+      };
+      const result = transformDashboardOut(input);
+      expect(result.project_routing).toBeUndefined();
+      expect(result).not.toHaveProperty('project_routing');
     });
   });
 });

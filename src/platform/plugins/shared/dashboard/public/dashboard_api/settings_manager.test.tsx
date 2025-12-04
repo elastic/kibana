@@ -18,7 +18,6 @@ describe('initializeSettingsManager', () => {
     test('Should set syncCursor to false when value not provided', () => {
       const settingsManager = initializeSettingsManager({
         title: 'dashboard 1',
-        panels: [],
       });
       expect(settingsManager.api.getSettings().syncColors).toBe(false);
     });
@@ -26,7 +25,6 @@ describe('initializeSettingsManager', () => {
     test('Should set syncTooltips to false when value not provided', () => {
       const settingsManager = initializeSettingsManager({
         title: 'dashboard 1',
-        panels: [],
       });
       expect(settingsManager.api.getSettings().syncTooltips).toBe(false);
     });
@@ -36,7 +34,6 @@ describe('initializeSettingsManager', () => {
     test('Should not overwrite settings when setting partial state', () => {
       const settingsManager = initializeSettingsManager({
         title: 'dashboard 1',
-        panels: [],
         options: {
           ...DEFAULT_DASHBOARD_OPTIONS,
           useMargins: false,
@@ -101,6 +98,30 @@ describe('initializeSettingsManager', () => {
         title: 'updated title',
         hidePanelTitles: !currentSettings.hidePanelTitles,
       });
+    });
+  });
+
+  describe('projectRoutingRestore deserialization', () => {
+    test('Should set projectRoutingRestore to false when projectRouting is undefined', () => {
+      const state: DashboardState = {
+        ...getSampleDashboardState(),
+        // projectRouting is undefined
+      };
+      const settingsManager = initializeSettingsManager(state);
+      const settings = settingsManager.api.getSettings();
+
+      expect(settings.projectRoutingRestore).toBe(false);
+    });
+
+    test('Should set projectRoutingRestore to true when project_routing is a string', () => {
+      const state: DashboardState = {
+        ...getSampleDashboardState(),
+        project_routing: '_alias:_origin',
+      };
+      const settingsManager = initializeSettingsManager(state);
+      const settings = settingsManager.api.getSettings();
+
+      expect(settings.projectRoutingRestore).toBe(true);
     });
   });
 });

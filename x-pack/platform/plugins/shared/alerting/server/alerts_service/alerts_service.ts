@@ -9,8 +9,16 @@ import { isEmpty, isEqual, omit } from 'lodash';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { Observable } from 'rxjs';
 import { filter, firstValueFrom } from 'rxjs';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { alertFieldMap, ecsFieldMap, legacyAlertFieldMap } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import {
+  ALERT_MUTED,
+  ALERT_INSTANCE_ID,
+  ALERT_RULE_UUID,
+  ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
+} from '@kbn/rule-data-utils';
 import {
   DEFAULT_ALERTS_ILM_POLICY_NAME,
   DEFAULT_ALERTS_ILM_POLICY,
@@ -52,7 +60,8 @@ import type { SetAlertsToUntrackedParams } from './lib/set_alerts_to_untracked';
 import { setAlertsToUntracked } from './lib/set_alerts_to_untracked';
 import type { ClearAlertFlappingHistoryParams } from './lib/clear_alert_flapping_history';
 import { clearAlertFlappingHistory } from './lib/clear_alert_flapping_history';
-
+import type { IsExistingAlertParams } from './lib/is_existing_alert';
+import { isExistingAlert } from './lib/is_existing_alert';
 export const TOTAL_FIELDS_LIMIT = 2500;
 const LEGACY_ALERT_CONTEXT = 'legacy-alert';
 export const ECS_CONTEXT = `ecs`;
@@ -509,6 +518,142 @@ export class AlertsService implements IAlertsService {
       logger: this.options.logger,
       esClient: await this.options.elasticsearchClientPromise,
       ...opts,
+    });
+  }
+
+  public async isExistingAlert(params: IsExistingAlertParams): Promise<boolean> {
+    return isExistingAlert({
+      logger: this.options.logger,
+      esClient: await this.options.elasticsearchClientPromise,
+      ...params,
+    });
+  }
+
+  private async _updateMuteState({
+    muted,
+    ruleId,
+    alertInstanceId,
+    indices,
+    logger,
+  }: {
+    muted: boolean;
+    ruleId: string;
+    alertInstanceId?: string;
+    indices: string[];
+    logger: Logger;
+  }) {
+    if (!indices || indices.length === 0) {
+      throw new Error(
+        `Unable to update mute state for rule ${ruleId} - no alert indices available`
+      );
+    }
+
+    const esClient = await this.options.elasticsearchClientPromise;
+
+    const mustClauses: QueryDslQueryContainer[] = [
+      { term: { [ALERT_RULE_UUID]: ruleId } },
+      { term: { [ALERT_STATUS]: ALERT_STATUS_ACTIVE } },
+    ];
+
+    if (alertInstanceId) {
+      mustClauses.push({ term: { [ALERT_INSTANCE_ID]: alertInstanceId } });
+    }
+
+    const query = { bool: { must: mustClauses } };
+
+    try {
+      await esClient.updateByQuery({
+        index: indices,
+        conflicts: 'proceed',
+        wait_for_completion: false,
+        refresh: true,
+        ignore_unavailable: true,
+        query,
+        script: {
+          source: `ctx._source['${ALERT_MUTED}'] = params.muted;`,
+          lang: 'painless',
+          params: { muted },
+        },
+      });
+    } catch (error) {
+      logger.error(
+        `Error updating muted field to ${muted} for rule ID ${ruleId} and alert instance ID ${alertInstanceId} - ${error.message}`
+      );
+      throw error;
+    }
+  }
+
+  public async muteAlertInstance({
+    ruleId,
+    alertInstanceId,
+    indices,
+    logger,
+  }: {
+    ruleId: string;
+    alertInstanceId: string;
+    indices: string[];
+    logger: Logger;
+  }) {
+    return this._updateMuteState({
+      muted: true,
+      ruleId,
+      alertInstanceId,
+      indices,
+      logger,
+    });
+  }
+
+  public async unmuteAlertInstance({
+    ruleId,
+    alertInstanceId,
+    indices,
+    logger,
+  }: {
+    ruleId: string;
+    alertInstanceId: string;
+    indices: string[];
+    logger: Logger;
+  }) {
+    return this._updateMuteState({
+      muted: false,
+      ruleId,
+      alertInstanceId,
+      indices,
+      logger,
+    });
+  }
+
+  public async muteAllAlerts({
+    ruleId,
+    indices,
+    logger,
+  }: {
+    ruleId: string;
+    indices: string[];
+    logger: Logger;
+  }) {
+    return this._updateMuteState({
+      muted: true,
+      ruleId,
+      indices,
+      logger,
+    });
+  }
+
+  public async unmuteAllAlerts({
+    ruleId,
+    indices,
+    logger,
+  }: {
+    ruleId: string;
+    indices: string[];
+    logger: Logger;
+  }) {
+    return this._updateMuteState({
+      muted: false,
+      ruleId,
+      indices,
+      logger,
     });
   }
 }
