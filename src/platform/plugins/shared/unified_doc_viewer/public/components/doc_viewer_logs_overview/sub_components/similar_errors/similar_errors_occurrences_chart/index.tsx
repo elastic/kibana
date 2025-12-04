@@ -14,9 +14,10 @@ import {
   LensConfigBuilder,
   type LensXYConfig,
   type LensSeriesLayer,
+  type LensAnnotationLayer,
 } from '@kbn/lens-embeddable-utils/config_builder';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils/config_builder';
-import { EuiCallOut, EuiLoadingChart, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiCallOut, EuiLoadingChart, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
@@ -70,11 +71,21 @@ const defaultLensConfig: Omit<LensXYConfig, 'title' | 'dataset'> = {
 
 export interface SimilarErrorsOccurrencesChartProps {
   baseEsqlQuery: ReturnType<typeof import('../get_esql_query').getEsqlQuery>;
+  currentDocumentTimestamp?: string;
 }
+
+const currentDocumentLabel = i18n.translate(
+  'unifiedDocViewer.docViewerLogsOverview.subComponents.similarErrors.occurrences.currentDocument',
+  {
+    defaultMessage: 'Current document',
+  }
+);
 
 export function SimilarErrorsOccurrencesChart({
   baseEsqlQuery,
+  currentDocumentTimestamp,
 }: SimilarErrorsOccurrencesChartProps) {
+  const { euiTheme } = useEuiTheme();
   const { data } = getUnifiedDocViewerServices();
   const { indexes } = useDataSourcesContext();
   const [lensAttributes, setLensAttributes] = useState<LensAttributes | undefined>(undefined);
@@ -82,6 +93,21 @@ export function SimilarErrorsOccurrencesChart({
   const timeRange = useMemo(
     () => data.query.timefilter.timefilter.getTime(),
     [data.query.timefilter.timefilter]
+  );
+
+  const createAnnotationLayer = useCallback(
+    (timestamp: string): LensAnnotationLayer => ({
+      type: 'annotation',
+      yAxis: [], // Annotation layers don't use yAxis but it's required by the type
+      events: [
+        {
+          name: currentDocumentLabel,
+          datetime: timestamp,
+          color: euiTheme.colors.danger,
+        },
+      ],
+    }),
+    [euiTheme.colors.danger]
   );
 
   const chartEsqlQuery = useMemo(() => {
@@ -108,6 +134,7 @@ export function SimilarErrorsOccurrencesChart({
           esqlVariables: [],
         },
       }),
+      noPadding: true,
     };
   }, [lensAttributes, timeRange]);
 
@@ -119,8 +146,18 @@ export function SimilarErrorsOccurrencesChart({
     }
 
     const builder = new LensConfigBuilder(data.dataViews);
+
+    // Build layers array with series layer and optional annotation layer
+    const layers: Array<LensSeriesLayer | LensAnnotationLayer> = [...chartLayers];
+
+    // Add annotation layer to mark the current document if timestamp is provided
+    if (currentDocumentTimestamp) {
+      layers.push(createAnnotationLayer(currentDocumentTimestamp));
+    }
+
     const lensConfig: LensXYConfig = {
       ...defaultLensConfig,
+      layers,
       title: chartTitle,
       dataset: {
         esql: chartEsqlQuery,
@@ -144,7 +181,7 @@ export function SimilarErrorsOccurrencesChart({
     };
 
     buildAttributes();
-  }, [chartEsqlQuery, data.dataViews]);
+  }, [chartEsqlQuery, data.dataViews, currentDocumentTimestamp, createAnnotationLayer]);
 
   const content = useMemo(() => {
     if (!lensAttributes) {

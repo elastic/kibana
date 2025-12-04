@@ -67,6 +67,10 @@ export function SimilarErrors({ hit }: SimilarErrorsProps) {
   const { field: messageField, value: messageValue } = getMessageFieldWithFallbacks(hitFlattened);
   const { field: typeField, originalValue: typeValue } =
     getLogExceptionTypeFieldWithFallback(hitFlattened);
+  const { value: timestampValue } = getFieldValueWithFallback(
+    hitFlattened,
+    fieldConstants.TIMESTAMP_FIELD
+  );
 
   const sectionDescription = useMemo(
     () =>
@@ -141,7 +145,10 @@ export function SimilarErrors({ hit }: SimilarErrorsProps) {
       actions={sectionActions}
       description={sectionDescription}
     >
-      <SimilarErrorsOccurrencesChart baseEsqlQuery={esqlQuery} />
+      <SimilarErrorsOccurrencesChart
+        baseEsqlQuery={esqlQuery}
+        currentDocumentTimestamp={typeof timestampValue === 'string' ? timestampValue : undefined}
+      />
     </ContentFrameworkSection>
   );
 }

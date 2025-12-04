@@ -158,4 +158,42 @@ describe('SimilarErrorsOccurrencesChart', () => {
       expect(screen.queryByTestId('lensEmbeddableSimilarErrorsChart')).not.toBeInTheDocument();
     });
   });
+
+  it('adds annotation layer when currentDocumentTimestamp is provided', async () => {
+    const baseQuery = where('service.name == ?serviceName', { serviceName: 'test-service' });
+    const timestamp = '2024-01-15T10:30:00Z';
+    render(
+      <SimilarErrorsOccurrencesChart
+        baseEsqlQuery={baseQuery}
+        currentDocumentTimestamp={timestamp}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockBuild).toHaveBeenCalled();
+    });
+
+    const lensConfig = mockBuild.mock.calls[0][0];
+    const layers = lensConfig.layers;
+
+    expect(layers.length).toBeGreaterThan(1);
+    const annotationLayer = layers.find((layer: any) => layer.type === 'annotation');
+    expect(annotationLayer.events[0].datetime).toBe(timestamp);
+    expect(annotationLayer.events[0].name).toBe('Current document');
+  });
+
+  it('does not add annotation layer when currentDocumentTimestamp is not provided', async () => {
+    const baseQuery = where('service.name == ?serviceName', { serviceName: 'test-service' });
+    render(<SimilarErrorsOccurrencesChart baseEsqlQuery={baseQuery} />);
+
+    await waitFor(() => {
+      expect(mockBuild).toHaveBeenCalled();
+    });
+
+    const lensConfig = mockBuild.mock.calls[0][0];
+    const layers = lensConfig.layers;
+
+    const annotationLayer = layers.find((layer: any) => layer.type === 'annotation');
+    expect(annotationLayer).toBeUndefined();
+  });
 });
