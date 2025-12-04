@@ -47,7 +47,7 @@ Scan a specific file or directory on an endpoint for malware.`,
     headerParams: [],
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['agent_type', 'alert_ids', 'case_ids', 'comment', 'endpoint_ids', 'parameters'],
   },
   paramsSchema: z.object({
     ...getShapeAt(endpoint_scan_action_request, 'body'),

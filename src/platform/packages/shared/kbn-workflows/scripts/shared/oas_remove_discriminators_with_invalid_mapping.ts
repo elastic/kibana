@@ -9,7 +9,8 @@
 
 import type { OpenAPIV3 } from 'openapi-types';
 
-// In order to generate valid zod schemas, we need to remove discriminators from the all components/schemas if they don't have a mapping
+// In order to generate valid zod schemas, we need to remove discriminators from the all components/schemas
+// if their mapping doesn't have the same number of items as the oneOf array
 // https://github.com/hey-api/openapi-ts/issues/3020
 export function removeDiscriminatorsWithInvalidMapping(document: OpenAPIV3.Document) {
   if (!document.components || !document.components.schemas) {
@@ -25,7 +26,7 @@ export function removeDiscriminatorsWithInvalidMapping(document: OpenAPIV3.Docum
           const oneOfCount = value.oneOf.length;
           const mappingCount = Object.keys(value.discriminator.mapping ?? {}).length;
           if (oneOfCount !== mappingCount) {
-            console.warn(`Discriminator ${key} has invalid mapping`, value);
+            // console.warn(`Discriminator ${key} has invalid mapping`, value);
             delete value.discriminator;
           }
         }

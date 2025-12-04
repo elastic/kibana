@@ -48,7 +48,7 @@ You must have \`all\` privileges for the Synthetics feature in the Observability
     headerParams: [],
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['description', 'key', 'share_across_spaces', 'tags', 'value'],
   },
   paramsSchema: z.object({
     ...getShapeAt(post_parameters_request, 'body'),
