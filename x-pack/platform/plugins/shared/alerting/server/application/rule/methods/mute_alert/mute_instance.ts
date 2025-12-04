@@ -84,7 +84,7 @@ async function muteInstanceWithOCC(
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
   if (validateAlertsExistence) {
-    const indices = await context.getAlertIndicesAlias([attributes.alertTypeId], context.spaceId);
+    const indices = context.getAlertIndicesAlias([attributes.alertTypeId], context.spaceId);
     const isExistingAlert = await context.alertsService?.isExistingAlert({
       indices,
       alertId: alertInstanceId,
@@ -101,6 +101,9 @@ async function muteInstanceWithOCC(
   const mutedInstanceIds = attributes.mutedInstanceIds || [];
   if (!attributes.muteAll && !mutedInstanceIds.includes(alertInstanceId)) {
     mutedInstanceIds.push(alertInstanceId);
+
+    const indices = context.getAlertIndicesAlias([attributes.alertTypeId], context.spaceId);
+
     await updateRuleSo({
       savedObjectsClient: context.unsecuredSavedObjectsClient,
       savedObjectsUpdateOptions: { version },
@@ -111,5 +114,14 @@ async function muteInstanceWithOCC(
         updatedAt: new Date().toISOString(),
       }),
     });
+
+    if (indices && indices.length > 0) {
+      await context.alertsService?.muteAlertInstance({
+        ruleId,
+        alertInstanceId,
+        indices,
+        logger: context.logger,
+      });
+    }
   }
 }

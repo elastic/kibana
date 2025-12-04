@@ -19,6 +19,7 @@ import type {
   ObservabilityAgentPluginStartDependencies,
   ObservabilityAgentPluginSetupDependencies,
 } from '../../types';
+import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
 
 type MlSystem = ReturnType<MlPluginSetup['mlSystemProvider']>;
 
@@ -56,22 +57,7 @@ const getAnomalyDetectionJobsSchema = z.object({
     .max(25)
     .describe(`Maximum number of jobs to return. Defaults to ${DEFAULT_JOBS_LIMIT}.`)
     .optional(),
-  start: z
-    .string()
-    .min(2)
-    .max(200)
-    .describe(
-      `Start of the time range for anomaly records, expressed with Elasticsearch date math (e.g. now-1h). Defaults to ${DEFAULT_TIME_RANGE.start}.`
-    )
-    .optional(),
-  end: z
-    .string()
-    .min(2)
-    .max(200)
-    .describe(
-      `End of the time range for anomaly records, expressed with Elasticsearch date math. Defaults to ${DEFAULT_TIME_RANGE.end}.`
-    )
-    .optional(),
+  ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
 });
 
 export function createGetAnomalyDetectionJobsTool({
@@ -87,7 +73,7 @@ export function createGetAnomalyDetectionJobsTool({
     id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
     type: ToolType.builtin,
     description:
-      'Return anomaly detection jobs and associated anomaly records. Useful for identifying unusual patterns in observability data.',
+      'Retrieves Machine Learning anomaly detection jobs and their top anomaly records for a given time range. Use this to identify unusual patterns or outliers in observability data.',
     schema: getAnomalyDetectionJobsSchema,
     tags: ['observability', 'machine_learning', 'anomaly_detection'],
     handler: async (

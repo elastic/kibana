@@ -16,8 +16,8 @@ import {
   type EuiTourStepProps,
 } from '@elastic/eui';
 import {
-  EIS_PROMO_TOUR_CLOSE,
-  EIS_PROMO_TOUR_CTA,
+  EIS_TOUR_DISMISS,
+  EIS_TOUR_CTA,
   EIS_PROMO_TOUR_DESCRIPTION,
   EIS_PROMO_TOUR_TITLE,
 } from '../translations';
@@ -66,7 +66,7 @@ export const EisPromotionalTour = ({
       onFinish={onSkipTour}
       footerAction={[
         <EuiButtonEmpty data-test-subj="eisPromoTourCloseBtn" onClick={onSkipTour}>
-          {EIS_PROMO_TOUR_CLOSE}
+          {EIS_TOUR_DISMISS}
         </EuiButtonEmpty>,
         ...(ctaLink
           ? [
@@ -77,7 +77,7 @@ export const EisPromotionalTour = ({
                 iconSide="right"
                 iconType="popout"
               >
-                {EIS_PROMO_TOUR_CTA}
+                {EIS_TOUR_CTA}
               </EuiButton>,
             ]
           : []),

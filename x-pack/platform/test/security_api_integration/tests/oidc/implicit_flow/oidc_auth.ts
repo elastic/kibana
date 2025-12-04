@@ -83,7 +83,11 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should fail if OpenID Connect response is not complemented with handshake cookie', async () => {
-        const { idToken, accessToken } = createTokens('1', stateAndNonce.nonce);
+        const { idToken, accessToken } = createTokens(
+          '1',
+          stateAndNonce.nonce,
+          'https://test-op.elastic.co'
+        );
         const authenticationResponse = `https://kibana.com/api/security/oidc/implicit#id_token=${idToken}&state=${stateAndNonce.state}&token_type=bearer&access_token=${accessToken}`;
 
         const unauthenticatedResponse = await supertest
@@ -99,7 +103,11 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should fail if state is not matching', async () => {
-        const { idToken, accessToken } = createTokens('1', stateAndNonce.nonce);
+        const { idToken, accessToken } = createTokens(
+          '1',
+          stateAndNonce.nonce,
+          'https://test-op.elastic.co'
+        );
         const authenticationResponse = `https://kibana.com/api/security/oidc/implicit#id_token=${idToken}&state=$someothervalue&token_type=bearer&access_token=${accessToken}`;
 
         const unauthenticatedResponse = await supertest
@@ -116,7 +124,11 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should succeed if both the OpenID Connect response and the cookie are provided', async () => {
-        const { idToken, accessToken } = createTokens('1', stateAndNonce.nonce);
+        const { idToken, accessToken } = createTokens(
+          '1',
+          stateAndNonce.nonce,
+          'https://test-op.elastic.co'
+        );
         const authenticationResponse = `https://kibana.com/api/security/oidc/implicit#id_token=${idToken}&state=${stateAndNonce.state}&token_type=bearer&access_token=${accessToken}`;
 
         const oidcAuthenticationResponse = await supertest
