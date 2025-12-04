@@ -33,58 +33,56 @@ apiTest.describe('/internal/transform/transforms', { tag: tags.ESS_ONLY }, () =>
     await apiServices.transform.cleanTransformIndices();
   });
 
-  apiTest.describe('/transforms', () => {
-    apiTest('should return a list of transforms for transform_admin', async ({ apiClient }) => {
-      const { body, statusCode } = await apiClient.get('internal/transform/transforms', {
-        headers: {
-          ...COMMON_HEADERS,
-          ...transformPowerUserApiCredentials.apiKeyHeader,
-        },
-        responseType: 'json',
-      });
-
-      expect(statusCode).toBe(200);
-
-      expect(body.count).toBe(2);
-      expect(body.transforms).toHaveLength(2);
-
-      // Check transform 1
-      const transform1 = body.transforms.find((t) => t.id === TRANSFORM_1_ID);
-      expect(transform1).toBeDefined();
-      expect(transform1!.id).toBe(TRANSFORM_1_ID);
-      expect(transform1!.dest.index).toBe('user-transform-test-get-1');
-      expect(typeof transform1!.version).toBe('string');
-      expect(typeof transform1!.create_time).toBe('number');
-
-      // Check transform 2
-      const transform2 = body.transforms.find((t) => t.id === TRANSFORM_2_ID);
-      expect(transform2).toBeDefined();
-      expect(transform2!.id).toBe(TRANSFORM_2_ID);
-      expect(transform2!.dest.index).toBe('user-transform-test-get-2');
-      expect(typeof transform2!.version).toBe('string');
-      expect(typeof transform2!.create_time).toBe('number');
+  apiTest('should return a list of transforms for transform_admin', async ({ apiClient }) => {
+    const { body, statusCode } = await apiClient.get('internal/transform/transforms', {
+      headers: {
+        ...COMMON_HEADERS,
+        ...transformPowerUserApiCredentials.apiKeyHeader,
+      },
+      responseType: 'json',
     });
 
-    apiTest('should return a list of transforms for transform_user', async ({ apiClient }) => {
-      const { body, statusCode } = await apiClient.get('internal/transform/transforms', {
-        headers: {
-          ...COMMON_HEADERS,
-          ...transformViewerUserApiCredentials.apiKeyHeader,
-        },
-        responseType: 'json',
-      });
+    expect(statusCode).toBe(200);
 
-      expect(statusCode).toBe(200);
+    expect(body.count).toBe(2);
+    expect(body.transforms).toHaveLength(2);
 
-      expect(body.count).toBe(2);
-      expect(body.transforms).toHaveLength(2);
+    // Check transform 1
+    const transform1 = body.transforms.find((t) => t.id === TRANSFORM_1_ID);
+    expect(transform1).toBeDefined();
+    expect(transform1!.id).toBe(TRANSFORM_1_ID);
+    expect(transform1!.dest.index).toBe('user-transform-test-get-1');
+    expect(typeof transform1!.version).toBe('string');
+    expect(typeof transform1!.create_time).toBe('number');
 
-      // Verify both transforms are present
-      const transform1 = body.transforms.find((t) => t.id === TRANSFORM_1_ID);
-      const transform2 = body.transforms.find((t) => t.id === TRANSFORM_2_ID);
-      expect(transform1).toBeDefined();
-      expect(transform2).toBeDefined();
+    // Check transform 2
+    const transform2 = body.transforms.find((t) => t.id === TRANSFORM_2_ID);
+    expect(transform2).toBeDefined();
+    expect(transform2!.id).toBe(TRANSFORM_2_ID);
+    expect(transform2!.dest.index).toBe('user-transform-test-get-2');
+    expect(typeof transform2!.version).toBe('string');
+    expect(typeof transform2!.create_time).toBe('number');
+  });
+
+  apiTest('should return a list of transforms for transform_user', async ({ apiClient }) => {
+    const { body, statusCode } = await apiClient.get('internal/transform/transforms', {
+      headers: {
+        ...COMMON_HEADERS,
+        ...transformViewerUserApiCredentials.apiKeyHeader,
+      },
+      responseType: 'json',
     });
+
+    expect(statusCode).toBe(200);
+
+    expect(body.count).toBe(2);
+    expect(body.transforms).toHaveLength(2);
+
+    // Verify both transforms are present
+    const transform1 = body.transforms.find((t) => t.id === TRANSFORM_1_ID);
+    const transform2 = body.transforms.find((t) => t.id === TRANSFORM_2_ID);
+    expect(transform1).toBeDefined();
+    expect(transform2).toBeDefined();
   });
 
   apiTest(
