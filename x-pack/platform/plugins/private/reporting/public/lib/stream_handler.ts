@@ -169,17 +169,9 @@ export class ReportingNotifierStreamHandler {
         return { completed: newCompleted, failed: newFailed };
       }),
       catchError((err) => {
-        // show connection refused toast
-        this.core.notifications.toasts.addDanger(
-          getGeneralErrorToast(
-            i18n.translate('xpack.reporting.publicNotifier.httpErrorMessage', {
-              defaultMessage: 'Could not check Reporting job status!',
-            }),
-            err,
-            this.core
-          )
-        );
-        window.console.error(err);
+        // Seems to only occur when connection to ES fails, and
+        // is very noisy.  We used to toast here, but ... it was
+        // very noisy.
         return Rx.of({});
       })
     );
