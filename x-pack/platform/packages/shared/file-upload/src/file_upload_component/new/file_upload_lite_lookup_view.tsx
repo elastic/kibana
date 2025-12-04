@@ -72,6 +72,12 @@ export const FileUploadLiteLookUpView: FC<Props> = ({
     };
   }, [setFileUploadActive]);
 
+  useEffect(() => {
+    if (filesStatus.length === 0) {
+      setFileUploadActive(false);
+    }
+  }, [filesStatus, setFileUploadActive]);
+
   const importClick = useCallback(() => {
     onImportClick();
     setStep('mapping', STATUS.COMPLETED);
