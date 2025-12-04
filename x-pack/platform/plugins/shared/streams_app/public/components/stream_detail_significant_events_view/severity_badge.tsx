@@ -5,40 +5,47 @@
  * 2.0.
  */
 
-import { EuiBadge, type EuiBadgeProps } from '@elastic/eui';
+import { EuiHealth, type EuiBadgeProps } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 type Severity = 'low' | 'medium' | 'high' | 'critical';
 
-const SEVERITY_COLORS: Record<Severity, { color: EuiBadgeProps['color']; label: string }> = {
+export const SIGNIFICANT_EVENT_SEVERITY: Record<
+  Severity,
+  { color: EuiBadgeProps['color']; label: string; defaultValue: number }
+> = {
   low: {
-    color: 'default',
+    color: '#5a6d8c',
     label: i18n.translate('xpack.streams.significantEventsTable.severityBadge.lowLabel', {
       defaultMessage: 'Low',
     }),
+    defaultValue: 20,
   },
   medium: {
-    color: 'warning',
+    color: '#facb3d',
     label: i18n.translate('xpack.streams.significantEventsTable.severityBadge.mediumLabel', {
       defaultMessage: 'Medium',
     }),
+    defaultValue: 50,
   },
   high: {
-    color: '#FFA500',
+    color: '#ed6723',
     label: i18n.translate('xpack.streams.significantEventsTable.severityBadge.highLabel', {
       defaultMessage: 'High',
     }),
+    defaultValue: 70,
   },
   critical: {
     color: 'danger',
     label: i18n.translate('xpack.streams.significantEventsTable.severityBadge.criticalLabel', {
       defaultMessage: 'Critical',
     }),
+    defaultValue: 90,
   },
 };
 
-const scoreSeverity = (score: number): Severity => {
+export const scoreSeverity = (score: number): Severity => {
   if (score < 40) {
     return 'low';
   } else if (score < 60) {
@@ -51,8 +58,14 @@ const scoreSeverity = (score: number): Severity => {
 
 export function SeverityBadge({ score }: { score?: number }) {
   if (!score) {
-    return <EuiBadge color="hollow">-</EuiBadge>;
+    return (
+      <EuiHealth color="text">
+        {i18n.translate('xpack.streams.significantEventsTable.severityBadge.noSeverity', {
+          defaultMessage: 'None',
+        })}
+      </EuiHealth>
+    );
   }
-  const { color, label } = SEVERITY_COLORS[scoreSeverity(score)];
-  return <EuiBadge color={color}>{label}</EuiBadge>;
+  const { color, label } = SIGNIFICANT_EVENT_SEVERITY[scoreSeverity(score)];
+  return <EuiHealth color={color}>{label}</EuiHealth>;
 }

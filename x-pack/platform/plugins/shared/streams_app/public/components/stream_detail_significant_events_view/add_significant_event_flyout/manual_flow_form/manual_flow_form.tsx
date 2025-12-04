@@ -23,6 +23,7 @@ import { UncontrolledStreamsAppSearchBar } from '../../../streams_app_search_bar
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
 import { validateQuery } from '../common/validate_query';
 import { NO_FEATURE } from '../utils/default_query';
+import { scoreSeverity, SeverityBadge, SIGNIFICANT_EVENT_SEVERITY } from '../../severity_badge';
 
 interface Props {
   definition: Streams.all.Definition;
@@ -43,13 +44,18 @@ export function ManualFlowForm({
   features,
   dataViews,
 }: Props) {
-  const [touched, setTouched] = useState({ title: false, feature: false, kql: false });
+  const [touched, setTouched] = useState({
+    title: false,
+    feature: false,
+    kql: false,
+    severity: false,
+  });
 
   const validation = validateQuery(query);
 
   useEffect(() => {
     const isValid = !validation.title.isInvalid && !validation.kql.isInvalid;
-    const isTouched = touched.title || touched.kql || touched.feature;
+    const isTouched = touched.title || touched.kql || touched.feature || touched.severity;
     setCanSave(isValid && isTouched);
   }, [validation, setCanSave, touched]);
 
@@ -67,6 +73,17 @@ export function ManualFlowForm({
         ),
       },
     ]);
+
+  const severityOptions = [
+    {
+      value: -1,
+      inputDisplay: <SeverityBadge />,
+    },
+    ...Object.values(SIGNIFICANT_EVENT_SEVERITY).map((severity) => ({
+      value: severity.defaultValue,
+      inputDisplay: <SeverityBadge score={severity.defaultValue} />,
+    })),
+  ];
 
   return (
     <EuiPanel hasShadow={false} color="subdued">
@@ -98,6 +115,36 @@ export function ManualFlowForm({
                 'xpack.streams.addSignificantEventFlyout.manualFlow.titlePlaceholder',
                 { defaultMessage: 'Add title' }
               )}
+            />
+          </EuiFormRow>
+
+          <EuiFormRow
+            label={
+              <EuiFormLabel>
+                {i18n.translate(
+                  'xpack.streams.addSignificantEventFlyout.manualFlow.formFieldSeverityLabel',
+                  { defaultMessage: 'Severity' }
+                )}
+              </EuiFormLabel>
+            }
+          >
+            <EuiSuperSelect
+              options={severityOptions}
+              valueOfSelected={
+                query.severity_score
+                  ? SIGNIFICANT_EVENT_SEVERITY[scoreSeverity(query.severity_score)].defaultValue ??
+                    SIGNIFICANT_EVENT_SEVERITY.medium.defaultValue
+                  : -1
+              }
+              onChange={(value) => {
+                setQuery({ ...query, severity_score: value === -1 ? undefined : value });
+                setTouched((prev) => ({ ...prev, severity: true }));
+              }}
+              placeholder={i18n.translate(
+                'xpack.streams.addSignificantEventFlyout.manualFlow.severityPlaceholder',
+                { defaultMessage: 'Select severity' }
+              )}
+              fullWidth
             />
           </EuiFormRow>
 

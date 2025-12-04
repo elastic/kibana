@@ -50,7 +50,7 @@ export function useSignificantEventsApi({
   const { signal, abort, refresh } = useAbortController();
 
   return {
-    upsertQuery: async ({ feature, kql, title, id }) => {
+    upsertQuery: async ({ feature, kql, title, id, severity_score }) => {
       const effectiveFeature = feature && feature.name === NO_FEATURE.name ? undefined : feature;
       await streamsRepositoryClient.fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
         signal,
@@ -62,6 +62,7 @@ export function useSignificantEventsApi({
           body: {
             kql,
             title,
+            severity_score,
             feature: effectiveFeature,
           },
         },
