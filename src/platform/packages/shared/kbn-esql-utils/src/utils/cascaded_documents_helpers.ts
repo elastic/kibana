@@ -385,25 +385,10 @@ export const constructCascadeQuery = ({
       (cmd) => cmd.text === summarizedStatsCommand.command.text
     );
 
-    // create a new query to populate with the cascade operation query
-    const cascadeOperationQuery = EsqlQuery.fromSrc('');
-
-    // include all the existing commands up to the operating stats command in the cascade operation query
-    EditorESQLQuery.ast.commands.slice(0, operatingStatsCommandIndex).forEach((cmd, idx, arr) => {
-      if (idx === arr.length - 1 && cmd.name === 'stats') {
-        // however, when the last command is a stats command, we don't want to include it in the cascade operation query
-        // since where commands that use either the MATCH or MATCH_PHRASE function cannot be immediately followed by a stats command
-        // and moreover this STATS command doesn't provide any useful context even if it defines new runtime fields
-        // as we would have already selected the definition of the field if our operation stats command references it
-        return;
-      }
-
-      mutate.generic.commands.append(cascadeOperationQuery.ast, cmd);
-    });
-
     if (isColumn(groupValue.definition)) {
       return handleStatsByColumnLeafOperation(
-        cascadeOperationQuery,
+        EditorESQLQuery,
+        operatingStatsCommandIndex,
         groupValue,
         dataView.fields,
         esqlVariables,
@@ -413,7 +398,8 @@ export const constructCascadeQuery = ({
       switch (groupValue.definition.name) {
         case 'categorize': {
           return handleStatsByCategorizeLeafOperation(
-            cascadeOperationQuery,
+            EditorESQLQuery,
+            operatingStatsCommandIndex,
             groupValue,
             esqlVariables,
             nodePathMap
@@ -436,12 +422,30 @@ export const constructCascadeQuery = ({
  * helps us with fetching documents that match the value of a specified column on a stats operation in the data cascade experience.
  */
 function handleStatsByColumnLeafOperation(
-  cascadeOperationQuery: EsqlQuery,
+  editorQuery: EsqlQuery,
+  operatingStatsCommandIndex: number,
   columnNode: StatsFieldSummary,
   dataViewFields: DataView['fields'],
   esqlVariables: ESQLControlVariable[] | undefined,
   operationValue: unknown
 ): AggregateQuery {
+  // create a new query to populate with the cascade operation query
+  const cascadeOperationQuery = EsqlQuery.fromSrc('');
+
+  // include all the existing commands up to the operating stats command in the cascade operation query
+  editorQuery.ast.commands.slice(0, operatingStatsCommandIndex + 1).forEach((cmd, idx, arr) => {
+    if (idx === arr.length - 1 && cmd.name === 'stats') {
+      // We know the operating stats command is the last command in the array,
+      // so we modify it into an INLINE STATS command
+      mutate.generic.commands.append(
+        cascadeOperationQuery.ast,
+        synth.cmd(`INLINE ${BasicPrettyPrinter.print(cmd)}`, { withFormatting: false })
+      );
+    } else {
+      mutate.generic.commands.append(cascadeOperationQuery.ast, cmd);
+    }
+  });
+
   let operationColumnName = columnNode.definition.name;
 
   let operationColumnNameParamValue;
@@ -489,12 +493,30 @@ function handleStatsByColumnLeafOperation(
  * Handles the stats command for a leaf operation that contains a categorize function by modifying the query and adding necessary commands.
  */
 function handleStatsByCategorizeLeafOperation(
-  cascadeOperationQuery: EsqlQuery,
+  editorQuery: EsqlQuery,
+  operatingStatsCommandIndex: number,
   categorizeCommandNode: StatsFieldSummary,
   esqlVariables: ESQLControlVariable[] | undefined,
   nodePathMap: Record<string, string>
 ): AggregateQuery {
-  // we select the first argument because that's the field being categorized {@see https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/grouping-functions#esql-categorize | here}
+  // create a new query to populate with the cascade operation query
+  const cascadeOperationQuery = EsqlQuery.fromSrc('');
+
+  // include all the existing commands right up until the operating stats command
+  editorQuery.ast.commands.slice(0, operatingStatsCommandIndex).forEach((cmd, idx, arr) => {
+    if (idx === arr.length - 1 && cmd.name === 'stats') {
+      // however, when the last command is a stats command, we don't want to include it in the cascade operation query
+      // since where commands that use either the MATCH or MATCH_PHRASE function cannot be immediately followed by a stats command
+      // and moreover this STATS command doesn't provide any useful context even if it defines new runtime fields
+      // as we would have already selected the definition of the field if our operation stats command references it
+      return;
+    }
+
+    mutate.generic.commands.append(cascadeOperationQuery.ast, cmd);
+  });
+
+  // we select the first argument because that's the field being categorized
+  // {@link https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/grouping-functions#esql-categorize | here}
   const categorizedField = (
     categorizeCommandNode.definition as ESQLFunction<'variadic-call', 'categorize'>
   ).args[0];
@@ -502,7 +524,7 @@ function handleStatsByCategorizeLeafOperation(
   let categorizedFieldName: string;
 
   if (isFunctionExpression(categorizedField)) {
-    // this assumes that the function invoked is accepts a column as its first argument and is not in itself another function invocation
+    // this assumes that the function invoked accepts a column as its first argument and is not in itself another function invocation
     categorizedFieldName = ((categorizedField as ESQLFunction).args[0] as ESQLColumn).text;
   } else {
     categorizedFieldName = (categorizedField as ESQLColumn).name;

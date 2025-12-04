@@ -190,7 +190,7 @@ describe('cascaded documents helpers utils', () => {
 
           expect(cascadeQuery).toBeDefined();
           expect(cascadeQuery!.esql).toBe(
-            'FROM kibana_sample_data_logs | WHERE clientip == "192.168.1.1"'
+            'FROM kibana_sample_data_logs | INLINE STATS COUNT() BY clientip | WHERE clientip == "192.168.1.1"'
           );
         });
 
@@ -239,7 +239,7 @@ describe('cascaded documents helpers utils', () => {
 
           expect(cascadeQuery).toBeDefined();
           expect(cascadeQuery!.esql).toBe(
-            'FROM kibana_sample_data_logs | WHERE `url.keyword` == "https://www.elastic.co/downloads/beats/metricbeat"'
+            'FROM kibana_sample_data_logs | STATS visits_per_client = COUNT(), p95_bytes_client = PERCENTILE(bytes, 95), median_bytes_client = MEDIAN(bytes) BY url.keyword, clientip | INLINE STATS unique_visitors = COUNT_DISTINCT(clientip), total_visits = SUM(visits_per_client), p95_bytes_url = PERCENTILE(p95_bytes_client, 95), median_bytes_url = MEDIAN(median_bytes_client) BY url.keyword | WHERE `url.keyword` == "https://www.elastic.co/downloads/beats/metricbeat"'
           );
         });
 
@@ -264,7 +264,7 @@ describe('cascaded documents helpers utils', () => {
 
           expect(cascadeQuery).toBeDefined();
           expect(cascadeQuery!.esql).toBe(
-            'FROM remote_cluster:traces* | EVAL event = CASE(span.duration.us > 100000, "Bad", "Good") | WHERE event == "Bad"'
+            'FROM remote_cluster:traces* | EVAL event = CASE(span.duration.us > 100000, "Bad", "Good") | INLINE STATS COUNT(*) BY event | WHERE event == "Bad"'
           );
         });
 
@@ -297,7 +297,7 @@ describe('cascaded documents helpers utils', () => {
 
           expect(cascadeQuery).toBeDefined();
           expect(cascadeQuery!.esql).toBe(
-            'FROM kibana_sample_data_logs | WHERE bytes == "some value"'
+            'FROM kibana_sample_data_logs | INLINE STATS count = COUNT(bytes), average = AVG(memory) BY ??field | WHERE bytes == "some value"'
           );
         });
 
@@ -328,7 +328,7 @@ describe('cascaded documents helpers utils', () => {
 
           expect(cascadeQuery).toBeDefined();
           expect(cascadeQuery!.esql).toBe(
-            'FROM kibana_sample_data_logs | WHERE MATCH_PHRASE(tags, "some random pattern")'
+            'FROM kibana_sample_data_logs | INLINE STATS count = COUNT(bytes), average = AVG(memory) BY tags | WHERE MATCH_PHRASE(tags, "some random pattern")'
           );
         });
       });
