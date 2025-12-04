@@ -64,7 +64,6 @@ export function AlertAiInsight({ alert }: { alert: AlertData }) {
       sessionTag: `alert:${alertId}`,
       attachments: [
         {
-          id: `ai_insight`,
           type: OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
           data: {
             summary,
@@ -72,7 +71,6 @@ export function AlertAiInsight({ alert }: { alert: AlertData }) {
           },
         },
         {
-          id: alertId,
           type: OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
           data: {
             alertId,
