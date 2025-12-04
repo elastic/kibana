@@ -8,6 +8,7 @@
 import type {
   SearchSearchRequestBody,
   MsearchMultisearchHeader,
+  QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type {
   ElasticsearchClient,
@@ -21,7 +22,12 @@ import type { ESSearchResponse, InferSearchResponseOf } from '@kbn/es-types';
 import { RequestStatus } from '@kbn/inspector-plugin/common';
 import type { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
-import { getInspectResponse } from '@kbn/observability-shared-plugin/common';
+import {
+  getInspectResponse,
+  getExcludedDataTiers,
+  mergeDataTierFilter,
+  applyDataTierFilterToSearchRequest,
+} from '@kbn/observability-shared-plugin/common';
 import { SYNTHETICS_API_URLS, SYNTHETICS_INDEX_PATTERN } from '../common/constants';
 import type { SyntheticsServerSetup } from './types';
 
@@ -76,7 +82,15 @@ export class SyntheticsEsClient {
     let res: any;
     let esError: any;
 
-    const esParams = { index: SYNTHETICS_INDEX_PATTERN, ignore_unavailable: true, ...params };
+    // Apply data tier filter
+    const excludedDataTiers = await getExcludedDataTiers(this.uiSettings?.client);
+    const filteredParams = applyDataTierFilterToSearchRequest(params, excludedDataTiers);
+
+    const esParams = {
+      index: SYNTHETICS_INDEX_PATTERN,
+      ignore_unavailable: true,
+      ...filteredParams,
+    };
     const startTimeNow = Date.now();
 
     let esRequestStatus: RequestStatus = RequestStatus.PENDING;
@@ -124,10 +138,23 @@ export class SyntheticsEsClient {
     requests: SearchSearchRequestBody[],
     operationName?: string
   ): Promise<{ responses: Array<InferSearchResponseOf<TDocument, TSearchRequest>> }> {
+    // Apply data tier filter
+    const excludedDataTiers = await getExcludedDataTiers(this.uiSettings?.client);
+
     const searches: Array<MsearchMultisearchHeader | SearchSearchRequestBody> = [];
     for (const request of requests) {
       searches.push({ index: SYNTHETICS_INDEX_PATTERN, ignore_unavailable: true });
-      searches.push(request);
+      const mustNot = mergeDataTierFilter(request.query?.bool?.must_not, excludedDataTiers);
+      searches.push({
+        ...request,
+        query: {
+          ...request.query,
+          bool: {
+            ...request.query?.bool,
+            must_not: mustNot,
+          },
+        },
+      });
     }
 
     const startTimeNow = Date.now();
@@ -175,11 +202,31 @@ export class SyntheticsEsClient {
     };
   }
 
-  async count<TParams>(params: TParams): Promise<CountResponse> {
+  async count<TParams extends { query?: QueryDslQueryContainer }>(
+    params: TParams
+  ): Promise<CountResponse> {
     let res: any;
     let esError: any;
 
-    const esParams = { index: SYNTHETICS_INDEX_PATTERN, ignore_unavailable: true, ...params };
+    // Apply data tier filter
+    const excludedDataTiers = await getExcludedDataTiers(this.uiSettings?.client);
+    const mustNot = mergeDataTierFilter(params.query?.bool?.must_not, excludedDataTiers);
+    const filteredParams: TParams = {
+      ...params,
+      query: {
+        ...params.query,
+        bool: {
+          ...params.query?.bool,
+          must_not: mustNot,
+        },
+      },
+    };
+
+    const esParams = {
+      index: SYNTHETICS_INDEX_PATTERN,
+      ignore_unavailable: true,
+      ...filteredParams,
+    };
 
     try {
       res = await this.baseESClient.count(esParams, {

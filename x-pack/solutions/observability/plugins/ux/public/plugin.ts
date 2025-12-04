@@ -82,6 +82,11 @@ async function getDataStartPlugin(core: CoreSetup) {
   return (startPlugins as ApmPluginStartDeps).data;
 }
 
+async function getUiSettingsClient(core: CoreSetup) {
+  const [coreStart] = await core.getStartServices();
+  return coreStart.uiSettings;
+}
+
 export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
   constructor(private readonly initContext: PluginInitializerContext) {}
 
@@ -103,17 +108,21 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
         hasData: async (params?: HasDataParams) => {
           const dataHelper = await getUxDataHelper();
           const dataStartPlugin = await getDataStartPlugin(core);
+          const uiSettingsClient = await getUiSettingsClient(core);
           return dataHelper.hasRumData({
             ...params!,
             dataStartPlugin,
+            uiSettingsClient,
           });
         },
         fetchData: async (params: FetchDataParams) => {
           const dataStartPlugin = await getDataStartPlugin(core);
+          const uiSettingsClient = await getUiSettingsClient(core);
           const dataHelper = await getUxDataHelper();
           return dataHelper.fetchUxOverviewDate({
             ...params,
             dataStartPlugin,
+            uiSettingsClient,
           });
         },
       });
@@ -123,17 +132,21 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
         hasData: async (params?: HasDataParams) => {
           const dataHelper = await getUxDataHelper();
           const dataStartPlugin = await getDataStartPlugin(core);
+          const uiSettingsClient = await getUiSettingsClient(core);
           return dataHelper.hasRumData({
             ...params!,
             dataStartPlugin,
+            uiSettingsClient,
           });
         },
         fetchData: async (params: FetchDataParams) => {
           const dataStartPlugin = await getDataStartPlugin(core);
+          const uiSettingsClient = await getUiSettingsClient(core);
           const dataHelper = await getUxDataHelper();
           return dataHelper.fetchUxOverviewDate({
             ...params,
             dataStartPlugin,
+            uiSettingsClient,
           });
         },
       });

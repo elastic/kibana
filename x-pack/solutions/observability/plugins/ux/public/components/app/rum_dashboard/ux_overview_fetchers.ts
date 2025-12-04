@@ -9,12 +9,17 @@ import type { ESSearchResponse } from '@kbn/es-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { isRunningResponse } from '@kbn/data-plugin/public';
 import type { IKibanaSearchRequest } from '@kbn/search-types';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import type {
   FetchDataParams,
   HasDataParams,
   UxFetchDataResponse,
   UXHasDataResponse,
 } from '@kbn/observability-plugin/public';
+import {
+  getExcludedDataTiers,
+  applyDataTierFilterToKibanaSearchRequest,
+} from '@kbn/observability-shared-plugin/common';
 import type { UXMetrics } from '@kbn/observability-shared-plugin/public';
 import { inpQuery, transformINPResponse } from '../../../services/data/inp_query';
 import {
@@ -27,34 +32,52 @@ import { formatHasRumResult, hasRumDataQuery } from '../../../services/data/has_
 
 export { createCallApmApi } from '../../../services/rest/create_call_apm_api';
 
-type WithDataPlugin<T> = T & { dataStartPlugin: DataPublicPluginStart };
+type WithDataPlugin<T> = T & {
+  dataStartPlugin: DataPublicPluginStart;
+  uiSettingsClient?: IUiSettingsClient;
+};
 
 async function getCoreWebVitalsResponse({
   absoluteTime,
   serviceName,
   dataStartPlugin,
+  uiSettingsClient,
 }: WithDataPlugin<FetchDataParams>) {
   const dataViewResponse = await callApmApi('GET /internal/apm/data_view/index_pattern', {
     signal: null,
   });
 
+  const excludedDataTiers = await getExcludedDataTiers(uiSettingsClient);
+
   return await Promise.all([
-    esQuery<ReturnType<typeof coreWebVitalsQuery>>(dataStartPlugin, {
-      params: {
-        index: dataViewResponse.apmDataViewIndexPattern,
-        ...coreWebVitalsQuery(absoluteTime.start, absoluteTime.end, undefined, {
-          serviceName: serviceName ? [serviceName] : undefined,
-        }),
-      },
-    }),
-    esQuery<ReturnType<typeof inpQuery>>(dataStartPlugin, {
-      params: {
-        index: dataViewResponse.apmDataViewIndexPattern,
-        ...inpQuery(absoluteTime.start, absoluteTime.end, undefined, {
-          serviceName: serviceName ? [serviceName] : undefined,
-        }),
-      },
-    }),
+    esQuery<ReturnType<typeof coreWebVitalsQuery>>(
+      dataStartPlugin,
+      applyDataTierFilterToKibanaSearchRequest(
+        {
+          params: {
+            index: dataViewResponse.apmDataViewIndexPattern,
+            ...coreWebVitalsQuery(absoluteTime.start, absoluteTime.end, undefined, {
+              serviceName: serviceName ? [serviceName] : undefined,
+            }),
+          },
+        },
+        excludedDataTiers
+      )
+    ),
+    esQuery<ReturnType<typeof inpQuery>>(
+      dataStartPlugin,
+      applyDataTierFilterToKibanaSearchRequest(
+        {
+          params: {
+            index: dataViewResponse.apmDataViewIndexPattern,
+            ...inpQuery(absoluteTime.start, absoluteTime.end, undefined, {
+              serviceName: serviceName ? [serviceName] : undefined,
+            }),
+          },
+        },
+        excludedDataTiers
+      )
+    ),
   ]);
 }
 
@@ -91,17 +114,22 @@ export async function hasRumData(
     signal: null,
   });
 
+  const excludedDataTiers = await getExcludedDataTiers(params.uiSettingsClient);
+
   const esQueryResponse = await esQuery<ReturnType<typeof hasRumDataQuery>>(
     params.dataStartPlugin,
-    {
-      params: {
-        index: dataViewResponse.apmDataViewIndexPattern,
-        ...hasRumDataQuery({
-          start: params?.absoluteTime?.start,
-          end: params?.absoluteTime?.end,
-        }),
+    applyDataTierFilterToKibanaSearchRequest(
+      {
+        params: {
+          index: dataViewResponse.apmDataViewIndexPattern,
+          ...hasRumDataQuery({
+            start: params?.absoluteTime?.start,
+            end: params?.absoluteTime?.end,
+          }),
+        },
       },
-    }
+      excludedDataTiers
+    )
   );
 
   return formatHasRumResult(esQueryResponse, dataViewResponse.apmDataViewIndexPattern);
