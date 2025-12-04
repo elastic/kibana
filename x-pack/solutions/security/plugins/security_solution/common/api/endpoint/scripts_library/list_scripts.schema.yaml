@@ -83,6 +83,7 @@ paths:
 
 
 components:
+  x-codegen-enabled: false
   schemas:
     ApiPageSize:
       allOf:
