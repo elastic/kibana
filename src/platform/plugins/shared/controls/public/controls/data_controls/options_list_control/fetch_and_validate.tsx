@@ -21,7 +21,7 @@ import { isValidSearch } from '../../../../common/options_list/is_valid_search';
 import type { OptionsListSuccessResponse } from '../../../../common/options_list/types';
 import { OptionsListFetchCache } from './options_list_fetch_cache';
 import type { OptionsListComponentApi, OptionsListControlApi } from './types';
-import { getFetchContextFilters } from '../utils';
+import { getFetchContextFilters, getFetchContextTimeRange } from '../utils';
 import type { DataControlStateManager } from '../data_control_manager';
 
 export function fetchAndValidate$({
@@ -114,6 +114,7 @@ export function fetchAndValidate$({
 
           ignoreValidations,
           ...fetchContext,
+          timeRange: getFetchContextTimeRange(fetchContext, useGlobalFilters),
           filters: getFetchContextFilters(fetchContext, useGlobalFilters),
           allowExpensiveQueries,
         };
