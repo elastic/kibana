@@ -34,7 +34,7 @@ export const getCellValueRenderer =
 
     return (
       <EuiFlexGroup gutterSize="s" responsive={false} style={{ height: '100%', width: '100%' }}>
-        <EuiFlexItem>
+        <EuiFlexItem css={{ width: '100%' }}>
           <div
             data-test-subj={`indexEditorCellValue-${rowIndex}-${colIndex}`}
             css={{
@@ -65,7 +65,11 @@ export const getCellValueRenderer =
                   </EuiText>
                 ) : null
               ) : (
-                <EuiText size="xs" title={cellValue}>
+                <EuiText
+                  size="xs"
+                  title={cellValue}
+                  css={{ overflow: 'hidden', textOverflow: 'ellipsis', width: '100%' }}
+                >
                   {cellValue}
                 </EuiText>
               )
