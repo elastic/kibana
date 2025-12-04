@@ -18,7 +18,7 @@ describe('validateMaxMuteUnmuteInstances', () => {
         { rule_id: 'rule-2', alert_instance_ids: ['id-3'] },
       ],
     };
-    expect(() => validateMaxMuteUnmuteInstances({ body })).to.not.throwError();
+    expect(() => validateMaxMuteUnmuteInstances(body)).to.not.throwError();
   });
 
   it('should not throw an error if total instances are exactly 100', () => {
@@ -26,7 +26,7 @@ describe('validateMaxMuteUnmuteInstances', () => {
     const body: BulkMuteUnmuteAlertsRequestBodyV1 = {
       rules: [{ rule_id: 'rule-1', alert_instance_ids: hundredIds }],
     };
-    expect(() => validateMaxMuteUnmuteInstances({ body })).to.not.throwError();
+    expect(() => validateMaxMuteUnmuteInstances(body)).to.not.throwError();
   });
 
   it('should throw Boom.badRequest if total instances are greater than 100', () => {
@@ -34,7 +34,7 @@ describe('validateMaxMuteUnmuteInstances', () => {
     const body: BulkMuteUnmuteAlertsRequestBodyV1 = {
       rules: [{ rule_id: 'rule-1', alert_instance_ids: hundredOneIds }],
     };
-    expect(() => validateMaxMuteUnmuteInstances({ body })).to.throwError((e: Boom.Boom) => {
+    expect(() => validateMaxMuteUnmuteInstances(body)).to.throwError((e: Boom.Boom) => {
       expect(e.isBoom).to.be(true);
       expect(e.output.statusCode).to.be(400);
       expect(e.message).to.be('The total number of alert instances to mute cannot exceed 100.');
@@ -50,7 +50,7 @@ describe('validateMaxMuteUnmuteInstances', () => {
         { rule_id: 'rule-B', alert_instance_ids: fiftyIds },
       ],
     }; // Total 110
-    expect(() => validateMaxMuteUnmuteInstances({ body })).to.throwError((e: Boom.Boom) => {
+    expect(() => validateMaxMuteUnmuteInstances(body)).to.throwError((e: Boom.Boom) => {
       expect(e.isBoom).to.be(true);
       expect(e.output.statusCode).to.be(400);
       expect(e.message).to.be('The total number of alert instances to mute cannot exceed 100.');
@@ -61,7 +61,7 @@ describe('validateMaxMuteUnmuteInstances', () => {
     const body: BulkMuteUnmuteAlertsRequestBodyV1 = {
       rules: [],
     };
-    expect(() => validateMaxMuteUnmuteInstances({ body })).to.not.throwError();
+    expect(() => validateMaxMuteUnmuteInstances(body)).to.not.throwError();
   });
 
   it('should not throw an error for rules with empty alert_instance_ids', () => {
@@ -71,6 +71,6 @@ describe('validateMaxMuteUnmuteInstances', () => {
         { rule_id: 'rule-2', alert_instance_ids: [] },
       ],
     };
-    expect(() => validateMaxMuteUnmuteInstances({ body })).to.not.throwError();
+    expect(() => validateMaxMuteUnmuteInstances(body)).to.not.throwError();
   });
 });

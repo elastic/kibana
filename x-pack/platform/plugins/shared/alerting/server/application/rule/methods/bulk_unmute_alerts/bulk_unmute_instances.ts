@@ -26,7 +26,7 @@ import type { RulesClientContext } from '../../../../rules_client/types';
 import { bulkGetRulesSo } from '../../../../data/rule';
 import type { BulkEditOperationResult } from '../../../../rules_client/common/bulk_edit';
 import { bulkUpdateRuleSo } from '../../../../data/rule/methods/bulk_update_rule_so';
-import { transformParamsRulesToAlertInstances } from '@kbn/alerting-plugin/server/application/rule/transforms/transform_bulk_mute_unmute_rules_to_alert_instances';
+import { transformParamsRulesToAlertInstances } from '../../transforms/transform_bulk_mute_unmute_rules_to_alert_instances';
 
 export async function bulkUnmuteInstances(
   context: RulesClientContext,
