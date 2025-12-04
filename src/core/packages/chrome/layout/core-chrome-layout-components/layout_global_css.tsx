@@ -28,7 +28,7 @@ export const LayoutGlobalCSS = () => {
     applicationBottomBarHeight,
     applicationMarginBottom,
     applicationMarginRight,
-    applicationMarginLeft,
+    navigationMarginRight,
   } = useLayoutState();
 
   const banner = css`
@@ -69,6 +69,7 @@ export const LayoutGlobalCSS = () => {
       100vh - ${layoutVar('navigation.top')} - ${layoutVar('navigation.bottom')}
     );
     ${layoutVarName('navigation.width')}: ${navigationWidth}px;
+    ${layoutVarName('navigation.marginRight')}: ${navigationMarginRight}px;
   `;
 
   const sidebar = css`
@@ -84,7 +85,6 @@ export const LayoutGlobalCSS = () => {
   `;
 
   const application = css`
-    ${layoutVarName('application.marginLeft')}: ${applicationMarginLeft}px;
     ${layoutVarName('application.marginBottom')}: ${applicationMarginBottom}px;
     ${layoutVarName('application.marginRight')}: ${applicationMarginRight}px;
 

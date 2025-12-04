@@ -63,9 +63,11 @@ export const LayoutStateProvider = ({ children, ...props }: LayoutStateProps) =>
     applicationBottomBarHeight: hasApplicationBottomBar
       ? layoutConfig.applicationBottomBarHeight ?? 0
       : 0,
-    applicationMarginLeft: layoutConfig.applicationMarginLeft ?? 0,
     applicationMarginRight: layoutConfig.applicationMarginRight ?? 0,
     applicationMarginBottom: layoutConfig.applicationMarginBottom ?? 0,
+
+    // FIXME should only be if not collapsed and has secondary navigation panel
+    navigationMarginRight: layoutConfig.navigationMarginRight ?? 0,
   };
 
   return <LayoutStateContext.Provider value={layoutState}>{children}</LayoutStateContext.Provider>;
