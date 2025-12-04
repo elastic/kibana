@@ -95,7 +95,7 @@ export function AlertAiInsight({ alert }: { alert: AlertData }) {
         defaultMessage: 'Alert insight',
       })}
       description={i18n.translate(
-        'xpack.observability.alertAiInsight.aiInsight.alertInsightDescriptionLabel',
+        'xpack.observability.alertAiInsight.descriptionLabel',
         {
           defaultMessage: 'Help me understand this alert',
         }
