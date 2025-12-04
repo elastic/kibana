@@ -17,10 +17,13 @@ import type { TableListViewTableProps } from '@kbn/content-management-table-list
 import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { ViewMode } from '@kbn/presentation-publishing';
+import {
+  findListItems as findVisualizationListItems,
+  toTableListViewSavedObject,
+} from '@kbn/visualizations-plugin/public';
 
 import { asyncMap } from '@kbn/std';
-import type { DashboardSearchAPIResult } from '../../../server/content_management';
-import { DASHBOARD_APP_ID } from '../../../common/constants';
+import { DASHBOARD_APP_ID } from '../../../common/page_bundle_constants';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import {
   SAVED_OBJECT_DELETE_TIME,
@@ -32,6 +35,9 @@ import {
   coreServices,
   contentManagementService,
   embeddableService,
+  savedObjectsTaggingService,
+  visualizationsService,
+  lensService,
 } from '../../services/kibana_services';
 import { logger } from '../../services/logger';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
@@ -74,27 +80,6 @@ const getVisTypeIcon = (visType: string): string => {
     Maps: 'gisApp',
   };
   return iconMap[visType] || 'visualizeApp';
-};
-
-const toTableListViewSavedObject = (
-  hit: DashboardSearchAPIResult['hits'][number]
-): DashboardSavedObjectUserContent => {
-  const { title, description, timeRange } = hit.attributes;
-  return {
-    type: 'dashboard',
-    id: hit.id,
-    updatedAt: hit.updatedAt!,
-    createdAt: hit.createdAt,
-    createdBy: hit.createdBy,
-    updatedBy: hit.updatedBy,
-    references: hit.references ?? [],
-    managed: hit.managed,
-    attributes: {
-      title,
-      description,
-      timeRestore: Boolean(timeRange),
-    },
-  };
 };
 
 type DashboardListingViewTableProps = Omit<
@@ -150,16 +135,35 @@ export const useDashboardListingTable = ({
   const listingLimit = coreServices.uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = coreServices.uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
 
-  const createItem = useCallback(() => {
-    if (useSessionStorageIntegration && dashboardBackupService.dashboardHasUnsavedEdits()) {
-      confirmCreateWithUnsaved(() => {
-        dashboardBackupService.clearState();
-        goToDashboard();
-      }, goToDashboard);
-      return;
-    }
-    goToDashboard();
-  }, [dashboardBackupService, goToDashboard, useSessionStorageIntegration]);
+  const createItem = useCallback(
+    (contentTypeTab?: 'dashboards' | 'visualizations' | 'annotation-groups') => {
+      if (contentTypeTab === 'visualizations') {
+        import('@kbn/visualizations-plugin/public').then(({ showNewVisModal }) => {
+          showNewVisModal();
+        });
+        return;
+      }
+
+      if (contentTypeTab === 'annotation-groups') {
+        // For annotation groups, navigate to Lens
+        if (lensService) {
+          coreServices.application.navigateToApp('lens', { path: '#/' });
+        }
+        return;
+      }
+
+      // Default: create dashboard
+      if (useSessionStorageIntegration && dashboardBackupService.dashboardHasUnsavedEdits()) {
+        confirmCreateWithUnsaved(() => {
+          dashboardBackupService.clearState();
+          goToDashboard();
+        }, goToDashboard);
+        return;
+      }
+      goToDashboard();
+    },
+    [dashboardBackupService, goToDashboard, useSessionStorageIntegration]
+  );
 
   const updateItemMeta = useCallback(
     async ({ id, ...updatedState }: Parameters<Required<OpenContentEditorParams>['onSave']>[0]) => {
@@ -253,18 +257,13 @@ export const useDashboardListingTable = ({
 
       // Handle different content types
       if (contentType === 'visualizations') {
-        // Fetch visualizations using content management
-        const response = (await contentManagementService.client.mSearch({
-          contentTypes: [{ contentTypeId: 'visualization' }, { contentTypeId: 'map' }],
-          query: {
-            text: searchTerm ? `${searchTerm}*` : undefined,
-            limit: listingLimit,
-            tags: {
-              included: references?.map((r) => r.id),
-              excluded: referencesToExclude?.map((r) => r.id),
-            },
-          },
-        })) as any;
+        const response = await findVisualizationListItems(
+          visualizationsService,
+          searchTerm,
+          listingLimit,
+          references,
+          referencesToExclude
+        );
 
         const searchEndTime = window.performance.now();
         const searchDuration = searchEndTime - searchStartTime;
@@ -276,54 +275,32 @@ export const useDashboardListingTable = ({
           },
         });
 
+        const transformedHits = response.hits.map((hit: Record<string, unknown>) => {
+          const visItem = toTableListViewSavedObject(hit);
+
+          // Map to our Dashboard listing type
+          return {
+            type: visItem.savedObjectType || visItem.type,
+            id: visItem.id,
+            updatedAt: visItem.updatedAt,
+            createdAt: visItem.createdAt,
+            createdBy: visItem.createdBy,
+            updatedBy: visItem.updatedBy,
+            references: visItem.references ?? [],
+            managed: visItem.managed,
+            attributes: {
+              title: visItem.attributes.title,
+              description: visItem.attributes.description,
+              timeRestore: false, // visualizations don't have timeRestore
+              visType: visItem.typeTitle,
+              readOnly: visItem.attributes.readOnly,
+            },
+          };
+        });
+
         return {
-          total: response.pagination.total,
-          hits: response.hits.map((hit: any) => {
-            // Extract visualization type from visState or use saved object type
-            let visType: string | undefined;
-            let readOnly = false;
-
-            // For maps, use the saved object type
-            if (hit.type === 'map') {
-              visType = 'Maps';
-            } else {
-              // For visualizations, extract from visState
-              try {
-                if (hit.attributes.visState) {
-                  const visState = JSON.parse(hit.attributes.visState);
-                  visType = visState.type;
-                } else if (hit.attributes.typeName) {
-                  visType = hit.attributes.typeName;
-                }
-              } catch (e) {
-                // If parsing fails, leave visType undefined
-              }
-            }
-
-            // Mark deprecated visualization types as read-only
-            // Markdown visualization is deprecated and has disableEdit: true
-            if (visType === 'markdown') {
-              readOnly = true;
-            }
-
-            return {
-              type: hit.type === 'map' ? 'map' : 'visualization',
-              id: hit.id,
-              updatedAt: hit.updatedAt!,
-              createdAt: hit.createdAt,
-              createdBy: hit.createdBy,
-              updatedBy: hit.updatedBy,
-              references: hit.references ?? [],
-              managed: hit.managed,
-              attributes: {
-                title: hit.attributes.title,
-                description: hit.attributes.description,
-                timeRestore: false, // visualizations don't have timeRestore
-                visType,
-                readOnly,
-              },
-            };
-          }),
+          total: response.total,
+          hits: transformedHits,
         };
       }
 
@@ -450,11 +427,12 @@ export const useDashboardListingTable = ({
         });
 
         const deleteDuration = window.performance.now() - deleteStartTime;
+
         reportPerformanceMetricEvent(coreServices.analytics, {
           eventName: SAVED_OBJECT_DELETE_TIME,
           duration: deleteDuration,
           meta: {
-            saved_object_type: itemsToDelete[0]?.type || DASHBOARD_CONTENT_ID,
+            saved_object_type: itemsToDelete[0]?.type ?? 'unknown',
             total: itemsToDelete.length,
           },
         });

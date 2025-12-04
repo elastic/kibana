@@ -143,8 +143,8 @@ export async function findListItems(
   visTypes: Pick<TypesStart, 'get' | 'getAliases'>,
   search: string,
   size: number,
-  references?: Reference[],
-  referencesToExclude?: Reference[]
+  references?: Array<{ type: string; id: string }>,
+  referencesToExclude?: Array<{ type: string; id: string }>
 ) {
   const visAliases = visTypes.getAliases();
   const extensions = visAliases

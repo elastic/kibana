@@ -61,6 +61,7 @@ import type {
   UsageCollectionSetup,
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
+import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
@@ -112,6 +113,7 @@ export interface DashboardStartDependencies {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   urlForwarding: UrlForwardingStart;
   usageCollection?: UsageCollectionStart;
+  visualizations: VisualizationsStart;
   customBranding: CustomBrandingStart;
   serverless?: ServerlessPluginStart;
   noDataPage?: NoDataPagePluginStart;
@@ -147,46 +149,6 @@ export class DashboardPlugin
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
     { share, home, data, urlForwarding }: DashboardSetupDependencies
   ) {
-    // Fetch and log visualization data (including Maps)
-    core.getStartServices().then(async ([_, startDeps]) => {
-      try {
-        // Log all available content types
-        const allContentTypes = startDeps.contentManagement.registry.getAll();
-        // eslint-disable-next-line no-console
-        console.log(
-          'All available content types:',
-          allContentTypes.map((ct) => ({
-            id: ct.id,
-            name: ct.name,
-            description: ct.description,
-          }))
-        );
-
-        const vizData = await startDeps.contentManagement.client.mSearch({
-          contentTypes: [{ contentTypeId: 'visualization' }, { contentTypeId: 'map' }],
-          query: {
-            limit: 100, // Get up to 100 visualizations to see all
-          },
-        });
-        const annotationGroups = await startDeps.contentManagement.client.search({
-          contentTypeId: 'event-annotation-group',
-          query: {
-            limit: 100, // Get up to 100 annotations to see all
-          },
-        });
-        // eslint-disable-next-line no-console
-        console.log('Visualization data received in dashboard setup:', {
-          total: vizData.pagination?.total,
-          hitsCount: vizData.hits?.length,
-          hits: vizData.hits,
-          fullResponse: vizData,
-        });
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Error fetching visualization data:', error);
-      }
-    });
-
     core.analytics.registerEventType({
       eventType: 'dashboard_loaded_with_data',
       schema: {},

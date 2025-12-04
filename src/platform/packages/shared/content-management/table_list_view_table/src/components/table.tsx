@@ -124,8 +124,7 @@ export function Table<T extends UserContentCommonSchema>({
   emptyPrompt,
 }: Props<T>) {
   const euiTheme = useEuiTheme();
-  const { getTagList, isTaggingEnabled, isKibanaVersioningEnabled, navigateToUrl, getUrlForApp } =
-    useServices();
+  const { getTagList, isTaggingEnabled, isKibanaVersioningEnabled } = useServices();
 
   // Compute dynamic entity name plural based on active tab
   const dynamicEntityNamePlural = useMemo(() => {
@@ -170,58 +169,8 @@ export function Table<T extends UserContentCommonSchema>({
 
   // Dynamic create button for toolbar (changes based on active tab)
   const renderDynamicCreateButton = useCallback(() => {
-    if (contentTypeTabsEnabled && tableFilter.contentTypeTab) {
-      switch (tableFilter.contentTypeTab) {
-        case 'visualizations':
-          // For visualizations, open the visualization creation modal
-          return (
-            <EuiButton
-              fill
-              iconType="plusInCircle"
-              onClick={async () => {
-                const { showNewVisModal } = await import('@kbn/visualizations-plugin/public');
-                showNewVisModal();
-              }}
-              data-test-subj="newItemButton"
-            >
-              <FormattedMessage
-                id="contentManagement.tableList.listing.visualizations.createButtonToolbar"
-                defaultMessage="Create visualization"
-              />
-            </EuiButton>
-          );
-        case 'annotation-groups':
-          // For annotation groups, button navigates to Lens
-          return (
-            <EuiButton
-              fill
-              iconType="plusInCircle"
-              onClick={() => {
-                const lensUrl = getUrlForApp('lens', { path: '#/' });
-                navigateToUrl(lensUrl);
-              }}
-              data-test-subj="createAnnotationInLensButton"
-            >
-              <FormattedMessage
-                id="contentManagement.tableList.listing.annotationGroups.createButtonToolbar"
-                defaultMessage="Create annotation in Lens"
-              />
-            </EuiButton>
-          );
-        default:
-          // Dashboards - use the create button from parent
-          return renderCreateButton();
-      }
-    }
-
     return renderCreateButton();
-  }, [
-    contentTypeTabsEnabled,
-    tableFilter.contentTypeTab,
-    renderCreateButton,
-    navigateToUrl,
-    getUrlForApp,
-  ]);
+  }, [renderCreateButton]);
 
   const selection = useMemo<EuiTableSelectionType<T> | undefined>(() => {
     if (deleteItems) {
@@ -368,18 +317,6 @@ export function Table<T extends UserContentCommonSchema>({
     searchQuery.error,
   ]);
 
-  // Simple message shown while loading
-  const loadingMessage = useMemo(
-    () => (
-      <FormattedMessage
-        id="contentManagement.tableList.listing.loadingMessage"
-        defaultMessage="No {entityNamePlural} matched your search."
-        values={{ entityNamePlural: dynamicEntityNamePlural }}
-      />
-    ),
-    [dynamicEntityNamePlural]
-  );
-
   const emptyPromptTitle = useMemo(
     () => (
       <FormattedMessage
@@ -428,57 +365,8 @@ export function Table<T extends UserContentCommonSchema>({
   }, [contentTypeTabsEnabled, tableFilter.contentTypeTab]);
 
   const emptyPromptActions = useMemo(() => {
-    if (contentTypeTabsEnabled && tableFilter.contentTypeTab) {
-      switch (tableFilter.contentTypeTab) {
-        case 'visualizations':
-          // For visualizations, open the visualization creation modal
-          return (
-            <EuiButton
-              fill
-              onClick={async () => {
-                // Dynamically import showNewVisModal from visualizations plugin
-                const { showNewVisModal } = await import('@kbn/visualizations-plugin/public');
-                showNewVisModal();
-              }}
-              data-test-subj="newItemButton"
-            >
-              <FormattedMessage
-                id="contentManagement.tableList.listing.visualizations.createButton"
-                defaultMessage="Create visualization"
-              />
-            </EuiButton>
-          );
-        case 'annotation-groups':
-          // For annotation groups, button navigates to Lens
-          return (
-            <EuiButton
-              fill
-              onClick={() => {
-                const lensUrl = getUrlForApp('lens', { path: '#/' });
-                navigateToUrl(lensUrl);
-              }}
-              data-test-subj="createAnnotationInLensButton"
-            >
-              <FormattedMessage
-                id="contentManagement.tableList.listing.annotationGroups.createButton"
-                defaultMessage="Create annotation in Lens"
-              />
-            </EuiButton>
-          );
-        default:
-          // Dashboards - use the create button from parent
-          return renderCreateButton();
-      }
-    }
-
     return renderCreateButton();
-  }, [
-    contentTypeTabsEnabled,
-    tableFilter.contentTypeTab,
-    renderCreateButton,
-    navigateToUrl,
-    getUrlForApp,
-  ]);
+  }, [renderCreateButton]);
 
   const { data: favorites, isError: favoritesError } = useFavorites({ enabled: favoritesEnabled });
 
@@ -493,7 +381,7 @@ export function Table<T extends UserContentCommonSchema>({
         if (currentTab === 'dashboards') {
           return itemType === 'dashboard' || !itemType; // Default to dashboard if no type
         } else if (currentTab === 'visualizations') {
-          return itemType === 'visualization' || itemType === 'map';
+          return itemType !== 'dashboard' && itemType !== 'event-annotation-group';
         } else if (currentTab === 'annotation-groups') {
           return itemType === 'event-annotation-group';
         }
@@ -584,10 +472,9 @@ export function Table<T extends UserContentCommonSchema>({
             loading={isFetchingItems}
             noItemsMessage={
               isFetchingItems ? (
-                // Show simple message while loading
-                loadingMessage
+                <></>
               ) : (
-                // Show full empty prompt when confirmed no items
+                // Show empty prompt when confirmed no items
                 <EuiEmptyPrompt
                   title={<h3>{emptyPromptTitle}</h3>}
                   titleSize="xs"

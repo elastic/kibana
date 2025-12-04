@@ -111,7 +111,8 @@ export interface TableListViewTableProps<
   getDetailViewLink?: (entity: T) => string | undefined;
   /** Handler to execute when clicking the item title */
   getOnClickTitle?: (item: T) => (() => void) | undefined;
-  createItem?(): void;
+  /** Handler to create a new item. When contentTypeTabsEnabled, receives the active tab to create tab-specific items. */
+  createItem?(contentTypeTab?: ContentType): void;
   deleteItems?(items: T[]): Promise<void>;
   /**
    * Edit action onClick handler. Edit action not provided when property is not provided
@@ -990,9 +991,24 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
 
   const renderCreateButton = useCallback(() => {
     if (createItem) {
+      // Dynamic button label based on active tab
+      let buttonLabel = entityName;
+      if (contentTypeTabsEnabled && tableFilter.contentTypeTab) {
+        switch (tableFilter.contentTypeTab) {
+          case 'visualizations':
+            buttonLabel = 'visualization';
+            break;
+          case 'annotation-groups':
+            buttonLabel = 'annotation';
+            break;
+          default:
+            buttonLabel = entityName;
+        }
+      }
+
       return (
         <EuiButton
-          onClick={createItem}
+          onClick={() => createItem(tableFilter.contentTypeTab)}
           data-test-subj="newItemButton"
           iconType="plusInCircleFilled"
           fill
@@ -1000,12 +1016,12 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           <FormattedMessage
             id="contentManagement.tableList.listing.createNewItemButtonLabel"
             defaultMessage="Create {entityName}"
-            values={{ entityName }}
+            values={{ entityName: buttonLabel }}
           />
         </EuiButton>
       );
     }
-  }, [createItem, entityName]);
+  }, [createItem, entityName, tableFilter.contentTypeTab, contentTypeTabsEnabled]);
 
   const renderNoItemsMessage = useCallback(() => {
     if (emptyPrompt) {
