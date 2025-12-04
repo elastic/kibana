@@ -410,10 +410,7 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
       white-space: normal !important;
     }
 
-    // Helps positioning the signature help popup at the top of the editor.'
-    .parameter-hints-widget {
-      z-index: 1010 !important;
-    }
+    // Modifies the height of the popup to make it fit under the page header.
     .parameter-hints-widget > .phwrapper {
       max-height: 85px !important;
       overflow: auto;
