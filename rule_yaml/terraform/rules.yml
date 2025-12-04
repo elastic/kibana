@@ -6,26 +6,34 @@ rules:
     tags: ['parent']
     schedule: '1m'
     # # We previously called this group key or entity key
-    # identify_by: []
+    identify_by: ['host.name']
     params:
       outcome: 'failure'
+    # The "active" alert query. Do we want to append the status condition
+    # Eg: EVAL status = "active"
+    # programmatically to the user's query, or require a user to write it explicitly?
     esql: |
       FROM kbn-data-forge-fake_stack.message_processor-*
       | STATS 
-          failure = COUNT(*) WHERE processor.outcome == 'failure',
+          failure = COUNT(*) WHERE processor.outcome == ${outcome},
           total = COUNT(*)
         BY host.name
       | EVAL failure_rate = (failure * 100  / total)
       | WHERE failure_rate > 50
-      | EVAL status = "active"
       | KEEP host.name, status, failure_rate
     timeField: '@timestamp'
     lookbackWindow: '5m'
     track:
+      # Creates a level 2 rule that tracks recovery events
+      # on the level 1 rule when defined
+      # Optionally can include a custom ESQL query for recovery events
+      # Automatically adds an `internal` tag/flag so we can hide from the UI
       recovery:
         enabled: true
         schedule: '1m'
         lookbackWindow: '5m'
+      # Create a level 3 rule that tracks flapping events
+      # Automatically adds an `internal` tag/flag so we can hide from the UI
       flapping:
         enabled: true
         schedule: '30m'
@@ -33,14 +41,22 @@ rules:
         recovery_count: 3
     notification_policies:
       active:
-        workflowId: someId
-        policies:
-          - reference some policy
+        - WHERE: 'host.name == "prod-*"'
+          workflowId: 'prod-critical-workflow-id'
+        - workflowId: 'default-active-workflow-id'
       flapping:
-        workflow:
-          somespec: hello
-        policies:
-          - reference some policy
+        - workflow:
+            version: 1
+            name: 'Notify on Flapping Rule'
+            description: 'Sends a Slack notification when a rule is flapping.'
+            triggers:
+              - type: manual
+            steps:
+              - name: Send Slack message
+                type: slack
+                connector-id: 'slack-uuid-prod'
+                with:
+                  channel: '#alerts-flapping'
+                  message: "Rule '{{rule.name}}' is flapping. Please investigate."
       recovered:
-        policies:
-          - reference some policy
+        - workflowId: 'standard-recovery-workflow-v1'
