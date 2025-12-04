@@ -206,8 +206,8 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
     const alphanumeric = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.split('');
 
     return {
-      signatureHelpTriggerCharacters: ['(', ',', ' ', ...alphanumeric],
-      signatureHelpRetriggerCharacters: [',', ' ', ...alphanumeric],
+      signatureHelpTriggerCharacters: ['(', ','],
+      signatureHelpRetriggerCharacters: ['(', ','],
 
       async provideSignatureHelp(
         model: monaco.editor.ITextModel,
