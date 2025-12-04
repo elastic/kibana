@@ -6,7 +6,7 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { i18n } from '@kbn/i18n';
+import { useState, useEffect } from 'react';
 
 interface CaseFlyoutParams {
   title: string;
@@ -17,25 +17,27 @@ export const useSiemReadinessCases = () => {
   const { services } = useKibana();
   const { useCasesAddToNewCaseFlyout } = services.cases.hooks;
 
-  const genericCase = useCasesAddToNewCaseFlyout({
-    initialValue: {
-      title: i18n.translate(
-        'xpack.securitySolution.siemReadiness.coverage.dataCoverage.caseTitle',
-        {
-          defaultMessage: 'Data Coverage Issue',
-        }
-      ),
-      description: i18n.translate(
-        'xpack.securitySolution.siemReadiness.coverage.dataCoverage.caseDescription',
-        {
-          defaultMessage:
-            "We've identified a data coverage gap that may impact detection capabilities...",
-        }
-      ),
-    },
+  const [formParams, setFormParams] = useState({
+    title: '',
+    description: '',
   });
 
+  const genericCase = useCasesAddToNewCaseFlyout({
+    initialValue: formParams,
+  });
+
+  const openFlyout = (flyoutParams: { title: string; description: string }) => {
+    setFormParams(flyoutParams);
+  };
+
+  useEffect(() => {
+    if (formParams.title || formParams.description) {
+      genericCase.open();
+    }
+    // @ts-ignore
+  }, [formParams]);
+
   return {
-    openGenericCaseFlyout: genericCase.open,
+    openFlyout,
   };
 };
