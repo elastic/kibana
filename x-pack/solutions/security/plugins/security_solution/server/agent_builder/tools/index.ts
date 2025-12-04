@@ -11,3 +11,4 @@ export {
   SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
 } from './attack_discovery_search_tool';
 export { securityLabsSearchTool, SECURITY_LABS_SEARCH_TOOL_ID } from './security_labs_search_tool';
+export { alertsTool, SECURITY_ALERTS_TOOL_ID } from './alerts_tool';
