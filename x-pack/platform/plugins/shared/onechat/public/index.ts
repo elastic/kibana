@@ -14,8 +14,10 @@ import type {
   ConfigSchema,
 } from './types';
 import { OnechatPlugin } from './plugin';
+import { RobotIcon } from './application/components/common/icons/robot';
 
 export type { OnechatPluginSetup, OnechatPluginStart };
+export { RobotIcon as onechatIconType };
 
 export const plugin: PluginInitializer<
   OnechatPluginSetup,
