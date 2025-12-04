@@ -82,7 +82,7 @@ export class SearchGettingStartedPlugin
       } else {
         // Subscribe to feature flag changes (only matters if not a viewer)
         this.featureFlagSubscription = core.featureFlags
-          .getBooleanValue$(SEARCH_GETTING_STARTED_FEATURE_FLAG, false)
+          .getBooleanValue$(SEARCH_GETTING_STARTED_FEATURE_FLAG, true)
           .subscribe((featureFlagEnabled) => {
             const status: AppStatus = featureFlagEnabled
               ? AppStatus.accessible

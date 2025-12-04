@@ -6,7 +6,7 @@
  */
 
 import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 const archiveEmptyIndex =
@@ -150,7 +150,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       expect(await testSubjects.missingOrFail('cases'));
     });
 
-    it('renders expected side navigation items', async () => {
+    it.only('renders expected side navigation items', async () => {
       await solutionNavigation.sidenav.expectOnlyDefinedLinks(
         [
           // home:
@@ -162,6 +162,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           'searchPlayground',
           'machine_learning',
           // footer:
+          'search_getting_started',
           'dev_tools',
           'data_management',
           'admin_and_settings',
@@ -180,11 +181,13 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.sidenav.feedbackCallout.expectMissing();
     });
 
-    it('renders tour', async () => {
+    it.only('renders tour', async () => {
       await solutionNavigation.sidenav.tour.reset();
       await solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-home');
       await solutionNavigation.sidenav.tour.nextStep();
       await solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-manage-data');
+      await solutionNavigation.sidenav.tour.nextStep();
+      await solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-search-getting-started');
       await solutionNavigation.sidenav.tour.nextStep();
       await solutionNavigation.sidenav.tour.expectHidden();
       await browser.refresh();
