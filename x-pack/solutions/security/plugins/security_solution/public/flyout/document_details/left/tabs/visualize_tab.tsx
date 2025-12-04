@@ -105,7 +105,7 @@ export const VisualizeTab = memo(() => {
   );
 
   // Decide whether to show the graph preview or not
-  const { hasGraphRepresentation } = useGraphPreview({
+  const { shouldShowGraph } = useGraphPreview({
     getFieldsData,
     ecsData: dataAsNestedObject,
     dataFormattedForFieldBrowser,
@@ -113,7 +113,7 @@ export const VisualizeTab = memo(() => {
 
   const options = [...visualizeButtons];
 
-  if (hasGraphRepresentation) {
+  if (shouldShowGraph) {
     options.push(graphVisualizationButton);
   }
 
@@ -122,7 +122,7 @@ export const VisualizeTab = memo(() => {
       const newId = panels.left.path.subTab;
 
       // Check if we need to select a different tab when graph is not available
-      if (newId === GRAPH_ID && !hasGraphRepresentation) {
+      if (newId === GRAPH_ID && !shouldShowGraph) {
         setActiveVisualizationId(SESSION_VIEW_ID);
       } else {
         setActiveVisualizationId(newId);
@@ -132,7 +132,7 @@ export const VisualizeTab = memo(() => {
         }
       }
     }
-  }, [panels.left?.path?.subTab, hasGraphRepresentation]);
+  }, [panels.left?.path?.subTab, shouldShowGraph]);
 
   return (
     <>

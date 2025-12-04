@@ -64,7 +64,7 @@ export interface UseGraphPreviewResult {
    * Boolean indicating if graph visualization is fully available
    * Combines: data availability (event ids, actor ids and action) + valid license + feature enabled in settings
    */
-  hasGraphRepresentation: boolean;
+  shouldShowGraph: boolean;
 
   /**
    * Boolean indicating if the event is an alert or not
@@ -96,7 +96,7 @@ export const useGraphPreview = ({
   const [isGraphFeatureEnabled] = useUiSetting$<boolean>(ENABLE_GRAPH_VISUALIZATION_SETTING);
 
   // Check if graph has all required data fields for graph visualization
-  const hasGraphData =
+  const hasGraphRepresentation =
     Boolean(timestamp) &&
     Boolean(action?.length) &&
     actorIds.length > 0 &&
@@ -104,7 +104,7 @@ export const useGraphPreview = ({
     targetIds.length > 0;
 
   // Combine all conditions: data availability + license + feature flag
-  const hasGraphRepresentation = hasGraphData && hasRequiredLicense && isGraphFeatureEnabled;
+  const shouldShowGraph = hasGraphRepresentation && hasRequiredLicense && isGraphFeatureEnabled;
 
   const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
 
@@ -114,7 +114,7 @@ export const useGraphPreview = ({
     actorIds,
     action,
     targetIds,
-    hasGraphRepresentation,
+    shouldShowGraph,
     isAlert,
   };
 };

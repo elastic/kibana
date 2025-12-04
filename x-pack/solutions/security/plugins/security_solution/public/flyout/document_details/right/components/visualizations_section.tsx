@@ -28,7 +28,7 @@ export const VisualizationsSection = memo(() => {
     useDocumentDetailsContext();
 
   // Decide whether to show the graph preview or not
-  const { hasGraphRepresentation } = useGraphPreview({
+  const { shouldShowGraph } = useGraphPreview({
     getFieldsData,
     ecsData: dataAsNestedObject,
     dataFormattedForFieldBrowser,
@@ -49,7 +49,7 @@ export const VisualizationsSection = memo(() => {
       <SessionPreviewContainer />
       <EuiSpacer />
       <AnalyzerPreviewContainer />
-      {hasGraphRepresentation && (
+      {shouldShowGraph && (
         <>
           <EuiSpacer />
           <GraphPreviewContainer />
