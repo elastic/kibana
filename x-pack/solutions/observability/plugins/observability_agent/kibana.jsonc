@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/observability-agent-plugin",
-  "owner": ["@elastic/obs-ai-assistant"],
+  "owner": ["@elastic/obs-ai-team"],
   "group": "observability",
   "visibility": "private",
   "plugin": {
@@ -17,9 +17,7 @@
       "dataViews",
       "metricsDataAccess"
     ],
-    "optionalPlugins": [
-      "ml"
-    ],
+    "optionalPlugins": ["ml"],
     "requiredBundles": [],
     "extraPublicDirs": []
   }
