@@ -41,7 +41,7 @@ export const INGEST_PUT_IP_LOCATION_DATABASE_CONTRACT: InternalConnectorContract
     headerParams: [],
     pathParams: ['id'],
     urlParams: ['master_timeout', 'timeout'],
-    bodyParams: [],
+    bodyParams: ['name', 'maxmind', 'ipinfo'],
   },
   paramsSchema: z.object({
     ...getShapeAt(ingest_put_ip_location_database_request, 'body'),

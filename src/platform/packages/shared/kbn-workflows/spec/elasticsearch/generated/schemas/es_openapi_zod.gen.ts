@@ -10022,18 +10022,14 @@ export const indices_types_downsampling_round = z.object({
     fixed_interval: types_duration_large
 });
 
-export const indices_types_data_stream_lifecycle_downsampling = z.object({
-    rounds: z.array(indices_types_downsampling_round).register(z.globalRegistry, {
-        description: 'The list of downsampling rounds to execute as part of this downsampling configuration'
-    })
-});
-
 /**
  * Data stream lifecycle denotes that a data stream is managed by the data stream lifecycle and contains the configuration.
  */
 export const indices_types_data_stream_lifecycle = z.object({
     data_retention: z.optional(types_duration),
-    downsampling: z.optional(indices_types_data_stream_lifecycle_downsampling),
+    downsampling: z.optional(z.array(indices_types_downsampling_round).register(z.globalRegistry, {
+        description: 'The list of downsampling rounds to execute as part of this downsampling configuration'
+    })),
     enabled: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If defined, it turns data stream lifecycle on/off (`true`/`false`) for this data stream. A data stream lifecycle\nthat\'s disabled (enabled: `false`) will have no effect on the data stream.'
     })).default(true)
