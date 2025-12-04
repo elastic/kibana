@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { StepContext } from '@kbn/workflows';
-import type { z } from '@kbn/zod';
-import type { CommonStepDefinition, InferStepInput, InferStepOutput } from '../../common';
+import type { z } from '@kbn/zod/v4';
+import type { CommonStepDefinition } from '../../common';
 
 /**
  * Definition of a server-side workflow step extension.
@@ -44,14 +44,16 @@ import type { CommonStepDefinition, InferStepInput, InferStepOutput } from '../.
  * };
  * ```
  */
-export type ServerStepDefinition<TCommon extends CommonStepDefinition = CommonStepDefinition> =
-  TCommon & {
-    /**
-     * The handler function that executes this step's logic.
-     * Input and output types are automatically inferred from the schemas.
-     */
-    handler: StepHandler<InferStepInput<TCommon>, InferStepOutput<TCommon>>;
-  };
+export interface ServerStepDefinition<
+  Input extends unknown = unknown,
+  Output extends unknown = unknown
+> extends CommonStepDefinition<z.ZodType<Input>, z.ZodType<Output>> {
+  /**
+   * The handler function that executes this step's logic.
+   * Input and output types are automatically inferred from the schemas.
+   */
+  handler: StepHandler<Input, Output>;
+}
 
 /**
  * Helper function to create a ServerStepDefinition with automatic type inference.
@@ -72,12 +74,9 @@ export type ServerStepDefinition<TCommon extends CommonStepDefinition = CommonSt
  * });
  * ```
  */
-export function createServerStepDefinition<
-  TInputSchema extends z.ZodTypeAny,
-  TOutputSchema extends z.ZodTypeAny
->(
-  definition: ServerStepDefinition<CommonStepDefinition<TInputSchema, TOutputSchema>>
-): ServerStepDefinition<CommonStepDefinition<TInputSchema, TOutputSchema>> {
+export function createServerStepDefinition<Input = unknown, Output = unknown>(
+  definition: ServerStepDefinition<Input, Output>
+): ServerStepDefinition<Input, Output> {
   return definition;
 }
 
@@ -88,9 +87,9 @@ export function createServerStepDefinition<
  * @param context - The runtime context for the step execution
  * @returns The step output (should conform to outputSchema)
  */
-export type StepHandler<TInput = unknown, TOutput = unknown> = (
-  context: StepHandlerContext<TInput>
-) => Promise<StepHandlerResult<TOutput>>;
+export type StepHandler<Input = unknown, Output = unknown> = (
+  context: StepHandlerContext<Input>
+) => Promise<StepHandlerResult<Output>>;
 
 /**
  * Context provided to custom step handlers during execution.
@@ -105,22 +104,7 @@ export interface StepHandlerContext<TInput = unknown> {
   /**
    * Runtime context manager for accessing workflow state, context, and template evaluation
    */
-  contextManager: {
-    /**
-     * Get the full context
-     */
-    getContext(): StepContext;
-
-    /**
-     * Get the scoped Elasticsearch client
-     */
-    getScopedEsClient(): ElasticsearchClient;
-
-    /**
-     * Evaluate a template string using the workflow context
-     */
-    renderInputTemplate<T>(input: T): T;
-  };
+  contextManager: ContextManager;
 
   /**
    * Logger scoped to this step execution
@@ -146,6 +130,31 @@ export interface StepHandlerContext<TInput = unknown> {
    * Current step's type
    */
   stepType: string;
+}
+
+/**
+ * Context manager for accessing step execution runtime services
+ */
+export interface ContextManager {
+  /**
+   * Get the full context
+   */
+  getContext(): StepContext;
+
+  /**
+   * Get the scoped Elasticsearch client
+   */
+  getScopedEsClient(): ElasticsearchClient;
+
+  /**
+   * Evaluate a template string using the workflow context
+   */
+  renderInputTemplate<T>(input: T): T;
+
+  /**
+   * Returns the fake request
+   */
+  getFakeRequest(): KibanaRequest;
 }
 
 /**
