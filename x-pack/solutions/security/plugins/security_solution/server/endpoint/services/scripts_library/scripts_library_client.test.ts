@@ -67,7 +67,6 @@ describe('scripts library client', () => {
       await scriptsClient.create(createBodyMock);
 
       expect(filesPluginClient.create).toHaveBeenCalledWith({
-        id: expect.any(String),
         metadata: {
           mime: 'application/text',
           name: 'foo.txt',
@@ -77,33 +76,6 @@ describe('scripts library client', () => {
       expect(fileMock.uploadContent).toHaveBeenCalledWith(expect.any(Readable), undefined, {
         transforms: [expect.any(Transform)],
       });
-    });
-
-    it('should create a new script entry in the library using same id as File storage', async () => {
-      await scriptsClient.create(createBodyMock);
-      const scriptId = filesPluginClient.create.mock.calls[0][0].id;
-
-      expect(
-        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient().create
-      ).toHaveBeenCalledWith(
-        SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE,
-        {
-          description: 'does some stuff',
-          example: 'bash -c script_one.sh',
-          path_to_executable: undefined,
-          hash: 'e5441eb2bb',
-          id: scriptId,
-          instructions: 'just execute it',
-          name: 'script one',
-          platform: ['linux', 'macos'],
-          requires_input: false,
-          created_by: 'elastic',
-          created_at: expect.any(String),
-          updated_by: 'elastic',
-          updated_at: expect.any(String),
-        },
-        { id: scriptId }
-      );
     });
 
     it('should delete the file record if upload of file content failed', async () => {
@@ -131,6 +103,9 @@ describe('scripts library client', () => {
         downloadUri: '/api/endpoint/scripts_library/1-2-3/download',
         id: '1-2-3',
         name: 'my script',
+        fileHash: 'e5441eb2bb',
+        fileName: 'my_script.sh',
+        fileSize: 12098,
         platform: ['macos', 'linux'],
         requiresInput: false,
         updatedAt: '2025-11-24T16:04:17.471Z',
@@ -251,6 +226,9 @@ describe('scripts library client', () => {
             id: '1-2-3',
             instructions: undefined,
             name: 'my script',
+            fileHash: 'e5441eb2bb',
+            fileName: 'my_script.sh',
+            fileSize: 12098,
             pathToExecutable: undefined,
             platform: ['macos', 'linux'],
             requiresInput: false,
