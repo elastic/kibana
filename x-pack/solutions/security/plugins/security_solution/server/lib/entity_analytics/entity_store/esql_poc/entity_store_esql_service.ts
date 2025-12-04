@@ -147,7 +147,7 @@ export class EntityStoreESQLService {
 
     // this.logger.debug(`[Entity Store ESQL] [${type}-${this.namespace}] ${query}`);
 
-    const esqlResponse = await executeEsqlQuery(this.esClient, query, this.logger);
+    const esqlResponse = await executeEsqlQuery(this.esClient, type, query, this.logger);
 
     await storeEntityStoreDocs(this.esClient, type, this.namespace, esqlResponse, this.logger);
 

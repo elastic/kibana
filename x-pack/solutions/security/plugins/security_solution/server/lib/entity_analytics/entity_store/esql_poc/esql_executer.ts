@@ -7,9 +7,11 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import type { EntityType } from '../../../../../common/api/entity_analytics';
 
 export const executeEsqlQuery = async (
   esClient: ElasticsearchClient,
+  type: EntityType,
   query: string,
   logger: Logger
 ): Promise<ESQLSearchResponse> => {
@@ -22,7 +24,7 @@ export const executeEsqlQuery = async (
 
     return response;
   } catch (error) {
-    logger.error(`Error executing ES|QL request: ${error.message}`);
+    logger.error(`Error executing ES|QL request for type ${type}: ${error.message}`);
     // Return empty response structure instead of empty array
     return { columns: [], values: [] };
   }

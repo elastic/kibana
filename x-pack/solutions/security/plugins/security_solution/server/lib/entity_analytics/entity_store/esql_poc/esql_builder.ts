@@ -57,8 +57,11 @@ export const buildESQLQuery = async (
     ${recentData(description.identityField)} AS ${description.identityField}
   | EVAL
     ${mergedFieldStats(description)},
-    ${customFieldEvalLogic(description)}
-  | KEEP ${fieldsToKeep(description)}
+    ${customFieldEvalLogic(description)},
+    entity.Metadata.EngineType = "${description.entityType}"
+  | KEEP
+    ${fieldsToKeep(description)},
+    entity.Metadata.EngineType
   | LIMIT ${config.maxPageSearchSize}
   // | SORT @timestamp ASC`;
 };

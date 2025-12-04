@@ -164,8 +164,10 @@ describe('buildEsql', () => {
         entity.relationships.Accessed_frequently_by = MV_DEDUPE(COALESCE(MV_APPEND(recent.entity.relationships.Accessed_frequently_by, entity.relationships.Accessed_frequently_by), recent.entity.relationships.Accessed_frequently_by)),
         entity.id = host.entity.id,
         @timestamp = recent.timestamp,
-        entity.name = COALESCE(entity.name, host.name, entity.id)
-      | KEEP host.name,
+        entity.name = COALESCE(entity.name, host.name, entity.id),
+        entity.Metadata.EngineType = "host"
+      | KEEP
+        host.name,
         host.domain,
         host.hostname,
         host.id,
@@ -202,7 +204,8 @@ describe('buildEsql', () => {
         entity.relationships.Accessed_frequently_by,
         @timestamp,
         entity.id,
-        host.entity.id
+        host.entity.id,
+        entity.Metadata.EngineType
       | LIMIT 10
       // | SORT @timestamp ASC
       `)

@@ -83,5 +83,12 @@ export const userEntityEngineDescription: EntityDescription = {
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),
+
+    // fields to make the mapping of host fields available
+    newestValue({ source: 'host.id' }),
+    newestValue({ source: 'host.name' }),
+    newestValue({ source: 'host.domain' }),
+    newestValue({ source: 'host.hostname' }),
+    newestValue({ source: 'host.mac' }),
   ],
 };
