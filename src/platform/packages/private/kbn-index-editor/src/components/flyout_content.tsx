@@ -137,17 +137,15 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
             `}
           >
             <FileDropzone noResults={noResults}>
-              {dataView ? (
-                dataViewColumns ? (
-                  <DataGridLazy
-                    {...props}
-                    dataView={dataView}
-                    columns={dataViewColumns}
-                    rows={rows}
-                    totalHits={totalHits}
-                    onOpenIndexInDiscover={props.onOpenIndexInDiscover}
-                  />
-                ) : null
+              {dataView && dataViewColumns ? (
+                <DataGridLazy
+                  {...props}
+                  dataView={dataView}
+                  columns={dataViewColumns}
+                  rows={rows}
+                  totalHits={totalHits}
+                  onOpenIndexInDiscover={props.onOpenIndexInDiscover}
+                />
               ) : (
                 <EuiSkeletonText />
               )}
