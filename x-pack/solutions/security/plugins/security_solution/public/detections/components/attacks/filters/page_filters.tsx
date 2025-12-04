@@ -16,13 +16,9 @@ import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 import type { DataView } from '@kbn/data-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
-import {
-  DEFAULT_ALERTS_INDEX,
-  DEFAULT_ATTACKS_PAGE_FILTERS,
-} from '../../../../../common/constants';
+import { DEFAULT_ATTACKS_PAGE_FILTERS } from '../../../../../common/constants';
 import { URL_PARAM_KEY } from '../../../../common/hooks/use_url_state';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
-import { SECURITY_ALERT_DATA_VIEW } from '../../../constants';
 
 const RULE_TYPES = [...SECURITY_SOLUTION_RULE_TYPE_IDS, ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID];
 
@@ -69,25 +65,15 @@ export const PageFilters = memo(({ dataView, ...props }: PageFiltersProps) => {
     [urlStorage]
   );
 
-  const alertsIndicesTitle = useMemo(
-    () =>
-      dataView
-        .getIndexPattern()
-        ?.split(',')
-        .filter((index) => index.includes(DEFAULT_ALERTS_INDEX))
-        .join(','),
-    [dataView]
-  );
-
   const customDataViewSpec = useMemo(
     () => ({
-      id: SECURITY_ALERT_DATA_VIEW.id,
-      name: SECURITY_ALERT_DATA_VIEW.name,
-      allowNoIndex: true,
-      title: alertsIndicesTitle,
-      timeFieldName: '@timestamp',
+      id: dataView.id,
+      name: dataView.name,
+      allowNoIndex: dataView.allowNoIndex,
+      title: dataView.getIndexPattern(),
+      timeFieldName: dataView.timeFieldName,
     }),
-    [alertsIndicesTitle]
+    [dataView]
   );
 
   const spaceId = useSpaceId();
