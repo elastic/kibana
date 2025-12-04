@@ -13,9 +13,12 @@ import { verifyAccessAndContext } from '../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import type { BulkMuteUnmuteAlertsRequestBodyV1 } from '../../../../../common/routes/rule/apis/bulk_mute_unmute';
-import { transformBulkMuteUnmuteAlertsBodyV1 } from '../../../../../common/routes/rule/apis/bulk_mute_unmute';
-import { bulkMuteUnmuteAlertsBodySchemaV1 } from '../../../../../common/routes/rule/apis/bulk_mute_unmute';
+import {
+  bulkMuteUnmuteAlertsBodySchemaV1,
+  transformBulkMuteUnmuteAlertsBodyV1,
+} from '../../../../../common/routes/rule/apis/bulk_mute_unmute';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
+import { validateMaxMuteUnmuteInstancesV1 } from '../../validation';
 
 export const bulkMuteAlertsRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -38,6 +41,8 @@ export const bulkMuteAlertsRoute = (
         const alertingContext = await context.alerting;
         const rulesClient = await alertingContext.getRulesClient();
         const body: BulkMuteUnmuteAlertsRequestBodyV1 = req.body;
+
+        validateMaxMuteUnmuteInstancesV1(body);
 
         const args = transformBulkMuteUnmuteAlertsBodyV1(body);
 

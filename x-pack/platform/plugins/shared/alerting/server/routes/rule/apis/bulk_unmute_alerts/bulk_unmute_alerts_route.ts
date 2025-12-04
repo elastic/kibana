@@ -18,6 +18,7 @@ import {
   transformBulkMuteUnmuteAlertsBodyV1,
 } from '../../../../../common/routes/rule/apis/bulk_mute_unmute';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
+import { validateMaxMuteUnmuteInstancesV1 } from '../../validation';
 
 export const bulkUnmuteAlertsRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -40,6 +41,8 @@ export const bulkUnmuteAlertsRoute = (
         const alertingContext = await context.alerting;
         const rulesClient = await alertingContext.getRulesClient();
         const body: BulkMuteUnmuteAlertsRequestBodyV1 = req.body;
+
+        validateMaxMuteUnmuteInstancesV1(body);
 
         const args = transformBulkMuteUnmuteAlertsBodyV1(body);
 
