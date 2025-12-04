@@ -34,12 +34,7 @@ export const InputSchema = z.object({
 /**
  * Output schema for the run agent step.
  */
-export const OutputSchema = z.object({
-  /**
-   * The agent's response message.
-   */
-  output: z.union([z.string(), z.any()]),
-});
+export const OutputSchema = z.union([z.string(), z.any()]);
 
 export type RunAgentStepInputSchema = typeof InputSchema;
 export type RunAgentStepOutputSchema = typeof OutputSchema;
