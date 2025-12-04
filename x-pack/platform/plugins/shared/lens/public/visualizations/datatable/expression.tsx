@@ -17,7 +17,6 @@ import type {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common';
-import { useRenderParams } from '@kbn/expressions-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { ChartSizeEvent } from '@kbn/chart-expressions-common';
 import {
@@ -175,16 +174,13 @@ export const getDatatableRenderer = (dependencies: {
 
     performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_START);
 
-    // Wrapper component that uses useRenderParams hook for reactive param updates
-    const DatatableWrapper = () => {
-      const { renderMode, syncColors } = useRenderParams(handlers);
-
-      return (
+    ReactDOM.render(
+      <KibanaRenderContextProvider {...startServices}>
         <DatatableComponent
           {...config}
           formatFactory={dependencies.formatFactory}
           dispatchEvent={handlers.event}
-          renderMode={renderMode}
+          renderMode={handlers.getRenderMode()}
           paletteService={dependencies.paletteService}
           getType={getType}
           rowHasRowClickTriggerActions={rowHasRowClickTriggerActions}
@@ -193,14 +189,8 @@ export const getDatatableRenderer = (dependencies: {
           interactive={isInteractive()}
           theme={dependencies.core.theme}
           renderComplete={renderComplete}
-          syncColors={syncColors}
+          syncColors={config.syncColors}
         />
-      );
-    };
-
-    ReactDOM.render(
-      <KibanaRenderContextProvider {...startServices}>
-        <DatatableWrapper />
       </KibanaRenderContextProvider>,
       domNode
     );
