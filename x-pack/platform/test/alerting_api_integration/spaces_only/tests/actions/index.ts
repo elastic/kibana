@@ -40,6 +40,7 @@ export default function actionsTests({ loadTestFile, getService }: FtrProviderCo
 
     loadTestFile(require.resolve('./single_file_connector_types/create'));
     loadTestFile(require.resolve('./single_file_connector_types/execute'));
+    loadTestFile(require.resolve('./single_file_connector_types/get_axios_instance'));
 
     // note that this test will destroy existing spaces
     loadTestFile(require.resolve('./migrations'));

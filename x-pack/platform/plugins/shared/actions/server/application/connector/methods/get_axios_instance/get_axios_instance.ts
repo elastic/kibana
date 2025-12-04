@@ -13,6 +13,13 @@ import { isSystemAction } from '../../../../lib/is_system_action';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../constants/saved_objects';
 import type { ActionsClientContext } from '../../../../actions_client';
 import { validateSecrets } from '../../../../lib';
+import { ActionType } from '@kbn/actions-plugin/common';
+
+const isWorkflowsOnlyConnectorType = ({
+  supportedFeatureIds,
+}: {
+  supportedFeatureIds: ActionType['supportedFeatureIds'];
+}): boolean => supportedFeatureIds?.length === 1 && supportedFeatureIds[0] === 'workflows';
 
 type ValidatedSecrets = Record<string, unknown>;
 
@@ -58,6 +65,14 @@ export async function getAxiosInstance(
     throw err;
   }
 
+  const actionType = actionTypeRegistry.get(actionTypeId!);
+
+  if (!isWorkflowsOnlyConnectorType(actionType)) {
+    throw new Error(
+      `Unable to get axios instance for ${actionTypeId}. This function is exclusive for workflows-only connectors.`
+    );
+  }
+
   await authorization.ensureAuthorized({
     operation: 'execute',
     additionalPrivileges: getActionKibanaPrivileges(context, actionTypeId),
@@ -90,7 +105,6 @@ export async function getAxiosInstance(
     secrets = rawAction.attributes.secrets;
   }
 
-  const actionType = actionTypeRegistry.get(actionTypeId!);
   const configurationUtilities = actionTypeRegistry.getUtils();
   const validatedSecrets = validateSecrets(actionType, secrets, { configurationUtilities });
 

@@ -59,7 +59,6 @@ export const generateExecutorFunction = ({
       throw new Error(errorMessage);
     }
 
-    // TODO - we need to update ActionContext in the spec
     const actionContext = {
       log: logger,
       client: axiosInstance,

@@ -123,6 +123,7 @@ describe('getAxiosInstance()', () => {
       getConnectorType({
         id: defaultConnectorTypeId,
         isSystemActionType: true,
+        supportedFeatureIds: ['workflows'],
         validate: {
           config: { schema: z.object({}) },
           secrets: { schema: z.object({ foobar: z.boolean() }) },
@@ -170,6 +171,7 @@ describe('getAxiosInstance()', () => {
       actionTypeRegistry.register(
         getConnectorType({
           id: inMemoryConnectorTypeId,
+          supportedFeatureIds: ['workflows'],
           validate: {
             config: { schema: z.object({}) },
             secrets: { schema: z.object({ foobar: z.boolean() }) },
@@ -218,6 +220,7 @@ describe('getAxiosInstance()', () => {
       actionTypeRegistry.register(
         getConnectorType({
           id: inMemoryConnectorTypeId,
+          supportedFeatureIds: ['workflows'],
           validate: {
             config: { schema: z.object({}) },
             secrets: { schema: z.object({ foobar: z.boolean() }) },
@@ -292,6 +295,7 @@ describe('getAxiosInstance()', () => {
       actionTypeRegistry.register(
         getConnectorType({
           id: newActionTypeId,
+          supportedFeatureIds: ['workflows'],
           validate: {
             config: { schema: z.object({}) },
             secrets: { schema: z.object({ foobar: z.string() }) },
@@ -308,6 +312,29 @@ describe('getAxiosInstance()', () => {
         [Error: error validating connector type secrets: ✖ Invalid input: expected string, received boolean
           → at foobar]
       `);
+    });
+
+    it('fails validation if the connector is not exclusive to workflows', async () => {
+      const newActionTypeId = '.validate-secrets';
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: newActionTypeId,
+          validate: {
+            config: { schema: z.object({}) },
+            secrets: { schema: z.object({ foobar: z.string() }) },
+            params: { schema: z.object({}) },
+          },
+        })
+      );
+
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(
+        actionTypeIdFromSavedObjectMock(newActionTypeId)
+      );
+      await expect(
+        actionsClient.getAxiosInstance(defaultConnectorId)
+      ).rejects.toMatchInlineSnapshot(
+        `[Error: Unable to get axios instance for .validate-secrets. This function is exclusive for workflows-only connectors.]`
+      );
     });
   });
 });

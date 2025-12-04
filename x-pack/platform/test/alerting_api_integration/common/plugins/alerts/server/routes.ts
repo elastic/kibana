@@ -37,6 +37,7 @@ import { AlertingEventLogger } from '@kbn/alerting-plugin/server/lib/alerting_ev
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import type { FixtureStartDeps } from './plugin';
 import { retryIfConflicts } from './lib/retry_if_conflicts';
+import axios from 'axios';
 
 export function defineRoutes(
   core: CoreSetup<FixtureStartDeps>,
@@ -760,6 +761,52 @@ export function defineRoutes(
         }
 
         throw err;
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: '/api/alerts_fixture/{id}/_test_get_axios',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+        body: schema.object({
+          method: schema.string(),
+          url: schema.string(),
+          data: schema.string(),
+        }),
+      },
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> => {
+      const [_, { actions }] = await core.getStartServices();
+      const actionsClient = await actions.getActionsClientWithRequest(req);
+
+      try {
+        const axiosInstanceWithAuth = await actionsClient.getAxiosInstance(req.params.id);
+        const response = await axiosInstanceWithAuth(req.body.url, {
+          method: req.body.method,
+          data: req.body.data,
+        });
+
+        return res.ok({ body: response.data });
+      } catch (err) {
+        if (err.isBoom && err.output.statusCode === 403) {
+          return res.forbidden({ body: err });
+        }
+
+        return res.ok({ body: err.message });
       }
     }
   );
