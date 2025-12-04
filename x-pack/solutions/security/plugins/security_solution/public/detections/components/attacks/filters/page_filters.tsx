@@ -18,24 +18,7 @@ import type { DataView } from '@kbn/data-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { URL_PARAM_KEY } from '../../../../common/hooks/use_url_state';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
-import {
-  DEFAULT_ALERTS_INDEX,
-  DEFAULT_DETECTION_PAGE_FILTERS,
-} from '../../../../../common/constants';
-import { SECURITY_ALERT_DATA_VIEW } from '../../../constants';
-
-const DEFAULT_ATTACKS_PAGE_FILTERS: FilterControlConfig[] = [
-  {
-    title: 'Status',
-    fieldName: 'kibana.alert.workflow_status',
-    selectedOptions: ['open'],
-    persist: true,
-    displaySettings: {
-      hideActionBar: true,
-      hideExists: true,
-    },
-  },
-];
+import { DEFAULT_ATTACKS_PAGE_FILTERS } from '../../../../../common/constants';
 
 const RULE_TYPES = [...SECURITY_SOLUTION_RULE_TYPE_IDS, ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID];
 
