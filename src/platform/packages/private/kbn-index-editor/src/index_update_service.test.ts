@@ -183,11 +183,6 @@ describe('IndexUpdateService', () => {
       const doc = body.operations[indexIdx + 1];
       expect(doc).toEqual({ b: 2, c: 3 });
     });
-
-    it('throws when calling bulkUpdate with empty operations', async () => {
-      service.setIndexName('idx');
-      await expect(service.bulkUpdate([] as any)).rejects.toThrow('empty operations');
-    });
   });
 
   it('Handles rows successive modifications in a correct manner', async () => {

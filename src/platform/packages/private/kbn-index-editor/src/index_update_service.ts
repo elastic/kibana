@@ -512,17 +512,20 @@ export class IndexUpdateService {
 
   private listenForUpdates() {
     this._subscription.add(
-      this.bufferState$
+      combineLatest([this.bufferState$, this._pendingColumnsToBeSaved$])
         .pipe(
-          map((actions) =>
-            actions.some((action) => {
+          map(([bufferState, pendingColumnsToBeSaved]) => {
+            const hasCellEditions = bufferState.some((action) => {
               if (action.type === 'add-doc') {
                 // Only consider rows with at least one value
                 return Object.keys(action.payload.value).length > 0;
               }
               return action.type === 'delete-doc';
-            })
-          )
+            });
+            const hasColumnAdditions =
+              pendingColumnsToBeSaved.filter((col) => !isPlaceholderColumn(col.name)).length > 0;
+            return hasColumnAdditions || hasCellEditions;
+          })
         )
         .subscribe(this._hasUnsavedChanges$)
     );
@@ -585,7 +588,7 @@ export class IndexUpdateService {
             newColumns,
             startTime: Date.now(),
           })),
-          filter(({ updates }) => updates.length > 0),
+          filter(({ updates, newColumns }) => updates.length > 0 || newColumns.length > 0),
           tap(() => {
             this._isSaving$.next(true);
           }),
@@ -870,10 +873,7 @@ export class IndexUpdateService {
               return acc.filter((column) => column.name !== action.payload.name);
             }
             if (action.type === 'saved') {
-              // Filter out columns that were saved with a value.
-              return acc.filter((column) =>
-                action.payload.updates.every((update) => update.value[column.name] === undefined)
-              );
+              return acc.filter((column) => isPlaceholderColumn(column.name));
             }
             if (action.type === 'new-row-added') {
               // Filter out columns that were populated when adding a new row
@@ -1075,8 +1075,10 @@ export class IndexUpdateService {
     ];
 
     if (!operations.length) {
-      // nothing to send
-      throw new Error('empty operations');
+      return {
+        bulkResponse: { errors: false, items: [], took: 0 },
+        bulkOperations: [],
+      };
     }
 
     const body = JSON.stringify({
