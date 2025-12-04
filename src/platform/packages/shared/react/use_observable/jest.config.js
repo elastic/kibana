@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { Fallback } from './src/fallback';
-export { getClosestLink, hasActiveModifierKey } from './src/utils';
-export { withSuspense, type WithSuspenseExtendedDeps } from './src/with_suspense';
-export { dynamic, type DynamicOptions } from './src/dynamic';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/react/use_observable'],
+};

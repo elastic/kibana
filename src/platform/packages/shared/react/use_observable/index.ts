@@ -6,8 +6,5 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-export { Fallback } from './src/fallback';
-export { getClosestLink, hasActiveModifierKey } from './src/utils';
-export { withSuspense, type WithSuspenseExtendedDeps } from './src/with_suspense';
-export { dynamic, type DynamicOptions } from './src/dynamic';
+export { useObservable } from './src/use_observable';
+export type { ObservableLike, BehaviorSubjectLike } from './src/use_observable';

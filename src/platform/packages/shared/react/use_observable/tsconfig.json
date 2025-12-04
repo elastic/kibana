@@ -6,13 +6,9 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
-    "../../../../../typings/emotion.d.ts"
   ],
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": [
-    "@kbn/react-context-registry",
-    "@kbn/use-observable",
-  ]
+  "kbn_references": []
 }

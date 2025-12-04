@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { useObservable } from '@kbn/shared-ux-utility';
+import { useObservable } from '@kbn/use-observable';
 import { SidebarPanel } from './sidebar_panel';
 import { useSidebar } from './use_sidebar';
 import { useSidebarService } from './sidebar_provider';
