@@ -13,25 +13,15 @@ import type { Logger } from '@kbn/core/server';
 import { runLogRateAnalysis } from '@kbn/aiops-log-rate-analysis/queries/fetch_log_rate_analysis_for_alert';
 import type { WindowParameters } from '@kbn/aiops-log-rate-analysis/window_parameters';
 import { parseDatemath } from '../../utils/time';
+import { timeRangeSchemaRequired } from '../../utils/tool_schemas';
 
 export const OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID = 'observability.run_log_rate_analysis';
-
-const dateRangeSchema = z.object({
-  start: z
-    .string()
-    .describe(
-      'Start of the time window expressed with Elasticsearch date math. Example: `now-15m`'
-    ),
-  end: z
-    .string()
-    .describe('End of the time window expressed with Elasticsearch date math. Example: `now`.'),
-});
 
 const logRateAnalysisSchema = z.object({
   index: z
     .string()
     .describe(
-      'Concrete index, data stream, or alias to analyze (for example `logs-payments.api-default`).'
+      'Concrete index or index pattern to analyze (for example `logs-payments.api-default`).'
     ),
   timeFieldName: z
     .string()
@@ -39,12 +29,14 @@ const logRateAnalysisSchema = z.object({
       'Timestamp field used to build the baseline/deviation windows. Defaults to `@timestamp`.'
     )
     .optional(),
-  baseline: dateRangeSchema.describe(
-    'Time range representing "normal" behavior that the deviation window will be compared against.'
-  ),
-  deviation: dateRangeSchema.describe(
-    'Time range representing the time period with unusual behavior.'
-  ),
+  baseline: z
+    .object(timeRangeSchemaRequired)
+    .describe(
+      'Time range representing "normal" behavior that the deviation window will be compared against.'
+    ),
+  deviation: z
+    .object(timeRangeSchemaRequired)
+    .describe('Time range representing the time period with unusual behavior.'),
   searchQuery: z
     .record(z.any())
     .describe(

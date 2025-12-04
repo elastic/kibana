@@ -7,11 +7,21 @@
 
 import { z } from '@kbn/zod';
 
-export const timeRangeSchema = z.object({
-  start: z
-    .string()
-    .describe('The start of the time range, in Elasticsearch date math, like `now`.'),
-  end: z
-    .string()
-    .describe('The end of the time range, in Elasticsearch date math, like `now-24h`.'),
-});
+const startDescription = 'The start of the time range, in Elasticsearch date math, like `now-24h`.';
+const endDescription = 'The end of the time range, in Elasticsearch date math, like `now-`.';
+
+export const timeRangeSchemaRequired = {
+  start: z.string().describe(startDescription),
+  end: z.string().describe(endDescription),
+};
+
+export function timeRangeSchemaOptional(defaultTimeRange: { start: string; end: string }) {
+  return {
+    start: z
+      .string()
+      .describe(`${startDescription} Defaults to ${defaultTimeRange.start}.`)
+      .optional(),
+
+    end: z.string().describe(`${endDescription} Defaults to ${defaultTimeRange.end}.`).optional(),
+  };
+}

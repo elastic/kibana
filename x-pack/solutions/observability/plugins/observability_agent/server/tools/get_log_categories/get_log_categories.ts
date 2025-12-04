@@ -21,6 +21,7 @@ import { getHitsTotal } from '../../utils/get_hits_total';
 import { getShouldMatchOrNotExistFilter } from '../../utils/get_should_match_or_not_exist_filter';
 import { timeRangeFilter } from '../../utils/dsl_filters';
 import { parseDatemath } from '../../utils/time';
+import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
 
 export interface GetLogCategoriesToolResult {
   type: ToolResultType.other;
@@ -30,17 +31,21 @@ export interface GetLogCategoriesToolResult {
   };
 }
 
+const DEFAULT_TIME_RANGE = {
+  start: 'now-1h',
+  end: 'now',
+};
+
 export const OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID = 'observability.get_log_categories';
 
 const getLogsSchema = z.object({
-  start: z
+  ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
+  index: z
     .string()
-    .describe('The start of the time range, in Elasticsearch date math, like `now-24h`.')
-    .min(1),
-  end: z
-    .string()
-    .describe('The end of the time range, in Elasticsearch date math, like `now`.')
-    .min(1),
+    .describe(
+      'Concrete index or index pattern to analyze (for example `logs-payments.api-default`).'
+    )
+    .optional(),
   terms: z
     .record(z.string(), z.string())
     .optional()
@@ -62,9 +67,12 @@ export function createGetLogCategoriesTool({
     description: `Retrieve distinct log patterns for a given time range using categorize_text aggregation. Returns categorized log messages with their patterns, counts, and sample documents.`,
     schema: getLogsSchema,
     tags: ['observability', 'logs'],
-    handler: async ({ start, end, terms }, { esClient }) => {
+    handler: async (
+      { index, start = DEFAULT_TIME_RANGE.start, end = DEFAULT_TIME_RANGE.end, terms },
+      { esClient }
+    ) => {
       try {
-        const logsIndices = await getLogsIndices({ core, logger });
+        const logsIndices = index?.split(',') ?? (await getLogsIndices({ core, logger }));
         const boolFilters = [
           ...timeRangeFilter('@timestamp', {
             ...getShouldMatchOrNotExistFilter(terms),
