@@ -62,6 +62,7 @@ import type {
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
 import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
+import type { EventAnnotationService } from '@kbn/event-annotation-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
@@ -99,6 +100,7 @@ export interface DashboardStartDependencies {
   data: DataPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
   embeddable: EmbeddableStart;
+  eventAnnotation: EventAnnotationService;
   fieldFormats: FieldFormatsStart;
   inspector: InspectorStartContract;
   navigation: NavigationPublicPluginStart;

@@ -87,6 +87,8 @@ export interface TableListViewTableProps<
   createdByEnabled?: boolean;
   /** Enable content type tabs filter (dashboards, visualizations, annotation-groups). Only used in dashboards app. */
   contentTypeTabsEnabled?: boolean;
+  /** Entity name mappings for different content types (used when contentTypeTabsEnabled is true) */
+  contentTypeEntityNames?: Record<ContentType, { singular: string; plural: string }>;
   /**
    * Id of the heading element describing the table. This id will be used as `aria-labelledby` of the wrapper element.
    * If the table is not empty, this component renders its own h1 element using the same id.
@@ -351,6 +353,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   setPageDataTestSubject,
   createdByEnabled = false,
   contentTypeTabsEnabled = false,
+  contentTypeEntityNames,
   recentlyAccessed,
 }: TableListViewTableProps<T>) {
   useEffect(() => {
@@ -993,17 +996,8 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     if (createItem) {
       // Dynamic button label based on active tab
       let buttonLabel = entityName;
-      if (contentTypeTabsEnabled && tableFilter.contentTypeTab) {
-        switch (tableFilter.contentTypeTab) {
-          case 'visualizations':
-            buttonLabel = 'visualization';
-            break;
-          case 'annotation-groups':
-            buttonLabel = 'annotation';
-            break;
-          default:
-            buttonLabel = entityName;
-        }
+      if (contentTypeTabsEnabled && tableFilter.contentTypeTab && contentTypeEntityNames) {
+        buttonLabel = contentTypeEntityNames[tableFilter.contentTypeTab]?.singular || entityName;
       }
 
       return (
@@ -1011,7 +1005,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           onClick={() => createItem(tableFilter.contentTypeTab)}
           data-test-subj="newItemButton"
           iconType="plusInCircleFilled"
-          fill
         >
           <FormattedMessage
             id="contentManagement.tableList.listing.createNewItemButtonLabel"
@@ -1021,7 +1014,13 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         </EuiButton>
       );
     }
-  }, [createItem, entityName, tableFilter.contentTypeTab, contentTypeTabsEnabled]);
+  }, [
+    createItem,
+    entityName,
+    tableFilter.contentTypeTab,
+    contentTypeTabsEnabled,
+    contentTypeEntityNames,
+  ]);
 
   const renderNoItemsMessage = useCallback(() => {
     if (emptyPrompt) {
@@ -1195,8 +1194,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     return null;
   }
 
-  // When tabs are enabled, always show the table structure (including tabs)
-  // even when there are no items, so users can switch between tabs
   if (!showFetchError && hasNoItems && !contentTypeTabsEnabled) {
     return (
       <PageTemplate isEmptyState={true}>
@@ -1252,6 +1249,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           createdByEnabled={createdByEnabled}
           favoritesEnabled={favoritesEnabled}
           contentTypeTabsEnabled={contentTypeTabsEnabled}
+          contentTypeEntityNames={contentTypeEntityNames}
           emptyPrompt={emptyPrompt}
         />
 

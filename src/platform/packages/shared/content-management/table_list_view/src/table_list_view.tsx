@@ -41,6 +41,7 @@ export type TableListViewProps<T extends UserContentCommonSchema = UserContentCo
   | 'createdByEnabled'
   | 'contentTypeTabsEnabled'
   | 'recentlyAccessed'
+  | 'contentTypeEntityNames'
 > & {
   title: string;
   description?: string;
@@ -79,6 +80,7 @@ export const TableListView = <T extends UserContentCommonSchema>({
   createdByEnabled,
   contentTypeTabsEnabled,
   recentlyAccessed,
+  contentTypeEntityNames,
 }: TableListViewProps<T>) => {
   const PageTemplate = withoutPageTemplateWrapper
     ? (React.Fragment as unknown as typeof KibanaPageTemplate)
@@ -129,6 +131,7 @@ export const TableListView = <T extends UserContentCommonSchema>({
           createdByEnabled={createdByEnabled}
           contentTypeTabsEnabled={contentTypeTabsEnabled}
           recentlyAccessed={recentlyAccessed}
+          contentTypeEntityNames={contentTypeEntityNames}
         />
       </KibanaPageTemplate.Section>
     </PageTemplate>

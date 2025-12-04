@@ -53,6 +53,31 @@ export const dashboardListingTableStrings = {
     }),
 };
 
+export const dashboardListingTabStrings = {
+  // Visualization tab entity names
+  getVisualizationEntityName: () =>
+    i18n.translate('dashboard.listing.table.visualizationEntityName', {
+      defaultMessage: 'visualization',
+    }),
+  getVisualizationEntityNamePlural: () =>
+    i18n.translate('dashboard.listing.table.visualizationEntityNamePlural', {
+      defaultMessage: 'visualizations',
+    }),
+  // Annotation group tab entity names
+  getAnnotationGroupEntityName: () =>
+    i18n.translate('dashboard.listing.table.annotationGroupEntityName', {
+      defaultMessage: 'annotation group',
+    }),
+  getAnnotationGroupEntityNamePlural: () =>
+    i18n.translate('dashboard.listing.table.annotationGroupEntityNamePlural', {
+      defaultMessage: 'annotation groups',
+    }),
+  getAnnotationEntityName: () =>
+    i18n.translate('dashboard.listing.table.annotationEntityName', {
+      defaultMessage: 'annotation',
+    }),
+};
+
 export const noItemsStrings = {
   getReadonlyTitle: () =>
     i18n.translate('dashboard.listing.readonlyNoItemsTitle', {

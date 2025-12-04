@@ -33,6 +33,7 @@ import {
   cssFavoriteHoverWithinEuiTableRow,
   useFavorites,
 } from '@kbn/content-management-favorites-public';
+import type { ContentType } from './tabbed_filter';
 
 import { useServices } from '../services';
 import type { Action } from '../actions';
@@ -88,6 +89,7 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   createdByEnabled: boolean;
   favoritesEnabled: boolean;
   contentTypeTabsEnabled?: boolean;
+  contentTypeEntityNames?: Record<ContentType, { singular: string; plural: string }>;
   emptyPrompt?: JSX.Element;
 }
 
@@ -121,30 +123,32 @@ export function Table<T extends UserContentCommonSchema>({
   createdByEnabled,
   favoritesEnabled,
   contentTypeTabsEnabled,
+  contentTypeEntityNames,
   emptyPrompt,
 }: Props<T>) {
   const euiTheme = useEuiTheme();
   const { getTagList, isTaggingEnabled, isKibanaVersioningEnabled } = useServices();
 
+  // Dynamic entity name (singular) based on active tab
+  const dynamicEntityName = useMemo(() => {
+    if (contentTypeTabsEnabled && tableFilter.contentTypeTab && contentTypeEntityNames) {
+      return contentTypeEntityNames[tableFilter.contentTypeTab]?.singular || entityName;
+    }
+    return entityName;
+  }, [contentTypeTabsEnabled, tableFilter.contentTypeTab, contentTypeEntityNames, entityName]);
+
+  // Dynamic entity name (plural) based on active tab
   const dynamicEntityNamePlural = useMemo(() => {
-    if (contentTypeTabsEnabled && tableFilter.contentTypeTab) {
-      switch (tableFilter.contentTypeTab) {
-        case 'dashboards':
-          return i18n.translate('contentManagement.tableList.entity.dashboards', {
-            defaultMessage: 'dashboards',
-          });
-        case 'visualizations':
-          return i18n.translate('contentManagement.tableList.entity.visualizations', {
-            defaultMessage: 'visualizations',
-          });
-        case 'annotation-groups':
-          return i18n.translate('contentManagement.tableList.entity.annotationGroups', {
-            defaultMessage: 'annotation groups',
-          });
-      }
+    if (contentTypeTabsEnabled && tableFilter.contentTypeTab && contentTypeEntityNames) {
+      return contentTypeEntityNames[tableFilter.contentTypeTab]?.plural || entityNamePlural;
     }
     return entityNamePlural;
-  }, [contentTypeTabsEnabled, tableFilter.contentTypeTab, entityNamePlural]);
+  }, [
+    contentTypeTabsEnabled,
+    tableFilter.contentTypeTab,
+    contentTypeEntityNames,
+    entityNamePlural,
+  ]);
 
   const renderToolsLeft = useCallback(() => {
     if (!deleteItems || selectedIds.length === 0) {
@@ -163,12 +167,12 @@ export function Table<T extends UserContentCommonSchema>({
           defaultMessage="Delete {itemCount} {entityName}"
           values={{
             itemCount: selectedIds.length,
-            entityName: selectedIds.length === 1 ? entityName : dynamicEntityNamePlural,
+            entityName: selectedIds.length === 1 ? dynamicEntityName : dynamicEntityNamePlural,
           }}
         />
       </EuiButton>
     );
-  }, [deleteItems, dispatch, entityName, dynamicEntityNamePlural, selectedIds.length]);
+  }, [deleteItems, dispatch, dynamicEntityName, dynamicEntityNamePlural, selectedIds.length]);
 
   // Dynamic create button for toolbar (changes based on active tab)
   const renderDynamicCreateButton = useCallback(() => {

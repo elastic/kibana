@@ -20,7 +20,9 @@ import type { ViewMode } from '@kbn/presentation-publishing';
 import {
   findListItems as findVisualizationListItems,
   toTableListViewSavedObject,
+  showNewVisModal,
 } from '@kbn/visualizations-plugin/public';
+import type { EventAnnotationGroupContent } from '@kbn/event-annotation-common';
 
 import { asyncMap } from '@kbn/std';
 import { DASHBOARD_APP_ID } from '../../../common/page_bundle_constants';
@@ -35,15 +37,16 @@ import {
   coreServices,
   contentManagementService,
   embeddableService,
+  eventAnnotationService,
   savedObjectsTaggingService,
   visualizationsService,
-  lensService,
 } from '../../services/kibana_services';
 import { logger } from '../../services/logger';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import {
   dashboardListingErrorStrings,
   dashboardListingTableStrings,
+  dashboardListingTabStrings,
 } from '../_dashboard_listing_strings';
 import { confirmCreateWithUnsaved } from '../confirm_overlays';
 import { DashboardListingEmptyPrompt } from '../dashboard_listing_empty_prompt';
@@ -120,9 +123,41 @@ export const useDashboardListingTable = ({
   contentTypeTabsEnabled?: boolean;
 }): UseDashboardListingTableReturnType => {
   const { getEntityName, getTableListTitle, getEntityNamePlural } = dashboardListingTableStrings;
+  const {
+    getVisualizationEntityName,
+    getVisualizationEntityNamePlural,
+    getAnnotationGroupEntityName,
+    getAnnotationGroupEntityNamePlural,
+  } = dashboardListingTabStrings;
   const title = getTableListTitle();
   const entityName = getEntityName();
   const entityNamePlural = getEntityNamePlural();
+
+  const contentTypeEntityNames = useMemo(
+    () => ({
+      dashboards: {
+        singular: entityName,
+        plural: entityNamePlural,
+      },
+      visualizations: {
+        singular: getVisualizationEntityName(),
+        plural: getVisualizationEntityNamePlural(),
+      },
+      'annotation-groups': {
+        singular: getAnnotationGroupEntityName(),
+        plural: getAnnotationGroupEntityNamePlural(),
+      },
+    }),
+    [
+      entityName,
+      entityNamePlural,
+      getVisualizationEntityName,
+      getVisualizationEntityNamePlural,
+      getAnnotationGroupEntityName,
+      getAnnotationGroupEntityNamePlural,
+    ]
+  );
+
   const [pageDataTestSubject, setPageDataTestSubject] = useState<string>();
   const [hasInitialFetchReturned, setHasInitialFetchReturned] = useState(false);
 
@@ -138,17 +173,13 @@ export const useDashboardListingTable = ({
   const createItem = useCallback(
     (contentTypeTab?: 'dashboards' | 'visualizations' | 'annotation-groups') => {
       if (contentTypeTab === 'visualizations') {
-        import('@kbn/visualizations-plugin/public').then(({ showNewVisModal }) => {
-          showNewVisModal();
-        });
+        showNewVisModal();
         return;
       }
 
       if (contentTypeTab === 'annotation-groups') {
         // For annotation groups, navigate to Lens
-        if (lensService) {
-          coreServices.application.navigateToApp('lens', { path: '#/' });
-        }
+        coreServices.application.navigateToApp('lens', { path: '#/' });
         return;
       }
 
@@ -305,47 +336,47 @@ export const useDashboardListingTable = ({
       }
 
       if (contentType === 'annotation-groups') {
-        // Fetch annotation groups using content management
-        const response = (await contentManagementService.client.search({
-          contentTypeId: 'event-annotation-group',
-          query: {
-            text: searchTerm ? `${searchTerm}*` : undefined,
-            limit: listingLimit,
-            tags: {
-              included: references?.map((r) => r.id),
-              excluded: referencesToExclude?.map((r) => r.id),
+        if (!eventAnnotationService) {
+          return { total: 0, hits: [] };
+        }
+
+        try {
+          // Fetch annotation groups using the event annotation service
+          const annotationService = await eventAnnotationService.getService();
+
+          const response = await annotationService.findAnnotationGroupContent(
+            searchTerm,
+            listingLimit,
+            references?.map((r) => r.id),
+            referencesToExclude?.map((r) => r.id)
+          );
+
+          const searchEndTime = window.performance.now();
+          const searchDuration = searchEndTime - searchStartTime;
+          reportPerformanceMetricEvent(coreServices.analytics, {
+            eventName: SAVED_OBJECT_LOADED_TIME,
+            duration: searchDuration,
+            meta: {
+              saved_object_type: 'event-annotation-group',
             },
-          },
-        })) as any;
+          });
 
-        const searchEndTime = window.performance.now();
-        const searchDuration = searchEndTime - searchStartTime;
-        reportPerformanceMetricEvent(coreServices.analytics, {
-          eventName: SAVED_OBJECT_LOADED_TIME,
-          duration: searchDuration,
-          meta: {
-            saved_object_type: 'event-annotation-group',
-          },
-        });
-
-        return {
-          total: response.pagination.total,
-          hits: response.hits.map((hit: any) => ({
-            type: 'event-annotation-group',
-            id: hit.id,
-            updatedAt: hit.updatedAt!,
-            createdAt: hit.createdAt,
-            createdBy: hit.createdBy,
-            updatedBy: hit.updatedBy,
-            references: hit.references ?? [],
-            managed: hit.managed,
+          const mappedHits = response.hits.map((hit: EventAnnotationGroupContent) => ({
+            ...hit,
+            type: 'event-annotation-group', // Explicitly set type for client-side filtering
             attributes: {
-              title: hit.attributes.title,
-              description: hit.attributes.description,
-              timeRestore: false,
+              ...hit.attributes,
+              timeRestore: false, // Annotation groups don't have timeRestore
             },
-          })),
-        };
+          }));
+
+          return {
+            total: response.total,
+            hits: mappedHits,
+          };
+        } catch (error) {
+          throw error;
+        }
       }
 
       // Default: fetch dashboards
@@ -635,10 +666,12 @@ export const useDashboardListingTable = ({
       urlStateEnabled,
       createdByEnabled: true,
       contentTypeTabsEnabled: true,
+      contentTypeEntityNames,
       recentlyAccessed: getDashboardRecentlyAccessedService(),
     };
   }, [
     contentEditorValidators,
+    contentTypeEntityNames,
     createItem,
     customTableColumn,
     dashboardListingId,

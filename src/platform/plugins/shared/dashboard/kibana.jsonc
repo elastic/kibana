@@ -14,6 +14,7 @@
       "dataViews",
       "dataViewEditor",
       "embeddable",
+      "eventAnnotation",
       "fieldFormats",
       "controls",
       "inspector",
