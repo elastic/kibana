@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isNil } from 'lodash';
+
 import type { ColorMapping, ColorStop, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 
 import type {
@@ -57,6 +59,7 @@ export function fromColorByValueAPIToLensState(
     name: 'custom',
     params: {
       name: 'custom',
+      progression: 'fixed', // to be removed
       reverse: false, // always applied to steps during transform
       rangeMin,
       rangeMax,
@@ -97,7 +100,7 @@ export function fromColorByValueLensStateToAPI(
       const { stop: currentStop, color } = step;
       if (i === 0) {
         return {
-          ...(colorParams.rangeMin ? { from: colorParams.rangeMin } : {}),
+          ...(!isNil(colorParams.rangeMin) && { from: colorParams.rangeMin }),
           to: currentStop,
           color,
         };
@@ -109,7 +112,7 @@ export function fromColorByValueLensStateToAPI(
         return {
           from: prevStop,
           // ignores stop value, current logic sets last stop to max domain not user defined rangeMax
-          ...(colorParams.rangeMax ? { to: colorParams.rangeMax } : {}),
+          ...(!isNil(colorParams.rangeMax) && { to: colorParams.rangeMax }),
           color,
         };
       }

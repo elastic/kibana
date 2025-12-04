@@ -8,7 +8,8 @@
  */
 
 import type { ColorMapping, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import type { ColorByValueType, ColorMappingType, StaticColorType } from '../schema/color';
+
+import type { ColorByValueType, ColorMappingType, StaticColorType } from '../../schema/color';
 import {
   fromColorByValueAPIToLensState,
   fromColorByValueLensStateToAPI,
@@ -18,20 +19,24 @@ import {
   fromColorMappingLensStateToAPI,
 } from './coloring';
 
+import * as percentageMocks from './percentage.mocks';
+import * as absoluteMocks from './absolute.mocks';
+import * as badMaxStepsMocks from './bad_max_step.mocks';
+
 describe('Color util transforms', () => {
   describe('fromColorByValueAPIToLensState', () => {
     it('should return undefined when color is undefined', () => {
       expect(fromColorByValueAPIToLensState(undefined)).toBeUndefined();
     });
 
-    it('should convert absolute range color with from/to/exact steps', () => {
+    it('should convert absolute range color steps', () => {
       const colorByValue: ColorByValueType = {
         type: 'dynamic',
         range: 'absolute',
         steps: [
-          { type: 'from', color: '#ff0000', from: 0 },
-          { type: 'exact', color: '#ffff00', value: 50 },
-          { type: 'to', color: '#00ff00', to: 100 },
+          { color: 'red', to: 0 },
+          { color: 'green', from: 0, to: 100 },
+          { color: 'blue', from: 100 },
         ],
       };
 
@@ -43,29 +48,34 @@ describe('Color util transforms', () => {
         params: {
           name: 'custom',
           rangeType: 'number',
+          progression: 'fixed',
+          continuity: 'all',
+          reverse: false,
+          steps: 3,
+          maxSteps: 5,
+          rangeMax: null,
+          rangeMin: null,
           stops: [
-            { color: '#ff0000', stop: 0 },
-            { color: '#ffff00', stop: 50 },
-            { color: '#00ff00', stop: 100 },
+            { color: 'red', stop: 0 },
+            { color: 'green', stop: 100 },
+            { color: 'blue', stop: null },
           ],
           colorStops: [
-            { color: '#ff0000', stop: 0 },
-            { color: '#ffff00', stop: 50 },
-            { color: '#00ff00', stop: 100 },
+            { color: 'red', stop: null },
+            { color: 'green', stop: 0 },
+            { color: 'blue', stop: 100 },
           ],
         },
-      });
+      } satisfies PaletteOutput<CustomPaletteParams>);
     });
 
     it('should convert percentage range color with min/max values', () => {
       const colorByValue: ColorByValueType = {
         type: 'dynamic',
         range: 'percentage',
-        min: 10,
-        max: 90,
         steps: [
-          { type: 'from', color: '#ff0000', from: 10 },
-          { type: 'to', color: '#00ff00', to: 90 },
+          { color: 'red', from: 10, to: 50 },
+          { color: 'green', from: 50, to: 90 },
         ],
       };
 
@@ -76,26 +86,31 @@ describe('Color util transforms', () => {
         name: 'custom',
         params: {
           name: 'custom',
+          rangeType: 'percent',
+          continuity: 'none',
+          progression: 'fixed',
+          reverse: false,
+          steps: 2,
+          maxSteps: 5,
           rangeMin: 10,
           rangeMax: 90,
-          rangeType: 'percent',
           stops: [
-            { color: '#ff0000', stop: 10 },
-            { color: '#00ff00', stop: 90 },
+            { color: 'red', stop: 50 },
+            { color: 'green', stop: 90 },
           ],
           colorStops: [
-            { color: '#ff0000', stop: 10 },
-            { color: '#00ff00', stop: 90 },
+            { color: 'red', stop: 10 },
+            { color: 'green', stop: 50 },
           ],
         },
-      });
+      } satisfies PaletteOutput<CustomPaletteParams>);
     });
 
     it('should default to absolute range when range is not specified', () => {
-      const colorByValue: ColorByValueType = {
+      const colorByValue = {
         type: 'dynamic',
-        steps: [{ type: 'exact', color: '#ff0000', value: 50 }],
-      } as ColorByValueType;
+        steps: [{ color: 'red', from: 0, to: 50 }],
+      } satisfies Partial<ColorByValueType> as ColorByValueType;
 
       const result = fromColorByValueAPIToLensState(colorByValue);
 
@@ -125,22 +140,27 @@ describe('Color util transforms', () => {
           name: 'custom',
           rangeType: 'number',
           stops: [
-            { color: '#ff0000', stop: 0 },
-            { color: '#ffff00', stop: 50 },
-            { color: '#00ff00', stop: 100 },
+            { color: 'red', stop: 0 },
+            { color: 'green', stop: 50 },
+            { color: 'blue', stop: 100 },
+          ],
+          colorStops: [
+            { color: 'red', stop: null },
+            { color: 'green', stop: 0 },
+            { color: 'blue', stop: 50 },
           ],
         },
       };
 
       const result = fromColorByValueLensStateToAPI(palette);
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
         type: 'dynamic',
         range: 'absolute',
         steps: [
-          { type: 'from', color: '#ff0000', from: 0 },
-          { type: 'exact', color: '#ffff00', value: 50 },
-          { type: 'to', color: '#00ff00', to: 100 },
+          { color: 'red', to: 0 },
+          { color: 'green', from: 0, to: 50 },
+          { color: 'blue', from: 50 },
         ],
       });
     });
@@ -152,12 +172,17 @@ describe('Color util transforms', () => {
         params: {
           name: 'custom',
           rangeType: 'percent',
-          rangeMin: 10,
-          rangeMax: 90,
+          rangeMin: 5,
+          rangeMax: 95,
           stops: [
-            { color: '#ff0000', stop: 10 },
-            { color: '#0000aa', stop: 50 },
-            { color: '#00ff00', stop: 90 },
+            { color: 'red', stop: 10 },
+            { color: 'green', stop: 50 },
+            { color: 'blue', stop: 90 },
+          ],
+          colorStops: [
+            { color: 'red', stop: 5 },
+            { color: 'green', stop: 10 },
+            { color: 'blue', stop: 50 },
           ],
         },
       };
@@ -166,13 +191,11 @@ describe('Color util transforms', () => {
 
       expect(result).toEqual({
         type: 'dynamic',
-        min: 10,
-        max: 90,
         range: 'percentage',
         steps: [
-          { type: 'from', color: '#ff0000', from: 10 },
-          { type: 'exact', color: '#0000aa', value: 50 },
-          { type: 'to', color: '#00ff00', to: 90 },
+          { color: 'red', from: 5, to: 10 },
+          { color: 'green', from: 10, to: 50 },
+          { color: 'blue', from: 50, to: 95 },
         ],
       });
     });
@@ -184,7 +207,7 @@ describe('Color util transforms', () => {
         params: {
           name: 'custom',
           rangeType: 'number',
-          stops: [{ color: '#ff0000', stop: 50 }],
+          stops: [{ color: 'red', stop: 50 }],
         },
       };
 
@@ -193,7 +216,7 @@ describe('Color util transforms', () => {
       expect(result).toEqual({
         type: 'dynamic',
         range: 'absolute',
-        steps: [{ type: 'from', color: '#ff0000', from: 50 }],
+        steps: [{ color: 'red', to: 50 }],
       });
     });
 
@@ -205,8 +228,8 @@ describe('Color util transforms', () => {
           name: 'custom',
           rangeType: 'number',
           stops: [
-            { color: '#ff0000', stop: 0 },
-            { color: '#00ff00', stop: 100 },
+            { color: 'red', stop: 0 },
+            { color: 'green', stop: 100 },
           ],
         },
       };
@@ -217,8 +240,8 @@ describe('Color util transforms', () => {
         type: 'dynamic',
         range: 'absolute',
         steps: [
-          { type: 'from', color: '#ff0000', from: 0 },
-          { type: 'to', color: '#00ff00', to: 100 },
+          { color: 'red', to: 0 },
+          { color: 'green', from: 0 },
         ],
       });
     });
@@ -229,7 +252,7 @@ describe('Color util transforms', () => {
         name: 'custom',
         params: {
           name: 'custom',
-          stops: [{ color: '#ff0000', stop: 50 }],
+          stops: [{ color: 'red', stop: 50 }],
         },
       };
 
@@ -429,6 +452,52 @@ describe('Color util transforms', () => {
   });
 
   describe('round-trip conversions', () => {
+    describe('percentage range', () => {
+      it.each([
+        ['no limit', percentageMocks.noLimitPalette],
+        ['lower limit', percentageMocks.lowerLimitPalette],
+        ['upper limit', percentageMocks.upperLimitPalette],
+        ['upper and lower limit', percentageMocks.upperAndLowerLimitPalette],
+      ])('should convert lens palette state to API and back - %s', (_, palette) => {
+        const apiColorByValue = fromColorByValueLensStateToAPI(palette);
+        const returnedPaletteState = fromColorByValueAPIToLensState(apiColorByValue);
+
+        expect(returnedPaletteState).toEqual(palette);
+      });
+    });
+
+    describe('absolute range', () => {
+      it.each([
+        ['no limit', absoluteMocks.noLimitPalette],
+        ['lower limit', absoluteMocks.lowerLimitPalette],
+        ['upper limit', absoluteMocks.upperLimitPalette],
+        ['upper and lower limit', absoluteMocks.upperAndLowerLimitPalette],
+      ])('should convert lens palette state to API and back - %s', (_, palette) => {
+        const apiColorByValue = fromColorByValueLensStateToAPI(palette);
+        const returnedPaletteState = fromColorByValueAPIToLensState(apiColorByValue);
+
+        expect(returnedPaletteState).toEqual(palette);
+      });
+    });
+
+    describe('bad max steps', () => {
+      it.each([
+        ['no limit', badMaxStepsMocks.noLimitPalette],
+        ['lower limit', badMaxStepsMocks.lowerLimitPalette],
+        ['upper and lower limit', badMaxStepsMocks.upperAndLowerLimitPalette],
+      ])('should convert lens palette state to API and back - %s', (_, palette) => {
+        const apiColorByValue = fromColorByValueLensStateToAPI(palette);
+        const returnedPaletteState = fromColorByValueAPIToLensState(apiColorByValue);
+
+        // Currently the final stop value is set to the domain max or the implicit max value
+        // instead of the more accurate rangeMax value. We need to override the final stop
+        // value to the rangeMax value, to match that of the transformed state.
+        palette.params!.stops!.at(-1)!.stop = palette.params!.rangeMax ?? null;
+
+        expect(returnedPaletteState).toEqual(palette);
+      });
+    });
+
     it('should maintain data integrity for static colors', () => {
       const originalColor = '#ff0000';
       const apiFormat = fromStaticColorLensStateToAPI(originalColor);
@@ -442,9 +511,41 @@ describe('Color util transforms', () => {
         type: 'dynamic',
         range: 'absolute',
         steps: [
-          { type: 'from', color: '#ff0000', from: 0 },
-          { type: 'exact', color: '#ffff00', value: 50 },
-          { type: 'to', color: '#00ff00', to: 100 },
+          { color: 'red', to: 50 },
+          { color: 'green', from: 50, to: 100 },
+          { color: 'blue', from: 100 },
+        ],
+      };
+
+      const lensState = fromColorByValueAPIToLensState(originalColorByValue);
+      const backToAPI = fromColorByValueLensStateToAPI(lensState);
+
+      expect(backToAPI).toEqual(originalColorByValue);
+    });
+
+    it('should maintain data integrity with falsy min', () => {
+      const originalColorByValue: ColorByValueType = {
+        type: 'dynamic',
+        range: 'absolute',
+        steps: [
+          { color: 'red', from: 0, to: 50 },
+          { color: 'blue', from: 50 },
+        ],
+      };
+
+      const lensState = fromColorByValueAPIToLensState(originalColorByValue);
+      const backToAPI = fromColorByValueLensStateToAPI(lensState);
+
+      expect(backToAPI).toEqual(originalColorByValue);
+    });
+
+    it('should maintain data integrity with falsy max', () => {
+      const originalColorByValue: ColorByValueType = {
+        type: 'dynamic',
+        range: 'absolute',
+        steps: [
+          { color: 'red', to: -50 },
+          { color: 'blue', from: -50, to: 0 },
         ],
       };
 
@@ -458,11 +559,9 @@ describe('Color util transforms', () => {
       const originalColorByValue: ColorByValueType = {
         type: 'dynamic',
         range: 'percentage',
-        min: 10,
-        max: 90,
         steps: [
-          { type: 'from', color: '#ff0000', from: 10 },
-          { type: 'to', color: '#00ff00', to: 90 },
+          { color: 'red', from: 5, to: 90 },
+          { color: 'green', from: 90, to: 95 },
         ],
       };
 
@@ -472,7 +571,7 @@ describe('Color util transforms', () => {
       expect(backToAPI).toEqual(originalColorByValue);
     });
 
-    it('should mantain data integrity for categorical color mapping with specific color codes', () => {
+    it('should maintain data integrity for categorical color mapping with specific color codes', () => {
       const originalColorMapping: ColorMappingType = {
         palette: 'kibana_palette',
         mode: 'categorical',
@@ -491,7 +590,7 @@ describe('Color util transforms', () => {
       expect(backToAPI).toEqual(originalColorMapping);
     });
 
-    it('should mantain data integrity for categorical color mapping with mixed assignments', () => {
+    it('should maintain data integrity for categorical color mapping with mixed assignments', () => {
       const originalColorMapping: ColorMappingType = {
         palette: 'kibana_palette',
         mode: 'categorical',
@@ -513,7 +612,7 @@ describe('Color util transforms', () => {
       expect(backToAPI).toEqual(originalColorMapping);
     });
 
-    it('should mantain data integrity for gradient color mapping with mixed assignments', () => {
+    it('should maintain data integrity for gradient color mapping with mixed assignments', () => {
       const originalColorMapping: ColorMappingType = {
         palette: 'kibana_palette',
         mode: 'gradient',
