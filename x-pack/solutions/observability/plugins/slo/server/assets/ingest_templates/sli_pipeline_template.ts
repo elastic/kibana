@@ -95,6 +95,14 @@ export const getSLIPipelineTemplate = (
       },
       {
         pipeline: {
+          description: 'Global custom pipeline for all SLO rollup data',
+          ignore_missing_pipeline: true,
+          ignore_failure: true,
+          name: 'slo-rollup-global@custom',
+        },
+      },
+      {
+        pipeline: {
           ignore_missing_pipeline: true,
           ignore_failure: true,
           name: `slo-${slo.id}@custom`,
