@@ -126,18 +126,21 @@ export function Table<T extends UserContentCommonSchema>({
   const euiTheme = useEuiTheme();
   const { getTagList, isTaggingEnabled, isKibanaVersioningEnabled } = useServices();
 
-  // Compute dynamic entity name plural based on active tab
   const dynamicEntityNamePlural = useMemo(() => {
     if (contentTypeTabsEnabled && tableFilter.contentTypeTab) {
       switch (tableFilter.contentTypeTab) {
         case 'dashboards':
-          return 'dashboards';
+          return i18n.translate('contentManagement.tableList.entity.dashboards', {
+            defaultMessage: 'dashboards',
+          });
         case 'visualizations':
-          return 'visualizations';
+          return i18n.translate('contentManagement.tableList.entity.visualizations', {
+            defaultMessage: 'visualizations',
+          });
         case 'annotation-groups':
-          return 'annotation groups';
-        default:
-          return entityNamePlural;
+          return i18n.translate('contentManagement.tableList.entity.annotationGroups', {
+            defaultMessage: 'annotation groups',
+          });
       }
     }
     return entityNamePlural;
