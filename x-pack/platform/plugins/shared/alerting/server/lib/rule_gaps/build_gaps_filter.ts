@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-const FAILED_AUTO_ATTEMPTS_FIELD = `kibana.alert.rule.gap.failed_auto_fill_attempts`;
+const FAILED_AUTO_FILL_ATTEMPTS_FIELD = `kibana.alert.rule.gap.failed_auto_fill_attempts`;
 
 const getFilterForInterval = (hasInterval: boolean | undefined, field: string) => {
   if (hasInterval === undefined) {
@@ -59,7 +59,7 @@ export const buildGapsFilter = ({
     : null;
 
   const failedAutoAttemptsLessThanFilter = failedAutoFillAttemptsLessThan
-    ? `(NOT ${FAILED_AUTO_ATTEMPTS_FIELD}:* OR ${FAILED_AUTO_ATTEMPTS_FIELD}:*  AND ${FAILED_AUTO_ATTEMPTS_FIELD} < ${failedAutoFillAttemptsLessThan})`
+    ? `(NOT ${FAILED_AUTO_FILL_ATTEMPTS_FIELD}:* OR ${FAILED_AUTO_FILL_ATTEMPTS_FIELD}:*  AND ${FAILED_AUTO_FILL_ATTEMPTS_FIELD} < ${failedAutoFillAttemptsLessThan})`
     : null;
 
   return [
