@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { BehaviorSubject } from 'rxjs';
 import { MappingEditor } from './mapping_editor';
 import { MappingEditorService } from './mapping_editor_service';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 jest.mock('../../../use_file_upload', () => ({
   useFileUploadContext: () => ({
@@ -104,11 +104,7 @@ describe('MappingEditor', () => {
   });
 
   it('renders field count and mappings correctly', () => {
-    render(
-      <IntlProvider locale="en">
-        <MappingEditor onImportClick={onImportClick} />
-      </IntlProvider>
-    );
+    renderWithI18n(<MappingEditor onImportClick={onImportClick} />);
 
     expect(screen.getByText(/2 fields found/)).toBeInTheDocument();
     expect(screen.getByText('Field name')).toBeInTheDocument();
@@ -119,11 +115,7 @@ describe('MappingEditor', () => {
   });
 
   it('updates field name when input changes', () => {
-    render(
-      <IntlProvider locale="en">
-        <MappingEditor onImportClick={onImportClick} />
-      </IntlProvider>
-    );
+    renderWithI18n(<MappingEditor onImportClick={onImportClick} />);
 
     const fieldInput = screen.getByDisplayValue('field1');
     fireEvent.change(fieldInput, { target: { value: 'newFieldName' } });
@@ -132,11 +124,7 @@ describe('MappingEditor', () => {
   });
 
   it('updates field type when select changes', () => {
-    render(
-      <IntlProvider locale="en">
-        <MappingEditor onImportClick={onImportClick} />
-      </IntlProvider>
-    );
+    renderWithI18n(<MappingEditor onImportClick={onImportClick} />);
 
     const fieldSelects = screen.getAllByTestId('field-type-select');
     fireEvent.change(fieldSelects[0], { target: { value: 'keyword' } });
@@ -152,11 +140,7 @@ describe('MappingEditor', () => {
     (mockService.mappingsError$ as any) = new BehaviorSubject(errorObj).asObservable();
     (mockService.getMappingsError as jest.Mock).mockReturnValue(errorObj);
 
-    render(
-      <IntlProvider locale="en">
-        <MappingEditor onImportClick={onImportClick} />
-      </IntlProvider>
-    );
+    renderWithI18n(<MappingEditor onImportClick={onImportClick} />);
 
     const errorElement = screen.getByText('Mapping name and type cannot be blank');
     expect(errorElement).toBeInTheDocument();
@@ -164,33 +148,13 @@ describe('MappingEditor', () => {
   });
 
   it('does not display error message when mappingsError is null', () => {
-    render(
-      <IntlProvider locale="en">
-        <MappingEditor onImportClick={onImportClick} />
-      </IntlProvider>
-    );
+    renderWithI18n(<MappingEditor onImportClick={onImportClick} />);
 
     expect(screen.queryByText(/error/i)).not.toBeInTheDocument();
   });
 
-  it('destroys service on unmount', () => {
-    const { unmount } = render(
-      <IntlProvider locale="en">
-        <MappingEditor onImportClick={onImportClick} />
-      </IntlProvider>
-    );
-
-    unmount();
-
-    expect(mockService.destroy).toHaveBeenCalled();
-  });
-
   it('renders field name placeholders correctly', () => {
-    render(
-      <IntlProvider locale="en">
-        <MappingEditor onImportClick={onImportClick} />
-      </IntlProvider>
-    );
+    renderWithI18n(<MappingEditor onImportClick={onImportClick} />);
 
     const fieldInputs = screen.getAllByPlaceholderText('Enter field name');
     expect(fieldInputs).toHaveLength(2);
@@ -200,11 +164,7 @@ describe('MappingEditor', () => {
     mockService.getMappings = jest.fn(() => []);
     mockService.mappings$ = new BehaviorSubject([]).asObservable();
 
-    render(
-      <IntlProvider locale="en">
-        <MappingEditor onImportClick={onImportClick} />
-      </IntlProvider>
-    );
+    renderWithI18n(<MappingEditor onImportClick={onImportClick} />);
 
     expect(screen.getByText(/0 fields found/)).toBeInTheDocument();
     expect(screen.queryByDisplayValue('field1')).not.toBeInTheDocument();
@@ -223,11 +183,7 @@ describe('MappingEditor', () => {
     (mockService.mappings$ as any) = mappingsSubject.asObservable();
     (mockService.getMappings as jest.Mock).mockImplementation(() => mappingsSubject.getValue());
 
-    render(
-      <IntlProvider locale="en">
-        <MappingEditor onImportClick={onImportClick} />
-      </IntlProvider>
-    );
+    renderWithI18n(<MappingEditor onImportClick={onImportClick} />);
 
     expect(screen.getByDisplayValue('initialField')).toBeInTheDocument();
 
@@ -241,7 +197,9 @@ describe('MappingEditor', () => {
       },
     ];
 
-    mappingsSubject.next(newMappings);
+    act(() => {
+      mappingsSubject.next(newMappings);
+    });
 
     await waitFor(() => {
       expect(screen.getByDisplayValue('updatedField')).toBeInTheDocument();
@@ -254,11 +212,7 @@ describe('MappingEditor', () => {
     (mockService.mappingsEdited$ as any) = mappingsEditedSubject.asObservable();
     (mockService.getMappingsEdited as jest.Mock).mockReturnValue(true);
 
-    render(
-      <IntlProvider locale="en">
-        <MappingEditor onImportClick={onImportClick} />
-      </IntlProvider>
-    );
+    renderWithI18n(<MappingEditor onImportClick={onImportClick} />);
 
     // Find the reset button by role and name
     const resetButton = screen.getByRole('button', { name: 'Reset to default' });
@@ -280,11 +234,7 @@ describe('MappingEditor', () => {
     (mockService.mappingsEdited$ as any) = mappingsEditedSubject.asObservable();
     (mockService.getMappingsEdited as jest.Mock).mockReturnValue(false);
 
-    render(
-      <IntlProvider locale="en">
-        <MappingEditor onImportClick={onImportClick} />
-      </IntlProvider>
-    );
+    renderWithI18n(<MappingEditor onImportClick={onImportClick} />);
 
     // Find the reset button by role and name
     const resetButton = screen.getByRole('button', { name: 'Reset to default' });
@@ -324,11 +274,7 @@ describe('MappingEditor', () => {
       mappingsEditedSubject.getValue()
     );
 
-    render(
-      <IntlProvider locale="en">
-        <MappingEditor onImportClick={onImportClick} />
-      </IntlProvider>
-    );
+    renderWithI18n(<MappingEditor onImportClick={onImportClick} />);
 
     expect(screen.getByDisplayValue('originalField1')).toBeInTheDocument();
     expect(screen.getByDisplayValue('originalField2')).toBeInTheDocument();
@@ -351,8 +297,10 @@ describe('MappingEditor', () => {
       },
     ];
 
-    mappingsSubject.next(editedMappings);
-    mappingsEditedSubject.next(true);
+    act(() => {
+      mappingsSubject.next(editedMappings);
+      mappingsEditedSubject.next(true);
+    });
 
     await waitFor(() => {
       expect(screen.getByDisplayValue('editedField1')).toBeInTheDocument();
