@@ -165,7 +165,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
           }),
         })
       );
-      expect(logger.info).toHaveBeenCalledWith(
+      expect(logger.debug).toHaveBeenCalledWith(
         `Skipping scheduled workflow ${workflow.id} execution - found existing non-terminal scheduled execution`
       );
     });

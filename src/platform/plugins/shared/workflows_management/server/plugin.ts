@@ -35,6 +35,7 @@ import { registerUISettings } from './ui_settings';
 import { defineRoutes } from './workflows_management/routes';
 import { WorkflowsManagementApi } from './workflows_management/workflows_management_api';
 import { WorkflowsService } from './workflows_management/workflows_management_service';
+import { stepSchemas } from '../common/step_schemas';
 // Import the workflows connector
 
 export class WorkflowsPlugin
@@ -141,7 +142,9 @@ export class WorkflowsPlugin
   }
 
   public start(core: CoreStart, plugins: WorkflowsServerPluginStartDeps) {
-    this.logger.info('Workflows Management: Start');
+    this.logger.debug('Workflows Management: Start');
+
+    stepSchemas.initialize(plugins.workflowsExtensions);
 
     // Initialize workflow task scheduler with the start contract
     this.workflowTaskScheduler = new WorkflowTaskScheduler(this.logger, plugins.taskManager);
@@ -157,7 +160,7 @@ export class WorkflowsPlugin
     const actionsTypes = plugins.actions.getAllTypes();
     this.logger.debug(`Available action types: ${actionsTypes.join(', ')}`);
 
-    this.logger.info('Workflows Management: Started');
+    this.logger.debug('Workflows Management: Started');
 
     return {};
   }

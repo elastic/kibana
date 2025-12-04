@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { SerializedError } from '@kbn/workflows';
 import type { EnterRetryNode } from '@kbn/workflows/graph';
+import { ExecutionError } from '../../../utils';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
@@ -21,16 +23,28 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
     private workflowLogger: IWorkflowEventLogger
   ) {}
 
-  public async run(): Promise<void> {
+  public run(): void {
     if (!this.stepExecutionRuntime.getCurrentStepState()) {
       // If retry state exists, it means we are re-entering the retry step
-      await this.initializeRetry();
+      this.initializeRetry();
       return;
     }
     this.advanceRetryAttempt();
   }
 
-  public catchError(): void {
+  public catchError(failedContext: StepExecutionRuntime): void {
+    const shouldRetry = failedContext.contextManager.evaluateBooleanExpressionInContext(
+      this.node.configuration.condition || true,
+      {
+        error: failedContext.getCurrentStepResult()?.error,
+      }
+    );
+
+    if (!shouldRetry) {
+      this.workflowLogger.logDebug(`Condition for retry step not met, propagating error.`);
+      return;
+    }
+
     const attempt = this.stepExecutionRuntime.getCurrentStepState()?.attempt ?? 0;
 
     if (attempt < this.node.configuration['max-attempts']) {
@@ -41,12 +55,19 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
       return;
     }
 
+    if (!failedContext.stepExecution?.error) {
+      // it should not happen that we are in catchError without an error, but just in case
+      this.stepExecutionRuntime.failStep(new Error('Retry step reached max attempts'));
+      return;
+    }
+
+    // fail retry with last error after exceeding max attempts
     this.stepExecutionRuntime.failStep(
-      new Error(`Retry step "${this.node.stepId}" has exceeded the maximum number of attempts.`)
+      new ExecutionError(failedContext.getCurrentStepResult()?.error as SerializedError)
     );
   }
 
-  private async initializeRetry(): Promise<void> {
+  private initializeRetry(): void {
     // Enter whole retry step scope
     this.stepExecutionRuntime.startStep();
     // Enter first attempt scope. Since attempt is 0 based, we add 1 to it.

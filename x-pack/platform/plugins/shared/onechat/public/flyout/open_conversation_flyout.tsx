@@ -9,15 +9,20 @@ import React, { Suspense, lazy } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { EuiLoadingSpinner, htmlIdGenerator } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { css } from '@emotion/react';
 import type { OpenConversationFlyoutOptions } from './types';
 import type { OnechatInternalService } from '../services';
 import type { ConversationFlyoutRef } from '../types';
+import type { EmbeddableConversationProps } from '../embeddable/types';
 
 const htmlId = htmlIdGenerator('onechat-conversation-flyout');
 
 interface OpenConversationFlyoutParams {
   coreStart: CoreStart;
   services: OnechatInternalService;
+  onClose?: () => void;
+  onPropsUpdate?: (callback: (props: EmbeddableConversationProps) => void) => void;
 }
 
 /**
@@ -29,7 +34,7 @@ interface OpenConversationFlyoutParams {
  */
 export function openConversationFlyout(
   options: OpenConversationFlyoutOptions,
-  { coreStart, services }: OpenConversationFlyoutParams
+  { coreStart, services, onClose, onPropsUpdate }: OpenConversationFlyoutParams
 ): { flyoutRef: ConversationFlyoutRef } {
   const { overlays, application, ...startServices } = coreStart;
 
@@ -46,9 +51,12 @@ export function openConversationFlyout(
     };
   });
 
+  const { onClose: externalOnClose, ...restOptions } = options;
+
   const handleOnClose = () => {
-    flyoutRef.close();
-    options.onClose?.();
+    flyoutRef.close(); // Always close the flyout
+    externalOnClose?.(); // Call external callback if provided
+    onClose?.(); // Call internal cleanup callback
   };
 
   const ariaLabelledBy = htmlId();
@@ -59,7 +67,8 @@ export function openConversationFlyout(
         <LazyEmbeddableConversationComponent
           onClose={handleOnClose}
           ariaLabelledBy={ariaLabelledBy}
-          {...options}
+          {...restOptions}
+          onPropsUpdate={onPropsUpdate}
         />
       </Suspense>,
       startServices
@@ -71,11 +80,18 @@ export function openConversationFlyout(
       type: 'push',
       hideCloseButton: true,
       'aria-labelledby': ariaLabelledBy,
+      maxWidth: 1200, // Maximum width for resizable flyout to prevent NaN error
+      css: css`
+        z-index: ${euiThemeVars.euiZFlyout + 3};
+      `,
     }
   );
 
   const conversationFlyoutRef: ConversationFlyoutRef = {
-    close: () => flyoutRef.close(),
+    close: () => {
+      flyoutRef.close();
+      onClose?.();
+    },
   };
 
   return {
