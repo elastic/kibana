@@ -150,7 +150,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       expect(await testSubjects.missingOrFail('cases'));
     });
 
-    it.only('renders expected side navigation items', async () => {
+    it('renders expected side navigation items', async () => {
       await solutionNavigation.sidenav.expectOnlyDefinedLinks(
         [
           // home:
@@ -181,7 +181,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.sidenav.feedbackCallout.expectMissing();
     });
 
-    it.only('renders tour', async () => {
+    it('renders tour', async () => {
       await solutionNavigation.sidenav.tour.reset();
       await solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-home');
       await solutionNavigation.sidenav.tour.nextStep();
