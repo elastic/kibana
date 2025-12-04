@@ -12,6 +12,7 @@ import {
   WorkflowsConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
+import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import {
   ValidatorType,
   type SubActionConnectorType,
@@ -19,23 +20,26 @@ import {
 import {
   CONNECTOR_ID,
   CONNECTOR_NAME,
-  ConfigSchema,
-  SecretsSchema,
-  type Config,
-  type Secrets,
+  MCPConnectorConfigSchema,
+  MCPConnectorSecretsSchema,
+  type MCPConnectorConfig,
+  type MCPConnectorSecrets,
 } from '@kbn/connector-schemas/mcp';
 import { McpConnector } from './mcp';
 
-export const getMcpConnectorType = (): SubActionConnectorType<Config, Secrets> => ({
+export const getMcpConnectorType = (): SubActionConnectorType<
+  MCPConnectorConfig,
+  MCPConnectorSecrets
+> => ({
   id: CONNECTOR_ID,
   name: CONNECTOR_NAME,
   getService: (params) => new McpConnector(params),
   schema: {
-    config: ConfigSchema,
-    secrets: SecretsSchema,
+    config: MCPConnectorConfigSchema,
+    secrets: MCPConnectorSecretsSchema,
   },
   validators: [
-    { type: ValidatorType.CONFIG, validator: urlAllowListValidator('serverUrl') },
+    { type: ValidatorType.CONFIG, validator: configValidator },
     { type: ValidatorType.SECRETS, validator: secretsValidator },
   ],
   supportedFeatureIds: [
@@ -47,6 +51,17 @@ export const getMcpConnectorType = (): SubActionConnectorType<Config, Secrets> =
   minimumLicenseRequired: 'enterprise' as const,
 });
 
-const secretsValidator = (secrets: Secrets) => {
-  return;
+const configValidator = (config: MCPConnectorConfig, validatorServices: ValidatorServices) => {
+  // Validate that the URL is allowed
+  // urlAllowListValidator uses lodash get() which supports nested paths like 'service.http.url'
+  urlAllowListValidator('service.http.url')(config, validatorServices);
+};
+
+const secretsValidator = (secrets: MCPConnectorSecrets) => {
+  // The schema validation ensures the discriminated union is correct
+  // Additional validation can be added here if needed
+  // The schema already enforces min(1) for customHeaders, so this check is redundant but kept for clarity
+  if (secrets.authType === 'customHeaders' && secrets.headers.length === 0) {
+    throw new Error('customHeaders auth type requires at least one header');
+  }
 };

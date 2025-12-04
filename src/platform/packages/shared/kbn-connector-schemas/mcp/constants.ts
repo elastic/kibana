@@ -13,3 +13,14 @@ export const CONNECTOR_ID = '.mcp';
 export const CONNECTOR_NAME = i18n.translate('connectors.mcp.title', {
   defaultMessage: 'MCP',
 });
+
+/**
+ * Default inactivity timeout for MCP connections.
+ * Connections will be automatically disconnected after this period of inactivity.
+ */
+export const DEFAULT_INACTIVITY_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
+
+/**
+ * MCP client version used by the connector.
+ */
+export const MCP_CLIENT_VERSION = '1.0.0';
