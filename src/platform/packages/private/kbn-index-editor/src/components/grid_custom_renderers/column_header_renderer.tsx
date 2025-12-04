@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import type { CustomGridColumnProps } from '@kbn/unified-data-table';
 import type { HTMLAttributes } from 'react';
-import React from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { IndexUpdateService } from '../../index_update_service';
@@ -118,6 +118,12 @@ const ColumnHeader = ({
   originalColumnDisplay,
 }: ColumnHeaderProps) => {
   const { euiTheme } = useEuiTheme();
+  const [renderKey, setRenderKey] = useState(0);
+
+  const handleClosePopover = () => {
+    setEditingColumnIndex(null);
+    setRenderKey((prev) => prev + 1);
+  };
 
   const columnLabel = isPlaceholderColumn(initialColumnName) ? (
     <EuiFlexGroup alignItems="center" gutterSize="xs" wrap={false}>
@@ -181,8 +187,9 @@ const ColumnHeader = ({
 
   return (
     <AddColumnPopover
+      key={`${renderKey}`}
       isPopoverOpen={isColumnInEditMode}
-      closePopover={() => setEditingColumnIndex(null)}
+      closePopover={handleClosePopover}
       initialColumnName={initialColumnName}
       initialColumnType={initialColumnType}
       columnIndex={columnIndex}
