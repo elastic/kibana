@@ -38,6 +38,7 @@ import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { pushFlyoutPaddingStyles } from '../../../../common.styles';
 import { docLinks } from '../../../../../common/doc_links';
 import { useAgentEdit } from '../../../hooks/agents/use_agent_edit';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -594,7 +595,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
         position="fixed"
         usePortal
       >
-        <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+        <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" css={pushFlyoutPaddingStyles}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               aria-label={labels.agents.settings.cancelButtonLabel}
