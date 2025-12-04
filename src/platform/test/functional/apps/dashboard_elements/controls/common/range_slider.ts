@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const DASHBOARD_NAME = 'Test Range Slider Control';
 
-  describe.only('Range Slider Control', () => {
+  describe('Range Slider Control', () => {
     before(async () => {
       await security.testUser.setRoles([
         'kibana_admin',
