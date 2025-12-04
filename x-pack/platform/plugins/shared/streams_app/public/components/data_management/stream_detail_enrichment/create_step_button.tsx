@@ -20,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 import {
   useInteractiveModeSelector,
   useStreamEnrichmentEvents,
+  useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
 import { selectStreamType } from './state_management/stream_enrichment_state_machine/selectors';
 

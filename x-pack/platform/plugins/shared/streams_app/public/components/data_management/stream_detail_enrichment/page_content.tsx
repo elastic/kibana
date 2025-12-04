@@ -29,8 +29,12 @@ import {
   useGetStreamEnrichmentState,
   useStreamEnrichmentEvents,
   useSimulatorSelector,
+  useOptionalInteractiveModeSelector,
 } from './state_management/stream_enrichment_state_machine';
-import { selectIsInteractiveMode } from './state_management/stream_enrichment_state_machine/selectors';
+import {
+  selectIsInteractiveMode,
+  selectStreamType,
+} from './state_management/stream_enrichment_state_machine/selectors';
 import { StepsEditor } from './steps/steps_editor';
 import { RunSimulationButton } from './yaml_mode/run_simulation_button';
 import { YamlEditorWrapper } from './yaml_mode/yaml_editor_wrapper';
@@ -169,17 +173,21 @@ export function StreamDetailEnrichmentContentImpl() {
 
   const hasChanges = useStreamEnrichmentSelector((state) => state.context.hasChanges);
 
-  const showManagementBar = hasChanges && !interactiveModeWithStepUnderEdit && !isSuggestionVisible;
-
   const streamType = useStreamEnrichmentSelector((snapshot) => selectStreamType(snapshot.context));
 
-  const isLoadingSuggestion = useStreamEnrichmentSelector((snapshot) =>
-    snapshot.matches({ ready: { enrichment: { pipelineSuggestion: 'generatingSuggestion' } } })
+  // Pipeline suggestion state from interactive mode machine (defaults to false when not in interactive mode)
+  const isLoadingSuggestion = useOptionalInteractiveModeSelector(
+    (snapshot) => snapshot.matches({ pipelineSuggestion: 'generatingSuggestion' }),
+    false
   );
-  const isViewingSuggestion = useStreamEnrichmentSelector((snapshot) =>
-    snapshot.matches({ ready: { enrichment: { pipelineSuggestion: 'viewingSuggestion' } } })
+  const isViewingSuggestion = useOptionalInteractiveModeSelector(
+    (snapshot) => snapshot.matches({ pipelineSuggestion: 'viewingSuggestion' }),
+    false
   );
   const isSuggestionVisible = isLoadingSuggestion || isViewingSuggestion;
+
+  const showManagementBar = hasChanges && !interactiveModeWithStepUnderEdit && !isSuggestionVisible;
+
   const {
     isRequestPreviewFlyoutOpen,
     requestPreviewFlyoutCodeContent,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type { StreamlangDSL, StreamType } from './types/streamlang';
+export type { StreamlangDSL, StreamType, StreamlangWhereBlock } from './types/streamlang';
 export { streamlangDSLSchema, isActionBlock, isWhereBlock } from './types/streamlang';
 export { transpile as transpileIngestPipeline } from './src/transpilers/ingest_pipeline';
 export { transpile as transpileEsql, conditionToESQL } from './src/transpilers/esql';

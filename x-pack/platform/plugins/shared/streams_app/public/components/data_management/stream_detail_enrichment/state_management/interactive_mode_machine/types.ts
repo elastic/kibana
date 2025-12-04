@@ -11,10 +11,20 @@ import type {
 } from '@kbn/streamlang';
 import type { StreamlangDSL, StreamlangWhereBlock } from '@kbn/streamlang/types/streamlang';
 import type { DraftGrokExpression } from '@kbn/grok-ui';
+import type { IToasts, NotificationsStart } from '@kbn/core/public';
+import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import type { SimulationActorRef } from '../simulation_state_machine';
-import type { DataSourceSimulationMode } from '../data_source_state_machine';
+import type { DataSourceActorRef, DataSourceSimulationMode } from '../data_source_state_machine';
 import type { StepActorRef } from '../steps_state_machine';
 import type { StreamPrivileges } from '../stream_enrichment_state_machine/types';
+import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
+
+export interface InteractiveModeMachineDeps {
+  streamsRepositoryClient: StreamsRepositoryClient;
+  notifications: NotificationsStart;
+  toasts: IToasts;
+  telemetryClient: StreamsTelemetryClient;
+}
 
 export type InteractiveModeToParentEvent =
   | { type: 'mode.dslUpdated'; dsl: StreamlangDSL }
@@ -24,6 +34,7 @@ export type InteractiveModeToParentEvent =
 interface InteractiveModeParentSnapshot {
   context: {
     simulatorRef: SimulationActorRef;
+    dataSourcesRefs: DataSourceActorRef[];
   };
 }
 
@@ -44,6 +55,10 @@ export interface InteractiveModeContext {
   privileges: StreamPrivileges;
   // Current simulation mode based on the active data source
   simulationMode: DataSourceSimulationMode;
+  // Stream name for pipeline suggestion
+  streamName: string;
+  // AI suggested pipeline suggestion, if any.
+  suggestedPipeline?: StreamlangDSL;
 }
 
 export interface InteractiveModeInput {
@@ -57,6 +72,8 @@ export interface InteractiveModeInput {
   privileges: StreamPrivileges;
   // Current simulation mode based on the active data source
   simulationMode: DataSourceSimulationMode;
+  // Stream name for pipeline suggestion
+  streamName: string;
 }
 
 export type InteractiveModeEvent =
@@ -91,4 +108,11 @@ export type InteractiveModeEvent =
   | {
       type: 'dataSource.activeChanged';
       simulationMode: DataSourceSimulationMode;
-    };
+    }
+  // Suggestions
+  | { type: 'suggestion.generate'; connectorId: string }
+  | { type: 'suggestion.cancel' }
+  | { type: 'suggestion.accept' }
+  | { type: 'suggestion.dismiss' }
+  | { type: 'suggestion.regenerate'; connectorId: string }
+  | { type: 'step.resetSteps'; steps: StreamlangDSL['steps'] };

@@ -202,7 +202,7 @@ const validateConvertActionConditions = (
       // Validate convert processor
       const hasTargetField = Boolean(step.to?.trim());
       const isEqualToSourceField = step.to?.trim() === step.from.trim();
-      const hasCondition = 'where' in step && !isAlwaysCondition(step.where);
+      const hasCondition = 'where' in step && step.where && !isAlwaysCondition(step.where);
 
       // Validation for steps within a where block
       if (isWithinWhereBlock) {

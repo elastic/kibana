@@ -17,6 +17,7 @@ import {
   useSimulatorSelector,
   useStreamEnrichmentSelector,
   useStreamEnrichmentEvents,
+  useInteractiveModeSelector,
 } from './state_management/stream_enrichment_state_machine';
 import { hasValidMessageFieldsForSuggestion } from './utils';
 import { NoStepsEmptyPrompt } from './empty_prompts';
@@ -30,7 +31,9 @@ import { SuggestPipelinePanel } from './pipeline_suggestions/suggest_pipeline_pa
 import { getActiveDataSourceRef } from './state_management/stream_enrichment_state_machine/utils';
 
 export const StepsEditor = React.memo(() => {
-  const stepRefs = useStreamEnrichmentSelector((state) => state.context.stepRefs);
+  // Step refs from interactive mode machine
+  const stepRefs = useInteractiveModeSelector((snapshot) => snapshot.context.stepRefs);
+
   const simulation = useSimulatorSelector((snapshot) => snapshot.context.simulation);
   const samples = useSimulatorSelector((snapshot) => snapshot.context.samples);
   const isLoadingSamples = useStreamEnrichmentSelector((state) =>
@@ -39,15 +42,15 @@ export const StepsEditor = React.memo(() => {
       .matches({ enabled: 'loadingData' })
   );
 
-  // Pipeline suggestion state
-  const isLoadingSuggestion = useStreamEnrichmentSelector((snapshot) =>
-    snapshot.matches({ ready: { enrichment: { pipelineSuggestion: 'generatingSuggestion' } } })
+  // Pipeline suggestion state from interactive mode machine
+  const isLoadingSuggestion = useInteractiveModeSelector((snapshot) =>
+    snapshot.matches({ pipelineSuggestion: 'generatingSuggestion' })
   );
-  const suggestedPipeline = useStreamEnrichmentSelector(
+  const suggestedPipeline = useInteractiveModeSelector(
     (snapshot) => snapshot.context.suggestedPipeline
   );
-  const isViewingSuggestion = useStreamEnrichmentSelector((snapshot) =>
-    snapshot.matches({ ready: { enrichment: { pipelineSuggestion: 'viewingSuggestion' } } })
+  const isViewingSuggestion = useInteractiveModeSelector((snapshot) =>
+    snapshot.matches({ pipelineSuggestion: 'viewingSuggestion' })
   );
 
   // Pipeline suggestion events
@@ -94,6 +97,7 @@ export const StepsEditor = React.memo(() => {
   const hasSteps = !isEmpty(stepRefs);
 
   const aiFeatures = useAIFeatures();
+
   const {
     definition: { stream },
   } = useStreamDetail();

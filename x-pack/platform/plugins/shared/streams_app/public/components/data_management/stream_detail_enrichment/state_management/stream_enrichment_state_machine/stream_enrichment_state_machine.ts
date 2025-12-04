@@ -9,8 +9,6 @@ import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { Streams } from '@kbn/streams-schema';
 import { GrokCollection } from '@kbn/grok-ui';
 import type { MachineImplementationsFrom, ActorRefFrom, SnapshotFrom } from 'xstate5';
-import { htmlIdGenerator } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 import {
   addDeterministicCustomIdentifiers,
@@ -55,12 +53,10 @@ import {
 import { setupGrokCollectionActor } from './setup_grok_collection_actor';
 import { interactiveModeMachine } from '../interactive_mode_machine';
 import { yamlModeMachine } from '../yaml_mode_machine';
-import { createSuggestPipelineActor } from './suggest_pipeline_actor';
+import { createInteractiveModeMachineImplementations } from '../interactive_mode_machine/interactive_mode_machine';
 
 export type StreamEnrichmentActorRef = ActorRefFrom<typeof streamEnrichmentMachine>;
 export type StreamEnrichmentActorSnapshot = SnapshotFrom<typeof streamEnrichmentMachine>;
-
-const createId = htmlIdGenerator();
 
 export const streamEnrichmentMachine = setup({
   types: {
@@ -76,12 +72,10 @@ export const streamEnrichmentMachine = setup({
     simulationMachine: getPlaceholderFor(() => simulationMachine),
     interactiveModeMachine: getPlaceholderFor(() => interactiveModeMachine),
     yamlModeMachine: getPlaceholderFor(() => yamlModeMachine),
-    suggestPipeline: getPlaceholderFor(createSuggestPipelineActor),
   },
   actions: {
     notifyUpsertStreamSuccess: getPlaceholderFor(createUpsertStreamSuccessNofitier),
     notifyUpsertStreamFailure: getPlaceholderFor(createUpsertStreamFailureNofitier),
-    notifySuggestionFailure: () => {}, // Placeholder for suggestion failure notification
     refreshDefinition: () => {},
     /* URL state actions */
     storeUrlState: assign((_, params: { urlState: EnrichmentUrlState }) => ({
@@ -115,7 +109,6 @@ export const streamEnrichmentMachine = setup({
           throw error;
         }
       }
-
       return {
         nextStreamlangDSL: params.dsl,
         isNextStreamlangDSLValid: isValid,
@@ -141,6 +134,7 @@ export const streamEnrichmentMachine = setup({
             privileges: context.definition.privileges,
             newStepIds: additiveChanges.newStepIds ?? [],
             simulationMode,
+            streamName: context.definition.stream.name,
           },
         }),
         yamlModeRef: undefined, // Clear YAML mode ref when switching to interactive
@@ -205,11 +199,6 @@ export const streamEnrichmentMachine = setup({
         simulationMode,
       });
     },
-    /* Pipeline suggestion actions */
-    storeSuggestedPipeline: assign((_, params: { pipeline: StreamlangDSL }) => ({
-      suggestedPipeline: params.pipeline,
-    })),
-    clearSuggestion: assign({ suggestedPipeline: undefined }),
     sendDataSourcesSamplesToSimulator: sendTo('simulator', ({ context }) => ({
       type: 'simulation.receive_samples',
       samples: getActiveDataSourceSamples(context),
@@ -484,12 +473,8 @@ export const streamEnrichmentMachine = setup({
                     'step.*': {
                       actions: forwardTo('interactiveMode'),
                     },
-                    'step.resetSteps': {
-                      guard: 'hasManagePrivileges',
-                      actions: [
-                        { type: 'overwriteSteps', params: ({ event }) => event },
-                        { type: 'sendStepsEventToSimulator' },
-                      ],
+                    'suggestion.*': {
+                      actions: forwardTo('interactiveMode'),
                     },
                   },
                 },
@@ -518,93 +503,6 @@ export const streamEnrichmentMachine = setup({
                 },
               },
             },
-            pipelineSuggestion: {
-              initial: 'idle',
-              states: {
-                idle: {
-                  on: {
-                    'suggestion.generate': {
-                      guard: ({ context }) => context.stepRefs.length === 0,
-                      target: 'generatingSuggestion',
-                    },
-                  },
-                },
-                generatingSuggestion: {
-                  invoke: {
-                    id: 'suggestPipelineActor',
-                    src: 'suggestPipeline',
-                    input: ({ context, event }) => {
-                      assertEvent(event, ['suggestion.generate', 'suggestion.regenerate']);
-                      // Get preview documents from simulator
-                      const documents = getActiveDataSourceSamples(context);
-
-                      return {
-                        streamName: context.definition.stream.name,
-                        connectorId: event.connectorId,
-                        documents,
-                      };
-                    },
-                    onDone: {
-                      target: 'viewingSuggestion',
-                      actions: [
-                        {
-                          type: 'storeSuggestedPipeline',
-                          params: ({ event }) => ({ pipeline: event.output }),
-                        },
-                        {
-                          type: 'overwriteSteps',
-                          params: ({ event }) => ({ steps: event.output.steps }),
-                        },
-                      ],
-                    },
-                    onError: {
-                      target: 'idle',
-                      actions: [
-                        {
-                          type: 'notifySuggestionFailure',
-                          params: ({ event }: { event: { error: unknown } }) => ({ event }),
-                        },
-                      ],
-                    },
-                  },
-                  on: {
-                    'suggestion.cancel': {
-                      target: 'idle',
-                      actions: [
-                        { type: 'clearSuggestion' },
-                        { type: 'overwriteSteps', params: () => ({ steps: [] }) },
-                        { type: 'sendStepsEventToSimulator' },
-                      ],
-                    },
-                  },
-                },
-                viewingSuggestion: {
-                  entry: [{ type: 'sendStepsEventToSimulator' }],
-                  on: {
-                    'suggestion.accept': {
-                      target: 'idle',
-                      actions: [{ type: 'clearSuggestion' }],
-                    },
-                    'suggestion.dismiss': {
-                      target: 'idle',
-                      actions: [
-                        { type: 'clearSuggestion' },
-                        { type: 'overwriteSteps', params: () => ({ steps: [] }) },
-                        { type: 'sendStepsEventToSimulator' },
-                      ],
-                    },
-                    'suggestion.regenerate': {
-                      target: 'generatingSuggestion',
-                      actions: [
-                        { type: 'clearSuggestion' },
-                        { type: 'overwriteSteps', params: () => ({ steps: [] }) },
-                        { type: 'sendStepsEventToSimulator' },
-                      ],
-                    },
-                  },
-                },
-              },
-            },
           },
         },
       },
@@ -626,7 +524,14 @@ export const createStreamEnrichmentMachineImplementations = ({
     initializeUrl: createUrlInitializerActor({ core, urlStateStorageContainer }),
     upsertStream: createUpsertStreamActor({ streamsRepositoryClient, telemetryClient }),
     setupGrokCollection: setupGrokCollectionActor(),
-    interactiveModeMachine,
+    interactiveModeMachine: interactiveModeMachine.provide(
+      createInteractiveModeMachineImplementations({
+        toasts: core.notifications.toasts,
+        telemetryClient,
+        streamsRepositoryClient,
+        notifications: core.notifications,
+      })
+    ),
     yamlModeMachine,
     dataSourceMachine: dataSourceMachine.provide(
       createDataSourceMachineImplementations({
@@ -642,11 +547,6 @@ export const createStreamEnrichmentMachineImplementations = ({
         toasts: core.notifications.toasts,
       })
     ),
-    suggestPipeline: createSuggestPipelineActor({
-      streamsRepositoryClient,
-      telemetryClient,
-      notifications: core.notifications,
-    }),
   },
   actions: {
     refreshDefinition,
@@ -657,15 +557,5 @@ export const createStreamEnrichmentMachineImplementations = ({
     notifyUpsertStreamFailure: createUpsertStreamFailureNofitier({
       toasts: core.notifications.toasts,
     }),
-    notifySuggestionFailure: (params: { event: unknown }) => {
-      const event = params.event as { error: Error };
-      core.notifications.toasts.addError(event.error, {
-        title: i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.suggestionError',
-          { defaultMessage: 'Failed to generate pipeline suggestion' }
-        ),
-        toastMessage: event.error.message,
-      });
-    },
   },
 });

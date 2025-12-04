@@ -6,6 +6,7 @@
  */
 
 import { htmlIdGenerator } from '@elastic/eui';
+import type { MachineImplementationsFrom } from 'xstate5';
 import {
   assign,
   setup,
@@ -13,6 +14,7 @@ import {
   enqueueActions,
   type ActorRefFrom,
   type SnapshotFrom,
+  assertEvent,
 } from 'xstate5';
 import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
 import {
@@ -22,7 +24,8 @@ import {
   addDeterministicCustomIdentifiers,
   convertStepsForUI,
 } from '@kbn/streamlang';
-import type { StreamlangWhereBlock } from '@kbn/streamlang/types/streamlang';
+import type { StreamlangDSL, StreamlangWhereBlock } from '@kbn/streamlang/types/streamlang';
+import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { stepMachine } from '../steps_state_machine';
 import { getDefaultGrokProcessor, stepConverter } from '../../utils';
 import {
@@ -31,11 +34,25 @@ import {
   insertAtIndex,
   reorderSteps,
 } from '../stream_enrichment_state_machine/utils';
-import type { InteractiveModeContext, InteractiveModeInput, InteractiveModeEvent } from './types';
-import { getStepsForSimulation, spawnStep } from './utils';
+import type {
+  InteractiveModeContext,
+  InteractiveModeInput,
+  InteractiveModeEvent,
+  InteractiveModeMachineDeps,
+} from './types';
+import {
+  getStepsForSimulation,
+  spawnStep,
+  getActiveDataSourceSamplesFromParent,
+  type StepSpawner,
+} from './utils';
 import { selectWhetherAnyProcessorBeforePersisted } from './selectors';
 import { selectPreviewRecords } from '../simulation_state_machine/selectors';
 import type { StepParentActor } from '../steps_state_machine/types';
+import {
+  createNotifySuggestionFailureNotifier,
+  createSuggestPipelineActor,
+} from './suggest_pipeline_actor';
 
 export type InteractiveModeActorRef = ActorRefFrom<typeof interactiveModeMachine>;
 export type InteractiveModeSnapshot = SnapshotFrom<typeof interactiveModeMachine>;
@@ -50,8 +67,10 @@ export const interactiveModeMachine = setup({
   },
   actors: {
     stepMachine,
+    suggestPipeline: getPlaceholderFor(createSuggestPipelineActor),
   },
   actions: {
+    notifySuggestionFailure: (_, __: { event: { error: unknown } }) => {},
     addProcessor: assign(
       (
         assignArgs,
@@ -74,9 +93,12 @@ export const interactiveModeMachine = setup({
         const convertedProcessor = stepConverter.toUIDefinition(processor, conversionOptions);
 
         const parentRef: StepParentActor = assignArgs.self;
-        const newProcessorRef = spawnStep(convertedProcessor, parentRef, assignArgs.spawn, {
-          isNew: true,
-        });
+        const newProcessorRef = spawnStep(
+          convertedProcessor,
+          parentRef,
+          assignArgs.spawn as StepSpawner,
+          { isNew: true }
+        );
         const insertIndex = findInsertIndex(
           assignArgs.context.stepRefs,
           conversionOptions.parentId
@@ -106,10 +128,8 @@ export const interactiveModeMachine = setup({
           customIdentifier: createId(),
         },
         parentRef,
-        assignArgs.spawn,
-        {
-          isNew: true,
-        }
+        assignArgs.spawn as StepSpawner,
+        { isNew: true }
       );
       const insertIndex = findInsertIndex(assignArgs.context.stepRefs, parentId);
 
@@ -141,9 +161,12 @@ export const interactiveModeMachine = setup({
         const convertedCondition = stepConverter.toUIDefinition(condition, conversionOptions);
 
         const parentRef: StepParentActor = assignArgs.self;
-        const newProcessorRef = spawnStep(convertedCondition, parentRef, assignArgs.spawn, {
-          isNew: true,
-        });
+        const newProcessorRef = spawnStep(
+          convertedCondition,
+          parentRef,
+          assignArgs.spawn as StepSpawner,
+          { isNew: true }
+        );
         const insertIndex = findInsertIndex(
           assignArgs.context.stepRefs,
           conversionOptions.parentId
@@ -211,6 +234,7 @@ export const interactiveModeMachine = setup({
         }),
       });
     }),
+    /* Pipeline suggestion actions */
     overwriteSteps: assign((assignArgs, params: { steps: StreamlangDSL['steps'] }) => {
       // Clean-up existing step refs
       assignArgs.context.stepRefs.forEach(stopChild);
@@ -219,14 +243,24 @@ export const interactiveModeMachine = setup({
       // Mark as isNew: true so they're tracked as new additions
       // Mark as isUpdated: true so they skip draft and go to configured state (can be simulated)
       const uiSteps = convertStepsForUI({ steps: params.steps });
+
+      const parentRef: StepParentActor = assignArgs.self;
+
       const stepRefs = uiSteps.map((step) => {
-        return spawnStep(step, assignArgs, { isNew: true, isUpdated: true });
+        return spawnStep(step, parentRef, assignArgs.spawn as StepSpawner, {
+          isNew: true,
+          isUpdated: true,
+        });
       });
 
       return {
         stepRefs,
       };
     }),
+    storeSuggestedPipeline: assign((_, params: { pipeline: StreamlangDSL }) => ({
+      suggestedPipeline: params.pipeline,
+    })),
+    clearSuggestion: assign({ suggestedPipeline: undefined }),
   },
   guards: {
     hasStagedChanges: ({ context }) => {
@@ -260,7 +294,7 @@ export const interactiveModeMachine = setup({
       // "new" and also "updated" (to mimic being fully configured in interactive mode). "new" alone would just
       // denote a draft state.
       const shouldBeMarkedAsNewAndUpdated = input.newStepIds.includes(step.customIdentifier);
-      return spawnStep(step, parentRef, spawn, {
+      return spawnStep(step, parentRef, spawn as StepSpawner, {
         isNew: shouldBeMarkedAsNewAndUpdated,
         isUpdated: shouldBeMarkedAsNewAndUpdated,
       });
@@ -272,9 +306,11 @@ export const interactiveModeMachine = setup({
       parentRef: input.parentRef,
       privileges: input.privileges,
       simulationMode: input.simulationMode,
+      streamName: input.streamName,
+      suggestedPipeline: undefined,
     };
   },
-  initial: 'idle',
+  type: 'parallel',
   on: {
     'dataSource.activeChanged': {
       actions: [
@@ -287,95 +323,224 @@ export const interactiveModeMachine = setup({
     },
   },
   states: {
-    idle: {
-      entry: [{ type: 'syncToDSL' }, { type: 'sendStepsToSimulator' }],
-      on: {
-        'step.change': {
-          actions: [
-            { type: 'reassignSteps' },
-            { type: 'sendStepsToSimulator', params: ({ event }) => event },
-          ],
+    pipelineSuggestion: {
+      initial: 'idle',
+      states: {
+        idle: {
+          on: {
+            'suggestion.generate': {
+              guard: ({ context }) => context.stepRefs.length === 0,
+              target: 'generatingSuggestion',
+            },
+          },
         },
-        'step.edit': {
-          guard: 'hasSimulatePrivileges',
-          target: 'editing',
+        generatingSuggestion: {
+          invoke: {
+            id: 'suggestPipelineActor',
+            src: 'suggestPipeline',
+            input: ({ context, event }) => {
+              assertEvent(event, ['suggestion.generate', 'suggestion.regenerate']);
+              // Get preview documents from parent's data sources
+              const documents = getActiveDataSourceSamplesFromParent(context);
+
+              return {
+                streamName: context.streamName,
+                connectorId: event.connectorId,
+                documents,
+              };
+            },
+            onDone: {
+              target: 'viewingSuggestion',
+              actions: [
+                {
+                  type: 'storeSuggestedPipeline',
+                  params: ({ event }) => ({ pipeline: event.output }),
+                },
+                {
+                  type: 'overwriteSteps',
+                  params: ({ event }) => ({ steps: event.output.steps }),
+                },
+              ],
+            },
+            onError: {
+              target: 'idle',
+              actions: [
+                {
+                  type: 'notifySuggestionFailure',
+                  params: ({ event }: { event: { error: unknown } }) => ({ event }),
+                },
+              ],
+            },
+          },
+          on: {
+            'suggestion.cancel': {
+              target: 'idle',
+              actions: [
+                { type: 'clearSuggestion' },
+                {
+                  type: 'overwriteSteps',
+                  params: () => ({ steps: [] }),
+                },
+                { type: 'syncToDSL' },
+                { type: 'sendStepsToSimulator' },
+              ],
+            },
+          },
         },
-        'step.reorder': {
-          guard: 'hasSimulatePrivileges',
-          actions: [{ type: 'reorderSteps', params: ({ event }) => event }],
-          target: 'idle',
-          reenter: true,
-        },
-        'step.delete': {
-          target: 'idle',
-          guard: 'hasManagePrivileges',
-          actions: [
-            stopChild(({ event }) => event.id),
-            { type: 'deleteStep', params: ({ event }) => event },
-          ],
-          reenter: true,
-        },
-        'step.duplicateProcessor': {
-          target: 'creating',
-          guard: 'hasManagePrivileges',
-          actions: [{ type: 'duplicateProcessor', params: ({ event }) => event }],
-        },
-        'step.addProcessor': {
-          guard: 'hasSimulatePrivileges',
-          target: 'creating',
-          actions: [{ type: 'addProcessor', params: ({ event }) => event }],
-        },
-        'step.addCondition': {
-          guard: 'hasSimulatePrivileges',
-          target: 'creating',
-          actions: [{ type: 'addCondition', params: ({ event }) => event }],
+        viewingSuggestion: {
+          entry: [{ type: 'syncToDSL' }, { type: 'sendStepsToSimulator' }],
+          on: {
+            'suggestion.accept': {
+              target: 'idle',
+              actions: [{ type: 'syncToDSL' }, { type: 'clearSuggestion' }],
+            },
+            'suggestion.dismiss': {
+              target: 'idle',
+              actions: [
+                { type: 'clearSuggestion' },
+                {
+                  type: 'overwriteSteps',
+                  params: () => ({ steps: [] }),
+                },
+                { type: 'syncToDSL' },
+                { type: 'sendStepsToSimulator' },
+              ],
+            },
+            'suggestion.regenerate': {
+              target: 'generatingSuggestion',
+              actions: [
+                { type: 'clearSuggestion' },
+                {
+                  type: 'overwriteSteps',
+                  params: () => ({ steps: [] }),
+                },
+                { type: 'syncToDSL' },
+                { type: 'sendStepsToSimulator' },
+              ],
+            },
+          },
         },
       },
     },
-    creating: {
-      entry: [{ type: 'syncToDSL' }, { type: 'sendStepsToSimulator' }],
-      on: {
-        'step.change': {
-          actions: [
-            { type: 'reassignSteps' },
-            { type: 'syncToDSL' },
-            { type: 'sendStepsToSimulator' },
-          ],
+    steps: {
+      initial: 'idle',
+      states: {
+        idle: {
+          entry: [{ type: 'syncToDSL' }, { type: 'sendStepsToSimulator' }],
+          on: {
+            'step.change': {
+              actions: [
+                { type: 'reassignSteps' },
+                { type: 'sendStepsToSimulator', params: ({ event }) => event },
+              ],
+            },
+            'step.edit': {
+              guard: 'hasSimulatePrivileges',
+              target: 'editing',
+            },
+            'step.reorder': {
+              guard: 'hasSimulatePrivileges',
+              actions: [{ type: 'reorderSteps', params: ({ event }) => event }],
+              target: 'idle',
+              reenter: true,
+            },
+            'step.delete': {
+              target: 'idle',
+              guard: 'hasManagePrivileges',
+              actions: [
+                stopChild(({ event }) => event.id),
+                { type: 'deleteStep', params: ({ event }) => event },
+              ],
+              reenter: true,
+            },
+            'step.duplicateProcessor': {
+              target: 'creating',
+              guard: 'hasManagePrivileges',
+              actions: [{ type: 'duplicateProcessor', params: ({ event }) => event }],
+            },
+            'step.addProcessor': {
+              guard: 'hasSimulatePrivileges',
+              target: 'creating',
+              actions: [{ type: 'addProcessor', params: ({ event }) => event }],
+            },
+            'step.addCondition': {
+              guard: 'hasSimulatePrivileges',
+              target: 'creating',
+              actions: [{ type: 'addCondition', params: ({ event }) => event }],
+            },
+            'step.resetSteps': {
+              guard: 'hasManagePrivileges',
+              actions: [
+                { type: 'overwriteSteps', params: ({ event }) => event },
+                { type: 'sendStepsToSimulator' },
+              ],
+            },
+          },
         },
-        'step.delete': {
-          target: 'idle',
-          guard: 'hasManagePrivileges',
-          actions: [
-            stopChild(({ event }) => event.id),
-            { type: 'deleteStep', params: ({ event }) => event },
-          ],
+        creating: {
+          entry: [{ type: 'syncToDSL' }, { type: 'sendStepsToSimulator' }],
+          on: {
+            'step.change': {
+              actions: [
+                { type: 'reassignSteps' },
+                { type: 'syncToDSL' },
+                { type: 'sendStepsToSimulator' },
+              ],
+            },
+            'step.delete': {
+              target: 'idle',
+              guard: 'hasManagePrivileges',
+              actions: [
+                stopChild(({ event }) => event.id),
+                { type: 'deleteStep', params: ({ event }) => event },
+              ],
+            },
+            'step.save': {
+              target: 'idle',
+              actions: [{ type: 'reassignSteps' }, { type: 'syncToDSL' }],
+            },
+          },
         },
-        'step.save': {
-          target: 'idle',
-          actions: [{ type: 'reassignSteps' }, { type: 'syncToDSL' }],
+        editing: {
+          entry: [{ type: 'syncToDSL' }, { type: 'sendStepsToSimulator' }],
+          on: {
+            'step.change': {
+              actions: [{ type: 'syncToDSL' }, { type: 'sendStepsToSimulator' }],
+            },
+            'step.cancel': 'idle',
+            'step.delete': {
+              target: 'idle',
+              guard: 'hasManagePrivileges',
+              actions: [
+                stopChild(({ event }) => event.id),
+                { type: 'deleteStep', params: ({ event }) => event },
+              ],
+            },
+            'step.save': {
+              target: 'idle',
+              actions: [{ type: 'reassignSteps' }, { type: 'syncToDSL' }],
+            },
+          },
         },
       },
     },
-    editing: {
-      entry: [{ type: 'syncToDSL' }, { type: 'sendStepsToSimulator' }],
-      on: {
-        'step.change': {
-          actions: [{ type: 'syncToDSL' }, { type: 'sendStepsToSimulator' }],
-        },
-        'step.cancel': 'idle',
-        'step.delete': {
-          target: 'idle',
-          guard: 'hasManagePrivileges',
-          actions: [
-            stopChild(({ event }) => event.id),
-            { type: 'deleteStep', params: ({ event }) => event },
-          ],
-        },
-        'step.save': {
-          target: 'idle',
-          actions: [{ type: 'reassignSteps' }, { type: 'syncToDSL' }],
-        },
-      },
-    },
+  },
+});
+
+export const createInteractiveModeMachineImplementations = ({
+  streamsRepositoryClient,
+  toasts,
+  telemetryClient,
+  notifications,
+}: InteractiveModeMachineDeps): MachineImplementationsFrom<typeof interactiveModeMachine> => ({
+  actors: {
+    suggestPipeline: createSuggestPipelineActor({
+      streamsRepositoryClient,
+      telemetryClient,
+      notifications,
+    }),
+  },
+  actions: {
+    notifySuggestionFailure: createNotifySuggestionFailureNotifier({ toasts }),
   },
 });

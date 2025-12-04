@@ -10,8 +10,9 @@ import type { StepActorRef, StepInput, StepParentActor } from '../steps_state_ma
 import type { InteractiveModeContext } from './types';
 import { isStepUnderEdit } from '../steps_state_machine';
 import type { DataSourceSimulationMode } from '../data_source_state_machine';
+import type { SampleDocumentWithUIAttributes } from '../simulation_state_machine/types';
 
-type StepSpawner = (
+export type StepSpawner = (
   src: 'stepMachine',
   options: {
     id: string;
@@ -72,4 +73,25 @@ export function getConfiguredSteps(context: InteractiveModeContext) {
     .map((proc) => proc.getSnapshot())
     .filter((proc) => proc.matches('configured'))
     .map((proc) => proc.context.step);
+}
+
+/**
+ * Gets active data source samples from the parent machine context.
+ * Used for pipeline suggestion to access preview documents.
+ */
+export function getActiveDataSourceSamplesFromParent(
+  context: InteractiveModeContext
+): SampleDocumentWithUIAttributes[] {
+  const { dataSourcesRefs } = context.parentRef.getSnapshot().context;
+
+  const activeDataSourceSnapshot = dataSourcesRefs
+    .map((dataSourceRef) => dataSourceRef.getSnapshot())
+    .find((snapshot) => snapshot.matches('enabled'));
+
+  if (!activeDataSourceSnapshot) return [];
+
+  return activeDataSourceSnapshot.context.data.map((doc) => ({
+    dataSourceId: activeDataSourceSnapshot.context.dataSource.id,
+    document: doc,
+  }));
 }

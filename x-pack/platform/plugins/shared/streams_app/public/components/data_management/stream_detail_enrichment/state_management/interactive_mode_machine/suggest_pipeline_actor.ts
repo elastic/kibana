@@ -7,7 +7,7 @@
 
 import { lastValueFrom, map } from 'rxjs';
 import { fromPromise } from 'xstate5';
-import type { NotificationsStart } from '@kbn/core/public';
+import type { IToasts, NotificationsStart } from '@kbn/core/public';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { streamlangDSLSchema, type StreamlangDSL } from '@kbn/streamlang';
 import type { FlattenRecord } from '@kbn/streams-schema';
@@ -17,6 +17,7 @@ import {
   groupMessagesByPattern as groupMessagesByGrokPattern,
 } from '@kbn/grok-heuristics';
 
+import { i18n } from '@kbn/i18n';
 import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
 import { PRIORITIZED_CONTENT_FIELDS, getDefaultTextField } from '../../utils';
 import { extractMessagesFromField } from '../../steps/blocks/action/utils/pattern_suggestion_helpers';
@@ -154,3 +155,16 @@ export const createSuggestPipelineActor = ({
     })
   );
 };
+
+export const createNotifySuggestionFailureNotifier =
+  ({ toasts }: { toasts: IToasts }) =>
+  (params: { event: unknown }) => {
+    const event = params.event as { error: Error };
+    toasts.addError(event.error, {
+      title: i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.suggestionError',
+        { defaultMessage: 'Failed to generate pipeline suggestion' }
+      ),
+      toastMessage: event.error.message,
+    });
+  };

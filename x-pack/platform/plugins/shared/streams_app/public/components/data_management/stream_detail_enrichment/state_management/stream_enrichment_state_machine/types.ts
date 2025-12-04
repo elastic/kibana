@@ -70,7 +70,6 @@ export interface StreamEnrichmentContextType {
   previousStreamlangDSL: StreamlangDSL;
   // Whether there are unsaved changes (diff of nextStreamlangDSL vs previousStreamlangDSL)
   hasChanges: boolean;
-  suggestedPipeline?: StreamlangDSL;
 }
 
 export type StreamEnrichmentEvent =
@@ -120,9 +119,10 @@ export type StreamEnrichmentEvent =
   // YAML events forwarded to YAML mode machine
   | { type: 'yaml.contentChanged'; streamlangDSL: StreamlangDSL; yaml: string }
   | { type: 'yaml.runSimulation'; stepIdBreakpoint?: string }
-  | { type: 'step.resetSteps'; steps: StreamlangDSL['steps'] }
   | { type: 'url.initialized'; urlState: EnrichmentUrlState }
   | { type: 'url.sync' }
+  // Suggestions events forwarded to interactive mode machine
+  | { type: 'step.resetSteps'; steps: StreamlangDSL['steps'] }
   | { type: 'suggestion.generate'; connectorId: string }
   | { type: 'suggestion.cancel' }
   | { type: 'suggestion.accept' }

@@ -8,12 +8,12 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { createActorContext, useSelector } from '@xstate5/react';
 import { createConsoleInspector } from '@kbn/xstate-utils';
-import type { StreamlangDSL, StreamlangWhereBlock } from '@kbn/streamlang/types/streamlang';
 import { isActionBlock } from '@kbn/streamlang/types/streamlang';
 import type {
   StreamlangProcessorDefinition,
   StreamlangStepWithUIAttributes,
   StreamlangDSL,
+  StreamlangWhereBlock,
 } from '@kbn/streamlang';
 import type { DraftGrokExpression } from '@kbn/grok-ui';
 import type { EnrichmentDataSource } from '../../../../../../common/url_schema';
@@ -254,6 +254,25 @@ export const useInteractiveModeSelector = <T,>(
   }
 
   return useSelector(interactiveModeRef, selector);
+};
+
+/**
+ * Safe version of useInteractiveModeSelector that returns a fallback value
+ * when not in interactive mode instead of throwing.
+ */
+export const useOptionalInteractiveModeSelector = <T,>(
+  selector: (state: InteractiveModeSnapshot) => T,
+  fallback: T
+): T => {
+  const interactiveModeRef = useStreamEnrichmentSelector(
+    (state) => state.context.interactiveModeRef
+  );
+
+  const selectedValue = useSelector(interactiveModeRef, (state) =>
+    state ? selector(state) : fallback
+  );
+
+  return interactiveModeRef ? selectedValue : fallback;
 };
 
 export const useYamlModeSelector = <T,>(selector: (state: YamlModeSnapshot) => T): T => {

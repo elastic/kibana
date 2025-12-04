@@ -21,6 +21,7 @@ import { useDiscardConfirm } from '../../../../../hooks/use_discard_confirm';
 import {
   useInteractiveModeSelector,
   useStreamEnrichmentEvents,
+  useStreamEnrichmentSelector,
 } from '../../state_management/stream_enrichment_state_machine';
 import { deleteProcessorPromptOptions } from './action/prompt_options';
 import { deleteConditionPromptOptions } from './where/prompt_options';
