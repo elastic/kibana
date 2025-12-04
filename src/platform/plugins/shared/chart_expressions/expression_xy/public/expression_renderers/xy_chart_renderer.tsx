@@ -284,7 +284,7 @@ export const getXyChartRenderer = ({
 
     // Wrapper component that uses useRenderParams hook for reactive param updates
     const XYChartWrapper = () => {
-      const { renderMode, syncColors, syncCursor, syncTooltips } = useRenderParams(handlers);
+      const { syncColors, syncCursor, syncTooltips } = useRenderParams(handlers);
 
       return (
         <div css={chartContainerStyle} data-test-subj="xyVisChart">
@@ -305,7 +305,6 @@ export const getXyChartRenderer = ({
             onCreateAlertRule={onCreateAlertRule}
             layerCellValueActions={layerCellValueActions}
             onSelectRange={onSelectRange}
-            renderMode={renderMode}
             syncColors={syncColors}
             syncTooltips={syncTooltips}
             syncCursor={syncCursor}
