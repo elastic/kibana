@@ -36786,7 +36786,8 @@ components:
     Cases_ids:
       description: |
         The cases that you want to removed. All non-ASCII characters must be URL encoded.
-      example: d4e7abb0-b462-11ec-9a8d-698504725a43
+      example:
+        - d4e7abb0-b462-11ec-9a8d-698504725a43
       in: query
       name: ids
       required: true
