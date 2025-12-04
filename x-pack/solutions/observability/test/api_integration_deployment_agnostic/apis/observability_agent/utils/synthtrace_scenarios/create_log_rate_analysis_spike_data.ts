@@ -6,8 +6,8 @@
  */
 
 import datemath from '@elastic/datemath';
-import type { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { generateShortId, log, timerange } from '@kbn/apm-synthtrace-client';
+import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';
+import { generateShortId, log, timerange } from '@kbn/synthtrace-client';
 
 const DATASET = 'payments.api';
 const SERVICE_NAME = 'payments-service';

@@ -218,6 +218,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       password: REPORTING_USER_PASSWORD,
       roles: [REPORTING_ROLE],
       full_name: 'Reporting User',
+      email: 'reportinguser@example.com',
     });
   };
 
@@ -345,12 +346,14 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
 
   const listScheduledReports = async (
     username = 'elastic',
-    password = process.env.TEST_KIBANA_PASS || 'changeme'
+    password = process.env.TEST_KIBANA_PASS || 'changeme',
+    search?: string
   ) => {
     const res = await supertestWithoutAuth
       .get(INTERNAL_ROUTES.SCHEDULED.LIST)
       .auth(username, password)
-      .set('kbn-xsrf', 'xxx');
+      .set('kbn-xsrf', 'xxx')
+      .query({ ...(search ? { search } : {}) });
 
     return res.body;
   };
