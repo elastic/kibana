@@ -14,7 +14,7 @@ import { SignatureAnalyzer } from '@kbn/esql-ast/src/definitions/utils/autocompl
 import { unescapeColumnName } from '@kbn/esql-ast/src/definitions/utils/shared';
 import type { FunctionParameter, Signature } from '@kbn/esql-ast/src/definitions/types';
 import type { ESQLCallbacks } from '../shared/types';
-import { getColumnsByTypeRetriever } from '../autocomplete/autocomplete';
+import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 
 export interface SignatureHelpItem {
   signatures: Array<{
