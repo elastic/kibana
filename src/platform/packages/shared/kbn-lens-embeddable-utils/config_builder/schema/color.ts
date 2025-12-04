@@ -9,6 +9,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { isNil } from 'lodash';
 import { serializedValueSchema } from './serializedValue';
 
 const colorByValueStepsSchema = schema.arrayOf(
@@ -16,8 +17,8 @@ const colorByValueStepsSchema = schema.arrayOf(
     /**
      * The value from which this color applies (inclusive).
      */
-    from: schema.nullable(
-      schema.maybe(
+    from: schema.maybe(
+      schema.nullable(
         schema.number({
           meta: { description: 'The value from which this color applies (inclusive).' },
         })
@@ -26,8 +27,8 @@ const colorByValueStepsSchema = schema.arrayOf(
     /**
      * The value up to which this color applies (inclusive).
      */
-    to: schema.nullable(
-      schema.maybe(
+    to: schema.maybe(
+      schema.nullable(
         schema.number({
           meta: { description: 'The value up to which this color applies (exclusive).' },
         })
@@ -46,12 +47,12 @@ const colorByValueStepsSchema = schema.arrayOf(
     validate(steps) {
       let trackingValue = steps[0].from ?? steps[0].to ?? -Infinity;
       for (const [i, step] of steps.entries()) {
-        if (step.from === undefined) {
+        if (isNil(step.from)) {
           if (i === 0) continue;
           return 'The "from" value is required for all steps except the first.';
         }
 
-        if (step.to === undefined) {
+        if (isNil(step.to)) {
           if (i === steps.length - 1) continue;
           return 'The "to" value is required for all steps except the last.';
         }
@@ -72,7 +73,7 @@ const colorByValueStepsSchema = schema.arrayOf(
   }
 );
 
-const colorByValueSchema = schema.object({
+export const colorByValueSchema = schema.object({
   type: schema.literal('dynamic'),
 
   /**
@@ -89,6 +90,10 @@ const colorByValueSchema = schema.object({
    * Array of color steps defining the mapping from values to colors.
    */
   steps: colorByValueStepsSchema,
+});
+
+export const colorByValueAbsoluteSchema = colorByValueSchema.extends({
+  range: schema.literal('absolute'),
 });
 
 export const staticColorSchema = schema.object({
