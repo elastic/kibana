@@ -47,8 +47,8 @@ export const NoDataEmptyState = memo<{
     secondaryAboutInfo,
     canCreateItems = true,
   }) => {
-    const isEndpointArtifactsExportImportEnabled = useIsExperimentalFeatureEnabled(
-      'endpointArtifactsExportImportEnabled'
+    const isEndpointExceptionsMovedUnderManagementFFEnabled = useIsExperimentalFeatureEnabled(
+      'endpointExceptionsMovedUnderManagement'
     );
     const getTestId = useTestIdGenerator(dataTestSubj);
 
@@ -80,7 +80,7 @@ export const NoDataEmptyState = memo<{
                 >
                   {primaryButtonLabel}
                 </EuiButton>
-                {isEndpointArtifactsExportImportEnabled && (
+                {isEndpointExceptionsMovedUnderManagementFFEnabled && (
                   <EuiButton
                     isDisabled={isAddDisabled}
                     onClick={onImport}

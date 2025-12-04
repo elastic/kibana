@@ -30,8 +30,8 @@ export const PolicyArtifactsEmptyUnexisting = memo<CommonProps>(
     getPolicyArtifactsPath,
     getArtifactPath,
   }) => {
-    const isEndpointArtifactsExportImportEnabled = useIsExperimentalFeatureEnabled(
-      'endpointArtifactsExportImportEnabled'
+    const isEndpointExceptionsMovedUnderManagementFFEnabled = useIsExperimentalFeatureEnabled(
+      'endpointExceptionsMovedUnderManagement'
     );
 
     const { onClickHandler: onAddClickHandler, toRouteUrl: toAddRouteUrl } = useGetLinkTo(
@@ -75,7 +75,7 @@ export const PolicyArtifactsEmptyUnexisting = memo<CommonProps>(
                 {labels.emptyUnexistingPrimaryActionButtonTitle}
               </EuiButton>
 
-              {isEndpointArtifactsExportImportEnabled && (
+              {isEndpointExceptionsMovedUnderManagementFFEnabled && (
                 // eslint-disable-next-line @elastic/eui/href-or-on-click
                 <EuiButton
                   onClick={onImportClickHandler}

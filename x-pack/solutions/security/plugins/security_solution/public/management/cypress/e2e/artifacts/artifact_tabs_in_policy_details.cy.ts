@@ -72,7 +72,6 @@ describe(
         kbnServerArgs: [
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'endpointExceptionsMovedUnderManagement',
-            'endpointArtifactsExportImportEnabled',
           ])}`,
         ],
       },

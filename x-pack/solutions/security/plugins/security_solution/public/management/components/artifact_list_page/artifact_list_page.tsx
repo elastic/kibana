@@ -98,8 +98,8 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     allowCardDeleteAction = true,
     CardDecorator,
   }) => {
-    const isExportImportFFEnabled = useIsExperimentalFeatureEnabled(
-      'endpointArtifactsExportImportEnabled'
+    const isEndpointExceptionsMovedUnderManagementFFEnabled = useIsExperimentalFeatureEnabled(
+      'endpointExceptionsMovedUnderManagement'
     );
     const { services } = useKibana();
     const { http } = services;
@@ -109,7 +109,8 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     const isMounted = useIsMounted();
     const isFlyoutOpened = useIsFlyoutOpened(allowCardEditAction, allowCardCreateAction);
     const isImportFlyoutOpened =
-      useIsImportFlyoutOpened(allowCardCreateAction) && isExportImportFFEnabled;
+      useIsImportFlyoutOpened(allowCardCreateAction) &&
+      isEndpointExceptionsMovedUnderManagementFFEnabled;
     const setUrlParams = useSetUrlParams();
     const {
       urlParams: { filter, includedPolicies },
@@ -331,7 +332,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
               </EuiButton>
             )}
 
-            {isExportImportFFEnabled && (
+            {isEndpointExceptionsMovedUnderManagementFFEnabled && (
               <HeaderMenu
                 iconType="boxesHorizontal"
                 dataTestSubj={getTestId('exportImportMenu')}
