@@ -1107,7 +1107,7 @@ logging:
 
 [discrete]
 [[breaking-216558]]
-.[Sharing & Reporting] .API keys are used for authenticating report generation requests. (8.19)
+.[Sharing & Reporting] API keys are used for authenticating report generation requests. (8.19)
 [%collapsible]
 ====
 
