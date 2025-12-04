@@ -211,6 +211,22 @@ export const interactiveModeMachine = setup({
         }),
       });
     }),
+    overwriteSteps: assign((assignArgs, params: { steps: StreamlangDSL['steps'] }) => {
+      // Clean-up existing step refs
+      assignArgs.context.stepRefs.forEach(stopChild);
+
+      // Convert new steps to UI format and spawn new step refs
+      // Mark as isNew: true so they're tracked as new additions
+      // Mark as isUpdated: true so they skip draft and go to configured state (can be simulated)
+      const uiSteps = convertStepsForUI({ steps: params.steps });
+      const stepRefs = uiSteps.map((step) => {
+        return spawnStep(step, assignArgs, { isNew: true, isUpdated: true });
+      });
+
+      return {
+        stepRefs,
+      };
+    }),
   },
   guards: {
     hasStagedChanges: ({ context }) => {

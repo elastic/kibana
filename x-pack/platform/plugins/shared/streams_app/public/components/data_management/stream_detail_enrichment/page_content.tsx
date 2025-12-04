@@ -6,11 +6,11 @@
  */
 
 import { EuiSplitPanel, EuiResizableContainer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { Streams } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import React from 'react';
-import { css } from '@emotion/react';
 import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
 import { useKbnUrlStateStorageFromRouterContext } from '../../../util/kbn_url_state_context';
 import { StreamsAppContextProvider } from '../../streams_app_context_provider';
@@ -169,8 +169,17 @@ export function StreamDetailEnrichmentContentImpl() {
 
   const hasChanges = useStreamEnrichmentSelector((state) => state.context.hasChanges);
 
-  const showManagementBar = hasChanges && !interactiveModeWithStepUnderEdit;
+  const showManagementBar = hasChanges && !interactiveModeWithStepUnderEdit && !isSuggestionVisible;
 
+  const streamType = useStreamEnrichmentSelector((snapshot) => selectStreamType(snapshot.context));
+
+  const isLoadingSuggestion = useStreamEnrichmentSelector((snapshot) =>
+    snapshot.matches({ ready: { enrichment: { pipelineSuggestion: 'generatingSuggestion' } } })
+  );
+  const isViewingSuggestion = useStreamEnrichmentSelector((snapshot) =>
+    snapshot.matches({ ready: { enrichment: { pipelineSuggestion: 'viewingSuggestion' } } })
+  );
+  const isSuggestionVisible = isLoadingSuggestion || isViewingSuggestion;
   const {
     isRequestPreviewFlyoutOpen,
     requestPreviewFlyoutCodeContent,
@@ -305,6 +314,7 @@ export function StreamDetailEnrichmentContentImpl() {
           insufficientPrivileges={!canManage}
           isInvalid={hasDefinitionError || isInvalid}
           onViewCodeClick={onBottomBarViewCodeClick}
+          streamType={streamType}
         />
       )}
       {isRequestPreviewFlyoutOpen && (

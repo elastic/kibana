@@ -100,7 +100,7 @@ export const stepMachine = setup({
     ),
   },
   guards: {
-    isDraft: ({ context }) => context.isNew,
+    isDraft: ({ context }) => context.isNew && !context.isUpdated,
     isUpdated: ({ context }) => context.isUpdated === true,
   },
 }).createMachine({
@@ -111,7 +111,7 @@ export const stepMachine = setup({
     previousStep: input.step,
     step: input.step,
     isNew: input.isNew ?? false,
-    isUpdated: input.isUpdated,
+    isUpdated: input.isUpdated ?? false,
   }),
   initial: 'unresolved',
   states: {

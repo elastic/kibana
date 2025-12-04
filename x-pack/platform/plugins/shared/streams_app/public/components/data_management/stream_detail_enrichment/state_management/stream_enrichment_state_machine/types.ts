@@ -12,10 +12,11 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { GrokCollection } from '@kbn/grok-ui';
 import type {
+  StreamlangWhereBlock,
   StreamlangProcessorDefinition,
+  StreamlangDSL,
   StreamlangStepWithUIAttributes,
 } from '@kbn/streamlang';
-import type { StreamlangDSL, StreamlangWhereBlock } from '@kbn/streamlang/types/streamlang';
 import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
 import type { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
 import type {
@@ -69,6 +70,7 @@ export interface StreamEnrichmentContextType {
   previousStreamlangDSL: StreamlangDSL;
   // Whether there are unsaved changes (diff of nextStreamlangDSL vs previousStreamlangDSL)
   hasChanges: boolean;
+  suggestedPipeline?: StreamlangDSL;
 }
 
 export type StreamEnrichmentEvent =
@@ -117,4 +119,12 @@ export type StreamEnrichmentEvent =
   | { type: 'step.reorder'; stepId: string; direction: 'up' | 'down' }
   // YAML events forwarded to YAML mode machine
   | { type: 'yaml.contentChanged'; streamlangDSL: StreamlangDSL; yaml: string }
-  | { type: 'yaml.runSimulation'; stepIdBreakpoint?: string };
+  | { type: 'yaml.runSimulation'; stepIdBreakpoint?: string }
+  | { type: 'step.resetSteps'; steps: StreamlangDSL['steps'] }
+  | { type: 'url.initialized'; urlState: EnrichmentUrlState }
+  | { type: 'url.sync' }
+  | { type: 'suggestion.generate'; connectorId: string }
+  | { type: 'suggestion.cancel' }
+  | { type: 'suggestion.accept' }
+  | { type: 'suggestion.dismiss' }
+  | { type: 'suggestion.regenerate'; connectorId: string };

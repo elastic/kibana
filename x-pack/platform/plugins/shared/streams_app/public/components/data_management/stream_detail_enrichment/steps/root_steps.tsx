@@ -16,7 +16,13 @@ import { useStepsProcessingSummary } from '../state_management/use_steps_process
 import { CreateStepButton } from '../create_step_button';
 import type { InteractiveModeContext } from '../state_management/interactive_mode_machine';
 
-export const RootSteps = ({ stepRefs }: { stepRefs: InteractiveModeContext['stepRefs'] }) => {
+export const RootSteps = ({
+  stepRefs,
+  readOnly = false,
+}: {
+  stepRefs: InteractiveModeContext['stepRefs'];
+  readOnly?: boolean;
+}) => {
   const { euiTheme } = useEuiTheme();
 
   const rootSteps = stepRefs.filter((stepRef) => isRootStep(stepRef.getSnapshot()));
@@ -42,6 +48,7 @@ export const RootSteps = ({ stepRefs }: { stepRefs: InteractiveModeContext['step
       borderRadius="none"
       css={css`
         overflow: auto;
+        background: none;
         padding: ${euiTheme.size.xs};
         // Root panels
         > .euiPanel {
@@ -59,13 +66,16 @@ export const RootSteps = ({ stepRefs }: { stepRefs: InteractiveModeContext['step
           stepsProcessingSummaryMap={stepsProcessingSummaryMap}
           isFirstStepInLevel={index === 0}
           isLastStepInLevel={index === rootSteps.length - 1}
+          readOnly={readOnly}
         />
       ))}
-      <EuiFlexGroup alignItems="center" justifyContent="center" wrap>
-        <EuiFlexItem grow={false}>
-          <CreateStepButton mode="subdued" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {!readOnly && (
+        <EuiFlexGroup alignItems="center" justifyContent="center" wrap>
+          <EuiFlexItem grow={false}>
+            <CreateStepButton mode="subdued" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
     </EuiPanel>
   );
 };
