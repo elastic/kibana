@@ -19,6 +19,7 @@ export {
   appendToESQLQuery,
   appendWhereClauseToESQLQuery,
   appendStatsByToQuery,
+  appendLimitToQuery,
   getESQLQueryColumns,
   getESQLQueryColumnsRaw,
   getESQLResults,

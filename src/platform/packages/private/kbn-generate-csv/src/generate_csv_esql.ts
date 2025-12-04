@@ -15,7 +15,7 @@ import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-ty
 import { ESQL_SEARCH_STRATEGY, cellHasFormulas, getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { type Filter, buildEsQuery, extractTimeRange } from '@kbn/es-query';
-import { getTimeFieldFromESQLQuery, getStartEndParams } from '@kbn/esql-utils';
+import { getTimeFieldFromESQLQuery, getStartEndParams, appendLimitToQuery } from '@kbn/esql-utils';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
 import type { CancellationToken, ReportingError } from '@kbn/reporting-common';
@@ -95,7 +95,7 @@ export class CsvESQLGenerator {
 
     let query = this.job.query.esql;
     if (query && maxRows) {
-      query = `${this.job.query.esql} | limit ${maxRows}`;
+      query = appendLimitToQuery(this.job.query.esql, maxRows);
     }
     const searchParams: IKibanaSearchRequest<ESQLSearchParams> = {
       params: {

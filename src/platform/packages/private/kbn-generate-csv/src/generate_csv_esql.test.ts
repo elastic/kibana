@@ -483,7 +483,7 @@ describe('CsvESQLGenerator', () => {
               },
             },
             locale: 'en',
-            query: `${query.esql} | limit 500`,
+            query: `${query.esql} | LIMIT 500`,
           },
         },
         {
@@ -556,7 +556,7 @@ describe('CsvESQLGenerator', () => {
               }),
             ]),
             locale: 'en',
-            query: `${query.esql} | limit 500`,
+            query: `${query.esql} | LIMIT 500`,
           },
         },
         {
@@ -594,7 +594,7 @@ describe('CsvESQLGenerator', () => {
           params: {
             filter: undefined,
             locale: 'en',
-            query: 'FROM custom-metrics | limit 500',
+            query: 'FROM custom-metrics | LIMIT 500',
           },
         },
         {

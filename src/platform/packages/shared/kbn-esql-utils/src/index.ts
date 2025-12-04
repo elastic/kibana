@@ -35,6 +35,7 @@ export {
   appendToESQLQuery,
   appendWhereClauseToESQLQuery,
   appendStatsByToQuery,
+  appendLimitToQuery,
 } from './utils/append_to_query';
 export {
   getESQLQueryColumns,
