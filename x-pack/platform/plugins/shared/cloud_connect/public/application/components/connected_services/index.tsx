@@ -175,11 +175,16 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
         <OverviewSection
           organizationId={clusterDetails.metadata.organization_id}
           connectedAt={clusterDetails.metadata.created_at}
+          subscription={clusterDetails.metadata.subscription}
         />
 
         <EuiSpacer size="xxl" />
 
-        <ServicesSection services={clusterDetails.services} onServiceUpdate={onServiceUpdate} />
+        <ServicesSection
+          services={clusterDetails.services}
+          onServiceUpdate={onServiceUpdate}
+          subscription={clusterDetails.metadata.subscription}
+        />
 
         <MigrationSection />
       </EuiPageBody>

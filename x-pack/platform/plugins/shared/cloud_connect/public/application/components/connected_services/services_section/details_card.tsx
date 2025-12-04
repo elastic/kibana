@@ -44,6 +44,8 @@ export interface ServiceCardProps {
   onOpen?: () => void;
   isLoading?: boolean;
   isCardDisabled?: boolean;
+  subscriptionRequired?: boolean;
+  hasActiveSubscription?: boolean;
 }
 
 export const ServiceCard: React.FC<ServiceCardProps> = ({
@@ -62,6 +64,8 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
   onOpen,
   isLoading = false,
   isCardDisabled = false,
+  subscriptionRequired = false,
+  hasActiveSubscription = true,
 }) => {
   const { hasConfigurePermission } = useCloudConnectedAppContext();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -122,6 +126,38 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
   const renderActions = () => {
     if (isCardDisabled || !supported) {
       return null;
+    }
+
+    // Show subscription requirement message if service requires subscription and there's no active subscription
+    if (subscriptionRequired && !hasActiveSubscription) {
+      return (
+        <EuiFlexGroup
+          gutterSize="xs"
+          alignItems="center"
+          responsive={false}
+          data-test-subj="serviceCardSubscriptionMessage"
+        >
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" color="subdued">
+              <FormattedMessage
+                id="xpack.cloudConnect.connectedServices.service.requiresSubscription"
+                defaultMessage="This service requires an active cloud subscription"
+              />
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIconTip
+              content={i18n.translate(
+                'xpack.cloudConnect.connectedServices.service.subscriptionInfo',
+                {
+                  defaultMessage: 'Contact your admin to activate a subscription',
+                }
+              )}
+              position="top"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
     }
 
     // Show permission message if user doesn't have configure permission

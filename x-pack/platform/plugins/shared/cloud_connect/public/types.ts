@@ -65,6 +65,9 @@ export interface CloudService {
     region_id?: string;
   };
   metadata?: ServiceMetadata;
+  subscription?: {
+    required: boolean;
+  };
 }
 
 export interface ClusterDetails {
@@ -74,6 +77,7 @@ export interface ClusterDetails {
     created_at: string;
     created_by: string;
     organization_id: string;
+    subscription?: string;
   };
   self_managed_cluster: {
     id: string;

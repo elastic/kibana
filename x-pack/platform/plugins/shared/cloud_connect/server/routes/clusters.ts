@@ -88,6 +88,16 @@ export const registerClustersRoute = ({
               metadata: {
                 ...clusterDetails.metadata,
                 subscription: subscription.state,
+                // subscription: 'inactive'
+              },
+              services: {
+                auto_ops: {
+                  ...clusterDetails.services.auto_ops,
+                },
+                eis: {
+                  ...clusterDetails.services.eis,
+                  // enabled: false
+                },
               },
             },
           });

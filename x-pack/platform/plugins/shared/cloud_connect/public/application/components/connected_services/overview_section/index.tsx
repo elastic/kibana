@@ -9,15 +9,18 @@ import React from 'react';
 import moment from 'moment';
 import { EuiTitle, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { SubscriptionBadge } from './subscription_badge';
 
 interface OverviewSectionProps {
   organizationId: string;
   connectedAt: string;
+  subscription?: string;
 }
 
 export const OverviewSection: React.FC<OverviewSectionProps> = ({
   organizationId,
   connectedAt,
+  subscription,
 }) => {
   const formattedDate = moment(connectedAt).format('LL');
 
@@ -55,6 +58,19 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({
             {formattedDate}
           </EuiText>
         </EuiFlexItem>
+        {subscription && (
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">
+              <strong>
+                <FormattedMessage
+                  id="xpack.cloudConnect.connectedServices.overview.subscription"
+                  defaultMessage="Cloud subscription"
+                />
+              </strong>{' '}
+              <SubscriptionBadge subscription={subscription} />
+            </EuiText>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </>
   );

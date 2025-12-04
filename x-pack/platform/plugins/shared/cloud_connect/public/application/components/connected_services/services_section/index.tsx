@@ -20,9 +20,14 @@ interface ServicesSectionProps {
     eis?: CloudService;
   };
   onServiceUpdate: (serviceKey: string, enabled: boolean) => void;
+  subscription?: string;
 }
 
-export const ServicesSection: React.FC<ServicesSectionProps> = ({ services, onServiceUpdate }) => {
+export const ServicesSection: React.FC<ServicesSectionProps> = ({
+  services,
+  onServiceUpdate,
+  subscription,
+}) => {
   const {
     loadingService,
     disableModalService,
@@ -32,6 +37,9 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ services, onSe
     closeDisableModal,
     handleEnableServiceByUrl,
   } = useServiceActions(onServiceUpdate);
+
+  // Check if there's an active subscription (active or trial)
+  const hasActiveSubscription = subscription === 'active' || subscription === 'trial';
 
   // Build service cards array
   const allServiceCards = [
@@ -63,6 +71,8 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ services, onSe
           })
         ),
       isLoading: loadingService === 'eis',
+      subscriptionRequired: services.eis?.subscription?.required,
+      hasActiveSubscription,
     },
     {
       key: 'auto_ops',
@@ -96,6 +106,8 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ services, onSe
           })
         ),
       isLoading: loadingService === 'auto_ops',
+      subscriptionRequired: services.auto_ops?.subscription?.required,
+      hasActiveSubscription,
     },
     // Synthetics Service (hardcoded as coming soon)
     {

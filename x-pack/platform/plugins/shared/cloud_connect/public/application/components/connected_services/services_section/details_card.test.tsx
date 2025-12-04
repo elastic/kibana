@@ -247,4 +247,88 @@ describe('ServiceCard', () => {
       expect(screen.queryByRole('link', { name: /learn more/i })).not.toBeInTheDocument();
     });
   });
+
+  describe('Subscription requirements', () => {
+    it('should show subscription message when subscription is required but not active', () => {
+      renderWithIntl(
+        <ServiceCard {...defaultProps} subscriptionRequired={true} hasActiveSubscription={false} />
+      );
+
+      expect(screen.getByTestId('serviceCardSubscriptionMessage')).toBeInTheDocument();
+      expect(
+        screen.getByText(/This service requires an active cloud subscription/i)
+      ).toBeInTheDocument();
+    });
+
+    it('should hide enable/disable actions when subscription is required but not active', () => {
+      renderWithIntl(
+        <ServiceCard
+          {...defaultProps}
+          subscriptionRequired={true}
+          hasActiveSubscription={false}
+          serviceUrl="https://example.com"
+        />
+      );
+
+      // Should not show Connect button
+      expect(screen.queryByTestId('serviceCardConnectButton')).not.toBeInTheDocument();
+      // Should not show Open button
+      expect(screen.queryByTestId('serviceCardOpenButton')).not.toBeInTheDocument();
+      // Should not show More actions button
+      expect(screen.queryByRole('button', { name: /more actions/i })).not.toBeInTheDocument();
+    });
+
+    it('should show normal actions when subscription is not required', () => {
+      renderWithIntl(
+        <ServiceCard {...defaultProps} subscriptionRequired={false} hasActiveSubscription={false} />
+      );
+
+      // Should show Connect button
+      expect(screen.getByTestId('serviceCardConnectButton')).toBeInTheDocument();
+    });
+
+    it('should show normal actions when subscription is required and active', () => {
+      renderWithIntl(
+        <ServiceCard {...defaultProps} subscriptionRequired={true} hasActiveSubscription={true} />
+      );
+
+      // Should show Connect button
+      expect(screen.getByTestId('serviceCardConnectButton')).toBeInTheDocument();
+    });
+
+    it('should show normal actions when subscription required is undefined (defaults to false)', () => {
+      renderWithIntl(<ServiceCard {...defaultProps} hasActiveSubscription={false} />);
+
+      // Should show Connect button (subscriptionRequired defaults to false)
+      expect(screen.getByTestId('serviceCardConnectButton')).toBeInTheDocument();
+    });
+
+    it('should prioritize subscription check over permission check', () => {
+      mockUseCloudConnectedAppContext.mockReturnValue({
+        hasConfigurePermission: false,
+      } as any);
+
+      renderWithIntl(
+        <ServiceCard {...defaultProps} subscriptionRequired={true} hasActiveSubscription={false} />
+      );
+
+      // Should show subscription message, not permission message
+      expect(screen.getByTestId('serviceCardSubscriptionMessage')).toBeInTheDocument();
+      expect(screen.queryByTestId('serviceCardPermissionMessage')).not.toBeInTheDocument();
+    });
+
+    it('should show permission message when subscription is active but user lacks permissions', () => {
+      mockUseCloudConnectedAppContext.mockReturnValue({
+        hasConfigurePermission: false,
+      } as any);
+
+      renderWithIntl(
+        <ServiceCard {...defaultProps} subscriptionRequired={true} hasActiveSubscription={true} />
+      );
+
+      // Should show permission message (subscription is ok)
+      expect(screen.getByTestId('serviceCardPermissionMessage')).toBeInTheDocument();
+      expect(screen.queryByTestId('serviceCardSubscriptionMessage')).not.toBeInTheDocument();
+    });
+  });
 });
