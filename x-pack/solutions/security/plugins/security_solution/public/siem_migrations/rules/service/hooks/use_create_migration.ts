@@ -51,7 +51,6 @@ export const useCreateMigration = (onSuccess: OnSuccess) => {
           const stats = await siemMigrations.rules.api.getRuleMigrationStats({
             migrationId,
           });
-
           notifications.toasts.addSuccess({
             title: RULES_DATA_INPUT_CREATE_MIGRATION_SUCCESS_TITLE,
             text: RULES_DATA_INPUT_CREATE_MIGRATION_SUCCESS_DESCRIPTION(stats.items.total),

@@ -11,9 +11,15 @@ import { DashboardsFileUpload } from './dashboards_file_upload';
 import { TestProviders } from '../../../../../../../../common/mock';
 import { useParseFileInput } from '../../../../../../../common/hooks/use_parse_file_input';
 
-jest.mock('../../../../../../../common/hooks/use_parse_file_input', () => ({
-  useParseFileInput: jest.fn(),
-}));
+jest.mock('../../../../../../../common/hooks/use_parse_file_input', () => {
+  const { parseContent } = jest.requireActual(
+    '../../../../../../../common/hooks/use_parse_file_input'
+  );
+  return {
+    parseContent,
+    useParseFileInput: jest.fn(),
+  };
+});
 
 jest.mock('../../../../../../../common/components/migration_steps', () => ({
   UploadFileButton: ({
@@ -34,7 +40,7 @@ jest.mock('../../../../../../../common/components/migration_steps', () => ({
 describe('DashboardsFileUpload', () => {
   const mockUseParseFileInput = useParseFileInput as jest.Mock;
   const mockParseFile = jest.fn();
-  let onFileParsedCallback: (content: Array<{ result: Record<string, unknown> }>) => void;
+  let onFileParsedCallback: (content: string) => void;
 
   beforeEach(() => {
     mockUseParseFileInput.mockImplementation((onFileParsed: typeof onFileParsedCallback) => {
@@ -90,7 +96,7 @@ describe('DashboardsFileUpload', () => {
     expect(mockParseFile).toHaveBeenCalledWith([file]);
 
     await act(async () => {
-      onFileParsedCallback([{ result: {} }]);
+      onFileParsedCallback('[{ "result": {} }]');
     });
 
     const uploadButton = getByText('Upload');

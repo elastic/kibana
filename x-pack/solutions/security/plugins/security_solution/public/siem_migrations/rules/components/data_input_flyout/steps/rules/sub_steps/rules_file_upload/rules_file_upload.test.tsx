@@ -117,7 +117,11 @@ describe('RulesFileUpload', () => {
       severity: rule['alert.severity'] as OriginalRule['severity'],
     }));
 
-    expect(mockCreateMigration).toHaveBeenNthCalledWith(1, migrationName, rulesToExpect);
+    expect(mockCreateMigration).toHaveBeenNthCalledWith(1, {
+      migrationName,
+      rules: rulesToExpect,
+      migrationSource: MigrationSource.SPLUNK,
+    });
   });
 
   describe('Error Handling', () => {

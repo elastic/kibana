@@ -8,6 +8,7 @@
 import { renderHook, act } from '@testing-library/react';
 import { useCreateMigration } from './use_create_migration';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import type { CreateRuleMigrationRulesRequestBody } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { MigrationSource } from '../../../common/types';
 
 jest.mock('../../../../common/lib/kibana/kibana_react', () => ({
@@ -22,6 +23,9 @@ describe('useCreateMigration', () => {
   const addSuccess = jest.fn();
   const addError = jest.fn();
   const onSuccess = jest.fn();
+  const rules: CreateRuleMigrationRulesRequestBody = [
+    { id: 'test-rule' },
+  ] as CreateRuleMigrationRulesRequestBody;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -47,22 +51,22 @@ describe('useCreateMigration', () => {
 
   it('should call createRuleMigration and onSuccess on success', async () => {
     createRuleMigration.mockResolvedValue('migration-id');
-    getRuleMigrationStats.mockResolvedValue({ id: 'migration-id' });
+    getRuleMigrationStats.mockResolvedValue({ id: 'migration-id', items: { total: 1 } });
 
     const { result } = renderHook(() => useCreateMigration(onSuccess));
 
     await act(async () => {
       await result.current.createMigration({
-        rules: [],
+        rules,
         migrationName: 'test-migration',
         migrationSource: MigrationSource.SPLUNK,
       });
     });
 
-    expect(createRuleMigration).toHaveBeenCalledWith([], 'test-migration');
+    expect(createRuleMigration).toHaveBeenCalledWith(rules, 'test-migration');
     expect(getRuleMigrationStats).toHaveBeenCalledWith({ migrationId: 'migration-id' });
     expect(addSuccess).toHaveBeenCalled();
-    expect(onSuccess).toHaveBeenCalledWith({ id: 'migration-id' });
+    expect(onSuccess).toHaveBeenCalledWith({ id: 'migration-id', items: { total: 1 } });
     expect(result.current.isLoading).toBe(false);
   });
 
@@ -75,7 +79,7 @@ describe('useCreateMigration', () => {
     await act(async () => {
       await result.current.createMigration({
         migrationName: 'test-migration',
-        rules: [],
+        rules,
         migrationSource: MigrationSource.SPLUNK,
       });
     });

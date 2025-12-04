@@ -19,6 +19,7 @@ const renderCopyExportQueryStep = (props: CopyExportQueryStepProps) => {
 };
 
 describe('useCopyExportQueryStep', () => {
+  const title = 'Copy rule query';
   it('returns step props with "incomplete" status', () => {
     const result = renderCopyExportQueryStep({
       migrationSource: MigrationSource.SPLUNK,
@@ -28,7 +29,7 @@ describe('useCopyExportQueryStep', () => {
     expect(result.current).toEqual({
       children: expect.anything(),
       status: 'incomplete',
-      title: 'Export Splunk rules',
+      title,
     });
   });
 
@@ -41,7 +42,7 @@ describe('useCopyExportQueryStep', () => {
     expect(result.current).toEqual({
       children: expect.anything(),
       status: 'complete',
-      title: 'Export Splunk rules',
+      title,
     });
   });
 
@@ -54,7 +55,7 @@ describe('useCopyExportQueryStep', () => {
     expect(result.current).toEqual({
       children: expect.anything(),
       status: 'disabled',
-      title: 'Export Splunk rules',
+      title,
     });
   });
 
@@ -67,7 +68,7 @@ describe('useCopyExportQueryStep', () => {
     expect(result.current).toEqual({
       children: expect.anything(),
       status: 'loading',
-      title: 'Export Splunk rules',
+      title,
     });
   });
 
@@ -80,7 +81,7 @@ describe('useCopyExportQueryStep', () => {
     expect(result.current).toEqual({
       children: expect.anything(),
       status: 'warning',
-      title: 'Export Splunk rules',
+      title,
     });
   });
 
@@ -93,7 +94,7 @@ describe('useCopyExportQueryStep', () => {
     expect(result.current).toEqual({
       children: expect.anything(),
       status: 'danger',
-      title: 'Export Splunk rules',
+      title,
     });
   });
 
@@ -106,7 +107,7 @@ describe('useCopyExportQueryStep', () => {
     expect(result.current).toEqual({
       children: expect.anything(),
       status: 'current',
-      title: 'Export Splunk rules',
+      title,
     });
   });
 });
