@@ -297,7 +297,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
               }
               pagination={pagination}
               loading={loadState === 'loadingTable'}
-              message={message}
+              noItemsMessage={message}
               rowProps={() => {
                 return {
                   'data-test-subj': 'roleMappingRow',

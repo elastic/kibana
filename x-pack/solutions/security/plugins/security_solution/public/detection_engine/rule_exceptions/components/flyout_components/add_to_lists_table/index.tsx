@@ -41,7 +41,7 @@ const ExceptionsAddToListsComponent: React.FC<ExceptionsAddToListsComponentProps
           error={error}
           items={lists}
           loading={isLoading}
-          message={
+          noItemsMessage={
             isLoading ? (
               <EuiSkeletonText lines={4} data-test-subj="exceptionItemViewerEmptyPrompts-loading" />
             ) : undefined
