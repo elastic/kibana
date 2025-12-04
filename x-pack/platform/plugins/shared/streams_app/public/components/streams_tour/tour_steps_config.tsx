@@ -74,7 +74,7 @@ const PROCESSING_STEP: Omit<TourStepConfig, 'step' | 'stepsTotal'> = {
     <EuiText size="s" css={tightContentCss}>
       {i18n.translate('xpack.streams.tour.processing.content', {
         defaultMessage:
-          'Define processing rules to clean, structure, and enrich your data. Check the Schema',
+          'Review high-level indicators to quickly understand the state of this stream.',
       })}
     </EuiText>
   ),
@@ -86,13 +86,13 @@ const ATTACHMENTS_STEP: Omit<TourStepConfig, 'step' | 'stepsTotal'> = {
   stepId: 'attachments',
   subtitle: TOUR_SUBTITLE,
   title: i18n.translate('xpack.streams.tour.attachments.title', {
-    defaultMessage: 'Keep your everything organized by stream',
+    defaultMessage: 'Manage assets built on this stream’s data in one place',
   }),
   content: (
     <EuiText size="s" css={tightContentCss}>
       {i18n.translate('xpack.streams.tour.attachments.content', {
         defaultMessage:
-          'Attach dashboards, alerts, SLOs, and other assets to this stream for a clear view of everything built on top of its data.',
+          'Link dashboards, rules, SLOs, and other assets based on this stream’s data so you can manage them from a single page.',
       })}
     </EuiText>
   ),
@@ -104,13 +104,13 @@ const ADVANCED_STEP: Omit<TourStepConfig, 'step' | 'stepsTotal'> = {
   stepId: 'advanced',
   subtitle: TOUR_SUBTITLE,
   title: i18n.translate('xpack.streams.tour.advanced.title', {
-    defaultMessage: 'Fine-tune your stream configuration',
+    defaultMessage: 'Fine-tune this stream',
   }),
   content: (
     <EuiText size="s" css={tightContentCss}>
       {i18n.translate('xpack.streams.tour.advanced.content', {
         defaultMessage:
-          'Adjust mappings, metadata, and other advanced controls to tailor how your data is structured and maintained',
+          'Review the underlying configuration of your stream, and add useful information for Streams AI components.',
       })}
     </EuiText>
   ),
