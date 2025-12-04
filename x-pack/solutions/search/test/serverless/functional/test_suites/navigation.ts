@@ -6,7 +6,7 @@
  */
 
 import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 const archiveEmptyIndex =
@@ -24,9 +24,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const common = getPageObject('common');
 
   describe('navigation', function () {
-    // failsOnMKI, see https://github.com/elastic/kibana/issues/244961
-    this.tags(['failsOnMKI']);
-
     before(async () => {
       await esArchiver.load(archiveEmptyIndex);
       await svlCommonPage.loginWithRole('admin');
