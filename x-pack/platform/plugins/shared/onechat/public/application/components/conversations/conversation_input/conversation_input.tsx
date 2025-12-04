@@ -177,7 +177,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
     <InputContainer isDisabled={isInputDisabled}>
       {visibleAttachments.length > 0 && (
         <EuiFlexItem grow={false}>
-          <AttachmentPillsRow attachments={visibleAttachments} />
+          <AttachmentPillsRow attachments={visibleAttachments} removable />
         </EuiFlexItem>
       )}
       <EuiFlexItem css={inputContainerStyles}>
