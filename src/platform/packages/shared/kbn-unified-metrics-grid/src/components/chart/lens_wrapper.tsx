@@ -12,7 +12,10 @@ import { css } from '@emotion/react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { PresentationPanelQuickActionContext } from '@kbn/presentation-panel-plugin/public';
 import type { LensProps } from './hooks/use_lens_props';
-import { useLensExtraActions } from './hooks/use_lens_extra_actions';
+import {
+  useLensExtraActions,
+  ACTION_EXPLORE_IN_DISCOVER_TAB,
+} from './hooks/use_lens_extra_actions';
 import { ChartTitle } from './chart_title';
 
 export type LensWrapperProps = {
@@ -105,7 +108,7 @@ export function LensWrapper({
   return (
     <div css={chartCss}>
       <PresentationPanelQuickActionContext.Provider
-        value={{ view: ['ACTION_METRICS_EXPERIENCE_EXPLORE_IN_DISCOVER_TAB', 'openInspector'] }}
+        value={{ view: [ACTION_EXPLORE_IN_DISCOVER_TAB, 'openInspector'] }}
       >
         <ChartTitle highlight={titleHighlight} title={lensProps.attributes.title} />
         <EmbeddableComponent
