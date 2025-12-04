@@ -8,17 +8,23 @@
  */
 
 import type { PublicStepDefinition } from './step_registry/types';
-import type {
-  WorkflowsExtensionsSetupContract,
-  WorkflowsExtensionsStartContract,
-} from '../common/types';
+import type { WorkflowsExtensionsStartContract } from '../common/types';
 
 /**
  * Public-side plugin setup contract.
  * Exposes methods for other plugins to register public-side step definition.
  */
-export type WorkflowsExtensionsPublicPluginSetup =
-  WorkflowsExtensionsSetupContract<PublicStepDefinition>;
+
+export interface WorkflowsExtensionsPublicPluginSetup {
+  /**
+   * Register user-facing definition for a workflow step.
+   * This should be called during the plugin's setup phase.
+   *
+   * @param definition - The public-side step definition
+   * @throws Error if definition for the same step type ID is already registered
+   */
+  registerStepDefinition(definition: PublicStepDefinition): void;
+}
 
 /**
  * Public-side plugin start contract.
