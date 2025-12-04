@@ -7,8 +7,7 @@
 
 import { EuiInlineEditText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Streams } from '@kbn/streams-schema';
-import { omit } from 'lodash';
+import { convertGetResponseIntoUpsertRequest, type Streams } from '@kbn/streams-schema';
 import type { ChangeEvent } from 'react';
 import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
@@ -81,11 +80,10 @@ export function StreamDescription({ definition }: Props) {
           const sanitized = value.trim();
           setDescription(sanitized);
 
-          await updateStream({
-            queries: definition.queries,
-            dashboards: definition.dashboards,
-            stream: { ...omit(definition.stream, ['name']), description: sanitized },
-          } as Streams.all.UpsertRequest);
+          const request = convertGetResponseIntoUpsertRequest(definition);
+          request.stream.description = sanitized;
+
+          await updateStream(request);
 
           refresh();
         }}
