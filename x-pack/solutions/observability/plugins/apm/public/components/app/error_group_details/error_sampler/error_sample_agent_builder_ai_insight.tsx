@@ -42,17 +42,6 @@ export function ErrorSampleAgentBuilderAiInsight({
   const { selectedConnector, defaultConnectorId } = useConnectorSelection();
 
   const fetchAiInsights = async () => {
-    // TODO: display the error and disable the start conversation button if there is an error
-    // TODO: llm response should be mandatory and should not be empty (if it's empty, consider it as an error)
-    // if (!onechat || !isObservabilityAgentEnabled || !start || !end || !error?.error?.id) {
-    //   return;
-    // }
-    // // avoid re-fetch if content is already loaded
-    // // we can change to fetch always if needed
-    // if (llmContent || isLoading) {
-    //   return;
-    // }
-
     setIsLoading(true);
     try {
       const response = await core.http.post<{ summary: string; context: string }>(
