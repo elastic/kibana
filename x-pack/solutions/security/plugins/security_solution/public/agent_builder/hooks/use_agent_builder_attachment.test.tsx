@@ -40,6 +40,7 @@ const mockOnechatService: OnechatPluginStart = {
   openConversationFlyout:
     mockOpenConversationFlyout as OnechatPluginStart['openConversationFlyout'],
   tools: {} as OnechatPluginStart['tools'],
+  attachments: {} as OnechatPluginStart['attachments'],
   setConversationFlyoutActiveConfig: jest.fn(),
   clearConversationFlyoutActiveConfig: jest.fn(),
 };
