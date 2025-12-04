@@ -33,23 +33,19 @@ jest.mock('../../../../content_framework/chart', () => ({
   ),
 }));
 
-const mockEmbeddableComponent = jest.fn(({}: any) => (
-  <div data-test-subj="lensEmbeddableSimilarErrorsChart">Lens Chart</div>
-));
+jest.mock('@kbn/embeddable-plugin/public', () => {
+  const original = jest.requireActual('@kbn/embeddable-plugin/public');
+  return {
+    ...original,
+    EmbeddableRenderer: ({ type, getParentApi, hidePanelChrome }: any) => {
+      // Call getParentApi to simulate the component behavior
+      const parentApi = getParentApi?.();
+      return <div data-test-subj="lensEmbeddableSimilarErrorsChart">Lens Chart (type: {type})</div>;
+    },
+  };
+});
 
 const mockBuild = jest.fn();
-
-const mockRegistry = {
-  getById: jest.fn((id: string) => {
-    if (id === 'lens-embeddable-component') {
-      return {
-        id: 'lens-embeddable-component',
-        EmbeddableComponent: mockEmbeddableComponent,
-      };
-    }
-    return undefined;
-  }),
-};
 
 setUnifiedDocViewerServices(
   merge(mockUnifiedDocViewerServices, {
@@ -63,11 +59,6 @@ setUnifiedDocViewerServices(
       },
       dataViews: {
         get: jest.fn(),
-      },
-    },
-    discoverShared: {
-      features: {
-        registry: mockRegistry,
       },
     },
   })
@@ -133,7 +124,7 @@ describe('SimilarErrorsOccurrencesChart', () => {
       expect(screen.getByTestId('lensEmbeddableSimilarErrorsChart')).toBeInTheDocument();
     });
 
-    expect(mockEmbeddableComponent).toHaveBeenCalled();
+    expect(screen.getByText('Lens Chart (type: lens)')).toBeInTheDocument();
   });
 
   it('shows error message when build fails', async () => {
@@ -146,23 +137,27 @@ describe('SimilarErrorsOccurrencesChart', () => {
     });
   });
 
-  it('does not build chart when baseEsqlQuery is undefined', () => {
+  it('does not build chart when baseEsqlQuery is undefined', async () => {
     render(<SimilarErrorsOccurrencesChart baseEsqlQuery={undefined} />);
 
-    expect(LensConfigBuilderMock).not.toHaveBeenCalled();
-    expect(mockBuild).not.toHaveBeenCalled();
-    expect(screen.queryByTestId('lensEmbeddableSimilarErrorsChart')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(LensConfigBuilderMock).not.toHaveBeenCalled();
+      expect(mockBuild).not.toHaveBeenCalled();
+      expect(screen.queryByTestId('lensEmbeddableSimilarErrorsChart')).not.toBeInTheDocument();
+    });
   });
 
-  it('does not build chart when indexes.logs is undefined', () => {
+  it('does not build chart when indexes.logs is undefined', async () => {
     mockUseDataSourcesContext.mockReturnValueOnce({
       indexes: { logs: undefined, apm: {} } as any,
     });
     const baseQuery = where('service.name == ?serviceName', { serviceName: 'test-service' });
     render(<SimilarErrorsOccurrencesChart baseEsqlQuery={baseQuery} />);
 
-    expect(LensConfigBuilderMock).not.toHaveBeenCalled();
-    expect(mockBuild).not.toHaveBeenCalled();
-    expect(screen.queryByTestId('lensEmbeddableSimilarErrorsChart')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(LensConfigBuilderMock).not.toHaveBeenCalled();
+      expect(mockBuild).not.toHaveBeenCalled();
+      expect(screen.queryByTestId('lensEmbeddableSimilarErrorsChart')).not.toBeInTheDocument();
+    });
   });
 });
