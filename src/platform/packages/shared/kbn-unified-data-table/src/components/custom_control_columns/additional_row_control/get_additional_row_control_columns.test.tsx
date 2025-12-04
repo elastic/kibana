@@ -90,31 +90,25 @@ describe('getAdditionalRowControlColumns', () => {
   });
 
   it('should calculate total width correctly for 2 controls', () => {
-    // Given
     const mocks = [
       { ...mockRowAdditionalLeadingControls[0], width: 50 },
       { ...mockRowAdditionalLeadingControls[1], width: 70 },
     ];
 
-    // When
     const { totalWidth } = getAdditionalRowControlColumns(mocks);
 
-    // Then
     expect(totalWidth).toBe(120);
   });
 
   it('should calculate total width correctly for 3 controls', () => {
-    // Given
     const mocks = [
       { ...mockRowAdditionalLeadingControls[0], width: 50 },
       { ...mockRowAdditionalLeadingControls[1] },
       { ...mockRowAdditionalLeadingControls[2] },
     ];
 
-    // When
     const { totalWidth } = getAdditionalRowControlColumns(mocks);
 
-    // Then
     expect(totalWidth).toBe(74); // 50 (first control) + 24 (menu button default width)
   });
 });
