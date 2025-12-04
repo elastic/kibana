@@ -38,7 +38,7 @@ export class DataConnectorsServerPlugin
   }
 
   setup(
-    core: CoreSetup,
+    core: CoreSetup<DataConnectorsServerStartDependencies>,
     plugins: DataConnectorsServerSetupDependencies
   ): DataConnectorsServerSetup {
     const { uiSettings } = core;
@@ -51,7 +51,7 @@ export class DataConnectorsServerPlugin
 
     // Register HTTP routes
     const router = core.http.createRouter();
-    registerRoutes(router, this.logger);
+    registerRoutes(router, this.logger, core.getStartServices);
 
     return {};
   }
@@ -60,8 +60,6 @@ export class DataConnectorsServerPlugin
     core: CoreStart,
     plugins: DataConnectorsServerStartDependencies
   ): DataConnectorsServerStart {
-    // const { actions } = plugins;
-    // actions.getActionsClientWithRequest();
     return {};
   }
 }
