@@ -262,8 +262,18 @@ interface BasicMetricPanel {
   metric: string; // TODO proper type
 }
 const BasicMetricPanel = ({ title, metric }: BasicMetricPanel) => {
+  const { euiTheme } = useEuiTheme();
   return (
-    <EuiFlexGroup direction="column" gutterSize="xs">
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="xs"
+      css={css({
+        borderRight: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+        '&:last-child': {
+          borderRight: 'none',
+        },
+      })}
+    >
       <EuiFlexItem>
         <EuiText color="subdued" size="xs">
           <p>{title}</p>
