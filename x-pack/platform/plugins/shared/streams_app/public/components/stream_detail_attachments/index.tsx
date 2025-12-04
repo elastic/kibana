@@ -263,9 +263,9 @@ export function StreamDetailAttachments({
                           }}
                         >
                           {i18n.translate(
-                            'xpack.streams.streamDetailAttachments.cancelSelectionLabel',
+                            'xpack.streams.streamDetailAttachments.clearSelectionLabel',
                             {
-                              defaultMessage: 'Cancel selection',
+                              defaultMessage: 'Clear selection',
                             }
                           )}
                         </EuiContextMenuItem>,

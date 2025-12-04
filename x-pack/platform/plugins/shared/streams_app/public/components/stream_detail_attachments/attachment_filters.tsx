@@ -5,13 +5,13 @@
  * 2.0.
  */
 import {
+  EuiFieldSearch,
   EuiFilterButton,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
   EuiPopoverTitle,
-  EuiSearchBar,
   EuiSelectable,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -124,15 +124,15 @@ export function AttachmentFilters({
   return (
     <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
       <EuiFlexItem grow>
-        <EuiSearchBar
-          query={filters.query}
-          box={{
-            incremental: true,
-            placeholder: searchPlaceholder,
-          }}
-          onChange={(nextQuery) => {
-            onFiltersChange((prev) => ({ ...prev, query: nextQuery.queryText }));
-            updateDebouncedQuery(nextQuery.queryText);
+        <EuiFieldSearch
+          value={filters.query}
+          incremental
+          fullWidth
+          placeholder={searchPlaceholder}
+          onChange={(event) => {
+            const nextQuery = event.target.value;
+            onFiltersChange((prev) => ({ ...prev, query: nextQuery }));
+            updateDebouncedQuery(nextQuery);
           }}
         />
       </EuiFlexItem>
