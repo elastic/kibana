@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin/server';
 import { SupportedOAuthProvider } from '@kbn/data-sources-registry-plugin/server/data_catalog/data_type';
 import {
@@ -17,7 +18,9 @@ import {
 export const notionDataSource: DataTypeDefinition = {
   id: 'notion',
   name: 'Notion',
-  description: 'Connect to Notion to pull data from your workspace.',
+  description: i18n.translate('xpack.dataConnectors.dataSources.notion.description', {
+    defaultMessage: 'Connect to Notion to pull data from your workspace.',
+  }),
 
   oauthConfiguration: {
     provider: SupportedOAuthProvider.NOTION,
