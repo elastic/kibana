@@ -147,8 +147,8 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     this._changes.processing =
       !startingStateStreamDefinition ||
       !_.isEqual(
-        this._definition.ingest.processing,
-        startingStateStreamDefinition.ingest.processing
+        _.omit(this._definition.ingest.processing, ['updated_at']),
+        _.omit(startingStateStreamDefinition.ingest.processing, ['updated_at'])
       );
 
     this._changes.lifecycle =
@@ -159,17 +159,27 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       !startingStateStreamDefinition ||
       !_.isEqual(this._definition.ingest.settings, startingStateStreamDefinition.ingest.settings);
 
+    // The newly upserted definition will always have a new updated_at timestamp. But, if processing didn't change,
+    // we should keep the existing updated_at as processing wasn't touched.
+    if (startingStateStreamDefinition && !this._changes.processing) {
+      this._definition.ingest.processing.updated_at =
+        startingStateStreamDefinition.ingest.processing.updated_at;
+    }
+
     const parentId = getParentId(this._definition.name);
     const cascadingChanges: StreamChange[] = [];
+    const now = new Date().toISOString();
+
     if (parentId && !desiredState.has(parentId)) {
       cascadingChanges.push({
         type: 'upsert',
         definition: {
           name: parentId,
           description: '',
+          updated_at: now,
           ingest: {
             lifecycle: { inherit: {} },
-            processing: { steps: [] },
+            processing: { steps: [], updated_at: now },
             settings: {},
             wired: {
               fields: {},
@@ -199,9 +209,10 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
             definition: {
               name: routeTarget,
               description: '',
+              updated_at: now,
               ingest: {
                 lifecycle: { inherit: {} },
-                processing: { steps: [] },
+                processing: { steps: [], updated_at: now },
                 settings: {},
                 wired: {
                   fields: {},
@@ -230,6 +241,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
             definition: {
               name: parentId,
               description: '',
+              updated_at: now,
               ingest: {
                 ...parentStream.definition.ingest,
                 wired: {
@@ -279,6 +291,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
             definition: {
               name: parentId,
               description: '',
+              updated_at: new Date().toISOString(),
               ingest: {
                 ...parentStream.definition.ingest,
                 wired: {
