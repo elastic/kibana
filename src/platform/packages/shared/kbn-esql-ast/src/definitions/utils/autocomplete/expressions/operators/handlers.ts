@@ -12,8 +12,10 @@ import type { ISuggestionItem } from '../../../../../commands_registry/types';
 import {
   listCompleteItem,
   commaCompleteItem,
+  likePatternItems,
+  rlikePatternItems,
 } from '../../../../../commands_registry/complete_items';
-import type { ESQLColumn, ESQLFunction } from '../../../../../types';
+import type { ESQLColumn, ESQLFunction, ESQLSingleAstItem } from '../../../../../types';
 import { getBinaryExpressionOperand, getExpressionType } from '../../../expressions';
 import type { ExpressionContext } from '../types';
 import {
@@ -22,7 +24,6 @@ import {
   shouldSuggestOpenListForOperand,
 } from './utils';
 import { shouldSuggestComma } from '../comma_decision_engine';
-import { buildConstantsDefinitions } from '../../../literals';
 import { SuggestionBuilder } from '../suggestion_builder';
 import { withAutoSuggest } from '../../helpers';
 
@@ -35,8 +36,11 @@ export async function handleListOperator(ctx: ExpressionContext): Promise<ISugge
   const { expressionRoot, innerText } = ctx;
 
   const fn = expressionRoot as ESQLFunction;
-  const list = getBinaryExpressionOperand(fn, 'right');
-  const leftOperand = getBinaryExpressionOperand(fn, 'left');
+
+  // For IN/NOT IN, args are never arrays because the parser builds a single ESQLList node
+  // containing the values, not a JS array of values.
+  const list = getBinaryExpressionOperand(fn, 'right') as ESQLSingleAstItem | undefined;
+  const leftOperand = getBinaryExpressionOperand(fn, 'left') as ESQLSingleAstItem | undefined;
 
   // No list yet: suggest opening parenthesis
   if (shouldSuggestOpenListForOperand(list)) {
@@ -149,7 +153,7 @@ export async function handleStringListOperator(
   }
 
   const operator = fn.name.toLowerCase();
-  const rightOperand = getBinaryExpressionOperand(fn, 'right');
+  const rightOperand = getBinaryExpressionOperand(fn, 'right') as ESQLSingleAstItem | undefined;
 
   if (isOperandMissing(rightOperand)) {
     return getStringPatternSuggestions(operator);
@@ -182,22 +186,7 @@ export async function handleStringListOperator(
   return getStringPatternSuggestions(operator);
 }
 
-/** Returns pattern suggestion for LIKE/RLIKE operators with cursor inside quotes */
+/** Returns pattern suggestions for LIKE/RLIKE operators */
 function getStringPatternSuggestions(operator: string): ISuggestionItem[] {
-  const isRlike = operator.includes('rlike');
-
-  // LIKE: wildcard pattern (% = any chars, _ = single char)
-  // RLIKE: regular expression pattern
-  const { snippet, label, detail } = isRlike
-    ? { snippet: '"${0:.*}"', label: 'regex', detail: 'Regular expression pattern' }
-    : { snippet: '"${0:%}"', label: 'pattern', detail: 'Use % for any chars, _ for single char' };
-
-  return [
-    {
-      ...buildConstantsDefinitions([label], undefined, 'A')[0],
-      text: snippet,
-      detail,
-      asSnippet: true,
-    },
-  ];
+  return operator.includes('rlike') ? rlikePatternItems : likePatternItems;
 }
