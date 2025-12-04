@@ -16,6 +16,8 @@ import type {
   ESQLAstItem,
   ESQLCommandOption,
   ESQLAstAllCommands,
+  ESQLAstHeaderCommand,
+  ESQLAstQueryExpression,
 } from '../../types';
 import { Walker } from '../../..';
 
@@ -31,14 +33,36 @@ export function isMarkerNode(node: ESQLAstItem | undefined): boolean {
   );
 }
 
-function findCommand(ast: ESQLAstAllCommands[], offset: number) {
-  const commandIndex = ast.findIndex(
+function findCommand(ast: ESQLAstQueryExpression, offset: number) {
+  const queryCommands = ast.commands;
+  const commandIndex = queryCommands.findIndex(
     ({ location }) => location.min <= offset && location.max >= offset
   );
 
-  const command = ast[commandIndex] || ast[ast.length - 1];
+  const command = queryCommands[commandIndex] || queryCommands[queryCommands.length - 1];
+
+  if (!command) {
+    return findHeaderCommand(ast, offset);
+  }
 
   return command;
+}
+
+function findHeaderCommand(
+  ast: ESQLAstQueryExpression,
+  offset: number
+): ESQLAstHeaderCommand | undefined {
+  if (!ast.header || ast.header.length === 0) {
+    return;
+  }
+
+  const commandIndex = ast.header.findIndex(
+    ({ location }) => location.min <= offset && location.max >= offset
+  );
+
+  const targetHeader = ast.header[commandIndex] || ast.header[ast.header.length - 1];
+
+  return targetHeader.incomplete ? targetHeader : undefined;
 }
 
 export function isNotMarkerNodeOrArray(arg: ESQLAstItem) {
@@ -101,7 +125,7 @@ function findCommandSubType<T extends ESQLCommandOption>(
   }
 }
 
-export function findAstPosition(ast: ESQLAstAllCommands[], offset: number) {
+export function findAstPosition(ast: ESQLAstQueryExpression, offset: number) {
   const command = findCommand(ast, offset);
   if (!command) {
     return { command: undefined, node: undefined };
@@ -156,7 +180,7 @@ export function findAstPosition(ast: ESQLAstAllCommands[], offset: number) {
  * @returns
  */
 export function getBracketsToClose(text: string) {
-  const stack = [];
+  const stack: string[] = [];
   const pairs: Record<string, string> = { '"""': '"""', '/*': '*/', '(': ')', '[': ']', '"': '"' };
   const pairsReversed: Record<string, string> = {
     '"""': '"""',
@@ -167,12 +191,20 @@ export function getBracketsToClose(text: string) {
   };
 
   for (let i = 0; i < text.length; i++) {
+    const isInsideString = stack.some((item) => item === '"' || item === '"""');
+
     for (const openBracket in pairs) {
       if (!Object.hasOwn(pairs, openBracket)) {
         continue;
       }
 
       const substr = text.slice(i, i + openBracket.length);
+
+      // Skip comment markers (/* and */) when inside a string
+      if (isInsideString && (openBracket === '/*' || substr === '*/')) {
+        continue;
+      }
+
       if (pairsReversed[substr] && pairsReversed[substr] === stack[stack.length - 1]) {
         stack.pop();
         break;
