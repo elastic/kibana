@@ -10,97 +10,101 @@ import { TRIGGER_DEF_ID } from '@kbn/product-intercept-plugin/common/constants';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
+  /**
+   * @see config.ts
+   */
+  const CONFIGURED_STANDARD_INTERCEPT_INTERVAL = 10 * 1000;
+
   const PageObjects = getPageObjects(['common']);
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
 
   describe('Standard Product intercept', () => {
-    beforeEach(async () => {
-      await PageObjects.common.navigateToApp('home');
-      await retry.waitFor('wait for product intercept to be displayed', async () => {
-        return await testSubjects.exists(`*intercept-`);
-      });
-    });
-
-    it('the product intercept remains visible when the user navigates to a different page', async () => {
-      await PageObjects.common.navigateToApp('discover');
-
-      await retry.waitFor('wait for product intercept to be displayed', async () => {
-        return await testSubjects.exists('*intercept-');
+    describe('on initial page load', () => {
+      beforeEach(async () => {
+        await PageObjects.common.navigateToApp('home');
+        // Wait for the intercept interval to elapse
+        await PageObjects.common.sleep(CONFIGURED_STANDARD_INTERCEPT_INTERVAL + 100);
+        // Refresh the page at this point the configured interval will have elapsed so we expect the intercept to be displayed
+        await browser.refresh();
+        await retry.waitFor('wait for product intercept to be displayed', async () => {
+          return await testSubjects.exists(`*intercept-`);
+        });
       });
 
-      const interceptElement = await testSubjects.find('*intercept-');
+      it('presents all available navigable steps', async () => {
+        const interceptTestId = `intercept-${TRIGGER_DEF_ID}`;
 
-      expect(
-        /productInterceptTrigger/.test((await interceptElement.getAttribute('data-test-subj'))!)
-      ).to.be(true);
-    });
+        await retry.waitFor('wait for product intercept to be displayed', async () => {
+          const intercept = await testSubjects.find(interceptTestId);
+          return intercept.isDisplayed();
+        });
 
-    it('the intercept will be displayed again for the same user after a terminal interaction after the configured interval elapses', async () => {
-      await testSubjects.click('productInterceptDismissButton');
+        // Navigate to the intercept steps
+        await testSubjects.click('productInterceptProgressionButton');
 
-      await retry.waitFor('wait for product intercept to be displayed', async () => {
-        return await testSubjects.exists('*intercept-');
-      });
-    });
+        let progressionButton:
+          | (ReturnType<typeof testSubjects.find> extends Promise<infer R> ? R : never)
+          | null = null;
 
-    it('will display the intercept even if the user transitions to a different tab, interacts with it in the new tab and transitions back', async () => {
-      await testSubjects.click('productInterceptDismissButton');
+        do {
+          // we know there are 5 possible responses, so we can randomly select one of them
+          await testSubjects.click(`nps-${Math.floor(Math.random() * 4) + 1}`);
+          // the progression button is only visible at the start and completion of the survey
+          progressionButton = await testSubjects
+            .find('productInterceptProgressionButton')
+            .catch(() => null);
+        } while (!progressionButton);
 
-      // open a new tab and navigate to the discover app
-      await browser.openNewTab();
+        expect(await progressionButton.getVisibleText()).to.be('Close');
 
-      await PageObjects.common.navigateToApp('discover');
-
-      // expect that the intercept is displayed in the new tab
-      await retry.waitFor('wait for product intercept to be displayed', async () => {
-        return await testSubjects.exists('*intercept-');
-      });
-
-      // dismiss the intercept in the new tab
-      await testSubjects.click('productInterceptDismissButton');
-
-      // switch back to the original tab and expect that the intercept would still get displayed
-      await browser.switchTab(0);
-
-      await retry.waitFor('wait for product intercept to be displayed', async () => {
-        return await testSubjects.exists('*intercept-');
-      });
-
-      // dismiss the intercept in the original tab
-      await testSubjects.click('productInterceptDismissButton');
-    });
-
-    it('presents all available steps', async () => {
-      const interceptTestId = `intercept-${TRIGGER_DEF_ID}`;
-
-      await retry.waitFor('wait for product intercept to be displayed', async () => {
         const intercept = await testSubjects.find(interceptTestId);
-        return intercept.isDisplayed();
+
+        expect(/Thanks for the feedback!/.test(await intercept.getVisibleText())).to.be(true);
       });
 
-      // Navigate to the intercept steps
-      await testSubjects.click('productInterceptProgressionButton');
+      it('the intercept will be displayed again for the same user after a terminal interaction after the configured interval elapses', async () => {
+        await testSubjects.click('productInterceptDismissButton');
 
-      let progressionButton:
-        | (ReturnType<typeof testSubjects.find> extends Promise<infer R> ? R : never)
-        | null = null;
+        // Refresh the page to set a new record for the new interval journey
+        await browser.refresh();
 
-      do {
-        // we know there are 5 possible responses, so we can randomly select one of them
-        await testSubjects.click(`nps-${Math.floor(Math.random() * 4) + 1}`);
-        // the progression button is only visible at the start and completion of the survey
-        progressionButton = await testSubjects
-          .find('productInterceptProgressionButton')
-          .catch(() => null);
-      } while (!progressionButton);
+        // Wait for the intercept interval to elapse
+        await PageObjects.common.sleep(CONFIGURED_STANDARD_INTERCEPT_INTERVAL);
 
-      expect(await progressionButton.getVisibleText()).to.be('Close');
+        // Refresh the page at this point the configured interval will have elapsed so we expect the intercept to be displayed
+        await browser.refresh();
 
-      const intercept = await testSubjects.find(interceptTestId);
+        await retry.waitFor('wait for product intercept to be displayed', async () => {
+          return await testSubjects.exists('*intercept-');
+        });
+      });
+    });
 
-      expect(/Thanks for the feedback!/.test(await intercept.getVisibleText())).to.be(true);
+    describe('page transitions', () => {
+      it('transitions from one tab to another and back again will cause the intercept to be displayed if the intercept interval has elapsed on transitioning', async () => {
+        // navigate the home journey to set a record for new intercept journey
+        await PageObjects.common.navigateToApp('home');
+
+        // open a new tab and navigate to the discover app
+        await browser.openNewTab();
+
+        await PageObjects.common.navigateToApp('discover');
+
+        // Wait for the intercept interval to elapse
+        await PageObjects.common.sleep(CONFIGURED_STANDARD_INTERCEPT_INTERVAL);
+
+        // switch back to the original tab and expect that the intercept would still get displayed
+        await browser.switchTab(0);
+
+        await retry.waitFor('wait for product intercept to be displayed', async () => {
+          return await testSubjects.exists('*intercept-');
+        });
+
+        // dismiss the intercept in the original tab
+        await testSubjects.click('productInterceptDismissButton');
+      });
     });
   });
 }

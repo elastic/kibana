@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
+  /**
+   * @see config.ts
+   */
+  const CONFIGURED_UPGRADE_INTERCEPT_INTERVAL = 10 * 1000;
+
   const PageObjects = getPageObjects(['common']);
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -17,30 +21,24 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('Product intercept for upgrade event', () => {
     beforeEach(async () => {
       await PageObjects.common.navigateToApp('home');
+      // Wait for the intercept interval to elapse
+      await PageObjects.common.sleep(CONFIGURED_UPGRADE_INTERCEPT_INTERVAL + 100);
+      // Refresh the page at this point the configured interval will have elapsed so we expect the intercept to be displayed
+      await browser.refresh();
       await retry.waitFor('wait for product intercept to be displayed', async () => {
         return await testSubjects.exists(`*intercept-`);
       });
     });
 
-    it('the product intercept remains visible when the user navigates to a different page', async () => {
-      await PageObjects.common.navigateToApp('discover');
-
-      await retry.waitFor('wait for product intercept to be displayed', async () => {
-        return await testSubjects.exists('*intercept-');
-      });
-
-      const interceptElement = await testSubjects.find('*intercept-');
-
-      expect(
-        /productUpgradeInterceptTrigger/.test(
-          (await interceptElement.getAttribute('data-test-subj'))!
-        )
-      ).to.be(true);
-    });
-
     it('the upgrade intercept will not be displayed again for the same user after a terminal interaction', async () => {
       await testSubjects.click('productInterceptDismissButton');
 
+      await browser.refresh();
+
+      // Wait for the intercept interval to elapse
+      await PageObjects.common.sleep(CONFIGURED_UPGRADE_INTERCEPT_INTERVAL);
+
+      // Refresh the page at this point the configured interval will have elapsed so we expect the intercept to be displayed
       await browser.refresh();
 
       await testSubjects.missingOrFail('*intercept-');
