@@ -40,7 +40,6 @@ export const streamsRouteRepository = {
   ...internalAttachmentRoutes,
   // public APIs
   ...docCountsRoutes,
-  ...dashboardRoutes,
   ...crudRoutes,
   ...enablementRoutes,
   ...managementRoutes,
