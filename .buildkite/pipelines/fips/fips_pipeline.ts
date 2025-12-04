@@ -22,6 +22,8 @@ import { emitPipeline, getPipeline } from '#pipeline-utils';
   try {
     pipeline.push(getPipeline('.buildkite/pipelines/fips.yml', false));
 
+    // TODO: push verify
+
     emitPipeline(pipeline);
   } catch (ex) {
     console.error('Error while generating the pipeline steps: ' + ex.message, ex);

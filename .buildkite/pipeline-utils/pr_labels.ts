@@ -7,36 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * Available auto-mapped label options, respected by 'collectEnvFromLabels' function.
- */
-export const LABEL_MAPPING: Record<string, Record<string, string>> = {
-  'ci:use-chrome-beta': {
-    USE_CHROME_BETA: 'true', // Use if you want to run tests with Chrome Beta
-  },
-};
-
-/**
- * This function reads available GITHUB_LABELS and maps them to environment variables.
- */
-export function collectEnvFromLabels(
-  labels = process.env.GITHUB_PR_LABELS
-): Record<string, string> {
-  const envFromlabels: Record<string, string> = {};
-
-  if (labels) {
-    const labelArray = labels.split(',');
-    labelArray.forEach((label) => {
-      const env = LABEL_MAPPING[label];
-      if (env) {
-        Object.assign(envFromlabels, env);
-      }
-    });
-  }
-
-  return envFromlabels;
-}
-
 export enum FIPS_VERSION {
   TWO = '140-2',
   THREE = '140-3',
@@ -62,4 +32,40 @@ export function prHasFIPSLabel(version?: FIPS_VERSION): boolean {
   }
 
   return Object.values(FIPS_GH_LABELS).some((label) => labels.includes(label));
+}
+
+/**
+ * Available auto-mapped label options, respected by 'collectEnvFromLabels' function.
+ */
+export const LABEL_MAPPING: Record<string, Record<string, string>> = {
+  'ci:use-chrome-beta': {
+    USE_CHROME_BETA: 'true', // Use if you want to run tests with Chrome Beta
+  },
+  [FIPS_GH_LABELS[FIPS_VERSION.TWO]]: {
+    TEST_ENABLE_FIPS_VERSION: FIPS_VERSION.TWO,
+  },
+  [FIPS_GH_LABELS[FIPS_VERSION.THREE]]: {
+    TEST_ENABLE_FIPS_VERSION: FIPS_VERSION.THREE,
+  },
+};
+
+/**
+ * This function reads available GITHUB_LABELS and maps them to environment variables.
+ */
+export function collectEnvFromLabels(
+  labels = process.env.GITHUB_PR_LABELS
+): Record<string, string> {
+  const envFromlabels: Record<string, string> = {};
+
+  if (labels) {
+    const labelArray = labels.split(',');
+    labelArray.forEach((label) => {
+      const env = LABEL_MAPPING[label];
+      if (env) {
+        Object.assign(envFromlabels, env);
+      }
+    });
+  }
+
+  return envFromlabels;
 }
