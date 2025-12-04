@@ -1008,7 +1008,8 @@
     "unInstallCount"
   ],
   "scheduled_report": [
-    "createdBy"
+    "createdBy",
+    "title"
   ],
   "search": [
     "description",

@@ -67,6 +67,7 @@ import { disableAttackDiscoverySchedulesInternalRoute } from './attack_discovery
 import { disableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/public/post/disable';
 import { enableAttackDiscoverySchedulesInternalRoute } from './attack_discovery/schedules/internal/post/enable';
 import { enableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/public/post/enable';
+import { getMissingIndexPrivilegesInternalRoute } from './attack_discovery/privileges/get_missing_privileges';
 import { suggestUsersRoute } from './users/suggest';
 
 jest.mock('./alert_summary/find_route');
@@ -122,6 +123,10 @@ const findAttackDiscoverySchedulesRouteMock = findAttackDiscoverySchedulesRoute 
 jest.mock('./attack_discovery/schedules/internal/get/find');
 const findAttackDiscoverySchedulesInternalRouteMock =
   findAttackDiscoverySchedulesInternalRoute as jest.Mock;
+
+jest.mock('./attack_discovery/privileges/get_missing_privileges');
+const getMissingIndexPrivilegesInternalRouteMock =
+  getMissingIndexPrivilegesInternalRoute as jest.Mock;
 
 jest.mock('./attack_discovery/schedules/public/put/update');
 const updateAttackDiscoverySchedulesRouteMock = updateAttackDiscoverySchedulesRoute as jest.Mock;
@@ -290,6 +295,10 @@ describe('registerRoutes', () => {
 
   it('should call `findAttackDiscoverySchedulesInternalRouteMock`', () => {
     expect(findAttackDiscoverySchedulesInternalRouteMock).toHaveBeenCalledWith(server.router);
+  });
+
+  it('should call `getMissingIndexPrivilegesInternalRouteMock`', () => {
+    expect(getMissingIndexPrivilegesInternalRouteMock).toHaveBeenCalledWith(server.router);
   });
 
   it('should call `updateAttackDiscoverySchedulesRouteMock`', () => {
