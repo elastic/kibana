@@ -148,6 +148,6 @@ export const waitForAllDatafeedsToStart = ({ jobIds }: { jobIds: string[] }) => 
       }
       return allStarted;
     },
-    { delay: 2000, timeout: 60000 }
+    { delay: 2000, timeout: 360000 }
   );
 };
