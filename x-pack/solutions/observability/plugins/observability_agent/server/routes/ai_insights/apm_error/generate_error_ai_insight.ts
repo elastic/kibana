@@ -26,15 +26,15 @@ const ERROR_AI_INSIGHT_SYSTEM_PROMPT = dedent(`
 
   Guardrails:
   - Strict Factuality: Only mention signals present in the JSON. If a signal is missing, do not mention it.
-  - Only assert a cause if multiple signals support it. Otherwise mark Assessment "Inconclusive".
+  - Only assert a cause if multiple signals support it. If the cause is not clear, mention that.
   - Prefer corroborated explanations. If only one source supports it, state that support is limited.
   - Do NOT repeat raw stacks verbatim (reference only key frames/fields).
-  - Conciseness: Use bullet points. Avoid flowery language. Be direct and technical.
+  - Conciseness: Use bullet points. Be direct and technical.
 
   Available context tags:
   - <ErrorDetails>: Full error document (exception, message, stacktrace, labels)
   - <TransactionDetails>: Transaction linked to the error (if present)
-  - <APMDownstreamDependencies>: Downstream dependencies for the erroring service
+  - <DownstreamDependencies>: Downstream dependencies for the erroring service
   - <TraceItems>: Span/transaction samples with service, name, type, eventOutcome, statusCode, duration, httpUrl, downstreamServiceResource
   - <TraceErrors>: Related errors within the trace (type, message, culprit, spanId, timestampUs)
   - <TraceServices>: Service aggregates for the trace (serviceName, count, errorCount)

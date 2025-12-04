@@ -9,11 +9,6 @@ import { z } from '@kbn/zod';
 import dedent from 'dedent';
 import type { Attachment } from '@kbn/onechat-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
-import {
-  OBSERVABILITY_GET_SERVICES_TOOL_ID,
-  OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
-} from '../../common/constants';
-import { OBSERVABILITY_GET_ALERTS_TOOL_ID } from '../tools/get_alerts/get_alerts';
 
 export const OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID = 'observability.ai_insight';
 
@@ -67,10 +62,5 @@ export const createAiInsightAttachmentType = (): AttachmentTypeDefinition => {
         The AI Insight attachment carries a concise natural-language summary (aiSummary) and contextual data (contextData) relevant to observability investigations.
       `);
     },
-    getTools: () => [
-      OBSERVABILITY_GET_SERVICES_TOOL_ID,
-      OBSERVABILITY_GET_ALERTS_TOOL_ID,
-      OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
-    ],
   };
 };

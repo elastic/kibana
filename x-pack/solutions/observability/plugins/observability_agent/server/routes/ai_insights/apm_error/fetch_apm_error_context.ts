@@ -33,25 +33,33 @@ export async function fetchApmErrorContext({
   const contextParts: string[] = [];
 
   // Fetch the full error details with transaction (if available)
-  const details = await dataRegistry.getData('apmErrorDetails', {
-    request,
-    errorId,
-    serviceName,
-    start,
-    end,
-    serviceEnvironment: environment ?? '',
-  });
+  let errorDetails;
+  try {
+    errorDetails = await dataRegistry.getData('apmErrorDetails', {
+      request,
+      errorId,
+      start,
+      end,
+      serviceName,
+      serviceEnvironment: environment ?? '',
+    });
 
-  contextParts.push(`<ErrorDetails>\n${JSON.stringify(details?.error, null, 2)}\n</ErrorDetails>`);
-
-  if (details?.transaction) {
     contextParts.push(
-      `<TransactionDetails>\n${JSON.stringify(
-        details?.transaction,
-        null,
-        2
-      )}\n</TransactionDetails>`
+      `<ErrorDetails>\n${JSON.stringify(errorDetails?.error, null, 2)}\n</ErrorDetails>`
     );
+
+    if (errorDetails?.transaction) {
+      contextParts.push(
+        `<TransactionDetails>\n${JSON.stringify(
+          errorDetails?.transaction,
+          null,
+          2
+        )}\n</TransactionDetails>`
+      );
+    }
+  } catch (error) {
+    logger.error(`Error AI insight: fetching error details failed: ${error?.message}`);
+    throw error;
   }
 
   try {
@@ -66,18 +74,18 @@ export async function fetchApmErrorContext({
 
     if (apmDownstreamDependencies?.length) {
       contextParts.push(
-        `<APMDownstreamDependencies>\n${JSON.stringify(
+        `<DownstreamDependencies>\n${JSON.stringify(
           apmDownstreamDependencies,
           null,
           2
-        )}\n</APMDownstreamDependencies>`
+        )}\n</DownstreamDependencies>`
       );
     }
   } catch (error) {
     logger.debug(`Error AI insight: apmDownstreamDependencies failed: ${error}`);
   }
 
-  const traceId = details?.error?.trace?.id;
+  const traceId = errorDetails?.error?.trace?.id;
   if (traceId) {
     try {
       // Fetch the trace details for the error (trace items, aggregated services for the trace, trace errors)
@@ -118,18 +126,18 @@ export async function fetchApmErrorContext({
     }
 
     try {
-      // Fetch categorized logs tied to this trace (trace.id or services in the trace)
-      const logCategories = await dataRegistry.getData('apmLogCategoriesByTrace', {
+      // Fetch categorized logs tied to the trace
+      const logCategoriesForTrace = await dataRegistry.getData('apmLogCategoriesByTrace', {
         request,
         traceId,
         start,
         end,
       });
 
-      if (logCategories?.length) {
+      if (logCategoriesForTrace?.length) {
         contextParts.push(
           `<TraceLogCategories>\n${JSON.stringify(
-            logCategories.slice(0, 10),
+            logCategoriesForTrace.slice(0, 10),
             null,
             2
           )}\n</TraceLogCategories>`

@@ -41,6 +41,9 @@ export function ErrorSampleAgentBuilderAiInsight({
 
   const { selectedConnector, defaultConnectorId } = useConnectorSelection();
 
+  const errorId = error.error.id;
+  const serviceName = error.service.name;
+
   const fetchAiInsights = async () => {
     setIsLoading(true);
     try {
@@ -81,7 +84,7 @@ export function ErrorSampleAgentBuilderAiInsight({
         data: {
           app: 'apm',
           url: window.location.href,
-          description: `APM error details page for ${error.service.name}`,
+          description: `APM error details page for error ID ${errorId} on service ${serviceName}`,
         },
         hidden: true,
       },
@@ -97,15 +100,25 @@ export function ErrorSampleAgentBuilderAiInsight({
         id: 'apm_error_details_error_attachment',
         type: OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID,
         data: {
-          errorId: error.error.id,
-          serviceName: error.service.name,
+          errorId,
+          serviceName,
           environment,
           start,
           end,
         },
       },
     ];
-  }, [error, onechat, isObservabilityAgentEnabled, summary, context, environment, start, end]);
+  }, [
+    onechat,
+    isObservabilityAgentEnabled,
+    errorId,
+    serviceName,
+    summary,
+    context,
+    environment,
+    start,
+    end,
+  ]);
 
   if (!onechat || !isObservabilityAgentEnabled || !inference) {
     return <></>;
@@ -126,7 +139,7 @@ export function ErrorSampleAgentBuilderAiInsight({
         onStartConversation={() => {
           onechat.openConversationFlyout({
             attachments,
-            sessionTag: 'apm-error-ai-insight',
+            sessionTag: 'observability',
             newConversation: true,
           });
         }}

@@ -211,7 +211,7 @@ export function ErrorGroupDetails() {
       newConversation: true,
       attachments: [
         {
-          id: errorId,
+          id: 'apm_error_attachment',
           type: OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID,
           data: {
             errorId,
