@@ -88,7 +88,14 @@ export interface TableListViewTableProps<
   /** Enable content type tabs filter (dashboards, visualizations, annotation-groups). Only used in dashboards app. */
   contentTypeTabsEnabled?: boolean;
   /** Entity name mappings for different content types (used when contentTypeTabsEnabled is true) */
-  contentTypeEntityNames?: Record<ContentType, { singular: string; plural: string }>;
+  contentTypeEntityNames?: Record<
+    ContentType,
+    { singular: string; plural: string; emptyPromptBody?: React.ReactNode }
+  >;
+  /** Custom filter function for content type tabs. If not provided, falls back to default filtering. */
+  filterItemByContentType?: (item: T, contentType: ContentType) => boolean;
+  /** Default content type tab to show when contentTypeTabsEnabled is true. Defaults to 'dashboards'. */
+  defaultContentTypeTab?: ContentType;
   /**
    * Id of the heading element describing the table. This id will be used as `aria-labelledby` of the wrapper element.
    * If the table is not empty, this component renders its own h1 element using the same id.
@@ -354,6 +361,8 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   createdByEnabled = false,
   contentTypeTabsEnabled = false,
   contentTypeEntityNames,
+  filterItemByContentType,
+  defaultContentTypeTab,
   recentlyAccessed,
 }: TableListViewTableProps<T>) {
   useEffect(() => {
@@ -1254,6 +1263,8 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           favoritesEnabled={favoritesEnabled}
           contentTypeTabsEnabled={contentTypeTabsEnabled}
           contentTypeEntityNames={contentTypeEntityNames}
+          filterItemByContentType={filterItemByContentType}
+          defaultContentTypeTab={defaultContentTypeTab}
           emptyPrompt={emptyPrompt}
         />
 

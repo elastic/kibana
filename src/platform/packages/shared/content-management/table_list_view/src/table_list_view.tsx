@@ -42,6 +42,8 @@ export type TableListViewProps<T extends UserContentCommonSchema = UserContentCo
   | 'contentTypeTabsEnabled'
   | 'recentlyAccessed'
   | 'contentTypeEntityNames'
+  | 'filterItemByContentType'
+  | 'defaultContentTypeTab'
 > & {
   title: string;
   description?: string;
@@ -81,6 +83,8 @@ export const TableListView = <T extends UserContentCommonSchema>({
   contentTypeTabsEnabled,
   recentlyAccessed,
   contentTypeEntityNames,
+  filterItemByContentType,
+  defaultContentTypeTab,
 }: TableListViewProps<T>) => {
   const PageTemplate = withoutPageTemplateWrapper
     ? (React.Fragment as unknown as typeof KibanaPageTemplate)
@@ -132,6 +136,8 @@ export const TableListView = <T extends UserContentCommonSchema>({
           contentTypeTabsEnabled={contentTypeTabsEnabled}
           recentlyAccessed={recentlyAccessed}
           contentTypeEntityNames={contentTypeEntityNames}
+          filterItemByContentType={filterItemByContentType}
+          defaultContentTypeTab={defaultContentTypeTab}
         />
       </KibanaPageTemplate.Section>
     </PageTemplate>

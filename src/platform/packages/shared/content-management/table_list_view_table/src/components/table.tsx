@@ -89,7 +89,14 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   createdByEnabled: boolean;
   favoritesEnabled: boolean;
   contentTypeTabsEnabled?: boolean;
-  contentTypeEntityNames?: Record<ContentType, { singular: string; plural: string }>;
+  contentTypeEntityNames?: Record<
+    ContentType,
+    { singular: string; plural: string; emptyPromptBody?: React.ReactNode }
+  >;
+  /** Custom filter function for content type tabs. If not provided, falls back to default filtering. */
+  filterItemByContentType?: (item: T, contentType: ContentType) => boolean;
+  /** Default content type tab to show when contentTypeTabsEnabled is true. Defaults to 'dashboards'. */
+  defaultContentTypeTab?: ContentType;
   emptyPrompt?: JSX.Element;
 }
 
@@ -124,6 +131,8 @@ export function Table<T extends UserContentCommonSchema>({
   favoritesEnabled,
   contentTypeTabsEnabled,
   contentTypeEntityNames,
+  filterItemByContentType,
+  defaultContentTypeTab = 'dashboards',
   emptyPrompt,
 }: Props<T>) {
   const euiTheme = useEuiTheme();
@@ -336,31 +345,15 @@ export function Table<T extends UserContentCommonSchema>({
   );
 
   const emptyPromptBody = useMemo(() => {
-    if (contentTypeTabsEnabled && tableFilter.contentTypeTab) {
-      switch (tableFilter.contentTypeTab) {
-        case 'visualizations':
-          return (
-            <FormattedMessage
-              id="contentManagement.tableList.listing.visualizations.noItemsBody"
-              defaultMessage="Create a visualization to get started."
-            />
-          );
-        case 'annotation-groups':
-          return (
-            <FormattedMessage
-              id="contentManagement.tableList.listing.annotationGroups.noItemsBody"
-              defaultMessage="Create and save annotations for use across multiple visualizations in the Lens editor."
-            />
-          );
-        default:
-          // Dashboards
-          return (
-            <FormattedMessage
-              id="contentManagement.tableList.listing.dashboards.noItemsBody"
-              defaultMessage="Create a dashboard to get started."
-            />
-          );
-      }
+    if (contentTypeTabsEnabled && tableFilter.contentTypeTab && contentTypeEntityNames) {
+      return (
+        contentTypeEntityNames[tableFilter.contentTypeTab]?.emptyPromptBody ?? (
+          <FormattedMessage
+            id="contentManagement.tableList.listing.noItemsBody"
+            defaultMessage="Create a new item to get started."
+          />
+        )
+      );
     }
 
     return (
@@ -369,7 +362,7 @@ export function Table<T extends UserContentCommonSchema>({
         defaultMessage="Create a new item to get started."
       />
     );
-  }, [contentTypeTabsEnabled, tableFilter.contentTypeTab]);
+  }, [contentTypeTabsEnabled, tableFilter.contentTypeTab, contentTypeEntityNames]);
 
   const emptyPromptActions = useMemo(() => {
     return renderCreateButton(false);
@@ -383,17 +376,23 @@ export function Table<T extends UserContentCommonSchema>({
     // Filter by content type tab
     if (contentTypeTabsEnabled && tableFilter?.contentTypeTab) {
       const currentTab = tableFilter.contentTypeTab;
-      filteredItems = filteredItems.filter((item) => {
-        const itemType = (item as any).type;
-        if (currentTab === 'dashboards') {
-          return itemType === 'dashboard' || !itemType; // Default to dashboard if no type
-        } else if (currentTab === 'visualizations') {
-          return itemType !== 'dashboard' && itemType !== 'event-annotation-group';
-        } else if (currentTab === 'annotation-groups') {
-          return itemType === 'event-annotation-group';
-        }
-        return true;
-      });
+      if (filterItemByContentType) {
+        // Use custom filter if provided
+        filteredItems = filteredItems.filter((item) => filterItemByContentType(item, currentTab));
+      } else {
+        // Fallback to default filtering (for backward compatibility)
+        filteredItems = filteredItems.filter((item) => {
+          const itemType = (item as any).type;
+          if (currentTab === 'dashboards') {
+            return itemType === 'dashboard' || !itemType;
+          } else if (currentTab === 'visualizations') {
+            return itemType !== 'dashboard' && itemType !== 'event-annotation-group';
+          } else if (currentTab === 'annotation-groups') {
+            return itemType === 'event-annotation-group';
+          }
+          return true;
+        });
+      }
     }
 
     if (tableFilter?.createdBy?.length > 0) {
@@ -413,7 +412,14 @@ export function Table<T extends UserContentCommonSchema>({
     }
 
     return filteredItems;
-  }, [items, tableFilter, favorites, favoritesError, contentTypeTabsEnabled]);
+  }, [
+    items,
+    tableFilter,
+    favorites,
+    favoritesError,
+    contentTypeTabsEnabled,
+    filterItemByContentType,
+  ]);
 
   const { allUsers, showNoUserOption } = useMemo(() => {
     if (!createdByEnabled) return { allUsers: [], showNoUserOption: false };
@@ -438,7 +444,7 @@ export function Table<T extends UserContentCommonSchema>({
 
   const tabbedFilter = contentTypeTabsEnabled ? (
     <TabbedTableFilter
-      selectedTabId={tableFilter.contentTypeTab ?? 'dashboards'}
+      selectedTabId={tableFilter.contentTypeTab ?? defaultContentTypeTab}
       onSelectedTabChanged={(newTab) => {
         onFilterChange({ contentTypeTab: newTab });
       }}

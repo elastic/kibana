@@ -14,7 +14,7 @@ import { css } from '@emotion/react';
 import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
 import type { TableListViewTableProps } from '@kbn/content-management-table-list-view-table';
-import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
+import type { Reference } from '@kbn/content-management-utils';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import {
@@ -126,8 +126,11 @@ export const useDashboardListingTable = ({
   const {
     getVisualizationEntityName,
     getVisualizationEntityNamePlural,
+    getVisualizationEmptyPromptBody,
     getAnnotationGroupEntityName,
     getAnnotationGroupEntityNamePlural,
+    getAnnotationGroupEmptyPromptBody,
+    getDashboardEmptyPromptBody,
   } = dashboardListingTabStrings;
   const title = getTableListTitle();
   const entityName = getEntityName();
@@ -138,24 +141,47 @@ export const useDashboardListingTable = ({
       dashboards: {
         singular: entityName,
         plural: entityNamePlural,
+        emptyPromptBody: getDashboardEmptyPromptBody(),
       },
       visualizations: {
         singular: getVisualizationEntityName(),
         plural: getVisualizationEntityNamePlural(),
+        emptyPromptBody: getVisualizationEmptyPromptBody(),
       },
       'annotation-groups': {
         singular: getAnnotationGroupEntityName(),
         plural: getAnnotationGroupEntityNamePlural(),
+        emptyPromptBody: getAnnotationGroupEmptyPromptBody(),
       },
     }),
     [
       entityName,
       entityNamePlural,
+      getDashboardEmptyPromptBody,
       getVisualizationEntityName,
       getVisualizationEntityNamePlural,
+      getVisualizationEmptyPromptBody,
       getAnnotationGroupEntityName,
       getAnnotationGroupEntityNamePlural,
+      getAnnotationGroupEmptyPromptBody,
     ]
+  );
+
+  const filterItemByContentType = useCallback(
+    (item: any, contentType: 'dashboards' | 'visualizations' | 'annotation-groups') => {
+      const itemType = item.type;
+      if (contentType === 'dashboards') {
+        return itemType === 'dashboard' || !itemType; // Default to dashboard if no type
+      } else if (contentType === 'visualizations') {
+        // Use negative filter: anything that's NOT a dashboard or annotation-group is a visualization
+        // This is more robust than enumerating all possible visualization types
+        return itemType !== 'dashboard' && itemType !== 'event-annotation-group';
+      } else if (contentType === 'annotation-groups') {
+        return itemType === 'event-annotation-group';
+      }
+      return true;
+    },
+    []
   );
 
   const [pageDataTestSubject, setPageDataTestSubject] = useState<string>();
@@ -279,8 +305,8 @@ export const useDashboardListingTable = ({
         referencesToExclude,
         contentType = 'dashboards',
       }: {
-        references?: SavedObjectsFindOptionsReference[];
-        referencesToExclude?: SavedObjectsFindOptionsReference[];
+        references?: Reference[];
+        referencesToExclude?: Reference[];
         contentType?: 'dashboards' | 'visualizations' | 'annotation-groups';
       } = {}
     ) => {
@@ -667,12 +693,15 @@ export const useDashboardListingTable = ({
       createdByEnabled: true,
       contentTypeTabsEnabled: true,
       contentTypeEntityNames,
+      filterItemByContentType,
+      defaultContentTypeTab: 'dashboards',
       recentlyAccessed: getDashboardRecentlyAccessedService(),
     };
   }, [
     contentEditorValidators,
     contentTypeEntityNames,
     createItem,
+    filterItemByContentType,
     customTableColumn,
     dashboardListingId,
     deleteItems,
