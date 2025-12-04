@@ -86,10 +86,10 @@ export async function reindexIntegrationKnowledgeForInstalledPackages() {
     installedPackages.saved_objects,
     async ({ attributes: installation }) => {
       const knowledgeBase = await getPackageKnowledgeBase({ esClient, pkgName: installation.name });
-      const knowledgeBaseHasCurrentPackageVersion = knowledgeBase?.items.some(
+      const everyKnowledgeBaseOnCurrentPackageVersion = knowledgeBase?.items.every(
         (item) => item.version === installation.version
       );
-      if (knowledgeBaseHasCurrentPackageVersion) {
+      if (everyKnowledgeBaseOnCurrentPackageVersion) {
         logger.debug(
           `Skipping reindexing knowledge base for package ${installation.name}@${installation.version} - already indexed`
         );

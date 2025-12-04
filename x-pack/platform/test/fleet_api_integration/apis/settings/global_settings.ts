@@ -61,7 +61,7 @@ export default function (providerContext: FtrProviderContext) {
       const updatedSettings = await apiClient.getSettings();
       expect(updatedSettings.item.integration_knowledge_enabled).to.be(true);
 
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 3000));
 
       const response = await apiClient.getPackage({
         pkgName: 'knowledge_base_test',

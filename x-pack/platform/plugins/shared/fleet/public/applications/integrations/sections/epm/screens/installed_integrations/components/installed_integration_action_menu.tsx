@@ -25,12 +25,12 @@ import { IntegrationKnowledgeFlyout } from './integration_knowledge_flyout';
 export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
   selectedItems: InstalledPackageUIPackageListItem[];
 }> = ({ selectedItems }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [showIntegrationKnowledgeFlyout, setShowIntegrationKnowledgeFlyout] = useState(false);
   const { enablePackageRollback } = ExperimentalFeaturesService.get();
   const licenseService = useLicense();
   const button = (
-    <EuiButton iconType="arrowDown" iconSide="right" onClick={() => setIsOpen((s) => !s)}>
+    <EuiButton iconType="arrowDown" iconSide="right" onClick={() => setIsPopoverOpen((s) => !s)}>
       <FormattedMessage
         id="xpack.fleet.epmInstalledIntegrations.actionButton"
         defaultMessage="Actions"
@@ -47,22 +47,22 @@ export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
   } = useInstalledIntegrationsActions();
 
   const openUpgradeModal = useCallback(() => {
-    setIsOpen(false);
+    setIsPopoverOpen(false);
     return bulkUpgradeIntegrationsWithConfirmModal(selectedItems);
   }, [selectedItems, bulkUpgradeIntegrationsWithConfirmModal]);
 
   const openUninstallModal = useCallback(async () => {
-    setIsOpen(false);
+    setIsPopoverOpen(false);
     return bulkUninstallIntegrationsWithConfirmModal(selectedItems);
   }, [selectedItems, bulkUninstallIntegrationsWithConfirmModal]);
 
   const openRollbackModal = useCallback(async () => {
-    setIsOpen(false);
+    setIsPopoverOpen(false);
     return bulkRollbackIntegrationsWithConfirmModal(selectedItems);
   }, [selectedItems, bulkRollbackIntegrationsWithConfirmModal]);
 
   const openManageIntegrationKnowledgeFlyout = useCallback(() => {
-    setIsOpen(false);
+    setIsPopoverOpen(false);
     setShowIntegrationKnowledgeFlyout(true);
   }, []);
 
@@ -192,8 +192,8 @@ export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
       <EuiPopover
         id="fleet.epmInstalledIntegrations.bulkActionPopover"
         button={button}
-        isOpen={isOpen}
-        closePopover={() => setIsOpen(false)}
+        isOpen={isPopoverOpen}
+        closePopover={() => setIsPopoverOpen(false)}
         panelPaddingSize="none"
         anchorPosition="downLeft"
       >
