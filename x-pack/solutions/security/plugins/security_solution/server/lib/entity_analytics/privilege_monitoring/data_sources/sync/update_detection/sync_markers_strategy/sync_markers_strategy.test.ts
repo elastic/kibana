@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MonitoringEntitySource } from '../../../../../../../common/api/entity_analytics';
+import type { MonitoringEntitySource } from '../../../../../../../../common/api/entity_analytics';
 import { createSyncMarkersStrategy } from './sync_markers_strategy';
 
 const createMockSource = (): MonitoringEntitySource => ({

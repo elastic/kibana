@@ -12,10 +12,11 @@ import type { MonitoringEntitySource } from '../../../../../../../../common/api/
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
 import { createSyncMarkersService } from '../../sync_markers';
 import { findStaleUsersFactory } from '../stale_users';
-import { timeStampsAreValid } from './deletion_detection/utils';
 import { createBulkUtilsService } from '../../../bulk';
 import { getErrorFromBulkResponse } from '../../utils';
-import { buildFindUsersSearchBodyWithSyncMarkers, getAllUserNamesInAggregation } from '../queries';
+import { buildFindUsersSearchBodyWithTimeStamps, getAllUserNamesInAggregation } from '../queries';
+import { DEFAULT_COMPOSITE_PAGE_SIZE } from '../constants';
+import { timeStampsAreValid } from './utils';
 
 export const createDeletionDetectionService = (
   dataClient: PrivilegeMonitoringDataClient,
@@ -62,13 +63,13 @@ export const createDeletionDetectionService = (
         dataClient,
         indexPattern: source.indexPattern,
         buildQuery: ({ afterKey, pageSize }) =>
-          buildFindUsersSearchBodyWithSyncMarkers({
+          buildFindUsersSearchBodyWithTimeStamps({
             timeGte: startedEventTimeStamp,
             timeLt: completedEventTimeStamp,
             afterKey,
             pageSize,
           }),
-        pageSize: 100,
+        pageSize: DEFAULT_COMPOSITE_PAGE_SIZE,
       });
       // get all users in the privileged index for this source that are not in integrations docs
       const staleUsers = await findStaleUsers(

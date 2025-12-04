@@ -23,7 +23,7 @@ import type { PrivilegeMonitoringDataClient } from '../../../engine/data_client'
  * @param pageSize
  * @returns Search body for use in query
  */
-export const buildFindUsersSearchBodyWithSyncMarkers = ({
+export const buildFindUsersSearchBodyWithTimeStamps = ({
   timeGte,
   timeLt,
   afterKey,

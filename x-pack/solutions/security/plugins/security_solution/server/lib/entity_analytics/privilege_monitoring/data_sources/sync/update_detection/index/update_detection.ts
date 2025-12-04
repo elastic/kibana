@@ -8,9 +8,9 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { MonitoringEntitySource } from '../../../../../../../../common/api/entity_analytics';
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
-import { createPatternMatcherService } from '../integrations/privileged_status_match';
 import type { PrivMonBulkUser } from '../../../../types';
-import { createPrivilegeStatusUpdateService } from '../integrations/privileged_status_update';
+import { createPatternMatcherService } from '../matchers/privileged_status_match';
+import { createPrivilegeStatusUpdateService } from '../privileged_status_update';
 
 export const createIndexUpdateDetectionService = (
   dataClient: PrivilegeMonitoringDataClient,

@@ -11,11 +11,11 @@ import type {
 } from '../../../../../../../../common/api/entity_analytics';
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { createPatternMatcherService } from './integrations/privileged_status_match';
 import type { PrivMatchersAggregation } from '../types';
+import { createPatternMatcherService } from './privileged_status_match';
 
 const mockBuildPrivilegedSearchBody = jest.fn();
-jest.mock('./queries', () => ({
+jest.mock('../queries', () => ({
   buildPrivilegedSearchBody: (...args: unknown[]) => mockBuildPrivilegedSearchBody(...args),
 }));
 

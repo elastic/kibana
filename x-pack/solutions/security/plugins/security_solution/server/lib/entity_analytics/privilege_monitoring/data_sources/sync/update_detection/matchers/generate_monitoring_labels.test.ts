@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { generateMonitoringLabels } from './matchers/generate_monitoring_labels';
+import { generateMonitoringLabels } from './generate_monitoring_labels';
 
 describe('generateMonitoringLabels', () => {
   const source = 'integration.okta';

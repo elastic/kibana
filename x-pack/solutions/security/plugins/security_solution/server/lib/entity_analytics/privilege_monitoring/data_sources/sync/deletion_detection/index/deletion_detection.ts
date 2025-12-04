@@ -14,6 +14,7 @@ import type { AfterKey, StaleUsersAggregations } from '../../types';
 import { findStaleUsersFactory } from '../stale_users';
 import { createBulkUtilsService } from '../../../bulk';
 import { getErrorFromBulkResponse } from '../../utils';
+import { DEFAULT_COMPOSITE_PAGE_SIZE } from '../constants';
 
 export const createIndexDeletionDetectionService = (
   dataClient: PrivilegeMonitoringDataClient,
@@ -29,7 +30,7 @@ export const createIndexDeletionDetectionService = (
       dataClient,
       indexPattern: source.indexPattern,
       buildQuery: buildFindUsersSearchBody,
-      pageSize: 100,
+      pageSize: DEFAULT_COMPOSITE_PAGE_SIZE,
     });
     const staleUsers = await findStaleUsers(source.id, allIndexUserNames, 'index');
     if (staleUsers.length === 0) {
