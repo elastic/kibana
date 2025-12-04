@@ -8,6 +8,7 @@
  */
 
 import React, { useMemo, type ReactElement } from 'react';
+import type { PopoverAnchorPosition } from '@elastic/eui';
 import { EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { getPopoverPanels, getTooltip } from './utils';
 import type {
@@ -25,6 +26,7 @@ interface TopNavContextMenuProps {
   popoverWidth?: number;
   primaryActionItem?: TopNavMenuPrimaryActionItem;
   secondaryActionItem?: TopNavMenuSecondaryActionItem;
+  anchorPosition?: PopoverAnchorPosition;
   onClose: () => void;
 }
 
@@ -37,6 +39,7 @@ export const TopNavMenuPopover = ({
   popoverWidth,
   primaryActionItem,
   secondaryActionItem,
+  anchorPosition,
   onClose,
 }: TopNavContextMenuProps) => {
   const panels = useMemo(
@@ -61,7 +64,7 @@ export const TopNavMenuPopover = ({
       closePopover={onClose}
       panelPaddingSize="none"
       hasArrow={false}
-      anchorPosition="upLeft"
+      anchorPosition={anchorPosition || 'upLeft'}
       panelStyle={{
         width: popoverWidth,
       }}

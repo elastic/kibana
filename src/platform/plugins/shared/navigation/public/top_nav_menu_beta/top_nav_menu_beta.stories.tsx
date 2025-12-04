@@ -278,7 +278,7 @@ const discoverConfig: TopNavMenuConfigBeta = {
       order: 4,
       label: 'alerts',
       testId: 'alertsButton',
-      iconType: 'warning',
+      iconType: 'alert',
       popoverWidth: 250,
       items: [
         {

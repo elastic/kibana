@@ -36,14 +36,22 @@ export const TopNavMenuItems = ({ config }: TopNavMenuItemsProps) => {
     config,
   });
 
+  const handlePopoverToggle = (id: string) => {
+    setOpenPopoverId(openPopoverId === id ? null : id);
+  };
+
+  const handleOnPopoverClose = () => {
+    setOpenPopoverId(null);
+  };
+
   const primaryActionComponent = primaryActionItem ? (
     <TopNavMenuActionButton
       {...primaryActionItem}
       isPopoverOpen={openPopoverId === primaryActionItem.id}
       onPopoverToggle={() => {
-        setOpenPopoverId(openPopoverId === primaryActionItem.id ? null : primaryActionItem.id);
+        handlePopoverToggle(primaryActionItem.id);
       }}
-      onPopoverClose={() => setOpenPopoverId(null)}
+      onPopoverClose={handleOnPopoverClose}
     />
   ) : undefined;
 
@@ -52,19 +60,11 @@ export const TopNavMenuItems = ({ config }: TopNavMenuItemsProps) => {
       {...secondaryActionItem}
       isPopoverOpen={openPopoverId === secondaryActionItem.id}
       onPopoverToggle={() => {
-        setOpenPopoverId(openPopoverId === secondaryActionItem.id ? null : secondaryActionItem.id);
+        handlePopoverToggle(secondaryActionItem.id);
       }}
-      onPopoverClose={() => setOpenPopoverId(null)}
+      onPopoverClose={handleOnPopoverClose}
     />
   ) : undefined;
-
-  const handlePopoverToggle = (id: string) => {
-    setOpenPopoverId(openPopoverId === id ? null : id);
-  };
-
-  const handleOnPopoverClose = () => {
-    setOpenPopoverId(null);
-  };
 
   if (isBetweenMandXlBreakpoint) {
     return (

@@ -10,7 +10,7 @@
 import React from 'react';
 import { SplitButtonWithNotification } from '@kbn/split-button';
 import { upperFirst } from 'lodash';
-import type { EuiButtonColor } from '@elastic/eui';
+import type { EuiButtonColor, PopoverAnchorPosition } from '@elastic/eui';
 import { EuiButton, EuiHideFor, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getIsSelectedColor, getTooltip, isDisabled } from './utils';
@@ -25,6 +25,7 @@ type TopNavMenuActionButtonProps = (TopNavMenuPrimaryActionItem | TopNavMenuSeco
   isPopoverOpen: boolean;
   onPopoverToggle: () => void;
   onPopoverClose: () => void;
+  popoverAnchorPosition?: PopoverAnchorPosition;
 };
 
 export const TopNavMenuActionButton = (props: TopNavMenuActionButtonProps) => {
@@ -47,6 +48,7 @@ export const TopNavMenuActionButton = (props: TopNavMenuActionButtonProps) => {
     popoverWidth,
     onPopoverToggle,
     onPopoverClose,
+    popoverAnchorPosition,
   } = props;
 
   const itemText = upperFirst(label);
@@ -186,6 +188,7 @@ export const TopNavMenuActionButton = (props: TopNavMenuActionButtonProps) => {
         isOpen={isPopoverOpen}
         popoverWidth={popoverWidth}
         onClose={onPopoverClose}
+        anchorPosition={popoverAnchorPosition}
       />
     );
   }
