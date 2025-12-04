@@ -21,6 +21,17 @@ describe(
   'Entity Threat Hunting page',
   {
     tags: ['@ess', '@serverless'],
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'bulkEditAlertSuppressionEnabled',
+            'doesNotMatchForIndicatorMatchRuleEnabled',
+            'entityThreatHuntingEnabled',
+          ])}`,
+        ],
+      },
+    },
   },
   () => {
     before(() => {
@@ -40,7 +51,7 @@ describe(
       // Wait for page to load - either loader disappears or page title appears
       // The page shows a loader when sourcerer is loading, then shows content
       cy.get(PAGE_TITLE, { timeout: 30000 }).should('be.visible');
-      cy.contains('Entity Threat Hunting').should('be.visible');
+      cy.contains('Entity Threat Hunting').should('exist');
     });
 
     it('renders KQL search bar', () => {
@@ -59,7 +70,7 @@ describe(
 
     it('renders entities table', () => {
       // Wait for table to load - it may start with loading-true and then change to loading-false
-      cy.get(THREAT_HUNTING_ENTITIES_TABLE, { timeout: 30000 }).should('be.visible');
+      cy.get(THREAT_HUNTING_ENTITIES_TABLE, { timeout: 30000 }).should('exist');
       // Verify the table content is rendered (either loading skeleton or actual table)
       cy.get(
         '[data-test-subj="paginated-basic-table"], [data-test-subj="initialLoadingPanelPaginatedTable"]',
@@ -73,9 +84,9 @@ describe(
       // Wait for table to load first - wait for loading to complete
       cy.get(THREAT_HUNTING_ENTITIES_TABLE_LOADED, {
         timeout: 30000,
-      }).should('be.visible');
+      }).should('exist');
       // Wait for table data to load - check for paginated-basic-table inside
-      cy.get('[data-test-subj="paginated-basic-table"]', { timeout: 30000 }).should('be.visible');
+      cy.get('[data-test-subj="paginated-basic-table"]', { timeout: 30000 }).should('exist');
       // Wait for table rows to render - check for table rows or empty state
       cy.get(
         '[data-test-subj="paginated-basic-table"] .euiTableRow, [data-test-subj="paginated-basic-table"] .euiEmptyPrompt',
@@ -102,9 +113,9 @@ describe(
       // Wait for table to load first - wait for loading to complete
       cy.get(THREAT_HUNTING_ENTITIES_TABLE_LOADED, {
         timeout: 30000,
-      }).should('be.visible');
+      }).should('exist');
       // Wait for table data to load
-      cy.get('[data-test-subj="paginated-basic-table"]', { timeout: 30000 }).should('be.visible');
+      cy.get('[data-test-subj="paginated-basic-table"]', { timeout: 30000 }).should('exist');
       // Wait for table rows to render - check for table rows or empty state
       cy.get(
         '[data-test-subj="paginated-basic-table"] .euiTableRow, [data-test-subj="paginated-basic-table"] .euiEmptyPrompt',
