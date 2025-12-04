@@ -75,7 +75,9 @@ describe('accessKnownApmEventFields', () => {
   it('can be spread into a new flattened object with the correct value formats', () => {
     const event = accessKnownApmEventFields(smallInput);
 
-    expect({ ...event }).toEqual({
+    const eventObj = { ...event };
+
+    expect(eventObj).toEqual({
       '@timestamp': '2024-10-10T10:10:10.000Z',
       'service.name': 'node-svc',
       'links.span_id': ['link1', 'link2'],
@@ -118,5 +120,16 @@ describe('accessKnownApmEventFields', () => {
     expect(event.containsFields('links')).toBe(true);
     expect(event.containsFields('transaction')).toBe(false);
     expect(event.containsFields('agent.version')).toBe(false);
+  });
+
+  it('lists only the keys that exist on the original object', () => {
+    const event = accessKnownApmEventFields(smallInput);
+
+    expect(Object.keys(event)).toEqual(['@timestamp', 'service.name', 'links.span_id']);
+    expect(Object.entries(event)).toEqual([
+      ['@timestamp', '2024-10-10T10:10:10.000Z'],
+      ['service.name', 'node-svc'],
+      ['links.span_id', ['link1', 'link2']],
+    ]);
   });
 });

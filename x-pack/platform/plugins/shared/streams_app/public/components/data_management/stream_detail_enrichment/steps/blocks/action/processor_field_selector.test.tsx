@@ -42,6 +42,13 @@ jest.mock('../../../../../../hooks/use_stream_data_view_field_types', () => ({
 // Mock the simulator selector hook
 jest.mock('../../../state_management/stream_enrichment_state_machine', () => ({
   useSimulatorSelector: jest.fn((selector) => selector({ context: { streamName: 'test-stream' } })),
+  useStreamEnrichmentSelector: jest.fn((selector) =>
+    selector({
+      context: {
+        fieldTypesByProcessor: new Map(),
+      },
+    })
+  ),
 }));
 
 // Mock the AutocompleteSelector component to focus on ProcessorFieldSelector-specific logic

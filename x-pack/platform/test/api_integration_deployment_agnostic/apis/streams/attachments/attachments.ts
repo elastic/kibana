@@ -111,16 +111,29 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         expect(response.attachments.length).to.eql(1);
-        expect(response.attachments[0].type).to.eql('dashboard');
-        expect(response.attachments[0].id).to.eql(SEARCH_DASHBOARD_ID);
+        const dashboard = response.attachments[0];
+        expect(dashboard.type).to.eql('dashboard');
+        expect(dashboard.id).to.eql(SEARCH_DASHBOARD_ID);
+        // Verify metadata fields
+        expect(dashboard.streamNames).to.be.an('array');
+        expect(dashboard.streamNames).to.contain('logs');
+        expect(dashboard).to.have.property('description');
+        expect(dashboard.createdAt).to.be.a('string');
+        expect(dashboard.updatedAt).to.be.a('string');
       });
 
       it('lists only rules when type filter is rule', async () => {
         const response = await getAttachments({ apiClient, stream: 'logs', type: 'rule' });
 
         expect(response.attachments.length).to.eql(1);
-        expect(response.attachments[0].type).to.eql('rule');
-        expect(response.attachments[0].id).to.eql(FIRST_RULE_ID);
+        const rule = response.attachments[0];
+        expect(rule.type).to.eql('rule');
+        expect(rule.id).to.eql(FIRST_RULE_ID);
+        // Verify metadata fields
+        expect(rule.streamNames).to.be.an('array');
+        expect(rule.streamNames).to.contain('logs');
+        expect(rule.createdAt).to.be.a('string');
+        expect(rule.updatedAt).to.be.a('string');
       });
     });
 
@@ -231,6 +244,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
           expect(logsResponse.attachments.length).to.eql(1);
           expect(childResponse.attachments.length).to.eql(1);
+
+          // Verify streamNames contains both streams
+          expect(logsResponse.attachments[0].streamNames).to.contain('logs');
+          expect(logsResponse.attachments[0].streamNames).to.contain('logs.child');
 
           // Clean up
           await unlinkAttachment({
