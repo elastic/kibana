@@ -5,6 +5,8 @@
   },
   "include": ["*.ts", "src/**/*", "__mocks__/**/*.ts"],
   "kbn_references": [
+    "@kbn/licensing-types",
+    "@kbn/core-pricing-common",
   ],
   "exclude": ["target/**/*"]
 }
