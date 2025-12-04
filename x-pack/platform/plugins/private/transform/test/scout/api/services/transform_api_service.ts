@@ -11,9 +11,19 @@ import type { PutTransformsRequestSchema } from '../../../../server/routes/api_s
 
 export interface TransformApiService {
   createTransform: (transformId: string, config: PutTransformsRequestSchema) => Promise<void>;
+  createTransformWithSecondaryAuth: (
+    transformId: string,
+    config: PutTransformsRequestSchema,
+    encodedApiKey: string,
+    deferValidation?: boolean
+  ) => Promise<void>;
   deleteTransform: (transformId: string) => Promise<void>;
   cleanTransformIndices: () => Promise<void>;
   deleteDataViewByTitle: (title: string) => Promise<void>;
+  getTransform: (transformId: string) => Promise<any>;
+  getTransformStats: (transformId: string) => Promise<any>;
+  waitForTransformState: (transformId: string, expectedState: string) => Promise<void>;
+  deleteIndices: (index: string) => Promise<void>;
 }
 
 export function getTransformApiService(
@@ -25,8 +35,51 @@ export function getTransformApiService(
       try {
         const response = await esClient.transform.putTransform({
           transform_id: transformId,
-          body: config as any,
-        });
+          ...config,
+        } as any);
+
+        // Wait for transform to exist
+        let retries = 10;
+        while (retries > 0) {
+          try {
+            await esClient.transform.getTransform({ transform_id: transformId });
+            return; // Transform exists, we're done
+          } catch {
+            retries--;
+            if (retries === 0) {
+              throw new Error(
+                `Transform ${transformId} was not created after waiting. Response: ${JSON.stringify(
+                  response
+                )}`
+              );
+            }
+            await new Promise((resolve) => setTimeout(resolve, 500));
+          }
+        }
+      } catch (error) {
+        throw new Error(`Failed to create transform ${transformId}: ${error}`);
+      }
+    },
+
+    async createTransformWithSecondaryAuth(
+      transformId: string,
+      config: PutTransformsRequestSchema,
+      encodedApiKey: string,
+      deferValidation = false
+    ) {
+      try {
+        const response = await esClient.transform.putTransform(
+          {
+            transform_id: transformId,
+            defer_validation: deferValidation,
+            ...config,
+          } as any,
+          {
+            headers: {
+              'es-secondary-authorization': `ApiKey ${encodedApiKey}`,
+            },
+          }
+        );
 
         // Wait for transform to exist
         let retries = 10;
@@ -92,7 +145,7 @@ export function getTransformApiService(
 
       // Delete transform notification indices - resolve wildcard first
       try {
-        const { body: indices } = await esClient.cat.indices({
+        const indices = await esClient.cat.indices({
           index: '.transform-notifications-*',
           format: 'json',
         });
@@ -128,6 +181,60 @@ export function getTransformApiService(
         }
       } catch (error) {
         throw new Error(`Failed to delete data view with title ${title}: ${error}`);
+      }
+    },
+
+    async getTransform(transformId: string) {
+      try {
+        const response = await esClient.transform.getTransform({ transform_id: transformId });
+        return response.transforms[0];
+      } catch (error) {
+        throw new Error(`Failed to get transform ${transformId}: ${error}`);
+      }
+    },
+
+    async getTransformStats(transformId: string) {
+      try {
+        const response = await esClient.transform.getTransformStats({
+          transform_id: transformId,
+        });
+        return response.transforms[0];
+      } catch (error) {
+        throw new Error(`Failed to get transform stats for ${transformId}: ${error}`);
+      }
+    },
+
+    async waitForTransformState(transformId: string, expectedState: string) {
+      const maxRetries = 30;
+      let retries = 0;
+
+      while (retries < maxRetries) {
+        try {
+          const stats = await this.getTransformStats(transformId);
+          if (stats.state === expectedState) {
+            return;
+          }
+        } catch (error) {
+          // Continue retrying even if there's an error
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        retries++;
+      }
+
+      throw new Error(
+        `Transform ${transformId} did not reach expected state ${expectedState} after ${maxRetries} retries`
+      );
+    },
+
+    async deleteIndices(index: string) {
+      try {
+        await esClient.indices.delete({
+          index,
+          ignore_unavailable: true,
+        });
+      } catch (error) {
+        throw new Error(`Failed to delete indices ${index}: ${error}`);
       }
     },
   };
