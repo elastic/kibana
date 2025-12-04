@@ -21,7 +21,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import type { EditLookupIndexContentContext, KibanaContextExtra } from '../types';
 
-const openInDiscoverText = i18n.translate('indexEditor.toolbar.openInDiscover', {
+const openInDiscoverTooltip = i18n.translate('indexEditor.toolbar.openInDiscoverTooltip', {
   defaultMessage: 'Open in Discover',
 });
 
@@ -112,7 +112,7 @@ export const QueryBar = ({
         </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiToolTip content={openInDiscoverText} disableScreenReaderOutput>
+        <EuiToolTip content={openInDiscoverTooltip} disableScreenReaderOutput>
           <EuiButtonIcon
             size="s"
             color="text"
@@ -122,7 +122,7 @@ export const QueryBar = ({
             href={discoverLink || undefined}
             target="_blank"
             iconType="discoverApp"
-            aria-label={openInDiscoverText}
+            aria-label={openInDiscoverTooltip}
             data-test-subj="indexEditorOpenInDiscoverButton"
           />
         </EuiToolTip>
