@@ -63,7 +63,7 @@ export async function checkAndSkipIfExistingScheduledExecution(
       cancelledBy: 'system',
     };
     await workflowExecutionRepository.createWorkflowExecution(skippedExecution);
-    logger.info(
+    logger.debug(
       `Skipping scheduled workflow ${workflow.id} execution - found existing non-terminal scheduled execution`
     );
     return true;

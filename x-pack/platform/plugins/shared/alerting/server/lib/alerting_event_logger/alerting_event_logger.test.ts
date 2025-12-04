@@ -1499,6 +1499,7 @@ describe('AlertingEventLogger', () => {
         filled_duration_ms: 0,
         unfilled_duration_ms: 3600000,
         in_progress_duration_ms: 0,
+        updated_at: mockNow,
       };
 
       const event = createGapRecord(ruleContext, ruleData, [alertSO], gap);

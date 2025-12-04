@@ -50,6 +50,7 @@ import { deleteProcessorPromptOptions, discardChangesPromptOptions } from './pro
 import { ConvertProcessorForm } from './convert';
 import { ReplaceProcessorForm } from './replace';
 import { DropProcessorForm } from './drop_document';
+import { selectStreamType } from '../../../state_management/stream_enrichment_state_machine/selectors';
 
 export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((props, ref) => {
   const { processorMetrics, stepRef } = props;
@@ -101,6 +102,8 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
     (snapshot) => !isEqual(snapshot.context.previousStep, snapshot.context.step)
   );
 
+  const streamType = useStreamEnrichmentSelector((snapshot) => selectStreamType(snapshot.context));
+
   const type = useWatch({ control: methods.control, name: 'action' });
 
   useUnsavedChangesPrompt({
@@ -131,49 +134,7 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
   return (
     <div ref={ref}>
       <EuiFlexGroup gutterSize="s" direction="column">
-        <EuiFlexItem>
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <strong>{step.action.toUpperCase()}</strong>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem>
-                  <EuiButtonEmpty
-                    data-test-subj="streamsAppProcessorConfigurationCancelButton"
-                    onClick={handleCancel}
-                    size="s"
-                  >
-                    {i18n.translate(
-                      'xpack.streams.streamDetailView.managementTab.enrichment.ProcessorConfiguration.cancel',
-                      { defaultMessage: 'Cancel' }
-                    )}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiButton
-                    data-test-subj="streamsAppProcessorConfigurationSaveProcessorButton"
-                    size="s"
-                    fill
-                    onClick={methods.handleSubmit(handleSubmit)}
-                    disabled={!canSave}
-                  >
-                    {isConfigured
-                      ? i18n.translate(
-                          'xpack.streams.streamDetailView.managementTab.enrichment.ProcessorConfiguration.confirmProcessor',
-                          { defaultMessage: 'Update' }
-                        )
-                      : i18n.translate(
-                          'xpack.streams.streamDetailView.managementTab.enrichment.ProcessorConfiguration.confirmCreateProcessor',
-                          { defaultMessage: 'Create' }
-                        )}
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-
+        <strong>{step.action.toUpperCase()}</strong>
         <EuiFlexItem>
           <FormProvider {...methods}>
             <EuiForm component="form" fullWidth onSubmit={methods.handleSubmit(handleSubmit)}>
@@ -191,26 +152,62 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
                 <ConfigDrivenProcessorFields type={type as ConfigDrivenProcessorType} />
               )}
             </EuiForm>
-            {canDelete && (
-              <>
-                <EuiHorizontalRule margin="m" />
-                <EuiFlexGroup>
+            <EuiHorizontalRule margin="m" />
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+              <EuiFlexItem grow={false}>
+                {canDelete && (
+                  <EuiButton
+                    data-test-subj="streamsAppProcessorConfigurationButton"
+                    data-stream-type={streamType}
+                    color="danger"
+                    onClick={handleDelete}
+                    size="s"
+                  >
+                    {i18n.translate(
+                      'xpack.streams.streamDetailView.managementTab.enrichment.deleteProcessorLabel',
+                      { defaultMessage: 'Delete processor' }
+                    )}
+                  </EuiButton>
+                )}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="s">
                   <EuiFlexItem grow={false}>
-                    <EuiButton
-                      data-test-subj="streamsAppProcessorConfigurationButton"
-                      color="danger"
-                      onClick={handleDelete}
+                    <EuiButtonEmpty
+                      data-test-subj="streamsAppProcessorConfigurationCancelButton"
+                      data-stream-type={streamType}
+                      onClick={handleCancel}
                       size="s"
                     >
                       {i18n.translate(
-                        'xpack.streams.streamDetailView.managementTab.enrichment.deleteProcessorLabel',
-                        { defaultMessage: 'Delete processor' }
+                        'xpack.streams.streamDetailView.managementTab.enrichment.ProcessorConfiguration.cancel',
+                        { defaultMessage: 'Cancel' }
                       )}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      data-test-subj="streamsAppProcessorConfigurationSaveProcessorButton"
+                      data-stream-type={streamType}
+                      size="s"
+                      fill
+                      onClick={methods.handleSubmit(handleSubmit)}
+                      disabled={!canSave}
+                    >
+                      {isConfigured
+                        ? i18n.translate(
+                            'xpack.streams.streamDetailView.managementTab.enrichment.ProcessorConfiguration.confirmProcessor',
+                            { defaultMessage: 'Update' }
+                          )
+                        : i18n.translate(
+                            'xpack.streams.streamDetailView.managementTab.enrichment.ProcessorConfiguration.confirmCreateProcessor',
+                            { defaultMessage: 'Create' }
+                          )}
                     </EuiButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-              </>
-            )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
             {processorMetrics && !isEmpty(processorMetrics.errors) && (
               <ProcessorErrors metrics={processorMetrics} />
             )}

@@ -19,7 +19,7 @@ import { throwOnUnmappedKeys } from '../scope_tooling';
 export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContext>) {
   const updateRoute = router.put({
     path: `${PUBLIC_API_PATH}/{id}`,
-    summary: `Update an existing dashboard`,
+    summary: `Replace current dashboard state with the dashboard state from request body.`,
     ...commonRouteConfig,
   });
 

@@ -76,6 +76,7 @@ dependsOn:
   - '@kbn/console-plugin'
   - '@kbn/actions-plugin'
   - '@kbn/dataset-quality-plugin'
+  - '@kbn/apm-utils'
 tags:
   - plugin
   - prod
