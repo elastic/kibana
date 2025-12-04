@@ -42,11 +42,27 @@ import { CREATE_RULE_URL } from '../../../../urls/navigation';
 describe(
   'Machine Learning Detection Rules - Alert suppression',
   {
-    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
+    tags: ['@ess', '@serverless'],
   },
   () => {
     let mlRule: ReturnType<typeof getMachineLearningRule>;
     const jobId = 'v3_linux_anomalous_network_activity';
+    const allSecurityLinuxV3JobIds = [
+      'v3_linux_anomalous_network_port_activity',
+      'v3_linux_network_configuration_discovery',
+      'v3_linux_network_connection_discovery',
+      'v3_linux_rare_sudo_user',
+      'v3_linux_rare_user_compiler',
+      'v3_linux_system_information_discovery',
+      'v3_linux_system_process_discovery',
+      'v3_linux_system_user_discovery',
+      'v3_linux_anomalous_process_all_hosts',
+      'v3_linux_anomalous_user_name',
+      'v3_linux_rare_metadata_process',
+      'v3_linux_rare_metadata_user',
+      'v3_rare_process_by_host_linux',
+      'v3_linux_anomalous_network_activity',
+    ];
     const suppressByFields = ['by_field_name', 'by_field_value'];
 
     beforeEach(() => {
@@ -84,7 +100,7 @@ describe(
         before(() => {
           cy.task('esArchiverLoad', { archiveName: 'auditbeat/hosts', type: 'platform' });
           setupMlModulesWithRetry({ moduleName: 'security_linux_v3' });
-          forceStartDatafeeds({ jobIds: [jobId] });
+          forceStartDatafeeds({ jobIds: allSecurityLinuxV3JobIds });
           cy.task('esArchiverLoad', { archiveName: 'anomalies', type: 'ftr' });
         });
 
