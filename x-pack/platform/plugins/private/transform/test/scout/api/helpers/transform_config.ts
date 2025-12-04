@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PutTransformsRequestSchema } from '@kbn/transform-plugin/server/routes/api_schemas/transforms';
+import type { PutTransformsRequestSchema } from '../../../../server/routes/api_schemas/transforms';
 
 export function generateDestIndex(transformId: string): string {
   return `user-${transformId}`;

@@ -30,11 +30,8 @@ export const TRANSFORM_USERS = {
   transformPowerUser: {
     kibana: [
       {
-        base: [],
-        feature: {
-          discover: ['read'],
-          transform: ['all'],
-        },
+        base: ['all'],
+        feature: {},
         spaces: ['*'],
       },
     ],
