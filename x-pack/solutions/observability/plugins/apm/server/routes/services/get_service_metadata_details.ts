@@ -205,14 +205,6 @@ export async function getServiceMetadataDetails({
   const runtimeName = event[SERVICE_RUNTIME_NAME];
   const runtimeVersion = event[SERVICE_RUNTIME_VERSION];
 
-  if (!event) {
-    return {
-      service: undefined,
-      container: undefined,
-      cloud: undefined,
-    };
-  }
-
   const serviceMetadataDetails = {
     versions: aggregations?.serviceVersions.buckets.map((bucket) => bucket.key as string),
     runtime:
