@@ -474,6 +474,10 @@ export default function (providerContext: FtrProviderContext) {
             id: 'metrics-all_assets.test_metrics@custom',
             type: 'component_template',
           },
+          {
+            id: 'all_assets-README.md',
+            type: 'knowledge_base',
+          },
         ],
         es_index_patterns: {
           test_logs: 'logs-all_assets.test_logs-*',
