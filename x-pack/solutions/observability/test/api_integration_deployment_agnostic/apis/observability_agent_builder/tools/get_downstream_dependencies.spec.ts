@@ -11,8 +11,8 @@ import { isOtherResult } from '@kbn/onechat-common/tools';
 import type { ToolResult, OtherResult } from '@kbn/onechat-common';
 import type { LlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
 import { createLlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
-import { OBSERVABILITY_AGENT_ID } from '@kbn/observability-agent-plugin/server/agent/register_observability_agent';
-import { OBSERVABILITY_GET_SERVICES_TOOL_ID } from '@kbn/apm-plugin/common/observability_agent/agent_tool_ids';
+import { OBSERVABILITY_AGENT_ID } from '@kbn/observability-agent-builder-plugin/server/agent/register_observability_agent';
+import { OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID } from '@kbn/apm-plugin/common/agent_builder/tool_ids';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
 import { setupToolCallThenAnswer } from '../utils/llm_proxy/scenarios';
@@ -20,18 +20,17 @@ import {
   createLlmProxyActionConnector,
   deleteActionConnector,
 } from '../utils/llm_proxy/action_connectors';
-import { createSyntheticApmData } from '../utils/synthtrace_scenarios/create_synthetic_apm_data';
+import { createSyntheticApmDataWithDependency } from '../utils/synthtrace_scenarios';
 
 const SERVICE_NAME = 'service-a';
-const SERVICE_NAME_2 = 'service-b';
-const SERVICE_NAME_3 = 'service-c';
 const ENVIRONMENT = 'production';
-const ENVIRONMENT_2 = 'staging';
 const START = 'now-15m';
 const END = 'now';
+const DEPENDENCY_RESOURCE = 'elasticsearch/my-backend';
 
-const LLM_EXPOSED_TOOL_NAME_FOR_GET_SERVICES = 'observability_get_services';
-const USER_PROMPT = 'List my services in the last 15 minutes';
+const LLM_EXPOSED_TOOL_NAME_FOR_GET_DOWNSTREAM_DEPENDENCIES =
+  'observability_get_downstream_dependencies';
+const USER_PROMPT = `What are the downstream dependencies for the service ${SERVICE_NAME} in the last 15 minutes?`;
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
@@ -41,7 +40,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let connectorId: string;
   let agentBuilderApiClient: ReturnType<typeof createAgentBuilderApiClient>;
 
-  describe(`tool: ${OBSERVABILITY_GET_SERVICES_TOOL_ID}`, function () {
+  describe(`tool: ${OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID}`, function () {
     // LLM Proxy is not yet supported in cloud environments
     this.tags(['skipCloud']);
 
@@ -56,17 +55,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const scoped = await roleScopedSupertest.getSupertestWithRoleScope('editor');
         agentBuilderApiClient = createAgentBuilderApiClient(scoped);
 
-        ({ apmSynthtraceEsClient } = await createSyntheticApmData({
+        ({ apmSynthtraceEsClient } = await createSyntheticApmDataWithDependency({
           getService,
-          serviceName: [SERVICE_NAME, SERVICE_NAME_2],
+          serviceName: SERVICE_NAME,
           environment: ENVIRONMENT,
-          language: 'nodejs',
+          dependencyResource: DEPENDENCY_RESOURCE,
         }));
 
         setupToolCallThenAnswer({
           llmProxy,
-          toolName: LLM_EXPOSED_TOOL_NAME_FOR_GET_SERVICES,
+          toolName: LLM_EXPOSED_TOOL_NAME_FOR_GET_DOWNSTREAM_DEPENDENCIES,
           toolArg: {
+            serviceName: SERVICE_NAME,
             serviceEnvironment: ENVIRONMENT,
             start: START,
             end: END,
@@ -107,79 +107,25 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(isOtherResult(toolResult)).to.be(true);
 
         const { data } = toolResult as OtherResult;
-        expect(data).to.have.property('services');
+        expect(data).to.have.property('dependencies');
       });
 
-      it('returns all available services for the given time range', () => {
+      it('returns downstream dependencies for the given service and time range', () => {
         const toolResult = toolResponseContent.results[0] as OtherResult;
         const { data } = toolResult as OtherResult;
-        const services = data.services as Array<Record<string, unknown>>;
+        const dependencies = data.dependencies as Array<Record<string, unknown>>;
 
-        expect(Array.isArray(services)).to.be(true);
-        expect(services.length).to.be(2);
+        expect(Array.isArray(dependencies)).to.be(true);
+        expect(dependencies.length > 0).to.be(true);
 
-        const hasServiceA = services.some((service) => service['service.name'] === SERVICE_NAME);
-        expect(hasServiceA).to.be(true);
+        const hasExpectedBackend = dependencies.some(
+          (d) =>
+            d['span.destination.service.resource'] === DEPENDENCY_RESOURCE &&
+            d['span.type'] === 'db' &&
+            d['span.subtype'] === 'elasticsearch'
+        );
 
-        const hasServiceB = services.some((service) => service['service.name'] === SERVICE_NAME_2);
-        expect(hasServiceB).to.be(true);
-      });
-
-      describe('filtered by environment', () => {
-        let nextToolResponseContent: { results: ToolResult[] };
-
-        before(async () => {
-          await apmSynthtraceEsClient.clean();
-
-          ({ apmSynthtraceEsClient } = await createSyntheticApmData({
-            getService,
-            serviceName: SERVICE_NAME_3,
-            environment: ENVIRONMENT_2,
-            language: 'nodejs',
-          }));
-
-          setupToolCallThenAnswer({
-            llmProxy,
-            toolName: LLM_EXPOSED_TOOL_NAME_FOR_GET_SERVICES,
-            toolArg: {
-              serviceEnvironment: ENVIRONMENT_2,
-              start: START,
-              end: END,
-            },
-          });
-
-          const body = await agentBuilderApiClient.converse({
-            input: USER_PROMPT,
-            connector_id: connectorId,
-            agent_id: OBSERVABILITY_AGENT_ID,
-          });
-
-          await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
-          expect(body.response.message).to.be('final');
-
-          const handoverRequests = llmProxy.interceptedRequests.filter(
-            (r) => r.matchingInterceptorName === 'handover-to-answer'
-          );
-          const latestHandover = handoverRequests[handoverRequests.length - 1]!.requestBody;
-          const toolResponseMessage = latestHandover.messages[latestHandover.messages.length - 1]!;
-          nextToolResponseContent = JSON.parse(toolResponseMessage.content as string) as {
-            results: ToolResult[];
-          };
-        });
-
-        after(async () => {
-          await apmSynthtraceEsClient.clean();
-        });
-
-        it('returns only services for the filtered environment', async () => {
-          const toolResult = nextToolResponseContent.results[0] as OtherResult;
-          const { data } = toolResult as OtherResult;
-          const services = data.services as Array<Record<string, unknown>>;
-
-          expect(Array.isArray(services)).to.be(true);
-          expect(services.length).to.be(1);
-          expect(services[0]['service.name']).to.be(SERVICE_NAME_3);
-        });
+        expect(hasExpectedBackend).to.be(true);
       });
     });
   });

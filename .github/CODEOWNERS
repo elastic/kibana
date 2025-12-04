@@ -1146,7 +1146,7 @@ x-pack/solutions/observability/plugins/exploratory_view @elastic/obs-ux-manageme
 x-pack/solutions/observability/plugins/infra @elastic/obs-exploration-team @elastic/obs-presentation-team
 x-pack/solutions/observability/plugins/metrics_data_access @elastic/obs-presentation-team
 x-pack/solutions/observability/plugins/observability @elastic/obs-ux-management-team
-x-pack/solutions/observability/plugins/observability_agent @elastic/obs-ai-team
+x-pack/solutions/observability/plugins/observability_agent_builder @elastic/obs-ai-team
 x-pack/solutions/observability/plugins/observability_ai_assistant_app @elastic/obs-ai-team
 x-pack/solutions/observability/plugins/observability_logs_explorer @elastic/obs-exploration-team
 x-pack/solutions/observability/plugins/observability_onboarding @elastic/obs-onboarding-team
@@ -1493,7 +1493,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/observability_ai_assistant_functional @elastic/obs-ai-team
 /x-pack/solutions/observability/test/fixtures/es_archives/observability/ai_assistant @elastic/obs-ai-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant @elastic/obs-ai-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/observability_agent @elastic/obs-ai-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/observability_agent_builder @elastic/obs-ai-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_assistant.index.ts @elastic/obs-ai-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_assistant.serverless.config.ts @elastic/obs-ai-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_assistant.index.ts @elastic/obs-ai-team

@@ -1,11 +1,11 @@
 {
   "type": "plugin",
-  "id": "@kbn/observability-agent-plugin",
+  "id": "@kbn/observability-agent-builder-plugin",
   "owner": ["@elastic/obs-ai-team"],
   "group": "observability",
   "visibility": "private",
   "plugin": {
-    "id": "observabilityAgent",
+    "id": "observabilityAgentBuilder",
     "browser": false,
     "server": true,
     "requiredPlugins": [

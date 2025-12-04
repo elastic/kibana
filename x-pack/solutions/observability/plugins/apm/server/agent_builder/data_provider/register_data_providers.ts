@@ -6,16 +6,16 @@
  */
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import { getRandomSampler } from '../lib/helpers/get_random_sampler';
-import { getApmServiceSummary } from '../routes/assistant_functions/get_apm_service_summary';
-import { getApmDownstreamDependencies } from '../routes/assistant_functions/get_apm_downstream_dependencies';
-import { getApmErrors } from '../routes/assistant_functions/get_observability_alert_details_context/get_apm_errors';
+import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
+import { getApmServiceSummary } from '../../routes/assistant_functions/get_apm_service_summary';
+import { getApmDownstreamDependencies } from '../../routes/assistant_functions/get_apm_downstream_dependencies';
+import { getApmErrors } from '../../routes/assistant_functions/get_observability_alert_details_context/get_apm_errors';
 import {
   getExitSpanChangePoints,
   getServiceChangePoints,
-} from '../routes/assistant_functions/get_changepoints';
-import { buildApmToolResources } from '../agent_tools/utils/build_apm_tool_resources';
-import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../types';
+} from '../../routes/assistant_functions/get_changepoints';
+import { buildApmToolResources } from '../utils/build_apm_tool_resources';
+import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
 
 export function registerDataProviders({
   core,

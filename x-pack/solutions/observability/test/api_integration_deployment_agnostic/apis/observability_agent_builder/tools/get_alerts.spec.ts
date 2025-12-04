@@ -12,11 +12,11 @@ import type { ToolResult, OtherResult } from '@kbn/onechat-common';
 import { isOtherResult } from '@kbn/onechat-common/tools';
 import type { LlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
 import { createLlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
-import { OBSERVABILITY_AGENT_ID } from '@kbn/observability-agent-plugin/server/agent/register_observability_agent';
+import { OBSERVABILITY_AGENT_ID } from '@kbn/observability-agent-builder-plugin/server/agent/register_observability_agent';
 import {
   OBSERVABILITY_GET_ALERTS_TOOL_ID,
   defaultFields,
-} from '@kbn/observability-agent-plugin/server/tools';
+} from '@kbn/observability-agent-builder-plugin/server/tools';
 import type { SearchAlertsResult } from '@kbn/alerts-ui-shared/src/common/apis/search_alerts/search_alerts';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import { APM_ALERTS_INDEX as APM_ALERTS_INDEX_PATTERN } from '../../apm/alerts/helpers/alerting_helper';
