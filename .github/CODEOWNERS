@@ -1859,6 +1859,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /.buildkite/pipelines/esql_grammar_sync.yml @elastic/kibana-esql
 /.buildkite/scripts/steps/code_generation/security_solution_codegen.sh @elastic/security-detection-rule-management
 /.buildkite/scripts/steps/security @elastic/kibana-security
+/.buildkite/scripts/steps/entity_store_performance @elastic/contextual-security
 /kbn_pm/ @elastic/kibana-operations
 /x-pack/dev-tools @elastic/kibana-operations
 /catalog-info.yaml @elastic/kibana-operations @elastic/kibana-tech-leads
