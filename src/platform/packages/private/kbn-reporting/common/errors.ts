@@ -166,3 +166,16 @@ export class ReportingSavedObjectNotFoundError extends ReportingError {
     return ReportingSavedObjectNotFoundError.code;
   }
 }
+
+export class IndexPrivilegeError extends ReportingError {
+  static code = 'index_privilege_error' as const;
+  public get code(): string {
+    return IndexPrivilegeError.code;
+  }
+
+  public humanFriendlyMessage() {
+    return i18n.translate('reporting.common.indexPrivilegeErrorMessage', {
+      defaultMessage: `Unable to generate CSV report due to insufficient index privileges. Please ensure your user has the necessary permissions to read from the specified indices.`,
+    });
+  }
+}

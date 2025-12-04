@@ -8,9 +8,11 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import { errors as esErrors } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/core/server';
 import { lastValueFrom } from 'rxjs';
 import { ES_SEARCH_STRATEGY, type ISearchSource } from '@kbn/data-plugin/common';
+import { IndexPrivilegeError } from '@kbn/reporting-common';
 import { SearchCursor, type SearchCursorClients, type SearchCursorSettings } from './search_cursor';
 import { i18nTexts } from './i18n_texts';
 
@@ -60,6 +62,21 @@ export class SearchCursorPit extends SearchCursor {
       pitId = response.id;
     } catch (err) {
       this.logger.error(err);
+      
+      if (err instanceof esErrors.ResponseError) {
+        const errorMessage = err.message || '';
+        
+        if (
+          errorMessage.includes('security_exception') &&
+          (errorMessage.includes('indices:data/read/search') ||
+           errorMessage.includes('indices:data/read') ||
+           errorMessage.includes('action') && errorMessage.includes('is unauthorized'))
+        ) {
+          throw new IndexPrivilegeError(
+            `Unable to access indices for CSV report generation. ${errorMessage}`
+          );
+        }
+      }
     }
 
     if (!pitId) {
