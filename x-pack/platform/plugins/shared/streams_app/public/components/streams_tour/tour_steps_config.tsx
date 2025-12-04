@@ -38,7 +38,7 @@ const STREAMS_LIST_STEP: Omit<TourStepConfig, 'step' | 'stepsTotal'> = {
     <EuiText size="s" css={tightContentCss}>
       {i18n.translate('xpack.streams.tour.streamsList.content', {
         defaultMessage:
-          'Browse all Streams from your data. Select a stream to explore its data, structure, and attached assets.',
+          'Browse all streams from your data. Select a stream to explore its data, structure, and attached assets.',
       })}
     </EuiText>
   ),
