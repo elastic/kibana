@@ -40,7 +40,7 @@ const CLOUD_RESOURCE_CARDS = [
       defaultMessage:
         'Get a detailed breakdown of your organization’s cloud resource usage across your deployments.',
     }),
-    actionHref: '#',
+    actionHref: 'http://cloud.elastic.co',
     actionText: i18n.translate('xpack.searchHomepage.cloudResources.billing.actionText', {
       defaultMessage: 'Go to Billing',
     }),
@@ -54,7 +54,7 @@ const CLOUD_RESOURCE_CARDS = [
       defaultMessage:
         'Enable AutoOps for performance recommendations, resource utilization, and cost insights.',
     }),
-    actionHref: '#',
+    actionHref: 'http://cloud.elastic.co',
     actionText: i18n.translate('xpack.searchHomepage.cloudResources.autoops.actionText', {
       defaultMessage: 'AutoOps',
     }),

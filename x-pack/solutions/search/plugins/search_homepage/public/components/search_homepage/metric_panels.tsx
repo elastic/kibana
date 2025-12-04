@@ -26,6 +26,7 @@ import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 import { useIndicesStats } from '../../hooks/api/use_indices_stats';
 import { useDashboardsStats } from '../../hooks/api/use_dashboards_stats';
 import { useAgentCount } from '../../hooks/api/use_agent_count';
+import { useStats } from '../../hooks/api/use_stats';
 interface MetricPanelProps {
   title: string;
   onClick?: () => void;
@@ -262,8 +263,18 @@ interface BasicMetricPanel {
   metric: string; // TODO proper type
 }
 const BasicMetricPanel = ({ title, metric }: BasicMetricPanel) => {
+  const { euiTheme } = useEuiTheme();
   return (
-    <EuiFlexGroup direction="column" gutterSize="xs">
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="xs"
+      css={css({
+        borderRight: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+        '&:last-child': {
+          borderRight: 'none',
+        },
+      })}
+    >
       <EuiFlexItem>
         <EuiText color="subdued" size="xs">
           <p>{title}</p>
@@ -282,6 +293,7 @@ interface MetricPanelsProps {
   panelType?: 'basic' | 'complex';
 }
 export const MetricPanels = ({ panelType = 'basic' }: MetricPanelsProps) => {
+  const { data } = useStats();
   const { data: indicesData, isLoading: isLoadingIndices } = useIndicesStats();
   const { data: dashboardsData, isLoading: isLoadingDashboards } = useDashboardsStats();
   const { tools } = useAgentCount();

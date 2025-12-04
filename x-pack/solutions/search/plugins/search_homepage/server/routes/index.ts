@@ -10,8 +10,10 @@ import type { Logger } from '@kbn/logging';
 
 import { registerStatusRoutes } from './status';
 import { registerApiKeyRoutes } from './api_key_routes';
+import { registerStatsRoutes } from './stats';
 
 export function defineRoutes(router: IRouter, logger: Logger) {
   registerApiKeyRoutes(router, logger);
   registerStatusRoutes(router, logger);
+  registerStatsRoutes(router, logger, { isSizeAndDocCountEnabled: true });
 }

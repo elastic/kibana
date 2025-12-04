@@ -14,7 +14,6 @@ import { css } from '@emotion/react';
 import { MetricPanels } from './metric_panels';
 import { Footer } from '../footer/footer';
 import { CloudResources } from './cloud_resources';
-import { RecentActivity } from './recent_activity';
 import { BodyLinks } from './body_links';
 
 export const SearchHomepageBody = () => {
@@ -26,10 +25,6 @@ export const SearchHomepageBody = () => {
       <MetricPanels />
 
       <EuiFlexGroup gutterSize="l" direction="column">
-        <EuiFlexItem>
-          <EuiSpacer size="l" />
-          <RecentActivity />
-        </EuiFlexItem>
         <EuiFlexItem>
           <EuiSpacer size="l" />
           <CloudResources />
