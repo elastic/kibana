@@ -169,9 +169,8 @@ export class ReportingNotifierStreamHandler {
         return { completed: newCompleted, failed: newFailed };
       }),
       catchError((err) => {
-        // Seems to only occur when connection to ES fails, and
-        // is very noisy.  We used to toast here, but ... it was
-        // very noisy.
+        // Seems to only occur when the connection to Kibana fails.
+        // We used to toast here, but ... it was very noisy.
         return Rx.of({});
       })
     );
