@@ -7,6 +7,8 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 
+import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
+
 import type {
   ASSETS_SAVED_OBJECT_TYPE,
   agentAssetTypes,
@@ -100,6 +102,7 @@ export enum ElasticsearchAssetType {
   transform = 'transform',
   mlModel = 'ml_model',
   knowledgeBase = 'knowledge_base',
+  esqlView = 'esql_view',
 }
 
 export type FleetElasticsearchAssetType = Exclude<
@@ -653,6 +656,8 @@ export interface CustomAssetFailedAttempt extends FailedAttempt {
 
 export enum INSTALL_STATES {
   CREATE_RESTART_INSTALLATION = 'create_restart_installation',
+  INSTALL_PRECHECK = 'install_precheck',
+  INSTALL_ESQL_VIEWS = 'install_esql_views',
   INSTALL_KIBANA_ASSETS = 'install_kibana_assets',
   INSTALL_ILM_POLICIES = 'install_ilm_policies',
   CREATE_ALERTING_RULES = 'create_alerting_rules',
@@ -791,6 +796,15 @@ export interface IndexTemplate {
   ignore_missing_component_templates?: string[];
   _meta: object;
 
+  // These properties are returned on ES read operations and
+  // not allowed to be set on ES write operations
+  created_date?: number;
+  created_date_millis?: number;
+  modified_date?: number;
+  modified_date_millis?: number;
+}
+
+export interface IngestPipelineWithDateFields extends IngestPipeline {
   // These properties are returned on ES read operations and
   // not allowed to be set on ES write operations
   created_date?: number;

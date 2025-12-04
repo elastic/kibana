@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
-import { Location } from '@kbn/esql-ast/src/commands_registry/types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type {
   ESQLControlVariable,
@@ -63,34 +62,7 @@ export interface ESQLCallbacks {
   ) => Promise<InferenceEndpointsAutocompleteResult>;
   getLicense?: () => Promise<Pick<ILicense, 'hasAtLeast'> | undefined>;
   getActiveProduct?: () => PricingProduct | undefined;
+  getHistoryStarredItems?: () => Promise<string[]>;
   canCreateLookupIndex?: (indexName: string) => Promise<boolean>;
   isServerless?: boolean;
 }
-
-export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';
-
-const commandOptionNameToLocation: Record<string, Location> = {
-  eval: Location.EVAL,
-  where: Location.WHERE,
-  row: Location.ROW,
-  sort: Location.SORT,
-  stats: Location.STATS,
-  by: Location.STATS_BY,
-  enrich: Location.ENRICH,
-  with: Location.ENRICH_WITH,
-  on: Location.RERANK,
-  dissect: Location.DISSECT,
-  rename: Location.RENAME,
-  join: Location.JOIN,
-  show: Location.SHOW,
-  completion: Location.COMPLETION,
-  rerank: Location.RERANK,
-};
-
-/**
- * Pause before using this in new places. Where possible, use the Location enum directly.
- *
- * This is primarily around for backwards compatibility with the old system of command and option names.
- */
-export const getLocationFromCommandOrOptionName = (name: string) =>
-  commandOptionNameToLocation[name];

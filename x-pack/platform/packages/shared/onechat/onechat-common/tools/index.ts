@@ -58,6 +58,7 @@ export {
   type QueryResult,
   type ResourceResult,
   type TabularDataResult,
+  type VisualizationResult,
   type OtherResult,
   isErrorResult,
   isOtherResult,
@@ -65,3 +66,4 @@ export {
   isResourceResult,
   isTabularDataResult,
 } from './tool_result';
+export { type BrowserApiToolMetadata } from './browser_tool_metadata';

@@ -69,6 +69,10 @@ const isLikelyIrrelevant = (name: string, failure: string) => {
     return true;
   }
 
+  if (failure.includes('Unable to read snapshot manifest: Internal Server Error')) {
+    return true;
+  }
+
   return false;
 };
 

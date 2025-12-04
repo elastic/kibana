@@ -12,8 +12,6 @@ export type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValue
  * This object is then used to validate and parse the value entered.
  */
 export const allowedExperimentalValues = Object.freeze({
-  donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
-
   /**
    * This is used for enabling the end-to-end tests for the security_solution telemetry.
    * We disable the telemetry since we don't have specific roles or permissions around it and
@@ -46,19 +44,21 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsSentinelOneRunScriptEnabled: true,
 
   /**
-   * Disables new notes
+   * Memory Dump response actions support for Elastic Defend.
+   * Release: v9.3
    */
-  securitySolutionNotesDisabled: false,
+  responseActionsEndpointMemoryDump: false,
+
+  /**
+   * Scripts library in support of `runscript`/upload-execute` new command for elastic defend
+   * Release: 9.4
+   */
+  responseActionsScriptLibraryManagement: false,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
   assistantModelEvaluation: false,
-
-  /**
-   * Enables the Managed User section inside the new user details flyout.
-   */
-  newUserDetailsFlyoutManagedUser: false,
 
   /**
    * Disables ESQL-based risk scoring
@@ -71,6 +71,11 @@ export const allowedExperimentalValues = Object.freeze({
   enableRiskScoreResetToZero: true,
 
   /**
+   * Enable privmon modifier in risk scoring calculation
+   */
+  enableRiskScorePrivmonModifier: false,
+
+  /**
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
    */
   riskScoreAssistantToolDisabled: false,
@@ -81,24 +86,19 @@ export const allowedExperimentalValues = Object.freeze({
   entityDetailsHighlightsEnabled: false,
 
   /**
+   * Enables the experimental Threat Hunting home experience.
+   */
+  entityThreatHuntingEnabled: false,
+
+  /**
    * disables ES|QL rules
    */
   esqlRulesDisabled: false,
 
   /**
-   * Enables Protection Updates tab in the Endpoint Policy Details page
-   */
-  protectionUpdatesEnabled: true,
-
-  /**
    * Enables experimental Microsoft Defender for Endpoint integration data to be available in Analyzer
    */
   microsoftDefenderEndpointDataInAnalyzerEnabled: true,
-
-  /**
-   * Enables the new modal for the value list items
-   */
-  valueListItemsModalEnabled: true,
 
   /**
    * Enables the storing of gaps in the event log
@@ -147,11 +147,6 @@ export const allowedExperimentalValues = Object.freeze({
   endpointExceptionsMovedUnderManagement: false,
 
   /**
-   * Disables flyout history and new preview navigation
-   */
-  newExpandableFlyoutNavigationDisabled: false,
-
-  /**
    * Enables CrowdStrike's RunScript RTR command
    * Release: 8.18/9.0
    */
@@ -192,9 +187,26 @@ export const allowedExperimentalValues = Object.freeze({
    */
   microsoftDefenderEndpointCancelEnabled: true,
   /**
-   * Protects all the work related to the attacks and alert alignment effort
+   * Protects all the work related to the attacks and alerts alignment effort
    */
-  attacksAlertAlignment: false,
+  attacksAlertsAlignment: false,
+  /**
+   *  Enables the QRadar rules import feature
+   */
+  qradarRulesMigration: false,
+  /**
+   * Enables the Kubernetes Dashboard in Security Solution
+   */
+  kubernetesEnabled: false,
+
+  /**
+   * Enables the Entity Analytics Watchlist feature.
+   */
+  entityAnalyticsWatchlistEnabled: false,
+  /**
+   * Enables dynamic registration of security attachments and tools from agent_builder with the onechat plugin
+   */
+  agentBuilderEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

@@ -44,7 +44,9 @@ describe('When displaying Endpoint Response Actions', () => {
 
   describe('for agent type endpoint', () => {
     beforeEach(() => {
-      (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({});
+      (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
+        responseActionsEndpointMemoryDump: true,
+      });
       commands = getEndpointConsoleCommands({
         agentType: 'endpoint',
         endpointAgentId: '123',
@@ -71,9 +73,18 @@ describe('When displaying Endpoint Response Actions', () => {
         HELP_GROUPS.responseActions.label
       );
 
-      const endpointCommands = CONSOLE_RESPONSE_ACTION_COMMANDS.filter(
-        (command) => command !== 'runscript' && command !== 'cancel'
-      );
+      const endpointCommands = CONSOLE_RESPONSE_ACTION_COMMANDS.filter((command) => {
+        if (
+          command === 'runscript' ||
+          command === 'cancel' ||
+          (command === 'memory-dump' &&
+            !ExperimentalFeaturesService.get().responseActionsEndpointMemoryDump)
+        ) {
+          return false;
+        }
+
+        return true;
+      });
       const expectedCommands: string[] = [...endpointCommands];
       // add status to the list of expected commands in that order
       expectedCommands.splice(2, 0, 'status');

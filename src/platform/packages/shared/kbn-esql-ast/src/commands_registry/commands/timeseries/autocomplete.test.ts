@@ -11,7 +11,7 @@ import { autocomplete } from './autocomplete';
 import { expectSuggestions } from '../../../__tests__/autocomplete';
 import type { ICommandCallbacks } from '../../types';
 import { correctQuerySyntax, findAstPosition } from '../../../definitions/utils/ast';
-import { parse } from '../../../parser';
+import { Parser } from '../../../parser';
 import { METADATA_FIELDS } from '../../options/metadata';
 import { getRecommendedQueriesTemplatesFromExtensions } from '../../options/recommended_queries';
 
@@ -60,9 +60,10 @@ describe('TS Autocomplete', () => {
   describe('... <sources> ...', () => {
     const suggest = async (query: string) => {
       const correctedQuery = correctQuerySyntax(query);
-      const { ast } = parse(correctedQuery, { withFormatting: true });
+      const { root } = Parser.parse(correctedQuery, { withFormatting: true });
+
       const cursorPosition = query.length;
-      const { command } = findAstPosition(ast, cursorPosition);
+      const { command } = findAstPosition(root, cursorPosition);
       if (!command) {
         throw new Error('Command not found in the parsed query');
       }
@@ -79,6 +80,13 @@ describe('TS Autocomplete', () => {
         'timeseries_index_alias_1',
         'timeseries_index_alias_2',
       ]);
+    });
+
+    test('can suggest timeseries after one already selected', async () => {
+      const suggestions = await suggest('TS timeseries_index,  ');
+      const labels = suggestions.map((s) => s.label);
+
+      expect(labels).toEqual(['timeseries_index_with_alias', 'time_series_index']);
     });
 
     test('discriminates between indices and aliases', async () => {

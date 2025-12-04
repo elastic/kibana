@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { setTimeout as timer } from 'timers/promises';
 import { ExecutionContextContainer } from '@kbn/core-execution-context-browser-internal';
 import type { createRoot } from '@kbn/core-test-helpers-kbn-server';
 import {
@@ -17,8 +18,6 @@ import {
 } from '@kbn/core-test-helpers-kbn-server';
 
 import type { RequestHandlerContext } from '../..';
-
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const parentContext = {
   type: 'test-type',
@@ -341,7 +340,7 @@ describe('trace', () => {
         },
         async (context, req, res) => {
           executionContext.set(parentContext);
-          await delay(100);
+          await timer(100);
           return res.ok({ body: executionContext.get() });
         }
       );
@@ -365,7 +364,7 @@ describe('trace', () => {
         },
         async (context, req, res) => {
           executionContext.set({ ...parentContext, id: String(id++) });
-          await delay(100);
+          await timer(100);
           return res.ok({ body: executionContext.get() });
         }
       );
@@ -392,7 +391,7 @@ describe('trace', () => {
         },
         async (context, req, res) => {
           executionContext.set({ ...parentContext, id: String(id) });
-          await delay(id-- * 100);
+          await timer(id-- * 100);
           return res.ok({ body: executionContext.get() });
         }
       );
@@ -427,7 +426,7 @@ describe('trace', () => {
         },
         async (context, req, res) => {
           executionContext.set(parentContext);
-          await delay(id-- * 100);
+          await timer(id-- * 100);
           const esClient = (await context.core).elasticsearch.client;
           const { headers } = await esClient.asCurrentUser.ping({}, { meta: true });
           return res.ok({ body: headers || {} });
@@ -775,9 +774,9 @@ describe('trace', () => {
           },
           async (context, req, res) => {
             return executionContext.withContext(parentContext, async () => {
-              await delay(100);
+              await timer(100);
               return executionContext.withContext(nestedContext, async () => {
-                await delay(100);
+                await timer(100);
                 return res.ok({ body: executionContext.get() });
               });
             });

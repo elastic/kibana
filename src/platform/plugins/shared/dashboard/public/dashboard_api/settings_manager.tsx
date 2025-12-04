@@ -11,13 +11,14 @@ import type { StateComparators, WithAllKeys } from '@kbn/presentation-publishing
 import { diffComparators, initializeStateManager } from '@kbn/presentation-publishing';
 import type { BehaviorSubject } from 'rxjs';
 import { combineLatestWith, debounceTime, map } from 'rxjs';
-import type { DashboardState, DashboardOptions } from '../../server/content_management';
-import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/content_management';
+import type { DashboardState, DashboardOptions } from '../../server';
+import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/constants';
 
 export type DashboardSettings = Required<DashboardOptions> & {
   description?: DashboardState['description'];
   tags: DashboardState['tags'];
-  timeRestore: DashboardState['timeRestore'];
+  timeRestore: boolean;
+  projectRoutingRestore: boolean;
   title: DashboardState['title'];
 };
 
@@ -26,6 +27,7 @@ const DEFAULT_SETTINGS: WithAllKeys<DashboardSettings> = {
   description: undefined,
   tags: [],
   timeRestore: false,
+  projectRoutingRestore: false,
   title: '',
 };
 
@@ -37,6 +39,7 @@ const comparators: StateComparators<DashboardSettings> = {
   syncCursor: 'referenceEquality',
   syncTooltips: 'referenceEquality',
   timeRestore: 'referenceEquality',
+  projectRoutingRestore: 'referenceEquality',
   useMargins: 'referenceEquality',
   tags: 'deepEquality',
 };
@@ -46,7 +49,8 @@ function deserializeState(state: DashboardState) {
     ...state.options,
     description: state.description,
     tags: state.tags,
-    timeRestore: state.timeRestore,
+    timeRestore: Boolean(state.timeRange),
+    projectRoutingRestore: Boolean(state.project_routing),
     title: state.title,
   };
 }
@@ -59,11 +63,11 @@ export function initializeSettingsManager(initialState: DashboardState) {
   );
 
   function serializeSettings() {
-    const { description, tags, timeRestore, title, ...options } = stateManager.getLatestState();
+    const { description, tags, timeRestore, projectRoutingRestore, title, ...options } =
+      stateManager.getLatestState();
     return {
       ...(description && { description }),
       tags,
-      timeRestore,
       title,
       options,
     };
@@ -80,9 +84,15 @@ export function initializeSettingsManager(initialState: DashboardState) {
         syncTooltips$: stateManager.api.syncTooltips$,
         useMargins$: stateManager.api.useMargins$,
       },
-      setSettings: stateManager.reinitializeState,
+      setSettings: (settings: Partial<DashboardSettings>) => {
+        stateManager.reinitializeState({
+          ...stateManager.getLatestState(),
+          ...settings,
+        });
+      },
       setTags: stateManager.api.setTags,
       timeRestore$: stateManager.api.timeRestore$,
+      projectRoutingRestore$: stateManager.api.projectRoutingRestore$,
       title$: stateManager.api.title$,
     },
     internalApi: {
@@ -93,12 +103,13 @@ export function initializeSettingsManager(initialState: DashboardState) {
           map(() => stateManager.getLatestState()),
           combineLatestWith(lastSavedState$),
           map(([latestState, lastSavedState]) => {
-            const { description, tags, timeRestore, title, ...optionDiffs } = diffComparators(
-              comparators,
-              deserializeState(lastSavedState),
-              latestState,
-              DEFAULT_SETTINGS
-            );
+            const { description, tags, timeRestore, projectRoutingRestore, title, ...optionDiffs } =
+              diffComparators(
+                comparators,
+                deserializeState(lastSavedState),
+                latestState,
+                DEFAULT_SETTINGS
+              );
             // options needs to contain all values and not just diffs since is spread into saved state
             const options = Object.keys(optionDiffs).length
               ? { ...serializeSettings().options, ...optionDiffs }
@@ -106,8 +117,9 @@ export function initializeSettingsManager(initialState: DashboardState) {
             return {
               ...(description && { description }),
               ...(tags && { tags }),
-              ...(typeof timeRestore === 'boolean' && { timeRestore }),
               ...(title && { title }),
+              ...(typeof timeRestore === 'boolean' && { timeRestore }),
+              ...(typeof projectRoutingRestore === 'boolean' && { projectRoutingRestore }),
               ...(options && { options }),
             };
           })

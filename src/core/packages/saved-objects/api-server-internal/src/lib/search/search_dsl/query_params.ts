@@ -15,6 +15,7 @@ import {
   DEFAULT_NAMESPACE_STRING,
 } from '@kbn/core-saved-objects-utils-server';
 import { getProperty, type IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import type { estypes } from '@elastic/elasticsearch';
 import { getReferencesFilter } from './references_filter';
 
 type KueryNode = any;
@@ -155,6 +156,31 @@ const toArray = (val: unknown) => {
   return !Array.isArray(val) ? [val] : val;
 };
 
+export function getNamespacesBoolFilter({
+  namespaces,
+  registry,
+  types,
+  typeToNamespacesMap,
+}: Pick<QueryParams, 'namespaces' | 'registry' | 'typeToNamespacesMap'> & {
+  types: string[];
+}): NamespacesBoolFilter {
+  return {
+    bool: {
+      should: types.map((shouldType) => {
+        const deduplicatedNamespaces = uniqNamespaces(
+          typeToNamespacesMap ? typeToNamespacesMap.get(shouldType) : namespaces
+        );
+        return getClauseForType(registry, deduplicatedNamespaces, shouldType);
+      }),
+      minimum_should_match: 1,
+    },
+  };
+}
+
+export interface NamespacesBoolFilter {
+  bool: { should: estypes.QueryDslQueryContainer[]; minimum_should_match: number };
+}
+
 /**
  *  Get the "query" related keys for the search body
  */
@@ -202,17 +228,7 @@ export function getQueryParams({
             }),
           ]
         : []),
-      {
-        bool: {
-          should: types.map((shouldType) => {
-            const deduplicatedNamespaces = uniqNamespaces(
-              typeToNamespacesMap ? typeToNamespacesMap.get(shouldType) : namespaces
-            );
-            return getClauseForType(registry, deduplicatedNamespaces, shouldType);
-          }),
-          minimum_should_match: 1,
-        },
-      },
+      getNamespacesBoolFilter({ namespaces, registry, types, typeToNamespacesMap }),
     ],
   };
 

@@ -10,9 +10,9 @@
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { WorkflowDetailPage } from './workflow_detail_page';
+import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
+import { setWorkflow } from '../../../entities/workflows/store/workflow_detail/slice';
 import { TestWrapper } from '../../../shared/test_utils';
-import { createMockStore } from '../../../widgets/workflow_yaml_editor/lib/store/__mocks__/store.mock';
-import { setWorkflow } from '../../../widgets/workflow_yaml_editor/lib/store/slice';
 
 interface WorkflowDetailPageProps {
   id?: string;
@@ -38,11 +38,11 @@ jest.mock('../../../hooks/use_workflow_url_state', () => ({
 }));
 
 // Mock the thunks
-jest.mock('../../../widgets/workflow_yaml_editor/lib/store/thunks/load_connectors_thunk', () => ({
-  loadConnectorsThunk: jest.fn(),
+jest.mock('../../../entities/workflows/store/workflow_detail/thunks/load_connectors_thunk', () => ({
+  loadConnectorsThunk: (...args: unknown[]) => mockLoadConnectors(...args),
 }));
-jest.mock('../../../widgets/workflow_yaml_editor/lib/store/thunks/load_workflow_thunk', () => ({
-  loadWorkflowThunk: jest.fn(),
+jest.mock('../../../entities/workflows/store/workflow_detail/thunks/load_workflow_thunk', () => ({
+  loadWorkflowThunk: (...args: unknown[]) => mockLoadWorkflow(...args),
 }));
 
 // Mock child components to avoid rendering deep component trees
@@ -78,9 +78,8 @@ jest.mock('../../../features/workflow_execution_list/ui/workflow_execution_list_
 }));
 
 // Mock useAsyncThunk hooks - needs to be dynamic
-jest.mock('../../../widgets/workflow_yaml_editor/lib/store/hooks/use_async_thunk', () => ({
-  useAsyncThunk: () => mockLoadConnectors,
-  useAsyncThunkState: () => [mockLoadWorkflow, mockAsyncThunkState],
+jest.mock('../../../hooks/use_async_thunk', () => ({
+  useAsyncThunkState: (mockedThunk: Function) => [mockedThunk, mockAsyncThunkState],
 }));
 
 describe('WorkflowDetailPage', () => {

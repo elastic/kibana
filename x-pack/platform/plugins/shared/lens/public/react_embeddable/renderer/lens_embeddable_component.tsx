@@ -7,7 +7,8 @@
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import React, { useEffect, useMemo } from 'react';
-import type { LensInternalApi, LensApi } from '@kbn/lens-common';
+import type { LensInternalApi } from '@kbn/lens-common';
+import type { LensApi } from '@kbn/lens-common-2';
 import { ExpressionWrapper } from '../expression_wrapper';
 import { UserMessages } from '../user_messages/container';
 import { useMessages, useDispatcher } from './hooks';

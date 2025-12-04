@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import { BehaviorSubject, type Subscription } from 'rxjs';
+
 import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { AppStatus, DEFAULT_APP_CATEGORIES, type AppUpdater } from '@kbn/core/public';
 import { QueryClient } from '@kbn/react-query';
+import { SEARCH_GETTING_STARTED_FEATURE_FLAG } from '@kbn/search-shared-ui/src/constants';
 import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_PATH } from '../common';
 
 import type {
@@ -16,6 +19,7 @@ import type {
   SearchGettingStartedAppPluginStartDependencies,
   SearchGettingStartedServicesContextDeps,
 } from './types';
+import { docLinks } from './common/doc_links';
 
 export class SearchGettingStartedPlugin
   implements
@@ -26,6 +30,9 @@ export class SearchGettingStartedPlugin
       SearchGettingStartedAppPluginStartDependencies
     >
 {
+  private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  private featureFlagSubscription: Subscription | undefined;
+
   public setup(
     core: CoreSetup<
       SearchGettingStartedAppPluginStartDependencies,
@@ -43,6 +50,7 @@ export class SearchGettingStartedPlugin
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart, depsStart] = await core.getStartServices();
+        docLinks.setDocLinks(coreStart.docLinks.links);
         const services: SearchGettingStartedServicesContextDeps = {
           ...depsStart,
           history,
@@ -51,6 +59,8 @@ export class SearchGettingStartedPlugin
 
         return renderApp(coreStart, services, element, queryClient);
       },
+      status: AppStatus.inaccessible,
+      updater$: this.appUpdater$,
       order: 1,
       visibleIn: ['globalSearch', 'sideNav'],
     });
@@ -59,6 +69,38 @@ export class SearchGettingStartedPlugin
   }
 
   public start(core: CoreStart) {
+    // Combine both feature flag and user role checks
+    core.userProfile.getCurrent().then((userProfile) => {
+      const userRoles = userProfile?.user.roles || [];
+      const isViewerRole = userRoles.length === 1 && userRoles.includes('viewer');
+
+      // If viewer role, keep app inaccessible permanently
+      if (isViewerRole) {
+        this.appUpdater$.next(() => ({
+          status: AppStatus.inaccessible,
+        }));
+      } else {
+        // Subscribe to feature flag changes (only matters if not a viewer)
+        this.featureFlagSubscription = core.featureFlags
+          .getBooleanValue$(SEARCH_GETTING_STARTED_FEATURE_FLAG, false)
+          .subscribe((featureFlagEnabled) => {
+            const status: AppStatus = featureFlagEnabled
+              ? AppStatus.accessible
+              : AppStatus.inaccessible;
+            this.appUpdater$.next(() => ({
+              status,
+            }));
+          });
+      }
+    });
+
     return {};
+  }
+
+  public stop() {
+    if (this.featureFlagSubscription) {
+      this.featureFlagSubscription.unsubscribe();
+      this.featureFlagSubscription = undefined;
+    }
   }
 }

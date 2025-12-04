@@ -126,6 +126,14 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
         setDefaultTime,
       };
 
+      /**
+       * To hide the sidenav tour we need to enable 'hideAnnouncements' setting
+       * It should hide both space tour and sidenav tour.
+       * Currently it can be set only per space, so we set it right after new space is created.
+       * TODO: update if setting becomes global https://github.com/elastic/kibana/issues/234771
+       */
+      await kbnClient.uiSettings.update({ hideAnnouncements: true }, { space: spaceId });
+
       log.serviceMessage('scoutSpace', `New Kibana space '${spaceId}' created`);
       await use({ savedObjects, uiSettings, id: spaceId });
 

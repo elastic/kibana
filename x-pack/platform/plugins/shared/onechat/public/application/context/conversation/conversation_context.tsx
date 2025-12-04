@@ -6,13 +6,23 @@
  */
 
 import { createContext, useContext } from 'react';
+import type { BrowserApiToolDefinition } from '@kbn/onechat-browser/tools/browser_api_tool';
+import type { AttachmentInput } from '@kbn/onechat-common/attachments';
 import type { ConversationActions } from './use_conversation_actions';
 
 interface ConversationContextValue {
   conversationId?: string;
   shouldStickToBottom?: boolean;
   isEmbeddedContext: boolean;
-  setConversationId?: (conversationId: string) => void;
+  sessionTag?: string;
+  agentId?: string;
+  initialMessage?: string;
+  resetInitialMessage?: () => void;
+  attachments?: AttachmentInput[];
+  resetAttachments?: () => void;
+  removeAttachment?: (attachmentIndex: number) => void;
+  browserApiTools?: Array<BrowserApiToolDefinition<any>>;
+  setConversationId?: (conversationId?: string) => void;
   conversationActions: ConversationActions;
 }
 

@@ -82,7 +82,7 @@ describe('InternalStateStore', () => {
     expect(tabsState.unsafeCurrentId).not.toBe(initialTabId);
     expect(tabsState.unsafeCurrentId).toBe(tabsState.allIds[1]);
     expect(tabsState.byId[tabsState.unsafeCurrentId].label).toBe(params.tabLabel);
-    expect(tabsState.byId[tabsState.unsafeCurrentId].initialAppState).toEqual(params.appState);
+    expect(tabsState.byId[tabsState.unsafeCurrentId].appState).toEqual(params.appState);
     expect(tabsState.byId[tabsState.unsafeCurrentId].globalState).toEqual(params.globalState);
     expect(tabsState.byId[tabsState.unsafeCurrentId].initialInternalState).toEqual({
       searchSessionId: params.searchSessionId,

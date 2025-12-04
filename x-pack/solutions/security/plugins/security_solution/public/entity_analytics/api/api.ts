@@ -35,6 +35,7 @@ import type {
   SearchPrivilegesIndicesResponse,
   UpdateEntitySourceResponse,
   UploadAssetCriticalityRecordsResponse,
+  ConfigureRiskEngineSavedObjectRequestBodyInput,
 } from '../../../common/api/entity_analytics';
 import {
   API_VERSIONS,
@@ -440,7 +441,9 @@ export const useEntityAnalyticsRoutes = () => {
         method: 'DELETE',
       });
 
-    const updateSavedObjectConfiguration = (params: {}) =>
+    const updateSavedObjectConfiguration = (
+      params: ConfigureRiskEngineSavedObjectRequestBodyInput
+    ) =>
       http.fetch(RISK_ENGINE_CONFIGURE_SO_URL, {
         version: API_VERSIONS.public.v1,
         method: 'PUT',

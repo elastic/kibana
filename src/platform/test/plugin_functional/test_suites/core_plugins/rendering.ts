@@ -253,7 +253,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         // can't be used to infer urls or customer id from the outside
         'xpack.cloud.serverless.project_id (string?)',
         'xpack.cloud.serverless.project_name (string?)',
-        'xpack.cloud.serverless.project_type (observability?|security?|search?|workplace_ai?)',
+        'xpack.cloud.serverless.project_type (observability?|security?|search?|workplaceai?)',
         'xpack.cloud.serverless.product_tier (never|complete?|essentials?|search_ai_lake?|logs_essentials?)',
         'xpack.cloud.serverless.orchestrator_target (string?)',
         'xpack.cloud.serverless.in_trial (boolean?)',
@@ -373,7 +373,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.trigger_actions_ui.rules.enabled (boolean?)',
         'xpack.timelines.enableExperimental (array?)',
         'xpack.alerting.rules.run.alerts.max (number?)',
-        'xpack.alerting.maintenanceWindow.enabled (boolean?)',
         'xpack.alerting.rulesSettings.enabled (boolean?)',
         'xpack.alerting.disabledRuleTypes (array?)',
         'xpack.alerting.enabledRuleTypes (array?)',
@@ -397,6 +396,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.genAiSettings.showAiBreadcrumb (boolean?)',
         'xpack.genAiSettings.showSpacesIntegration (boolean?)',
         'xpack.genAiSettings.showAiAssistantsVisibilitySetting (boolean?)',
+        'xpack.maintenanceWindows.enabled (boolean?)',
         /**
          * Rule form V2 feature flags
          */
@@ -408,6 +408,9 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.apm.featureFlags.ruleFormV2Enabled (boolean?)',
         'xpack.observability.unsafe.ruleFormV2.enabled (boolean?)',
         'xpack.slo.experimental.ruleFormV2.enabled (boolean?)',
+
+        // temporary feature flag, to be removed when cps is released
+        'cps.cpsEnabled (boolean?|never)',
         /**/
       ];
       // We don't assert that actualExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large

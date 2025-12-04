@@ -8,15 +8,21 @@
 import React, { Suspense, lazy } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { EuiLoadingSpinner } from '@elastic/eui';
-import { ConversationFlyout } from './conversation_flyout';
+import { EuiLoadingSpinner, htmlIdGenerator } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { css } from '@emotion/react';
 import type { OpenConversationFlyoutOptions } from './types';
 import type { OnechatInternalService } from '../services';
 import type { ConversationFlyoutRef } from '../types';
+import type { EmbeddableConversationProps } from '../embeddable/types';
+
+const htmlId = htmlIdGenerator('onechat-conversation-flyout');
 
 interface OpenConversationFlyoutParams {
   coreStart: CoreStart;
   services: OnechatInternalService;
+  onClose?: () => void;
+  onPropsUpdate?: (callback: (props: EmbeddableConversationProps) => void) => void;
 }
 
 /**
@@ -28,11 +34,11 @@ interface OpenConversationFlyoutParams {
  */
 export function openConversationFlyout(
   options: OpenConversationFlyoutOptions,
-  { coreStart, services }: OpenConversationFlyoutParams
+  { coreStart, services, onClose, onPropsUpdate }: OpenConversationFlyoutParams
 ): { flyoutRef: ConversationFlyoutRef } {
   const { overlays, application, ...startServices } = coreStart;
 
-  const LazyConversationComponent = lazy(async () => {
+  const LazyEmbeddableConversationComponent = lazy(async () => {
     const { createEmbeddableConversation } = await import(
       '../embeddable/create_embeddable_conversation'
     );
@@ -45,32 +51,47 @@ export function openConversationFlyout(
     };
   });
 
+  const { onClose: externalOnClose, ...restOptions } = options;
+
+  const handleOnClose = () => {
+    flyoutRef.close(); // Always close the flyout
+    externalOnClose?.(); // Call external callback if provided
+    onClose?.(); // Call internal cleanup callback
+  };
+
+  const ariaLabelledBy = htmlId();
+
   const flyoutRef = overlays.openFlyout(
     toMountPoint(
       <Suspense fallback={<EuiLoadingSpinner size="l" />}>
-        <ConversationFlyout
-          {...options}
-          onClose={() => flyoutRef.close()}
-          ConversationComponent={LazyConversationComponent}
+        <LazyEmbeddableConversationComponent
+          onClose={handleOnClose}
+          ariaLabelledBy={ariaLabelledBy}
+          {...restOptions}
+          onPropsUpdate={onPropsUpdate}
         />
       </Suspense>,
       startServices
     ),
     {
       'data-test-subj': 'onechat-conversation-flyout-wrapper',
-      ownFocus: true,
-      onClose: () => {
-        flyoutRef.close();
-        options.onClose?.();
-      },
+      ownFocus: false,
       isResizable: true,
-      size: '1000px',
       type: 'push',
+      hideCloseButton: true,
+      'aria-labelledby': ariaLabelledBy,
+      maxWidth: 1200, // Maximum width for resizable flyout to prevent NaN error
+      css: css`
+        z-index: ${euiThemeVars.euiZFlyout + 3};
+      `,
     }
   );
 
   const conversationFlyoutRef: ConversationFlyoutRef = {
-    close: () => flyoutRef.close(),
+    close: () => {
+      flyoutRef.close();
+      onClose?.();
+    },
   };
 
   return {

@@ -14,7 +14,6 @@ import {
   euiPaletteColorBlind,
   euiPaletteColorBlindBehindText,
   useEuiFontSize,
-  useEuiTheme,
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
@@ -46,46 +45,30 @@ const ENTITY_TYPES: Record<EntityTypeName, EntityType> = {
   PER: {
     label: 'Person',
     icon: 'user',
-    // Amsterdam color
-    colorIndex: 5,
+    colorIndex: 9,
   },
   LOC: {
     label: 'Location',
     icon: 'visMapCoordinate',
-    // Amsterdam color
-    colorIndex: 1,
+    colorIndex: 2,
   },
   ORG: {
     label: 'Organization',
     icon: 'home',
-    // Amsterdam color
     colorIndex: 0,
   },
   MISC: {
     label: 'Miscellaneous',
     icon: 'question',
-    // Amsterdam color
-    colorIndex: 7,
+    colorIndex: 8,
   },
 };
 
 const UNKNOWN_ENTITY_TYPE: EntityType = {
   label: '',
   icon: 'question',
-  // Amsterdam color
-  colorIndex: 5,
+  colorIndex: 9,
 };
-
-// Amsterdam
-// ['#6dccb1', '#79aad9', '#ee789d', '#a987d1', '#e4a6c7', '#f1d86f', '#d2c0a0', '#f5a35c', '#c47c6c', '#ff7e62']
-// Borealis
-// ['#00BEB8', '#98E6E2', '#599DFF', '#B4D5FF', '#ED6BA2', '#FFBED5', '#F66D64', '#FFC0B8', '#E6AB01', '#FCD279']
-const amsterdam2BorealisColorMap = new Map<number, number>([
-  [0, 0],
-  [1, 2],
-  [5, 9],
-  [7, 8],
-]);
 
 export const getNerOutputComponent = (inferrer: NerInference) => <NerOutput inferrer={inferrer} />;
 
@@ -170,25 +153,14 @@ const EntityBadge = ({
 }: PropsWithChildren<{
   entity: estypes.MlTrainedModelEntities;
 }>) => {
-  const { euiTheme } = useEuiTheme();
   const euiFontSizeXS = useEuiFontSize('xs').fontSize;
 
   return (
     <EuiBadge
-      color={getClassColor(entity.class_name, euiTheme.flags.hasVisColorAdjustment)}
+      color={getClassColor(entity.class_name)}
       style={{
         marginRight: ICON_PADDING,
         marginTop: `-${ICON_PADDING}`,
-        // For Amsterdam, add a border to the badge to improve contrast with the background.
-        ...(euiTheme.flags.hasVisColorAdjustment
-          ? {
-              border: `1px solid ${getClassColor(
-                entity.class_name,
-                euiTheme.flags.hasVisColorAdjustment,
-                true
-              )}`,
-            }
-          : {}),
         fontSize: euiFontSizeXS,
         padding: '0px 6px',
         pointerEvents: 'none',
@@ -218,21 +190,10 @@ export function getClassLabel(className: string) {
   return entity?.label ?? className;
 }
 
-export function getClassColor(
-  className: string,
-  hasVisColorAdjustment: boolean,
-  border: boolean = false
-) {
+export function getClassColor(className: string, border: boolean = false) {
   const colorIndex = isEntityTypeName(className)
     ? ENTITY_TYPES[className].colorIndex
     : UNKNOWN_ENTITY_TYPE.colorIndex;
 
-  // map colors from Amsterdam to Borealis if necessary
-  const themeColorIndex = hasVisColorAdjustment
-    ? colorIndex
-    : amsterdam2BorealisColorMap.get(colorIndex) ?? colorIndex;
-
-  return border
-    ? badgeColorPaletteBorder[themeColorIndex]
-    : badgeColorPaletteBehindText[themeColorIndex];
+  return border ? badgeColorPaletteBorder[colorIndex] : badgeColorPaletteBehindText[colorIndex];
 }

@@ -31,8 +31,10 @@ import {
   AZURE_CLOUD_CONNECTOR_FIELD_NAMES,
   CLOUD_FORMATION_TEMPLATE_URL_CLOUD_CONNECTORS,
   ARM_TEMPLATE_URL_CLOUD_CONNECTORS,
-  CLOUD_CONNECTOR_ASSET_INVENTORY_REUSABLE_MIN_VERSION,
-  CLOUD_CONNECTOR_CSPM_REUSABLE_MIN_VERSION,
+  CLOUD_CONNECTOR_AWS_ASSET_INVENTORY_REUSABLE_MIN_VERSION,
+  CLOUD_CONNECTOR_AWS_CSPM_REUSABLE_MIN_VERSION,
+  CLOUD_CONNECTOR_AZURE_CSPM_REUSABLE_MIN_VERSION,
+  CLOUD_CONNECTOR_AZURE_ASSET_INVENTORY_REUSABLE_MIN_VERSION,
   AWS_PROVIDER,
   AZURE_PROVIDER,
   AWS_SINGLE_ACCOUNT,
@@ -67,7 +69,7 @@ export function isAwsCredentials(
 }
 
 export const isAzureCloudConnectorVars = (
-  vars: CloudConnectorVars,
+  vars: CloudConnectorVars | PackagePolicyConfigRecord,
   provider: string
 ): vars is AzureCloudConnectorVars => {
   return (
@@ -99,12 +101,6 @@ export function hasValidNewConnectionCredentials(
   }
 }
 
-const getCloudProviderFromCloudHost = (cloudHost: string | undefined): string | undefined => {
-  if (!cloudHost) return undefined;
-  const match = cloudHost.match(/\b(aws|gcp|azure)\b/)?.[1];
-  return match;
-};
-
 export const getDeploymentIdFromUrl = (url: string | undefined): string | undefined => {
   if (!url) return undefined;
   const match = url.match(/\/deployments\/([^/?#]+)/);
@@ -114,11 +110,18 @@ export const getDeploymentIdFromUrl = (url: string | undefined): string | undefi
 export const getKibanaComponentId = (cloudId: string | undefined): string | undefined => {
   if (!cloudId) return undefined;
 
-  const base64Part = cloudId.split(':')[1];
-  const decoded = atob(base64Part);
-  const [, , kibanaComponentId] = decoded.split('$');
+  try {
+    const base64Part = cloudId.split(':')[1];
+    if (!base64Part) return undefined;
 
-  return kibanaComponentId || undefined;
+    const decoded = atob(base64Part);
+    const [, , kibanaComponentId] = decoded.split('$');
+
+    return kibanaComponentId || undefined;
+  } catch (error) {
+    // Return undefined if cloudId is malformed or cannot be decoded
+    return undefined;
+  }
 };
 
 export const getTemplateUrlFromPackageInfo = (
@@ -179,11 +182,6 @@ export const getCloudConnectorRemoteRoleTemplate = ({
 }: GetCloudConnectorRemoteRoleTemplateParams): string | undefined => {
   let elasticResourceId: string | undefined;
   const accountType = getAccountTypeFromInput(input, provider);
-
-  const hostProvider = getCloudProviderFromCloudHost(cloud?.cloudHost);
-
-  if (!hostProvider || (provider === AWS_PROVIDER && hostProvider !== provider)) return undefined;
-
   const deploymentId = getDeploymentIdFromUrl(cloud?.deploymentUrl);
   const kibanaComponentId = getKibanaComponentId(cloud?.cloudId);
   const templateUrlFieldName = getTemplateFieldNameByProvider(provider);
@@ -415,13 +413,17 @@ export const updateInputVarsWithAzureCredentials = (
 
   // Update Azure-specific fields - always create new objects instead of mutating
   if (credentials?.tenantId !== undefined) {
+    // Update tenant_id if it exists
     if (updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID]) {
       updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID] = {
         ...updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID],
         value: credentials.tenantId,
       };
-    } else {
+    }
+    // Update azure.credentials.tenant_id if it exists
+    if (updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID]) {
       updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID] = {
+        ...updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID],
         value: credentials.tenantId,
       };
     }
@@ -436,13 +438,17 @@ export const updateInputVarsWithAzureCredentials = (
   }
 
   if (credentials?.clientId !== undefined) {
+    // Update client_id if it exists
     if (updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID]) {
       updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID] = {
         ...updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID],
         value: credentials.clientId,
       };
-    } else {
+    }
+    // Update azure.credentials.client_id if it exists
+    if (updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID]) {
       updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID] = {
+        ...updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID],
         value: credentials.clientId,
       };
     }
@@ -550,15 +556,30 @@ export const updatePolicyInputs = (
 };
 
 export const isCloudConnectorReusableEnabled = (
+  provider: string,
   packageInfoVersion: string,
   templateName: string
 ) => {
-  if (templateName === 'cspm') {
-    return semver.gte(packageInfoVersion, CLOUD_CONNECTOR_CSPM_REUSABLE_MIN_VERSION);
-  }
-
-  if (templateName === 'asset_inventory') {
-    return semver.gte(packageInfoVersion, CLOUD_CONNECTOR_ASSET_INVENTORY_REUSABLE_MIN_VERSION);
+  if (provider === AWS_PROVIDER) {
+    if (templateName === 'cspm') {
+      return semver.gte(packageInfoVersion, CLOUD_CONNECTOR_AWS_CSPM_REUSABLE_MIN_VERSION);
+    }
+    if (templateName === 'asset_inventory') {
+      return semver.gte(
+        packageInfoVersion,
+        CLOUD_CONNECTOR_AWS_ASSET_INVENTORY_REUSABLE_MIN_VERSION
+      );
+    }
+  } else if (provider === AZURE_PROVIDER) {
+    if (templateName === 'cspm') {
+      return semver.gte(packageInfoVersion, CLOUD_CONNECTOR_AZURE_CSPM_REUSABLE_MIN_VERSION);
+    }
+    if (templateName === 'asset_inventory') {
+      return semver.gte(
+        packageInfoVersion,
+        CLOUD_CONNECTOR_AZURE_ASSET_INVENTORY_REUSABLE_MIN_VERSION
+      );
+    }
   }
   return false;
 };

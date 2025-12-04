@@ -620,6 +620,11 @@ export default function (providerContext: FtrProviderContext) {
             path: 'all_assets-0.2.0/data_stream/test_logs/fields/fields.yml',
             type: 'epm-packages-assets',
           },
+          {
+            id: 'f8da8ce3-77bb-5fa9-ad05-9f362684d494',
+            path: 'all_assets-0.2.0/elasticsearch/esql_view/test_query.yml',
+            type: 'epm-packages-assets',
+          },
         ],
         name: 'all_assets',
         version: '0.2.0',
@@ -633,6 +638,18 @@ export default function (providerContext: FtrProviderContext) {
         verification_status: 'unknown',
         verification_key_id: null,
         previous_version: '0.1.0',
+      });
+    });
+
+    it('should have updated the ilm migration status', async function () {
+      const settingsSO = await kibanaServer.savedObjects.get({
+        type: 'ingest_manager_settings',
+        id: 'fleet-default-settings',
+      });
+      expect(settingsSO.attributes.ilm_migration_status).eql({
+        logs: 'success',
+        metrics: 'success',
+        synthetics: 'success',
       });
     });
   });

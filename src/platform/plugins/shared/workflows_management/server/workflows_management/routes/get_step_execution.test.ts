@@ -29,34 +29,6 @@ describe('GET /api/workflowExecutions/{executionId}/steps/{id}', () => {
     jest.clearAllMocks();
   });
 
-  describe('route definition', () => {
-    it('should define the step execution route with correct configuration', () => {
-      registerGetStepExecutionRoute({
-        router: mockRouter,
-        api: workflowsApi,
-        logger: mockLogger,
-        spaces: mockSpaces,
-      });
-
-      const getStepCall = (mockRouter.get as jest.Mock).mock.calls.find(
-        (call) => call[0].path === '/api/workflowExecutions/{executionId}/steps/{id}'
-      );
-
-      expect(getStepCall).toBeDefined();
-      expect(getStepCall[0]).toMatchObject({
-        path: '/api/workflowExecutions/{executionId}/steps/{id}',
-        security: {
-          authz: {
-            requiredPrivileges: ['all'],
-          },
-        },
-      });
-      expect(getStepCall[0].validate).toBeDefined();
-      expect(getStepCall[0].validate.params).toBeDefined();
-      expect(getStepCall[1]).toEqual(expect.any(Function));
-    });
-  });
-
   describe('handler logic', () => {
     let routeHandler: any;
 

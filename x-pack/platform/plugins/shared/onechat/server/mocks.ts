@@ -16,11 +16,17 @@ const createSetupContractMock = (): jest.Mocked<OnechatPluginSetup> => {
     tools: {
       register: jest.fn(),
     },
+    attachments: {
+      registerType: jest.fn(),
+    },
   };
 };
 
 const createStartContractMock = (): jest.Mocked<OnechatPluginStart> => {
   return {
+    agents: {
+      runAgent: jest.fn(),
+    },
     tools: {
       execute: jest.fn(),
       getRegistry: jest.fn().mockImplementation(() => createToolRegistryMock()),

@@ -10,9 +10,8 @@ import { registerConnectorTypes } from '..';
 import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
-import { MAX_ADDITIONAL_FIELDS_LENGTH } from '../../../common/servicenow/constants';
-
-const SERVICENOW_SIR_CONNECTOR_TYPE_ID = '.servicenow-sir';
+import { MAX_ADDITIONAL_FIELDS_LENGTH } from '@kbn/connector-schemas/servicenow/constants';
+import { CONNECTOR_ID } from '@kbn/connector-schemas/servicenow_sir/constants';
 let connectorTypeRegistry: TypeRegistry<ConnectorTypeModel>;
 
 beforeAll(() => {
@@ -22,20 +21,20 @@ beforeAll(() => {
 });
 
 describe('connectorTypeRegistry.get() works', () => {
-  test(`${SERVICENOW_SIR_CONNECTOR_TYPE_ID}: connector type static data is as expected`, () => {
-    const connectorTypeModel = connectorTypeRegistry.get(SERVICENOW_SIR_CONNECTOR_TYPE_ID);
-    expect(connectorTypeModel.id).toEqual(SERVICENOW_SIR_CONNECTOR_TYPE_ID);
+  test(`${CONNECTOR_ID}: connector type static data is as expected`, () => {
+    const connectorTypeModel = connectorTypeRegistry.get(CONNECTOR_ID);
+    expect(connectorTypeModel.id).toEqual(CONNECTOR_ID);
   });
 });
 
 describe('servicenow action params validation', () => {
-  test(`${SERVICENOW_SIR_CONNECTOR_TYPE_ID}: action params validation succeeds when action params is valid`, async () => {
-    const connectorTypeModel = connectorTypeRegistry.get(SERVICENOW_SIR_CONNECTOR_TYPE_ID);
+  test(`${CONNECTOR_ID}: action params validation succeeds when action params is valid`, async () => {
+    const connectorTypeModel = connectorTypeRegistry.get(CONNECTOR_ID);
     const actionParams = {
       subActionParams: { incident: { short_description: 'some title {{test}}' }, comments: [] },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         ['subActionParams.incident.short_description']: [],
         ['subActionParams.incident.additional_fields']: [],
@@ -43,13 +42,13 @@ describe('servicenow action params validation', () => {
     });
   });
 
-  test(`${SERVICENOW_SIR_CONNECTOR_TYPE_ID}: params validation fails when short_description is not valid`, async () => {
-    const connectorTypeModel = connectorTypeRegistry.get(SERVICENOW_SIR_CONNECTOR_TYPE_ID);
+  test(`${CONNECTOR_ID}: params validation fails when short_description is not valid`, async () => {
+    const connectorTypeModel = connectorTypeRegistry.get(CONNECTOR_ID);
     const actionParams = {
       subActionParams: { incident: { short_description: '' }, comments: [] },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         ['subActionParams.incident.short_description']: ['Short description is required.'],
         ['subActionParams.incident.additional_fields']: [],
@@ -58,14 +57,14 @@ describe('servicenow action params validation', () => {
   });
 
   test('params validation fails when additional_fields is not valid JSON', async () => {
-    const connectorTypeModel = connectorTypeRegistry.get(SERVICENOW_SIR_CONNECTOR_TYPE_ID);
+    const connectorTypeModel = connectorTypeRegistry.get(CONNECTOR_ID);
     const actionParams = {
       subActionParams: {
         incident: { short_description: 'some title', additional_fields: 'invalid json' },
       },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'subActionParams.incident.short_description': [],
         'subActionParams.incident.additional_fields': ['Invalid JSON.'],
@@ -81,14 +80,14 @@ describe('servicenow action params validation', () => {
       longJSON[`key${i}`] = 'value';
     }
 
-    const connectorTypeModel = connectorTypeRegistry.get(SERVICENOW_SIR_CONNECTOR_TYPE_ID);
+    const connectorTypeModel = connectorTypeRegistry.get(CONNECTOR_ID);
     const actionParams = {
       subActionParams: {
         incident: { short_description: 'some title', additional_fields: JSON.stringify(longJSON) },
       },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'subActionParams.incident.short_description': [],
         ['subActionParams.incident.additional_fields']: [

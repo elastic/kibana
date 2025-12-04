@@ -127,8 +127,8 @@ class DocumentationService {
     this.mappingTypesRemoval = links.elasticsearch.mappingTypesRemoval;
     this.percolate = links.query.percolate;
     this.runtimeFields = links.runtimeFields.overview;
-    this.indicesComponentTemplate = links.apis.putComponentTemplate;
-    this.bulkIndexAlias = links.apis.bulkIndexAlias;
+    this.indicesComponentTemplate = links.indexManagement.componentTemplate;
+    this.bulkIndexAlias = links.indexManagement.indexAlias;
     this.indexStats = links.apis.indexStats;
     this.bulkApi = links.enterpriseSearch.bulkApi;
     this.updateExistingDS = links.elasticsearch.tutorialUpdateExistingDataStream;

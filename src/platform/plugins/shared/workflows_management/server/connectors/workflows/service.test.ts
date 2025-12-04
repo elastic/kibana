@@ -80,7 +80,20 @@ describe('Workflows Service', () => {
       const params = {
         workflowId: 'test-workflow-id',
         spaceId: 'default',
-        inputs: { test: 'data' },
+        inputs: {
+          event: {
+            alerts: [],
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: [],
+              consumer: 'test',
+              producer: 'test',
+              ruleTypeId: 'test',
+            },
+            spaceId: 'default',
+          },
+        },
       };
 
       const result = await service.runWorkflow(params);
@@ -93,14 +106,27 @@ describe('Workflows Service', () => {
       expect(mockWorkflowService).toHaveBeenCalledWith(
         'test-workflow-id',
         'default',
-        { test: 'data' },
+        {
+          event: {
+            alerts: [],
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: [],
+              consumer: 'test',
+              producer: 'test',
+              ruleTypeId: 'test',
+            },
+            spaceId: 'default',
+          },
+        },
         mockRequest
       );
 
-      expect(mockLogger.info).toHaveBeenCalledWith(
+      expect(mockLogger.debug).toHaveBeenCalledWith(
         'Attempting to run workflow test-workflow-id via internal service'
       );
-      expect(mockLogger.info).toHaveBeenCalledWith(
+      expect(mockLogger.debug).toHaveBeenCalledWith(
         'Successfully started workflow test-workflow-id, run ID: workflow-run-123'
       );
     });
@@ -117,14 +143,27 @@ describe('Workflows Service', () => {
       const params = {
         workflowId: 'test-workflow-id',
         spaceId: 'default',
-        inputs: { test: 'data' },
+        inputs: {
+          event: {
+            alerts: [],
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: [],
+              consumer: 'test',
+              producer: 'test',
+              ruleTypeId: 'test',
+            },
+            spaceId: 'default',
+          },
+        },
       };
 
       await expect(service.runWorkflow(params)).rejects.toThrow(
         'Workflows service not available. This connector requires workflows management plugin to be enabled.'
       );
 
-      expect(mockLogger.info).toHaveBeenCalledWith(
+      expect(mockLogger.debug).toHaveBeenCalledWith(
         'Attempting to run workflow test-workflow-id via internal service'
       );
     });
@@ -146,7 +185,20 @@ describe('Workflows Service', () => {
       const params = {
         workflowId: 'test-workflow-id',
         spaceId: 'default',
-        inputs: { test: 'data' },
+        inputs: {
+          event: {
+            alerts: [],
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: [],
+              consumer: 'test',
+              producer: 'test',
+              ruleTypeId: 'test',
+            },
+            spaceId: 'default',
+          },
+        },
       };
 
       await expect(service.runWorkflow(params)).rejects.toThrow(
@@ -173,7 +225,20 @@ describe('Workflows Service', () => {
       const params = {
         workflowId: 'test-workflow-id',
         spaceId: 'default',
-        inputs: { test: 'data' },
+        inputs: {
+          event: {
+            alerts: [],
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: [],
+              consumer: 'test',
+              producer: 'test',
+              ruleTypeId: 'test',
+            },
+            spaceId: 'default',
+          },
+        },
       };
 
       await expect(service.runWorkflow(params)).rejects.toThrow(
@@ -198,6 +263,20 @@ describe('Workflows Service', () => {
       const params = {
         workflowId: 'test-workflow-id',
         spaceId: 'default',
+        inputs: {
+          event: {
+            alerts: [],
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: [],
+              consumer: 'test',
+              producer: 'test',
+              ruleTypeId: 'test',
+            },
+            spaceId: 'default',
+          },
+        },
       };
 
       const result = await service.runWorkflow(params);
@@ -210,7 +289,20 @@ describe('Workflows Service', () => {
       expect(mockWorkflowService).toHaveBeenCalledWith(
         'test-workflow-id',
         'default',
-        {},
+        {
+          event: {
+            alerts: [],
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: [],
+              consumer: 'test',
+              producer: 'test',
+              ruleTypeId: 'test',
+            },
+            spaceId: 'default',
+          },
+        },
         mockRequest
       );
     });

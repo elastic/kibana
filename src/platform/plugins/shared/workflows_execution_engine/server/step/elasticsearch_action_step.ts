@@ -15,7 +15,7 @@ import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
-import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
+import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 // Extend BaseStep for elasticsearch-specific properties
 export interface ElasticsearchActionStep extends BaseStep {
@@ -77,7 +77,7 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
       const stepType = (this.step as any).configuration?.type || this.step.type;
       const stepWith = withInputs || this.step.with || (this.step as any).configuration?.with;
 
-      this.workflowLogger.logError(`Elasticsearch action failed: ${stepType}`, error as Error, {
+      this.workflowLogger.logError(`Elasticsearch action failed: ${stepType}`, error, {
         event: { action: 'elasticsearch-action', outcome: 'failure' },
         tags: ['elasticsearch', 'internal-action', 'error'],
         labels: {
@@ -102,8 +102,8 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
       return esClient.transport.request({ method, path, body });
     } else if (stepType === 'elasticsearch.request') {
       // Special case: elasticsearch.request type uses raw API format at top level
-      const { method = 'GET', path, body } = params;
-      return esClient.transport.request({ method, path, body });
+      const { method = 'GET', path, body, headers } = params;
+      return esClient.transport.request({ method, path, body }, headers ? { headers } : {});
     } else {
       // Use generated connector definitions to determine method and path (covers all 568+ ES APIs)
       const {

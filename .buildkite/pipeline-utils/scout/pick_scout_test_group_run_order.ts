@@ -1,0 +1,86 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import Fs from 'fs';
+import { BuildkiteClient, type BuildkiteStep } from '../buildkite';
+import { collectEnvFromLabels } from '../pr_labels';
+import { expandAgentQueue } from '../agent_images';
+import { getRequiredEnv } from '#pipeline-utils';
+
+interface ScoutTestDiscoveryConfig {
+  group: string;
+  path: string;
+  usesParallelWorkers: boolean;
+  configs: string[];
+  type: 'plugin' | 'package';
+}
+
+// Collect environment variables to pass through to test execution steps
+const scoutExtraEnv: Record<string, string> = {};
+if (process.env.SERVERLESS_TESTS_ONLY) {
+  scoutExtraEnv.SERVERLESS_TESTS_ONLY = process.env.SERVERLESS_TESTS_ONLY;
+}
+
+export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
+  const bk = new BuildkiteClient();
+  const envFromlabels: Record<string, string> = collectEnvFromLabels();
+
+  if (!Fs.existsSync(scoutConfigsPath)) {
+    throw new Error(`Scout configs file not found at ${scoutConfigsPath}`);
+  }
+
+  const rawScoutConfigs = JSON.parse(Fs.readFileSync(scoutConfigsPath, 'utf-8')) as Record<
+    string,
+    ScoutTestDiscoveryConfig
+  >;
+  const pluginsOrPackagesWithScoutTests: string[] = Object.keys(rawScoutConfigs);
+
+  if (pluginsOrPackagesWithScoutTests.length === 0) {
+    // no scout configs found, nothing to need to upload steps
+    return;
+  }
+
+  const scoutCiRunGroups = pluginsOrPackagesWithScoutTests.map((name) => ({
+    label: `Scout: [ ${rawScoutConfigs[name].group} / ${name} ] ${rawScoutConfigs[name].type}`,
+    key: name,
+    agents: expandAgentQueue(rawScoutConfigs[name].usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
+    group: rawScoutConfigs[name].group,
+  }));
+
+  // upload the step definitions to Buildkite
+  bk.uploadSteps(
+    [
+      {
+        group: 'Scout Configs',
+        key: 'scout-configs',
+        depends_on: ['build_scout_tests'],
+        steps: scoutCiRunGroups.map(
+          ({ label, key, group, agents }): BuildkiteStep => ({
+            label,
+            command: getRequiredEnv('SCOUT_CONFIGS_SCRIPT'),
+            timeout_in_minutes: 60,
+            agents,
+            env: {
+              SCOUT_CONFIG_GROUP_KEY: key,
+              SCOUT_CONFIG_GROUP_TYPE: group,
+              ...envFromlabels,
+              ...scoutExtraEnv,
+            },
+            retry: {
+              automatic: [
+                { exit_status: '10', limit: 1 },
+                { exit_status: '*', limit: 3 },
+              ],
+            },
+          })
+        ),
+      },
+    ].flat()
+  );
+}

@@ -21,8 +21,12 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
+  const common = getPageObject('common');
 
   describe('navigation', function () {
+    // failsOnMKI, see https://github.com/elastic/kibana/issues/244961
+    this.tags(['failsOnMKI']);
+
     before(async () => {
       await esArchiver.load(archiveEmptyIndex);
       await svlCommonPage.loginWithRole('admin');
@@ -75,7 +79,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         },
         {
           link: { deepLinkId: 'searchPlayground' },
-          breadcrumbs: ['Build', 'Playground'],
+          breadcrumbs: ['Playground'],
           pageTestSubject: 'playgroundsListPage',
         },
         {
@@ -185,6 +189,12 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.sidenav.tour.expectHidden();
       await browser.refresh();
       await solutionNavigation.sidenav.tour.expectHidden();
+    });
+
+    it('opens panel on legacy management landing page', async () => {
+      await common.navigateToApp('management');
+      await testSubjects.exists('cards-navigation-page');
+      await solutionNavigation.sidenav.expectPanelExists('admin_and_settings');
     });
   });
 }

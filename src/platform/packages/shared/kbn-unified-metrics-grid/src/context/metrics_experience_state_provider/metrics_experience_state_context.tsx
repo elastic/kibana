@@ -9,12 +9,13 @@
 
 import React, { useCallback } from 'react';
 import { createContext } from 'react';
+import type { Dimension } from '@kbn/metrics-experience-plugin/common/types';
 import { type MetricsExperienceRestorableState, useRestorableState } from '../../restorable_state';
 import { FIELD_VALUE_SEPARATOR } from '../../common/constants';
 
 export interface MetricsExperienceStateContextValue extends MetricsExperienceRestorableState {
   onPageChange: (value: number) => void;
-  onDimensionsChange: (value: string[]) => void;
+  onDimensionsChange: (value: Dimension[]) => void;
   onValuesChange: (value: string[]) => void;
   onSearchTermChange: (value: string) => void;
   onToggleFullscreen: () => void;
@@ -31,19 +32,26 @@ export function MetricsExperienceStateProvider({ children }: { children: React.R
   const [isFullscreen, setIsFullscreen] = useRestorableState('isFullscreen', false);
 
   const onDimensionsChange = useCallback(
-    (nextDimensions: string[]) => {
+    (nextDimensions: Dimension[]) => {
+      setCurrentPage(0);
       setDimensions(nextDimensions);
-      const filteredValues =
-        nextDimensions.length === 0
-          ? []
-          : valueFilters.filter((v) => nextDimensions.includes(v.split(FIELD_VALUE_SEPARATOR)[0]));
-      setValueFilters(filteredValues);
+      setValueFilters((prevValueFilters) => {
+        if (nextDimensions.length === 0) {
+          return [];
+        }
+        const dimensionNames = new Set(nextDimensions.map((d) => d.name));
+        return prevValueFilters.filter((v) =>
+          dimensionNames.has(v.split(FIELD_VALUE_SEPARATOR)[0])
+        );
+      });
     },
-    [valueFilters, setValueFilters, setDimensions]
+    [setValueFilters, setCurrentPage, setDimensions]
   );
 
   const onValuesChange = useCallback(
-    (values: string[]) => setValueFilters(values),
+    (values: string[]) => {
+      setValueFilters(values);
+    },
     [setValueFilters]
   );
 
@@ -51,14 +59,15 @@ export function MetricsExperienceStateProvider({ children }: { children: React.R
 
   const onSearchTermChange = useCallback(
     (term: string) => {
+      setCurrentPage(0);
       setSearchTerm(term);
     },
-    [setSearchTerm]
+    [setSearchTerm, setCurrentPage]
   );
 
   const onToggleFullscreen = useCallback(() => {
-    setIsFullscreen(!isFullscreen);
-  }, [isFullscreen, setIsFullscreen]);
+    setIsFullscreen((prev) => !prev);
+  }, [setIsFullscreen]);
 
   return (
     <MetricsExperienceStateContext.Provider

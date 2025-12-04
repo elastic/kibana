@@ -33,7 +33,12 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
           all: [],
           read: [],
         },
-        ui: [uiPrivileges.show, uiPrivileges.showManagement],
+        ui: [
+          uiPrivileges.show,
+          uiPrivileges.showManagement,
+          uiPrivileges.manageTools,
+          uiPrivileges.manageAgents,
+        ],
       },
       read: {
         app: ['kibana', ONECHAT_APP_ID],

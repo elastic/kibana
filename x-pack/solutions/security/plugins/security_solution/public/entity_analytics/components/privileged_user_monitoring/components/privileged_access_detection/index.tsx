@@ -61,9 +61,11 @@ export const PrivilegedAccessDetectionsPanel: React.FC<{ spaceId: string }> = ({
     padInstallationStatus?.ml_module_setup_status === 'complete';
 
   return (
+    // @ts-expect-error upgrade typescript v5.9.3
     <>
       {padInstallationStatusError && (
         <EuiCallOut
+          announceOnMount
           title={i18n.translate(
             'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedAccessDetection.errorStatus',
             {

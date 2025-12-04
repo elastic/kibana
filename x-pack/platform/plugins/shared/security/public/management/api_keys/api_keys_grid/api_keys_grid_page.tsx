@@ -319,6 +319,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
             {canManageOwnApiKeys && !canManageApiKeys ? (
               <>
                 <EuiCallOut
+                  announceOnMount
                   title={
                     <FormattedMessage
                       id="xpack.security.management.apiKeys.table.manageOwnKeysWarning"
@@ -342,9 +343,8 @@ export const APIKeysGridPage: FunctionComponent = () => {
                   query={tableState.query}
                   queryFilters={tableState.filters}
                   onDelete={(apiKeysToDelete) =>
-                    invalidateApiKeyPrompt(
-                      apiKeysToDelete.map(({ name, id }) => ({ name, id })),
-                      () => queryApiKeysAndAggregations(tableState)
+                    invalidateApiKeyPrompt(apiKeysToDelete, () =>
+                      queryApiKeysAndAggregations(tableState)
                     )
                   }
                   currentUser={currentUser}

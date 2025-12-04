@@ -7,9 +7,12 @@
 import { niceTimeFormatter } from '@elastic/charts';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { StreamQueryKql, Feature } from '@kbn/streams-schema';
-import type { Streams } from '@kbn/streams-schema';
+import type { Streams, StreamQueryKql, Feature } from '@kbn/streams-schema';
+import type { TimeRange } from '@kbn/es-query';
+import { isEqual } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
+import { StreamFeaturesFlyout } from '../stream_detail_features/stream_features/stream_features_flyout';
+import { useStreamFeatures } from '../stream_detail_features/stream_features/hooks/use_stream_features';
 import { useFilteredSigEvents } from './hooks/use_filtered_sig_events';
 import { useKibana } from '../../hooks/use_kibana';
 import { EditSignificantEventFlyout } from './edit_significant_event_flyout';
@@ -23,8 +26,6 @@ import { NoSignificantEventsEmptyState } from './empty_state/empty_state';
 import { SignificantEventsTable } from './significant_events_table';
 import { NO_FEATURE } from './add_significant_event_flyout/utils/default_query';
 import { NoFeaturesEmptyState } from './empty_state/no_features';
-import { StreamFeaturesFlyout } from '../data_management/stream_detail_management/stream_features/stream_features_flyout';
-import { useStreamFeatures } from '../data_management/stream_detail_management/stream_features/hooks/use_stream_features';
 import { useStreamFeaturesApi } from '../../hooks/use_stream_features_api';
 import { useAIFeatures } from './add_significant_event_flyout/generated_flow_form/use_ai_features';
 import {
@@ -37,17 +38,14 @@ interface Props {
 }
 
 export function StreamDetailSignificantEventsView({ definition }: Props) {
-  const {
-    timeState: { start, end },
-    setTime,
-  } = useTimefilter();
+  const { timeState, setTime, refresh } = useTimefilter();
   const { unifiedSearch } = useKibana().dependencies.start;
 
   const aiFeatures = useAIFeatures();
 
   const xFormatter = useMemo(() => {
-    return niceTimeFormatter([start, end]);
-  }, [start, end]);
+    return niceTimeFormatter([timeState.start, timeState.end]);
+  }, [timeState.start, timeState.end]);
 
   const { features, refreshFeatures, featuresLoading } = useStreamFeatures(definition.stream);
   const { identifyFeatures, abort } = useStreamFeaturesApi(definition.stream);
@@ -57,14 +55,14 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
 
   const significantEventsFetchState = useFetchSignificantEvents({
     name: definition.stream.name,
-    start,
-    end,
+    start: timeState.start,
+    end: timeState.end,
   });
 
   const { removeQuery } = useSignificantEventsApi({
     name: definition.stream.name,
-    start,
-    end,
+    start: timeState.start,
+    end: timeState.end,
   });
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
   const [initialFlow, setInitialFlow] = useState<Flow | undefined>('ai');
@@ -72,6 +70,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   const [selectedFeatures, setSelectedFeatures] = useState<Feature[]>([]);
   const [queryToEdit, setQueryToEdit] = useState<StreamQueryKql | undefined>();
 
+  const [dateRange, setDateRange] = useState<TimeRange | undefined>(undefined);
   const [query, setQuery] = useState<string>('');
 
   const { significantEvents, combinedQuery } = useFilteredSigEvents(
@@ -102,7 +101,10 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     }
   }, [features]);
 
-  if (featuresLoading || significantEventsFetchState.loading) {
+  if (
+    !significantEventsFetchState.value &&
+    (featuresLoading || significantEventsFetchState.loading)
+  ) {
     return <LoadingPanel size="xxl" />;
   }
 
@@ -203,17 +205,18 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
                 submitButtonStyle="iconOnly"
                 displayStyle="inPage"
                 disableQueryLanguageSwitcher
-                onRefresh={(q) => {
-                  significantEventsFetchState.refresh();
-                  setTime(q.dateRange);
-                }}
                 onQuerySubmit={(queryN) => {
                   setQuery(String(queryN.query?.query ?? ''));
-                  setTime(queryN.dateRange);
+
+                  if (isEqual(queryN.dateRange, dateRange)) {
+                    refresh();
+                  } else {
+                    setTime(queryN.dateRange);
+                    setDateRange(queryN.dateRange);
+                  }
                 }}
                 onQueryChange={(queryN) => {
                   setQuery(String(queryN.query?.query ?? ''));
-                  setTime(queryN.dateRange);
                 }}
                 query={{
                   query,
@@ -231,6 +234,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
                   setQueryToEdit(undefined);
                 }}
                 iconType="plus"
+                data-test-subj="significant_events_existing_queries_open_flyout_button"
               >
                 {i18n.translate('xpack.streams.significantEvents.addSignificantEventButton', {
                   defaultMessage: 'Significant events',

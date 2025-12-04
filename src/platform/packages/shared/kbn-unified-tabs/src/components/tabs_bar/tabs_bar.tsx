@@ -11,6 +11,7 @@ import type { KeyboardEvent } from 'react';
 import React, {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
   forwardRef,
@@ -34,7 +35,7 @@ import type { TabItem, TabsServices, TabsEBTEvent } from '../../types';
 import { TabsEventName } from '../../types';
 import { getTabIdAttribute } from '../../utils/get_tab_attributes';
 import { useResponsiveTabs } from '../../hooks/use_responsive_tabs';
-import { TabsBarWithBackground } from '../tabs_visual_glue_to_header/tabs_bar_with_background';
+import { TabsBarWithBackground } from '../tabs_visual_glue_to_app_container/tabs_bar_with_background';
 import { TabsBarMenu, type TabsBarMenuProps } from '../tabs_bar_menu';
 import { TabsEventDataKeys } from '../../event_data_keys';
 import { OptionalDraggable } from './optional_draggable';
@@ -62,7 +63,6 @@ export type TabsBarProps = Pick<
   | 'tabContentId'
   | 'disableCloseButton'
   | 'disableInlineLabelEditing'
-  | 'disablePreview'
   | 'disableDragAndDrop'
 > & {
   items: TabItem[];
@@ -107,7 +107,6 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
       customNewTabButton,
       disableCloseButton = false,
       disableInlineLabelEditing = false,
-      disablePreview = false,
       disableDragAndDrop = false,
       disableTabsBarMenu = false,
     },
@@ -266,6 +265,11 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
       [items, selectedItem, selectAndMoveFocusToItemIndex, onClose, emitOnKeyUsedEvent]
     );
 
+    const ariaOwnsValue = useMemo(
+      () => items.map((item) => getTabIdAttribute(item)).join(' '),
+      [items]
+    );
+
     const mainTabsBarContent = (
       <EuiFlexGroup
         responsive={false}
@@ -278,7 +282,13 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
         <EuiFlexItem ref={setTabsContainerWithPlusElement} grow css={growingFlexItemCss}>
           <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false} css={growingFlexItemCss}>
-              <div ref={setTabsContainerElement} role="tablist" css={tabsContainerCss}>
+              <div
+                aria-orientation="horizontal"
+                aria-owns={ariaOwnsValue}
+                ref={setTabsContainerElement}
+                role="tablist"
+                css={tabsContainerCss}
+              >
                 {/*
                   OptionalDroppable provides the drag-drop context wrapper.
                   When disableDragAndDrop=false, it sets up EuiDragDropContext and EuiDroppable.
@@ -316,7 +326,6 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
                           onClose={items.length > 1 ? onClose : undefined} // prevents closing the last tab
                           disableCloseButton={disableCloseButton}
                           disableInlineLabelEditing={disableInlineLabelEditing}
-                          disablePreview={disablePreview}
                           disableDragAndDrop={disableDragAndDrop}
                         />
                       )}

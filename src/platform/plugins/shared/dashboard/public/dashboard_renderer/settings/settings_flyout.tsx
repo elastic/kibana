@@ -32,9 +32,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
-import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
-import { savedObjectsTaggingService } from '../../services/kibana_services';
+import { cpsService, savedObjectsTaggingService } from '../../services/kibana_services';
 import type { DashboardSettings } from '../../dashboard_api/settings_manager';
+import { checkForDuplicateDashboardTitle } from '../../dashboard_client';
 
 interface DashboardSettingsProps {
   onClose: () => void;
@@ -62,15 +62,13 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
 
   const onApply = async () => {
     setIsApplying(true);
-    const validTitle = await getDashboardContentManagementService().checkForDuplicateDashboardTitle(
-      {
-        title: localSettings.title,
-        copyOnSave: false,
-        lastSavedTitle: dashboardApi.title$.value ?? '',
-        onTitleDuplicate,
-        isTitleDuplicateConfirmed,
-      }
-    );
+    const validTitle = await checkForDuplicateDashboardTitle({
+      title: localSettings.title,
+      copyOnSave: false,
+      lastSavedTitle: dashboardApi.title$.value ?? '',
+      onTitleDuplicate,
+      isTitleDuplicateConfirmed,
+    });
 
     if (!isMounted()) return;
 
@@ -126,19 +124,10 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
     if (!savedObjectsTaggingApi) return;
 
     return (
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="dashboard.embeddableApi.showSettings.flyout.form.tagsFormRowLabel"
-            defaultMessage="Tags"
-          />
-        }
-      >
-        <savedObjectsTaggingApi.ui.components.TagSelector
-          selected={localSettings.tags ?? []}
-          onTagsSelected={(selectedTags) => updateDashboardSetting({ tags: selectedTags })}
-        />
-      </EuiFormRow>
+      <savedObjectsTaggingApi.ui.components.SavedObjectSaveModalTagSelector
+        initialSelection={localSettings.tags ?? []}
+        onTagsSelected={(selectedTags) => updateDashboardSetting({ tags: selectedTags })}
+      />
     );
   };
 
@@ -231,6 +220,30 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
               }
             />
           </EuiFormRow>
+          {cpsService?.cpsManager && (
+            <EuiFormRow
+              helpText={
+                <FormattedMessage
+                  id="dashboard.embeddableApi.showSettings.flyout.form.storeProjectRoutingWithDashboardFormRowHelpText"
+                  defaultMessage="This changes the project routing to the currently selected project each time this dashboard is loaded."
+                />
+              }
+            >
+              <EuiSwitch
+                data-test-subj="storeProjectRoutingWithDashboard"
+                checked={localSettings.projectRoutingRestore}
+                onChange={(event) =>
+                  updateDashboardSetting({ projectRoutingRestore: event.target.checked })
+                }
+                label={
+                  <FormattedMessage
+                    id="dashboard.embeddableApi.showSettings.flyout.form.storeProjectRoutingWithDashboardFormRowLabel"
+                    defaultMessage="Store project routing with dashboard"
+                  />
+                }
+              />
+            </EuiFormRow>
+          )}
           <EuiFormRow>
             <EuiSwitch
               label={i18n.translate(

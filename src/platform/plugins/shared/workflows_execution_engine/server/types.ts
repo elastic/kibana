@@ -18,6 +18,11 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type {
+  WorkflowsExtensionsServerPluginSetup,
+  WorkflowsExtensionsServerPluginStart,
+} from '@kbn/workflows-extensions/server';
+import type { IWorkflowEventLoggerService } from './workflow_event_logger';
 
 export interface ExecuteWorkflowResponse {
   workflowExecutionId: string;
@@ -30,28 +35,39 @@ export interface ExecuteWorkflowStepResponse {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkflowsExecutionEnginePluginSetup {}
 export interface WorkflowsExecutionEnginePluginStart {
-  executeWorkflow(
-    workflow: WorkflowExecutionEngineModel,
-    context: Record<string, any>,
-    request: KibanaRequest
-  ): Promise<ExecuteWorkflowResponse>;
-
-  executeWorkflowStep(
-    workflow: WorkflowExecutionEngineModel,
-    stepId: string,
-    contextOverride: Record<string, any>
-  ): Promise<ExecuteWorkflowStepResponse>;
-
-  cancelWorkflowExecution(workflowExecutionId: string, spaceId: string): Promise<void>;
+  executeWorkflow: ExecuteWorkflow;
+  executeWorkflowStep: ExecuteWorkflowStep;
+  cancelWorkflowExecution: CancelWorkflowExecution;
+  workflowEventLoggerService: IWorkflowEventLoggerService;
 }
 
 export interface WorkflowsExecutionEnginePluginSetupDeps {
   taskManager: TaskManagerSetupContract;
   cloud: CloudSetup;
+  workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
 }
 
 export interface WorkflowsExecutionEnginePluginStartDeps {
   taskManager: TaskManagerStartContract;
   actions: ActionsPluginStartContract;
   cloud: CloudStart;
+  workflowsExtensions: WorkflowsExtensionsServerPluginStart;
 }
+
+export type ExecuteWorkflow = (
+  workflow: WorkflowExecutionEngineModel,
+  context: Record<string, any>,
+  request: KibanaRequest
+) => Promise<ExecuteWorkflowResponse>;
+
+export type ExecuteWorkflowStep = (
+  workflow: WorkflowExecutionEngineModel,
+  stepId: string,
+  contextOverride: Record<string, any>,
+  request?: KibanaRequest
+) => Promise<ExecuteWorkflowStepResponse>;
+
+export type CancelWorkflowExecution = (
+  workflowExecutionId: string,
+  spaceId: string
+) => Promise<void>;

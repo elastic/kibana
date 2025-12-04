@@ -96,6 +96,9 @@ export const INTERNAL_CASE_OBSERVABLES_DELETE_URL =
 export const INTERNAL_CASE_FIND_USER_ACTIONS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/user_actions/_find` as const;
 export const INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL =
+  `${CASES_INTERNAL_URL}/case/attachments/_find_containing_all` as const;
+// TODO: below is an alias to INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL that should be removed in the next serverless development cycle
+export const INTERNAL_CASE_GET_CASES_BY_ALERTS_URL =
   `${CASES_INTERNAL_URL}/case/alerts/_find_containing_all` as const;
 export const INTERNAL_BULK_CREATE_CASE_OBSERVABLES_URL = `${CASES_INTERNAL_URL}/{case_id}/observables/_bulk_create`;
 
@@ -295,4 +298,6 @@ export const MAX_CUSTOM_OBSERVABLE_TYPES = 10;
 /**
  * EBT events
  */
-export const CASE_PAGE_VIEW_EVENT_TYPE = 'case_page_view';
+export const CASE_PAGE_VIEW_EVENT_TYPE = 'case_page_view' as const;
+
+export const CASE_ATTACH_EVENTS_EVENT_TYPE = 'case_attach_events' as const;

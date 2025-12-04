@@ -1,0 +1,83 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { i18n } from '@kbn/i18n';
+import type { ConnectorSpec } from '@kbn/connector-specs';
+import type {
+  ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
+  ActionTypeExecutorResult as ConnectorTypeExecutorResult,
+} from '../../types';
+import type { ExecutorParams } from '../../sub_action_framework/types';
+import type { GetAxiosInstanceWithAuthFn } from '../get_axios_instance';
+
+type RecordUnknown = Record<string, unknown>;
+
+function errorResultUnexpectedError(actionId: string): ConnectorTypeExecutorResult<void> {
+  const errMessage = i18n.translate('xpack.actions.singleFileConnector.unexpectedErrorMessage', {
+    defaultMessage: 'error calling connector, unexpected error',
+  });
+  return {
+    status: 'error',
+    message: errMessage,
+    actionId,
+  };
+}
+
+export const generateExecutorFunction = ({
+  actions,
+  getAxiosInstanceWithAuth,
+}: {
+  actions: ConnectorSpec['actions'];
+  getAxiosInstanceWithAuth: GetAxiosInstanceWithAuthFn;
+}) =>
+  async function (
+    execOptions: ConnectorTypeExecutorOptions<RecordUnknown, RecordUnknown, RecordUnknown>
+  ): Promise<ConnectorTypeExecutorResult<unknown>> {
+    const {
+      actionId: connectorId,
+      config,
+      connectorTokenClient,
+      params,
+      secrets,
+      logger,
+    } = execOptions;
+    const { subAction, subActionParams } = params as ExecutorParams;
+
+    const axiosInstance = await getAxiosInstanceWithAuth({
+      connectorId,
+      secrets,
+      connectorTokenClient,
+    });
+
+    if (!actions[subAction]) {
+      const errorMessage = `[Action][ExternalService] Unsupported subAction type ${subAction}.`;
+      logger.error(errorMessage);
+      throw new Error(errorMessage);
+    }
+
+    // TODO - we need to update ActionContext in the spec
+    const actionContext = {
+      log: logger,
+      client: axiosInstance,
+      secrets,
+      config,
+    };
+
+    try {
+      let data = {};
+      const res = await actions[subAction].handler(actionContext, subActionParams);
+
+      if (res != null) {
+        data = res;
+      }
+
+      return { status: 'ok', data, actionId: connectorId };
+    } catch (error) {
+      logger.error(`error on ${connectorId} event: ${error}`);
+      return errorResultUnexpectedError(connectorId);
+    }
+  };

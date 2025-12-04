@@ -49,7 +49,6 @@ export type {
 
 export {
   AlertHistoryDefaultIndexName,
-  ALERT_HISTORY_PREFIX,
   AlertHistoryDocumentTemplate,
   AlertHistoryEsIndexConnectorId,
   ActionConnectorMode,
@@ -76,6 +75,8 @@ export {
   TextFieldWithMessageVariables,
   SectionLoading,
 } from './application/components';
+
+export { AddMessageVariablesOptional } from './application/components/add_message_variables_optional';
 
 export { AlertProvidedActionVariables } from '@kbn/alerts-ui-shared';
 export { templateActionVariable, updateActionConnector, executeAction } from './application/lib';

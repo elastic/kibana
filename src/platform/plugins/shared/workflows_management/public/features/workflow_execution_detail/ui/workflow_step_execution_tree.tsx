@@ -15,63 +15,99 @@ import type {
 } from '@elastic/eui';
 import {
   EuiEmptyPrompt,
+  EuiHorizontalRule,
   EuiIcon,
   EuiLoadingSpinner,
   EuiText,
   EuiTreeView,
   logicalCSS,
+  transparentize,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
+
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { WorkflowExecutionDto, WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
-import { ExecutionStatus, isDangerousStatus, isInProgressStatus } from '@kbn/workflows';
+import type {
+  ExecutionStatus,
+  WorkflowExecutionDto,
+  WorkflowStepExecutionDto,
+  WorkflowYaml,
+} from '@kbn/workflows';
+import { isDangerousStatus, isInProgressStatus, isTerminalStatus } from '@kbn/workflows';
 import type { StepExecutionTreeItem } from './build_step_executions_tree';
 import { buildStepExecutionsTree } from './build_step_executions_tree';
 import { StepExecutionTreeItemLabel } from './step_execution_tree_item_label';
-import { getExecutionStatusColors } from '../../../shared/ui/status_badge';
+import {
+  buildOverviewStepExecutionFromContext,
+  buildTriggerStepExecutionFromContext,
+} from './workflow_pseudo_step_context';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
+
+const TRIGGER_BOLT_ICON_SVG =
+  'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path fill="%23535966" d="M7.04 13.274a.5.5 0 1 0 .892.453l3.014-5.931a.5.5 0 0 0-.445-.727H5.316L8.03 1.727a.5.5 0 1 0-.892-.453L4.055 7.343a.5.5 0 0 0 .446.726h5.185L7.04 13.274Z"/></svg>';
 
 function convertTreeToEuiTreeViewItems(
   treeItems: StepExecutionTreeItem[],
   stepExecutionMap: Map<string, WorkflowStepExecutionDto>,
   euiTheme: EuiThemeComputed,
   selectedId: string | null,
-  onClickHandler: (stepExecutionId: string) => void
+  onSelectStepExecution: (stepExecutionId: string) => void
 ): EuiTreeViewProps['items'] {
-  const onClickFn = onClickHandler;
   return treeItems.map((item) => {
     const stepExecution = stepExecutionMap.get(item.stepExecutionId ?? '');
-    const status = stepExecution?.status || null;
-    return {
-      ...item,
-      id: item.stepExecutionId ?? `${item.stepId}-${item.executionIndex}-no-step-execution`,
-      icon: <StepIcon stepType={item.stepType} executionStatus={status} />,
-      css:
-        status && isDangerousStatus(status)
-          ? css`
-              &,
-              &:active,
-              &:focus {
-                background-color: ${getExecutionStatusColors(euiTheme, status).backgroundColor};
-              }
+    const status = stepExecution?.status;
+    const selected = selectedId === stepExecution?.id;
 
-              &:hover {
-                background-color: ${euiTheme.colors.backgroundLightDanger};
-              }
-            `
-          : undefined,
+    const stepId = stepExecution?.stepId ?? item.stepId;
+    const stepType = stepExecution?.stepType ?? item.stepType;
+
+    const selectStepExecution: React.MouseEventHandler = (e) => {
+      // Prevent the click event from bubbling up to the tree view item so that the tree view item is not expanded/collapsed when selected
+      e.preventDefault();
+      e.stopPropagation();
+      if (stepExecution?.id) {
+        onSelectStepExecution(stepExecution.id);
+      }
+    };
+
+    // Check if this is a trigger pseudo-step
+    const isTriggerPseudoStep = stepType.startsWith('trigger_');
+
+    return {
+      id: item.stepExecutionId ?? `${item.stepId}-${item.executionIndex}-no-step-execution`,
+      css: [
+        getStatusCss({ status, selected }, euiTheme),
+        isTriggerPseudoStep &&
+          css`
+            .euiTreeView__arrowPlaceholder::before {
+              content: '';
+              display: inline-block;
+              width: 16px;
+              height: 16px;
+              background-image: url('${TRIGGER_BOLT_ICON_SVG}');
+              background-repeat: no-repeat;
+              background-position: center;
+              background-size: 12px 12px;
+            }
+          `,
+      ],
+      icon: (
+        <StepIcon
+          stepType={stepType}
+          executionStatus={status ?? null}
+          onClick={selectStepExecution}
+        />
+      ),
       label: (
         <StepExecutionTreeItemLabel
-          stepId={item.stepId}
+          stepId={stepId}
+          selected={selected}
           status={status}
-          executionIndex={item.executionIndex}
           executionTimeMs={stepExecution?.executionTimeMs ?? null}
-          stepType={item.stepType}
-          selected={selectedId === stepExecution?.id}
+          onClick={selectStepExecution}
         />
       ),
       children:
@@ -81,18 +117,19 @@ function convertTreeToEuiTreeViewItems(
               stepExecutionMap,
               euiTheme,
               selectedId,
-              onClickFn
+              onSelectStepExecution
             )
           : undefined,
       callback:
-        // TODO: for nodes with children, we don't want other onClick behavior besides expanding/collapsing
+        // collapse/expand the tree view item when the button is clicked
         () => {
           let toOpen = item.stepExecutionId;
           if (!toOpen && item.children.length) {
             toOpen = item.children[0].stepExecutionId;
           }
-          onClickFn(toOpen ?? '');
-          // string is expected by EuiTreeView for some reason
+          if (toOpen) {
+            onSelectStepExecution(toOpen);
+          }
           return toOpen ?? '';
         },
     };
@@ -102,7 +139,6 @@ function convertTreeToEuiTreeViewItems(
 export interface WorkflowStepExecutionTreeProps {
   execution: WorkflowExecutionDto | null;
   definition: WorkflowYaml | null;
-  isLoading: boolean;
   error: Error | null;
   onStepExecutionClick: (stepExecutionId: string) => void;
   selectedId: string | null;
@@ -111,7 +147,6 @@ export interface WorkflowStepExecutionTreeProps {
 const emptyPromptCommonProps: EuiEmptyPromptProps = { titleSize: 'xs', paddingSize: 's' };
 
 export const WorkflowStepExecutionTree = ({
-  isLoading,
   error,
   execution,
   definition,
@@ -121,7 +156,7 @@ export const WorkflowStepExecutionTree = ({
   const styles = useMemoCss(componentStyles);
   const { euiTheme } = useEuiTheme();
 
-  if (isLoading || !execution) {
+  if (!execution) {
     return (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
@@ -168,35 +203,62 @@ export const WorkflowStepExecutionTree = ({
       />
     );
   } else if (definition) {
-    const skeletonStepExecutions: WorkflowStepExecutionDto[] = definition.steps.map(
-      (step, index) => ({
-        stepId: step.name,
-        stepType: step.type,
-        status: ExecutionStatus.PENDING,
-        id: `${step.name}-${step.type}-${index}`,
-        scopeStack: [],
-        workflowRunId: '',
-        workflowId: '',
-        startedAt: '',
-        finishedAt: '',
-        children: [],
-        globalExecutionIndex: 0,
-        stepExecutionIndex: 0,
-        topologicalIndex: 0,
-      })
-    );
-    const stepExecutionMap = new Map<string, WorkflowStepExecutionDto>();
     const stepExecutionNameMap = new Map<string, WorkflowStepExecutionDto>();
+    const stepExecutionMap = new Map<string, WorkflowStepExecutionDto>();
+
     for (const stepExecution of execution.stepExecutions) {
       stepExecutionNameMap.set(stepExecution.stepId, stepExecution);
       stepExecutionMap.set(stepExecution.id, stepExecution);
     }
-    for (const skeletonStepExecution of skeletonStepExecutions) {
-      if (!stepExecutionNameMap.has(skeletonStepExecution.stepId)) {
-        stepExecutionMap.set(skeletonStepExecution.id, skeletonStepExecution);
+
+    if (!isTerminalStatus(execution.status)) {
+      definition.steps
+        .filter((step) => !stepExecutionNameMap.has(step.name)) // we put skeletons only for steps without execution
+        .filter((step) => !execution.stepId || step.name === execution.stepId) // we create skeletons only for the executed step and its children
+        .map((step, index) => ({
+          stepId: step.name,
+          stepType: step.type,
+          status: 'pending' as WorkflowStepExecutionDto['status'],
+          id: `${step.name}-${step.type}-${index}`,
+          scopeStack: [],
+          workflowRunId: '',
+          workflowId: '',
+          startedAt: '',
+          finishedAt: '',
+          children: [],
+          globalExecutionIndex: 0,
+          stepExecutionIndex: 0,
+          topologicalIndex: 0,
+        }))
+        .forEach((skeletonStepExecution) =>
+          stepExecutionMap.set(skeletonStepExecution.id, skeletonStepExecution)
+        );
+    }
+
+    const stepExecutionsTree = buildStepExecutionsTree(
+      Array.from(stepExecutionMap.values()),
+      execution.context,
+      execution.status
+    );
+
+    const overviewPseudoStep = stepExecutionsTree.find((item) => item.stepType === '__overview');
+    if (overviewPseudoStep) {
+      const executionOverview = buildOverviewStepExecutionFromContext(execution);
+      stepExecutionMap.set('__overview', executionOverview);
+    }
+
+    const triggerPseudoStep =
+      stepExecutionsTree.find((item) => item.stepType === '__trigger') ??
+      stepExecutionsTree.find((item) => item.stepType === '__inputs');
+
+    if (triggerPseudoStep && execution.context) {
+      const triggerExecution = buildTriggerStepExecutionFromContext(execution);
+      if (triggerExecution) {
+        stepExecutionMap.set(triggerExecution.id, triggerExecution);
+        triggerPseudoStep.stepExecutionId = triggerExecution.id;
+        triggerPseudoStep.stepType = triggerExecution.stepType ?? '';
       }
     }
-    const stepExecutionsTree = buildStepExecutionsTree(Array.from(stepExecutionMap.values()));
     const items: EuiTreeViewProps['items'] = convertTreeToEuiTreeViewItems(
       stepExecutionsTree,
       stepExecutionMap,
@@ -204,20 +266,51 @@ export const WorkflowStepExecutionTree = ({
       selectedId,
       onStepExecutionClick
     );
+
+    const overviewItem = items.find(
+      (item) => stepExecutionMap.get(item.id)?.stepType === '__overview'
+    );
+    const regularItems = items.filter(
+      (item) => stepExecutionMap.get(item.id)?.stepType !== '__overview'
+    );
+
     return (
       <>
         <div css={styles.treeViewContainer}>
-          <EuiTreeView
-            showExpansionArrows
-            expandByDefault
-            items={items}
-            aria-label={i18n.translate(
-              'workflows.WorkflowStepExecutionTree.workflowStepExecutionTreeAriaLabel',
-              {
-                defaultMessage: 'Workflow step execution tree',
-              }
-            )}
-          />
+          {overviewItem && (
+            <>
+              <EuiTreeView
+                showExpansionArrows
+                expandByDefault
+                items={[overviewItem]}
+                aria-label={i18n.translate(
+                  'workflows.WorkflowStepExecutionTree.overviewAriaLabel',
+                  {
+                    defaultMessage: 'Execution overview',
+                  }
+                )}
+              />
+              <EuiHorizontalRule
+                margin="none"
+                css={{ marginTop: euiTheme.size.xs, marginBottom: euiTheme.size.xs }}
+              />
+            </>
+          )}
+
+          {/* Regular steps */}
+          {regularItems.length > 0 && (
+            <EuiTreeView
+              showExpansionArrows
+              expandByDefault
+              items={regularItems}
+              aria-label={i18n.translate(
+                'workflows.WorkflowStepExecutionTree.workflowStepExecutionTreeAriaLabel',
+                {
+                  defaultMessage: 'Workflow step execution tree',
+                }
+              )}
+            />
+          )}
         </div>
       </>
     );
@@ -241,8 +334,9 @@ export const WorkflowStepExecutionTree = ({
 
 const componentStyles = {
   treeViewContainer: ({ euiTheme }: UseEuiTheme) => css`
-    overflow-y: auto;
-
+    & .euiTreeView__expansionArrow {
+      inline-size: 12px;
+    }
     & .euiTreeView__nodeLabel {
       flex-grow: 1;
       text-align: left;
@@ -291,4 +385,34 @@ const componentStyles = {
       }
     }
   `,
+};
+
+const getStatusCss = (
+  { status, selected }: { status?: ExecutionStatus; selected?: boolean },
+  euiTheme: EuiThemeComputed
+) => {
+  if (!status) {
+    return;
+  }
+  let background = euiTheme.colors.backgroundLightPrimary;
+  if (isDangerousStatus(status)) {
+    background = euiTheme.colors.backgroundBaseDanger;
+  }
+
+  if (selected) {
+    return css`
+      &,
+      &:active,
+      &:focus,
+      &:hover {
+        background-color: ${background};
+      }
+    `;
+  }
+
+  return css`
+    &:hover {
+      background-color: ${transparentize(background, 0.4)};
+    }
+  `;
 };

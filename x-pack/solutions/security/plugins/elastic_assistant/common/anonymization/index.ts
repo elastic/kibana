@@ -103,7 +103,19 @@ export const DEFAULT_ALLOW = [
   'Ransomware.files.path',
   'Ransomware.files.score',
   'Ransomware.version',
+  'resource.id',
+  'resource.name',
+  'resource.sub_type',
+  'resource.type',
+  'result.evaluation',
+  'rule.description',
   'rule.name',
+  'rule.section',
+  'rule.tags',
+  'rule.benchmark.name',
+  'rule.benchmark.id',
+  'rule.benchmark.rule_number',
+  'rule.benchmark.version',
   'rule.reference',
   'source.ip',
   'threat.framework',
@@ -145,6 +157,8 @@ export const DEFAULT_ALLOW_REPLACEMENT = [
   'host.name',
   'user.name',
   'user.target.name',
+  'resource.name',
+  'resource.id',
 ];
 
 export const getDefaultAnonymizationFields = (spaceId: string) => {

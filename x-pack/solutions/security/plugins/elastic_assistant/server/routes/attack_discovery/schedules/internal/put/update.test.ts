@@ -7,7 +7,7 @@
 
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { UpdateAttackDiscoverySchedulesInternalRequestBody } from '@kbn/elastic-assistant-common';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
 
 import { updateAttackDiscoverySchedulesInternalRoute } from './update';
 import { serverMock } from '../../../../../__mocks__/server';

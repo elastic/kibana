@@ -12,16 +12,16 @@ import { setupTestbed } from './__tests__/fixtures';
 import { fromCache } from './hover_cache';
 
 describe('getHoverItem() caching', () => {
-  test('caches function hover results by function name', async () => {
-    const statement = 'from a | eval round(numberField)';
-    const triggerString = 'round(numberField)';
+  test('caches function hover results by function name and param types', async () => {
+    const statement = 'from a | eval round(doubleField)';
+    const triggerString = 'round';
     const kit = setupTestbed(statement, triggerString);
 
     // Nothing in cache initially
-    expect(fromCache(triggerString)).toBeUndefined();
+    expect(fromCache('round:double')).toBeUndefined();
     const result1 = await getHoverItem(statement, kit.offset, kit.callbacks);
     // Now should be cached
-    expect(fromCache(triggerString)).toBeDefined();
+    expect(fromCache('round:double')).toBeDefined();
 
     // This retrieves from cache
     const result2 = await getHoverItem(statement, kit.offset, kit.callbacks);

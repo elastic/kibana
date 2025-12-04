@@ -7,7 +7,10 @@
 
 import { useState, useCallback } from 'react';
 import type { NewPackagePolicy, NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
-import type { PackagePolicyConfigRecord } from '@kbn/fleet-plugin/public/types';
+import type {
+  PackagePolicyConfigRecord,
+  PackagePolicyConfigRecordEntry,
+} from '@kbn/fleet-plugin/public/types';
 import type { UpdatePolicy } from '../../types';
 import type { CloudConnectorCredentials, AwsCloudConnectorCredentials } from '../types';
 import {
@@ -31,24 +34,53 @@ export interface UseCloudConnectorSetupReturn {
   updatePolicyWithExistingCredentials: (credentials: CloudConnectorCredentials) => void;
 }
 
+// Helper function to extract value from var entry (handles both string and secret reference)
+const extractVarValue = (
+  varEntry: PackagePolicyConfigRecordEntry | undefined
+): string | undefined => {
+  if (!varEntry?.value) {
+    return undefined;
+  }
+
+  // Handle string values directly
+  if (typeof varEntry.value === 'string') {
+    return varEntry.value;
+  }
+
+  // Handle secret reference objects
+  if (typeof varEntry.value === 'object' && 'id' in varEntry.value) {
+    return varEntry.value.id;
+  }
+
+  return undefined;
+};
+
 // Helper function to create initial credentials based on existing vars
 const createInitialCredentials = (vars: PackagePolicyConfigRecord): CloudConnectorCredentials => {
   if (isAzureCloudConnectorVars(vars, 'azure')) {
+    const azureCredentialsId =
+      extractVarValue(vars.azure_credentials_cloud_connector_id) ||
+      extractVarValue(vars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID]);
+
     return {
       tenantId:
-        vars.tenant_id?.value || vars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID]?.value,
+        extractVarValue(vars.tenant_id) ||
+        extractVarValue(vars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID]),
       clientId:
-        vars.client_id?.value || vars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID]?.value,
-      azure_credentials_cloud_connector_id:
-        vars.azure_credentials_cloud_connector_id?.value ||
-        vars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID]?.value,
+        extractVarValue(vars.client_id) ||
+        extractVarValue(vars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID]),
+      azure_credentials_cloud_connector_id: azureCredentialsId,
     };
   }
 
-  // Default to AWS credentials
+  // Default to AWS credentials (role_arn is a text var, external_id could be secret or text)
   return {
-    roleArn: vars.role_arn?.value || vars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.ROLE_ARN]?.value,
-    externalId: vars.external_id?.value || vars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.EXTERNAL_ID]?.value,
+    roleArn:
+      extractVarValue(vars.role_arn) ||
+      extractVarValue(vars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.ROLE_ARN]),
+    externalId:
+      extractVarValue(vars.external_id) ||
+      extractVarValue(vars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.EXTERNAL_ID]),
   } as AwsCloudConnectorCredentials;
 };
 
@@ -75,6 +107,14 @@ export const useCloudConnectorSetup = (
       const updatedPolicy = { ...newPolicy };
       const inputVars = input.streams?.find((i) => i.enabled)?.vars;
 
+      // Determine if name is valid (format only) mimicking the API schema validation
+      // Check for trimmed name to prevent whitespace-only strings
+      const isNameValid =
+        credentials.name && credentials.name.trim().length > 0 && credentials.name.length <= 255;
+
+      // Set cloud_connector_name directly on the policy object (not in input vars)
+      updatedPolicy.cloud_connector_name = credentials.name;
+
       // Handle undefined cases safely
       if (inputVars) {
         const updatedInputVars = updateInputVarsWithCredentials(
@@ -88,6 +128,7 @@ export const useCloudConnectorSetup = (
         );
         updatePolicy({
           updatedPolicy: { ...updatedPolicyWithInputs, cloud_connector_id: undefined },
+          isValid: isNameValid ? undefined : false,
         });
       }
 

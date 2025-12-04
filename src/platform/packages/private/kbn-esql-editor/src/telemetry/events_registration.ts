@@ -20,6 +20,10 @@ export const ESQL_QUERY_HISTORY_OPENED = 'esql.query_history_opened';
 export const ESQL_QUERY_HISTORY_CLICKED = 'esql.query_history_clicked';
 export const ESQL_STARRED_QUERY_CLICKED = 'esql.starred_query_clicked';
 export const ESQL_QUERY_SUBMITTED = 'esql.query_submitted';
+export const ESQL_RECOMMENDED_QUERY_CLICKED = 'esql.recommended_query_clicked';
+export const ESQL_CONTROL_FLYOUT_OPENED = 'esql.control_flyout_opened';
+export const ESQL_CONTROL_CANCELLED = 'esql.control_cancelled';
+export const ESQL_CONTROL_SAVED = 'esql.control_saved';
 
 /**
  * Registers the esql editor analytics events.
@@ -107,6 +111,100 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
       anti_missing_sort_before_limit: {
         type: 'boolean',
         _meta: { description: 'Whether the query was missing a SORT before a LIMIT.' },
+      },
+    },
+  });
+  analytics.registerEventType({
+    eventType: ESQL_RECOMMENDED_QUERY_CLICKED,
+    schema: {
+      trigger_source: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The UI surface where the recommendation was shown. Possible values are: help|autocomplete',
+        },
+      },
+      recommended_query: {
+        type: 'keyword',
+        _meta: {
+          description: 'The label of the recommended query that was clicked',
+        },
+      },
+    },
+  });
+  analytics.registerEventType({
+    eventType: ESQL_CONTROL_FLYOUT_OPENED,
+    schema: {
+      prefilled: {
+        type: 'boolean',
+        _meta: {
+          description: 'Whether the control configuration was prefilled from the context.',
+        },
+      },
+      control_kind: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The type of control that is about to be created. Possible values are: multi_values|time_literal|fields|values|functions',
+        },
+      },
+      trigger_source: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The way how the control flyout was opened. Possible values are: question_mark|smart_suggestion',
+        },
+      },
+      query_length: {
+        type: 'keyword',
+        _meta: {
+          description: 'The length of the query when the control configuration was opened.',
+        },
+      },
+      query_lines: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The number of lines in the query when the control configuration was opened.',
+        },
+      },
+    },
+  });
+  analytics.registerEventType({
+    eventType: ESQL_CONTROL_CANCELLED,
+    schema: {
+      control_kind: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The type of control that was being created. Possible values are: multi_values|time_literal|fields|values|functions',
+        },
+      },
+      reason: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The reason why the control configuration was cancelled. Possible value is: cancel_button',
+        },
+      },
+    },
+  });
+  analytics.registerEventType({
+    eventType: ESQL_CONTROL_SAVED,
+    schema: {
+      control_kind: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The type of control that was created. Possible values are: multi_values|time_literal|fields|values|functions',
+        },
+      },
+      trigger_source: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The way how the control flyout was opened. Possible values are: question_mark|smart_suggestion',
+        },
       },
     },
   });

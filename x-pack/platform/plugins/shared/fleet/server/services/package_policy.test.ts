@@ -38,6 +38,7 @@ import type {
   PostPackagePolicyPostCreateCallback,
   PostPackagePolicyDeleteCallback,
   UpdatePackagePolicy,
+  AssetsMap,
 } from '../types';
 import { createPackagePolicyMock } from '../../common/mocks';
 
@@ -58,6 +59,7 @@ import type {
   DeletePackagePoliciesResponse,
   PackagePolicyAssetsMap,
   PreconfiguredInputs,
+  ArchiveEntry,
 } from '../../common/types';
 import { packageToPackagePolicy, packageToPackagePolicyInputs } from '../../common/services';
 
@@ -73,6 +75,7 @@ import {
   _compilePackagePolicyInputs,
   _validateRestrictedFieldsNotModifiedOrThrow,
   _normalizePackagePolicyKuery,
+  _getAssetForTemplatePath,
 } from './package_policy';
 import { appContextService } from '.';
 
@@ -272,6 +275,7 @@ jest.mock('./secrets', () => ({
     id,
     isSecretRef: true,
   })),
+  extractAndWriteSecrets: jest.fn(),
 }));
 
 type CombinedExternalCallback = PutPackagePolicyUpdateCallback | PostPackagePolicyCreateCallback;
@@ -1254,8 +1258,113 @@ describe('Package policy service', () => {
             agentPolicy
           )
         ).rejects.toThrow(
-          'Error creating cloud connector in Fleet, Error: Cloud connector creation failed'
+          'Error creating cloud connector in Fleet, Cloud connector creation failed'
         );
+      } finally {
+        // Restore the original method
+        cloudConnectorService.create = originalCreate;
+      }
+    });
+
+    it('should create cloud connector with generated name when no cloud_connector_name is provided', async () => {
+      const soClient = createSavedObjectClientMock();
+      const enrichedPackagePolicy = {
+        name: 'test-cspm-policy',
+        supports_cloud_connector: true,
+        cloud_connector_id: undefined,
+        inputs: [
+          {
+            type: 'cis_aws',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { dataset: 'test', type: 'logs' },
+                vars: {
+                  role_arn: {
+                    value: 'arn:aws:iam::123456789012:role/TestRole',
+                    type: 'text',
+                  },
+                  external_id: {
+                    value: {
+                      id: 'ABCDEFGHIJKLMNOPQRST',
+                      isSecretRef: true,
+                    },
+                    type: 'password',
+                  },
+                  // Note: no cloud_connector_name provided
+                },
+              },
+            ],
+          },
+        ],
+      } as any;
+
+      const agentPolicy = {
+        id: 'test',
+        agentless: {
+          cloud_connectors: {
+            enabled: true,
+            target_csp: 'aws',
+          },
+        },
+      } as any;
+
+      // Mock the cloud connector service
+      const mockCloudConnector = {
+        id: 'cloud-connector-generated-id',
+        name: 'aws-cloud-connector: test-cspm-policy',
+        cloudProvider: 'aws',
+        vars: {
+          role_arn: {
+            value: 'arn:aws:iam::123456789012:role/TestRole',
+            type: 'text',
+          },
+          external_id: {
+            type: 'password',
+            value: {
+              id: 'ABCDEFGHIJKLMNOPQRST',
+              isSecretRef: true,
+            },
+          },
+        },
+        packagePolicyCount: 1,
+        created_at: '2023-01-01T00:00:00.000Z',
+        updated_at: '2023-01-01T00:00:00.000Z',
+      };
+
+      // Mock the cloudConnectorService.create method
+      const originalCreate = cloudConnectorService.create;
+      cloudConnectorService.create = jest.fn().mockResolvedValue(mockCloudConnector);
+
+      try {
+        const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
+          soClient,
+          enrichedPackagePolicy,
+          agentPolicy
+        );
+
+        expect(result).toEqual(mockCloudConnector);
+        expect(cloudConnectorService.create).toHaveBeenCalledWith(soClient, {
+          name: 'aws-cloud-connector: test-cspm-policy',
+          vars: {
+            role_arn: {
+              value: 'arn:aws:iam::123456789012:role/TestRole',
+              type: 'text',
+            },
+            external_id: {
+              value: {
+                id: 'ABCDEFGHIJKLMNOPQRST',
+                isSecretRef: true,
+              },
+              type: 'password',
+            },
+          },
+          cloudProvider: 'aws',
+        });
+
+        // Verify the name was auto-generated with the correct format
+        expect(mockCloudConnector.name).toBe('aws-cloud-connector: test-cspm-policy');
       } finally {
         // Restore the original method
         cloudConnectorService.create = originalCreate;
@@ -1938,6 +2047,9 @@ describe('Package policy service', () => {
   });
 
   describe('update', () => {
+    beforeEach(() => {
+      mockAgentPolicyGet();
+    });
     it('should fail to update on version conflict', async () => {
       const savedObjectsClient = createSavedObjectClientMock();
 
@@ -7746,6 +7858,8 @@ describe('Package policy service', () => {
       const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const updateSpy = jest.spyOn(packagePolicyService, 'update');
+
+      mockAgentPolicyGet();
       soClient.find.mockResolvedValue({
         saved_objects: [
           {
@@ -8806,5 +8920,56 @@ describe('_normalizePackagePolicyKuery', () => {
       `fleet-package-policies.name:test`
     );
     expect(res).toEqual('ingest-package-policies.attributes.name:test');
+  });
+});
+
+describe('_getAssetForTemplatePath()', () => {
+  it('should return the asset for the given template path', () => {
+    const pkgInfo: PackageInfo = {
+      name: 'test_package',
+      version: '1.0.0',
+      type: 'integration',
+    } as any;
+    const datasetPath = 'test_data_stream';
+    const templatePath = 'log.yml.hbs';
+    const assetsMap: AssetsMap = new Map();
+    assetsMap.set(
+      `test_package-1.0.0/data_stream/${datasetPath}/agent/stream/syslog.yml.hbs`,
+      Buffer.from('wrong match asset')
+    );
+    assetsMap.set(
+      `test_package-1.0.0/data_stream/${datasetPath}/agent/stream/log.yml.hbs`,
+      Buffer.from('exact match asset')
+    );
+
+    const expectedAsset: ArchiveEntry = {
+      path: 'test_package-1.0.0/data_stream/test_data_stream/agent/stream/log.yml.hbs',
+      buffer: Buffer.from('exact match asset'),
+    };
+    const asset = _getAssetForTemplatePath(pkgInfo, assetsMap, datasetPath, templatePath);
+    expect(asset).toEqual(expectedAsset);
+  });
+  it('should return fallback asset it exact match is not found', () => {
+    // representing the scenario where the templatePath has the default value 'stream.yml.hbs'
+    // but the actual asset uses a prefixed name like 'filestream.yml.hbs'
+    const pkgInfo: PackageInfo = {
+      name: 'test_package',
+      version: '1.0.0',
+      type: 'integration',
+    } as any;
+    const datasetPath = 'test_data_stream';
+    const templatePath = 'stream.yml.hbs';
+    const assetsMap: AssetsMap = new Map();
+    assetsMap.set(
+      `test_package-1.0.0/data_stream/${datasetPath}/agent/stream/filestream.yml.hbs`,
+      Buffer.from('ends with match asset')
+    );
+
+    const expectedFallbackAsset: ArchiveEntry = {
+      path: 'test_package-1.0.0/data_stream/test_data_stream/agent/stream/filestream.yml.hbs',
+      buffer: Buffer.from('ends with match asset'),
+    };
+    const asset = _getAssetForTemplatePath(pkgInfo, assetsMap, datasetPath, templatePath);
+    expect(asset).toEqual(expectedFallbackAsset);
   });
 });

@@ -102,7 +102,12 @@ describe('observabilityAIAssistant rule_connector', () => {
   });
 
   describe('Connector Type - getObsAIAssistantConnectorType', () => {
-    const completeMock = jest.fn().mockReturnValue(new Observable());
+    const completeMock = jest.fn().mockImplementation(() => ({
+      response$: new Observable((subscriber) => {
+        subscriber.complete();
+      }),
+      conversationPromise: Promise.resolve(undefined),
+    }));
 
     const initResources = jest.fn().mockResolvedValue({
       service: {

@@ -11,12 +11,12 @@ import { RISK_SCORE_PREVIEW_URL } from '@kbn/security-solution-plugin/common/con
 import { v4 as uuidv4 } from 'uuid';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type { EntityRiskScoreRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics/common';
-import { dataGeneratorFactory } from '../../../detections_response/utils';
 import {
   createAlertsIndex,
   deleteAllAlerts,
   deleteAllRules,
-} from '../../../../config/services/detections_response';
+} from '@kbn/detections-response-ftr-services';
+import { dataGeneratorFactory } from '../../../detections_response/utils';
 import {
   assetCriticalityRouteHelpersFactory,
   buildDocument,
@@ -137,7 +137,11 @@ export default ({ getService }: FtrProviderContext): void => {
             alerts: 2,
           });
 
-          expect(sanitizeScores(body.scores.host!)).to.eql([
+          const sortedScores = sanitizeScores(body.scores.host!).sort((a, b) =>
+            String(a.id_value).localeCompare(String(b.id_value))
+          );
+
+          expect(sortedScores).to.eql([
             {
               calculated_level: 'Unknown',
               calculated_score: 21,
@@ -592,7 +596,11 @@ export default ({ getService }: FtrProviderContext): void => {
             alerts: 2,
           });
 
-          expect(sanitizeScores(body.scores.host!)).to.eql([
+          const sortedScores = sanitizeScores(body.scores.host!).sort((a, b) =>
+            String(a.id_value).localeCompare(String(b.id_value))
+          );
+
+          expect(sortedScores).to.eql([
             {
               criticality_level: 'extreme_impact',
               criticality_modifier: 2.0,

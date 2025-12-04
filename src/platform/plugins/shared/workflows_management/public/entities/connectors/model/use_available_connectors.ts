@@ -10,7 +10,7 @@
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import type { ConnectorInstance, ConnectorTypeInfo } from '@kbn/workflows';
-import { selectConnectors } from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
+import { selectConnectors } from '../../workflows/store/workflow_detail/selectors';
 
 export const useAvailableConnectors = () => useSelector(selectConnectors);
 

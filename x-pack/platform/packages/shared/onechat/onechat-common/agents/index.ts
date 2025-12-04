@@ -10,6 +10,7 @@ export {
   oneChatDefaultAgentId,
   type AgentDefinition,
   type AgentConfiguration,
+  type AgentConfigurationOverrides,
   type AgentResearchStepConfiguration,
   type AgentAnswerStepConfiguration,
 } from './definition';
@@ -19,3 +20,4 @@ export {
   type ResolvedAgentCapabilities,
   getKibanaDefaultAgentCapabilities,
 } from './capabilities';
+export { AgentExecutionErrorCode } from './execution_errors';

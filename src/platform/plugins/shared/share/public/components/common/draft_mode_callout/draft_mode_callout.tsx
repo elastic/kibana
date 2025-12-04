@@ -7,19 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type ReactNode } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CommonProps } from '@elastic/eui';
 import { EuiButton, EuiCallOut, EuiText } from '@elastic/eui';
 
 export interface SaveButtonProps extends CommonProps {
-  onSave: () => Promise<void | object>;
+  onSave: () => Promise<void>;
   label?: string;
   isSaving?: boolean;
 }
 export interface DraftModeCalloutProps extends CommonProps {
   message?: string;
-  node?: ReactNode;
   saveButtonProps?: SaveButtonProps;
 }
 
@@ -36,14 +35,11 @@ const saveButtonText = i18n.translate('share.draftModeCallout.saveButtonText', {
  * A warning callout to indicate the user has unsaved changes.
  */
 export const DraftModeCallout = ({
-  node,
   message = defaultCalloutMessage,
   ['data-test-subj']: dataTestSubj = 'unsavedChangesDraftModeCallOut',
   saveButtonProps,
 }: DraftModeCalloutProps) => {
-  return node ? (
-    node
-  ) : (
+  return (
     <EuiCallOut
       announceOnMount
       data-test-subj={dataTestSubj}

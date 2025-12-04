@@ -13,7 +13,7 @@ import { resolve } from 'path';
 import url from 'url';
 
 import { isKibanaDistributable } from '@kbn/repo-info';
-import { readKeystore } from '../keystore/read_keystore';
+import { readKeystore } from '../keystore/lib/read_keystore';
 import { compileConfigStack } from './compile_config_stack';
 import { getConfigFromFiles } from '@kbn/config';
 
@@ -247,7 +247,7 @@ export default function (program) {
         'Adds plugin paths for all the Kibana example plugins and runs with no base path'
       )
       .option(
-        '--serverless [oblt|security|es|workplace_ai]',
+        '--serverless [oblt|security|es|workplaceai]',
         'Start Kibana in a specific serverless project mode. ' +
           'If no mode is provided, it starts Kibana in the most recent serverless project mode (default is es)'
       );
@@ -369,6 +369,7 @@ function tryConfigureServerlessSamlProvider(rawConfig, opts, extraCliOptions) {
   // Ensure the plugin is loaded in dynamically to exclude from production build
   const {
     MOCK_IDP_REALM_NAME,
+    MOCK_IDP_UIAM_SERVICE_URL,
     MOCK_IDP_UIAM_SHARED_SECRET,
     MOCK_IDP_UIAM_ORGANIZATION_ID,
     MOCK_IDP_UIAM_PROJECT_ID, // eslint-disable-next-line import/no-dynamic-require
@@ -445,7 +446,7 @@ function tryConfigureServerlessSamlProvider(rawConfig, opts, extraCliOptions) {
     lodashSet(rawConfig, 'mockIdpPlugin.uiam.enabled', true);
 
     if (!_.has(rawConfig, 'xpack.security.uiam.url')) {
-      lodashSet(rawConfig, 'xpack.security.uiam.url', 'http://localhost:8080');
+      lodashSet(rawConfig, 'xpack.security.uiam.url', MOCK_IDP_UIAM_SERVICE_URL);
     }
 
     if (!_.has(rawConfig, 'xpack.security.uiam.sharedSecret')) {
