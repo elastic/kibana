@@ -77,7 +77,7 @@ export async function scheduleReindexIntegrationKnowledgeTask(
   });
 }
 
-async function reindexIntegrationKnowledgeForInstalledPackages() {
+export async function reindexIntegrationKnowledgeForInstalledPackages() {
   const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
   const esClient = appContextService.getInternalUserESClient();
   const logger = appContextService.getLogger();
