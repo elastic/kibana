@@ -10,6 +10,7 @@ import type { MonitoringEntitySource } from '../../../../../../../../common/api/
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
 import type { PrivMonBulkUser } from '../../../../types';
 import { createPatternMatcherService } from '../matchers/privileged_status_match';
+import { createPrivilegeStatusUpdateService } from '../privileged_status_update';
 export const createUpdateDetectionService = (
   dataClient: PrivilegeMonitoringDataClient,
   soClient: SavedObjectsClientContract

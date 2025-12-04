@@ -36,11 +36,7 @@ export const createIndexDeletionDetectionService = (
     if (staleUsers.length === 0) {
       dataClient.log('debug', `No stale users to soft delete for source ${source.id}`);
     }
-    const ops = bulkUtilsService.bulkSoftDeleteOperations(
-      staleUsers,
-      dataClient.index,
-      'entity_analytics_integration'
-    );
+    const ops = bulkUtilsService.bulkSoftDeleteOperations(staleUsers, dataClient.index, 'index');
     try {
       // soft delete the stale users, NOT outright delete.
       const resp = await esClient.bulk({ body: ops, refresh: 'wait_for' });
