@@ -112,7 +112,7 @@ describe('alertsTool', () => {
 
   describe('handler', () => {
     it('calls runSearchTool with default index when index not provided', async () => {
-      const mockResults = [{ type: ToolResultType.text, data: 'test results' }];
+      const mockResults = [{ type: ToolResultType.other, data: 'test results' }];
       (runSearchTool as jest.Mock).mockResolvedValue({ results: mockResults });
       const fieldsList = ESSENTIAL_ALERT_FIELDS.map((field) => `\`${field}\``).join(', ');
 
@@ -138,7 +138,7 @@ describe('alertsTool', () => {
     });
 
     it('calls runSearchTool with explicit index when provided', async () => {
-      const mockResults = [{ type: ToolResultType.text, data: 'test results' }];
+      const mockResults = [{ type: ToolResultType.other, data: 'test results' }];
       (runSearchTool as jest.Mock).mockResolvedValue({ results: mockResults });
 
       await tool.handler(
@@ -160,7 +160,7 @@ describe('alertsTool', () => {
     });
 
     it('enhances query with KEEP clause for alerts index', async () => {
-      const mockResults = [{ type: ToolResultType.text, data: 'test results' }];
+      const mockResults = [{ type: ToolResultType.other, data: 'test results' }];
       (runSearchTool as jest.Mock).mockResolvedValue({ results: mockResults });
       const fieldsList = ESSENTIAL_ALERT_FIELDS.map((field) => `\`${field}\``).join(', ');
 
@@ -179,7 +179,7 @@ describe('alertsTool', () => {
     });
 
     it('enhances query with count instructions when isCount is true', async () => {
-      const mockResults = [{ type: ToolResultType.text, data: 'test results' }];
+      const mockResults = [{ type: ToolResultType.other, data: 'test results' }];
       (runSearchTool as jest.Mock).mockResolvedValue({ results: mockResults });
 
       await tool.handler(
@@ -197,7 +197,7 @@ describe('alertsTool', () => {
     });
 
     it('does not enhance query for non-alerts index', async () => {
-      const mockResults = [{ type: ToolResultType.text, data: 'test results' }];
+      const mockResults = [{ type: ToolResultType.other, data: 'test results' }];
       (runSearchTool as jest.Mock).mockResolvedValue({ results: mockResults });
 
       await tool.handler(
@@ -214,7 +214,7 @@ describe('alertsTool', () => {
     });
 
     it('logs debug message with correct parameters', async () => {
-      const mockResults = [{ type: ToolResultType.text, data: 'test results' }];
+      const mockResults = [{ type: ToolResultType.other, data: 'test results' }];
       (runSearchTool as jest.Mock).mockResolvedValue({ results: mockResults });
 
       await tool.handler(
@@ -231,7 +231,7 @@ describe('alertsTool', () => {
     });
 
     it('returns results from runSearchTool', async () => {
-      const mockResults = [{ type: ToolResultType.text, data: 'test results' }];
+      const mockResults = [{ type: ToolResultType.other, data: 'test results' }];
       const runSearchToolResult = { results: mockResults };
       (runSearchTool as jest.Mock).mockResolvedValue(runSearchToolResult);
 
