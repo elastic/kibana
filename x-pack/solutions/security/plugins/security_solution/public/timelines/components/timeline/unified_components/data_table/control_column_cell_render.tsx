@@ -19,7 +19,6 @@ type TimelineControlColumnCellRenderProps = Pick<
   | 'ecsData'
   | 'eventId'
   | 'eventIdToNoteIds'
-  | 'pinnedEventIds'
   | 'refetch'
   | 'showNotes'
   | 'timelineId'
@@ -40,7 +39,6 @@ export const TimelineControlColumnCellRender = memo(function TimelineControlColu
       eventId={props.eventId}
       eventIdToNoteIds={props.eventIdToNoteIds}
       isEventViewer={false}
-      isEventPinned={props.pinnedEventIds?.[props.eventId]}
       onEventDetailsPanelOpened={noOp}
       onRuleChange={noOp}
       refetch={props.refetch}

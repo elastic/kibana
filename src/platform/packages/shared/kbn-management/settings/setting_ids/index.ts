@@ -141,6 +141,8 @@ export const AI_ANONYMIZATION_SETTINGS = 'ai:anonymizationSettings';
 export const OBSERVABILITY_SEARCH_EXCLUDED_DATA_TIERS = 'observability:searchExcludedDataTiers';
 export const OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS =
   'observability:streamsEnableSignificantEvents';
+export const OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_ANALYZER =
+  'observability:streamsEnableSignificantEventsAnalyzer';
 export const OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS = 'observability:streamsEnableGroupStreams';
 export const OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS = 'observability:streamsEnableContentPacks';
 export const OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS = 'observability:streamsEnableAttachments';
@@ -189,6 +191,12 @@ export const SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING =
   'securitySolution:enableAssetInventory' as const;
 export const SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING =
   'securitySolution:enableCloudConnector' as const;
+export const SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES =
+  'securitySolution:defaultValueReportMinutes' as const;
+export const SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE =
+  'securitySolution:defaultValueReportRate' as const;
+export const SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE =
+  'securitySolution:defaultValueReportTitle' as const;
 // Timelion settings
 export const TIMELION_ES_DEFAULT_INDEX_ID = 'timelion:es.default_index';
 export const TIMELION_ES_TIME_FIELD_ID = 'timelion:es.timefield';

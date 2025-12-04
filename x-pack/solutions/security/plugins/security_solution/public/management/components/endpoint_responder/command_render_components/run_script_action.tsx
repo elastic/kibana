@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import type { ParsedCommandInput } from '../../console/service/types';
 import { RunscriptActionResult } from '../../runscript_action_result';
 import type { ArgSelectorState, SupportedArguments } from '../../console';
-import { ExecuteActionHostResponse } from '../../endpoint_execute_action';
 import { useSendRunScriptEndpoint } from '../../../hooks/response_actions/use_send_run_script_endpoint_request';
 import type { RunScriptActionRequestBody } from '../../../../../common/api/endpoint';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
@@ -136,25 +135,11 @@ export const RunScriptActionResult = memo<
         { defaultMessage: 'RunScript was successful.' }
       )}
     >
-      {command.commandDefinition?.meta?.agentType === 'sentinel_one' ? (
-        <RunscriptActionResult
-          action={completedActionDetails}
-          agentId={command.commandDefinition?.meta?.endpointId}
-          data-test-subj="sentinelOneRunscriptResult"
-        />
-      ) : (
-        <ExecuteActionHostResponse
-          action={completedActionDetails}
-          canAccessFileDownloadLink={true}
-          agentId={command.commandDefinition?.meta?.endpointId}
-          textSize="s"
-          data-test-subj="console"
-          // Currently file is not supported for CrowdStrike
-          hideFile={command.commandDefinition?.meta?.agentType === 'crowdstrike'}
-          showPasscode={false}
-          hideContext={true}
-        />
-      )}
+      <RunscriptActionResult
+        action={completedActionDetails}
+        data-test-subj="runscriptResult"
+        textSize="s"
+      />
     </ResultComponent>
   );
 });

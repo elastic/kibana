@@ -37,14 +37,14 @@ export function WiredAdvancedView({
         </>
       )}
 
-      {significantEvents?.available && (
+      {significantEvents?.enabled && (
         <>
           <StreamDescription definition={definition} refreshDefinition={refreshDefinition} />
           <EuiSpacer />
           <StreamFeatureConfiguration definition={definition.stream} />
         </>
       )}
-      <EuiSpacer size="m" />
+      <EuiSpacer />
       <IndexConfiguration definition={definition} refreshDefinition={refreshDefinition}>
         <EuiCallOut
           iconType="warning"

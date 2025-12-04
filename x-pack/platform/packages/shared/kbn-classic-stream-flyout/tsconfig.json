@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": ["jest", "node", "react"]
@@ -10,5 +10,6 @@
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/storybook",
+    "@kbn/index-management-plugin",
   ]
 }

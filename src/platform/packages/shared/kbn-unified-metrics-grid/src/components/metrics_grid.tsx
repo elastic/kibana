@@ -11,9 +11,12 @@ import React, { useCallback, useMemo, useState, useRef } from 'react';
 import type { EuiFlexGridProps } from '@elastic/eui';
 import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Dimension, MetricField } from '@kbn/metrics-experience-plugin/common/types';
-import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
-import type { Observable } from 'rxjs';
+import type {
+  MetricField,
+  Dimension,
+  DimensionFilters,
+} from '@kbn/metrics-experience-plugin/common/types';
+import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { css } from '@emotion/react';
 import type { ChartSize } from './chart';
 import { Chart } from './chart';
@@ -26,13 +29,13 @@ import { useChartLayers } from './chart/hooks/use_chart_layers';
 
 export type MetricsGridProps = Pick<
   ChartSectionProps,
-  'searchSessionId' | 'services' | 'onBrushEnd' | 'onFilter' | 'abortController' | 'requestParams'
+  'services' | 'onBrushEnd' | 'onFilter' | 'fetchParams'
 > & {
-  filters?: Array<{ field: string; value: string }>;
+  filters?: DimensionFilters;
   dimensions: Dimension[];
   searchTerm?: string;
   columns: NonNullable<EuiFlexGridProps['columns']>;
-  discoverFetch$: Observable<UnifiedHistogramInputMessage>;
+  discoverFetch$: ChartSectionProps['fetch$'];
   fields: MetricField[];
 };
 
@@ -41,17 +44,15 @@ const getItemKey = (metric: MetricField, index: number) => {
 };
 export const MetricsGrid = ({
   fields,
-  searchSessionId,
   onBrushEnd,
   onFilter,
   dimensions,
   services,
   columns,
-  abortController,
-  requestParams,
+  fetchParams,
   discoverFetch$,
   searchTerm,
-  filters = [],
+  filters = {},
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const chartRefs = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -160,12 +161,10 @@ export const MetricsGrid = ({
                   size="s"
                   dimensions={dimensions}
                   filters={filters}
-                  searchSessionId={searchSessionId}
                   services={services}
                   onBrushEnd={onBrushEnd}
                   onFilter={onFilter}
-                  abortController={abortController}
-                  requestParams={requestParams}
+                  fetchParams={fetchParams}
                   discoverFetch$={discoverFetch$}
                   rowIndex={rowIndex}
                   colIndex={colIndex}
@@ -192,17 +191,14 @@ export const MetricsGrid = ({
 };
 
 interface ChartItemProps
-  extends Pick<
-    ChartSectionProps,
-    'searchSessionId' | 'services' | 'onBrushEnd' | 'onFilter' | 'abortController' | 'requestParams'
-  > {
+  extends Pick<ChartSectionProps, 'services' | 'onBrushEnd' | 'onFilter' | 'fetchParams'> {
   id: string;
   metric: MetricField;
   index: number;
   size: ChartSize;
   dimensions: Dimension[];
-  filters: Array<{ field: string; value: string }>;
-  discoverFetch$: Observable<UnifiedHistogramInputMessage>;
+  filters: DimensionFilters;
+  discoverFetch$: ChartSectionProps['fetch$'];
   rowIndex: number;
   colIndex: number;
   isFocused: boolean;
@@ -221,12 +217,10 @@ const ChartItem = React.memo(
         size,
         dimensions,
         filters,
-        searchSessionId,
         services,
         onBrushEnd,
         onFilter,
-        abortController,
-        requestParams,
+        fetchParams,
         discoverFetch$,
         rowIndex,
         colIndex,
@@ -275,10 +269,8 @@ const ChartItem = React.memo(
             esqlQuery={esqlQuery}
             size={size}
             discoverFetch$={discoverFetch$}
-            requestParams={requestParams}
+            fetchParams={fetchParams}
             services={services}
-            abortController={abortController}
-            searchSessionId={searchSessionId}
             onBrushEnd={onBrushEnd}
             onFilter={onFilter}
             onViewDetails={handleViewDetailsCallback}

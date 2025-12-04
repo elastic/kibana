@@ -1,15 +1,23 @@
 {
   "type": "plugin",
   "id": "@kbn/observability-agent-plugin",
-  "owner": ["@elastic/obs-ai-assistant"],
+  "owner": ["@elastic/obs-ai-team"],
   "group": "observability",
   "visibility": "private",
   "plugin": {
     "id": "observabilityAgent",
     "browser": false,
     "server": true,
-    "requiredPlugins": ["onechat", "apmDataAccess", "logsDataAccess", "metricsDataAccess", "security"],
-    "optionalPlugins": [],
+    "requiredPlugins": [
+      "onechat",
+      "apmDataAccess",
+      "logsDataAccess",
+      "security",
+      "ruleRegistry",
+      "dataViews",
+      "metricsDataAccess"
+    ],
+    "optionalPlugins": ["ml"],
     "requiredBundles": [],
     "extraPublicDirs": []
   }

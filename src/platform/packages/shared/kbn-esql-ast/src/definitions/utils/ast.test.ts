@@ -22,6 +22,11 @@ describe('getBracketsToClose', () => {
     ).toEqual([')']);
     expect(getBracketsToClose('FROM a | WHERE ("""field: *""")')).toEqual([]);
   });
+
+  it('ignores /* and */ inside string literals but handles real comments', () => {
+    expect(getBracketsToClose('KQL("path: */internal/*")')).toEqual([]);
+    expect(getBracketsToClose('WHERE field /* comment')).toEqual(['*/']);
+  });
 });
 
 describe('correctQuerySyntax', () => {

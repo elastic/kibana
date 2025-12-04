@@ -138,10 +138,12 @@ describe('WorkflowStepExecutionTree', () => {
     overrides: Partial<WorkflowExecutionDto> = {}
   ): WorkflowExecutionDto => ({
     id: 'exec-123',
+    isTestRun: false,
     spaceId: 'default',
     status: ExecutionStatus.RUNNING,
     startedAt: '2024-01-01T10:00:00Z',
     finishedAt: '',
+    error: null,
     workflowId: 'workflow-123',
     workflowName: 'Test Workflow',
     workflowDefinition: {
@@ -343,7 +345,8 @@ describe('WorkflowStepExecutionTree', () => {
 
       expect(buildStepExecutionsTree).toHaveBeenCalledWith(
         [stepExecution],
-        expect.objectContaining({})
+        expect.objectContaining({}),
+        'completed'
       );
       expect(
         screen.getByRole('list', { name: 'Workflow step execution tree' })
@@ -535,7 +538,8 @@ describe('WorkflowStepExecutionTree', () => {
       expect(buildStepExecutionsTree).toHaveBeenCalled();
       expect(buildStepExecutionsTree).toHaveBeenCalledWith(
         [stepExecution],
-        expect.objectContaining({})
+        expect.objectContaining({}),
+        'completed'
       );
       expect(isTerminalStatus).toHaveBeenCalledWith(ExecutionStatus.COMPLETED);
     });

@@ -8,6 +8,8 @@
 import {
   STREAMS_AI_GROK_SUGGESTION_ACCEPTED_EVENT_TYPE,
   STREAMS_AI_GROK_SUGGESTION_LATENCY_EVENT_TYPE,
+  STREAMS_AI_DISSECT_SUGGESTION_ACCEPTED_EVENT_TYPE,
+  STREAMS_AI_DISSECT_SUGGESTION_LATENCY_EVENT_TYPE,
   STREAMS_ATTACHMENT_CLICK_EVENT_TYPE,
   STREAMS_ATTACHMENT_COUNT_EVENT_TYPE,
   STREAMS_CHILD_STREAM_CREATED_EVENT_TYPE,
@@ -17,10 +19,17 @@ import {
   STREAMS_SIGNIFICANT_EVENTS_CREATED_EVENT_TYPE,
   STREAMS_SIGNIFICANT_EVENTS_SUGGESTIONS_GENERATED_EVENT_TYPE,
   STREAMS_WIRED_STREAMS_STATUS_CHANGED_EVENT_TYPE,
+  STREAMS_FEATURE_IDENTIFICATION_IDENTIFIED_EVENT_TYPE,
+  STREAMS_FEATURE_IDENTIFICATION_SAVED_EVENT_TYPE,
+  STREAMS_FEATURE_IDENTIFICATION_DELETED_EVENT_TYPE,
+  STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE,
+  STREAMS_PROCESSING_SIMULATION_SAMPLES_FETCH_LATENCY_EVENT_TYPE,
 } from './constants';
 import {
   streamsAIGrokSuggestionAcceptedSchema,
   streamsAIGrokSuggestionLatencySchema,
+  streamsAIDissectSuggestionAcceptedSchema,
+  streamsAIDissectSuggestionLatencySchema,
   streamsAttachmentClickEventSchema,
   streamsAttachmentCountSchema,
   streamsChildStreamCreatedSchema,
@@ -30,6 +39,11 @@ import {
   streamsSignificantEventsCreatedSchema,
   streamsSignificantEventsSuggestionsGeneratedSchema,
   wiredStreamsStatusChangedSchema,
+  streamsFeatureIdentificationIdentifiedSchema,
+  streamsFeatureIdentificationSavedSchema,
+  streamsFeatureIdentificationDeletedSchema,
+  streamsDescriptionGeneratedSchema,
+  streamsProcessingSimulationSamplesFetchLatencySchema,
 } from './schemas';
 
 const streamsAttachmentCountEventType = {
@@ -50,6 +64,16 @@ const streamsAIGrokSuggestionLatencyEventType = {
 const streamsAIGrokSuggestionAcceptedEventType = {
   eventType: STREAMS_AI_GROK_SUGGESTION_ACCEPTED_EVENT_TYPE,
   schema: streamsAIGrokSuggestionAcceptedSchema,
+};
+
+const streamsAIDissectSuggestionLatencyEventType = {
+  eventType: STREAMS_AI_DISSECT_SUGGESTION_LATENCY_EVENT_TYPE,
+  schema: streamsAIDissectSuggestionLatencySchema,
+};
+
+const streamsAIDissectSuggestionAcceptedEventType = {
+  eventType: STREAMS_AI_DISSECT_SUGGESTION_ACCEPTED_EVENT_TYPE,
+  schema: streamsAIDissectSuggestionAcceptedSchema,
 };
 
 const streamsProcessingSavedEventType = {
@@ -82,9 +106,34 @@ const streamsSignificantEventsCreatedEventType = {
   schema: streamsSignificantEventsCreatedSchema,
 };
 
+const streamsFeatureIdentificationIdentifiedEventType = {
+  eventType: STREAMS_FEATURE_IDENTIFICATION_IDENTIFIED_EVENT_TYPE,
+  schema: streamsFeatureIdentificationIdentifiedSchema,
+};
+
+const streamsFeatureIdentificationSavedEventType = {
+  eventType: STREAMS_FEATURE_IDENTIFICATION_SAVED_EVENT_TYPE,
+  schema: streamsFeatureIdentificationSavedSchema,
+};
+
+const streamsFeatureIdentificationDeletedEventType = {
+  eventType: STREAMS_FEATURE_IDENTIFICATION_DELETED_EVENT_TYPE,
+  schema: streamsFeatureIdentificationDeletedSchema,
+};
+
+const streamsDescriptionGeneratedEventType = {
+  eventType: STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE,
+  schema: streamsDescriptionGeneratedSchema,
+};
+
 const wiredStreamsStatusChangedEventType = {
   eventType: STREAMS_WIRED_STREAMS_STATUS_CHANGED_EVENT_TYPE,
   schema: wiredStreamsStatusChangedSchema,
+};
+
+const streamsProcessingSimulationSamplesFetchLatencyEventType = {
+  eventType: STREAMS_PROCESSING_SIMULATION_SAMPLES_FETCH_LATENCY_EVENT_TYPE,
+  schema: streamsProcessingSimulationSamplesFetchLatencySchema,
 };
 
 export {
@@ -92,6 +141,8 @@ export {
   streamsAttachmentClickEventType,
   streamsAIGrokSuggestionLatencyEventType,
   streamsAIGrokSuggestionAcceptedEventType,
+  streamsAIDissectSuggestionLatencyEventType,
+  streamsAIDissectSuggestionAcceptedEventType,
   streamsProcessingSavedEventType,
   streamsRetentionChangedEventType,
   streamsChildStreamCreatedEventType,
@@ -99,4 +150,9 @@ export {
   streamsSignificantEventsSuggestionsGeneratedEventType,
   streamsSignificantEventsCreatedEventType,
   wiredStreamsStatusChangedEventType,
+  streamsFeatureIdentificationIdentifiedEventType,
+  streamsFeatureIdentificationSavedEventType,
+  streamsFeatureIdentificationDeletedEventType,
+  streamsDescriptionGeneratedEventType,
+  streamsProcessingSimulationSamplesFetchLatencyEventType,
 };

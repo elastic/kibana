@@ -12,12 +12,15 @@ import { EuiLoadingSpinner, htmlIdGenerator } from '@elastic/eui';
 import type { OpenConversationFlyoutOptions } from './types';
 import type { OnechatInternalService } from '../services';
 import type { ConversationFlyoutRef } from '../types';
+import type { EmbeddableConversationProps } from '../embeddable/types';
 
 const htmlId = htmlIdGenerator('onechat-conversation-flyout');
 
 interface OpenConversationFlyoutParams {
   coreStart: CoreStart;
   services: OnechatInternalService;
+  onClose?: () => void;
+  onPropsUpdate?: (callback: (props: EmbeddableConversationProps) => void) => void;
 }
 
 /**
@@ -29,7 +32,7 @@ interface OpenConversationFlyoutParams {
  */
 export function openConversationFlyout(
   options: OpenConversationFlyoutOptions,
-  { coreStart, services }: OpenConversationFlyoutParams
+  { coreStart, services, onClose, onPropsUpdate }: OpenConversationFlyoutParams
 ): { flyoutRef: ConversationFlyoutRef } {
   const { overlays, application, ...startServices } = coreStart;
 
@@ -46,9 +49,12 @@ export function openConversationFlyout(
     };
   });
 
+  const { onClose: externalOnClose, ...restOptions } = options;
+
   const handleOnClose = () => {
-    flyoutRef.close();
-    options.onClose?.();
+    flyoutRef.close(); // Always close the flyout
+    externalOnClose?.(); // Call external callback if provided
+    onClose?.(); // Call internal cleanup callback
   };
 
   const ariaLabelledBy = htmlId();
@@ -59,14 +65,15 @@ export function openConversationFlyout(
         <LazyEmbeddableConversationComponent
           onClose={handleOnClose}
           ariaLabelledBy={ariaLabelledBy}
-          {...options}
+          {...restOptions}
+          onPropsUpdate={onPropsUpdate}
         />
       </Suspense>,
       startServices
     ),
     {
       'data-test-subj': 'onechat-conversation-flyout-wrapper',
-      ownFocus: true,
+      ownFocus: false,
       isResizable: true,
       type: 'push',
       hideCloseButton: true,
@@ -75,7 +82,10 @@ export function openConversationFlyout(
   );
 
   const conversationFlyoutRef: ConversationFlyoutRef = {
-    close: () => flyoutRef.close(),
+    close: () => {
+      flyoutRef.close();
+      onClose?.();
+    },
   };
 
   return {

@@ -60,6 +60,8 @@ describe('useWorkflowExecutionPolling', () => {
     spaceId: 'default',
     id: mockWorkflowExecutionId,
     status,
+    error: null,
+    isTestRun: false,
     startedAt: new Date().toISOString(),
     finishedAt: new Date().toISOString(),
     workflowId: 'test-workflow-id',

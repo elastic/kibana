@@ -26,6 +26,7 @@ import {
   updateSavedQueryRequestBodySchema,
   updateSavedQueryRequestParamsSchema,
 } from '../../../common/api/saved_query/update_saved_query_route';
+import { getUserInfo } from '../../lib/get_user_info';
 
 export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -55,7 +56,6 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
         },
       },
       async (context, request, response) => {
-        const coreContext = await context.core;
         const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
           osqueryContext,
           request
@@ -64,7 +64,12 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
         const space = await osqueryContext.service.getActiveSpace(request);
         const spaceId = space?.id ?? DEFAULT_SPACE_ID;
 
-        const currentUser = coreContext.security.authc.getCurrentUser()?.username;
+        const currentUser = await getUserInfo({
+          request,
+          security: osqueryContext.security,
+          logger: osqueryContext.logFactory.get('savedQuery'),
+        });
+        const username = currentUser?.username ?? undefined;
 
         const {
           id,
@@ -122,7 +127,7 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
             snapshot,
             removed,
             ecs_mapping: convertECSMappingToArray(ecs_mapping),
-            updated_by: currentUser,
+            updated_by: username,
             updated_at: new Date().toISOString(),
           },
           {

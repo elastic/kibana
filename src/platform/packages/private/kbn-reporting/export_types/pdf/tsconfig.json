@@ -22,5 +22,6 @@
     "@kbn/reporting-export-types-pdf-common",
     "@kbn/reporting-mocks-server",
     "@kbn/licensing-types",
+    "@kbn/licensing-plugin",
   ]
 }

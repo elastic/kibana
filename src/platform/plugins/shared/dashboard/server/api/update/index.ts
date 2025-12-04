@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { DashboardUpdateRequestBody } from './types';
+export type { DashboardUpdateRequestBody, DashboardUpdateResponseBody } from './types';
 export { registerUpdateRoute } from './register_update_route';
