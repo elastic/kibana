@@ -5236,6 +5236,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-chrome-sidebar@link:src/core/packages/chrome/sidebar":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-config-server-internal@link:src/core/packages/config/server-internal":
   version "0.0.0"
   uid ""
@@ -7872,6 +7876,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/react-context-registry@link:src/platform/packages/shared/react/context_registry":
+  version "0.0.0"
+  uid ""
+
 "@kbn/react-env@link:src/platform/packages/shared/react/env":
   version "0.0.0"
   uid ""
@@ -8809,6 +8817,10 @@
   uid ""
 
 "@kbn/shared-ux-utility@link:src/platform/packages/shared/kbn-shared-ux-utility":
+  version "0.0.0"
+  uid ""
+
+"@kbn/sidebar-examples-plugin@link:examples/sidebar_examples":
   version "0.0.0"
   uid ""
 

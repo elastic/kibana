@@ -9,7 +9,7 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
-import { map } from 'rxjs';
+import { map, combineLatest } from 'rxjs';
 import type { ChromeLayoutConfig } from '@kbn/core-chrome-layout-components';
 import {
   ChromeLayout,
@@ -30,11 +30,9 @@ const layoutConfigs: { classic: ChromeLayoutConfig; project: ChromeLayoutConfig 
   classic: {
     headerHeight: 96,
     bannerHeight: 32,
-
-    /** for debug for now */
-    sidebarWidth: 48,
+    sidebarWidth: 0,
     footerHeight: 0,
-    navigationWidth: 48,
+    navigationWidth: 0,
   },
   project: {
     headerHeight: 48,
@@ -43,11 +41,9 @@ const layoutConfigs: { classic: ChromeLayoutConfig; project: ChromeLayoutConfig 
     /** The application top bar renders the app specific menu */
     /** we use it only in project style, because in classic it is included as part of the global header */
     applicationTopBarHeight: 48,
-
-    /** for debug for now */
-    sidebarWidth: 48,
+    sidebarWidth: 0,
     footerHeight: 0,
-    navigationWidth: 48,
+    navigationWidth: 0,
   },
 };
 
@@ -86,7 +82,13 @@ export class GridLayout implements LayoutService {
 
     const projectSideNavigation = chrome.getProjectSideNavComponentForGridLayout();
 
+    const sidebar = chrome.getSidebarComponent();
+
     const footer$ = chrome.getGlobalFooter$();
+
+    const sidebarWidth$ = combineLatest([chrome.sidebar.width$, chrome.sidebar.isOpen$]).pipe(
+      map(([width, isOpen]) => (isOpen ? width : 0))
+    );
 
     return React.memo(() => {
       // TODO: Get rid of observables https://github.com/elastic/kibana/issues/225265
@@ -95,16 +97,18 @@ export class GridLayout implements LayoutService {
       const chromeStyle = useObservable(chromeStyle$, 'classic');
       const hasAppMenu = useObservable(hasAppMenu$, false);
       const footer: ReactNode = useObservable(footer$, null);
+      const sidebarWidth = useObservable(sidebarWidth$, 0);
 
-      const layoutConfig = layoutConfigs[chromeStyle];
+      const layoutConfig = {
+        ...layoutConfigs[chromeStyle],
+        sidebarWidth,
+      };
 
       // Assign main layout parts first
       let header: ReactNode;
       let navigation: ReactNode;
       let banner: ReactNode;
       let applicationTopBar: ReactNode;
-      // not implemented, just for debug
-      let sidebar: ReactNode;
 
       if (chromeVisible) {
         if (chromeStyle === 'classic') {
@@ -130,7 +134,6 @@ export class GridLayout implements LayoutService {
       // If debug, override/add debug overlays
       if (debug) {
         if (chromeVisible) {
-          if (!sidebar) sidebar = <SimpleDebugOverlay label="Debug Sidebar" />;
           if (!navigation) {
             navigation = <SimpleDebugOverlay label="Debug Navigation" />;
           }

@@ -11,8 +11,8 @@ import { css } from '@emotion/css';
 import { filter, firstValueFrom } from 'rxjs';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import {
-  InjectedMetadataService,
   type InjectedMetadataParams,
+  InjectedMetadataService,
 } from '@kbn/core-injected-metadata-browser-internal';
 import { BrowserLoggingSystem } from '@kbn/core-logging-browser-internal';
 import { DocLinksService } from '@kbn/core-doc-links-browser-internal';
@@ -45,17 +45,17 @@ import { UserProfileService } from '@kbn/core-user-profile-browser-internal';
 import { version as REACT_VERSION } from 'react';
 import { muteLegacyRootWarning } from '@kbn/react-mute-legacy-root-warning';
 import { CoreInjectionService } from '@kbn/core-di-browser-internal';
-import { KBN_LOAD_MARKS } from './events';
-import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 import {
-  LOAD_SETUP_DONE,
-  LOAD_START_DONE,
+  KBN_LOAD_MARKS,
   KIBANA_LOADED_EVENT,
+  LOAD_BOOTSTRAP_START,
   LOAD_CORE_CREATED,
   LOAD_FIRST_NAV,
-  LOAD_BOOTSTRAP_START,
+  LOAD_SETUP_DONE,
   LOAD_START,
+  LOAD_START_DONE,
 } from './events';
+import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 
 /**
  * @internal
@@ -264,7 +264,7 @@ export class CoreSystem {
       const injection = this.injection.setup();
       const security = this.security.setup();
       const userProfile = this.userProfile.setup();
-      this.chrome.setup({ analytics });
+      const chrome = this.chrome.setup({ analytics });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const settings = this.settings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings, analytics });
@@ -276,6 +276,7 @@ export class CoreSystem {
       const core: InternalCoreSetup = {
         analytics,
         application,
+        chrome,
         fatalErrors: this.fatalErrorsSetup,
         featureFlags,
         http,
@@ -353,6 +354,29 @@ export class CoreSystem {
       const executionContext = this.executionContext.start({
         curApp$: application.currentAppId$,
       });
+
+      const featureFlags = await this.featureFlags.start();
+
+      // TODO: notification hack due to a circular dependency between chrome -> rendering -> notifications -> chrome
+      let notificationsStartResolve: (value: InternalCoreStart['notifications']) => void = () => {};
+      const chrome = await this.chrome.start({
+        application,
+        docLinks,
+        http,
+        injectedMetadata,
+        customBranding,
+        i18n,
+        theme,
+        userProfile,
+        uiSettings,
+        analytics,
+        featureFlags,
+        notifications: () =>
+          new Promise((resolve) => {
+            notificationsStartResolve = resolve;
+          }),
+      });
+
       const rendering = this.rendering.start({
         analytics,
         executionContext,
@@ -360,6 +384,7 @@ export class CoreSystem {
         theme,
         userProfile,
         coreEnv: this.coreContext.env,
+        chrome,
       });
 
       const notifications = this.notifications.start({
@@ -368,23 +393,8 @@ export class CoreSystem {
         targetDomElement: notificationsTargetDomElement,
         rendering,
       });
+      notificationsStartResolve(notifications);
 
-      const featureFlags = await this.featureFlags.start();
-
-      const chrome = await this.chrome.start({
-        application,
-        docLinks,
-        http,
-        injectedMetadata,
-        notifications,
-        customBranding,
-        i18n,
-        theme,
-        userProfile,
-        uiSettings,
-        analytics,
-        featureFlags,
-      });
       const deprecations = this.deprecations.start({ http });
 
       this.coreApp.start({

@@ -7,7 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { Header } from './header';
-export { ProjectHeader } from './project';
-export { LoadingIndicator } from './loading_indicator';
-export { Sidebar } from './sidebar';
+import React from 'react';
+import { SidebarPanel } from './sidebar_panel';
+import { useSidebar } from './use_sidebar';
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SidebarProps {}
+
+export function Sidebar(props: SidebarProps) {
+  const { close } = useSidebar();
+
+  return (
+    <SidebarPanel title={'Sidebar App Title'} onClose={close}>
+      Sidebar Content
+    </SidebarPanel>
+  );
+}

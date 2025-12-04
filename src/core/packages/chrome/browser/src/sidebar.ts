@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { Header } from './header';
-export { ProjectHeader } from './project';
-export { LoadingIndicator } from './loading_indicator';
-export { Sidebar } from './sidebar';
+export type {
+  SidebarApp,
+  SidebarAppButton,
+  SidebarAppContent,
+  SidebarSize,
+  SidebarServiceStart,
+  SidebarServiceSetup,
+} from '@kbn/core-chrome-sidebar';

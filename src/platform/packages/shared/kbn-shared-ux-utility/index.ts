@@ -11,3 +11,5 @@ export { Fallback } from './src/fallback';
 export { getClosestLink, hasActiveModifierKey } from './src/utils';
 export { withSuspense, type WithSuspenseExtendedDeps } from './src/with_suspense';
 export { dynamic, type DynamicOptions } from './src/dynamic';
+export { useObservable } from './src/use_observable';
+export type { ObservableLike, BehaviorSubjectLike } from './src/use_observable';

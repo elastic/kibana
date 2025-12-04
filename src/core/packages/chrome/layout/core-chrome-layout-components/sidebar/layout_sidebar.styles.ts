@@ -11,13 +11,9 @@ import { css } from '@emotion/react';
 import { layoutVar, layoutLevels } from '@kbn/core-chrome-layout-constants';
 
 const root = css`
-  position: sticky;
   grid-area: sidebar;
-  align-self: start;
   display: flex;
-  gap: 12px;
   flex-direction: column;
-  align-items: center;
   height: 100%;
   width: ${layoutVar('sidebar.width')};
   z-index: ${layoutLevels.sidebar};

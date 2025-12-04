@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { Header } from './header';
-export { ProjectHeader } from './project';
-export { LoadingIndicator } from './loading_indicator';
-export { Sidebar } from './sidebar';
+import { createContext, type Context } from 'react';
+
+const globalContextRegistry: Record<string, Context<any>> = {};
+
+export function getOrCreateContext<T>(ctxName: string, defaultValue?: T): Context<T> {
+  return (globalContextRegistry[ctxName] ??= createContext<T>(defaultValue as T));
+}

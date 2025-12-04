@@ -12,7 +12,7 @@ export type {
   ChromeBreadcrumb,
   ChromeSetBreadcrumbsParams,
 } from './breadcrumb';
-export type { ChromeStart } from './contracts';
+export type { ChromeStart, ChromeSetup } from './contracts';
 export type { ChromeDocTitle } from './doc_title';
 export type {
   ChromeHelpExtension,
@@ -53,3 +53,12 @@ export type {
   EuiSideNavItemTypeEnhanced,
   RenderAs,
 } from './project_navigation';
+
+export type {
+  SidebarApp,
+  SidebarAppButton,
+  SidebarAppContent,
+  SidebarSize,
+  SidebarServiceSetup,
+  SidebarServiceStart,
+} from './sidebar';

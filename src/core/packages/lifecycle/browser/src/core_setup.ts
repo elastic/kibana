@@ -21,6 +21,7 @@ import type { CustomBrandingSetup } from '@kbn/core-custom-branding-browser';
 import type { PluginsServiceSetup } from '@kbn/core-plugins-contracts-browser';
 import type { SecurityServiceSetup } from '@kbn/core-security-browser';
 import type { UserProfileServiceSetup } from '@kbn/core-user-profile-browser';
+import type { ChromeSetup } from '@kbn/core-chrome-browser';
 import type { CoreStart } from './core_start';
 
 /**
@@ -42,6 +43,8 @@ export interface CoreSetup<TPluginsStart extends Record<string, any> = {}, TStar
   analytics: AnalyticsServiceSetup;
   /** {@link ApplicationSetup} */
   application: ApplicationSetup;
+  /** {@link ChromeSetup} */
+  chrome: ChromeSetup;
   /** {@link CustomBrandingSetup} */
   customBranding: CustomBrandingSetup;
   /** {@link FatalErrorsSetup} */

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { Header } from './header';
-export { ProjectHeader } from './project';
-export { LoadingIndicator } from './loading_indicator';
-export { Sidebar } from './sidebar';
+import { SidebarExamplesPlugin } from './plugin';
+
+export function plugin() {
+  return new SidebarExamplesPlugin();
+}

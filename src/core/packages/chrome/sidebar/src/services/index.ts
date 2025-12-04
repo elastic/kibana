@@ -7,7 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { Header } from './header';
-export { ProjectHeader } from './project';
-export { LoadingIndicator } from './loading_indicator';
-export { Sidebar } from './sidebar';
+export {
+  SidebarService,
+  type SidebarServiceStart,
+  type SidebarServiceSetup,
+} from './sidebar_service';
+
+export type {
+  SidebarApp,
+  SidebarAppButton,
+  SidebarAppContent,
+  SidebarSize,
+} from './sidebar_registry_service';
+
+export { SidebarRegistryService, type SidebarRegistryServiceApi } from './sidebar_registry_service';
+export { SidebarStateService, type SidebarStateServiceApi } from './sidebar_state_service';
