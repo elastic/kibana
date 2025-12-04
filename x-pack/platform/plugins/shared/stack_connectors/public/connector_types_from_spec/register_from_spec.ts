@@ -12,6 +12,10 @@ import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-action
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { getIcon } from './get_icon';
+import {
+  createConnectorFormSerializer,
+  createConnectorFormDeserializer,
+} from './connector_form_serializers';
 
 export function registerConnectorTypesFromSpecs({
   connectorTypeRegistry,
@@ -89,5 +93,9 @@ const createConnectorTypeFromSpec = (
     ),
     actionParamsFields: lazy(() => Promise.resolve({ default: () => null })),
     validateParams: async () => ({ errors: {} }),
+    connectorForm: {
+      serializer: createConnectorFormSerializer(),
+      deserializer: createConnectorFormDeserializer(schema),
+    },
   };
 };

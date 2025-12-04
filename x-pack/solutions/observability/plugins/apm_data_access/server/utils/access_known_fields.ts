@@ -142,4 +142,8 @@ const accessHandler = {
   set() {
     return false;
   },
+
+  ownKeys(target: any) {
+    return Object.keys(target);
+  },
 };

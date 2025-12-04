@@ -5,22 +5,14 @@
  * 2.0.
  */
 
-import type { MaybePromise } from '@kbn/utility-types';
 import type { CoreStart } from '@kbn/core/public';
 import type { BrowserApiToolDefinition } from '@kbn/onechat-browser/tools/browser_api_tool';
+import type { AttachmentInput } from '@kbn/onechat-common/attachments';
 import type { OnechatInternalService } from '../services';
 
 export interface EmbeddableConversationDependencies {
   services: OnechatInternalService;
   coreStart: CoreStart;
-}
-
-export type AttachmentsGetContent = () => MaybePromise<Record<string, unknown>>;
-
-export interface UiAttachment {
-  id: string;
-  type: string;
-  getContent: AttachmentsGetContent;
 }
 
 export interface EmbeddableConversationProps {
@@ -56,18 +48,27 @@ export interface EmbeddableConversationProps {
   agentId?: string;
 
   /**
-   * Optional initial message to automatically send when starting a new conversation.
+   * Optional initial message content to use when starting a new conversation.
    * Only applies when creating a new conversation (not when restoring existing ones).
+   * Use with `autoSendInitialMessage` to control whether this message is automatically sent.
    *
    * Example: 'Show me error logs from the last hour'
    */
   initialMessage?: string;
   /**
+   * Whether to automatically send the initial message when starting a new conversation.
+   * Only applies when creating a new conversation (not when restoring existing ones).
+   * Requires `initialMessage` to be provided.
+   *
+   * @default false
+   */
+  autoSendInitialMessage?: boolean;
+  /**
    * Optional attachments with lazy content loading.
    * Content will be fetched when starting a new conversation round.
    * It will be appended only if it has changed since previous conversation round.
    */
-  attachments?: UiAttachment[];
+  attachments?: AttachmentInput[];
 
   /**
    * Browser API tools that the agent can use to interact with the page.
@@ -93,6 +94,12 @@ export interface EmbeddableConversationProps {
 export interface EmbeddableConversationFlyoutProps {
   onClose: () => void;
   ariaLabelledBy: string;
+  /**
+   * Callback to register a function that will receive prop updates.
+   * Used internally to update flyout props without recreating it.
+   * @internal
+   */
+  onPropsUpdate?: (callback: (props: EmbeddableConversationProps) => void) => void;
 }
 
 export type EmbeddableConversationInternalProps = EmbeddableConversationDependencies &
