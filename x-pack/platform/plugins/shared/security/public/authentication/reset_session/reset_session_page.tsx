@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiButtonEmpty, EuiEmptyPrompt, EuiText } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiPageTemplate } from '@elastic/eui';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
@@ -23,41 +23,41 @@ export function ResetSessionPage({ logoutUrl }: Props) {
   };
 
   return (
-    <EuiEmptyPrompt
-      iconType="securityApp"
-      data-test-subj="promptPage"
-      title={
-        <h2>
-          {i18n.translate('xpack.security.resetSession.title', {
-            defaultMessage: 'You do not have permission to access the requested page',
-          })}
-        </h2>
-      }
-      body={
-        <EuiText>
+    <EuiPageTemplate data-test-subj="promptPage">
+      <EuiPageTemplate.EmptyPrompt
+        iconType="warning"
+        iconColor="danger"
+        title={
+          <h2>
+            {i18n.translate('xpack.security.resetSession.title', {
+              defaultMessage: 'You do not have permission to access the requested page',
+            })}
+          </h2>
+        }
+        body={
           <p>
             <FormattedMessage
               id="xpack.security.resetSession.description"
               defaultMessage="Either go back to the previous page or log in as a different user."
             />
           </p>
-        </EuiText>
-      }
-      actions={[
-        <EuiButton color="primary" fill href={logoutUrl} data-test-subj="ResetSessionButton">
-          <FormattedMessage
-            id="xpack.security.resetSession.logOutButtonLabel"
-            defaultMessage="Log in as different user"
-          />
-        </EuiButton>,
-        <EuiButtonEmpty onClick={handleGoBack} data-test-subj="goBackButton">
-          <FormattedMessage
-            id="xpack.security.resetSession.goBackButtonLabel"
-            defaultMessage="Go back"
-          />
-        </EuiButtonEmpty>,
-      ]}
-    />
+        }
+        actions={[
+          <EuiButton color="primary" fill href={logoutUrl} data-test-subj="ResetSessionButton">
+            <FormattedMessage
+              id="xpack.security.resetSession.logOutButtonLabel"
+              defaultMessage="Log in as different user"
+            />
+          </EuiButton>,
+          <EuiButtonEmpty onClick={handleGoBack} data-test-subj="goBackButton">
+            <FormattedMessage
+              id="xpack.security.resetSession.goBackButtonLabel"
+              defaultMessage="Go back"
+            />
+          </EuiButtonEmpty>,
+        ]}
+      />
+    </EuiPageTemplate>
   );
 }
 

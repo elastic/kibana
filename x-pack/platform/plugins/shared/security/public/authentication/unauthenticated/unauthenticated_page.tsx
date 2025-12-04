@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiEmptyPrompt, EuiText } from '@elastic/eui';
+import { EuiButton, EuiPageTemplate } from '@elastic/eui';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
@@ -19,35 +19,35 @@ interface Props {
 
 export function UnauthenticatedPage({ loginUrl }: Props) {
   return (
-    <EuiEmptyPrompt
-      iconType="securityApp"
-      data-test-subj="promptPage"
-      title={
-        <h2>
-          {i18n.translate('xpack.security.unauthenticated.pageTitle', {
-            defaultMessage: 'We hit an authentication error',
-          })}
-        </h2>
-      }
-      body={
-        <EuiText>
+    <EuiPageTemplate data-test-subj="promptPage">
+      <EuiPageTemplate.EmptyPrompt
+        iconType="warning"
+        iconColor="danger"
+        title={
+          <h2>
+            {i18n.translate('xpack.security.unauthenticated.pageTitle', {
+              defaultMessage: 'We hit an authentication error',
+            })}
+          </h2>
+        }
+        body={
           <p>
             <FormattedMessage
               id="xpack.security.unauthenticated.errorDescription"
               defaultMessage="Try logging in again, and if the problem persists, contact your system administrator."
             />
           </p>
-        </EuiText>
-      }
-      actions={[
-        <EuiButton color="primary" fill href={loginUrl} data-test-subj="logInButton">
-          <FormattedMessage
-            id="xpack.security.unauthenticated.loginButtonLabel"
-            defaultMessage="Log in"
-          />
-        </EuiButton>,
-      ]}
-    />
+        }
+        actions={[
+          <EuiButton color="primary" fill href={loginUrl} data-test-subj="logInButton">
+            <FormattedMessage
+              id="xpack.security.unauthenticated.loginButtonLabel"
+              defaultMessage="Log in"
+            />
+          </EuiButton>,
+        ]}
+      />
+    </EuiPageTemplate>
   );
 }
 
