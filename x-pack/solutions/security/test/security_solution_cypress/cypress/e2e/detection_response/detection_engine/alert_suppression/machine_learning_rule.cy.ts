@@ -21,6 +21,7 @@ import {
   forceStartDatafeeds,
   forceStopAndCloseJob,
   setupMlModulesWithRetry,
+  waitForAllDatafeedsToStart,
 } from '../../../../support/machine_learning';
 import {
   continueFromDefineStep,
@@ -100,7 +101,6 @@ describe(
         before(() => {
           cy.task('esArchiverLoad', { archiveName: 'auditbeat/hosts', type: 'platform' });
           setupMlModulesWithRetry({ moduleName: 'security_linux_v3' });
-          forceStartDatafeeds({ jobIds: allSecurityLinuxV3JobIds });
           cy.task('esArchiverLoad', { archiveName: 'anomalies', type: 'ftr' });
         });
 
@@ -128,6 +128,8 @@ describe(
         describe('when all jobs are running', () => {
           beforeEach(() => {
             mlRule = getMachineLearningRule({ machine_learning_job_id: [jobId] });
+            forceStartDatafeeds({ jobIds: allSecurityLinuxV3JobIds });
+            waitForAllDatafeedsToStart({ jobIds: allSecurityLinuxV3JobIds });
             selectMachineLearningRuleType();
             fillDefineMachineLearningRule(mlRule);
           });

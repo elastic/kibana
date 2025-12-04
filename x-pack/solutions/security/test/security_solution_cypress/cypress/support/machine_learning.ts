@@ -108,3 +108,46 @@ export const forceStopAndCloseJob = ({ jobId }: { jobId: string }) =>
       jobId,
     },
   });
+
+/**
+ * Gets the stats for all datafeeds, including their state.
+ * @returns the response from the get datafeed stats request
+ */
+const getDatafeedStats = () =>
+  rootRequest<{ datafeeds: Array<{ datafeed_id: string; state: string }> }>({
+    headers: {
+      'elastic-api-version': 1,
+    },
+    method: 'GET',
+    url: '/internal/ml/datafeeds/_stats',
+    failOnStatusCode: true,
+  });
+
+/**
+ * Verifies that all specified datafeeds are in the "started" state.
+ * Uses recurse to retry until all datafeeds are started or timeout is reached.
+ * @param jobIds the job IDs for which to verify datafeeds are started
+ * @returns the response from the get datafeed stats request
+ */
+export const waitForAllDatafeedsToStart = ({ jobIds }: { jobIds: string[] }) => {
+  const expectedDatafeedIds = jobIds.map((jobId) => `datafeed-${jobId}`);
+  return recurse(
+    () => getDatafeedStats(),
+    (response) => {
+      const datafeedStates = new Map(
+        response.body.datafeeds.map((df) => [df.datafeed_id, df.state])
+      );
+      const allStarted = expectedDatafeedIds.every(
+        (datafeedId) => datafeedStates.get(datafeedId) === 'started'
+      );
+      if (!allStarted) {
+        const notStarted = expectedDatafeedIds.filter(
+          (datafeedId) => datafeedStates.get(datafeedId) !== 'started'
+        );
+        cy.log(`Waiting for datafeeds to start. Not started yet: ${notStarted.join(', ')}`);
+      }
+      return allStarted;
+    },
+    { delay: 2000, timeout: 60000 }
+  );
+};
