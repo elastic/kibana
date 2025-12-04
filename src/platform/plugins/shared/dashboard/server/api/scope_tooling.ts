@@ -23,12 +23,14 @@ export function stripUnmappedKeys(dashboardState: DashboardState) {
 
   function isMappedPanelType(panel: DashboardPanel) {
     const transforms = embeddableService?.getTransforms(panel.type);
-    if (!transforms?.schema) {
+    const isMapped = transforms?.isMappedPanel?.(panel.config) ?? Boolean(transforms?.schema);
+
+    if (!isMapped) {
       warnings.push(
         `Dropped panel ${panel.uid}, panel schema not available for panel type: ${panel.type}. Panels without schemas are not supported by dashboard REST endpoints`
       );
     }
-    return Boolean(transforms?.schema);
+    return isMapped;
   }
 
   function removeEnhancements(panel: DashboardPanel) {

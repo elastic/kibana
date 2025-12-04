@@ -40,4 +40,8 @@ export type EmbeddableTransforms<
    * When schema is provided, EmbeddableState is expected to be TypeOf<typeof schema>
    */
   schema?: Type<object>;
+  /**
+   * Filters out panels based on state. Used in cases where panel.type is not sufficient to determine if the panel is mapped.
+   */
+  isMappedPanel?: (state: EmbeddableState) => boolean;
 };
