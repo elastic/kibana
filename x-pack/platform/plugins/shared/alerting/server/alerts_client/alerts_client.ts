@@ -510,6 +510,7 @@ export class AlertsClient<
               alert: trackedAlert,
               legacyAlert: activeAlerts[id],
               rule: this.rule,
+              ruleData: this.options.rule,
               isImproving,
               runTimestamp: this.runTimestampString,
               timestamp: currentTime,
@@ -534,6 +535,7 @@ export class AlertsClient<
             >({
               legacyAlert: activeAlerts[id],
               rule: this.rule,
+              ruleData: this.options.rule,
               runTimestamp: this.runTimestampString,
               timestamp: currentTime,
               payload: this.reportedAlerts[id],
@@ -568,6 +570,7 @@ export class AlertsClient<
                 alert: trackedAlert,
                 legacyAlert: recoveredAlerts[id],
                 rule: this.rule,
+                ruleData: this.options.rule,
                 runTimestamp: this.runTimestampString,
                 timestamp: currentTime,
                 payload: this.reportedAlerts[id],
