@@ -32,7 +32,7 @@ interface SecondaryMenuComponent
 }
 
 const SecondaryMenuBase = forwardRef<HTMLDivElement, SecondaryMenuProps>(
-  ({ badgeType, children, title }, ref) => {
+  ({ badgeType, children, isPanel = false, title }, ref) => {
     const { euiTheme } = useEuiTheme();
     const headerStyle = useMenuHeaderStyle();
 
@@ -44,7 +44,7 @@ const SecondaryMenuBase = forwardRef<HTMLDivElement, SecondaryMenuProps>(
 
     const titleStyles = css`
       ${headerStyle}
-      background: ${euiTheme.colors.backgroundBasePlain};
+      background: ${isPanel ? 'transparent' : euiTheme.colors.backgroundBasePlain};
       border-radius: ${euiTheme.border.radius.medium};
     `;
 
