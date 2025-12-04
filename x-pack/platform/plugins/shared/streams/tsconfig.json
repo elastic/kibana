@@ -72,7 +72,6 @@
     "@kbn/utility-types",
     "@kbn/console-plugin",
     "@kbn/actions-plugin",
-    "@kbn/dataset-quality-plugin",
     "@kbn/apm-utils",
   ]
 }
