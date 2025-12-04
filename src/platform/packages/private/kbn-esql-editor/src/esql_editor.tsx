@@ -414,18 +414,6 @@ const ESQLEditorInternal = function ESQLEditor({
     );
   }, [onMouseDownResize, editorHeight, onKeyDownResize, setEditorHeight]);
 
-  const onEditorFocus = useCallback(
-    ({ shouldTriggerSuggestions = false }: { shouldTriggerSuggestions?: boolean } = {}) => {
-      setIsCodeEditorExpandedFocused(true);
-      setLabelInFocus(true);
-
-      if (shouldTriggerSuggestions) {
-        triggerSuggestions();
-      }
-    },
-    [triggerSuggestions]
-  );
-
   const { cache: esqlFieldsCache, memoizedFieldsFromESQL } = useMemo(() => {
     // need to store the timing of the first request so we can atomically clear the cache per query
     const fn = memoize(
@@ -1120,14 +1108,13 @@ const ESQLEditorInternal = function ESQLEditor({
                     });
 
                     editor.onDidFocusEditorText(() => {
-                      const shouldTriggerSuggestions = !isFirstFocusRef.current;
+                      // Skip triggering suggestions on initial focus to avoid interfering
+                      // with editor initialization and automated tests
+                      if (!isFirstFocusRef.current) {
+                        triggerSuggestions();
+                      }
+
                       isFirstFocusRef.current = false;
-
-                      onEditorFocus({ shouldTriggerSuggestions });
-                    });
-
-                    editor.onKeyDown(() => {
-                      onEditorFocus();
                     });
 
                     // on CMD/CTRL + / comment out the entire line
