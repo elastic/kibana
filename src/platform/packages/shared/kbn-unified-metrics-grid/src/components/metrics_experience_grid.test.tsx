@@ -108,6 +108,10 @@ describe('MetricsExperienceGrid', () => {
       chartToolbarCss: { name: '', styles: '' },
       histogramCss: { name: '', styles: '' },
       fetchParams,
+      actions: {
+        openInNewTab: jest.fn(),
+        updateESQLQuery: jest.fn(),
+      },
       services: {
         fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
       } as unknown as UnifiedHistogramServices,

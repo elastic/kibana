@@ -8,13 +8,13 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
+import { useLensExtraActions } from './use_lens_extra_actions';
+import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import {
-  useLensExtraActions,
   ACTION_COPY_TO_DASHBOARD,
   ACTION_VIEW_DETAILS,
   ACTION_EXPLORE_IN_DISCOVER_TAB,
-} from './use_lens_extra_actions';
-import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+} from '../../../common/constants';
 
 describe('useLensExtraActions', () => {
   it('should return an empty array when no config is provided', () => {

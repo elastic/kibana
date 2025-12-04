@@ -17,7 +17,7 @@ import type { UnifiedHistogramServices } from '@kbn/unified-histogram';
 import { getFetchParamsMock, getFetch$Mock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
-import type { UnifiedHistogramFetch$ } from '@kbn/unified-histogram/types';
+import type { ChartSectionProps, UnifiedHistogramFetch$ } from '@kbn/unified-histogram/types';
 
 jest.mock('./chart', () => ({
   Chart: jest.fn(() => <div data-test-subj="chart" />),
@@ -25,6 +25,12 @@ jest.mock('./chart', () => ({
 
 describe('MetricsGrid', () => {
   let discoverFetch$: UnifiedHistogramFetch$;
+
+  const actions: ChartSectionProps['actions'] = {
+    openInNewTab: jest.fn(),
+    updateESQLQuery: jest.fn(),
+  };
+
   const fetchParams: MetricsGridProps['fetchParams'] = getFetchParamsMock({
     filters: [],
     query: {
@@ -71,6 +77,7 @@ describe('MetricsGrid', () => {
         fields={fields}
         fetchParams={fetchParams}
         services={services}
+        actions={actions}
       />
     );
 
@@ -87,6 +94,7 @@ describe('MetricsGrid', () => {
         fields={fields}
         fetchParams={fetchParams}
         services={services}
+        actions={actions}
       />
     );
 
@@ -100,6 +108,7 @@ describe('MetricsGrid', () => {
         fields={fields}
         fetchParams={fetchParams}
         services={services}
+        actions={actions}
       />
     );
 
@@ -125,6 +134,7 @@ describe('MetricsGrid', () => {
           fields={fields}
           fetchParams={fetchParams}
           services={services}
+          actions={actions}
         />
       );
 
@@ -148,6 +158,7 @@ describe('MetricsGrid', () => {
           fields={fields}
           fetchParams={fetchParams}
           services={services}
+          actions={actions}
         />
       );
 
@@ -176,6 +187,7 @@ describe('MetricsGrid', () => {
           fields={fields}
           fetchParams={fetchParams}
           services={services}
+          actions={actions}
         />
       );
 
@@ -207,6 +219,7 @@ describe('MetricsGrid', () => {
           fields={fields}
           fetchParams={fetchParams}
           services={services}
+          actions={actions}
         />
       );
 
@@ -245,6 +258,7 @@ describe('MetricsGrid', () => {
           fields={multipleFields}
           fetchParams={fetchParams}
           services={services}
+          actions={actions}
         />
       );
 
@@ -290,6 +304,7 @@ describe('MetricsGrid', () => {
             fields={fields}
             fetchParams={fetchParams}
             services={services}
+            actions={actions}
           />
         );
 
@@ -309,6 +324,7 @@ describe('MetricsGrid', () => {
             fields={fields}
             fetchParams={fetchParams}
             services={services}
+            actions={actions}
           />
         );
 
@@ -340,6 +356,7 @@ describe('MetricsGrid', () => {
             fields={fields}
             fetchParams={fetchParams}
             services={services}
+            actions={actions}
           />
         );
 
@@ -362,6 +379,7 @@ describe('MetricsGrid', () => {
             fields={fields}
             fetchParams={fetchParams}
             services={services}
+            actions={actions}
           />
         );
 
