@@ -36,18 +36,6 @@ export function defineResetSessionRoutes({ httpResources }: RouteDefinitionParam
       },
     },
     (context, request, response) => {
-      // Check if request has an sid cookie, if not redirect to the home page
-      const cookies = Array.isArray(request.headers.cookie)
-        ? request.headers.cookie
-        : [request.headers.cookie || ''];
-      if (!cookies.find((c) => c.includes('sid='))) {
-        const next = request.query.next ? `?next=${encodeURIComponent(request.query.next)}` : '';
-        return response.redirected({
-          headers: {
-            location: `/app/home${next}`,
-          },
-        });
-      }
       return response.renderAnonymousCoreApp();
     }
   );
