@@ -14,7 +14,7 @@ import type { PersistedState } from '@kbn/visualizations-common';
 import { getTimeZone } from '@kbn/visualizations-common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
-import { useRenderParams } from '@kbn/expressions-plugin/public';
+import { useSyncParams } from '@kbn/expressions-plugin/public';
 import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
@@ -122,9 +122,9 @@ export const heatmapRenderer: (
 
     performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_START);
 
-    // Wrapper component that uses useRenderParams hook for reactive param updates
+    // Wrapper component that uses useSyncParams hook for reactive param updates
     const HeatmapWrapper = () => {
-      const { syncCursor, syncTooltips } = useRenderParams(handlers);
+      const { syncCursor, syncTooltips } = useSyncParams(handlers);
 
       return (
         <div className="eui-scrollBar" css={heatmapContainerCss} data-test-subj="heatmapChart">

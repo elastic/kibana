@@ -16,7 +16,7 @@ import type {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/public';
-import { useRenderParams } from '@kbn/expressions-plugin/public';
+import { useSyncParams } from '@kbn/expressions-plugin/public';
 import type { PersistedState } from '@kbn/visualizations-common';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -146,9 +146,9 @@ export const getPartitionVisRenderer: (
 
     performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_START);
 
-    // Wrapper component that uses useRenderParams hook for reactive param updates
+    // Wrapper component that uses useSyncParams hook for reactive param updates
     const PartitionVisWrapper = () => {
-      const { syncColors } = useRenderParams(handlers);
+      const { syncColors } = useSyncParams(handlers);
 
       return (
         <div css={partitionVisRenderer}>

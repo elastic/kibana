@@ -50,7 +50,7 @@ export class ExpressionRenderHandler {
   render$: Observable<number>;
   update$: Observable<UpdateValue | null>;
   events$: Observable<ExpressionRendererEvent>;
-  renderParamsUpdate$: Observable<RenderParams>;
+  syncParamsUpdate$: Observable<RenderParams>;
 
   private element: HTMLElement;
   private destroyFn?: Function;
@@ -58,7 +58,7 @@ export class ExpressionRenderHandler {
   private renderSubject: Rx.BehaviorSubject<number | null>;
   private eventsSubject: Rx.Subject<unknown>;
   private updateSubject: Rx.Subject<UpdateValue | null>;
-  private renderParamsUpdateSubject: Rx.Subject<RenderParams>;
+  private syncParamsUpdateSubject: Rx.Subject<RenderParams>;
   private renderMode: RenderMode;
   private syncColors: boolean;
   private syncCursor: boolean;
@@ -93,8 +93,8 @@ export class ExpressionRenderHandler {
     this.updateSubject = new Rx.Subject();
     this.update$ = this.updateSubject.asObservable();
 
-    this.renderParamsUpdateSubject = new Rx.Subject();
-    this.renderParamsUpdate$ = this.renderParamsUpdateSubject.asObservable();
+    this.syncParamsUpdateSubject = new Rx.Subject();
+    this.syncParamsUpdate$ = this.syncParamsUpdateSubject.asObservable();
 
     this.renderMode = renderMode || 'view';
     this.syncColors = syncColors ?? false;
@@ -136,7 +136,7 @@ export class ExpressionRenderHandler {
       isInteractive: () => {
         return interactive ?? true;
       },
-      renderParamsUpdate$: this.renderParamsUpdate$,
+      syncParamsUpdate$: this.syncParamsUpdate$,
       hasCompatibleActions,
       getCompatibleCellValueActions,
     };
@@ -178,13 +178,13 @@ export class ExpressionRenderHandler {
     this.renderSubject.complete();
     this.eventsSubject.complete();
     this.updateSubject.complete();
-    this.renderParamsUpdateSubject.complete();
+    this.syncParamsUpdateSubject.complete();
     if (this.destroyFn) {
       this.destroyFn();
     }
   };
 
-  updateRenderParams = (params: RenderParams) => {
+  updateSyncParams = (params: RenderParams) => {
     const changes: RenderParams = {};
 
     if (params.renderMode && this.renderMode !== params.renderMode) {
@@ -205,7 +205,7 @@ export class ExpressionRenderHandler {
     }
 
     if (Object.keys(changes).length > 0) {
-      this.renderParamsUpdateSubject.next(changes);
+      this.syncParamsUpdateSubject.next(changes);
     }
   };
 

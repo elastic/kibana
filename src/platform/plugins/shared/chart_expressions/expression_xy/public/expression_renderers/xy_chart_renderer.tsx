@@ -26,7 +26,7 @@ import type {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common';
-import { useRenderParams } from '@kbn/expressions-plugin/public';
+import { useSyncParams } from '@kbn/expressions-plugin/public';
 import type { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
@@ -282,9 +282,9 @@ export const getXyChartRenderer = ({
 
     performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_START);
 
-    // Wrapper component that uses useRenderParams hook for reactive param updates
+    // Wrapper component that uses useSyncParams hook for reactive param updates
     const XYChartWrapper = () => {
-      const { syncColors, syncCursor, syncTooltips } = useRenderParams(handlers);
+      const { syncColors, syncCursor, syncTooltips } = useSyncParams(handlers);
 
       return (
         <div css={chartContainerStyle} data-test-subj="xyVisChart">

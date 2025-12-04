@@ -58,7 +58,6 @@ export function useExpressionRenderer(
     onRender$,
     reload$,
     abortController,
-    renderMode,
     syncColors,
     syncCursor,
     syncTooltips,
@@ -75,7 +74,6 @@ export function useExpressionRenderer(
 
   const memoizedOptions = useShallowMemo({
     expression,
-    renderMode,
     syncColors,
     syncCursor,
     syncTooltips,
@@ -84,7 +82,6 @@ export function useExpressionRenderer(
   const [
     {
       expression: debouncedExpression,
-      renderMode: debouncedRenderMode,
       syncColors: debouncedSyncColors,
       syncCursor: debouncedSyncCursor,
       syncTooltips: debouncedSyncTooltips,
@@ -115,7 +112,6 @@ export function useExpressionRenderer(
       nodeRef.current &&
       new ExpressionLoader(nodeRef.current, debouncedExpression, {
         ...debouncedLoaderParams,
-        renderMode: debouncedRenderMode,
         syncColors: debouncedSyncColors,
         syncCursor: debouncedSyncCursor,
         syncTooltips: debouncedSyncTooltips,
@@ -145,7 +141,11 @@ export function useExpressionRenderer(
       expressionLoaderRef.current = null;
       errorRenderHandlerRef.current = null;
     };
-  }, [debouncedLoaderParams.onRenderError, debouncedLoaderParams.interactive]);
+  }, [
+    debouncedLoaderParams.onRenderError,
+    debouncedLoaderParams.interactive,
+    debouncedLoaderParams.renderMode,
+  ]);
 
   useEffect(() => {
     const subscription = onEvent && expressionLoaderRef.current?.events$.subscribe(onEvent);
@@ -196,15 +196,14 @@ export function useExpressionRenderer(
     expressionLoaderRef.current?.update(debouncedExpression, debouncedLoaderParams);
   }, [debouncedExpression, debouncedLoaderParams]);
 
-  // Handle renderMode and sync params changes separately without triggering full update
+  // Handle sync params changes separately without triggering full update
   useUpdateEffect(() => {
-    expressionLoaderRef.current?.updateRenderParams({
-      renderMode: debouncedRenderMode,
+    expressionLoaderRef.current?.updateSyncParams({
       syncColors: debouncedSyncColors,
       syncCursor: debouncedSyncCursor,
       syncTooltips: debouncedSyncTooltips,
     });
-  }, [debouncedRenderMode, debouncedSyncColors, debouncedSyncCursor, debouncedSyncTooltips]);
+  }, [debouncedSyncColors, debouncedSyncCursor, debouncedSyncTooltips]);
 
   // call expression loader's done() handler when finished rendering custom error state
   useLayoutEffect(() => {

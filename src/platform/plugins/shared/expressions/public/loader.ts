@@ -14,7 +14,7 @@ import { defaults } from 'lodash';
 import type { SerializableRecord, UnwrapObservable } from '@kbn/utility-types';
 import type { Adapters } from '@kbn/inspector-plugin/public';
 import type { IExpressionLoaderParams } from './types';
-import type { ExpressionAstExpression, RenderMode } from '../common';
+import type { ExpressionAstExpression } from '../common';
 import type { ExecutionContract } from '../common/execution/execution_contract';
 
 import { ExpressionRenderHandler } from './render';
@@ -121,23 +121,16 @@ export class ExpressionLoader {
     return this.execution?.inspect() as Adapters;
   }
 
-  updateRenderParams(params: {
-    renderMode?: RenderMode;
+  updateSyncParams(params: {
     syncColors?: boolean;
     syncCursor?: boolean;
     syncTooltips?: boolean;
   }): void {
     const changedParams: {
-      renderMode?: RenderMode;
       syncColors?: boolean;
       syncCursor?: boolean;
       syncTooltips?: boolean;
     } = {};
-
-    if (params.renderMode && params.renderMode !== this.params.renderMode) {
-      this.params.renderMode = params.renderMode;
-      changedParams.renderMode = params.renderMode;
-    }
     if (params.syncColors !== undefined && params.syncColors !== this.params.syncColors) {
       this.params.syncColors = params.syncColors;
       changedParams.syncColors = params.syncColors;
@@ -151,7 +144,7 @@ export class ExpressionLoader {
       changedParams.syncTooltips = params.syncTooltips;
     }
     if (Object.keys(changedParams).length > 0) {
-      this.renderHandler.updateRenderParams(changedParams);
+      this.renderHandler.updateSyncParams(changedParams);
     }
   }
 

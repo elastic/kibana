@@ -8,33 +8,28 @@
  */
 
 import { useState, useEffect } from 'react';
-import type { IInterpreterRenderHandlers, RenderMode } from '../../common';
+import type { IInterpreterRenderHandlers } from '../../common';
 
-export interface RenderParamsState {
-  renderMode: RenderMode;
+export interface SyncParamsState {
   syncColors: boolean;
   syncCursor: boolean;
   syncTooltips: boolean;
 }
 
 /**
- * React hook that subscribes to render params updates from expression handlers.
- * Use this in chart renderers to efficiently update when params change without re-executing expressions.
+ * React hook that subscribes to sync params updates from expression handlers.
+ * Use this in chart renderers to efficiently update when sync params change without re-executing expressions.
  *
  * @param handlers - The interpreter render handlers passed to the render function
- * @returns Current render params state that updates when params change
+ * @returns Current sync params state that updates when params change
  */
-export function useRenderParams(handlers: IInterpreterRenderHandlers): RenderParamsState {
-  const [renderMode, setRenderMode] = useState(handlers.getRenderMode());
+export function useSyncParams(handlers: IInterpreterRenderHandlers): SyncParamsState {
   const [syncColors, setSyncColors] = useState(handlers.isSyncColorsEnabled());
   const [syncCursor, setSyncCursor] = useState(handlers.isSyncCursorEnabled());
   const [syncTooltips, setSyncTooltips] = useState(handlers.isSyncTooltipsEnabled());
 
   useEffect(() => {
-    const subscription = handlers.renderParamsUpdate$.subscribe((params) => {
-      if (params.renderMode) {
-        setRenderMode(params.renderMode);
-      }
+    const subscription = handlers.syncParamsUpdate$.subscribe((params) => {
       if (params.syncColors !== undefined) {
         setSyncColors(params.syncColors);
       }
@@ -47,10 +42,9 @@ export function useRenderParams(handlers: IInterpreterRenderHandlers): RenderPar
     });
 
     return () => subscription.unsubscribe();
-  }, [handlers.renderParamsUpdate$]);
+  }, [handlers.syncParamsUpdate$]);
 
   return {
-    renderMode,
     syncColors,
     syncCursor,
     syncTooltips,

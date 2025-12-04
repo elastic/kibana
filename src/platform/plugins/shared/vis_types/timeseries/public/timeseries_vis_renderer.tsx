@@ -17,7 +17,7 @@ import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { VisualizationContainer } from '@kbn/visualizations-common';
 
 import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
-import { useRenderParams } from '@kbn/expressions-plugin/public';
+import { useSyncParams } from '@kbn/expressions-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { getUsageCollectionStart } from './services';
 import { TIME_RANGE_DATA_MODES } from '../common/enums';
@@ -91,9 +91,9 @@ export const getTimeseriesVisRenderer: (deps: {
       handlers.done();
     };
 
-    // Wrapper component that uses useRenderParams hook for reactive param updates
+    // Wrapper component that uses useSyncParams hook for reactive param updates
     const TimeseriesWrapper = () => {
-      const { syncColors, syncCursor, syncTooltips } = useRenderParams(handlers);
+      const { syncColors, syncCursor, syncTooltips } = useSyncParams(handlers);
 
       return (
         <VisualizationContainer
