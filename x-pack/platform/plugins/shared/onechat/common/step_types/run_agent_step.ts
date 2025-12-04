@@ -28,7 +28,7 @@ export const InputSchema = z.object({
   /**
    * The user input message to send to the agent.
    */
-  input: z.string(),
+  message: z.string(),
 });
 
 /**
