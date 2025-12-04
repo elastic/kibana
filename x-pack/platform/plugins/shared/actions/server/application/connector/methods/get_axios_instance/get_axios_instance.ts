@@ -6,6 +6,7 @@
  */
 
 import type { AxiosInstance } from 'axios';
+import type { ActionType } from '../../../../../common';
 import type { RawAction } from '../../../../types';
 import { getActionKibanaPrivileges } from '../../../../lib/get_action_kibana_privileges';
 import { isPreconfigured } from '../../../../lib/is_preconfigured';
@@ -13,7 +14,6 @@ import { isSystemAction } from '../../../../lib/is_system_action';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../constants/saved_objects';
 import type { ActionsClientContext } from '../../../../actions_client';
 import { validateSecrets } from '../../../../lib';
-import { ActionType } from '@kbn/actions-plugin/common';
 
 const isWorkflowsOnlyConnectorType = ({
   supportedFeatureIds,

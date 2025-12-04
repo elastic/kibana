@@ -37,7 +37,6 @@ import { AlertingEventLogger } from '@kbn/alerting-plugin/server/lib/alerting_ev
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import type { FixtureStartDeps } from './plugin';
 import { retryIfConflicts } from './lib/retry_if_conflicts';
-import axios from 'axios';
 
 export function defineRoutes(
   core: CoreSetup<FixtureStartDeps>,
