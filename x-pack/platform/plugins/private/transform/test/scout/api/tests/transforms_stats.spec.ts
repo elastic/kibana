@@ -45,7 +45,6 @@ apiTest.describe('/internal/transform/transforms/_stats', { tag: tags.ESS_ONLY }
         responseType: 'json',
       });
 
-      console.log('Response body:', JSON.stringify(body, null, 2));
       expect(statusCode).toBe(200);
 
       expect(body.count).toBe(2);
