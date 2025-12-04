@@ -251,9 +251,9 @@ const createMockValidator = (
 ): StreamNameValidator => {
   const onValidateAction = action('onValidate');
 
-  return async (streamName: string) => {
+  return async (streamName: string, selectedTemplate: TemplateDeserialized) => {
     // Log the validation call to Storybook actions panel
-    onValidateAction(streamName);
+    onValidateAction(streamName, selectedTemplate);
 
     // Simulate network delay
     await new Promise((resolve) => setTimeout(resolve, 500));

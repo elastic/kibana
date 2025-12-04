@@ -50,7 +50,10 @@ export interface StreamNameValidationResult {
 /**
  * Async validator function type for external validation (duplicate/priority checks)
  */
-export type StreamNameValidator = (streamName: string) => Promise<{
+export type StreamNameValidator = (
+  streamName: string,
+  selectedTemplate: TemplateDeserialized
+) => Promise<{
   errorType: 'duplicate' | 'higherPriority' | null;
   conflictingIndexPattern?: string;
 }>;
@@ -61,6 +64,7 @@ export type StreamNameValidator = (streamName: string) => Promise<{
  */
 export const validateStreamName = async (
   streamName: string,
+  selectedTemplate: TemplateDeserialized,
   onValidate?: StreamNameValidator
 ): Promise<StreamNameValidationResult> => {
   // First, check for empty wildcards (local validation)
@@ -70,7 +74,7 @@ export const validateStreamName = async (
 
   // Run the external validator if provided
   if (onValidate) {
-    const result = await onValidate(streamName);
+    const result = await onValidate(streamName, selectedTemplate);
 
     if (result.errorType === 'duplicate') {
       return { errorType: 'duplicate' };

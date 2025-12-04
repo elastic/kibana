@@ -100,7 +100,11 @@ export const CreateClassicStreamFlyout = ({
     async (name: string): Promise<boolean> => {
       setIsValidating(true);
       try {
-        const result = await validateStreamName(name, onValidate);
+        const result = await validateStreamName(
+          name,
+          selectedTemplateData as TemplateDeserialized,
+          onValidate
+        );
         setValidationError(result.errorType);
         setConflictingIndexPattern(result.conflictingIndexPattern);
         return result.errorType === null;
@@ -108,7 +112,7 @@ export const CreateClassicStreamFlyout = ({
         setIsValidating(false);
       }
     },
-    [onValidate]
+    [selectedTemplateData, onValidate]
   );
 
   // Debounced validation - only runs after first submit attempt with an error
@@ -157,7 +161,11 @@ export const CreateClassicStreamFlyout = ({
     setIsValidating(true);
 
     try {
-      const result = await validateStreamName(streamName, onValidate);
+      const result = await validateStreamName(
+        streamName,
+        selectedTemplateData as TemplateDeserialized,
+        onValidate
+      );
       setValidationError(result.errorType);
       setConflictingIndexPattern(result.conflictingIndexPattern);
 
@@ -167,7 +175,7 @@ export const CreateClassicStreamFlyout = ({
     } finally {
       setIsValidating(false);
     }
-  }, [streamName, onValidate, onCreate]);
+  }, [streamName, selectedTemplateData, onValidate, onCreate]);
 
   const steps: EuiStepsHorizontalProps['steps'] = useMemo(
     () => [

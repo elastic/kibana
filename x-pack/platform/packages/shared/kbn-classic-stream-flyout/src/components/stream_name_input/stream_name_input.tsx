@@ -207,11 +207,24 @@ export const StreamNameInput = ({
     row-gap: ${euiTheme.size.xs};
   `;
 
+  // If there are no wildcards, show the index pattern as a read-only field
+  if (wildcardCount === 0) {
+    return (
+      <EuiFieldText
+        value={indexPattern}
+        readOnly
+        fullWidth
+        data-test-subj={`${dataTestSubj}-readonly`}
+      />
+    );
+  }
+
   // For single wildcard, use simple prepend/append
   if (!hasMultipleWildcards && inputGroups.length === 1) {
     const group = inputGroups[0];
     return (
       <EuiFieldText
+        autoFocus
         value={parts[group.wildcardIndex] ?? ''}
         onChange={(e) => handleWildcardChange(group.wildcardIndex, e.target.value)}
         placeholder="*"
@@ -243,6 +256,7 @@ export const StreamNameInput = ({
             css={getConnectedInputStyles(isFirst, isLast)}
           >
             <EuiFieldText
+              autoFocus={isFirst}
               value={parts[group.wildcardIndex] ?? ''}
               onChange={(e) => handleWildcardChange(group.wildcardIndex, e.target.value)}
               placeholder="*"

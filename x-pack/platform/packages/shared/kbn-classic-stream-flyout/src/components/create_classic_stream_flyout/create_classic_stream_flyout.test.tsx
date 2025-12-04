@@ -512,7 +512,10 @@ describe('CreateClassicStreamFlyout', () => {
 
         // Wait for validation
         await waitFor(() => {
-          expect(onValidate).toHaveBeenCalledWith('logs-template-1-mystream');
+          expect(onValidate).toHaveBeenCalledWith(
+            'logs-template-1-mystream',
+            expect.objectContaining({ name: 'template-1' })
+          );
           expect(onCreate).toHaveBeenCalledWith('logs-template-1-mystream');
         });
       });
