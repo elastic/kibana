@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { parseDatemath } from '../../../utils/time';
 import type { ObservabilityAgentDataRegistry } from '../../../data_registry/data_registry';
 
 export interface FetchApmErrorContextParams {
@@ -17,6 +17,7 @@ export interface FetchApmErrorContextParams {
   start: string;
   end: string;
   errorId: string;
+  logger: Logger;
 }
 
 export async function fetchApmErrorContext({
@@ -27,111 +28,117 @@ export async function fetchApmErrorContext({
   start,
   end,
   errorId,
+  logger,
 }: FetchApmErrorContextParams): Promise<string> {
-  const startMs = parseDatemath(start);
-  const endMs = parseDatemath(end);
+  const contextParts: string[] = [];
 
-  const error =
-    (await dataRegistry.getData('apmErrorById', {
-      request,
-      serviceName,
-      serviceEnvironment: environment ?? '',
-      start: startMs,
-      end: endMs,
-      errorId,
-    })) ?? undefined;
+  // Fetch the full error details with transaction (if available)
+  const details = await dataRegistry.getData('apmErrorDetails', {
+    request,
+    errorId,
+    serviceName,
+    start,
+    end,
+    serviceEnvironment: environment ?? '',
+  });
 
-  const downstreamDependencies =
-    (await dataRegistry.getData('apmDownstreamDependencies', {
+  contextParts.push(`<ErrorDetails>\n${JSON.stringify(details?.error, null, 2)}\n</ErrorDetails>`);
+
+  if (details?.transaction) {
+    contextParts.push(
+      `<TransactionDetails>\n${JSON.stringify(
+        details?.transaction,
+        null,
+        2
+      )}\n</TransactionDetails>`
+    );
+  }
+
+  try {
+    // Fetch the downstream dependencies for the service related to the error
+    const apmDownstreamDependencies = await dataRegistry.getData('apmDownstreamDependencies', {
       request,
       serviceName,
       serviceEnvironment: environment ?? '',
       start,
       end,
-    })) ?? [];
+    });
 
-  const contextLines: string[] = [
-    `Service: ${serviceName}`,
-    `Environment: ${environment ?? ''}`,
-    `Error ID: ${errorId}`,
-  ];
-
-  if (error) {
-    contextLines.push(
-      `Error group: ${error.error?.grouping_key ?? ''}`,
-      `Name: ${error.error?.exception?.[0]?.type ?? ''}`,
-      `Type: ${error.processor?.event ?? ''}`,
-      `Culprit: ${error.error?.culprit ?? ''}`,
-      `Trace ID: ${error.trace?.id ?? ''}`
-    );
+    if (apmDownstreamDependencies?.length) {
+      contextParts.push(
+        `<APMDownstreamDependencies>\n${JSON.stringify(
+          apmDownstreamDependencies,
+          null,
+          2
+        )}\n</APMDownstreamDependencies>`
+      );
+    }
+  } catch (error) {
+    logger.debug(`Error AI insight: apmDownstreamDependencies failed: ${error}`);
   }
 
-  const traceId = error?.trace?.id;
+  const traceId = details?.error?.trace?.id;
   if (traceId) {
-    const [traceOverview, traceErrors, logCategories] = await Promise.all([
-      dataRegistry.getData('apmTraceOverviewByTraceId', {
+    try {
+      // Fetch the trace details for the error (trace items, aggregated services for the trace, trace errors)
+      const traces = await dataRegistry.getData('apmTraceDetails', {
         request,
         traceId,
-        start: startMs,
-        end: endMs,
-      }),
-      dataRegistry.getData('apmTraceErrorsByTraceId', {
-        request,
-        traceId,
-        start: startMs,
-        end: endMs,
-      }),
-      dataRegistry.getData('apmLogCategoriesByService', {
-        request,
-        serviceName,
         start,
         end,
-      }),
-    ]);
+      });
 
-    if (traceOverview?.services?.length) {
-      contextLines.push(
-        `<TraceServices>\n${JSON.stringify(
-          traceOverview.services.slice(0, 25),
-          null,
-          2
-        )}\n</TraceServices>`
-      );
+      if (traces?.traceItems?.length) {
+        contextParts.push(
+          `<TraceItems>\n${JSON.stringify(traces.traceItems.slice(0, 100), null, 2)}\n</TraceItems>`
+        );
+      }
+
+      if (traces?.traceErrors?.length) {
+        contextParts.push(
+          `<TraceErrors>\n${JSON.stringify(
+            traces.traceErrors.slice(0, 100),
+            null,
+            2
+          )}\n</TraceErrors>`
+        );
+      }
+
+      if (traces?.traceServiceAggregates?.length) {
+        contextParts.push(
+          `<TraceServices>\n${JSON.stringify(
+            traces.traceServiceAggregates.slice(0, 25),
+            null,
+            2
+          )}\n</TraceServices>`
+        );
+      }
+    } catch (error) {
+      logger.debug(`Error AI insight: apmTraces failed: ${error}`);
     }
 
-    if (traceOverview?.items?.length) {
-      contextLines.push(
-        `<TraceItems>\n${JSON.stringify(traceOverview.items.slice(0, 100), null, 2)}\n</TraceItems>`
-      );
-    }
+    try {
+      // Fetch categorized logs tied to this trace (trace.id or services in the trace)
+      const logCategories = await dataRegistry.getData('apmLogCategoriesByTrace', {
+        request,
+        traceId,
+        start,
+        end,
+      });
 
-    if (traceErrors?.length) {
-      contextLines.push(
-        `<TraceErrors>\n${JSON.stringify(traceErrors.slice(0, 100), null, 2)}\n</TraceErrors>`
-      );
-    }
-
-    if (logCategories?.length) {
-      contextLines.push(
-        `<LogCategories service="${serviceName}">\n${JSON.stringify(
-          logCategories.slice(0, 10),
-          null,
-          2
-        )}\n</LogCategories>`
-      );
+      if (logCategories?.length) {
+        contextParts.push(
+          `<TraceLogCategories>\n${JSON.stringify(
+            logCategories.slice(0, 10),
+            null,
+            2
+          )}\n</TraceLogCategories>`
+        );
+      }
+    } catch (error) {
+      logger.debug(`Error AI insight: apmLogCategoriesByTrace failed: ${error}`);
     }
   }
 
-  if (downstreamDependencies.length > 0) {
-    const deps = downstreamDependencies
-      .slice(0, 5)
-      .map((d) => d['span.destination.service.resource'])
-      .filter(Boolean)
-      .join(', ');
-    if (deps) {
-      contextLines.push(`Downstream dependencies (sample): ${deps}`);
-    }
-  }
-
-  return contextLines.filter(Boolean).join('\n');
+  return contextParts.filter(Boolean).join('\n\n');
 }

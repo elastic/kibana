@@ -7,7 +7,6 @@
 
 import * as t from 'io-ts';
 import { apiPrivileges } from '@kbn/onechat-plugin/common/features';
-import { fetchApmErrorContext } from './apm_error/fetch_apm_error_context';
 import { generateErrorAiInsight } from './apm_error/generate_error_ai_insight';
 import { createObservabilityAgentBuilderServerRoute } from '../create_observability_agent_builder_server_route';
 
@@ -33,26 +32,22 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
         connectorId: t.union([t.string, t.undefined, t.null]),
       }),
     }),
-    handler: async ({ request, core, dataRegistry, params }) => {
+    handler: async ({ request, core, dataRegistry, params, logger }) => {
       const { errorId, serviceName, start, end, environment = '', connectorId } = params.body;
 
       const [_, pluginsStart] = await core.getStartServices();
 
-      const context = await fetchApmErrorContext({
-        dataRegistry,
-        request,
+      const { summary, context } = await generateErrorAiInsight({
+        connectorId: connectorId ?? undefined,
+        errorId,
         serviceName,
-        environment: environment ?? '',
         start,
         end,
-        errorId,
-      });
-
-      const summary = await generateErrorAiInsight({
-        inferenceStart: pluginsStart.inference,
+        environment: environment ?? '',
+        dataRegistry,
         request,
-        connectorId: connectorId ?? undefined,
-        context,
+        inferenceStart: pluginsStart.inference,
+        logger,
       });
 
       return {

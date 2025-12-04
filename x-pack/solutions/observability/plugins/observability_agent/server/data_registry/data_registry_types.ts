@@ -70,40 +70,66 @@ interface APMErrorSample {
   };
 }
 
-interface TraceItemLite {
-  '@timestamp': string;
-  'service.name': string;
-  name: string;
-  type?: string;
-  'event.outcome'?: string;
-  'status.code'?: number | string;
-  'span.duration.us'?: number;
-  'transaction.duration.us'?: number;
-  'http.url'?: string;
-  'span.destination.service.resource'?: string;
+interface APMTransaction {
+  transaction?: {
+    id?: string;
+    name?: string;
+    type?: string;
+  };
+  trace?: {
+    id?: string;
+  };
+  service?: {
+    name?: string;
+  };
 }
 
-interface TraceServiceAggregate {
+interface APMTraceItem {
+  timestamp: string;
+  serviceName?: string;
+  traceId?: string;
+  transactionId?: string;
+  spanId?: string;
+  transactionName?: string;
+  spanName?: string;
+  transactionType?: string;
+  spanType?: string;
+  spanSubtype?: string;
+  eventOutcome?: string;
+  statusCode?: number | string;
+  transactionDurationUs?: number;
+  spanDurationUs?: number;
+  httpUrl?: string;
+  parentId?: string;
+  downstreamServiceResource?: string;
+}
+
+interface APMTraceServiceAggregate {
   serviceName: string;
   count: number;
   errorCount: number;
-  avgDurationUs?: number;
 }
 
-interface TraceOverviewResult {
-  items: TraceItemLite[];
-  services: TraceServiceAggregate[];
-}
-
-interface TraceErrorLite {
-  spanId: string;
+interface APMTraceError {
+  timestamp?: string;
   timestampUs?: number;
-  type?: string;
-  message?: string;
-  culprit?: string;
+  traceId?: string;
+  transactionId?: string;
+  spanId?: string;
+  serviceName?: string;
+  errorExceptionType?: string;
+  errorExceptionMessage?: string;
+  errorLogMessage?: string;
+  errorCulprit?: string;
 }
 
-interface LogCategoryLite {
+interface APMTraceDetails {
+  traceItems: APMTraceItem[];
+  traceServiceAggregates: APMTraceServiceAggregate[];
+  traceErrors: APMTraceError[];
+}
+
+interface LogCategory {
   errorCategory: string;
   docCount: number;
   sampleMessage: string;
@@ -119,15 +145,15 @@ export interface ObservabilityAgentDataRegistryTypes {
     end: string;
   }) => Promise<APMError[]>;
 
-  apmErrorById: (params: {
+  apmErrorDetails: (params: {
     request: KibanaRequest;
     errorId: string;
     serviceName: string;
     serviceEnvironment: string;
-    start: number;
-    end: number;
+    start: string;
+    end: string;
     kuery?: string;
-  }) => Promise<APMErrorSample | undefined>;
+  }) => Promise<{ error?: APMErrorSample; transaction?: APMTransaction } | undefined>;
 
   apmServiceSummary: (params: {
     request: KibanaRequest;
@@ -164,24 +190,17 @@ export interface ObservabilityAgentDataRegistryTypes {
     end: string;
   }) => Promise<ChangePointGrouping[]>;
 
-  apmTraceOverviewByTraceId: (params: {
+  apmTraceDetails: (params: {
     request: KibanaRequest;
     traceId: string;
-    start: number;
-    end: number;
-  }) => Promise<TraceOverviewResult>;
-
-  apmTraceErrorsByTraceId: (params: {
-    request: KibanaRequest;
-    traceId: string;
-    start: number;
-    end: number;
-  }) => Promise<TraceErrorLite[]>;
-
-  apmLogCategoriesByService: (params: {
-    request: KibanaRequest;
-    serviceName: string;
     start: string;
     end: string;
-  }) => Promise<LogCategoryLite[]>;
+  }) => Promise<APMTraceDetails>;
+
+  apmLogCategoriesByTrace: (params: {
+    request: KibanaRequest;
+    traceId: string;
+    start: string;
+    end: string;
+  }) => Promise<LogCategory[]>;
 }

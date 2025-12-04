@@ -6,23 +6,77 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { Logger } from '@kbn/logging';
 import { MessageRole } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import dedent from 'dedent';
+import type { ObservabilityAgentDataRegistry } from '../../../data_registry/data_registry';
+import { fetchApmErrorContext } from './fetch_apm_error_context';
+
+const ERROR_AI_INSIGHT_SYSTEM_PROMPT = dedent(`
+  You are an expert SRE Assistant within Elastic Observability. Your job is to analyze an APM error using ONLY the provided context (APM trace items, related errors, downstream dependencies, and log categories).
+
+  Output structure (concise, Markdown):
+  - Error summary (1-2 sentences): What is observed and why it matters.
+  - Failure pinpoint: Whether failure is in application code vs dependency. Name the likely failing component/endpoint. Reference specific fields or key frames if available.
+  - Timeline of significant events: Chronological bullets of key events around the error. Use bold timestamps. Explicitly relate events (Preceded by / Coinciding with / Followed by). Cite services and span/transaction names.
+  - Impact: Scope and severity (services/endpoints and the extent of the error if evident).
+  - Immediate actions (2-4): Ordered, concrete steps (config/network checks, retries/backoff, circuit breakers, targeted tracing/logging).
+  - Open questions: Short list of unknowns and the quickest queries to resolve them, if any (this is strictly optional and should not be present if there are no open questions).
+
+  Guardrails:
+  - Strict Factuality: Only mention signals present in the JSON. If a signal is missing, do not mention it.
+  - Only assert a cause if multiple signals support it. Otherwise mark Assessment "Inconclusive".
+  - Prefer corroborated explanations. If only one source supports it, state that support is limited.
+  - Do NOT repeat raw stacks verbatim (reference only key frames/fields).
+  - Conciseness: Use bullet points. Avoid flowery language. Be direct and technical.
+
+  Available context tags:
+  - <TraceServices>: service aggregates with counts, errorCount, avgDurationUs
+  - <TraceItems>: span/transaction samples with service, name, type, outcome, status.code, duration, http.url, downstream resource
+  - <TraceErrors>: related errors within the trace (type, message, culprit, spanId, timestampUs)
+  - <LogCategories>: categorized log patterns (errorCategory, docCount, sampleMessage, downstreamServiceResource)
+  - Downstream dependencies line (if present)
+`);
+
+const buildUserPrompt = (errorContext: string) => {
+  return dedent(`
+    <ErrorContext>
+    ${errorContext}
+    </ErrorContext>
+
+    I am investigating an error and have retrieved related signals (logs, metrics, and traces) leading up to this error.
+    Please analyze this error context and generate a summary of the error and a timeline of significant events.
+
+    Follow your system instructions. Ensure the analysis is specific to error investigation, grounded in the provided context, and concise.
+  `);
+};
 
 export interface GenerateErrorAiInsightParams {
-  inferenceStart: InferenceServerStart;
-  request: KibanaRequest;
   connectorId?: string;
-  context: string;
+  errorId: string;
+  serviceName: string;
+  environment?: string;
+  start: string;
+  end: string;
+  logger: Logger;
+  request: KibanaRequest;
+  inferenceStart: InferenceServerStart;
+  dataRegistry: ObservabilityAgentDataRegistry;
 }
 
 export async function generateErrorAiInsight({
-  inferenceStart,
-  request,
   connectorId: initialConnectorId,
-  context,
-}: GenerateErrorAiInsightParams): Promise<string> {
+  errorId,
+  serviceName,
+  environment,
+  start,
+  end,
+  logger,
+  request,
+  inferenceStart,
+  dataRegistry,
+}: GenerateErrorAiInsightParams): Promise<{ summary: string; context: string }> {
   let connectorId = initialConnectorId;
 
   if (!connectorId) {
@@ -34,48 +88,24 @@ export async function generateErrorAiInsight({
     throw new Error('No default connector found');
   }
 
+  const errorContext = await fetchApmErrorContext({
+    dataRegistry,
+    request,
+    serviceName,
+    environment: environment ?? '',
+    start,
+    end,
+    errorId,
+    logger,
+  });
+
   const inferenceClient = inferenceStart.getClient({ request });
 
-  const systemPrompt = dedent(`
-    You are an expert SRE Assistant within Elastic Observability. Your job is to analyze an APM error using ONLY the provided context (APM trace items, related errors, downstream dependencies, and log categories).
-
-    Output structure (concise, Markdown):
-    - Error summary (1-2 sentences): What is observed and why it matters.
-    - Timeline of significant events: Chronological bullets of key events around the error. Use bold timestamps. Explicitly relate events (Preceded by / Coinciding with / Followed by). Cite services and span/transaction names.
-    - Failure pinpoint: Whether failure is in application code vs dependency. Name the likely failing component/endpoint. Reference specific fields or key frames if available.
-    - Impact: Scope and severity (services/endpoints and the extent of the error if evident).
-    - Immediate actions (2-4): Ordered, concrete steps (config/network checks, retries/backoff, circuit breakers, targeted tracing/logging).
-    - Open questions: Short list of unknowns and the quickest queries to resolve them.
-
-    Guardrails:
-    - Strict Factuality: Only mention signals present in the JSON. If a signal is missing, do not mention it.
-    - Only assert a cause if multiple signals support it. Otherwise mark Assessment "Inconclusive".
-    - Prefer corroborated explanations. If only one source supports it, state that support is limited.
-    - Do NOT repeat raw stacks verbatim (reference only key frames/fields).
-    - Conciseness: Use bullet points. Avoid flowery language. Be direct and technical.
-
-    Available context tags:
-    - <TraceServices>: service aggregates with counts, errorCount, avgDurationUs
-    - <TraceItems>: span/transaction samples with service, name, type, outcome, status.code, duration, http.url, downstream resource
-    - <TraceErrors>: related errors within the trace (type, message, culprit, spanId, timestampUs)
-    - <LogCategories>: categorized log patterns (errorCategory, docCount, sampleMessage, downstreamServiceResource)
-    - Downstream dependencies line (if present)
-  `);
-
-  const userPrompt = dedent(`
-    <ErrorContext>
-    ${context}
-    </ErrorContext>
-
-    I am investigating an error and have retrieved related signals (logs, metrics, and traces) leading up to this error.
-    Please analyze this error context and generate a summary of the error and a timeline of significant events.
-
-    Follow your system instructions. Ensure the analysis is specific to error investigation, grounded in the provided context, and concise.
-  `);
+  const userPrompt = buildUserPrompt(errorContext);
 
   const response = await inferenceClient.chatComplete({
     connectorId,
-    system: systemPrompt,
+    system: ERROR_AI_INSIGHT_SYSTEM_PROMPT,
     messages: [
       {
         role: MessageRole.User,
@@ -84,5 +114,5 @@ export async function generateErrorAiInsight({
     ],
   });
 
-  return response.content;
+  return { summary: response.content, context: errorContext };
 }

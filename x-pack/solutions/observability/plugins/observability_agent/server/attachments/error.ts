@@ -16,7 +16,6 @@ import type {
   ObservabilityAgentPluginStartDependencies,
 } from '../types';
 import type { ObservabilityAgentDataRegistry } from '../data_registry/data_registry';
-import { parseDatemath } from '../utils/time';
 
 export const OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID = 'observability.error';
 const GET_ERROR_DETAILS_TOOL_ID = 'get_error_details';
@@ -65,12 +64,12 @@ export function createErrorAttachmentType({
             schema: z.object({}),
             handler: async (_args, context) => {
               try {
-                const error = await dataRegistry.getData('apmErrorById', {
+                const errorDetails = await dataRegistry.getData('apmErrorDetails', {
                   request: context.request,
                   errorId,
                   serviceName,
-                  start: parseDatemath(start),
-                  end: parseDatemath(end),
+                  start,
+                  end,
                   serviceEnvironment: environment ?? '',
                 });
 
@@ -78,7 +77,7 @@ export function createErrorAttachmentType({
                   results: [
                     {
                       type: ToolResultType.other,
-                      data: error as Record<string, unknown>,
+                      data: errorDetails as Record<string, unknown>,
                     },
                   ],
                 };
