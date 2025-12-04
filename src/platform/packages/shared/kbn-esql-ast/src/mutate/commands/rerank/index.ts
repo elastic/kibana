@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isStringLiteral } from '../../../ast/is';
 import { Builder } from '../../../builder';
 import type {
   ESQLAstQueryExpression,
@@ -179,8 +180,15 @@ export const setWithParameter = (
 
   // Checks if an entry in the map has the specified key
   // normalizeKey avoid cases like: "inference_id" === "'inferenceId"' -> this is false
-  const getExistingEntry = (entry: ESQLMapEntry) =>
-    normalizeKey(entry.key.valueUnquoted ?? entry.key.value) === key;
+  const getKeyValue = (entry: ESQLMapEntry): string | undefined => {
+    const k = entry.key;
+    if (isStringLiteral(k)) {
+      return k.valueUnquoted ?? k.value;
+    }
+    return undefined;
+  };
+
+  const getExistingEntry = (entry: ESQLMapEntry) => normalizeKey(getKeyValue(entry)) === key;
 
   // Creates a new map entry with the given key and value
   const createMapEntry = (entryKey: string, entryValue: ESQLLiteral | ESQLParamLiteral) => ({
