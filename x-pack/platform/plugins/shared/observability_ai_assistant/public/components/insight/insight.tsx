@@ -21,6 +21,7 @@ import { cloneDeep, isArray, isEmpty, last, once } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { ILicense } from '@kbn/licensing-types';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { MessageRole, type Message } from '../../../common/types';
 import { ObservabilityAIAssistantChatServiceContext } from '../../context/observability_ai_assistant_chat_service_context';
 import { useAbortableAsync } from '../../hooks/use_abortable_async';
@@ -364,14 +365,22 @@ export function Insight({
     services: {
       http,
       plugins: {
-        start: { licensing },
+        start: { licensing, aiAssistantManagementSelection },
       },
     },
   } = useKibana();
 
   const license = useObservable<ILicense | null>(licensing.license$);
   const hasEnterpriseLicense = license?.hasAtLeast('enterprise');
-  if (isEmpty(connectors.connectors) || !hasEnterpriseLicense) {
+
+  const chatExperience$ = aiAssistantManagementSelection?.chatExperience$;
+  const preferredChatExperience = useObservable(chatExperience$, AIChatExperience.Classic);
+
+  if (
+    isEmpty(connectors.connectors) ||
+    !hasEnterpriseLicense ||
+    preferredChatExperience === AIChatExperience.Agents
+  ) {
     return null;
   }
 
