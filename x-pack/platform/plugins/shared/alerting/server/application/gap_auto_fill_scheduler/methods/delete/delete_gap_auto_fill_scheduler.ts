@@ -68,19 +68,37 @@ export async function deleteGapAutoFillScheduler(
 
     const scheduledTaskId = schedulerSo.id;
 
-    await taskManager.removeIfExists(scheduledTaskId);
+    try {
+      await taskManager.removeIfExists(scheduledTaskId);
+    } catch (err) {
+      const errorMessage = `Unable to remove gap auto fill scheduler task for id: ${params.id}. Backfills and saved object will not be deleted.`;
+      context.logger.error(`${errorMessage} - ${err}`);
+      throw err;
+    }
 
-    await soClient.delete(GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE, params.id);
+    try {
+      await context.backfillClient.deleteBackfillsByInitiatorId({
+        initiatorId: scheduledTaskId,
+        unsecuredSavedObjectsClient: soClient,
+        shouldUpdateGaps: true,
+        internalSavedObjectsRepository: context.internalSavedObjectsRepository,
+        eventLogClient: await context.getEventLogClient(),
+        eventLogger: context.eventLogger,
+        actionsClient: await context.getActionsClient(),
+      });
+    } catch (err) {
+      const errorMessage = `Unable to delete backfills for gap auto fill scheduler id: ${params.id}. Saved object will not be deleted.`;
+      context.logger.error(`${errorMessage} - ${err}`);
+      throw err;
+    }
 
-    await context.backfillClient.deleteBackfillsByInitiatorId({
-      initiatorId: scheduledTaskId,
-      unsecuredSavedObjectsClient: soClient,
-      shouldUpdateGaps: true,
-      internalSavedObjectsRepository: context.internalSavedObjectsRepository,
-      eventLogClient: await context.getEventLogClient(),
-      eventLogger: context.eventLogger,
-      actionsClient: await context.getActionsClient(),
-    });
+    try {
+      await soClient.delete(GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE, params.id);
+    } catch (err) {
+      const errorMessage = `Unable to delete gap auto fill scheduler saved object for id: ${params.id}`;
+      context.logger.error(`${errorMessage} - ${err}`);
+      throw err;
+    }
 
     context.auditLogger?.log(
       gapAutoFillSchedulerAuditEvent({
