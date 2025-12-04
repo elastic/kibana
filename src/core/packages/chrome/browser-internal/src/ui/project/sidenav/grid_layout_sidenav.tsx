@@ -14,13 +14,15 @@ import type { BehaviorSubject } from 'rxjs';
 import { css, Global } from '@emotion/react';
 import { Navigation } from './navigation';
 import type { NavigationProps } from './types';
+import { SideNavCollapseButton } from './collapse_button';
 
 export interface Props {
   isCollapsed$: BehaviorSubject<boolean>;
+  toggle: (isCollapsed: boolean) => void;
   navProps: NavigationProps;
 }
 
-export const GridLayoutProjectSideNav = ({ isCollapsed$, navProps }: Props) => {
+export const GridLayoutProjectSideNav = ({ isCollapsed$, toggle, navProps }: Props) => {
   const isCollapsed = useObservable(isCollapsed$, isCollapsed$.getValue());
   const updateLayout = useLayoutUpdate();
   const setWidth = useCallback(
@@ -40,7 +42,12 @@ export const GridLayoutProjectSideNav = ({ isCollapsed$, navProps }: Props) => {
           }
         `}
       />
-      <Navigation isCollapsed={isCollapsed} setWidth={setWidth} {...navProps} />
+      <Navigation
+        isCollapsed={isCollapsed}
+        setWidth={setWidth}
+        collapseButton={<SideNavCollapseButton isCollapsed={isCollapsed} toggle={toggle} />}
+        {...navProps}
+      />
     </>
   );
 };

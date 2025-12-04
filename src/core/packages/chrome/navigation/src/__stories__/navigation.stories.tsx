@@ -16,6 +16,7 @@ import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants'
 import { Box } from '@kbn/core-chrome-layout-components/__stories__/box';
 import { ChromeLayout, ChromeLayoutConfigProvider } from '@kbn/core-chrome-layout-components';
 import { css, Global } from '@emotion/react';
+import { SideNavCollapseButton } from '@kbn/core-chrome-browser-internal/src/ui/project/sidenav/collapse_button';
 
 import { LOGO, PRIMARY_MENU_FOOTER_ITEMS, PRIMARY_MENU_ITEMS } from '../mocks/observability';
 import { Navigation } from '../components/navigation';
@@ -84,24 +85,6 @@ export const Default: StoryObj<PropsAndArgs> = {
       );
     },
   ],
-  render: (args) => <ControlledNavigation {...args} />,
-};
-
-export const Collapsed: StoryObj<PropsAndArgs> = {
-  name: 'Collapsed Navigation',
-  decorators: [
-    (Story) => {
-      return (
-        <>
-          <Global styles={styles} />
-          <Story />
-        </>
-      );
-    },
-  ],
-  args: {
-    isCollapsed: true,
-  },
   render: (args) => <ControlledNavigation {...args} />,
 };
 
@@ -174,12 +157,15 @@ export const WithinLayout: StoryObj<PropsAndArgs> = {
 
 const ControlledNavigation = ({ ...props }: PropsAndArgs) => {
   const [activeItemId, setActiveItemId] = useState(props.activeItemId || PRIMARY_MENU_ITEMS[0].id);
+  const [isCollapsed, setIsCollapsed] = useState(props.isCollapsed ?? false);
 
   return (
     <Navigation
       {...props}
+      isCollapsed={isCollapsed}
       activeItemId={activeItemId}
       onItemClick={(item) => setActiveItemId(item.id)}
+      collapseButton={<SideNavCollapseButton isCollapsed={isCollapsed} toggle={setIsCollapsed} />}
     />
   );
 };
@@ -187,6 +173,8 @@ const ControlledNavigation = ({ ...props }: PropsAndArgs) => {
 const Layout = ({ ...props }: PropsAndArgs) => {
   const { euiTheme } = useEuiTheme();
   const [navigationWidth, setNavigationWidth] = useState(0);
+  const [activeItemId, setActiveItemId] = useState(props.activeItemId || PRIMARY_MENU_ITEMS[0].id);
+  const [isCollapsed, setIsCollapsed] = useState(props.isCollapsed ?? false);
 
   const headerHeight = 48;
 
@@ -226,7 +214,18 @@ const Layout = ({ ...props }: PropsAndArgs) => {
               backgroundColor={euiTheme.colors.backgroundFilledText}
             />
           }
-          navigation={<ControlledNavigation {...props} setWidth={setNavigationWidth} />}
+          navigation={
+            <Navigation
+              {...props}
+              setWidth={setNavigationWidth}
+              isCollapsed={isCollapsed}
+              activeItemId={activeItemId}
+              onItemClick={(item) => setActiveItemId(item.id)}
+              collapseButton={
+                <SideNavCollapseButton isCollapsed={isCollapsed} toggle={setIsCollapsed} />
+              }
+            />
+          }
           sidebar={
             <Box
               label="Global Sidebar"

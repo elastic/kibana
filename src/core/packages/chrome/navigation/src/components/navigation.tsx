@@ -62,6 +62,10 @@ export interface NavigationProps {
    */
   sidePanelFooter?: ReactNode;
   /**
+   * (optional) Collapse button configuration for controlling navigation expand/collapse state.
+   */
+  collapseButton?: ReactNode;
+  /**
    * (optional) data-test-subj attribute for testing purposes.
    */
   'data-test-subj'?: string;
@@ -75,6 +79,7 @@ export const Navigation = ({
   onItemClick,
   setWidth,
   sidePanelFooter,
+  collapseButton,
   ...rest
 }: NavigationProps) => {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
@@ -311,7 +316,7 @@ export const Navigation = ({
           )}
         </SideNav.PrimaryMenu>
 
-        <SideNav.Footer isCollapsed={isCollapsed}>
+        <SideNav.Footer isCollapsed={isCollapsed} collapseButton={collapseButton}>
           {({ footerNavigationInstructionsId }) => (
             <>
               {items.footerItems.slice(0, MAX_FOOTER_ITEMS).map((item, index) => {
