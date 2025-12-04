@@ -56,7 +56,7 @@ const CloudDefend = () => {
                 <h2>
                   <FormattedMessage
                     id="xpack.securitySolution.cloudDefend.serverlessNotOfferedTitle"
-                    defaultMessage="Page Unavailable"
+                    defaultMessage="Coming soon"
                   />
                 </h2>
               }
@@ -64,7 +64,7 @@ const CloudDefend = () => {
                 <p>
                   <FormattedMessage
                     id="xpack.securitySolution.cloudDefend.serverlessNotOfferedBodyMessage"
-                    defaultMessage="Defend for containers integration is not enabled in serverless"
+                    defaultMessage="Defend for Containers isn’t available on serverless projects just yet. Our team is working to deliver support as quickly as possible."
                   />
                 </p>
               }
