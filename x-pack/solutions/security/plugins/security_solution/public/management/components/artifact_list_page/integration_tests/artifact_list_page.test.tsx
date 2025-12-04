@@ -164,11 +164,11 @@ describe('When using the ArtifactListPage component', () => {
 
     describe('Import and export', () => {
       beforeEach(() => {
-        setExperimentalFlag({ endpointArtifactsExportImportEnabled: true });
+        setExperimentalFlag({ endpointExceptionsMovedUnderManagement: true });
       });
 
       it('should not show import and export actions with feature flag disabled', async () => {
-        setExperimentalFlag({ endpointArtifactsExportImportEnabled: false });
+        setExperimentalFlag({ endpointExceptionsMovedUnderManagement: false });
 
         await renderWithListData();
 
@@ -218,7 +218,7 @@ describe('When using the ArtifactListPage component', () => {
       });
 
       it('should not display the import flyout if it is requested via URL param without FF enabled', async () => {
-        setExperimentalFlag({ endpointArtifactsExportImportEnabled: false });
+        setExperimentalFlag({ endpointExceptionsMovedUnderManagement: false });
         history.push('somepage?show=import');
         await renderWithListData();
 
@@ -297,7 +297,7 @@ describe('When using the ArtifactListPage component', () => {
       ])(
         'should NOT show flyout if url has a show param of %s but the action is not allowed',
         async (_, urlParam) => {
-          setExperimentalFlag({ endpointArtifactsExportImportEnabled: true });
+          setExperimentalFlag({ endpointExceptionsMovedUnderManagement: true });
           history.push(`somepage?${urlParam}`);
           const { queryByTestId } = await renderWithListData({
             allowCardCreateAction: false,

@@ -108,7 +108,7 @@ describe('Policy artifacts layout', () => {
   });
 
   it('should render layout with no assigned artifacts data when there are no artifacts', async () => {
-    setExperimentalFlag({ endpointArtifactsExportImportEnabled: true });
+    setExperimentalFlag({ endpointExceptionsMovedUnderManagement: true });
     mockedApi.responseProvider.eventFiltersList.mockReturnValue(
       getFoundExceptionListItemSchemaMock(0)
     );
@@ -124,7 +124,7 @@ describe('Policy artifacts layout', () => {
   });
 
   it('should not render import button when experimental flag is disabled', async () => {
-    setExperimentalFlag({ endpointArtifactsExportImportEnabled: false });
+    setExperimentalFlag({ endpointExceptionsMovedUnderManagement: false });
     mockedApi.responseProvider.eventFiltersList.mockReturnValue(
       getFoundExceptionListItemSchemaMock(0)
     );

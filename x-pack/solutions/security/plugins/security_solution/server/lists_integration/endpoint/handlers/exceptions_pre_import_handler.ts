@@ -32,7 +32,7 @@ const validateCanEndpointArtifactsBeImported = (
   data: PromiseFromStreams,
   experimentalFeatures: ExperimentalFeatures
 ) => {
-  if (experimentalFeatures.endpointArtifactsExportImportEnabled) {
+  if (experimentalFeatures.endpointExceptionsMovedUnderManagement) {
     return;
   }
 

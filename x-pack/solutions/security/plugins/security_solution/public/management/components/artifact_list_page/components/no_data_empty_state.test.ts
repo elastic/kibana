@@ -64,7 +64,7 @@ describe('When showing the Empty State in ArtifactListPage', () => {
 
   describe('and user is allowed to Create entries', () => {
     it('should show title, about info, add and import buttons', async () => {
-      setExperimentalFlag({ endpointArtifactsExportImportEnabled: true });
+      setExperimentalFlag({ endpointExceptionsMovedUnderManagement: true });
 
       const { getByTestId, queryByTestId } = render();
 
@@ -90,7 +90,7 @@ describe('When showing the Empty State in ArtifactListPage', () => {
     });
 
     it('should not show import button when experimental flag is disabled', async () => {
-      setExperimentalFlag({ endpointArtifactsExportImportEnabled: false });
+      setExperimentalFlag({ endpointExceptionsMovedUnderManagement: false });
 
       const { getByTestId, queryByTestId } = render();
 
@@ -113,7 +113,7 @@ describe('When showing the Empty State in ArtifactListPage', () => {
     });
 
     it('should open import flyout when import button is clicked', async () => {
-      setExperimentalFlag({ endpointArtifactsExportImportEnabled: true });
+      setExperimentalFlag({ endpointExceptionsMovedUnderManagement: true });
 
       render();
       const importButton = await renderResult.findByTestId('testPage-emptyState-importButton');
@@ -158,7 +158,7 @@ describe('When showing the Empty State in ArtifactListPage', () => {
 
   describe('and user is not allowed to Create entries', () => {
     it('should hide title, about info and add/import buttons promoting entry creation', async () => {
-      setExperimentalFlag({ endpointArtifactsExportImportEnabled: true });
+      setExperimentalFlag({ endpointExceptionsMovedUnderManagement: true });
 
       render({ allowCardCreateAction: false });
 
