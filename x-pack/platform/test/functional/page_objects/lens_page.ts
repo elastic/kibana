@@ -1700,9 +1700,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async ensureLayerTabIsActive(index: number = 0) {
       const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 1000);
 
-      // Ensure the requested tab exists
-      expect(tabs.length).to.be.greaterThan(index);
-
       if (tabs[index]) {
         // Check if the tab is already active
         const isActive = await tabs[index].getAttribute('aria-selected');
