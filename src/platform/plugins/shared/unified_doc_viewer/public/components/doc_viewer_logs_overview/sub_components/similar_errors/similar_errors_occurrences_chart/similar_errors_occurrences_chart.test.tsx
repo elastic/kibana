@@ -38,8 +38,6 @@ jest.mock('@kbn/embeddable-plugin/public', () => {
   return {
     ...original,
     EmbeddableRenderer: ({ type, getParentApi, hidePanelChrome }: any) => {
-      // Call getParentApi to simulate the component behavior
-      const parentApi = getParentApi?.();
       return <div data-test-subj="lensEmbeddableSimilarErrorsChart">Lens Chart (type: {type})</div>;
     },
   };
