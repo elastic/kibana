@@ -17,7 +17,7 @@
       "dataViews",
       "metricsDataAccess"
     ],
-    "optionalPlugins": ["ml"],
+    "optionalPlugins": ["ml", "spaces"],
     "requiredBundles": [],
     "extraPublicDirs": []
   }

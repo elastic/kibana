@@ -24,6 +24,7 @@ import type {
 import { getRelevantAlertFields } from './get_relevant_alert_fields';
 import { getHitsTotal } from '../../utils/get_hits_total';
 import { kqlFilter as buildKqlFilter } from '../../utils/dsl_filters';
+import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 
 export const OBSERVABILITY_GET_ALERTS_TOOL_ID = 'observability.get_alerts';
 
@@ -102,6 +103,12 @@ export function createGetAlertsTool({
     description: `Retrieve Observability alerts and relevant fields for a given time range. Defaults to active alerts (set includeRecovered to true to include recovered alerts).`,
     schema: getAlertsSchema,
     tags: ['observability', 'alerts'],
+    availability: {
+      cacheMode: 'space',
+      handler: async ({ request }) => {
+        return getAgentBuilderResourceAvailability({ core, request, logger });
+      },
+    },
     handler: async ({ start, end, kqlFilter, includeRecovered, query }, handlerinfo) => {
       try {
         const [coreStart, pluginStart] = await core.getStartServices();

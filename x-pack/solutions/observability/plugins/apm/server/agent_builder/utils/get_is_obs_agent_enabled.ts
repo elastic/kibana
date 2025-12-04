@@ -6,10 +6,6 @@
  */
 
 import type { CoreSetup } from '@kbn/core/server';
-import {
-  OBSERVABILITY_AGENT_FEATURE_FLAG,
-  OBSERVABILITY_AGENT_FEATURE_FLAG_DEFAULT,
-} from '../../../common/observability_agent/feature_flag';
 import type { APMPluginStartDependencies } from '../../types';
 
 export async function getIsObservabilityAgentEnabled(
@@ -17,8 +13,6 @@ export async function getIsObservabilityAgentEnabled(
 ): Promise<boolean> {
   const [coreStart] = await core.getStartServices();
 
-  return coreStart.featureFlags.getBooleanValue(
-    OBSERVABILITY_AGENT_FEATURE_FLAG,
-    OBSERVABILITY_AGENT_FEATURE_FLAG_DEFAULT
-  );
+  // TODO: update to UI setting
+  return true;
 }

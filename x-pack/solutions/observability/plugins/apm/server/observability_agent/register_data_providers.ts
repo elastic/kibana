@@ -14,7 +14,7 @@ import {
   getExitSpanChangePoints,
   getServiceChangePoints,
 } from '../routes/assistant_functions/get_changepoints';
-import { buildApmToolResources } from '../agent_tools/utils/build_apm_tool_resources';
+import { buildApmToolResources } from '../agent_builder/utils/build_apm_tool_resources';
 import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../types';
 
 export function registerDataProviders({
