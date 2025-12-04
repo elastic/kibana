@@ -7,6 +7,7 @@
 
 export { AgentBuilderAccessChecker } from './access';
 export { AgentService } from './agents';
+export { AttachmentsService } from './attachments';
 export { ChatService } from './chat';
 export { ConversationsService } from './conversations';
 export { NavigationService } from './navigation';
