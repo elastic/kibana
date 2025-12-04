@@ -6,28 +6,31 @@
  */
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import { createAiInsightAttachmentType } from './ai_insight';
+import { registerRoutes } from '@kbn/server-route-repository';
 import type {
-  ObservabilityAgentPluginSetupDependencies,
   ObservabilityAgentPluginStart,
   ObservabilityAgentPluginStartDependencies,
 } from '../types';
 import type { ObservabilityAgentDataRegistry } from '../data_registry/data_registry';
+import { getGlobalObservabilityAgentBuilderServerRouteRepository } from './get_global_observability_agent_builder_route_repository';
 
-export async function registerAttachments({
+export function registerServerRoutes({
   core,
-  plugins,
   logger,
   dataRegistry,
 }: {
   core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>;
-  plugins: ObservabilityAgentPluginSetupDependencies;
   logger: Logger;
   dataRegistry: ObservabilityAgentDataRegistry;
 }) {
-  const attachmentTypes: AttachmentTypeDefinition<any, any>[] = [createAiInsightAttachmentType()];
-
-  for (const attachment of attachmentTypes) {
-    plugins.onechat.attachments.registerType(attachment);
-  }
+  registerRoutes({
+    core,
+    logger,
+    repository: getGlobalObservabilityAgentBuilderServerRouteRepository(),
+    dependencies: {
+      core,
+      dataRegistry,
+    },
+    runDevModeChecks: false,
+  });
 }

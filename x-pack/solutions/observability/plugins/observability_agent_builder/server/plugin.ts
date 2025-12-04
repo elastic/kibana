@@ -23,8 +23,8 @@ import type {
   ObservabilityAgentPluginStart,
   ObservabilityAgentPluginStartDependencies,
 } from './types';
-
 import { ObservabilityAgentDataRegistry } from './data_registry/data_registry';
+import { registerServerRoutes } from './routes/register_routes';
 
 export class ObservabilityAgentPlugin
   implements
@@ -64,8 +64,21 @@ export class ObservabilityAgentPlugin
           this.logger.error(`Error registering observability tools: ${error}`);
         });
 
-        registerAttachments({ plugins }).catch((error) => {
+        registerAttachments({
+          core,
+          plugins,
+          logger: this.logger,
+          dataRegistry: this.dataRegistry,
+        }).catch((error) => {
           this.logger.error(`Error registering observability attachments: ${error}`);
+        });
+
+        registerServerRoutes({
+          core,
+          logger: this.logger,
+          dataRegistry: this.dataRegistry,
+        }).catch((error) => {
+          this.logger.error(`Error registering observability server routes: ${error}`);
         });
       })
       .catch((error) => {
