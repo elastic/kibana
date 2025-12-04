@@ -7,48 +7,139 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useRef } from 'react';
+import React, { useState } from 'react';
 import type { ComponentProps } from 'react';
-import type { MountPoint } from '@kbn/core/public';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { EuiFlexGroup, EuiHeader, EuiPageTemplate } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHeader, EuiPageTemplate, useEuiTheme } from '@elastic/eui';
+import { UnifiedTabs, useNewTabProps, type TabItem } from '@kbn/unified-tabs';
+import { TabStatus, type TabPreviewData } from '@kbn/unified-tabs';
+import { css } from '@emotion/react';
 import type { TopNavMenuConfigBeta } from './types';
 import { TopNavMenuBeta } from './top_nav_menu_beta';
 
-const TopNavMenuBetaWrapper = (props: ComponentProps<typeof TopNavMenuBeta>) => {
-  const mountContainerRef = useRef<HTMLDivElement>(null);
+interface TopNavMenuBetaWrapperProps extends ComponentProps<typeof TopNavMenuBeta> {
+  showTabs?: boolean;
+}
 
-  const setMenuMountPoint = useCallback((mount: MountPoint<HTMLElement> | undefined) => {
-    if (mount && mountContainerRef.current) {
-      mountContainerRef.current.innerHTML = '';
-      const unmount = mount(mountContainerRef.current);
-      action('setMenuMountPoint-called')();
-      return unmount;
-    }
-  }, []);
+const VerticalRule = () => {
+  const { euiTheme } = useEuiTheme();
 
   return (
-    <>
-      <div ref={mountContainerRef} />
-      <TopNavMenuBeta {...props} setMenuMountPoint={setMenuMountPoint} />
-    </>
+    <span
+      css={css`
+        width: ${euiTheme.border.width.thin};
+        height: 28px;
+        background-color: ${euiTheme.colors.borderBasePlain};
+      `}
+    />
   );
 };
 
-const meta: Meta<typeof TopNavMenuBeta> = {
+const TopNavMenuBetaWrapper = ({ showTabs = false, ...props }: TopNavMenuBetaWrapperProps) => {
+  const { getNewTabDefaultProps } = useNewTabProps({ numberOfInitialItems: 0 });
+
+  const [tabsState, setTabsState] = useState<{
+    managedItems: TabItem[];
+    managedSelectedItemId?: string;
+  }>(() => ({
+    managedItems: Array.from({ length: 3 }, () => getNewTabDefaultProps()),
+    managedSelectedItemId: undefined,
+  }));
+
+  const mockServices = {
+    i18n: {
+      Context: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    },
+    analytics: {
+      reportEvent: action('analytics-event'),
+    },
+  };
+
+  // Mock preview data for tabs with different states
+  const getPreviewData = (item: TabItem): TabPreviewData => {
+    const index = tabsState.managedItems.findIndex((i) => i.id === item.id);
+    const states = [
+      { status: TabStatus.SUCCESS, query: { language: 'kql', query: 'status:200' } },
+      {
+        status: TabStatus.ERROR,
+        query: { esql: 'FROM logs-* | WHERE @timestamp > NOW() - 1 hour' },
+      },
+    ];
+    return states[index % states.length];
+  };
+
+  if (!showTabs) {
+    return <TopNavMenuBeta {...props} />;
+  }
+
+  return (
+    <EuiFlexGroup
+      gutterSize="s"
+      alignItems="center"
+      wrap={false}
+      responsive={false}
+      justifyContent="spaceBetween"
+    >
+      <EuiFlexItem grow={true}>
+        <UnifiedTabs
+          items={tabsState.managedItems}
+          selectedItemId={tabsState.managedSelectedItemId}
+          recentlyClosedItems={[]}
+          onClearRecentlyClosed={action('clear-recently-closed')}
+          maxItemsCount={25}
+          services={mockServices as any}
+          onChanged={(updatedState) => {
+            action('tabs-changed')(updatedState);
+            setTabsState({
+              managedItems: updatedState.items,
+              managedSelectedItemId: updatedState.selectedItem?.id,
+            });
+          }}
+          createItem={getNewTabDefaultProps}
+          getPreviewData={getPreviewData}
+          onEBTEvent={action('tabs-ebt-event')}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <VerticalRule />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <TopNavMenuBeta {...props} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+const meta: Meta<TopNavMenuBetaWrapperProps> = {
   title: 'Navigation/TopNavMenuBeta',
   component: TopNavMenuBetaWrapper,
+  argTypes: {
+    showTabs: {
+      control: 'boolean',
+      description: 'Show or hide the Unified Tabs integration',
+      defaultValue: false,
+    },
+  },
   decorators: [
-    (Story) => (
-      <EuiPageTemplate>
-        <EuiHeader>
-          <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-            <Story />
-          </EuiFlexGroup>
-        </EuiHeader>
-      </EuiPageTemplate>
-    ),
+    (Story, { args }) => {
+      const { euiTheme } = useEuiTheme();
+      const headerBackground = args.showTabs
+        ? css`
+            background-color: ${euiTheme.colors.lightestShade};
+          `
+        : undefined;
+
+      return (
+        <EuiPageTemplate>
+          <EuiHeader css={headerBackground}>
+            <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+              <Story />
+            </EuiFlexGroup>
+          </EuiHeader>
+        </EuiPageTemplate>
+      );
+    },
   ],
   parameters: {
     docs: {
@@ -61,7 +152,7 @@ const meta: Meta<typeof TopNavMenuBeta> = {
 
 export default meta;
 
-type Story = StoryObj<typeof TopNavMenuBeta>;
+type Story = StoryObj<TopNavMenuBetaWrapperProps>;
 
 const dashboardEditModeConfig: TopNavMenuConfigBeta = {
   items: [
@@ -367,5 +458,6 @@ export const DiscoverConfig: Story = {
   name: 'Discover',
   args: {
     config: discoverConfig,
+    showTabs: true,
   },
 };
