@@ -31,7 +31,7 @@ import { EditTabLabel, type EditTabLabelProps } from './edit_tab_label';
 import { getTabAttributes } from '../../utils/get_tab_attributes';
 import type { TabItem, TabsSizeConfig, GetTabMenuItems, TabsServices } from '../../types';
 import { TabStatus, type TabPreviewData } from '../../types';
-import { TabWithBackground } from '../tabs_visual_glue_to_header/tab_with_background';
+import { TabWithBackground } from '../tabs_visual_glue_to_app_container/tab_with_background';
 import { TabPreview } from '../tab_preview';
 import { useTabLabelWidth } from './use_tab_label_width';
 
@@ -264,6 +264,7 @@ export const Tab: React.FC<TabProps> = (props) => {
                     item={item}
                     getTabMenuItems={getTabMenuItems}
                     isPopoverOpen={isActionPopoverOpen}
+                    isSelected={isSelected}
                     setPopover={onToggleActionsMenu}
                     onEnterRenaming={onEnterRenaming}
                   />
@@ -273,14 +274,14 @@ export const Tab: React.FC<TabProps> = (props) => {
             )}
             {!disableCloseButton && !!onClose && (
               <EuiFlexItem grow={false} className="unifiedTabs__closeTabBtn">
-                <EuiToolTip content={closeButtonLabel}>
+                <EuiToolTip content={closeButtonLabel} disableScreenReaderOutput>
                   <EuiButtonIcon
-                    // semantically role="tablist" does not allow other buttons in tabs
-                    aria-hidden={true}
+                    aria-label={closeButtonLabel}
                     color="text"
                     data-test-subj={`unifiedTabs_closeTabBtn_${item.id}`}
                     iconType="cross"
                     onClick={onCloseEvent}
+                    tabIndex={isSelected ? 0 : -1}
                   />
                 </EuiToolTip>
               </EuiFlexItem>
@@ -329,8 +330,6 @@ function getTabContainerCss(
 
   return css`
     position: relative;
-    border-right: ${euiTheme.border.thin};
-    border-color: ${isDragging ? 'transparent' : euiTheme.colors.lightShade};
     min-width: ${tabsSizeConfig.regularTabMinWidth}px;
     max-width: ${tabsSizeConfig.regularTabMaxWidth}px;
 

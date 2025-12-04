@@ -13,8 +13,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./enrichment'));
     loadTestFile(require.resolve('./classic'));
     loadTestFile(require.resolve('./flush_config'));
-    loadTestFile(require.resolve('./attachments/dashboard'));
-    loadTestFile(require.resolve('./attachments/rule'));
+    loadTestFile(require.resolve('./attachments/attachments'));
     loadTestFile(require.resolve('./schema'));
     loadTestFile(require.resolve('./processing_date_suggestions'));
     loadTestFile(require.resolve('./processing_simulate'));
@@ -33,5 +32,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./global_search'));
     loadTestFile(require.resolve('./features'));
     loadTestFile(require.resolve('./settings'));
+    loadTestFile(require.resolve('./snapshot_restore'));
   });
 }

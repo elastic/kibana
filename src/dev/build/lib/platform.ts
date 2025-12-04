@@ -8,19 +8,32 @@
  */
 
 import type { KibanaSolution } from '@kbn/projects-solutions-groups';
+import { dashSuffix } from './util';
 
 export type PlatformName = 'win32' | 'darwin' | 'linux';
 export type PlatformArchitecture = 'x64' | 'arm64';
-export type Variant = 'serverless' | null;
-export type Solution = KibanaSolution | null;
+export type Variant = 'serverless';
+
+export type SolutionArtifact = Exclude<KibanaSolution, 'search'> | 'elasticsearch';
+export interface Solution {
+  id: KibanaSolution;
+  artifact: SolutionArtifact;
+}
+
+export const SOLUTION_BUILDS: Solution[] = [
+  { id: 'workplaceai', artifact: 'workplaceai' },
+  { id: 'observability', artifact: 'observability' },
+  { id: 'search', artifact: 'elasticsearch' },
+  { id: 'security', artifact: 'security' },
+];
 
 export class Platform {
   constructor(
     private name: PlatformName,
     private architecture: PlatformArchitecture,
     private buildName: string,
-    private variant: Variant,
-    private solution: Solution
+    private variant?: Variant,
+    private solution?: Solution
   ) {}
 
   getName() {
@@ -43,8 +56,12 @@ export class Platform {
     return this.variant;
   }
 
-  getSolution() {
-    return this.solution;
+  getSolutionId() {
+    return this.solution?.id;
+  }
+
+  getSolutionArtifact() {
+    return this.solution?.artifact;
   }
 
   isWindows() {
@@ -64,36 +81,29 @@ export class Platform {
   }
 
   toString() {
-    const variant = this.variant ? `-${this.variant}` : '';
-    const solution = this.solution ? `-${this.solution}` : '';
-    return `${this.name}-${this.architecture}${variant}${solution}`;
+    return `${this.name}-${this.architecture}${dashSuffix(this.getVariant())}${dashSuffix(
+      this.getSolutionArtifact()
+    )}`;
   }
 }
 
 export const DOWNLOAD_PLATFORMS = [
-  new Platform('linux', 'x64', 'linux-x86_64', null, null),
-  new Platform('linux', 'arm64', 'linux-aarch64', null, null),
-  new Platform('darwin', 'x64', 'darwin-x86_64', null, null),
-  new Platform('darwin', 'arm64', 'darwin-aarch64', null, null),
-  new Platform('win32', 'x64', 'windows-x86_64', null, null),
-  new Platform('win32', 'arm64', 'windows-arm64', null, null),
+  new Platform('linux', 'x64', 'linux-x86_64'),
+  new Platform('linux', 'arm64', 'linux-aarch64'),
+  new Platform('darwin', 'x64', 'darwin-x86_64'),
+  new Platform('darwin', 'arm64', 'darwin-aarch64'),
+  new Platform('win32', 'x64', 'windows-x86_64'),
+  new Platform('win32', 'arm64', 'windows-arm64'),
 ];
 
 export const SERVERLESS_PLATFORMS = [
-  new Platform('linux', 'x64', 'linux-x86_64', 'serverless', null),
-  new Platform('linux', 'arm64', 'linux-aarch64', 'serverless', null),
+  new Platform('linux', 'x64', 'linux-x86_64', 'serverless'),
+  new Platform('linux', 'arm64', 'linux-aarch64', 'serverless'),
 
-  new Platform('linux', 'x64', 'linux-x86_64', 'serverless', 'workplaceai'),
-  new Platform('linux', 'arm64', 'linux-aarch64', 'serverless', 'workplaceai'),
-
-  new Platform('linux', 'x64', 'linux-x86_64', 'serverless', 'observability'),
-  new Platform('linux', 'arm64', 'linux-aarch64', 'serverless', 'observability'),
-
-  new Platform('linux', 'x64', 'linux-x86_64', 'serverless', 'search'),
-  new Platform('linux', 'arm64', 'linux-aarch64', 'serverless', 'search'),
-
-  new Platform('linux', 'x64', 'linux-x86_64', 'serverless', 'security'),
-  new Platform('linux', 'arm64', 'linux-aarch64', 'serverless', 'security'),
+  ...SOLUTION_BUILDS.flatMap((solution) => [
+    new Platform('linux', 'x64', 'linux-x86_64', 'serverless', solution),
+    new Platform('linux', 'arm64', 'linux-aarch64', 'serverless', solution),
+  ]),
 ];
 
 export const ALL_PLATFORMS = [...DOWNLOAD_PLATFORMS, ...SERVERLESS_PLATFORMS];

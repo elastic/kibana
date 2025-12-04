@@ -189,7 +189,7 @@ export default ({ getService }: FtrProviderContext) => {
         const listed = listRes.body as ListPrivMonUsersResponse;
         listed.forEach((user) => {
           privmonUtils.assertIsPrivileged(user, true);
-          expect(user['@timestamp']).to.be.a('string');
+          expect(user.event?.['@timestamp']).to.be.a('string');
           expect(user.event?.ingested).to.be.a('string');
           expect(user.labels?.sources).to.contain('csv');
         });

@@ -359,6 +359,7 @@ export class CoreSystem {
         i18n,
         theme,
         userProfile,
+        coreEnv: this.coreContext.env,
       });
 
       const notifications = this.notifications.start({
@@ -451,9 +452,6 @@ export class CoreSystem {
 
       // Wait for the first app navigation to report Kibana Loaded
       firstValueFrom(application.currentAppId$.pipe(filter(Boolean))).then(() => {
-        performance.mark(KBN_LOAD_MARKS, {
-          detail: LOAD_FIRST_NAV,
-        });
         this.reportKibanaLoadedEvent(analytics);
       });
 
