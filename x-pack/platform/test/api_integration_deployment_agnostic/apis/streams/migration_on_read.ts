@@ -329,6 +329,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     after(async () => {
       await disableStreams(apiClient);
+      await esClient.indices.deleteDataStream({ name: TEST_STREAM_NAME });
       await kibanaServer.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
         [OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS]: false,

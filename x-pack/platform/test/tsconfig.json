@@ -175,6 +175,7 @@
     "@kbn/onechat-server",
     "@kbn/setup-node-env",
     "@kbn/connector-schemas",
-    "@kbn/es-types"
+    "@kbn/es-types",
+    "@kbn/streamlang"
   ]
 }
