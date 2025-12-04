@@ -88,6 +88,7 @@ export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
         key="integrationKnowledge"
         icon="gear"
         onClick={openManageIntegrationKnowledgeFlyout}
+        disabled={!licenseService.isEnterprise()}
       >
         <FormattedMessage
           id="xpack.fleet.epmInstalledIntegrations.manageIntegrationKnowledgeButton"
