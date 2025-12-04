@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type {
   ConnectorStep,
   EsWorkflowExecution,
@@ -89,6 +90,8 @@ describe('WorkflowContextManager', () => {
       workflowExecutionState,
       esClient,
       dependencies,
+      fakeRequest: {} as KibanaRequest,
+      coreStart: {} as CoreStart,
     });
 
     return {
