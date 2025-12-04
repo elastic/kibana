@@ -2660,12 +2660,10 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@110.0.0":
+"@elastic/eui@file:./elastic_eui_110.0.0_feat_flyout_system_0042.tgz":
   version "110.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-110.0.0.tgz#2baeb804e5124b1c88577d7b9b03fdbbcfcdf7a8"
-  integrity sha512-mzq9NTrJNkkTp7d+zV8wX8NeiqivczwfthZlV/dIjW2qCTH1eU3B7gT5c28qrymynvD9Jp6zy/EtK8MnEzB4ng==
+  resolved "file:./elastic_eui_110.0.0_feat_flyout_system_0042.tgz#2cfdf2af670dab799759d60cfbae19824ac2d65e"
   dependencies:
-    "@elastic/eui-theme-common" "7.1.0"
     "@elastic/prismjs-esql" "^1.1.2"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
@@ -2698,6 +2696,7 @@
     unified "^9.2.2"
     unist-util-visit "^2.0.3"
     url-parse "^1.5.10"
+    use-sync-external-store "^1.6.0"
     uuid "^8.3.0"
     vfile "^4.2.1"
 
@@ -6797,6 +6796,10 @@
   uid ""
 
 "@kbn/flot-charts@link:src/platform/packages/shared/kbn-flot-charts":
+  version "0.0.0"
+  uid ""
+
+"@kbn/flyout-system-example-plugin@link:examples/flyout_system":
   version "0.0.0"
   uid ""
 
@@ -33641,6 +33644,11 @@ use-sync-external-store@^1.0.0, use-sync-external-store@^1.2.0, use-sync-externa
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/use-sync-external-store/-/use-sync-external-store-1.4.0.tgz#adbc795d8eeb47029963016cefdf89dc799fcebc"
   integrity sha512-9WXSPC5fMv61vaupRkCKCxsPxBocVnwakBEkMIHHpkTTg6icbJtg6jzgtLDm4bl3cSHAca52rYWih0k4K3PfHw==
+
+use-sync-external-store@^1.6.0:
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/use-sync-external-store/-/use-sync-external-store-1.6.0.tgz#b174bfa65cb2b526732d9f2ac0a408027876f32d"
+  integrity sha512-Pp6GSwGP/NrPIrxVFAIkOQeyw8lFenOHijQWkUTrDvrF4ALqylP2C/KCkeS9dpUM3KvYRQhna5vt7IL95+ZQ9w==
 
 use@^2.0.0:
   version "2.0.2"
