@@ -129,7 +129,8 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
   const agentId = useAgentId();
   const conversationId = useConversationId();
   const messageEditor = useMessageEditor();
-  const { attachments } = useConversationContext();
+  const { attachments, initialMessage, autoSendInitialMessage, resetInitialMessage } =
+    useConversationContext();
 
   const validateAgentId = useValidateAgentId();
   const isAgentIdValid = validateAgentId(agentId);
@@ -151,6 +152,22 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
         id: attachment.id ?? `attachment-${idx}`,
       }));
   }, [attachments, shouldHideAttachments]);
+
+  const isNewConversation = !conversationId;
+  // Set initial message in input when {autoSendInitialMessage} is false and {initialMessage} is provided
+  useEffect(() => {
+    if (initialMessage && !autoSendInitialMessage && isNewConversation) {
+      messageEditor.setContent(initialMessage);
+      messageEditor.focus();
+      resetInitialMessage?.(); // Reset the initial message to avoid sending it again
+    }
+  }, [
+    initialMessage,
+    autoSendInitialMessage,
+    isNewConversation,
+    messageEditor,
+    resetInitialMessage,
+  ]);
 
   // Auto-focus when conversation changes
   useEffect(() => {
@@ -177,7 +194,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
     <InputContainer isDisabled={isInputDisabled}>
       {visibleAttachments.length > 0 && (
         <EuiFlexItem grow={false}>
-          <AttachmentPillsRow attachments={visibleAttachments} />
+          <AttachmentPillsRow attachments={visibleAttachments} removable />
         </EuiFlexItem>
       )}
       <EuiFlexItem css={inputContainerStyles}>
