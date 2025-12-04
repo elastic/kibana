@@ -71,6 +71,7 @@ components:
         - metadata.host.ip
         - metadata.agent.version
         - last_checkin
+
     AgentIds:
       oneOf:
         - type: array
