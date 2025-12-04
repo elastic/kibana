@@ -26,6 +26,10 @@ export const SCOUT_CYPRESS_REPORTER_PATH = path.join(
   'src/platform/packages/shared/kbn-cypress-config/src/reporting/scout_events'
 );
 
+// Cache for work dir and counter to ensure we read reporter config path only once
+let counter: number = 0;
+let cachedWorkDir: string;
+
 /**
  * Extract the Cypress config file path from process arguments or environment
  */
@@ -58,24 +62,19 @@ function getReportingOptionOverrides(options?: Cypress.ConfigOptions): Record<st
   // this is the list of reporters that should be enabled through the multi-reporter plugin
   let enabledReporters: string[] = [];
   let reporterOptions: Record<string, any> = options?.reporterOptions ?? {};
-  let counter = 0;
 
   if (reporterOptions.configFile) {
     // Load reporter options from file
-    // not sure if path is relative to process.cwd() will test it
-    const workDir = path.join(process.cwd(), '../');
-    try {
-      reporterOptions = JSON.parse(
-        readFileSync(path.join(workDir, reporterOptions.configFile), 'utf8')
-      );
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.log('The initial process.cwd is on a different location');
+    // path in the config file is relative to package.json so I should keep the path of first process.cwd.
+    // This will ensure path exists for all cases
+    if (counter === 0) {
+      cachedWorkDir = process.cwd();
       counter++;
-      if (counter > 1) {
-        throw e;
-      }
     }
+
+    reporterOptions = JSON.parse(
+      readFileSync(path.join(cachedWorkDir, reporterOptions.configFile), 'utf8')
+    );
   }
 
   if (reporterOptions.reporterEnabled) {
