@@ -24,7 +24,7 @@ const DEFAULT_AGENT_IMAGE_CONFIG: BuildkiteAgentTargetingRule = {
 
 const GITHUB_PR_LABELS = process.env.GITHUB_PR_LABELS ?? '';
 const USE_FIPS_IMAGE_FOR_PR = process.env.TEST_ENABLE_FIPS_VERSION?.match(
-  `${FIPS_VERSION.TWO}|${FIPS_VERSION.THREE}`
+  new RegExp(`^${FIPS_VERSION.TWO}|${FIPS_VERSION.THREE}$`)
 );
 const USE_QA_IMAGE_FOR_PR = process.env.USE_QA_IMAGE_FOR_PR?.match(/(1|true)/i);
 
