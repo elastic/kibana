@@ -98,13 +98,6 @@ Object {
         "name": "slo-irrelevant@custom",
       },
     },
-    Object {
-      "pipeline": Object {
-        "ignore_failure": true,
-        "ignore_missing_pipeline": true,
-        "name": "slo-rollup-global@custom",
-      },
-    },
   ],
 }
 `;
@@ -205,13 +198,6 @@ Object {
         "ignore_failure": true,
         "ignore_missing_pipeline": true,
         "name": "slo-irrelevant@custom",
-      },
-    },
-    Object {
-      "pipeline": Object {
-        "ignore_failure": true,
-        "ignore_missing_pipeline": true,
-        "name": "slo-rollup-global@custom",
       },
     },
   ],
