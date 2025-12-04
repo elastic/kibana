@@ -632,7 +632,12 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
   }
   if (clean && exists) {
     log.info('Cleaning existing object store.');
-    await Fsp.rm(objectStorePath, { recursive: true, force: true });
+    try {
+      await Fsp.rm(objectStorePath, { recursive: true, force: true });
+    } catch (error) {
+      // Fall back to sudo if needed, CI user can have issues removing old state
+      await execa('sudo', ['rm', '-rf', objectStorePath]);
+    }
   }
 
   if (clean || !exists) {

@@ -22,7 +22,7 @@ export const getNotificationResultsLink = ({
 }) => {
   if (from == null || to == null) return '';
 
-  return `${kibanaSiemAppUrl}/detections/rules/id/${id}?timerange=(global:(linkTo:!(timeline),timerange:(from:${from},kind:absolute,to:${to})),timeline:(linkTo:!(global),timerange:(from:${from},kind:absolute,to:${to})))`;
+  return `${kibanaSiemAppUrl}/rules/id/${id}?timerange=(global:(linkTo:!(timeline),timerange:(from:${from},kind:absolute,to:${to})),timeline:(linkTo:!(global),timerange:(from:${from},kind:absolute,to:${to})))`;
 };
 
 interface DeconflictOptions {

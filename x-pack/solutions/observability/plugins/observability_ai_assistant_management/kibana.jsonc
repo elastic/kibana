@@ -18,6 +18,7 @@
       "observabilityAIAssistant",
       "observabilityShared",
       "ml",
+      "licensing"
     ],
     "optionalPlugins": [
       "home",

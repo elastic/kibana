@@ -611,6 +611,7 @@ export class AnomalyTimelineStateService extends StateService {
 
   public getContainerWidth$(): Observable<number | undefined> {
     return this._containerWidth$.pipe(
+      skipWhile((v) => v === 0),
       debounceTime(500),
       distinctUntilChanged((prev, curr) => {
         const delta = Math.abs(prev - curr);

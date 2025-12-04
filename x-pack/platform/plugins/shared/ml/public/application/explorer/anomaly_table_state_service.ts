@@ -27,6 +27,7 @@ import { ML_JOB_AGGREGATION, getEntityFieldList } from '@kbn/ml-anomaly-utils';
 import type { UrlStateService } from '@kbn/ml-url-state';
 import { mlTimefilterRefresh$ } from '@kbn/ml-date-picker';
 import type { TimeRangeBounds } from '@kbn/data-plugin/common';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 import type { MlJobService } from '../services/job_service';
 import type { MlApi } from '../services/ml_api_service';
 import type { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';
@@ -53,6 +54,7 @@ import type { Refresh } from '../routing/use_refresh';
 export class AnomalyTableStateService extends StateService {
   private _tableData$ = new BehaviorSubject<AnomaliesTableData | null>(null);
   private _tableDataLoading$ = new BehaviorSubject<boolean>(true);
+  private _tableError$ = new BehaviorSubject<string | null>(null);
   private _timeBounds$: Observable<TimeRangeBounds>;
   private _refreshSubject$: Observable<Refresh>;
 
@@ -89,6 +91,12 @@ export class AnomalyTableStateService extends StateService {
     return this._tableDataLoading$.getValue();
   }
 
+  public readonly tableError$ = this._tableError$.asObservable();
+
+  public get tableError(): string | null {
+    return this._tableError$.getValue();
+  }
+
   protected _initSubscriptions(): Subscription {
     const subscriptions = new Subscription();
 
@@ -123,6 +131,9 @@ export class AnomalyTableStateService extends StateService {
               tableSeverity,
               influencersFilterQuery,
             ]) => {
+              // Clear previous error before starting a new load cycle
+              this._tableError$.next(null);
+
               return this.loadAnomaliesTableData(
                 selectedCells,
                 selectedJobs,
@@ -137,7 +148,9 @@ export class AnomalyTableStateService extends StateService {
                   tableDataLoading: false,
                 })),
                 catchError((error) => {
-                  return of({ tableData: null });
+                  const message = extractErrorMessage(error);
+                  this._tableError$.next(message);
+                  return of({ tableData: null, tableDataLoading: false });
                 })
               );
             }
@@ -230,9 +243,6 @@ export class AnomalyTableStateService extends StateService {
             showViewSeriesLink: true,
             jobIds,
           };
-        }),
-        catchError((error) => {
-          return of(null);
         })
       );
   }

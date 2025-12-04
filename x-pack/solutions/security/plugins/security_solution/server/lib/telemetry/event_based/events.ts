@@ -21,6 +21,221 @@ import type {
 } from '../indices.metadata.types';
 import type { NodeIngestPipelinesStats } from '../ingest_pipelines_stats.types';
 import { SiemMigrationsEventTypes } from './types';
+import type {
+  HealthDiagnosticQueryResult,
+  HealthDiagnosticQueryStats,
+} from '../diagnostic/health_diagnostic_service.types';
+import type {
+  RuleBulkUpgradeTelemetry,
+  RuleUpgradeTelemetry,
+} from '../../detection_engine/prebuilt_rules/api/perform_rule_upgrade/update_rule_telemetry';
+
+// Telemetry event that is sent for each rule that is upgraded during a prebuilt rule upgrade
+export const DETECTION_RULE_UPGRADE_EVENT: EventTypeOpts<RuleUpgradeTelemetry> = {
+  eventType: 'detection_rule_upgrade',
+  schema: {
+    ruleId: { type: 'keyword', _meta: { description: 'Rule ID' } },
+    ruleName: { type: 'keyword', _meta: { description: 'Rule name' } },
+    hasBaseVersion: {
+      type: 'boolean',
+      _meta: { description: 'True if base version exists for this rule' },
+    },
+    finalResult: {
+      type: 'keyword',
+      _meta: { description: 'Overall outcome: SUCCESS | SKIP | ERROR' },
+    },
+    updatedFieldsSummary: {
+      properties: {
+        count: { type: 'long', _meta: { description: 'Number of updated fields' } },
+        nonSolvableConflictsCount: {
+          type: 'long',
+          _meta: { description: 'Number of non-solvable conflicts' },
+        },
+        solvableConflictsCount: {
+          type: 'long',
+          _meta: { description: 'Number of solvable conflicts' },
+        },
+        noConflictsCount: {
+          type: 'long',
+          _meta: { description: 'Number of fields without conflicts' },
+        },
+      },
+    },
+    updatedFieldsTotal: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'Rule field name',
+        },
+      },
+      _meta: { description: 'Fields that were updated' },
+    },
+    updatedFieldsWithNonSolvableConflicts: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'Rule field name',
+        },
+      },
+      _meta: { description: 'Fields with non-solvable conflicts' },
+    },
+    updatedFieldsWithSolvableConflicts: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'Rule field name',
+        },
+      },
+      _meta: { description: 'Fields with solvable conflicts' },
+    },
+    updatedFieldsWithNoConflicts: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'Rule field name',
+        },
+      },
+      _meta: { description: 'Fields updated without conflicts' },
+    },
+  },
+};
+
+// Telemetry event that is sent for each bulk upgrade rules request
+export const DETECTION_RULE_BULK_UPGRADE_EVENT: EventTypeOpts<RuleBulkUpgradeTelemetry> = {
+  eventType: 'detection_rule_bulk_upgrade',
+  schema: {
+    successfulUpdates: {
+      properties: {
+        totalNumberOfRules: {
+          type: 'long',
+          _meta: { description: 'Number of successfully updated rules in bulk update request' },
+        },
+        numOfCustomizedRules: {
+          type: 'long',
+          _meta: {
+            description: 'Number of successfully updated customized rules in bulk update request',
+          },
+        },
+        numOfNonCustomizedRules: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of successfully updated non-customized rules in bulk update request',
+          },
+        },
+        numOfNonSolvableConflicts: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of successfully updated rules with non-solvable conflicts in bulk update request',
+          },
+        },
+        numOfSolvableConflicts: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of successfully updated rules with solvable conflicts in bulk update request',
+          },
+        },
+        numOfNoConflicts: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of successfully updated rules with no conflicts in bulk update request',
+          },
+        },
+      },
+    },
+    errorUpdates: {
+      properties: {
+        totalNumberOfRules: {
+          type: 'long',
+          _meta: { description: 'Number of rules that failed to update in bulk update request' },
+        },
+        numOfCustomizedRules: {
+          type: 'long',
+          _meta: {
+            description: 'Number of customized rules that failed to update in bulk update request',
+          },
+        },
+        numOfNonCustomizedRules: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of non-customized rules that failed to update in bulk update request',
+          },
+        },
+        numOfNonSolvableConflicts: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of rules with non-solvable conflicts that failed to update in bulk update request',
+          },
+        },
+        numOfSolvableConflicts: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of rules with solvable conflicts that failed to update in bulk update request',
+          },
+        },
+        numOfNoConflicts: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of rules with no conflicts that failed to update in bulk update request',
+          },
+        },
+      },
+    },
+    skippedUpdates: {
+      properties: {
+        totalNumberOfRules: {
+          type: 'long',
+          _meta: { description: 'Number of rules that were skipped during bulk update request' },
+        },
+        numOfCustomizedRules: {
+          type: 'long',
+          _meta: {
+            description: 'Number of customized rules that were skipped during bulk update request',
+          },
+        },
+        numOfNonCustomizedRules: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of non-customized rules that were skipped during bulk update request',
+          },
+        },
+        numOfNonSolvableConflicts: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of rules with non-solvable conflicts that were skipped during bulk update request',
+          },
+        },
+        numOfSolvableConflicts: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of rules with solvable conflicts that were skipped during bulk update request',
+          },
+        },
+        numOfNoConflicts: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of rules with no conflicts that were skipped during bulk update request',
+          },
+        },
+      },
+    },
+  },
+};
 
 export const RISK_SCORE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
   scoresWritten: number;
@@ -846,6 +1061,115 @@ export const TELEMETRY_NODE_INGEST_PIPELINES_STATS_EVENT: EventTypeOpts<NodeInge
     },
   };
 
+export const TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_RESULT_EVENT: EventTypeOpts<HealthDiagnosticQueryResult> =
+  {
+    eventType: 'telemetry_health_diagnostic_query_result_event',
+    schema: {
+      name: {
+        type: 'keyword',
+        _meta: { description: 'Identifier for the executed query.' },
+      },
+      queryId: {
+        type: 'keyword',
+        _meta: { description: 'Unique identifier for the specific query.' },
+      },
+      traceId: {
+        type: 'keyword',
+        _meta: { description: 'Unique trace ID for correlating a single query execution.' },
+      },
+      page: {
+        type: 'integer',
+        _meta: { description: 'Page number of the query result.' },
+      },
+      data: {
+        type: 'pass_through',
+        _meta: { description: 'Raw query result payload.' },
+      },
+    },
+  };
+export const TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT: EventTypeOpts<HealthDiagnosticQueryStats> =
+  {
+    eventType: 'telemetry_health_diagnostic_query_stats_event',
+    schema: {
+      name: {
+        type: 'keyword',
+        _meta: { description: 'Identifier for the executed query.' },
+      },
+      traceId: {
+        type: 'keyword',
+        _meta: { description: 'Unique trace ID for correlating a single query execution.' },
+      },
+      numDocs: {
+        type: 'integer',
+        _meta: { description: 'Number of documents returned by the query.' },
+      },
+      passed: {
+        type: 'boolean',
+        _meta: { description: 'Indicates whether the query completed successfully.' },
+      },
+      started: {
+        type: 'keyword',
+        _meta: { description: 'When the query started execution.' },
+      },
+      finished: {
+        type: 'keyword',
+        _meta: { description: 'When the query finished execution.' },
+      },
+      failure: {
+        properties: {
+          message: {
+            type: 'keyword',
+            _meta: { description: 'A high-level failure message describing the error.' },
+          },
+          reason: {
+            properties: {
+              circuitBreaker: {
+                type: 'keyword',
+                _meta: {
+                  description: 'The name of the circuit breaker that triggered the failure.',
+                },
+              },
+              valid: {
+                type: 'boolean',
+                _meta: {
+                  description: 'Indicates whether the query execution was considered valid.',
+                },
+              },
+              message: {
+                type: 'keyword',
+                _meta: {
+                  optional: true,
+                  description:
+                    'A detailed reason or message explaining why the circuit breaker was triggered.',
+                },
+              },
+            },
+          },
+        },
+        _meta: {
+          optional: true,
+          description: 'Details about the failure if the operation was unsuccessful.',
+        },
+      },
+      fieldNames: {
+        type: 'array',
+        items: {
+          type: 'keyword',
+          _meta: {
+            description: 'Field names in the query result.',
+          },
+        },
+      },
+      circuitBreakers: {
+        type: 'pass_through',
+        _meta: {
+          optional: true,
+          description: 'Circuit breaker metrics such as execution time and memory usage.',
+        },
+      },
+    },
+  };
+
 interface CreateAssetCriticalityProcessedFileEvent {
   result?: BulkUpsertAssetCriticalityRecordsResponse['stats'];
   startTime: Date;
@@ -1348,6 +1672,8 @@ export const SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE: EventTypeOpts<{
 };
 
 export const events = [
+  DETECTION_RULE_UPGRADE_EVENT,
+  DETECTION_RULE_BULK_UPGRADE_EVENT,
   RISK_SCORE_EXECUTION_SUCCESS_EVENT,
   RISK_SCORE_EXECUTION_ERROR_EVENT,
   RISK_SCORE_EXECUTION_CANCELLATION_EVENT,
@@ -1362,6 +1688,8 @@ export const events = [
   ENTITY_ENGINE_INITIALIZATION_EVENT,
   ENTITY_STORE_USAGE_EVENT,
   TELEMETRY_DATA_STREAM_EVENT,
+  TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_RESULT_EVENT,
+  TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT,
   TELEMETRY_ILM_POLICY_EVENT,
   TELEMETRY_ILM_STATS_EVENT,
   TELEMETRY_INDEX_SETTINGS_EVENT,

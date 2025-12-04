@@ -127,6 +127,8 @@ export class RequestContextFactory implements IRequestContextFactory {
     return {
       core: coreContext,
 
+      getAnalytics: () => core.analytics,
+
       getServerBasePath: () => core.http.basePath.serverBasePath,
 
       getEndpointAuthz: async (): Promise<Immutable<EndpointAuthz>> => {

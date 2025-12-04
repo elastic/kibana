@@ -156,6 +156,21 @@ export class SampleTaskManagerFixturePlugin
           },
         },
       },
+      sampleRecurringTaskDisablesItself: {
+        title: 'Sample Recurring Task that disables itself',
+        description: 'A sample task that disables itself.',
+        maxAttempts: 3,
+        timeout: '60s',
+        createTaskRunner: () => ({
+          async run() {
+            await new Promise((resolve) => setTimeout(resolve, 3000)); // 3 seconds
+            return {
+              shouldDisableTask: true,
+              state: {},
+            };
+          },
+        }),
+      },
       sampleRecurringTaskTimingOut: {
         title: 'Sample Recurring Task that Times Out',
         description: 'A sample task that times out each run.',
@@ -163,7 +178,7 @@ export class SampleTaskManagerFixturePlugin
         timeout: '1s',
         createTaskRunner: () => ({
           async run() {
-            return await new Promise((resolve) => {});
+            return await new Promise((resolve) => setTimeout(resolve, 3000)); // 3 seconds
           },
         }),
       },

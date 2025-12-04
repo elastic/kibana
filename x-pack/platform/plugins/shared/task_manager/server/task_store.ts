@@ -221,7 +221,7 @@ export class TaskStore {
     try {
       savedObjects = await this.savedObjectsRepository.bulkCreate<SerializedConcreteTaskInstance>(
         objects,
-        { refresh: false }
+        { refresh: false, overwrite: true }
       );
       this.adHocTaskCounter.increment(
         taskInstances.filter((task) => {

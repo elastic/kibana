@@ -25,7 +25,7 @@ import {
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
 
   const PREBUILT_RULE_ID_A = 'test-prebuilt-rule-a';
@@ -51,7 +51,7 @@ export default ({ getService }: FtrProviderContext): void => {
       {
         name: '_export API',
         exportRules: async () => {
-          const { body: exportResult } = await securitySolutionApi
+          const { body: exportResult } = await detectionsApi
             .exportRules({
               query: {},
               body: null,
@@ -65,7 +65,7 @@ export default ({ getService }: FtrProviderContext): void => {
       {
         name: 'bulk actions API',
         exportRules: async () => {
-          const { body } = await securitySolutionApi
+          const { body } = await detectionsApi
             .performRulesBulkAction({
               query: {},
               body: { action: BulkActionTypeEnum.export },
@@ -135,7 +135,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await createPrebuiltRuleAssetSavedObjects(es, [PREBUILT_RULE_A, PREBUILT_RULE_B]);
           await installPrebuiltRules(es, supertest);
 
-          await securitySolutionApi
+          await detectionsApi
             .patchRule({
               body: {
                 rule_id: PREBUILT_RULE_ID_A,
@@ -144,7 +144,7 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             })
             .expect(200);
-          await securitySolutionApi
+          await detectionsApi
             .patchRule({
               body: {
                 rule_id: PREBUILT_RULE_ID_B,
@@ -213,13 +213,13 @@ export default ({ getService }: FtrProviderContext): void => {
           const CUSTOM_RULE_ID_2 = 'custom-rule-id-2';
 
           await Promise.all([
-            securitySolutionApi
+            detectionsApi
               .createRule({ body: getCustomQueryRuleParams({ rule_id: CUSTOM_RULE_ID_1 }) })
               .expect(200),
-            securitySolutionApi
+            detectionsApi
               .createRule({ body: getCustomQueryRuleParams({ rule_id: CUSTOM_RULE_ID_2 }) })
               .expect(200),
-            await securitySolutionApi
+            await detectionsApi
               .patchRule({
                 body: {
                   rule_id: PREBUILT_RULE_ID_B,
@@ -230,7 +230,7 @@ export default ({ getService }: FtrProviderContext): void => {
               .expect(200),
           ]);
 
-          const { body: exportResult } = await securitySolutionApi
+          const { body: exportResult } = await detectionsApi
             .exportRules({ query: {}, body: null })
             .expect(200)
             .parse(binaryToString);
@@ -281,9 +281,9 @@ export default ({ getService }: FtrProviderContext): void => {
           const CUSTOM_RULE_ID = 'rule-id-1';
           const CUSTOM_RULE = getCustomQueryRuleParams({ rule_id: CUSTOM_RULE_ID });
 
-          await securitySolutionApi.createRule({ body: CUSTOM_RULE }).expect(200);
+          await detectionsApi.createRule({ body: CUSTOM_RULE }).expect(200);
 
-          await securitySolutionApi
+          await detectionsApi
             .patchRule({
               body: {
                 rule_id: PREBUILT_RULE_ID_B,
@@ -292,7 +292,7 @@ export default ({ getService }: FtrProviderContext): void => {
             })
             .expect(200);
 
-          const { body: exportResult } = await securitySolutionApi
+          const { body: exportResult } = await detectionsApi
             .performRulesBulkAction({
               body: { query: '', action: BulkActionTypeEnum.export },
               query: {},
@@ -304,7 +304,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           await deleteAllRules(supertest, log);
 
-          await securitySolutionApi
+          await detectionsApi
             .importRules({ query: { overwrite: false } })
             .attach('file', exportResult, 'rules.ndjson')
             .expect('Content-Type', 'application/json; charset=utf-8')
@@ -312,7 +312,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const {
             body: { data: importedRules },
-          } = await securitySolutionApi
+          } = await detectionsApi
             .findRules({
               query: {},
             })
@@ -371,7 +371,7 @@ export default ({ getService }: FtrProviderContext): void => {
       ]);
       await installPrebuiltRules(es, supertest);
 
-      const { body: exportResult } = await securitySolutionApi
+      const { body: exportResult } = await detectionsApi
         .exportRules({
           query: {},
           body: { objects: [{ rule_id: PREBUILT_RULE_ID_A }, { rule_id: PREBUILT_RULE_ID_B }] },
@@ -409,7 +409,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const {
         body: { data: prebuiltRules },
-      } = await securitySolutionApi
+      } = await detectionsApi
         .findRules({
           query: { page: 1, per_page: 2, filter: 'alert.attributes.params.immutable: true' },
         })
@@ -417,7 +417,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const prebuiltRuleObjectIds = prebuiltRules.map((rule: RuleResponse) => rule.id);
 
-      const { body: exportResult } = await securitySolutionApi
+      const { body: exportResult } = await detectionsApi
         .performRulesBulkAction({
           query: {},
           body: { action: BulkActionTypeEnum.export, ids: prebuiltRuleObjectIds },

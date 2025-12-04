@@ -13,7 +13,7 @@ const DATE_WITH_DATA = DATES.metricsAndLogs.hosts.withData;
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'error', 'infraHome', 'security']);
+  const PageObjects = getPageObjects(['common', 'error', 'infraHome', 'security', 'header']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
@@ -95,7 +95,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
-          await retry.try(async () => {
+          await retry.tryForTime(5000, async () => {
             await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
             await testSubjects.existOrFail('~waffleMap');
           });
@@ -195,7 +195,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
-          await retry.try(async () => {
+
+          await PageObjects.header.waitUntilLoadingHasFinished();
+
+          await retry.tryForTime(5000, async () => {
             await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
             await testSubjects.existOrFail('~waffleMap');
           });

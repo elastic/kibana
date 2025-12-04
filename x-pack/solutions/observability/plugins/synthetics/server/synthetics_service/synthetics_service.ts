@@ -191,9 +191,7 @@ export class SyntheticsService {
                   await service.pushConfigs();
                 } else {
                   if (!service.isAllowed) {
-                    service.logger.error(
-                      'User is not allowed to access Synthetics service. Please contact support.'
-                    );
+                    service.logger.debug('User is not allowed to access Synthetics service.');
                   }
                 }
               } catch (e) {
@@ -310,10 +308,12 @@ export class SyntheticsService {
   }
 
   async getOutput({ inspect }: { inspect: boolean } = { inspect: false }) {
-    const { apiKey, isValid } = await getAPIKeyForSyntheticsService({ server: this.server });
+    const { apiKey, isValid } = await getAPIKeyForSyntheticsService({
+      server: this.server,
+    });
     // do not check for api key validity if inspecting
     if (!isValid && !inspect) {
-      this.server.logger.error(
+      this.server.logger.debug(
         'API key is not valid. Cannot push monitor configuration to synthetics public testing locations'
       );
       this.invalidApiKeyError = true;

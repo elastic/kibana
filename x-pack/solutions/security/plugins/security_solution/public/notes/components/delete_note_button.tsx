@@ -9,6 +9,7 @@ import React, { memo, useCallback, useEffect, useState } from 'react';
 import { EuiButtonIcon } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import { useUserPrivileges } from '../../common/components/user_privileges';
 import { DELETE_NOTE_BUTTON_TEST_ID } from './test_ids';
 import type { State } from '../../common/store';
 import type { Note } from '../../../common/api/timeline';
@@ -49,6 +50,9 @@ export const DeleteNoteButtonIcon = memo(({ note, index }: DeleteNoteButtonIconP
   const dispatch = useDispatch();
   const { addError: addErrorToast } = useAppToasts();
 
+  const { notesPrivileges } = useUserPrivileges();
+  const canDeleteNotes = notesPrivileges.crud;
+
   const deleteStatus = useSelector((state: State) => selectDeleteNotesStatus(state));
   const deleteError = useSelector((state: State) => selectDeleteNotesError(state));
   const [deletingNoteId, setDeletingNoteId] = useState('');
@@ -68,6 +72,10 @@ export const DeleteNoteButtonIcon = memo(({ note, index }: DeleteNoteButtonIconP
       });
     }
   }, [addErrorToast, deleteError, deleteStatus]);
+
+  if (!canDeleteNotes) {
+    return null;
+  }
 
   return (
     <EuiButtonIcon

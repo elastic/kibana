@@ -66,12 +66,15 @@ export const createRule = async ({
 export const createAction = async ({
   supertest,
   objectRemover,
+  spaceId = Spaces.space1.id,
 }: {
   supertest: SuperTestAgent;
   objectRemover: ObjectRemover;
+  spaceId?: string;
 }) => {
+  const spacePrefix = spaceId !== 'default' ? `${getUrlPrefix(spaceId)}` : '';
   const { body: createdAction } = await supertest
-    .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
+    .post(`${spacePrefix}/api/actions/connector`)
     .set('kbn-xsrf', 'foo')
     .send({
       name: 'MY action',
@@ -81,7 +84,7 @@ export const createAction = async ({
     })
     .expect(200);
 
-  objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
+  objectRemover.add(spaceId, createdAction.id, 'action', 'actions');
   return createdAction;
 };
 
@@ -89,13 +92,16 @@ export const createMaintenanceWindow = async ({
   overwrites,
   supertest,
   objectRemover,
+  spaceId = Spaces.space1.id,
 }: {
   overwrites?: any;
   supertest: SuperTestAgent;
   objectRemover: ObjectRemover;
+  spaceId?: string;
 }) => {
+  const spacePrefix = spaceId !== 'default' ? `${getUrlPrefix(spaceId)}` : '';
   const { body: window } = await supertest
-    .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/maintenance_window`)
+    .post(`${spacePrefix}/internal/alerting/rules/maintenance_window`)
     .set('kbn-xsrf', 'foo')
     .send({
       title: 'test-maintenance-window-1',
@@ -110,7 +116,7 @@ export const createMaintenanceWindow = async ({
     })
     .expect(200);
 
-  objectRemover.add(Spaces.space1.id, window.id, 'rules/maintenance_window', 'alerting', true);
+  objectRemover.add(spaceId, window.id, 'rules/maintenance_window', 'alerting', true);
 
   // wait so cache expires
   await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
@@ -152,6 +158,7 @@ export const getRuleEvents = async ({
   recoveredInstance,
   retry,
   getService,
+  spaceId = Spaces.space1.id,
 }: {
   id: string;
   action?: number;
@@ -160,6 +167,7 @@ export const getRuleEvents = async ({
   recoveredInstance?: number;
   retry: RetryService;
   getService: FtrProviderContext['getService'];
+  spaceId?: string;
 }) => {
   const actions: Array<[string, { equal: number }]> = [];
   if (action) {
@@ -177,7 +185,7 @@ export const getRuleEvents = async ({
   return retry.try(async () => {
     return await getEventLog({
       getService,
-      spaceId: Spaces.space1.id,
+      spaceId,
       type: 'alert',
       id,
       provider: 'alerting',
@@ -190,14 +198,17 @@ export const expectNoActionsFired = async ({
   id,
   supertest,
   retry,
+  spaceId = Spaces.space1.id,
 }: {
   id: string;
   supertest: SuperTestAgent;
   retry: RetryService;
+  spaceId?: string;
 }) => {
+  const spacePrefix = spaceId !== 'default' ? `${getUrlPrefix(spaceId)}` : '';
   const events = await retry.try(async () => {
     const { body: result } = await supertest
-      .get(`${getUrlPrefix(Spaces.space1.id)}/_test/event_log/alert/${id}/_find?per_page=5000`)
+      .get(`${spacePrefix}/_test/event_log/alert/${id}/_find?per_page=5000`)
       .expect(200);
 
     if (!result.total) {
@@ -218,15 +229,18 @@ export const expectActionsFired = async ({
   supertest,
   retry,
   expectedNumberOfActions,
+  spaceId = Spaces.space1.id,
 }: {
   id: string;
   supertest: SuperTestAgent;
   retry: RetryService;
   expectedNumberOfActions: number;
+  spaceId?: string;
 }) => {
+  const spacePrefix = spaceId !== 'default' ? `${getUrlPrefix(spaceId)}` : '';
   await retry.try(async () => {
     const { body: result } = await supertest
-      .get(`${getUrlPrefix(Spaces.space1.id)}/_test/event_log/alert/${id}/_find?per_page=5000`)
+      .get(`${spacePrefix}/_test/event_log/alert/${id}/_find?per_page=5000`)
       .expect(200);
 
     if (!result.total) {

@@ -6528,28 +6528,31 @@
           },
           "experimental_data_stream_features": {
             "type": "array",
-            "properties": {
-              "data_stream": {
-                "type": "string"
-              },
-              "features": {
-                "type": "object",
-                "properties": {
-                  "synthetic_source": {
-                    "type": "boolean",
-                    "nullable": true
-                  },
-                  "tsdb": {
-                    "type": "boolean",
-                    "nullable": true
-                  },
-                  "doc_value_only_numeric": {
-                    "type": "boolean",
-                    "nullable": true
-                  },
-                  "doc_value_only_other": {
-                    "type": "boolean",
-                    "nullable": true
+            "items": {
+              "type": "object",
+              "properties": {
+                "data_stream": {
+                  "type": "string"
+                },
+                "features": {
+                  "type": "object",
+                  "properties": {
+                    "synthetic_source": {
+                      "type": "boolean",
+                      "nullable": true
+                    },
+                    "tsdb": {
+                      "type": "boolean",
+                      "nullable": true
+                    },
+                    "doc_value_only_numeric": {
+                      "type": "boolean",
+                      "nullable": true
+                    },
+                    "doc_value_only_other": {
+                      "type": "boolean",
+                      "nullable": true
+                    }
                   }
                 }
               }

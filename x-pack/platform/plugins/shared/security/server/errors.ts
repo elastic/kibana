@@ -56,3 +56,34 @@ export function getDetailedErrorMessage(error: any): string {
 
   return error.message;
 }
+
+export function isExpiredOrInvalidRefreshTokenError(error: errors.ResponseError): boolean {
+  return (
+    error.body?.error_description?.includes('token has already been refreshed') ||
+    error.body?.error_description?.includes('could not refresh the requested token')
+  );
+}
+
+export function isCredentialMismatchError(error: errors.ResponseError): boolean {
+  return error.body?.error_description?.includes('tokens must be refreshed by the creating client');
+}
+
+export class InvalidGrantError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'InvalidGrantError';
+    Object.setPrototypeOf(this, InvalidGrantError.prototype);
+  }
+
+  public static expiredOrInvalidRefreshToken() {
+    return new InvalidGrantError(
+      'Your session has expired because your refresh token is no longer valid. Please log in again.'
+    );
+  }
+
+  public static credentialMismatch() {
+    return new InvalidGrantError(
+      'Your session could not be refreshed due to a system misconfiguration. Please contact your administrator for assistance.'
+    );
+  }
+}

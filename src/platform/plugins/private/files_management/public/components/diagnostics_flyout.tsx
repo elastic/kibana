@@ -27,7 +27,7 @@ import {
   Chart,
   Axis,
   Position,
-  HistogramBarSeries,
+  BarSeries,
   ScaleType,
   Settings,
   LEGACY_LIGHT_THEME,
@@ -50,7 +50,13 @@ export const DiagnosticsFlyout: FunctionComponent<Props> = ({ onClose }) => {
   const titleId = useGeneratedHtmlId({ prefix: 'diagnosticsFlyoutTitle' });
 
   return (
-    <EuiFlyout ownFocus onClose={onClose} size="s" aria-labelledby={titleId}>
+    <EuiFlyout
+      ownFocus
+      onClose={onClose}
+      size="s"
+      aria-labelledby={titleId}
+      data-test-subj="diagnosticsFlyout"
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id={titleId}>{i18nTexts.diagnosticsFlyoutTitle}</h2>
@@ -107,7 +113,7 @@ export const DiagnosticsFlyout: FunctionComponent<Props> = ({ onClose }) => {
                 />
                 <Axis id="y" position={Position.Left} showOverlappingTicks />
                 <Axis id="x" position={Position.Bottom} showOverlappingTicks />
-                <HistogramBarSeries
+                <BarSeries
                   data={Object.entries(data.countByStatus).map(([key, count]) => ({
                     key,
                     count,
@@ -115,9 +121,8 @@ export const DiagnosticsFlyout: FunctionComponent<Props> = ({ onClose }) => {
                   id="Status"
                   xAccessor={'key'}
                   yAccessors={['count']}
-                  xScaleType={ScaleType.Time}
+                  xScaleType={ScaleType.Ordinal}
                   yScaleType={ScaleType.Linear}
-                  timeZone="local"
                 />
               </Chart>
             </EuiPanel>
@@ -129,7 +134,7 @@ export const DiagnosticsFlyout: FunctionComponent<Props> = ({ onClose }) => {
               <Chart size={{ height: 200, width: '100%' }}>
                 <Axis id="y" position={Position.Left} showOverlappingTicks />
                 <Axis id="x" position={Position.Bottom} showOverlappingTicks />
-                <HistogramBarSeries
+                <BarSeries
                   data={Object.entries(data.countByExtension).map(([key, count]) => ({
                     key,
                     count,
@@ -137,9 +142,8 @@ export const DiagnosticsFlyout: FunctionComponent<Props> = ({ onClose }) => {
                   id="Extension"
                   xAccessor={'key'}
                   yAccessors={['count']}
-                  xScaleType={ScaleType.Time}
+                  xScaleType={ScaleType.Ordinal}
                   yScaleType={ScaleType.Linear}
-                  timeZone="local"
                 />
               </Chart>
             </EuiPanel>

@@ -85,6 +85,7 @@ function createStartContract(): ObservabilityAIAssistantPublicStart {
       loading: false,
       selectConnector: () => {},
       reloadConnectors: () => {},
+      isConnectorSelectionRestricted: false,
     }),
     getContextualInsightMessages: () => [],
     createScreenContextAction: () => ({} as ScreenContextActionDefinition<any>),

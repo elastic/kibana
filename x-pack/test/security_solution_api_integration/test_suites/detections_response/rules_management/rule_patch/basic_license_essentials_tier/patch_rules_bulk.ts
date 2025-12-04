@@ -29,7 +29,7 @@ import {
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
   const es = getService('es');
   const utils = getService('securitySolutionUtils');
@@ -49,7 +49,7 @@ export default ({ getService }: FtrProviderContext) => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's name
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkPatchRules({ body: [{ rule_id: 'rule-1', name: 'some other name' }] })
           .expect(200);
 
@@ -78,11 +78,11 @@ export default ({ getService }: FtrProviderContext) => {
           required_fields: [{ name: '@timestamp', type: 'date', ecs: true }],
         };
 
-        await securitySolutionApi.createRule({
+        await detectionsApi.createRule({
           body: getCustomQueryRuleParams({ rule_id: 'rule-1' }),
         });
 
-        const { body: patchedRulesBulkResponse } = await securitySolutionApi
+        const { body: patchedRulesBulkResponse } = await detectionsApi
           .bulkPatchRules({
             body: [
               {
@@ -94,7 +94,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(patchedRulesBulkResponse[0]).toMatchObject(expectedRule);
 
-        const { body: patchedRule } = await securitySolutionApi
+        const { body: patchedRule } = await detectionsApi
           .readRule({
             query: { rule_id: 'rule-1' },
           })
@@ -109,7 +109,7 @@ export default ({ getService }: FtrProviderContext) => {
         const username = await utils.getUsername();
 
         // patch both rule names
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkPatchRules({
             body: [
               { rule_id: 'rule-1', name: 'some other name' },
@@ -138,7 +138,7 @@ export default ({ getService }: FtrProviderContext) => {
         const createRuleBody = await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's name
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkPatchRules({ body: [{ id: createRuleBody.id, name: 'some other name' }] })
           .expect(200);
 
@@ -156,7 +156,7 @@ export default ({ getService }: FtrProviderContext) => {
         const username = await utils.getUsername();
 
         // patch both rule names
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkPatchRules({
             body: [
               { id: createRule1.id, name: 'some other name' },
@@ -185,7 +185,7 @@ export default ({ getService }: FtrProviderContext) => {
         const createdBody = await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's name
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkPatchRules({ body: [{ id: createdBody.id, name: 'some other name' }] })
           .expect(200);
 
@@ -202,7 +202,7 @@ export default ({ getService }: FtrProviderContext) => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's enabled to false
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkPatchRules({ body: [{ rule_id: 'rule-1', enabled: false }] })
           .expect(200);
 
@@ -218,7 +218,7 @@ export default ({ getService }: FtrProviderContext) => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's enabled to false and another property
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkPatchRules({ body: [{ rule_id: 'rule-1', severity: 'low', enabled: false }] })
           .expect(200);
 
@@ -236,14 +236,14 @@ export default ({ getService }: FtrProviderContext) => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's timeline_title
-        await securitySolutionApi
+        await detectionsApi
           .bulkPatchRules({
             body: [{ rule_id: 'rule-1', timeline_title: 'some title', timeline_id: 'some id' }],
           })
           .expect(200);
 
         // patch a simple rule's name
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkPatchRules({ body: [{ rule_id: 'rule-1', name: 'some other name' }] })
           .expect(200);
 
@@ -259,7 +259,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should return a 200 but give a 404 in the message if it is given a fake id', async () => {
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkPatchRules({
             body: [{ id: '5096dec6-b6b9-4d8d-8f93-6c2602079d9d', name: 'some other name' }],
           })
@@ -277,7 +277,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should return a 200 but give a 404 in the message if it is given a fake rule_id', async () => {
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkPatchRules({ body: [{ rule_id: 'fake_id', name: 'some other name' }] })
           .expect(200);
 
@@ -293,7 +293,7 @@ export default ({ getService }: FtrProviderContext) => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch one rule name and give a fake id for the second
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkPatchRules({
             body: [
               { rule_id: 'rule-1', name: 'some other name' },
@@ -324,7 +324,7 @@ export default ({ getService }: FtrProviderContext) => {
         const createdBody = await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch one rule name and give a fake id for the second
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkPatchRules({
             body: [
               { id: createdBody.id, name: 'some other name' },
@@ -359,7 +359,7 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
         await installPrebuiltRules(es, supertest);
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkPatchRules({
             body: [
               { rule_id: 'rule-1', author: ['new user'] },

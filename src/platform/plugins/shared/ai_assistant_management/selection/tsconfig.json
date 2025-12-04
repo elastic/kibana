@@ -18,7 +18,10 @@
     "@kbn/core-plugins-server",
     "@kbn/features-plugin",
     "@kbn/config",
-    "@kbn/doc-links"
+    "@kbn/doc-links",
+    "@kbn/licensing-plugin",
+    "@kbn/licensing-plugin",
+    "@kbn/management-settings-ids"
   ],
   "exclude": ["target/**/*"]
 }

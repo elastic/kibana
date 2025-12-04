@@ -15,6 +15,7 @@ import {
   locationRenderer,
   whoisRenderer,
   reputationRenderer,
+  hostIdRenderer,
 } from './field_renderers';
 import { mockData } from '../../../explore/network/components/details/mock';
 import type { AutonomousSystem } from '../../../../common/search_strategy';
@@ -134,6 +135,19 @@ describe('Field Renderers', () => {
         <TestProviders>{hostNameRenderer(scopeId, emptyIpHost, FlowTarget.source)}</TestProviders>
       );
       expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
+    });
+
+    test('it renders multiple host ids', () => {
+      render(
+        <TestProviders>
+          {hostIdRenderer({
+            scopeId,
+            host: { ...emptyIdHost, id: ['test1', 'test2'] },
+          })}
+        </TestProviders>
+      );
+      expect(screen.getByText('test1')).toBeInTheDocument();
+      expect(screen.getByText('+1 More')).toBeInTheDocument();
     });
   });
 

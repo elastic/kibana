@@ -20,7 +20,7 @@ const { REPO_ROOT } = require('@kbn/repo-info');
       `${REPO_ROOT}/src/platform/plugins/shared/data_views/docs/openapi/bundled.yaml`,
       `${REPO_ROOT}/x-pack/platform/plugins/shared/ml/common/openapi/ml_apis.yaml`,
       `${REPO_ROOT}/src/core/packages/saved-objects/docs/openapi/bundled.yaml`,
-      `${REPO_ROOT}/x-pack/plugins/fleet/common/openapi/bundled.yaml`,
+      `${REPO_ROOT}/x-pack/platform/plugins/shared/fleet/common/openapi/bundled.yaml`,
       `${REPO_ROOT}/x-pack/platform/plugins/private/upgrade_assistant/docs/openapi/upgrade_apis.yaml`,
       `${REPO_ROOT}/x-pack/platform/plugins/shared/security/docs/openapi/user_session_apis.yaml`,
       `${REPO_ROOT}/src/platform/plugins/shared/share/docs/openapi/short_url_apis.yaml`,

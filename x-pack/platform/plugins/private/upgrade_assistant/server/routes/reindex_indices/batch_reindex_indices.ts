@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { errors } from '@elastic/elasticsearch';
+import { SavedObjectsClient } from '@kbn/core/server';
 
 import { API_BASE_PATH } from '../../../common/constants';
 import { REINDEX_OP_TYPE, ReindexStatus } from '../../../common/types';
@@ -26,6 +27,7 @@ export function registerBatchReindexIndicesRoutes(
     licensing,
     log,
     getSecurityPlugin,
+    getSavedObjectsService,
     lib: { handleEsError },
   }: RouteDependencies,
   getWorker: () => ReindexWorker
@@ -51,14 +53,14 @@ export function registerBatchReindexIndicesRoutes(
     versionCheckHandlerWrapper(async ({ core }, request, response) => {
       const {
         elasticsearch: { client: esClient },
-        savedObjects,
       } = await core;
-      const { getClient } = savedObjects;
       const callAsCurrentUser = esClient.asCurrentUser;
-      const reindexActions = reindexActionsFactory(
-        getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
-        callAsCurrentUser
+
+      const soClient = new SavedObjectsClient(
+        getSavedObjectsService().createInternalRepository([REINDEX_OP_TYPE])
       );
+
+      const reindexActions = reindexActionsFactory(soClient, callAsCurrentUser);
       try {
         const inProgressOps = await reindexActions.findAllByStatus(ReindexStatus.inProgress);
         const { queue } = sortAndOrderReindexOperations(inProgressOps);
@@ -99,9 +101,13 @@ export function registerBatchReindexIndicesRoutes(
     },
     versionCheckHandlerWrapper(async ({ core }, request, response) => {
       const {
-        savedObjects: { getClient },
         elasticsearch: { client: esClient },
       } = await core;
+
+      const soClient = new SavedObjectsClient(
+        getSavedObjectsService().createInternalRepository([REINDEX_OP_TYPE])
+      );
+
       const { indexNames } = request.body;
       const results: PostBatchResponse = {
         enqueued: [],
@@ -110,7 +116,7 @@ export function registerBatchReindexIndicesRoutes(
       for (const indexName of indexNames) {
         try {
           const result = await reindexHandler({
-            savedObjects: getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
+            savedObjects: soClient,
             dataClient: esClient,
             indexName,
             log,

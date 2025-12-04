@@ -52,6 +52,7 @@ export const bootstrapPrebuiltRulesHandler = async (
       body: responseBody,
     });
   } catch (err) {
+    logger.error(`bootstrapPrebuiltRulesHandler: Caught error:`, err);
     const error = transformError(err);
     return siemResponse.error({
       body: error.message,

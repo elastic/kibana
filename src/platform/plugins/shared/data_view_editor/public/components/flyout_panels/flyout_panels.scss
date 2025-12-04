@@ -1,5 +1,13 @@
 .fieldEditor__flyoutPanels {
   height: 100%;
+  @include euiBreakpoint('xs', 's') {
+    overflow: auto;
+    .euiFlyoutFooter {
+      position: sticky;
+      bottom: 0;
+      flex-grow: 1;
+    }
+  }
 }
 
 .fieldEditor__flyoutPanel {
@@ -38,5 +46,13 @@
 
   &__footer {
     flex: 0;
+  }
+}
+
+.fieldEditor__flyoutColumn {
+  height: 100%;
+  overflow: hidden;
+  @include euiBreakpoint('xs', 's') {
+    height: auto;
   }
 }

@@ -96,6 +96,31 @@ describe('getFileHandler', () => {
     );
   });
 
+  it('should throw if the file is not supported for bundled package and an existing file', async () => {
+    mockedGetBundledPackageByPkgKey.mockResolvedValue({
+      getBuffer: () => Promise.resolve(),
+    } as any);
+    const request = httpServerMock.createKibanaRequest({
+      params: {
+        pkgName: 'test',
+        pkgVersion: '1.0.0',
+        filePath: 'test.zip',
+      },
+    });
+    const buffer = Buffer.from(`TEST`);
+    mockedUnpackBufferEntries.mockResolvedValue([
+      {
+        path: 'test-1.0.0/test.zip',
+        buffer,
+      },
+    ]);
+    const response = httpServerMock.createResponseFactory();
+    const context = mockContext();
+    await expect(getFileHandler(context, request, response)).rejects.toThrow(
+      /File content type "application\/zip" is not allowed to be retrieved/
+    );
+  });
+
   it('should a 404 for bundled package with a non existing file', async () => {
     mockedGetBundledPackageByPkgKey.mockResolvedValue({
       getBuffer: () => Promise.resolve(),
@@ -176,7 +201,7 @@ describe('getFileHandler', () => {
       body: 'not found',
       headers: new Headers({
         raw: '',
-        'content-type': 'text',
+        'content-type': 'text/plain',
       }),
     });
 
@@ -187,7 +212,7 @@ describe('getFileHandler', () => {
         statusCode: 404,
         body: 'not found',
         headers: expect.objectContaining({
-          'content-type': 'text',
+          'content-type': 'text/plain',
         }),
       })
     );
@@ -224,6 +249,33 @@ describe('getFileHandler', () => {
           'content-type': 'text/markdown; charset=utf-8',
         }),
       })
+    );
+  });
+
+  it('should throw if the file is not a supported extension for installed package', async () => {
+    const request = httpServerMock.createKibanaRequest({
+      params: {
+        pkgName: 'test',
+        pkgVersion: '1.0.0',
+        filePath: 'test.zip',
+      },
+    });
+    const response = httpServerMock.createResponseFactory();
+    const context = mockContext();
+
+    mockedGetInstallation.mockResolvedValue({ version: '1.0.0' } as any);
+    mockedGetAsset.mockResolvedValue({
+      asset_path: '/test/1.0.0/test.zip',
+      data_utf8: 'test',
+      data_base64: '',
+      media_type: 'application/zip',
+      package_name: 'test',
+      package_version: '1.0.0',
+      install_source: 'registry',
+    });
+
+    await expect(getFileHandler(context, request, response)).rejects.toThrow(
+      /File content type "application\/zip" is not allowed to be retrieved/
     );
   });
 

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { installMockPrebuiltRulesPackage } from '../../../../../tasks/api_calls/prebuilt_rules';
 import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
-import { getNewRule } from '../../../../../objects/rule';
+import { getCustomQueryRuleParams } from '../../../../../objects/rule';
 
 import { RULE_SWITCH } from '../../../../../screens/alerts_detection_rules';
 
@@ -22,10 +23,14 @@ import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import { login } from '../../../../../tasks/login';
 
 describe('Rule deletion', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
+  before(() => {
+    installMockPrebuiltRulesPackage();
+  });
+
   const testRules = [
-    getNewRule({ rule_id: 'rule1', name: 'Rule 1', enabled: false }),
-    getNewRule({ rule_id: 'rule2', name: 'Rule 2', enabled: false }),
-    getNewRule({ rule_id: 'rule3', name: 'Rule 3', enabled: false }),
+    getCustomQueryRuleParams({ rule_id: 'rule1', name: 'Rule 1', enabled: false }),
+    getCustomQueryRuleParams({ rule_id: 'rule2', name: 'Rule 2', enabled: false }),
+    getCustomQueryRuleParams({ rule_id: 'rule3', name: 'Rule 3', enabled: false }),
   ];
   beforeEach(() => {
     deleteAlertsAndRules();

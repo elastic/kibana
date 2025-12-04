@@ -22,6 +22,7 @@ import { SECURITY_AI_SETTINGS } from '@kbn/elastic-assistant/impl/assistant/sett
 import { CONVERSATIONS_TAB } from '@kbn/elastic-assistant/impl/assistant/settings/const';
 import type { SettingsTabs } from '@kbn/elastic-assistant/impl/assistant/settings/types';
 
+import { DefaultAiConnectorSettingsContextProvider } from '@kbn/ai-assistant-default-llm-setting/src/context/default_ai_connector_context';
 import { useKibana } from '../../common/lib/kibana';
 
 const defaultSelectedConversationId = WELCOME_CONVERSATION_TITLE;
@@ -34,16 +35,22 @@ export const ManagementSettings = React.memo(() => {
   } = useAssistantContext();
 
   const {
-    application: {
-      navigateToApp,
-      capabilities: {
-        securitySolutionAssistant: { 'ai-assistant': securityAIAssistantEnabled },
-      },
-    },
+    application,
     data: { dataViews },
     chrome: { docTitle, setBreadcrumbs },
     serverless,
+    settings,
+    docLinks,
+    featureFlags,
+    notifications,
   } = useKibana().services;
+
+  const {
+    navigateToApp,
+    capabilities: {
+      securitySolutionAssistant: { 'ai-assistant': securityAIAssistantEnabled },
+    },
+  } = application;
 
   const onFetchedConversations = useCallback(
     (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>
@@ -132,12 +139,20 @@ export const ManagementSettings = React.memo(() => {
 
   if (conversations) {
     return (
-      <AssistantSettingsManagement
-        selectedConversation={currentConversation}
-        dataViews={dataViews}
-        onTabChange={handleTabChange}
-        currentTab={currentTab}
-      />
+      <DefaultAiConnectorSettingsContextProvider
+        toast={notifications.toasts}
+        application={application}
+        docLinks={docLinks}
+        featureFlags={featureFlags}
+      >
+        <AssistantSettingsManagement
+          selectedConversation={currentConversation}
+          dataViews={dataViews}
+          onTabChange={handleTabChange}
+          currentTab={currentTab}
+          settings={settings}
+        />{' '}
+      </DefaultAiConnectorSettingsContextProvider>
     );
   }
 

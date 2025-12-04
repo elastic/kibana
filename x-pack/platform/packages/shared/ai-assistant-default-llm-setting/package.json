@@ -1,0 +1,7 @@
+{
+  "name": "@kbn/ai-assistant-default-llm-setting",
+  "description": "Default LLM settings for AI Assistant",
+  "private": true,
+  "version": "1.0.0",
+  "license": "Elastic License 2.0"
+}

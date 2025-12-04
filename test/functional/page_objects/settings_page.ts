@@ -550,6 +550,19 @@ export class SettingsPageObject extends FtrService {
       if (dataViewName) {
         await this.setNameField(dataViewName);
       }
+
+      await this.retry.waitFor(
+        'the index pattern form should have no validation errors',
+        async () => {
+          const form = await this.testSubjects.find('indexPatternEditorForm');
+          const validationError = await form.getAttribute('data-validation-error');
+          if (validationError !== '0') {
+            this.log.debug('Validation error found, retrying');
+          }
+          return validationError === '0';
+        }
+      );
+
       await (await this.getSaveIndexPatternButton()).click();
     });
     await this.header.waitUntilLoadingHasFinished();

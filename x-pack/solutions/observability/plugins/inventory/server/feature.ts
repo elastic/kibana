@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 
 const INVENTORY_SERVER_FEATURE_ID = 'inventory';
 
@@ -18,7 +17,6 @@ export const INVENTORY_SERVER_FEATURE = {
   }),
   order: 1000,
   category: DEFAULT_APP_CATEGORIES.observability,
-  scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   app: [INVENTORY_SERVER_FEATURE_ID],
   catalogue: [INVENTORY_SERVER_FEATURE_ID],
   alerting: [],

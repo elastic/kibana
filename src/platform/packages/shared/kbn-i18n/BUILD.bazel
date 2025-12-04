@@ -24,8 +24,6 @@ SRCS = glob(
 
 BUNDLER_DEPS = [
   "@npm//@formatjs/intl",
-  "@npm//@formatjs/intl-pluralrules",
-  "@npm//@formatjs/intl-relativetimeformat",
   "@npm//@formatjs/intl-utils",
 ]
 

@@ -76,6 +76,7 @@ import { getCaseConnectorsMockResponse } from '../common/mock/connectors';
 import { set } from '@kbn/safer-lodash-set';
 import { cloneDeep, omit } from 'lodash';
 import type { CaseUserActionTypeWithAll } from './types';
+import type { CaseUserActionStatsResponse } from '../../common/types/api';
 import {
   CaseSeverity,
   CaseStatuses,
@@ -597,10 +598,13 @@ describe('Cases API', () => {
   });
 
   describe('getCaseUserActionsStats', () => {
-    const getCaseUserActionsStatsSnake = {
+    const getCaseUserActionsStatsSnake: CaseUserActionStatsResponse = {
       total: 20,
+      total_deletions: 0,
       total_comments: 10,
+      total_comment_deletions: 0,
       total_other_actions: 10,
+      total_other_action_deletions: 0,
     };
 
     beforeEach(() => {

@@ -1145,11 +1145,16 @@ const updateExistingDataStream = async ({
     updatedDynamicDimensionMappings.sort(sortMappings)
   );
 
+  const packageDefinedIndexMode = settings?.index?.mode;
+  // @ts-expect-error Property 'source.mode' does not exist on type 'IndicesMappingLimitSettings'
+  const packageDefinedSourceMode = settings?.index?.mapping?.source?.mode;
+
   // Trigger a rollover if the index mode or source type has changed
   if (
-    currentIndexMode !== settings?.index?.mode ||
-    // @ts-expect-error Property 'source.mode' does not exist on type 'IndicesMappingLimitSettings'
-    currentSourceType !== settings?.index?.mapping?.source?.mode ||
+    (packageDefinedIndexMode !== undefined && currentIndexMode !== settings?.index?.mode) ||
+    (packageDefinedSourceMode !== undefined &&
+      // @ts-expect-error Property 'source.mode' does not exist on type 'IndicesMappingLimitSettings'
+      currentSourceType !== settings?.index?.mapping?.source?.mode) ||
     dynamicDimensionMappingsChanged
   ) {
     if (options?.skipDataStreamRollover === true) {

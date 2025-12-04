@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import React, { useEffect } from 'react';
@@ -25,13 +26,13 @@ export function SloEditPage() {
     serverless,
   } = useKibana().services;
   const { sloId } = useParams<{ sloId: string | undefined }>();
+  const { data: slo, isLoading: isLoadingSlo } = useFetchSloDetails({ sloId });
+  const isEditMode = Boolean(sloId);
 
   const { data: permissions } = usePermissions();
   const { ObservabilityPageTemplate } = usePluginContext();
-
   const { hasAtLeast } = useLicense();
   const hasRightLicense = hasAtLeast('platinum');
-  const { data: slo } = useFetchSloDetails({ sloId });
 
   useBreadcrumbs(
     [
@@ -51,7 +52,7 @@ export function SloEditPage() {
           ]
         : []),
       {
-        text: slo
+        text: sloId
           ? i18n.translate('xpack.slo.breadcrumbs.sloEditLabel', {
               defaultMessage: 'Edit',
             })
@@ -88,7 +89,11 @@ export function SloEditPage() {
       data-test-subj="slosEditPage"
     >
       <HeaderMenu />
-      <SloEditForm slo={slo} />
+      {isEditMode && isLoadingSlo ? (
+        <EuiLoadingSpinner size="xl" data-test-subj="sloEditLoadingSpinner" />
+      ) : (
+        <SloEditForm slo={slo} />
+      )}
     </ObservabilityPageTemplate>
   );
 }

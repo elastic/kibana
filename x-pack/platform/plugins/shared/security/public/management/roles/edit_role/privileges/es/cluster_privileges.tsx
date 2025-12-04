@@ -55,7 +55,7 @@ export class ClusterPrivileges extends Component<Props, {}> {
           isDisabled={isRoleReadOnly(role) || !editable}
           placeholder={i18n.translate(
             'xpack.security.management.editRole.clusterPrivileges.placeholder',
-            { defaultMessage: 'Add an action…' }
+            { defaultMessage: 'Add a privilege…' }
           )}
         />
       </EuiFlexItem>

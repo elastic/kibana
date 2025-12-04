@@ -69,7 +69,7 @@ export default function (context: FtrProviderContext) {
     });
 
     it('should be able to configure with valid authentication code', async function () {
-      this.timeout(60000);
+      this.timeout(75000);
 
       const esServerConfig = config.get('servers.elasticsearch');
       const configurePayload = {

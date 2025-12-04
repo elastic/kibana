@@ -37,6 +37,12 @@ describe('SettingsTab', () => {
             advancedSettings: { save: true },
           },
         },
+        notifications: {
+          toasts: { addError: jest.fn(), addSuccess: jest.fn() },
+        },
+        featureFlags: {
+          getBooleanValue: jest.fn().mockReturnValue(true),
+        },
         http: {
           basePath: { prepend: prependMock },
         },
@@ -49,7 +55,9 @@ describe('SettingsTab', () => {
       isPolling: false,
       isWarmingUpModel: false,
     });
-    useGenAIConnectorsMock.mockReturnValue({ connectors: [{ id: 'test-connector' }] });
+    useGenAIConnectorsMock.mockReturnValue({
+      connectors: [{ id: 'test-connector', name: 'Test Connector' }],
+    });
 
     getUrlForAppMock.mockReset();
     prependMock.mockReset();

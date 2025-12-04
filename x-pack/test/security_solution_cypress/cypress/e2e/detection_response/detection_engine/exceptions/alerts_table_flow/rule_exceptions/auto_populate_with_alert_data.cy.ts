@@ -38,8 +38,8 @@ describe('Auto populate exception with Alert data', { tags: ['@ess', '@serverles
   const ADDITIONAL_ENTRY = 'host.hostname';
 
   beforeEach(() => {
-    cy.task('esArchiverUnload', { archiveName: 'endpoint' });
-    cy.task('esArchiverLoad', { archiveName: 'endpoint' });
+    cy.task('esArchiverUnload', { archiveName: 'endpoint_2' });
+    cy.task('esArchiverLoad', { archiveName: 'endpoint_2' });
     login();
     createRule(getEndpointRule()).then((rule) => visitRuleDetailsPage(rule.body.id));
 

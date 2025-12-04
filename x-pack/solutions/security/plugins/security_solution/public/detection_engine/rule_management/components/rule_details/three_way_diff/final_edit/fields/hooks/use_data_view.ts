@@ -26,13 +26,12 @@ export function useDataView(indexPatternsOrDataViewId: UseDataViewParams): UseDa
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    if (dataView !== undefined) {
+      return;
+    }
     setIsLoading(true);
 
     (async () => {
-      if (dataView !== undefined) {
-        return;
-      }
-
       try {
         if (indexPatternsOrDataViewId.indexPatterns) {
           const indexPatternsDataView = await dataViewsService.create({

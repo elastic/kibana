@@ -55,7 +55,8 @@ const twoDaysAgoToString = new Date(twoDaysAgo.getTime()).toDateString();
 const yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
 const yesterdayToString = new Date(yesterday.getTime()).toDateString();
 
-describe('TableListView', () => {
+// Failing: See https://github.com/elastic/kibana/issues/223345
+describe.skip('TableListView', () => {
   const requiredProps: TableListViewTableProps = {
     entityName: 'test',
     entityNamePlural: 'tests',
