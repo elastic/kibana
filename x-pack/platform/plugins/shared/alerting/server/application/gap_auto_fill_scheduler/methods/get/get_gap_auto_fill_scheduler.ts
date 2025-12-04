@@ -57,7 +57,7 @@ export async function getGapAutoFillScheduler(
 
     // Authorization check - we need to check if user has permission to get
     // For gap fill auto scheduler, we check against the rule types it manages
-    const ruleTypes = result.attributes.ruleTypes || [];
+    const ruleTypes = result.attributes.ruleTypes;
 
     try {
       for (const ruleType of ruleTypes) {
