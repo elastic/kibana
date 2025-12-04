@@ -121,6 +121,30 @@ describe('convertLegacyInputsToJsonSchema', () => {
 
     expect(result.required).toBeUndefined();
   });
+
+  it('should handle array with null items (partial YAML parsing)', () => {
+    const legacyInputs = [
+      {
+        name: 'username',
+        type: 'string' as const,
+        required: true,
+      },
+      null,
+      undefined,
+      {
+        name: 'age',
+        type: 'number' as const,
+      },
+    ];
+
+    const result = convertLegacyInputsToJsonSchema(legacyInputs as any);
+
+    expect(result.properties?.username).toEqual({ type: 'string' });
+    expect(result.properties?.age).toEqual({ type: 'number' });
+    expect(result.required).toEqual(['username']);
+    // Should not crash and should only process valid inputs
+    expect(Object.keys(result.properties || {})).toEqual(['username', 'age']);
+  });
 });
 
 describe('normalizeInputsToJsonSchema', () => {

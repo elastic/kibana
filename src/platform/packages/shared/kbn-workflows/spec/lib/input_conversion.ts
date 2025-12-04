@@ -82,10 +82,13 @@ export function convertLegacyInputsToJsonSchema(
   const required: string[] = [];
 
   for (const input of legacyInputs) {
-    properties[input.name] = convertLegacyInputToJsonSchemaProperty(input as LegacyWorkflowInput);
+    // Skip null/undefined inputs (can happen during partial YAML parsing)
+    if (input && typeof input === 'object' && input.name) {
+      properties[input.name] = convertLegacyInputToJsonSchemaProperty(input as LegacyWorkflowInput);
 
-    if (input.required === true) {
-      required.push(input.name);
+      if (input.required === true) {
+        required.push(input.name);
+      }
     }
   }
 
