@@ -24,3 +24,10 @@ export interface ContractMeta
 export interface OperationObjectWithOperationId extends OpenAPIV3.OperationObject {
   operationId: string;
 }
+
+export interface ParameterTypes {
+  headerParams: string[];
+  pathParams: string[];
+  urlParams: string[];
+  bodyParams: string[];
+}

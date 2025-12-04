@@ -33,4 +33,32 @@ describe('getShapeAt', () => {
     const atPath = getShapeAt(schema, 'path');
     expect(atPath).toEqual({});
   });
+
+  it('should return the shape at the given property in a union', () => {
+    const schema = z.union([
+      z.object({ a: z.object({ b: z.string() }) }),
+      z.object({ c: z.object({ d: z.number() }) }),
+    ]);
+    const atA = getShapeAt(schema, 'a');
+    expect(atA).toHaveProperty('b');
+    expectZodSchemaEqual(atA.b, z.string());
+    const atC = getShapeAt(schema, 'c');
+    expect(atC).toHaveProperty('d');
+    expectZodSchemaEqual(atC.d, z.number());
+  });
+
+  it('should return the shape for a nested union', () => {
+    const schema = z.object({
+      body: z.union([
+        z.union([z.object({ a: z.string() }), z.object({ b: z.number() })]),
+        z.union([z.object({ c: z.boolean() }), z.object({ d: z.string() })]),
+      ]),
+    });
+    const atBody = getShapeAt(schema, 'body');
+    expect(Object.keys(atBody)).toEqual(['a', 'b', 'c', 'd']);
+    expectZodSchemaEqual(atBody.a, z.string());
+    expectZodSchemaEqual(atBody.b, z.number());
+    expectZodSchemaEqual(atBody.c, z.boolean());
+    expectZodSchemaEqual(atBody.d, z.string());
+  });
 });

@@ -14,6 +14,12 @@ export function getShape(schema: z.ZodType): Record<string, z.ZodType> {
   if (current instanceof z.ZodOptional) {
     current = current.unwrap();
   }
+  if (current instanceof z.ZodIntersection) {
+    return {
+      ...getShape(current.def.left as z.ZodType),
+      ...getShape(current.def.right as z.ZodType),
+    };
+  }
   if (current instanceof z.ZodUnion) {
     return current.options.reduce((acc, option) => {
       return { ...acc, ...getShape(option as z.ZodType) };
