@@ -1087,7 +1087,7 @@ export interface PolicyConfig {
   linux: {
     advanced?: {};
     events: {
-      dns: boolean;
+      dns?: boolean;
       file: boolean;
       process: boolean;
       network: boolean;

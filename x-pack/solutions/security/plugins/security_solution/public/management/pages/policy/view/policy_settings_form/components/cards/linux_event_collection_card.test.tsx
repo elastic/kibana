@@ -13,8 +13,12 @@ import React from 'react';
 import type { LinuxEventCollectionCardProps } from './linux_event_collection_card';
 import { LinuxEventCollectionCard } from './linux_event_collection_card';
 import { set } from '@kbn/safer-lodash-set';
+import { useIsExperimentalFeatureEnabled } from '../../../../../../../common/hooks/use_experimental_features';
+
+jest.mock('../../../../../../../common/hooks/use_experimental_features');
 
 describe('Policy Linux Event Collection Card', () => {
+  const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
   const testSubj = getPolicySettingsFormTestSubjects('test').linuxEvents;
 
   let formProps: LinuxEventCollectionCardProps;
@@ -23,6 +27,14 @@ describe('Policy Linux Event Collection Card', () => {
 
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
+
+    // Mock linuxDnsEvents FF as enabled by default
+    mockUseIsExperimentalFeatureEnabled.mockImplementation((feature: string) => {
+      if (feature === 'linuxDnsEvents') {
+        return true;
+      }
+      return false;
+    });
 
     formProps = {
       policy: new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy().inputs[0]
@@ -42,6 +54,7 @@ describe('Policy Linux Event Collection Card', () => {
     expect(
       getByTestId(testSubj.optionsContainer).querySelectorAll('input[type="checkbox"]')
     ).toHaveLength(4);
+    expect(getByTestId(testSubj.dnsCheckbox)).toBeChecked();
     expect(getByTestId(testSubj.fileCheckbox)).toBeChecked();
     expect(getByTestId(testSubj.networkCheckbox)).toBeChecked();
     expect(getByTestId(testSubj.processCheckbox)).toBeChecked();
@@ -98,6 +111,53 @@ describe('Policy Linux Event Collection Card', () => {
             '3 / 4 event collections enabled' +
             'Events' +
             'DNS' +
+            'File' +
+            'Process' +
+            'Network' +
+            'Session data' +
+            'Collect session data' +
+            'Capture terminal output' +
+            'Info'
+        )
+      );
+    });
+  });
+
+  describe('when linuxDnsEvents feature flag is disabled', () => {
+    beforeEach(() => {
+      mockUseIsExperimentalFeatureEnabled.mockImplementation((feature: string) => {
+        if (feature === 'linuxDnsEvents') {
+          return false;
+        }
+        return false;
+      });
+      // Remove dns field from policy when FF is disabled
+      delete formProps.policy.linux.events.dns;
+    });
+
+    it('should not render DNS checkbox', () => {
+      const { getByTestId, queryByTestId } = render();
+
+      expect(
+        getByTestId(testSubj.optionsContainer).querySelectorAll('input[type="checkbox"]')
+      ).toHaveLength(3);
+      expect(queryByTestId(testSubj.dnsCheckbox)).not.toBeInTheDocument();
+    });
+
+    it('should render card with 3 total events in view mode', () => {
+      formProps.mode = 'view';
+      render();
+      const card = renderResult.getByTestId(testSubj.card);
+
+      expectIsViewOnly(card);
+      expect(card).toHaveTextContent(
+        exactMatchText(
+          'Type' +
+            'Event collection' +
+            'Operating system' +
+            'Linux ' +
+            '3 / 3 event collections enabled' +
+            'Events' +
             'File' +
             'Process' +
             'Network' +
