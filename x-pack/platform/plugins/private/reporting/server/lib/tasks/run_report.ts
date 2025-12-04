@@ -597,11 +597,13 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
 
                 stream.end();
 
-                logger.debug(`Begin waiting for the stream's pending callbacks...`, {
+                this.logger.debug(`Begin waiting for the stream's pending callbacks...`, {
                   tags: [jobId],
                 });
                 await finishedWithNoPendingCallbacks(stream);
-                logger.info(`The stream's pending callbacks have completed.`, { tags: [jobId] });
+                this.logger.info(`The stream's pending callbacks have completed.`, {
+                  tags: [jobId],
+                });
 
                 rep._seq_no = stream.getSeqNo()!;
                 rep._primary_term = stream.getPrimaryTerm()!;
@@ -610,7 +612,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
                 eventLog.logExecutionComplete({ ...(output.result.metrics ?? {}), byteSize });
 
                 if (output.result) {
-                  logger.debug(`Job output size: ${byteSize} bytes.`, { tags: [jobId] });
+                  this.logger.debug(`Job output size: ${byteSize} bytes.`, { tags: [jobId] });
                   // Update the job status to "completed"
                   report = await this.completeJob(rep, isNumber(atmpts) ? atmpts : rep.attempts, {
                     ...output.result,
@@ -627,7 +629,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
                   );
                 }
 
-                logger.debug(`Stopping ${jobId}.`, { tags: [jobId] });
+                this.logger.debug(`Stopping ${jobId}.`, { tags: [jobId] });
               },
             });
           } catch (failedToExecuteErr) {
