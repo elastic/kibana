@@ -129,11 +129,11 @@ export class ScoutPlaywrightReporter implements Reporter {
     step?: TestStep,
     result?: TestResult
   ): ScoutReportEvent['test'] {
-    const testTitle = test.titlePath().slice(3).join(' ');
+    const fullTestTitle = test.titlePath().slice(3).join(' ');
     const testFilePath = path.relative(REPO_ROOT, test.location.file);
     const testProps: ScoutReportEvent['test'] = {
-      id: computeTestID(testFilePath, testTitle),
-      title: testTitle,
+      id: computeTestID(testFilePath, fullTestTitle),
+      title: test.title,
       tags: test.tags,
       annotations: test.annotations,
       expected_status: test.expectedStatus,
@@ -286,7 +286,7 @@ export class ScoutPlaywrightReporter implements Reporter {
       },
       test_run: this.baseTestRunInfo,
       suite: this.getSuitePropsFromTest(test),
-      test: this.getTestPropsFromTest(test),
+      test: this.getTestPropsFromTest(test, undefined, result),
       event: {
         action: ScoutReportEventAction.TEST_END,
         error: {
