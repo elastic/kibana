@@ -56,7 +56,12 @@ export class DataConnectorsServerPlugin
     return {};
   }
 
-  start(core: CoreStart): DataConnectorsServerStart {
+  start(
+    core: CoreStart,
+    plugins: DataConnectorsServerStartDependencies
+  ): DataConnectorsServerStart {
+    // const { actions } = plugins;
+    // actions.getActionsClientWithRequest();
     return {};
   }
 }
