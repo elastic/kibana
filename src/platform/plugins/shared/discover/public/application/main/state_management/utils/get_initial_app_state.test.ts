@@ -10,10 +10,13 @@
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { Filter } from '@kbn/es-query';
 import { getInitialAppState } from './get_initial_app_state';
-import { createDataViewDataSource } from '../../../../../common/data_sources';
+import { createDataViewDataSource, createEsqlDataSource } from '../../../../../common/data_sources';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { getTabStateMock } from '../redux/__mocks__/internal_state.mocks';
 import { fromTabStateToSavedObjectTab } from '../redux';
+import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
+import type { DiscoverServices } from '../../../../build_services';
+import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 
 describe('getInitialAppState', () => {
   const customQuery = {
@@ -142,5 +145,198 @@ describe('getInitialAppState', () => {
         viewMode: undefined,
       })
     );
+  });
+
+  test('data view with timefield', () => {
+    const services = createDiscoverServicesMock();
+    const actual = getInitialAppState({
+      initialUrlState: undefined,
+      persistedTab: undefined,
+      dataView: dataViewWithTimefieldMock,
+      services,
+    });
+    expect(actual).toMatchInlineSnapshot(`
+      Object {
+        "breakdownField": undefined,
+        "columns": Array [
+          "default_column",
+        ],
+        "dataSource": Object {
+          "dataViewId": "index-pattern-with-timefield-id",
+          "type": "dataView",
+        },
+        "density": undefined,
+        "filters": undefined,
+        "grid": undefined,
+        "headerRowHeight": undefined,
+        "hideAggregatedPreview": undefined,
+        "hideChart": undefined,
+        "interval": "auto",
+        "query": undefined,
+        "rowHeight": undefined,
+        "rowsPerPage": undefined,
+        "sampleSize": undefined,
+        "savedQuery": undefined,
+        "sort": Array [
+          Array [
+            "timestamp",
+            "desc",
+          ],
+        ],
+        "viewMode": undefined,
+      }
+    `);
+  });
+
+  test('data view without timefield', () => {
+    const services = createDiscoverServicesMock();
+    const actual = getInitialAppState({
+      initialUrlState: undefined,
+      persistedTab: undefined,
+      dataView: dataViewMock,
+      services,
+    });
+    expect(actual).toMatchInlineSnapshot(`
+      Object {
+        "breakdownField": undefined,
+        "columns": Array [
+          "default_column",
+        ],
+        "dataSource": Object {
+          "dataViewId": "the-data-view-id",
+          "type": "dataView",
+        },
+        "density": undefined,
+        "filters": undefined,
+        "grid": undefined,
+        "headerRowHeight": undefined,
+        "hideAggregatedPreview": undefined,
+        "hideChart": undefined,
+        "interval": "auto",
+        "query": undefined,
+        "rowHeight": undefined,
+        "rowsPerPage": undefined,
+        "sampleSize": undefined,
+        "savedQuery": undefined,
+        "sort": Array [],
+        "viewMode": undefined,
+      }
+    `);
+  });
+
+  const getPersistedTab = ({ services }: { services: DiscoverServices }) =>
+    fromTabStateToSavedObjectTab({
+      tab: getTabStateMock({ id: 'mock-tab' }),
+      timeRestore: false,
+      services,
+    });
+
+  test('should set view mode correctly', () => {
+    const services = createDiscoverServicesMock();
+    const actualForUndefinedViewMode = getInitialAppState({
+      initialUrlState: undefined,
+      persistedTab: {
+        ...getPersistedTab({ services }),
+        viewMode: undefined,
+      },
+      dataView: dataViewMock,
+      services,
+    });
+    expect(actualForUndefinedViewMode.viewMode).toBeUndefined();
+
+    const actualForEsqlWithAggregatedViewMode = getInitialAppState({
+      initialUrlState: undefined,
+      persistedTab: {
+        ...getPersistedTab({ services }),
+        viewMode: VIEW_MODE.AGGREGATED_LEVEL,
+        serializedSearchSource: { query: { esql: 'FROM test' } },
+      },
+      dataView: undefined,
+      services,
+    });
+    expect(actualForEsqlWithAggregatedViewMode.viewMode).toBe(VIEW_MODE.AGGREGATED_LEVEL);
+
+    const actualForEsqlWithInvalidPatternLevelViewMode = getInitialAppState({
+      initialUrlState: undefined,
+      persistedTab: {
+        ...getPersistedTab({ services }),
+        viewMode: VIEW_MODE.PATTERN_LEVEL,
+        serializedSearchSource: { query: { esql: 'FROM test' } },
+      },
+      dataView: undefined,
+      services,
+    });
+    expect(actualForEsqlWithInvalidPatternLevelViewMode.viewMode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
+
+    const actualForEsqlWithValidViewMode = getInitialAppState({
+      initialUrlState: undefined,
+      persistedTab: {
+        ...getPersistedTab({ services }),
+        viewMode: VIEW_MODE.DOCUMENT_LEVEL,
+        serializedSearchSource: { query: { esql: 'FROM test' } },
+      },
+      dataView: undefined,
+      services,
+    });
+    expect(actualForEsqlWithValidViewMode.viewMode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
+    expect(actualForEsqlWithValidViewMode.dataSource).toEqual(createEsqlDataSource());
+
+    const actualForWithValidAggLevelViewMode = getInitialAppState({
+      initialUrlState: undefined,
+      persistedTab: {
+        ...getPersistedTab({ services }),
+        viewMode: VIEW_MODE.AGGREGATED_LEVEL,
+      },
+      dataView: dataViewMock,
+      services,
+    });
+    expect(actualForWithValidAggLevelViewMode.viewMode).toBe(VIEW_MODE.AGGREGATED_LEVEL);
+    expect(actualForWithValidAggLevelViewMode.dataSource).toEqual(
+      createDataViewDataSource({ dataViewId: dataViewMock.id! })
+    );
+
+    const actualForWithValidPatternLevelViewMode = getInitialAppState({
+      initialUrlState: undefined,
+      persistedTab: {
+        ...getPersistedTab({ services }),
+        viewMode: VIEW_MODE.PATTERN_LEVEL,
+      },
+      dataView: dataViewMock,
+      services,
+    });
+    expect(actualForWithValidPatternLevelViewMode.viewMode).toBe(VIEW_MODE.PATTERN_LEVEL);
+    expect(actualForWithValidPatternLevelViewMode.dataSource).toEqual(
+      createDataViewDataSource({ dataViewId: dataViewMock.id! })
+    );
+  });
+
+  test('should return expected dataSource', () => {
+    const services = createDiscoverServicesMock();
+    const actualForEsql = getInitialAppState({
+      initialUrlState: undefined,
+      persistedTab: {
+        ...getPersistedTab({ services }),
+        serializedSearchSource: { query: { esql: 'FROM test' } },
+      },
+      dataView: undefined,
+      services,
+    });
+    expect(actualForEsql.dataSource).toMatchInlineSnapshot(`
+      Object {
+        "type": "esql",
+      }
+    `);
+    const actualForDataView = getInitialAppState({
+      initialUrlState: undefined,
+      persistedTab: getPersistedTab({ services }),
+      dataView: dataViewMock,
+      services,
+    });
+    expect(actualForDataView.dataSource).toMatchInlineSnapshot(`
+      Object {
+        "dataViewId": "the-data-view-id",
+        "type": "dataView",
+      }
+    `);
   });
 });
