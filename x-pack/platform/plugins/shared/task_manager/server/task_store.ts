@@ -51,6 +51,7 @@ import type {
   PartialConcreteTaskInstance,
   PartialSerializedConcreteTaskInstance,
   ApiKeyOptions,
+  TaskUserScope,
 } from './task';
 import { TaskStatus, TaskLifecycleResult } from './task';
 
@@ -215,6 +216,20 @@ export class TaskStore {
       });
     }
     return this.savedObjectsRepository;
+  }
+
+  private async getRawTasksWithoutEncryptedApiKeys(tasks: ConcreteTaskInstance[]) {
+    const existingTasksResponse =
+      await this.savedObjectsRepository.bulkGet<SerializedConcreteTaskInstance>(
+        tasks.map((task) => ({ type: 'task', id: task.id }))
+      );
+
+    return new Map<string, { apiKey?: string; userScope?: TaskUserScope }>(
+      existingTasksResponse.saved_objects.map((obj) => {
+        const { apiKey, userScope } = obj.attributes;
+        return [obj.id, { apiKey, userScope }];
+      })
+    );
   }
 
   private async getApiKeyFromRequest(taskInstances: TaskInstance[], request?: KibanaRequest) {
@@ -520,20 +535,22 @@ export class TaskStore {
     docs: ConcreteTaskInstance[],
     { validate, mergeAttributes = true }: BulkUpdateOpts
   ): Promise<BulkUpdateResult[]> {
+    const existingApiKeyAndUserScopeMap = await this.getRawTasksWithoutEncryptedApiKeys(docs);
     const newDocs = docs.reduce(
       (acc: Map<string, SavedObjectsBulkUpdateObject<SerializedConcreteTaskInstance>>, doc) => {
         try {
           const taskInstance = this.taskValidator.getValidatedTaskInstanceForUpdating(doc, {
             validate,
           });
+          const existingAttrs = existingApiKeyAndUserScopeMap.get(doc.id);
           acc.set(doc.id, {
             type: 'task',
             id: doc.id,
             version: doc.version,
             attributes: {
               ...taskInstanceToAttributes(taskInstance, doc.id),
-              ...(doc.apiKey ? { apiKey: doc.apiKey } : {}),
-              ...(doc.userScope ? { userScope: doc.userScope } : {}),
+              ...(existingAttrs?.apiKey ? { apiKey: existingAttrs.apiKey } : {}),
+              ...(existingAttrs?.userScope ? { userScope: existingAttrs.userScope } : {}),
             },
             mergeAttributes,
           });
