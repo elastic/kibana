@@ -12,10 +12,10 @@ import { useGraphPreview } from './use_graph_preview';
 import type { GetFieldsData } from './use_get_fields_data';
 import { mockFieldData } from '../mocks/mock_get_fields_data';
 import { mockDataFormattedForFieldBrowser } from '../mocks/mock_data_formatted_for_field_browser';
-import { useHasGraphVisualizationAccess } from '../../../../common/hooks/use_has_graph_visualization_access';
+import { useHasGraphVisualizationLicense } from '../../../../common/hooks/use_has_graph_visualization_license';
 
-jest.mock('../../../../common/hooks/use_has_graph_visualization_access');
-const mockUseHasGraphVisualizationAccess = useHasGraphVisualizationAccess as jest.Mock;
+jest.mock('../../../../common/hooks/use_has_graph_visualization_license');
+const mockUseHasGraphVisualizationLicense = useHasGraphVisualizationLicense as jest.Mock;
 
 jest.mock('@kbn/kibana-react-plugin/public');
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
@@ -59,7 +59,7 @@ describe('useGraphPreview', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // Default mock: graph visualization feature is available
-    mockUseHasGraphVisualizationAccess.mockReturnValue(true);
+    mockUseHasGraphVisualizationLicense.mockReturnValue(true);
     // Default mock: UI setting is enabled
     mockUseUiSetting.mockReturnValue([true, jest.fn()]);
   });
@@ -343,7 +343,7 @@ describe('useGraphPreview', () => {
   });
 
   it('should return false when all conditions are met but env does not have required license', () => {
-    mockUseHasGraphVisualizationAccess.mockReturnValue(false);
+    mockUseHasGraphVisualizationLicense.mockReturnValue(false);
 
     const hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
       initialProps: {

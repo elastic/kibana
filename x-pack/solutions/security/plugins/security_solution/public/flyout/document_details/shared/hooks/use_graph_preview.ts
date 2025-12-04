@@ -12,7 +12,7 @@ import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import type { GetFieldsData } from './use_get_fields_data';
 import { getField, getFieldArray } from '../utils';
 import { useBasicDataFromDetailsData } from './use_basic_data_from_details_data';
-import { useHasGraphVisualizationAccess } from '../../../../common/hooks/use_has_graph_visualization_access';
+import { useHasGraphVisualizationLicense } from '../../../../common/hooks/use_has_graph_visualization_license';
 import { ENABLE_GRAPH_VISUALIZATION_SETTING } from '../../../../../common/constants';
 
 export interface UseGraphPreviewParams {
@@ -90,7 +90,7 @@ export const useGraphPreview = ({
   const action: string[] | undefined = get(['event', 'action'], ecsData);
 
   // Check if user license is high enough to access graph visualization
-  const hasRequiredLicense = useHasGraphVisualizationAccess();
+  const hasRequiredLicense = useHasGraphVisualizationLicense();
 
   // Check if graph visualization feature is enabled in UI settings
   const [isGraphFeatureEnabled] = useUiSetting$<boolean>(ENABLE_GRAPH_VISUALIZATION_SETTING);
