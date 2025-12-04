@@ -21,7 +21,7 @@ import { getHitsTotal } from '../../utils/get_hits_total';
 import { getShouldMatchOrNotExistFilter } from '../../utils/get_should_match_or_not_exist_filter';
 import { timeRangeFilter } from '../../utils/dsl_filters';
 import { parseDatemath } from '../../utils/time';
-import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
+import { timeRangeSchemaOptional, indexDescription } from '../../utils/tool_schemas';
 
 export interface GetLogCategoriesToolResult {
   type: ToolResultType.other;
@@ -40,12 +40,7 @@ export const OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID = 'observability.get_log_c
 
 const getLogsSchema = z.object({
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
-  index: z
-    .string()
-    .describe(
-      'Concrete index or index pattern to analyze (for example `logs-payments.api-default`).'
-    )
-    .optional(),
+  index: z.string().describe(indexDescription).optional(),
   terms: z
     .record(z.string(), z.string())
     .optional()

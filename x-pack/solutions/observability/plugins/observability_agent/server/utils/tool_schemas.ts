@@ -7,8 +7,13 @@
 
 import { z } from '@kbn/zod';
 
-const startDescription = 'The start of the time range, in Elasticsearch date math, like `now-24h`.';
-const endDescription = 'The end of the time range, in Elasticsearch date math, like `now-`.';
+const startDescription =
+  'The start time of the query window using Elasticsearch date math (e.g., "now-24h", "now-15m").';
+const endDescription =
+  'The end time of the query window using Elasticsearch date math (e.g., "now").';
+
+export const indexDescription =
+  'Concrete index or index pattern to analyze (for example `logs-payments.api-default`).';
 
 export const timeRangeSchemaRequired = {
   start: z.string().describe(startDescription),

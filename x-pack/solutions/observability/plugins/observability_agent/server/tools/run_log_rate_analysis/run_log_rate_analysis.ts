@@ -13,16 +13,12 @@ import type { Logger } from '@kbn/core/server';
 import { runLogRateAnalysis } from '@kbn/aiops-log-rate-analysis/queries/fetch_log_rate_analysis_for_alert';
 import type { WindowParameters } from '@kbn/aiops-log-rate-analysis/window_parameters';
 import { parseDatemath } from '../../utils/time';
-import { timeRangeSchemaRequired } from '../../utils/tool_schemas';
+import { timeRangeSchemaRequired, indexDescription } from '../../utils/tool_schemas';
 
 export const OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID = 'observability.run_log_rate_analysis';
 
 const logRateAnalysisSchema = z.object({
-  index: z
-    .string()
-    .describe(
-      'Concrete index or index pattern to analyze (for example `logs-payments.api-default`).'
-    ),
+  index: z.string().describe(indexDescription),
   timeFieldName: z
     .string()
     .describe(
