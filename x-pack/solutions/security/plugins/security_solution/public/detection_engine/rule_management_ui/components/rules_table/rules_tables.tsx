@@ -254,7 +254,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   const shouldShowRulesTable = !isLoading && !isTableEmpty;
 
   useEffect(() => {
-    if (selectedTab !== AllRulesTabs.monitoring) {
+    if (selectedTab !== AllRulesTabs.monitoring && filterOptions.gapFillStatuses) {
       setFilterOptions({ gapFillStatuses: undefined });
     }
   }, [filterOptions.gapFillStatuses, selectedTab, setFilterOptions]);
