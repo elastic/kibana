@@ -42,6 +42,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
       role_arn: { value: 'arn:aws:iam::123456789012:role/TestRole' },
       external_id: { value: { isSecretRef: true, id: 'secret-ref-id-123' } },
     },
+    accountType: 'single' as const,
     provider: 'aws' as const,
     onClose: mockOnClose,
   };
@@ -473,6 +474,34 @@ describe('CloudConnectorPoliciesFlyout', () => {
       expect(
         screen.queryByText('Cloud Connector Name must be 255 characters or less')
       ).not.toBeInTheDocument();
+    });
+  });
+
+  describe('AccountBadge rendering', () => {
+    it('should render Single Account badge in flyout header when accountType is single', () => {
+      renderFlyout({ accountType: 'single' });
+
+      expect(screen.getByText('Single Account')).toBeInTheDocument();
+    });
+
+    it('should render Organization badge in flyout header when accountType is organization', () => {
+      renderFlyout({ accountType: 'organization' });
+
+      expect(screen.getByText('Organization')).toBeInTheDocument();
+    });
+
+    it('should not render badge when accountType is undefined', () => {
+      renderFlyout({ accountType: undefined });
+
+      expect(screen.queryByText('Single Account')).not.toBeInTheDocument();
+      expect(screen.queryByText('Organization')).not.toBeInTheDocument();
+    });
+
+    it('should render badge with default color variant in flyout', () => {
+      const { container } = renderFlyout({ accountType: 'single' });
+
+      const badge = container.querySelector('.euiBadge');
+      expect(badge?.className).toMatch(/euiBadge-default/);
     });
   });
 });
