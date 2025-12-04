@@ -77,6 +77,9 @@ export const TASK_MANAGER_RUN_TRANSACTION_TYPE = 'task-run';
 export const TASK_MANAGER_TRANSACTION_TYPE = 'task-manager';
 export const TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING = 'mark-task-as-running';
 
+const UPDATE_RETRY_AT_INTERVAL = 10000; // 10 seconds
+const LONG_RUNNING_TASK_MS = 365 * 86400 * 1000; // 1 year
+
 export interface TaskRunner {
   isExpired: boolean;
   expiration: Date;
@@ -388,6 +391,12 @@ export class TaskManagerRunner implements TaskRunner {
       )
     );
 
+    // For long running tasks, update retryAt on an interval to allow for quicker task recovery
+    let stopUpdatingLongRunningTasks;
+    if (isLongRunningTask(this.timeout)) {
+      stopUpdatingLongRunningTasks = this.updateRetryAtOnIntervalForLongRunningTasks();
+    }
+
     try {
       const sanitizedTaskInstance = omit(modifiedContext.taskInstance, ['apiKey', 'userScope']);
       const fakeRequest = this.getFakeKibanaRequest(
@@ -419,6 +428,11 @@ export class TaskManagerRunner implements TaskRunner {
       const result = await this.executionContext.withContext(ctx, () =>
         withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
       );
+
+      // Stop updating retryAt for long running tasks once the task has finished
+      if (stopUpdatingLongRunningTasks) {
+        stopUpdatingLongRunningTasks();
+      }
 
       const validatedResult = this.validateResult(result);
       const processedResult = await withSpan({ name: 'process result', type: 'task manager' }, () =>
@@ -933,6 +947,47 @@ export class TaskManagerRunner implements TaskRunner {
       return fakeRequest;
     }
   }
+
+  private updateRetryAtOnIntervalForLongRunningTasks() {
+    let stopped = false;
+
+    const updateRetryAt = async () => {
+      if (!stopped) {
+        try {
+          // Set retryAt to now + 1m
+          const updatedRetryAt = new Date(Date.now() + 60 * 1000);
+          const taskInstance = this.instance.task;
+          this.instance = asReadyToRun(
+            (await this.bufferedTaskStore.partialUpdate(
+              {
+                id: this.instance.task.id,
+                retryAt: updatedRetryAt,
+              },
+              { validate: false, doc: taskInstance }
+            )) as ConcreteTaskInstanceWithStartedAt
+          );
+        } catch (e) {
+          this.logger.warn(
+            `Unable to update retryAt for long running task: ${this.instance.task.id} - ${e.message}`
+          );
+        }
+        timer = setTimeout(updateRetryAt, UPDATE_RETRY_AT_INTERVAL);
+      }
+    };
+
+    this.logger.info(
+      `Starting interval to update retryAt for long running task: ${this.instance.task.id}`
+    );
+    let timer = setTimeout(updateRetryAt, UPDATE_RETRY_AT_INTERVAL);
+
+    return () => {
+      stopped = true;
+      clearTimeout(timer);
+      this.logger.info(
+        `Stopping interval to update retryAt for long running task: ${this.instance.task.id}`
+      );
+    };
+  }
 }
 
 function sanitizeInstance(instance: ConcreteTaskInstance): ConcreteTaskInstance {
@@ -951,6 +1006,11 @@ function howManyMsUntilOwnershipClaimExpires(ownershipClaimedUntil: Date | null)
 // initiated changes to "enabled" while the task was running
 function taskWithoutEnabled(task: ConcreteTaskInstance): ConcreteTaskInstance {
   return omit(task, 'enabled');
+}
+
+function isLongRunningTask(timeout: string) {
+  const timeoutDuration = parseIntervalAsMillisecond(timeout);
+  return timeoutDuration >= LONG_RUNNING_TASK_MS;
 }
 
 // A type that extracts the Instance type out of TaskRunningStage
