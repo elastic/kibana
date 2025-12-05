@@ -290,7 +290,6 @@ export function StreamDetailAttachments({
       )}
       {definition && isAddAttachmentFlyoutOpen ? (
         <AddAttachmentFlyout
-          linkedAttachments={linkedAttachments}
           entityId={definition.stream.name}
           onAddAttachments={handleLinkAttachments}
           isLoading={isLinkLoading}

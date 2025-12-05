@@ -681,6 +681,82 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(hasDashboard).to.eql(true);
         expect(hasRule).to.eql(true);
       });
+
+      it('excludes already linked attachments from suggestions', async () => {
+        // First, get suggestions before linking to verify the attachments exist
+        const beforeResponse = await getAttachmentSuggestions({
+          apiClient,
+          stream: 'logs',
+          filters: { types: ['dashboard', 'rule'] },
+        });
+
+        // Verify the attachments we're about to link are in the suggestions
+        const dashboardInSuggestionsBefore = beforeResponse.suggestions.some(
+          (s) => s.id === SEARCH_DASHBOARD_ID && s.type === 'dashboard'
+        );
+        const ruleInSuggestionsBefore = beforeResponse.suggestions.some(
+          (s) => s.id === FIRST_RULE_ID && s.type === 'rule'
+        );
+        expect(dashboardInSuggestionsBefore).to.eql(true);
+        expect(ruleInSuggestionsBefore).to.eql(true);
+
+        // Link the dashboard and rule to the stream
+        await linkAttachment({
+          apiClient,
+          stream: 'logs',
+          type: 'dashboard',
+          id: SEARCH_DASHBOARD_ID,
+        });
+        await linkAttachment({
+          apiClient,
+          stream: 'logs',
+          type: 'rule',
+          id: FIRST_RULE_ID,
+        });
+
+        // Get suggestions after linking
+        const afterResponse = await getAttachmentSuggestions({
+          apiClient,
+          stream: 'logs',
+          filters: { types: ['dashboard', 'rule'] },
+        });
+
+        // Verify the linked dashboard is NOT in the suggestions
+        const dashboardInSuggestionsAfter = afterResponse.suggestions.some(
+          (s) => s.id === SEARCH_DASHBOARD_ID && s.type === 'dashboard'
+        );
+        expect(dashboardInSuggestionsAfter).to.eql(false);
+
+        // Verify the linked rule is NOT in the suggestions
+        const ruleInSuggestionsAfter = afterResponse.suggestions.some(
+          (s) => s.id === FIRST_RULE_ID && s.type === 'rule'
+        );
+        expect(ruleInSuggestionsAfter).to.eql(false);
+
+        // Verify other attachments are still suggested (the other dashboard and rule)
+        const otherDashboardInSuggestions = afterResponse.suggestions.some(
+          (s) => s.id === BASIC_DASHBOARD_ID && s.type === 'dashboard'
+        );
+        const otherRuleInSuggestions = afterResponse.suggestions.some(
+          (s) => s.id === SECOND_RULE_ID && s.type === 'rule'
+        );
+        expect(otherDashboardInSuggestions).to.eql(true);
+        expect(otherRuleInSuggestions).to.eql(true);
+
+        // Clean up
+        await unlinkAttachment({
+          apiClient,
+          stream: 'logs',
+          type: 'dashboard',
+          id: SEARCH_DASHBOARD_ID,
+        });
+        await unlinkAttachment({
+          apiClient,
+          stream: 'logs',
+          type: 'rule',
+          id: FIRST_RULE_ID,
+        });
+      });
     });
 
     describe('Cross-space linking', () => {

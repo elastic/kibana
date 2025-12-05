@@ -61,6 +61,7 @@ const suggestAttachmentsRoute = createServerRoute({
     const tags = query?.tags ? (Array.isArray(query.tags) ? query.tags : [query.tags]) : undefined;
 
     const { suggestions, hasMore } = await attachmentClient.getSuggestions({
+      streamName: params.path.streamName,
       attachmentTypes,
       query: query?.query || '',
       tags,

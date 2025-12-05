@@ -26,9 +26,10 @@ import {
 import {
   getAttachmentDocument,
   getAttachmentLinkUuid,
+  getRulesByIds,
   getSoByIds,
+  getSuggestedRules,
   getSuggestedSo,
-  processRuleResults,
 } from './utils';
 
 /**
@@ -49,63 +50,69 @@ export class AttachmentClient {
     }
   ) {}
 
+  /**
+   * Helper to search attachment documents with the given filters.
+   */
+  private async searchAttachmentDocuments(options: {
+    filter: QueryDslQueryContainer[];
+    size?: number;
+  }): Promise<AttachmentDocument[]> {
+    const response = await this.clients.storageClient.search({
+      size: options.size ?? 10_000,
+      track_total_hits: false,
+      query: {
+        bool: {
+          filter: options.filter,
+        },
+      },
+    });
+    return response.hits.hits.map((hit) => hit._source);
+  }
+
   private getAttachmentEntitiesMap: Record<
     AttachmentType,
     (ids: string[]) => Promise<AttachmentData[]>
   > = {
     dashboard: async (ids) =>
       getSoByIds({ soClient: this.clients.soClient, attachmentType: 'dashboard', ids }),
-    rule: async (ids) => {
-      try {
-        const { rules } = await this.clients.rulesClient.bulkGetRules({
-          ids,
-        });
-
-        return processRuleResults(rules);
-      } catch (error) {
-        if (error.message === 'No rules found for bulk get') {
-          return [];
-        }
-        throw error;
-      }
-    },
+    rule: async (ids) => getRulesByIds({ rulesClient: this.clients.rulesClient, ids }),
     slo: async (ids) => getSoByIds({ soClient: this.clients.soClient, attachmentType: 'slo', ids }),
   };
 
   private getSuggestedEntitiesMap: Record<
     AttachmentType,
-    (options: { query: string; tags?: string[]; perPage: number }) => Promise<AttachmentData[]>
+    (options: {
+      query: string;
+      tags?: string[];
+      limit: number;
+      excludeIds?: string[];
+    }) => Promise<AttachmentData[]>
   > = {
-    dashboard: async ({ query, tags, perPage }) =>
+    dashboard: async ({ query, tags, limit, excludeIds }) =>
       getSuggestedSo({
         soClient: this.clients.soClient,
         attachmentType: 'dashboard',
         query,
         tags,
-        perPage,
+        limit,
+        excludeIds,
       }),
-    rule: async ({ query, tags, perPage }) => {
-      const { data } = await this.clients.rulesClient.find({
-        options: {
-          search: query ? `${query}*` : undefined,
-          perPage,
-          ...(tags && tags.length > 0
-            ? {
-                filter: tags.map((tag) => `alert.attributes.tags:"${tag}"`).join(' or '),
-              }
-            : {}),
-        },
-      });
-
-      return processRuleResults(data);
-    },
-    slo: async ({ query, tags, perPage }) =>
+    rule: async ({ query, tags, limit, excludeIds }) =>
+      getSuggestedRules({
+        rulesClient: this.clients.rulesClient,
+        query,
+        tags,
+        limit,
+        excludeIds,
+      }),
+    slo: async ({ query, tags, limit, excludeIds }) =>
       getSuggestedSo({
         soClient: this.clients.soClient,
         attachmentType: 'slo',
         query,
         tags,
-        perPage,
+        limit,
+        excludeIds,
       }),
   };
 
@@ -394,29 +401,16 @@ export class AttachmentClient {
     // Step 2: Get existing attachments from storage
     const attachmentUuids = Array.from(attachmentMap.keys());
 
-    const existingAttachmentsResponse = await this.clients.storageClient.search({
+    const existingAttachmentDocuments = await this.searchAttachmentDocuments({
+      filter: [{ terms: { [ATTACHMENT_UUID]: attachmentUuids } }],
       size: attachmentUuids.length,
-      track_total_hits: false,
-      query: {
-        bool: {
-          filter: [
-            {
-              terms: {
-                [ATTACHMENT_UUID]: attachmentUuids,
-              },
-            },
-          ],
-        },
-      },
     });
 
     // Create a map of existing attachments by UUID
     const existingAttachmentsByUuid = new Map<string, AttachmentDocument>();
-    existingAttachmentsResponse.hits.hits.forEach((hit) => {
-      if (hit._source) {
-        existingAttachmentsByUuid.set(hit._source[ATTACHMENT_UUID], hit._source);
-      }
-    });
+    for (const doc of existingAttachmentDocuments) {
+      existingAttachmentsByUuid.set(doc[ATTACHMENT_UUID], doc);
+    }
 
     // Step 3: Build bulk operations array
     const bulkOperations: Array<
@@ -540,23 +534,15 @@ export class AttachmentClient {
     if (options?.attachmentTypes && options.attachmentTypes.length > 0) {
       filter.push({ terms: { [ATTACHMENT_TYPE]: options.attachmentTypes } });
     }
-    const attachmentsResponse = await this.clients.storageClient.search({
-      size: 10_000,
-      track_total_hits: false,
-      query: {
-        bool: {
-          filter,
-        },
-      },
-    });
+    const attachmentDocuments = await this.searchAttachmentDocuments({ filter });
 
     // Extract attachment links and stream names in a single pass
     const streamNamesById = new Map<string, string[]>();
-    const attachmentLinks: AttachmentLink[] = attachmentsResponse.hits.hits.map(({ _source }) => {
-      streamNamesById.set(_source[ATTACHMENT_ID], _source[STREAM_NAMES]);
+    const attachmentLinks: AttachmentLink[] = attachmentDocuments.map((doc) => {
+      streamNamesById.set(doc[ATTACHMENT_ID], doc[STREAM_NAMES]);
       return {
-        id: _source[ATTACHMENT_ID],
-        type: _source[ATTACHMENT_TYPE],
+        id: doc[ATTACHMENT_ID],
+        type: doc[ATTACHMENT_TYPE],
       };
     });
 
@@ -590,8 +576,10 @@ export class AttachmentClient {
    *
    * Provides suggestions for attachments that can be linked to streams,
    * searching across attachment types based on the specified filters.
+   * Automatically excludes attachments already linked to the specified stream.
    *
    * @param options - The search options
+   * @param options.streamName - The stream name to exclude already-linked attachments from
    * @param options.query - Search query string to match against attachment titles/names
    * @param options.attachmentTypes - Optional array of attachment types to search (searches all if not provided)
    * @param options.tags - Optional array of tags to filter attachments by
@@ -602,6 +590,7 @@ export class AttachmentClient {
    * @example
    * ```typescript
    * const results = await attachmentClient.getSuggestions({
+   *   streamName: 'my-stream',
    *   query: 'security',
    *   attachmentTypes: ['dashboard', 'rule'],
    *   tags: ['security', 'monitoring']
@@ -609,11 +598,13 @@ export class AttachmentClient {
    * ```
    */
   async getSuggestions({
+    streamName,
     query,
     attachmentTypes,
     tags,
     limit,
   }: {
+    streamName: string;
     query: string;
     attachmentTypes?: AttachmentType[];
     tags?: string[];
@@ -622,11 +613,29 @@ export class AttachmentClient {
     // Search all types if none specified, otherwise only search the requested types
     const typesToSearch = attachmentTypes || ATTACHMENT_TYPES;
 
+    // Fetch all attachments linked to this stream to exclude them from suggestions
+    const linkedAttachmentDocuments = await this.searchAttachmentDocuments({
+      filter: [{ terms: { [STREAM_NAMES]: [streamName] } }],
+    });
+
+    // Group linked attachment IDs by type
+    const linkedIdsByType = new Map<AttachmentType, string[]>();
+    for (const doc of linkedAttachmentDocuments) {
+      const type = doc[ATTACHMENT_TYPE];
+      const ids = linkedIdsByType.get(type);
+      if (ids) {
+        ids.push(doc[ATTACHMENT_ID]);
+      } else {
+        linkedIdsByType.set(type, [doc[ATTACHMENT_ID]]);
+      }
+    }
+
     const suggestionsPromises = typesToSearch.map((type) =>
       this.getSuggestedEntitiesMap[type]({
         query,
         tags,
-        perPage: limit,
+        limit,
+        excludeIds: linkedIdsByType.get(type),
       })
     );
 
@@ -666,19 +675,13 @@ export class AttachmentClient {
       return new Map();
     }
 
-    const response = await this.clients.storageClient.search({
-      size: 10_000,
-      track_total_hits: false,
-      query: {
-        bool: {
-          filter: [{ terms: { [ATTACHMENT_ID]: attachmentIds } }],
-        },
-      },
+    const documents = await this.searchAttachmentDocuments({
+      filter: [{ terms: { [ATTACHMENT_ID]: attachmentIds } }],
     });
 
     const streamNamesById = new Map<string, string[]>();
-    for (const hit of response.hits.hits) {
-      streamNamesById.set(hit._source[ATTACHMENT_ID], hit._source[STREAM_NAMES]);
+    for (const doc of documents) {
+      streamNamesById.set(doc[ATTACHMENT_ID], doc[STREAM_NAMES]);
     }
 
     return streamNamesById;
@@ -716,24 +719,12 @@ export class AttachmentClient {
     if (attachmentType) {
       filter.push({ terms: { [ATTACHMENT_TYPE]: [attachmentType] } });
     }
-    const attachmentsResponse = await this.clients.storageClient.search({
-      size: 10_000,
-      track_total_hits: false,
-      query: {
-        bool: {
-          filter,
-        },
-      },
-    });
+    const attachmentDocuments = await this.searchAttachmentDocuments({ filter });
 
-    const existingAttachmentLinks: AttachmentLink[] = attachmentsResponse.hits.hits.map(
-      ({ _source }) => {
-        return {
-          id: _source[ATTACHMENT_ID],
-          type: _source[ATTACHMENT_TYPE],
-        };
-      }
-    );
+    const existingAttachmentLinks: AttachmentLink[] = attachmentDocuments.map((doc) => ({
+      id: doc[ATTACHMENT_ID],
+      type: doc[ATTACHMENT_TYPE],
+    }));
 
     const nextIds = new Set(links.map((link) => link.id));
     const attachmentLinksDeleted = existingAttachmentLinks.filter((link) => !nextIds.has(link.id));

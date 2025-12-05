@@ -12,6 +12,7 @@ import type {
   SavedObjectsFindOptions,
 } from '@kbn/core/server';
 import type { SanitizedRule } from '@kbn/alerting-types';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type {
   AttachmentLink,
   AttachmentDocument,
@@ -116,6 +117,69 @@ export const getSoByIds = async ({
 };
 
 /**
+ * Fetches rules by IDs using the rules client.
+ */
+export const getRulesByIds = async ({
+  rulesClient,
+  ids,
+}: {
+  rulesClient: RulesClient;
+  ids: string[];
+}): Promise<AttachmentData[]> => {
+  try {
+    const { rules } = await rulesClient.bulkGetRules({ ids });
+    return processRuleResults(rules);
+  } catch (error) {
+    if (error.message === 'No rules found for bulk get') {
+      return [];
+    }
+    throw error;
+  }
+};
+
+// Different saved object types use different field names for their title
+const searchFieldsByType: Record<Extract<AttachmentType, 'dashboard' | 'slo'>, string[]> = {
+  dashboard: ['title'],
+  slo: ['name'],
+};
+
+const MAX_PAGES = 10;
+const PAGE_SIZE = 100;
+
+/**
+ * Paginates through results, filtering out excluded IDs, until we have enough items.
+ * This is needed because neither the saved objects client nor the rules client
+ * support filtering by ID in the query.
+ */
+async function paginateWithExclusion<T extends SavedObject<unknown> | SanitizedRule>({
+  limit,
+  excludeIds,
+  fetchPage,
+}: {
+  limit: number;
+  excludeIds?: string[];
+  fetchPage: (page: number) => Promise<{ items: T[]; total: number }>;
+}): Promise<T[]> {
+  const excludeIdsSet = new Set(excludeIds ?? []);
+  const results: T[] = [];
+  let page = 1;
+  let hasMore = true;
+
+  while (results.length < limit && hasMore && page <= MAX_PAGES) {
+    const { items, total } = await fetchPage(page);
+
+    const filteredItems = items.filter((item) => !excludeIdsSet.has(item.id));
+    results.push(...filteredItems);
+
+    const fetchedSoFar = page * PAGE_SIZE;
+    hasMore = fetchedSoFar < total;
+    page++;
+  }
+
+  return results.slice(0, limit);
+}
+
+/**
  * Searches for suggested saved objects for dashboards and SLOs only.
  * Rules use the rule client instead.
  */
@@ -124,25 +188,21 @@ export const getSuggestedSo = async ({
   attachmentType,
   query,
   tags,
-  perPage,
+  limit,
+  excludeIds,
 }: {
   soClient: SavedObjectsClientContract;
   attachmentType: Extract<AttachmentType, 'dashboard' | 'slo'>;
   query: string;
   tags?: string[];
-  perPage: number;
+  limit: number;
+  excludeIds?: string[];
 }): Promise<AttachmentData[]> => {
-  // Different saved object types use different field names for their title
-  const searchFieldsByType: Record<typeof attachmentType, string[]> = {
-    dashboard: ['title'],
-    slo: ['name'],
-  };
-
   const searchOptions: SavedObjectsFindOptions = {
     type: attachmentType,
     search: query ? `${query}*` : undefined,
     searchFields: searchFieldsByType[attachmentType],
-    perPage,
+    perPage: PAGE_SIZE,
     ...(tags
       ? {
           hasReferenceOperator: 'OR',
@@ -152,12 +212,64 @@ export const getSuggestedSo = async ({
   };
 
   if (attachmentType === 'dashboard') {
-    const result = await soClient.find<DashboardSOAttributes>(searchOptions);
-    return processDashboardResults(result.saved_objects);
-  } else if (attachmentType === 'slo') {
-    const result = await soClient.find<SloSOAttributes>(searchOptions);
-    return processSloResults(result.saved_objects);
+    const dashboardResults = await paginateWithExclusion({
+      limit,
+      excludeIds,
+      fetchPage: async (page) => {
+        const result = await soClient.find<DashboardSOAttributes>({ ...searchOptions, page });
+        return { items: result.saved_objects, total: result.total };
+      },
+    });
+    return processDashboardResults(dashboardResults);
   } else {
-    throw new Error(`Unsupported attachment type: ${attachmentType}`);
+    const sloResults = await paginateWithExclusion({
+      limit,
+      excludeIds,
+      fetchPage: async (page) => {
+        const result = await soClient.find<SloSOAttributes>({ ...searchOptions, page });
+        return { items: result.saved_objects, total: result.total };
+      },
+    });
+    return processSloResults(sloResults);
   }
+};
+
+/**
+ * Searches for suggested rules.
+ */
+export const getSuggestedRules = async ({
+  rulesClient,
+  query,
+  tags,
+  limit,
+  excludeIds,
+}: {
+  rulesClient: RulesClient;
+  query: string;
+  tags?: string[];
+  limit: number;
+  excludeIds?: string[];
+}): Promise<AttachmentData[]> => {
+  const tagsFilter =
+    tags && tags.length > 0
+      ? tags.map((tag) => `alert.attributes.tags:"${tag}"`).join(' or ')
+      : undefined;
+
+  const results = await paginateWithExclusion({
+    limit,
+    excludeIds,
+    fetchPage: async (page) => {
+      const { data, total } = await rulesClient.find({
+        options: {
+          search: query ? `${query}*` : undefined,
+          page,
+          perPage: PAGE_SIZE,
+          ...(tagsFilter ? { filter: tagsFilter } : {}),
+        },
+      });
+      return { items: data, total };
+    },
+  });
+
+  return processRuleResults(results);
 };
