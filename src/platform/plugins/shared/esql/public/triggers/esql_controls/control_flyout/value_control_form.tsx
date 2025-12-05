@@ -35,6 +35,8 @@ import {
   getESQLResults,
   appendStatsByToQuery,
 } from '@kbn/esql-utils';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { ServiceDeps } from '../../../kibana_services';
 import { ESQLLangEditor } from '../../../create_editor';
 import { ControlWidth, ControlLabel, ControlSelectionType } from './shared_form_components';
 import { ChooseColumnPopover } from './choose_column_popover';
@@ -74,6 +76,8 @@ export function ValueControlForm({
 }: ValueControlFormProps) {
   const isMounted = useMountedState();
   const theme = useEuiTheme();
+  const kibana = useKibana<ServiceDeps>();
+  const { core } = kibana.services;
 
   const [availableValuesOptions, setAvailableValuesOptions] = useState<EuiComboBoxOptionOption[]>(
     variableType === ESQLVariableType.TIME_LITERAL
@@ -214,13 +218,21 @@ export function ValueControlForm({
       if (initialState?.esqlQuery) {
         onValuesQuerySubmit(initialState.esqlQuery);
       } else if (valuesRetrieval) {
-        const queryForValues = `FROM ${getIndexPatternFromESQLQuery(
-          queryString
-        )} | STATS BY ${valuesRetrieval}`;
-        onValuesQuerySubmit(queryForValues);
+        const indexPattern = getIndexPatternFromESQLQuery(queryString);
+        core.http
+          .get<{ timeField?: string }>(`/internal/esql/get_timefield/FROM ${indexPattern}`)
+          .then((result) => {
+            const hasTimeField = result?.timeField ? true : false;
+            const timeFilter = hasTimeField
+              ? `| WHERE ${result.timeField} <= ?_tend and ${result.timeField} > ?_tstart`
+              : '';
+            const queryForValues = `FROM ${indexPattern} ${timeFilter} | STATS BY ${valuesRetrieval}`;
+            onValuesQuerySubmit(queryForValues);
+          });
       }
     }
   }, [
+    core.http,
     initialState?.esqlQuery,
     controlFlyoutType,
     onValuesQuerySubmit,
