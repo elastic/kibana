@@ -82,7 +82,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         targetTags(this, ['@skipInServerless']);
 
         it('should not hide the side navigation', async function () {
-          await testSubjects.scrollIntoView('solutionSideNavItemLink-securityGroup:launchpad');
+          await testSubjects.scrollIntoView('solutionSideNavItemLink-launchpad');
           // ensure center of button is visible and not hidden by sticky bottom bar
           await testSubjects.click('solutionSideNavItemLink-administration', 1000, 15);
           // test cleanup: go back to policy details page

@@ -168,9 +168,8 @@ describe('SecuritySideNav', () => {
   describe('Launchpad', () => {
     it('should render Launchpad as a parent link with children', () => {
       const launchpadLink: NavigationLink = {
-        id: SecurityPageName.landing,
+        id: SecurityPageName.launchpad,
         title: 'Launchpad',
-        sideNavIcon: 'launch',
         links: [
           {
             id: SecurityPageName.landing,
@@ -195,15 +194,14 @@ describe('SecuritySideNav', () => {
 
       const callArgs = mockSolutionSideNav.mock.calls[0][0];
       const launchpadItem = callArgs.items.find(
-        (item: { id: string }) => item.id === SecurityPageName.landing
+        (item: { id: string }) => item.id === SecurityPageName.launchpad
       );
 
       expect(launchpadItem).toBeDefined();
       expect(launchpadItem).toMatchObject({
-        id: SecurityPageName.landing,
+        id: SecurityPageName.launchpad,
         label: 'Launchpad',
         position: 'bottom',
-        iconType: 'launch',
         items: expect.arrayContaining([
           expect.objectContaining({
             id: SecurityPageName.landing,
@@ -225,7 +223,7 @@ describe('SecuritySideNav', () => {
 
     it('should position Launchpad above Manage', () => {
       const launchpadLink: NavigationLink = {
-        id: SecurityPageName.landing,
+        id: SecurityPageName.launchpad,
         title: 'Launchpad',
         links: [],
       };
@@ -237,7 +235,7 @@ describe('SecuritySideNav', () => {
       const items = callArgs.items;
 
       const launchpadIndex = items.findIndex(
-        (item: { id: string }) => item.id === SecurityPageName.landing
+        (item: { id: string }) => item.id === SecurityPageName.launchpad
       );
       const manageIndex = items.findIndex(
         (item: { id: string }) => item.id === SecurityPageName.administration
@@ -251,7 +249,7 @@ describe('SecuritySideNav', () => {
 
     it('should exclude disabled Launchpad children', () => {
       const launchpadLink: NavigationLink = {
-        id: SecurityPageName.landing,
+        id: SecurityPageName.launchpad,
         title: 'Launchpad',
         links: [
           {
@@ -271,7 +269,7 @@ describe('SecuritySideNav', () => {
 
       const callArgs = mockSolutionSideNav.mock.calls[0][0];
       const launchpadItem = callArgs.items.find(
-        (item: { id: string }) => item.id === SecurityPageName.landing
+        (item: { id: string }) => item.id === SecurityPageName.launchpad
       );
 
       expect(launchpadItem?.items).toHaveLength(1);
