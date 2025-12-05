@@ -32,6 +32,8 @@ export interface MenuItem {
   'data-test-subj'?: string;
   /** Title for the child panel (used for back navigation). If not provided, uses `name` */
   panelTitle?: string;
+  /** If true, the menu will NOT close after clicking this item. Useful for items that open a secondary popover anchored to the menu item button. */
+  keepMenuOpen?: boolean;
 }
 
 export interface HierarchicalActionsMenuProps {
@@ -148,7 +150,10 @@ export const HierarchicalActionsMenu: React.FC<HierarchicalActionsMenuProps> = (
             if (item.onClick) {
               item.onClick(event);
             }
-            closeMenu();
+            // Only close the menu if keepMenuOpen is not set to true
+            if (!item.keepMenuOpen) {
+              closeMenu();
+            }
           },
           'data-test-subj': item['data-test-subj'],
         };

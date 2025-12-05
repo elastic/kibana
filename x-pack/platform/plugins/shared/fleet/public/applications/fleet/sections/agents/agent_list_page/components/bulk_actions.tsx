@@ -127,6 +127,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
         ),
         icon: 'tag',
         disabled: !authz.fleet.allAgents,
+        keepMenuOpen: true,
         onClick: (event) => {
           setTagsPopoverButton((event.target as Element).closest('button')!);
           setIsTagAddVisible(!isTagAddVisible);

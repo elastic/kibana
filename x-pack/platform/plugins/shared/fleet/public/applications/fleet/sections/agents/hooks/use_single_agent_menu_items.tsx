@@ -94,6 +94,7 @@ export function useSingleAgentMenuItems({
           ),
           icon: 'tag',
           disabled: !agent.active,
+          keepMenuOpen: true,
           onClick: (event) => {
             callbacks.onAddRemoveTagsClick((event.target as Element).closest('button')!);
           },
