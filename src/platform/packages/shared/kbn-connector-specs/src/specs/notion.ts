@@ -18,9 +18,12 @@ export const NotionConnector: ConnectorSpec = {
     supportedFeatureIds: ['workflows'],
   },
 
-  // TODO: we also need to send another custom header "Notion-Version": "2025-09-03"
-  // https://developers.notion.com/docs/authorization#making-api-requests-with-an-internal-integration
-  authTypes: ['bearer'],
+  auth: {
+    types: ['bearer'],
+    headers: {
+      'Notion-Version': '2025-09-03',
+    },
+  },
 
   // TODO: check if we need `schema` attribute / what for
 
@@ -42,19 +45,15 @@ export const NotionConnector: ConnectorSpec = {
           pageSize?: number;
         };
 
-        const response = await ctx.client.post(
-          'https://api.notion.com/v1/search',
-          {
-            query: typedInput.query,
-            filter: {
-              value: typedInput.queryObjectType,
-              property: 'object',
-            },
-            ...(typedInput.startCursor && { start_cursor: typedInput.startCursor }),
-            ...(typedInput.pageSize && { page_size: typedInput.pageSize }),
+        const response = await ctx.client.post('https://api.notion.com/v1/search', {
+          query: typedInput.query,
+          filter: {
+            value: typedInput.queryObjectType,
+            property: 'object',
           },
-          { headers: { 'Notion-Version': '2025-09-03' } }
-        );
+          ...(typedInput.startCursor && { start_cursor: typedInput.startCursor }),
+          ...(typedInput.pageSize && { page_size: typedInput.pageSize }),
+        });
 
         return response.data;
       },
@@ -69,7 +68,6 @@ export const NotionConnector: ConnectorSpec = {
         const response = await ctx.client.get(
           `https://api.notion.com/v1/pages/${typedInput.pageId}`,
           {}
-          // { headers: { 'Notion-Version': '2025-09-03' } }
         );
         return response.data;
       },
@@ -84,7 +82,6 @@ export const NotionConnector: ConnectorSpec = {
         const response = await ctx.client.get(
           `https://api.notion.com/v1/data_sources/${typedInput.dataSourceId}`,
           {}
-          // { headers: { 'Notion-Version': '2025-09-03' } }
         );
         return response.data;
       },
@@ -120,8 +117,7 @@ export const NotionConnector: ConnectorSpec = {
         // or if we still need to add some of our own
         const response = await ctx.client.post(
           `https://api.notion.com/v1/data_sources/${typedInput.dataSourceId}/query`,
-          requestData,
-          { headers: { 'Notion-Version': '2025-09-03' } }
+          requestData
         );
         return response.data;
       },
