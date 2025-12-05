@@ -45,11 +45,6 @@ export const mockDataStreamParams: DataStreamParams = {
   title: 'Test Data Stream',
   description: 'A test data stream',
   inputTypes: [{ name: INPUT_TYPES.filestream }],
-  rawSamples: ['sample1', 'sample2'],
-  originalSource: {
-    sourceType: 'file',
-    sourceValue: 'test-file.log',
-  },
   jobInfo: {
     jobId: 'test-job-id',
     jobType: 'test-job-type',

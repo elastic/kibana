@@ -169,11 +169,6 @@ describe('TaskManagerService Integration Tests', () => {
         title: 'Test Data Stream',
         description: 'Test data stream description',
         inputTypes: [{ name: INPUT_TYPES.filestream }],
-        rawSamples: ['sample1'],
-        originalSource: {
-          sourceType: 'file',
-          sourceValue: 'test-file.log',
-        },
         jobInfo: {
           jobId: scheduledTask.taskId,
           jobType: 'ai-workflow',
@@ -286,11 +281,6 @@ describe('TaskManagerService Integration Tests', () => {
             title: `Concurrent Data Stream ${i}`,
             description: `Test data stream for concurrent execution`,
             inputTypes: [{ name: INPUT_TYPES.filestream }],
-            rawSamples: ['sample1'],
-            originalSource: {
-              sourceType: 'file',
-              sourceValue: 'test-file.log',
-            },
             jobInfo: {
               jobId: scheduledTask.taskId,
               jobType: 'ai-workflow',
