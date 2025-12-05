@@ -45,4 +45,10 @@ describe('where', () => {
       'FROM logs-*\n  | WHERE host.name IN ("host1", "host2", "host3")'
     );
   });
+
+  it('handles WHERE clause with STARTS_WITH and named parameter', () => {
+    const pipeline = source.pipe(where('STARTS_WITH(host.name, ?search)', { search: 'web-' }));
+
+    expect(pipeline.toString()).toEqual('FROM logs-*\n  | WHERE STARTS_WITH(host.name, "web-")');
+  });
 });

@@ -58,6 +58,18 @@ function createFunctionWithParam(functionName: string): ESQLFunction {
   };
 }
 
+function createVariadicCallFunction(functionName: string): ESQLFunction {
+  return {
+    name: functionName,
+    args: [],
+    location: { min: 0, max: 0 },
+    text: '',
+    incomplete: false,
+    type: 'function',
+    subtype: 'variadic-call',
+  };
+}
+
 describe('ParameterReplacer', () => {
   it('replaces named parameters in literals', () => {
     const params = { foo: 'bar' };
@@ -124,5 +136,32 @@ describe('ParameterReplacer', () => {
     const replacedNode = replacer.replace(funcNode);
 
     expect(replacedNode.name).toBe('AVG');
+  });
+
+  describe('string functions', () => {
+    it.each(['STARTS_WITH', 'ENDS_WITH', 'LIKE', 'RLIKE'])(
+      'replaces parameter with quoted string literal in %s',
+      (functionName) => {
+        const params = { search: 'test_value' };
+        const replacer = new ParameterReplacer(params);
+
+        const parentFunction = createVariadicCallFunction(functionName);
+        const node = createParamLiteral('named', 'search');
+        const substituted = replacer.replace(node, parentFunction);
+
+        expect(substituted).toEqual(Builder.expression.literal.string('test_value'));
+      }
+    );
+
+    it('replaces parameter with identifier for non-string variadic-call functions', () => {
+      const params = { field: 'my_field' };
+      const replacer = new ParameterReplacer(params);
+
+      const parentFunction = createVariadicCallFunction('some_other_function');
+      const node = createParamLiteral('named', 'field');
+      const substituted = replacer.replace(node, parentFunction);
+
+      expect(substituted).toEqual(Builder.identifier('my_field'));
+    });
   });
 });

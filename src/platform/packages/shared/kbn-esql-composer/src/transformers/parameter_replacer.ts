@@ -137,6 +137,12 @@ export class ParameterReplacer {
         });
       }
 
+      // String functions expect literal values, not identifiers
+      const stringFunctions = ['starts_with', 'ends_with', 'like', 'rlike'];
+      if (stringFunctions.includes(parent.name.toLowerCase())) {
+        return this.buildLiteral(value);
+      }
+
       return Builder.identifier(String(value));
     }
 
