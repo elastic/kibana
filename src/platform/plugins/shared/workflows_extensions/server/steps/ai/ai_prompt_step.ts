@@ -8,10 +8,7 @@
  */
 
 import type { CoreSetup } from '@kbn/core/server';
-import { z } from '@kbn/zod';
 import { resolveConnectorId } from './resolve_connector_id';
-// TODO: convertJsonSchemaToZod is currently a temporary copy. Once the PR is merged in inference plugin, we should import from there.
-import { convertJsonSchemaToZod } from './temp_json_schema_to_zod';
 import { AiPromptStepCommonDefinition } from '../../../common/steps/ai';
 import { createServerStepDefinition } from '../../step_registry/types';
 import type { WorkflowsExtensionsServerPluginStartDeps } from '../../types';
@@ -23,6 +20,7 @@ export const aiPromptStepDefinition = (
     ...AiPromptStepCommonDefinition,
     handler: async (context) => {
       const [, { actions, inference }] = await coreSetup.getStartServices();
+      await inference.getConnectorList(context.contextManager.getFakeRequest());
 
       const connectorId = await resolveConnectorId(
         context.input.connectorId,
@@ -33,34 +31,52 @@ export const aiPromptStepDefinition = (
       const chatModel = await inference.getChatModel({
         connectorId,
         request: context.contextManager.getFakeRequest(),
-        chatModelOptions: {},
+        chatModelOptions: {
+          temperature: context.input.temperature,
+        },
       });
-
-      if (!context.input.outputSchema) {
-        const response = await chatModel.invoke([{ role: 'user', content: context.input.input }]);
-        return {
-          output: response,
-        };
-      }
 
       const modelInput = [
+        ...(context.input.outputSchema
+          ? [getStructuredOutputPrompt(context.input.outputSchema)]
+          : []),
         {
-          role: 'system',
-          content:
-            'You are a helpful assistant that only responds in the structured format that is requested.',
+          role: 'user',
+          content: context.input.prompt,
         },
-        { role: 'user', content: context.input.input },
       ];
 
-      // TODO: convertJsonSchemaToZod is currently a temporary copy. Once the PR is merged in inference plugin, we should import from there.
-      const zodSchema = z.object({
-        response: convertJsonSchemaToZod(context.input.outputSchema), // Workaround, because inference plugin refuses z.array, but having array response is valid use case
+      const response = await chatModel.invoke(modelInput, {
+        signal: context.abortSignal,
       });
 
-      const output = await chatModel.withStructuredOutput(zodSchema).invoke(modelInput);
-
       return {
-        output: output.response,
+        output: {
+          content: context.input.outputSchema
+            ? JSON.parse(response.content as string)
+            : response.content,
+          response_metadata: response.response_metadata,
+        },
       };
     },
   });
+
+function getStructuredOutputPrompt(outputSchema: unknown) {
+  return {
+    role: 'system',
+    content: `
+You are an assistant that responds strictly in JSON format.
+
+Rules:
+1. Your entire response MUST be a single valid JSON object.
+2. The JSON MUST conform to the schema provided below.
+3. Do not include explanations, comments, markdown, code fences, or text outside the JSON.
+4. Output RAW JSON only — no formatting other than what makes it valid JSON.
+
+JSON schema:
+\`\`\`json
+${JSON.stringify(outputSchema)}
+\`\`\`
+`,
+  };
+}
