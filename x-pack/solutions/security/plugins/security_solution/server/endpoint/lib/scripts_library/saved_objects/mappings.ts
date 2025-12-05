@@ -7,28 +7,27 @@
 
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { schema } from '@kbn/config-schema';
+import { schema, type TypeOf } from '@kbn/config-schema';
+import type { DeepMutable } from '../../../../../common/endpoint/types';
 import { SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE } from '../constants';
 
 const ScriptsLibraryAttributesSchemaV1 = schema.object({
   id: schema.string(),
   name: schema.string(),
-  platform: schema.string(),
+  platform: schema.arrayOf(schema.string()),
   hash: schema.maybe(schema.string()),
   requires_input: schema.maybe(schema.boolean()),
   description: schema.maybe(schema.string()),
   instructions: schema.maybe(schema.string()),
   example: schema.maybe(schema.string()),
-  executable: schema.maybe(
-    schema.object({
-      linux: schema.maybe(schema.string()),
-      macos: schema.maybe(schema.string()),
-      windows: schema.maybe(schema.string()),
-    })
-  ),
+  pathToExecutable: schema.maybe(schema.string()),
   created_by: schema.string(),
   updated_by: schema.string(),
 });
+
+export type ScriptsLibrarySavedObjectAttributes = DeepMutable<
+  TypeOf<typeof ScriptsLibraryAttributesSchemaV1>
+>;
 
 export const scriptsLibrarySavedObjectType: SavedObjectsType = {
   name: SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE,
@@ -46,13 +45,7 @@ export const scriptsLibrarySavedObjectType: SavedObjectsType = {
       description: { type: 'keyword' },
       instructions: { type: 'keyword' },
       example: { type: 'keyword' },
-      executable: {
-        properties: {
-          linux: { type: 'keyword' },
-          macos: { type: 'keyword' },
-          windows: { type: 'keyword' },
-        },
-      },
+      pathToExecutable: { type: 'keyword' },
       created_by: { type: 'keyword' },
       updated_by: { type: 'keyword' },
       // FYI: the created_at/_by fields are auto populated by the so framework

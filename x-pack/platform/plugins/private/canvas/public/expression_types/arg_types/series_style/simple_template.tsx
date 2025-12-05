@@ -117,6 +117,7 @@ SimpleTemplate.propTypes = {
     labels: PropTypes.array.isRequired,
   }).isRequired,
   onValueChange: PropTypes.func.isRequired,
+  // @ts-expect-error upgrade typescript v5.9.3
   workpad: PropTypes.shape({
     colors: PropTypes.array.isRequired,
   }).isRequired,

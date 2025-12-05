@@ -122,14 +122,13 @@
     "@kbn/core-provider-plugin",
     "@kbn/reporting-plugin",
     "@kbn/kibana-usage-collection-plugin",
-    "@kbn/apm-synthtrace",
     "@kbn/aiops-change-point-detection",
     "@kbn/aiops-plugin",
     "@kbn/ml-category-validator",
     "@kbn/response-ops-alerts-filters-form",
     "@kbn/embeddable-alerts-table-plugin",
-    "@kbn/apm-synthtrace-client",
-    "@kbn/apm-synthtrace",
+    "@kbn/synthtrace-client",
+    "@kbn/synthtrace",
     "@kbn/streams-schema",
     "@kbn/streams-plugin",
     "@kbn/content-packs-schema",
@@ -177,5 +176,6 @@
     "@kbn/setup-node-env",
     "@kbn/connector-schemas",
     "@kbn/es-types",
+    "@kbn/streamlang"
   ]
 }

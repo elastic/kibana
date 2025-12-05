@@ -51,16 +51,16 @@ export class DataViewsService extends FtrService {
       return isInvalid !== 'true';
     });
 
-    if (hasTimeField) {
-      await this.retry.waitFor('timestamp field loaded', async () => {
-        const timestampField = await this.testSubjects.find('timestampField');
-        return !(await timestampField.elementHasClass('euiComboBox-isDisabled'));
-      });
+    await this.testSubjects.waitForAttributeToChange('timestampField', 'data-is-loading', '0');
 
-      if (changeTimestampField) {
-        await this.comboBox.set('timestampField', changeTimestampField);
+    if (await this.testSubjects.isEnabled('timestampField > comboBoxSearchInput')) {
+      if (!hasTimeField) {
+        await this.comboBox.set('timestampField', "--- I don't want to use the time filter ---");
+      } else if (changeTimestampField) {
+        await this.comboBox.set('timestampField', changeTimestampField!);
       }
     }
+
     await this.testSubjects.click(adHoc ? 'exploreIndexPatternButton' : 'saveIndexPatternButton');
     await this.header.waitUntilLoadingHasFinished();
   }

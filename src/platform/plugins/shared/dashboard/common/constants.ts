@@ -17,11 +17,11 @@ export const DEFAULT_PANEL_WIDTH = DASHBOARD_GRID_COLUMN_COUNT / 2;
 export const DEFAULT_PANEL_HEIGHT = 15;
 
 export const DEFAULT_DASHBOARD_OPTIONS = {
-  hidePanelTitles: false,
-  useMargins: true,
-  syncColors: false,
-  syncCursor: true,
-  syncTooltips: false,
+  hide_panel_titles: false,
+  use_margins: true,
+  sync_colors: false,
+  sync_cursor: true,
+  sync_tooltips: false,
 } as const;
 
 export const UI_SETTINGS = {

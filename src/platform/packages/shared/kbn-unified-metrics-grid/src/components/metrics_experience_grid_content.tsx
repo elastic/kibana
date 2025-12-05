@@ -49,7 +49,7 @@ export const MetricsExperienceGridContent = ({
   onFilter,
   histogramCss,
   isFieldsLoading = false,
-  isDiscoverLoading,
+  isDiscoverLoading = false,
 }: MetricsExperienceGridContentProps) => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
@@ -69,6 +69,7 @@ export const MetricsExperienceGridContent = ({
     isLoading: isFilteredFieldsLoading,
   } = useFilteredMetricFields({
     allFields,
+    isFieldsLoading,
     dimensions,
     searchTerm,
     valueFilters,
@@ -158,7 +159,9 @@ export const MetricsExperienceGridContent = ({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow>
-        {(isDiscoverLoading || isFilteredFieldsLoading) && <MetricsGridLoadingProgress />}
+        {(isDiscoverLoading || isFilteredFieldsLoading || isFieldsLoading) && (
+          <MetricsGridLoadingProgress />
+        )}
         <MetricsGrid
           columns={columns}
           dimensions={dimensions}
