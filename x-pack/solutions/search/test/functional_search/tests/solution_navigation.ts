@@ -48,7 +48,8 @@ export default function searchSolutionNavigation({
 
     it('has expected navigation', async () => {
       const expectNoPageReload = await solutionNavigation.createNoPageReloadCheck();
-
+      // Navigate to the home page to account for the getting started page redirect
+      await searchSpace.navigateTo(`${spaceCreated.id}/app/elasticsearch/home`);
       // check side nav links
       await solutionNavigation.sidenav.expectLinkActive({
         deepLinkId: 'searchHomepage',
