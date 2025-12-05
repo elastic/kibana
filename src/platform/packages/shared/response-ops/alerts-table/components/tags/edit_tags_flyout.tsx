@@ -73,10 +73,7 @@ const EditTagsFlyoutComponent: React.FC<Props> = ({
   const onSave = useCallback(() => onSaveTags(tagsSelection), [onSaveTags, tagsSelection]);
   const focusTrapProps = useFocusButtonTrap(focusButtonRef);
 
-  const headerSubtitle =
-    selectedAlerts.length > 1
-      ? i18n.SELECTED_ALERTS(selectedAlerts.length)
-      : selectedAlerts[0].title;
+  const headerSubtitle = i18n.SELECTED_ALERTS(selectedAlerts.length);
 
   return (
     <EuiFlyout
