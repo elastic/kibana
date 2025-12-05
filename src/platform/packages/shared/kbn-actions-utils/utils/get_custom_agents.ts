@@ -134,7 +134,7 @@ export function getCustomAgents(opts: GetCustomAgentsOpts): GetCustomAgentsRespo
   // At this point, we are going to use a proxy, so we need new agents.
   // We will though, copy over the calculated ssl options from above, into
   // the https agent.
-  const httpAgent = new HttpProxyAgent(proxySettings.proxyUrl);
+  const httpAgent = new HttpProxyAgent(proxySettings.proxyUrl) as unknown as HttpAgent;
   const httpsAgent = new HttpsProxyAgent({
     host: proxyUrl.hostname,
     port: Number(proxyUrl.port),
