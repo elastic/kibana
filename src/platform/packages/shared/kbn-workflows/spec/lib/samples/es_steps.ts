@@ -9,7 +9,7 @@
 
 export const ES_VALID_SAMPLE_STEPS = [
   {
-    name: 'create-document',
+    name: 'search-simple-query',
     type: 'elasticsearch.search',
     with: {
       index: 'test-index',
@@ -23,7 +23,7 @@ export const ES_VALID_SAMPLE_STEPS = [
     },
   },
   {
-    name: 'create-document',
+    name: 'search-full-query',
     type: 'elasticsearch.search',
     with: {
       index: 'test-index',
@@ -59,7 +59,7 @@ export const ES_VALID_SAMPLE_STEPS = [
   },
   // indices
   {
-    name: 'create-index',
+    name: 'create-index-with-mappings',
     type: 'elasticsearch.indices.create',
     with: {
       index: 'test-index',
