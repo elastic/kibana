@@ -136,21 +136,21 @@ export const useDashboardListingTable = ({
   const entityName = getEntityName();
   const entityNamePlural = getEntityNamePlural();
 
-  const contentTypeEntityNames = useMemo(
+  const tabEntityNames = useMemo(
     () => ({
       dashboards: {
-        singular: entityName,
-        plural: entityNamePlural,
+        entityName,
+        entityNamePlural,
         emptyPromptBody: getDashboardEmptyPromptBody(),
       },
       visualizations: {
-        singular: getVisualizationEntityName(),
-        plural: getVisualizationEntityNamePlural(),
+        entityName: getVisualizationEntityName(),
+        entityNamePlural: getVisualizationEntityNamePlural(),
         emptyPromptBody: getVisualizationEmptyPromptBody(),
       },
       'annotation-groups': {
-        singular: getAnnotationGroupEntityName(),
-        plural: getAnnotationGroupEntityNamePlural(),
+        entityName: getAnnotationGroupEntityName(),
+        entityNamePlural: getAnnotationGroupEntityNamePlural(),
         emptyPromptBody: getAnnotationGroupEmptyPromptBody(),
       },
     }),
@@ -167,22 +167,19 @@ export const useDashboardListingTable = ({
     ]
   );
 
-  const filterItemByContentType = useCallback(
-    (item: any, contentType: 'dashboards' | 'visualizations' | 'annotation-groups') => {
-      const itemType = item.type;
-      if (contentType === 'dashboards') {
-        return itemType === 'dashboard' || !itemType; // Default to dashboard if no type
-      } else if (contentType === 'visualizations') {
-        // Use negative filter: anything that's NOT a dashboard or annotation-group is a visualization
-        // This is more robust than enumerating all possible visualization types
-        return itemType !== 'dashboard' && itemType !== 'event-annotation-group';
-      } else if (contentType === 'annotation-groups') {
-        return itemType === 'event-annotation-group';
-      }
-      return true;
-    },
-    []
-  );
+  const filterItemByTab = useCallback((item: DashboardSavedObjectUserContent, tabId: string) => {
+    const itemType = item.type;
+    if (tabId === 'dashboards') {
+      return itemType === 'dashboard' || !itemType; // Default to dashboard if no type
+    } else if (tabId === 'visualizations') {
+      // Use negative filter: anything that's NOT a dashboard or annotation-group is a visualization
+      // This is more robust than enumerating all possible visualization types
+      return itemType !== 'dashboard' && itemType !== 'event-annotation-group';
+    } else if (tabId === 'annotation-groups') {
+      return itemType === 'event-annotation-group';
+    }
+    return true;
+  }, []);
 
   const [pageDataTestSubject, setPageDataTestSubject] = useState<string>();
   const [hasInitialFetchReturned, setHasInitialFetchReturned] = useState(false);
@@ -691,17 +688,16 @@ export const useDashboardListingTable = ({
       title,
       urlStateEnabled,
       createdByEnabled: true,
-      contentTypeTabsEnabled: true,
-      contentTypeEntityNames,
-      filterItemByContentType,
-      defaultContentTypeTab: 'dashboards',
+      tabsEnabled: true,
+      tabEntityNames,
+      filterItemByTab,
       recentlyAccessed: getDashboardRecentlyAccessedService(),
     };
   }, [
     contentEditorValidators,
-    contentTypeEntityNames,
     createItem,
-    filterItemByContentType,
+    filterItemByTab,
+    tabEntityNames,
     customTableColumn,
     dashboardListingId,
     deleteItems,

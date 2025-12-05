@@ -39,11 +39,10 @@ export type TableListViewProps<T extends UserContentCommonSchema = UserContentCo
   | 'titleColumnName'
   | 'withoutPageTemplateWrapper'
   | 'createdByEnabled'
-  | 'contentTypeTabsEnabled'
+  | 'tabsEnabled'
   | 'recentlyAccessed'
-  | 'contentTypeEntityNames'
-  | 'filterItemByContentType'
-  | 'defaultContentTypeTab'
+  | 'tabEntityNames'
+  | 'filterItemByTab'
 > & {
   title: string;
   description?: string;
@@ -80,11 +79,10 @@ export const TableListView = <T extends UserContentCommonSchema>({
   additionalRightSideActions,
   withoutPageTemplateWrapper,
   createdByEnabled,
-  contentTypeTabsEnabled,
+  tabsEnabled,
   recentlyAccessed,
-  contentTypeEntityNames,
-  filterItemByContentType,
-  defaultContentTypeTab,
+  tabEntityNames,
+  filterItemByTab,
 }: TableListViewProps<T>) => {
   const PageTemplate = withoutPageTemplateWrapper
     ? (React.Fragment as unknown as typeof KibanaPageTemplate)
@@ -132,12 +130,11 @@ export const TableListView = <T extends UserContentCommonSchema>({
           withoutPageTemplateWrapper={withoutPageTemplateWrapper}
           onFetchSuccess={onFetchSuccess}
           setPageDataTestSubject={setPageDataTestSubject}
-          createdByEnabled={createdByEnabled}
-          contentTypeTabsEnabled={contentTypeTabsEnabled}
           recentlyAccessed={recentlyAccessed}
-          contentTypeEntityNames={contentTypeEntityNames}
-          filterItemByContentType={filterItemByContentType}
-          defaultContentTypeTab={defaultContentTypeTab}
+          createdByEnabled={createdByEnabled}
+          tabEntityNames={tabEntityNames}
+          tabsEnabled={tabsEnabled}
+          filterItemByTab={filterItemByTab}
         />
       </KibanaPageTemplate.Section>
     </PageTemplate>

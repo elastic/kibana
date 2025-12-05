@@ -434,7 +434,7 @@ export const VisualizeListing = () => {
               // we allow users to create visualizations even if they can't save them
               // for data exploration purposes
               customTableColumn={getCustomColumn()}
-              contentTypeTabsEnabled={false}
+              tabsEnabled={false}
               customSortingOptions={getCustomSortingOptions()}
               initialPageSize={initialPageSize}
               initialFilter={''}

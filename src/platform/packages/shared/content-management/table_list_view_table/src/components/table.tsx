@@ -33,7 +33,7 @@ import {
   cssFavoriteHoverWithinEuiTableRow,
   useFavorites,
 } from '@kbn/content-management-favorites-public';
-import type { ContentType } from './tabbed_filter';
+import type { TabEntityNameConfig } from './tabbed_filter';
 
 import { useServices } from '../services';
 import type { Action } from '../actions';
@@ -88,15 +88,10 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   clearTagSelection: () => void;
   createdByEnabled: boolean;
   favoritesEnabled: boolean;
-  contentTypeTabsEnabled?: boolean;
-  contentTypeEntityNames?: Record<
-    ContentType,
-    { singular: string; plural: string; emptyPromptBody?: React.ReactNode }
-  >;
-  /** Custom filter function for content type tabs. If not provided, falls back to default filtering. */
-  filterItemByContentType?: (item: T, contentType: ContentType) => boolean;
-  /** Default content type tab to show when contentTypeTabsEnabled is true. Defaults to 'dashboards'. */
-  defaultContentTypeTab?: ContentType;
+  tabsEnabled?: boolean;
+  tabEntityNames?: Record<string, TabEntityNameConfig>;
+  /** Custom filter function for tabs. If not provided, uses item.type to match tab id. */
+  filterItemByTab?: (item: T, tabId: string) => boolean;
   emptyPrompt?: JSX.Element;
 }
 
@@ -129,10 +124,9 @@ export function Table<T extends UserContentCommonSchema>({
   clearTagSelection,
   createdByEnabled,
   favoritesEnabled,
-  contentTypeTabsEnabled,
-  contentTypeEntityNames,
-  filterItemByContentType,
-  defaultContentTypeTab = 'dashboards',
+  tabsEnabled,
+  tabEntityNames,
+  filterItemByTab,
   emptyPrompt,
 }: Props<T>) {
   const euiTheme = useEuiTheme();
@@ -140,24 +134,19 @@ export function Table<T extends UserContentCommonSchema>({
 
   // Dynamic entity name (singular) based on active tab
   const dynamicEntityName = useMemo(() => {
-    if (contentTypeTabsEnabled && tableFilter.contentTypeTab && contentTypeEntityNames) {
-      return contentTypeEntityNames[tableFilter.contentTypeTab]?.singular || entityName;
+    if (tabsEnabled && tableFilter.activeTab && tabEntityNames) {
+      return tabEntityNames[tableFilter.activeTab]?.entityName || entityName;
     }
     return entityName;
-  }, [contentTypeTabsEnabled, tableFilter.contentTypeTab, contentTypeEntityNames, entityName]);
+  }, [tabsEnabled, tableFilter.activeTab, tabEntityNames, entityName]);
 
   // Dynamic entity name (plural) based on active tab
   const dynamicEntityNamePlural = useMemo(() => {
-    if (contentTypeTabsEnabled && tableFilter.contentTypeTab && contentTypeEntityNames) {
-      return contentTypeEntityNames[tableFilter.contentTypeTab]?.plural || entityNamePlural;
+    if (tabsEnabled && tableFilter.activeTab && tabEntityNames) {
+      return tabEntityNames[tableFilter.activeTab]?.entityNamePlural || entityNamePlural;
     }
     return entityNamePlural;
-  }, [
-    contentTypeTabsEnabled,
-    tableFilter.contentTypeTab,
-    contentTypeEntityNames,
-    entityNamePlural,
-  ]);
+  }, [tabsEnabled, tableFilter.activeTab, tabEntityNames, entityNamePlural]);
 
   const renderToolsLeft = useCallback(() => {
     if (!deleteItems || selectedIds.length === 0) {
@@ -345,9 +334,9 @@ export function Table<T extends UserContentCommonSchema>({
   );
 
   const emptyPromptBody = useMemo(() => {
-    if (contentTypeTabsEnabled && tableFilter.contentTypeTab && contentTypeEntityNames) {
+    if (tabsEnabled && tableFilter.activeTab && tabEntityNames) {
       return (
-        contentTypeEntityNames[tableFilter.contentTypeTab]?.emptyPromptBody ?? (
+        tabEntityNames[tableFilter.activeTab]?.emptyPromptBody ?? (
           <FormattedMessage
             id="contentManagement.tableList.listing.noItemsBody"
             defaultMessage="Create a new item to get started."
@@ -362,7 +351,7 @@ export function Table<T extends UserContentCommonSchema>({
         defaultMessage="Create a new item to get started."
       />
     );
-  }, [contentTypeTabsEnabled, tableFilter.contentTypeTab, contentTypeEntityNames]);
+  }, [tabsEnabled, tableFilter.activeTab, tabEntityNames]);
 
   const emptyPromptActions = useMemo(() => {
     return renderCreateButton(false);
@@ -373,24 +362,20 @@ export function Table<T extends UserContentCommonSchema>({
   const visibleItems = React.useMemo(() => {
     let filteredItems = items;
 
-    // Filter by content type tab
-    if (contentTypeTabsEnabled && tableFilter?.contentTypeTab) {
-      const currentTab = tableFilter.contentTypeTab;
-      if (filterItemByContentType) {
+    // Filter by active tab
+    if (tabsEnabled && tableFilter?.activeTab) {
+      const currentTab = tableFilter.activeTab;
+      if (filterItemByTab) {
         // Use custom filter if provided
-        filteredItems = filteredItems.filter((item) => filterItemByContentType(item, currentTab));
+        filteredItems = filteredItems.filter((item) => filterItemByTab(item, currentTab));
       } else {
-        // Fallback to default filtering (for backward compatibility)
+        // Fallback to default filtering: match item.type to tab id
         filteredItems = filteredItems.filter((item) => {
           const itemType = (item as any).type;
-          if (currentTab === 'dashboards') {
-            return itemType === 'dashboard' || !itemType;
-          } else if (currentTab === 'visualizations') {
-            return itemType !== 'dashboard' && itemType !== 'event-annotation-group';
-          } else if (currentTab === 'annotation-groups') {
-            return itemType === 'event-annotation-group';
-          }
-          return true;
+          return (
+            itemType === currentTab ||
+            (!itemType && currentTab === Object.keys(tabEntityNames || {})[0])
+          );
         });
       }
     }
@@ -412,14 +397,7 @@ export function Table<T extends UserContentCommonSchema>({
     }
 
     return filteredItems;
-  }, [
-    items,
-    tableFilter,
-    favorites,
-    favoritesError,
-    contentTypeTabsEnabled,
-    filterItemByContentType,
-  ]);
+  }, [items, tableFilter, favorites, favoritesError, tabsEnabled, filterItemByTab, tabEntityNames]);
 
   const { allUsers, showNoUserOption } = useMemo(() => {
     if (!createdByEnabled) return { allUsers: [], showNoUserOption: false };
@@ -442,14 +420,19 @@ export function Table<T extends UserContentCommonSchema>({
       ? true // by passing "true" we disable the EuiInMemoryTable sorting and handle it ourselves, but sorting is still enabled
       : { sort: tableSort };
 
-  const tabbedFilter = contentTypeTabsEnabled ? (
-    <TabbedTableFilter
-      selectedTabId={tableFilter.contentTypeTab ?? defaultContentTypeTab}
-      onSelectedTabChanged={(newTab) => {
-        onFilterChange({ contentTypeTab: newTab });
-      }}
-    />
-  ) : undefined;
+  const tabbedFilter =
+    tabsEnabled && tabEntityNames ? (
+      <TabbedTableFilter
+        tabs={Object.keys(tabEntityNames).map((id) => ({
+          id,
+          name: tabEntityNames[id].entityNamePlural,
+        }))}
+        selectedTabId={tableFilter.activeTab ?? Object.keys(tabEntityNames)[0]}
+        onSelectedTabChanged={(newTab) => {
+          onFilterChange({ activeTab: newTab });
+        }}
+      />
+    ) : undefined;
 
   // Show search/filters for all tabs (annotation-groups now behaves like other tabs)
   const showSearch = true;

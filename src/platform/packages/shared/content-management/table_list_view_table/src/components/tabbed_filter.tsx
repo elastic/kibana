@@ -9,15 +9,27 @@
 
 import React from 'react';
 import { EuiTab, EuiTabs, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 
-export type ContentType = 'dashboards' | 'visualizations' | 'annotation-groups';
+export interface TabConfig {
+  id: string;
+  name: string | React.ReactNode;
+}
+
+export interface TabEntityNameConfig {
+  entityName: string;
+  entityNamePlural: string;
+  emptyPromptBody?: React.ReactNode;
+}
+
 interface TabbedTableFilterProps {
-  onSelectedTabChanged: (tabId: ContentType) => void;
-  selectedTabId: ContentType;
+  tabs: TabConfig[];
+  onSelectedTabChanged: (tabId: string) => void;
+  selectedTabId: string;
 }
 
 export const TabbedTableFilter = (props: TabbedTableFilterProps) => {
+  const { tabs, onSelectedTabChanged, selectedTabId } = props;
+
   return (
     <>
       <EuiTabs
@@ -27,36 +39,16 @@ export const TabbedTableFilter = (props: TabbedTableFilterProps) => {
             '-8px' /* TODO: the default EuiTable betweenChildren spacing is too big, needs eui change */,
         }}
       >
-        <EuiTab
-          onClick={() => props.onSelectedTabChanged('dashboards')}
-          isSelected={props.selectedTabId === 'dashboards'}
-          data-test-subj="dashboardsTab"
-        >
-          <FormattedMessage
-            id="contentManagement.tableList.tabsFilter.dashboardsTabLabel"
-            defaultMessage="Dashboards"
-          />
-        </EuiTab>
-        <EuiTab
-          onClick={() => props.onSelectedTabChanged('visualizations')}
-          isSelected={props.selectedTabId === 'visualizations'}
-          data-test-subj="visualizationsTab"
-        >
-          <FormattedMessage
-            id="contentManagement.tableList.tabsFilter.visualizationsTabLabel"
-            defaultMessage="Visualizations"
-          />
-        </EuiTab>
-        <EuiTab
-          onClick={() => props.onSelectedTabChanged('annotation-groups')}
-          isSelected={props.selectedTabId === 'annotation-groups'}
-          data-test-subj="annotationGroupsTab"
-        >
-          <FormattedMessage
-            id="contentManagement.tableList.tabsFilter.annotationGroupsTabLabel"
-            defaultMessage="Annotation groups"
-          />
-        </EuiTab>
+        {tabs.map((tab) => (
+          <EuiTab
+            key={tab.id}
+            onClick={() => onSelectedTabChanged(tab.id)}
+            isSelected={selectedTabId === tab.id}
+            data-test-subj={`${tab.id}Tab`}
+          >
+            {tab.name}
+          </EuiTab>
+        ))}
       </EuiTabs>
       <EuiSpacer size={'s'} />
     </>

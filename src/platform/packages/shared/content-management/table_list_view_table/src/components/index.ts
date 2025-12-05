@@ -13,7 +13,7 @@ export { ConfirmDeleteModal } from './confirm_delete_modal';
 export { ItemDetails } from './item_details';
 export { TableSortSelect } from './table_sort_select';
 export { TagFilterPanel } from './tag_filter_panel';
-export type { ContentType } from './tabbed_filter';
+export type { TabEntityNameConfig } from './tabbed_filter';
 
 export {
   type SortColumnField,
