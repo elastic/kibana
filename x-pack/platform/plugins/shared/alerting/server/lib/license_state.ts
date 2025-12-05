@@ -175,7 +175,7 @@ export class LicenseState {
   }
 
   public ensureLicenseForMaintenanceWindow() {
-    if (!this.license || !this.license?.isAvailable) {
+    if (!this.license?.isAvailable) {
       throw Boom.forbidden(
         i18n.translate(
           'xpack.alerting.serverSideErrors.maintenanceWindow.unavailableLicenseErrorMessage',
