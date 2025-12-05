@@ -27,7 +27,7 @@ export function registerRoutes(
   logger: Logger,
   getStartServices: StartServicesAccessor<DataConnectorsServerStartDependencies>
 ) {
-  // List data connectors
+  // List all data connectors
   router.get(
     {
       path: '/api/data_connectors',
@@ -64,6 +64,7 @@ export function registerRoutes(
           },
         });
       } catch (error) {
+        logger.error(`Failed to list all data connectors: ${(error as Error).message}`);
         return response.customError({
           statusCode: 500,
           body: {
@@ -146,6 +147,50 @@ export function registerRoutes(
           statusCode: 500,
           body: {
             message: `Failed to create data connector: ${(error as Error).message}`,
+          },
+        });
+      }
+    }
+  );
+
+  // Delete all data connectors
+  router.delete(
+    {
+      path: '/api/data_connectors',
+      validate: false,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+    },
+    async (context, request, response) => {
+      const coreContext = await context.core;
+
+      try {
+        const savedObjectsClient = coreContext.savedObjects.client;
+        const findResponse = await savedObjectsClient.find({
+          type: DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+          perPage: 1000,
+        });
+        const connectors = findResponse.saved_objects;
+        const deletePromises = connectors.map((connector) =>
+          savedObjectsClient.delete(DATA_CONNECTOR_SAVED_OBJECT_TYPE, connector.id)
+        );
+        await Promise.all(deletePromises);
+        return response.ok({
+          body: {
+            success: true,
+            deletedCount: connectors.length,
+          },
+        });
+      } catch (error) {
+        logger.error(`Failed to delete all connectors: ${(error as Error).message}`);
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: `Failed to delete all connectors: ${(error as Error).message}`,
           },
         });
       }
