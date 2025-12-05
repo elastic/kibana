@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { BehaviorSubject, type Subscription } from 'rxjs';
-
 import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { AppStatus, DEFAULT_APP_CATEGORIES, type AppUpdater } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { QueryClient } from '@kbn/react-query';
 import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_PATH } from '../common';
 
@@ -29,9 +27,6 @@ export class SearchGettingStartedPlugin
       SearchGettingStartedAppPluginStartDependencies
     >
 {
-  private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
-  private featureFlagSubscription: Subscription | undefined;
-
   public setup(
     core: CoreSetup<
       SearchGettingStartedAppPluginStartDependencies,
@@ -58,8 +53,6 @@ export class SearchGettingStartedPlugin
 
         return renderApp(coreStart, services, element, queryClient);
       },
-      status: AppStatus.accessible,
-      updater$: this.appUpdater$,
       order: 1,
       visibleIn: ['globalSearch', 'sideNav'],
     });
