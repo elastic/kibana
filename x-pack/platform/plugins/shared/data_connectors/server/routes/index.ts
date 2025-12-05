@@ -51,18 +51,9 @@ export function registerRoutes(
           });
 
         const connectors = findResult.saved_objects.map((savedObject) => {
-          const attrs = savedObject.attributes;
           return {
+            ...savedObject.attributes,
             id: savedObject.id,
-            name: attrs.name,
-            type: attrs.type,
-            config: attrs.config,
-            createdAt: attrs.createdAt,
-            updatedAt: attrs.updatedAt,
-            workflowIds: attrs.workflowIds,
-            toolIds: attrs.toolIds,
-            kscId: attrs.kscId,
-            features: attrs.features,
           };
         });
 

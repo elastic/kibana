@@ -67,7 +67,7 @@ export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
     management: {
       displayName: 'Data Connector',
       defaultSearchField: 'name',
-      importableAndExportable: false,
+      importableAndExportable: true,
       getTitle(obj) {
         const attrs = obj.attributes as unknown as { name?: string };
         return attrs.name ?? 'Data Connector';
