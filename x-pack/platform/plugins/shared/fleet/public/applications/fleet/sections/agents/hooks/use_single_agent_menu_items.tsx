@@ -147,7 +147,7 @@ export function useSingleAgentMenuItems({
     });
 
     // Upgrade management submenu (only show if agent is stuck in updating)
-    if (hasFleetAllPrivileges && isAgentUpdating) {
+    if (hasFleetAllPrivileges) {
       items.push({
         id: 'upgrade-management',
         name: (
@@ -167,6 +167,7 @@ export function useSingleAgentMenuItems({
               />
             ),
             icon: 'refresh',
+            disabled: !isAgentUpdating,
             onClick: () => {
               callbacks.onUpgradeClick();
             },
