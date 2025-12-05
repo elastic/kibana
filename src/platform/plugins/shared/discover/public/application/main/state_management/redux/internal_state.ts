@@ -51,7 +51,6 @@ const initialState: DiscoverInternalState = {
   userId: undefined,
   spaceId: undefined,
   persistedDiscoverSession: undefined,
-  projectRouting: undefined,
   hasUnsavedChanges: false,
   defaultProfileAdHocDataViewIds: [],
   savedDataViews: [],
@@ -152,13 +151,9 @@ export const internalStateSlice = createSlice({
       state.tabsBarVisibility = action.payload;
     },
 
-    setProjectRouting: (state, action: PayloadAction<DiscoverInternalState['projectRouting']>) => {
-      if (state.projectRouting === action.payload) {
-        return;
-      }
-      state.projectRouting = action.payload;
-
+    markNonActiveTabsForRefetch: (state) => {
       // Mark all non-active tabs to refetch on selection
+      // Used when projectRouting changes in CPS Manager
       const currentTabId = state.tabs.unsafeCurrentId;
       state.tabs.allIds.forEach((tabId) => {
         if (tabId !== currentTabId && state.tabs.byId[tabId]) {
@@ -425,17 +420,6 @@ const createMiddleware = (options: InternalStateDependencies) => {
         const projectRouting =
           persistedSession?.projectRouting ?? services.cps.cpsManager.getDefaultProjectRouting();
         services.cps.cpsManager.setProjectRouting(projectRouting);
-      }
-    },
-  });
-
-  startListening({
-    actionCreator: internalStateSlice.actions.setProjectRouting,
-    effect: (action, listenerApi) => {
-      const { services } = listenerApi.extra;
-      // Sync Redux state to CPS manager whenever projectRouting changes
-      if (services.cps?.cpsManager) {
-        services.cps.cpsManager.setProjectRouting(action.payload);
       }
     },
   });

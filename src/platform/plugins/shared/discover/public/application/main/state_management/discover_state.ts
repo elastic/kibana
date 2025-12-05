@@ -569,14 +569,13 @@ export function getDiscoverStateContainer({
     );
 
     // Subscribe to CPS projectRouting changes (global subscription affects all tabs)
+    // When projectRouting changes, mark non-active tabs for refetch and trigger data fetch
     const cpsProjectRoutingSubscription = services.cps?.cpsManager
       ?.getProjectRouting$()
-      .subscribe((cpsProjectRouting) => {
-        const currentProjectRouting = internalState.getState().projectRouting;
-
-        if (cpsProjectRouting !== currentProjectRouting) {
-          internalState.dispatch(internalStateActions.setProjectRouting(cpsProjectRouting));
-        }
+      .subscribe(() => {
+        internalState.dispatch(internalStateActions.markNonActiveTabsForRefetch());
+        addLog('[getDiscoverStateContainer] projectRouting changes triggers data fetching');
+        fetchData();
       });
 
     const { start: startSyncingGlobalStateWithUrl, stop: stopSyncingGlobalStateWithUrl } =
@@ -646,17 +645,6 @@ export function getDiscoverStateContainer({
       })
     );
 
-    // Subscribe to session-level projectRouting changes and trigger data fetch
-    let previousProjectRouting = internalState.getState().projectRouting;
-    const projectRoutingUnsubscribe = internalState.subscribe(() => {
-      const currentProjectRouting = internalState.getState().projectRouting;
-      if (currentProjectRouting !== previousProjectRouting) {
-        previousProjectRouting = currentProjectRouting;
-        addLog('[getDiscoverStateContainer] projectRouting changes triggers data fetching');
-        fetchData();
-      }
-    });
-
     const savedSearchChangesSubscription = savedSearchContainer
       .getCurrent$()
       .subscribe(syncLocallyPersistedTabState);
@@ -698,7 +686,6 @@ export function getDiscoverStateContainer({
       unsubscribeData();
       appStateSubscription.unsubscribe();
       unsubscribeUrlState();
-      projectRoutingUnsubscribe();
       unsubscribeSavedSearchUrlTracking();
       filterUnsubscribe.unsubscribe();
       timefilerUnsubscribe.unsubscribe();

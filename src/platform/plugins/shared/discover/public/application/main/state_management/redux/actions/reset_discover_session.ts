@@ -20,6 +20,7 @@ import { setDataView } from './data_views';
 import { updateTabs } from './tabs';
 import { getInitialAppState } from '../../utils/get_initial_app_state';
 import type { DiscoverAppState } from '../types';
+import { internalStateActions } from '..';
 
 export const resetDiscoverSession = createInternalStateAsyncThunk(
   'internalState/resetDiscoverSession',
@@ -92,20 +93,16 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
       })
     );
 
+    if (services.cps?.cpsManager && !updatedDiscoverSession) {
+      const restoredProjectRouting = discoverSession.projectRouting;
+      services.cps.cpsManager.setProjectRouting(
+        restoredProjectRouting ?? services.cps.cpsManager.getDefaultProjectRouting()
+      );
+      dispatch(internalStateActions.markNonActiveTabsForRefetch());
+    }
+
     const selectedTab = allTabs.find((tab) => tab.id === selectedTabId) ?? allTabs[0];
 
-    if (services.cps?.cpsManager) {
-      const restoredProjectRouting = discoverSession.projectRouting;
-      // If a saved value exists, restore it
-      if (restoredProjectRouting) {
-        dispatch(internalStateSlice.actions.setProjectRouting(restoredProjectRouting));
-      } else if (!updatedDiscoverSession) {
-        // Only reset to default when switching between saved objects (not after a save operation)
-        // This preserves the picker value after "Save As" when projectRouting is not stored
-        const defaultRouting = services.cps.cpsManager.getDefaultProjectRouting();
-        dispatch(internalStateSlice.actions.setProjectRouting(defaultRouting));
-      }
-    }
     await dispatch(
       updateTabs({ items: allTabs, selectedItem: selectedTab, updatedDiscoverSession })
     );

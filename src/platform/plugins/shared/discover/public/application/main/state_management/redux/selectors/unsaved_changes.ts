@@ -61,16 +61,20 @@ export const selectHasUnsavedChanges = (
     });
   }
 
-  // If the persisted session has projectRouting compare it with current projectRouting
-  const persistedProjectRouting = persistedDiscoverSession.projectRouting;
-  const projectRoutingChanged =
-    persistedProjectRouting !== undefined && persistedProjectRouting !== state.projectRouting;
+  let projectRoutingChanged = false;
+  if (services.cps?.cpsManager && persistedDiscoverSession) {
+    // If the persisted session has projectRouting compare it with current projectRouting from CPS Manager
+    const persistedProjectRouting = persistedDiscoverSession.projectRouting;
+    const currentProjectRouting = services.cps?.cpsManager?.getProjectRouting();
+    projectRoutingChanged =
+      persistedProjectRouting !== undefined && persistedProjectRouting !== currentProjectRouting;
 
-  if (projectRoutingChanged) {
-    addLog('[DiscoverSession] difference between initial and changed version: projectRouting', {
-      before: persistedProjectRouting,
-      after: state.projectRouting,
-    });
+    if (projectRoutingChanged) {
+      addLog('[DiscoverSession] difference between initial and changed version: projectRouting', {
+        before: persistedProjectRouting,
+        after: currentProjectRouting,
+      });
+    }
   }
 
   const unsavedTabIds: string[] = [];

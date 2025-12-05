@@ -213,7 +213,9 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
       description: newDescription,
       tabs: updatedTabs,
       tags: services.savedObjectsTagging ? newTags : state.persistedDiscoverSession?.tags,
-      projectRouting: newProjectRoutingRestore ? state.projectRouting : undefined,
+      projectRouting: newProjectRoutingRestore
+        ? services.cps?.cpsManager?.getProjectRouting()
+        : undefined,
     };
 
     const saveOptions: SaveDiscoverSessionOptions = {
