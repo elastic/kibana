@@ -21,8 +21,8 @@ const LazyTopNavMenu = lazy(async () => {
 });
 
 const LazyTopNavMenuBeta = lazy(async () => {
-  const { TopNavMenuItems } = await import('../top_nav_menu_beta/top_nav_menu_items');
-  return { default: TopNavMenuItems };
+  const { TopNavMenuBeta } = await import('../top_nav_menu_beta/top_nav_menu_beta');
+  return { default: TopNavMenuBeta };
 });
 
 export function createTopNav(

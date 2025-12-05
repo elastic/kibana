@@ -15,7 +15,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiHeader, EuiPageTemplate, useEuiTheme } fr
 import { UnifiedTabs, useNewTabProps, type TabItem } from '@kbn/unified-tabs';
 import { TabStatus, type TabPreviewData } from '@kbn/unified-tabs';
 import { css } from '@emotion/react';
-import { TopNavMenuItems } from './top_nav_menu_items';
+import { TopNavMenuBeta } from './top_nav_menu_beta';
 import type { TopNavMenuConfigBeta } from './types';
 
 // Hook to replace the tabs menu button icon with arrowDown for Storybook
@@ -47,7 +47,7 @@ const useTabsMenuButtonIconOverride = () => {
   }, []);
 };
 
-interface TopNavMenuBetaWrapperProps extends ComponentProps<typeof TopNavMenuItems> {
+interface TopNavMenuBetaWrapperProps extends ComponentProps<typeof TopNavMenuBeta> {
   showTabs?: boolean;
 }
 
@@ -151,11 +151,11 @@ const TopNavMenuBetaWrapper = ({ showTabs = false, ...props }: TopNavMenuBetaWra
           flex-shrink: 0;
         `}
       >
-        <TopNavMenuItems {...props} />
+        <TopNavMenuBeta {...props} />
       </EuiFlexItem>
     </EuiFlexGroup>
   ) : (
-    <TopNavMenuItems {...props} />
+    <TopNavMenuBeta {...props} />
   );
 
   return (

@@ -23,7 +23,7 @@ export interface TopNavMenuItemsProps {
 const hasNoItems = (config: TopNavMenuConfigBeta) =>
   !config.items?.length && !config?.primaryActionItem && !config?.secondaryActionItem;
 
-export const TopNavMenuItems = ({ config, visible = true }: TopNavMenuItemsProps) => {
+export const TopNavMenuBeta = ({ config, visible = true }: TopNavMenuItemsProps) => {
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
   const isBetweenMandXlBreakpoint = useIsWithinBreakpoints(['m', 'l']);
   const isAtXlBreakpoint = useIsWithinBreakpoints(['xl']);
