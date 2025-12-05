@@ -292,6 +292,7 @@ const getEuiProps = (
         href,
         external: isExternal,
         'aria-label': navNode.title,
+        // @ts-expect-error upgrade typescript v5.9.3
         onClick: (e) => {
           if (href) {
             eventTracker.clickNavLink({

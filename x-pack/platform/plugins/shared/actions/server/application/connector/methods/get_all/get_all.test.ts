@@ -72,6 +72,7 @@ describe('getAll()', () => {
     jest.resetAllMocks();
     actionsClient = new ActionsClient({
       logger,
+      // @ts-expect-error upgrade typescript v5.9.3
       actionTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
@@ -128,6 +129,7 @@ describe('getAll()', () => {
 
         actionsClient = new ActionsClient({
           logger,
+          // @ts-expect-error upgrade typescript v5.9.3
           actionTypeRegistry,
           unsecuredSavedObjectsClient,
           scopedClusterClient,
@@ -272,6 +274,7 @@ describe('getAll()', () => {
 
       actionsClient = new ActionsClient({
         logger,
+        // @ts-expect-error upgrade typescript v5.9.3
         actionTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
@@ -374,6 +377,7 @@ describe('getAll()', () => {
 
       actionsClient = new ActionsClient({
         logger,
+        // @ts-expect-error upgrade typescript v5.9.3
         actionTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
@@ -478,6 +482,7 @@ describe('getAll()', () => {
 
       actionsClient = new ActionsClient({
         logger,
+        // @ts-expect-error upgrade typescript v5.9.3
         actionTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
@@ -569,6 +574,7 @@ describe('getAll()', () => {
 
       actionsClient = new ActionsClient({
         logger,
+        // @ts-expect-error upgrade typescript v5.9.3
         actionTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
@@ -611,6 +617,7 @@ describe('getAll()', () => {
 
       actionsClient = new ActionsClient({
         logger,
+        // @ts-expect-error upgrade typescript v5.9.3
         actionTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
@@ -680,6 +687,7 @@ describe('getAll()', () => {
 
         actionsClient = new ActionsClient({
           logger,
+          // @ts-expect-error upgrade typescript v5.9.3
           actionTypeRegistry,
           unsecuredSavedObjectsClient,
           scopedClusterClient,
@@ -756,6 +764,7 @@ describe('getAll()', () => {
 
       actionsClient = new ActionsClient({
         logger,
+        // @ts-expect-error upgrade typescript v5.9.3
         actionTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
