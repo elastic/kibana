@@ -11,6 +11,7 @@ import { BasicPrettyPrinter } from '../../../pretty_print';
 import * as commands from '..';
 import { EsqlQuery } from '../../../query';
 import type { ESQLAstItem, ESQLCommandOption, ESQLMap } from '../../../types';
+import { isStringLiteral } from '../../../ast/is';
 
 describe('commands.rerank', () => {
   describe('.list()', () => {
@@ -142,7 +143,7 @@ describe('.setTargetField()', () => {
 
       const map = cmd.args.find(isWithOption)!.args[0] as ESQLMap;
       const scoreColumnEntry = map?.entries?.find(
-        (entry) => entry.key.valueUnquoted === 'scoreColumn'
+        (entry) => isStringLiteral(entry.key) && entry.key.valueUnquoted === 'scoreColumn'
       );
 
       expect(BasicPrettyPrinter.expression(scoreColumnEntry!.value)).toBe('"rank_score"');

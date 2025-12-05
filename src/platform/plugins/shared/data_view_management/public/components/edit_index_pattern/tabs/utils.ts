@@ -8,10 +8,10 @@
  */
 
 import type { Dictionary } from 'lodash';
-import { countBy, defaults, uniq } from 'lodash';
+import { countBy, defaults } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import type { FilterChecked } from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   TAB_INDEXED_FIELDS,
   TAB_SCRIPTED_FIELDS,
@@ -131,15 +131,42 @@ export function getPath(field: DataViewField, indexPattern: DataView) {
   return `/dataView/${indexPattern?.id}/field/${encodeURIComponent(field.name)}`;
 }
 
-export function convertToEuiFilterOptions(options: string[]) {
-  return uniq(options).map<{
-    value: string;
-    name: string;
-    checked?: FilterChecked;
-  }>((option) => {
-    return {
-      value: option,
-      name: option,
-    };
+export type OptionWithValue = EuiSelectableOption<{ value: string }>;
+
+export function convertToEuiSelectableOptionsFromArray(options: string[]): OptionWithValue[] {
+  return options.map((option) => ({
+    value: option,
+    label: option,
+    'data-test-subj': `selectable-option-${option}`,
+  }));
+}
+
+export function convertToEuiSelectableOptions(
+  options: OptionWithValue[],
+  selectedOptions: string[]
+): OptionWithValue[] {
+  return options.map((option) => ({
+    value: option.value,
+    label: option.label,
+    checked: selectedOptions.some((value) => value === option.value) ? 'on' : undefined,
+    'data-test-subj': `selectable-option-${option.value}`,
+  }));
+}
+
+export function getNewSelectedValues<T extends { value: string; checked?: string | undefined }>(
+  options: Array<T>,
+  selectedOptions?: string[]
+): [string[], number] {
+  const newSelectedOptions = options
+    .filter((option) => option.checked === 'on')
+    .map((option) => option.value);
+
+  if (!selectedOptions) return [newSelectedOptions, -1];
+
+  const newSelectedIndex = options.findIndex((option) => {
+    if (option.checked !== 'off') return false;
+    return selectedOptions.includes(option.value);
   });
+
+  return [newSelectedOptions, newSelectedIndex];
 }

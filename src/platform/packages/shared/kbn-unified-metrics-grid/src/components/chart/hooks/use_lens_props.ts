@@ -9,11 +9,12 @@
 
 import type { LensAttributes, LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import { LensConfigBuilder, type LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
-import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
+import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
 import useLatest from 'react-use/lib/useLatest';
 import { useStableCallback } from '@kbn/unified-histogram';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import {
   filter,
   Observable,
@@ -38,18 +39,19 @@ export type LensProps = Pick<
   | 'viewMode'
   | 'timeRange'
   | 'attributes'
+  | 'esqlVariables'
   | 'noPadding'
   | 'searchSessionId'
   | 'executionContext'
   | 'onLoad'
+  | 'lastReloadRequestTime'
 >;
 
 export const useLensProps = ({
   title,
   query,
   services,
-  getTimeRange,
-  searchSessionId,
+  fetchParams,
   discoverFetch$,
   chartRef,
   chartLayers,
@@ -57,12 +59,11 @@ export const useLensProps = ({
 }: {
   title: string;
   query: string;
-  discoverFetch$: Observable<UnifiedHistogramInputMessage>;
-  getTimeRange: () => TimeRange;
+  discoverFetch$: ChartSectionProps['fetch$'];
   chartRef?: React.RefObject<HTMLDivElement>;
   chartLayers: LensSeriesLayer[];
   yBounds?: LensYBoundsConfig;
-} & Pick<ChartSectionProps, 'services' | 'searchSessionId'>) => {
+} & Pick<ChartSectionProps, 'services' | 'fetchParams'>) => {
   const { euiTheme } = useEuiTheme();
   const chartConfigUpdates$ = useRef<BehaviorSubject<void>>(new BehaviorSubject<void>(undefined));
 
@@ -86,12 +87,19 @@ export const useLensProps = ({
   const buildLensProps = useCallback(
     (attributes: LensAttributes) => {
       return getLensProps({
-        searchSessionId,
-        getTimeRange,
+        searchSessionId: fetchParams.searchSessionId,
+        timeRange: fetchParams.relativeTimeRange, // same as in the time picker
+        esqlVariables: fetchParams.esqlVariables,
         attributes,
+        lastReloadRequestTime: fetchParams.lastReloadRequestTime,
       });
     },
-    [searchSessionId, getTimeRange]
+    [
+      fetchParams.searchSessionId,
+      fetchParams.relativeTimeRange,
+      fetchParams.lastReloadRequestTime,
+      fetchParams.esqlVariables,
+    ]
   );
 
   const [lensPropsContext, setLensPropsContext] = useState<ReturnType<typeof buildLensProps>>();
@@ -183,20 +191,26 @@ const buildLensParams = ({
 
 const getLensProps = ({
   searchSessionId,
-  getTimeRange,
+  timeRange,
   attributes,
+  lastReloadRequestTime,
+  esqlVariables,
 }: {
   searchSessionId?: string;
   attributes: LensAttributes;
-  getTimeRange: () => TimeRange;
+  esqlVariables: ESQLControlVariable[] | undefined;
+  timeRange: TimeRange;
+  lastReloadRequestTime?: number;
 }): LensProps => ({
   id: 'metricsExperienceLensComponent',
   viewMode: 'view',
-  timeRange: getTimeRange(),
+  timeRange,
   attributes,
   noPadding: true,
+  esqlVariables,
   searchSessionId,
   executionContext: {
     description: 'metrics experience chart data',
   },
+  lastReloadRequestTime,
 });

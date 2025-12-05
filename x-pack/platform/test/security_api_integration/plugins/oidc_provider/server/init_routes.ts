@@ -65,16 +65,22 @@ export function initRoutes(router: IRouter) {
 
   router.post(
     {
-      path: '/api/oidc_provider/token_endpoint',
-      security: { authz: { enabled: false, reason: '' } },
-      validate: { body: (value) => ({ value }) },
+      path: '/api/oidc_provider/token_endpoint/{issuer?}',
+      security: { authc: { enabled: false, reason: '' }, authz: { enabled: false, reason: '' } },
+      validate: {
+        body: (value) => ({ value }),
+        params: schema.object({
+          issuer: schema.string({ defaultValue: 'https://test-op.elastic.co' }),
+        }),
+      },
       // Token endpoint needs authentication (with the client credentials) but we don't attempt to
       // validate this OIDC behavior here
-      options: { authRequired: false, xsrfRequired: false },
+      options: { xsrfRequired: false },
     },
     (context, request, response) => {
       const userId = request.body.code.substring(4);
-      const { accessToken, idToken } = createTokens(userId, nonce);
+
+      const { accessToken, idToken } = createTokens(userId, nonce, request.params.issuer);
       return response.ok({
         body: {
           access_token: accessToken,

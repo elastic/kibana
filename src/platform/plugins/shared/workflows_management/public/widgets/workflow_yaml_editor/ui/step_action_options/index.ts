@@ -9,3 +9,4 @@
 
 export { CopyElasticSearchDevToolsOption } from './copy_elastic_search_devtools_option';
 export { CopyWorkflowStepOption } from './copy_workflow_step_option';
+export { CopyWorkflowStepJsonOption } from './copy_workflow_step_json_option';

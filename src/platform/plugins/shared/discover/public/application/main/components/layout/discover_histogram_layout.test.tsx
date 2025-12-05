@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, ReplaySubject } from 'rxjs';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { esHitsMock } from '@kbn/discover-utils/src/__mocks__';
@@ -17,6 +17,7 @@ import type {
   DataDocuments$,
   DataMain$,
   DataTotalHits$,
+  DiscoverLatestFetchDetails,
 } from '../../state_management/discover_data_state_container';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import type { SidebarToggleState } from '../../../types';
@@ -59,8 +60,9 @@ function getStateContainer({
     query: { query: '', language: 'kuery' },
   };
 
-  stateContainer.appState.update(appState);
-
+  stateContainer.internalState.dispatch(
+    stateContainer.injectCurrentTab(internalStateActions.updateAppState)({ appState })
+  );
   stateContainer.internalState.dispatch(
     stateContainer.injectCurrentTab(internalStateActions.setDataView)({ dataView })
   );
@@ -132,6 +134,10 @@ const mountComponent = async ({
     searchSessionId: noSearchSessionId ? undefined : mockSearchSessionId,
   });
   stateContainer.dataState.data$ = savedSearchData$;
+
+  const fetchChart$ = new ReplaySubject<DiscoverLatestFetchDetails>(1);
+  fetchChart$.next({});
+  stateContainer.dataState.fetchChart$ = fetchChart$;
 
   const props: DiscoverMainContentProps = {
     dataView,

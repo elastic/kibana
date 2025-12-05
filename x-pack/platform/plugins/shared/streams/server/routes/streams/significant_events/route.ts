@@ -12,7 +12,7 @@ import {
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { conditionSchema } from '@kbn/streamlang';
-import { from as fromRxjs, map, mergeMap } from 'rxjs';
+import { from as fromRxjs, map } from 'rxjs';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { generateSignificantEventDefinitions } from '../../../lib/significant_events/generate_significant_events';
 import { previewSignificantEvents } from '../../../lib/significant_events/preview_significant_events';
@@ -201,15 +201,15 @@ const generateSignificantEventsRoute = createServerRoute({
         {
           inferenceClient,
           esClient: scopedClusterClient.asCurrentUser,
-          logger,
+          logger: logger.get('significant_events'),
           signal: getRequestAbortSignal(request),
         }
       )
     ).pipe(
-      mergeMap((queries) => fromRxjs(queries)),
-      map((query) => ({
-        query,
-        type: 'generated_query' as const,
+      map(({ queries, tokensUsed }) => ({
+        type: 'generated_queries' as const,
+        queries,
+        tokensUsed,
       }))
     );
   },

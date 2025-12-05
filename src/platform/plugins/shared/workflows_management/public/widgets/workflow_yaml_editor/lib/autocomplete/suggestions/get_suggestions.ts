@@ -48,13 +48,24 @@ export function getSuggestions(
     return getConnectorIdSuggestions(autocompleteContext);
   }
 
-  // Handle completions inside {{ }} or after @ triggers
+  // Handle completions inside {{ }} or foreach variables
   if (
     lineParseResult?.matchType === 'variable-unfinished' ||
     lineParseResult?.matchType === 'variable-complete' ||
-    lineParseResult?.matchType === 'at' ||
     lineParseResult?.matchType === 'foreach-variable'
   ) {
+    return getVariableSuggestions(autocompleteContext);
+  }
+
+  // @ triggers should only work in value nodes (after colon)
+  // This prevents @ completions from appearing in keys, comments, or root-level positions
+  if (lineParseResult?.matchType === 'at') {
+    // Check if we're in a value node using focusedYamlPair
+    // focusedYamlPair is only set when cursor is in a Pair.value node
+    if (!autocompleteContext.focusedYamlPair) {
+      // Not in a value node, skip @ completions
+      return [];
+    }
     return getVariableSuggestions(autocompleteContext);
   }
 

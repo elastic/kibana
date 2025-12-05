@@ -36,12 +36,12 @@ describe('transformDashboardIn', () => {
       description: 'description',
       query: { query: 'test', language: 'KQL' },
       options: {
-        hidePanelTitles: true,
-        useMargins: false,
-        syncColors: false,
-        syncTooltips: false,
-        syncCursor: false,
-        autoApplyFilters: true,
+        hide_panel_titles: true,
+        use_margins: false,
+        sync_colors: false,
+        sync_tooltips: false,
+        sync_cursor: false,
+        auto_apply_filters: true,
       },
       panels: [
         {
@@ -58,8 +58,8 @@ describe('transformDashboardIn', () => {
       ],
       tags: [],
       title: 'title',
-      refreshInterval: { pause: true, value: 1000 },
-      timeRange: {
+      refresh_interval: { pause: true, value: 1000 },
+      time_range: {
         from: 'now-15m',
         to: 'now',
       },
@@ -159,5 +159,26 @@ describe('transformDashboardIn', () => {
         "references": null,
       }
     `);
+  });
+
+  it('should transform project_routing to attributes', () => {
+    const dashboardState: DashboardState = {
+      title: 'title',
+      project_routing: '_alias:_origin',
+    };
+
+    const output = transformDashboardIn(dashboardState);
+    expect(output.error).toBeNull();
+    expect(output.attributes?.projectRouting).toBe('_alias:_origin');
+  });
+
+  it('should not include projectRouting in attributes when it is undefined', () => {
+    const dashboardState: DashboardState = {
+      title: 'title',
+    };
+
+    const output = transformDashboardIn(dashboardState);
+    expect(output.error).toBeNull();
+    expect(output.attributes).not.toHaveProperty('projectRouting');
   });
 });

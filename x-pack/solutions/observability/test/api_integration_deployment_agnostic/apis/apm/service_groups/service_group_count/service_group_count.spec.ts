@@ -5,7 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import { AggregationType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
@@ -37,7 +37,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
   };
 
-  describe('Service group counts', () => {
+  describe('Service group counts', function () {
+    // flaky when running in stateful cloud, see https://github.com/elastic/kibana/issues/244457
+    this.tags(['skipCloud']);
+
     let synthbeansServiceGroupId: string;
     let opbeansServiceGroupId: string;
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;

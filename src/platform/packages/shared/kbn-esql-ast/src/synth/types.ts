@@ -10,6 +10,7 @@
 import type { ParseOptions } from '../parser';
 import type { ESQLAstExpression, ESQLProperNode } from '../types';
 import type { SynthLiteralFragment } from './synth_literal_fragment';
+import type { SynthNode } from './synth_node';
 
 export type SynthGenerator<N extends ESQLProperNode> = (src: string, opts?: ParseOptions) => N;
 
@@ -65,7 +66,7 @@ export type SynthColumnShorthand = string[];
 export type SynthTaggedTemplate<N extends ESQLProperNode> = (
   template: TemplateStringsArray,
   ...params: SynthTemplateHole[]
-) => N;
+) => N & SynthNode;
 
 export type SynthTaggedTemplateWithOpts<N extends ESQLProperNode> = (
   opts?: ParseOptions

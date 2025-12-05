@@ -15,7 +15,7 @@ import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import { updateSavedSearch } from './utils/update_saved_search';
 import { addLog } from '../../../utils/add_log';
-import type { DiscoverAppState } from './discover_app_state_container';
+import type { DiscoverAppState } from './redux';
 import type { DiscoverServices } from '../../../build_services';
 import type { InternalStateStore, TabState } from './redux';
 

@@ -7,21 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { RefreshInterval, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { Filter, TimeRange } from '@kbn/es-query';
-import type { ESQLControlVariable } from '@kbn/esql-types';
-import type { UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
-import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-metrics-grid';
-import type { UnifiedFieldListRestorableState } from '@kbn/unified-field-list';
-import type { UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
-import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
+import type { ESQLControlVariable } from '@kbn/esql-types';
+import type {
+  DiscoverGridSettings,
+  DiscoverSession,
+  VIEW_MODE,
+} from '@kbn/saved-search-plugin/common';
+import type { DataGridDensity, UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
+import type { UnifiedFieldListRestorableState } from '@kbn/unified-field-list';
+import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
+import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-metrics-grid';
+import type { UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
-import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
-import type { ControlPanelsState } from '@kbn/control-group-renderer';
-import type { DiscoverAppState } from '../discover_app_state_container';
+import type { DiscoverDataSource } from '../../../../../common/data_sources';
 import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
 
 export interface InternalStateDataRequestParams {
@@ -29,13 +33,83 @@ export interface InternalStateDataRequestParams {
   timeRangeRelative: TimeRange | undefined;
   searchSessionId: string | undefined;
   isSearchSessionRestored: boolean;
-  lastReloadRequestTime?: number;
 }
 
 export interface TabStateGlobalState {
   timeRange?: TimeRange;
   refreshInterval?: RefreshInterval;
   filters?: Filter[];
+}
+
+export interface DiscoverAppState {
+  /**
+   * Columns displayed in the table
+   */
+  columns?: string[];
+  /**
+   * Array of applied filters
+   */
+  filters?: Filter[];
+  /**
+   * Data Grid related state
+   */
+  grid?: DiscoverGridSettings;
+  /**
+   * Hide chart
+   */
+  hideChart?: boolean;
+  /**
+   * The current data source
+   */
+  dataSource?: DiscoverDataSource;
+  /**
+   * Used interval of the histogram
+   */
+  interval?: string;
+  /**
+   * Lucence or KQL query
+   */
+  query?: Query | AggregateQuery;
+  /**
+   * Array of the used sorting [[field,direction],...]
+   */
+  sort?: string[][];
+  /**
+   * id of the used saved query
+   */
+  savedQuery?: string;
+  /**
+   * Table view: Documents vs Field Statistics
+   */
+  viewMode?: VIEW_MODE;
+  /**
+   * Hide mini distribution/preview charts when in Field Statistics mode
+   */
+  hideAggregatedPreview?: boolean;
+  /**
+   * Document explorer row height option
+   */
+  rowHeight?: number;
+  /**
+   * Document explorer header row height option
+   */
+  headerRowHeight?: number;
+  /**
+   * Number of rows in the grid per page
+   */
+  rowsPerPage?: number;
+  /**
+   * Custom sample size
+   */
+  sampleSize?: number;
+  /**
+   * Breakdown field of chart
+   */
+  breakdownField?: string;
+  /**
+   * Density of table
+   */
+  density?: DataGridDensity;
 }
 
 export interface TabState extends TabItem {

@@ -37,7 +37,7 @@ export const createExternalService = (
     inputs,
   }: RunWorkflowParams): Promise<WorkflowExecutionResponse> => {
     try {
-      logger.info(`Attempting to run workflow ${workflowId} via internal service`);
+      logger.debug(`Attempting to run workflow ${workflowId} via internal service`);
 
       if (!runWorkflowService) {
         throw new Error(
@@ -52,7 +52,7 @@ export const createExternalService = (
         throw new Error('Invalid response: missing workflowRunId');
       }
 
-      logger.info(`Successfully started workflow ${workflowId}, run ID: ${workflowRunId}`);
+      logger.debug(`Successfully started workflow ${workflowId}, run ID: ${workflowRunId}`);
 
       return {
         workflowRunId,

@@ -6942,7 +6942,7 @@
             "section": "def-common.IngestPipelineParams",
             "text": "IngestPipelineParams"
           },
-          " | null | undefined; configuration: ",
+          " | null | undefined; deleted: boolean | null; index_name: string | null; configuration: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -6950,7 +6950,7 @@
             "section": "def-common.ConnectorConfiguration",
             "text": "ConnectorConfiguration"
           },
-          "; deleted: boolean | null; index_name: string | null; api_key_id: string | null; api_key_secret_id: string | null; custom_scheduling: ",
+          "; api_key_id: string | null; api_key_secret_id: string | null; custom_scheduling: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",

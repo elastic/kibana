@@ -1113,7 +1113,7 @@ export const semconvFlat = {
   'container.image.tags': {
     name: 'container.image.tags',
     description:
-      'Container image tags. An example can be found in [Docker Image Inspect](https://docs.docker.com/reference/api/engine/version/v1.43/#tag/Image/operation/ImageInspect). Should be only the `<tag>` section of the full name for example from `registry.example.com/my-org/my-image:<tag>`.',
+      'Container image tags. An example can be found in [Docker Image Inspect](https://docs.docker.com/reference/api/engine/version/v1.52/#tag/Image/operation/ImageInspect). Should be only the `<tag>` section of the full name for example from `registry.example.com/my-org/my-image:<tag>`.',
     type: 'keyword',
     example: 'v1.27.1,3.5.7-0',
   },
@@ -3581,7 +3581,7 @@ export const semconvFlat = {
   'metrics.dotnet.gc.heap.total_allocated': {
     name: 'metrics.dotnet.gc.heap.total_allocated',
     description:
-      'The *approximate* number of bytes allocated on the managed GC heap since the process has started. The returned value does not include any native allocations.',
+      'The _approximate_ number of bytes allocated on the managed GC heap since the process has started. The returned value does not include any native allocations.',
     type: 'double',
   },
   'metrics.dotnet.gc.last_collection.heap.fragmentation.size': {
