@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsBulkResponse } from '@kbn/core-saved-objects-api-server';
-import type { UpdateRuleSoParams } from '../../../../../data/rule/methods/bulk_update_rule_so';
+import type { BulkUpdateRuleSoParams } from '../../../../../data/rule/methods/bulk_update_rule_so';
 import type { RawRule } from '../../../../../saved_objects/schemas/raw_rule';
 import type { BulkMuteUnmuteAlertsParams } from '../../../types';
 
@@ -36,7 +36,7 @@ export const transformUnmuteRequestToRuleAttributes = ({
         };
       })
       // Removing undefined (in case all instanceIds are already muted)
-      .filter(Boolean) as UpdateRuleSoParams['rules']
+      .filter(Boolean) as BulkUpdateRuleSoParams['rules']
   );
 };
 

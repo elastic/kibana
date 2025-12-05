@@ -13,14 +13,14 @@ import type {
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { RawRule } from '../../../types';
 
-export interface UpdateRuleSoParams {
+export interface BulkUpdateRuleSoParams {
   savedObjectsClient: SavedObjectsClientContract;
   rules: Array<{ id: string; attributes: Partial<RawRule> }>;
   options?: SavedObjectsBulkUpdateOptions;
 }
 
 export const bulkUpdateRuleSo = (
-  params: UpdateRuleSoParams
+  params: BulkUpdateRuleSoParams
 ): Promise<SavedObjectsBulkUpdateResponse<RawRule>> => {
   const rulesToUpdate = params.rules.map((rule) => ({
     type: RULE_SAVED_OBJECT_TYPE,

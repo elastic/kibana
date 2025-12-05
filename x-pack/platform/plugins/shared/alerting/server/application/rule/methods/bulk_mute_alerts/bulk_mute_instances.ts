@@ -8,11 +8,10 @@
 import Boom from '@hapi/boom';
 import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import type { SavedObjectsBulkUpdateResponse } from '@kbn/core-saved-objects-api-server';
-import { bulkGetRulesSo } from '../../../../data/rule';
+import { bulkGetRulesSo, bulkUpdateRuleSo } from '../../../../data/rule';
 import type { BulkEditOperationResult } from '../../../../rules_client/common/bulk_edit';
 import { retryIfBulkEditConflicts } from '../../../../rules_client/common';
 import { transformParamsRulesToAlertInstances } from '../../transforms/transform_bulk_mute_unmute_rules_to_alert_instances';
-import { bulkUpdateRuleSo } from '../../../../data/rule/methods/bulk_update_rule_so';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { bulkMuteUnmuteAlertsParamsSchema } from '../../schemas/bulk_mute_unmute_schema';
 import type { BulkMuteUnmuteAlertsParams } from '../../types';

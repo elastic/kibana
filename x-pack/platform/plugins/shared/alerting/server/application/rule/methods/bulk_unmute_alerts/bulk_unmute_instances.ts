@@ -23,9 +23,8 @@ import {
 } from '../../../../authorization';
 import { RuleAuditAction, ruleAuditEvent } from '../../../../rules_client/common/audit_events';
 import type { RulesClientContext } from '../../../../rules_client/types';
-import { bulkGetRulesSo } from '../../../../data/rule';
+import { bulkGetRulesSo, bulkUpdateRuleSo } from '../../../../data/rule';
 import type { BulkEditOperationResult } from '../../../../rules_client/common/bulk_edit';
-import { bulkUpdateRuleSo } from '../../../../data/rule/methods/bulk_update_rule_so';
 import { transformParamsRulesToAlertInstances } from '../../transforms/transform_bulk_mute_unmute_rules_to_alert_instances';
 
 export async function bulkUnmuteInstances(
