@@ -8,9 +8,13 @@
 import Boom from '@hapi/boom';
 import type { BulkMuteUnmuteAlertsRequestBodyV1 } from '../../../../../common/routes/rule/apis/bulk_mute_unmute';
 
+export const MAX_MUTE_INSTANCES = 100;
+
 export const validateMaxMuteUnmuteInstances = (body: BulkMuteUnmuteAlertsRequestBodyV1) => {
-  if (getTotalAlertInstances(body) > 100) {
-    throw Boom.badRequest('The total number of alert instances to mute cannot exceed 100.');
+  if (getTotalAlertInstances(body) > MAX_MUTE_INSTANCES) {
+    throw Boom.badRequest(
+      `The total number of alert instances to mute cannot exceed ${MAX_MUTE_INSTANCES}.`
+    );
   }
 };
 
