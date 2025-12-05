@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
+import React, { useState, useMemo, useCallback, useEffect, useReducer } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -26,8 +25,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
 import { css } from '@emotion/react';
-import { SelectTemplateStep, NameAndConfirmStep, type ValidationErrorType } from './steps';
-import { validateStreamName, type StreamNameValidator } from '../../utils';
+import { SelectTemplateStep, NameAndConfirmStep } from './steps';
+import { type StreamNameValidator } from '../../utils';
+import { useStreamValidation } from './hooks/use_stream_validation';
+import { formReducer, initialFormState } from './reducers/form_reducer';
 
 const VALIDATION_DEBOUNCE_MS = 300;
 
@@ -85,89 +86,54 @@ export const CreateClassicStreamFlyout = ({
   const [currentStep, setCurrentStep] = useState<ClassicStreamStep>(
     ClassicStreamStep.SELECT_TEMPLATE
   );
-  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
-  const [streamName, setStreamName] = useState<string>('');
-  const [selectedIndexPattern, setSelectedIndexPattern] = useState<string>('');
-  const [validationError, setValidationError] = useState<ValidationErrorType>(null);
-  const [conflictingIndexPattern, setConflictingIndexPattern] = useState<string | undefined>();
-  const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
-  const [isValidating, setIsValidating] = useState(false);
 
-  const selectedTemplateData = templates.find((t) => t.name === selectedTemplate);
+  const [formState, dispatchForm] = useReducer(formReducer, initialFormState);
+  const { selectedTemplate, selectedIndexPattern, streamName } = formState;
 
-  // Run validation and update state, returns true if validation passes
-  const runValidation = useCallback(
-    async (name: string): Promise<boolean> => {
-      setIsValidating(true);
-      try {
-        const result = await validateStreamName(name, onValidate);
-        setValidationError(result.errorType);
-        setConflictingIndexPattern(result.conflictingIndexPattern);
-        return result.errorType === null;
-      } finally {
-        setIsValidating(false);
-      }
+  const {
+    validationError,
+    conflictingIndexPattern,
+    isValidating,
+    isSubmitting,
+    handleStreamNameChange: handleValidationStreamNameChange,
+    handleCreate,
+    resetOnTemplateChange,
+    resetOnIndexPatternChange,
+  } = useStreamValidation({
+    streamName,
+    onCreate,
+    onValidate,
+    debounceMs: VALIDATION_DEBOUNCE_MS,
+  });
+
+  const selectedTemplateData = templates.find((t) => t.name === formState.selectedTemplate);
+
+  const handleStreamNameChange = useCallback(
+    (newStreamName: string) => {
+      dispatchForm({ type: 'SET_STREAM_NAME', payload: newStreamName });
+      handleValidationStreamNameChange(newStreamName);
     },
-    [onValidate]
+    [dispatchForm, handleValidationStreamNameChange]
   );
 
-  // Debounced validation - only runs after first submit attempt with an error
-  // When validation passes, reset to "submit only" mode
-  useDebounce(
-    () => {
-      if (hasAttemptedSubmit && validationError !== null) {
-        runValidation(streamName).then((isValid) => {
-          if (isValid) {
-            // Validation passed, reset to "submit only" mode
-            setHasAttemptedSubmit(false);
-          }
-        });
-      }
-    },
-    VALIDATION_DEBOUNCE_MS,
-    [streamName, hasAttemptedSubmit, validationError, runValidation]
-  );
-
-  // Reset stream name and validation when changing templates
+  // Reset form and validation when template changes
   useEffect(() => {
-    setStreamName('');
-    setSelectedIndexPattern('');
-    setValidationError(null);
-    setConflictingIndexPattern(undefined);
-    setHasAttemptedSubmit(false);
-  }, [selectedTemplate]);
+    dispatchForm({ type: 'RESET_ON_TEMPLATE_CHANGE' });
+    resetOnTemplateChange();
+  }, [dispatchForm, resetOnTemplateChange, selectedTemplate]);
 
-  // Reset validation when changing index patterns within a template
+  // Reset validation when index pattern changes
   useEffect(() => {
-    setValidationError(null);
-    setConflictingIndexPattern(undefined);
-    setHasAttemptedSubmit(false);
-  }, [selectedIndexPattern]);
+    resetOnIndexPatternChange();
+  }, [resetOnIndexPatternChange, selectedIndexPattern]);
 
   const isFirstStep = currentStep === ClassicStreamStep.SELECT_TEMPLATE;
   const hasNextStep = isFirstStep;
   const hasPreviousStep = !isFirstStep;
-  const isNextButtonEnabled = selectedTemplate !== null;
+  const isNextButtonEnabled = formState.selectedTemplate !== null;
 
   const goToNextStep = () => setCurrentStep(ClassicStreamStep.NAME_AND_CONFIRM);
   const goToPreviousStep = () => setCurrentStep(ClassicStreamStep.SELECT_TEMPLATE);
-
-  const handleCreate = useCallback(async () => {
-    setHasAttemptedSubmit(true);
-    setIsValidating(true);
-
-    try {
-      const result = await validateStreamName(streamName, onValidate);
-      setValidationError(result.errorType);
-      setConflictingIndexPattern(result.conflictingIndexPattern);
-
-      if (result.errorType === null) {
-        onCreate(streamName);
-      }
-    } finally {
-      setIsValidating(false);
-    }
-  }, [streamName, onValidate, onCreate]);
 
   const steps: EuiStepsHorizontalProps['steps'] = useMemo(
     () => [
@@ -199,7 +165,9 @@ export const CreateClassicStreamFlyout = ({
           <SelectTemplateStep
             templates={templates}
             selectedTemplate={selectedTemplate}
-            onTemplateSelect={setSelectedTemplate}
+            onTemplateSelect={(template) =>
+              dispatchForm({ type: 'SET_SELECTED_TEMPLATE', payload: template })
+            }
             onCreateTemplate={onCreateTemplate}
             hasErrorLoadingTemplates={hasErrorLoadingTemplates}
             onRetryLoadTemplates={onRetryLoadTemplates}
@@ -214,8 +182,10 @@ export const CreateClassicStreamFlyout = ({
           <NameAndConfirmStep
             template={selectedTemplateData}
             selectedIndexPattern={selectedIndexPattern}
-            onIndexPatternChange={setSelectedIndexPattern}
-            onStreamNameChange={setStreamName}
+            onIndexPatternChange={(pattern) =>
+              dispatchForm({ type: 'SET_SELECTED_INDEX_PATTERN', payload: pattern })
+            }
+            onStreamNameChange={handleStreamNameChange}
             validationError={validationError}
             conflictingIndexPattern={conflictingIndexPattern}
           />
@@ -288,7 +258,7 @@ export const CreateClassicStreamFlyout = ({
               <EuiButton
                 onClick={handleCreate}
                 fill
-                isLoading={isValidating}
+                isLoading={isValidating || isSubmitting}
                 data-test-subj="createButton"
               >
                 <FormattedMessage

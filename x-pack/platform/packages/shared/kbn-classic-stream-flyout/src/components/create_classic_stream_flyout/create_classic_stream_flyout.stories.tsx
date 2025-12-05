@@ -247,16 +247,42 @@ const HIGHER_PRIORITY_PATTERNS = [
  */
 const createMockValidator = (
   existingNames: string[],
-  higherPriorityPatterns: string[]
+  higherPriorityPatterns: string[],
+  delayMs: number = 500
 ): StreamNameValidator => {
   const onValidateAction = action('onValidate');
 
-  return async (streamName: string) => {
+  return async (streamName: string, signal?: AbortSignal) => {
     // Log the validation call to Storybook actions panel
     onValidateAction(streamName);
+    action('onValidate:start')({ streamName, timestamp: Date.now() });
 
-    // Simulate network delay
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    // Simulate network delay (configurable for testing race conditions)
+    // For race condition testing: make "foo-logs-bar-baz" take longer than "foo-logs-test-test"
+    let delay = delayMs;
+    if (streamName === 'foo-logs-bar-baz') {
+      delay = 5000; // 5 seconds - slow request
+    }
+
+    // Check if aborted before starting delay
+    if (signal?.aborted) {
+      action('onValidate:aborted')({ streamName, reason: 'aborted before delay' });
+      throw new Error('Validation aborted');
+    }
+
+    // Wait with periodic abort checks
+    const startTime = Date.now();
+    while (Date.now() - startTime < delay) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      if (signal?.aborted) {
+        action('onValidate:aborted')({
+          streamName,
+          reason: 'aborted during delay',
+          elapsed: Date.now() - startTime,
+        });
+        throw new Error('Validation aborted');
+      }
+    }
 
     // Check for duplicate
     if (existingNames.includes(streamName)) {
@@ -299,6 +325,8 @@ export const Default: Story = {
  * - Empty fields: Leave any wildcard empty and click Create
  * - Duplicate: Select "multi-pattern-template", enter "foo", "bar", "baz" to trigger duplicate validation
  * - Higher priority: Enter "foo", "bar", then anything (e.g., "test") to trigger higher priority conflict
+ *
+ * Uses 500ms delay (normal network conditions).
  */
 export const WithValidation: Story = {
   render: () => (
@@ -308,7 +336,30 @@ export const WithValidation: Story = {
       onCreateTemplate={action('onCreateTemplate')}
       onRetryLoadTemplates={action('onRetryLoadTemplates')}
       templates={MOCK_TEMPLATES}
-      onValidate={createMockValidator(EXISTING_STREAM_NAMES, HIGHER_PRIORITY_PATTERNS)}
+      onValidate={createMockValidator(EXISTING_STREAM_NAMES, HIGHER_PRIORITY_PATTERNS, 500)}
+    />
+  ),
+};
+
+/**
+ * Tests race condition scenarios with slow network (3000ms delay).
+ *
+ * To test race condition:
+ * 1. Select a template and go to name step
+ * 2. Type "test" in the input
+ * 3. Click Create button immediately
+ * 4. Quickly type "valid" (before validation completes)
+ * 5. Observe if validation state shows incorrect error for "test" after "valid" should be valid
+ */
+export const WithSlowValidation: Story = {
+  render: () => (
+    <CreateClassicStreamFlyout
+      onClose={action('onClose')}
+      onCreate={action('onCreate')}
+      onCreateTemplate={action('onCreateTemplate')}
+      onRetryLoadTemplates={action('onRetryLoadTemplates')}
+      templates={MOCK_TEMPLATES}
+      onValidate={createMockValidator(EXISTING_STREAM_NAMES, HIGHER_PRIORITY_PATTERNS, 5000)}
     />
   ),
 };
