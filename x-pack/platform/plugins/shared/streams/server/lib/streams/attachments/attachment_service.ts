@@ -32,9 +32,13 @@ export class AttachmentService {
 
     // Create an internal saved objects repository that can query across all spaces
     // This is needed to distinguish between "attachment deleted" vs "attachment in different space"
-    const internalSavedObjectsRepository = coreStart.savedObjects.createInternalRepository(
-      Object.values(attachmentTypeToSavedObjectTypeMap)
+    // Filter to only include saved object types that are registered (some may be disabled, e.g., 'slo' in Logs Essentials tier)
+    const typeRegistry = coreStart.savedObjects.getTypeRegistry();
+    const availableSoTypes = Object.values(attachmentTypeToSavedObjectTypeMap).filter(
+      (soType) => typeRegistry.getType(soType) !== undefined
     );
+    const internalSavedObjectsRepository =
+      coreStart.savedObjects.createInternalRepository(availableSoTypes);
     const internalSoClient = new SavedObjectsClient(internalSavedObjectsRepository);
 
     return new AttachmentClient({
