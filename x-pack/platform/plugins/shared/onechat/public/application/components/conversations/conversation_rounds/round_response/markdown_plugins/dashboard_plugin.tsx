@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiIcon,
+  EuiSpacer,
 } from '@elastic/eui';
 import type { ConversationRoundStep } from '@kbn/onechat-common';
 import {
@@ -127,6 +128,11 @@ export function createDashboardRenderer({
     const { title, content } = toolResult.data;
     const dashboardUrl = content?.url as string | undefined;
 
-    return <DashboardCard title={title || 'Dashboard'} url={dashboardUrl} />;
+    return (
+      <>
+        <DashboardCard title={title || 'Dashboard'} url={dashboardUrl} />
+        <EuiSpacer size="m" />
+      </>
+    );
   };
 }
