@@ -19,10 +19,12 @@ describe('allCasesUrlStateSerializer', () => {
       })
     ).toMatchInlineSnapshot(`
       Object {
+        "from": "now-30d",
         "page": 1,
         "perPage": 10,
         "sortField": "createdAt",
         "sortOrder": "desc",
+        "to": "now",
       }
     `);
   });
@@ -49,10 +51,12 @@ describe('allCasesUrlStateSerializer', () => {
             "bar",
           ],
         },
+        "from": "now-30d",
         "page": 1,
         "perPage": 10,
         "sortField": "createdAt",
         "sortOrder": "desc",
+        "to": "now",
       }
     `);
   });
@@ -70,10 +74,12 @@ describe('allCasesUrlStateSerializer', () => {
       })
     ).toMatchInlineSnapshot(`
       Object {
+        "from": "now-30d",
         "page": 1,
         "perPage": 10,
         "sortField": "createdAt",
         "sortOrder": "desc",
+        "to": "now",
       }
     `);
   });
@@ -86,10 +92,12 @@ describe('allCasesUrlStateSerializer', () => {
       })
     ).toMatchInlineSnapshot(`
       Object {
+        "from": "now-30d",
         "page": 1,
         "perPage": 10,
         "sortField": "createdAt",
         "sortOrder": "desc",
+        "to": "now",
       }
     `);
   });
@@ -109,10 +117,12 @@ describe('allCasesUrlStateSerializer', () => {
           "none",
           "elastic",
         ],
+        "from": "now-30d",
         "page": 1,
         "perPage": 10,
         "sortField": "createdAt",
         "sortOrder": "desc",
+        "to": "now",
       }
     `);
   });
