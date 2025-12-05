@@ -24,6 +24,26 @@ import { buildApmToolResources } from '../utils/build_apm_tool_resources';
 import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
 import type { APMConfig } from '../..';
 
+interface TraceItem {
+  timestamp: string;
+  serviceName?: string;
+  traceId?: string;
+  transactionId?: string;
+  spanId?: string;
+  transactionName?: string;
+  spanName?: string;
+  transactionType?: string;
+  spanType?: string;
+  spanSubtype?: string;
+  eventOutcome?: string;
+  statusCode?: number | string;
+  transactionDurationUs?: number;
+  spanDurationUs?: number;
+  httpUrl?: string;
+  parentId?: string;
+  downstreamServiceResource?: string;
+}
+
 export function registerDataProviders({
   core,
   plugins,
@@ -167,25 +187,7 @@ export function registerDataProviders({
         logger,
       });
 
-      const items: Array<{
-        timestamp: string;
-        serviceName?: string;
-        traceId?: string;
-        transactionId?: string;
-        spanId?: string;
-        transactionName?: string;
-        spanName?: string;
-        transactionType?: string;
-        spanType?: string;
-        spanSubtype?: string;
-        eventOutcome?: string;
-        statusCode?: number | string;
-        transactionDurationUs?: number;
-        spanDurationUs?: number;
-        httpUrl?: string;
-        parentId?: string;
-        downstreamServiceResource?: string;
-      }> = [];
+      const items: TraceItem[] = [];
 
       for (const doc of traceDocs as TraceDoc[]) {
         const timestamp = new Date(Math.floor(doc.timestamp.us / 1000)).toISOString();
