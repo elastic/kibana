@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import type { Agent as HttpAgent } from 'http';
-
-import type { Agent as HttpsAgent } from 'https';
-
 import fetch, { FetchError } from 'node-fetch';
 import type { RequestInit, Response } from 'node-fetch';
 import pRetry from 'p-retry';
@@ -20,6 +16,8 @@ import { RegistryError, RegistryConnectionError, RegistryResponseError } from '.
 import { airGappedUtils } from '../airgapped';
 
 import { getProxyAgent, getRegistryProxyUrl } from './proxy';
+import type { Agent as HttpAgent } from 'http';
+import type { Agent as HttpsAgent } from 'https';
 
 type FailedAttemptErrors = pRetry.FailedAttemptError | FetchError | Error;
 
