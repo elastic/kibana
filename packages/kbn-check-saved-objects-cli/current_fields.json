@@ -559,7 +559,6 @@
     "updated_by"
   ],
   "fleet-cloud-connector": [
-    "accountType",
     "cloudProvider",
     "created_at",
     "name",
