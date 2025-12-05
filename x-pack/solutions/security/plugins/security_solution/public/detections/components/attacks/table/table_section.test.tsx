@@ -100,6 +100,7 @@ describe('<TableSection />', () => {
         buckets: [
           {
             key: ['attack-id-1'],
+            key_as_string: 'attack-id-1',
             doc_count: 1,
             selectedGroup: ALERT_ATTACK_IDS,
             isNullGroup: false,
@@ -149,6 +150,7 @@ describe('<TableSection />', () => {
         buckets: [
           {
             key: ['attack-id-1'],
+            key_as_string: 'attack-id-1',
             doc_count: 1,
             selectedGroup: ALERT_ATTACK_IDS,
             isNullGroup: false,
