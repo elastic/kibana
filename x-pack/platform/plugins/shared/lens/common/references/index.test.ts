@@ -12,16 +12,13 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { LensSerializedState } from '../../public';
 import { extractLensReferences, injectLensReferences } from '.';
 
+/**
+ * A typical lens reference (i.e. `<ref-type>-<ref-id>`)
+ */
 const getMockPanelReference = (): Reference => ({
   type: 'some-panel-ref',
   id: uuidv4(),
   name: `lens-ref-type-${uuidv4()}`,
-});
-
-const getMockDashboardReference = (panelId: string = uuidv4()): Reference => ({
-  type: 'some-dashboard-ref',
-  id: uuidv4(),
-  name: `${panelId}:ref-type-${uuidv4()}`,
 });
 
 const getMockLensState = (
@@ -38,49 +35,123 @@ const getMockLensState = (
 describe('references', () => {
   describe('injectLensReferences', () => {
     it('should return by-ref state', () => {
-      const state = getMockLensState([getMockDashboardReference()], { savedObjectId: uuidv4() });
+      const state = getMockLensState([getMockPanelReference()], { savedObjectId: uuidv4() });
       const references = [getMockPanelReference()];
       const injected = injectLensReferences(state, references);
 
       expect(injected).toEqual(state);
     });
 
-    it('should inject panel references from dashboard', () => {
-      const panelReferences = [getMockPanelReference()];
+    it('should not inject erroneous panel references from dashboard', () => {
+      const dashboardReferences = [getMockPanelReference(), getMockPanelReference()];
       const state = getMockLensState([]);
-      const injected = injectLensReferences(state, panelReferences);
+      const injected = injectLensReferences(state, dashboardReferences);
 
-      expect(injected!.attributes!.references).toEqual(panelReferences);
+      expect(injected!.attributes!.references).toEqual([]);
     });
 
-    it('should inject merge dashboard panel references with attribute references', () => {
-      const panelReferences = [getMockPanelReference()];
-      const state = getMockLensState([getMockPanelReference()]);
-      const injected = injectLensReferences(state, panelReferences);
-
-      expect(injected!.attributes!.references).toEqual([
-        ...panelReferences,
-        ...state.attributes!.references,
-      ]);
-    });
-
-    it('should deduplicate merged panel references', () => {
+    it('should fallback to attribute references when dashboard references are empty/missing', () => {
       const panelReferences = [getMockPanelReference(), getMockPanelReference()];
       const state = getMockLensState(panelReferences);
-      const injected = injectLensReferences(state, panelReferences);
+      const injected = injectLensReferences(state, []);
 
       expect(injected!.attributes!.references).toEqual(panelReferences);
+    });
+
+    it('should update panel references with dashboard reference id', () => {
+      const dashboardReference = getMockPanelReference();
+      const panelReference: Reference = {
+        ...dashboardReference,
+        id: 'old-lens-reference-id',
+      };
+      const state = getMockLensState([panelReference]);
+      const injected = injectLensReferences(state, [dashboardReference]);
+
+      expect(injected!.attributes!.references).toEqual([dashboardReference]);
+    });
+
+    it('should not update reference for different reference type from dashboard', () => {
+      const dashboardReference = getMockPanelReference();
+      const panelReference: Reference = {
+        ...dashboardReference,
+        id: 'old-lens-reference-id',
+        type: 'wrong-type',
+      };
+      const state = getMockLensState([panelReference]);
+      const injected = injectLensReferences(state, [dashboardReference]);
+
+      expect(injected!.attributes!.references).toEqual([panelReference]);
     });
 
     // when filtered panel references are empty, dashboards passes all references
     // Thus we need to ensure all the references are panel-specific
     // See https://github.com/elastic/kibana/issues/245283
-    it('should filter out dashboard references', () => {
-      const panelReferences = [getMockDashboardReference(), getMockDashboardReference()];
-      const state = getMockLensState([]);
-      const injected = injectLensReferences(state, panelReferences);
+    describe('Dashboard named references', () => {
+      const panelId = 'panel-id';
 
-      expect(injected!.attributes!.references).toEqual([]);
+      /**
+       * A reference with dashboard panel id prefix (i.e. `<panel-id>:<ref-type>-<ref-id>`)
+       */
+      const getMockDashboardReference = (id: string = uuidv4()): Reference => ({
+        type: 'some-dashboard-ref',
+        id: uuidv4(),
+        name: `${id}:ref-type-${uuidv4()}`,
+      });
+
+      it('should return by-ref state', () => {
+        const state = getMockLensState([getMockPanelReference()], { savedObjectId: uuidv4() });
+        const references = [getMockDashboardReference()];
+        const injected = injectLensReferences(state, references);
+
+        expect(injected).toEqual(state);
+      });
+
+      it('should not inject erroneous panel references from dashboard', () => {
+        const dashboardReferences = [getMockDashboardReference(), getMockDashboardReference()];
+        const state = getMockLensState([]);
+        const injected = injectLensReferences(state, dashboardReferences);
+
+        expect(injected!.attributes!.references).toEqual([]);
+      });
+
+      it('should fallback to attribute references when dashboard references are empty/missing', () => {
+        const panelReferences = [getMockPanelReference(), getMockPanelReference()];
+        const state = getMockLensState(panelReferences);
+        const injected = injectLensReferences(state, []);
+
+        expect(injected!.attributes!.references).toEqual(panelReferences);
+      });
+
+      it('should update panel references with dashboard reference id', () => {
+        const dashboardReference = getMockDashboardReference(panelId);
+        const panelReference: Reference = {
+          ...dashboardReference,
+          id: 'old-lens-reference-id',
+          name: dashboardReference.name.replace(`${panelId}:`, ''),
+        };
+        const state = getMockLensState([panelReference]);
+        const injected = injectLensReferences(state, [dashboardReference]);
+
+        expect(injected!.attributes!.references).toEqual([
+          {
+            ...dashboardReference,
+            name: panelReference.name, // panel naming
+          },
+        ]);
+      });
+
+      it('should not update reference for different reference type from dashboard', () => {
+        const dashboardReference = getMockDashboardReference(panelId);
+        const panelReference: Reference = {
+          id: 'old-lens-reference-id',
+          type: 'wrong-type',
+          name: dashboardReference.name.replace(`${panelId}:`, ''),
+        };
+        const state = getMockLensState([panelReference]);
+        const injected = injectLensReferences(state, [dashboardReference]);
+
+        expect(injected!.attributes!.references).toEqual([panelReference]);
+      });
     });
   });
 

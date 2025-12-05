@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { cloneDeep, uniqBy } from 'lodash';
+import { cloneDeep } from 'lodash';
 
 import type { Reference } from '@kbn/content-management-utils';
 
@@ -21,17 +21,25 @@ export const injectLensReferences = (
     return clonedState;
   }
 
-  const panelReferences = references.filter((reference) => {
-    return !reference.name.match(/.+?:.+?/);
+  const panelReferencesMap = references.reduce<Map<string, Reference>>((acc, reference) => {
+    const name = reference.name.split(':').at(-1); // name can be dashboard or panel reference name
+
+    if (name) {
+      acc.set(name, {
+        ...reference,
+        name, // panel reference name
+      });
+    }
+
+    return acc;
+  }, new Map());
+
+  const newReferences = clonedState.attributes.references.map((lensRef) => {
+    const panelReference = panelReferencesMap.get(lensRef.name);
+    return panelReference?.type === lensRef.type ? panelReference : lensRef;
   });
 
-  // TODO: find a way to cull erroneous dashboard references
-  const combinedReferences = uniqBy(
-    [...panelReferences, ...clonedState.attributes.references],
-    'name'
-  );
-
-  clonedState.attributes.references = combinedReferences;
+  clonedState.attributes.references = newReferences;
 
   return clonedState;
 };
