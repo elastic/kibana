@@ -34,7 +34,7 @@ export function BulkPurgeRollupConfirmationModal({ items, onCancel, onConfirm }:
       onConfirm={onClickConfirm}
       purgePolicyHelpText={i18n.translate('xpack.slo.bulkPurgeConfirmationModal.descriptionText', {
         defaultMessage:
-          'Rollup data for {count} selected SLOs will be purged according to the policy provided below.',
+          'Purge rollup data for {count} selected SLOs according to the following policy.',
         values: { count: items.length },
       })}
     />
