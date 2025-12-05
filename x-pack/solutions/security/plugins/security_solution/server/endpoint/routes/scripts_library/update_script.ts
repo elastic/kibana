@@ -46,7 +46,9 @@ export const getPatchUpdateScriptRequestHandler = (
         user?.username || 'unknown',
         esClient
       );
-      const response: EndpointScriptApiResponse = { data: await scriptsClient.update(req.body) };
+      const response: EndpointScriptApiResponse = {
+        data: await scriptsClient.update({ ...req.body, id: req.params.script_id }),
+      };
 
       return res.ok({ body: response });
     } catch (err) {

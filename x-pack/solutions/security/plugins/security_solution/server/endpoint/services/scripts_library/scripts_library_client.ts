@@ -14,10 +14,12 @@ import type {
   SavedObject,
   SavedObjectsFindOptions,
 } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { v4 as uuidV4 } from 'uuid';
 import assert from 'assert';
 import type { KueryNode } from '@kbn/es-query';
 import * as esKuery from '@kbn/es-query';
+import type { File } from '@kbn/files-plugin/common';
 import { KUERY_FIELD_TO_SO_FIELD_MAP } from '../../../../common/endpoint/service/scripts_library';
 import type { ListScriptsRequestQuery } from '../../../../common/api/endpoint/scripts_library/list_scripts';
 import {
@@ -32,10 +34,7 @@ import {
 } from '../../lib/scripts_library';
 import { ScriptLibraryError } from './common';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
-import type {
-  CreateScriptRequestBody,
-  PatchUpdateRequestBody,
-} from '../../../../common/api/endpoint/scripts_library';
+import type { CreateScriptRequestBody } from '../../../../common/api/endpoint/scripts_library';
 import type {
   EndpointScript,
   EndpointScriptListApiResponse,
@@ -44,6 +43,7 @@ import type {
   ScriptDownloadResponse,
   ScriptsLibraryClientInterface,
   ScriptsLibrarySavedObjectAttributes,
+  ScriptUpdateParams,
 } from './types';
 import { catchAndWrapError, wrapErrorIfNeeded } from '../../utils';
 import { stringify } from '../../utils/stringify';
@@ -204,6 +204,79 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
     return kueryAst;
   }
 
+  protected getScriptSavedObject(
+    scriptId: string
+  ): Promise<SavedObject<ScriptsLibrarySavedObjectAttributes>> {
+    return this.soClient
+      .get<ScriptsLibrarySavedObjectAttributes>(SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE, scriptId)
+      .catch((error) => {
+        if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+          throw new ScriptLibraryError(`Script with id ${scriptId} not found`, 404, error);
+        }
+
+        throw new ScriptLibraryError(`Failed to retrieve script with id: ${scriptId}`, 500, error);
+      });
+  }
+
+  /**
+   * Uploads a new file to the file storage and returns its instance
+   * @protected
+   */
+  protected async storeFile({
+    scriptId,
+    file,
+    fileName = '',
+  }: {
+    scriptId: string;
+    file: HapiReadableStream;
+    /** The file name. By Default, an attempt will be made to get it from the File stream unless this option is set. */
+    fileName?: string;
+  }): Promise<File> {
+    const fileStorage = await this.filesClient
+      .create({
+        metadata: {
+          name: fileName || (file.hapi.filename ?? 'script_file'),
+          mime: file.hapi.headers['content-type'] ?? 'application/octet-stream',
+
+          // FIXME:PT update file info. to SO once PR245273 merges
+        },
+      })
+      .catch((error) => {
+        const message = `Unable to create File storage record: ${error.message}`;
+        this.logger.error(message, { error });
+
+        throw new ScriptLibraryError(message, 500, error);
+      });
+
+    try {
+      await fileStorage.uploadContent(file, undefined, {
+        transforms: [createFileHashTransform()],
+      });
+
+      assert(
+        fileStorage.data.hash && fileStorage.data.hash.sha256,
+        new ScriptLibraryError('File hash was not generated after upload!')
+      );
+    } catch (error) {
+      this.logger.error(`Error encountered while attempting to store file: ${error.message}`, {
+        error,
+      });
+
+      // attempt to delete the file record since we encountered an error during upload fo the file
+      // Best effort being done here. If it fails, then just log the error since there is nothing else we can do.
+      await fileStorage.delete().catch((deleteError) => {
+        this.logger.error(
+          `Error encountered while attempting to cleanup file record: ${deleteError.message}`,
+          { error: deleteError }
+        );
+      });
+
+      throw wrapErrorIfNeeded(error);
+    }
+
+    return fileStorage;
+  }
+
   public async create({
     file: _file,
     ...scriptDefinition
@@ -296,8 +369,64 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
     }
   }
 
-  public async update(script: Partial<PatchUpdateRequestBody>): Promise<EndpointScript> {
-    throw new ScriptLibraryError('Not implemented', 501);
+  public async update({
+    id,
+    version,
+    file,
+    ...scriptUpdates
+  }: ScriptUpdateParams): Promise<EndpointScript> {
+    const currentScriptSoItem = await this.getScriptSavedObject(id);
+    let fileStorage: File | undefined;
+
+    if (version && currentScriptSoItem.version !== version) {
+      throw new ScriptLibraryError(
+        `Script with id ${id} has a different version than the one provided in the request. Current version: ${currentScriptSoItem.version}, provided version: ${version}`,
+        409
+      );
+    }
+
+    if (file) {
+      fileStorage = await this.storeFile({ scriptId: id, file: file as HapiReadableStream });
+
+      this.logger.debug(
+        () => `New file for Script id ${id} uploaded successfully: ${stringify(fileStorage?.data)}`
+      );
+    }
+
+    try {
+      // FIXME:PT create a partial update instead of a combined update. SO client seems to take in partial attributes
+      const soUpdate = this.mapToSavedObjectProperties({
+        ...this.mapSoAttributesToEndpointScript(currentScriptSoItem),
+        ...scriptUpdates,
+      });
+
+      soUpdate.updated_by = this.username;
+      soUpdate.updated_at = new Date().toISOString();
+
+      if (fileStorage) {
+        // FIXME:PT update file info. to SO once PR245273 merges
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        soUpdate.hash = fileStorage.data.hash!.sha256;
+      }
+
+      this.logger.debug(() => `Updating script id ${id} with:\n${stringify(soUpdate)}`);
+
+      await this.soClient
+        .update<ScriptsLibrarySavedObjectAttributes>(
+          SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE,
+          id,
+          soUpdate
+        )
+        .catch(catchAndWrapError.withMessage(`Failed to update script with id: ${id}`));
+    } catch (error) {
+      // TODO: If a new file was uploaded, then delete it now since the update failed
+
+      throw wrapErrorIfNeeded(error);
+    }
+
+    // TODO:PT delete old file if a new one was uploaded and since update was successful
+
+    return this.mapSoAttributesToEndpointScript(await this.getScriptSavedObject(id));
   }
 
   public async get(scriptId: string): Promise<EndpointScript> {

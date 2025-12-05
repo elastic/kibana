@@ -24,12 +24,14 @@ export interface ScriptsLibraryClientInterface {
    * Updates an existing script with the data provided. This method accepts partial
    * script data allowing for only certain fields to be updated
    */
-  update: (script: Partial<PatchUpdateRequestBody>) => Promise<EndpointScript>;
+  update: (script: ScriptUpdateParams) => Promise<EndpointScript>;
   get: (scriptId: string) => Promise<EndpointScript>;
   list: (options?: ListScriptsRequestQuery) => Promise<EndpointScriptListApiResponse>;
   delete: (scriptId: string) => Promise<void>;
   download: (scriptId: string) => Promise<ScriptDownloadResponse>;
 }
+
+export type ScriptUpdateParams = Partial<PatchUpdateRequestBody> & { id: string };
 
 export interface ScriptDownloadResponse {
   stream: Readable;

@@ -33,9 +33,9 @@ export const PatchUpdateRequestSchema = {
       version: schema.maybe(schema.string({ minLength: 1, validate: validateNonEmptyString })),
     },
     {
-      validate: (value) => {
-        if (Object.keys(value).length === 0) {
-          return 'At least one field must defined for updated';
+      validate: ({ version, ...updates }) => {
+        if (Object.keys(updates).length === 0) {
+          return 'At least one field must defined for update';
         }
       },
     }
