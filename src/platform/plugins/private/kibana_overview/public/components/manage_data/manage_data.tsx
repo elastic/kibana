@@ -58,6 +58,7 @@ export const ManageData: FC<Props> = ({ addBasePath, features }) => {
                   <Synopsis
                     id={feature.id}
                     description={feature.description}
+                    // @ts-expect-error upgrade typescript v5.9.3
                     iconType={feature.icon}
                     title={feature.title}
                     url={addBasePath(feature.path)}

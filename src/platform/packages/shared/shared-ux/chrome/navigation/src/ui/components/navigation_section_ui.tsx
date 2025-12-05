@@ -304,6 +304,7 @@ const getEuiProps = (
     ? {
         href,
         external: isExternal,
+        // @ts-expect-error upgrade typescript v5.9.3
         onClick: (e) => {
           if (href) {
             eventTracker.clickNavLink({
