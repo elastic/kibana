@@ -11,7 +11,7 @@ import { createObservabilityAgentBuilderServerRoute } from '../create_observabil
 
 export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
   const exampleRoute = createObservabilityAgentBuilderServerRoute({
-    endpoint: 'GET /internal/observability_agent_builder/ai_insights/example',
+    endpoint: 'POST /internal/observability_agent_builder/ai_insights/example',
     options: {
       access: 'internal',
     },
@@ -25,8 +25,8 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
         id: t.string,
       }),
     }),
-    handler: async () => {
-      throw new Error('Not implemented');
+    handler: async ({ params }) => {
+      return { id: params.body.id };
     },
   });
 
