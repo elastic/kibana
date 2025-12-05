@@ -19,7 +19,7 @@ import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { SLOConfig, SLOPluginStartDependencies } from '../../../types';
 import { cleanupOrphanSummaries } from './cleanup_orphan_summary';
 
-export const TYPE = 'slo:orphan-summary-cleanup-task';
+export const TYPE = 'SLO:ORPHAN_SUMMARIES-CLEANUP-TASK';
 
 interface TaskSetupContract {
   taskManager: TaskManagerSetupContract;
