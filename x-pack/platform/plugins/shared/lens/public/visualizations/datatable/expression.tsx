@@ -29,6 +29,7 @@ import type {
   ILensInterpreterRenderHandlers,
   LensCellValueAction,
 } from '@kbn/lens-common';
+import { useSyncParams } from '@kbn/expressions-plugin/public';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { DatatableComponent } from './components';
 
@@ -174,8 +175,11 @@ export const getDatatableRenderer = (dependencies: {
 
     performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_START);
 
-    ReactDOM.render(
-      <KibanaRenderContextProvider {...startServices}>
+    // Wrapper component that uses useSyncParams hook for reactive param updates
+    const DatatableWrapper = () => {
+      const { syncColors } = useSyncParams(handlers);
+
+      return (
         <DatatableComponent
           {...config}
           formatFactory={dependencies.formatFactory}
@@ -189,8 +193,14 @@ export const getDatatableRenderer = (dependencies: {
           interactive={isInteractive()}
           theme={dependencies.core.theme}
           renderComplete={renderComplete}
-          syncColors={config.syncColors}
+          syncColors={syncColors}
         />
+      );
+    };
+
+    ReactDOM.render(
+      <KibanaRenderContextProvider {...startServices}>
+        <DatatableWrapper />
       </KibanaRenderContextProvider>,
       domNode
     );
