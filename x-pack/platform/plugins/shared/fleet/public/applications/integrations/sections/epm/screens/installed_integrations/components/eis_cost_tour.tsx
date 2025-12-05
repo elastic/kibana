@@ -36,14 +36,14 @@ export const EisCostTour = ({
   return (
     <EuiTourStep
       data-test-subj="fleetEisCostTour"
-      title={i18n.translate('fleet.eisCosts.tour.title', {
+      title={i18n.translate('xpack.fleet.eisCosts.tour.title', {
         defaultMessage: 'AI agents now understand your integrations',
       })}
       maxWidth={`${euiTheme.base * 25}px`}
       content={
         <EuiText>
           <p>
-            {i18n.translate('fleet.eisCosts.tour.description', {
+            {i18n.translate('xpack.fleet.eisCosts.tour.description', {
               defaultMessage:
                 'Integration documentation and metadata are automatically indexed using Elastic Inference Service (EIS) to help agents understand your environment. Manage settings here.',
             })}
@@ -59,11 +59,11 @@ export const EisCostTour = ({
         <EuiButtonEmpty
           data-test-subj="fleetEisCostTourCloseBtn"
           onClick={dismiss}
-          aria-label={i18n.translate('fleet.eisCosts.tour.dismiss.aria', {
+          aria-label={i18n.translate('xpack.fleet.eisCosts.tour.dismiss.aria', {
             defaultMessage: 'Close the cost tour',
           })}
         >
-          {i18n.translate('fleet.eisCosts.tour.dismiss', {
+          {i18n.translate('xpack.fleet.eisCosts.tour.dismiss', {
             defaultMessage: 'Dismiss',
           })}
         </EuiButtonEmpty>,
@@ -79,7 +79,7 @@ export const EisCostTour = ({
                 iconSide="right"
                 iconType="popout"
               >
-                {i18n.translate('fleet.eisCosts.tour.cta', {
+                {i18n.translate('xpack.fleet.eisCosts.tour.cta', {
                   defaultMessage: 'Learn more',
                 })}
               </EuiButton>,
