@@ -9,8 +9,8 @@
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { removePackagesFromPackageMap } from '@kbn/repo-packages';
-import { KIBANA_SOLUTIONS } from '@kbn/projects-solutions-groups';
 import type { KibanaSolution } from '@kbn/projects-solutions-groups';
+import { KIBANA_SOLUTIONS } from '@kbn/projects-solutions-groups';
 import { resolve, join } from 'path';
 import { scanCopy, deleteAll, copyAll } from '../lib';
 import type { Task, Platform } from '../lib';
@@ -23,6 +23,7 @@ export const CreateArchivesSources: Task = {
       const solutionPluginNames: string[] = [];
 
       for (const solution of solutionsToRemove) {
+        if (!solution) continue;
         const solutionPlugins = config.getPrivateSolutionPackagesFromRepo(solution);
         solutionPluginNames.push(...solutionPlugins.map((p) => p.name));
       }
@@ -81,7 +82,7 @@ export const CreateArchivesSources: Task = {
 
           // Copy solution config.yml
           const WORKPLACE_AI_CONFIGS = ['serverless.workplaceai.yml'];
-          const SEARCH_CONFIGS = ['serverless.es.yml'];
+          const ELASTICSEARCH_CONFIGS = ['serverless.es.yml'];
           const OBSERVABILITY_CONFIGS = [
             'serverless.oblt.yml',
             'serverless.oblt.{logs_essentials,complete}.yml',
@@ -91,12 +92,13 @@ export const CreateArchivesSources: Task = {
             'serverless.security.{search_ai_lake,essentials,complete}.yml',
           ];
           const configFiles = ['serverless.yml'];
-          switch (platform.getSolution()) {
+          const solutionId = platform.getSolutionId();
+          switch (solutionId) {
             case 'workplaceai':
               configFiles.push(...WORKPLACE_AI_CONFIGS);
               break;
             case 'search':
-              configFiles.push(...SEARCH_CONFIGS);
+              configFiles.push(...ELASTICSEARCH_CONFIGS);
               break;
             case 'observability':
               configFiles.push(...OBSERVABILITY_CONFIGS);
@@ -105,9 +107,10 @@ export const CreateArchivesSources: Task = {
               configFiles.push(...SECURITY_CONFIGS);
               break;
             default:
+              // we push all of the solution config files for non-solution specific serverless builds
               configFiles.push(
                 ...WORKPLACE_AI_CONFIGS,
-                ...SEARCH_CONFIGS,
+                ...ELASTICSEARCH_CONFIGS,
                 ...OBSERVABILITY_CONFIGS,
                 ...SECURITY_CONFIGS
               );
@@ -122,9 +125,10 @@ export const CreateArchivesSources: Task = {
           );
 
           // Remove non-target solutions
-          const targetSolution = platform.getSolution();
-          if (targetSolution && KIBANA_SOLUTIONS.includes(targetSolution)) {
-            const solutionsToRemove = KIBANA_SOLUTIONS.filter((s) => s !== targetSolution);
+          if (solutionId && KIBANA_SOLUTIONS.includes(solutionId)) {
+            const solutionsToRemove: KibanaSolution[] = KIBANA_SOLUTIONS.filter(
+              (s) => s !== solutionId
+            );
             await removeSolutions(solutionsToRemove, platform);
           }
         } else if (config.isRelease) {

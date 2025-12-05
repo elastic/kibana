@@ -17,9 +17,11 @@ interface ConversationContextValue {
   sessionTag?: string;
   agentId?: string;
   initialMessage?: string;
+  autoSendInitialMessage?: boolean;
   resetInitialMessage?: () => void;
   attachments?: AttachmentInput[];
   resetAttachments?: () => void;
+  removeAttachment?: (attachmentIndex: number) => void;
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
   setConversationId?: (conversationId?: string) => void;
   conversationActions: ConversationActions;

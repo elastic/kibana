@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { JsonValue } from '@kbn/utility-types';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
-import { JSONDataView } from '../../../shared/ui/json_data_view';
+import { ExecutionDataViewer } from '../../../shared/ui/execution_data_viewer';
 
 const Titles = {
   output: i18n.translate('workflowsManagement.stepExecutionDataView.outputTitle', {
@@ -90,7 +90,11 @@ export const StepExecutionDataView = React.memo<StepExecutionDataViewProps>(
     }
 
     return (
-      <JSONDataView data={data} title={title} fieldPathActionsPrefix={fieldPathActionsPrefix} />
+      <ExecutionDataViewer
+        data={data}
+        title={title}
+        fieldPathActionsPrefix={fieldPathActionsPrefix}
+      />
     );
   }
 );

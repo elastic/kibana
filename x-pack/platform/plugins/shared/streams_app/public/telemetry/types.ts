@@ -6,6 +6,7 @@
  */
 
 import type { FeatureType } from '@kbn/streams-schema';
+import type { EnrichmentDataSource } from '../../common/url_schema';
 
 type StreamType = 'wired' | 'classic' | 'unknown';
 
@@ -128,6 +129,29 @@ interface StreamsDescriptionGeneratedProps {
   output_tokens_used: number;
 }
 
+interface StreamsProcessingSimulationSamplesFetchLatencyProps {
+  stream_name: string;
+  stream_type: StreamType;
+  data_source_type: EnrichmentDataSource['type'];
+  duration_ms: number;
+}
+
+interface StreamsTabVisitedProps {
+  stream_name: string;
+  stream_type: StreamType;
+  tab_name: string;
+  privileges: {
+    manage: boolean;
+    monitor: boolean;
+    view_index_metadata: boolean;
+    lifecycle: boolean;
+    simulate: boolean;
+    text_structure: boolean;
+    read_failure_store: boolean;
+    manage_failure_store: boolean;
+  };
+}
+
 export {
   type StreamsAttachmentCountProps,
   type StreamsAttachmentClickEventProps,
@@ -146,4 +170,6 @@ export {
   type StreamsFeatureIdentificationIdentifiedProps,
   type StreamsFeatureIdentificationDeletedProps,
   type StreamsDescriptionGeneratedProps,
+  type StreamsProcessingSimulationSamplesFetchLatencyProps,
+  type StreamsTabVisitedProps,
 };
