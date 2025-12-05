@@ -246,7 +246,6 @@ describe('SecuritySideNav', () => {
       expect(launchpadIndex).toBeLessThan(manageIndex);
     });
 
-
     it('should exclude disabled Launchpad children', () => {
       const launchpadLink: NavigationLink = {
         id: SecurityPageName.launchpad,
