@@ -15,6 +15,7 @@ import { getTemplate } from './get_template';
 import type { TemplateLayout } from './types';
 import { assetPath } from './constants';
 import { _, Printer } from './worker_dependencies';
+import { generateReportRequestSchema } from './validators';
 
 export interface WorkerData {
   port: MessagePort;
@@ -89,6 +90,20 @@ const getPageCount = (pdfDoc: PDFKit.PDFDocument): number => {
 };
 
 async function execute({ data: { layout, logo, title, content } }: GeneratePdfRequest) {
+  try {
+    generateReportRequestSchema.parse({
+      data: {
+        layout,
+        title,
+        logo,
+        content,
+      },
+    });
+  } catch (e) {
+    const err = new Error(`PDF worker unable to parse request data: ${e.message}`);
+    err.stack = e.stack;
+    throw err;
+  }
   const { port } = workerData as WorkerData;
   port.postMessage({
     type: GeneratePdfResponseType.Log,
