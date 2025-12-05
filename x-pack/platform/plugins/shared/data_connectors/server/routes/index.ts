@@ -8,6 +8,7 @@
 import type {
   IRouter,
   Logger,
+  SavedObject,
   SavedObjectsFindResponse,
   StartServicesAccessor,
 } from '@kbn/core/server';
@@ -69,6 +70,47 @@ export function registerRoutes(
           statusCode: 500,
           body: {
             message: `Failed to list connectors: ${(error as Error).message}`,
+          },
+        });
+      }
+    }
+  );
+
+  // Get one data connector by ID
+  router.get(
+    {
+      path: '/api/data_connectors/{id}',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+    },
+    async (context, request, response) => {
+      const coreContext = await context.core;
+
+      try {
+        const savedObjectsClient = coreContext.savedObjects.client;
+        const savedObject: SavedObject<DataConnectorAttributes> = await savedObjectsClient.get(
+          DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+          request.params.id
+        );
+
+        return response.ok({
+          body: { ...savedObject.attributes, id: savedObject.id },
+        });
+      } catch (error) {
+        logger.error(`Error fetching data connector: ${(error as Error).message}`);
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: `Failed to fetch data connector: ${(error as Error).message}`,
           },
         });
       }
