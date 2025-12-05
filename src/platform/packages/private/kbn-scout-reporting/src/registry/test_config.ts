@@ -13,14 +13,14 @@ import path from 'node:path';
 import { ToolingLog } from '@kbn/tooling-log';
 import { SCOUT_CONFIG_PATH_GLOB, SCOUT_CONFIG_PATH_REGEX } from '@kbn/scout-info';
 import { existsSync, readFileSync } from 'node:fs';
-import type { ScoutTestableComponent } from './testable_component';
+import type { ScoutTestableModule } from './testable_module';
 import type { ScoutConfigManifest } from './manifest';
 
 export interface ScoutTestConfig {
   path: string;
   category: string;
   type: string;
-  component: ScoutTestableComponent;
+  module: ScoutTestableModule;
   manifest: ScoutConfigManifest;
 }
 
@@ -36,26 +36,19 @@ export const testConfig = {
       _,
       platform,
       solution,
-      componentType,
-      componentVisibility,
-      componentName,
+      moduleType,
+      moduleVisibility,
+      moduleName,
       customTargetConfigSetName,
       testCategory,
       testConfigType,
     ] = match;
 
     const scoutDirName = `scout${customTargetConfigSetName ? `_${customTargetConfigSetName}` : ''}`;
-
-    const component = {
-      name: componentName,
-      group: platform ?? solution,
-      type: componentType.slice(0, -1) as ScoutTestableComponent['type'],
-      visibility: componentVisibility as ScoutTestableComponent['visibility'],
-      root: configPath.split(`/test/${scoutDirName}`)[0],
-    };
+    const moduleRoot = configPath.split('/test/scout')[0];
 
     const manifestPath = path.join(
-      component.root,
+      moduleRoot,
       'test',
       scoutDirName,
       '.meta',
@@ -63,31 +56,39 @@ export const testConfig = {
       `${testConfigType || 'standard'}.json`
     );
     const manifestExists = existsSync(manifestPath);
+    let manifestFileData;
 
-    const manifest: ScoutConfigManifest = manifestExists
-      ? {
-          path: manifestPath,
-          exists: manifestExists,
-          ...JSON.parse(readFileSync(manifestPath, 'utf8')),
-        }
-      : {
-          path: manifestPath,
-          exists: manifestExists,
-          tests: [],
-        };
+    if (manifestExists) {
+      try {
+        manifestFileData = JSON.parse(readFileSync(manifestPath, 'utf8'));
+      } catch (e) {
+        e.message = `Failed while trying to load manifest file at '${manifestPath}': ${e.message}`;
+        throw e;
+      }
+    } else {
+      manifestFileData = {
+        lastModified: new Date(0).toISOString(),
+        sha1: '0000000000000000-0000000000000000',
+        tests: [],
+      };
+    }
 
     return {
       path: configPath,
       category: testCategory,
       type: testConfigType || 'standard',
-      component: {
-        name: componentName,
+      module: {
+        name: moduleName,
         group: platform ?? solution,
-        type: componentType.slice(0, -1) as ScoutTestableComponent['type'],
-        visibility: componentVisibility as ScoutTestableComponent['visibility'],
-        root: configPath.split('/test/scout')[0],
+        type: moduleType.slice(0, -1) as ScoutTestableModule['type'],
+        visibility: (moduleVisibility || 'private') as ScoutTestableModule['visibility'],
+        root: moduleRoot,
       },
-      manifest,
+      manifest: {
+        path: manifestPath,
+        exists: manifestExists,
+        ...manifestFileData,
+      },
     };
   },
 };
@@ -97,20 +98,21 @@ export const testConfigs = {
   log: new ToolingLog(),
 
   findPaths(): string[] {
-    return globSync(path.join(REPO_ROOT, SCOUT_CONFIG_PATH_GLOB), { onlyFiles: true }).map(
-      (configPath) => path.relative(REPO_ROOT, configPath)
-    );
+    const pattern = path.join(REPO_ROOT, SCOUT_CONFIG_PATH_GLOB);
+    const configPaths = globSync(pattern, { onlyFiles: true });
+    return configPaths.map((configPath) => path.relative(REPO_ROOT, configPath));
   },
 
   _load() {
-    this.log.info(`${this._configs == null ? 'L' : 'Rel'}oading Scout test configs`);
+    const action = this._configs === null ? 'Load' : 'Reload';
+    this.log.info(`${action}ing Scout test configs`);
 
     const loadStartTime = performance.now();
-    this._configs = this.findPaths().map((configPath) => testConfig.fromPath(configPath));
-    const loadTime = performance.now() - loadStartTime;
+    this._configs = this.findPaths().map(testConfig.fromPath);
+    const loadDuration = (performance.now() - loadStartTime) / 1000;
 
     this.log.info(
-      `Loaded ${this._configs.length} Scout test configs in ${(loadTime / 1000).toFixed(2)}s`
+      `Loaded ${this._configs.length} Scout test configs in ${loadDuration.toFixed(2)}s`
     );
   },
 
@@ -123,18 +125,16 @@ export const testConfigs = {
     return this._configs!;
   },
 
-  forComponent(name: string, type?: ScoutTestableComponent['type']): ScoutTestConfig[] {
-    const configs = this.all.filter((config) => config.component.name === name);
-    return type === undefined
-      ? configs
-      : configs.filter((config) => config.component.type === type);
+  forModule(name: string, type?: ScoutTestableModule['type']): ScoutTestConfig[] {
+    const configs = this.all.filter((config) => config.module.name === name);
+    return type === undefined ? configs : configs.filter((config) => config.module.type === type);
   },
 
-  forPlugin(pluginName: string) {
-    return this.forComponent(pluginName, 'plugin');
+  forPlugin(pluginName: string): ScoutTestConfig[] {
+    return this.forModule(pluginName, 'plugin');
   },
 
-  forPackage(packageName: string) {
-    return this.forComponent(packageName, 'package');
+  forPackage(packageName: string): ScoutTestConfig[] {
+    return this.forModule(packageName, 'package');
   },
 };

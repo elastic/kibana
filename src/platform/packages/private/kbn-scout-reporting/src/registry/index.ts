@@ -8,4 +8,4 @@
  */
 
 export * from './test_config';
-export * from './testable_component';
+export * from './testable_module';

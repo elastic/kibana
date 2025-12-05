@@ -13,8 +13,8 @@ import CliTable3 from 'cli-table3';
 import dedent from 'dedent';
 import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
-import type { ScoutTestableComponentWithConfigs } from '@kbn/scout-reporting/src/registry';
-import { testableComponents, testConfigs } from '@kbn/scout-reporting/src/registry';
+import type { ScoutTestableModuleWithConfigs } from '@kbn/scout-reporting/src/registry';
+import { testableModules, testConfigs } from '@kbn/scout-reporting/src/registry';
 import { getGitSHA1ForPath } from '@kbn/scout-reporting/src/registry/manifest';
 import { playwrightCLI } from '../playwright/cli_wrapper';
 
@@ -35,17 +35,17 @@ async function updateScoutConfigManifests(onlyOutdated: boolean, reload: boolean
   const updatedConfigPaths: string[] = [];
 
   for (const config of testConfigs.all) {
-    const currentComponentSHA1 = await getGitSHA1ForPath(path.dirname(config.path));
+    const configDirSHA1 = await getGitSHA1ForPath(path.dirname(config.path));
 
-    if (onlyOutdated && config.manifest.exists && config.manifest.sha1 === currentComponentSHA1) {
-      log.debug(` ✅ ${config.component.name} / ${config.category} / ${config.type}`);
+    if (onlyOutdated && config.manifest.exists && config.manifest.sha1 === configDirSHA1) {
+      log.debug(` ✅ ${config.module.name} / ${config.category} / ${config.type}`);
       continue;
     }
 
     if (config.manifest.exists) {
       log.info(
         `Manifest file is outdated for Scout test config at ${config.path} ` +
-          `(expected parent directory git object hash '${config.manifest.sha1}' but got '${currentComponentSHA1}')`
+          `(expected parent directory git object hash '${config.manifest.sha1}' but got '${configDirSHA1}')`
       );
     } else {
       log.info(`No manifest file found for Scout test config at ${config.path}`);
@@ -70,7 +70,7 @@ async function updateScoutConfigManifests(onlyOutdated: boolean, reload: boolean
   return updatedConfigPaths;
 }
 
-function displaySummary(components: ScoutTestableComponentWithConfigs[], log: ToolingLog) {
+function displaySummary(modules: ScoutTestableModuleWithConfigs[], log: ToolingLog) {
   const pluginTable = new CliTable3({
     head: ['#', 'Name', 'Group', 'Visibility', 'Path', 'Configs', 'Tests', 'Skipped'],
   });
@@ -78,17 +78,17 @@ function displaySummary(components: ScoutTestableComponentWithConfigs[], log: To
     head: ['#', 'Name', 'Group', 'Visibility', 'Path', 'Configs', 'Tests', 'Skipped'],
   });
 
-  components.forEach((component) => {
-    const targetTable = component.type === 'plugin' ? pluginTable : packageTable;
+  modules.forEach((module) => {
+    const targetTable = module.type === 'plugin' ? pluginTable : packageTable;
     targetTable.push([
       targetTable.length + 1,
-      component.name,
-      component.group,
-      component.visibility || '-',
-      component.root,
-      component.configs.length,
-      component.configs.reduce((testCount, config) => testCount + config.manifest.tests.length, 0),
-      component.configs.reduce(
+      module.name,
+      module.group,
+      module.visibility || '-',
+      module.root,
+      module.configs.length,
+      module.configs.reduce((testCount, config) => testCount + config.manifest.tests.length, 0),
+      module.configs.reduce(
         (skippedCount, config) =>
           skippedCount +
           config.manifest.tests.filter((test) => test.expectedStatus === 'skipped').length,
@@ -99,8 +99,8 @@ function displaySummary(components: ScoutTestableComponentWithConfigs[], log: To
 
   const panel = new CliTable3();
   panel.push(
-    [{ content: 'Scout testable components summary', hAlign: 'center' }],
-    [`Found ${components.length} components with Scout configs.`],
+    [{ content: 'Scout testable modules summary', hAlign: 'center' }],
+    [`Found ${modules.length} modules with Scout configs.`],
     [
       dedent(
         `Plugins
@@ -140,6 +140,6 @@ export const updateTestConfigManifests: Command<void> = {
       log
     );
     if (!shouldDisplaySummary) return;
-    displaySummary(testableComponents.allIncludingConfigs, log);
+    displaySummary(testableModules.allIncludingConfigs, log);
   },
 };
