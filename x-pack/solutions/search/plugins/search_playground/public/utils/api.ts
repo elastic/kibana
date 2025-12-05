@@ -100,16 +100,27 @@ export async function parseDataStream({
   const createdAt = getCurrentDate();
   const prefixMap: PrefixMap = {};
   let messageAnnotations: Annotation[] | undefined;
+  const streamInstanceId = generateId();
+  let messageSequence = 0;
+  const allocateResponseId = (serverAssignedId?: string) => {
+    messageSequence += 1;
+    const baseId = `${streamInstanceId}-${messageSequence}`;
+    return serverAssignedId ? `${baseId}:${serverAssignedId}` : baseId;
+  };
 
-  let responseMessageId = generateId();
+  let responseMessageId = allocateResponseId();
 
   for await (const chunk of readDataStream(reader, {
     isAborted: () => abortControllerRef?.current === null,
   })) {
     const { type } = chunk;
 
-    if (type === 'text-start' && 'id' in chunk && chunk.id) {
-      responseMessageId = chunk.id;
+    if (type === 'text-start') {
+      responseMessageId =
+        'id' in chunk && chunk.id ? allocateResponseId(chunk.id) : allocateResponseId();
+      prefixMap.text = undefined;
+      messageAnnotations = undefined;
+      continue;
     } else if (type === 'text-delta' && 'delta' in chunk && typeof chunk.delta === 'string') {
       if (prefixMap.text) {
         prefixMap.text = {
