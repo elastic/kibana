@@ -36,16 +36,16 @@ export default function ({ getService }: FtrProviderContext) {
       }
 
       // Explicitly unset traceparent so that APM agent provides a new trace.id for the request
-      const response1 = await supertest.get('/emit_log_with_trace_id').unset('traceparent');
+      const response1 = await supertest.get('/emit_log_with_trace_id').set('traceparent', '');
       expect(response1.body.traceId).to.be.a('string');
       expect(response1.status).to.be(200);
 
       // Explicitly unset traceparent so that APM agent provides a new trace.id for the request
-      const response2 = await supertest.get('/emit_log_with_trace_id').unset('traceparent');
+      const response2 = await supertest.get('/emit_log_with_trace_id').set('traceparent', '');
       expect(response2.body.traceId).to.be.a('string');
       expect(response2.status).to.be(200);
 
-      expect(response1.body.traceId).to.be(response2.body.traceId);
+      expect(response1.body.traceId).not.to.be(response2.body.traceId);
 
       const logs = await readLogFile();
 
