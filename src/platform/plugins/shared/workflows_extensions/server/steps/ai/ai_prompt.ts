@@ -8,13 +8,14 @@
  */
 
 import type { CoreSetup } from '@kbn/core/server';
+import { z } from '@kbn/zod';
 import { resolveConnectorId } from './resolve_connector_id';
+// TODO: convertJsonSchemaToZod is currently a temporary copy. Once the PR is merged in inference plugin, we should import from there.
+import { convertJsonSchemaToZod } from './temp_json_schema_to_zod';
 import { AiPromptStepCommonDefinition } from '../../../common/steps/ai';
 import { createServerStepDefinition } from '../../step_registry/types';
 import type { WorkflowsExtensionsServerPluginStartDeps } from '../../types';
 
-// Using createServerStepDefinition for automatically inferring input and output types from the schemas in setVarStepCommonDefinition
-// No need to explicitly specify SetVarStepInput and SetVarStepOutput types
 export const aiPromptStepDefinition = (
   coreSetup: CoreSetup<WorkflowsExtensionsServerPluginStartDeps>
 ) =>
@@ -45,17 +46,21 @@ export const aiPromptStepDefinition = (
       const modelInput = [
         {
           role: 'system',
-          content: 'You are a helpful assistant that only responds in JSON format.',
+          content:
+            'You are a helpful assistant that only responds in the structured format that is requested.',
         },
         { role: 'user', content: context.input.input },
       ];
 
-      chatModel.withStructuredOutput(context.input.outputSchema).invoke(modelInput);
+      // TODO: convertJsonSchemaToZod is currently a temporary copy. Once the PR is merged in inference plugin, we should import from there.
+      const zodSchema = z.object({
+        response: convertJsonSchemaToZod(context.input.outputSchema), // Workaround, because inference plugin refuses z.array, but having array response is valid use case
+      });
+
+      const output = await chatModel.withStructuredOutput(zodSchema).invoke(modelInput);
 
       return {
-        output: {
-          response: 'This is a placeholder response from the AI Prompt step.',
-        } as any,
+        output: output.response,
       };
     },
   });
