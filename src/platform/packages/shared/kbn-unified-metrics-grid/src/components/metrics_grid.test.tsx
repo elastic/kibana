@@ -17,7 +17,8 @@ import type { UnifiedHistogramServices } from '@kbn/unified-histogram';
 import { getFetchParamsMock, getFetch$Mock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
-import type { ChartSectionProps, UnifiedHistogramFetch$ } from '@kbn/unified-histogram/types';
+import type { UnifiedHistogramFetch$ } from '@kbn/unified-histogram/types';
+import type { UnifiedMetricsGridProps } from '../types';
 
 jest.mock('./chart', () => ({
   Chart: jest.fn(() => <div data-test-subj="chart" />),
@@ -26,7 +27,7 @@ jest.mock('./chart', () => ({
 describe('MetricsGrid', () => {
   let discoverFetch$: UnifiedHistogramFetch$;
 
-  const actions: ChartSectionProps['actions'] = {
+  const actions: UnifiedMetricsGridProps['actions'] = {
     openInNewTab: jest.fn(),
     updateESQLQuery: jest.fn(),
   };

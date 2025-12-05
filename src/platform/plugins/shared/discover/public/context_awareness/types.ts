@@ -143,9 +143,11 @@ export interface ChartSectionConfigurationExtensionParams {
 export type ChartSectionConfiguration<T extends object = object> =
   | {
       /**
-       * The component to render for the chart section
+       * The render function for the chart section
        */
-      Component: React.ComponentType<ChartSectionProps & RestorableStateProviderProps<T>>;
+      renderChartSection: (
+        props: ChartSectionProps & RestorableStateProviderProps<T>
+      ) => React.ReactElement;
       /**
        * Controls whether or not to replace the default histogram and activate the custom chart
        */
@@ -158,11 +160,6 @@ export type ChartSectionConfiguration<T extends object = object> =
        * The default chart section height
        */
       defaultTopPanelHeight?: UnifiedHistogramTopPanelHeightContext;
-
-      /** *
-       * The actions for the chart section
-       */
-      actions: ChartSectionConfigurationExtensionParams['actions'];
     }
   | {
       replaceDefaultChart: false;
@@ -513,6 +510,22 @@ export interface Profile {
   getPaginationConfig: () => PaginationConfigExtension;
 
   /**
+   * Allows overwriting the default columns configuration used in the data grid.customGridColumnsConfiguration
+   * Example use case is to overwrite the column header display name or to add icons to the column headers.
+   */
+  getColumnsConfiguration: () => CustomGridColumnsConfiguration;
+
+  /**
+   * Field list
+   */
+
+  /**
+   * Allows passing additional fields (recommended fields) to the field list area.
+   * @returns The additional fields to display in the Field List under Recommended fields section
+   */
+  getRecommendedFields: () => FieldListExtension;
+
+  /**
    * Document viewer flyout
    */
 
@@ -539,16 +552,4 @@ export interface Profile {
    * @returns The app menu extension
    */
   getAppMenu: (params: AppMenuExtensionParams) => AppMenuExtension;
-
-  /**
-   * Allows overwriting the default columns configuration used in the data grid.customGridColumnsConfiguration
-   * Example use case is to overwrite the column header display name or to add icons to the column headers.
-   */
-  getColumnsConfiguration: () => CustomGridColumnsConfiguration;
-
-  /**
-   * Allows passing additional fields (recommended fields) to the field list area.
-   * @returns The additional fields to display in the Field List under Recommended fields section
-   */
-  getRecommendedFields: () => FieldListExtension;
 }

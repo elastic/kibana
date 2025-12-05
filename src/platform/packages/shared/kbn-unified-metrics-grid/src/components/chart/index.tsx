@@ -11,12 +11,12 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, useEuiTheme } from '@elasti
 import { css } from '@emotion/react';
 import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
 import { useBoolean } from '@kbn/react-hooks';
-import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import React, { useRef } from 'react';
 import type { LensYBoundsConfig } from '@kbn/lens-embeddable-utils/config_builder/types';
 import { useLensProps } from './hooks/use_lens_props';
 import type { LensWrapperProps } from './lens_wrapper';
 import { LensWrapper } from './lens_wrapper';
+import type { UnifiedMetricsGridProps } from '../../types';
 
 export const ChartSizes = {
   s: 230,
@@ -24,10 +24,10 @@ export const ChartSizes = {
 };
 
 export type ChartSize = keyof typeof ChartSizes;
-export type ChartProps = Pick<ChartSectionProps, 'fetchParams'> &
+export type ChartProps = Pick<UnifiedMetricsGridProps, 'fetchParams'> &
   Omit<LensWrapperProps, 'lensProps' | 'description' | 'abortController'> & {
     size?: ChartSize;
-    discoverFetch$: ChartSectionProps['fetch$'];
+    discoverFetch$: UnifiedMetricsGridProps['fetch$'];
     esqlQuery: string;
     title: string;
     chartLayers: LensSeriesLayer[];

@@ -7,29 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { TraceMetricsGrid, type DataSource } from '@kbn/unified-metrics-grid';
 import React from 'react';
-import { once } from 'lodash';
 import type { DataSourceProfileProvider } from '../../../../profiles';
-import type {
-  ChartSectionConfigurationExtensionParams,
-  ChartSectionConfiguration,
-} from '../../../../types';
-export const createChartSection = (
-  dataSource: DataSource
-): DataSourceProfileProvider['profile']['getChartSectionConfiguration'] =>
-  // prevents unmounting the component when the query changes but the index pattern is still valid
-  once((prev: (params: ChartSectionConfigurationExtensionParams) => ChartSectionConfiguration) =>
-    once((params: ChartSectionConfigurationExtensionParams): ChartSectionConfiguration => {
-      return {
-        actions: params.actions,
-        ...(prev ? prev(params) : {}),
-        Component: (props: ChartSectionProps) => (
-          <TraceMetricsGrid {...props} dataSource={dataSource} />
-        ),
-        replaceDefaultChart: true,
-        defaultTopPanelHeight: 300,
-      };
-    })
-  );
+
+export const createChartSection =
+  (dataSource: DataSource): DataSourceProfileProvider['profile']['getChartSectionConfiguration'] =>
+  (prev) =>
+  (params) => {
+    return {
+      ...prev(params),
+      renderChartSection: (props) => {
+        return <TraceMetricsGrid {...props} dataSource={dataSource} actions={params.actions} />;
+      },
+      replaceDefaultChart: true,
+      defaultTopPanelHeight: 300,
+    };
+  };

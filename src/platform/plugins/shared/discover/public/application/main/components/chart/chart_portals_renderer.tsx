@@ -284,21 +284,17 @@ const CustomChartSectionWrapper = ({
     return null;
   }
 
-  const isComponentVisible =
-    !!chartSectionConfig.Component && !!layoutProps.chart && !layoutProps.chart.hidden;
+  const isComponentVisible = !!layoutProps.chart && !layoutProps.chart.hidden;
 
-  return (
-    <chartSectionConfig.Component
-      histogramCss={histogramCss}
-      chartToolbarCss={chartToolbarCss}
-      renderToggleActions={renderCustomChartToggleActions}
-      fetch$={fetch$}
-      fetchParams={fetchParams}
-      isComponentVisible={isComponentVisible}
-      {...unifiedHistogramProps}
-      initialState={metricsGridState}
-      onInitialStateChange={onInitialStateChange}
-      actions={chartSectionConfig.actions}
-    />
-  );
+  return chartSectionConfig.renderChartSection({
+    histogramCss,
+    chartToolbarCss,
+    renderToggleActions: renderCustomChartToggleActions,
+    fetch$,
+    fetchParams,
+    isComponentVisible,
+    ...unifiedHistogramProps,
+    initialState: metricsGridState,
+    onInitialStateChange,
+  });
 };
