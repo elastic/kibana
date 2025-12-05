@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = () => ({
+module.exports = (api) => ({
+  // Enables import-attributes syntax on imports
+  generatorOpts: {
+    importAttributesKeyword: 'with',
+  },
   presets: [
     // plugins always run before presets, but in this case we need the
     // @babel/preset-typescript preset to run first so we have to move
