@@ -95,11 +95,11 @@ export function getFormattedFunctionSignature(
 
   if (formattedParams.length > 0) {
     const paramsString = formattedParams.join(',  \n  ');
-    return `${functionDef.name} (
+    return `${functionDef.name.toUpperCase()}(
   ${paramsString}
 ): ${returnTypesList}`;
   } else {
-    return `${functionDef.name}(): ${returnTypesList}`;
+    return `${functionDef.name.toUpperCase()}(): ${returnTypesList}`;
   }
 }
 

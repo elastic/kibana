@@ -7,14 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Walker, Parser, type ESQLFunction, Builder } from '@kbn/esql-ast';
+import { Walker, Parser, type ESQLFunction } from '@kbn/esql-ast';
 import { within } from '@kbn/esql-ast/src/ast/location';
-import { getFunctionDefinition } from '@kbn/esql-ast/src/definitions/utils';
-import { SignatureAnalyzer } from '@kbn/esql-ast/src/definitions/utils/autocomplete/expressions/signature_analyzer';
-import { unescapeColumnName } from '@kbn/esql-ast/src/definitions/utils/shared';
-import type { FunctionParameter, Signature } from '@kbn/esql-ast/src/definitions/types';
+import {
+  getFormattedFunctionSignature,
+  getFunctionDefinition,
+} from '@kbn/esql-ast/src/definitions/utils';
 import type { ESQLCallbacks } from '../shared/types';
 import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
+import { findSubquery } from '../shared/subqueries_helpers';
+import { getQueryForFields } from '../shared/get_query_for_fields';
+import { correctQuerySyntax } from '../hover/helpers';
 
 export interface SignatureHelpItem {
   signatures: Array<{
@@ -29,349 +32,144 @@ export interface SignatureHelpItem {
   activeParameter: number;
 }
 
-/**
- * Fallback to find a function call by analyzing text when AST parsing fails.
- * Creates mock function nodes without type information - types are enriched later.
- */
-function findFunctionByTextAnalysis(
-  fullText: string,
-  offset: number
-): ESQLFunction<'variadic-call'> | undefined {
-  let parenDepth = 0;
-  let openParenPos = -1;
-
-  // Find opening parenthesis by walking backwards
-  for (let charIndex = offset - 1; charIndex >= 0; charIndex--) {
-    const char = fullText[charIndex];
-
-    if (char === ')') {
-      parenDepth++;
-    } else if (char === '(') {
-      if (parenDepth === 0) {
-        openParenPos = charIndex;
-        break;
-      }
-
-      parenDepth--;
-    }
-  }
-
-  if (openParenPos === -1) {
-    return undefined;
-  }
-
-  // Extract function name before the parenthesis
-  const textBeforeParen = fullText.substring(0, openParenPos);
-  const functionNameMatch = textBeforeParen.match(/([a-zA-Z_][a-zA-Z0-9_]*)\s*$/);
-
-  if (!functionNameMatch) {
-    return undefined;
-  }
-
-  const functionName = functionNameMatch[1].toLowerCase();
-  const argsText = fullText.substring(openParenPos + 1, offset);
-  const args = parseSimpleArguments(argsText);
-
-  return {
-    name: functionName,
-    type: 'function',
-    subtype: 'variadic-call',
-    text: '',
-    location: {
-      min: openParenPos - functionName.length,
-      max: offset,
-    },
-    args,
-    incomplete: false,
-  } as unknown as ESQLFunction<'variadic-call'>;
-}
-
-/**
- * Parse arguments from text, accounting for nested parentheses.
- * Essential for incomplete queries where AST parsing fails.
- * Example: "BUCKET(bytes, " → args: ["bytes", ""]
- */
-function parseSimpleArguments(argsText: string): any[] {
-  const args: any[] = [];
-  let currentArg = '';
-  let parenDepth = 0;
-  let lastWasComma = false;
-
-  for (let charIndex = 0; charIndex < argsText.length; charIndex++) {
-    const char = argsText[charIndex];
-
-    if (char === '(') {
-      parenDepth++;
-      currentArg += char;
-    } else if (char === ')') {
-      parenDepth--;
-      currentArg += char;
-    } else if (char === ',' && parenDepth === 0) {
-      args.push(createMockArgument(currentArg.trim()));
-      currentArg = '';
-      lastWasComma = true;
-    } else {
-      currentArg += char;
-    }
-  }
-
-  // Add last argument (or empty arg if trailing comma)
-  if (currentArg.trim() || lastWasComma) {
-    args.push(createMockArgument(currentArg.trim()));
-  }
-
-  return args;
-}
-
-/**
- * Create minimal mock argument nodes for text-based detection.
- * Only distinguish literals (for type inference) from columns.
- */
-function createMockArgument(argText: string): any {
-  if (!argText) {
-    return { type: 'unknown', text: '', incomplete: true, location: { min: 0, max: 0 }, name: '' };
-  }
-
-  const numValue = Number(argText);
-
-  if (!isNaN(numValue)) {
-    return Number.isInteger(numValue)
-      ? Builder.expression.literal.integer(numValue)
-      : Builder.expression.literal.decimal(numValue);
-  }
-
-  // Note: unescaping will be handled later by getColumnWithPrefixMatch
-  return Builder.expression.column(argText);
-}
-
-const columnPrefixCache = new WeakMap<Map<string, any>, Map<string, any>>();
-
-/**
- * Get column info with prefix matching and caching.
- * First tries direct lookup, then prefix match for partial column names.
- */
-function getColumnWithPrefixMatch(
-  columnsMap: Map<string, any>,
-  columnName: string
-): any | undefined {
-  const unescaped = unescapeColumnName(columnName);
-
-  // Direct lookup first
-  const direct = columnsMap.get(unescaped);
-  if (direct) {
-    return direct;
-  }
-
-  // Check cache for prefix matches
-  if (!columnPrefixCache.has(columnsMap)) {
-    const prefixMap = new Map<string, any>();
-
-    Array.from(columnsMap.entries()).forEach(([name, info]) => {
-      const lowerName = name.toLowerCase();
-
-      // Add prefixes of length 1, 2, and 3
-      for (let len = 1; len <= 3 && len <= lowerName.length; len++) {
-        const prefix = lowerName.substring(0, len);
-
-        if (!prefixMap.has(prefix)) {
-          prefixMap.set(prefix, info);
-        }
-      }
-    });
-
-    columnPrefixCache.set(columnsMap, prefixMap);
-  }
-
-  // Use cached prefix match with unescaped name
-  const prefixMap = columnPrefixCache.get(columnsMap)!;
-  const prefix = unescaped.toLowerCase();
-
-  // Try exact prefix match first, then progressively shorter prefixes
-  for (let len = Math.min(prefix.length, 3); len >= 1; len--) {
-    const searchPrefix = prefix.substring(0, len);
-    const match = prefixMap.get(searchPrefix);
-
-    if (match) {
-      return match;
-    }
-  }
-
-  return undefined;
-}
-
-/**
- * Score a signature based on how well it matches the provided argument types.
- * Higher score = better match
- */
-function scoreSignature(signature: Signature, argTypes: (string | undefined)[]): number {
-  let score = 0;
-
-  for (let i = 0; i < argTypes.length && i < signature.params.length; i++) {
-    const argType = argTypes[i];
-
-    if (!argType) {
-      continue;
-    }
-
-    const paramType = signature.params[i]?.type;
-
-    if (!paramType) {
-      continue;
-    }
-
-    const matches = Array.isArray(paramType) ? paramType.includes(argType) : paramType === argType;
-
-    if (matches) {
-      score += 10; // High score for exact type match
-    }
-  }
-
-  // Bonus for longer signatures (more specific)
-  score += signature.params.length;
-
-  return score;
-}
-
-/**
- * Get columns map for the correct command context
- */
-async function getColumnsMapForCommand(
-  root: any,
-  fullText: string,
-  callbacks: ESQLCallbacks | undefined,
-  commandIndex: number
-): Promise<Map<string, any>> {
-  if (commandIndex > 0) {
-    const queryBeforeCommand = {
-      ...root,
-      commands: root.commands.slice(0, commandIndex),
-    };
-    const { getColumnMap } = getColumnsByTypeRetriever(queryBeforeCommand, fullText, callbacks);
-
-    return await getColumnMap();
-  }
-
-  const { getColumnMap } = getColumnsByTypeRetriever(root, fullText, callbacks);
-
-  return await getColumnMap();
-}
-
 export async function getSignatureHelp(
   fullText: string,
   offset: number,
   callbacks?: ESQLCallbacks
 ): Promise<SignatureHelpItem | undefined> {
-  const { root } = Parser.parse(fullText);
+  const innerText = fullText.substring(0, offset);
+  const endsWithComma = innerText.trimEnd().endsWith(',');
 
-  const astFunctionNode = Walker.findAll(root, (node): node is ESQLFunction<'variadic-call'> => {
-    if (node.type !== 'function' || node.subtype !== 'variadic-call') {
-      return false;
-    }
+  const correctedQuery = correctQuerySyntax(fullText, offset); // HD hover import
+  const { root } = Parser.parse(correctedQuery);
 
-    // Check if cursor is within the function arguments (after opening paren)
-    const leftParen = fullText.indexOf('(', node.location.min);
+  let fnNode: ESQLFunction | undefined;
 
-    return leftParen < offset && within(offset, node);
-  })[0] as ESQLFunction<'variadic-call'> | undefined;
+  Walker.walk(root, {
+    visitFunction: (fn) => {
+      const leftParen = fullText.indexOf('(', fn.location.min);
+      if (leftParen < offset && within(offset - 1, fn)) {
+        fnNode = fn;
+      }
+    },
+  });
 
-  // Fallback: try text-based detection for incomplete queries
-  const functionNode = astFunctionNode || findFunctionByTextAnalysis(fullText, offset);
-
-  if (!functionNode) {
+  if (!fnNode) {
     return undefined;
   }
 
-  const { location } = functionNode;
-  let commandIndex = -1;
+  // Calculate the argument to highlight based on cursor position
+  const currentArgIndex = getArgumentToHighlightIndex(innerText, fnNode, offset);
 
-  if (location) {
-    commandIndex = root.commands.findIndex(
-      ({ location: cmdLocation }) =>
-        cmdLocation.min <= location.min && cmdLocation.max >= location.max
-    );
-  }
+  const { subQuery } = findSubquery(root, offset);
+  const astForContext = subQuery ?? root;
 
-  if (commandIndex === -1) {
-    commandIndex = root.commands.findIndex((cmd) => {
-      const functionsInCommand = Walker.findAll(cmd, (node) => node.type === 'function');
+  const { getColumnMap } = getColumnsByTypeRetriever(
+    getQueryForFields(fullText, astForContext),
+    fullText,
+    callbacks
+  );
+  const columnsMap = await getColumnMap();
 
-      return functionsInCommand.some((fn) => fn === functionNode);
-    });
-  }
-
-  const columnsMap = await getColumnsMapForCommand(root, fullText, callbacks, commandIndex);
-  const fnDefinition = getFunctionDefinition(functionNode.name);
+  const fnDefinition = getFunctionDefinition(fnNode.name);
 
   if (!fnDefinition) {
     return undefined;
   }
 
-  // Use SignatureAnalyzer for type analysis and signature filtering
-  const analyzer = SignatureAnalyzer.fromNode(functionNode, { columns: columnsMap }, fnDefinition);
+  const formattedSignature = getFormattedFunctionSignature(fnDefinition, fnNode, columnsMap);
 
-  let validSignatures = analyzer ? analyzer.getValidSignatures() : fnDefinition.signatures;
-  const argIndex = analyzer
-    ? analyzer.getCurrentParameterIndex()
-    : Math.max(functionNode.args.length - 1, 0);
+  // Extract parameters from formatted signature
+  // Example: "count_distinct (\n  field: boolean | date,\n  precision?: integer\n): long"
+  // Extract to: ['field: boolean | date', 'precision?: integer']
+  const parameters: string[] = [];
+  const openParenIndex = formattedSignature.indexOf('(');
+  const closeParenIndex = formattedSignature.lastIndexOf(')');
 
-  if (functionNode.args.length > 0) {
-    const argTypes: (string | undefined)[] = functionNode.args.map((arg) => {
-      if (!arg || !('type' in arg) || arg.type !== 'column' || !('name' in arg)) {
-        return undefined;
-      }
+  if (openParenIndex !== -1 && closeParenIndex !== -1 && closeParenIndex > openParenIndex) {
+    const paramsSection = formattedSignature.substring(openParenIndex + 1, closeParenIndex);
 
-      // Get column info (unescaping is handled by getColumnWithPrefixMatch)
-      const columnName = String(arg.name);
-      const columnInfo = getColumnWithPrefixMatch(columnsMap, columnName);
-
-      return columnInfo && 'type' in columnInfo ? columnInfo.type : undefined;
-    });
-
-    const hasKnownTypes = argTypes.some((type) => type !== undefined);
-
-    if (hasKnownTypes) {
-      validSignatures = [...validSignatures].sort(
-        (a, b) => scoreSignature(b, argTypes) - scoreSignature(a, argTypes)
-      );
-    }
+    // Split by comma and clean up whitespace/newlines
+    const paramParts = paramsSection
+      .split(',')
+      .map((part) => part.trim())
+      .filter(Boolean);
+    parameters.push(...paramParts);
   }
 
-  const signatures = validSignatures.map((signature) => ({
-    label: buildSignatureLabel(functionNode.name, signature),
+  const signature = {
+    label: formattedSignature,
     documentation: fnDefinition.description,
-    parameters: signature.params.map((param) => ({
-      label: buildParameterLabel(param),
-      documentation: buildParameterDocumentation(param),
-    })),
-  }));
+    parameters:
+      parameters.map((param) => ({
+        label: param,
+        documentation: 'lalala',
+      })) || [],
+  };
 
   return {
-    signatures,
+    signatures: [signature],
     activeSignature: 0,
-    activeParameter: Math.min(argIndex, signatures[0]?.parameters.length - 1 ?? 0),
+    activeParameter: currentArgIndex,
   };
 }
 
-function buildSignatureLabel(functionName: string, { params, returnType }: Signature): string {
-  const paramsLabel = params.map((param) => buildParameterLabel(param)).join(', ');
+/**
+ * Determines which parameter should be highlighted in signature help based on cursor position.
+ *
+ * @param innerText - The query text up to the cursor position
+ * @param fnNode - The function AST node
+ * @param offset - The cursor offset in the full query
+ * @returns The index of the parameter to highlight (0-based)
+ *
+ * Examples:
+ * - `COUNT_DISTINCT(|` -> 0 (cursor after opening paren)
+ * - `COUNT_DISTINCT(field|` -> 0 (cursor within first arg)
+ * - `COUNT_DISTINCT(field,|` -> 1 (cursor after comma)
+ * - `COUNT_DISTINCT(field, |` -> 1 (cursor after comma with space)
+ * - `COUNT_DISTINCT(field, 10|` -> 1 (cursor within second arg)
+ */
+function getArgumentToHighlightIndex(
+  innerText: string,
+  fnNode: ESQLFunction,
+  offset: number
+): number {
+  // If cursor is right after opening parenthesis, highlight first parameter
+  if (innerText.trimEnd().endsWith('(')) {
+    return 0;
+  }
 
-  return `${functionName.toUpperCase()}(${paramsLabel}): ${returnType}`;
-}
+  // Find which argument contains or precedes the cursor
+  for (let i = 0; i < fnNode.args.length; i++) {
+    const arg = fnNode.args[i];
 
-function buildParameterLabel({ name, optional, type }: FunctionParameter): string {
-  const optionalMarker = optional ? '?' : '';
-  const typeStr = Array.isArray(type) ? type.join(' | ') : type;
+    // Skip if arg doesn't have location info
+    if (!arg || (typeof arg === 'object' && !('location' in arg))) {
+      continue;
+    }
 
-  return `${name}${optionalMarker}: ${typeStr}`;
-}
+    // Case 1: Cursor is within this argument's range
+    if (within(offset - 1, arg)) {
+      return i;
+    }
 
-function buildParameterDocumentation(param: FunctionParameter): string {
-  return [
-    param.constantOnly && 'constant value only',
-    param.fieldsOnly && 'field names only',
-    param.supportsWildcard && 'supports wildcards',
-    param.optional && 'optional',
-  ]
-    .filter(Boolean)
-    .join(', ');
+    // Case 2: Cursor is after this argument but before the next
+    // This handles: `fn(arg1,| arg2)` or `fn(arg1, |arg2)`
+    const argEnd = arg.location.max;
+    const nextArg = fnNode.args[i + 1];
+
+    if (nextArg && 'location' in nextArg) {
+      const nextArgStart = nextArg.location.min;
+      // If cursor is between this arg's end and next arg's start, highlight next arg
+      if (offset - 1 >= argEnd && offset - 1 < nextArgStart) {
+        return i + 1;
+      }
+    } else if (offset - 1 >= argEnd) {
+      // No next argument and cursor is after this arg, highlight the next position
+      return i + 1;
+    }
+  }
+
+  // Default: highlight last argument position
+  return Math.max(fnNode.args.length - 1, 0);
 }

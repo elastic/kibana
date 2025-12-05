@@ -48,7 +48,7 @@ export function correctQuerySyntax(query: string, offset: number): string {
   query += bracketsToAppend.join('');
 
   // Replace partially written function arguments: ,) with )
-  query = query.replace(/,\s*\)/g, ')');
+  query = query.replace(/,(\s*)\)/g, '$1)');
 
   return query;
 }

@@ -207,20 +207,13 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
 
     return {
       signatureHelpTriggerCharacters: ['(', ','],
-      signatureHelpRetriggerCharacters: ['(', ','],
-
+      signatureHelpRetriggerCharacters: ['(', ',', ...alphanumeric],
       async provideSignatureHelp(
         model: monaco.editor.ITextModel,
         position: monaco.Position,
         token: monaco.CancellationToken,
         context: monaco.languages.SignatureHelpContext
       ): Promise<monaco.languages.SignatureHelpResult | null> {
-        // When triggered by command from autocomplete, wait for the snippet to be inserted
-        // triggerKind: 1 = Invoke (command), 2 = TriggerCharacter, 3 = ContentChange
-        if (context.triggerKind === 1) {
-          await new Promise((resolve) => setTimeout(resolve, 150));
-        }
-
         const fullText = model.getValue();
         const offset = monacoPositionToOffset(fullText, position);
         const signatureHelp = await getSignatureHelp(fullText, offset, deps);
