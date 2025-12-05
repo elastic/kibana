@@ -14,5 +14,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     // do not resolve files which are ending with `.essentials.ts`
     loadTestFile(require.resolve('./compliance_dashboard'));
     loadTestFile(require.resolve('./csp_integrations_form'));
+    loadTestFile(require.resolve('./graph_alerts_flyout'));
+    loadTestFile(require.resolve('./graph_events_flyout'));
   });
 }
