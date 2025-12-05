@@ -7,12 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataTableRecord } from '../types';
-
-export const getFieldValue = <TRecord extends DataTableRecord, TField extends string>(
-  record: TRecord,
-  field: TField & keyof TRecord['flattened']
-): TRecord['flattened'][TField] => {
-  const value = record.flattened[field];
-  return Array.isArray(value) ? value[0] : (value as TRecord['flattened'][TField]);
-};
+declare module 'zod/v4' {
+  export * from 'zod/v4/index.d.cts';
+}
