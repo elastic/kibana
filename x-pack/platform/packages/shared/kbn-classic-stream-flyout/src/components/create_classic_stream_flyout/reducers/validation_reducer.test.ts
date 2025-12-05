@@ -19,6 +19,8 @@ describe('validationReducer', () => {
         conflictingIndexPattern: undefined,
         hasAttemptedSubmit: false,
         isValidating: false,
+        isSubmitting: false,
+        pendingValidationNames: new Set(),
       });
     });
   });
@@ -30,6 +32,8 @@ describe('validationReducer', () => {
         conflictingIndexPattern: undefined,
         hasAttemptedSubmit: true,
         isValidating: false,
+        isSubmitting: false,
+        pendingValidationNames: new Set(),
       };
 
       const result = validationReducer(state, {
@@ -42,6 +46,8 @@ describe('validationReducer', () => {
         conflictingIndexPattern: undefined,
         hasAttemptedSubmit: true,
         isValidating: false,
+        isSubmitting: false,
+        pendingValidationNames: new Set(),
       });
     });
 
@@ -51,6 +57,8 @@ describe('validationReducer', () => {
         conflictingIndexPattern: undefined,
         hasAttemptedSubmit: false,
         isValidating: false,
+        isSubmitting: false,
+        pendingValidationNames: new Set(),
       };
 
       const result = validationReducer(state, {
@@ -63,6 +71,8 @@ describe('validationReducer', () => {
         conflictingIndexPattern: undefined,
         hasAttemptedSubmit: false,
         isValidating: false,
+        isSubmitting: false,
+        pendingValidationNames: new Set(),
       });
     });
 
@@ -72,6 +82,8 @@ describe('validationReducer', () => {
         conflictingIndexPattern: undefined,
         hasAttemptedSubmit: false,
         isValidating: false,
+        isSubmitting: false,
+        pendingValidationNames: new Set(),
       };
 
       const result = validationReducer(state, {
@@ -84,6 +96,8 @@ describe('validationReducer', () => {
         conflictingIndexPattern: undefined,
         hasAttemptedSubmit: false,
         isValidating: false,
+        isSubmitting: false,
+        pendingValidationNames: new Set(),
       });
     });
 
@@ -93,6 +107,8 @@ describe('validationReducer', () => {
         conflictingIndexPattern: undefined,
         hasAttemptedSubmit: false,
         isValidating: false,
+        isSubmitting: false,
+        pendingValidationNames: new Set(),
       };
 
       const result = validationReducer(state, {
@@ -105,6 +121,8 @@ describe('validationReducer', () => {
         conflictingIndexPattern: undefined,
         hasAttemptedSubmit: false,
         isValidating: false,
+        isSubmitting: false,
+        pendingValidationNames: new Set(),
       });
     });
   });
@@ -116,6 +134,8 @@ describe('validationReducer', () => {
         conflictingIndexPattern: undefined,
         hasAttemptedSubmit: true,
         isValidating: false,
+        isSubmitting: false,
+        pendingValidationNames: new Set(),
       };
 
       const result = validationReducer(state, {
@@ -128,6 +148,8 @@ describe('validationReducer', () => {
         conflictingIndexPattern: 'logs-*',
         hasAttemptedSubmit: true,
         isValidating: false,
+        isSubmitting: false,
+        pendingValidationNames: new Set(),
       });
     });
 
@@ -137,6 +159,8 @@ describe('validationReducer', () => {
         conflictingIndexPattern: 'logs-*',
         hasAttemptedSubmit: true,
         isValidating: false,
+        isSubmitting: false,
+        pendingValidationNames: new Set(),
       };
 
       const result = validationReducer(state, {
@@ -149,6 +173,8 @@ describe('validationReducer', () => {
         conflictingIndexPattern: undefined,
         hasAttemptedSubmit: true,
         isValidating: false,
+        isSubmitting: false,
+        pendingValidationNames: new Set(),
       });
     });
   });
@@ -160,6 +186,8 @@ describe('validationReducer', () => {
         conflictingIndexPattern: undefined,
         hasAttemptedSubmit: false,
         isValidating: false,
+        isSubmitting: false,
+        pendingValidationNames: new Set(),
       };
 
       const result = validationReducer(state, {
@@ -172,6 +200,8 @@ describe('validationReducer', () => {
         conflictingIndexPattern: undefined,
         hasAttemptedSubmit: true,
         isValidating: false,
+        isSubmitting: false,
+        pendingValidationNames: new Set(),
       });
     });
 
@@ -181,6 +211,8 @@ describe('validationReducer', () => {
         conflictingIndexPattern: undefined,
         hasAttemptedSubmit: true,
         isValidating: false,
+        isSubmitting: false,
+        pendingValidationNames: new Set(),
       };
 
       const result = validationReducer(state, {
@@ -193,6 +225,8 @@ describe('validationReducer', () => {
         conflictingIndexPattern: undefined,
         hasAttemptedSubmit: false,
         isValidating: false,
+        isSubmitting: false,
+        pendingValidationNames: new Set(),
       });
     });
   });
@@ -204,6 +238,8 @@ describe('validationReducer', () => {
         conflictingIndexPattern: undefined,
         hasAttemptedSubmit: false,
         isValidating: false,
+        isSubmitting: false,
+        pendingValidationNames: new Set(),
       };
 
       const result = validationReducer(state, {
@@ -216,6 +252,8 @@ describe('validationReducer', () => {
         conflictingIndexPattern: undefined,
         hasAttemptedSubmit: false,
         isValidating: true,
+        isSubmitting: false,
+        pendingValidationNames: new Set(),
       });
     });
 
@@ -225,6 +263,8 @@ describe('validationReducer', () => {
         conflictingIndexPattern: undefined,
         hasAttemptedSubmit: false,
         isValidating: true,
+        isSubmitting: false,
+        pendingValidationNames: new Set(),
       };
 
       const result = validationReducer(state, {
@@ -237,6 +277,8 @@ describe('validationReducer', () => {
         conflictingIndexPattern: undefined,
         hasAttemptedSubmit: false,
         isValidating: false,
+        isSubmitting: false,
+        pendingValidationNames: new Set(),
       });
     });
   });
@@ -248,6 +290,8 @@ describe('validationReducer', () => {
         conflictingIndexPattern: 'logs-*',
         hasAttemptedSubmit: true,
         isValidating: true,
+        isSubmitting: false,
+        pendingValidationNames: new Set(),
       };
 
       const result = validationReducer(state, { type: 'RESET_VALIDATION' });
@@ -257,6 +301,8 @@ describe('validationReducer', () => {
         conflictingIndexPattern: undefined,
         hasAttemptedSubmit: false,
         isValidating: true, // Should keep isValidating state
+        isSubmitting: false,
+        pendingValidationNames: new Set(),
       });
     });
 
@@ -266,6 +312,8 @@ describe('validationReducer', () => {
         conflictingIndexPattern: 'metrics-*',
         hasAttemptedSubmit: true,
         isValidating: false,
+        isSubmitting: false,
+        pendingValidationNames: new Set(),
       };
 
       const result = validationReducer(state, { type: 'RESET_VALIDATION' });
@@ -275,6 +323,8 @@ describe('validationReducer', () => {
         conflictingIndexPattern: undefined,
         hasAttemptedSubmit: false,
         isValidating: false,
+        isSubmitting: false,
+        pendingValidationNames: new Set(),
       });
     });
   });
@@ -286,6 +336,8 @@ describe('validationReducer', () => {
         conflictingIndexPattern: 'logs-*',
         hasAttemptedSubmit: true,
         isValidating: false,
+        isSubmitting: false,
+        pendingValidationNames: new Set(),
       };
 
       const result = validationReducer(state, { type: 'UNKNOWN_ACTION' } as any);

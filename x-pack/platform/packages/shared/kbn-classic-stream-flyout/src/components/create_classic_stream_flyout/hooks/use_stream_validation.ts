@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
-import { useDebounceFn } from '@kbn/react-hooks';
+import { useCallback, useEffect, useReducer, useRef } from 'react';
 import { validateStreamName, type StreamNameValidator } from '../../../utils';
 import { useAbortController } from './use_abort_controller';
+import { useDebouncedCallback } from './use_debounced_callback';
 import {
   validationReducer,
   initialValidationState,
@@ -46,14 +46,19 @@ export const useStreamValidation = ({
     validationReducer,
     initialValidationState
   );
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { validationError, conflictingIndexPattern, hasAttemptedSubmit, isValidating } =
-    validationState;
+  const {
+    validationError,
+    conflictingIndexPattern,
+    hasAttemptedSubmit,
+    isValidating,
+    isSubmitting,
+    pendingValidationNames,
+  } = validationState;
 
-  const pendingValidationNamesRef = useRef<Set<string>>(new Set());
   const lastStreamNameRef = useRef<string>('');
-  // Ref needed for closure in useDebounceFn
+  // Ref needed to access current isSubmitting value in handleStreamNameChange callback
+  // which may have been created before isSubmitting was set to true
   const isSubmittingRef = useRef(false);
 
   const { getAbortController: getCreateAbortController, abort: abortCreateValidation } =
@@ -100,49 +105,36 @@ export const useStreamValidation = ({
     [getDebouncedAbortController, isDebouncedAborted]
   );
 
-  // Stable reference for debounced validation
-  const runDebouncedValidationRef = useRef(runDebouncedValidation);
-  runDebouncedValidationRef.current = runDebouncedValidation;
-
-  const { run: runDebouncedValidationDebounced, cancel: cancelDebouncedValidation } = useDebounceFn(
-    async (name: string) => {
+  const { trigger: triggerDebouncedValidation, cancel: cancelDebouncedValidation } =
+    useDebouncedCallback(async (name: string) => {
       // Skip if name has changed since this validation was scheduled
       if (lastStreamNameRef.current !== name) {
         return;
       }
-      if (pendingValidationNamesRef.current.has(name)) {
+      if (pendingValidationNames.has(name)) {
         return;
       }
-      if (isSubmittingRef.current) {
+      if (isSubmitting) {
         return;
       }
-      pendingValidationNamesRef.current.add(name);
+      dispatchValidation({ type: 'ADD_PENDING_VALIDATION_NAME', payload: name });
       try {
-        const isValid = await runDebouncedValidationRef.current(name);
+        const isValid = await runDebouncedValidation(name);
         if (isValid) {
           dispatchValidation({ type: 'SET_HAS_ATTEMPTED_SUBMIT', payload: false });
         }
       } finally {
-        pendingValidationNamesRef.current.delete(name);
+        dispatchValidation({ type: 'REMOVE_PENDING_VALIDATION_NAME', payload: name });
       }
-    },
-    { wait: debounceMs }
-  );
-
-  // Store debounced functions in refs to avoid recreating on every render
-  const runDebouncedValidationDebouncedRef = useRef(runDebouncedValidationDebounced);
-  runDebouncedValidationDebouncedRef.current = runDebouncedValidationDebounced;
-  const cancelDebouncedValidationRef = useRef(cancelDebouncedValidation);
-  cancelDebouncedValidationRef.current = cancelDebouncedValidation;
+    }, debounceMs);
 
   const resetValidationState = useCallback(() => {
     abortCreateValidation();
     abortDebouncedValidation();
-    cancelDebouncedValidationRef.current();
+    cancelDebouncedValidation();
     dispatchValidation({ type: 'RESET_VALIDATION' });
-    pendingValidationNamesRef.current.clear();
     isSubmittingRef.current = false;
-  }, [abortCreateValidation, abortDebouncedValidation]);
+  }, [abortCreateValidation, abortDebouncedValidation, cancelDebouncedValidation]);
 
   const handleStreamNameChange = useCallback(
     (newStreamName: string) => {
@@ -160,7 +152,7 @@ export const useStreamValidation = ({
       if (isSubmittingRef.current && hasNameChanged) {
         isSubmittingRef.current = false;
         abortCreateValidation();
-        setIsSubmitting(false);
+        dispatchValidation({ type: 'SET_IS_SUBMITTING', payload: false });
         // Keep isValidating true to show loading state during debounced validation
       }
 
@@ -172,23 +164,31 @@ export const useStreamValidation = ({
           dispatchValidation({ type: 'SET_VALIDATION_ERROR', payload: null });
           dispatchValidation({ type: 'SET_CONFLICTING_INDEX_PATTERN', payload: undefined });
         }
-        if (!pendingValidationNamesRef.current.has(newStreamName)) {
+        if (!pendingValidationNames.has(newStreamName)) {
           // Show loading state while waiting for debounced validation
           dispatchValidation({ type: 'SET_IS_VALIDATING', payload: true });
           // Abort any in-flight validation and cancel pending debounced validation before scheduling a new one
           abortDebouncedValidation();
-          cancelDebouncedValidationRef.current();
-          runDebouncedValidationDebouncedRef.current(newStreamName);
+          cancelDebouncedValidation();
+          triggerDebouncedValidation(newStreamName);
         }
       }
     },
-    [hasAttemptedSubmit, validationError, abortCreateValidation, abortDebouncedValidation]
+    [
+      hasAttemptedSubmit,
+      validationError,
+      pendingValidationNames,
+      abortCreateValidation,
+      abortDebouncedValidation,
+      cancelDebouncedValidation,
+      triggerDebouncedValidation,
+    ]
   );
 
   const handleCreate = useCallback(async () => {
-    setIsSubmitting(true);
+    dispatchValidation({ type: 'SET_IS_SUBMITTING', payload: true });
     isSubmittingRef.current = true;
-    cancelDebouncedValidationRef.current();
+    cancelDebouncedValidation();
     abortDebouncedValidation();
 
     const abortController = getCreateAbortController();
@@ -202,6 +202,11 @@ export const useStreamValidation = ({
         onValidateRef.current,
         abortController.signal
       );
+
+      // Check if validation was aborted before processing result
+      if (abortController.signal.aborted) {
+        return;
+      }
 
       dispatchValidation({ type: 'SET_VALIDATION_ERROR', payload: result.errorType });
       dispatchValidation({
@@ -220,10 +225,17 @@ export const useStreamValidation = ({
       }
     } finally {
       dispatchValidation({ type: 'SET_IS_VALIDATING', payload: false });
-      setIsSubmitting(false);
+      dispatchValidation({ type: 'SET_IS_SUBMITTING', payload: false });
       isSubmittingRef.current = false;
     }
-  }, [abortDebouncedValidation, getCreateAbortController, onCreate, streamName, onValidateRef]);
+  }, [
+    abortDebouncedValidation,
+    cancelDebouncedValidation,
+    getCreateAbortController,
+    onCreate,
+    streamName,
+    onValidateRef,
+  ]);
 
   const resetOnTemplateChange = useCallback(() => {
     resetValidationState();
@@ -232,6 +244,11 @@ export const useStreamValidation = ({
   const resetOnIndexPatternChange = useCallback(() => {
     resetValidationState();
   }, [resetValidationState]);
+
+  // Sync isSubmitting from reducer state to ref for use in callbacks with stale closures
+  useEffect(() => {
+    isSubmittingRef.current = isSubmitting;
+  }, [isSubmitting]);
 
   useEffect(() => {
     return () => {
