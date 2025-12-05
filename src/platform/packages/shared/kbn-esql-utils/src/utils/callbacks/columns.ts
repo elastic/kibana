@@ -14,7 +14,7 @@ import { getESQLQueryColumns } from '../run_query';
 
 /**
  * Gets the columns of an ESQL query, formatted as ESQLFieldWithMetadata
- * @param queryToExecute The ESQL query to execute
+ * @param esqlQuery The ESQL query to execute
  * @param search The search service to use
  * @param variables Optional ESQL control variables to substitute in the query
  * @param signal Optional AbortSignal to cancel the request
@@ -22,22 +22,22 @@ import { getESQLQueryColumns } from '../run_query';
  * @returns A promise that resolves to an array of ESQLFieldWithMetadata
  */
 export const getEsqlColumns = async ({
-  query: queryToExecute,
+  esqlQuery,
   search,
   variables,
   signal,
   timeRange,
 }: {
   search: ISearchGeneric;
-  query?: string;
+  esqlQuery?: string;
   variables?: ESQLControlVariable[];
   signal?: AbortSignal;
   timeRange?: TimeRange;
 }): Promise<ESQLFieldWithMetadata[]> => {
-  if (queryToExecute) {
+  if (esqlQuery) {
     try {
       const columns = await getESQLQueryColumns({
-        esqlQuery: queryToExecute,
+        esqlQuery,
         search,
         dropNullColumns: true,
         variables: variables ?? [],
