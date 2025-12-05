@@ -150,6 +150,31 @@ export interface ESQLAstForkCommand extends ESQLCommand<'fork'> {
 }
 
 /**
+ * Represents a PROMQL command.
+ *
+ * ```
+ * PROMQL <params_map> ( <query> )
+ * ```
+ */
+export interface ESQLAstPromqlCommand extends ESQLCommand<'promql'> {
+  args:
+    | // Full version of args
+    [
+        /** The parameters map for the PROMQL query. */
+        params: ESQLMap,
+        /** The embedded PromQL query expression wrapped in parentheses. */
+        query: ESQLParens
+      ]
+
+    // Below versions are in case the command is `.incomplete: true`.
+    | [
+        /** The parameters map for the PROMQL query. */
+        params: ESQLMap
+      ]
+    | [];
+}
+
+/**
  * Represents a header pseudo-command, such as SET.
  *
  * Example:
@@ -247,7 +272,8 @@ export interface ESQLFunctionCallExpression extends ESQLFunction<'variadic-call'
   args: ESQLAstItem[];
 }
 
-export interface ESQLUnaryExpression extends ESQLFunction<'unary-expression'> {
+export interface ESQLUnaryExpression<Name extends string = string>
+  extends ESQLFunction<'unary-expression', Name> {
   subtype: 'unary-expression';
   args: [ESQLAstItem];
 }
@@ -398,6 +424,20 @@ export interface ESQLColumn extends ESQLAstBaseItem {
   type: 'column';
 
   /**
+   * Optional qualifier for the column, e.g. index name or alias.
+   *
+   * @example
+   *
+   * ```esql
+   * [index].[column]
+   * [index].[nested.column.part]
+   * ```
+   *
+   * `index` is the qualifier.
+   */
+  qualifier?: ESQLIdentifier;
+
+  /**
    * A ES|QL column name can be composed of multiple parts,
    * e.g: part1.part2.`part``3️⃣`.?param. Where parts can be quoted, or not
    * quoted, or even be a parameter.
@@ -457,12 +497,32 @@ export interface ESQLList extends ESQLAstBaseItem {
 }
 
 /**
- * Represents a ES|QL "map" object, normally used as the last argument of a
- * function.
+ * Represents a ES|QL "map" object, a list of key-value pairs. Can have different
+ * *representation* styles, such as "map" or "listpairs". The representation
+ * style affects how the map is pretty-printed.
  */
 export interface ESQLMap extends ESQLAstBaseItem {
   type: 'map';
   entries: ESQLMapEntry[];
+
+  /**
+   * Specifies how the key-value pairs are represented.
+   *
+   * @default 'map'
+   *
+   * `map` example:
+   *
+   * ```
+   * { "key1": "value1", "key2": "value2" }
+   * ```
+   *
+   * `listpairs` example:
+   *
+   * ```
+   * key1 value1 key2 value2
+   * ```
+   */
+  representation?: 'map' | 'listpairs';
 }
 
 /**
@@ -470,7 +530,7 @@ export interface ESQLMap extends ESQLAstBaseItem {
  */
 export interface ESQLMapEntry extends ESQLAstBaseItem {
   type: 'map-entry';
-  key: ESQLStringLiteral;
+  key: ESQLAstExpression;
   value: ESQLAstExpression;
 }
 

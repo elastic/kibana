@@ -34,7 +34,7 @@ import {
   ESQL_COMMON_NUMERIC_TYPES,
 } from '../../../definitions/types';
 import { correctQuerySyntax, findAstPosition } from '../../../definitions/utils/ast';
-import { parse } from '../../../parser';
+import { Parser } from '../../../parser';
 import { setTestFunctions } from '../../../definitions/utils/test_functions';
 import { getDateHistogramCompletionItem } from '../../../..';
 
@@ -126,9 +126,9 @@ describe('STATS Autocomplete', () => {
 
   const suggest = async (query: string) => {
     const correctedQuery = correctQuerySyntax(query);
-    const { ast } = parse(correctedQuery, { withFormatting: true });
+    const { root } = Parser.parse(correctedQuery, { withFormatting: true });
     const cursorPosition = query.length;
-    const { command } = findAstPosition(ast, cursorPosition);
+    const { command } = findAstPosition(root, cursorPosition);
     if (!command) {
       throw new Error('Command not found in the parsed query');
     }
@@ -899,6 +899,21 @@ describe('STATS Autocomplete', () => {
 
         // Should NOT suggest comma because 2-param signature is complete
         expect(labels).not.toContain(',');
+      });
+
+      test('after comma in BY with assignment should suggest fields and functions', async () => {
+        const fields = getFieldNamesByType('any');
+
+        await statsExpectSuggestions(
+          'FROM a | STATS BY col = BUCKET(@timestamp, 50, ?_tstart, ?_tend), ',
+          [
+            ' = ',
+            getDateHistogramCompletionItem().text,
+            ...fields,
+            ...getFunctionSignaturesByReturnType(Location.STATS, 'any', { scalar: true }),
+            ...allGroupingFunctions,
+          ]
+        );
       });
     });
   });

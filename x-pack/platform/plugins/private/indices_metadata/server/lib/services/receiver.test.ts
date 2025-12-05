@@ -29,9 +29,12 @@ describe('Indices Metadata - MetadataReceiver', () => {
         explainLifecycle: jest.fn(),
         getLifecycle: jest.fn(),
       },
+      transport: {
+        request: jest.fn(),
+      },
     } as unknown as ElasticsearchClient;
 
-    receiver = new MetadataReceiver(logger, esClient);
+    receiver = new MetadataReceiver(logger, esClient, false);
   });
 
   describe('getIndices', () => {
@@ -80,24 +83,12 @@ describe('Indices Metadata - MetadataReceiver', () => {
       ]);
     });
 
-    it('should handle empty indices response', async () => {
-      (esClient.indices.get as jest.Mock).mockResolvedValue({});
-
-      const result = await receiver.getIndices();
-
-      expect(result).toEqual([]);
-    });
-
-    it('should handle null indices response', async () => {
-      (esClient.indices.get as jest.Mock).mockResolvedValue(null);
-
-      const result = await receiver.getIndices();
-
-      expect(result).toEqual([]);
-    });
-
-    it('should handle undefined indices response', async () => {
-      (esClient.indices.get as jest.Mock).mockResolvedValue(undefined);
+    it.each([
+      { description: 'empty', mockValue: {} },
+      { description: 'null', mockValue: null },
+      { description: 'undefined', mockValue: undefined },
+    ])('should handle $description indices response', async ({ mockValue }) => {
+      (esClient.indices.get as jest.Mock).mockResolvedValue(mockValue);
 
       const result = await receiver.getIndices();
 
@@ -183,32 +174,13 @@ describe('Indices Metadata - MetadataReceiver', () => {
       ]);
     });
 
-    it('should handle empty data_streams response', async () => {
-      (esClient.indices.getDataStream as jest.Mock).mockResolvedValue({ data_streams: [] });
-
-      const result = await receiver.getDataStreams();
-
-      expect(result).toEqual([]);
-    });
-
-    it('should handle null data_streams response', async () => {
-      (esClient.indices.getDataStream as jest.Mock).mockResolvedValue({ data_streams: null });
-
-      const result = await receiver.getDataStreams();
-
-      expect(result).toEqual([]);
-    });
-
-    it('should handle undefined data_streams response', async () => {
-      (esClient.indices.getDataStream as jest.Mock).mockResolvedValue({ data_streams: undefined });
-
-      const result = await receiver.getDataStreams();
-
-      expect(result).toEqual([]);
-    });
-
-    it('should handle missing data_streams property', async () => {
-      (esClient.indices.getDataStream as jest.Mock).mockResolvedValue({});
+    it.each([
+      { description: 'empty data_streams', mockValue: { data_streams: [] } },
+      { description: 'null data_streams', mockValue: { data_streams: null } },
+      { description: 'undefined data_streams', mockValue: { data_streams: undefined } },
+      { description: 'missing data_streams property', mockValue: {} },
+    ])('should handle $description response', async ({ mockValue }) => {
+      (esClient.indices.getDataStream as jest.Mock).mockResolvedValue(mockValue);
 
       const result = await receiver.getDataStreams();
 
@@ -319,26 +291,12 @@ describe('Indices Metadata - MetadataReceiver', () => {
       ]);
     });
 
-    it('should handle empty index_templates response', async () => {
-      (esClient.indices.getIndexTemplate as jest.Mock).mockResolvedValue({ index_templates: [] });
-
-      const result = await receiver.getIndexTemplatesStats();
-
-      expect(result).toEqual([]);
-    });
-
-    it('should handle null index_templates response', async () => {
-      (esClient.indices.getIndexTemplate as jest.Mock).mockResolvedValue({ index_templates: null });
-
-      const result = await receiver.getIndexTemplatesStats();
-
-      expect(result).toEqual([]);
-    });
-
-    it('should handle undefined index_templates response', async () => {
-      (esClient.indices.getIndexTemplate as jest.Mock).mockResolvedValue({
-        index_templates: undefined,
-      });
+    it.each([
+      { description: 'empty', mockValue: { index_templates: [] } },
+      { description: 'null', mockValue: { index_templates: null } },
+      { description: 'undefined', mockValue: { index_templates: undefined } },
+    ])('should handle $description index_templates response', async ({ mockValue }) => {
+      (esClient.indices.getIndexTemplate as jest.Mock).mockResolvedValue(mockValue);
 
       const result = await receiver.getIndexTemplatesStats();
 
@@ -458,9 +416,9 @@ describe('Indices Metadata - MetadataReceiver', () => {
           index_name: 'test-index-1',
           query_total: 100,
           query_time_in_millis: 1000,
-          docs_count: 500,
+          docs_count: 250,
           docs_deleted: 10,
-          docs_total_size_in_bytes: 1024000,
+          docs_total_size_in_bytes: 512000,
           index_failed: 5,
           index_failed_due_to_version_conflict: 2,
           docs_count_primaries: 250,
@@ -470,30 +428,12 @@ describe('Indices Metadata - MetadataReceiver', () => {
       ]);
     });
 
-    it('should handle empty indices response', async () => {
-      (esClient.indices.stats as jest.Mock).mockResolvedValue({ indices: {} });
-
-      const results = [];
-      for await (const stat of receiver.getIndicesStats(['test-index-1'], 10)) {
-        results.push(stat);
-      }
-
-      expect(results).toEqual([]);
-    });
-
-    it('should handle null indices response', async () => {
-      (esClient.indices.stats as jest.Mock).mockResolvedValue({ indices: null });
-
-      const results = [];
-      for await (const stat of receiver.getIndicesStats(['test-index-1'], 10)) {
-        results.push(stat);
-      }
-
-      expect(results).toEqual([]);
-    });
-
-    it('should handle undefined indices response', async () => {
-      (esClient.indices.stats as jest.Mock).mockResolvedValue({ indices: undefined });
+    it.each([
+      { description: 'empty', mockValue: { indices: {} } },
+      { description: 'null', mockValue: { indices: null } },
+      { description: 'undefined', mockValue: { indices: undefined } },
+    ])('should handle $description indices response', async ({ mockValue }) => {
+      (esClient.indices.stats as jest.Mock).mockResolvedValue(mockValue);
 
       const results = [];
       for await (const stat of receiver.getIndicesStats(['test-index-1'], 10)) {
@@ -564,9 +504,9 @@ describe('Indices Metadata - MetadataReceiver', () => {
           index_name: 'test-index-1',
           query_total: 100,
           query_time_in_millis: 1000,
-          docs_count: 500,
+          docs_count: undefined,
           docs_deleted: 10,
-          docs_total_size_in_bytes: 1024000,
+          docs_total_size_in_bytes: undefined,
           index_failed: 5,
           index_failed_due_to_version_conflict: 2,
           docs_count_primaries: undefined,
@@ -618,9 +558,9 @@ describe('Indices Metadata - MetadataReceiver', () => {
           index_name: 'test-index-1',
           query_total: 100,
           query_time_in_millis: 1000,
-          docs_count: 500,
+          docs_count: 250,
           docs_deleted: 10,
-          docs_total_size_in_bytes: 1024000,
+          docs_total_size_in_bytes: 512000,
           index_failed: undefined,
           index_failed_due_to_version_conflict: undefined,
           docs_count_primaries: 250,
@@ -662,6 +602,249 @@ describe('Indices Metadata - MetadataReceiver', () => {
           docs_total_size_in_bytes_primaries: undefined,
         },
       ]);
+    });
+
+    describe('with metering stats', () => {
+      describe('serverless mode', () => {
+        let serverlessReceiver: MetadataReceiver;
+
+        beforeEach(() => {
+          serverlessReceiver = new MetadataReceiver(logger, esClient, true);
+        });
+
+        it.each([
+          {
+            description: 'metering data matches primaries',
+            meteringResponse: {
+              indices: [
+                {
+                  name: 'test-index-1',
+                  num_docs: 250,
+                  size_in_bytes: 512000,
+                },
+              ],
+            },
+            expectError: false,
+          },
+          {
+            description: 'metering stats fetch fails',
+            meteringResponse: new Error('Metering API error'),
+            expectError: true,
+          },
+          {
+            description: 'metering stats are empty',
+            meteringResponse: {
+              indices: [],
+            },
+            expectError: false,
+          },
+        ])(
+          'should not log debug message when $description',
+          async ({ meteringResponse, expectError }) => {
+            (esClient.indices.stats as jest.Mock).mockResolvedValue(mockStatsResponse);
+
+            if (meteringResponse instanceof Error) {
+              (esClient.transport.request as jest.Mock).mockRejectedValue(meteringResponse);
+            } else {
+              (esClient.transport.request as jest.Mock).mockResolvedValue(meteringResponse);
+            }
+
+            const results = [];
+            for await (const stat of serverlessReceiver.getIndicesStats(['test-index-1'], 10)) {
+              results.push(stat);
+            }
+
+            expect(esClient.transport.request).toHaveBeenCalledWith({
+              method: 'GET',
+              path: '/_metering/stats/test-index-1',
+            });
+
+            if (expectError) {
+              expect(logger.error).toHaveBeenCalledWith('Error fetching metering stats', {
+                error: meteringResponse,
+              });
+            }
+
+            expect(results).toEqual([
+              {
+                index_name: 'test-index-1',
+                query_total: 100,
+                query_time_in_millis: 1000,
+                docs_count: 250,
+                docs_deleted: 10,
+                docs_total_size_in_bytes: 512000,
+                index_failed: 5,
+                index_failed_due_to_version_conflict: 2,
+                docs_count_primaries: 250,
+                docs_deleted_primaries: 5,
+                docs_total_size_in_bytes_primaries: 512000,
+              },
+            ]);
+
+            expect(logger.debug).not.toHaveBeenCalledWith(
+              'Metering stats differ from regular stats',
+              expect.any(Object)
+            );
+          }
+        );
+
+        it('should log debug message when metering stats differ from regular stats', async () => {
+          const mockMeteringResponse = {
+            indices: [
+              {
+                name: 'test-index-1',
+                num_docs: 300,
+                size_in_bytes: 600000,
+              },
+            ],
+          };
+
+          (esClient.indices.stats as jest.Mock).mockResolvedValue(mockStatsResponse);
+          (esClient.transport.request as jest.Mock).mockResolvedValue(mockMeteringResponse);
+
+          const results = [];
+          for await (const stat of serverlessReceiver.getIndicesStats(['test-index-1'], 10)) {
+            results.push(stat);
+          }
+
+          expect(results).toEqual([
+            {
+              index_name: 'test-index-1',
+              query_total: 100,
+              query_time_in_millis: 1000,
+              docs_count: 300,
+              docs_deleted: 10,
+              docs_total_size_in_bytes: 600000,
+              index_failed: 5,
+              index_failed_due_to_version_conflict: 2,
+              docs_count_primaries: 300,
+              docs_deleted_primaries: 5,
+              docs_total_size_in_bytes_primaries: 600000,
+            },
+          ]);
+
+          expect(logger.debug).toHaveBeenCalledWith('Metering stats differ from regular stats', {
+            index: 'test-index-1',
+            metering: { num_docs: 300, size_in_bytes: 600000 },
+            regular: { docs_count: 250, size_in_bytes: 512000 },
+          });
+        });
+
+        it('should handle partial metering stats', async () => {
+          const mockMultiIndexStatsResponse = {
+            indices: {
+              'test-index-1': mockStatsResponse.indices['test-index-1'],
+              'test-index-2': {
+                total: {
+                  search: {
+                    query_total: 200,
+                    query_time_in_millis: 2000,
+                  },
+                  docs: {
+                    count: 1000,
+                    deleted: 20,
+                  },
+                  store: {
+                    size_in_bytes: 2048000,
+                  },
+                  indexing: {
+                    index_failed: 10,
+                    index_failed_due_to_version_conflict: 4,
+                  },
+                },
+                primaries: {
+                  docs: {
+                    count: 500,
+                    deleted: 10,
+                  },
+                  store: {
+                    size_in_bytes: 1024000,
+                  },
+                },
+              },
+            },
+          };
+
+          const mockMeteringResponse = {
+            indices: [
+              {
+                name: 'test-index-1',
+                num_docs: 300,
+                size_in_bytes: 600000,
+              },
+            ],
+          };
+
+          (esClient.indices.stats as jest.Mock).mockResolvedValue(mockMultiIndexStatsResponse);
+          (esClient.transport.request as jest.Mock).mockResolvedValue(mockMeteringResponse);
+
+          const results = [];
+          for await (const stat of serverlessReceiver.getIndicesStats(
+            ['test-index-1', 'test-index-2'],
+            100
+          )) {
+            results.push(stat);
+          }
+
+          expect(results).toEqual([
+            {
+              index_name: 'test-index-1',
+              query_total: 100,
+              query_time_in_millis: 1000,
+              docs_count: 300,
+              docs_deleted: 10,
+              docs_total_size_in_bytes: 600000,
+              index_failed: 5,
+              index_failed_due_to_version_conflict: 2,
+              docs_count_primaries: 300,
+              docs_deleted_primaries: 5,
+              docs_total_size_in_bytes_primaries: 600000,
+            },
+            {
+              index_name: 'test-index-2',
+              query_total: 200,
+              query_time_in_millis: 2000,
+              docs_count: 500,
+              docs_deleted: 20,
+              docs_total_size_in_bytes: 1024000,
+              index_failed: 10,
+              index_failed_due_to_version_conflict: 4,
+              docs_count_primaries: 500,
+              docs_deleted_primaries: 10,
+              docs_total_size_in_bytes_primaries: 1024000,
+            },
+          ]);
+        });
+      });
+
+      describe('non-serverless mode', () => {
+        it('should not call metering API', async () => {
+          (esClient.indices.stats as jest.Mock).mockResolvedValue(mockStatsResponse);
+
+          const results = [];
+          for await (const stat of receiver.getIndicesStats(['test-index-1'], 10)) {
+            results.push(stat);
+          }
+
+          expect(esClient.transport.request).not.toHaveBeenCalled();
+
+          expect(results).toEqual([
+            {
+              index_name: 'test-index-1',
+              query_total: 100,
+              query_time_in_millis: 1000,
+              docs_count: 250,
+              docs_deleted: 10,
+              docs_total_size_in_bytes: 512000,
+              index_failed: 5,
+              index_failed_due_to_version_conflict: 2,
+              docs_count_primaries: 250,
+              docs_deleted_primaries: 5,
+              docs_total_size_in_bytes_primaries: 512000,
+            },
+          ]);
+        });
+      });
     });
   });
 
@@ -733,30 +916,12 @@ describe('Indices Metadata - MetadataReceiver', () => {
       ]);
     });
 
-    it('should handle empty indices response', async () => {
-      (esClient.ilm.explainLifecycle as jest.Mock).mockResolvedValue({ indices: {} });
-
-      const results = [];
-      for await (const stat of receiver.getIlmsStats(['test-index-1'])) {
-        results.push(stat);
-      }
-
-      expect(results).toEqual([]);
-    });
-
-    it('should handle null indices response', async () => {
-      (esClient.ilm.explainLifecycle as jest.Mock).mockResolvedValue({ indices: null });
-
-      const results = [];
-      for await (const stat of receiver.getIlmsStats(['test-index-1'])) {
-        results.push(stat);
-      }
-
-      expect(results).toEqual([]);
-    });
-
-    it('should handle undefined indices response', async () => {
-      (esClient.ilm.explainLifecycle as jest.Mock).mockResolvedValue({ indices: undefined });
+    it.each([
+      { description: 'empty', mockValue: { indices: {} } },
+      { description: 'null', mockValue: { indices: null } },
+      { description: 'undefined', mockValue: { indices: undefined } },
+    ])('should handle $description indices response', async ({ mockValue }) => {
+      (esClient.ilm.explainLifecycle as jest.Mock).mockResolvedValue(mockValue);
 
       const results = [];
       for await (const stat of receiver.getIlmsStats(['test-index-1'])) {

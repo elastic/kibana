@@ -19,6 +19,7 @@ class AgentBuilderDocLinks {
   public mcpServer: string = '';
   public a2aServer: string = '';
   public limitationsKnownIssues: string = '';
+  public limitationsKnownIssuesConversationLengthExceeded: string = '';
 
   constructor() {}
 
@@ -34,6 +35,7 @@ class AgentBuilderDocLinks {
     this.mcpServer = newDocLinks.agentBuilder.mcpServer;
     this.a2aServer = newDocLinks.agentBuilder.a2aServer;
     this.limitationsKnownIssues = newDocLinks.agentBuilder.limitationsKnownIssues;
+    this.limitationsKnownIssuesConversationLengthExceeded = `${newDocLinks.agentBuilder.limitationsKnownIssues}#conversation-length-exceeded`;
   }
 }
 

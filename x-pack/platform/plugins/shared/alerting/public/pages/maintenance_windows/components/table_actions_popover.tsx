@@ -16,8 +16,8 @@ import {
   EuiPopover,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import type { MaintenanceWindowStatus } from '@kbn/maintenance-windows-plugin/common';
 import * as i18n from '../translations';
-import type { MaintenanceWindowStatus } from '../../../../common';
 import { useKibana } from '../../../utils/kibana_react';
 
 export interface TableActionsPopoverProps {
@@ -251,6 +251,7 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
         upcoming: ['edit', 'copyId', 'archive', 'delete'],
         finished: ['edit', 'copyId', 'archive', 'delete'],
         archived: ['copyId', 'unarchive', 'delete'],
+        disabled: ['copyId', 'delete'],
       };
       return statusMenuItemsMap[status].map((type) => menuItems[type]);
     }, [status, closePopover, onEdit, id, toasts, showModal]);

@@ -11,4 +11,4 @@ export { takeSnapshot } from './take_snapshot';
 export { fetchSnapshot } from './fetch_snapshot';
 export { getNewTypes } from './get_new_types';
 export { getUpdatedTypes } from './get_updated_types';
-export { validateChanges } from './validate_changes';
+export { validateChangesNewType, validateChangesExistingType } from './validate_changes';

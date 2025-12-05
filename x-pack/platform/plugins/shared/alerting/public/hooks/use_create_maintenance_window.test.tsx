@@ -41,7 +41,7 @@ const maintenanceWindow = {
   rRule: {
     dtstart: '2023-03-23T19:16:21.293Z',
     tzid: 'America/New_York',
-    freq: 3,
+    freq: 3 as const,
     interval: 1,
     byweekday: ['TH'],
   },

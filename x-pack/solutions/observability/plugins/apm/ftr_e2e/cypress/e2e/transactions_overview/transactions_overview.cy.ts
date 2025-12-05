@@ -6,7 +6,7 @@
  */
 
 import url from 'url';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { apm, timerange } from '@kbn/synthtrace-client';
 import { synthtrace } from '../../../synthtrace';
 import { checkA11y } from '../../support/commands';
 

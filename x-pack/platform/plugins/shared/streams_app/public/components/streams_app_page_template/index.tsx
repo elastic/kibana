@@ -17,7 +17,7 @@ export function StreamsAppPageTemplate({ children }: { children: React.ReactNode
       minHeight={0}
       restrictWidth={false}
       className={css`
-        max-height: 100%;
+        height: 0;
       `}
     >
       {children}
@@ -35,15 +35,14 @@ StreamsAppPageTemplate.Body = ({
     grow
     className={css`
       overflow-y: auto;
-      padding-inline: ${noPadding ? '0px' : '24px'};
+      ${noPadding ? 'padding: 0px;' : ''}
     `}
     contentProps={{
       className: css`
         display: flex;
         flex-direction: column;
-        flex-grow: 1;
-        padding-block: ${noPadding ? '0px' : '24px'};
         height: 100%;
+        ${noPadding ? 'padding: 0px;' : ''}
       `,
     }}
     {...props}

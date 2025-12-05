@@ -1,0 +1,7 @@
+{
+  "name": "@kbn/observability-agent-builder",
+  "description": "Agent builder UI components for Observability",
+  "private": true,
+  "version": "1.0.0",
+  "license": "Elastic License 2.0"
+}

@@ -7,9 +7,9 @@
 
 import expect from '@kbn/expect';
 import { ServicesAPIResponseRT } from '@kbn/infra-plugin/common/http_api/host_details';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { apm, timerange } from '@kbn/synthtrace-client';
 import type { SupertestWithRoleScopeType } from '../../services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 

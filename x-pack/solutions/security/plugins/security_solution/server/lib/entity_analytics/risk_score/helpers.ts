@@ -25,3 +25,5 @@ export const isRiskScoreCalculationComplete = (result: RiskScoresCalculationResp
   Object.keys(result.after_keys.host ?? {}).length === 0 &&
   Object.keys(result.after_keys.user ?? {}).length === 0 &&
   Object.keys(result.after_keys.service ?? {}).length === 0;
+
+export const max10DecimalPlaces = (num: number) => Math.round(num * 1e10) / 1e10;
