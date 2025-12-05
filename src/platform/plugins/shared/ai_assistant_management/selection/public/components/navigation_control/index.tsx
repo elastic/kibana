@@ -284,7 +284,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                         onClick: () =>
                           handleSelect({
                             chatExperience: AIChatExperience.Agents,
-                            assistant: AIAssistantType.Never, // TODO: Change it later, when buttons topic is clarified
+                            assistant: AIAssistantType.Default,
                           }),
                       }}
                       title={i18n.translate(

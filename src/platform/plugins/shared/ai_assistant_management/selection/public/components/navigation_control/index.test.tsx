@@ -235,7 +235,7 @@ describe('AIAssistantHeaderButton', () => {
         expect(mockCoreStart.settings.client.set).toHaveBeenCalled();
         expect(mockTriggerOpenChat).toHaveBeenCalledWith({
           chatExperience: AIChatExperience.Agents,
-          assistant: AIAssistantType.Never,
+          assistant: AIAssistantType.Default,
         });
       });
     });
