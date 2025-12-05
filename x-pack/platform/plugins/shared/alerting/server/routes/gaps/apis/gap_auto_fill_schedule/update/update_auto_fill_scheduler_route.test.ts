@@ -132,7 +132,7 @@ describe('updateAutoFillSchedulerRoute', () => {
 
     updateAutoFillSchedulerRoute(router, licenseState);
 
-    (verifyApiAccess as jest.Mock).mockImplementation(() => {
+    (licenseState.ensureLicenseForGapAutoFillScheduler as jest.Mock).mockImplementation(() => {
       throw new Error('License check failed');
     });
     const [, handler] = router.put.mock.calls[0];

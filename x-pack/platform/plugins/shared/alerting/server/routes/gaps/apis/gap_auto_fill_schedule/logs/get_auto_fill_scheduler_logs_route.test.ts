@@ -113,6 +113,7 @@ describe('getAutoFillSchedulerLogsRoute', () => {
     );
     await handler(context, req, res);
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
+    expect(licenseState.ensureLicenseForGapAutoFillScheduler).toHaveBeenCalled();
   });
 
   test('ensures the license check prevents getting gap auto fill scheduler logs when appropriate', async () => {
