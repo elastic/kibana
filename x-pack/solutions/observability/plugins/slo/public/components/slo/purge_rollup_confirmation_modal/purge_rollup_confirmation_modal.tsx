@@ -74,7 +74,7 @@ export function PurgeRollupConfirmationModal({ purgePolicyHelpText, onCancel, on
       <EuiSpacer size="m" />
       <EuiFormRow
         label={i18n.translate('xpack.slo.purgeConfirmationModal.purgeTypeLabel', {
-          defaultMessage: 'Choose basis by which to purge data',
+          defaultMessage: 'Purge data based on',
         })}
       >
         <EuiRadioGroup

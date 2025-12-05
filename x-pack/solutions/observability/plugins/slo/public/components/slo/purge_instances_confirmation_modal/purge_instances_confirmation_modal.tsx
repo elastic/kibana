@@ -28,6 +28,16 @@ interface Props {
   onConfirm: () => void;
 }
 
+const STALE_SLO_THRESHOLD_LABEL = i18n.translate(
+  'xpack.slo.purgeInstancesConfirmationModal.staleSloThresholdLabel',
+  { defaultMessage: 'Stale SLOs threshold' }
+);
+
+const STALE_THRESHOLD_LABEL = i18n.translate(
+  'xpack.slo.purgeInstancesConfirmationModal.staleThresholdLabel',
+  { defaultMessage: 'Stale threshold' }
+);
+
 export function PurgeInstancesConfirmationModal({ items, onCancel, onConfirm }: Props) {
   const { mutate: purgeInstances } = usePurgeInstances({ onConfirm });
   const { data: settings, isLoading } = useGetSettings();
@@ -85,13 +95,21 @@ export function PurgeInstancesConfirmationModal({ items, onCancel, onConfirm }: 
                 'xpack.slo.purgeInstancesConfirmationModal.descriptionTextWithSelection',
                 {
                   defaultMessage:
-                    'Permanently remove all stale instances from the selected SLOs based on the Stale SLOs threshold setting. Override this setting by updating the following Stale threshold.',
-                  values: { count: items.length },
+                    'Permanently remove all stale instances from the {count} selected {count, plural, one {SLO} other {SLOs}} based on the {staleSloThresholdLabel} setting. Override this setting by updating the following {staleThresholdLabel}.',
+                  values: {
+                    count: items.length,
+                    staleSloThresholdLabel: <strong>{STALE_SLO_THRESHOLD_LABEL}</strong>,
+                    staleThresholdLabel: <strong>{STALE_THRESHOLD_LABEL}</strong>,
+                  },
                 }
               )
             : i18n.translate('xpack.slo.purgeInstancesConfirmationModal.descriptionText', {
                 defaultMessage:
-                  'Permanently delete all stale SLO instances based on the Stale SLOs threshold setting. Override this setting by updating the following Stale threshold.',
+                  'Permanently delete all stale SLO instances based on the {staleSloThresholdLabel} setting. Override this setting by updating the following {staleThresholdLabel}.',
+                values: {
+                  staleSloThresholdLabel: <strong>{STALE_SLO_THRESHOLD_LABEL}</strong>,
+                  staleThresholdLabel: <strong>{STALE_THRESHOLD_LABEL}</strong>,
+                },
               })}
         </EuiText>
 
@@ -100,7 +118,7 @@ export function PurgeInstancesConfirmationModal({ items, onCancel, onConfirm }: 
         <EuiFormRow
           label={i18n.translate(
             'xpack.slo.purgeInstancesConfirmationModal.euiFormRow.staleDurationLabel',
-            { defaultMessage: 'Stale duration' }
+            { defaultMessage: 'Stale threshold' }
           )}
           helpText="In hours"
           isInvalid={!Number.isInteger(staleDuration) || staleDuration <= 0}
@@ -115,7 +133,7 @@ export function PurgeInstancesConfirmationModal({ items, onCancel, onConfirm }: 
             onChange={(e) => setStaleDuration(Number(e.target.value))}
             aria-label={i18n.translate(
               'xpack.slo.purgeInstancesConfirmationModal.euiFieldNumber.staleDurationInHoursLabel',
-              { defaultMessage: 'Stale duration in hours' }
+              { defaultMessage: 'Stale threshold in hours' }
             )}
           />
         </EuiFormRow>
@@ -129,7 +147,10 @@ export function PurgeInstancesConfirmationModal({ items, onCancel, onConfirm }: 
               setOverride(e.target.checked);
             }}
             label={i18n.translate('xpack.slo.purgeInstancesConfirmationModal.forcePurge', {
-              defaultMessage: 'Override the Stale SLOs threshold setting',
+              defaultMessage: 'Override the {staleSloThresholdLabel} setting',
+              values: {
+                staleSloThresholdLabel: <strong>{STALE_SLO_THRESHOLD_LABEL}</strong>,
+              },
             })}
           />
         </EuiFormRow>
