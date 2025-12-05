@@ -621,7 +621,34 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     ]
   );
 
+  // Helper: Get active tab configuration
+  const getActiveTabConfig = useCallback(() => {
+    return tabsEnabled && tableFilter.activeTab && tabEntityNames
+      ? tabEntityNames[tableFilter.activeTab]
+      : undefined;
+  }, [tabsEnabled, tableFilter.activeTab, tabEntityNames]);
+
+  const resolveCustomColumn = useCallback(
+    (activeTabConfig: TabEntityNameConfig<T> | undefined) => {
+      return tabsEnabled ? activeTabConfig?.columns?.customTableColumn : customTableColumn;
+    },
+    [tabsEnabled, customTableColumn]
+  );
+
+  const checkShowCreatorColumn = useCallback(
+    (activeTabConfig: TabEntityNameConfig<T> | undefined) => {
+      const showInConfig = activeTabConfig?.columns?.showCreatorColumn ?? true;
+      return tabsEnabled
+        ? createdByEnabled && showInConfig
+        : hasCreatedByMetadata && createdByEnabled && showInConfig;
+    },
+    [tabsEnabled, createdByEnabled, hasCreatedByMetadata]
+  );
+
   const tableColumns = useMemo(() => {
+    const activeTabConfig = getActiveTabConfig();
+    const customColumn = resolveCustomColumn(activeTabConfig);
+
     const columns: Array<EuiBasicTableColumn<T>> = [
       {
         field: tableColumnMetadata.title.field,
@@ -653,11 +680,11 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       },
     ];
 
-    if (customTableColumn) {
-      columns.push(customTableColumn);
+    if (customColumn) {
+      columns.push(customColumn);
     }
 
-    if (hasCreatedByMetadata && createdByEnabled) {
+    if (checkShowCreatorColumn(activeTabConfig)) {
       columns.push({
         field: tableColumnMetadata.createdBy.field,
         name: (
@@ -763,10 +790,10 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     return columns;
   }, [
     titleColumnName,
-    customTableColumn,
+    getActiveTabConfig,
+    resolveCustomColumn,
+    checkShowCreatorColumn,
     hasUpdatedAtMetadata,
-    hasCreatedByMetadata,
-    createdByEnabled,
     editItem,
     contentEditor.enabled,
     listingId,

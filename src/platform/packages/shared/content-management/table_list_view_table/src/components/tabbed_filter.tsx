@@ -9,16 +9,31 @@
 
 import React from 'react';
 import { EuiTab, EuiTabs, EuiSpacer } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 
 export interface TabConfig {
   id: string;
   name: string | React.ReactNode;
 }
 
-export interface TabEntityNameConfig {
+export interface TabEntityNameConfig<T extends object = any> {
+  /** Display name for the tab (e.g., "Dashboards") */
+  tabName: string;
+  /** Entity name singular for use in sentences (e.g., "dashboard") */
   entityName: string;
+  /** Entity name plural for use in sentences (e.g., "dashboards") */
   entityNamePlural: string;
+  /** Custom empty prompt body for this tab */
   emptyPromptBody?: React.ReactNode;
+  /**
+   * Column configuration for this tab.
+   */
+  columns?: {
+    /** Whether to show the Creator column. Default: true */
+    showCreatorColumn?: boolean;
+    /** Optional custom table column specific to this tab (e.g., Type or Data view column) */
+    customTableColumn?: EuiBasicTableColumn<T>;
+  };
 }
 
 interface TabbedTableFilterProps {
@@ -33,6 +48,7 @@ export const TabbedTableFilter = (props: TabbedTableFilterProps) => {
   return (
     <>
       <EuiTabs
+        size="l"
         data-test-subj="tabbedTableFilter"
         style={{
           marginTop:

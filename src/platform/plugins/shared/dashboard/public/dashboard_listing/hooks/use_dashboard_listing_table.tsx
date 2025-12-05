@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-
-import { EuiIcon } from '@elastic/eui';
-import { css } from '@emotion/react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import useUnmount from 'react-use/lib/useUnmount';
 import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
 import type { TableListViewTableProps } from '@kbn/content-management-table-list-view-table';
@@ -27,6 +26,7 @@ import type { EventAnnotationGroupContent } from '@kbn/event-annotation-common';
 import { asyncMap } from '@kbn/std';
 import { DASHBOARD_APP_ID } from '../../../common/page_bundle_constants';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { getTabsConfiguration } from '../utils/get_tabs_configuration';
 import {
   SAVED_OBJECT_DELETE_TIME,
   SAVED_OBJECT_LOADED_TIME,
@@ -46,7 +46,6 @@ import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities
 import {
   dashboardListingErrorStrings,
   dashboardListingTableStrings,
-  dashboardListingTabStrings,
 } from '../_dashboard_listing_strings';
 import { confirmCreateWithUnsaved } from '../confirm_overlays';
 import { DashboardListingEmptyPrompt } from '../dashboard_listing_empty_prompt';
@@ -62,28 +61,6 @@ type GetDetailViewLink =
 
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
-
-// Map visualization type names to their icons
-const getVisTypeIcon = (visType: string): string => {
-  const iconMap: Record<string, string> = {
-    area: 'visArea',
-    line: 'visLine',
-    bar: 'visBarVertical',
-    horizontal_bar: 'visBarHorizontal',
-    pie: 'visPie',
-    markdown: 'visText',
-    vega: 'visVega',
-    metric: 'visMetric',
-    table: 'visTable',
-    tagcloud: 'visTagCloud',
-    gauge: 'visGauge',
-    goal: 'visGoal',
-    heatmap: 'visHeatmap',
-    timelion: 'visTimelion',
-    Maps: 'gisApp',
-  };
-  return iconMap[visType] || 'visualizeApp';
-};
 
 type DashboardListingViewTableProps = Omit<
   TableListViewTableProps<DashboardSavedObjectUserContent>,
@@ -109,7 +86,7 @@ export const useDashboardListingTable = ({
   urlStateEnabled,
   useSessionStorageIntegration,
   showCreateDashboardButton = true,
-  contentTypeTabsEnabled = true,
+  tabsEnabled = true,
 }: {
   dashboardListingId?: string;
   disableCreateDashboardButton?: boolean;
@@ -120,51 +97,16 @@ export const useDashboardListingTable = ({
   urlStateEnabled?: boolean;
   useSessionStorageIntegration?: boolean;
   showCreateDashboardButton?: boolean;
-  contentTypeTabsEnabled?: boolean;
+  tabsEnabled?: boolean;
 }): UseDashboardListingTableReturnType => {
   const { getEntityName, getTableListTitle, getEntityNamePlural } = dashboardListingTableStrings;
-  const {
-    getVisualizationEntityName,
-    getVisualizationEntityNamePlural,
-    getVisualizationEmptyPromptBody,
-    getAnnotationGroupEntityName,
-    getAnnotationGroupEntityNamePlural,
-    getAnnotationGroupEmptyPromptBody,
-    getDashboardEmptyPromptBody,
-  } = dashboardListingTabStrings;
   const title = getTableListTitle();
   const entityName = getEntityName();
   const entityNamePlural = getEntityNamePlural();
 
-  const tabEntityNames = useMemo(
-    () => ({
-      dashboards: {
-        entityName,
-        entityNamePlural,
-        emptyPromptBody: getDashboardEmptyPromptBody(),
-      },
-      visualizations: {
-        entityName: getVisualizationEntityName(),
-        entityNamePlural: getVisualizationEntityNamePlural(),
-        emptyPromptBody: getVisualizationEmptyPromptBody(),
-      },
-      'annotation-groups': {
-        entityName: getAnnotationGroupEntityName(),
-        entityNamePlural: getAnnotationGroupEntityNamePlural(),
-        emptyPromptBody: getAnnotationGroupEmptyPromptBody(),
-      },
-    }),
-    [
-      entityName,
-      entityNamePlural,
-      getDashboardEmptyPromptBody,
-      getVisualizationEntityName,
-      getVisualizationEntityNamePlural,
-      getVisualizationEmptyPromptBody,
-      getAnnotationGroupEntityName,
-      getAnnotationGroupEntityNamePlural,
-      getAnnotationGroupEmptyPromptBody,
-    ]
+  const { tabEntityNames } = useMemo(
+    () => getTabsConfiguration(entityName, entityNamePlural),
+    [entityName, entityNamePlural]
   );
 
   const filterItemByTab = useCallback((item: DashboardSavedObjectUserContent, tabId: string) => {
@@ -193,10 +135,14 @@ export const useDashboardListingTable = ({
   const listingLimit = coreServices.uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = coreServices.uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
 
+  // Store close function for new visualization modal (to close on navigation)
+  const closeNewVisModal = useRef(() => {});
+  const { pathname } = useLocation();
+
   const createItem = useCallback(
     (contentTypeTab?: 'dashboards' | 'visualizations' | 'annotation-groups') => {
       if (contentTypeTab === 'visualizations') {
-        showNewVisModal();
+        closeNewVisModal.current = showNewVisModal();
         return;
       }
 
@@ -218,6 +164,16 @@ export const useDashboardListingTable = ({
     },
     [dashboardBackupService, goToDashboard, useSessionStorageIntegration]
   );
+
+  // Close new visualization modal when navigating away (e.g., browser back button)
+  useEffect(() => {
+    return () => {
+      closeNewVisModal.current();
+    };
+  }, [pathname]);
+
+  // Cleanup modal on unmount
+  useUnmount(() => closeNewVisModal.current());
 
   const updateItemMeta = useCallback(
     async ({ id, ...updatedState }: Parameters<Required<OpenContentEditorParams>['onSave']>[0]) => {
@@ -300,17 +256,17 @@ export const useDashboardListingTable = ({
       {
         references,
         referencesToExclude,
-        contentType = 'dashboards',
+        tabId = 'dashboards',
       }: {
         references?: Reference[];
         referencesToExclude?: Reference[];
-        contentType?: 'dashboards' | 'visualizations' | 'annotation-groups';
+        tabId?: 'dashboards' | 'visualizations' | 'annotation-groups';
       } = {}
     ) => {
       const searchStartTime = window.performance.now();
 
       // Handle different content types
-      if (contentType === 'visualizations') {
+      if (tabId === 'visualizations') {
         const response = await findVisualizationListItems(
           visualizationsService,
           searchTerm,
@@ -358,7 +314,7 @@ export const useDashboardListingTable = ({
         };
       }
 
-      if (contentType === 'annotation-groups') {
+      if (tabId === 'annotation-groups') {
         if (!eventAnnotationService) {
           return { total: 0, hits: [] };
         }
@@ -423,26 +379,27 @@ export const useDashboardListingTable = ({
             },
           });
           const tagApi = savedObjectsTaggingService?.getTaggingApi();
+          const hits = dashboards.map(
+            ({ id, data, meta }) =>
+              ({
+                type: 'dashboard',
+                id,
+                updatedAt: meta.updatedAt!,
+                createdAt: meta.createdAt,
+                createdBy: meta.createdBy,
+                updatedBy: meta.updatedBy,
+                references: tagApi && data.tags ? data.tags.map(tagApi.ui.tagIdToReference) : [],
+                managed: meta.managed,
+                attributes: {
+                  title: data.title,
+                  description: data.description,
+                  timeRestore: Boolean(data.timeRange),
+                },
+              } as DashboardSavedObjectUserContent)
+          );
           return {
             total,
-            hits: dashboards.map(
-              ({ id, data, meta }) =>
-                ({
-                  type: 'dashboard',
-                  id,
-                  updatedAt: meta.updatedAt!,
-                  createdAt: meta.createdAt,
-                  createdBy: meta.createdBy,
-                  updatedBy: meta.updatedBy,
-                  references: tagApi && data.tags ? data.tags.map(tagApi.ui.tagIdToReference) : [],
-                  managed: meta.managed,
-                  attributes: {
-                    title: data.title,
-                    description: data.description,
-                    timeRestore: Boolean(data.timeRange),
-                  },
-                } as DashboardSavedObjectUserContent)
-            ),
+            hits,
           };
         });
     },
@@ -604,39 +561,6 @@ export const useDashboardListingTable = ({
     return undefined;
   }, []);
 
-  const customTableColumn = useMemo<
-    TableListViewTableProps<DashboardSavedObjectUserContent>['customTableColumn']
-  >(
-    () => ({
-      field: 'attributes.visType',
-      name: 'Type',
-      sortable: true,
-      width: '150px',
-      render: (_visType: string | undefined, item: DashboardSavedObjectUserContent) => {
-        // Only show type for visualizations and maps
-        if ((item.type === 'visualization' || item.type === 'map') && item.attributes.visType) {
-          const visType = item.attributes.visType;
-          return (
-            <span>
-              <EuiIcon
-                css={css`
-                  margin-right: 8px;
-                  vertical-align: middle;
-                `}
-                aria-hidden="true"
-                type={getVisTypeIcon(visType)}
-                size="m"
-              />
-              {visType}
-            </span>
-          );
-        }
-        return null;
-      },
-    }),
-    []
-  );
-
   const rowItemActions = useCallback((item: DashboardSavedObjectUserContent) => {
     const { showWriteControls } = getDashboardCapabilities();
     const { managed, attributes } = item;
@@ -676,7 +600,6 @@ export const useDashboardListingTable = ({
       findItems,
       getDetailViewLink,
       getOnClickTitle,
-      customTableColumn,
       rowItemActions,
       headingId,
       id: dashboardListingId,
@@ -688,17 +611,17 @@ export const useDashboardListingTable = ({
       title,
       urlStateEnabled,
       createdByEnabled: true,
-      tabsEnabled: true,
+      tabsEnabled,
       tabEntityNames,
       filterItemByTab,
       recentlyAccessed: getDashboardRecentlyAccessedService(),
     };
   }, [
     contentEditorValidators,
+    tabsEnabled,
     createItem,
     filterItemByTab,
     tabEntityNames,
-    customTableColumn,
     dashboardListingId,
     deleteItems,
     editItem,

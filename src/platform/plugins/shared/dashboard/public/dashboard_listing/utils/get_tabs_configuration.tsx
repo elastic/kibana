@@ -12,7 +12,9 @@ import { EuiIcon } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { TabEntityNameConfig } from '@kbn/content-management-table-list-view-table';
 import type { DashboardSavedObjectUserContent } from '../types';
+import { dashboardListingTabStrings } from '../_dashboard_listing_strings';
 
 const getVisTypeIcon = (visType: string): string => {
   const iconMap: Record<string, string> = {
@@ -35,7 +37,7 @@ const getVisTypeIcon = (visType: string): string => {
   return iconMap[visType] || 'visualizeApp';
 };
 
-export const getTypeColumn = (): EuiBasicTableColumn<DashboardSavedObjectUserContent> => {
+const getTypeColumn = (): EuiBasicTableColumn<DashboardSavedObjectUserContent> => {
   return {
     field: 'type',
     name: i18n.translate('dashboard.listing.table.typeColumnName', {
@@ -44,7 +46,6 @@ export const getTypeColumn = (): EuiBasicTableColumn<DashboardSavedObjectUserCon
     sortable: true,
     width: '150px',
     render: (_type: string | undefined, item: DashboardSavedObjectUserContent) => {
-      // Show Dashboard
       if (item.type === 'dashboard') {
         return (
           <span>
@@ -64,7 +65,6 @@ export const getTypeColumn = (): EuiBasicTableColumn<DashboardSavedObjectUserCon
         );
       }
 
-      // Show Annotation group
       if (item.type === 'event-annotation-group') {
         return (
           <span>
@@ -84,7 +84,6 @@ export const getTypeColumn = (): EuiBasicTableColumn<DashboardSavedObjectUserCon
         );
       }
 
-      // Show visualization type (for all other types)
       if (item.attributes.visType) {
         const visType = item.attributes.visType;
         return (
@@ -108,7 +107,7 @@ export const getTypeColumn = (): EuiBasicTableColumn<DashboardSavedObjectUserCon
   };
 };
 
-export const getDataViewColumn = (): EuiBasicTableColumn<DashboardSavedObjectUserContent> => {
+const getDataViewColumn = (): EuiBasicTableColumn<DashboardSavedObjectUserContent> => {
   return {
     field: 'attributes.indexPatternId',
     name: i18n.translate('dashboard.listing.table.dataViewColumnName', {
@@ -117,5 +116,60 @@ export const getDataViewColumn = (): EuiBasicTableColumn<DashboardSavedObjectUse
     sortable: false,
     width: '200px',
     render: (indexPatternId: string) => indexPatternId || '-',
+  };
+};
+
+export const getTabsConfiguration = (
+  dashboardEntityName: string,
+  dashboardEntityNamePlural: string
+): {
+  tabEntityNames: Record<string, TabEntityNameConfig<DashboardSavedObjectUserContent>>;
+} => {
+  const {
+    getDashboardTabName,
+    getDashboardEmptyPromptBody,
+    getVisualizationTabName,
+    getVisualizationEntityName,
+    getVisualizationEntityNamePlural,
+    getVisualizationEmptyPromptBody,
+    getAnnotationGroupTabName,
+    getAnnotationGroupEntityName,
+    getAnnotationGroupEntityNamePlural,
+    getAnnotationGroupEmptyPromptBody,
+  } = dashboardListingTabStrings;
+
+  return {
+    tabEntityNames: {
+      dashboards: {
+        tabName: getDashboardTabName(),
+        entityName: dashboardEntityName,
+        entityNamePlural: dashboardEntityNamePlural,
+        emptyPromptBody: getDashboardEmptyPromptBody(),
+        columns: {
+          customTableColumn: getTypeColumn(),
+          showCreatorColumn: true,
+        },
+      },
+      visualizations: {
+        tabName: getVisualizationTabName(),
+        entityName: getVisualizationEntityName(),
+        entityNamePlural: getVisualizationEntityNamePlural(),
+        emptyPromptBody: getVisualizationEmptyPromptBody(),
+        columns: {
+          customTableColumn: getTypeColumn(),
+          showCreatorColumn: false,
+        },
+      },
+      'annotation-groups': {
+        tabName: getAnnotationGroupTabName(),
+        entityName: getAnnotationGroupEntityName(),
+        entityNamePlural: getAnnotationGroupEntityNamePlural(),
+        emptyPromptBody: getAnnotationGroupEmptyPromptBody(),
+        columns: {
+          customTableColumn: getDataViewColumn(),
+          showCreatorColumn: false,
+        },
+      },
+    },
   };
 };

@@ -425,7 +425,7 @@ export function Table<T extends UserContentCommonSchema>({
       <TabbedTableFilter
         tabs={Object.keys(tabEntityNames).map((id) => ({
           id,
-          name: tabEntityNames[id].entityNamePlural,
+          name: tabEntityNames[id].tabName,
         }))}
         selectedTabId={tableFilter.activeTab ?? Object.keys(tabEntityNames)[0]}
         onSelectedTabChanged={(newTab) => {
