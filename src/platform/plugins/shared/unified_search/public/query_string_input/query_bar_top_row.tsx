@@ -623,6 +623,7 @@ export const QueryBarTopRow = React.memo(
           isQuickSelectOnly={isMobile ? false : isQueryInputFocused}
           width={isMobile ? 'full' : 'auto'}
           compressed
+          timeZoneDisplayProps={{ timeZone: uiSettings.get('dateFormat:tz') }}
         />
       );
       const component = getWrapperWithTooltip(datePicker, enableTooltip, props.query);
