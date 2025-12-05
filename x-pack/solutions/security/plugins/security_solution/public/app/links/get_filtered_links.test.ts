@@ -42,12 +42,18 @@ describe('getFilteredLinks', () => {
     jest.clearAllMocks();
   });
 
-  it('returns filtered links including AI Value links', async () => {
+  it('returns filtered links including Launchpad links', async () => {
     mockGetManagementFilteredLinks.mockResolvedValue(mockManagementLinks);
 
     const result = await getFilteredLinks(mockCore, mockPlugins);
 
-    expect(result).toContainEqual(expect.objectContaining({ id: SecurityPageName.aiValue }));
+    // Launchpad is now a top-level link that contains AI Value as a child
+    const launchpadLink = result.find((link) => link.id === SecurityPageName.launchpad);
+    expect(launchpadLink).toBeDefined();
+    expect(launchpadLink?.links).toBeDefined();
+    expect(launchpadLink?.links).toContainEqual(
+      expect.objectContaining({ id: SecurityPageName.aiValue })
+    );
     expect(result).toContainEqual(mockManagementLinks);
     expect(mockGetManagementFilteredLinks).toHaveBeenCalledWith(mockCore, mockPlugins);
   });
@@ -66,7 +72,10 @@ describe('getFilteredLinks', () => {
     expect(resultIds).toContain('alerts');
     expect(resultIds).toContain('cases');
     expect(resultIds).toContain('configurations');
-    expect(resultIds).toContain('ai_value'); // AI Value is now included statically
+    expect(resultIds).toContain('launchpad'); // Launchpad is now a top-level link
+    // AI Value is now a child of Launchpad, not a top-level link
+    const launchpadLink = result.find((link) => link.id === SecurityPageName.launchpad);
+    expect(launchpadLink?.links?.some((link) => link.id === SecurityPageName.aiValue)).toBe(true);
   });
 
   it('returns a frozen array', async () => {
@@ -103,7 +112,10 @@ describe('getFilteredLinks', () => {
       expect(resultIds).toContain('attack_discovery');
       expect(resultIds).toContain('cases');
       expect(resultIds).toContain('configurations');
-      expect(resultIds).toContain('ai_value'); // AI Value is now included statically
+      expect(resultIds).toContain('launchpad'); // Launchpad is now a top-level link
+      // AI Value is now a child of Launchpad, not a top-level link
+      const launchpadLink = result.find((link) => link.id === SecurityPageName.launchpad);
+      expect(launchpadLink?.links?.some((link) => link.id === SecurityPageName.aiValue)).toBe(true);
     });
 
     it('includes all base links in the result when feature flag is enabled', async () => {
@@ -122,7 +134,10 @@ describe('getFilteredLinks', () => {
       expect(resultIds).toContain('attack_discovery');
       expect(resultIds).toContain('cases');
       expect(resultIds).toContain('configurations');
-      expect(resultIds).toContain('ai_value'); // AI Value is now included statically
+      expect(resultIds).toContain('launchpad'); // Launchpad is now a top-level link
+      // AI Value is now a child of Launchpad, not a top-level link
+      const launchpadLink = result.find((link) => link.id === SecurityPageName.launchpad);
+      expect(launchpadLink?.links?.some((link) => link.id === SecurityPageName.aiValue)).toBe(true);
     });
   });
 });
