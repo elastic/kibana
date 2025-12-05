@@ -64,4 +64,5 @@ export type StepEvent =
     }
   | { type: 'step.delete' }
   | { type: 'step.edit' }
-  | { type: 'step.save' };
+  | { type: 'step.save' }
+  | { type: 'step.updateIdentifier'; customIdentifier: string };

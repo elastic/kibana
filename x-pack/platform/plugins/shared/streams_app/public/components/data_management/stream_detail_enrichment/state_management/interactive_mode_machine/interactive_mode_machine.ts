@@ -21,8 +21,8 @@ import {
   ALWAYS_CONDITION,
   type StreamlangProcessorDefinition,
   convertUIStepsToDSL,
-  addDeterministicCustomIdentifiers,
   convertStepsForUI,
+  addDeterministicCustomIdentifiers,
 } from '@kbn/streamlang';
 import type { StreamlangDSL, StreamlangWhereBlock } from '@kbn/streamlang/types/streamlang';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
@@ -194,13 +194,27 @@ export const interactiveModeMachine = setup({
       stepRefs: [...context.stepRefs],
     })),
     syncToDSL: ({ context }) => {
-      // Convert step refs to DSL and send to parent
+      // Convert step refs to DSL (strip identifiers, they'll be regenerated deterministically)
       const dsl = convertUIStepsToDSL(
         context.stepRefs.map((stepRef) => {
           return stepRef.getSnapshot().context.step;
         })
       );
+
       const dslWithIdentifiers = addDeterministicCustomIdentifiers(dsl);
+
+      // Flatten the DSL to get steps in the same order as stepRefs
+      const flattenedSteps = convertStepsForUI(dslWithIdentifiers);
+
+      // Update each individual step machine with its new deterministic identifier
+      // We defer this here as individual step machines don't have an awareness of sibling steps or hierarchy
+      // This keeps step machines in sync with validation and simulations which use the identifiers
+      context.stepRefs.forEach((stepRef, index) => {
+        const newIdentifier = flattenedSteps[index]?.customIdentifier;
+        if (newIdentifier) {
+          stepRef.send({ type: 'step.updateIdentifier', customIdentifier: newIdentifier });
+        }
+      });
 
       context.parentRef.send({
         type: 'mode.dslUpdated',
@@ -220,6 +234,7 @@ export const interactiveModeMachine = setup({
     sendStepsToSimulator: enqueueActions(({ context }) => {
       // Check parent for any errors (schema or validation) - don't simulate if there are errors
       if (hasErrorsInParentSnapshot(context.parentRef.getSnapshot())) {
+        context.parentRef.send({ type: 'simulation.reset' });
         return;
       }
 
