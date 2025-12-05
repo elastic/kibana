@@ -11,6 +11,7 @@ import {
   firstNonNullValue,
   getAllGroupsInStorage,
   addGroupsToStorage,
+  isRawBucket,
   isGroupingBucket,
   LOCAL_STORAGE_GROUPING_KEY,
 } from './helpers';
@@ -99,21 +100,210 @@ describe('helpers', () => {
     });
   });
 
+  describe('isRawBucket', () => {
+    it('returns true for a valid RawBucket with string key', () => {
+      const bucket: RawBucket<{}> = {
+        key: 'test-key',
+        doc_count: 5,
+      };
+      expect(isRawBucket(bucket)).toBe(true);
+    });
+
+    it('returns true for a valid RawBucket with array key', () => {
+      const bucket: RawBucket<{}> = {
+        key: ['key1', 'key2'],
+        doc_count: 10,
+      };
+      expect(isRawBucket(bucket)).toBe(true);
+    });
+
+    it('returns true for a RawBucket with optional key_as_string', () => {
+      const bucket = {
+        key: 'test',
+        key_as_string: 'Test Key',
+        doc_count: 3,
+      };
+      expect(isRawBucket(bucket)).toBe(true);
+    });
+
+    it('returns true for a RawBucket with additional properties (generic type T)', () => {
+      const bucket = {
+        key: 'test',
+        doc_count: 7,
+        customField: 'extra',
+        anotherField: 123,
+      };
+      expect(isRawBucket(bucket)).toBe(true);
+    });
+
+    it('returns false for null', () => {
+      expect(isRawBucket(null)).toBe(false);
+    });
+
+    it('returns false for undefined', () => {
+      expect(isRawBucket(undefined)).toBe(false);
+    });
+
+    it('returns false for a non-object value', () => {
+      expect(isRawBucket('string')).toBe(false);
+      expect(isRawBucket(123)).toBe(false);
+      expect(isRawBucket(true)).toBe(false);
+    });
+
+    it('returns false for an object missing key property', () => {
+      const bucket = {
+        doc_count: 5,
+      };
+      expect(isRawBucket(bucket)).toBe(false);
+    });
+
+    it('returns false for an object missing doc_count property', () => {
+      const bucket = {
+        key: 'test',
+      };
+      expect(isRawBucket(bucket)).toBe(false);
+    });
+
+    it('returns false for an object with invalid key type', () => {
+      const bucket = {
+        key: 123,
+        doc_count: 5,
+      };
+      expect(isRawBucket(bucket)).toBe(false);
+    });
+
+    it('returns false for an object with invalid doc_count type', () => {
+      const bucket = {
+        key: 'test',
+        doc_count: '5',
+      };
+      expect(isRawBucket(bucket)).toBe(false);
+    });
+
+    it('returns false for an empty object', () => {
+      expect(isRawBucket({})).toBe(false);
+    });
+
+    it('returns false for an array', () => {
+      expect(isRawBucket([])).toBe(false);
+      expect(isRawBucket([{ key: 'test', doc_count: 1 }])).toBe(false);
+    });
+  });
+
   describe('isGroupingBucket', () => {
-    it('returns true for a GroupingBucket', () => {
+    it('returns true for a valid GroupingBucket', () => {
       const bucket: GroupingBucket<{}> = {
-        selectedGroup: 'test',
-        doc_count: 1,
-        key: ['key'],
-        key_as_string: 'key',
+        key: ['key1', 'key2'],
+        key_as_string: 'Key 1, Key 2',
+        doc_count: 15,
+        selectedGroup: 'groupName',
       };
       expect(isGroupingBucket(bucket)).toBe(true);
     });
 
-    it('returns false for a RawBucket', () => {
+    it('returns true for a GroupingBucket with isNullGroup', () => {
+      const bucket: GroupingBucket<{}> = {
+        key: ['none'],
+        key_as_string: 'None',
+        doc_count: 5,
+        selectedGroup: 'test',
+        isNullGroup: true,
+      };
+      expect(isGroupingBucket(bucket)).toBe(true);
+    });
+
+    it('returns true for a GroupingBucket with additional properties (generic type T)', () => {
+      const bucket = {
+        key: ['key'],
+        key_as_string: 'Key',
+        doc_count: 20,
+        selectedGroup: 'myGroup',
+        customData: { foo: 'bar' },
+      };
+      expect(isGroupingBucket(bucket)).toBe(true);
+    });
+
+    it('returns false for a RawBucket (missing selectedGroup)', () => {
       const bucket: RawBucket<{}> = {
+        key: ['key'],
+        key_as_string: 'Key',
+        doc_count: 10,
+      };
+      expect(isGroupingBucket(bucket)).toBe(false);
+    });
+
+    it('returns false for a RawBucket with string key instead of array', () => {
+      const bucket = {
+        key: 'string-key',
+        key_as_string: 'String Key',
+        doc_count: 5,
+        selectedGroup: 'group',
+      };
+      expect(isGroupingBucket(bucket)).toBe(false);
+    });
+
+    it('returns false when key is not an array', () => {
+      const bucket = {
+        key: 'test',
+        key_as_string: 'Test',
         doc_count: 1,
-        key: 'key',
+        selectedGroup: 'group',
+      };
+      expect(isGroupingBucket(bucket)).toBe(false);
+    });
+
+    it('returns false when missing key_as_string', () => {
+      const bucket = {
+        key: ['key'],
+        doc_count: 1,
+        selectedGroup: 'group',
+      };
+      expect(isGroupingBucket(bucket)).toBe(false);
+    });
+
+    it('returns false when selectedGroup is not a string', () => {
+      const bucket = {
+        key: ['key'],
+        key_as_string: 'Key',
+        doc_count: 1,
+        selectedGroup: 123,
+      };
+      expect(isGroupingBucket(bucket)).toBe(false);
+    });
+
+    it('returns false when key_as_string is not a string', () => {
+      const bucket = {
+        key: ['key'],
+        key_as_string: 123,
+        doc_count: 1,
+        selectedGroup: 'group',
+      };
+      expect(isGroupingBucket(bucket)).toBe(false);
+    });
+
+    it('returns false for null', () => {
+      expect(isGroupingBucket(null)).toBe(false);
+    });
+
+    it('returns false for undefined', () => {
+      expect(isGroupingBucket(undefined)).toBe(false);
+    });
+
+    it('returns false for non-object values', () => {
+      expect(isGroupingBucket('string')).toBe(false);
+      expect(isGroupingBucket(123)).toBe(false);
+      expect(isGroupingBucket(true)).toBe(false);
+    });
+
+    it('returns false for an empty object', () => {
+      expect(isGroupingBucket({})).toBe(false);
+    });
+
+    it('returns false when missing doc_count (fails isRawBucket check)', () => {
+      const bucket = {
+        key: ['key'],
+        key_as_string: 'Key',
+        selectedGroup: 'group',
       };
       expect(isGroupingBucket(bucket)).toBe(false);
     });

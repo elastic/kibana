@@ -57,15 +57,41 @@ export const addGroupsToStorage = (storage: Storage, groupingId: string, group: 
 };
 
 /**
+ * A type guard function that checks if a given value is a `RawBucket`.
+ * It verifies that the value is an object with the required properties:
+ * `key` and `doc_count`.
+ *
+ * @param bucket The value to check.
+ * @returns `true` if the value is a `RawBucket`, `false` otherwise.
+ */
+export const isRawBucket = <T>(bucket: unknown): bucket is RawBucket<T> => {
+  return (
+    typeof bucket === 'object' &&
+    bucket !== null &&
+    'key' in bucket &&
+    (typeof bucket.key === 'string' || Array.isArray(bucket.key)) &&
+    'doc_count' in bucket &&
+    typeof bucket.doc_count === 'number'
+  );
+};
+
+/**
  * A type guard function that checks if a given bucket is a `GroupingBucket`.
  * It differentiates from a `RawBucket` by verifying the presence of the
  * `selectedGroup` property, which is unique to `GroupingBucket`.
+ * Since `GroupingBucket` is derived from `RawBucket`, it first checks if
+ * the bucket is a valid `RawBucket` before checking for `GroupingBucket`-specific properties.
  *
- * @param bucket The bucket to check, which can be either a `RawBucket` or a `GroupingBucket`.
+ * @param bucket The bucket to check.
  * @returns `true` if the bucket is a `GroupingBucket`, `false` otherwise.
  */
-export const isGroupingBucket = <T>(
-  bucket: RawBucket<T> | GroupingBucket<T>
-): bucket is GroupingBucket<T> => {
-  return 'selectedGroup' in bucket;
+export const isGroupingBucket = <T>(bucket: unknown): bucket is GroupingBucket<T> => {
+  return (
+    isRawBucket<T>(bucket) &&
+    Array.isArray(bucket.key) &&
+    'selectedGroup' in bucket &&
+    typeof bucket.selectedGroup === 'string' &&
+    'key_as_string' in bucket &&
+    typeof bucket.key_as_string === 'string'
+  );
 };
