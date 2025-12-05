@@ -11,13 +11,16 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { SubSteps, useMigrationNameStep } from '../../../../../common/components';
 import { getEuiStepStatus } from '../../../../../common/utils/get_eui_step_status';
 import { useKibana } from '../../../../../../common/lib/kibana';
-import type { OnMigrationCreated, OnMissingResourcesFetched } from '../../types';
+import type {
+  OnMigrationCreated,
+  OnMissingResourcesFetched,
+  RulesDataInputSubStepsProps,
+} from '../../types';
 import * as i18n from './translations';
 import { QradarDataInputStep, SplunkDataInputStep } from '../constants';
 import { useCopyExportQueryStep } from './sub_steps/copy_export_query';
 import { useRulesFileUploadStep } from './sub_steps/rules_file_upload';
 import { useCheckResourcesStep } from './sub_steps/check_resources';
-import type { RulesDataInputSubStepsProps } from '../../../../../common/components/migration_steps/use_migration_steps';
 import { MigrationSource } from '../../../../types';
 
 interface RulesDataInputProps extends Omit<RulesDataInputSubStepsProps, 'dataInputStep'> {

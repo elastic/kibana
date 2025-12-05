@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import { useMigrationSourceOptions } from './use_migration_source_options';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { MigrationSource } from '../../../rules/types';
+import { MigrationSource } from '../../types';
 
 jest.mock('../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn(),

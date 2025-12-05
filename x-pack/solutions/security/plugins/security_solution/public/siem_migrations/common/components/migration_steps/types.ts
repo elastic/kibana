@@ -4,34 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { MacrosDataInput } from '../../../rules/components/data_input_flyout/steps/macros/macros_data_input';
-import type { LookupsDataInput } from '../../../rules/components/data_input_flyout/steps/lookups/lookups_data_input';
 import type { SiemMigrationResourceData } from '../../../../../common/siem_migrations/model/common.gen';
-import type { RulesDataInput } from '../../../rules/components/data_input_flyout/steps/rules/rules_data_input';
-import type {
-  QradarDataInputStepId,
-  SplunkDataInputStepId,
-} from '../../../rules/components/data_input_flyout/steps/constants';
 
 export type UploadedLookups = Record<string, string>;
 export type AddUploadedLookups = (lookups: SiemMigrationResourceData[]) => void;
-
-export type DataInputStepId = SplunkDataInputStepId | QradarDataInputStepId;
-
-export interface Step<Props, C extends React.ComponentType<Props>> {
-  id: DataInputStepId;
-  Component: C;
-  props?: Props;
-}
-
-type RulesStep = Step<React.ComponentProps<typeof RulesDataInput>, typeof RulesDataInput>;
-
-type MacrosStep = Step<React.ComponentProps<typeof MacrosDataInput>, typeof MacrosDataInput>;
-
-type LookupsStep = Step<React.ComponentProps<typeof LookupsDataInput>, typeof LookupsDataInput>;
-
-export type SplunkStep = RulesStep | MacrosStep | LookupsStep;
-export type QradarStep = RulesStep;
-
-export type SplunkMigrationSteps = Array<SplunkStep>;
-export type QradarMigrationSteps = Array<QradarStep>;

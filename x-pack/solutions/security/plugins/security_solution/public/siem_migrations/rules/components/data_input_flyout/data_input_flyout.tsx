@@ -28,11 +28,11 @@ import { QradarDataInputStep, SplunkDataInputStep } from './steps/constants';
 import { useStartRulesMigrationModal } from '../../hooks/use_start_rules_migration_modal';
 import { MigrationSource, type RuleMigrationSettings, type RuleMigrationStats } from '../../types';
 import { useStartMigration } from '../../logic/use_start_migration';
-import { useMigrationSourceStep } from '../../../common/components/migration_source_step/use_migration_source_step';
-import { MigrationSourceDropdown } from '../../../common/components/migration_source_step/migration_source_dropdown';
+import { useMigrationSourceStep } from '../migration_source_step/use_migration_source_step';
+import { MigrationSourceDropdown } from '../migration_source_step/migration_source_dropdown';
 import { CenteredLoadingSpinner } from '../../../../common/components/centered_loading_spinner';
-import { useMigrationSteps } from '../../../common/components/migration_steps/use_migration_steps';
-import type { QradarStep, SplunkStep } from '../../../common/components/migration_steps/types';
+import { useMigrationSteps } from '../../hooks/use_migration_steps';
+import type { QradarStep, SplunkStep } from './types';
 
 export interface MigrationDataInputFlyoutProps {
   onClose: () => void;
@@ -40,9 +40,9 @@ export interface MigrationDataInputFlyoutProps {
   migrationSource?: MigrationSource;
 }
 
-type Step = SplunkStep | QradarStep;
+type StepToRender = SplunkStep | QradarStep;
 
-function StepRenderer({ step }: { step: Step }) {
+function StepRenderer({ step }: { step: StepToRender }) {
   const Component = step.Component as React.ComponentType<typeof step.props | {}>;
 
   return step.props ? <Component {...step.props} /> : <Component />;

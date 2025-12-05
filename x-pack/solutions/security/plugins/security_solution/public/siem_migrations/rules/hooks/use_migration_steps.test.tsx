@@ -8,12 +8,12 @@
 import {
   QradarDataInputStep,
   SplunkDataInputStep,
-} from '../../../rules/components/data_input_flyout/steps/constants';
+} from '../components/data_input_flyout/steps/constants';
 import type { UseMigrationStepsProps } from './use_migration_steps';
 import { useMigrationSteps } from './use_migration_steps';
 import { renderHook } from '@testing-library/react';
-import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
-import { MigrationSource } from '../../../rules/types';
+import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
+import { MigrationSource } from '../types';
 
 describe('useMigrationSteps', () => {
   const props: UseMigrationStepsProps = {

@@ -6,28 +6,24 @@
  */
 import { useCallback, useMemo, useState } from 'react';
 
-import type { SiemMigrationResourceBase } from '../../../../../common/siem_migrations/model/common.gen';
+import type { SiemMigrationResourceBase } from '../../../../common/siem_migrations/model/common.gen';
 
 import type {
   DataInputStep,
   QradarDataInputStep,
-} from '../../../rules/components/data_input_flyout/steps/constants';
-import { SplunkDataInputStep } from '../../../rules/components/data_input_flyout/steps/constants';
+} from '../components/data_input_flyout/steps/constants';
+import { SplunkDataInputStep } from '../components/data_input_flyout/steps/constants';
 
 import { STEP_COMPONENTS } from './configs';
 
-import type { RuleMigrationStats } from '../../../rules/types';
-import { MigrationSource } from '../../../rules/types';
-import type { OnMissingResourcesFetched } from '../../../rules/components/data_input_flyout/types';
-import type { QradarMigrationSteps, QradarStep, SplunkMigrationSteps, SplunkStep } from './types';
-
-export interface RulesDataInputSubStepsProps {
-  dataInputStep: SplunkDataInputStep | QradarDataInputStep;
-  migrationSource: MigrationSource;
-  migrationStats?: RuleMigrationStats;
-  onMigrationCreated: (createdMigrationStats: RuleMigrationStats) => void;
-  onMissingResourcesFetched?: OnMissingResourcesFetched;
-}
+import { MigrationSource } from '../types';
+import type {
+  QradarMigrationSteps,
+  QradarStep,
+  RulesDataInputSubStepsProps,
+  SplunkMigrationSteps,
+  SplunkStep,
+} from '../components/data_input_flyout/types';
 
 export type UseMigrationStepsProps = Omit<RulesDataInputSubStepsProps, 'dataInputStep'> & {
   dataInputStep: DataInputStep;

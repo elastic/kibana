@@ -8,7 +8,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MigrationSourceDropdown } from './migration_source_dropdown';
 import * as i18n from './translations';
-import { MigrationSource } from '../../../rules/types';
+import { MigrationSource } from '../../types';
 
 describe('MigrationSourceDropdown', () => {
   const mockSetMigrationSource = jest.fn();
