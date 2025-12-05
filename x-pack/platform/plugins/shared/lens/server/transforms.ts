@@ -42,14 +42,17 @@ const lensPanelSchema = schema.object(
 
 function getExtraServerTransformProps(
   builder: LensConfigBuilder
-): Pick<LensTransforms, 'schema' | 'isMappedPanel'> {
+): Pick<LensTransforms, 'schema' | 'throwOnUnmappedPanel'> {
   if (!builder.isEnabled) return {};
 
   return {
-    isMappedPanel: (state: LensSerializedAPIConfig) => {
-      const chartType = builder.getType(state.attributes);
-      return builder.isSupported(chartType);
-    },
     schema: lensPanelSchema,
+    throwOnUnmappedPanel: (state: LensSerializedAPIConfig) => {
+      const chartType = builder.getType(state.attributes);
+
+      if (!builder.isSupported(chartType)) {
+        throw new Error(`Lens "${chartType}" chart type is not supported`);
+      }
+    },
   };
 }

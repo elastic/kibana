@@ -41,7 +41,7 @@ export type EmbeddableTransforms<
    */
   schema?: Type<object>;
   /**
-   * Filters out panels based on state. Used in cases where panel.type is not sufficient to determine if the panel is mapped.
+   * Throws error when panel config is not supported.
    */
-  isMappedPanel?: (state: EmbeddableState) => boolean;
+  throwOnUnmappedPanel?: (config: EmbeddableState) => void;
 };
