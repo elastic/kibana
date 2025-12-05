@@ -8,6 +8,7 @@
  */
 
 import type { CoreSetup } from '@kbn/core/server';
+import { resolveConnectorId } from './resolve_connector_id';
 import { AiPromptStepCommonDefinition } from '../../../common/steps/ai';
 import { createServerStepDefinition } from '../../step_registry/types';
 import type { WorkflowsExtensionsServerPluginStartDeps } from '../../types';
@@ -22,22 +23,25 @@ export const aiPromptStepDefinition = (
     handler: async (context) => {
       const [, { actions, inference }] = await coreSetup.getStartServices();
 
-      const foo = actions;
+      const connectorId = await resolveConnectorId(
+        context.input.connectorId,
+        actions,
+        context.contextManager.getFakeRequest()
+      );
 
-      console.log();
-      // try {
-      //   const { variables } = context.input;
-      //   const variableNames = Object.keys(variables);
-      //   context.logger.debug(`Successfully set ${variableNames.length} variable(s)`, {
-      //     variables: variableNames,
-      //   });
-      //   return { output: { variables } };
-      // } catch (error) {
-      //   context.logger.error('Failed to set variables', error);
-      //   return {
-      //     error: new Error(error instanceof Error ? error.message : 'Failed to set variables'),
-      //   };
-      // }
+      const chatModel = await inference.getChatModel({
+        connectorId,
+        request: context.contextManager.getFakeRequest(),
+        chatModelOptions: {},
+      });
+
+      if (!context.input.outputSchema) {
+        const response = await chatModel.invoke([{ role: 'user', content: context.input.input }]);
+        return {
+          output: response,
+        };
+      }
+
       return {
         output: {
           response: 'This is a placeholder response from the AI Prompt step.',
