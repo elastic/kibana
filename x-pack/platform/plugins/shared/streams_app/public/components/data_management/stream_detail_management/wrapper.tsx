@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiPageHeader, useEuiTheme, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiPageHeader, useEuiTheme, EuiFlexItem, EuiTourStep } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect, useRef } from 'react';
 import { Streams } from '@kbn/streams-schema';
 import type { ReactNode } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { DatasetQualityIndicator } from '@kbn/dataset-quality-plugin/public';
+import { useStreamsTour, TAB_TO_TOUR_STEP_ID } from '../../streams_tour';
 import { calculateDataQuality } from '../../../util/calculate_data_quality';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamDocCountsFetch } from '../../../hooks/use_streams_doc_counts_fetch';
@@ -51,6 +52,7 @@ export function Wrapper({
   const {
     features: { groupStreams },
   } = useStreamsPrivileges();
+  const { getStepPropsByStepId } = useStreamsTour();
 
   const lastTrackedRef = useRef<string | null>(null);
 
@@ -170,11 +172,24 @@ export function Wrapper({
             <FeedbackButton />
           </EuiFlexGroup>
         }
-        tabs={Object.entries(tabMap).map(([tabKey, { label, href }]) => ({
-          label,
-          href,
-          isSelected: tab === tabKey,
-        }))}
+        tabs={Object.entries(tabMap).map(([tabKey, { label, href }]) => {
+          const tourStepId = TAB_TO_TOUR_STEP_ID[tabKey];
+          const stepProps = tourStepId ? getStepPropsByStepId(tourStepId) : undefined;
+
+          const wrappedLabel = stepProps ? (
+            <EuiTourStep {...stepProps}>
+              <span>{label}</span>
+            </EuiTourStep>
+          ) : (
+            label
+          );
+
+          return {
+            label: wrappedLabel,
+            href,
+            isSelected: tab === tabKey,
+          };
+        })}
       />
       <StreamsAppPageTemplate.Body noPadding={tab === 'partitioning' || tab === 'processing'}>
         {tabs[tab]?.content}

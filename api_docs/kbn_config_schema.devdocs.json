@@ -5461,7 +5461,7 @@
           "<Record<K, V>>; stream: (options?: ",
           "TypeOptions",
           "<",
-          "Stream",
+          "stream",
           "> | undefined) => ",
           {
             "pluginId": "@kbn/config-schema",
@@ -5471,7 +5471,7 @@
             "text": "Type"
           },
           "<",
-          "Stream",
+          "stream",
           ">; siblingRef: <T>(key: string) => ",
           "SiblingReference",
           "<T>; string: (options?: ",
@@ -10061,7 +10061,7 @@
               "(options?: ",
               "TypeOptions",
               "<",
-              "Stream",
+              "stream",
               "> | undefined) => ",
               {
                 "pluginId": "@kbn/config-schema",
@@ -10071,7 +10071,7 @@
                 "text": "Type"
               },
               "<",
-              "Stream",
+              "stream",
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-config-schema/index.ts",
@@ -10089,7 +10089,7 @@
                 "signature": [
                   "TypeOptions",
                   "<",
-                  "Stream",
+                  "stream",
                   "> | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-config-schema/index.ts",

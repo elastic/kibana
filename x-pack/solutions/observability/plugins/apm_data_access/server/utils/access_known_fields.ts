@@ -39,7 +39,7 @@ type RequiredApmFields<
  * Accessing fields from the document will correctly return single or multi values
  * according to known field types.
  */
-type ProxiedApmEvent<
+export type ProxiedApmEvent<
   T extends Partial<FlattenedApmEvent>,
   R extends keyof FlattenedApmEvent = never
 > = Readonly<MapToSingleOrMultiValue<RequiredApmFields<T, R>>>;
