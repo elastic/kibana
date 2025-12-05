@@ -18,9 +18,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { InstalledPackageUIPackageListItem } from '../types';
 import { useInstalledIntegrationsActions } from '../hooks/use_installed_integrations_actions';
 import { ExperimentalFeaturesService } from '../../../../../services';
-import { useLicense } from '../../../../../hooks';
+import { useLicense, useStartServices } from '../../../../../hooks';
 
 import { IntegrationKnowledgeFlyout } from './integration_knowledge_flyout';
+import { EisCostTour } from './eis_cost_tour';
 
 export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
   selectedItems: InstalledPackageUIPackageListItem[];
@@ -29,13 +30,19 @@ export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
   const [showIntegrationKnowledgeFlyout, setShowIntegrationKnowledgeFlyout] = useState(false);
   const { enablePackageRollback } = ExperimentalFeaturesService.get();
   const licenseService = useLicense();
+  const { cloud, docLinks } = useStartServices();
   const button = (
-    <EuiButton iconType="arrowDown" iconSide="right" onClick={() => setIsPopoverOpen((s) => !s)}>
-      <FormattedMessage
-        id="xpack.fleet.epmInstalledIntegrations.actionButton"
-        defaultMessage="Actions"
-      />
-    </EuiButton>
+    <EisCostTour
+      ctaLink={docLinks.links.enterpriseSearch.elasticInferenceService}
+      isCloudEnabled={cloud?.isCloudEnabled ?? false}
+    >
+      <EuiButton iconType="arrowDown" iconSide="right" onClick={() => setIsPopoverOpen((s) => !s)}>
+        <FormattedMessage
+          id="xpack.fleet.epmInstalledIntegrations.actionButton"
+          defaultMessage="Actions"
+        />
+      </EuiButton>
+    </EisCostTour>
   );
 
   const {

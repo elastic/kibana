@@ -15,6 +15,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiLink,
   EuiSwitch,
   EuiText,
   EuiTitle,
@@ -38,7 +39,7 @@ export const IntegrationKnowledgeFlyout: React.FunctionComponent<{
     React.useState<boolean>(false);
 
   const authz = useAuthz();
-  const { notifications } = useStartServices();
+  const { notifications, docLinks } = useStartServices();
 
   const { data: settings, isInitialLoading: isSettingsInitialLoading } = useGetSettingsQuery({
     enabled: authz.fleet.readSettings,
@@ -104,7 +105,7 @@ export const IntegrationKnowledgeFlyout: React.FunctionComponent<{
         {isSettingsInitialLoading ? (
           <Loading />
         ) : (
-          <EuiFlexGroup direction="column" gutterSize="l">
+          <EuiFlexGroup direction="column" gutterSize="l" alignItems="flexStart">
             <EuiFlexItem>
               <EuiText size="s">
                 <h3>
@@ -155,7 +156,16 @@ export const IntegrationKnowledgeFlyout: React.FunctionComponent<{
                   <FormattedMessage
                     id="xpack.fleet.integrationKnowledgeFlyout.costDescription"
                     defaultMessage="Indexing uses Elastic Inference Service and incurs minimal per-token costs."
-                  />
+                  />{' '}
+                  <EuiLink
+                    href={docLinks.links.enterpriseSearch.elasticInferenceService}
+                    target="_blank"
+                  >
+                    <FormattedMessage
+                      id="xpack.fleet.integrationKnowledgeFlyout.learnMoreLink"
+                      defaultMessage="Learn more"
+                    />
+                  </EuiLink>
                 </p>
               </EuiText>
             </EuiFlexItem>
