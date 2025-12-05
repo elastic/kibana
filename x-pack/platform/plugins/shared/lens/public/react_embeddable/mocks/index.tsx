@@ -109,6 +109,11 @@ function getDefaultLensApiMock() {
     setDisabledActionIds: jest.fn(),
     rendered$: new BehaviorSubject<boolean>(false),
     searchSessionId$: new BehaviorSubject<string | undefined>(undefined),
+    settings: {
+      syncColors$: new BehaviorSubject<boolean | undefined>(false),
+      syncCursor$: new BehaviorSubject<boolean | undefined>(true),
+      syncTooltips$: new BehaviorSubject<boolean | undefined>(false),
+    },
   };
   return LensApiMock;
 }
