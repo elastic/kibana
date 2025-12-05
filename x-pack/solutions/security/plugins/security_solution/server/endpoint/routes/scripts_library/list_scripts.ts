@@ -64,6 +64,12 @@ export const registerListScriptsRoute = (
         authz: { requiredPrivileges: ['securitySolution'] },
         authc: { enabled: true },
       },
+      options: {
+        availability: {
+          since: '9.4.0',
+          stability: 'stable',
+        },
+      },
     })
     .addVersion(
       {
