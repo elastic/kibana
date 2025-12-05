@@ -8,7 +8,6 @@ import React from 'react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { css } from '@emotion/react';
 import type { OnechatPluginStart } from '../../types';
 import { RobotIcon } from '../../application/components/common/icons/robot';
 
@@ -16,9 +15,9 @@ interface OnechatNavControlServices {
   onechat: OnechatPluginStart;
 }
 
-const buttonCss = css`
-  padding: 0px 8px;
-`;
+const LINK_LABEL = i18n.translate('xpack.onechat.navControl.linkLabel', {
+  defaultMessage: 'AI Agent',
+});
 
 export function OnechatNavControl() {
   const {
@@ -28,7 +27,6 @@ export function OnechatNavControl() {
   return (
     <EuiToolTip content={buttonLabel}>
       <EuiButton
-        css={buttonCss}
         aria-label={buttonLabel}
         data-test-subj="OnechatNavControlButton"
         onClick={() => {
@@ -40,6 +38,7 @@ export function OnechatNavControl() {
         minWidth={0}
       >
         <RobotIcon size="m" />
+        {LINK_LABEL}
       </EuiButton>
     </EuiToolTip>
   );
