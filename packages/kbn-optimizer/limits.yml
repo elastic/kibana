@@ -1,6 +1,7 @@
 pageLoadAssetSize:
   actions: 20000
   advancedSettings: 6196
+  agentBuilderPlatform: 64202
   aiAssistantManagementSelection: 10000
   aiops: 15359
   alerting: 26932
@@ -123,7 +124,7 @@ pageLoadAssetSize:
   observabilityLogsExplorer: 4918
   observabilityOnboarding: 12872
   observabilityShared: 75115
-  onechat: 25218
+  onechat: 28638
   osquery: 47422
   painlessLab: 6299
   presentationPanel: 11418
