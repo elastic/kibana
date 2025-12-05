@@ -164,7 +164,7 @@ export function SignificantEventsGeneratedTable({
       width: '20%',
       field: 'severity_score',
       name: i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.severityScoreColumn', {
-        defaultMessage: 'Severity score',
+        defaultMessage: 'Severity',
       }),
       render: (score: number) => {
         return <SeverityBadge score={score} />;
