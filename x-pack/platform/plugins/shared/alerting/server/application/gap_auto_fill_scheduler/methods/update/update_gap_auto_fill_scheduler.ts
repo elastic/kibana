@@ -20,20 +20,10 @@ import { transformSavedObjectToGapAutoFillSchedulerResult } from '../../transfor
 import type { GapAutoFillSchedulerResponse } from '../../result/types';
 import { updateGapAutoFillSchedulerSchema } from './schemas';
 import type { UpdateGapAutoFillSchedulerParams } from './types';
+import { getGapAutoFillSchedulerSO } from '../utils';
 
 const toRuleTypeKey = (ruleType: { type: string; consumer: string }) =>
   `${ruleType.type}:${ruleType.consumer}`;
-
-const buildRuleTypeUnion = (
-  existing: Array<{ type: string; consumer: string }>,
-  incoming: Array<{ type: string; consumer: string }> = []
-) => {
-  const map = new Map<string, { type: string; consumer: string }>();
-  for (const ruleType of [...existing, ...incoming]) {
-    map.set(toRuleTypeKey(ruleType), ruleType);
-  }
-  return Array.from(map.values());
-};
 
 export async function updateGapAutoFillScheduler(
   context: RulesClientContext,
@@ -52,18 +42,12 @@ export async function updateGapAutoFillScheduler(
 
   const soClient = context.unsecuredSavedObjectsClient;
   const taskManager = context.taskManager;
-  let schedulerSo: SavedObject<GapAutoFillSchedulerSO>;
-
-  try {
-    schedulerSo = await soClient.get<GapAutoFillSchedulerSO>(
-      GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
-      params.id
-    );
-  } catch (err) {
-    const errorMessage = `Failed to load gap auto fill scheduler by id: ${params.id}`;
-    context.logger.error(`${errorMessage} - ${err}`);
-    throw Boom.boomify(err as Error, { message: errorMessage });
-  }
+  const schedulerSo = await getGapAutoFillSchedulerSO({
+    context,
+    id: params.id,
+    operation: WriteOperations.UpdateGapAutoFillScheduler,
+    authAuditAction: GapAutoFillSchedulerAuditAction.UPDATE,
+  });
 
   const schedulerName = schedulerSo.attributes?.name ?? params.id;
   const existingRuleTypes = schedulerSo.attributes?.ruleTypes ?? [];
@@ -99,9 +83,9 @@ export async function updateGapAutoFillScheduler(
     }
   }
 
+  // Authorize against any newly requested rule types in the update params
   try {
-    const ruleTypesToCheck = buildRuleTypeUnion(existingRuleTypes, params.ruleTypes);
-    for (const ruleType of ruleTypesToCheck) {
+    for (const ruleType of params.ruleTypes) {
       await context.authorization.ensureAuthorized({
         ruleTypeId: ruleType.type,
         consumer: ruleType.consumer,
@@ -123,6 +107,7 @@ export async function updateGapAutoFillScheduler(
     );
     throw error;
   }
+
   const now = new Date().toISOString();
   const updatedEnabled = params.enabled;
   const updatedSchedule = params.schedule;

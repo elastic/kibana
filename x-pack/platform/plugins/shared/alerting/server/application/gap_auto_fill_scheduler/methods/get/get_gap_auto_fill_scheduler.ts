@@ -11,13 +11,13 @@ import type { GetGapAutoFillSchedulerParams } from '../types';
 import type { GapAutoFillSchedulerResponse } from '../../result/types';
 import { getGapAutoFillSchedulerSchema } from '../schemas';
 import { transformSavedObjectToGapAutoFillSchedulerResult } from '../../transforms';
-import type { GapAutoFillSchedulerSO } from '../../../../data/gap_auto_fill_scheduler/types/gap_auto_fill_scheduler';
-import { ReadOperations, AlertingAuthorizationEntity } from '../../../../authorization';
+import { ReadOperations } from '../../../../authorization';
 import {
   gapAutoFillSchedulerAuditEvent,
   GapAutoFillSchedulerAuditAction,
 } from '../../../../rules_client/common/audit_events';
 import { GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { getGapAutoFillSchedulerSO } from '../utils';
 
 export async function getGapAutoFillScheduler(
   context: RulesClientContext,
@@ -34,54 +34,12 @@ export async function getGapAutoFillScheduler(
   }
 
   try {
-    const result = await context.unsecuredSavedObjectsClient.get<GapAutoFillSchedulerSO>(
-      GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
-      params.id
-    );
-
-    if (result.error) {
-      const err = new Error(result.error.message);
-      context.auditLogger?.log(
-        gapAutoFillSchedulerAuditEvent({
-          action: GapAutoFillSchedulerAuditAction.GET,
-          savedObject: {
-            type: GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
-            id: params.id,
-            name: result.attributes.name,
-          },
-          error: new Error(result.error.message),
-        })
-      );
-      throw err;
-    }
-
-    // Authorization check - we need to check if user has permission to get
-    // For gap fill auto scheduler, we check against the rule types it manages
-    const ruleTypes = result.attributes.ruleTypes;
-
-    try {
-      for (const ruleType of ruleTypes) {
-        await context.authorization.ensureAuthorized({
-          ruleTypeId: ruleType.type,
-          consumer: ruleType.consumer,
-          operation: ReadOperations.GetGapAutoFillScheduler,
-          entity: AlertingAuthorizationEntity.Rule,
-        });
-      }
-    } catch (error) {
-      context.auditLogger?.log(
-        gapAutoFillSchedulerAuditEvent({
-          action: GapAutoFillSchedulerAuditAction.GET,
-          savedObject: {
-            type: GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
-            id: params.id,
-            name: result.attributes.name,
-          },
-          error,
-        })
-      );
-      throw error;
-    }
+    const result = await getGapAutoFillSchedulerSO({
+      context,
+      id: params.id,
+      operation: ReadOperations.GetGapAutoFillScheduler,
+      authAuditAction: GapAutoFillSchedulerAuditAction.GET,
+    });
 
     context.auditLogger?.log(
       gapAutoFillSchedulerAuditEvent({

@@ -13,14 +13,14 @@ import type {
   GapAutoFillSchedulerLogEntry,
 } from './types';
 import { findGapAutoFillSchedulerLogsParamsSchema } from './schemas';
-import type { GapAutoFillSchedulerSO } from '../../../../data/gap_auto_fill_scheduler/types/gap_auto_fill_scheduler';
-import { ReadOperations, AlertingAuthorizationEntity } from '../../../../authorization';
+import { ReadOperations } from '../../../../authorization';
 import {
   gapAutoFillSchedulerAuditEvent,
   GapAutoFillSchedulerAuditAction,
 } from '../../../../rules_client/common/audit_events';
 import { GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { formatGapAutoFillSchedulerLogEntry } from './utils';
+import { getGapAutoFillSchedulerSO } from '../utils';
 
 export async function findGapAutoFillSchedulerLogs(
   context: RulesClientContext,
@@ -38,56 +38,13 @@ export async function findGapAutoFillSchedulerLogs(
   }
 
   try {
-    // Get the scheduler saved object to access ruleTypes for authorization
-    const schedulerSO = await context.unsecuredSavedObjectsClient.get<GapAutoFillSchedulerSO>(
-      GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
-      params.id
-    );
-
-    // Check for errors in the savedObjectClient result
-    if (schedulerSO.error) {
-      const err = new Error(schedulerSO.error.message);
-      context.auditLogger?.log(
-        gapAutoFillSchedulerAuditEvent({
-          action: GapAutoFillSchedulerAuditAction.GET,
-          savedObject: {
-            type: GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
-            id: params.id,
-            name: schedulerSO.attributes.name,
-          },
-          error: new Error(schedulerSO.error.message),
-        })
-      );
-      throw err;
-    }
-
-    // Authorization check - we need to check if user has permission to get logs
-    // For gap fill auto scheduler, we check against the rule types it manages
-    const ruleTypes = schedulerSO.attributes.ruleTypes;
-
-    try {
-      for (const ruleType of ruleTypes) {
-        await context.authorization.ensureAuthorized({
-          ruleTypeId: ruleType.type,
-          consumer: ruleType.consumer,
-          operation: ReadOperations.FindGapAutoFillSchedulerLogs,
-          entity: AlertingAuthorizationEntity.Rule,
-        });
-      }
-    } catch (error) {
-      context.auditLogger?.log(
-        gapAutoFillSchedulerAuditEvent({
-          action: GapAutoFillSchedulerAuditAction.GET_LOGS,
-          savedObject: {
-            type: GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
-            id: params.id,
-            name: schedulerSO.attributes.name,
-          },
-          error,
-        })
-      );
-      throw error;
-    }
+    // Get the scheduler saved object and perform authorization against the rule types it manages
+    const schedulerSO = await getGapAutoFillSchedulerSO({
+      context,
+      id: params.id,
+      operation: ReadOperations.FindGapAutoFillSchedulerLogs,
+      authAuditAction: GapAutoFillSchedulerAuditAction.GET_LOGS,
+    });
 
     // Get the task ID from the scheduler saved object
     const taskId = schedulerSO.id;

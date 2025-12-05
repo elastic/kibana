@@ -8,14 +8,14 @@
 import Boom from '@hapi/boom';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import { GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
+import { WriteOperations } from '../../../../authorization';
 import {
   gapAutoFillSchedulerAuditEvent,
   GapAutoFillSchedulerAuditAction,
 } from '../../../../rules_client/common/audit_events';
-import type { GapAutoFillSchedulerSO } from '../../../../data/gap_auto_fill_scheduler/types/gap_auto_fill_scheduler';
 import { getGapAutoFillSchedulerSchema } from '../schemas';
 import type { GetGapAutoFillSchedulerParams } from '../types';
+import { getGapAutoFillSchedulerSO } from '../utils';
 
 export async function deleteGapAutoFillScheduler(
   context: RulesClientContext,
@@ -35,36 +35,14 @@ export async function deleteGapAutoFillScheduler(
   const taskManager = context.taskManager;
 
   try {
-    const schedulerSo = await soClient.get<GapAutoFillSchedulerSO>(
-      GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
-      params.id
-    );
+    const schedulerSo = await getGapAutoFillSchedulerSO({
+      context,
+      id: params.id,
+      operation: WriteOperations.DeleteGapAutoFillScheduler,
+      authAuditAction: GapAutoFillSchedulerAuditAction.DELETE,
+    });
 
-    const schedulerName = schedulerSo.attributes?.name;
-    const ruleTypes = schedulerSo.attributes?.ruleTypes ?? [];
-    try {
-      for (const ruleType of ruleTypes) {
-        await context.authorization.ensureAuthorized({
-          ruleTypeId: ruleType.type,
-          consumer: ruleType.consumer,
-          operation: WriteOperations.DeleteGapAutoFillScheduler,
-          entity: AlertingAuthorizationEntity.Rule,
-        });
-      }
-    } catch (authError) {
-      context.auditLogger?.log(
-        gapAutoFillSchedulerAuditEvent({
-          action: GapAutoFillSchedulerAuditAction.DELETE,
-          savedObject: {
-            type: GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
-            id: params.id,
-            name: schedulerName,
-          },
-          error: authError as Error,
-        })
-      );
-      throw authError;
-    }
+    const schedulerName = schedulerSo.attributes.name;
 
     const scheduledTaskId = schedulerSo.id;
 
