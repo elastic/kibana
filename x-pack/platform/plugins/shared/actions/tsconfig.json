@@ -57,6 +57,7 @@
     "@kbn/connector-schemas",
     "@kbn/connector-specs",
     "@kbn/actions-utils",
+    "@kbn/encrypted-saved-objects-shared",
   ],
   "exclude": [
     "target/**/*",

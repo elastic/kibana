@@ -1530,8 +1530,8 @@
       "@kbn/object-versioning-utils/*": ["src/platform/packages/shared/kbn-object-versioning-utils/*"],
       "@kbn/observability-agent-builder": ["x-pack/solutions/observability/packages/agent-builder"],
       "@kbn/observability-agent-builder/*": ["x-pack/solutions/observability/packages/agent-builder/*"],
-      "@kbn/observability-agent-plugin": ["x-pack/solutions/observability/plugins/observability_agent"],
-      "@kbn/observability-agent-plugin/*": ["x-pack/solutions/observability/plugins/observability_agent/*"],
+      "@kbn/observability-agent-builder-plugin": ["x-pack/solutions/observability/plugins/observability_agent_builder"],
+      "@kbn/observability-agent-builder-plugin/*": ["x-pack/solutions/observability/plugins/observability_agent_builder/*"],
       "@kbn/observability-ai-assistant-app-plugin": ["x-pack/solutions/observability/plugins/observability_ai_assistant_app"],
       "@kbn/observability-ai-assistant-app-plugin/*": ["x-pack/solutions/observability/plugins/observability_ai_assistant_app/*"],
       "@kbn/observability-ai-assistant-management-plugin": ["x-pack/platform/plugins/private/observability_ai_assistant_management"],
@@ -2475,7 +2475,9 @@
       "@typescript-eslint/parser": ["typings/@typescript-eslint/parser"],
       "@a2a-js/sdk/server": ["typings/@a2a-js-sdk/server"],
       "zod": ["typings/zod/v3"],
-      "zod/v4": ["typings/zod/v4"]
+      "zod/v4": ["typings/zod/v4"],
+      "vega-lite": ["typings/vega/vega_lite"],
+      "vega-tooltip": ["typings/vega/vega_tooltip"]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
