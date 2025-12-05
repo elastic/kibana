@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should return empty array if there are no existing schedules', async () => {
         const apis = getAttackDiscoverySchedulesApis({ supertest });
         const results = await apis.find({ query: {} });
-        expect(results).toEqual({ data: [], total: 0 });
+        expect(results).toEqual({ data: [], total: 0, page: 1, per_page: 10 });
       });
 
       it('should return all existing schedules', async () => {
@@ -45,6 +45,8 @@ export default ({ getService }: FtrProviderContext) => {
         expect(results).toEqual({
           data: expect.arrayContaining(createdSchedules),
           total: schedulesCount,
+          page: 1,
+          per_page: 10,
         });
       });
 
@@ -56,7 +58,7 @@ export default ({ getService }: FtrProviderContext) => {
         const apis = getAttackDiscoverySchedulesApis({ supertest });
         const allSchedules = await apis.find({ query: {} });
 
-        const results = await apis.find({ query: { page: 1, perPage: 2 } });
+        const results = await apis.find({ query: { page: 1, per_page: 2 } });
         expect(results).toEqual({
           data: expect.arrayContaining(allSchedules.data.slice(2, 4)),
           total: schedulesCount,
@@ -74,7 +76,9 @@ export default ({ getService }: FtrProviderContext) => {
         const scheduleNames = scheduleToCreate.map((schedule) => schedule.name).sort();
 
         const apis = getAttackDiscoverySchedulesApis({ supertest });
-        const results = await apis.find({ query: { sortField: 'name', sortDirection: 'asc' } });
+        const results = await apis.find({
+          query: { sort_field: 'name', sort_direction: 'asc' },
+        });
         const resultsNames = (results.data as Array<{ name: string }>).map(({ name }) => name);
 
         expect(resultsNames).toEqual(scheduleNames);
@@ -94,7 +98,9 @@ export default ({ getService }: FtrProviderContext) => {
           .reverse();
 
         const apis = getAttackDiscoverySchedulesApis({ supertest });
-        const results = await apis.find({ query: { sortField: 'name', sortDirection: 'desc' } });
+        const results = await apis.find({
+          query: { sort_field: 'name', sort_direction: 'desc' },
+        });
         const resultsNames = (results.data as Array<{ name: string }>).map(({ name }) => name);
 
         expect(resultsNames).toEqual(scheduleNames);
