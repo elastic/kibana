@@ -101,6 +101,32 @@ export const SimilarCasesBadge = ({
 
 SimilarCasesBadge.displayName = 'SimilarCasesBadge';
 
+export const AttachmentsBadge = ({
+  isActive,
+  count,
+  euiTheme,
+}: {
+  isActive: boolean;
+  count?: number;
+  euiTheme: EuiThemeComputed<{}>;
+}) => (
+  <>
+    {
+      <EuiNotificationBadge
+        css={css`
+          margin-left: ${euiTheme.size.xs};
+        `}
+        data-test-subj="case-view-attachments-badge"
+        color={isActive ? 'accent' : 'subdued'}
+      >
+        {count ?? 0}
+      </EuiNotificationBadge>
+    }
+  </>
+);
+
+AttachmentsBadge.displayName = 'AttachmentsBadge';
+
 const AlertsBadge = ({
   activeTab,
   totalAlerts,
@@ -158,13 +184,18 @@ export interface CaseViewTab {
   name: string;
 }
 
+export interface UseCaseAttachmentTabsReturnValue {
+  tabs: CaseViewTab[];
+  totalAttachments: number;
+}
+
 export const useCaseAttachmentTabs = ({
   caseData,
   activeTab,
 }: {
   caseData: CaseUI;
   activeTab: CASE_VIEW_PAGE_TABS;
-}): CaseViewTab[] => {
+}): UseCaseAttachmentTabsReturnValue => {
   const { features } = useCasesContext();
   const { euiTheme } = useEuiTheme();
   const { data: fileStatsData, isLoading: isLoadingFiles } = useGetCaseFileStats({
@@ -174,6 +205,12 @@ export const useCaseAttachmentTabs = ({
 
   const { observablesAuthorized: canShowObservableTabs, isObservablesFeatureEnabled } =
     useCasesFeatures();
+
+  const totalAttachments =
+    Number(features.alerts.enabled ? caseData.totalAlerts : 0) +
+    Number(features.events.enabled ? caseData.totalEvents : 0) +
+    Number(fileStatsData?.total) +
+    (canShowObservableTabs && isObservablesFeatureEnabled ? observables.length : 0);
 
   const tabsConfig = useMemo(
     () => [
@@ -254,5 +291,5 @@ export const useCaseAttachmentTabs = ({
     ]
   );
 
-  return tabsConfig;
+  return { tabs: tabsConfig, totalAttachments };
 };
