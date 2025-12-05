@@ -41,7 +41,10 @@ export const getDimensions = async ({
     .pipe(
       evaluate('??dim = ??dim::string', { dim: dimensions[0] }),
       search
-        ? where(`TO_LOWER(??dim) LIKE "*${search.toLowerCase()}*"`, { dim: dimensions[0] })
+        ? where(`STARTS_WITH(TO_LOWER(??dim), ?search)`, {
+            dim: dimensions[0],
+            search: `${search.toLowerCase()}`,
+          })
         : where('??dim IS NOT NULL', { dim: dimensions[0] }),
       stats('BY ??dim', {
         dim: dimensions[0],
