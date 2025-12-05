@@ -11,8 +11,7 @@ import type { AssetCriticalityRecord } from '../../../../../common/api/entity_an
 import type { RiskScoreBucket } from '../../types';
 
 import type { AssetCriticalityService } from '../../asset_criticality';
-import { max10DecimalPlaces } from '../helpers';
-import { bayesianUpdate, getCriticalityModifier } from '../../asset_criticality/helpers';
+import { getCriticalityModifier } from '../../asset_criticality/helpers';
 import type { Modifier } from './types';
 
 export interface AssetCriticalityRiskFields {
@@ -61,16 +60,11 @@ export const applyCriticalityModifier = async ({
       (c) => c.id_field === page.identifierField && c.id_value === bucket.key[page.identifierField]
     );
 
-    return calculateScoreAndContributions(
-      bucket.top_inputs.risk_details.value.normalized_score,
-      criticality,
-      globalWeight
-    );
+    return buildModifier(criticality, globalWeight);
   });
 };
 
-const calculateScoreAndContributions = (
-  normalizedBaseScore: number,
+const buildModifier = (
   criticality?: AssetCriticalityRecord,
   globalWeight?: number
 ): Modifier<'asset_criticality'> | undefined => {
@@ -79,20 +73,19 @@ const calculateScoreAndContributions = (
     return;
   }
 
-  const weightedNormalizedScore =
-    globalWeight !== undefined ? normalizedBaseScore * globalWeight : normalizedBaseScore;
+  const weightedModifier =
+    globalWeight !== undefined ? criticalityModifier * globalWeight : criticalityModifier;
 
-  const updatedNormalizedScore = bayesianUpdate({
-    modifier: criticalityModifier,
-    score: weightedNormalizedScore,
-  });
+  // const updatedNormalizedScore = bayesianUpdate({
+  //   modifier: criticalityModifier,
+  //   score: weightedNormalizedScore,
+  // });
 
-  const contribution = updatedNormalizedScore - weightedNormalizedScore;
+  // const contribution = updatedNormalizedScore - weightedNormalizedScore;
 
   return {
     type: 'asset_criticality',
-    modifier_value: criticalityModifier,
-    contribution: max10DecimalPlaces(contribution),
+    modifier_value: weightedModifier,
     metadata: {
       criticality_level: criticality?.criticality_level,
     },

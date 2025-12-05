@@ -15,8 +15,6 @@ import type { Logger } from '@kbn/core/server';
 
 import type { RiskScoreBucket } from '../../types';
 
-import { max10DecimalPlaces } from '../helpers';
-import { bayesianUpdate } from '../../asset_criticality/helpers';
 import type { PrivmonUserCrudService } from '../../privilege_monitoring/users/privileged_users_crud';
 
 import type { ExperimentalFeatures } from '../../../../../common';
@@ -47,9 +45,8 @@ interface ApplyCriticalityModifierParams {
   globalWeight?: number;
 }
 
-// TODO: Tune modifier value
 // QUESTION: This should take labels/sources/roles into account?
-const PRIVILEGED_USER_MODIFIER = 2;
+const PRIVILEGED_USER_MODIFIER = 1.5;
 
 export const applyPrivmonModifier = async ({
   page: { buckets, identifierField, bounds },
@@ -84,16 +81,11 @@ export const applyPrivmonModifier = async ({
       ({ user }) => user?.name === bucket.key[identifierField] && user?.is_privileged
     );
 
-    return calculateScoreAndContributions(
-      bucket.top_inputs.risk_details.value.normalized_score,
-      isPrivilegedUser,
-      globalWeight
-    );
+    return buildModifier(isPrivilegedUser, globalWeight);
   });
 };
 
-const calculateScoreAndContributions = (
-  normalizedBaseScore: number,
+const buildModifier = (
   isPrivilegedUser: boolean,
   globalWeight?: number
 ): Modifier<'watchlist'> | undefined => {
@@ -101,21 +93,22 @@ const calculateScoreAndContributions = (
     return;
   }
 
-  const weightedNormalizedScore =
-    globalWeight !== undefined ? normalizedBaseScore * globalWeight : normalizedBaseScore;
+  const weightedModifier =
+    globalWeight !== undefined ? PRIVILEGED_USER_MODIFIER * globalWeight : PRIVILEGED_USER_MODIFIER;
+  // const weightedNormalizedScore =
+  //   globalWeight !== undefined ? normalizedBaseScore * globalWeight : normalizedBaseScore;
 
-  const updatedNormalizedScore = bayesianUpdate({
-    modifier: PRIVILEGED_USER_MODIFIER,
-    score: weightedNormalizedScore,
-  });
+  // const updatedNormalizedScore = bayesianUpdate({
+  //   modifier: PRIVILEGED_USER_MODIFIER,
+  //   score: weightedNormalizedScore,
+  // });
 
-  const contribution = updatedNormalizedScore - weightedNormalizedScore;
+  // const contribution = updatedNormalizedScore - weightedNormalizedScore;
 
   return {
     type: 'watchlist',
     subtype: 'privmon',
-    modifier_value: PRIVILEGED_USER_MODIFIER,
-    contribution: max10DecimalPlaces(contribution),
+    modifier_value: weightedModifier,
     metadata: {
       is_privileged_user: true,
     },

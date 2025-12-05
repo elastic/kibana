@@ -16,12 +16,11 @@ interface ModifierTypeMap {
     metadata: { is_privileged_user: boolean | undefined };
   };
 }
-type MODIFIER_TYPE = keyof ModifierTypeMap;
+export type MODIFIER_TYPE = keyof ModifierTypeMap;
 
 export type Modifier<T extends MODIFIER_TYPE> = {
   type: T;
   modifier_value?: number;
-  contribution: number;
   metadata?: ModifierTypeMap[T]['metadata'];
 } & (ModifierTypeMap[T]['subtype'] extends void
   ? { subtype?: never }
