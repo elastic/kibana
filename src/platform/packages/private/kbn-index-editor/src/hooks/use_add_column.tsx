@@ -29,7 +29,7 @@ export const errorMessages: Record<ErrorCode, (columnName: string) => string> = 
     }),
 };
 
-export const useAddColumnName = (initialColumnName = '', initialColumnType?: string) => {
+export const useAddColumn = (initialColumnName = '', initialColumnType?: string) => {
   const {
     services: { indexUpdateService },
   } = useKibana<KibanaContextExtra>();
@@ -60,7 +60,7 @@ export const useAddColumnName = (initialColumnName = '', initialColumnType?: str
     if (initialColumnName) {
       indexUpdateService.editColumn(columnName, initialColumnName, columnType);
     } else {
-      indexUpdateService.addNewColumn();
+      indexUpdateService.addNewColumn(columnName, columnType);
     }
   }, [columnName, columnType, indexUpdateService, initialColumnName, validationError]);
 

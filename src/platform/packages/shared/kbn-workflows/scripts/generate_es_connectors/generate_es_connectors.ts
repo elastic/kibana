@@ -237,7 +237,9 @@ function generateContractMeta(
     documentation,
     parameterTypes,
 
-    fileName: `${type}.gen.ts`,
+    // Use underscores in filename to avoid build exclusion (files with .test. are excluded)
+    // The `type` field keeps dots for runtime compatibility
+    fileName: `elasticsearch.${endpoint.name.replace(/\./g, '_')}.gen.ts`,
     contractName,
     operationIds,
     schemaImports,
