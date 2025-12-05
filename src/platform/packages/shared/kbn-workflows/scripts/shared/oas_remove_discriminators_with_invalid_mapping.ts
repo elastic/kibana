@@ -26,7 +26,9 @@ export function removeDiscriminatorsWithInvalidMapping(document: OpenAPIV3.Docum
           const oneOfCount = value.oneOf.length;
           const mappingCount = Object.keys(value.discriminator.mapping ?? {}).length;
           if (oneOfCount !== mappingCount) {
-            // console.warn(`Discriminator ${key} has invalid mapping`, value);
+            console.warn(
+              `Discriminator ${key} has invalid mapping: mapping has ${mappingCount} items, but oneOf has ${oneOfCount} items, removing it`
+            );
             delete value.discriminator;
           }
         }

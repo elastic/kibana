@@ -13,10 +13,12 @@ import {
 import { removeDiscriminatorsWithInvalidMapping } from '../shared/oas_remove_discriminators_with_invalid_mapping';
 import { removeDiscriminatorsWithoutMapping } from '../shared/oas_remove_discriminators_without_mapping';
 
+console.log('Reading OpenAPI spec from ', KIBANA_SPEC_OPENAPI_PATH);
 const openApiSpec = yaml.parse(
   fs.readFileSync(KIBANA_SPEC_OPENAPI_PATH, 'utf8')
 ) as OpenAPIV3.Document;
 
+console.log('Preprocessing OpenAPI spec...');
 const preprocessedOpenApiSpec = [
   removeDiscriminatorsWithoutMapping,
   removeDiscriminatorsWithInvalidMapping,

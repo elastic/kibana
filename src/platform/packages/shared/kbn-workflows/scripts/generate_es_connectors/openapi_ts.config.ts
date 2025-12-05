@@ -13,7 +13,9 @@ import { alignDefaultWithEnum } from '../shared/oas_align_default_with_enum';
 import { allowShortQuerySyntax } from '../shared/oas_allow_short_query_syntax';
 import { removeDiscriminatorsWithoutMapping } from '../shared/oas_remove_discriminators_without_mapping';
 
+console.log('Reading OpenAPI spec from ', ES_SPEC_OPENAPI_PATH);
 const openApiSpec = JSON.parse(fs.readFileSync(ES_SPEC_OPENAPI_PATH, 'utf8')) as OpenAPIV3.Document;
+console.log('Preprocessing OpenAPI spec...');
 const preprocessedOpenApiSpec = [
   removeDiscriminatorsWithoutMapping,
   allowShortQuerySyntax,
