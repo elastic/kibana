@@ -59,17 +59,6 @@ jest.mock('@kbn/mcp-client', () => {
 // Import the mocked error classes for use in tests
 import { StreamableHTTPError, UnauthorizedError } from '@kbn/mcp-client';
 
-// Mock the lifecycle manager
-jest.mock('./lifecycle_management', () => ({
-  McpConnectionLifecycleManager: jest.fn().mockImplementation(() => ({
-    recordActivity: jest.fn(),
-    reset: jest.fn(),
-    cleanup: jest.fn(),
-    shouldDisconnect: jest.fn().mockReturnValue(false),
-    getTimeSinceLastActivity: jest.fn().mockReturnValue(null),
-  })),
-}));
-
 // Mock the auth helpers
 jest.mock('./auth_helpers', () => ({
   buildHeadersFromSecrets: jest.fn().mockReturnValue({}),
@@ -293,12 +282,14 @@ describe('McpConnector', () => {
 
       mockMcpClient.isConnected.mockReturnValue(true);
       mockMcpClient.listTools.mockResolvedValue(mockToolsResult);
+      mockMcpClient.disconnect.mockResolvedValue(undefined);
 
       const result = await connector.listTools({}, connectorUsageCollector);
 
       expect(result).toEqual(mockToolsResult);
       expect(mockMcpClient.listTools).toHaveBeenCalledTimes(1);
       expect(mockMcpClient.connect).not.toHaveBeenCalled(); // Already connected
+      expect(mockMcpClient.disconnect).toHaveBeenCalledTimes(1); // Disconnect in finally block
       expect(services.savedObjectsClient.create).toHaveBeenCalledWith(
         MCP_CONNECTOR_TOOLS_SAVED_OBJECT_TYPE,
         expect.objectContaining({
@@ -326,15 +317,20 @@ describe('McpConnector', () => {
         ],
       };
 
-      mockMcpClient.isConnected.mockReturnValue(false);
+      // Initially not connected, then connected after connect() is called
+      mockMcpClient.isConnected
+        .mockReturnValueOnce(false) // Before connect
+        .mockReturnValueOnce(true); // After connect, for safeDisconnect check
       mockMcpClient.connect.mockResolvedValue(mockConnectResult);
       mockMcpClient.listTools.mockResolvedValue(mockToolsResult);
+      mockMcpClient.disconnect.mockResolvedValue(undefined);
 
       const result = await connector.listTools({}, connectorUsageCollector);
 
       expect(result).toEqual(mockToolsResult);
       expect(mockMcpClient.connect).toHaveBeenCalledTimes(1);
       expect(mockMcpClient.listTools).toHaveBeenCalledTimes(1);
+      expect(mockMcpClient.disconnect).toHaveBeenCalledTimes(1); // Disconnect in finally block
     });
 
     it('should handle errors and clean up connection state', async () => {
@@ -359,8 +355,8 @@ describe('McpConnector', () => {
         'Failed to list tools'
       );
 
-      // Should not disconnect on non-connection errors
-      expect(mockMcpClient.disconnect).not.toHaveBeenCalled();
+      // Should disconnect in finally block even on errors
+      expect(mockMcpClient.disconnect).toHaveBeenCalledTimes(1);
     });
 
     it('should handle connection errors and disconnect', async () => {
@@ -381,22 +377,6 @@ describe('McpConnector', () => {
       );
     });
 
-    it('should record activity after successful operation', async () => {
-      const mockToolsResult: ListToolsResponse = {
-        tools: [],
-      };
-
-      mockMcpClient.isConnected.mockReturnValue(true);
-      mockMcpClient.listTools.mockResolvedValue(mockToolsResult);
-
-      await connector.listTools({}, connectorUsageCollector);
-
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { McpConnectionLifecycleManager } = require('./lifecycle_management');
-      const lifecycleManagerInstance = McpConnectionLifecycleManager.mock.results[0].value;
-      expect(lifecycleManagerInstance.recordActivity).toHaveBeenCalled();
-    });
-
     it('should handle forceRefresh parameter', async () => {
       const mockToolsResult: ListToolsResponse = {
         tools: [],
@@ -404,10 +384,12 @@ describe('McpConnector', () => {
 
       mockMcpClient.isConnected.mockReturnValue(true);
       mockMcpClient.listTools.mockResolvedValue(mockToolsResult);
+      mockMcpClient.disconnect.mockResolvedValue(undefined);
 
       await connector.listTools({ forceRefresh: true }, connectorUsageCollector);
 
       expect(mockMcpClient.listTools).toHaveBeenCalledTimes(1);
+      expect(mockMcpClient.disconnect).toHaveBeenCalledTimes(1); // Disconnect in finally block
     });
   });
 
@@ -424,6 +406,7 @@ describe('McpConnector', () => {
 
       mockMcpClient.isConnected.mockReturnValue(true);
       mockMcpClient.callTool.mockResolvedValue(mockCallResult);
+      mockMcpClient.disconnect.mockResolvedValue(undefined);
 
       const params = {
         name: 'test-tool',
@@ -438,6 +421,7 @@ describe('McpConnector', () => {
         arguments: { param1: 'value1' },
       });
       expect(mockMcpClient.connect).not.toHaveBeenCalled(); // Already connected
+      expect(mockMcpClient.disconnect).toHaveBeenCalledTimes(1); // Disconnect in finally block
     });
 
     it('should connect automatically when not connected', async () => {
@@ -454,9 +438,13 @@ describe('McpConnector', () => {
         ],
       };
 
-      mockMcpClient.isConnected.mockReturnValue(false);
+      // Initially not connected, then connected after connect() is called
+      mockMcpClient.isConnected
+        .mockReturnValueOnce(false) // Before connect
+        .mockReturnValueOnce(true); // After connect, for safeDisconnect check
       mockMcpClient.connect.mockResolvedValue(mockConnectResult);
       mockMcpClient.callTool.mockResolvedValue(mockCallResult);
+      mockMcpClient.disconnect.mockResolvedValue(undefined);
 
       const params = {
         name: 'test-tool',
@@ -471,12 +459,14 @@ describe('McpConnector', () => {
         name: 'test-tool',
         arguments: {},
       });
+      expect(mockMcpClient.disconnect).toHaveBeenCalledTimes(1); // Disconnect in finally block
     });
 
     it('should handle errors during tool call', async () => {
       const toolError = new Error('Tool execution failed');
       mockMcpClient.isConnected.mockReturnValue(true);
       mockMcpClient.callTool.mockRejectedValue(toolError);
+      mockMcpClient.disconnect.mockResolvedValue(undefined);
 
       const params = {
         name: 'test-tool',
@@ -491,6 +481,8 @@ describe('McpConnector', () => {
       expect(logger.debug).not.toHaveBeenCalledWith(
         expect.stringContaining('Successfully called tool')
       );
+      // Should disconnect in finally block even on errors
+      expect(mockMcpClient.disconnect).toHaveBeenCalledTimes(1);
     });
 
     it('should handle connection errors and disconnect', async () => {
@@ -516,27 +508,6 @@ describe('McpConnector', () => {
       );
     });
 
-    it('should record activity after successful operation', async () => {
-      const mockCallResult: CallToolResponse = {
-        content: [
-          {
-            type: 'text',
-            text: 'Result',
-          },
-        ],
-      };
-
-      mockMcpClient.isConnected.mockReturnValue(true);
-      mockMcpClient.callTool.mockResolvedValue(mockCallResult);
-
-      await connector.callTool({ name: 'test-tool' }, connectorUsageCollector);
-
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { McpConnectionLifecycleManager } = require('./lifecycle_management');
-      const lifecycleManagerInstance = McpConnectionLifecycleManager.mock.results[0].value;
-      expect(lifecycleManagerInstance.recordActivity).toHaveBeenCalled();
-    });
-
     it('should handle tool calls with no arguments', async () => {
       const mockCallResult: CallToolResponse = {
         content: [
@@ -549,6 +520,7 @@ describe('McpConnector', () => {
 
       mockMcpClient.isConnected.mockReturnValue(true);
       mockMcpClient.callTool.mockResolvedValue(mockCallResult);
+      mockMcpClient.disconnect.mockResolvedValue(undefined);
 
       const result = await connector.callTool({ name: 'test-tool' }, connectorUsageCollector);
 
@@ -557,6 +529,7 @@ describe('McpConnector', () => {
         name: 'test-tool',
         arguments: undefined,
       });
+      expect(mockMcpClient.disconnect).toHaveBeenCalledTimes(1); // Disconnect in finally block
     });
   });
 
@@ -572,13 +545,18 @@ describe('McpConnector', () => {
         tools: [],
       };
 
-      mockMcpClient.isConnected.mockReturnValue(false);
+      // Initially not connected, then connected after connect() is called
+      mockMcpClient.isConnected
+        .mockReturnValueOnce(false) // Before connect
+        .mockReturnValueOnce(true); // After connect, for safeDisconnect check
       mockMcpClient.connect.mockResolvedValue(mockConnectResult);
       mockMcpClient.listTools.mockResolvedValue(mockToolsResult);
+      mockMcpClient.disconnect.mockResolvedValue(undefined);
 
       await connector.listTools({}, connectorUsageCollector);
 
       expect(retryWithRecovery).toHaveBeenCalled();
+      expect(mockMcpClient.disconnect).toHaveBeenCalledTimes(1); // Disconnect in finally block
     });
 
     it('should handle retryable connection errors', async () => {

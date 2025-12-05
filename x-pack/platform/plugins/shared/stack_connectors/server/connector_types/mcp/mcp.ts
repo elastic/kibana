@@ -26,14 +26,9 @@ import {
   UnauthorizedError,
 } from '@kbn/mcp-client';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
-import {
-  MCP_CLIENT_VERSION,
-  MAX_RETRIES,
-  DEFAULT_INACTIVITY_TIMEOUT_MS,
-} from '@kbn/connector-schemas/mcp/constants';
+import { MCP_CLIENT_VERSION, MAX_RETRIES } from '@kbn/connector-schemas/mcp/constants';
 import { buildHeadersFromSecrets } from './auth_helpers';
 import { retryWithRecovery, type RetryOptions } from './retry_utils';
-import { McpConnectionLifecycleManager } from './lifecycle_management';
 import {
   MCP_CONNECTOR_TOOLS_SAVED_OBJECT_TYPE,
   type McpConnectorToolsAttributes,
@@ -46,12 +41,10 @@ import {
  * - The connector maintains a single MCP Client instance per connector instance.
  * - Connections are established automatically on-demand (lazy connection):
  *   - When calling listTools() or callTool(), the connector will auto-connect if not already connected.
- * - Connections remain open after operations and are automatically disconnected after
- *   a period of inactivity (default: 10 minutes) to optimize performance while managing resources.
+ * - Connections are disconnected after each operation completes to ensure proper cleanup.
  */
 export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConnectorSecrets> {
   private mcpClient: McpClient;
-  private lifecycleManager: McpConnectionLifecycleManager;
 
   constructor(params: ServiceParams<MCPConnectorConfig, MCPConnectorSecrets>) {
     super(params);
@@ -74,13 +67,6 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
 
     // Initialize the single MCP Client instance for this connector
     this.mcpClient = new McpClient(this.logger, clientDetails, clientOptions);
-
-    // Initialize lifecycle manager for connection timeout management
-    this.lifecycleManager = new McpConnectionLifecycleManager(
-      this.mcpClient,
-      this.logger,
-      DEFAULT_INACTIVITY_TIMEOUT_MS
-    );
 
     this.registerSubActions();
   }
@@ -135,10 +121,8 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
       );
       throw error;
     } finally {
-      // Always disconnect after test to clean up (test operations should clean up)
+      // Always disconnect after test to clean up
       await this.safeDisconnect('test');
-      // Clean up lifecycle manager for test operations
-      this.lifecycleManager.cleanup();
     }
   }
 
@@ -154,18 +138,26 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
 
     try {
       await this.mcpClient.disconnect();
-      this.lifecycleManager.reset();
     } catch (disconnectError) {
       const operationContext = operationName ? ` after ${operationName}` : '';
-
-      this.lifecycleManager.reset();
-
       this.logger.debug(
         `Error disconnecting${operationContext}: ${
           disconnectError instanceof Error ? disconnectError.message : String(disconnectError)
         }`
       );
     }
+  }
+
+  /**
+   * Checks if an error is a connection-related error that should trigger retry or cleanup.
+   */
+  private isConnectionError(error: unknown): boolean {
+    return (
+      error instanceof StreamableHTTPError ||
+      error instanceof UnauthorizedError ||
+      (error instanceof Error &&
+        (error.message.includes('connection') || error.message.includes('ECONNREFUSED')))
+    );
   }
 
   /**
@@ -180,15 +172,7 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     const retryOptions: RetryOptions = {
       maxAttempts: MAX_RETRIES,
       initialDelayMs: 100,
-      isRetryableError: (error) => {
-        // Retry on connection-related errors
-        return (
-          error instanceof StreamableHTTPError ||
-          error instanceof UnauthorizedError ||
-          (error instanceof Error &&
-            (error.message.includes('connection') || error.message.includes('ECONNREFUSED')))
-        );
-      },
+      isRetryableError: (error) => this.isConnectionError(error),
       logger: this.logger,
       operationName: `${operationName}.connect`,
       onRetry: async () => {
@@ -207,9 +191,6 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     };
 
     await retryWithRecovery(() => this.mcpClient.connect(), retryOptions);
-
-    // Record activity after successful connection
-    this.lifecycleManager.recordActivity();
   }
 
   /**
@@ -267,9 +248,6 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
       const result = await this.mcpClient.listTools();
       this.logger.debug(`Listed ${result.tools.length} tools from MCP server`);
 
-      // Record activity after successful operation
-      this.lifecycleManager.recordActivity();
-
       // Save tools to a saved object
       await this.saveTools(result);
       return result;
@@ -277,6 +255,9 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
       // On error, ensure connection state is cleaned up
       await this.handleConnectionError(error, 'listTools');
       throw error;
+    } finally {
+      // Always disconnect after operation to clean up
+      await this.safeDisconnect('listTools');
     }
   }
 
@@ -303,14 +284,14 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
       const result = await this.mcpClient.callTool(callParams);
       this.logger.debug(`Successfully called tool: ${params.name}`);
 
-      // Record activity after successful operation
-      this.lifecycleManager.recordActivity();
-
       return result;
     } catch (error) {
       // On error, ensure connection state is cleaned up
       await this.handleConnectionError(error, `callTool(${params.name})`);
       throw error;
+    } finally {
+      // Always disconnect after operation to clean up
+      await this.safeDisconnect(`callTool(${params.name})`);
     }
   }
   /**
@@ -319,13 +300,7 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
    */
   private async handleConnectionError(error: unknown, operation: string): Promise<void> {
     // Check if this is a connection-related error that requires cleanup
-    const isConnectionError =
-      error instanceof StreamableHTTPError ||
-      error instanceof UnauthorizedError ||
-      (error instanceof Error &&
-        (error.message.includes('connection') || error.message.includes('ECONNREFUSED')));
-
-    if (isConnectionError && this.mcpClient.isConnected()) {
+    if (this.isConnectionError(error) && this.mcpClient.isConnected()) {
       this.logger.warn(
         `Connection error during ${operation}, cleaning up connection state: ${
           error instanceof Error ? error.message : String(error)
@@ -333,8 +308,6 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
       );
       try {
         await this.mcpClient.disconnect();
-        // Reset lifecycle state after error disconnection
-        this.lifecycleManager.reset();
       } catch (cleanupError) {
         // Log but don't throw - we're already handling an error
         this.logger.debug(
@@ -351,12 +324,11 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     // But we must implement it to satisfy the abstract method requirement
 
     // Handle MCP-specific errors that might be wrapped
-    const cause = error.cause;
-    if (cause instanceof StreamableHTTPError) {
-      return `MCP Connection Error: ${cause.message}`;
+    if (error.cause instanceof StreamableHTTPError) {
+      return `MCP Connection Error: ${error.cause.message}`;
     }
-    if (cause instanceof UnauthorizedError) {
-      return `MCP Unauthorized Error: ${cause.message}`;
+    if (error.cause instanceof UnauthorizedError) {
+      return `MCP Unauthorized Error: ${error.cause.message}`;
     }
 
     // Handle standard Axios errors (unlikely in our case)
