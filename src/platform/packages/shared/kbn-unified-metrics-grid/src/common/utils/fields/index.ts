@@ -9,10 +9,10 @@
 
 import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
 import type { ES_FIELD_TYPES } from '@kbn/field-types';
-import { NUMERIC_TYPES_SET } from '../../constants';
+import { NUMERIC_TYPES } from '../../constants';
 
 export const isMetricField = (fieldType: string, typeCaps: FieldCapsFieldCapability): boolean =>
-  Boolean(typeCaps.time_series_metric) || NUMERIC_TYPES_SET.has(fieldType as ES_FIELD_TYPES);
+  Boolean(typeCaps.time_series_metric) || NUMERIC_TYPES.includes(fieldType as ES_FIELD_TYPES);
 
 export const hasValue = (value: unknown): boolean => {
   if (value == null) {

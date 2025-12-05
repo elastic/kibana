@@ -12,30 +12,30 @@ import { useEuiTheme, useIsWithinMaxBreakpoint } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
 import { css } from '@emotion/react';
-import type { MetricField } from '../../../types';
+import type { MetricField, UnifiedMetricsGridProps } from '../../../types';
 import { useMetricsExperienceState } from '../../../context/metrics_experience_state_provider';
 import { DimensionsSelector } from '../dimensions_selector';
 import { ValuesSelector } from '../values_selector';
 import { MAX_DIMENSIONS_SELECTIONS } from '../../../common/constants';
-import type { UnifiedMetricsGridProps } from '../../../types';
 
-interface UseToolbarActionsProps
-  extends Pick<UnifiedMetricsGridProps, 'fetchParams' | 'renderToggleActions'> {
-  fields: MetricField[];
+interface UseToolbarActionsProps extends Pick<UnifiedMetricsGridProps, 'renderToggleActions'> {
+  metricFields: MetricField[];
+  visibleFields: MetricField[];
   hideDimensionsSelector?: boolean;
   hideRightSideActions?: boolean;
   isLoading?: boolean;
 }
+
 export const useToolbarActions = ({
-  fields,
-  fetchParams,
+  metricFields,
+  visibleFields,
   renderToggleActions,
   hideDimensionsSelector = false,
   hideRightSideActions = false,
   isLoading = false,
 }: UseToolbarActionsProps) => {
   const [indices, setIndices] = useState<string[]>([
-    ...new Set(fields.map((field) => field.index)),
+    ...new Set(metricFields.map((field) => field.index)),
   ]);
 
   const {
@@ -62,15 +62,15 @@ export const useToolbarActions = ({
 
   useEffect(() => {
     if (!isLoading) {
-      setIndices([...new Set(fields.map((field) => field.index))]);
+      setIndices([...new Set(visibleFields.map((field) => field.index))]);
     }
-  }, [isLoading, fields, fetchParams.timeRange]);
+  }, [isLoading, visibleFields]);
 
   const leftSideActions = useMemo(
     () => [
       hideDimensionsSelector ? null : (
         <DimensionsSelector
-          fields={fields}
+          fields={metricFields}
           onChange={onDimensionsChange}
           selectedDimensions={selectedDimensions}
           singleSelection={MAX_DIMENSIONS_SELECTIONS === 1}
@@ -95,7 +95,7 @@ export const useToolbarActions = ({
       indices,
       isSmallScreen,
       selectedDimensions,
-      fields,
+      metricFields,
       onClearValues,
       onDimensionsChange,
       onDimensionValuesChange,

@@ -23,29 +23,29 @@ export const useExtractDimensionsValues = ({
   indices: string[];
   dimensionNames: string[];
 }) => {
-  const { getRowsByDimension } = useMetricFieldsCapsContext();
+  const { getValuesByDimension } = useMetricFieldsCapsContext();
 
-  const specsKeys = useMemo(() => {
+  const requiredDimensionFields = useMemo(() => {
     return dimensionNames.flatMap((dimName) =>
       indices.map((index) => buildFieldSpecsKey(index, dimName))
     );
   }, [indices, dimensionNames]);
 
-  const rowsByDimension = useMemo(() => {
-    return getRowsByDimension(specsKeys);
-  }, [specsKeys, getRowsByDimension]);
+  const valuesByDimension = useMemo(() => {
+    return getValuesByDimension(requiredDimensionFields);
+  }, [requiredDimensionFields, getValuesByDimension]);
 
   return useMemo(() => {
-    if (rowsByDimension.size === 0) {
+    if (valuesByDimension.size === 0) {
       return new Map<string, Map<string, Set<SpecsKey>>>();
     }
 
     const result = new Map<string, Map<string, Set<SpecsKey>>>();
 
-    for (const [key, values] of rowsByDimension.entries()) {
+    for (const [key, values] of valuesByDimension.entries()) {
       result.set(key, values);
     }
 
     return result;
-  }, [rowsByDimension]);
+  }, [valuesByDimension]);
 };

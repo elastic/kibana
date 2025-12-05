@@ -46,12 +46,13 @@ export const MetricsExperienceGrid = ({
   } = useMetricsExperienceState();
 
   const { isFetching: isFetchingFieldsCaps } = useMetricFieldsCapsContext();
-  const { metricFields: fields } = useMetricFields();
+
+  const { metricFields, visibleFields, dimensionFilters } = useMetricFields();
 
   const { toggleActions, leftSideActions, rightSideActions } = useToolbarActions({
-    fields,
+    metricFields,
+    visibleFields,
     renderToggleActions,
-    fetchParams,
     isLoading: isFetchingFieldsCaps,
   });
 
@@ -65,7 +66,7 @@ export const MetricsExperienceGrid = ({
     [isFullscreen, onToggleFullscreen]
   );
 
-  if (fields.length === 0 && selectedDimensionValues.length === 0) {
+  if (metricFields.length === 0 && selectedDimensionValues.length === 0) {
     return <EmptyState isLoading={isFetchingFieldsCaps} />;
   }
 
@@ -95,8 +96,9 @@ export const MetricsExperienceGrid = ({
       onKeyDown={onKeyDown}
     >
       <MetricsExperienceGridContent
-        fields={fields}
+        fields={visibleFields}
         services={services}
+        filters={dimensionFilters}
         discoverFetch$={discoverFetch$}
         fetchParams={fetchParams}
         onBrushEnd={onBrushEnd}

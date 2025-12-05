@@ -32,7 +32,7 @@ export interface MetricFieldsCapsContextValue {
   /** Map of metric key (index>fieldName) → first row (sample for metadata) */
   sampleRowByMetric: Map<SpecsKey, DatatableRow>;
   /** Returns map of dimension key (index>dimensionName) → rows. Computed on demand. */
-  getRowsByDimension: (specsKeys: SpecsKey[]) => Map<string, Map<string, Set<SpecsKey>>>;
+  getValuesByDimension: (requiredFields: SpecsKey[]) => Map<string, Map<string, Set<SpecsKey>>>;
   isFetching: boolean;
   isError: boolean;
 }
@@ -40,7 +40,7 @@ export interface MetricFieldsCapsContextValue {
 const EMPTY_CONTEXT: MetricFieldsCapsContextValue = {
   fieldSpecs: [],
   sampleRowByMetric: new Map(),
-  getRowsByDimension: (specsKeys: SpecsKey[]) => new Map(),
+  getValuesByDimension: (_requiredFields: SpecsKey[]) => new Map(),
   isFetching: false,
   isError: false,
 };
@@ -84,19 +84,26 @@ export const MetricFieldsCapsProvider = ({
 
   const fieldSpecs = useMemo(() => createFieldSpecs(fieldCaps), [fieldCaps]);
 
-  const sampleRowByMetric = useMemo(
-    () => createSampleRowByMetric(table?.rows, fieldSpecs),
+  // Precompute row → spec mapping once (O(rows))
+  const { sampleRowByMetric, specByRow } = useMemo(
+    () => createRowMappings(table?.rows, fieldSpecs),
     [table?.rows, fieldSpecs]
   );
 
-  const getRowsByDimension = useCallback(
-    (specsKeys: SpecsKey[]) => createRowsByDimension(table?.rows, fieldSpecs, specsKeys),
-    [table?.rows, fieldSpecs]
+  const getValuesByDimension = useCallback(
+    (specsKeys: SpecsKey[]) => createValuesByDimesions(table?.rows, specByRow, specsKeys),
+    [table?.rows, specByRow]
   );
 
   const value = useMemo<MetricFieldsCapsContextValue>(
-    () => ({ fieldSpecs, sampleRowByMetric, getRowsByDimension, isFetching, isError }),
-    [fieldSpecs, sampleRowByMetric, getRowsByDimension, isFetching, isError]
+    () => ({
+      fieldSpecs,
+      sampleRowByMetric,
+      getValuesByDimension,
+      isFetching,
+      isError,
+    }),
+    [fieldSpecs, sampleRowByMetric, getValuesByDimension, isFetching, isError]
   );
 
   return (
@@ -104,25 +111,95 @@ export const MetricFieldsCapsProvider = ({
   );
 };
 
+const INVALID_FIELD_NAME = '_metric_names_hash';
+const FILTER_OUT_EXACT_FIELDS_FOR_CONTENT = [
+  '_id',
+  '_index',
+  '_source',
+  '_size',
+  '_doc_count',
+  '_field_names',
+  '_ignored',
+  '_routing',
+  '_meta',
+  '_tier',
+];
+
+function* batchGenerator<T>(gen: Generator<T>, batchSize: number): Generator<T[]> {
+  let batch: T[] = [];
+
+  for (const item of gen) {
+    batch.push(item);
+    if (batch.length === batchSize) {
+      yield batch;
+      batch = [];
+    }
+  }
+
+  if (batch.length > 0) {
+    yield batch;
+  }
+}
+
+function* timeseriesFieldCapsGenerator(
+  fields: Record<string, Record<string, FieldCapsFieldCapability>>
+) {
+  for (const fieldName in fields) {
+    if (FILTER_OUT_EXACT_FIELDS_FOR_CONTENT.includes(fieldName)) continue;
+
+    const capabilities = fields[fieldName];
+    for (const type in capabilities) {
+      if (!(type in capabilities)) continue;
+
+      const typeInfo = capabilities[type];
+
+      if (isMetricField(type, typeInfo)) {
+        yield { fieldName, type, typeInfo };
+      }
+    }
+  }
+}
+
+export const getTimeSeriesFieldCapsGenerator = (
+  fields: Record<string, Record<string, FieldCapsFieldCapability>>,
+  { batchSize }: { batchSize: number } = { batchSize: 100 }
+) => batchGenerator(timeseriesFieldCapsGenerator(fields), batchSize);
+
+function* dimensionFieldCapsGenerator(
+  fields: Record<string, Record<string, FieldCapsFieldCapability>>
+) {
+  for (const fieldName in fields) {
+    if (fieldName === INVALID_FIELD_NAME) continue;
+    if (FILTER_OUT_EXACT_FIELDS_FOR_CONTENT.includes(fieldName)) continue;
+
+    const capabilities = fields[fieldName];
+    for (const type in capabilities) {
+      if (!(type in capabilities)) continue;
+
+      const typeInfo = capabilities[type];
+
+      if (typeInfo.time_series_dimension) {
+        yield { fieldName, type: type as ES_FIELD_TYPES, typeInfo };
+      }
+    }
+  }
+}
+
+export const getDimensionFieldCapsGenerator = (
+  fields: Record<string, Record<string, FieldCapsFieldCapability>>,
+  { batchSize }: { batchSize: number } = { batchSize: 100 }
+) => batchGenerator(dimensionFieldCapsGenerator(fields), batchSize);
+
 /**
- * Builds sorted dimensions for an index.
+ * Builds sorted dimensions for an index using the dimension generator.
  */
 const buildDimensions = (
   indexFieldCaps: Record<string, Record<string, FieldCapsFieldCapability>>
 ): Dimension[] => {
   const dimensions: Dimension[] = [];
 
-  for (const [fieldName, fieldTypes] of Object.entries(indexFieldCaps)) {
-    const dimensionEntry = Object.entries(fieldTypes).find(
-      ([, typeInfo]) => typeInfo.time_series_dimension
-    );
-
-    if (dimensionEntry) {
-      dimensions.push({
-        name: fieldName,
-        type: dimensionEntry[0] as ES_FIELD_TYPES,
-      });
-    }
+  for (const batch of getDimensionFieldCapsGenerator(indexFieldCaps, { batchSize: 100 })) {
+    dimensions.push(...batch.map(({ fieldName, type }) => ({ name: fieldName, type })));
   }
 
   return dimensions.sort((a, b) => a.name.localeCompare(b.name));
@@ -143,99 +220,115 @@ const createFieldSpecs = (fieldCaps: FieldCapsResponseMap | undefined): MetricFi
 
     const dimensions = buildDimensions(indexFieldCaps);
 
-    for (const [fieldName, fieldTypes] of Object.entries(indexFieldCaps)) {
-      const metricEntry = Object.entries(fieldTypes).find(([typeName, typeInfo]) =>
-        isMetricField(typeName, typeInfo)
+    for (const batch of getTimeSeriesFieldCapsGenerator(indexFieldCaps, { batchSize: 500 })) {
+      fieldSpecs.push(
+        ...batch.map(({ fieldName, type, typeInfo }) => ({
+          key: buildFieldSpecsKey(indexName, fieldName),
+          index: indexName,
+          fieldName,
+          fieldType: type,
+          typeInfo,
+          dimensions,
+        }))
       );
-
-      if (!metricEntry) continue;
-
-      const [fieldType, typeInfo] = metricEntry;
-      fieldSpecs.push({
-        key: buildFieldSpecsKey(indexName, fieldName),
-        index: indexName,
-        fieldName,
-        fieldType,
-        typeInfo,
-        dimensions,
-      });
     }
   }
 
   return fieldSpecs;
 };
 
+interface RowMappings {
+  sampleRowByMetric: Map<SpecsKey, DatatableRow>;
+  specByRow: WeakMap<DatatableRow, MetricFieldSpecs>;
+}
+
 /**
- * Creates a map of metric key → first row (sample for metadata).
+ * Creates row mappings in a single pass:
+ * - sampleRowByMetric: metric key → first row (sample for metadata)
+ * - specByRow: row → spec (for O(1) lookup in dimension extraction)
  */
-const createSampleRowByMetric = (
+const createRowMappings = (
   rows: DatatableRow[] | undefined,
   fieldSpecs: MetricFieldSpecs[]
-): Map<SpecsKey, DatatableRow> => {
-  const result = new Map<SpecsKey, DatatableRow>();
+): RowMappings => {
+  const sampleRowByMetric = new Map<SpecsKey, DatatableRow>();
+  const specByRow = new WeakMap<DatatableRow, MetricFieldSpecs>();
 
   if (!rows?.length || fieldSpecs.length === 0) {
-    return result;
+    return { sampleRowByMetric, specByRow };
   }
 
-  const pending = new Set(fieldSpecs.map((s) => s.key));
+  const specByFieldName = new Map<string, MetricFieldSpecs>();
+  for (const spec of fieldSpecs) {
+    specByFieldName.set(spec.fieldName, spec);
+  }
+
+  const metricFieldNames = [...specByFieldName.keys()];
+  const pendingSamples = new Set(fieldSpecs.map((s) => s.key));
 
   for (const row of rows) {
-    if (pending.size === 0) break;
+    // Find which spec this row belongs to
+    for (const fieldName of metricFieldNames) {
+      if (hasValue(row[fieldName])) {
+        const spec = specByFieldName.get(fieldName)!;
+        specByRow.set(row, spec);
 
-    for (const spec of fieldSpecs) {
-      if (!pending.has(spec.key) || !hasValue(row[spec.fieldName])) {
-        continue;
+        // Collect sample if not yet collected for this spec
+        if (pendingSamples.has(spec.key)) {
+          sampleRowByMetric.set(spec.key, row);
+          pendingSamples.delete(spec.key);
+        }
+        break;
       }
-
-      result.set(spec.key, row);
-      pending.delete(spec.key);
     }
   }
 
-  return result;
+  return { sampleRowByMetric, specByRow };
 };
 
 /**
- * Creates a map of dimension key → rows that have data for that dimension.
+ * Creates a map of dimension name → (value → Set<metricFieldKey>).
+ * Uses precomputed specByRow for O(1) spec lookup per row.
  */
-const createRowsByDimension = (
+const createValuesByDimesions = (
   rows: DatatableRow[] | undefined,
-  fieldSpecs: MetricFieldSpecs[],
-  specsKeys: SpecsKey[]
+  specByRow: WeakMap<DatatableRow, MetricFieldSpecs>,
+  requiredFields: SpecsKey[]
 ): Map<string, Map<string, Set<SpecsKey>>> => {
   const result = new Map<string, Map<string, Set<SpecsKey>>>();
 
-  if (!rows?.length || fieldSpecs.length === 0) {
+  if (!rows?.length || requiredFields.length === 0) {
     return result;
   }
 
+  const requiredFieldsSet = new Set(requiredFields);
+
   for (const row of rows) {
-    for (const spec of fieldSpecs) {
-      if (!hasValue(row[spec.fieldName])) {
+    const spec = specByRow.get(row);
+    if (!spec) {
+      continue;
+    }
+
+    for (const dim of spec.dimensions) {
+      const dimensionKey = buildFieldSpecsKey(spec.index, dim.name);
+      const dimensionValue = row[dim.name];
+      if (!requiredFieldsSet.has(dimensionKey) || !hasValue(dimensionValue)) {
         continue;
       }
 
-      const dimensions = spec.dimensions.filter(
-        (dim) =>
-          hasValue(row[dim.name]) && specsKeys.includes(buildFieldSpecsKey(spec.index, dim.name))
-      );
+      const value = String(dimensionValue);
+      let dimensionMap = result.get(dim.name);
 
-      for (const dim of dimensions) {
-        const existing = result.get(dim.name);
+      if (!dimensionMap) {
+        dimensionMap = new Map();
+        result.set(dim.name, dimensionMap);
+      }
 
-        const value = String(row[dim.name]);
-
-        if (!existing) {
-          result.set(dim.name, new Map([[value, new Set([spec.key])]]));
-        } else {
-          const existingValue = existing.get(value);
-          if (!existingValue) {
-            existing.set(value, new Set([spec.key]));
-          } else {
-            existingValue.add(spec.key);
-          }
-        }
+      const existingSet = dimensionMap.get(value);
+      if (existingSet) {
+        existingSet.add(spec.key);
+      } else {
+        dimensionMap.set(value, new Set([spec.key]));
       }
     }
   }

@@ -20,7 +20,7 @@ import {
   useEuiTheme,
   type EuiFlexGridProps,
 } from '@elastic/eui';
-import type { MetricField } from '../types';
+import type { DimensionValueFilters, MetricField } from '../types';
 import { PAGE_SIZE } from '../common/constants';
 import { MetricsGrid } from './metrics_grid';
 import { Pagination } from './pagination';
@@ -28,7 +28,6 @@ import { usePagination } from '../hooks';
 import { MetricsGridLoadingProgress } from './empty_state/empty_state';
 import { useMetricsExperienceState } from '../context/metrics_experience_state_provider';
 import type { UnifiedMetricsGridProps } from '../types';
-import { useMetricFieldsFilter } from '../hooks/use_metric_fields_filter';
 
 export interface MetricsExperienceGridContentProps
   extends Pick<
@@ -37,12 +36,14 @@ export interface MetricsExperienceGridContentProps
   > {
   discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   fields: MetricField[];
+  filters?: DimensionValueFilters;
   isFieldsLoading?: boolean;
   isDiscoverLoading?: boolean;
 }
 
 export const MetricsExperienceGridContent = ({
   fields,
+  filters,
   services,
   discoverFetch$,
   fetchParams,
@@ -56,30 +57,14 @@ export const MetricsExperienceGridContent = ({
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
 
-  const {
-    searchTerm,
-    currentPage,
-    selectedDimensions,
-    selectedDimensionValues,
-    selectedValueMetricFields,
-    onPageChange,
-  } = useMetricsExperienceState();
-
-  const { filteredFields, dimensionFilters } = useMetricFieldsFilter({
-    fields,
-    isFieldsLoading,
-    searchTerm,
-    dimensions: selectedDimensions,
-    dimensionValues: selectedDimensionValues,
-    dimensionMetricFields: selectedValueMetricFields,
-  });
+  const { searchTerm, currentPage, selectedDimensions, onPageChange } = useMetricsExperienceState();
 
   const {
     currentPageItems: currentPageFields = [],
     totalPages = 0,
     totalCount: filteredFieldsCount = 0,
   } = usePagination({
-    items: filteredFields,
+    items: fields,
     pageSize: PAGE_SIZE,
     currentPage,
   }) ?? {};
@@ -160,7 +145,7 @@ export const MetricsExperienceGridContent = ({
         <MetricsGrid
           columns={columns}
           dimensions={selectedDimensions}
-          filters={dimensionFilters}
+          filters={filters}
           services={services}
           fields={currentPageFields}
           onBrushEnd={onBrushEnd}

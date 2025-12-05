@@ -151,13 +151,15 @@ describe('MetricsExperienceGrid', () => {
     useMetricFieldsCapsContextMock.mockReturnValue({
       fieldSpecs: [],
       sampleRowByMetric: new Map(),
-      getRowsByDimension: jest.fn(() => new Map()),
+      getValuesByDimension: jest.fn(() => new Map()),
       isFetching: false,
       isError: false,
     });
 
     useMetricFieldsMock.mockReturnValue({
       metricFields: allFields,
+      visibleFields: allFields,
+      dimensionFilters: undefined,
     });
   });
 
@@ -170,13 +172,15 @@ describe('MetricsExperienceGrid', () => {
     useMetricFieldsCapsContextMock.mockReturnValue({
       fieldSpecs: [],
       sampleRowByMetric: new Map(),
-      getRowsByDimension: jest.fn(() => new Map()),
+      getValuesByDimension: jest.fn(() => new Map()),
       isFetching: true,
       isError: false,
     });
 
     useMetricFieldsMock.mockReturnValue({
       metricFields: [],
+      visibleFields: [],
+      dimensionFilters: undefined,
     });
 
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
@@ -190,13 +194,15 @@ describe('MetricsExperienceGrid', () => {
     useMetricFieldsCapsContextMock.mockReturnValue({
       fieldSpecs: [],
       sampleRowByMetric: new Map(),
-      getRowsByDimension: jest.fn(() => new Map()),
+      getValuesByDimension: jest.fn(() => new Map()),
       isFetching: false,
       isError: false,
     });
 
     useMetricFieldsMock.mockReturnValue({
       metricFields: [],
+      visibleFields: [],
+      dimensionFilters: undefined,
     });
 
     const { queryByTestId, getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {

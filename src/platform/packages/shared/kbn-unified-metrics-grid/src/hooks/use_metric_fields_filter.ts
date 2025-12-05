@@ -7,71 +7,51 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useMemo, useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import type { MetricField, Dimension } from '../types';
 import { parseDimensionFilters, buildFieldSpecsKey } from '../common/utils';
 import type { SpecsKey } from '../common/utils';
 
 export const useMetricFieldsFilter = ({
   fields,
-  isFieldsLoading,
   dimensions,
   searchTerm,
   dimensionValues,
   dimensionMetricFields,
 }: {
   fields: MetricField[];
-  isFieldsLoading: boolean;
   searchTerm: string;
   dimensions: Dimension[];
   dimensionValues: string[];
   dimensionMetricFields: SpecsKey[];
 }) => {
-  const parsedDimensionFilters = useMemo(
-    () => parseDimensionFilters(dimensionValues),
-    [dimensionValues]
-  );
-  const [filteredFields, setFilteredFields] = useState<MetricField[]>(fields);
+  const dimensionFilters = useMemo(() => parseDimensionFilters(dimensionValues), [dimensionValues]);
 
-  // Client-side filtering by dimensions and search term
-  const dimensionFieldNamesSet = useMemo(
-    () => new Set(dimensions.map((d) => d.name)),
-    [dimensions]
-  );
-  const dimensionMetricFieldsSet = useMemo(
-    () => new Set(dimensionMetricFields),
-    [dimensionMetricFields]
-  );
-  const searchTermLower = useMemo(() => searchTerm?.toLowerCase(), [searchTerm]);
-
-  useEffect(() => {
-    if (isFieldsLoading) {
-      return;
-    }
+  const filteredFields = useMemo(() => {
+    const dimensionFieldNamesSet = new Set(dimensions.map((d) => d.name));
+    const dimensionMetricFieldsSet = new Set(dimensionMetricFields);
+    const searchTermLower = searchTerm?.toLowerCase();
 
     const hasClientFilters = dimensionFieldNamesSet.size > 0 || searchTermLower?.length > 0;
 
     if (!hasClientFilters) {
-      setFilteredFields(fields);
-      return;
+      return fields;
     }
 
-    setFilteredFields(
-      fields.filter((field) => {
-        if (searchTermLower && !field.name.toLowerCase().includes(searchTermLower)) {
-          return false;
-        }
+    return fields.filter((field) => {
+      if (searchTermLower && !field.name.toLowerCase().includes(searchTermLower)) {
+        return false;
+      }
 
-        if (dimensionMetricFieldsSet.size > 0) {
-          return dimensionMetricFieldsSet.has(buildFieldSpecsKey(field.index, field.name));
-        } else if (dimensionFieldNamesSet.size > 0) {
-          return field.dimensions.some((d) => dimensionFieldNamesSet.has(d.name));
-        }
+      if (dimensionMetricFieldsSet.size > 0) {
+        return dimensionMetricFieldsSet.has(buildFieldSpecsKey(field.index, field.name));
+      } else if (dimensionFieldNamesSet.size > 0) {
+        return field.dimensions.some((d) => dimensionFieldNamesSet.has(d.name));
+      }
 
-        return true;
-      })
-    );
-  }, [isFieldsLoading, fields, searchTermLower, dimensionFieldNamesSet, dimensionMetricFieldsSet]);
+      return true;
+    });
+  }, [fields, searchTerm, dimensions, dimensionMetricFields]);
 
-  return { filteredFields, dimensionFilters: parsedDimensionFilters };
+  return { filteredFields, dimensionFilters };
 };

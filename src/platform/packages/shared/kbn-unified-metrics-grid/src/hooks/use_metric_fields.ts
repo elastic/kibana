@@ -15,12 +15,18 @@ import { useMetricFieldsCapsContext } from '../context/metric_fields_caps_provid
 import { normalizeUnit } from '../common/utils/metric_unit/normalize_unit';
 import type { FieldSpec } from '../types';
 import { hasValue } from '../common/utils/fields';
+import { useMetricsExperienceState } from '../context/metrics_experience_state_provider';
+import { useMetricFieldsFilter } from './use_metric_fields_filter';
 
 /**
  * Builds MetricField[] from the context's metric fieldSpecs and sampleRowByMetric.
- * Only includes metrics that have data in the table.
+ * Returns:
+ * - metricFields: Complete set of metric fields (for dimension selector, filtering source)
+ * - visibleFields: Currently visible fields based on filters (for grid, value selector)
  */
 export const useMetricFields = () => {
+  const { searchTerm, selectedDimensionValues, selectedDimensions, selectedValueMetricFields } =
+    useMetricsExperienceState();
   const { fieldSpecs, sampleRowByMetric, isFetching } = useMetricFieldsCapsContext();
 
   const metricFields = useMemo(() => {
@@ -43,14 +49,27 @@ export const useMetricFields = () => {
     return result;
   }, [fieldSpecs, sampleRowByMetric]);
 
-  const lastValueRef = useRef<{ metricFields: MetricField[] }>({ metricFields });
+  const { filteredFields: visibleFields, dimensionFilters } = useMetricFieldsFilter({
+    fields: metricFields,
+    searchTerm,
+    dimensions: selectedDimensions,
+    dimensionValues: selectedDimensionValues,
+    dimensionMetricFields: selectedValueMetricFields,
+  });
+
+  const lastValueRef = useRef<{ metricFields: MetricField[]; visibleFields: MetricField[] }>({
+    metricFields,
+    visibleFields,
+  });
 
   if (!isFetching) {
-    lastValueRef.current = { metricFields };
+    lastValueRef.current = { metricFields, visibleFields };
   }
 
   return {
     metricFields: lastValueRef.current.metricFields,
+    visibleFields: lastValueRef.current.visibleFields,
+    dimensionFilters,
   };
 };
 
