@@ -30,109 +30,57 @@ import { useParentLinks } from '../../../links/links_hooks';
 export const EUI_HEADER_HEIGHT = '93px';
 export const BOTTOM_BAR_HEIGHT = '50px';
 
-const getNavItemPosition = (id: SecurityPageName): SolutionSideNavItemPosition =>
-  id === SecurityPageName.administration
+const getNavItemPosition = (
+  id: SecurityPageName | SecurityGroupName
+): SolutionSideNavItemPosition =>
+  id === SecurityPageName.administration || id === SecurityGroupName.launchpad
     ? SolutionSideNavItemPosition.bottom
     : SolutionSideNavItemPosition.top;
-
-const isLaunchpadNavItem = (id: SecurityPageName) =>
-  id === SecurityPageName.landing ||
-  id === SecurityPageName.siemReadiness ||
-  id === SecurityPageName.aiValue;
 
 /**
  * Formats generic navigation links into the shape expected by the `SolutionSideNav`
  */
 const formatLink = (
-  navLink: NavigationLink,
-  getSecuritySolutionLinkProps: GetSecuritySolutionLinkProps
-): SolutionSideNavItem => ({
-  id: navLink.id,
-  label: navLink.title,
-  position: getNavItemPosition(navLink.id),
-  ...getSecuritySolutionLinkProps({ deepLinkId: navLink.id }),
-  ...(navLink.sideNavIcon && { iconType: navLink.sideNavIcon }),
-  ...(navLink.categories?.length && { categories: navLink.categories }),
-  ...(navLink.links?.length && {
-    items: navLink.links.reduce<SolutionSideNavItem[]>((acc, current) => {
-      if (!current.disabled) {
-        acc.push({
-          id: current.id,
-          label: current.title,
-          iconType: current.sideNavIcon,
-          isBeta: current.isBeta,
-          betaOptions: current.betaOptions,
-          ...getSecuritySolutionLinkProps({ deepLinkId: current.id }),
-        });
-      }
-      return acc;
-    }, []),
-  }),
-});
-
-/**
- * Formats Launchpad navigation item with children (Get started, SIEM Readiness, Value report)
- */
-const formatLaunchpadItem = (
-  launchpadNavLinks: NavigationLink[],
+  navLink:
+    | NavigationLink
+    | { id: SecurityGroupName.launchpad; title: string; links: NavigationLink[] },
   getSecuritySolutionLinkProps: GetSecuritySolutionLinkProps
 ): SolutionSideNavItem => {
-  // Find landing link once for reuse (only non-disabled links)
-  const landingLink =
-    launchpadNavLinks.find((link) => link.id === SecurityPageName.landing && !link.disabled) ??
-    launchpadNavLinks.find((link) => !link.disabled);
+  // Handle SecurityGroupName items (like launchpad) that use a landing page for navigation
+  const isGroupItem = navLink.id === SecurityGroupName.launchpad;
+  const landingPageId =
+    isGroupItem && navLink.links?.length
+      ? navLink.links.find((link) => link.id === SecurityPageName.landing && !link.disabled)?.id ??
+        navLink.links.find((link) => !link.disabled)?.id
+      : navLink.id;
 
-  if (!landingLink) {
-    // Fallback: return minimal item if no valid (non-disabled) links
-    return {
-      id: SecurityGroupName.launchpad,
-      label: i18nStrings.launchPad.title,
-      position: SolutionSideNavItemPosition.bottom,
-      appendSeparator: true,
-      items: [],
-      href: '#',
-    };
-  }
-
-  const landingLinkProps = getSecuritySolutionLinkProps({ deepLinkId: landingLink.id });
-
-  // Format children, excluding disabled links
-  const children = launchpadNavLinks
-    .filter((link) => !link.disabled)
-    .map((link) => ({
-      id: link.id,
-      label: link.title,
-      ...(link.id !== SecurityPageName.landing &&
-        link.sideNavIcon && { iconType: link.sideNavIcon }),
-      ...getSecuritySolutionLinkProps({ deepLinkId: link.id }),
-    }));
-
-  // Create onClick handler that navigates to Get started AND opens the panel
-  const launchpadOnClick: React.MouseEventHandler = (ev) => {
-    // Navigate to Get started page
-    landingLinkProps.onClick?.(ev);
-
-    // Open the panel by triggering click on the panel opener button (rocket icon)
-    // Use setTimeout to ensure navigation happens first, then panel opens
-    setTimeout(() => {
-      const panelButton = document.querySelector(
-        `[data-test-subj="solutionSideNavItemButton-${SecurityGroupName.launchpad}"]`
-      ) as HTMLElement;
-      if (panelButton && !panelButton.classList.contains('euiButtonIcon-isSelected')) {
-        panelButton.click();
-      }
-    }, 100);
-  };
+  const navigationProps = landingPageId
+    ? getSecuritySolutionLinkProps({ deepLinkId: landingPageId as SecurityPageName })
+    : { href: '#', onClick: undefined };
 
   return {
-    id: SecurityGroupName.launchpad,
-    label: i18nStrings.launchPad.title,
-    panelOpenerIconType: 'launch',
-    position: SolutionSideNavItemPosition.bottom,
-    appendSeparator: true,
-    items: children,
-    href: landingLinkProps.href,
-    onClick: launchpadOnClick,
+    id: navLink.id,
+    label: navLink.title,
+    position: getNavItemPosition(navLink.id),
+    ...navigationProps,
+    ...(navLink.sideNavIcon && { iconType: navLink.sideNavIcon }),
+    ...(navLink.categories?.length && { categories: navLink.categories }),
+    ...(isGroupItem && { appendSeparator: true }),
+    ...(navLink.links?.length && {
+      items: navLink.links.reduce<SolutionSideNavItem[]>((acc, current) => {
+        if (!current.disabled) {
+          acc.push({
+            id: current.id,
+            label: current.title,
+            iconType: current.sideNavIcon,
+            isBeta: current.isBeta,
+            betaOptions: current.betaOptions,
+            ...getSecuritySolutionLinkProps({ deepLinkId: current.id }),
+          });
+        }
+        return acc;
+      }, []),
+    }),
   };
 };
 
@@ -148,14 +96,17 @@ const useSolutionSideNavItems = () => {
       return undefined;
     }
 
-    // Separate Launchpad items from regular items in a single pass
-    // Note: We collect Launchpad items even if disabled, so we can create the Launchpad group
-    // formatLaunchpadItem will filter out disabled items from children
+    // Group launchpad items together to match the navigation tree structure
+    const launchpadPageIds = new Set([
+      SecurityPageName.landing,
+      SecurityPageName.siemReadiness,
+      SecurityPageName.aiValue,
+    ]);
     const launchpadNavLinks: NavigationLink[] = [];
     const regularNavLinks: NavigationLink[] = [];
 
     for (const navLink of navLinks) {
-      if (isLaunchpadNavItem(navLink.id)) {
+      if (launchpadPageIds.has(navLink.id)) {
         launchpadNavLinks.push(navLink);
       } else if (!navLink.disabled) {
         regularNavLinks.push(navLink);
@@ -175,11 +126,15 @@ const useSolutionSideNavItems = () => {
       }
     }
 
-    // Add Launchpad item before other bottom items (so it appears above Manage)
+    // Create launchpad group item from navigation tree structure
     if (launchpadNavLinks.length > 0) {
-      bottomFormattedItems.unshift(
-        formatLaunchpadItem(launchpadNavLinks, getSecuritySolutionLinkProps)
-      );
+      const launchpadGroupLink = {
+        id: SecurityGroupName.launchpad,
+        title: i18nStrings.launchPad.title,
+        links: launchpadNavLinks.filter((link) => !link.disabled),
+      } as const;
+      const launchpadItem = formatLink(launchpadGroupLink, getSecuritySolutionLinkProps);
+      bottomFormattedItems.unshift(launchpadItem);
     }
 
     return [...topFormattedItems, ...bottomFormattedItems];
