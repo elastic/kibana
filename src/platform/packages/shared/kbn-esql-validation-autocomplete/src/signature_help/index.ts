@@ -19,6 +19,8 @@ import { findSubquery } from '../shared/subqueries_helpers';
 import { getQueryForFields } from '../shared/get_query_for_fields';
 import { correctQuerySyntax } from '../hover/helpers';
 
+const MAX_PARAM_TYPES_TO_SHOW = 3;
+
 export interface SignatureHelpItem {
   signatures: Array<{
     label: string;
@@ -38,7 +40,6 @@ export async function getSignatureHelp(
   callbacks?: ESQLCallbacks
 ): Promise<SignatureHelpItem | undefined> {
   const innerText = fullText.substring(0, offset);
-  const endsWithComma = innerText.trimEnd().endsWith(',');
 
   const correctedQuery = correctQuerySyntax(fullText, offset); // HD hover import
   const { root } = Parser.parse(correctedQuery);
@@ -57,6 +58,10 @@ export async function getSignatureHelp(
   if (!fnNode) {
     return undefined;
   }
+  const fnDefinition = getFunctionDefinition(fnNode.name);
+  if (!fnDefinition) {
+    return undefined;
+  }
 
   // Calculate the argument to highlight based on cursor position
   const currentArgIndex = getArgumentToHighlightIndex(innerText, fnNode, offset);
@@ -71,13 +76,13 @@ export async function getSignatureHelp(
   );
   const columnsMap = await getColumnMap();
 
-  const fnDefinition = getFunctionDefinition(fnNode.name);
-
-  if (!fnDefinition) {
-    return undefined;
-  }
-
-  const formattedSignature = getFormattedFunctionSignature(fnDefinition, fnNode, columnsMap);
+  const formattedSignature = getFormattedFunctionSignature(
+    fnDefinition,
+    fnNode,
+    columnsMap,
+    '|',
+    MAX_PARAM_TYPES_TO_SHOW
+  );
 
   // Extract parameters from formatted signature
   // Example: "count_distinct (\n  field: boolean | date,\n  precision?: integer\n): long"
@@ -110,7 +115,8 @@ export async function getSignatureHelp(
   return {
     signatures: [signature],
     activeSignature: 0,
-    activeParameter: currentArgIndex,
+    // Math.min for the variadic functions, that can have more arguments than the defined parameters
+    activeParameter: Math.min(currentArgIndex, parameters.length - 1),
   };
 }
 

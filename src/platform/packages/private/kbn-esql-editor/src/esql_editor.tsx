@@ -414,24 +414,6 @@ const ESQLEditorInternal = function ESQLEditor({
     );
   }, [onMouseDownResize, editorHeight, onKeyDownResize, setEditorHeight]);
 
-  const triggerSignatureHelpIfInsideParentheses = useCallback(
-    (e: monaco.editor.ICursorPositionChangedEvent) => {
-      if (!editorModel.current) {
-        return;
-      }
-
-      const position = e.position;
-      const line = editorModel.current.getLineContent(position.lineNumber);
-      const charBefore = line[position.column - 2];
-      const charAfter = line[position.column - 1];
-
-      if (charBefore === '(' && charAfter === ')') {
-        editorRef.current?.trigger('esql', 'editor.action.triggerParameterHints', {});
-      }
-    },
-    []
-  );
-
   const { cache: esqlFieldsCache, memoizedFieldsFromESQL } = useMemo(() => {
     // need to store the timing of the first request so we can atomically clear the cache per query
     const fn = memoize(
@@ -1175,8 +1157,6 @@ const ESQLEditorInternal = function ESQLEditor({
                       await addLookupIndicesDecorator();
                       maybeTriggerSuggestions();
                     });
-
-                    editor.onDidChangeCursorPosition(triggerSignatureHelpIfInsideParentheses);
 
                     // Auto-focus the editor and move the cursor to the end.
                     if (!disableAutoFocus) {

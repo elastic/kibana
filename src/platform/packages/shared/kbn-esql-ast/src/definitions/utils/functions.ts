@@ -313,6 +313,10 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
     // time_series_agg functions have priority over everything else
     sortText: functionsPriority,
     category,
+    command: {
+      id: 'editor.action.triggerParameterHints',
+      title: '',
+    },
   });
 }
 
