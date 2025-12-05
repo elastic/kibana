@@ -23,7 +23,6 @@ import { UncontrolledStreamsAppSearchBar } from '../../../streams_app_search_bar
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
 import { validateQuery } from '../common/validate_query';
 import { NO_FEATURE } from '../utils/default_query';
-import { scoreSeverity, SeverityBadge, SIGNIFICANT_EVENT_SEVERITY } from '../../severity_badge';
 import { SeveritySelector } from '../common/severity_selector';
 
 interface Props {
