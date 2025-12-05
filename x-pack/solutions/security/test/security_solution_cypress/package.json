@@ -8,8 +8,6 @@
     "cypress": "../../../../../node_modules/.bin/cypress",
     "junit:merge": "../../../../../node_modules/.bin/mochawesome-merge ../../../../../target/kibana-security-solution/cypress/results/mochawesome*.json > ../../../../../target/kibana-security-solution/cypress/results/output.json && ../../../../../node_modules/.bin/marge ../../../../../target/kibana-security-solution/cypress/results/output.json --reportDir ../../../../../target/kibana-security-solution/cypress/results && yarn junit:transform && mkdir -p ../../../../../target/junit && cp ../../../../../target/kibana-security-solution/cypress/results/*.xml ../../../../../target/junit/",
     "junit:transform": "node ../../plugins/security_solution/scripts/junit_transformer --pathPattern '../../../../../target/kibana-security-solution/cypress/results/*.xml' --rootDirectory ../../../../../ --reportName 'Security Solution Cypress' --writeInPlace",
-
-
     "cypress:open:ess": "TZ=UTC node ../../plugins/security_solution/scripts/start_cypress_parallel open --spec './cypress/e2e/**/*.cy.ts' --config-file ./test/security_solution_cypress/cypress/cypress.config.ts --ftr-config-file ./cli_config",
     "cypress:asset_inventory:run:ess": "yarn cypress:ess --spec '.cypress/screens/asset_inventory/**/*.cy.ts'",
     "cypress:entity_analytics:run:ess": "yarn cypress:ess --spec './cypress/e2e/entity_analytics/**/*.cy.ts'",
@@ -24,7 +22,7 @@
     "cypress:detection_engine:exceptions:run:ess": "yarn cypress:ess --spec './cypress/e2e/detection_response/detection_engine/exceptions/**/*.cy.ts'",
     "cypress:ai_assistant:run:ess": "yarn cypress:ess --spec './cypress/e2e/ai_assistant/**/*.cy.ts'",
     "cypress:run:respops:ess": "yarn cypress:ess --spec './cypress/e2e/detection_response/**/*.cy.ts'",
-    "cypress:investigations:run:ess": "yarn cypress:ess --spec './cypress/e2e/investigations/**/*.cy.ts'",
+    "cypress:investigations:run:ess": "yarn cypress:ess --spec './cypress/e2e/investigations/threat_intelligence/cases.cy.ts'",
     "cypress:explore:run:ess": "yarn cypress:ess --spec './cypress/e2e/explore/**/*.cy.ts'",
     "cypress:changed-specs-only:ess": "yarn cypress:ess --changed-specs-only --env burn=5",
     "cypress:cloud_security_posture:run:ess": "yarn cypress:ess --spec './cypress/e2e/cloud_security_posture/**/*.cy.ts'",
@@ -47,13 +45,11 @@
     "cypress:ai_assistant:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/ai_assistant/**/*.cy.ts'",
     "cypress:ai4dsoc:run:serverless": "yarn cypress:ai4dsoc:serverless --spec './cypress/e2e/ai4dsoc/**/*.cy.ts'",
     "cypress:automatic_import:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/automatic_import/**/*.cy.ts'",
-    "cypress:investigations:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/investigations/**/*.cy.ts'",
+    "cypress:investigations:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/investigations/threat_intelligence/cases.cy.ts'",
     "cypress:explore:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/explore/**/*.cy.ts'",
     "cypress:changed-specs-only:serverless": "yarn cypress:serverless --changed-specs-only --env burn=5",
     "cypress:cloud_security_posture:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/cloud_security_posture/**/*.cy.ts'",
     "cypress:burn:serverless": "yarn cypress:serverless --env burn=2",
-
-
     "cypress:qa:serverless": "TZ=UTC node ../../plugins/security_solution/scripts/start_cypress_parallel_serverless --config-file ./test/security_solution_cypress/cypress/cypress_ci_serverless_qa.config.ts",
     "cypress:open:qa:serverless": "yarn cypress:qa:serverless open",
     "cypress:run:qa:serverless:ai_assistant": "yarn cypress:qa:serverless --spec './cypress/e2e/ai_assistant/**/*.cy.ts'",
