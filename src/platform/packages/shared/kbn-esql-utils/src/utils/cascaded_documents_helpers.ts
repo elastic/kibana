@@ -148,7 +148,7 @@ export function getFieldParamDefinition(
   fieldName: string,
   fieldTerminals: StatsFieldSummary['terminals'],
   esqlVariables: ESQLControlVariable[] | undefined
-): string | undefined {
+) {
   const fieldParamDef = fieldTerminals.find(
     (arg) => arg.text === fieldName && arg.type === 'literal' && arg.literalType === 'param'
   ) as ESQLLiteral | undefined;
@@ -160,21 +160,23 @@ export function getFieldParamDefinition(
       throw new Error(`The control variable for the "${fieldName}" column was not found`);
     }
 
-    return controlVariable.value as string;
+    return controlVariable.value;
   }
 }
 
-export function getStatsGroupFieldType(groupByFields: StatsFieldSummary): string;
-export function getStatsGroupFieldType(
-  groupByFields: StatsFieldSummary | undefined
-): string | undefined {
+export function getStatsGroupFieldType<
+  T extends StatsFieldSummary | undefined,
+  R = T extends StatsFieldSummary ? string : undefined
+>(groupByFields: T): R {
   if (!groupByFields) {
-    return undefined;
+    return undefined as R;
   }
 
-  return groupByFields.definition.type === 'function'
-    ? groupByFields.definition.name
-    : groupByFields.definition.type;
+  return (
+    groupByFields.definition.type === 'function'
+      ? groupByFields.definition.name
+      : groupByFields.definition.type
+  ) as R;
 }
 
 export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta => {
@@ -266,7 +268,7 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
       // as they are not valid in this context
       groupByFields.push({
         field: groupFieldName,
-        type: getStatsGroupFieldType(groupFieldNode)!,
+        type: getStatsGroupFieldType(groupFieldNode),
       });
 
       break;
@@ -281,7 +283,7 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
 
     groupByFields.push({
       field: groupFieldName,
-      type: getStatsGroupFieldType(groupFieldNode)!,
+      type: getStatsGroupFieldType(groupFieldNode),
     });
   }
 
@@ -463,16 +465,19 @@ function handleStatsByColumnLeafOperation(
       esqlVariables
     ))
   ) {
-    operationColumnName = operationColumnNameParamValue;
+    if (typeof operationColumnNameParamValue === 'string') {
+      // we expect the operation column name parameter value to be a string, so we check for that and update the operation column name to the param value if it is
+      operationColumnName = operationColumnNameParamValue;
+    }
   }
 
-  const useMatchPhrase = requiresMatchPhrase(operationColumnName, dataViewFields);
+  const shouldUseMatchPhrase = requiresMatchPhrase(operationColumnName, dataViewFields);
 
   // build a where command with match expressions for the selected column
   const filterCommand = Builder.command({
     name: 'where',
     args: [
-      useMatchPhrase
+      shouldUseMatchPhrase
         ? Builder.expression.func.call('match_phrase', [
             Builder.identifier({ name: operationColumnName }),
             Builder.expression.literal.string(operationValue as string),
@@ -544,7 +549,10 @@ function handleStatsByCategorizeLeafOperation(
         esqlVariables
       ))
     ) {
-      categorizedFieldName = categorizedFieldNameParamValue;
+      if (typeof categorizedFieldNameParamValue === 'string') {
+        // we expect the categorized field name parameter value to be a string, so we check for that and update the categorized field name to the param value if it is
+        categorizedFieldName = categorizedFieldNameParamValue;
+      }
     }
   }
 
@@ -748,8 +756,10 @@ export const appendFilteringWhereClauseForCascadeLayout = <
         esqlVariables
       ))
     ) {
-      // if the field name is a param definition, we update the normalized field name to the param value so that we can use it in the filtering command to be generated
-      normalizedFieldName = fieldNameParamValue;
+      if (typeof fieldNameParamValue === 'string') {
+        // we expect the field name parameter value to be a string, so we check for that and update the normalized field name to the param value if it is
+        normalizedFieldName = fieldNameParamValue;
+      }
     }
   } else {
     // if the requested field doesn't exist on the stats command that's driving the cascade experience,
@@ -760,9 +770,9 @@ export const appendFilteringWhereClauseForCascadeLayout = <
   const { operator, expressionType } = getOperator(operation);
 
   // if the value being filtered on is not "aggregatable" and is either a text or keyword field, we opt to use match phrase for the where command
-  const useMatchPhrase = requiresMatchPhrase(normalizedFieldName, dataView.fields);
+  const shouldUseMatchPhrase = requiresMatchPhrase(normalizedFieldName, dataView.fields);
 
-  if (useMatchPhrase) {
+  if (shouldUseMatchPhrase) {
     const matchPhraseExpression = Builder.expression.func.call('match_phrase', [
       Builder.identifier({ name: removeBackticks(normalizedFieldName) }),
       Builder.expression.literal.string(value as string),
