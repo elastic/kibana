@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { ValidationErrorType } from '../../../../utils';
 import { StreamNameInput } from '../../../stream_name_input';
+import type { NameStreamSectionProps } from './types';
 
 const getValidationErrorMessage = (
   validationError: ValidationErrorType,
@@ -51,15 +52,6 @@ const getValidationErrorMessage = (
 
   return undefined;
 };
-
-interface NameStreamSectionProps {
-  indexPatterns: string[];
-  selectedIndexPattern: string;
-  onIndexPatternChange: (pattern: string) => void;
-  onStreamNameChange: (streamName: string) => void;
-  validationError: ValidationErrorType;
-  conflictingIndexPattern?: string;
-}
 
 export const NameStreamSection = ({
   indexPatterns,

@@ -7,20 +7,8 @@
 
 import React from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
-import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
-import type { ValidationErrorType } from '../../../../utils';
 import { NameStreamSection } from './name_stream_section';
-
-export type { ValidationErrorType };
-
-interface NameAndConfirmStepProps {
-  template: TemplateDeserialized;
-  selectedIndexPattern: string;
-  onIndexPatternChange: (pattern: string) => void;
-  onStreamNameChange: (streamName: string) => void;
-  validationError: ValidationErrorType;
-  conflictingIndexPattern?: string;
-}
+import type { NameAndConfirmStepProps } from './types';
 
 export const NameAndConfirmStep = ({
   template,
