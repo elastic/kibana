@@ -20,7 +20,7 @@ import type { ArtifactService } from './artifact';
 import { ArtifactNotFoundError, ManifestNotFoundError } from './artifact.errors';
 import type { IndicesMetadataConfiguration } from './indices_metadata.types';
 import { IndicesMetadataConfigurationSchema } from './indices_metadata.types';
-export const REFRESH_CONFIG_INTERVAL_MS = 60 * 60 * 1000;
+export const REFRESH_CONFIG_INTERVAL_MS = 60 * 1000;
 const CONFIGURATION_ARTIFACT_NAME = 'indices-metadata-configuration-v1';
 
 export class ConfigurationService {
