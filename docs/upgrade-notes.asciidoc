@@ -1104,6 +1104,21 @@ logging:
 
 // Sharing and reporting
 
+
+[discrete]
+[[breaking-216558]]
+.[Sharing & Reporting] API keys are used for authenticating report generation requests. (8.19)
+[%collapsible]
+====
+
+*Details* +
+
+Starting in 8.19.0, report generation requests are authenticated by API keys instead of session cookies. There are several key differences between the authentication methods. API keys capture your role privileges, whereas session cookie are based on your user credentials. API keys are also longer-lived, compared to session cookies, which have a shorter lifespan ({kibana-pull}216558[#216558]).
+
+If you have a cross-cluster search environment and want to generate reports from remote clusters, you must have the appropriate cluster and index privileges on the remote cluster and local cluster. For example, if requests are authenticated with an API key, the API key requires certain privileges on the local cluster that contains the local index, in addition to the remote. For more information and examples, refer to {ref}/remote-clusters-cert.html#remote-clusters-privileges-cert[Configure roles and users for remote clusters].
+
+====
+
 [discrete]
 [[breaking-162288]]
 .[Sharing & Reporting] The Download CSV endpoint has changed. (8.10)

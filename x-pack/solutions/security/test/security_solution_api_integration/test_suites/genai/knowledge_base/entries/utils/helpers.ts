@@ -20,7 +20,7 @@ import type SuperTest from 'supertest';
 import { SUPPORTED_TRAINED_MODELS } from '@kbn/test-suites-xpack-platform/functional/services/ml/api';
 
 import { MachineLearningProvider } from '@kbn/test-suites-xpack-platform/api_integration/services/ml';
-import { routeWithNamespace } from '../../../../../config/services/detections_response';
+import { routeWithNamespace } from '@kbn/detections-response-ftr-services';
 
 export const TINY_ELSER = {
   ...SUPPORTED_TRAINED_MODELS.TINY_ELSER,
