@@ -19,7 +19,6 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   euiFullHeight,
-  EuiLoadingSpinner,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -90,20 +89,16 @@ const EditTagsFlyoutComponent: React.FC<Props> = ({
           <h2 data-test-subj="alerts-edit-tags-flyout-title">{i18n.EDIT_TAGS}</h2>
         </EuiTitle>
         <EuiText color="subdued">
-          <p>{headerSubtitle as string}</p>
+          <p>{headerSubtitle}</p>
         </EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody css={FlyoutBodyCss}>
-        {isLoading ? (
-          <EuiLoadingSpinner />
-        ) : (
-          <EditTagsSelectable
-            selectedAlerts={selectedAlerts}
-            isLoading={isLoading}
-            tags={tags ?? []}
-            onChangeTags={setTagsSelection}
-          />
-        )}
+        <EditTagsSelectable
+          selectedAlerts={selectedAlerts}
+          isLoading={isLoading}
+          tags={tags ?? []}
+          onChangeTags={setTagsSelection}
+        />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">

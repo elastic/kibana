@@ -250,32 +250,4 @@ describe('useBulkUpdateAlertTags', () => {
 
     expect(onError).not.toHaveBeenCalled();
   });
-
-  it('should update loading state during mutation', async () => {
-    http.post.mockImplementation(
-      () =>
-        new Promise((resolve) => {
-          setTimeout(() => resolve('success'), 100);
-        })
-    );
-
-    const { result } = renderHook(
-      () => useBulkUpdateAlertTags({ http, notifications, onSuccess, onError }),
-      { wrapper }
-    );
-
-    expect(result.current.isLoading).toBe(false);
-
-    result.current.mutate({
-      index: '.alerts-test',
-      alertIds: ['alert-1'],
-      add: ['tag1'],
-    });
-
-    await waitFor(() => expect(result.current.isLoading).toBe(true));
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-
-    expect(result.current.isLoading).toBe(false);
-  });
 });

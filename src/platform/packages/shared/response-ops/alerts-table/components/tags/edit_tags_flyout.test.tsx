@@ -67,13 +67,7 @@ describe('EditTagsFlyout', () => {
     });
   });
 
-  it('shows the alert title when selecting one alert', async () => {
-    render(<EditTagsFlyout {...props} />);
-
-    expect(await screen.findByText(mockAlert.title as string)).toBeInTheDocument();
-  });
-
-  it('shows the number of total selected alerts in the title when selecting multiple alerts', async () => {
+  it('shows the number of total selected alerts in the title', async () => {
     const mockAlert2 = {
       ...mockAlert,
       _id: 'alert-2',

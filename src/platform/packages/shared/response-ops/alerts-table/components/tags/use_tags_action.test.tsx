@@ -121,6 +121,11 @@ describe('useTagsAction', () => {
         remove: ['pepsi'],
       }),
     });
+
+    await waitFor(() => {
+      expect(onActionSuccess).toHaveBeenCalledTimes(1);
+    });
+    expect(onActionError).not.toHaveBeenCalled();
   });
 
   it('opens and closes the flyout correctly', async () => {
@@ -149,6 +154,10 @@ describe('useTagsAction', () => {
     await waitFor(() => {
       expect(result.current.isFlyoutOpen).toBe(false);
     });
+
+    // Callbacks should not be called when just closing the flyout
+    expect(onActionSuccess).not.toHaveBeenCalled();
+    expect(onActionError).not.toHaveBeenCalled();
   });
 
   it('handles multiple alerts', async () => {
@@ -191,29 +200,22 @@ describe('useTagsAction', () => {
         remove: ['pepsi'],
       }),
     });
+
+    await waitFor(() => {
+      expect(onActionSuccess).toHaveBeenCalledTimes(1);
+    });
+    expect(onActionError).not.toHaveBeenCalled();
   });
 
-  it('handles multiple alerts from different indices', async () => {
+  it('calls onActionError when the API request fails', async () => {
+    http.post.mockRejectedValue(new Error('API Error'));
+
     const { result } = renderHook(
       () => useTagsAction({ onActionSuccess, onActionError, isDisabled: false }),
       { wrapper }
     );
 
-    const mockAlert2 = {
-      ...mockAlert,
-      _id: 'alert-2',
-      _index: 'test-index-2',
-      ALERT_WORKFLOW_TAGS: ['one', 'three'],
-    } as unknown as Alert;
-
-    const mockAlert3 = {
-      ...mockAlert,
-      _id: 'alert-3',
-      _index: 'test-index',
-      ALERT_WORKFLOW_TAGS: ['two'],
-    } as unknown as Alert;
-
-    const action = result.current.getAction([mockAlert, mockAlert2, mockAlert3]);
+    const action = result.current.getAction([mockAlert]);
 
     act(() => {
       action.onClick();
@@ -222,11 +224,7 @@ describe('useTagsAction', () => {
     expect(result.current.isFlyoutOpen).toBe(true);
 
     act(() => {
-      result.current.onSaveTags({ selectedItems: ['one', 'two'], unSelectedItems: ['pepsi'] });
-    });
-
-    await waitFor(() => {
-      expect(result.current.isFlyoutOpen).toBe(false);
+      result.current.onSaveTags({ selectedItems: ['one'], unSelectedItems: ['pepsi'] });
     });
 
     await waitFor(() => {
@@ -236,10 +234,15 @@ describe('useTagsAction', () => {
     expect(http.post).toHaveBeenCalledWith('/internal/rac/alerts/tags', {
       body: JSON.stringify({
         index: '.alerts-observability*,.alerts-stack*',
-        alertIds: ['alert-1', 'alert-2', 'alert-3'],
-        add: ['one', 'two'],
+        alertIds: ['alert-1'],
+        add: ['one'],
         remove: ['pepsi'],
       }),
     });
+
+    await waitFor(() => {
+      expect(onActionError).toHaveBeenCalledTimes(1);
+    });
+    expect(onActionSuccess).not.toHaveBeenCalled();
   });
 });
