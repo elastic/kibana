@@ -19,7 +19,7 @@ jest.mock('fast-glob');
 const dummyManifestProps = {
   exists: false,
   lastModified: new Date(0).toISOString(),
-  sha1: '0000000000000000-0000000000000000',
+  sha1: '000000000000000-000000000000000',
   tests: [],
 };
 
