@@ -7,7 +7,7 @@
 import type { IRouter } from '@kbn/core/server';
 import type { GapAutoFillSchedulerLogsResponseV1 } from '../../../../../../common/routes/gaps/apis/gap_auto_fill_scheduler';
 import {
-  getGapAutoFillSchedulerLogsParamsSchemaV1,
+  findGapAutoFillSchedulerLogsParamsSchemaV1,
   gapAutoFillSchedulerLogsRequestQuerySchemaV1,
 } from '../../../../../../common/routes/gaps/apis/gap_auto_fill_scheduler';
 import type { ILicenseState } from '../../../../../lib';
@@ -17,7 +17,7 @@ import { INTERNAL_ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH } from '../../../..
 import { transformRequestV1, transformResponseV1 } from './transforms';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../../constants';
 
-export const getAutoFillSchedulerLogsRoute = (
+export const findAutoFillSchedulerLogsRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
@@ -27,7 +27,7 @@ export const getAutoFillSchedulerLogsRoute = (
       security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: { access: 'internal' },
       validate: {
-        params: getGapAutoFillSchedulerLogsParamsSchemaV1,
+        params: findGapAutoFillSchedulerLogsParamsSchemaV1,
         body: gapAutoFillSchedulerLogsRequestQuerySchemaV1,
       },
     },
@@ -42,7 +42,7 @@ export const getAutoFillSchedulerLogsRoute = (
 
         const params = transformRequestV1(id, body);
 
-        const result = await rulesClient.getGapAutoFillSchedulerLogs(params);
+        const result = await rulesClient.findGapAutoFillSchedulerLogs(params);
 
         const response: GapAutoFillSchedulerLogsResponseV1 = {
           body: transformResponseV1(result),

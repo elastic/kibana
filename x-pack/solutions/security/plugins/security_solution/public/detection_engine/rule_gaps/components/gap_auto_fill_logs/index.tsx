@@ -31,7 +31,7 @@ import { FormattedDate } from '../../../../common/components/formatted_date';
 import * as i18n from './translations';
 import {
   useGetGapAutoFillScheduler,
-  useGetGapAutoFillSchedulerLogs,
+  useFindGapAutoFillSchedulerLogs,
 } from '../../api/hooks/use_gap_auto_fill_scheduler';
 import { MultiselectFilter } from '../../../../common/components/multiselect_filter';
 
@@ -56,7 +56,7 @@ export const GapAutoFillLogsFlyout = ({ isOpen, onClose }: GapAutoFillLogsFlyout
     GAP_AUTO_FILL_STATUS.ERROR,
   ]);
 
-  const { data: logsData, isFetching: isLogsLoading } = useGetGapAutoFillSchedulerLogs({
+  const { data: logsData, isFetching: isLogsLoading } = useFindGapAutoFillSchedulerLogs({
     page: pageIndex + 1,
     perPage: pageSize,
     statuses: selectedStatuses,

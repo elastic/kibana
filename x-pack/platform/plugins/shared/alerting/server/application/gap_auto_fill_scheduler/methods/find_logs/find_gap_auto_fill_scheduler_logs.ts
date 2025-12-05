@@ -8,11 +8,11 @@
 import Boom from '@hapi/boom';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import type {
-  GetGapAutoFillSchedulerLogsParams,
+  FindGapAutoFillSchedulerLogsParams,
   GapAutoFillSchedulerLogsResult,
   GapAutoFillSchedulerLogEntry,
 } from './types';
-import { getGapAutoFillSchedulerLogsParamsSchema } from './schemas';
+import { findGapAutoFillSchedulerLogsParamsSchema } from './schemas';
 import type { GapAutoFillSchedulerSO } from '../../../../data/gap_auto_fill_scheduler/types/gap_auto_fill_scheduler';
 import { ReadOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import {
@@ -22,13 +22,13 @@ import {
 import { GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { formatGapAutoFillSchedulerLogEntry } from './utils';
 
-export async function getGapAutoFillSchedulerLogs(
+export async function findGapAutoFillSchedulerLogs(
   context: RulesClientContext,
-  params: GetGapAutoFillSchedulerLogsParams
+  params: FindGapAutoFillSchedulerLogsParams
 ): Promise<GapAutoFillSchedulerLogsResult> {
   try {
     // Validate input parameters
-    getGapAutoFillSchedulerLogsParamsSchema.validate(params);
+    findGapAutoFillSchedulerLogsParamsSchema.validate(params);
   } catch (error) {
     throw Boom.badRequest(
       `Error validating gap auto fill scheduler logs parameters "${JSON.stringify(params)}" - ${
@@ -70,7 +70,7 @@ export async function getGapAutoFillSchedulerLogs(
         await context.authorization.ensureAuthorized({
           ruleTypeId: ruleType.type,
           consumer: ruleType.consumer,
-          operation: ReadOperations.GetGapAutoFillSchedulerLogs,
+          operation: ReadOperations.FindGapAutoFillSchedulerLogs,
           entity: AlertingAuthorizationEntity.Rule,
         });
       }

@@ -26,7 +26,7 @@ import { RulesClient } from '../../../../rules_client';
 import { ReadOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { GapAutoFillSchedulerAuditAction } from '../../../../rules_client/common/audit_events';
-import type { GetGapAutoFillSchedulerLogsParams } from './types';
+import type { FindGapAutoFillSchedulerLogsParams } from './types';
 
 const kibanaVersion = 'v8.0.0';
 const taskManager = taskManagerMock.createStart();
@@ -66,7 +66,7 @@ const mockLogs: Partial<IValidatedEventInternalDocInfo>[] = [
   },
 ];
 
-describe('getGapAutoFillSchedulerLogs()', () => {
+describe('findGapAutoFillSchedulerLogs()', () => {
   let rulesClient: RulesClient;
   const now = new Date().toISOString();
 
@@ -138,7 +138,7 @@ describe('getGapAutoFillSchedulerLogs()', () => {
   });
 
   test('should successfully get gap fill auto scheduler logs with default sort and no status filter', async () => {
-    const result = await rulesClient.getGapAutoFillSchedulerLogs({
+    const result = await rulesClient.findGapAutoFillSchedulerLogs({
       id: 'gap-1',
       page: 1,
       perPage: 10,
@@ -162,7 +162,7 @@ describe('getGapAutoFillSchedulerLogs()', () => {
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
         ruleTypeId: ruleType.type,
         consumer: ruleType.consumer,
-        operation: ReadOperations.GetGapAutoFillSchedulerLogs,
+        operation: ReadOperations.FindGapAutoFillSchedulerLogs,
         entity: AlertingAuthorizationEntity.Rule,
       });
     }
@@ -210,7 +210,7 @@ describe('getGapAutoFillSchedulerLogs()', () => {
   });
 
   test('should include status filters when statuses are provided', async () => {
-    await rulesClient.getGapAutoFillSchedulerLogs({
+    await rulesClient.findGapAutoFillSchedulerLogs({
       id: 'gap-1',
       page: 2,
       perPage: 5,
@@ -239,7 +239,7 @@ describe('getGapAutoFillSchedulerLogs()', () => {
       });
 
       await expect(
-        rulesClient.getGapAutoFillSchedulerLogs({
+        rulesClient.findGapAutoFillSchedulerLogs({
           id: 'gap-1',
           page: 1,
           perPage: 10,
@@ -257,7 +257,7 @@ describe('getGapAutoFillSchedulerLogs()', () => {
       });
 
       await expect(
-        rulesClient.getGapAutoFillSchedulerLogs({
+        rulesClient.findGapAutoFillSchedulerLogs({
           id: 'gap-1',
           page: 1,
           perPage: 10,
@@ -280,11 +280,11 @@ describe('getGapAutoFillSchedulerLogs()', () => {
 
     test('validate params and throw error when invalid', async () => {
       await expect(
-        rulesClient.getGapAutoFillSchedulerLogs({
+        rulesClient.findGapAutoFillSchedulerLogs({
           id: 'gap-1',
           page: 1,
           perPage: 10,
-        } as unknown as GetGapAutoFillSchedulerLogsParams)
+        } as unknown as FindGapAutoFillSchedulerLogsParams)
       ).rejects.toThrowError(/Error validating gap auto fill scheduler logs parameters/);
     });
   });

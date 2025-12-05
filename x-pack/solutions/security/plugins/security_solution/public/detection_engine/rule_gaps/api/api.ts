@@ -323,7 +323,7 @@ export const updateGapAutoFillScheduler = async (
     }
   );
 
-export const getGapAutoFillSchedulerLogs = async ({
+export const findGapAutoFillSchedulerLogs = async ({
   id,
   start,
   end,

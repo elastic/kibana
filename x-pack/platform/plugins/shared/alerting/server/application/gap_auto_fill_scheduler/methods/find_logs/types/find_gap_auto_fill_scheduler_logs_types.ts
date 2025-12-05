@@ -8,13 +8,13 @@
 import type { TypeOf } from '@kbn/config-schema';
 
 import type {
-  getGapAutoFillSchedulerLogsParamsSchema,
+  findGapAutoFillSchedulerLogsParamsSchema,
   gapAutoFillSchedulerLogEntrySchema,
   gapAutoFillSchedulerLogsResultSchema,
 } from '../schemas';
 
-export type GetGapAutoFillSchedulerLogsParams = TypeOf<
-  typeof getGapAutoFillSchedulerLogsParamsSchema
+export type FindGapAutoFillSchedulerLogsParams = TypeOf<
+  typeof findGapAutoFillSchedulerLogsParamsSchema
 >;
 
 export type GapAutoFillSchedulerLogEntry = TypeOf<typeof gapAutoFillSchedulerLogEntrySchema>;

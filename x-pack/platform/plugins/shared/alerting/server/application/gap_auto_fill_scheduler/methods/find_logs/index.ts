@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { getGapAutoFillSchedulerLogs } from './get_gap_auto_fill_scheduler_logs';
-export type { GetGapAutoFillSchedulerLogsParams, GapAutoFillSchedulerLogsResult } from './types';
+export { findGapAutoFillSchedulerLogs } from './find_gap_auto_fill_scheduler_logs';
+export type { FindGapAutoFillSchedulerLogsParams, GapAutoFillSchedulerLogsResult } from './types';

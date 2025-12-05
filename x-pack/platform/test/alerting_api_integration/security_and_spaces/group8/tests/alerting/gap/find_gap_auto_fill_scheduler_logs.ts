@@ -11,11 +11,11 @@ import { UserAtSpaceScenarios } from '../../../../scenarios';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 
-export default function getGapAutoFillSchedulerLogsTests({ getService }: FtrProviderContext) {
+export default function findGapAutoFillSchedulerLogsTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('gap auto fill scheduler - get logs', () => {
+  describe('gap auto fill scheduler - find logs', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     for (const scenario of UserAtSpaceScenarios) {

@@ -109,8 +109,8 @@ import type {
   BulkFillGapsByRuleIdsOptions,
   BulkFillGapsByRuleIdsParams,
 } from '../application/gaps/methods/bulk_fill_gaps_by_rule_ids/types';
-import type { GetGapAutoFillSchedulerLogsParams } from '../application/gap_auto_fill_scheduler/methods/get_logs/types/get_gap_auto_fill_scheduler_logs_types';
-import { getGapAutoFillSchedulerLogs } from '../application/gap_auto_fill_scheduler/methods/get_logs/get_gap_auto_fill_scheduler_logs';
+import type { FindGapAutoFillSchedulerLogsParams } from '../application/gap_auto_fill_scheduler/methods/find_logs/types/find_gap_auto_fill_scheduler_logs_types';
+import { findGapAutoFillSchedulerLogs } from '../application/gap_auto_fill_scheduler/methods/find_logs/find_gap_auto_fill_scheduler_logs';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,
@@ -283,8 +283,8 @@ export class RulesClient {
   public deleteGapAutoFillScheduler = (params: GetGapAutoFillSchedulerParams) =>
     deleteGapAutoFillScheduler(this.context, params);
 
-  public getGapAutoFillSchedulerLogs = (params: GetGapAutoFillSchedulerLogsParams) =>
-    getGapAutoFillSchedulerLogs(this.context, params);
+  public findGapAutoFillSchedulerLogs = (params: FindGapAutoFillSchedulerLogsParams) =>
+    findGapAutoFillSchedulerLogs(this.context, params);
 
   public getContext() {
     return this.context;

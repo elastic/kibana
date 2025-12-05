@@ -12,7 +12,7 @@ import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import {
   createGapAutoFillScheduler,
   getGapAutoFillScheduler,
-  getGapAutoFillSchedulerLogs,
+  findGapAutoFillSchedulerLogs,
   updateGapAutoFillScheduler,
 } from '../api';
 import type { GapAutoFillSchedulerResponse, GapAutoFillSchedulerBase } from '../../types';
@@ -115,7 +115,7 @@ export const useUpdateGapAutoFillScheduler = () => {
   });
 };
 
-export const useGetGapAutoFillSchedulerLogs = ({
+export const useFindGapAutoFillSchedulerLogs = ({
   page,
   perPage,
   sortField,
@@ -147,7 +147,7 @@ export const useGetGapAutoFillSchedulerLogs = ({
       ...statuses,
     ],
     async ({ signal }) => {
-      const response = await getGapAutoFillSchedulerLogs({
+      const response = await findGapAutoFillSchedulerLogs({
         id: schedulerId,
         signal,
         start,

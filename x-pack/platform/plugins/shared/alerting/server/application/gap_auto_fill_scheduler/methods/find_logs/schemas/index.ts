@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export type {
-  GetGapAutoFillSchedulerLogsParams,
-  GapAutoFillSchedulerLogsResult,
-  GapAutoFillSchedulerLogEntry,
-} from './get_gap_auto_fill_scheduler_logs_types';
+export {
+  findGapAutoFillSchedulerLogsParamsSchema,
+  gapAutoFillSchedulerLogEntrySchema,
+  gapAutoFillSchedulerLogsResultSchema,
+} from './find_gap_auto_fill_scheduler_logs_schema';

@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const getGapAutoFillSchedulerLogsParamsSchema = schema.object({
+export const findGapAutoFillSchedulerLogsParamsSchema = schema.object({
   id: schema.string(),
   start: schema.string(),
   end: schema.string(),

@@ -10,7 +10,7 @@ import { licenseStateMock } from '../../../../../lib/license_state.mock';
 import { verifyApiAccess } from '../../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../../rules_client.mock';
-import { getAutoFillSchedulerLogsRoute } from './get_auto_fill_scheduler_logs_route';
+import { findAutoFillSchedulerLogsRoute } from './find_auto_fill_scheduler_logs_route';
 
 const rulesClient = rulesClientMock.create();
 
@@ -18,7 +18,7 @@ jest.mock('../../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
-describe('getAutoFillSchedulerLogsRoute', () => {
+describe('findAutoFillSchedulerLogsRoute', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
@@ -47,8 +47,8 @@ describe('getAutoFillSchedulerLogsRoute', () => {
   test('should call get gap auto fill scheduler logs with proper parameters', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
-    getAutoFillSchedulerLogsRoute(router, licenseState);
-    rulesClient.getGapAutoFillSchedulerLogs.mockResolvedValueOnce(mockGetLogsResponse);
+    findAutoFillSchedulerLogsRoute(router, licenseState);
+    rulesClient.findGapAutoFillSchedulerLogs.mockResolvedValueOnce(mockGetLogsResponse);
     const [config, handler] = router.post.mock.calls[0];
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -68,7 +68,7 @@ describe('getAutoFillSchedulerLogsRoute', () => {
     );
     expect(config.path).toEqual('/internal/alerting/rules/gaps/auto_fill_scheduler/{id}/logs');
     await handler(context, req, res);
-    expect(rulesClient.getGapAutoFillSchedulerLogs).toHaveBeenCalledWith({
+    expect(rulesClient.findGapAutoFillSchedulerLogs).toHaveBeenCalledWith({
       id: 'test-scheduler-id',
       start: '2024-01-01T00:00:00.000Z',
       end: '2024-01-01T00:00:00.000Z',
@@ -105,7 +105,7 @@ describe('getAutoFillSchedulerLogsRoute', () => {
   test('ensures the license allows for getting gap auto fill scheduler logs', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
-    getAutoFillSchedulerLogsRoute(router, licenseState);
+    findAutoFillSchedulerLogsRoute(router, licenseState);
     const [, handler] = router.post.mock.calls[0];
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -119,7 +119,7 @@ describe('getAutoFillSchedulerLogsRoute', () => {
   test('ensures the license check prevents getting gap auto fill scheduler logs when appropriate', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
-    getAutoFillSchedulerLogsRoute(router, licenseState);
+    findAutoFillSchedulerLogsRoute(router, licenseState);
     const [, handler] = router.post.mock.calls[0];
     (verifyApiAccess as jest.Mock).mockImplementation(() => {
       throw new Error('License check failed');

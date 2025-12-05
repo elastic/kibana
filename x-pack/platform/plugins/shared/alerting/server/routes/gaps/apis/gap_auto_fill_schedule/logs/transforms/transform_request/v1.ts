@@ -6,12 +6,12 @@
  */
 
 import type { GapAutoFillSchedulerLogsRequestQueryV1 } from '../../../../../../../../common/routes/gaps/apis/gap_auto_fill_scheduler';
-import type { GetGapAutoFillSchedulerLogsParams } from '../../../../../../../application/gap_auto_fill_scheduler/methods/get_logs/types/get_gap_auto_fill_scheduler_logs_types';
+import type { FindGapAutoFillSchedulerLogsParams } from '../../../../../../../application/gap_auto_fill_scheduler/methods/find_logs/types/find_gap_auto_fill_scheduler_logs_types';
 
 export const transformRequest = (
   id: string,
   query: GapAutoFillSchedulerLogsRequestQueryV1
-): GetGapAutoFillSchedulerLogsParams => ({
+): FindGapAutoFillSchedulerLogsParams => ({
   id,
   start: query.start,
   end: query.end,
