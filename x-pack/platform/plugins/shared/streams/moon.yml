@@ -76,6 +76,7 @@ dependsOn:
   - '@kbn/console-plugin'
   - '@kbn/actions-plugin'
   - '@kbn/apm-utils'
+  - '@kbn/alerting-types'
 tags:
   - plugin
   - prod
