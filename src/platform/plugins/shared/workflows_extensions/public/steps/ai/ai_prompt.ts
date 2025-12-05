@@ -19,47 +19,62 @@ export const AiPromptStepDefinition: PublicStepDefinition = {
     defaultMessage: 'AI Prompt',
   }),
   description: i18n.translate('workflowsExtensionsExample.AiPromptStep.description', {
-    defaultMessage: 'Prompts the user for input and sets the result as a variable',
+    defaultMessage: 'Sends a prompt to an AI connector and returns the response',
   }),
   documentation: {
     details: i18n.translate('workflowsExtensionsExample.AiPromptStep.documentation.details', {
-      defaultMessage: `The ${AiPromptStepTypeId} step allows you to store values in the workflow context that can be referenced in later steps using template syntax like {templateSyntax}.`,
-      values: { templateSyntax: '`{{ steps.stepName.output.variables.variableName }}`' }, // Needs to be extracted so it is not interpreted as a variable by the i18n plugin
+      defaultMessage: `The ${AiPromptStepTypeId} step sends a prompt to an AI connector and returns the response. The response can be referenced in later steps using template syntax like {templateSyntax}.`,
+      values: { templateSyntax: '`{{ steps.stepName.output }}`' }, // Needs to be extracted so it is not interpreted as a variable by the i18n plugin
     }),
     examples: [
-      `## Set variables using key-value pairs
+      `## Basic AI prompt
 \`\`\`yaml
-- name: set_vars
+- name: ask_ai
   type: ${AiPromptStepTypeId}
   with:
-    variables:
-      myVar: "Hello World"
-      count: 42
-      enabled: true
+    connectorId: "my-ai-connector"
+    input: "What is the weather like today?"
 \`\`\``,
 
-      `## Set a single variable
+      `## AI prompt with dynamic input
 \`\`\`yaml
-- name: set_single_var
+- name: analyze_data
   type: ${AiPromptStepTypeId}
   with:
-    variables:
-      message: "{{ workflow.name }}"
+    connectorId: "{{ workflow.connectorId }}"
+    input: "Analyze this data: {{ steps.previous_step.output }}"
 \`\`\``,
 
-      `## Use variables in subsequent steps
+      `## AI prompt with structured output schema
 \`\`\`yaml
-- name: vars
+- name: extract_info
   type: ${AiPromptStepTypeId}
   with:
-    variables:
-      apiUrl: "https://api.example.com"
-      timeout: 5000
-- name: use_vars
+    connectorId: "my-ai-connector"
+    input: "Extract key information from this text: {{ workflow.input }}"
+    outputSchema:
+      type: "object"
+      properties:
+        summary:
+          type: "string"
+        key_points:
+          type: "array"
+          items:
+            type: "string"
+\`\`\``,
+
+      `## Use AI response in subsequent steps
+\`\`\`yaml
+- name: get_recommendation
+  type: ${AiPromptStepTypeId}
+  with:
+    connectorId: "my-ai-connector"
+    input: "Provide a recommendation based on this data"
+- name: process_recommendation
   type: http
   with:
-    url: "{{ steps.vars.output.variables.apiUrl }}"
-    timeout: "{{ steps.vars.timeout }}" # can also be accessed as step state
+    url: "https://api.example.com/process"
+    body: "{{ steps.get_recommendation.output }}"
 \`\`\``,
     ],
   },

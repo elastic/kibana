@@ -23,7 +23,7 @@ export const InputSchema = z.object({
   connectorId: z.string(),
   input: z.string(),
   // TODO: replace with proper JsonSchema7 zod schema when https://github.com/elastic/kibana/pull/244223 is merged and released
-  outputSchema: z.any(),
+  outputSchema: z.any().optional(),
 });
 
 /**
