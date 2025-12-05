@@ -13,7 +13,7 @@ import {
   CreateExceptionListItemRequestBody,
   CreateExceptionListItemResponse,
 } from '@kbn/securitysolution-exceptions-common/api';
-import { EXCEPTIONS_API_ALL } from '@kbn/security-solution-features/constants';
+import { LISTS_API_ALL } from '@kbn/security-solution-features/constants';
 
 import type { ListsPluginRouter } from '../types';
 
@@ -29,7 +29,8 @@ export const createExceptionListItemRoute = (router: ListsPluginRouter): void =>
       path: EXCEPTION_LIST_ITEM_URL,
       security: {
         authz: {
-          requiredPrivileges: [EXCEPTIONS_API_ALL],
+          // TODO: migrate away from lists authz string
+          requiredPrivileges: [LISTS_API_ALL],
         },
       },
     })
