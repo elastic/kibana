@@ -12,7 +12,7 @@ import type * as t from 'io-ts';
 import moment from 'moment';
 import type { alertDetailsContextRt } from '@kbn/observability-plugin/server/services';
 import type { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { SERVICE_NAME } from '@kbn/apm-types';
 import { maybe } from '../../../../common/utils/maybe';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
@@ -120,7 +120,9 @@ async function getServiceNameFromTraces({
     fields: requiredFields,
   });
 
-  const event = unflattenKnownApmEventFields(maybe(res.hits.hits[0])?.fields, requiredFields);
+  const fields = maybe(res.hits.hits[0])?.fields;
 
-  return event?.service.name;
+  const event = fields && accessKnownApmEventFields(fields).requireFields(requiredFields);
+
+  return event?.[SERVICE_NAME];
 }

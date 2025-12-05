@@ -29,7 +29,7 @@ export const searchStepExecutions = async ({
   spaceId,
 }: SearchStepExecutionsParams): Promise<EsWorkflowStepExecution[]> => {
   try {
-    logger.info(`Searching workflows in index ${stepsExecutionIndex}`);
+    logger.debug(`Searching workflows in index ${stepsExecutionIndex}`);
 
     const mustQueries: estypes.QueryDslQueryContainer[] = [
       { match: { workflowRunId: workflowExecutionId } },
@@ -52,7 +52,7 @@ export const searchStepExecutions = async ({
       size: 1000, // TODO: without it, it returns up to 10 results by default. We should improve this.
     });
 
-    logger.info(
+    logger.debug(
       `Found ${response.hits.hits.length} workflows, ${response.hits.hits.map((hit) => hit._id)}`
     );
 

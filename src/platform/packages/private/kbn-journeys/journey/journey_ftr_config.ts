@@ -107,6 +107,7 @@ export function makeFtrConfigProvider(
           args: dockerArgs,
           waitForLogLine: 'package manifests loaded',
           waitForLogLineTimeoutMs: 60 * 6 * 1000, // 6 minutes
+          preferCached: true,
         },
       }),
 
