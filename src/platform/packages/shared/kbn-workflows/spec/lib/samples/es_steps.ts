@@ -9,7 +9,7 @@
 
 export const ES_VALID_SAMPLE_STEPS = [
   {
-    name: 'create-document',
+    name: 'search',
     type: 'elasticsearch.search',
     with: {
       index: 'test-index',
@@ -23,7 +23,7 @@ export const ES_VALID_SAMPLE_STEPS = [
     },
   },
   {
-    name: 'create-document',
+    name: 'search',
     type: 'elasticsearch.search',
     with: {
       index: 'test-index',
