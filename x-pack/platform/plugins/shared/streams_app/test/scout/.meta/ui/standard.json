@@ -1,6 +1,6 @@
 {
-  "lastModified": "2025-12-04T11:34:01.425Z",
-  "sha1": "8294e3e6c806a036ffbc65627dcce61724c0639a",
+  "lastModified": "2025-12-05T15:42:58.234Z",
+  "sha1": "2741d1358cb9369b8a610566cc62da6cfe7f6293",
   "tests": [
     {
       "id": "3cc9409cebf2cef-744ce32675c025c",
@@ -709,7 +709,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
-        "line": 28,
+        "line": 79,
         "column": 7
       }
     },
@@ -723,7 +723,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
-        "line": 45,
+        "line": 96,
         "column": 7
       }
     },
@@ -737,13 +737,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
-        "line": 61,
+        "line": 112,
         "column": 7
       }
     },
     {
-      "id": "3fffa783271190b-04abe2e02e07cd8",
-      "title": "Stream data quality should edit failure store for wired stream from data quality tab",
+      "id": "3fffa783271190b-4775d23430ce410",
+      "title": "Stream data quality should toggle between degraded and failed docs quality issues charts",
       "expectedStatus": "passed",
       "tags": [
         "@ess",
@@ -751,7 +751,63 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
-        "line": 76,
+        "line": 127,
+        "column": 7
+      }
+    },
+    {
+      "id": "3fffa783271190b-d433732b148e845",
+      "title": "Stream data quality should show degraded fields table with data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
+        "line": 135,
+        "column": 7
+      }
+    },
+    {
+      "id": "3fffa783271190b-dd8fbacadb48e67",
+      "title": "Stream data quality should open and close degraded field flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
+        "line": 158,
+        "column": 7
+      }
+    },
+    {
+      "id": "3fffa783271190b-20b23641495bf7b",
+      "title": "Stream data quality should navigate to Discover from degraded field flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
+        "line": 185,
+        "column": 7
+      }
+    },
+    {
+      "id": "3fffa783271190b-27ee667d7063050",
+      "title": "Stream data quality should edit failure store for wired streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
+        "line": 208,
         "column": 7
       }
     },
