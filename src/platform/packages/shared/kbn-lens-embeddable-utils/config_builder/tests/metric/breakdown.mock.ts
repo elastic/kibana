@@ -141,7 +141,7 @@ export const breakdownMetricAttributes: LensAttributes = {
           },
         },
       },
-      // @ts-expect-error why is this type erroring?
+      // @ts-expect-error - deprecated layer
       indexpattern: {
         layers: {},
       },
