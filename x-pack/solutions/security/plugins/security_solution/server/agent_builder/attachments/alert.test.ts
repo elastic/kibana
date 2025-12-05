@@ -12,6 +12,7 @@ import {
   SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
   SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
   SECURITY_LABS_SEARCH_TOOL_ID,
+  SECURITY_ALERTS_TOOL_ID,
 } from '../tools';
 import { createAlertAttachmentType } from './alert';
 
@@ -90,8 +91,10 @@ describe('createAlertAttachmentType', () => {
         expect(tools).toContain(SECURITY_ENTITY_RISK_SCORE_TOOL_ID);
         expect(tools).toContain(SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID);
         expect(tools).toContain(SECURITY_LABS_SEARCH_TOOL_ID);
+        expect(tools).toContain(SECURITY_ALERTS_TOOL_ID);
         expect(tools).toContain(platformCoreTools.cases);
         expect(tools).toContain(platformCoreTools.generateEsql);
+        expect(tools).toContain(platformCoreTools.productDocumentation);
       }
     });
   });
