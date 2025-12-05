@@ -4,12 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
 
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
@@ -99,7 +93,9 @@ export default ({ getService }: FtrProviderContext) => {
           'Rules table to be visible',
           async () => await testSubjects.exists('rulesList')
         );
-        await find.clickByButtonText(logThresholdRuleName);
+
+        await find.clickByLinkText(logThresholdRuleName);
+
         await retry.waitFor(
           'Rule details to be visible',
           async () => await testSubjects.exists('ruleDetails')
@@ -237,6 +233,67 @@ export default ({ getService }: FtrProviderContext) => {
         );
         await observability.alerts.common.navigateToRuleDetailsByRuleId(logThresholdRuleId);
         await testSubjects.missingOrFail('actions');
+      });
+    });
+
+    describe('Related dashboards', function () {
+      const comboBox = getService('comboBox');
+      const kibanaServer = getService('kibanaServer');
+      let testDashboardId: string;
+      const testDashboardTitle = `Test Dashboard for Rule Details ${Date.now()}`;
+
+      before(async () => {
+        const dashboardResponse = await kibanaServer.savedObjects.create({
+          type: 'dashboard',
+          overwrite: false,
+          attributes: {
+            title: testDashboardTitle,
+            description: 'Test dashboard for rule details functional test',
+            panelsJSON: '[]',
+            kibanaSavedObjectMeta: {
+              searchSourceJSON: '{}',
+            },
+          },
+        });
+
+        testDashboardId = dashboardResponse.id;
+      });
+
+      after(async () => {
+        if (testDashboardId) {
+          await kibanaServer.savedObjects.delete({
+            type: 'dashboard',
+            id: testDashboardId,
+          });
+        }
+      });
+
+      it('should display dashboard options in "Related dashboards" dropdown when editing rule', async () => {
+        await observability.alerts.common.navigateToRuleDetailsByRuleId(logThresholdRuleId);
+        await retry.waitFor(
+          'Rule details to be visible',
+          async () => await testSubjects.exists('ruleDetails')
+        );
+
+        await testSubjects.click('actions');
+        await testSubjects.click('editRuleButton');
+
+        await retry.waitFor(
+          'Rule form to be visible',
+          async () => await testSubjects.exists('ruleDetailsNameInput')
+        );
+
+        await retry.waitFor(
+          'Dashboard selector to be visible',
+          async () => await testSubjects.exists('dashboardsSelector')
+        );
+
+        const optionsText = await comboBox.getOptionsList('dashboardsSelector');
+
+        expect(optionsText.length).to.be.greaterThan(0);
+        expect(optionsText.trim()).to.not.be.empty();
+
+        expect(optionsText).to.contain(testDashboardTitle);
       });
     });
   });

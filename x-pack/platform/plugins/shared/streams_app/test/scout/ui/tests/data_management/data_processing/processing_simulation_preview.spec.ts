@@ -16,8 +16,7 @@ import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 
 test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-    await apiServices.streams.enable();
+  test.beforeAll(async ({ logsSynthtraceEsClient }) => {
     await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
   });
 
@@ -31,8 +30,8 @@ test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@s
   });
 
   test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+    await apiServices.streams.clearStreamProcessors('logs-generic-default');
     await logsSynthtraceEsClient.clean();
-    await apiServices.streams.disable();
   });
 
   test('should display default samples when no processors are configured', async ({

@@ -6,7 +6,35 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [],
+    "setup": {
+      "parentPluginId": "automaticImportVTwo",
+      "id": "def-public.AutomaticImportPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "AutomaticImportPluginSetup",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/automatic_import_v2/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "automaticImportVTwo",
+      "id": "def-public.AutomaticImportPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "AutomaticImportPluginStart",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/automatic_import_v2/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
   },
   "server": {
     "classes": [],
@@ -59,6 +87,26 @@
                 "text": "SpacesPluginSetup"
               },
               " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImportVTwo",
+            "id": "def-server.AutomaticImportV2PluginSetupDependencies.features",
+            "type": "Object",
+            "tags": [],
+            "label": "features",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "features",
+                "scope": "server",
+                "docId": "kibFeaturesPluginApi",
+                "section": "def-server.FeaturesPluginSetup",
+                "text": "FeaturesPluginSetup"
+              }
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
             "deprecated": false,

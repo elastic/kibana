@@ -16,6 +16,7 @@ Object {
     },
   ],
   "now": 0,
+  "projectRouting": undefined,
   "query": Array [
     Object {
       "language": "lucene",

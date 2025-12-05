@@ -17,6 +17,7 @@ import type {
   LensApiBucketOperations,
   LensApiDateHistogramOperation,
   LensApiFiltersOperation,
+  LensApiHistogramOperation,
   LensApiRangeOperation,
   LensApiTermsOperation,
 } from '../../schema/bucket_ops';
@@ -47,14 +48,18 @@ export function fromBucketLensApiToLensState(
   if (isAPIColumnOfType<LensApiDateHistogramOperation>('date_histogram', options)) {
     return fromDateHistogramLensApiToLensState(options);
   }
-  if (isAPIColumnOfType<LensApiRangeOperation>('range', options)) {
+  if (
+    isAPIColumnOfType<LensApiRangeOperation>('range', options) ||
+    isAPIColumnOfType<LensApiHistogramOperation>('histogram', options)
+  ) {
     return fromRangeOrHistogramLensApiToLensState(options);
   }
   if (isAPIColumnOfType<LensApiTermsOperation>('terms', options)) {
     const findByIndex = (index: number) => columns[index]?.id;
     return fromTermsLensApiToLensState(options, findByIndex);
   }
-  throw new Error(`Unsupported bucket operation`);
+  // @ts-expect-error This should never happen if the types are correct
+  throw new Error(`Unsupported bucket operation: "${options.operation}"`);
 }
 
 export function fromBucketLensStateToAPI(
@@ -73,5 +78,6 @@ export function fromBucketLensStateToAPI(
   if (isLensStateColumnOfType<TermsIndexPatternColumn>('terms', column)) {
     return fromTermsLensStateToAPI(column, columns);
   }
-  throw new Error(`Unsupported bucket operation`);
+  // @ts-expect-error This should never happen if the types are correct
+  throw new Error(`Unsupported bucket operation: "${column.operationType}"`);
 }

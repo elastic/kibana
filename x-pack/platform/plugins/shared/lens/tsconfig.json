@@ -130,7 +130,8 @@
     "@kbn/lens-common-2",
     "@kbn/react-kibana-context-common",
     "@kbn/control-group-renderer",
-    "@kbn/unified-tabs"
+    "@kbn/unified-tabs",
+    "@kbn/esql-composer"
   ],
   "exclude": ["target/**/*"]
 }

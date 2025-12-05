@@ -16,6 +16,7 @@ import { coreServices } from '../../services/kibana_services';
 import { logger } from '../../services/logger';
 import { DEFAULT_DASHBOARD_STATE } from '../default_dashboard_state';
 import { getDashboardApi } from '../get_dashboard_api';
+import { DASHBOARD_DURATION_START_MARK } from '../performance/dashboard_duration_start_mark';
 import { startQueryPerformanceTracking } from '../performance/query_performance_tracking';
 import type { DashboardCreationOptions } from '../types';
 import { transformPanels } from './transform_panels';
@@ -27,7 +28,6 @@ export async function loadDashboardApi({
   getCreationOptions?: () => Promise<DashboardCreationOptions>;
   savedObjectId?: string;
 }) {
-  const creationStartTime = performance.now();
   const creationOptions = await getCreationOptions?.();
 
   // --------------------------------------------------------------------------------------
@@ -84,7 +84,8 @@ export async function loadDashboardApi({
 
   const performanceSubscription = startQueryPerformanceTracking(api, {
     firstLoad: true,
-    creationStartTime,
+    creationStartTime: performance.getEntriesByName(DASHBOARD_DURATION_START_MARK, 'mark')[0]
+      ?.startTime,
   });
 
   if (savedObjectId && !incomingEmbeddables?.length) {

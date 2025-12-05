@@ -9,4 +9,4 @@
 
 export * from './client';
 export * from './types';
-export * from './emitPipeline';
+export * from './utils';

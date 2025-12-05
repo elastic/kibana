@@ -492,6 +492,7 @@ export const initUiSettings = (
       schema: schema.boolean(),
       solutionViews: ['classic', 'security'],
     },
+    ...getDefaultValueReportSettings(),
     ...(experimentalFeatures.disableESQLRiskScoring
       ? {}
       : {

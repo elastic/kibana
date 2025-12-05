@@ -2701,11 +2701,11 @@
           "objectOutputType",
           "<{}, ",
           "ZodString",
-          ", \"strip\"> | undefined; alert_rule_uuid?: string | undefined; alert_workflow_status?: string | undefined; alert_start?: string | undefined; alert_updated_at?: string | undefined; alert_updated_by_user_id?: string | undefined; alert_updated_by_user_name?: string | undefined; alert_workflow_status_updated_at?: string | undefined; entity_summary_markdown?: string | undefined; mitre_attack_tactics?: string[] | undefined; user_id?: string | undefined; user_name?: string | undefined; }) => { id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; userId?: string | undefined; replacements?: ",
+          ", \"strip\"> | undefined; alert_rule_uuid?: string | undefined; alert_workflow_status?: string | undefined; alert_start?: string | undefined; alert_updated_at?: string | undefined; alert_updated_by_user_id?: string | undefined; alert_updated_by_user_name?: string | undefined; alert_workflow_status_updated_at?: string | undefined; entity_summary_markdown?: string | undefined; mitre_attack_tactics?: string[] | undefined; user_id?: string | undefined; user_name?: string | undefined; }) => { id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; replacements?: ",
           "objectOutputType",
           "<{}, ",
           "ZodString",
-          ", \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; }"
+          ", \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; userId?: string | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/utils/transform_attack_discovery_alert_from_api/index.ts",
         "deprecated": false,
@@ -2742,11 +2742,11 @@
         "label": "transformAttackDiscoveryAlertToApi",
         "description": [],
         "signature": [
-          "(attackDiscoveryAlert: { id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; userId?: string | undefined; replacements?: ",
+          "(attackDiscoveryAlert: { id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; replacements?: ",
           "objectOutputType",
           "<{}, ",
           "ZodString",
-          ", \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; }) => { id: string; timestamp: string; title: string; connector_id: string; connector_name: string; alert_ids: string[]; details_markdown: string; generation_uuid: string; summary_markdown: string; risk_score?: number | undefined; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; replacements?: ",
+          ", \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; userId?: string | undefined; }) => { id: string; timestamp: string; title: string; connector_id: string; connector_name: string; alert_ids: string[]; details_markdown: string; generation_uuid: string; summary_markdown: string; risk_score?: number | undefined; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; replacements?: ",
           "objectOutputType",
           "<{}, ",
           "ZodString",
@@ -2764,11 +2764,11 @@
             "label": "attackDiscoveryAlert",
             "description": [],
             "signature": [
-              "{ id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; userId?: string | undefined; replacements?: ",
+              "{ id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; replacements?: ",
               "objectOutputType",
               "<{}, ",
               "ZodString",
-              ", \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; }"
+              ", \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; userId?: string | undefined; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/utils/transform_attack_discovery_alert_to_api/index.ts",
             "deprecated": false,
@@ -4326,6 +4326,21 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.ATTACK_DISCOVERY_INTERNAL_MISSING_PRIVILEGES",
+        "type": "string",
+        "tags": [],
+        "label": "ATTACK_DISCOVERY_INTERNAL_MISSING_PRIVILEGES",
+        "description": [],
+        "signature": [
+          "\"/internal/elastic_assistant/attack_discovery/_missing_privileges\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.ATTACK_DISCOVERY_INTERNAL_SCHEDULES",
         "type": "string",
         "tags": [],
@@ -4565,11 +4580,11 @@
           "\nAn attack discovery that's also an alert"
         ],
         "signature": [
-          "{ id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; userId?: string | undefined; replacements?: ",
+          "{ id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; replacements?: ",
           "objectOutputType",
           "<{}, ",
           "ZodString",
-          ", \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; }"
+          ", \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; userId?: string | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/attack_discovery/attack_discovery_alert.gen.ts",
         "deprecated": false,
@@ -4664,11 +4679,11 @@
         "label": "AttackDiscoveryFindInternalResponse",
         "description": [],
         "signature": [
-          "{ page: number; data: { id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; userId?: string | undefined; replacements?: ",
+          "{ page: number; data: { id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; replacements?: ",
           "objectOutputType",
           "<{}, ",
           "ZodString",
-          ", \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; }[]; total: number; connector_names: string[]; unique_alert_ids_count: number; per_page?: number | undefined; unique_alert_ids?: string[] | undefined; }"
+          ", \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; userId?: string | undefined; }[]; total: number; connector_names: string[]; unique_alert_ids_count: number; per_page?: number | undefined; unique_alert_ids?: string[] | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/attack_discovery/routes/internal/get/find_attack_discoveries_route.gen.ts",
         "deprecated": false,
@@ -4777,6 +4792,21 @@
           "{} & { [k: string]: unknown; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/attack_discovery/routes/internal/schedules/crud_attack_discovery_schedules_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.AttackDiscoveryMissingPrivileges",
+        "type": "Type",
+        "tags": [],
+        "label": "AttackDiscoveryMissingPrivileges",
+        "description": [],
+        "signature": [
+          "{ privileges: string[]; index_name: string; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/attack_discovery/routes/internal/privileges/get_missing_privileges.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -9481,6 +9511,23 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.GetAttackDiscoveryMissingPrivilegesInternalResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "GetAttackDiscoveryMissingPrivilegesInternalResponse",
+        "description": [
+          "\nThe missing index privileges required for Attack discovery"
+        ],
+        "signature": [
+          "{ privileges: string[]; index_name: string; }[]"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/attack_discovery/routes/internal/privileges/get_missing_privileges.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.GetAttackDiscoverySchedulesInternalRequestParams",
         "type": "Type",
         "tags": [],
@@ -11439,11 +11486,11 @@
         "label": "PostAttackDiscoveryBulkInternalResponse",
         "description": [],
         "signature": [
-          "{ data: { id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; userId?: string | undefined; replacements?: ",
+          "{ data: { id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; replacements?: ",
           "objectOutputType",
           "<{}, ",
           "ZodString",
-          ", \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; }[]; }"
+          ", \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; userId?: string | undefined; }[]; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/attack_discovery/routes/internal/post/post_attack_discovery_bulk.route.gen.ts",
         "deprecated": false,
@@ -16537,15 +16584,15 @@
           "ZodTypeAny",
           ", { id?: string | undefined; name?: string | undefined; }, { id?: string | undefined; name?: string | undefined; }>, \"many\">>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; userId?: string | undefined; replacements?: ",
+          ", { id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; replacements?: ",
           "objectOutputType",
           "<{}, ",
           "ZodString",
-          ", \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; }, { id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; userId?: string | undefined; replacements?: ",
+          ", \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; userId?: string | undefined; }, { id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; replacements?: ",
           "objectInputType",
           "<{}, ",
           "ZodString",
-          ", \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; }>"
+          ", \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; userId?: string | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/attack_discovery/attack_discovery_alert.gen.ts",
         "deprecated": false,
@@ -17171,15 +17218,15 @@
           "ZodTypeAny",
           ", { id?: string | undefined; name?: string | undefined; }, { id?: string | undefined; name?: string | undefined; }>, \"many\">>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; userId?: string | undefined; replacements?: ",
+          ", { id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; replacements?: ",
           "objectOutputType",
           "<{}, ",
           "ZodString",
-          ", \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; }, { id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; userId?: string | undefined; replacements?: ",
+          ", \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; userId?: string | undefined; }, { id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; replacements?: ",
           "objectInputType",
           "<{}, ",
           "ZodString",
-          ", \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; }>, \"many\">; page: ",
+          ", \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; userId?: string | undefined; }>, \"many\">; page: ",
           "ZodNumber",
           "; per_page: ",
           "ZodOptional",
@@ -17197,15 +17244,15 @@
           "ZodString",
           ", \"many\">>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { page: number; data: { id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; userId?: string | undefined; replacements?: ",
+          ", { page: number; data: { id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; replacements?: ",
           "objectOutputType",
           "<{}, ",
           "ZodString",
-          ", \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; }[]; total: number; connector_names: string[]; unique_alert_ids_count: number; per_page?: number | undefined; unique_alert_ids?: string[] | undefined; }, { page: number; data: { id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; userId?: string | undefined; replacements?: ",
+          ", \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; userId?: string | undefined; }[]; total: number; connector_names: string[]; unique_alert_ids_count: number; per_page?: number | undefined; unique_alert_ids?: string[] | undefined; }, { page: number; data: { id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; replacements?: ",
           "objectInputType",
           "<{}, ",
           "ZodString",
-          ", \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; }[]; total: number; connector_names: string[]; unique_alert_ids_count: number; per_page?: number | undefined; unique_alert_ids?: string[] | undefined; }>"
+          ", \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; userId?: string | undefined; }[]; total: number; connector_names: string[]; unique_alert_ids_count: number; per_page?: number | undefined; unique_alert_ids?: string[] | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/attack_discovery/routes/internal/get/find_attack_discoveries_route.gen.ts",
         "deprecated": false,
@@ -17696,6 +17743,30 @@
           ", \"strip\">>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/attack_discovery/routes/internal/schedules/crud_attack_discovery_schedules_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.AttackDiscoveryMissingPrivileges",
+        "type": "Object",
+        "tags": [],
+        "label": "AttackDiscoveryMissingPrivileges",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ index_name: ",
+          "ZodString",
+          "; privileges: ",
+          "ZodArray",
+          "<",
+          "ZodString",
+          ", \"many\">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { privileges: string[]; index_name: string; }, { privileges: string[]; index_name: string; }>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/attack_discovery/routes/internal/privileges/get_missing_privileges.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -40880,6 +40951,32 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.GetAttackDiscoveryMissingPrivilegesInternalResponse",
+        "type": "Object",
+        "tags": [],
+        "label": "GetAttackDiscoveryMissingPrivilegesInternalResponse",
+        "description": [],
+        "signature": [
+          "ZodArray",
+          "<",
+          "ZodObject",
+          "<{ index_name: ",
+          "ZodString",
+          "; privileges: ",
+          "ZodArray",
+          "<",
+          "ZodString",
+          ", \"many\">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { privileges: string[]; index_name: string; }, { privileges: string[]; index_name: string; }>, \"many\">"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/attack_discovery/routes/internal/privileges/get_missing_privileges.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.GetAttackDiscoverySchedulesInternalRequestParams",
         "type": "Object",
         "tags": [],
@@ -52730,25 +52827,25 @@
           "ZodTypeAny",
           ", { id?: string | undefined; name?: string | undefined; }, { id?: string | undefined; name?: string | undefined; }>, \"many\">>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; userId?: string | undefined; replacements?: ",
+          ", { id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; replacements?: ",
           "objectOutputType",
           "<{}, ",
           "ZodString",
-          ", \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; }, { id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; userId?: string | undefined; replacements?: ",
+          ", \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; userId?: string | undefined; }, { id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; replacements?: ",
           "objectInputType",
           "<{}, ",
           "ZodString",
-          ", \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; }>, \"many\">; }, \"strip\", ",
+          ", \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; userId?: string | undefined; }>, \"many\">; }, \"strip\", ",
           "ZodTypeAny",
-          ", { data: { id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; userId?: string | undefined; replacements?: ",
+          ", { data: { id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; replacements?: ",
           "objectOutputType",
           "<{}, ",
           "ZodString",
-          ", \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; }[]; }, { data: { id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; userId?: string | undefined; replacements?: ",
+          ", \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; userId?: string | undefined; }[]; }, { data: { id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; replacements?: ",
           "objectInputType",
           "<{}, ",
           "ZodString",
-          ", \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; }[]; }>"
+          ", \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; userId?: string | undefined; }[]; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/attack_discovery/routes/internal/post/post_attack_discovery_bulk.route.gen.ts",
         "deprecated": false,

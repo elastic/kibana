@@ -46,6 +46,7 @@ import {
   type PublishesTimeRange,
   type PublishesUnifiedSearch,
 } from './publishes_unified_search';
+import { apiPublishesProjectRouting } from './publishes_project_routing';
 
 // TODO Avoid redefining this here, fix circular dependency with presentation-containers
 interface HasSections {
@@ -82,6 +83,7 @@ function getFetchContext$(api: unknown): Observable<Omit<FetchContext, 'isReload
     timeRange: of(undefined),
     timeslice: of(undefined),
     esqlVariables: of(undefined),
+    projectRouting: of(undefined),
   };
 
   const sectionId$ =
@@ -94,6 +96,10 @@ function getFetchContext$(api: unknown): Observable<Omit<FetchContext, 'isReload
       map(([allFilters, sectionId]) => filterByMetaData(api, sectionId, allFilters))
     );
     observables.query = api.parentApi.query$;
+  }
+
+  if (apiHasParentApi(api) && apiPublishesProjectRouting(api.parentApi)) {
+    observables.projectRouting = api.parentApi.projectRouting$;
   }
 
   observables.timeRange = combineLatest({
@@ -189,6 +195,7 @@ export const useFetchContext = (api: unknown): FetchContext => {
       timeRange: typeApi?.timeRange$?.value ?? typeApi?.parentApi?.timeRange$?.value,
       timeslice: typeApi?.timeRange$?.value ? undefined : typeApi?.parentApi?.timeslice$?.value,
       isReload: false,
+      projectRouting: undefined,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

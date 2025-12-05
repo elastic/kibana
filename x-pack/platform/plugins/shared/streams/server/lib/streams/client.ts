@@ -16,7 +16,12 @@ import type {
 import type { IScopedClusterClient, Logger, KibanaRequest } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
 import type { RoutingStatus } from '@kbn/streams-schema';
-import { Streams, getAncestors, getParentId } from '@kbn/streams-schema';
+import {
+  Streams,
+  convertUpsertRequestIntoDefinition,
+  getAncestors,
+  getParentId,
+} from '@kbn/streams-schema';
 import type { LockManagerService } from '@kbn/lock-manager';
 import type { Condition } from '@kbn/streamlang';
 import type { AssetClient } from './assets/asset_client';
@@ -27,7 +32,7 @@ import {
 } from './errors/definition_not_found_error';
 import { SecurityError } from './errors/security_error';
 import { StatusError } from './errors/status_error';
-import { LOGS_ROOT_STREAM_NAME, rootStreamDefinition } from './root_stream_definition';
+import { LOGS_ROOT_STREAM_NAME, createRootStreamDefinition } from './root_stream_definition';
 import type { StreamsStorageClient } from './storage/streams_storage_client';
 import { State } from './state_management/state';
 import { checkAccess, checkAccessBulk } from './stream_crud';
@@ -144,7 +149,7 @@ export class StreamsClient {
         [
           {
             type: 'upsert',
-            definition: rootStreamDefinition,
+            definition: createRootStreamDefinition(),
           },
         ],
         {
@@ -201,7 +206,7 @@ export class StreamsClient {
         [
           {
             type: 'delete' as const,
-            name: rootStreamDefinition.name,
+            name: LOGS_ROOT_STREAM_NAME,
           },
         ].concat(
           groupStreams.map((stream) => ({
@@ -260,7 +265,7 @@ export class StreamsClient {
     name: string;
     request: Streams.all.UpsertRequest;
   }): Promise<UpsertStreamResponse> {
-    const stream: Streams.all.Definition = { ...request.stream, name };
+    const stream = convertUpsertRequestIntoDefinition(name, request);
 
     const result = await State.attemptChanges(
       [
@@ -287,7 +292,7 @@ export class StreamsClient {
     const result = await State.attemptChanges(
       streams.map(({ name, request }) => ({
         type: 'upsert',
-        definition: { ...request.stream, name } as Streams.all.Definition,
+        definition: convertUpsertRequestIntoDefinition(name, request),
       })),
       {
         ...this.dependencies,
@@ -325,12 +330,14 @@ export class StreamsClient {
       throw new StatusError(`Child stream ${name} already exists`, 409);
     }
 
+    const now = new Date().toISOString();
     await State.attemptChanges(
       [
         {
           type: 'upsert',
           definition: {
             ...parentDefinition,
+            updated_at: now,
             ingest: {
               ...parentDefinition.ingest,
               wired: {
@@ -349,9 +356,10 @@ export class StreamsClient {
           definition: {
             name,
             description: '',
+            updated_at: now,
             ingest: {
               lifecycle: { inherit: {} },
-              processing: { steps: [] },
+              processing: { steps: [], updated_at: now },
               settings: {},
               wired: {
                 fields: {},
@@ -579,12 +587,15 @@ export class StreamsClient {
   private getDataStreamAsIngestStream(
     dataStream: IndicesDataStream
   ): Streams.ClassicStream.Definition {
+    const now = new Date().toISOString();
+
     const definition: Streams.ClassicStream.Definition = {
       name: dataStream.name,
       description: '',
+      updated_at: now,
       ingest: {
         lifecycle: { inherit: {} },
-        processing: { steps: [] },
+        processing: { steps: [], updated_at: now },
         settings: {},
         classic: {},
         failure_store: { inherit: {} },
@@ -665,12 +676,15 @@ export class StreamsClient {
       throw e;
     }
 
+    const now = new Date().toISOString();
+
     return response.data_streams.map((dataStream) => ({
       name: dataStream.name,
       description: '',
+      updated_at: now,
       ingest: {
         lifecycle: { inherit: {} },
-        processing: { steps: [] },
+        processing: { steps: [], updated_at: now },
         settings: {},
         classic: {},
         failure_store: { inherit: {} },

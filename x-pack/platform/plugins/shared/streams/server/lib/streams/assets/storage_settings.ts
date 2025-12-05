@@ -12,6 +12,7 @@ import {
   ASSET_TYPE,
   ASSET_UUID,
   QUERY_KQL_BODY,
+  QUERY_SEVERITY_SCORE,
   QUERY_TITLE,
   STREAM_NAME,
 } from './fields';
@@ -26,6 +27,7 @@ export const assetStorageSettings = {
       [STREAM_NAME]: types.keyword(),
       [QUERY_KQL_BODY]: types.match_only_text(),
       [QUERY_TITLE]: types.keyword(),
+      [QUERY_SEVERITY_SCORE]: types.long(),
       experimental: types.object({ enabled: false }),
     },
   },

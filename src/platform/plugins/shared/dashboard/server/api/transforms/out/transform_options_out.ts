@@ -7,31 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Writable } from '@kbn/utility-types';
 import type { DashboardState } from '../../types';
 
-const OPTION_KEYS = [
-  'hidePanelTitles',
-  'useMargins',
-  'syncColors',
-  'syncCursor',
-  'syncTooltips',
-  'autoApplyFilters',
-];
+const savedObjectToAPIOptionsKeys = {
+  hidePanelTitles: 'hide_panel_titles',
+  useMargins: 'use_margins',
+  syncColors: 'sync_colors',
+  syncTooltips: 'sync_tooltips',
+  syncCursor: 'sync_cursor',
+  autoApplyFilters: 'auto_apply_filters',
+} as const;
+type ParsedSavedObjectOptions = { [key in keyof typeof savedObjectToAPIOptionsKeys]: boolean };
 
 export function transformOptionsOut(
   optionsJSON: string,
   controlGroupShowApplyButtonSetting?: boolean
 ): Required<DashboardState>['options'] {
-  const options = JSON.parse(optionsJSON);
-  const knownOptions: { [key: string]: unknown } = {};
+  const options = JSON.parse(optionsJSON) as ParsedSavedObjectOptions;
+  const apiOptions: Writable<Required<DashboardState>['options']> = {};
   Object.keys(options).forEach((key) => {
-    if (OPTION_KEYS.includes(key)) knownOptions[key] = options[key];
+    const savedObjectKey = key as keyof ParsedSavedObjectOptions;
+    const apiKey = savedObjectToAPIOptionsKeys[savedObjectKey];
+    if (apiKey) apiOptions[apiKey] = options[savedObjectKey];
   });
+
   return {
-    ...knownOptions,
-    ...(knownOptions.autoApplyFilters === undefined &&
+    ...apiOptions,
+    ...(apiOptions.auto_apply_filters === undefined &&
       controlGroupShowApplyButtonSetting !== undefined && {
-        autoApplyFilters: !controlGroupShowApplyButtonSetting,
+        auto_apply_filters: !controlGroupShowApplyButtonSetting,
       }),
   };
 }

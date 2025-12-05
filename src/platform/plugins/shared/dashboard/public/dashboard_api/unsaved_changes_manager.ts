@@ -18,6 +18,7 @@ import type {
 } from '@kbn/presentation-publishing';
 import { apiHasSerializableState } from '@kbn/presentation-publishing';
 
+import { of } from 'rxjs';
 import type { DashboardState } from '../../common';
 import {
   getDashboardBackupService,
@@ -25,6 +26,7 @@ import {
 } from '../services/dashboard_backup_service';
 import type { initializeFiltersManager } from './filters_manager';
 import type { initializeLayoutManager } from './layout_manager';
+import type { initializeProjectRoutingManager } from './project_routing_manager';
 import type { initializeSettingsManager } from './settings_manager';
 import type { initializeUnifiedSearchManager } from './unified_search_manager';
 
@@ -39,6 +41,7 @@ export function initializeUnsavedChangesManager({
   viewMode$,
   storeUnsavedChanges,
   unifiedSearchManager,
+  projectRoutingManager,
 }: {
   lastSavedState: DashboardState;
   storeUnsavedChanges?: boolean;
@@ -48,6 +51,7 @@ export function initializeUnsavedChangesManager({
   viewMode$: PublishingSubject<ViewMode>;
   settingsManager: ReturnType<typeof initializeSettingsManager>;
   unifiedSearchManager: ReturnType<typeof initializeUnifiedSearchManager>;
+  projectRoutingManager?: ReturnType<typeof initializeProjectRoutingManager>;
 }): {
   api: {
     hasUnsavedChanges$: PublishingSubject<boolean>;
@@ -81,9 +85,10 @@ export function initializeUnsavedChangesManager({
     settingsManager.internalApi.startComparing$(lastSavedState$),
     unifiedSearchManager.internalApi.startComparing$(lastSavedState$),
     layoutManager.internalApi.startComparing$(lastSavedState$),
+    projectRoutingManager?.internalApi.startComparing$(lastSavedState$) ?? of({}),
   ]).pipe(
-    map(([settings, unifiedSearch, panels]) => {
-      return { ...settings, ...unifiedSearch, ...panels };
+    map(([settings, unifiedSearch, panels, projectRouting]) => {
+      return { ...settings, ...unifiedSearch, ...panels, ...projectRouting };
     })
   );
 
@@ -103,7 +108,8 @@ export function initializeUnsavedChangesManager({
       }
 
       if (storeUnsavedChanges) {
-        const { timeRestore, ...restOfDashboardChanges } = dashboardChanges;
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        const { time_restore, ...restOfDashboardChanges } = dashboardChanges;
         const dashboardBackupState: DashboardBackupState = {
           // always back up view mode. This allows us to know which Dashboards were last changed while in edit mode.
           viewMode,
@@ -138,6 +144,7 @@ export function initializeUnsavedChangesManager({
         const savedState = lastSavedState$.value;
         layoutManager.internalApi.reset();
         unifiedSearchManager.internalApi.reset(savedState);
+        projectRoutingManager?.internalApi.reset(savedState);
         settingsManager.internalApi.reset(savedState);
 
         // when auto-apply is `false`, wait for children to update their filters, then publish

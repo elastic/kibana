@@ -9,16 +9,12 @@ import type { IScopedClusterClient } from '@kbn/core/server';
 import type {
   FindSLODefinitionsParams,
   FindSLODefinitionsResponse,
-  FindSLODefinitionsWithHealthResponse,
   Pagination,
 } from '@kbn/slo-schema';
-import {
-  findSloDefinitionsResponseSchema,
-  findSloDefinitionsWithHealthResponseSchema,
-} from '@kbn/slo-schema';
+import { findSloDefinitionsResponseSchema } from '@kbn/slo-schema';
 import { keyBy } from 'lodash';
+import { computeHealth } from '../domain/services';
 import { IllegalArgumentError } from '../errors';
-import { GetSLOHealth } from './get_slo_health';
 import type { SLORepository } from './slo_repository';
 
 const MAX_PER_PAGE = 1000;
@@ -31,9 +27,7 @@ export class FindSLODefinitions {
     private scopedClusterClient: IScopedClusterClient
   ) {}
 
-  public async execute(
-    params: FindSLODefinitionsParams
-  ): Promise<FindSLODefinitionsResponse | FindSLODefinitionsWithHealthResponse> {
+  public async execute(params: FindSLODefinitionsParams): Promise<FindSLODefinitionsResponse> {
     const tags: string[] = params.tags?.split(',') ?? [];
 
     const { results: definitions, ...result } = await this.repository.search(
@@ -43,29 +37,23 @@ export class FindSLODefinitions {
     );
 
     if (params.includeHealth) {
-      const getSLOHealth = new GetSLOHealth(this.scopedClusterClient, this.repository);
-
-      const healthResponses = await getSLOHealth.execute({
-        list: definitions.map((definition) => ({
-          sloId: definition.id,
-          sloInstanceId: '*',
-        })),
+      const healthResults = await computeHealth(definitions, {
+        scopedClusterClient: this.scopedClusterClient,
       });
 
-      const healthBySloId = keyBy(healthResponses, 'sloId');
-      const resultsWithHealth = definitions.map((definition) => {
+      const healthBySloId = keyBy(healthResults, (health) => health.id);
+      const definitionsWithHealth = definitions.map((definition) => {
         return {
           ...definition,
-          state: healthBySloId[definition.id]?.state,
           health: healthBySloId[definition.id]?.health,
         };
       });
 
-      return findSloDefinitionsWithHealthResponseSchema.encode({
+      return findSloDefinitionsResponseSchema.encode({
         page: result.page,
         perPage: result.perPage,
         total: result.total,
-        results: resultsWithHealth,
+        results: definitionsWithHealth,
       });
     }
 

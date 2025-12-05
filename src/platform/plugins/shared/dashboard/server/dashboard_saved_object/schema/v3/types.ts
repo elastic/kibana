@@ -12,7 +12,10 @@ import type { ControlsGroupState, LegacyIgnoreParentSettings } from '@kbn/contro
 import type { SavedDashboardPanel as SavedDashboardPanelV2 } from '../v2';
 import type { dashboardAttributesSchema, gridDataSchema, sectionSchema } from './v3';
 
-export type DashboardAttributes = TypeOf<typeof dashboardAttributesSchema>;
+export type DashboardAttributes = TypeOf<typeof dashboardAttributesSchema> & {
+  projectRouting?: string;
+};
+
 export type GridData = TypeOf<typeof gridDataSchema>;
 
 /**

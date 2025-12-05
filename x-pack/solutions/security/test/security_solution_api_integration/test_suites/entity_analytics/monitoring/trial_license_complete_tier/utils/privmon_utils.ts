@@ -25,7 +25,9 @@ import moment from 'moment';
 import { routeWithNamespace, waitFor } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
-type PrivmonUser = ListPrivMonUsersResponse[number];
+type PrivmonUser = ListPrivMonUsersResponse[number] & {
+  '@timestamp'?: string;
+};
 // Default within last month so included in first run range of now-1M
 const DEFAULT_INTEGRATIONS_RELATIVE_TIMESTAMP = new Date(
   Date.now() - 3.5 * 7 * 24 * 60 * 60 * 1000
@@ -42,7 +44,6 @@ const OKTA_USER_IDS = {
 interface TimestampSource {
   '@timestamp'?: string;
 }
-
 export const PrivMonUtils = (
   getService: FtrProviderContext['getService'],
   namespace: string = 'default'
