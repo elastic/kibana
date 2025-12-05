@@ -20,6 +20,7 @@ import type { RuleTypeRegistryContract, ActionTypeRegistryContract } from '../..
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 
 export const createStartServicesMock = (): TriggersAndActionsUiServices => {
   const core = coreMock.createStart();
@@ -48,6 +49,7 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
     dataViewEditor: {
       openEditor: jest.fn(),
     } as unknown as DataViewEditorStart,
+    uiActions: uiActionsPluginMock.createStartContract(),
     unifiedSearch: unifiedSearchPluginMock.createStartContract(),
     actionTypeRegistry: {
       has: jest.fn(),
