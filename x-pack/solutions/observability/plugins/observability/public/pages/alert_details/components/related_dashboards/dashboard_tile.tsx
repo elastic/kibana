@@ -35,7 +35,7 @@ export function DashboardTile({
 }: {
   dashboard: RelatedDashboard;
   actionButtonProps?: ActionButtonProps;
-  timeRange: NonNullable<DashboardLocatorParams['timeRange']>;
+  timeRange: NonNullable<DashboardLocatorParams['time_range']>;
 }) {
   const {
     services: {
@@ -61,7 +61,7 @@ export function DashboardTile({
             data-test-subj={`alertDetails_viewLinkedDashboard_${actionButtonProps?.ruleType}`}
             href={dashboardLocator?.getRedirectUrl({
               dashboardId: dashboard.id,
-              timeRange,
+              time_range: timeRange,
             })}
             target="_blank"
             onClick={() => {
