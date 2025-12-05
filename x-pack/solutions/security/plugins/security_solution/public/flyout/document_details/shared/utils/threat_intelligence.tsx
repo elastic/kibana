@@ -18,12 +18,12 @@ import {
 } from '../../../../../common/constants';
 import {
   ENRICHMENT_TYPES,
+  FEED_NAME,
   FIRST_SEEN,
   MATCHED_ATOMIC,
   MATCHED_FIELD,
   MATCHED_ID,
   MATCHED_TYPE,
-  FEED_NAME,
 } from '../../../../../common/cti/constants';
 
 const NESTED_OBJECT_VALUES_NOT_RENDERED = i18n.translate(
@@ -189,10 +189,10 @@ export const buildThreatDetailsItems = (enrichment: CtiEnrichment): ThreatDetail
         ? field.replace(`${DEFAULT_INDICATOR_SOURCE_PATH}`, 'indicator')
         : field;
 
-      let value = getFirstElement(enrichment[field]);
-      if (isObject(value)) {
+      let value = enrichment[field];
+      if (isObject(value) && !Array.isArray(value)) {
         value = NESTED_OBJECT_VALUES_NOT_RENDERED;
       }
 
-      return { title, description: { fieldName: field, value: value as string } };
+      return { title, description: { fieldName: field, value: value as string[] } };
     });
