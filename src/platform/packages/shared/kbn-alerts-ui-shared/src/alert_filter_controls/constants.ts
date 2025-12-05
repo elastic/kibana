@@ -66,7 +66,13 @@ export const TEST_IDS = {
 
 export const COMMON_OPTIONS_LIST_CONTROL_INPUTS: Partial<StickyControlState> &
   Partial<OptionsListControlState> = {
-  displaySettings: { hideExclude: true, hideSort: true, placeholder: '' },
+  displaySettings: {
+    hideExclude: true,
+    hideExists: true,
+    hideSort: true,
+    hideActionBar: true,
+    placeholder: '',
+  },
   width: 'small',
   grow: true,
 };
