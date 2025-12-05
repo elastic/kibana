@@ -1,0 +1,196 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
+import { parse } from '@kbn/tinymath';
+import type { TinymathAST, TinymathFunction, TinymathVariable } from '@kbn/tinymath';
+import type { MathProcessor } from '../../../../types/processors';
+import { conditionToPainless } from '../../../conditions/condition_to_painless';
+import {
+  FUNCTION_REGISTRY,
+  BINARY_ARITHMETIC_OPERATORS,
+  validateMathExpression,
+  extractFieldReferences,
+} from '../../shared/math';
+
+/**
+ * Checks if a TinyMath node is a variable (field reference)
+ */
+function isTinymathVariable(node: TinymathAST): node is TinymathVariable {
+  return typeof node === 'object' && node !== null && 'type' in node && node.type === 'variable';
+}
+
+/**
+ * Checks if a TinyMath node is a function
+ */
+function isTinymathFunction(node: TinymathAST): node is TinymathFunction {
+  return typeof node === 'object' && node !== null && 'type' in node && node.type === 'function';
+}
+
+/**
+ * Converts a field name to Painless ctx accessor syntax.
+ * Handles both simple and nested field paths.
+ *
+ * @example
+ * fieldToPainless('price') -> "ctx['price']"
+ * fieldToPainless('order.total') -> "ctx['order']['total']"
+ */
+function fieldToPainless(field: string): string {
+  const parts = field.split('.');
+  return parts.map((p, i) => (i === 0 ? `ctx['${p}']` : `['${p}']`)).join('');
+}
+
+/**
+ * Converts a TinyMath AST node to Painless expression string.
+ */
+function convertTinymathToPainless(node: TinymathAST): string {
+  // Handle numeric literals
+  if (typeof node === 'number') {
+    return String(node);
+  }
+
+  // Handle variable (field reference)
+  if (isTinymathVariable(node)) {
+    return fieldToPainless(node.value);
+  }
+
+  // Handle function
+  if (isTinymathFunction(node)) {
+    const { name, args } = node;
+
+    // Check if this is a core binary arithmetic operator
+    const binaryArithOp =
+      BINARY_ARITHMETIC_OPERATORS[name as keyof typeof BINARY_ARITHMETIC_OPERATORS];
+    if (binaryArithOp && args.length === 2) {
+      const left = convertTinymathToPainless(args[0]);
+      const right = convertTinymathToPainless(args[1]);
+      return `(${left} ${binaryArithOp} ${right})`;
+    }
+
+    // Check if this function is in the registry
+    const funcDef = FUNCTION_REGISTRY[name];
+    if (funcDef) {
+      // Handle constants (0-arity)
+      if (funcDef.isConstant) {
+        return funcDef.painless;
+      }
+
+      // Handle binary operators from registry (mod, comparisons)
+      if (funcDef.isBinaryOp && args.length === 2) {
+        const left = convertTinymathToPainless(args[0]);
+        const right = convertTinymathToPainless(args[1]);
+        return `(${left} ${funcDef.painless} ${right})`;
+      }
+
+      // Handle round with 2 args specially (Painless has no round(a, decimals))
+      if (name === 'round' && args.length === 2) {
+        const value = convertTinymathToPainless(args[0]);
+        const decimals = convertTinymathToPainless(args[1]);
+        return `(Math.round(${value} * Math.pow(10, ${decimals})) / Math.pow(10, ${decimals}))`;
+      }
+
+      // Handle log with 2 args (change of base formula)
+      if (name === 'log' && args.length === 2) {
+        const value = convertTinymathToPainless(args[0]);
+        const base = convertTinymathToPainless(args[1]);
+        return `(Math.log(${value}) / Math.log(${base}))`;
+      }
+
+      // Standard function call using Math class
+      const convertedArgs = args.map((arg) => convertTinymathToPainless(arg));
+      return `${funcDef.painless}(${convertedArgs.join(', ')})`;
+    }
+
+    // Fallback for unknown functions
+    const convertedArgs = args.map((arg) => convertTinymathToPainless(arg));
+    return `${name}(${convertedArgs.join(', ')})`;
+  }
+
+  throw new Error(`Unsupported TinyMath node type: ${JSON.stringify(node)}`);
+}
+
+/**
+ * Builds null check condition for multiple fields.
+ *
+ * @example
+ * buildNullChecks(['price', 'quantity']) -> "ctx['price'] != null && ctx['quantity'] != null"
+ */
+function buildNullChecks(fields: string[]): string | null {
+  if (fields.length === 0) {
+    return null;
+  }
+  return fields.map((field) => `${fieldToPainless(field)} != null`).join(' && ');
+}
+
+/**
+ * Converts a MathProcessor to an Ingest Pipeline script processor.
+ *
+ * @example
+ * Input:
+ *   { action: 'math', expression: 'price * quantity', to: 'total' }
+ *
+ * Output:
+ *   { script: { lang: 'painless', source: "ctx['total'] = ctx['price'] * ctx['quantity']" } }
+ */
+export function processMathProcessor(
+  processor: MathProcessor & { tag?: string }
+): IngestProcessorContainer {
+  // Validate the expression
+  const validation = validateMathExpression(processor.expression);
+  if (!validation.valid) {
+    throw new Error(`Invalid math expression: ${validation.errors.join('; ')}`);
+  }
+
+  // Parse and convert to Painless
+  const ast = parse(processor.expression);
+  const painlessExpression = convertTinymathToPainless(ast);
+
+  // Build the assignment statement
+  const targetField = fieldToPainless(processor.to);
+  let source = `${targetField} = ${painlessExpression};`;
+
+  // Handle ignore_missing: wrap in null checks
+  if (processor.ignore_missing === true) {
+    const fields = extractFieldReferences(processor.expression);
+    const nullChecks = buildNullChecks(fields);
+    if (nullChecks) {
+      source = `if (${nullChecks}) { ${source} }`;
+    }
+  }
+
+  // Build script processor
+  const scriptProcessor: IngestProcessorContainer = {
+    script: {
+      lang: 'painless',
+      source,
+    },
+  };
+
+  // Add optional description
+  if (scriptProcessor.script) {
+    (
+      scriptProcessor.script as Record<string, unknown>
+    ).description = `Math processor: ${processor.expression}`;
+  }
+
+  // Add tag if customIdentifier was provided
+  if (processor.tag && scriptProcessor.script) {
+    (scriptProcessor.script as Record<string, unknown>).tag = processor.tag;
+  }
+
+  // Handle where condition using script processor's if parameter
+  if (processor.where && scriptProcessor.script) {
+    (scriptProcessor.script as Record<string, unknown>).if = conditionToPainless(processor.where);
+  }
+
+  // Handle ignore_failure
+  if (processor.ignore_failure === true && scriptProcessor.script) {
+    (scriptProcessor.script as Record<string, unknown>).ignore_failure = true;
+  }
+
+  return scriptProcessor;
+}

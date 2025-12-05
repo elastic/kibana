@@ -242,15 +242,17 @@ Object {
       },
     },
     Object {
-      "math": Object {
-        "expression": "price * quantity",
-        "to": "total",
+      "script": Object {
+        "description": "Math processor: price * quantity",
+        "lang": "painless",
+        "source": "ctx['total'] = (ctx['price'] * ctx['quantity']);",
       },
     },
     Object {
-      "math": Object {
-        "expression": "attributes.price * attributes.quantity + attributes.tax",
-        "to": "attributes.total",
+      "script": Object {
+        "description": "Math processor: attributes.price * attributes.quantity + attributes.tax",
+        "lang": "painless",
+        "source": "ctx['attributes']['total'] = ((ctx['attributes']['price'] * ctx['attributes']['quantity']) + ctx['attributes']['tax']);",
       },
     },
     Object {
