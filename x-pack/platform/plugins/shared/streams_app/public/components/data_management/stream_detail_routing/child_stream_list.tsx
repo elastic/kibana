@@ -46,15 +46,10 @@ import { SuggestionLoadingPrompt } from '../shared/suggestion_loading_prompt';
 
 function getReasonDisabledCreateButton(canManageRoutingRules: boolean, maxNestingLevel: boolean) {
   if (maxNestingLevel) {
-    return i18n.translate('xpack.streams.streamDetailRouting.rules.maxNestingLevel', {
-      defaultMessage:
-        'You have reached the maximum nesting level for streams. Try to flatten your hierarchy.',
-    });
+    return maxNestingLevelText;
   }
   if (!canManageRoutingRules) {
-    return i18n.translate('xpack.streams.streamDetailRouting.rules.onlySimulate', {
-      defaultMessage: "You don't have sufficient privileges to create new streams, only simulate.",
-    });
+    return cannotManageRoutingRulesText;
   }
 }
 
@@ -90,7 +85,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
   // This isRefreshing tracks async gap between operation completion and server data arrival
   const { isRefreshing } = routingSnapshot.context;
 
-  const hasData = routing.length > 0 || (aiFeatures && aiFeatures.enabled && suggestions);
+  const hasData = routing.length > 0 || (aiFeatures?.enabled && suggestions);
 
   const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
     if (source && destination) {
@@ -122,7 +117,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
           `}
           wrap
         >
-          {aiFeatures && aiFeatures.enabled && !isLoadingSuggestions && !suggestions && (
+          {aiFeatures?.enabled && !isLoadingSuggestions && !suggestions && (
             <EuiFlexItem grow={false}>
               <GenerateSuggestionButton
                 size="s"
@@ -131,12 +126,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
                 isDisabled={isEditingOrReorderingStreams}
                 aiFeatures={aiFeatures}
               >
-                {i18n.translate(
-                  'xpack.streams.streamDetailRouting.childStreamList.suggestPartitions',
-                  {
-                    defaultMessage: 'Suggest partitions with AI',
-                  }
-                )}
+                {suggestPartitionsWithAIText}
               </GenerateSuggestionButton>
             </EuiFlexItem>
           )}
@@ -151,9 +141,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
                 onClick={createNewRule}
                 disabled={!canCreateRoutingRules || maxNestingLevel}
               >
-                {i18n.translate('xpack.streams.streamDetailRouting.addRule', {
-                  defaultMessage: 'Create partition manually',
-                })}
+                {createPartitionManuallyText}
               </CreateButtonComponent>
             </EuiToolTip>
           </EuiFlexItem>
@@ -174,7 +162,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
 
       {!hasData && !isLoadingSuggestions && !isRefreshing ? (
         <NoDataEmptyPrompt createNewRule={createNewRule}>
-          {aiFeatures && aiFeatures.enabled && (
+          {aiFeatures?.enabled && (
             <SuggestPartitionPanel>
               <GenerateSuggestionButton
                 size="s"
@@ -183,12 +171,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
                 isDisabled={isEditingOrReorderingStreams}
                 aiFeatures={aiFeatures}
               >
-                {i18n.translate(
-                  'xpack.streams.streamDetailView.routingTab.noDataEmptyPrompt.cardButton',
-                  {
-                    defaultMessage: 'Suggest partitions',
-                  }
-                )}
+                {suggestPartitionsCardButtonText}
               </GenerateSuggestionButton>
             </SuggestPartitionPanel>
           )}
@@ -255,7 +238,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
               </EuiDragDropContext>
             )}
 
-            {aiFeatures && aiFeatures.enabled && shouldDisplayCreateButton && (
+            {aiFeatures?.enabled && shouldDisplayCreateButton && (
               <div ref={scrollToSuggestions}>
                 <EuiSpacer size="m" />
                 {isLoadingSuggestions && (
@@ -293,9 +276,42 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
             )}
           </EuiFlexItem>
 
-          {routing.length > 0 && shouldDisplayCreateButton && renderCreateButton()}
+          {shouldDisplayCreateButton && renderCreateButton()}
         </>
       )}
     </EuiFlexGroup>
   );
 }
+
+const maxNestingLevelText = i18n.translate(
+  'xpack.streams.streamDetailRouting.rules.maxNestingLevel',
+  {
+    defaultMessage:
+      'You have reached the maximum nesting level for streams. Try to flatten your hierarchy.',
+  }
+);
+
+const cannotManageRoutingRulesText = i18n.translate(
+  'xpack.streams.streamDetailRouting.rules.onlySimulate',
+  {
+    defaultMessage: "You don't have sufficient privileges to create new streams, only simulate.",
+  }
+);
+
+const suggestPartitionsWithAIText = i18n.translate(
+  'xpack.streams.streamDetailRouting.childStreamList.suggestPartitions',
+  {
+    defaultMessage: 'Suggest partitions with AI',
+  }
+);
+
+const createPartitionManuallyText = i18n.translate('xpack.streams.streamDetailRouting.addRule', {
+  defaultMessage: 'Create partition manually',
+});
+
+const suggestPartitionsCardButtonText = i18n.translate(
+  'xpack.streams.streamDetailView.routingTab.noDataEmptyPrompt.cardButton',
+  {
+    defaultMessage: 'Suggest partitions',
+  }
+);
