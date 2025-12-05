@@ -21,6 +21,7 @@ import type {
   DataConnectorsServerStartDependencies,
 } from './types';
 import { registerUISettings } from './register';
+import { setupSavedObjects } from './saved_objects';
 
 export class DataConnectorsServerPlugin
   implements
@@ -41,13 +42,16 @@ export class DataConnectorsServerPlugin
     core: CoreSetup<DataConnectorsServerStartDependencies>,
     plugins: DataConnectorsServerSetupDependencies
   ): DataConnectorsServerSetup {
-    const { uiSettings } = core;
+    const { savedObjects, uiSettings } = core;
     const { dataSourcesRegistry } = plugins;
 
     // Register WorkplaceAI-owned data sources
     registerDataSources(dataSourcesRegistry);
 
     registerUISettings({ uiSettings });
+
+    // Register saved objects type
+    setupSavedObjects(savedObjects);
 
     // Register HTTP routes
     const router = core.http.createRouter();

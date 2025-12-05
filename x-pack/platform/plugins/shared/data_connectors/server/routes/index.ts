@@ -7,6 +7,7 @@
 
 import type { IRouter, Logger, StartServicesAccessor } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { DATA_CONNECTOR_SAVED_OBJECT_TYPE } from '../saved_objects';
 import type { DataConnectorsServerStartDependencies } from '../types';
 
 const createDataConnectorRequestSchema = schema.object({
@@ -20,6 +21,60 @@ export function registerRoutes(
   logger: Logger,
   getStartServices: StartServicesAccessor<DataConnectorsServerStartDependencies>
 ) {
+  // List data connectors
+  router.get(
+    {
+      path: '/api/data_connectors',
+      validate: false,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+    },
+    async (context, request, response) => {
+      const coreContext = await context.core;
+
+      try {
+        const savedObjectsClient = coreContext.savedObjects.client;
+        const findResult = await savedObjectsClient.find({
+          type: DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+          perPage: 100,
+        });
+
+        const connectors = findResult.saved_objects.map((savedObject) => {
+          const attrs = savedObject.attributes;
+          return {
+            id: savedObject.id,
+            name: attrs.name,
+            type: attrs.type,
+            config: attrs.config,
+            createdAt: attrs.createdAt,
+            updatedAt: attrs.updatedAt,
+            workflowIds: attrs.workflowIds,
+            toolIds: attrs.toolIds,
+            features: attrs.features,
+          };
+        });
+
+        return response.ok({
+          body: {
+            connectors,
+            total: findResult.total,
+          },
+        });
+      } catch (error) {
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: `Failed to list connectors: ${(error as Error).message}`,
+          },
+        });
+      }
+    }
+  );
+
   // Create data connector
   router.post(
     {
@@ -35,9 +90,23 @@ export function registerRoutes(
       },
     },
     async (context, request, response) => {
+      const coreContext = await context.core;
+
       try {
-        const [, { actions, dataSourcesRegistry }] = await getStartServices();
         const { name, type, token } = request.body;
+
+        const savedObjectsClient = coreContext.savedObjects.client;
+        const now = new Date().toISOString();
+        await savedObjectsClient.create(DATA_CONNECTOR_SAVED_OBJECT_TYPE, {
+          name,
+          type,
+          config: {},
+          features: [],
+          createdAt: now,
+          updatedAt: now,
+        });
+
+        const [, { actions, dataSourcesRegistry }] = await getStartServices();
 
         const dataCatalog = dataSourcesRegistry.getCatalog();
         const dataConnectorTypeDef = dataCatalog.get(type);
