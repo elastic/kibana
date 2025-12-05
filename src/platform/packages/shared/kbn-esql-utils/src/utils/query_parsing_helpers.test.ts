@@ -31,7 +31,7 @@ import {
   convertTimeseriesCommandToFrom,
   hasLimitBeforeAggregate,
   missingSortBeforeLimit,
-  hasTimeseriesBucketAggregation,
+  hasDateBreakdown,
 } from './query_parsing_helpers';
 
 describe('esql query helpers', () => {
@@ -1055,122 +1055,134 @@ describe('esql query helpers', () => {
   });
 
   describe('hasTimeseriesBucketAggregation', () => {
-    const mockColumns = [
-      {
-        id: 'BUCKET(@timestamp, 1h)',
-        isNull: false,
-        meta: { type: 'date', esType: 'date' },
-        name: 'BUCKET(@timestamp, 1h)',
-      },
-      {
-        id: 'agent.name',
-        isNull: false,
-        meta: { type: 'string', esType: 'keyword' },
-        name: 'agent.name',
-      },
-      {
-        id: '@timestamp',
-        isNull: false,
-        meta: { type: 'date', esType: 'date' },
-        name: '@timestamp',
-      },
-      {
-        id: 'c3',
-        isNull: false,
-        meta: { type: 'number', esType: 'long' },
-        name: 'c3',
-      },
-    ] as DatatableColumn[];
+    const countColumn = {
+      id: 'COUNT()',
+      isNull: false,
+      meta: { type: 'number', esType: 'long' },
+      name: 'COUNT()',
+    } as DatatableColumn;
+
+    const mockDateFieldColumn = {
+      id: '@timestamp',
+      isNull: false,
+      meta: { type: 'date', esType: 'date' },
+      name: '@timestamp',
+    } as DatatableColumn;
+
+    const mockBucketColumn = {
+      id: 'BUCKET(@timestamp, 1h)',
+      isNull: false,
+      meta: { type: 'date', esType: 'date' },
+      name: 'BUCKET(@timestamp, 1h)',
+    } as DatatableColumn;
 
     it('should return false if the query is empty', () => {
-      expect(hasTimeseriesBucketAggregation('')).toBe(false);
+      expect(hasDateBreakdown('')).toBe(false);
     });
-    it('should return false if it is not a timeseries command', () => {
+    it('should return false if date column cannot be identified', () => {
+      expect(hasDateBreakdown('TS index | STATS COUNT() BY BUCKET(@timestamp, 1h)')).toBe(false);
+    });
+    it('should return false if it is not a TS command', () => {
+      expect(hasDateBreakdown('FROM index | STATS COUNT() BY BUCKET(@timestamp, 1h)')).toBe(false);
+    });
+    it('should return false if the STATS BY command does not use a date column', () => {
       expect(
-        hasTimeseriesBucketAggregation('FROM index | STATS COUNT() BY bucket(@timestamp, 1h)')
+        hasDateBreakdown('TS index | STATS COUNT() BY agent.name', [
+          countColumn,
+          {
+            id: 'agent.name',
+            isNull: false,
+            meta: { type: 'string', esType: 'keyword' },
+            name: 'agent.name',
+          },
+        ] as DatatableColumn[])
       ).toBe(false);
     });
-    it('should return false if there is no BUCKET aggregation', () => {
-      expect(hasTimeseriesBucketAggregation('TS index | STATS COUNT() BY @timestamp')).toBe(false);
-    });
-    it('should return false if the BUCKET aggregation is not a date column', () => {
+    it('should return false if the last STATS BY command does use a date column', () => {
       expect(
-        hasTimeseriesBucketAggregation(
-          'TS index | STATS COUNT() BY bucket(c3, 20, 100, 200), agent.name',
+        hasDateBreakdown(
+          `TS index 
+            | STATS count=COUNT(*) BY category=CATEGORIZE(message), @timestamp=BUCKET(@timestamp, 1 day) 
+            | STATS sample = SAMPLE(count, 10) BY category`,
           [
             {
-              id: 'agent.name',
-              isNull: false,
-              meta: { type: 'string', esType: 'keyword' },
-              name: 'agent.name',
-            },
-            {
-              id: 'c3',
+              id: 'count',
               isNull: false,
               meta: { type: 'number', esType: 'long' },
-              name: 'c3',
+              name: 'count',
             },
-          ] as DatatableColumn[]
+            {
+              id: 'category',
+              isNull: false,
+              meta: { type: 'string', esType: 'keyword' },
+              name: 'category',
+            },
+            mockDateFieldColumn,
+          ]
         )
       ).toBe(false);
     });
-    it('should return false if bucket column cannot be identified', () => {
+    it('should return true if the query bucket aggregation, case insensitive and ignoring spaces', () => {
       expect(
-        hasTimeseriesBucketAggregation('TS index | STATS COUNT() BY bucket(@timestamp, 1h)')
-      ).toBe(false);
-    });
-    it('should return false if the last stats command does not contain a BUCKET aggregation', () => {
-      expect(
-        hasTimeseriesBucketAggregation(
-          `TS index 
-            | STATS count_per_day=COUNT(*) BY category=CATEGORIZE(message), @timestamp=BUCKET(@timestamp, 1 day) 
-            | STATS count = SUM(count_per_day), Trend=VALUES(count_per_day) BY category
-            | KEEP category, count
-            | STATS sample = SAMPLE(count, 10) BY category`,
-          mockColumns
-        )
-      ).toBe(false);
-    });
-    it('should return true if the query contains a BUCKET aggregation', () => {
-      expect(
-        hasTimeseriesBucketAggregation(
-          'TS index | STATS COUNT() BY bucket(@timestamp, 1h)',
-          mockColumns
-        )
+        hasDateBreakdown('TS index | STATS COUNT() BY bucket(@timestamp,    1h)', [
+          countColumn,
+          mockBucketColumn,
+        ])
       ).toBe(true);
     });
-    it('should return true if the query contains aliased BUCKET aggregation', () => {
-      const columns = [
-        {
-          id: 't',
-          isNull: false,
-          meta: { type: 'date', esType: 'date' },
-          name: 't',
-        },
-      ] as DatatableColumn[];
+    it('should return true if STATS BY command uses a date column', () => {
+      expect(
+        hasDateBreakdown('TS index | STATS COUNT() BY @timestamp', [
+          countColumn,
+          mockDateFieldColumn,
+        ])
+      ).toBe(true);
+    });
+    it('should return true if the query contains a STATS BY command with multiple breakdowns, one of which is a date column', () => {
+      expect(
+        hasDateBreakdown('TS index | STATS COUNT() BY BUCKET(@timestamp, 1h), agent.name', [
+          countColumn,
+          mockDateFieldColumn,
+          {
+            id: 'agent.name',
+            isNull: false,
+            meta: { type: 'string', esType: 'keyword' },
+            name: 'agent.name',
+          },
+        ])
+      ).toBe(true);
+    });
+    it('should return true if the query contains a STATS BY command with an aliased breakdown field that is a date column', () => {
+      expect(
+        hasDateBreakdown('TS index | STATS COUNT() BY t=BUCKET(@timestamp, 1h)', [
+          countColumn,
+          {
+            id: 't',
+            isNull: false,
+            meta: { type: 'date', esType: 'date' },
+            name: 't',
+          },
+        ])
+      ).toBe(true);
+    });
+    it('should return true if the query contains a STATS BY a function that uses a date column', () => {
+      expect(
+        hasDateBreakdown('TS index | STATS COUNT() BY BUCKET(@timestamp, 1h)', [
+          countColumn,
+          mockBucketColumn,
+        ])
+      ).toBe(true);
 
       expect(
-        hasTimeseriesBucketAggregation(
-          'TS index | STATS COUNT() BY t=bucket(@timestamp, 1h)',
-          columns
-        )
-      ).toBe(true);
-    });
-    it('should return true if the query contains a BUCKET aggregation with multiple breakdowns', () => {
-      expect(
-        hasTimeseriesBucketAggregation(
-          'TS index | STATS COUNT() BY bucket(@timestamp, 1h), agent.name',
-          mockColumns
-        )
-      ).toBe(true);
-    });
-
-    it('should return true if the query contains a TBUCKET aggregation with multiple breakdowns', () => {
-      expect(
-        hasTimeseriesBucketAggregation(
-          'TS index | STATS COUNT() BY tbucket(@timestamp, 1h), agent.name',
-          mockColumns
-        )
+        hasDateBreakdown('TS index | STATS COUNT() BY DATE_TRUNC(1h, @timestamp)', [
+          countColumn,
+          {
+            id: 'DATE_TRUNC(1h, @timestamp)',
+            isNull: false,
+            meta: { type: 'date', esType: 'date' },
+            name: 'DATE_TRUNC(1h, @timestamp)',
+          },
+        ])
       ).toBe(true);
     });
   });

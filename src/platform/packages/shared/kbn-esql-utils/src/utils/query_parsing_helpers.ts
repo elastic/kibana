@@ -598,22 +598,23 @@ export const missingSortBeforeLimit = (esql: string): boolean => {
  * @param columns: DatatableColumn[] - The columns of the datatable
  * @returns true if the query contains a timeseries bucket aggregation, false otherwise
  */
-export function hasTimeseriesBucketAggregation(
-  esql: string,
-  columns: DatatableColumn[] = []
-): boolean {
+export function hasDateBreakdown(esql: string, columns: DatatableColumn[] = []): boolean {
   const { root } = Parser.parse(esql);
 
-  if (!columns.some((column) => column.meta.type === 'date')) {
+  const normalize = (name: string) => name.toLowerCase().replace(/\s+/g, '');
+  const dateColumnNames = new Set(
+    columns.filter((col) => col.meta.type === 'date').map((col) => normalize(col.name))
+  );
+  if (dateColumnNames.size === 0) {
     return false;
   }
 
-  const isTimeseriesCommand = Walker.commands(root).some(({ name }) => name === 'ts');
-  if (!isTimeseriesCommand) {
+  const commands = Walker.commands(root);
+  if (!commands.some((cmd) => cmd.name === 'ts')) {
     return false;
   }
 
-  const statsCommands = Walker.commands(root).filter(({ name }) => name === 'stats');
+  const statsCommands = commands.filter((cmd) => cmd.name === 'stats');
   if (statsCommands.length === 0) {
     return false;
   }
@@ -624,8 +625,20 @@ export function hasTimeseriesBucketAggregation(
   }
 
   const lastByCommand = statsByCommands[statsByCommands.length - 1];
-  const bucketFunction = Walker.match(lastByCommand, { type: 'function', name: 'bucket' });
-  const tbucketFunction = Walker.match(lastByCommand, { type: 'function', name: 'tbucket' });
 
-  return !!bucketFunction || !!tbucketFunction;
+  let foundDateField = false;
+  walk(lastByCommand, {
+    visitColumn: (node) => {
+      if (!foundDateField && dateColumnNames.has(normalize(node.name))) {
+        foundDateField = true;
+      }
+    },
+    visitFunction: (node) => {
+      if (!foundDateField && dateColumnNames.has(normalize(node.text))) {
+        foundDateField = true;
+      }
+    },
+  });
+
+  return foundDateField;
 }

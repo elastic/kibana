@@ -52,7 +52,7 @@ export {
   constructCascadeQuery,
   mutateQueryStatsGrouping,
   appendFilteringWhereClauseForCascadeLayout,
-  hasTimeseriesBucketAggregation,
+  hasDateBreakdown,
 } from './src';
 
 export { ENABLE_ESQL, FEEDBACK_LINK } from './constants';

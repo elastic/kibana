@@ -16,7 +16,7 @@ import {
   hasTransformationalCommand,
   getCategorizeField,
   convertTimeseriesCommandToFrom,
-  hasTimeseriesBucketAggregation,
+  hasDateBreakdown,
 } from '@kbn/esql-utils';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type {
@@ -663,7 +663,7 @@ export class LensVisService {
       : undefined;
 
     const preferredChartType =
-      !mappedPreferredChartType && hasTimeseriesBucketAggregation(query.esql, columns)
+      !mappedPreferredChartType && hasDateBreakdown(query.esql, columns)
         ? ChartType.Line
         : mappedPreferredChartType;
 
