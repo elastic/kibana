@@ -9,7 +9,9 @@
 
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import type { UnifiedHistogramFetch$Arguments } from '@kbn/unified-histogram/types';
+import { UnifiedBreakdownFieldSelector } from '@kbn/unified-histogram';
 import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { css } from '@emotion/react';
 import {
   EuiButton,
@@ -20,6 +22,11 @@ import {
 } from '@elastic/eui';
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import type { ChartSectionConfigurationExtensionParams } from '../../../../types';
+import {
+  useCurrentTabAction,
+  useInternalStateDispatch,
+} from '../../../../../application/main/state_management/redux';
+import { internalStateActions } from '../../../../../application/main/state_management/redux';
 
 interface ChartWithCustomButtonsProps extends ChartSectionProps {
   actions: ChartSectionConfigurationExtensionParams['actions'];
@@ -31,6 +38,16 @@ export const ChartWithCustomButtons = ({ actions, ...props }: ChartWithCustomBut
   const { euiTheme } = useEuiTheme();
   const euiPalette = euiPaletteColorBlind();
   const { openInNewTab, updateESQLQuery } = actions;
+
+  const dispatch = useInternalStateDispatch();
+  const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
+
+  const handleBreakdownFieldChange = useCallback(
+    (breakdownField: DataViewField | undefined) => {
+      dispatch(updateAppState({ appState: { breakdownField: breakdownField?.name } }));
+    },
+    [dispatch, updateAppState]
+  );
 
   const lensAttributes = useMemo(() => {
     const { dataView, query, timeInterval } = fetchParams;
@@ -170,6 +187,15 @@ export const ChartWithCustomButtons = ({ actions, ...props }: ChartWithCustomBut
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="center" direction="row" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>{renderToggleActions()}</EuiFlexItem>
+          {fetchParams.breakdown && (
+            <EuiFlexItem grow={false}>
+              <UnifiedBreakdownFieldSelector
+                breakdown={fetchParams.breakdown}
+                dataView={fetchParams.dataView}
+                onBreakdownFieldChange={handleBreakdownFieldChange}
+              />
+            </EuiFlexItem>
+          )}
           {updateESQLQuery && (
             <EuiFlexItem grow={false}>
               <EuiButton
