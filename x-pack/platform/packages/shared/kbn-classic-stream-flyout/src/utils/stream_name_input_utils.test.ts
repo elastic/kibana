@@ -6,6 +6,7 @@
  */
 
 import {
+  normalizePattern,
   parseIndexPattern,
   createInputGroups,
   countWildcards,
@@ -13,6 +14,29 @@ import {
 } from './stream_name_input_utils';
 
 describe('stream_name_input_utils', () => {
+  describe('normalizePattern', () => {
+    it('returns empty string for empty pattern', () => {
+      expect(normalizePattern('')).toBe('');
+    });
+
+    it('returns pattern unchanged when no consecutive wildcards', () => {
+      expect(normalizePattern('logs-*')).toBe('logs-*');
+      expect(normalizePattern('logs-*-*-data')).toBe('logs-*-*-data');
+    });
+
+    it('collapses consecutive wildcards into single wildcard', () => {
+      expect(normalizePattern('logs-**')).toBe('logs-*');
+      expect(normalizePattern('logs-***')).toBe('logs-*');
+      expect(normalizePattern('**-logs')).toBe('*-logs');
+      expect(normalizePattern('***')).toBe('*');
+    });
+
+    it('collapses multiple groups of consecutive wildcards', () => {
+      expect(normalizePattern('**-logs-**')).toBe('*-logs-*');
+      expect(normalizePattern('***-data-**-env')).toBe('*-data-*-env');
+    });
+  });
+
   describe('parseIndexPattern', () => {
     it('returns empty array for empty pattern', () => {
       expect(parseIndexPattern('')).toEqual([]);
@@ -50,20 +74,15 @@ describe('stream_name_input_utils', () => {
       ]);
     });
 
-    it('parses pattern with consecutive wildcards', () => {
+    it('collapses consecutive wildcards into single wildcard', () => {
       expect(parseIndexPattern('logs-**')).toEqual([
         { type: 'static', value: 'logs-' },
         { type: 'wildcard', value: '*', index: 0 },
-        { type: 'wildcard', value: '*', index: 1 },
       ]);
     });
 
-    it('parses pattern with only wildcards', () => {
-      expect(parseIndexPattern('***')).toEqual([
-        { type: 'wildcard', value: '*', index: 0 },
-        { type: 'wildcard', value: '*', index: 1 },
-        { type: 'wildcard', value: '*', index: 2 },
-      ]);
+    it('collapses pattern with only wildcards to single wildcard', () => {
+      expect(parseIndexPattern('***')).toEqual([{ type: 'wildcard', value: '*', index: 0 }]);
     });
 
     it('parses pattern with no wildcards', () => {
@@ -150,11 +169,10 @@ describe('stream_name_input_utils', () => {
       ]);
     });
 
-    it('handles consecutive wildcards', () => {
+    it('collapses consecutive wildcards into single input group', () => {
       const segments = parseIndexPattern('logs-**-data');
       expect(createInputGroups(segments)).toEqual([
-        { prepend: 'logs-', wildcardIndex: 0, isFirst: true, isLast: false },
-        { prepend: undefined, wildcardIndex: 1, append: '-data', isFirst: false, isLast: true },
+        { prepend: 'logs-', wildcardIndex: 0, append: '-data', isFirst: true, isLast: true },
       ]);
     });
 
@@ -163,11 +181,10 @@ describe('stream_name_input_utils', () => {
       expect(createInputGroups(segments)).toEqual([]);
     });
 
-    it('handles consecutive wildcards at start', () => {
+    it('collapses consecutive wildcards at start into single input group', () => {
       const segments = parseIndexPattern('**-logs');
       expect(createInputGroups(segments)).toEqual([
-        { prepend: undefined, wildcardIndex: 0, isFirst: true, isLast: false },
-        { prepend: undefined, wildcardIndex: 1, append: '-logs', isFirst: false, isLast: true },
+        { prepend: undefined, wildcardIndex: 0, append: '-logs', isFirst: true, isLast: true },
       ]);
     });
 
@@ -200,8 +217,9 @@ describe('stream_name_input_utils', () => {
       expect(countWildcards('*-logs-*-data-*-env-*')).toBe(4);
     });
 
-    it('returns correct count for consecutive wildcards', () => {
-      expect(countWildcards('logs-***')).toBe(3);
+    it('counts consecutive wildcards as one', () => {
+      expect(countWildcards('logs-***')).toBe(1);
+      expect(countWildcards('**-logs-**')).toBe(2);
     });
   });
 
@@ -236,8 +254,9 @@ describe('stream_name_input_utils', () => {
       expect(buildStreamName('*-logs-*', ['prefix', 'suffix'])).toBe('prefix-logs-suffix');
     });
 
-    it('handles consecutive wildcards', () => {
-      expect(buildStreamName('logs-**', ['first', 'second'])).toBe('logs-firstsecond');
+    it('collapses consecutive wildcards and uses single part', () => {
+      expect(buildStreamName('logs-**', ['myapp'])).toBe('logs-myapp');
+      expect(buildStreamName('**-logs-**', ['prefix', 'suffix'])).toBe('prefix-logs-suffix');
     });
 
     it('handles all empty parts', () => {

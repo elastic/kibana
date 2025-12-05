@@ -30,19 +30,33 @@ export interface InputGroup {
 }
 
 /**
+ * Normalizes an index pattern by collapsing consecutive wildcards into a single wildcard.
+ * For example, 'logs-**' becomes 'logs-*' and '**-logs-**' becomes '*-logs-*'.
+ * This is because consecutive wildcards are functionally equivalent to a single wildcard.
+ * @param pattern The index pattern to normalize.
+ * @returns The normalized pattern.
+ */
+export const normalizePattern = (pattern: string): string => {
+  if (!pattern) return pattern;
+  // Replace consecutive wildcards with a single wildcard
+  return pattern.replace(/\*+/g, '*');
+};
+
+/**
  * Parses the index pattern into a list of segments.
  * @param pattern The index pattern to parse.
  * @returns The list of segments.
  */
 export const parseIndexPattern = (pattern: string): PatternSegment[] => {
-  if (!pattern) return [];
+  const normalizedPattern = normalizePattern(pattern);
+  if (!normalizedPattern) return [];
 
   const segments: PatternSegment[] = [];
   let currentSegment = '';
   let wildcardIndex = 0;
 
-  for (let i = 0; i < pattern.length; i++) {
-    const char = pattern[i];
+  for (let i = 0; i < normalizedPattern.length; i++) {
+    const char = normalizedPattern[i];
     if (char === '*') {
       if (currentSegment) {
         segments.push({ type: 'static', value: currentSegment });
@@ -109,7 +123,8 @@ export const createInputGroups = (segments: PatternSegment[]): InputGroup[] => {
  * @returns The number of wildcards.
  */
 export const countWildcards = (pattern: string): number => {
-  return (pattern.match(/\*/g) || []).length;
+  const normalizedPattern = normalizePattern(pattern);
+  return (normalizedPattern.match(/\*/g) || []).length;
 };
 
 /**
@@ -123,8 +138,10 @@ export const buildStreamName = (pattern: string, parts: string[]): string => {
     return pattern;
   }
 
+  const normalizedPattern = normalizePattern(pattern);
   let partIndex = 0;
-  return pattern.replace(/\*/g, () => {
+
+  return normalizedPattern.replace(/\*/g, () => {
     // Trim whitespace and keep * if the part is empty, so validation can detect unfilled wildcards
     const part = parts[partIndex]?.trim() || '*';
     partIndex++;
