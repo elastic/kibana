@@ -53,8 +53,8 @@ interface ApmDocumentMethods<
   R extends keyof FlattenedApmEvent = never
 > {
   /**
-   * Creates an unproxied object with all the values extracted into their single or multi-value
-   * form. No longer grants access to proxied methods.
+   * Creates a new unproxied object with all the fields values extracted into their single or
+   * multi-value form. The new object no longer grants access to proxied methods.
    */
   build(): MapToSingleOrMultiValue<RequiredApmFields<T, R>>;
   /**

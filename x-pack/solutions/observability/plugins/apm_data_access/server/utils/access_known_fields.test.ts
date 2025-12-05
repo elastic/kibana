@@ -72,7 +72,7 @@ describe('accessKnownApmEventFields', () => {
     });
   });
 
-  it('can be spread into a new flattened object with the correct value formats', () => {
+  it('can be built into a new flattened object with the correct value formats', () => {
     const event = accessKnownApmEventFields(smallInput);
 
     const newEvent = event.build();
