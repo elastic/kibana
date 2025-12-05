@@ -21,8 +21,6 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
   SERVICE_ENVIRONMENT,
-  EXCEPTION_MESSAGE,
-  EXCEPTION_TYPE,
 } from '@kbn/apm-types';
 import type { ApmIndexSettingsResponse } from '@kbn/apm-sources-access-plugin/server/routes/settings';
 import type { ObservabilityPublicPluginsStart } from '@kbn/observability-plugin/public';
@@ -141,7 +139,7 @@ const getESQLQueryForChart = ({
       return from(index)
         .pipe(
           ...baseFilters,
-          keep(...commonFields, EVENT_OUTCOME, EXCEPTION_MESSAGE, EXCEPTION_TYPE),
+          keep(...commonFields, EVENT_OUTCOME),
           sort({ [AT_TIMESTAMP]: SortOrder.Desc }),
           limit(100)
         )
