@@ -9,6 +9,7 @@ import { renderHook, act } from '@testing-library/react';
 import { useProductFeatureKeys } from './use_product_feature_keys';
 import { useKibana } from '../lib/kibana';
 import { BehaviorSubject } from 'rxjs';
+import type { ProductFeatureKeyType } from '@kbn/security-solution-features';
 
 jest.mock('../lib/kibana');
 
@@ -20,7 +21,7 @@ describe('useProductFeatureKeys', () => {
   });
 
   it('should return empty Set when productFeatureKeys is null', () => {
-    const productFeatureKeys$ = new BehaviorSubject<Set<string> | null>(null);
+    const productFeatureKeys$ = new BehaviorSubject<Set<ProductFeatureKeyType> | null>(null);
 
     mockUseKibana.mockReturnValue({
       services: {
@@ -35,7 +36,7 @@ describe('useProductFeatureKeys', () => {
   });
 
   it('should return empty Set when productFeatureKeys is undefined', () => {
-    const productFeatureKeys$ = new BehaviorSubject<Set<string> | null>(
+    const productFeatureKeys$ = new BehaviorSubject<Set<ProductFeatureKeyType> | null>(
       undefined as unknown as null
     );
 
@@ -52,7 +53,9 @@ describe('useProductFeatureKeys', () => {
   });
 
   it('should return empty Set when productFeatureKeys is empty', () => {
-    const productFeatureKeys$ = new BehaviorSubject<Set<string> | null>(new Set<string>([]));
+    const productFeatureKeys$ = new BehaviorSubject<Set<ProductFeatureKeyType> | null>(
+      new Set<ProductFeatureKeyType>([])
+    );
 
     mockUseKibana.mockReturnValue({
       services: {
@@ -67,8 +70,12 @@ describe('useProductFeatureKeys', () => {
   });
 
   it('should return Set with feature keys when productFeatureKeys has values', () => {
-    const productFeatureKeys$ = new BehaviorSubject<Set<string> | null>(
-      new Set<string>(['feature1', 'feature2', 'feature3'])
+    const productFeatureKeys$ = new BehaviorSubject<Set<ProductFeatureKeyType> | null>(
+      new Set<ProductFeatureKeyType>([
+        'feature1' as ProductFeatureKeyType,
+        'feature2' as ProductFeatureKeyType,
+        'feature3' as ProductFeatureKeyType,
+      ])
     );
 
     mockUseKibana.mockReturnValue({
@@ -80,15 +87,15 @@ describe('useProductFeatureKeys', () => {
     const { result } = renderHook(() => useProductFeatureKeys());
 
     expect(result.current.size).toBe(3);
-    expect(result.current.has('feature1')).toBe(true);
-    expect(result.current.has('feature2')).toBe(true);
-    expect(result.current.has('feature3')).toBe(true);
-    expect(result.current.has('feature4')).toBe(false);
+    expect(result.current.has('feature1' as ProductFeatureKeyType)).toBe(true);
+    expect(result.current.has('feature2' as ProductFeatureKeyType)).toBe(true);
+    expect(result.current.has('feature3' as ProductFeatureKeyType)).toBe(true);
+    expect(result.current.has('feature4' as ProductFeatureKeyType)).toBe(false);
   });
 
   it('should return Set with single feature key', () => {
-    const productFeatureKeys$ = new BehaviorSubject<Set<string> | null>(
-      new Set<string>(['graph_visualization'])
+    const productFeatureKeys$ = new BehaviorSubject<Set<ProductFeatureKeyType> | null>(
+      new Set<ProductFeatureKeyType>(['graph_visualization' as ProductFeatureKeyType])
     );
 
     mockUseKibana.mockReturnValue({
@@ -100,12 +107,12 @@ describe('useProductFeatureKeys', () => {
     const { result } = renderHook(() => useProductFeatureKeys());
 
     expect(result.current.size).toBe(1);
-    expect(result.current.has('graph_visualization')).toBe(true);
+    expect(result.current.has('graph_visualization' as ProductFeatureKeyType)).toBe(true);
   });
 
   it('should update when productFeatureKeys observable emits new value', () => {
-    const productFeatureKeys$ = new BehaviorSubject<Set<string> | null>(
-      new Set<string>(['feature1'])
+    const productFeatureKeys$ = new BehaviorSubject<Set<ProductFeatureKeyType> | null>(
+      new Set<ProductFeatureKeyType>(['feature1' as ProductFeatureKeyType])
     );
 
     mockUseKibana.mockReturnValue({
@@ -117,22 +124,30 @@ describe('useProductFeatureKeys', () => {
     const { result, rerender } = renderHook(() => useProductFeatureKeys());
 
     expect(result.current.size).toBe(1);
-    expect(result.current.has('feature1')).toBe(true);
+    expect(result.current.has('feature1' as ProductFeatureKeyType)).toBe(true);
 
     // Update the observable
     act(() => {
-      productFeatureKeys$.next(new Set<string>(['feature1', 'feature2']));
+      productFeatureKeys$.next(
+        new Set<ProductFeatureKeyType>([
+          'feature1' as ProductFeatureKeyType,
+          'feature2' as ProductFeatureKeyType,
+        ])
+      );
     });
     rerender();
 
     expect(result.current.size).toBe(2);
-    expect(result.current.has('feature1')).toBe(true);
-    expect(result.current.has('feature2')).toBe(true);
+    expect(result.current.has('feature1' as ProductFeatureKeyType)).toBe(true);
+    expect(result.current.has('feature2' as ProductFeatureKeyType)).toBe(true);
   });
 
   it('should return memoized value when productFeatureKeys does not change', () => {
-    const featureSet = new Set<string>(['feature1', 'feature2']);
-    const productFeatureKeys$ = new BehaviorSubject<Set<string> | null>(featureSet);
+    const featureSet = new Set<ProductFeatureKeyType>([
+      'feature1' as ProductFeatureKeyType,
+      'feature2' as ProductFeatureKeyType,
+    ]);
+    const productFeatureKeys$ = new BehaviorSubject<Set<ProductFeatureKeyType> | null>(featureSet);
 
     mockUseKibana.mockReturnValue({
       services: {
@@ -151,7 +166,7 @@ describe('useProductFeatureKeys', () => {
   });
 
   it('should handle transition from null to Set', () => {
-    const productFeatureKeys$ = new BehaviorSubject<Set<string> | null>(null);
+    const productFeatureKeys$ = new BehaviorSubject<Set<ProductFeatureKeyType> | null>(null);
 
     mockUseKibana.mockReturnValue({
       services: {
@@ -166,17 +181,22 @@ describe('useProductFeatureKeys', () => {
 
     // Update to non-null
     act(() => {
-      productFeatureKeys$.next(new Set<string>(['feature1']));
+      productFeatureKeys$.next(
+        new Set<ProductFeatureKeyType>(['feature1' as ProductFeatureKeyType])
+      );
     });
     rerender();
 
     expect(result.current.size).toBe(1);
-    expect(result.current.has('feature1')).toBe(true);
+    expect(result.current.has('feature1' as ProductFeatureKeyType)).toBe(true);
   });
 
   it('should handle transition from Set to null', () => {
-    const productFeatureKeys$ = new BehaviorSubject<Set<string> | null>(
-      new Set<string>(['feature1', 'feature2'])
+    const productFeatureKeys$ = new BehaviorSubject<Set<ProductFeatureKeyType> | null>(
+      new Set<ProductFeatureKeyType>([
+        'feature1' as ProductFeatureKeyType,
+        'feature2' as ProductFeatureKeyType,
+      ])
     );
 
     mockUseKibana.mockReturnValue({
