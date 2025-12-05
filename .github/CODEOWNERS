@@ -2922,6 +2922,8 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/gen
 
 ## Security Solution sub teams - Automatic Import
 x-pack/platform/test/automatic_import_api_integration @elastic/integration-experience
+x-pack/platform/test/automatic_import_v2_api_integration @elastic/integration-experience
+
 
 # Security Defend Workflows - OSQuery Ownership
 /x-pack/solutions/security/test/osquery_cypress @elastic/security-defend-workflows
