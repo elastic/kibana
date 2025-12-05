@@ -51,7 +51,9 @@ describe('ml_executor', () => {
     mlMock = mlPluginServerMock.createSetupContract();
     mlMock.jobServiceProvider.mockReturnValue({
       jobsSummary: jobsSummaryMock,
+      // @ts-expect-error upgrade typescript v5.9.3
       forceStartDatafeeds: forceStartDatafeedsMock,
+      // @ts-expect-error upgrade typescript v5.9.3
       stopDatafeeds: stopDatafeedsMock,
     });
     ruleServices = createPersistenceExecutorOptionsMock();

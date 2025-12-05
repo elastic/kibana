@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/logs-explorer-plugin",
   "owner": [
-    "@elastic/obs-ux-onboarding-team"
+    "@elastic/obs-onboarding-team"
   ],
   "group": "observability",
   "visibility": "private",

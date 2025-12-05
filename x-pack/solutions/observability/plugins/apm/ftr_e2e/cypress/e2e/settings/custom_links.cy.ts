@@ -116,11 +116,11 @@ describe('Custom links', () => {
       cy.visitKibana(basePath);
 
       cy.contains('Create custom link').click();
-      cy.getByTestSubj('filter-0').select('service.name');
+      cy.get('select[aria-label="Choose a field to filter by"]').select('service.name');
       cy.get('[data-test-subj="service.name.value"] [data-test-subj="comboBoxSearchInput"]').type(
         'foo'
       );
-      cy.getByTestSubj('filter-0').select('service.environment');
+      cy.get('select[aria-label="Choose a field to filter by"]').select('service.environment');
       cy.get(
         '[data-test-subj="service.environment.value"] [data-test-subj="comboBoxInput"]'
       ).should('not.contain', 'foo');

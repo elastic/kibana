@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('../src/setup_node_env');
+require('@kbn/setup-node-env');
 require('@kbn/generate-console-definitions').runGenerateConsoleDefinitionsCli();

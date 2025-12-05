@@ -12,12 +12,12 @@ import { Serializable } from '../serializable';
 import { generateLongIdWithSeed, generateShortId, generateLongId } from '../utils/generate_id';
 
 export class ApmError extends Serializable<ApmFields> {
-  constructor(fields: ApmFields) {
+  constructor(fields: ApmFields, options?: { withoutErrorId?: boolean }) {
     super({
       ...fields,
       'processor.event': 'error',
       'processor.name': 'error',
-      'error.id': generateShortId(),
+      'error.id': options?.withoutErrorId ? undefined : generateShortId(),
     });
   }
 

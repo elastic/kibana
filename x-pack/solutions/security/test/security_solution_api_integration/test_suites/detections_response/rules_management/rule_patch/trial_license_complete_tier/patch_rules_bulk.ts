@@ -12,6 +12,12 @@ import { Rule } from '@kbn/alerting-plugin/common';
 import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 
 import {
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+  createRule,
+} from '@kbn/detections-response-ftr-services';
+import {
   getSimpleRule,
   getSimpleRuleOutput,
   removeServerGeneratedProperties,
@@ -26,12 +32,6 @@ import {
   getRuleSavedObjectWithLegacyInvestigationFields,
   checkInvestigationFieldSoValue,
 } from '../../../utils';
-import {
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
-  createRule,
-} from '../../../../../config/services/detections_response';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
