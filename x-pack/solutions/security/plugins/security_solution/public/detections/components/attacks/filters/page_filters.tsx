@@ -20,6 +20,17 @@ import { URL_PARAM_KEY } from '../../../../common/hooks/use_url_state';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { DEFAULT_ATTACKS_PAGE_FILTERS } from '../../../../../common/constants';
 
+const DEFAULT_ATTACKS_PAGE_FILTERS: FilterControlConfig[] = [
+  {
+    title: 'Status',
+    fieldName: 'kibana.alert.workflow_status',
+    selectedOptions: ['open'],
+    hideActionBar: true,
+    persist: true,
+    hideExists: true,
+  },
+];
+
 const RULE_TYPES = [...SECURITY_SOLUTION_RULE_TYPE_IDS, ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID];
 
 export type PageFiltersProps = Pick<

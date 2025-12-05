@@ -20,7 +20,7 @@ import { URL_PARAM_KEY } from '../../../../common/hooks/use_url_state';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { SECURITY_ALERT_DATA_VIEW } from '../../../constants';
 
-export const DEFAULT_DETECTION_PAGE_FILTERS: FilterControlConfig[] = [
+const DEFAULT_DETECTION_PAGE_FILTERS: FilterControlConfig[] = [
   {
     title: 'Status',
     fieldName: 'kibana.alert.workflow_status',
