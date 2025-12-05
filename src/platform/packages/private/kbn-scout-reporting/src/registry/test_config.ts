@@ -107,13 +107,11 @@ export const testConfigs = {
     const action = this._configs === null ? 'Load' : 'Reload';
     this.log.info(`${action}ing Scout test configs`);
 
-    const loadStartTime = performance.now();
+    const startTime = performance.now();
     this._configs = this.findPaths().map(testConfig.fromPath);
-    const loadDuration = (performance.now() - loadStartTime) / 1000;
+    const duration = (performance.now() - startTime) / 1000;
 
-    this.log.info(
-      `Loaded ${this._configs.length} Scout test configs in ${loadDuration.toFixed(2)}s`
-    );
+    this.log.info(`Loaded ${this._configs.length} Scout test configs in ${duration.toFixed(2)}s`);
   },
 
   reload() {
