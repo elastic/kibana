@@ -124,6 +124,7 @@ const ESQLEditorInternal = function ESQLEditor({
   );
 
   const datePickerOpenStatusRef = useRef<boolean>(false);
+  const isFirstFocusRef = useRef<boolean>(true);
   const theme = useEuiTheme();
   const kibana = useKibana<ESQLEditorDeps>();
   const { application, core, fieldsMetadata, uiSettings, uiActions, data, usageCollection } =
@@ -302,13 +303,33 @@ const ESQLEditorInternal = function ESQLEditor({
     }
   }, [variablesService, controlsContext, esqlVariables]);
 
-  const showSuggestionsIfEmptyQuery = useCallback(() => {
-    if (editorModel.current?.getValueLength() === 0) {
-      setTimeout(() => {
-        editorRef.current?.trigger(undefined, 'editor.action.triggerSuggest', {});
-      }, 0);
-    }
+  const triggerSuggestions = useCallback(() => {
+    setTimeout(() => {
+      editorRef.current?.trigger(undefined, 'editor.action.triggerSuggest', {});
+    }, 0);
   }, []);
+
+  const maybeTriggerSuggestions = useCallback(() => {
+    const { current: editor } = editorRef;
+    const { current: model } = editorModel;
+
+    if (!editor || !model) {
+      return;
+    }
+
+    const position = editor.getPosition();
+    if (!position) {
+      return;
+    }
+
+    const { lineNumber, column } = position;
+    const lineContent = model.getLineContent(lineNumber);
+    const charBeforeCursor = column > 1 ? lineContent[column - 2] : '';
+
+    if (charBeforeCursor === ' ') {
+      triggerSuggestions();
+    }
+  }, [triggerSuggestions]);
 
   const openTimePickerPopover = useCallback(() => {
     const currentCursorPosition = editorRef.current?.getPosition();
@@ -392,12 +413,6 @@ const ESQLEditorInternal = function ESQLEditor({
       />
     );
   }, [onMouseDownResize, editorHeight, onKeyDownResize, setEditorHeight]);
-
-  const onEditorFocus = useCallback(() => {
-    setIsCodeEditorExpandedFocused(true);
-    showSuggestionsIfEmptyQuery();
-    setLabelInFocus(true);
-  }, [showSuggestionsIfEmptyQuery]);
 
   const triggerSignatureHelpIfInsideParentheses = useCallback(
     (e: monaco.editor.ICursorPositionChangedEvent) => {
@@ -1117,26 +1132,20 @@ const ESQLEditorInternal = function ESQLEditor({
                     // Add Tab keybinding rules for inline suggestions
                     addTabKeybindingRules();
 
-                    // this is fixing a bug between the EUIPopover and the monaco editor
-                    // when the user clicks the editor, we force it to focus and the onDidFocusEditorText
-                    // to fire, the timeout is needed because otherwise it refocuses on the popover icon
-                    // and the user needs to click again the editor.
-                    // IMPORTANT: The popover needs to be wrapped with the EuiOutsideClickDetector component.
                     editor.onMouseDown(() => {
-                      setTimeout(() => {
-                        editor.focus();
-                      }, 100);
                       if (datePickerOpenStatusRef.current) {
                         setPopoverPosition({});
                       }
                     });
 
                     editor.onDidFocusEditorText(() => {
-                      onEditorFocus();
-                    });
+                      // Skip triggering suggestions on initial focus to avoid interfering
+                      // with editor initialization and automated tests
+                      if (!isFirstFocusRef.current) {
+                        triggerSuggestions();
+                      }
 
-                    editor.onKeyDown(() => {
-                      onEditorFocus();
+                      isFirstFocusRef.current = false;
                     });
 
                     // on CMD/CTRL + / comment out the entire line
@@ -1164,7 +1173,7 @@ const ESQLEditorInternal = function ESQLEditor({
 
                     editor.onDidChangeModelContent(async () => {
                       await addLookupIndicesDecorator();
-                      showSuggestionsIfEmptyQuery();
+                      maybeTriggerSuggestions();
                     });
 
                     editor.onDidChangeCursorPosition(triggerSignatureHelpIfInsideParentheses);
