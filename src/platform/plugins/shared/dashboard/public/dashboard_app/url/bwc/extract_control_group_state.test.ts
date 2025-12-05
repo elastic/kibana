@@ -270,7 +270,7 @@ describe('extractDashboardState', () => {
           autoApplySelections: false,
         },
       });
-      expect(dashboardState.options?.autoApplyFilters).toEqual(false);
+      expect(dashboardState.options?.auto_apply_filters).toEqual(false);
     });
 
     test('should set `useGlobalFilters`', () => {
@@ -343,7 +343,7 @@ describe('extractDashboardState', () => {
           showApplySelections: true,
         },
       });
-      expect(dashboardState.options?.autoApplyFilters).toEqual(false);
+      expect(dashboardState.options?.auto_apply_filters).toEqual(false);
     });
   });
 });

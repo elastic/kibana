@@ -17,7 +17,11 @@ import type {
   LensEmbeddableInput,
   LensEmbeddableOutput,
 } from '@kbn/lens-plugin/public';
-import type { Datatable, DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import type {
+  Datatable,
+  DatatableColumn,
+  DefaultInspectorAdapters,
+} from '@kbn/expressions-plugin/common';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { RequestStatus } from '@kbn/inspector-plugin/public';

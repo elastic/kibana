@@ -25,11 +25,11 @@ export function extractDashboardState(
 
     if (controlGroupState) dashboardState.controlGroupInput = controlGroupState;
     if (
-      dashboardState.options?.autoApplyFilters === undefined &&
+      dashboardState.options?.auto_apply_filters === undefined &&
       typeof autoApplyFilters === 'boolean'
     ) {
       // >9.3 the `autoApplySelections` control group setting became the `autoApplyFilters` dashboard setting
-      dashboardState.options = { ...dashboardState.options, autoApplyFilters };
+      dashboardState.options = { ...dashboardState.options, auto_apply_filters: autoApplyFilters };
     }
 
     if (typeof stateAsObject.description === 'string') {

@@ -320,7 +320,6 @@ export class Plugin
             fieldsMetadata: pluginsStart.fieldsMetadata,
             contentManagement: pluginsStart.contentManagement,
             share: pluginsStart.share,
-            uiActions: pluginsStart.uiActions,
           });
         },
       });
@@ -421,7 +420,6 @@ export class Plugin
             fieldFormats: pluginsStart.fieldFormats,
             lens: pluginsStart.lens,
             fieldsMetadata: pluginsStart.fieldsMetadata,
-            uiActions: pluginsStart.uiActions,
           });
         },
       });

@@ -37,7 +37,6 @@ import {
   createRuleFromTemplateRoute,
 } from '@kbn/rule-data-utils';
 import { QueryClientProvider } from '@kbn/react-query';
-import type { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
@@ -80,7 +79,6 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   element: HTMLElement;
   i18n: I18nStart;
   theme: ThemeServiceStart;
-  uiActions: UiActionsPublicStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   licensing: LicensingPluginStart;
   expressions: ExpressionsStart;
