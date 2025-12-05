@@ -12,7 +12,10 @@ import type { KibanaSolution } from '@kbn/projects-solutions-groups';
 export type PlatformName = 'win32' | 'darwin' | 'linux';
 export type PlatformArchitecture = 'x64' | 'arm64';
 export type Variant = 'serverless' | null;
-export type Solution = KibanaSolution | null;
+
+// Upstream project type referenced as kibana-elasticsearch
+// See https://github.com/elastic/kibana/pull/244739 for context
+export type Solution = Exclude<KibanaSolution, 'search'> | 'elasticsearch' | null;
 
 export class Platform {
   constructor(
@@ -89,8 +92,8 @@ export const SERVERLESS_PLATFORMS = [
   new Platform('linux', 'x64', 'linux-x86_64', 'serverless', 'observability'),
   new Platform('linux', 'arm64', 'linux-aarch64', 'serverless', 'observability'),
 
-  new Platform('linux', 'x64', 'linux-x86_64', 'serverless', 'search'),
-  new Platform('linux', 'arm64', 'linux-aarch64', 'serverless', 'search'),
+  new Platform('linux', 'x64', 'linux-x86_64', 'serverless', 'elasticsearch'),
+  new Platform('linux', 'arm64', 'linux-aarch64', 'serverless', 'elasticsearch'),
 
   new Platform('linux', 'x64', 'linux-x86_64', 'serverless', 'security'),
   new Platform('linux', 'arm64', 'linux-aarch64', 'serverless', 'security'),

@@ -76,3 +76,7 @@ export const AZURE_INPUT_FIELDS_TEST_SUBJECTS = {
 
 export const ADVANCED_OPTION_ACCORDION_TEST_SUBJ = 'advancedOptionsAccordion';
 export const NAMESPACE_INPUT_TEST_SUBJ = 'namespaceInputTestId';
+
+// Cloud Connector test subjects
+export const AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ = 'aws-cloud-connector-super-select';
+export const AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ = 'azure-cloud-connector-super-select';

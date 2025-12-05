@@ -7,8 +7,11 @@
 
 import { createSelector } from 'reselect';
 import { isActionBlock } from '@kbn/streamlang';
+import moment from 'moment';
 import type { StreamEnrichmentContextType } from './types';
 import { isStepUnderEdit } from '../steps_state_machine';
+import { canDataSourceTypeBeOutdated } from './utils';
+import type { DataSourceContext } from '../data_source_state_machine';
 
 /**
  * Selects the processor marked as the draft processor.
@@ -53,5 +56,48 @@ export const selectWhetherAnyProcessorBeforePersisted = createSelector(
 
         return hasPersistedAfter;
       });
+  }
+);
+
+export const selectWhetherThereAreOutdatedDocumentsInSimulation = createSelector(
+  [
+    (streamEnrichmentContext: StreamEnrichmentContextType) =>
+      streamEnrichmentContext.definition.stream.ingest.processing.updated_at,
+    (_: StreamEnrichmentContextType, dataSourceContext: DataSourceContext | undefined) =>
+      dataSourceContext?.dataSource.type,
+    (_: StreamEnrichmentContextType, dataSourceContext: DataSourceContext | undefined) =>
+      dataSourceContext?.data,
+  ],
+  (processingUpdatedAt, dataSourceType, dataSourceSamples) => {
+    if (!dataSourceType || !dataSourceSamples) {
+      return false;
+    }
+
+    if (!canDataSourceTypeBeOutdated(dataSourceType)) {
+      return false;
+    }
+
+    if (dataSourceSamples.length === 0) {
+      return false;
+    }
+
+    const documentsTimestamps = dataSourceSamples
+      .map((doc) => doc['@timestamp'])
+      .filter(
+        (timestamp): timestamp is string | number =>
+          typeof timestamp === 'string' || typeof timestamp === 'number'
+      )
+      .map((timestamp) => moment(timestamp))
+      .filter((momentDate) => momentDate.isValid())
+      .map((momentDate) => momentDate.toDate().getTime());
+
+    if (documentsTimestamps.length === 0) {
+      return false;
+    }
+
+    const oldestDocumentTimestamp = Math.min(...documentsTimestamps);
+    const streamProcessingTimestamp = new Date(processingUpdatedAt).getTime();
+
+    return oldestDocumentTimestamp < streamProcessingTimestamp;
   }
 );

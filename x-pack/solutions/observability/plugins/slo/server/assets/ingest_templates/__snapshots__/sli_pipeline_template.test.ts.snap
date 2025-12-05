@@ -85,6 +85,14 @@ Object {
     },
     Object {
       "pipeline": Object {
+        "description": "Global custom pipeline for all SLO rollup data",
+        "ignore_failure": true,
+        "ignore_missing_pipeline": true,
+        "name": "slo-rollup-global@custom",
+      },
+    },
+    Object {
+      "pipeline": Object {
         "ignore_failure": true,
         "ignore_missing_pipeline": true,
         "name": "slo-irrelevant@custom",
@@ -175,6 +183,14 @@ Object {
         "description": "Generated the instanceId field based on the groupings field",
         "field": "slo.instanceId",
         "value": "{{{slo.groupings.host.name}}},{{{slo.groupings.some.labelId}}}",
+      },
+    },
+    Object {
+      "pipeline": Object {
+        "description": "Global custom pipeline for all SLO rollup data",
+        "ignore_failure": true,
+        "ignore_missing_pipeline": true,
+        "name": "slo-rollup-global@custom",
       },
     },
     Object {

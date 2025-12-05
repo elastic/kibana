@@ -21,7 +21,7 @@ export const SERVER_FLAG_OPTIONS: FlagOptions = {
   boolean: ['stateful', 'logToFile'],
   help: `
     --stateful           Start Elasticsearch and Kibana with default ESS configuration
-    --serverless         Start Elasticsearch and Kibana with serverless project configuration: es | oblt | oblt-logs-essentials | security
+    --serverless         Start Elasticsearch and Kibana with serverless project configuration: es | oblt | oblt-logs-essentials | security | security-essentials | security-ease
     --esFrom             Build Elasticsearch from source or run snapshot or serverless. Default: $TEST_ES_FROM or "snapshot"
     --kibana-install-dir Run Kibana from existing install directory instead of from source
     --logToFile          Write the log output from Kibana/ES to files instead of to stdout
@@ -34,6 +34,8 @@ export function parseServerFlags(flags: FlagsReader) {
     'oblt',
     'oblt-logs-essentials',
     'security',
+    'security-essentials',
+    'security-ease',
   ]);
   const isStateful = flags.boolean('stateful');
 

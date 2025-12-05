@@ -209,6 +209,8 @@ export class AdHocTaskRunner implements CancellableTask {
         consumer: rule.consumer,
         revision: rule.revision,
         params: rule.params,
+        muteAll: false,
+        mutedInstanceIds: [],
       },
       ruleType,
       runTimestamp: this.runDate,

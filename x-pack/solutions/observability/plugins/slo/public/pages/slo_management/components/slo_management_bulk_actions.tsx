@@ -54,7 +54,7 @@ export function SloManagementBulkActions({ items, setSelectedItems }: Props) {
           onClick: () => {
             triggerAction({
               items,
-              type: 'bulk_purge',
+              type: 'bulk_purge_rollup',
               onConfirm: () => resetSelectedItems(),
             });
             setIsOpen(false);

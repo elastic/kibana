@@ -170,12 +170,12 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     artifactTasks.push(Tasks.CreateDockerServerless('x64', null));
     artifactTasks.push(Tasks.CreateDockerServerless('x64', 'workplaceai'));
     artifactTasks.push(Tasks.CreateDockerServerless('x64', 'observability'));
-    artifactTasks.push(Tasks.CreateDockerServerless('x64', 'search'));
+    artifactTasks.push(Tasks.CreateDockerServerless('x64', 'elasticsearch'));
     artifactTasks.push(Tasks.CreateDockerServerless('x64', 'security'));
     artifactTasks.push(Tasks.CreateDockerServerless('aarch64', null));
     artifactTasks.push(Tasks.CreateDockerServerless('aarch64', 'workplaceai'));
     artifactTasks.push(Tasks.CreateDockerServerless('aarch64', 'observability'));
-    artifactTasks.push(Tasks.CreateDockerServerless('aarch64', 'search'));
+    artifactTasks.push(Tasks.CreateDockerServerless('aarch64', 'elasticsearch'));
     artifactTasks.push(Tasks.CreateDockerServerless('aarch64', 'security'));
   }
 

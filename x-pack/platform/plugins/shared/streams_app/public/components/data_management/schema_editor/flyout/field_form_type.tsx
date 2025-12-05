@@ -6,7 +6,7 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { getRegularEcsField } from '@kbn/streams-schema';
 import { EcsRecommendation } from './ecs_recommendation';
 import { FieldType } from '../field_type';
@@ -19,10 +19,12 @@ export const FieldFormType = ({
   field,
   isEditing,
   onTypeChange,
+  streamType,
 }: {
   field: SchemaField;
   isEditing: boolean;
   onTypeChange: FieldTypeSelectorProps['onChange'];
+  streamType: 'classic' | 'wired';
 }) => {
   const { useFieldsMetadata } = useKibana().dependencies.start.fieldsMetadata;
 
@@ -52,7 +54,12 @@ export const FieldFormType = ({
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
         {isEditing ? (
-          <FieldTypeSelector value={field.type} onChange={onTypeChange} isLoading={loading} />
+          <FieldTypeSelector
+            value={field.type}
+            onChange={onTypeChange}
+            isLoading={loading}
+            streamType={streamType}
+          />
         ) : field.type ? (
           <FieldType type={field.type} />
         ) : (
@@ -70,21 +77,29 @@ interface FieldTypeSelectorProps {
   isLoading?: boolean;
   onChange: (value: FieldTypeOption) => void;
   value?: FieldTypeOption;
+  streamType: 'classic' | 'wired';
 }
-
-const typeSelectorOptions = (Object.keys(FIELD_TYPE_MAP) as FieldTypeOption[])
-  .filter((optionKey) => !FIELD_TYPE_MAP[optionKey].readonly)
-  .map((optionKey) => ({
-    value: optionKey,
-    inputDisplay: <FieldType type={optionKey} />,
-    'data-test-subj': `option-type-${optionKey}`,
-  }));
 
 export const FieldTypeSelector = ({
   value,
   onChange,
   isLoading = false,
+  streamType,
 }: FieldTypeSelectorProps) => {
+  const typeSelectorOptions = useMemo(() => {
+    return (Object.keys(FIELD_TYPE_MAP) as FieldTypeOption[])
+      .filter((optionKey) => {
+        if (FIELD_TYPE_MAP[optionKey].readonly) return false;
+        if (optionKey === 'geo_point' && streamType !== 'classic') return false;
+        return true;
+      })
+      .map((optionKey) => ({
+        value: optionKey,
+        inputDisplay: <FieldType type={optionKey} />,
+        'data-test-subj': `option-type-${optionKey}`,
+      }));
+  }, [streamType]);
+
   return (
     <EuiSuperSelect
       isLoading={isLoading}
