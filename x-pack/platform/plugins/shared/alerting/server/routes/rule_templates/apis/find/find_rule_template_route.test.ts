@@ -59,7 +59,7 @@ describe('findInternalRuleTemplatesRoute', () => {
     findInternalRuleTemplatesRoute(router, licenseState);
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/templates/_find"`);
+    expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rule_template/_find"`);
 
     rulesClient.findTemplates.mockResolvedValueOnce(findResult);
 

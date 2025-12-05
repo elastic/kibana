@@ -29,7 +29,7 @@ export const findInternalRuleTemplatesRoute = (
 ) => {
   router.get(
     {
-      path: `${INTERNAL_BASE_ALERTING_API_PATH}/templates/_find`,
+      path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule_template/_find`,
       options: { access: 'internal' },
       security: DEFAULT_ALERTING_ROUTE_SECURITY,
       validate: {

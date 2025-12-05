@@ -6,11 +6,11 @@
  */
 
 import type { FindRuleTemplatesResponseV1 } from '../../../../../../common/routes/rule_template/apis/find';
-import type { FindRuleTemplatesResult } from '../../../../../application/rule_template/methods/find/find_rule_templates';
+import type { FindResult } from '../../../../../../server/application/rule_template/methods/find/find_rule_templates';
 import { transformGetResponse } from '../../get/transforms/transform_to_get_response';
 
 export const transformFindRuleTemplatesResponseV1 = (
-  result: FindRuleTemplatesResult
+  result: FindResult
 ): FindRuleTemplatesResponseV1 => ({
   page: result.page,
   per_page: result.perPage,

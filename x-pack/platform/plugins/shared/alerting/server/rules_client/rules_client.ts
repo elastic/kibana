@@ -246,7 +246,7 @@ export class RulesClient {
 
   public getTemplate = (params: GetRuleTemplateParams) => getRuleTemplate(this.context, params);
 
-  public findTemplates = (params?: FindRuleTemplatesParams) =>
+  public findTemplates = (params: FindRuleTemplatesParams) =>
     findRuleTemplates(this.context, params);
 
   public getScheduleFrequency = () => getScheduleFrequency(this.context);
