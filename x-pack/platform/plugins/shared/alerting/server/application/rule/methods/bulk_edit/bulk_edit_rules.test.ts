@@ -1663,7 +1663,7 @@ describe('bulkEdit()', () => {
       expect(res).toEqual({
         errors: [
           {
-            message: 'Cannot use the same system action twice',
+            message: 'Cannot use action system_action-id more than once for this rule',
             rule: {
               id: '1',
               name: 'my rule name',
