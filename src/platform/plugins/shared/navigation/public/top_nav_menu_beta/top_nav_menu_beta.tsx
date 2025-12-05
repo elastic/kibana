@@ -10,10 +10,10 @@
 import React, { useState } from 'react';
 import { EuiHeaderLinks, useIsWithinBreakpoints } from '@elastic/eui';
 import { getTopNavItems } from './utils';
-import type { TopNavMenuConfigBeta } from './types';
 import { TopNavMenuActionButton } from './top_nav_menu_action_button';
 import { TopNavMenuItem } from './top_nav_menu_item';
 import { TopNavMenuOverflowButton } from './top_nav_menu_overflow_button';
+import type { TopNavMenuConfigBeta } from './types';
 
 export interface TopNavMenuItemsProps {
   config?: TopNavMenuConfigBeta;
@@ -35,6 +35,13 @@ export const TopNavMenuBeta = ({ config, visible = true }: TopNavMenuItemsProps)
   const primaryActionItem = config?.primaryActionItem;
   const secondaryActionItem = config?.secondaryActionItem;
   const showMoreButtonId = 'show-more';
+
+  const headerLinksProps = {
+    'data-test-subj': 'top-nav',
+    gutterSize: 'xs' as const,
+    popoverBreakpoints: 'none' as const,
+    className: 'kbnTopNavMenu__wrapper',
+  };
 
   const { displayedItems, overflowItems, shouldOverflow } = getTopNavItems({
     config,
@@ -72,7 +79,7 @@ export const TopNavMenuBeta = ({ config, visible = true }: TopNavMenuItemsProps)
 
   if (isBetweenMandXlBreakpoint) {
     return (
-      <EuiHeaderLinks data-test-subj="top-nav" gutterSize="xs" popoverBreakpoints="none">
+      <EuiHeaderLinks {...headerLinksProps}>
         <TopNavMenuOverflowButton
           items={[...displayedItems, ...overflowItems]}
           isPopoverOpen={openPopoverId === showMoreButtonId}
@@ -87,12 +94,7 @@ export const TopNavMenuBeta = ({ config, visible = true }: TopNavMenuItemsProps)
 
   if (isAtXlBreakpoint) {
     return (
-      <EuiHeaderLinks
-        data-test-subj="top-nav"
-        gutterSize="xs"
-        popoverBreakpoints="none"
-        className="kbnTopNavMenu__wrapper"
-      >
+      <EuiHeaderLinks {...headerLinksProps}>
         {displayedItems?.length > 0 &&
           displayedItems.map((menuItem) => (
             <TopNavMenuItem
@@ -118,7 +120,7 @@ export const TopNavMenuBeta = ({ config, visible = true }: TopNavMenuItemsProps)
   }
 
   return (
-    <EuiHeaderLinks data-test-subj="top-nav" gutterSize="xs" popoverBreakpoints="none">
+    <EuiHeaderLinks {...headerLinksProps}>
       <TopNavMenuOverflowButton
         items={[...displayedItems, ...overflowItems]}
         isPopoverOpen={openPopoverId === showMoreButtonId}

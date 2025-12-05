@@ -12,12 +12,12 @@ import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { getIsSelectedColor } from './utils';
+import { TopNavMenuPopover } from './top_nav_menu_popover';
 import type {
   TopNavMenuItemType,
   TopNavMenuPrimaryActionItem,
   TopNavMenuSecondaryActionItem,
 } from './types';
-import { TopNavMenuPopover } from './top_nav_menu_popover';
 
 interface TopNavMenuShowMoreButtonProps {
   items: TopNavMenuItemType[];
@@ -54,7 +54,7 @@ export const TopNavMenuOverflowButton = ({
 
   const button = (
     <EuiButtonIcon
-      iconType="boxesHorizontal" // Change to "ellipsis" when available in EUI
+      iconType="boxesHorizontal" // TODO: Change to "ellipsis" when it's available in EUI.
       size="xs"
       aria-label={i18n.translate('navigation.topNavMenu.showMoreButtonLabel', {
         defaultMessage: 'More',

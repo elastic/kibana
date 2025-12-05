@@ -10,6 +10,9 @@
 import type { EuiButtonColor, EuiButtonProps, EuiHideForProps, IconType } from '@elastic/eui';
 import type { SplitButtonWithNotificationProps } from '@kbn/split-button';
 
+/**
+ * Subset of SplitButtonWithNotificationProps.
+ */
 type BaseSplitProps = Pick<
   SplitButtonWithNotificationProps,
   | 'isMainButtonLoading'
@@ -24,36 +27,118 @@ type BaseSplitProps = Pick<
   | 'notifcationIndicatorTooltipContent'
 >;
 
+/**
+ * Subset of SplitButtonWithNotificationProps.
+ */
 export type TopNavMenuSplitButtonProps =
-  // If `items` is provided then `run` shouldn't be, as having items means the button opens a popover
-  | (BaseSplitProps & { items?: undefined; run: () => void })
-  | (BaseSplitProps & { items: TopNavMenuPopoverItem[]; run?: never });
+  // If `items` is provided then `run` shouldn't be, as having items means the button opens a popover.
+  | (BaseSplitProps & {
+      /**
+       * Sub-items to show in a popover when the item is clicked. Only used if `run` is not provided.
+       */
+      items?: undefined;
+      /**
+       * Function to run when the item is clicked. Only used if `items` is not provided.
+       */
+      run: () => void;
+    })
+  | (BaseSplitProps & {
+      /**
+       * Sub-items to show in a popover when the item is clicked. Only used if `run` is not provided.
+       */
+      items: TopNavMenuPopoverItem[];
+      /**
+       * Function to run when the item is clicked. Only used if `items` is not provided.
+       */
+      run?: never;
+    });
 
 interface TopNavItemBase {
+  /**
+   * A unique, internal identifier for the item.
+   */
   id: string;
+  /**
+   * A unique identifier for the item, used for HTML `id` attribute.
+   */
   htmlId?: string;
+  /**
+   * The text label for the item.
+   */
   label: string;
+  /**
+   * The icon type for the item.
+   */
   iconType: IconType;
+  /**
+   * A unique identifier for the item, used for testing purposes. Maps to `data-test-subj` attribute.
+   */
   testId?: string;
+  /**
+   * Disables the button if set to `true` or a function that returns `true`.
+   */
   disableButton?: boolean | (() => boolean);
+  /**
+   * Displays a loading indicator on the button if set to `true`.
+   */
   isLoading?: boolean;
+  /**
+   * The HTML target attribute for the item.
+   */
   target?: string;
+  /**
+   * The HTML href attribute for the item.
+   */
   href?: string;
+  /**
+   * Tooltip content to show when hovering over the item.
+   */
   tooltipContent?: string | (() => string | undefined);
+  /**
+   * Tooltip title to show when hovering over the item.
+   */
   tooltipTitle?: string | (() => string | undefined);
+  /**
+   * Hides the item at the specified responsive breakpoints.
+   * */
+  hidden?: EuiHideForProps['sizes'];
 }
 
 export type TopNavMenuItemCommon =
-  // If `items` is provided then `run` shouldn't be, as having items means the button opens a popover
-  | (TopNavItemBase & { run: () => void; items?: undefined; popoverWidth?: never; hidden?: never })
+  // If `items` is provided then `run` shouldn't be, as having items means the button opens a popover.
   | (TopNavItemBase & {
+      /**
+       * Function to run when the item is clicked. Only used if `items` is not provided.
+       */
+      run: () => void;
+      /**
+       * Sub-items to show in a popover when the item is clicked. Only used if `run` is not provided.
+       */
+      items?: undefined;
+      /**
+       * Width of the popover in pixels.
+       */
+      popoverWidth?: never;
+    })
+  | (TopNavItemBase & {
+      /**
+       * Function to run when the item is clicked. Only used if `items` is not provided.
+       */
       run?: never;
+      /**
+       * Sub-items to show in a popover when the item is clicked. Only used if `run` is not provided.
+       */
       items: TopNavMenuPopoverItem[];
+      /**
+       * Width of the popover in pixels.
+       */
       popoverWidth?: number;
-      hidden?: EuiHideForProps['sizes'];
     });
 
 export type TopNavMenuItemType = TopNavMenuItemCommon & {
+  /**
+   * Order of the item in the menu. Lower numbers appear first.
+   */
   order: number;
 };
 
@@ -61,22 +146,49 @@ export type TopNavMenuPopoverItem = Omit<
   TopNavMenuItemType,
   'iconType' | 'hidden' | 'popoverWidth'
 > & {
+  /**
+   * The icon type for the item.
+   */
   iconType?: IconType;
+  /**
+   * Adds a separator line above or below the item in the popover menu.
+   */
   seperator?: 'above' | 'below';
 };
 
 export type TopNavMenuSecondaryActionItem = TopNavMenuItemCommon & {
+  /**
+   * The color of the button.
+   */
   color?: EuiButtonColor;
+  /**
+   * * Whether the button should be filled.
+   */
   isFilled?: boolean;
+  /**
+   * Equal to EUI `minWidth` property.
+   */
   minWidth?: EuiButtonProps['minWidth'];
 };
 
 export type TopNavMenuPrimaryActionItem = Omit<TopNavMenuItemCommon, 'items'> & {
+  /**
+   * Subset of SplitButtonWithNotificationProps.
+   */
   splitButtonProps?: TopNavMenuSplitButtonProps;
 };
 
 export interface TopNavMenuConfigBeta {
+  /**
+   * List of menu items to display in the top navigation menu.
+   */
   items?: TopNavMenuItemType[];
-  secondaryActionItem?: TopNavMenuSecondaryActionItem;
+  /**
+   * Primary action button to display in the top navigation menu.
+   */
   primaryActionItem?: TopNavMenuPrimaryActionItem;
+  /**
+   * Secondary action button to display in the top navigation menu.
+   */
+  secondaryActionItem?: TopNavMenuSecondaryActionItem;
 }

@@ -106,24 +106,29 @@ export const getTooltip = ({
   };
 };
 
-const mapTopNavItemToPanelItem = (item: TopNavMenuPopoverItem, childPanelId?: number) => {
+const mapTopNavItemToPanelItem = (
+  item: TopNavMenuPopoverItem,
+  childPanelId?: number
+): EuiContextMenuPanelItemDescriptor => {
   const { content, title } = getTooltip({
     tooltipContent: item?.tooltipContent,
     tooltipTitle: item?.tooltipTitle,
   });
 
+  const handleClick = () => {
+    if (isDisabled(item?.disableButton)) {
+      return;
+    }
+    item.run?.();
+  };
+
   return {
     key: item.id,
     name: upperFirst(item.label),
     icon: item?.iconType,
-    onClick:
-      item?.href || childPanelId !== undefined
-        ? undefined
-        : () => {
-            item.run?.();
-          },
+    onClick: item?.href || childPanelId !== undefined ? undefined : handleClick,
     href: item?.href,
-    target: item?.target,
+    target: item?.href ? item?.target : undefined,
     disabled: isDisabled(item?.disableButton),
     'data-test-subj': item?.testId,
     toolTipContent: content,
@@ -131,8 +136,13 @@ const mapTopNavItemToPanelItem = (item: TopNavMenuPopoverItem, childPanelId?: nu
       title,
     },
     ...(childPanelId !== undefined && { panel: childPanelId }),
-  } as EuiContextMenuPanelItemDescriptor;
+  };
 };
+
+const createSeparatorItem = (key: string): EuiContextMenuPanelItemDescriptor => ({
+  isSeparator: true,
+  key,
+});
 
 /**
  * Generate action items for the popover menu. This is only used below "m" breakpoint.
@@ -143,7 +153,7 @@ const getPopoverActionItems = ({
 }: {
   primaryActionItem?: TopNavMenuPrimaryActionItem;
   secondaryActionItem?: TopNavMenuSecondaryActionItem;
-}) => {
+}): EuiContextMenuPanelItemDescriptor[] => {
   if (!primaryActionItem && !secondaryActionItem) {
     return [];
   }
@@ -155,6 +165,7 @@ const getPopoverActionItems = ({
 
     const isHiddenInMobile =
       isArray(item?.hidden) &&
+      // Check if any of the hidden values match mobile breakpoints
       (item.hidden.includes('m') || item.hidden.includes('s') || item.hidden.includes('xs'));
 
     return item?.hidden === 'all' || isHiddenInMobile;
@@ -166,15 +177,12 @@ const getPopoverActionItems = ({
     return [];
   }
 
+  const seperator = createSeparatorItem('action-items-separator');
+
   return [
-    {
-      key: 'action-buttons-separator',
-      id: 'action-buttons-separator',
-      isSeparator: true,
-    },
+    seperator,
     {
       key: 'action-items',
-      id: 'action-items',
       renderItem: () => (
         <TopNavMenuPopoverActionButtons
           primaryActionItem={primaryActionItem}
@@ -182,29 +190,25 @@ const getPopoverActionItems = ({
         />
       ),
     },
-  ] as EuiContextMenuPanelItemDescriptor[];
+  ];
 };
 
 /**
  * Recursively generate EUI context menu panels from the provided menu items.
  */
 export const getPopoverPanels = ({
-  menuItems,
+  items,
   primaryActionItem,
   secondaryActionItem,
+  startPanelId = 0,
 }: {
-  menuItems: TopNavMenuPopoverItem[];
-  primaryActionItem?: Omit<TopNavMenuItemCommon, 'items'> & { splitButtonProps?: any };
-  secondaryActionItem?: TopNavMenuItemCommon & {
-    color?: EuiButtonColor;
-    isFilled?: boolean;
-    minWidth?: any;
-  };
+  items: TopNavMenuPopoverItem[];
+  primaryActionItem?: TopNavMenuPrimaryActionItem;
+  secondaryActionItem?: TopNavMenuSecondaryActionItem;
   startPanelId?: number;
 }): EuiContextMenuPanelDescriptor[] => {
   const panels: EuiContextMenuPanelDescriptor[] = [];
   const hasActionItems = Boolean(primaryActionItem || secondaryActionItem);
-  const startPanelId = 0;
   let currentPanelId = startPanelId;
 
   const processItems = (
@@ -216,10 +220,7 @@ export const getPopoverPanels = ({
 
     itemsToProcess.forEach((item) => {
       if (item.seperator === 'above') {
-        panelItems.push({
-          isSeparator: true,
-          key: `separator-${item.id}`,
-        } as EuiContextMenuPanelItemDescriptor);
+        panelItems.push(createSeparatorItem(`separator-${item.id}`));
       }
 
       if (item.items && item.items.length > 0) {
@@ -233,10 +234,7 @@ export const getPopoverPanels = ({
       }
 
       if (item.seperator === 'below') {
-        panelItems.push({
-          isSeparator: true,
-          key: `separator-${item.id}`,
-        } as EuiContextMenuPanelItemDescriptor);
+        panelItems.push(createSeparatorItem(`separator-${item.id}`));
       }
     });
 
@@ -247,7 +245,8 @@ export const getPopoverPanels = ({
     });
   };
 
-  processItems(menuItems, startPanelId);
+  processItems(items, startPanelId);
+
   if (hasActionItems) {
     const mainPanel = panels.find((panel) => panel.id === startPanelId);
 
@@ -278,44 +277,10 @@ export const getIsSelectedColor = ({
   euiTheme: EuiThemeComputed;
   isFilled: boolean;
 }) => {
-  switch (color) {
-    case 'warning':
-      return isFilled
-        ? euiTheme.components.buttons.backgroundFilledWarningHover
-        : euiTheme.components.buttons.backgroundEmptyWarningHover;
-    case 'text':
-      return isFilled
-        ? euiTheme.components.buttons.backgroundFilledTextHover
-        : euiTheme.components.buttons.backgroundEmptyTextHover;
-    case 'accent':
-      return isFilled
-        ? euiTheme.components.buttons.backgroundFilledAccentHover
-        : euiTheme.components.buttons.backgroundEmptyAccentHover;
-    case 'accentSecondary':
-      return isFilled
-        ? euiTheme.components.buttons.backgroundFilledAccentSecondaryHover
-        : euiTheme.components.buttons.backgroundEmptyAccentSecondaryHover;
-    case 'primary':
-      return isFilled
-        ? euiTheme.components.buttons.backgroundFilledPrimaryHover
-        : euiTheme.components.buttons.backgroundEmptyPrimaryHover;
-    case 'success':
-      return isFilled
-        ? euiTheme.components.buttons.backgroundFilledSuccessHover
-        : euiTheme.components.buttons.backgroundEmptySuccessHover;
-    case 'danger':
-      return isFilled
-        ? euiTheme.components.buttons.backgroundFilledDangerHover
-        : euiTheme.components.buttons.backgroundEmptyDangerHover;
-    case 'neutral':
-      return isFilled
-        ? euiTheme.components.buttons.backgroundFilledNeutralHover
-        : euiTheme.components.buttons.backgroundEmptyNeutralHover;
-    case 'risk':
-      return isFilled
-        ? euiTheme.components.buttons.backgroundFilledRiskHover
-        : euiTheme.components.buttons.backgroundEmptyRiskHover;
-    default:
-      return undefined;
-  }
+  // Construct the color key based on whether the button is filled or empty e.g. backgroundFilledPrimaryHover.
+  const colorKey = `background${isFilled ? 'Filled' : 'Empty'}${upperFirst(
+    color
+  )}Hover` as keyof typeof euiTheme.components.buttons;
+
+  return euiTheme.components.buttons[colorKey] || euiTheme.colors.backgroundBaseInteractiveHover;
 };

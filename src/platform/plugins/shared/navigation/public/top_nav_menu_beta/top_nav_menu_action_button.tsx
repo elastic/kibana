@@ -18,12 +18,12 @@ import {
   TOP_NAV_MENU_NOTIFICATION_INDICATOR_TOP,
 } from './constants';
 import { getIsSelectedColor, getTooltip, isDisabled } from './utils';
+import { TopNavMenuPopover } from './top_nav_menu_popover';
 import type {
   TopNavMenuPrimaryActionItem,
   TopNavMenuSecondaryActionItem,
   TopNavMenuSplitButtonProps,
 } from './types';
-import { TopNavMenuPopover } from './top_nav_menu_popover';
 
 type TopNavMenuActionButtonProps = (TopNavMenuPrimaryActionItem | TopNavMenuSecondaryActionItem) & {
   isPopoverOpen: boolean;
@@ -109,7 +109,7 @@ export const TopNavMenuActionButton = (props: TopNavMenuActionButtonProps) => {
     iconSize: 'm' as const,
   };
 
-  // Target the split part of the button for popover behavior
+  // Target the split part of the button for popover behavior.
   const splitButtonCss = css`
     & + button {
       background-color: ${isPopoverOpen
@@ -187,7 +187,7 @@ export const TopNavMenuActionButton = (props: TopNavMenuActionButtonProps) => {
   if (hasItems || hasSplitItems) {
     return (
       <TopNavMenuPopover
-        // For split button, only allow popover behavior on the split part of the split button
+        // For split button, only allow popover behavior on the split part of the split button.
         items={hasSplitItems ? splitButtonItems : items ?? []}
         tooltipContent={content}
         tooltipTitle={title}

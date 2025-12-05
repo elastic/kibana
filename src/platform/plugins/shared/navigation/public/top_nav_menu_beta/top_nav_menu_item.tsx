@@ -12,8 +12,8 @@ import { EuiHeaderLink, EuiHideFor, EuiToolTip, useEuiTheme } from '@elastic/eui
 import { upperFirst } from 'lodash';
 import { css } from '@emotion/react';
 import { getIsSelectedColor, getTooltip, isDisabled } from './utils';
-import type { TopNavMenuItemType } from './types';
 import { TopNavMenuPopover } from './top_nav_menu_popover';
+import type { TopNavMenuItemType } from './types';
 
 type TopNavMenuItemBetaProps = TopNavMenuItemType & {
   isPopoverOpen: boolean;

@@ -30,9 +30,9 @@ export {
 } from './constants';
 
 export {
-  getTopNavItems,
   isDisabled,
   getTooltip,
+  getTopNavItems,
   getPopoverPanels,
   getIsSelectedColor,
 } from './utils';

@@ -43,7 +43,7 @@ export const TopNavMenuPopover = ({
   onClose,
 }: TopNavContextMenuProps) => {
   const panels = useMemo(
-    () => getPopoverPanels({ menuItems: items, primaryActionItem, secondaryActionItem }),
+    () => getPopoverPanels({ items, primaryActionItem, secondaryActionItem }),
     [items, primaryActionItem, secondaryActionItem]
   );
   const { content, title } = getTooltip({ tooltipContent, tooltipTitle });
