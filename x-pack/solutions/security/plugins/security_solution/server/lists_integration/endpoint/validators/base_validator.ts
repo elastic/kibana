@@ -31,7 +31,6 @@ import {
   isArtifactByPolicy,
 } from '../../../../common/endpoint/service/artifacts';
 import { EndpointArtifactExceptionValidationError } from './errors';
-import { EndpointExceptionsValidationError } from './endpoint_exception_errors';
 
 const OWNER_SPACE_ID_TAG_MANAGEMENT_NOT_ALLOWED_MESSAGE = i18n.translate(
   'xpack.securitySolution.baseValidator.noGlobalArtifactAuthzApiMessage',
@@ -111,14 +110,6 @@ export class BaseValidator {
       (!this.isItemByPolicy(item) && !featureKey.endsWith('_BY_POLICY'))
     ) {
       this.endpointAppContext.getFeatureUsageService().notifyUsage(featureKey);
-    }
-  }
-
-  protected async validateHasEndpointExceptionsPrivileges(
-    privilege: keyof EndpointAuthz
-  ): Promise<void> {
-    if (!(await this.endpointAuthzPromise)[privilege]) {
-      throw new EndpointExceptionsValidationError('Endpoint exceptions authorization failure', 403);
     }
   }
 
