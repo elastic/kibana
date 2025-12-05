@@ -5,12 +5,11 @@
  * 2.0.
  */
 
+import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import {
   copyToClipboard,
-  Criteria,
   EuiBadge,
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiButtonIcon,
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -27,13 +26,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  Connector,
-  ConnectorStatus,
-  SyncStatus,
-  syncStatusToColor,
-  syncStatusToText,
-} from '@kbn/search-connectors';
+import type { Connector, SyncStatus } from '@kbn/search-connectors';
+import { ConnectorStatus, syncStatusToColor, syncStatusToText } from '@kbn/search-connectors';
 import React, { useEffect, useState } from 'react';
 import { generatePath } from 'react-router-dom';
 import {
@@ -248,6 +242,12 @@ export const ConnectorsTable: React.FC = () => {
             data-test-subj="serverlessSearchConnectorsTableSelect"
             onChange={(e) => setFilter(e.currentTarget.value as Filter)}
             options={filterOptions}
+            aria-label={i18n.translate(
+              'xpack.serverlessSearch.connectorsTable.filterSelect.ariaLabel',
+              {
+                defaultMessage: 'Filter',
+              }
+            )}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

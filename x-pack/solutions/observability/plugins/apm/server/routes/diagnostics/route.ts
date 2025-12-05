@@ -117,7 +117,7 @@ const getServiceMapDiagnosticsRoute = createApmServerRoute({
       end,
     });
 
-    const [sourceSpanIds, traceCorrelation] = await Promise.all([
+    const [sourceSpans, traceCorrelation] = await Promise.all([
       getSourceSpanIds({
         apmEventClient,
         start,
@@ -142,13 +142,13 @@ const getServiceMapDiagnosticsRoute = createApmServerRoute({
         end,
         sourceNode,
         destinationNode,
-        ids: sourceSpanIds.spanIds,
+        parentSpans: sourceSpans.destinationsBySpanId,
       }),
       getDestinationParentIds({
         apmEventClient,
         start,
         end,
-        ids: sourceSpanIds.spanIds,
+        parentSpans: sourceSpans.destinationsBySpanId,
         destinationNode,
       }),
     ]);
@@ -164,7 +164,7 @@ const getServiceMapDiagnosticsRoute = createApmServerRoute({
         parentRelationships: {
           found: destinationParentIds.hasParent,
           documentCount: destinationParentIds.rawResponse?.hits?.hits?.length || 0,
-          sourceSpanIds: [...sourceSpanIds.spanIds],
+          sourceSpanIds: [...sourceSpans.destinationsBySpanId.keys()],
         },
         ...(traceId && {
           traceCorrelation: {
@@ -179,7 +179,7 @@ const getServiceMapDiagnosticsRoute = createApmServerRoute({
       // Include raw Elasticsearch responses for debugging and advanced analysis
       elasticsearchResponses: {
         exitSpansQuery: exitSpans.rawResponse,
-        sourceSpanIdsQuery: sourceSpanIds.sourceSpanIdsRawResponse,
+        sourceSpansQuery: sourceSpans.sourceSpanIdsRawResponse,
         destinationParentIdsQuery: destinationParentIds.rawResponse,
         ...(traceId && {
           traceCorrelationQuery: traceCorrelation?.rawResponse,

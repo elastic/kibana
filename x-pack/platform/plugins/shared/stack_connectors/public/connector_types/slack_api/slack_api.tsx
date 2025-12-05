@@ -10,6 +10,15 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { CONNECTOR_ID as SLACK_CONNECTOR_ID } from '@kbn/connector-schemas/slack/constants';
+import { CONNECTOR_ID as SLACK_API_CONNECTOR_ID } from '@kbn/connector-schemas/slack_api/constants';
+import type {
+  PostBlockkitParams,
+  PostMessageParams,
+  SlackApiActionParams,
+  SlackApiConfig,
+  SlackApiSecrets,
+} from '@kbn/connector-schemas/slack_api';
 import {
   ACTION_TYPE_TITLE,
   CHANNEL_REQUIRED,
@@ -18,15 +27,7 @@ import {
   JSON_REQUIRED,
   BLOCKS_REQUIRED,
 } from './translations';
-import type {
-  SlackApiActionParams,
-  SlackApiSecrets,
-  PostMessageParams,
-  SlackApiConfig,
-  PostBlockkitParams,
-} from '../../../common/slack_api/types';
-import { SLACK_API_CONNECTOR_ID } from '../../../common/slack_api/constants';
-import { SlackActionParams } from '../types';
+import type { SlackActionParams } from '../types';
 import { subtype } from '../slack/slack';
 
 const isChannelValid = (channels?: string[], channelIds?: string[]) => {
@@ -47,7 +48,10 @@ export const getConnectorType = (): ConnectorTypeModel<
 > => ({
   id: SLACK_API_CONNECTOR_ID,
   subtype,
-  hideInUi: true,
+  // Hide slack api connector in UI when when slack connector is enabled in config
+  getHideInUi: (actionTypes) =>
+    actionTypes.find((actionType) => actionType.id === SLACK_CONNECTOR_ID)?.enabledInConfig ===
+    true,
   modalWidth: 675,
   iconClass: 'logoSlack',
   selectMessage: SELECT_MESSAGE,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { StackTraceResponse } from '../stack_traces';
+import type { StackTraceResponse } from '../stack_traces';
 
 export const stacktraces: StackTraceResponse = {
   stack_traces: {

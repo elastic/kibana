@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { UseQueryResult } from '@tanstack/react-query';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import type { HttpSetup, IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
 import { useCallback } from 'react';
-import { ReadKnowledgeBaseResponse } from '@kbn/elastic-assistant-common';
-import { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
+import type { ReadKnowledgeBaseResponse } from '@kbn/elastic-assistant-common';
+import type { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
 import { getKnowledgeBaseStatus } from './api';
 
 const KNOWLEDGE_BASE_STATUS_QUERY_KEY = ['elastic-assistant', 'knowledge-base-status'];

@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { mockContext } from '../../../__tests__/context_fixtures';
-import { validate } from './validate';
 import { expectErrors } from '../../../__tests__/validation';
-import { METADATA_FIELDS } from '../../../..';
+import { validate } from './validate';
 
 const fuseExpectErrors = (query: string, expectedErrors: string[], context = mockContext) => {
   return expectErrors(query, expectedErrors, context, 'fuse', validate);
@@ -22,22 +21,22 @@ describe('FUSE Validation', () => {
 
   describe('FUSE', () => {
     test('no errors for valid command', () => {
-      const newFields = new Map(mockContext.fields);
-      METADATA_FIELDS.forEach((fieldName) => {
-        newFields.set(fieldName, { name: fieldName, type: 'keyword' });
-      });
-      const context = {
-        ...mockContext,
-        fields: newFields,
-      };
       fuseExpectErrors(
         `FROM index METADATA _id, _score, _index
                     | FORK
                       (WHERE keywordField != "" | LIMIT 100)
                       (SORT doubleField ASC NULLS LAST)
                     | FUSE`,
-        [],
-        context
+        []
+      );
+
+      fuseExpectErrors(
+        `TS index METADATA _id, _score, _index
+                    | FORK
+                      (WHERE keywordField != "" | LIMIT 100)
+                      (SORT doubleField ASC NULLS LAST)
+                    | FUSE`,
+        []
       );
     });
 
@@ -48,11 +47,18 @@ describe('FUSE Validation', () => {
                       (WHERE keywordField != "" | LIMIT 100)
                       (SORT doubleField ASC NULLS LAST)
                     | FUSE`,
-        [
-          '[FUSE] The FROM command is missing the _id METADATA field.',
-          '[FUSE] The FROM command is missing the _index METADATA field.',
-          '[FUSE] The FROM command is missing the _score METADATA field.',
-        ]
+        ['[FUSE] The FROM command is missing the _id, _index, _score METADATA field.']
+      );
+    });
+
+    test('requires _id metadata to be selected in the FROM command', () => {
+      fuseExpectErrors(
+        `FROM index METADATA _score, _index
+                    | FORK
+                      (WHERE keywordField != "" | LIMIT 100)
+                      (SORT doubleField ASC NULLS LAST)
+                    | FUSE`,
+        ['[FUSE] The FROM command is missing the _id METADATA field.']
       );
     });
   });

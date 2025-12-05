@@ -8,17 +8,17 @@ import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { COMMON_OBSERVABILITY_GROUPING } from '@kbn/observability-shared-plugin/common';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
-import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import {
   IncompatibleActionError,
   type UiActionsActionDefinition,
 } from '@kbn/ui-actions-plugin/public';
-import { SLOPublicPluginsStart } from '..';
+import type { SLOPublicPluginsStart } from '..';
 import {
   ADD_SLO_ALERTS_ACTION_ID,
   SLO_ALERTS_EMBEDDABLE_ID,
 } from '../embeddable/slo/alerts/constants';
-import { SLORepositoryClient } from '../types';
+import type { SLORepositoryClient } from '../types';
 import { openSloConfiguration } from '../embeddable/slo/alerts/slo_alerts_open_configuration';
 
 export function createAddAlertsPanelAction(

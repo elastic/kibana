@@ -23,6 +23,7 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  htmlIdGenerator,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import moment from 'moment';
@@ -51,6 +52,7 @@ export class NewEventModal extends Component {
       startDate,
       endDate,
       description: '',
+      descriptionVisited: false,
       startDateString: startDate.format(TIME_FORMAT),
       endDateString: endDate.format(TIME_FORMAT),
     };
@@ -59,6 +61,13 @@ export class NewEventModal extends Component {
   onDescriptionChange = (e) => {
     this.setState({
       description: e.target.value,
+      descriptionVisited: true,
+    });
+  };
+
+  onDescriptionBlur = () => {
+    this.setState({
+      descriptionVisited: true,
     });
   };
 
@@ -259,7 +268,10 @@ export class NewEventModal extends Component {
 
   render() {
     const { closeModal } = this.props;
-    const { description } = this.state;
+    const { description, descriptionVisited } = this.state;
+    const isDescriptionInvalid = !description.trim();
+    const isDescriptionInvalidVisible = isDescriptionInvalid && descriptionVisited;
+    const modalTitleId = htmlIdGenerator()('modalTitle');
 
     return (
       <Fragment>
@@ -268,9 +280,10 @@ export class NewEventModal extends Component {
           initialFocus="[name=eventDescription]"
           maxWidth={false}
           data-test-subj={'mlCalendarEventForm'}
+          aria-labelledby={modalTitleId}
         >
           <EuiModalHeader>
-            <EuiModalHeaderTitle>
+            <EuiModalHeaderTitle id={modalTitleId}>
               <FormattedMessage
                 id="xpack.ml.calendarsEdit.newEventModal.createNewEventTitle"
                 defaultMessage="Create new event"
@@ -288,11 +301,16 @@ export class NewEventModal extends Component {
                   />
                 }
                 fullWidth
+                error={i18n.translate('xpack.ml.calendarsEdit.newEventModal.descriptionError', {
+                  defaultMessage: 'Description cannot be empty',
+                })}
+                isInvalid={isDescriptionInvalidVisible}
               >
                 <EuiFieldText
                   name="eventDescription"
+                  onBlur={this.onDescriptionBlur}
                   onChange={this.onDescriptionChange}
-                  isInvalid={!description}
+                  isInvalid={isDescriptionInvalidVisible}
                   fullWidth
                   data-test-subj={'mlCalendarEventDescriptionInput'}
                 />
@@ -314,7 +332,7 @@ export class NewEventModal extends Component {
             <EuiButton
               onClick={this.handleAddEvent}
               fill
-              disabled={!description}
+              disabled={isDescriptionInvalid}
               data-test-subj={'mlCalendarAddEventButton'}
             >
               <FormattedMessage

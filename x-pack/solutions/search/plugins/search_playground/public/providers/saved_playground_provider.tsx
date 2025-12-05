@@ -6,23 +6,24 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { type QueryClient, useQueryClient } from '@tanstack/react-query';
+import { type QueryClient, useQueryClient } from '@kbn/react-query';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import { FormProvider as ReactHookFormProvider, UseFormReturn, useForm } from 'react-hook-form';
+import type { UseFormReturn } from 'react-hook-form';
+import { FormProvider as ReactHookFormProvider, useForm } from 'react-hook-form';
 
 import { ROUTE_VERSIONS, SearchPlaygroundQueryKeys } from '../../common';
 import { useKibana } from '../hooks/use_kibana';
 import { useLoadFieldsByIndices } from '../hooks/use_load_fields_by_indices';
 
 import { LLMsQuery } from '../hooks/use_llms_models';
-import {
-  APIRoutes,
+import type {
   SavedPlaygroundForm,
   PlaygroundResponse,
   PlaygroundForm,
   LLMModel,
   SavedPlaygroundLoadErrors,
 } from '../types';
+import { APIRoutes } from '../types';
 import { savedPlaygroundFormResolver } from '../utils/playground_form_resolver';
 import {
   fetchSavedPlaygroundError,

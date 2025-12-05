@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { SavedObjectsFindResult } from '@kbn/core/server';
-import { Logger } from '@kbn/core/server';
+import type { SavedObjectsFindResult } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { queryMonitorStatusAlert } from './query_monitor_status_alert';
-import { EncryptedSyntheticsMonitorAttributes } from '../../../../common/runtime_types';
-import { SyntheticsEsClient } from '../../../lib';
+import type { EncryptedSyntheticsMonitorAttributes } from '../../../../common/runtime_types';
+import type { SyntheticsEsClient } from '../../../lib';
 
 // Mock the logger
 const createLoggerMock = () => {

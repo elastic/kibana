@@ -7,9 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { EsWorkflowExecution, EsWorkflowStepExecution, WorkflowExecutionDto } from '@kbn/workflows';
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type {
+  EsWorkflowExecution,
+  EsWorkflowStepExecution,
+  WorkflowExecutionDto,
+} from '@kbn/workflows';
 import { searchStepExecutions } from './search_step_executions';
+import { stringifyWorkflowDefinition } from '../../../common/lib/yaml';
 
 interface GetWorkflowExecutionParams {
   esClient: ElasticsearchClient;
@@ -17,6 +24,7 @@ interface GetWorkflowExecutionParams {
   workflowExecutionIndex: string;
   stepsExecutionIndex: string;
   workflowExecutionId: string;
+  spaceId: string;
 }
 
 export const getWorkflowExecution = async ({
@@ -25,20 +33,28 @@ export const getWorkflowExecution = async ({
   workflowExecutionIndex,
   stepsExecutionIndex,
   workflowExecutionId,
+  spaceId,
 }: GetWorkflowExecutionParams): Promise<WorkflowExecutionDto | null> => {
   try {
     const response = await esClient.search<EsWorkflowExecution>({
       index: workflowExecutionIndex,
       query: {
-        match: {
-          _id: workflowExecutionId,
+        bool: {
+          must: [
+            {
+              ids: {
+                values: [workflowExecutionId],
+              },
+            },
+            { term: { spaceId } },
+          ],
         },
       },
     });
 
-    const workflowExecution = response.hits.hits.map((hit) => hit._source)[0] ?? null;
+    const hit = response.hits.hits[0] ?? null;
 
-    if (!workflowExecution) {
+    if (!hit || !hit._source) {
       return null;
     }
 
@@ -47,9 +63,10 @@ export const getWorkflowExecution = async ({
       logger,
       stepsExecutionIndex,
       workflowExecutionId,
+      spaceId,
     });
 
-    return transformToWorkflowExecutionDetailDto(workflowExecution, stepExecutions);
+    return transformToWorkflowExecutionDetailDto(hit._id!, hit._source, stepExecutions, logger);
   } catch (error) {
     logger.error(`Failed to get workflow: ${error}`);
     throw error;
@@ -57,12 +74,28 @@ export const getWorkflowExecution = async ({
 };
 
 function transformToWorkflowExecutionDetailDto(
+  id: string,
   workflowExecution: EsWorkflowExecution,
-  stepExecutions: EsWorkflowStepExecution[]
+  stepExecutions: EsWorkflowStepExecution[],
+  logger: Logger
 ): WorkflowExecutionDto {
+  let yaml = workflowExecution.yaml;
+  // backward compatibility for workflow executions created before yaml was added to the workflow execution object
+  try {
+    if (!yaml) {
+      yaml = stringifyWorkflowDefinition(workflowExecution.workflowDefinition);
+    }
+  } catch (error) {
+    logger.error(`Failed to stringify workflow definition: ${error}`);
+    yaml = '';
+  }
   return {
     ...workflowExecution,
+    id,
+    isTestRun: workflowExecution.isTestRun ?? false,
+    stepId: workflowExecution.stepId,
     stepExecutions,
     triggeredBy: workflowExecution.triggeredBy, // <-- Include the triggeredBy field
+    yaml,
   };
 }

@@ -14,7 +14,7 @@ import {
   getDatasetSpecs,
 } from '../src/hf_dataset_loader/datasets/config';
 import { listAllOneChatDatasets } from '../src/hf_dataset_loader/datasets/onechat';
-import { HuggingFaceDatasetSpec } from '../src/hf_dataset_loader/types';
+import type { HuggingFaceDatasetSpec } from '../src/hf_dataset_loader/types';
 
 interface Flags {
   // the number of rows per dataset to load into ES

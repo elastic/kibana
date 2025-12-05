@@ -9,7 +9,7 @@
 import { mockContext, getMockCallbacks } from '../../../__tests__/context_fixtures';
 import { autocomplete } from './autocomplete';
 import { expectSuggestions, getFieldNamesByType } from '../../../__tests__/autocomplete';
-import { ICommandCallbacks } from '../../types';
+import type { ICommandCallbacks } from '../../types';
 import { ESQL_NUMBER_TYPES } from '../../../definitions/types';
 
 const changePointExpectSuggestions = (

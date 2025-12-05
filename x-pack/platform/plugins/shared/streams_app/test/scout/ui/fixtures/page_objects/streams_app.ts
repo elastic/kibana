@@ -7,16 +7,68 @@
 
 /* eslint-disable playwright/no-nth-methods */
 
-import { ScoutPage, expect } from '@kbn/scout';
-import { ProcessorType } from '@kbn/streams-schema';
-import { FieldTypeOption } from '../../../../../public/components/data_management/schema_editor/constants';
+import type { Locator, ScoutPage } from '@kbn/scout';
+import {
+  expect,
+  EuiDataGridWrapper,
+  EuiSuperSelectWrapper,
+  EuiComboBoxWrapper,
+  EuiCodeBlockWrapper,
+  KibanaCodeEditorWrapper,
+} from '@kbn/scout';
+import type { FieldTypeOption } from '../../../../../public/components/data_management/schema_editor/constants';
 
 export class StreamsApp {
-  constructor(private readonly page: ScoutPage) {}
+  public readonly processorFieldComboBox;
+  public readonly conditionEditorFieldComboBox;
+  public readonly conditionEditorValueComboBox;
+  public readonly processorTypeComboBox;
+  public readonly fieldTypeSuperSelect;
+  public readonly previewDataGrid;
+  public readonly schemaDataGrid;
+  public readonly advancedSettingsCodeBlock;
+  public readonly kibanaMonacoEditor;
+
+  constructor(private readonly page: ScoutPage) {
+    this.processorFieldComboBox = new EuiComboBoxWrapper(
+      this.page,
+      'streamsAppProcessorFieldSelectorComboFieldText'
+    );
+    this.conditionEditorFieldComboBox = new EuiComboBoxWrapper(
+      this.page,
+      'streamsAppConditionEditorFieldText'
+    );
+    this.conditionEditorValueComboBox = new EuiComboBoxWrapper(
+      this.page,
+      'streamsAppConditionEditorValueText'
+    );
+    this.processorTypeComboBox = new EuiComboBoxWrapper(
+      this.page,
+      'streamsAppProcessorTypeSelector'
+    );
+    this.fieldTypeSuperSelect = new EuiSuperSelectWrapper(
+      this.page,
+      'streamsAppFieldFormTypeSelect'
+    );
+    // TODO: Make locator more specific when possible
+    this.previewDataGrid = new EuiDataGridWrapper(this.page, { locator: '.euiDataGrid' });
+    this.schemaDataGrid = new EuiDataGridWrapper(
+      this.page,
+      'streamsAppSchemaEditorFieldsTableLoaded'
+    );
+    this.advancedSettingsCodeBlock = new EuiCodeBlockWrapper(this.page, {
+      locator: '.euiCodeBlock',
+    });
+    this.kibanaMonacoEditor = new KibanaCodeEditorWrapper(this.page);
+  }
 
   async goto() {
     await this.page.gotoApp('streams');
     await expect(this.page.getByText('StreamsTechnical Preview')).toBeVisible();
+  }
+
+  async gotoStreamMainPage() {
+    await this.page.gotoApp(`streams`);
   }
 
   async gotoStreamManagementTab(streamName: string, tabName: string) {
@@ -24,19 +76,23 @@ export class StreamsApp {
   }
 
   async gotoPartitioningTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'route');
+    await this.gotoStreamManagementTab(streamName, 'partitioning');
   }
 
   async gotoDataRetentionTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'lifecycle');
+    await this.gotoStreamManagementTab(streamName, 'retention');
+  }
+
+  async gotoDataQualityTab(streamName: string) {
+    await this.gotoStreamManagementTab(streamName, 'dataQuality');
   }
 
   async gotoProcessingTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'enrich');
+    await this.gotoStreamManagementTab(streamName, 'processing');
   }
 
   async gotoSchemaEditorTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'schemaEditor');
+    await this.gotoStreamManagementTab(streamName, 'schema');
   }
 
   async gotoSignificantEventsTab(streamName: string) {
@@ -45,6 +101,132 @@ export class StreamsApp {
 
   async gotoAdvancedTab(streamName: string) {
     await this.gotoStreamManagementTab(streamName, 'advanced');
+  }
+
+  async clickStreamNameLink(streamName: string) {
+    await this.page.getByTestId(`streamsNameLink-${streamName}`).click();
+  }
+
+  async clickDataQualityTab() {
+    await this.page.getByTestId('dataQualityTab').click();
+  }
+
+  async clickRootBreadcrumb() {
+    await this.page.getByTestId('breadcrumb first').click();
+  }
+
+  // Streams table utility methods
+  async expectStreamsTableVisible() {
+    await expect(this.page.getByTestId('streamsTable')).toBeVisible();
+  }
+
+  async verifyDatePickerTimeRange(expectedRange: { from: string; to: string }) {
+    await expect(
+      this.page.testSubj.locator('superDatePickerstartDatePopoverButton'),
+      `Date picker 'start date' is incorrect`
+    ).toHaveText(expectedRange.from);
+    await expect(
+      this.page.testSubj.locator('superDatePickerendDatePopoverButton'),
+      `Date picker 'end date' is incorrect`
+    ).toHaveText(expectedRange.to);
+  }
+
+  async verifyDocCount(streamName: string, expectedCount: number) {
+    await expect(this.page.locator(`[data-test-subj="streamsDocCount-${streamName}"]`)).toHaveText(
+      expectedCount.toString()
+    );
+  }
+
+  async verifyDataQuality(streamName: string, expectedQuality: string) {
+    await expect(
+      this.page.locator(`[data-test-subj="dataQualityIndicator-${streamName}"]`)
+    ).toHaveText(expectedQuality);
+  }
+
+  async verifyRetention(streamName: string, expectedIlmPolicy: string) {
+    await expect(
+      this.page.locator(`[data-test-subj="retentionColumn-${streamName}"]`)
+    ).toContainText(expectedIlmPolicy);
+  }
+
+  async verifyDiscoverButtonLink(streamName: string) {
+    const locator = this.page.locator(
+      `[data-test-subj="streamsDiscoverActionButton-${streamName}"]`
+    );
+    await locator.waitFor();
+
+    const href = await locator.getAttribute('href');
+    if (!href) {
+      throw new Error(`Missing href for Discover action button of stream ${streamName}`);
+    }
+
+    // Expect encoded ESQL snippet to appear (basic validation)
+    // 'FROM <streamName>' should appear URL-encoded
+    const expectedFragment = encodeURIComponent(`FROM ${streamName}`);
+    if (!href.includes(expectedFragment)) {
+      throw new Error(
+        `Href for ${streamName} did not contain expected ESQL fragment. href=${href} expectedFragment=${expectedFragment}`
+      );
+    }
+  }
+
+  async verifyStreamsAreInTable(streamNames: string[]) {
+    for (const name of streamNames) {
+      await expect(
+        this.page.getByTestId(`streamsNameLink-${name}`),
+        `Stream ${name} should be present in the table`
+      ).toBeVisible();
+    }
+  }
+
+  async verifyStreamsAreNotInTable(streamNames: string[]) {
+    for (const name of streamNames) {
+      await expect(
+        this.page.getByTestId(`streamsNameLink-${name}`),
+        `Stream ${name} should not be present in the table`
+      ).toBeHidden();
+    }
+  }
+
+  async expandAllStreams() {
+    const expandAllButton = this.page.getByTestId('streamsExpandAllButton');
+    await expect(expandAllButton, 'Expand all button should be visible').toBeVisible();
+    await expandAllButton.click();
+  }
+
+  async collapseAllStreams() {
+    const collapseAllButton = this.page.getByTestId('streamsCollapseAllButton');
+    await expect(collapseAllButton, 'Collapse all button should be visible').toBeVisible();
+    await collapseAllButton.click();
+  }
+
+  async collapseExpandStream(streamName: string, collapse: boolean) {
+    if (collapse) {
+      const collapseButton = this.page.locator(`[data-test-subj="collapseButton-${streamName}"]`);
+      if (await collapseButton.isVisible()) {
+        await collapseButton.click();
+      }
+    } else {
+      const expandButton = this.page.locator(`[data-test-subj="expandButton-${streamName}"]`);
+      if (await expandButton.isVisible()) {
+        await expandButton.click();
+      }
+    }
+  }
+
+  // Streams header utility methods
+  async verifyLifecycleBadge(streamName: string, expectedLabel: string) {
+    await expect(
+      this.page.locator(`[data-test-subj="lifecycleBadge-${streamName}"]`)
+    ).toContainText(expectedLabel);
+  }
+
+  async verifyClassicBadge() {
+    await expect(this.page.locator(`[data-test-subj="classicStreamBadge"]`)).toBeVisible();
+  }
+
+  async verifyWiredBadge() {
+    await expect(this.page.locator(`[data-test-subj="wiredStreamBadge"]`)).toBeVisible();
   }
 
   // Routing-specific utility methods
@@ -60,16 +242,20 @@ export class StreamsApp {
     await this.page.getByTestId(`routingRuleEditButton-${streamName}`).click();
   }
 
+  async switchToColumnsView() {
+    await this.page.getByTestId('columns').click();
+  }
+
   async saveRoutingRule() {
-    await this.page.getByRole('button', { name: 'Save' }).click();
+    await this.page.testSubj.locator('streamsAppStreamDetailRoutingSaveButton').click();
   }
 
   async updateRoutingRule() {
-    await this.page.getByRole('button', { name: 'Change routing' }).click();
+    await this.page.testSubj.locator('streamsAppStreamDetailRoutingUpdateButton').click();
   }
 
   async cancelRoutingRule() {
-    await this.page.getByRole('button', { name: 'Cancel' }).click();
+    await this.page.testSubj.locator('streamsAppRoutingStreamEntryCancelButton').click();
   }
 
   async removeRoutingRule() {
@@ -81,6 +267,14 @@ export class StreamsApp {
   }
 
   async confirmDeleteInModal() {
+    await this.getModal().getByRole('button', { name: 'Delete' }).click();
+    await expect(this.getModal()).toBeHidden();
+  }
+
+  async confirmStreamDeleteInModal(streamName: string) {
+    await this.getModal()
+      .getByTestId('streamsAppDeleteStreamModalStreamNameInput')
+      .fill(streamName);
     await this.getModal().getByRole('button', { name: 'Delete' }).click();
     await expect(this.getModal()).toBeHidden();
   }
@@ -101,10 +295,10 @@ export class StreamsApp {
     operator?: string;
   }) {
     if (field) {
-      await this.page.getByTestId('streamsAppConditionEditorFieldText').fill(field);
+      await this.conditionEditorFieldComboBox.setCustomSingleOption(field);
     }
     if (value) {
-      await this.page.getByTestId('streamsAppConditionEditorValueText').fill(value);
+      await this.conditionEditorValueComboBox.setCustomSingleOption(value);
     }
     if (operator) {
       await this.page.getByTestId('streamsAppConditionEditorOperator').selectOption(operator);
@@ -138,7 +332,7 @@ export class StreamsApp {
     const arrowButton = steps > 0 ? 'ArrowDown' : 'ArrowUp';
     let absoluteSteps = Math.abs(steps);
     while (absoluteSteps > 0) {
-      this.page.keyboard.press(arrowButton);
+      await this.page.keyboard.press(arrowButton);
       absoluteSteps--;
     }
     // Release DnD
@@ -154,7 +348,7 @@ export class StreamsApp {
     const arrowButton = steps > 0 ? 'ArrowDown' : 'ArrowUp';
     let absoluteSteps = Math.abs(steps);
     while (absoluteSteps > 0) {
-      this.page.keyboard.press(arrowButton);
+      await this.page.keyboard.press(arrowButton);
       absoluteSteps--;
     }
     // Release DnD
@@ -192,12 +386,7 @@ export class StreamsApp {
   }
 
   async expectPreviewPanelVisible() {
-    await expect(this.page.getByTestId('routingPreviewPanelWithResults')).toBeVisible();
-  }
-
-  async expectToastVisible() {
-    // Check if at least one element appears and is visible.
-    await expect(this.page.getByTestId('toastCloseButton').first()).toBeVisible();
+    await expect(this.page.getByTestId('streamsAppRoutingPreviewPanelWithResults')).toBeVisible();
   }
 
   async saveRuleOrder() {
@@ -212,12 +401,31 @@ export class StreamsApp {
   /**
    * Utility for data processing
    */
-  async clickAddProcessor() {
-    await this.page.getByTestId('streamsAppStreamDetailEnrichmentAddProcessorButton').click();
+  async clickAddProcessor(handleContextMenuClick: boolean = true) {
+    if (handleContextMenuClick) {
+      await this.page.getByTestId('streamsAppStreamDetailEnrichmentCreateStepButton').click();
+    }
+    await this.page
+      .getByTestId('streamsAppStreamDetailEnrichmentCreateStepButtonAddProcessor')
+      .click();
+  }
+
+  async clickAddCondition() {
+    await this.page.getByTestId('streamsAppStreamDetailEnrichmentCreateStepButton').click();
+    await this.page
+      .getByTestId('streamsAppStreamDetailEnrichmentCreateStepButtonAddCondition')
+      .click();
+  }
+  async getProcessorPatternText() {
+    return await this.page.getByTestId('fullText').locator('.euiText').textContent();
   }
 
   async clickSaveProcessor() {
     await this.page.getByTestId('streamsAppProcessorConfigurationSaveProcessorButton').click();
+  }
+
+  async clickSaveCondition() {
+    await this.page.getByTestId('streamsAppConditionConfigurationSaveConditionButton').click();
   }
 
   async clickCancelProcessorChanges() {
@@ -227,6 +435,16 @@ export class StreamsApp {
   async clickEditProcessor(pos: number) {
     const processorEditButton = await this.getProcessorEditButton(pos);
     await processorEditButton.click();
+  }
+
+  async clickDuplicateProcessor(pos: number) {
+    const processorDuplicateButton = await this.getProcessorDuplicateButton(pos);
+    await processorDuplicateButton.click();
+  }
+
+  async clickEditCondition(pos: number) {
+    const conditionEditButton = await this.getConditionEditButton(pos);
+    await conditionEditButton.click();
   }
 
   async clickManageDataSourcesButton() {
@@ -245,7 +463,64 @@ export class StreamsApp {
   async getProcessorEditButton(pos: number) {
     const processors = await this.getProcessorsListItems();
     const targetProcessor = processors[pos];
-    return targetProcessor.getByRole('button', { name: 'Edit' });
+    await targetProcessor.getByRole('button', { name: 'Step context menu' }).first().click();
+    return this.page.getByTestId('stepContextMenuEditItem');
+  }
+
+  async getProcessorDuplicateButton(pos: number) {
+    const processors = await this.getProcessorsListItems();
+    const targetProcessor = processors[pos];
+    await targetProcessor.getByRole('button', { name: 'Step context menu' }).first().click();
+    return this.page.getByTestId('stepContextMenuDuplicateItem');
+  }
+
+  async getConditionEditButton(pos: number) {
+    const conditions = await this.getConditionsListItems();
+    const targetCondition = conditions[pos];
+    await targetCondition.getByRole('button', { name: 'Step context menu' }).first().click();
+    return this.page.getByTestId('stepContextMenuEditItem');
+  }
+
+  async getProcessorContextMenuButton(pos: number) {
+    const processors = await this.getProcessorsListItems();
+    const targetProcessor = processors[pos];
+    return targetProcessor.getByRole('button', { name: 'Step context menu' });
+  }
+
+  async getConditionAddStepMenuButton(pos: number) {
+    const conditions = await this.getConditionsListItems();
+    const targetCondition = conditions[pos];
+    return targetCondition.getByRole('button', { name: 'Create nested step' });
+  }
+
+  // Gets the first level of nested steps under a condition at position 'pos'
+  async getConditionNestedStepsList(pos: number) {
+    const conditions = await this.getConditionsListItems();
+    const targetCondition = conditions[pos];
+    const connectedNodesList = targetCondition.getByTestId(
+      'streamsAppStreamDetailEnrichmentConnectedNodesList'
+    );
+    // Get all <li> elements inside the connected nodes list
+    const listItems = await connectedNodesList.locator('li').all();
+
+    // For each <li>, get the first child that matches either processor or condition block
+    const firstBlocks = await Promise.all(
+      listItems.map(async (li) => {
+        const processorBlock = li.getByTestId('streamsAppProcessorBlock').first();
+        if (await processorBlock.isVisible()) {
+          return processorBlock;
+        }
+        const conditionBlock = li.getByTestId('streamsAppConditionBlock').first();
+        if (await conditionBlock.isVisible()) {
+          return conditionBlock;
+        }
+        return null;
+      })
+    );
+
+    // Filter out any nulls (where neither block was found)
+    const validBlocks = firstBlocks.filter(Boolean);
+    return validBlocks;
   }
 
   async confirmDiscardInModal() {
@@ -253,13 +528,16 @@ export class StreamsApp {
     await expect(this.getModal()).toBeHidden();
   }
 
-  async selectProcessorType(value: ProcessorType) {
-    await this.page.getByTestId('streamsAppProcessorTypeSelector').click();
-    await this.page.getByRole('dialog').getByRole('option').getByText(value).click();
+  async selectProcessorType(value: string) {
+    await this.processorTypeComboBox.selectSingleOption(value);
   }
 
-  async fillFieldInput(value: string) {
-    await this.page.getByTestId('streamsAppProcessorFieldSelectorFieldText').fill(value);
+  async fillProcessorFieldInput(value: string, options?: { isCustomValue: boolean }) {
+    const isCustomValue = options?.isCustomValue || false;
+    if (isCustomValue) {
+      return await this.processorFieldComboBox.setCustomSingleOption(value);
+    }
+    await this.processorFieldComboBox.selectSingleOption(value);
   }
 
   async fillGrokPatternInput(value: string) {
@@ -269,6 +547,34 @@ export class StreamsApp {
     await this.page.keyboard.press('Backspace');
     // Fill with new condition
     await this.page.getByTestId('streamsAppPatternExpression').getByRole('textbox').fill(value);
+  }
+
+  async fillDateProcessorSourceFieldInput(value: string) {
+    await this.page.getByLabel('Source Field').fill(value);
+  }
+
+  async fillDateProcessorFormatInput(value: string) {
+    await this.page.getByPlaceholder('Type and then hit "Enter"').fill(value);
+  }
+
+  async fillDateProcessorTargetFieldInput(value: string) {
+    await this.page.getByLabel('Target field').fill(value);
+  }
+
+  async fillDateProcessorTimezoneInput(value: string) {
+    await this.page.getByLabel('Timezone').fill(value);
+  }
+
+  async fillDateProcessorLocaleInput(value: string) {
+    await this.page.getByLabel('Locale').fill(value);
+  }
+
+  async fillDateProcessorOutputFormatInput(value: string) {
+    await this.page.getByLabel('Output format').fill(value);
+  }
+
+  async clickDateProcessorAdvancedSettings() {
+    await this.page.getByRole('button', { name: 'Advanced settings' }).click();
   }
 
   async fillCustomSamplesEditor(value: string) {
@@ -283,25 +589,51 @@ export class StreamsApp {
       .fill(value);
   }
 
-  async removeProcessor(pos: number) {
-    await this.clickEditProcessor(pos);
-    await this.page.getByRole('button', { name: 'Delete' }).click();
+  async fillCondition(field: string, operator: string, value: string) {
+    await this.conditionEditorFieldComboBox.setCustomSingleOption(field);
+    await this.page.getByTestId('streamsAppConditionEditorOperator').selectOption(operator);
+    await this.conditionEditorValueComboBox.setCustomSingleOption(value);
   }
 
-  async saveProcessorsListChanges() {
+  async removeProcessor(pos: number) {
+    await this.clickEditProcessor(pos);
+    await this.page.getByRole('button', { name: 'Delete processor' }).click();
+  }
+
+  async saveStepsListChanges() {
     await this.page.getByRole('button', { name: 'Save changes' }).click();
   }
 
-  async getProcessorsListItems() {
+  private async getStepListItems(testId: string, expectItems: boolean = true) {
+    const timeout = expectItems ? 15_000 : 2_000;
+
     try {
-      await expect(this.page.getByRole('list', { name: 'Processors list' })).toBeVisible({
-        timeout: 5000,
+      await expect(this.page.getByTestId('streamsAppStreamDetailEnrichmentRootSteps')).toBeVisible({
+        timeout,
       });
     } catch {
       // If the list is not visible, it might be empty or not rendered yet
       return [];
     }
-    return this.page.getByTestId('streamsAppProcessorConfigurationListItem').all();
+    return this.page.getByTestId(testId).all();
+  }
+
+  async getProcessorsListItems(expectProcessors: boolean = true) {
+    return this.getStepListItems('streamsAppProcessorBlock', expectProcessors);
+  }
+
+  async getProcessorsListItemsFast() {
+    // Fast method for when no processors are expected - uses minimal timeout
+    return this.getProcessorsListItems(false);
+  }
+
+  async getConditionsListItems(expectConditions: boolean = true) {
+    return this.getStepListItems('streamsAppConditionBlock', expectConditions);
+  }
+
+  async getConditionsListItemsFast() {
+    // Fast method for when no conditions are expected - uses minimal timeout
+    return this.getConditionsListItems(false);
   }
 
   async expectProcessorsOrder(expectedOrder: string[]) {
@@ -321,8 +653,18 @@ export class StreamsApp {
     return this.page.getByTestId('streamsAppProcessingDataSourcesList');
   }
 
+  async getDataSourcesSelector() {
+    const dataSourcesSelector = this.page.getByTestId('streamsAppProcessingDataSourceSelector');
+    await expect(dataSourcesSelector).toBeVisible();
+    return dataSourcesSelector;
+  }
+
   getDataSourcesListItems() {
     return this.getDataSourcesList().getByTestId('streamsAppProcessingDataSourceListItem');
+  }
+
+  async confirmChangesInReviewModal() {
+    await this.page.getByTestId('streamsAppSchemaChangesReviewModalSubmitButton').click();
   }
 
   /**
@@ -338,15 +680,20 @@ export class StreamsApp {
     columnName,
     rowIndex,
     value,
+    invertCondition = false,
   }: {
     columnName: string;
     rowIndex: number;
     value: string;
+    invertCondition?: boolean;
   }) {
-    const cellContent = this.page.locator(
-      `[data-gridcell-column-id="${columnName}"][data-gridcell-row-index="${rowIndex}"]`
-    );
-    await expect(cellContent).toContainText(value);
+    const cellLocator = this.previewDataGrid.getCellLocatorByColId(rowIndex, columnName);
+
+    if (invertCondition) {
+      await expect(cellLocator).not.toContainText(value);
+    } else {
+      await expect(cellLocator).toContainText(value);
+    }
   }
 
   /**
@@ -361,7 +708,7 @@ export class StreamsApp {
       .getByTestId('streamsAppSchemaEditorControls')
       .getByRole('searchbox');
     await expect(searchBox).toBeVisible();
-    searchBox.clear();
+    await searchBox.clear();
     await searchBox.focus();
     await this.page.keyboard.type(searchTerm);
   }
@@ -379,6 +726,10 @@ export class StreamsApp {
 
   async clickFieldStatusFilter() {
     await this.page.getByRole('button', { name: 'Status' }).click();
+  }
+
+  async getFilterOptions() {
+    return this.getModal().getByRole('option');
   }
 
   async selectFilterValue(value: string) {
@@ -401,39 +752,120 @@ export class StreamsApp {
   }
 
   async setFieldMappingType(type: FieldTypeOption) {
-    const typeSelector = this.page.getByTestId('streamsAppFieldFormTypeSelect');
-    await expect(typeSelector).toBeVisible();
-    await typeSelector.selectOption(type);
+    await this.page.getByTestId('streamsAppFieldFormTypeSelect').click();
+    await this.page.getByTestId(`option-type-${type}`).click();
   }
 
-  async saveFieldMappingChanges() {
-    await this.page.getByTestId('streamsAppSchemaEditorFieldSaveButton').click();
+  async stageFieldMappingChanges() {
+    await this.page.getByTestId('streamsAppSchemaEditorFieldStageButton').click();
   }
 
   async unmapField() {
     await this.openFieldActionsMenu();
     await this.clickFieldAction('Unmap field');
-    await this.getModal().getByRole('button', { name: 'Unmap field' }).click();
+  }
+
+  async discardStagedFieldMappingChanges() {
+    await this.page.getByTestId('streamsAppSchemaEditorDiscardChangesButton').click();
+  }
+
+  async reviewStagedFieldMappingChanges() {
+    await this.page.getByTestId('streamsAppSchemaEditorReviewStagedChangesButton').click();
+  }
+
+  async closeSchemaReviewModal() {
+    await this.page.getByTestId('streamsAppSchemaChangesReviewModalCancelButton').click();
+  }
+
+  async submitSchemaChanges() {
+    await this.page.getByTestId('streamsAppSchemaChangesReviewModalSubmitButton').click();
+  }
+
+  async checkDraggingOver() {
+    await expect(this.page.getByTestId('droppable')).not.toHaveAttribute('class', /isDragging/);
+  }
+
+  private async clickCellActionButton(testId: string, cell: Locator) {
+    // Get the cell action button scoped to the specific cell
+    // EuiDataGrid renders cell actions for all cells in the DOM, but only the one
+    // for the hovered/clicked cell is visible. We find the button within the cell's actions wrapper.
+    const cellActionsWrapper = cell.locator('.euiDataGridRowCell__actionsWrapper');
+    const button = cellActionsWrapper.getByTestId(testId);
+    await button.scrollIntoViewIfNeeded();
+    await button.click();
+  }
+
+  async clickFilterForButton(cell: Locator) {
+    await this.clickCellActionButton('streamsAppCellActionFilterFor', cell);
+  }
+
+  async clickFilterOutButton(cell: Locator) {
+    await this.clickCellActionButton('streamsAppCellActionFilterOut', cell);
+  }
+
+  /**
+   * AI Suggestions utility methods
+   */
+  async clickSuggestPartitionsButton() {
+    const button = this.page.getByTestId('streamsAppGenerateSuggestionButton');
+    await expect(button).toBeVisible();
+    await button.click();
+  }
+
+  async expectSuggestionsVisible(count?: number) {
+    await expect(this.page.getByText('Review partitioning suggestions')).toBeVisible();
+    if (count !== undefined) {
+      const suggestions = await this.page
+        .locator('[data-test-subj^="suggestionEditButton-"]')
+        .all();
+      expect(suggestions.length).toHaveLength(count);
+    }
+  }
+
+  async previewSuggestion(suggestionName: string) {
+    const previewButton = this.page.getByTestId(`suggestionPreviewButton-${suggestionName}`);
+    await previewButton.click();
+  }
+
+  async editSuggestion(suggestionName: string) {
+    const editButton = this.page.getByTestId(`suggestionEditButton-${suggestionName}`);
+    await editButton.click();
+  }
+
+  async rejectSuggestion(suggestionName: string) {
+    const rejectButton = this.page.getByTestId(`suggestionRejectButton-${suggestionName}`);
+    await rejectButton.click();
+  }
+
+  async acceptSuggestion(suggestionName: string) {
+    const acceptButton = this.page.getByTestId(`suggestionAcceptButton-${suggestionName}`);
+    await acceptButton.click();
+  }
+
+  async regenerateSuggestions() {
+    const regenerateButton = this.page
+      .getByTestId('streamsAppGenerateSuggestionButton')
+      .filter({ hasText: 'Regenerate' });
+    await expect(regenerateButton).toBeVisible();
+    await regenerateButton.click();
+  }
+
+  async expectConfirmationModalVisible() {
+    const modal = this.page.getByTestId('streamsAppCreateStreamConfirmationModal');
+    await expect(modal).toBeVisible();
+    await expect(modal.getByTestId('streamsAppCreateStreamConfirmationModalTitle')).toBeVisible();
   }
 
   /**
    * Share utility methods
    */
-  async closeToasts() {
-    await this.expectToastVisible();
-    // Check if at least one element appears and is visible.
-
-    // Get an array of all locators and loop through them
-    const allCloseButtons = this.page.getByTestId('toastCloseButton');
-    for (const button of await allCloseButtons.all()) {
-      await button.click();
-    }
-
-    await expect(this.page.getByTestId('toastCloseButton')).toHaveCount(0);
-  }
 
   async closeFlyout() {
     await this.page.getByTestId('euiFlyoutCloseButton').click();
     await expect(this.page.getByTestId('euiFlyoutCloseButton')).toBeHidden();
+  }
+
+  async clickProcessorPreviewTab(label: string) {
+    await this.page.getByText(label).click();
   }
 }

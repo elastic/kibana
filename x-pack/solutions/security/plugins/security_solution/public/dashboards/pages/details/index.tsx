@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
 import { useParams } from 'react-router-dom';
 import { pick } from 'lodash/fp';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { ViewMode } from '@kbn/presentation-publishing';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { SecurityPageName } from '../../../../common/constants';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { useCapabilities } from '../../../common/lib/kibana';
@@ -51,7 +52,7 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
   );
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
-  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView();
+  const { sourcererDataView: oldSourcererDataViewSpec } = useSourcererDataView();
 
   const { show: canReadDashboard } = useCapabilities<DashboardCapabilities>('dashboard_v2');
   const errorState = useMemo(
@@ -66,13 +67,15 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
   const onDashboardToolBarLoad = useCallback((mode: ViewMode) => {
     setViewMode(mode);
   }, []);
+  const { dataView: experimentalDataView } = useDataView();
 
   return (
     <>
       <FiltersGlobal>
         <SiemSearchBar
+          dataView={experimentalDataView}
           id={InputsModelId.global}
-          sourcererDataView={oldSourcererDataView} // TODO: newDataViewPickerEnabled -  Can be removed when the new data view picker is released
+          sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
         />
       </FiltersGlobal>
       <SecuritySolutionPageWrapper>

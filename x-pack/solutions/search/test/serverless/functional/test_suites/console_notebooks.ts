@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['svlCommonPage', 'embeddedConsole']);
@@ -15,7 +15,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     before(async () => {
       await pageObjects.svlCommonPage.loginAsViewer();
 
-      await svlSearchNavigation.navigateToGettingStartedPage();
+      await svlSearchNavigation.navigateToElasticsearchHome();
     });
 
     it('has notebooks view available', async () => {

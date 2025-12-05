@@ -8,7 +8,8 @@
 import { LIST_ITEM_INDEX, TIE_BREAKERS, VALUE_2 } from '../../../common/constants.mock';
 import { getIndexESListItemMock } from '../../schemas/elastic_query/index_es_list_item_schema.mock';
 
-import { CreateListItemsBulkOptions, createListItemsBulk } from './create_list_items_bulk';
+import type { CreateListItemsBulkOptions } from './create_list_items_bulk';
+import { createListItemsBulk } from './create_list_items_bulk';
 import { getCreateListItemBulkOptionsMock } from './create_list_items_bulk.mock';
 
 describe('crete_list_item_bulk', () => {

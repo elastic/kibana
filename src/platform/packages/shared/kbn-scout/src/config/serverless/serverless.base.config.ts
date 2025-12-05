@@ -17,9 +17,13 @@ import {
   defineDockerServersConfig,
   getDockerFileMountPath,
 } from '@kbn/test';
-import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
+import {
+  MOCK_IDP_REALM_NAME,
+  MOCK_IDP_UIAM_ORGANIZATION_ID,
+  MOCK_IDP_UIAM_PROJECT_ID,
+} from '@kbn/mock-idp-utils';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { ScoutServerConfig } from '../../types';
+import type { ScoutServerConfig } from '../../types';
 import { SAML_IDP_PLUGIN_PATH, SERVERLESS_IDP_METADATA_PATH, JWKS_PATH } from '../constants';
 
 const packageRegistryConfig = join(__dirname, './package_registry_config.yml');
@@ -62,7 +66,8 @@ export const defaultConfig: ScoutServerConfig = {
       port: dockerRegistryPort,
       args: dockerArgs,
       waitForLogLine: 'package manifests loaded',
-      waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
+      waitForLogLineTimeoutMs: 60 * 6 * 1000, // 6 minutes
+      preferCached: true,
     },
   }),
   esTestCluster: {
@@ -99,7 +104,6 @@ export const defaultConfig: ScoutServerConfig = {
     serverArgs: [
       `--server.restrictInternalApis=true`,
       `--server.port=${servers.kibana.port}`,
-      `--server.prototypeHardening=true`,
       '--status.allowAnonymous=true',
       `--migrations.zdt.runOnRoles=${JSON.stringify(['ui'])}`,
       // We shouldn't embed credentials into the URL since Kibana requests to Elasticsearch should
@@ -148,10 +152,11 @@ export const defaultConfig: ScoutServerConfig = {
       '--xpack.cloud.billing_url=/billing/overview/',
       '--xpack.cloud.deployments_url=/deployments',
       '--xpack.cloud.id=ftr_fake_cloud_id',
+      `--xpack.cloud.organization_id=${MOCK_IDP_UIAM_ORGANIZATION_ID}`,
       '--xpack.cloud.organization_url=/account/',
       '--xpack.cloud.profile_url=/user/settings/',
       '--xpack.cloud.projects_url=/projects/',
-      '--xpack.cloud.serverless.project_id=fakeprojectid',
+      `--xpack.cloud.serverless.project_id=${MOCK_IDP_UIAM_PROJECT_ID}`,
       '--xpack.cloud.users_and_roles_url=/account/members/',
       // Ensure that SAML is used as the default authentication method whenever a user navigates to Kibana. In other
       // words, Kibana should attempt to authenticate the user using the provider with the lowest order if the Login
@@ -170,6 +175,24 @@ export const defaultConfig: ScoutServerConfig = {
       `--permissionsPolicy.report_to=${JSON.stringify(['violations-endpoint'])}`,
       // Allow dynamic config overrides in tests
       `--coreApp.allowDynamicConfigOverrides=true`,
+      `--xpack.fleet.fleetServerHosts=${JSON.stringify([
+        {
+          id: 'default-fleet-server',
+          name: 'Default Fleet Server',
+          is_default: true,
+          host_urls: ['https://localhost:8220'],
+        },
+      ])}`,
+      `--xpack.fleet.outputs=${JSON.stringify([
+        {
+          id: 'es-default-output',
+          name: 'Default Output',
+          type: 'elasticsearch',
+          is_default: true,
+          is_default_monitoring: true,
+          hosts: ['https://localhost:9200'],
+        },
+      ])}`,
     ],
   },
 };

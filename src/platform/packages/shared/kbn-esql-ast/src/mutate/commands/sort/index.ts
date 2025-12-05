@@ -8,14 +8,14 @@
  */
 
 import { Builder } from '../../../builder';
-import {
+import type {
   ESQLAstQueryExpression,
   ESQLColumn,
   ESQLCommand,
   ESQLOrderExpression,
 } from '../../../types';
 import { Visitor } from '../../../visitor';
-import { Predicate } from '../../types';
+import type { Predicate } from '../../types';
 import * as util from '../../util';
 import * as generic from '../../generic';
 

@@ -219,6 +219,7 @@ export const importRulesRoute = (
 
           return response.ok({ body: ImportRulesResponse.parse(importRulesResponse) });
         } catch (err) {
+          logger.error(`importRulesRoute: Caught error:`, err);
           const error = transformError(err);
           return siemResponse.error({
             body: error.message,

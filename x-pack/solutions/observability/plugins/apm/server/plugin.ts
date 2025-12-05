@@ -51,6 +51,8 @@ import type {
   APMPluginSetupDependencies,
   APMPluginStartDependencies,
 } from './types';
+import { registerAgentTools } from './agent_builder/tools';
+import { registerDataProviders } from './agent_builder/data_provider/register_data_providers';
 
 export class APMPlugin
   implements Plugin<APMPluginSetup, void, APMPluginSetupDependencies, APMPluginStartDependencies>
@@ -130,6 +132,14 @@ export class APMPlugin
       const { getApmIndices } = plugins.apmDataAccess;
       return getApmIndices(soClient);
     })();
+    const managedOtlpServiceFeaturePromise = (async () => {
+      const coreStart = await getCoreStart();
+
+      return await coreStart.featureFlags.getBooleanValue(
+        'observability.managedOtlpServiceEnabled',
+        false
+      );
+    })();
 
     // This if else block will go away in favour of removing Home Tutorial Integration
     // Ideally we will directly register a custom integration and pass the configs
@@ -138,14 +148,17 @@ export class APMPlugin
     if (currentConfig.serverlessOnboarding && plugins.customIntegrations) {
       plugins.customIntegrations?.registerCustomIntegration(apmTutorialCustomIntegration);
     } else {
-      apmIndicesPromise
-        .then((apmIndices) => {
+      Promise.all([apmIndicesPromise, managedOtlpServiceFeaturePromise])
+        .then(([apmIndices, isManagedOtlpServiceFeatureEnabled]) => {
           plugins.home?.tutorials.registerTutorial(
             tutorialProvider({
               apmConfig: currentConfig,
               apmIndices,
               cloud: plugins.cloud,
+              observability: plugins.observability,
               isFleetPluginEnabled: !isEmpty(resourcePlugins.fleet),
+              isManagedOtlpServiceFeatureEnabled,
+              managedOtlpServiceUrl: plugins.observability.managedOtlpServiceUrl,
             })
           );
         })
@@ -236,6 +249,23 @@ export class APMPlugin
     plugins.observability.alertDetailsContextualInsightsService.registerHandler(
       getAlertDetailsContextHandler(getCoreStart(), resourcePlugins, logger)
     );
+
+    if (plugins.onechat) {
+      registerAgentTools({ core, plugins, logger: this.logger!.get('observabilityAgent') }).catch(
+        (e) => {
+          this.logger?.error(`Failed to register observability agent APM tools: ${e.message}`);
+          this.logger?.debug(e);
+        }
+      );
+
+      this.logger?.debug('Successfully registered observability agent APM tools');
+    }
+
+    registerDataProviders({
+      core,
+      plugins,
+      logger: this.logger!.get('observabilityAgent'),
+    });
 
     registerDeprecations({
       core,

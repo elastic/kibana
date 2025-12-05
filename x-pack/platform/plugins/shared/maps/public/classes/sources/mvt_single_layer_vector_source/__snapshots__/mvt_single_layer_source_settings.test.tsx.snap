@@ -4,11 +4,13 @@ exports[`should not render fields-editor when there is no layername 1`] = `
 <Fragment>
   <EuiFormRow
     display="columnCompressed"
+    isInvalid={false}
     label="Source layer"
   >
     <EuiFieldText
       compressed={true}
-      isInvalid={true}
+      isInvalid={false}
+      onBlur={[Function]}
       onChange={[Function]}
       value=""
     />
@@ -19,23 +21,15 @@ exports[`should not render fields-editor when there is no layername 1`] = `
     formRowDisplay="columnCompressed"
     fullWidth={false}
     label={
-      <EuiToolTip
-        anchorClassName="eui-alignMiddle"
-        content="Zoom levels where the layer is present in the tiles. This does not correspond directly to visibility. Layer data from lower levels can always be displayed at higher zoom levels (but not vice versa)."
-        delay="regular"
-        disableScreenReaderOutput={false}
-        display="inlineBlock"
-        position="top"
-      >
-        <span>
-          Available levels
-           
-          <EuiIcon
-            color="subdued"
-            type="question"
-          />
-        </span>
-      </EuiToolTip>
+      <span>
+        Available levels
+         
+        <EuiIconTip
+          color="subdued"
+          content="Zoom levels where the layer is present in the tiles. This does not correspond directly to visibility. Layer data from lower levels can always be displayed at higher zoom levels (but not vice versa)."
+          type="question"
+        />
+      </span>
     }
     max={24}
     min={0}
@@ -57,11 +51,13 @@ exports[`should render with fields 1`] = `
 <Fragment>
   <EuiFormRow
     display="columnCompressed"
+    isInvalid={false}
     label="Source layer"
   >
     <EuiFieldText
       compressed={true}
       isInvalid={false}
+      onBlur={[Function]}
       onChange={[Function]}
       value="foobar"
     />
@@ -72,23 +68,15 @@ exports[`should render with fields 1`] = `
     formRowDisplay="columnCompressed"
     fullWidth={false}
     label={
-      <EuiToolTip
-        anchorClassName="eui-alignMiddle"
-        content="Zoom levels where the layer is present in the tiles. This does not correspond directly to visibility. Layer data from lower levels can always be displayed at higher zoom levels (but not vice versa)."
-        delay="regular"
-        disableScreenReaderOutput={false}
-        display="inlineBlock"
-        position="top"
-      >
-        <span>
-          Available levels
-           
-          <EuiIcon
-            color="subdued"
-            type="question"
-          />
-        </span>
-      </EuiToolTip>
+      <span>
+        Available levels
+         
+        <EuiIconTip
+          color="subdued"
+          content="Zoom levels where the layer is present in the tiles. This does not correspond directly to visibility. Layer data from lower levels can always be displayed at higher zoom levels (but not vice versa)."
+          type="question"
+        />
+      </span>
     }
     max={24}
     min={0}
@@ -105,35 +93,27 @@ exports[`should render with fields 1`] = `
   />
   <EuiFormRow
     label={
-      <EuiToolTip
-        anchorClassName="eui-alignMiddle"
-        content={
-          <React.Fragment>
-            Fields which are available in 
+      <span>
+        Fields
+         
+        <EuiIconTip
+          color="subdued"
+          content={
             <React.Fragment>
-              <b>
-                foobar
-              </b>
-              .
-               
+              Fields which are available in 
+              <React.Fragment>
+                <b>
+                  foobar
+                </b>
+                .
+                 
+              </React.Fragment>
+              These can be used for tooltips and dynamic styling.
             </React.Fragment>
-            These can be used for tooltips and dynamic styling.
-          </React.Fragment>
-        }
-        delay="regular"
-        disableScreenReaderOutput={false}
-        display="inlineBlock"
-        position="top"
-      >
-        <span>
-          Fields
-           
-          <EuiIcon
-            color="subdued"
-            type="question"
-          />
-        </span>
-      </EuiToolTip>
+          }
+          type="question"
+        />
+      </span>
     }
   >
     <MVTFieldConfigEditor
@@ -148,11 +128,13 @@ exports[`should render without fields 1`] = `
 <Fragment>
   <EuiFormRow
     display="columnCompressed"
+    isInvalid={false}
     label="Source layer"
   >
     <EuiFieldText
       compressed={true}
       isInvalid={false}
+      onBlur={[Function]}
       onChange={[Function]}
       value="foobar"
     />
@@ -163,23 +145,15 @@ exports[`should render without fields 1`] = `
     formRowDisplay="columnCompressed"
     fullWidth={false}
     label={
-      <EuiToolTip
-        anchorClassName="eui-alignMiddle"
-        content="Zoom levels where the layer is present in the tiles. This does not correspond directly to visibility. Layer data from lower levels can always be displayed at higher zoom levels (but not vice versa)."
-        delay="regular"
-        disableScreenReaderOutput={false}
-        display="inlineBlock"
-        position="top"
-      >
-        <span>
-          Available levels
-           
-          <EuiIcon
-            color="subdued"
-            type="question"
-          />
-        </span>
-      </EuiToolTip>
+      <span>
+        Available levels
+         
+        <EuiIconTip
+          color="subdued"
+          content="Zoom levels where the layer is present in the tiles. This does not correspond directly to visibility. Layer data from lower levels can always be displayed at higher zoom levels (but not vice versa)."
+          type="question"
+        />
+      </span>
     }
     max={24}
     min={0}

@@ -7,8 +7,8 @@
 
 import { expect } from 'expect';
 import { v4 as uuidv4 } from 'uuid';
-import { RoleCredentials } from '../../services';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { RoleCredentials } from '../../services';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export enum RuleNotifyWhen {
   CHANGE = 'onActionGroupChange',
@@ -38,20 +38,15 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
   const openRulesSection = async () => {
     await svlSearchNavigation.navigateToLandingPage();
-    await svlCommonNavigation.sidenav.openSection(
-      'search_project_nav_footer.project_settings_project_nav'
-    );
 
-    await svlCommonNavigation.sidenav.clickLink({ navId: 'management' });
+    await svlCommonNavigation.sidenav.clickLink({ navId: 'admin_and_settings' });
     await svlCommonNavigation.sidenav.clickPanelLink('management:triggersActions');
   };
 
   const navigateToConnectors = async () => {
     await svlSearchNavigation.navigateToLandingPage();
-    await svlCommonNavigation.sidenav.openSection(
-      'search_project_nav_footer.project_settings_project_nav'
-    );
-    await svlCommonNavigation.sidenav.clickLink({ navId: 'management' });
+
+    await svlCommonNavigation.sidenav.clickLink({ navId: 'admin_and_settings' });
     await svlCommonNavigation.sidenav.clickPanelLink('management:triggersActionsConnectors');
     // await testSubjects.click('app-card-triggersActionsConnectors');
   };

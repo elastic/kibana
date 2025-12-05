@@ -18,7 +18,7 @@
  * in the setup/start interfaces in `plugin.ts`. The remaining items exported here are
  * either types, or static code.
  */
-import { PluginInitializerContext } from '@kbn/core/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { IndexPatternManagementPlugin } from './plugin';
 export type { IndexPatternManagementSetup, IndexPatternManagementStart } from './plugin';
 

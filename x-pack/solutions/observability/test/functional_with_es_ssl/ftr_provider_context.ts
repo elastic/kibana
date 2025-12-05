@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { GenericFtrProviderContext, GenericFtrService } from '@kbn/test';
+import type { GenericFtrProviderContext } from '@kbn/test';
+import { GenericFtrService } from '@kbn/test';
 
 import { pageObjects as platformPageObjects } from '@kbn/test-suites-xpack-platform/functional_with_es_ssl/page_objects';
 import { pageObjects as obltPageObjects } from '../functional/page_objects';

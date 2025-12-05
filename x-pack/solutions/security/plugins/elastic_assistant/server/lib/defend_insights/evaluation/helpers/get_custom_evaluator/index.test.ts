@@ -6,8 +6,10 @@
  */
 
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
-import { getDefendInsightsCustomEvaluator } from '.';
+
+import { InvalidDefendInsightTypeError } from '../../../errors';
 import { customIncompatibleAntivirusEvaluator } from './customIncompatibleAntivirusEvaluator';
+import { getDefendInsightsCustomEvaluator } from '.';
 
 describe('getDefendInsightsCustomEvaluator', () => {
   it('should return customIncompatibleAntivirusEvaluator for incompatible_antivirus', () => {
@@ -18,11 +20,11 @@ describe('getDefendInsightsCustomEvaluator', () => {
     expect(evaluator).toBe(customIncompatibleAntivirusEvaluator);
   });
 
-  it('should default to customIncompatibleAntivirusEvaluator for unknown insightType', () => {
-    const evaluator = getDefendInsightsCustomEvaluator({
-      insightType: 'some_unknown_type' as DefendInsightType,
-    });
-
-    expect(evaluator).toBe(customIncompatibleAntivirusEvaluator);
+  it('should throw for unknown insightType', () => {
+    expect(() =>
+      getDefendInsightsCustomEvaluator({
+        insightType: 'some_unknown_type' as DefendInsightType,
+      })
+    ).toThrowError(new InvalidDefendInsightTypeError());
   });
 });

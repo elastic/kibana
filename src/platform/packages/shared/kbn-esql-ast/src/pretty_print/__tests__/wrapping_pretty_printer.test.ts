@@ -8,9 +8,10 @@
  */
 
 import { parse } from '../../parser';
-import { ESQLMap } from '../../types';
+import type { ESQLMap } from '../../types';
 import { Walker } from '../../walker';
-import { WrappingPrettyPrinter, WrappingPrettyPrinterOptions } from '../wrapping_pretty_printer';
+import type { WrappingPrettyPrinterOptions } from '../wrapping_pretty_printer';
+import { WrappingPrettyPrinter } from '../wrapping_pretty_printer';
 
 const reprint = (src: string, opts?: WrappingPrettyPrinterOptions) => {
   const { root } = parse(src);
@@ -21,7 +22,75 @@ const reprint = (src: string, opts?: WrappingPrettyPrinterOptions) => {
   return { text };
 };
 
+const assertReprint = (src: string, expected: string = src) => {
+  const { text } = reprint(src);
+
+  expect(text).toBe(expected);
+};
+
 describe('commands', () => {
+  describe('header commands', () => {
+    describe('SET', () => {
+      test('single SET command with short query', () => {
+        const { text } = reprint('SET timeout = "30s"; FROM index');
+
+        expect(text).toBe('SET timeout = "30s";\nFROM index');
+      });
+
+      test('multiple SET commands with short query', () => {
+        const { text } = reprint(
+          'SET timeout = "30s"; SET max_results = 100; FROM index | LIMIT 10'
+        );
+
+        expect('\n' + text).toBe(`
+SET timeout = "30s";
+SET max_results = 100;
+FROM index | LIMIT 10`);
+      });
+
+      test('SET command with long query wraps correctly', () => {
+        const { text } = reprint(
+          'SET timeout = "30s"; FROM very_long_index_name_that_exceeds_line_length | WHERE very_long_field_name == "value" | LIMIT 100'
+        );
+
+        expect('\n' + text).toBe(`
+SET timeout = "30s";
+FROM very_long_index_name_that_exceeds_line_length
+  | WHERE very_long_field_name == "value"
+  | LIMIT 100`);
+      });
+
+      test('multiple SET commands with long query', () => {
+        const { text } = reprint(
+          'SET timeout = "30s"; SET max_results = 1000; FROM very_long_index_name_that_exceeds_line_length | WHERE field == "value"'
+        );
+
+        expect('\n' + text).toBe(`
+SET timeout = "30s";
+SET max_results = 1000;
+FROM very_long_index_name_that_exceeds_line_length | WHERE field == "value"`);
+      });
+
+      test('SET with keyword identifier', () => {
+        const { text } = reprint('SET key = "value"; FROM index');
+
+        expect(text).toBe('SET `key` = "value";\nFROM index');
+      });
+
+      test('SET with numeric value', () => {
+        const { text } = reprint('SET max_results = 500; FROM index');
+
+        expect(text).toBe('SET max_results = 500;\nFROM index');
+      });
+
+      test('SET with boolean value', () => {
+        const { text } = reprint('SET debug = true; FROM index');
+
+        expect(text).toBe('SET debug = TRUE;\nFROM index');
+      });
+    });
+  });
+
   describe('JOIN', () => {
     test('with short identifiers', () => {
       const { text } = reprint('FROM a | RIGHT JOIN b ON d, e');
@@ -40,6 +109,16 @@ FROM aaaaaaaaaaaa
         ON
           dddddddddddddddddddddddddddddddddddddddd,
           eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee`);
+    });
+
+    test('supports binary expressions', () => {
+      assertReprint(
+        `FROM employees
+  | LEFT JOIN asdf
+        ON
+          aaaaaaaaaaaaaaaaaaaaaaaaa > bbbbbbbbbbbbbbbbbbbbb AND
+            ccccccccccccccccccc == dddddddddddddddddddddddddddddddddddddddd`
+      );
     });
   });
 
@@ -128,7 +207,7 @@ FROM index
     test('value and key', () => {
       const { text } = reprint(`FROM a | CHANGE_POINT value ON key`);
 
-      expect(text).toBe('FROM a | CHANGE_POINT value ON key');
+      expect(text).toBe('FROM a | CHANGE_POINT value ON `key`');
     });
 
     test('value and target', () => {
@@ -140,7 +219,7 @@ FROM index
     test('value, key, and target', () => {
       const { text } = reprint(`FROM a | CHANGE_POINT value ON key AS type, pvalue`);
 
-      expect(text).toBe('FROM a | CHANGE_POINT value ON key AS type, pvalue');
+      expect(text).toBe('FROM a | CHANGE_POINT value ON `key` AS type, pvalue');
     });
 
     test('example from docs', () => {
@@ -163,43 +242,127 @@ FROM index
     });
   });
 
-  /**
-   * @todo Tests skipped, while RERANK command grammar is being stabilized. We will
-   * get back to it after 9.1 release.
-   */
-  describe.skip('RERANK', () => {
+  describe('RERANK', () => {
     test('default example', () => {
-      const { text } = reprint(`FROM a | RERANK "query" ON field1 WITH some_id`);
+      const { text } = reprint(`FROM a | RERANK "query" ON field1 WITH {"inference_id": "model"}`);
 
-      expect(text).toBe('FROM a | RERANK "query" ON field1 WITH some_id');
+      expect(text).toBe('FROM a | RERANK "query" ON field1 WITH {"inference_id": "model"}');
     });
 
     test('wraps long query', () => {
       const { text } = reprint(
-        `FROM a | RERANK "asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf" ON field1 WITH some_id`
+        `FROM a | RERANK "this is a very long long long long long long long long long long long long text" ON field1 WITH {"inference_id": "model"}`
       );
 
       expect(text).toBe(`FROM a
-  | RERANK "asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf"
+  | RERANK
+      "this is a very long long long long long long long long long long long long text"
         ON field1
-        WITH some_id`);
+        WITH {"inference_id": "model"}`);
     });
 
     test('two fields', () => {
-      const { text } = reprint(`FROM a | RERANK "query" ON field1,field2 WITH some_id`);
+      const { text } = reprint(
+        `FROM a | RERANK "query" ON field1,field2 WITH {"inference_id": "model"}`
+      );
 
-      expect(text).toBe('FROM a | RERANK "query" ON field1, field2 WITH some_id');
+      expect(text).toBe('FROM a | RERANK "query" ON field1, field2 WITH {"inference_id": "model"}');
     });
 
     test('wraps many fields', () => {
       const { text } = reprint(
-        `FROM a | RERANK "query" ON field1,field2,field3,field4,field5,field6,field7,field8,field9,field10,field11,field12 WITH some_id`
+        `FROM a | RERANK "query" ON field1,field2,field3,field4,field5,field6,field7,field8,field9,field10,field11,field12 WITH {"inference_id": "model"}`
       );
       expect(text).toBe(`FROM a
   | RERANK "query"
         ON field1, field2, field3, field4, field5, field6, field7, field8, field9,
           field10, field11, field12
-        WITH some_id`);
+        WITH {"inference_id": "model"}`);
+    });
+  });
+
+  describe('FORK', () => {
+    test('basic fork with simple subqueries', () => {
+      const { text } = reprint('FROM index | FORK ( KEEP a ) ( KEEP b )');
+
+      expect(text).toBe('FROM index | FORK (KEEP a) (KEEP b)');
+    });
+
+    test('fork with longer subqueries', () => {
+      const { text } = reprint(
+        'FROM index | FORK ( KEEP field1, field2, field3 | WHERE x > 100 ) ( DROP field4, field5 | LIMIT 50 )',
+        { multiline: true }
+      );
+
+      expect(text).toBe(`FROM index
+  | FORK
+      (
+          KEEP field1, field2, field3
+        | WHERE x > 100
+      )
+      (
+          DROP field4, field5
+        | LIMIT 50
+      )`);
+    });
+
+    test('fork with multiple complex subqueries', () => {
+      const { text } = reprint(
+        'FROM index | FORK ( STATS count=COUNT() BY category | WHERE count > 10 | SORT count DESC ) ( KEEP name, value | WHERE value IS NOT NULL | LIMIT 100 )',
+        { multiline: true }
+      );
+
+      expect(text).toBe(`FROM index
+  | FORK
+      (
+          STATS count = COUNT()
+          BY category
+        | WHERE count > 10
+        | SORT count DESC
+      )
+      (
+          KEEP name, value
+        | WHERE value IS NOT NULL
+        | LIMIT 100
+      )`);
+    });
+
+    test('fork with commands before and after it', () => {
+      const { text } = reprint(
+        'FROM index | DROP a | FORK ( KEEP field1 | WHERE x > 100 ) ( DROP field2 | LIMIT 50 ) | LIMIT 100',
+        { multiline: true }
+      );
+
+      expect(text).toBe(`FROM index
+  | DROP a
+  | FORK
+      (
+          KEEP field1
+        | WHERE x > 100
+      )
+      (
+          DROP field2
+        | LIMIT 50
+      )
+  | LIMIT 100`);
+    });
+
+    test('fork with a very long command within', () => {
+      const { text } = reprint(
+        'FROM index | FORK ( WHERE x > 100 | KEEP field1, asd, asd, asd, asd, asd, asd, asd, asd, asd, asd, asd, asd, asd, asd, asd, asd, asd, asd) (LIMIT 10)',
+        { multiline: true }
+      );
+
+      expect(text).toBe(`FROM index
+  | FORK
+      (
+          WHERE x > 100
+        | KEEP field1, asd, asd, asd, asd, asd, asd, asd, asd, asd, asd, asd,
+            asd, asd, asd, asd, asd, asd, asd
+      )
+      (
+          LIMIT 10
+      )`);
     });
   });
 });
@@ -233,6 +396,18 @@ describe('casing', () => {
     expect(text1).toBe('from index | stats fn1(), fn2(), fn3()');
     expect(text2).toBe('FROM index | STATS fn1(), fn2(), fn3()');
     expect(text3).toBe('FROM index | STATS FN1(), FN2(), FN3()');
+  });
+
+  test('parameter function name is printed as specified', () => {
+    const text = reprint('ROW ??functionName(*)').text;
+
+    expect(text).toBe('ROW ??functionName(*)');
+  });
+
+  test('parameter function name is printed as specified (single ?)', () => {
+    const text = reprint('ROW ?functionName(42)').text;
+
+    expect(text).toBe('ROW ?functionName(42)');
   });
 
   test('can choose keyword casing', () => {
@@ -678,6 +853,10 @@ FROM index
       expect(text).toBe(`ROW F(0, {})`);
     });
 
+    test('supports nested maps', () => {
+      assertReprint('ROW FN(1, {"foo": "bar", "baz": {"a": 1, "b": 2}})');
+    });
+
     test('empty map (multiline)', () => {
       const src = `ROW F(0, {"a": 0}) | LIMIT 1`;
       const { root } = parse(src);
@@ -804,6 +983,21 @@ FROM index
       "abc":
         "abcdefghijklmnopqrstuvwxyz-abcdefghijklmnopqrstuvwxyz-abcdefghijklmnopqrstuvwxyz"
     })`);
+    });
+
+    test('supports wrapping in nested maps', () => {
+      assertReprint(
+        `ROW
+  FN(
+    1,
+    {
+      "map":
+        {
+          "aaaaaaaaaaaaaaaaaaaaa": 111111111111111,
+          "bbbbbbbbbbbbbbbbbbbbbbbb": 222222222222222
+        }
+    })`
+      );
     });
   });
 
@@ -1051,6 +1245,94 @@ FROM a
           "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"
         )`);
     });
+  });
+});
+
+describe('unary operator precedence and grouping', () => {
+  test('NOT should not parenthesize literals', () => {
+    assertReprint('ROW NOT a');
+    assertReprint(
+      `FROM a
+  | STATS
+      NOT aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa`
+    );
+  });
+
+  test('NOT should not parenthesize literals unnecessarily', () => {
+    assertReprint('ROW NOT (a)', 'ROW NOT a');
+  });
+
+  test('NOT should parenthesize OR expressions', () => {
+    assertReprint(
+      `ROW
+  NOT (aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa OR
+    bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb)`
+    );
+  });
+
+  test('NOT should parenthesize AND expressions', () => {
+    assertReprint(
+      `ROW
+  NOT (aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa AND
+    bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb)`
+    );
+  });
+
+  test('NOT should not parenthesize expressions with higher precedence', () => {
+    assertReprint(
+      `ROW
+  NOT (aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa >
+    bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb)`,
+      `ROW
+  NOT aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa >
+    bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb`
+    );
+  });
+
+  test('NOT should parenthesize OR expressions on the right side', () => {
+    assertReprint(
+      `ROW
+  NOT aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa OR
+    NOT (aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ==
+      aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa OR
+      aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ==
+        aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa)`
+    );
+  });
+
+  test('unary minus should parenthesize addition', () => {
+    assertReprint(
+      `ROW
+  -2 *
+    (aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa +
+      bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb)`
+    );
+  });
+});
+
+describe('subqueries (parens)', () => {
+  test('can print complex subqueries with processing', () => {
+    const src =
+      'FROM index1, (FROM index2 | WHERE a > 10 | EVAL b = a * 2 | STATS cnt = COUNT(*) BY c | SORT cnt DESC | LIMIT 10), index3, (FROM index4 | STATS count(*)) | WHERE d > 10 | STATS max = max(*) BY e | SORT max DESC';
+
+    assertReprint(
+      src,
+      `FROM
+  index1,
+  (FROM index2
+    | WHERE a > 10
+    | EVAL b = a * 2
+    | STATS cnt = COUNT(*)
+          BY c
+    | SORT cnt DESC
+    | LIMIT 10),
+  index3,
+  (FROM index4 | STATS COUNT(*))
+  | WHERE d > 10
+  | STATS max = MAX(*)
+        BY e
+  | SORT max DESC`
+    );
   });
 });
 

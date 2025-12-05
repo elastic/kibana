@@ -178,7 +178,7 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
   }
 
   const onSaveCallback: SaveModalDashboardProps['onSave'] = useCallback(
-    ({ dashboardId, newTitle, newDescription }) => {
+    async ({ dashboardId, newTitle, newDescription }) => {
       const stateTransfer = embeddable!.getStateTransfer();
       const config = getDefaultEmbeddablePanelConfig(selectedJobId);
 
@@ -199,8 +199,8 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
 
-      stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
-        state,
+      stateTransfer.navigateToWithEmbeddablePackages('dashboards', {
+        state: [state],
         path,
       });
     },

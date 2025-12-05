@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CustomPaletteParams, PaletteOutput, getValidColor } from '@kbn/coloring';
-import { getStopsWithColorsFromRanges, PaletteConfig } from '../../../utils';
-import { PaletteParams } from './types';
-import { PercentageModeConfig, PercentageModeConfigWithMinMax } from '../../types';
+import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import { getValidColor } from '@kbn/coloring';
+import type { PaletteConfig } from '../../../utils';
+import { getStopsWithColorsFromRanges } from '../../../utils';
+import type { PaletteParams } from './types';
+import type { PercentageModeConfig, PercentageModeConfigWithMinMax } from '../../types';
 
 type ColorStopsWithMinMax = Pick<
   CustomPaletteParams,

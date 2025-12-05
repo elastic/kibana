@@ -8,6 +8,7 @@
 import React from 'react';
 import { useGeneratedHtmlId } from '@elastic/eui';
 
+import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiCallOut,
   EuiFlexGroup,
@@ -18,13 +19,12 @@ import {
   EuiFlyoutBody,
   EuiText,
   EuiTabbedContent,
-  EuiTabbedContentTab,
   EuiSpacer,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { FilteringValidation } from '@kbn/search-connectors';
+import type { FilteringValidation } from '@kbn/search-connectors';
 
 import { AdvancedSyncRules } from './advanced_sync_rules';
 import { EditSyncRulesTab } from './edit_sync_rules_tab';
@@ -126,6 +126,7 @@ export const EditSyncRulesFlyout: React.FC<EditFilteringFlyoutProps> = ({
             {errors.map((error, index) => (
               <EuiFlexItem id={`${index}`} grow={false}>
                 <EuiCallOut
+                  announceOnMount
                   color="danger"
                   title={i18n.translate(
                     'xpack.contentConnectors.content.index.connector.syncRules.flyout.errorTitle',

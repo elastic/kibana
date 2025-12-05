@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   HasEditCapabilities,
   HasLibraryTransforms,
   HasType,
@@ -16,14 +16,14 @@ import {
   PublishesSavedObjectId,
   PublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
-import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-containers';
-import { LocatorPublic } from '@kbn/share-plugin/common';
-import { DASHBOARD_API_TYPE } from '@kbn/dashboard-plugin/public';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-containers';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
+import type { DASHBOARD_API_TYPE } from '@kbn/dashboard-plugin/public';
 import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
-import type { DashboardAttributes } from '@kbn/dashboard-plugin/server';
+import type { DashboardState } from '@kbn/dashboard-plugin/server';
 
-import {
+import type {
   LINKS_EMBEDDABLE_TYPE,
   LinksByReferenceState,
   LinksByValueState,
@@ -55,5 +55,6 @@ export type ResolvedLink = Link & {
 
 export interface DashboardItem {
   id: string;
-  attributes: Pick<DashboardAttributes, 'title' | 'description' | 'timeRestore'>;
+  title: DashboardState['title'];
+  description?: DashboardState['description'];
 }

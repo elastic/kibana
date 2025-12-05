@@ -11,7 +11,7 @@ import { API_BASE_PATH, RECENT_DURATION_MS } from '../../common/constants';
 import { getESUpgradeStatus } from '../lib/es_deprecations_status';
 import { getKibanaUpgradeStatus } from '../lib/kibana_status';
 import { getESSystemIndicesMigrationStatus } from '../lib/es_system_indices_migration';
-import { RouteDependencies } from '../types';
+import type { RouteDependencies } from '../types';
 import { getUpgradeType } from '../lib/upgrade_type';
 import { getRecentEsDeprecationLogs } from '../lib/es_deprecation_logging_apis';
 

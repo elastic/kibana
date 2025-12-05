@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MonitoringCore } from '../../../../types';
+import type { MonitoringCore } from '../../../../types';
 import { kibanaInstanceRoute } from './instance';
 import { kibanaInstancesRoute } from './instances';
 import { kibanaOverviewRoute } from './overview';

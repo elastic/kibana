@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ProcessorSelector } from './types';
+import type { ProcessorSelector } from './types';
 
 export const selectorToDataTestSubject = (selector: ProcessorSelector) => selector.join('>');
 

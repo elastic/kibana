@@ -18,7 +18,7 @@ import type { QueryInputServices } from '@kbn/visualization-ui-components';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import type { EmbeddableComponent as LensEmbeddableComponent } from '@kbn/lens-plugin/public';
-import { ISessionService } from '@kbn/data-plugin/public';
+import type { ISessionService } from '@kbn/data-plugin/public';
 import { EventAnnotationGroupTableList } from './components/table_list';
 
 export interface EventAnnotationListingPageServices {

@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SearchFilterConfig } from '@elastic/eui';
+import type { SearchFilterConfig } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash';
-import { UISession } from '../../../types';
+import type { UISession } from '../../../types';
 
 export const getAppFilter: (tableData: UISession[]) => SearchFilterConfig = (tableData) => ({
   type: 'field_value_selection',

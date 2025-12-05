@@ -6,9 +6,9 @@
  */
 
 import moment from 'moment';
-import { INDEX_PATTERN_TYPES } from '../../../common/constants';
-import { TimeRange } from '../../../common/http_api/shared';
-import { LegacyRequest } from '../../types';
+import type { INDEX_PATTERN_TYPES } from '../../../common/constants';
+import type { TimeRange } from '../../../common/http_api/shared';
+import type { LegacyRequest } from '../../types';
 import { calculateTimeseriesInterval } from '../calculate_timeseries_interval';
 import { checkParam } from '../error_missing_required';
 import { getTimezone } from '../get_timezone';

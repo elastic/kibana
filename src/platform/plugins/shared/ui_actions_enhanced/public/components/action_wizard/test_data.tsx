@@ -9,15 +9,16 @@
 
 import React, { useState } from 'react';
 import { EuiFieldText, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
-import { CollectConfigProps } from '@kbn/kibana-utils-plugin/public';
+import type { CollectConfigProps } from '@kbn/kibana-utils-plugin/public';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import {
+import type {
   Trigger,
   UiActionsActionDefinition as ActionDefinition,
 } from '@kbn/ui-actions-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
-import { ActionFactory, ActionFactoryDefinition, BaseActionConfig } from '../../dynamic_actions';
+import type { ActionFactoryDefinition, BaseActionConfig } from '../../dynamic_actions';
+import { ActionFactory } from '../../dynamic_actions';
 import { ActionWizard } from './action_wizard';
 
 export const dashboards = [

@@ -4,20 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IScopedClusterClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import {
-  FindSLOGroupsParams,
-  FindSLOGroupsResponse,
-  findSLOGroupsResponseSchema,
-  Pagination,
-  sloGroupWithSummaryResponseSchema,
-} from '@kbn/slo-schema';
+import type { IScopedClusterClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { FindSLOGroupsParams, FindSLOGroupsResponse, Pagination } from '@kbn/slo-schema';
+import { findSLOGroupsResponseSchema, sloGroupWithSummaryResponseSchema } from '@kbn/slo-schema';
 import { getSummaryIndices, getSloSettings } from './slo_settings';
 import { DEFAULT_SLO_GROUPS_PAGE_SIZE } from '../../common/constants';
 import { IllegalArgumentError } from '../errors';
 import { typedSearch } from '../utils/queries';
-import { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
+import type { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import { getElasticsearchQueryOrThrow, parseStringFilters } from './transform_generators';
+import { excludeStaleSummaryFilter } from './summary_utils';
 
 const DEFAULT_PAGE = 1;
 const MAX_PER_PAGE = 5000;
@@ -64,6 +60,7 @@ export class FindSLOGroups {
         bool: {
           filter: [
             { term: { spaceId: this.spaceId } },
+            ...excludeStaleSummaryFilter(settings, kqlQuery, true),
             getElasticsearchQueryOrThrow(kqlQuery),
             ...(parsedFilters.filter ?? []),
           ],

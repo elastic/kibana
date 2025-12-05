@@ -66,9 +66,9 @@ export const EntityForm = (props: Props) => {
     let ignore = false;
     setIsLoading(true);
     setDataViewNotFound(false);
-    props.data.indexPatterns
+    props.data.dataViews
       .get(props.ruleParams.indexId)
-      .then((nextDataView) => {
+      .then((nextDataView: DataView) => {
         if (!ignore) {
           setDataView(nextDataView);
           setDateFields(getDateFields(nextDataView.fields));
@@ -87,7 +87,7 @@ export const EntityForm = (props: Props) => {
     return () => {
       ignore = true;
     };
-  }, [props.ruleParams.indexId, dataView?.id, props.data.indexPatterns]);
+  }, [props.ruleParams.indexId, dataView?.id, props.data.dataViews]);
 
   function getDataViewError() {
     const validationError = props.getValidationError('index');

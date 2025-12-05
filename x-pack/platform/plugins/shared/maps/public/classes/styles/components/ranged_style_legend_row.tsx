@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 
@@ -31,7 +32,12 @@ export function RangedStyleLegendRow({
       <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiToolTip position="top" title={propertyLabel} content={fieldLabel}>
-            <EuiText className="eui-textTruncate" size="xs" style={{ maxWidth: '180px' }}>
+            <EuiText
+              tabIndex={0}
+              className="eui-textTruncate"
+              size="xs"
+              style={{ maxWidth: '180px' }}
+            >
               <small>
                 <strong>{fieldLabel}</strong>
               </small>

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiToolTip, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -54,7 +55,7 @@ export const NoPermissionsTooltip = ({
   if (!isServiceAllowed) {
     return (
       <EuiToolTip content={SERVICE_NOT_ALLOWED}>
-        <span>{children}</span>
+        <span tabIndex={0}>{children}</span>
       </EuiToolTip>
     );
   }
@@ -62,7 +63,7 @@ export const NoPermissionsTooltip = ({
   if (disabledMessage) {
     return (
       <EuiToolTip content={disabledMessage}>
-        <span>{children}</span>
+        <span tabIndex={0}>{children}</span>
       </EuiToolTip>
     );
   }
@@ -70,7 +71,7 @@ export const NoPermissionsTooltip = ({
   if (content) {
     return (
       <EuiToolTip content={content}>
-        <span>{children}</span>
+        <span tabIndex={0}>{children}</span>
       </EuiToolTip>
     );
   }

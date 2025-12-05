@@ -48,7 +48,7 @@ export const registerUpdateRoute = (router: IRouter) => {
       const hiddenTypes = listHiddenTypes(savedObjects.typeRegistry);
       const soClient = savedObjects.getClient({ includedHiddenTypes: hiddenTypes });
 
-      const options = { version: migrationVersion, references };
+      const options = { version: migrationVersion, references, refresh: true };
       const result = await soClient.update(type, id, attributes, options);
       return res.ok({ body: result });
     })

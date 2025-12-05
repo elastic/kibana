@@ -9,7 +9,7 @@ jest.mock('@kbn/search-connectors', () => ({
   fetchConnectorByIndexName: jest.fn(),
 }));
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { fetchConnectorByIndexName } from '@kbn/search-connectors';
 
 import { fetchIndex } from './fetch_index';

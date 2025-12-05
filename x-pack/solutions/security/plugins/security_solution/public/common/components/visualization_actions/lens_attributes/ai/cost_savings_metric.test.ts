@@ -7,9 +7,11 @@
 
 import { getCostSavingsMetricLensAttributes } from './cost_savings_metric';
 import type { EuiThemeComputed } from '@elastic/eui';
+import { getAlertIndexFilter } from './helpers';
 
 describe('getCostSavingsMetricLensAttributes', () => {
   const mockTheme = {} as EuiThemeComputed;
+  const defaultSignalIndexName = '.alerts-security.alerts-default';
   const defaultParams = {
     euiTheme: mockTheme,
     minutesPerAlert: 8,
@@ -17,9 +19,11 @@ describe('getCostSavingsMetricLensAttributes', () => {
     extraOptions: undefined,
     stackByField: undefined,
     esql: undefined,
+    backgroundColor: '#00FF00',
+    signalIndexName: defaultSignalIndexName,
   };
 
-  it('includes the correct formula in the countColumn', () => {
+  it('returns correct lens attributes with formula and filter handling', () => {
     const result = getCostSavingsMetricLensAttributes({
       ...defaultParams,
       minutesPerAlert: 10,
@@ -30,33 +34,49 @@ describe('getCostSavingsMetricLensAttributes', () => {
     expect(countColumn?.operationType).toBe('formula');
     // @ts-ignore
     expect(countColumn?.params.formula).toBe('count() * ((10/60)*100)');
-  });
-
-  it('applies filters from extraOptions if provided', () => {
-    const filters = [{ query: { match_all: {} }, meta: {} }];
-    const result = getCostSavingsMetricLensAttributes({
-      ...defaultParams,
-      extraOptions: { filters },
-    });
-    expect(result.state.filters).toBe(filters);
-  });
-
-  it('defaults filters to empty array if extraOptions is not provided', () => {
-    const result = getCostSavingsMetricLensAttributes({
-      ...defaultParams,
-      extraOptions: undefined,
-    });
-    expect(result.state.filters).toEqual([]);
-  });
-
-  it('returns a LensAttributes object with required properties', () => {
-    const result = getCostSavingsMetricLensAttributes({
-      ...defaultParams,
-    });
     expect(result).toHaveProperty('title', 'Cost Savings Metric');
-    expect(result).toHaveProperty('type', 'lens');
     expect(result).toHaveProperty('visualizationType', 'lnsMetric');
     expect(result).toHaveProperty('state');
     expect(result).toHaveProperty('references');
+    const filters = [{ query: { match_all: {} }, meta: {} }];
+    const resultWithFilters = getCostSavingsMetricLensAttributes({
+      ...defaultParams,
+      extraOptions: { filters },
+    });
+    expect(resultWithFilters.state.filters).toEqual([
+      getAlertIndexFilter(defaultSignalIndexName),
+      ...filters,
+    ]);
+
+    const resultWithoutFilters = getCostSavingsMetricLensAttributes({
+      ...defaultParams,
+      extraOptions: undefined,
+    });
+    expect(resultWithoutFilters.state.filters).toEqual([
+      getAlertIndexFilter(defaultSignalIndexName),
+    ]);
+  });
+
+  it('includes alert index filter in filters array', () => {
+    const result = getCostSavingsMetricLensAttributes(defaultParams);
+    const expectedFilter = getAlertIndexFilter(defaultSignalIndexName);
+    expect(result.state.filters).toContainEqual(expectedFilter);
+  });
+
+  it('handles different signal index names correctly', () => {
+    const testCases = [
+      '.alerts-security.alerts-default',
+      '.alerts-security.alerts-custom-space',
+      'custom-alerts-index',
+    ];
+
+    testCases.forEach((signalIndexName) => {
+      const result = getCostSavingsMetricLensAttributes({
+        ...defaultParams,
+        signalIndexName,
+      });
+      const expectedFilter = getAlertIndexFilter(signalIndexName);
+      expect(result.state.filters).toContainEqual(expectedFilter);
+    });
   });
 });

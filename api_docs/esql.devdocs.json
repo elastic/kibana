@@ -35,15 +35,7 @@
             "section": "def-public.ESQLEditorRestorableState",
             "text": "ESQLEditorRestorableState"
           },
-          ">, \"initialState\" | \"onInitialStateChange\"> & React.RefAttributes<",
-          {
-            "pluginId": "@kbn/restorable-state",
-            "scope": "public",
-            "docId": "kibKbnRestorableStatePluginApi",
-            "section": "def-public.RestorableStateProviderApi",
-            "text": "RestorableStateProviderApi"
-          },
-          ">) => React.JSX.Element"
+          ">, \"initialState\" | \"onInitialStateChange\"> & React.RefAttributes<never>) => React.JSX.Element"
         ],
         "path": "src/platform/plugins/shared/esql/public/create_editor.tsx",
         "deprecated": false,
@@ -80,15 +72,7 @@
                 "section": "def-public.ESQLEditorRestorableState",
                 "text": "ESQLEditorRestorableState"
               },
-              ">, \"initialState\" | \"onInitialStateChange\"> & React.RefAttributes<",
-              {
-                "pluginId": "@kbn/restorable-state",
-                "scope": "public",
-                "docId": "kibKbnRestorableStatePluginApi",
-                "section": "def-public.RestorableStateProviderApi",
-                "text": "RestorableStateProviderApi"
-              },
-              ">"
+              ">, \"initialState\" | \"onInitialStateChange\"> & React.RefAttributes<never>"
             ],
             "path": "src/platform/plugins/shared/esql/public/create_editor.tsx",
             "deprecated": false,
@@ -192,15 +176,7 @@
             "section": "def-public.ESQLEditorRestorableState",
             "text": "ESQLEditorRestorableState"
           },
-          ">, \"initialState\" | \"onInitialStateChange\"> & React.RefAttributes<",
-          {
-            "pluginId": "@kbn/restorable-state",
-            "scope": "public",
-            "docId": "kibKbnRestorableStatePluginApi",
-            "section": "def-public.RestorableStateProviderApi",
-            "text": "RestorableStateProviderApi"
-          },
-          ">"
+          ">, \"initialState\" | \"onInitialStateChange\"> & React.RefAttributes<never>"
         ],
         "path": "src/platform/packages/private/kbn-esql-editor/src/esql_editor.tsx",
         "deprecated": false,
@@ -228,7 +204,7 @@
           "label": "getJoinIndicesAutocomplete",
           "description": [],
           "signature": [
-            "() => Promise<",
+            "(remoteClusters?: string | undefined) => Promise<",
             {
               "pluginId": "@kbn/esql-types",
               "scope": "common",
@@ -241,7 +217,23 @@
           "path": "src/platform/plugins/shared/esql/public/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
-          "children": [],
+          "children": [
+            {
+              "parentPluginId": "esql",
+              "id": "def-public.EsqlPluginStart.getJoinIndicesAutocomplete.$1",
+              "type": "string",
+              "tags": [],
+              "label": "remoteClusters",
+              "description": [],
+              "signature": [
+                "string | undefined"
+              ],
+              "path": "src/platform/plugins/shared/esql/public/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": false
+            }
+          ],
           "returnComment": []
         },
         {
@@ -320,6 +312,17 @@
           "signature": [
             "EsqlVariablesService"
           ],
+          "path": "src/platform/plugins/shared/esql/public/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "esql",
+          "id": "def-public.EsqlPluginStart.isServerless",
+          "type": "boolean",
+          "tags": [],
+          "label": "isServerless",
+          "description": [],
           "path": "src/platform/plugins/shared/esql/public/plugin.ts",
           "deprecated": false,
           "trackAdoption": false

@@ -7,23 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC } from 'react';
-import * as ReactQuery from '@tanstack/react-query';
+import type { FC } from 'react';
+import React from 'react';
+import '@kbn/react-query/mock';
+import * as ReactQuery from '@kbn/react-query';
 import { waitFor, renderHook } from '@testing-library/react';
 import { testQueryClientConfig } from '../test_utils/test_query_client_config';
 import { useFetchUnifiedAlertsFields } from './use_fetch_unified_alerts_fields';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core/public/mocks';
 
-const { QueryClient, QueryClientProvider } = ReactQuery;
+const { QueryClient, QueryClientProvider, useQuery } = ReactQuery;
 
 const queryClient = new QueryClient(testQueryClientConfig);
 
 const wrapper: FC<React.PropsWithChildren<{}>> = ({ children }) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
-
-const useQuerySpy = jest.spyOn(ReactQuery, 'useQuery');
 
 const mockHttpClient = httpServiceMock.createStartContract();
 const mockToasts = notificationServiceMock.createStartContract().toasts;
@@ -116,11 +116,11 @@ describe('useFetchAlertsFieldsNewApi', () => {
       }
     );
 
-    expect(useQuerySpy).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
+    expect(useQuery).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
 
     rerender({ ruleTypeIds: [], enabled: true });
 
-    expect(useQuerySpy).toHaveBeenCalledWith(expect.objectContaining({ enabled: true }));
+    expect(useQuery).toHaveBeenCalledWith(expect.objectContaining({ enabled: true }));
   });
 
   it('should call the api only once', async () => {

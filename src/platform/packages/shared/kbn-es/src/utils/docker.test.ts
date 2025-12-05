@@ -12,12 +12,14 @@ import mockFs from 'mock-fs';
 import Fsp from 'fs/promises';
 import { basename } from 'path';
 
+import type { ServerlessOptions, ServerlessProjectType } from './docker';
+import * as dockerUiam from './docker_uiam';
 import {
   DOCKER_IMG,
   detectRunningNodes,
   maybeCreateDockerNetwork,
   maybePullDockerImage,
-  printESImageInfo,
+  printDockerImageInfo,
   resolveDockerCmd,
   resolveDockerImage,
   resolveEsArgs,
@@ -31,8 +33,6 @@ import {
   teardownServerlessClusterSync,
   verifyDockerInstalled,
   getESp12Volume,
-  ServerlessOptions,
-  ServerlessProjectType,
 } from './docker';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import { CA_CERT_PATH, ES_P12_PATH } from '@kbn/dev-utils';
@@ -62,6 +62,17 @@ jest.mock('./wait_until_cluster_ready', () => ({
 jest.mock('./wait_for_security_index', () => ({
   waitForSecurityIndex: jest.fn(),
 }));
+
+jest.mock('./docker_uiam', () => {
+  const originalModule = jest.requireActual('./docker_uiam');
+  return {
+    ...originalModule,
+    runUiamContainer: jest
+      .fn()
+      .mockImplementation((_, container) => Promise.resolve(container.name)),
+    initializeUiamContainers: jest.fn(),
+  };
+});
 
 jest.mock('@kbn/mock-idp-utils');
 
@@ -346,7 +357,7 @@ describe('detectRunningNodes()', () => {
     );
 
     await expect(detectRunningNodes(log, {})).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"ES has already been started, pass --kill to automatically stop the nodes on startup."`
+      `"ES has already been started, pass --kill to automatically stop the containers on startup."`
     );
   });
 });
@@ -356,17 +367,24 @@ describe('resolveEsArgs()', () => {
     ['foo', 'bar'],
     ['qux', 'zip'],
   ];
+  const refreshOverrideFlag = '-Des.stateless.allow.index.refresh_interval.override=true';
+  const findEnvValue = (args: string[], key: string) => {
+    const entry = args.find((value) => value.startsWith(`${key}=`));
+    return entry ? entry.slice(key.length + 1) : undefined;
+  };
 
   test('should return default args when no options', () => {
     const esArgs = resolveEsArgs(defaultEsArgs, {});
 
-    expect(esArgs).toHaveLength(4);
+    expect(esArgs).toHaveLength(6);
     expect(esArgs).toMatchInlineSnapshot(`
       Array [
         "--env",
         "foo=bar",
         "--env",
         "qux=zip",
+        "--env",
+        "ES_JAVA_OPTS=-Des.stateless.allow.index.refresh_interval.override=true",
       ]
     `);
   });
@@ -374,13 +392,15 @@ describe('resolveEsArgs()', () => {
   test('should override default args when options is a string', () => {
     const esArgs = resolveEsArgs(defaultEsArgs, { esArgs: 'foo=true' });
 
-    expect(esArgs).toHaveLength(4);
+    expect(esArgs).toHaveLength(6);
     expect(esArgs).toMatchInlineSnapshot(`
       Array [
         "--env",
         "foo=true",
         "--env",
         "qux=zip",
+        "--env",
+        "ES_JAVA_OPTS=-Des.stateless.allow.index.refresh_interval.override=true",
       ]
     `);
   });
@@ -388,13 +408,15 @@ describe('resolveEsArgs()', () => {
   test('should override default args when options is an array', () => {
     const esArgs = resolveEsArgs(defaultEsArgs, { esArgs: ['foo=false', 'qux=true'] });
 
-    expect(esArgs).toHaveLength(4);
+    expect(esArgs).toHaveLength(6);
     expect(esArgs).toMatchInlineSnapshot(`
       Array [
         "--env",
         "foo=false",
         "--env",
         "qux=true",
+        "--env",
+        "ES_JAVA_OPTS=-Des.stateless.allow.index.refresh_interval.override=true",
       ]
     `);
   });
@@ -402,7 +424,7 @@ describe('resolveEsArgs()', () => {
   test('should override defaults args and handle password option', () => {
     const esArgs = resolveEsArgs(defaultEsArgs, { esArgs: 'foo=false', password: 'hello' });
 
-    expect(esArgs).toHaveLength(6);
+    expect(esArgs).toHaveLength(8);
     expect(esArgs).toMatchInlineSnapshot(`
       Array [
         "--env",
@@ -411,6 +433,8 @@ describe('resolveEsArgs()', () => {
         "qux=zip",
         "--env",
         "ELASTIC_PASSWORD=hello",
+        "--env",
+        "ES_JAVA_OPTS=-Des.stateless.allow.index.refresh_interval.override=true",
       ]
     `);
   });
@@ -418,7 +442,7 @@ describe('resolveEsArgs()', () => {
   test('should add SSL args when SSL is passed', () => {
     const esArgs = resolveEsArgs(defaultEsArgs, { ssl: true });
 
-    expect(esArgs).toHaveLength(10);
+    expect(esArgs).toHaveLength(12);
     expect(esArgs).toMatchInlineSnapshot(`
       Array [
         "--env",
@@ -431,6 +455,8 @@ describe('resolveEsArgs()', () => {
         "xpack.security.http.ssl.keystore.path=/usr/share/elasticsearch/config/certs/elasticsearch.p12",
         "--env",
         "xpack.security.http.ssl.verification_mode=certificate",
+        "--env",
+        "ES_JAVA_OPTS=-Des.stateless.allow.index.refresh_interval.override=true",
       ]
     `);
   });
@@ -471,6 +497,8 @@ describe('resolveEsArgs()', () => {
         "xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.name=http://saml.elastic-cloud.com/attributes/name",
         "--env",
         "xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.mail=http://saml.elastic-cloud.com/attributes/email",
+        "--env",
+        "ES_JAVA_OPTS=-Des.stateless.allow.index.refresh_interval.override=true",
       ]
     `);
   });
@@ -491,8 +519,131 @@ describe('resolveEsArgs()', () => {
         "xpack.security.http.ssl.keystore.path=/usr/share/elasticsearch/config/certs/elasticsearch.p12",
         "--env",
         "xpack.security.http.ssl.verification_mode=certificate",
+        "--env",
+        "ES_JAVA_OPTS=-Des.stateless.allow.index.refresh_interval.override=true",
       ]
     `);
+  });
+
+  test('should not add UIAM-related args when run in Serverless mode without `--uiam` option', () => {
+    const esArgs = resolveEsArgs([], {
+      ssl: true,
+      kibanaUrl: 'http://localhost:5601/',
+      projectType,
+      basePath: baseEsPath,
+      uiam: false,
+    });
+
+    expect(esArgs).toMatchInlineSnapshot(`
+      Array [
+        "--env",
+        "xpack.security.http.ssl.enabled=true",
+        "--env",
+        "xpack.security.http.ssl.keystore.path=/usr/share/elasticsearch/config/certs/elasticsearch.p12",
+        "--env",
+        "xpack.security.http.ssl.verification_mode=certificate",
+        "--env",
+        "xpack.security.authc.native_role_mappings.enabled=true",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.order=0",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.idp.metadata.path=/usr/share/elasticsearch/config/secrets/idp_metadata.xml",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.idp.entity_id=urn:mock-idp",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.sp.entity_id=http://localhost:5601",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.sp.acs=http://localhost:5601/api/security/saml/callback",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.sp.logout=http://localhost:5601/logout",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.principal=http://saml.elastic-cloud.com/attributes/principal",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.groups=http://saml.elastic-cloud.com/attributes/roles",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.name=http://saml.elastic-cloud.com/attributes/name",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.mail=http://saml.elastic-cloud.com/attributes/email",
+        "--env",
+        "serverless.project_type=elasticsearch_general_purpose",
+        "--env",
+        "ES_JAVA_OPTS=-Des.stateless.allow.index.refresh_interval.override=true",
+      ]
+    `);
+  });
+
+  test('should add UIAM-related args when run in Serverless mode with `--uiam` option', () => {
+    const esArgs = resolveEsArgs([], {
+      ssl: true,
+      kibanaUrl: 'http://localhost:5601/',
+      projectType,
+      basePath: baseEsPath,
+      uiam: true,
+    });
+
+    expect(esArgs).toMatchInlineSnapshot(`
+      Array [
+        "--env",
+        "xpack.security.http.ssl.enabled=true",
+        "--env",
+        "xpack.security.http.ssl.keystore.path=/usr/share/elasticsearch/config/certs/elasticsearch.p12",
+        "--env",
+        "xpack.security.http.ssl.verification_mode=certificate",
+        "--env",
+        "xpack.security.authc.native_role_mappings.enabled=true",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.order=0",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.idp.metadata.path=/usr/share/elasticsearch/config/secrets/idp_metadata.xml",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.idp.entity_id=urn:mock-idp",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.sp.entity_id=http://localhost:5601",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.sp.acs=http://localhost:5601/api/security/saml/callback",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.sp.logout=http://localhost:5601/logout",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.principal=http://saml.elastic-cloud.com/attributes/principal",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.groups=http://saml.elastic-cloud.com/attributes/roles",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.name=http://saml.elastic-cloud.com/attributes/name",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.mail=http://saml.elastic-cloud.com/attributes/email",
+        "--env",
+        "metering.url=http://localhost:5601/",
+        "--env",
+        "metering.report_period=60m",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.private_attributes=http://saml.elastic-cloud.com/attributes/uiam/authentication/access_token,http://saml.elastic-cloud.com/attributes/uiam/authentication/access_token_expires_at,http://saml.elastic-cloud.com/attributes/uiam/authentication/refresh_token,http://saml.elastic-cloud.com/attributes/uiam/authentication/refresh_token_expires_at",
+        "--env",
+        "serverless.organization_id=org1234567890",
+        "--env",
+        "serverless.project_type=elasticsearch_general_purpose",
+        "--env",
+        "serverless.project_id=abcde1234567890",
+        "--env",
+        "serverless.universal_iam_service.enabled=true",
+        "--env",
+        "serverless.universal_iam_service.url=http://uiam:8080",
+        "--env",
+        "ES_JAVA_OPTS=-Des.stateless.allow.index.refresh_interval.override=true",
+      ]
+    `);
+  });
+
+  test('should append refresh interval override when ES_JAVA_OPTS is provided', () => {
+    const esArgs = resolveEsArgs([], { esArgs: 'ES_JAVA_OPTS=-Xms1g -Xmx1g' });
+
+    expect(findEnvValue(esArgs, 'ES_JAVA_OPTS')).toBe(`-Xms1g -Xmx1g ${refreshOverrideFlag}`);
+  });
+
+  test('should not duplicate refresh interval override when already present', () => {
+    const existingOptions = `-Xms1g -Xmx1g ${refreshOverrideFlag}`;
+    const esArgs = resolveEsArgs([], { esArgs: `ES_JAVA_OPTS=${existingOptions}` });
+
+    expect(findEnvValue(esArgs, 'ES_JAVA_OPTS')).toBe(existingOptions);
   });
 });
 
@@ -654,6 +805,17 @@ describe('runServerlessEsNode()', () => {
 });
 
 describe('runServerlessCluster()', () => {
+  let runUiamContainerMock: jest.MockedFunction<typeof dockerUiam.runUiamContainer>;
+  let initializeUiamContainersMock: jest.MockedFunction<typeof dockerUiam.initializeUiamContainers>;
+  beforeEach(() => {
+    runUiamContainerMock = dockerUiam.runUiamContainer as jest.MockedFunction<
+      typeof dockerUiam.runUiamContainer
+    >;
+    initializeUiamContainersMock = dockerUiam.initializeUiamContainers as jest.MockedFunction<
+      typeof dockerUiam.initializeUiamContainers
+    >;
+  });
+
   test('should start 3 serverless nodes', async () => {
     waitUntilClusterReadyMock.mockResolvedValue();
     mockFs({
@@ -665,13 +827,48 @@ describe('runServerlessCluster()', () => {
 
     // docker version (1)
     // docker ps (1)
-    // docker container rm (3)
+    // docker container rm (5 = 3 for ES nodes, 2 for UIAM containers)
     // docker network create (1)
     // docker pull (1)
     // docker inspect (1)
     // docker run (3)
     // docker logs (1)
-    expect(execa.mock.calls).toHaveLength(12);
+    expect(execa.mock.calls).toHaveLength(14);
+
+    // UIAM containers should not be started when `--uiam` is not passed
+    expect(runUiamContainerMock).not.toHaveBeenCalled();
+    expect(initializeUiamContainersMock).not.toHaveBeenCalled();
+  });
+
+  test('should start 3 serverless ES nodes and two UIAM containers when in UIAM mode', async () => {
+    waitUntilClusterReadyMock.mockResolvedValue();
+    mockFs({
+      [baseEsPath]: {},
+    });
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+
+    await runServerlessCluster(log, { projectType, basePath: baseEsPath, uiam: true });
+
+    // docker version (1)
+    // docker ps (1)
+    // docker container rm (5 = 3 for ES nodes, 2 for UIAM containers)
+    // docker network create (1)
+    // docker pull (3 = 1 for ES nodes, 2 for UIAM containers)
+    // docker inspect (2 = image info call for ES nodes is memoized in the previous test, 2 for UIAM containers)
+    // docker run (3)
+    // docker logs (1)
+    expect(execa.mock.calls).toHaveLength(17);
+
+    expect(runUiamContainerMock).toHaveBeenCalledTimes(2);
+    expect(runUiamContainerMock).toHaveBeenCalledWith(
+      expect.anything(),
+      dockerUiam.UIAM_CONTAINERS[0]
+    );
+    expect(runUiamContainerMock).toHaveBeenCalledWith(
+      expect.anything(),
+      dockerUiam.UIAM_CONTAINERS[1]
+    );
+    expect(initializeUiamContainersMock).toHaveBeenCalledTimes(1);
   });
 
   test(`should wait for serverless nodes to return 'green' status`, async () => {
@@ -764,9 +961,24 @@ describe('teardownServerlessClusterSync()', () => {
 
     expect(execa.commandSync.mock.calls).toHaveLength(2);
     expect(execa.commandSync.mock.calls[0][0]).toEqual(
-      expect.stringContaining(ES_SERVERLESS_DEFAULT_IMAGE)
+      `docker ps --filter status=running --filter ancestor=${ES_SERVERLESS_DEFAULT_IMAGE} --quiet`
     );
     expect(execa.commandSync.mock.calls[1][0]).toEqual(`docker kill ${nodes.join(' ')}`);
+  });
+
+  test('should kill running serverless nodes and UIAM containers when in UIAM mode', () => {
+    const containers = ['es01', 'es02', 'es03', 'uiam-cosmosdb', 'uiam'];
+    execa.commandSync.mockImplementation(() => ({
+      stdout: containers.join('\n'),
+    }));
+
+    teardownServerlessClusterSync(log, { ...defaultOptions, uiam: true });
+
+    expect(execa.commandSync.mock.calls).toHaveLength(2);
+    expect(execa.commandSync.mock.calls[0][0]).toEqual(
+      `docker ps --filter status=running --filter ancestor=${ES_SERVERLESS_DEFAULT_IMAGE} --filter ancestor=${dockerUiam.COSMOS_DB_EMULATOR_DEFAULT_IMAGE} --filter ancestor=${dockerUiam.UIAM_DEFAULT_IMAGE} --quiet`
+    );
+    expect(execa.commandSync.mock.calls[1][0]).toEqual(`docker kill ${containers.join(' ')}`);
   });
 
   test('should not kill if no serverless nodes', () => {
@@ -807,12 +1019,12 @@ describe('runDockerContainer()', () => {
     await expect(runDockerContainer(log, {})).resolves.toBeUndefined();
     // docker version (1)
     // docker ps (1)
-    // docker container rm (3)
+    // docker container rm (5 = 3 for ES nodes, 2 for UIAM containers)
     // docker network create (1)
     // docker pull (1)
     // docker inspect (1)
     // docker run (1)
-    expect(execa.mock.calls).toHaveLength(9);
+    expect(execa.mock.calls).toHaveLength(11);
   });
 });
 
@@ -831,7 +1043,7 @@ describe('printESImageInfo', () => {
       })
     );
 
-    await printESImageInfo(
+    await printDockerImageInfo(
       log,
       'docker.elastic.co/elasticsearch-ci/elasticsearch-serverless:latest'
     );
@@ -855,7 +1067,7 @@ describe('printESImageInfo', () => {
       })
     );
 
-    await printESImageInfo(log, 'docker.elastic.co/elasticsearch/elasticsearch:8.15-SNAPSHOT');
+    await printDockerImageInfo(log, 'docker.elastic.co/elasticsearch/elasticsearch:8.15-SNAPSHOT');
 
     expect(execa.mock.calls).toHaveLength(1);
     expect(logWriter.messages[0]).toContain(

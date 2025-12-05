@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { TransportResult, errors, estypes } from '@elastic/elasticsearch';
+import type { TransportResult, estypes } from '@elastic/elasticsearch';
+import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { JOB_STATUS } from '@kbn/reporting-common';

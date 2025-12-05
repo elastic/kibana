@@ -7,17 +7,17 @@
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import { omit } from 'lodash';
-import {
-  ConfigKey,
+import type {
   EncryptedSyntheticsSavedMonitor,
   HTTPFields,
   MonitorFields,
   PrivateLocation,
 } from '@kbn/synthetics-plugin/common/runtime_types';
-import { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import { ConfigKey } from '@kbn/synthetics-plugin/common/runtime_types';
+import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { omitResponseTimestamps, omitEmptyValues } from './helpers/monitor';
 import { PrivateLocationTestService } from '../../services/synthetics_private_location';
@@ -25,6 +25,8 @@ import { SyntheticsMonitorTestService } from '../../services/synthetics_monitor'
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('EditMonitorAPI - Private Location', function () {
+    // TODO: Replace with roleScopedSupertest for deployment-agnostic compatibility
+    // eslint-disable-next-line @kbn/eslint/deployment_agnostic_test_context
     const supertestWithAuth = getService('supertest');
     const supertest = getService('supertestWithoutAuth');
     const kibanaServer = getService('kibanaServer');

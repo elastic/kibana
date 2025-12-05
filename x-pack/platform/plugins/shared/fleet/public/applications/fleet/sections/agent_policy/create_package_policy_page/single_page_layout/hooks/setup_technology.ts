@@ -21,10 +21,10 @@ import { SelectedPolicyTab } from '../../components';
 import {
   AGENTLESS_AGENT_POLICY_INACTIVITY_TIMEOUT,
   AGENTLESS_AGENT_POLICY_MONITORING,
-  SERVERLESS_DEFAULT_OUTPUT_ID,
-  DEFAULT_OUTPUT_ID,
-  SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
-  DEFAULT_FLEET_SERVER_HOST_ID,
+  ECH_AGENTLESS_OUTPUT_ID,
+  SERVERLESS_AGENTLESS_OUTPUT_ID,
+  ECH_AGENTLESS_FLEET_SERVER_HOST_ID,
+  SERVERLESS_AGENTLESS_FLEET_SERVER_HOST_ID,
 } from '../../../../../../../../common/constants';
 import {
   isAgentlessIntegration as isAgentlessIntegrationFn,
@@ -107,9 +107,17 @@ export function useSetupTechnology({
   const [currentAgentPolicy, setCurrentAgentPolicy] = useState(newAgentPolicy);
 
   const allowedSetupTechnologies = useMemo(() => {
-    return isOnlyAgentlessIntegration(packageInfo, integrationToEnable)
-      ? [SetupTechnology.AGENTLESS]
-      : [SetupTechnology.AGENTLESS, SetupTechnology.AGENT_BASED];
+    const setupTechnologies = [];
+
+    if (isAgentlessIntegrationFn(packageInfo, integrationToEnable)) {
+      setupTechnologies.push(SetupTechnology.AGENTLESS);
+    }
+
+    if (!isOnlyAgentlessIntegration(packageInfo, integrationToEnable)) {
+      setupTechnologies.push(SetupTechnology.AGENT_BASED);
+    }
+
+    return setupTechnologies;
   }, [integrationToEnable, packageInfo]);
   const [selectedSetupTechnology, setSelectedSetupTechnology] = useState<SetupTechnology>(
     SetupTechnology.AGENT_BASED
@@ -145,9 +153,9 @@ export function useSetupTechnology({
   useEffect(() => {
     const fetchOutputId = async () => {
       const outputId = isServerless
-        ? SERVERLESS_DEFAULT_OUTPUT_ID
+        ? SERVERLESS_AGENTLESS_OUTPUT_ID
         : isCloud
-        ? DEFAULT_OUTPUT_ID
+        ? ECH_AGENTLESS_OUTPUT_ID
         : undefined;
       if (outputId) {
         const outputData = await sendGetOneOutput(outputId);
@@ -158,9 +166,9 @@ export function useSetupTechnology({
     };
     const fetchFleetServerHostId = async () => {
       const hostId = isServerless
-        ? SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID
+        ? SERVERLESS_AGENTLESS_FLEET_SERVER_HOST_ID
         : isCloud
-        ? DEFAULT_FLEET_SERVER_HOST_ID
+        ? ECH_AGENTLESS_FLEET_SERVER_HOST_ID
         : undefined;
 
       if (hostId) {
@@ -206,7 +214,12 @@ export function useSetupTechnology({
         inactivity_timeout: AGENTLESS_AGENT_POLICY_INACTIVITY_TIMEOUT,
         supports_agentless: true,
         monitoring_enabled: AGENTLESS_AGENT_POLICY_MONITORING,
-        ...(agentlessPolicyOutputId ? { data_output_id: agentlessPolicyOutputId } : {}),
+        ...(agentlessPolicyOutputId
+          ? {
+              data_output_id: agentlessPolicyOutputId,
+              monitoring_output_id: agentlessPolicyOutputId,
+            }
+          : {}),
         ...(agentlessPolicyFleetServerHostId
           ? { fleet_server_host_id: agentlessPolicyFleetServerHostId }
           : {}),

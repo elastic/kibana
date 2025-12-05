@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { CONTEXT_MENU_TRIGGER, EmbeddableSetup } from '@kbn/embeddable-plugin/public';
-import { ADD_PANEL_TRIGGER, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import {
-  ADD_MARKDOWN_ACTION_ID,
-  CONVERT_LEGACY_MARKDOWN_ACTION_ID,
-  MARKDOWN_ID,
-} from './constants';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { ADD_MARKDOWN_ACTION_ID, CONVERT_LEGACY_MARKDOWN_ACTION_ID } from './constants';
+import { MARKDOWN_EMBEDDABLE_TYPE } from '../common/constants';
 
 export interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -26,7 +25,7 @@ export interface StartDeps {
 
 export class DashboardMarkdownPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   public setup(core: CoreSetup<StartDeps>, { embeddable }: SetupDeps) {
-    embeddable.registerReactEmbeddableFactory(MARKDOWN_ID, async () => {
+    embeddable.registerReactEmbeddableFactory(MARKDOWN_EMBEDDABLE_TYPE, async () => {
       const { markdownEmbeddableFactory } = await import('./async_services');
       return markdownEmbeddableFactory;
     });

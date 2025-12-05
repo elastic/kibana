@@ -6,23 +6,29 @@
  */
 
 import type { Logger, RequestHandler } from '@kbn/core/server';
+import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { isOnechatError } from '@kbn/onechat-common';
-import { ONECHAT_API_SETTING_ID } from '../../common/constants';
+import { isValidLicense } from '../../common/license';
+import type { OnechatHandlerContext } from '../request_handler_context';
 
 export interface RouteWrapConfig {
   /**
    * The feature flag to gate this route behind.
-   * Defaults to {ONECHAT_API_SETTING_ID}
+   * Defaults to {AGENT_BUILDER_ENABLED_SETTING_ID}
    */
   featureFlag?: string | false;
+  /**
+   * If true, will not check license level
+   */
+  ignoreLicense?: boolean;
 }
 
 export const getHandlerWrapper =
   ({ logger }: { logger: Logger }) =>
-  <P, Q, B>(
-    handler: RequestHandler<P, Q, B>,
-    { featureFlag = ONECHAT_API_SETTING_ID }: RouteWrapConfig = {}
-  ): RequestHandler<P, Q, B> => {
+  <P, Q, B, Context extends OnechatHandlerContext>(
+    handler: RequestHandler<P, Q, B, Context>,
+    { featureFlag = AGENT_BUILDER_ENABLED_SETTING_ID, ignoreLicense = false }: RouteWrapConfig = {}
+  ): RequestHandler<P, Q, B, Context> => {
     return async (ctx, req, res) => {
       if (featureFlag !== false) {
         const { uiSettings } = await ctx.core;
@@ -31,6 +37,14 @@ export const getHandlerWrapper =
           return res.notFound();
         }
       }
+
+      if (!ignoreLicense) {
+        const { license } = await ctx.licensing;
+        if (!isValidLicense(license)) {
+          return res.forbidden();
+        }
+      }
+
       try {
         return await handler(ctx, req, res);
       } catch (e) {

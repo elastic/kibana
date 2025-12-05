@@ -28,8 +28,6 @@ export const INDICATORS_TABLE_FEED_NAME_CELL = '[data-gridcell-column-id="threat
 export const INDICATORS_TABLE_FIRST_SEEN_COLUMN_HEADER = getDataTestSubjectSelector(
   'dataGridHeaderCell-threat.indicator.first_seen'
 );
-export const INDICATORS_TABLE_INDICATOR_FIRST_SEEN_CELL =
-  '[data-gridcell-column-id="threat.indicator.first_seen"]';
 export const INDICATORS_TABLE_LAST_SEEN_COLUMN_HEADER = getDataTestSubjectSelector(
   'dataGridHeaderCell-threat.indicator.last_seen'
 );
@@ -52,38 +50,33 @@ export const INDICATORS_TABLE_MORE_ACTION_BUTTON_ICON = getDataTestSubjectSelect
 export const TOGGLE_FLYOUT_BUTTON = getDataTestSubjectSelector('tiToggleIndicatorFlyoutButton');
 export const FLYOUT_CLOSE_BUTTON = getDataTestSubjectSelector('euiFlyoutCloseButton');
 export const FLYOUT_TITLE = getDataTestSubjectSelector('tiIndicatorFlyoutTitle');
-export const FLYOUT_TABS = getDataTestSubjectSelector('tiIndicatorFlyoutTabs');
+export const FLYOUT_OVERVIEW_TAB = getDataTestSubjectSelector('securitySolutionFlyoutOverviewTab');
+export const FLYOUT_TABLE_TAB = getDataTestSubjectSelector('securitySolutionFlyoutTableTab');
+export const FLYOUT_JSON_TAB = getDataTestSubjectSelector('securitySolutionFlyoutJsonTab');
 export const FLYOUT_TABLE = getDataTestSubjectSelector('tiFlyoutTable');
-export const FLYOUT_JSON = getDataTestSubjectSelector('tiFlyoutJsonCodeBlock');
+export const FLYOUT_JSON = getDataTestSubjectSelector('indicators-flyoutjsonView');
 export const FLYOUT_OVERVIEW_TAB_TABLE_ROW_FILTER_IN_BUTTON = getDataTestSubjectSelector(
-  'tiFlyoutOverviewTableRowFilterInButton'
+  'actionItem-security-default-cellActions-filterIn'
 );
 export const FLYOUT_OVERVIEW_TAB_TABLE_ROW_FILTER_OUT_BUTTON = getDataTestSubjectSelector(
-  'tiFlyoutOverviewTableRowFilterOutButton'
+  'actionItem-security-default-cellActions-filterOut'
 );
 export const FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM = getDataTestSubjectSelector(
   'tiFlyoutOverviewHighLevelBlocksItem'
 );
 export const FLYOUT_OVERVIEW_TAB_BLOCKS_FILTER_IN_BUTTON = getDataTestSubjectSelector(
-  'tiFlyoutOverviewHighLevelBlocksFilterInButton'
+  'actionItem-security-default-cellActions-filterIn'
 );
 export const FLYOUT_OVERVIEW_TAB_BLOCKS_FILTER_OUT_BUTTON = getDataTestSubjectSelector(
-  'tiFlyoutOverviewHighLevelBlocksFilterOutButton'
+  'actionItem-security-default-cellActions-filterOut'
 );
 export const FLYOUT_OVERVIEW_HIGHLIGHTED_FIELDS_TABLE = getDataTestSubjectSelector(
   'tiFlyoutOverviewTableRow'
 );
-export const FLYOUT_TABLE_MORE_ACTIONS_BUTTON = `${getDataTestSubjectSelector(
-  'tiFlyoutOverviewTableRowPopoverButton'
-)} button`;
-export const FLYOUT_BLOCK_MORE_ACTIONS_BUTTON = `${getDataTestSubjectSelector(
-  'tiFlyoutOverviewHighLevelBlocksPopoverButton'
-)} button`;
-export const FLYOUT_TABLE_TAB_ROW_FILTER_IN_BUTTON = getDataTestSubjectSelector(
-  'tiFlyoutTableFilterInButton'
-);
+export const FLYOUT_BLOCK_MORE_ACTIONS_BUTTON =
+  getDataTestSubjectSelector('showExtraActionsButton');
 export const FLYOUT_TABLE_TAB_ROW_FILTER_OUT_BUTTON = getDataTestSubjectSelector(
-  'tiFlyoutTableFilterOutButton'
+  'actionItem-security-default-cellActions-filterOut'
 );
 
 export const FLYOUT_TAKE_ACTION_BUTTON = getDataTestSubjectSelector(
@@ -127,4 +120,3 @@ export const INSPECTOR_BUTTON = getDataTestSubjectSelector('tiIndicatorsGridInsp
 export const INSPECTOR_PANEL = getDataTestSubjectSelector('inspectorPanel');
 export const ADD_INTEGRATIONS_BUTTON = getDataTestSubjectSelector('add-data');
 export const REFRESH_BUTTON = getDataTestSubjectSelector('querySubmitButton');
-export const ADDED_TO_TIMELINE_TOAST = getDataTestSubjectSelector('add-to-timeline-toast-success');

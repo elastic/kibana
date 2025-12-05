@@ -12,7 +12,7 @@ import { FIELDS_PATH } from '@kbn/data-views-plugin/common/constants';
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

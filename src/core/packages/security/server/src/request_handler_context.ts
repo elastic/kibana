@@ -9,7 +9,7 @@
 
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 
-import { AuditLogger } from './audit_logging/audit_logger';
+import type { AuditLogger } from './audit_logging/audit_logger';
 import type { APIKeysServiceWithContext } from './authentication/api_keys';
 
 export interface SecurityRequestHandlerContext {

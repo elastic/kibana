@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-require('../../../../../../src/setup_node_env');
+require('@kbn/setup-node-env');
 
 const fs = require('fs');
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -19,7 +19,7 @@ const OUTPUT_DIRECTORY = resolve('public', 'detections', 'mitre');
 // Every release we should update the version of MITRE ATT&CK content and regenerate the model in our code.
 // This version must correspond to the one used for prebuilt rules in https://github.com/elastic/detection-rules.
 // This version is basically a tag on https://github.com/mitre/cti/tags, or can be a branch name like `master`.
-const MITRE_CONTENT_VERSION = 'ATT&CK-v16.1'; // last updated when preparing for 8.18.1 release
+const MITRE_CONTENT_VERSION = 'ATT&CK-v17.1'; // last updated when preparing for 9.2 release
 const MITRE_CONTENT_URL = `https://raw.githubusercontent.com/mitre/cti/${MITRE_CONTENT_VERSION}/enterprise-attack/enterprise-attack.json`;
 
 /**
@@ -199,8 +199,19 @@ const extractSubtechniques = (mitreData) => {
 const buildMockThreatData = (tacticsData, techniques, subtechniques) => {
   const numberOfThreatsToGenerate = 4;
   const mockThreatData = [];
+  const generatedTechniqueIds = new Set();
   for (let i = 0; i < numberOfThreatsToGenerate; i++) {
-    const subtechnique = subtechniques[i * 50]; // Increase our interval to broaden the subtechnique types we're pulling data from a bit
+    let subtechnique;
+    let count = i * 50;
+    /**
+     * Since we're building from the subtechnique level -> up, we make sure there are no
+     * dupilicate techniques in the generated MITRE test data. This can cause flakiness in
+     * the tests as we don't expect the data to duplicated in the table
+     */
+    while (subtechnique == null || generatedTechniqueIds.has(subtechnique.techniqueId)) {
+      subtechnique = subtechniques[count++];
+    }
+    generatedTechniqueIds.add(subtechnique.techniqueId);
     const technique = techniques.find((technique) => technique.id === subtechnique.techniqueId);
     const tactic = tacticsData.find((tactic) => tactic.shortName === technique.tactics[0]);
 

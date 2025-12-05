@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import {
+import type {
   IndicesIndexTemplate,
   TransformGetTransformStatsTransformStats,
 } from '@elastic/elasticsearch/lib/api/types';
-import { EntityDefinition } from '@kbn/entities-schema';
+import type { EntityDefinition } from '@kbn/entities-schema';
 
 interface TransformState {
   id: string;

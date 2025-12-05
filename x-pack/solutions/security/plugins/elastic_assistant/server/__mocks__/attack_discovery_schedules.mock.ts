@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   AttackDiscoverySchedule,
   AttackDiscoveryScheduleAction,
   AttackDiscoveryScheduleCreateProps,
@@ -13,7 +13,7 @@ import {
   AttackDiscoveryScheduleUpdateProps,
 } from '@kbn/elastic-assistant-common';
 
-import { SanitizedRule, SanitizedRuleAction } from '@kbn/alerting-types';
+import type { SanitizedRule, SanitizedRuleAction } from '@kbn/alerting-types';
 
 export const getAttackDiscoveryCreateScheduleMock = (
   enabled = true

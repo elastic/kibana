@@ -5,62 +5,64 @@
  * 2.0.
  */
 
-import { shareReplay, switchMap, Observable } from 'rxjs';
-import { KibanaRequest } from '@kbn/core-http-server';
-import {
-  AgentMode,
-  type RoundInput,
-  type Conversation,
-  type ChatAgentEvent,
+import { Observable, shareReplay } from 'rxjs';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type {
+  RawRoundInput,
+  Conversation,
+  ChatAgentEvent,
+  AgentCapabilities,
 } from '@kbn/onechat-common';
+import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
 import type { AgentsServiceStart } from '../../agents';
 
 export const executeAgent$ = ({
   agentId,
   request,
+  capabilities,
   agentService,
-  conversation$,
-  mode,
+  conversation,
   nextInput,
   abortSignal,
+  defaultConnectorId,
+  browserApiTools,
 }: {
   agentId: string;
   request: KibanaRequest;
+  capabilities?: AgentCapabilities;
   agentService: AgentsServiceStart;
-  conversation$: Observable<Conversation>;
-  mode: AgentMode;
-  nextInput: RoundInput;
+  conversation: Conversation;
+  nextInput: RawRoundInput;
   abortSignal?: AbortSignal;
+  defaultConnectorId?: string;
+  browserApiTools?: BrowserApiToolMetadata[];
 }): Observable<ChatAgentEvent> => {
-  return conversation$.pipe(
-    switchMap((conversation) => {
-      return new Observable<ChatAgentEvent>((observer) => {
-        agentService
-          .execute({
-            request,
-            agentId,
-            abortSignal,
-            agentParams: {
-              agentMode: mode,
-              nextInput,
-              conversation: conversation.rounds,
-            },
-            onEvent: (event) => {
-              observer.next(event);
-            },
-          })
-          .then(
-            () => {
-              observer.complete();
-            },
-            (err) => {
-              observer.error(err);
-            }
-          );
+  return new Observable<ChatAgentEvent>((observer) => {
+    agentService
+      .execute({
+        request,
+        agentId,
+        abortSignal,
+        defaultConnectorId,
+        agentParams: {
+          nextInput,
+          conversation,
+          capabilities,
+          browserApiTools,
+        },
+        onEvent: (event) => {
+          observer.next(event);
+        },
+      })
+      .then(
+        () => {
+          observer.complete();
+        },
+        (err) => {
+          observer.error(err);
+        }
+      );
 
-        return () => {};
-      });
-    }),
-    shareReplay()
-  );
+    return () => {};
+  }).pipe(shareReplay());
 };

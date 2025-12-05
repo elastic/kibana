@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { ILicense, LicenseType } from '@kbn/licensing-plugin/server';
+import type { ILicense, LicenseType } from '@kbn/licensing-types';
 import { firstValueFrom, map, type Observable, ReplaySubject, type Subject } from 'rxjs';
 import type { AttachmentEmail, EmailService, HTMLEmail, PlainTextEmail } from './types';
 import { PLUGIN_ID } from '../../common';

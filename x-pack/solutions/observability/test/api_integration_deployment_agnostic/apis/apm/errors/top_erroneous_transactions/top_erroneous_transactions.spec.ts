@@ -5,13 +5,13 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import {
+import type {
   APIClientRequestParamsOf,
   APIReturnType,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import type { RecursivePartial } from '@kbn/apm-plugin/typings/common';
 import { sumBy, first, last } from 'lodash';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace/src/lib/apm/client/apm_synthtrace_es_client';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { config, generateData } from './generate_data';
 import { isFiniteNumber } from '../../utils/common';

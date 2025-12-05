@@ -8,11 +8,13 @@
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import type {
+  GroupingLicenseCtaMessageDetailsButtonProps,
+  GroupingLicenseCtaMessageTrialButtonDependencies,
+} from './grouping_license_cta_shared';
 import {
   GroupingLicenseCtaMessageDetailsButton,
-  GroupingLicenseCtaMessageDetailsButtonProps,
   GroupingLicenseCtaMessageTrialButton,
-  GroupingLicenseCtaMessageTrialButtonDependencies,
   groupingLicenseCtaMessageDescription,
   groupingLicenseCtaMessageTitle,
 } from './grouping_license_cta_shared';

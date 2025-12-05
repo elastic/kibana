@@ -11,13 +11,14 @@ import React, { useCallback, useState, useEffect } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFormRow,
   EuiCallOut,
   type EuiSwitchEvent,
   EuiPanel,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { TimeRange } from '@kbn/es-query';
@@ -35,7 +36,7 @@ import {
   appendStatsByToQuery,
 } from '@kbn/esql-utils';
 import { ESQLLangEditor } from '../../../create_editor';
-import { ControlWidth, ControlLabel } from './shared_form_components';
+import { ControlWidth, ControlLabel, ControlSelectionType } from './shared_form_components';
 import { ChooseColumnPopover } from './choose_column_popover';
 
 interface ValueControlFormProps {
@@ -48,6 +49,7 @@ interface ValueControlFormProps {
   initialState?: ESQLControlState;
   valuesRetrieval?: string;
   timeRange?: TimeRange;
+  currentApp?: string;
 }
 
 const SUGGESTED_INTERVAL_VALUES = ['5 minutes', '1 hour', '1 day', '1 week', '1 month'];
@@ -68,8 +70,10 @@ export function ValueControlForm({
   setControlState,
   valuesRetrieval,
   timeRange,
+  currentApp,
 }: ValueControlFormProps) {
   const isMounted = useMountedState();
+  const theme = useEuiTheme();
 
   const [availableValuesOptions, setAvailableValuesOptions] = useState<EuiComboBoxOptionOption[]>(
     variableType === ESQLVariableType.TIME_LITERAL
@@ -84,7 +88,7 @@ export function ValueControlForm({
   );
 
   const [selectedValues, setSelectedValues] = useState<EuiComboBoxOptionOption[]>(
-    initialState
+    initialState?.availableOptions
       ? initialState.availableOptions.map((option) => {
           return {
             label: option,
@@ -104,8 +108,14 @@ export function ValueControlForm({
   const [queryColumns, setQueryColumns] = useState<string[]>(
     valuesRetrieval ? [valuesRetrieval] : []
   );
+  const [showValuesPreview, setShowValuesPreview] = useState<boolean>(false);
   const [label, setLabel] = useState(initialState?.title ?? '');
   const [minimumWidth, setMinimumWidth] = useState(initialState?.width ?? 'medium');
+  const shouldDefaultToMultiSelect = variableType === ESQLVariableType.MULTI_VALUES;
+  const [singleSelect, setSingleSelect] = useState<boolean>(
+    initialState?.singleSelect ?? !shouldDefaultToMultiSelect
+  );
+
   const [grow, setGrow] = useState(initialState?.grow ?? false);
 
   const onValuesChange = useCallback((selectedOptions: EuiComboBoxOptionOption[]) => {
@@ -149,6 +159,10 @@ export function ValueControlForm({
     }
   }, []);
 
+  const onSelectionTypeChange = useCallback((isSingleSelect: boolean) => {
+    setSingleSelect(isSingleSelect);
+  }, []);
+
   const onGrowChange = useCallback((e: EuiSwitchEvent) => {
     setGrow(e.target.checked);
   }, []);
@@ -169,6 +183,7 @@ export function ValueControlForm({
           }
           const columns = results.response.columns.map((col) => col.name);
           setQueryColumns(columns);
+          setShowValuesPreview(true);
 
           if (columns.length === 1) {
             const valuesArray = results.response.values.map((value) => value[0]);
@@ -195,18 +210,18 @@ export function ValueControlForm({
   );
 
   useEffect(() => {
-    if (
-      !selectedValues?.length &&
-      controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY &&
-      valuesRetrieval
-    ) {
-      const queryForValues =
-        variableName !== ''
-          ? `FROM ${getIndexPatternFromESQLQuery(queryString)} | STATS BY ${valuesRetrieval}`
-          : '';
-      onValuesQuerySubmit(queryForValues);
+    if (!selectedValues?.length && controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY) {
+      if (initialState?.esqlQuery) {
+        onValuesQuerySubmit(initialState.esqlQuery);
+      } else if (valuesRetrieval) {
+        const queryForValues = `FROM ${getIndexPatternFromESQLQuery(
+          queryString
+        )} | STATS BY ${valuesRetrieval}`;
+        onValuesQuerySubmit(queryForValues);
+      }
     }
   }, [
+    initialState?.esqlQuery,
     controlFlyoutType,
     onValuesQuerySubmit,
     queryString,
@@ -223,9 +238,10 @@ export function ValueControlForm({
       availableOptions,
       selectedOptions: [availableOptions[0]],
       width: minimumWidth,
+      singleSelect,
       title: label || variableNameWithoutQuestionmark,
       variableName: variableNameWithoutQuestionmark,
-      variableType,
+      variableType: singleSelect ? variableType : ESQLVariableType.MULTI_VALUES,
       esqlQuery: valuesQuery || queryString,
       controlType: controlFlyoutType,
       grow,
@@ -234,6 +250,7 @@ export function ValueControlForm({
       setControlState(state);
     }
   }, [
+    singleSelect,
     controlFlyoutType,
     grow,
     initialState,
@@ -281,51 +298,71 @@ export function ValueControlForm({
               defaultMessage: 'Values query',
             })}
           />
-          {queryColumns.length > 0 && (
+          {showValuesPreview && (
             <EuiFormRow
               label={i18n.translate('esql.flyout.previewValues.placeholder', {
                 defaultMessage: 'Values preview',
               })}
               fullWidth
+              css={css`
+                margin-block-start: ${theme.euiTheme.size.base};
+              `}
             >
-              {queryColumns.length === 1 ? (
-                <EuiPanel
-                  paddingSize="s"
-                  color="primary"
-                  css={css`
-                    white-space: wrap;
-                    overflow-y: auto;
-                    max-height: 200px;
-                  `}
-                  data-test-subj="esqlValuesPreview"
-                >
-                  {selectedValues.map((value) => value.label).join(', ')}
-                </EuiPanel>
-              ) : (
-                <EuiCallOut
-                  title={i18n.translate('esql.flyout.displayMultipleColsCallout.title', {
-                    defaultMessage: 'Your query must return a single column',
-                  })}
-                  color="warning"
-                  iconType="warning"
-                  size="s"
-                  data-test-subj="esqlMoreThanOneColumnCallout"
-                >
-                  <p>
-                    <FormattedMessage
-                      id="esql.flyout.displayMultipleColsCallout.description"
-                      defaultMessage="Your query is currently returning {totalColumns} columns. Choose column {chooseColumnPopover} or use {boldText}."
-                      values={{
-                        totalColumns: queryColumns.length,
-                        boldText: <strong>STATS BY</strong>,
-                        chooseColumnPopover: (
-                          <ChooseColumnPopover columns={queryColumns} updateQuery={updateQuery} />
-                        ),
-                      }}
-                    />
-                  </p>
-                </EuiCallOut>
-              )}
+              <>
+                {queryColumns.length === 0 && (
+                  <EuiCallOut
+                    announceOnMount
+                    title={i18n.translate('esql.flyout.displayNoValuesForControlCallout.title', {
+                      defaultMessage:
+                        "This query isn't returning any values. Edit it and run it again.",
+                    })}
+                    color="warning"
+                    iconType="warning"
+                    size="s"
+                    data-test-subj="esqlNoValuesForControlCallout"
+                  />
+                )}
+                {queryColumns.length === 1 && (
+                  <EuiPanel
+                    paddingSize="s"
+                    color="primary"
+                    css={css`
+                      white-space: wrap;
+                      overflow-y: auto;
+                      max-height: 200px;
+                    `}
+                    data-test-subj="esqlValuesPreview"
+                  >
+                    {selectedValues.map((value) => value.label).join(', ')}
+                  </EuiPanel>
+                )}
+                {queryColumns.length > 1 && (
+                  <EuiCallOut
+                    announceOnMount
+                    title={i18n.translate('esql.flyout.displayMultipleColsCallout.title', {
+                      defaultMessage: 'Your query must return a single column',
+                    })}
+                    color="warning"
+                    iconType="warning"
+                    size="s"
+                    data-test-subj="esqlMoreThanOneColumnCallout"
+                  >
+                    <p>
+                      <FormattedMessage
+                        id="esql.flyout.displayMultipleColsCallout.description"
+                        defaultMessage="Your query is currently returning {totalColumns} columns. Choose column {chooseColumnPopover} or use {boldText}."
+                        values={{
+                          totalColumns: queryColumns.length,
+                          boldText: <strong>STATS BY</strong>,
+                          chooseColumnPopover: (
+                            <ChooseColumnPopover columns={queryColumns} updateQuery={updateQuery} />
+                          ),
+                        }}
+                      />
+                    </p>
+                  </EuiCallOut>
+                )}
+              </>
             </EuiFormRow>
           )}
         </>
@@ -370,6 +407,14 @@ export function ValueControlForm({
         grow={grow}
         onMinimumSizeChange={onMinimumSizeChange}
         onGrowChange={onGrowChange}
+        // This property is not compatible with the unified search yet
+        // we will hide this possibility for now
+        hideFitToSpace={currentApp === 'discover'}
+      />
+
+      <ControlSelectionType
+        singleSelect={singleSelect}
+        onSelectionTypeChange={onSelectionTypeChange}
       />
     </>
   );

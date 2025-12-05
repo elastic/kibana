@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiPageTemplate,
   EuiFlexItem,
   EuiFlexGroup,
   EuiButtonEmpty,
   EuiTabbedContent,
-  EuiTabbedContentTab,
   useEuiTheme,
   EuiButton,
 } from '@elastic/eui';
@@ -264,7 +264,7 @@ export const SearchIndexDetailsPage = () => {
                 ) : (
                   <EuiFlexItem>
                     <EuiButtonEmpty
-                      href={docLinks.links.apiReference}
+                      href={docLinks.links.apis.restApis}
                       target="_blank"
                       isLoading={isInitialLoading}
                       iconType="documentation"

@@ -34,7 +34,10 @@ export type {
 export { aiAssistantCapabilities } from '../common/capabilities';
 export { ConnectorSelectorBase } from './components/connector_selector/connector_selector_base';
 export { useAbortableAsync, type AbortableAsyncState } from './hooks/use_abortable_async';
-export { useGenAIConnectorsWithoutContext } from './hooks/use_genai_connectors';
+export {
+  useGenAIConnectorsWithoutContext,
+  type UseGenAIConnectorsResult,
+} from './hooks/use_genai_connectors';
 
 export { createStorybookChatService, createStorybookService } from './storybook_mock';
 
@@ -73,7 +76,6 @@ export {
   ELSER_ON_ML_NODE_INFERENCE_ID,
   ELSER_IN_EIS_INFERENCE_ID,
   E5_SMALL_INFERENCE_ID,
-  E5_LARGE_IN_EIS_INFERENCE_ID,
   EIS_PRECONFIGURED_INFERENCE_IDS,
   LEGACY_CUSTOM_INFERENCE_ID,
 } from '../common';
@@ -107,7 +109,6 @@ export {
   aiAssistantLogsIndexPattern,
   aiAssistantSimulatedFunctionCalling,
   aiAssistantSearchConnectorIndexPattern,
-  aiAssistantPreferredAIAssistantType,
 } from '../common/ui_settings/settings_keys';
 
 export {

@@ -8,16 +8,17 @@
  */
 
 import React, { useEffect, useReducer, useCallback, useState, useRef } from 'react';
-import { EuiDragDropContext, DragDropContextProps, useEuiPaddingSize } from '@elastic/eui';
+import type { DragDropContextProps } from '@elastic/eui';
+import { EuiDragDropContext, useEuiPaddingSize } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { type Filter, BooleanRelation, compareFilters } from '@kbn/es-query';
 import { FiltersBuilderContextType } from './context';
 import { FilterGroup } from './filter_group';
 import { FiltersBuilderReducer } from './reducer';
 import { getPathInArray } from './utils';
-import { FilterLocation } from './types';
+import type { FilterLocation } from './types';
 import { filtersBuilderCss } from './filters_builder.styles';
-import { SuggestionsAbstraction } from '../typeahead/suggestions_component';
+import type { SuggestionsAbstraction } from '../typeahead/suggestions_component';
 
 export interface FiltersBuilderProps {
   filters: Filter[];

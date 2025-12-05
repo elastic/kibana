@@ -6,7 +6,7 @@
  */
 
 import type { EnrichPolicyType } from '@elastic/elasticsearch/lib/api/types';
-import { SendRequestResponse } from '../types';
+import type { SendRequestResponse } from '../types';
 
 export interface SerializedEnrichPolicy {
   type: EnrichPolicyType;

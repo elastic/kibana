@@ -11,12 +11,13 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@el
 import { AlertLifecycleStatusBadge } from '@kbn/alerts-ui-shared/src/alert_lifecycle_status_badge';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AlertStatus, ALERT_DURATION, ALERT_FLAPPING, TIMESTAMP, TAGS } from '@kbn/rule-data-utils';
+import type { AlertStatus } from '@kbn/rule-data-utils';
+import { ALERT_DURATION, ALERT_FLAPPING, TIMESTAMP, TAGS } from '@kbn/rule-data-utils';
 import { css } from '@emotion/react';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { asDuration } from '../../../../common/utils/formatters';
-import { TopAlert } from '../../../typings/alerts';
+import type { TopAlert } from '../../../typings/alerts';
 import { CaseLinks } from './case_links';
 
 export interface StatusBarProps {
@@ -29,6 +30,7 @@ export function StatusBar({ alert, alertStatus }: StatusBarProps) {
   const dateFormat = useUiSetting<string>('dateFormat');
 
   const tags = alert?.fields[TAGS];
+  const workflowTags = alert?.fields['kibana.alert.workflow_tags'];
 
   if (!alert) {
     return null;
@@ -52,19 +54,41 @@ export function StatusBar({ alert, alertStatus }: StatusBarProps) {
       </EuiFlexItem>
       <CaseLinks alert={alert} />
       <EuiFlexItem grow={false}>
-        <TagsList tags={tags} ignoreEmpty color="default" />
+        <EuiFlexGroup gutterSize="xs">
+          <EuiText size="s" color="subdued">
+            <FormattedMessage
+              id="xpack.observability.pages.alertDetails.pageTitle.tags"
+              defaultMessage="Tags:"
+            />
+          </EuiText>
+          <TagsList tags={tags} ignoreEmpty color="default" />
+        </EuiFlexGroup>
       </EuiFlexItem>
+      {workflowTags && workflowTags.length > 0 && (
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="xs">
+            <EuiText size="s" color="subdued">
+              <FormattedMessage
+                id="xpack.observability.pages.alertDetails.pageTitle.workflowTags"
+                defaultMessage="Workflow tags:"
+              />
+            </EuiText>
+            <TagsList tags={workflowTags} ignoreEmpty color="default" />
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      )}
+
       <EuiFlexItem grow={false} css={{ minWidth: 100 }}>
-        <EuiFlexGroup gutterSize="none">
+        <EuiFlexGroup gutterSize="xs">
           <EuiText size="s" color="subdued">
             <FormattedMessage
               id="xpack.observability.pages.alertDetails.pageTitle.triggered"
-              defaultMessage="Triggered"
+              defaultMessage="Triggered:"
             />
-            :&nbsp;
           </EuiText>
           <EuiToolTip content={moment(Number(alert.start)).format(dateFormat)}>
             <EuiText
+              tabIndex={0}
               css={css`
                 font-weight: ${euiTheme.font.weight.semiBold};
               `}
@@ -76,13 +100,12 @@ export function StatusBar({ alert, alertStatus }: StatusBarProps) {
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false} css={{ minWidth: 120 }}>
-        <EuiFlexGroup gutterSize="none">
+        <EuiFlexGroup gutterSize="xs">
           <EuiText size="s" color="subdued">
             <FormattedMessage
               id="xpack.observability.pages.alertDetails.pageTitle.duration"
-              defaultMessage="Duration"
+              defaultMessage="Duration:"
             />
-            :&nbsp;
           </EuiText>
           <EuiText
             css={css`
@@ -95,16 +118,16 @@ export function StatusBar({ alert, alertStatus }: StatusBarProps) {
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false} css={{ minWidth: 240 }}>
-        <EuiFlexGroup gutterSize="none">
+        <EuiFlexGroup gutterSize="xs">
           <EuiText size="s" color="subdued">
             <FormattedMessage
               id="xpack.observability.pages.alertDetails.pageTitle.lastStatusUpdate"
-              defaultMessage="Last status update"
+              defaultMessage="Last status update:"
             />
-            :&nbsp;
           </EuiText>
           <EuiToolTip content={moment(alert.fields[TIMESTAMP]).format(dateFormat)}>
             <EuiText
+              tabIndex={0}
               css={css`
                 font-weight: ${euiTheme.font.weight.semiBold};
               `}

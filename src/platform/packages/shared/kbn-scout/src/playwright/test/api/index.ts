@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TestType, test as base, mergeTests } from 'playwright/test';
+import type { TestType } from 'playwright/test';
+import { test as base, mergeTests } from 'playwright/test';
 import {
   coreWorkerFixtures,
   esArchiverFixture,
   apiClientFixture,
+  apiServicesFixture,
   defaultRolesFixture,
   requestAuthFixture,
 } from '../../fixtures/scope/worker';
@@ -21,6 +23,7 @@ import type {
   RequestAuthFixture,
   ApiClientFixture,
   DefaultRolesFixture,
+  ApiServicesFixture,
 } from '../../fixtures/scope/worker';
 
 /**
@@ -28,6 +31,7 @@ import type {
  */
 export interface ApiWorkerFixtures extends CoreWorkerFixtures {
   apiClient: ApiClientFixture;
+  apiServices: ApiServicesFixture;
   defaultRolesFixture: DefaultRolesFixture;
   requestAuth: RequestAuthFixture;
   esArchiver: EsArchiverFixture;
@@ -69,6 +73,7 @@ export const apiTest = mergeTests(
   noBrowserFixtures,
   coreWorkerFixtures,
   apiClientFixture,
+  apiServicesFixture,
   defaultRolesFixture,
   requestAuthFixture,
   esArchiverFixture

@@ -8,7 +8,7 @@
  */
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
 import useDebounce from 'react-use/lib/useDebounce';
 import type { AlertDeleteParams } from '@kbn/alerting-types/alert_delete_types';

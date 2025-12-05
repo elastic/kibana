@@ -13,13 +13,16 @@ import * as Fsp from 'fs/promises';
 import * as Peggy from '@kbn/peggy';
 import * as DotText from '@kbn/dot-text';
 import { asyncForEach } from '@kbn/std';
-import { TransformConfig, withFastAsyncTransform } from '@kbn/babel-transform';
+import type { TransformConfig } from '@kbn/babel-transform';
+import { withFastAsyncTransform } from '@kbn/babel-transform';
 import { makeMatcher } from '@kbn/picomatcher';
 import { PackageFileMap } from '@kbn/repo-file-maps';
 import { getRepoFiles } from '@kbn/get-repo-files';
 import { REPO_ROOT } from '@kbn/repo-info';
-import execa, { StdioOption } from 'execa';
-import { deleteAll, scanCopy, Task, write } from '../lib';
+import type { StdioOption } from 'execa';
+import execa from 'execa';
+import type { Task } from '../lib';
+import { deleteAll, scanCopy, write } from '../lib';
 import type { Record } from '../lib/fs_records';
 import { fleetBuildTasks } from './fleet';
 
@@ -110,6 +113,7 @@ export const BuildPackages: Task = {
     await buildWebpackBundles({
       quiet: false,
       dist: true,
+      noCache: true,
     });
 
     const transformConfig: TransformConfig = {
@@ -320,8 +324,20 @@ export const BuildPackages: Task = {
   },
 };
 
-export async function buildWebpackBundles({ quiet, dist }: { quiet: boolean; dist: boolean }) {
-  const options = [quiet ? ['--quiet'] : [], dist ? ['--dist'] : []].flat();
+export async function buildWebpackBundles({
+  quiet,
+  dist,
+  noCache,
+}: {
+  quiet: boolean;
+  dist: boolean;
+  noCache?: boolean;
+}) {
+  const options = [
+    quiet ? ['--quiet'] : [],
+    dist ? ['--dist'] : [],
+    noCache ? ['--no-cache'] : [],
+  ].flat();
   const stdio: StdioOption[] = quiet
     ? ['ignore', 'pipe', 'pipe']
     : ['inherit', 'inherit', 'inherit'];

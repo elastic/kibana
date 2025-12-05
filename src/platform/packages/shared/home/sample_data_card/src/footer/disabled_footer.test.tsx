@@ -10,7 +10,8 @@
 import React from 'react';
 import { renderWithIntl } from '@kbn/test-jest-helpers';
 
-import { DisabledFooter, Props } from './disabled_footer';
+import type { Props } from './disabled_footer';
+import { DisabledFooter } from './disabled_footer';
 import { SampleDataCardProvider } from '../services';
 import { getMockServices } from '../mocks';
 

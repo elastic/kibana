@@ -6,13 +6,14 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const spacesService = getService('spaces');
   const securityService = getService('security');
   const inspector = getService('inspector');
+  const filterBar = getService('filterBar');
   const { common, header, discover, security, timePicker, searchSessionsManagement } =
     getPageObjects([
       'common',
@@ -39,9 +40,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await discover.waitForDocTableLoadingComplete();
 
-        await searchSessions.expectState('completed');
-        await searchSessions.save();
-        await searchSessions.expectState('backgroundCompleted');
+        // Add slow query through DSL so we can background it
+        await filterBar.addDslFilter(
+          JSON.stringify({
+            error_query: {
+              indices: [
+                {
+                  error_type: 'none',
+                  name: '*',
+                  stall_time_seconds: 5,
+                },
+              ],
+            },
+          }),
+          false
+        );
+        await timePicker.setDefaultAbsoluteRange();
+        await searchSessions.save({ withRefresh: true });
         await inspector.open();
 
         const savedSessionId = await (
@@ -49,12 +64,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ).getAttribute('data-search-session-id');
         await inspector.close();
 
-        await searchSessions.openPopover();
-        await searchSessions.viewSearchSessions();
-
         // purge client side search cache
         // https://github.com/elastic/kibana/issues/106074#issuecomment-920462094
         await browser.refresh();
+
+        await searchSessions.openFlyout();
 
         const searchSessionList = await searchSessionsManagement.getList();
         const searchSessionItem = searchSessionList.find(
@@ -70,7 +84,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitForDocTableLoadingComplete();
 
         // Check that session is restored
-        await searchSessions.expectState('restored');
         expect(await toasts.getCount()).to.be(0); // no session restoration related warnings
       });
     });
@@ -89,8 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await discover.waitForDocTableLoadingComplete();
 
-        await searchSessions.expectState('completed');
-        await searchSessions.disabledOrFail();
+        await searchSessions.missingOrFail();
       });
     });
   });

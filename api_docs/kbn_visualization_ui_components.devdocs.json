@@ -224,7 +224,7 @@
         "label": "DimensionTrigger",
         "description": [],
         "signature": [
-          "({ id, label, color, dataTestSubj, }: { label: React.ReactNode; id?: string | undefined; color?: \"success\" | \"default\" | \"warning\" | \"subdued\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"ghost\" | ",
+          "({ id, label, color, dataTestSubj, }: { label: React.ReactNode; id?: string | undefined; color?: \"success\" | \"warning\" | \"default\" | \"subdued\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"ghost\" | ",
           "Property",
           ".Color | undefined; dataTestSubj?: string | undefined; }) => React.JSX.Element"
         ],
@@ -279,7 +279,7 @@
                 "label": "color",
                 "description": [],
                 "signature": [
-                  "\"success\" | \"default\" | \"warning\" | \"subdued\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"ghost\" | ",
+                  "\"success\" | \"warning\" | \"default\" | \"subdued\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"ghost\" | ",
                   "Property",
                   ".Color | undefined"
                 ],
@@ -1620,7 +1620,7 @@
         "label": "TextDecorationSetting",
         "description": [],
         "signature": [
-          "({\n  idPrefix,\n  currentConfig,\n  setConfig,\n  isQueryBased,\n  children,\n}: { idPrefix: string; currentConfig?: TextDecorationConfig | undefined; setConfig: (config: TextDecorationConfig) => void; isQueryBased?: boolean | undefined; children?: ((textDecoration: \"none\" | \"name\" | \"field\") => JSX.Element | null) | undefined; }) => React.JSX.Element"
+          "({\n  idPrefix,\n  currentConfig,\n  setConfig,\n  isQueryBased,\n  children,\n}: { idPrefix: string; currentConfig?: TextDecorationConfig | undefined; setConfig: (config: TextDecorationConfig) => void; isQueryBased?: boolean | undefined; children?: ((textDecoration: \"name\" | \"none\" | \"field\") => JSX.Element | null) | undefined; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/text_decoration_setting.tsx",
         "deprecated": false,
@@ -1718,7 +1718,7 @@
                   "A children render function for custom sub fields on textDecoration change"
                 ],
                 "signature": [
-                  "((textDecoration: \"none\" | \"name\" | \"field\") => JSX.Element | null) | undefined"
+                  "((textDecoration: \"name\" | \"none\" | \"field\") => JSX.Element | null) | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/text_decoration_setting.tsx",
                 "deprecated": false,
@@ -1732,7 +1732,7 @@
                     "label": "textDecoration",
                     "description": [],
                     "signature": [
-                      "\"none\" | \"name\" | \"field\""
+                      "\"name\" | \"none\" | \"field\""
                     ],
                     "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/text_decoration_setting.tsx",
                     "deprecated": false,

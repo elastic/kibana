@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IUiSettingsClient, CoreSetup } from '@kbn/core/public';
+import type { IUiSettingsClient, CoreSetup } from '@kbn/core/public';
 import { stubIndexPattern, stubFields } from '@kbn/data-plugin/public/stubs';
 import type { TimefilterSetup } from '@kbn/data-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';

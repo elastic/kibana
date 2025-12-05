@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { MonitorSummary } from '@kbn/synthetics-plugin/common/runtime_types';
+import type { MonitorSummary } from '@kbn/synthetics-plugin/common/runtime_types';
 import { API_URLS } from '@kbn/uptime-plugin/common/constants';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { makeChecksWithStatus } from './helper/make_checks';
 
 export default function ({ getService }: FtrProviderContext) {

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { MlPageHeader } from './page_header';
+export { MlPageHeader, MlPageHeaderRenderer } from './page_header';

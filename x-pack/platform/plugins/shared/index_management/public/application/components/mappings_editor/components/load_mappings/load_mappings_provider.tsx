@@ -17,8 +17,10 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
-import { JsonEditor, OnJsonEditorUpdateHandler } from '../../shared_imports';
-import { validateMappings, MappingsValidationError } from '../../lib';
+import type { OnJsonEditorUpdateHandler } from '../../shared_imports';
+import { JsonEditor } from '../../shared_imports';
+import type { MappingsValidationError } from '../../lib';
+import { validateMappings } from '../../lib';
 
 const MAX_ERRORS_TO_DISPLAY = 1;
 
@@ -259,6 +261,7 @@ export const LoadMappingsProvider = ({ onJson, esNodesPlugins, children }: Props
           ) : (
             <>
               <EuiCallOut
+                announceOnMount
                 title={i18nTexts.validationErrors.title}
                 iconType="warning"
                 color="warning"

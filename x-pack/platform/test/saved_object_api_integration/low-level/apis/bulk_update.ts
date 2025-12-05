@@ -14,7 +14,7 @@
 
 import expect from 'expect';
 import { getUrlPrefix } from '../../../alerting_api_integration/common/lib';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

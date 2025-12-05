@@ -40,8 +40,10 @@ export default {
     showFitView: {
       control: { type: 'boolean' },
     },
-    showCenter: {
-      control: { type: 'boolean' },
+    nodeIdsToCenterOn: {
+      control: { type: 'object' },
+      description:
+        'Array of origin node IDs (nodes that have isOrigin=true or isOriginAlert=true) the graph must center on',
     },
   },
   decorators: [GlobalStylesStorybookDecorator],
@@ -51,6 +53,7 @@ export const Controls: StoryObj<ControlsProps> = {
   args: {
     showZoom: true,
     showFitView: true,
-    showCenter: true,
+    nodeIdsToCenterOn: ['node1', 'node2'],
+    fitViewOptions: { duration: 200 },
   },
 };

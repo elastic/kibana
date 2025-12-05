@@ -9,7 +9,7 @@ import React, { Fragment, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 
-import { Repository } from '../../../common/types';
+import type { Repository } from '../../../common/types';
 import { useServices, useToastNotifications } from '../app_context';
 import { deleteRepositories } from '../services/http';
 

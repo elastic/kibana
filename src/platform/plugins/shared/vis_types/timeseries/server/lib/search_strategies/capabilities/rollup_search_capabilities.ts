@@ -10,10 +10,8 @@
 import { get, has } from 'lodash';
 import { leastCommonInterval, isCalendarInterval } from '../lib/interval_helper';
 
-import {
-  DefaultSearchCapabilities,
-  SearchCapabilitiesOptions,
-} from './default_search_capabilities';
+import type { SearchCapabilitiesOptions } from './default_search_capabilities';
+import { DefaultSearchCapabilities } from './default_search_capabilities';
 
 export class RollupSearchCapabilities extends DefaultSearchCapabilities {
   rollupIndex: string;

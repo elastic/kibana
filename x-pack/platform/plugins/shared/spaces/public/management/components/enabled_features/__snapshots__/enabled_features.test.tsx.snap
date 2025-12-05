@@ -54,10 +54,6 @@ exports[`EnabledFeatures renders as expected 1`] = `
               "id": "feature-1",
               "name": "Feature 1",
               "privileges": null,
-              "scope": Array [
-                "spaces",
-                "security",
-              ],
             },
             Object {
               "app": Array [],
@@ -70,10 +66,19 @@ exports[`EnabledFeatures renders as expected 1`] = `
               "id": "feature-2",
               "name": "Feature 2",
               "privileges": null,
-              "scope": Array [
-                "spaces",
-                "security",
-              ],
+            },
+            Object {
+              "app": Array [],
+              "category": Object {
+                "euiIconType": "logoKibana",
+                "id": "kibana",
+                "label": "Analytics",
+                "order": 1000,
+              },
+              "hidden": true,
+              "id": "feature-3",
+              "name": "Feature 3 (hidden)",
+              "privileges": null,
             },
           ]
         }

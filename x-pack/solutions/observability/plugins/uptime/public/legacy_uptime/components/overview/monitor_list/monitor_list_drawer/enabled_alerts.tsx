@@ -14,10 +14,10 @@ import {
   EuiListGroup,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { EuiListGroupItemProps } from '@elastic/eui/src/components/list_group/list_group_item';
+import type { EuiListGroupItemProps } from '@elastic/eui/src/components/list_group/list_group_item';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { UptimeSettingsContext } from '../../../../contexts';
 import { getUrlForAlert } from '../../../../lib/alert_types/common';
 
@@ -60,6 +60,7 @@ export const EnabledAlerts = ({ monitorAlerts, loading }: Props) => {
       <EuiDescriptionListDescription>
         {listItems.length === 0 && !loading && (
           <EuiCallOut
+            announceOnMount
             size="s"
             title={i18n.translate('xpack.uptime.monitorList.enabledAlerts.noAlert', {
               defaultMessage: 'No rules are enabled for this monitor.',

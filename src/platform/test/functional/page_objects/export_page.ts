@@ -19,6 +19,10 @@ export class ExportPageObject extends FtrService {
     return await this.testSubjects.exists('exportTopNavButton');
   }
 
+  async exportButtonMissingOrFail() {
+    await this.testSubjects.missingOrFail('exportTopNavButton', { timeout: 1000 });
+  }
+
   async clickExportTopNavButton() {
     return this.testSubjects.click('exportTopNavButton');
   }
@@ -60,14 +64,15 @@ export class ExportPageObject extends FtrService {
   }
 
   async closeExportFlyout() {
-    await this.retry.waitFor('close export flyout', async () => {
-      let isExportFlyoutOpen;
-      if ((isExportFlyoutOpen = await this.isExportFlyoutOpen())) {
-        await this.testSubjects.click('exportFlyoutCloseButton');
-      }
+    const closeButtonSubj = 'exportFlyoutCloseButton';
+    const isExportFlyoutOpen = await this.testSubjects.exists(closeButtonSubj);
 
-      return !isExportFlyoutOpen;
-    });
+    if (!isExportFlyoutOpen) {
+      return; // It was already closed
+    }
+
+    await this.testSubjects.click(closeButtonSubj);
+    await this.testSubjects.waitForDeleted(closeButtonSubj);
   }
 
   async getExportAssetTextButton() {

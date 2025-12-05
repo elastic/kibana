@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
+import type { RawRule } from '@kbn/alerting-plugin/server/types';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { ALERT_STATUS } from '@kbn/rule-data-utils';
 import { Spaces } from '../../../scenarios';
@@ -19,8 +20,9 @@ import {
   getTestRuleData,
   ObjectRemover,
   getEventLog,
+  TaskManagerUtils,
 } from '../../../../common/lib';
-import { validateEvent } from './event_log';
+import { validateEvent } from '../validate_event';
 
 const alertAsDataIndex = '.internal.alerts-observability.test.alerts.alerts-default-000001';
 
@@ -29,6 +31,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const retry = getService('retry');
   const supertest = getService('supertest');
+  const taskManagerUtils = new TaskManagerUtils(es, retry);
 
   describe('disable', function () {
     this.tags('skipFIPS');
@@ -53,6 +56,14 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
         index: '.kibana_task_manager',
       });
       return scheduledTask._source!;
+    }
+
+    async function getRule(id: string): Promise<RawRule> {
+      const ruleDoc = await es.get<{ alert: RawRule }>({
+        id: `alert:${id}`,
+        index: '.kibana_alerting_cases',
+      });
+      return ruleDoc._source!.alert;
     }
 
     it('should handle disable rule request appropriately', async () => {
@@ -265,5 +276,46 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
         id: createdRule.id,
       });
     });
+
+    it('should disable task if task is run but rule is disabled', async () => {
+      const { body: createdRule } = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            enabled: true,
+            schedule: {
+              interval: '3s',
+            },
+          })
+        )
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+
+      // wait for rule to run once
+      await retry.try(async () => {
+        const rule = await getRule(createdRule.id);
+        expect(rule?.monitoring?.run?.last_run?.timestamp).not.to.be(undefined);
+      });
+
+      // disable rule, and implicitly task
+      await ruleUtils.disable(createdRule.id);
+
+      // wait for the task to be disabled
+      await waitForDisabledTask(createdRule.scheduled_task_id);
+
+      // manually enable task
+      await taskManagerUtils.setTaskEnabled(createdRule.scheduled_task_id, true);
+
+      // wait for the task to be disabled
+      await waitForDisabledTask(createdRule.scheduled_task_id);
+    });
+
+    async function waitForDisabledTask(taskId: string) {
+      await retry.try(async () => {
+        const taskDoc = await getScheduledTask(taskId);
+        expect(taskDoc.task.enabled).to.be(false);
+      });
+    }
   });
 }

@@ -5,22 +5,26 @@
  * 2.0.
  */
 
+import { from, where, sort, SortOrder, stats } from '@kbn/esql-composer';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { getCalculateAutoTimeExpression, getUserTimeZone } from '@kbn/data-plugin/common';
 import { convertIntervalToEsInterval } from '@kbn/data-plugin/public';
 import moment from 'moment';
 import { partition } from 'lodash';
+import type {
+  DateHistogramIndexPatternColumn,
+  DateRange,
+  FormBasedLayer,
+  IndexPattern,
+  ValueFormatConfig,
+  GenericIndexPatternColumn,
+} from '@kbn/lens-common';
 import { isColumnOfType } from './operations/definitions/helpers';
-import { ValueFormatConfig } from './operations/definitions/column_types';
 import { convertToAbsoluteDateRange } from '../../utils';
-import { DateRange, OriginalColumn } from '../../../common/types';
-import { GenericIndexPatternColumn } from './form_based';
+import type { OriginalColumn } from '../../../common/types';
 import { operationDefinitionMap } from './operations';
-import { DateHistogramIndexPatternColumn } from './operations/definitions';
-import type { IndexPattern } from '../../types';
 import { resolveTimeShift } from './time_shift_utils';
-import { FormBasedLayer } from '../..';
 
 // esAggs column ID manipulation functions
 export const extractAggId = (id: string) => id.split('.')[0].split('-')[2];
@@ -40,6 +44,7 @@ export function getESQLForLayer(
   const timeZone = getUserTimeZone((key) => uiSettings.get(key), true);
   const utcOffset = moment.tz(timeZone).utcOffset() / 60;
   if (utcOffset !== 0) return;
+
   if (
     Object.values(layer.columns).find(
       (col) =>
@@ -51,10 +56,13 @@ export function getESQLForLayer(
     return;
 
   // indexPattern.title is the actual es pattern
-  const esql = [`FROM ${indexPattern.title}`];
+  let esqlCompose = from(indexPattern.title);
+
   if (indexPattern.timeFieldName) {
-    esql.push(
-      `WHERE ${indexPattern.timeFieldName} >= ?_tstart AND ${indexPattern.timeFieldName} <= ?_tend`
+    esqlCompose = esqlCompose.pipe(
+      where('??timeFieldName >= ?_tstart AND ??timeFieldName <= ?_tend', {
+        timeFieldName: indexPattern.timeFieldName,
+      })
     );
   }
 
@@ -161,7 +169,6 @@ export function getESQLForLayer(
   });
 
   if (metrics.some((m) => !m)) return;
-  let stats = `STATS ${metrics.join(', ')}`;
 
   const buckets = bucketEsAggsEntries.map(([colId, col], index) => {
     const def = operationDefinitionMap[col.operationType];
@@ -274,10 +281,11 @@ export function getESQLForLayer(
   if (buckets.some((m) => !m)) return;
 
   if (buckets.length > 0) {
-    stats += ` BY ${buckets.join(', ')}`;
-    esql.push(stats);
-
     if (buckets.some((b) => !b || b.includes('undefined'))) return;
+
+    if (metrics.length > 0) {
+      esqlCompose = esqlCompose.pipe(stats(`${metrics.join(', ')} BY ${buckets.join(', ')}`));
+    }
 
     const sorts = bucketEsAggsEntries.map(([colId, col], index) => {
       const aggId = String(index);
@@ -289,17 +297,23 @@ export function getESQLForLayer(
         esAggsId = col.sourceField;
       }
 
-      return `${esAggsId} ASC`;
+      return { [esAggsId]: SortOrder.Asc };
     });
 
-    esql.push(`SORT ${sorts.join(', ')}`);
+    esqlCompose = esqlCompose.pipe(sort(...sorts));
   } else {
-    esql.push(stats);
+    if (metrics.length > 0) {
+      esqlCompose = esqlCompose.pipe(stats(metrics.join(', ')));
+    }
   }
 
-  return {
-    esql: esql.join(' | '),
-    partialRows,
-    esAggsIdMap,
-  };
+  try {
+    return {
+      esql: esqlCompose.toString(),
+      partialRows,
+      esAggsIdMap,
+    };
+  } catch (e) {
+    return;
+  }
 }

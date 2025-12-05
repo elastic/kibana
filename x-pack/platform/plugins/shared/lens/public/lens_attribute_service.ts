@@ -6,61 +6,31 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
-import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
+import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { noop } from 'lodash';
-import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
-import type { LensPluginStartDependencies } from './plugin';
-import type { LensSavedObjectAttributes as LensSavedObjectAttributesWithoutReferences } from '../common/content_management';
-import { extract, inject } from '../common/embeddable_factory';
+import type { HttpStart } from '@kbn/core/public';
+import type {
+  SharingSavedObjectProps,
+  LensSavedObjectAttributes,
+  CheckDuplicateTitleProps,
+  LensAttributesService,
+} from '@kbn/lens-common';
 import { LensDocumentService } from './persistence';
 import { DOC_TYPE } from '../common/constants';
-import { SharingSavedObjectProps } from './types';
-import { LensRuntimeState, LensSavedObjectAttributes } from './react_embeddable/types';
-
-type CheckDuplicateTitleProps = OnSaveProps & {
-  id?: string;
-  displayName: string;
-  lastSavedTitle: string;
-  copyOnSave: boolean;
-};
-
-export interface LensAttributesService {
-  loadFromLibrary: (savedObjectId: string) => Promise<{
-    attributes: LensSavedObjectAttributes;
-    sharingSavedObjectProps: SharingSavedObjectProps;
-    managed: boolean;
-  }>;
-  saveToLibrary: (
-    attributes: LensSavedObjectAttributesWithoutReferences,
-    references: Reference[],
-    savedObjectId?: string
-  ) => Promise<string>;
-  checkForDuplicateTitle: (props: CheckDuplicateTitleProps) => Promise<{ isDuplicate: boolean }>;
-  injectReferences: (
-    runtimeState: LensRuntimeState,
-    references: Reference[] | undefined
-  ) => LensRuntimeState;
-  extractReferences: (runtimeState: LensRuntimeState) => {
-    rawState: LensRuntimeState;
-    references: Reference[];
-  };
-}
 
 export const savedObjectToEmbeddableAttributes = (
-  savedObject: SavedObjectCommon<LensSavedObjectAttributesWithoutReferences>
+  savedObject: SavedObjectCommon<LensSavedObjectAttributes>
 ): LensSavedObjectAttributes => {
   return {
     ...savedObject.attributes,
+    visualizationType: savedObject.attributes.visualizationType ?? null,
     state: savedObject.attributes.state as LensSavedObjectAttributes['state'],
     references: savedObject.references,
   };
 };
 
-export function getLensAttributeService({
-  contentManagement,
-}: LensPluginStartDependencies): LensAttributesService {
-  const lensDocumentService = new LensDocumentService(contentManagement);
+export function getLensAttributeService(http: HttpStart): LensAttributesService {
+  const lensDocumentService = new LensDocumentService(http);
 
   return {
     loadFromLibrary: async (
@@ -70,12 +40,11 @@ export function getLensAttributeService({
       sharingSavedObjectProps: SharingSavedObjectProps;
       managed: boolean;
     }> => {
-      const { meta, item } = await lensDocumentService.load(savedObjectId);
+      const { item, meta } = await lensDocumentService.load(savedObjectId);
       return {
         attributes: {
-          ...item.attributes,
-          state: item.attributes.state as LensSavedObjectAttributes['state'],
-          references: item.references,
+          ...item,
+          state: item.state as LensSavedObjectAttributes['state'],
         },
         sharingSavedObjectProps: {
           aliasTargetId: meta.aliasTargetId,
@@ -83,11 +52,11 @@ export function getLensAttributeService({
           aliasPurpose: meta.aliasPurpose,
           sourceId: item.id,
         },
-        managed: Boolean(item.managed),
+        managed: Boolean(meta.managed),
       };
     },
     saveToLibrary: async (
-      attributes: LensSavedObjectAttributesWithoutReferences,
+      attributes: LensSavedObjectAttributes,
       references: Reference[],
       savedObjectId?: string
     ) => {
@@ -121,20 +90,6 @@ export function getLensAttributeService({
           onTitleDuplicate
         ),
       };
-    },
-    // Make sure to inject references from the container down to the runtime state
-    // this ensure migrations/copy to spaces works correctly
-    injectReferences: (runtimeState, references) => {
-      return inject(
-        runtimeState as unknown as EmbeddableStateWithType,
-        references ?? runtimeState.attributes.references
-      ) as unknown as LensRuntimeState;
-    },
-    // Make sure to move the internal references into the parent references
-    // so migrations/move to spaces can work properly
-    extractReferences: (runtimeState) => {
-      const { state, references } = extract(runtimeState as unknown as EmbeddableStateWithType);
-      return { rawState: state as unknown as LensRuntimeState, references };
     },
   };
 }

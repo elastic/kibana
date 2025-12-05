@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
+import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
 import { useKibana } from './use_kibana';

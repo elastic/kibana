@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
 } from '@kbn/actions-plugin/server/types';
-import type { ParamsSchema, ConfigSchema } from './schema';
-import type { SecretConfigurationSchema } from '../../../common/auth/schema';
+import type {
+  ConnectorTypeConfigType,
+  ConnectorTypeSecretsType,
+  ActionParamsType,
+} from '@kbn/connector-schemas/webhook';
 
 export type WebhookConnectorType = ConnectorType<
   ConnectorTypeConfigType,
@@ -24,11 +26,3 @@ export type WebhookConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
   ConnectorTypeSecretsType,
   ActionParamsType
 >;
-
-export type ConnectorTypeConfigType = TypeOf<typeof ConfigSchema>;
-
-// secrets definition
-export type ConnectorTypeSecretsType = TypeOf<typeof SecretConfigurationSchema>;
-
-// params definition
-export type ActionParamsType = TypeOf<typeof ParamsSchema>;

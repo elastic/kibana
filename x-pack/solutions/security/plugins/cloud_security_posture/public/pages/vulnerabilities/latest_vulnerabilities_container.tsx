@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import React, { useEffect } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { CDR_VULNERABILITIES_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
@@ -15,7 +15,6 @@ import { FindingsSearchBar } from '../configurations/layout/findings_search_bar'
 import { ErrorCallout } from '../configurations/layout/error_callout';
 import { EmptyState } from '../../components/empty_state';
 import { CloudSecurityGrouping } from '../../components/cloud_security_grouping';
-import { DEFAULT_GROUPING_TABLE_HEIGHT } from '../../common/constants';
 
 export const LatestVulnerabilitiesContainer = () => {
   const SubGrouping = ({
@@ -122,7 +121,6 @@ export const LatestVulnerabilitiesContainer = () => {
               ...currentGroupFilters,
               ...(parentGroupFilters ? JSON.parse(parentGroupFilters) : []),
             ]}
-            height={DEFAULT_GROUPING_TABLE_HEIGHT}
           />
         );
       };

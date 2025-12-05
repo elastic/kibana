@@ -24,7 +24,7 @@ import type { DeviceControlOSes } from '../../../types';
 const ALLOW_ALL_LABEL = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.deviceControl.allowReadWrite',
   {
-    defaultMessage: 'Allow all',
+    defaultMessage: 'Allow read, write and execute',
   }
 );
 
@@ -45,7 +45,7 @@ const READ_ONLY_LABEL = i18n.translate(
 const BLOCK_EXECUTE_LABEL = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.deviceControl.executeOnly',
   {
-    defaultMessage: 'Block execute',
+    defaultMessage: 'Read and write',
   }
 );
 
@@ -70,12 +70,12 @@ export const DeviceControlProtectionLevel = memo<DeviceControlProtectionLevelPro
           label: ALLOW_ALL_LABEL,
         },
         {
-          id: DeviceControlAccessLevelEnum.read_only,
-          label: READ_ONLY_LABEL,
-        },
-        {
           id: DeviceControlAccessLevelEnum.no_execute,
           label: BLOCK_EXECUTE_LABEL,
+        },
+        {
+          id: DeviceControlAccessLevelEnum.read_only,
+          label: READ_ONLY_LABEL,
         },
         {
           id: DeviceControlAccessLevelEnum.deny_all,
@@ -208,11 +208,29 @@ const DeviceControlAccessRadio = React.memo(
         newPayload.mac.device_control.usb_storage = accessLevel;
       }
 
+      // Manage notifications based on access level
+      if (accessLevel === DeviceControlAccessLevelEnum.deny_all) {
+        if (newPayload.windows.popup.device_control) {
+          newPayload.windows.popup.device_control.enabled = true;
+        }
+        if (newPayload.mac.popup.device_control) {
+          newPayload.mac.popup.device_control.enabled = true;
+        }
+      } else {
+        if (newPayload.windows.popup.device_control) {
+          newPayload.windows.popup.device_control.enabled = false;
+        }
+        if (newPayload.mac.popup.device_control) {
+          newPayload.mac.popup.device_control.enabled = false;
+        }
+      }
+
       onChange({ isValid: true, updatedPolicy: newPayload });
     }, [accessLevel, onChange, policy]);
 
     return (
       <EuiRadio
+        name={radioId}
         label={label}
         id={radioId}
         checked={selected === accessLevel}

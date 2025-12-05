@@ -6,12 +6,13 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { RouteComponentProps, useHistory } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageHeader, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 
 import { getListPath } from '../../services/navigation';
-import { Pipeline } from '../../../../common/types';
+import type { Pipeline } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
 import { PipelineForm } from '../../components';
 import { useRedirectToPathOrRedirectPath } from '../../hooks';
@@ -31,6 +32,12 @@ function useFormDefaultValue(sourcePipeline?: Pipeline) {
   const history = useHistory<LocationState>();
 
   const locationSearchParams = useMemo(() => {
+    // Note:
+    // No need to decode the search params as URLSearchParams
+    // does that automatically upon reading them
+    //
+    // For the context on why this note exists
+    // see: https://github.com/elastic/kibana/issues/234500
     return new URLSearchParams(history.location.search);
   }, [history.location.search]);
 

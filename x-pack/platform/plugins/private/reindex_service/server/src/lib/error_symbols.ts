@@ -7,6 +7,7 @@
 
 export const AccessForbidden = Symbol('AccessForbidden');
 export const IndexNotFound = Symbol('IndexNotFound');
+export const IndexAlreadyExists = Symbol('IndexAlreadyExists');
 export const CannotCreateIndex = Symbol('CannotCreateIndex');
 
 export const ReindexTaskFailed = Symbol('ReindexTaskFailed');

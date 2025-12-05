@@ -11,10 +11,8 @@ import type { RawRule } from '@kbn/alerting-plugin/server/types';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/server/types';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
-import {
-  MAX_ARTIFACTS_DASHBOARDS_LENGTH,
-  MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH,
-} from '@kbn/alerting-plugin/common/routes/rule/request/schemas/v1';
+import { MAX_ARTIFACTS_DASHBOARDS_LENGTH } from '@kbn/alerting-plugin/common/routes/rule/request/schemas/v1';
+import { MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH } from '@kbn/alerting-types/rule/latest';
 import { omit } from 'lodash';
 import { Spaces } from '../../../scenarios';
 import type { TaskManagerDoc } from '../../../../common/lib';
@@ -670,6 +668,41 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             })
           )
           .expect(400);
+      });
+
+      it('should allow multiple instances of the same system action if allowMultipleSystemActions is true', async () => {
+        const multipleSystemAction = {
+          id: 'system-connector-test.system-action-allow-multiple',
+          params: {},
+        };
+
+        const response = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              actions: [multipleSystemAction, multipleSystemAction],
+            })
+          );
+
+        expect(response.status).to.eql(200);
+        expect(response.body.actions.length).to.eql(2);
+
+        objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
+
+        const action1 = response.body.actions[0];
+        const action2 = response.body.actions[1];
+
+        expect(action1.id).to.eql('system-connector-test.system-action-allow-multiple');
+        expect(action1.connector_type_id).to.eql('test.system-action-allow-multiple');
+        expect(action1.uuid).to.not.be(undefined);
+
+        expect(action2.id).to.eql('system-connector-test.system-action-allow-multiple');
+        expect(action2.connector_type_id).to.eql('test.system-action-allow-multiple');
+        expect(action2.uuid).to.not.be(undefined);
+
+        // UUIDs should be different
+        expect(action1.uuid).to.not.eql(action2.uuid);
       });
 
       describe('create rule flapping', () => {

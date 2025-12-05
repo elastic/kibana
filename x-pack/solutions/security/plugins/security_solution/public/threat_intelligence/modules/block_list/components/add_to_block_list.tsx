@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React from 'react';
+import type { Dispatch, SetStateAction } from 'react';
+import React, { memo, useCallback } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useSecurityContext } from '../../../hooks/use_security_context';
-import { useBlockListContext } from '../../indicators/hooks/use_block_list_context';
-import { useSetUrlParams } from '../hooks/use_set_url_params';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { useSetUrlParams } from '../../../../management/components/artifact_list_page/hooks/use_set_url_params';
 
 export interface AddToBlockListProps {
   /**
@@ -26,6 +25,10 @@ export interface AddToBlockListProps {
    * Click event to notify the parent component (to for example close the popover)
    */
   onClick: () => void;
+  /**
+   * Set the indicator value for the blocklist flyout to use
+   */
+  setBlockListIndicatorValue: Dispatch<SetStateAction<string>>;
 }
 
 /**
@@ -34,36 +37,37 @@ export interface AddToBlockListProps {
  * When clicking on the ContextMenuItem, the indicator filehash value is saved in context.
  * The flyout is shown by adding a parameter to the url.
  */
-export const AddToBlockListContextMenu: FC<AddToBlockListProps> = ({
-  data,
-  'data-test-subj': dataTestSub,
-  onClick,
-}) => {
-  const {
-    blockList: { canWriteBlocklist },
-  } = useSecurityContext();
-  const { setBlockListIndicatorValue } = useBlockListContext();
-  const { setUrlParams } = useSetUrlParams();
+export const AddToBlockListContextMenu = memo(
+  ({
+    data,
+    'data-test-subj': dataTestSub,
+    onClick,
+    setBlockListIndicatorValue,
+  }: AddToBlockListProps) => {
+    const canWriteBlocklist = useUserPrivileges().endpointPrivileges.canWriteBlocklist;
+    const setUrlParams = useSetUrlParams();
 
-  const menuItemClicked = () => {
-    onClick();
-    setBlockListIndicatorValue(data as string);
-    setUrlParams({ show: 'create' });
-  };
+    const menuItemClicked = useCallback(() => {
+      onClick();
+      setBlockListIndicatorValue(data as string);
+      setUrlParams({ show: 'create' });
+    }, [data, onClick, setBlockListIndicatorValue, setUrlParams]);
 
-  const disabled = !canWriteBlocklist || data === null;
+    const disabled = !canWriteBlocklist || data === null;
 
-  return (
-    <EuiContextMenuItem
-      key="addToBlocklist"
-      onClick={() => menuItemClicked()}
-      data-test-subj={dataTestSub}
-      disabled={disabled}
-    >
-      <FormattedMessage
-        defaultMessage="Add blocklist entry"
-        id="xpack.securitySolution.threatIntelligence.addToBlockList"
-      />
-    </EuiContextMenuItem>
-  );
-};
+    return (
+      <EuiContextMenuItem
+        onClick={menuItemClicked}
+        data-test-subj={dataTestSub}
+        disabled={disabled}
+      >
+        <FormattedMessage
+          defaultMessage="Add blocklist entry"
+          id="xpack.securitySolution.threatIntelligence.addToBlockList"
+        />
+      </EuiContextMenuItem>
+    );
+  }
+);
+
+AddToBlockListContextMenu.displayName = 'AddToBlockListContextMenu';

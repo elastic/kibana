@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 
 export const getMockAnonymizationFieldResponse = (): AnonymizationFieldResponse[] => [
   {

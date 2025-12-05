@@ -7,9 +7,9 @@
 
 import expect from '@kbn/expect';
 import { getRoutePaths } from '@kbn/profiling-plugin/common';
-import { ProfilingStatus } from '@kbn/profiling-utils';
+import type { ProfilingStatus } from '@kbn/profiling-utils';
 import { getBettertest } from '../common/bettertest';
-import { FtrProviderContext } from '../common/ftr_provider_context';
+import type { FtrProviderContext } from '../common/ftr_provider_context';
 import { deletePackagePolicy, getProfilingPackagePolicyIds } from '../utils/fleet';
 import { cleanUpProfilingData, loadProfilingData, setupProfiling } from '../utils/profiling_data';
 

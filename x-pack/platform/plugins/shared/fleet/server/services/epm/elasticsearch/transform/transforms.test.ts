@@ -392,7 +392,16 @@ _meta:
           ],
           index_patterns: ['.metrics-endpoint.metadata_united_default'],
           priority: 250,
-          template: { mappings: undefined, settings: undefined },
+          template: {
+            mappings: undefined,
+            settings: {
+              index: {
+                mapping: {
+                  ignore_malformed: true,
+                },
+              },
+            },
+          },
           ignore_missing_component_templates: [
             'endpoint@custom',
             'logs-endpoint.metadata_current-template@custom',
@@ -681,7 +690,16 @@ _meta:
           ],
           index_patterns: ['.metrics-endpoint.metadata_united_default'],
           priority: 250,
-          template: { mappings: undefined, settings: undefined },
+          template: {
+            mappings: undefined,
+            settings: {
+              index: {
+                mapping: {
+                  ignore_malformed: true,
+                },
+              },
+            },
+          },
           ignore_missing_component_templates: [
             'endpoint@custom',
             'logs-endpoint.metadata_current-template@custom',
@@ -947,7 +965,16 @@ _meta:
           ],
           index_patterns: ['.metrics-endpoint.metadata_united_default'],
           priority: 250,
-          template: { mappings: undefined, settings: undefined },
+          template: {
+            mappings: undefined,
+            settings: {
+              index: {
+                mapping: {
+                  ignore_malformed: true,
+                },
+              },
+            },
+          },
           ignore_missing_component_templates: [
             'endpoint@custom',
             'logs-endpoint.metadata_current-template@custom',

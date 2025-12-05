@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Plugin, CoreSetup, CustomRequestHandlerContext } from '@kbn/core/server';
+import type { Plugin, CoreSetup, CustomRequestHandlerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { PluginAApiRequestContext } from '@kbn/core-plugin-a-plugin/server';
+import type { PluginAApiRequestContext } from '@kbn/core-plugin-a-plugin/server';
 
 type PluginBContext = CustomRequestHandlerContext<{
   pluginA: PluginAApiRequestContext;

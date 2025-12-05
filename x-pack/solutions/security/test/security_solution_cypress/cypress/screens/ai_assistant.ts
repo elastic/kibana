@@ -7,7 +7,6 @@
 
 export const ADD_NEW_CONNECTOR = '[data-test-subj="addNewConnectorButton"]';
 export const ADD_QUICK_PROMPT = '[data-test-subj="addQuickPrompt"]';
-export const ASSISTANT_SETTINGS_BUTTON = 'button[data-test-subj="settings"]';
 export const AI_ASSISTANT_BUTTON = '[data-test-subj="assistantNavLink"]';
 export const ASSISTANT_CHAT_BODY = '[data-test-subj="assistantChat"]';
 export const CHAT_CONTEXT_MENU = '[data-test-subj="chat-context-menu"]';
@@ -26,7 +25,6 @@ export const CONVERSATION_MULTI_SELECTOR =
   '[data-test-subj="conversationMultiSelector"] [data-test-subj="comboBoxSearchInput"]';
 export const CONVERSATION_SELECT = (c: string) => `[data-test-subj="conversation-select-${c}"]`;
 export const CONVERSATION_TITLE = '[data-test-subj="conversationTitle"]';
-export const CONVERSATION_TITLE_SAVE_BUTTON = '[data-test-subj="euiInlineEditModeSaveButton"]';
 export const CREATE_SYSTEM_PROMPT = '[data-test-subj="addSystemPrompt"]';
 export const EMPTY_CONVO = '[data-test-subj="emptyConvo"]';
 export const FLYOUT_NAV_TOGGLE = '[data-test-subj="aiAssistantFlyoutNavigationToggle"]';
@@ -52,3 +50,25 @@ export const USER_PROMPT = '[data-test-subj="prompt-textarea"]';
 export const WELCOME_SETUP = '[data-test-subj="welcome-setup"]';
 export const OPENAI_CONNECTOR_OPTION = '[data-test-subj="action-option-OpenAI"]';
 export const SECRETS_APIKEY_INPUT = '[data-test-subj="secrets.apiKey-input"]';
+export const SHARE_BADGE_BUTTON = '[data-test-subj="shareBadgeButton"]';
+export const SHARE_SELECT = '[data-test-subj="shareSelect"]';
+export const RESTRICTED_SELECT_OPTION = 'li[data-test-subj="restricted"]';
+export const SHARED_SELECT_OPTION = 'li[data-test-subj="shared"]';
+export const PRIVATE_SELECT_OPTION = 'li[data-test-subj="private"]';
+export const OWNER_SHARED_CALLOUT = '[data-test-subj="ownerSharedConversationCallout"]';
+export const SHARED_CALLOUT = '[data-test-subj="sharedConversationCallout"]';
+export const SHARE_MODAL = '[data-test-subj="shareConversationModal"]';
+export const SHARE_BUTTON = `button[data-test-subj="shareConversation"]`;
+export const USER_PROFILES_SEARCH = '[data-test-subj="userProfilesSearch"]';
+export const USER_PROFILES_SELECT_OPTION = (user: string) =>
+  `[data-test-subj="userProfileSelectableOption-${user}"]`;
+export const CONVERSATION_LIST_ICON = (c: string) => `[data-test-subj="conversation-icon-${c}"]`;
+export const DISMISS_CALLOUT_BUTTON = '[data-test-subj="euiDismissCalloutButton"]';
+export const DUPLICATE_CONVERSATION = '[data-test-subj="duplicateConversation"]';
+export const CONVERSATION_SETTINGS_MENU = `[data-test-subj="conversation-settings-menu"]`;
+export const COPY_URL = '[data-test-subj="copy-url"]';
+export const DUPLICATE = '[data-test-subj="duplicate"]';
+export const CONVO_CONTEXT_MENU_BUTTON = '[data-test-subj="convo-context-menu-button"]';
+export const CONVO_CONTEXT_MENU_COPY_URL = '[data-test-subj="convo-context-menu-item-copy"]';
+export const CONVO_CONTEXT_MENU_DUPLICATE = '[data-test-subj="convo-context-menu-item-duplicate"]';
+export const SHARE_MODAL_COPY_URL = '[data-test-subj="copyConversationUrl"]';

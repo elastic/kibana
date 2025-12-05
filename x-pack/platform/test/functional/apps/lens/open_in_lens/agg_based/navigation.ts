@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { visualize, lens } = getPageObjects(['visualize', 'lens']);
@@ -26,9 +26,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
 
-      await retry.try(async () => {
-        expect(await lens.getLayerCount()).to.be(1);
-      });
+      await lens.assertLayerCount(1);
 
       await testSubjects.click('lnsApp_goBackToAppButton');
 
@@ -42,9 +40,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
 
-      await retry.try(async () => {
-        expect(await lens.getLayerCount()).to.be(1);
-      });
+      await lens.assertLayerCount(1);
 
       // Make a change in Lens
       await lens.configureDimension({
@@ -71,9 +67,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
 
-      await retry.try(async () => {
-        expect(await lens.getLayerCount()).to.be(1);
-      });
+      await lens.assertLayerCount(1);
 
       // Make a change in Lens
       await lens.configureDimension({

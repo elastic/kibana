@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { supportedFormats } from '../../defs/format_column/supported_formats';
 import type { FormatColumnArgs } from '../../defs/format_column';

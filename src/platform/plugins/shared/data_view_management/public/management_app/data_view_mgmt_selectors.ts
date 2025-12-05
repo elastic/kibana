@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataViewMgmtState } from './data_view_management_service';
+import type { DataViewMgmtState } from './data_view_management_service';
 
 export const dataViewSelector = (state: DataViewMgmtState) => state.dataView;
 export const allowedTypesSelector = (state: DataViewMgmtState) => state.allowedTypes;

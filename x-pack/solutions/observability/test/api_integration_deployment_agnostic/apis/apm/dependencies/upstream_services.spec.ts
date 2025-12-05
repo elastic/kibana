@@ -5,8 +5,8 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { ServiceNode } from '@kbn/apm-plugin/common/connections';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ServiceNode } from '@kbn/apm-plugin/common/connections';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { generateData } from './generate_data';
 

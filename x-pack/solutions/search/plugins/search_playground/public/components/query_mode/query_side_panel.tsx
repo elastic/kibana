@@ -6,22 +6,15 @@
  */
 
 import React, { useCallback } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiForm,
-  EuiIcon,
-  EuiPanel,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiForm, EuiPanel, EuiText, EuiIconTip } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { generateSearchQuery } from '@kbn/search-queries';
 import { useController, useWatch, useFormContext } from 'react-hook-form';
 import { useSourceIndicesFields } from '../../hooks/use_source_indices_field';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
-import { PlaygroundForm, PlaygroundFormFields, PlaygroundPageMode } from '../../types';
+import type { PlaygroundForm } from '../../types';
+import { PlaygroundFormFields, PlaygroundPageMode } from '../../types';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { SearchQuery } from './search_query';
 import { QueryFieldsPanel } from './query_fields_panel';
@@ -125,16 +118,16 @@ export const QuerySidePanel = ({
               </h5>
             </EuiText>
             {hasFieldsError && (
-              <EuiToolTip
+              <EuiIconTip
                 content={
                   <FormattedMessage
                     id="xpack.searchPlayground.viewQuery.queryFields.error"
                     defaultMessage="At least one index field must be enabled"
                   />
                 }
-              >
-                <EuiIcon type="warning" color="danger" />
-              </EuiToolTip>
+                type="warning"
+                color="danger"
+              />
             )}
           </EuiFlexGroup>
         </EuiFlexItem>

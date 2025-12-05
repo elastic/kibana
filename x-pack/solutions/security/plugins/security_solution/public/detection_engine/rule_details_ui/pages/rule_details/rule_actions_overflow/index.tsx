@@ -139,7 +139,7 @@ const RuleActionsOverflowComponent = ({
                     : undefined
                 }
               >
-                <>{i18nActions.DUPLICATE_RULE}</>
+                <span tabIndex={0}>{i18nActions.DUPLICATE_RULE}</span>
               </EuiToolTip>
             </EuiContextMenuItem>,
             <EuiContextMenuItem

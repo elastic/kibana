@@ -8,7 +8,7 @@
 import React, { Fragment, useState, useEffect, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Moment } from 'moment';
+import type { Moment } from 'moment';
 
 import {
   EuiInMemoryTable,
@@ -87,7 +87,7 @@ export const ActionStatusesPanel = () => {
             }
           )}
         >
-          <span>
+          <span tabIndex={0}>
             {i18n.translate('xpack.watcher.sections.watchDetail.watchTable.stateHeader', {
               defaultMessage: 'State',
             })}{' '}
@@ -110,7 +110,7 @@ export const ActionStatusesPanel = () => {
             }
           )}
         >
-          <span>
+          <span tabIndex={0}>
             {i18n.translate(
               'xpack.watcher.sections.watchHistory.watchActionStatusTable.lastExecuted',
               {
@@ -237,6 +237,7 @@ export const ActionStatusesPanel = () => {
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
             <EuiCallOut
+              announceOnMount
               title={i18n.translate('xpack.watcher.sections.watchDetail.actionErrorsCalloutTitle', {
                 defaultMessage: 'This action contains errors',
               })}

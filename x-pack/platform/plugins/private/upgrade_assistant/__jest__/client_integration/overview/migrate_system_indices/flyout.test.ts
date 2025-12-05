@@ -7,7 +7,8 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
+import type { OverviewTestBed } from '../overview.helpers';
+import { setupOverviewPage } from '../overview.helpers';
 import { setupEnvironment } from '../../helpers';
 import { systemIndicesMigrationStatus, systemIndicesMigrationErrorStatus } from './mocks';
 

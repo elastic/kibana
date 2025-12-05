@@ -121,6 +121,7 @@ export async function handleSystemColorModeChange({
                     size="s"
                     onClick={() => window.location.reload()}
                     data-test-subj="windowReloadButton"
+                    autoFocus
                   >
                     {i18n.translate(
                       'core.ui.chrome.appearanceChange.requiresPageReloadButtonLabel',

@@ -6,9 +6,10 @@
  */
 
 import React, { useMemo } from 'react';
-import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import { FilterOptions } from '../types';
-import { MultiSelectFilter, MultiSelectFilterOption } from './multi_select_filter';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import type { FilterOptions } from '../types';
+import type { MultiSelectFilterOption } from './multi_select_filter';
+import { MultiSelectFilter } from './multi_select_filter';
 import * as i18n from './translations';
 
 interface Props {

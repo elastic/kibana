@@ -7,9 +7,9 @@
 
 import React from 'react';
 import type { RenderHookResult } from '@testing-library/react';
-import { render, act, waitFor, renderHook } from '@testing-library/react';
+import { act, render, renderHook, waitFor } from '@testing-library/react';
 import type { Store } from 'redux';
-import type { UseFieldBrowserOptionsProps, UseFieldBrowserOptions, FieldEditorActionsRef } from '.';
+import type { FieldEditorActionsRef, UseFieldBrowserOptions, UseFieldBrowserOptionsProps } from '.';
 import { useFieldBrowserOptions } from '.';
 import type { Start } from '@kbn/data-view-field-editor-plugin/public/mocks';
 import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
@@ -17,22 +17,17 @@ import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-p
 import { TestProviders } from '../../../common/mock';
 import { useKibana } from '../../../common/lib/kibana';
 import type { DataView, DataViewField } from '@kbn/data-plugin/common';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
 import { EuiInMemoryTable } from '@elastic/eui';
 import type { BrowserFieldItem } from '@kbn/response-ops-alerts-fields-browser/types';
+import { PageScope } from '../../../data_view_manager/constants';
 
 let mockIndexPatternFieldEditor: Start;
 jest.mock('../../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
-const mockIndexFieldsSearch = jest.fn();
-jest.mock('../../../common/containers/source/use_data_view', () => ({
-  useDataView: () => ({
-    indexFieldsSearch: mockIndexFieldsSearch,
-  }),
-}));
+jest.mock('../../../data_view_manager/hooks/use_data_view');
 
 const mockRemoveColumn = jest.fn();
 const mockUpsertColumn = jest.fn();
@@ -51,7 +46,7 @@ const renderUseFieldBrowserOptions = ({
   >(
     () =>
       useFieldBrowserOptions({
-        sourcererScope: SourcererScopeName.default,
+        sourcererScope: PageScope.default,
         removeColumn: mockRemoveColumn,
         upsertColumn: mockUpsertColumn,
         ...props,
@@ -187,7 +182,6 @@ describe('useFieldBrowserOptions', () => {
     onSave!(savedField);
     await runAllPromises();
 
-    expect(mockIndexFieldsSearch).toHaveBeenCalled();
     expect(mockUpsertColumn).toHaveBeenCalledTimes(1);
     expect(mockUpsertColumn).toHaveBeenCalledWith(
       {
@@ -225,7 +219,6 @@ describe('useFieldBrowserOptions', () => {
     onSave!(savedField);
     await runAllPromises();
 
-    expect(mockIndexFieldsSearch).toHaveBeenCalled();
     expect(mockRemoveColumn).toHaveBeenCalledWith(fieldItem.name);
     expect(mockUpsertColumn).toHaveBeenCalledWith(
       {
@@ -262,7 +255,6 @@ describe('useFieldBrowserOptions', () => {
     onDelete!([fieldItem.name]);
     await runAllPromises();
 
-    expect(mockIndexFieldsSearch).toHaveBeenCalled();
     expect(mockRemoveColumn).toHaveBeenCalledTimes(1);
     expect(mockRemoveColumn).toHaveBeenCalledWith(fieldItem.name);
   });

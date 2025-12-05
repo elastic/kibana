@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'indexManagement', 'header', 'svlCommonPage']);
@@ -52,21 +52,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       log.debug('Navigating to the enrich policies tab');
       await pageObjects.svlCommonPage.loginAsAdmin();
-      await pageObjects.common.navigateToApp('indexManagement');
-
-      // Navigate to the enrich policies tab
-      await pageObjects.indexManagement.changeTabs('enrich_policiesTab');
-      await pageObjects.header.waitUntilLoadingHasFinished();
+      await pageObjects.indexManagement.navigateToIndexManagementTab('enrich_policies');
     });
 
     after(async () => {
       log.debug('Cleaning up created index and policy');
 
       try {
+        await es.enrich.deletePolicy({ name: ENRICH_POLICY_NAME });
+      } catch (e) {
+        log.debug(`[Teardown error] Error deleting test policy: ${e.message}`);
+      }
+      try {
         await es.indices.delete({ index: ENRICH_INDEX_NAME });
       } catch (e) {
-        log.debug('[Teardown error] Error deleting test policy');
-        throw e;
+        log.debug(`[Teardown error] Error deleting test index: ${e.message}`);
       }
     });
 

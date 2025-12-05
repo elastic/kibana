@@ -7,16 +7,18 @@
 
 import { createHash } from 'crypto';
 import { EcsVersion } from '@elastic/ecs';
-import { Alert } from '@kbn/alerts-as-data-utils';
-import { AuthenticatedUser } from '@kbn/core/server';
+import type { Alert } from '@kbn/alerts-as-data-utils';
+import type { AuthenticatedUser } from '@kbn/core/server';
+import type {
+  AttackDiscovery,
+  Replacements,
+  CreateAttackDiscoveryAlertsParams,
+} from '@kbn/elastic-assistant-common';
 import {
   ATTACK_DISCOVERY_AD_HOC_RULE_ID,
   ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID,
-  type CreateAttackDiscoveryAlertsParams,
   replaceAnonymizedValuesWithOriginalValues,
-  AttackDiscovery,
   getOriginalAlertIds,
-  Replacements,
 } from '@kbn/elastic-assistant-common';
 import {
   ALERT_INSTANCE_ID,
@@ -57,9 +59,10 @@ import {
   ALERT_ATTACK_DISCOVERY_USER_ID,
   ALERT_ATTACK_DISCOVERY_USER_NAME,
   ALERT_ATTACK_DISCOVERY_USERS,
+  ALERT_ATTACK_IDS,
   ALERT_RISK_SCORE,
 } from '../../../schedules/fields/field_names';
-import { AttackDiscoveryAlertDocument } from '../../../schedules/types';
+import type { AttackDiscoveryAlertDocument } from '../../../schedules/types';
 import { getAlertUrl } from './get_alert_url';
 
 type AttackDiscoveryAlertDocumentBase = Omit<
@@ -179,6 +182,16 @@ export const transformToBaseAlertDocument = ({
       messageContent: title,
       replacements,
     }),
+
+    /**
+     * This field is shared with security solution alerts.
+     * We want both attacks and alerts to have this field so
+     * we can filter and group them in the security attacks
+     * page using both the attacks and the alerts indexes.
+     *
+     * @see https://github.com/elastic/kibana/issues/232341
+     */
+    [ALERT_ATTACK_IDS]: [alertDocId],
   };
 
   return baseAlertDocument;

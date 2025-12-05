@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   RouteRepositoryClient,
   ServerRouteRepository,
-  formatRequest,
 } from '@kbn/server-route-repository-utils';
+import { formatRequest } from '@kbn/server-route-repository-utils';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
 import { from } from 'rxjs';
-import { HttpFetchQuery, HttpHandler, HttpResponse } from '@kbn/core-http-browser';
+import type { HttpFetchQuery, HttpHandler, HttpResponse } from '@kbn/core-http-browser';
 import { omit } from 'lodash';
 
 export function createRepositoryClient<

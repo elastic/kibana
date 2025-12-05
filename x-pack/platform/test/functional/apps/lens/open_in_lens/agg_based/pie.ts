@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { visualize, visEditor, lens, header } = getPageObjects([
@@ -74,7 +74,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('partitionVisChart');
 
-      expect(await lens.getLayerCount()).to.be(1);
+      await lens.assertLayerCount(1);
 
       const sliceByText = await lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel', 0);
       const sizeByText = await lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel', 0);

@@ -1,0 +1,35 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/management-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/spaces-utils",
+    "@kbn/spaces-plugin",
+    "@kbn/shared-ux-router",
+    "@kbn/config-schema",
+    "@kbn/test-jest-helpers",
+    "@kbn/actions-plugin",
+    "@kbn/inference-plugin",
+    "@kbn/server-route-repository",
+    "@kbn/server-route-repository-utils",
+    "@kbn/server-route-repository-client",
+    "@kbn/inference-common",
+    "@kbn/logging",
+    "@kbn/management-settings-ids",
+    "@kbn/management-settings-types",
+    "@kbn/management-settings-utilities",
+    "@kbn/management-settings-field-definition",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/licensing-plugin",
+    "@kbn/management-settings-components-field-row",
+    "@kbn/react-query",
+  ],
+  "exclude": ["target/**/*"]
+}

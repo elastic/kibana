@@ -35,16 +35,14 @@ test('can create a ROW command', () => {
   expect(text).toBe('ROW coordinates.lat >= 12.123123');
 });
 
-/**
- * @todo Tests skipped, while RERANK command grammar is being stabilized. We will
- * get back to it after 9.1 release.
- */
-test.skip('can create a RERANK command', () => {
-  const node = cmd`RERANK "star wars" ON title, overview=SUBSTRING(overview, 0, 100), actors WITH rerankerInferenceId`;
+test('can create a RERANK command', () => {
+  const node = cmd`RERANK "star wars" ON title, actors WITH {
+    "inference_id" : "my_inference_endpoint"
+  }`;
   const text = node.toString();
 
   expect(text).toBe(
-    'RERANK "star wars" ON title, overview = SUBSTRING(overview, 0, 100), actors WITH rerankerInferenceId'
+    'RERANK "star wars" ON title, actors WITH {"inference_id": "my_inference_endpoint"}'
   );
 });
 
@@ -61,6 +59,15 @@ test('can create a complex STATS command', () => {
 
   expect(text).toBe(
     'STATS count_last_hour = SUM(count_last_hour), total_visits = SUM(total_visits), bytes_transform = SUM(bytes_transform), bytes_transform_last_hour = SUM(bytes_transform_last_hour) BY extension.keyword'
+  );
+});
+
+test('can create a complex INLINE STATS command', () => {
+  const node = cmd`INLINE STATS count_last_hour = SUM(count_last_hour), total_visits = SUM(total_visits), bytes_transform = SUM(bytes_transform), bytes_transform_last_hour = SUM(bytes_transform_last_hour) BY extension.keyword`;
+  const text = BasicPrettyPrinter.command(node);
+
+  expect(text).toBe(
+    'INLINE STATS count_last_hour = SUM(count_last_hour), total_visits = SUM(total_visits), bytes_transform = SUM(bytes_transform), bytes_transform_last_hour = SUM(bytes_transform_last_hour) BY extension.keyword'
   );
 });
 

@@ -8,14 +8,15 @@
  */
 
 import React from 'react';
-import { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react';
 import { EuiButton } from '@elastic/eui';
 
 import { action } from '@storybook/addon-actions';
 import { TextField } from '../../components';
-import { FormHook, FieldConfig } from '../types';
+import type { FormHook, FieldConfig } from '../types';
 import { useForm } from '../hooks/use_form';
-import { Form, Props as FormProps } from './form';
+import type { Props as FormProps } from './form';
+import { Form } from './form';
 import { UseField } from './use_field';
 import { formStories } from './__stories__';
 

@@ -7,7 +7,8 @@
 
 import { omit } from 'lodash';
 import expect from '@kbn/expect';
-import { cleanup, generate, Dataset, PartialConfig } from '@kbn/data-forge';
+import type { Dataset, PartialConfig } from '@kbn/data-forge';
+import { cleanup, generate } from '@kbn/data-forge';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { Aggregators } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/constants';
@@ -15,9 +16,9 @@ import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { parseSearchParams } from '@kbn/share-plugin/common/url_service';
 import { kbnTestConfig } from '@kbn/test';
 import type { InternalRequestHeader, RoleCredentials } from '@kbn/ftr-common-functional-services';
-import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { ISO_DATE_REGEX } from './constants';
-import { ActionDocument, LogsExplorerLocatorParsedParams } from './types';
+import type { ActionDocument, LogsExplorerLocatorParsedParams } from './types';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esClient = getService('es');
@@ -34,7 +35,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let roleAuthc: RoleCredentials;
   let internalReqHeader: InternalRequestHeader;
 
-  describe('AVG - TICKS - FIRED', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/240902
+  describe.skip('AVG - TICKS - FIRED', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
     const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';

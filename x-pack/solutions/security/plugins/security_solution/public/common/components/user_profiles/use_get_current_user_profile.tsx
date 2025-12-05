@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
@@ -39,6 +39,7 @@ export const useGetCurrentUserProfile = () => {
     {
       retry: false,
       staleTime: Infinity,
+      refetchOnWindowFocus: false,
       onError: (e) => {
         addError(e, { title: CURRENT_USER_PROFILE_FAILURE });
       },

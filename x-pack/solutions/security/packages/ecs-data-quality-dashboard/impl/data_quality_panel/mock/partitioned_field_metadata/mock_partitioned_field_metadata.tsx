@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PartitionedFieldMetadata } from '../../types';
+import type { PartitionedFieldMetadata } from '../../types';
 
 /**
  * Note: this mock does NOT have any `sameFamily` entries.

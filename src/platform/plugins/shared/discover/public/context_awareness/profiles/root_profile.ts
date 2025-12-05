@@ -17,7 +17,7 @@ import { AsyncProfileService } from '../profile_service';
 export enum SolutionType {
   Observability = 'oblt',
   Security = 'security',
-  Search = 'search',
+  Search = 'es',
   Default = 'default',
 }
 

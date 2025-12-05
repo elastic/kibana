@@ -6,7 +6,7 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { AIAssistantPluginStartDependencies } from '../types';
+import type { AIAssistantPluginStartDependencies } from '../types';
 
 const useTypedKibana = () => useKibana<AIAssistantPluginStartDependencies>();
 

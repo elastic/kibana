@@ -6,7 +6,7 @@
  */
 
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
-import { FtrService } from '@kbn/test-suites-xpack/functional/ftr_provider_context';
+import { FtrService } from '@kbn/test-suites-xpack-platform/functional/ftr_provider_context';
 
 const TIMELINE_CLOSE_BUTTON_TEST_SUBJ = 'timeline-modal-header-close-button';
 const TIMELINE_MODAL_PAGE_TEST_SUBJ = 'timeline';

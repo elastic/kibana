@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import {
-  Agent,
-  AgentPolicy,
-  NewAgentPolicy,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-} from '@kbn/fleet-plugin/common';
-import {
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { Agent, AgentPolicy, NewAgentPolicy } from '@kbn/fleet-plugin/common';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type {
   AgentPolicyServiceInterface,
   AgentService,
   PackagePolicyClient,
@@ -248,7 +244,7 @@ export class AgentlessConnectorsInfraService {
       options: {
         withSysMonitoring: true,
         spaceId: this.soClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID,
-        force: true,
+        forcePackagePolicyCreation: true,
       },
     });
 

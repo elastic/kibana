@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EMPTY_LABEL } from '@kbn/field-formats-common';
 import { StringFormat } from './string';
 
 /**
@@ -107,9 +108,9 @@ describe('String Format', () => {
 
   test('outputs specific empty value', () => {
     const string = new StringFormat();
-    expect(string.convert('')).toBe('(empty)');
+    expect(string.convert('')).toBe(EMPTY_LABEL);
     expect(stripSpan(string.convert('', 'html'))).toBe(
-      '<span class="ffString__emptyValue">(empty)</span>'
+      `<span class="ffString__emptyValue">${EMPTY_LABEL}</span>`
     );
   });
 

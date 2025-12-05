@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Message, MessageRole } from '@kbn/inference-common';
+import type { Message } from '@kbn/inference-common';
+import { MessageRole } from '@kbn/inference-common';
 
 /**
  * getAnonymizableMessageParts returns just the data of a
@@ -32,7 +33,5 @@ export function getAnonymizableMessageParts(message: Message) {
     };
   }
 
-  return {
-    content: message.content,
-  };
+  return { content: message.content };
 }

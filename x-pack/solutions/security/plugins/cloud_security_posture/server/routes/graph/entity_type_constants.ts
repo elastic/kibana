@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntityNodeDataModel } from '@kbn/cloud-security-posture-common/types/graph/v1';
+import type { EntityNodeDataModel } from '@kbn/cloud-security-posture-common/types/graph/v1';
 
 type EntityTypeIconMapping = Record<string, string>;
 type EntityTypeShapeMapping = Record<string, EntityNodeDataModel['shape']>;
@@ -186,6 +186,11 @@ const buildEntityTypeMappings = (): EntityTypeMappings => {
       icon: 'key',
       shape: 'rectangle',
       values: ['Secrets', 'Keys', 'API Keys', 'Encryption Keys', 'Access Keys'],
+    },
+    {
+      icon: 'magnifyWithExclamation',
+      shape: 'rectangle',
+      values: ['Entities', 'Entity'],
     },
   ];
 

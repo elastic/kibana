@@ -19,7 +19,7 @@ import {
 import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
 import React, { useCallback, useState } from 'react';
 
-import { DataViewManagerScopeName } from '../../../../../data_view_manager/constants';
+import { PageScope } from '../../../../../data_view_manager/constants';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { ConfirmationModal } from '../confirmation_modal';
@@ -58,13 +58,14 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
     services: { uiSettings },
   } = useKibana();
 
-  const { alertsIndexPattern, http } = useAssistantContext();
+  const { alertsIndexPattern, http, settings } = useAssistantContext();
   const { data: aiConnectors, isLoading: isLoadingConnectors } = useLoadConnectors({
     http,
+    settings,
   });
 
   const { sourcererDataView } = useSourcererDataView();
-  const { dataView: experimentalDataView } = useDataView(DataViewManagerScopeName.detections);
+  const { dataView: experimentalDataView } = useDataView(PageScope.alerts);
 
   const { mutateAsync: createAttackDiscoverySchedule, isLoading: isLoadingQuery } =
     useCreateAttackDiscoverySchedule();

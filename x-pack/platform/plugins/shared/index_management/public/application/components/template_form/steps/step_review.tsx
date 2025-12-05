@@ -22,16 +22,17 @@ import {
   EuiCodeBlock,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DataStreamOptions } from '../../../../../common/types/data_streams';
+import type { DataStreamOptions } from '../../../../../common/types/data_streams';
 import { indexModeLabels } from '../../../lib/index_mode_labels';
 import { allowAutoCreateRadioIds } from '../../../../../common/constants';
 import { serializers } from '../../../../shared_imports';
 
 import { serializeLegacyTemplate, serializeTemplate } from '../../../../../common/lib';
-import { TemplateDeserialized, getTemplateParameter, Aliases } from '../../../../../common';
+import type { TemplateDeserialized, Aliases } from '../../../../../common';
+import { getTemplateParameter } from '../../../../../common';
 import { SimulateTemplate } from '../../index_templates';
 import { getLifecycleValue } from '../../../lib/data_streams';
-import { WizardSection } from '../template_form';
+import type { WizardSection } from '../template_form';
 
 const { stripEmptyFields } = serializers;
 const INFINITE_AS_ICON = true;
@@ -422,6 +423,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
         {hasWildCardIndexPattern ? (
           <Fragment>
             <EuiCallOut
+              announceOnMount
               title={
                 <FormattedMessage
                   id="xpack.idxMgmt.templateForm.stepReview.summaryTab.indexPatternsWarningTitle"

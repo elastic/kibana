@@ -17,10 +17,12 @@ import { AgentsService } from './agents';
 import { RunnerFactoryImpl } from './runner';
 import { ConversationServiceImpl } from './conversation';
 import { createChatService } from './chat';
+import { type AttachmentService, createAttachmentService } from './attachments';
 
 interface ServiceInstances {
   tools: ToolsService;
   agents: AgentsService;
+  attachments: AttachmentService;
 }
 
 export class ServiceManager {
@@ -28,15 +30,17 @@ export class ServiceManager {
   public internalSetup?: InternalSetupServices;
   public internalStart?: InternalStartServices;
 
-  setupServices({ logger }: ServiceSetupDeps): InternalSetupServices {
+  setupServices({ logger, workflowsManagement }: ServiceSetupDeps): InternalSetupServices {
     this.services = {
       tools: new ToolsService(),
       agents: new AgentsService(),
+      attachments: createAttachmentService(),
     };
 
     this.internalSetup = {
-      tools: this.services.tools.setup({ logger }),
+      tools: this.services.tools.setup({ logger, workflowsManagement }),
       agents: this.services.agents.setup({ logger }),
+      attachments: this.services.attachments.setup(),
     };
 
     return this.internalSetup;
@@ -45,9 +49,12 @@ export class ServiceManager {
   startServices({
     logger,
     security,
+    spaces,
     elasticsearch,
-    actions,
     inference,
+    uiSettings,
+    savedObjects,
+    trackingService,
   }: ServicesStartDeps): InternalStartServices {
     if (!this.services) {
       throw new Error('#startServices called before #setupServices');
@@ -62,12 +69,18 @@ export class ServiceManager {
       return runner;
     };
 
+    const attachments = this.services.attachments.start();
+
     const tools = this.services.tools.start({
       getRunner,
+      spaces,
       elasticsearch,
+      uiSettings,
+      savedObjects,
     });
 
     const agents = this.services.agents.start({
+      spaces,
       security,
       elasticsearch,
       getRunner,
@@ -78,10 +91,12 @@ export class ServiceManager {
       logger: logger.get('runnerFactory'),
       security,
       elasticsearch,
-      actions,
       inference,
+      spaces,
       toolsService: tools,
       agentsService: agents,
+      attachmentsService: attachments,
+      trackingService,
     });
     runner = runnerFactory.getRunner();
 
@@ -89,19 +104,23 @@ export class ServiceManager {
       logger: logger.get('conversations'),
       security,
       elasticsearch,
+      spaces,
     });
 
     const chat = createChatService({
       logger: logger.get('chat'),
-      actions,
       inference,
       conversationService: conversations,
       agentService: agents,
+      uiSettings,
+      savedObjects,
+      trackingService,
     });
 
     this.internalStart = {
       tools,
       agents,
+      attachments,
       conversations,
       runnerFactory,
       chat,

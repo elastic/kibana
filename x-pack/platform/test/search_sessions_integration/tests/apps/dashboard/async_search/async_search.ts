@@ -6,18 +6,14 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const testSubjects = getService('testSubjects');
   const log = getService('log');
-  const { common, header, dashboard, visChart } = getPageObjects([
-    'common',
-    'header',
-    'dashboard',
-    'visChart',
-  ]);
+  const kibanaServer = getService('kibanaServer');
+  const { common, dashboard, visChart } = getPageObjects(['common', 'dashboard', 'visChart']);
   const dashboardPanelActions = getService('dashboardPanelActions');
   const queryBar = getService('queryBar');
   const elasticChart = getService('elasticChart');
@@ -42,7 +38,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('not delayed should load', async () => {
       await common.navigateToApp('dashboard');
       await dashboard.loadSavedDashboard('Not Delayed');
-      await header.waitUntilLoadingHasFinished();
       await dashboardExpect.noErrorEmbeddablesPresent();
       await enableNewChartLibraryDebug();
       const data = await visChart.getBarChartData(xyChartSelector, 'Sum of bytes');
@@ -52,46 +47,53 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('delayed should load', async () => {
       await common.navigateToApp('dashboard');
       await dashboard.loadSavedDashboard('Delayed 5s');
-      await header.waitUntilLoadingHasFinished();
       await dashboardExpect.noErrorEmbeddablesPresent();
       await enableNewChartLibraryDebug();
       const data = await visChart.getBarChartData(xyChartSelector, 'Sum of bytes');
       expect(data.length).to.be(5);
     });
 
-    it('timed out should show error', async () => {
-      await common.navigateToApp('dashboard');
-      await dashboard.loadSavedDashboard('Delayed 15s');
-      await header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail('searchTimeoutError');
-    });
+    describe('given a search timeout', () => {
+      before(async () => {
+        await kibanaServer.uiSettings.replace({ 'search:timeout': 10000 });
+      });
 
-    it('multiple searches are grouped and only single error popup is shown', async () => {
-      await common.navigateToApp('dashboard');
-      await dashboard.loadSavedDashboard('Multiple delayed');
-      await header.waitUntilLoadingHasFinished();
+      after(async () => {
+        await kibanaServer.uiSettings.unset('search:timeout');
+      });
 
-      // but only single error toast because searches are grouped
-      expect((await testSubjects.findAll('searchTimeoutError')).length).to.be(1);
+      it('timed out should show error', async () => {
+        await common.navigateToApp('dashboard');
+        await dashboard.loadSavedDashboard('Delayed 15s');
+        await testSubjects.existOrFail('searchTimeoutError');
+      });
 
-      const panel1SessionId1 = await dashboardPanelActions.getSearchSessionIdByTitle(
-        'Sum of Bytes by Extension'
-      );
-      const panel2SessionId1 = await dashboardPanelActions.getSearchSessionIdByTitle(
-        'Sum of Bytes by Extension (Delayed 5s)'
-      );
-      expect(panel1SessionId1).to.be(panel2SessionId1);
+      it('multiple searches are grouped and only single error popup is shown', async () => {
+        await common.navigateToApp('dashboard');
+        await dashboard.loadSavedDashboard('Multiple delayed');
 
-      await queryBar.clickQuerySubmitButton();
+        // but only single error toast because searches are grouped
+        expect((await testSubjects.findAll('searchTimeoutError')).length).to.be(1);
 
-      const panel1SessionId2 = await dashboardPanelActions.getSearchSessionIdByTitle(
-        'Sum of Bytes by Extension'
-      );
-      const panel2SessionId2 = await dashboardPanelActions.getSearchSessionIdByTitle(
-        'Sum of Bytes by Extension (Delayed 5s)'
-      );
-      expect(panel1SessionId2).to.be(panel2SessionId2);
-      expect(panel1SessionId1).not.to.be(panel1SessionId2);
+        const panel1SessionId1 = await dashboardPanelActions.getSearchSessionIdByTitle(
+          'Sum of Bytes by Extension'
+        );
+        const panel2SessionId1 = await dashboardPanelActions.getSearchSessionIdByTitle(
+          'Sum of Bytes by Extension (Delayed 5s)'
+        );
+        expect(panel1SessionId1).to.be(panel2SessionId1);
+
+        await queryBar.clickQuerySubmitButton();
+
+        const panel1SessionId2 = await dashboardPanelActions.getSearchSessionIdByTitle(
+          'Sum of Bytes by Extension'
+        );
+        const panel2SessionId2 = await dashboardPanelActions.getSearchSessionIdByTitle(
+          'Sum of Bytes by Extension (Delayed 5s)'
+        );
+        expect(panel1SessionId2).to.be(panel2SessionId2);
+        expect(panel1SessionId1).not.to.be(panel1SessionId2);
+      });
     });
   });
 }

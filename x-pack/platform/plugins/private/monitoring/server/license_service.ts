@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { Subscription } from 'rxjs';
-import { ICustomClusterClient } from '@kbn/core/server';
-import { ILicense, LicenseFeature } from '@kbn/licensing-plugin/common/types';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { Logger } from '@kbn/core/server';
-import { MonitoringConfig } from './config';
-import { MonitoringLicenseService } from './types';
+import type { Subscription } from 'rxjs';
+import type { ILicense, LicenseFeature } from '@kbn/licensing-types';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { IClusterClient, Logger } from '@kbn/core/server';
+import type { MonitoringConfig } from './config';
+import type { MonitoringLicenseService } from './types';
 
 interface SetupDeps {
   licensing: LicensingPluginStart;
-  monitoringClient: ICustomClusterClient;
+  monitoringClient: IClusterClient;
   config: MonitoringConfig;
   log: Logger;
 }

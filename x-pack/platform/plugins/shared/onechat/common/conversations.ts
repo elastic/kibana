@@ -14,13 +14,14 @@ export type ConversationCreateRequest = Omit<
   id?: string;
 };
 
-export type ConversationUpdateRequest = Pick<Conversation, 'id'> &
-  Partial<Pick<Conversation, 'title' | 'rounds'>>;
-
 export interface ConversationListOptions {
   agentId?: string;
 }
 
 export interface ConversationGetOptions {
+  conversationId: string;
+}
+
+export interface ConversationDeleteOptions {
   conversationId: string;
 }

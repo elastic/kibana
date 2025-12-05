@@ -25,9 +25,11 @@ import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 import { pricingServiceMock } from '@kbn/core-pricing-server-mocks';
 import { injectionServiceMock } from '@kbn/core-di-mocks';
+import { dataStreamServiceMock } from '@kbn/core-data-streams-server-mocks';
+import { lazyObject } from '@kbn/lazy-object';
 
 export function createCoreStartMock() {
-  const mock: MockedKeys<CoreStart> = {
+  const mock: MockedKeys<CoreStart> = lazyObject({
     analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     capabilities: capabilitiesServiceMock.createStartContract(),
     docLinks: docLinksServiceMock.createStartContract(),
@@ -43,11 +45,12 @@ export function createCoreStartMock() {
     security: securityServiceMock.createStart(),
     userProfile: userProfileServiceMock.createStart(),
     injection: injectionServiceMock.createStartContract(),
-    plugins: {
+    plugins: lazyObject({
       onStart: jest.fn(),
-    },
+    }),
     pricing: pricingServiceMock.createStartContract(),
-  };
+    dataStreams: dataStreamServiceMock.createStartContract(),
+  });
 
   return mock;
 }

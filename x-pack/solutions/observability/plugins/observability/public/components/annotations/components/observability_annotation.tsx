@@ -5,18 +5,13 @@
  * 2.0.
  */
 
-import {
-  SeriesIdentifier,
-  Tooltip,
-  TooltipAction,
-  TooltipSpec,
-  TooltipType,
-} from '@elastic/charts';
+import type { SeriesIdentifier, TooltipAction, TooltipSpec } from '@elastic/charts';
+import { Tooltip, TooltipType } from '@elastic/charts';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useFormContext } from 'react-hook-form';
 import moment from 'moment';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { ObsAnnotation } from './obs_annotation';
 import type { CreateAnnotationForm } from './create_annotation';
 import type { Annotation } from '../../../../common/annotations';

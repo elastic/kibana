@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Bundle } from '../common';
+import type { Bundle } from '../common';
 import { filterById } from './filter_by_id';
 
 export function focusBundles(filters: string[], bundles: Bundle[]) {

@@ -4,7 +4,7 @@
     "types": ["jest", "node"]
   },
   "exclude": ["target/**/*"],
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "include": ["**/*.ts"],
   "kbn_references": [
     "@kbn/datemath",

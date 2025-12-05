@@ -8,11 +8,11 @@
  */
 
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
-import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
-import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
-import { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
-import {
+import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
+import type {
   HasEditCapabilities,
   HasLibraryTransforms,
   HasSupportedTriggers,
@@ -24,9 +24,11 @@ import {
   SerializedTimeRange,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
-import { DeepPartial } from '@kbn/utility-types';
+import type { DeepPartial } from '@kbn/utility-types';
+import type { VisParams } from '@kbn/visualizations-common';
+import type { VisualizeEmbeddableState } from '../../common/embeddable/types';
 import type { HasVisualizeConfig } from './interfaces/has_visualize_config';
-import type { Vis, VisParams, VisSavedObject } from '../types';
+import type { Vis, VisSavedObject } from '../types';
 import type { SerializedVis } from '../vis';
 
 export type ExtraSavedObjectProperties = Pick<
@@ -53,24 +55,6 @@ export type VisualizeEditorInput = Omit<VisualizeRuntimeState, 'vis'> & {
   vis?: Vis<VisParams> & { colors?: Record<string, string>; legendOpen?: boolean };
 };
 
-export type VisualizeSavedObjectInputState = SerializedTitles &
-  Partial<DynamicActionsSerializedState> & {
-    savedObjectId?: string;
-    timeRange?: TimeRange;
-    uiState?: any;
-  };
-
-export type VisualizeSavedVisInputState = SerializedTitles &
-  Partial<DynamicActionsSerializedState> & {
-    savedVis: SerializedVis<VisParams>;
-    timeRange?: TimeRange;
-  };
-
-export type VisualizeSerializedState = VisualizeSavedObjectInputState | VisualizeSavedVisInputState;
-export type VisualizeOutputState = VisualizeSavedVisInputState &
-  Required<Omit<SerializedTitles, 'hidePanelTitles'>> &
-  ExtraSavedObjectProperties;
-
 export type VisualizeApi = Partial<HasEditCapabilities> &
   PublishesDataViews &
   PublishesDataLoading &
@@ -81,7 +65,7 @@ export type VisualizeApi = Partial<HasEditCapabilities> &
   HasSupportedTriggers &
   PublishesTimeRange &
   HasLibraryTransforms &
-  DefaultEmbeddableApi<VisualizeSerializedState> & {
+  DefaultEmbeddableApi<VisualizeEmbeddableState> & {
     updateVis: (vis: DeepPartial<SerializedVis<VisParams>>) => void;
     openInspector: () => OverlayRef | undefined;
   };

@@ -13,18 +13,19 @@ import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { prebootServiceMock } from '@kbn/core-preboot-server-mocks';
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { CorePreboot } from '@kbn/core-lifecycle-server';
+import { lazyObject } from '@kbn/lazy-object';
 
 type CorePrebootMockType = MockedKeys<CorePreboot> & {
   elasticsearch: ReturnType<typeof elasticsearchServiceMock.createPreboot>;
 };
 
 export function createCorePrebootMock() {
-  const mock: CorePrebootMockType = {
+  const mock: CorePrebootMockType = lazyObject({
     analytics: analyticsServiceMock.createAnalyticsServicePreboot(),
     elasticsearch: elasticsearchServiceMock.createPreboot(),
     http: httpServiceMock.createPrebootContract() as CorePrebootMockType['http'],
     preboot: prebootServiceMock.createPrebootContract(),
-  };
+  });
 
   return mock;
 }

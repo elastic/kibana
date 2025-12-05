@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ILicense } from '@kbn/licensing-plugin/server';
+import type { ILicense } from '@kbn/licensing-types';
 import { SCHEDULED_REPORT_VALID_LICENSES } from '@kbn/reporting-common';
 import type { ExportType } from '.';
-import { ExportTypesRegistry } from './export_types_registry';
+import type { ExportTypesRegistry } from './export_types_registry';
 
 export interface LicenseCheckResult {
   showLinks: boolean;

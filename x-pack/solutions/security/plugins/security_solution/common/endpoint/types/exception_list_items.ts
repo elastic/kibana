@@ -6,6 +6,14 @@
  */
 
 import type { AllConditionEntryFields, EntryTypes } from '@kbn/securitysolution-utils';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+
+export type ExceptionEntries = Array<{
+  field: string;
+  value: string;
+  operator: 'included' | 'excluded';
+  type: Exclude<ExceptionListItemSchema['entries'][number]['type'], 'list'>;
+}>;
 
 export type ConditionEntriesMap<T> = {
   [K in AllConditionEntryFields]?: T;

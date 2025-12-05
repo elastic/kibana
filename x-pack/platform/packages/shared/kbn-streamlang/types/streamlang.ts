@@ -6,9 +6,12 @@
  */
 
 import { z } from '@kbn/zod';
-import { isSchema } from '@kbn/streams-schema';
-import { Condition, conditionSchema } from './conditions';
-import { StreamlangProcessorDefinition, streamlangProcessorSchema } from './processors';
+import { isSchema } from '@kbn/zod-helpers';
+import type { Condition } from './conditions';
+import { conditionSchema } from './conditions';
+import type { StreamlangProcessorDefinition } from './processors';
+import { streamlangProcessorSchema } from './processors';
+import type { StreamlangStepWithUIAttributes } from './ui';
 
 // Recursive schema for ConditionWithSteps
 export const conditionWithStepsSchema: z.ZodType<ConditionWithSteps> = z.lazy(() =>
@@ -26,6 +29,7 @@ export type ConditionWithSteps = Condition & { steps: StreamlangStep[] };
  * Nested where block (recursive)
  */
 export interface StreamlangWhereBlock {
+  customIdentifier?: string;
   where: ConditionWithSteps;
 }
 
@@ -33,11 +37,18 @@ export interface StreamlangWhereBlock {
  * Zod schema for a where block
  */
 export const streamlangWhereBlockSchema: z.ZodType<StreamlangWhereBlock> = z.object({
+  customIdentifier: z.string().optional(),
   where: conditionWithStepsSchema,
 });
 
-export const isWhereBlock = (obj: any): obj is StreamlangWhereBlock => {
+export const isWhereBlockSchema = (obj: any): obj is StreamlangWhereBlock => {
   return isSchema(streamlangWhereBlockSchema, obj);
+};
+
+// Cheap check that bypasses having to do full schema checks.
+// This is useful for quickly identifying where blocks without full recursive validation.
+export const isWhereBlock = (obj: any): obj is StreamlangWhereBlock => {
+  return 'where' in obj && !('action' in obj);
 };
 
 /**
@@ -48,8 +59,16 @@ export const streamlangStepSchema: z.ZodType<StreamlangStep> = z.lazy(() =>
   z.union([streamlangProcessorSchema, streamlangWhereBlockSchema])
 );
 
-export const isActionBlock = (obj: any): obj is StreamlangProcessorDefinition => {
+export const isActionBlockSchema = (obj: any): obj is StreamlangProcessorDefinition => {
   return isSchema(streamlangProcessorSchema, obj);
+};
+
+// Cheap check that bypasses having to do full schema checks.
+// This is useful for quickly identifying action blocks without full recursive validation.
+export const isActionBlock = <TBlock extends StreamlangStep | StreamlangStepWithUIAttributes>(
+  obj?: TBlock
+): obj is Extract<TBlock, { action: string }> => {
+  return obj !== undefined && 'action' in obj;
 };
 
 /**

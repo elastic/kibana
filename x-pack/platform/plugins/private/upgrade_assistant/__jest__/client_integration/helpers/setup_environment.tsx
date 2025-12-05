@@ -9,14 +9,15 @@ import React from 'react';
 import SemVer from 'semver/classes/semver';
 import { merge } from 'lodash';
 
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import { ReindexService } from '@kbn/reindex-service-plugin/public';
-import { AuthorizationContext, Authorization, Privileges } from '../../../public/shared_imports';
+import type { Authorization, Privileges } from '../../../public/shared_imports';
+import { AuthorizationContext } from '../../../public/shared_imports';
 import { AppContextProvider } from '../../../public/application/app_context';
 import { apiService } from '../../../public/application/lib/api';
 import { breadcrumbService } from '../../../public/application/lib/breadcrumbs';
 import { GlobalFlyout } from '../../../public/shared_imports';
-import { AppDependencies } from '../../../public/types';
+import type { RootComponentDependencies } from '../../../public/types';
 import { getAppContextMock } from './app_context.mock';
 import { init as initHttpRequests } from './http_requests';
 
@@ -37,7 +38,7 @@ export const WithAppDependencies =
     apiService.setup(httpSetup, new ReindexService(httpSetup));
     breadcrumbService.setup(() => '');
 
-    const appContextMock = getAppContextMock(kibanaVersion) as unknown as AppDependencies;
+    const appContextMock = getAppContextMock(kibanaVersion) as unknown as RootComponentDependencies;
 
     return (
       <AuthorizationContext.Provider

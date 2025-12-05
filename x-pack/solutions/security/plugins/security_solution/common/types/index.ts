@@ -5,11 +5,23 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod';
 import type { Status } from '../api/detection_engine';
 
 export * from './timeline';
 export type * from './header_actions';
 export type * from './bulk_actions';
+
+const AlertClosingReasonSchema = z.enum([
+  'false_positive',
+  'duplicate',
+  'true_positive',
+  'benign_positive',
+  'automated_closure',
+  'other',
+]);
+export type AlertClosingReason = z.infer<typeof AlertClosingReasonSchema>;
+export const AlertClosingReasonValues = AlertClosingReasonSchema.enum;
 
 export const FILTER_OPEN: Status = 'open';
 export const FILTER_CLOSED: Status = 'closed';

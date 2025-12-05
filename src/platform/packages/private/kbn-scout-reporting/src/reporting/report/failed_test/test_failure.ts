@@ -15,8 +15,9 @@ export interface TestFailure {
   command: string;
   location: string;
   owner: string[];
-  plugin?: {
+  kibanaModule?: {
     id: string;
+    type: string;
     visibility: string;
     group: string;
   };

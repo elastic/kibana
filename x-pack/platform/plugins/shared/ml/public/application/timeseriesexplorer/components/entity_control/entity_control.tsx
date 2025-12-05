@@ -171,6 +171,9 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
 
     const control = (
       <EuiComboBox
+        aria-label={i18n.translate('xpack.ml.timeSeriesExplorer.entityControlLabel', {
+          defaultMessage: 'Entity control',
+        })}
         async
         isLoading={isLoading}
         inputRef={(input) => {

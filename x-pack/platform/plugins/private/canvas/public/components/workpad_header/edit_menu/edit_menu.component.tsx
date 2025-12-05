@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import React, { Fragment, FunctionComponent, useState } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { Fragment, useState } from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonEmpty, EuiContextMenu, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Popover, ClosePopoverFn } from '../../popover';
+import type { ClosePopoverFn } from '../../popover';
+import { Popover } from '../../popover';
 import { ShortcutStrings } from '../../../../i18n/shortcuts';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
 import { CustomElementModal } from '../../custom_element_modal';
 import { CONTEXT_MENU_TOP_BORDER_CLASSNAME } from '../../../../common/lib/constants';
-import { PositionedElement } from '../../../../types';
+import type { PositionedElement } from '../../../../types';
 
 const shortcutHelp = ShortcutStrings.getShortcutHelp();
 const strings = {
@@ -529,6 +531,7 @@ EditMenu.propTypes = {
   distributeHorizontally: PropTypes.func.isRequired,
   distributeVertically: PropTypes.func.isRequired,
   createCustomElement: PropTypes.func.isRequired,
+  // @ts-expect-error upgrade typescript v5.9.3
   selectedNodes: PropTypes.arrayOf(PropTypes.object).isRequired,
   groupIsSelected: PropTypes.bool.isRequired,
   groupNodes: PropTypes.func.isRequired,

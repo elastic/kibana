@@ -20,8 +20,45 @@ const renderMitreAttack = (contextValue: DocumentDetailsContext) =>
   );
 
 describe('<MitreAttack />', () => {
-  it('should render mitre attack information', async () => {
+  it('should render mitre attack information (in array form)', async () => {
     const contextValue = { searchHit: mockSearchHit } as unknown as DocumentDetailsContext;
+
+    const { getByTestId } = renderMitreAttack(contextValue);
+
+    await act(async () => {
+      expect(getByTestId(MITRE_ATTACK_TITLE_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(MITRE_ATTACK_DETAILS_TEST_ID)).toBeInTheDocument();
+    });
+  });
+
+  it('should render mitre attack information (in object form)', async () => {
+    const contextValue = {
+      searchHit: {
+        _index: 'index',
+        _id: 'id',
+        fields: {
+          'kibana.alert.rule.parameters': [
+            {
+              threat: {
+                framework: 'MITRE ATT&CK',
+                tactic: {
+                  id: '123',
+                  reference: 'https://attack.mitre.org/tactics/123',
+                  name: 'Tactic',
+                },
+                technique: [
+                  {
+                    id: '456',
+                    reference: 'https://attack.mitre.org/techniques/456',
+                    name: 'Technique',
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+    } as unknown as DocumentDetailsContext;
 
     const { getByTestId } = renderMitreAttack(contextValue);
 

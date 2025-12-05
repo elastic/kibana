@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreRequestHandlerContext, KibanaResponseFactory } from '@kbn/core/server';
+import type { CoreRequestHandlerContext, KibanaResponseFactory } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 
 export const checkPrivileges = async (

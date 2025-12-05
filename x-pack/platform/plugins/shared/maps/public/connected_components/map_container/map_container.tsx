@@ -7,12 +7,13 @@
 
 import '../../_index.scss';
 import React, { Component } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiCallOut, UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
-import { Filter } from '@kbn/es-query';
-import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
-import { Observable } from 'rxjs';
+import type { Filter } from '@kbn/es-query';
+import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
+import type { Observable } from 'rxjs';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -23,12 +24,13 @@ import { ToolbarOverlay } from '../toolbar_overlay';
 import { EditLayerPanel } from '../edit_layer_panel';
 import { AddLayerPanel } from '../add_layer_panel';
 import { isScreenshotMode } from '../../kibana_services';
-import { RawValue, RENDER_TIMEOUT } from '../../../common/constants';
+import type { RawValue } from '../../../common/constants';
+import { RENDER_TIMEOUT } from '../../../common/constants';
 import { FLYOUT_STATE } from '../../reducers/ui';
-import { MapSettings } from '../../../common/descriptor_types';
+import type { MapSettings } from '../../../common/descriptor_types';
 import { MapSettingsPanel } from '../map_settings_panel';
-import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
-import { ILayer } from '../../classes/layers/layer';
+import type { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
+import type { ILayer } from '../../classes/layers/layer';
 
 const RENDER_COMPLETE_EVENT = 'renderComplete';
 
@@ -179,6 +181,7 @@ export class MapContainer extends Component<Props, State> {
           data-description={this.props.description}
         >
           <EuiCallOut
+            announceOnMount
             title={i18n.translate('xpack.maps.map.initializeErrorTitle', {
               defaultMessage: 'Unable to initialize map',
             })}

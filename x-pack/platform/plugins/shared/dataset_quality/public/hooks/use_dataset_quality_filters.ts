@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { OnRefreshChangeProps } from '@elastic/eui';
+import type { OnRefreshChangeProps } from '@elastic/eui';
 import { useSelector } from '@xstate/react';
 import { useCallback, useMemo } from 'react';
 import { DEFAULT_DATASET_TYPE } from '../../common/constants';
-import { DataStreamType, QualityIndicators } from '../../common/types';
+import type { DataStreamType, QualityIndicators } from '../../common/types';
 import { Integration } from '../../common/data_streams_stats/integration';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
-import { IntegrationItem } from '../components/dataset_quality/filters/integrations_selector';
-import { NamespaceItem } from '../components/dataset_quality/filters/namespaces_selector';
-import { QualityItem } from '../components/dataset_quality/filters/qualities_selector';
-import { Item } from '../components/dataset_quality/filters/selector';
+import type { IntegrationItem } from '../components/dataset_quality/filters/integrations_selector';
+import type { NamespaceItem } from '../components/dataset_quality/filters/namespaces_selector';
+import type { QualityItem } from '../components/dataset_quality/filters/qualities_selector';
+import type { Item } from '../components/dataset_quality/filters/selector';
 
 export const useDatasetQualityFilters = () => {
   const { service, isDatasetQualityAllSignalsAvailable } = useDatasetQualityContext();
@@ -66,11 +66,7 @@ export const useDatasetQualityFilters = () => {
   );
 
   const onTimeChange = useCallback(
-    (selectedTime: { start: string; end: string; isInvalid: boolean }) => {
-      if (selectedTime.isInvalid) {
-        return;
-      }
-
+    (selectedTime: { start: string; end: string }) => {
       service.send({
         type: 'UPDATE_TIME_RANGE',
         timeRange: {
@@ -90,7 +86,7 @@ export const useDatasetQualityFilters = () => {
   }, [service]);
 
   const onRefreshChange = useCallback(
-    ({ refreshInterval, isPaused }: OnRefreshChangeProps) => {
+    ({ refreshInterval, isPaused }: Pick<OnRefreshChangeProps, 'refreshInterval' | 'isPaused'>) => {
       service.send({
         type: 'UPDATE_TIME_RANGE',
         timeRange: {

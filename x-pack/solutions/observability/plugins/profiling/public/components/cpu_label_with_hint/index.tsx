@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import type { EuiIconProps, EuiTextProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 type CPUType = 'self' | 'total';
@@ -50,9 +50,7 @@ export function CPULabelWithHint({ iconSize, labelSize, labelStyle, type }: Prop
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiToolTip content={hint}>
-          <EuiIcon type="question" size={iconSize} />
-        </EuiToolTip>
+        <EuiIconTip content={hint} type="question" size={iconSize} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

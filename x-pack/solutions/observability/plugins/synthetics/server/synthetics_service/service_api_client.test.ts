@@ -6,15 +6,16 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { CoreStart } from '@kbn/core/server';
+import type { CoreStart } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { ServiceAPIClient } from './service_api_client';
-import { ServiceConfig } from '../config';
+import type { ServiceConfig } from '../config';
 import axios from 'axios';
-import { LocationStatus, PublicLocations } from '../../common/runtime_types';
-import { LicenseGetResponse } from '@elastic/elasticsearch/lib/api/types';
-import { SyntheticsServerSetup } from '../types';
+import type { PublicLocations } from '../../common/runtime_types';
+import { LocationStatus } from '../../common/runtime_types';
+import type { LicenseGetResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SyntheticsServerSetup } from '../types';
 
 const licenseMock: LicenseGetResponse = {
   license: {
@@ -231,7 +232,11 @@ describe('callAPI', () => {
         'x-kibana-version': '8.7.0',
       },
       httpsAgent: expect.objectContaining({
-        options: { rejectUnauthorized: true, path: null, noDelay: true },
+        options: expect.objectContaining({
+          rejectUnauthorized: true,
+          path: null,
+          noDelay: true,
+        }),
       }),
       method: 'POST',
       url: 'https://service.dev/monitors',
@@ -251,7 +256,11 @@ describe('callAPI', () => {
         'x-kibana-version': '8.7.0',
       },
       httpsAgent: expect.objectContaining({
-        options: { rejectUnauthorized: true, path: null, noDelay: true },
+        options: expect.objectContaining({
+          rejectUnauthorized: true,
+          path: null,
+          noDelay: true,
+        }),
       }),
       method: 'POST',
       url: 'https://qa.service.elstc.co/monitors',
@@ -271,7 +280,11 @@ describe('callAPI', () => {
         'x-kibana-version': '8.7.0',
       },
       httpsAgent: expect.objectContaining({
-        options: { rejectUnauthorized: true, path: null, noDelay: true },
+        options: expect.objectContaining({
+          rejectUnauthorized: true,
+          path: null,
+          noDelay: true,
+        }),
       }),
       method: 'POST',
       url: 'https://qa.service.stg.co/monitors',
@@ -344,13 +357,13 @@ describe('callAPI', () => {
         'x-kibana-version': '8.7.0',
       },
       httpsAgent: expect.objectContaining({
-        options: {
+        options: expect.objectContaining({
           rejectUnauthorized: true,
           path: null,
           noDelay: true,
           cert: 'test-certificate',
           key: 'test-key',
-        },
+        }),
       }),
       method: 'POST',
       url: 'https://service.dev/monitors',
@@ -398,13 +411,13 @@ describe('callAPI', () => {
         'x-kibana-version': '8.7.0',
       },
       httpsAgent: expect.objectContaining({
-        options: {
+        options: expect.objectContaining({
           rejectUnauthorized: true,
           path: null,
           noDelay: true,
           cert: 'test-certificate',
           key: 'test-key',
-        },
+        }),
       }),
       method: 'POST',
       url: 'https://service.dev/run',
@@ -458,13 +471,13 @@ describe('callAPI', () => {
         'x-kibana-version': '8.7.0',
       },
       httpsAgent: expect.objectContaining({
-        options: {
+        options: expect.objectContaining({
           rejectUnauthorized: true,
           path: null,
           noDelay: true,
           cert: 'test-certificate',
           key: 'test-key',
-        },
+        }),
       }),
       method: 'PUT',
       url: 'https://service.dev/monitors/sync',

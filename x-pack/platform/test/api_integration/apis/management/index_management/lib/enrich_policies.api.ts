@@ -6,7 +6,7 @@
  */
 
 import { INTERNAL_API_BASE_PATH } from '../constants';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export function enrichPoliciesApi(getService: FtrProviderContext['getService']) {
   const supertest = getService('supertest');

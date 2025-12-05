@@ -10,8 +10,14 @@ import type {
   PluginSetupContract as ActionsPluginSetup,
 } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { BoundInferenceClient, BoundOptions, InferenceClient } from '@kbn/inference-common';
+import type {
+  BoundInferenceClient,
+  BoundOptions,
+  InferenceClient,
+  InferenceConnector,
+} from '@kbn/inference-common';
 import type { InferenceChatModel, InferenceChatModelParams } from '@kbn/inference-langchain';
+import type { InferenceCallbacks } from '@kbn/inference-common/src/chat_complete';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -36,6 +42,10 @@ export interface InferenceUnboundClientCreateOptions {
    * The request to scope the client to.
    */
   request: KibanaRequest;
+  /**
+   * Callbacks to be used by the client to report lifecycle events.
+   */
+  callbacks?: InferenceCallbacks;
 }
 
 /**
@@ -109,6 +119,32 @@ export interface InferenceServerStart {
    * });
    */
   getChatModel: (options: CreateChatModelOptions) => Promise<InferenceChatModel>;
+
+  /**
+   * Returns a list of all available inference connectors.
+   *
+   * @param request - The Kibana request to scope the operation to
+   * @returns A promise that resolves to an array of inference connectors
+   */
+  getConnectorList: (request: KibanaRequest) => Promise<InferenceConnector[]>;
+
+  /**
+   * Retrieves the default inference connector configured for the system.
+   *
+   * @param request - The Kibana request to scope the operation to
+   * @returns A promise that resolves to the default inference connector
+   */
+  getDefaultConnector: (request: KibanaRequest) => Promise<InferenceConnector>;
+
+  /**
+   * Retrieves a specific inference connector by its ID.
+   *
+   * @param id - The unique identifier of the connector to retrieve
+   * @param request - The Kibana request to scope the operation to
+   * @returns A promise that resolves to the requested inference connector
+   * @throws Error if the connector with the specified ID does not exist
+   */
+  getConnectorById: (id: string, request: KibanaRequest) => Promise<InferenceConnector>;
 }
 
 /**
@@ -123,6 +159,10 @@ export interface CreateChatModelOptions {
    * The id of the GenAI connector to use.
    */
   connectorId: string;
+  /**
+   * Callback to be used by the client to report lifecycle events.
+   */
+  callbacks?: InferenceCallbacks;
   /**
    * Additional parameters to be passed down to the model constructor.
    */

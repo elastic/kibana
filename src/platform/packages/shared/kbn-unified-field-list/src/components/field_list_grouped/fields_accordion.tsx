@@ -21,7 +21,8 @@ import {
 } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
-import { type FieldListItem, FieldsGroupNames, type RenderFieldItemParams } from '../../types';
+import type { FieldsGroupNames } from '../../types';
+import { type FieldListItem, type RenderFieldItemParams } from '../../types';
 
 export interface FieldsAccordionProps<T extends FieldListItem> {
   initialIsOpen: boolean;
@@ -71,16 +72,7 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
   const renderButton = useMemo(() => {
     return (
       <EuiText size="xs">
-        <strong
-          css={!!helpTooltip ? styles.titleTooltip : undefined}
-          aria-label={i18n.translate('unifiedFieldList.fieldsAccordion.accordionButtonAriaLabel', {
-            defaultMessage:
-              '{label}: {fieldsCount} {fieldsCount, plural, one {item} other {items}}',
-            values: { label, fieldsCount },
-          })}
-        >
-          {label}
-        </strong>
+        <strong css={!!helpTooltip ? styles.titleTooltip : undefined}>{label}</strong>
         {!!helpTooltip && (
           <EuiIconTip
             aria-label={helpTooltip}
@@ -96,7 +88,7 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
         )}
       </EuiText>
     );
-  }, [label, helpTooltip, fieldsCount, styles.titleTooltip]);
+  }, [label, helpTooltip, styles.titleTooltip]);
 
   const accordionExtraAction = useMemo(() => {
     if (showExistenceFetchError) {
@@ -153,6 +145,10 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
       id={id}
       buttonProps={{
         id: buttonId,
+        'aria-label': i18n.translate('unifiedFieldList.fieldsAccordion.accordionButtonAriaLabel', {
+          defaultMessage: '{label}: {fieldsCount} {fieldsCount, plural, one {item} other {items}}',
+          values: { label, fieldsCount },
+        }),
       }}
       buttonContent={renderButton}
       extraAction={accordionExtraAction}

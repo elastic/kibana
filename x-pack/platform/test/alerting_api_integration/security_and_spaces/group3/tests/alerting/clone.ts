@@ -10,7 +10,8 @@ import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { RawRule } from '@kbn/alerting-plugin/server/types';
-import { Spaces, UserAtSpaceScenarios } from '../../../scenarios';
+import { AlertUtils, getAlwaysFiringInternalRule } from '../../../../common/lib/alert_utils';
+import { DefaultSpace, Spaces, Superuser, UserAtSpaceScenarios } from '../../../scenarios';
 import type { TaskManagerDoc } from '../../../../common/lib';
 import {
   checkAAD,
@@ -119,8 +120,14 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
-            case 'global_read at space1':
             case 'space_1_all at space2':
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getUnauthorizedErrorMessage('get', 'test.noop', 'alertsFixture'),
+                statusCode: 403,
+              });
+              break;
+            case 'global_read at space1':
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
@@ -369,6 +376,33 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
 
         expect(rawActionUuid).to.not.be(undefined);
         expect(rawSystemActionUuid).to.not.be(undefined);
+      });
+    });
+
+    describe('internally managed rule types', () => {
+      const rulePayload = getAlwaysFiringInternalRule();
+
+      const alertUtils = new AlertUtils({
+        user: Superuser,
+        space: DefaultSpace,
+        supertestWithoutAuth: supertest,
+      });
+
+      it('should throw 400 error when trying to clone an internally managed rule type', async () => {
+        const { body: createdRule } = await supertest
+          .post('/api/alerts_fixture/rule/internally_managed')
+          .set('kbn-xsrf', 'foo')
+          .send(rulePayload)
+          .expect(200);
+
+        await supertest
+          .post(`/internal/alerting/rule/${createdRule.id}/_clone`)
+          .set('kbn-xsrf', 'foo')
+          .expect(400);
+
+        const res = await alertUtils.deleteInternallyManagedRule(createdRule.id);
+
+        expect(res.statusCode).to.eql(200);
       });
     });
   });

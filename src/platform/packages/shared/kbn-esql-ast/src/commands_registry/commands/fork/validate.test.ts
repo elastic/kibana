@@ -9,6 +9,7 @@
 import { mockContext } from '../../../__tests__/context_fixtures';
 import { validate } from './validate';
 import { expectErrors } from '../../../__tests__/validation';
+import { getNoValidCallSignatureError } from '../../../definitions/utils/validation/utils';
 
 const forkExpectErrors = (query: string, expectedErrors: string[], context = mockContext) => {
   return expectErrors(query, expectedErrors, context, 'fork', validate);
@@ -47,6 +48,11 @@ describe('FORK Validation', () => {
     );
   });
 
+  test('supports a maximum of 8 branches', () => {
+    const branches = Array(9).fill('(WHERE keywordField != "")').join(' ');
+    forkExpectErrors(`FROM index| FORK ${branches}`, [`[FORK] Supports a maximum of 8 branches.`]);
+  });
+
   test('enforces only one fork command', () => {
     forkExpectErrors(
       `FROM index
@@ -82,9 +88,9 @@ describe('FORK Validation', () => {
     (WHERE TO_UPPER(doubleField) != "" | LIMIT 100)
     (WHERE TO_LOWER(doubleField) == "" | WHERE TRIM(integerField))`,
         [
-          'Argument of [to_upper] must be [keyword], found value [doubleField] type [double]',
-          'Argument of [to_lower] must be [keyword], found value [doubleField] type [double]',
-          'Argument of [trim] must be [keyword], found value [integerField] type [integer]',
+          getNoValidCallSignatureError('to_upper', ['double']),
+          getNoValidCallSignatureError('to_lower', ['double']),
+          getNoValidCallSignatureError('trim', ['integer']),
         ]
       );
     });

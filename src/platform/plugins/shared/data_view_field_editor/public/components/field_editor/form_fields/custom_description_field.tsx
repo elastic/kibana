@@ -11,6 +11,12 @@ import React from 'react';
 
 import { UseField, TextAreaField } from '../../../shared_imports';
 
-export const CustomDescriptionField = () => {
-  return <UseField path="customDescription" component={TextAreaField} />;
+export const CustomDescriptionField = ({ disabled }: { disabled?: boolean }) => {
+  return (
+    <UseField
+      path="customDescription"
+      component={TextAreaField}
+      componentProps={{ euiFieldProps: { disabled } }}
+    />
+  );
 };

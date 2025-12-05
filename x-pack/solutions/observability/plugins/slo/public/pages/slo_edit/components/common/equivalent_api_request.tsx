@@ -18,11 +18,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CreateSLOInput, GetSLOResponse } from '@kbn/slo-schema';
+import type { CreateSLOInput, GetSLOResponse } from '@kbn/slo-schema';
 import React, { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { transformCreateSLOFormToCreateSLOInput } from '../../helpers/process_slo_form_values';
-import { CreateSLOForm } from '../../types';
+import type { CreateSLOForm } from '../../types';
 
 interface Props {
   isEditMode: boolean;

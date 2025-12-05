@@ -9,11 +9,12 @@
 
 import { Client, HttpConnection } from '@elastic/elasticsearch';
 import url from 'url';
-import { Either, fromNullable, chain, getOrElse, toError } from 'fp-ts/Either';
+import type { Either } from 'fp-ts/Either';
+import { fromNullable, chain, getOrElse, toError } from 'fp-ts/Either';
 import { flow, pipe } from 'fp-ts/function';
 import * as TE from 'fp-ts/TaskEither';
 import * as T from 'fp-ts/Task';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { FtrService } from '../ftr_provider_context';
 import { print } from './utils';
 

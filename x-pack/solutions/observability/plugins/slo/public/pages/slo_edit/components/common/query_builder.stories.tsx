@@ -10,7 +10,8 @@ import type { StoryFn } from '@storybook/react';
 
 import { FormProvider, useForm } from 'react-hook-form';
 import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
-import { QueryBuilder as Component, SearchBarProps } from './query_builder';
+import type { SearchBarProps } from './query_builder';
+import { QueryBuilder as Component } from './query_builder';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../../constants';
 
 export default {

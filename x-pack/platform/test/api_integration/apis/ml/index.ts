@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -61,6 +61,12 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/ml/module_metricbeat');
       await esArchiver.unload(
         'x-pack/platform/test/fixtures/es_archives/ml/module_security_cloudtrail'
+      );
+      await esArchiver.unload(
+        'x-pack/platform/test/fixtures/es_archives/ml/module_security_azure_activitylogs'
+      );
+      await esArchiver.unload(
+        'x-pack/platform/test/fixtures/es_archives/ml/module_security_gcp_audit'
       );
       await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/ml/module_metrics_ui');
       await esArchiver.unload(

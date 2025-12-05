@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiHeader,
   EuiHeaderLogo,
@@ -14,37 +15,36 @@ import {
   EuiHeaderSectionItem,
   EuiImage,
   EuiLoadingSpinner,
-  EuiThemeComputed,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
-import {
+import type {
   ChromeBreadcrumb,
-  type ChromeBreadcrumbsAppendExtension,
   ChromeGlobalHelpExtensionMenuLink,
   ChromeHelpExtension,
   ChromeHelpMenuLink,
   ChromeNavControl,
   ChromeUserBanner,
 } from '@kbn/core-chrome-browser/src';
+import { type ChromeBreadcrumbsAppendExtension } from '@kbn/core-chrome-browser/src';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
-import { MountPoint } from '@kbn/core-mount-utils-browser';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { i18n } from '@kbn/i18n';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import React, { type ComponentProps, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { debounceTime, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { debounceTime } from 'rxjs';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 
 import { Breadcrumbs } from './breadcrumbs';
 import { HeaderHelpMenu } from '../header/header_help_menu';
 import { HeaderNavControls } from '../header/header_nav_controls';
 import { HeaderTopBanner } from '../header/header_top_banner';
-import { ScreenReaderRouteAnnouncements, SkipToMainContent } from '../header/screen_reader_a11y';
 import { AppMenuBar } from './app_menu';
 import { BreadcrumbsWithExtensionsWrapper } from '../header/breadcrumbs_with_extensions';
+import { HeaderPageAnnouncer } from '../header/header_page_announcer';
 
 const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
   logo: {
@@ -71,9 +71,6 @@ const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
     flex-shrink: 1;
   `,
   breadcrumbsSectionItem: css`
-    min-width: 0; // needed to enable breadcrumbs truncation
-  `,
-  redirectAppLinksContainer: css`
     min-width: 0; // needed to enable breadcrumbs truncation
   `,
   leftNavcontrols: css`
@@ -234,23 +231,28 @@ export const ProjectHeader = ({
   const headerCss = getHeaderCss(euiTheme);
   const { logo: logoCss } = headerCss;
 
+  const topBarStyles = css`
+    box-shadow: none !important;
+  `;
+
   return (
     <>
-      <ScreenReaderRouteAnnouncements
-        breadcrumbs$={observables.breadcrumbs$}
-        customBranding$={customBranding$}
-        appId$={application.currentAppId$}
-      />
-      <SkipToMainContent />
-
       {observables.headerBanner$ && <HeaderTopBanner headerBanner$={observables.headerBanner$} />}
       <header data-test-subj="kibanaProjectHeader">
         <div id="globalHeaderBars" data-test-subj="headerGlobalNav" className="header__bars">
-          <EuiHeader position={isFixed ? 'fixed' : 'static'} className="header__firstBar">
+          <EuiHeader
+            position={isFixed ? 'fixed' : 'static'}
+            className="header__firstBar"
+            css={topBarStyles}
+          >
             <EuiHeaderSection grow={false} css={headerCss.leftHeaderSection}>
               {children}
 
               <EuiHeaderSectionItem>
+                <HeaderPageAnnouncer
+                  breadcrumbs$={observables.breadcrumbs$}
+                  customBranding$={customBranding$}
+                />
                 <Logo
                   prependBasePath={prependBasePath}
                   application={application}
@@ -270,16 +272,11 @@ export const ProjectHeader = ({
               </EuiHeaderSectionItem>
 
               <EuiHeaderSectionItem css={headerCss.breadcrumbsSectionItem}>
-                <RedirectAppLinks
-                  coreStart={{ application }}
-                  css={headerCss.redirectAppLinksContainer}
+                <BreadcrumbsWithExtensionsWrapper
+                  breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$}
                 >
-                  <BreadcrumbsWithExtensionsWrapper
-                    breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$}
-                  >
-                    <Breadcrumbs breadcrumbs$={observables.breadcrumbs$} />
-                  </BreadcrumbsWithExtensionsWrapper>
-                </RedirectAppLinks>
+                  <Breadcrumbs breadcrumbs$={observables.breadcrumbs$} />
+                </BreadcrumbsWithExtensionsWrapper>
               </EuiHeaderSectionItem>
             </EuiHeaderSection>
 

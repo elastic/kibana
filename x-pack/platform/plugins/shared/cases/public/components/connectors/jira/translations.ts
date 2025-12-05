@@ -70,3 +70,10 @@ export const PARENT_ISSUE = i18n.translate('xpack.cases.connectors.jira.parentIs
 export const ISSUE_TYPE_REQUIRED = i18n.translate('xpack.cases.connectors.jira.issueTypeRequired', {
   defaultMessage: 'Issue type is required',
 });
+
+export const OTHER_FIELDS = i18n.translate(
+  'xpack.cases.connectors.jira.otherFieldsSelectFieldLabel',
+  {
+    defaultMessage: 'Other fields',
+  }
+);

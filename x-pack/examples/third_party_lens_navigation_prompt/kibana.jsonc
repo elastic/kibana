@@ -2,6 +2,8 @@
   "type": "plugin",
   "id": "@kbn/third-party-lens-navigation-prompt-plugin",
   "owner": "@elastic/kibana-visualizations",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "thirdPartyLensNavigationPrompt",
     "server": false,

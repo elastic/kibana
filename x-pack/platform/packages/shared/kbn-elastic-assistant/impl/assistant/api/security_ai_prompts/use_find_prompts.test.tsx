@@ -6,13 +6,14 @@
  */
 
 import { waitFor, renderHook } from '@testing-library/react';
-import { useFindPrompts, UseFindPromptsParams } from './use_find_prompts';
+import type { UseFindPromptsParams } from './use_find_prompts';
+import { useFindPrompts } from './use_find_prompts';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL_FIND,
 } from '@kbn/elastic-assistant-common';
 import { TestProviders } from '../../../mock/test_providers/test_providers';
-import { IToasts } from '@kbn/core-notifications-browser';
+import type { IToasts } from '@kbn/core-notifications-browser';
 
 const mockHttpFetch = jest.fn();
 const mockToasts = {

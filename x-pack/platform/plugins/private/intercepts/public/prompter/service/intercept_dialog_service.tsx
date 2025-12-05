@@ -6,7 +6,8 @@
  */
 
 import * as Rx from 'rxjs';
-import React, { ComponentProps } from 'react';
+import type { ComponentProps } from 'react';
+import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import type { HttpStart } from '@kbn/core-http-browser';
@@ -14,7 +15,7 @@ import type { AnalyticsServiceStart, AnalyticsServiceSetup } from '@kbn/core-ana
 import type { RenderingService } from '@kbn/core-rendering-browser';
 import type { NotificationsSetup } from '@kbn/core-notifications-browser';
 import { InterceptDialogApi } from './intercept_dialog_api';
-import { UserInterceptRunPersistenceService } from './user_intercept_run_persistence_service';
+import type { UserInterceptRunPersistenceService } from './user_intercept_run_persistence_service';
 import { InterceptDisplayManager } from '../component/intercept_display_manager';
 
 interface InterceptServiceSetupDeps {

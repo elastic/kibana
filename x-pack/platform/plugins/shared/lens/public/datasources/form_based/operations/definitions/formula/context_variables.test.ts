@@ -14,13 +14,11 @@ import {
   TIMERANGE_OP_MISSING_TIME_RANGE,
 } from '../../../../../user_messages_ids';
 import { createMockedIndexPattern } from '../../../mocks';
-import { DateHistogramIndexPatternColumn } from '../date_histogram';
-import {
+import type {
+  DateHistogramIndexPatternColumn,
   ConstantsIndexPatternColumn,
-  nowOperation,
-  intervalOperation,
-  timeRangeOperation,
-} from './context_variables';
+} from '@kbn/lens-common';
+import { nowOperation, intervalOperation, timeRangeOperation } from './context_variables';
 
 function createLayer<T extends ConstantsIndexPatternColumn>(
   type: 'interval' | 'now' | 'time_range'

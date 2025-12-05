@@ -12,19 +12,19 @@ tags: ['kibana', 'dev', 'contributor', 'api docs', 'a/b testing', 'feature flags
 The Feature Flags service provides the necessary APIs to evaluate dynamic feature flags.
 
 The service is always enabled, however, it will return the fallback value if a feature flags provider hasn't been attached.
-Kibana only registers a provider when running on Elastic Cloud Hosted/Serverless. And even in those scenarios, we expect that some customers might 
+Kibana only registers a provider when running on Elastic Cloud Hosted/Serverless. And even in those scenarios, we expect that some customers might
 have network restrictions that might not allow the flags to evaluate. The fallback value must provide a non-broken experience to users.
 
 ⚠️Feature Flags are considered dynamic configuration and cannot be used for settings that require restarting Kibana.
-One example of invalid use cases are settings used during the `setup` lifecycle of the plugin, such as settings that define 
-if an HTTP route is registered or not. Instead, you should always register the route, and return `404 - Not found` in the route 
-handler if the feature flag returns a _disabled_ state.  
+One example of invalid use cases are settings used during the `setup` lifecycle of the plugin, such as settings that define
+if an HTTP route is registered or not. Instead, you should always register the route, and return `404 - Not found` in the route
+handler if the feature flag returns a _disabled_ state.
 
 In summary, Feature flagging is best suited for
  - Phased rollout of the features (either to a specific customer, a subset of customers, or a % of overall users)
  - Feature experimentation
 
-Feature flagging is NOT suitable for 
+Feature flagging is NOT suitable for
  - Applying feature availability for licensing and/or tiers
  - Restricting or applying customer entitlement to specific GA features
 
@@ -88,7 +88,7 @@ different recommendations:
 * The segmentation rules of my flag are set up to return the fallback value 100% of the time: it should be safe to
 remove the flag at any time.
 * My flag only made it to Serverless (it never made it to Elastic Cloud Hosted): it should be safe to remove the flag
-after 2 releases have been rolled out (roughly 2-3 weeks later). This is to ensure that all Serverless projects have 
+after 2 releases have been rolled out (roughly 2-3 weeks later). This is to ensure that all Serverless projects have
 been upgraded and that we won't need to rollback to the previous version.
 * My flag made it to Elastic Cloud Hosted: if we want to remove the flag, we should approach the affected customers to
 fix the expected values via [config overrides](#config-overrides).
@@ -148,15 +148,15 @@ feature_flags.overrides:
   myPlugin.myFeatureFlag: 'my-forced-value'
 ```
 
-> [!WARNING]  
+> [!WARNING]
 > There is no validation regarding the variations nor the type of the flags. Use these overrides with caution.
 
 ### Dynamic config
 
-When running in our test environments, the overrides can be updated without restarting Kibana via the HTTP `PUT /internal/core/_settings`:
+When running in our test environments, the overrides can be updated without restarting Kibana via the HTTP `PUT kbn:/internal/core/_settings`:
 
 ```
-PUT /internal/core/_settings
+PUT kbn:/internal/core/_settings
 {
   "feature_flags.overrides": {
     "my-feature-flag": "my-forced-value"
@@ -165,9 +165,13 @@ PUT /internal/core/_settings
 ```
 
 > [!NOTE]
-> The `PUT /internal/core/_settings` endpoint is only available in the test environments. To enable it, add the following
+> The `PUT kbn:/internal/core/_settings` endpoint is only available in the test environments. To enable it, add the following
 > to your `kibana.yml`:
 >
 > ```yaml
 > coreApp.allowDynamicConfigOverrides: true
 > ```
+
+## Usage in Cloud
+
+Feature flags aren't whitelisted in Cloud, meaning that in production environments, users have to go through Support. Support sets feature flags as user setting overrides following a standard process for enabling non-whitelisted settings.

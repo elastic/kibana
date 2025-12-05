@@ -10,7 +10,7 @@
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type {
   ControlGroupRenderer,
-  OptionsListControlState,
+  OptionsListDSLControlState,
   ControlGroupRuntimeState,
   ControlGroupRendererApi,
 } from '@kbn/controls-plugin/public';
@@ -19,7 +19,7 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 export type FilterUrlFormat = Record<
   string,
   Pick<
-    OptionsListControlState,
+    OptionsListDSLControlState,
     'selectedOptions' | 'title' | 'fieldName' | 'existsSelected' | 'exclude'
   >
 >;
@@ -29,7 +29,7 @@ export interface FilterContextType {
   addControl: (controls: FilterControlConfig) => void;
 }
 
-export type FilterControlConfig = Omit<OptionsListControlState, 'dataViewId'> & {
+export type FilterControlConfig = Omit<OptionsListDSLControlState, 'dataViewId'> & {
   /*
    * Determines the presence and order of a control
    * */

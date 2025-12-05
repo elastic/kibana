@@ -18,11 +18,9 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  OBSERVABILITY_ONBOARDING_FLOW_DATASET_DETECTED_TELEMETRY_EVENT,
-  OnboardingFlowEventContext,
-} from '../../../../common/telemetry_events';
-import { ObservabilityOnboardingContextValue } from '../../../plugin';
+import type { OnboardingFlowEventContext } from '../../../../common/telemetry_events';
+import { OBSERVABILITY_ONBOARDING_FLOW_DATASET_DETECTED_TELEMETRY_EVENT } from '../../../../common/telemetry_events';
+import type { ObservabilityOnboardingContextValue } from '../../../plugin';
 
 export function GetStartedPanel({
   onboardingFlowType,
@@ -55,6 +53,10 @@ export function GetStartedPanel({
   } = useKibana<ObservabilityOnboardingContextValue>();
 
   useEffect(() => {
+    if (isLoading) {
+      return;
+    }
+
     analytics?.reportEvent(
       OBSERVABILITY_ONBOARDING_FLOW_DATASET_DETECTED_TELEMETRY_EVENT.eventType,
       {
@@ -65,10 +67,10 @@ export function GetStartedPanel({
       }
     );
     /**
-     * Firing the event only once when the component mounts
+     * Making sure the event is fired only once when the component is loaded
      */
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isLoading]);
 
   return (
     <>

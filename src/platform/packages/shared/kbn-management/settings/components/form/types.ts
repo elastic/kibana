@@ -11,12 +11,12 @@ import type {
   FieldRowKibanaDependencies,
   FieldRowServices,
 } from '@kbn/management-settings-components-field-row';
-import { UnsavedFieldChanges } from '@kbn/management-settings-types';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { I18nStart } from '@kbn/core-i18n-browser';
-import { ThemeServiceStart } from '@kbn/core-theme-browser';
-import { ToastsStart } from '@kbn/core-notifications-browser';
-import { UserProfileService } from '@kbn/core-user-profile-browser';
+import type { UnsavedFieldChanges } from '@kbn/management-settings-types';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { I18nStart } from '@kbn/core-i18n-browser';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { ToastsStart } from '@kbn/core-notifications-browser';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 /**
  * Contextual services used by a {@link Form} component.
  */

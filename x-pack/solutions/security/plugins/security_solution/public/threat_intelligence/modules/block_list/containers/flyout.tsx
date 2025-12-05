@@ -5,22 +5,29 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React from 'react';
-import type {
-  CreateExceptionListItemSchema,
-  EntriesArray,
-} from '@kbn/securitysolution-io-ts-list-types';
-import { usePolicies } from '../hooks/use_policies';
-import { useBlockListContext } from '../../indicators/hooks/use_block_list_context';
+import type { Dispatch, SetStateAction } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
+import type { EntriesArray, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { useKibana } from '../../../../common/lib/kibana';
+import { BlockListForm } from '../../../../management/pages/blocklist/view/components/blocklist_form';
+import { ArtifactFlyout } from '../../../../management/components/artifact_list_page/components/artifact_flyout';
 import { ADD_TO_BLOCKLIST_FLYOUT_TITLE } from './translations';
-import { useSecurityContext } from '../../../hooks/use_security_context';
+import { BlocklistsApiClient } from '../../../../management/pages/blocklist/services';
+
+// texts to customize the flyout
+const labels = {
+  flyoutCreateTitle: ADD_TO_BLOCKLIST_FLYOUT_TITLE,
+};
 
 export interface BlockListFlyoutProps {
   /**
    * Indicator file-hash value (sha256, sh1 or md5) to pass to the block list flyout.
    */
   indicatorFileHash: string;
+  /**
+   * Allows to clear the blocklist value to hide the flyout
+   */
+  setBlockListIndicatorValue: Dispatch<SetStateAction<string>>;
 }
 
 /**
@@ -29,52 +36,57 @@ export interface BlockListFlyoutProps {
  * - the flyout component: x-pack/solutions/security/plugins/security_solution/public/management/components/artifact_list_page/components/artifact_flyout.tsx
  * - the form component: x-pack/solutions/security/plugins/security_solution/public/management/pages/blocklist/view/components/blocklist_form.tsx
  */
-export const BlockListFlyout: FC<BlockListFlyoutProps> = ({ indicatorFileHash }) => {
-  const { setBlockListIndicatorValue } = useBlockListContext();
-  const { blockList } = useSecurityContext();
-  const Component = blockList.getFlyoutComponent();
-  const exceptionListApiClient = blockList.exceptionListApiClient;
-  const FormComponent = blockList.getFormComponent();
-  const { isLoading: policiesIsLoading, data: policies } = usePolicies();
+export const BlockListFlyout = memo(
+  ({ indicatorFileHash, setBlockListIndicatorValue }: BlockListFlyoutProps) => {
+    const { http } = useKibana().services;
+    const exceptionListApiClient = BlocklistsApiClient.getInstance(http);
 
-  // prepopulate the for with the indicator file hash
-  const entries: EntriesArray = [
-    {
-      field: 'file.hash.*',
-      operator: 'included',
-      type: 'match_any',
-      value: [indicatorFileHash],
-    },
-  ];
+    // prepopulate the for with the indicator file hash
+    const entries: EntriesArray = useMemo(
+      () => [
+        {
+          field: 'file.hash.*',
+          operator: 'included',
+          type: 'match_any',
+          value: [indicatorFileHash],
+        },
+      ],
+      [indicatorFileHash]
+    );
 
-  // prepare the payload to pass to the form (and then sent to the blocklist endpoint)
-  const item: CreateExceptionListItemSchema = {
-    description: '',
-    entries,
-    list_id: 'endpoint_blocklists',
-    name: '',
-    namespace_type: 'agnostic',
-    os_types: ['windows'],
-    tags: ['policy:all'],
-    type: 'simple',
-  };
+    // prepare the payload to pass to the form (and then sent to the blocklist endpoint)
+    const item: ExceptionListItemSchema = useMemo(
+      () =>
+        ({
+          description: '',
+          entries,
+          list_id: 'endpoint_blocklists',
+          name: '',
+          namespace_type: 'agnostic',
+          os_types: ['windows'],
+          tags: ['policy:all'],
+          type: 'simple',
+        } as unknown as ExceptionListItemSchema),
+      [entries]
+    );
 
-  // texts to customize the flyout
-  const labels = {
-    flyoutCreateTitle: ADD_TO_BLOCKLIST_FLYOUT_TITLE,
-  };
+    const clearBlockListIndicatorValue = useCallback(
+      () => setBlockListIndicatorValue(''),
+      [setBlockListIndicatorValue]
+    );
+    const onSuccess = useCallback(() => null, []);
 
-  const clearBlockListIndicatorValue = () => setBlockListIndicatorValue('');
+    return (
+      <ArtifactFlyout
+        apiClient={exceptionListApiClient}
+        labels={labels}
+        item={item}
+        FormComponent={BlockListForm}
+        onClose={clearBlockListIndicatorValue}
+        onSuccess={onSuccess}
+      />
+    );
+  }
+);
 
-  const props = {
-    apiClient: exceptionListApiClient,
-    labels,
-    item,
-    policies: policies || [],
-    policiesIsLoading,
-    FormComponent,
-    onClose: clearBlockListIndicatorValue,
-  };
-
-  return <Component {...props} />;
-};
+BlockListFlyout.displayName = 'BlockListFlyout';

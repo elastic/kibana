@@ -8,13 +8,13 @@ import expect from '@kbn/expect';
 import rawExpect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
 import { omit } from 'lodash';
-import { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { DEFAULT_FIELDS } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import moment from 'moment';
-import { PrivateLocation } from '@kbn/synthetics-plugin/common/runtime_types';
+import type { PrivateLocation } from '@kbn/synthetics-plugin/common/runtime_types';
 import { LOCATION_REQUIRED_ERROR } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/monitor_validation';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { addMonitorAPIHelper, omitMonitorKeys } from './create_monitor';
 import { PrivateLocationTestService } from '../../services/synthetics_private_location';
 

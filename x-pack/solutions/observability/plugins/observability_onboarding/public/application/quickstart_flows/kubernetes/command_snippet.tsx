@@ -13,7 +13,7 @@ import { buildHelmCommand } from './build_helm_command';
 import { CopyToClipboardButton } from '../shared/copy_to_clipboard_button';
 import { usePricingFeature } from '../shared/use_pricing_feature';
 import { ObservabilityOnboardingPricingFeature } from '../../../../common/pricing_features';
-import { ElasticAgentVersionInfo } from '../../../../common/types';
+import type { ElasticAgentVersionInfo } from '../../../../common/types';
 
 interface Props {
   encodedApiKey: string;

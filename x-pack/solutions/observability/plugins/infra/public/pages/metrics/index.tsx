@@ -27,7 +27,10 @@ import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
 import { MetricsSettingsPage } from './settings';
 import { MetricsAlertDropdown } from '../../alerting/common/components/metrics_alert_dropdown';
 import { AlertPrefillProvider } from '../../alerting/use_alert_prefill';
-import { InfraMLCapabilitiesProvider } from '../../containers/ml/infra_ml_capabilities';
+import {
+  InfraMLCapabilitiesProvider,
+  useInfraMLCapabilitiesContext,
+} from '../../containers/ml/infra_ml_capabilities';
 import { AnomalyDetectionFlyout } from '../../components/ml/anomaly_detection/anomaly_detection_flyout';
 import { HeaderActionMenuContext } from '../../containers/header_action_menu_provider';
 import { NotFoundPage } from '../404';
@@ -42,9 +45,8 @@ import { useKibanaEnvironmentContext } from '../../hooks/use_kibana';
 const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLabel', {
   defaultMessage: 'Add data',
 });
-const HOSTS_FEEDBACK_LINK =
-  'https://docs.google.com/forms/d/e/1FAIpQLScRHG8TIVb1Oq8ZhD4aks3P1TmgiM58TY123QpDCcBz83YC6w/viewform';
-const METRICS_EXPLORER_FEEDBACK_URL = 'https://ela.st/survey-infra-metricsexplorer?usp=pp_url';
+const HOSTS_FEEDBACK_LINK = 'https://ela.st/host-feedback';
+const METRICS_EXPLORER_FEEDBACK_URL = 'https://ela.st/survey-infra-metricsexplorer';
 
 const MetricsExplorerPage = dynamic(() =>
   import('./metrics_explorer').then((mod) => ({ default: mod.MetricsExplorerPage }))
@@ -160,12 +162,15 @@ export const InfrastructurePage = () => {
 
 const HeaderLinkAnomalyFlyoutRoute = ({ path }: { path: string }) => {
   const isInventory = path !== '/inventory';
+  const { isTopbarMenuVisible } = useInfraMLCapabilitiesContext();
   return (
     <Route
       path={path}
-      render={() => (
-        <AnomalyDetectionFlyout hideJobType={isInventory} hideSelectGroup={isInventory} />
-      )}
+      render={() =>
+        isTopbarMenuVisible ? (
+          <AnomalyDetectionFlyout hideJobType={isInventory} hideSelectGroup={isInventory} />
+        ) : null
+      }
     />
   );
 };
@@ -234,6 +239,7 @@ const HeaderLinkFeedbackButtonRoute = ({
           kibanaVersion={kibanaVersion}
           isCloudEnv={isCloudEnv}
           isServerlessEnv={isServerlessEnv}
+          sanitizedPath={path}
         />
       )}
     />

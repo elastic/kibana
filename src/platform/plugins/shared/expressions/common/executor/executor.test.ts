@@ -10,10 +10,12 @@
 import { Executor } from './executor';
 import * as expressionTypes from '../expression_types';
 import * as expressionFunctions from '../expression_functions';
-import { Execution, FunctionCacheItem } from '../execution';
-import { ExpressionAstFunction, parseExpression, formatExpression } from '../ast';
-import { MigrateFunction } from '@kbn/kibana-utils-plugin/common/persistable_state';
-import { SavedObjectReference } from '@kbn/core/types';
+import type { FunctionCacheItem } from '../execution';
+import { Execution } from '../execution';
+import type { ExpressionAstFunction } from '../ast';
+import { parseExpression, formatExpression } from '../ast';
+import type { MigrateFunction } from '@kbn/kibana-utils-plugin/common/persistable_state';
+import type { SavedObjectReference } from '@kbn/core/types';
 
 describe('Executor', () => {
   test('can instantiate', () => {
@@ -334,6 +336,7 @@ describe('Executor', () => {
       await executor.run('theme size default=12', null, { allowCache: true }).toPromise();
       expect(functionCache.size).toEqual(1);
       const entry = functionCache.keys().next().value;
+      // @ts-expect-error upgrade typescript v5.9.3
       functionCache.set(entry, fakeCacheEntry);
       const result = await executor
         .run('theme size default=12', null, { allowCache: true })
@@ -346,6 +349,7 @@ describe('Executor', () => {
       await executor.run('theme size default=12', null, { allowCache: true }).toPromise();
       expect(functionCache.size).toEqual(1);
       const entry = functionCache.keys().next().value;
+      // @ts-expect-error upgrade typescript v5.9.3
       functionCache.set(entry, fakeCacheEntry);
       const result = await executor
         .run('theme size default=12', null, { allowCache: false })

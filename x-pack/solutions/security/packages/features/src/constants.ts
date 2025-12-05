@@ -13,6 +13,8 @@ export const SERVER_APP_ID = 'siem' as const;
 export const SECURITY_FEATURE_ID_V2 = 'siemV2' as const;
 // New version for 9.1.
 export const SECURITY_FEATURE_ID_V3 = 'siemV3' as const;
+// New version for 9.2.
+export const SECURITY_FEATURE_ID_V4 = 'siemV4' as const;
 
 /**
  * @deprecated deprecated in 8.17. Use CASE_FEATURE_ID_V2 instead
@@ -35,6 +37,9 @@ export const SIEM_MIGRATIONS_FEATURE_ID = 'securitySolutionSiemMigrations' as co
 
 // Same as the plugin id defined by Cloud Security Posture
 export const CLOUD_POSTURE_APP_ID = 'csp' as const;
+
+// Same as the plugin id defined by Defend for containers (cloud_defend)
+export const CLOUD_DEFEND_APP_ID = 'cloudDefend' as const;
 
 /**
  * Id for the notifications alerting type

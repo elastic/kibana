@@ -6,22 +6,24 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@kbn/react-query';
+import type {
+  CriteriaWithPagination,
+  EuiBasicTableColumn,
+  EuiTableSortingType,
+} from '@elastic/eui';
 import {
   formatDate,
-  CriteriaWithPagination,
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiLink,
   EuiText,
   EuiSpacer,
   EuiI18nNumber,
-  EuiTableSortingType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { PlaygroundListObject, PlaygroundListResponse } from '../../types';
+import type { PlaygroundListObject, PlaygroundListResponse } from '../../types';
 import { useKibana } from '../../hooks/use_kibana';
 import { PLUGIN_ID, SearchPlaygroundQueryKeys } from '../../../common';
 import { DeletePlaygroundModal } from '../saved_playground/delete_playground_modal';

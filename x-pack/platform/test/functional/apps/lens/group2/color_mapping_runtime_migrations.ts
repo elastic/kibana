@@ -7,10 +7,10 @@
 import expect from '@kbn/expect';
 
 import { getKbnPalettes, KbnPalette } from '@kbn/palettes';
-import { DebugState } from '@elastic/charts';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { DebugState } from '@elastic/charts';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import chroma from 'chroma-js';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const oldColorMappingsDashboardFixture =
   'x-pack/platform/test/functional/fixtures/kbn_archives/lens/old_color_mapping_dashboard.json';
@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await kibanaServer.importExport.load(oldColorMappingsDashboardFixture);
       await dashboard.navigateToApp();
-      await dashboard.gotoDashboardEditMode('Old Color Mappings');
+      await dashboard.loadDashboardInEditMode('Old Color Mappings');
       await elasticChart.setNewChartUiDebugFlag(true);
       await testSubjects.click('querySubmitButton');
 

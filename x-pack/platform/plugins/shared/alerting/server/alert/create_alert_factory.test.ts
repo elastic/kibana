@@ -29,7 +29,7 @@ describe('createAlertFactory()', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
-      maxAlerts: 1000,
+      configuredMaxAlerts: 1000,
       autoRecoverAlerts: true,
     });
     const result = alertFactory.create('1');
@@ -59,7 +59,7 @@ describe('createAlertFactory()', () => {
         '1': alert,
       },
       logger,
-      maxAlerts: 1000,
+      configuredMaxAlerts: 1000,
       autoRecoverAlerts: true,
     });
     const result = alertFactory.create('1');
@@ -83,7 +83,7 @@ describe('createAlertFactory()', () => {
     const alertFactory = createAlertFactory({
       alerts,
       logger,
-      maxAlerts: 1000,
+      configuredMaxAlerts: 1000,
       autoRecoverAlerts: true,
     });
     alertFactory.create('1');
@@ -113,7 +113,7 @@ describe('createAlertFactory()', () => {
         '1': alert,
       },
       logger,
-      maxAlerts: 1000,
+      configuredMaxAlerts: 1000,
       autoRecoverAlerts: true,
     });
     expect(alertFactory.get('1')).toMatchObject({
@@ -143,7 +143,7 @@ describe('createAlertFactory()', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
-      maxAlerts: 3,
+      configuredMaxAlerts: 3,
       autoRecoverAlerts: true,
     });
 
@@ -159,11 +159,33 @@ describe('createAlertFactory()', () => {
     expect(alertFactory.hasReachedAlertLimit()).toBe(true);
   });
 
+  test('logs a warning when more alerts are created than allowed and the configured alert limit is greater than the max allowed threshold', () => {
+    const alertFactory = createAlertFactory({
+      alerts: {},
+      logger,
+      configuredMaxAlerts: 50001,
+      autoRecoverAlerts: true,
+    });
+
+    expect(alertFactory.hasReachedAlertLimit()).toBe(false);
+    for (let i = 0; i < 5000; i++) {
+      alertFactory.create(`${i}`);
+    }
+
+    expect(() => {
+      alertFactory.create('50001');
+    }).toThrowErrorMatchingInlineSnapshot(`"Rule reported more than 5000 alerts."`);
+    expect(logger.warn).toHaveBeenCalledWith(
+      'The configured maximum alert limit exceeds the allowed threshold. Only 5000 alerts are being returned. Please consider adjusting xpack.alerting.rules.run.alerts.max.'
+    );
+    expect(alertFactory.hasReachedAlertLimit()).toBe(true);
+  });
+
   test('throws error when creating alerts after done() is called', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
-      maxAlerts: 1000,
+      configuredMaxAlerts: 1000,
       autoRecoverAlerts: true,
     });
     const result = alertFactory.create('1');
@@ -206,7 +228,7 @@ describe('createAlertFactory()', () => {
       alerts: {},
       logger,
       canSetRecoveryContext: true,
-      maxAlerts: 1000,
+      configuredMaxAlerts: 1000,
       autoRecoverAlerts: true,
     });
     const result = alertFactory.create('1');
@@ -233,7 +255,7 @@ describe('createAlertFactory()', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
-      maxAlerts: 1000,
+      configuredMaxAlerts: 1000,
       canSetRecoveryContext: true,
       autoRecoverAlerts: true,
     });
@@ -260,7 +282,7 @@ describe('createAlertFactory()', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
-      maxAlerts: 1000,
+      configuredMaxAlerts: 1000,
       canSetRecoveryContext: true,
       autoRecoverAlerts: true,
     });
@@ -286,7 +308,7 @@ describe('createAlertFactory()', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
-      maxAlerts: 1000,
+      configuredMaxAlerts: 1000,
       canSetRecoveryContext: false,
       autoRecoverAlerts: true,
     });
@@ -315,7 +337,7 @@ describe('createAlertFactory()', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
-      maxAlerts: 1000,
+      configuredMaxAlerts: 1000,
       autoRecoverAlerts: true,
     });
 
@@ -333,7 +355,7 @@ describe('createAlertFactory()', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
-      maxAlerts: 1000,
+      configuredMaxAlerts: 1000,
       autoRecoverAlerts: true,
     });
 
@@ -348,7 +370,7 @@ describe('createAlertFactory()', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
-      maxAlerts: 1000,
+      configuredMaxAlerts: 1000,
       autoRecoverAlerts: true,
     });
 
@@ -363,7 +385,7 @@ describe('createAlertFactory()', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
-      maxAlerts: 1000,
+      configuredMaxAlerts: 1000,
       canSetRecoveryContext: true,
       autoRecoverAlerts: false,
     });
@@ -395,7 +417,7 @@ describe('getPublicAlertFactory', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
-      maxAlerts: 1000,
+      configuredMaxAlerts: 1000,
       autoRecoverAlerts: true,
     });
 

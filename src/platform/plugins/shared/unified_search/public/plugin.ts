@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { Storage, IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { createQueryStringInput } from './query_string_input/get_query_string_input';
@@ -61,7 +62,13 @@ export class UnifiedSearchPublicPlugin
 
   public start(
     core: CoreStart,
-    { data, dataViews, uiActions, screenshotMode }: UnifiedSearchStartDependencies
+    {
+      data,
+      dataViews,
+      uiActions,
+      screenshotMode,
+      cps: crossProjectSearch,
+    }: UnifiedSearchStartDependencies
   ): UnifiedSearchPublicPluginStart {
     setCoreStart(core);
     setIndexPatterns(dataViews);
@@ -86,6 +93,7 @@ export class UnifiedSearchPublicPlugin
         unifiedSearch: {
           autocomplete: autocompleteStart,
         },
+        cps: crossProjectSearch,
       });
 
     const SearchBar = getCustomSearchBar();

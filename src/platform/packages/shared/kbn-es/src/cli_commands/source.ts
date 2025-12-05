@@ -11,7 +11,7 @@ import dedent from 'dedent';
 import getopts from 'getopts';
 import { Cluster } from '../cluster';
 import { parseTimeoutToMs } from '../utils';
-import { Command } from './types';
+import type { Command } from './types';
 
 export const source: Command = {
   description: 'Build and run from source',

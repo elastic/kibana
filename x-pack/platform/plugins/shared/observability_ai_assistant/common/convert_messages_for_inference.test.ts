@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { InferenceMessage } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceMessage } from '@elastic/elasticsearch/lib/api/types';
 import { collapseInternalToolCalls } from './convert_messages_for_inference';
-import { Message, MessageRole } from './types';
+import type { Message } from './types';
+import { MessageRole } from './types';
 
 const mockLogger = {
   error: jest.fn(),

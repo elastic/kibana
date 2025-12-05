@@ -48,7 +48,8 @@ export const loadAlertRuleFlyoutContent = async ({
     ? undefined
     : embeddable.dataViews$.getValue()?.find((view) => view.id === datatable?.meta?.source);
 
-  const { state } = embeddable.serializeState().rawState.attributes ?? {};
+  // TODO: refactor this to use the new Lens api format
+  const { state } = embeddable.getLegacySerializedState().attributes ?? {};
   const layers = (state?.datasourceStates?.textBased as TextBasedPersistedState | undefined)
     ?.layers;
   const [firstLayer] = Object.values(layers ?? {});

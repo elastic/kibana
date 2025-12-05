@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { APIRequestContext } from '@playwright/test';
+import type { APIRequestContext } from '@playwright/test';
 import { getCommonHeaders } from './headers';
 
 export const deleteAllSecurityDocuments = async (request: APIRequestContext) => {

@@ -11,8 +11,8 @@
  * in future. The pattern in this file is legacy and should be updated to conform to the plugin lifecycle.
  */
 
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { UiCounterMetricType } from '@kbn/analytics';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { UiCounterMetricType } from '@kbn/analytics';
 
 import {
   UIM_APP_NAME,
@@ -22,7 +22,7 @@ import {
   defaultIndexPriority,
 } from '../constants';
 
-import { Phases } from '../../../common/types';
+import type { Phases } from '../../../common/types';
 
 export let trackUiMetric = (metricType: UiCounterMetricType, eventName: string | string[]) => {};
 

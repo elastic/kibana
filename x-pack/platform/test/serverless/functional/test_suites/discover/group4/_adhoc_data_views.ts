@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
@@ -60,6 +60,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should navigate back correctly from to surrounding and single views', async () => {
+      await PageObjects.discover.waitUntilTabIsLoaded();
+
       await dataViews.createFromSearchBar({
         name: 'logstash',
         adHoc: true,
@@ -78,7 +80,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // navigate to context view
       await dataGrid.clickRowToggle({ rowIndex: 0 });
-      const [, surrDocs] = await dataGrid.getRowActions({ rowIndex: 0 });
+      const [, surrDocs] = await dataGrid.getRowActions();
       await surrDocs.click();
       await PageObjects.context.waitUntilContextLoadingHasFinished();
       // TODO: Clicking breadcrumbs works differently in Serverless
@@ -89,7 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // navigate to single doc view
       await dataGrid.clickRowToggle({ rowIndex: 0 });
-      const [singleView] = await dataGrid.getRowActions({ rowIndex: 0 });
+      const [singleView] = await dataGrid.getRowActions();
       await singleView.click();
       await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -106,18 +108,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'is',
         value: 'nestedValue',
       });
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
       expect(await filterBar.hasFilter('nestedField.child', 'nestedValue')).to.be(true);
       await retry.try(async function () {
         expect(await PageObjects.discover.getHitCount()).to.be('1');
       });
       await filterBar.removeFilter('nestedField.child');
 
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
       await queryBar.setQuery('test');
       await queryBar.submitQuery();
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
       await retry.try(async () => expect(await PageObjects.discover.getHitCount()).to.be('22'));
 
       await queryBar.clearQuery();
       await queryBar.submitQuery();
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
     });
 
     it('should not update data view id when saving search first time', async () => {
@@ -143,11 +159,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('search results should be different after data view update', async () => {
+      await PageObjects.discover.waitUntilTabIsLoaded();
+
       await dataViews.createFromSearchBar({
         name: 'logst',
         adHoc: true,
         hasTimeField: true,
       });
+      await PageObjects.discover.waitUntilSearchingHasFinished();
       const prevDataViewId = await PageObjects.discover.getCurrentDataViewId();
 
       // trigger data view id update
@@ -155,29 +174,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         '_bytes-runtimefield',
         `emit(doc["bytes"].value.toString())`
       );
+      await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
       await PageObjects.unifiedFieldList.clickFieldListItemToggle('_bytes-runtimefield');
       const newDataViewId = await PageObjects.discover.getCurrentDataViewId();
       expect(newDataViewId).not.to.equal(prevDataViewId);
 
       // save first search
       await PageObjects.discover.saveSearch('logst*-ss-_bytes-runtimefield');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilTabIsLoaded();
 
       // remove field and create with the same name, but different value
       await PageObjects.unifiedFieldList.clickFieldListItemRemove('_bytes-runtimefield');
       await PageObjects.discover.removeField('_bytes-runtimefield');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilTabIsLoaded();
+      await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
       // trigger data view id update
       await PageObjects.discover.addRuntimeField(
         '_bytes-runtimefield',
         `emit((doc["bytes"].value * 2).toString())`
       );
+      await PageObjects.discover.waitUntilTabIsLoaded();
+      await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
       await PageObjects.unifiedFieldList.clickFieldListItemToggle('_bytes-runtimefield');
 
       // save second search
       await PageObjects.discover.saveSearch('logst*-ss-_bytes-runtimefield-updated', true);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilTabIsLoaded();
+      await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
       // open searches on dashboard
       await PageObjects.dashboard.navigateToApp();
@@ -202,7 +226,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should open saved search by navigation to context from embeddable', async () => {
       // navigate to context view
       await dataGrid.clickRowToggle({ rowIndex: 0 });
-      const [, surrDocs] = await dataGrid.getRowActions({ rowIndex: 0 });
+      const [, surrDocs] = await dataGrid.getRowActions();
       await surrDocs.click();
 
       // close popup
@@ -250,6 +274,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should notify about invalid filter reffs', async () => {
+      await PageObjects.discover.waitUntilTabIsLoaded();
+
       await dataViews.createFromSearchBar({
         name: 'logstas',
         adHoc: true,

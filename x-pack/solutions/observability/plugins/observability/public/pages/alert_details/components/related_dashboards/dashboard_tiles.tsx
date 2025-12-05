@@ -18,7 +18,8 @@ import {
 } from '@elastic/eui';
 import type { RelatedDashboard } from '@kbn/observability-schema';
 import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
-import { ActionButtonProps, DashboardTile } from './dashboard_tile';
+import type { ActionButtonProps } from './dashboard_tile';
+import { DashboardTile } from './dashboard_tile';
 
 export function DashboardTiles({
   title,
@@ -31,7 +32,7 @@ export function DashboardTiles({
   isLoadingDashboards: boolean;
   dashboards?: Array<RelatedDashboard & { actionButtonProps?: ActionButtonProps }>;
   dataTestSubj: string;
-  timeRange: NonNullable<DashboardLocatorParams['timeRange']>;
+  timeRange: NonNullable<DashboardLocatorParams['time_range']>;
 }) {
   const wrapWithHeader = (component: React.ReactNode) => {
     return (

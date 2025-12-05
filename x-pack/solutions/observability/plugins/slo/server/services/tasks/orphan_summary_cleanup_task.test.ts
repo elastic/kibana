@@ -31,7 +31,7 @@ describe('SloSummaryCleanupTask', () => {
     task.fetchSloSummariesIds = jest.fn().mockReturnValue({ sloSummaryIds: [] });
 
     task.findSloDefinitions = jest.fn();
-    await task.runTask();
+    await task.runTask(new AbortController());
   });
 
   it('should run some slos', async function () {
@@ -55,7 +55,7 @@ describe('SloSummaryCleanupTask', () => {
       ],
     });
 
-    await task.runTask();
+    await task.runTask(new AbortController());
 
     expect(task.fetchSloSummariesIds).toHaveBeenCalled();
     expect(esClient.deleteByQuery).toHaveBeenCalledWith({
@@ -96,7 +96,7 @@ describe('SloSummaryCleanupTask', () => {
       ],
     });
     await task.start(taskManagerStart, soClient, esClient);
-    await task.runTask();
+    await task.runTask(new AbortController());
 
     expect(task.fetchSloSummariesIds).toHaveBeenCalledTimes(1);
     expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
@@ -156,7 +156,7 @@ describe('SloSummaryCleanupTask', () => {
       };
     });
     await task.start(taskManagerStart, soClient, esClient);
-    await task.runTask();
+    await task.runTask(new AbortController());
 
     expect(task.fetchSloSummariesIds).toHaveBeenCalledTimes(2);
     expect(esClient.deleteByQuery).toHaveBeenCalledTimes(2);
@@ -234,7 +234,7 @@ describe('SloSummaryCleanupTask', () => {
       };
     });
     await task.start(taskManagerStart, soClient, esClient);
-    await task.runTask();
+    await task.runTask(new AbortController());
 
     expect(task.fetchSloSummariesIds).toHaveBeenCalledTimes(2);
     expect(esClient.deleteByQuery).toHaveBeenCalledTimes(2);
@@ -305,7 +305,7 @@ describe('SloSummaryCleanupTask', () => {
       };
     });
     await task.start(taskManagerStart, soClient, esClient);
-    await task.runTask();
+    await task.runTask(new AbortController());
 
     expect(task.fetchSloSummariesIds).toHaveBeenCalledTimes(2);
     expect(esClient.deleteByQuery).toHaveBeenCalledTimes(2);

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Config, ObjectToConfigAdapter } from '..';
+import type { Config } from '..';
+import { ObjectToConfigAdapter } from '..';
 
 /**
  * Overrides some config values with ones from argv.

@@ -10,8 +10,9 @@
 import React from 'react';
 import { EuiText, EuiToolTip } from '@elastic/eui';
 import moment from 'moment';
-import { EuiInlineEditTextSizes } from '@elastic/eui/src/components/inline_edit/inline_edit_text';
-import { TimeUnit, asAbsoluteDateTime } from '../../utils/formatters/datetime';
+import type { EuiInlineEditTextSizes } from '@elastic/eui/src/components/inline_edit/inline_edit_text';
+import type { TimeUnit } from '../../utils/formatters/datetime';
+import { asAbsoluteDateTime } from '../../utils/formatters/datetime';
 
 interface TimestampProps {
   timestamp: number;
@@ -36,7 +37,7 @@ export function Timestamp({
     </EuiText>
   ) : (
     <EuiToolTip content={absoluteTime} data-test-subj="apmUiSharedTimestampTooltip">
-      <>{relativeTime}</>
+      <span tabIndex={0}>{relativeTime}</span>
     </EuiToolTip>
   );
 }

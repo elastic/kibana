@@ -7,7 +7,6 @@
 
 import {
   EuiBadge,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -24,6 +23,7 @@ import { TruncateWithTooltip } from '../truncate_with_tooltip';
 import { useTraceWaterfallContext } from './trace_waterfall_context';
 import { isFailureOrError } from './utils/is_failure_or_error';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
+import { SpanLinksBadge } from './badges/span_links_badge';
 
 const ORPHAN_TITLE = i18n.translate('xpack.apm.trace.barDetails.euiIconTip.orphanTitleLabel', {
   defaultMessage: 'Orphan',
@@ -36,25 +36,18 @@ const ORPHAN_CONTENT = i18n.translate(
   }
 );
 
-export function BarDetails({
-  item,
-  left,
-  onErrorClick,
-}: {
-  item: TraceWaterfallItem;
-  left: number;
-  onErrorClick?: (params: { traceId: string; docId: string }) => void;
-}) {
+export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: number }) {
   const theme = useEuiTheme();
-  const { getRelatedErrorsHref } = useTraceWaterfallContext();
+  const { getRelatedErrorsHref, onErrorClick } = useTraceWaterfallContext();
   const itemStatusIsFailureOrError = isFailureOrError(item.status?.value);
+  const errorCount = item.errors.length;
 
   const viewRelatedErrorsLabel = i18n.translate(
     'xpack.apm.waterfall.embeddableRelatedErrors.unifedErrorCount',
     {
-      defaultMessage: '{count, plural, one {View related error} other {View # related errors}}',
+      defaultMessage: '{count, plural, one {View error} other {View # errors}}',
       values: {
-        count: item.errorCount,
+        count: errorCount,
       },
     }
   );
@@ -103,40 +96,31 @@ export function BarDetails({
               data-test-subj="apmBarDetailsFailureTooltip"
               content={`${item.status.fieldName} = ${item.status.value}`}
             >
-              <EuiBadge data-test-subj="apmBarDetailsFailureBadge" color="danger">
+              <EuiBadge data-test-subj="apmBarDetailsFailureBadge" color="danger" tabIndex={0}>
                 {item.status.value}
               </EuiBadge>
             </EuiToolTip>
           </EuiFlexItem>
         )}
-        {item.errorCount > 0 ? (
+        {errorCount > 0 ? (
           <EuiFlexItem grow={false}>
-            {onErrorClick ? (
-              <EuiButtonIcon
-                aria-label={i18n.translate('xpack.apm.barDetails.errorButton.ariaLabel', {
-                  defaultMessage: 'View error details',
-                })}
-                data-test-subj="apmBarDetailsErrorButton"
-                color="danger"
-                iconType="errorFilled"
-                iconSize="s"
-                href={getRelatedErrorsHref ? (getRelatedErrorsHref(item.id) as any) : undefined}
-                onClick={(e: React.MouseEvent) => {
-                  if (onErrorClick) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onErrorClick({ traceId: item.traceId, docId: item.id });
-                  }
-                }}
-              />
-            ) : getRelatedErrorsHref ? (
+            {getRelatedErrorsHref || onErrorClick ? (
               // eslint-disable-next-line @elastic/eui/href-or-on-click
               <EuiBadge
                 color={theme.euiTheme.colors.danger}
                 iconType="arrowRight"
-                href={getRelatedErrorsHref(item.id) as any}
+                href={getRelatedErrorsHref?.(item.id) as any}
                 onClick={(e: React.MouseEvent | React.KeyboardEvent) => {
-                  e.stopPropagation();
+                  if (onErrorClick) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onErrorClick({
+                      traceId: item.traceId,
+                      docId: item.id,
+                      errorCount,
+                      errorDocId: errorCount > 1 ? undefined : item.errors[0].errorDocId,
+                    });
+                  }
                 }}
                 tabIndex={0}
                 role="button"
@@ -171,6 +155,11 @@ export function BarDetails({
             />
           </EuiFlexItem>
         ) : null}
+        <SpanLinksBadge
+          outgoingCount={item.spanLinksCount.outgoing}
+          incomingCount={item.spanLinksCount.incoming}
+          id={item.id}
+        />
       </EuiFlexGroup>
     </div>
   );

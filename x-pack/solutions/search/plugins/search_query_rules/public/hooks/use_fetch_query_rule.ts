@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { QueryRulesQueryRule, QueryRulesQueryRuleset } from '@elastic/elasticsearch/lib/api/types';
-import { useQuery } from '@tanstack/react-query';
-import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
+import type {
+  QueryRulesQueryRule,
+  QueryRulesQueryRuleset,
+} from '@elastic/elasticsearch/lib/api/types';
+import { useQuery } from '@kbn/react-query';
+import type { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 import { QUERY_RULES_QUERY_RULE_FETCH_KEY } from '../../common/constants';
 import { useKibana } from './use_kibana';
-import { SearchQueryRulesQueryRule } from '../types';
+import type { SearchQueryRulesQueryRule } from '../types';
 
 export const useFetchQueryRule = (
   rulesetId: QueryRulesQueryRuleset['ruleset_id'],

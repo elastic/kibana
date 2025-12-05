@@ -6,32 +6,25 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import {
-  Criteria,
-  EuiBasicTable,
-  EuiTableSortingType,
-  EuiPanel,
-  EuiHorizontalRule,
-  useIsWithinMinBreakpoint,
-} from '@elastic/eui';
+import type { Criteria, EuiTableSortingType } from '@elastic/eui';
+import { EuiBasicTable, EuiPanel, EuiHorizontalRule, useIsWithinMinBreakpoint } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
+import type { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { SpacesContextProps } from '@kbn/spaces-plugin/public';
+import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { MonitorListHeader } from './monitor_list_header';
 import type { MonitorListSortField } from '../../../../../../../common/runtime_types/monitor_management/sort_field';
 import { DeleteMonitor } from './delete_monitor';
-import { IHttpSerializedFetchError } from '../../../../state/utils/http_error';
-import { MonitorListPageState } from '../../../../state';
-import {
-  ConfigKey,
+import type { IHttpSerializedFetchError } from '../../../../state/utils/http_error';
+import type { MonitorListPageState } from '../../../../state';
+import type {
   EncryptedSyntheticsSavedMonitor,
   OverviewStatusState,
-  SourceType,
 } from '../../../../../../../common/runtime_types';
+import { ConfigKey, SourceType } from '../../../../../../../common/runtime_types';
 import { useMonitorListColumns } from './columns';
 import * as labels from './labels';
-import { ClientPluginsStart } from '../../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../../plugin';
 
 interface Props {
   pageState: MonitorListPageState;

@@ -6,19 +6,16 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 
-import {
-  registerTestBed,
-  TestBed,
-  AsyncTestBedConfig,
-  findTestSubject,
-} from '@kbn/test-jest-helpers';
-import { HttpSetup } from '@kbn/core/public';
-import { DataStream } from '../../../common';
+import type { TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
+import { registerTestBed, findTestSubject } from '@kbn/test-jest-helpers';
+import type { HttpSetup } from '@kbn/core/public';
+import type { DataStream } from '../../../common';
 import { IndexManagementHome } from '../../../public/application/sections/home';
 import { indexManagementStore } from '../../../public/application/store';
-import { WithAppDependencies, services, TestSubjects } from '../helpers';
+import type { TestSubjects } from '../helpers';
+import { WithAppDependencies, services } from '../helpers';
 
 export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
   actions: {
@@ -50,6 +47,8 @@ export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
   findDetailPanelIlmPolicyDetail: () => ReactWrapper;
   findDetailPanelIndexTemplateLink: () => ReactWrapper;
   findDetailPanelDataRetentionDetail: () => ReactWrapper;
+  findDetailPanelFailureStoreDetail: () => ReactWrapper;
+  findDetailPanelFailureStoreRetentionDetail: () => ReactWrapper;
 }
 
 export const setup = async (
@@ -253,6 +252,16 @@ export const setup = async (
     return find('dataRetentionDetail');
   };
 
+  const findDetailPanelFailureStoreDetail = () => {
+    const { find } = testBed;
+    return find('failureStoreDetail');
+  };
+
+  const findDetailPanelFailureStoreRetentionDetail = () => {
+    const { find } = testBed;
+    return find('failureStoreRetentionDetail');
+  };
+
   return {
     ...testBed,
     actions: {
@@ -284,6 +293,8 @@ export const setup = async (
     findDetailPanelIlmPolicyDetail,
     findDetailPanelIndexTemplateLink,
     findDetailPanelDataRetentionDetail,
+    findDetailPanelFailureStoreDetail,
+    findDetailPanelFailureStoreRetentionDetail,
   };
 };
 
@@ -314,6 +325,9 @@ export const createDataStreamPayload = (dataStream: Partial<DataStream>): DataSt
   lifecycle: {
     enabled: true,
     data_retention: '7d',
+  },
+  failureStoreRetention: {
+    defaultRetentionPeriod: '30d',
   },
   indexMode: 'standard',
   ...dataStream,

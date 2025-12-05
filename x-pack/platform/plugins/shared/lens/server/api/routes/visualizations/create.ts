@@ -5,30 +5,31 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-
 import { boomify, isBoom } from '@hapi/boom';
-import { CONTENT_ID, type LensSavedObject } from '../../../../common/content_management';
+
 import {
-  PUBLIC_API_PATH,
-  PUBLIC_API_VERSION,
-  PUBLIC_API_CONTENT_MANAGEMENT_VERSION,
-  PUBLIC_API_ACCESS,
-} from '../../constants';
+  LENS_VIS_API_PATH,
+  LENS_API_VERSION,
+  LENS_API_ACCESS,
+  LENS_CONTENT_TYPE,
+} from '../../../../common/constants';
+import type { LensCreateIn, LensSavedObject } from '../../../content_management';
+import type { LensCreateResponseBody, RegisterAPIRouteFn } from '../../types';
 import {
-  lensAttributesSchema,
-  lensCreateOptionsSchema,
-  lensSavedObjectSchema,
-} from '../../../content_management/v1';
-import { RegisterAPIRouteFn } from '../../types';
+  lensCreateRequestBodySchema,
+  lensCreateRequestParamsSchema,
+  lensCreateRequestQuerySchema,
+  lensCreateResponseBodySchema,
+} from './schema';
+import { getLensRequestConfig, getLensResponseItem } from '../utils';
 
 export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
   router,
-  { contentManagement }
+  { contentManagement, builder }
 ) => {
   const createRoute = router.post({
-    path: `${PUBLIC_API_PATH}/visualizations`,
-    access: PUBLIC_API_ACCESS,
+    path: `${LENS_VIS_API_PATH}/{id?}`,
+    access: LENS_API_ACCESS,
     enableQueryVersion: true,
     summary: 'Create Lens visualization',
     description: 'Create a new Lens visualization.',
@@ -48,17 +49,16 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
 
   createRoute.addVersion(
     {
-      version: PUBLIC_API_VERSION,
+      version: LENS_API_VERSION,
       validate: {
         request: {
-          body: schema.object({
-            options: lensCreateOptionsSchema,
-            data: lensAttributesSchema,
-          }),
+          query: lensCreateRequestQuerySchema,
+          params: lensCreateRequestParamsSchema,
+          body: lensCreateRequestBodySchema,
         },
         response: {
           201: {
-            body: () => lensSavedObjectSchema,
+            body: () => lensCreateResponseBodySchema,
             description: 'Created',
           },
           400: {
@@ -77,14 +77,30 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
       },
     },
     async (ctx, req, res) => {
-      let result;
-      const { data, options } = req.body;
+      const requestBodyData = req.body;
+      if ('state' in requestBodyData && !requestBodyData.visualizationType) {
+        throw new Error('visualizationType is required');
+      }
+
+      // TODO fix IContentClient to type this client based on the actual
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
-        .for<LensSavedObject>(CONTENT_ID, PUBLIC_API_CONTENT_MANAGEMENT_VERSION);
+        .for<LensSavedObject>(LENS_CONTENT_TYPE);
 
       try {
-        ({ result } = await client.create(data, options));
+        // Note: these types are to enforce loose param typings of client methods
+        const { references, ...data } = getLensRequestConfig(builder, req.body);
+        const options: LensCreateIn['options'] = { ...req.query, references, id: req.params.id };
+        const { result } = await client.create(data, options);
+
+        if (result.item.error) {
+          throw result.item.error;
+        }
+
+        const responseItem = getLensResponseItem(builder, result.item);
+        return res.created<LensCreateResponseBody>({
+          body: responseItem,
+        });
       } catch (error) {
         if (isBoom(error) && error.output.statusCode === 403) {
           return res.forbidden();
@@ -92,8 +108,6 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
 
         return boomify(error); // forward unknown error
       }
-
-      return res.created({ body: result.item });
     }
   );
 };

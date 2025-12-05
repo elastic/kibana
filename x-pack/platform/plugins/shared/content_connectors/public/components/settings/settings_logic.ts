@@ -5,24 +5,23 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
 import isDeepEqual from 'fast-deep-equal/react';
 
 import type { IngestPipelineParams } from '@kbn/search-connectors';
 
-import { HttpSetup } from '@kbn/core/public';
-import {
-  FetchDefaultPipelineApiLogic,
-  FetchDefaultPipelineResponse,
-} from '../../api/connector/get_default_pipeline_api_logic';
-import {
+import type { HttpSetup } from '@kbn/core/public';
+import type { FetchDefaultPipelineResponse } from '../../api/connector/get_default_pipeline_api_logic';
+import { FetchDefaultPipelineApiLogic } from '../../api/connector/get_default_pipeline_api_logic';
+import type {
   PostDefaultPipelineArgs,
   PostDefaultPipelineResponse,
-  UpdateDefaultPipelineApiLogic,
 } from '../../api/connector/update_default_pipeline_api_logic';
+import { UpdateDefaultPipelineApiLogic } from '../../api/connector/update_default_pipeline_api_logic';
 import { Status } from '../../../common/types/api';
-import { Actions } from '../../api/api_logic/create_api_logic';
+import type { Actions } from '../../api/api_logic/create_api_logic';
 import { DEFAULT_PIPELINE_VALUES } from '../../../common/constants';
 
 type PipelinesActions = Pick<

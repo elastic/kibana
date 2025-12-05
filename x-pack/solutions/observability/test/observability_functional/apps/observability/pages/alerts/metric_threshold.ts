@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/227919
-  describe.skip('Metric threshold rule', function () {
+  describe('Metric threshold rule', function () {
     this.tags('includeFirefox');
 
     const observability = getService('observability');

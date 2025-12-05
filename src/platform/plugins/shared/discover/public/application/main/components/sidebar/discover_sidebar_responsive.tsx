@@ -26,6 +26,7 @@ import {
 } from '@kbn/unified-field-list';
 import { calcFieldCounts } from '@kbn/discover-utils/src/utils/calc_field_counts';
 import type { Filter } from '@kbn/es-query';
+import { useProfileAccessor } from '../../../../context_awareness';
 import { PLUGIN_ID } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import type { DataDocuments$ } from '../../state_management/discover_data_state_container';
@@ -56,6 +57,7 @@ const getCreationOptions: UnifiedFieldListSidebarContainerProps['getCreationOpti
     compressed: true,
     showSidebarToggleButton: true,
     disableFieldsExistenceAutoFetching: true,
+    shouldKeepAdHocDataViewImmutable: true,
     buttonAddFieldVariant: 'toolbar',
     buttonAddFieldToWorkspaceProps: {
       'aria-label': i18n.translate('discover.fieldChooser.discoverField.addFieldTooltip', {
@@ -130,7 +132,10 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * callback to execute on edit runtime field
    */
-  onFieldEdited: (options?: { removedFieldName?: string }) => Promise<void>;
+  onFieldEdited: (options: {
+    editedDataView: DataView;
+    removedFieldName?: string;
+  }) => Promise<void>;
   /**
    * callback to execute on create dataview
    */
@@ -181,7 +186,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   );
   const selectedDataViewRef = useRef<DataView | null | undefined>(selectedDataView);
   const showFieldList = sidebarState.status !== DiscoverSidebarReducerStatus.INITIAL;
-  const { savedDataViews, managedDataViews, adHocDataViews } = useDataViewsForPicker();
+  const { savedDataViews, adHocDataViews } = useDataViewsForPicker();
 
   useEffect(() => {
     const subscription = props.documents$.subscribe((documentState) => {
@@ -282,24 +287,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     [setUnifiedFieldListSidebarContainerApi, scheduleFieldsExistenceInfoFetchRef]
   );
 
-  const closeDataViewEditor = useRef<() => void | undefined>();
-
-  useEffect(() => {
-    const cleanup = () => {
-      if (closeDataViewEditor?.current) {
-        closeDataViewEditor?.current();
-      }
-    };
-    return () => {
-      // Make sure to close the editor when unmounting
-      cleanup();
-    };
-  }, []);
-
-  const setDataViewEditorRef = useCallback((ref: () => void | undefined) => {
-    closeDataViewEditor.current = ref;
-  }, []);
-
   const { dataViewEditor } = services;
 
   const canEditDataView =
@@ -309,22 +296,20 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const createNewDataView = useMemo(
     () =>
       canEditDataView
-        ? () => {
-            const ref = dataViewEditor.openEditor({
-              onSave: async (dataView) => {
-                onDataViewCreated(dataView);
-              },
-            });
-            if (setDataViewEditorRef) {
-              setDataViewEditorRef(ref);
-            }
+        ? (dataView: DataView) => {
+            onDataViewCreated(dataView);
             closeFieldListFlyout?.();
           }
         : undefined,
-    [canEditDataView, dataViewEditor, setDataViewEditorRef, onDataViewCreated, closeFieldListFlyout]
+    [canEditDataView, onDataViewCreated, closeFieldListFlyout]
   );
 
   const searchBarCustomization = useDiscoverCustomization('search_bar');
+  const getRecommendedFieldsAccessor = useProfileAccessor('getRecommendedFields');
+  const additionalFieldGroups = useMemo(() => {
+    return getRecommendedFieldsAccessor(() => ({ recommendedFields: [] }))();
+  }, [getRecommendedFieldsAccessor]);
+
   const CustomDataViewPicker = searchBarCustomization?.CustomDataViewPicker;
 
   const createField = unifiedFieldListSidebarContainerApi?.createField;
@@ -336,7 +321,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
         <DataViewPicker
           currentDataViewId={selectedDataView.id}
           adHocDataViews={adHocDataViews}
-          managedDataViews={managedDataViews}
           savedDataViews={savedDataViews}
           onChangeDataView={onChangeDataView}
           onAddField={createField}
@@ -354,7 +338,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     selectedDataView,
     CustomDataViewPicker,
     adHocDataViews,
-    managedDataViews,
     savedDataViews,
     onChangeDataView,
     createField,
@@ -413,6 +396,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       <EuiFlexItem>
         {selectedDataView ? (
           <UnifiedFieldListSidebarContainer
+            additionalFieldGroups={additionalFieldGroups}
             additionalFilters={additionalFilters}
             allFields={sidebarState.allFields}
             dataView={selectedDataView}

@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import { Connector } from '@kbn/actions-plugin/server/application/connector/types';
+import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import { isOpenSourceModel } from './utils';
-import {
-  OPENAI_CHAT_URL,
-  OpenAiProviderType,
-} from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { OPENAI_CHAT_URL, OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
 
 describe('Utils', () => {
   describe('isOpenSourceModel', () => {

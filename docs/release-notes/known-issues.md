@@ -8,6 +8,35 @@ For Elastic {{observability}} known issues, refer to [Elastic Observability know
 
 For Elastic Security known issues, refer to [Elastic Security known issues](docs-content://release-notes/elastic-security/known-issues.md).
 
+::::{dropdown} The connection between agentless integrations and {{fleet-server}} is broken
+:applies_to: ess: ga
+
+Applies to: {{stack}} <9.1.6
+
+**Details**
+
+When agentless integrations are deployed in {{fleet}} in an {{ech}} deployment, the connection between the agentless integrations and {{fleet-server}} can be broken if the default {{fleet-server}} host URL is modified or if a different host URL is set as the default.
+
+**Resolved**
+
+This issue is resolved in {{stack}} 9.1.6.
+
+::::
+
+::::{dropdown} Alerts aren't generated for rules with alert flapping off and an alert delay higher than 1
+
+Applies to: {{stack}} 9.0.0-9.2.0
+
+**Details**
+
+Alerts aren't generated for rules that have **Alert flapping detection** turned off and the alert delay set to a value higher than 1.
+
+**Workaround**
+
+Set the alert delay value to 1 or turn on **Alert flapping detection**.
+
+::::
+
 ::::{dropdown} Reports created in non-default Kibana spaces aren't shown in the Reporting UI
 
 Applies to: {{stack}} 9.1.0, 9.1.1
@@ -30,6 +59,10 @@ If you've set `xpack.alerting.rules.run.alerts.max` to a value greater than `500
 
 To mitigate the issue, set `xpack.alerting.rules.run.alerts.max` to a value equal to or less than `5000`.
 
+**Resolved**
+
+This issue is resolved in {{stack}} 9.1.0 and 9.1.2.
+
 ::::
 
 ::::{dropdown} PDF and PNG reports time out and fail with an invalid header error if server.protocol is set to http2
@@ -38,7 +71,7 @@ Applies to: {{stack}} 9.0.0
 
 **Details**
 
-If you've changed the [`server.protocol`](/reference/configuration-reference/general-settings.md) value to `http2`, PDF and PNG reports will fail when you export them from the dashboard, visualization, or Canvas workpad that you're generating a report for.
+Starting in  9.0.0, the default value of `server.protocol` is `http2`. PDF and PNG reports will fail when this setting is used in this release.
 
 **Action**
 
@@ -100,10 +133,10 @@ This was resolved in {{stack}} 9.0.3.
 
 Applies to: {{stack}} 9.0.0, 9.0.1, 9.0.2
 
-**Details** 
+**Details**
 Errors occur when rules run during an active maintenance window that has filters and a matching rule category. 
 
-**Workaround** 
+**Workaround**
 Remove any filters added to the active maintenance window.
 
 **Resolved**
@@ -149,7 +182,7 @@ Applies to: {{stack}} 9.0.0
 
 **Details**
 
-Rollup indices, like all indices, created in 7.x or earlier need to be reindexed in preparation for migration to 9.0. However, in addition to the normal reindex process the rollup job also needs to be accounted for. 
+Rollup indices, like all indices, created in 7.x or earlier need to be reindexed in preparation for migration to 9.0. However, in addition to the normal reindex process the rollup job also needs to be accounted for.
 
 **Action**
 

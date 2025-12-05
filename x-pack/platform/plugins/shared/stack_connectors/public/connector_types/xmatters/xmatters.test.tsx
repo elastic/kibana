@@ -43,7 +43,7 @@ describe('xmatters action params validation', () => {
       tags: 'test1, test2',
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: { alertActionGroupName: [], signalId: [] },
     });
   });

@@ -8,7 +8,7 @@
  */
 
 import { EsqlQuery } from '../../query';
-import { ESQLAstCompletionCommand, ESQLAstItem, ESQLFunction } from '../../types';
+import type { ESQLAstCompletionCommand, ESQLAstItem, ESQLFunction } from '../../types';
 
 describe('COMPLETION command', () => {
   describe('correctly formatted', () => {
@@ -37,10 +37,9 @@ describe('COMPLETION command', () => {
       it('parses prompt when it is a param', () => {
         const text = `FROM index | COMPLETION ? WITH { "inference_id": "my_inference_endpoint" }`;
         const query = EsqlQuery.fromSrc(text);
-
         const promptArg = query.ast.commands[1].args[0] as ESQLAstItem[];
 
-        expect(promptArg[0]).toMatchObject({
+        expect(promptArg).toMatchObject({
           type: 'literal',
           literalType: 'param',
           paramType: 'unnamed',

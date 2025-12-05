@@ -39,10 +39,6 @@ Some Cypress test suites are only run when code changes are made in certain file
 
 Build Windows, macOS, and Linux archives.
 
-#### `ci:build-canvas-shareable-runtime`
-
-Build the Canvas shareable runtime and include it in the distribution.
-
 #### `ci:build-cdn-assets`
 
 Build an archive that can be used to serve Kibana's static assets.
@@ -90,6 +86,10 @@ Create a new deployment on Elastic Cloud.  Previous deployments linked to a pull
 #### `ci:collect-apm`
 
 Collect APM metrics, available for viewing on the Kibana CI APM cluster.
+
+#### `ci:entity-store-performance`
+
+Run entity store performance tests on Elastic Cloud. A fresh deployment is created for each test run (previous deployments are automatically cleaned up). Results are posted as PR comments.
 
 #### `ci:no-auto-commit`
 

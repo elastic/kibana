@@ -23,11 +23,11 @@ import {
   AlertHistoryEsIndexConnectorId,
   AlertHistoryDocumentTemplate,
   AlertHistoryDefaultIndexName,
-  ALERT_HISTORY_PREFIX,
   JsonEditorWithMessageVariables,
   useKibana,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { IndexActionParams } from '../types';
+import { ALERT_HISTORY_PREFIX } from '@kbn/connector-schemas/es_index/constants';
+import type { IndexActionParams } from '../types';
 
 export const IndexParamsFields = ({
   actionParams,
@@ -61,7 +61,7 @@ export const IndexParamsFields = ({
         ? // if non-empty object, stringify it into format that JSON editor expects
           JSON.stringify(docs[0], null, 2)
         : null
-      : undefined;
+      : '';
   };
 
   const [documentToIndex, setDocumentToIndex] = useState<string | undefined | null>(

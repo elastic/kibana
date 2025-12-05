@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { appContextService } from '@kbn/fleet-plugin/server/services';
 import { getTemplate } from '@kbn/fleet-plugin/server/services/epm/elasticsearch/template/template';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const templateName = 'bar';
@@ -34,7 +34,6 @@ export default function ({ getService }: FtrProviderContext) {
         packageName: 'system',
         composedOfTemplates: [],
         templatePriority: 200,
-        mappings: { properties: [] },
         type: 'logs',
       });
 

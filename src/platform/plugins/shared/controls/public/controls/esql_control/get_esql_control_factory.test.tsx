@@ -12,8 +12,8 @@ import { fireEvent, render, waitFor } from '@testing-library/react';
 import { EsqlControlType, type ESQLControlState } from '@kbn/esql-types';
 import { getMockedControlGroupApi, getMockedFinalizeApi } from '../mocks/control_mocks';
 import { getESQLControlFactory } from './get_esql_control_factory';
-import { BehaviorSubject } from 'rxjs';
-import { ControlFetchContext } from '../../control_group/control_fetch';
+import type { BehaviorSubject } from 'rxjs';
+import type { ControlFetchContext } from '../../control_group/control_fetch';
 
 const mockGetESQLSingleColumnValues = jest.fn(() => ({ options: ['option1', 'option2'] }));
 const mockIsSuccess = jest.fn(() => true);
@@ -85,6 +85,7 @@ describe('ESQLControlApi', () => {
         title: '',
         variableName: 'variable1',
         variableType: 'values',
+        singleSelect: true,
         width: 'medium',
       },
       references: [],

@@ -7,7 +7,7 @@
 
 import { castArray, orderBy } from 'lodash';
 import Fuse from 'fuse.js';
-import { TracedElasticsearchClient } from '@kbn/traced-es-client';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 
 export async function getEntitiesByFuzzySearch({
   esClient,

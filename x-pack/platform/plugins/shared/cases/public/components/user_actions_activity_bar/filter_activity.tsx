@@ -39,7 +39,11 @@ export const FilterActivity = React.memo<FilterActivityProps>(
           isToggle
           isSelected={type === 'all'}
           hasActiveFilters={type === 'all'}
-          numFilters={userActionsStats && userActionsStats.total > 0 ? userActionsStats.total : 0}
+          numFilters={
+            userActionsStats && userActionsStats.total > 0
+              ? userActionsStats.total - userActionsStats.totalDeletions
+              : 0
+          }
           isLoading={isLoading}
           isDisabled={isLoading}
           data-test-subj="user-actions-filter-activity-button-all"
@@ -55,7 +59,7 @@ export const FilterActivity = React.memo<FilterActivityProps>(
           hasActiveFilters={type === 'user'}
           numFilters={
             userActionsStats && userActionsStats.totalComments > 0
-              ? userActionsStats.totalComments
+              ? userActionsStats.totalComments - userActionsStats.totalCommentDeletions
               : 0
           }
           isLoading={isLoading}
@@ -71,7 +75,7 @@ export const FilterActivity = React.memo<FilterActivityProps>(
           hasActiveFilters={type === 'action'}
           numFilters={
             userActionsStats && userActionsStats.totalOtherActions > 0
-              ? userActionsStats.totalOtherActions
+              ? userActionsStats.totalOtherActions - userActionsStats.totalOtherActionDeletions
               : 0
           }
           onClick={() => handleFilterChange('action')}

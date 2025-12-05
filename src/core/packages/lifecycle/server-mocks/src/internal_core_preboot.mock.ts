@@ -15,9 +15,10 @@ import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { loggingServiceMock } from '@kbn/core-logging-server-mocks';
 import { prebootServiceMock } from '@kbn/core-preboot-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
+import { lazyObject } from '@kbn/lazy-object';
 
 export function createInternalCorePrebootMock() {
-  const prebootDeps = {
+  const prebootDeps = lazyObject({
     analytics: analyticsServiceMock.createAnalyticsServicePreboot(),
     context: contextServiceMock.createPrebootContract(),
     elasticsearch: elasticsearchServiceMock.createInternalPreboot(),
@@ -26,6 +27,6 @@ export function createInternalCorePrebootMock() {
     uiSettings: uiSettingsServiceMock.createPrebootContract(),
     logging: loggingServiceMock.createInternalPrebootContract(),
     preboot: prebootServiceMock.createInternalPrebootContract(),
-  };
+  });
   return prebootDeps;
 }

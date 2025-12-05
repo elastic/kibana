@@ -9,43 +9,43 @@
 
 import React from 'react';
 import moment from 'moment';
-import EventEmitter from 'events';
+import type EventEmitter from 'events';
 import { i18n } from '@kbn/i18n';
-import { EuiBetaBadgeProps, EuiCallOut } from '@elastic/eui';
+import type { EuiBetaBadgeProps } from '@elastic/eui';
 import { parse } from 'query-string';
 
-import { Capabilities } from '@kbn/core/public';
-import { TopNavMenuData } from '@kbn/navigation-plugin/public';
-import {
-  showSaveModal,
-  SavedObjectSaveModalOrigin,
+import type { Capabilities } from '@kbn/core/public';
+import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
+import type {
   SavedObjectSaveOpts,
   OnSaveProps,
+  ShowSaveModalMinimalSaveModalProps,
+  SaveResult,
 } from '@kbn/saved-objects-plugin/public';
+import { showSaveModal, SavedObjectSaveModalOrigin } from '@kbn/saved-objects-plugin/public';
 import {
-  LazySavedObjectSaveModalDashboard,
+  LazySavedObjectSaveModalDashboardWithSaveResult,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 import { unhashUrl } from '@kbn/kibana-utils-plugin/public';
-import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { VISUALIZE_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 
+import { VisualizeConstants, VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
 import { saveVisualization } from '../../utils/saved_visualize_utils';
-import { VISUALIZE_EMBEDDABLE_TYPE, getFullPath } from '../..';
+import { getFullPath } from '../..';
 
-import {
+import type {
   VisualizeServices,
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
 } from '../types';
-import { VisualizeConstants } from '../../../common/constants';
 import { getEditBreadcrumbs, getEditServerlessBreadcrumbs } from './breadcrumbs';
-import { VisualizeLocatorParams } from '../../../common/locator';
+import type { VisualizeLocatorParams } from '../../../common/locator';
 import { getUiActions } from '../../services';
 import { VISUALIZE_EDITOR_TRIGGER, AGG_BASED_VISUALIZATION_TRIGGER } from '../../triggers';
 import { getVizEditorOriginatingAppUrl } from './utils';
 
-import { serializeReferences } from '../../utils/saved_visualization_references';
 import { serializeState } from '../../embeddable/state';
 
 interface VisualizeCapabilities {
@@ -75,7 +75,9 @@ export interface TopNavConfigParams {
   eventEmitter?: EventEmitter;
 }
 
-const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
+const SavedObjectSaveModalDashboardWithSaveResult = withSuspense(
+  LazySavedObjectSaveModalDashboardWithSaveResult
+);
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
   if (!anonymousUserCapabilities.visualize_v2) return false;
@@ -186,20 +188,19 @@ export const getTopNavConfig = (
           }
 
           if (stateTransfer) {
-            const serializedVis = vis.serialize();
-            const { references } = serializeReferences(serializedVis);
-            stateTransfer.navigateToWithEmbeddablePackage(app, {
-              state: {
-                type: VISUALIZE_EMBEDDABLE_TYPE,
-                serializedState: {
-                  rawState: {
-                    savedObjectId: id,
+            stateTransfer.navigateToWithEmbeddablePackages(app, {
+              state: [
+                {
+                  type: VISUALIZE_EMBEDDABLE_TYPE,
+                  serializedState: {
+                    rawState: {
+                      savedObjectId: id,
+                    },
                   },
-                  references,
+                  embeddableId: saveOptions.copyOnSave ? undefined : embeddableId,
+                  searchSessionId: data.search.session.getSessionId(),
                 },
-                embeddableId: saveOptions.copyOnSave ? undefined : embeddableId,
-                searchSessionId: data.search.session.getSessionId(),
-              },
+              ],
               path,
             });
           } else {
@@ -253,15 +254,17 @@ export const getTopNavConfig = (
       return;
     }
 
-    stateTransfer.navigateToWithEmbeddablePackage(originatingApp, {
-      state: {
-        serializedState: serializeState({
-          serializedVis: vis.serialize(),
-        }),
-        embeddableId,
-        type: VISUALIZE_EMBEDDABLE_TYPE,
-        searchSessionId: data.search.session.getSessionId(),
-      },
+    stateTransfer.navigateToWithEmbeddablePackages(originatingApp, {
+      state: [
+        {
+          serializedState: serializeState({
+            serializedVis: vis.serialize(),
+          }),
+          embeddableId,
+          type: VISUALIZE_EMBEDDABLE_TYPE,
+          searchSessionId: data.search.session.getSessionId(),
+        },
+      ],
       path: originatingPath,
     });
   };
@@ -288,7 +291,7 @@ export const getTopNavConfig = (
   const showSaveButton =
     visualizeCapabilities.save || (!originatingApp && dashboardCapabilities.showWriteControls);
 
-  const showShareOptions = (anchorElement: HTMLElement, asExport?: boolean) => {
+  const showShareOptions = async (anchorElement: HTMLElement, asExport?: boolean) => {
     if (share) {
       const currentState = stateContainer.getState();
       const searchParams = parse(history.location.search);
@@ -307,7 +310,7 @@ export const getTopNavConfig = (
         savedSearchId: visInstance.savedSearch?.id ?? (searchParams.savedSearchId as string),
       };
       // TODO: support sharing in by-value mode
-      share.toggleShareContextMenu({
+      await share.toggleShareContextMenu({
         asExport,
         anchorElement,
         allowShortUrl: Boolean(visualizeCapabilities.createShortUrl),
@@ -325,58 +328,13 @@ export const getTopNavConfig = (
             integration: {
               export: {
                 pdfReports: {
-                  draftModeCallOut: (
-                    <EuiCallOut
-                      color="warning"
-                      iconType="warning"
-                      title={i18n.translate('visualizations.exports.pdfReports.warning.title', {
-                        defaultMessage: 'Unsaved changes',
-                      })}
-                    >
-                      {i18n.translate(
-                        'visualizations.exports.pdfReports.postURLWatcherMessage.unsavedChanges',
-                        {
-                          defaultMessage: 'URL may change if you upgrade Kibana.',
-                        }
-                      )}
-                    </EuiCallOut>
-                  ),
+                  draftModeCallOut: true,
                 },
                 imageReports: {
-                  draftModeCallOut: (
-                    <EuiCallOut
-                      color="warning"
-                      iconType="warning"
-                      title={i18n.translate('visualizations.exports.imageReports.warning.title', {
-                        defaultMessage: 'Unsaved changes',
-                      })}
-                    >
-                      {i18n.translate(
-                        'visualizations.exports.imageReports.postURLWatcherMessage.unsavedChanges',
-                        {
-                          defaultMessage: 'URL may change if you upgrade Kibana.',
-                        }
-                      )}
-                    </EuiCallOut>
-                  ),
+                  draftModeCallOut: true,
                 },
                 csvReports: {
-                  draftModeCallOut: (
-                    <EuiCallOut
-                      color="warning"
-                      iconType="warning"
-                      title={i18n.translate('visualizations.exports.csvReports.warning.title', {
-                        defaultMessage: 'Unsaved changes',
-                      })}
-                    >
-                      {i18n.translate(
-                        'visualizations.exports.csvReports.postURLWatcherMessage.unsavedChanges',
-                        {
-                          defaultMessage: 'URL may change if you upgrade Kibana.',
-                        }
-                      )}
-                    </EuiCallOut>
-                  ),
+                  draftModeCallOut: true,
                 },
               },
             },
@@ -583,7 +541,7 @@ export const getTopNavConfig = (
               }: OnSaveProps & { returnToOrigin?: boolean } & {
                 dashboardId?: string | null;
                 addToLibrary?: boolean;
-              }) => {
+              }): Promise<SaveResult> => {
                 const currentTitle = savedVis.title;
                 savedVis.title = newTitle;
                 embeddableHandler.updateInput({ title: newTitle });
@@ -602,24 +560,26 @@ export const getTopNavConfig = (
                   history.replace(appPath);
                   setActiveUrl(appPath);
 
-                  stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
-                    state: {
-                      serializedState: serializeState({
-                        serializedVis: vis.serialize(),
-                        titles: {
-                          title: newTitle,
-                          description: newDescription,
-                        },
-                      }),
-                      embeddableId,
-                      type: VISUALIZE_EMBEDDABLE_TYPE,
-                      searchSessionId: data.search.session.getSessionId(),
-                    },
+                  stateTransfer.navigateToWithEmbeddablePackages('dashboards', {
+                    state: [
+                      {
+                        serializedState: serializeState({
+                          serializedVis: vis.serialize(),
+                          titles: {
+                            title: newTitle,
+                            description: newDescription,
+                          },
+                        }),
+                        embeddableId,
+                        type: VISUALIZE_EMBEDDABLE_TYPE,
+                        searchSessionId: data.search.session.getSessionId(),
+                      },
+                    ],
                     path: dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`,
                   });
 
                   // TODO: Saved Object Modal requires `id` to be defined so this is a workaround
-                  return { id: true };
+                  return { id: 'true' };
                 }
 
                 // We're adding the viz to a library so we need to save it and then
@@ -656,7 +616,7 @@ export const getTopNavConfig = (
                 );
               }
 
-              let saveModal;
+              let saveModal: React.ReactElement<ShowSaveModalMinimalSaveModalProps>;
 
               if (originatingApp) {
                 saveModal = (
@@ -687,7 +647,7 @@ export const getTopNavConfig = (
                 );
               } else {
                 saveModal = (
-                  <SavedObjectSaveModalDashboard
+                  <SavedObjectSaveModalDashboardWithSaveResult
                     documentInfo={{
                       id: visualizeCapabilities.save ? savedVis?.id : undefined,
                       title: savedVis?.title || '',

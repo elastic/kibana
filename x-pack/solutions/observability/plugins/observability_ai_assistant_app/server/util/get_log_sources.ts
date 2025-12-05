@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IUiSettingsClient } from '@kbn/core/server';
+import type { IUiSettingsClient } from '@kbn/core/server';
 import { OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID } from '@kbn/management-settings-ids';
 
 export function getLogSources({ uiSettings }: { uiSettings: IUiSettingsClient }) {

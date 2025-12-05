@@ -26,8 +26,10 @@ import type { Agent } from '../types';
 import { SO_SEARCH_LIMIT } from '../constants';
 import { getAgentPolicySavedObjectType } from '../services/agent_policy';
 
+import { throwIfAborted } from './utils';
+
 export const TYPE = 'fleet:agent-status-change-task';
-export const VERSION = '1.0.0';
+export const VERSION = '1.0.2';
 const TITLE = 'Fleet Agent Status Change Task';
 const SCOPE = ['fleet'];
 const DEFAULT_INTERVAL = '1m';
@@ -58,7 +60,6 @@ interface AgentStatusChangeTaskStartContract {
 export class AgentStatusChangeTask {
   private logger: Logger;
   private wasStarted: boolean = false;
-  private abortController?: AbortController;
   private taskInterval: string;
 
   constructor(setupContract: AgentStatusChangeTaskSetupContract) {
@@ -70,15 +71,18 @@ export class AgentStatusChangeTask {
       [TYPE]: {
         title: TITLE,
         timeout: TIMEOUT,
-        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+        createTaskRunner: ({
+          taskInstance,
+          abortController,
+        }: {
+          taskInstance: ConcreteTaskInstance;
+          abortController: AbortController;
+        }) => {
           return {
             run: async () => {
-              this.abortController = new AbortController();
-              return this.runTask(taskInstance, core);
+              return this.runTask(taskInstance, core, abortController);
             },
-            cancel: async () => {
-              this.abortController?.abort('Task timed out');
-            },
+            cancel: async () => {},
           };
         },
       },
@@ -115,10 +119,14 @@ export class AgentStatusChangeTask {
   }
 
   private endRun(msg: string = '') {
-    this.logger.info(`[AgentStatusChangeTask] runTask ended${msg ? ': ' + msg : ''}`);
+    this.logger.debug(`[AgentStatusChangeTask] runTask ended${msg ? ': ' + msg : ''}`);
   }
 
-  public runTask = async (taskInstance: ConcreteTaskInstance, core: CoreSetup) => {
+  public runTask = async (
+    taskInstance: ConcreteTaskInstance,
+    core: CoreSetup,
+    abortController: AbortController
+  ) => {
     if (!appContextService.getExperimentalFeatures().enableAgentStatusAlerting) {
       this.logger.debug(
         '[AgentStatusChangeTask] Aborting runTask: agent status alerting feature is disabled'
@@ -137,14 +145,14 @@ export class AgentStatusChangeTask {
       return getDeleteTaskRunResult();
     }
 
-    this.logger.info(`[runTask()] started`);
+    this.logger.debug(`[runTask()] started`);
 
     const [coreStart, _startDeps] = (await core.getStartServices()) as any;
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
 
     try {
-      await this.persistAgentStatusChanges(esClient, soClient);
+      await this.persistAgentStatusChanges(esClient, soClient, abortController);
 
       this.endRun('success');
     } catch (err) {
@@ -160,7 +168,8 @@ export class AgentStatusChangeTask {
 
   private persistAgentStatusChanges = async (
     esClient: ElasticsearchClient,
-    soClient: SavedObjectsClientContract
+    soClient: SavedObjectsClientContract,
+    abortController: AbortController
   ) => {
     let agentlessPolicies: string[] | undefined;
     const agentsFetcher = await fetchAllAgentsByKuery(esClient, soClient, {
@@ -176,7 +185,7 @@ export class AgentStatusChangeTask {
       const agentsToUpdate = [];
 
       for (const agent of agentPageResults) {
-        this.throwIfAborted();
+        throwIfAborted(abortController);
 
         if (agent.status !== agent.last_known_status) {
           agentsToUpdate.push(agent);
@@ -261,10 +270,4 @@ export class AgentStatusChangeTask {
       refresh: 'wait_for',
     });
   };
-
-  private throwIfAborted() {
-    if (this.abortController?.signal.aborted) {
-      throw new Error('Task was aborted');
-    }
-  }
 }

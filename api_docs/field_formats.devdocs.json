@@ -4567,7 +4567,7 @@
             "label": "textConvert",
             "description": [],
             "signature": [
-              "(val: string | number, options: ",
+              "(val: any, options: ",
               {
                 "pluginId": "fieldFormats",
                 "scope": "common",
@@ -4584,12 +4584,12 @@
               {
                 "parentPluginId": "fieldFormats",
                 "id": "def-common.StringFormat.textConvert.$1",
-                "type": "CompoundType",
+                "type": "Any",
                 "tags": [],
                 "label": "val",
                 "description": [],
                 "signature": [
-                  "string | number"
+                  "any"
                 ],
                 "path": "src/platform/plugins/shared/field_formats/common/converters/string.ts",
                 "deprecated": false,

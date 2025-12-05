@@ -13,8 +13,8 @@ import {
   buildExistsFilter,
   buildPhraseFilter,
 } from '@kbn/es-query';
-import { AggConfig } from '../../agg_config';
-import { IMetricAggConfig } from '../metric_agg_type';
+import type { AggConfig } from '../../agg_config';
+import type { IMetricAggConfig } from '../metric_agg_type';
 
 export const createMetricFilter = <TMetricAggConfig extends AggConfig = IMetricAggConfig>(
   aggConfig: TMetricAggConfig,

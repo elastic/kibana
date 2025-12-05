@@ -10,26 +10,24 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  EuiTitle,
   EuiHealth,
-  EuiSpacer,
   useEuiTheme,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import * as i18n from './translations';
-import { formatThousands } from './metrics';
 
 interface Props {
-  totalAlerts: number;
   filteredAlerts: number;
   escalatedAlerts: number;
+  isLoading: boolean;
   filteredAlertsPerc: string;
   escalatedAlertsPerc: string;
 }
 
 export const AlertsProcessingTable: React.FC<Props> = ({
-  totalAlerts,
   filteredAlerts,
   escalatedAlerts,
+  isLoading,
   filteredAlertsPerc,
   escalatedAlertsPerc,
 }) => {
@@ -43,21 +41,7 @@ export const AlertsProcessingTable: React.FC<Props> = ({
       style={{ maxWidth: 280 }}
       data-test-subj="alertsProcessingTable"
     >
-      <EuiFlexItem>
-        <EuiText size="s" color="subdued">
-          <p>{i18n.TOTAL_ALERTS_PROCESSED}</p>
-        </EuiText>
-      </EuiFlexItem>
-
-      <EuiFlexItem data-test-subj="alertsProcessingTableTotalAlerts">
-        <EuiTitle size="m">
-          <h2>{formatThousands(totalAlerts)}</h2>
-        </EuiTitle>
-      </EuiFlexItem>
-
-      <EuiSpacer size="s" />
-
-      <EuiFlexItem data-test-subj="alertsProcessingTableFilteredAlerts">
+      <EuiFlexItem grow={false} data-test-subj="alertsProcessingTableFilteredAlerts">
         <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiHealth color={colors.vis.euiColorVis0} />
@@ -67,15 +51,19 @@ export const AlertsProcessingTable: React.FC<Props> = ({
               <p>{i18n.AI_FILTERED}</p>
             </EuiText>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              <strong>{`${filteredAlerts} (${filteredAlertsPerc})`}</strong>
-            </EuiText>
+          <EuiFlexItem grow={isLoading}>
+            {isLoading ? (
+              <EuiSkeletonText lines={1} size="xs" isLoading={true} />
+            ) : (
+              <EuiText size="s">
+                <strong>{`${filteredAlerts} (${filteredAlertsPerc})`}</strong>
+              </EuiText>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
 
-      <EuiFlexItem data-test-subj="alertsProcessingTableEscalatedAlerts">
+      <EuiFlexItem grow={false} data-test-subj="alertsProcessingTableEscalatedAlerts">
         <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiHealth color={colors.vis.euiColorVis9} />
@@ -85,10 +73,14 @@ export const AlertsProcessingTable: React.FC<Props> = ({
               <p>{i18n.ESCALATED}</p>
             </EuiText>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              <strong>{`${escalatedAlerts} (${escalatedAlertsPerc})`}</strong>
-            </EuiText>
+          <EuiFlexItem grow={isLoading}>
+            {isLoading ? (
+              <EuiSkeletonText lines={1} size="xs" isLoading={true} />
+            ) : (
+              <EuiText size="s">
+                <strong>{`${escalatedAlerts} (${escalatedAlertsPerc})`}</strong>
+              </EuiText>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

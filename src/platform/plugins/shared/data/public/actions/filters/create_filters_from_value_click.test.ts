@@ -7,17 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataViewsContract } from '@kbn/data-views-plugin/common';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { dataPluginMock } from '../../mocks';
 import { setIndexPatterns, setSearchService } from '../../services';
+import { getESQLAdHocDataview } from '@kbn/esql-utils';
+
+jest.mock('@kbn/esql-utils', () => ({
+  ...jest.requireActual('@kbn/esql-utils'),
+  getESQLAdHocDataview: jest.fn(),
+}));
+
+const mockGetESQLAdHocDataview = getESQLAdHocDataview as jest.MockedFunction<
+  typeof getESQLAdHocDataview
+>;
+
 import {
   createFiltersFromValueClickAction,
   appendFilterToESQLQueryFromValueClickAction,
   createFilterESQL,
 } from './create_filters_from_value_click';
-import { FieldFormatsGetConfigFn, BytesFormat } from '@kbn/field-formats-plugin/common';
-import { RangeFilter } from '@kbn/es-query';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { FieldFormatsGetConfigFn } from '@kbn/field-formats-plugin/common';
+import { BytesFormat } from '@kbn/field-formats-plugin/common';
+import type { RangeFilter } from '@kbn/es-query';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 
 const mockField = {
   name: 'bytes',
@@ -25,18 +38,17 @@ const mockField = {
 };
 describe('createFiltersFromClickEvent', () => {
   const dataStart = dataPluginMock.createStartContract();
+  const dataViews = dataViewPluginMocks.createStartContract();
+  dataViews.get = jest.fn().mockResolvedValue({
+    id: 'logstash-*',
+    fields: {
+      getByName: () => mockField,
+      filter: () => [mockField],
+    },
+    getFormatterForField: () => new BytesFormat({}, (() => {}) as FieldFormatsGetConfigFn),
+  });
   setSearchService(dataStart.search);
-  setIndexPatterns({
-    ...dataStart.indexPatterns,
-    get: async () => ({
-      id: 'logstash-*',
-      fields: {
-        getByName: () => mockField,
-        filter: () => [mockField],
-      },
-      getFormatterForField: () => new BytesFormat({}, (() => {}) as FieldFormatsGetConfigFn),
-    }),
-  } as unknown as DataViewsContract);
+  setIndexPatterns(dataViews);
   describe('createFiltersFromValueClick', () => {
     let dataPoints: Parameters<typeof createFiltersFromValueClickAction>[0]['data'];
 
@@ -199,6 +211,113 @@ describe('createFiltersFromClickEvent', () => {
 
       expect(filter.length).toBe(1);
     });
+
+    describe('raw columns (createFilterFromRawColumnsESQL)', () => {
+      const mockFieldByName = jest.fn();
+      const mockDataView = createStubDataView({
+        spec: {
+          id: 'mock-dataview-id',
+          title: 'logs*',
+        },
+      });
+
+      mockDataView.getFieldByName = mockFieldByName;
+
+      beforeEach(() => {
+        mockFieldByName.mockReset();
+        mockGetESQLAdHocDataview.mockReset();
+        mockGetESQLAdHocDataview.mockResolvedValue(mockDataView);
+
+        table.columns[0] = {
+          name: 'message',
+          id: '1-1',
+          meta: {
+            type: 'string',
+            sourceParams: {
+              indexPattern: 'logs*',
+              sourceField: 'message',
+            },
+          },
+        };
+        table.rows[0]['1-1'] = 'test message';
+      });
+
+      test('should return empty array when field is not found in dataview', async () => {
+        mockFieldByName.mockReturnValue(null);
+        const filter = await createFilterESQL(table, 0, 0);
+        expect(filter).toEqual([]);
+      });
+
+      test('should return empty array when field is not filterable', async () => {
+        mockFieldByName.mockReturnValue({
+          name: 'message',
+          filterable: false,
+        });
+        const filter = await createFilterESQL(table, 0, 0);
+        expect(filter).toEqual([]);
+      });
+
+      test('should create phrase filter for string value', async () => {
+        const mockFilterableField = {
+          name: 'message',
+          filterable: true,
+        };
+        mockFieldByName.mockReturnValue(mockFilterableField);
+
+        const filter = await createFilterESQL(table, 0, 0);
+
+        expect(filter).toHaveLength(1);
+        expect(filter[0]).toEqual(
+          expect.objectContaining({
+            query: expect.objectContaining({
+              match_phrase: expect.objectContaining({
+                message: 'test message',
+              }),
+            }),
+          })
+        );
+      });
+
+      test('should create phrases filter for array value', async () => {
+        const mockFilterableField = {
+          name: 'tags',
+          filterable: true,
+        };
+        mockFieldByName.mockReturnValue(mockFilterableField);
+        table.columns[0].name = 'tags';
+        table.columns[0].meta.type = 'string';
+        table.rows[0]['1-1'] = ['tag1', 'tag2', 'tag3'];
+
+        const filter = await createFilterESQL(table, 0, 0);
+
+        expect(filter).toHaveLength(1);
+        expect(filter[0]).toEqual(
+          expect.objectContaining({
+            query: expect.objectContaining({
+              bool: expect.objectContaining({
+                should: expect.arrayContaining([
+                  expect.objectContaining({
+                    match_phrase: expect.objectContaining({
+                      tags: 'tag1',
+                    }),
+                  }),
+                  expect.objectContaining({
+                    match_phrase: expect.objectContaining({
+                      tags: 'tag2',
+                    }),
+                  }),
+                  expect.objectContaining({
+                    match_phrase: expect.objectContaining({
+                      tags: 'tag3',
+                    }),
+                  }),
+                ]),
+              }),
+            }),
+          })
+        );
+      });
+    });
   });
 
   describe('appendFilterToESQLQueryFromValueClickAction', () => {
@@ -271,8 +390,8 @@ describe('createFiltersFromClickEvent', () => {
         query: { esql: 'from meow' },
       });
       expect(queryString).toEqual(`from meow
-| WHERE \`columnA\`=="2048"
-AND \`columnB\`=="2048"`);
+| WHERE \`columnA\` == "2048"
+AND \`columnB\` == "2048"`);
     });
 
     test('should return null if no aggregate query is present', async () => {
@@ -304,7 +423,7 @@ AND \`columnB\`=="2048"`);
       });
 
       expect(queryString).toEqual(`from meow
-| WHERE \`columnA\`=="2048"`);
+| WHERE \`columnA\` == "2048"`);
     });
 
     test('should return the update query string for negated action', async () => {
@@ -322,7 +441,7 @@ AND \`columnB\`=="2048"`);
       });
 
       expect(queryString).toEqual(`from meow
-| WHERE \`columnA\`!="2048"`);
+| WHERE \`columnA\` != "2048"`);
     });
   });
 });

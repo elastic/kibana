@@ -10,7 +10,7 @@
 // @ts-expect-error
 import Vsi from 'vega-spec-injector';
 
-import { Spec } from 'vega';
+import type { Spec } from 'vega';
 import { defaultProjection } from '../constants';
 
 export const injectMapPropsIntoSpec = (spec: Spec) => {

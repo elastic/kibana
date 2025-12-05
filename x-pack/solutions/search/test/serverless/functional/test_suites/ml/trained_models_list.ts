@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { SUPPORTED_TRAINED_MODELS } from '@kbn/test-suites-xpack-platform/functional/services/ml/api';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects, getPageObject }: FtrProviderContext) {
   const ml = getService('ml');
@@ -29,9 +29,7 @@ export default function ({ getService, getPageObjects, getPageObject }: FtrProvi
 
     describe('page navigation', () => {
       it('renders trained models list', async () => {
-        await svlCommonNavigation.sidenav.openSection(
-          'search_project_nav_footer.project_settings_project_nav'
-        );
+        await svlCommonNavigation.sidenav.clickLink({ navId: 'admin_and_settings' });
         await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management:trained_models' });
         await svlCommonNavigation.sidenav.expectLinkActive({
           deepLinkId: 'management:trained_models',

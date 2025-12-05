@@ -9,18 +9,23 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { search } from '@kbn/data-plugin/public';
+import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import {
   calcAutoIntervalNear,
-  DatatableUtilitiesService,
   isAbsoluteTimeShift,
   parseAbsoluteTimeShift,
   parseTimeShift,
 } from '@kbn/data-plugin/common';
-import type { DateRange } from '../../../common/types';
-import type { FormBasedLayer, FormBasedPrivateState } from './types';
-import type { FramePublicAPI, IndexPattern, UserMessage } from '../../types';
+import type {
+  FormBasedLayer,
+  FormBasedPrivateState,
+  FramePublicAPI,
+  IndexPattern,
+  UserMessage,
+  DateRange,
+} from '@kbn/lens-common';
 import { TIMESHIFT_LT_INTERVAL, TIMESHIFT_NOT_MULTIPLE_INTERVAL } from '../../user_messages_ids';
 
 export function parseTimeShiftWrapper(timeShiftString: string, dateRange: DateRange) {

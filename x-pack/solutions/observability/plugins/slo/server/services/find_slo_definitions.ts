@@ -5,30 +5,64 @@
  * 2.0.
  */
 
-import {
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type {
   FindSLODefinitionsParams,
   FindSLODefinitionsResponse,
-  findSloDefinitionsResponseSchema,
   Pagination,
 } from '@kbn/slo-schema';
+import { findSloDefinitionsResponseSchema } from '@kbn/slo-schema';
+import { keyBy } from 'lodash';
+import { computeHealth } from '../domain/services';
 import { IllegalArgumentError } from '../errors';
-import { SLORepository } from './slo_repository';
+import type { SLORepository } from './slo_repository';
 
 const MAX_PER_PAGE = 1000;
 const DEFAULT_PER_PAGE = 100;
 const DEFAULT_PAGE = 1;
 
 export class FindSLODefinitions {
-  constructor(private repository: SLORepository) {}
+  constructor(
+    private repository: SLORepository,
+    private scopedClusterClient: IScopedClusterClient
+  ) {}
 
   public async execute(params: FindSLODefinitionsParams): Promise<FindSLODefinitionsResponse> {
-    const requestTags: string[] = params.tags?.split(',') ?? [];
+    const tags: string[] = params.tags?.split(',') ?? [];
 
-    const result = await this.repository.search(params.search ?? '', toPagination(params), {
-      includeOutdatedOnly: params.includeOutdatedOnly === true,
-      tags: requestTags,
+    const { results: definitions, ...result } = await this.repository.search(
+      params.search ?? '',
+      toPagination(params),
+      { includeOutdatedOnly: !!params.includeOutdatedOnly, tags }
+    );
+
+    if (params.includeHealth) {
+      const healthResults = await computeHealth(definitions, {
+        scopedClusterClient: this.scopedClusterClient,
+      });
+
+      const healthBySloId = keyBy(healthResults, (health) => health.id);
+      const definitionsWithHealth = definitions.map((definition) => {
+        return {
+          ...definition,
+          health: healthBySloId[definition.id]?.health,
+        };
+      });
+
+      return findSloDefinitionsResponseSchema.encode({
+        page: result.page,
+        perPage: result.perPage,
+        total: result.total,
+        results: definitionsWithHealth,
+      });
+    }
+
+    return findSloDefinitionsResponseSchema.encode({
+      page: result.page,
+      perPage: result.perPage,
+      total: result.total,
+      results: definitions,
     });
-    return findSloDefinitionsResponseSchema.encode(result);
   }
 }
 
@@ -42,6 +76,6 @@ function toPagination(params: FindSLODefinitionsParams): Pagination {
 
   return {
     page: !isNaN(page) && page >= 1 ? page : DEFAULT_PAGE,
-    perPage: !isNaN(perPage) && perPage >= 1 ? perPage : DEFAULT_PER_PAGE,
+    perPage: !isNaN(perPage) && perPage >= 0 ? perPage : DEFAULT_PER_PAGE,
   };
 }

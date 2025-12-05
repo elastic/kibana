@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiAccordion } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { State } from '../../../types';
+import type { State } from '../../../types';
 
 const strings = {
   getFailedLabel: () =>

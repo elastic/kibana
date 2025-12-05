@@ -42,10 +42,22 @@
             "text": "AbstractStorybookMock"
           },
           "<",
-          "NoDataConfigPageProps",
+          {
+            "pluginId": "@kbn/shared-ux-page-no-data-config-types",
+            "scope": "common",
+            "docId": "kibKbnSharedUxPageNoDataConfigTypesPluginApi",
+            "section": "def-common.NoDataConfigPageProps",
+            "text": "NoDataConfigPageProps"
+          },
           ", ",
-          "NoDataCardServices",
-          ", PropArguments, {}>"
+          {
+            "pluginId": "@kbn/shared-ux-card-no-data-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxCardNoDataTypesPluginApi",
+            "section": "def-public.Services",
+            "text": "Services"
+          },
+          ", {}, {}>"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/no_data_config/mocks/src/storybook.ts",
         "deprecated": false,
@@ -61,217 +73,7 @@
             "path": "src/platform/packages/shared/shared-ux/page/no_data_config/mocks/src/storybook.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/shared-ux-page-no-data-config-mocks",
-                "id": "def-common.NoDataConfigPageStorybookMock.propArguments.solution",
-                "type": "Object",
-                "tags": [],
-                "label": "solution",
-                "description": [],
-                "path": "src/platform/packages/shared/shared-ux/page/no_data_config/mocks/src/storybook.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "@kbn/shared-ux-page-no-data-config-mocks",
-                    "id": "def-common.NoDataConfigPageStorybookMock.propArguments.solution.control",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "control",
-                    "description": [],
-                    "path": "src/platform/packages/shared/shared-ux/page/no_data_config/mocks/src/storybook.ts",
-                    "deprecated": false,
-                    "trackAdoption": false,
-                    "children": [
-                      {
-                        "parentPluginId": "@kbn/shared-ux-page-no-data-config-mocks",
-                        "id": "def-common.NoDataConfigPageStorybookMock.propArguments.solution.control.control",
-                        "type": "string",
-                        "tags": [],
-                        "label": "control",
-                        "description": [],
-                        "path": "src/platform/packages/shared/shared-ux/page/no_data_config/mocks/src/storybook.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      }
-                    ]
-                  },
-                  {
-                    "parentPluginId": "@kbn/shared-ux-page-no-data-config-mocks",
-                    "id": "def-common.NoDataConfigPageStorybookMock.propArguments.solution.defaultValue",
-                    "type": "string",
-                    "tags": [],
-                    "label": "defaultValue",
-                    "description": [],
-                    "path": "src/platform/packages/shared/shared-ux/page/no_data_config/mocks/src/storybook.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "@kbn/shared-ux-page-no-data-config-mocks",
-                "id": "def-common.NoDataConfigPageStorybookMock.propArguments.logo",
-                "type": "Object",
-                "tags": [],
-                "label": "logo",
-                "description": [],
-                "path": "src/platform/packages/shared/shared-ux/page/no_data_config/mocks/src/storybook.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "@kbn/shared-ux-page-no-data-config-mocks",
-                    "id": "def-common.NoDataConfigPageStorybookMock.propArguments.logo.control",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "control",
-                    "description": [],
-                    "path": "src/platform/packages/shared/shared-ux/page/no_data_config/mocks/src/storybook.ts",
-                    "deprecated": false,
-                    "trackAdoption": false,
-                    "children": [
-                      {
-                        "parentPluginId": "@kbn/shared-ux-page-no-data-config-mocks",
-                        "id": "def-common.NoDataConfigPageStorybookMock.propArguments.logo.control.control",
-                        "type": "string",
-                        "tags": [],
-                        "label": "control",
-                        "description": [],
-                        "path": "src/platform/packages/shared/shared-ux/page/no_data_config/mocks/src/storybook.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      }
-                    ]
-                  },
-                  {
-                    "parentPluginId": "@kbn/shared-ux-page-no-data-config-mocks",
-                    "id": "def-common.NoDataConfigPageStorybookMock.propArguments.logo.options",
-                    "type": "Array",
-                    "tags": [],
-                    "label": "options",
-                    "description": [],
-                    "signature": [
-                      "(string | undefined)[]"
-                    ],
-                    "path": "src/platform/packages/shared/shared-ux/page/no_data_config/mocks/src/storybook.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "@kbn/shared-ux-page-no-data-config-mocks",
-                    "id": "def-common.NoDataConfigPageStorybookMock.propArguments.logo.defaultValue",
-                    "type": "Uncategorized",
-                    "tags": [],
-                    "label": "defaultValue",
-                    "description": [],
-                    "signature": [
-                      "undefined"
-                    ],
-                    "path": "src/platform/packages/shared/shared-ux/page/no_data_config/mocks/src/storybook.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "@kbn/shared-ux-page-no-data-config-mocks",
-                "id": "def-common.NoDataConfigPageStorybookMock.propArguments.docsLink",
-                "type": "Object",
-                "tags": [],
-                "label": "docsLink",
-                "description": [],
-                "path": "src/platform/packages/shared/shared-ux/page/no_data_config/mocks/src/storybook.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "@kbn/shared-ux-page-no-data-config-mocks",
-                    "id": "def-common.NoDataConfigPageStorybookMock.propArguments.docsLink.control",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "control",
-                    "description": [],
-                    "path": "src/platform/packages/shared/shared-ux/page/no_data_config/mocks/src/storybook.ts",
-                    "deprecated": false,
-                    "trackAdoption": false,
-                    "children": [
-                      {
-                        "parentPluginId": "@kbn/shared-ux-page-no-data-config-mocks",
-                        "id": "def-common.NoDataConfigPageStorybookMock.propArguments.docsLink.control.control",
-                        "type": "string",
-                        "tags": [],
-                        "label": "control",
-                        "description": [],
-                        "path": "src/platform/packages/shared/shared-ux/page/no_data_config/mocks/src/storybook.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      }
-                    ]
-                  },
-                  {
-                    "parentPluginId": "@kbn/shared-ux-page-no-data-config-mocks",
-                    "id": "def-common.NoDataConfigPageStorybookMock.propArguments.docsLink.defaultValue",
-                    "type": "string",
-                    "tags": [],
-                    "label": "defaultValue",
-                    "description": [],
-                    "path": "src/platform/packages/shared/shared-ux/page/no_data_config/mocks/src/storybook.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "@kbn/shared-ux-page-no-data-config-mocks",
-                "id": "def-common.NoDataConfigPageStorybookMock.propArguments.pageTitle",
-                "type": "Object",
-                "tags": [],
-                "label": "pageTitle",
-                "description": [],
-                "path": "src/platform/packages/shared/shared-ux/page/no_data_config/mocks/src/storybook.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "@kbn/shared-ux-page-no-data-config-mocks",
-                    "id": "def-common.NoDataConfigPageStorybookMock.propArguments.pageTitle.control",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "control",
-                    "description": [],
-                    "path": "src/platform/packages/shared/shared-ux/page/no_data_config/mocks/src/storybook.ts",
-                    "deprecated": false,
-                    "trackAdoption": false,
-                    "children": [
-                      {
-                        "parentPluginId": "@kbn/shared-ux-page-no-data-config-mocks",
-                        "id": "def-common.NoDataConfigPageStorybookMock.propArguments.pageTitle.control.control",
-                        "type": "string",
-                        "tags": [],
-                        "label": "control",
-                        "description": [],
-                        "path": "src/platform/packages/shared/shared-ux/page/no_data_config/mocks/src/storybook.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      }
-                    ]
-                  },
-                  {
-                    "parentPluginId": "@kbn/shared-ux-page-no-data-config-mocks",
-                    "id": "def-common.NoDataConfigPageStorybookMock.propArguments.pageTitle.defaultValue",
-                    "type": "string",
-                    "tags": [],
-                    "label": "defaultValue",
-                    "description": [],
-                    "path": "src/platform/packages/shared/shared-ux/page/no_data_config/mocks/src/storybook.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              }
-            ]
+            "children": []
           },
           {
             "parentPluginId": "@kbn/shared-ux-page-no-data-config-mocks",
@@ -316,14 +118,20 @@
             "signature": [
               "(params?: ",
               {
-                "pluginId": "@kbn/shared-ux-page-no-data-config-mocks",
-                "scope": "common",
-                "docId": "kibKbnSharedUxPageNoDataConfigMocksPluginApi",
-                "section": "def-common.Params",
+                "pluginId": "@kbn/shared-ux-card-no-data-mocks",
+                "scope": "public",
+                "docId": "kibKbnSharedUxCardNoDataMocksPluginApi",
+                "section": "def-public.Params",
                 "text": "Params"
               },
               " | undefined) => ",
-              "NoDataConfigPageProps"
+              {
+                "pluginId": "@kbn/shared-ux-page-no-data-config-types",
+                "scope": "common",
+                "docId": "kibKbnSharedUxPageNoDataConfigTypesPluginApi",
+                "section": "def-common.NoDataConfigPageProps",
+                "text": "NoDataConfigPageProps"
+              }
             ],
             "path": "src/platform/packages/shared/shared-ux/page/no_data_config/mocks/src/storybook.ts",
             "deprecated": false,
@@ -332,16 +140,16 @@
               {
                 "parentPluginId": "@kbn/shared-ux-page-no-data-config-mocks",
                 "id": "def-common.NoDataConfigPageStorybookMock.getProps.$1",
-                "type": "CompoundType",
+                "type": "Object",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/shared-ux-page-no-data-config-mocks",
-                    "scope": "common",
-                    "docId": "kibKbnSharedUxPageNoDataConfigMocksPluginApi",
-                    "section": "def-common.Params",
+                    "pluginId": "@kbn/shared-ux-card-no-data-mocks",
+                    "scope": "public",
+                    "docId": "kibKbnSharedUxCardNoDataMocksPluginApi",
+                    "section": "def-public.Params",
                     "text": "Params"
                   },
                   " | undefined"
@@ -364,14 +172,20 @@
             "signature": [
               "(params: ",
               {
-                "pluginId": "@kbn/shared-ux-page-no-data-config-mocks",
-                "scope": "common",
-                "docId": "kibKbnSharedUxPageNoDataConfigMocksPluginApi",
-                "section": "def-common.Params",
+                "pluginId": "@kbn/shared-ux-card-no-data-mocks",
+                "scope": "public",
+                "docId": "kibKbnSharedUxCardNoDataMocksPluginApi",
+                "section": "def-public.Params",
                 "text": "Params"
               },
               ") => ",
-              "NoDataCardServices"
+              {
+                "pluginId": "@kbn/shared-ux-card-no-data-types",
+                "scope": "public",
+                "docId": "kibKbnSharedUxCardNoDataTypesPluginApi",
+                "section": "def-public.Services",
+                "text": "Services"
+              }
             ],
             "path": "src/platform/packages/shared/shared-ux/page/no_data_config/mocks/src/storybook.ts",
             "deprecated": false,
@@ -380,16 +194,16 @@
               {
                 "parentPluginId": "@kbn/shared-ux-page-no-data-config-mocks",
                 "id": "def-common.NoDataConfigPageStorybookMock.getServices.$1",
-                "type": "CompoundType",
+                "type": "Object",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/shared-ux-page-no-data-config-mocks",
-                    "scope": "common",
-                    "docId": "kibKbnSharedUxPageNoDataConfigMocksPluginApi",
-                    "section": "def-common.Params",
+                    "pluginId": "@kbn/shared-ux-card-no-data-mocks",
+                    "scope": "public",
+                    "docId": "kibKbnSharedUxCardNoDataMocksPluginApi",
+                    "section": "def-public.Params",
                     "text": "Params"
                   }
                 ],
@@ -415,7 +229,13 @@
         "description": [],
         "signature": [
           "() => ",
-          "NoDataCardServices"
+          {
+            "pluginId": "@kbn/shared-ux-card-no-data-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxCardNoDataTypesPluginApi",
+            "section": "def-public.Services",
+            "text": "Services"
+          }
         ],
         "path": "src/platform/packages/shared/shared-ux/page/no_data_config/mocks/src/jest.ts",
         "deprecated": false,
@@ -436,29 +256,7 @@
         "label": "Params",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/shared-ux-storybook-mock",
-            "scope": "common",
-            "docId": "kibKbnSharedUxStorybookMockPluginApi",
-            "section": "def-common.ArgumentParams",
-            "text": "ArgumentParams"
-          },
-          "<PropArguments, {}> & ",
-          {
-            "pluginId": "@kbn/shared-ux-storybook-mock",
-            "scope": "common",
-            "docId": "kibKbnSharedUxStorybookMockPluginApi",
-            "section": "def-common.ArgumentParams",
-            "text": "ArgumentParams"
-          },
-          "<PropArguments, {}> & ",
-          {
-            "pluginId": "@kbn/shared-ux-card-no-data-mocks",
-            "scope": "public",
-            "docId": "kibKbnSharedUxCardNoDataMocksPluginApi",
-            "section": "def-public.Params",
-            "text": "Params"
-          }
+          "{ \"data-test-subj\": any; title: any; description: any; href: any; docsLink: any; canAccessFleet: any; buttonText: any; disabledButtonTooltipText: any; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/no_data_config/mocks/src/storybook.ts",
         "deprecated": false,

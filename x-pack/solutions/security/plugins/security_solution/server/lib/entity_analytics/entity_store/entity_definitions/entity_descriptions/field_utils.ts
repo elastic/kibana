@@ -13,11 +13,13 @@ export const collectValues = ({
   source,
   fieldHistoryLength = 10,
   mapping = { type: 'keyword' },
+  allowAPIUpdate = false,
 }: {
   source: string;
   destination?: string;
   mapping?: MappingProperty;
   fieldHistoryLength?: number;
+  allowAPIUpdate?: boolean;
 }): FieldDescription => ({
   destination: destination ?? source,
   source,
@@ -30,6 +32,7 @@ export const collectValues = ({
     limit: fieldHistoryLength,
   },
   mapping,
+  allowAPIUpdate,
 });
 
 export const newestValue = ({
@@ -37,11 +40,13 @@ export const newestValue = ({
   mapping = { type: 'keyword' },
   source,
   sort,
+  allowAPIUpdate = false,
 }: {
   source: string;
   destination?: string;
   mapping?: MappingProperty;
   sort?: Record<string, 'asc' | 'desc'>;
+  allowAPIUpdate?: boolean;
 }): FieldDescription => ({
   destination: destination ?? source,
   source,
@@ -53,6 +58,7 @@ export const newestValue = ({
     },
   },
   mapping,
+  allowAPIUpdate,
 });
 
 export const oldestValue = ({
@@ -76,4 +82,5 @@ export const oldestValue = ({
     },
   },
   mapping,
+  allowAPIUpdate: false, // oldest value should never be updated
 });

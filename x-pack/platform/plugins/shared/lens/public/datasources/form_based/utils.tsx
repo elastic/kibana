@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocLinksStart, ThemeServiceStart } from '@kbn/core/public';
 import { hasUnsupportedDownsampledAggregationFailure } from '@kbn/search-response-warnings';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
-import { TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import { EuiLink, EuiSpacer } from '@elastic/eui';
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -26,37 +26,39 @@ import {
 import type { estypes } from '@elastic/elasticsearch';
 import { isQueryValid } from '@kbn/visualization-ui-components';
 import { getOriginalId } from '@kbn/transpose-utils';
-import type { DateRange } from '../../../common/types';
 import type {
+  DateRange,
+  FiltersIndexPatternColumn,
+  FormBasedLayer,
+  FormBasedPersistedState,
+  FormBasedPrivateState,
   FramePublicAPI,
   IndexPattern,
-  StateSetter,
+  ReferenceBasedIndexPatternColumn,
   UserMessage,
   VisualizationInfo,
-} from '../../types';
+  GenericIndexPatternColumn,
+  TermsIndexPatternColumn,
+  CountIndexPatternColumn,
+  RangeIndexPatternColumn,
+  FormulaIndexPatternColumn,
+  DateHistogramIndexPatternColumn,
+  MaxIndexPatternColumn,
+  MinIndexPatternColumn,
+  FieldBasedIndexPatternColumn,
+  StateSetter,
+} from '@kbn/lens-common';
 import { renewIDs } from '../../utils';
-import type { FormBasedLayer, FormBasedPersistedState, FormBasedPrivateState } from './types';
-import type { ReferenceBasedIndexPatternColumn } from './operations/definitions/column_types';
 
+import type { GenericOperationDefinition } from './operations';
 import {
   operationDefinitionMap,
   getReferenceRoot,
   updateColumnParam,
   updateDefaultLabels,
-  type GenericIndexPatternColumn,
-  type TermsIndexPatternColumn,
-  type CountIndexPatternColumn,
-  type RangeIndexPatternColumn,
-  type FormulaIndexPatternColumn,
-  type DateHistogramIndexPatternColumn,
-  type MaxIndexPatternColumn,
-  type MinIndexPatternColumn,
-  type GenericOperationDefinition,
-  type FieldBasedIndexPatternColumn,
 } from './operations';
 
 import { getInvalidFieldMessage, isColumnOfType } from './operations/definitions/helpers';
-import { FiltersIndexPatternColumn } from './operations/definitions/filters';
 import { hasField } from './pure_utils';
 import { mergeLayer } from './state_helpers';
 import { supportsRarityRanking } from './operations/definitions/terms';

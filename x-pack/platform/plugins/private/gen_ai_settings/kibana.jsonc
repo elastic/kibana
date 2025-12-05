@@ -1,0 +1,16 @@
+{
+  "type": "plugin",
+  "id": "@kbn/gen-ai-settings-plugin",
+  "owner": ["@elastic/appex-ai-infra"],
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "genAiSettings",
+    "browser": true,
+    "server": true,
+    "configPath": ["xpack", "genAiSettings"],
+    "requiredPlugins": ["management", "actions", "inference", "licensing"],
+    "optionalPlugins": ["spaces"],
+    "requiredBundles": ["kibanaReact"]
+  }
+}

@@ -7,6 +7,7 @@
 
 import React, { type ComponentProps, memo } from 'react';
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
+import { RELATED_INTEGRATION } from '../../../constants';
 import type { GetTableProp } from './types';
 import { DatetimeSchemaCellRenderer } from './datetime_schema_cell_renderer';
 import { BasicCellRenderer } from './basic_cell_renderer';
@@ -26,15 +27,10 @@ export type CellValueProps = Pick<
    */
   | 'columnId'
   /**
-   * List of installed AI for SOC integrations.
+   * List of installed EASE integrations.
    * This comes from the additionalContext property on the table.
    */
   | 'packages'
-  /**
-   * Result from the useQuery to fetch all rules.
-   * This comes from the additionalContext property on the table.
-   */
-  | 'ruleResponse'
   /**
    * Type of field used to drive how we render the value in the BasicCellRenderer.
    * This comes from EuiDataGrid.
@@ -43,7 +39,7 @@ export type CellValueProps = Pick<
 >;
 
 /**
- * Component used in the AI for SOC alert summary table.
+ * Component used in EASE alert summary table.
  * It renders some of the value with custom renderers for some specific columns:
  *  - kibana.alert.rule.parameters
  *  - kibana.alert.severity
@@ -51,28 +47,20 @@ export type CellValueProps = Pick<
  *  - datetime
  * Finally it renders the rest as basic strings.
  */
-export const CellValue = memo(
-  ({ alert, columnId, packages, ruleResponse, schema }: CellValueProps) => {
-    let component;
+export const CellValue = memo(({ alert, columnId, packages, schema }: CellValueProps) => {
+  let component;
 
-    if (columnId === 'signal.rule.rule_id') {
-      component = (
-        <KibanaAlertRelatedIntegrationsCellRenderer
-          alert={alert}
-          packages={packages}
-          rules={ruleResponse.rules}
-        />
-      );
-    } else if (columnId === ALERT_SEVERITY) {
-      component = <KibanaAlertSeverityCellRenderer alert={alert} />;
-    } else if (schema === DATETIME_SCHEMA) {
-      component = <DatetimeSchemaCellRenderer alert={alert} field={columnId} />;
-    } else {
-      component = <BasicCellRenderer alert={alert} field={columnId} />;
-    }
-
-    return <>{component}</>;
+  if (columnId === RELATED_INTEGRATION) {
+    component = <KibanaAlertRelatedIntegrationsCellRenderer alert={alert} packages={packages} />;
+  } else if (columnId === ALERT_SEVERITY) {
+    component = <KibanaAlertSeverityCellRenderer alert={alert} />;
+  } else if (schema === DATETIME_SCHEMA) {
+    component = <DatetimeSchemaCellRenderer alert={alert} field={columnId} />;
+  } else {
+    component = <BasicCellRenderer alert={alert} field={columnId} />;
   }
-);
+
+  return <>{component}</>;
+});
 
 CellValue.displayName = 'CellValue';

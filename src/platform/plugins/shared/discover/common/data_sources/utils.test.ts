@@ -32,4 +32,10 @@ describe('createDataSource', () => {
     const result = createDataSource({ dataView, query });
     expect(result).toEqual(undefined);
   });
+
+  it('should return data view source when not ES|QL query and passed a dataView id directly', () => {
+    const query = { language: 'kql', query: 'test' };
+    const result = createDataSource({ dataView: 'test', query });
+    expect(result).toEqual(createDataViewDataSource({ dataViewId: 'test' }));
+  });
 });

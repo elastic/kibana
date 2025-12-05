@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AggParamsFilters } from '@kbn/data-plugin/common';
+import type { AggParamsFilters } from '@kbn/data-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
-import { FiltersColumn } from './types';
+import type { FiltersColumn } from './types';
 
 export const convertToFiltersColumn = (
   aggId: string,
@@ -27,7 +27,7 @@ export const convertToFiltersColumn = (
     isBucketed: true,
     isSplit,
     params: {
-      filters: aggParams.filters ?? [],
+      filters: aggParams.filters.map(({ label, input }) => ({ label: label ?? '', input })),
     },
     timeShift: aggParams.timeShift,
     meta: { aggId },

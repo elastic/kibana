@@ -11,16 +11,19 @@ import type { ICommandMethods } from '../../registry';
 import { autocomplete } from './autocomplete';
 import type { ICommandContext } from '../../types';
 import { validate } from './validate';
+import { columnsAfter } from './columns_after';
 
 const rowCommandMethods: ICommandMethods<ICommandContext> = {
   autocomplete,
   validate,
+  columnsAfter,
 };
 
 export const rowCommand = {
   name: 'row',
   methods: rowCommandMethods,
   metadata: {
+    type: 'source' as const,
     description: i18n.translate('kbn-esql-ast.esql.definitions.rowDoc', {
       defaultMessage:
         'Produces a row with one or more columns with values that you specify. This can be useful for testing.',

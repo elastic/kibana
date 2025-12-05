@@ -8,192 +8,30 @@
  */
 
 import * as Fs from 'fs';
+import os from 'os';
 
 import * as globby from 'globby';
 import minimatch from 'minimatch';
 
 import { load as loadYaml } from 'js-yaml';
 
-import { BuildkiteClient, BuildkiteStep } from '../buildkite';
-import { CiStatsClient, TestGroupRunOrderResponse } from './client';
+import type { BuildkiteStep } from '../buildkite';
+import { BuildkiteClient } from '../buildkite';
+import type { TestGroupRunOrderResponse } from './client';
+import { CiStatsClient } from './client';
 
 import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
 import { serverless, stateful } from '../../ftr_configs_manifests.json';
-import { collectEnvFromLabels, expandAgentQueue } from '#pipeline-utils';
+import { filterEmptyJestConfigs } from './get_tests_from_config';
+import { collectEnvFromLabels, expandAgentQueue, getRequiredEnv } from '#pipeline-utils';
 
 const ALL_FTR_MANIFEST_REL_PATHS = serverless.concat(stateful);
 
 type RunGroup = TestGroupRunOrderResponse['types'][0];
-
-const getRequiredEnv = (name: string) => {
-  const value = process.env[name];
-  if (typeof value !== 'string' || !value) {
-    throw new Error(`Missing required environment variable "${name}"`);
-  }
-  return value;
-};
-
-function getRunGroups(bk: BuildkiteClient, allTypes: RunGroup[], typeName: string): RunGroup[] {
-  const types = allTypes.filter((t) => t.type === typeName);
-  if (!types.length) {
-    throw new Error(`missing test group run order for group [${typeName}]`);
-  }
-
-  const misses = types.flatMap((t) => t.namesWithoutDurations);
-  if (misses.length > 0) {
-    bk.setAnnotation(
-      `test-group-missing-durations:${typeName}`,
-      'warning',
-      [
-        misses.length === 1
-          ? `The following "${typeName}" config doesn't have a recorded time in ci-stats so the automatically-determined test groups might be a little unbalanced.`
-          : `The following "${typeName}" configs don't have recorded times in ci-stats so the automatically-determined test groups might be a little unbalanced.`,
-        misses.length === 1
-          ? `If this is a new config then this warning can be ignored as times will be reported soon.`
-          : `If these are new configs then this warning can be ignored as times will be reported soon.`,
-        misses.length === 1
-          ? `The other possibility is that there aren't any tests in this config, so times are never reported.`
-          : `The other possibility is that there aren't any tests in these configs, so times are never reported.`,
-        'Empty test configs should be removed',
-        '',
-        ...misses.map((n) => ` - ${n}`),
-      ].join('\n')
-    );
-  }
-
-  const tooLongs = types.flatMap((t) => t.tooLong ?? []);
-  if (tooLongs.length > 0) {
-    bk.setAnnotation(
-      `test-group-too-long:${typeName}`,
-      'warning',
-      [
-        tooLongs.length === 1
-          ? `The following "${typeName}" config has a duration that exceeds the maximum amount of time desired for a single CI job. ` +
-            `This is not an error, and if you don't own this config then you can ignore this warning. ` +
-            `If you own this config please split it up ASAP and ask Operations if you have questions about how to do that.`
-          : `The following "${typeName}" configs have durations that exceed the maximum amount of time desired for a single CI job. ` +
-            `This is not an error, and if you don't own any of these configs then you can ignore this warning.` +
-            `If you own any of these configs please split them up ASAP and ask Operations if you have questions about how to do that.`,
-        '',
-        ...tooLongs.map(({ config, durationMin }) => ` - ${config}: ${durationMin} minutes`),
-      ].join('\n')
-    );
-  }
-
-  return types;
-}
-
-function getRunGroup(bk: BuildkiteClient, allTypes: RunGroup[], typeName: string): RunGroup {
-  const groups = getRunGroups(bk, allTypes, typeName);
-  if (groups.length !== 1) {
-    throw new Error(`expected to find exactly 1 "${typeName}" run group`);
-  }
-  return groups[0];
-}
-
-function getTrackedBranch(): string {
-  let pkg;
-  try {
-    pkg = JSON.parse(Fs.readFileSync('package.json', 'utf8'));
-  } catch (_) {
-    const error = _ instanceof Error ? _ : new Error(`${_} thrown`);
-    throw new Error(`unable to read kibana's package.json file: ${error.message}`);
-  }
-
-  const branch = pkg.branch;
-  if (typeof branch !== 'string') {
-    throw new Error('missing `branch` field from package.json file');
-  }
-
-  return branch;
-}
-
-function isObj(x: unknown): x is Record<string, unknown> {
-  return typeof x === 'object' && x !== null;
-}
-
 interface FtrConfigsManifest {
   defaultQueue?: string;
   disabled?: string[];
   enabled?: Array<string | { [configPath: string]: { queue: string } }>;
-}
-
-function getEnabledFtrConfigs(patterns?: string[]) {
-  const configs: {
-    enabled: Array<string | { [configPath: string]: { queue: string } }>;
-    defaultQueue: string | undefined;
-  } = { enabled: [], defaultQueue: undefined };
-  const uniqueQueues = new Set<string>();
-
-  for (const manifestRelPath of ALL_FTR_MANIFEST_REL_PATHS) {
-    try {
-      const ymlData = loadYaml(Fs.readFileSync(manifestRelPath, 'utf8'));
-      if (!isObj(ymlData)) {
-        throw new Error('expected yaml file to parse to an object');
-      }
-      const manifest = ymlData as FtrConfigsManifest;
-
-      configs.enabled.push(...(manifest?.enabled ?? []));
-      if (manifest.defaultQueue) {
-        uniqueQueues.add(manifest.defaultQueue);
-      }
-    } catch (_) {
-      const error = _ instanceof Error ? _ : new Error(`${_} thrown`);
-      throw new Error(`unable to parse ${manifestRelPath} file: ${error.message}`);
-    }
-  }
-
-  try {
-    if (configs.enabled.length === 0) {
-      throw new Error('expected yaml files to have at least 1 "enabled" key');
-    }
-    if (uniqueQueues.size !== 1) {
-      throw Error(
-        `FTR manifest yml files should define the same 'defaultQueue', but found different ones: ${[
-          ...uniqueQueues,
-        ].join(' ')}`
-      );
-    }
-    configs.defaultQueue = uniqueQueues.values().next().value;
-
-    if (
-      !Array.isArray(configs.enabled) ||
-      !configs.enabled.every(
-        (p): p is string | { [configPath: string]: { queue: string } } =>
-          typeof p === 'string' ||
-          (isObj(p) && Object.values(p).every((v) => isObj(v) && typeof v.queue === 'string'))
-      )
-    ) {
-      throw new Error(`expected "enabled" value to be an array of strings or objects shaped as:\n
-  - {configPath}:
-      queue: {queueName}`);
-    }
-    if (typeof configs.defaultQueue !== 'string') {
-      throw new Error('expected yaml file to have a string "defaultQueue" key');
-    }
-
-    const defaultQueue = configs.defaultQueue;
-    const ftrConfigsByQueue = new Map<string, string[]>();
-    for (const enabled of configs.enabled) {
-      const path = typeof enabled === 'string' ? enabled : Object.keys(enabled)[0];
-      const queue = isObj(enabled) ? enabled[path].queue : defaultQueue;
-
-      if (patterns && !patterns.some((pattern) => minimatch(path, pattern))) {
-        continue;
-      }
-
-      const group = ftrConfigsByQueue.get(queue);
-      if (group) {
-        group.push(path);
-      } else {
-        ftrConfigsByQueue.set(queue, [path]);
-      }
-    }
-    return { defaultQueue, ftrConfigsByQueue };
-  } catch (_) {
-    const error = _ instanceof Error ? _ : new Error(`${_} thrown`);
-    throw new Error(`unable to collect enabled FTR configs: ${error.message}`);
-  }
 }
 
 export async function pickTestGroupRunOrder() {
@@ -234,6 +72,17 @@ export async function pickTestGroupRunOrder() {
         .filter(Boolean)
     : ['unit', 'integration', 'functional'];
 
+  const LIMIT_SOLUTIONS = process.env.LIMIT_SOLUTIONS
+    ? process.env.LIMIT_SOLUTIONS.split(',')
+        .map((t) => t.trim())
+        .filter(Boolean)
+    : undefined;
+  if (LIMIT_SOLUTIONS) {
+    const validSolutions = ['observability', 'search', 'security', 'workplaceai'];
+    const invalidSolutions = LIMIT_SOLUTIONS.filter((s) => !validSolutions.includes(s));
+    if (invalidSolutions.length) throw new Error('Unsupported LIMIT_SOLUTIONS value');
+  }
+
   const FTR_CONFIG_PATTERNS = process.env.FTR_CONFIG_PATTERNS
     ? process.env.FTR_CONFIG_PATTERNS.split(',')
         .map((t) => t.trim())
@@ -272,30 +121,62 @@ export async function pickTestGroupRunOrder() {
           .filter(Boolean)
       : ['build'];
 
+  const JEST_CONFIGS_DEPS =
+    process.env.JEST_CONFIGS_DEPS !== undefined
+      ? process.env.JEST_CONFIGS_DEPS.split(',')
+          .map((t) => t.trim())
+          .filter(Boolean)
+      : ['build'];
+
   const ftrExtraArgs: Record<string, string> = process.env.FTR_EXTRA_ARGS
     ? { FTR_EXTRA_ARGS: process.env.FTR_EXTRA_ARGS }
     : {};
   const envFromlabels: Record<string, string> = collectEnvFromLabels();
 
-  const { defaultQueue, ftrConfigsByQueue } = getEnabledFtrConfigs(FTR_CONFIG_PATTERNS);
+  const { defaultQueue, ftrConfigsByQueue } = getEnabledFtrConfigs(
+    FTR_CONFIG_PATTERNS,
+    LIMIT_SOLUTIONS
+  );
 
   const ftrConfigsIncluded = LIMIT_CONFIG_TYPE.includes('functional');
 
   if (!ftrConfigsIncluded) ftrConfigsByQueue.clear();
 
-  const jestUnitConfigs = LIMIT_CONFIG_TYPE.includes('unit')
-    ? globby.sync(['**/jest.config.js', '!**/__fixtures__/**'], {
+  const getJestConfigGlobs = (patterns: string[]) => {
+    if (!LIMIT_SOLUTIONS) {
+      return patterns;
+    }
+
+    const platformPatterns = ['src/', 'x-pack/platform/'].flatMap((platformPrefix: string) =>
+      patterns.map((pattern: string) => `${platformPrefix}${pattern}`)
+    );
+
+    return (
+      LIMIT_SOLUTIONS.flatMap((solution: string) =>
+        patterns.map((p: string) => `x-pack/solutions/${solution}/${p}`)
+      )
+        // When applying the solution filter, still allow platform tests
+        .concat(platformPatterns)
+    );
+  };
+
+  const jestUnitConfigsWithEmpties = LIMIT_CONFIG_TYPE.includes('unit')
+    ? globby.sync(getJestConfigGlobs(['**/jest.config.js', '!**/__fixtures__/**']), {
         cwd: process.cwd(),
         absolute: false,
-        ignore: DISABLED_JEST_CONFIGS,
+        ignore: [...DISABLED_JEST_CONFIGS, '**/node_modules/**'],
       })
     : [];
+  const jestUnitConfigs = await filterEmptyJestConfigs(
+    jestUnitConfigsWithEmpties,
+    os.availableParallelism()
+  );
 
   const jestIntegrationConfigs = LIMIT_CONFIG_TYPE.includes('integration')
-    ? globby.sync(['**/jest.integration.config.js', '!**/__fixtures__/**'], {
+    ? globby.sync(getJestConfigGlobs(['**/jest.integration.config.*js', '!**/__fixtures__/**']), {
         cwd: process.cwd(),
         absolute: false,
-        ignore: DISABLED_JEST_CONFIGS,
+        ignore: [...DISABLED_JEST_CONFIGS, '**/node_modules/**'],
       })
     : [];
 
@@ -378,7 +259,7 @@ export async function pickTestGroupRunOrder() {
         queue,
         maxMin: FUNCTIONAL_MAX_MINUTES,
         minimumIsolationMin: FUNCTIONAL_MINIMUM_ISOLATION_MIN,
-        overheadMin: 1.5,
+        overheadMin: 0,
         names,
       })),
     ],
@@ -461,11 +342,12 @@ export async function pickTestGroupRunOrder() {
             key: 'jest',
             agents: {
               ...expandAgentQueue('n2-4-spot'),
-              diskSizeGb: 85,
+              diskSizeGb: 115,
             },
             env: {
               SCOUT_TARGET_TYPE: 'local',
             },
+            depends_on: JEST_CONFIGS_DEPS,
             retry: {
               automatic: [
                 { exit_status: '-1', limit: 3 },
@@ -487,6 +369,7 @@ export async function pickTestGroupRunOrder() {
             env: {
               SCOUT_TARGET_TYPE: 'local',
             },
+            depends_on: JEST_CONFIGS_DEPS,
             retry: {
               automatic: [
                 { exit_status: '-1', limit: 3 },
@@ -519,7 +402,7 @@ export async function pickTestGroupRunOrder() {
                 ({ title, key, queue = defaultQueue }): BuildkiteStep => ({
                   label: title,
                   command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
-                  timeout_in_minutes: 90,
+                  timeout_in_minutes: 120,
                   agents: expandAgentQueue(queue),
                   env: {
                     SCOUT_TARGET_TYPE: 'local',
@@ -543,55 +426,171 @@ export async function pickTestGroupRunOrder() {
   );
 }
 
-export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
-  const bk = new BuildkiteClient();
-  const envFromlabels: Record<string, string> = collectEnvFromLabels();
-
-  if (!Fs.existsSync(scoutConfigsPath)) {
-    throw new Error(`Scout configs file not found at ${scoutConfigsPath}`);
+function getRunGroups(bk: BuildkiteClient, allTypes: RunGroup[], typeName: string): RunGroup[] {
+  const types = allTypes.filter((t) => t.type === typeName);
+  if (!types.length) {
+    throw new Error(`missing test group run order for group [${typeName}]`);
   }
 
-  const rawScoutConfigs = JSON.parse(Fs.readFileSync(scoutConfigsPath, 'utf-8'));
-  const pluginsWithScoutConfigs: string[] = Object.keys(rawScoutConfigs);
-
-  if (pluginsWithScoutConfigs.length === 0) {
-    // no scout configs found, nothing to need to upload steps
-    return;
+  const misses = types.flatMap((t) => t.namesWithoutDurations);
+  if (misses.length > 0) {
+    bk.setAnnotation(
+      `test-group-missing-durations:${typeName}`,
+      'warning',
+      [
+        misses.length === 1
+          ? `The following "${typeName}" config doesn't have a recorded time in ci-stats so the automatically-determined test groups might be a little unbalanced.`
+          : `The following "${typeName}" configs don't have recorded times in ci-stats so the automatically-determined test groups might be a little unbalanced.`,
+        misses.length === 1
+          ? `If this is a new config then this warning can be ignored as times will be reported soon.`
+          : `If these are new configs then this warning can be ignored as times will be reported soon.`,
+        misses.length === 1
+          ? `The other possibility is that there aren't any tests in this config, so times are never reported.`
+          : `The other possibility is that there aren't any tests in these configs, so times are never reported.`,
+        'Empty test configs should be removed',
+        '',
+        ...misses.map((n) => ` - ${n}`),
+      ].join('\n')
+    );
   }
 
-  const scoutGroups = pluginsWithScoutConfigs.map((plugin) => ({
-    title: plugin,
-    key: plugin,
-    usesParallelWorkers: rawScoutConfigs[plugin].usesParallelWorkers,
-    group: rawScoutConfigs[plugin].group,
-  }));
+  const tooLongs = types.flatMap((t) => t.tooLong ?? []);
+  if (tooLongs.length > 0) {
+    bk.setAnnotation(
+      `test-group-too-long:${typeName}`,
+      'warning',
+      [
+        tooLongs.length === 1
+          ? `The following "${typeName}" config has a duration that exceeds the maximum amount of time desired for a single CI job. ` +
+            `This is not an error, and if you don't own this config then you can ignore this warning. ` +
+            `If you own this config please split it up ASAP and ask Operations if you have questions about how to do that.`
+          : `The following "${typeName}" configs have durations that exceed the maximum amount of time desired for a single CI job. ` +
+            `This is not an error, and if you don't own any of these configs then you can ignore this warning.` +
+            `If you own any of these configs please split them up ASAP and ask Operations if you have questions about how to do that.`,
+        '',
+        ...tooLongs.map(({ config, durationMin }) => ` - ${config}: ${durationMin} minutes`),
+      ].join('\n')
+    );
+  }
 
-  // upload the step definitions to Buildkite
-  bk.uploadSteps(
-    [
-      {
-        group: 'Scout Configs',
-        depends_on: ['build'],
-        steps: scoutGroups.map(
-          ({ title, key, group, usesParallelWorkers }): BuildkiteStep => ({
-            label: `Scout: [ ${group} / ${title} ] plugin`,
-            command: getRequiredEnv('SCOUT_CONFIGS_SCRIPT'),
-            timeout_in_minutes: 60,
-            agents: expandAgentQueue(usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
-            env: {
-              SCOUT_CONFIG_GROUP_KEY: key,
-              SCOUT_CONFIG_GROUP_TYPE: group,
-              ...envFromlabels,
-            },
-            retry: {
-              automatic: [
-                { exit_status: '-1', limit: 1 },
-                { exit_status: '*', limit: 0 },
-              ],
-            },
-          })
-        ),
-      },
-    ].flat()
-  );
+  return types;
+}
+
+function getRunGroup(bk: BuildkiteClient, allTypes: RunGroup[], typeName: string): RunGroup {
+  const groups = getRunGroups(bk, allTypes, typeName);
+  if (groups.length !== 1) {
+    throw new Error(`expected to find exactly 1 "${typeName}" run group`);
+  }
+  return groups[0];
+}
+
+function getTrackedBranch(): string {
+  let pkg;
+  try {
+    pkg = JSON.parse(Fs.readFileSync('package.json', 'utf8'));
+  } catch (_) {
+    const error = _ instanceof Error ? _ : new Error(`${_} thrown`);
+    throw new Error(`unable to read kibana's package.json file: ${error.message}`);
+  }
+
+  const branch = pkg.branch;
+  if (typeof branch !== 'string') {
+    throw new Error('missing `branch` field from package.json file');
+  }
+
+  return branch;
+}
+
+function isObj(x: unknown): x is Record<string, unknown> {
+  return typeof x === 'object' && x !== null;
+}
+
+function getEnabledFtrConfigs(patterns?: string[], solutions?: string[]) {
+  const configs: {
+    enabled: Array<string | { [configPath: string]: { queue: string } }>;
+    defaultQueue: string | undefined;
+  } = { enabled: [], defaultQueue: undefined };
+  const uniqueQueues = new Set<string>();
+
+  const mappedSolutions = solutions?.map((s) => (s === 'observability' ? 'oblt' : s));
+  for (const manifestRelPath of ALL_FTR_MANIFEST_REL_PATHS) {
+    if (
+      mappedSolutions &&
+      !(
+        mappedSolutions.some((s) => manifestRelPath.includes(`ftr_${s}_`)) ||
+        // When applying the solution filter, still allow platform tests
+        manifestRelPath.includes('ftr_platform_') ||
+        manifestRelPath.includes('ftr_base_')
+      )
+    ) {
+      continue;
+    }
+    try {
+      const ymlData = loadYaml(Fs.readFileSync(manifestRelPath, 'utf8'));
+      if (!isObj(ymlData)) {
+        throw new Error('expected yaml file to parse to an object');
+      }
+      const manifest = ymlData as FtrConfigsManifest;
+
+      configs.enabled.push(...(manifest?.enabled ?? []));
+      if (manifest.defaultQueue) {
+        uniqueQueues.add(manifest.defaultQueue);
+      }
+    } catch (_) {
+      const error = _ instanceof Error ? _ : new Error(`${_} thrown`);
+      throw new Error(`unable to parse ${manifestRelPath} file: ${error.message}`);
+    }
+  }
+
+  try {
+    if (configs.enabled.length === 0) {
+      throw new Error('expected yaml files to have at least 1 "enabled" key');
+    }
+    if (uniqueQueues.size !== 1) {
+      throw Error(
+        `FTR manifest yml files should define the same 'defaultQueue', but found different ones: ${[
+          ...uniqueQueues,
+        ].join(' ')}`
+      );
+    }
+    configs.defaultQueue = uniqueQueues.values().next().value;
+
+    if (
+      !Array.isArray(configs.enabled) ||
+      !configs.enabled.every(
+        (p): p is string | { [configPath: string]: { queue: string } } =>
+          typeof p === 'string' ||
+          (isObj(p) && Object.values(p).every((v) => isObj(v) && typeof v.queue === 'string'))
+      )
+    ) {
+      throw new Error(`expected "enabled" value to be an array of strings or objects shaped as:\n
+  - {configPath}:
+      queue: {queueName}`);
+    }
+    if (typeof configs.defaultQueue !== 'string') {
+      throw new Error('expected yaml file to have a string "defaultQueue" key');
+    }
+
+    const defaultQueue = configs.defaultQueue;
+    const ftrConfigsByQueue = new Map<string, string[]>();
+    for (const enabled of configs.enabled) {
+      const path = typeof enabled === 'string' ? enabled : Object.keys(enabled)[0];
+      const queue = isObj(enabled) ? enabled[path].queue : defaultQueue;
+
+      if (patterns && !patterns.some((pattern) => minimatch(path, pattern))) {
+        continue;
+      }
+
+      const group = ftrConfigsByQueue.get(queue);
+      if (group) {
+        group.push(path);
+      } else {
+        ftrConfigsByQueue.set(queue, [path]);
+      }
+    }
+    return { defaultQueue, ftrConfigsByQueue };
+  } catch (_) {
+    const error = _ instanceof Error ? _ : new Error(`${_} thrown`);
+    throw new Error(`unable to collect enabled FTR configs: ${error.message}`);
+  }
 }

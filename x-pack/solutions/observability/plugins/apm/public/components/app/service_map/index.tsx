@@ -6,14 +6,7 @@
  */
 
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPanel,
-  EuiSpacer,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel, useEuiTheme } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React, { useEffect, useRef } from 'react';
 import { Subscription } from 'rxjs';
@@ -190,7 +183,6 @@ export function ServiceMap({
   return (
     <>
       <SearchBar showTimeComparison />
-      <EuiSpacer size="s" />
       <EuiPanel hasBorder={true} paddingSize="none">
         <div data-test-subj="serviceMap" style={{ height: heightWithPadding }} ref={ref}>
           <Cytoscape

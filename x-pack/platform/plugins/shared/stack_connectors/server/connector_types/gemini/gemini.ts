@@ -17,15 +17,18 @@ import type {
   ConnectorTokenClientContract,
 } from '@kbn/actions-plugin/server/types';
 import { HarmBlockThreshold, HarmCategory } from '@google/generative-ai';
+import { trace } from '@opentelemetry/api';
 import {
+  SUB_ACTION,
+  DEFAULT_TIMEOUT_MS,
   RunActionParamsSchema,
   RunApiResponseSchema,
   RunActionRawResponseSchema,
   InvokeAIActionParamsSchema,
   InvokeAIRawActionParamsSchema,
   StreamingResponseSchema,
-} from '../../../common/gemini/schema';
-import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
+  DashboardActionParamsSchema,
+} from '@kbn/connector-schemas/gemini';
 import type {
   Config,
   Secrets,
@@ -40,9 +43,8 @@ import type {
   InvokeAIActionResponse,
   InvokeAIRawActionParams,
   InvokeAIRawActionResponse,
-} from '../../../common/gemini/types';
-import { SUB_ACTION, DEFAULT_TIMEOUT_MS } from '../../../common/gemini/constants';
-import { DashboardActionParamsSchema } from '../../../common/gemini/schema';
+} from '@kbn/connector-schemas/gemini';
+import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 /** Interfaces to define Gemini model response type */
 
 interface MessagePart {
@@ -220,6 +222,8 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     { body, model: reqModel, signal, timeout, raw }: RunActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<RunActionResponse | RunActionRawResponse> {
+    const parentSpan = trace.getActiveSpan();
+    parentSpan?.setAttribute('gemini.raw_request', body);
     // set model on per request basis
     const currentModel = reqModel ?? this.model;
     const path = `/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:generateContent`;
@@ -255,6 +259,9 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     { body, model: reqModel, signal, timeout }: RunActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<StreamingResponse> {
+    const parentSpan = trace.getActiveSpan();
+    parentSpan?.setAttribute('gemini.raw_request', body);
+
     const currentModel = reqModel ?? this.model;
     const path = `/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:streamGenerateContent?alt=sse`;
     const token = await this.getAccessToken();

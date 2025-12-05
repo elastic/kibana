@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { DataStreamsResponseBodySchemaBody } from '@kbn/data-usage-plugin/common/rest_types';
+import type { DataStreamsResponseBodySchemaBody } from '@kbn/data-usage-plugin/server/routes/internal/data_streams';
 import { DATA_USAGE_DATA_STREAMS_API_ROUTE } from '@kbn/data-usage-plugin/common';
-import { SupertestWithRoleScopeType } from '../../../services';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { SupertestWithRoleScopeType } from '../../../services';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const svlDatastreamsHelpers = getService('svlDatastreamsHelpers');

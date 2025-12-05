@@ -21,32 +21,35 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
-import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
-import { ISearchSource, Query, type SavedQuery } from '@kbn/data-plugin/common';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { DataViewBase, type Filter } from '@kbn/es-query';
+import type { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
+import type { ISearchSource, Query } from '@kbn/data-plugin/common';
+import { type SavedQuery } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataViewBase } from '@kbn/es-query';
+import { type Filter } from '@kbn/es-query';
 import { DataViewSelectPopover } from '@kbn/stack-alerts-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  ForLastExpression,
+import type {
   IErrorObject,
   RuleTypeParams,
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { ForLastExpression } from '@kbn/triggers-actions-ui-plugin/public';
 import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
 
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useKibana } from '../../utils/kibana_react';
 import {
   Aggregators,
   type CustomThresholdSearchSourceFields,
 } from '../../../common/custom_threshold_rule/types';
-import { TimeUnitChar } from '../../../common/utils/formatters/duration';
-import { AlertContextMeta, AlertParams, MetricExpression } from './types';
+import type { TimeUnitChar } from '../../../common/utils/formatters/duration';
+import type { AlertContextMeta, AlertParams, MetricExpression } from './types';
 import { ExpressionRow } from './components/expression_row';
-import { MetricsExplorerFields, GroupBy } from './components/group_by';
+import type { MetricsExplorerFields } from './components/group_by';
+import { GroupBy } from './components/group_by';
 import { RuleConditionChart as PreviewChart } from '../rule_condition_chart/rule_condition_chart';
 import { getSearchConfiguration } from './helpers/get_search_configuration';
 
@@ -464,6 +467,7 @@ export default function Expressions(props: Props) {
       {!!paramsWarning && (
         <>
           <EuiCallOut
+            announceOnMount
             title={i18n.translate(
               'xpack.observability.customThreshold.rule.alertFlyout.warning.title',
               {
@@ -489,7 +493,12 @@ export default function Expressions(props: Props) {
       </EuiTitle>
       <EuiSpacer size="s" />
       {paramsError && !triggerResetDataView ? (
-        <EuiCallOut color="danger" iconType="warning" data-test-subj="thresholdRuleExpressionError">
+        <EuiCallOut
+          announceOnMount
+          color="danger"
+          iconType="warning"
+          data-test-subj="thresholdRuleExpressionError"
+        >
           <p>
             {i18n.translate('xpack.observability.customThreshold.rule.alertFlyout.error.message', {
               defaultMessage: 'Error fetching search source',

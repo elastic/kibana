@@ -12,7 +12,7 @@ import type { Logger } from '@kbn/core/server';
 
 import { appContextService } from '../..';
 
-import { compileTemplate, replaceKeyByParent } from './agent';
+import { compileTemplate } from './agent';
 
 jest.mock('../../app_context');
 
@@ -21,11 +21,27 @@ mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
 }));
 
-mockedAppContextService.getExperimentalFeatures.mockReturnValue({
-  enableOtelIntegrations: false,
-} as any);
-
 let mockedLogger: jest.Mocked<Logger>;
+
+function getMockedMetaVariable() {
+  return {
+    package: {
+      name: 'test-package',
+      title: 'Test Package',
+      version: '1.0.0',
+    },
+    stream: {
+      id: 'stream-id',
+      data_stream: {
+        dataset: 'dataset.name',
+        type: 'logs',
+      },
+    },
+    input: {
+      id: 'input-id',
+    },
+  };
+}
 
 describe('compileTemplate', () => {
   beforeEach(() => {
@@ -66,7 +82,7 @@ multi_text_field:
       multi_text: { type: 'text', value: ['1234', 'foo', 'bar'] },
     };
 
-    const output = compileTemplate(vars, streamTemplate);
+    const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
     expect(output).toEqual({
       input: 'log',
       paths: ['/usr/local/var/log/nginx/access.log'],
@@ -117,7 +133,7 @@ foo: bar
       nullfield: { type: 'yaml' },
     };
 
-    const output = compileTemplate(vars, streamTemplate);
+    const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
     expect(output).toEqual({
       input: 'redis/metrics',
       metricsets: ['key'],
@@ -171,7 +187,7 @@ pcap: false
         tags: { value: ['foo', 'bar', 'forwarded'] },
       };
 
-      const output = compileTemplate(vars, streamTemplate);
+      const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
       expect(output).toEqual({
         input: 'log',
         paths: ['/usr/local/var/log/nginx/access.log'],
@@ -190,7 +206,7 @@ pcap: false
         tags: { value: ['foo', 'bar'] },
       };
 
-      const output = compileTemplate(vars, streamTemplate);
+      const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
       expect(output).toEqual({
         input: 'log',
         paths: ['/usr/local/var/log/nginx/access.log'],
@@ -206,7 +222,7 @@ pcap: false
         file: { value: 'foo.pcap' },
       };
 
-      const output = compileTemplate(vars, streamTemplateWithString);
+      const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplateWithString);
       expect(output).toEqual({
         pcap: true,
       });
@@ -217,7 +233,7 @@ pcap: false
         file: { value: 'file' },
       };
 
-      const output = compileTemplate(vars, streamTemplateWithString);
+      const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplateWithString);
       expect(output).toEqual({
         pcap: false,
       });
@@ -240,7 +256,7 @@ text_var: {{escape_string text_var}}
         password: { type: 'password', value: "ab'c'" },
       };
 
-      const output = compileTemplate(vars, streamTemplate);
+      const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
       expect(output).toEqual({
         input: 'log',
         password: "ab'c'",
@@ -252,15 +268,19 @@ text_var: {{escape_string text_var}}
         text_var: {
           type: 'text',
           value: `This is a text with
-New lines and \\n escaped values.`,
+New lines and\\n escaped values.`,
         },
       };
 
-      const output = compileTemplate(vars, streamTemplateWithNewlinesAndEscapes);
+      const output = compileTemplate(
+        vars,
+        getMockedMetaVariable(),
+        streamTemplateWithNewlinesAndEscapes
+      );
       expect(output).toEqual({
         input: 'log',
         text_var: `This is a text with
-New lines and \\n escaped values.`,
+New lines and\\n escaped values.`,
       });
     });
   });
@@ -280,7 +300,7 @@ New lines and\n escaped values.`,
         },
       };
 
-      const output = compileTemplate(vars, streamTemplate);
+      const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
       expect(output).toEqual({
         input: 'log',
         multiline_text: `This is a text with
@@ -303,7 +323,7 @@ escaped values.`,
         },
       };
 
-      const output = compileTemplate(vars, streamTemplate);
+      const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
       expect(output).toEqual({
         input: 'log',
         multiline_text: `This is a multiline text with
@@ -327,7 +347,7 @@ New lines and\nescaped values.`,
         },
       };
 
-      const output = compileTemplate(vars, streamTemplate);
+      const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
       expect(output).toEqual({
         input: 'log',
         multiline_text: `This is a text with
@@ -355,7 +375,7 @@ yaml_var: {{to_json yaml_var}}
         json_var: { type: 'text', value: `{"foo":["bar","bazz"]}` },
       };
 
-      const output = compileTemplate(vars, streamTemplate);
+      const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
       expect(output).toEqual({
         input: 'log',
         json_var: {
@@ -375,7 +395,7 @@ yaml_var: {{to_json yaml_var}}
         },
       };
 
-      const output = compileTemplate(vars, streamTemplateWithNewYaml);
+      const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplateWithNewYaml);
       expect(output).toEqual({
         input: 'log',
         yaml_var: {
@@ -399,7 +419,7 @@ input: logs
       },
     };
 
-    const output = compileTemplate(vars, streamTemplate);
+    const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
     expect(output).toEqual({
       input: 'logs',
     });
@@ -417,7 +437,7 @@ input: logs
       },
     };
 
-    const output = compileTemplate(vars, streamTemplate);
+    const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
     expect(output).toEqual({
       input: 'logs',
       test: '$$$$',
@@ -462,7 +482,7 @@ my-package:
       },
     };
 
-    const output = compileTemplate(vars, stringTemplate);
+    const output = compileTemplate(vars, getMockedMetaVariable(), stringTemplate);
     expect(output).toEqual(targetOutput);
   });
 
@@ -476,7 +496,7 @@ paths:
 `;
     const vars = {};
 
-    expect(() => compileTemplate(vars, streamTemplate)).toThrowError(
+    expect(() => compileTemplate(vars, getMockedMetaVariable(), streamTemplate)).toThrowError(
       'Error while compiling agent template: options.inverse is not a function'
     );
   });
@@ -493,9 +513,34 @@ paths:
       },
     };
 
-    expect(() => compileTemplate(vars, template)).toThrowError(
-      'YAMLException: duplicated mapping key'
+    expect(() => compileTemplate(vars, getMockedMetaVariable(), template)).toThrowError(
+      'YAMLException: Duplicated key "processors" found in agent policy yaml, please check your yaml variables.'
     );
+  });
+
+  it('should inject package meta varaible', () => {
+    const streamTemplate = `
+input: {{_meta.input.id}}
+package_name: {{_meta.package.name}}
+package_title: {{_meta.package.title}}
+package_version: {{_meta.package.version}}
+stream_id: {{_meta.stream.id}}
+dataset: {{_meta.stream.data_stream.dataset}}
+type: {{_meta.stream.data_stream.type}}
+      `;
+
+    const vars = {};
+
+    const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
+    expect(output).toEqual({
+      input: 'input-id',
+      package_name: 'test-package',
+      package_title: 'Test Package',
+      package_version: '1.0.0',
+      stream_id: 'stream-id',
+      dataset: 'dataset.name',
+      type: 'logs',
+    });
   });
 });
 
@@ -511,7 +556,7 @@ describe('encode', () => {
       hosts: { value: 'localhost', type: 'text' },
     };
 
-    const output = compileTemplate(vars, streamTemplate);
+    const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
     expect(output).toEqual({
       hosts: ['sqlserver://db_elastic_agent%40%3F%23%3A:dbelasticagent%5B%21%23%402023@localhost'],
     });
@@ -528,7 +573,7 @@ describe('encode', () => {
       hosts: { value: 'localhost', type: 'text' },
     };
 
-    const output = compileTemplate(vars, streamTemplate);
+    const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
     expect(output).toEqual({
       hosts: ['sqlserver://domain%5Cusername:dbelasticagent%5B%21%23%402023@localhost'],
     });
@@ -545,93 +590,11 @@ describe('encode', () => {
       hosts: { value: 'localhost', type: 'text' },
     };
 
-    const output = compileTemplate(vars, streamTemplate);
+    const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
     expect(output).toEqual({
       hosts: [
         'sqlserver://db_elastic_agent:Special%20Characters%3A%20%21%20%2A%20%28%20%29%27@localhost',
       ],
-    });
-  });
-});
-
-describe('replaceKeyByParent', () => {
-  it('appends package policy id to a key in the yaml', () => {
-    const config = {
-      receivers: {
-        httpcheck: {
-          collection_interval: `30s`,
-          targets: [
-            {
-              method: 'GET',
-              endpoints: ['https://elastic.co'],
-            },
-          ],
-        },
-      },
-    };
-
-    const packagePolicyId = '2d4cb55b-f885-47dd-81fd-11ab796c4c76';
-
-    expect(replaceKeyByParent(config, ['receivers'], packagePolicyId)).toEqual({
-      receivers: {
-        'httpcheck/2d4cb55b-f885-47dd-81fd-11ab796c4c76': {
-          collection_interval: '30s',
-          targets: [{ endpoints: ['https://elastic.co'], method: 'GET' }],
-        },
-      },
-    });
-  });
-  it('appends package policy ids to multiple keys', () => {
-    const config = {
-      receivers: {
-        httpcheck: {
-          collection_interval: `30s`,
-          targets: [
-            {
-              method: 'GET',
-              endpoints: ['https://elastic.co'],
-            },
-          ],
-        },
-      },
-      service: {
-        pipelines: {
-          logs: {
-            receivers: ['httpcheck'],
-          },
-        },
-      },
-      processors: {
-        httpcheck: {},
-      },
-      extensions: {
-        httpcheck: {},
-      },
-    };
-
-    const packagePolicyId = '2d4cb55b-f885-47dd-81fd-11ab796c4c76';
-    const parentKeys = ['receivers', 'processors', 'extensions'];
-
-    expect(replaceKeyByParent(config, parentKeys, packagePolicyId)).toEqual({
-      receivers: {
-        'httpcheck/2d4cb55b-f885-47dd-81fd-11ab796c4c76': {
-          collection_interval: '30s',
-          targets: [{ endpoints: ['https://elastic.co'], method: 'GET' }],
-        },
-      },
-      service: {
-        pipelines: {
-          logs: {
-            receivers: ['httpcheck/2d4cb55b-f885-47dd-81fd-11ab796c4c76'],
-          },
-        },
-      },
-      processors: {
-        'httpcheck/2d4cb55b-f885-47dd-81fd-11ab796c4c76': {},
-      },
-      extensions: {
-        'httpcheck/2d4cb55b-f885-47dd-81fd-11ab796c4c76': {},
-      },
     });
   });
 });

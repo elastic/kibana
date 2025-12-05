@@ -12,14 +12,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import moment from 'moment';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { SearchSessionsMgmtAPI } from '../../../lib/api';
-import { IClickActionDescriptor } from './types';
-import { OnActionDismiss } from './types';
-import { UISession } from '../../../types';
+import type { SearchSessionsMgmtAPI } from '../../../lib/api';
+import type { IClickActionDescriptor } from './types';
+import type { OnActionDismiss } from './types';
 import extendSessionIcon from './icons/extend_session.svg';
-
+import type { UISession } from '../../../types';
 interface ExtendButtonProps {
   searchSession: UISession;
   api: SearchSessionsMgmtAPI;
@@ -34,19 +33,19 @@ const ExtendConfirm = ({ ...props }: ExtendButtonProps & { onActionDismiss: OnAc
   const newExpiration = moment(expires).add(extendByDuration);
 
   const confirmModalTitleId = useGeneratedHtmlId();
-
-  const title = i18n.translate('data.mgmt.searchSessions.extendModal.title', {
-    defaultMessage: 'Extend search session expiration',
+  const title = i18n.translate('data.mgmt.searchSessions.extendModal.backgroundSearchTitle', {
+    defaultMessage: 'Extend background search expiration',
   });
+
   const confirm = i18n.translate('data.mgmt.searchSessions.extendModal.extendButton', {
     defaultMessage: 'Extend expiration',
   });
   const extend = i18n.translate('data.mgmt.searchSessions.extendModal.dontExtendButton', {
     defaultMessage: 'Cancel',
   });
-  const message = i18n.translate('data.mgmt.searchSessions.extendModal.extendMessage', {
+  const message = i18n.translate('data.mgmt.searchSessions.extendModal.backgroundSearchMessage', {
     defaultMessage:
-      "The search session ''{name}'' expiration would be extended until {newExpires}.",
+      "The background search ''{name}'' expiration would be extended until {newExpires}.",
     values: {
       name,
       newExpires: newExpiration.toLocaleString(),

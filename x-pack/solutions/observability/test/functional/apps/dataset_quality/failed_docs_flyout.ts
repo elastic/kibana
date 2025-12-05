@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IndexTemplateName } from '@kbn/apm-synthtrace/src/lib/logs/custom_logsdb_index_templates';
-import { DatasetQualityFtrProviderContext } from './config';
+import { IndexTemplateName } from '@kbn/synthtrace/src/lib/logs/custom_logsdb_index_templates';
+import type { DatasetQualityFtrProviderContext } from './config';
 import {
   createFailedLogRecord,
   datasetNames,

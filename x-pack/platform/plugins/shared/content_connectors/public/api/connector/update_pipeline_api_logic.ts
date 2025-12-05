@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
 import type { IngestPipelineParams } from '@kbn/search-connectors';

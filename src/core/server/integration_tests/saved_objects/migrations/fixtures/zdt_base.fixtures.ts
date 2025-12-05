@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectsModelVersion, SavedObjectMigrationFn } from '@kbn/core-saved-objects-server';
+import type {
+  SavedObjectsModelVersion,
+  SavedObjectMigrationFn,
+} from '@kbn/core-saved-objects-server';
+import { type KibanaMigratorTestKitParams, currentVersion } from '@kbn/migrator-test-kit';
 import { createType } from '../test_utils';
-import { type KibanaMigratorTestKitParams, currentVersion } from '../kibana_migrator_test_kit';
 
 export const getBaseMigratorParams = ({
   migrationAlgorithm = 'zdt',

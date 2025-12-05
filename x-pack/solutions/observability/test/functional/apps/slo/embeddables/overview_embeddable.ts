@@ -8,7 +8,7 @@
 import { cleanup } from '@kbn/infra-forge';
 import { loadTestData } from '../../../services/slo/helper/load_test_data';
 import { sloData } from '../../../services/slo/fixtures/create_slo';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'dashboard']);
@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Single SLO', function () {
       it('should open SLO configuration flyout', async () => {
-        await dashboardAddPanel.clickEditorMenuButton();
+        await dashboardAddPanel.openAddPanelFlyout();
         await dashboardAddPanel.verifyEmbeddableFactoryGroupExists('observability');
         await dashboardAddPanel.clickAddNewPanelFromUIActionLink('SLO Overview');
         await sloUi.common.assertSloOverviewConfigurationExists();
@@ -73,7 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Group of SLOs', function () {
       it('can select Group Overview mode in the Flyout configuration', async () => {
-        await dashboardAddPanel.clickEditorMenuButton();
+        await dashboardAddPanel.openAddPanelFlyout();
         await dashboardAddPanel.verifyEmbeddableFactoryGroupExists('observability');
         await dashboardAddPanel.clickAddNewPanelFromUIActionLink('SLO Overview');
         await sloUi.common.clickOverviewMode();

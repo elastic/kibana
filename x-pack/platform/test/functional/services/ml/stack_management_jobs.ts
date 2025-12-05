@@ -13,7 +13,7 @@ import path from 'path';
 import type { JobType, MlSavedObjectType } from '@kbn/ml-plugin/common/types/saved_objects';
 import type { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { MlDFAJobTable } from './data_frame_analytics_table';
 import type { MlADJobTable } from './job_table';
@@ -81,13 +81,15 @@ export function MachineLearningStackManagementJobsProvider(
     },
 
     async assertSyncFlyoutSyncButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('mlJobMgmtSyncFlyoutSyncButton');
-      expect(isEnabled).to.eql(
-        expectedValue,
-        `Expected Stack Management job sync flyout "Synchronize" button to be '${
-          expectedValue ? 'enabled' : 'disabled'
-        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
-      );
+      await retry.tryForTime(5000, async () => {
+        const isEnabled = await testSubjects.isEnabled('mlJobMgmtSyncFlyoutSyncButton');
+        expect(isEnabled).to.eql(
+          expectedValue,
+          `Expected Stack Management job sync flyout "Synchronize" button to be '${
+            expectedValue ? 'enabled' : 'disabled'
+          }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+        );
+      });
     },
 
     async getSyncFlyoutObjectCountFromTitle(objectType: SyncFlyoutObjectType): Promise<number> {
@@ -329,6 +331,15 @@ export function MachineLearningStackManagementJobsProvider(
           )}')`
         );
       });
+    },
+
+    async assertDatafeedWarnings(expectedNumberOfJobs: number) {
+      const warningElements = await testSubjects.findAll('mlJobImportJobDatafeedWarning');
+
+      expect(warningElements.length).to.eql(
+        expectedNumberOfJobs,
+        `Expected ${expectedNumberOfJobs} datafeed warnings (got ${warningElements.length})`
+      );
     },
 
     async importJobs() {

@@ -12,7 +12,7 @@ import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility';
 import { TooltipWithKeyboardShortcut } from '../../tooltip_with_keyboard_shortcut';
 import { createFilter, getAdditionalScreenReaderOnlyContext } from '../utils';
-import { HoverActionComponentProps, FilterValueFnArgs } from './types';
+import type { HoverActionComponentProps, FilterValueFnArgs } from './types';
 
 export const FILTER_FOR_VALUE = i18n.translate('xpack.timelines.hoverActions.filterIn', {
   defaultMessage: 'Filter for',

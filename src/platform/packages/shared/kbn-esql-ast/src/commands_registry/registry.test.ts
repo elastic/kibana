@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { mergeCommandWithGeneratedCommandData } from './elastisearch_command_data_loader';
-import { CommandRegistry, ICommand, ICommandMethods, ICommandMetadata } from './registry';
-import { ItemKind } from './types';
+import type { ICommand, ICommandMethods, ICommandMetadata } from './registry';
+import { CommandRegistry } from './registry';
+import type { ItemKind } from './types';
 
 describe('CommandRegistry', () => {
   let registry: CommandRegistry;
@@ -195,6 +196,86 @@ describe('CommandRegistry', () => {
       const allCommands = registry.getAllCommands();
       expect(allCommands.length).toBe(1);
       expect(allCommands[0]).toEqual(command1); // Should be the first registered command
+    });
+  });
+
+  describe('getAllCommands with subquery restrictions', () => {
+    test('should filter out commands with hideInside when cursor is in subquery', () => {
+      const normalCommand = createMockCommand('normalCommand');
+      const hiddenInsideCommand = createMockCommand('hiddenInsideCommand', undefined, {
+        subqueryRestrictions: { hideInside: true, hideOutside: false },
+      });
+
+      registry.registerCommand(normalCommand);
+      registry.registerCommand(hiddenInsideCommand);
+
+      const commands = registry.getAllCommands({
+        isCursorInSubquery: true,
+        queryContainsSubqueries: true,
+      });
+
+      const commandNames = commands.map((cmd) => cmd.name);
+      expect(commandNames).toContain('normalCommand');
+      expect(commandNames).not.toContain('hiddenInsideCommand');
+    });
+
+    test('should filter out commands with hideOutside when cursor is outside subquery', () => {
+      const normalCommand = createMockCommand('normalCommand');
+      const hiddenOutsideCommand = createMockCommand('hiddenOutsideCommand', undefined, {
+        subqueryRestrictions: { hideInside: false, hideOutside: true },
+      });
+
+      registry.registerCommand(normalCommand);
+      registry.registerCommand(hiddenOutsideCommand);
+
+      const commands = registry.getAllCommands({
+        isCursorInSubquery: false,
+        queryContainsSubqueries: true,
+      });
+
+      const commandNames = commands.map((cmd) => cmd.name);
+      expect(commandNames).toContain('normalCommand');
+      expect(commandNames).not.toContain('hiddenOutsideCommand');
+    });
+
+    test('should not apply restrictions when query does not contain subqueries', () => {
+      const normalCommand = createMockCommand('normalCommand');
+      const hiddenInsideCommand = createMockCommand('hiddenInsideCommand', undefined, {
+        subqueryRestrictions: { hideInside: true, hideOutside: false },
+      });
+      const hiddenOutsideCommand = createMockCommand('hiddenOutsideCommand', undefined, {
+        subqueryRestrictions: { hideInside: false, hideOutside: true },
+      });
+
+      registry.registerCommand(normalCommand);
+      registry.registerCommand(hiddenInsideCommand);
+      registry.registerCommand(hiddenOutsideCommand);
+
+      const commands = registry.getAllCommands({
+        queryContainsSubqueries: false,
+      });
+
+      const commandNames = commands.map((cmd) => cmd.name);
+      expect(commandNames).toContain('normalCommand');
+      expect(commandNames).toContain('hiddenInsideCommand');
+      expect(commandNames).toContain('hiddenOutsideCommand');
+    });
+
+    test('should only return FROM when starting a subquery', () => {
+      const fromCommand = createMockCommand('from');
+      const evalCommand = createMockCommand('eval');
+      const whereCommand = createMockCommand('where');
+
+      registry.registerCommand(fromCommand);
+      registry.registerCommand(evalCommand);
+      registry.registerCommand(whereCommand);
+
+      const commands = registry.getAllCommands({
+        isStartingSubquery: true,
+      });
+
+      const commandNames = commands.map((cmd) => cmd.name);
+      expect(commandNames).toEqual(['from']);
     });
   });
 

@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Alert, BrowserFields, LegacyField } from '@kbn/alerting-types';
-import { AlertsField, RowSelectionState } from '../types';
-import { AdditionalContext, RenderContext } from '../types';
+import type { Alert, BrowserFields, LegacyField } from '@kbn/alerting-types';
+import type { RowSelectionState } from '../types';
+import { AlertsField } from '../types';
+import type { AdditionalContext, RenderContext } from '../types';
 import { createCasesServiceMock, getCasesMapMock } from './cases.mock';
 import { getMaintenanceWindowsMock } from './maintenance_windows.mock';
 import { EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { identity } from 'lodash';
-import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import {
   ALERT_CASE_IDS,
   ALERT_FLAPPING,
@@ -203,8 +204,9 @@ export const mockRenderContext = createPartialObjectMock<RenderContext<Additiona
   isLoadingMutedAlerts: false,
   mutedAlerts: {},
   pageIndex: 0,
+  onPageIndexChange: jest.fn(),
   pageSize: 1,
-  openAlertInFlyout: jest.fn(),
+  onPageSizeChange: jest.fn(),
   bulkActionsStore: [
     createMockBulkActionsState(),
     jest.fn(),
@@ -212,9 +214,6 @@ export const mockRenderContext = createPartialObjectMock<RenderContext<Additiona
   renderCellValue: jest.fn().mockImplementation((props) => {
     return `${props.colIndex}:${props.rowIndex}`;
   }),
-  renderFlyoutHeader: jest.fn(),
-  renderFlyoutBody: jest.fn(),
-  renderFlyoutFooter: jest.fn(),
   renderActionsCell: () => (
     <EuiFlexItem grow={false}>
       <EuiButtonIcon

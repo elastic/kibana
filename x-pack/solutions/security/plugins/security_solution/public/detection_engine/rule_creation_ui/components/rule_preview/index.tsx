@@ -270,6 +270,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
       {showInvocationCountWarning && (
         <>
           <EuiCallOut
+            announceOnMount
             color="warning"
             title={i18n.QUERY_PREVIEW_INVOCATION_COUNT_WARNING_TITLE}
             data-test-subj="previewInvocationCountWarning"
@@ -282,6 +283,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
       {showRuleDefitnionInvalidWarning && (
         <>
           <EuiCallOut
+            announceOnMount={false}
             color="warning"
             title={i18n.QUERY_PREVIEW_RULE_DEFINITION_INVALID_WARNING_TITLE}
             data-test-subj="previewRuleDefinitionInvalidWarning"

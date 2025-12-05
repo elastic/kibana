@@ -5,16 +5,17 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import type { estypes } from '@elastic/elasticsearch';
-import {
+import type {
   AppendConversationMessageRequestBody,
   PerformBulkActionRequestBody,
   ConversationCreateProps,
   ConversationResponse,
-  ConversationUpdateProps,
   DeleteAllConversationsRequestBody,
+  ConversationUpdateProps,
 } from '@kbn/elastic-assistant-common';
-import {
+import type {
   CreateMessageSchema,
   EsConversationSchema,
 } from '../ai_assistant_data_clients/conversations/types';
@@ -55,6 +56,9 @@ export const getConversationSearchEsMock = () => {
                 name: 'elastic',
               },
             ],
+            created_by: {
+              name: 'elastic',
+            },
           },
         },
       ],
@@ -133,9 +137,9 @@ export const getAppendConversationMessagesSchemaMock =
     ],
   });
 
-export const getConversationMock = (
-  params: ConversationCreateProps | ConversationUpdateProps
-): ConversationResponse => ({
+export type ConversationMockParams = ConversationCreateProps | ConversationUpdateProps;
+
+export const getConversationMock = (params: ConversationMockParams): ConversationResponse => ({
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
   apiConfig: {
     actionTypeId: '.gen-ai',
@@ -153,11 +157,12 @@ export const getConversationMock = (
       name: 'elastic',
     },
   ],
+  createdBy: {
+    name: 'elastic',
+  },
 });
 
-export const getQueryConversationParams = (
-  isUpdate?: boolean
-): ConversationCreateProps | ConversationUpdateProps => {
+export const getQueryConversationParams = (isUpdate?: boolean): ConversationMockParams => {
   return isUpdate
     ? {
         title: 'Welcome 2',
@@ -230,6 +235,7 @@ export const getEsCreateConversationSchemaMock = (
   exclude_from_last_conversation_storage: false,
   messages: [
     {
+      id: uuidv4(),
       content: 'test content',
       role: 'user',
       '@timestamp': '2019-12-13T16:40:33.400Z',
@@ -241,6 +247,40 @@ export const getEsCreateConversationSchemaMock = (
   ],
   category: 'assistant',
   users: [{ name: 'elastic' }],
+  created_by: { name: 'elastic' },
   namespace: 'default',
+  ...rest,
+});
+
+export const getEsConversationSchemaMock = (
+  rest?: Partial<EsConversationSchema>
+): EsConversationSchema => ({
+  '@timestamp': '2020-04-20T15:25:31.830Z',
+  created_at: '2020-04-20T15:25:31.830Z',
+  title: 'title-1',
+  updated_at: '2020-04-20T15:25:31.830Z',
+  messages: [],
+  id: '1',
+  namespace: 'default',
+  exclude_from_last_conversation_storage: false,
+  api_config: {
+    action_type_id: '.gen-ai',
+    connector_id: 'c1',
+    default_system_prompt_id: 'prompt-1',
+    model: 'test',
+    provider: 'Azure OpenAI',
+  },
+  category: 'assistant',
+  users: [
+    {
+      id: '1111',
+      name: 'elastic',
+    },
+  ],
+  created_by: {
+    id: '1111',
+    name: 'elastic',
+  },
+  replacements: undefined,
   ...rest,
 });

@@ -9,7 +9,7 @@
 
 /* eslint max-len: 0 */
 import { i18n } from '@kbn/i18n';
-import { SavedObject } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
 
 export const getSavedObjects = (): SavedObject[] => [
   {
@@ -418,21 +418,17 @@ export const getSavedObjects = (): SavedObject[] => [
         defaultMessage: '[Logs] Visits',
       }),
       description: '',
-      columns: ['response', 'url', 'clientip', 'machine.os', 'tags'],
+      columns: ['@timestamp', 'response', 'url', 'clientip', 'machine.os', 'tags'],
+      isTextBasedQuery: true,
+      timeRestore: false,
       hits: 0,
       kibanaSavedObjectMeta: {
         searchSourceJSON:
-          '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+          '{"query":{"esql":"FROM kibana_sample_data_logs | SORT @timestamp desc | LIMIT 10000"},"filter":[]}',
       },
       sort: [['timestamp', 'desc']],
       version: 1,
     },
-    references: [
-      {
-        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
-        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-        type: 'index-pattern',
-      },
-    ],
+    references: [],
   },
 ];

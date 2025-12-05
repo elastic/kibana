@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { getSegments, isRootStreamDefinition, Streams } from '@kbn/streams-schema';
+import { getAncestors, getSegments, isRootStreamDefinition, Streams } from '@kbn/streams-schema';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import { isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
-import { Direction } from '@elastic/eui';
-import { parseDurationInSeconds } from '../data_management/stream_detail_lifecycle/helpers';
+import type { Direction } from '@elastic/eui';
+import { parseDurationInSeconds } from '../data_management/stream_detail_lifecycle/helpers/helpers';
 
 const SORTABLE_FIELDS = ['nameSortKey', 'retentionMs'] as const;
 
@@ -37,8 +37,60 @@ export function isParentName(parent: string, descendant: string) {
   return parent !== descendant && descendant.startsWith(parent + '.');
 }
 
-export function shouldComposeTree(sortField: SortableField, query: string) {
-  return (!sortField || sortField === 'nameSortKey') && !query;
+export function shouldComposeTree(sortField: SortableField) {
+  // Always allow tree mode for nameSortKey
+  return !sortField || sortField === 'nameSortKey';
+}
+
+// Returns all streams that match the query or are ancestors of a match
+export function filterStreamsByQuery(
+  streams: ListStreamDetail[],
+  query: string
+): ListStreamDetail[] {
+  if (!query) return streams;
+  const lowerQuery = query.toLowerCase();
+  const nameToStream = new Map<string, ListStreamDetail>();
+  streams.forEach((s) => nameToStream.set(s.stream.name, s));
+
+  // Find all streams that match the query
+  const matching = streams.filter((s) => s.stream.name.toLowerCase().includes(lowerQuery));
+  const resultSet = new Map<string, ListStreamDetail>();
+  for (const stream of matching) {
+    // Add the match
+    resultSet.set(stream.stream.name, stream);
+    // Add all ancestors
+    const ancestors = getAncestors(stream.stream.name);
+    for (let i = 0; i < ancestors.length; ++i) {
+      const ancestor = nameToStream.get(ancestors[i]);
+      if (ancestor) {
+        resultSet.set(ancestors[i], ancestor);
+      }
+    }
+  }
+  return Array.from(resultSet.values());
+}
+
+// Filters out rows that are children of collapsed streams
+export function filterCollapsedStreamRows(
+  rows: TableRow[],
+  collapsedStreams: Set<string>,
+  sortField: SortableField
+) {
+  if (!shouldComposeTree(sortField)) return rows;
+  const result: TableRow[] = [];
+  for (const row of rows) {
+    // If any ancestor is collapsed, skip this row
+    const ancestors = getAncestors(row.stream.name);
+    let skip = false;
+    for (let i = 0; i < ancestors.length; ++i) {
+      if (collapsedStreams.has(ancestors[i])) {
+        skip = true;
+        break;
+      }
+    }
+    if (!skip) result.push(row);
+  }
+  return result;
 }
 
 export function buildStreamRows(
@@ -110,7 +162,7 @@ export function asTrees(streams: ListStreamDetail[]): StreamTree[] {
 
 export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStream => {
   let retentionMs = 0;
-  const lc = node.effective_lifecycle;
+  const lc = node.effective_lifecycle!;
   if (isDslLifecycle(lc)) {
     retentionMs = lc.dsl.data_retention
       ? parseDurationInSeconds(lc.dsl.data_retention) * 1000

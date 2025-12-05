@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { createScenarios as createAPIScenarios } from '../../reporting_api_integration/services/scenarios';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 const GENERATE_CSV_DATA_TEST_SUBJ = 'embeddablePanelAction-generateCsvReport';
 
@@ -37,20 +37,33 @@ export function createScenarios(
     DATA_ANALYST_PASSWORD,
     REPORTING_USER_USERNAME,
     REPORTING_USER_PASSWORD,
+    MANAGE_REPORTING_USER_USERNAME,
+    MANAGE_REPORTING_USER_PASSWORD,
   } = scenariosAPI;
 
   const loginDataAnalyst = async () => {
     await PageObjects.security.forceLogout();
     await PageObjects.security.login(DATA_ANALYST_USERNAME, DATA_ANALYST_PASSWORD, {
-      expectSpaceSelector: false,
+      expectSuccess: true,
     });
   };
 
   const loginReportingUser = async () => {
     await PageObjects.security.forceLogout();
     await PageObjects.security.login(REPORTING_USER_USERNAME, REPORTING_USER_PASSWORD, {
-      expectSpaceSelector: false,
+      expectSuccess: true,
     });
+  };
+
+  const loginReportingManager = async () => {
+    await PageObjects.security.forceLogout();
+    await PageObjects.security.login(
+      MANAGE_REPORTING_USER_USERNAME,
+      MANAGE_REPORTING_USER_PASSWORD,
+      {
+        expectSuccess: true,
+      }
+    );
   };
 
   const openSavedVisualization = async (title: string) => {
@@ -108,10 +121,6 @@ export function createScenarios(
     expect(queueReportError).to.be(true);
   };
 
-  const tryDiscoverCsvNotAvailable = async () => {
-    expect(await PageObjects.exports.exportButtonExists()).to.be(false);
-  };
-
   const tryDiscoverCsvSuccess = async () => {
     await PageObjects.reporting.openExportPopover();
     await PageObjects.exports.clickPopoverItem('CSV');
@@ -140,8 +149,7 @@ export function createScenarios(
   };
 
   const tryReportsNotAvailable = async () => {
-    await PageObjects.share.clickShareTopNavButton();
-    await testSubjects.missingOrFail('Export');
+    await PageObjects.exports.exportButtonMissingOrFail();
   };
 
   return {
@@ -154,7 +162,6 @@ export function createScenarios(
     tryDashboardGenerateCsvNotAvailable,
     tryDashboardGenerateCsvSuccess,
     tryDiscoverCsvFail,
-    tryDiscoverCsvNotAvailable,
     tryDiscoverCsvSuccess,
     tryGeneratePdfFail,
     tryGeneratePdfNotAvailable,
@@ -163,5 +170,6 @@ export function createScenarios(
     tryReportsNotAvailable,
     loginDataAnalyst,
     loginReportingUser,
+    loginReportingManager,
   };
 }

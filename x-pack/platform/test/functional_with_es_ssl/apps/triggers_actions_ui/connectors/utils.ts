@@ -9,7 +9,7 @@ import type SuperTest from 'supertest';
 import { findIndex } from 'lodash';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { ObjectRemover } from '../../../lib/object_remover';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { getTestConnectorData, getTestAlertData } from '../../../lib/get_test_data';
 
 export const createSlackConnectorAndObjectRemover = async ({

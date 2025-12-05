@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RenderHookResult, act, renderHook } from '@testing-library/react';
+import type { RenderHookResult } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { createLocalStorageMock } from '../../__mocks__/local_storage_mock';
-import { UseRowHeightProps, useRowHeight } from './use_row_height';
+import type { UseRowHeightProps } from './use_row_height';
+import { RowHeightType, useRowHeight } from './use_row_height';
 import { RowHeightMode } from '../components/row_height_settings';
 
 const CONFIG_ROW_HEIGHT = 3;
@@ -37,6 +39,7 @@ const renderRowHeightHook = (
       : {};
   const storage = createLocalStorageMock(storageValue);
   const initialProps: UseRowHeightProps = {
+    type: RowHeightType.row,
     storage,
     consumer: 'discover',
     key: 'dataGridRowHeight',

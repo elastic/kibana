@@ -9,8 +9,20 @@
 
 import { isEmpty, filter } from 'lodash';
 
-import { DashboardItem } from '../../types';
+import type { DashboardState } from '@kbn/dashboard-plugin/server';
+import type { DashboardItem } from '../../types';
 import { dashboardServices } from '../../services/kibana_services';
+
+function getDashboardItem(
+  id: string,
+  dashboardState: Pick<DashboardState, 'title' | 'description'>
+) {
+  return {
+    id,
+    title: dashboardState.title,
+    ...(dashboardState.description && { description: dashboardState.description }),
+  };
+}
 
 /**
  * ----------------------------------
@@ -24,7 +36,7 @@ export const fetchDashboard = async (dashboardId: string): Promise<DashboardItem
   if (response.status === 'error') {
     throw new Error(response.error.message);
   }
-  return response;
+  return getDashboardItem(response.id, response.attributes);
 };
 
 /**
@@ -33,27 +45,26 @@ export const fetchDashboard = async (dashboardId: string): Promise<DashboardItem
  * ----------------------------------
  */
 
-interface FetchDashboardsProps {
-  size?: number;
-  search?: string;
-  parentDashboardId?: string;
-  selectedDashboardId?: string;
-}
-
 export const fetchDashboards = async ({
   search = '',
   size = 10,
   parentDashboardId,
   selectedDashboardId,
-}: FetchDashboardsProps): Promise<DashboardItem[]> => {
+}: {
+  size?: number;
+  search?: string;
+  parentDashboardId?: string;
+  selectedDashboardId?: string;
+}): Promise<DashboardItem[]> => {
   const findDashboardsService = await dashboardServices.findDashboardsService();
   const responses = await findDashboardsService.search({
     search,
-    size,
-    options: { onlyTitle: true },
+    per_page: size,
   });
 
-  let dashboardList: DashboardItem[] = responses.hits;
+  let dashboardList: DashboardItem[] = responses.dashboards.map(({ id, data }) => {
+    return getDashboardItem(id, data);
+  });
 
   /** If there is no search string... */
   if (isEmpty(search)) {
@@ -78,10 +89,5 @@ export const fetchDashboards = async ({
     }
   }
 
-  /** Then, only return the parts of the dashboard object that we need */
-  const simplifiedDashboardList = dashboardList.map((hit) => {
-    return { id: hit.id, attributes: hit.attributes };
-  });
-
-  return simplifiedDashboardList;
+  return dashboardList;
 };

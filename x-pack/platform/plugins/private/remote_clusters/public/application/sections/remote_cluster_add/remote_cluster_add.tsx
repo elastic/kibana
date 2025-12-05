@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageSection, EuiPageBody } from '@elastic/eui';
 
-import { ClusterPayload } from '../../../../common/lib';
+import type { ClusterPayload } from '../../../../common/lib';
 import { extractQueryParams } from '../../../shared_imports';
 import { getRouter, redirect } from '../../services';
 import { setBreadcrumbs } from '../../services/breadcrumb';

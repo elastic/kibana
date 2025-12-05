@@ -10,7 +10,8 @@ import { takeOsqueryActionWithParams } from '../../tasks/live_query';
 import { ServerlessRoleName } from '../../support/roles';
 import { disableNewFeaturesTours } from '../../tasks/navigation';
 
-describe('ALL - Timelines', { tags: ['@ess'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/229432
+describe.skip('ALL - Timelines', { tags: ['@ess'] }, () => {
   before(() => {
     initializeDataViews();
   });
@@ -28,18 +29,8 @@ describe('ALL - Timelines', { tags: ['@ess'] }, () => {
       cy.getBySel('timeline-bottom-bar-title-button').click();
     });
     cy.getBySel('timelineQueryInput').type(
-      'NOT host.name: "dev-fleet-server*" and component.type: "osquery"{enter}'
+      'NOT host.name: "dev-fleet-server*" and component.type: "osquery" AND (_index: "logs-*" OR _index: "filebeat-*"){enter}'
     );
-    // Filter out alerts
-    cy.getBySel('timeline-sourcerer-trigger').click();
-    cy.getBySel('sourcerer-advanced-options-toggle').click();
-    cy.getBySel('sourcerer-combo-box').within(() => {
-      cy.getBySel('comboBoxClearButton').click();
-      cy.getBySel('comboBoxInput').type(
-        'logs-*{downArrow}{enter}filebeat-*{downArrow}{enter}{esc}'
-      );
-    });
-    cy.getBySel('sourcerer-save').click();
 
     // Force true due to pointer-events: none on parent prevents user mouse interaction.
     cy.getBySel('docTableExpandToggleColumn').first().click({ force: true });

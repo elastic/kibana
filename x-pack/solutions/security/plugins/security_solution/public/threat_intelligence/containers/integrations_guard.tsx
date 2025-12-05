@@ -8,11 +8,15 @@
 import { EuiLoadingLogo, EuiPageTemplate } from '@elastic/eui';
 import type { PropsWithChildren } from 'react';
 import React, { memo } from 'react';
-import { LOADING_LOGO_TEST_ID } from './test_ids';
+import {
+  EMPTY_PAGE_WRAPPER_TEST_ID,
+  LOADING_LOGO_TEST_ID,
+  LOADING_LOGO_WRAPPER_TEST_ID,
+} from './test_ids';
 import { useIntegrations } from '../hooks/use_integrations';
 import { EmptyPage } from '../modules/empty_page/empty_page';
 import { useIndicatorsTotalCount } from '../modules/indicators/hooks/use_total_count';
-import { SecuritySolutionPluginTemplateWrapper } from './security_solution_plugin_template_wrapper';
+import { SecuritySolutionTemplateWrapper } from '../../app/home/template_wrapper';
 
 /**
  * Renders the indicators page if the user has some Threat Intelligence integrations installed or
@@ -30,20 +34,28 @@ export const IntegrationsGuard = memo<PropsWithChildren<unknown>>(({ children })
 
   if (integrationLoading || indicatorsTotalCountLoading) {
     return (
-      <SecuritySolutionPluginTemplateWrapper
-        isEmptyState
-        emptyPageBody={
-          <EuiPageTemplate.EmptyPrompt color="transparent">
-            <EuiLoadingLogo data-test-subj={LOADING_LOGO_TEST_ID} logo="logoSecurity" size="xl" />
-          </EuiPageTemplate.EmptyPrompt>
-        }
-      />
+      <div data-test-subj={LOADING_LOGO_WRAPPER_TEST_ID}>
+        <SecuritySolutionTemplateWrapper
+          isEmptyState
+          emptyPageBody={
+            <EuiPageTemplate.EmptyPrompt color="transparent">
+              <EuiLoadingLogo data-test-subj={LOADING_LOGO_TEST_ID} logo="logoSecurity" size="xl" />
+            </EuiPageTemplate.EmptyPrompt>
+          }
+        />
+      </div>
     );
   }
 
   // show indicators page if there are indicators, or if some ti integrations have been added
   const showIndicatorsPage = indicatorsTotalCount > 0 || (installedTIIntegrations || []).length > 0;
-  return showIndicatorsPage ? <>{children}</> : <EmptyPage />;
+  return showIndicatorsPage ? (
+    <>{children}</>
+  ) : (
+    <div data-test-subj={EMPTY_PAGE_WRAPPER_TEST_ID}>
+      <SecuritySolutionTemplateWrapper isEmptyState emptyPageBody={<EmptyPage />} />
+    </div>
+  );
 });
 
 IntegrationsGuard.displayName = 'IntegrationsGuard';

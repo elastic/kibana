@@ -6,17 +6,18 @@
  */
 
 import { isObject } from 'lodash';
-import { DOCUMENT_FIELD_NAME } from '../../../../../../common/constants';
-import {
+import type {
+  BaseIndexPatternColumn,
   FieldBasedIndexPatternColumn,
-  GenericOperationDefinition,
   GenericIndexPatternColumn,
-} from '..';
-import { BaseIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
-import { FormBasedLayer } from '../../../types';
+  ReferenceBasedIndexPatternColumn,
+  StaticValueIndexPatternColumn,
+  FormBasedLayer,
+} from '@kbn/lens-common';
+import { DOCUMENT_FIELD_NAME } from '../../../../../../common/constants';
+import type { GenericOperationDefinition } from '..';
 import { unquotedStringRegex } from './util';
 import { isColumnOfType } from '../helpers';
-import { StaticValueIndexPatternColumn } from '../static_value';
 
 // Just handle two levels for now
 type OperationParams = Record<string, string | number | Record<string, string | number>>;

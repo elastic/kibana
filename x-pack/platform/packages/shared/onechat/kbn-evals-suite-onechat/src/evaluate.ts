@@ -16,17 +16,24 @@ export const evaluate = base.extend<
 >({
   onechatSetup: [
     async ({ fetch, log }, use) => {
-      // Enable OneChat API before running the evaluation
-      await fetch('/internal/kibana/settings', {
-        method: 'POST',
-        body: JSON.stringify({
-          changes: {
-            'onechat:api:enabled': true,
-          },
-        }),
-      });
+      // Ensure OneChat API is enabled before running the evaluation
+      const currentSettings = (await fetch('/internal/kibana/settings')) as any;
+      const isOnechatEnabled =
+        currentSettings?.settings?.['agentBuilder:enabled']?.userValue === true;
 
-      log.info('OneChat API enabled for the evaluation');
+      if (isOnechatEnabled) {
+        log.debug('Agent Builder is already enabled');
+      } else {
+        await fetch('/internal/kibana/settings', {
+          method: 'POST',
+          body: JSON.stringify({
+            changes: {
+              ['agentBuilder:enabled']: true,
+            },
+          }),
+        });
+        log.debug('Agent Builder enabled for the evaluation');
+      }
 
       await use();
     },

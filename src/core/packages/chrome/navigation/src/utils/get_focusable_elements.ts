@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RefObject } from 'react';
-
 /**
- * Utility function for getting focusable elements
+ * Utility function for getting focusable elements.
+ *
+ * @param container - the container element to search within.
+ * @returns an array of focusable elements.
  */
-export const getFocusableElements = (ref: RefObject<HTMLElement> | null) => {
-  if (!ref?.current) return [];
-
-  return Array.from(ref.current.querySelectorAll('button, a')).filter(
+export const getFocusableElements = (container: HTMLElement) => {
+  return Array.from(container.querySelectorAll('button, a')).filter(
     (el) => !el.hasAttribute('disabled') && !el.getAttribute('aria-hidden')
   ) as HTMLElement[];
 };

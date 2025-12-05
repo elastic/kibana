@@ -13,23 +13,23 @@ import {
   API_VERSIONS,
   APP_ID,
   ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
+  MONITORING_ENTITY_LIST_SOURCES_URL,
 } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import {
   ListEntitySourcesRequestQuery,
   type ListEntitySourcesResponse,
-} from '../../../../../../common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
+} from '../../../../../../common/api/entity_analytics';
 import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
 
 export const listMonitoringEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger,
-  config: EntityAnalyticsRoutesDeps['config']
+  logger: Logger
 ) => {
   router.versioned
     .get({
       access: 'public',
-      path: '/api/entity_analytics/monitoring/entity_source/list',
+      path: MONITORING_ENTITY_LIST_SOURCES_URL,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],

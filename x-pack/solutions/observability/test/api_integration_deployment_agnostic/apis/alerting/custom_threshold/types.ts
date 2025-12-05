@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Query, TimeRange } from '@kbn/es-query';
-import { SerializableRecord } from '@kbn/utility-types';
+import type { Query, TimeRange } from '@kbn/es-query';
+import type { SerializableRecord } from '@kbn/utility-types';
 
 export interface ActionDocument {
   ruleType: string;

@@ -7,15 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 import { KbnClientImportExport } from './kbn_client_import_export';
 import { KbnClientPlugins } from './kbn_client_plugins';
-import { KbnClientRequester, ReqOptions } from './kbn_client_requester';
+import type { ReqOptions } from './kbn_client_requester';
+import { KbnClientRequester } from './kbn_client_requester';
 import { KbnClientSavedObjects } from './kbn_client_saved_objects';
 import { KbnClientSpaces } from './kbn_client_spaces';
 import { KbnClientStatus } from './kbn_client_status';
-import { KbnClientUiSettings, UiSettingValues } from './kbn_client_ui_settings';
+import type { UiSettingValues } from './kbn_client_ui_settings';
+import { KbnClientUiSettings } from './kbn_client_ui_settings';
 import { KbnClientVersion } from './kbn_client_version';
 
 export interface KbnClientOptions {

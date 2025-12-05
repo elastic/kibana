@@ -6,18 +6,8 @@
  */
 
 import type { TinymathAST } from '@kbn/tinymath';
-import { OperationDefinition } from '..';
-import { ValueFormatConfig, ReferenceBasedIndexPatternColumn } from '../column_types';
-import { IndexPattern } from '../../../../../types';
-
-export interface MathIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
-  operationType: 'math';
-  params: {
-    tinymathAst: TinymathAST | string;
-    // last value on numeric fields can be formatted
-    format?: ValueFormatConfig;
-  };
-}
+import type { MathIndexPatternColumn, IndexPattern } from '@kbn/lens-common';
+import type { OperationDefinition } from '..';
 
 export const mathOperation: OperationDefinition<MathIndexPatternColumn, 'managedReference'> = {
   type: 'math',

@@ -5,22 +5,19 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { RoleCredentials, SamlAuthProviderType } from '@kbn/ftr-common-functional-services';
+import type { RoleCredentials, SamlAuthProviderType } from '@kbn/ftr-common-functional-services';
 import moment from 'moment/moment';
 import { v4 as uuidv4 } from 'uuid';
 import { omit, omitBy } from 'lodash';
-import {
-  ConfigKey,
-  HTTPFields,
-  PrivateLocation,
-} from '@kbn/synthetics-plugin/common/runtime_types';
+import type { HTTPFields, PrivateLocation } from '@kbn/synthetics-plugin/common/runtime_types';
+import { ConfigKey } from '@kbn/synthetics-plugin/common/runtime_types';
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import {
   removeMonitorEmptyValues,
   transformPublicKeys,
 } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/formatters/saved_object_to_monitor';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { SyntheticsMonitorTestService } from '../../services/synthetics_monitor';
 import { PrivateLocationTestService } from '../../services/synthetics_private_location';

@@ -9,9 +9,9 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { Alert } from '@kbn/alerting-types';
+import type { Alert } from '@kbn/alerting-types';
 import { AlertLifecycleStatusCell } from './alert_lifecycle_status_cell';
-import { CellComponentProps } from '../types';
+import type { CellComponentProps } from '../types';
 import { getCasesMapMock } from '../mocks/cases.mock';
 import { getMaintenanceWindowsMapMock } from '../mocks/maintenance_windows.mock';
 

@@ -6,9 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { GET_APM_DOWNSTREAM_DEPENDENCIES_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server';
 import type { FunctionRegistrationParameters } from '.';
 import type { RandomSampler } from '../lib/helpers/get_random_sampler';
-import { getAssistantDownstreamDependencies } from '../routes/assistant_functions/get_apm_downstream_dependencies';
+import { getApmDownstreamDependencies } from '../routes/assistant_functions/get_apm_downstream_dependencies';
 
 interface DownstreamDependenciesFunctionRegistrationParams extends FunctionRegistrationParameters {
   randomSampler: RandomSampler;
@@ -21,7 +22,7 @@ export function registerGetApmDownstreamDependenciesFunction({
 }: DownstreamDependenciesFunctionRegistrationParams) {
   registerFunction(
     {
-      name: 'get_apm_downstream_dependencies',
+      name: GET_APM_DOWNSTREAM_DEPENDENCIES_FUNCTION_NAME,
       description: `Get the downstream dependencies (services or uninstrumented backends) for a
       service. This allows you to map the downstream dependency name to a service, by
       returning both span.destination.service.resource and service.name. Use this to
@@ -62,7 +63,7 @@ export function registerGetApmDownstreamDependenciesFunction({
     async ({ arguments: args }, signal) => {
       return {
         content: {
-          dependencies: await getAssistantDownstreamDependencies({
+          dependencies: await getApmDownstreamDependencies({
             arguments: args,
             apmEventClient,
             randomSampler,

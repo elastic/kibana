@@ -10,7 +10,7 @@ import { v4 as uuidV4 } from 'uuid';
 import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
 
-import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../helpers';
 import { SpaceTestApiClient } from './space_awareness/api_helper';
 
@@ -157,6 +157,63 @@ export default function (providerContext: FtrProviderContext) {
           }
         );
       });
+    });
+
+    it('should migrate existing component templates to move away from deprecated ILM policies', async () => {
+      await es.cluster.putComponentTemplate({
+        name: 'logs-test@package',
+        template: {
+          settings: {
+            index: {
+              lifecycle: {
+                name: 'logs',
+              },
+            },
+          },
+        },
+      });
+      await es.cluster.putComponentTemplate({
+        name: 'metrics-test@package',
+        template: {
+          settings: {
+            index: {
+              lifecycle: {
+                name: 'metrics',
+              },
+            },
+          },
+        },
+      });
+      await es.cluster.putComponentTemplate({
+        name: 'synthetics-test@package',
+        template: {
+          settings: {
+            index: {
+              lifecycle: {
+                name: 'synthetics',
+              },
+            },
+          },
+        },
+      });
+
+      await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx').expect(200);
+      // wait for the async task to run (6s delay + buffer)
+      await new Promise((resolve) => setTimeout(resolve, 10 * 1000));
+
+      const componentTemplates = await es.cluster.getComponentTemplate({
+        name: '*@package',
+      });
+      const ilms = Object.entries(componentTemplates.component_templates).map(
+        ([name, componentTemplate]) => {
+          const settings = componentTemplate.component_template.template.settings || {};
+          return settings.index?.lifecycle?.name;
+        }
+      );
+
+      expect(ilms).to.not.contain('logs');
+      expect(ilms).to.not.contain('metrics');
+      expect(ilms).to.not.contain('synthetics');
     });
   });
 }

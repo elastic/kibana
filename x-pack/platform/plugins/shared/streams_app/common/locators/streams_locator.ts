@@ -8,9 +8,16 @@
 import { STREAMS_APP_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
-import { SerializableRecord } from '@kbn/utility-types';
-import { ENRICHMENT_URL_STATE_KEY } from '../url_schema/common';
-import type { EnrichmentUrlState } from '../url_schema/enrichment_url_schema';
+import type { SerializableRecord } from '@kbn/utility-types';
+import { v4 as uuidv4 } from 'uuid';
+import {
+  CUSTOM_SAMPLES_DATA_SOURCE_STORAGE_KEY_PREFIX,
+  ENRICHMENT_URL_STATE_KEY,
+} from '../url_schema/common';
+import type {
+  CustomSamplesDataSource,
+  EnrichmentUrlState,
+} from '../url_schema/enrichment_url_schema';
 
 export type StreamsAppLocatorParams = SerializableRecord &
   (
@@ -20,7 +27,7 @@ export type StreamsAppLocatorParams = SerializableRecord &
       }
     | {
         name: string;
-        managementTab: 'enrich';
+        managementTab: 'processing';
         pageState: EnrichmentUrlState;
       }
     | {
@@ -49,10 +56,18 @@ export class StreamsAppLocatorDefinition implements LocatorDefinition<StreamsApp
         path = `/${params.name}/management/${params.managementTab}`;
 
         // Concat page state
-        if (params.pageState) {
+        if (isEnrichmentPageState(params.pageState)) {
+          const parsedDataSources = params.pageState.dataSources.map((dataSource) => {
+            // For custom samples data source, we need to persist the documents in the browser local storage to retrieve them later.
+            if (dataSource.type === 'custom-samples') {
+              return parseAndPersistCustomSamplesDataSource(dataSource, params.name);
+            }
+            return dataSource;
+          });
+
           path = setStateToKbnUrl(
             ENRICHMENT_URL_STATE_KEY,
-            params.pageState,
+            { ...params.pageState, dataSources: parsedDataSources },
             { useHash: false, storeInHashQuery: false },
             path
           );
@@ -67,3 +82,26 @@ export class StreamsAppLocatorDefinition implements LocatorDefinition<StreamsApp
     };
   };
 }
+
+const parseAndPersistCustomSamplesDataSource = (
+  dataSource: CustomSamplesDataSource,
+  streamName: string
+) => {
+  const key =
+    dataSource.storageKey ??
+    `${CUSTOM_SAMPLES_DATA_SOURCE_STORAGE_KEY_PREFIX}${streamName}__${uuidv4()}`;
+  sessionStorage.setItem(key, JSON.stringify(dataSource));
+  return {
+    name: dataSource.name,
+    enabled: dataSource.enabled,
+    type: dataSource.type,
+    documents: [],
+    storageKey: key,
+  };
+};
+
+const isEnrichmentPageState = (
+  pageState: StreamsAppLocatorParams['pageState']
+): pageState is EnrichmentUrlState => {
+  return typeof pageState === 'object' && pageState !== null && 'v' in pageState;
+};

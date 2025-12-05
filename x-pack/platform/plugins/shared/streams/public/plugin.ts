@@ -5,31 +5,40 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
-import { Logger } from '@kbn/logging';
-import { OBSERVABILITY_ENABLE_STREAMS_UI } from '@kbn/management-settings-ids';
+import type {
+  ApplicationStart,
+  CoreSetup,
+  CoreStart,
+  PluginInitializerContext,
+} from '@kbn/core/public';
+import type { Logger } from '@kbn/logging';
 import { createRepositoryClient } from '@kbn/server-route-repository-client';
-import { of, Observable, from, shareReplay, startWith } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { of, from } from 'rxjs';
+import { map, catchError } from 'rxjs';
 import { once } from 'lodash';
 import type { StreamsPublicConfig } from '../common/config';
-import {
+import type {
+  StreamsNavigationStatus,
   StreamsPluginClass,
   StreamsPluginSetup,
   StreamsPluginSetupDependencies,
   StreamsPluginStart,
   StreamsPluginStartDependencies,
-  StreamsStatus,
+  WiredStreamsStatus,
 } from './types';
-import { StreamsRepositoryClient } from './api';
+import type { StreamsRepositoryClient } from './api';
 
 export class Plugin implements StreamsPluginClass {
   public config: StreamsPublicConfig;
   public logger: Logger;
 
   private repositoryClient!: StreamsRepositoryClient;
+  private isServerless: boolean;
 
   constructor(context: PluginInitializerContext<{}>) {
     this.config = context.config.get();
+    this.isServerless = context.env.packageInfo.buildFlavor === 'serverless';
     this.logger = context.logger.get();
   }
 
@@ -41,7 +50,31 @@ export class Plugin implements StreamsPluginClass {
   start(core: CoreStart, pluginsStart: StreamsPluginStartDependencies): StreamsPluginStart {
     return {
       streamsRepositoryClient: this.repositoryClient,
-      status$: createStreamsStatusObservable(core, this.repositoryClient, this.logger),
+      navigationStatus$: createStreamsNavigationStatusObservable(
+        pluginsStart,
+        core.application,
+        this.isServerless
+      ),
+      getWiredStatus: async () => {
+        try {
+          return await this.repositoryClient.fetch('GET /api/streams/_status', {
+            signal: new AbortController().signal,
+          });
+        } catch (error) {
+          this.logger.error(error);
+          return UNKNOWN_STATUS;
+        }
+      },
+      enableWiredMode: async (signal: AbortSignal) => {
+        return await this.repositoryClient.fetch('POST /api/streams/_enable 2023-10-31', {
+          signal,
+        });
+      },
+      disableWiredMode: async (signal: AbortSignal) => {
+        return await this.repositoryClient.fetch('POST /api/streams/_disable 2023-10-31', {
+          signal,
+        });
+      },
       config$: of(this.config),
     };
   }
@@ -49,40 +82,47 @@ export class Plugin implements StreamsPluginClass {
   stop() {}
 }
 
-const ENABLED_STATUS: StreamsStatus = { status: 'enabled' };
-const DISABLED_STATUS: StreamsStatus = { status: 'disabled' };
-const UNKNOWN_STATUS: StreamsStatus = { status: 'unknown' };
+const UNKNOWN_STATUS: WiredStreamsStatus = { enabled: 'unknown', can_manage: false };
 
-const createStreamsStatusObservable = once(
+const createStreamsNavigationStatusObservable = once(
   (
-    core: CoreStart,
-    repositoryClient: StreamsRepositoryClient,
-    logger: Logger
-  ): Observable<StreamsStatus> => {
-    const { application, uiSettings } = core;
+    deps: StreamsPluginStartDependencies,
+    application: ApplicationStart,
+    isServerless: boolean
+  ): Observable<StreamsNavigationStatus> => {
     const hasCapabilities = application.capabilities?.streams?.show;
-    const isUIEnabled = uiSettings.get(OBSERVABILITY_ENABLE_STREAMS_UI);
+    const isServerlessObservability = deps.cloud?.serverless.projectType === 'observability';
+    const isServerlessSecurity = deps.cloud?.serverless.projectType === 'security';
 
     if (!hasCapabilities) {
-      return of(DISABLED_STATUS);
+      return of({ status: 'disabled' });
     }
 
-    if (isUIEnabled) {
-      return of(ENABLED_STATUS);
+    if (isServerless) {
+      // For serverless, only check cloud project type
+      return of({
+        status: isServerlessObservability || isServerlessSecurity ? 'enabled' : 'disabled',
+      });
     }
 
-    return from(
-      repositoryClient
-        .fetch('GET /api/streams/_status', {
-          signal: new AbortController().signal,
-        })
-        .then(
-          (response) => (response.enabled ? ENABLED_STATUS : DISABLED_STATUS),
-          (error) => {
-            logger.error(error);
-            return UNKNOWN_STATUS;
-          }
-        )
-    ).pipe(startWith(UNKNOWN_STATUS), shareReplay(1));
+    // For non-serverless, check the active space solution
+    if (!deps.spaces?.getActiveSpace) {
+      return of({ status: 'enabled' });
+    }
+
+    return from(deps.spaces.getActiveSpace()).pipe(
+      map((space) => {
+        const spaceSolution = space?.solution;
+        const isValidSolution =
+          !spaceSolution ||
+          spaceSolution === 'classic' ||
+          spaceSolution === 'oblt' ||
+          spaceSolution === 'security';
+        return { status: isValidSolution ? 'enabled' : 'disabled' } as const;
+      }),
+      catchError(() => {
+        return of({ status: 'enabled' } as const);
+      })
+    );
   }
 );

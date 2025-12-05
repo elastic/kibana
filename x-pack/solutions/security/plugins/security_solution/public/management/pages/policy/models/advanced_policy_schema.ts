@@ -34,7 +34,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.artifacts.global.base_url',
       {
         defaultMessage:
-          'Base URL from which to download global artifact manifests. Default: https://artifacts.security.elastic.co.',
+          'Modify the base URL from which to download protection artifact updates. Default: https://artifacts.security.elastic.co.',
       }
     ),
   },
@@ -45,7 +45,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.artifacts.global.manifest_relative_url',
       {
         defaultMessage:
-          'Relative URL from which to download global artifact manifests. Default: /downloads/endpoint/manifest/artifacts-<version>.zip.',
+          'Modify the relative URL from which to download protection artifact manifests. Default: /downloads/endpoint/manifest/artifacts-<version>.zip.',
         ignoreTag: true,
       }
     ),
@@ -57,7 +57,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.artifacts.global.public_key',
       {
         defaultMessage:
-          'PEM-encoded public key used to verify the global artifact manifest signature.',
+          'Override the PEM-encoded public key used to verify the protection artifact manifest signature. Default: none.',
       }
     ),
   },
@@ -68,7 +68,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.artifacts.global.interval',
       {
         defaultMessage:
-          'Interval between global artifact manifest download attempts, in seconds. Default: 3600.',
+          'Specify the period between protection artifact update attempts, in seconds. Default: 3600.',
       }
     ),
   },
@@ -79,7 +79,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.artifacts.global.channel',
       {
         defaultMessage:
-          'The release channel to use for receiving global artifacts. The "default" is staged roll-out. Set to "rapid" to receive candidate artifacts as soon as available. Set to "stable" to only receive stable artifacts. Default: default',
+          "Modify the release channel for protection artifact updates. The 'default' is staged rollout, 'rapid' receives candidate artifacts as soon as available, and 'stable' only receives artifact updates after staged rollout has finished. Default: default.",
       }
     ),
   },
@@ -100,7 +100,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.allow_cloud_features',
       {
-        defaultMessage: `Advanced option to selectively choose which external services are allowed, valid keywords are "sample-collection,reputation-lookup,malware-lookup,artifacts-update,staged-artifacts-rollout". Everything is allowed by default, but if any comma separated value(s) are provided all other features are disabled. To disallow all a special keyword "none" can be used. The option imposes severe limitation on Defend functionality. It's meant only for telemetry extra-avoidant users.`,
+        defaultMessage:
+          "Explicitly define which cloud services are permitted. Valid services are 'sample-collection', 'reputation-lookup', 'malware-lookup', 'artifacts-update', 'staged-artifacts-rollout'. If any comma-separated values are provided, all other services are disabled. To disallow all, use the keyword 'none'. Warning: this may reduce protection efficacy and increase false positive rates. Default: all services are permitted.",
       }
     ),
   },
@@ -110,7 +111,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.elasticsearch.delay',
       {
-        defaultMessage: 'Delay for sending events to Elasticsearch, in seconds. Default: 120.',
+        defaultMessage:
+          'Specify the delay between sending documents to Elasticsearch, in seconds. Default: 120.',
       }
     ),
   },
@@ -120,7 +122,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.elasticsearch.tls.verify_peer',
       {
-        defaultMessage: 'Whether to verify the certificates presented by the peer. Default: true.',
+        defaultMessage:
+          'Verify certificates for the Elasticsearch SSL/TLS connection. Default: true.',
       }
     ),
   },
@@ -131,7 +134,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.elasticsearch.tls.verify_hostname',
       {
         defaultMessage:
-          "Whether to verify the hostname of the peer is what's in the certificate. Default: true.",
+          'Verify the hostname for the Elasticsearch SSL/TLS connection. Default: true.',
       }
     ),
   },
@@ -141,7 +144,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.elasticsearch.tls.ca_cert',
       {
-        defaultMessage: 'PEM-encoded certificate for Elasticsearch certificate authority.',
+        defaultMessage:
+          'Provide an additional PEM-encoded certificate for Elasticsearch certificate authority. Default: none.',
       }
     ),
   },
@@ -152,7 +156,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.logging.file',
       {
         defaultMessage:
-          'A supplied value will override the log level configured for logs that are saved to disk and streamed to Elasticsearch. It is recommended Fleet be used to change this logging in most circumstances. Allowed values are error, warning, info, debug, and trace.',
+          "Override the log level configured for logs that are saved to disk and streamed to Elasticsearch. Elastic recommends using Fleet to change this logging setting in most circumstances. Allowed values are 'error', 'warning', 'info', 'debug', and 'trace'. Default: Fleet configuration is used.",
       }
     ),
   },
@@ -163,7 +167,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.logging.syslog',
       {
         defaultMessage:
-          'A supplied value will configure logging to syslog. Allowed values are error, warning, info, debug, and trace.',
+          "Write logs to syslog. Allowed values are 'error', 'warning', 'info', 'debug', and 'trace'. Default: none.",
       }
     ),
   },
@@ -174,7 +178,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.tty_io.max_kilobytes_per_process',
       {
         defaultMessage:
-          'The maximum kilobytes of terminal output to record for a single process. Default: 512',
+          'The maximum kilobytes of terminal output to record for a single process. Default: 512.',
       }
     ),
   },
@@ -185,7 +189,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.tty_io.max_kilobytes_per_event',
       {
         defaultMessage:
-          'The maximum kilobytes of terminal output to record in a single event. Default: 512',
+          'The maximum kilobytes of terminal output to record in a single event. Default: 512.',
       }
     ),
   },
@@ -196,7 +200,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.capture_env_vars',
       {
         defaultMessage:
-          'The list of environment variables to capture (up to five), separated by commas.',
+          'Provide a comma-separated list of up to five environment variables to capture in process creation events. Default: none.',
       }
     ),
   },
@@ -207,7 +211,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.tty_io.max_event_interval_seconds',
       {
         defaultMessage:
-          'The maximum amount of time (seconds) to batch terminal output in a single event. Default: 30',
+          'The maximum amount of time (seconds) to batch terminal output in a single event. Default: 30.',
       }
     ),
   },
@@ -238,7 +242,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.capture_command_line',
       {
         defaultMessage:
-          'Include process command line in all events that are related to this process. Default: false.',
+          'Include the command line as part of the collected process information for all event types. Default: false.',
       }
     ),
   },
@@ -249,7 +253,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.capture_command_line',
       {
         defaultMessage:
-          'Include process command line in all events that are related to this process. Default: false.',
+          'Include the command line as part of the collected process information for all event types. Default: false.',
       }
     ),
   },
@@ -270,7 +274,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.artifacts.global.base_url',
       {
-        defaultMessage: 'URL from which to download global artifact manifests.',
+        defaultMessage:
+          'Modify the base URL from which to download protection artifact updates. Default: https://artifacts.security.elastic.co.',
       }
     ),
   },
@@ -281,7 +286,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.artifacts.global.manifest_relative_url',
       {
         defaultMessage:
-          'Relative URL from which to download global artifact manifests. Default: /downloads/endpoint/manifest/artifacts-<version>.zip.',
+          'Modify the relative URL from which to download protection artifact manifests. Default: /downloads/endpoint/manifest/artifacts-<version>.zip.',
         ignoreTag: true,
       }
     ),
@@ -293,7 +298,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.artifacts.global.public_key',
       {
         defaultMessage:
-          'PEM-encoded public key used to verify the global artifact manifest signature.',
+          'Override the PEM-encoded public key used to verify the protection artifact manifest signature. Default: none.',
       }
     ),
   },
@@ -304,7 +309,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.artifacts.global.interval',
       {
         defaultMessage:
-          'Interval between global artifact manifest download attempts, in seconds. Default: 3600.',
+          'Specify the period between protection artifact update attempts, in seconds. Default: 3600.',
       }
     ),
   },
@@ -315,7 +320,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.artifacts.global.channel',
       {
         defaultMessage:
-          'The release channel to use for receiving global artifacts. The "default" is staged roll-out. Set to "rapid" to receive candidate artifacts as soon as available. Set to "stable" to only receive stable artifacts. Default: default',
+          "Modify the release channel for protection artifact updates. The 'default' is staged rollout, 'rapid' receives candidate artifacts as soon as available, and 'stable' only receives artifact updates after staged rollout has finished. Default: default.",
       }
     ),
   },
@@ -336,7 +341,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.allow_cloud_features',
       {
-        defaultMessage: `Advanced option to selectively choose which external services are allowed, valid keywords are "sample-collection,reputation-lookup,malware-lookup,artifacts-update,staged-artifacts-rollout". Everything is allowed by default, but if any comma separated value(s) are provided all other features are disabled. To disallow all a special keyword "none" can be used. The option imposes severe limitation on Defend functionality. It's meant only for telemetry extra-avoidant users.`,
+        defaultMessage:
+          "Explicitly define which cloud services are permitted. Valid services are 'sample-collection', 'reputation-lookup', 'malware-lookup', 'artifacts-update', 'staged-artifacts-rollout'. If any comma-separated values are provided, all other services are disabled. To disallow all, use the keyword 'none'. Warning: this may reduce protection efficacy and increase false positive rates. Default: all services are permitted.",
       }
     ),
   },
@@ -346,7 +352,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.elasticsearch.delay',
       {
-        defaultMessage: 'Delay for sending events to Elasticsearch, in seconds. Default: 120.',
+        defaultMessage:
+          'Specify the delay between sending documents to Elasticsearch, in seconds. Default: 120.',
       }
     ),
   },
@@ -356,7 +363,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.elasticsearch.tls.verify_peer',
       {
-        defaultMessage: 'Whether to verify the certificates presented by the peer. Default: true.',
+        defaultMessage:
+          'Verify certificates for the Elasticsearch SSL/TLS connection. Default: true.',
       }
     ),
   },
@@ -367,7 +375,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.elasticsearch.tls.verify_hostname',
       {
         defaultMessage:
-          "Whether to verify the hostname of the peer is what's in the certificate. Default: true.",
+          'Verify the hostname for the Elasticsearch SSL/TLS connection. Default: true.',
       }
     ),
   },
@@ -377,7 +385,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.elasticsearch.tls.ca_cert',
       {
-        defaultMessage: 'PEM-encoded certificate for Elasticsearch certificate authority.',
+        defaultMessage:
+          'Provide an additional PEM-encoded certificate for Elasticsearch certificate authority. Default: none.',
       }
     ),
   },
@@ -388,7 +397,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.logging.file',
       {
         defaultMessage:
-          'A supplied value will override the log level configured for logs that are saved to disk and streamed to Elasticsearch. It is recommended Fleet be used to change this logging in most circumstances. Allowed values are error, warning, info, debug, and trace.',
+          "Override the log level configured for logs that are saved to disk and streamed to Elasticsearch. Elastic recommends using Fleet to change this logging setting in most circumstances. Allowed values are 'error', 'warning', 'info', 'debug', and 'trace'. Default: Fleet configuration is used.",
       }
     ),
   },
@@ -399,7 +408,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.logging.syslog',
       {
         defaultMessage:
-          'A supplied value will configure logging to syslog. Allowed values are error, warning, info, debug, and trace.',
+          "Write logs to syslog. Allowed values are 'error', 'warning', 'info', 'debug', and 'trace'. Default: none.",
       }
     ),
   },
@@ -410,7 +419,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.malware.quarantine',
       {
         defaultMessage:
-          'Whether quarantine should be enabled when malware prevention is enabled. Default: true.',
+          'Enable quarantining files when malware prevention is enabled. Default: true.',
       }
     ),
   },
@@ -421,7 +430,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.malware.threshold',
       {
         defaultMessage:
-          'The threshold that should be used for evaluating malware. Allowed values are normal, conservative, and aggressive. Default: normal.',
+          "Control the threshold that should be used for evaluating malware. Allowed values are 'normal', 'conservative', and 'aggressive'. Default: normal.",
       }
     ),
   },
@@ -432,7 +441,40 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.malware.max_file_size_bytes',
       {
         defaultMessage:
-          'The maximum file size in bytes that should be used for evaluating malware. Default: 78643200.',
+          'Control the maximum file size in bytes that should be evaluated for malware. Default: 78643200.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.ransomware.diagnostic',
+    first_supported_version: '9.2.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.ransomware.diagnostic',
+      {
+        defaultMessage:
+          'Set this to false to disable diagnostic ransomware protection. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.device_control.filter_images',
+    first_supported_version: '9.2',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.device_control.filter_images',
+      {
+        defaultMessage:
+          "A value of 'false' disables the filtering of file backed images and CD-ROM volumes. Default: true.",
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.events.populate_file_data',
+    first_supported_version: '9.2.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.populate_file_data',
+      {
+        defaultMessage:
+          'Set this to false to disable collection of header bytes on file events. Default: true.',
       }
     ),
   },
@@ -442,7 +484,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.kernel.connect',
       {
-        defaultMessage: 'Whether to connect to the kernel driver. Default: true.',
+        defaultMessage:
+          'Control whether to connect to the kernel driver. Warning: disabling this will break most features. Default: true.',
       }
     ),
   },
@@ -453,7 +496,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.kernel.process',
       {
         defaultMessage:
-          "A value of 'false' overrides other config settings that would enable kernel process events. Default: true.",
+          "Enable kernel process events. 'false' disables them even if they are needed by other features. Default: true.",
       }
     ),
   },
@@ -464,7 +507,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.kernel.filewrite',
       {
         defaultMessage:
-          "A value of 'false' overrides other config settings that would enable kernel file write events. Default: true.",
+          "Enable kernel file write events. 'false' disables them even if they are needed by other features. Default: true.",
       }
     ),
   },
@@ -475,7 +518,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.kernel.network',
       {
         defaultMessage:
-          "A value of 'false' overrides other config settings that would enable kernel network events. Default: true.",
+          "Enable kernel network events. 'false' disables them even if they are needed by other features. Default: true.",
       }
     ),
   },
@@ -485,7 +528,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.harden.self_protect',
       {
-        defaultMessage: 'Enables self-protection on macOS. Default: true.',
+        defaultMessage: 'Enable self-protection hardening on macOS. Default: true.',
       }
     ),
   },
@@ -506,7 +549,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.capture_command_line',
       {
         defaultMessage:
-          'Include process command line in all events that are related to this process. Default: false.',
+          'Include the command line as part of the collected process information for all event types. Default: false.',
       }
     ),
   },
@@ -527,7 +570,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.artifacts.global.base_url',
       {
-        defaultMessage: 'URL from which to download global artifact manifests.',
+        defaultMessage:
+          'Modify the base URL from which to download protection artifact updates. Default: https://artifacts.security.elastic.co.',
       }
     ),
   },
@@ -538,7 +582,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.artifacts.global.manifest_relative_url',
       {
         defaultMessage:
-          'Relative URL from which to download global artifact manifests. Default: /downloads/endpoint/manifest/artifacts-<version>.zip.',
+          'Modify the relative URL from which to download protection artifact manifests. Default: /downloads/endpoint/manifest/artifacts-<version>.zip.',
         ignoreTag: true,
       }
     ),
@@ -550,7 +594,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.artifacts.global.public_key',
       {
         defaultMessage:
-          'PEM-encoded public key used to verify the global artifact manifest signature.',
+          'Override the PEM-encoded public key used to verify the protection artifact manifest signature. Default: none.',
       }
     ),
   },
@@ -561,7 +605,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.artifacts.global.interval',
       {
         defaultMessage:
-          'Interval between global artifact manifest download attempts, in seconds. Default: 3600.',
+          'Specify the period between protection artifact update attempts, in seconds. Default: 3600.',
       }
     ),
   },
@@ -572,7 +616,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.artifacts.global.channel',
       {
         defaultMessage:
-          'The release channel to use for receiving global artifacts. The "default" is staged roll-out. Set to "rapid" to receive candidate artifacts as soon as available. Set to "stable" to only receive stable artifacts. Default: default',
+          "Modify the release channel for protection artifact updates. The 'default' is staged rollout, 'rapid' receives candidate artifacts as soon as available, and 'stable' only receives artifact updates after staged rollout has finished. Default: 'default'.",
       }
     ),
   },
@@ -593,7 +637,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.allow_cloud_features',
       {
-        defaultMessage: `Advanced option to selectively choose which external services are allowed, valid keywords are "sample-collection,reputation-lookup,malware-lookup,artifacts-update,staged-artifacts-rollout". Everything is allowed by default, but if any comma separated value(s) are provided all other features are disabled. To disallow all a special keyword "none" can be used. The option imposes severe limitation on Defend functionality. It's meant only for telemetry extra-avoidant users.`,
+        defaultMessage:
+          "Explicitly define which cloud services are permitted. Valid services are 'sample-collection', 'reputation-lookup', 'malware-lookup', 'artifacts-update', 'staged-artifacts-rollout'. If any comma-separated values are provided, all other services are disabled. To disallow all, use the keyword 'none'. Warning: this may reduce protection efficacy and increase false positive rates. Default: all services are permitted.",
       }
     ),
   },
@@ -603,7 +648,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.elasticsearch.delay',
       {
-        defaultMessage: 'Delay for sending events to Elasticsearch, in seconds. Default: 120.',
+        defaultMessage:
+          'Specify the delay between sending documents to Elasticsearch, in seconds. Default: 120.',
       }
     ),
   },
@@ -613,7 +659,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.elasticsearch.tls.verify_peer',
       {
-        defaultMessage: 'Whether to verify the certificates presented by the peer. Default: true.',
+        defaultMessage:
+          'Verify certificates for the Elasticsearch SSL/TLS connection. Default: true.',
       }
     ),
   },
@@ -624,7 +671,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.elasticsearch.tls.verify_hostname',
       {
         defaultMessage:
-          "Whether to verify the hostname of the peer is what's in the certificate. Default: true.",
+          'Verify the hostname for the Elasticsearch SSL/TLS connection. Default: true.',
       }
     ),
   },
@@ -634,7 +681,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.elasticsearch.tls.ca_cert',
       {
-        defaultMessage: 'PEM-encoded certificate for Elasticsearch certificate authority.',
+        defaultMessage:
+          'Provide an additional PEM-encoded certificate for Elasticsearch certificate authority. Default: none.',
       }
     ),
   },
@@ -645,7 +693,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.logging.file',
       {
         defaultMessage:
-          'A supplied value will override the log level configured for logs that are saved to disk and streamed to Elasticsearch. It is recommended Fleet be used to change this logging in most circumstances. Allowed values are error, warning, info, debug, and trace.',
+          "Override the log level configured for logs that are saved to disk and streamed to Elasticsearch. Elastic recommends using Fleet to change this logging setting in most circumstances. Allowed values are 'error', 'warning', 'info', 'debug', and 'trace'. Default: Fleet configuration is used.",
       }
     ),
   },
@@ -656,7 +704,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.logging.debugview',
       {
         defaultMessage:
-          'A supplied value will configure logging to Debugview (a Sysinternals tool). Allowed values are error, warning, info, debug, and trace.',
+          "Write logs to the DebugView Sysinternals tool. Allowed values are 'error', 'warning', 'info', 'debug', and 'trace'. Default: none.",
       }
     ),
   },
@@ -667,7 +715,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.malware.quarantine',
       {
         defaultMessage:
-          'Whether quarantine should be enabled when malware prevention is enabled. Default: true.',
+          'Enable quarantining files when malware prevention is enabled. Default: true.',
       }
     ),
   },
@@ -678,7 +726,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.malware.threshold',
       {
         defaultMessage:
-          'The threshold that should be used for evaluating malware. Allowed values are normal, conservative, and aggressive. Default: normal.',
+          "Control the threshold that should be used for evaluating malware. Allowed values are 'normal', 'conservative', and 'aggressive'. Default: 'normal'.",
       }
     ),
   },
@@ -689,7 +737,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.malware.max_file_size_bytes',
       {
         defaultMessage:
-          'The maximum file size in bytes that should be used for evaluating malware. Default: 78643200.',
+          'Control the maximum file size in bytes that should be evaluated for malware. Default: 78643200.',
       }
     ),
   },
@@ -699,7 +747,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.connect',
       {
-        defaultMessage: 'Whether to connect to the kernel driver. Default: true.',
+        defaultMessage:
+          'Control whether to connect to the kernel driver. Warning: disabling this will break most features. Default: true.',
       }
     ),
   },
@@ -710,7 +759,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.process',
       {
         defaultMessage:
-          "A value of 'false' overrides other config settings that would enable kernel process events. Default: true.",
+          "Enable kernel process events. 'false' disables them even if they are needed by other features. Default: true.",
       }
     ),
   },
@@ -721,7 +770,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.filewrite',
       {
         defaultMessage:
-          "A value of 'false' overrides other config settings that would enable kernel file write events. Default: true.",
+          "Enable kernel file write events. 'false' disables them even if they are needed by other features. Default: true.",
       }
     ),
   },
@@ -732,7 +781,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.filewrite_sync',
       {
         defaultMessage:
-          'Send file kernel driver write notifications synchronously where possible.  May improve the reliability of file write and malware-on-write enrichments at the cost of system responsiveness. Default: false.',
+          'Process file write notifications synchronously when possible. This may improve file write and malware-on-write enrichment reliability at the cost of system responsiveness. Default: false.',
       }
     ),
   },
@@ -743,7 +792,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.network',
       {
         defaultMessage:
-          "A value of 'false' overrides other config settings that would enable kernel network events. Default: true.",
+          "Enable kernel network events. 'false' disables them even if they are needed by other features. Default: true.",
       }
     ),
   },
@@ -753,8 +802,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.network_report_loopback',
       {
-        defaultMessage:
-          'Controls whether the kernel reports loopback network events. Default: true.',
+        defaultMessage: 'Report loopback network events. Default: true.',
       }
     ),
   },
@@ -765,7 +813,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.fileopen',
       {
         defaultMessage:
-          "A value of 'false' overrides other config settings that would enable kernel file open events. Default: true.",
+          "Enable kernel file open events. 'false' disables them even if they are needed by other features. Default: true.",
       }
     ),
   },
@@ -776,7 +824,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.asyncimageload',
       {
         defaultMessage:
-          "A value of 'false' overrides other config settings that would enable kernel async image load events. Default: true.",
+          "Enable kernel asynchronous image load events. 'false' disables them even if they are needed by other features. Default: true.",
       }
     ),
   },
@@ -787,7 +835,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.syncimageload',
       {
         defaultMessage:
-          "A value of 'false' overrides other config settings that would enable kernel sync image load events. Default: true.",
+          "Enable kernel sync image load events. 'false' disables them even if they are needed by other features. Default: true.",
       }
     ),
   },
@@ -798,7 +846,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.registry',
       {
         defaultMessage:
-          "A value of 'false' overrides other config settings that would enable kernel registry events. Default: true.",
+          "Enable kernel registry events. 'false' disables them even if they are needed by other features. Default: true.",
       }
     ),
   },
@@ -820,7 +868,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.registryaccess',
       {
         defaultMessage:
-          'Report limited registry access (queryvalue, savekey) events. Paths are not user-configurable. Default value is true.',
+          'Report limited registry access (queryvalue, savekey) events. Additional paths can be monitored via windows.advanced.events.event_on_access.registry_paths. Default: true.',
       }
     ),
   },
@@ -830,7 +878,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.process_handle',
       {
-        defaultMessage: 'Capture process and thread handle events. Default: true.',
+        defaultMessage:
+          "Enable process and thread handle events. 'false' disables them even if they are needed by other features. Default: true.",
       }
     ),
   },
@@ -840,8 +889,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.diagnostic.enabled',
       {
-        defaultMessage:
-          "A value of 'false' disables running diagnostic features on Endpoint. Default: true.",
+        defaultMessage: 'Enable diagnostic features. Default: true.',
       }
     ),
   },
@@ -851,8 +899,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.diagnostic.enabled',
       {
-        defaultMessage:
-          "A value of 'false' disables running diagnostic features on Endpoint. Default: true.",
+        defaultMessage: 'Enable diagnostic features. Default: true.',
       }
     ),
   },
@@ -862,8 +909,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.diagnostic.enabled',
       {
-        defaultMessage:
-          "A value of 'false' disables running diagnostic features on Endpoint. Default: true.",
+        defaultMessage: 'Enable diagnostic features. Default: true.',
       }
     ),
   },
@@ -874,7 +920,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.cloud_lookup',
       {
         defaultMessage:
-          "A value of 'false' disables cloud lookup for Windows alerts. Default: true.",
+          'Check a cloud service for known false positives before generating malware alerts. Default: true.',
       }
     ),
   },
@@ -884,7 +930,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.alerts.cloud_lookup',
       {
-        defaultMessage: "A value of 'false' disables cloud lookup for Mac alerts. Default: true.",
+        defaultMessage:
+          'Check a cloud service for known false positives before generating malware alerts. Default: true.',
       }
     ),
   },
@@ -894,7 +941,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.ransomware.mbr',
       {
-        defaultMessage: "A value of 'false' disables Ransomware MBR protection. Default: true.",
+        defaultMessage: 'Enable ransomware MBR protection. Default: true.',
       }
     ),
   },
@@ -904,7 +951,18 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.ransomware.canary',
       {
-        defaultMessage: "A value of 'false' disables Ransomware canary protection. Default: true.",
+        defaultMessage: 'Enable ransomware canary protection. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.device_control.filter_images',
+    first_supported_version: '9.2',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.device_control.filter_images',
+      {
+        defaultMessage:
+          "A value of 'false' disables the filtering of file backed images and CD-ROM volumes. Default: true.",
       }
     ),
   },
@@ -948,7 +1006,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.malware.quarantine',
       {
         defaultMessage:
-          'Whether quarantine should be enabled when malware prevention is enabled. Default: true.',
+          'Enable quarantining files when malware prevention is enabled. Default: true.',
       }
     ),
   },
@@ -959,7 +1017,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.malware.max_file_size_bytes',
       {
         defaultMessage:
-          'The maximum file size in bytes that should be used for evaluating malware. Default: 78643200.',
+          'Control the maximum file size in bytes that should be evaluated for malware. Default: 78643200.',
       }
     ),
   },
@@ -981,7 +1039,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.memory_protection.enable_shared_dirty_scan',
       {
         defaultMessage:
-          'Instead of ignoring regions with just no Private_Dirty bytes, ingore regions with the combination of no Private_Dirty bytes, no Shared_Dirty bytes and is file backed. This has the effect of scanning more memory regions because of the loosened restrictions. Default: true.',
+          "Instead of ignoring memory regions with just no 'Private_Dirty' bytes, ignore regions with the combination of no 'Private_Dirty' bytes, no 'Shared_Dirty' bytes and is file-backed. This has the effect of scanning more memory regions because of the loosened restrictions. Default: true.",
       }
     ),
   },
@@ -992,7 +1050,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.shellcode_collect_sample',
       {
         defaultMessage:
-          'Collect 4MB of memory surrounding detected shellcode regions. Default: false. Enabling this value may significantly increase the amount of data stored in Elasticsearch.',
+          'Collect 4MB of memory surrounding detected shellcode regions. Warning: enabling this value may significantly increase the amount of data stored in Elasticsearch. Default: false.',
       }
     ),
   },
@@ -1003,7 +1061,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.memory_scan_collect_sample',
       {
         defaultMessage:
-          'Collect 4MB of memory surrounding detected malicious memory regions. Default: false. Enabling this value may significantly increase the amount of data stored in Elasticsearch.',
+          'Collect 4MB of memory surrounding detected malicious memory regions. Warning: enabling this value may significantly increase the amount of data stored in Elasticsearch. Default: false.',
       }
     ),
   },
@@ -1014,7 +1072,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.memory_protection.shellcode_enhanced_pe_parsing',
       {
         defaultMessage:
-          'Attempt to identify and extract PE metadata from injected shellcode, including Authenticode signatures and version resource information. Default: true.',
+          'Collect 4MB of memory surrounding detected shellcode regions. Warning: enabling this value may significantly increase the amount of data stored in Elasticsearch. Default: false.',
       }
     ),
   },
@@ -1025,7 +1083,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.memory_protection.memory_scan_collect_sample',
       {
         defaultMessage:
-          'Collect 4MB of memory surrounding detected malicious memory regions. Default: false. Enabling this value may significantly increase the amount of data stored in Elasticsearch.',
+          'Collect 4MB of memory surrounding detected malicious memory regions. Warning: enabling this value may significantly increase the amount of data stored in Elasticsearch. Default: false.',
       }
     ),
   },
@@ -1047,7 +1105,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.memory_protection.memory_scan_collect_sample',
       {
         defaultMessage:
-          'Collect 4MB of memory surrounding detected malicious memory regions. Default: false. Enabling this value may significantly increase the amount of data stored in Elasticsearch.',
+          'Collect 4MB of memory surrounding detected malicious memory regions. Warning: enabling this value may significantly increase the amount of data stored in Elasticsearch. Default: false.',
       }
     ),
   },
@@ -1068,7 +1126,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.artifacts.user.ca_cert',
       {
-        defaultMessage: 'PEM-encoded certificate for Fleet Server certificate authority.',
+        defaultMessage:
+          'Provide an additional PEM-encoded certificate for Fleet Server SSL/TLS verification. Default: none.',
       }
     ),
   },
@@ -1078,7 +1137,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.artifacts.user.ca_cert',
       {
-        defaultMessage: 'PEM-encoded certificate for Fleet Server certificate authority.',
+        defaultMessage:
+          'Provide an additional PEM-encoded certificate for Fleet Server SSL/TLS verification. Default: none.',
       }
     ),
   },
@@ -1088,7 +1148,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.artifacts.user.ca_cert',
       {
-        defaultMessage: 'PEM-encoded certificate for Fleet Server certificate authority.',
+        defaultMessage:
+          'Provide an additional PEM-encoded certificate for Fleet Server SSL/TLS verification. Default: none.',
       }
     ),
   },
@@ -1108,7 +1169,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.diagnostic.rollback_telemetry_enabled',
       {
-        defaultMessage: 'Enable diagnostic rollback telemetry. Default: true',
+        defaultMessage:
+          'Enable diagnostic self-healing features without affecting other diagnostic features. Default: true.',
       }
     ),
   },
@@ -1119,7 +1181,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.kernel.network_extension.enable_content_filtering',
       {
         defaultMessage:
-          'Enable or disable the network content filter, this will enable/disable network eventing. Host isolation will fail if this option is disabled. Default: true',
+          'Enable the network content filter, which will enable network eventing. Warning: host isolation will fail if this is disabled. Default: true.',
       }
     ),
   },
@@ -1130,7 +1192,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.kernel.network_extension.enable_packet_filtering',
       {
         defaultMessage:
-          'Enable or disable the network packet filter. Host isolation will fail if this option is disabled. Default: true',
+          'Enable the network packet filter. Warning: host isolation will fail if this is disabled. Default: true.',
       }
     ),
   },
@@ -1141,7 +1203,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.shellcode_trampoline_detection',
       {
         defaultMessage:
-          'Enable trampoline-based shellcode injection detection as a part of memory protection. Default: true',
+          'Enable trampoline-based shellcode injection detection as a part of memory protection. Default: true.',
       }
     ),
   },
@@ -1152,7 +1214,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.kernel.capture_mode',
       {
         defaultMessage:
-          'Allows users to control whether kprobes or ebpf are used to gather data. Options are kprobe, ebpf, or auto. Auto uses ebpf if possible, otherwise uses kprobe. Default: auto',
+          "Control whether kprobes or eBPF are used to gather data. Options are 'kprobe', 'ebpf', or 'auto'. 'auto' uses eBPF if possible, otherwise it uses 'kprobe'. Default: auto.",
       }
     ),
   },
@@ -1162,7 +1224,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.event_filter.default',
       {
-        defaultMessage: 'Download default event filter rules from Elastic.  Default: true',
+        defaultMessage: 'Download and use default event filter rules from Elastic. Default: true.',
       }
     ),
   },
@@ -1172,7 +1234,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.event_filter.default',
       {
-        defaultMessage: 'Download default event filter rules from Elastic.  Default: true',
+        defaultMessage: 'Download and use default event filter rules from Elastic. Default: true.',
       }
     ),
   },
@@ -1182,7 +1244,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.event_filter.default',
       {
-        defaultMessage: 'Download default event filter rules from Elastic.  Default: true',
+        defaultMessage: 'Download and use default event filter rules from Elastic. Default: true.',
       }
     ),
   },
@@ -1193,7 +1255,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.utilization_limits.cpu',
       {
         defaultMessage:
-          'The percentage of the aggregate system CPU to restrict Endpoint to. The range is 20-100%. Anything under 20 gets ignored and causes a policy warning.  Default: 100',
+          'Restrict Endpoint CPU usage to a percentage of the total system CPU. The range is 20-100%. Values under 20 are ignored and trigger a policy warning. Default: 50.',
       }
     ),
   },
@@ -1204,7 +1266,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.utilization_limits.cpu',
       {
         defaultMessage:
-          'The percentage of the aggregate system CPU to restrict Endpoint to. The range is 20-100%. Anything under 20 gets ignored and causes a policy warning.  Default: 50',
+          'Restrict Endpoint CPU usage to a percentage of the total system CPU. The range is 20-100%. Values under 20 are ignored and trigger a policy warning. Default: 50.',
       }
     ),
   },
@@ -1215,7 +1277,19 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.rollback.self_healing.enabled',
       {
         defaultMessage:
-          'Self-healing erases attack artifacts when prevention alerts are triggered. Warning: data loss can occur. Default: false',
+          'Enable self-healing by erasing attack artifacts when prevention alerts are triggered. Warning: data loss can occur. Default: false.',
+      }
+    ),
+    license: 'platinum',
+  },
+  {
+    key: 'windows.advanced.alerts.rollback.self_healing.process_enabled',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.rollback.self_healing.process_enabled',
+      {
+        defaultMessage:
+          'Enable automatic removal of malware processes when a related prevention alert fires, including processes which were not directly involved in the alert. Requires rollback.self_healing.enabled to also be enabled. Default: true.',
       }
     ),
     license: 'platinum',
@@ -1227,7 +1301,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.fanotify.ignore_unknown_filesystems',
       {
         defaultMessage:
-          'Whether fanotify should ignore unknown filesystems. When true, only CI tested filesystems will be marked by default; additional filesystems can be added or removed with "monitored_filesystems" and "ignored_filesystems", respectively. When false, only an internally curated list of filesystems will be ignored, all others will be marked; additional filesystems can be ignored via "ignored_filesystems". "monitored_filesystems" is ignored when "ignore_unknown_filesystems" is false. Default: true',
+          'Control if the fanotify subsystem should ignore unknown filesystems. By default only Elastic-tested filesystems are monitored. If set to false, all filesystems, excluding certain known-benign filesystems, will be monitored. Default: true.',
       }
     ),
   },
@@ -1238,7 +1312,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.fanotify.monitored_filesystems',
       {
         defaultMessage:
-          'Additional filesystems for fanotify to monitor. The format is a comma separated list of filesystem names as they appear in "/proc/filesystems", e.g. "jfs,ufs,ramfs". It is recommended to avoid network-backed filesystems. When "ignore_unknown_filesystems" is false, this option is ignored. When "ignore_unknown_filesystems" is true, parsed entries of this option are monitored by fanotify unless overridden by entries in "ignored_filesystems" or internally known bad filesystems.',
+          "Provide a comma-separated list of additional filesystems for fanotify subsystem to monitor. Names should be as they appear in '/proc/filesystems', for example 'jfs,ufs,ramfs'. When linux.advanced.fanotify.ignore_unknown_filesystems is false, this option is ignored. Warning: it's recommended to avoid network backed filesystems. Default: none.",
       }
     ),
   },
@@ -1249,7 +1323,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.fanotify.ignored_filesystems',
       {
         defaultMessage:
-          'Additional filesystems for fanotify to ignore. The format is a comma separated list of filesystem names as they appear in "/proc/filesystems", e.g. "ext4,tmpfs". When "ignore_unknown_filesystems" is false, parsed entries of this option supplement internally known bad filesystems to be ignored. When "ignore_unknown_filesystems" is true, parsed entries of this option override entries in "monitored_filesystems" and internally CI tested filesystems.',
+          "Provide a comma-separated list of additional filesystems for the fanotify subsystem to ignore. Names should be as they appear in '/proc/filesystems', for example 'ext4,tmpfs'. Default: none.",
       }
     ),
   },
@@ -1260,7 +1334,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.fanotify.seccomp_restricted',
       {
         defaultMessage:
-          'Prevent the Defend permission checking thread from calling the open/openat syscalls when running on kernels which require FAN_OPEN_PERM (older than 5.0). Will avoid potential deadlocks with other anti-virus vendors at the cost of racy hash-based trusted application entries. Ignored when running on newer kernels. Default: false',
+          "Prevent permission checking from using the 'open'/'openat' syscalls when running on kernels which require 'FAN_OPEN_PERM' (older than 5.0). This will avoid potential deadlocks with other antivirus products at the cost of racy hash-based trusted application entries. Ignored when running on newer kernels. Default: false.",
       }
     ),
   },
@@ -1271,7 +1345,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.context_manipulation_detection',
       {
         defaultMessage:
-          'Detect injection based on thread context manipulation (e.g. `SetThreadContext`) as a part of memory protection. Default: true',
+          "Detect injection based on thread context manipulation (e.g. 'SetThreadContext') as a part of memory protection. Default: true",
       }
     ),
   },
@@ -1282,7 +1356,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.image_and_process_file_timestamp',
       {
         defaultMessage:
-          'Collect executable/dll timestamps for process and async image load events. Default: true',
+          'Collect executable/dll timestamps for process and asynchronous image load events. Default: true.',
       }
     ),
   },
@@ -1293,7 +1367,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.host_isolation.allowed',
       {
         defaultMessage:
-          'A value of false disallows host isolation activity on Linux endpoints, regardless of whether host isolation is supported. Note that if a host is currently not isolated, it will refuse to isolate, and likewise, a host will refuse to release if it is currently isolated. A value of true will allow Linux endpoints to isolate if supported. Default: true',
+          'Force disable host isolation. If a host is currently not isolated, it will refuse to isolate, and likewise, a host will refuse to release if it is currently isolated. Default: true.',
       }
     ),
   },
@@ -1304,7 +1378,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.capture_env_vars',
       {
         defaultMessage:
-          'The list of environment variables to capture (up to five), separated by commas.',
+          'Provide a comma-separated list of up to five environment variables to capture in process create events. Default: none.',
       }
     ),
   },
@@ -1315,7 +1389,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.disable_fd_kprobes',
       {
         defaultMessage:
-          'When only process events are being collected, this option will disable file descriptor tracking probes. This can be used to reduce Endpoint processing at the expense of missing fchdir based working directory changes. This only applies if the capture_mode is kprobe or if auto resolves tracefs (kprobe) probes. ebpf based event collection ignores this setting. Default is false.',
+          'Disable file descriptor tracking kprobes to reduce Endpoint processing at the expense of missing fchdir-based working directory changes. If eBPF is used for system monitoring, this option is ignored. If file events are enabled, this option is ineffective. Default: false.',
       }
     ),
   },
@@ -1326,7 +1400,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.enable_caps',
       {
         defaultMessage:
-          'This setting ensures thread capability arrays are not pruned from Linux process events before being sent to Elasticsearch. At the expense of higher Endpoint data volumes, a true value will ensure capability matching detection rules running within the Elastic stack can match. Detection rules running within Elastic Defend are unaffected because capabilities are conditionally pruned after rule processing. Default is false.',
+          'Include Linux process capabilities in process events written to Elasticsearch. Capabilities must be enabled for some SIEM detection rules. Warning: enabling this will increase data volume. For 8.13 and earlier, default: true. For 8.14 and later, default: false.',
       }
     ),
   },
@@ -1337,7 +1411,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.callstacks.emit_in_events',
       {
         defaultMessage:
-          'If set, callstacks will be included in regular events where they are collected. Otherwise, they are only included in events that trigger behavioral protection rules. Note that setting this may significantly increase data volumes. Default: false',
+          'Include callstacks in regular events whenever possible. When disabled (false), they are only included in events that trigger behavioral protection rules. Warning: event filtering is recommended if enabled. Default: false.',
       }
     ),
   },
@@ -1347,7 +1421,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.callstacks.process',
       {
-        defaultMessage: 'Collect callstacks during process events?  Default: true',
+        defaultMessage: 'Collect callstacks during process events. Default: true.',
       }
     ),
   },
@@ -1357,7 +1431,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.callstacks.image_load',
       {
-        defaultMessage: 'Collect callstacks during image/library load events?  Default: true',
+        defaultMessage: 'Collect callstacks during image/library load events. Default: true.',
       }
     ),
   },
@@ -1367,7 +1441,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.callstacks.file',
       {
-        defaultMessage: 'Collect callstacks during file events?  Default: true',
+        defaultMessage: 'Collect callstacks during file events. Default: true.',
       }
     ),
   },
@@ -1377,7 +1451,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.callstacks.registry',
       {
-        defaultMessage: 'Collect callstacks during registry events?  Default: true',
+        defaultMessage: 'Collect callstacks during registry events. Default: true.',
       }
     ),
   },
@@ -1388,7 +1462,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.callstacks.timeout_microseconds',
       {
         defaultMessage:
-          'Maximum runtime of inline callstack collection/enrichment.  Default: 100000',
+          'Alter the maximum runtime of inline callstack collection/enrichment, in microseconds. Default: 100000.',
       }
     ),
   },
@@ -1399,7 +1473,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.callstacks.use_hardware',
       {
         defaultMessage:
-          'Use hardware callstacks (e.g. Intel CET) if supported by the OS and CPU.  Default: true',
+          'Use hardware callstacks (e.g. Intel CET) if supported by the OS and CPU. Default: true.',
       }
     ),
   },
@@ -1410,7 +1484,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.callstacks.exclude_hotpatch_extension_pages',
       {
         defaultMessage:
-          'Exclude Windows 11 24H2 hotpatch extension pages, which resemble injected code, from callstack module stomp scanning.  Default: true',
+          'Exclude Windows 11 24H2 hotpatch extension pages, which resemble injected code, from callstack module stomp scanning. Default: true.',
       }
     ),
   },
@@ -1421,7 +1495,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.process_ancestry_length',
       {
         defaultMessage:
-          'Maximum number of process ancestry entries to include in process events. Default: 5',
+          'Maximum number of process ancestry entries to include in process events. For 8.14 and earlier, default: 20. For 8.15 and later, default: 5.',
       }
     ),
   },
@@ -1432,7 +1506,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.process_ancestry_length',
       {
         defaultMessage:
-          'Maximum number of process ancestry entries to include in process events. Default: 5',
+          'Maximum number of process ancestry entries to include in process events. For 8.14 and earlier, default: 20. For 8.15 and later, default: 5.',
       }
     ),
   },
@@ -1443,7 +1517,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.process_ancestry_length',
       {
         defaultMessage:
-          'Maximum number of process ancestry entries to include in process events. Default: 5',
+          'Maximum number of process ancestry entries to include in process events. For 8.14 and earlier, default: 20. For 8.15 and later, default: 5.',
       }
     ),
   },
@@ -1454,7 +1528,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.ancestry_in_all_events',
       {
         defaultMessage:
-          'Include ancestor process entity IDs in all event types, by default it is only included in alerts and process events. Default: false',
+          'Include ancestor process entity IDs in all event types; by default they are only included in alerts and process events. Default: false.',
       }
     ),
   },
@@ -1465,7 +1539,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.ancestry_in_all_events',
       {
         defaultMessage:
-          'Include ancestor process entity IDs in all event types, by default it is only included in alerts and process events. Default: false',
+          'Include ancestor process entity IDs in all event types; by default they are only included in alerts and process events. Default: false.',
       }
     ),
   },
@@ -1476,7 +1550,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.ancestry_in_all_events',
       {
         defaultMessage:
-          'Include ancestor process entity IDs in all event types, by default it is only included in alerts and process events. Default: false',
+          'Include ancestor process entity IDs in all event types; by default they are only included in alerts and process events. Default: false.',
       }
     ),
   },
@@ -1487,7 +1561,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.artifacts.global.proxy_url',
       {
         defaultMessage:
-          'Proxy server to use when downloading global artifact manifests. Default: none',
+          'Override all other proxy settings for use when downloading protection artifact updates. Default: none.',
       }
     ),
   },
@@ -1498,7 +1572,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.artifacts.global.proxy_disable',
       {
         defaultMessage:
-          'If the proxy setting should be used when downloading global artifact manifests. Default: false',
+          'Disable the use of a proxy when downloading protection artifact updates. Default: false.',
       }
     ),
   },
@@ -1509,7 +1583,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.artifacts.user.proxy_url',
       {
         defaultMessage:
-          'Proxy server to use when downloading user artifact manifests. Default: none',
+          'Override all other proxy settings for use when downloading user artifact updates from Fleet Server. Default: none.',
       }
     ),
   },
@@ -1520,7 +1594,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.artifacts.user.proxy_disable',
       {
         defaultMessage:
-          'If the proxy setting should be used when downloading user artifact manifests. Default: false',
+          'Disable the use of a proxy when downloading user artifact updates. Default: false.',
       }
     ),
   },
@@ -1531,7 +1605,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.artifacts.global.proxy_url',
       {
         defaultMessage:
-          'Proxy server to use when downloading global artifact manifests. Default: none',
+          'Override all other proxy settings for use when downloading protection artifact updates. Default: none.',
       }
     ),
   },
@@ -1542,7 +1616,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.artifacts.global.proxy_disable',
       {
         defaultMessage:
-          'If the proxy setting should be used when downloading global artifact manifests. Default: false',
+          'Disable the use of a proxy when downloading protection artifact updates. Default: false.',
       }
     ),
   },
@@ -1553,7 +1627,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.artifacts.user.proxy_url',
       {
         defaultMessage:
-          'Proxy server to use when downloading user artifact manifests. Default: none',
+          'Override all other proxy settings for use when downloading user artifact updates from Fleet Server. Default: none.',
       }
     ),
   },
@@ -1564,7 +1638,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.artifacts.user.proxy_disable',
       {
         defaultMessage:
-          'If the proxy setting should be used when downloading user artifact manifests. Default: false',
+          'Disable the use of a proxy when downloading user artifact updates. Default: false.',
       }
     ),
   },
@@ -1575,7 +1649,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.artifacts.global.proxy_url',
       {
         defaultMessage:
-          'Proxy server to use when downloading global artifact manifests. Default: none',
+          'Override all other proxy settings for use when downloading protection artifact updates. Default: none.',
       }
     ),
   },
@@ -1586,7 +1660,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.artifacts.global.proxy_disable',
       {
         defaultMessage:
-          'If the proxy setting should be used when downloading global artifact manifests. Default: false',
+          'Disable the use of a proxy when downloading protection artifact updates. Default: false.',
       }
     ),
   },
@@ -1597,7 +1671,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.artifacts.user.proxy_url',
       {
         defaultMessage:
-          'Proxy server to use when downloading user artifact manifests. Default: none',
+          'Override all other proxy settings for use when downloading user artifact updates from Fleet Server. Default: none.',
       }
     ),
   },
@@ -1608,7 +1682,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.artifacts.user.proxy_disable',
       {
         defaultMessage:
-          'If the proxy setting should be used when downloading user artifact manifests. Default: false',
+          'Disable the use of a proxy when downloading user artifact updates. Default: false.',
       }
     ),
   },
@@ -1619,7 +1693,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api',
       {
         defaultMessage:
-          'Controls whether ETW API events are enabled. Set to false to disable ETW event collection. Default: true',
+          "Enable ETW API events. 'false' disables them even if they are needed by other features. Default: true.",
       }
     ),
   },
@@ -1629,7 +1703,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api_disabled',
       {
-        defaultMessage: 'A comma separated list of API names to selectively disable.',
+        defaultMessage:
+          'Provide a comma-separated list of API names to selectively disable. Default: none.',
       }
     ),
   },
@@ -1640,7 +1715,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api_verbose',
       {
         defaultMessage:
-          'Controls whether high volume API events are forwarded. Event filtering is recommended if enabled. Default: false',
+          'Send high-volume API events to Elasticsearch. Warning: event filtering is recommended if enabled. Default: false.',
       }
     ),
   },
@@ -1651,7 +1726,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.rollback.self_healing.registry_enabled',
       {
         defaultMessage:
-          'Enables self-healing of registry based malware artifacts. Requires rollback.self_healing.enabled to also be enabled. Default: true',
+          'Enable self-healing of registry based malware artifacts when prevention alerts are triggered. Requires windows.advanced.alerts.rollback.self_healing.enabled to also be enabled. Default: true.',
       }
     ),
   },
@@ -1662,7 +1737,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.callstacks.include_network_images',
       {
         defaultMessage:
-          'Should executables and DLLs on network shares be parsed for call stack symbols?  This may cause Endpoint to hang on some networks. Default: true',
+          'Parse executables and DLLs on network shares for callstack symbols. Disable this if Endpoint hangs because of a network file system. Default: true.',
       }
     ),
   },
@@ -1673,7 +1748,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.ppl.harden_images',
       {
         defaultMessage:
-          'Mitigate attacks like PPLFault by preventing Protected Process Light (PPL) processes from loading DLLs over the network. Default: true',
+          'Mitigate attacks like PPLFault by preventing Protected Process Light (PPL) processes from loading DLLs over the network. Default: true.',
       }
     ),
   },
@@ -1684,7 +1759,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.ppl.harden_am_images',
       {
         defaultMessage:
-          'Apply the windows.advanced.kernel.ppl.harden_images mitigation to Anti-Malware PPL as well. Disable this if third-party Anti-Malware is blocked from loading DLLs over the network. If this happens, there will be Event ID 8 events in the "Microsoft-Windows-Security-Mitigations/Kernel Mode" event log. Default: true',
+          "Apply the windows.advanced.kernel.ppl.harden_images mitigation to Anti-Malware PPL as well. Disable this if third-party Anti-Malware is blocked from loading DLLs over the network. If this happens, there will be Event ID 8 events in the 'Microsoft-Windows-Security-Mitigations/Kernel Mode' event log.  Default: true.",
       }
     ),
   },
@@ -1694,8 +1769,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.dev_drives.harden',
       {
-        defaultMessage:
-          'Controls whether malware protection is applied to dev drives. Default: false',
+        defaultMessage: 'Apply malware protection to dev drives. Default: false.',
       }
     ),
   },
@@ -1705,8 +1779,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.malware.networkshare',
       {
-        defaultMessage:
-          'Controls whether malware protection is applied to network drives. Default: true',
+        defaultMessage: 'Apply malware protection to network drives. Default: true.',
       }
     ),
   },
@@ -1717,7 +1790,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.check_debug_registers',
       {
         defaultMessage:
-          'Check debug registers inline to detect the use of hardware breakpoints. Malware may use hardware breakpoints to forge benign-looking call stacks. Default: true',
+          'Check debug registers inline to detect the use of hardware breakpoints. Malware may use hardware breakpoints to forge benign-looking call stacks. Default: true.',
       }
     ),
   },
@@ -1728,7 +1801,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.kernel.fileaccess',
       {
         defaultMessage:
-          'A value of false overrides other config settings that would enable kernel fileaccess events. Default: true.',
+          "Enable kernel file access events. 'false' disables them even if they are needed by other features. Default: true.",
       }
     ),
   },
@@ -1739,7 +1812,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.image_load.origin_info_collection',
       {
         defaultMessage:
-          "If set to true, image load events include dll.origin_url, dll.origin_referrer_url, and dll.Ext.windows.zone_identifier. These fields normally show where the loaded DLL was downloaded from, using information taken from the file's Mark of the Web. Default: false",
+          "Include 'dll.origin_url', 'dll.origin_referrer_url', and 'dll.Ext.windows.zone_identifier' in image load events. These fields normally show where the loaded DLL was downloaded from, using information taken from the file's Mark of the Web. For 9.1 and earlier, default: false. For 9.2 and later, default: true.",
       }
     ),
   },
@@ -1750,7 +1823,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.image_load',
       {
         defaultMessage:
-          'A value of false overrides other config settings that would enable kernel image load events. Default: true.',
+          "Enable kernel image load events. 'false' disables them even if they are needed by other features. Default: true.",
       }
     ),
   },
@@ -1761,7 +1834,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.image_load.collect',
       {
         defaultMessage:
-          'Collect and send image load events to Elasticsearch. Take caution, this can be a very high data volume. Adding an event filter to drop unwanted events is strongly recommended. Default: false',
+          'Collect and send image load events to Elasticsearch. Warning: this can lead to very high data volumes; use of event filters to drop unwanted events is strongly recommended. Default: false.',
       }
     ),
   },
@@ -1772,7 +1845,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.document_enrichment.fields',
       {
         defaultMessage:
-          'A comma delimited set of key=value pairs of values to add into all Endpoint documents. Each key must begin with Custom. An example is Custom.key=value1,Custom.key2=value2',
+          "Provide a comma-delimited set of key=value pairs of values to add into all documents. Each key must begin with 'Custom'. An example is 'Custom.key=value1,Custom.key2=value2'. Default: none.",
       }
     ),
   },
@@ -1783,7 +1856,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.document_enrichment.fields',
       {
         defaultMessage:
-          'A comma delimited set of key=value pairs of values to add into all Endpoint documents. Each key must begin with Custom. An example is Custom.key=value1,Custom.key2=value2',
+          "Provide a comma-delimited set of key=value pairs of values to add into all documents. Each key must begin with 'Custom'. An example is 'Custom.key=value1,Custom.key2=value2'. Default: none.",
       }
     ),
   },
@@ -1794,7 +1867,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.document_enrichment.fields',
       {
         defaultMessage:
-          'A comma delimited set of key=value pairs of values to add into all Endpoint documents. Each key must begin with Custom. An example is Custom.key=value1,Custom.key2=value2',
+          "Provide a comma-delimited set of key=value pairs of values to add into all documents. Each key must begin with 'Custom'. An example is 'Custom.key=value1,Custom.key2=value2'. Default: none.",
       }
     ),
   },
@@ -1805,7 +1878,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.file_cache.file_object_cache_size',
       {
         defaultMessage:
-          'Maximum size of the file cache.  Larger values can improve performance but increase memory usage. Default: 250',
+          'Control the number of file metadata cache entries stored in memory. Larger values can improve performance but increase memory usage. Default: 5000.',
       }
     ),
   },
@@ -1816,7 +1889,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.file_cache.file_object_cache_size',
       {
         defaultMessage:
-          'Maximum size of the file cache.  Larger values can improve performance but increase memory usage. Default: 250',
+          'Control the number of file metadata cache entries stored in memory. Larger values can improve performance but increase memory usage. Default: 5000.',
       }
     ),
   },
@@ -1827,7 +1900,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.file_cache.file_object_cache_size',
       {
         defaultMessage:
-          'Maximum size of the file cache.  Larger values can improve performance but increase memory usage. Default: 250',
+          'Control the number of file metadata cache entries stored in memory. Larger values can improve performance but increase memory usage. Default: 5000.',
       }
     ),
   },
@@ -1838,7 +1911,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.utilization_limits.resident_memory_target_mb',
       {
         defaultMessage:
-          'How much memory (in MB) should Endpoint aim to keep resident in RAM? This setting affects Private Working Set on Windows. It does not affect the amount of virtual memory that Endpoint requests from the OS (Private Bytes aka Commit Charge). If plenty of unused RAM is available, Windows may give Endpoint more RAM than requested to reduce unnecessary paging and improve performance. If the current Defend configuration requires regularly touching more than the requested amount of memory, then the Private Working Set will be higher than requested here. Default 200. This value cannot be decreased below 50.',
+          'Control how much memory (in MB) should be kept resident in RAM. This setting affects Private Working Set but does not affect the amount of virtual memory requested from the OS (Private Bytes or Commit Charge). If plenty of unused RAM is available, Windows may give elastic-endpoint.exe more RAM than requested to reduce unnecessary paging and improve performance. If the current Elastic Defend configuration requires regularly touching more than the requested amount of memory, then the Private Working Set will be higher than requested here. The minimum value is 50. Default: 200.',
       }
     ),
   },
@@ -1848,8 +1921,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.sample_collection',
       {
-        defaultMessage:
-          "A value of 'false' disables malicious sample collection for Windows alerts. Default: true.",
+        defaultMessage: 'Allow Elastic to collect samples of unknown malware files. Default: true.',
       }
     ),
   },
@@ -1859,8 +1931,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.alerts.sample_collection',
       {
-        defaultMessage:
-          "A value of 'false' disables malicious sample collection for Mac alerts. Default: true.",
+        defaultMessage: 'Allow Elastic to collect samples of unknown malware files. Default: true.',
       }
     ),
   },
@@ -1870,8 +1941,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.alerts.sample_collection',
       {
-        defaultMessage:
-          "A value of 'false' disables malicious sample collection for Linux alerts. Default: true.",
+        defaultMessage: 'Allow Elastic to collect samples of unknown malware files. Default: true.',
       }
     ),
   },
@@ -1882,7 +1952,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.disable_image_load_suppression_cache',
       {
         defaultMessage:
-          'The image load suppression cache improves system performance by enabling Endpoint to tell its kernel driver about DLLs which are un-interesting and will never be evented upon. This feature improves system reponsiveness and reduces Endpoint CPU usage.  Use this setting only for troubleshooting if image load events are not being generated as expected. Default: false',
+          'Disable the cache system used to improve image (DLL) load performance. Only disable this if image load events are not being generated as expected. Default: false.',
       }
     ),
   },
@@ -1893,7 +1963,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.disable_registry_write_suppression',
       {
         defaultMessage:
-          'Registry write suppression improves system performance by enabling Endpoint to tell its driver that certain types of registry operations are uninteresting. Once deemed uninteresting, the driver can quickly drop these events, improving system responsiveness and reducing Endpoint CPU usage. Use this setting only for troubleshooting if registry events are not functioning as expected. Default: false',
+          'Ignore uninteresting registry events for performance. Only modify this to troubleshoot if registry events are not functioning as expected. Default: false.',
       }
     ),
   },
@@ -1904,7 +1974,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.process.creation_flags',
       {
         defaultMessage:
-          'Enables an additional enrichment for process events. Use this setting only for troubleshooting if process events are not functioning as expected. Default: true',
+          'Enrich process events with process creation flags. Only use this setting to troubleshoot if process events are not functioning as expected. Default: true.',
       }
     ),
   },
@@ -1915,7 +1985,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.process.origin_info_collection',
       {
         defaultMessage:
-          "If set to true, process events include process.origin_url, process.origin_referrer_url, and process.Ext.windows.zone_identifier. These fields normally show where the process's executable file was downloaded from, using information taken from the file's Mark of the Web. Default: false",
+          "Include 'process.origin_url', 'process.origin_referrer_url', and 'process.Ext.windows.zone_identifier' in process events. These fields normally show where the process's executable file was downloaded from, using information taken from the file's Mark of the Web. For 9.1 and earlier, default: false. For 9.2 and later, default: true.",
       }
     ),
   },
@@ -1926,7 +1996,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.memory_scan',
       {
         defaultMessage:
-          'On behavior alerts, this feature enables an additional scan of identified memory regions against well-known malware signatures. Default: true',
+          'Enable an additional scan of suspicious memory regions against well-known malware signatures when malicious behavior alerts are triggered. Default: true.',
       }
     ),
   },
@@ -1970,7 +2040,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.artifacts.global.ca_cert',
       {
         defaultMessage:
-          'PEM-encoded certificate for security artifacts server certificate authority.',
+          'Provide an additional PEM-encoded certificate to validate the protection artifact update SSL/TLS server. Default: none.',
       }
     ),
   },
@@ -1981,7 +2051,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.artifacts.global.ca_cert',
       {
         defaultMessage:
-          'PEM-encoded certificate for security artifacts server certificate authority.',
+          'Provide an additional PEM-encoded certificate to validate the protection artifact update SSL/TLS server. Default: none.',
       }
     ),
   },
@@ -1992,7 +2062,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.artifacts.global.ca_cert',
       {
         defaultMessage:
-          'PEM-encoded certificate for security artifacts server certificate authority.',
+          'Provide an additional PEM-encoded certificate to validate the protection artifact update SSL/TLS server. Default: none.',
       }
     ),
   },
@@ -2003,7 +2073,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.event_on_access.file_paths',
       {
         defaultMessage:
-          'Comma-separated list of additional wildcard patterns that will be monitored for read access. Endpoint will report at most one match per pattern per process. Endpoint will attempt to convert drive letters to NT paths (e.g. \\\\Device\\\\HarddiskVolume4), but conversion will fail for per-user drives such as network drives. Put only commas (no spaces) between entries. Wildcard matching is case-insensitive. See Microsoft FsRtlIsNameInExpression documentation for wildcard matching rules.',
+          "Provide a comma-separated list of additional wildcard patterns that will be monitored for read access. At most one match per pattern per process will be reported. If possible, drive letters will be converted to NT paths (e.g. 'DeviceHarddiskVolume4'), but conversion will fail for per-user drives, such as network drives. Put only commas (no spaces) between entries. Wildcard matching is case-insensitive. Check Microsoft FsRtlIsNameInExpression documentation for wildcard matching rules. Default: none.",
       }
     ),
   },
@@ -2025,7 +2095,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.event_on_access.file_paths',
       {
         defaultMessage:
-          'Comma-separated list of additional wildcard patterns that will be monitored for read access.  Put only commas (no spaces) between entries. Wildcard matching is case-insensitive.',
+          'Comma-separated list of additional wildcard patterns that will be monitored for read access. Put only commas (no spaces) between entries. Wildcard matching is case-insensitive.',
       }
     ),
   },
@@ -2035,7 +2105,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.deduplicate_network_events',
       {
-        defaultMessage: "A value of 'false' disables network events deduplication. Default: true",
+        defaultMessage:
+          'Deduplicate network events based on repeated Src-IP/Dst-IP/Dst-Port/PID tuple grouping. For 8.14 and earlier, default: false. For 8.15 and later, default: true.',
       }
     ),
   },
@@ -2045,7 +2116,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.deduplicate_network_events',
       {
-        defaultMessage: "A value of 'false' disables network events deduplication. Default: true",
+        defaultMessage:
+          'Deduplicate network events based on repeated Src-IP/Dst-IP/Dst-Port/PID tuple grouping. For 8.14 and earlier, default: false. For 8.15 and later, default: true.',
       }
     ),
   },
@@ -2055,7 +2127,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.deduplicate_network_events',
       {
-        defaultMessage: "A value of 'false' disables network events deduplication. Default: true",
+        defaultMessage:
+          'Deduplicate network events based on repeated Src-IP/Dst-IP/Dst-Port/PID tuple grouping. For 8.14 and earlier, default: false. For 8.15 and later, default: true.',
       }
     ),
   },
@@ -2066,7 +2139,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.deduplicate_network_events_below_bytes',
       {
         defaultMessage:
-          "Deduplication transfer threshold in bytes. Events exceeding the transfer will not be deduplicated. A value '0' means disabled. Default: 1048576 (1MB)",
+          'Specify a network event deduplication transfer threshold, in bytes. Events for connections exceeding the threshold will always be emitted. A value 0 disables this feature. Default: 1048576 (1MB).',
       }
     ),
   },
@@ -2077,7 +2150,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.deduplicate_network_events_below_bytes',
       {
         defaultMessage:
-          "Deduplication transfer threshold in bytes. Events exceeding the transfer will not be deduplicated. A value '0' means disabled. Default: 1048576 (1MB)",
+          'Specify a network event deduplication transfer threshold, in bytes. Events for connections exceeding the threshold will always be emitted. A value 0 disables this feature. Default: 1048576 (1MB).',
       }
     ),
   },
@@ -2088,7 +2161,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.deduplicate_network_events_below_bytes',
       {
         defaultMessage:
-          "Deduplication transfer threshold in bytes. Events exceeding the transfer will not be deduplicated. A value '0' means disabled. Default: 1048576 (1MB)",
+          'Specify a network event deduplication transfer threshold, in bytes. Events for connections exceeding the threshold will always be emitted. A value 0 disables this feature. Default: 1048576 (1MB).',
       }
     ),
   },
@@ -2099,7 +2172,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.enforce_registry_filters',
       {
         defaultMessage:
-          'Reduce data volume by filtering out registry events which are not relevant to behavioral protections.  Default: true',
+          'Reduce data volume by filtering out registry events which are not relevant to behavioral protections. Default: true.',
       }
     ),
   },
@@ -2110,7 +2183,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.file.origin_info_collection',
       {
         defaultMessage:
-          "If set to true, file events include file origin details: file.origin_url, file.origin_referrer_url, and file.Ext.windows.zone_identifier. These fields show the details of file's Mark of the Web. Default: true",
+          "Include 'file.origin_url', 'file.origin_referrer_url', and 'file.Ext.windows.zone_identifier' in file events. These fields show the details of file's Mark of the Web. Default: true.",
       }
     ),
   },
@@ -2121,7 +2194,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.file.max_hash_size_mb',
       {
         defaultMessage:
-          "Attempt to include file.hash.sha256 in file events.  Hashing is asynchronous, best-effort, and is not guaranteed to succeed, especially on network drives.  WARNING: File hashing is a very CPU- and I/O-intensive process.  WARNING: This feature will increase Endpoint's CPU and I/O, and may adversely affect system responsiveness, especially during I/O-intensive activity such as directory copies and compilation.  WARNING: Event processing will be delayed due to the time spent hashing, causing Endpoint's Behavioral and Ransomware protections to fire later than normal, potentially allowing threats to inflect additional damage.  Set to 'off' to disable this feature.  Set to '0' to hash all files up to 1 GiB.  Otherwise, this sets the maximum to-be-hashed file size in MiB.  Default: off",
+          "Attempt to include 'file.hash.sha256' in file events. Hashing is asynchronous, best-effort, and not guaranteed to succeed, especially on network drives. Warning: file hashing will increase Endpoint's CPU and I/O, and may adversely affect system responsiveness. Warning: Event processing will be delayed due to the time spent hashing, which will interfere with malicious behavior and ransomware protections and potentially allow threats to inflict additional damage. Set to 'off' to disable this feature. Set to '0' to hash all files up to 1 GiB. Otherwise, this sets the maximum to-be-hashed file size in MiB. Default: 'off'.",
       }
     ),
   },
@@ -2132,7 +2205,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.file.max_hash_size_mb',
       {
         defaultMessage:
-          "Attempt to include file.hash.sha256 in file events.  Hashing is asynchronous, best-effort, and is not guaranteed to succeed, especially on network drives.  WARNING: File hashing is a very CPU- and I/O-intensive process.  WARNING: This feature will increase Endpoint's CPU and I/O, and may adversely affect system responsiveness, especially during I/O-intensive activity such as directory copies and compilation.  WARNING: Event processing will be delayed due to the time spent hashing, causing Endpoint's Behavioral and Ransomware protections to fire later than normal, potentially allowing threats to inflect additional damage.  Set to 'off' to disable this feature.  Set to '0' to hash all files up to 1 GiB.  Otherwise, this sets the maximum to-be-hashed file size in MiB.  Default: off",
+          "Attempt to include 'file.hash.sha256' in file events. Hashing is asynchronous, best-effort, and not guaranteed to succeed, especially on network drives. Warning: file hashing will increase Endpoint's CPU and I/O, and may adversely affect system responsiveness. Warning: Event processing will be delayed due to the time spent hashing, which will interfere with malicious behavior and ransomware protections and potentially allow threats to inflict additional damage. Set to 'off' to disable this feature. Set to '0' to hash all files up to 1 GiB. Otherwise, this sets the maximum to-be-hashed file size in MiB. Default: off.",
       }
     ),
   },
@@ -2143,7 +2216,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.file.max_hash_size_mb',
       {
         defaultMessage:
-          "Attempt to include file.hash.sha256 in file events.  Hashing is asynchronous, best-effort, and is not guaranteed to succeed, especially on network drives.  WARNING: File hashing is a very CPU- and I/O-intensive process.  WARNING: This feature will increase Endpoint's CPU and I/O, and may adversely affect system responsiveness, especially during I/O-intensive activity such as directory copies and compilation.  WARNING: Event processing will be delayed due to the time spent hashing, causing Endpoint's Behavioral and Ransomware protections to fire later than normal, potentially allowing threats to inflect additional damage.  Set to 'off' to disable this feature.  Set to '0' to hash all files up to 1 GiB.  Otherwise, this sets the maximum to-be-hashed file size in MiB.  Default: off",
+          "Attempt to include 'file.hash.sha256' in file events. Hashing is asynchronous, best-effort, and not guaranteed to succeed, especially on network drives. Warning: file hashing will increase Endpoint's CPU and I/O, and may adversely affect system responsiveness. Warning: Event processing will be delayed due to the time spent hashing, which will interfere with malicious behavior and ransomware protections and potentially allow threats to inflict additional damage. Set to 'off' to disable this feature. Set to '0' to hash all files up to 1 GiB. Otherwise, this sets the maximum to-be-hashed file size in MiB. Default: off.",
       }
     ),
   },
@@ -2154,7 +2227,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.aggregate_process',
       {
         defaultMessage:
-          'Reduce event volume by merging related process events into fewer aggregate events. <=8.17 default: false, >=8.18 default: true',
+          'Reduce event volume by merging related process events into fewer aggregate events. For 8.17 and earlier, default: false. For 8.18 and later, default: true.',
       }
     ),
   },
@@ -2165,7 +2238,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.aggregate_process',
       {
         defaultMessage:
-          'Reduce event volume by merging related process events into fewer aggregate events. <=8.17 default: false, >=8.18 default: true',
+          'Reduce event volume by merging related process events into fewer aggregate events. For 8.17 and earlier, default: false. For 8.18 and later, default: true.',
       }
     ),
   },
@@ -2176,7 +2249,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.aggregate_process',
       {
         defaultMessage:
-          'Reduce event volume by merging related process events into fewer aggregate events. <=8.17 default: false, >=8.18 default: true',
+          'Reduce event volume by merging related process events into fewer aggregate events. For 8.17 and earlier, default: false. For 8.18 and later, default: true.',
       }
     ),
   },
@@ -2187,7 +2260,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.aggregate_network',
       {
         defaultMessage:
-          'Reduce event volume by merging related network events into fewer aggregate events. Default is true.',
+          'Reduce event volume by merging related network events into fewer aggregate events. For 8.17 and earlier, default: false. For 8.18 and later, default: true.',
       }
     ),
   },
@@ -2198,7 +2271,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.aggregate_network',
       {
         defaultMessage:
-          'Reduce event volume by merging related network events into fewer aggregate events. Default is true.',
+          'Reduce event volume by merging related network events into fewer aggregate events. For 8.17 and earlier, default: false. For 8.18 and later, default: true.',
       }
     ),
   },
@@ -2209,7 +2282,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.aggregate_network',
       {
         defaultMessage:
-          'Reduce event volume by merging related network events into fewer aggregate events. Default is true.',
+          'Reduce event volume by merging related network events into fewer aggregate events. For 8.17 and earlier, default: false. For 8.18 and later, default: true.',
       }
     ),
   },
@@ -2220,7 +2293,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.hash.md5',
       {
         defaultMessage:
-          'Compute and include MD5 hashes for processes and libraries in alerts? This will increase CPU usage and alert sizes. If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. <=8.17 default: true, >=8.18 default: false',
+          'Include MD5 hashes in alerts. Even if set to false, MD5 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.',
       }
     ),
   },
@@ -2231,7 +2304,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.hash.sha1',
       {
         defaultMessage:
-          'Compute and include SHA-1 hashes for processes and libraries in alerts? This will increase CPU usage and alert sizes. If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. <=8.17 default: true, >=8.18 default: false',
+          "Include SHA-1 hashes in alerts. Even if set to 'false', SHA-1 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.",
       }
     ),
   },
@@ -2242,7 +2315,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.hash.md5',
       {
         defaultMessage:
-          'Compute and include MD5 hashes for processes and libraries in events? This will increase CPU usage and event sizes. If any user event filter or trustlists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. <=8.17 default: true, >=8.18 default: false',
+          "Include MD5 hashes in processes and libraries in events. Even if set to 'false', MD5 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.",
       }
     ),
   },
@@ -2253,7 +2326,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.hash.sha1',
       {
         defaultMessage:
-          'Compute and include SHA-1 hashes for processes and libraries in events? This will increase CPU usage and event sizes. If any user event filter or trustlists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. <=8.17 default: true, >=8.18 default: false',
+          "Include SHA-1 hashes in processes and libraries in events. Even if set to 'false', SHA-1 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.",
       }
     ),
   },
@@ -2264,7 +2337,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.hash.sha256',
       {
         defaultMessage:
-          'Compute and include SHA-256 hashes for processes and libraries in events? This will increase CPU usage and event sizes. If any user event filter or trustlists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. Default: true',
+          "Include SHA-256 hashes in processes and libraries in events. Even if set to 'false', SHA-256 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.",
       }
     ),
   },
@@ -2275,7 +2348,29 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.security.provider_etw',
       {
         defaultMessage:
-          'Controls whether Microsoft-Windows-Security-Auditing ETW provider is enabled for security events collection. Set to false to disable the provider. Default: true.',
+          'Enable the Microsoft-Windows-Security-Auditing ETW provider for security events collection. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.security.event_disabled',
+    first_supported_version: '9.2.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.security.event_disabled',
+      {
+        defaultMessage:
+          'A comma separated list of security event IDs to selectively disable. example: 4624,4800,4801',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.firewall_anti_tamper',
+    first_supported_version: '9.2',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.firewall_anti_tamper',
+      {
+        defaultMessage:
+          'Controls whether the firewall anti tamper plugin is enabled. This value will only take effect if tamper protection is enabled. Allowed values are prevent, detect, and off. Default: prevent.',
       }
     ),
   },
@@ -2286,7 +2381,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.alerts.hash.md5',
       {
         defaultMessage:
-          'Compute and include MD5 hashes for processes and libraries in alerts? This will increase CPU usage and alert sizes. If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. <=8.17 default: true, >=8.18 default: false',
+          'Include MD5 hashes in alerts. Even if set to false, MD5 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.',
       }
     ),
   },
@@ -2297,7 +2392,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.alerts.hash.sha1',
       {
         defaultMessage:
-          'Compute and include SHA-1 hashes for processes and libraries in alerts? This will increase CPU usage and alert sizes. If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. <=8.17 default: true, >=8.18 default: false',
+          "Include SHA-1 hashes in alerts. Even if set to 'false', SHA-1 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.",
       }
     ),
   },
@@ -2308,7 +2403,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.hash.md5',
       {
         defaultMessage:
-          'Compute and include MD5 hashes for processes and libraries in events? This will increase CPU usage and event sizes. If any user event filter or trustlists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. <=8.17 default: true, >=8.18 default: false',
+          "Include MD5 hashes in processes and libraries in events. Even if set to 'false', MD5 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.",
       }
     ),
   },
@@ -2319,7 +2414,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.hash.sha1',
       {
         defaultMessage:
-          'Compute and include SHA-1 hashes for processes and libraries in events? This will increase CPU usage and event sizes. If any user event filter or trustlists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. <=8.17 default: true, >=8.18 default: false',
+          "Include SHA-1 hashes in processes and libraries in events. Even if set to 'false', SHA-1 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.",
       }
     ),
   },
@@ -2330,7 +2425,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.hash.sha256',
       {
         defaultMessage:
-          'Compute and include SHA-256 hashes for processes and libraries in events? This will increase CPU usage and event sizes. If any user event filter or trustlists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. Default: true',
+          "Include SHA-256 hashes in processes and libraries in events. Even if set to 'false', SHA-256 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.",
       }
     ),
   },
@@ -2341,7 +2436,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.alerts.hash.md5',
       {
         defaultMessage:
-          'Compute and include MD5 hashes for processes and libraries in alerts? This will increase CPU usage and alert sizes. If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. <=8.17 default: true, >=8.18 default: false',
+          'Include MD5 hashes in alerts. Even if set to false, MD5 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.',
       }
     ),
   },
@@ -2352,7 +2447,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.alerts.hash.sha1',
       {
         defaultMessage:
-          'Compute and include SHA-1 hashes for processes and libraries in alerts? This will increase CPU usage and alert sizes. If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. <=8.17 default: true, >=8.18 default: false',
+          "Include SHA-1 hashes in alerts. Even if set to 'false', SHA-1 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.",
       }
     ),
   },
@@ -2363,7 +2458,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.hash.md5',
       {
         defaultMessage:
-          'Compute and include MD5 hashes for processes and libraries in events? This will increase CPU usage and event sizes. If any user event filter or trustlists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. <=8.17 default: true, >=8.18 default: false',
+          "Include MD5 hashes in processes and libraries in events. Even if set to 'false', MD5 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.",
       }
     ),
   },
@@ -2374,7 +2469,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.hash.sha1',
       {
         defaultMessage:
-          'Compute and include SHA-1 hashes for processes and libraries in events? This will increase CPU usage and event sizes. If any user event filter or trustlists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. <=8.17 default: true, >=8.18 default: false',
+          "Include SHA-1 hashes in processes and libraries in events. Even if set to 'false', SHA-1 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.",
       }
     ),
   },
@@ -2385,7 +2480,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.hash.sha256',
       {
         defaultMessage:
-          'Compute and include SHA-256 hashes for processes and libraries in events? This will increase CPU usage and event sizes. If any user event filter or trustlists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. Default: true',
+          "Include SHA-256 hashes in processes and libraries in events. Even if set to 'false', SHA-256 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.",
       }
     ),
   },
@@ -2396,7 +2491,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.set_extended_host_information',
       {
         defaultMessage:
-          'Include more details about hosts in events? Set to false to receive only id, name and os. Setting to true will increase event size. <=8.17 default: true, >=8.18 default: false',
+          "Include full 'host.*' fieldset information in events. When 'false', only 'id', 'name', and 'os' are included. Warning: 'true' will increase event size. For 8.17 and earlier, default: true. For 8.18 and later, default: false.",
       }
     ),
   },
@@ -2407,7 +2502,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.set_extended_host_information',
       {
         defaultMessage:
-          'Include more details about hosts in events? Set to false to receive only id, name and os. Setting to true will increase event size. <=8.17 default: true, >=8.18 default: false',
+          "Include full 'host.*' fieldset information in events. When 'false', only 'id', 'name', and 'os' are included. Warning: 'true' will increase event size. For 8.17 and earlier, default: true. For 8.18 and later, default: false.",
       }
     ),
   },
@@ -2418,7 +2513,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.set_extended_host_information',
       {
         defaultMessage:
-          'Include more details about hosts in events? Set to false to receive only id, name and os. Setting to true will increase event size. <=8.17 default: true, >=8.18 default: false',
+          "Include full 'host.*' fieldset information in events. When 'false', only 'id', 'name', and 'os' are included. Warning: 'true' will increase event size. For 8.17 and earlier, default: true. For 8.18 and later, default: false.",
       }
     ),
   },
@@ -2474,6 +2569,105 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Allow Memory Protection to perform memory scans in response to image loads. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.agent.orphaned_remediation',
+    first_supported_version: '9.2',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.agent.orphaned_remediation',
+      {
+        defaultMessage:
+          'Attempt to start Agent service when Endpoint becomes orphaned. Default: false.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.agent.orphaned_remediation',
+    first_supported_version: '9.2',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.agent.orphaned_remediation',
+      {
+        defaultMessage:
+          'Attempt to start Agent service when Endpoint becomes orphaned. Default: false.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.agent.orphaned_remediation',
+    first_supported_version: '9.2',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.agent.orphaned_remediation',
+      {
+        defaultMessage:
+          'Should Endpoint attempt to start Agent service when becoming orphaned. Default: false.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.utilization_limits.free_disk_space_gb',
+    first_supported_version: '9.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.utilization_limits.free_disk_space_gb',
+      {
+        defaultMessage:
+          'Keep at least gigabytes of free space on the volume where Endpoint is installed. If free space falls below this threshold, certain features, such as response actions that require additional storage space, will no longer function. Default: no limit.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.utilization_limits.free_disk_space_gb',
+    first_supported_version: '9.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.utilization_limits.free_disk_space_gb',
+      {
+        defaultMessage:
+          'Keep at least gigabytes of free space on the volume where Endpoint is installed. If free space falls below this threshold, certain features, such as response actions that require additional storage space, will no longer function. Default: no limit.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.utilization_limits.free_disk_space_gb',
+    first_supported_version: '9.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.utilization_limits.free_disk_space_gb',
+      {
+        defaultMessage:
+          'Keep at least gigabytes of free space on the volume where Endpoint is installed. If free space falls below this threshold, certain features, such as response actions that require additional storage space, will no longer function. Default: no limit.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.utilization_limits.free_disk_space_percent',
+    first_supported_version: '9.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.utilization_limits.free_disk_space_percent',
+      {
+        defaultMessage:
+          'Maintain a minimum percentage of free space on the volume where Endpoint is installed. If free space falls below this threshold, certain features, such as response actions that require additional space, will no longer function. Default: no limit.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.utilization_limits.free_disk_space_percent',
+    first_supported_version: '9.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.utilization_limits.free_disk_space_percent',
+      {
+        defaultMessage:
+          'Maintain a minimum percentage of free space on the volume where Endpoint is installed. If free space falls below this threshold, certain features, such as response actions that require additional space, will no longer function. Default: no limit.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.utilization_limits.free_disk_space_percent',
+    first_supported_version: '9.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.utilization_limits.free_disk_space_percent',
+      {
+        defaultMessage:
+          'Maintain a minimum percentage of free space on the volume where Endpoint is installed. If free space falls below this threshold, certain features, such as response actions that require additional space, will no longer function. Default: no limit.',
       }
     ),
   },

@@ -8,8 +8,9 @@
  */
 
 import { useMemo } from 'react';
-import { CSSInterpolation } from '@emotion/css';
-import { UseEuiTheme, useEuiTheme } from '@elastic/eui';
+import type { CSSInterpolation } from '@emotion/css';
+import type { UseEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 
 // TODO: Move to use @kbn/css-utils when available https://github.com/elastic/kibana/pull/223933
 

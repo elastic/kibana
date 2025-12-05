@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DatatableColumnType } from '@kbn/expressions-plugin/common';
+import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { convertDatatableColumnToDataViewFieldSpec } from './convert_to_data_view_field_spec';
 
 describe('convertDatatableColumnToDataViewFieldSpec', () => {

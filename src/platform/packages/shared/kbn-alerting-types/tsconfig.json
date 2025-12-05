@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": ["jest", "node", "react"]
@@ -8,7 +8,6 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/i18n",
-    "@kbn/licensing-plugin",
     "@kbn/rule-data-utils",
     "@kbn/rrule",
     "@kbn/core",
@@ -16,6 +15,7 @@
     "@kbn/field-formats-plugin",
     "@kbn/data-views-plugin",
     "@kbn/search-types",
-    "@kbn/utility-types"
+    "@kbn/utility-types",
+    "@kbn/licensing-types"
   ]
 }

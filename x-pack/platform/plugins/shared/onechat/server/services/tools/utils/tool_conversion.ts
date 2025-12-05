@@ -5,32 +5,37 @@
  * 2.0.
  */
 
-import zodToJsonSchema, { JsonSchema7ObjectType } from 'zod-to-json-schema';
+import type { JsonSchema7ObjectType } from 'zod-to-json-schema';
+import zodToJsonSchema from 'zod-to-json-schema';
 import type { ZodObject } from '@kbn/zod';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
-import type { Runner, ExecutableTool } from '@kbn/onechat-server';
-import { InternalToolDefinition } from '../tool_provider';
+import type { ToolDefinitionWithSchema, ToolDefinition, ToolType } from '@kbn/onechat-common';
+import type { Runner, ExecutableTool, InternalToolDefinition } from '@kbn/onechat-server';
 
 export const toExecutableTool = <
   TConfig extends object = {},
-  RunInput extends ZodObject<any> = ZodObject<any>,
-  RunOutput = unknown
+  RunInput extends ZodObject<any> = ZodObject<any>
 >({
   tool,
   runner,
   request,
+  asInternal = false,
 }: {
-  tool: InternalToolDefinition<TConfig, RunInput>;
+  tool: InternalToolDefinition<ToolType, TConfig, RunInput>;
   runner: Runner;
   request: KibanaRequest;
+  asInternal?: boolean;
 }): ExecutableTool<TConfig, RunInput> => {
-  const { handler, ...toolParts } = tool;
+  const { getHandler, ...toolParts } = tool;
 
   return {
     ...toolParts,
     execute: (params) => {
-      return runner.runTool({ ...params, toolId: tool.id, request });
+      if (asInternal) {
+        return runner.runInternalTool({ ...params, tool, request });
+      } else {
+        return runner.runTool({ ...params, toolId: tool.id, request });
+      }
     },
   };
 };
@@ -40,8 +45,16 @@ export const toExecutableTool = <
  *
  * Can be used to convert/clean tool registration for public-facing APIs.
  */
-export const toDescriptorWithSchema = (tool: InternalToolDefinition): ToolDefinitionWithSchema => {
-  const { id, type, description, tags, configuration, schema } = tool;
+export const toDescriptorWithSchema = async (
+  tool: InternalToolDefinition
+): Promise<ToolDefinitionWithSchema> => {
+  const descriptor = toDescriptor(tool);
+  const schema = await tool.getSchema();
   const jsonSchema = zodToJsonSchema(schema) as JsonSchema7ObjectType;
-  return { id, type, description, tags, configuration, schema: jsonSchema };
+  return { ...descriptor, schema: jsonSchema };
+};
+
+export const toDescriptor = (tool: InternalToolDefinition): ToolDefinition => {
+  const { id, type, description, tags, configuration, readonly } = tool;
+  return { id, type, description, tags, configuration, readonly };
 };

@@ -15,7 +15,7 @@ export interface TraceItem {
   name: string;
   traceId: string;
   duration: number;
-  errorCount: number;
+  errors: Array<{ errorDocId: string }>;
   status?: {
     fieldName: (typeof STATUS_FIELD_NAME)[number];
     value: EventOutcome | StatusCode;
@@ -23,4 +23,8 @@ export interface TraceItem {
   parentId?: string;
   serviceName: string;
   type?: string;
+  spanLinksCount: {
+    incoming: number;
+    outgoing: number;
+  };
 }

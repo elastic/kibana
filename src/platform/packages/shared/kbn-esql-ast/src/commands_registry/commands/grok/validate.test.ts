@@ -22,7 +22,7 @@ describe('GROK Validation', () => {
   test('validates the most basic query', () => {
     grokExpectErrors('from a_index | grok textField """%{WORD:textPrts} %{WORD:textPrts}"""', []);
     grokExpectErrors('from a_index | grok doubleField """%{WORD:textPrts} %{WORD:textPrts}"""', [
-      'GROK only supports values of type [keyword, text]. Found [doubleField] of type [double]',
+      'GROK only supports values of type keyword, text. Found "doubleField" of type double',
     ]);
     grokExpectErrors(
       'from a_index | grok textField """%{WORD:textPrts} %{WORD:textPrts}""" | keep textPrts',

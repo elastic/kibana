@@ -7,10 +7,11 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiSpacer, EuiLoadingSpinner, EuiEmptyPrompt, EuiCallOut } from '@elastic/eui';
-import { ISearchSource } from '@kbn/data-plugin/common';
-import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { SavedQuery } from '@kbn/data-plugin/public';
-import { EsQueryRuleMetaData, EsQueryRuleParams, SearchType } from '../types';
+import type { ISearchSource } from '@kbn/data-plugin/common';
+import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import type { SavedQuery } from '@kbn/data-plugin/public';
+import type { EsQueryRuleMetaData, EsQueryRuleParams } from '../types';
+import { SearchType } from '../types';
 import { SearchSourceExpressionForm } from './search_source_expression_form';
 import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
 import { useTriggerUiActionServices } from '../util';
@@ -42,7 +43,6 @@ export const SearchSourceExpression = ({
     termField,
     termSize,
     excludeHitsFromPreviousRun,
-    sourceFields,
   } = ruleParams;
   const { data, isServerless } = useTriggerUiActionServices();
 
@@ -92,7 +92,8 @@ export const SearchSourceExpression = ({
           termSize: termSize ?? DEFAULT_VALUES.TERM_SIZE,
           excludeHitsFromPreviousRun:
             excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
-          sourceFields,
+          // The sourceFields param is ignored
+          sourceFields: [],
         });
         setSearchSource(createdSearchSource);
       } catch (error) {
@@ -113,7 +114,7 @@ export const SearchSourceExpression = ({
   if (paramsError) {
     return (
       <>
-        <EuiCallOut color="danger" iconType="warning">
+        <EuiCallOut announceOnMount color="danger" iconType="warning">
           <p>{paramsError.message}</p>
         </EuiCallOut>
         <EuiSpacer size="s" />

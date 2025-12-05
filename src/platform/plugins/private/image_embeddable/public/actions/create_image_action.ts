@@ -9,16 +9,14 @@
 
 import { i18n } from '@kbn/i18n';
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
-import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { ADD_PANEL_ANNOTATION_GROUP } from '@kbn/embeddable-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
-import {
-  ADD_IMAGE_EMBEDDABLE_ACTION_ID,
-  IMAGE_EMBEDDABLE_TYPE,
-} from '../image_embeddable/constants';
-import { ImageConfig, ImageEmbeddableSerializedState } from '../image_embeddable/types';
+import type { ImageEmbeddableState } from '../../server';
+import { ADD_IMAGE_EMBEDDABLE_ACTION_ID, IMAGE_EMBEDDABLE_TYPE } from '../../common/constants';
+import type { ImageConfig } from '../types';
 import { coreServices } from '../services/kibana_services';
 
 export const createImageAction: ActionDefinition<EmbeddableApiContext> = {
@@ -38,7 +36,7 @@ export const createImageAction: ActionDefinition<EmbeddableApiContext> = {
           closeFlyout,
           ariaLabelledBy,
           onSave: (imageConfig: ImageConfig) => {
-            parentApi.addNewPanel<ImageEmbeddableSerializedState>({
+            parentApi.addNewPanel<ImageEmbeddableState>({
               panelType: IMAGE_EMBEDDABLE_TYPE,
               serializedState: { rawState: { imageConfig } },
             });

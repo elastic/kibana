@@ -46,7 +46,7 @@
             "signature": [
               "K"
             ],
-            "path": "src/core/packages/di/common-internal/src/utils.ts",
+            "path": "src/core/packages/di/common-internal/src/modules/lifecycle.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -88,7 +88,7 @@
             "signature": [
               "K"
             ],
-            "path": "src/core/packages/di/common-internal/src/utils.ts",
+            "path": "src/core/packages/di/common-internal/src/modules/lifecycle.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -130,7 +130,7 @@
             "signature": [
               "K"
             ],
-            "path": "src/core/packages/di/common-internal/src/utils.ts",
+            "path": "src/core/packages/di/common-internal/src/modules/lifecycle.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -173,6 +173,24 @@
             ],
             "signature": [
               "Method"
+            ],
+            "path": "src/core/packages/di/server/src/services/http.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-di-server",
+            "id": "def-server.RouteDefinition.handleLegacyErrors",
+            "type": "CompoundType",
+            "tags": [
+              "see"
+            ],
+            "label": "handleLegacyErrors",
+            "description": [
+              "\nCatch and convert legacy boom errors to proper custom errors."
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/core/packages/di/server/src/services/http.ts",
             "deprecated": false,
@@ -222,6 +240,72 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "@kbn/core-di-server",
+        "id": "def-server.CapabilitiesProvider",
+        "type": "CompoundType",
+        "tags": [
+          "see"
+        ],
+        "label": "CapabilitiesProvider",
+        "description": [
+          "\nService identifier to register a capabilities provider."
+        ],
+        "signature": [
+          "string | symbol | Function | ",
+          "Newable",
+          "<",
+          "CapabilitiesProvider",
+          ", any[]> | ",
+          "AbstractNewable",
+          "<",
+          "CapabilitiesProvider",
+          ", any[]>"
+        ],
+        "path": "src/core/packages/di/server/src/services/capabilities.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-di-server",
+        "id": "def-server.ISavedObjectsClientFactory",
+        "type": "Type",
+        "tags": [
+          "see"
+        ],
+        "label": "ISavedObjectsClientFactory",
+        "description": [
+          "\nFactory type for creating parameterized Saved Objects client instances."
+        ],
+        "signature": [
+          "(args_0?: ",
+          "SavedObjectsClientProviderOptions",
+          " | undefined) => ",
+          "SavedObjectsClientContract"
+        ],
+        "path": "src/core/packages/di/server/src/services/saved_objects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-di-server",
+            "id": "def-server.ISavedObjectsClientFactory.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              "TArgs"
+            ],
+            "path": "node_modules/@inversifyjs/core/lib/cjs/binding/models/Factory.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/core-di-server",
         "id": "def-server.Request",
@@ -330,6 +414,85 @@
           "<any>, any[]>"
         ],
         "path": "src/core/packages/di/server/src/services/http.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-di-server",
+        "id": "def-server.SavedObjectsClient",
+        "type": "CompoundType",
+        "tags": [
+          "see"
+        ],
+        "label": "SavedObjectsClient",
+        "description": [
+          "\nThe Saved Objects client instance in the current HTTP request context."
+        ],
+        "signature": [
+          "string | symbol | Function | ",
+          "Newable",
+          "<",
+          "SavedObjectsClientContract",
+          ", any[]> | ",
+          "AbstractNewable",
+          "<",
+          "SavedObjectsClientContract",
+          ", any[]>"
+        ],
+        "path": "src/core/packages/di/server/src/services/saved_objects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-di-server",
+        "id": "def-server.SavedObjectsClientFactory",
+        "type": "CompoundType",
+        "tags": [],
+        "label": "SavedObjectsClientFactory",
+        "description": [
+          "\nThe Saved Objects client factory that constructs a client instance the current HTTP request context."
+        ],
+        "signature": [
+          "string | symbol | Function | ",
+          "Newable",
+          "<",
+          "ISavedObjectsClientFactory",
+          ", any[]> | ",
+          "AbstractNewable",
+          "<",
+          "ISavedObjectsClientFactory",
+          ", any[]>"
+        ],
+        "path": "src/core/packages/di/server/src/services/saved_objects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-di-server",
+        "id": "def-server.SavedObjectsTypeRegistry",
+        "type": "CompoundType",
+        "tags": [
+          "see"
+        ],
+        "label": "SavedObjectsTypeRegistry",
+        "description": [
+          "\nThe Saved Objects type registry."
+        ],
+        "signature": [
+          "string | symbol | Function | ",
+          "Newable",
+          "<",
+          "ISavedObjectTypeRegistry",
+          ", any[]> | ",
+          "AbstractNewable",
+          "<",
+          "ISavedObjectTypeRegistry",
+          ", any[]>"
+        ],
+        "path": "src/core/packages/di/server/src/services/saved_objects.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

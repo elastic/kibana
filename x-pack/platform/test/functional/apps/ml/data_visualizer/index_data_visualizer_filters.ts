@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   farequoteKQLFiltersSearchTestData,
   farequoteLuceneFiltersSearchTestData,
   farequoteDataViewTestData,
 } from './index_test_data';
-import { TestData } from './types';
+import type { TestData } from './types';
 
 const PINNED_FILTER = {
   key: 'type.keyword',

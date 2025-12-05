@@ -7,7 +7,7 @@
 
 import type { OutputOptions, OutputCompositeResponse } from './api';
 import type { ToolSchema } from '../chat_complete/tool_schema';
-import { UnboundOptions } from '../bind/bind_api';
+import type { UnboundOptions } from '../bind/bind_api';
 
 /**
  * Options used to call the {@link BoundOutputAPI}

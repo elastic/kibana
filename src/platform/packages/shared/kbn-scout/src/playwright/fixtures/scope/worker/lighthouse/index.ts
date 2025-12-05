@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RunnerResult } from 'lighthouse';
+import type { RunnerResult } from 'lighthouse';
 import { coreWorkerFixtures } from '../core_fixtures';
 
 type OutputMode = 'html' | 'json' | 'csv';

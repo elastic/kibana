@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
-import { StackProductUsage } from '../types';
+import type { StackProductUsage } from '../types';
 
 interface ESIndicesBucket {
   key: string;

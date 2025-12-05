@@ -5,9 +5,17 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
+import type { CloudBasicUrls, CloudSetup, CloudStart } from './types';
 
-import type { CloudSetup, CloudStart } from './types';
+const mockCloudUrls: CloudBasicUrls = {
+  baseUrl: 'base-url',
+  kibanaUrl: 'kibana-url',
+  deploymentUrl: 'deployment-url',
+  profileUrl: 'profile-url',
+  organizationUrl: 'organization-url',
+};
 
 function createSetupMock(): jest.Mocked<CloudSetup> {
   return {
@@ -15,14 +23,9 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
     deploymentId: 'mock-deployment-id',
     isCloudEnabled: true,
     cname: 'cname',
-    baseUrl: 'base-url',
-    deploymentUrl: 'deployment-url',
-    profileUrl: 'profile-url',
-    organizationUrl: 'organization-url',
     fetchElasticsearchConfig: jest
       .fn()
       .mockResolvedValue({ elasticsearchUrl: 'elasticsearch-url' }),
-    kibanaUrl: 'kibana-url',
     cloudHost: 'cloud-host',
     cloudDefaultPort: '443',
     isElasticStaffOwned: true,
@@ -36,6 +39,10 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
       projectType: undefined,
       productTier: undefined,
     },
+    getUrls: jest.fn().mockReturnValue({}),
+    getPrivilegedUrls: jest.fn().mockResolvedValue({}),
+    isInTrial: jest.fn().mockReturnValue(false),
+    ...mockCloudUrls,
   };
 }
 
@@ -48,15 +55,15 @@ const createStartMock = (): jest.Mocked<CloudStart> => ({
   CloudContextProvider: jest.fn(getContextProvider()),
   cloudId: 'mock-cloud-id',
   isCloudEnabled: true,
-  deploymentUrl: 'deployment-url',
-  billingUrl: 'billing-url',
-  profileUrl: 'profile-url',
-  organizationUrl: 'organization-url',
   isServerlessEnabled: false,
   serverless: {
     projectId: undefined,
   },
   fetchElasticsearchConfig: jest.fn().mockResolvedValue({ elasticsearchUrl: 'elasticsearch-url' }),
+  getUrls: jest.fn().mockReturnValue({}),
+  getPrivilegedUrls: jest.fn().mockResolvedValue({}),
+  isInTrial: jest.fn().mockReturnValue(false),
+  ...mockCloudUrls,
 });
 
 export const cloudMock = {

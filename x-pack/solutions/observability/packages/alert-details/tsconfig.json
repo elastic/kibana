@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -20,6 +20,7 @@
     "@kbn/rule-data-utils",
     "@kbn/core",
     "@kbn/rule-registry-plugin",
-    "@kbn/core-http-browser-mocks"
+    "@kbn/core-http-browser-mocks",
+    "@kbn/react-query"
   ]
 }

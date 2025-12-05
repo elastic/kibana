@@ -8,8 +8,8 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { Observable } from 'rxjs';
-import {
+import type { Observable } from 'rxjs';
+import type {
   HttpSetup,
   NotificationsStart,
   CoreTheme,
@@ -17,33 +17,25 @@ import {
   CoreStart,
   ApplicationStart,
 } from '@kbn/core/public';
-import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { EuiWindowEvent } from '@elastic/eui';
-import { ObjectStorageClient } from '../../../../common/types';
+import type { ObjectStorageClient } from '../../../../common/types';
 
 import * as localStorageObjectClient from '../../../lib/local_storage_object_client';
 import { loadActiveApi } from '../../../lib/kb';
-import {
-  getAutocompleteInfo,
-  AutocompleteInfo,
-  History,
-  Settings,
-  Storage,
-  createHistory,
-  createSettings,
-  getStorage,
-} from '../../../services';
+import type { AutocompleteInfo, History, Settings, Storage } from '../../../services';
+import { getAutocompleteInfo, createHistory, createSettings, getStorage } from '../../../services';
 import { createUsageTracker } from '../../../services/tracker';
-import {
+import type {
   MetricsTracker,
   EmbeddableConsoleDependencies,
   ConsoleStartServices,
 } from '../../../types';
 
 import { createApi, createEsHostService } from '../../lib';
-import { EsHostService } from '../../lib/es_host_service';
+import type { EsHostService } from '../../lib/es_host_service';
 
 import {
   ServicesContextProvider,
@@ -52,6 +44,7 @@ import {
 } from '../../contexts';
 import { Main } from '../main';
 import { EditorContentSpinner } from '../../components';
+import { useEmbeddableConsoleContentStyles } from './styles';
 
 interface ConsoleDependencies extends ConsoleStartServices {
   autocompleteInfo: AutocompleteInfo;
@@ -118,9 +111,16 @@ interface ConsoleWrapperProps
   isOpen: boolean;
 }
 
+const useStyles = () => {
+  return {
+    embeddableConsoleContent: useEmbeddableConsoleContentStyles(),
+  };
+};
+
 export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
   const [dependencies, setDependencies] = useState<ConsoleDependencies | null>(null);
-  const { core, dataViews, data, licensing, usageCollection, onKeyDown, isDevMode, isOpen } = props;
+  const { core, data, licensing, usageCollection, onKeyDown, isDevMode, isOpen } = props;
+  const styles = useStyles();
 
   useEffect(() => {
     if (dependencies === null && isOpen) {
@@ -170,7 +170,6 @@ export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
             http,
             autocompleteInfo,
             application: startServices.application,
-            dataViews,
             data,
             licensing,
           },
@@ -182,7 +181,7 @@ export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
         <RequestContextProvider>
           <EditorContextProvider settings={settings.toJSON()}>
             {isOpen ? (
-              <div className="embeddableConsole__content" data-test-subj="consoleEmbeddedBody">
+              <div css={styles.embeddableConsoleContent} data-test-subj="consoleEmbeddedBody">
                 <EuiWindowEvent event="keydown" handler={onKeyDown} />
                 <Main isEmbeddable={true} />
               </div>

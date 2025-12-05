@@ -90,12 +90,13 @@ export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId })
           toggleQuery={setToggleStatus}
           id={PRIVILEGED_USERS_TABLE_QUERY_ID}
           title={TITLE}
-          titleSize="s"
+          titleSize="m"
           outerDirection="column"
           hideSubtitle
         />
         {hasError && (
           <EuiCallOut
+            announceOnMount
             title={i18n.translate(
               'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedUsersTable.error',
               {

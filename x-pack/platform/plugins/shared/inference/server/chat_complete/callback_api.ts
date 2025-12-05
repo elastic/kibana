@@ -7,34 +7,35 @@
 
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { ChatCompleteOptions, AnonymizationRule } from '@kbn/inference-common';
 import {
-  ChatCompleteOptions,
   createInferenceRequestError,
   getConnectorFamily,
   getConnectorProvider,
   type ChatCompleteCompositeResponse,
   MessageRole,
-  AnonymizationRule,
 } from '@kbn/inference-common';
 import type { Logger } from '@kbn/logging';
 import { defer, forkJoin, from, identity, share, switchMap, throwError } from 'rxjs';
 import { withChatCompleteSpan } from '@kbn/inference-tracing';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { omit } from 'lodash';
 import { getInferenceAdapter } from './adapters';
+import type { InferenceExecutor } from './utils';
 import {
-  InferenceExecutor,
   chunksIntoMessage,
   getInferenceExecutor,
   handleCancellation,
+  handleLifecycleCallbacks,
   streamToResponse,
 } from './utils';
+import type { InferenceCallbackManager } from '../inference_client/callback_manager';
 import { retryWithExponentialBackoff } from '../../common/utils/retry_with_exponential_backoff';
 import { getRetryFilter } from '../../common/utils/error_retry_filter';
 import { anonymizeMessages } from './anonymization/anonymize_messages';
 import { deanonymizeMessage } from './anonymization/deanonymize_message';
 import { addAnonymizationInstruction } from './anonymization/add_anonymization_instruction';
-import { RegexWorkerService } from './anonymization/regex_worker_service';
+import type { RegexWorkerService } from './anonymization/regex_worker_service';
 
 interface CreateChatCompleteApiOptions {
   request: KibanaRequest;
@@ -43,6 +44,7 @@ interface CreateChatCompleteApiOptions {
   anonymizationRulesPromise: Promise<AnonymizationRule[]>;
   regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;
+  callbackManager?: InferenceCallbackManager;
 }
 
 type CreateChatCompleteApiOptionsKey =
@@ -77,6 +79,7 @@ export function createChatCompleteCallbackApi({
   anonymizationRulesPromise,
   regexWorker,
   esClient,
+  callbackManager,
 }: CreateChatCompleteApiOptions) {
   return (
     {
@@ -191,6 +194,7 @@ export function createChatCompleteCallbackApi({
           initialDelay: retryConfiguration.initialDelay,
           errorFilter: getRetryFilter(retryConfiguration.retryOn),
         }),
+        callbackManager ? handleLifecycleCallbacks({ callbackManager }) : identity,
         abortSignal ? handleCancellation(abortSignal) : identity
       );
 

@@ -7,10 +7,10 @@
 
 import { renderHook } from '@testing-library/react';
 import { useQuickPromptTable } from './use_quick_prompt_table';
-import { EuiTableActionsColumnType, EuiTableComputedColumnType } from '@elastic/eui';
+import type { EuiTableActionsColumnType, EuiTableComputedColumnType } from '@elastic/eui';
 import { MOCK_QUICK_PROMPTS } from '../../../mock/quick_prompt';
 import { mockPromptContexts } from '../../../mock/prompt_context';
-import { PromptResponse } from '@kbn/elastic-assistant-common';
+import type { PromptResponse } from '@kbn/elastic-assistant-common';
 
 const mockIsEditEnabled = jest.fn();
 const mockOnEditActionClicked = jest.fn();

@@ -7,29 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  BehaviorSubject,
-  Observable,
-  combineLatest,
-  debounceTime,
-  first,
-  skip,
-  switchMap,
-  tap,
-} from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, first, skip, switchMap, tap } from 'rxjs';
 
-import {
-  DATA_VIEW_SAVED_OBJECT_TYPE,
-  DataView,
-  DataViewField,
-} from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import type { Reference } from '@kbn/content-management-utils';
-import { Filter } from '@kbn/es-query';
-import { StateComparators } from '@kbn/presentation-publishing';
+import type { Filter } from '@kbn/es-query';
+import type { StateComparators } from '@kbn/presentation-publishing';
 
 import { i18n } from '@kbn/i18n';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
-import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
+import type { StateManager } from '@kbn/presentation-publishing/state_manager/types';
 import type { DefaultDataControlState } from '../../../common';
 import { dataViewsService } from '../../services/kibana_services';
 import type { ControlGroupApi } from '../../control_group/types';
@@ -186,7 +175,7 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
     });
   };
 
-  const filtersReadySubscription = filters$.pipe(skip(1), debounceTime(0)).subscribe(() => {
+  const filtersReadySubscription = filters$.pipe(skip(1)).subscribe(() => {
     // Set filtersReady$.next(true); in filters$ subscription instead of setOutputFilter
     // to avoid signaling filters ready until after filters have been emitted
     // to avoid timing issues

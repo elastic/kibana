@@ -6,17 +6,16 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { KibanaRequest } from '@kbn/core/server';
+import path from 'node:path';
 import { apiPrivileges } from '../../common/features';
+import { publicApiPath } from '../../common/constants';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
-import { ONECHAT_A2A_SERVER_UI_SETTING_ID } from '../../common/constants';
-import { getTechnicalPreviewWarning } from './utils';
 import { KibanaA2AAdapter } from '../utils/a2a/kibana_a2a_adapter';
 import { getKibanaUrl } from '../utils/get_kibana_url';
 
-const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic A2A Server');
-
-export const A2A_SERVER_PATH = '/api/chat/a2a';
+export const A2A_SERVER_PATH = `${publicApiPath}/a2a`;
 
 export function registerA2ARoutes({
   router,
@@ -27,8 +26,9 @@ export function registerA2ARoutes({
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
-  const getBaseUrl = () => {
-    return getKibanaUrl(coreSetup, pluginsSetup.cloud);
+  const getBaseUrl = async (request: KibanaRequest) => {
+    const [, startDeps] = await coreSetup.getStartServices();
+    return getKibanaUrl(coreSetup, pluginsSetup.cloud, request, startDeps.spaces);
   };
 
   const a2aAdapter = new KibanaA2AAdapter(logger, getInternalServices, getBaseUrl);
@@ -40,12 +40,14 @@ export function registerA2ARoutes({
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
       access: 'public',
-      summary: 'A2A Agent Card',
-      description: 'Provides agent discovery metadata for A2A protocol',
+      summary: 'Get A2A agent card',
+      description:
+        'Get agent discovery metadata in JSON format. Use this endpoint to provide agent information for A2A protocol integration and discovery.',
       options: {
-        tags: ['a2a'],
+        tags: ['a2a', 'oas-tag:agent builder'],
         availability: {
           stability: 'experimental',
+          since: '9.2.0',
         },
       },
     })
@@ -55,17 +57,21 @@ export function registerA2ARoutes({
         validate: {
           request: {
             params: schema.object({
-              agentId: schema.string(),
+              agentId: schema.string({
+                meta: {
+                  description: 'The unique identifier of the agent to get A2A metadata for.',
+                },
+              }),
             }),
           },
         },
-      },
-      wrapHandler(
-        async (ctx, request, response) => {
-          return await a2aAdapter.handleAgentCardRequest(request, response, request.params.agentId);
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/a2a_agent_card.yaml'),
         },
-        { featureFlag: ONECHAT_A2A_SERVER_UI_SETTING_ID }
-      )
+      },
+      wrapHandler(async (ctx, request, response) => {
+        return await a2aAdapter.handleAgentCardRequest(request, response, request.params.agentId);
+      })
     );
 
   router.versioned
@@ -75,13 +81,15 @@ export function registerA2ARoutes({
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
       access: 'public',
-      summary: 'A2A Task Endpoint',
-      description: TECHNICAL_PREVIEW_WARNING,
+      summary: 'Send A2A task',
+      description: `> warn
+> This endpoint is designed for A2A protocol clients and should not be used directly via REST APIs. Use an A2A SDK or A2A Inspector instead.`,
       options: {
-        tags: ['a2a'],
+        tags: ['a2a', 'oas-tag:agent builder'],
         xsrfRequired: false,
         availability: {
           stability: 'experimental',
+          since: '9.2.0',
         },
       },
     })
@@ -91,18 +99,28 @@ export function registerA2ARoutes({
         validate: {
           request: {
             params: schema.object({
-              agentId: schema.string(),
+              agentId: schema.string({
+                meta: {
+                  description: 'The unique identifier of the agent to send the A2A task to.',
+                },
+              }),
             }),
-            body: schema.object({}, { unknowns: 'allow' }),
+            body: schema.object(
+              {},
+              {
+                unknowns: 'allow',
+                meta: { description: 'JSON-RPC 2.0 request payload for A2A communication.' },
+              }
+            ),
           },
         },
-      },
-      wrapHandler(
-        async (ctx, request, response) => {
-          const { agentId } = request.params;
-          return await a2aAdapter.handleA2ARequest(request, response, agentId);
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/a2a_task.yaml'),
         },
-        { featureFlag: ONECHAT_A2A_SERVER_UI_SETTING_ID }
-      )
+      },
+      wrapHandler(async (ctx, request, response) => {
+        const { agentId } = request.params;
+        return await a2aAdapter.handleA2ARequest(request, response, agentId);
+      })
     );
 }

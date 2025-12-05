@@ -8,7 +8,7 @@ import React, { useEffect } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
 import { Router } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
-import { I18nStart, ChromeBreadcrumb, CoreStart, AppMountParameters } from '@kbn/core/public';
+import type { I18nStart, ChromeBreadcrumb, CoreStart, AppMountParameters } from '@kbn/core/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -17,14 +17,14 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
-import { ClientPluginsSetup, ClientPluginsStart } from '../../plugin';
-import { UMUpdateBadge } from '../lib/lib';
+import type { ClientPluginsSetup, ClientPluginsStart } from '../../plugin';
+import type { UMUpdateBadge } from '../lib/lib';
 import {
   UptimeRefreshContextProvider,
   UptimeSettingsContextProvider,
   UptimeStartupPluginsContextProvider,
 } from '../contexts';
-import { CommonlyUsedRange } from '../components/common/uptime_date_picker';
+import type { CommonlyUsedRange } from '../components/common/uptime_date_picker';
 import { setBasePath } from '../state/actions';
 import { PageRouter } from '../routes';
 import { UptimeAlertsFlyoutWrapper } from '../components/overview';

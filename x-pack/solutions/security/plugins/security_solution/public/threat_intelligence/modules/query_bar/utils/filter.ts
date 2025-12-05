@@ -10,12 +10,17 @@ import type { Filter } from '@kbn/es-query';
 export const FilterIn = true;
 export const FilterOut = false;
 
+type Value = string | string[] | null;
+
+const isNonEmptyString = (v: unknown): v is string => typeof v === 'string' && v.length > 0;
+
 /**
- * Creates a new filter to apply to the KQL bar.
- * @param key A string value mainly representing the field of an indicator
- * @param value A string value mainly representing the value of the indicator for the field
- * @param negate Set to true when we create a negated filter (e.g. NOT threat.indicator.type: url)
- * @returns The new {@link Filter}
+ * Create a single phrase (match_phrase) filter for a field/value.
+ * @param key   Field name
+ * @param value Exact value to match
+ * @param negate Whether the filter is negated
+ * @param index Optional data view id
+ * @returns A Kibana {@link Filter} with meta.type 'phrase'
  */
 const createFilter = ({
   key,
@@ -54,46 +59,57 @@ const filterExistsInFiltersArray = (
 ): Filter | undefined =>
   filters.find(
     (f: Filter) =>
-      f.meta.key === key &&
+      f.meta?.type === 'phrase' &&
+      f.meta?.key === key &&
       typeof f.meta.params === 'object' &&
       'query' in f.meta.params &&
       f.meta.params?.query === value
   );
 
 /**
- * Returns true if the filter exists and should be removed, false otherwise (depending on a FilterIn or FilterOut action)
- * @param filter The {@link Filter}
- * @param filterType The type of action ({@link FilterIn} or {@link FilterOut})
+ * Should an existing matching filter be replaced to flip its negation?
+ * @param existing  Existing matching filter
+ * @param filterType {@link FilterIn} or {@link FilterOut}
+ * @returns true to replace (toggle negation), false to add another filter
  */
-const shouldRemoveFilter = (filter: Filter | undefined, filterType: boolean): boolean =>
-  filter != null && filterType === filter.meta.negate;
+const shouldReplaceNegation = (existing: Filter | undefined, filterType: boolean): boolean =>
+  !!existing && filterType === existing.meta.negate;
 
 /**
- * Takes an array of filters and returns the updated array according to:
- * - if a filter already exists but negated, replace it by it's negation
- * - add the newly created filter
- * @param existingFilters List of {@link Filter} retrieved from the filterManager
- * @param key The value used in the newly created [@link Filter} as a key
- * @param value The value used in the newly created [@link Filter} as a params query
- * @param filterType Weather the function is called for a {@link FilterIn} or {@link FilterOut} action
- * @returns the updated array of filters
+ * Update filters:
+ * - Normalizes values to unique strings
+ * - For a single value: add or replace a phrase filter
+ * - For multiple values: applies the same logic for each value, adding one phrase filter per value
+ *
+ * @param existingFilters Current filters from filterManager
+ * @param key             Field name
+ * @param value           String or string[] (multi-value supported)
+ * @param filterType      {@link FilterIn} (include) or {@link FilterOut} (exclude)
+ * @param index           Optional data view id
+ * @returns Updated filters array
  */
 export const updateFiltersArray = (
   existingFilters: Filter[],
   key: string,
-  value: string | null,
+  value: Value,
   filterType: boolean,
   index?: string
 ): Filter[] => {
-  const newFilter = createFilter({ key, value: value as string, negate: !filterType, index });
+  // Normalize to unique non-empty strings
+  const nonEmptyValues = [value].flat().filter(isNonEmptyString);
+  const sanitizedValues = Array.from(new Set(nonEmptyValues));
 
-  const filter: Filter | undefined = filterExistsInFiltersArray(
-    existingFilters,
-    key,
-    value as string
-  );
+  if (sanitizedValues.length === 0) return existingFilters;
 
-  return shouldRemoveFilter(filter, filterType)
-    ? [...existingFilters.filter((f: Filter) => f !== filter), newFilter]
-    : [...existingFilters, newFilter];
+  return sanitizedValues.reduce<Filter[]>((result, v) => {
+    const existing = filterExistsInFiltersArray(result, key, v);
+    const newFilter = createFilter({ key, value: v, negate: !filterType, index });
+
+    if (shouldReplaceNegation(existing, filterType)) {
+      // Flip negation by replacing the opposite one
+      return [...result.filter((f) => f !== existing), newFilter];
+    }
+
+    return [...result, newFilter];
+  }, existingFilters);
 };

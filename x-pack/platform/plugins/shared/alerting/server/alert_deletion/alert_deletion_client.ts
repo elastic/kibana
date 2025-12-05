@@ -78,16 +78,18 @@ export class AlertDeletionClient {
       [ALERT_DELETION_TASK_TYPE]: {
         title: 'Alert deletion task',
         maxAttempts: 1,
-        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
-          const abortController = new AbortController();
+        createTaskRunner: ({
+          taskInstance,
+          abortController,
+        }: {
+          taskInstance: ConcreteTaskInstance;
+          abortController: AbortController;
+        }) => {
           return {
             run: async () => {
               return this.runTask(taskInstance, abortController);
             },
-
-            cancel: async () => {
-              abortController.abort('task timed out');
-            },
+            cancel: async () => {},
           };
         },
       },

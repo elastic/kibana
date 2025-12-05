@@ -11,7 +11,8 @@ import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts
 
 import { LIST_ID } from '../../constants/index.mock';
 
-import { FindListItemSchema, FindListItemSchemaDecoded, findListItemSchema } from '.';
+import type { FindListItemSchema, FindListItemSchemaDecoded } from '.';
+import { findListItemSchema } from '.';
 import { getFindListItemSchemaDecodedMock, getFindListItemSchemaMock } from './index.mock';
 
 describe('find_list_item_schema', () => {

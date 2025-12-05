@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 type TestingModes = 'snapshot' | 'savedObject';
 type AppState = string | undefined;
@@ -102,8 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await common.setTime({ from, to });
       await dashboard.navigateToApp();
       await dashboard.preserveCrossAppState();
-      await dashboard.loadSavedDashboard('few panels');
-      await dashboard.switchToEditMode();
+      await dashboard.loadDashboardInEditMode('few panels');
       await dashboard.waitForRenderComplete();
     });
 

@@ -10,6 +10,7 @@
 import type { EuiDataGridStyle } from '@elastic/eui';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { useCallback, useMemo } from 'react';
+import { useRestorableRef } from '../restorable_state';
 import {
   DATA_GRID_STYLE_COMPACT,
   DATA_GRID_STYLE_EXPANDED,
@@ -53,9 +54,19 @@ export const useDataGridDensity = ({
   dataGridDensityState,
   onUpdateDataGridDensity,
 }: UseDataGridDensityProps) => {
-  const dataGridDensity = useMemo<DataGridDensity>(() => {
-    return dataGridDensityState ?? getDataGridDensity(storage, consumer);
-  }, [consumer, dataGridDensityState, storage]);
+  const initialValue = useMemo(
+    () => dataGridDensityState ?? getDataGridDensity(storage, consumer),
+    [dataGridDensityState, storage, consumer]
+  );
+
+  const restorableDensityRef = useRestorableRef('density', initialValue);
+
+  const dataGridDensity = useMemo<DataGridDensity>(
+    () => dataGridDensityState || restorableDensityRef.current,
+    [dataGridDensityState, restorableDensityRef]
+  );
+
+  restorableDensityRef.current = dataGridDensity; // Update the ref when dataGridDensityState changes
 
   const onChangeDataGridDensity = useCallback(
     (gridStyle: EuiDataGridStyle) => {

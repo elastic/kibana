@@ -28,7 +28,7 @@ import {
   DEFAULT_THEME_NAME,
 } from '@kbn/core-ui-settings-common';
 import { Template } from './views';
-import {
+import type {
   IRenderOptions,
   RenderingPrebootDeps,
   RenderingSetupDeps,
@@ -268,6 +268,7 @@ export class RenderingService {
     }
 
     const apmConfig = getApmConfig(request.url.pathname);
+
     const filteredPlugins = filterUiPlugins({ uiPlugins, isAnonymousPage });
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
     const metadata: RenderingMetadata = {

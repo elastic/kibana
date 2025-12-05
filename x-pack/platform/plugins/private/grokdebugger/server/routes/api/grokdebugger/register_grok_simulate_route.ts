@@ -12,7 +12,7 @@ import { GrokdebuggerResponse } from '../../../models/grokdebugger_response';
 
 import { handleEsError } from '../../../shared_imports';
 
-import { KibanaFramework } from '../../../lib/kibana_framework';
+import type { KibanaFramework } from '../../../lib/kibana_framework';
 
 const requestBodySchema = schema.object({
   pattern: schema.string(),

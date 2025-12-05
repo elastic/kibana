@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IFieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import type { IFieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 
 import { getPoint } from './_get_point';
 import { setFormatService } from '../../../services';
-import { Aspect } from './point_series';
-import { Table, Row, Column } from '../../types';
+import type { Aspect } from './point_series';
+import type { Table, Row, Column } from '../../types';
 
 describe('getPoint', function () {
   let deserialize: IFieldFormatsRegistry['deserialize'];

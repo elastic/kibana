@@ -8,8 +8,7 @@
 import React, { memo, useMemo } from 'react';
 import type { Alert } from '@kbn/alerting-types';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
-import type { RuleResponse } from '../../../../../common/api/detection_engine';
-import { useGetIntegrationFromRuleId } from '../../../hooks/alert_summary/use_get_integration_from_rule_id';
+import { RELATED_INTEGRATION } from '../../../constants';
 import { IntegrationIcon } from '../common/integration_icon';
 import { getAlertFieldValueAsStringOrNull } from '../../../utils/type_utils';
 
@@ -22,31 +21,23 @@ export interface KibanaAlertRelatedIntegrationsCellRendererProps {
    */
   alert: Alert;
   /**
-   * List of installed AI for SOC integrations.
+   * List of installed EASE integrations.
    * This comes from the additionalContext property on the table.
    */
   packages: PackageListItem[];
-  /**
-   * List of rules for the AI for SOC.
-   * This comes from the additionalContext property on the table.
-   */
-  rules: RuleResponse[];
 }
 
 /**
- * Renders an integration/package icon within the AI for SOC alert summary table Integration column.
+ * Renders an integration/package icon within EASE alert summary table Integration column.
  */
 export const KibanaAlertRelatedIntegrationsCellRenderer = memo(
-  ({ alert, packages, rules }: KibanaAlertRelatedIntegrationsCellRendererProps) => {
-    const ruleRuleId: string = useMemo(
-      () => getAlertFieldValueAsStringOrNull(alert, 'signal.rule.rule_id') || '',
-      [alert]
-    );
-    const { integration } = useGetIntegrationFromRuleId({
-      packages,
-      ruleId: ruleRuleId,
-      rules,
-    });
+  ({ alert, packages }: KibanaAlertRelatedIntegrationsCellRendererProps) => {
+    const integration: PackageListItem | undefined = useMemo(() => {
+      const relatedIntegration: string =
+        getAlertFieldValueAsStringOrNull(alert, RELATED_INTEGRATION) || '';
+
+      return packages.find((p) => relatedIntegration === p.name);
+    }, [alert, packages]);
 
     return (
       <IntegrationIcon

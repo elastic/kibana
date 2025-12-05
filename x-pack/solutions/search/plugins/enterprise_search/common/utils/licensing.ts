@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ILicense } from '@kbn/licensing-plugin/public';
+import type { ILicense } from '@kbn/licensing-types';
 
 /* hasEnterpriseLicense return if the given license is an active `enterprise` or greater license
  */

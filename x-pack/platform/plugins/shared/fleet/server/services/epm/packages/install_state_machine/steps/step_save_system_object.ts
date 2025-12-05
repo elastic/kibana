@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import semverLt from 'semver/functions/lt';
 
 import {
   PACKAGES_SAVED_OBJECT_TYPE,
@@ -41,7 +42,6 @@ export async function stepSaveSystemObject(context: InstallContext) {
     name: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
-
   await withPackageSpan('Update install status', () =>
     savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
       version: pkgVersion,
@@ -53,6 +53,9 @@ export async function stepSaveSystemObject(context: InstallContext) {
         pkgVersion,
         installedPkg?.attributes.latest_install_failed_attempts ?? []
       ),
+      rolled_back:
+        !!installedPkg?.attributes.version &&
+        semverLt(pkgVersion, installedPkg?.attributes.version),
     })
   );
 

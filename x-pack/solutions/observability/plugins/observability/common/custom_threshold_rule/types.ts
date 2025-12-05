@@ -6,11 +6,11 @@
  */
 
 import * as rt from 'io-ts';
-import { DataViewSpec, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
-import { Filter, Query } from '@kbn/es-query';
-import { COMPARATORS } from '@kbn/alerting-comparators';
-import { LEGACY_COMPARATORS } from '../utils/convert_legacy_outside_comparator';
-import { TimeUnitChar } from '../utils/formatters/duration';
+import type { DataViewSpec, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import type { Filter, Query } from '@kbn/es-query';
+import type { COMPARATORS } from '@kbn/alerting-comparators';
+import type { LEGACY_COMPARATORS } from '../utils/convert_legacy_outside_comparator';
+import type { TimeUnitChar } from '../utils/formatters/duration';
 
 export const ThresholdFormatterTypeRT = rt.keyof({
   abbreviatedNumber: null,
@@ -29,6 +29,7 @@ export enum Aggregators {
   MIN = 'min',
   MAX = 'max',
   CARDINALITY = 'cardinality',
+  MED = 'median',
   RATE = 'rate',
   P95 = 'p95',
   P99 = 'p99',

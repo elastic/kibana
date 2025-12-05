@@ -20,8 +20,8 @@ import {
 
 import { noKibanaPrivileges as noKibanaPrivilegesRole } from '@kbn/test-suites-xpack-platform/rule_registry/common/lib/authentication/roles';
 
-import { Role } from '@kbn/test-suites-xpack-platform/rule_registry/common/lib/authentication/types';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { Role } from '@kbn/test-suites-xpack-platform/rule_registry/common/lib/authentication/types';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const globalReadRole: Role = {
   name: 'global_read',
@@ -57,7 +57,7 @@ export const securitySolutionOnlyReadSpacesAll: Role = {
     kibana: [
       {
         feature: {
-          siemV3: ['read'],
+          siemV4: ['read'],
         },
         spaces: ['*'],
       },

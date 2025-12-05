@@ -33,12 +33,36 @@
       "name": "[Serverless] Security Solution Rule Management - Cypress"
     },
     {
-      "key": "cypress/security_solution_rule_management_prebuilt_rules",
-      "name": "Security Solution Rule Management - Prebuilt Rules - Cypress"
+      "key": "cypress/security_solution_rule_management_prebuilt_rules_customization",
+      "name": "Security Solution Rule Management - Prebuilt Rules Customization - Cypress"
     },
     {
-      "key": "cypress/security_serverless_rule_management_prebuilt_rules",
-      "name": "[Serverless] Security Solution Rule Management - Prebuilt Rules - Cypress"
+      "key": "cypress/security_serverless_rule_management_prebuilt_rules_customization",
+      "name": "[Serverless] Security Solution Rule Management - Prebuilt Rules Customization - Cypress"
+    },
+    {
+      "key": "cypress/security_solution_rule_management_prebuilt_rules_installation",
+      "name": "Security Solution Rule Management - Prebuilt Rules Installation - Cypress"
+    },
+    {
+      "key": "cypress/security_serverless_rule_management_prebuilt_rules_installation",
+      "name": "[Serverless] Security Solution Rule Management - Prebuilt Rules Installation - Cypress"
+    },
+    {
+      "key": "cypress/security_solution_rule_management_prebuilt_rules_management",
+      "name": "Security Solution Rule Management - Prebuilt Rules Management - Cypress"
+    },
+    {
+      "key": "cypress/security_serverless_rule_management_prebuilt_rules_management",
+      "name": "[Serverless] Security Solution Rule Management - Prebuilt Rules Management - Cypress"
+    },
+    {
+      "key": "cypress/security_solution_rule_management_prebuilt_rules_upgrade",
+      "name": "Security Solution Rule Management - Prebuilt Rules Upgrade - Cypress"
+    },
+    {
+      "key": "cypress/security_serverless_rule_management_prebuilt_rules_upgrade",
+      "name": "[Serverless] Security Solution Rule Management - Prebuilt Rules Upgrade - Cypress"
     },
     {
       "key": "cypress/security_solution_detection_engine",
@@ -87,10 +111,6 @@
     {
       "key": "cypress/apm_cypress",
       "name": "APM - Cypress"
-    },
-    {
-      "key": "cypress/profiling_cypress",
-      "name": "Profiling - Cypress"
     },
     {
       "key": "cypress/cloud_security_posture",

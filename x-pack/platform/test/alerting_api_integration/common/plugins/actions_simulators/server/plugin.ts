@@ -8,7 +8,7 @@
 import type http from 'http';
 import type https from 'https';
 import type { Plugin, CoreSetup } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type {
@@ -16,7 +16,7 @@ import type {
   PluginStartContract as ActionsPluginStartContract,
 } from '@kbn/actions-plugin/server/plugin';
 import type { ActionType } from '@kbn/actions-plugin/server';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
+import { createConnectorTypeFromSpec } from '@kbn/actions-plugin/server/lib';
 import { initPlugin as initPagerduty } from './pagerduty_simulation';
 import { initPlugin as initSwimlane } from './swimlane_simulation';
 import { initPlugin as initServiceNow } from './servicenow_simulation';
@@ -25,11 +25,13 @@ import { initPlugin as initJira } from './jira_simulation';
 import { initPlugin as initResilient } from './resilient_simulation';
 import { initPlugin as initSlack } from './slack_simulation';
 import { initPlugin as initWebhook } from './webhook_simulation';
+import { initPlugin as initSFCServer } from './single_file_connector_simulation';
 import { initPlugin as initMSExchange } from './ms_exchage_server_simulation';
 import { initPlugin as initXmatters } from './xmatters_simulation';
 import { initPlugin as initTorq } from './torq_simulation';
 import { initPlugin as initUnsecuredAction } from './unsecured_actions_simulation';
 import { initPlugin as initTines } from './tines_simulation';
+import { TestSingleFileConnector } from './test_spec_connector';
 
 export const NAME = 'actions-FTS-external-service-simulators';
 
@@ -66,6 +68,7 @@ export function getAllExternalServiceSimulatorPaths(): string[] {
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.MS_EXCHANGE}/users/test@/sendMail`);
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.MS_EXCHANGE}/1234567/oauth2/v2.0/token`);
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SERVICENOW}/oauth_token.do`);
+  allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.TINES}/api/v1/actions/1`);
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.TINES}/webhook/path/secret`);
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SENTINELONE}/web/api/v2.1/`);
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.CROWDSTRIKE}`);
@@ -95,6 +98,11 @@ export async function getServiceNowServer(): Promise<http.Server> {
   return await initServiceNow();
 }
 
+export async function getSFCServer(): Promise<http.Server> {
+  const { httpServer } = await initSFCServer();
+  return httpServer;
+}
+
 interface FixtureSetupDeps {
   actions: ActionsPluginSetupContract;
   features: FeaturesPluginSetup;
@@ -114,9 +122,9 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       minimumLicenseRequired: 'gold',
       supportedFeatureIds: ['alerting'],
       validate: {
-        config: { schema: schema.object({}, { defaultValue: {} }) },
-        secrets: { schema: schema.object({}, { defaultValue: {} }) },
-        params: { schema: schema.object({}, { defaultValue: {} }) },
+        config: { schema: z.object({}).strict().default({}) },
+        secrets: { schema: z.object({}).strict().default({}) },
+        params: { schema: z.object({}).strict().default({}) },
       },
       async executor() {
         return { status: 'ok', actionId: '' };
@@ -128,7 +136,6 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       name: 'actionsSimulators',
       app: ['actions', 'kibana'],
       category: { id: 'foo', label: 'foo' },
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       privileges: {
         all: {
           app: ['actions', 'kibana'],
@@ -150,6 +157,9 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         },
       },
     });
+
+    // register a single file connector
+    actions.registerType(createConnectorTypeFromSpec(TestSingleFileConnector, actions));
 
     const router = core.http.createRouter();
 

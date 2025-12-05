@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { DeprecationsDetails } from '@kbn/core-deprecations-common';
-import { GetDeprecationsContext } from '@kbn/core-deprecations-server';
+import type { DeprecationsDetails } from '@kbn/core-deprecations-common';
+import type { GetDeprecationsContext } from '@kbn/core-deprecations-server';
 import pMap from 'p-map';
 import type { Space } from '@kbn/spaces-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -13,7 +13,7 @@ import { MIGRATE_LOG_VIEW_SETTINGS_URL } from '../../common/http_api/deprecation
 import { CONCURRENT_SPACES_TO_CHECK } from './constants';
 import { defaultLogViewId } from '../../common/log_views';
 import { logSourcesKibanaAdvancedSettingRT } from '../../common';
-import { LogsSharedPluginStartServicesAccessor } from '../types';
+import type { LogsSharedPluginStartServicesAccessor } from '../types';
 
 export interface LogSourcesSettingDeprecationParams {
   context: GetDeprecationsContext;

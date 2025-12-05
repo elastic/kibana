@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { BoolQuery } from '@kbn/es-query';
+import type { BoolQuery } from '@kbn/es-query';
 import { useHasData } from '../../../../../hooks/use_has_data';
 import { SectionContainer } from '../section_container';
 import { paths } from '../../../../../../common/locators/paths';
@@ -22,7 +22,7 @@ import { useDatePickerContext } from '../../../../../hooks/use_date_picker_conte
 import { getColumns } from '../../../../../components/alerts_table/common/get_columns';
 import { useKibana } from '../../../../../utils/kibana_react';
 import { DEFAULT_DATE_FORMAT, DEFAULT_INTERVAL } from '../../../../../constants';
-import { BucketSize } from '../../../helpers/calculate_bucket_size';
+import type { BucketSize } from '../../../helpers/calculate_bucket_size';
 import { buildEsQuery } from '../../../../../utils/build_es_query';
 
 const ALERTS_PER_PAGE = 10;
@@ -91,7 +91,7 @@ export function AlertsSection({ bucketSize }: { bucketSize: BucketSize }) {
         ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
         consumers={observabilityAlertFeatureIds}
         query={esQuery}
-        initialPageSize={ALERTS_PER_PAGE}
+        pageSize={ALERTS_PER_PAGE}
         columns={tableColumns}
         showInspectButton
         services={{

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GetSLOSettingsResponse } from '@kbn/slo-schema';
+import type { GetSLOSettingsResponse } from '@kbn/slo-schema';
 import { SUMMARY_DESTINATION_INDEX_PATTERN } from './constants';
 
 /**

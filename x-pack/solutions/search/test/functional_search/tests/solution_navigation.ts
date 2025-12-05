@@ -6,131 +6,90 @@
  */
 
 import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
+
+const archiveEmptyIndex =
+  'x-pack/solutions/search/test/functional_search/fixtures/search-empty-index';
 
 export default function searchSolutionNavigation({
   getPageObjects,
   getService,
 }: FtrProviderContext) {
-  const { common, solutionNavigation } = getPageObjects([
-    'common',
-    'solutionNavigation',
-    'console',
-  ]);
-  const spaces = getService('spaces');
-  const browser = getService('browser');
+  const { solutionNavigation } = getPageObjects(['solutionNavigation']);
+  const searchSpace = getService('searchSpace');
   const testSubjects = getService('testSubjects');
+  const esArchiver = getService('esArchiver');
 
-  describe('Search Solution Navigation', () => {
+  describe('Elasticsearch Solution Navigation', () => {
     let cleanUp: () => Promise<unknown>;
     let spaceCreated: { id: string } = { id: '' };
 
     before(async () => {
-      // Navigate to the spaces management page which will log us in Kibana
-      await common.navigateToUrl('management', 'kibana/spaces', {
-        shouldUseHashForSubUrl: false,
-      });
-
-      // Create a space with the search solution and navigate to its home page
-      ({ cleanUp, space: spaceCreated } = await spaces.create({
-        name: 'search-ftr',
-        solution: 'es',
-      }));
-      await browser.navigateTo(spaces.getRootUrl(spaceCreated.id));
+      await esArchiver.load(archiveEmptyIndex);
+      ({ cleanUp, spaceCreated } = await searchSpace.createTestSpace('search-solution-nav-ftr'));
+      await searchSpace.navigateTo(spaceCreated.id);
     });
 
     after(async () => {
       // Clean up space created
       await cleanUp();
+      await esArchiver.unload(archiveEmptyIndex);
     });
 
     it('renders expected side nav items', async () => {
-      // Verify all expected top-level links exist
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Home' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Discover' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Dashboards' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Index Management' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Playground' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Connectors' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Search applications' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Synonyms' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Query Rules' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Inference Endpoints' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Dev Tools' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Developer Tools' });
+      // await solutionNavigation.sidenav.expectLinkExists({ text: 'Agents' }); enable when available
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Machine Learning' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Data management' });
     });
 
     it('has expected navigation', async () => {
       const expectNoPageReload = await solutionNavigation.createNoPageReloadCheck();
 
       // check side nav links
-      await solutionNavigation.sidenav.expectSectionExists('search_project_nav');
       await solutionNavigation.sidenav.expectLinkActive({
         deepLinkId: 'searchHomepage',
       });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        text: 'Create your first index',
-      });
 
       const sideNavTestCases: Array<{
-        deepLinkId: AppDeepLinkId;
+        link: { deepLinkId: AppDeepLinkId } | { navId: string } | { text: string };
         breadcrumbs: string[];
         pageTestSubject: string;
       }> = [
         {
-          deepLinkId: 'discover',
+          link: { navId: 'agent_builder' },
+          breadcrumbs: [],
+          pageTestSubject: 'agentBuilderWrapper',
+        },
+        {
+          link: { deepLinkId: 'discover' },
           breadcrumbs: ['Discover'],
-          pageTestSubject: 'kbnNoDataPage',
+          pageTestSubject: 'noDataViewsPrompt',
         },
         {
-          deepLinkId: 'dashboards',
+          link: { deepLinkId: 'dashboards' },
           breadcrumbs: ['Dashboards'],
-          pageTestSubject: 'kbnNoDataPage',
+          pageTestSubject: 'noDataViewsPrompt',
         },
         {
-          deepLinkId: 'elasticsearchIndexManagement',
-          breadcrumbs: ['Build', 'Index Management', 'Indices'],
-          pageTestSubject: 'elasticsearchIndexManagement',
-        },
-        {
-          deepLinkId: 'searchPlayground',
+          link: { deepLinkId: 'searchPlayground' },
           breadcrumbs: ['Build', 'Playground'],
           pageTestSubject: 'playgroundsListPage',
         },
         {
-          deepLinkId: 'enterpriseSearchContent:connectors',
-          breadcrumbs: ['Build', 'Connectors'],
-          pageTestSubject: 'searchCreateConnectorPage',
-        },
-        {
-          deepLinkId: 'enterpriseSearchApplications:searchApplications',
-          breadcrumbs: ['Build', 'Search applications'],
-          pageTestSubject: 'searchApplicationsListPage',
-        },
-        {
-          deepLinkId: 'searchSynonyms:synonyms',
-          breadcrumbs: ['Relevance', 'Synonyms'],
-          pageTestSubject: 'searchSynonymsOverviewPage',
-        },
-        {
-          deepLinkId: 'searchInferenceEndpoints:inferenceEndpoints',
-          breadcrumbs: ['Relevance', 'Inference Endpoints'],
-          pageTestSubject: 'inferenceEndpointsPage',
-        },
-        {
-          deepLinkId: 'dev_tools',
-          breadcrumbs: ['Dev Tools'],
+          link: { deepLinkId: 'dev_tools' },
+          breadcrumbs: ['Developer Tools'],
           pageTestSubject: 'console',
         },
       ];
 
       for (const testCase of sideNavTestCases) {
-        await solutionNavigation.sidenav.clickLink({
-          deepLinkId: testCase.deepLinkId,
-        });
+        await solutionNavigation.sidenav.clickLink(testCase.link);
         await testSubjects.existOrFail(testCase.pageTestSubject);
-        await solutionNavigation.sidenav.expectLinkActive({
-          deepLinkId: testCase.deepLinkId,
-        });
+        await solutionNavigation.sidenav.expectLinkActive(testCase.link);
         for (const breadcrumb of testCase.breadcrumbs) {
           await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: breadcrumb });
         }
@@ -140,33 +99,22 @@ export default function searchSolutionNavigation({
     });
 
     it('renders only expected items', async () => {
-      await solutionNavigation.sidenav.openSection(
-        'search_project_nav_footer.project_settings_project_nav'
+      await solutionNavigation.sidenav.clickLink({ deepLinkId: 'searchHomepage' });
+
+      await solutionNavigation.sidenav.expectOnlyDefinedLinks(
+        [
+          'searchHomepage',
+          'agent_builder',
+          'discover',
+          'dashboards',
+          'searchPlayground',
+          'machine_learning',
+          'dev_tools',
+          'data_management',
+          'stack_management',
+        ],
+        { checkOrder: false }
       );
-      await solutionNavigation.sidenav.expectSectionOpen(
-        'search_project_nav_footer.project_settings_project_nav'
-      );
-      await solutionNavigation.sidenav.expectOnlyDefinedLinks([
-        'search_project_nav',
-        'searchHomepage',
-        'discover',
-        'dashboards',
-        'build',
-        'elasticsearchIndexManagement',
-        'searchPlayground',
-        'enterpriseSearchContent:connectors',
-        'enterpriseSearchApplications:searchApplications',
-        'relevance',
-        'searchSynonyms:synonyms',
-        'searchQueryRules',
-        'searchInferenceEndpoints:inferenceEndpoints',
-        'search_project_nav_footer',
-        'dev_tools',
-        'project_settings_project_nav',
-        'management:trained_models',
-        'stack_management',
-        'monitoring',
-      ]);
     });
   });
 }

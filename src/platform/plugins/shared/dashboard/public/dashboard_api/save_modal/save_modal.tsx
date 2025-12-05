@@ -12,7 +12,8 @@ import React, { Fragment, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
+import type { SaveResult } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectSaveModalWithSaveResult } from '@kbn/saved-objects-plugin/public';
 import { savedObjectsTaggingService } from '../../services/kibana_services';
 import type { DashboardSaveOptions } from './types';
 
@@ -23,16 +24,19 @@ interface DashboardSaveModalProps {
     newCopyOnSave,
     newTags,
     newTimeRestore,
+    newProjectRoutingRestore,
     isTitleDuplicateConfirmed,
     onTitleDuplicate,
-  }: DashboardSaveOptions) => void;
+  }: DashboardSaveOptions) => Promise<SaveResult>;
   onClose: () => void;
   title: string;
   description: string;
   tags?: string[];
   timeRestore: boolean;
+  projectRoutingRestore: boolean;
   showCopyOnSave: boolean;
   showStoreTimeOnSave?: boolean;
+  showStoreProjectRoutingOnSave?: boolean;
   customModalTitle?: string;
 }
 
@@ -51,12 +55,16 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
   onSave,
   showCopyOnSave,
   showStoreTimeOnSave = true,
+  showStoreProjectRoutingOnSave = true,
   tags,
   title,
   timeRestore,
+  projectRoutingRestore,
 }) => {
   const [selectedTags, setSelectedTags] = React.useState<string[]>(tags ?? []);
   const [persistSelectedTimeInterval, setPersistSelectedTimeInterval] = React.useState(timeRestore);
+  const [persistSelectedProjectRouting, setPersistSelectedProjectRouting] =
+    React.useState(projectRoutingRestore);
 
   const saveDashboard = React.useCallback<SaveDashboardHandler>(
     async ({
@@ -65,18 +73,18 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
       newCopyOnSave,
       isTitleDuplicateConfirmed,
       onTitleDuplicate,
-    }) => {
+    }) =>
       onSave({
         newTitle,
         newDescription,
         newCopyOnSave,
         newTimeRestore: persistSelectedTimeInterval,
+        newProjectRoutingRestore: persistSelectedProjectRouting,
         isTitleDuplicateConfirmed,
         onTitleDuplicate,
         newTags: selectedTags,
-      });
-    },
-    [onSave, persistSelectedTimeInterval, selectedTags]
+      }),
+    [onSave, persistSelectedTimeInterval, persistSelectedProjectRouting, selectedTags]
   );
 
   const renderDashboardSaveOptions = useCallback(() => {
@@ -126,12 +134,50 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
             </EuiFlexGroup>
           </EuiFormRow>
         ) : null}
+        {showStoreProjectRoutingOnSave ? (
+          <EuiFormRow>
+            <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiSwitch
+                  data-test-subj="storeProjectRoutingWithDashboard"
+                  checked={persistSelectedProjectRouting}
+                  onChange={(event) => {
+                    setPersistSelectedProjectRouting(event.target.checked);
+                  }}
+                  label={
+                    <FormattedMessage
+                      id="dashboard.topNav.saveModal.storeProjectRoutingWithDashboardFormRowLabel"
+                      defaultMessage="Store project routing with dashboard"
+                    />
+                  }
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  content={
+                    <FormattedMessage
+                      id="dashboard.topNav.saveModal.storeProjectRoutingWithDashboardFormRowHelpText"
+                      defaultMessage="This changes the project routing to the currently selected project each time this dashboard is loaded."
+                    />
+                  }
+                  position="top"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFormRow>
+        ) : null}
       </Fragment>
     );
-  }, [persistSelectedTimeInterval, selectedTags, showStoreTimeOnSave]);
+  }, [
+    persistSelectedTimeInterval,
+    persistSelectedProjectRouting,
+    selectedTags,
+    showStoreTimeOnSave,
+    showStoreProjectRoutingOnSave,
+  ]);
 
   return (
-    <SavedObjectSaveModal
+    <SavedObjectSaveModalWithSaveResult
       onSave={saveDashboard}
       onClose={onClose}
       title={title}

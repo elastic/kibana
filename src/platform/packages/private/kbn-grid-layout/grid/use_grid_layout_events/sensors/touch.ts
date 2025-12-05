@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UserInteractionEvent } from '../types';
+import type { UserInteractionEvent } from '../types';
 
 export type UserTouchEvent = TouchEvent | React.TouchEvent<HTMLButtonElement>;
 

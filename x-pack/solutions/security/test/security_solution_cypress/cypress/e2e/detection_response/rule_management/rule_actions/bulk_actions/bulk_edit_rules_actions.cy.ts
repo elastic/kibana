@@ -64,6 +64,7 @@ import {
 } from '../../../../../objects/rule';
 import {
   createAndInstallMockedPrebuiltRules,
+  installMockPrebuiltRulesPackage,
   preventPrebuiltRulesPackageInstallation,
 } from '../../../../../tasks/api_calls/prebuilt_rules';
 
@@ -77,6 +78,10 @@ describe(
   'Detection rules, bulk edit of rule actions',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
+    before(() => {
+      installMockPrebuiltRulesPackage();
+    });
+
     beforeEach(() => {
       login();
       deleteAlertsAndRules();

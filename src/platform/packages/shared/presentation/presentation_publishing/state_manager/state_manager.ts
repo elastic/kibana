@@ -8,7 +8,7 @@
  */
 
 import { BehaviorSubject, map, merge } from 'rxjs';
-import { StateComparators, StateManager, WithAllKeys } from './types';
+import type { StateComparators, StateManager, WithAllKeys } from './types';
 import { runComparator } from './state_comparators';
 
 type SubjectOf<StateType extends object> = BehaviorSubject<WithAllKeys<StateType>[keyof StateType]>;
@@ -28,7 +28,7 @@ type KeyToSubjectMap<StateType extends object> = {
  * @param comparators - Optional StateComparators. When provided, subject will only emit when value changes.
  */
 export const initializeStateManager = <StateType extends object>(
-  initialState: StateType,
+  initialState: Partial<StateType>,
   defaultState: WithAllKeys<StateType>,
   comparators?: StateComparators<StateType>
 ): StateManager<StateType> => {

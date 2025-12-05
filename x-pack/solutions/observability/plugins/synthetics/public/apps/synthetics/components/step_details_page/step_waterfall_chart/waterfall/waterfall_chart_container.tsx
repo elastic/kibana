@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { networkEventsSelector } from '../../../../state/network_events/selectors';
-import { JourneyStep } from '../../../../../../../common/runtime_types';
+import type { JourneyStep } from '../../../../../../../common/runtime_types';
 import { WaterfallChartWrapper } from './waterfall_chart_wrapper';
 import { extractItems } from '../../common/network_data/data_formatting';
 import { useStepWaterfallMetrics } from '../use_step_waterfall_metrics';
@@ -81,6 +81,7 @@ export const WaterfallChartContainer: React.FC<Props> = ({ checkGroup, stepIndex
       )}
       {waterfallLoaded && hasEvents && !isWaterfallSupported && (
         <EuiCallOut
+          announceOnMount
           title={
             <FormattedMessage
               id="xpack.synthetics.synthetics.stepDetail.waterfallUnsupported.title"

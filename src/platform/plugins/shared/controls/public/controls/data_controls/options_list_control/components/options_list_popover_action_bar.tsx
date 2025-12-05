@@ -9,6 +9,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiCheckbox,
@@ -18,7 +19,6 @@ import {
   EuiFormRow,
   EuiText,
   EuiToolTip,
-  UseEuiTheme,
 } from '@elastic/eui';
 import {
   useBatchedPublishingSubjects,
@@ -28,7 +28,7 @@ import {
 import { lastValueFrom, take } from 'rxjs';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { OptionsListSuggestions } from '../../../../../common/options_list';
+import type { OptionsListSuggestions } from '../../../../../common/options_list';
 import { getCompatibleSearchTechniques } from '../../../../../common/options_list/suggestions_searching';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListPopoverSortingButton } from './options_list_popover_sorting_button';
@@ -38,6 +38,7 @@ import { MAX_OPTIONS_LIST_BULK_SELECT_SIZE, MAX_OPTIONS_LIST_REQUEST_SIZE } from
 interface OptionsListPopoverProps {
   showOnlySelected: boolean;
   setShowOnlySelected: (value: boolean) => void;
+  disableMultiValueEmptySelection?: boolean;
 }
 
 const optionsListPopoverStyles = {
@@ -70,6 +71,7 @@ const optionsListPopoverStyles = {
 export const OptionsListPopoverActionBar = ({
   showOnlySelected,
   setShowOnlySelected,
+  disableMultiValueEmptySelection = false,
 }: OptionsListPopoverProps) => {
   const { componentApi, displaySettings } = useOptionsListContext();
   const [areAllSelected, setAllSelected] = useState<boolean>(false);
@@ -123,7 +125,14 @@ export const OptionsListPopoverActionBar = ({
     ? selectedOptions.length > MAX_OPTIONS_LIST_BULK_SELECT_SIZE
     : totalCardinality > MAX_OPTIONS_LIST_BULK_SELECT_SIZE;
 
-  const isBulkSelectDisabled = dataLoading || hasNoOptions || hasTooManyOptions || showOnlySelected;
+  const isEmptySelectionDisabled = disableMultiValueEmptySelection && areAllSelected;
+
+  const isBulkSelectDisabled =
+    dataLoading ||
+    hasNoOptions ||
+    hasTooManyOptions ||
+    showOnlySelected ||
+    isEmptySelectionDisabled;
 
   const handleBulkAction = useCallback(
     async (bulkAction: (keys: string[]) => void) => {

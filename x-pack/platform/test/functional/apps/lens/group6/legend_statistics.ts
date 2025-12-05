@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { visualize, lens } = getPageObjects(['visualize', 'lens']);
@@ -54,12 +54,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('shows table with legend statistics', async () => {
         await loadSavedLens('lnsXYvis');
 
-        await lens.toggleToolbarPopover('lnsLegendButton');
+        await lens.openLegendSettingsFlyout();
         await lens.selectOptionFromComboBox('lnsLegendStatisticsSelect', [
           'average',
           'minimum',
           'maximum',
         ]);
+        await lens.closeFlyoutWithBackButton();
 
         const tableText = `Avg
 Min

@@ -94,6 +94,7 @@ describe('CaseActionBar', () => {
       key: 'settings',
       value: {
         syncAlerts: false,
+        extractObservables: true,
       },
     });
   });

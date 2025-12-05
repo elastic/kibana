@@ -12,15 +12,15 @@ import { i18n } from '@kbn/i18n';
 import { DEFAULT_CONTEXT_DOCUMENTS } from '../../common';
 import { DEFAULT_LLM_PROMPT } from '../../common/prompt';
 
-import {
+import type {
   LLMModel,
   PlaygroundForm,
   PlaygroundResponse,
   PlaygroundSavedObject,
   SavedPlaygroundForm,
   SavedPlaygroundFormFetchError,
-  SavedPlaygroundFormFields,
 } from '../types';
+import { SavedPlaygroundFormFields } from '../types';
 
 function parseSummarizationModel(
   model: PlaygroundSavedObject['summarizationModel'],

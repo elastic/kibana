@@ -10,6 +10,10 @@
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { GroupStats } from './group_stats';
+import type {
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
+} from '@elastic/eui';
 
 const onTakeActionsOpen = jest.fn();
 const testProps = {
@@ -26,10 +30,13 @@ const testProps = {
     { title: 'Rules:', badge: { value: 2 } },
     { title: 'Alerts:', badge: { value: 2, width: 50, color: '#a83632' } },
   ],
-  takeActionItems: () => [
-    <p data-test-subj="takeActionItem-1" key={1} />,
-    <p data-test-subj="takeActionItem-2" key={2} />,
-  ],
+  takeActionItems: () => ({
+    items: [
+      { key: '1', 'data-test-subj': 'takeActionItem-1' },
+      { key: '2', 'data-test-subj': 'takeActionItem-2' },
+    ] as EuiContextMenuPanelItemDescriptor[],
+    panels: [] as EuiContextMenuPanelDescriptor[],
+  }),
 };
 describe('Group stats', () => {
   beforeEach(() => {
@@ -69,13 +76,18 @@ describe('Group stats', () => {
 
   it('shows the Take Actions menu when action items are provided', () => {
     const { queryByTestId } = render(
-      <GroupStats {...testProps} takeActionItems={() => [<span />]} />
+      <GroupStats
+        {...testProps}
+        takeActionItems={() => ({ items: [{ name: 'test' }], panels: [] })}
+      />
     );
     expect(queryByTestId('take-action-button')).toBeInTheDocument();
   });
 
   it('hides the Take Actions menu when no action item is provided', () => {
-    const { queryByTestId } = render(<GroupStats {...testProps} takeActionItems={() => []} />);
+    const { queryByTestId } = render(
+      <GroupStats {...testProps} takeActionItems={() => ({ items: [], panels: [] })} />
+    );
     expect(queryByTestId('take-action-button')).not.toBeInTheDocument();
   });
 });

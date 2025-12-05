@@ -9,17 +9,17 @@
 
 import React, { useMemo } from 'react';
 import { SourceDocument, type DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import type { ShouldShowFieldInTableHandler, DataTableRecord } from '@kbn/discover-utils';
 import {
-  ShouldShowFieldInTableHandler,
-  getLogDocumentOverview,
   getMessageFieldWithFallbacks,
   getLogLevelCoalescedValue,
   getLogLevelColor,
   LOG_LEVEL_REGEX,
-  DataTableRecord,
+  OTEL_MESSAGE_FIELD,
 } from '@kbn/discover-utils';
 import { MESSAGE_FIELD } from '@kbn/discover-utils';
-import { makeHighContrastColor, EuiThemeComputed, useEuiTheme } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { makeHighContrastColor, useEuiTheme } from '@elastic/eui';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { formatJsonDocumentForContent } from './utils';
 
@@ -38,7 +38,7 @@ const LogMessage = ({
   value: string | HTMLElement;
   className: string;
 }) => {
-  const shouldRenderFieldName = field !== MESSAGE_FIELD;
+  const shouldRenderFieldName = field !== MESSAGE_FIELD && field !== OTEL_MESSAGE_FIELD;
 
   if (shouldRenderFieldName) {
     return (
@@ -97,14 +97,14 @@ export const Content = ({
   row,
   shouldShowFieldHandler,
 }: ContentProps) => {
-  const documentOverview = getLogDocumentOverview(row, { dataView, fieldFormats });
-  const { field, value } = getMessageFieldWithFallbacks(documentOverview);
+  // Use OTel fallback version that returns the actual field name used
+  const { field, value } = getMessageFieldWithFallbacks(row.flattened);
 
   const { euiTheme } = useEuiTheme();
   const isDarkTheme = useKibanaIsDarkMode();
 
   const highlightedValue = useMemo(
-    () => (value ? getHighlightedMessage(value as string, row, euiTheme, isDarkTheme) : value),
+    () => (value ? getHighlightedMessage(value, row, euiTheme, isDarkTheme) : value),
     [value, row, euiTheme, isDarkTheme]
   );
 

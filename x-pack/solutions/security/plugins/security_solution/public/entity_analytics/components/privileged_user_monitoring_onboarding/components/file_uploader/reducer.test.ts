@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { PrivmonBulkUploadUsersCSVResponse } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/upload_csv.gen';
-
+import type { PrivmonBulkUploadUsersCSVResponse } from '../../../../../../common/api/entity_analytics';
 import type { ReducerAction, ReducerState, ValidationStepState } from './reducer';
 import { reducer } from './reducer';
 import { FileUploaderSteps } from './types';

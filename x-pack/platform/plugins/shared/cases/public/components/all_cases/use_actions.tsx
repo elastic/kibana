@@ -39,6 +39,7 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const refreshCases = useRefreshCases();
   const { permissions } = useCasesContext();
+  const buttonRef = React.useRef<HTMLButtonElement>(null);
 
   const shouldDisable = useShouldDisableStatus();
 
@@ -195,6 +196,7 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
             key={`case-action-popover-button-${theCase.id}`}
             data-test-subj={`case-action-popover-button-${theCase.id}`}
             disabled={disableActions}
+            buttonRef={buttonRef}
           />
         }
         isOpen={isPopoverOpen}
@@ -214,6 +216,7 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
           totalCasesToBeDeleted={1}
           onCancel={deleteAction.onCloseModal}
           onConfirm={deleteAction.onConfirmDeletion}
+          focusButtonRef={buttonRef}
         />
       ) : null}
       {tagsAction.isFlyoutOpen ? (
@@ -221,6 +224,7 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
           onClose={tagsAction.onFlyoutClosed}
           selectedCases={[theCase]}
           onSaveTags={tagsAction.onSaveTags}
+          focusButtonRef={buttonRef}
         />
       ) : null}
       {assigneesAction.isFlyoutOpen ? (
@@ -228,6 +232,7 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
           onClose={assigneesAction.onFlyoutClosed}
           selectedCases={[theCase]}
           onSaveAssignees={assigneesAction.onSaveAssignees}
+          focusButtonRef={buttonRef}
         />
       ) : null}
     </>

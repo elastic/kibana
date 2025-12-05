@@ -57,7 +57,7 @@ export const item: GetInfoResponse['item'] = {
   ],
   assets: {
     kibana: {
-      alert: [],
+      alerting_rule_template: [],
       dashboard: [
         {
           pkgkey: 'nginx-0.7.0',
@@ -301,6 +301,8 @@ export const item: GetInfoResponse['item'] = {
       index_template: [],
       transform: [],
       ml_model: [],
+      knowledge_base: [],
+      esql_view: [],
     },
   },
   policy_templates: [

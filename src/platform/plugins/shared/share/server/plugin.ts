@@ -9,8 +9,14 @@
 
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import {
+import type {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
+import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
@@ -22,15 +28,15 @@ import {
 } from './unused_urls_task';
 import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../common/constants';
 import { UrlService } from '../common/url_service';
+import type { ServerUrlService } from './url_service';
 import {
-  ServerUrlService,
   ServerShortUrlClientFactory,
   registerUrlServiceRoutes,
   registerUrlServiceSavedObjectType,
 } from './url_service';
 import { LegacyShortUrlLocatorDefinition } from '../common/url_service/locators/legacy_short_url_locator';
 import { ShortUrlRedirectLocatorDefinition } from '../common/url_service/locators/short_url_redirect_locator';
-import { ConfigSchema } from './config';
+import type { ConfigSchema } from './config';
 
 /** @public */
 export interface SharePublicSetup {

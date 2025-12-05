@@ -2032,3 +2032,239 @@ export const installIntegration = async (
     .catch(catchAxiosErrorFormatAndThrow)
     .then((response) => response.data);
 };
+
+interface AddCrowdStrikeIntegrationToAgentPolicyOptions {
+  kbnClient: KbnClient;
+  log: ToolingLog;
+  agentPolicyId: string;
+  /** The CrowdStrike API URL */
+  apiUrl: string;
+  /** The CrowdStrike API client ID */
+  clientId: string;
+  /** The CrowdStrike API client secret */
+  clientSecret: string;
+  integrationPolicyName?: string;
+  /** Set to `true` if wanting to add the integration to the agent policy even if that agent policy already has one  */
+  force?: boolean;
+}
+
+export const addCrowdStrikeIntegrationToAgentPolicy = async ({
+  kbnClient,
+  log,
+  agentPolicyId,
+  apiUrl,
+  clientId,
+  clientSecret,
+  integrationPolicyName = `CrowdStrike policy (${Math.random().toString().substring(2, 6)})`,
+  force = false,
+}: AddCrowdStrikeIntegrationToAgentPolicyOptions): Promise<PackagePolicy> => {
+  // If `force` is `false and agent policy already has a CrowdStrike integration, exit here
+  if (!force) {
+    log.debug(
+      `Checking to see if agent policy [${agentPolicyId}] already includes a CrowdStrike integration policy`
+    );
+    const agentPolicy = await fetchAgentPolicy(kbnClient, agentPolicyId);
+    log.verbose(agentPolicy);
+    const integrationPolicies = agentPolicy.package_policies ?? [];
+
+    for (const integrationPolicy of integrationPolicies) {
+      if (integrationPolicy.package?.name === 'crowdstrike') {
+        log.debug(
+          `Returning existing CrowdStrike Integration Policy included in agent policy [${agentPolicyId}]`
+        );
+        return integrationPolicy;
+      }
+    }
+  }
+
+  // Try to get package info, install if not available
+  let packageInfo;
+  try {
+    packageInfo = await fetchPackageInfo(kbnClient, 'crowdstrike');
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('404')) {
+      log.info('CrowdStrike package not found, installing it first...');
+      await installIntegration(kbnClient, 'crowdstrike');
+      packageInfo = await fetchPackageInfo(kbnClient, 'crowdstrike');
+    } else {
+      throw error;
+    }
+  }
+
+  const { version: packageVersion, name: packageName, title: packageTitle } = packageInfo;
+
+  log.debug(
+    `Creating new CrowdStrike integration policy [package v${packageVersion}] and adding it to agent policy [${agentPolicyId}]`
+  );
+
+  return createIntegrationPolicy(kbnClient, {
+    name: integrationPolicyName,
+    description: `Created by script: ${__filename}`,
+    policy_id: agentPolicyId,
+    policy_ids: [agentPolicyId],
+    enabled: true,
+    inputs: [
+      {
+        type: 'cel',
+        policy_template: 'crowdstrike',
+        enabled: true,
+        vars: {
+          client_id: {
+            value: clientId,
+            type: 'text',
+          },
+          client_secret: {
+            value: clientSecret,
+            type: 'password',
+          },
+          url: {
+            value: apiUrl,
+            type: 'text',
+          },
+          token_url: {
+            value: `${apiUrl}/oauth2/token`,
+            type: 'text',
+          },
+          scopes: {
+            value: [],
+            type: 'text',
+          },
+          enable_request_tracer: {
+            value: false,
+            type: 'bool',
+          },
+          proxy_url: {
+            type: 'text',
+          },
+        },
+        streams: [
+          {
+            enabled: true,
+            data_stream: {
+              type: 'logs',
+              dataset: 'crowdstrike.alert',
+            },
+            vars: {
+              initial_interval: {
+                value: '30m',
+                type: 'text',
+              },
+              interval: {
+                value: '30s',
+                type: 'text',
+              },
+              batch_size: {
+                value: 1000,
+                type: 'text',
+              },
+              http_client_timeout: {
+                value: '30s',
+                type: 'text',
+              },
+              tags: {
+                value: ['forwarded', 'crowdstrike-alert'],
+                type: 'text',
+              },
+              preserve_original_event: {
+                value: false,
+                type: 'bool',
+              },
+              preserve_duplicate_custom_fields: {
+                value: false,
+                type: 'bool',
+              },
+              processors: {
+                type: 'yaml',
+              },
+            },
+          },
+          {
+            enabled: true,
+            data_stream: {
+              type: 'logs',
+              dataset: 'crowdstrike.host',
+            },
+            vars: {
+              initial_interval: {
+                value: '24h',
+                type: 'text',
+              },
+              interval: {
+                value: '5m',
+                type: 'text',
+              },
+              batch_size: {
+                value: 1000,
+                type: 'text',
+              },
+              http_client_timeout: {
+                value: '30s',
+                type: 'text',
+              },
+              tags: {
+                value: ['forwarded', 'crowdstrike-host'],
+                type: 'text',
+              },
+              preserve_original_event: {
+                value: false,
+                type: 'bool',
+              },
+              preserve_duplicate_custom_fields: {
+                value: false,
+                type: 'bool',
+              },
+              processors: {
+                type: 'yaml',
+              },
+            },
+          },
+          {
+            enabled: false,
+            data_stream: {
+              type: 'logs',
+              dataset: 'crowdstrike.vulnerability',
+            },
+            vars: {
+              initial_interval: {
+                value: '24h',
+                type: 'text',
+              },
+              interval: {
+                value: '5m',
+                type: 'text',
+              },
+              batch_size: {
+                value: 1000,
+                type: 'text',
+              },
+              http_client_timeout: {
+                value: '30s',
+                type: 'text',
+              },
+              tags: {
+                value: ['forwarded', 'crowdstrike-vulnerability'],
+                type: 'text',
+              },
+              preserve_original_event: {
+                value: false,
+                type: 'bool',
+              },
+              preserve_duplicate_custom_fields: {
+                value: false,
+                type: 'bool',
+              },
+              processors: {
+                type: 'yaml',
+              },
+            },
+          },
+        ],
+      },
+    ],
+    package: {
+      name: packageName,
+      title: packageTitle,
+      version: packageVersion,
+    },
+  });
+};

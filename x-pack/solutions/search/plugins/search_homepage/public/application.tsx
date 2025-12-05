@@ -7,15 +7,17 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { SearchHomepageServicesContextDeps } from './types';
+import type { QueryClient } from '@kbn/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
+import type { SearchHomepageServicesContextDeps } from './types';
 import { HomepageRouter } from './router';
 import { UsageTrackerContextProvider } from './contexts/usage_tracker_context';
+import { GettingStartedRedirectGate } from './components/getting_started_redirect_gate';
 
 export const renderApp = async (
   core: CoreStart,
@@ -29,9 +31,11 @@ export const renderApp = async (
         <UsageTrackerContextProvider usageCollection={services.usageCollection}>
           <QueryClientProvider client={queryClient}>
             <I18nProvider>
-              <Router history={services.history}>
-                <HomepageRouter />
-              </Router>
+              <GettingStartedRedirectGate coreStart={core}>
+                <Router history={services.history}>
+                  <HomepageRouter />
+                </Router>
+              </GettingStartedRedirectGate>
             </I18nProvider>
           </QueryClientProvider>
         </UsageTrackerContextProvider>

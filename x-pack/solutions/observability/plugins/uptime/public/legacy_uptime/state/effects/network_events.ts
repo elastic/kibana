@@ -7,11 +7,11 @@
 
 import type { Action } from 'redux-actions';
 import { call, put, takeLatest } from 'redux-saga/effects';
+import type { FetchNetworkEventsParams } from '../actions/network_events';
 import {
   getNetworkEvents,
   getNetworkEventsSuccess,
   getNetworkEventsFail,
-  FetchNetworkEventsParams,
 } from '../actions/network_events';
 import { fetchNetworkEvents } from '../api/network_events';
 import type { SyntheticsNetworkEventsApiResponse } from '../../../../common/runtime_types';

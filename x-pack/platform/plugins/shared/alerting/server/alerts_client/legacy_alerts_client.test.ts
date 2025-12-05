@@ -5,9 +5,10 @@
  * 2.0.
  */
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { MaintenanceWindowStatus } from '@kbn/maintenance-windows-plugin/common';
 import type { UntypedNormalizedRuleType } from '../rule_type_registry';
 import type { AlertInstanceContext } from '../types';
-import { MaintenanceWindowStatus, RecoveredActionGroup } from '../types';
+import { RecoveredActionGroup } from '../types';
 import { LegacyAlertsClient } from './legacy_alerts_client';
 import { createAlertFactory, getPublicAlertFactory } from '../alert/create_alert_factory';
 import { Alert } from '../alert/alert';
@@ -15,8 +16,10 @@ import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
 import { processAlerts } from '../lib';
 import { DEFAULT_FLAPPING_SETTINGS } from '../../common/rules_settings';
 import { schema } from '@kbn/config-schema';
-import { maintenanceWindowsServiceMock } from '../task_runner/maintenance_windows/maintenance_windows_service.mock';
-import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
+import {
+  maintenanceWindowsServiceMock,
+  getMockMaintenanceWindow,
+} from '../task_runner/maintenance_windows/maintenance_windows_service.mock';
 import type { KibanaRequest } from '@kbn/core/server';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import { determineFlappingAlerts } from '../lib/flapping/determine_flapping_alerts';
@@ -176,7 +179,32 @@ describe('Legacy Alerts Client', () => {
         '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
       },
       logger,
-      maxAlerts: 1000,
+      configuredMaxAlerts: 1000,
+      canSetRecoveryContext: false,
+      autoRecoverAlerts: true,
+    });
+  });
+
+  test('initializeExecution() should set maxAlerts and pass the configured value to the alert factory if greater than the max allowed threshold', async () => {
+    const alertsClient = new LegacyAlertsClient({
+      alertingEventLogger,
+      logger,
+      request: fakeRequest,
+      spaceId: 'space1',
+      ruleType,
+      maintenanceWindowsService,
+    });
+
+    await alertsClient.initializeExecution({ ...defaultExecutionOpts, maxAlerts: 10000 });
+
+    expect(alertsClient.getMaxAlertLimit()).toBe(5000);
+    expect(createAlertFactory).toHaveBeenCalledWith({
+      alerts: {
+        '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
+        '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
+      },
+      logger,
+      configuredMaxAlerts: 10000,
       canSetRecoveryContext: false,
       autoRecoverAlerts: true,
     });

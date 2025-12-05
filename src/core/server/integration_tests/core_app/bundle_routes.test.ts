@@ -13,9 +13,10 @@ import supertest from 'supertest';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import type { IRouter } from '@kbn/core-http-server';
 import { registerRouteForBundle, FileHashCache } from '@kbn/core-apps-server-internal';
-import { HttpService } from '@kbn/core-http-server-internal';
+import type { HttpService } from '@kbn/core-http-server-internal';
 import { createInternalHttpService } from '../utilities';
 
 const buildHash = 'buildHash';
@@ -33,7 +34,10 @@ describe('bundle routes', () => {
     fileHashCache = new FileHashCache();
 
     server = createInternalHttpService({ logger });
-    await server.preboot({ context: contextServiceMock.createPrebootContract() });
+    await server.preboot({
+      context: contextServiceMock.createPrebootContract(),
+      docLinks: docLinksServiceMock.createSetupContract(),
+    });
   });
 
   afterEach(async () => {

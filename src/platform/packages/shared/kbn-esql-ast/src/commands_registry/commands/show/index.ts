@@ -10,15 +10,18 @@ import { i18n } from '@kbn/i18n';
 import type { ICommandMethods } from '../../registry';
 import { autocomplete } from './autocomplete';
 import type { ICommandContext } from '../../types';
+import { columnsAfter } from './columns_after';
 
 const showCommandMethods: ICommandMethods<ICommandContext> = {
   autocomplete,
+  columnsAfter,
 };
 
 export const showCommand = {
   name: 'show',
   methods: showCommandMethods,
   metadata: {
+    type: 'source' as const,
     description: i18n.translate('kbn-esql-ast.esql.definitions.showDoc', {
       defaultMessage: 'Returns information about the deployment and its capabilities',
     }),

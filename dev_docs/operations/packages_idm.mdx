@@ -40,9 +40,10 @@ Every package has:
   - a globally unique module ID in the `@kbn/` namespace
   - a type, see [Package Types](#package-types)
   - dependencies on other packages in the repo or from NPM declared in their `kibana.jsonc` file and updated automatically
-  - configuration files like `BUILD.bazel`, `jest.config.js`, `package.json`, etc. which are automatically generated when necessary from the `kibana.jsonc` file.
+  - configuration files like `jest.config.js`, `package.json`, etc. which are automatically generated when necessary from the `kibana.jsonc` file.
   - a single interface. When you import a package you get its one (and only) interface. Packages don't have sub-imports or sub-modules.
   - the ability to include jest tests alongside the code
+  - an optional `devOnly: true | false` property. This flag allows excluding development packages (tooling and processes) from the production builds.
 
 ## Package Types
 Package types allow us to have many different packages, pre-defined build tasks, restrictions, and unique configurations for each package type. Every package is one of the following types:
@@ -136,6 +137,55 @@ This phase is about finalizing the rough edges and making sure every piece of co
   - Automatically build the components that need changes
   - Build package artifacts that can be installed in a Kibana distributable
 
+## Sustainable Kibana Architecture
+
+### Introduction
+
+The tools and processes around the Kibana repository (linting, building, TS compiler, testing, CI, ...) are put under a lot of load, and execution times are becoming more and more of a bottleneck. The _Sustainable Kibana Architecture_ initative aims at breaking down the Kibana monolith, creating independent builds and CI pipelines for each solution.
+
+### Modules belong to groups
+
+To that end, the different modules (packages and plugins) have been categorised into one of the following groups:
+
+`group: 'platform'`
+: These modules are used by more than one solution, and thus they belong to the _platform_ layer, which is built / tested / loaded systematically. Platform modules **cannot** depend on solution modules.
+
+`group: 'observability' | 'security' | 'search' | 'workplaceai'`
+: These modules belong to a particular solution, and their code/services are _private_ (aka they cannot be accessed from platform or from other solutions). This allows building / testing / loading them in the context of the solution they belong to.
+
+### Platform modules have visibility
+
+Some of the platform code contains logic and services that we do not want solutions to access / consume. To that end, the `kibana.jsonc` files support the _visibility_ attribute:
+
+`visibility: 'private'`
+: Services and logic in these modules (packages and plugins) can only be accessed from modules within the same group. This allows e.g. abstracting away some implementations and keeping some internal logic and services private.
+
+`visibility: 'shared'`
+: Services and logic in these modules (packages and plugins) can be accessed from modules from any group. This configuration can only be applied to platform modules, as solution modules are  _private_ by definition.
+
+### Sustainable folder structure
+
+To make module categories clear and reinforce our commitment to splitting the Kibana monolith into platform and solution components, we've restructured the Kibana repository as follows:
+
+`src/platform/[plugins|packages]/[private|shared]/...`
+: SSPL licensed platform modules that are used at test-time (mocks) and/or runtime.
+
+`x-pack/platform/[plugins|packages]/[private|shared]/...`
+: Elastic licensed platform modules that are used at test-time (mocks) and/or runtime.
+
+`x-pack/[solution]/[plugins|packages]/...`
+: Solution-specific modules.
+
+`src/platform/test` and `x-pack/platform/test`
+: Platform testing modules.
+
+`src/core/packages/...`
+: Low-level platform packages that contain Kibana's essential building blocks.
+
+`packages/...`
+: Mainly `devOnly: true` packages and CLI tools that are only used at development / CI time.
+
+
 
 ## FAQ
 
@@ -184,14 +234,6 @@ The `@kbn/{team}-{domain}-{component}(-{type})?` style naming scheme is also fol
  - `@kbn/core-analytics-server-mocks`
  - `@kbn/core-analytics-server-internal`
  - etc.
-
-### Where do I put my package?
-
-The only rule the package system enforces is that packages can't live inside of other packages. Additionally, for licensing purposes, it's probably best to keep SSPL licensed code in the `packages` or `src` directories and Elastic licensed code in the `x-pack` directory.
-
-Otherwise, you can put your packages wherever you like. It's probably best that you don't put them in the current `packages` directory as it's huge and only getting bigger with time.
-
-To define a new directory where packages will live you will need to edit the [`BAZEL_PACKAGE_DIRS`][pkgDirs] const. This list points to all the directories where packages can live in the repository and includes the current list of locations where packages are being created.
 
 ### What works now?
 

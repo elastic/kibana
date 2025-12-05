@@ -15,6 +15,7 @@ import {
 } from '../../common/endpoint/service/authz';
 import {
   BLOCKLIST_PATH,
+  ENDPOINT_EXCEPTIONS_PATH,
   ENDPOINTS_PATH,
   ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
   ENTITY_ANALYTICS_MANAGEMENT_PATH,
@@ -23,23 +24,26 @@ import {
   MANAGE_PATH,
   POLICIES_PATH,
   RESPONSE_ACTIONS_HISTORY_PATH,
-  SecurityPageName,
+  SCRIPTS_LIBRARY_PATH,
   SECURITY_FEATURE_ID,
+  SecurityPageName,
   TRUSTED_APPS_PATH,
   TRUSTED_DEVICES_PATH,
 } from '../../common/constants';
 import {
   BLOCKLIST,
+  ENDPOINT_EXCEPTIONS,
   ENDPOINTS,
+  ENTITY_ANALYTICS_RISK_SCORE,
+  ENTITY_STORE,
   EVENT_FILTERS,
   HOST_ISOLATION_EXCEPTIONS,
   MANAGE,
   POLICIES,
   RESPONSE_ACTIONS_HISTORY,
+  SCRIPTS_LIBRARY,
   TRUSTED_APPLICATIONS,
   TRUSTED_DEVICES,
-  ENTITY_ANALYTICS_RISK_SCORE,
-  ENTITY_STORE,
 } from '../app/translations';
 import { licenseService } from '../common/hooks/use_license';
 import type { LinkItem } from '../common/links/types';
@@ -55,6 +59,7 @@ import { IconDashboards } from '../common/icons/dashboards';
 import { IconEntityAnalytics } from '../common/icons/entity_analytics';
 import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
 import { IconAssetCriticality } from '../common/icons/asset_criticality';
+import { IconDeviceControl } from '../common/icons/device_control';
 
 const categories = [
   {
@@ -78,8 +83,16 @@ const categories = [
       SecurityPageName.eventFilters,
       SecurityPageName.hostIsolationExceptions,
       SecurityPageName.blocklist,
+      SecurityPageName.endpointExceptions,
       SecurityPageName.responseActionsHistory,
+      SecurityPageName.scriptsLibrary,
     ],
+  },
+  {
+    label: i18n.translate('xpack.securitySolution.appLinks.category.cloudSecurity', {
+      defaultMessage: 'Cloud Security',
+    }),
+    linkIds: [SecurityPageName.cloudDefendPolicies],
   },
   {
     label: i18n.translate('xpack.securitySolution.appLinks.category.investigations', {
@@ -147,9 +160,9 @@ export const links: LinkItem = {
       title: TRUSTED_DEVICES,
       description: i18n.translate('xpack.securitySolution.appLinks.trustedDevicesDescription', {
         defaultMessage:
-          'Add a trusted device to improve performance or alleviate compatibility issues.',
+          'Specify which external devices can connect to your endpoints even when Device Control is enabled.',
       }),
-      landingIcon: IconDashboards,
+      landingIcon: IconDeviceControl,
       path: TRUSTED_DEVICES_PATH,
       skipUrlState: true,
       hideTimeline: true,
@@ -191,6 +204,19 @@ export const links: LinkItem = {
       hideTimeline: true,
     },
     {
+      id: SecurityPageName.endpointExceptions,
+      title: ENDPOINT_EXCEPTIONS,
+      description: i18n.translate('xpack.securitySolution.appLinks.endpointExceptionsDescription', {
+        defaultMessage: 'Add exceptions to your hosts.',
+      }),
+      landingIcon: IconTool,
+      path: ENDPOINT_EXCEPTIONS_PATH,
+      skipUrlState: true,
+      hideTimeline: true,
+
+      experimentalKey: 'endpointExceptionsMovedUnderManagement',
+    },
+    {
       id: SecurityPageName.entityAnalyticsManagement,
       title: ENTITY_ANALYTICS_RISK_SCORE,
       description: i18n.translate('xpack.securitySolution.appLinks.entityRiskScoringDescription', {
@@ -201,7 +227,6 @@ export const links: LinkItem = {
       skipUrlState: true,
       hideTimeline: true,
       capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
-      experimentalKey: 'riskScoringRoutesEnabled',
       licenseType: 'platinum',
     },
     {
@@ -227,6 +252,20 @@ export const links: LinkItem = {
       skipUrlState: true,
       hideTimeline: true,
     },
+    {
+      id: SecurityPageName.scriptsLibrary,
+      title: SCRIPTS_LIBRARY,
+      description: i18n.translate('xpack.securitySolution.appLinks.scriptsLibraryDescription', {
+        defaultMessage: 'View and manage your scripts library.',
+      }),
+      // TODO: Replace with a custom icon same as other links when available
+      landingIcon: 'broom',
+      path: SCRIPTS_LIBRARY_PATH,
+      skipUrlState: true,
+      hideTimeline: true,
+      experimentalKey: 'responseActionsScriptLibraryManagement',
+      licenseType: 'enterprise',
+    },
     notesLink,
   ],
 };
@@ -247,11 +286,13 @@ export const getManagementFilteredLinks = async (
     canAccessHostIsolationExceptions,
     canReadHostIsolationExceptions,
     canReadEndpointList,
+    canReadEndpointExceptions,
     canReadTrustedApplications,
     canReadTrustedDevices,
     canReadEventFilters,
     canReadBlocklist,
     canReadPolicyManagement,
+    canReadScriptsLibrary,
   } =
     fleetAuthz && currentUser
       ? calculateEndpointAuthz(licenseService, fleetAuthz, currentUser.roles)
@@ -272,6 +313,11 @@ export const getManagementFilteredLinks = async (
 
   if (!canReadPolicyManagement) {
     linksToExclude.push(SecurityPageName.policies);
+    linksToExclude.push(SecurityPageName.cloudDefendPolicies);
+  }
+
+  if (!canReadEndpointExceptions) {
+    linksToExclude.push(SecurityPageName.endpointExceptions);
   }
 
   if (!canReadActionsLogManagement) {
@@ -296,6 +342,10 @@ export const getManagementFilteredLinks = async (
 
   if (!canReadBlocklist) {
     linksToExclude.push(SecurityPageName.blocklist);
+  }
+
+  if (!canReadScriptsLibrary) {
+    linksToExclude.push(SecurityPageName.scriptsLibrary);
   }
 
   return excludeLinks(linksToExclude);

@@ -17,7 +17,7 @@ import {
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { BurnRateWindow } from '../../hooks/use_fetch_burn_rate_windows';
+import type { BurnRateWindow } from '../../hooks/use_fetch_burn_rate_windows';
 import { getStatus } from './utils';
 
 export interface BurnRateParams {

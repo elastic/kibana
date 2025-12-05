@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { AccountsEvaluatedWidget } from './accounts_evaluated_widget';
-import { BenchmarkData } from '../../common/types_old';
+import type { BenchmarkData } from '../../common/types_old';
 import { TestProvider } from '../test/test_provider';
 import { FINDINGS_FILTER_OPTIONS, FINDINGS_GROUPING_OPTIONS } from '../common/constants';
 

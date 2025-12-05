@@ -879,20 +879,6 @@ export const COLUMN_GAP_TOOLTIP_SEE_DOCUMENTATION = i18n.translate(
   }
 );
 
-export const RULES_TAB = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.tabs.rules',
-  {
-    defaultMessage: 'Rules',
-  }
-);
-
-export const MONITORING_TAB = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.tabs.monitoring',
-  {
-    defaultMessage: 'Rule Monitoring',
-  }
-);
-
 export const ENABLED_RULES = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.filters.enabledRulesTitle',
   {
@@ -1168,13 +1154,6 @@ export const REFRESH_RULE_POPOVER_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.refreshRulePopoverDescription',
   {
     defaultMessage: 'Automatically refresh table',
-  }
-);
-
-export const REFRESH_RULE_POPOVER_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.refreshRulePopoverLabel',
-  {
-    defaultMessage: 'Refresh settings',
   }
 );
 
@@ -1647,5 +1626,12 @@ export const COLUMN_TOTAL_UNFILLED_GAPS_DURATION_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.columnTotalUnfilledGapsDurationTooltip',
   {
     defaultMessage: 'Sum of remaining unfilled or partially filled gaps',
+  }
+);
+
+export const CHAT_IN_AGENT_BUILDER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.chatInAgentBuilder',
+  {
+    defaultMessage: 'Chat in Agent Builder',
   }
 );

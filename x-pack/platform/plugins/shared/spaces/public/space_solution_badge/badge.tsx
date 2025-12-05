@@ -25,9 +25,14 @@ const SolutionOptions: Record<
       />
     ),
   },
-  chat: {
+  workplaceai: {
     iconType: 'logoElasticsearch',
-    label: <FormattedMessage id="xpack.spaces.spaceSolutionBadge.chat" defaultMessage="Workchat" />,
+    label: (
+      <FormattedMessage
+        id="xpack.spaces.spaceSolutionBadge.workplaceai"
+        defaultMessage="Workplace AI"
+      />
+    ),
   },
   security: {
     iconType: 'logoSecurity',

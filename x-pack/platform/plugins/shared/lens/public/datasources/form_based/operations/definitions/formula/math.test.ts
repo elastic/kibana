@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { TinymathAST } from '@kbn/tinymath';
-import { IndexPattern } from '../../../../../types';
-import { FormBasedLayer } from '../../../types';
-import { MathIndexPatternColumn, mathOperation } from './math';
+import type { TinymathAST } from '@kbn/tinymath';
+import { mathOperation } from './math';
+import type { MathIndexPatternColumn, IndexPattern, FormBasedLayer } from '@kbn/lens-common';
 
 function createLayerWithMathColumn(tinymathAst: string | TinymathAST): FormBasedLayer {
   return {

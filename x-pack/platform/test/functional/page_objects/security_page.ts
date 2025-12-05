@@ -6,7 +6,11 @@
  */
 
 import { adminTestUser } from '@kbn/test';
-import { AuthenticatedUser, Role, RoleRemoteClusterPrivilege } from '@kbn/security-plugin/common';
+import type {
+  AuthenticatedUser,
+  Role,
+  RoleRemoteClusterPrivilege,
+} from '@kbn/security-plugin/common';
 import type { UserFormValues } from '@kbn/security-plugin/public/management/users/edit_user/user_form';
 import { Key } from 'selenium-webdriver';
 import { FtrService } from '../ftr_provider_context';
@@ -165,7 +169,7 @@ export class SecurityPageObject extends FtrService {
         if (alert && alert.accept) {
           await alert.accept();
         }
-        return await this.find.existsByDisplayedByCssSelector('.login-form');
+        return await this.isLoginFormVisible();
       }
     );
   }
@@ -303,7 +307,7 @@ export class SecurityPageObject extends FtrService {
     { waitForLoginPage }: { waitForLoginPage: boolean } = { waitForLoginPage: true }
   ) {
     this.log.debug('SecurityPage.forceLogout');
-    if (await this.find.existsByDisplayedByCssSelector('.login-form', 100)) {
+    if (await this.isLoginFormVisible()) {
       this.log.debug('Already on the login page, not forcing anything');
       return;
     }
@@ -535,6 +539,10 @@ export class SecurityPageObject extends FtrService {
     await this.find.clickByButtonText('Update user');
   }
 
+  async backToUsersList() {
+    await this.find.clickByButtonText('Back to users');
+  }
+
   async createUser(user: UserFormValues) {
     await this.clickElasticsearchUsers();
     await this.clickCreateNewUser();
@@ -581,7 +589,7 @@ export class SecurityPageObject extends FtrService {
         return userResponse[user.username!].enabled === false;
       });
     }
-    await this.submitUpdateUserForm();
+    await this.backToUsersList();
   }
 
   async activatesUser(user: UserFormValues) {
@@ -595,7 +603,7 @@ export class SecurityPageObject extends FtrService {
         return userResponse[user.username!].enabled === true;
       });
     }
-    await this.submitUpdateUserForm();
+    await this.backToUsersList();
   }
 
   async deleteUser(username: string) {

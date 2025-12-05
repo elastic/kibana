@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiLoadingLogo, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DEFAULT_END, DEFAULT_START } from '@kbn/elastic-assistant-common';
-import { css } from '@emotion/react';
 import {
   ATTACK_DISCOVERY_STORAGE_KEY,
   DEFAULT_ASSISTANT_NAMESPACE,
@@ -21,26 +21,23 @@ import {
   useAssistantContext,
   useLoadConnectors,
 } from '@kbn/elastic-assistant';
-import type { AttackDiscoveries, Replacements } from '@kbn/elastic-assistant-common';
 import type { Filter, Query } from '@kbn/es-query';
-import { uniq } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
-import { SecurityPageName } from '../../../common/constants';
+import { ATTACKS_ALERTS_ALIGNMENT_ENABLED, SecurityPageName } from '../../../common/constants';
 import { HeaderPage } from '../../common/components/header_page';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 import { useKibana } from '../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../common/lib/kuery';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
-import { Header } from './header';
-import { CONNECTOR_ID_LOCAL_STORAGE_KEY, getDefaultQuery, getSize, showLoading } from './helpers';
-import { LoadingCallout } from './loading_callout';
+import { Actions } from './header/actions';
+import { CONNECTOR_ID_LOCAL_STORAGE_KEY, getDefaultQuery, getSize } from './helpers';
 import { deserializeQuery } from './local_storage/deserialize_query';
 import { deserializeFilters } from './local_storage/deserialize_filters';
 import { PageTitle } from './page_title';
-import { Results } from './results';
+import { History } from './results/history';
 import type { SettingsOverrideOptions } from './results/history/types';
 import { SettingsFlyout } from './settings_flyout';
 import { SETTINGS_TAB_ID } from './settings_flyout/constants';
@@ -48,22 +45,21 @@ import { parseFilterQuery } from './settings_flyout/parse_filter_query';
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { useAttackDiscovery } from './use_attack_discovery';
 import { useInvalidateGetAttackDiscoveryGenerations } from './use_get_attack_discovery_generations';
-import { useKibanaFeatureFlags } from './use_kibana_feature_flags';
 import { getConnectorNameFromId } from './utils/get_connector_name_from_id';
+import { MovingAttacksCallout } from './moving_attacks_callout';
 
 export const ID = 'attackDiscoveryQuery';
 
 const AttackDiscoveryPageComponent: React.FC = () => {
   const {
-    services: { uiSettings },
+    services: { featureFlags, uiSettings, settings },
   } = useKibana();
-
-  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
 
   const { http, inferenceEnabled } = useAssistantContext();
   const { data: aiConnectors } = useLoadConnectors({
     http,
     inferenceEnabled,
+    settings,
   });
 
   // for showing / hiding anonymized data:
@@ -132,55 +128,14 @@ const AttackDiscoveryPageComponent: React.FC = () => {
     [aiConnectors, connectorId]
   );
 
-  // state for the connector loading in the background:
-  const [loadingConnectorId, setLoadingConnectorId] = useState<string | null>(null);
-
-  const {
-    alertsContextCount,
-    approximateFutureTime,
-    attackDiscoveries,
-    didInitialFetch,
-    failureReason,
-    fetchAttackDiscoveries,
-    generationIntervals,
-    onCancel,
-    isLoading,
-    isLoadingPost,
-    lastUpdated,
-    replacements,
-    stats,
-  } = useAttackDiscovery({
+  const { fetchAttackDiscoveries, isLoading } = useAttackDiscovery({
     connectorId,
     connectorName,
-    setLoadingConnectorId,
     size: getSize({
       defaultMaxAlerts: DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
       localStorageAttackDiscoveryMaxAlerts,
     }),
   });
-
-  // get last updated from the cached attack discoveries if it exists:
-  const [selectedConnectorLastUpdated, setSelectedConnectorLastUpdated] = useState<Date | null>(
-    lastUpdated ?? null
-  );
-
-  // get cached attack discoveries if they exist:
-  const [selectedConnectorAttackDiscoveries, setSelectedConnectorAttackDiscoveries] =
-    useState<AttackDiscoveries>(attackDiscoveries ?? []);
-
-  // get replacements from the cached attack discoveries if they exist:
-  const [selectedConnectorReplacements, setSelectedConnectorReplacements] = useState<Replacements>(
-    replacements ?? {}
-  );
-
-  // the number of unique alerts in the attack discoveries:
-  const alertsCount = useMemo(
-    () =>
-      uniq(
-        selectedConnectorAttackDiscoveries.flatMap((attackDiscovery) => attackDiscovery.alertIds)
-      ).length,
-    [selectedConnectorAttackDiscoveries]
-  );
 
   /** The callback when users select a connector ID */
   const onConnectorIdSelected = useCallback(
@@ -191,9 +146,6 @@ const AttackDiscoveryPageComponent: React.FC = () => {
     },
     [setLocalStorageAttackDiscoveryConnectorId]
   );
-
-  // get connector intervals from generation intervals:
-  const connectorIntervals = useMemo(() => generationIntervals ?? [], [generationIntervals]);
 
   const pageTitle = useMemo(() => <PageTitle />, []);
 
@@ -261,28 +213,21 @@ const AttackDiscoveryPageComponent: React.FC = () => {
   );
 
   useEffect(() => {
-    setSelectedConnectorReplacements(replacements);
-    setSelectedConnectorAttackDiscoveries(attackDiscoveries);
-    setSelectedConnectorLastUpdated(lastUpdated);
-  }, [attackDiscoveries, lastUpdated, replacements]);
-
-  useEffect(() => {
     // If there is only one connector, set it as the selected connector
     if (aiConnectors != null && aiConnectors.length === 1) {
       setConnectorId(aiConnectors[0].id);
     } else if (aiConnectors != null && aiConnectors.length === 0) {
       // connectors have been removed, reset the connectorId and cached Attack discoveries
       setConnectorId(undefined);
-      setSelectedConnectorAttackDiscoveries([]);
     }
   }, [aiConnectors]);
 
-  const animatedLogo = useMemo(() => <EuiLoadingLogo logo="logoSecurity" size="xl" />, []);
-
-  const connectorsAreConfigured = aiConnectors != null && aiConnectors.length > 0;
-  const attackDiscoveriesCount = selectedConnectorAttackDiscoveries.length;
-
   const onClose = useCallback(() => setShowFlyout(false), []);
+
+  const attacksAlertsAlignmentEnabled = featureFlags.getBooleanValue(
+    ATTACKS_ALERTS_ALIGNMENT_ENABLED,
+    false
+  );
 
   return (
     <div
@@ -295,92 +240,52 @@ const AttackDiscoveryPageComponent: React.FC = () => {
     >
       <div data-test-subj="attackDiscoveryPage">
         <HeaderPage border title={pageTitle}>
-          <Header
-            connectorId={connectorId}
-            connectorsAreConfigured={connectorsAreConfigured}
-            // disable header actions before post request has completed
-            isDisabledActions={isLoadingPost}
+          <Actions
             isLoading={isLoading}
-            onCancel={onCancel}
-            onConnectorIdSelected={onConnectorIdSelected}
             onGenerate={onGenerate}
             openFlyout={openFlyout}
-            stats={stats}
-            showFlyout={showFlyout}
+            isDisabled={connectorId == null}
           />
-          <EuiSpacer size={attackDiscoveryAlertsEnabled ? 's' : 'm'} />
+          <EuiSpacer size={'s'} />
         </HeaderPage>
 
-        {!attackDiscoveryAlertsEnabled &&
-        connectorsAreConfigured &&
-        connectorId != null &&
-        !didInitialFetch ? (
-          <EuiEmptyPrompt data-test-subj="animatedLogo" icon={animatedLogo} />
-        ) : (
-          <>
-            {!attackDiscoveryAlertsEnabled &&
-            showLoading({
-              attackDiscoveriesCount,
-              connectorId,
-              isLoading: isLoading || isLoadingPost,
-              loadingConnectorId,
-            }) ? (
-              <LoadingCallout
-                alertsContextCount={alertsContextCount}
-                approximateFutureTime={approximateFutureTime}
-                connectorIntervals={connectorIntervals}
-                end={end}
-                localStorageAttackDiscoveryMaxAlerts={localStorageAttackDiscoveryMaxAlerts}
-                start={start}
-              />
-            ) : (
-              <Results
-                aiConnectors={aiConnectors}
-                alertsContextCount={alertsContextCount}
-                alertsCount={alertsCount}
-                approximateFutureTime={approximateFutureTime}
-                attackDiscoveriesCount={attackDiscoveriesCount}
-                connectorId={connectorId}
-                connectorIntervals={connectorIntervals}
-                end={end}
-                failureReason={failureReason}
-                isLoading={isLoading}
-                isLoadingPost={isLoadingPost}
-                localStorageAttackDiscoveryMaxAlerts={localStorageAttackDiscoveryMaxAlerts}
-                loadingConnectorId={loadingConnectorId}
-                onGenerate={onGenerate}
-                onToggleShowAnonymized={onToggleShowAnonymized}
-                selectedConnectorAttackDiscoveries={selectedConnectorAttackDiscoveries}
-                selectedConnectorLastUpdated={selectedConnectorLastUpdated}
-                selectedConnectorReplacements={selectedConnectorReplacements}
-                showAnonymized={showAnonymized}
-                start={start}
-                stats={stats}
-              />
-            )}
+        <EuiSpacer size="s" />
 
-            {showFlyout && (
-              <SettingsFlyout
-                connectorId={connectorId}
-                defaultSelectedTabId={defaultSelectedTabId}
-                end={end}
-                filters={filters}
-                onClose={onClose}
-                onConnectorIdSelected={onConnectorIdSelected}
-                onGenerate={onGenerate}
-                query={query}
-                setEnd={setEnd}
-                setFilters={setFilters}
-                setQuery={setQuery}
-                setStart={setStart}
-                start={start}
-                stats={stats}
-                localStorageAttackDiscoveryMaxAlerts={localStorageAttackDiscoveryMaxAlerts}
-                setLocalStorageAttackDiscoveryMaxAlerts={setLocalStorageAttackDiscoveryMaxAlerts}
-              />
-            )}
+        {attacksAlertsAlignmentEnabled && (
+          <>
+            <MovingAttacksCallout />
+            <EuiSpacer size="s" />
           </>
         )}
+
+        <History
+          aiConnectors={aiConnectors}
+          localStorageAttackDiscoveryMaxAlerts={localStorageAttackDiscoveryMaxAlerts}
+          onGenerate={onGenerate}
+          onToggleShowAnonymized={onToggleShowAnonymized}
+          showAnonymized={showAnonymized}
+        />
+
+        {showFlyout && (
+          <SettingsFlyout
+            connectorId={connectorId}
+            defaultSelectedTabId={defaultSelectedTabId}
+            end={end}
+            filters={filters}
+            onClose={onClose}
+            onConnectorIdSelected={onConnectorIdSelected}
+            onGenerate={onGenerate}
+            query={query}
+            setEnd={setEnd}
+            setFilters={setFilters}
+            setQuery={setQuery}
+            setStart={setStart}
+            start={start}
+            localStorageAttackDiscoveryMaxAlerts={localStorageAttackDiscoveryMaxAlerts}
+            setLocalStorageAttackDiscoveryMaxAlerts={setLocalStorageAttackDiscoveryMaxAlerts}
+          />
+        )}
+
         <SpyRoute pageName={SecurityPageName.attackDiscovery} />
       </div>
     </div>

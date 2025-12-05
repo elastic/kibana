@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('Dataset quality', () => {
@@ -26,5 +26,8 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./integrations'));
     loadTestFile(require.resolve('./update_field_limit'));
     loadTestFile(require.resolve('./data_streams_failure_store'));
+    loadTestFile(require.resolve('./stats'));
+    loadTestFile(require.resolve('./types_privileges'));
+    loadTestFile(require.resolve('./update_failure_store'));
   });
 }

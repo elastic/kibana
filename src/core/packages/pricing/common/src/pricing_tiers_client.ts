@@ -10,7 +10,7 @@
 import { isEqual } from 'lodash';
 import type { IPricingTiersClient, PricingProduct, PricingProductSecurity } from './types';
 import type { IPricingProduct, TiersConfig } from './pricing_tiers_config';
-import { ProductFeaturesRegistry } from './product_features_registry';
+import type { ProductFeaturesRegistry } from './product_features_registry';
 
 /**
  * Client implementation for checking feature availability based on pricing tiers.

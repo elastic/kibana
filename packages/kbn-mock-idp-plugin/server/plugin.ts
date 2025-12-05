@@ -22,6 +22,8 @@ import {
 import type { ServerlessProductTier } from '@kbn/es/src/utils';
 import { createSAMLResponse, MOCK_IDP_LOGIN_PATH, MOCK_IDP_LOGOUT_PATH } from '@kbn/mock-idp-utils';
 
+import type { ConfigType } from './config';
+
 export interface PluginSetupDependencies {
   cloud: CloudSetup;
 }
@@ -38,10 +40,7 @@ const projectToAlias = new Map<string, string>([
   ['observability', 'oblt'],
   ['security', 'security'],
   ['search', 'es'],
-  // TODO add new 'chat' solution
-  // https://elastic.slack.com/archives/C04HT4P1YS3/p1741690997400059
-  // https://github.com/elastic/kibana/issues/213469
-  // requires update of config/serverless.chat.yml (currently uses projectType 'search')
+  ['workplaceai', 'workplaceai'],
 ]);
 
 const tierSpecificRolesFileExists = (filePath: string): boolean => {
@@ -76,12 +75,12 @@ const readStatefulRoles = () => {
 
 export type CreateSAMLResponseParams = TypeOf<typeof createSAMLResponseSchema>;
 
-export const plugin: PluginInitializer<
-  void,
-  void,
-  PluginSetupDependencies
-> = async (): Promise<Plugin> => ({
+export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = async (
+  initializerContext
+): Promise<Plugin> => ({
   setup(core, plugins: PluginSetupDependencies) {
+    const logger = initializerContext.logger.get();
+    const config = initializerContext.config.get<ConfigType>();
     const router = core.http.createRouter();
 
     core.http.resources.register(
@@ -139,17 +138,33 @@ export const plugin: PluginInitializer<
         const { protocol, hostname, port } = core.http.getServerInfo();
         const pathname = core.http.basePath.prepend('/api/security/saml/callback');
 
-        return response.ok({
-          body: {
-            SAMLResponse: await createSAMLResponse({
-              kibanaUrl: `${protocol}://${hostname}:${port}${pathname}`,
-              username: request.body.username,
-              full_name: request.body.full_name ?? undefined,
-              email: request.body.email ?? undefined,
-              roles: request.body.roles,
-            }),
-          },
-        });
+        const serverlessOptions = plugins.cloud?.serverless
+          ? {
+              serverless: {
+                organizationId: plugins.cloud.organizationId!,
+                projectType: plugins.cloud.serverless.projectType!,
+                uiamEnabled: !!config.uiam?.enabled,
+              },
+            }
+          : {};
+
+        try {
+          return response.ok({
+            body: {
+              SAMLResponse: await createSAMLResponse({
+                kibanaUrl: `${protocol}://${hostname}:${port}${pathname}`,
+                username: request.body.username,
+                full_name: request.body.full_name ?? undefined,
+                email: request.body.email ?? undefined,
+                roles: request.body.roles,
+                ...serverlessOptions,
+              }),
+            },
+          });
+        } catch (err) {
+          logger.error(`Failed to create SAMLResponse: ${err}`, err);
+          throw err;
+        }
       }
     );
 

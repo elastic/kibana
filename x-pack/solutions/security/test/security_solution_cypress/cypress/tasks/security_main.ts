@@ -7,12 +7,7 @@
 
 import { recurse } from 'cypress-recurse';
 import { TIMELINE_BOTTOM_BAR_TOGGLE_BUTTON } from '../screens/security_main';
-import {
-  CLOSE_TIMELINE_BTN,
-  TIMELINE_EXIT_FULL_SCREEN_BUTTON,
-  TIMELINE_FULL_SCREEN_BUTTON,
-  TIMELINE_WRAPPER,
-} from '../screens/timeline';
+import { CLOSE_TIMELINE_BTN, TIMELINE_WRAPPER } from '../screens/timeline';
 
 export const openTimelineUsingToggle = () => {
   recurse(
@@ -27,12 +22,4 @@ export const openTimelineUsingToggle = () => {
 
 export const closeTimelineUsingCloseButton = () => {
   cy.get(CLOSE_TIMELINE_BTN).filter(':visible').click();
-};
-
-export const enterFullScreenMode = () => {
-  cy.get(TIMELINE_FULL_SCREEN_BUTTON).first().click();
-};
-
-export const exitFullScreenMode = () => {
-  cy.get(TIMELINE_EXIT_FULL_SCREEN_BUTTON).first().click();
 };

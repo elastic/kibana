@@ -19,7 +19,7 @@ import { BehaviorSubject } from 'rxjs';
 import { AlertRuleFromVisAction } from './alert_rule_from_vis_ui_action';
 import * as AlertFlyoutComponentModule from './rule_flyout_component';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
-import { AggregateQuery, Query } from '@kbn/es-query';
+import type { AggregateQuery, Query } from '@kbn/es-query';
 
 // mock lazy flyout component
 jest.mock('@kbn/presentation-util', () => ({
@@ -52,23 +52,21 @@ const actionTypeRegistry: jest.Mocked<ActionTypeRegistryContract> = {
 const parentApiMock = createParentApiMock();
 
 const embeddableMock = getLensApiMock({
-  serializeState: jest.fn(() => ({
-    rawState: {
-      attributes: {
-        state: {
-          datasourceStates: {
-            textBased: {
-              layers: [
-                {
-                  timeField: '@timestamp',
-                },
-              ],
-            },
+  getLegacySerializedState: jest.fn(() => ({
+    attributes: {
+      state: {
+        datasourceStates: {
+          textBased: {
+            layers: [
+              {
+                timeField: '@timestamp',
+              },
+            ],
           },
         },
       },
     },
-  })) as unknown as LensApi['serializeState'],
+  })) as unknown as LensApi['getLegacySerializedState'],
   getInspectorAdapters: jest.fn(() => ({
     tables: {
       tables: [],
@@ -84,6 +82,10 @@ const startDependenciesMock = {
   fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
   coreStart: {
     ...embeddableServices.coreStart,
+    application: {
+      ...embeddableServices.coreStart.application,
+      currentAppId$: new BehaviorSubject('dashboards'),
+    },
     overlays: {
       ...embeddableServices.coreStart.overlays,
       openFlyout: jest.fn((a) => a),
@@ -490,23 +492,21 @@ describe('AlertRuleFromVisAction', () => {
             },
           },
         })),
-        serializeState: jest.fn(() => ({
-          rawState: {
+        getLegacySerializedState: jest.fn(() => ({
+          attributes: {
             state: {
-              attributes: {
-                datasourceStates: {
-                  textBased: {
-                    layers: [
-                      {
-                        timeField: 'timestamp',
-                      },
-                    ],
-                  },
+              datasourceStates: {
+                textBased: {
+                  layers: [
+                    {
+                      timeField: 'timestamp',
+                    },
+                  ],
                 },
               },
             },
           },
-        })) as unknown as LensApi['serializeState'],
+        })) as unknown as LensApi['getLegacySerializedState'],
         parentApi: parentApiMock,
       });
       await act(async () => await action.execute({ embeddable }));
@@ -558,23 +558,21 @@ describe('AlertRuleFromVisAction', () => {
             },
           },
         })),
-        serializeState: jest.fn(() => ({
-          rawState: {
+        getLegacySerializedState: jest.fn(() => ({
+          attributes: {
             state: {
-              attributes: {
-                datasourceStates: {
-                  textBased: {
-                    layers: [
-                      {
-                        timeField: 'timestamp',
-                      },
-                    ],
-                  },
+              datasourceStates: {
+                textBased: {
+                  layers: [
+                    {
+                      timeField: 'timestamp',
+                    },
+                  ],
                 },
               },
             },
           },
-        })) as unknown as LensApi['serializeState'],
+        })) as unknown as LensApi['getLegacySerializedState'],
       });
       await act(async () => await action.execute({ embeddable }));
       // wait for the async operations to complete

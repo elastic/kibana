@@ -14,19 +14,21 @@ import {
   EuiPanel,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { Message } from '@kbn/observability-ai-assistant-plugin/common';
-import {
+import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
+import type {
   ChatActionClickHandler,
-  ChatItemControls,
-  FailedToLoadResponse,
   Feedback,
   TelemetryEventTypeWithPayload,
+} from '@kbn/observability-ai-assistant-plugin/public';
+import {
+  ChatItemControls,
+  FailedToLoadResponse,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { getRoleTranslation } from '../utils/get_role_translation';
 import { ChatItemActions } from './chat_item_actions';
 import { ChatItemAvatar } from './chat_item_avatar';
 import { ChatItemContentInlinePromptEditor } from './chat_item_content_inline_prompt_editor';
-import { ChatTimelineItem } from './chat_timeline';
+import type { ChatTimelineItem } from './chat_timeline';
 // Helper function to extract plain text from a React node.
 function extractTextFromReactNode(node: React.ReactNode): string {
   if (typeof node === 'string' || typeof node === 'number') {

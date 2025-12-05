@@ -18,3 +18,5 @@ export * from './src/stringify_zod_error';
 export * from './src/build_route_validation_with_zod';
 export * from './src/non_empty_string';
 export * from './src/deep_strict';
+export * from './src/schema';
+export * from './src/iso_to_epoch';

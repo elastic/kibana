@@ -7,20 +7,23 @@
 
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { RuleMigrationsRetriever } from '../../../../../retrievers';
-import type { SiemMigrationTelemetryClient } from '../../../../../rule_migrations_telemetry_client';
-import type { ChatModel } from '../../../../../util/actions_client_chat';
-import { cleanMarkdown, generateAssistantComment } from '../../../../../util/comments';
+import type { RuleMigrationTelemetryClient } from '../../../../../rule_migrations_telemetry_client';
+import {
+  cleanMarkdown,
+  generateAssistantComment,
+} from '../../../../../../../common/task/util/comments';
 import type { GraphNode } from '../../types';
 import { MATCH_INTEGRATION_PROMPT } from './prompts';
+import type { MigrateRuleGraphParams } from '../../../../types';
 
 interface GetRetrieveIntegrationsNodeParams {
-  model: ChatModel;
-  telemetryClient: SiemMigrationTelemetryClient;
+  model: MigrateRuleGraphParams['model'];
+  telemetryClient: RuleMigrationTelemetryClient;
   ruleMigrationsRetriever: RuleMigrationsRetriever;
 }
 
 interface GetMatchedIntegrationResponse {
-  match: string;
+  id: string;
   summary: string;
 }
 
@@ -46,6 +49,7 @@ export const getRetrieveIntegrationsNode = ({
     const mostRelevantIntegration = MATCH_INTEGRATION_PROMPT.pipe(model).pipe(outputParser);
 
     const integrationsInfo = integrations.map((integration) => ({
+      id: integration.id,
       title: integration.title,
       description: integration.description,
     }));
@@ -66,8 +70,8 @@ export const getRetrieveIntegrationsNode = ({
       ? [generateAssistantComment(cleanMarkdown(response.summary))]
       : undefined;
 
-    if (response.match) {
-      const matchedIntegration = integrations.find((r) => r.title === response.match);
+    if (response.id) {
+      const matchedIntegration = integrations.find((r) => r.id === response.id);
       telemetryClient.reportIntegrationsMatch({
         preFilterIntegrations: integrations,
         postFilterIntegration: matchedIntegration,

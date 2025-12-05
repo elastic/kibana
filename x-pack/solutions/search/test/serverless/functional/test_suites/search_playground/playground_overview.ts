@@ -7,10 +7,11 @@
 
 import type OpenAI from 'openai';
 import { testHasEmbeddedConsole } from '../embedded_console';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { RoleCredentials } from '../../services';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { RoleCredentials } from '../../services';
 import { createOpenAIConnector } from './utils/create_openai_connector';
-import { createLlmProxy, LlmProxy } from './utils/create_llm_proxy';
+import type { LlmProxy } from './utils/create_llm_proxy';
+import { createLlmProxy } from './utils/create_llm_proxy';
 
 const esArchiveIndex =
   'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/basic_index';
@@ -22,7 +23,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'searchPlayground',
     'embeddedConsole',
     'solutionNavigation',
-    'svlSearchElasticsearchStartPage',
     'svlSearchCreateIndexPage',
   ]);
   const svlSearchNavigation = getService('svlSearchNavigation');
@@ -105,12 +105,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       describe('without existing LLM connectors', () => {
         after(async () => {
           await svlSearchNavigation.navigateToLandingPage();
-          await pageObjects.svlCommonNavigation.sidenav.openSection(
-            'search_project_nav_footer.project_settings_project_nav'
-          );
 
-          await pageObjects.solutionNavigation.sidenav.clickLink({ navId: 'management' });
-          await pageObjects.solutionNavigation.sidenav.expectLinkActive({ navId: 'management' });
+          await pageObjects.solutionNavigation.sidenav.clickLink({ navId: 'admin_and_settings' });
           await pageObjects.svlCommonNavigation.sidenav.clickPanelLink(
             'management:triggersActionsConnectors'
           );
@@ -195,10 +191,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await pageObjects.searchPlayground.PlaygroundStartChatPage.expectCreateIndexButtonToExists();
             await pageObjects.searchPlayground.PlaygroundStartChatPage.clickCreateIndex();
             await pageObjects.svlSearchCreateIndexPage.expectToBeOnCreateIndexPage();
-            await pageObjects.svlSearchElasticsearchStartPage.setIndexNameValue(indexName);
-            await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexButtonToBeEnabled();
-            await pageObjects.svlSearchElasticsearchStartPage.clickCreateIndexButton();
-            await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnIndexDetailsPage();
+            await pageObjects.searchPlayground.PlaygroundStartChatPage.setIndexNameValue(indexName);
+            await pageObjects.searchPlayground.PlaygroundStartChatPage.expectCreateIndexButtonToBeEnabled();
+            await pageObjects.searchPlayground.PlaygroundStartChatPage.clickCreateIndexButton();
+            await pageObjects.searchPlayground.PlaygroundStartChatPage.expectToBeOnIndexDetailsPage();
 
             // add mapping
             await es.indices.putMapping({

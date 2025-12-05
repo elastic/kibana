@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const OPEN_IN_DISCOVER_DATA_TEST_SUBJ = 'embeddablePanelAction-ACTION_OPEN_IN_DISCOVER';
 
@@ -152,9 +152,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await filterBarService.removeAllFilters();
 
       // Create a new panel
-      await dashboardAddPanel.clickEditorMenuButton();
+      await dashboardAddPanel.openAddPanelFlyout();
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
-      await dashboardAddPanel.expectEditorMenuClosed();
+      await dashboardAddPanel.expectAddPanelFlyoutClosed();
 
       const ESQL_QUERY = 'from logs* | stats maxB = max(bytes)';
       // Configure the ES|QL chart

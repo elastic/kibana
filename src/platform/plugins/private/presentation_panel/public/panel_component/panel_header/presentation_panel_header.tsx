@@ -9,9 +9,9 @@
 
 import { transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ViewMode } from '@kbn/presentation-publishing';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import React, { useCallback, useMemo } from 'react';
-import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
+import type { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
 import { PresentationPanelTitle } from './presentation_panel_title';
 import { usePresentationPanelHeaderActions } from './use_presentation_panel_header_actions';
 

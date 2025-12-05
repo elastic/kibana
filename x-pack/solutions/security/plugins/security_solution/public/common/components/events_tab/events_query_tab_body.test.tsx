@@ -16,11 +16,9 @@ import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { licenseService } from '../../hooks/use_license';
 import { mockHistory } from '../../mock/router';
 import { DEFAULT_EVENTS_STACK_BY_VALUE } from './histogram_configurations';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { useUserPrivileges } from '../user_privileges';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('../../hooks/use_experimental_features');
 jest.mock('../user_privileges');
 
 const mockGetDefaultControlColumn = jest.fn();
@@ -46,6 +44,13 @@ jest.mock('../../lib/kibana', () => {
         cases: {
           ui: {
             getCasesContext: jest.fn(),
+          },
+          helpers: {
+            canUseCases: () => [],
+          },
+          hooks: {
+            useCasesAddToNewCaseFlyout: () => () => {},
+            useCasesAddToExistingCaseModal: () => () => {},
           },
         },
       },
@@ -104,7 +109,6 @@ describe('EventsQueryTabBody', () => {
   };
 
   beforeEach(() => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
     (useUserPrivileges as jest.Mock).mockReturnValue({
       notesPrivileges: { read: true },
     });
@@ -209,18 +213,6 @@ describe('EventsQueryTabBody', () => {
     expect(mockGetDefaultControlColumn).toHaveBeenCalledWith(5);
   });
 
-  it('should have 4 columns on Action bar for non-Enterprise user and securitySolutionNotesDisabled is true', () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-
-    render(
-      <TestProviders>
-        <EventsQueryTabBody {...commonProps} />
-      </TestProviders>
-    );
-
-    expect(mockGetDefaultControlColumn).toHaveBeenCalledWith(4);
-  });
-
   it('should have 4 columns on Action bar for non-Enterprise user and if user does not have Notes privileges', () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({ notesPrivileges: { read: false } });
 
@@ -244,20 +236,6 @@ describe('EventsQueryTabBody', () => {
     );
 
     expect(mockGetDefaultControlColumn).toHaveBeenCalledWith(6);
-  });
-
-  it('should have 5 columns on Action bar for Enterprise user and securitySolutionNotesDisabled is true', () => {
-    const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
-    licenseServiceMock.isEnterprise.mockReturnValue(true);
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-
-    render(
-      <TestProviders>
-        <EventsQueryTabBody {...commonProps} />
-      </TestProviders>
-    );
-
-    expect(mockGetDefaultControlColumn).toHaveBeenCalledWith(5);
   });
 
   it('should have 5 columns on Action bar for Enterprise user and if user does not have Notes privileges', () => {

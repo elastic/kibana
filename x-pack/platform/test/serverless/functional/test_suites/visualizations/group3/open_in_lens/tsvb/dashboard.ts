@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { lens, timePicker, dashboard, canvas } = getPageObjects([
@@ -26,7 +26,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('Dashboard to TSVB to Lens', function describeIndexTests() {
     const fixture =
-      'x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/open_in_lens/tsvb/dashboard.json';
+      'x-pack/platform/test/serverless/fixtures/kbn_archives/lens/open_in_lens/tsvb/dashboard.json';
 
     before(async () => {
       await kibanaServer.importExport.load(fixture);
@@ -41,7 +41,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert a by value TSVB viz to a Lens viz', async () => {
-      await dashboard.gotoDashboardEditMode('Convert to Lens - Dashboard - TSVB - 1');
+      await dashboard.loadDashboardInEditMode('Convert to Lens - Dashboard - TSVB - 1');
       await timePicker.setDefaultAbsoluteRange();
 
       await dashboard.waitForRenderComplete();
@@ -74,7 +74,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert a by reference TSVB viz to a Lens viz', async () => {
-      await dashboard.gotoDashboardEditMode('Convert to Lens - Dashboard - TSVB - 2');
+      await dashboard.loadDashboardInEditMode('Convert to Lens - Dashboard - TSVB - 2');
       await timePicker.setDefaultAbsoluteRange();
 
       // save it to library

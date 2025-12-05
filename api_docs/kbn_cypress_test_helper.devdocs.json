@@ -371,7 +371,7 @@
           "\nCreates an instance of `ToolingLog` that outputs to `stdout`.\nThe default log `level` for all instances can be set by setting the function's `defaultLogLevel`\nproperty. Default logging level can also be set from CLI scripts that use the `@kbn/dev-cli-runner`\nby calling the `setDefaultLogLevelFromCliFlags(flags)` and passing in the `flags` property.\n"
         ],
         "signature": [
-          "{ (level: \"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\" | undefined): ",
+          "{ (level: \"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\" | undefined): ",
           {
             "pluginId": "@kbn/tooling-log",
             "scope": "common",
@@ -379,7 +379,7 @@
             "section": "def-common.ToolingLog",
             "text": "ToolingLog"
           },
-          "; defaultLogLevel: \"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\"; setDefaultLogLevelFromCliFlags(flags: ",
+          "; defaultLogLevel: \"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\"; setDefaultLogLevelFromCliFlags(flags: ",
           {
             "pluginId": "@kbn/dev-cli-runner",
             "scope": "common",
@@ -401,7 +401,7 @@
             "label": "level",
             "description": [],
             "signature": [
-              "\"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\" | undefined"
+              "\"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/logger.ts",
             "deprecated": false,

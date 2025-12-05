@@ -7,19 +7,21 @@
 
 import React from 'react';
 import { createMemoryHistory } from 'history';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { RenderResult, render as testLibRender } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { RenderResult } from '@testing-library/react';
+import { render as testLibRender } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { RouterProvider } from '@kbn/typed-react-router-config';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { merge } from 'lodash';
-import { DeepPartial } from 'utility-types';
-import { AppContextProvider, AppContextValue } from '../context/app_context';
+import type { DeepPartial } from 'utility-types';
+import type { AppContextValue } from '../context/app_context';
+import { AppContextProvider } from '../context/app_context';
 import { RedirectToHomeIfUnauthorized } from '../routes/components/redirect_to_home_if_unauthorized';
 import { aIAssistantManagementObservabilityRouter } from '../routes/config';
-import { CoreStartWithStartDeps } from '../hooks/use_kibana';
+import type { CoreStartWithStartDeps } from '../hooks/use_kibana';
 
 export const coreStartMock = coreMock.createStart();
 
@@ -54,7 +56,7 @@ export const render = (
       application: {
         capabilities: {
           management: {
-            kibana: {
+            ai: {
               observabilityAiAssistantManagement: true,
             },
           },
@@ -72,7 +74,6 @@ export const render = (
     config: {
       logSourcesEnabled: true,
       spacesEnabled: true,
-      visibilityEnabled: true,
     },
   };
 

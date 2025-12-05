@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
-import { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
-import { Logger } from '@kbn/logging';
+import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
+import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
+import type { Logger } from '@kbn/logging';
 import { createGetLogsRateTimeseries } from './get_logs_rate_timeseries/get_logs_rate_timeseries';
 import { createGetLogErrorRateTimeseries } from './get_logs_error_rate_timeseries/get_logs_error_rate_timeseries';
 import { createGetLogsRatesService } from './get_logs_rates_service';

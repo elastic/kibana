@@ -7,7 +7,8 @@
 
 import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import PropTypes from 'prop-types';
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 
 export interface Props {
   isOpen: boolean;
@@ -61,6 +62,7 @@ export const ConfirmModal: FunctionComponent<Props> = (props) => {
 };
 
 ConfirmModal.propTypes = {
+  // @ts-expect-error upgrade typescript v5.9.3
   isOpen: PropTypes.bool,
   title: PropTypes.string,
   message: PropTypes.string.isRequired,

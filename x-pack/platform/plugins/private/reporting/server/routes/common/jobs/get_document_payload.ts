@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { Stream } from 'stream';
+import type { Stream } from 'stream';
 
-import { ResponseHeaders } from '@kbn/core-http-server';
+import type { ResponseHeaders } from '@kbn/core-http-server';
 import { JOB_STATUS } from '@kbn/reporting-common';
-import { ReportApiJSON } from '@kbn/reporting-common/types';
+import type { ReportApiJSON } from '@kbn/reporting-common/types';
 import { CSV_JOB_TYPE, CSV_JOB_TYPE_DEPRECATED } from '@kbn/reporting-export-types-csv-common';
-import { ExportType } from '@kbn/reporting-server';
+import type { ExportType } from '@kbn/reporting-server';
 
-import { ReportingCore } from '../../..';
+import type { ReportingCore } from '../../..';
 import { getContentStream } from '../../../lib';
 import { STATUS_CODES } from './constants';
 import { jobsQueryFactory } from './jobs_query';

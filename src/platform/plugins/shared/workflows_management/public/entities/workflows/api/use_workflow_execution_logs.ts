@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useQuery } from '@tanstack/react-query';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-
+import { useQuery } from '@kbn/react-query';
+import { useKibana } from '../../../hooks/use_kibana';
 interface WorkflowExecutionLogEntry {
   id: string;
   timestamp: string;
@@ -19,20 +18,21 @@ interface WorkflowExecutionLogEntry {
   stepName?: string;
   connectorType?: string;
   duration?: number;
-  additionalData?: Record<string, any>;
+  additionalData?: Record<string, unknown>;
 }
 
 interface WorkflowExecutionLogsResponse {
   logs: WorkflowExecutionLogEntry[];
   total: number;
-  limit: number;
-  offset: number;
+  size: number;
+  page: number;
 }
 
 interface UseWorkflowExecutionLogsParams {
   executionId: string;
-  limit?: number;
-  offset?: number;
+  stepExecutionId?: string;
+  size?: number;
+  page?: number;
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
   enabled?: boolean;
@@ -40,8 +40,9 @@ interface UseWorkflowExecutionLogsParams {
 
 export function useWorkflowExecutionLogs({
   executionId,
-  limit = 100,
-  offset = 0,
+  stepExecutionId,
+  size = 100,
+  page = 1,
   sortField = 'timestamp',
   sortOrder = 'desc',
   enabled = true,
@@ -49,14 +50,23 @@ export function useWorkflowExecutionLogs({
   const { http } = useKibana().services;
 
   return useQuery<WorkflowExecutionLogsResponse>({
-    queryKey: ['workflowExecutionLogs', executionId, limit, offset, sortField, sortOrder],
+    queryKey: [
+      'workflowExecutionLogs',
+      executionId,
+      stepExecutionId,
+      size,
+      page,
+      sortField,
+      sortOrder,
+    ],
     queryFn: async () => {
-      const response = await http!.get<WorkflowExecutionLogsResponse>(
+      const response = await http.get<WorkflowExecutionLogsResponse>(
         `/api/workflowExecutions/${executionId}/logs`,
         {
           query: {
-            limit,
-            offset,
+            stepExecutionId,
+            size,
+            page,
             sortField,
             sortOrder,
           },

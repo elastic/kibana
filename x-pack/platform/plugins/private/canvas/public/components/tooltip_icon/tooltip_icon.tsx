@@ -6,9 +6,11 @@
  */
 
 /* eslint react/forbid-elements: 0 */
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiIconTip, PropsOf } from '@elastic/eui';
+import type { PropsOf } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
 
 export enum IconType {
   error = 'error',
@@ -33,5 +35,6 @@ export const TooltipIcon: FC<Props> = ({ icon = IconType.info, ...rest }) => {
 };
 
 TooltipIcon.propTypes = {
+  // @ts-expect-error upgrade typescript v5.9.3
   icon: PropTypes.string,
 };

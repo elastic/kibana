@@ -9,7 +9,8 @@
 
 import { SearchSessionStatus } from '../../../../../../../common';
 import { getSearchSessionSavedObjectMock } from '../../../__mocks__';
-import { ACTION, LocatorsStart } from '../../../types';
+import type { LocatorsStart } from '../../../types';
+import { ACTION } from '../../../types';
 import { mapToUISession } from './map_to_ui_session';
 
 describe('mapToUISession', () => {

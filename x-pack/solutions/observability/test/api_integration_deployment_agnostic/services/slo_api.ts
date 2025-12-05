@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { RoleCredentials } from '@kbn/ftr-common-functional-services';
-import { StoredSLODefinition } from '@kbn/slo-plugin/server/domain/models/slo';
-import {
+import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import type { StoredSLODefinition } from '@kbn/slo-plugin/server/domain/models/slo';
+import type {
   BulkDeleteInput,
   CreateSLOInput,
   FindSLODefinitionsResponse,
   UpdateSLOInput,
 } from '@kbn/slo-schema';
-import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
 interface SavedObject<Attributes extends Record<string, any>> {
   attributes: Attributes;
@@ -202,6 +202,31 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
           purgePolicy,
         })
         .expect(expectedStatus);
+
+      return body;
+    },
+
+    async purgeInstances(
+      params: { list?: string[]; staleDuration?: string; force?: boolean },
+      roleAuthc: RoleCredentials
+    ) {
+      const { body } = await supertestWithoutAuth
+        .post(`/api/observability/slos/_purge_instances`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send(params)
+        .expect(200);
+
+      return body;
+    },
+
+    async purgeInstancesStatus(taskId: string, roleAuthc: RoleCredentials) {
+      const { body } = await supertestWithoutAuth
+        .get(`/api/observability/slos/_purge_instances/${taskId}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(200);
 
       return body;
     },

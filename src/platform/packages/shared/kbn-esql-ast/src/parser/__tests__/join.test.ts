@@ -179,5 +179,373 @@ describe('<TYPE> JOIN command', () => {
 
       expect(query.src.slice(on?.location.min, on?.location.max! + 1)).toBe('ON on_1, on_2');
     });
+
+    describe('boolean expressions in ON clause', () => {
+      it('can parse a single boolean expression', () => {
+        const text = `FROM employees | LOOKUP JOIN index ON on_1 > on_2 | LIMIT 1`;
+        const query = EsqlQuery.fromSrc(text);
+
+        expect(query.ast.commands[1]).toMatchObject({
+          name: 'join',
+          args: [
+            {},
+            {
+              type: 'option',
+              name: 'on',
+              args: [
+                {
+                  type: 'function',
+                  name: '>',
+                  args: [
+                    {
+                      type: 'column',
+                      name: 'on_1',
+                    },
+                    {
+                      type: 'column',
+                      name: 'on_2',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        });
+      });
+
+      it('can parse multiple conditions separated by commas', () => {
+        const text = `FROM employees | LOOKUP JOIN index ON on_1 > on_2, on_3 < on_4, on_5 == on_6 | LIMIT 1`;
+        const query = EsqlQuery.fromSrc(text);
+
+        expect(query.ast.commands[1]).toMatchObject({
+          name: 'join',
+          args: [
+            {},
+            {
+              type: 'option',
+              name: 'on',
+              args: [
+                {
+                  type: 'function',
+                  name: '>',
+                  args: [
+                    {
+                      type: 'column',
+                      name: 'on_1',
+                    },
+                    {
+                      type: 'column',
+                      name: 'on_2',
+                    },
+                  ],
+                },
+                {
+                  type: 'function',
+                  name: '<',
+                  args: [
+                    {
+                      type: 'column',
+                      name: 'on_3',
+                    },
+                    {
+                      type: 'column',
+                      name: 'on_4',
+                    },
+                  ],
+                },
+                {
+                  type: 'function',
+                  name: '==',
+                  args: [
+                    {
+                      type: 'column',
+                      name: 'on_5',
+                    },
+                    {
+                      type: 'column',
+                      name: 'on_6',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        });
+      });
+
+      it('can parse multiple conditions separated by AND', () => {
+        const text = `FROM employees | LOOKUP JOIN index ON on_1 > on_2 AND on_3 < on_4 AND on_5 == on_6 | LIMIT 1`;
+        const query = EsqlQuery.fromSrc(text);
+
+        expect(query.ast.commands[1]).toMatchObject({
+          name: 'join',
+          args: [
+            {},
+            {
+              type: 'option',
+              name: 'on',
+              args: [
+                {
+                  type: 'function',
+                  name: 'and',
+                  args: [
+                    {
+                      type: 'function',
+                      name: 'and',
+                      args: [
+                        {
+                          type: 'function',
+                          name: '>',
+                          args: [
+                            {
+                              type: 'column',
+                              name: 'on_1',
+                            },
+                            {
+                              type: 'column',
+                              name: 'on_2',
+                            },
+                          ],
+                        },
+                        {
+                          type: 'function',
+                          name: '<',
+                          args: [
+                            {
+                              type: 'column',
+                              name: 'on_3',
+                            },
+                            {
+                              type: 'column',
+                              name: 'on_4',
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                    {
+                      type: 'function',
+                      name: '==',
+                      args: [
+                        {
+                          type: 'column',
+                          name: 'on_5',
+                        },
+                        {
+                          type: 'column',
+                          name: 'on_6',
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        });
+      });
+
+      it('can parse a MATCH function', () => {
+        const text = `FROM left_table
+          | LOOKUP JOIN right_table ON MATCH(right_field, "search_term")`;
+        const query = EsqlQuery.fromSrc(text);
+
+        expect(query.ast.commands[1]).toMatchObject({
+          name: 'join',
+          args: [
+            {},
+            {
+              type: 'option',
+              name: 'on',
+              args: [
+                {
+                  type: 'function',
+                  name: 'match',
+                  args: [
+                    {
+                      type: 'column',
+                      name: 'right_field',
+                    },
+                    {
+                      type: 'literal',
+                      valueUnquoted: 'search_term',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        });
+      });
+
+      it('can parse a LIKE expression', () => {
+        const text = `FROM left_table
+          | LOOKUP JOIN right_table
+              ON right_field LIKE "*pattern"`;
+        const query = EsqlQuery.fromSrc(text);
+
+        expect(query.ast.commands[1]).toMatchObject({
+          name: 'join',
+          args: [
+            {},
+            {
+              type: 'option',
+              name: 'on',
+              args: [
+                {
+                  type: 'function',
+                  name: 'like',
+                  args: [
+                    {
+                      type: 'column',
+                      name: 'right_field',
+                    },
+                    {
+                      type: 'literal',
+                      valueUnquoted: '*pattern',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        });
+      });
+
+      it('parses OR and NOT expressions', () => {
+        const text = `FROM left_table
+          | LOOKUP JOIN right_table
+              ON (right_value < 5000 OR NOT left_id == right_id)`;
+        const query = EsqlQuery.fromSrc(text);
+
+        expect(query.ast.commands[1]).toMatchObject({
+          name: 'join',
+          args: [
+            {},
+            {
+              type: 'option',
+              name: 'on',
+              args: [
+                {
+                  type: 'function',
+                  name: 'or',
+                  args: [
+                    {
+                      type: 'function',
+                      name: '<',
+                      args: [
+                        {
+                          type: 'column',
+                          name: 'right_value',
+                        },
+                        {
+                          type: 'literal',
+                          value: 5000,
+                        },
+                      ],
+                    },
+                    {
+                      type: 'function',
+                      name: 'not',
+                      args: [
+                        {
+                          type: 'function',
+                          name: '==',
+                          args: [
+                            {
+                              type: 'column',
+                              name: 'left_id',
+                            },
+                            {
+                              type: 'column',
+                              name: 'right_id',
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        });
+      });
+    });
+  });
+
+  describe('malformed', () => {
+    it('can parse JOIN without target', () => {
+      const text = `FROM employees | LOOKUP JOIN `;
+      const query = EsqlQuery.fromSrc(text);
+      expect(query.ast.commands[1].args[0]).toMatchObject({
+        sourceType: 'index',
+        name: '',
+        location: {
+          min: 29,
+          max: 27,
+        },
+        text: '',
+        incomplete: true,
+        type: 'source',
+      });
+    });
+
+    const testMissingRightOperand = (text: string) => {
+      const query = EsqlQuery.fromSrc(text);
+
+      expect(query.ast.commands[1]).toMatchObject({
+        name: 'join',
+        incomplete: true,
+        args: [
+          {},
+          {
+            type: 'option',
+            name: 'on',
+            incomplete: true,
+            args: [
+              {
+                type: 'unknown',
+                incomplete: true,
+              },
+            ],
+          },
+        ],
+      });
+    };
+
+    it('on missing right operand emits "unknown" node and set "incomplete" flag', () => {
+      testMissingRightOperand(`FROM left_table
+        | LOOKUP JOIN right_table
+            ON right_value <`); // <--- missing right operand
+      testMissingRightOperand(`FROM left_table
+        | LOOKUP JOIN right_table
+            ON right_value < `); // <--- missing right operand
+    });
+
+    it('on no MATCH operands', () => {
+      const text = `FROM left_table
+        | LOOKUP JOIN right_table
+            ON MATCH(`;
+      const query = EsqlQuery.fromSrc(text);
+
+      expect(query.ast.commands[1]).toMatchObject({
+        name: 'join',
+        args: [
+          {},
+          {
+            type: 'option',
+            name: 'on',
+            incomplete: true,
+            args: [
+              {
+                type: 'unknown',
+                incomplete: true,
+              },
+            ],
+          },
+        ],
+      });
+    });
   });
 });

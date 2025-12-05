@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { StreamQueryKql } from '../../queries';
+import type { Observable } from 'rxjs';
+import type { ServerSentEventBase } from '@kbn/sse-utils';
+import type { Condition } from '@kbn/streamlang';
+import type { ChatCompletionTokenCount } from '@kbn/inference-common';
+import type { StreamQueryKql } from '../../queries';
 
 /**
  * SignificantEvents Get Response
@@ -40,8 +44,28 @@ type SignificantEventsPreviewResponse = Pick<
   'occurrences' | 'change_points' | 'kql'
 >;
 
+interface GeneratedSignificantEventQuery {
+  title: string;
+  kql: string;
+  feature?: {
+    name: string;
+    filter: Condition;
+    type: string;
+  };
+  severity_score: number;
+}
+
+type SignificantEventsGenerateResponse = Observable<
+  ServerSentEventBase<
+    'generated_queries',
+    { queries: GeneratedSignificantEventQuery[]; tokensUsed: ChatCompletionTokenCount }
+  >
+>;
+
 export type {
   SignificantEventsResponse,
   SignificantEventsGetResponse,
   SignificantEventsPreviewResponse,
+  GeneratedSignificantEventQuery,
+  SignificantEventsGenerateResponse,
 };

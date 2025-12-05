@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -23,7 +23,7 @@ import {
   EuiFlexItem,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { Chart, Axis, Position, HistogramBarSeries, ScaleType, Settings } from '@elastic/charts';
+import { Chart, Axis, Position, BarSeries, ScaleType, Settings } from '@elastic/charts';
 import numeral from '@elastic/numeral';
 import type { FunctionComponent } from 'react';
 import React from 'react';
@@ -44,7 +44,13 @@ export const DiagnosticsFlyout: FunctionComponent<Props> = ({ onClose }) => {
   const titleId = useGeneratedHtmlId({ prefix: 'diagnosticsFlyoutTitle' });
 
   return (
-    <EuiFlyout ownFocus onClose={onClose} size="s" aria-labelledby={titleId}>
+    <EuiFlyout
+      ownFocus
+      onClose={onClose}
+      size="s"
+      aria-labelledby={titleId}
+      data-test-subj="diagnosticsFlyout"
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id={titleId}>{i18nTexts.diagnosticsFlyoutTitle}</h2>
@@ -98,7 +104,7 @@ export const DiagnosticsFlyout: FunctionComponent<Props> = ({ onClose }) => {
                 <Settings baseTheme={chartBaseTheme} />
                 <Axis id="y" position={Position.Left} showOverlappingTicks />
                 <Axis id="x" position={Position.Bottom} showOverlappingTicks />
-                <HistogramBarSeries
+                <BarSeries
                   data={Object.entries(data.countByStatus).map(([key, count]) => ({
                     key,
                     count,
@@ -106,9 +112,8 @@ export const DiagnosticsFlyout: FunctionComponent<Props> = ({ onClose }) => {
                   id="Status"
                   xAccessor={'key'}
                   yAccessors={['count']}
-                  xScaleType={ScaleType.Time}
+                  xScaleType={ScaleType.Ordinal}
                   yScaleType={ScaleType.Linear}
-                  timeZone="local"
                 />
               </Chart>
             </EuiPanel>
@@ -121,7 +126,7 @@ export const DiagnosticsFlyout: FunctionComponent<Props> = ({ onClose }) => {
                 <Settings baseTheme={chartBaseTheme} />
                 <Axis id="y" position={Position.Left} showOverlappingTicks />
                 <Axis id="x" position={Position.Bottom} showOverlappingTicks />
-                <HistogramBarSeries
+                <BarSeries
                   data={Object.entries(data.countByExtension).map(([key, count]) => ({
                     key,
                     count,
@@ -129,9 +134,8 @@ export const DiagnosticsFlyout: FunctionComponent<Props> = ({ onClose }) => {
                   id="Extension"
                   xAccessor={'key'}
                   yAccessors={['count']}
-                  xScaleType={ScaleType.Time}
+                  xScaleType={ScaleType.Ordinal}
                   yScaleType={ScaleType.Linear}
-                  timeZone="local"
                 />
               </Chart>
             </EuiPanel>

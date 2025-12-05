@@ -7,7 +7,7 @@
 
 import { rgb, nest } from 'd3';
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 interface ColorStat {
   color: string;

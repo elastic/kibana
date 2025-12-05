@@ -6,29 +6,31 @@
  */
 
 import * as rt from 'io-ts';
-import { HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { DataView, DataViewLazy } from '@kbn/data-views-plugin/common';
 import { lastValueFrom } from 'rxjs';
-import { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
+import type { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
 import { getLogViewResponsePayloadRT, putLogViewRequestPayloadRT } from '../../../common/http_api';
 import { getLogViewUrl } from '../../../common/http_api/log_views';
-import {
-  FetchLogViewError,
-  FetchLogViewStatusError,
+import type {
   LogView,
   LogViewAttributes,
-  logViewAttributesRT,
   LogViewReference,
   LogViewsStaticConfig,
   LogViewStatus,
-  PutLogViewError,
   ResolvedLogView,
+} from '../../../common/log_views';
+import {
+  FetchLogViewError,
+  FetchLogViewStatusError,
+  logViewAttributesRT,
+  PutLogViewError,
   resolveLogView,
 } from '../../../common/log_views';
 import { decodeOrThrow } from '../../../common/runtime_types';
-import { ILogViewsClient } from './types';
+import type { ILogViewsClient } from './types';
 
 export class LogViewsClient implements ILogViewsClient {
   constructor(

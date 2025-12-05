@@ -10,7 +10,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { SwitchParamEditor } from './switch';
-import { AggParamEditorProps } from '../agg_param_props';
+import type { AggParamEditorProps } from '../agg_param_props';
 
 function DropPartialsParamEditor(props: AggParamEditorProps<boolean>) {
   return (

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Meta, StoryFn } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 
 import { NoConnectorAccess as Component } from '../no_connector_access';
 

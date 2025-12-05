@@ -11,7 +11,12 @@ export {
   type ModelProviderMock,
   type ModelProviderFactoryMock,
 } from './model_provider';
-export { createScopedRunnerDepsMock, type CreateScopedRunnerDepsMock } from './runner';
+export {
+  createScopedRunnerDepsMock,
+  type CreateScopedRunnerDepsMock,
+  createRunnerDepsMock,
+  type CreateRunnerDepsMock,
+} from './runner';
 export {
   createToolsServiceStartMock,
   createToolProviderMock,
@@ -26,10 +31,10 @@ export {
 } from './tools';
 export {
   createAgentsServiceStartMock,
-  createMockedAgentClient,
+  createMockedAgentRegistry,
   createMockedAgent,
   type AgentsServiceStartMock,
-  type AgentClientMock,
+  type AgentRegistryMock,
   type MockedAgent,
 } from './agents';
 export {

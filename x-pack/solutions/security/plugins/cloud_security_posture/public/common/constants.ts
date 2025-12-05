@@ -6,7 +6,7 @@
  */
 
 import type { CloudSecurityPolicyTemplate, PostureInput } from '../../common/types_old';
-import { CLOUDBEAT_AKS, CLOUDBEAT_GKE } from '../../common/constants';
+import type { CLOUDBEAT_AKS, CLOUDBEAT_GKE } from '../../common/constants';
 
 export const DEFAULT_VISIBLE_ROWS_PER_PAGE = 25;
 
@@ -38,7 +38,7 @@ export interface CloudPostureIntegrationProps {
   policyTemplate: CloudSecurityPolicyTemplate;
   name: string;
   shortName: string;
-  options: Array<{
+  options?: Array<{
     type: PostureInput | typeof CLOUDBEAT_AKS | typeof CLOUDBEAT_GKE;
     name: string;
     benchmark: string;
@@ -57,8 +57,6 @@ export const NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS = 10000;
 
 export const DETECTION_ENGINE_RULES_KEY = 'detection_engine_rules';
 export const DETECTION_ENGINE_ALERTS_KEY = 'detection_engine_alerts';
-
-export const DEFAULT_GROUPING_TABLE_HEIGHT = 512;
 
 export const FINDINGS_GROUPING_OPTIONS = {
   NONE: 'none',

@@ -10,13 +10,13 @@ import type {
   QueryDslQueryContainer,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { errors, type Client } from '@elastic/elasticsearch';
 import type { TryWithRetriesOptions } from '@kbn/ftr-common-functional-services';
 import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
 import type { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export interface SloBurnRateRuleParams {
   sloId: string;
@@ -574,7 +574,7 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
       alertId: string;
     }) {
       const { body } = await supertestWithoutAuth
-        .post(`/api/alerting/rule/${ruleId}/alert/${alertId}/_mute`)
+        .post(`/api/alerting/rule/${ruleId}/alert/${alertId}/_mute?validate_alerts_existence=false`)
         .set(samlAuth.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .expect(204);

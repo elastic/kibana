@@ -4,23 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
+import type { IconType } from '@elastic/eui';
 import {
   EuiText,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  IconType,
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
+import type { RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
 import { NOTIFY_WHEN_OPTIONS } from '@kbn/response-ops-rule-form';
 import { suspendedComponentWithProps } from '../../../lib/suspended_component_with_props';
-import { ActionTypeRegistryContract } from '../../../..';
+import type { ActionTypeRegistryContract } from '../../../..';
 import { useFetchRuleActionConnectors } from '../../../hooks/use_fetch_rule_action_connectors';
-import { RuleUiAction } from '../../../../types';
+import type { RuleUiAction } from '../../../../types';
 
 export interface RuleActionsProps {
   ruleActions: RuleUiAction[];
@@ -90,12 +91,19 @@ export function RuleActions({
       {ruleActions.map((action, index) => {
         const { actionTypeId, id } = action;
         const actionName = getActionName(id);
+        const iconType = getActionIconClass(actionTypeId) ?? 'apps';
 
         return (
           <EuiFlexItem key={index}>
             <EuiFlexGroup alignItems="center" gutterSize="s" component="span">
               <EuiFlexItem grow={false}>
-                <EuiIcon size="m" type={getActionIconClass(actionTypeId) ?? 'apps'} />
+                <EuiIcon
+                  size="m"
+                  type={iconType}
+                  data-test-subj={`ruleActionIcon${
+                    typeof iconType === 'string' ? `-${iconType}` : ''
+                  }`}
+                />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText

@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
+import type { PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
-import { ClonePanelAction, ClonePanelActionApi } from './clone_panel_action';
+import type { ClonePanelActionApi } from './clone_panel_action';
+import { ClonePanelAction } from './clone_panel_action';
 
 describe('Clone panel action', () => {
   let action: ClonePanelAction;

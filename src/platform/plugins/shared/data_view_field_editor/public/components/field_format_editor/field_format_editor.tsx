@@ -8,19 +8,19 @@
  */
 
 import { EuiCode, EuiFormRow, EuiSelect } from '@elastic/eui';
-import { CoreStart } from '@kbn/core/public';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import type {
   FieldFormatInstanceType,
   FieldFormatParams,
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { PureComponent } from 'react';
-import { FormatEditorServiceStart } from '../../service';
+import type { FormatEditorServiceStart } from '../../service';
 import { FormatEditor } from './format_editor';
 
 export interface FormatSelectEditorProps {
@@ -31,6 +31,7 @@ export interface FormatSelectEditorProps {
   onChange: (change?: SerializedFieldFormat) => void;
   onError: (error?: string) => void;
   value?: SerializedFieldFormat;
+  disabled?: boolean;
 }
 
 interface FieldTypeFormat {
@@ -104,7 +105,7 @@ export class FormatSelectEditor extends PureComponent<
   };
 
   render() {
-    const { fieldFormatEditors, onError, value, fieldFormats, esTypes } = this.props;
+    const { fieldFormatEditors, onError, value, fieldFormats, esTypes, disabled } = this.props;
     const fieldFormatId = value?.id;
     const { kbnType } = this.state;
 
@@ -142,6 +143,7 @@ export class FormatSelectEditor extends PureComponent<
             onChange={(e) => {
               this.onFormatChange(e.target.value);
             }}
+            disabled={disabled}
           />
         </EuiFormRow>
         {fieldFormatId ? (

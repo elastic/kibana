@@ -12,16 +12,16 @@ import { GroupStream } from './streams/group_stream';
 import { ClassicStream } from './streams/classic_stream';
 import { WiredStream } from './streams/wired_stream';
 import * as streamFromDefinition from './stream_active_record/stream_from_definition';
-import {
-  StreamActiveRecord,
+import type {
   StreamChangeStatus,
   ValidationResult,
 } from './stream_active_record/stream_active_record';
-import { StreamChange } from './types';
-import { ElasticsearchAction } from './execution_plan/types';
+import { StreamActiveRecord } from './stream_active_record/stream_active_record';
+import type { StreamChange } from './types';
+import type { ElasticsearchAction } from './execution_plan/types';
 import { ExecutionPlan } from './execution_plan/execution_plan';
-import { Streams } from '@kbn/streams-schema';
-import { LockManagerService } from '@kbn/lock-manager';
+import type { Streams } from '@kbn/streams-schema';
+import type { LockManagerService } from '@kbn/lock-manager';
 
 describe('State', () => {
   const searchMock = jest.fn();
@@ -40,28 +40,37 @@ describe('State', () => {
     const wiredStream: Streams.WiredStream.Definition = {
       name: 'wired_stream',
       description: '',
+      updated_at: new Date().toISOString(),
       ingest: {
         lifecycle: { inherit: {} },
-        processing: [],
+        processing: { steps: [], updated_at: new Date().toISOString() },
+        settings: {},
         wired: {
           fields: {},
           routing: [],
         },
+        failure_store: { inherit: {} },
       },
     };
     const classicStream: Streams.ClassicStream.Definition = {
       name: 'classic_stream',
       description: '',
+      updated_at: new Date().toISOString(),
       ingest: {
         lifecycle: { inherit: {} },
-        processing: [],
+        processing: { steps: [], updated_at: new Date().toISOString() },
+        settings: {},
         classic: {},
+        failure_store: { inherit: {} },
       },
     };
     const groupStream: Streams.GroupStream.Definition = {
       name: 'group_stream',
       description: '',
+      updated_at: new Date().toISOString(),
       group: {
+        metadata: {},
+        tags: [],
         members: [],
       },
     };
@@ -123,7 +132,10 @@ describe('State', () => {
               definition: {
                 description: '',
                 name: 'whatever',
+                updated_at: new Date().toISOString(),
                 group: {
+                  metadata: {},
+                  tags: [],
                   members: [],
                 },
               },
@@ -155,7 +167,10 @@ describe('State', () => {
               definition: {
                 description: '',
                 name: 'new_group_stream',
+                updated_at: new Date().toISOString(),
                 group: {
+                  metadata: {},
+                  tags: [],
                   members: [],
                 },
               },
@@ -187,7 +202,10 @@ describe('State', () => {
               definition: {
                 name: 'stream_that_fails',
                 description: 'Something went wrong',
+                updated_at: new Date().toISOString(),
                 group: {
+                  metadata: {},
+                  tags: [],
                   members: [],
                 },
               },
@@ -303,7 +321,10 @@ function streamThatCascadesTooMuch(stateDependenciesMock: any) {
             definition: {
               name: 'and_another',
               description: '',
+              updated_at: new Date().toISOString(),
               group: {
+                metadata: {},
+                tags: [],
                 members: [],
               },
             },

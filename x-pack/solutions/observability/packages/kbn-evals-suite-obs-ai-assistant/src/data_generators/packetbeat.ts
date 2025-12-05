@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 
 /**
  * Generates a variety of sample Packetbeat documents.

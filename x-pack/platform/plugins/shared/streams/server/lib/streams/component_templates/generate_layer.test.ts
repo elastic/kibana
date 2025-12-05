@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import { generateLayer } from './generate_layer';
 
 describe('generateLayer', () => {
   const definition: Streams.WiredStream.Definition = {
     name: 'logs.abc',
     description: '',
+    updated_at: new Date().toISOString(),
     ingest: {
-      processing: [],
+      processing: { steps: [], updated_at: new Date().toISOString() },
       wired: {
         routing: [],
         fields: {
@@ -26,6 +27,8 @@ describe('generateLayer', () => {
         // simulate DSL lifecycle
         dsl: { data_retention: '30d' },
       },
+      settings: {},
+      failure_store: { inherit: {} },
     },
   };
 
@@ -116,13 +119,6 @@ describe('generateLayer', () => {
                   "attributes": Object {
                     "subobjects": false,
                     "type": "object",
-                  },
-                  "dropped_attributes_count": Object {
-                    "type": "long",
-                  },
-                  "schema_url": Object {
-                    "ignore_above": 1024,
-                    "type": "keyword",
                   },
                 },
                 "type": "object",

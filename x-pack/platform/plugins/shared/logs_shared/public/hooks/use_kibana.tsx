@@ -7,13 +7,10 @@
 
 import type { PropsOf } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { CoreStart } from '@kbn/core/public';
-import {
-  createKibanaReactContext,
-  KibanaReactContextValue,
-  useKibana,
-} from '@kbn/kibana-react-plugin/public';
-import {
+import type { CoreStart } from '@kbn/core/public';
+import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
+import { createKibanaReactContext, useKibana } from '@kbn/kibana-react-plugin/public';
+import type {
   LogsSharedClientCoreSetup,
   LogsSharedClientStartDeps,
   LogsSharedClientStartExports,

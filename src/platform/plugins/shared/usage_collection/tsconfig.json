@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "isolatedModules": true
@@ -27,6 +27,7 @@
     "@kbn/es-query",
     "@kbn/core-saved-objects-utils-server",
     "@kbn/core-saved-objects-api-server",
+    "@kbn/lazy-object",
   ],
   "exclude": [
     "target/**/*",

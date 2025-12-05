@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { of, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { of } from 'rxjs';
 import { catchError } from 'rxjs';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import { Execution, ExecutionResult } from './execution';
-import { ExpressionValueError } from '../expression_types/specs';
-import { ExpressionAstExpression } from '../ast';
+import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { Execution, ExecutionResult } from './execution';
+import type { ExpressionValueError } from '../expression_types/specs';
+import type { ExpressionAstExpression } from '../ast';
 
 /**
  * `ExecutionContract` is a wrapper around `Execution` class. It provides the

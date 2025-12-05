@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
-import { useMutation } from '@tanstack/react-query';
+import type { HttpSetup } from '@kbn/core/public';
+import { useMutation } from '@kbn/react-query';
 import { mutationKeys } from '../mutation_keys';
-import { scheduleReport, ScheduleReportRequestParams } from '../apis/schedule_report';
+import type { ScheduleReportRequestParams } from '../apis/schedule_report';
+import { scheduleReport } from '../apis/schedule_report';
 
 export const getKey = mutationKeys.scheduleReport;
 

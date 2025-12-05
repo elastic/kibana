@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/saved-objects-example-plugin",
+  "owner": "@elastic/kibana-core",
+  "description": "Plugin that shows how to use the Saved Objects client server-side.",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "savedObjectsExample",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": [],
+    "optionalPlugins": []
+  }
+}

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { compact } from 'lodash';
 import { useEuiTheme } from '@elastic/eui';
 import { useMemo } from 'react';
-import {
+import type {
   IlmPolicyDeletePhase,
   IlmPolicyHotPhase,
   IlmPolicyPhase,
@@ -24,7 +24,7 @@ export const useIlmPhasesColorAndDescription = () => {
     () => ({
       ilmPhases: {
         hot: {
-          color: euiTheme.colors.vis.euiColorVis6,
+          color: euiTheme.colors.severity.risk,
           description: (phase: IlmPolicyPhase | IlmPolicyDeletePhase, phases: IlmPolicyPhases) => {
             const hotPhase = phase as IlmPolicyHotPhase;
             const hasNextPhase = Boolean(
@@ -58,7 +58,7 @@ export const useIlmPhasesColorAndDescription = () => {
           },
         },
         warm: {
-          color: euiTheme.colors.vis.euiColorVis9,
+          color: euiTheme.colors.severity.warning,
           description: () => [
             i18n.translate('xpack.streams.streamDetailLifecycle.warmPhaseDescription', {
               defaultMessage:
@@ -67,7 +67,7 @@ export const useIlmPhasesColorAndDescription = () => {
           ],
         },
         cold: {
-          color: euiTheme.colors.vis.euiColorVis1,
+          color: euiTheme.colors.severity.neutral,
           description: () => [
             i18n.translate('xpack.streams.streamDetailLifecycle.coldPhaseDescription', {
               defaultMessage:
@@ -76,7 +76,7 @@ export const useIlmPhasesColorAndDescription = () => {
           ],
         },
         frozen: {
-          color: euiTheme.colors.vis.euiColorVis2,
+          color: euiTheme.colors.vis.euiColorVis3,
           description: () => [
             i18n.translate('xpack.streams.streamDetailLifecycle.frozenPhaseDescription', {
               defaultMessage:
@@ -85,7 +85,7 @@ export const useIlmPhasesColorAndDescription = () => {
           ],
         },
         delete: {
-          color: euiTheme.border.color,
+          color: euiTheme.colors.borderBasePlain,
           description: (phase: IlmPolicyPhase | IlmPolicyDeletePhase) => [
             i18n.translate('xpack.streams.streamDetailLifecycle.deletePhaseDescription', {
               defaultMessage: 'Data deleted after {duration}.',

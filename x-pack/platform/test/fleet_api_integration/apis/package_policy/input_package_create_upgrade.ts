@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { getInstallationInfo } from './helper';
 const PACKAGE_NAME = 'input_package_upgrade';
@@ -209,37 +209,40 @@ export default function (providerContext: FtrProviderContext) {
 
       // now check the package component template was created correctly
       const packageComponentTemplate = await getComponentTemplate('logs-dataset1@package');
-      expect(packageComponentTemplate).eql({
-        name: 'logs-dataset1@package',
-        component_template: {
-          template: {
-            settings: {
-              index: {
-                lifecycle: { name: 'logs' },
-                default_pipeline: 'logs-dataset1-1.0.0',
-                mapping: {
-                  total_fields: { limit: '1000' },
-                },
+      const {
+        created_date_millis: createdDateMillis,
+        modified_date_millis: modifiedDateMillis,
+        ...definitionWithouTimestamps
+      } = packageComponentTemplate!.component_template as any;
+      expect(packageComponentTemplate!.name).eql('logs-dataset1@package');
+      expect(definitionWithouTimestamps).eql({
+        template: {
+          settings: {
+            index: {
+              lifecycle: { name: 'logs@lifecycle' },
+              default_pipeline: 'logs-dataset1-1.0.0',
+              mapping: {
+                total_fields: { limit: '1000' },
               },
             },
-            mappings: {
-              properties: {
-                input: {
-                  properties: {
-                    name: {
-                      type: 'constant_keyword',
-                      value: 'logs',
-                    },
+          },
+          mappings: {
+            properties: {
+              input: {
+                properties: {
+                  name: {
+                    type: 'constant_keyword',
+                    value: 'logs',
                   },
                 },
               },
             },
           },
-          _meta: {
-            package: { name: 'input_package_upgrade' },
-            managed_by: 'fleet',
-            managed: true,
-          },
+        },
+        _meta: {
+          package: { name: 'input_package_upgrade' },
+          managed_by: 'fleet',
+          managed: true,
         },
       });
     });

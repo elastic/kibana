@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest, SecurityServiceStart } from '@kbn/core/server';
+import type { KibanaRequest, SecurityServiceStart } from '@kbn/core/server';
 
 export function getUser(request: KibanaRequest, securityService: SecurityServiceStart) {
   return securityService.authc.getCurrentUser(request) ?? false;

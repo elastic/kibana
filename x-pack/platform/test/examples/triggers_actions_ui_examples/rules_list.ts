@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '@kbn/test-suites-src/functional/ftr_provider_context';
+import type { FtrProviderContext } from '@kbn/test-suites-src/functional/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -28,8 +28,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should load from shareable lazy loader', async () => {
-      await testSubjects.find('rulesList');
-      const exists = await testSubjects.exists('rulesList');
+      await testSubjects.find('rulesListSection');
+      const exists = await testSubjects.exists('rulesListSection');
       expect(exists).to.be(true);
     });
   });

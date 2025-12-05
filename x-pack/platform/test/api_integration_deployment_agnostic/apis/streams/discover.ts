@@ -6,11 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import {
-  StreamsSupertestRepositoryClient,
-  createStreamsRepositoryAdminClient,
-} from './helpers/repository_client';
+import type { Streams } from '@kbn/streams-schema';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
+import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 import { disableStreams, enableStreams, indexDocument } from './helpers/requests';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -57,16 +56,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       expect(status).to.eql(200);
-
+      expect(stream).not.to.be(undefined);
       expect(stream).to.eql({
         name: TEST_STREAM_NAME,
         description: '',
+        updated_at: stream!.updated_at,
         ingest: {
           lifecycle: { inherit: {} },
-          processing: [],
+          settings: {},
+          processing: {
+            steps: [],
+            updated_at: (stream as Streams.ClassicStream.Definition).ingest.processing.updated_at,
+          },
           classic: {},
+          failure_store: { inherit: {} },
         },
-      });
+      } satisfies Streams.ClassicStream.Definition);
     });
 
     it('endpoint is resolving wired stream properly', async () => {

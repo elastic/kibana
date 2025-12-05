@@ -8,8 +8,8 @@
  */
 
 import type { AggregateQuery } from '@kbn/es-query';
-import { Datatable } from '@kbn/expressions-plugin/public';
-import { UiActionsActionDefinition, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { Datatable } from '@kbn/expressions-plugin/public';
+import type { UiActionsActionDefinition, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '../triggers';
 
 export interface SelectRangeActionContext {

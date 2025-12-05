@@ -8,6 +8,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { sortBy } from 'lodash';
+import type { Query } from '@elastic/eui';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -23,9 +24,8 @@ import {
   EuiCallOut,
   EuiTableRowCell,
   Pager,
-  Query,
 } from '@elastic/eui';
-import { EnrichedDeprecationInfo } from '../../../../common/types';
+import type { EnrichedDeprecationInfo } from '../../../../common/types';
 import { useAppContext } from '../../app_context';
 import {
   MlSnapshotsTableRow,
@@ -36,7 +36,7 @@ import {
   HealthIndicatorTableRow,
   DataStreamTableRow,
 } from './deprecation_types';
-import { DeprecationSortableTableColumns, DeprecationTableColumns } from '../types';
+import type { DeprecationSortableTableColumns, DeprecationTableColumns } from '../types';
 import { DEPRECATION_TYPE_MAP, PAGINATION_CONFIG } from '../constants';
 
 const i18nTexts = {
@@ -342,6 +342,7 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
           <EuiSpacer size="l" />
 
           <EuiCallOut
+            announceOnMount
             iconType="warning"
             color="danger"
             title={`Invalid search: ${searchError.message}`}

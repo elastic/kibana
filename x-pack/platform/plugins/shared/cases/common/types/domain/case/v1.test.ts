@@ -61,6 +61,7 @@ const basicCase = {
   title: 'Another horrible breach!!',
   totalComment: 1,
   totalAlerts: 0,
+  totalEvents: 0,
   updated_at: '2020-02-20T15:02:57.995Z',
   updated_by: {
     full_name: 'Leslie Knope',
@@ -70,6 +71,7 @@ const basicCase = {
   version: 'WzQ3LDFd',
   settings: {
     syncAlerts: true,
+    extractObservables: false,
   },
   // damaged_raccoon uid
   assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
@@ -92,6 +94,7 @@ const basicCase = {
     },
   ],
   observables: [],
+  total_observables: 0,
   incremental_id: undefined,
   in_progress_at: undefined,
   time_to_acknowledge: undefined,
@@ -109,6 +112,7 @@ describe('RelatedCaseRt', () => {
     totals: {
       alerts: 5,
       userComments: 2,
+      events: 0,
     },
   };
   it('has expected attributes in request', () => {
@@ -144,20 +148,24 @@ describe('RelatedCaseRt', () => {
 
 describe('SettingsRt', () => {
   it('has expected attributes in request', () => {
-    const query = CaseSettingsRt.decode({ syncAlerts: true });
+    const query = CaseSettingsRt.decode({ syncAlerts: true, extractObservables: true });
 
     expect(query).toStrictEqual({
       _tag: 'Right',
-      right: { syncAlerts: true },
+      right: { syncAlerts: true, extractObservables: true },
     });
   });
 
   it('removes foo:bar attributes from request', () => {
-    const query = CaseSettingsRt.decode({ syncAlerts: false, foo: 'bar' });
+    const query = CaseSettingsRt.decode({
+      syncAlerts: false,
+      extractObservables: false,
+      foo: 'bar',
+    });
 
     expect(query).toStrictEqual({
       _tag: 'Right',
-      right: { syncAlerts: false },
+      right: { syncAlerts: false, extractObservables: false },
     });
   });
 });
@@ -176,6 +184,7 @@ describe('CaseAttributesRt', () => {
     },
     settings: {
       syncAlerts: true,
+      extractObservables: true,
     },
     owner: 'cases',
     severity: CaseSeverity.LOW,
@@ -211,6 +220,7 @@ describe('CaseAttributesRt', () => {
       },
     ],
     observables: [],
+    total_observables: 0,
     in_progress_at: undefined,
     time_to_acknowledge: undefined,
     time_to_investigate: undefined,

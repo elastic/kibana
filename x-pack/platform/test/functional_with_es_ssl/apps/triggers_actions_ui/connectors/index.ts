@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Connectors', function () {
     loadTestFile(require.resolve('./general'));
     loadTestFile(require.resolve('./opsgenie'));
+    loadTestFile(require.resolve('./jsm'));
     loadTestFile(require.resolve('./tines'));
     loadTestFile(require.resolve('./slack'));
     loadTestFile(require.resolve('./webhook'));

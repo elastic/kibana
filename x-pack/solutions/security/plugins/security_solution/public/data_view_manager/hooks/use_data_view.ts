@@ -11,7 +11,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { useSelector } from 'react-redux';
 import { type FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { useKibana } from '../../common/lib/kibana';
-import { DataViewManagerScopeName } from '../constants';
+import { PageScope } from '../constants';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { sourcererAdapterSelector } from '../redux/selectors';
 import type { SharedDataViewSelectionState } from '../redux/types';
@@ -20,13 +20,18 @@ const INITIAL_DV = new DataView({
   fieldFormats: {} as FieldFormatsStartCommon,
 });
 
+export interface UseDataViewReturnValue {
+  dataView: DataView;
+  status: SharedDataViewSelectionState['status'];
+}
+
 /*
  * This hook should be used whenever we need the actual DataView and not just the spec for the
  * selected data view.
  */
 export const useDataView = (
-  dataViewManagerScope: DataViewManagerScopeName = DataViewManagerScopeName.default
-): { dataView: DataView; status: SharedDataViewSelectionState['status'] } => {
+  dataViewManagerScope: PageScope = PageScope.default
+): UseDataViewReturnValue => {
   const {
     services: { dataViews, notifications },
   } = useKibana();

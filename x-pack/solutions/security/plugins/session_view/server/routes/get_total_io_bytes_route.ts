@@ -4,7 +4,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 import { EVENT_ACTION } from '@kbn/rule-data-utils';
 import {
   GET_TOTAL_IO_BYTES_ROUTE,

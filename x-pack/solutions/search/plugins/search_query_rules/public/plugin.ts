@@ -8,7 +8,7 @@
 import type { CoreSetup, Plugin, AppMountParameters, CoreStart } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_TITLE } from '../common';
-import {
+import type {
   AppPluginSetupDependencies,
   AppPluginStartDependencies,
   SearchQueryRulesPluginSetup,
@@ -50,7 +50,7 @@ export class QueryRulesPlugin
 
         return renderApp(coreStart, startDeps, element);
       },
-      order: 4,
+      order: 5,
       visibleIn: ['globalSearch', 'sideNav'],
     });
 

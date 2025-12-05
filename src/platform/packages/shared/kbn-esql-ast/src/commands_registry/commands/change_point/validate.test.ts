@@ -38,23 +38,23 @@ describe('CHANGE_POINT Validation', () => {
 
       test('raises error on unknown field', () => {
         changePointExpectErrors('FROM index | CHANGE_POINT notExistingField', [
-          'Unknown column [notExistingField]',
+          'Unknown column "notExistingField"',
         ]);
       });
 
       test('raises error on unsupported field time for value', () => {
         changePointExpectErrors('FROM index | CHANGE_POINT keywordField', [
-          'CHANGE_POINT only supports numeric types values, found [keywordField] of type [keyword]',
+          'CHANGE_POINT only supports numeric values, found "keywordField" of type keyword',
         ]);
       });
 
       test('raises error when the default @timestamp field is missing', () => {
         // make sure that @timestamp field is not present
-        const newFields = new Map(mockContext.fields);
-        newFields.delete('@timestamp');
+        const newColumns = new Map(mockContext.columns);
+        newColumns.delete('@timestamp');
         const context = {
           ...mockContext,
-          fields: newFields,
+          columns: newColumns,
         };
         changePointExpectErrors(
           'FROM a_index | CHANGE_POINT doubleField',

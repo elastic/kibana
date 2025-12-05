@@ -6,15 +6,16 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLCommand, ESQLCommandOption, ESQLMessage } from '../../../types';
-import { ICommandCallbacks, ICommandContext } from '../../../commands_registry/types';
+import type { ESQLAst, ESQLAstAllCommands, ESQLCommandOption, ESQLMessage } from '../../../types';
+import type { ICommandCallbacks, ICommandContext } from '../../../commands_registry/types';
 import { isColumn, isFunctionExpression } from '../../../ast/is';
 import { validateColumnForCommand } from './column';
 import { validateFunction } from './function';
 
 export function validateOption(
   option: ESQLCommandOption,
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
+  ast: ESQLAst,
   context: ICommandContext,
   callbacks: ICommandCallbacks
 ): ESQLMessage[] {
@@ -39,8 +40,8 @@ export function validateOption(
       messages.push(
         ...validateFunction({
           fn: arg,
-          parentCommand: command.name,
-          parentOption: option.name,
+          parentCommand: command,
+          ast,
           context,
           callbacks,
         })

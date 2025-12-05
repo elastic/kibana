@@ -8,218 +8,251 @@
  */
 
 import {
-  ResizableLayout,
+  type DiscoverResizableLayoutProps,
+  DiscoverResizableLayout as OriginalDiscoverResizableLayout,
+  SIDEBAR_WIDTH_KEY,
+} from './discover_resizable_layout';
+import type { SidebarToggleState } from '../../../types';
+import {
+  type ResizableLayoutProps,
   ResizableLayoutDirection,
   ResizableLayoutMode,
 } from '@kbn/resizable-layout';
-import { findTestSubject } from '@kbn/test-jest-helpers';
-import { mount } from 'enzyme';
-import { isEqual as mockIsEqual } from 'lodash';
-import React from 'react';
-import {
-  DiscoverResizableLayout as OriginalDiscoverResizableLayout,
-  type DiscoverResizableLayoutProps,
-  SIDEBAR_WIDTH_KEY,
-} from './discover_resizable_layout';
 import { BehaviorSubject } from 'rxjs';
-import type { SidebarToggleState } from '../../../types';
-import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
+import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
+import { isEqual } from 'lodash';
+import { render, screen } from '@testing-library/react';
+import React from 'react';
 
-const mockSidebarKey = SIDEBAR_WIDTH_KEY;
+const DEFAULT_RESIZABLE_PANEL_SIZE = 304;
+const MOCK_SIDEBAR_KEY = SIDEBAR_WIDTH_KEY;
+
+let lastResizableLayoutProps: ResizableLayoutProps | null = null;
+let mockIsMobile = false;
 let mockSidebarWidth: number | undefined;
 
 const services = createDiscoverServicesMock();
 services.storage.get = jest.fn((key: string) => {
-  if (key === mockSidebarKey) {
-    return mockSidebarWidth;
-  }
+  if (key === MOCK_SIDEBAR_KEY) return mockSidebarWidth;
   throw new Error(`Unexpected key: ${key}`);
 });
 
-let mockIsMobile = false;
+jest.mock('@kbn/resizable-layout', () => {
+  const actual = jest.requireActual('@kbn/resizable-layout');
+  const ActualResizableLayout = actual.ResizableLayout;
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
   return {
-    ...original,
-    useIsWithinBreakpoints: jest.fn((breakpoints: string[]) => {
-      if (!mockIsEqual(breakpoints, ['xs', 's'])) {
-        throw new Error(`Unexpected breakpoints: ${breakpoints}`);
-      }
-      return mockIsMobile;
-    }),
+    ...actual,
+    ResizableLayout: (props: ResizableLayoutProps) => {
+      lastResizableLayoutProps = props;
+      return ActualResizableLayout(props);
+    },
   };
 });
 
-const DiscoverResizableLayout: React.FC<DiscoverResizableLayoutProps> = (props) => {
-  return (
-    <DiscoverTestProvider services={services}>
-      <OriginalDiscoverResizableLayout {...props} />
-    </DiscoverTestProvider>
-  );
-};
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+
+  return {
+    ...original,
+    useIsWithinBreakpoints: jest.fn(),
+  };
+});
+
+import { useIsWithinBreakpoints as useIsWithinBreakpointsImport } from '@elastic/eui';
+
+const useIsWithinBreakpoints = jest.mocked(useIsWithinBreakpointsImport);
+
+useIsWithinBreakpoints.mockImplementation((breakpoints: string[]) => {
+  if (!isEqual(breakpoints, ['xs', 's'])) {
+    throw new Error(`Unexpected breakpoints: ${breakpoints}`);
+  }
+  return mockIsMobile;
+});
+
+const DiscoverResizableLayout: React.FC<DiscoverResizableLayoutProps> = (props) => (
+  <DiscoverTestProvider services={services}>
+    <OriginalDiscoverResizableLayout {...props} />
+  </DiscoverTestProvider>
+);
 
 describe('DiscoverResizableLayout', () => {
   beforeEach(() => {
     mockSidebarWidth = undefined;
     mockIsMobile = false;
+    lastResizableLayoutProps = null;
   });
 
   it('should render sidebarPanel and mainPanel', () => {
-    const wrapper = mount(
+    render(
       <DiscoverResizableLayout
+        mainPanel={<div data-test-subj="mainPanel" />}
+        sidebarPanel={<div data-test-subj="sidebarPanel" />}
         sidebarToggleState$={
           new BehaviorSubject<SidebarToggleState>({
             isCollapsed: true,
             toggle: () => {},
           })
         }
-        sidebarPanel={<div data-test-subj="sidebarPanel" />}
-        mainPanel={<div data-test-subj="mainPanel" />}
       />
     );
-    expect(findTestSubject(wrapper, 'sidebarPanel')).toHaveLength(1);
-    expect(findTestSubject(wrapper, 'mainPanel')).toHaveLength(1);
+
+    expect(screen.getByTestId('sidebarPanel')).toBeVisible();
+    expect(screen.getByTestId('mainPanel')).toBeVisible();
   });
 
   it('should use the default sidebar width when no value is stored in local storage', () => {
-    const wrapper = mount(
+    render(
       <DiscoverResizableLayout
+        mainPanel={<div data-test-subj="mainPanel" />}
+        sidebarPanel={<div data-test-subj="sidebarPanel" />}
         sidebarToggleState$={
           new BehaviorSubject<SidebarToggleState>({
             isCollapsed: true,
             toggle: () => {},
           })
         }
-        sidebarPanel={<div data-test-subj="sidebarPanel" />}
-        mainPanel={<div data-test-subj="mainPanel" />}
       />
     );
-    expect(wrapper.find(ResizableLayout).prop('fixedPanelSize')).toBe(304);
+
+    expect(lastResizableLayoutProps?.fixedPanelSize).toBe(DEFAULT_RESIZABLE_PANEL_SIZE);
   });
 
   it('should use the stored sidebar width from local storage', () => {
     mockSidebarWidth = 400;
-    const wrapper = mount(
+
+    render(
       <DiscoverResizableLayout
+        mainPanel={<div data-test-subj="mainPanel" />}
+        sidebarPanel={<div data-test-subj="sidebarPanel" />}
         sidebarToggleState$={
           new BehaviorSubject<SidebarToggleState>({
             isCollapsed: true,
             toggle: () => {},
           })
         }
-        sidebarPanel={<div data-test-subj="sidebarPanel" />}
-        mainPanel={<div data-test-subj="mainPanel" />}
       />
     );
-    expect(wrapper.find(ResizableLayout).prop('fixedPanelSize')).toBe(400);
+
+    expect(lastResizableLayoutProps?.fixedPanelSize).toBe(mockSidebarWidth);
   });
 
   it('should use the restored sidebar width despite local storage value', () => {
     mockSidebarWidth = 400;
-    const wrapper = mount(
+    const INITIAL_SIDEBAR_WIDTH = 450;
+
+    render(
       <DiscoverResizableLayout
+        initialState={{
+          sidebarWidth: INITIAL_SIDEBAR_WIDTH,
+        }}
+        mainPanel={<div data-test-subj="mainPanel" />}
+        sidebarPanel={<div data-test-subj="sidebarPanel" />}
         sidebarToggleState$={
           new BehaviorSubject<SidebarToggleState>({
             isCollapsed: true,
             toggle: () => {},
           })
         }
-        sidebarPanel={<div data-test-subj="sidebarPanel" />}
-        mainPanel={<div data-test-subj="mainPanel" />}
-        initialState={{
-          sidebarWidth: 450,
-        }}
       />
     );
-    expect(wrapper.find(ResizableLayout).prop('fixedPanelSize')).toBe(450);
+
+    expect(lastResizableLayoutProps?.fixedPanelSize).toBe(INITIAL_SIDEBAR_WIDTH);
   });
 
   it('should pass mode ResizableLayoutMode.Resizable when not mobile and sidebar is not collapsed', () => {
     mockIsMobile = false;
-    const wrapper = mount(
+
+    render(
       <DiscoverResizableLayout
+        mainPanel={<div data-test-subj="mainPanel" />}
+        sidebarPanel={<div data-test-subj="sidebarPanel" />}
         sidebarToggleState$={
           new BehaviorSubject<SidebarToggleState>({
             isCollapsed: false,
             toggle: () => {},
           })
         }
-        sidebarPanel={<div data-test-subj="sidebarPanel" />}
-        mainPanel={<div data-test-subj="mainPanel" />}
       />
     );
-    expect(wrapper.find(ResizableLayout).prop('mode')).toBe(ResizableLayoutMode.Resizable);
+
+    expect(lastResizableLayoutProps?.mode).toBe(ResizableLayoutMode.Resizable);
   });
 
   it('should pass mode ResizableLayoutMode.Static when mobile', () => {
     mockIsMobile = true;
-    const wrapper = mount(
+
+    render(
       <DiscoverResizableLayout
+        mainPanel={<div data-test-subj="mainPanel" />}
+        sidebarPanel={<div data-test-subj="sidebarPanel" />}
         sidebarToggleState$={
           new BehaviorSubject<SidebarToggleState>({
             isCollapsed: false,
             toggle: () => {},
           })
         }
-        sidebarPanel={<div data-test-subj="sidebarPanel" />}
-        mainPanel={<div data-test-subj="mainPanel" />}
       />
     );
-    expect(wrapper.find(ResizableLayout).prop('mode')).toBe(ResizableLayoutMode.Static);
+
+    expect(lastResizableLayoutProps?.mode).toBe(ResizableLayoutMode.Static);
   });
 
   it('should pass mode ResizableLayoutMode.Static when not mobile and sidebar is collapsed', () => {
     mockIsMobile = false;
-    const wrapper = mount(
+
+    render(
       <DiscoverResizableLayout
+        mainPanel={<div data-test-subj="mainPanel" />}
+        sidebarPanel={<div data-test-subj="sidebarPanel" />}
         sidebarToggleState$={
           new BehaviorSubject<SidebarToggleState>({
             isCollapsed: true,
             toggle: () => {},
           })
         }
-        sidebarPanel={<div data-test-subj="sidebarPanel" />}
-        mainPanel={<div data-test-subj="mainPanel" />}
       />
     );
-    expect(wrapper.find(ResizableLayout).prop('mode')).toBe(ResizableLayoutMode.Static);
+
+    expect(lastResizableLayoutProps?.mode).toBe(ResizableLayoutMode.Static);
   });
 
   it('should pass direction ResizableLayoutDirection.Horizontal when not mobile', () => {
     mockIsMobile = false;
-    const wrapper = mount(
+
+    render(
       <DiscoverResizableLayout
+        mainPanel={<div data-test-subj="mainPanel" />}
+        sidebarPanel={<div data-test-subj="sidebarPanel" />}
         sidebarToggleState$={
           new BehaviorSubject<SidebarToggleState>({
             isCollapsed: false,
             toggle: () => {},
           })
         }
-        sidebarPanel={<div data-test-subj="sidebarPanel" />}
-        mainPanel={<div data-test-subj="mainPanel" />}
       />
     );
-    expect(wrapper.find(ResizableLayout).prop('direction')).toBe(
-      ResizableLayoutDirection.Horizontal
-    );
+
+    expect(lastResizableLayoutProps?.direction).toBe(ResizableLayoutDirection.Horizontal);
   });
 
   it('should pass direction ResizableLayoutDirection.Vertical when mobile', () => {
     mockIsMobile = true;
-    const wrapper = mount(
+
+    render(
       <DiscoverResizableLayout
+        mainPanel={<div data-test-subj="mainPanel" />}
+        sidebarPanel={<div data-test-subj="sidebarPanel" />}
         sidebarToggleState$={
           new BehaviorSubject<SidebarToggleState>({
             isCollapsed: false,
             toggle: () => {},
           })
         }
-        sidebarPanel={<div data-test-subj="sidebarPanel" />}
-        mainPanel={<div data-test-subj="mainPanel" />}
       />
     );
-    expect(wrapper.find(ResizableLayout).prop('direction')).toBe(ResizableLayoutDirection.Vertical);
+
+    expect(lastResizableLayoutProps?.direction).toBe(ResizableLayoutDirection.Vertical);
   });
 });

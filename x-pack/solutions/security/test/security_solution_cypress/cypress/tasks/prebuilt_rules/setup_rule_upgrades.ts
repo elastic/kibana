@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import {
+import type {
   RuleResponse,
   RuleSignatureId,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { patchRule } from '../api_calls/rules';
+import type { SAMPLE_PREBUILT_RULE } from '../api_calls/prebuilt_rules';
 import {
-  SAMPLE_PREBUILT_RULE,
   installPrebuiltRuleAssets,
   installSpecificPrebuiltRulesRequest,
 } from '../api_calls/prebuilt_rules';

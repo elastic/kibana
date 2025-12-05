@@ -6,18 +6,17 @@
  */
 
 import { pipe } from 'fp-ts/pipeable';
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import { fold } from 'fp-ts/Either';
 import { exactCheck, formatErrors, validate } from '@kbn/securitysolution-io-ts-utils';
+import type { NamespaceType, NonEmptyEntriesArray } from '@kbn/securitysolution-io-ts-list-types';
 import {
-  NamespaceType,
-  NonEmptyEntriesArray,
   foundExceptionListItemSchema,
   nonEmptyEndpointEntriesArray,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { MAX_EXCEPTION_LIST_SIZE } from '@kbn/securitysolution-list-constants';
 
-import { ExceptionListClient } from '../services/exception_lists/exception_list_client';
+import type { ExceptionListClient } from '../services/exception_lists/exception_list_client';
 
 export const validateExceptionListSize = async (
   exceptionLists: ExceptionListClient,

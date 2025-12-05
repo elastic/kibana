@@ -5,18 +5,13 @@
  * 2.0.
  */
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { Title } from '.';
 import { TestProviders } from '../../../../../../../common/mock';
-import { useKibanaFeatureFlags } from '../../../../../use_kibana_feature_flags';
-
-jest.mock('../../../../../use_kibana_feature_flags', () => ({
-  useKibanaFeatureFlags: jest.fn(),
-}));
 
 jest.mock('@kbn/elastic-assistant-common', () => ({
   ATTACK_DISCOVERY_AD_HOC_RULE_ID: 'ad-hoc-rule-id',
@@ -45,10 +40,6 @@ jest.mock('../../../../../settings_flyout/schedule/details_flyout', () => ({
 jest.mock('../../../../../utils/is_attack_discovery_alert', () => ({
   isAttackDiscoveryAlert: jest.fn((discovery) => !!discovery.alertRuleUuid),
 }));
-
-const mockUseKibanaFeatureFlags = useKibanaFeatureFlags as jest.MockedFunction<
-  typeof useKibanaFeatureFlags
->;
 
 // Test wrapper with QueryClient and TestProviders
 const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -94,12 +85,7 @@ const defaultProps = {
 };
 
 describe('Title', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockUseKibanaFeatureFlags.mockReturnValue({
-      attackDiscoveryAlertsEnabled: true,
-    });
-  });
+  beforeEach(() => jest.clearAllMocks());
 
   describe('rendering', () => {
     it('renders the title component', () => {
@@ -112,7 +98,7 @@ describe('Title', () => {
       expect(screen.getByTestId('titleText')).toBeInTheDocument();
     });
 
-    it('renders the checkbox when attackDiscoveryAlertsEnabled is true', () => {
+    it('renders the checkbox', () => {
       render(
         <TestWrapper>
           <Title {...defaultProps} />
@@ -130,54 +116,6 @@ describe('Title', () => {
       );
 
       expect(screen.getByTestId('attackDiscoveryAccordion')).toBeInTheDocument();
-    });
-  });
-
-  describe('feature flag variations', () => {
-    describe('when attackDiscoveryAlertsEnabled is false', () => {
-      beforeEach(() => {
-        mockUseKibanaFeatureFlags.mockReturnValue({
-          attackDiscoveryAlertsEnabled: false,
-        });
-      });
-
-      it('does not render the checkbox', () => {
-        render(
-          <TestWrapper>
-            <Title {...defaultProps} />
-          </TestWrapper>
-        );
-
-        expect(screen.queryByTestId('attackDiscoveryCheckbox')).not.toBeInTheDocument();
-      });
-
-      it('still renders other components', () => {
-        render(
-          <TestWrapper>
-            <Title {...defaultProps} />
-          </TestWrapper>
-        );
-
-        expect(screen.getByTestId('attackDiscoveryAccordion')).toBeInTheDocument();
-      });
-    });
-
-    describe('when attackDiscoveryAlertsEnabled is true', () => {
-      beforeEach(() => {
-        mockUseKibanaFeatureFlags.mockReturnValue({
-          attackDiscoveryAlertsEnabled: true,
-        });
-      });
-
-      it('renders the checkbox', () => {
-        render(
-          <TestWrapper>
-            <Title {...defaultProps} />
-          </TestWrapper>
-        );
-
-        expect(screen.getByTestId('attackDiscoveryCheckbox')).toBeInTheDocument();
-      });
     });
   });
 

@@ -20,11 +20,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import {
-  TextExpansionCallOutState,
-  TextExpansionDismissButton,
-  FineTuneModelsButton,
-} from './text_expansion_callout';
+import type { TextExpansionCallOutState } from './text_expansion_callout';
+import { TextExpansionDismissButton, FineTuneModelsButton } from './text_expansion_callout';
 import { TextExpansionCalloutLogic } from './text_expansion_callout_logic';
 
 export const ModelDeployed = ({

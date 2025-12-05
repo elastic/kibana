@@ -9,12 +9,16 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import { ListPrivMonUsersRequestQuery } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/list.gen';
-import type { ListPrivMonUsersResponse } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/list.gen';
+import { getPrivilegedMonitorUsersIndex } from '../../../../../../common/entity_analytics/privileged_user_monitoring/utils';
+import {
+  ListPrivMonUsersRequestQuery,
+  type ListPrivMonUsersResponse,
+} from '../../../../../../common/api/entity_analytics';
 import {
   API_VERSIONS,
   APP_ID,
   ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
+  MONITORING_USERS_LIST_URL,
 } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
@@ -24,7 +28,7 @@ export const listUsersRoute = (router: EntityAnalyticsRoutesDeps['router'], logg
   router.versioned
     .get({
       access: 'public',
-      path: '/api/entity_analytics/monitoring/users/list',
+      path: MONITORING_USERS_LIST_URL,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
@@ -49,8 +53,12 @@ export const listUsersRoute = (router: EntityAnalyticsRoutesDeps['router'], logg
           );
 
           const secSol = await context.securitySolution;
-          const dataClient = secSol.getPrivilegeMonitoringDataClient();
-          const crudService = createPrivilegedUsersCrudService(dataClient);
+          const { elasticsearch } = await context.core;
+          const crudService = createPrivilegedUsersCrudService({
+            esClient: elasticsearch.client.asCurrentUser,
+            index: getPrivilegedMonitorUsersIndex(secSol.getSpaceId()),
+            logger: secSol.getLogger(),
+          });
 
           const body = await crudService.list(request.query.kql);
           return response.ok({ body });

@@ -17,13 +17,12 @@ import type { ChangeEventHandler } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { PageScope } from '../../data_view_manager/constants';
 import * as i18n from './translations';
-import type { sourcererModel } from '../store';
 import { sourcererActions, sourcererSelectors } from '../store';
 import type { SourcererUrlState } from '../store/model';
 import type { State } from '../../common/store';
 import type { ModifiedTypes } from './use_pick_index_patterns';
-import { SourcererScopeName } from '../store/model';
 import { usePickIndexPatterns } from './use_pick_index_patterns';
 import { FormRow, PopoverContent, StyledButtonEmpty, StyledFormRow } from './helpers';
 import { TemporarySourcerer } from './temporary';
@@ -36,7 +35,7 @@ import { useUpdateUrlParam } from '../../common/utils/global_query_string';
 import { URL_PARAM_KEY } from '../../common/hooks/use_url_state';
 
 export interface SourcererComponentProps {
-  scope: sourcererModel.SourcererScopeName;
+  scope: PageScope;
 }
 
 interface SourcererPopoverProps {
@@ -58,7 +57,7 @@ interface SourcererPopoverProps {
   handleOutsideClick: () => void;
   setMissingPatterns: (missingPatterns: string[]) => void;
   setDataViewId: (dataViewId: string | null) => void;
-  scopeId: sourcererModel.SourcererScopeName;
+  scopeId: PageScope;
   children: React.ReactNode;
 }
 
@@ -86,7 +85,7 @@ const SourcererPopover = React.memo<SourcererPopoverProps>(
   }) => {
     if (!showSourcerer) {
       return null;
-    } else if (scopeId === SourcererScopeName.analyzer) {
+    } else if (scopeId === PageScope.analyzer) {
       return <div data-test-subj="analyzer-sourcerer">{children}</div>;
     } else {
       return (
@@ -122,11 +121,14 @@ const SourcererPopover = React.memo<SourcererPopoverProps>(
 
 SourcererPopover.displayName = 'SourcererPopover';
 
+/**
+ * @deprecated Use security_solution/public/data_view_manager/components/data_view_picker instead
+ */
 export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }) => {
   const dispatch = useDispatch();
-  const isDetectionsSourcerer = scopeId === SourcererScopeName.detections;
-  const isTimelineSourcerer = scopeId === SourcererScopeName.timeline;
-  const isDefaultSourcerer = scopeId === SourcererScopeName.default;
+  const isDetectionsSourcerer = scopeId === PageScope.alerts;
+  const isTimelineSourcerer = scopeId === PageScope.timeline;
+  const isDefaultSourcerer = scopeId === PageScope.default;
   const updateUrlParam = useUpdateUrlParam<SourcererUrlState>(URL_PARAM_KEY.sourcerer);
 
   const signalIndexName = useSelector(sourcererSelectors.signalIndexName);
@@ -244,7 +246,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
 
       if (isDefaultSourcerer) {
         updateUrlParam({
-          [SourcererScopeName.default]: {
+          [PageScope.default]: {
             id: newSelectedDataView,
             selectedPatterns: newSelectedPatterns,
           },
@@ -351,9 +353,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   }, []);
 
   const showSourcerer = useMemo(() => {
-    return (
-      indicesExist || [SourcererScopeName.analyzer, SourcererScopeName.timeline].includes(scopeId)
-    );
+    return indicesExist || [PageScope.analyzer, PageScope.timeline].includes(scopeId);
   }, [indicesExist, scopeId]);
 
   return (
@@ -422,6 +422,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
                     options={dataViewSelectOptions}
                     placeholder={i18n.INDEX_PATTERNS_CHOOSE_DATA_VIEW_LABEL}
                     valueOfSelected={dataViewId}
+                    aria-label={i18n.INDEX_PATTERNS_CHOOSE_DATA_VIEW_LABEL}
                   />
                 </StyledFormRow>
               )}
@@ -451,6 +452,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
                   placeholder={i18n.PICK_INDEX_PATTERNS}
                   renderOption={renderOption}
                   selectedOptions={selectedOptions}
+                  aria-label={i18n.INDEX_PATTERNS_LABEL}
                 />
               </FormRow>
 

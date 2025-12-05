@@ -5,7 +5,17 @@
  * 2.0.
  */
 
-import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  MappingBooleanProperty,
+  MappingDateProperty,
+  MappingDoubleNumberProperty,
+  MappingGeoPointProperty,
+  MappingIpProperty,
+  MappingKeywordProperty,
+  MappingLongNumberProperty,
+  MappingMatchOnlyTextProperty,
+  MappingProperty,
+} from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod';
 import { NonEmptyString } from '@kbn/zod-helpers';
 import { recursiveRecord } from '../shared/record_types';
@@ -18,6 +28,7 @@ export const FIELD_DEFINITION_TYPES = [
   'date',
   'boolean',
   'ip',
+  'geo_point',
 ] as const;
 
 export type FieldDefinitionType = (typeof FIELD_DEFINITION_TYPES)[number];
@@ -53,6 +64,22 @@ export const fieldDefinitionConfigSchema: z.Schema<FieldDefinitionConfig> = z.in
 
 export interface FieldDefinition {
   [x: string]: FieldDefinitionConfig;
+}
+
+export type AllowedMappingProperty =
+  | MappingKeywordProperty
+  | MappingMatchOnlyTextProperty
+  | MappingLongNumberProperty
+  | MappingDoubleNumberProperty
+  | MappingDateProperty
+  | MappingBooleanProperty
+  | MappingIpProperty
+  | MappingGeoPointProperty;
+
+export type StreamsMappingProperties = Record<string, AllowedMappingProperty>;
+
+export function isMappingProperties(value: FieldDefinition): value is StreamsMappingProperties {
+  return Object.values(value).every((prop) => prop.type !== 'system');
 }
 
 export const fieldDefinitionSchema: z.Schema<FieldDefinition> = z.record(

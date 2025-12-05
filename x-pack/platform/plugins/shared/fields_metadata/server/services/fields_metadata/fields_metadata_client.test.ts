@@ -4,12 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FieldMetadata, TEcsFields, TMetadataFields } from '../../../common';
+import type { TEcsFields, TMetadataFields, TOtelFields } from '../../../common';
 import { loggerMock } from '@kbn/logging-mocks';
 import { FieldsMetadataClient } from './fields_metadata_client';
 import { EcsFieldsRepository } from './repositories/ecs_fields_repository';
 import { IntegrationFieldsRepository } from './repositories/integration_fields_repository';
 import { MetadataFieldsRepository } from './repositories/metadata_fields_repository';
+import { OtelFieldsRepository } from './repositories/otel_fields_repository';
+import { FieldMetadata } from '../../../common/fields_metadata/models/field_metadata';
 
 const ecsFields = {
   '@timestamp': {
@@ -71,10 +73,50 @@ const integrationFields = {
   },
 };
 
+// Mock OTel fields in the new structured format
+const otelFields = {
+  'service.name': {
+    name: 'service.name',
+    description: 'Logical name of the service.',
+
+    type: 'keyword',
+    example: 'shoppingcart',
+  },
+  'http.request.method': {
+    name: 'http.request.method',
+    description: 'HTTP request method.',
+    type: 'keyword',
+    example: 'GET',
+  },
+  '@timestamp': {
+    name: '@timestamp',
+    description: 'Time when the event occurred. UNIX Epoch time in nanoseconds.',
+    type: 'date_nanos',
+  },
+  observed_timestamp: {
+    name: 'observed_timestamp',
+    description: 'Time when the event was observed by the collection system.',
+    type: 'date_nanos',
+  },
+  severity_number: {
+    name: 'severity_number',
+    description: 'Numerical value of the severity.',
+    type: 'long',
+  },
+  severity_text: {
+    name: 'severity_text',
+    description: 'The severity text (also known as log level).',
+    type: 'keyword',
+  },
+} as Partial<TOtelFields>;
+
 describe('FieldsMetadataClient class', () => {
   const logger = loggerMock.create();
   const ecsFieldsRepository = EcsFieldsRepository.create({ ecsFields });
   const metadataFieldsRepository = MetadataFieldsRepository.create({ metadataFields });
+  const otelFieldsRepository = OtelFieldsRepository.create({
+    otelFields: otelFields as TOtelFields,
+  });
   const integrationFieldsExtractor = jest.fn();
   const integrationListExtractor = jest.fn();
   integrationFieldsExtractor.mockImplementation(() => Promise.resolve(integrationFields));
@@ -108,6 +150,7 @@ describe('FieldsMetadataClient class', () => {
       ecsFieldsRepository,
       integrationFieldsRepository,
       metadataFieldsRepository,
+      otelFieldsRepository,
     });
   });
 
@@ -193,11 +236,21 @@ describe('FieldsMetadataClient class', () => {
         ecsFieldsRepository,
         integrationFieldsRepository,
         metadataFieldsRepository,
+        otelFieldsRepository,
       });
 
       const fieldInstance = await clientWithouthPrivileges.getByName('mysql.slowlog.filesort');
 
       expect(integrationFieldsExtractor).not.toHaveBeenCalled();
+      expect(fieldInstance).toBeUndefined();
+    });
+
+    it('should not resolve the field if the source is not allowed', async () => {
+      // '_index' is a metadata field, but we filter for ECS sources only
+      const fieldInstance = await fieldsMetadataClient.getByName('_index', {
+        source: ['ecs'],
+      });
+
       expect(fieldInstance).toBeUndefined();
     });
   });
@@ -244,6 +297,138 @@ describe('FieldsMetadataClient class', () => {
       expect(Object.hasOwn(fields, '@timestamp')).toBeTruthy();
       expect(Object.hasOwn(fields, 'onepassword.client.platform_version')).toBeTruthy();
       expect(Object.hasOwn(fields, 'not-existing-field')).toBeFalsy();
+    });
+
+    it('should not resolve the fields from sources not allowed', async () => {
+      // Should resolve '@timestamp' from ECS but not '_index'
+      const fieldsDictionaryInstance = await fieldsMetadataClient.find({
+        fieldNames: ['@timestamp', '_index'],
+        source: ['ecs'],
+      });
+
+      const fields = fieldsDictionaryInstance.toPlain();
+
+      expect(Object.hasOwn(fields, '@timestamp')).toBeTruthy();
+      expect(Object.hasOwn(fields, '_index')).toBeFalsy();
+    });
+  });
+
+  describe('field resolution priority', () => {
+    it('should prioritize MetadataFields over all other sources', async () => {
+      // Test field '_index' exists in both metadata and otel fields
+      const field = await fieldsMetadataClient.getByName('_index');
+
+      expectToBeDefined(field);
+      expect(field.source).toBe('metadata');
+      expect(field.description).toContain('The index to which the document belongs');
+    });
+
+    it('should prioritize IntegrationFields over ECS and OTel when integration context provided', async () => {
+      // This would need a field that exists in multiple sources
+      // For now, test that integration fields are returned when available
+      const field = await fieldsMetadataClient.getByName('onepassword.client.platform_version', {
+        integration: '1password',
+        dataset: '1password.item_usages',
+      });
+
+      expectToBeDefined(field);
+      expect(field.source).toBe('integration');
+    });
+
+    it('should prioritize ECS over OTel for common fields', async () => {
+      // Test field '@timestamp' exists in both ECS and OTel
+      const field = await fieldsMetadataClient.getByName('@timestamp');
+
+      expectToBeDefined(field);
+      expect(field.source).toBe('ecs');
+      expect(field.description).toContain('Date/time when the event originated');
+    });
+
+    it('should fall back to OTel when field not found in higher priority sources', async () => {
+      // Test field 'service.name' only exists in OTel
+      const field = await fieldsMetadataClient.getByName('service.name');
+
+      expectToBeDefined(field);
+      expect(field.source).toBe('otel');
+      expect(field.description).toBe('Logical name of the service.');
+      expect(field.type).toBe('keyword');
+    });
+
+    it('should fall back to OTel for HTTP fields', async () => {
+      // Test field 'http.request.method' only exists in OTel
+      const field = await fieldsMetadataClient.getByName('http.request.method');
+
+      expectToBeDefined(field);
+      expect(field.source).toBe('otel');
+      expect(field.description).toBe('HTTP request method.');
+      expect(field.type).toBe('keyword');
+      expect(field.example).toBe('GET');
+    });
+
+    it('should return undefined when field not found in any source', async () => {
+      const field = await fieldsMetadataClient.getByName('completely.non.existent.field');
+
+      expect(field).toBeUndefined();
+    });
+
+    it('should include OTel fields in find() when no specific fieldNames provided', async () => {
+      const fieldsDict = await fieldsMetadataClient.find();
+      const fields = fieldsDict.getFields();
+
+      // Should include fields from all sources including OTel
+      expect(fields['service.name']).toBeDefined();
+      expect(fields['http.request.method']).toBeDefined();
+      expect(fields['@timestamp']).toBeDefined(); // ECS takes priority
+      expect(fields._index).toBeDefined(); // Metadata takes priority
+
+      // Verify OTel fields have correct source
+      expect(fields['service.name'].source).toBe('otel');
+      expect(fields['http.request.method'].source).toBe('otel');
+    });
+
+    it('should respect priority order in find() with specific fieldNames', async () => {
+      const fieldsDict = await fieldsMetadataClient.find({
+        fieldNames: ['@timestamp', 'service.name', '_index', 'http.request.method'],
+      });
+      const fields = fieldsDict.getFields();
+
+      // Verify sources match priority order
+      expect(fields._index.source).toBe('metadata'); // Highest priority
+      expect(fields['@timestamp'].source).toBe('ecs'); // Second priority
+      expect(fields['service.name'].source).toBe('otel'); // Lowest priority (fallback)
+      expect(fields['http.request.method'].source).toBe('otel'); // Lowest priority (fallback)
+    });
+  });
+
+  describe('OTel field-specific functionality', () => {
+    it('should preserve OTel field examples when available', async () => {
+      const field = await fieldsMetadataClient.getByName('service.name');
+
+      expectToBeDefined(field);
+      expect(field.example).toBe('shoppingcart');
+    });
+
+    it('should handle OTel fields without examples', async () => {
+      // '@timestamp' in otel fields has no example
+      const field = await fieldsMetadataClient.getByName('@timestamp');
+
+      // This should return ECS version which has example, but if it returned OTel it would have no example
+      expectToBeDefined(field);
+      expect(field.source).toBe('ecs'); // ECS takes priority
+    });
+
+    it('should properly convert OTel structured format to FieldMetadata', async () => {
+      const field = await fieldsMetadataClient.getByName('http.request.method');
+
+      expectToBeDefined(field);
+      expect(field.source).toBe('otel');
+      expect(field.name).toBe('http.request.method');
+      expect(field.description).toBe('HTTP request method.');
+      expect(field.type).toBe('keyword');
+      expect(field.example).toBe('GET');
+
+      // Verify it's a proper FieldMetadata instance
+      expect(typeof field.toPlain).toBe('function');
     });
   });
 });

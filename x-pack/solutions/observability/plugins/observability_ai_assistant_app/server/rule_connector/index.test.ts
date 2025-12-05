@@ -5,17 +5,14 @@
  * 2.0.
  */
 
-import { AlertHit } from '@kbn/alerting-plugin/server/types';
-import { ObservabilityAIAssistantRouteHandlerResources } from '@kbn/observability-ai-assistant-plugin/server/routes/types';
+import type { AlertHit } from '@kbn/alerting-plugin/server/types';
+import type { ObservabilityAIAssistantRouteHandlerResources } from '@kbn/observability-ai-assistant-plugin/server/routes/types';
 import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
 import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import { OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID } from '../../common/rule_connector';
 import { ALERT_STATUSES } from '../../common/constants';
-import {
-  getObsAIAssistantConnectorAdapter,
-  getObsAIAssistantConnectorType,
-  ObsAIAssistantConnectorTypeExecutorOptions,
-} from '.';
+import type { ObsAIAssistantConnectorTypeExecutorOptions } from '.';
+import { getObsAIAssistantConnectorAdapter, getObsAIAssistantConnectorType } from '.';
 import { Observable } from 'rxjs';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
 import { AlertDetailsContextualInsightsService } from '@kbn/observability-plugin/server/services';
@@ -105,7 +102,12 @@ describe('observabilityAIAssistant rule_connector', () => {
   });
 
   describe('Connector Type - getObsAIAssistantConnectorType', () => {
-    const completeMock = jest.fn().mockReturnValue(new Observable());
+    const completeMock = jest.fn().mockImplementation(() => ({
+      response$: new Observable((subscriber) => {
+        subscriber.complete();
+      }),
+      conversationPromise: Promise.resolve(undefined),
+    }));
 
     const initResources = jest.fn().mockResolvedValue({
       service: {

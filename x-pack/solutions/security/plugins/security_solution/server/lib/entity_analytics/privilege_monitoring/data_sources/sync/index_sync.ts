@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import type { ErrorCause, SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { uniq } from 'lodash';
@@ -16,16 +16,20 @@ import { createSearchService } from '../../users/search';
 
 import { MonitoringEntitySourceDescriptorClient } from '../../saved_objects';
 import { createBulkUtilsService } from '../bulk';
-import { findStaleUsersForIndexFactory } from './stale_users';
+import { findStaleUsersFactory } from './stale_users';
+import { getErrorFromBulkResponse } from './utils';
 
 export type IndexSyncService = ReturnType<typeof createIndexSyncService>;
 
-export const createIndexSyncService = (dataClient: PrivilegeMonitoringDataClient) => {
+export const createIndexSyncService = (
+  dataClient: PrivilegeMonitoringDataClient,
+  maxUsersAllowed: number
+) => {
   const { deps } = dataClient;
   const esClient = deps.clusterClient.asCurrentUser;
 
   const bulkUtilsService = createBulkUtilsService(dataClient);
-  const findStaleUsers = findStaleUsersForIndexFactory(dataClient);
+  const findStaleUsers = findStaleUsersFactory(dataClient);
 
   const searchService = createSearchService(dataClient);
 
@@ -49,12 +53,18 @@ export const createIndexSyncService = (dataClient: PrivilegeMonitoringDataClient
       soClient,
       namespace: deps.namespace,
     });
-    // get all monitoring index source saved objects of type 'index'
-    const indexSources = await monitoringIndexSourceClient.findByIndex();
+    // get all monitoring index source saved objects of type 'index_sync'
+    const indexSources = await monitoringIndexSourceClient.findSourcesByType('index');
     if (indexSources.length === 0) {
       dataClient.log('debug', 'No monitoring index sources found. Skipping sync.');
       return;
     }
+
+    dataClient.log(
+      'info',
+      `Privilege monitoring sync started - Maximum supported number of privileged users allowed: ${maxUsersAllowed}`
+    );
+
     const allStaleUsers: PrivMonBulkUser[] = [];
 
     for (const source of indexSources) {
@@ -63,13 +73,14 @@ export const createIndexSyncService = (dataClient: PrivilegeMonitoringDataClient
       const index: string = source.indexPattern;
 
       try {
-        const batchUserNames = await syncUsernamesFromIndex({
+        const allUserNames = await syncUsernamesFromIndex({
           indexName: index,
+          sourceId: source.id,
           kuery: source.filter?.kuery,
         });
 
         // collect stale users
-        const staleUsers = await findStaleUsers(index, batchUserNames);
+        const staleUsers = await findStaleUsers(source.id, allUserNames, 'index');
         allStaleUsers.push(...staleUsers);
       } catch (error) {
         if (
@@ -89,8 +100,24 @@ export const createIndexSyncService = (dataClient: PrivilegeMonitoringDataClient
     // Soft delete stale users
     dataClient.log('debug', `Found ${allStaleUsers.length} stale users across all index sources.`);
     if (allStaleUsers.length > 0) {
-      const ops = bulkUtilsService.bulkSoftDeleteOperations(allStaleUsers, dataClient.index);
-      await esClient.bulk({ body: ops });
+      const ops = bulkUtilsService.bulkSoftDeleteOperations(
+        allStaleUsers,
+        dataClient.index,
+        'index'
+      );
+      const resp = await esClient.bulk({ body: ops, refresh: 'wait_for' });
+
+      const errors = getErrorFromBulkResponse(resp);
+
+      if (errors.length > 0) {
+        dataClient.log(
+          'error',
+          `${errors.length} errors deleting stale users with bulk operation.
+        The first error is: ${JSON.stringify(errors[0])}`
+        );
+        // Log all errors for debugging
+        dataClient.log('debug', `Errors deleting stale users: ${JSON.stringify(errors)}`);
+      }
     }
   };
 
@@ -113,9 +140,11 @@ export const createIndexSyncService = (dataClient: PrivilegeMonitoringDataClient
    */
   const syncUsernamesFromIndex = async ({
     indexName,
+    sourceId,
     kuery,
   }: {
     indexName: string;
+    sourceId: string;
     kuery?: string | unknown;
   }): Promise<string[]> => {
     const allUsernames: string[] = []; // Collect all usernames across batches
@@ -123,6 +152,7 @@ export const createIndexSyncService = (dataClient: PrivilegeMonitoringDataClient
     const batchSize = 100;
 
     const query = kuery ? toElasticsearchQuery(fromKueryExpression(kuery)) : { match_all: {} };
+    const failures: ErrorCause[] = [];
     while (true) {
       const response = await searchService.searchUsernamesInIndex({
         indexName,
@@ -145,19 +175,13 @@ export const createIndexSyncService = (dataClient: PrivilegeMonitoringDataClient
         `Found ${batchUniqueUsernames.length} unique usernames in ${batchUsernames.length} hits.`
       );
 
-      const existingUserRes = await searchService.getMonitoredUsers(batchUsernames);
-
-      const existingUserMap = new Map<string, string | undefined>();
-      for (const hit of existingUserRes.hits.hits) {
-        const username = hit._source?.user?.name;
-        dataClient.log('info', `Found existing user: ${username} with ID: ${hit._id}`);
-        if (username) existingUserMap.set(username, hit._id);
-      }
+      const existingUserMap = await searchService.getExistingUsersMap(batchUsernames);
 
       const usersToWrite: PrivMonBulkUser[] = batchUniqueUsernames.map((username) => ({
         username,
-        indexName,
+        sourceId,
         existingUserId: existingUserMap.get(username),
+        isPrivileged: true,
       }));
 
       if (usersToWrite.length === 0) return batchUsernames;
@@ -166,14 +190,28 @@ export const createIndexSyncService = (dataClient: PrivilegeMonitoringDataClient
       dataClient.log('debug', `Executing bulk operations for ${usersToWrite.length} users`);
       try {
         dataClient.log('debug', `Bulk ops preview:\n${JSON.stringify(ops, null, 2)}`);
-        await esClient.bulk({ body: ops, refresh: true });
+        const resp = await esClient.bulk({ body: ops, refresh: true });
+
+        failures.push(...getErrorFromBulkResponse(resp));
       } catch (error) {
         dataClient.log('error', `Error executing bulk operations: ${error}`);
       }
       searchAfter = hits[hits.length - 1].sort;
     }
+
+    if (failures.length > 0) {
+      dataClient.log(
+        'error',
+        `${failures.length} errors upserting users with bulk operations.
+        The first error is: ${JSON.stringify(failures[0])}`
+      );
+
+      // Log all errors for debugging
+      dataClient.log('debug', `Errors upserting users: ${JSON.stringify(failures)}`);
+    }
+
     return uniq(allUsernames); // Return all unique usernames collected across batches;
   };
 
-  return { plainIndexSync, syncUsernamesFromIndex };
+  return { plainIndexSync, _syncUsernamesFromIndex: syncUsernamesFromIndex };
 };

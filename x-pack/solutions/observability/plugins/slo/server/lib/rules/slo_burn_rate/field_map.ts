@@ -6,6 +6,7 @@
  */
 
 import {
+  SLO_DATA_VIEW_ID_FIELD,
   SLO_ID_FIELD,
   SLO_INSTANCE_ID_FIELD,
   SLO_REVISION_FIELD,
@@ -23,6 +24,11 @@ export const sloRuleFieldMap = {
     required: false,
   },
   [SLO_INSTANCE_ID_FIELD]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  [SLO_DATA_VIEW_ID_FIELD]: {
     type: 'keyword',
     array: false,
     required: false,

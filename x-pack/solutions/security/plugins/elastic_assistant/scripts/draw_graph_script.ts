@@ -5,22 +5,21 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs/promises';
 import path from 'path';
-import {
+import type {
   ActionsClientChatOpenAI,
-  type ActionsClientLlm,
-  ActionsClientSimpleChatModel,
+  ActionsClientLlm,
 } from '@kbn/langchain/server/language_models';
 import type { Logger } from '@kbn/logging';
-import { ChatPromptTemplate } from '@langchain/core/prompts';
-import { FakeLLM } from '@langchain/core/utils/testing';
-import { createOpenAIFunctionsAgent } from 'langchain/agents';
-import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
-import { coreMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
+import { FakeChatModel, FakeLLM } from '@langchain/core/utils/testing';
+import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
+import { DefendInsightType } from '@kbn/elastic-assistant-common';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import { MemorySaver } from '@langchain/langgraph-checkpoint';
 import {
   ATTACK_DISCOVERY_GENERATION_DETAILS_MARKDOWN,
   ATTACK_DISCOVERY_GENERATION_ENTITY_SUMMARY_MARKDOWN,
@@ -31,49 +30,47 @@ import {
   ATTACK_DISCOVERY_CONTINUE,
   ATTACK_DISCOVERY_DEFAULT,
   ATTACK_DISCOVERY_REFINE,
+  DEFEND_INSIGHTS,
 } from '../server/lib/prompt/prompts';
 import { getDefaultAssistantGraph } from '../server/lib/langchain/graphs/default_assistant_graph/graph';
 import { getDefaultAttackDiscoveryGraph } from '../server/lib/attack_discovery/graphs/default_attack_discovery_graph';
+import { getDefaultDefendInsightsGraph } from '../server/lib/defend_insights/graphs/default_defend_insights_graph';
 
+/**
+ * Sometimes there is a cloudflare error from mermaid.ink (mermaid js rendered).
+ *  Error: Failed to render the graph using the Mermaid.INK API.
+ *  Status code: 502
+ *  Status text: Bad Gateway
+ * The error seems to be intermittent, try again after a few minutes.
+ */
 interface Drawable {
   drawMermaidPng: () => Promise<Blob>;
 }
 
-// Just defining some test variables to get the graph to compile..
-const testPrompt = ChatPromptTemplate.fromMessages([
-  ['system', 'You are a helpful assistant'],
-  ['placeholder', '{chat_history}'],
-  ['human', '{input}'],
-  ['placeholder', '{agent_scratchpad}'],
-]);
-
 const mockLlm = new FakeLLM({
   response: JSON.stringify({}, null, 2),
-}) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
+}) as unknown as ActionsClientChatOpenAI;
+
+class FakeChatModelWithBindTools extends FakeChatModel {
+  bindTools = () => this;
+}
 
 const createLlmInstance = () => {
-  return Promise.resolve(mockLlm);
+  const model = new FakeChatModelWithBindTools({});
+  return Promise.resolve(model);
 };
 
 async function getAssistantGraph(logger: Logger): Promise<Drawable> {
-  const agentRunnable = await createOpenAIFunctionsAgent({
-    llm: mockLlm,
-    tools: [],
-    prompt: testPrompt,
-    streamRunnable: false,
-  });
-  const graph = getDefaultAssistantGraph({
-    actionsClient: actionsClientMock.create(),
-    agentRunnable,
+  const graph = await getDefaultAssistantGraph({
+    actionsClient: {} as unknown as PublicMethodsOf<ActionsClient>,
     logger,
     createLlmInstance,
     tools: [],
-    replacements: {},
-    savedObjectsClient: savedObjectsClientMock.create(),
-    contentReferencesStore: newContentReferencesStoreMock(),
-    telemetry: coreMock.createSetup().analytics,
+    savedObjectsClient: {} as unknown as SavedObjectsClientContract,
+    contentReferencesStore: {} as unknown as ContentReferencesStore,
+    checkpointSaver: new MemorySaver(),
   });
-  return graph.getGraph();
+  return graph.getGraphAsync({ xray: true });
 }
 
 async function getAttackDiscoveryGraph(logger: Logger): Promise<Drawable> {
@@ -95,6 +92,34 @@ async function getAttackDiscoveryGraph(logger: Logger): Promise<Drawable> {
       summaryMarkdown: ATTACK_DISCOVERY_GENERATION_SUMMARY_MARKDOWN,
       title: ATTACK_DISCOVERY_GENERATION_TITLE,
       insights: ATTACK_DISCOVERY_GENERATION_INSIGHTS,
+    },
+    size: 20,
+  });
+
+  return graph.getGraph();
+}
+
+async function getDefendInsightsGraph(logger: Logger): Promise<Drawable> {
+  const mockEsClient = {} as unknown as ElasticsearchClient;
+
+  const graph = getDefaultDefendInsightsGraph({
+    insightType: DefendInsightType.Enum.incompatible_antivirus,
+    endpointIds: ['mock-endpoint-1'],
+    anonymizationFields: [],
+    esClient: mockEsClient,
+    kbDataClient: null,
+    llm: mockLlm as unknown as ActionsClientLlm,
+    logger,
+    replacements: {},
+    prompts: {
+      default: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.DEFAULT,
+      refine: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.REFINE,
+      continue: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.CONTINUE,
+      group: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.GROUP,
+      events: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.EVENTS,
+      eventsId: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.EVENTS_ID,
+      eventsEndpointId: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.EVENTS_ENDPOINT_ID,
+      eventsValue: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.EVENTS_VALUE,
     },
     size: 20,
   });
@@ -131,5 +156,10 @@ export const draw = async () => {
   await drawGraph({
     getGraph: getAttackDiscoveryGraph,
     outputFilename: '../docs/img/default_attack_discovery_graph.png',
+  });
+
+  await drawGraph({
+    getGraph: getDefendInsightsGraph,
+    outputFilename: '../docs/img/default_defend_insights_graph.png',
   });
 };

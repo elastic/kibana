@@ -6,10 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { GroupOption } from '@kbn/grouping';
+import type { GroupOption } from '@kbn/grouping';
 import { FINDINGS_GROUPING_OPTIONS } from '../../../common/constants';
-import { FindingsBaseURLQuery } from '../../../common/types';
-import { CloudSecurityDefaultColumn } from '../../../components/cloud_security_data_table';
+import type { FindingsBaseURLQuery } from '../../../common/types';
+import type { CloudSecurityDefaultColumn } from '../../../components/cloud_security_data_table';
 
 export const FINDINGS_UNIT = (totalCount: number) =>
   i18n.translate('xpack.csp.findings.unit', {

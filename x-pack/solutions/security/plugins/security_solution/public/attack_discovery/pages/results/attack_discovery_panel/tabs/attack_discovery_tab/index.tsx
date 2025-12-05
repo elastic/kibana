@@ -6,11 +6,16 @@
  */
 
 import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
-import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
+import {
+  getAttackDiscoveryMarkdown,
+  replaceAnonymizedValuesWithOriginalValues,
+} from '@kbn/elastic-assistant-common';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 
+import { SecurityAgentBuilderAttachments } from '../../../../../../../common/constants';
+import { ATTACK_DISCOVERY_ATTACHMENT_PROMPT } from '../../../../../../agent_builder/components/prompts';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { AttackChain } from './attack/attack_chain';
 import { InvestigateInTimelineButton } from '../../../../../../common/components/event_details/investigate_in_timeline_button';
@@ -20,6 +25,9 @@ import { AttackDiscoveryMarkdownFormatter } from '../../../attack_discovery_mark
 import * as i18n from './translations';
 import { ViewInAiAssistant } from '../../view_in_ai_assistant';
 import { SECURITY_FEATURE_ID } from '../../../../../../../common';
+import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
+import { NewAgentBuilderAttachment } from '../../../../../../agent_builder/components/new_agent_builder_attachment';
+import { useAgentBuilderAttachment } from '../../../../../../agent_builder/hooks/use_agent_builder_attachment';
 
 const scrollable = css`
   overflow-x: auto;
@@ -42,7 +50,7 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
   } = useKibana().services;
   // TODO We shouldn't have to check capabilities here, this should be done at a much higher level.
   //  https://github.com/elastic/kibana/issues/218731
-  //  For the AI for SOC we need to hide cell actions and all preview links that could open non-AI4DSOC flyouts
+  //  For the EASE we need to hide cell actions and all preview links that could open non-EASE flyouts
   const disabledActions = useMemo(
     () => showAnonymized || Boolean(capabilities[SECURITY_FEATURE_ID].configurations),
     [capabilities, showAnonymized]
@@ -77,6 +85,22 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
   );
 
   const filters = useMemo(() => buildAlertsKqlFilter('_id', originalAlertIds), [originalAlertIds]);
+
+  const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
+  const attackDiscoveryWithOriginalValues = useMemo(
+    () =>
+      getAttackDiscoveryMarkdown({
+        attackDiscovery,
+        replacements,
+      }),
+    [attackDiscovery, replacements]
+  );
+
+  const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
+    attachmentType: SecurityAgentBuilderAttachments.alert,
+    attachmentData: { alert: attackDiscoveryWithOriginalValues },
+    attachmentPrompt: ATTACK_DISCOVERY_ATTACHMENT_PROMPT,
+  });
 
   return (
     <div data-test-subj="attackDiscoveryTab">
@@ -120,7 +144,11 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
 
       <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
         <EuiFlexItem grow={false}>
-          <ViewInAiAssistant attackDiscovery={attackDiscovery} replacements={replacements} />
+          {isAgentBuilderEnabled ? (
+            <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} />
+          ) : (
+            <ViewInAiAssistant attackDiscovery={attackDiscovery} replacements={replacements} />
+          )}
         </EuiFlexItem>
         <EuiFlexItem
           css={css`

@@ -7,13 +7,13 @@
 
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
+export default function ({ loadTestFile, getService }: DeploymentAgnosticFtrProviderContext) {
   describe('spaces api with security', function () {
     loadTestFile(require.resolve('./resolve_copy_to_space_conflicts'));
     loadTestFile(require.resolve('./create'));
-    loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./get_all'));
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./update'));
+    loadTestFile(require.resolve('./delete'));
   });
 }

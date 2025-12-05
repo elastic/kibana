@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
-import { AlertCluster, AlertMissingData } from '../../../common/types/alerts';
+import type { AlertCluster, AlertMissingData } from '../../../common/types/alerts';
 import { Globals } from '../../static_globals';
 import { CCS_REMOTE_PATTERN } from '../../../common/constants';
 import { getIndexPatterns, getElasticsearchDataset } from '../../../common/get_index_patterns';

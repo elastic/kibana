@@ -54,6 +54,30 @@ describe('SyncAlertsToggle', () => {
     expect(await screen.findByText('Sync alert status with case status')).toBeInTheDocument();
   });
 
+  it('it renders with default value', async () => {
+    render(
+      <FormTestComponent>
+        <SyncAlertsToggle isLoading={false} defaultValue={false} />
+      </FormTestComponent>
+    );
+
+    const syncAlerts = await screen.findByTestId('caseSyncAlerts');
+    expect(syncAlerts).toBeInTheDocument();
+    expect(within(syncAlerts).getByRole('switch')).toHaveAttribute('aria-checked', 'false');
+  });
+
+  it('it toggles the switch with default value', async () => {
+    render(
+      <FormTestComponent>
+        <SyncAlertsToggle isLoading={false} defaultValue={false} />
+      </FormTestComponent>
+    );
+
+    const syncAlerts = await screen.findByTestId('caseSyncAlerts');
+    await userEvent.click(within(syncAlerts).getByRole('switch'));
+    expect(await screen.findByRole('switch')).toHaveAttribute('aria-checked', 'true');
+  });
+
   it('calls onSubmit with correct data', async () => {
     render(
       <FormTestComponent {...defaultFormProps}>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InheritedFieldDefinition, Streams } from '@kbn/streams-schema';
+import type { InheritedFieldDefinition, Streams } from '@kbn/streams-schema';
 import { addAliasesForNamespacedFields, baseMappings, baseFields } from './logs_layer';
 
 describe('logs_layer', () => {
@@ -199,7 +199,9 @@ describe('logs_layer', () => {
               routing: [],
             },
             lifecycle: { inherit: {} },
-            processing: [],
+            processing: { steps: [], updated_at: new Date().toISOString() },
+            settings: {},
+            failure_store: { inherit: {} },
           },
         },
         conflictingFields

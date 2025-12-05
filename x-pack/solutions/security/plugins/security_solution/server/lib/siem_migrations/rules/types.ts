@@ -6,25 +6,22 @@
  */
 
 import type { IndexAdapter, IndexPatternAdapter } from '@kbn/index-adapter';
-import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type {
+  MigrationTranslationResult,
+  SiemMigrationResource,
+} from '../../../../common/siem_migrations/model/common.gen';
 import type {
   RuleMigration,
   RuleMigrationRule,
-  RuleMigrationTranslationResult,
   UpdateRuleMigrationRule,
-  RuleMigrationResource,
 } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleVersions } from './data/rule_migrations_data_prebuilt_rules_client';
 import type { Stored } from '../types';
-import type {
-  SiemMigrationsClientDependencies,
-  SiemMigrationsIndexNameProvider,
-} from '../common/types';
+import type { SiemMigrationsIndexNameProvider } from '../common/types';
 
-export type StoredSiemMigration = Stored<RuleMigration>;
-
-export type StoredRuleMigration = Stored<RuleMigrationRule>;
-export type StoredRuleMigrationResource = Stored<RuleMigrationResource>;
+export type StoredRuleMigration = Stored<RuleMigration>;
+export type StoredRuleMigrationRule = Stored<RuleMigrationRule>;
+export type StoredRuleMigrationResource = Stored<SiemMigrationResource>;
 
 export interface RuleMigrationIntegration {
   id: string;
@@ -45,7 +42,7 @@ export interface RuleMigrationPrebuiltRule {
 export type RuleSemanticSearchResult = RuleMigrationPrebuiltRule & RuleVersions;
 
 export type InternalUpdateRuleMigrationRule = UpdateRuleMigrationRule & {
-  translation_result?: RuleMigrationTranslationResult;
+  translation_result?: MigrationTranslationResult;
 };
 
 /**
@@ -77,7 +74,3 @@ export type RuleMigrationIndexNameProviders = Record<
   RuleMigrationAdapterId,
   SiemMigrationsIndexNameProvider
 >;
-
-export type RuleMigrationsClientDependencies = SiemMigrationsClientDependencies & {
-  rulesClient: RulesClient;
-};

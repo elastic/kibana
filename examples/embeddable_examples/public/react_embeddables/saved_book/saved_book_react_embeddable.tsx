@@ -17,27 +17,27 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
+import type { SerializedPanelState, StateComparators } from '@kbn/presentation-publishing';
 import {
   apiHasParentApi,
   initializeTitleManager,
-  SerializedPanelState,
   useBatchedPublishingSubjects,
   initializeStateManager,
   titleComparators,
-  StateComparators,
 } from '@kbn/presentation-publishing';
 import React from 'react';
-import { PresentationContainer, apiIsPresentationContainer } from '@kbn/presentation-containers';
+import type { PresentationContainer } from '@kbn/presentation-containers';
+import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { merge } from 'rxjs';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import type { BookState } from '../../../server';
 import { defaultBookState } from './default_book_state';
 import { loadBook, saveBook } from './library_utils';
-import { BookApi } from './types';
+import type { BookApi } from './types';
 import type { BookEmbeddableState, BookByReferenceState } from '../../../common';
 import { BOOK_EMBEDDABLE_TYPE } from '../../../common';
 
@@ -169,6 +169,7 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
             >
               {showLibraryCallout && (
                 <EuiCallOut
+                  announceOnMount={false}
                   size="s"
                   color={'warning'}
                   title={

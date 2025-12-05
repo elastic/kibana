@@ -10,16 +10,18 @@ import { css } from '@emotion/css';
 import { EuiCommentList, useEuiTheme } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { omit } from 'lodash';
-import {
+import type {
   ChatActionClickPayload,
   ChatState,
+} from '@kbn/observability-ai-assistant-plugin/public';
+import {
   type Feedback,
   type Message,
   type ObservabilityAIAssistantChatService,
   type TelemetryEventTypeWithPayload,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { aiAnonymizationSettings } from '@kbn/inference-common';
-import { AnonymizationSettings } from '@kbn/inference-common';
+import type { AnonymizationSettings } from '@kbn/inference-common';
 import { ChatItem } from './chat_item';
 import { ChatConsolidatedItems } from './chat_consolidated_items';
 import { getTimelineItemsfromConversation } from '../utils/get_timeline_items_from_conversation';

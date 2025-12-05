@@ -6,17 +6,18 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { CSSProperties } from 'react';
-import {
-  LogEventsControlBar,
+import type { CSSProperties } from 'react';
+import React from 'react';
+import type {
   LogEventsControlBarDependencies,
   LogEventsControlBarProps,
 } from './log_events_control_bar';
-import {
-  LogEventsResultContent,
+import { LogEventsControlBar } from './log_events_control_bar';
+import type {
   LogEventsResultContentDependencies,
   LogEventsResultContentProps,
 } from './log_events_result_content';
+import { LogEventsResultContent } from './log_events_result_content';
 
 export type LogEventsProps = LogEventsControlBarProps &
   LogEventsResultContentProps & {
@@ -31,6 +32,7 @@ export const LogEvents = React.memo<LogEventsProps>(
   ({
     dependencies,
     documentFilters,
+    nonHighlightingFilters,
     logsSource,
     timeRange,
     grouping,
@@ -38,6 +40,10 @@ export const LogEvents = React.memo<LogEventsProps>(
     height,
     onChangeGrouping,
   }) => {
+    const allFilters = React.useMemo(
+      () => [...(documentFilters || []), ...(nonHighlightingFilters || [])],
+      [documentFilters, nonHighlightingFilters]
+    );
     return (
       <EuiFlexGroup
         direction="column"
@@ -48,7 +54,7 @@ export const LogEvents = React.memo<LogEventsProps>(
         <EuiFlexItem grow={false}>
           <LogEventsControlBar
             dependencies={dependencies}
-            documentFilters={documentFilters}
+            documentFilters={allFilters}
             logsSource={logsSource}
             timeRange={timeRange}
             grouping={grouping}
@@ -60,6 +66,7 @@ export const LogEvents = React.memo<LogEventsProps>(
           <LogEventsResultContent
             dependencies={dependencies}
             documentFilters={documentFilters}
+            nonHighlightingFilters={nonHighlightingFilters}
             logsSource={logsSource}
             timeRange={timeRange}
           />

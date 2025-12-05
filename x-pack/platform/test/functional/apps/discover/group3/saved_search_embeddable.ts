@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
@@ -93,6 +93,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             searchSourceJSON:
               '{"highlightAll":true,"version":true,"query":{"language":"lucene","query":""},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
           },
+          tabs: [
+            {
+              id: 'my_tab',
+              label: 'My Tab',
+              attributes: {
+                columns: ['agent', 'bytes', 'clientip'],
+                sort: [['@timestamp', 'desc']],
+                kibanaSavedObjectMeta: {
+                  searchSourceJSON:
+                    '{"highlightAll":true,"version":true,"query":{"language":"lucene","query":""},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+                },
+              },
+            },
+          ],
         },
         references: [
           {

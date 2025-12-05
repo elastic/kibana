@@ -4,34 +4,152 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { PackageInfo } from '@kbn/fleet-plugin/common';
+import type { PackageInfo, NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
+import { createNewPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 
 import {
-  getMaxPackageName,
-  getPostureInputHiddenVars,
-  getPosturePolicy,
-  getCspmCloudShellDefaultValue,
-  isBelowMinVersion,
+  getInputHiddenVars,
+  updatePolicyWithInputs,
+  getCloudShellDefaultValue,
   findVariableDef,
+  getDefaultAwsCredentialsType,
+  getDefaultAwsCredentialConfig,
+  getDefaultAzureCredentialsConfig,
+  getDefaultGcpHiddenVars,
 } from './utils';
-import { getMockPolicyAWS, getPackageInfoMock } from './mocks';
-import { getDefaultAwsCredentialsType } from './aws_credentials_form/aws_utils';
-import { getDefaultAzureCredentialsType } from './azure_credentials_form/azure_utils';
-import { getDefaultGcpHiddenVars } from './gcp_credentials_form/gcp_utils';
+import { AWS_PROVIDER } from './constants';
+import {
+  CLOUD_FORMATION_TEMPLATE_URL_CLOUD_CONNECTORS,
+  ARM_TEMPLATE_URL_CLOUD_CONNECTORS,
+} from './cloud_connector/constants';
+
+// Internal test mocks
+const TEMPLATE_NAME = 'cspm';
+const CLOUDBEAT_AWS = 'cloudbeat/cis_aws';
+
+const getMockPolicyAWS = (): NewPackagePolicy => {
+  const mockPackagePolicy = createNewPackagePolicyMock();
+
+  const awsVarsMock = {
+    access_key_id: { type: 'text' },
+    secret_access_key: { type: 'password', isSecret: true },
+    session_token: { type: 'text' },
+    shared_credential_file: { type: 'text' },
+    credential_profile_name: { type: 'text' },
+    role_arn: { type: 'text' },
+    'aws.credentials.type': { value: 'cloud_formation', type: 'text' },
+  };
+
+  const dataStream = { type: 'logs', dataset: 'cloud_security_posture.findings' };
+
+  return {
+    ...mockPackagePolicy,
+    name: 'cloud_security_posture-policy',
+    package: {
+      name: 'cloud_security_posture',
+      title: 'Security Posture Management',
+      version: '1.1.1',
+    },
+    vars: {
+      posture: {
+        value: TEMPLATE_NAME,
+        type: 'text',
+      },
+      deployment: { value: AWS_PROVIDER, type: 'text' },
+    },
+    inputs: [
+      {
+        type: CLOUDBEAT_AWS,
+        policy_template: TEMPLATE_NAME,
+        enabled: true,
+        streams: [
+          {
+            enabled: true,
+            data_stream: dataStream,
+            vars: awsVarsMock,
+          },
+        ],
+      },
+    ],
+  } as NewPackagePolicy;
+};
+
+const getPackageInfoMock = (): PackageInfo => {
+  return {
+    name: TEMPLATE_NAME,
+    title: 'Cloud Security Posture Management',
+    version: '1.5.0',
+    description: 'Test package',
+    type: 'integration',
+    categories: [],
+    requirement: { kibana: { versions: '>=8.0.0' } },
+    format_version: '1.0.0',
+    release: 'ga',
+    owner: { github: 'elastic/security-team' },
+    latestVersion: '1.5.0',
+    assets: {},
+    data_streams: [
+      {
+        title: 'Cloud Security Posture Findings',
+        streams: [
+          {
+            vars: [
+              {
+                name: 'secret_access_key',
+                secret: true,
+                title: 'Secret Access Key',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    policy_templates: [
+      {
+        name: TEMPLATE_NAME,
+        title: 'CSPM',
+        description: 'Cloud Security Posture Management',
+        inputs: [
+          {
+            type: CLOUDBEAT_AWS,
+            title: 'AWS',
+            description: 'AWS integration',
+            vars: [
+              {
+                name: 'cloud_formation_template',
+                default: 'http://example.com/cloud_formation_template',
+              },
+              {
+                name: 'cloud_shell_url',
+                default: 'https://example.com/cloud_shell_url',
+              },
+              {
+                name: 'arm_template_url',
+                default: 'https://example.com/arm_template_url',
+              },
+            ],
+          },
+        ],
+        multiple: false,
+      },
+    ],
+  } as unknown as PackageInfo;
+};
 
 describe('getPosturePolicy', () => {
   for (const [name, getPolicy, expectedVars] of [
     ['cloudbeat/cis_aws', getMockPolicyAWS, { 'aws.credentials.type': { value: 'assume_role' } }],
   ] as const) {
     it(`updates package policy with hidden vars for ${name}`, () => {
-      const inputVars = getPostureInputHiddenVars(
-        name,
+      const inputVars = getInputHiddenVars(
+        'aws',
         {} as PackageInfo,
+        TEMPLATE_NAME,
         SetupTechnology.AGENT_BASED,
         false
       );
-      const policy = getPosturePolicy(getPolicy(), name, inputVars);
+      const policy = updatePolicyWithInputs(getPolicy(), name, inputVars);
 
       const enabledInputs = policy.inputs.filter(
         (i) => i.type === name && i.enabled && i.streams.some((s) => s.enabled)
@@ -44,87 +162,22 @@ describe('getPosturePolicy', () => {
   }
 });
 
-describe('getMaxPackageName', () => {
-  it('should correctly increment cspm package name', () => {
-    const packageName = 'cspm';
-    const packagePolicies = [
-      { name: 'kspm-1' },
-      { name: 'kspm-2' },
-      { name: 'cspm-3' },
-      { name: 'vuln_mgmt-1' },
-    ];
-
-    const result = getMaxPackageName(packageName, packagePolicies);
-
-    expect(result).toBe('cspm-4');
-  });
-
-  it('should return correctly increment vuln_mgmt package name', () => {
-    const packageName = 'vuln_mgmt';
-    const packagePolicies = [
-      { name: 'vuln_mgmt-1' },
-      { name: 'vuln_mgmt-2' },
-      { name: 'vuln_mgmt-3' },
-      { name: 'cspm-1' },
-      { name: 'kspm-1' },
-    ];
-
-    const result = getMaxPackageName(packageName, packagePolicies);
-
-    expect(result).toBe('vuln_mgmt-4');
-  });
-
-  it('should return correctly increment kspm package name', () => {
-    const packageName = 'kspm';
-    const packagePolicies = [
-      { name: 'vuln_mgmt-1' },
-      { name: 'vuln_mgmt-2' },
-      { name: 'vuln_mgmt-3' },
-      { name: 'cspm-1' },
-      { name: 'kspm-1' },
-    ];
-
-    const result = getMaxPackageName(packageName, packagePolicies);
-
-    expect(result).toBe('kspm-2');
-  });
-
-  it('should return package name with -1 when no matching package policies are found', () => {
-    const packageName = 'kspm';
-    const packagePolicies = [
-      { name: 'vuln_mgmt-1' },
-      { name: 'vuln_mgmt-2' },
-      { name: 'vuln_mgmt-3' },
-      { name: 'cspm-1' },
-    ];
-
-    const result = getMaxPackageName(packageName, packagePolicies);
-
-    expect(result).toBe('kspm-1');
-  });
-});
-
-describe('getCspmCloudShellDefaultValue', () => {
+describe('getCloudShellDefaultValue', () => {
   it('should return empty string when policy_templates is missing', () => {
     const packagePolicy = { name: 'test' } as PackageInfo;
 
-    const result = getCspmCloudShellDefaultValue(packagePolicy);
-
-    expect(result).toBe('');
-  });
-
-  it('should return empty string when policy_templates.name is not cspm', () => {
-    const packagePolicy = { name: 'test', policy_templates: [{ name: 'kspm' }] } as PackageInfo;
-
-    const result = getCspmCloudShellDefaultValue(packagePolicy);
+    const result = getCloudShellDefaultValue(packagePolicy, TEMPLATE_NAME);
 
     expect(result).toBe('');
   });
 
   it('should return empty string when policy_templates.inputs is missing', () => {
-    const packagePolicy = { name: 'test', policy_templates: [{ name: 'cspm' }] } as PackageInfo;
+    const packagePolicy = {
+      name: 'test',
+      policy_templates: [{ name: TEMPLATE_NAME }],
+    } as PackageInfo;
 
-    const result = getCspmCloudShellDefaultValue(packagePolicy);
+    const result = getCloudShellDefaultValue(packagePolicy, TEMPLATE_NAME);
 
     expect(result).toBe('');
   });
@@ -136,13 +189,13 @@ describe('getCspmCloudShellDefaultValue', () => {
         {
           title: '',
           description: '',
-          name: 'cspm',
+          name: TEMPLATE_NAME,
           inputs: [{}],
         },
       ],
     } as PackageInfo;
 
-    const result = getCspmCloudShellDefaultValue(packagePolicy);
+    const result = getCloudShellDefaultValue(packagePolicy, TEMPLATE_NAME);
 
     expect(result).toBe('');
   });
@@ -154,13 +207,13 @@ describe('getCspmCloudShellDefaultValue', () => {
         {
           title: '',
           description: '',
-          name: 'cspm',
+          name: TEMPLATE_NAME,
           inputs: undefined,
         },
       ],
     } as PackageInfo;
 
-    const result = getCspmCloudShellDefaultValue(packagePolicy);
+    const result = getCloudShellDefaultValue(packagePolicy, TEMPLATE_NAME);
 
     expect(result).toBe('');
   });
@@ -172,13 +225,13 @@ describe('getCspmCloudShellDefaultValue', () => {
         {
           title: '',
           description: '',
-          name: 'cspm',
+          name: TEMPLATE_NAME,
           inputs: [{ vars: [{ name: 'cloud_shell_url_FAKE' }] }],
         },
       ],
     } as PackageInfo;
 
-    const result = getCspmCloudShellDefaultValue(packagePolicy);
+    const result = getCloudShellDefaultValue(packagePolicy, TEMPLATE_NAME);
 
     expect(result).toBe('');
   });
@@ -190,13 +243,13 @@ describe('getCspmCloudShellDefaultValue', () => {
         {
           title: '',
           description: '',
-          name: 'cspm',
+          name: TEMPLATE_NAME,
           inputs: [{ vars: [{ name: 'cloud_shell_url' }] }],
         },
       ],
     } as PackageInfo;
 
-    const result = getCspmCloudShellDefaultValue(packagePolicy);
+    const result = getCloudShellDefaultValue(packagePolicy, TEMPLATE_NAME);
 
     expect(result).toBe('');
   });
@@ -208,7 +261,7 @@ describe('getCspmCloudShellDefaultValue', () => {
         {
           title: '',
           description: '',
-          name: 'cspm',
+          name: TEMPLATE_NAME,
           inputs: [
             {
               vars: [
@@ -221,36 +274,9 @@ describe('getCspmCloudShellDefaultValue', () => {
       ],
     } as PackageInfo;
 
-    const result = getCspmCloudShellDefaultValue(packagePolicy);
+    const result = getCloudShellDefaultValue(packagePolicy, TEMPLATE_NAME);
 
     expect(result).toBe('URL');
-  });
-});
-
-describe('isBelowMinVersion', () => {
-  test.each([
-    ['1.2.3', '2.0.0', true], // Version '1.2.3' is below '2.0.0', expect true
-    ['1.2.3-preview20', '2.0.0', true], // Version '1.2.3-preview20' is below '2.0.0', expect true
-    ['2.0.0', '1.2.3', false], // Version '2.0.0' is not below '1.2.3', expect false
-    ['1.2.3', '1.2.3', false], // Version '1.2.3' is not below itself, expect false
-  ])('returns expected boolean for version and minVersion', (version, minVersion, expected) => {
-    const result = isBelowMinVersion(version, minVersion);
-
-    expect(result).toBe(expected);
-  });
-
-  test.each([
-    ['invalid', '1.0.0'], // Invalid version, expect error
-    ['1.2', '1.0.0'], // Invalid version, expect error
-    ['', '1.0.0'], // Empty version, expect error
-    ['1.0.0', ''], // Empty minVersion, expect error
-    ['', ''], // Empty version and minVersion, expect error
-  ])('semver return errors when invalid versions are used', (version, minVersion) => {
-    try {
-      isBelowMinVersion(version, minVersion);
-    } catch (error) {
-      expect(error).toBeDefined();
-    }
   });
 });
 
@@ -261,7 +287,7 @@ describe('getDefaultAwsCredentialsType', () => {
     packageInfo = {
       policy_templates: [
         {
-          name: 'cspm',
+          name: TEMPLATE_NAME,
           inputs: [
             {
               vars: [
@@ -279,7 +305,7 @@ describe('getDefaultAwsCredentialsType', () => {
 
   it('should return "direct_access_key" for agentless', () => {
     const setupTechnology = SetupTechnology.AGENTLESS;
-    const result = getDefaultAwsCredentialsType(packageInfo, false, setupTechnology);
+    const result = getDefaultAwsCredentialsType(packageInfo, false, TEMPLATE_NAME, setupTechnology);
 
     expect(result).toBe('direct_access_keys');
   });
@@ -289,7 +315,7 @@ describe('getDefaultAwsCredentialsType', () => {
     packageInfo = {
       policy_templates: [
         {
-          name: 'cspm',
+          name: TEMPLATE_NAME,
           inputs: [
             {
               vars: [
@@ -304,7 +330,12 @@ describe('getDefaultAwsCredentialsType', () => {
       ],
     } as PackageInfo;
 
-    const result = getDefaultAwsCredentialsType({} as PackageInfo, false, setupTechnology);
+    const result = getDefaultAwsCredentialsType(
+      {} as PackageInfo,
+      false,
+      TEMPLATE_NAME,
+      setupTechnology
+    );
 
     expect(result).toBe('assume_role');
   });
@@ -312,19 +343,161 @@ describe('getDefaultAwsCredentialsType', () => {
   it('should return "cloud_formation" for agent-based, when cloudformation is available', () => {
     const setupTechnology = SetupTechnology.AGENT_BASED;
 
-    const result = getDefaultAwsCredentialsType(packageInfo, false, setupTechnology);
+    const result = getDefaultAwsCredentialsType(packageInfo, false, TEMPLATE_NAME, setupTechnology);
     expect(result).toBe('cloud_formation');
+  });
+
+  it('should return "cloud_connectors" for agentless, when cloud connectors template is available and showCloudConnectors is true', () => {
+    const setupTechnology = SetupTechnology.AGENTLESS;
+    packageInfo = {
+      policy_templates: [
+        {
+          name: TEMPLATE_NAME,
+          inputs: [
+            {
+              vars: [
+                {
+                  name: CLOUD_FORMATION_TEMPLATE_URL_CLOUD_CONNECTORS,
+                  default: 'http://example.com/cloud_formation_cloud_connectors_template',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    } as PackageInfo;
+
+    const result = getDefaultAwsCredentialsType(packageInfo, true, TEMPLATE_NAME, setupTechnology);
+
+    expect(result).toBe('cloud_connectors');
   });
 });
 
-describe('getDefaultAzureCredentialsType', () => {
+describe('getDefaultAwsCredentialsConfig', () => {
+  it('should return "cloud_connectors" for agentless, when cloud connectors template is available and showCloudConnectors is true', () => {
+    const packageInfo = {
+      policy_templates: [
+        {
+          name: TEMPLATE_NAME,
+          inputs: [
+            {
+              vars: [
+                {
+                  name: CLOUD_FORMATION_TEMPLATE_URL_CLOUD_CONNECTORS,
+                  default: 'http://example.com/cloud_formation_cloud_connectors_template',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    } as PackageInfo;
+    const result = getDefaultAwsCredentialConfig({
+      packageInfo,
+      templateName: TEMPLATE_NAME,
+      isAgentless: true,
+      showCloudConnectors: true,
+    });
+
+    expect(result['aws.credentials.type'].value).toBe('cloud_connectors');
+    expect(result['aws.supports_cloud_connectors'].value).toBe(true);
+  });
+
+  it('should return "cloud_formation" for agent-based, when cloud formation template is available', () => {
+    const packageInfo = {
+      policy_templates: [
+        {
+          name: TEMPLATE_NAME,
+          inputs: [
+            {
+              vars: [
+                {
+                  name: 'cloud_formation_template',
+                  default: 'http://example.com/cloud_formation_template',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    } as PackageInfo;
+    const result = getDefaultAwsCredentialConfig({
+      packageInfo,
+      templateName: TEMPLATE_NAME,
+      isAgentless: false,
+      showCloudConnectors: false,
+    });
+
+    expect(result['aws.credentials.type'].value).toBe('cloud_formation');
+    expect(result['aws.supports_cloud_connectors'].value).toBe(false);
+  });
+
+  it('should return "assume_role" for agent-based, when cloud formation template is not available', () => {
+    const packageInfo = {
+      policy_templates: [
+        {
+          name: TEMPLATE_NAME,
+          inputs: [
+            {
+              vars: [
+                {
+                  name: 'cloud_shell',
+                  default: 'http://example.com/cloud_shell',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    } as PackageInfo;
+    const result = getDefaultAwsCredentialConfig({
+      packageInfo,
+      templateName: TEMPLATE_NAME,
+      isAgentless: false,
+      showCloudConnectors: false,
+    });
+
+    expect(result['aws.credentials.type'].value).toBe('assume_role');
+    expect(result['aws.supports_cloud_connectors'].value).toBe(false);
+  });
+
+  it('should return "cloud_formation" for agent-based even with showCloudConnectors true, when cloud formation template is available', () => {
+    const packageInfo = {
+      policy_templates: [
+        {
+          name: TEMPLATE_NAME,
+          inputs: [
+            {
+              vars: [
+                {
+                  name: 'cloud_formation_template',
+                  default: 'http://example.com/cloud_formation_template',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    } as PackageInfo;
+    const result = getDefaultAwsCredentialConfig({
+      packageInfo,
+      templateName: TEMPLATE_NAME,
+      isAgentless: false,
+      showCloudConnectors: true,
+    });
+
+    expect(result['aws.credentials.type'].value).toBe('cloud_formation');
+    expect(result['aws.supports_cloud_connectors'].value).toBe(true);
+  });
+});
+describe('getDefaultAzureCredentialsConfig', () => {
   let packageInfo: PackageInfo;
 
   beforeEach(() => {
     packageInfo = {
       policy_templates: [
         {
-          name: 'cspm',
+          name: TEMPLATE_NAME,
           inputs: [
             {
               vars: [
@@ -341,25 +514,22 @@ describe('getDefaultAzureCredentialsType', () => {
   });
 
   it('should return "service_principal_with_client_secret" for agentless', () => {
-    const setupTechnology = SetupTechnology.AGENTLESS;
-    const result = getDefaultAzureCredentialsType(packageInfo, setupTechnology);
+    const result = getDefaultAzureCredentialsConfig(packageInfo, TEMPLATE_NAME, true, false);
 
-    expect(result).toBe('service_principal_with_client_secret');
+    expect(result['azure.credentials.type'].value).toBe('service_principal_with_client_secret');
   });
 
-  it('shold return "arm_template" for agent-based, when arm_template is available', () => {
-    const setupTechnology = SetupTechnology.AGENT_BASED;
-    const result = getDefaultAzureCredentialsType(packageInfo, setupTechnology);
+  it('should return "arm_template" for agent-based, when arm_template is available', () => {
+    const result = getDefaultAzureCredentialsConfig(packageInfo, TEMPLATE_NAME, false, false);
 
-    expect(result).toBe('arm_template');
+    expect(result['azure.credentials.type'].value).toBe('arm_template');
   });
 
   it('should return "managed_identity" for agent-based, when arm_template is not available', () => {
-    const setupTechnology = SetupTechnology.AGENT_BASED;
     packageInfo = {
       policy_templates: [
         {
-          name: 'cspm',
+          name: TEMPLATE_NAME,
           inputs: [
             {
               vars: [
@@ -373,10 +543,59 @@ describe('getDefaultAzureCredentialsType', () => {
         },
       ],
     } as PackageInfo;
+    const result = getDefaultAzureCredentialsConfig(packageInfo, TEMPLATE_NAME, false, false);
 
-    const result = getDefaultAzureCredentialsType(packageInfo, setupTechnology);
+    expect(result['azure.credentials.type'].value).toBe('managed_identity');
+  });
 
-    expect(result).toBe('managed_identity');
+  it('should return "cloud_connectors" for agentless, when cloud connectors template is available and showCloudConnectors is true', () => {
+    packageInfo = {
+      policy_templates: [
+        {
+          name: TEMPLATE_NAME,
+          inputs: [
+            {
+              vars: [
+                {
+                  name: ARM_TEMPLATE_URL_CLOUD_CONNECTORS,
+                  default: 'http://example.com/arm_template_cloud_connectors_url',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    } as PackageInfo;
+
+    const result = getDefaultAzureCredentialsConfig(packageInfo, TEMPLATE_NAME, true, true);
+
+    expect(result['azure.credentials.type'].value).toBe('cloud_connectors');
+    expect(result['azure.supports_cloud_connectors'].value).toBe(true);
+  });
+
+  it('should return "arm_template" for agent-based even with showCloudConnectors true, when arm_template is available', () => {
+    packageInfo = {
+      policy_templates: [
+        {
+          name: TEMPLATE_NAME,
+          inputs: [
+            {
+              vars: [
+                {
+                  name: 'arm_template_url',
+                  default: 'http://example.com/arm_template_url',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    } as PackageInfo;
+
+    const result = getDefaultAzureCredentialsConfig(packageInfo, TEMPLATE_NAME, false, true);
+
+    expect(result['azure.credentials.type'].value).toBe('arm_template');
+    expect(result['azure.supports_cloud_connectors'].value).toBe(true);
   });
 });
 
@@ -387,7 +606,7 @@ describe('getDefaultGcpHiddenVars', () => {
     packageInfo = {
       policy_templates: [
         {
-          name: 'cspm',
+          name: TEMPLATE_NAME,
           inputs: [
             {
               vars: [
@@ -405,7 +624,7 @@ describe('getDefaultGcpHiddenVars', () => {
 
   it('should return manual credentials-json credentials type for agentless', () => {
     const setupTechnology = SetupTechnology.AGENTLESS;
-    const result = getDefaultGcpHiddenVars(packageInfo, setupTechnology);
+    const result = getDefaultGcpHiddenVars(packageInfo, TEMPLATE_NAME, setupTechnology);
 
     expect(result).toMatchObject({
       'gcp.credentials.type': { value: 'credentials-json', type: 'text' },
@@ -414,7 +633,7 @@ describe('getDefaultGcpHiddenVars', () => {
 
   it('should return google_cloud_shell setup access for agent-based if cloud_shell_url is available', () => {
     const setupTechnology = SetupTechnology.AGENT_BASED;
-    const result = getDefaultGcpHiddenVars(packageInfo, setupTechnology);
+    const result = getDefaultGcpHiddenVars(packageInfo, TEMPLATE_NAME, setupTechnology);
 
     expect(result).toMatchObject({
       'gcp.credentials.type': { value: 'credentials-none', type: 'text' },
@@ -426,7 +645,7 @@ describe('getDefaultGcpHiddenVars', () => {
     packageInfo = {
       policy_templates: [
         {
-          name: 'cspm',
+          name: TEMPLATE_NAME,
           inputs: [
             {
               vars: [

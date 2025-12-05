@@ -9,11 +9,12 @@
 
 import React from 'react';
 
-import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { IngestPipelineParams } from '../..';
+import type { IngestPipelineParams } from '../..';
 
 import { FlyoutPanel } from './flyout_panel';
 

@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { PreviewChartResponse } from '../../../common/api_types';
+import type { PreviewChartResponse } from '../../../common/api_types';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
 import { getChartPreview } from '../../rule_types/degraded_docs/get_chart_preview';
 import { groupByRt } from '../../types/default_api_types';

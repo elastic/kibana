@@ -15,7 +15,7 @@ import {
   USER_AGENT_NAME,
   USER_AGENT_OS,
 } from '../../../../../common/elasticsearch_fieldnames';
-import { BreakdownItem } from '../../../../../typings/ui_filters';
+import type { BreakdownItem } from '../../../../../typings/ui_filters';
 
 interface Props {
   selectedBreakdown: BreakdownItem | null;
@@ -85,6 +85,9 @@ export function BreakdownFilter({ selectedBreakdown, onBreakdownChange, dataTest
       valueOfSelected={selectedBreakdown?.fieldName ?? NO_BREAKDOWN}
       onChange={(value) => onOptionChange(value)}
       data-test-subj={dataTestSubj}
+      aria-label={i18n.translate('xpack.ux.breakdownFilter.ariaLabel', {
+        defaultMessage: 'Breakdown filter',
+      })}
     />
   );
 }

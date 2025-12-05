@@ -9,11 +9,12 @@ import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { BoundOptions, BoundInferenceClient, InferenceClient } from '@kbn/inference-common';
-import { AnonymizationRule } from '@kbn/inference-common';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { AnonymizationRule } from '@kbn/inference-common';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { InferenceCallbacks } from '@kbn/inference-common/src/chat_complete';
 import { createInferenceClient } from './inference_client';
 import { bindClient } from '../../common/inference_client/bind_client';
-import { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
+import type { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
 
 interface CreateClientOptions {
   request: KibanaRequest;
@@ -22,6 +23,7 @@ interface CreateClientOptions {
   anonymizationRulesPromise: Promise<AnonymizationRule[]>;
   regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;
+  callbacks?: InferenceCallbacks;
 }
 
 interface BoundCreateClientOptions extends CreateClientOptions {
@@ -33,7 +35,8 @@ export function createClient(options: BoundCreateClientOptions): BoundInferenceC
 export function createClient(
   options: CreateClientOptions | BoundCreateClientOptions
 ): BoundInferenceClient | InferenceClient {
-  const { actions, request, logger, anonymizationRulesPromise, esClient, regexWorker } = options;
+  const { actions, request, logger, anonymizationRulesPromise, esClient, regexWorker, callbacks } =
+    options;
   const client = createInferenceClient({
     request,
     actions,
@@ -41,6 +44,7 @@ export function createClient(
     anonymizationRulesPromise,
     regexWorker,
     esClient,
+    callbacks,
   });
   if ('bindTo' in options) {
     return bindClient(client, options.bindTo);

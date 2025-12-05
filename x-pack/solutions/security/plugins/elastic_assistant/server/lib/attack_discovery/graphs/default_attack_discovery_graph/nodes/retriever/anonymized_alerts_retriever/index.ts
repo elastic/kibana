@@ -6,8 +6,8 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { Replacements } from '@kbn/elastic-assistant-common';
-import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { Replacements } from '@kbn/elastic-assistant-common';
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import type { CallbackManagerForRetrieverRun } from '@langchain/core/callbacks/manager';
 import type { Document } from '@langchain/core/documents';
 import { BaseRetriever, type BaseRetrieverInput } from '@langchain/core/retrievers';

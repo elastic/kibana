@@ -7,7 +7,7 @@
 
 /* eslint-disable no-console */
 
-import { Prompt } from '@kbn/security-ai-prompts';
+import type { Prompt } from '@kbn/security-ai-prompts';
 import * as fs from 'fs/promises';
 import { existsSync, mkdirSync } from 'fs';
 import * as path from 'path';

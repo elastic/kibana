@@ -14,6 +14,9 @@ import type { ESQLExtensionsRegistry } from '../extensions_registry';
 import { registerGetJoinIndicesRoute } from './get_join_indices';
 import { registerGetTimeseriesIndicesRoute } from './get_timeseries_indices';
 import { registerESQLExtensionsRoute } from './get_esql_extensions_route';
+import { registerLookupIndexRoutes } from './lookup_index';
+import { registerGetSourcesRoute } from './get_all_sources';
+import { registerGetTimeFieldRoute } from './get_timefield';
 
 export const registerRoutes = (
   setup: CoreSetup,
@@ -26,4 +29,7 @@ export const registerRoutes = (
   registerGetTimeseriesIndicesRoute(router, initContext);
   registerESQLExtensionsRoute(router, extensionsRegistry, initContext);
   registerGetInferenceEndpointsRoute(router, initContext);
+  registerLookupIndexRoutes(router, initContext);
+  registerGetSourcesRoute(router, initContext);
+  registerGetTimeFieldRoute(router, initContext);
 };

@@ -8,11 +8,10 @@ export KBN_NP_PLUGINS_BUILT=true
 
 echo "--- Build Kibana Distribution"
 
-BUILD_ARGS=("--with-test-plugins" "--with-example-plugins")
+BUILD_ARGS=("--with-test-plugins" "--with-example-plugins" "--no-debug")
 is_pr_with_label "ci:build-all-platforms" && BUILD_ARGS+=("--all-platforms")
 is_pr_with_label "ci:build-docker-cross-compile" && BUILD_ARGS+=("--docker-cross-compile")
 is_pr_with_label "ci:build-os-packages" || BUILD_ARGS+=("--skip-os-packages")
-is_pr_with_label "ci:build-canvas-shareable-runtime" || BUILD_ARGS+=("--skip-canvas-shareable-runtime")
 is_pr_with_label "ci:build-docker-contexts" || BUILD_ARGS+=("--skip-docker-contexts")
 is_pr_with_label "ci:build-cdn-assets" || BUILD_ARGS+=("--skip-cdn-assets")
 

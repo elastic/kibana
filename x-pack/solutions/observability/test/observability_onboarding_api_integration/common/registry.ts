@@ -7,8 +7,8 @@
 
 import { castArray, groupBy } from 'lodash';
 import callsites from 'callsites';
-import { FtrProviderContext } from './ftr_provider_context';
-import { ObservabilityOnboardingFtrConfigName } from '../configs';
+import type { FtrProviderContext } from './ftr_provider_context';
+import type { ObservabilityOnboardingFtrConfigName } from '../configs';
 import { maybe } from './utils/maybe';
 import { joinByKey } from './utils/join_by_key';
 

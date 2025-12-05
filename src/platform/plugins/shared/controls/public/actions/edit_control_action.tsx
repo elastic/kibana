@@ -27,7 +27,7 @@ import { IncompatibleActionError, type Action } from '@kbn/ui-actions-plugin/pub
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
 import { ACTION_EDIT_CONTROL } from './constants';
-import { DataControlApi } from '../controls/data_controls/types';
+import type { DataControlApi } from '../controls/data_controls/types';
 
 const compatibilityCheck = (api: unknown): api is DataControlApi => {
   return Boolean(

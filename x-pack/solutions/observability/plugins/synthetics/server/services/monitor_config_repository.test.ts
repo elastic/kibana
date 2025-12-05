@@ -7,14 +7,13 @@
 
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { MonitorConfigRepository } from './monitor_config_repository';
-import { ConfigKey, SyntheticsMonitor } from '../../common/runtime_types';
+import type { SyntheticsMonitor } from '../../common/runtime_types';
+import { ConfigKey } from '../../common/runtime_types';
 import * as utils from '../synthetics_service/utils';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import {
-  SavedObjectsClientContract,
-  type SavedObjectsFindOptions,
-} from '@kbn/core-saved-objects-api-server';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { type SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 import {
   legacyMonitorAttributes,
   legacySyntheticsMonitorTypeSingle,

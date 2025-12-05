@@ -5,27 +5,31 @@
  * 2.0.
  */
 
-import { OnechatPluginSetup, OnechatPluginStart } from './types';
+import type { OnechatPluginSetup, OnechatPluginStart } from './types';
 import { createMockedExecutableTool, createToolRegistryMock } from './test_utils/tools';
-import { createMockedAgentClient } from './test_utils/agents';
 
 const createSetupContractMock = (): jest.Mocked<OnechatPluginSetup> => {
   return {
+    agents: {
+      register: jest.fn(),
+    },
     tools: {
       register: jest.fn(),
+    },
+    attachments: {
+      registerType: jest.fn(),
     },
   };
 };
 
 const createStartContractMock = (): jest.Mocked<OnechatPluginStart> => {
   return {
+    agents: {
+      runAgent: jest.fn(),
+    },
     tools: {
       execute: jest.fn(),
       getRegistry: jest.fn().mockImplementation(() => createToolRegistryMock()),
-    },
-    agents: {
-      execute: jest.fn(),
-      getScopedClient: jest.fn().mockImplementation(() => createMockedAgentClient()),
     },
   };
 };

@@ -47,7 +47,7 @@ function getSettingDefaults(setting: RawSettingDefinition): SettingDefinition {
     }
 
     case 'float': {
-      if (setting.key === 'transaction_sample_rate') {
+      if (setting.key === 'transaction_sample_rate' || setting.key === 'sampling_rate') {
         return {
           validation: floatFourDecimalPlacesRt,
           ...setting,

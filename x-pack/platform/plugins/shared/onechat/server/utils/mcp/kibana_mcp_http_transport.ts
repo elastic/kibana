@@ -6,24 +6,26 @@
  */
 
 import type { Transport } from '@modelcontextprotocol/sdk/shared/transport.js';
-import {
+import type {
   MessageExtraInfo,
-  ErrorCode,
   RequestInfo,
+  JSONRPCMessage,
+  RequestId,
+} from '@modelcontextprotocol/sdk/types.js';
+import {
+  ErrorCode,
   isInitializeRequest,
   isJSONRPCError,
   isJSONRPCRequest,
   isJSONRPCResponse,
-  JSONRPCMessage,
   JSONRPCMessageSchema,
-  RequestId,
   SUPPORTED_PROTOCOL_VERSIONS,
   DEFAULT_NEGOTIATED_PROTOCOL_VERSION,
 } from '@modelcontextprotocol/sdk/types.js';
 import { randomUUID } from 'node:crypto';
 
 import type { KibanaResponseFactory, KibanaRequest } from '@kbn/core-http-server';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import type { IKibanaResponse } from '@kbn/core/server';
 
 /**

@@ -9,6 +9,12 @@
 
 import { append } from '../pipeline/append';
 
+/**
+ * Appends a `LIMIT` command to the ESQL composer pipeline.
+ *
+ * @param value The limit to apply.
+ * @returns A `QueryPipeline` instance with the `LIMIT` command appended.
+ */
 export function limit(value: number) {
   return append({ command: `LIMIT ${value}` });
 }

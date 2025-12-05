@@ -10,7 +10,8 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { NumberRow, NumberRowProps } from './number_row';
+import type { NumberRowProps } from './number_row';
+import { NumberRow } from './number_row';
 
 describe('NumberRow', () => {
   let defaultProps: NumberRowProps;

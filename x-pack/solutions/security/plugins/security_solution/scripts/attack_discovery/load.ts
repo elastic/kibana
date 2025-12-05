@@ -19,8 +19,9 @@ const pipelineAsync = promisify(pipeline);
 const PIPELINE_NAME = 'insights_pipeline';
 const DIRECTORY_PATH = path.resolve(
   __dirname,
-  '../../../../../../test/security_solution_cypress/cypress/fixtures/assistant/attack_discovery'
+  '../../../../test/security_solution_cypress/cypress/fixtures/assistant/attack_discovery'
 );
+
 const MAPPING_FILE_PATH = path.join(DIRECTORY_PATH, 'mapping.json');
 
 const enableRule = async ({

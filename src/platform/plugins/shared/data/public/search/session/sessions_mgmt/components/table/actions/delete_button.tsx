@@ -10,12 +10,12 @@ import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { SearchSessionsMgmtAPI } from '../../../lib/api';
-import { IClickActionDescriptor } from './types';
-import { OnActionDismiss } from './types';
-import { UISession } from '../../../types';
+import type { SearchSessionsMgmtAPI } from '../../../lib/api';
+import type { IClickActionDescriptor } from './types';
+import type { OnActionDismiss } from './types';
+import type { UISession } from '../../../types';
 
 interface DeleteButtonProps {
   api: SearchSessionsMgmtAPI;
@@ -28,27 +28,31 @@ const DeleteConfirm = (props: DeleteButtonProps & { onActionDismiss: OnActionDis
   const [isLoading, setIsLoading] = useState(false);
   const modalTitleId = useGeneratedHtmlId();
 
-  const title = i18n.translate('data.mgmt.searchSessions.cancelModal.title', {
-    defaultMessage: 'Delete search session',
+  const bgsTitle = i18n.translate('data.mgmt.searchSessions.cancelModal.backgroundSearchTitle', {
+    defaultMessage: 'Delete background search',
   });
+
   const confirm = i18n.translate('data.mgmt.searchSessions.cancelModal.deleteButton', {
     defaultMessage: 'Delete',
   });
   const cancel = i18n.translate('data.mgmt.searchSessions.cancelModal.cancelButton', {
     defaultMessage: 'Cancel',
   });
-  const message = i18n.translate('data.mgmt.searchSessions.cancelModal.message', {
-    defaultMessage: `Deleting the search session ''{name}'' deletes all cached results.`,
-    values: {
-      name,
-    },
-  });
+  const bgsMessage = i18n.translate(
+    'data.mgmt.searchSessions.cancelModal.backgroundSearchMessage',
+    {
+      defaultMessage: `Deleting the background search ''{name}'' deletes all cached results.`,
+      values: {
+        name,
+      },
+    }
+  );
 
   return (
     <EuiConfirmModal
       aria-labelledby={modalTitleId}
       titleProps={{ id: modalTitleId }}
-      title={title}
+      title={bgsTitle}
       onCancel={onActionDismiss}
       onConfirm={async () => {
         setIsLoading(true);
@@ -61,7 +65,7 @@ const DeleteConfirm = (props: DeleteButtonProps & { onActionDismiss: OnActionDis
       defaultFocusedButton="confirm"
       buttonColor="danger"
     >
-      {message}
+      {bgsMessage}
     </EuiConfirmModal>
   );
 };

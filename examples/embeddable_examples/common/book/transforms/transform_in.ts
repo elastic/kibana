@@ -8,7 +8,7 @@
  */
 
 import { BOOK_SAVED_OBJECT_TYPE } from '../constants';
-import { BookByReferenceState, BookEmbeddableState } from '../types';
+import type { BookByReferenceState, BookEmbeddableState } from '../types';
 
 export function transformIn(state: BookEmbeddableState) {
   // extract saved object reference for by-reference state

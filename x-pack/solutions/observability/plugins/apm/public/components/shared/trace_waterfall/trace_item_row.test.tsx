@@ -64,7 +64,12 @@ const baseItem = {
   skew: 0,
   color: 'red',
   depth: 2,
-  errorCount: 0,
+  errors: [],
+  timestampUs: 100,
+  name: 'Test Span',
+  traceId: 'trace-1',
+  serviceName: 'Test Service',
+  spanLinksCount: { incoming: 0, outgoing: 0 },
 } as TraceWaterfallItem;
 
 describe('TraceItemRow', () => {

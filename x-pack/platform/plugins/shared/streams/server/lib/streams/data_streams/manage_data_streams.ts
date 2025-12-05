@@ -5,17 +5,26 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import {
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type {
   IngestStreamLifecycle,
   IngestStreamLifecycleDSL,
   IngestStreamLifecycleDisabled,
   IngestStreamLifecycleILM,
-  isDslLifecycle,
-  isIlmLifecycle,
-  isInheritLifecycle,
 } from '@kbn/streams-schema';
-import { IndicesSimulateTemplateTemplate } from '@elastic/elasticsearch/lib/api/types';
+import type { Streams } from '@kbn/streams-schema';
+import type {
+  IndicesDataStreamFailureStore,
+  IndicesSimulateTemplateTemplate,
+} from '@elastic/elasticsearch/lib/api/types';
+import type { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
+import { isDslLifecycle, isIlmLifecycle, isInheritLifecycle } from '@kbn/streams-schema';
+import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
+import {
+  isDisabledLifecycleFailureStore,
+  isEnabledLifecycleFailureStore,
+  isInheritFailureStore,
+} from '@kbn/streams-schema/src/models/ingest/failure_store';
 import { retryTransientEsErrors } from '../helpers/retry';
 
 interface DataStreamManagementOptions {
@@ -34,6 +43,13 @@ interface UpdateOrRolloverDataStreamOptions {
   esClient: ElasticsearchClient;
   name: string;
   logger: Logger;
+}
+
+interface UpdateDataStreamsMappingsOptions {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  name: string;
+  mappings: StreamsMappingProperties;
 }
 
 interface UpdateDefaultIngestPipelineOptions {
@@ -98,6 +114,47 @@ export async function updateDefaultIngestPipeline({
   }
 }
 
+// TODO: Remove once client lib has been updated
+export interface DataStreamMappingsUpdateResponse {
+  data_streams: Array<{
+    name: string;
+    applied_to_data_stream: boolean;
+    error?: string;
+    mappings: Record<string, any>;
+    effective_mappings: Record<string, any>;
+  }>;
+}
+
+export async function updateDataStreamsMappings({
+  esClient,
+  logger,
+  name,
+  mappings,
+}: UpdateDataStreamsMappingsOptions) {
+  // update the mappings on the data stream level
+  const response = (await esClient.transport.request({
+    method: 'PUT',
+    path: `/_data_stream/${name}/_mappings`,
+    body: {
+      properties: mappings,
+      _meta: {
+        managed_by: 'streams',
+      },
+    },
+  })) as DataStreamMappingsUpdateResponse;
+  if (response.data_streams.length === 0) {
+    throw new Error(`Data stream ${name} not found`);
+  }
+  if (response.data_streams[0].error) {
+    throw new Error(
+      `Error updating data stream mappings for ${name}: ${response.data_streams[0].error}`
+    );
+  }
+  await retryTransientEsErrors(() => esClient.indices.rollover({ alias: name, lazy: true }), {
+    logger,
+  });
+}
+
 export async function updateDataStreamsLifecycle({
   esClient,
   logger,
@@ -116,7 +173,6 @@ export async function updateDataStreamsLifecycle({
       await putDataStreamsSettings({
         esClient,
         names,
-        logger,
         settings: {
           'index.lifecycle.name': lifecycle.ilm.policy,
           'index.lifecycle.prefer_ilm': true,
@@ -138,7 +194,6 @@ export async function updateDataStreamsLifecycle({
         await putDataStreamsSettings({
           esClient,
           names,
-          logger,
           settings: {
             'index.lifecycle.name': null,
             'index.lifecycle.prefer_ilm': false,
@@ -184,7 +239,6 @@ export async function updateDataStreamsLifecycle({
             await putDataStreamsSettings({
               esClient,
               names: [name],
-              logger,
               settings: {
                 'index.lifecycle.name': null,
                 'index.lifecycle.prefer_ilm': null,
@@ -200,30 +254,98 @@ export async function updateDataStreamsLifecycle({
   }
 }
 
-async function putDataStreamsSettings({
+export async function putDataStreamsSettings({
   esClient,
   names,
-  logger,
   settings,
 }: {
   esClient: ElasticsearchClient;
   names: string[];
-  logger: Logger;
   settings: {
     'index.lifecycle.name'?: string | null;
     'index.lifecycle.prefer_ilm'?: boolean | null;
+    'index.number_of_replicas'?: number | null;
+    'index.number_of_shards'?: number | null;
+    'index.refresh_interval'?: string | -1 | null;
   };
 }) {
-  await retryTransientEsErrors(
-    () =>
-      // TODO: use client method once available
-      esClient.transport.request({
-        method: 'PUT',
-        path: `/_data_stream/${names.join(',')}/_settings`,
-        body: settings,
-      }),
-    { logger }
+  const response = await retryTransientEsErrors(() =>
+    esClient.indices.putDataStreamSettings({
+      name: names,
+      settings,
+    })
   );
+  const errors = response.data_streams
+    .filter(({ error }) => Boolean(error))
+    .map(({ error }) => error);
+  if (errors.length) {
+    throw new Error(errors.join('\n'));
+  }
+}
+
+export async function updateDataStreamsFailureStore({
+  esClient,
+  logger,
+  failureStore,
+  stream,
+  isServerless,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  failureStore: FailureStore;
+  stream: Streams.all.Definition;
+  isServerless: boolean;
+}) {
+  try {
+    let failureStoreConfig: IndicesDataStreamFailureStore;
+
+    // Handle { inherit: {} }
+    if (isInheritFailureStore(failureStore)) {
+      const response = await retryTransientEsErrors(
+        () => esClient.indices.simulateIndexTemplate({ name: stream.name }),
+        { logger }
+      );
+      // If not template, disable the failure store. Empty object would cause Elasticsearch error.
+      // @ts-expect-error index simulate response is not well typed
+      failureStoreConfig = response.template?.data_stream_options?.failure_store ?? {
+        enabled: false,
+      };
+    } else if (isEnabledLifecycleFailureStore(failureStore)) {
+      // Handle { lifecycle: { enabled: { data_retention?: string } } }
+      const dataRetention = failureStore.lifecycle.enabled?.data_retention;
+      failureStoreConfig = {
+        enabled: true,
+        ...(dataRetention ? { lifecycle: { data_retention: dataRetention, enabled: true } } : {}),
+      };
+    } else if (isDisabledLifecycleFailureStore(failureStore)) {
+      // Handle { lifecycle: { disabled: {} } }
+      // lifecycle cannot be disabled in serverless
+      failureStoreConfig = {
+        enabled: true,
+        ...(isServerless ? {} : { lifecycle: { enabled: false } }),
+      };
+    } else {
+      // Handle { disabled: {} }
+      failureStoreConfig = {
+        enabled: false,
+      };
+    }
+
+    await retryTransientEsErrors(
+      () =>
+        esClient.indices.putDataStreamOptions(
+          {
+            name: stream.name,
+            failure_store: failureStoreConfig,
+          },
+          { meta: true }
+        ),
+      { logger }
+    );
+  } catch (err: any) {
+    logger.error(`Error updating data stream failure store: ${err.message}`);
+    throw err;
+  }
 }
 
 export function getTemplateLifecycle(

@@ -10,6 +10,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject, combineLatest, of, Subject } from 'rxjs';
 import useMountedState from 'react-use/lib/useMountedState';
+import type { OnTimeChangeProps } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButton,
@@ -21,21 +22,22 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiSuperDatePicker,
-  OnTimeChangeProps,
 } from '@elastic/eui';
 import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
-import { ControlGroupApi } from '@kbn/controls-plugin/public';
-import { CoreStart } from '@kbn/core/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { ControlGroupApi } from '@kbn/controls-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
-import {
-  apiPublishesDataLoading,
+import type {
   PublishesDataLoading,
   SerializedPanelState,
-  useBatchedPublishingSubjects,
   ViewMode,
+} from '@kbn/presentation-publishing';
+import {
+  apiPublishesDataLoading,
+  useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { ControlsGroupState } from '@kbn/controls-schemas';
@@ -272,12 +274,15 @@ export const ReactControlExample = ({
   return (
     <>
       {dataViewNotFound && (
-        <EuiCallOut color="warning" iconType="warning">
+        <EuiCallOut announceOnMount color="warning" iconType="warning">
           <p>{`Install "Sample web logs" to run example`}</p>
         </EuiCallOut>
       )}
       {!dataViewNotFound && (
-        <EuiCallOut title="This example uses session storage to persist saved state and unsaved changes">
+        <EuiCallOut
+          announceOnMount
+          title="This example uses session storage to persist saved state and unsaved changes"
+        >
           <EuiButton
             color="accent"
             size="s"

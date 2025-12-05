@@ -881,134 +881,6 @@
           }
         ],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "controls",
-        "id": "def-public.OptionsListControlState",
-        "type": "Interface",
-        "tags": [],
-        "label": "OptionsListControlState",
-        "description": [],
-        "signature": [
-          "OptionsListControlState",
-          " extends ",
-          {
-            "pluginId": "controls",
-            "scope": "common",
-            "docId": "kibControlsPluginApi",
-            "section": "def-common.DefaultDataControlState",
-            "text": "DefaultDataControlState"
-          },
-          ",",
-          "OptionsListDisplaySettings"
-        ],
-        "path": "src/platform/plugins/shared/controls/common/options_list/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "controls",
-            "id": "def-public.OptionsListControlState.searchTechnique",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "searchTechnique",
-            "description": [],
-            "signature": [
-              "OptionsListSearchTechnique",
-              " | undefined"
-            ],
-            "path": "src/platform/plugins/shared/controls/common/options_list/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-public.OptionsListControlState.sort",
-            "type": "Object",
-            "tags": [],
-            "label": "sort",
-            "description": [],
-            "signature": [
-              "OptionsListSortingType",
-              " | undefined"
-            ],
-            "path": "src/platform/plugins/shared/controls/common/options_list/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-public.OptionsListControlState.selectedOptions",
-            "type": "Array",
-            "tags": [],
-            "label": "selectedOptions",
-            "description": [],
-            "signature": [
-              "OptionsListSelection",
-              "[] | undefined"
-            ],
-            "path": "src/platform/plugins/shared/controls/common/options_list/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-public.OptionsListControlState.existsSelected",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "existsSelected",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/plugins/shared/controls/common/options_list/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-public.OptionsListControlState.runPastTimeout",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "runPastTimeout",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/plugins/shared/controls/common/options_list/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-public.OptionsListControlState.singleSelect",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "singleSelect",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/plugins/shared/controls/common/options_list/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-public.OptionsListControlState.exclude",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "exclude",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/plugins/shared/controls/common/options_list/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -1247,7 +1119,7 @@
             "section": "def-common.DefaultControlState",
             "text": "DefaultControlState"
           },
-          "> | undefined; onSave?: (() => void) | undefined; } | undefined) => void; untilInitialized: () => Promise<void>; getEditorConfig: () => ",
+          "> | undefined; onSave?: (() => void) | undefined; } | undefined) => void; untilInitialized: () => Promise<void>; untilFiltersPublished: () => Promise<void>; getEditorConfig: () => ",
           {
             "pluginId": "controls",
             "scope": "common",
@@ -1449,7 +1321,7 @@
             "section": "def-common.DefaultControlState",
             "text": "DefaultControlState"
           },
-          "> | undefined; onSave?: (() => void) | undefined; } | undefined) => void; untilInitialized: () => Promise<void>; getEditorConfig: () => ",
+          "> | undefined; onSave?: (() => void) | undefined; } | undefined) => void; untilInitialized: () => Promise<void>; untilFiltersPublished: () => Promise<void>; getEditorConfig: () => ",
           {
             "pluginId": "controls",
             "scope": "common",
@@ -2247,6 +2119,53 @@
       },
       {
         "parentPluginId": "controls",
+        "id": "def-public.OptionsListControlState",
+        "type": "Type",
+        "tags": [],
+        "label": "OptionsListControlState",
+        "description": [],
+        "signature": [
+          "OptionsListDSLControlState",
+          " | ",
+          "OptionsListESQLControlState"
+        ],
+        "path": "src/platform/plugins/shared/controls/common/options_list/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
+        "id": "def-public.OptionsListDSLControlState",
+        "type": "Type",
+        "tags": [],
+        "label": "OptionsListDSLControlState",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.DefaultDataControlState",
+            "text": "DefaultDataControlState"
+          },
+          " & ",
+          "OptionsListDisplaySettings",
+          " & { searchTechnique?: ",
+          "OptionsListSearchTechnique",
+          " | undefined; sort?: ",
+          "OptionsListSortingType",
+          " | undefined; selectedOptions?: ",
+          "OptionsListSelection",
+          "[] | undefined; existsSelected?: boolean | undefined; runPastTimeout?: boolean | undefined; singleSelect?: boolean | undefined; exclude?: boolean | undefined; }"
+        ],
+        "path": "src/platform/plugins/shared/controls/common/options_list/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
         "id": "def-public.RangesliderControlApi",
         "type": "Type",
         "tags": [],
@@ -2725,7 +2644,7 @@
               {
                 "parentPluginId": "controls",
                 "id": "def-public.controlGroupStateBuilder.addOptionsListControl.$2",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "controlState",
                 "description": [],

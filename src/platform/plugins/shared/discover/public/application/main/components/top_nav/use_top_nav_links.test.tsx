@@ -33,6 +33,10 @@ describe('useTopNavLinks', () => {
   const state = getDiscoverStateMock({ isTimeBased: true });
   state.actions.setDataView(dataViewMock);
 
+  // identifier to denote if share integration is available,
+  // we default to false especially that there a specific test scenario for when this is true
+  const hasShareIntegration = false;
+
   const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     return (
       <DiscoverTestProvider
@@ -48,23 +52,32 @@ describe('useTopNavLinks', () => {
     );
   };
 
-  test('useTopNavLinks result', () => {
-    const topNavLinks = renderHook(
+  const setup = (hookAttrs: Partial<Parameters<typeof useTopNavLinks>[0]> = {}) => {
+    return renderHook(
       () =>
         useTopNavLinks({
           dataView: dataViewMock,
           onOpenInspector: jest.fn(),
           services,
           state,
+          hasUnsavedChanges: false,
           isEsqlMode: false,
           adHocDataViews: [],
           topNavCustomization: undefined,
           shouldShowESQLToDataViewTransitionModal: false,
+          hasShareIntegration,
+          persistedDiscoverSession: undefined,
+          ...hookAttrs,
         }),
       {
         wrapper: Wrapper,
       }
     ).result.current;
+  };
+
+  it('should return results', () => {
+    const topNavLinks = setup();
+
     expect(topNavLinks).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -115,74 +128,64 @@ describe('useTopNavLinks', () => {
     `);
   });
 
-  test('useTopNavLinks result for ES|QL mode', () => {
-    const topNavLinks = renderHook(
-      () =>
-        useTopNavLinks({
-          dataView: dataViewMock,
-          onOpenInspector: jest.fn(),
-          services,
-          state,
-          isEsqlMode: true,
-          adHocDataViews: [],
-          topNavCustomization: undefined,
-          shouldShowESQLToDataViewTransitionModal: false,
-        }),
-      {
-        wrapper: Wrapper,
-      }
-    ).result.current;
-    expect(topNavLinks).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "color": "text",
-          "emphasize": true,
-          "fill": false,
-          "id": "esql",
-          "label": "Switch to classic",
-          "run": [Function],
-          "testId": "switch-to-dataviews",
-          "tooltip": "Switch to KQL or Lucene syntax.",
-        },
-        Object {
-          "description": "Open Inspector for search",
-          "id": "inspect",
-          "label": "Inspect",
-          "run": [Function],
-          "testId": "openInspectorButton",
-        },
-        Object {
-          "description": "New session",
-          "iconOnly": true,
-          "iconType": "plus",
-          "id": "new",
-          "label": "New session",
-          "run": [Function],
-          "testId": "discoverNewButton",
-        },
-        Object {
-          "description": "Open session",
-          "iconOnly": true,
-          "iconType": "folderOpen",
-          "id": "open",
-          "label": "Open session",
-          "run": [Function],
-          "testId": "discoverOpenButton",
-        },
-        Object {
-          "description": "Save session",
-          "emphasize": true,
-          "iconType": "save",
-          "id": "save",
-          "label": "Save",
-          "run": [Function],
-          "testId": "discoverSaveButton",
-        },
-      ]
-    `);
+  describe('when ES|QL mode is true', () => {
+    it('should return results', () => {
+      const topNavLinks = setup({
+        isEsqlMode: true,
+      });
+
+      expect(topNavLinks).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "color": "text",
+            "emphasize": true,
+            "fill": false,
+            "id": "esql",
+            "label": "Switch to classic",
+            "run": [Function],
+            "testId": "switch-to-dataviews",
+            "tooltip": "Switch to KQL or Lucene syntax.",
+          },
+          Object {
+            "description": "Open Inspector for search",
+            "id": "inspect",
+            "label": "Inspect",
+            "run": [Function],
+            "testId": "openInspectorButton",
+          },
+          Object {
+            "description": "New session",
+            "iconOnly": true,
+            "iconType": "plus",
+            "id": "new",
+            "label": "New session",
+            "run": [Function],
+            "testId": "discoverNewButton",
+          },
+          Object {
+            "description": "Open session",
+            "iconOnly": true,
+            "iconType": "folderOpen",
+            "id": "open",
+            "label": "Open session",
+            "run": [Function],
+            "testId": "discoverOpenButton",
+          },
+          Object {
+            "description": "Save session",
+            "emphasize": true,
+            "iconType": "save",
+            "id": "save",
+            "label": "Save",
+            "run": [Function],
+            "testId": "discoverSaveButton",
+          },
+        ]
+      `);
+    });
   });
 
-  describe('useTopNavLinks with share service included', () => {
+  describe('when share service included', () => {
     beforeAll(() => {
       services.share = sharePluginMock.createStartContract();
     });
@@ -191,23 +194,9 @@ describe('useTopNavLinks', () => {
       services.share = undefined;
     });
 
-    it('will include share menu item if the share service is available', () => {
-      const topNavLinks = renderHook(
-        () =>
-          useTopNavLinks({
-            dataView: dataViewMock,
-            onOpenInspector: jest.fn(),
-            services,
-            state,
-            isEsqlMode: false,
-            adHocDataViews: [],
-            topNavCustomization: undefined,
-            shouldShowESQLToDataViewTransitionModal: false,
-          }),
-        {
-          wrapper: Wrapper,
-        }
-      ).result.current;
+    it('should include the share menu item', () => {
+      const topNavLinks = setup();
+
       expect(topNavLinks).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -267,24 +256,7 @@ describe('useTopNavLinks', () => {
       `);
     });
 
-    it('will include export menu item if there are export integrations available', () => {
-      const availableIntegrationsSpy = jest.spyOn(services.share!, 'availableIntegrations');
-
-      availableIntegrationsSpy.mockImplementation((_objectType, groupId) => {
-        if (groupId === 'export') {
-          return [
-            {
-              id: 'export',
-              shareType: 'integration',
-              groupId: 'export',
-              config: () => ({}),
-            },
-          ];
-        }
-
-        return [];
-      });
-
+    it('should include the export menu item', () => {
       const topNavLinks = renderHook(
         () =>
           useTopNavLinks({
@@ -292,16 +264,43 @@ describe('useTopNavLinks', () => {
             onOpenInspector: jest.fn(),
             services,
             state,
+            hasUnsavedChanges: false,
             isEsqlMode: false,
             adHocDataViews: [],
             topNavCustomization: undefined,
             shouldShowESQLToDataViewTransitionModal: false,
+            hasShareIntegration: true,
+            persistedDiscoverSession: undefined,
           }),
         {
           wrapper: Wrapper,
         }
       ).result.current;
       expect(topNavLinks.filter((obj) => obj.id === 'export')).toBeDefined();
+    });
+  });
+
+  describe('when background search is enabled', () => {
+    beforeEach(() => {
+      services.data.search.isBackgroundSearchEnabled = true;
+    });
+
+    afterEach(() => {
+      services.data.search.isBackgroundSearchEnabled = false;
+    });
+
+    it('should return the background search menu item', () => {
+      const topNavLinks = setup();
+
+      expect(topNavLinks.filter((obj) => obj.id === 'backgroundSearch')).toBeDefined();
+    });
+  });
+
+  describe('when background search is disabled', () => {
+    it('should NOT return the background search menu item', () => {
+      const topNavLinks = setup();
+
+      expect(topNavLinks.filter((obj) => obj.id === 'backgroundSearch')).toHaveLength(0);
     });
   });
 });

@@ -47,6 +47,13 @@ export const DELETE_ALERTS_SUCCESS_TITLE = (totalAlerts: number) =>
     values: { totalAlerts },
   });
 
+export const DELETE_EVENTS_SUCCESS_TITLE = (totalEvents: number) =>
+  i18n.translate('xpack.cases.userActions.attachments.events.successToasterTitle', {
+    defaultMessage:
+      'Deleted {totalEvents, plural, =1 {one} other {{totalEvents}}} {totalEvents, plural, =1 {event} other {events}}',
+    values: { totalEvents },
+  });
+
 export const DELETE_COMMENT_SUCCESS_TITLE = i18n.translate(
   'xpack.cases.userActions.attachments.comment.successToasterTitle',
   {

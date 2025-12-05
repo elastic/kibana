@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { getPrivilegedMonitorUsersIndex } from '../../../../../../../common/entity_analytics/privilege_monitoring/utils';
+import { getPrivilegedMonitorUsersIndex } from '../../../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 
 export const getPrivilegedUsersEsqlCount = (
   namespace: string
 ) => `FROM ${getPrivilegedMonitorUsersIndex(namespace)}
+      | WHERE user.is_privileged == true
       | STATS count = COUNT_DISTINCT(user.name)`;

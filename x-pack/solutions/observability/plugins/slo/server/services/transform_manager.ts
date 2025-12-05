@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { IScopedClusterClient, Logger } from '@kbn/core/server';
-import { IndicatorTypes, SLODefinition } from '../domain/models';
+import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { IndicatorTypes, SLODefinition } from '../domain/models';
 import { SecurityException } from '../errors';
 import { retryTransientEsErrors } from '../utils/retry';
-import { TransformGenerator } from './transform_generators';
+import type { TransformGenerator } from './transform_generators';
 
 type TransformId = string;
 
@@ -148,12 +148,21 @@ export class DefaultTransformManager implements TransformManager {
         () =>
           this.scopedClusterClient.asSecondaryAuthUser.transform.getTransform(
             { transform_id: transformId },
-            { ignore: [404], signal: this.abortController.signal }
+            { signal: this.abortController.signal }
           ),
         { logger: this.logger }
       );
-      return response?.transforms[0]?._meta?.version;
+
+      if (response.count === 0) {
+        return undefined;
+      }
+
+      return response.transforms[0]._meta?.version;
     } catch (err) {
+      if (err.meta?.body?.error?.type === 'resource_not_found_exception') {
+        return undefined;
+      }
+
       this.logger.debug(`Cannot retrieve SLO transform version [${transformId}]. ${err}`);
       throw err;
     }

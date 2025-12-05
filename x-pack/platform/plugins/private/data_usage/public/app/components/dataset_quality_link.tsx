@@ -6,10 +6,8 @@
  */
 
 import React from 'react';
-import {
-  DataQualityDetailsLocatorParams,
-  DATA_QUALITY_DETAILS_LOCATOR_ID,
-} from '@kbn/deeplinks-observability';
+import type { DataQualityDetailsLocatorParams } from '@kbn/deeplinks-observability';
+import { DATA_QUALITY_DETAILS_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';
 import { useDateRangePicker } from '../hooks/use_date_picker';
 import { LegendActionItem } from './legend_action_item';

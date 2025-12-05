@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 
-import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import {
+import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type {
   UnifiedSearchPublicPluginStart,
   UnifiedSearchPluginSetup,
 } from '@kbn/unified-search-plugin/public';
-import { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
-import { VisualizationsSetup, VisualizationsStart } from '@kbn/visualizations-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
+import type { VisualizationsSetup, VisualizationsStart } from '@kbn/visualizations-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { PANEL_BADGE_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { createInputControlVisFn } from './input_control_fn';
 import { getInputControlVisRenderer } from './input_control_vis_renderer';

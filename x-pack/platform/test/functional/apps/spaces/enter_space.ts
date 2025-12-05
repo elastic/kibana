@@ -6,7 +6,7 @@
  */
 
 import { stripVersionQualifier } from '@kbn/std';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function enterSpaceFunctionalTests({
   getService,

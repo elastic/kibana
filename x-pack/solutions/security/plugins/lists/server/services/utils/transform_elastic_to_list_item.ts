@@ -10,7 +10,7 @@ import type { ListItemArraySchema, Type } from '@kbn/securitysolution-io-ts-list
 import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
 
 import { ErrorWithStatusCode } from '../../error_with_status_code';
-import { SearchEsListItemSchema } from '../../schemas/elastic_response';
+import type { SearchEsListItemSchema } from '../../schemas/elastic_response';
 
 import { findSourceValue } from './find_source_value';
 import { convertDateNumberToString } from './convert_date_number_to_string';

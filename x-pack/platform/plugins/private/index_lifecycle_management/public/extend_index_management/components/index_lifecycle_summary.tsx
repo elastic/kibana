@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import type { EuiBadgeProps, EuiThemeComputed } from '@elastic/eui';
 import {
   EuiCodeBlock,
   EuiLink,
@@ -19,49 +21,43 @@ import {
   EuiText,
   EuiSpacer,
   EuiDescriptionList,
-  EuiBadgeProps,
   EuiBadge,
   EuiCode,
-  EuiThemeComputed,
 } from '@elastic/eui';
 
-import { ApplicationStart } from '@kbn/core/public';
-import { Index, IndexDetailsTab } from '@kbn/index-management-shared-types';
-import { IlmExplainLifecycleLifecycleExplainManaged } from '@elastic/elasticsearch/lib/api/types';
-import { Phase } from '../../../common/types';
+import type { ApplicationStart } from '@kbn/core/public';
+import type { Index, IndexDetailsTab } from '@kbn/index-management-shared-types';
+import type { IlmExplainLifecycleLifecycleExplainManaged } from '@elastic/elasticsearch/lib/api/types';
+import type { Phase } from '../../../common/types';
 import { getPolicyEditPath } from '../../application/services/navigation';
+import { usePhaseColors } from '../../application/lib';
 interface Props {
   index: Index;
   getUrlForApp: ApplicationStart['getUrlForApp'];
   euiTheme: EuiThemeComputed;
 }
 
-export const IndexLifecycleSummary: FunctionComponent<Props> = ({
-  index,
-  getUrlForApp,
-  euiTheme,
-}) => {
+export const IndexLifecycleSummary: FunctionComponent<Props> = ({ index, getUrlForApp }) => {
   const { ilm: ilmData } = index;
   // only ILM managed indices render the ILM tab
   const ilm = ilmData as IlmExplainLifecycleLifecycleExplainManaged;
-  const isBorealis = euiTheme.themeName === 'EUI_THEME_BOREALIS';
 
-  // Changing the mappings for the phases in Borealis as a mid-term solution. See https://github.com/elastic/kibana/issues/203664#issuecomment-2536593361.
+  const phaseColors = usePhaseColors();
   const phaseToBadgeMapping: Record<Phase, { color: EuiBadgeProps['color']; label: string }> = {
     hot: {
-      color: isBorealis ? euiTheme.colors.vis.euiColorVis6 : euiTheme.colors.vis.euiColorVis9,
+      color: phaseColors.hot,
       label: 'Hot',
     },
     warm: {
-      color: isBorealis ? euiTheme.colors.vis.euiColorVis9 : euiTheme.colors.vis.euiColorVis5,
+      color: phaseColors.warm,
       label: 'Warm',
     },
     cold: {
-      color: isBorealis ? euiTheme.colors.vis.euiColorVis2 : euiTheme.colors.vis.euiColorVis1,
+      color: phaseColors.cold,
       label: 'Cold',
     },
     frozen: {
-      color: euiTheme.colors.vis.euiColorVis4,
+      color: phaseColors.frozen,
       label: 'Frozen',
     },
     delete: {

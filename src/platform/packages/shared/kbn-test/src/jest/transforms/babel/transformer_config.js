@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
+module.exports = () => ({
   presets: [
     [
       require.resolve('@kbn/babel-preset/node_preset'),
@@ -35,4 +35,4 @@ module.exports = {
       ],
     },
   ],
-};
+});

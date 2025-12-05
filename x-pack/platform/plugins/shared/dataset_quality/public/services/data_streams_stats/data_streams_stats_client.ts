@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import rison from '@kbn/rison';
-import {
+import type {
   DataStreamDegradedDocsResponse,
   DataStreamFailedDocsResponse,
   DataStreamTotalDocsResponse,
+  IntegrationsResponse,
+  NonAggregatableDatasets,
+  UpdateFailureStoreResponse,
+} from '../../../common/api_types';
+import {
   getDataStreamDegradedDocsResponseRt,
   getDataStreamFailedDocsResponseRt,
   getDataStreamsStatsResponseRt,
@@ -19,11 +24,10 @@ import {
   getDataStreamTotalDocsResponseRt,
   getIntegrationsResponseRt,
   getNonAggregatableDatasetsRt,
-  IntegrationsResponse,
-  NonAggregatableDatasets,
+  updateFailureStoreResponseRt,
 } from '../../../common/api_types';
 import { KNOWN_TYPES } from '../../../common/constants';
-import {
+import type {
   DataStreamStatServiceResponse,
   GetDataStreamsDegradedDocsStatsQuery,
   GetDataStreamsFailedDocsStatsQuery,
@@ -36,10 +40,14 @@ import {
 } from '../../../common/data_streams_stats';
 import { Integration } from '../../../common/data_streams_stats/integration';
 import { DatasetQualityError } from '../../../common/errors';
-import { IDataStreamsStatsClient } from './types';
+import type { IDataStreamsStatsClient } from './types';
+import type { ITelemetryClient } from '../telemetry';
 
 export class DataStreamsStatsClient implements IDataStreamsStatsClient {
-  constructor(private readonly http: HttpStart) {}
+  constructor(
+    private readonly http: HttpStart,
+    private readonly telemetryClient?: ITelemetryClient
+  ) {}
 
   public async getDataStreamsTypesPrivileges(
     params: GetDataStreamsTypesPrivilegesQuery
@@ -208,5 +216,41 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
     )(response);
 
     return integrations.map(Integration.create);
+  }
+
+  public async updateFailureStore({
+    dataStream,
+    failureStoreEnabled,
+    customRetentionPeriod,
+  }: {
+    dataStream: string;
+    failureStoreEnabled: boolean;
+    customRetentionPeriod?: string;
+  }): Promise<UpdateFailureStoreResponse> {
+    const response = await this.http
+      .put<UpdateFailureStoreResponse>(
+        `/internal/dataset_quality/data_streams/${dataStream}/update_failure_store`,
+        {
+          body: JSON.stringify({
+            failureStoreEnabled,
+            customRetentionPeriod,
+          }),
+        }
+      )
+      .catch((error) => {
+        throw new DatasetQualityError(`Failed to update failure store": ${error}`, error);
+      });
+
+    this.telemetryClient?.trackFailureStoreUpdated({
+      data_stream_name: dataStream,
+      failure_store_enabled: failureStoreEnabled,
+      custom_retention_period: customRetentionPeriod,
+    });
+
+    return decodeOrThrow(
+      updateFailureStoreResponseRt,
+      (message: string) =>
+        new DatasetQualityError(`Failed to decode update failure store response: ${message}"`)
+    )(response);
   }
 }

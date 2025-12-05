@@ -9,8 +9,8 @@
 
 import { EsArchiver } from '@kbn/es-archiver';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { ScoutLogger } from './logger';
-import { EsClient, KbnClient } from '../../types';
+import type { ScoutLogger } from './logger';
+import type { EsClient, KbnClient } from '../../types';
 
 let esArchiverInstance: EsArchiver | undefined;
 

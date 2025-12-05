@@ -6,9 +6,11 @@
  */
 
 import React, { useMemo } from 'react';
-import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
+import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
+import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
 import type { FilterOptions } from '../types';
-import { MultiSelectFilter, MultiSelectFilterOption } from './multi_select_filter';
+import type { MultiSelectFilterOption } from './multi_select_filter';
+import { MultiSelectFilter } from './multi_select_filter';
 import * as i18n from './translations';
 
 interface Props {
@@ -31,16 +33,11 @@ export const ServiceProviderFilter: React.FC<Props> = ({
     });
   };
 
-  const filteredOptions = useMemo(() => {
-    const options: any = [];
-    uniqueProviders.forEach((provider) => {
-      const { name } = SERVICE_PROVIDERS[provider];
-      options.push({
-        key: provider,
-        label: name,
-      });
-    });
-    return options;
+  const filteredOptions = useMemo<MultiSelectFilterOption[]>(() => {
+    return Array.from(uniqueProviders).map((provider) => ({
+      key: provider,
+      label: SERVICE_PROVIDERS[provider]?.name ?? provider,
+    }));
   }, [uniqueProviders]);
 
   return (

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -55,7 +55,12 @@
     "@kbn/response-ops-rule-form",
     "@kbn/charts-plugin",
     "@kbn/fields-metadata-plugin",
-    "@kbn/deeplinks-analytics"
+    "@kbn/deeplinks-analytics",
+    "@kbn/licensing-types",
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/autoops-promotion-callout",
+    "@kbn/react-query",
+    "@kbn/response-ops-rule-params"
   ],
   "exclude": ["target/**/*"]
 }

@@ -11,9 +11,9 @@ import {
   getSyntheticsDynamicSettings,
   setSyntheticsDynamicSettings,
 } from '../../saved_objects/synthetics_settings';
-import { SyntheticsRestApiRouteFactory } from '../types';
-import { DynamicSettings } from '../../../common/runtime_types';
-import { DynamicSettingsAttributes } from '../../runtime_types/settings';
+import type { SyntheticsRestApiRouteFactory } from '../types';
+import type { DynamicSettings } from '../../../common/runtime_types';
+import type { DynamicSettingsAttributes } from '../../runtime_types/settings';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
 export const createGetDynamicSettingsRoute: SyntheticsRestApiRouteFactory<

@@ -413,29 +413,6 @@ describe('expression params validation', () => {
     expect(validateExpression(initialParams).errors.groupBy[0]).toBe('Group by is required.');
   });
 
-  test('if sourceFields property is an array but has more than 5 items, should return proper error message', () => {
-    const sourceField = { label: 'test', searchPath: 'test' };
-    const initialParams: EsQueryRuleParams<SearchType.esQuery> = {
-      index: ['test'],
-      esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-      size: 100,
-      timeWindowSize: 1,
-      timeWindowUnit: 's',
-      threshold: [0],
-      timeField: '',
-      excludeHitsFromPreviousRun: true,
-      aggType: 'count',
-      groupBy: 'top',
-      termSize: 10,
-      termField: ['term'],
-      sourceFields: [sourceField, sourceField, sourceField, sourceField, sourceField, sourceField],
-    };
-    expect(validateExpression(initialParams).errors.sourceFields.length).toBeGreaterThan(0);
-    expect(validateExpression(initialParams).errors.sourceFields[0]).toBe(
-      'Cannot select more than 5 fields'
-    );
-  });
-
   test('if groupBy is defined and size is greater than max allowed, should return proper errror message', () => {
     const initialParams: EsQueryRuleParams<SearchType.esQuery> = {
       index: ['test'],

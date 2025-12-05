@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TimelineItem } from '@kbn/timelines-plugin/common';
+import type { TimelineItem } from '@kbn/timelines-plugin/common';
 
 export type AlertWorkflowStatus = 'open' | 'closed' | 'acknowledged';
 
@@ -17,10 +17,6 @@ export interface CustomBulkAction {
   onClick: (items?: TimelineItem[]) => void;
   ['data-test-subj']?: string;
 }
-
-export type CustomBulkActionProp = Omit<CustomBulkAction, 'onClick'> & {
-  onClick: (eventIds: string[]) => void;
-};
 
 export interface BulkActionsObjectProp {
   alertStatusActions?: boolean;

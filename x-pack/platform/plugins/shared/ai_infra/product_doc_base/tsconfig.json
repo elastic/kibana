@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -28,6 +28,7 @@
     "@kbn/inference-common",
     "@kbn/core-security-server",
     "@kbn/ml-is-populated-object",
-    "@kbn/i18n"
+    "@kbn/i18n",
+    "@kbn/licensing-types"
   ]
 }

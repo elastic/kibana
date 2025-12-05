@@ -6,12 +6,20 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { useLoadSettings } from '../../../../lib/api';
 import { WatchActionsDropdown } from './threshold_watch_action_dropdown';
 import { WatchActionsAccordion } from './threshold_watch_action_accordion';
 import { WatchContext } from '../../watch_context';
+
+const styles = {
+  watcherThresholdActionDropdownContainer: css`
+    justify-content: flex-end;
+    flex-direction: row;
+  `,
+};
 
 interface Props {
   actionErrors: {
@@ -42,7 +50,7 @@ export const WatchActionsPanel: React.FunctionComponent<Props> = ({ actionErrors
             </h2>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem className="watcherThresholdWatchActionDropdownContainer">
+        <EuiFlexItem css={styles.watcherThresholdActionDropdownContainer}>
           <WatchActionsDropdown settings={settings} isLoading={isLoading} />
         </EuiFlexItem>
       </EuiFlexGroup>

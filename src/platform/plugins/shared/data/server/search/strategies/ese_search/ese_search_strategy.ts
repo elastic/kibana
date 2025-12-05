@@ -13,7 +13,7 @@ import { catchError, tap } from 'rxjs';
 import { firstValueFrom, from } from 'rxjs';
 import type { ISearchOptions, IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
-import { IAsyncSearchRequestParams } from '../..';
+import type { IAsyncSearchRequestParams } from '../..';
 import { getKbnSearchError, KbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type { IAsyncSearchOptions } from '../../../../common';
@@ -24,10 +24,11 @@ import {
   getIgnoreThrottled,
 } from './request_utils';
 import { toAsyncKibanaSearchResponse, toAsyncKibanaSearchStatusResponse } from './response_utils';
-import { SearchUsage, searchUsageObserver } from '../../collectors/search';
+import type { SearchUsage } from '../../collectors/search';
+import { searchUsageObserver } from '../../collectors/search';
 import { getDefaultSearchParams, getShardTimeout } from '../es_search';
 import { getTotalLoaded, shimHitsTotal } from '../../../../common/search/strategies/es_search';
-import { SearchConfigSchema } from '../../../config';
+import type { SearchConfigSchema } from '../../../config';
 import { sanitizeRequestParams } from '../../sanitize_request_params';
 
 export const enhancedEsSearchStrategyProvider = (
@@ -35,7 +36,8 @@ export const enhancedEsSearchStrategyProvider = (
   searchConfig: SearchConfigSchema,
   logger: Logger,
   usage?: SearchUsage,
-  useInternalUser: boolean = false
+  useInternalUser: boolean = false,
+  isServerless: boolean = false
 ): ISearchStrategy<IEsSearchRequest<IAsyncSearchRequestParams>> => {
   function cancelAsyncSearch(id: string, { esClient }: SearchStrategyDependencies) {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
@@ -99,7 +101,7 @@ export const enhancedEsSearchStrategyProvider = (
   ) {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
     const params = {
-      ...(await getDefaultAsyncSubmitParams(uiSettingsClient, searchConfig, options)),
+      ...(await getDefaultAsyncSubmitParams(uiSettingsClient, searchConfig, options, isServerless)),
       ...request.params,
     };
     const { body, headers, meta } = await client.asyncSearch.submit(params, {

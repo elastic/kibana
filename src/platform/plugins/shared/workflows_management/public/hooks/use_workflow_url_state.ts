@@ -7,13 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { parse, stringify } from 'query-string';
 import { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { parse, stringify } from 'query-string';
+
+export type WorkflowUrlStateTabType = 'workflow' | 'executions';
 
 export interface WorkflowUrlState {
-  tab?: 'workflow' | 'executions';
+  tab?: WorkflowUrlStateTabType;
   executionId?: string;
+  stepExecutionId?: string;
+  stepId?: string;
 }
 
 export function useWorkflowUrlState() {
@@ -23,8 +27,10 @@ export function useWorkflowUrlState() {
   const urlState = useMemo(() => {
     const params = parse(location.search);
     return {
-      tab: (params.tab as 'workflow' | 'executions') || 'workflow',
+      tab: (params.tab as WorkflowUrlStateTabType) || 'workflow',
       executionId: params.executionId as string | undefined,
+      stepExecutionId: params.stepExecutionId as string | undefined,
+      stepId: params.stepId as string | undefined,
     };
   }, [location.search]);
 
@@ -39,7 +45,7 @@ export function useWorkflowUrlState() {
       };
 
       // Remove undefined values to keep URL clean
-      const cleanParams: Record<string, any> = {};
+      const cleanParams: Record<string, any> = {}; // eslint-disable-line @typescript-eslint/no-explicit-any
       Object.entries(newParams).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
           cleanParams[key] = value;
@@ -60,12 +66,13 @@ export function useWorkflowUrlState() {
 
   const setActiveTab = useCallback(
     (tab: 'workflow' | 'executions') => {
-      // When switching to workflow tab, clear execution selection
-      const updates: Partial<WorkflowUrlState> = { tab };
-      if (tab === 'workflow') {
-        updates.executionId = undefined;
-      }
-      updateUrlState(updates);
+      // When switching to other tab, clear execution selection
+      updateUrlState({
+        executionId: undefined,
+        stepExecutionId: undefined,
+        stepId: undefined,
+        tab,
+      });
     },
     [updateUrlState]
   );
@@ -73,8 +80,28 @@ export function useWorkflowUrlState() {
   const setSelectedExecution = useCallback(
     (executionId: string | null) => {
       updateUrlState({
-        tab: 'executions', // Automatically switch to executions tab
         executionId: executionId || undefined,
+        stepExecutionId: undefined,
+        stepId: undefined,
+      });
+    },
+    [updateUrlState]
+  );
+
+  const setSelectedStepExecution = useCallback(
+    (stepExecutionId: string | null) => {
+      updateUrlState({
+        stepExecutionId: stepExecutionId || undefined,
+        stepId: undefined,
+      });
+    },
+    [updateUrlState]
+  );
+
+  const setSelectedStep = useCallback(
+    (stepId: string | null) => {
+      updateUrlState({
+        stepId: stepId || undefined,
       });
     },
     [updateUrlState]
@@ -84,10 +111,14 @@ export function useWorkflowUrlState() {
     // Current state
     activeTab: urlState.tab,
     selectedExecutionId: urlState.executionId,
+    selectedStepExecutionId: urlState.stepExecutionId,
+    selectedStepId: urlState.stepId,
 
     // State setters
     setActiveTab,
     setSelectedExecution,
+    setSelectedStepExecution,
+    setSelectedStep,
     updateUrlState,
   };
 }

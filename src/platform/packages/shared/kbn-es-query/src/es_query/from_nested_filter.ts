@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EsQueryFiltersConfig } from '../..';
-import { getFilterField, cleanFilter, Filter } from '../filters';
-import { DataViewBase } from './types';
+import type { EsQueryFiltersConfig } from '../..';
+import type { Filter } from '../filters';
+import { getFilterField, cleanFilter } from '../filters';
+import type { DataViewBase } from './types';
 import { getDataViewFieldSubtypeNested } from '../utils';
 
 /** @internal */

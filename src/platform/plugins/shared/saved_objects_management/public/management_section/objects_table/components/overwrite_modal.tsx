@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, Fragment, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { useState, Fragment } from 'react';
 import {
   EuiConfirmModal,
   EUI_MODAL_CONFIRM_BUTTON,
@@ -18,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
-import { FailedImportConflict } from '../../../lib/resolve_import_errors';
+import type { FailedImportConflict } from '../../../lib/resolve_import_errors';
 import { getDefaultTitle } from '../../../lib';
 
 export interface OverwriteModalProps {
@@ -41,6 +42,10 @@ export const OverwriteModal = ({ conflict, onFinish, allowedTypes }: OverwriteMo
   const [destinationId, setDestinationId] = useState(initialDestinationId);
 
   if (error.type === 'ambiguous_conflict') {
+    const selectControlLabel = i18n.translate(
+      'savedObjectsManagement.objectsTable.overwriteModal.selectControlLabel',
+      { defaultMessage: 'Object ID' }
+    );
     const selectProps = {
       options: error.destinations.map((destination) => {
         const header = destination.title ?? `${type} [id=${destination.id}]`;
@@ -75,10 +80,8 @@ export const OverwriteModal = ({ conflict, onFinish, allowedTypes }: OverwriteMo
         options={selectProps.options}
         valueOfSelected={destinationId}
         onChange={selectProps.onChange}
-        prepend={i18n.translate(
-          'savedObjectsManagement.objectsTable.overwriteModal.selectControlLabel',
-          { defaultMessage: 'Object ID' }
-        )}
+        prepend={selectControlLabel}
+        aria-label={selectControlLabel}
         hasDividers
         fullWidth
         compressed

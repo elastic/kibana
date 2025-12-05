@@ -9,6 +9,14 @@ import rison from '@kbn/rison';
 import type { RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
 
+import { LENS_ITEM_VERSION_V1 } from './content_management/constants';
+
+export {
+  LENS_ITEM_VERSION_V1,
+  LENS_ITEM_LATEST_VERSION,
+  LENS_CONTENT_TYPE,
+} from './content_management/constants';
+
 export const PLUGIN_ID = 'lens';
 export const APP_ID = PLUGIN_ID;
 export const DOC_TYPE = 'lens';
@@ -19,6 +27,12 @@ export const BASE_API_URL = '/api/lens';
 export const LENS_EDIT_BY_VALUE = 'edit_by_value';
 export const LENS_ICON = 'lensApp';
 export const STAGE_ID = 'production';
+
+export const LENS_API_CONTENT_MANAGEMENT_VERSION = LENS_ITEM_VERSION_V1;
+export const LENS_API_VERSION = '1';
+export const LENS_API_ACCESS = 'internal';
+export const LENS_API_PATH = '/api/lens';
+export const LENS_VIS_API_PATH = `${LENS_API_PATH}/visualizations`;
 
 export const INDEX_PATTERN_TYPE = 'index-pattern';
 

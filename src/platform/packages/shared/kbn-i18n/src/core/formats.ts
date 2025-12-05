@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CustomFormats } from '@formatjs/intl';
+import type { CustomFormats } from '@formatjs/intl';
 export type Formats = CustomFormats;
 /**
  * Default format options used for "en" locale.

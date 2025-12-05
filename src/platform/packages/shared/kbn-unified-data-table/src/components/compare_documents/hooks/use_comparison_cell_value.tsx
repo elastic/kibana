@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiDataGridCellValueElementProps, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { formatFieldValue } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
@@ -19,7 +20,8 @@ import { isEqual, memoize } from 'lodash';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { CELL_CLASS } from '../../../utils/get_render_cell_value';
 import type { DocumentDiffMode } from '../types';
-import { calculateDiff, CalculateDiffProps, formatDiffValue } from './calculate_diff';
+import type { CalculateDiffProps } from './calculate_diff';
+import { calculateDiff, formatDiffValue } from './calculate_diff';
 import {
   ADDED_SEGMENT_CLASS,
   BASE_CELL_CLASS,
@@ -96,7 +98,6 @@ const CellValue = (props: CellValueProps) => {
   const fieldName = comparisonFields[rowIndex];
   const field = useMemo(() => dataView.fields.getByName(fieldName), [dataView.fields, fieldName]);
   const comparisonDoc = useMemo(() => getDocById(columnId), [columnId, getDocById]);
-
   if (columnId === fieldColumnId) {
     return <FieldCellValue field={field} fieldName={fieldName} />;
   }

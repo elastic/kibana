@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Role } from '@kbn/test/src/auth/types';
+import type { Role } from '@kbn/test/src/auth/types';
 
 export const PROJECT_DEFAULT_ROLES = new Map<string, Role>([
   ['es', 'developer'],

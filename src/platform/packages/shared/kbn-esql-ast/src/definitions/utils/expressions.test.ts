@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { Parser } from '../../parser';
-import { SupportedDataType, FunctionDefinitionTypes } from '../types';
+import type { SupportedDataType } from '../types';
+import { FunctionDefinitionTypes } from '../types';
+import type { ESQLColumnData } from '../../commands_registry/types';
 import { Location } from '../../commands_registry/types';
 import { buildPartialMatcher, getExpressionType } from './expressions';
 import { setTestFunctions } from './test_functions';
+import { TIME_SYSTEM_PARAMS } from './literals';
 
 describe('buildPartialMatcher', () => {
   it('should build a partial matcher', () => {
@@ -74,11 +77,19 @@ describe('getExpressionType', () => {
         expression: '?value',
         expectedType: 'param',
       },
+      // time system params are interpreted as keywords... this is not a mistake
+      ...TIME_SYSTEM_PARAMS.map((p) => ({
+        expression: p,
+        expectedType: 'keyword' as SupportedDataType,
+      })),
     ];
-    test.each(cases)('detects a literal of type $expectedType', ({ expression, expectedType }) => {
-      const ast = getASTForExpression(expression);
-      expect(getExpressionType(ast)).toBe(expectedType);
-    });
+    test.each(cases)(
+      "detects literal '$expression' of type $expectedType",
+      ({ expression, expectedType }) => {
+        const ast = getASTForExpression(expression);
+        expect(getExpressionType(ast)).toBe(expectedType);
+      }
+    );
   });
 
   describe('inline casting', () => {
@@ -100,7 +111,6 @@ describe('getExpressionType', () => {
       { expectedType: 'keyword', expression: '1::keyword' },
       { expectedType: 'long', expression: '1::long' },
       { expectedType: 'keyword', expression: '1::string' },
-      { expectedType: 'keyword', expression: '1::text' },
       { expectedType: 'time_duration', expression: '1::time_duration' },
       { expectedType: 'unsigned_long', expression: '1::unsigned_long' },
       { expectedType: 'version', expression: '"1.2.3"::version' },
@@ -126,27 +136,25 @@ describe('getExpressionType', () => {
               {
                 name: 'fieldName',
                 type: 'geo_shape',
+                userDefined: false,
               },
             ],
-          ]),
-          new Map()
+          ])
         )
       ).toBe('geo_shape');
 
       expect(
         getExpressionType(
           getASTForExpression('col0'),
-          new Map(),
           new Map([
             [
               'col0',
-              [
-                {
-                  name: 'col0',
-                  type: 'long',
-                  location: { min: 0, max: 0 },
-                },
-              ],
+              {
+                name: 'col0',
+                type: 'long',
+                location: { min: 0, max: 0 },
+                userDefined: true,
+              },
             ],
           ])
         )
@@ -154,13 +162,31 @@ describe('getExpressionType', () => {
     });
 
     it('handles fields and userDefinedColumns which do not exist', () => {
-      expect(getExpressionType(getASTForExpression('fieldName'), new Map(), new Map())).toBe(
-        'unknown'
-      );
+      expect(getExpressionType(getASTForExpression('fieldName'), new Map())).toBe('unknown');
+    });
+
+    // this is here to fix https://github.com/elastic/kibana/issues/215157
+    it('handles conflict fields', () => {
+      expect(
+        getExpressionType(
+          getASTForExpression('fieldName'),
+          new Map([
+            [
+              'fieldName',
+              {
+                name: 'fieldName',
+                type: 'unsupported',
+                hasConflict: true,
+                userDefined: false,
+              },
+            ],
+          ])
+        )
+      ).toBe('unknown');
     });
 
     it('handles fields defined by a named param', () => {
-      expect(getExpressionType(getASTForExpression('??field'), new Map(), new Map())).toBe('param');
+      expect(getExpressionType(getASTForExpression('??field'), new Map())).toBe('param');
     });
   });
 
@@ -258,17 +284,23 @@ describe('getExpressionType', () => {
       expect(
         getExpressionType(
           getASTForExpression('CASE(true, "", true, "", keywordField)'),
-          new Map([[`keywordField`, { name: 'keywordField', type: 'keyword' }]]),
-          new Map()
+          new Map([[`keywordField`, { name: 'keywordField', type: 'keyword', userDefined: false }]])
         )
       ).toBe('keyword');
 
       expect(
         getExpressionType(
           getASTForExpression('CASE(true, "", true, "", keywordVar)'),
-          new Map(),
-          new Map([
-            [`keywordVar`, [{ name: 'keywordVar', type: 'keyword', location: { min: 0, max: 0 } }]],
+          new Map<string, ESQLColumnData>([
+            [
+              `keywordVar`,
+              {
+                name: 'keywordVar',
+                type: 'keyword',
+                location: { min: 0, max: 0 },
+                userDefined: true,
+              },
+            ],
           ])
         )
       ).toBe('keyword');
@@ -289,6 +321,111 @@ describe('getExpressionType', () => {
         },
       ]);
       expect(getExpressionType(getASTForExpression('test(1)'))).toBe('keyword');
+    });
+
+    it('returns unknown when no signature matches the provided arguments', () => {
+      setTestFunctions([
+        {
+          type: FunctionDefinitionTypes.SCALAR,
+          name: 'no_match',
+          description: 'No matching signature',
+          locationsAvailable: [Location.EVAL],
+          signatures: [{ params: [{ name: 'arg', type: 'integer' }], returnType: 'integer' }],
+        },
+      ]);
+      expect(getExpressionType(getASTForExpression('no_match("foo")'))).toBe('unknown');
+    });
+
+    it('returns unknown when multiple signatures match and return types are ambiguous', () => {
+      setTestFunctions([
+        {
+          type: FunctionDefinitionTypes.SCALAR,
+          name: 'ambiguous',
+          description: 'Ambiguous return type',
+          locationsAvailable: [Location.EVAL],
+          signatures: [
+            { params: [{ name: 'arg', type: 'integer' }], returnType: 'integer' },
+            { params: [{ name: 'arg', type: 'keyword' }], returnType: 'keyword' },
+          ],
+        },
+      ]);
+      expect(getExpressionType(getASTForExpression('ambiguous(?param)'))).toBe('unknown');
+    });
+
+    it('returns the type when multiple signatures match and so do their types', () => {
+      setTestFunctions([
+        {
+          type: FunctionDefinitionTypes.SCALAR,
+          name: 'ambiguous',
+          description: 'Ambiguous return type',
+          locationsAvailable: [Location.EVAL],
+          signatures: [
+            { params: [{ name: 'arg', type: 'keyword' }], returnType: 'integer' },
+            { params: [{ name: 'arg', type: 'integer' }], returnType: 'integer' },
+          ],
+        },
+      ]);
+      expect(getExpressionType(getASTForExpression('ambiguous(?param)'))).toBe('integer');
+    });
+
+    it('returns unknown when the any matching signature has returnType any', () => {
+      setTestFunctions([
+        {
+          type: FunctionDefinitionTypes.SCALAR,
+          name: 'returns_any',
+          description: 'Return type any',
+          locationsAvailable: [Location.EVAL],
+          signatures: [{ params: [], returnType: 'any' }],
+        },
+      ]);
+      expect(getExpressionType(getASTForExpression('returns_any()'))).toBe('unknown');
+    });
+
+    it('returns unknown when a function argument is of type unknown', () => {
+      setTestFunctions([
+        {
+          type: FunctionDefinitionTypes.SCALAR,
+          name: 'takes_keyword',
+          description: 'Test function',
+          locationsAvailable: [Location.EVAL],
+          signatures: [{ params: [{ name: 'arg', type: 'keyword' }], returnType: 'keyword' }],
+        },
+      ]);
+      expect(getExpressionType(getASTForExpression('takes_keyword(unknownField)'))).toBe('unknown');
+    });
+
+    it('implicit casting within function parameter', () => {
+      setTestFunctions([
+        {
+          type: FunctionDefinitionTypes.SCALAR,
+          name: 'accepts_dates',
+          description: 'Test function',
+          locationsAvailable: [Location.EVAL],
+          signatures: [
+            {
+              params: [{ name: 'arg1', type: 'date' }],
+              returnType: 'keyword',
+            },
+          ],
+        },
+      ]);
+      expect(getExpressionType(getASTForExpression('accepts_dates("")'))).toBe('keyword');
+      expect(
+        getExpressionType(
+          getASTForExpression('accepts_dates(keywordCol)'),
+          new Map([
+            [
+              'keywordCol',
+              {
+                name: 'keywordCol',
+                type: 'keyword',
+                location: { min: 0, max: 0 },
+                userDefined: true,
+              },
+            ],
+          ])
+        )
+      ).toBe('unknown');
     });
   });
 

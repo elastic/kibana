@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CreateSLOInput, GetSLOResponse, Indicator, UpdateSLOInput } from '@kbn/slo-schema';
+import type { CreateSLOInput, GetSLOResponse, Indicator, UpdateSLOInput } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
-import { RecursivePartial } from '@kbn/utility-types';
+import type { RecursivePartial } from '@kbn/utility-types';
 import { cloneDeep } from 'lodash';
 import { toDuration, toMinutes } from '../../../utils/slo/duration';
 import {
@@ -22,7 +22,7 @@ import {
   SYNTHETICS_AVAILABILITY_DEFAULT_VALUES,
   TIMESLICE_METRIC_DEFAULT_VALUES,
 } from '../constants';
-import { CreateSLOForm } from '../types';
+import type { CreateSLOForm } from '../types';
 
 export function transformSloResponseToCreateSloForm(
   values?: GetSLOResponse
@@ -61,6 +61,9 @@ export function transformSloResponseToCreateSloForm(
         : SETTINGS_DEFAULT_VALUES.frequency,
       syncField: values.settings?.syncField ?? null,
     },
+    artifacts: {
+      dashboards: values.artifacts?.dashboards || [],
+    },
   };
 }
 
@@ -93,6 +96,9 @@ export function transformCreateSLOFormToCreateSLOInput(values: CreateSLOForm): C
       frequency: `${values.settings.frequency ?? SETTINGS_DEFAULT_VALUES.frequency}m`,
       syncField: values.settings.syncField,
     },
+    artifacts: {
+      dashboards: values.artifacts?.dashboards || [],
+    },
   };
 }
 
@@ -124,6 +130,9 @@ export function transformValuesToUpdateSLOInput(values: CreateSLOForm): UpdateSL
       syncDelay: `${values.settings.syncDelay ?? SETTINGS_DEFAULT_VALUES.syncDelay}m`,
       frequency: `${values.settings.frequency ?? SETTINGS_DEFAULT_VALUES.frequency}m`,
       syncField: values.settings.syncField,
+    },
+    artifacts: {
+      dashboards: values.artifacts?.dashboards || [],
     },
   };
 }

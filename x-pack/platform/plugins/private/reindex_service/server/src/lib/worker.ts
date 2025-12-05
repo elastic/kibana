@@ -5,16 +5,24 @@
  * 2.0.
  */
 
-import { IClusterClient, Logger, SavedObjectsClientContract, FakeRequest } from '@kbn/core/server';
+import type {
+  IClusterClient,
+  Logger,
+  SavedObjectsClientContract,
+  FakeRequest,
+} from '@kbn/core/server';
 import { exhaustMap, Subject, takeUntil, timer } from 'rxjs';
 import moment from 'moment';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import { ReindexSavedObject, ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
-import { Version } from '@kbn/upgrade-assistant-pkg-server';
-import { Credential, CredentialStore } from './credential_store';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { type Version } from '@kbn/upgrade-assistant-pkg-common';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
+import { getRollupJobByIndexName } from '@kbn/upgrade-assistant-pkg-server';
+import type { ReindexSavedObject } from './types';
+import type { Credential, CredentialStore } from './credential_store';
 import { reindexActionsFactory } from './reindex_actions';
-import { ReindexService, reindexServiceFactory } from './reindex_service';
+import type { ReindexService } from './reindex_service';
+import { reindexServiceFactory } from './reindex_service';
 import { sortAndOrderReindexOperations, queuedOpHasStarted, isQueuedOp } from './op_utils';
 
 const POLL_INTERVAL = 30000;
@@ -61,13 +69,14 @@ export class ReindexWorker {
   private readonly log: Logger;
   private readonly security: SecurityPluginStart;
   private currentWorkerPadding: number = INITIAL_WORKER_PADDING_MS;
+  private rollupsEnabled: boolean;
 
   public static create(
     client: SavedObjectsClientContract,
     credentialStore: CredentialStore,
     clusterClient: IClusterClient,
     log: Logger,
-    licensing: LicensingPluginSetup,
+    licensing: LicensingPluginStart,
     security: SecurityPluginStart,
     version: Version
   ): ReindexWorker {
@@ -93,19 +102,27 @@ export class ReindexWorker {
     private credentialStore: CredentialStore,
     private clusterClient: IClusterClient,
     log: Logger,
-    private licensing: LicensingPluginSetup,
+    private licensing: LicensingPluginStart,
     security: SecurityPluginStart,
-    version: Version
+    version: Version,
+    rollupsEnabled: boolean = true
   ) {
     this.log = log.get('reindex_worker');
     this.security = security;
+    this.rollupsEnabled = rollupsEnabled;
     ReindexWorker.version = version;
 
     const callAsInternalUser = this.clusterClient.asInternalUser;
 
     this.reindexService = reindexServiceFactory(
       callAsInternalUser,
-      reindexActionsFactory(this.client, callAsInternalUser, this.log, version),
+      reindexActionsFactory(
+        this.client,
+        callAsInternalUser,
+        this.log,
+        getRollupJobByIndexName,
+        rollupsEnabled
+      ),
       log,
       this.licensing,
       version
@@ -210,7 +227,8 @@ export class ReindexWorker {
       this.client,
       callAsCurrentUser,
       this.log,
-      ReindexWorker.version
+      getRollupJobByIndexName,
+      this.rollupsEnabled
     );
     return reindexServiceFactory(
       callAsCurrentUser,

@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { DoneInvokeEvent } from 'xstate';
-import {
+import type { DoneInvokeEvent } from 'xstate';
+import type {
   DataStreamDocsStat,
   DatasetUserPrivileges,
   NonAggregatableDatasets,
 } from '../../../../common/api_types';
-import {
+import type {
   DataStreamDetails,
   DataStreamStat,
   DataStreamStatServiceResponse,
   DataStreamStatType,
   GetDataStreamsTypesPrivilegesResponse,
 } from '../../../../common/data_streams_stats';
-import { Integration } from '../../../../common/data_streams_stats/integration';
-import {
+import type { Integration } from '../../../../common/data_streams_stats/integration';
+import type {
   DataStreamType,
   QualityIndicators,
   TableCriteria,
   TimeRangeConfig,
 } from '../../../../common/types';
-import { DatasetTableSortField } from '../../../hooks';
+import type { DatasetTableSortField } from '../../../hooks';
 
 interface FiltersCriteria {
   inactive: boolean;
@@ -183,6 +183,10 @@ export type DatasetQualityControllerEvent =
   | {
       type: 'UPDATE_TYPES';
       types: DataStreamType[];
+    }
+  | {
+      type: 'UPDATE_FAILURE_STORE';
+      dataStream: DataStreamStat;
     }
   | DoneInvokeEvent<GetDataStreamsTypesPrivilegesResponse>
   | DoneInvokeEvent<DataStreamDocsStat[]>

@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { castArray, once } from 'lodash';
+import { castArray } from 'lodash';
 import { Metadata } from '@grpc/grpc-js';
 import { OTLPMetricExporter as OTLPMetricExporterGrpc } from '@opentelemetry/exporter-metrics-otlp-grpc';
 import { OTLPMetricExporter as OTLPMetricExporterHttp } from '@opentelemetry/exporter-metrics-otlp-http';
-import { api, metrics, resources } from '@elastic/opentelemetry-node/sdk';
+import type { resources } from '@elastic/opentelemetry-node/sdk';
+import { api, metrics } from '@elastic/opentelemetry-node/sdk';
 import type { MetricsConfig, MonitoringCollectionConfig } from '@kbn/metrics-config';
 import { fromExternalVariant } from '@kbn/std';
+import { cleanupBeforeExit } from '@kbn/cleanup-before-exit';
 import { PrometheusExporter } from './prometheus_exporter';
 
 /**
@@ -131,9 +133,5 @@ export function initMetrics(initMetricsOptions: InitMetricsOptions) {
 
   api.metrics.setGlobalMeterProvider(meterProvider);
 
-  const shutdown = once(() => meterProvider.shutdown());
-  process.on('SIGTERM', shutdown);
-  process.on('SIGINT', shutdown);
-  process.on('beforeExit', shutdown);
-  process.on('uncaughtExceptionMonitor', shutdown);
+  cleanupBeforeExit(() => meterProvider.shutdown());
 }

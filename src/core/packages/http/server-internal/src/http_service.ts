@@ -7,17 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable, Subscription, combineLatest, firstValueFrom, of, mergeMap } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
+import { combineLatest, firstValueFrom, of, mergeMap } from 'rxjs';
 import { map } from 'rxjs';
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 import { pick, Semaphore } from '@kbn/std';
 import {
   generateOpenApiDocument,
   type GenerateOpenApiDocumentOptionsFilters,
 } from '@kbn/router-to-openapispec';
-import { Logger } from '@kbn/logging';
-import { Env } from '@kbn/config';
+import type { Logger } from '@kbn/logging';
+import type { Env } from '@kbn/config';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
@@ -31,23 +33,31 @@ import type {
   InternalContextSetup,
   InternalContextPreboot,
 } from '@kbn/core-http-context-server-internal';
-import { Router, RouterOptions } from '@kbn/core-http-router-server-internal';
+import type { DocLinksServicePreboot } from '@kbn/core-doc-links-server';
+import type { RouterOptions } from '@kbn/core-http-router-server-internal';
+import { Router } from '@kbn/core-http-router-server-internal';
 
-import { CspConfigType, cspConfig } from './csp';
-import { PermissionsPolicyConfigType, permissionsPolicyConfig } from './permissions_policy';
-import { HttpConfig, HttpConfigType, config as httpConfig } from './http_config';
+import type { CspConfigType } from './csp';
+import { cspConfig } from './csp';
+import type { PermissionsPolicyConfigType } from './permissions_policy';
+import { permissionsPolicyConfig } from './permissions_policy';
+import type { HttpConfigType } from './http_config';
+import { HttpConfig, config as httpConfig } from './http_config';
 import { HttpServer } from './http_server';
 import { HttpsRedirectServer } from './https_redirect_server';
-import {
+import type {
   InternalHttpServicePreboot,
   InternalHttpServiceSetup,
   InternalHttpServiceStart,
+  GenerateOasArgs,
 } from './types';
 import { registerCoreHandlers } from './register_lifecycle_handlers';
-import { ExternalUrlConfigType, externalUrlConfig, ExternalUrlConfig } from './external_url';
+import type { ExternalUrlConfigType } from './external_url';
+import { externalUrlConfig, ExternalUrlConfig } from './external_url';
 
 export interface PrebootDeps {
   context: InternalContextPreboot;
+  docLinks: DocLinksServicePreboot;
 }
 
 export interface SetupDeps {
@@ -97,6 +107,7 @@ export class HttpService
 
   public async preboot(deps: PrebootDeps): Promise<InternalHttpServicePreboot> {
     this.log.debug('setting up preboot server');
+
     const config = await firstValueFrom(this.config$);
 
     const prebootSetup = await this.prebootServer.setup({
@@ -106,7 +117,9 @@ export class HttpService
       path: '/{p*}',
       method: '*',
       handler: (req, responseToolkit) => {
-        this.log.debug(`Kibana server is not ready yet ${req.method}:${req.url.href}.`);
+        this.log.debug(
+          `Kibana server is not ready yet ${req.method}:${req.url.href}. For troubleshooting guidance, see ${deps.docLinks.links.server.troubleshootServerNotReady}`
+        );
 
         // If server is not ready yet, because plugins or core can perform
         // long running tasks (build assets, saved objects migrations etc.)
@@ -219,11 +232,12 @@ export class HttpService
     return this.internalSetup;
   }
 
-  // this method exists because we need the start contract to create the `CoreStart` used to start
+  // this method exists because we need the start contract to create `CoreStart` used to start
   // the `plugin` and `legacy` services.
   public getStartContract(): InternalHttpServiceStart {
     return {
       ...pick(this.internalSetup!, ['auth', 'basePath', 'getServerInfo', 'staticAssets']),
+      generateOas: (args: GenerateOasArgs) => this.generateOas(args),
       isListening: () => this.httpServer.isListening(),
     };
   }
@@ -250,6 +264,24 @@ export class HttpService
     }
 
     return this.getStartContract();
+  }
+
+  private generateOas({ pluginId, baseUrl, filters }: GenerateOasArgs) {
+    // Potentially quite expensive
+    return firstValueFrom(
+      of(1).pipe(
+        HttpService.generateOasSemaphore.acquire(),
+        mergeMap(async () => {
+          return generateOpenApiDocument(this.httpServer.getRouters({ pluginId }), {
+            baseUrl,
+            title: 'Kibana HTTP APIs',
+            version: '0.0.0', // TODO get a better version here
+            filters,
+            env: { serverless: this.env.packageInfo.buildFlavor === 'serverless' },
+          });
+        })
+      )
+    );
   }
 
   private registerOasApi(config: HttpConfig) {
@@ -298,32 +330,19 @@ export class HttpService
         } catch (e) {
           return h.response({ message: e.message }).code(400);
         }
-        return await firstValueFrom(
-          of(1).pipe(
-            HttpService.generateOasSemaphore.acquire(),
-            mergeMap(async () => {
-              try {
-                // Potentially quite expensive
-                const result = await generateOpenApiDocument(
-                  this.httpServer.getRouters({ pluginId: query.pluginId }),
-                  {
-                    baseUrl,
-                    title: 'Kibana HTTP APIs',
-                    version: '0.0.0', // TODO get a better version here
-                    filters,
-                    env: { serverless: this.env.packageInfo.buildFlavor === 'serverless' },
-                  }
-                );
-                return h.response(result);
-              } catch (e) {
-                this.log.error(e);
-                return h.response({ message: e.message }).code(500);
-              }
-            })
-          )
-        );
+        try {
+          const result = await this.generateOas({
+            baseUrl,
+            filters,
+            pluginId: query.pluginId,
+          });
+          return h.response(result);
+        } catch (e) {
+          return h.response({ message: e.message }).code(500);
+        }
       },
       options: {
+        auth: false,
         app: {
           access: 'public',
           security: {
@@ -333,7 +352,6 @@ export class HttpService
             },
           },
         },
-        auth: false,
         cache: {
           privacy: 'public',
           otherwise: 'must-revalidate',

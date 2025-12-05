@@ -7,9 +7,10 @@
 
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import expect from '@kbn/expect';
+import { omit } from 'lodash';
 import { decompressFromBase64 } from 'lz-string';
 import { getSavedQuerySecurityUtils } from '../../../saved_query_management/utils/saved_query_security';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function (ctx: FtrProviderContext) {
   const { getPageObjects, getService } = ctx;
@@ -53,7 +54,7 @@ export default function (ctx: FtrProviderContext) {
     await timePicker.setDefaultAbsoluteRange();
   }
 
-  // more tests are in x-pack/test/functional/apps/saved_query_management/feature_controls/security.ts
+  // more tests are in x-pack/platform/test/functional/apps/saved_query_management/feature_controls/security.ts
 
   describe('discover feature controls security', () => {
     before(async () => {
@@ -214,7 +215,8 @@ export default function (ctx: FtrProviderContext) {
         const actualUrl = await share.getSharedUrl();
         expect(actualUrl).to.contain(`?l=${DISCOVER_APP_LOCATOR}`);
         const urlSearchParams = new URLSearchParams(actualUrl);
-        expect(JSON.parse(decompressFromBase64(urlSearchParams.get('lz')!)!)).to.eql({
+        const parsedSharedUrl = JSON.parse(decompressFromBase64(urlSearchParams.get('lz')!)!);
+        expect(omit(parsedSharedUrl, 'tab')).to.eql({
           query: {
             language: 'kuery',
             query: '',
@@ -233,6 +235,8 @@ export default function (ctx: FtrProviderContext) {
             pause: true,
           },
         });
+        expect(parsedSharedUrl.tab.id).to.be.a('string');
+        expect(parsedSharedUrl.tab.label).to.be.a('string');
         await share.closeShareModal();
       });
 

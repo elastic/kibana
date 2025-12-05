@@ -7,8 +7,9 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { FtrService, FtrProviderContext } from '../ftr_provider_context';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { FtrProviderContext } from '../ftr_provider_context';
+import { FtrService } from '../ftr_provider_context';
 
 interface FillTagFormFields {
   name?: string;
@@ -87,6 +88,7 @@ class TagModal extends FtrService {
 
     if (submit) {
       await this.clickConfirm();
+      await this.header.waitUntilLoadingHasFinished();
     }
   }
 
@@ -337,22 +339,26 @@ export class TagManagementPageObject extends FtrService {
   }
 
   async clickActionItem(action: string) {
+    await this.openCollapsedMenu();
+
+    await this.testSubjects.click(`tagsTableAction-${action}`);
+  }
+
+  async openCollapsedMenu(rowIndex = 0) {
     const rows = await this.testSubjects.findAll('tagsTableRow');
-    const firstRow = rows[0];
+    const row = rows[rowIndex];
     // if there is more than 2 actions, they are wrapped in a popover that opens from a new action.
     const menuActionPresent = await this.testSubjects.descendantExists(
       'euiCollapsedItemActionsButton',
-      firstRow
+      row
     );
     if (menuActionPresent) {
       const actionButton = await this.testSubjects.findDescendant(
         'euiCollapsedItemActionsButton',
-        firstRow
+        row
       );
       await actionButton.click();
     }
-
-    await this.testSubjects.click(`tagsTableAction-${action}`);
   }
 
   /**

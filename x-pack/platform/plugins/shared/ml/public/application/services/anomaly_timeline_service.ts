@@ -14,6 +14,7 @@ import type { InfluencersFilterQuery, MlEntityField } from '@kbn/ml-anomaly-util
 import type { TimeBucketsInterval, TimeRangeBounds } from '@kbn/ml-time-buckets';
 import { getBoundsRoundedToInterval, TimeBuckets } from '@kbn/ml-time-buckets';
 import type { SeverityThreshold } from '../../../common/types/anomalies';
+import type { MlApi } from './ml_api_service';
 import type {
   ExplorerJob,
   OverallSwimlaneData,
@@ -21,7 +22,7 @@ import type {
   ViewBySwimLaneData,
 } from '../explorer/explorer_utils';
 import { OVERALL_LABEL, VIEW_BY_JOB_LABEL } from '../explorer/explorer_constants';
-import type { MlResultsService } from './results_service';
+import { mlResultsServiceProvider, type MlResultsService } from './results_service';
 import { shouldIncludePointByScore } from '../util/anomaly_score_utils';
 
 /**
@@ -30,12 +31,14 @@ import { shouldIncludePointByScore } from '../util/anomaly_score_utils';
 export class AnomalyTimelineService {
   private timeBuckets: TimeBuckets;
   private _customTimeRange: TimeRange | undefined;
+  private mlResultsService: MlResultsService;
 
   constructor(
     private timeFilter: TimefilterContract,
     uiSettings: IUiSettingsClient,
-    private mlResultsService: MlResultsService
+    private mlApi: MlApi
   ) {
+    this.mlResultsService = mlResultsServiceProvider(mlApi);
     this.timeBuckets = new TimeBuckets({
       'histogram:maxBars': uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
       'histogram:barTarget': uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
@@ -213,29 +216,29 @@ export class AnomalyTimelineService {
     if (viewBySwimlaneFieldName === VIEW_BY_JOB_LABEL) {
       const jobIds =
         fieldValues !== undefined && fieldValues.length > 0 ? fieldValues : selectedJobIds;
-      response = await this.mlResultsService.getScoresByBucket(
+      response = await this.mlApi.results.getScoresByBucket({
         jobIds,
-        searchBounds.min.valueOf(),
-        searchBounds.max.valueOf(),
+        earliestMs: searchBounds.min.valueOf(),
+        latestMs: searchBounds.max.valueOf(),
         intervalMs,
         perPage,
         fromPage,
-        swimLaneSeverity
-      );
+        swimLaneSeverity,
+      });
     } else {
-      response = await this.mlResultsService.getInfluencerValueMaxScoreByTime(
-        selectedJobIds,
-        viewBySwimlaneFieldName,
-        fieldValues,
-        searchBounds.min.valueOf(),
-        searchBounds.max.valueOf(),
+      response = await this.mlApi.results.getInfluencerValueMaxScoreByTime({
+        jobIds: selectedJobIds,
+        influencerFieldName: viewBySwimlaneFieldName,
+        influencerFieldValues: fieldValues,
+        earliestMs: searchBounds.min.valueOf(),
+        latestMs: searchBounds.max.valueOf(),
         intervalMs,
-        swimlaneLimit,
+        maxResults: swimlaneLimit,
         perPage,
         fromPage,
         influencersFilterQuery,
-        swimLaneSeverity
-      );
+        swimLaneSeverity,
+      });
     }
 
     if (response === undefined) {
@@ -272,22 +275,25 @@ export class AnomalyTimelineService {
     // Find the top field values for the selected time, and then load the 'view by'
     // swimlane over the full time range for those specific field values.
     if (viewBySwimlaneFieldName !== VIEW_BY_JOB_LABEL) {
-      const resp = await this.mlResultsService.getTopInfluencers(
-        selectedJobIds,
+      const resp = await this.mlApi.results.getTopInfluencers({
+        jobIds: selectedJobIds,
         earliestMs,
         latestMs,
-        swimlaneLimit,
+        maxFieldValues: swimlaneLimit,
         perPage,
-        fromPage,
-        selectionInfluencers,
-        influencersFilterQuery
-      );
-      if (resp.influencers[viewBySwimlaneFieldName] === undefined) {
+        page: fromPage,
+        influencers: selectionInfluencers.map((s) => ({
+          fieldName: s.fieldName,
+          fieldValue: String(s.fieldValue ?? ''),
+        })),
+        influencersFilterQuery,
+      });
+      if (resp[viewBySwimlaneFieldName] === undefined) {
         return [];
       }
 
       const topFieldValues: any[] = [];
-      const topInfluencers = resp.influencers[viewBySwimlaneFieldName];
+      const topInfluencers = resp[viewBySwimlaneFieldName];
       if (Array.isArray(topInfluencers)) {
         topInfluencers.forEach((influencerData) => {
           if (influencerData.maxAnomalyScore > 0) {
@@ -297,15 +303,15 @@ export class AnomalyTimelineService {
       }
       return topFieldValues;
     } else {
-      const resp = await this.mlResultsService.getScoresByBucket(
-        selectedJobIds,
+      const resp = await this.mlApi.results.getScoresByBucket({
+        jobIds: selectedJobIds,
         earliestMs,
         latestMs,
-        bucketInterval.asMilliseconds(),
+        intervalMs: bucketInterval.asMilliseconds(),
         perPage,
         fromPage,
-        swimLaneSeverity
-      );
+        swimLaneSeverity,
+      });
       return Object.keys(resp.results);
     }
   }

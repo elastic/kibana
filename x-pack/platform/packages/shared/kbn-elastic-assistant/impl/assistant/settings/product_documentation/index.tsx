@@ -15,7 +15,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
+import type { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
 import { useInstallProductDoc } from '../../api/product_docs/use_install_product_doc';
 import * as i18n from './translations';
 

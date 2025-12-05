@@ -7,7 +7,7 @@
 
 import { BulletSubtype } from '@elastic/charts';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { svlCommonPage, lens, timePicker, dashboard } = getPageObjects([
@@ -24,7 +24,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('Gauge', function describeIndexTests() {
     const fixture =
-      'x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/open_in_lens/agg_based/gauge.json';
+      'x-pack/platform/test/serverless/fixtures/kbn_archives/lens/open_in_lens/agg_based/gauge.json';
 
     before(async () => {
       await kibanaServer.importExport.load(fixture);
@@ -37,7 +37,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     beforeEach(async () => {
       await dashboard.navigateToApp(); // required for svl until dashboard PO navigation is fixed
-      await dashboard.gotoDashboardEditMode('Convert to Lens - Gauge');
+      await dashboard.loadDashboardInEditMode('Convert to Lens - Gauge');
       await timePicker.setDefaultAbsoluteRange();
       await elasticChart.setNewChartUiDebugFlag(true);
     });
@@ -50,7 +50,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await panelActions.convertToLensByTitle('Gauge - Agg with params');
       await lens.waitForVisualization('gaugeChart');
 
-      expect(await lens.getLayerCount()).to.be(1);
+      await lens.assertLayerCount(1);
 
       const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
       expect(dimensions).to.have.length(3);
@@ -76,7 +76,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await panelActions.convertToLensByTitle('Gauge - Color ranges');
       await lens.waitForVisualization('gaugeChart');
 
-      expect(await lens.getLayerCount()).to.be(1);
+      await lens.assertLayerCount(1);
 
       const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
       expect(dimensions).to.have.length(3);

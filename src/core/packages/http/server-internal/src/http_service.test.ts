@@ -18,10 +18,12 @@ import { getEnvOptions } from '@kbn/config-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { Router } from '@kbn/core-http-router-server-internal';
 jest.mock('@kbn/core-http-router-server-internal');
 import { HttpService } from './http_service';
-import { HttpConfigType, config } from './http_config';
+import type { HttpConfigType } from './http_config';
+import { config } from './http_config';
 import { cspConfig } from './csp';
 import { externalUrlConfig, ExternalUrlConfig } from './external_url';
 import { permissionsPolicyConfig } from './permissions_policy';
@@ -50,8 +52,11 @@ const createConfigService = (value: Partial<HttpConfigType> = {}) => {
 const contextPreboot = contextServiceMock.createPrebootContract();
 const contextSetup = contextServiceMock.createSetupContract();
 
+const docLinksPreboot = docLinksServiceMock.createSetupContract();
+
 const prebootDeps = {
   context: contextPreboot,
+  docLinks: docLinksPreboot,
 };
 const setupDeps = {
   context: contextSetup,

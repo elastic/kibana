@@ -8,7 +8,7 @@
  */
 
 import { assignIn } from 'lodash';
-import { IMetricAggConfig } from '../metric_agg_type';
+import type { IMetricAggConfig } from '../metric_agg_type';
 
 /**
  * Get the ResponseAggConfig class for an aggConfig,

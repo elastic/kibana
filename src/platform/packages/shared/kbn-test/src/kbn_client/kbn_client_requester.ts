@@ -11,9 +11,10 @@ import Url from 'url';
 import Https from 'https';
 import Qs from 'querystring';
 
-import Axios, { AxiosResponse, ResponseType } from 'axios';
+import type { AxiosResponse, ResponseType } from 'axios';
+import Axios from 'axios';
 import { isAxiosRequestError, isAxiosResponseError } from '@kbn/dev-utils';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { KbnClientRequesterError } from './kbn_client_requester_error';
 
 const isConcliftOnGetError = (error: any) => {
@@ -135,13 +136,22 @@ export class KbnClientRequester {
         this.log.debug(`Requesting url (redacted): [${redacted}]`);
         return await Axios.request(buildRequest(url, this.httpsAgent, options));
       } catch (error) {
+        const statusCode = isAxiosResponseError(error) ? error.response.status : 'N/A';
+        const errorCause = error.code || error.message || 'Unknown error';
+        const responseBody = isAxiosResponseError(error)
+          ? JSON.stringify(error.response.data, null, 2)
+          : 'No response body';
+        const errorDetails = `Status: ${statusCode}, Cause: ${errorCause}, Response: ${responseBody}`;
+
+        this.log.debug(`Request failed - ${errorDetails}, Attempt: ${attempt}/${maxAttempts}`);
+
         if (isIgnorableError(error, options.ignoreErrors)) return error.response;
         if (attempt < maxAttempts) {
           await delay(1000 * attempt);
           continue;
         }
         throw new KbnClientRequesterError(
-          `${msgOrThrow(attempt, error)} -- and ran out of retries`,
+          `${msgOrThrow(attempt, error)} -- ${errorDetails} -- and ran out of retries`,
           error
         );
       }

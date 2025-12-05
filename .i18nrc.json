@@ -8,12 +8,16 @@
     "apmOss": "src/plugins/apm_oss",
     "autocomplete": "x-pack/solutions/security/packages/kbn-securitysolution-autocomplete/src",
     "avcBanner": "src/platform/packages/shared/kbn-avc-banner/src",
-    "cases": ["src/platform/packages/shared/kbn-cases-components"],
+    "cases": [
+      "src/platform/packages/shared/kbn-cases-components"
+    ],
     "cellActions": "src/platform/packages/shared/kbn-cell-actions",
     "charts": "src/platform/plugins/shared/charts",
     "console": "src/platform/plugins/shared/console",
     "contentManagement": "src/platform/packages/shared/content-management",
-    "core": ["src/core"],
+    "core": [
+      "src/core"
+    ],
     "customIntegrations": "src/platform/plugins/shared/custom_integrations",
     "dashboard": "src/platform/plugins/shared/dashboard",
     "cloud": "src/platform/packages/shared/cloud",
@@ -22,7 +26,10 @@
     "data": "src/platform/plugins/shared/data",
     "observabilityAlertDetails": "x-pack/solutions/observability/packages/alert-details",
     "dataViews": "src/platform/plugins/shared/data_views",
-    "defaultNavigation": ["packages/default-nav", "src/platform/packages/private/default-nav"],
+    "defaultNavigation": [
+      "packages/default-nav",
+      "src/platform/packages/private/default-nav"
+    ],
     "devTools": "src/platform/plugins/shared/dev_tools",
     "discover": [
       "src/platform/plugins/shared/discover",
@@ -50,15 +57,16 @@
     "eventAnnotationCommon": "src/platform/packages/shared/kbn-event-annotation-common",
     "eventAnnotationComponents": "src/platform/packages/shared/kbn-event-annotation-components",
     "fieldUtils": "src/platform/packages/shared/kbn-field-utils",
-    "fieldFormats": "src/platform/plugins/shared/field_formats",
+    "fieldFormats": [
+      "src/platform/plugins/shared/field_formats",
+      "src/platform/packages/shared/kbn-field-formats-common"
+    ],
     "files": "src/platform/plugins/shared/files",
     "filesManagement": "src/platform/plugins/private/files_management",
     "flot": "src/platform/packages/shared/kbn-flot-charts/lib",
     "generateCsv": "src/platform/packages/private/kbn-generate-csv",
     "grouping": "src/platform/packages/shared/kbn-grouping/src",
     "alertsGrouping": "x-pack/solutions/observability/packages/kbn-alerts-grouping",
-    "guidedOnboarding": "src/platform/plugins/shared/guided_onboarding",
-    "guidedOnboardingPackage": "src/platform/packages/shared/kbn-guided-onboarding",
     "home": "src/platform/plugins/shared/home",
     "homePackages": "src/platform/packages/shared/home",
     "indexPatternEditor": "src/platform/plugins/shared/data_view_editor",
@@ -86,14 +94,21 @@
       "src/platform/packages/shared/kbn-management",
       "packages/kbn-management"
     ],
+    "metricsExperience": "src/platform/packages/shared/kbn-unified-metrics-grid/src",
     "monaco": "src/platform/packages/shared/kbn-monaco/src",
-    "navigation": ["src/platform/plugins/shared/navigation", "packages/solution-nav"],
+    "navigation": [
+      "src/platform/plugins/shared/navigation",
+      "packages/solution-nav"
+    ],
     "links": "src/platform/plugins/private/links",
     "newsfeed": "src/platform/plugins/shared/newsfeed",
     "presentationUtil": "src/platform/plugins/shared/presentation_util",
     "presentationUtils": "src/platform/packages/shared/presentation/presentation_util",
     "randomSampling": "x-pack/platform/packages/private/kbn-random-sampling",
-    "reactPackages": ["src/platform/packages/shared/react", "src/platform/packages/private/react"],
+    "reactPackages": [
+      "src/platform/packages/shared/react",
+      "src/platform/packages/private/react"
+    ],
     "esqlEditor": "src/platform/packages/private/kbn-esql-editor",
     "esqlUtils": "src/platform/packages/shared/kbn-esql-utils",
     "reporting": "src/platform/packages/private/kbn-reporting",
@@ -102,8 +117,15 @@
     "savedObjectsManagement": "src/platform/plugins/shared/saved_objects_management",
     "searchConnectors": "src/platform/packages/shared/kbn-search-connectors",
     "server": "src/legacy/server",
-    "share": ["src/platform/plugins/shared/share", "packages/kbn-reporting-share"],
-    "sharedUXPackages": ["packages/shared-ux", "src/platform/packages/shared/shared-ux", "src/platform/packages/private/shared-ux/"],
+    "share": [
+      "src/platform/plugins/shared/share",
+      "packages/kbn-reporting-share"
+    ],
+    "sharedUXPackages": [
+      "packages/shared-ux",
+      "src/platform/packages/shared/shared-ux",
+      "src/platform/packages/private/shared-ux/"
+    ],
     "searchApiKeysComponents": "x-pack/solutions/search/packages/kbn-search-api-keys-components",
     "searchApiPanels": "src/platform/packages/shared/kbn-search-api-panels/",
     "searchErrors": "src/platform/packages/shared/kbn-search-errors",
@@ -119,18 +141,30 @@
       "x-pack/solutions/security/packages/side-nav",
       "x-pack/solutions/security/packages/upselling"
     ],
-    "sharedPlatformPackages": ["x-pack/platform/packages/shared/kbn-cloud-security-posture"],
+    "sharedPlatformPackages": [
+      "x-pack/platform/packages/shared/kbn-cloud-security-posture"
+    ],
     "serverlessPackages": "packages/serverless",
-    "sse": ["src/platform/packages/shared/kbn-sse-utils"],
+    "sse": [
+      "src/platform/packages/shared/kbn-sse-utils"
+    ],
     "coloring": "src/platform/packages/shared/kbn-coloring/src",
     "languageDocumentation": "src/platform/packages/private/kbn-language-documentation/src",
     "esql": "src/platform/plugins/shared/esql",
     "esqlDataGrid": "src/platform/plugins/shared/esql_datagrid",
     "statusPage": "src/legacy/core_plugins/status_page",
-    "telemetry": ["src/platform/plugins/shared/telemetry", "src/platform/plugins/shared/telemetry_management_section"],
-    "timelion": ["src/platform/plugins/private/vis_types/timelion"],
+    "telemetry": [
+      "src/platform/plugins/shared/telemetry",
+      "src/platform/plugins/shared/telemetry_management_section"
+    ],
+    "timelion": [
+      "src/platform/plugins/private/vis_types/timelion"
+    ],
     "tryInConsole": "src/platform/packages/shared/kbn-try-in-console/",
-    "uiActions": ["src/platform/plugins/shared/ui_actions", "src/platform/packages/shared/kbn-ui-actions-browser"],
+    "uiActions": [
+      "src/platform/plugins/shared/ui_actions",
+      "src/platform/packages/shared/kbn-ui-actions-browser"
+    ],
     "uiActionsEnhanced": "src/platform/plugins/shared/ui_actions_enhanced",
     "uiActionsExamples": "examples/ui_action_examples",
     "usageCollection": "src/platform/plugins/shared/usage_collection",
@@ -151,7 +185,10 @@
     "visualizations": "src/platform/plugins/shared/visualizations",
     "visualizationUiComponents": "src/platform/packages/shared/kbn-visualization-ui-components",
     "visualizationUtils": "src/platform/packages/shared/kbn-visualization-utils",
-    "unifiedDocViewer": ["src/platform/plugins/shared/unified_doc_viewer", "src/platform/packages/shared/kbn-unified-doc-viewer"],
+    "unifiedDocViewer": [
+      "src/platform/plugins/shared/unified_doc_viewer",
+      "src/platform/packages/shared/kbn-unified-doc-viewer"
+    ],
     "unifiedSearch": "src/platform/plugins/shared/unified_search",
     "unifiedFieldList": "src/platform/packages/shared/kbn-unified-field-list",
     "unifiedHistogram": "src/platform/packages/shared/kbn-unified-histogram",

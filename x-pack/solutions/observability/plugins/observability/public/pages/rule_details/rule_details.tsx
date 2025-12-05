@@ -17,7 +17,7 @@ import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { ALERT_STATUS } from '@kbn/rule-data-utils';
 import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
-import { ruleDetailsLocatorID } from '../../../common';
+import { ruleDetailsLocatorID } from '@kbn/deeplinks-observability';
 import {
   ALERT_STATUS_ALL,
   OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
@@ -30,7 +30,7 @@ import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { useFetchRuleTypes } from '../../hooks/use_fetch_rule_types';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { RuleDetailsLocatorParams } from '../../locators/rule_details';
+import type { RuleDetailsLocatorParams } from '../../locators/rule_details';
 import { getControlIndex } from '../../utils/alert_controls/get_control_index';
 import { setStatusOnControlConfigs } from '../../utils/alert_controls/set_status_on_control_configs';
 import { updateSelectedOptions } from '../../utils/alert_controls/update_selected_options';

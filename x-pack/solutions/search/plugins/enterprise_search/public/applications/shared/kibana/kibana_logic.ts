@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { FC } from 'react';
+import type { FC } from 'react';
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
-import { ConsolePluginStart } from '@kbn/console-plugin/public';
-import {
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import type { ConsolePluginStart } from '@kbn/console-plugin/public';
+import type {
   ApplicationStart,
   Capabilities,
   ChromeBreadcrumb,
@@ -21,25 +22,26 @@ import {
   ChromeStart,
   SecurityServiceStart,
 } from '@kbn/core/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
-import { FleetStart } from '@kbn/fleet-plugin/public';
-import { IndexMappingProps } from '@kbn/index-management-shared-types';
-import { LensPublicStart } from '@kbn/lens-plugin/public';
-import { MlPluginStart } from '@kbn/ml-plugin/public';
-import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
-import { ConnectorDefinition } from '@kbn/search-connectors';
+import type { FleetStart } from '@kbn/fleet-plugin/public';
+import type { IndexMappingProps } from '@kbn/index-management-shared-types';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { MlPluginStart } from '@kbn/ml-plugin/public';
+import type { ConnectorDefinition } from '@kbn/search-connectors';
 import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
-import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
+import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-shared-ui';
+import type { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
-import { ClientConfigType, ProductFeatures } from '../../../../common/types';
-import { ESConfig, UpdateSideNavDefinitionFn } from '../../../plugin';
+import type { ClientConfigType, ProductFeatures } from '../../../../common/types';
+import type { ESConfig, UpdateSideNavDefinitionFn } from '../../../plugin';
 
 import { HttpLogic } from '../http';
-import { createHref, CreateHrefOptions } from '../react_router_helpers';
+import type { CreateHrefOptions } from '../react_router_helpers';
+import { createHref } from '../react_router_helpers';
 
 type RequiredFieldsOnly<T> = {
   [K in keyof T as T[K] extends Required<T>[K] ? K : never]: T[K];

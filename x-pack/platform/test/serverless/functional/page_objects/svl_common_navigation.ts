@@ -21,7 +21,7 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
 
 class SvlNavigationSearchPageObject extends NavigationalSearchPageObject {
   constructor(ctx: FtrProviderContext) {
-    // @ts-expect-error -- this expects FtrProviderContext from x-pack/test/functional/ftr_provider_context.ts
+    // @ts-expect-error -- this expects FtrProviderContext from x-pack/platform/test/functional/ftr_provider_context.ts
     super(ctx);
   }
 

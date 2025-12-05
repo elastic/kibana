@@ -11,14 +11,15 @@ import React, { Component } from 'react';
 
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiContextMenu, EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiContextMenu } from '@elastic/eui';
 
 import type { Capabilities } from '@kbn/core/public';
 
 import type { LocatorPublic } from '../../common';
 import { UrlPanelContent } from './url_panel_content';
-import { ShareMenuItemLegacy, ShareContextMenuPanelItem, UrlParamExtension } from '../types';
-import { AnonymousAccessServiceContract } from '../../common/anonymous_access';
+import type { ShareMenuItemLegacy, ShareContextMenuPanelItem, UrlParamExtension } from '../types';
+import type { AnonymousAccessServiceContract } from '../../common/anonymous_access';
 import type { BrowserUrlService } from '../types';
 
 export interface ShareContextMenuProps {

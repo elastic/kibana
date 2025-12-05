@@ -4,18 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { RoleCredentials, SamlAuthProviderType } from '@kbn/ftr-common-functional-services';
+import type { RoleCredentials, SamlAuthProviderType } from '@kbn/ftr-common-functional-services';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { syntheticsMonitorSavedObjectType } from '@kbn/synthetics-plugin/common/types/saved_objects';
-import { EncryptedSyntheticsSavedMonitor } from '@kbn/synthetics-plugin/common/runtime_types';
-import { MonitorInspectResponse } from '@kbn/synthetics-plugin/public/apps/synthetics/state/monitor_management/api';
+import type { EncryptedSyntheticsSavedMonitor } from '@kbn/synthetics-plugin/common/runtime_types';
+import type { MonitorInspectResponse } from '@kbn/synthetics-plugin/public/apps/synthetics/state/monitor_management/api';
 import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
-import { ProjectAPIKeyResponse } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/get_api_key';
+import type { ProjectAPIKeyResponse } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/get_api_key';
 import moment from 'moment/moment';
 import { omit } from 'lodash';
-import { KibanaSupertestProvider } from '@kbn/ftr-common-functional-services';
-import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
+import type { KibanaSupertestProvider } from '@kbn/ftr-common-functional-services';
+import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
 export class SyntheticsMonitorTestService {
   private supertest: ReturnType<typeof KibanaSupertestProvider>;
@@ -105,7 +105,7 @@ export class SyntheticsMonitorTestService {
     return apiResponse.body;
   }
 
-  async addMonitor(monitor: any, user: RoleCredentials) {
+  async createMonitor(monitor: any, user: RoleCredentials) {
     const res = await this.supertest
       .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
       .set(user.apiKeyHeader)
@@ -116,9 +116,33 @@ export class SyntheticsMonitorTestService {
     return res.body as EncryptedSyntheticsSavedMonitor;
   }
 
+  async triggerSyntheticsTaskManually(taskType: string, user: RoleCredentials) {
+    await this.supertest
+      .post(SYNTHETICS_API_URLS.TRIGGER_TASK_RUN.replace('{taskType}', taskType))
+      .set(user.apiKeyHeader)
+      .set(this.samlAuth.getInternalRequestHeader())
+      .expect(200);
+  }
+
+  async triggerCleanup(user: RoleCredentials) {
+    await this.supertest
+      .put(SYNTHETICS_API_URLS.PRIVATE_LOCATIONS_CLEANUP)
+      .set(user.apiKeyHeader)
+      .set(this.samlAuth.getInternalRequestHeader())
+      .expect(200);
+  }
+
+  async testNowMonitor(id: string, user: RoleCredentials) {
+    await this.supertest
+      .post(SYNTHETICS_API_URLS.TEST_NOW_MONITOR + `/${id}`)
+      .set(user.apiKeyHeader)
+      .set(this.samlAuth.getInternalRequestHeader())
+      .expect(200);
+  }
+
   async inspectMonitor(user: RoleCredentials, monitor: any, hideParams: boolean = true) {
     const res = await this.supertest
-      .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITOR_INSPECT)
+      .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITOR_INSPECT + `?hideParams=${hideParams}`)
       .set(user.apiKeyHeader)
       .set(this.samlAuth.getInternalRequestHeader())
       .send(monitor)

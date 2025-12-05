@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Meta, StoryFn } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 import { niceTimeFormatter } from '@elastic/charts';
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import { SignificantEventsTable } from './significant_events_table';
 
 const stories: Meta<{}> = {
@@ -35,29 +35,22 @@ const xFormatter = niceTimeFormatter([start, end]);
 const logsStreamDefinition: Streams.WiredStream.Definition = {
   name: 'logs',
   description: '',
+  updated_at: new Date().toISOString(),
   ingest: {
     wired: {
       fields: {},
       routing: [],
     },
-    lifecycle: {
-      inherit: {},
-    },
-    processing: [],
+    lifecycle: { inherit: {} },
+    processing: { steps: [], updated_at: new Date().toISOString() },
+    settings: {},
+    failure_store: { inherit: {} },
   },
 };
 
 export const Empty: StoryFn<{}> = () => {
   return (
-    <SignificantEventsTable
-      definition={logsStreamDefinition}
-      response={{
-        loading: false,
-        value: [],
-        error: undefined,
-      }}
-      xFormatter={xFormatter}
-    />
+    <SignificantEventsTable definition={logsStreamDefinition} items={[]} xFormatter={xFormatter} />
   );
 };
 
@@ -72,30 +65,33 @@ export const SomeThings: StoryFn<{}> = () => {
           }, 1000)
         );
       }}
-      response={{
-        loading: false,
-        value: [
-          {
-            query: {
-              id: 'match_everything',
-              title: 'Match everything',
-              kql: {
-                query: '*',
+      items={[
+        {
+          title: 'High error rate',
+          query: {
+            id: 'match_everything',
+            title: 'Match everything',
+            kql: {
+              query: '*',
+            },
+            feature: {
+              name: 'Feature',
+              filter: {
+                always: {},
               },
             },
-            change_points: {
-              type: {
-                spike: {
-                  change_point: 3,
-                  p_value: 0.0001,
-                },
-              },
-            },
-            occurrences: generateValues(),
           },
-        ],
-        error: undefined,
-      }}
+          change_points: {
+            type: {
+              spike: {
+                change_point: 3,
+                p_value: 0.0001,
+              },
+            },
+          },
+          occurrences: generateValues(),
+        },
+      ]}
       xFormatter={xFormatter}
     />
   );

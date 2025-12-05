@@ -11,12 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { filter, map } from 'rxjs';
 import { createHashHistory } from 'history';
 import { BehaviorSubject } from 'rxjs';
-import {
-  AppMountParameters,
-  AppUpdater,
-  DEFAULT_APP_CATEGORIES,
-  ScopedHistory,
-} from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 
 import {
   createKbnUrlStateStorage,
@@ -35,8 +30,11 @@ import type {
   CoreStart,
   Plugin,
   ApplicationStart,
+  AppMountParameters,
+  AppUpdater,
+  ScopedHistory,
 } from '@kbn/core/public';
-import { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type {
   Setup as InspectorSetup,
@@ -46,7 +44,7 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
@@ -56,17 +54,18 @@ import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/publ
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
-import {
+import type {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
-import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
+import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 
 import { css, injectGlobal } from '@emotion/css';
+import { VisualizeConstants, VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
 import type { TypesSetup, TypesStart } from './vis_types';
 import type { VisualizeServices } from './visualize_app/types';
 import {
@@ -74,7 +73,8 @@ import {
   dashboardVisualizationPanelTrigger,
   visualizeEditorTrigger,
 } from './triggers';
-import { createVisEditorsRegistry, VisEditorsRegistry } from './vis_editors_registry';
+import type { VisEditorsRegistry } from './vis_editors_registry';
+import { createVisEditorsRegistry } from './vis_editors_registry';
 import { showNewVisModal } from './wizard';
 import { VisualizeLocatorDefinition } from '../common/locator';
 import { xyDimension as xyDimensionExpressionFunction } from '../common/expression_functions/xy_dimension';
@@ -113,15 +113,11 @@ import {
   getTypes,
   setNotifications,
 } from './services';
-import { VisualizeConstants, VISUALIZE_EMBEDDABLE_TYPE } from '../common/constants';
-import { ListingViewRegistry } from './types';
-import {
-  LATEST_VERSION,
-  CONTENT_ID,
-  VisualizationSavedObjectAttributes,
-} from '../common/content_management';
-import type { VisualizeSavedObjectInputState } from './embeddable/types';
+import type { ListingViewRegistry } from './types';
+import type { VisualizationSavedObjectAttributes } from '../common/content_management';
+import { LATEST_VERSION, CONTENT_ID } from '../common/content_management';
 import { registerActions } from './actions/register_actions';
+import type { VisualizeByReferenceState } from '../common/embeddable/types';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -465,25 +461,19 @@ export class VisualizationsPlugin
         plugins: { embeddable: embeddableStart, embeddableEnhanced: embeddableEnhancedStart },
       } = start();
 
-      const { getVisualizeEmbeddableFactory } = await import('./embeddable/visualize_embeddable');
+      const { getVisualizeEmbeddableFactory } = await import('./embeddable/embeddable_module');
       return getVisualizeEmbeddableFactory({ embeddableStart, embeddableEnhancedStart });
     });
     embeddable.registerAddFromLibraryType<VisualizationSavedObjectAttributes>({
       onAdd: async (container, savedObject) => {
-        const { SAVED_OBJECT_REF_NAME } = await import('@kbn/presentation-publishing');
-        container.addNewPanel<VisualizeSavedObjectInputState>(
+        container.addNewPanel<VisualizeByReferenceState>(
           {
             panelType: VISUALIZE_EMBEDDABLE_TYPE,
             serializedState: {
-              rawState: {},
-              references: [
-                ...savedObject.references,
-                {
-                  name: SAVED_OBJECT_REF_NAME,
-                  type: VISUALIZE_EMBEDDABLE_TYPE,
-                  id: savedObject.id,
-                },
-              ],
+              rawState: {
+                savedObjectId: savedObject.id,
+              },
+              references: [],
             },
           },
           true
@@ -497,6 +487,10 @@ export class VisualizationsPlugin
         const visState = JSON.parse(savedObject.attributes.visState ?? '{}');
         return getTypes().get(visState.type)?.icon ?? '';
       },
+    });
+    embeddable.registerLegacyURLTransform(VISUALIZE_EMBEDDABLE_TYPE, async () => {
+      const { getTransformOut } = await import('./embeddable/embeddable_module');
+      return getTransformOut(embeddable.transformEnhancementsOut);
     });
 
     contentManagement.registry.register({

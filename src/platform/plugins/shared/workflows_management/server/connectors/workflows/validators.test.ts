@@ -8,44 +8,9 @@
  */
 
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
-import type { WorkflowsPublicConfigurationType, WorkflowsSecretConfigurationType } from './types';
-import {
-  removeSlash,
-  validateAndNormalizeUrl,
-  validateConnector,
-  validateWorkflowsConfig,
-} from './validators';
+import { removeSlash, validateAndNormalizeUrl } from './validators';
 
 describe('Workflows Validators', () => {
-  describe('validateWorkflowsConfig', () => {
-    it('should not throw for any config (no validation required)', () => {
-      const config: WorkflowsPublicConfigurationType = {};
-      const configurationUtilities = actionsConfigMock.create();
-
-      expect(() => validateWorkflowsConfig(config, { configurationUtilities })).not.toThrow();
-    });
-  });
-
-  describe('validateConnector', () => {
-    it('should return null for valid config and secrets', () => {
-      const config: WorkflowsPublicConfigurationType = {};
-      const secrets: WorkflowsSecretConfigurationType = {};
-
-      const result = validateConnector(config, secrets);
-
-      expect(result).toBeNull();
-    });
-
-    it('should return null for empty config and secrets', () => {
-      const config: WorkflowsPublicConfigurationType = {};
-      const secrets: WorkflowsSecretConfigurationType = {};
-
-      const result = validateConnector(config, secrets);
-
-      expect(result).toBeNull();
-    });
-  });
-
   describe('validateAndNormalizeUrl', () => {
     let mockConfigurationUtilities: ReturnType<typeof actionsConfigMock.create>;
 

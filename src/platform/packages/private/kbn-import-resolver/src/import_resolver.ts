@@ -14,7 +14,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { getPackages, type Package, type ParsedPackageJson } from '@kbn/repo-packages';
 import { exports as resolvePackageExports } from 'resolve.exports';
 import { safeStat, readFileSync } from './helpers/fs';
-import { ResolveResult } from './resolve_result';
+import type { ResolveResult } from './resolve_result';
 import { getRelativeImportReq } from './helpers/import_req';
 import { memoize } from './helpers/memoize';
 
@@ -157,6 +157,22 @@ export class ImportResolver {
 
     if (req.startsWith('@typescript-eslint/parser')) {
       return Path.resolve(REPO_ROOT, `node_modules/@typescript-eslint/parser/dist/index.js`);
+    }
+
+    // zod migration from v3 to v4
+    if (req.startsWith('zod/v4')) {
+      return Path.resolve(REPO_ROOT, `node_modules/zod/v4/index.cjs`);
+    }
+    if (req.startsWith('zod') || req.startsWith('zod/v3')) {
+      return Path.resolve(REPO_ROOT, `node_modules/zod/v3/index.cjs`);
+    }
+
+    if (req.startsWith('vega-lite')) {
+      return Path.resolve(REPO_ROOT, `node_modules/vega-lite/build`);
+    }
+
+    if (req.startsWith('vega-tooltip')) {
+      return Path.resolve(REPO_ROOT, `node_modules/vega-tooltip/build`);
     }
 
     // turn root-relative paths into relative paths

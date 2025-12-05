@@ -7,8 +7,9 @@
 
 import { act } from 'react-dom/test-utils';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { setup, setupEnvironment, SetupResult } from './pipeline_processors_editor.helpers';
-import { Pipeline } from '../../../../../common/types';
+import type { SetupResult } from './pipeline_processors_editor.helpers';
+import { setup, setupEnvironment } from './pipeline_processors_editor.helpers';
+import type { Pipeline } from '../../../../../common/types';
 import {
   extractProcessorDetails,
   getProcessorTypesAndLabels,
@@ -338,7 +339,7 @@ describe('Pipeline Editor', () => {
 
       const processorDescriptions = {
         userProvided: 'my script',
-        default: 'Sets value of "test" to "test"',
+        default: 'Sets value of "test" to test',
         none: 'No description',
       };
 
@@ -354,12 +355,22 @@ describe('Pipeline Editor', () => {
           expect(find(`processors>${processorIndex}.inlineTextInputNonEditableText`).text()).toBe(
             description
           );
-          expect(
-            (
-              find(`processors>${processorIndex}.pipelineProcessorItemDescriptionContainer`).props()
-                .className as string
-            ).includes('--displayNone')
-          ).toBe(!descriptionVisible);
+
+          const descriptionContainer = find(
+            `processors>${processorIndex}.pipelineProcessorItemDescriptionContainer`
+          );
+
+          expect(descriptionContainer.exists()).toBe(true);
+
+          if (descriptionVisible) {
+            expect(
+              window.getComputedStyle(descriptionContainer.getDOMNode()).getPropertyValue('display')
+            ).not.toBe('none');
+          } else {
+            expect(
+              window.getComputedStyle(descriptionContainer.getDOMNode()).getPropertyValue('display')
+            ).toBe('none');
+          }
         };
 
       const assertScriptProcessor = createAssertForProcessor('0');
@@ -424,10 +435,10 @@ describe('Pipeline Editor', () => {
         onUpdate,
       });
       expect(testBed.find(`processors>0.inlineTextInputNonEditableText`).text()).toBe(
-        'Sets value of "test" to "{"test":"test"}"'
+        'Sets value of "test" to {"test":"test"}'
       );
       expect(testBed.find(`processors>1.inlineTextInputNonEditableText`).text()).toBe(
-        'Appends "{"test":"test"}" to the "test" field'
+        'Appends {"test":"test"} to the "test" field'
       );
     });
   });

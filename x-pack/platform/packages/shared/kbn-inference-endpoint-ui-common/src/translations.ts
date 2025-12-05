@@ -202,3 +202,91 @@ export const DOCUMENTATION_BASE = i18n.translate(
     defaultMessage: 'documentation',
   }
 );
+
+export const CONTEXT_WINDOW_LABEL = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.contextWindowLengthTextFieldLabel',
+  {
+    defaultMessage: 'Context window length',
+  }
+);
+
+export const CONTEXT_WINDOW_VALIDATION_MESSAGE = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.contextWindowLengthValidationMessage',
+  {
+    defaultMessage: 'Context window length must be an integer.',
+  }
+);
+
+export const CONTEXT_WINDOW_TASK_TYPE_VALIDATION_MESSAGE = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.contextWindowLengthTaskTypeValidationMessage',
+  {
+    defaultMessage: 'Context window length is only applicable for chat completion tasks.',
+  }
+);
+
+export const ADD_HEADERS_SWITCH_LABEL = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.addHeadersLabel',
+  {
+    defaultMessage: 'Add HTTP headers',
+  }
+);
+
+export const VIEW_HEADERS_SWITCH_LABEL = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.viewHeadersLabel',
+  {
+    defaultMessage: 'View HTTP headers',
+  }
+);
+
+export const HIDE_HEADERS_SWITCH_LABEL = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.hideHeadersLabel',
+  {
+    defaultMessage: 'Hide HTTP headers',
+  }
+);
+
+export const ADD_LABEL = i18n.translate('xpack.inferenceEndpointUICommon.components.addLabel', {
+  defaultMessage: 'Add',
+});
+
+export const DELETE_LABEL = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.deleteLabel',
+  {
+    defaultMessage: 'Delete',
+  }
+);
+
+export const HEADERS_KEY_LABEL = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.headersKeyLabel',
+  {
+    defaultMessage: 'Key',
+  }
+);
+
+export const HEADERS_VALUE_LABEL = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.headersValueLabel',
+  {
+    defaultMessage: 'Value',
+  }
+);
+
+export const HEADERS_DUPLICATE_KEY_MESSAGE = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.headersDuplicateKeyMessage',
+  {
+    defaultMessage: 'Header keys must be unique.',
+  }
+);
+
+export const TEMPERATURE_LABEL = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.temperatureTextFieldLabel',
+  {
+    defaultMessage: 'Temperature',
+  }
+);
+
+export const TEMPERATURE_VALIDATION_MESSAGE = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.temperatureValidationMessage',
+  {
+    defaultMessage: 'Temperature must be a number between 0 and 1.',
+  }
+);

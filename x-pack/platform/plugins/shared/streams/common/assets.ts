@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import { ValuesType } from 'utility-types';
-import { StreamQuery } from '@kbn/streams-schema';
+import type { ValuesType } from 'utility-types';
+import type { StreamQuery } from '@kbn/streams-schema';
 
 export const ASSET_TYPES = {
-  Dashboard: 'dashboard' as const,
-  Rule: 'rule' as const,
-  Slo: 'slo' as const,
   Query: 'query' as const,
 };
 
@@ -23,14 +20,11 @@ interface AssetLinkBase<TAssetType extends AssetType = AssetType> {
   'asset.id': string;
 }
 
-export type DashboardLink = AssetLinkBase<'dashboard'>;
-export type SloLink = AssetLinkBase<'slo'>;
-export type RuleLink = AssetLinkBase<'rule'>;
 export type QueryLink = AssetLinkBase<'query'> & {
   query: StreamQuery;
 };
 
-export type AssetLink = DashboardLink | SloLink | RuleLink | QueryLink;
+export type AssetLink = QueryLink;
 
 export function isQueryLink(item: AssetLink): item is QueryLink {
   return item['asset.type'] === 'query';
@@ -46,24 +40,13 @@ interface AssetBase<TAssetType extends AssetType> extends AssetLinkBase<TAssetTy
   title: string;
 }
 
-interface SavedObjectAssetBase<TAssetType extends AssetType = AssetType>
-  extends AssetBase<TAssetType> {
-  tags: string[];
-}
-
-export type DashboardAsset = SavedObjectAssetBase<'dashboard'>;
-export type SloAsset = SavedObjectAssetBase<'slo'>;
-export type RuleAsset = SavedObjectAssetBase<'rule'>;
 export type QueryAsset = AssetBase<'query'> & {
   query: StreamQuery;
 };
 
-export type Asset = DashboardAsset | SloAsset | RuleAsset | QueryAsset;
+export type Asset = QueryAsset;
 export type AssetWithoutUuid = Omit<AssetLink, 'asset.uuid'>;
 
 export interface AssetTypeToAssetMap {
-  [ASSET_TYPES.Dashboard]: DashboardAsset;
-  [ASSET_TYPES.Slo]: SloAsset;
-  [ASSET_TYPES.Rule]: RuleAsset;
   [ASSET_TYPES.Query]: QueryAsset;
 }

@@ -29,12 +29,7 @@ export const sampleMetricFormulaAttribute = {
       formBased: {
         layers: {
           layer0: {
-            columnOrder: [
-              'layer-0-column-1X0',
-              'layer-0-column-1X1',
-              'layer-0-column-1X2',
-              'layer-0-column-1',
-            ],
+            columnOrder: ['layer-0-column-1'],
             columns: {
               'layer-0-column-1': {
                 customLabel: true,
@@ -56,72 +51,9 @@ export const sampleMetricFormulaAttribute = {
                   formula: "1- (count(kql='summary.down > 0') / count())",
                   isFormulaBroken: false,
                 },
-                references: ['layer-0-column-1X2'],
-              },
-              'layer-0-column-1X0': {
-                customLabel: true,
-                dataType: 'number',
-                filter: {
-                  language: 'kuery',
-                  query: `(${FINAL_SUMMARY_KQL}) AND (summary.down > 0)`,
-                },
-                isBucketed: false,
-                label: 'Part of Availability',
-                operationType: 'count',
-                params: {
-                  emptyAsNull: false,
-                },
-                sourceField: '___records___',
-              },
-              'layer-0-column-1X1': {
-                customLabel: true,
-                dataType: 'number',
-                filter: {
-                  language: 'kuery',
-                  query: FINAL_SUMMARY_KQL,
-                },
-                isBucketed: false,
-                label: 'Part of Availability',
-                operationType: 'count',
-                params: {
-                  emptyAsNull: false,
-                },
-                sourceField: '___records___',
-              },
-              'layer-0-column-1X2': {
-                customLabel: true,
-                dataType: 'number',
-                isBucketed: false,
-                label: 'Part of Availability',
-                operationType: 'math',
-                params: {
-                  tinymathAst: {
-                    args: [
-                      1,
-                      {
-                        args: ['layer-0-column-1X0', 'layer-0-column-1X1'],
-                        location: {
-                          max: 44,
-                          min: 2,
-                        },
-                        name: 'divide',
-                        text: " (count(kql='summary.down > 0') / count())",
-                        type: 'function',
-                      },
-                    ],
-                    location: {
-                      max: 44,
-                      min: 0,
-                    },
-                    name: 'subtract',
-                    text: "1- (count(kql='summary.down > 0') / count())",
-                    type: 'function',
-                  },
-                },
-                references: ['layer-0-column-1X0', 'layer-0-column-1X1'],
+                references: [],
               },
             },
-            indexPatternId: 'apm-*',
           },
         },
       },

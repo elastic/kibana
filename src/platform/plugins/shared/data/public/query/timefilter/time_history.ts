@@ -8,9 +8,9 @@
  */
 
 import moment from 'moment';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { TimeRange } from '@kbn/es-query';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 import { PersistedLog } from '../persisted_log';
 
 export class TimeHistory {
@@ -23,6 +23,7 @@ export class TimeHistory {
       isDuplicate: (oldItem: TimeRange, newItem: TimeRange) => {
         return oldItem.from === newItem.from && oldItem.to === newItem.to;
       },
+      enableBrowserTabsSync: true,
     };
     this.history = new PersistedLog('kibana.timepicker.timeHistory', historyOptions, storage);
   }

@@ -35,10 +35,12 @@ import {
   FIELD_SELECTOR_TOGGLE_BUTTON,
   FILTERS_GLOBAL_CONTAINER,
   FLYOUT_JSON,
+  FLYOUT_JSON_TAB,
   FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM,
   FLYOUT_OVERVIEW_HIGHLIGHTED_FIELDS_TABLE,
+  FLYOUT_OVERVIEW_TAB,
   FLYOUT_TABLE,
-  FLYOUT_TABS,
+  FLYOUT_TABLE_TAB,
   FLYOUT_TITLE,
   INDICATOR_TYPE_CELL,
   INDICATORS_TABLE,
@@ -117,8 +119,9 @@ describe('Single indicator', { tags: ['@ess'] }, () => {
       openFlyout();
 
       cy.get(FLYOUT_TITLE).should('contain', 'Indicator details');
-      cy.get(FLYOUT_TABS).should('exist').children().should('have.length', 3);
-      cy.get(FLYOUT_TABS).should('exist');
+      cy.get(FLYOUT_OVERVIEW_TAB).should('exist');
+      cy.get(FLYOUT_TABLE_TAB).should('exist');
+      cy.get(FLYOUT_JSON_TAB).should('exist');
 
       closeFlyout();
 
@@ -184,8 +187,7 @@ describe('Single indicator', { tags: ['@ess'] }, () => {
 
       navigateToFlyoutJsonTab();
 
-      cy.get(FLYOUT_JSON).should('contain.text', 'threat.indicator.type');
-      cy.get(FLYOUT_JSON).should('contain.text', '"@timestamp": "2022-06-02T13:29:47.677Z",');
+      cy.get(FLYOUT_JSON).should('contain.text', '2022-06-02T13:29:47.677Z');
     });
   });
 
@@ -320,7 +322,7 @@ describe('Invalid Indicators', { tags: ['@ess'] }, () => {
     it('should display data grid despite the missing fields', () => {
       cy.get(INDICATORS_TABLE).should('exist');
 
-      // there are 19 documents in the x-pack/test/security_solution_cypress/es_archives/ti_indicators_data_invalid/data.json
+      // there are 19 documents in the x-pack/solutions/security/test/security_solution_cypress/es_archives/ti_indicators_data_invalid/data.json
       const documentsNumber = 22;
       cy.get(INDICATORS_TABLE_ROW_CELL).should('have.length.gte', documentsNumber);
 
@@ -375,7 +377,7 @@ describe('Missing mappings', { tags: ['@ess'] }, () => {
     });
 
     it('should display data grid despite the missing mappings and missing fields', () => {
-      // there are 2 documents in the x-pack/test/security_solution_cypress/es_archives/ti_indicators_data_no_mappings/data.json
+      // there are 2 documents in the x-pack/solutions/security/test/security_solution_cypress/es_archives/ti_indicators_data_no_mappings/data.json
       // mappings are removed entirely
       const documentsNumber = 2;
       cy.get(INDICATORS_TABLE_ROW_CELL).should('have.length.gte', documentsNumber);

@@ -72,7 +72,7 @@ export const AgentPolicyPackageBadges: React.FunctionComponent<Props> = ({
     <>
       {!hideTitle && (
         <>
-          <EuiText>
+          <EuiText data-test-subj="agentPolicyDescription">
             <FormattedMessage
               id="xpack.fleet.agentReassignPolicy.policyDescription"
               defaultMessage="The selected agent policy will collect data for {count, plural, one {{countValue} integration} other {{countValue} integrations}}:"
@@ -104,6 +104,7 @@ export const AgentPolicyPackageBadges: React.FunctionComponent<Props> = ({
         <>
           <EuiSpacer size="s" />
           <EuiCallOut
+            announceOnMount
             size="s"
             color="warning"
             iconType="warning"

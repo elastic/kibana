@@ -8,7 +8,8 @@
  */
 
 import { isEqual } from 'lodash';
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { readPkcs12Keystore, readPkcs12Truststore } from '@kbn/crypto';
 import { constants as cryptoConstants } from 'crypto';
 import { readFileSync } from 'fs';

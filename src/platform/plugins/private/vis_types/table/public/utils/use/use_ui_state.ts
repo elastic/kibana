@@ -11,7 +11,7 @@ import { debounce, isEqual } from 'lodash';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 
-import { ColumnWidthData, TableVisUiState, TableVisUseUiStateProps } from '../../types';
+import type { ColumnWidthData, TableVisUiState, TableVisUseUiStateProps } from '../../types';
 
 const defaultSort = {
   columnIndex: null,
@@ -111,6 +111,10 @@ export const useUiState = (uiState: PersistedState): TableVisUseUiStateProps => 
       }
 
       if (!isEqual(vis?.params.sort, uiStateValues.current.sort)) {
+        // prevent clearing a valid current sort
+        if (vis?.params.sort === undefined && uiStateValues.current.sort?.columnIndex !== null) {
+          return;
+        }
         uiStateValues.current.sort = vis?.params.sort;
         setSortState(vis?.params.sort || defaultSort);
       }

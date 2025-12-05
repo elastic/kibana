@@ -9,10 +9,8 @@
 
 import { renderHook } from '@testing-library/react';
 import type { History } from 'history';
-
 import { useSavedSearchAliasMatchRedirect } from './saved_search_alias_match_redirect';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-
+import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 
 describe('useSavedSearchAliasMatchRedirect', () => {
@@ -29,7 +27,7 @@ describe('useSavedSearchAliasMatchRedirect', () => {
   });
 
   test('should redirect in case of aliasMatch', () => {
-    const savedSearch = {
+    const discoverSession = {
       id: 'id',
       title: 'my-title',
       sharingSavedObjectProps: {
@@ -37,9 +35,9 @@ describe('useSavedSearchAliasMatchRedirect', () => {
         aliasTargetId: 'aliasTargetId',
         aliasPurpose: 'savedObjectConversion',
       },
-    } as SavedSearch;
+    } as DiscoverSession;
 
-    renderHook(() => useSavedSearchAliasMatchRedirect({ spaces, savedSearch, history }));
+    renderHook(() => useSavedSearchAliasMatchRedirect({ spaces, discoverSession, history }));
 
     expect(spaces.ui.redirectLegacyUrl).toHaveBeenCalledWith({
       path: '#/view/aliasTargetId?_g=foo',
@@ -49,27 +47,27 @@ describe('useSavedSearchAliasMatchRedirect', () => {
   });
 
   test('should not redirect if outcome !== aliasMatch', () => {
-    const savedSearch = {
+    const discoverSession = {
       id: 'id',
       sharingSavedObjectProps: {
         outcome: 'exactMatch',
       },
-    } as SavedSearch;
+    } as DiscoverSession;
 
-    renderHook(() => useSavedSearchAliasMatchRedirect({ spaces, savedSearch, history }));
+    renderHook(() => useSavedSearchAliasMatchRedirect({ spaces, discoverSession, history }));
 
     expect(spaces.ui.redirectLegacyUrl).not.toHaveBeenCalled();
   });
 
   test('should not redirect if aliasTargetId is not defined', () => {
-    const savedSearch = {
+    const discoverSession = {
       id: 'id',
       sharingSavedObjectProps: {
         outcome: 'aliasMatch',
       },
-    } as SavedSearch;
+    } as DiscoverSession;
 
-    renderHook(() => useSavedSearchAliasMatchRedirect({ spaces, savedSearch, history }));
+    renderHook(() => useSavedSearchAliasMatchRedirect({ spaces, discoverSession, history }));
 
     expect(spaces.ui.redirectLegacyUrl).not.toHaveBeenCalled();
   });

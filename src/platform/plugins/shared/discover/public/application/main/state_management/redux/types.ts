@@ -7,48 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RefreshInterval } from '@kbn/data-plugin/common';
+import type { RefreshInterval, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
+import type { ControlPanelsState } from '@kbn/controls-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { Filter, TimeRange } from '@kbn/es-query';
-import type { UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
+import type { DataGridDensity, UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
+import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-metrics-grid';
 import type { UnifiedFieldListRestorableState } from '@kbn/unified-field-list';
 import type { UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
 import type { TabItem } from '@kbn/unified-tabs';
-import type { DiscoverAppState } from '../discover_app_state_container';
+import type {
+  DiscoverGridSettings,
+  DiscoverSession,
+  VIEW_MODE,
+} from '@kbn/saved-search-plugin/common';
 import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
-
-export enum LoadingStatus {
-  Uninitialized = 'uninitialized',
-  Loading = 'loading',
-  LoadingMore = 'loading_more',
-  Complete = 'complete',
-  Error = 'error',
-}
-
-type RequestState<
-  TResult extends {},
-  TLoadingStatus extends LoadingStatus = Exclude<LoadingStatus, LoadingStatus.LoadingMore>
-> =
-  | {
-      loadingStatus: Exclude<TLoadingStatus, LoadingStatus.Error>;
-      result: TResult;
-    }
-  | {
-      loadingStatus: LoadingStatus.Error;
-      error: Error;
-    };
-
-export type DocumentsRequest = RequestState<DataTableRecord[], LoadingStatus>;
-export type TotalHitsRequest = RequestState<number>;
-export type ChartRequest = RequestState<{}>;
+import type { DiscoverDataSource } from '../../../../../common/data_sources';
 
 export interface InternalStateDataRequestParams {
   timeRangeAbsolute: TimeRange | undefined;
   timeRangeRelative: TimeRange | undefined;
   searchSessionId: string | undefined;
+  isSearchSessionRestored: boolean;
 }
 
 export interface TabStateGlobalState {
@@ -57,14 +41,96 @@ export interface TabStateGlobalState {
   filters?: Filter[];
 }
 
+export interface DiscoverAppState {
+  /**
+   * Columns displayed in the table
+   */
+  columns?: string[];
+  /**
+   * Array of applied filters
+   */
+  filters?: Filter[];
+  /**
+   * Data Grid related state
+   */
+  grid?: DiscoverGridSettings;
+  /**
+   * Hide chart
+   */
+  hideChart?: boolean;
+  /**
+   * The current data source
+   */
+  dataSource?: DiscoverDataSource;
+  /**
+   * Used interval of the histogram
+   */
+  interval?: string;
+  /**
+   * Lucence or KQL query
+   */
+  query?: Query | AggregateQuery;
+  /**
+   * Array of the used sorting [[field,direction],...]
+   */
+  sort?: string[][];
+  /**
+   * id of the used saved query
+   */
+  savedQuery?: string;
+  /**
+   * Table view: Documents vs Field Statistics
+   */
+  viewMode?: VIEW_MODE;
+  /**
+   * Hide mini distribution/preview charts when in Field Statistics mode
+   */
+  hideAggregatedPreview?: boolean;
+  /**
+   * Document explorer row height option
+   */
+  rowHeight?: number;
+  /**
+   * Document explorer header row height option
+   */
+  headerRowHeight?: number;
+  /**
+   * Number of rows in the grid per page
+   */
+  rowsPerPage?: number;
+  /**
+   * Custom sample size
+   */
+  sampleSize?: number;
+  /**
+   * Breakdown field of chart
+   */
+  breakdownField?: string;
+  /**
+   * Density of table
+   */
+  density?: DataGridDensity;
+}
+
 export interface TabState extends TabItem {
-  // Initial app and global state for the tab (provided before the tab is initialized).
-  initialAppState?: DiscoverAppState;
-  initialGlobalState?: TabStateGlobalState;
+  // Initial state for the tab (provided before the tab is initialized).
+  initialInternalState?: {
+    serializedSearchSource?: SerializedSearchSourceFields;
+    visContext?: UnifiedHistogramVisContext | {};
+    controlGroupJson?: string;
+    searchSessionId?: string;
+  };
 
   // The following properties are used to manage the tab's state after it has been initialized.
-  lastPersistedGlobalState: TabStateGlobalState;
-  dataViewId: string | undefined;
+  globalState: TabStateGlobalState;
+  appState: DiscoverAppState;
+  previousAppState: DiscoverAppState;
+  controlGroupState: ControlPanelsState<ESQLControlState> | undefined;
+  /**
+   * ESQL query variables
+   */
+  esqlVariables: ESQLControlVariable[] | undefined;
+  forceFetchOnSelect: boolean;
   isDataViewLoading: boolean;
   dataRequestParams: InternalStateDataRequestParams;
   overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saved search saving
@@ -75,15 +141,13 @@ export interface TabState extends TabItem {
     breakdownField: boolean;
     hideChart: boolean;
   };
-  documentsRequest: DocumentsRequest;
-  totalHitsRequest: TotalHitsRequest;
-  chartRequest: ChartRequest;
   uiState: {
     esqlEditor?: Partial<ESQLEditorRestorableState>;
     dataGrid?: Partial<UnifiedDataTableRestorableState>;
     fieldList?: Partial<UnifiedFieldListRestorableState>;
     layout?: Partial<DiscoverLayoutRestorableState>;
     searchDraft?: Partial<UnifiedSearchDraft>;
+    metricsGrid?: Partial<UnifiedMetricsGridRestorableState>;
   };
 }
 
@@ -98,6 +162,10 @@ export enum TabsBarVisibility {
 
 export interface DiscoverInternalState {
   initializationState: { hasESData: boolean; hasUserDataView: boolean };
+  userId: string | undefined;
+  spaceId: string | undefined;
+  persistedDiscoverSession: DiscoverSession | undefined;
+  hasUnsavedChanges: boolean;
   savedDataViews: DataViewListItem[];
   defaultProfileAdHocDataViewIds: string[];
   expandedDoc: DataTableRecord | undefined;
@@ -105,8 +173,11 @@ export interface DiscoverInternalState {
   isESQLToDataViewTransitionModalVisible: boolean;
   tabsBarVisibility: TabsBarVisibility;
   tabs: {
-    byId: Record<string, TabState | RecentlyClosedTabState>;
+    areInitializing: boolean;
+    byId: Record<string, TabState>;
     allIds: string[];
+    unsavedIds: string[];
+    recentlyClosedTabsById: Record<string, RecentlyClosedTabState>;
     recentlyClosedTabIds: string[];
     /**
      * WARNING: You probably don't want to use this property.

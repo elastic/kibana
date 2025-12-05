@@ -11,8 +11,8 @@ import { securityLink } from '../links';
 
 export const createDashboardsNavigationTree = (): NodeDefinition => ({
   id: SecurityPageName.dashboards,
+  icon: 'dashboardApp',
   link: securityLink(SecurityPageName.dashboards),
-  renderAs: 'item',
   children: [
     {
       id: SecurityPageName.overview,
@@ -37,6 +37,10 @@ export const createDashboardsNavigationTree = (): NodeDefinition => ({
     {
       id: SecurityPageName.dataQuality,
       link: securityLink(SecurityPageName.dataQuality),
+    },
+    {
+      id: SecurityPageName.kubernetes,
+      link: securityLink(SecurityPageName.kubernetes),
     },
   ],
 });

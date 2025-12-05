@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import {
+import type {
   TextBasedLayer,
   TextBasedPersistedState,
-} from '../../../datasources/form_based/esql_layer/types';
-import { FormBasedLayer, FormBasedPersistedState } from '../../../datasources/form_based/types';
-import { StructuredDatasourceStates } from '../../../react_embeddable/types';
-import { ColumnMeta, getColumnMetaFn } from './utils';
+  FormBasedLayer,
+  FormBasedPersistedState,
+  StructuredDatasourceStates,
+} from '@kbn/lens-common';
+import type { ColumnMeta } from './utils';
+import { getColumnMetaFn } from './utils';
 
 const layerId = 'layer-1';
 const columnId = 'column-1';

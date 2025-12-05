@@ -6,7 +6,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { ChatClient, KibanaClient } from '../kibana_client';
 import type { SynthtraceEsClients } from '../setup_synthtrace';
 

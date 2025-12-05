@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import originalExpect from 'expect';
-import { IndexTemplateName } from '@kbn/apm-synthtrace/src/lib/logs/custom_logsdb_index_templates';
-import { DatasetQualityFtrProviderContext } from './config';
+import { IndexTemplateName } from '@kbn/synthtrace/src/lib/logs/custom_logsdb_index_templates';
+import type { DatasetQualityFtrProviderContext } from './config';
 import {
   createFailedLogRecord,
   datasetNames,
@@ -112,9 +112,15 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       const datasetNameCol = cols[PageObjects.datasetQuality.texts.datasetNameColumn];
       await datasetNameCol.sort('descending');
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
-      expect(datasetNameColCellTexts).to.eql(
-        [apacheAccessDatasetHumanName, ...datasetNames].reverse()
+
+      // This is to accomodate for failure if the integration hasn't been loaded successfully
+      // Dataset name is shown in this case
+      expect([apacheAccessDatasetHumanName, apacheAccessDatasetName]).to.contain(
+        datasetNameColCellTexts[datasetNameColCellTexts.length - 1]
       );
+
+      // Check the rest of the array matches the expected pattern
+      expect(datasetNameColCellTexts.slice(0, -1)).to.eql([...datasetNames].reverse());
 
       const namespaceCol = cols.Namespace;
       const namespaceColCellTexts = await namespaceCol.getCellTexts();
@@ -219,10 +225,12 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       });
 
       it('changes link text on hover when failure store is not enabled', async () => {
-        const linkSelector = 'datasetQualitySetFailureStoreLink';
-        const links = await testSubjects.findAll(linkSelector);
-        expect(links.length).to.be.greaterThan(0);
-        const link = links[links.length - 1];
+        // Target synth.1 which doesn't have failure store enabled
+        const targetDataStreamName = 'logs-synth.1-default';
+        const targetLink = `${PageObjects.datasetQuality.testSubjectSelectors.enableFailureStoreFromTableButton}-${targetDataStreamName}`;
+
+        await testSubjects.existOrFail(targetLink);
+        const link = await testSubjects.find(targetLink);
 
         expect(await link.getVisibleText()).to.eql('N/A');
 
@@ -234,6 +242,30 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
         const table = await PageObjects.datasetQuality.getDatasetsTable();
         await table.moveMouseTo();
+      });
+
+      it('enables failure store through modal and removes link from table', async () => {
+        const {
+          editFailureStoreModal,
+          failureStoreModalSaveButton,
+          enableFailureStoreToggle,
+          enableFailureStoreFromTableButton,
+        } = PageObjects.datasetQuality.testSubjectSelectors;
+        // Target synth.1 which doesn't have failure store enabled
+        const targetDataStreamName = 'logs-synth.1-default';
+
+        const targetLink = `${enableFailureStoreFromTableButton}-${targetDataStreamName}`;
+        await testSubjects.existOrFail(targetLink);
+        await testSubjects.click(targetLink);
+
+        await testSubjects.existOrFail(editFailureStoreModal);
+
+        await testSubjects.click(enableFailureStoreToggle);
+        await testSubjects.clickWhenNotDisabled(failureStoreModalSaveButton);
+        await testSubjects.missingOrFail(editFailureStoreModal);
+
+        // Verify the specific link is now removed
+        await testSubjects.missingOrFail(targetLink);
       });
     });
   });

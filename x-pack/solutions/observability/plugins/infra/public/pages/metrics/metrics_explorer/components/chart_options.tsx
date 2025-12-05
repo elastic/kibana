@@ -39,6 +39,7 @@ export const MetricsExplorerChartOptions = ({ chartOptions, onChange }: Props) =
         { defaultMessage: 'Customize' }
       )}
       iconSide="left"
+      size="s"
       iconType="eye"
       onClick={togglePopover}
       data-test-subj="metricsExplorer-customize"
@@ -139,6 +140,7 @@ export const MetricsExplorerChartOptions = ({ chartOptions, onChange }: Props) =
             options={typeRadios}
             idSelected={chartOptions.type}
             onChange={handleTypeChange}
+            name="chartStyle"
           />
         </EuiFormRow>
         <EuiFormRow
@@ -167,6 +169,7 @@ export const MetricsExplorerChartOptions = ({ chartOptions, onChange }: Props) =
             options={yAxisRadios}
             idSelected={chartOptions.yAxisMode}
             onChange={handleYAxisChange}
+            name="yAxisDomain"
           />
         </EuiFormRow>
       </EuiForm>

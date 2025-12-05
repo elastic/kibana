@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Span } from '@opentelemetry/api';
+import type { Span } from '@opentelemetry/api';
 import { isPromise } from 'util/types';
 import { safeJsonStringify } from '@kbn/std';
-import { WithActiveSpanOptions } from '@kbn/tracing-utils';
+import type { WithActiveSpanOptions } from '@kbn/tracing-utils';
 import { ElasticGenAIAttributes, GenAISemanticConventions } from './types';
 import { withActiveInferenceSpan } from './with_active_inference_span';
 

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
-import {
+import type { Client } from '@elastic/elasticsearch';
+import type {
   Instruction,
   KnowledgeBaseEntry,
-  InferenceModelState,
 } from '@kbn/observability-ai-assistant-plugin/common/types';
+import { InferenceModelState } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { resourceNames } from '@kbn/observability-ai-assistant-plugin/server/service';
 import expect from '@kbn/expect';
 import pRetry from 'p-retry';
-import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { setAdvancedSettings } from './advanced_settings';
 import { TINY_ELSER_INFERENCE_ID } from './model_and_inference';
 import type { ObservabilityAIAssistantApiClient } from '../../../services/observability_ai_assistant_api';
@@ -150,6 +150,7 @@ export async function addSampleDocsToCustomIndex(
   customSearchConnectorIndex: string
 ) {
   const es = getService('es');
+  // eslint-disable-next-line @kbn/eslint/deployment_agnostic_test_context
   const supertest = getService('supertest');
   const log = getService('log');
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-require('../../../../../../src/setup_node_env');
+require('@kbn/setup-node-env');
 // eslint-disable-next-line import/no-nodejs-modules
 const { join, resolve } = require('path');
 const { generate } = require('@kbn/openapi-generator');
@@ -30,7 +30,7 @@ const ROOT = resolve(__dirname, '..');
     bundle: {
       outFile: join(
         REPO_ROOT,
-        'x-pack/test/api_integration/services/security_solution_endpoint_exceptions_api.gen.ts'
+        'x-pack/solutions/security/packages/test-api-clients/supertest/endpoint_exceptions.gen.ts'
       ),
     },
   });

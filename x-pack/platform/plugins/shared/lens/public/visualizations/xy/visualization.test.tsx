@@ -7,16 +7,16 @@
 
 import { type ExtraAppendLayerArg, getXyVisualization } from './visualization';
 import { LegendValue, Position } from '@elastic/charts';
-import {
+import type {
   Operation,
   OperationDescriptor,
   DatasourcePublicAPI,
   FramePublicAPI,
   UserMessage,
   AnnotationGroups,
-} from '../../types';
-import {
-  State,
+  DataViewsState,
+} from '@kbn/lens-common';
+import type {
   XYState,
   XYLayerConfig,
   XYDataLayerConfig,
@@ -30,20 +30,20 @@ import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { IconChartBar, IconCircle } from '@kbn/chart-icons';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
-import {
+import type {
   EventAnnotationConfig,
   PointInTimeEventAnnotationConfig,
 } from '@kbn/event-annotation-common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { DataViewsState } from '../../state_management';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { createMockedIndexPattern } from '../../datasources/form_based/mocks';
 import { createMockDataViewsState } from '../../data_views_service/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { layerTypes, Visualization } from '../..';
+import type { Visualization } from '../..';
+import { layerTypes } from '../..';
 import { set } from '@kbn/safer-lodash-set';
 import type { Reference } from '@kbn/content-management-utils';
 import {
@@ -51,8 +51,8 @@ import {
   isAnnotationsLayer,
   isByReferenceAnnotationsLayer,
 } from './visualization_helpers';
-import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
-import {
+import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
+import type {
   XYPersistedByReferenceAnnotationLayerConfig,
   XYPersistedByValueAnnotationLayerConfig,
   XYPersistedLinkedByValueAnnotationLayerConfig,
@@ -655,7 +655,7 @@ describe('xy_visualization', () => {
 
   describe('#removeLayer', () => {
     it('removes the specified layer', () => {
-      const prevState: State = {
+      const prevState: XYState = {
         ...exampleState(),
         layers: [
           ...exampleState().layers,
@@ -1906,7 +1906,7 @@ describe('xy_visualization', () => {
             },
           ],
         ],
-      ] as Array<[string, State['layers']]>)(
+      ] as Array<[string, XYState['layers']]>)(
         'should not require break down group for %s',
         (_, layers) => {
           const [, , splitGroup] = xyVisualization.getConfiguration({
@@ -2055,7 +2055,7 @@ describe('xy_visualization', () => {
             },
           ],
         ],
-      ] as Array<[string, State['layers']]>)(
+      ] as Array<[string, XYState['layers']]>)(
         'should require break down group for %s',
         (_, layers) => {
           const [, , splitGroup] = xyVisualization.getConfiguration({
@@ -2076,7 +2076,7 @@ describe('xy_visualization', () => {
         };
       });
 
-      function getStateWithBaseReferenceLine(): State {
+      function getStateWithBaseReferenceLine(): XYState {
         return {
           ...exampleState(),
           layers: [
@@ -2432,7 +2432,7 @@ describe('xy_visualization', () => {
         };
       });
 
-      function getStateWithAnnotationLayer(): State {
+      function getStateWithAnnotationLayer(): XYState {
         return {
           ...exampleState(),
           layers: [
@@ -2464,7 +2464,7 @@ describe('xy_visualization', () => {
         });
         expect(config.groups[0].accessors).toEqual([
           {
-            color: '#f04e98',
+            color: '#BC1E70',
             columnId: 'an1',
             customIcon: IconCircle,
             triggerIconType: 'custom',
@@ -3109,7 +3109,7 @@ describe('xy_visualization', () => {
           });
         }
         test('When data layer is empty, should return error on dimension', () => {
-          const state: State = {
+          const state: XYState = {
             ...exampleState(),
             layers: [
               {
@@ -3368,7 +3368,7 @@ describe('xy_visualization', () => {
 
       it('should not return an info message if annotation layer is ignoring the global filters but contains only manual annotations', () => {
         const initialState = createStateWithAnnotationProps({});
-        const state: State = {
+        const state: XYState = {
           ...initialState,
           layers: [
             // replace the existing annotation layers with a new one
@@ -3909,7 +3909,7 @@ describe('xy_visualization', () => {
                 "icon": "save",
                 "isCompatible": true,
                 "order": 100,
-                "showOutsideList": true,
+                "showOutsideList": false,
               },
               Object {
                 "data-test-subj": "lnsXY_annotationLayer_unlinkFromLibrary",

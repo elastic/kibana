@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { act, renderHook } from '@testing-library/react';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { getAbsoluteTimeRange } from '../../../common';
 import { NowProvider } from '../../now_provider';
 import { TimeHistory } from './time_history';
 import { Timefilter } from './timefilter';
-import { TimeStateUpdate, TimefilterHook } from './use_timefilter';
+import type { TimeStateUpdate, TimefilterHook } from './use_timefilter';
 
 const now = new Date('2025-04-02T00:00:00.000Z');
 

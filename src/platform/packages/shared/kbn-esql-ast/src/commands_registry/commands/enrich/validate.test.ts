@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { mockContext } from '../../../__tests__/context_fixtures';
 import { validate } from './validate';
 
@@ -22,79 +23,67 @@ describe('ENRICH Validation', () => {
   });
 
   test('validates the most basic query', () => {
-    enrichExpectErrors(`from a_index | enrich policy `, []);
-    enrichExpectErrors(`from a_index | enrich policy on textField with var0 = doubleField `, []);
-    enrichExpectErrors(
-      `from a_index | enrich policy on textField with var0 = doubleField, textField `,
-      []
-    );
-    enrichExpectErrors(
-      `from a_index | enrich policy on textField with col0 = doubleField, var0 = textField`,
-      []
-    );
-    enrichExpectErrors(`from a_index | enrich policy with doubleField`, []);
-    enrichExpectErrors(`from a_index | enrich policy | eval doubleField`, []);
-    enrichExpectErrors(`from a_index | enrich policy with col0 = doubleField | eval col0`, []);
+    enrichExpectErrors(`FROM a_index | ENRICH policy `, []);
   });
+
   test('validates the coordinators', () => {
     for (const value of ['any', 'coordinator', 'remote']) {
-      enrichExpectErrors(`from a_index | enrich _${value}:policy `, []);
-      enrichExpectErrors(`from a_index | enrich _${value} :  policy `, [
-        `Unknown policy [_${value}]`,
+      enrichExpectErrors(`FROM a_index | enrich _${value}:policy `, []);
+      enrichExpectErrors(`FROM a_index | enrich _${value} :  policy `, [
+        `Unknown policy "_${value}"`,
       ]);
-      enrichExpectErrors(`from a_index | enrich _${value}:  policy `, [
-        `Unknown policy [_${value}]`,
+      enrichExpectErrors(`FROM a_index | enrich _${value}:  policy `, [
+        `Unknown policy "_${value}"`,
       ]);
-      enrichExpectErrors(`from a_index | enrich _${camelCase(value)}:policy `, []);
-      enrichExpectErrors(`from a_index | enrich _${value.toUpperCase()}:policy `, []);
+      enrichExpectErrors(`FROM a_index | enrich _${camelCase(value)}:policy `, []);
+      enrichExpectErrors(`FROM a_index | enrich _${value.toUpperCase()}:policy `, []);
     }
 
-    enrichExpectErrors(`from a_index | enrich _unknown:policy`, [
-      'Unrecognized value [_unknown] for ENRICH, mode needs to be one of [_any, _coordinator, _remote]',
+    enrichExpectErrors(`FROM a_index | enrich _unknown:policy`, [
+      'Unrecognized value "_unknown" for ENRICH, mode needs to be one of [_any, _coordinator, _remote]',
     ]);
-    enrichExpectErrors(`from a_index | enrich any:policy`, [
-      'Unrecognized value [any] for ENRICH, mode needs to be one of [_any, _coordinator, _remote]',
+    enrichExpectErrors(`FROM a_index | enrich any:policy`, [
+      'Unrecognized value "any" for ENRICH, mode needs to be one of [_any, _coordinator, _remote]',
     ]);
   });
   test('raises error on unknown policy', () => {
-    enrichExpectErrors(`from a_index | enrich _`, ['Unknown policy [_]']);
-    enrichExpectErrors(`from a_index | enrich _:`, ['Unknown policy [_]']);
-    enrichExpectErrors(`from a_index | enrich any:`, ['Unknown policy [any]']);
-    enrichExpectErrors(`from a_index | enrich _:policy`, [
-      'Unrecognized value [_] for ENRICH, mode needs to be one of [_any, _coordinator, _remote]',
+    enrichExpectErrors(`FROM a_index | enrich _`, ['Unknown policy "_"']);
+    enrichExpectErrors(`FROM a_index | enrich _:`, ['Unknown policy "_"']);
+    enrichExpectErrors(`FROM a_index | enrich any:`, ['Unknown policy "any"']);
+    enrichExpectErrors(`FROM a_index | enrich _:policy`, [
+      'Unrecognized value "_" for ENRICH, mode needs to be one of [_any, _coordinator, _remote]',
     ]);
-    enrichExpectErrors(`from a_index | enrich _any:`, ['Unknown policy [_any]']);
-    enrichExpectErrors('from a_index | enrich `this``is fine`', ['Unknown policy [`this``is]']);
-    enrichExpectErrors('from a_index | enrich this is fine', ['Unknown policy [this]']);
-    enrichExpectErrors(`from a_index |enrich missing-policy `, ['Unknown policy [missing-policy]']);
+    enrichExpectErrors(`FROM a_index | enrich _any:`, ['Unknown policy "_any"']);
+    enrichExpectErrors('FROM a_index | enrich `this``is fine`', ['Unknown policy "`this``is"']);
+    enrichExpectErrors('FROM a_index | enrich this is fine', ['Unknown policy "this"']);
+    enrichExpectErrors(`FROM a_index |enrich missing-policy `, ['Unknown policy "missing-policy"']);
   });
 
-  test('validates the columns', () => {
-    enrichExpectErrors(`from a_index | enrich policy on b `, ['Unknown column [b]']);
+  test('validates match field', () => {
+    enrichExpectErrors(`FROM a_index | ENRICH policy ON b `, ['Unknown column "b"']);
 
-    enrichExpectErrors('from a_index | enrich policy on `this``is fine`', [
-      'Unknown column [this`is fine]',
+    enrichExpectErrors('FROM a_index | ENRICH policy ON `this``is fine`', [
+      'Unknown column "this`is fine"',
     ]);
-    enrichExpectErrors('from a_index | enrich policy on this is fine', ['Unknown column [this]']);
-    enrichExpectErrors(`from a_index | enrich policy on textField with col1 `, [
-      'Unknown column [col1]',
-    ]);
-    enrichExpectErrors(`from a_index |enrich policy on doubleField with col1 = `, [
-      'Unknown column [col1]',
-    ]);
-    enrichExpectErrors(`from a_index | enrich policy on textField with col1 = c `, [
-      'Unknown column [col1]',
-      `Unknown column [c]`,
-    ]);
-    enrichExpectErrors(`from a_index |enrich policy on doubleField with col1 = , `, [
-      'Unknown column [col1]',
-    ]);
-    enrichExpectErrors(`from a_index | enrich policy on textField with var0 = doubleField, col1 `, [
-      'Unknown column [col1]',
-    ]);
+    enrichExpectErrors('FROM a_index | ENRICH policy ON this is fine', ['Unknown column "this"']);
+  });
+
+  test('validates enrich fields against policy', () => {
+    // otherField and yetAnotherField are enrich fields in the policy
+    enrichExpectErrors(`FROM a_index | ENRICH policy ON textField WITH otherField `, []);
     enrichExpectErrors(
-      `from a_index |enrich policy on doubleField with col0 = doubleField, col1 = `,
-      ['Unknown column [col1]']
+      `FROM a_index | ENRICH policy ON textField WITH otherField, newname = yetAnotherField `,
+      []
     );
+
+    // keywordField is a field in the index, but not an enrich field
+    enrichExpectErrors(`FROM a_index | ENRICH policy ON textField WITH keywordField `, [
+      'Unknown column "keywordField"',
+    ]);
+
+    // col1 shouldn't be validated, only foo
+    enrichExpectErrors(`FROM a_index |ENRICH policy ON doubleField WITH col1 = foo`, [
+      'Unknown column "foo"',
+    ]);
   });
 });

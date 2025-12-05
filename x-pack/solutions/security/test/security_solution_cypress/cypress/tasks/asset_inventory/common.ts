@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { getDataTestSubjectSelector } from '../../helpers/common';
-const ADD_ELASTIC_AGENT_LATER_TEST_ID = getDataTestSubjectSelector('confirmModalCancelButton');
-export const SAVE_BUTTON = getDataTestSubjectSelector('createPackagePolicySaveButton');
-export const SAVE_EDIT_BUTTON = getDataTestSubjectSelector('saveIntegration');
-
-export const AWS_PROVIDER_TEST_ID = `${getDataTestSubjectSelector('caiAwsTestId')} input`;
-export const GCP_PROVIDER_TEST_ID = `${getDataTestSubjectSelector('caiGcpTestId')} input`;
-export const AZURE_PROVIDER_TEST_ID = `${getDataTestSubjectSelector('caiAzureTestId')} input`;
+import {
+  ADD_ELASTIC_AGENT_LATER_TEST_ID,
+  AWS_PROVIDER_TEST_ID,
+  AZURE_PROVIDER_TEST_ID,
+  GCP_PROVIDER_TEST_ID,
+  SAVE_BUTTON,
+  SAVE_EDIT_BUTTON,
+} from '../../screens/asset_inventory/common';
 
 export const selectCloudProvider = (provider: 'aws' | 'gcp' | 'azure') => {
   const providerSelector =

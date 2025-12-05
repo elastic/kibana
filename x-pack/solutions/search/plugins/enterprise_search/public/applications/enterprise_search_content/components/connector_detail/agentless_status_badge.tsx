@@ -6,8 +6,9 @@
  */
 import React from 'react';
 
-import { EuiBadge, EuiBadgeProps } from '@elastic/eui';
-import { Agent } from '@kbn/fleet-plugin/common';
+import type { EuiBadgeProps } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
+import type { Agent } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiLightVars as euiVars } from '@kbn/ui-theme';
 

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { SavedObject } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
 import { mergeWith, omit, omitBy } from 'lodash';
-import {
-  ConfigKey,
+import type {
   EncryptedSyntheticsMonitor,
   MonitorFields,
   MonitorFieldsResult,
 } from '../../../../common/runtime_types';
+import { ConfigKey } from '../../../../common/runtime_types';
 
 const keysToOmit = [
   ConfigKey.URLS,

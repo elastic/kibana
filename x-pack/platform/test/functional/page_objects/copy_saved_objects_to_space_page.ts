@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 function extractCountFromSummary(str: string) {
   return parseInt(str.split('\n')[1], 10);

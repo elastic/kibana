@@ -34,6 +34,92 @@ import { isValidDataset } from './is_valid_namespace';
 
 type Errors = string[] | null;
 
+interface DurationParseResult {
+  isValid: boolean;
+  valueNs: number; // in nanoseconds
+  errors: string[];
+}
+
+/**
+ * Parses a duration string into nanoseconds and validates the format.
+ * Valid time units are "ms", "s", "m", "h".
+ *
+ * @param durationStr - The duration string to parse (e.g., "1h30m45s")
+ * @returns An object with parsing results
+ */
+export const parseDuration = (durationStr: string): DurationParseResult => {
+  const result: DurationParseResult = {
+    isValid: true,
+    valueNs: 0,
+    errors: [],
+  };
+
+  if (!durationStr || typeof durationStr !== 'string' || durationStr.trim() === '') {
+    result.isValid = false;
+    result.errors.push(
+      i18n.translate('xpack.fleet.packagePolicyValidation.emptyDurationErrorMessage', {
+        defaultMessage: 'Duration cannot be empty',
+      })
+    );
+    return result;
+  }
+
+  // Regular expression to match duration components.
+  const durationRegex = /(\d+)(ms|s|m|h)/g;
+  const matches = [...durationStr.matchAll(durationRegex)];
+
+  if (matches.length === 0) {
+    result.isValid = false;
+    result.errors.push(
+      i18n.translate('xpack.fleet.packagePolicyValidation.invalidDurationFormatErrorMessage', {
+        defaultMessage: 'Invalid duration format. Expected format like "1h30m45s"',
+      })
+    );
+    return result;
+  }
+
+  // Check if the entire string is matched
+  const fullMatch = matches.reduce((acc, match) => acc + match[0], '');
+  if (fullMatch !== durationStr) {
+    result.isValid = false;
+    result.errors.push(
+      i18n.translate('xpack.fleet.packagePolicyValidation.invalidDurationCharactersErrorMessage', {
+        defaultMessage: 'Duration contains invalid characters',
+      })
+    );
+  }
+
+  const NANOSECONDS_PER_MS = 1_000_000;
+  const NANOSECONDS_PER_SECOND = 1_000_000_000;
+  const NANOSECONDS_PER_MINUTE = 60 * NANOSECONDS_PER_SECOND;
+  const NANOSECONDS_PER_HOUR = 60 * NANOSECONDS_PER_MINUTE;
+
+  // Calculate the total duration in nanoseconds
+  let totalNs = 0;
+  for (const match of matches) {
+    const value = parseFloat(match[1]);
+    const unit = match[2];
+
+    switch (unit) {
+      case 'h':
+        totalNs += value * NANOSECONDS_PER_HOUR;
+        break;
+      case 'm':
+        totalNs += value * NANOSECONDS_PER_MINUTE;
+        break;
+      case 's':
+        totalNs += value * NANOSECONDS_PER_SECOND;
+        break;
+      case 'ms':
+        totalNs += value * NANOSECONDS_PER_MS;
+        break;
+    }
+  }
+
+  result.valueNs = totalNs;
+  return result;
+};
+
 type ValidationEntry = Record<string, Errors>;
 interface ValidationRequiredVarsEntry {
   name: string;
@@ -517,11 +603,91 @@ export const validatePackagePolicyConfig = (
     }
   }
 
+  if (varDef.type === 'duration' && parsedValue !== undefined && !Array.isArray(parsedValue)) {
+    const durationResult = parseDuration(parsedValue);
+
+    if (!durationResult.isValid) {
+      errors.push(...durationResult.errors);
+    } else {
+      // Check min_duration if specified
+      if (varDef.min_duration !== undefined) {
+        const minDurationResult = parseDuration(varDef.min_duration as string);
+        if (!minDurationResult.isValid) {
+          errors.push(
+            i18n.translate('xpack.fleet.packagePolicyValidation.invalidMinDurationErrorMessage', {
+              defaultMessage: 'Invalid min_duration specification',
+            })
+          );
+        } else if (durationResult.valueNs < minDurationResult.valueNs) {
+          errors.push(
+            i18n.translate('xpack.fleet.packagePolicyValidation.durationBelowMinErrorMessage', {
+              defaultMessage: 'Duration is below the minimum allowed value of {minDuration}',
+              values: {
+                minDuration: varDef.min_duration,
+              },
+            })
+          );
+        }
+      }
+
+      // Check max_duration if specified
+      if (varDef.max_duration !== undefined) {
+        const maxDurationResult = parseDuration(varDef.max_duration as string);
+        if (!maxDurationResult.isValid) {
+          errors.push(
+            i18n.translate('xpack.fleet.packagePolicyValidation.invalidMaxDurationErrorMessage', {
+              defaultMessage: 'Invalid max_duration specification',
+            })
+          );
+        } else if (durationResult.valueNs > maxDurationResult.valueNs) {
+          errors.push(
+            i18n.translate('xpack.fleet.packagePolicyValidation.durationAboveMaxErrorMessage', {
+              defaultMessage: 'Duration is above the maximum allowed value of {maxDuration}',
+              values: {
+                maxDuration: varDef.max_duration,
+              },
+            })
+          );
+        }
+      }
+    }
+  }
+
   if (varDef.type === 'select' && parsedValue !== undefined) {
     if (!varDef.options?.map((o) => o.value).includes(parsedValue)) {
       errors.push(
         i18n.translate('xpack.fleet.packagePolicyValidation.invalidSelectValueErrorMessage', {
           defaultMessage: 'Invalid value for select type',
+        })
+      );
+    }
+  }
+
+  if (varDef.type === 'url' && parsedValue !== undefined && parsedValue !== '') {
+    try {
+      // Validate URL against RFC3986 using the URL constructor
+      new URL(parsedValue);
+
+      // Validate the scheme against url_allowed_schemes.
+      if (varDef.url_allowed_schemes && varDef.url_allowed_schemes.length > 0) {
+        const urlScheme = parsedValue.split(':')[0].toLowerCase();
+        if (!varDef.url_allowed_schemes.includes(urlScheme)) {
+          errors.push(
+            i18n.translate('xpack.fleet.packagePolicyValidation.invalidUrlSchemeErrorMessage', {
+              defaultMessage:
+                'URL scheme "{urlScheme}" is not allowed. Allowed schemes: {allowedSchemes}',
+              values: {
+                urlScheme,
+                allowedSchemes: varDef.url_allowed_schemes.join(', '),
+              },
+            })
+          );
+        }
+      }
+    } catch (e) {
+      errors.push(
+        i18n.translate('xpack.fleet.packagePolicyValidation.invalidUrlFormatErrorMessage', {
+          defaultMessage: 'Invalid URL format',
         })
       );
     }

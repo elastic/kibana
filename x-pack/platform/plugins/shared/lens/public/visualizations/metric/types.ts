@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import type { LayoutDirection, MetricStyle } from '@elastic/charts';
+import type { LayoutDirection, MetricStyle, SecondaryMetricProps } from '@elastic/charts';
 import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
-import type { CollapseFunction } from '@kbn/visualizations-plugin/common';
-import type { LayerType } from '../../../common/types';
+import type { CollapseFunction, LensLayerType as LayerType } from '@kbn/lens-common';
 
 export type ValueFontMode = Exclude<MetricStyle['valueFontSize'], number>;
+export type PrimaryMetricFontSize = ValueFontMode;
+
+export type PrimaryMetricPosition = MetricStyle['valuePosition'];
 
 export type SecondaryTrendType = 'none' | 'static' | 'dynamic';
 
@@ -36,14 +38,20 @@ export interface MetricVisualizationState {
   // computed by collapsing all rows
   collapseFn?: CollapseFunction;
   subtitle?: string;
-  secondaryPrefix?: string;
+  secondaryPrefix?: string; // legacy state property
+  secondaryLabel?: string;
   secondaryTrend?: SecondaryTrend;
   progressDirection?: LayoutDirection;
   showBar?: boolean;
   titlesTextAlign?: MetricStyle['titlesTextAlign'];
-  valuesTextAlign?: MetricStyle['valuesTextAlign'];
+  valuesTextAlign?: 'left' | 'right' | 'center'; // legacy state property
+  secondaryAlign?: MetricStyle['extraTextAlign'];
+  primaryAlign?: MetricStyle['valueTextAlign'];
   iconAlign?: MetricStyle['iconAlign'];
   valueFontMode?: ValueFontMode;
+  titleWeight?: MetricStyle['titleWeight'];
+  primaryPosition?: MetricStyle['valuePosition'];
+  secondaryLabelPosition?: SecondaryMetricProps['labelPosition'];
   color?: string;
   icon?: string;
   palette?: PaletteOutput<CustomPaletteParams>;
@@ -55,4 +63,12 @@ export interface MetricVisualizationState {
   trendlineMetricAccessor?: string;
   trendlineSecondaryMetricAccessor?: string;
   trendlineBreakdownByAccessor?: string;
+
+  applyColorTo?: 'background' | 'value'; // Used for coordination between dimension editor sections
 }
+
+export type TitleFontWeight = MetricStyle['titleWeight'];
+
+export type IconPosition = MetricStyle['iconAlign'];
+
+export type Alignment = 'left' | 'center' | 'right';

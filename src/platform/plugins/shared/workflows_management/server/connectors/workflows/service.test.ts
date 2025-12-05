@@ -24,8 +24,7 @@ describe('Workflows Service', () => {
 
   describe('createExternalService', () => {
     const actionId = 'test-action-id';
-    const config = {};
-    const secrets = {};
+
     const mockConfigurationUtilities = actionsConfigMock.create();
     const mockConnectorUsageCollector = {} as any;
 
@@ -34,7 +33,6 @@ describe('Workflows Service', () => {
 
       const service = createExternalService(
         actionId,
-        { config, secrets },
         mockLogger,
         mockConfigurationUtilities,
         mockConnectorUsageCollector,
@@ -49,7 +47,6 @@ describe('Workflows Service', () => {
     it('should create external service without workflow service', () => {
       const service = createExternalService(
         actionId,
-        { config, secrets },
         mockLogger,
         mockConfigurationUtilities,
         mockConnectorUsageCollector,
@@ -63,8 +60,6 @@ describe('Workflows Service', () => {
 
   describe('runWorkflow', () => {
     const actionId = 'test-action-id';
-    const config = {};
-    const secrets = {};
     const mockConfigurationUtilities = actionsConfigMock.create();
     const mockConnectorUsageCollector = {} as any;
 
@@ -75,7 +70,6 @@ describe('Workflows Service', () => {
 
       const service = createExternalService(
         actionId,
-        { config, secrets },
         mockLogger,
         mockConfigurationUtilities,
         mockConnectorUsageCollector,
@@ -85,7 +79,21 @@ describe('Workflows Service', () => {
 
       const params = {
         workflowId: 'test-workflow-id',
-        inputs: { test: 'data' },
+        spaceId: 'default',
+        inputs: {
+          event: {
+            alerts: [],
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: [],
+              consumer: 'test',
+              producer: 'test',
+              ruleTypeId: 'test',
+            },
+            spaceId: 'default',
+          },
+        },
       };
 
       const result = await service.runWorkflow(params);
@@ -97,14 +105,28 @@ describe('Workflows Service', () => {
 
       expect(mockWorkflowService).toHaveBeenCalledWith(
         'test-workflow-id',
-        { test: 'data' },
+        'default',
+        {
+          event: {
+            alerts: [],
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: [],
+              consumer: 'test',
+              producer: 'test',
+              ruleTypeId: 'test',
+            },
+            spaceId: 'default',
+          },
+        },
         mockRequest
       );
 
-      expect(mockLogger.info).toHaveBeenCalledWith(
+      expect(mockLogger.debug).toHaveBeenCalledWith(
         'Attempting to run workflow test-workflow-id via internal service'
       );
-      expect(mockLogger.info).toHaveBeenCalledWith(
+      expect(mockLogger.debug).toHaveBeenCalledWith(
         'Successfully started workflow test-workflow-id, run ID: workflow-run-123'
       );
     });
@@ -112,7 +134,6 @@ describe('Workflows Service', () => {
     it('should handle missing workflow service', async () => {
       const service = createExternalService(
         actionId,
-        { config, secrets },
         mockLogger,
         mockConfigurationUtilities,
         mockConnectorUsageCollector,
@@ -121,14 +142,28 @@ describe('Workflows Service', () => {
 
       const params = {
         workflowId: 'test-workflow-id',
-        inputs: { test: 'data' },
+        spaceId: 'default',
+        inputs: {
+          event: {
+            alerts: [],
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: [],
+              consumer: 'test',
+              producer: 'test',
+              ruleTypeId: 'test',
+            },
+            spaceId: 'default',
+          },
+        },
       };
 
       await expect(service.runWorkflow(params)).rejects.toThrow(
         'Workflows service not available. This connector requires workflows management plugin to be enabled.'
       );
 
-      expect(mockLogger.info).toHaveBeenCalledWith(
+      expect(mockLogger.debug).toHaveBeenCalledWith(
         'Attempting to run workflow test-workflow-id via internal service'
       );
     });
@@ -140,7 +175,6 @@ describe('Workflows Service', () => {
 
       const service = createExternalService(
         actionId,
-        { config, secrets },
         mockLogger,
         mockConfigurationUtilities,
         mockConnectorUsageCollector,
@@ -150,7 +184,21 @@ describe('Workflows Service', () => {
 
       const params = {
         workflowId: 'test-workflow-id',
-        inputs: { test: 'data' },
+        spaceId: 'default',
+        inputs: {
+          event: {
+            alerts: [],
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: [],
+              consumer: 'test',
+              producer: 'test',
+              ruleTypeId: 'test',
+            },
+            spaceId: 'default',
+          },
+        },
       };
 
       await expect(service.runWorkflow(params)).rejects.toThrow(
@@ -167,7 +215,6 @@ describe('Workflows Service', () => {
 
       const service = createExternalService(
         actionId,
-        { config, secrets },
         mockLogger,
         mockConfigurationUtilities,
         mockConnectorUsageCollector,
@@ -177,7 +224,21 @@ describe('Workflows Service', () => {
 
       const params = {
         workflowId: 'test-workflow-id',
-        inputs: { test: 'data' },
+        spaceId: 'default',
+        inputs: {
+          event: {
+            alerts: [],
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: [],
+              consumer: 'test',
+              producer: 'test',
+              ruleTypeId: 'test',
+            },
+            spaceId: 'default',
+          },
+        },
       };
 
       await expect(service.runWorkflow(params)).rejects.toThrow(
@@ -192,7 +253,6 @@ describe('Workflows Service', () => {
 
       const service = createExternalService(
         actionId,
-        { config, secrets },
         mockLogger,
         mockConfigurationUtilities,
         mockConnectorUsageCollector,
@@ -202,6 +262,21 @@ describe('Workflows Service', () => {
 
       const params = {
         workflowId: 'test-workflow-id',
+        spaceId: 'default',
+        inputs: {
+          event: {
+            alerts: [],
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: [],
+              consumer: 'test',
+              producer: 'test',
+              ruleTypeId: 'test',
+            },
+            spaceId: 'default',
+          },
+        },
       };
 
       const result = await service.runWorkflow(params);
@@ -211,7 +286,25 @@ describe('Workflows Service', () => {
         status: 'executed',
       });
 
-      expect(mockWorkflowService).toHaveBeenCalledWith('test-workflow-id', {}, mockRequest);
+      expect(mockWorkflowService).toHaveBeenCalledWith(
+        'test-workflow-id',
+        'default',
+        {
+          event: {
+            alerts: [],
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: [],
+              consumer: 'test',
+              producer: 'test',
+              ruleTypeId: 'test',
+            },
+            spaceId: 'default',
+          },
+        },
+        mockRequest
+      );
     });
   });
 });

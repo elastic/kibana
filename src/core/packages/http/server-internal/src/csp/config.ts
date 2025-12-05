@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TypeOf, schema } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 
 interface DirectiveValidationOptions {
@@ -70,6 +71,10 @@ const configSchema = schema.object(
       validate: getDirectiveValidator({ allowNone: false, allowNonce: false }),
     }),
     img_src: schema.arrayOf(schema.string(), {
+      defaultValue: [],
+      validate: getDirectiveValidator({ allowNone: false, allowNonce: false }),
+    }),
+    object_src: schema.arrayOf(schema.string(), {
       defaultValue: [],
       validate: getDirectiveValidator({ allowNone: false, allowNonce: false }),
     }),
@@ -141,4 +146,17 @@ export const cspConfig: ServiceConfigDescriptor<CspConfigType> = {
   // ? https://github.com/elastic/kibana/pull/52251
   path: 'csp',
   schema: configSchema,
+  deprecations: ({ unusedFromRoot, deprecateFromRoot }) => [
+    unusedFromRoot('csp.report_only.object_src', { level: 'warning' }),
+    deprecateFromRoot('csp.disableUnsafeEval', '10.0.0', {
+      level: 'warning',
+      message: '`csp.disableUnsafeEval` has been replaced by the `csp.script_src` setting.',
+      correctiveActions: {
+        manualSteps: [
+          'Remove the `csp.disableUnsafeEval` setting from your kibana configuration file.',
+          "Use `csp.script_src: ['unsafe-eval']` instead if you wish to enable `unsafe-eval`.",
+        ],
+      },
+    }),
+  ],
 };

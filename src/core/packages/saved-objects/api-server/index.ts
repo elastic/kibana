@@ -62,6 +62,8 @@ export type {
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteStatus,
   SavedObjectsBulkDeleteResponse,
+  SavedObjectsSearchOptions,
+  SavedObjectsSearchResponse,
 } from './src/apis';
 
 export type {
@@ -70,4 +72,5 @@ export type {
   SavedObjectAttributes,
   SavedObjectAttributeSingle,
   SavedObjectReference,
+  SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-common/src/server_types';

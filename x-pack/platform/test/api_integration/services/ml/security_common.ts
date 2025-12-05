@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ProvidedType } from '@kbn/test';
+import type { ProvidedType } from '@kbn/test';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export type MlSecurityCommon = ProvidedType<typeof MachineLearningSecurityCommonProvider>;
 

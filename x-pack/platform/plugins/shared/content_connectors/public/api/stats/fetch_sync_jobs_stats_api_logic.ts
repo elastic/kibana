@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
-import { SyncJobsStats } from '../../../common/stats';
+import type { HttpSetup } from '@kbn/core/public';
+import type { SyncJobsStats } from '../../../common/stats';
 import { createApiLogic } from '../api_logic/create_api_logic';
 
 export type FetchSyncJobsStatsResponse = SyncJobsStats;

@@ -5,21 +5,49 @@
  * 2.0.
  */
 
-import { builtInToolIdPrefix } from './constants';
+import { hasNamespaceName, isInProtectedNamespace } from '../base/namespaces';
 
-export const idRegexp = /^[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?$/;
+export const toolIdRegexp =
+  /^(?:[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?)(?:\.(?:[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?))*$/;
+export const toolIdMaxLength = 64;
 
-/**
- * Check if the given ID is a built-in ID (starting with `.`)
- */
-export const isBuiltInToolId = (id: string) => {
-  return id.startsWith(builtInToolIdPrefix);
-};
+const reservedKeywords = ['new'];
 
 /**
  * Check if the given ID is a reserved ID
- * Atm this only checks for built-in IDs, but it will check for MCP and such later.
+ * Atm this only checks for `new` because that's a value we're using for url paths on the UI.
  */
 export const isReservedToolId = (id: string) => {
-  return isBuiltInToolId(id);
+  return reservedKeywords.includes(id);
+};
+
+/**
+ * Validate that a tool id has the right format,
+ * returning an error message if it fails the validation,
+ * and undefined otherwise.
+ *
+ * @param toolId: the toolId to validate
+ * @param builtIn: set to true if we're validating a built-in (internal) tool id.
+ */
+export const validateToolId = ({
+  toolId,
+  builtIn,
+}: {
+  toolId: string;
+  builtIn: boolean;
+}): string | undefined => {
+  if (!toolIdRegexp.test(toolId)) {
+    return `Tool ids must start and end with a letter or number, and can only contain lowercase letters, numbers, dots, hyphens and underscores`;
+  }
+  if (toolId.length > toolIdMaxLength) {
+    return `Tool ids are limited to ${toolIdMaxLength} characters.`;
+  }
+  if (hasNamespaceName(toolId)) {
+    return `Tool id cannot have the same name as a reserved namespace.`;
+  }
+  if (!builtIn) {
+    if (isInProtectedNamespace(toolId)) {
+      return `Tool id is using a protected namespace.`;
+    }
+  }
 };

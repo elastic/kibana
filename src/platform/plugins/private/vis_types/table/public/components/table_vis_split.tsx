@@ -9,12 +9,12 @@
 
 import React, { memo } from 'react';
 
-import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
+import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
 import { type UseEuiTheme } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { TableGroup, TableVisConfig, TableVisUseUiStateProps } from '../types';
+import type { TableGroup, TableVisConfig, TableVisUseUiStateProps } from '../types';
 import { TableVisBasic } from './table_vis_basic';
 
 const tableVisSplitStyles = {

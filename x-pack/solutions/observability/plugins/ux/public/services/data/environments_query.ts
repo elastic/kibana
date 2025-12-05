@@ -14,7 +14,7 @@ import {
   PROCESSOR_EVENT,
 } from '../../../common/elasticsearch_fieldnames';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
-import { Environment } from '../../../common/environment_rt';
+import type { Environment } from '../../../common/environment_rt';
 
 export function transformEnvironmentsResponse<T>(
   response?: ESSearchResponse<T, ReturnType<typeof getEnvironments>>

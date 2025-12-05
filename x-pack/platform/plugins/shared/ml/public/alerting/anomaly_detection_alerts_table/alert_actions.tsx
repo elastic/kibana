@@ -86,7 +86,7 @@ export const AlertActions: GetAlertsTableProp<'renderActionsCell'> = (props) => 
 
   const defaultAlertActions = useMemo(
     () => (
-      <DefaultAlertActions
+      <DefaultAlertActions<{}>
         key="defaultRowActions"
         onActionExecuted={closeActionsPopover}
         isAlertDetailsEnabled={false}

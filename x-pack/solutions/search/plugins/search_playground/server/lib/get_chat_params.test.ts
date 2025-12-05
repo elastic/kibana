@@ -6,16 +6,15 @@
  */
 
 import { getChatParams } from './get_chat_params';
-import {
-  OPENAI_CONNECTOR_ID,
-  BEDROCK_CONNECTOR_ID,
-  GEMINI_CONNECTOR_ID,
-  INFERENCE_CONNECTOR_ID,
-} from '@kbn/stack-connectors-plugin/public/common';
+import { CONNECTOR_ID as GEMINI_CONNECTOR_ID } from '@kbn/connector-schemas/gemini/constants';
+import { CONNECTOR_ID as BEDROCK_CONNECTOR_ID } from '@kbn/connector-schemas/bedrock/constants';
+import { CONNECTOR_ID as INFERENCE_CONNECTOR_ID } from '@kbn/connector-schemas/inference/constants';
+import { CONNECTOR_ID as OPENAI_CONNECTOR_ID } from '@kbn/connector-schemas/openai/constants';
 import { Prompt, QuestionRewritePrompt } from '../../common/prompt';
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core/server/mocks';
-import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
 import { elasticModelIds } from '@kbn/inference-common';
 
@@ -24,7 +23,6 @@ jest.mock('@kbn/langchain/server', () => {
   return {
     ...original,
     ActionsClientChatOpenAI: jest.fn(),
-    ActionsClientSimpleChatModel: jest.fn(),
   };
 });
 

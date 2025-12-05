@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { WarningCheckbox, WarningCheckboxProps } from './warning_step_checkbox';
+import type { WarningCheckboxProps } from './warning_step_checkbox';
+import { WarningCheckbox } from './warning_step_checkbox';
 
 export const IncompatibleDataInDataStreamWarningCheckbox: React.FunctionComponent<
   WarningCheckboxProps

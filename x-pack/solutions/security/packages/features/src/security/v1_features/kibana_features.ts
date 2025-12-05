@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import {
@@ -24,9 +23,10 @@ import {
   SERVER_APP_ID,
   LEGACY_NOTIFICATIONS_ID,
   CLOUD_POSTURE_APP_ID,
-  SECURITY_FEATURE_ID_V3,
+  SECURITY_FEATURE_ID_V4,
   TIMELINE_FEATURE_ID,
   NOTES_FEATURE_ID,
+  CLOUD_DEFEND_APP_ID,
 } from '../../constants';
 import type { SecurityFeatureParams } from '../types';
 import type { BaseKibanaFeatureConfig } from '../../types';
@@ -58,7 +58,7 @@ export const getSecurityBaseKibanaFeature = ({
         defaultMessage: 'The {currentId} permissions are deprecated, please see {latestId}.',
         values: {
           currentId: SERVER_APP_ID,
-          latestId: SECURITY_FEATURE_ID_V3,
+          latestId: SECURITY_FEATURE_ID_V4,
         },
       }
     ),
@@ -73,8 +73,8 @@ export const getSecurityBaseKibanaFeature = ({
   ),
   order: 1100,
   category: DEFAULT_APP_CATEGORIES.security,
-  scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
-  app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
+  // scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
+  app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
   catalogue: [APP_ID],
   management: {
     insightsAndAlerting: ['triggersActions'],
@@ -93,17 +93,17 @@ export const getSecurityBaseKibanaFeature = ({
         default: [
           { feature: TIMELINE_FEATURE_ID, privileges: ['all'] },
           { feature: NOTES_FEATURE_ID, privileges: ['all'] },
-          // note: overriden by product feature endpointArtifactManagement when enabled
-          { feature: SECURITY_FEATURE_ID_V3, privileges: ['all'] },
+          // note: ESS/serverless specific productFeaturesExtensions modify this privilege array
+          { feature: SECURITY_FEATURE_ID_V4, privileges: ['all'] },
         ],
         minimal: [
           { feature: TIMELINE_FEATURE_ID, privileges: ['all'] },
           { feature: NOTES_FEATURE_ID, privileges: ['all'] },
-          // note: overriden by product feature endpointArtifactManagement when enabled
-          { feature: SECURITY_FEATURE_ID_V3, privileges: ['minimal_all'] },
+          // note: ESS/serverless specific productFeaturesExtensions modify this privilege array
+          { feature: SECURITY_FEATURE_ID_V4, privileges: ['minimal_all'] },
         ],
       },
-      app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
+      app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
       catalogue: [APP_ID],
       api: [
         APP_ID,
@@ -143,15 +143,17 @@ export const getSecurityBaseKibanaFeature = ({
         default: [
           { feature: TIMELINE_FEATURE_ID, privileges: ['read'] },
           { feature: NOTES_FEATURE_ID, privileges: ['read'] },
-          { feature: SECURITY_FEATURE_ID_V3, privileges: ['read'] },
+          // note: ESS/serverless specific productFeaturesExtensions modify this privilege array
+          { feature: SECURITY_FEATURE_ID_V4, privileges: ['read'] },
         ],
         minimal: [
           { feature: TIMELINE_FEATURE_ID, privileges: ['read'] },
           { feature: NOTES_FEATURE_ID, privileges: ['read'] },
-          { feature: SECURITY_FEATURE_ID_V3, privileges: ['minimal_read'] },
+          // note: ESS/serverless specific productFeaturesExtensions modify this privilege array
+          { feature: SECURITY_FEATURE_ID_V4, privileges: ['minimal_read'] },
         ],
       },
-      app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
+      app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
       catalogue: [APP_ID],
       api: [
         APP_ID,

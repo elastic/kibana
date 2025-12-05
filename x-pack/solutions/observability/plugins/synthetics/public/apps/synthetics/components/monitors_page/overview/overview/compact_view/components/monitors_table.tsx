@@ -5,13 +5,15 @@
  * 2.0.
  */
 import React, { useCallback } from 'react';
-import { EuiBasicTable, EuiTableRowProps } from '@elastic/eui';
+import type { EuiTableRowProps } from '@elastic/eui';
+import { EuiBasicTable } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
-import { OverviewStatusMetaData } from '../../../../../../../../../common/runtime_types';
+import type { OverviewStatusMetaData } from '../../../../../../../../../common/runtime_types';
 import { useOverviewStatus } from '../../../../hooks/use_overview_status';
-import { FlyoutParamProps } from '../../types';
+import type { FlyoutParamProps } from '../../types';
 import { useMonitorsTableColumns } from '../hooks/use_monitors_table_columns';
 import { useMonitorsTablePagination } from '../hooks/use_monitors_table_pagination';
+import { useOverviewTrendsRequests } from '../../../../hooks/use_overview_trends_requests';
 
 export const MonitorsTable = ({
   items,
@@ -26,6 +28,8 @@ export const MonitorsTable = ({
   const { pageOfItems, pagination, onTableChange } = useMonitorsTablePagination({
     totalItems: items,
   });
+
+  useOverviewTrendsRequests(pageOfItems);
 
   const { columns } = useMonitorsTableColumns({ setFlyoutConfigCallback, items: pageOfItems });
 

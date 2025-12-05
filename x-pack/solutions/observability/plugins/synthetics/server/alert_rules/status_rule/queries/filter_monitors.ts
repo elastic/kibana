@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { KueryNode, fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import type { KueryNode } from '@kbn/es-query';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
-import { SyntheticsEsClient } from '../../../lib';
+import type { SyntheticsEsClient } from '../../../lib';
 import {
   FINAL_SUMMARY_FILTER,
   getRangeFilter,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { VisualizeInput } from '@kbn/visualizations-plugin/public';
+import type { VisualizeInput } from '@kbn/visualizations-plugin/public';
 
 export function toExpression(input: VisualizeInput & { savedObjectId: string }): string {
   const expressionParts = [] as string[];

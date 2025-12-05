@@ -99,4 +99,10 @@ export const ruleMetricsSchema: MakeSchemaFrom<RuleMetric> = {
     type: 'boolean',
     _meta: { description: 'True if this rule has exceptions' },
   },
+  has_does_not_match_condition: {
+    type: 'boolean',
+    _meta: {
+      description: 'True if Threat match rule has does_not_match condition in threat mappings',
+    },
+  },
 };

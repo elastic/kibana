@@ -8,11 +8,12 @@
  */
 
 import type { IDocumentMigrator } from '@kbn/core-saved-objects-base-server-internal';
+import { lazyObject } from '@kbn/lazy-object';
 
 export const createDocumentMigratorMock = (): jest.Mocked<IDocumentMigrator> => {
-  return {
+  return lazyObject({
     migrate: jest.fn().mockImplementation((doc: unknown) => doc),
     migrateAndConvert: jest.fn().mockImplementation((doc: unknown) => doc),
     isDowngradeRequired: jest.fn().mockReturnValue(false),
-  };
+  });
 };

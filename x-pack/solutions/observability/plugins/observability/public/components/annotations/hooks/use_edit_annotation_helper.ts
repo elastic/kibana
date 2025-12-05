@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import { useEffect } from 'react';
-import { UseFormReset } from 'react-hook-form';
+import type { UseFormReset } from 'react-hook-form';
 import type { Annotation } from '../../../../common/annotations';
 import type { CreateAnnotationForm } from '../components/create_annotation';
 

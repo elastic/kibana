@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';
 
@@ -30,9 +30,9 @@ export default ({ getService }: FtrProviderContext) => {
     user: USER
   ) {
     const { body, status } = await supertest
-      .post(`/internal/ml/saved_objects/update_trained_models_spaces`)
+      .post(`/api/ml/saved_objects/update_trained_models_spaces`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(getCommonRequestHeader('1'))
+      .set(getCommonRequestHeader('2023-10-31'))
       .send(requestBody);
     ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 

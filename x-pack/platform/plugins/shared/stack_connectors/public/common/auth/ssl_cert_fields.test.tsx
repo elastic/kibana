@@ -9,7 +9,7 @@ import React from 'react';
 import { SSLCertFields } from './ssl_cert_fields';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { SSLCertType } from '../../../common/auth/constants';
+import { SSLCertType } from '@kbn/connector-schemas/common/auth/constants';
 import { AuthFormTestProvider } from '../../connector_types/lib/test_utils';
 import { useConnectorContext } from '@kbn/triggers-actions-ui-plugin/public';
 import * as i18n from './translations';

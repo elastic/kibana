@@ -29,7 +29,7 @@ function getCallbacksCode(callbacks: CodeSnippetProps['callbacks']) {
             ? `
         // the getFieldsFor callback gets an esql query to get the required fields
         // note that the query is not optimized yet, so things like "| limit 0"
-        // might be appended to speed up the retrieval. 
+        // might be appended to speed up the retrieval.
         getFieldsFor: async (esqlFieldsQuery: string) => [
             { name: 'numberField', type: 'number' },
             { name: 'stringField', type: 'string' },
@@ -64,7 +64,6 @@ const callbacks: ESQLCallbacks = () => ${getCallbacksCode(callbacks)};
 
 const {errors, warnings} = validateQuery(
     currentQuery,
-    { ignoreOnMissingCallbacks: ${Boolean(ignoreErrors)} },
     callbacks
 );
 `}

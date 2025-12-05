@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
-import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { ILicense } from '@kbn/licensing-types';
 import pRetry from 'p-retry';
 import { Subject } from 'rxjs';
 
@@ -22,9 +22,10 @@ import { LicenseService } from '../../common/services';
 
 import { createAgentPolicyMock } from '../../common/mocks';
 
+import { createAppContextStartContractMock } from '../mocks';
+
 import { PolicyWatcher } from './agent_policy_watch';
 import { agentPolicyService } from './agent_policy';
-import { createAppContextStartContractMock } from '../mocks';
 import { appContextService } from './app_context';
 
 jest.mock('./agent_policy');
@@ -347,6 +348,25 @@ describe('Agent Policy-Changing license watcher', () => {
 
       expect(logger.error).toHaveBeenCalledWith(
         'Done - 1 out of 2 were unsuccessful. Errors encountered:\nPolicy [policy-2] failed to update due to error: Failed to update policy'
+      );
+    });
+
+    it('should handle errors during async iteration gracefully', async () => {
+      const getMockAgentPolicyFetchAllAgentPolicies = () =>
+        jest.fn().mockResolvedValue(
+          jest.fn(async function* () {
+            throw new Error('Not Found');
+          })()
+        );
+
+      agentPolicySvcMock.fetchAllAgentPolicies = getMockAgentPolicyFetchAllAgentPolicies();
+
+      const pw = new PolicyWatcher(logger);
+
+      await pw.watch(Basic);
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'Unable to process agent policy license compliance: Not Found'
       );
     });
   });

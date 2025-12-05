@@ -8,14 +8,15 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import { MaintenanceWindowStatus } from '@kbn/alerting-plugin/common';
+import { MaintenanceWindowStatus } from '@kbn/maintenance-windows-plugin/common';
 import * as api from '../apis/bulk_get_maintenance_windows';
 import { coreMock } from '@kbn/core/public/mocks';
 import { useBulkGetMaintenanceWindowsQuery } from './use_bulk_get_maintenance_windows';
 import { useLicense } from './use_license';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import React, { PropsWithChildren } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import type { PropsWithChildren } from 'react';
+import React from 'react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { testQueryClientConfig } from '../utils/test';
 
 jest.mock('./use_license');

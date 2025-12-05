@@ -6,7 +6,7 @@
  */
 
 import { mergeProjection } from '../../../common/utils/merge_projection';
-import { SetupUX, UxUIFilters } from '../../../typings/ui_filters';
+import type { SetupUX, UxUIFilters } from '../../../typings/ui_filters';
 import {
   ERROR_EXC_MESSAGE,
   ERROR_EXC_TYPE,

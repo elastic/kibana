@@ -12,7 +12,7 @@
  * validation tests. This allows us to use our own fixtures without relying
  * on the generated definitions provided by Elasticsearch.
  */
-import { FunctionDefinition } from '../types';
+import type { FunctionDefinition } from '../types';
 
 let testFunctions: FunctionDefinition[] = [];
 

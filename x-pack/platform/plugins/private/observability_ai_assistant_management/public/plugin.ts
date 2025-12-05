@@ -6,17 +6,22 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { Subscription } from 'rxjs';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { ManagementApp } from '@kbn/management-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 
 import type {
   ObservabilityAIAssistantPublicSetup,
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
+import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AiAssistantManagementObservabilityPluginSetup {}
@@ -29,6 +34,7 @@ export interface SetupDependencies {
   home?: HomePublicPluginSetup;
   observabilityAIAssistant: ObservabilityAIAssistantPublicSetup;
   ml: MlPluginStart;
+  spaces?: SpacesPluginSetup;
 }
 
 export interface StartDependencies {
@@ -36,12 +42,14 @@ export interface StartDependencies {
   serverless?: ServerlessPluginStart;
   productDocBase?: ProductDocBasePluginStart;
   ml: MlPluginSetup;
+  spaces?: SpacesPluginStart;
+  cloud?: CloudStart;
+  licensing: LicensingPluginStart;
 }
 
 export interface ConfigSchema {
   logSourcesEnabled: boolean;
   spacesEnabled: boolean;
-  visibilityEnabled: boolean;
 }
 
 export class AiAssistantManagementObservabilityPlugin
@@ -54,9 +62,13 @@ export class AiAssistantManagementObservabilityPlugin
     >
 {
   private readonly config: ConfigSchema;
+  private readonly isServerless: boolean;
+  private registeredApp?: ManagementApp;
+  private licensingSubscription?: Subscription;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.config = context.config.get();
+    this.isServerless = context.env.packageInfo.buildFlavor === 'serverless';
   }
 
   public setup(
@@ -64,7 +76,7 @@ export class AiAssistantManagementObservabilityPlugin
     { home, management, observabilityAIAssistant }: SetupDependencies
   ): AiAssistantManagementObservabilityPluginSetup {
     const title = i18n.translate('xpack.observabilityAiAssistantManagement.app.title', {
-      defaultMessage: 'AI Assistant for Observability and Search',
+      defaultMessage: 'AI Assistant',
     });
 
     if (home) {
@@ -75,18 +87,19 @@ export class AiAssistantManagementObservabilityPlugin
           defaultMessage: 'Manage your AI Assistant for Observability and Search.',
         }),
         icon: 'sparkles',
-        path: '/app/management/kibana/ai-assistant/observability',
+        path: '/app/management/ai/ai-assistant/observability',
         showOnHomePage: false,
         category: 'admin',
       });
     }
 
     if (observabilityAIAssistant) {
-      management.sections.section.kibana.registerApp({
+      this.registeredApp = management.sections.section.ai.registerApp({
         id: 'observabilityAiAssistantManagement',
         title,
         hideFromSidebar: true,
-        order: 1,
+        hideFromGlobalSearch: !this.isServerless,
+        order: 2,
         mount: async (mountParams) => {
           const { mountManagementSection } = await import('./app');
 
@@ -97,12 +110,31 @@ export class AiAssistantManagementObservabilityPlugin
           });
         },
       });
+
+      // Default to disabled until license check runs in start()
+      this.registeredApp.disable();
     }
 
     return {};
   }
 
-  public start() {
+  public start(coreStart: CoreStart, { licensing }: StartDependencies) {
+    if (licensing) {
+      this.licensingSubscription = licensing.license$.subscribe((license) => {
+        const isEnterprise = license?.hasAtLeast('enterprise');
+
+        if (isEnterprise) {
+          this.registeredApp?.enable();
+        } else {
+          this.registeredApp?.disable();
+        }
+      });
+    }
+
     return {};
+  }
+
+  public stop() {
+    this.licensingSubscription?.unsubscribe();
   }
 }

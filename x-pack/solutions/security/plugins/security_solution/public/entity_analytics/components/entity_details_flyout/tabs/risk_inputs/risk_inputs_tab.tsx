@@ -11,8 +11,8 @@ import type { ReactNode } from 'react';
 import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
-
 import { get } from 'lodash/fp';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { AlertPreviewButton } from '../../../../../flyout/shared/components/alert_preview_button';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../../common/components/page/manage_query';
@@ -30,6 +30,7 @@ import { buildEntityNameFilter } from '../../../../../../common/search_strategy'
 import { AssetCriticalityBadge } from '../../../asset_criticality';
 import { RiskInputsUtilityBar } from '../../components/utility_bar';
 import { ActionColumn } from '../../components/action_column';
+import { AskAiAssistant } from './ask_ai_assistant';
 
 export interface RiskInputsTabProps<T extends EntityType> {
   entityType: T;
@@ -166,6 +167,7 @@ export const RiskInputsTab = <T extends EntityType>({
   if (riskScoreError) {
     return (
       <EuiCallOut
+        announceOnMount
         title={
           <FormattedMessage
             id="xpack.securitySolution.flyout.entityDetails.riskInputs.errorTitle"
@@ -220,6 +222,7 @@ export const RiskInputsTab = <T extends EntityType>({
       />
       <EuiSpacer size="m" />
       {riskInputsAlertSection}
+      <AskAiAssistant entityType={entityType} entityName={entityName} />
     </>
   );
 };
@@ -237,19 +240,64 @@ const ContextsSection = <T extends EntityType>({
   loading,
   entityType,
 }: ContextsSectionProps<T>) => {
-  const criticality = useMemo(() => {
+  const isPrivmonEnabled = useIsExperimentalFeatureEnabled('enableRiskScorePrivmonModifier');
+  const contributions = useMemo(() => {
     if (!riskScore) {
       return undefined;
     }
 
     return {
-      level: riskScore[entityType].risk.criticality_level,
-      contribution: riskScore[entityType].risk.category_2_score,
+      criticality: {
+        level: riskScore[entityType].risk.criticality_level,
+        contribution: riskScore[entityType].risk.category_2_score,
+      },
+      privmon: {
+        isPrivileged: riskScore[entityType].risk.is_privileged_user,
+        contribution: riskScore[entityType].risk.category_3_score,
+      },
     };
   }, [entityType, riskScore]);
 
-  if (loading || criticality === undefined) {
+  if (loading || contributions === undefined) {
     return null;
+  }
+  const { criticality, privmon } = contributions;
+
+  const items = [
+    {
+      field: (
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.entityDetails.riskInputs.assetCriticalityField"
+          defaultMessage="Asset Criticality Level"
+        />
+      ),
+      value: (
+        <AssetCriticalityBadge
+          criticalityLevel={criticality.level}
+          dataTestSubj="risk-inputs-asset-criticality-badge"
+        />
+      ),
+      contribution: formatContribution(criticality.contribution || 0),
+    },
+  ];
+
+  if (isPrivmonEnabled) {
+    items.push({
+      field: (
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.entityDetails.riskInputs.privmonField"
+          defaultMessage="Privileged user"
+        />
+      ),
+      value: (
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.entityDetails.riskInputs.privmonValue"
+          defaultMessage="{value}"
+          values={{ value: privmon.isPrivileged ? 'Yes' : 'No' }}
+        />
+      ),
+      contribution: formatContribution(privmon.contribution || 0),
+    });
   }
 
   return (
@@ -268,23 +316,7 @@ const ContextsSection = <T extends EntityType>({
         loading={loading}
         data-test-subj="risk-input-contexts-table"
         columns={contextColumns}
-        items={[
-          {
-            field: (
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.entityDetails.riskInputs.assetCriticalityField"
-                defaultMessage="Asset Criticality Level"
-              />
-            ),
-            value: (
-              <AssetCriticalityBadge
-                criticalityLevel={criticality.level}
-                dataTestSubj="risk-inputs-asset-criticality-badge"
-              />
-            ),
-            contribution: formatContribution(criticality.contribution || 0),
-          },
-        ]}
+        items={items}
       />
     </>
   );

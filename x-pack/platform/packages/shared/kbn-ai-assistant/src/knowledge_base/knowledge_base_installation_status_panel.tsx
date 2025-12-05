@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { InferenceModelState } from '@kbn/observability-ai-assistant-plugin/public';
-import { UseKnowledgeBaseResult } from '../hooks';
+import type { UseKnowledgeBaseResult } from '../hooks';
 import { SelectModelAndInstallKnowledgeBase } from './select_model_and_install_knowledge_base';
 import { SettingUpKnowledgeBase } from './setting_up_knowledge_base';
 import { InspectKnowledgeBasePopover } from './inspect_knowlegde_base_popover';

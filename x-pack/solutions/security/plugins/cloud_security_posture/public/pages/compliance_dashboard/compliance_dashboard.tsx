@@ -6,8 +6,8 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { UseQueryResult } from '@tanstack/react-query';
-import { EuiEmptyPrompt, EuiIcon, EuiLink, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import type { UseQueryResult } from '@kbn/react-query';
+import { EuiEmptyPrompt, EuiIcon, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -22,10 +22,10 @@ import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
 import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
 import type { PosturePolicyTemplate, ComplianceDashboardDataV2 } from '../../../common/types_old';
 import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
+import type { CspNoDataPageProps } from '../../components/cloud_posture_page';
 import {
   CloudPosturePage,
   CspNoDataPage,
-  CspNoDataPageProps,
   KSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT,
   CSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT,
 } from '../../components/cloud_posture_page';
@@ -52,55 +52,48 @@ const POSTURE_TYPE_KSPM = KSPM_POLICY_TEMPLATE;
 
 const noDataOptions: Record<
   PosturePolicyTemplate,
-  Pick<CspNoDataPageProps, 'docsLink' | 'actionTitle' | 'actionDescription'> & { testId: string }
+  Pick<
+    CspNoDataPageProps,
+    'docsLink' | 'actionTitle' | 'actionDescription' | 'dataTestSubj' | 'buttonText'
+  >
 > = {
   kspm: {
-    testId: KSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT,
+    dataTestSubj: KSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT,
     docsLink: cspIntegrationDocsNavigation.kspm.overviewPath,
     actionTitle: i18n.translate(
-      'xpack.csp.cloudPosturePage.kspmIntegration.packageNotInstalled.buttonLabel',
+      'xpack.csp.cloudPosturePage.kspmIntegration.packageNotInstalled.actionTitle',
       { defaultMessage: 'Add a KSPM integration' }
     ),
-    actionDescription: (
-      <FormattedMessage
-        id="xpack.csp.cloudPosturePage.kspmIntegration.packageNotInstalled.description"
-        defaultMessage="Use our {integrationFullName} (KSPM) integration to detect security misconfigurations in your Kubernetes clusters."
-        values={{
-          integrationFullName: (
-            <EuiLink href={cspIntegrationDocsNavigation.kspm.overviewPath} target="_blank">
-              <FormattedMessage
-                id="xpack.csp.cloudPosturePage.kspmIntegration.packageNotInstalled.integrationNameLabel"
-                defaultMessage="Kubernetes Security Posture Management"
-              />
-            </EuiLink>
-          ),
-        }}
-      />
+    actionDescription: i18n.translate(
+      'xpack.csp.cloudPosturePage.kspmIntegration.packageNotInstalled.actionDescription',
+      {
+        defaultMessage:
+          'Use our Kubernetes Security Posture Management (KSPM) integration to detect security misconfigurations in your Kubernetes clusters.',
+      }
+    ),
+    buttonText: i18n.translate(
+      'xpack.csp.cloudPosturePage.kspmIntegration.packageNotInstalled.buttonText',
+      { defaultMessage: 'Add a KSPM integration' }
     ),
   },
   cspm: {
-    testId: CSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT,
+    dataTestSubj: CSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT,
     // TODO: CIS AWS - replace link or create the docs
     docsLink: cspIntegrationDocsNavigation.cspm.overviewPath,
     actionTitle: i18n.translate(
-      'xpack.csp.cloudPosturePage.cspmIntegration.packageNotInstalled.buttonLabel',
+      'xpack.csp.cloudPosturePage.cspmIntegration.packageNotInstalled.actionTitle',
       { defaultMessage: 'Add a CSPM integration' }
     ),
-    actionDescription: (
-      <FormattedMessage
-        id="xpack.csp.cloudPosturePage.cspmIntegration.packageNotInstalled.description"
-        defaultMessage="Use our {integrationFullName} (CSPM) integration to detect security misconfigurations in your cloud infrastructure."
-        values={{
-          integrationFullName: (
-            <EuiLink href={cspIntegrationDocsNavigation.cspm.overviewPath} target="_blank">
-              <FormattedMessage
-                id="xpack.csp.cloudPosturePage.cspmIntegration.packageNotInstalled.integrationNameLabel"
-                defaultMessage="Cloud Security Posture Management"
-              />
-            </EuiLink>
-          ),
-        }}
-      />
+    actionDescription: i18n.translate(
+      'xpack.csp.cloudPosturePage.cspmIntegration.packageNotInstalled.actionDescription',
+      {
+        defaultMessage:
+          'Use our Cloud Security Posture Management (CSPM) integration to detect security misconfigurations in your cloud infrastructure.',
+      }
+    ),
+    buttonText: i18n.translate(
+      'xpack.csp.cloudPosturePage.cspmIntegration.packageNotInstalled.buttonText',
+      { defaultMessage: 'Add a CSPM integration' }
     ),
   },
 };
@@ -112,14 +105,12 @@ const getNotInstalledConfig = (
   const policyTemplateNoDataConfig = noDataOptions[policyTemplate];
 
   return {
-    pageTitle: i18n.translate('xpack.csp.cloudPosturePage.packageNotInstalled.pageTitle', {
-      defaultMessage: 'Install Integration to get started',
-    }),
     docsLink: policyTemplateNoDataConfig.docsLink,
     actionHref,
     actionTitle: policyTemplateNoDataConfig.actionTitle,
     actionDescription: policyTemplateNoDataConfig.actionDescription,
-    testId: policyTemplateNoDataConfig.testId,
+    dataTestSubj: policyTemplateNoDataConfig.dataTestSubj,
+    buttonText: policyTemplateNoDataConfig.buttonText,
   };
 };
 

@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBadge } from '@elastic/eui';
 
-import { TemplateType } from '../../../../../../common';
+import type { TemplateType } from '../../../../../../common';
 
 interface Props {
   templateType: TemplateType;

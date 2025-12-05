@@ -21,6 +21,21 @@ export const SPLUNK_QUERY_TOOLTIP = i18n.translate(
   }
 );
 
+export const QRADAR_RULE_TITLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.qradarRule.title',
+  {
+    defaultMessage: 'QRadar rule definition',
+  }
+);
+
+export const QRADAR_RULE_TITLE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.qradarRule.tooltip',
+  {
+    defaultMessage:
+      'This is the original QRadar rule definition in XML format as exported from QRadar',
+  }
+);
+
 export const CUSTOM_TRANSLATION_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.customTranslation.title',
   { defaultMessage: 'ES|QL translation' }

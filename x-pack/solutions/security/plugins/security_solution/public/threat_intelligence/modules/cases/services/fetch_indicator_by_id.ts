@@ -7,6 +7,7 @@
 
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { FactoryQueryType } from '../../../../../common/threat_intelligence/constants';
 import { search } from '../../../utils/search';
 import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
 
@@ -29,13 +30,6 @@ export interface RawIndicatorsResponse {
 
 export interface FetchParams {
   indicatorId: string;
-}
-
-type ReactQueryKey = [string, FetchParams];
-
-export interface IndicatorsQueryParams {
-  signal?: AbortSignal;
-  queryKey: ReactQueryKey;
 }
 
 export const createFetchIndicatorById =
@@ -71,12 +65,13 @@ export const createFetchIndicatorById =
           fields,
           size: 1,
         },
+        factoryQueryType: FactoryQueryType.IndicatorGrid,
       },
       {
         inspectorAdapter,
         requestName: `Fetch indicator by Id (${indicatorId})`,
         signal,
-        skipDefaultStrategy: true,
+        // skipDefaultStrategy: true,
       }
     );
 

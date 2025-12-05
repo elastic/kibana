@@ -13,9 +13,9 @@ import fs, { existsSync } from 'fs';
 import Fsp from 'fs/promises';
 import pRetry from 'p-retry';
 import { resolve, basename, join } from 'path';
-import { Client, ClientOptions, HttpConnection } from '@elastic/elasticsearch';
-
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ClientOptions } from '@elastic/elasticsearch';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { kibanaPackageJson as pkg, REPO_ROOT } from '@kbn/repo-info';
 import { CA_CERT_PATH, ES_P12_PASSWORD, ES_P12_PATH } from '@kbn/dev-utils';
 import {
@@ -25,14 +25,22 @@ import {
   MOCK_IDP_ATTRIBUTE_ROLES,
   MOCK_IDP_ATTRIBUTE_EMAIL,
   MOCK_IDP_ATTRIBUTE_NAME,
+  MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN,
+  MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN_EXPIRES_AT,
+  MOCK_IDP_ATTRIBUTE_UIAM_REFRESH_TOKEN,
+  MOCK_IDP_ATTRIBUTE_UIAM_REFRESH_TOKEN_EXPIRES_AT,
+  MOCK_IDP_UIAM_ORGANIZATION_ID,
+  MOCK_IDP_UIAM_PROJECT_ID,
   ensureSAMLRoleMapping,
   createMockIdpMetadata,
+  MOCK_IDP_UIAM_SERVICE_INTERNAL_URL,
 } from '@kbn/mock-idp-utils';
 
+import { initializeUiamContainers, runUiamContainer, UIAM_CONTAINERS } from './docker_uiam';
 import { getServerlessImageTag, getCommitUrl } from './extract_image_info';
 import { waitForSecurityIndex } from './wait_for_security_index';
 import { createCliError } from '../errors';
-import { EsClusterExecOptions } from '../cluster_exec_options';
+import type { EsClusterExecOptions } from '../cluster_exec_options';
 import {
   SERVERLESS_RESOURCES_PATHS,
   SERVERLESS_SECRETS_PATH,
@@ -63,23 +71,58 @@ interface BaseOptions extends ImageOptions {
   files?: string | string[];
 }
 
-export const serverlessProjectTypes = new Set<string>(['es', 'oblt', 'security', 'chat']);
-export const serverlessProductTiers = new Set<string>([
+export const serverlessProjectTypes = ['es', 'oblt', 'security', 'workplaceai'] as const;
+export type ServerlessProjectType = (typeof serverlessProjectTypes)[number];
+
+export const esServerlessProjectTypes = [
+  'elasticsearch_general_purpose',
+  'elasticsearch_search',
+  'elasticsearch_vector',
+  'elasticsearch_timeseries',
+  'observability',
+  'security',
+  'workplaceai',
+] as const;
+export type EsServerlessProjectType = (typeof esServerlessProjectTypes)[number];
+
+export const serverlessProductTiers = [
   'essentials',
   'logs_essentials',
   'complete',
   'search_ai_lake',
-]);
+] as const;
+export type ServerlessProductTier = (typeof serverlessProductTiers)[number];
+
 export const isServerlessProjectType = (value: string): value is ServerlessProjectType => {
-  return serverlessProjectTypes.has(value);
+  return serverlessProjectTypes.includes(value as ServerlessProjectType);
 };
 
-export type ServerlessProjectType = 'es' | 'oblt' | 'security' | 'chat';
-export type ServerlessProductTier =
-  | 'essentials'
-  | 'logs_essentials'
-  | 'complete'
-  | 'search_ai_lake';
+export const isEsServerlessProjectType = (value: string): value is EsServerlessProjectType => {
+  return esServerlessProjectTypes.includes(value as EsServerlessProjectType);
+};
+
+export const isServerlessProjectTier = (value: string): value is ServerlessProductTier => {
+  return serverlessProductTiers.includes(value as ServerlessProductTier);
+};
+
+export const esProjectTypeFromKbn = new Map<string, string>([
+  // resolve Kibana `es` project type to general purpose by default
+  // other elasticsearch_* project types need to be set explicitly in the test config
+  ['es', 'elasticsearch_general_purpose'],
+  ['oblt', 'observability'],
+  ['security', 'security'],
+  ['workplaceai', 'workplaceai'],
+]);
+
+export const kbnProjectTypeFromEs = new Map<string, string>([
+  ['elasticsearch_general_purpose', 'es'],
+  ['elasticsearch_search', 'es'],
+  ['elasticsearch_vector', 'es'],
+  ['elasticsearch_timeseries', 'es'],
+  ['observability', 'oblt'],
+  ['security', 'security'],
+  ['workplaceai', 'workplaceai'],
+]);
 
 export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
   dockerCmd?: string;
@@ -88,8 +131,10 @@ export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
 export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
   /** Publish ES docker container on additional host IP */
   host?: string;
-  /**  Serverless project type */
+  /** Serverless project type */
   projectType: ServerlessProjectType;
+  /** Elasticsearch serverless project type */
+  esProjectType?: EsServerlessProjectType;
   /** Product tier for serverless project */
   productTier?: ServerlessProductTier;
   /** Clean (or delete) all data created by the ES cluster after it is stopped */
@@ -111,6 +156,8 @@ export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
    * (see list of files that can be overwritten under `src/platform/packages/shared/kbn-es/src/serverless_resources/users`)
    */
   resources?: string | string[];
+  /** Configure ES serverless with UIAM support */
+  uiam?: boolean;
 }
 
 interface ServerlessEsNodeArgs {
@@ -122,6 +169,9 @@ interface ServerlessEsNodeArgs {
 
 export const DEFAULT_PORT = 9200;
 const DOCKER_REGISTRY = 'docker.elastic.co';
+
+const ES_REFRESH_INTERVAL_OVERRIDE_FLAG =
+  '-Des.stateless.allow.index.refresh_interval.override=true';
 
 const DOCKER_BASE_CMD = [
   'run',
@@ -280,8 +330,8 @@ export const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
     ],
     esArgs: [
       ['xpack.searchable.snapshot.shared_cache.size', '16MB'],
-
       ['xpack.searchable.snapshot.shared_cache.region_size', '256K'],
+      ['ES_JAVA_OPTS', '-Xms1536m -Xmx1536m'],
     ],
   },
   {
@@ -301,7 +351,6 @@ export const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
     ],
     esArgs: [
       ['xpack.searchable.snapshot.shared_cache.size', '16MB'],
-
       ['xpack.searchable.snapshot.shared_cache.region_size', '256K'],
     ],
   },
@@ -456,7 +505,7 @@ ${message}`;
 /**
  * When we're working with :latest or :latest-verified, it is useful to expand what version they refer to
  */
-export async function printESImageInfo(log: ToolingLog, image: string) {
+export async function printDockerImageInfo(log: ToolingLog, image: string) {
   let imageFullName = image;
   if (image.includes('serverless')) {
     const imageTag = (await getServerlessImageTag(image)) ?? image.split(':').pop() ?? '';
@@ -465,14 +514,16 @@ export async function printESImageInfo(log: ToolingLog, image: string) {
   }
 
   const revisionUrl = await getCommitUrl(image);
-  log.info(`Using ES image: ${imageFullName} (${revisionUrl})`);
+  log.info(`Using Docker image: ${imageFullName} (${revisionUrl})`);
 }
 
 export async function cleanUpDanglingContainers(log: ToolingLog) {
   log.info(chalk.bold('Cleaning up dangling Docker containers.'));
 
   try {
-    const serverlessContainerNames = SERVERLESS_NODES.map(({ name }) => name);
+    const serverlessContainerNames = SERVERLESS_NODES.concat(UIAM_CONTAINERS).map(
+      ({ name }) => name
+    );
 
     for (const name of serverlessContainerNames) {
       await execa('docker', ['container', 'rm', name, '--force']).catch(() => {
@@ -486,11 +537,8 @@ export async function cleanUpDanglingContainers(log: ToolingLog) {
   }
 }
 
-export async function detectRunningNodes(
-  log: ToolingLog,
-  options: ServerlessOptions | DockerOptions
-) {
-  const namesCmd = SERVERLESS_NODES.reduce<string[]>((acc, { name }) => {
+export async function detectRunningNodes(log: ToolingLog, options: BaseOptions) {
+  const namesCmd = SERVERLESS_NODES.concat(UIAM_CONTAINERS).reduce<string[]>((acc, { name }) => {
     acc.push('--filter', `name=${name}`);
 
     return acc;
@@ -501,36 +549,34 @@ export async function detectRunningNodes(
 
   if (runningNodeIds.length) {
     if (options.kill) {
-      log.info(chalk.bold('Killing running ES Nodes.'));
+      log.info(chalk.bold('Killing running serverless containers.'));
       await execa('docker', ['kill'].concat(runningNodeIds));
     } else {
       throw createCliError(
-        'ES has already been started, pass --kill to automatically stop the nodes on startup.'
+        'ES has already been started, pass --kill to automatically stop the containers on startup.'
       );
     }
   } else {
-    log.info('No running nodes detected.');
+    log.info('No running containers detected.');
   }
 }
 
 /**
  * Common setup for Docker and Serverless containers
  */
-async function setupDocker({
-  log,
-  image,
-  options,
-}: {
-  log: ToolingLog;
-  image: string;
-  options: ServerlessOptions | DockerOptions;
-}) {
+async function setupDocker({ log, options }: { log: ToolingLog; options: BaseOptions }) {
   await verifyDockerInstalled(log);
   await detectRunningNodes(log, options);
   await cleanUpDanglingContainers(log);
   await maybeCreateDockerNetwork(log);
+}
+
+/**
+ * Pulls and prints info about the Docker image.
+ */
+async function setupDockerImage({ log, image }: { log: ToolingLog; image: string }) {
   await maybePullDockerImage(log, image);
-  await printESImageInfo(log, image);
+  await printDockerImageInfo(log, image);
 }
 
 /**
@@ -613,6 +659,62 @@ export function resolveEsArgs(
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.mail`,
       MOCK_IDP_ATTRIBUTE_EMAIL
     );
+
+    if (options.uiam) {
+      // HACK: A workaround for the Serverless ES metering service, which is enabled automatically after we set
+      // `serverless.project_id`, and, if not configured _explicitly_ with an HTTP URL, expects CA certs in a
+      // fixed location (`http-certs/ca.crt`) that we cannot override. So we just point it to Kibana as if it
+      // were a metering service and use the longest possible interval to reduce noise.
+      esArgs.set('metering.url', options.kibanaUrl);
+      esArgs.set('metering.report_period', '60m');
+
+      esArgs.set(
+        `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.private_attributes`,
+        [
+          MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN,
+          MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN_EXPIRES_AT,
+          MOCK_IDP_ATTRIBUTE_UIAM_REFRESH_TOKEN,
+          MOCK_IDP_ATTRIBUTE_UIAM_REFRESH_TOKEN_EXPIRES_AT,
+        ].join(',')
+      );
+
+      esArgs.set('serverless.organization_id', MOCK_IDP_UIAM_ORGANIZATION_ID);
+      esArgs.set('serverless.project_type', esProjectTypeFromKbn.get(options.projectType)!);
+      esArgs.set('serverless.project_id', MOCK_IDP_UIAM_PROJECT_ID);
+
+      esArgs.set('serverless.universal_iam_service.enabled', 'true');
+      esArgs.set('serverless.universal_iam_service.url', MOCK_IDP_UIAM_SERVICE_INTERNAL_URL);
+    }
+  }
+
+  const getEsProjectTypeValue = () => {
+    const esProjectTypeParam = esArgs.get('serverless.project_type');
+    if (esProjectTypeParam) {
+      // parameter explicitly set, use that as first option
+      return esProjectTypeParam;
+    }
+    if ('esProjectType' in options) {
+      // esProjectType specified, pass that as parameter value
+      return options.esProjectType;
+    }
+    if ('projectType' in options) {
+      // determine ES project type from Kibana project type as fallback
+      return esProjectTypeFromKbn.get(options.projectType);
+    }
+  };
+  const esProjectTypeValue = getEsProjectTypeValue();
+  if (esProjectTypeValue) {
+    esArgs.set('serverless.project_type', esProjectTypeValue);
+  }
+
+  const javaOptions = esArgs.get('ES_JAVA_OPTS');
+  if (javaOptions) {
+    // Ensure the serverless refresh interval override flag is always present alongside any custom ES_JAVA_OPTS.
+    if (!javaOptions.includes(ES_REFRESH_INTERVAL_OVERRIDE_FLAG)) {
+      esArgs.set('ES_JAVA_OPTS', `${javaOptions} ${ES_REFRESH_INTERVAL_OVERRIDE_FLAG}`.trim());
+    }
+  } else {
+    esArgs.set('ES_JAVA_OPTS', ES_REFRESH_INTERVAL_OVERRIDE_FLAG);
   }
 
   return Array.from(esArgs).flatMap((e) => ['--env', e.join('=')]);
@@ -660,7 +762,12 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
   }
   if (clean && exists) {
     log.info('Cleaning existing object store.');
-    await Fsp.rm(objectStorePath, { recursive: true, force: true });
+    try {
+      await Fsp.rm(objectStorePath, { recursive: true, force: true });
+    } catch (error) {
+      // Fall back to sudo if needed, CI user can have issues removing old state
+      await execa('sudo', ['rm', '-rf', objectStorePath]);
+    }
   }
 
   if (clean || !exists) {
@@ -824,11 +931,13 @@ function getESClient(clientOptions: ClientOptions): Client {
  * Runs an ES Serverless Cluster through Docker
  */
 export async function runServerlessCluster(log: ToolingLog, options: ServerlessOptions) {
-  const image = getServerlessImage({
-    image: options.image,
-    tag: options.tag,
-  });
-  await setupDocker({ log, image, options });
+  await setupDocker({ log, options });
+
+  const esServerlessImage = getServerlessImage({ image: options.image, tag: options.tag });
+  await Promise.all([
+    setupDockerImage({ log, image: esServerlessImage }),
+    ...(options.uiam ? UIAM_CONTAINERS.map(({ image }) => setupDockerImage({ log, image })) : []),
+  ]);
 
   const volumeCmd = await setupServerlessVolumes(log, options);
   const portCmd = resolvePort(options);
@@ -838,7 +947,7 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
     SERVERLESS_NODES.map(async (node, i) => {
       await runServerlessEsNode(log, {
         ...node,
-        image,
+        image: esServerlessImage,
         params: node.params.concat(
           resolveEsArgs(DEFAULT_SERVERLESS_ESARGS.concat(node.esArgs ?? []), options),
           i === 0 ? portCmd : [],
@@ -846,7 +955,9 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
         ),
       });
       return node.name;
-    })
+    }).concat(
+      options.uiam ? UIAM_CONTAINERS.map((container) => runUiamContainer(log, container)) : []
+    )
   );
 
   log.success(`Serverless ES cluster running.
@@ -860,6 +971,10 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   if (!options.skipTeardown) {
     // SIGINT will not trigger in FTR (see cluster.runServerless for FTR signal)
     process.on('SIGINT', () => teardownServerlessClusterSync(log, options));
+  }
+
+  if (options.uiam) {
+    await initializeUiamContainers(log);
   }
 
   const esNodeUrl = `${options.ssl ? 'https' : 'http'}://${portCmd[1].substring(
@@ -940,17 +1055,23 @@ export async function stopServerlessCluster(log: ToolingLog, nodes: string[]) {
 }
 
 /**
- * Kill any serverless ES nodes which are running.
+ * Kill any serverless ES nodes and UIAM related containers which are running.
  */
 export function teardownServerlessClusterSync(log: ToolingLog, options: ServerlessOptions) {
+  const imagesToKillContainersFor = [
+    getServerlessImage(options),
+    ...(options.uiam ? UIAM_CONTAINERS.map(({ image }) => image) : []),
+  ];
   const { stdout } = execa.commandSync(
-    `docker ps --filter status=running --filter ancestor=${getServerlessImage(options)} --quiet`
+    `docker ps --filter status=running ${imagesToKillContainersFor
+      .map((image) => `--filter ancestor=${image}`)
+      .join(' ')} --quiet`
   );
   // Filter empty strings
   const runningNodes = stdout.split(/\r?\n/).filter((s) => s);
 
   if (runningNodes.length) {
-    log.info('Killing running serverless ES nodes.');
+    log.info('Killing running serverless containers.');
 
     execa.commandSync(`docker kill ${runningNodes.join(' ')}`);
   }
@@ -991,11 +1112,9 @@ export async function runDockerContainer(log: ToolingLog, options: DockerOptions
   let image;
 
   if (!options.dockerCmd) {
-    image = getDockerImage({
-      image: options.image,
-      tag: options.tag,
-    });
-    await setupDocker({ log, image, options });
+    await setupDocker({ log, options });
+    image = getDockerImage({ image: options.image, tag: options.tag });
+    await setupDockerImage({ log, image });
   }
 
   const dockerCmd = resolveDockerCmd(options, image);

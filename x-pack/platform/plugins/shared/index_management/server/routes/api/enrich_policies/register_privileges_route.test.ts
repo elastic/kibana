@@ -6,7 +6,8 @@
  */
 
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
-import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from '@kbn/core/server';
+import type { RequestHandlerContext, RequestHandler } from '@kbn/core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
 
 import { IndexDataEnricher } from '../../../services/index_data_enricher';
 
@@ -53,6 +54,7 @@ describe('GET privileges', () => {
         enableMappingsSourceFieldSection: true,
         enableTogglingDataRetention: true,
         enableProjectLevelRetentionChecks: false,
+        enableFailureStoreRetentionDisabling: true,
       },
       indexDataEnricher: mockedIndexDataEnricher,
       lib: {
@@ -126,6 +128,7 @@ describe('GET privileges', () => {
           enableMappingsSourceFieldSection: true,
           enableTogglingDataRetention: true,
           enableProjectLevelRetentionChecks: false,
+          enableFailureStoreRetentionDisabling: true,
         },
         indexDataEnricher: mockedIndexDataEnricher,
         lib: {

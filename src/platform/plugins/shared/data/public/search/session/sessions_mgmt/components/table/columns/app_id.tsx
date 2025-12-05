@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBasicTableColumn, EuiIcon, EuiToolTip } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { capitalize } from 'lodash';
-import { UISession } from '../../../types';
+import type { UISession } from '../../../types';
 
 // Helper function: translate an app string to EuiIcon-friendly string
 const appToIcon = (app: string) => {
@@ -43,13 +44,13 @@ export const appIdColumn: EuiBasicTableColumn<UISession> = {
   render: (appId: UISession['appId'], { id }) => {
     const app = `${appToIcon(appId)}`;
     return (
-      <EuiToolTip content={appToTooltip(appId) ?? capitalize(app)}>
-        <EuiIcon
-          data-test-subj="sessionManagementAppIcon"
-          data-test-app-id={app}
-          type={`${app}App`}
-        />
-      </EuiToolTip>
+      <EuiIconTip
+        content={appToTooltip(appId) ?? capitalize(app)}
+        type={`${app}App`}
+        iconProps={{
+          'data-test-subj': 'sessionManagementAppIcon',
+        }}
+      />
     );
   },
 };

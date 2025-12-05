@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiScreenReaderOnly } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SolutionPanel } from './solution_panel';
-import { FeatureCatalogueEntry, FeatureCatalogueSolution } from '../../..';
+import type { FeatureCatalogueEntry, FeatureCatalogueSolution } from '../../..';
 
 const sortByOrder = (
   { order: orderA = 0 }: FeatureCatalogueSolution | FeatureCatalogueEntry,

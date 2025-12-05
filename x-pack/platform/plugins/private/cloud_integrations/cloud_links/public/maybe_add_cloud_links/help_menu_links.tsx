@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ChromeHelpMenuLink } from '@kbn/core-chrome-browser';
+import type { ChromeHelpMenuLink } from '@kbn/core-chrome-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 
 import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
@@ -14,9 +14,11 @@ import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
 export const createHelpMenuLinks = ({
   docLinks,
   helpSupportUrl,
+  isServerless,
 }: {
   docLinks: DocLinksStart;
   helpSupportUrl: string;
+  isServerless?: boolean;
 }) => {
   const helpMenuLinks: ChromeHelpMenuLink[] = [
     {
@@ -25,6 +27,16 @@ export const createHelpMenuLinks = ({
       }),
       href: docLinks.links.elasticStackGetStarted,
     },
+    ...(isServerless
+      ? [
+          {
+            title: i18n.translate('xpack.cloudLinks.helpMenuLinks.releaseNotes', {
+              defaultMessage: 'Release notes',
+            }),
+            href: docLinks.links.serverlessReleaseNotes,
+          },
+        ]
+      : []),
     {
       title: i18n.translate('xpack.cloudLinks.helpMenuLinks.support', {
         defaultMessage: 'Support',

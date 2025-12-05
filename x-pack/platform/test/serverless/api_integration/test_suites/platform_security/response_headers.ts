@@ -7,8 +7,8 @@
 
 import expect from 'expect';
 import cspParser from 'content-security-policy-parser';
-import { SupertestWithRoleScopeType } from '../../services';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { SupertestWithRoleScopeType } from '../../services';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const samlAuth = getService('samlAuth');
@@ -17,7 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
   let supertestViewerWithCookieCredentials: SupertestWithRoleScopeType;
 
   describe('security/response_headers', function () {
-    const baseCSP = `script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; frame-ancestors 'self'`;
+    const baseCSP = `script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'; frame-ancestors 'self'`;
     const defaultCOOP = 'same-origin';
     const defaultPermissionsPolicy =
       'camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=();report-to=violations-endpoint';

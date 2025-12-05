@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { Either } from 'fp-ts/Either';
+import type { Either } from 'fp-ts/Either';
 import { RuleActionArray } from '../actions';
 
 export const DefaultActionsArray = new t.Type<

@@ -6,12 +6,20 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
+
+declare global {
+  interface Window {
+    /**
+     * Debug setting to make requests complete slower than normal. data.search.aggs.shardDelay.enabled has to be set via settings for this to work
+     */
+    ELASTIC_LENS_DELAY_SECONDS?: number;
+  }
+}
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const log = getService('log');
-  const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const { common, dashboard, searchSessionsManagement } = getPageObjects([
     'common',
@@ -42,12 +50,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('until session is saved search keepAlive is short, when it is saved, keepAlive is extended and search is saved into the session saved object, when session is extended, searches are also extended', async () => {
-      await dashboard.loadSavedDashboard('Not Delayed');
+      await dashboard.loadSavedDashboard('Delayed 5s');
       await dashboard.waitForRenderComplete();
-      await searchSessions.expectState('completed');
 
       const searchResponse = await dashboardPanelActions.getSearchResponseByTitle(
-        'Sum of Bytes by Extension'
+        'Sum of Bytes by Extension (Delayed 5s)'
       );
 
       const asyncSearchId = searchResponse.id;
@@ -60,13 +67,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'expiration time should be less then a minute from now'
       );
 
-      await searchSessions.save();
-      await searchSessions.expectState('backgroundCompleted');
+      await searchSessions.save({ isSubmitButton: true, withRefresh: true });
 
       let asyncExpirationTimeAfterSessionWasSaved: number;
+      let newAsyncSearchId: string;
       await retry.waitFor('async search keepAlive is extended', async () => {
+        const newSearchResponse = await dashboardPanelActions.getSearchResponseByTitle(
+          'Sum of Bytes by Extension (Delayed 5s)'
+        );
+
+        newAsyncSearchId = newSearchResponse.id;
+
         asyncExpirationTimeAfterSessionWasSaved = await searchSessions.getAsyncSearchExpirationTime(
-          asyncSearchId
+          newAsyncSearchId
         );
 
         return (
@@ -76,13 +89,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       const savedSessionId = await dashboardPanelActions.getSearchSessionIdByTitle(
-        'Sum of Bytes by Extension'
+        'Sum of Bytes by Extension (Delayed 5s)'
       );
 
       // check that search saved into the session
 
-      await searchSessions.openPopover();
-      await searchSessions.viewSearchSessions();
+      await searchSessionsManagement.goTo();
 
       const searchSessionList = await searchSessionsManagement.getList();
       const searchSessionItem = searchSessionList.find((session) => session.id === savedSessionId)!;
@@ -91,7 +103,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await searchSessionItem.extend();
 
       const asyncExpirationTimeAfterSessionWasExtended =
-        await searchSessions.getAsyncSearchExpirationTime(asyncSearchId);
+        await searchSessions.getAsyncSearchExpirationTime(newAsyncSearchId!);
 
       expect(asyncExpirationTimeAfterSessionWasExtended).to.be.greaterThan(
         asyncExpirationTimeAfterSessionWasSaved!
@@ -100,28 +112,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('When session is deleted, searches are also deleted', async () => {
       await common.navigateToApp('dashboard');
-      await dashboard.loadSavedDashboard('Not Delayed');
-      await dashboard.waitForRenderComplete();
-      await searchSessions.expectState('completed');
+      await dashboard.loadSavedDashboard('Delayed 5s');
+
+      await searchSessions.save({ isSubmitButton: true, withRefresh: true });
 
       const searchResponse = await dashboardPanelActions.getSearchResponseByTitle(
-        'Sum of Bytes by Extension'
+        'Sum of Bytes by Extension (Delayed 5s)'
       );
 
       const asyncSearchId = searchResponse.id;
       expect(typeof asyncSearchId).to.be('string');
 
-      await searchSessions.save();
-      await searchSessions.expectState('backgroundCompleted');
-
       const savedSessionId = await dashboardPanelActions.getSearchSessionIdByTitle(
-        'Sum of Bytes by Extension'
+        'Sum of Bytes by Extension (Delayed 5s)'
       );
 
       // check that search saved into the session
-
-      await searchSessions.openPopover();
-      await searchSessions.viewSearchSessions();
+      await searchSessionsManagement.goTo();
 
       const searchSessionList = await searchSessionsManagement.getList();
       const searchSessionItem = searchSessionList.find((session) => session.id === savedSessionId)!;
@@ -137,7 +144,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Slow lens with other bucket', () => {
       before(async function () {
-        await kibanaServer.uiSettings.unset('search:timeout');
         await common.navigateToApp('dashboard', { insertTimestamp: false });
         await browser.execute(() => {
           window.ELASTIC_LENS_DELAY_SECONDS = 25;
@@ -149,7 +155,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.execute(() => {
           window.ELASTIC_LENS_DELAY_SECONDS = undefined;
         });
-        await kibanaServer.uiSettings.replace({ 'search:timeout': 10000 });
       });
 
       it('Other bucket should be added to a session when restoring', async () => {
@@ -158,46 +163,52 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await listingTable.clickItemLink('dashboard', 'Lens with other bucket');
         await testSubjects.missingOrFail('dashboardLandingPage');
 
-        await searchSessions.expectState('loading');
-        await searchSessions.save();
-        await searchSessions.expectState('backgroundLoading');
+        await searchSessions.save({ isSubmitButton: true });
 
         const savedSessionId = await dashboardPanelActions.getSearchSessionIdByTitle(
           'Lens with other bucket'
         );
 
-        await searchSessions.openPopover();
-        await searchSessions.viewSearchSessions();
+        await searchSessionsManagement.goTo();
 
         let searchSessionList = await searchSessionsManagement.getList();
         let searchSessionItem = searchSessionList.find((session) => session.id === savedSessionId)!;
         expect(searchSessionItem.searchesCount).to.be(1);
-        await new Promise((resolve) => setTimeout(resolve, 10000));
+
+        await new Promise((resolve) => setTimeout(resolve, 10_000));
+        await retry.waitFor('session should be in a completed status', async () => {
+          searchSessionList = await searchSessionsManagement.getList();
+          searchSessionItem = searchSessionList.find((session) => session.id === savedSessionId)!;
+          return searchSessionItem.status === 'complete';
+        });
 
         await searchSessionItem.view();
 
         // Check that session is still loading
-        await searchSessions.expectState('backgroundLoading');
         await retry.waitFor('session restoration warnings related to other bucket', async () => {
           return (await toasts.getCount()) === 1;
         });
         await toasts.dismissAll();
 
         // check that other bucket requested add to a session
-        await searchSessions.openPopover();
-        await searchSessions.viewSearchSessions();
+        await searchSessionsManagement.goTo();
 
-        searchSessionList = await searchSessionsManagement.getList();
-        searchSessionItem = searchSessionList.find((session) => session.id === savedSessionId)!;
-        expect(searchSessionItem.searchesCount).to.be(2);
+        await new Promise((resolve) => setTimeout(resolve, 10_000));
+        await retry.waitFor('session should be in a completed status', async () => {
+          searchSessionList = await searchSessionsManagement.getList();
+          searchSessionItem = searchSessionList.find((session) => session.id === savedSessionId)!;
+          return searchSessionItem.status === 'complete';
+        });
+
+        await retry.waitFor('the third search should be added to the session', async () => {
+          searchSessionList = await searchSessionsManagement.getList();
+          searchSessionItem = searchSessionList.find((session) => session.id === savedSessionId)!;
+          return searchSessionItem.searchesCount === 3;
+        });
 
         await searchSessionItem.view();
         expect(await toasts.getCount()).to.be(0); // there should be no warnings
-        await searchSessions.expectState('restored', 20000);
         await dashboardExpect.noErrorEmbeddablesPresent();
-
-        const data = await elasticChart.getChartDebugData();
-        expect(data!.bars![0].bars.length).to.eql(4);
       });
     });
   });

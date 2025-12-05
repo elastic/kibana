@@ -112,8 +112,12 @@ const DashboardRendererComponent = ({
       getInitialInput: () => {
         return initialInput.value;
       },
-      getIncomingEmbeddable: () =>
-        embeddable.getStateTransfer().getIncomingEmbeddablePackage(APP_UI_ID, true),
+      getIncomingEmbeddables: () => {
+        const incoming = embeddable
+          .getStateTransfer()
+          .getIncomingEmbeddablePackage(APP_UI_ID, true);
+        return incoming;
+      },
       getEmbeddableAppContext: (dashboardId?: string) => ({
         getCurrentPath: () =>
           dashboardId ? `${DASHBOARDS_PATH}/${dashboardId}/edit` : `${DASHBOARDS_PATH}/create`,
@@ -160,7 +164,7 @@ const DashboardRendererComponent = ({
 
   useEffect(() => {
     /** We need to update the initial input on navigation so that changes to filter pills, queries, etc. get applied */
-    initialInput.next({ timeRange, viewMode, query, filters });
+    initialInput.next({ time_range: timeRange, viewMode, query, filters });
   }, [timeRange, viewMode, query, filters]);
 
   /** Dashboard renderer is stored in the state as it's a temporary solution for

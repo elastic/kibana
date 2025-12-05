@@ -7,10 +7,19 @@
 
 import { validateQuery } from '@kbn/esql-validation-autocomplete';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { ESQLSearchResponse, ESQLRow } from '@kbn/es-types';
+import type { ESQLSearchResponse, ESQLRow } from '@kbn/es-types';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
-import { DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/common';
-import { splitIntoCommands } from '../../../common';
+import type { DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/common';
+import { trace } from '@opentelemetry/api';
+import { BasicPrettyPrinter, Parser } from '@kbn/esql-ast';
+import { formatQueryWithErrors } from './format_query_with_errors';
+
+export interface QueryValidateRunOutput {
+  columns?: DatatableColumn[];
+  rows?: ESQLRow[];
+  error?: Error;
+  errorMessages?: string[];
+}
 
 export async function runAndValidateEsqlQuery({
   query,
@@ -18,36 +27,27 @@ export async function runAndValidateEsqlQuery({
 }: {
   query: string;
   client: ElasticsearchClient;
-}): Promise<{
-  columns?: DatatableColumn[];
-  rows?: ESQLRow[];
-  error?: Error;
-  errorMessages?: string[];
-}> {
-  const { errors } = await validateQuery(query, {
-    // setting this to true, we don't want to validate the index / fields existence
-    ignoreOnMissingCallbacks: true,
-  });
+}): Promise<QueryValidateRunOutput> {
+  // Format the query for readability before validation and execution
+  let formattedQuery: string;
+  try {
+    const parser = Parser.create(query);
+    formattedQuery = BasicPrettyPrinter.print(parser.parse().root, { multiline: true });
+  } catch (e) {
+    // Fallback to original query if parsing fails
+    formattedQuery = query;
+  }
 
-  const asCommands = splitIntoCommands(query);
+  const { errors } = await validateQuery(formattedQuery);
 
-  const errorMessages = errors?.map((error) => {
-    if ('location' in error) {
-      const commandsUntilEndOfError = splitIntoCommands(query.substring(0, error.location.max));
-      const lastCompleteCommand = asCommands[commandsUntilEndOfError.length - 1];
-      if (lastCompleteCommand) {
-        return `Error in ${lastCompleteCommand.command}\n: ${error.text}`;
-      }
-    }
-    return 'text' in error ? error.text : error.message;
-  });
+  const errorMessages = formatQueryWithErrors(formattedQuery, errors);
 
   return client.transport
     .request({
       method: 'POST',
       path: '_query',
       body: {
-        query,
+        query: formattedQuery,
       },
     })
     .then((res) => {
@@ -63,6 +63,7 @@ export async function runAndValidateEsqlQuery({
       return { columns, rows: esqlResponse.values };
     })
     .catch((error) => {
+      trace.getActiveSpan()?.recordException(error);
       return {
         error,
         ...(errorMessages.length ? { errorMessages } : {}),

@@ -7,9 +7,10 @@
 
 import numeral from '@elastic/numeral';
 import { flattenObject } from '@kbn/object-utils';
-import { AlertsClientError, ExecutorType, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
-import { ObservabilitySloAlert } from '@kbn/alerts-as-data-utils';
-import { IBasePath } from '@kbn/core/server';
+import type { ExecutorType, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import { AlertsClientError } from '@kbn/alerting-plugin/server';
+import type { ObservabilitySloAlert } from '@kbn/alerts-as-data-utils';
+import type { IBasePath } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { getFormattedGroups, getEcsGroupsFromFlattenGrouping } from '@kbn/alerting-rule-utils';
 import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
@@ -35,15 +36,16 @@ import {
   SLO_ID_FIELD,
   SLO_INSTANCE_ID_FIELD,
   SLO_REVISION_FIELD,
+  SLO_DATA_VIEW_ID_FIELD,
 } from '../../../../common/field_names/slo';
-import { Duration, SLODefinition } from '../../../domain/models';
+import type { Duration, SLODefinition } from '../../../domain/models';
 import { KibanaSavedObjectsSLORepository } from '../../../services';
+import type { EsSummaryDocument } from '../../../services/summary_transform_generator/helpers/create_temp_summary';
 import { evaluate } from './lib/evaluate';
 import { evaluateDependencies } from './lib/evaluate_dependencies';
 import { shouldSuppressInstanceId } from './lib/should_suppress_instance_id';
 import { getSloSummary } from './lib/summary_repository';
-import {
-  AlertStates,
+import type {
   BurnRateAlertContext,
   BurnRateAlertState,
   BurnRateAllowedActionGroups,
@@ -52,6 +54,7 @@ import {
   Group,
   WindowSchema,
 } from './types';
+import { AlertStates } from './types';
 
 export type BurnRateAlert = Omit<ObservabilitySloAlert, 'kibana.alert.group'> & {
   [ALERT_GROUP]?: Group[];
@@ -170,6 +173,8 @@ export const getRuleExecutor = (basePath: IBasePath) =>
             ? SUPPRESSED_PRIORITY_ACTION.id
             : windowDef.actionGroup;
 
+          const apmFields = extractApmFieldsFromSLOSummary(sloSummary);
+
           const { uuid } = alertsClient.report({
             id: alertId,
             actionGroup,
@@ -185,7 +190,9 @@ export const getRuleExecutor = (basePath: IBasePath) =>
               [SLO_ID_FIELD]: slo.id,
               [SLO_REVISION_FIELD]: slo.revision,
               [SLO_INSTANCE_ID_FIELD]: instanceId,
+              [SLO_DATA_VIEW_ID_FIELD]: slo.indicator.params.dataViewId,
               ...getEcsGroupsFromFlattenGrouping(groupingsFlattened),
+              ...apmFields,
             },
           });
 
@@ -307,4 +314,27 @@ function buildReason(
       instanceId,
     },
   });
+}
+
+function extractApmFieldsFromSLOSummary(
+  sloSummary: EsSummaryDocument | undefined
+): Record<string, string> {
+  const apmFields: Record<string, string> = {};
+
+  if (sloSummary) {
+    if (sloSummary.service?.name) {
+      apmFields['service.name'] = sloSummary.service.name;
+    }
+    if (sloSummary.service?.environment) {
+      apmFields['service.environment'] = sloSummary.service.environment;
+    }
+    if (sloSummary.transaction?.name) {
+      apmFields['transaction.name'] = sloSummary.transaction.name;
+    }
+    if (sloSummary.transaction?.type) {
+      apmFields['transaction.type'] = sloSummary.transaction.type;
+    }
+  }
+
+  return apmFields;
 }

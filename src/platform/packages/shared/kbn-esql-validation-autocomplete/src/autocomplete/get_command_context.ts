@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLCallbacks } from '../shared/types';
+import type { ESQLCallbacks } from '../shared/types';
 import { getPolicyHelper, getSourcesHelper } from '../shared/resources_helpers';
 
 export const getCommandContext = async (
@@ -49,7 +49,13 @@ export const getCommandContext = async (
       return {
         histogramBarTarget,
         supportsControls: callbacks?.canSuggestVariables?.() ?? false,
-        variables: await callbacks?.getVariables?.(),
+        variables: callbacks?.getVariables?.(),
+      };
+    case 'inline stats':
+      return {
+        histogramBarTarget: (await callbacks?.getPreferences?.())?.histogramBarTarget || 50,
+        supportsControls: callbacks?.canSuggestVariables?.() ?? false,
+        variables: callbacks?.getVariables?.(),
       };
     case 'fork':
       const enrichPolicies = await helpers.getPolicies();
@@ -66,6 +72,9 @@ export const getCommandContext = async (
       return {
         timeSeriesSources: timeseriesSources?.indices || [],
         sources: await getSources(),
+        editorExtensions: (await callbacks?.getEditorExtensions?.(queryString)) ?? {
+          recommendedQueries: [],
+        },
       };
     default:
       return {};

@@ -62,6 +62,7 @@ Object {
             "visualization": Object {},
           },
           "title": "An extremely cool default document!",
+          "version": 1,
           "visualizationType": "testVis",
         },
         "sharingSavedObjectProps": Object {
@@ -105,6 +106,7 @@ Object {
     },
     "visualization": Object {
       "activeId": "testVis",
+      "selectedLayerId": null,
       "state": "testVis initial state",
     },
   },

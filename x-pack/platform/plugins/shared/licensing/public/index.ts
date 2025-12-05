@@ -9,16 +9,5 @@ import type { PluginInitializerContext } from '@kbn/core/public';
 
 import { LicensingPlugin } from './plugin';
 
-export type {
-  LicenseCheckState,
-  LicenseType,
-  LicenseStatus,
-  LicenseFeature,
-  PublicLicense,
-  PublicFeatures,
-  PublicLicenseJSON,
-  LicenseCheck,
-  ILicense,
-} from '../common/types';
 export type { LicensingPluginSetup, LicensingPluginStart } from './types';
 export const plugin = (context: PluginInitializerContext) => new LicensingPlugin(context);

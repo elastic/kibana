@@ -27,7 +27,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         id: chance.guid(),
         tags: ['CIS', 'CIS K8S'],
         rationale: 'rationale steps for rule 1.1',
-        references: '1. https://elastic.co/rules/1.1',
+        reference: '1. https://elastic.co/rules/1.1',
         name: 'Upper case rule name',
         section: 'Upper case section',
         benchmark: {
@@ -53,7 +53,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         id: chance.guid(),
         tags: ['CIS', 'CIS K8S'],
         rationale: 'rationale steps',
-        references: '1. https://elastic.co',
+        reference: '1. https://elastic.co',
         name: 'lower case rule name',
         section: 'Another upper case section',
         benchmark: {
@@ -79,7 +79,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         id: chance.guid(),
         tags: ['CIS', 'CIS K8S'],
         rationale: 'rationale steps',
-        references: '1. https://elastic.co',
+        reference: '1. https://elastic.co',
         name: 'Another upper case rule name',
         section: 'lower case section',
         benchmark: {
@@ -105,7 +105,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         id: chance.guid(),
         tags: ['CIS', 'CIS K8S'],
         rationale: 'rationale steps',
-        references: '1. https://elastic.co',
+        reference: '1. https://elastic.co',
         name: 'some lower case rule name',
         section: 'another lower case section',
         benchmark: {

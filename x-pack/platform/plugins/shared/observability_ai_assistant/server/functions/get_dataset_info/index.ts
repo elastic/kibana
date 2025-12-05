@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { IScopedClusterClient, Logger } from '@kbn/core/server';
-import { Message } from '../../../common';
-import { FunctionRegistrationParameters } from '..';
-import { FunctionCallChatFunction, RespondFunctionResources } from '../../service/types';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { Message } from '../../../common';
+import { GET_DATASET_INFO_FUNCTION_NAME } from '../../../common';
+import type { FunctionRegistrationParameters } from '..';
+import type { FunctionCallChatFunction, RespondFunctionResources } from '../../service/types';
 import { getRelevantFieldNames } from './get_relevant_field_names';
-
-export const GET_DATASET_INFO_FUNCTION_NAME = 'get_dataset_info';
 
 export function registerGetDatasetInfoFunction({
   resources,
@@ -77,6 +76,7 @@ export async function getDatasetInfo({
       savedObjectsClient,
       signal,
       chat,
+      logger: resources.logger,
     });
     return { indices, fields, stats };
   } catch (e) {

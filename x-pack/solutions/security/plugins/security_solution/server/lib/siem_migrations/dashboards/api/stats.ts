@@ -11,10 +11,9 @@ import type { GetDashboardMigrationStatsResponse } from '../../../../../common/s
 import { GetDashboardMigrationStatsRequestParams } from '../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import { SIEM_DASHBOARD_MIGRATION_STATS_PATH } from '../../../../../common/siem_migrations/dashboards/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { withLicense } from '../../common/utils/with_license';
-import { authz } from '../../common/utils/authz';
-import { MIGRATION_ID_NOT_FOUND } from '../../common/translations';
-import { withExistingDashboardMigration } from './utils/use_existing_dashboard_migration';
+import { withLicense } from '../../common/api/util/with_license';
+import { authz } from '../../common/api/util/authz';
+import { withExistingMigration } from '../../common/api/util/with_existing_migration_id';
 
 export const registerSiemDashboardMigrationsStatsRoute = (
   router: SecuritySolutionPluginRouter,
@@ -34,7 +33,7 @@ export const registerSiemDashboardMigrationsStatsRoute = (
         },
       },
       withLicense(
-        withExistingDashboardMigration(
+        withExistingMigration(
           async (
             context,
             req,
@@ -46,26 +45,12 @@ export const registerSiemDashboardMigrationsStatsRoute = (
               const dashboardMigrationClient =
                 ctx.securitySolution.siemMigrations.getDashboardsClient();
 
-              const [stats, migration] = await Promise.all([
-                dashboardMigrationClient.data.dashboards.getStats(migrationId),
-                dashboardMigrationClient.data.migrations.get(migrationId),
-              ]);
+              const stats = await dashboardMigrationClient.task.getStats(migrationId);
 
-              if (!migration) {
-                return res.notFound({
-                  body: MIGRATION_ID_NOT_FOUND(migrationId),
-                });
-              }
-
-              if (stats.dashboards?.total === 0) {
+              if (stats.items?.total === 0) {
                 return res.noContent();
               }
-              return res.ok({
-                body: {
-                  ...stats,
-                  name: migration.name,
-                },
-              });
+              return res.ok({ body: stats });
             } catch (err) {
               logger.error(err);
               return res.badRequest({ body: err.message });

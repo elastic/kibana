@@ -6,13 +6,14 @@
  */
 
 import { useCallback, useEffect, useMemo } from 'react';
-import { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
+import type { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
 import { getDateISORange } from '@kbn/timerange';
 import { useDatasetQualityDetailsState } from './use_dataset_quality_details_state';
-import { DatasetDetailsEbtProps, NavigationSource, NavigationTarget } from '../services/telemetry';
-import { BasicDataStream, TimeRangeConfig } from '../../common/types';
-import { DataStreamDetails } from '../../common/api_types';
-import { Integration } from '../../common/data_streams_stats/integration';
+import type { DatasetDetailsEbtProps } from '../services/telemetry';
+import { NavigationSource, NavigationTarget } from '../services/telemetry';
+import type { BasicDataStream, TimeRangeConfig } from '../../common/types';
+import type { DataStreamDetails } from '../../common/api_types';
+import type { Integration } from '../../common/data_streams_stats/integration';
 import { mapPercentageToQuality } from '../../common/utils';
 import { MASKED_FIELD_PLACEHOLDER, UNKOWN_FIELD_PLACEHOLDER } from '../../common/constants';
 import { calculatePercentage } from '../utils';
@@ -69,7 +70,13 @@ export function useDatasetDetailsTelemetry() {
   useEffect(() => {
     const datasetDetailsTrackingState = telemetryClient.getDatasetDetailsTrackingState();
     if (datasetDetailsTrackingState === 'started' && ebtProps) {
-      telemetryClient.trackDatasetDetailsOpened(ebtProps);
+      telemetryClient.trackDatasetDetailsOpened({
+        ...ebtProps,
+        data_stream: {
+          ...ebtProps.data_stream,
+          namespace: ebtProps.data_stream.namespace || '',
+        },
+      });
     }
   }, [ebtProps, telemetryClient]);
 
@@ -163,9 +170,9 @@ function getDatasetDetailsEbtProps({
 }): DatasetDetailsEbtProps {
   const indexName = datasetDetails.rawName;
   const dataStream = {
-    dataset: datasetDetails.name,
-    namespace: datasetDetails.namespace,
-    type: datasetDetails.type,
+    dataset: datasetDetails.name ?? '',
+    namespace: datasetDetails.namespace ?? '',
+    type: datasetDetails.name && datasetDetails.namespace ? datasetDetails.type : '',
   };
   const degradedDocs = dataStreamDetails?.degradedDocsCount ?? 0;
   const failedDocs = dataStreamDetails?.failedDocsCount ?? 0;

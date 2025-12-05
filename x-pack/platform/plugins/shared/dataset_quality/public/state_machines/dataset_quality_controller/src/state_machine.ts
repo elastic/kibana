@@ -7,21 +7,22 @@
 
 import type { IToasts } from '@kbn/core/public';
 import { getDateISORange } from '@kbn/timerange';
-import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from 'xstate';
-import {
+import type { DoneInvokeEvent, InterpreterFrom } from 'xstate';
+import { assign, createMachine } from 'xstate';
+import type {
   DatasetTypesPrivileges,
   DataStreamDocsStat,
   DataStreamStat,
   NonAggregatableDatasets,
 } from '../../../../common/api_types';
 import { DEFAULT_DATASET_TYPE, KNOWN_TYPES } from '../../../../common/constants';
-import {
+import type {
   DataStreamStatServiceResponse,
   GetDataStreamsTypesPrivilegesResponse,
 } from '../../../../common/data_streams_stats';
-import { Integration } from '../../../../common/data_streams_stats/integration';
-import { DataStreamType } from '../../../../common/types';
-import { IDataStreamsStatsClient } from '../../../services/data_streams_stats';
+import type { Integration } from '../../../../common/data_streams_stats/integration';
+import type { DataStreamType } from '../../../../common/types';
+import type { IDataStreamsStatsClient } from '../../../services/data_streams_stats';
 import { generateDatasets } from '../../../utils';
 import { fetchNonAggregatableDatasetsFailedNotifier } from '../../common/notifications';
 import { DEFAULT_CONTEXT } from './defaults';
@@ -32,8 +33,10 @@ import {
   fetchFailedStatsFailedNotifier,
   fetchIntegrationsFailedNotifier,
   fetchTotalDocsFailedNotifier,
+  updateFailureStoreFailedNotifier,
+  updateFailureStoreSuccessNotifier,
 } from './notifications';
-import {
+import type {
   DatasetQualityControllerContext,
   DatasetQualityControllerEvent,
   DatasetQualityControllerTypeState,
@@ -350,6 +353,31 @@ export const createPureDatasetQualityControllerStateMachine = (
                 },
               },
             },
+            failureStoreUpdate: {
+              initial: 'idle',
+              states: {
+                idle: {
+                  on: {
+                    UPDATE_FAILURE_STORE: {
+                      target: 'updating',
+                    },
+                  },
+                },
+                updating: {
+                  invoke: {
+                    src: 'updateFailureStore',
+                    onDone: {
+                      target: '#DatasetQualityController.main.stats.datasets.fetching',
+                      actions: ['notifyUpdateFailureStoreSuccess'],
+                    },
+                    onError: {
+                      target: 'idle',
+                      actions: ['notifyUpdateFailureStoreFailed'],
+                    },
+                  },
+                },
+              },
+            },
           },
         },
       },
@@ -586,6 +614,9 @@ export const createDatasetQualityControllerStateMachine = ({
         fetchTotalDocsFailedNotifier(toasts, event.data, meta),
       notifyFetchFailedStatsFailed: (_context, event: DoneInvokeEvent<Error>) =>
         fetchFailedStatsFailedNotifier(toasts, event.data),
+      notifyUpdateFailureStoreSuccess: () => updateFailureStoreSuccessNotifier(toasts),
+      notifyUpdateFailureStoreFailed: (_context, event: DoneInvokeEvent<Error>) =>
+        updateFailureStoreFailedNotifier(toasts, event.data),
     },
     services: {
       loadDatasetTypesPrivileges: () => {
@@ -655,6 +686,20 @@ export const createDatasetQualityControllerStateMachine = ({
       },
       loadIntegrations: () => {
         return dataStreamStatsClient.getIntegrations();
+      },
+      updateFailureStore: (_context, event) => {
+        if (
+          'dataStream' in event &&
+          event.dataStream &&
+          event.dataStream.hasFailureStore !== undefined
+        ) {
+          return dataStreamStatsClient.updateFailureStore({
+            dataStream: event.dataStream.rawName,
+            failureStoreEnabled: event.dataStream.hasFailureStore,
+            customRetentionPeriod: event.dataStream.customRetentionPeriod,
+          });
+        }
+        return Promise.resolve();
       },
     },
   });

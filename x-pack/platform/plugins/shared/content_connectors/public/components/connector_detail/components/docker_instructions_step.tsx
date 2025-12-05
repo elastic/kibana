@@ -7,20 +7,14 @@
 
 import React, { useEffect } from 'react';
 
-import {
-  EuiAccordion,
-  EuiAccordionProps,
-  EuiSpacer,
-  EuiText,
-  EuiLink,
-  EuiCode,
-} from '@elastic/eui';
+import type { EuiAccordionProps } from '@elastic/eui';
+import { EuiAccordion, EuiSpacer, EuiText, EuiLink, EuiCode } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeBox } from '@kbn/search-api-panels';
 
-import { ApiKey } from '../../../api/connector/generate_connector_api_key_api_logic';
+import type { ApiKey } from '../../../api/connector/generate_connector_api_key_api_logic';
 import {
   getConnectorTemplate,
   getRunFromDockerSnippet,

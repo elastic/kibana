@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { duration, unitOfTime } from 'moment';
+import type { unitOfTime } from 'moment';
+import { duration } from 'moment';
 
 export function durationAsMs(value: number, unit: unitOfTime.DurationConstructor) {
   return duration(value, unit).asMilliseconds();

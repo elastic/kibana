@@ -7,7 +7,7 @@
 
 import { reduce, map } from 'rxjs';
 import { schema } from '@kbn/config-schema';
-import { GlobalSearchRouter } from '../types';
+import type { GlobalSearchRouter } from '../types';
 import { GlobalSearchFindError } from '../../common/errors';
 
 export const registerInternalFindRoute = (router: GlobalSearchRouter) => {

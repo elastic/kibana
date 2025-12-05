@@ -111,7 +111,7 @@ async function deleteRuleWithOCC(context: RulesClientContext, { id }: { id: stri
     const eventLogClient = await context.getEventLogClient();
 
     await softDeleteGaps({
-      ruleId: id,
+      ruleIds: [id],
       logger: context.logger,
       eventLogClient,
       eventLogger: context.eventLogger,

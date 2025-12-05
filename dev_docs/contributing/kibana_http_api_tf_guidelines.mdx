@@ -7,11 +7,17 @@ date: 2025-06-16
 tags: ['terraform', 'tf', 'kibana','contributor', 'dev', 'http', 'api']
 ---
 
+<DocCallOut title="Think Holistically">
+These guidelines are **recommended but not mandatory**. Deviating from them will increase the effort required on the Terraform provider side to consume your APIs effectively. Adhering to these guidelines ensures smoother integration and reduces the implementation burden for infrastructure-as-code consumers.
+</DocCallOut>
+
 Kibana's role has expanded beyond the UI. APIs have become the backbone for how customers automate their workflows, build custom scripts, and create their own integrations. With GitOps becoming the standard and Terraform establishing itself as the go-to infrastructure-as-code tool, HTTP APIs are now business-critical. The rise in Search AI means that it's more important than ever to make sure our APIs are easily understood by LLMs.
 
 For Terraform to be a first class citizen, the provider needs to cover resources that weren't available before—think Dashboards, Visualizations, Data Views, and Detection Rules. This means we need to build REST APIs that follow the OpenAPI Specification properly, making it straightforward for teams to manage these resources as code through GitOps workflows.
 
 These guidelines will help you build APIs that are easy to use, whether someone's automating with scripts or managing infrastructure at scale.
+
+
 
 ## Terraform provider developer-friendly API design
 
@@ -246,11 +252,23 @@ The cost of not catching errors early is interrupted workflow, repetitive plan/a
 
 ### Return as much as you can, and handle defaults carefully
 
-Terraform needs complete information to track resource state effectively. If your API doesn't return enough details, Terraform can't properly detect changes or manage drift.
+Terraform needs complete information to track resource state effectively. If your API doesn't return enough details, Terraform can't properly detect changes or manage drift. For this reason, **the overall recommendation is to _return as much information as possible and define the optional attributes in the [Terraform provider](https://github.com/elastic/terraform-provider-elasticstack/tree/main/internal/kibana) as `Optional: true, Default: <default value>`._**
 
 **The challenge with defaults**
 
 Many Kibana APIs have extensive configuration options. Requiring users to specify every single value would create verbose, unwieldy configurations. We need to keep in mind that changing a default may cause Terraform to get out-of-sync and so view changes to defaults as a breaking change until we can update our provider.
+
+[Our tests](https://github.com/elastic/kibana-team/issues/2001) show the following facts:
+
+* Defining a resource attribute as `Optional: true, Default: <default value>` (_recommended_) provides a more consistent behavior to the user (it identifies external changes, and ensures a consistent default value fixed by their Terraform Provider's version), but can restrict the Terraform provider's version support matrix: if Kibana changes the default value, Terraform won't know about the change until the Terraform resource configuration gets updated. Keep in mind that our Terraform provider doesn't follow the Stack release cycle, so we can't guarantee that the default value will be the same as the one in the Stack. Also, the opposite can occur: a more recent version of the Terraform provider may have a default value that is not supported by an older version of Kibana. However, there is an easy workaround: the user can define a valid value if this occurs.
+* Resource attributes defined as `Optional: true, Computed: true`: Terraform won't detect changes unless explicitly defined by the Terraform user. This means we can change the defaults, choose not to return it, and UI users can manually change that attribute without Terraform noticing the change if no explicit value is provided by the user in their terraform definition.
+* The API can return fields that Terraform doesn't understand (e.g.: a new version of Kibana returns extra fields in the response, or it returns fields that Terraform users shouldn't be concerned about like `last_updated` or `created_by`): Terraform dismisses them when comparing the resource.
+
+This is why the overall recommendation is to return as much information as possible and define the optional attributes in the [Terraform provider](https://github.com/elastic/terraform-provider-elasticstack/tree/main/internal/kibana) as `Optional: true, Default: <default value>`.
+
+**So can't I return slimmed-down information?**
+
+If you have a use case where you'd like your API to remove defaults from the response, you can do so, but we recommend that you add a query parameter to control stripping defaults so that Terraform can always retrieve them by requesting the full response.
 
 ### Be predictable
 
@@ -361,130 +379,3 @@ resource "elasticstack_kibana_space" "example" {
   initials          = "ts"
 }
 ```
-
-### (Optional) Support bulk operations
-
-Terraform configurations may manage many resources at once. When operating at scale, API efficiency may be a crucial factor. Supporting bulk operations allows Terraform providers to optimize performance and provide a better experience for users managing many resources.
-
-<DocCallOut title="Reach out to Core for guidance" color="warning">
-  You may not need to implement bulk operations. Using bulk APIs may require additional work from
-  the Terraform provider implementation or you need to carefully design your bulk API to work well as Terraform configuration.
-</DocCallOut>
-
-#### Why bulk operations matter for Terraform
-
-When a Terraform configuration manages hundreds of similar resources, individual API calls for each resource can lead to:
-
-- **Performance bottlenecks**: Each HTTP request adds network latency
-- **Rate limiting issues**: Many sequential calls may trigger rate limiting
-
-#### Implement efficient bulk endpoints
-
-Add these bulk operation endpoints to complement your individual resource operations:
-
-```
-POST   /api/resources/_bulk_create   # Create multiple resources
-POST   /api/resources/_bulk_update   # Update multiple resources
-POST   /api/resources/_bulk_delete   # Delete multiple resources
-```
-
-#### Design principles for bulk APIs
-
-1. **Atomic operations**: If one operation fails, provide clear options:
-   - Allow partial success with detailed reports
-   - Support all-or-nothing transactions when needed
-
-2. **Consistent response format**: Return individual status for each item in the batch:
-
-   ```json
-   {
-     "items": [
-       {
-         "id": "resource-1",
-         "status": "created",
-         "result": { /* complete resource state */ }
-       },
-       {
-         "id": "resource-2",
-         "status": "error",
-         "error": { "message": "Validation failed", "code": 400 }
-       }
-     ],
-     "took": 42,
-     "errors": true
-   }
-   ```
-
-3. **Reasonable batch sizes**: Document recommended batch sizes and implement server-side limits
-
-4. **Idempotency**: Ensure bulk operations are idempotent for retry safety
-
-5. **Consistent error handling**: Provide detailed errors for each item in the batch
-
-#### Example: Bulk resource creation
-
-```typescript
-// Bulk create resources
-router.post(
-  {
-    path: '/api/resources/_bulk_create',
-    validate: {
-      body: schema.arrayOf(
-        schema.object({
-          id: schema.string(), // Client-specified ID
-          title: schema.string(),
-          type: schema.string(),
-          space_id: schema.string(),
-          // etc.
-        })
-      )
-    }
-  },
-  async (context, request, response) => {
-    const visualizations = request.body;
-    const results = [];
-
-    // Process each item in the batch
-    for (const viz of visualizations) {
-      try {
-        const result = await createVisualization(viz);
-        results.push({
-          id: viz.id,
-          status: 'created',
-          result
-        });
-      } catch (error) {
-        results.push({
-          id: viz.id,
-          status: 'error',
-          error: {
-            message: error.message,
-            code: error.statusCode || 500
-          }
-        });
-      }
-    }
-
-    const hasErrors = results.some(item => item.status === 'error');
-
-    return response.ok({
-      body: {
-        items: results,
-        took: Date.now() - request.info.received,
-        errors: hasErrors
-      }
-    });
-  }
-);
-```
-
-#### Optimizations for Terraform providers
-
-When implementing bulk operations, consider these Terraform-specific optimizations:
-
-1. **Batch size recommendations**: Document optimal batch sizes to help provider developers maximize performance
-
-2. **Error mapping**: Design error responses that map cleanly to Terraform error handling patterns
-
-3. **State synchronization**: Include complete resource state in responses to avoid additional GET requests
-

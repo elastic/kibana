@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export const farequoteKQLFiltersSearchTestData = {
   suiteTitle: 'KQL saved search and filters',
@@ -23,7 +23,7 @@ const dataViewCreationTestData = {
   isSavedSearch: true,
   dateTimeField: '@timestamp',
   chartClickCoordinates: [0, 0] as [number, number],
-  comparisonChartClickCoordinates: [2, 2] as [number, number],
+  comparisonChartClickCoordinates: [0, 0] as [number, number],
   totalDocCount: '86,274',
 };
 

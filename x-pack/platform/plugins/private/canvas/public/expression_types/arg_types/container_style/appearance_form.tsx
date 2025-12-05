@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, ChangeEvent } from 'react';
+import type { FunctionComponent, ChangeEvent } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { ArgTypesStrings } from '../../../../i18n';
@@ -90,8 +91,11 @@ export const AppearanceForm: FunctionComponent<Props> = ({
 };
 
 AppearanceForm.propTypes = {
+  // @ts-expect-error upgrade typescript v5.9.3
   padding: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  // @ts-expect-error upgrade typescript v5.9.3
   opacity: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  // @ts-expect-error upgrade typescript v5.9.3
   overflow: PropTypes.oneOf(['hidden', 'visible']),
   onChange: PropTypes.func.isRequired,
 };

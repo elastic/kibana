@@ -1,0 +1,133 @@
+{
+  "id": "@kbn/shared-ux-page-kibana-template-types",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/shared-ux-page-kibana-template-types",
+        "id": "def-public.KibanaPageTemplateKibanaDependencies",
+        "type": "Type",
+        "tags": [],
+        "label": "KibanaPageTemplateKibanaDependencies",
+        "description": [],
+        "signature": [
+          "KibanaDependencies"
+        ],
+        "path": "src/platform/packages/shared/shared-ux/page/kibana_template/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-page-kibana-template-types",
+        "id": "def-public.KibanaPageTemplateProps",
+        "type": "Type",
+        "tags": [],
+        "label": "KibanaPageTemplateProps",
+        "description": [],
+        "signature": [
+          "_EuiPageOuterProps",
+          " & Omit<",
+          "_EuiPageInnerProps",
+          "<\"main\">, \"border\" | \"component\"> & ",
+          "_EuiPageRestrictWidth",
+          " & ",
+          "_EuiPageBottomBorder",
+          " & { contentBorder?: boolean | undefined; minHeight?: ",
+          "Property",
+          ".MinHeight<string | number> | undefined; offset?: number | undefined; mainProps?: (",
+          "CommonProps",
+          " & React.HTMLAttributes<HTMLElement>) | undefined; component?: ",
+          "ComponentTypes",
+          " | undefined; } & { isEmptyState?: boolean | undefined; emptyPageBody?: React.ReactNode; solutionNav?: ",
+          {
+            "pluginId": "@kbn/shared-ux-page-solution-nav",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPageSolutionNavPluginApi",
+            "section": "def-public.SolutionNavProps",
+            "text": "SolutionNavProps"
+          },
+          " | undefined; noDataConfig?: ",
+          {
+            "pluginId": "@kbn/shared-ux-page-no-data-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPageNoDataTypesPluginApi",
+            "section": "def-public.NoDataPageProps",
+            "text": "NoDataPageProps"
+          },
+          " | undefined; pageHeader?: ",
+          "EuiPageHeaderProps",
+          " | undefined; pageSideBar?: React.ReactNode; pageSideBarProps?: ",
+          "EuiPageSidebarProps",
+          " | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/shared-ux/page/kibana_template/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-page-kibana-template-types",
+        "id": "def-public.KibanaPageTemplateServices",
+        "type": "Type",
+        "tags": [],
+        "label": "KibanaPageTemplateServices",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/shared-ux-card-no-data-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxCardNoDataTypesPluginApi",
+            "section": "def-public.Services",
+            "text": "Services"
+          }
+        ],
+        "path": "src/platform/packages/shared/shared-ux/page/kibana_template/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-page-kibana-template-types",
+        "id": "def-public.NoDataConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "NoDataConfig",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/shared-ux-page-no-data-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPageNoDataTypesPluginApi",
+            "section": "def-public.NoDataPageProps",
+            "text": "NoDataPageProps"
+          }
+        ],
+        "path": "src/platform/packages/shared/shared-ux/page/no_data_config/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { intersection, uniq } from 'lodash';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { visualize, lens, dashboard, timePicker } = getPageObjects([
@@ -137,8 +137,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const errorMessages = await Promise.all(failureElements.map((el) => el.getVisibleText()));
 
       expect(errorMessages).to.eql([
-        'Visualization type not found.',
-        'The visualization type lnsUNKNOWN could not be resolved.',
+        'The visualization type UNKNOWN could not be resolved.',
+        'The visualization type UNKNOWN could not be resolved.',
         'Could not find datasource for the visualization',
       ]);
 

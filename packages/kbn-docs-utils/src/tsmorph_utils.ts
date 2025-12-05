@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Node, SourceFile, Project, ReferenceFindableNode } from 'ts-morph';
+import type { Node, SourceFile, Project, ReferenceFindableNode } from 'ts-morph';
 
 export interface NamedNode extends Node {
   getName(): string;

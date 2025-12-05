@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { visualize, lens, common } = getPageObjects(['visualize', 'lens', 'common']);
@@ -247,6 +247,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await lens.createLayer('referenceLine');
+
+      await lens.assertLayerCount(2);
+      // switch to the reference line tab
+      await lens.ensureLayerTabIsActive(1);
 
       await lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_yReferenceLineLeftPanel > lns-dimensionTrigger',

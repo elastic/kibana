@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
-import { IScopedClusterClient } from '@kbn/core/server';
-import {
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type {
   IndicesDataStream,
   IndicesDataStreamsStatsDataStreamsStatsItem,
   SecurityHasPrivilegesResponse,
@@ -18,8 +19,8 @@ import {
   deserializeDataStream,
   deserializeDataStreamList,
 } from '../../../lib/data_stream_serialization';
-import { EnhancedDataStreamFromEs } from '../../../../common/types';
-import { RouteDependencies } from '../../../types';
+import type { EnhancedDataStreamFromEs } from '../../../../common/types';
+import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 
 interface MeteringStatsResponse {
@@ -173,6 +174,9 @@ export function registerGetAllRoute({ router, lib: { handleEsError }, config }: 
           enabled:
             persistent?.data_streams?.failure_store?.enabled ??
             defaults?.data_streams?.failure_store?.enabled,
+          defaultRetentionPeriod:
+            persistent?.data_streams?.lifecycle?.retention?.failures_default ??
+            defaults?.data_streams?.lifecycle?.retention?.failures_default,
         };
 
         // Only take the lifecycle of the first data stream since all data streams have the same global retention period
@@ -254,6 +258,9 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
             enabled:
               persistent?.data_streams?.failure_store?.enabled ??
               defaults?.data_streams?.failure_store?.enabled,
+            defaultRetentionPeriod:
+              persistent?.data_streams?.lifecycle?.retention?.failures_default ??
+              defaults?.data_streams?.lifecycle?.retention?.failures_default,
           };
 
           const enhancedDataStreams = enhanceDataStreams({

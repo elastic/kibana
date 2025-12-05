@@ -170,7 +170,6 @@ export function createPluginStartContext<
     overlays: deps.overlays,
     uiSettings: deps.uiSettings,
     settings: deps.settings,
-    savedObjects: deps.savedObjects,
     fatalErrors: deps.fatalErrors,
     deprecations: deps.deprecations,
     theme: deps.theme,

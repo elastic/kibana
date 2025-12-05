@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UiActionsStart, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { ADD_SEARCH_ACTION_ID } from './constants';
 
 export const registerSearchPanelAction = (uiActions: UiActionsStart) => {

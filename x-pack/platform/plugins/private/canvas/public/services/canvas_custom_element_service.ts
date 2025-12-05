@@ -6,7 +6,7 @@
  */
 
 import { API_ROUTE_CUSTOM_ELEMENT } from '../../common/lib';
-import { CustomElement } from '../../types';
+import type { CustomElement } from '../../types';
 import { coreServices } from './kibana_services';
 
 export interface CustomElementFindResponse {

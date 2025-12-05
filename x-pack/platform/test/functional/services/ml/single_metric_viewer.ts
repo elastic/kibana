@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { MlCommonUI } from './common_ui';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { MlCommonUI } from './common_ui';
 
 export function MachineLearningSingleMetricViewerProvider(
   { getService }: FtrProviderContext,
@@ -93,6 +93,10 @@ export function MachineLearningSingleMetricViewerProvider(
 
     async assertAnomalyActionJobRulesButtonExists() {
       await testSubjects.existOrFail('mlAnomaliesListRowActionConfigureRulesButton');
+    },
+
+    async assertFeedbackButtonExists() {
+      await testSubjects.existOrFail('mlFeatureFeedbackButton');
     },
 
     async ensureAnomalyActionDiscoverButtonClicked() {

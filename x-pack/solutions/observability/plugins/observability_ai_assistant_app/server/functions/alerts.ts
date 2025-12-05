@@ -6,10 +6,10 @@
  */
 
 import datemath from '@elastic/datemath';
-import { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { getRelevantFieldNames } from '@kbn/observability-ai-assistant-plugin/server/functions/get_dataset_info/get_relevant_field_names';
-import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import {
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
@@ -17,9 +17,11 @@ import {
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { omit } from 'lodash';
 import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-plugin/common/constants';
-import { FunctionRegistrationParameters } from '.';
-
-export const GET_ALERTS_DATASET_INFO_NAME = 'get_alerts_dataset_info';
+import {
+  GET_ALERTS_DATASET_INFO_FUNCTION_NAME,
+  ALERTS_FUNCTION_NAME,
+} from '@kbn/observability-ai-assistant-plugin/server';
+import type { FunctionRegistrationParameters } from '.';
 
 const defaultFields = [
   '@timestamp',
@@ -73,7 +75,7 @@ export function registerAlertsFunction({
   if (scopes.includes('observability')) {
     functions.registerFunction(
       {
-        name: GET_ALERTS_DATASET_INFO_NAME,
+        name: GET_ALERTS_DATASET_INFO_FUNCTION_NAME,
         description: `Use this function to get information about alerts data.`,
         parameters: {
           type: 'object',
@@ -121,6 +123,7 @@ export function registerAlertsFunction({
               stream: true,
             });
           },
+          logger: resources.logger,
         });
 
         return {
@@ -133,8 +136,8 @@ export function registerAlertsFunction({
 
     functions.registerFunction(
       {
-        name: 'alerts',
-        description: `Get alerts for Observability. Make sure ${GET_ALERTS_DATASET_INFO_NAME} was called before.
+        name: ALERTS_FUNCTION_NAME,
+        description: `Get alerts for Observability. Make sure ${GET_ALERTS_DATASET_INFO_FUNCTION_NAME} was called before.
         Use this to get open (and optionally recovered) alerts for Observability assets, like services,
         hosts or containers.
         Display the response in tabular format if appropriate.

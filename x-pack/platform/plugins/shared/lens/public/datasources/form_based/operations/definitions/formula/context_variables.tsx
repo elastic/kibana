@@ -8,29 +8,30 @@
 import { i18n } from '@kbn/i18n';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { partition } from 'lodash';
-import {
-  buildExpressionFunction,
-  buildExpression,
-  ExpressionFunctionDefinitions,
-} from '@kbn/expressions-plugin/common';
-import {
+import type { ExpressionFunctionDefinitions } from '@kbn/expressions-plugin/common';
+import { buildExpressionFunction, buildExpression } from '@kbn/expressions-plugin/common';
+import type {
+  ConstantsIndexPatternColumn,
+  DateRange,
+  IntervalIndexPatternColumn,
+  NowIndexPatternColumn,
+  TimeRangeIndexPatternColumn,
+  LensConstantContextValues as ContextValues,
+  FormBasedLayer,
+  GenericIndexPatternColumn,
+  DateHistogramIndexPatternColumn,
+  IndexPattern,
+} from '@kbn/lens-common';
+import type {
   ExpressionFunctionFormulaInterval,
   ExpressionFunctionFormulaNow,
   ExpressionFunctionFormulaTimeRange,
 } from '../../../../../../common/expressions/defs/formula_context/context_fns';
 import type {
-  DateHistogramIndexPatternColumn,
-  FormBasedLayer,
-  GenericIndexPatternColumn,
-} from '../../../../..';
-import type { DateRange } from '../../../../../../common/types';
-import type {
   FieldBasedOperationErrorMessage,
   GenericOperationDefinition,
   OperationDefinition,
 } from '..';
-import type { ReferenceBasedIndexPatternColumn } from '../column_types';
-import { IndexPattern } from '../../../../../types';
 import {
   INTERVAL_OP_MISSING_DATE_HISTOGRAM_TO_COMPUTE_INTERVAL,
   INTERVAL_OP_MISSING_TIME_RANGE,
@@ -66,16 +67,6 @@ export function isColumnOfType<C extends GenericIndexPatternColumn>(
   column: GenericIndexPatternColumn
 ): column is C {
   return column.operationType === type;
-}
-
-export interface ContextValues {
-  dateRange?: DateRange;
-  now?: Date;
-  targetBars?: number;
-}
-
-export interface TimeRangeIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
-  operationType: 'time_range';
 }
 
 function getTimeRangeErrorMessages(
@@ -115,10 +106,6 @@ export const timeRangeOperation = createContextValueBasedOperation<TimeRangeInde
   getErrorMessage: getTimeRangeErrorMessages,
 });
 
-export interface NowIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
-  operationType: 'now';
-}
-
 function getNowErrorMessage() {
   return [];
 }
@@ -133,10 +120,6 @@ export const nowOperation = createContextValueBasedOperation<NowIndexPatternColu
     buildExpressionFunction<ExpressionFunctionFormulaNow>('formula_now', {}),
   getErrorMessage: getNowErrorMessage,
 });
-
-export interface IntervalIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
-  operationType: 'interval';
-}
 
 function getIntervalErrorMessages(
   layer: FormBasedLayer,
@@ -193,11 +176,6 @@ export const intervalOperation = createContextValueBasedOperation<IntervalIndexP
     }),
   getErrorMessage: getIntervalErrorMessages,
 });
-
-export type ConstantsIndexPatternColumn =
-  | IntervalIndexPatternColumn
-  | TimeRangeIndexPatternColumn
-  | NowIndexPatternColumn;
 
 function createContextValueBasedOperation<ColumnType extends ConstantsIndexPatternColumn>({
   label,

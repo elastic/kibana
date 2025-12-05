@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EsArchiver } from '@kbn/es-archiver';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { EsArchiver } from '@kbn/es-archiver';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext) => {
   const browser = getService('browser');
@@ -17,7 +17,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
   const config = getService('config');
   let remoteEsArchiver;
 
-  describe('lens app - group 4', () => {
+  describe('lens app - group 7', () => {
     const esArchive = 'x-pack/platform/test/fixtures/es_archives/logstash_functional';
     const localIndexPatternString = 'logstash-*';
     const remoteIndexPatternString = 'ftr-remote:logstash-*';
@@ -58,6 +58,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       await kibanaServer.uiSettings.update({
         defaultIndex: indexPatternString,
         'dateFormat:tz': 'UTC',
+        hideAnnouncements: true,
       });
       await kibanaServer.importExport.load(fixtureDirs.lensBasic);
       await kibanaServer.importExport.load(fixtureDirs.lensDefault);
@@ -71,8 +72,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    // total run time ~30m
-    loadTestFile(require.resolve('./logsdb')); // 30m
+    loadTestFile(require.resolve('./logsdb')); // 43m
     loadTestFile(require.resolve('./esql'));
   });
 };

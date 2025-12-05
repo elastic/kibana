@@ -6,7 +6,7 @@
  */
 
 import { useKibana as _useKibana } from '@kbn/kibana-react-plugin/public';
-import { AppServicesContext } from './types';
+import type { AppServicesContext } from './types';
 
 export type {
   FormHook,
@@ -57,4 +57,4 @@ export const useKibana = () => _useKibana<AppServicesContext>();
 
 export type { CloudSetup } from '@kbn/cloud-plugin/public';
 
-export type { ILicense } from '@kbn/licensing-plugin/public';
+export type { ILicense } from '@kbn/licensing-types';

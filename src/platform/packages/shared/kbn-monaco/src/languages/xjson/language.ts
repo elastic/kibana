@@ -11,7 +11,7 @@
 
 import { WorkerProxyService } from '../../ace_migration/worker_proxy';
 import { setupWorker } from '../../ace_migration/setup_worker';
-import { XJsonWorker } from './worker';
+import type { XJsonWorker } from './worker';
 import { ID } from './constants';
 import type { LangModuleType } from '../../types';
 

@@ -9,7 +9,7 @@ import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../../common/constant
 import { getFilter } from '../../utils/get_filter';
 import { searchAfterAndBulkCreate } from '../../utils/search_after_bulk_create';
 import { buildReasonMessageForThreatMatchAlert } from '../../utils/reason_formatters';
-import type { CreateEventSignalOptions, ThreatListItem } from './types';
+import type { CreateEventSignalOptions } from './types';
 import type {
   SearchAfterAndBulkCreateParams,
   SearchAfterAndBulkCreateReturnType,
@@ -21,7 +21,6 @@ import { searchAfterAndBulkCreateSuppressedAlerts } from '../../utils/search_aft
 import { threatEnrichmentFactory } from './threat_enrichment_factory';
 import { FAILED_CREATE_QUERY_MAX_CLAUSE, MANY_NESTED_CLAUSES_ERR } from './utils';
 import { alertSuppressionTypeGuard } from '../../utils/get_is_alert_suppression_active';
-import { validateCompleteThreatMatches } from './validate_complete_threat_matches';
 
 export const createEventSignal = async ({
   sharedParams,
@@ -52,9 +51,8 @@ export const createEventSignal = async ({
     sharedParams.completeRule.ruleParams.threatIndicatorPath ?? DEFAULT_INDICATOR_SOURCE_PATH;
 
   let signalIdToMatchedQueriesMap: SignalIdToMatchedQueriesMap | undefined;
-  let threatList: ThreatListItem[] | undefined;
   try {
-    const result = await getSignalIdToMatchedQueriesMap({
+    signalIdToMatchedQueriesMap = await getSignalIdToMatchedQueriesMap({
       services,
       sharedParams,
       signals: currentEventList,
@@ -65,8 +63,6 @@ export const createEventSignal = async ({
       threatIndexFields,
       threatIndicatorPath,
     });
-    signalIdToMatchedQueriesMap = result.signalIdToMatchedQueriesMap;
-    threatList = result.threatList;
   } catch (exc) {
     // we receive an error if the event list count < threat list count
     // which puts us into the create_event_signal which differs from create threat signal
@@ -83,16 +79,7 @@ export const createEventSignal = async ({
     }
   }
 
-  const { matchedEvents, skippedIds } = validateCompleteThreatMatches(
-    signalIdToMatchedQueriesMap,
-    threatMapping
-  );
-
-  if (skippedIds.length > 0) {
-    ruleExecutionLogger.debug(`Skipping not matched documents: ${skippedIds.join(', ')}`);
-  }
-
-  const ids = Array.from(matchedEvents.keys());
+  const ids = Array.from(signalIdToMatchedQueriesMap.keys());
   if (ids.length === 0) {
     return currentResult;
   }
@@ -122,9 +109,9 @@ export const createEventSignal = async ({
   ruleExecutionLogger.debug(`${ids?.length} matched signals found`);
 
   const enrichment = threatEnrichmentFactory({
-    signalIdToMatchedQueriesMap: matchedEvents,
+    signalIdToMatchedQueriesMap,
     threatIndicatorPath,
-    matchedThreats: threatList,
+    threatMappings: threatMapping,
   });
 
   let createResult: SearchAfterAndBulkCreateReturnType;

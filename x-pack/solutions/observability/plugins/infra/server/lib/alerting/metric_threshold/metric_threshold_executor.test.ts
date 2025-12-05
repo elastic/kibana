@@ -31,6 +31,7 @@ import {
   ALERT_REASON,
   ALERT_GROUP,
   ALERT_GROUPING,
+  ALERT_INDEX_PATTERN,
 } from '@kbn/rule-data-utils';
 import { type Group } from '@kbn/alerting-rule-utils';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
@@ -116,7 +117,7 @@ describe('The metric threshold rule type', () => {
     jest.setSystemTime();
   });
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
 
     mockAssetDetailsLocator.getRedirectUrl.mockImplementation(
       ({ entityId, entityType, assetDetails }: AssetDetailsLocatorParams) =>
@@ -2470,6 +2471,7 @@ describe('The metric threshold rule type', () => {
             }
           : {}),
         [ALERT_REASON]: reason,
+        [ALERT_INDEX_PATTERN]: 'metrics-*,metricbeat-*',
         ...(tags ? { tags } : {}),
         ...(ecsGroups ? ecsGroups : {}),
         ...(grouping ? { [ALERT_GROUPING]: grouping } : {}),
@@ -2501,7 +2503,6 @@ const createMockStaticConfiguration = (sources: any): InfraConfig => ({
     // to be removed in https://github.com/elastic/kibana/issues/221904
     profilingEnabled: false,
     ruleFormV2Enabled: false,
-    hostOtelEnabled: false,
   },
   enabled: true,
   sources,
@@ -2517,6 +2518,7 @@ const mockLibs: any = {
             type: 'index_pattern',
             indexPatternId: 'some-id',
           },
+          metricAlias: 'metrics-*,metricbeat-*',
         },
       });
     },

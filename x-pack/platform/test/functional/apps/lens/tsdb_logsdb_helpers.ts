@@ -5,9 +5,9 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { Client } from '@elastic/elasticsearch';
-import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { Client } from '@elastic/elasticsearch';
+import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import type { ToolingLog } from '@kbn/tooling-log';
 import moment from 'moment';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -451,6 +451,12 @@ export function setupScenarioRunner(
           );
         });
 
+        beforeEach(async () => {
+          await lens.switchDataPanelIndexPattern(dataViewName);
+          await lens.removeLayer();
+          await lens.ensureLayerTabIsActive();
+        });
+
         after(async () => {
           for (const { index, create, mode: indexMode } of indexes) {
             if (create) {
@@ -466,11 +472,6 @@ export function setupScenarioRunner(
             // no need to cleant he specific downsample index as everything linked to the stream
             // is cleaned up automatically
           }
-        });
-
-        beforeEach(async () => {
-          await lens.switchDataPanelIndexPattern(dataViewName);
-          await lens.removeLayer();
         });
 
         testingFn(indexes);

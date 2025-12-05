@@ -58,7 +58,7 @@ export function ChildStreamList({ definition }: { definition?: Streams.ingest.al
                     href={router.link('/{key}/management/{tab}', {
                       path: {
                         key: definition.stream.name,
-                        tab: 'route',
+                        tab: 'partitioning',
                       },
                     })}
                   >

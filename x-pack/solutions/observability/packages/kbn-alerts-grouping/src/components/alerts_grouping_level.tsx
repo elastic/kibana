@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { memo, ReactElement, useMemo } from 'react';
+import type { ReactElement } from 'react';
+import { memo, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
@@ -14,11 +15,9 @@ import { isNoneGroup } from '@kbn/grouping';
 import type { DynamicGroupingProps } from '@kbn/grouping/src';
 import { parseGroupingQuery } from '@kbn/grouping/src';
 import { ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
-import {
-  useGetAlertsGroupAggregationsQuery,
-  UseGetAlertsGroupAggregationsQueryProps,
-} from '@kbn/alerts-ui-shared';
-import { AlertsGroupingProps, BaseAlertsGroupAggregations } from '../types';
+import type { UseGetAlertsGroupAggregationsQueryProps } from '@kbn/alerts-ui-shared';
+import { useGetAlertsGroupAggregationsQuery } from '@kbn/alerts-ui-shared';
+import type { AlertsGroupingProps, BaseAlertsGroupAggregations } from '../types';
 
 export interface AlertsGroupingLevelProps<
   T extends BaseAlertsGroupAggregations = BaseAlertsGroupAggregations

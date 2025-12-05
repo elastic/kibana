@@ -23,18 +23,14 @@ import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
-import { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
-import { RenderingService as IRenderingService } from '@kbn/core-rendering-browser';
-import {
-  LayoutService,
-  LayoutFeatureFlag,
-  LAYOUT_FEATURE_FLAG_KEY,
-  LAYOUT_DEBUG_FEATURE_FLAG_KEY,
-  LAYOUT_PROJECT_SIDENAV_FEATURE_FLAG_KEY,
-  LayoutProjectSideNavVersion,
-} from '@kbn/core-chrome-layout';
+import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
+import type { RenderingService as IRenderingService } from '@kbn/core-rendering-browser';
+import type { LayoutService } from '@kbn/core-chrome-layout';
+import { getLayoutVersion, getLayoutDebugFlag } from '@kbn/core-chrome-layout-feature-flags';
 import { GridLayout } from '@kbn/core-chrome-layout/layouts/grid';
 import { LegacyFixedLayout } from '@kbn/core-chrome-layout/layouts/legacy-fixed';
+import { GlobalRedirectAppLink } from '@kbn/global-redirect-app-links';
+import type { CoreEnv } from '@kbn/core-base-browser-internal';
 
 export interface RenderingServiceContextDeps {
   analytics: AnalyticsServiceStart;
@@ -42,6 +38,7 @@ export interface RenderingServiceContextDeps {
   i18n: I18nStart;
   theme: ThemeServiceStart;
   userProfile: UserProfileService;
+  coreEnv: CoreEnv;
 }
 
 export interface RenderingServiceRenderCoreDeps {
@@ -90,15 +87,8 @@ export class RenderingService implements IRenderingService {
     targetDomElement: HTMLDivElement
   ) {
     const { chrome, featureFlags } = renderCoreDeps;
-    const layoutType = featureFlags.getStringValue<LayoutFeatureFlag>(
-      LAYOUT_FEATURE_FLAG_KEY,
-      'legacy-fixed'
-    );
-    const debugLayout = featureFlags.getBooleanValue(LAYOUT_DEBUG_FEATURE_FLAG_KEY, false);
-    const projectSideNavVersion = featureFlags.getStringValue<LayoutProjectSideNavVersion>(
-      LAYOUT_PROJECT_SIDENAV_FEATURE_FLAG_KEY,
-      'v1'
-    );
+    const layoutType = getLayoutVersion(featureFlags);
+    const debugLayout = getLayoutDebugFlag(featureFlags);
 
     const startServices = this.contextDeps.getValue()!;
 
@@ -113,13 +103,14 @@ export class RenderingService implements IRenderingService {
 
     const layout: LayoutService =
       layoutType === 'grid'
-        ? new GridLayout(renderCoreDeps, { debug: debugLayout, projectSideNavVersion })
-        : new LegacyFixedLayout(renderCoreDeps, { projectSideNavVersion });
+        ? new GridLayout(renderCoreDeps, { debug: debugLayout })
+        : new LegacyFixedLayout(renderCoreDeps);
 
     const Layout = layout.getComponent();
 
     ReactDOM.render(
       <KibanaRootContextProvider {...startServices} globalStyles={true}>
+        <GlobalRedirectAppLink navigateToUrl={renderCoreDeps.application.navigateToUrl} />
         <Layout />
       </KibanaRootContextProvider>,
       targetDomElement
@@ -147,6 +138,7 @@ export class RenderingService implements IRenderingService {
         i18n={deps.i18n}
         theme={deps.theme}
         userProfile={deps.userProfile}
+        coreEnv={deps.coreEnv}
       >
         {children}
       </KibanaRenderContextProvider>

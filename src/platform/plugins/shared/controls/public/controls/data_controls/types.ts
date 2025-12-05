@@ -7,19 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataViewField } from '@kbn/data-views-plugin/common';
-import { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
-import {
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
+import type {
   HasEditCapabilities,
   PublishesDataViews,
   PublishesTitle,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 
-import { DefaultDataControlState } from '../../../common';
-import { ControlGroupApi } from '../../control_group/types';
-import { ControlFactory, DefaultControlApi } from '../types';
-import { PublishesAsyncFilters } from './publishes_async_filters';
+import type { DefaultControlState } from '../../../common';
+import type { ControlGroupApi } from '../../control_group/types';
+import type { ControlFactory, DefaultControlApi } from '../types';
+import type { PublishesAsyncFilters } from './publishes_async_filters';
 
 export type DataControlFieldFormatter = FieldFormatConvertFunction | ((toFormat: any) => string);
 
@@ -36,17 +36,17 @@ export type DataControlApi = DefaultControlApi &
   PublishesAsyncFilters;
 
 export interface CustomOptionsComponentProps<
-  State extends DefaultDataControlState = DefaultDataControlState
+  State extends DefaultControlState = DefaultControlState
 > {
   initialState: Partial<State>;
-  field: DataViewField;
+  field?: DataViewField;
   updateState: (newState: Partial<State>) => void;
   setControlEditorValid: (valid: boolean) => void;
   controlGroupApi: ControlGroupApi;
 }
 
 export interface DataControlFactory<
-  State extends DefaultDataControlState = DefaultDataControlState,
+  State extends DefaultControlState = DefaultControlState,
   Api extends DataControlApi = DataControlApi
 > extends ControlFactory<State, Api> {
   isFieldCompatible: (field: DataViewField) => boolean;

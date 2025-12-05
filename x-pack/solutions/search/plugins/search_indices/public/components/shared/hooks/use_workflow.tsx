@@ -6,7 +6,8 @@
  */
 
 import { useEffect, useState } from 'react';
-import { WORKFLOW_LOCALSTORAGE_KEY, WorkflowId } from '@kbn/search-shared-ui';
+import type { WorkflowId } from '@kbn/search-shared-ui';
+import { WORKFLOW_LOCALSTORAGE_KEY } from '@kbn/search-shared-ui';
 import { useLocation } from 'react-router-dom';
 import {
   DenseVectorIngestDataCodeExamples,
@@ -48,8 +49,8 @@ function isWorkflowId(value: string | null): value is WorkflowId {
 }
 
 // possible onboarding tokens now: 'general' | 'vector' | 'timeseries' | 'semantic' for serverless, 'vectorsearch' or 'search' for hosted
-// note: test with http://localhost:5601/app/cloud/onboarding?next=/app/elasticsearc/starth&onboarding_token=vector in Serverless
-// http://localhost:5601/app/cloud/onboarding?next=/app/elasticsearch/start&onboarding_token=vector in Hosted
+// note: test with http://localhost:5601/app/cloud/onboarding?next=/app/elasticsearc/home&onboarding_token=vector in Serverless
+// http://localhost:5601/app/cloud/onboarding?next=/app/elasticsearch/home&onboarding_token=vector in Hosted
 
 function onboardingTokenToWorkflowId(token: string | undefined | null): WorkflowId {
   switch (token) {

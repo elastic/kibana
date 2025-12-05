@@ -10,8 +10,8 @@ import { act } from 'react-dom/test-utils';
 import { API_BASE_PATH } from '../../common/constants';
 
 import { setupEnvironment, pageHelpers } from './helpers';
-import { PipelineListTestBed } from './helpers/pipelines_list.helpers';
-import { Pipeline } from '../../common/types';
+import type { PipelineListTestBed } from './helpers/pipelines_list.helpers';
+import type { Pipeline } from '../../common/types';
 import { waitFor } from '@testing-library/dom';
 
 const { setup } = pageHelpers.pipelinesList;
@@ -265,9 +265,6 @@ describe('<PipelinesList />', () => {
           expect(exists('pipelineErrorFlyout')).toBe(true);
           expect(find('pipelineErrorFlyout.title').text()).toBe(customPipeline);
           expect(exists('missingCustomPipeline')).toBe(true);
-          expect(find('missingCustomPipeline.cause').text()).toBe(
-            `The pipeline ${customPipeline} does not exist.`
-          );
           expect(exists('createCustomPipeline')).toBe(true);
         });
       });

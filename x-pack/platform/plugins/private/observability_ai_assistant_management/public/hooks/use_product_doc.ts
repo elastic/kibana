@@ -6,9 +6,9 @@
  */
 
 import { useEffect, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
-import {
+import { useQuery } from '@kbn/react-query';
+import type { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
+import type {
   PerformInstallResponse,
   UninstallResponse,
 } from '@kbn/product-doc-base-plugin/common/http_api/installation';

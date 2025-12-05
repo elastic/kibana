@@ -8,7 +8,7 @@
 export type { EsqlTable } from './esql_query_utils';
 export {
   rowToDocument,
-  transformDatatableToEsqlTable,
+  transformToEsqlTable,
   getEsqlQueryHits,
   ALERT_ID_COLUMN,
   ALERT_ID_SUGGESTED_MAX,

@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
@@ -30,7 +30,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
   };
 
-  describe('discover URL state', () => {
+  describe('discover URL state', function () {
+    // failsOnMKI, see https://github.com/elastic/kibana/issues/237086
+    this.tags(['failsOnMKI']);
+
     before(async function () {
       log.debug('load kibana index with default index pattern');
       await kibanaServer.importExport.load(
@@ -92,8 +95,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         let discoverLink = await PageObjects.svlCommonNavigation.sidenav.findLink({
           deepLinkId: 'discover',
         });
+        expect(await discoverLink?.getAttribute('href')).to.contain('/app/discover#/');
         expect(await discoverLink?.getAttribute('href')).to.contain(
-          '/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:now-15m,to:now))' +
+          '_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:now-15m,to:now))' +
             "&_a=(columns:!(),dataSource:(dataViewId:'logstash-*',type:dataView),filters:!(),interval:auto,query:(language:kuery,query:''),sort:!(!('@timestamp',desc)))"
         );
         await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -107,8 +111,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         discoverLink = await PageObjects.svlCommonNavigation.sidenav.findLink({
           deepLinkId: 'discover',
         });
+        expect(await discoverLink?.getAttribute('href')).to.contain('/app/discover#/');
         expect(await discoverLink?.getAttribute('href')).to.contain(
-          "/app/discover#/?_g=(filters:!(('$state':(store:globalState)," +
+          "_g=(filters:!(('$state':(store:globalState)," +
             "meta:(alias:!n,disabled:!f,field:extension.raw,index:'logstash-*'," +
             'key:extension.raw,negate:!f,params:!(jpg,css),type:phrases,value:!(jpg,css)),' +
             'query:(bool:(minimum_should_match:1,should:!((match_phrase:(extension.raw:jpg)),' +

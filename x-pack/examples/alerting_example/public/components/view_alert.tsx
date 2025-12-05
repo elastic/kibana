@@ -18,15 +18,16 @@ import {
   EuiCodeBlock,
   EuiSpacer,
 } from '@elastic/eui';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
-import { CoreStart } from '@kbn/core/public';
+import type { RouteComponentProps } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
+import type { CoreStart } from '@kbn/core/public';
 import { isEmpty } from 'lodash';
 import {
   BASE_ALERTING_API_PATH,
   INTERNAL_BASE_ALERTING_API_PATH,
 } from '@kbn/alerting-plugin/common';
 import { ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
-import { Rule, RuleTaskState } from '../../common/types';
+import type { Rule, RuleTaskState } from '../../common/types';
 
 type Props = RouteComponentProps & {
   http: CoreStart['http'];
@@ -50,7 +51,7 @@ export const ViewAlertPage = withRouter(({ http, id }: Props) => {
 
   return alert && alertState ? (
     <Fragment>
-      <EuiCallOut title={`Rule "${alert.name}"`} iconType="search">
+      <EuiCallOut announceOnMount title={`Rule "${alert.name}"`} iconType="search">
         <p>
           This is a generic view for all Rules created by the
           <EuiTextColor color="accent"> {ALERTING_EXAMPLE_APP_ID} </EuiTextColor>
@@ -71,12 +72,12 @@ export const ViewAlertPage = withRouter(({ http, id }: Props) => {
         <h2>Alerts</h2>
       </EuiText>
       {isEmpty(alertState.alerts) ? (
-        <EuiCallOut title="No Alerts!" color="warning" iconType="question">
+        <EuiCallOut announceOnMount title="No Alerts!" color="warning" iconType="question">
           <p>This Rule doesn&apos;t have any active alerts at the moment.</p>
         </EuiCallOut>
       ) : (
         <Fragment>
-          <EuiCallOut title="Active State" color="success" iconType="user">
+          <EuiCallOut announceOnMount title="Active State" color="success" iconType="user">
             <p>
               Below are the active Alerts which were activated on the rules last run.
               <br />

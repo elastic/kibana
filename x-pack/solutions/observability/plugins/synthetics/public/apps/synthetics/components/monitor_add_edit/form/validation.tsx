@@ -4,14 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  ConfigKey,
-  MonitorTypeEnum,
-  ScheduleUnit,
-  MonitorFields,
-  Validator,
-  Validation,
-} from '../types';
+import type { MonitorFields, Validator, Validation } from '../types';
+import { ConfigKey, MonitorTypeEnum, ScheduleUnit } from '../types';
 
 export const DIGITS_ONLY = /^[0-9]*$/g;
 export const INCLUDES_VALID_PORT = /[^\:]+:[0-9]{1,5}$/g;

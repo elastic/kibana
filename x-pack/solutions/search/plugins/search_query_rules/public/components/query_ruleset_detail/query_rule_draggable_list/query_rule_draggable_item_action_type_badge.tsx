@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryRulesQueryRule } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryRulesQueryRule } from '@elastic/elasticsearch/lib/api/types';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiIcon, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';

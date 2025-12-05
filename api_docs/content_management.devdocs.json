@@ -21,7 +21,13 @@
             "label": "queryClient",
             "description": [],
             "signature": [
-              "QueryClient"
+              {
+                "pluginId": "@kbn/react-query",
+                "scope": "common",
+                "docId": "kibKbnReactQueryPluginApi",
+                "section": "def-common.QueryClient",
+                "text": "QueryClient"
+              }
             ],
             "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
             "deprecated": false,
@@ -1923,6 +1929,21 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-server.StorageContext.request",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>"
+            ],
+            "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "contentManagement",
             "id": "def-server.StorageContext.requestHandlerContext",

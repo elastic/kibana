@@ -179,6 +179,80 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-di",
+        "id": "def-common.Logger",
+        "type": "CompoundType",
+        "tags": [],
+        "label": "Logger",
+        "description": [
+          "\nPlugin's default logger instance."
+        ],
+        "signature": [
+          "string | symbol | Function | ",
+          "Newable",
+          "<",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.Logger",
+            "text": "Logger"
+          },
+          ", any[]> | ",
+          "AbstractNewable",
+          "<",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.Logger",
+            "text": "Logger"
+          },
+          ", any[]>"
+        ],
+        "path": "src/core/packages/di/common/src/services/logging.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-di",
+        "id": "def-common.LoggerFactory",
+        "type": "CompoundType",
+        "tags": [],
+        "label": "LoggerFactory",
+        "description": [
+          "\nPlugin's logger factory."
+        ],
+        "signature": [
+          "string | symbol | Function | ",
+          "Newable",
+          "<",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.LoggerFactory",
+            "text": "LoggerFactory"
+          },
+          ", any[]> | ",
+          "AbstractNewable",
+          "<",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.LoggerFactory",
+            "text": "LoggerFactory"
+          },
+          ", any[]>"
+        ],
+        "path": "src/core/packages/di/common/src/services/logging.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-di",
         "id": "def-common.OnSetup",
         "type": "CompoundType",
         "tags": [],

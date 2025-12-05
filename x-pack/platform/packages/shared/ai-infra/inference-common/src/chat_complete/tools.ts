@@ -5,59 +5,7 @@
  * 2.0.
  */
 
-import type { ValuesType } from 'utility-types';
-import { FromToolSchema, ToolSchema } from './tool_schema';
-import { ToolMessage } from './messages';
-
-type ToolsOfChoice<TToolOptions extends ToolOptions> = TToolOptions['toolChoice'] extends {
-  function: infer TToolName;
-}
-  ? TToolName extends keyof TToolOptions['tools']
-    ? TToolName extends string
-      ? Pick<TToolOptions['tools'], TToolName>
-      : TToolOptions['tools']
-    : TToolOptions['tools']
-  : TToolOptions['tools'];
-
-type ToolCallbacksOfTools<TTools extends Record<string, ToolDefinition> | undefined> =
-  TTools extends Record<string, ToolDefinition>
-    ? {
-        [TName in keyof TTools & string]: (
-          toolCall: ToolCall<TName, ToolResponseOf<TTools[TName]>>
-        ) => Promise<ToolMessage['response']>;
-      }
-    : never;
-
-export type ToolCallback = (toolCall: ToolCall) => Promise<ToolMessage['response']>;
-
-export type ToolCallbacksOf<TToolOptions extends ToolOptions> = TToolOptions extends {
-  tools?: Record<string, ToolDefinition>;
-}
-  ? ToolCallbacksOfTools<TToolOptions['tools']>
-  : never;
-
-/**
- * Utility type to infer the tool calls response shape.
- */
-export type ToolResponsesOf<TTools extends Record<string, ToolDefinition> | undefined> =
-  TTools extends Record<string, ToolDefinition>
-    ? keyof TTools extends never
-      ? []
-      : Array<
-          ValuesType<{
-            [TName in keyof TTools & string]: ToolCall<TName, ToolResponseOf<TTools[TName]>>;
-          }>
-        >
-    : [];
-
-/**
- * Utility type to infer the tool call response shape.
- */
-export type ToolResponseOf<TToolDefinition extends ToolDefinition> = TToolDefinition extends {
-  schema: ToolSchema;
-}
-  ? FromToolSchema<TToolDefinition['schema']>
-  : {};
+import type { ToolSchema } from './tool_schema';
 
 /**
  * Tool invocation choice type.
@@ -75,8 +23,8 @@ export enum ToolChoiceType {
  *
  * Refer to {@link ToolChoice} for more details.
  */
-interface CustomToolChoice<TName extends string = string> {
-  function: TName;
+export interface CustomToolChoice<TToolName extends string = string> {
+  function: TToolName;
 }
 
 /**
@@ -86,12 +34,16 @@ interface CustomToolChoice<TName extends string = string> {
  * - {@link ToolChoiceType.required}: the LLM will always call a tool, but will decide with one to call
  * - {@link CustomToolChoice}: the LLM will always call the specified tool
  */
-export type ToolChoice<TName extends string = string> = ToolChoiceType | CustomToolChoice<TName>;
+export type ToolChoice<TToolName extends string = string> =
+  | ToolChoiceType
+  | CustomToolChoice<TToolName>;
 
 /**
  * The definition of a tool that will be provided to the LLM for it to eventually call.
  */
-export interface ToolDefinition {
+export interface ToolDefinition<
+  TToolSchema extends ToolSchema | undefined = ToolSchema | undefined
+> {
   /**
    * A description of what the tool does. Note that this will be exposed to the LLM,
    * so the description should be explicit about what the tool does and when to call it.
@@ -103,33 +55,26 @@ export interface ToolDefinition {
    * Even if optional, it is highly recommended to define a schema for all tool definitions, unless
    * the tool is supposed to be called without parameters.
    */
-  schema?: ToolSchema;
+  schema?: TToolSchema;
 }
-
-/**
- * Utility type to infer the toolCall type of {@link ChatCompletionMessageEvent}.
- */
-export type ToolCallsOf<TToolOptions extends ToolOptions> = TToolOptions extends {
-  tools?: Record<string, ToolDefinition>;
-}
-  ? TToolOptions extends { toolChoice: ToolChoiceType.none }
-    ? { toolCalls: [] }
-    : {
-        toolCalls: ToolResponsesOf<ToolsOfChoice<TToolOptions>>;
-      }
-  : { toolCalls: [] };
-
 /**
  * Represents a tool call from the LLM before correctly converted to the schema type.
  *
  * Only publicly exposed because referenced by {@link ChatCompletionToolValidationError}
  */
-export interface UnvalidatedToolCall {
+export interface UnvalidatedToolCall<TName extends string = string> {
   toolCallId: string;
   function: {
-    name: string;
+    name: TName;
     arguments: string;
   };
+}
+
+/**
+ * The shape of tool call arguments (`toolCalls[number].arguments`).
+ */
+export interface ToolCallArguments {
+  [x: string]: unknown;
 }
 
 /**
@@ -137,7 +82,7 @@ export interface UnvalidatedToolCall {
  */
 export interface ToolCall<
   TName extends string = string,
-  TArguments extends Record<string, any> | undefined = Record<string, any> | undefined
+  TArguments extends ToolCallArguments = ToolCallArguments
 > {
   /**
    * The id of the tool call, that must be re-used when providing the tool call response
@@ -148,27 +93,51 @@ export interface ToolCall<
      * The name of the tool that was called
      */
     name: TName;
-  } & (TArguments extends Record<string, any> ? { arguments: TArguments } : {});
+    arguments: TArguments;
+  };
 }
-/**
- * Utility type to get the tool names of ToolOptions
- */
-export type ToolNamesOf<TToolOptions extends ToolOptions> = keyof TToolOptions['tools'] & string;
+
+export type ToolResponseString = string;
+
+export type ToolResponseStructured = Record<string, unknown>;
+
+export type ToolResponse = ToolResponseString | ToolResponseStructured;
+
+export type ToolData = Record<string, unknown>;
+
+export interface ToolCallbackResult {
+  response: ToolResponse;
+  data?: ToolData;
+}
+
+export type ToolCallback<
+  TToolCall extends ToolCall = ToolCall,
+  TToolCallbackResult extends ToolCallbackResult = ToolCallbackResult
+> = (toolCall: TToolCall) => Promise<TToolCallbackResult>;
+
+export interface ToolDefinitions {
+  [x: string]: ToolDefinition;
+}
 
 /**
  * Tool-related parameters of {@link ChatCompleteAPI}
  */
-export interface ToolOptions<TToolNames extends string = string> {
+export interface ToolOptions<
+  TToolDefinitions extends ToolDefinitions = ToolDefinitions,
+  TToolChoice extends ToolChoice<keyof ToolDefinitions & string> = ToolChoice<
+    keyof ToolDefinitions & string
+  >
+> {
   /**
    * The choice of tool execution.
    *
    * Refer to {@link ToolChoice}
    */
-  toolChoice?: ToolChoice<TToolNames>;
+  toolChoice?: TToolChoice;
   /**
    * The list of tool definitions that will be exposed to the LLM.
    *
    * Refer to {@link ToolDefinition}.
    */
-  tools?: Record<TToolNames, ToolDefinition>;
+  tools?: TToolDefinitions;
 }

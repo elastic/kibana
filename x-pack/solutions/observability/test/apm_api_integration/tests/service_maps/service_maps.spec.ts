@@ -7,9 +7,9 @@
 
 import expect from '@kbn/expect';
 import { first, last, orderBy, uniq } from 'lodash';
-import { ApmApiError, SupertestReturnType } from '../../common/apm_api_supertest';
+import type { ApmApiError, SupertestReturnType } from '../../common/apm_api_supertest';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
 type DependencyResponse = SupertestReturnType<'GET /internal/apm/service-map/dependency'>;
 type ServiceNodeResponse =
@@ -72,27 +72,10 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
         expect(response.body.spans.length).to.be.greaterThan(0);
       });
 
-      it('returns the correct data', () => {
+      it('returns servicesData equal empty array if services have no traces', () => {
         const { spans, servicesData } = response.body;
 
-        const serviceNames = uniq(
-          servicesData
-            .filter((element) => element['service.name'] !== undefined)
-            .map((element) => element['service.name'])
-        ).sort();
-
-        expectSnapshot(serviceNames).toMatchInline(`
-              Array [
-                "auditbeat",
-                "opbeans-dotnet",
-                "opbeans-go",
-                "opbeans-java",
-                "opbeans-node",
-                "opbeans-python",
-                "opbeans-ruby",
-                "opbeans-rum",
-              ]
-            `);
+        expect(servicesData.length).to.be.equal(0);
 
         const externalDestinations = uniq(
           spans

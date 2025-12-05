@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useCallback } from 'react';
 import { SIEM_RULE_MIGRATION_MISSING_PRIVILEGES_PATH } from '../../../../common/siem_migrations/constants';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';

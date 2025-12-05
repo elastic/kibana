@@ -6,9 +6,9 @@
  */
 import expect from '@kbn/expect';
 import { INTERNAL_ROUTES, PUBLIC_ROUTES } from '@kbn/reporting-common';
-import { Response } from 'supertest';
+import type { Response } from 'supertest';
 import { indexTimestamp } from './index_timestamp';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function createUsageServices({ getService }: FtrProviderContext) {
   const log = getService('log');
@@ -20,7 +20,8 @@ export function createUsageServices({ getService }: FtrProviderContext) {
       downloadReportPath: string,
       ignoreFailure = false,
       username = 'elastic',
-      password = process.env.TEST_KIBANA_PASS || 'changeme'
+      password = process.env.TEST_KIBANA_PASS || 'changeme',
+      { checkStatus = true } = {}
     ) {
       log.debug(`Waiting for job to finish: ${downloadReportPath}`);
       const JOB_IS_PENDING_CODE = 503;
@@ -54,8 +55,11 @@ export function createUsageServices({ getService }: FtrProviderContext) {
             )
           )
           .auth(username, password);
-        expect(jobInfo.body.output.warnings).to.be(undefined); // expect no failure message to be present in job info
-        expect(statusCode).to.be(200);
+
+        if (checkStatus) {
+          expect(jobInfo.body.output.warnings).to.be(undefined); // expect no failure message to be present in job info
+          expect(statusCode).to.be(200);
+        }
       }
     },
 

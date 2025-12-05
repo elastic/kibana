@@ -7,36 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExitIfNode } from '@kbn/workflows';
+import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
+import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import { ExitIfNodeImpl } from '../exit_if_node_impl';
-import { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 
 describe('ExitIfNodeImpl', () => {
-  let step: ExitIfNode;
-  let wfExecutionRuntimeManagerMock: WorkflowExecutionRuntimeManager;
+  let mockStepExecutionRuntime: jest.Mocked<StepExecutionRuntime>;
+  let mockWorkflowRuntime: jest.Mocked<WorkflowExecutionRuntimeManager>;
   let impl: ExitIfNodeImpl;
 
   beforeEach(() => {
-    step = {
-      id: 'testStep',
-      type: 'exit-if',
-      startNodeId: 'enterIfNode',
-    };
-    wfExecutionRuntimeManagerMock = {
-      goToNextStep: jest.fn(),
-      finishStep: jest.fn(),
+    mockStepExecutionRuntime = {
+      finishStep: jest.fn().mockResolvedValue(undefined),
     } as any;
-    impl = new ExitIfNodeImpl(step, wfExecutionRuntimeManagerMock);
+
+    mockWorkflowRuntime = {
+      navigateToNextNode: jest.fn(),
+    } as any;
+
+    impl = new ExitIfNodeImpl(mockStepExecutionRuntime, mockWorkflowRuntime);
   });
 
-  it('should finish enterIfNode', async () => {
+  it('should finish step', async () => {
     await impl.run();
-    expect(wfExecutionRuntimeManagerMock.finishStep).toHaveBeenCalledTimes(1);
-    expect(wfExecutionRuntimeManagerMock.finishStep).toHaveBeenCalledWith('enterIfNode');
+    expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledTimes(1);
+    expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith();
   });
 
-  it('should go to the next step', async () => {
+  it('should go to the next node', async () => {
     await impl.run();
-    expect(wfExecutionRuntimeManagerMock.goToNextStep).toHaveBeenCalledTimes(1);
+    expect(mockWorkflowRuntime.navigateToNextNode).toHaveBeenCalledTimes(1);
   });
 });

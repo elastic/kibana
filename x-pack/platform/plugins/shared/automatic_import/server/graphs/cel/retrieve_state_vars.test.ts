@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server/language_models';
 import { FakeLLM } from '@langchain/core/utils/testing';
 import { celTestState } from '../../../__jest__/fixtures/cel';
 import type { CelInputState } from '../../types';
 import { handleGetStateVariables } from './retrieve_state_vars';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
 
 const model = new FakeLLM({
   response: '[ "my_state_var", "url" ]',
-}) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
+}) as unknown as InferenceChatModel;
 
 const state: CelInputState = celTestState;
 

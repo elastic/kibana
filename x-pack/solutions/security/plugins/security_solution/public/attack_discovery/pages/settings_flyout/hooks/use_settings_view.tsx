@@ -12,17 +12,14 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { DEFAULT_STACK_BY_FIELD } from '..';
 import { AlertSelection } from '../alert_selection';
-import { AlertSelectionOld } from '../alert_selection/alert_selection_old';
 import { useKibana } from '../../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../../common/lib/kuery';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
@@ -31,7 +28,6 @@ import type { SettingsOverrideOptions } from '../../results/history/types';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import * as i18n from './translations';
 import type { AlertsSelectionSettings } from '../types';
-import { useKibanaFeatureFlags } from '../../use_kibana_feature_flags';
 
 export interface UseSettingsView {
   settingsView: React.ReactNode;
@@ -47,7 +43,6 @@ interface Props {
   onSettingsSave?: () => void;
   settings: AlertsSelectionSettings;
   showConnectorSelector: boolean;
-  stats: AttackDiscoveryStats | null;
 }
 
 export const useSettingsView = ({
@@ -59,12 +54,10 @@ export const useSettingsView = ({
   onSettingsChanged,
   settings,
   showConnectorSelector,
-  stats,
 }: Props): UseSettingsView => {
   const { euiTheme } = useEuiTheme();
   const { uiSettings } = useKibana().services;
   const filterManager = useRef<FilterManager>(new FilterManager(uiSettings));
-  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
   const { sourcererDataView: oldSourcererDataView } = useSourcererDataView();
   const { dataView: experimentalDataView } = useDataView();
 
@@ -84,45 +77,28 @@ export const useSettingsView = ({
   }, []);
 
   const settingsView = useMemo(
-    () =>
-      attackDiscoveryAlertsEnabled ? (
-        <AlertSelection
-          alertsPreviewStackBy0={alertsPreviewStackBy0}
-          alertSummaryStackBy0={alertSummaryStackBy0}
-          connectorId={localConnectorId}
-          filterManager={filterManager.current}
-          onConnectorIdSelected={handleLocalConnectorIdChange}
-          onSettingsChanged={onSettingsChanged}
-          setAlertsPreviewStackBy0={setAlertsPreviewStackBy0}
-          setAlertSummaryStackBy0={setAlertSummaryStackBy0}
-          settings={settings}
-          showConnectorSelector={showConnectorSelector}
-          stats={stats}
-        />
-      ) : (
-        <>
-          <EuiSpacer size="s" />
-          <AlertSelectionOld
-            alertsPreviewStackBy0={alertsPreviewStackBy0}
-            alertSummaryStackBy0={alertSummaryStackBy0}
-            filterManager={filterManager.current}
-            onSettingsChanged={onSettingsChanged}
-            setAlertsPreviewStackBy0={setAlertsPreviewStackBy0}
-            setAlertSummaryStackBy0={setAlertSummaryStackBy0}
-            settings={settings}
-          />
-        </>
-      ),
+    () => (
+      <AlertSelection
+        alertsPreviewStackBy0={alertsPreviewStackBy0}
+        alertSummaryStackBy0={alertSummaryStackBy0}
+        connectorId={localConnectorId}
+        filterManager={filterManager.current}
+        onConnectorIdSelected={handleLocalConnectorIdChange}
+        onSettingsChanged={onSettingsChanged}
+        setAlertsPreviewStackBy0={setAlertsPreviewStackBy0}
+        setAlertSummaryStackBy0={setAlertSummaryStackBy0}
+        settings={settings}
+        showConnectorSelector={showConnectorSelector}
+      />
+    ),
     [
       alertSummaryStackBy0,
       alertsPreviewStackBy0,
       localConnectorId,
       handleLocalConnectorIdChange,
       onSettingsChanged,
-      attackDiscoveryAlertsEnabled,
       settings,
       showConnectorSelector,
-      stats,
     ]
   );
 
@@ -237,37 +213,26 @@ export const useSettingsView = ({
           </EuiToolTip>
         </EuiFlexItem>
 
-        {attackDiscoveryAlertsEnabled && (
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              content={
-                localConnectorId == null ? i18n.SELECT_A_CONNECTOR_TO_SAVE_AND_RUN : undefined
-              }
-              position="top"
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            content={localConnectorId == null ? i18n.SELECT_A_CONNECTOR_TO_SAVE_AND_RUN : undefined}
+            position="top"
+          >
+            <EuiButton
+              data-test-subj="saveAndRun"
+              isDisabled={localConnectorId == null}
+              fill
+              iconType="play"
+              onClick={onSaveAndRun}
+              size="m"
             >
-              <EuiButton
-                data-test-subj="saveAndRun"
-                isDisabled={localConnectorId == null}
-                fill
-                iconType="play"
-                onClick={onSaveAndRun}
-                size="m"
-              >
-                {i18n.SAVE_AND_RUN}
-              </EuiButton>
-            </EuiToolTip>
-          </EuiFlexItem>
-        )}
+              {i18n.SAVE_AND_RUN}
+            </EuiButton>
+          </EuiToolTip>
+        </EuiFlexItem>
       </EuiFlexGroup>
     );
-  }, [
-    attackDiscoveryAlertsEnabled,
-    euiTheme.size.s,
-    handleSave,
-    localConnectorId,
-    onSaveAndRun,
-    onSettingsReset,
-  ]);
+  }, [euiTheme.size.s, handleSave, localConnectorId, onSaveAndRun, onSettingsReset]);
 
   return { settingsView, actionButtons };
 };

@@ -22,7 +22,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { ReindexStatus } from '../../../../../../../../../common/types';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import { LoadingState } from '../../../../../../types';
 import type { ReindexState } from '../../../use_reindex';
 import { ReindexProgress } from './progress';
@@ -104,6 +104,7 @@ export const ReindexFlyoutStep: React.FunctionComponent<{
           <Fragment>
             <EuiSpacer />
             <EuiCallOut
+              announceOnMount={false}
               title={
                 <FormattedMessage
                   id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.insufficientPrivilegeCallout.calloutTitle"

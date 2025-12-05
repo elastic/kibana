@@ -32,7 +32,7 @@ import { getCustomAssets } from './custom_assets';
 import type { SyncIntegrationsData } from './model';
 
 export const TYPE = 'fleet:sync-integrations-task';
-export const VERSION = '1.0.5';
+export const VERSION = '1.0.6';
 const TITLE = 'Fleet Sync Integrations Task';
 const SCOPE = ['fleet'];
 const DEFAULT_INTERVAL = '5m';
@@ -56,7 +56,6 @@ interface SyncIntegrationsTaskStartContract {
 export class SyncIntegrationsTask {
   private logger: Logger;
   private wasStarted: boolean = false;
-  private abortController = new AbortController();
   private taskInterval: string;
 
   constructor(setupContract: SyncIntegrationsTaskSetupContract) {
@@ -68,14 +67,18 @@ export class SyncIntegrationsTask {
       [TYPE]: {
         title: TITLE,
         timeout: TIMEOUT,
-        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+        createTaskRunner: ({
+          taskInstance,
+          abortController,
+        }: {
+          taskInstance: ConcreteTaskInstance;
+          abortController: AbortController;
+        }) => {
           return {
             run: async () => {
-              return this.runTask(taskInstance, core);
+              return this.runTask(taskInstance, core, abortController);
             },
-            cancel: async () => {
-              this.abortController.abort('Task cancelled');
-            },
+            cancel: async () => {},
           };
         },
       },
@@ -112,10 +115,14 @@ export class SyncIntegrationsTask {
   }
 
   private endRun(msg: string = '') {
-    this.logger.info(`[SyncIntegrationsTask] runTask ended${msg ? ': ' + msg : ''}`);
+    this.logger.debug(`[SyncIntegrationsTask] runTask ended${msg ? ': ' + msg : ''}`);
   }
 
-  public runTask = async (taskInstance: ConcreteTaskInstance, core: CoreSetup) => {
+  public runTask = async (
+    taskInstance: ConcreteTaskInstance,
+    core: CoreSetup,
+    abortController: AbortController
+  ) => {
     if (!this.wasStarted) {
       this.logger.debug('[SyncIntegrationsTask] runTask Aborted. Task not started yet');
       return;
@@ -128,7 +135,7 @@ export class SyncIntegrationsTask {
       return getDeleteTaskRunResult();
     }
 
-    this.logger.info(`[runTask()] started`);
+    this.logger.debug(`[runTask()] started`);
 
     if (!canEnableSyncIntegrations()) {
       this.logger.debug(`[SyncIntegrationsTask] Remote synced integration cannot be enabled.`);
@@ -141,14 +148,14 @@ export class SyncIntegrationsTask {
 
     try {
       // write integrations on main cluster
-      await this.updateSyncedIntegrationsData(esClient, soClient);
+      await this.updateSyncedIntegrationsData(esClient, soClient, abortController);
 
       // sync integrations on remote cluster
       await syncIntegrationsOnRemote(
         esClient,
         soClient,
         packageService.asInternalUser,
-        this.abortController,
+        abortController,
         this.logger
       );
 
@@ -189,9 +196,10 @@ export class SyncIntegrationsTask {
 
   private updateSyncedIntegrationsData = async (
     esClient: ElasticsearchClient,
-    soClient: SavedObjectsClient
+    soClient: SavedObjectsClient,
+    abortController: AbortController
   ) => {
-    const outputs = await outputService.list(soClient);
+    const outputs = await outputService.list();
     const remoteESOutputs = outputs.items.filter(
       (output) => output.type === outputType.RemoteElasticsearch
     );
@@ -232,15 +240,22 @@ export class SyncIntegrationsTask {
       perPage: SO_SEARCH_LIMIT,
       sortOrder: 'asc',
     });
-    newDoc.integrations = packageSavedObjects.saved_objects.map((item) => {
-      return {
-        package_name: item.attributes.name,
-        package_version: item.attributes.version,
-        updated_at: item.updated_at ?? new Date().toISOString(),
-        install_status: item.attributes.install_status,
-        install_source: item.attributes.install_source,
-      };
-    });
+    newDoc.integrations = packageSavedObjects.saved_objects
+      .filter(
+        (item) =>
+          item.attributes.install_source === 'registry' ||
+          item.attributes.install_source === 'bundled'
+      ) // not included install sources: 'custom' and 'upload'
+      .map((item) => {
+        return {
+          package_name: item.attributes.name,
+          package_version: item.attributes.version,
+          updated_at: item.updated_at ?? new Date().toISOString(),
+          install_status: item.attributes.install_status,
+          install_source: item.attributes.install_source,
+          rolled_back: item.attributes.rolled_back,
+        };
+      });
 
     const isSyncUninstalledEnabled = remoteESOutputs.some(
       (output) => (output as NewRemoteElasticsearchOutput).sync_uninstalled_integrations
@@ -262,7 +277,7 @@ export class SyncIntegrationsTask {
         esClient,
         soClient,
         newDoc.integrations,
-        this.abortController,
+        abortController,
         previousSyncIntegrationsData
       );
       newDoc.custom_assets = keyBy(customAssets, (asset) => `${asset.type}:${asset.name}`);
@@ -280,7 +295,7 @@ export class SyncIntegrationsTask {
         index: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
         body: newDoc,
       },
-      { signal: this.abortController.signal }
+      { signal: abortController.signal }
     );
   };
 }

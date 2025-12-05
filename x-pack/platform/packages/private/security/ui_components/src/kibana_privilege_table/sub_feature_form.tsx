@@ -69,7 +69,7 @@ export const SubFeatureForm = (props: Props) => {
         type="info"
         color="subdued"
         content={tooltipContent}
-        anchorProps={{ 'data-test-subj': getTestId('nameTooltip') }}
+        data-test-subj={getTestId('nameTooltip')}
       />
     );
   };

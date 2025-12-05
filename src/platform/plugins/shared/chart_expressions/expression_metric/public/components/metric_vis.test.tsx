@@ -10,15 +10,16 @@
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen } from '@testing-library/react';
-import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
-import { MetricVis, MetricVisComponentProps } from './metric_vis';
-import { MetricWTrend } from '@elastic/charts';
-import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import { SerializableRecord } from '@kbn/utility-types';
-import { CustomPaletteState } from '@kbn/charts-plugin/common/expressions/palette/types';
-import { MetricVisParam } from '../../common';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { MetricVisComponentProps } from './metric_vis';
+import { MetricVis } from './metric_vis';
+import type { MetricWTrend } from '@elastic/charts';
+import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { CustomPaletteState } from '@kbn/charts-plugin/common/expressions/palette/types';
+import type { MetricVisParam } from '../../common';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
-import { PaletteOutput } from '@kbn/coloring';
+import type { PaletteOutput } from '@kbn/coloring';
 import { faker } from '@faker-js/faker';
 import {
   setupResizeObserverMock,
@@ -27,6 +28,8 @@ import {
   waitForRenderComplete,
 } from '@kbn/chart-test-jest-helpers';
 import { euiThemeVars } from '@kbn/ui-theme';
+
+import * as secondaryMetricInfoModule from './secondary_metric_info';
 
 const mockDeserialize = jest.fn(({ id }: { id: string }) => {
   const convertFn = (v: unknown) => `${id}-${v === null ? NaN : v}`;
@@ -78,7 +81,8 @@ const defaultMetricParams: MetricVisParam = {
   progressDirection: 'vertical',
   maxCols: 5,
   titlesTextAlign: 'left',
-  valuesTextAlign: 'right',
+  primaryAlign: 'right',
+  secondaryAlign: 'right',
   iconAlign: 'left',
   valueFontSize: 'default',
   secondaryTrend: {
@@ -86,6 +90,10 @@ const defaultMetricParams: MetricVisParam = {
     baseline: undefined,
     palette: undefined,
   },
+  primaryPosition: 'bottom',
+  titleWeight: 'bold',
+  secondaryLabelPosition: 'before',
+  applyColorTo: 'background',
 };
 
 const table: Datatable = {
@@ -293,32 +301,41 @@ describe('MetricVisComponent', function () {
       expect(screen.getByText(table.columns[1].name)).toBeInTheDocument();
     });
 
-    it('should display secondary metric', async () => {
+    it('should not call getSecondaryMetricInfo if no secondaryMetric', async () => {
+      const spy = jest.spyOn(secondaryMetricInfoModule, 'getSecondaryMetricInfo');
+      await renderMetricChart({ config });
+      expect(spy).not.toHaveBeenCalled();
+      spy.mockRestore();
+    });
+
+    it('should call getSecondaryMetricInfo and should display secondary metric', async () => {
+      const spy = jest.spyOn(secondaryMetricInfoModule, 'getSecondaryMetricInfo');
       const { rerender } = await renderMetricChart({
         config: {
           ...config,
-          metric: { ...config.metric, subtitle: 'subtitle', secondaryPrefix: undefined },
+          metric: { ...config.metric, subtitle: 'subtitle', secondaryLabel: undefined },
           dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
         },
       });
-      // for the secondary metric
-      const secondaryLabel = table.columns.find((col) => col.id === minPriceColumnId)!.name;
 
-      const secondaryElement = screen.getByTestId('metric-secondary-element');
-      expect(secondaryElement.textContent).toBe(
-        `${secondaryLabel}number-${table.rows[0][minPriceColumnId]}`
-      );
+      expect(spy).toHaveBeenCalled();
+
+      const secondaryLabel = table.columns.find((col) => col.id === minPriceColumnId)!.name;
+      expect(screen.getByText(secondaryLabel)).toBeInTheDocument();
+
+      const secondaryValue = `number-${table.rows[0][minPriceColumnId]}`;
+      expect(screen.getByText(secondaryValue)).toBeInTheDocument();
 
       await rerender({
         config: {
           ...config,
-          metric: { ...config.metric, subtitle: 'subtitle', secondaryPrefix: 'secondary prefix' },
+          metric: { ...config.metric, subtitle: 'subtitle', secondaryLabel: 'secondary label' },
           dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
         },
       });
 
-      expect(screen.getByText(/secondary prefix/)).toBeInTheDocument();
       expect(screen.queryByText(secondaryLabel)).not.toBeInTheDocument();
+      expect(screen.getByText(/secondary label/)).toBeInTheDocument();
     });
 
     it('should display progress bar if min and max provided', async () => {
@@ -544,21 +561,20 @@ describe('MetricVisComponent', function () {
       }
     });
 
-    it('should display secondary prefix or secondary metric', async () => {
+    it('should display secondary label or secondary metric', async () => {
       const { rerender } = await renderMetricChart({
         config: {
           ...config,
           dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
-          metric: { ...config.metric, secondaryPrefix: 'howdy' },
+          metric: { ...config.metric, secondaryLabel: 'howdy' },
         },
       });
 
-      let secondaryElements = screen.getAllByTestId('metric-secondary-element');
+      let charts = screen.getAllByRole('listitem');
       for (const row of table.rows) {
         const regExp = new RegExp(`howdynumber-${row[minPriceColumnId]}`, 'i');
-        expect(secondaryElements.some((element) => regExp.test(element.textContent ?? ''))).toBe(
-          true
-        );
+        // Check that at least one listitem contains the expected text
+        expect(charts.some((chart) => regExp.test(chart.textContent ?? ''))).toBe(true);
       }
 
       // Now remove the prefix and check the secondary label is there
@@ -566,18 +582,16 @@ describe('MetricVisComponent', function () {
         config: {
           ...config,
           dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
-          metric: { ...config.metric, secondaryPrefix: undefined },
+          metric: { ...config.metric, secondaryLabel: undefined },
         },
       });
 
-      secondaryElements = screen.getAllByTestId('metric-secondary-element');
+      charts = screen.getAllByRole('listitem');
 
       const secondaryLabel = table.columns.find((col) => col.id === minPriceColumnId)!.name;
       for (const row of table.rows) {
         const regExp = new RegExp(`${secondaryLabel}*number-${row[minPriceColumnId]}`, 'i');
-        expect(secondaryElements.some((element) => regExp.test(element.textContent ?? ''))).toBe(
-          true
-        );
+        expect(charts.some((chart) => regExp.test(chart.textContent ?? ''))).toBe(true);
       }
     });
 
@@ -752,11 +766,11 @@ describe('MetricVisComponent', function () {
         maxDimensions: {
           x: {
             unit: 'pixels',
-            value: 300,
+            value: 310,
           },
           y: {
             unit: 'pixels',
-            value: 300,
+            value: 310,
           },
         },
       },
@@ -1071,7 +1085,7 @@ describe('MetricVisComponent', function () {
       'applies $id custom field format pattern when passed over',
       async ({ id, pattern, finalPattern }) => {
         await getFormattedMetrics(394.2393, 983123.984, { id, params: { pattern } });
-        expect(mockDeserialize).toHaveBeenCalledTimes(2);
+        expect(mockDeserialize).toHaveBeenCalledTimes(4);
         expect(mockDeserialize).toHaveBeenCalledWith({ id, params: { pattern: finalPattern } });
       }
     );
@@ -1085,14 +1099,14 @@ describe('MetricVisComponent', function () {
       async ({ id }) => {
         mockIsOverridden.mockReturnValueOnce(true);
         await getFormattedMetrics(394.2393, 983123.984, { id });
-        expect(mockDeserialize).toHaveBeenCalledTimes(2);
+        expect(mockDeserialize).toHaveBeenCalledTimes(4);
         expect(mockDeserialize).toHaveBeenCalledWith({ id });
       }
     );
 
     it('applies a custom duration configuration to the formatter', async () => {
       await getFormattedMetrics(394.2393, 983123.984, { id: 'duration' });
-      expect(mockDeserialize).toHaveBeenCalledTimes(2);
+      expect(mockDeserialize).toHaveBeenCalledTimes(4);
       expect(mockDeserialize).toHaveBeenCalledWith({
         id: 'duration',
         params: { outputFormat: 'humanizePrecise', outputPrecision: 1, useShortSuffix: true },
@@ -1104,7 +1118,7 @@ describe('MetricVisComponent', function () {
         id: 'duration',
         params: { useShortSuffix: false },
       });
-      expect(mockDeserialize).toHaveBeenCalledTimes(2);
+      expect(mockDeserialize).toHaveBeenCalledTimes(4);
       expect(mockDeserialize).toHaveBeenCalledWith({
         id: 'duration',
         params: { outputFormat: 'humanizePrecise', outputPrecision: 1, useShortSuffix: false },
@@ -1116,7 +1130,7 @@ describe('MetricVisComponent', function () {
         id: 'duration',
         params: { formatOverride: true, outputFormat: 'asSeconds' },
       });
-      expect(mockDeserialize).toHaveBeenCalledTimes(2);
+      expect(mockDeserialize).toHaveBeenCalledTimes(4);
       expect(mockDeserialize).toHaveBeenCalledWith({
         id: 'duration',
         params: { formatOverride: true, outputFormat: 'asSeconds' },
@@ -1127,7 +1141,7 @@ describe('MetricVisComponent', function () {
       await getFormattedMetrics(394.2393, 983123.984, {
         id: 'bytes',
       });
-      expect(mockDeserialize).toHaveBeenCalledTimes(2);
+      expect(mockDeserialize).toHaveBeenCalledTimes(4);
       expect(mockDeserialize).toHaveBeenCalledWith({
         id: 'bytes',
       });
@@ -1138,7 +1152,7 @@ describe('MetricVisComponent', function () {
         id: 'bytes',
         params: { pattern: '0.0bitd' },
       });
-      expect(mockDeserialize).toHaveBeenCalledTimes(2);
+      expect(mockDeserialize).toHaveBeenCalledTimes(4);
       expect(mockDeserialize).toHaveBeenCalledWith({
         id: 'bytes',
         params: { pattern: '0.0bitd' },
@@ -1151,7 +1165,7 @@ describe('MetricVisComponent', function () {
         params: { pattern: `0,0bitd` },
       };
       await getFormattedMetrics(394.2393, 983123.984, legacyBitFormat);
-      expect(mockDeserialize).toHaveBeenCalledTimes(2);
+      expect(mockDeserialize).toHaveBeenCalledTimes(4);
       expect(mockDeserialize).toHaveBeenCalledWith(legacyBitFormat);
     });
 
@@ -1162,7 +1176,7 @@ describe('MetricVisComponent', function () {
 
     it('still call the numeric formatter when no format is passed', async () => {
       await getFormattedMetrics(394.2393, 983123.984, undefined);
-      expect(mockDeserialize).toHaveBeenCalledTimes(2);
+      expect(mockDeserialize).toHaveBeenCalledTimes(4);
       expect(mockDeserialize).toHaveBeenCalledWith({ id: 'number' });
       expect(screen.getByTitle('number-394.2393')).toBeInTheDocument();
       expect(screen.getByText('number-983123.984')).toBeInTheDocument();
@@ -1200,12 +1214,17 @@ describe('MetricVisComponent', function () {
             maxCols: 3,
             titlesTextAlign: 'left',
             valueFontSize: 'default',
-            valuesTextAlign: 'right',
+            primaryAlign: 'right',
+            secondaryAlign: 'right',
+            primaryPosition: 'bottom',
+            titleWeight: 'bold',
             secondaryTrend: {
               visuals: undefined,
               baseline: undefined,
               palette: undefined,
             },
+            secondaryLabelPosition: 'before',
+            applyColorTo: 'background',
           },
         },
       });

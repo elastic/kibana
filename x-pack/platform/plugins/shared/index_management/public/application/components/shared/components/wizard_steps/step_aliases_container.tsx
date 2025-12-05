@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { Forms } from '../../../../../shared_imports';
-import { CommonWizardSteps } from './types';
+import type { CommonWizardSteps } from './types';
 import { StepAliases } from './step_aliases';
 
 interface Props {

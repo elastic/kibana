@@ -10,6 +10,7 @@ import { pick } from 'lodash';
 
 import type { EuiStepStatus } from '@elastic/eui';
 import { EuiSteps } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -46,6 +47,14 @@ import {
 import { WizardNav } from '../wizard_nav';
 
 import { TRANSFORM_STORAGE_KEYS } from './storage';
+
+const styles = {
+  steps: css`
+    .euiStep__content {
+      padding-right: 0;
+    }
+  `,
+};
 
 const localStorage = new Storage(window.localStorage);
 
@@ -262,7 +271,7 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
         <UrlStateProvider>
           <StorageContextProvider storage={localStorage} storageKeys={TRANSFORM_STORAGE_KEYS}>
             <DatePickerContextProvider {...datePickerDeps}>
-              <EuiSteps className="transform__steps" steps={stepsConfig} />
+              <EuiSteps css={styles.steps} steps={stepsConfig} />
             </DatePickerContextProvider>
           </StorageContextProvider>
         </UrlStateProvider>

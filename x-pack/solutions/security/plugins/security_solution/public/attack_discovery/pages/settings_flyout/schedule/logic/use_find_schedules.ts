@@ -6,8 +6,12 @@
  */
 
 import { useCallback } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ATTACK_DISCOVERY_SCHEDULES_FIND } from '@kbn/elastic-assistant-common';
+import { useQuery, useQueryClient } from '@kbn/react-query';
+import {
+  ATTACK_DISCOVERY_SCHEDULES_FIND,
+  transformAttackDiscoveryScheduleFromApi,
+} from '@kbn/elastic-assistant-common';
+import type { AttackDiscoverySchedule } from '@kbn/elastic-assistant-common';
 
 import * as i18n from './translations';
 import { findAttackDiscoverySchedule } from '../api';
@@ -28,9 +32,17 @@ export const useFindAttackDiscoverySchedules = (params?: {
   return useQuery(
     ['GET', ATTACK_DISCOVERY_SCHEDULES_FIND, params],
     async ({ signal }) => {
-      const response = await findAttackDiscoverySchedule({ signal, ...restParams });
+      const response = await findAttackDiscoverySchedule({
+        signal,
+        ...restParams,
+      });
 
-      return { schedules: response.data, total: response.total };
+      // Transform from API snake_case to frontend camelCase
+      const schedules: AttackDiscoverySchedule[] = response.data.map(
+        transformAttackDiscoveryScheduleFromApi
+      );
+
+      return { schedules, total: response.total };
     },
     {
       ...DEFAULT_QUERY_OPTIONS,

@@ -634,14 +634,6 @@
               {
                 "plugin": "@kbn/esql-editor",
                 "path": "src/platform/packages/private/kbn-esql-editor/src/esql_editor.tsx"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/pricing/browser-mocks/src/pricing_service.mock.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/pricing/server-mocks/src/pricing_service.mock.ts"
               }
             ],
             "returnComment": [],

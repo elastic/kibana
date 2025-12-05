@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   HasEditCapabilities,
   HasReadOnlyCapabilities,
   HasSupportedTriggers,
@@ -13,31 +13,30 @@ import {
   PublishesViewMode,
   PublishingSubject,
   ViewMode,
-  apiHasAppContext,
-  apiPublishesDisabledActionIds,
 } from '@kbn/presentation-publishing';
+import { apiHasAppContext, apiPublishesDisabledActionIds } from '@kbn/presentation-publishing';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { noop } from 'lodash';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
-import { Filter } from '@kbn/es-query';
-import { APP_ID, getEditPath } from '../../../common/constants';
-import {
+import type { Filter } from '@kbn/es-query';
+import type {
   GetStateType,
-  LensEmbeddableStartServices,
   LensHasEditPanel,
   LensInspectorAdapters,
   LensInternalApi,
   LensRuntimeState,
-} from '../types';
+} from '@kbn/lens-common';
+import { APP_ID, getEditPath } from '../../../common/constants';
+import type { LensEmbeddableStartServices } from '../types';
 import { extractInheritedViewModeObservable } from '../helper';
 import { prepareInlineEditPanel } from '../inline_editing/setup_inline_editing';
 import { setupPanelManagement } from '../inline_editing/panel_management';
 import { mountInlinePanel } from '../mount';
-import { StateManagementConfig } from './initialize_state_management';
+import type { StateManagementConfig } from './initialize_state_management';
 import { apiPublishesInlineEditingCapabilities } from '../type_guards';
-import { SearchContextConfig } from './initialize_search_context';
+import type { SearchContextConfig } from './initialize_search_context';
 
 function getSupportedTriggers(
   getState: GetStateType,

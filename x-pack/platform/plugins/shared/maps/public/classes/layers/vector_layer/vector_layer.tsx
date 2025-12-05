@@ -7,38 +7,39 @@
 
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { asyncForEach } from '@kbn/std';
 import type { FilterSpecification, Map as MbMap, LayerSpecification } from '@kbn/mapbox-gl';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { Query } from '@kbn/data-plugin/common';
-import { Feature, FeatureCollection, GeoJsonProperties, Geometry, Position } from 'geojson';
+import type { Feature, FeatureCollection, GeoJsonProperties, Geometry, Position } from 'geojson';
 import _ from 'lodash';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { Writable } from '@kbn/utility-types';
 import { AbstractLayer } from '../layer';
-import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
+import type { IVectorStyle } from '../../styles/vector/vector_style';
+import { VectorStyle } from '../../styles/vector/vector_style';
+import type { FieldFormatter, VECTOR_STYLES } from '../../../../common/constants';
 import {
   AGG_TYPE,
   SOURCE_META_DATA_REQUEST_ID,
   SOURCE_FORMATTERS_DATA_REQUEST_ID,
   LAYER_TYPE,
   FIELD_ORIGIN,
-  FieldFormatter,
   STYLE_TYPE,
-  VECTOR_STYLES,
 } from '../../../../common/constants';
 import { TermJoinTooltipProperty } from '../../tooltips/term_join_tooltip_property';
 import { DataRequestAbortError } from '../../util/data_request';
 import { canSkipStyleMetaUpdate, canSkipFormattersUpdate } from '../../util/can_skip_fetch';
+import type { TimesliceMaskConfig } from '../../util/mb_filter_expressions';
 import {
   getLabelFilterExpression,
   getFillFilterExpression,
   getLineFilterExpression,
   getPointFilterExpression,
-  TimesliceMaskConfig,
 } from '../../util/mb_filter_expressions';
-import {
+import type {
   AbstractESJoinSourceDescriptor,
   AggDescriptor,
   CustomIcon,
@@ -49,16 +50,18 @@ import {
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
   VectorStyleRequestMeta,
+  JoinSourceDescriptor,
+  StylePropertyField,
 } from '../../../../common/descriptor_types';
-import { IVectorSource } from '../../sources/vector_source';
+import type { IVectorSource } from '../../sources/vector_source';
 import { isESVectorTileSource } from '../../sources/es_source';
-import { LayerIcon, ILayer, LayerMessage } from '../layer';
-import { InnerJoin } from '../../joins/inner_join';
+import type { LayerIcon, ILayer, LayerMessage } from '../layer';
+import type { InnerJoin } from '../../joins/inner_join';
 import { isSpatialJoin } from '../../joins/is_spatial_join';
-import { IField } from '../../fields/field';
-import { DataRequestContext } from '../../../actions';
-import { ITooltipProperty } from '../../tooltips/tooltip_property';
-import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
+import type { IField } from '../../fields/field';
+import type { DataRequestContext } from '../../../actions';
+import type { ITooltipProperty } from '../../tooltips/tooltip_property';
+import type { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 import { hasESSourceMethod } from '../../sources/es_source';
 import type { IJoinSource, ITermJoinSource } from '../../sources/join_sources';
 import { isTermJoinSource } from '../../sources/join_sources';
@@ -66,9 +69,9 @@ import type { IESAggSource } from '../../sources/es_agg_source';
 import { buildVectorRequestMeta } from '../build_vector_request_meta';
 import { getJoinAggKey } from '../../../../common/get_agg_key';
 import { syncBoundsData } from './bounds_data';
-import { JoinState } from './types';
+import type { JoinState } from './types';
 import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
-import { PropertiesMap } from '../../../../common/elasticsearch_util';
+import type { PropertiesMap } from '../../../../common/elasticsearch_util';
 import { Mask } from './mask';
 
 const SUPPORTS_FEATURE_EDITING_REQUEST_ID = 'SUPPORTS_FEATURE_EDITING_REQUEST_ID';
@@ -149,7 +152,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     options: Partial<VectorLayerDescriptor>,
     mapColors?: string[]
   ): VectorLayerDescriptor {
-    const layerDescriptor = super.createDescriptor(options) as VectorLayerDescriptor;
+    const layerDescriptor = super.createDescriptor(options) as Writable<VectorLayerDescriptor>;
     layerDescriptor.type =
       layerDescriptor.type !== undefined ? layerDescriptor.type : LAYER_TYPE.GEOJSON_VECTOR;
 
@@ -181,7 +184,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     this._joins = joins;
     this._descriptor = AbstractVectorLayer.createDescriptor(layerDescriptor);
     this._style = new VectorStyle(
-      this._descriptor.style,
+      this._descriptor.style ?? VectorStyle.createDescriptor(),
       source,
       this,
       customIcons,
@@ -208,7 +211,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
 
         // right.id is uuid used to track requests in inspector
         const clonedJoinId = uuidv4();
-        joinDescriptor.right.id = clonedJoinId;
+        (joinDescriptor.right as Writable<JoinSourceDescriptor>).id = clonedJoinId;
 
         // Update all data driven styling properties using join fields
         if (clonedDescriptor.style && 'properties' in clonedDescriptor.style) {
@@ -225,16 +228,16 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
               rightSourceId: clonedJoinId,
             });
 
-            Object.keys(clonedDescriptor.style.properties).forEach((key) => {
-              const styleProp = clonedDescriptor.style.properties[key as VECTOR_STYLES];
-              if ('type' in styleProp && styleProp.type === STYLE_TYPE.DYNAMIC) {
+            Object.keys(clonedDescriptor.style?.properties ?? {}).forEach((key) => {
+              const styleProp = clonedDescriptor.style!.properties[key as VECTOR_STYLES];
+              if (styleProp && 'type' in styleProp && styleProp.type === STYLE_TYPE.DYNAMIC) {
                 const options = styleProp.options as DynamicStylePropertyOptions;
                 if (
                   options.field &&
                   options.field.origin === FIELD_ORIGIN.JOIN &&
                   options.field.name === originalJoinKey
                 ) {
-                  options.field.name = newJoinKey;
+                  (options.field as Writable<StylePropertyField>).name = newJoinKey;
                 }
               }
             });

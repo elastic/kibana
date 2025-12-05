@@ -19,7 +19,7 @@ export const getFilteredHostNames = async ({
   limit,
   query,
   schema,
-}: Pick<GetHostParameters, 'infraMetricsClient' | 'from' | 'to' | 'limit' | 'schema'> & {
+}: Required<Pick<GetHostParameters, 'infraMetricsClient' | 'from' | 'to' | 'limit' | 'schema'>> & {
   query?: estypes.QueryDslQueryContainer;
 }) => {
   const inventoryModel = findInventoryModel('host');
@@ -60,7 +60,7 @@ export const getHasDataFromSystemIntegration = async ({
   to,
   query,
   schema,
-}: Pick<GetHostParameters, 'infraMetricsClient' | 'from' | 'to' | 'schema'> & {
+}: Required<Pick<GetHostParameters, 'infraMetricsClient' | 'from' | 'to' | 'schema'>> & {
   query?: estypes.QueryDslQueryContainer;
 }) => {
   const inventoryModel = findInventoryModel('host');

@@ -7,18 +7,21 @@
 import rawExpect from 'expect';
 import expect from '@kbn/expect';
 import { join } from 'path';
-import { cleanup, generate, Dataset, PartialConfig } from '@kbn/data-forge';
+import type { Dataset, PartialConfig } from '@kbn/data-forge';
+import { cleanup, generate } from '@kbn/data-forge';
 import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { Aggregators } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { ALERTS_API_URLS } from '@kbn/observability-plugin/common/constants';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
   const esClient = getService('es');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  // TODO: Replace with roleScopedSupertest for deployment-agnostic compatibility
+  // eslint-disable-next-line @kbn/eslint/deployment_agnostic_test_context
   const supertestWithAuth = getService('supertest');
   const kibanaServer = getService('kibanaServer');
   const esDeleteAllIndices = getService('esDeleteAllIndices');

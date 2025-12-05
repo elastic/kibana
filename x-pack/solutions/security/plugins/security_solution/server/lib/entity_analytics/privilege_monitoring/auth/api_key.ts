@@ -47,17 +47,29 @@ const generate = async (deps: ApiKeyManagerDependencies) => {
   } else if (!request) {
     throw new Error('Unable to create API key due to invalid request');
   } else {
-    const apiKey = await generateAPIKey(request, deps);
+    try {
+      const apiKey = await generateAPIKey(request, deps);
 
-    const soClient = core.savedObjects.getScopedClient(request, {
-      includedHiddenTypes: [PrivilegeMonitoringApiKeyType.name, monitoringEntitySourceType.name],
-    });
+      const soClient = core.savedObjects.getScopedClient(request, {
+        includedHiddenTypes: [PrivilegeMonitoringApiKeyType.name, monitoringEntitySourceType.name],
+      });
 
-    await soClient.create(PrivilegeMonitoringApiKeyType.name, apiKey, {
-      id: getPrivmonEncryptedSavedObjectId(namespace),
-      overwrite: true,
-      managed: true,
-    });
+      await soClient.create(PrivilegeMonitoringApiKeyType.name, apiKey, {
+        id: getPrivmonEncryptedSavedObjectId(namespace),
+        overwrite: true,
+        managed: true,
+      });
+    } catch (error) {
+      // In serverless environments, API key creation may fail due to unsupported authentication schemes
+      // In this case, we'll skip API key creation and rely on the existing request context
+      if (error.message && error.message.includes('Unsupported scheme')) {
+        deps.logger.warn(
+          'API key creation not supported in this environment, using existing request context'
+        );
+        return;
+      }
+      throw error;
+    }
   }
 };
 
@@ -96,14 +108,35 @@ const getRequestFromApiKey = async (apiKey: PrivilegeMonitoringAPIKey) => {
 };
 const getClient = async (deps: ApiKeyManagerDependencies) => {
   const apiKey = await getApiKey(deps);
-  if (!apiKey) return undefined;
+
+  if (!apiKey) {
+    // In serverless environments, API key creation may fail, so we use the existing request context
+    if (deps.request) {
+      const clusterClient = deps.core.elasticsearch.client.asScoped(deps.request);
+      const soClient = deps.core.savedObjects.getScopedClient(deps.request, {
+        includedHiddenTypes: [monitoringEntitySourceType.name],
+      });
+      return {
+        clusterClient,
+        soClient,
+      };
+    }
+    return undefined;
+  }
+
   const fakeRequest = getFakeKibanaRequest({
     id: apiKey.id,
     api_key: apiKey.apiKey,
   });
+
   const clusterClient = deps.core.elasticsearch.client.asScoped(fakeRequest);
+
+  const soClient = deps.core.savedObjects.getScopedClient(fakeRequest, {
+    includedHiddenTypes: [monitoringEntitySourceType.name],
+  });
   return {
     clusterClient,
+    soClient,
   };
 };
 

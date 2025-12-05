@@ -8,7 +8,7 @@
 import type { CoreSetup, Plugin, AppMountParameters, CoreStart } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_TITLE } from '../common';
-import {
+import type {
   AppPluginSetupDependencies,
   AppPluginStartDependencies,
   SearchSynonymsPluginSetup,
@@ -58,7 +58,7 @@ export class SearchSynonymsPlugin
 
         return renderApp(coreStart, startDeps, element);
       },
-      order: 3,
+      order: 4,
       visibleIn: ['sideNav'],
     });
 

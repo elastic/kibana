@@ -10,9 +10,14 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
-import { CoreSetup, Plugin, PluginInitializerContext, UiSettingsParams } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  Plugin,
+  PluginInitializerContext,
+  UiSettingsParams,
+} from '@kbn/core/server';
 import type { VisualizationsServerSetup } from '@kbn/visualizations-plugin/server';
-import { GaugeConfig } from './config';
+import type { GaugeConfig } from './config';
 
 import { LEGACY_GAUGE_CHARTS_LIBRARY } from '../common';
 

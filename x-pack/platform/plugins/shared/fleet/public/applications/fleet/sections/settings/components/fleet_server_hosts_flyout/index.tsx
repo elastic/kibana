@@ -165,6 +165,7 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
       <EuiFlyoutBody>
         {fleetServerHost && (
           <EuiCallOut
+            announceOnMount
             size="m"
             color="warning"
             iconType="warning"

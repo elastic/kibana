@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CodeEditorProps } from '@kbn/code-editor';
+import type { CodeEditorProps } from '@kbn/code-editor';
 
 export const LANGUAGE_CONFIGURATION = {
   autoClosingPairs: [

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DocLinks } from '@kbn/doc-links';
+import type { DocLinks } from '@kbn/doc-links';
 
 class SearchIndicesDocLinks {
   public apiReference: string = '';

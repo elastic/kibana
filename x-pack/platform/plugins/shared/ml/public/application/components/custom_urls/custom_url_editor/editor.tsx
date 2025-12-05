@@ -113,9 +113,9 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
       } catch (e) {
         dataViewToUse = undefined;
       }
-      if (dataViewToUse && dataViewToUse.timeFieldName) {
-        setHasTimefield(true);
-      }
+
+      setHasTimefield(dataViewToUse?.timeFieldName !== undefined);
+
       const dropDownOptions = await getDropDownOptions(
         isFirst.current,
         job,
@@ -242,8 +242,8 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
 
   const { label, type, timeRange, kibanaSettings, otherUrlSettings } = customUrl;
 
-  const dashboardOptions = dashboards.map((dashboard) => {
-    return { value: dashboard.id, text: dashboard.attributes.title };
+  const dashboardOptions = dashboards.map(({ id, data }) => {
+    return { value: id, text: data.title };
   });
 
   const dataViewOptions = dataViewListItems.map(({ id, title }) => {
@@ -316,6 +316,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
           display="rowCompressed"
         >
           <EuiRadioGroup
+            name="linkToType"
             options={getLinkToOptions()}
             idSelected={type}
             onChange={onTypeChange}

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { DebugState } from '@elastic/charts';
+import type { DebugState } from '@elastic/charts';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { visualize, lens, header, dashboard, timeToVisualize, discover, unifiedFieldList } =
@@ -95,6 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const data = await lens.getCurrentChartDebugState('xyVisChart');
       assertMatchesExpectedData(data!);
       await lens.removeLayer();
+      await lens.ensureLayerTabIsActive();
     });
 
     it('should allow adding and using a field', async () => {
@@ -114,6 +115,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await lens.getDatatableHeaderText(0)).to.equal('Top 5 values of runtimefield');
       expect(await lens.getDatatableCellText(0, 0)).to.eql('abc');
       await lens.removeLayer();
+      await lens.ensureLayerTabIsActive();
     });
 
     it('should allow switching to another data view and back', async () => {

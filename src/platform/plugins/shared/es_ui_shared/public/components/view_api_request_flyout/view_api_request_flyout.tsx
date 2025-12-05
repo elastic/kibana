@@ -11,9 +11,9 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { compressToEncodedURIComponent } from 'lz-string';
 
+import type { EuiFlyoutProps } from '@elastic/eui';
 import {
   EuiFlyout,
-  EuiFlyoutProps,
   EuiFlyoutHeader,
   EuiTitle,
   EuiFlyoutBody,
@@ -27,7 +27,8 @@ import {
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import type { UrlService } from '@kbn/share-plugin/common/url_service';
-import { ApplicationStart, APP_WRAPPER_CLASS } from '@kbn/core/public';
+import type { ApplicationStart } from '@kbn/core/public';
+import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 type FlyoutProps = Omit<EuiFlyoutProps, 'onClose'>;

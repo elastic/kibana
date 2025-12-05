@@ -8,9 +8,9 @@
 import { EuiPanel } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from '@emotion/styled';
-import { AnonymizedData } from '@kbn/elastic-assistant-common/impl/data_anonymization/types';
+import type { AnonymizedData } from '@kbn/elastic-assistant-common/impl/data_anonymization/types';
 import type { SelectedPromptContext } from '../assistant/prompt_context/types';
-import { BatchUpdateListItem } from './context_editor/types';
+import type { BatchUpdateListItem } from './context_editor/types';
 import { getIsDataAnonymizable, updateSelectedPromptContext } from './helpers';
 import { ReadOnlyContextViewer } from './read_only_context_viewer';
 import { ContextEditorFlyout } from './context_editor_flyout';

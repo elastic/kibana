@@ -10,7 +10,7 @@ import { FixedSizeList as VirtualList, areEqual } from 'react-window';
 import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { SearchResult as SearchResultType, State } from '../../../types';
+import type { SearchResult as SearchResultType, State } from '../../../types';
 import { useDispatch } from '../../../mappings_state_context';
 import { SearchResultItem } from './search_result_item';
 

@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { HttpServiceSetup, Logger, RequestHandlerContext } from '@kbn/core/server';
-import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
-import { VersionedRouter } from '@kbn/core-http-server';
+import type { HttpServiceSetup, Logger, RequestHandlerContext } from '@kbn/core/server';
+import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import type { VersionedRouter } from '@kbn/core-http-server';
+import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
+
+export type * from './routes/types';
 
 export interface RegisterAPIRoutesArgs {
   http: HttpServiceSetup;
   contentManagement: ContentManagementServerSetup;
+  builder: LensConfigBuilder;
   logger: Logger;
 }
 

@@ -9,13 +9,14 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { encode } from '@kbn/rison';
 
-import { useEnableExperimental } from '../../../common/hooks/use_experimental_features';
+import { PageScope } from '../../../data_view_manager/constants';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 import {
   RULE_FROM_EQL_URL_PARAM,
   RULE_FROM_TIMELINE_URL_PARAM,
-} from '../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
+} from '../../../detections/hooks/use_rule_from_timeline';
 import { useNavigation } from '../../../common/lib/kibana';
 import { SecurityPageName } from '../../../../common/constants';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
@@ -53,7 +54,6 @@ import { useTimelineTypes } from './use_timeline_types';
 import { useTimelineStatus } from './use_timeline_status';
 import { deleteTimelinesByIds } from '../../containers/api';
 import type { Direction } from '../../../../common/search_strategy';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useStartTransaction } from '../../../common/lib/apm/use_start_transaction';
 import { TIMELINE_ACTIONS } from '../../../common/lib/apm/user_actions';
 import { defaultUdtHeaders } from '../timeline/body/column_headers/default_headers';
@@ -161,11 +161,11 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     );
 
     const { dataViewId: oldDataViewId, selectedPatterns: oldSelectedPatterns } =
-      useSourcererDataView(SourcererScopeName.timeline);
-    const { newDataViewPickerEnabled } = useEnableExperimental();
+      useSourcererDataView(PageScope.timeline);
+    const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-    const { dataView: experimentalDataView } = useDataView(SourcererScopeName.timeline);
-    const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
+    const { dataView: experimentalDataView } = useDataView(PageScope.timeline);
+    const experimentalSelectedPatterns = useSelectedPatterns(PageScope.timeline);
 
     const dataViewId = useMemo(
       () => (newDataViewPickerEnabled ? experimentalDataView.id || '' : oldDataViewId),

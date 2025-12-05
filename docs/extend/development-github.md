@@ -55,33 +55,33 @@ In order to assist with developer tooling we ask that all Elastic engineers use 
     git commit -m 'commit using @elastic.co' --allow-empty
     ```
 
-5. Push the new commit to your PR and the status should now be green
+5. Push the new commit to your PR and the status should now be green
 
 
 ### Rebasing and fixing merge conflicts [_rebasing_and_fixing_merge_conflicts]
 
 Rebasing can be tricky, and fixing merge conflicts can be even trickier because it involves force pushing. This is all compounded by the fact that attempting to push a rebased branch remotely will be rejected by git, and you’ll be prompted to do a `pull`, which is not at all what you should do (this will really mess up your branch’s history).
 
-Here’s how you should rebase master onto your branch, and how to fix merge conflicts when they arise.
+Here’s how you should rebase main onto your branch, and how to fix merge conflicts when they arise.
 
-First, make sure master is up-to-date.
+First, make sure main is up-to-date.
 
 ```shell
-git checkout master
+git checkout main
 git fetch upstream
-git rebase upstream/master
+git rebase upstream/main
 ```
 
-Then, check out your branch and rebase master on top of it, which will apply all of the new commits on master to your branch, and then apply all of your branch’s new commits after that.
+Then, check out your branch and rebase main on top of it, which will apply all of the new commits on main to your branch, and then apply all of your branch’s new commits after that.
 
 ```shell
 git checkout name-of-your-branch
-git rebase master
+git rebase main
 ```
 
 You want to make sure there are no merge conflicts. If there are merge conflicts, git will pause the rebase and allow you to fix the conflicts before continuing.
 
-You can use `git status` to see which files contain conflicts. They’ll be the ones that aren’t staged for commit. Open those files, and look for where git has marked the conflicts. Resolve the conflicts so that the changes you want to make to the code have been incorporated in a way that doesn’t destroy work that’s been done in master. Refer to master’s commit history on GitHub if you need to gain a better understanding of how code is conflicting and how best to resolve it.
+You can use `git status` to see which files contain conflicts. They’ll be the ones that aren’t staged for commit. Open those files, and look for where git has marked the conflicts. Resolve the conflicts so that the changes you want to make to the code have been incorporated in a way that doesn’t destroy work that’s been done in main. Refer to main’s commit history on GitHub if you need to gain a better understanding of how code is conflicting and how best to resolve it.
 
 Once you’ve resolved all of the merge conflicts, use `git add -A` to stage them to be committed, and then use `git rebase --continue` to tell git to continue the rebase.
 

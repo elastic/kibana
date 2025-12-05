@@ -5,26 +5,28 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-
 import { boomify, isBoom } from '@hapi/boom';
-import { CONTENT_ID, type LensSavedObject } from '../../../../common/content_management';
+
+import type { TypeOf } from '@kbn/config-schema';
+
 import {
-  PUBLIC_API_PATH,
-  PUBLIC_API_VERSION,
-  PUBLIC_API_CONTENT_MANAGEMENT_VERSION,
-  PUBLIC_API_ACCESS,
-} from '../../constants';
-import { lensSavedObjectSchema } from '../../../content_management/v1';
-import { RegisterAPIRouteFn } from '../../types';
+  LENS_VIS_API_PATH,
+  LENS_API_VERSION,
+  LENS_API_ACCESS,
+  LENS_CONTENT_TYPE,
+} from '../../../../common/constants';
+import type { LensSavedObject } from '../../../content_management';
+import type { CMItemResultMeta, RegisterAPIRouteFn } from '../../types';
+import { lensGetRequestParamsSchema, lensGetResponseBodySchema } from './schema';
+import { getLensResponseItem } from '../utils';
 
 export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
   router,
-  { contentManagement }
+  { contentManagement, builder }
 ) => {
   const getRoute = router.get({
-    path: `${PUBLIC_API_PATH}/visualizations/{id}`,
-    access: PUBLIC_API_ACCESS,
+    path: `${LENS_VIS_API_PATH}/{id}`,
+    access: LENS_API_ACCESS,
     enableQueryVersion: true,
     summary: 'Get Lens visualization',
     description: 'Get a Lens visualization from id.',
@@ -44,20 +46,14 @@ export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
 
   getRoute.addVersion(
     {
-      version: PUBLIC_API_VERSION,
+      version: LENS_API_VERSION,
       validate: {
         request: {
-          params: schema.object({
-            id: schema.string({
-              meta: {
-                description: 'The saved object id of a Lens visualization.',
-              },
-            }),
-          }),
+          params: lensGetRequestParamsSchema,
         },
         response: {
           200: {
-            body: () => lensSavedObjectSchema,
+            body: () => lensGetResponseBodySchema,
             description: 'Ok',
           },
           400: {
@@ -79,19 +75,30 @@ export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
       },
     },
     async (ctx, req, res) => {
-      let result;
+      // TODO fix IContentClient to type this client based on the actual
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
-        .for<LensSavedObject>(CONTENT_ID, PUBLIC_API_CONTENT_MANAGEMENT_VERSION);
+        .for<LensSavedObject>(LENS_CONTENT_TYPE);
 
       try {
-        ({ result } = await client.get(req.params.id));
+        const { result } = await client.get(req.params.id);
+
+        if (result.item.error) {
+          throw result.item.error;
+        }
+
+        const resultMeta: CMItemResultMeta = result.meta;
+        const responseItem = getLensResponseItem(builder, result.item, resultMeta);
+
+        return res.ok<TypeOf<typeof lensGetResponseBodySchema>>({
+          body: responseItem,
+        });
       } catch (error) {
         if (isBoom(error)) {
           if (error.output.statusCode === 404) {
             return res.notFound({
               body: {
-                message: `A Lens visualization with saved object id [${req.params.id}] was not found.`,
+                message: `A Lens visualization with id [${req.params.id}] was not found.`,
               },
             });
           }
@@ -102,8 +109,6 @@ export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
 
         return boomify(error); // forward unknown error
       }
-
-      return res.ok({ body: result.item });
     }
   );
 };

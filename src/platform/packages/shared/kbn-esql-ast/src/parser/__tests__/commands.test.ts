@@ -156,14 +156,9 @@ describe('commands', () => {
               name: 'abc',
             },
             {
-              type: 'column',
-              args: [
-                {
-                  type: 'literal',
-                  literalType: 'param',
-                  value: 'param',
-                },
-              ],
+              type: 'literal',
+              literalType: 'param',
+              value: 'param',
             },
           ],
         },

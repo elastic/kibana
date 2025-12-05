@@ -7,11 +7,10 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { IconIntegrations } from '../../../../../common/icons/integrations';
 import type { OnboardingCardConfig } from '../../../../types';
 import { checkIntegrationsCardComplete } from './integrations_check_complete';
 import { OnboardingCardId } from '../../../../constants';
-import integrationsIcon from '../common/integrations/images/integrations_icon.png';
-import integrationsDarkIcon from '../common/integrations/images/integrations_icon_dark.png';
 import { SECURITY_FEATURE_ID } from '../../../../../../common/constants';
 import type { IntegrationCardMetadata } from '../../../../../common/lib/integrations/types';
 
@@ -20,8 +19,7 @@ export const integrationsCardConfig: OnboardingCardConfig<IntegrationCardMetadat
   title: i18n.translate('xpack.securitySolution.onboarding.integrationsCard.title', {
     defaultMessage: 'Add data with integrations',
   }),
-  icon: integrationsIcon,
-  iconDark: integrationsDarkIcon,
+  icon: IconIntegrations,
   Component: React.lazy(
     () =>
       import(

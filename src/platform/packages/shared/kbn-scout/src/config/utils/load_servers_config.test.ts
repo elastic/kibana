@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { getConfigFilePath } from './get_config_file';
 import { readConfigFile } from '../loader';
 import { loadServersConfig } from '..';
 import { saveScoutTestConfigOnDisk } from './save_scout_test_config';
-import { CliSupportedServerModes, ScoutTestConfig } from '../../types';
+import type { CliSupportedServerModes, ScoutTestConfig } from '../../types';
 
 jest.mock('./get_config_file', () => ({
   getConfigFilePath: jest.fn(),
@@ -36,6 +36,7 @@ const mockScoutTestConfig: ScoutTestConfig = {
     password: 'changeme',
   },
   serverless: true,
+  uiam: false,
   projectType: 'oblt',
   isCloud: true,
   license: 'trial',

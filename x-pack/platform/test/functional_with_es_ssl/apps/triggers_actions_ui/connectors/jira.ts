@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { ObjectRemover } from '../../../lib/object_remover';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { ObjectRemover } from '../../../lib/object_remover';
 import { generateUniqueKey } from '../../../lib/get_test_data';
 import { createSlackConnectorAndObjectRemover } from './utils';
 

@@ -30,7 +30,8 @@
       "screenshotMode",
       "share",
       "features",
-      "actions"
+      "actions",
+      "triggersActionsUi"
     ],
     "optionalPlugins": [
       "security",

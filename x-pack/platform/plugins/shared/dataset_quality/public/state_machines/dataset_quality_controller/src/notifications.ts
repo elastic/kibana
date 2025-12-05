@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IToasts } from '@kbn/core/public';
+import type { IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { DataStreamType } from '../../../../common/types';
+import type { DataStreamType } from '../../../../common/types';
 
 export const fetchDatasetTypesPrivilegesFailedNotifier = (toasts: IToasts, error: Error) => {
   toasts.addDanger({
@@ -63,5 +63,22 @@ export const fetchFailedStatsFailedNotifier = (toasts: IToasts, error: Error) =>
       defaultMessage: "We couldn't get your failed docs information.",
     }),
     text: error.message,
+  });
+};
+
+export const updateFailureStoreFailedNotifier = (toasts: IToasts, error: Error) => {
+  toasts.addDanger({
+    title: i18n.translate('xpack.datasetQuality.updateFailureStoreFailed', {
+      defaultMessage: "We couldn't update the failure store settings.",
+    }),
+    text: error.message,
+  });
+};
+
+export const updateFailureStoreSuccessNotifier = (toasts: IToasts) => {
+  toasts.addSuccess({
+    title: i18n.translate('xpack.datasetQuality.updateFailureStoreSuccess', {
+      defaultMessage: 'Failure store settings saved',
+    }),
   });
 };

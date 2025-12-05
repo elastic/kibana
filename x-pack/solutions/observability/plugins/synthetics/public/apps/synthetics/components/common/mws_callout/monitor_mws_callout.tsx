@@ -11,7 +11,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { MwsCalloutContent } from './mws_callout_content';
 import { ConfigKey } from '../../../../../../common/runtime_types';
 import { useSelectedMonitor } from '../../monitor_details/hooks/use_selected_monitor';
-import { ClientPluginsStart } from '../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../plugin';
 
 export const MonitorMWsCallout = () => {
   const { monitor } = useSelectedMonitor();

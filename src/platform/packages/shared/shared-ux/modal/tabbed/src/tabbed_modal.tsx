@@ -8,16 +8,14 @@
  */
 
 import React, {
-  useRef,
   useMemo,
-  useState,
-  useLayoutEffect,
   useCallback,
   Fragment,
   type ComponentProps,
   type FC,
   type ReactElement,
 } from 'react';
+import { Global } from '@emotion/react';
 import {
   EuiButton,
   EuiModal,
@@ -61,7 +59,8 @@ export interface IModalTabDeclaration<S = {}> extends EuiTabProps, ITabDeclarati
   modalActionBtn?: IModalTabActionBtn<S>;
 }
 
-export interface ITabbedModalInner extends Pick<ComponentProps<typeof EuiModal>, 'onClose'> {
+export interface ITabbedModalInner
+  extends Pick<ComponentProps<typeof EuiModal>, 'onClose' | 'outsideClickCloses'> {
   modalWidth?: number;
   modalTitle?: string;
   anchorElement?: HTMLElement;
@@ -73,42 +72,14 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({
   modalTitle,
   modalWidth,
   anchorElement,
+  outsideClickCloses,
   ...props
 }) => {
   const { tabs, state, dispatch } =
     useModalContext<Array<IModalTabDeclaration<Record<string, any>>>>();
-  const { selectedTabId, defaultSelectedTabId } = state.meta;
+  const { selectedTabId } = state.meta;
   const tabbedModalHTMLId = useGeneratedHtmlId({ prefix: 'tabbedModal' });
-  const tabbedModalHeadingHTMLId = useGeneratedHtmlId({ prefix: 'tabbedModal' });
-  const defaultTabCoordinates = useRef(new Map<string, Pick<DOMRect, 'top'>>());
-  const [translateYValue, setTranslateYValue] = useState(0);
-
-  const onTabContentRender = useCallback(() => {
-    const tabbedModal = document.querySelector(`[id="${tabbedModalHTMLId}"]`) as HTMLDivElement;
-
-    if (!defaultTabCoordinates.current.get(defaultSelectedTabId)) {
-      // on initial render the modal animates into it's final position
-      // hence the need to wait till said animation has completed
-      tabbedModal.onanimationend = () => {
-        const { top } = tabbedModal.getBoundingClientRect();
-        defaultTabCoordinates.current.set(defaultSelectedTabId, { top });
-      };
-    } else {
-      let translateYOverride = 0;
-
-      if (defaultSelectedTabId !== selectedTabId) {
-        const defaultTabData = defaultTabCoordinates.current.get(defaultSelectedTabId);
-
-        const rect = tabbedModal.getBoundingClientRect();
-
-        translateYOverride = translateYValue + (defaultTabData?.top! - rect.top);
-      }
-
-      if (translateYOverride !== translateYValue) {
-        setTranslateYValue(translateYOverride);
-      }
-    }
-  }, [tabbedModalHTMLId, defaultSelectedTabId, selectedTabId, translateYValue]);
+  const tabbedModalHeadingHTMLId = useGeneratedHtmlId({ prefix: 'tabbedModalHeading' });
 
   const selectedTabState = useMemo(
     () => (selectedTabId ? state[selectedTabId] : {}),
@@ -152,12 +123,6 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({
     );
   }, [onSelectedTabChanged, selectedTabId, tabs]);
 
-  const modalPositionOverrideStyles: React.CSSProperties = {
-    transform: `translateY(${translateYValue}px)`,
-    transformOrigin: 'top',
-    willChange: 'transform',
-  };
-
   return (
     <EuiModal
       id={tabbedModalHTMLId}
@@ -169,36 +134,33 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({
       data-test-subj={props['data-test-subj']}
       css={{
         ...(modalWidth ? { width: modalWidth } : {}),
-        ...modalPositionOverrideStyles,
       }}
       aria-labelledby={tabbedModalHeadingHTMLId}
+      outsideClickCloses={outsideClickCloses}
     >
+      <Global
+        styles={{
+          // overrides so modal retains a fixed position from top of viewport, despite having content of varying heights
+          [`.euiOverlayMask:has([id="${tabbedModalHTMLId}"])`]: {
+            alignItems: 'flex-start',
+            paddingBlockStart: '20vh',
+          },
+        }}
+      />
       <EuiModalHeader>
         <EuiModalHeaderTitle id={tabbedModalHeadingHTMLId}>{modalTitle}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <Fragment>
-          <Fragment>{renderTabs()}</Fragment>
-          <EuiSpacer size="m" />
-          {React.createElement(function RenderSelectedTabContent() {
-            useLayoutEffect(() => {
-              requestAnimationFrame(onTabContentRender);
-            }, []);
-            return (
-              <div
-                css={{ display: 'contents' }}
-                data-test-subj={`tabbedModal-${selectedTabId}-content`}
-              >
-                <SelectedTabContent
-                  {...{
-                    state: selectedTabState,
-                    dispatch,
-                  }}
-                />
-              </div>
-            );
-          })}
-        </Fragment>
+        <Fragment>{renderTabs()}</Fragment>
+        <EuiSpacer size="m" />
+        <div css={{ display: 'contents' }} data-test-subj={`tabbedModal-${selectedTabId}-content`}>
+          <SelectedTabContent
+            {...{
+              state: selectedTabState,
+              dispatch,
+            }}
+          />
+        </div>
       </EuiModalBody>
       {modalActionBtn?.id !== undefined && selectedTabState && (
         <EuiModalFooter>

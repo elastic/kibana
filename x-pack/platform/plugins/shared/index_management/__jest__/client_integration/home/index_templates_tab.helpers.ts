@@ -7,16 +7,13 @@
 
 import { act } from 'react-dom/test-utils';
 
-import {
-  registerTestBed,
-  TestBed,
-  AsyncTestBedConfig,
-  findTestSubject,
-} from '@kbn/test-jest-helpers';
-import { HttpSetup } from '@kbn/core/public';
+import type { TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
+import { registerTestBed, findTestSubject } from '@kbn/test-jest-helpers';
+import type { HttpSetup } from '@kbn/core/public';
 import { TemplateList } from '../../../public/application/sections/home/template_list';
-import { TemplateDeserialized } from '../../../common';
-import { WithAppDependencies, TestSubjects } from '../helpers';
+import type { TemplateDeserialized } from '../../../common';
+import type { TestSubjects } from '../helpers';
+import { WithAppDependencies } from '../helpers';
 
 const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {
@@ -43,10 +40,10 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
   const selectDetailsTab = async (
     tab: 'summary' | 'settings' | 'mappings' | 'aliases' | 'preview'
   ) => {
-    const tabs = ['summary', 'settings', 'mappings', 'aliases', 'preview'];
+    const tabTestDataSubj = `${tab}TabBtn` as TestSubjects;
 
     await act(async () => {
-      testBed.find('templateDetails.tab').at(tabs.indexOf(tab)).simulate('click');
+      testBed.find(tabTestDataSubj).simulate('click');
     });
     testBed.component.update();
   };

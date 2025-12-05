@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Schema } from 'joi';
+import type { Schema } from 'joi';
 import * as Url from 'url';
 import Path from 'path';
 import { cloneDeepWith, get, has, toPath } from 'lodash';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { schema } from './schema';
-import { ScoutServerConfig, ScoutTestConfig } from '../types';
-import { formatCurrentDate, getProjectType } from './utils/utils';
+import type { ScoutServerConfig, ScoutTestConfig } from '../types';
+import { formatCurrentDate, getProjectType, getOrganizationId } from './utils/utils';
 
 const $values = Symbol('values');
 
@@ -107,8 +107,12 @@ export class Config {
   public getScoutTestConfig(): ScoutTestConfig {
     return {
       serverless: this.get('serverless'),
+      uiam: this.get('esServerlessOptions.uiam', false),
       projectType: this.get('serverless')
         ? getProjectType(this.get('kbnTestServer.serverArgs'))
+        : undefined,
+      organizationId: this.get('serverless')
+        ? getOrganizationId(this.get('kbnTestServer.serverArgs'))
         : undefined,
       isCloud: false,
       license: this.get('esTestCluster.license'),

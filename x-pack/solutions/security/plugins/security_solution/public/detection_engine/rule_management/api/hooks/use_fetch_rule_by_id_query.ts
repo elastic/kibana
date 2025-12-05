@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { UseQueryOptions } from '@tanstack/react-query';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import type { UseQueryOptions } from '@kbn/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useCallback } from 'react';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { transformInput } from '../../../../detections/containers/detection_engine/rules/transforms';
+import { transformInput } from '../../../common/transforms';
 import { fetchRuleById } from '../api';
 import { DEFAULT_QUERY_OPTIONS } from './constants';
 

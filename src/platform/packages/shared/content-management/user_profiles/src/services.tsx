@@ -8,7 +8,8 @@
  */
 
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
-import React, { FC, PropsWithChildren, useCallback, useContext, useMemo } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import type { UserProfile } from '@kbn/user-profile-components';
 import { createBatcher } from './utils/batcher';
 

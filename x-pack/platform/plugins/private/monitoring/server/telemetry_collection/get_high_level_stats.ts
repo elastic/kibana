@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
 import { createQuery } from './create_query';
 import {

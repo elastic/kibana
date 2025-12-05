@@ -7,16 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
-import { ViewMode } from '@kbn/presentation-publishing';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { CustomizePanelActionApi } from './customize_panel_action';
+import type { CustomizePanelActionApi } from './customize_panel_action';
 import { CustomizePanelEditor } from './customize_panel_editor';
+
+// Mock FilterItems to avoid expensive rendering and lazy-loading delays in tests
+jest.mock('@kbn/unified-search-plugin/public', () => ({
+  FilterItems: () => <div data-test-subj="mocked-filter-items">Mocked FilterItems</div>,
+}));
 
 describe('customize panel editor', () => {
   let api: CustomizePanelActionApi;

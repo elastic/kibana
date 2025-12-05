@@ -9,7 +9,7 @@
 
 import type { PluginInitializerContext } from '@kbn/core-plugins-server';
 
-export type { DiscoverSessionTab } from './saved_objects/schema';
+export type { DiscoverSessionTab, DiscoverSessionTabAttributes } from './saved_objects/schema';
 export { getSavedSearch } from './services/saved_searches';
 
 export const plugin = async (initContext: PluginInitializerContext) => {

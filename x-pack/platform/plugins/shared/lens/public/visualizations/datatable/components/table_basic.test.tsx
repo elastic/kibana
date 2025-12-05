@@ -11,17 +11,17 @@ import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { faker } from '@faker-js/faker';
 import { act } from 'react-dom/test-utils';
-import { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import { coreMock } from '@kbn/core/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { DatatableComponent } from './table_basic';
 import type { DatatableProps } from '../../../../common/expressions';
-import { LENS_EDIT_PAGESIZE_ACTION } from './constants';
-import { DatatableRenderProps } from './types';
-import { PaletteOutput } from '@kbn/coloring';
+import { LENS_EDIT_PAGESIZE_ACTION } from '@kbn/lens-common';
+import type { DatatableRenderProps } from './types';
+import type { PaletteOutput } from '@kbn/coloring';
 import { getTransposeId } from '@kbn/transpose-utils';
-import { CustomPaletteState } from '@kbn/charts-plugin/common';
+import type { CustomPaletteState } from '@kbn/charts-plugin/common';
 import { getCellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
 import { DataGridDensity } from '@kbn/unified-data-table';
 
@@ -306,7 +306,7 @@ describe('DatatableComponent', () => {
     renderDatatableComponent({
       data: {
         ...data,
-        rows: [{ a: undefined, b: undefined, c: undefined }],
+        rows: [],
       },
     });
     expect(screen.getByTestId('lnsVisualizationContainer')).toHaveTextContent('No results found');

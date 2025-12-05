@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -18,7 +18,6 @@
     "@kbn/security-solution-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/security-solution-features",
-    "@kbn/cases-plugin",
     "@kbn/security-solution-navigation",
     "@kbn/licensing-plugin",
     "@kbn/security-solution-upselling",
@@ -27,5 +26,7 @@
     "@kbn/management-plugin",
     "@kbn/core-chrome-browser",
     "@kbn/cloud-plugin",
+    "@kbn/licensing-types",
+    "@kbn/deeplinks-management",
   ]
 }

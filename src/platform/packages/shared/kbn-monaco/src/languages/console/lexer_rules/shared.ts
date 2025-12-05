@@ -14,7 +14,7 @@ import {
   painlessLanguageAttributes,
 } from './nested_painless';
 import { buildEsqlRules, buildEsqlStartRule, esqlLanguageAttributes } from './nested_esql';
-import { monaco } from '../../../..';
+import type { monaco } from '../../../..';
 import { globals } from '../../../common/lexer_rules';
 import { buildXjsonRules } from '../../xjson/lexer_rules/xjson';
 
@@ -101,7 +101,17 @@ export const matchTokensWithEOL = (
 
 const xjsonRules = { ...buildXjsonRules('json_root') };
 
+// Override the xjson brace rules to prevent stack overflow in Console
+// The default xjson uses @push/@pop which causes stack overflow with many requests
+// We replace those rules with Console-specific rules that don't use @push
+const originalJsonRoot = xjsonRules.json_root;
 xjsonRules.json_root = [
+  // Return to root when closing brace is at end of line
+  // This prevents stack accumulation across multiple HTTP requests
+  // @ts-expect-error custom rule
+  matchTokensWithEOL('paren.rparen', /}/, 'root'),
+  // Don't push for opening braces to prevent stack overflow
+  [/{/, { token: 'paren.lparen' }],
   // @ts-expect-error include comments into json
   { include: '@comments' },
   // @ts-expect-error include variables into json
@@ -114,7 +124,18 @@ xjsonRules.json_root = [
   buildEsqlStartRule(false),
   // @ts-expect-error include a rule to start esql highlighting
   buildEsqlStartRule(true),
-  ...xjsonRules.json_root,
+  // Include remaining xjson rules, filtering out the original brace rules
+  ...originalJsonRoot.filter((rule: any) => {
+    // Filter out the original @push/@pop brace rules from xjson
+    if (Array.isArray(rule) && rule.length >= 2) {
+      const regex = rule[0];
+      // Skip the original brace rules (they use @push/@pop)
+      if (regex instanceof RegExp && (regex.source === '\\{' || regex.source === '\\}')) {
+        return false;
+      }
+    }
+    return true;
+  }),
 ];
 
 const sqlRules = buildSqlRules();

@@ -61,6 +61,7 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
   if (status === 'success') {
     return (
       <EuiCallOut
+        announceOnMount
         color="success"
         iconType="check"
         title={i18n.translate(

@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import axios, { AxiosInstance } from 'axios';
+import type { AxiosInstance } from 'axios';
+import axios from 'axios';
 import type { Capabilities as UICapabilities } from '@kbn/core/types';
 import { format as formatUrl } from 'url';
 import util from 'util';
-import { ToolingLog } from '@kbn/tooling-log';
-import { FtrProviderContext } from '../ftr_provider_context';
-import { FeaturesService, FeaturesProvider } from './features';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { FtrProviderContext } from '../ftr_provider_context';
+import type { FeaturesService } from './features';
+import { FeaturesProvider } from './features';
 
 export interface BasicCredentials {
   username: string;

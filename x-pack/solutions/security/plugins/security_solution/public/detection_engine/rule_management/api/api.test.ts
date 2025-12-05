@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildEsQuery } from '@kbn/es-query';
+import { fromKueryExpression } from '@kbn/es-query';
 import { KibanaServices } from '../../../common/lib/kibana';
 
 import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../common/api/detection_engine/rule_exceptions';
@@ -179,7 +179,16 @@ describe('Detections Rules API', () => {
           method: 'GET',
           query: {
             filter:
-              '(alert.attributes.name: "hello world" OR alert.attributes.params.index: "hello world" OR alert.attributes.params.threat.tactic.id: "hello world" OR alert.attributes.params.threat.tactic.name: "hello world" OR alert.attributes.params.threat.technique.id: "hello world" OR alert.attributes.params.threat.technique.name: "hello world" OR alert.attributes.params.threat.technique.subtechnique.id: "hello world" OR alert.attributes.params.threat.technique.subtechnique.name: "hello world")',
+              '(' +
+              'alert.attributes.name: "hello world" ' +
+              'OR alert.attributes.params.index: "hello world" ' +
+              'OR alert.attributes.params.threat.tactic.id: "hello world" ' +
+              'OR alert.attributes.params.threat.tactic.name: "hello world" ' +
+              'OR alert.attributes.params.threat.technique.id: "hello world" ' +
+              'OR alert.attributes.params.threat.technique.name: "hello world" ' +
+              'OR alert.attributes.params.threat.technique.subtechnique.id: "hello world" ' +
+              'OR alert.attributes.params.threat.technique.subtechnique.name: "hello world"' +
+              ')',
             page: 1,
             per_page: 20,
             sort_field: 'enabled',
@@ -189,7 +198,46 @@ describe('Detections Rules API', () => {
       );
     });
 
-    test('check parameter url, query with a filter get escaped correctly', async () => {
+    test('check parameter url, query with a filter get escaped correctly (single term)', async () => {
+      await fetchRules({
+        filterOptions: {
+          filter: '"user\\-agent*with)a<surprise:',
+          showCustomRules: false,
+          showElasticRules: false,
+          tags: [],
+        },
+        sortingOptions: {
+          field: 'enabled',
+          order: 'desc',
+        },
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/detection_engine/rules/_find',
+        expect.objectContaining({
+          method: 'GET',
+          query: {
+            filter:
+              '(' +
+              'alert.attributes.name.keyword: *\\"user\\\\-agent\\*with\\)a\\<surprise\\:* ' +
+              'OR alert.attributes.params.index: "\\"user\\\\-agent*with)a<surprise:" ' +
+              'OR alert.attributes.params.threat.tactic.id: "\\"user\\\\-agent*with)a<surprise:" ' +
+              'OR alert.attributes.params.threat.tactic.name: "\\"user\\\\-agent*with)a<surprise:" ' +
+              'OR alert.attributes.params.threat.technique.id: "\\"user\\\\-agent*with)a<surprise:" ' +
+              'OR alert.attributes.params.threat.technique.name: "\\"user\\\\-agent*with)a<surprise:" ' +
+              'OR alert.attributes.params.threat.technique.subtechnique.id: "\\"user\\\\-agent*with)a<surprise:" ' +
+              'OR alert.attributes.params.threat.technique.subtechnique.name: "\\"user\\\\-agent*with)a<surprise:"' +
+              ')',
+            page: 1,
+            per_page: 20,
+            sort_field: 'enabled',
+            sort_order: 'desc',
+          },
+        })
+      );
+    });
+
+    test('check parameter url, query with a filter get escaped correctly (multiple terms)', async () => {
       await fetchRules({
         filterOptions: {
           filter: '" OR (foo:bar)',
@@ -209,7 +257,16 @@ describe('Detections Rules API', () => {
           method: 'GET',
           query: {
             filter:
-              '(alert.attributes.name: "\\" OR (foo:bar)" OR alert.attributes.params.index: "\\" OR (foo:bar)" OR alert.attributes.params.threat.tactic.id: "\\" OR (foo:bar)" OR alert.attributes.params.threat.tactic.name: "\\" OR (foo:bar)" OR alert.attributes.params.threat.technique.id: "\\" OR (foo:bar)" OR alert.attributes.params.threat.technique.name: "\\" OR (foo:bar)" OR alert.attributes.params.threat.technique.subtechnique.id: "\\" OR (foo:bar)" OR alert.attributes.params.threat.technique.subtechnique.name: "\\" OR (foo:bar)")',
+              '(' +
+              'alert.attributes.name: "\\" OR (foo:bar)" ' +
+              'OR alert.attributes.params.index: "\\" OR (foo:bar)" ' +
+              'OR alert.attributes.params.threat.tactic.id: "\\" OR (foo:bar)" ' +
+              'OR alert.attributes.params.threat.tactic.name: "\\" OR (foo:bar)" ' +
+              'OR alert.attributes.params.threat.technique.id: "\\" OR (foo:bar)" ' +
+              'OR alert.attributes.params.threat.technique.name: "\\" OR (foo:bar)" ' +
+              'OR alert.attributes.params.threat.technique.subtechnique.id: "\\" OR (foo:bar)" ' +
+              'OR alert.attributes.params.threat.technique.subtechnique.name: "\\" OR (foo:bar)"' +
+              ')',
             page: 1,
             per_page: 20,
             sort_field: 'enabled',
@@ -352,7 +409,7 @@ describe('Detections Rules API', () => {
           },
         ],
       ] = fetchMock.mock.calls;
-      expect(() => buildEsQuery(undefined, { query: filter, language: 'kuery' }, [])).not.toThrow();
+      expect(() => fromKueryExpression(filter)).not.toThrow();
     });
 
     test('query KQL parses without errors when filter contains characters such as double quotes', async () => {
@@ -376,7 +433,7 @@ describe('Detections Rules API', () => {
           },
         ],
       ] = fetchMock.mock.calls;
-      expect(() => buildEsQuery(undefined, { query: filter, language: 'kuery' }, [])).not.toThrow();
+      expect(() => fromKueryExpression(filter)).not.toThrow();
     });
 
     test('query KQL parses without errors when tags contains characters such as double quotes', async () => {
@@ -400,7 +457,7 @@ describe('Detections Rules API', () => {
           },
         ],
       ] = fetchMock.mock.calls;
-      expect(() => buildEsQuery(undefined, { query: filter, language: 'kuery' }, [])).not.toThrow();
+      expect(() => fromKueryExpression(filter)).not.toThrow();
     });
 
     test('check parameter url, query with all options', async () => {
@@ -422,7 +479,16 @@ describe('Detections Rules API', () => {
           method: 'GET',
           query: {
             filter:
-              '(alert.attributes.name: "ruleName" OR alert.attributes.params.index: "ruleName" OR alert.attributes.params.threat.tactic.id: "ruleName" OR alert.attributes.params.threat.tactic.name: "ruleName" OR alert.attributes.params.threat.technique.id: "ruleName" OR alert.attributes.params.threat.technique.name: "ruleName" OR alert.attributes.params.threat.technique.subtechnique.id: "ruleName" OR alert.attributes.params.threat.technique.subtechnique.name: "ruleName") AND alert.attributes.tags:("hello" AND "world")',
+              '(' +
+              'alert.attributes.name.keyword: *ruleName* ' +
+              'OR alert.attributes.params.index: "ruleName" ' +
+              'OR alert.attributes.params.threat.tactic.id: "ruleName" ' +
+              'OR alert.attributes.params.threat.tactic.name: "ruleName" ' +
+              'OR alert.attributes.params.threat.technique.id: "ruleName" ' +
+              'OR alert.attributes.params.threat.technique.name: "ruleName" ' +
+              'OR alert.attributes.params.threat.technique.subtechnique.id: "ruleName" ' +
+              'OR alert.attributes.params.threat.technique.subtechnique.name: "ruleName") ' +
+              'AND alert.attributes.tags:("hello" AND "world")',
             page: 1,
             per_page: 20,
             sort_field: 'enabled',

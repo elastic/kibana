@@ -8,7 +8,7 @@
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import React from 'react';
 import { HiddenField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { ConfigEntryView } from '../../types/types';
+import type { ConfigEntryView } from '../../types/types';
 import { getNonEmptyValidator } from '../../utils/helpers';
 
 interface ProviderSecretHiddenFieldProps {

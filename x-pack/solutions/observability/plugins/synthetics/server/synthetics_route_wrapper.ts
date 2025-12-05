@@ -13,7 +13,7 @@ import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { isTestUser, SyntheticsEsClient } from './lib';
 import { SYNTHETICS_INDEX_PATTERN } from '../common/constants';
 import { checkIndicesReadPrivileges } from './synthetics_service/authentication/check_has_privilege';
-import { SyntheticsRouteWrapper } from './routes/types';
+import type { SyntheticsRouteWrapper } from './routes/types';
 
 export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
   syntheticsRoute,
@@ -66,7 +66,7 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
       const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
       try {
-        const res = await syntheticsRoute.handler({
+        const data = {
           syntheticsEsClient,
           savedObjectsClient,
           context,
@@ -76,7 +76,10 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
           spaceId,
           syntheticsMonitorClient,
           monitorConfigRepository,
-        });
+        };
+
+        const res = await server.fleet.runWithCache(() => syntheticsRoute.handler(data));
+
         if (isKibanaResponse(res)) {
           return res;
         }

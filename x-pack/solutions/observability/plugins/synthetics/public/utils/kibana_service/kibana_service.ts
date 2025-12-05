@@ -7,8 +7,8 @@
 
 import type { Observable } from 'rxjs';
 import type { CoreStart, CoreTheme, CoreSetup } from '@kbn/core/public';
-import { AppMountParameters } from '@kbn/core/public';
-import { ClientPluginsSetup, ClientPluginsStart } from '../../plugin';
+import type { AppMountParameters } from '@kbn/core/public';
+import type { ClientPluginsSetup, ClientPluginsStart } from '../../plugin';
 import { apiService } from '../api_service/api_service';
 
 class KibanaService {

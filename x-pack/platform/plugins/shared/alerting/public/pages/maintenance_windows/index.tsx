@@ -16,6 +16,13 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import type { MaintenanceWindowStatus } from '@kbn/maintenance-windows-plugin/common';
+import {
+  MAINTENANCE_WINDOW_FEATURE_ID,
+  MAINTENANCE_WINDOW_DEEP_LINK_IDS,
+  MAINTENANCE_WINDOW_DEFAULT_PER_PAGE,
+  MAINTENANCE_WINDOW_DEFAULT_TABLE_ACTIVE_PAGE,
+} from '@kbn/maintenance-windows-plugin/common';
 import { useKibana } from '../../utils/kibana_react';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { EmptyPrompt } from './components/empty_prompt';
@@ -23,16 +30,8 @@ import * as i18n from './translations';
 import { useCreateMaintenanceWindowNavigation } from '../../hooks/use_navigation';
 import { MaintenanceWindowsList } from './components/maintenance_windows_list';
 import { useFindMaintenanceWindows } from '../../hooks/use_find_maintenance_windows';
-import { ExperimentalBadge } from './components/page_header';
 import { useLicense } from '../../hooks/use_license';
 import { LicensePrompt } from './components/license_prompt';
-import type { MaintenanceWindowStatus } from '../../../common';
-import {
-  MAINTENANCE_WINDOW_FEATURE_ID,
-  MAINTENANCE_WINDOW_DEEP_LINK_IDS,
-  MAINTENANCE_WINDOW_DEFAULT_PER_PAGE,
-  MAINTENANCE_WINDOW_DEFAULT_TABLE_ACTIVE_PAGE,
-} from '../../../common';
 
 export const MaintenanceWindowsPage = React.memo(() => {
   const {
@@ -126,9 +125,6 @@ export const MaintenanceWindowsPage = React.memo(() => {
               <EuiTitle size="l">
                 <h1>{i18n.MAINTENANCE_WINDOWS}</h1>
               </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <ExperimentalBadge />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer />

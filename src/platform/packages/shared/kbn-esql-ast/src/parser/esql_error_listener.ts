@@ -7,26 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Recognizer, RecognitionException } from 'antlr4';
-import { ErrorListener } from 'antlr4';
-import { getPosition } from './helpers';
+import * as antlr4 from 'antlr4';
+import { getPosition } from './tokens';
 import type { EditorError } from '../types';
 
 // These will need to be manually updated whenever the relevant grammar changes.
-const SYNTAX_ERRORS_TO_IGNORE = [`mismatched input '<EOF>' expecting {'row', 'from', 'show'}`];
+const SYNTAX_ERRORS_TO_IGNORE = [
+  `mismatched input '<EOF>' expecting {'row', 'from', 'ts', 'show'}`,
+];
 
 const REPLACE_DEV = /,{0,1}(?<!\s)\s*DEV_\w+\s*/g;
 const REPLACE_ORPHAN_COMMA = /{, /g;
-export class ESQLErrorListener extends ErrorListener<any> {
+
+export class ESQLErrorListener extends antlr4.ErrorListener<any> {
   protected errors: EditorError[] = [];
 
   syntaxError(
-    recognizer: Recognizer<any>,
+    recognizer: antlr4.Recognizer<any>,
     offendingSymbol: any,
     line: number,
     column: number,
     message: string,
-    error: RecognitionException | undefined
+    error: antlr4.RecognitionException | undefined
   ): void {
     // Remove any DEV_ tokens from the error message
     message = message.replace(REPLACE_DEV, '');
@@ -53,6 +55,7 @@ export class ESQLErrorListener extends ErrorListener<any> {
       endColumn,
       message: textMessage,
       severity: 'error',
+      code: 'syntaxError',
     });
   }
 

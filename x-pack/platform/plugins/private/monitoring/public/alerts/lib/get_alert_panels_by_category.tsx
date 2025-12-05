@@ -10,13 +10,13 @@ import { EuiText, EuiToolTip } from '@elastic/eui';
 import { AlertPanel } from '../panel';
 import { RULE_PANEL_MENU } from '../../../common/constants';
 import { getDateFromNow, getCalendar } from '../../../common/formatting';
-import {
+import type {
   AlertState,
   CommonAlert,
   CommonAlertState,
   CommonAlertStatus,
 } from '../../../common/types/alerts';
-import { PanelItem } from '../types';
+import type { PanelItem } from '../types';
 import { sortByNewestAlert } from './sort_by_newest_alert';
 import { Legacy } from '../../legacy_shims';
 
@@ -208,7 +208,7 @@ export function getAlertPanelsByCategory(
                     Legacy.shims.uiSettings.get('dateFormat:tz')
                   )}
                 >
-                  <EuiText size="s">
+                  <EuiText size="s" tabIndex={0}>
                     {getDateFromNow(
                       alertState.state.ui.triggeredMS,
                       Legacy.shims.uiSettings.get('dateFormat:tz')

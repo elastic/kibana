@@ -7,14 +7,15 @@
 import { StringOutputParser } from '@langchain/core/output_parsers';
 
 import { ChatPromptTemplate } from '@langchain/core/prompts';
-import { BaseChatModel } from '@langchain/core/language_models/chat_models';
-import { TelemetryParams } from '@kbn/langchain/server/tracers/telemetry/telemetry_tracer';
-import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
+import type { TelemetryParams } from '@kbn/langchain/server/tracers/telemetry/telemetry_tracer';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import type { BaseMessage } from '@langchain/core/messages';
 import { NEW_CHAT } from '../../../../../routes/helpers';
-import { AIAssistantConversationsDataClient } from '../../../../../ai_assistant_data_clients/conversations';
+import type { AIAssistantConversationsDataClient } from '../../../../../ai_assistant_data_clients/conversations';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../../../../telemetry/event_based_telemetry';
 import { getPrompt, promptDictionary } from '../../../../prompt';
-import { GraphInputs, NodeParamsBase } from '../types';
+import type { GraphInputs, NodeParamsBase } from '../types';
 import { NodeType } from '../constants';
 import { promptGroupId } from '../../../../prompt/local_prompt_object';
 import { getActionTypeId } from '../../../../../routes/utils';
@@ -26,16 +27,19 @@ export const GENERATE_CHAT_TITLE_PROMPT = ({
   prompt: string;
   responseLanguage: string;
 }) =>
-  ChatPromptTemplate.fromMessages([
+  ChatPromptTemplate.fromMessages<{
+    newMessages: BaseMessage[];
+  }>([
     ['system', `${prompt}\nPlease create the title in ${responseLanguage}.`],
-    ['human', '{input}'],
+    ['placeholder', '{newMessages}'],
   ]);
 
 export interface GenerateChatTitleParams extends NodeParamsBase {
   state: Pick<
     GraphInputs,
-    'connectorId' | 'conversationId' | 'llmType' | 'responseLanguage' | 'input' | 'isStream'
+    'connectorId' | 'conversationId' | 'llmType' | 'responseLanguage' | 'isStream'
   >;
+  newMessages: BaseMessage[];
   model: BaseChatModel;
   conversationsDataClient?: AIAssistantConversationsDataClient;
   telemetryParams?: TelemetryParams;
@@ -51,6 +55,7 @@ export async function generateChatTitle({
   model,
   telemetryParams,
   telemetry,
+  newMessages,
 }: GenerateChatTitleParams): Promise<void> {
   if (!state.conversationId) {
     return;
@@ -88,7 +93,7 @@ export async function generateChatTitle({
       .withConfig({ runName: 'Generate Chat Title' });
 
     const chatTitle = await graph.invoke({
-      input: JSON.stringify(state.input, null, 2),
+      newMessages,
     });
     logger.debug(`chatTitle: ${chatTitle}`);
 

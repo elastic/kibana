@@ -55,7 +55,7 @@ import {
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
 import { mockGetSearchDsl } from '../lib/repository.test.mock';
-import { SavedObjectsRepository } from '../lib/repository';
+import type { SavedObjectsRepository } from '../lib/repository';
 
 export const DEFAULT_SPACE = 'default';
 
@@ -570,6 +570,7 @@ export const expectBulkGetResult = (
 ) => ({
   type,
   id,
+  // @ts-expect-error upgrade typescript v5.9.3
   namespaces: doc._source!.namespaces ?? [doc._source!.namespace] ?? ['default'],
   ...(doc._source!.originId && { originId: doc._source!.originId }),
   ...(doc._source!.updated_at && { updated_at: doc._source!.updated_at }),

@@ -12,18 +12,17 @@ import React from 'react';
 
 import { EuiThemeProvider as ThemeProvider } from '@elastic/eui';
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { UserProfileService } from '@kbn/core/public';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { UserProfileService } from '@kbn/core/public';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
 import { docLinksServiceMock } from '@kbn/core/public/mocks';
-import {
-  AssistantProvider,
-  AssistantProviderProps,
-  useAssistantContextValue,
-} from '../../assistant_context';
-import { AssistantAvailability } from '../../assistant_context/types';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import type { AssistantProviderProps } from '../../assistant_context';
+import { AssistantProvider, useAssistantContextValue } from '../../assistant_context';
+import type { AssistantAvailability } from '../../assistant_context/types';
 import { AssistantSpaceIdProvider } from '../../assistant/use_space_aware_context';
+import { MOCK_CURRENT_USER } from '../../assistant/use_conversation/sample_conversations';
 
 interface Props {
   assistantAvailability?: AssistantAvailability;
@@ -99,7 +98,12 @@ export const TestProvidersComponent: React.FC<Props> = ({
     },
     userProfileService: jest.fn() as unknown as UserProfileService,
     chrome,
-  };
+    settings: {
+      client: {
+        get: jest.fn(),
+      },
+    } as unknown as SettingsStart,
+  } as AssistantProviderProps;
 
   return (
     <I18nProvider>
@@ -126,5 +130,9 @@ const TestAssistantProviders = ({
   children: React.ReactNode;
 }) => {
   const assistantContextValue = useAssistantContextValue(assistantProviderProps);
-  return <AssistantProvider value={assistantContextValue}>{children}</AssistantProvider>;
+  return (
+    <AssistantProvider value={{ ...assistantContextValue, currentUser: MOCK_CURRENT_USER }}>
+      {children}
+    </AssistantProvider>
+  );
 };

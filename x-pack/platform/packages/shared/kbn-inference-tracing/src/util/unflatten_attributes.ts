@@ -6,7 +6,7 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
-import { AttributeValue } from '@opentelemetry/api';
+import type { AttributeValue } from '@opentelemetry/api';
 
 export function unflattenAttributes(
   flat: Record<string, AttributeValue | undefined>

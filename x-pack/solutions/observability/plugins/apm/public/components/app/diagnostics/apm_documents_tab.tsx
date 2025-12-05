@@ -55,7 +55,9 @@ export function DiagnosticsApmDocuments() {
       field: 'docCount',
       render: (_, { docCount }) => (
         <EuiToolTip content={`${asInteger(docCount)} docs`}>
-          <div style={{ cursor: 'pointer' }}>{asBigNumber(docCount)}</div>
+          <div style={{ cursor: 'pointer' }} tabIndex={0}>
+            {asBigNumber(docCount)}
+          </div>
         </EuiToolTip>
       ),
       sortable: true,
@@ -194,7 +196,7 @@ function IntervalDocCount({
         interval.eventDocCount
       )} events`}
     >
-      <div style={{ cursor: 'pointer' }}>
+      <div style={{ cursor: 'pointer' }} tabIndex={0}>
         {asBigNumber(interval.metricDocCount)}&nbsp;
         <EuiText css={{ fontStyle: 'italic', fontSize: '80%', display: 'inline' }}>
           {i18n.translate('xpack.apm.intervalDocCount.TextLabel', {

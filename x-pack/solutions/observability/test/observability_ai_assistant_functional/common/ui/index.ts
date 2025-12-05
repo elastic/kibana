@@ -9,7 +9,7 @@ import type { PathsOf, TypeAsArgs, TypeOf } from '@kbn/typed-react-router-config
 import { kbnTestConfig } from '@kbn/test';
 import type { ObservabilityAIAssistantRoutes } from '@kbn/observability-ai-assistant-app-plugin/public/routes/config';
 import qs from 'query-string';
-import { User } from '../users/users';
+import type { User } from '../users/users';
 import type { InheritedFtrProviderContext } from '../../ftr_provider_context';
 
 export interface ObservabilityAIAssistantUIService {
@@ -41,6 +41,7 @@ const pages = {
     bulkImportSaveButton: 'knowledgeBaseBulkImportFlyoutSaveButton',
     bulkImportCancelButton: 'knowledgeBaseBulkImportFlyoutCancelButton',
     bulkImportFlyout: 'knowledgeBaseBulkImportFlyout',
+    bulkImportFilePicker: 'knowledgeBaseBulkImportFilePicker',
     toastTitle: 'euiToastHeader__title',
   },
   conversations: {

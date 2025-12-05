@@ -48,3 +48,4 @@ export {
   getFindingsDetectionRuleSearchTags,
 } from './rules/detection_rules';
 export type { RuleResponse } from './rules/rule';
+export * from './test_subjects';

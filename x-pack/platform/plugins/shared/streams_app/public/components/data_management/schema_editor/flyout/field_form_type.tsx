@@ -4,23 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
-import React, { useEffect } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { useEffect, useMemo } from 'react';
 import { getRegularEcsField } from '@kbn/streams-schema';
 import { EcsRecommendation } from './ecs_recommendation';
 import { FieldType } from '../field_type';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { EMPTY_CONTENT, FIELD_TYPE_MAP, FieldTypeOption } from '../constants';
-import { MappedSchemaField, SchemaField } from '../types';
+import type { FieldTypeOption } from '../constants';
+import { EMPTY_CONTENT, FIELD_TYPE_MAP } from '../constants';
+import type { MappedSchemaField, SchemaField } from '../types';
 
 export const FieldFormType = ({
   field,
   isEditing,
   onTypeChange,
+  streamType,
 }: {
   field: SchemaField;
   isEditing: boolean;
   onTypeChange: FieldTypeSelectorProps['onChange'];
+  streamType: 'classic' | 'wired';
 }) => {
   const { useFieldsMetadata } = useKibana().dependencies.start.fieldsMetadata;
 
@@ -50,7 +54,12 @@ export const FieldFormType = ({
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
         {isEditing ? (
-          <FieldTypeSelector value={field.type} onChange={onTypeChange} isLoading={loading} />
+          <FieldTypeSelector
+            value={field.type}
+            onChange={onTypeChange}
+            isLoading={loading}
+            streamType={streamType}
+          />
         ) : field.type ? (
           <FieldType type={field.type} />
         ) : (
@@ -68,26 +77,40 @@ interface FieldTypeSelectorProps {
   isLoading?: boolean;
   onChange: (value: FieldTypeOption) => void;
   value?: FieldTypeOption;
+  streamType: 'classic' | 'wired';
 }
 
-const typeSelectorOptions = Object.entries(FIELD_TYPE_MAP)
-  .filter(([_, { readonly }]) => !readonly)
-  .map(([optionKey, { label }]) => ({
-    text: label,
-    value: optionKey,
-  }));
+export const FieldTypeSelector = ({
+  value,
+  onChange,
+  isLoading = false,
+  streamType,
+}: FieldTypeSelectorProps) => {
+  const typeSelectorOptions = useMemo(() => {
+    return (Object.keys(FIELD_TYPE_MAP) as FieldTypeOption[])
+      .filter((optionKey) => {
+        if (FIELD_TYPE_MAP[optionKey].readonly) return false;
+        if (optionKey === 'geo_point' && streamType !== 'classic') return false;
+        return true;
+      })
+      .map((optionKey) => ({
+        value: optionKey,
+        inputDisplay: <FieldType type={optionKey} />,
+        'data-test-subj': `option-type-${optionKey}`,
+      }));
+  }, [streamType]);
 
-const FieldTypeSelector = ({ value, onChange, isLoading = false }: FieldTypeSelectorProps) => {
   return (
-    <EuiSelect
+    <EuiSuperSelect
       isLoading={isLoading}
       data-test-subj="streamsAppFieldFormTypeSelect"
-      hasNoInitialSelection={!value}
-      onChange={(event) => {
-        onChange(event.target.value as FieldTypeOption);
-      }}
-      value={value}
+      onChange={onChange}
+      valueOfSelected={value}
       options={typeSelectorOptions}
+      fullWidth
+      aria-label={i18n.translate('xpack.streams.fieldFormType.typeSelectAriaLabel', {
+        defaultMessage: 'Field type',
+      })}
     />
   );
 };

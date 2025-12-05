@@ -4,12 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
-import {
-  StreamQuery,
-  streamQuerySchema,
-  upsertStreamQueryRequestSchema,
-} from '@kbn/streams-schema';
+import type { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
+import type { StreamQuery } from '@kbn/streams-schema';
+import { streamQuerySchema, upsertStreamQueryRequestSchema } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { QueryNotFoundError } from '../../lib/streams/errors/query_not_found_error';
@@ -102,6 +99,7 @@ const upsertQueryRoute = createServerRoute({
     await queryClient.upsert(streamName, {
       id: queryId,
       title: body.title,
+      feature: body.feature,
       kql: {
         query: body.kql.query,
       },
@@ -134,7 +132,7 @@ const deleteQueryRoute = createServerRoute({
       queryId: z.string(),
     }),
   }),
-  handler: async ({ params, request, getScopedClients }): Promise<DeleteQueryResponse> => {
+  handler: async ({ params, request, getScopedClients, logger }): Promise<DeleteQueryResponse> => {
     const { streamsClient, queryClient, licensing, assetClient } = await getScopedClients({
       request,
     });
@@ -152,6 +150,8 @@ const deleteQueryRoute = createServerRoute({
     }
 
     await queryClient.delete(streamName, queryId);
+
+    logger.get('significant_events').debug(`Deleting query ${queryId} for stream ${streamName}`);
 
     return {
       acknowledged: true,
@@ -191,7 +191,12 @@ const bulkQueriesRoute = createServerRoute({
       ),
     }),
   }),
-  handler: async ({ params, request, getScopedClients }): Promise<BulkUpdateAssetsResponse> => {
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    logger,
+  }): Promise<BulkUpdateAssetsResponse> => {
     const { streamsClient, queryClient, licensing } = await getScopedClients({ request });
     await assertEnterpriseLicense(licensing);
 
@@ -202,6 +207,12 @@ const bulkQueriesRoute = createServerRoute({
 
     await streamsClient.ensureStream(streamName);
     await queryClient.bulk(streamName, operations);
+
+    logger
+      .get('significant_events')
+      .debug(
+        `Performing bulk significant events operation with ${operations.length} operations for stream ${streamName}`
+      );
 
     return { acknowledged: true };
   },

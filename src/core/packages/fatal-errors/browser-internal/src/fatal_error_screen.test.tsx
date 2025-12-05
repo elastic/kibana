@@ -11,7 +11,7 @@ import React from 'react';
 import { pick } from 'lodash';
 import { act, render } from '@testing-library/react';
 import { Subject } from 'rxjs';
-import { FatalError } from '@kbn/core-fatal-errors-browser';
+import type { FatalError } from '@kbn/core-fatal-errors-browser';
 
 import { FatalErrorScreen } from './fatal_error_screen';
 

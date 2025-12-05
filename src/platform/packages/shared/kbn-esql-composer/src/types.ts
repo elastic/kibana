@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLAstQueryExpression, ESQLCommand } from '@kbn/esql-ast';
+import type { ESQLAstQueryExpression, ESQLCommand } from '@kbn/esql-ast';
 
 export interface Command {
   body: string;
@@ -31,7 +31,9 @@ type ExtractSingleParam<
 export type ExtractNamedParamNames<
   S extends string,
   Acc extends string = never
-> = S extends `${infer _Before}?${infer After}`
+> = S extends `${infer _Before}\?${infer After}`
+  ? ExtractNamedParamNames<After, Acc>
+  : S extends `${infer _Before}?${infer After}`
   ? ExtractSingleParam<After> extends [infer Param extends string, infer Rest extends string]
     ? Param extends ''
       ? ExtractNamedParamNames<Rest, Acc>

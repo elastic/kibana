@@ -19,10 +19,10 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { Filter } from '@kbn/es-query';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { GroupSummary } from '@kbn/slo-schema';
+import type { GroupSummary } from '@kbn/slo-schema';
 import React, { memo, useState } from 'react';
 import { paths } from '../../../../../common/locators/paths';
 import { useFetchSloList } from '../../../../hooks/use_fetch_slo_list';

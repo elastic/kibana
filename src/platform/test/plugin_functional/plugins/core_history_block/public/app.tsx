@@ -12,7 +12,6 @@ import ReactDOM from 'react-dom';
 import { Prompt } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import type { AppMountParameters, IBasePath, ApplicationStart } from '@kbn/core/public';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 const HomePage = ({
   basePath,
@@ -23,21 +22,15 @@ const HomePage = ({
 }) => (
   <div data-test-subj="page-home">
     <Prompt message="Unsaved changes, are you sure you wanna leave?" />
-    <RedirectAppLinks
-      coreStart={{
-        application,
-      }}
-    >
-      <h1>HOME PAGE</h1>
-      <br /> <br />
-      <a data-test-subj="applink-intra-test" href={basePath.prepend(`/app/core_history_block/foo`)}>
-        Link to foo on the same app
-      </a>
-      <br /> <br />
-      <a data-test-subj="applink-external-test" href={basePath.prepend(`/app/home`)}>
-        Link to the home app
-      </a>
-    </RedirectAppLinks>
+    <h1>HOME PAGE</h1>
+    <br /> <br />
+    <a data-test-subj="applink-intra-test" href={basePath.prepend(`/app/core_history_block/foo`)}>
+      Link to foo on the same app
+    </a>
+    <br /> <br />
+    <a data-test-subj="applink-external-test" href={basePath.prepend(`/app/home`)}>
+      Link to the home app
+    </a>
   </div>
 );
 
@@ -49,21 +42,15 @@ const FooPage = ({
   application: ApplicationStart;
 }) => (
   <div data-test-subj="page-home">
-    <RedirectAppLinks
-      coreStart={{
-        application,
-      }}
-    >
-      <h1>FOO PAGE</h1>
-      <br /> <br />
-      <a data-test-subj="applink-intra-test" href={basePath.prepend(`/app/core_history_block`)}>
-        Link to home on the same app
-      </a>
-      <br /> <br />
-      <a data-test-subj="applink-nested-test" href={basePath.prepend(`/app/home`)}>
-        Link to the home app
-      </a>
-    </RedirectAppLinks>
+    <h1>FOO PAGE</h1>
+    <br /> <br />
+    <a data-test-subj="applink-intra-test" href={basePath.prepend(`/app/core_history_block`)}>
+      Link to home on the same app
+    </a>
+    <br /> <br />
+    <a data-test-subj="applink-nested-test" href={basePath.prepend(`/app/home`)}>
+      Link to the home app
+    </a>
   </div>
 );
 

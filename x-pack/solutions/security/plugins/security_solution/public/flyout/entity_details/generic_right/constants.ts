@@ -11,3 +11,7 @@ export const GENERIC_FLYOUT_STORAGE_KEYS = {
   // TODO: Asset Inventory - add insight section expand state local storage support
   // OVERVIEW_INSIGHTS_SECTION: 'generic_entity_flyout:overview:insights_section',
 };
+
+export const GENERIC_ENTITY_FLYOUT_FOOTER_TEST_SUBJ = 'generic-entity-flyout-footer';
+export const GENERIC_ENTITY_FLYOUT_FOOTER_DETAILS_LINK_TEST_SUBJ =
+  'generic-entity-flyout-footer-details-link';

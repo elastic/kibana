@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { closeToast } from './common/toast';
 import { CONNECTOR_NAME_INPUT, SAVE_ACTION_CONNECTOR_BTN } from '../screens/common/rule_actions';
 import { azureConnectorAPIPayload } from './api_calls/connectors';
 import { TIMELINE_CHECKBOX } from '../screens/timelines';
@@ -46,7 +47,29 @@ import {
   SEND_TO_TIMELINE_BUTTON,
   OPENAI_CONNECTOR_OPTION,
   SECRETS_APIKEY_INPUT,
+  SHARE_BADGE_BUTTON,
+  SHARE_SELECT,
+  PRIVATE_SELECT_OPTION,
+  RESTRICTED_SELECT_OPTION,
+  OWNER_SHARED_CALLOUT,
+  SHARED_CALLOUT,
+  SHARE_MODAL,
+  SHARE_BUTTON,
+  USER_PROFILES_SEARCH,
+  CONVERSATION_LIST_ICON,
+  USER_PROFILES_SELECT_OPTION,
+  DISMISS_CALLOUT_BUTTON,
+  DUPLICATE_CONVERSATION,
+  CONVERSATION_SETTINGS_MENU,
+  COPY_URL,
+  CONVO_CONTEXT_MENU_BUTTON,
+  CONVO_CONTEXT_MENU_COPY_URL,
+  SHARE_MODAL_COPY_URL,
+  DUPLICATE,
+  CONVO_CONTEXT_MENU_DUPLICATE,
+  SHARED_SELECT_OPTION,
 } from '../screens/ai_assistant';
+import { SUCCESS_TOASTER_HEADER, TOASTER } from '../screens/alerts_detection_rules';
 
 export const openAssistant = (context?: 'rule' | 'alert') => {
   if (!context) {
@@ -77,9 +100,11 @@ export const selectConnector = (connectorName: string) => {
   cy.get(CONNECTOR_SELECTOR).click();
   cy.get(CONNECTOR_SELECT(connectorName)).click();
   assertConnectorSelected(connectorName);
+  // eslint-disable-next-line cypress/no-unnecessary-waiting
+  cy.wait(2000);
 };
 export const resetConversation = () => {
-  cy.get(CHAT_CONTEXT_MENU).click();
+  cy.get(CONVERSATION_SETTINGS_MENU).click();
   cy.get(CLEAR_CHAT).click();
   cy.get(CONFIRM_CLEAR_CHAT).click();
   cy.get(EMPTY_CONVO).should('be.visible');
@@ -104,6 +129,7 @@ export const submitMessage = () => {
 };
 
 export const typeAndSendMessage = (message: string) => {
+  cy.get(USER_PROMPT).click();
   cy.get(USER_PROMPT).type(message);
   submitMessage();
 };
@@ -112,6 +138,7 @@ export const typeAndSendMessage = (message: string) => {
 export const createAndTitleConversation = (newTitle = 'Something else') => {
   createNewChat();
   assertNewConversation(false, 'New chat');
+  selectConnector(azureConnectorAPIPayload.name);
   assertConnectorSelected(azureConnectorAPIPayload.name);
   typeAndSendMessage('hello');
   assertMessageSent('hello');
@@ -244,3 +271,190 @@ export const assertConversationReadOnly = () => {
   cy.get(FLYOUT_NAV_TOGGLE).should('be.disabled');
   cy.get(NEW_CHAT).should('be.disabled');
 };
+
+export const openShareMenu = () => {
+  cy.get(SHARE_BADGE_BUTTON).click();
+  cy.get(SHARE_SELECT).should('be.visible');
+};
+export const assertShareMenuStatus = (type: 'Private' | 'Shared' | 'Restricted') => {
+  cy.get(SHARE_BADGE_BUTTON).should('have.attr', 'title').and('include', type);
+  cy.get(PRIVATE_SELECT_OPTION).should(
+    'have.attr',
+    'aria-checked',
+    type === 'Private' ? 'true' : 'false'
+  );
+  cy.get(RESTRICTED_SELECT_OPTION).should(
+    'have.attr',
+    'aria-checked',
+    type === 'Restricted' ? 'true' : 'false'
+  );
+  cy.get(SHARED_SELECT_OPTION).should(
+    'have.attr',
+    'aria-checked',
+    type === 'Shared' ? 'true' : 'false'
+  );
+};
+
+export const shareConversationWithUser = (user: string) => {
+  cy.get(USER_PROFILES_SEARCH).find('input').type(user);
+  cy.get(USER_PROFILES_SEARCH)
+    .find(USER_PROFILES_SELECT_OPTION(user))
+    .should('have.attr', 'aria-checked', 'false');
+  cy.get(USER_PROFILES_SEARCH).find(USER_PROFILES_SELECT_OPTION(user)).click();
+  cy.get(USER_PROFILES_SEARCH)
+    .find(USER_PROFILES_SELECT_OPTION(user))
+    .should('have.attr', 'aria-checked', 'true');
+};
+
+export const selectPrivate = () => {
+  cy.get(PRIVATE_SELECT_OPTION).click();
+};
+
+export const selectGlobal = () => {
+  cy.get(SHARED_SELECT_OPTION).click();
+};
+
+export const selectShareModal = () => {
+  cy.get(RESTRICTED_SELECT_OPTION).click();
+  cy.get(SHARE_MODAL).should('exist');
+};
+
+export const assertShareUser = (user: string) => {
+  cy.get(USER_PROFILES_SEARCH)
+    .find(USER_PROFILES_SELECT_OPTION(user))
+    .should('have.attr', 'aria-checked', 'true');
+};
+
+export const submitShareModal = () => {
+  cy.get(SHARE_MODAL).find(SHARE_BUTTON).click();
+};
+
+export const closeShareModal = () => {
+  cy.get(SHARE_MODAL).find(`button.euiModal__closeIcon`).click();
+};
+export const assertCalloutState = (state: 'private' | 'shared-by-me' | 'shared-with-me') => {
+  if (state === 'private') {
+    cy.get(OWNER_SHARED_CALLOUT).should('not.exist');
+    cy.get(SHARED_CALLOUT).should('not.exist');
+    cy.get(USER_PROMPT).should('exist');
+    cy.get(SUBMIT_CHAT).should('exist');
+  } else if (state === 'shared-by-me') {
+    cy.get(OWNER_SHARED_CALLOUT).should('exist');
+    cy.get(SHARED_CALLOUT).should('not.exist');
+    cy.get(USER_PROMPT).should('exist');
+    cy.get(SUBMIT_CHAT).should('exist');
+  } else if (state === 'shared-with-me') {
+    cy.get(SHARED_CALLOUT).should('exist');
+    cy.get(OWNER_SHARED_CALLOUT).should('not.exist');
+    cy.get(USER_PROMPT).should('not.exist');
+    cy.get(SUBMIT_CHAT).should('not.exist');
+  }
+};
+
+export const dismissSharedCallout = () => {
+  cy.get(SHARED_CALLOUT).find(DISMISS_CALLOUT_BUTTON).click();
+  assertNoSharedCallout();
+};
+
+export const assertNoSharedCallout = () => {
+  cy.get(SHARED_CALLOUT).should('not.exist');
+};
+
+export const toggleConversationSideMenu = () => {
+  cy.get(FLYOUT_NAV_TOGGLE).click();
+};
+
+export const duplicateFromMenu = (title: string) => {
+  cy.get(CONVERSATION_SETTINGS_MENU).click();
+  cy.get(DUPLICATE).click();
+  assertConversationTitle(`[Duplicate] ${title}`);
+  assertDuplicateSuccessToastShown(title);
+};
+
+export const assertDuplicateSuccessToastShown = (title: string) => {
+  cy.get(SUCCESS_TOASTER_HEADER)
+    .should('be.visible')
+    .should('have.text', `[Duplicate] ${title} created successfully`);
+};
+
+export const copyUrlFromMenu = () => {
+  cy.get(CONVERSATION_SETTINGS_MENU).click();
+  cy.get(COPY_URL).click();
+  assertCopyUrlSuccessToastShown();
+};
+
+export const copyUrlFromConversationSideContextMenu = () => {
+  cy.get(CONVO_CONTEXT_MENU_BUTTON).eq(0).click();
+  cy.get(CONVO_CONTEXT_MENU_COPY_URL).click();
+  assertCopyUrlSuccessToastShown();
+};
+
+export const duplicateFromConversationSideContextMenu = (title: string) => {
+  cy.get(CONVO_CONTEXT_MENU_BUTTON).eq(0).click();
+  cy.get(CONVO_CONTEXT_MENU_DUPLICATE).click();
+  assertConversationTitle(`[Duplicate] ${title}`);
+  assertDuplicateSuccessToastShown(title);
+};
+
+export const copyUrlFromShareModal = () => {
+  openShareMenu();
+  selectShareModal();
+  cy.get(SHARE_MODAL_COPY_URL).click();
+  assertCopyUrlSuccessToastShown();
+  closeShareModal();
+};
+
+export const assertCopyUrlSuccessToastShown = () => {
+  cy.get(SUCCESS_TOASTER_HEADER)
+    .should('be.visible')
+    .should('have.text', `Conversation URL copied to clipboard`);
+};
+
+export const assertSharedConversationIcon = (title: string) => {
+  cy.get(CONVERSATION_LIST_ICON(title)).should('exist');
+};
+
+export const assertNotSharedConversationIcon = (title: string) => {
+  cy.get(CONVERSATION_LIST_ICON(title)).should('not.exist');
+};
+
+export const shareConversation = (share: string) => {
+  openShareMenu();
+  if (share === 'global') {
+    selectGlobal();
+    assertCalloutState('shared-by-me');
+  } else {
+    selectShareModal();
+    shareConversationWithUser(share);
+    submitShareModal();
+    assertCalloutState('shared-by-me');
+  }
+};
+
+export const shareConversations = (convos: Array<{ title: string; share: string }>) => {
+  openAssistant();
+  convos.forEach(({ title, share }) => {
+    selectConversation(title);
+    selectConnector(azureConnectorAPIPayload.name);
+    shareConversation(share);
+  });
+};
+
+export const duplicateConversation = (conversationName: string) => {
+  cy.get(SHARED_CALLOUT).find(DUPLICATE_CONVERSATION).click();
+  assertConversationTitle(`[Duplicate] ${conversationName}`);
+  assertDuplicateSuccessToastShown(conversationName);
+  closeToast();
+};
+
+export const assertMessageUser = (user: string, messageIndex: number) => {
+  cy.get(`.euiCommentEvent__headerUsername`).eq(messageIndex).should('have.text', user);
+};
+
+export function assertAccessErrorToast(): void {
+  cy.get(TOASTER).should('contain', 'Access denied to conversation');
+}
+
+export function assertGenericConversationErrorToast(): void {
+  cy.get(TOASTER).should('contain', 'Error fetching conversation by id');
+}

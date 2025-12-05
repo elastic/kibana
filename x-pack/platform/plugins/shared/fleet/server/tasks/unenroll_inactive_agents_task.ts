@@ -29,7 +29,7 @@ import { agentPolicyService, auditLoggingService } from '../services';
 import type { AgentPolicy } from '../types';
 
 export const TYPE = 'fleet:unenroll-inactive-agents-task';
-export const VERSION = '1.0.1';
+export const VERSION = '1.0.2';
 const TITLE = 'Fleet Unenroll Inactive Agent Task';
 const SCOPE = ['fleet'];
 const INTERVAL = '10m';
@@ -51,7 +51,6 @@ interface UnenrollInactiveAgentsTaskStartContract {
 export class UnenrollInactiveAgentsTask {
   private logger: Logger;
   private wasStarted: boolean = false;
-  private abortController = new AbortController();
   private unenrollBatchSize: number;
 
   constructor(setupContract: UnenrollInactiveAgentsTaskSetupContract) {
@@ -69,9 +68,7 @@ export class UnenrollInactiveAgentsTask {
             run: async () => {
               return this.runTask(taskInstance, core);
             },
-            cancel: async () => {
-              this.abortController.abort('Task timed out');
-            },
+            cancel: async () => {},
           };
         },
       },
@@ -121,7 +118,7 @@ export class UnenrollInactiveAgentsTask {
   }
 
   private endRun(msg: string = '') {
-    this.logger.info(`[UnenrollInactiveAgentsTask] runTask ended${msg ? ': ' + msg : ''}`);
+    this.logger.debug(`[UnenrollInactiveAgentsTask] runTask ended${msg ? ': ' + msg : ''}`);
   }
 
   public async unenrollInactiveAgents(
@@ -199,7 +196,7 @@ export class UnenrollInactiveAgentsTask {
       return getDeleteTaskRunResult();
     }
 
-    this.logger.info(`[runTask()] started`);
+    this.logger.debug(`[runTask()] started`);
 
     const [coreStart] = await core.getStartServices();
     const esClient = coreStart.elasticsearch.client.asInternalUser;

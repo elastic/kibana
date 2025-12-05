@@ -15,10 +15,11 @@ import { SelectOption, SwitchOption, TextInputOption } from '@kbn/vis-default-ed
 
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { visEditorSidebarStyles } from '@kbn/vis-default-editor-plugin/public';
-import { ValueAxis } from '../../../../types';
-import { LabelOptions, SetAxisLabel } from './label_options';
+import type { ValueAxis } from '../../../../types';
+import type { SetAxisLabel } from './label_options';
+import { LabelOptions } from './label_options';
 import { CustomExtentsOptions } from './custom_extents_options';
-import { SetParamByIndex } from '.';
+import type { SetParamByIndex } from '.';
 import { getConfigCollections } from '../../../collections';
 
 const collections = getConfigCollections();

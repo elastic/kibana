@@ -15,7 +15,7 @@ import { LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
 import { ExternalLinkComponent } from './external_link_component';
 import { coreServices } from '../../services/kibana_services';
 import { DEFAULT_URL_DRILLDOWN_OPTIONS } from '@kbn/ui-actions-enhanced-plugin/public';
-import { ResolvedLink } from '../../types';
+import type { ResolvedLink } from '../../types';
 
 describe('external link component', () => {
   const defaultLinkInfo: ResolvedLink = {

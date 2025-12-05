@@ -16,10 +16,11 @@ import {
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
-import { ActionVariable, RuleActionParam } from '@kbn/alerting-types';
-import { ActionConnector, ActionConnectorMode } from '@kbn/alerts-ui-shared';
+import type { ActionVariable, RuleActionParam } from '@kbn/alerting-types';
+import type { ActionConnector } from '@kbn/alerts-ui-shared';
+import { ActionConnectorMode } from '@kbn/alerts-ui-shared';
 import { useRuleFormState } from '../hooks';
-import { RuleAction, RuleUiAction } from '../common';
+import type { RuleAction, RuleUiAction } from '../common';
 import { getSelectedActionGroup } from '../utils';
 import { ACTION_USE_AAD_TEMPLATE_FIELDS_LABEL } from '../translations';
 
@@ -128,7 +129,7 @@ export const RuleActionsMessage = (props: RuleActionsMessageProps) => {
             {warning ? (
               <>
                 <EuiSpacer size="s" />
-                <EuiCallOut size="s" color="warning" title={warning} />
+                <EuiCallOut announceOnMount size="s" color="warning" title={warning} />
               </>
             ) : null}
           </Suspense>

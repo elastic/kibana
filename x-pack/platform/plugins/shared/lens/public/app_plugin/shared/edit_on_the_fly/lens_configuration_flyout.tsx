@@ -13,16 +13,14 @@ import {
   EuiTitle,
   EuiAccordion,
   useEuiTheme,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
   euiScrollBarStyles,
   EuiWindowEvent,
   keys,
 } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { getLanguageDisplayName, isOfAggregateQueryType } from '@kbn/es-query';
-import type { TypedLensSerializedState } from '../../../react_embeddable/types';
+import type { TypedLensSerializedState } from '@kbn/lens-common';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import { useLensSelector, selectFramePublicAPI, useLensDispatch } from '../../../state_management';
 import { EXPRESSION_BUILD_ERROR_ID, getAbsoluteDateRange } from '../../../utils';
@@ -30,16 +28,19 @@ import { LayerConfiguration } from './layer_configuration_section';
 import type { EditConfigPanelProps } from './types';
 import { FlyoutWrapper } from './flyout_wrapper';
 import { SuggestionPanel } from '../../../editor_frame_service/editor_frame/suggestion_panel';
+import { VisualizationToolbarWrapper } from '../../../editor_frame_service/editor_frame/visualization_toolbar';
+import { useEditorFrameService } from '../../../editor_frame_service/editor_frame_service_context';
 import { useApplicationUserMessages } from '../../get_application_user_messages';
 import { trackSaveUiCounterEvents } from '../../../lens_ui_telemetry';
 import { useCurrentAttributes } from './use_current_attributes';
+import { deleteUserChartTypeFromSessionStorage } from '../../../chart_type_session_storage';
+import { LayerTabsWrapper } from './layer_tabs';
+import { useAddLayerButton } from './use_add_layer_button';
 
 export function LensEditConfigurationFlyout({
   attributes,
   coreStart,
   startDependencies,
-  visualizationMap,
-  datasourceMap,
   datasourceId,
   updatePanelState,
   updateSuggestion,
@@ -60,9 +61,12 @@ export function LensEditConfigurationFlyout({
   isReadOnly,
   parentApi,
   panelId,
+  applyButtonLabel,
 }: EditConfigPanelProps) {
   const euiTheme = useEuiTheme();
   const previousAttributes = useRef<TypedLensSerializedState['attributes']>(attributes);
+
+  const { datasourceMap, visualizationMap } = useEditorFrameService();
 
   const [isInlineFlyoutVisible, setIsInlineFlyoutVisible] = useState(true);
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
@@ -93,7 +97,10 @@ export function LensEditConfigurationFlyout({
             previousAttrs.state.datasourceStates[datasourceId],
             previousAttrs.references,
             datasourceStates[datasourceId].state,
-            attributes.references
+            // Extract references from the current state as they contain resolved data view IDs
+            // We cannot use attributes.references because they may contain stale data view IDs from when the panel was initially loaded
+            datasourceMap[datasourceId].getPersistableState(datasourceStates[datasourceId].state)
+              .references
           )
         : false;
 
@@ -147,6 +154,8 @@ export function LensEditConfigurationFlyout({
         updateByRefInput?.(savedObjectId);
       }
     }
+    // Remove the user's preferred chart type from localStorage
+    deleteUserChartTypeFromSessionStorage();
     onCancelCallback?.();
     closeFlyout?.();
   }, [
@@ -167,8 +176,6 @@ export function LensEditConfigurationFlyout({
   const currentAttributes = useCurrentAttributes({
     textBasedMode,
     initialAttributes: attributes,
-    datasourceMap,
-    visualizationMap,
   });
 
   const onApply = useCallback(() => {
@@ -194,6 +201,8 @@ export function LensEditConfigurationFlyout({
     }
 
     onApplyCallback?.(currentAttributes);
+    // Remove the user's preferred chart type from sessionStorage
+    deleteUserChartTypeFromSessionStorage();
     closeFlyout?.();
   }, [
     visualization.activeId,
@@ -263,14 +272,43 @@ export function LensEditConfigurationFlyout({
     getUserMessages,
   ]);
 
+  const addLayerButton = useAddLayerButton(
+    framePublicAPI,
+    coreStart,
+    startDependencies.dataViews,
+    startDependencies.uiActions,
+    setIsInlineFlyoutVisible
+  );
+
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.key === keys.ESCAPE) {
       closeFlyout?.();
       setIsInlineFlyoutVisible(false);
+      // Remove the user's preferred chart type from sessionStorage
+      deleteUserChartTypeFromSessionStorage();
     }
   };
 
   if (isLoading) return null;
+
+  const toolbar = (
+    <>
+      <EuiFlexItem grow={false} data-test-subj="lnsVisualizationToolbar">
+        <VisualizationToolbarWrapper framePublicAPI={framePublicAPI} isInlineEditing={true} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{addLayerButton}</EuiFlexItem>
+    </>
+  );
+
+  const layerTabs = (
+    <LayerTabsWrapper
+      attributes={attributes}
+      coreStart={coreStart}
+      uiActions={startDependencies.uiActions}
+      framePublicAPI={framePublicAPI}
+    />
+  );
+
   // Example is the Discover editing where we dont want to render the text based editor on the panel, neither the suggestions (for now)
   if (!canEditTextBasedQuery && hidesSuggestions) {
     return (
@@ -286,6 +324,9 @@ export function LensEditConfigurationFlyout({
           isNewPanel={isNewPanel}
           isSaveable={isSaveable}
           isReadOnly={isReadOnly}
+          applyButtonLabel={applyButtonLabel}
+          toolbar={toolbar}
+          layerTabs={layerTabs}
         >
           <LayerConfiguration
             // TODO: remove this once we support switching to any chart in Discover
@@ -294,8 +335,6 @@ export function LensEditConfigurationFlyout({
             attributes={attributes}
             coreStart={coreStart}
             startDependencies={startDependencies}
-            visualizationMap={visualizationMap}
-            datasourceMap={datasourceMap}
             datasourceId={datasourceId}
             hasPadding
             framePublicAPI={framePublicAPI}
@@ -326,6 +365,9 @@ export function LensEditConfigurationFlyout({
         language={textBasedMode ? getLanguageDisplayName('esql') : ''}
         isNewPanel={isNewPanel}
         isReadOnly={isReadOnly}
+        applyButtonLabel={applyButtonLabel}
+        toolbar={toolbar}
+        layerTabs={layerTabs}
       >
         <EuiFlexGroup
           css={css`
@@ -352,8 +394,9 @@ export function LensEditConfigurationFlyout({
               ${euiScrollBarStyles(euiTheme)}
               overflow-y: auto !important;
               pointer-events: none;
-              padding-left: ${euiThemeVars.euiFormMaxWidth};
-              margin-left: -${euiThemeVars.euiFormMaxWidth};
+
+              padding-left: ${euiTheme.euiTheme.components.forms.maxWidth};
+              margin-left: -${euiTheme.euiTheme.components.forms.maxWidth};
               > * {
                 pointer-events: auto;
               }
@@ -386,7 +429,7 @@ export function LensEditConfigurationFlyout({
               .euiAccordion__childWrapper {
                 flex: ${isLayerAccordionOpen ? 1 : 'none'};
               }
-              padding: 0 ${euiThemeVars.euiSize};
+              padding: 0 ${euiTheme.euiTheme.size.base};
             `}
           >
             <EuiAccordion
@@ -428,8 +471,6 @@ export function LensEditConfigurationFlyout({
                   getUserMessages={getUserMessages}
                   coreStart={coreStart}
                   startDependencies={startDependencies}
-                  visualizationMap={visualizationMap}
-                  datasourceMap={datasourceMap}
                   datasourceId={datasourceId}
                   framePublicAPI={framePublicAPI}
                   setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
@@ -441,7 +482,6 @@ export function LensEditConfigurationFlyout({
                   canEditTextBasedQuery={canEditTextBasedQuery}
                   editorContainer={editorContainer.current || undefined}
                 />
-                <EuiSpacer />
               </>
             </EuiAccordion>
           </EuiFlexItem>
@@ -450,10 +490,10 @@ export function LensEditConfigurationFlyout({
             grow={isSuggestionsAccordionOpen ? 1 : false}
             data-test-subj="InlineEditingSuggestions"
             css={css`
-              border-top: ${euiThemeVars.euiBorderThin};
-              border-bottom: ${euiThemeVars.euiBorderThin};
-              padding-left: ${euiThemeVars.euiSize};
-              padding-right: ${euiThemeVars.euiSize};
+              border-top: ${euiTheme.euiTheme.border.thin};
+              border-bottom: ${euiTheme.euiTheme.border.thin};
+              padding-left: ${euiTheme.euiTheme.size.base};
+              padding-right: ${euiTheme.euiTheme.size.base};
               .euiAccordion__childWrapper {
                 flex: ${isSuggestionsAccordionOpen ? 1 : 'none'};
               }
@@ -461,8 +501,6 @@ export function LensEditConfigurationFlyout({
           >
             <SuggestionPanel
               ExpressionRenderer={startDependencies.expressions.ReactExpressionRenderer}
-              datasourceMap={datasourceMap}
-              visualizationMap={visualizationMap}
               frame={framePublicAPI}
               core={coreStart}
               nowProvider={startDependencies.data.nowProvider}

@@ -8,30 +8,31 @@
 import { i18n } from '@kbn/i18n';
 
 import React, { useEffect } from 'react';
-import { DefaultEmbeddableApi, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { DefaultEmbeddableApi, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type {
+  PublishesWritableTitle,
+  PublishesTitle,
+  HasEditCapabilities,
+  HasSupportedTriggers,
+} from '@kbn/presentation-publishing';
 import {
   initializeTitleManager,
   useBatchedPublishingSubjects,
   fetch$,
-  PublishesWritableTitle,
-  PublishesTitle,
-  SerializedTitles,
-  HasEditCapabilities,
-  HasSupportedTriggers,
   titleComparators,
 } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { BehaviorSubject, Subject, map, merge } from 'rxjs';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
-import {
-  DynamicActionsSerializedState,
-  HasDynamicActions,
-} from '@kbn/embeddable-enhanced-plugin/public';
-import { MonitorFilters } from '../monitors_overview/types';
-import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../constants';
-import { ClientPluginsStart } from '../../../plugin';
+import type { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
+import type { ClientPluginsStart } from '../../../plugin';
 import { StatsOverviewComponent } from './stats_overview_component';
 import { openMonitorConfiguration } from '../common/monitors_open_configuration';
+import type {
+  MonitorFilters,
+  OverviewStatsEmbeddableState,
+} from '../../../../common/embeddables/stats_overview/types';
+import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../../../../common/embeddables/stats_overview/constants';
 
 export const getOverviewPanelTitle = () =>
   i18n.translate('xpack.synthetics.statusOverview.list.displayName', {
@@ -45,14 +46,6 @@ const DEFAULT_FILTERS: MonitorFilters = {
   monitorIds: [],
   monitorTypes: [],
 };
-
-export interface OverviewStatsEmbeddableCustomState {
-  filters?: MonitorFilters;
-}
-
-export type OverviewStatsEmbeddableState = SerializedTitles &
-  DynamicActionsSerializedState &
-  OverviewStatsEmbeddableCustomState;
 
 export type StatsOverviewApi = DefaultEmbeddableApi<OverviewStatsEmbeddableState> &
   PublishesWritableTitle &
@@ -83,15 +76,13 @@ export const getStatsOverviewEmbeddableFactory = (
       const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
 
       function serializeState() {
-        const { rawState: dynamicActionsState, references: dynamicActionsReferences } =
-          dynamicActionsManager?.serializeState() ?? {};
         return {
           rawState: {
             ...titleManager.getLatestState(),
             filters: filters$.getValue(),
-            ...dynamicActionsState,
+            ...(dynamicActionsManager?.getLatestState() ?? {}),
           },
-          references: dynamicActionsReferences ?? [],
+          references: [],
         };
       }
 

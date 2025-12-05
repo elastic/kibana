@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { SingleRangeChangeEvent } from '@kbn/elastic-assistant';
 import { AlertsRange } from '@kbn/elastic-assistant';
 import React, { useCallback } from 'react';
 
 import * as i18n from '../translations';
-import { useKibanaFeatureFlags } from '../../../use_kibana_feature_flags';
 
 export const MAX_ALERTS = 500;
 export const MIN_ALERTS = 50;
@@ -25,8 +24,6 @@ interface Props {
 }
 
 const AlertSelectionRangeComponent: React.FC<Props> = ({ maxAlerts, setMaxAlerts }) => {
-  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
-
   // called when the slider changes the number of alerts to analyze:
   const onChangeAlertsRange = useCallback(
     (e: SingleRangeChangeEvent) => {
@@ -37,14 +34,6 @@ const AlertSelectionRangeComponent: React.FC<Props> = ({ maxAlerts, setMaxAlerts
 
   return (
     <EuiFlexGroup data-test-subj="alertSelectionRange" direction="column" gutterSize="none">
-      {!attackDiscoveryAlertsEnabled && (
-        <EuiFlexItem grow={false}>
-          <EuiTitle data-test-subj="title" size="xs">
-            <h3>{i18n.SET_NUMBER_OF_ALERTS_TO_ANALYZE}</h3>
-          </EuiTitle>
-        </EuiFlexItem>
-      )}
-
       <EuiFlexItem grow={false}>
         <EuiSpacer size="m" />
       </EuiFlexItem>

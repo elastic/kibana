@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, memo, type ComponentProps, useContext } from 'react';
-import { EuiIcon, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiIconTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { find, getOr } from 'lodash/fp';
 import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import { useKibana } from '../../../common/lib/kibana';
@@ -41,7 +41,7 @@ export type RenderCellValueProps = Pick<
   | 'colIndex'
   | 'setCellProps'
   | 'truncate'
-  | 'sourcererScope'
+  | 'pageScope'
   | 'userProfiles'
 > &
   Partial<Omit<CellValueElementProps, 'browserFields'>>;
@@ -49,7 +49,7 @@ export type RenderCellValueProps = Pick<
 export const CellValue = memo(function RenderCellValue({
   columnId,
   rowIndex,
-  sourcererScope,
+  pageScope,
   tableId,
   tableType,
   header,
@@ -148,7 +148,7 @@ export const CellValue = memo(function RenderCellValue({
         colIndex={colIndex}
         rowRenderers={rowRenderers ?? defaultRowRenderers}
         setCellProps={setCellProps}
-        scopeId={sourcererScope}
+        scopeId={pageScope}
         truncate={truncate}
         asPlainText={false}
         context={userProfiles}
@@ -170,7 +170,7 @@ export const CellValue = memo(function RenderCellValue({
     colIndex,
     rowRenderers,
     setCellProps,
-    sourcererScope,
+    pageScope,
     truncate,
     userProfiles,
   ]);
@@ -178,9 +178,11 @@ export const CellValue = memo(function RenderCellValue({
   return columnId === SIGNAL_RULE_NAME_FIELD_NAME && actualSuppressionCount ? (
     <EuiFlexGroup gutterSize="xs">
       <EuiFlexItem grow={false}>
-        <EuiToolTip position="top" content={SUPPRESSED_ALERT_TOOLTIP(actualSuppressionCount)}>
-          <EuiIcon type="layers" />
-        </EuiToolTip>
+        <EuiIconTip
+          content={SUPPRESSED_ALERT_TOOLTIP(actualSuppressionCount)}
+          position="top"
+          type="layers"
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{CellRenderer}</EuiFlexItem>
     </EuiFlexGroup>

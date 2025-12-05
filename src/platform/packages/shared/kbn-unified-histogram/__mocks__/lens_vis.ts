@@ -15,7 +15,7 @@ import { LensVisService } from '../services/lens_vis_service';
 import { type QueryParams } from '../utils/external_vis_context';
 import { unifiedHistogramServicesMock } from './services';
 import { histogramESQLSuggestionMock } from './suggestions';
-import { UnifiedHistogramSuggestionContext, UnifiedHistogramVisContext } from '../types';
+import type { UnifiedHistogramSuggestionContext, UnifiedHistogramVisContext } from '../types';
 
 const TIME_RANGE: TimeRange = {
   from: '2022-11-17T00:00:00.000Z',
@@ -72,13 +72,10 @@ export const getLensVisMock = async ({
   });
 
   let visContext: UnifiedHistogramVisContext | undefined;
-  lensService.visContext$.subscribe((nextAttributesContext) => {
-    visContext = nextAttributesContext;
-  });
-
   let currentSuggestionContext: UnifiedHistogramSuggestionContext | undefined;
-  lensService.currentSuggestionContext$.subscribe((nextSuggestionContext) => {
-    currentSuggestionContext = nextSuggestionContext;
+  lensService.state$.subscribe((state) => {
+    visContext = state.visContext;
+    currentSuggestionContext = state.currentSuggestionContext;
   });
 
   lensService.update({

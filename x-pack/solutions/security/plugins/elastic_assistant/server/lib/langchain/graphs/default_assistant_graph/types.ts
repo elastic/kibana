@@ -5,46 +5,30 @@
  * 2.0.
  */
 
-import { BaseMessage } from '@langchain/core/messages';
-import { AgentAction, AgentFinish, AgentStep } from '@langchain/core/agents';
+import type { BaseMessage } from '@langchain/core/messages';
 import type { Logger } from '@kbn/logging';
-import { ContentReferencesStore, ConversationResponse } from '@kbn/elastic-assistant-common';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { ActionsClient } from '@kbn/actions-plugin/server';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-
-export interface AgentStateBase {
-  agentOutcome?: AgentAction | AgentFinish;
-  steps: AgentStep[];
-}
+import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { AssistantStateAnnotation } from './state';
 
 export interface GraphInputs {
   connectorId: string;
   conversationId?: string;
+  threadId: string;
   llmType?: string;
   isStream?: boolean;
   isOssModel?: boolean;
-  input: string;
-  provider: string;
+  /**
+   * The entire conversation history, including the new messages.
+   */
+  messages: BaseMessage[];
+  isRegeneration: boolean;
   responseLanguage?: string;
 }
 
-export interface AgentState extends AgentStateBase {
-  input: string;
-  messages: BaseMessage[];
-  chatTitle: string;
-  lastNode: string;
-  hasRespondStep: boolean;
-  isStream: boolean;
-  isOssModel: boolean;
-  llmType: string;
-  provider: string;
-  responseLanguage: string;
-  connectorId: string;
-  conversation: ConversationResponse | undefined;
-  conversationId: string;
-  formattedTime: string;
-}
+export type AgentState = typeof AssistantStateAnnotation.State;
 
 export interface NodeParamsBase {
   actionsClient: PublicMethodsOf<ActionsClient>;

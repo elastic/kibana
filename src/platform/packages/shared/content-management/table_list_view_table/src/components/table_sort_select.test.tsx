@@ -8,7 +8,7 @@
  */
 
 import { sortByRecentlyAccessed } from './table_sort_select';
-import { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 
 describe('sortByRecentlyAccessed', () => {
   const items: UserContentCommonSchema[] = [

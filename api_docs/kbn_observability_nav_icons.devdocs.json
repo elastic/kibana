@@ -1,0 +1,176 @@
+{
+  "id": "@kbn/observability-nav-icons",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/observability-nav-icons",
+        "id": "def-public.iconBriefcase",
+        "type": "Function",
+        "tags": [],
+        "label": "iconBriefcase",
+        "description": [],
+        "signature": [
+          "({ size, ...rest }: Omit<",
+          "EuiIconProps",
+          ", \"type\">) => React.JSX.Element"
+        ],
+        "path": "x-pack/solutions/observability/packages/nav-icons/icons/briefcase.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/observability-nav-icons",
+            "id": "def-public.iconBriefcase.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ size = 'm', ...rest }",
+            "description": [],
+            "signature": [
+              "Omit<",
+              "EuiIconProps",
+              ", \"type\">"
+            ],
+            "path": "x-pack/solutions/observability/packages/nav-icons/icons/briefcase.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/observability-nav-icons",
+        "id": "def-public.iconProductCloudInfra",
+        "type": "Function",
+        "tags": [],
+        "label": "iconProductCloudInfra",
+        "description": [],
+        "signature": [
+          "({ size, ...rest }: Omit<",
+          "EuiIconProps",
+          ", \"type\">) => React.JSX.Element"
+        ],
+        "path": "x-pack/solutions/observability/packages/nav-icons/icons/product_cloud_infra.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/observability-nav-icons",
+            "id": "def-public.iconProductCloudInfra.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ size = 'm', ...rest }",
+            "description": [],
+            "signature": [
+              "Omit<",
+              "EuiIconProps",
+              ", \"type\">"
+            ],
+            "path": "x-pack/solutions/observability/packages/nav-icons/icons/product_cloud_infra.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/observability-nav-icons",
+        "id": "def-public.iconProductMl",
+        "type": "Function",
+        "tags": [],
+        "label": "iconProductMl",
+        "description": [],
+        "signature": [
+          "({ size, ...rest }: Omit<",
+          "EuiIconProps",
+          ", \"type\">) => React.JSX.Element"
+        ],
+        "path": "x-pack/solutions/observability/packages/nav-icons/icons/product_ml.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/observability-nav-icons",
+            "id": "def-public.iconProductMl.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ size = 'm', ...rest }",
+            "description": [],
+            "signature": [
+              "Omit<",
+              "EuiIconProps",
+              ", \"type\">"
+            ],
+            "path": "x-pack/solutions/observability/packages/nav-icons/icons/product_ml.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/observability-nav-icons",
+        "id": "def-public.iconProductStreamsWired",
+        "type": "Function",
+        "tags": [],
+        "label": "iconProductStreamsWired",
+        "description": [],
+        "signature": [
+          "({ size, ...rest }: Omit<",
+          "EuiIconProps",
+          ", \"type\">) => React.JSX.Element"
+        ],
+        "path": "x-pack/solutions/observability/packages/nav-icons/icons/product_streams_wired.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/observability-nav-icons",
+            "id": "def-public.iconProductStreamsWired.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ size = 'm', ...rest }",
+            "description": [],
+            "signature": [
+              "Omit<",
+              "EuiIconProps",
+              ", \"type\">"
+            ],
+            "path": "x-pack/solutions/observability/packages/nav-icons/icons/product_streams_wired.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

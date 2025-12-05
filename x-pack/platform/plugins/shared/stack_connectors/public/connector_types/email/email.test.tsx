@@ -9,15 +9,11 @@ import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application
 import { registerConnectorTypes } from '..';
 import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { emailServices, getEmailServices } from './email';
-import {
-  ValidatedEmail,
-  InvalidEmailReason,
-  ValidateEmailAddressesOptions,
-  MustacheInEmailRegExp,
-} from '@kbn/actions-plugin/common';
+import type { ValidatedEmail, ValidateEmailAddressesOptions } from '@kbn/actions-plugin/common';
+import { InvalidEmailReason, MustacheInEmailRegExp } from '@kbn/actions-plugin/common';
 import { experimentalFeaturesMock } from '../../mocks';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
-import { serviceParamValueToKbnSettingMap } from '../../../common/email/constants';
+import { serviceParamValueToKbnSettingMap } from '@kbn/connector-schemas/email/constants';
 
 const CONNECTOR_TYPE_ID = '.email';
 let connectorTypeModel: ConnectorTypeModel;
@@ -137,7 +133,7 @@ describe('action params validation', () => {
       subject: 'test',
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         to: [],
         cc: [],
@@ -156,7 +152,7 @@ describe('action params validation', () => {
       subject: 'test',
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         to: ['Email address invalid.com is not valid.'],
         cc: ['Email address bob@notallowed.com is not allowed.'],

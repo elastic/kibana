@@ -9,10 +9,10 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { SerializableRecord } from '@kbn/utility-types';
-import { IFieldSubType } from '@kbn/es-query';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { IFieldSubType } from '@kbn/es-query';
 import type { estypes } from '@elastic/elasticsearch';
-import { RuntimePrimitiveTypes, RuntimeType } from '../../common/types';
+import type { RuntimePrimitiveTypes, RuntimeType } from '../../common/types';
 
 // types for REST responses. separate but similar to other types to draw attention to REST api return changes
 

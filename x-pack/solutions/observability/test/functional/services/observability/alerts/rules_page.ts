@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const METRIC_THRESHOLD_RULE_TYPE_SELECTOR = 'metrics.alert.threshold-SelectOption';
 const CUSTOM_THRESHOLD_RULE_TYPE_SELECTOR = 'observability.rules.custom_threshold-SelectOption';
@@ -13,6 +13,7 @@ export function ObservabilityAlertsRulesProvider({ getService }: FtrProviderCont
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const log = getService('log');
+  const retry = getService('retry');
 
   const getManageRulesPageHref = async () => {
     const manageRulesPageButton = await testSubjects.find('manageRulesPageButton');
@@ -21,9 +22,13 @@ export function ObservabilityAlertsRulesProvider({ getService }: FtrProviderCont
 
   const clickCreateRuleButton = async () => {
     await testSubjects.existOrFail('createRuleButton');
+    await retry.waitFor(
+      'Create Rule button is enabled',
+      async () => await testSubjects.isEnabled('createRuleButton')
+    );
     const createRuleButton = await testSubjects.find('createRuleButton');
     log.debug(`clicking on ${await createRuleButton.getAttribute('innerText')}`);
-    return await createRuleButton.click();
+    return createRuleButton.click();
   };
 
   const clickRuleStatusDropDownMenu = async () => testSubjects.click('statusDropdown');

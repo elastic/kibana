@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InheritedFtrProviderContext } from '../../ftr_provider_context';
+import type { InheritedFtrProviderContext } from '../../ftr_provider_context';
 import { allUsers } from './users';
 import { allRoles } from './roles';
 

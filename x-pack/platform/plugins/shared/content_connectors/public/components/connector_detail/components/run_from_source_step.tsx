@@ -9,9 +9,9 @@ import React, { useEffect } from 'react';
 
 import dedent from 'dedent';
 
+import type { EuiAccordionProps } from '@elastic/eui';
 import {
   EuiAccordion,
-  EuiAccordionProps,
   EuiButton,
   EuiCode,
   EuiFlexGroup,
@@ -26,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeBox } from '@kbn/search-api-panels';
 
-import { ApiKey } from '../../../api/connector/generate_connector_api_key_api_logic';
+import type { ApiKey } from '../../../api/connector/generate_connector_api_key_api_logic';
 import { getConnectorTemplate } from '../../search_index/connector/constants';
 import { useCloudDetails } from '../../shared/cloud_details/cloud_details';
 

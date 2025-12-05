@@ -20,17 +20,14 @@ import {
   EuiCodeBlock,
   EuiTitle,
 } from '@elastic/eui';
-import { Option, map, getOrElse } from 'fp-ts/Option';
+import type { Option } from 'fp-ts/Option';
+import { map, getOrElse } from 'fp-ts/Option';
 import { pipe } from 'fp-ts/pipeable';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import {
-  ActionConnector,
-  ActionConnectorMode,
-  ActionTypeRegistryContract,
-  IErrorObject,
-} from '../../../types';
+import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import type { ActionConnector, ActionTypeRegistryContract, IErrorObject } from '../../../types';
+import { ActionConnectorMode } from '../../../types';
 
 export interface TestConnectorFormProps {
   connector: ActionConnector;
@@ -60,11 +57,16 @@ export const TestConnectorForm = ({
 
   useEffect(() => {
     (async () => {
-      const res = (await actionTypeModel?.validateParams(actionParams)).errors as IErrorObject;
+      const res = (
+        await actionTypeModel?.validateParams(
+          actionParams,
+          connector && 'config' in connector ? connector.config : undefined
+        )
+      ).errors as IErrorObject;
       setActionErrors({ ...res });
       setHasErrors(!!Object.values(res).find((errors) => (errors.length as number) > 0));
     })();
-  }, [actionTypeModel, actionParams]);
+  }, [actionTypeModel, actionParams, connector]);
 
   const steps = [
     {
@@ -120,7 +122,7 @@ export const TestConnectorForm = ({
         <>
           {executeEnabled ? null : (
             <>
-              <EuiCallOut iconType="warning" color="warning">
+              <EuiCallOut announceOnMount iconType="warning" color="warning">
                 <p>
                   <FormattedMessage
                     defaultMessage="Save your changes before testing the connector."

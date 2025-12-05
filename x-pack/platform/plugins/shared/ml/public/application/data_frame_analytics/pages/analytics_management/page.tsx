@@ -7,10 +7,8 @@
 
 import type { FC } from 'react';
 import React, { useState, useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState, type ListingPageUrlState } from '@kbn/ml-url-state';
-import { css } from '@emotion/react';
 import { DataFrameAnalyticsList } from './components/analytics_list';
 import { useRefreshInterval } from './components/analytics_list/use_refresh_interval';
 import { NodeAvailableWarning } from '../../../components/node_available_warning';
@@ -26,6 +24,7 @@ import { CreateAnalyticsButton } from './components/create_analytics_button/crea
 import { usePermissionCheck } from '../../../capabilities/check_capabilities';
 import { ExportJobsFlyout, ImportJobsFlyout } from '../../../components/import_export_jobs';
 import { SynchronizeSavedObjectsButton } from '../../../jobs/jobs_list/components/top_level_actions/synchronize_saved_objects_button';
+import { PageTitle } from '../../../components/page_title';
 
 interface PageUrlState {
   pageKey: typeof ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE_FOR_URL;
@@ -67,37 +66,27 @@ export const Page: FC = () => {
   const canCreateAnalytics = usePermissionCheck('canCreateDataFrameAnalytics');
   return (
     <>
-      <MlPageHeader>
-        <EuiFlexGroup direction="row" gutterSize="s" wrap={true}>
-          <EuiFlexItem grow={true} css={css({ minWidth: '400px' })}>
+      <MlPageHeader
+        wrapHeader
+        rightSideItems={[
+          <SynchronizeSavedObjectsButton refreshJobs={refresh} />,
+          <ExportJobsFlyout isDisabled={!canCreateAnalytics} currentTab={'data-frame-analytics'} />,
+          <ImportJobsFlyout isDisabled={!canCreateAnalytics} onImportComplete={refresh} />,
+          <CreateAnalyticsButton
+            size="m"
+            navigateToSourceSelection={navigateToSourceSelection}
+            isDisabled={!canCreateAnalytics}
+          />,
+        ]}
+      >
+        <PageTitle
+          title={
             <FormattedMessage
               id="xpack.ml.dataframe.analyticsList.title"
               defaultMessage="Data Frame Analytics Jobs"
             />
-          </EuiFlexItem>
-          <EuiFlexItem grow={true} />
-          <EuiFlexItem grow={false} justifyContent="flexEnd">
-            <EuiFlexGroup direction="row" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <SynchronizeSavedObjectsButton refreshJobs={refresh} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <ExportJobsFlyout
-                  isDisabled={!canCreateAnalytics}
-                  currentTab={'data-frame-analytics'}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <ImportJobsFlyout isDisabled={!canCreateAnalytics} onImportComplete={refresh} />
-              </EuiFlexItem>
-              <CreateAnalyticsButton
-                size="m"
-                navigateToSourceSelection={navigateToSourceSelection}
-                isDisabled={!canCreateAnalytics}
-              />
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          }
+        />
       </MlPageHeader>
 
       <NodeAvailableWarning />

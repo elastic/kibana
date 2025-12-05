@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
-import { HttpSetup } from '@kbn/core-http-browser';
+import type React from 'react';
+import { useCallback, useState } from 'react';
+import type { HttpSetup } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
-import { Replacements } from '@kbn/elastic-assistant-common';
+import type { Replacements } from '@kbn/elastic-assistant-common';
 import { useKnowledgeBaseStatus } from '../api/knowledge_base/use_knowledge_base_status';
-import { DataStreamApis } from '../use_data_stream_apis';
+import type { DataStreamApis } from '../use_data_stream_apis';
 import type { ClientMessage } from '../../assistant_context/types';
-import { SelectedPromptContext } from '../prompt_context/types';
+import type { SelectedPromptContext } from '../prompt_context/types';
 import { useSendMessage } from '../use_send_message';
 import { useConversation } from '../use_conversation';
 import { getCombinedMessage } from '../prompt/helpers';
-import { Conversation, useAssistantContext } from '../../..';
+import type { Conversation } from '../../..';
+import { useAssistantContext } from '../../..';
 import { getMessageFromRawResponse } from '../helpers';
 import { useAssistantSpaceId, useAssistantLastConversation } from '../use_space_aware_context';
 
@@ -56,16 +58,20 @@ export const useChatSend = ({
     assistantTelemetry,
     toasts,
     assistantAvailability: { isAssistantEnabled },
+    currentUser,
   } = useAssistantContext();
   const spaceId = useAssistantSpaceId();
   const { setLastConversation } = useAssistantLastConversation({ spaceId });
   const [userPrompt, setUserPrompt] = useState<string | null>(null);
 
-  const { isLoading, sendMessage, abortStream } = useSendMessage();
+  const { sendMessage, abortStream } = useSendMessage();
   const { clearConversation, createConversation, getConversation, removeLastMessage } =
     useConversation();
   const { data: kbStatus } = useKnowledgeBaseStatus({ http, enabled: isAssistantEnabled });
   const isSetupComplete = kbStatus?.elser_exists && kbStatus?.security_labs_exists;
+
+  // Local loading state that persists until the entire message flow is complete
+  const [isLoadingChatSend, setIsLoadingChatSend] = useState(false);
 
   // Handles sending latest user prompt to API
   const handleSendMessage = useCallback(
@@ -74,91 +80,116 @@ export const useChatSend = ({
         toasts?.addError(
           new Error('The conversation needs a connector configured in order to send a message.'),
           {
-            title: i18n.translate('xpack.elasticAssistant.knowledgeBase.setupError', {
-              defaultMessage: 'Error setting up Knowledge Base',
+            title: i18n.translate('xpack.elasticAssistant.conversationConfig.setupError', {
+              defaultMessage: 'Error with conversation configuration',
             }),
           }
         );
         return;
       }
-      const apiConfig = currentConversation.apiConfig;
-      let newConvo;
-      if (currentConversation.id === '') {
-        // create conversation with empty title, GENERATE_CHAT_TITLE graph step will properly title
-        newConvo = await createConversation(currentConversation);
-        if (newConvo?.id) {
-          setLastConversation({
-            id: newConvo.id,
-          });
+
+      setIsLoadingChatSend(true);
+
+      try {
+        const apiConfig = currentConversation.apiConfig;
+        let newConvo;
+        if (currentConversation.id === '') {
+          // create conversation with empty title, GENERATE_CHAT_TITLE graph step will properly title
+          newConvo = await createConversation(currentConversation);
+          if (newConvo?.id) {
+            setLastConversation({
+              id: newConvo.id,
+            });
+          }
         }
+        const convo: Conversation = { ...currentConversation, ...(newConvo ?? {}) };
+        const userMessage = getCombinedMessage({
+          currentReplacements: convo.replacements,
+          promptText,
+          selectedPromptContexts,
+          user: currentUser,
+        });
+
+        const baseReplacements: Replacements = userMessage.replacements ?? convo.replacements;
+
+        const selectedPromptContextsReplacements = Object.values(
+          selectedPromptContexts
+        ).reduce<Replacements>((acc, context) => ({ ...acc, ...context.replacements }), {});
+
+        const replacements: Replacements = {
+          ...baseReplacements,
+          ...selectedPromptContextsReplacements,
+        };
+        const updatedMessages = [...convo.messages, userMessage].map((m) => ({
+          ...m,
+          content: m.content ?? '',
+        }));
+        setCurrentConversation({
+          ...convo,
+          replacements,
+          messages: updatedMessages,
+        });
+
+        // Reset prompt context selection and preview before sending:
+        setSelectedPromptContexts({});
+
+        const rawResponse = await sendMessage({
+          apiConfig,
+          http,
+          message: userMessage.content ?? '',
+          conversationId: convo.id,
+          replacements,
+        });
+
+        assistantTelemetry?.reportAssistantMessageSent({
+          role: userMessage.role,
+          actionTypeId: apiConfig.actionTypeId,
+          model: apiConfig.model,
+          provider: apiConfig.provider,
+          isEnabledKnowledgeBase: isSetupComplete ?? false,
+        });
+
+        const responseMessage: ClientMessage = getMessageFromRawResponse(rawResponse);
+        if (convo.title === '') {
+          // Retry getConversation up to 5 times if title is empty
+          let retryCount = 0;
+          const maxRetries = 5;
+          while (retryCount < maxRetries) {
+            const conversation = await getConversation(convo.id);
+            convo.title = conversation?.title ?? '';
+
+            if (convo.title !== '') {
+              break; // Title found, exit retry loop
+            }
+
+            retryCount++;
+            if (retryCount < maxRetries) {
+              // Wait 1 second before next retry
+              await new Promise((resolve) => setTimeout(resolve, 1000));
+            }
+          }
+        }
+        setCurrentConversation({
+          ...convo,
+          replacements,
+          messages: [...updatedMessages, responseMessage],
+        });
+        assistantTelemetry?.reportAssistantMessageSent({
+          role: responseMessage.role,
+          actionTypeId: apiConfig.actionTypeId,
+          model: apiConfig.model,
+          provider: apiConfig.provider,
+          isEnabledKnowledgeBase: isSetupComplete ?? false,
+        });
+      } finally {
+        setIsLoadingChatSend(false);
       }
-      const convo: Conversation = { ...currentConversation, ...(newConvo ?? {}) };
-      const userMessage = getCombinedMessage({
-        currentReplacements: convo.replacements,
-        promptText,
-        selectedPromptContexts,
-      });
-
-      const baseReplacements: Replacements = userMessage.replacements ?? convo.replacements;
-
-      const selectedPromptContextsReplacements = Object.values(
-        selectedPromptContexts
-      ).reduce<Replacements>((acc, context) => ({ ...acc, ...context.replacements }), {});
-
-      const replacements: Replacements = {
-        ...baseReplacements,
-        ...selectedPromptContextsReplacements,
-      };
-      const updatedMessages = [...convo.messages, userMessage].map((m) => ({
-        ...m,
-        content: m.content ?? '',
-      }));
-      setCurrentConversation({
-        ...convo,
-        replacements,
-        messages: updatedMessages,
-      });
-
-      // Reset prompt context selection and preview before sending:
-      setSelectedPromptContexts({});
-
-      const rawResponse = await sendMessage({
-        apiConfig,
-        http,
-        message: userMessage.content ?? '',
-        conversationId: convo.id,
-        replacements,
-      });
-
-      assistantTelemetry?.reportAssistantMessageSent({
-        role: userMessage.role,
-        actionTypeId: apiConfig.actionTypeId,
-        model: apiConfig.model,
-        provider: apiConfig.provider,
-        isEnabledKnowledgeBase: isSetupComplete ?? false,
-      });
-
-      const responseMessage: ClientMessage = getMessageFromRawResponse(rawResponse);
-      if (convo.title === '') {
-        convo.title = (await getConversation(convo.id))?.title ?? '';
-      }
-      setCurrentConversation({
-        ...convo,
-        replacements,
-        messages: [...updatedMessages, responseMessage],
-      });
-      assistantTelemetry?.reportAssistantMessageSent({
-        role: responseMessage.role,
-        actionTypeId: apiConfig.actionTypeId,
-        model: apiConfig.model,
-        provider: apiConfig.provider,
-        isEnabledKnowledgeBase: isSetupComplete ?? false,
-      });
     },
     [
       assistantTelemetry,
       createConversation,
       currentConversation,
+      currentUser,
       getConversation,
       http,
       isSetupComplete,
@@ -195,7 +226,7 @@ export const useChatSend = ({
       http,
       // do not send any new messages, the previous conversation is already stored
       conversationId: currentConversation.id,
-      replacements: {},
+      replacements: currentConversation.replacements,
     });
 
     const responseMessage: ClientMessage = getMessageFromRawResponse(rawResponse);
@@ -241,7 +272,7 @@ export const useChatSend = ({
     handleChatSend,
     abortStream,
     handleRegenerateResponse,
-    isLoading,
+    isLoading: isLoadingChatSend,
     userPrompt,
     setUserPrompt,
   };

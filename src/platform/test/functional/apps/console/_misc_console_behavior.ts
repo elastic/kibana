@@ -11,12 +11,14 @@ import expect from '@kbn/expect';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { existsSync, readFileSync, writeFileSync, unlinkSync } from 'fs';
 import { resolve } from 'path';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import { LARGE_INPUT } from './large_input';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
+  const testSubjects = getService('testSubjects');
   const toasts = getService('toasts');
 
   describe('misc console behavior', function testMiscConsoleBehavior() {
@@ -26,9 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Ensure that the text area can be interacted with
       await PageObjects.console.skipTourIfExists();
 
-      await PageObjects.console.openConfig();
-      await PageObjects.console.toggleKeyboardShortcuts(true);
-      await PageObjects.console.openConsole();
+      await PageObjects.console.setKeyboardShortcutsEnabled(true);
     });
 
     beforeEach(async () => {
@@ -98,21 +98,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      // flaky
-      it.skip('should go to line number when Ctrl+L is pressed', async () => {
-        await PageObjects.console.enterText(
-          '\nGET _search/foo\n{\n  "query": {\n    "match_all": {} \n} \n}'
-        );
-        await PageObjects.console.pressCtrlL();
-        // Sleep to allow the line number input to be focused
-        await PageObjects.common.sleep(1000);
-        const alert = await browser.getAlert();
-        await alert?.sendKeys('4');
-        await alert?.accept();
-        await PageObjects.common.sleep(1000);
-        expect(await PageObjects.console.getCurrentLineNumber()).to.be(4);
-      });
-
       describe('open documentation', () => {
         const requests = ['GET _search', 'GET test_index/_search', 'GET /_search'];
         requests.forEach((request) => {
@@ -141,10 +126,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Enter a sample command
       await PageObjects.console.enterText('GET _search');
 
-      // Disable keyboard shorcuts
-      await PageObjects.console.openConfig();
-      await PageObjects.console.toggleKeyboardShortcuts(false);
-      await PageObjects.console.openConsole();
+      // Disable keyboard shortcuts
+      await PageObjects.console.setKeyboardShortcutsEnabled(false);
 
       // Upon clicking ctrl enter a newline character should be added to the editor
       await PageObjects.console.pressCtrlEnter();
@@ -152,9 +135,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.console.isOutputPanelEmptyStateVisible()).to.be(true);
 
       // Restore setting
-      await PageObjects.console.openConfig();
-      await PageObjects.console.toggleKeyboardShortcuts(true);
-      await PageObjects.console.openConsole();
+      await PageObjects.console.setKeyboardShortcutsEnabled(true);
     });
 
     describe('customizable font size', () => {
@@ -256,16 +237,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         unlinkSync(filePath);
       });
 
-      // It seems that the downloadPath is not being resolved correctly in the CI anymore?
-      // Also doesnt seem to work locally either.
-      it.skip('can export input as file', async () => {
+      it('can export input as file', async () => {
         await PageObjects.console.enterText('GET _search');
         await PageObjects.console.clickExportButton();
 
         // Wait for download to trigger
         await PageObjects.common.sleep(1000);
 
-        const downloadPath = resolve(REPO_ROOT, `target/functional-tests/downloads/console_export`);
+        const downloadPath = resolve(
+          REPO_ROOT,
+          `target/functional-tests/downloads/console_export.txt`
+        );
         await retry.try(async () => {
           const fileExists = existsSync(downloadPath);
           expect(fileExists).to.be(true);
@@ -278,6 +260,92 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Clean up downloaded file
         unlinkSync(downloadPath);
       });
+    });
+
+    describe('clickable links', () => {
+      let initialWindowHandles: string[];
+
+      beforeEach(async () => {
+        initialWindowHandles = await browser.getAllWindowHandles();
+      });
+
+      afterEach(async () => {
+        // Close any new tabs that were opened
+        const currentHandles = await browser.getAllWindowHandles();
+        if (currentHandles.length > initialWindowHandles.length) {
+          // Close all new tabs
+          for (let i = initialWindowHandles.length; i < currentHandles.length; i++) {
+            await browser.switchToWindow(currentHandles[i]);
+            await browser.closeCurrentWindow();
+          }
+          // Switch back to the original tab
+          await browser.switchToWindow(initialWindowHandles[0]);
+        }
+      });
+
+      it('should open URL in new tab when clicking on a link in the input editor', async () => {
+        await PageObjects.console.clearEditorText();
+        await PageObjects.console.enterText('# https://www.elastic.co');
+
+        // Wait for Monaco to detect and decorate the link
+        await retry.waitFor('link to be detected by Monaco', async () => {
+          const inputEditor = await testSubjects.find('consoleMonacoEditor');
+          const detectedLinks = await inputEditor.findAllByCssSelector('.detected-link');
+          return detectedLinks.length > 0;
+        });
+
+        const inputEditor = await testSubjects.find('consoleMonacoEditor');
+        const detectedLink = await inputEditor.findByCssSelector('.detected-link');
+
+        // Perform Cmd/Ctrl+Click on the detected link
+        const modifierKey = browser.keys[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
+        await browser
+          .getActions()
+          .keyDown(modifierKey)
+          .click(detectedLink._webElement)
+          .keyUp(modifierKey)
+          .perform();
+
+        // Wait for a new tab to open
+        await retry.waitFor('new tab to open after clicking link', async () => {
+          const handles = await browser.getAllWindowHandles();
+          return handles.length > initialWindowHandles.length;
+        });
+
+        const windowHandles = await browser.getAllWindowHandles();
+        expect(windowHandles.length).to.be.greaterThan(initialWindowHandles.length);
+
+        await browser.switchToWindow(windowHandles[windowHandles.length - 1]);
+        const currentUrl = await browser.getCurrentUrl();
+        expect(currentUrl).to.contain('elastic.co');
+      });
+    });
+
+    it('should work fine with a large content', async () => {
+      await PageObjects.console.clearEditorText();
+
+      // We input the large content via file import since enterText() is slow and times out
+      const filePath = resolve(
+        REPO_ROOT,
+        `target/functional-tests/downloads/console_import_large_input`
+      );
+      writeFileSync(filePath, LARGE_INPUT, 'utf8');
+
+      // Set file to upload and wait for the editor to be updated
+      await PageObjects.console.setFileToUpload(filePath);
+      await PageObjects.console.acceptFileImport();
+      await PageObjects.common.sleep(1000);
+
+      // The autocomplete should still show up without causing stack overflow
+      await PageObjects.console.enterText(`GET _search\n`);
+      await PageObjects.console.enterText(`{\n\t"query": {`);
+      await PageObjects.console.pressEnter();
+      await PageObjects.console.sleepForDebouncePeriod();
+      await PageObjects.console.promptAutocomplete();
+      expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
+
+      // Clean up input file
+      unlinkSync(filePath);
     });
   });
 }

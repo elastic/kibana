@@ -14,7 +14,7 @@ import { distDir as UiSharedDepsSrcDistDir } from '@kbn/ui-shared-deps-src';
 import * as KbnMonaco from '@kbn/monaco/server';
 import type { IRouter } from '@kbn/core-http-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
-import { InternalStaticAssets } from '@kbn/core-http-server-internal';
+import type { InternalStaticAssets } from '@kbn/core-http-server-internal';
 import { FileHashCache } from './file_hash_cache';
 import { registerRouteForBundle } from './bundles_route';
 

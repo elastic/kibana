@@ -1,0 +1,286 @@
+{
+  "attributes": {
+    "allowHidden": false,
+    "fieldAttrs": "{}",
+    "fieldFormatMap": "{}",
+    "fields": "[]",
+    "name": "logs*",
+    "runtimeFieldMap": "{}",
+    "sourceFilters": "[]",
+    "timeFieldName": "@timestamp",
+    "title": "logs*"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-08-28T14:59:48.707Z",
+  "created_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+  "id": "c3471e07-7dbc-45a6-bc5d-7b8985493ba1",
+  "managed": false,
+  "references": [],
+  "type": "index-pattern",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2025-08-28T14:59:48.707Z",
+  "updated_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+  "version": "WzE1LDFd"
+}
+
+{
+  "attributes": {
+    "actions": [],
+    "alertDelay": {
+      "active": 1
+    },
+    "alertTypeId": "observability.rules.custom_threshold",
+    "apiKey": null,
+    "apiKeyCreatedByUser": null,
+    "apiKeyOwner": null,
+    "artifacts": {
+      "dashboards": [],
+      "investigation_guide": {
+        "blob": ""
+      }
+    },
+    "consumer": "stackAlerts",
+    "createdAt": "2025-08-28T15:00:34.371Z",
+    "createdBy": "elastic",
+    "enabled": false,
+    "executionStatus": {
+      "error": null,
+      "lastExecutionDate": "2025-08-28T15:00:47.246Z",
+      "status": "pending",
+      "warning": null
+    },
+    "lastRun": {
+      "alertsCount": {
+        "active": 0,
+        "ignored": 0,
+        "new": 0,
+        "recovered": 0
+      },
+      "outcome": "succeeded",
+      "outcomeMsg": null,
+      "outcomeOrder": 0,
+      "warning": null
+    },
+    "legacyId": null,
+    "meta": {
+      "versionApiKeyLastmodified": "9.2.0"
+    },
+    "monitoring": {
+      "run": {
+        "calculated_metrics": {
+          "p50": 41,
+          "p95": 41,
+          "p99": 41,
+          "success_ratio": 1
+        },
+        "history": [
+          {
+            "duration": 41,
+            "success": true,
+            "timestamp": 1756393237722
+          }
+        ],
+        "last_run": {
+          "metrics": {
+            "duration": 41,
+            "gap_duration_s": null,
+            "total_alerts_created": null,
+            "total_alerts_detected": null,
+            "total_indexing_duration_ms": null,
+            "total_search_duration_ms": null
+          },
+          "timestamp": "2025-08-28T15:00:37.722Z"
+        }
+      }
+    },
+    "muteAll": false,
+    "mutedInstanceIds": [],
+    "name": "Stream Rule 2",
+    "nextRun": "2025-08-28T15:01:37.700Z",
+    "notifyWhen": null,
+    "params": {
+      "alertOnGroupDisappear": false,
+      "alertOnNoData": false,
+      "criteria": [
+        {
+          "comparator": ">",
+          "metrics": [
+            {
+              "aggType": "count",
+              "name": "A"
+            }
+          ],
+          "threshold": [
+            100
+          ],
+          "timeSize": 1,
+          "timeUnit": "m"
+        }
+      ],
+      "searchConfiguration": {
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.index",
+        "query": {
+          "language": "kuery",
+          "query": ""
+        }
+      }
+    },
+    "revision": 0,
+    "running": false,
+    "schedule": {
+      "interval": "1m"
+    },
+    "scheduledTaskId": null,
+    "snoozeSchedule": [],
+    "tags": [],
+    "throttle": null,
+    "updatedAt": "2025-08-28T15:00:34.371Z",
+    "updatedBy": "elastic"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-08-28T15:00:34.371Z",
+  "id": "312638da-43d1-4d6e-8fb8-9cae201cdd3a",
+  "managed": false,
+  "references": [
+    {
+      "id": "c3471e07-7dbc-45a6-bc5d-7b8985493ba1",
+      "name": "param:kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "alert",
+  "typeMigrationVersion": "10.6.0",
+  "updated_at": "2025-08-28T15:00:34.525Z",
+  "version": "WzgsMV0="
+}
+
+{
+  "attributes": {
+    "actions": [],
+    "alertDelay": {
+      "active": 1
+    },
+    "alertTypeId": "observability.rules.custom_threshold",
+    "apiKey": null,
+    "apiKeyCreatedByUser": null,
+    "apiKeyOwner": null,
+    "artifacts": {
+      "dashboards": [],
+      "investigation_guide": {
+        "blob": ""
+      }
+    },
+    "consumer": "stackAlerts",
+    "createdAt": "2025-08-28T15:00:06.274Z",
+    "createdBy": "elastic",
+    "enabled": false,
+    "executionStatus": {
+      "error": null,
+      "lastExecutionDate": "2025-08-28T15:00:47.246Z",
+      "status": "pending",
+      "warning": null
+    },
+    "lastRun": {
+      "alertsCount": {
+        "active": 0,
+        "ignored": 0,
+        "new": 0,
+        "recovered": 0
+      },
+      "outcome": "succeeded",
+      "outcomeMsg": null,
+      "outcomeOrder": 0,
+      "warning": null
+    },
+    "legacyId": null,
+    "meta": {
+      "versionApiKeyLastmodified": "9.2.0"
+    },
+    "monitoring": {
+      "run": {
+        "calculated_metrics": {
+          "p50": 755,
+          "p95": 755,
+          "p99": 755,
+          "success_ratio": 1
+        },
+        "history": [
+          {
+            "duration": 755,
+            "success": true,
+            "timestamp": 1756393207697
+          }
+        ],
+        "last_run": {
+          "metrics": {
+            "duration": 755,
+            "gap_duration_s": null,
+            "total_alerts_created": null,
+            "total_alerts_detected": null,
+            "total_indexing_duration_ms": null,
+            "total_search_duration_ms": null
+          },
+          "timestamp": "2025-08-28T15:00:07.697Z"
+        }
+      }
+    },
+    "muteAll": false,
+    "mutedInstanceIds": [],
+    "name": "Stream Rule 1",
+    "nextRun": "2025-08-28T15:01:07.678Z",
+    "notifyWhen": null,
+    "params": {
+      "alertOnGroupDisappear": false,
+      "alertOnNoData": false,
+      "criteria": [
+        {
+          "comparator": ">",
+          "metrics": [
+            {
+              "aggType": "count",
+              "name": "A"
+            }
+          ],
+          "threshold": [
+            100
+          ],
+          "timeSize": 1,
+          "timeUnit": "m"
+        }
+      ],
+      "searchConfiguration": {
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.index",
+        "query": {
+          "language": "kuery",
+          "query": ""
+        }
+      }
+    },
+    "revision": 0,
+    "running": false,
+    "schedule": {
+      "interval": "1m"
+    },
+    "scheduledTaskId": null,
+    "snoozeSchedule": [],
+    "tags": [],
+    "throttle": null,
+    "updatedAt": "2025-08-28T15:00:06.274Z",
+    "updatedBy": "elastic"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-08-28T15:00:06.275Z",
+  "id": "09cef989-3ded-4a1e-b2b0-53d491d13397",
+  "managed": false,
+  "references": [
+    {
+      "id": "c3471e07-7dbc-45a6-bc5d-7b8985493ba1",
+      "name": "param:kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "alert",
+  "typeMigrationVersion": "10.6.0",
+  "updated_at": "2025-08-28T15:00:06.357Z",
+  "version": "WzUsMV0="
+}

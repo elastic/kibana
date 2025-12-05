@@ -8,7 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ILM_POLICY_NAME } from '@kbn/reporting-common';
-import { IlmPolicyMigrationStatus } from '@kbn/reporting-common/types';
+import type { IlmPolicyMigrationStatus } from '@kbn/reporting-common/types';
 import {
   REPORTING_DATA_STREAM_ALIAS,
   REPORTING_DATA_STREAM_COMPONENT_TEMPLATE,

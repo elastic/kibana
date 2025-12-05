@@ -27,9 +27,10 @@ import {
 } from './default_cell_actions';
 import { servicesMock } from '../../__mocks__/services';
 import { UnifiedDataTableContext } from '../table_context';
-import { EuiButton, EuiDataGridColumnCellActionProps } from '@elastic/eui';
+import type { EuiDataGridColumnCellActionProps } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import { dataTableContextMock } from '../../__mocks__/table_context';
-import { DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 
 describe('Default cell actions ', function () {
   const CopyBtn = buildCopyValueButton(

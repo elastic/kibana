@@ -12,6 +12,11 @@ import { useShowTimeline } from './use_show_timeline';
 import { TestProviders } from '../../mock';
 import { hasAccessToSecuritySolution } from '../../../helpers_access';
 import type { LinkInfo } from '../../links';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import {
+  defaultImplementation,
+  withMatchedIndices,
+} from '../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('../../components/user_privileges');
 jest.mock('../../../helpers_access', () => ({ hasAccessToSecuritySolution: jest.fn(() => true) }));
@@ -40,6 +45,8 @@ const mockUseSourcererDataView = jest.fn(
 jest.mock('../../../sourcerer/containers', () => ({
   useSourcererDataView: () => mockUseSourcererDataView(),
 }));
+
+jest.mocked(useDataView).mockImplementation(withMatchedIndices);
 
 const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
 
@@ -109,6 +116,7 @@ describe('sourcererDataView', () => {
   });
 
   it('should not show timeline when dataViewId is not null and indices does not exist', () => {
+    jest.mocked(useDataView).mockImplementation(defaultImplementation);
     mockUseSourcererDataView.mockReturnValueOnce({ indicesExist: false, dataViewId: 'test' });
     const { result } = renderUseShowTimeline();
     expect(result.current).toEqual([false]);
@@ -117,6 +125,7 @@ describe('sourcererDataView', () => {
 
 describe('Security solution capabilities', () => {
   it('should show timeline when user has read capabilities', () => {
+    jest.mocked(useDataView).mockImplementation(withMatchedIndices);
     const { result } = renderUseShowTimeline();
     expect(result.current).toEqual([true]);
   });

@@ -8,16 +8,12 @@
 import type { ESSearchResponse, ESSearchRequest } from '@kbn/es-types';
 
 export interface ExitSpanFields {
-  destinationService?: string;
-  spanSubType?: string;
-  spanId?: string;
-  spanType?: string;
-  transactionId?: string;
-  serviceNodeName?: string;
-  traceId?: string;
-  agentName?: string;
-  docCount?: number;
-  isOtel?: boolean;
+  destinationService: string;
+  spanId: string;
+  transactionId: string;
+  serviceNodeName: string;
+  traceId: string;
+  agentName: string;
 }
 
 export interface ServiceMapDiagnosticResponse {
@@ -25,7 +21,7 @@ export interface ServiceMapDiagnosticResponse {
     exitSpans: {
       found: boolean;
       totalConnections: number;
-      apmExitSpans: ExitSpanFields[];
+      apmExitSpans: ExitSpanFields[] | [];
       hasMatchingDestinationResources: boolean;
     };
     parentRelationships: {
@@ -43,7 +39,7 @@ export interface ServiceMapDiagnosticResponse {
   };
   elasticsearchResponses: {
     exitSpansQuery?: ESSearchResponse<unknown, ESSearchRequest>;
-    sourceSpanIdsQuery?: ESSearchResponse<unknown, ESSearchRequest>;
+    sourceSpansQuery?: ESSearchResponse<unknown, ESSearchRequest>;
     destinationParentIdsQuery?: ESSearchResponse<unknown, ESSearchRequest>;
     traceCorrelationQuery?: ESSearchResponse<unknown, ESSearchRequest>;
   };

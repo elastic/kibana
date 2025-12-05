@@ -9,14 +9,13 @@ import expect from '@kbn/expect';
 import { v4 as uuid } from 'uuid';
 import prettyMilliseconds from 'pretty-ms';
 import nock from 'nock';
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 import { times } from 'lodash';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import pRetry from 'p-retry';
+import type { LockId, LockDocument } from '@kbn/lock-manager/src/lock_manager_client';
 import {
-  LockId,
   LockManager,
-  LockDocument,
   withLock,
   rerunSetupIndexAsset,
 } from '@kbn/lock-manager/src/lock_manager_client';
@@ -803,6 +802,72 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
           const indexExists = await es.indices.exists({ index: LOCKS_CONCRETE_INDEX_NAME });
           expect(indexExists).to.be(true);
+        });
+      });
+
+      describe('when lock index is accessed via alias (simulating reindexed scenario)', () => {
+        const reindexedIndexName = `${LOCKS_CONCRETE_INDEX_NAME}-reindexed-for-10`;
+
+        before(async () => {
+          await deleteLockIndexAssets(es, log);
+
+          // Create the actual index with correct mappings but different name
+          await es.indices.create({
+            index: reindexedIndexName,
+            settings: {
+              number_of_shards: 1,
+              auto_expand_replicas: '0-1',
+              hidden: true,
+            },
+            mappings: {
+              dynamic: false,
+              properties: {
+                token: { type: 'keyword' },
+                metadata: { enabled: false },
+                createdAt: { type: 'date' },
+                expiresAt: { type: 'date' },
+              },
+            },
+          });
+
+          // Add alias pointing LOCKS_CONCRETE_INDEX_NAME to the reindexed index
+          await es.indices.putAlias({
+            index: reindexedIndexName,
+            name: LOCKS_CONCRETE_INDEX_NAME,
+          });
+        });
+
+        after(async () => {
+          // Clean up alias and reindexed index
+          await es.indices.deleteAlias(
+            { index: reindexedIndexName, name: LOCKS_CONCRETE_INDEX_NAME },
+            { ignore: [404] }
+          );
+          await es.indices.delete({ index: reindexedIndexName }, { ignore: [404] });
+        });
+
+        it('should not throw when getMapping returns a different index name than requested', async () => {
+          // Verify the alias setup
+          const aliasExists = await es.indices.existsAlias({ name: LOCKS_CONCRETE_INDEX_NAME });
+          expect(aliasExists).to.be(true);
+
+          // This should NOT throw "Cannot destructure property 'mappings' of 'res[LOCKS_CONCRETE_INDEX_NAME]' as it is undefined"
+          try {
+            await setupLockManagerIndex(es, logger);
+          } catch (error) {
+            expect().fail(
+              `setupLockManagerIndex should not throw when index is accessed via alias, but got: ${error.message}`
+            );
+          }
+        });
+
+        it('should successfully acquire a lock when index is accessed via alias', async () => {
+          const lockManager = new LockManager('alias_test_lock', es, logger);
+          const acquired = await lockManager.acquire();
+          expect(acquired).to.be(true);
+
+          // Cleanup
+          await lockManager.release();
         });
       });
     });

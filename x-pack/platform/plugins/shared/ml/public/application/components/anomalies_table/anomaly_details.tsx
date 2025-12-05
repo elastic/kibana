@@ -17,6 +17,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiCallOut,
   EuiIcon,
   EuiIconTip,
   EuiLink,
@@ -46,6 +47,7 @@ interface Props {
   job: ExplorerJob;
   definition?: CategoryDefinition;
   examples?: string[];
+  categoryDefinitionError?: string;
   filter?: EntityCellFilter;
   influencerFilter?: EntityCellFilter;
 }
@@ -54,6 +56,7 @@ export const AnomalyDetails: FC<Props> = ({
   anomaly,
   examples,
   definition,
+  categoryDefinitionError,
   isAggregatedData,
   filter,
   influencersLimit,
@@ -84,7 +87,13 @@ export const AnomalyDetails: FC<Props> = ({
         name: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.categoryExamplesTitle', {
           defaultMessage: 'Category examples',
         }),
-        content: <CategoryExamples examples={examples} definition={definition} />,
+        content: (
+          <CategoryExamples
+            examples={examples}
+            definition={definition}
+            error={categoryDefinitionError}
+          />
+        ),
       },
     ];
 
@@ -309,10 +318,11 @@ const Influencers: FC<{
   return null;
 };
 
-const CategoryExamples: FC<{ definition?: CategoryDefinition; examples: string[] }> = ({
-  definition,
-  examples,
-}) => {
+const CategoryExamples: FC<{
+  definition?: CategoryDefinition;
+  examples: string[];
+  error?: string;
+}> = ({ definition, examples, error }) => {
   const { euiTheme } = useEuiTheme();
   return (
     <EuiFlexGroup
@@ -323,6 +333,24 @@ const CategoryExamples: FC<{ definition?: CategoryDefinition; examples: string[]
         padding: euiTheme.size.l,
       }}
     >
+      {error && (
+        <EuiFlexItem>
+          <EuiCallOut
+            announceOnMount
+            size="s"
+            color="danger"
+            iconType="warning"
+            title={i18n.translate(
+              'xpack.ml.anomaliesTable.anomalyDetails.categoryDefinitionErrorTitle',
+              { defaultMessage: 'An error occurred loading category definition:' }
+            )}
+            data-test-subj="mlAnomaliesTableCategoryDefinitionError"
+          >
+            <EuiText size="xs">{error}</EuiText>
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+        </EuiFlexItem>
+      )}
       {definition !== undefined && definition.terms && (
         <>
           <EuiFlexItem key={`example-terms`}>

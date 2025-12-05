@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, Plugin } from '@kbn/core/server';
+import type { CoreSetup, Plugin } from '@kbn/core/server';
 import { registerScriptsRoute } from './route';
 
 export class ScriptsService implements Plugin<void> {

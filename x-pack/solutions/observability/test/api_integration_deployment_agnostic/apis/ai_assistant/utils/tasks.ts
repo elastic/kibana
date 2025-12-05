@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 import { getActiveReindexingTaskId } from '@kbn/observability-ai-assistant-plugin/server/service/knowledge_base_service/reindex_knowledge_base';
 import pRetry from 'p-retry';
 

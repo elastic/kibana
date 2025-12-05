@@ -7,15 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getSavedSearchUrl, getSavedSearchFullPathUrl } from './saved_searches_url';
+export { getSavedSearchFullPathUrl } from './saved_searches_url';
 export { fromSavedSearchAttributes } from './saved_searches_utils';
-export { extractTabs, extractTabsBackfillFn } from './service/extract_tabs';
+export { extractTabs } from './service/extract_tabs';
 
 export type {
   DiscoverGridSettings,
   DiscoverGridSettingsColumn,
   SavedSearch,
   SavedSearchAttributes,
+  SavedSearchByValueAttributes,
+  DiscoverSession,
+  DiscoverSessionTab,
 } from './types';
 
 export enum VIEW_MODE {
@@ -31,6 +34,5 @@ export {
   MIN_SAVED_SEARCH_SAMPLE_SIZE,
   MAX_SAVED_SEARCH_SAMPLE_SIZE,
 } from './constants';
-export { getKibanaContextFn } from './expressions/kibana_context';
 
 export { toSavedSearchAttributes } from './service/saved_searches_utils';

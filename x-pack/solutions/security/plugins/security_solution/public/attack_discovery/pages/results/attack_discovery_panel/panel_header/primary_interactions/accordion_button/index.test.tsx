@@ -10,21 +10,6 @@ import React from 'react';
 
 import { AccordionButton } from '.';
 
-jest.mock('../../../../../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../../../../../common/lib/kibana');
-
-  return {
-    ...original,
-    useKibana: () => ({
-      services: {
-        featureFlags: {
-          getBooleanValue: jest.fn().mockReturnValue(true),
-        },
-      },
-    }),
-  };
-});
-
 describe('AccordionButton', () => {
   const title = 'Malware Delivery and Credentials Access on macOS';
 

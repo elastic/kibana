@@ -12,8 +12,8 @@ import { BehaviorSubject } from 'rxjs';
 
 import { render } from '@testing-library/react';
 
-import { ControlGroupApi } from '../..';
-import { DefaultControlApi } from '../../controls/types';
+import type { ControlGroupApi } from '../..';
+import type { DefaultControlApi } from '../../controls/types';
 import { ControlGroupEditor } from './control_group_editor';
 import { initializeEditorStateManager } from '../initialize_editor_state_manager';
 import { DEFAULT_CONTROLS_LABEL_POSITION } from '@kbn/controls-constants';

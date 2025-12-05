@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { dashboard, visualize, lens, timeToVisualize, common, header } = getPageObjects([
@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const createAndSaveDashboard = async (dashboardName: string) => {
     await dashboard.navigateToApp();
     await dashboard.clickNewDashboard();
-    await dashboardAddPanel.clickOpenAddPanel();
+    await dashboardAddPanel.clickAddFromLibrary();
     await dashboardAddPanel.filterEmbeddableNames('lnsXYvis');
     await find.clickByButtonText('lnsXYvis');
     await dashboardAddPanel.closeAddPanel();

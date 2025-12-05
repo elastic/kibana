@@ -9,7 +9,7 @@
 
 import React, { useRef, useState, useCallback } from 'react';
 import { RowCellsRenderer } from './row_cells_renderer';
-import { AllCellsProps, RowMatches } from '../types';
+import type { AllCellsProps, RowMatches } from '../types';
 
 // Processes rows in chunks:
 // - to don't block the main thread for too long

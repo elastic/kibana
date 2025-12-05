@@ -6,9 +6,9 @@
 #   ### Saved Object type(s) that we care about:
 #     index-pattern
 #   ### Test file(s) that use it:
-#     x-pack/test/api_integration/apis/security_solution/timeline_migrations.ts
+#     x-pack/solutions/security/test/api_integration/apis/security_solution/timeline_migrations.ts
 #   ### Config(s) that govern the test file(s):
-#     x-pack/test/api_integration/config.ts
+#     x-pack/solutions/security/test/api_integration/config.ts
 # The other types it contains:
 # config
 # index-pattern
@@ -48,7 +48,7 @@ list_stragglers() {
   done <<<"$(find x-pack/platform/test/fixtures/es_archives -name mappings.json)"
 
   # Also search in x-pack/solutions/{solution}/test/fixtures/es_archives for each solution
-  for solution in search security chat observability; do
+  for solution in search security workplaceai observability; do
     solution_dir="x-pack/solutions/${solution}/test/fixtures/es_archives"
     if [ -d "$solution_dir" ]; then
       while read -r y; do
@@ -271,7 +271,8 @@ usages_list() {
   local found_usages=()
 
   if [[ $isInXpack = 0 ]]; then
-    found_usages+=($(find x-pack/test -type f -print0 | xargs -0 grep -n "$archive" | cut -d ':' -f 1 | uniq))
+    found_usages+=($(find x-pack/platform/test -type f -print0 | xargs -0 grep -n "$archive" | cut -d ':' -f 1 | uniq))
+    found_usages+=($(find x-pack/solutions/*/test -type f -print0 | xargs -0 grep -n "$archive" | cut -d ':' -f 1 | uniq))
   else
     found_usages+=($(find test -type f -print0 | xargs -0 grep -n "$archive" | cut -d ':' -f 1 | uniq))
   fi
@@ -393,7 +394,7 @@ save_kbn() {
   set -x
   node scripts/kbn_archiver.js --config "$test_config" save "$new_archive" --type $standard_list --space "$space"
   set +x
-  #  node scripts/kbn_archiver.js --config x-pack/platform/test/spaces_api_integration/security_and_spaces/config_basic.ts save x-pack/test/functional/fixtures/kbn_archiver/saved_objects/default_space --type search,index-pattern,visualization,dashboard,lens,map,graph-workspace,query,tag,url,canvas-workpad
+  #  node scripts/kbn_archiver.js --config x-pack/platform/test/spaces_api_integration/security_and_spaces/config_basic.ts save x-pack/platform/test/fixtures/kbn_archives/saved_objects/default_space --type search,index-pattern,visualization,dashboard,lens,map,graph-workspace,query,tag,url,canvas-workpad
 }
 
 load_kbn() {

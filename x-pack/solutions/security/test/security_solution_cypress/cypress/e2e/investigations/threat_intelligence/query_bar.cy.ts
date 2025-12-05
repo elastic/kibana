@@ -32,8 +32,7 @@ import { login } from '../../../tasks/login';
 
 const URL = '/app/security/threat_intelligence/indicators';
 
-// Failing: See https://github.com/elastic/kibana/issues/193804
-describe.skip('Indicators query bar interaction', { tags: ['@ess'] }, () => {
+describe('Indicators query bar interaction', { tags: ['@ess'] }, () => {
   before(() => cy.task('esArchiverLoad', { archiveName: 'ti_indicators_data_multiple' }));
 
   after(() => cy.task('esArchiverUnload', { archiveName: 'ti_indicators_data_multiple' }));
@@ -104,7 +103,7 @@ describe.skip('Indicators query bar interaction', { tags: ['@ess'] }, () => {
 
     cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
 
-    openFlyout();
+    openFlyout(5);
     filterInFromFlyoutBlockItem();
     closeFlyout();
     waitForViewToBeUpdated();
@@ -119,7 +118,7 @@ describe.skip('Indicators query bar interaction', { tags: ['@ess'] }, () => {
 
     cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
 
-    openFlyout();
+    openFlyout(5);
     filterOutFromFlyoutBlockItem();
     closeFlyout();
     waitForViewToBeUpdated();
@@ -134,7 +133,7 @@ describe.skip('Indicators query bar interaction', { tags: ['@ess'] }, () => {
 
     cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
 
-    openFlyout();
+    openFlyout(5);
     filterInFromFlyoutOverviewTable();
     closeFlyout();
     waitForViewToBeUpdated();
@@ -149,7 +148,7 @@ describe.skip('Indicators query bar interaction', { tags: ['@ess'] }, () => {
 
     cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
 
-    openFlyout();
+    openFlyout(5);
     filterOutFromFlyoutOverviewTable();
     closeFlyout();
     waitForViewToBeUpdated();
@@ -164,7 +163,7 @@ describe.skip('Indicators query bar interaction', { tags: ['@ess'] }, () => {
 
     cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
 
-    openFlyout();
+    openFlyout(5);
     navigateToFlyoutTableTab();
     filterInFromFlyoutTableTab();
     closeFlyout();
@@ -180,7 +179,7 @@ describe.skip('Indicators query bar interaction', { tags: ['@ess'] }, () => {
 
     cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
 
-    openFlyout();
+    openFlyout(5);
     navigateToFlyoutTableTab();
     filterOutFromFlyoutTableTab();
     closeFlyout();

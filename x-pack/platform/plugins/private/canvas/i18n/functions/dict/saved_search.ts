@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import type { savedSearch } from '../../../canvas_plugin_src/functions/external/saved_search';
-import { FunctionHelp } from '../function_help';
-import { FunctionFactory } from '../../../types';
+import type { FunctionHelp } from '../function_help';
+import type { FunctionFactory } from '../../../types';
 
 export const help: FunctionHelp<FunctionFactory<typeof savedSearch>> = {
   help: i18n.translate('xpack.canvas.functions.savedSearchHelpText', {

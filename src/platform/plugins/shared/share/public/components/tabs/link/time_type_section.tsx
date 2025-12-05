@@ -7,15 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiCallOut,
-  EuiSpacer,
-  EuiSwitch,
-  EuiSwitchEvent,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
-import React, { ReactNode, useEffect, useState } from 'react';
+import type { EuiSwitchEvent } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiSwitch, EuiText, useEuiTheme } from '@elastic/eui';
+import type { ReactNode } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FormattedMessage, FormattedRelativeTime, FormattedDate } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -203,6 +198,7 @@ export const TimeTypeSection = ({ timeRange, isAbsoluteTime, changeTimeType }: P
       <EuiSpacer size="m" />
       {isAbsoluteTimeByDefault && (
         <EuiCallOut
+          announceOnMount
           size="s"
           title={i18n.translate('share.link.timeRange.relativeTimeCallout', {
             defaultMessage: 'To use a relative time range, select it in the time picker first.',

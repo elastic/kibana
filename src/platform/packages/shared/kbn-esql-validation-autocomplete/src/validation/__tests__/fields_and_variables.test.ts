@@ -7,12 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type FunctionParameterType, FunctionDefinitionTypes } from '@kbn/esql-ast';
+import {
+  type FunctionParameterType,
+  FunctionDefinitionTypes,
+  getNoValidCallSignatureError,
+} from '@kbn/esql-ast';
 import { Location } from '@kbn/esql-ast/src/commands_registry/types';
 import { setTestFunctions } from '@kbn/esql-ast/src/definitions/utils/test_functions';
 import { setup } from './helpers';
 
-describe('field and userDefinedColumn escaping', () => {
+describe('column escaping', () => {
   it('recognizes escaped fields', async () => {
     const { expectErrors } = await setup();
     // command level
@@ -35,7 +39,7 @@ describe('field and userDefinedColumn escaping', () => {
     );
   });
 
-  it('recognizes escaped userDefinedColumns', async () => {
+  it('recognizes escaped user-defined columns', async () => {
     const { expectErrors } = await setup();
     // command level
     await expectErrors('ROW `var$iable` = 1 | EVAL `var$iable`', []);
@@ -52,12 +56,12 @@ describe('field and userDefinedColumn escaping', () => {
       []
     );
 
-    // expression userDefinedColumn
+    // expression user-defined column
     await expectErrors('FROM index | EVAL doubleField + 20 | EVAL `doubleField + 20`', []);
     await expectErrors('ROW 21 + 20 | STATS AVG(`21 + 20`)', []);
   });
 
-  it('recognizes userDefinedColumns with spaces and comments', async () => {
+  it('recognizes user-defined columns with spaces and comments', async () => {
     const { expectErrors } = await setup();
     // command level
     await expectErrors(
@@ -110,13 +114,11 @@ describe('field and userDefinedColumn escaping', () => {
   });
 });
 
-describe('userDefinedColumn support', () => {
-  describe('userDefinedColumn data type detection', () => {
-    // most of these tests are aspirational (and skipped) because we don't have
-    // a good way to compute the type of an expression yet.
+describe('user-defined column support', () => {
+  describe('user-defined column data type detection', () => {
     beforeAll(() => {
       setTestFunctions([
-        // this test function is just used to test the type of the userDefinedColumn
+        // this test function is just used to test the type of the user-defined column
         {
           type: FunctionDefinitionTypes.SCALAR,
           description: 'Test function',
@@ -127,7 +129,7 @@ describe('userDefinedColumn support', () => {
           ],
         },
         // this test function is used to check that the correct return type is used
-        // when determining userDefinedColumn types
+        // when determining user-defined column types
         {
           type: FunctionDefinitionTypes.SCALAR,
           description: 'Test function',
@@ -153,10 +155,9 @@ describe('userDefinedColumn support', () => {
     });
 
     const expectType = (type: FunctionParameterType) =>
-      `Argument of [test] must be [cartesian_point], found value [var] type [${type}]`;
+      getNoValidCallSignatureError('test', [type]);
 
-    // @todo unskip after https://github.com/elastic/kibana/issues/195682
-    test.skip('literals', async () => {
+    test('literals', async () => {
       const { expectErrors } = await setup();
       // literal assignment
       await expectErrors('FROM index | EVAL var = 1, TEST(var)', [expectType('integer')]);
@@ -167,19 +168,19 @@ describe('userDefinedColumn support', () => {
     test('fields', async () => {
       const { expectErrors } = await setup();
       // field assignment
-      await expectErrors('FROM index | EVAL var = textField, TEST(var)', [expectType('text')]);
-    });
-
-    // @todo unskip after https://github.com/elastic/kibana/issues/195682
-    test.skip('userDefinedColumns', async () => {
-      const { expectErrors } = await setup();
-      await expectErrors('FROM index | EVAL var = textField, col2 = var, TEST(col2)', [
-        `Argument of [test] must be [cartesian_point], found value [col2] type [text]`,
+      await expectErrors('FROM index | EVAL var = textField, TEST(var)', [
+        getNoValidCallSignatureError('test', ['text']),
       ]);
     });
 
-    // @todo unskip after https://github.com/elastic/kibana/issues/195682
-    test.skip('inline casting', async () => {
+    test('user-defined columns', async () => {
+      const { expectErrors } = await setup();
+      await expectErrors('FROM index | EVAL var = textField, col2 = var, TEST(col2)', [
+        getNoValidCallSignatureError('test', ['text']),
+      ]);
+    });
+
+    test('inline casting', async () => {
       const { expectErrors } = await setup();
       // inline cast assignment
       await expectErrors('FROM index | EVAL var = doubleField::long, TEST(var)', [
@@ -191,8 +192,7 @@ describe('userDefinedColumn support', () => {
       ]);
     });
 
-    // @todo unskip after https://github.com/elastic/kibana/issues/195682
-    test.skip('function results', async () => {
+    test('function results', async () => {
       const { expectErrors } = await setup();
       // function assignment
       await expectErrors('FROM index | EVAL var = RETURN_VALUE(doubleField), TEST(var)', [

@@ -15,7 +15,7 @@ import execa from 'execa';
 import path from 'path';
 import expect from '@kbn/expect';
 import { retryForSuccess } from '@kbn/ftr-common-functional-services';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
 const DEFAULT_VERSION = '8.15.0-SNAPSHOT';

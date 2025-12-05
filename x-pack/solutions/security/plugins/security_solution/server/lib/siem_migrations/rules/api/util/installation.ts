@@ -15,18 +15,18 @@ import { performTimelinesInstallation } from '../../../../detection_engine/prebu
 import { createPrebuiltRules } from '../../../../detection_engine/prebuilt_rules/logic/rule_objects/create_prebuilt_rules';
 import type { IDetectionRulesClient } from '../../../../detection_engine/rule_management/logic/detection_rules_client/detection_rules_client_interface';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine';
-import type { StoredRuleMigration } from '../../types';
+import type { StoredRuleMigrationRule } from '../../types';
 import { getPrebuiltRules, getUniquePrebuiltRuleIds } from './prebuilt_rules';
 import {
   convertMigrationCustomRuleToSecurityRulePayload,
   isMigrationCustomRule,
 } from '../../../../../../common/siem_migrations/rules/utils';
-import { getVendorTag } from './tags';
+import { getVendorTag } from '../../../common/api/util/tags';
 
 const MAX_CUSTOM_RULES_TO_CREATE_IN_PARALLEL = 50;
 
 const installPrebuiltRules = async (
-  rulesToInstall: StoredRuleMigration[],
+  rulesToInstall: StoredRuleMigrationRule[],
   enabled: boolean,
   securitySolutionContext: SecuritySolutionApiRequestHandlerContext,
   rulesClient: RulesClient,
@@ -88,7 +88,7 @@ const installPrebuiltRules = async (
 };
 
 export const installCustomRules = async (
-  rulesToInstall: StoredRuleMigration[],
+  rulesToInstall: StoredRuleMigrationRule[],
   enabled: boolean,
   detectionRulesClient: IDetectionRulesClient
 ): Promise<{
@@ -108,7 +108,7 @@ export const installCustomRules = async (
         rule.elastic_rule,
         enabled
       );
-      const tags = [getVendorTag(rule.original_rule)];
+      const tags = [getVendorTag(rule.original_rule.vendor)];
       const createdRule = await detectionRulesClient.createCustomRule({
         params: {
           ...payloadRule,
@@ -179,7 +179,7 @@ export const installTranslated = async ({
   const installationErrors: Error[] = [];
 
   // Install rules that matched Elastic prebuilt rules
-  const prebuiltRuleBatches = ruleMigrationsClient.data.rules.searchBatches(migrationId, {
+  const prebuiltRuleBatches = ruleMigrationsClient.data.items.searchBatches(migrationId, {
     filters: { ids, installable: true, prebuilt: true },
   });
   let prebuiltRulesToInstall = await prebuiltRuleBatches.next();
@@ -194,7 +194,7 @@ export const installTranslated = async ({
     );
     installedCount += rulesToUpdate.length;
     installationErrors.push(...errors);
-    await ruleMigrationsClient.data.rules.update(rulesToUpdate);
+    await ruleMigrationsClient.data.items.update(rulesToUpdate);
     prebuiltRulesToInstall = await prebuiltRuleBatches.next();
   }
 
@@ -205,7 +205,7 @@ export const installTranslated = async ({
   }
 
   // Install rules with custom translation
-  const customRuleBatches = ruleMigrationsClient.data.rules.searchBatches(migrationId, {
+  const customRuleBatches = ruleMigrationsClient.data.items.searchBatches(migrationId, {
     filters: { ids, installable: true, prebuilt: false },
   });
   let customRulesToInstall = await customRuleBatches.next();
@@ -217,7 +217,7 @@ export const installTranslated = async ({
     );
     installedCount += rulesToUpdate.length;
     installationErrors.push(...errors);
-    await ruleMigrationsClient.data.rules.update(rulesToUpdate);
+    await ruleMigrationsClient.data.items.update(rulesToUpdate);
     customRulesToInstall = await customRuleBatches.next();
   }
 

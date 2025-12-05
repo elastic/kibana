@@ -12,6 +12,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiResizeObserver } from '@el
 import styled from 'styled-components';
 import classNames from 'classnames';
 import type { EuiResizeObserverProps } from '@elastic/eui/src/components/observer/resize_observer/resize_observer';
+import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import { InputDisplay } from './components/input_display';
 import type { ExecuteCommandPayload, ConsoleDataState } from '../console_state/types';
 import { useWithInputShowPopover } from '../../hooks/state_selectors/use_with_input_show_popover';
@@ -34,8 +35,10 @@ const CommandInputContainer = styled.div`
   padding: ${({ theme: { eui } }) => eui.euiSizeS};
   outline: ${({ theme: { eui } }) => eui.euiBorderThin};
 
+  border-bottom: ${({ theme: { eui } }) => eui.euiBorderThick};
+  border-bottom-color: transparent;
+
   &:focus-within {
-    border-bottom: ${({ theme: { eui } }) => eui.euiBorderThick};
     border-bottom-color: ${({ theme: { eui } }) => eui.euiColorPrimary};
   }
 
@@ -85,6 +88,7 @@ export interface CommandInputProps extends CommonProps {
 
 export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ...commonProps }) => {
   useInputHints();
+  const isMounted = useIsMounted();
   const getTestId = useTestIdGenerator(useDataTestSubj());
   const dispatch = useConsoleStateDispatch();
   const commands = useWithCommandList();
@@ -140,6 +144,21 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
 
   const handleTypingAreaClick = useCallback<MouseEventHandler>(
     (ev) => {
+      // We don't want to trigger input area focus if the click was done from a component that
+      // resides OUTSIDE of the typing areas. This can be the case with commands that have an argument
+      // value component (aka: argument selector), where events done from inside those components
+      // all bubble up through the input area - and this includes events from components inside
+      // Portals - like popups - where the HTML element is NOT inside this typing area.
+      const { currentTarget, target } = ev;
+
+      if (currentTarget !== target && target instanceof Node && !currentTarget.contains(target)) {
+        if (isKeyInputBeingCaptured && keyCaptureFocusRef.current) {
+          keyCaptureFocusRef.current.blur();
+        }
+
+        return;
+      }
+
       if (keyCaptureFocusRef.current) {
         keyCaptureFocusRef.current.focus();
       }
@@ -148,15 +167,15 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
         dispatch({ type: 'updateInputPopoverState', payload: { show: undefined } });
       }
     },
-    [dispatch, isPopoverOpen, keyCaptureFocusRef]
+    [dispatch, isKeyInputBeingCaptured, isPopoverOpen, keyCaptureFocusRef]
   );
 
   const handleInputCapture = useCallback<InputCaptureProps['onCapture']>(
     ({ value, selection, eventDetails }) => {
-      const keyCode = eventDetails.keyCode;
+      const key = eventDetails.code;
 
       // UP arrow key
-      if (keyCode === 38) {
+      if (key === 'ArrowUp') {
         dispatch({ type: 'removeFocusFromKeyCapture' });
         dispatch({ type: 'updateInputPopoverState', payload: { show: 'input-history' } });
 
@@ -193,44 +212,55 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
 
           inputText.addValue(processedValue ?? '', selection);
 
-          switch (keyCode) {
+          switch (key) {
             // BACKSPACE
-            case 8:
+            case 'Backspace':
               inputText.backspaceChar(selection);
               break;
 
             // DELETE
-            case 46:
+            case 'Delete':
               inputText.deleteChar(selection);
               break;
 
-            // ENTER  = Execute command and blank out the input area
-            case 13:
-              setCommandToExecute({
-                input: inputText.getFullText(true),
-                enteredCommand: prevEnteredCommand as ConsoleDataState['input']['enteredCommand'],
-                parsedInput: prevParsedInput as ConsoleDataState['input']['parsedInput'],
-              });
-              inputText.clear();
+            // ENTER = Execute command and blank out the input area
+            case 'Enter':
+              // In order to avoid triggering another state update while this one is being processed,
+              // we defer the setting of the command to execute until this state update is done
+              // This essentially avoids the React warning:
+              //    "Cannot update a component (`name here`) while rendering a different component (`name here`)"
+              {
+                const commandToExecutePayload: ExecuteCommandPayload = {
+                  input: inputText.getFullText(true),
+                  enteredCommand: prevEnteredCommand as ConsoleDataState['input']['enteredCommand'],
+                  parsedInput: prevParsedInput as ConsoleDataState['input']['parsedInput'],
+                };
+                Promise.resolve().then(() => {
+                  if (isMounted()) {
+                    setCommandToExecute(commandToExecutePayload);
+                  }
+                });
+                inputText.clear();
+              }
               break;
 
             // ARROW LEFT
-            case 37:
+            case 'ArrowLeft':
               inputText.moveCursorTo('left');
               break;
 
             // ARROW RIGHT
-            case 39:
+            case 'ArrowRight':
               inputText.moveCursorTo('right');
               break;
 
             // HOME
-            case 36:
+            case 'Home':
               inputText.moveCursorTo('home');
               break;
 
             // END
-            case 35:
+            case 'End':
               inputText.moveCursorTo('end');
               break;
           }
@@ -246,7 +276,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
         },
       });
     },
-    [commands, dispatch]
+    [commands, dispatch, isMounted]
   );
 
   // Execute the command if one was ENTER'd.

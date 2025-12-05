@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { useSnapshot } from '../hooks/use_snaphot';
 import { useWaffleFiltersContext } from '../hooks/use_waffle_filters';
@@ -21,10 +22,15 @@ export const SnapshotContainer = React.memo(() => {
   const { currentTime } = useWaffleTimeContext();
   const { filterQuery } = useWaffleFiltersContext();
 
+  const { inventoryPrefill } = useAlertPrefillContext();
+
+  useEffect(() => {
+    return () => inventoryPrefill.reset();
+  }, [inventoryPrefill]);
+
   const {
     loading,
     nodes,
-    reload,
     interval = '60s',
   } = useSnapshot(
     {
@@ -44,7 +50,7 @@ export const SnapshotContainer = React.memo(() => {
   return (
     <>
       <FilterBar interval={interval} />
-      <LayoutView loading={loading} nodes={nodes} reload={reload} interval={interval} />
+      <LayoutView loading={loading} nodes={nodes} interval={interval} />
     </>
   );
 });

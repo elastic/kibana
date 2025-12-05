@@ -8,13 +8,10 @@
  */
 
 import { BehaviorSubject, debounceTime, first, map } from 'rxjs';
-import {
-  PublishesDataLoading,
-  PublishingSubject,
-  apiPublishesDataLoading,
-} from '@kbn/presentation-publishing';
+import type { PublishesDataLoading, PublishingSubject } from '@kbn/presentation-publishing';
+import { apiPublishesDataLoading } from '@kbn/presentation-publishing';
 import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
-import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 
 export function initializeDataLoadingManager(
   children$: PublishingSubject<{ [key: string]: DefaultEmbeddableApi }>

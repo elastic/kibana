@@ -17,7 +17,7 @@ import { OptimizerConfig } from '@kbn/optimizer';
 import { Bundle, BundleRemotes } from '@kbn/optimizer/src/common';
 import { observeLines } from '@kbn/stdio-dev-helpers';
 
-import { TaskContext } from '../task_context';
+import type { TaskContext } from '../task_context';
 
 type WorkerMsg = { success: true; warnings: string } | { success: false; error: string };
 

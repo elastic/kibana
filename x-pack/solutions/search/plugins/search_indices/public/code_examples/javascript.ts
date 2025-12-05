@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { API_KEY_PLACEHOLDER, INDEX_PLACEHOLDER } from '../constants';
-import {
+import type {
   CodeLanguage,
   CodeSnippetParameters,
   IngestDataCodeDefinition,
@@ -15,7 +15,7 @@ import {
   SearchCodeSnippetFunction,
   SearchCodeSnippetParameters,
 } from '../types';
-import { CreateIndexLanguageExamples } from './types';
+import type { CreateIndexLanguageExamples } from './types';
 
 export const JAVASCRIPT_INFO: CodeLanguage = {
   id: 'javascript',
@@ -132,11 +132,11 @@ const searchCommand: SearchCodeSnippetFunction = (
 ${createClientSnippet(args)}
 
 const index = '${args.indexName}';
-const query = ${JSON.stringify(args.queryObject, null, 2)};
+const body = ${JSON.stringify(args.queryObject, null, 2)};
 
 const result = await client.search({
   index,
-  query,
+  body,
 });
 
 console.log(result.hits.hits);`;

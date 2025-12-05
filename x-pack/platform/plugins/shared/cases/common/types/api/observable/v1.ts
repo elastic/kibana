@@ -29,5 +29,11 @@ export const UpdateObservableRequestRt = rt.strict({
   observable: ObservablePatchRt,
 });
 
+export const BulkAddObservablesRequestRt = rt.strict({
+  caseId: rt.string,
+  observables: rt.array(ObservablePostRt),
+});
+
 export type AddObservableRequest = rt.TypeOf<typeof AddObservableRequestRt>;
 export type UpdateObservableRequest = rt.TypeOf<typeof UpdateObservableRequestRt>;
+export type BulkAddObservablesRequest = rt.TypeOf<typeof BulkAddObservablesRequestRt>;

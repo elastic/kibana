@@ -7,23 +7,30 @@
 
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
+import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
+import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { ToolsServiceSetup, ToolsServiceStart } from './tools';
 import type { RunnerFactory } from './runner';
 import type { AgentsServiceSetup, AgentsServiceStart } from './agents';
 import type { ConversationService } from './conversation';
 import type { ChatService } from './chat';
+import type { AttachmentServiceSetup, AttachmentServiceStart } from './attachments';
+import type { TrackingService } from '../telemetry/tracking_service';
 
 export interface InternalSetupServices {
   tools: ToolsServiceSetup;
   agents: AgentsServiceSetup;
+  attachments: AttachmentServiceSetup;
 }
 
 export interface InternalStartServices {
   tools: ToolsServiceStart;
   agents: AgentsServiceStart;
+  attachments: AttachmentServiceStart;
   conversations: ConversationService;
   chat: ChatService;
   runnerFactory: RunnerFactory;
@@ -31,6 +38,8 @@ export interface InternalStartServices {
 
 export interface ServiceSetupDeps {
   logger: Logger;
+  workflowsManagement?: WorkflowsServerPluginSetup;
+  trackingService?: TrackingService;
 }
 
 export interface ServicesStartDeps {
@@ -38,7 +47,10 @@ export interface ServicesStartDeps {
   logger: Logger;
   elasticsearch: ElasticsearchServiceStart;
   security: SecurityServiceStart;
+  uiSettings: UiSettingsServiceStart;
+  savedObjects: SavedObjectsServiceStart;
   // plugin deps
   inference: InferenceServerStart;
-  actions: ActionsPluginStart;
+  spaces?: SpacesPluginStart;
+  trackingService?: TrackingService;
 }

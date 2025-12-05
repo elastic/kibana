@@ -126,6 +126,23 @@
         "tags": [],
         "label": "SavedSearchComponentProps",
         "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/saved-search-component",
+            "scope": "public",
+            "docId": "kibKbnSavedSearchComponentPluginApi",
+            "section": "def-public.SavedSearchComponentProps",
+            "text": "SavedSearchComponentProps"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/saved-search-component",
+            "scope": "public",
+            "docId": "kibKbnSavedSearchComponentPluginApi",
+            "section": "def-public.SavedSearchTableConfig",
+            "text": "SavedSearchTableConfig"
+          }
+        ],
         "path": "src/platform/packages/shared/kbn-saved-search-component/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -226,13 +243,22 @@
           },
           {
             "parentPluginId": "@kbn/saved-search-component",
-            "id": "def-public.SavedSearchComponentProps.timestampField",
-            "type": "string",
+            "id": "def-public.SavedSearchComponentProps.nonHighlightingFilters",
+            "type": "Array",
             "tags": [],
-            "label": "timestampField",
-            "description": [],
+            "label": "nonHighlightingFilters",
+            "description": [
+              "\nFilters that should not trigger highlighting.\nThese filters will be included in the search query for document retrieval,\nbut excluded from the highlight_query parameter in Elasticsearch."
+            ],
             "signature": [
-              "string | undefined"
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-saved-search-component/src/types.ts",
             "deprecated": false,
@@ -240,13 +266,13 @@
           },
           {
             "parentPluginId": "@kbn/saved-search-component",
-            "id": "def-public.SavedSearchComponentProps.columns",
-            "type": "Array",
+            "id": "def-public.SavedSearchComponentProps.timestampField",
+            "type": "string",
             "tags": [],
-            "label": "columns",
+            "label": "timestampField",
             "description": [],
             "signature": [
-              "string[] | undefined"
+              "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-saved-search-component/src/types.ts",
             "deprecated": false,
@@ -277,12 +303,193 @@
             "signature": [
               {
                 "pluginId": "discover",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibDiscoverPluginApi",
-                "section": "def-public.NonPersistedDisplayOptions",
+                "section": "def-common.NonPersistedDisplayOptions",
                 "text": "NonPersistedDisplayOptions"
               },
               " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-saved-search-component/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/saved-search-component",
+            "id": "def-public.SavedSearchComponentProps.onTableConfigChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onTableConfigChange",
+            "description": [],
+            "signature": [
+              "((config: ",
+              {
+                "pluginId": "@kbn/saved-search-component",
+                "scope": "public",
+                "docId": "kibKbnSavedSearchComponentPluginApi",
+                "section": "def-public.SavedSearchTableConfig",
+                "text": "SavedSearchTableConfig"
+              },
+              ") => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-saved-search-component/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/saved-search-component",
+                "id": "def-public.SavedSearchComponentProps.onTableConfigChange.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/saved-search-component",
+                    "scope": "public",
+                    "docId": "kibKbnSavedSearchComponentPluginApi",
+                    "section": "def-public.SavedSearchTableConfig",
+                    "text": "SavedSearchTableConfig"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-saved-search-component/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/saved-search-component",
+        "id": "def-public.SavedSearchTableConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedSearchTableConfig",
+        "description": [
+          "\nRepresents the table configuration of the saved search component\nthat can be persisted externally (e.g., in URL params or local storage)\n\nThis includes user customizations related to how the data table is displayed:\ncolumns selection, sorting, grid layout and row display options."
+        ],
+        "path": "src/platform/packages/shared/kbn-saved-search-component/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/saved-search-component",
+            "id": "def-public.SavedSearchTableConfig.columns",
+            "type": "Array",
+            "tags": [],
+            "label": "columns",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-saved-search-component/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/saved-search-component",
+            "id": "def-public.SavedSearchTableConfig.sort",
+            "type": "Array",
+            "tags": [],
+            "label": "sort",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.SortOrder",
+                "text": "SortOrder"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-saved-search-component/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/saved-search-component",
+            "id": "def-public.SavedSearchTableConfig.grid",
+            "type": "Object",
+            "tags": [],
+            "label": "grid",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "savedSearch",
+                "scope": "common",
+                "docId": "kibSavedSearchPluginApi",
+                "section": "def-common.DiscoverGridSettings",
+                "text": "DiscoverGridSettings"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-saved-search-component/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/saved-search-component",
+            "id": "def-public.SavedSearchTableConfig.rowHeight",
+            "type": "number",
+            "tags": [],
+            "label": "rowHeight",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-saved-search-component/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/saved-search-component",
+            "id": "def-public.SavedSearchTableConfig.rowsPerPage",
+            "type": "number",
+            "tags": [],
+            "label": "rowsPerPage",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-saved-search-component/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/saved-search-component",
+            "id": "def-public.SavedSearchTableConfig.density",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "density",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-data-table",
+                "scope": "public",
+                "docId": "kibKbnUnifiedDataTablePluginApi",
+                "section": "def-public.DataGridDensity",
+                "text": "DataGridDensity"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-saved-search-component/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/saved-search-component",
+            "id": "def-public.SavedSearchTableConfig.inTableSearchTerm",
+            "type": "string",
+            "tags": [],
+            "label": "inTableSearchTerm",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-saved-search-component/src/types.ts",
             "deprecated": false,

@@ -9,9 +9,9 @@
 
 import { HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { LegendLayout, LegendSize } from '@kbn/visualizations-plugin/common/constants';
+import { LegendLayout, LegendSize } from '@kbn/chart-expressions-common';
 import { LEGEND_CONFIG } from '../constants';
-import { LegendConfigFn } from '../types';
+import type { LegendConfigFn } from '../types';
 
 export const legendConfigFunction: LegendConfigFn = {
   name: LEGEND_CONFIG,

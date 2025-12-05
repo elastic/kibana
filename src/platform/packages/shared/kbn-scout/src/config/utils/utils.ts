@@ -8,7 +8,7 @@
  */
 
 import getopts from 'getopts';
-import { ServerlessProjectType } from '@kbn/es';
+import type { ServerlessProjectType } from '@kbn/es';
 
 export const formatCurrentDate = () => {
   const now = new Date();
@@ -25,4 +25,8 @@ export const formatCurrentDate = () => {
 export const getProjectType = (kbnServerArgs: string[]) => {
   const options = getopts(kbnServerArgs);
   return options.serverless as ServerlessProjectType;
+};
+
+export const getOrganizationId = (kbnServerArgs: string[]) => {
+  return getopts(kbnServerArgs)['xpack.cloud.organization_id'] as string | undefined;
 };

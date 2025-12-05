@@ -11,7 +11,7 @@ import React, { Suspense, useMemo } from 'react';
 import { EuiCodeBlock, EuiSpacer, EuiLoadingSpinner, EuiErrorBoundary } from '@elastic/eui';
 import { Content } from './content';
 import { getServices } from '../../kibana_services';
-import { InstructionType } from '../../../services/tutorials/types';
+import type { InstructionType } from '../../../services/tutorials/types';
 
 export interface InstructionProps extends InstructionType {
   variantId: string;

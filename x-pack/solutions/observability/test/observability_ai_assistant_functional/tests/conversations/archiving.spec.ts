@@ -6,11 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  createLlmProxy,
-  LlmProxy,
-} from '../../../api_integration_deployment_agnostic/apis/ai_assistant/utils/create_llm_proxy';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { LlmProxy } from '../../../api_integration_deployment_agnostic/apis/ai_assistant/utils/create_llm_proxy';
+import { createLlmProxy } from '../../../api_integration_deployment_agnostic/apis/ai_assistant/utils/create_llm_proxy';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { createConnector, deleteConnectors } from '../../common/connectors';
 import { deleteConversations } from '../../common/conversations';
 import { interceptRequest } from '../../common/intercept_request';

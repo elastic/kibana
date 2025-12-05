@@ -11,9 +11,8 @@ export type {
   IndexWarningType,
   ResolveIndexResponseFromES,
 } from './src/types';
-export { getRollupJobByIndexName } from './src/rollup_job';
+export { getRollupJobByIndexName, type GetRollupJobByIndexNameType } from './src/rollup_job';
 export { getReindexWarnings } from './src/index_settings';
-export { Version } from './src/version';
 export { esIndicesStateCheck } from './src/es_indices_state_check';
 export { getIndexState } from './src/get_index_state';
 export {

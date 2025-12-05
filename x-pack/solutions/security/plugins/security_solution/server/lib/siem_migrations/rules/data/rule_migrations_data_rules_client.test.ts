@@ -12,14 +12,15 @@ import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { RuleMigrationsDataRulesClient } from './rule_migrations_data_rules_client';
 import {
   SiemMigrationStatus,
-  RuleTranslationResult,
+  MigrationTranslationResult,
 } from '../../../../../common/siem_migrations/constants';
 import type { RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { SiemMigrationsClientDependencies } from '../../common/types';
-import type { AddRuleMigrationRulesInput } from './rule_migrations_data_rules_client';
-import type { StoredRuleMigration } from '../types';
-import { SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER } from '../constants';
-import { conditions } from './search';
+import type { StoredRuleMigrationRule } from '../types';
+import { MISSING_INDEX_PATTERN_PLACEHOLDER } from '../../common/constants';
+import type { CreateMigrationItemInput } from '../../common/data/siem_migrations_data_item_client';
+import { dsl } from './dsl_queries';
+import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/rules/types';
 
 describe('RuleMigrationsDataRulesClient', () => {
   let ruleMigrationsDataRulesClient: RuleMigrationsDataRulesClient;
@@ -49,7 +50,7 @@ describe('RuleMigrationsDataRulesClient', () => {
 
   describe('create', () => {
     test('should create rule migrations in bulk', async () => {
-      const ruleMigrations: AddRuleMigrationRulesInput[] = [
+      const ruleMigrations: CreateMigrationItemInput<RuleMigrationRule>[] = [
         {
           migration_id: 'migration1',
           original_rule: {
@@ -138,22 +139,25 @@ describe('RuleMigrationsDataRulesClient', () => {
     });
 
     test('should handle bulk operations in chunks', async () => {
-      const ruleMigrations: AddRuleMigrationRulesInput[] = Array.from({ length: 600 }, (_, i) => ({
-        migration_id: 'migration1',
-        original_rule: {
-          id: `rule${i}`,
-          vendor: 'splunk',
-          title: `Test Rule ${i}`,
-          description: `Test description ${i}`,
-          query: `test query ${i}`,
-          query_language: 'spl',
-        },
-        elastic_rule: {
-          id: `elastic_rule${i}`,
-          title: `Elastic Rule ${i}`,
-          query: `elastic query ${i}`,
-        },
-      }));
+      const ruleMigrations: CreateMigrationItemInput<RuleMigrationRule>[] = Array.from(
+        { length: 600 },
+        (_, i) => ({
+          migration_id: 'migration1',
+          original_rule: {
+            id: `rule${i}`,
+            vendor: 'splunk',
+            title: `Test Rule ${i}`,
+            description: `Test description ${i}`,
+            query: `test query ${i}`,
+            query_language: 'spl',
+          },
+          elastic_rule: {
+            id: `elastic_rule${i}`,
+            title: `Elastic Rule ${i}`,
+            query: `elastic query ${i}`,
+          },
+        })
+      );
 
       await ruleMigrationsDataRulesClient.create(ruleMigrations);
 
@@ -167,12 +171,12 @@ describe('RuleMigrationsDataRulesClient', () => {
         {
           id: 'doc1',
           status: SiemMigrationStatus.COMPLETED,
-          translation_result: RuleTranslationResult.FULL,
+          translation_result: MigrationTranslationResult.FULL,
         },
         {
           id: 'doc2',
           status: SiemMigrationStatus.FAILED,
-          translation_result: RuleTranslationResult.UNTRANSLATABLE,
+          translation_result: MigrationTranslationResult.UNTRANSLATABLE,
         },
       ];
 
@@ -185,7 +189,7 @@ describe('RuleMigrationsDataRulesClient', () => {
           {
             doc: {
               status: SiemMigrationStatus.COMPLETED,
-              translation_result: RuleTranslationResult.FULL,
+              translation_result: MigrationTranslationResult.FULL,
               updated_by: 'testProfileUid',
               updated_at: expect.any(String),
             },
@@ -194,7 +198,7 @@ describe('RuleMigrationsDataRulesClient', () => {
           {
             doc: {
               status: SiemMigrationStatus.FAILED,
-              translation_result: RuleTranslationResult.UNTRANSLATABLE,
+              translation_result: MigrationTranslationResult.UNTRANSLATABLE,
               updated_by: 'testProfileUid',
               updated_at: expect.any(String),
             },
@@ -218,7 +222,7 @@ describe('RuleMigrationsDataRulesClient', () => {
         'Bulk update failed'
       );
       expect(logger.error).toHaveBeenCalledWith(
-        'Error updating rule migrations: Bulk update failed'
+        'Error updating migration rule: Bulk update failed'
       );
     });
   });
@@ -332,7 +336,7 @@ describe('RuleMigrationsDataRulesClient', () => {
       esClient.asInternalUser.search = jest.fn().mockRejectedValue(error);
 
       await expect(ruleMigrationsDataRulesClient.get(migrationId)).rejects.toThrow('Search failed');
-      expect(logger.error).toHaveBeenCalledWith('Error searching rule migrations: Search failed');
+      expect(logger.error).toHaveBeenCalledWith('Error searching migration rule: Search failed');
     });
   });
 
@@ -374,12 +378,12 @@ describe('RuleMigrationsDataRulesClient', () => {
           query: 'elastic query',
         },
         status: SiemMigrationStatus.PROCESSING,
-        translation_result: RuleTranslationResult.FULL,
+        translation_result: MigrationTranslationResult.FULL,
         '@timestamp': '2025-08-04T00:00:00.000Z',
         created_by: 'testProfileUid',
       };
 
-      await ruleMigrationsDataRulesClient.saveCompleted(ruleMigration as StoredRuleMigration);
+      await ruleMigrationsDataRulesClient.saveCompleted(ruleMigration as StoredRuleMigrationRule);
 
       expect(esClient.asInternalUser.update).toHaveBeenCalledWith({
         index: '.kibana-siem-rule-migrations',
@@ -400,7 +404,7 @@ describe('RuleMigrationsDataRulesClient', () => {
             query: 'elastic query',
           },
           status: SiemMigrationStatus.COMPLETED,
-          translation_result: RuleTranslationResult.FULL,
+          translation_result: MigrationTranslationResult.FULL,
           '@timestamp': '2025-08-04T00:00:00.000Z',
           created_by: 'testProfileUid',
           updated_by: 'testProfileUid',
@@ -435,7 +439,7 @@ describe('RuleMigrationsDataRulesClient', () => {
         created_by: 'testProfileUid',
       };
 
-      await ruleMigrationsDataRulesClient.saveError(ruleMigration as StoredRuleMigration);
+      await ruleMigrationsDataRulesClient.saveError(ruleMigration as StoredRuleMigrationRule);
 
       expect(esClient.asInternalUser.update).toHaveBeenCalledWith({
         index: '.kibana-siem-rule-migrations',
@@ -523,7 +527,7 @@ describe('RuleMigrationsDataRulesClient', () => {
         ruleMigrationsDataRulesClient.updateStatus(migrationId, {}, SiemMigrationStatus.COMPLETED)
       ).rejects.toThrow('UpdateByQuery failed');
       expect(logger.error).toHaveBeenCalledWith(
-        'Error updating rule migrations status: UpdateByQuery failed'
+        'Error updating migration rule status: UpdateByQuery failed'
       );
     });
   });
@@ -538,9 +542,9 @@ describe('RuleMigrationsDataRulesClient', () => {
             doc_count: 8,
             result: {
               buckets: [
-                { key: RuleTranslationResult.FULL, doc_count: 5 },
-                { key: RuleTranslationResult.PARTIAL, doc_count: 2 },
-                { key: RuleTranslationResult.UNTRANSLATABLE, doc_count: 1 },
+                { key: MigrationTranslationResult.FULL, doc_count: 5 },
+                { key: MigrationTranslationResult.PARTIAL, doc_count: 2 },
+                { key: MigrationTranslationResult.UNTRANSLATABLE, doc_count: 1 },
               ],
             },
             installable: { doc_count: 6 },
@@ -552,8 +556,45 @@ describe('RuleMigrationsDataRulesClient', () => {
       };
 
       esClient.asInternalUser.search = jest.fn().mockResolvedValue(mockResponse);
-
       const result = await ruleMigrationsDataRulesClient.getTranslationStats(migrationId);
+
+      // make sure the search is being called with correct query
+      expect(esClient.asInternalUser.search).toHaveBeenCalledWith({
+        index: '.kibana-siem-rule-migrations',
+        query: {
+          bool: {
+            filter: [{ term: { migration_id: 'migration1' } }],
+          },
+        },
+        aggregations: {
+          success: {
+            filter: { term: { status: SiemMigrationStatus.COMPLETED } },
+            aggs: {
+              result: { terms: { field: 'translation_result' } },
+              installable: {
+                filter: {
+                  bool: {
+                    must: [
+                      { term: { translation_result: MigrationTranslationResult.FULL } },
+                      { bool: { must_not: dsl.isInstalled() } },
+                    ],
+                  },
+                },
+              },
+              prebuilt: { filter: { exists: { field: 'elastic_rule.prebuilt_rule_id' } } },
+              missing_index: {
+                filter: {
+                  query_string: {
+                    query: `elastic_rule.query: "${MISSING_INDEX_PATTERN_PLACEHOLDER}"`,
+                  },
+                },
+              },
+            },
+          },
+          failed: { filter: { term: { status: SiemMigrationStatus.FAILED } } },
+        },
+        _source: false,
+      });
 
       expect(result).toEqual({
         id: 'migration1',
@@ -562,9 +603,9 @@ describe('RuleMigrationsDataRulesClient', () => {
           success: {
             total: 8,
             result: {
-              [RuleTranslationResult.FULL]: 5,
-              [RuleTranslationResult.PARTIAL]: 2,
-              [RuleTranslationResult.UNTRANSLATABLE]: 1,
+              [MigrationTranslationResult.FULL]: 5,
+              [MigrationTranslationResult.PARTIAL]: 2,
+              [MigrationTranslationResult.UNTRANSLATABLE]: 1,
             },
             installable: 6,
             prebuilt: 4,
@@ -614,7 +655,7 @@ describe('RuleMigrationsDataRulesClient', () => {
 
       expect(result).toEqual({
         id: 'migration1',
-        rules: {
+        items: {
           total: 10,
           [SiemMigrationStatus.PENDING]: 3,
           [SiemMigrationStatus.PROCESSING]: 2,
@@ -657,7 +698,7 @@ describe('RuleMigrationsDataRulesClient', () => {
       expect(result).toEqual([
         {
           id: 'migration1',
-          rules: {
+          items: {
             total: 5,
             [SiemMigrationStatus.PENDING]: 0,
             [SiemMigrationStatus.PROCESSING]: 0,
@@ -741,7 +782,7 @@ describe('RuleMigrationsDataRulesClient', () => {
             '@timestamp': '2025-08-04T00:00:00.000Z',
             created_by: 'testProfileUid',
           },
-        ] as StoredRuleMigration[],
+        ] as StoredRuleMigrationRule[],
       };
       jest.spyOn(ruleMigrationsDataRulesClient, 'get').mockResolvedValue(mockGetResponse);
 
@@ -774,10 +815,13 @@ describe('RuleMigrationsDataRulesClient', () => {
         script: {
           source: expect.stringContaining(
             `def originalQuery = ctx._source.elastic_rule.query;
-                def newQuery = originalQuery.replace('${SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER}', '${indexPattern}');
+                def newQuery = originalQuery.replace('${MISSING_INDEX_PATTERN_PLACEHOLDER}', params.indexPattern);
                 ctx._source.elastic_rule.query = newQuery;`
           ),
           lang: 'painless',
+          params: {
+            indexPattern,
+          },
         },
         query: {
           bool: {
@@ -792,10 +836,11 @@ describe('RuleMigrationsDataRulesClient', () => {
                   _id: ['rule1', 'rule2'],
                 },
               },
-              conditions.isMissingIndex(),
+              dsl.isMissingIndex(),
             ],
           },
         },
+        refresh: true,
       });
       expect(result).toBe(2);
     });
@@ -814,10 +859,13 @@ describe('RuleMigrationsDataRulesClient', () => {
         script: {
           source: expect.stringContaining(
             `def originalQuery = ctx._source.elastic_rule.query;
-                def newQuery = originalQuery.replace('${SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER}', '${indexPattern}');
+                def newQuery = originalQuery.replace('${MISSING_INDEX_PATTERN_PLACEHOLDER}', params.indexPattern);
                 ctx._source.elastic_rule.query = newQuery;`
           ),
           lang: 'painless',
+          params: {
+            indexPattern,
+          },
         },
         query: {
           bool: {
@@ -827,10 +875,11 @@ describe('RuleMigrationsDataRulesClient', () => {
                   migration_id: 'migration1',
                 },
               },
-              conditions.isMissingIndex(),
+              dsl.isMissingIndex(),
             ],
           },
         },
+        refresh: true,
       });
       expect(result).toBe(5);
     });
@@ -852,10 +901,189 @@ describe('RuleMigrationsDataRulesClient', () => {
 
   describe('private methods', () => {
     describe('getFilterQuery', () => {
+      const migrationId = 'migration1';
+      const getFilterQuery = (filters: RuleMigrationFilters) => {
+        return (
+          ruleMigrationsDataRulesClient as unknown as { getFilterQuery: Function }
+        ).getFilterQuery(migrationId, filters);
+      };
+
+      test('should build filter query with no filters', () => {
+        const result = getFilterQuery({});
+        expect(result).toEqual({ bool: { filter: [{ term: { migration_id: migrationId } }] } });
+      });
+
+      test('should build filter query with ids filter', () => {
+        const result = getFilterQuery({ ids: ['doc1', 'doc2'] });
+        expect(result.bool.filter[1]).toEqual({ terms: { _id: ['doc1', 'doc2'] } });
+      });
+
+      test('should build filter query with searchTerm filter', () => {
+        const result = getFilterQuery({ searchTerm: 'test' });
+        expect(result).toEqual({
+          bool: {
+            filter: [
+              { term: { migration_id: 'migration1' } },
+              {
+                bool: {
+                  should: [
+                    { match: { 'elastic_rule.title': 'test' } },
+                    {
+                      bool: {
+                        must: [
+                          { term: { status: 'failed' } },
+                          { match: { 'original_rule.title': 'test' } },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        });
+      });
+
+      test('should build filter query with multiple statuses', () => {
+        const filters = { status: [SiemMigrationStatus.COMPLETED, SiemMigrationStatus.FAILED] };
+        const result = getFilterQuery(filters);
+
+        expect(result.bool.filter[1]).toEqual({
+          terms: { status: [SiemMigrationStatus.COMPLETED, SiemMigrationStatus.FAILED] },
+        });
+      });
+
+      test('should build filter query with single status', () => {
+        const result = getFilterQuery({ status: SiemMigrationStatus.COMPLETED });
+
+        expect(result.bool.filter[1]).toEqual({ term: { status: SiemMigrationStatus.COMPLETED } });
+      });
+
+      test('should build filter query with installed filter', () => {
+        const result = getFilterQuery({ installed: true });
+        expect(result.bool.filter[1]).toEqual({ exists: { field: 'elastic_rule.id' } });
+      });
+
+      test('should build filter query with not installed filter', () => {
+        const result = getFilterQuery({ installed: false });
+        expect(result.bool.filter[1]).toEqual({
+          bool: { must_not: { exists: { field: 'elastic_rule.id' } } },
+        });
+      });
+
+      test('should build filter query with installable filter', () => {
+        const result = getFilterQuery({ installable: true });
+        expect(result.bool.filter[1]).toEqual({
+          bool: {
+            must: [
+              { term: { translation_result: MigrationTranslationResult.FULL } },
+              { bool: { must_not: { exists: { field: 'elastic_rule.id' } } } },
+            ],
+          },
+        });
+      });
+
+      test('should build filter query with not installable filter', () => {
+        const result = getFilterQuery({ installable: false });
+        expect(result.bool.filter[1]).toEqual({
+          bool: {
+            should: [
+              {
+                bool: {
+                  must_not: { term: { translation_result: MigrationTranslationResult.FULL } },
+                },
+              },
+              { exists: { field: 'elastic_rule.id' } },
+            ],
+          },
+        });
+      });
+
+      test('should build filter query with prebuilt filter', () => {
+        const result = getFilterQuery({ prebuilt: true });
+        expect(result.bool.filter[1]).toEqual({
+          exists: { field: 'elastic_rule.prebuilt_rule_id' },
+        });
+      });
+
+      test('should build filter query with not prebuilt filter', () => {
+        const result = getFilterQuery({ prebuilt: false });
+        expect(result.bool.filter[1]).toEqual({
+          bool: { must_not: { exists: { field: 'elastic_rule.prebuilt_rule_id' } } },
+        });
+      });
+
+      test('should build filter query with failed filter', () => {
+        const result = getFilterQuery({ failed: true });
+        expect(result.bool.filter[1]).toEqual({ term: { status: SiemMigrationStatus.FAILED } });
+      });
+
+      test('should build filter query with not failed filter', () => {
+        const result = getFilterQuery({ failed: false });
+        expect(result.bool.filter[1]).toEqual({
+          bool: { must_not: { term: { status: SiemMigrationStatus.FAILED } } },
+        });
+      });
+
+      test('should build filter query with fullyTranslated filter', () => {
+        const result = getFilterQuery({ fullyTranslated: true });
+        expect(result.bool.filter[1]).toEqual({
+          term: { translation_result: MigrationTranslationResult.FULL },
+        });
+      });
+
+      test('should build filter query with not fullyTranslated filter', () => {
+        const result = getFilterQuery({ fullyTranslated: false });
+        expect(result.bool.filter[1]).toEqual({
+          bool: {
+            must_not: { term: { translation_result: MigrationTranslationResult.FULL } },
+          },
+        });
+      });
+
+      test('should build filter query with partiallyTranslated filter', () => {
+        const result = getFilterQuery({ partiallyTranslated: true });
+        expect(result.bool.filter[1]).toEqual({
+          term: { translation_result: MigrationTranslationResult.PARTIAL },
+        });
+      });
+
+      test('should build filter query with not partiallyTranslated filter', () => {
+        const result = getFilterQuery({ partiallyTranslated: false });
+        expect(result.bool.filter[1]).toEqual({
+          bool: {
+            must_not: { term: { translation_result: MigrationTranslationResult.PARTIAL } },
+          },
+        });
+      });
+
+      test('should build filter query with untranslatable filter', () => {
+        const result = getFilterQuery({ untranslatable: true });
+        expect(result.bool.filter[1]).toEqual({
+          term: { translation_result: MigrationTranslationResult.UNTRANSLATABLE },
+        });
+      });
+
+      test('should build filter query with not untranslatable filter', () => {
+        const result = getFilterQuery({ untranslatable: false });
+        expect(result.bool.filter[1]).toEqual({
+          bool: {
+            must_not: {
+              term: { translation_result: MigrationTranslationResult.UNTRANSLATABLE },
+            },
+          },
+        });
+      });
+
+      test('should build filter query with missingIndex filter', () => {
+        const result = getFilterQuery({ missingIndex: true });
+        expect(result.bool.filter[1]).toEqual({
+          query_string: { query: `elastic_rule.query: "${MISSING_INDEX_PATTERN_PLACEHOLDER}"` },
+        });
+      });
+
       test('should build filter query with multiple conditions', () => {
-        const migrationId = 'migration1';
         const filters = {
-          status: [SiemMigrationStatus.PENDING, SiemMigrationStatus.PROCESSING],
           ids: ['doc1', 'doc2'],
           searchTerm: 'test',
           installed: true,
@@ -867,64 +1095,43 @@ describe('RuleMigrationsDataRulesClient', () => {
           untranslatable: false,
         };
 
-        const result = (
-          ruleMigrationsDataRulesClient as unknown as { getFilterQuery: Function }
-        ).getFilterQuery(migrationId, filters);
+        const result = getFilterQuery(filters);
 
         expect(result).toEqual({
           bool: {
             filter: [
               { term: { migration_id: 'migration1' } },
-              { terms: { status: [SiemMigrationStatus.PENDING, SiemMigrationStatus.PROCESSING] } },
               { terms: { _id: ['doc1', 'doc2'] } },
-              { match: { 'elastic_rule.title': 'test' } },
-              { exists: { field: 'elastic_rule.id' } },
-              { term: { translation_result: RuleTranslationResult.FULL } },
-              { bool: { must_not: { exists: { field: 'elastic_rule.id' } } } },
-              { bool: { must_not: { exists: { field: 'elastic_rule.prebuilt_rule_id' } } } },
-              { bool: { must_not: { term: { status: SiemMigrationStatus.FAILED } } } },
-              { term: { translation_result: RuleTranslationResult.FULL } },
-              {
-                bool: { must_not: { term: { translation_result: RuleTranslationResult.PARTIAL } } },
-              },
+              { bool: { must_not: { term: { status: 'failed' } } } },
+              { term: { translation_result: 'full' } },
+              { bool: { must_not: { term: { translation_result: 'partial' } } } },
+              { bool: { must_not: { term: { translation_result: 'untranslatable' } } } },
               {
                 bool: {
-                  must_not: { term: { translation_result: RuleTranslationResult.UNTRANSLATABLE } },
+                  should: [
+                    { match: { 'elastic_rule.title': 'test' } },
+                    {
+                      bool: {
+                        must: [
+                          { term: { status: 'failed' } },
+                          { match: { 'original_rule.title': 'test' } },
+                        ],
+                      },
+                    },
+                  ],
                 },
               },
+              { exists: { field: 'elastic_rule.id' } },
+              {
+                bool: {
+                  must: [
+                    { term: { translation_result: 'full' } },
+                    { bool: { must_not: { exists: { field: 'elastic_rule.id' } } } },
+                  ],
+                },
+              },
+              { bool: { must_not: { exists: { field: 'elastic_rule.prebuilt_rule_id' } } } },
             ],
-          },
-        });
-      });
-
-      test('should build filter query with single status', () => {
-        const migrationId = 'migration1';
-        const filters = { status: SiemMigrationStatus.COMPLETED };
-
-        const result = (
-          ruleMigrationsDataRulesClient as unknown as { getFilterQuery: Function }
-        ).getFilterQuery(migrationId, filters);
-
-        expect(result).toEqual({
-          bool: {
-            filter: [
-              { term: { migration_id: 'migration1' } },
-              { term: { status: SiemMigrationStatus.COMPLETED } },
-            ],
-          },
-        });
-      });
-
-      test('should build filter query with no filters', () => {
-        const migrationId = 'migration1';
-
-        const result = (
-          ruleMigrationsDataRulesClient as unknown as { getFilterQuery: Function }
-        ).getFilterQuery(migrationId);
-
-        expect(result).toEqual({
-          bool: {
-            filter: [{ term: { migration_id: 'migration1' } }],
           },
         });
       });
@@ -975,9 +1182,9 @@ describe('RuleMigrationsDataRulesClient', () => {
       test('should count translation result aggregations correctly', () => {
         const resultAgg = {
           buckets: [
-            { key: RuleTranslationResult.FULL, doc_count: 8 },
-            { key: RuleTranslationResult.PARTIAL, doc_count: 2 },
-            { key: RuleTranslationResult.UNTRANSLATABLE, doc_count: 1 },
+            { key: MigrationTranslationResult.FULL, doc_count: 8 },
+            { key: MigrationTranslationResult.PARTIAL, doc_count: 2 },
+            { key: MigrationTranslationResult.UNTRANSLATABLE, doc_count: 1 },
           ],
         };
 
@@ -986,15 +1193,15 @@ describe('RuleMigrationsDataRulesClient', () => {
         ).translationResultAggCount(resultAgg);
 
         expect(result).toEqual({
-          [RuleTranslationResult.FULL]: 8,
-          [RuleTranslationResult.PARTIAL]: 2,
-          [RuleTranslationResult.UNTRANSLATABLE]: 1,
+          [MigrationTranslationResult.FULL]: 8,
+          [MigrationTranslationResult.PARTIAL]: 2,
+          [MigrationTranslationResult.UNTRANSLATABLE]: 1,
         });
       });
 
       test('should handle missing translation result buckets', () => {
         const resultAgg = {
-          buckets: [{ key: RuleTranslationResult.FULL, doc_count: 5 }],
+          buckets: [{ key: MigrationTranslationResult.FULL, doc_count: 5 }],
         };
 
         const result = (
@@ -1002,9 +1209,9 @@ describe('RuleMigrationsDataRulesClient', () => {
         ).translationResultAggCount(resultAgg);
 
         expect(result).toEqual({
-          [RuleTranslationResult.FULL]: 5,
-          [RuleTranslationResult.PARTIAL]: 0,
-          [RuleTranslationResult.UNTRANSLATABLE]: 0,
+          [MigrationTranslationResult.FULL]: 5,
+          [MigrationTranslationResult.PARTIAL]: 0,
+          [MigrationTranslationResult.UNTRANSLATABLE]: 0,
         });
       });
     });

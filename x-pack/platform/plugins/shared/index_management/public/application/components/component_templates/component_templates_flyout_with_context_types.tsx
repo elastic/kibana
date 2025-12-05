@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import type { ComponentTemplateFlyoutProps } from '@kbn/index-management-shared-types';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { AppDependencies } from '../../app_context';
-import { ExtensionsService } from '../../../services/extensions_service';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { AppDependencies } from '../../app_context';
+import type { ExtensionsService } from '../../../services/extensions_service';
 
 export interface ComponentTemplatesFlyoutWithContextProps extends ComponentTemplateFlyoutProps {
   core: CoreStart;

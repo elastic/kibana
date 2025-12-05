@@ -44,7 +44,7 @@ interface Props {
 const getListItem = (stat: StatState) => ({
   title: (
     <EuiToolTip content={stat.description}>
-      <EuiText>
+      <EuiText tabIndex={0}>
         <h6>
           {stat.title} <EuiIcon type="question" />
         </h6>
@@ -57,7 +57,7 @@ const getListItem = (stat: StatState) => ({
     <>
       {stat.stat}{' '}
       <EuiToolTip content={stat.percentage.note}>
-        <EuiBadge color={stat.percentage.color}>
+        <EuiBadge tabIndex={0} color={stat.percentage.color}>
           {stat.percentage.percent != null ? stat.percentage.percent : '-'}
         </EuiBadge>
       </EuiToolTip>

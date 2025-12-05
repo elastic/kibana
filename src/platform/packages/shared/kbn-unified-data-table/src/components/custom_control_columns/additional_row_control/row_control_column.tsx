@@ -8,8 +8,9 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiButtonIcon, EuiDataGridCellValueElementProps, EuiToolTip } from '@elastic/eui';
-import { RowControlColumn, RowControlProps } from '@kbn/discover-utils';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import type { RowControlColumn, RowControlProps } from '@kbn/discover-utils';
 import { useControlColumn } from '../../../hooks/use_control_column';
 
 export const RowControlCell = ({

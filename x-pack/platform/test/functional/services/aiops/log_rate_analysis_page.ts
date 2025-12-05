@@ -13,7 +13,7 @@ import type { LogRateAnalysisType } from '@kbn/aiops-log-rate-analysis';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 import type { LogRateAnalysisDataGenerator } from './log_rate_analysis_data_generator';
-import { CreateCaseParams } from '../cases/create';
+import type { CreateCaseParams } from '../cases/create';
 
 export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrProviderContext) {
   const browser = getService('browser');

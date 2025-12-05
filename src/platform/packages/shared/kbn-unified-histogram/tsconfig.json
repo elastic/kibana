@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -18,6 +18,7 @@
     "@kbn/test-jest-helpers",
     "@kbn/core",
     "@kbn/shared-ux-button-toolbar",
+    "@kbn/shared-ux-toolbar-selector",
     "@kbn/es-query",
     "@kbn/presentation-publishing",
     "@kbn/inspector-plugin",
@@ -28,12 +29,16 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/datemath",
     "@kbn/shared-ux-utility",
-    "@kbn/i18n-react",
-    "@kbn/calculate-width-from-char-count",
     "@kbn/resizable-layout",
     "@kbn/visualization-utils",
-    "@kbn/visualizations-plugin",
     "@kbn/kibana-utils-plugin",
-    "@kbn/lens-embeddable-utils"
+    "@kbn/lens-embeddable-utils",
+    "@kbn/esql-types",
+    "@kbn/data-views-plugin",
+    "@kbn/fields-metadata-plugin",
+    "@kbn/controls-plugin",
+    "@kbn/restorable-state",
+    "@kbn/chart-expressions-common",
+    "@kbn/lens-common"
   ]
 }

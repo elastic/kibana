@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { pageObjects as xpackFunctionalPageObjects } from '@kbn/test-suites-xpack/functional/page_objects';
+import { pageObjects as xpackFunctionalPageObjects } from '@kbn/test-suites-xpack-platform/functional/page_objects';
 import { FindingsPageProvider } from './findings_page';
 import { CspDashboardPageProvider } from './csp_dashboard_page';
 import { AddCisIntegrationFormPageProvider } from './add_cis_integration_form_page';
@@ -17,11 +17,13 @@ import { AlertsPageObject } from './alerts_page';
 import { NetworkEventsPageObject } from './network_events_page';
 import { ExpandedFlyoutGraph } from './expanded_flyout_graph';
 import { TimelinePageObject } from './timeline_page';
+import { GenericEntityFlyoutPageObject } from './generic_entity_flyout';
 
 export const cloudSecurityPosturePageObjects = {
   alerts: AlertsPageObject,
   networkEvents: NetworkEventsPageObject,
   expandedFlyoutGraph: ExpandedFlyoutGraph,
+  genericEntityFlyout: GenericEntityFlyoutPageObject,
   timeline: TimelinePageObject,
   findings: FindingsPageProvider,
   cloudPostureDashboard: CspDashboardPageProvider,

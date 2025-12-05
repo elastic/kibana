@@ -6,35 +6,73 @@
  */
 
 import type { FC } from 'react';
-import React, { useState, useEffect, useMemo } from 'react';
-import useMountedState from 'react-use/lib/useMountedState';
-import type { MlPages } from '../../../locator';
-import { ML_PAGES } from '../../../locator';
+import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { useMlKibana } from '../../contexts/kibana';
 import { useEnabledFeatures } from '../../contexts/ml';
 
-import { useJobsApiService } from '../../services/ml_api_service/jobs';
 import { useCloudCheck } from '../node_available_warning/hooks';
-import { FeatureFeedbackButton } from './feature_feedback_button';
 
 interface Props {
   jobIds: string[];
-  page: MlPages;
 }
 
-const FORM_IDS = {
-  SINGLE_METRIC_VIEWER: '1FAIpQLSdlMYe3wuJh2KtBLajI4EVoUljAhGjJwjZI7zUY_Kn_Sr2lug',
-  ANOMALY_EXPLORER: '1FAIpQLSfF1Ry561b4lYrY7iiyXhuZpxFzAmy2c9BFUT3J2AJUevY1iw',
+const KIBANA_VERSION_QUERY_PARAM = 'version';
+const KIBANA_DEPLOYMENT_TYPE_PARAM = 'deployment_type';
+const SANITIZED_PATH_PARAM = 'path';
+const FEEDBACK_BUTTON_DEFAULT_TEXT = i18n.translate('xpack.ml.feedbackButton.defaultText', {
+  defaultMessage: 'Give feedback',
+});
+const ANOMALY_DETECTION_FEEDBACK_URL = 'https://ela.st/anomaly-detection-feedback';
+
+const getDeploymentType = (isCloudEnv?: boolean, isServerlessEnv?: boolean): string | undefined => {
+  if (isCloudEnv === undefined || isServerlessEnv === undefined) {
+    return undefined;
+  }
+  if (isServerlessEnv) {
+    return 'Serverless';
+  }
+  if (isCloudEnv) {
+    return 'Elastic Cloud';
+  }
+  return 'Self-Managed';
 };
 
-const MATCHED_CREATED_BY_TAGS = ['ml-module-metrics-ui-hosts'];
+export const getSurveyFeedbackURL = ({
+  formUrl,
+  kibanaVersion,
+  sanitizedPath,
+  isCloudEnv,
+  isServerlessEnv,
+}: {
+  formUrl: string;
+  kibanaVersion?: string;
+  sanitizedPath?: string;
+  isCloudEnv?: boolean;
+  isServerlessEnv?: boolean;
+}) => {
+  const deploymentType = getDeploymentType(isCloudEnv, isServerlessEnv);
 
-export const FeedBackButton: FC<Props> = ({ jobIds, page }) => {
-  const { jobs: getJobs } = useJobsApiService();
+  const url = new URL(formUrl);
+  if (kibanaVersion) {
+    url.searchParams.append(KIBANA_VERSION_QUERY_PARAM, kibanaVersion);
+  }
+  if (deploymentType) {
+    url.searchParams.append(KIBANA_DEPLOYMENT_TYPE_PARAM, deploymentType);
+  }
+  if (sanitizedPath) {
+    url.searchParams.append(SANITIZED_PATH_PARAM, sanitizedPath);
+  }
+
+  return url.href;
+};
+
+export const FeedBackButton: FC<Props> = ({ jobIds }) => {
   const {
     services: { kibanaVersion },
   } = useMlKibana();
-  const { isCloud } = useCloudCheck();
+  const { isCloud: isCloudEnv } = useCloudCheck();
   // ML does not have an explicit isServerless flag,
   // it does however have individual feature flags which are set depending
   // whether the environment is serverless or not.
@@ -42,55 +80,35 @@ export const FeedBackButton: FC<Props> = ({ jobIds, page }) => {
   // and true in a non-serverless environment.
   const { showNodeInfo } = useEnabledFeatures();
 
-  const [jobIdsString, setJobIdsString] = useState<string | null>(null);
-  const [showButton, setShowButton] = useState(false);
-
-  const formId = useMemo(() => getFormId(page), [page]);
-  const isMounted = useMountedState();
-
-  useEffect(() => {
-    const tempJobIdsString = jobIds.join(',');
-    if (tempJobIdsString === jobIdsString || tempJobIdsString === '') {
+  const href = useMemo(() => {
+    if (jobIds.length === 0) {
       return;
     }
-    setShowButton(false);
-    setJobIdsString(tempJobIdsString);
-
-    getJobs(jobIds).then((resp) => {
-      if (isMounted()) {
-        setShowButton(
-          resp.some((job) => MATCHED_CREATED_BY_TAGS.includes(job.custom_settings?.created_by))
-        );
-      }
+    return getSurveyFeedbackURL({
+      formUrl: ANOMALY_DETECTION_FEEDBACK_URL,
+      kibanaVersion,
+      isCloudEnv,
+      isServerlessEnv: showNodeInfo === false,
+      sanitizedPath: window.location.pathname,
     });
-  }, [jobIds, getJobs, jobIdsString, isMounted]);
+  }, [isCloudEnv, jobIds.length, kibanaVersion, showNodeInfo]);
 
-  if (showButton === false || formId === null) {
+  if (jobIds.length === 0) {
     return null;
   }
 
   return (
-    <FeatureFeedbackButton
-      data-test-subj="mlFeatureFeedbackButton"
-      formUrl={getFormUrl(formId)}
-      kibanaVersion={kibanaVersion}
-      isCloudEnv={isCloud}
-      isServerlessEnv={showNodeInfo === false}
-    />
+    <EuiButtonEmpty
+      aria-label={FEEDBACK_BUTTON_DEFAULT_TEXT}
+      href={href}
+      size="s"
+      iconType={'popout'}
+      iconSide="right"
+      target="_blank"
+      data-test-subj={'mlFeatureFeedbackButton'}
+      color="primary"
+    >
+      {FEEDBACK_BUTTON_DEFAULT_TEXT}
+    </EuiButtonEmpty>
   );
 };
-
-function getFormId(page: MlPages) {
-  switch (page) {
-    case ML_PAGES.SINGLE_METRIC_VIEWER:
-      return FORM_IDS.SINGLE_METRIC_VIEWER;
-    case ML_PAGES.ANOMALY_EXPLORER:
-      return FORM_IDS.ANOMALY_EXPLORER;
-    default:
-      return null;
-  }
-}
-
-function getFormUrl(formId: string) {
-  return `https://docs.google.com/forms/d/e/${formId}/viewform?usp=pp_url`;
-}

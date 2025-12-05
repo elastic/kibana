@@ -53,7 +53,7 @@ export interface ObjectTransforms<
     }
   ) => TransformReturn<O>;
   down: <I = DownIn, O = DownOut>(
-    obj: DownIn,
+    obj: I,
     version?: Version | 'latest',
     options?: {
       /** Validate the object _before_ down transform */

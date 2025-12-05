@@ -11,24 +11,19 @@ import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/a
 
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type {
-  ExternalService,
-  ExternalServiceCredentials,
-  RunWorkflowParams,
-  WorkflowExecutionResponse,
-} from './types';
+import type { ExternalService, RunWorkflowParams, WorkflowExecutionResponse } from './types';
 import { createServiceError } from './utils';
 
 // Type for the workflows service function that should be injected
 export type WorkflowsServiceFunction = (
   workflowId: string,
+  spaceId: string,
   inputs: Record<string, unknown>,
   request: KibanaRequest
 ) => Promise<string>;
 
 export const createExternalService = (
   _actionId: string,
-  _config: ExternalServiceCredentials,
   logger: Logger,
   _configurationUtilities: ActionsConfigurationUtilities,
   _connectorUsageCollector: ConnectorUsageCollector,
@@ -38,10 +33,11 @@ export const createExternalService = (
 ): ExternalService => {
   const runWorkflow = async ({
     workflowId,
-    inputs = {},
+    spaceId,
+    inputs,
   }: RunWorkflowParams): Promise<WorkflowExecutionResponse> => {
     try {
-      logger.info(`Attempting to run workflow ${workflowId} via internal service`);
+      logger.debug(`Attempting to run workflow ${workflowId} via internal service`);
 
       if (!runWorkflowService) {
         throw new Error(
@@ -50,13 +46,13 @@ export const createExternalService = (
       }
 
       // Use the injected service function instead of making HTTP requests
-      const workflowRunId = await runWorkflowService(workflowId, inputs, request);
+      const workflowRunId = await runWorkflowService(workflowId, spaceId, inputs, request);
 
       if (!workflowRunId) {
         throw new Error('Invalid response: missing workflowRunId');
       }
 
-      logger.info(`Successfully started workflow ${workflowId}, run ID: ${workflowRunId}`);
+      logger.debug(`Successfully started workflow ${workflowId}, run ID: ${workflowRunId}`);
 
       return {
         workflowRunId,

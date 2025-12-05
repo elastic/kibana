@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { EcsEvent } from '@elastic/ecs';
+import type { EcsEvent } from '@elastic/ecs';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import {
   vulnerabilitiesLatestMock,

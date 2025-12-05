@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MonacoEditorActionsProvider } from '../../containers/editor/monaco_editor_actions_provider';
+import type { MonacoEditorActionsProvider } from '../../containers/editor/monaco_editor_actions_provider';
 
 export class EditorRegistry {
   private inputEditor: MonacoEditorActionsProvider | undefined;

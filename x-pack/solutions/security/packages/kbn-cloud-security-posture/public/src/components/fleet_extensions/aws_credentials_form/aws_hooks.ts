@@ -6,33 +6,34 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
+import type {
+  NewPackagePolicy,
+  NewPackagePolicyInput,
+  PackageInfo,
+} from '@kbn/fleet-plugin/common';
 import {
-  cspIntegrationDocsNavigation,
   AWS_CREDENTIALS_TYPE,
   AWS_SETUP_FORMAT,
-  CLOUDBEAT_AWS,
-} from '../constants';
-import { getPosturePolicy } from '../utils';
-import {
   DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE,
+} from '../constants';
+import {
+  updatePolicyWithInputs,
+  getAwsCredentialsType,
+  getCloudFormationDefaultValue,
+} from '../utils';
+import {
   getAwsCredentialsFormOptions,
   getInputVarsFields,
 } from './get_aws_credentials_form_options';
-import {
-  NewPackagePolicyPostureInput,
-  AwsCredentialsType,
-  AwsSetupFormat,
-  UpdatePolicy,
-} from '../types';
-import { getAwsCredentialsType, getCspmCloudFormationDefaultValue } from './aws_utils';
+import type { AwsCredentialsType, AwsSetupFormat, UpdatePolicy } from '../types';
+import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 /**
  * Update CloudFormation template and stack name in the Agent Policy
  * based on the selected policy template
  */
 
 const getSetupFormatFromInput = (
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>,
+  input: NewPackagePolicyInput,
   hasCloudFormationTemplate: boolean
 ): AwsSetupFormat => {
   const credentialsType = getAwsCredentialsType(input);
@@ -49,11 +50,83 @@ const getSetupFormatFromInput = (
 
 interface UseAwsCredentialsFormProps {
   newPolicy: NewPackagePolicy;
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>;
+  input: NewPackagePolicyInput;
   packageInfo: PackageInfo;
   updatePolicy: UpdatePolicy;
   isValid: boolean;
 }
+
+const getAwsCloudFormationTemplate = (newPolicy: NewPackagePolicy, awsPolicyType?: string) => {
+  if (!newPolicy?.inputs) {
+    return undefined;
+  }
+  if (!awsPolicyType) {
+    return undefined;
+  }
+  const template: string | undefined = newPolicy?.inputs?.find((i) => i.type === awsPolicyType)
+    ?.config?.cloud_formation_template_url?.value;
+
+  return template || undefined;
+};
+
+const updateCloudFormationPolicyTemplate = (
+  newPolicy: NewPackagePolicy,
+  updatePolicy: UpdatePolicy,
+  templateUrl: string | undefined,
+  awsPolicyType?: string
+) => {
+  if (!awsPolicyType) {
+    return;
+  }
+
+  updatePolicy?.({
+    updatedPolicy: {
+      ...newPolicy,
+      inputs: newPolicy.inputs.map((input) => {
+        if (input.type === awsPolicyType) {
+          return {
+            ...input,
+            config: { cloud_formation_template_url: { value: templateUrl } },
+          };
+        }
+        return input;
+      }),
+    },
+  });
+};
+
+const useCloudFormationTemplate = ({
+  packageInfo,
+  newPolicy,
+  updatePolicy,
+  setupFormat,
+  awsPolicyType,
+  templateName,
+}: {
+  packageInfo: PackageInfo;
+  newPolicy: NewPackagePolicy;
+  updatePolicy: UpdatePolicy;
+  setupFormat: AwsSetupFormat;
+  awsPolicyType?: string;
+  templateName: string;
+}) => {
+  const policyInputCloudFormationTemplate = getAwsCloudFormationTemplate(newPolicy, awsPolicyType);
+
+  if (setupFormat === AWS_SETUP_FORMAT.MANUAL) {
+    if (policyInputCloudFormationTemplate) {
+      updateCloudFormationPolicyTemplate(newPolicy, updatePolicy, undefined, awsPolicyType);
+    }
+    return;
+  }
+  const templateUrl = getCloudFormationDefaultValue(packageInfo, templateName);
+
+  // If the template is not available, do not update the policy
+  if (templateUrl === '') return;
+
+  // If the template is already set, do not update the policy
+  if (policyInputCloudFormationTemplate === templateUrl) return;
+  updateCloudFormationPolicyTemplate(newPolicy, updatePolicy, templateUrl, awsPolicyType);
+};
 
 export const useAwsCredentialsForm = ({
   newPolicy,
@@ -64,10 +137,10 @@ export const useAwsCredentialsForm = ({
 }: UseAwsCredentialsFormProps) => {
   // We only have a value for 'aws.credentials.type' once the form has mounted.
   // On initial render we don't have that value, so we fall back to the default option.
+  const { awsPolicyType, awsOverviewPath, awsInputFieldMapping, templateName } = useCloudSetup();
+  const options = getAwsCredentialsFormOptions(awsInputFieldMapping);
 
-  const options = getAwsCredentialsFormOptions();
-
-  const hasCloudFormationTemplate = !!getCspmCloudFormationDefaultValue(packageInfo);
+  const hasCloudFormationTemplate = !!getCloudFormationDefaultValue(packageInfo, templateName);
 
   const setupFormat = getSetupFormatFromInput(input, hasCloudFormationTemplate);
   const lastManualCredentialsType = useRef<string | undefined>(undefined);
@@ -78,14 +151,14 @@ export const useAwsCredentialsForm = ({
     AWS_SETUP_FORMAT.CLOUD_FORMATION;
 
   const group = options[awsCredentialsType];
-  const fields = getInputVarsFields(input, group.fields);
+  const fields = getInputVarsFields(input, group?.fields || {});
   const fieldsSnapshot = useRef({});
 
   useEffect(() => {
     // This should ony set the credentials after the initial render
     if (!getAwsCredentialsType(input) && !lastManualCredentialsType.current) {
       updatePolicy({
-        updatedPolicy: getPosturePolicy(newPolicy, input.type, {
+        updatedPolicy: updatePolicyWithInputs(newPolicy, awsPolicyType, {
           'aws.credentials.type': {
             value: awsCredentialsType,
             type: 'text',
@@ -93,7 +166,7 @@ export const useAwsCredentialsForm = ({
         }),
       });
     }
-  }, [awsCredentialsType, input, newPolicy, updatePolicy]);
+  }, [awsCredentialsType, awsPolicyType, input, newPolicy, updatePolicy]);
 
   if (isValid && setupFormat === AWS_SETUP_FORMAT.CLOUD_FORMATION && !hasCloudFormationTemplate) {
     updatePolicy({
@@ -102,13 +175,13 @@ export const useAwsCredentialsForm = ({
     });
   }
 
-  const elasticDocLink = cspIntegrationDocsNavigation.cspm.awsGetStartedPath;
-
   useCloudFormationTemplate({
+    updatePolicy,
     packageInfo,
     newPolicy,
-    updatePolicy,
     setupFormat,
+    awsPolicyType,
+    templateName,
   });
 
   const onSetupFormatChange = (newSetupFormat: AwsSetupFormat) => {
@@ -121,7 +194,7 @@ export const useAwsCredentialsForm = ({
       lastManualCredentialsType.current = getAwsCredentialsType(input);
 
       updatePolicy({
-        updatedPolicy: getPosturePolicy(newPolicy, input.type, {
+        updatedPolicy: updatePolicyWithInputs(newPolicy, awsPolicyType, {
           'aws.credentials.type': {
             value: AWS_CREDENTIALS_TYPE.CLOUD_FORMATION,
             type: 'text',
@@ -133,7 +206,7 @@ export const useAwsCredentialsForm = ({
       });
     } else {
       updatePolicy({
-        updatedPolicy: getPosturePolicy(newPolicy, input.type, {
+        updatedPolicy: updatePolicyWithInputs(newPolicy, awsPolicyType, {
           'aws.credentials.type': {
             // Restoring last manual credentials type or defaulting to the first option
             value: lastManualCredentialsType.current || DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE,
@@ -151,69 +224,8 @@ export const useAwsCredentialsForm = ({
     setupFormat,
     group,
     fields,
-    elasticDocLink,
+    elasticDocLink: awsOverviewPath,
     hasCloudFormationTemplate,
     onSetupFormatChange,
   };
-};
-
-const getAwsCloudFormationTemplate = (newPolicy: NewPackagePolicy) => {
-  const template: string | undefined = newPolicy?.inputs?.find((i) => i.type === CLOUDBEAT_AWS)
-    ?.config?.cloud_formation_template_url?.value;
-
-  return template || undefined;
-};
-
-const updateCloudFormationPolicyTemplate = (
-  newPolicy: NewPackagePolicy,
-  updatePolicy: UpdatePolicy,
-  templateUrl: string | undefined
-) => {
-  updatePolicy?.({
-    updatedPolicy: {
-      ...newPolicy,
-      inputs: newPolicy.inputs.map((input) => {
-        if (input.type === CLOUDBEAT_AWS) {
-          return {
-            ...input,
-            config: { cloud_formation_template_url: { value: templateUrl } },
-          };
-        }
-        return input;
-      }),
-    },
-  });
-};
-
-const useCloudFormationTemplate = ({
-  packageInfo,
-  newPolicy,
-  updatePolicy,
-  setupFormat,
-}: {
-  packageInfo: PackageInfo;
-  newPolicy: NewPackagePolicy;
-  updatePolicy: UpdatePolicy;
-  setupFormat: AwsSetupFormat;
-}) => {
-  useEffect(() => {
-    const policyInputCloudFormationTemplate = getAwsCloudFormationTemplate(newPolicy);
-
-    if (setupFormat === AWS_SETUP_FORMAT.MANUAL) {
-      if (policyInputCloudFormationTemplate) {
-        updateCloudFormationPolicyTemplate(newPolicy, updatePolicy, undefined);
-      }
-      return;
-    }
-    const templateUrl = getCspmCloudFormationDefaultValue(packageInfo);
-
-    // If the template is not available, do not update the policy
-    if (templateUrl === '') return;
-
-    // If the template is already set, do not update the policy
-    if (policyInputCloudFormationTemplate === templateUrl) return;
-
-    updateCloudFormationPolicyTemplate(newPolicy, updatePolicy, templateUrl);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [newPolicy?.vars?.cloud_formation_template_url, newPolicy, packageInfo, setupFormat]);
 };

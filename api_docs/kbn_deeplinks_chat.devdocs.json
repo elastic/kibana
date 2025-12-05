@@ -30,7 +30,7 @@
         "label": "DeepLinkId",
         "description": [],
         "signature": [
-          "\"workchat\" | \"workchat:integrations\" | \"workchat:agents\" | \"onechat\" | \"onechat:agents\" | \"onechat:tools\" | \"onechat:conversations\""
+          "\"workplace_ai\" | \"workplace_ai:integrations\" | \"workplace_ai:agents\" | \"agent_builder\" | \"agent_builder:agents\" | \"agent_builder:tools\" | \"agent_builder:conversations\""
         ],
         "path": "src/platform/packages/shared/deeplinks/chat/deep_links.ts",
         "deprecated": false,
@@ -39,13 +39,13 @@
       },
       {
         "parentPluginId": "@kbn/deeplinks-chat",
-        "id": "def-common.WORKCHAT_APP_ID",
+        "id": "def-common.WORKPLACE_AI_APP_ID",
         "type": "string",
         "tags": [],
-        "label": "WORKCHAT_APP_ID",
+        "label": "WORKPLACE_AI_APP_ID",
         "description": [],
         "signature": [
-          "\"workchat\""
+          "\"workplace_ai\""
         ],
         "path": "src/platform/packages/shared/deeplinks/chat/constants.ts",
         "deprecated": false,
@@ -54,13 +54,13 @@
       },
       {
         "parentPluginId": "@kbn/deeplinks-chat",
-        "id": "def-common.WorkchatApp",
+        "id": "def-common.WorkplaceAIApp",
         "type": "Type",
         "tags": [],
-        "label": "WorkchatApp",
+        "label": "WorkplaceAIApp",
         "description": [],
         "signature": [
-          "\"workchat\""
+          "\"workplace_ai\""
         ],
         "path": "src/platform/packages/shared/deeplinks/chat/deep_links.ts",
         "deprecated": false,
@@ -69,10 +69,10 @@
       },
       {
         "parentPluginId": "@kbn/deeplinks-chat",
-        "id": "def-common.WorkchatLinkId",
+        "id": "def-common.WorkplaceAILinkId",
         "type": "Type",
         "tags": [],
-        "label": "WorkchatLinkId",
+        "label": "WorkplaceAILinkId",
         "description": [],
         "signature": [
           "\"integrations\" | \"agents\""

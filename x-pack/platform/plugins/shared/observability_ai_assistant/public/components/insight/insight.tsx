@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { cloneDeep, isArray, isEmpty, last, once } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { ILicense } from '@kbn/licensing-plugin/public';
+import type { ILicense } from '@kbn/licensing-types';
 import { MessageRole, type Message } from '../../../common/types';
 import { ObservabilityAIAssistantChatServiceContext } from '../../context/observability_ai_assistant_chat_service_context';
 import { useAbortableAsync } from '../../hooks/use_abortable_async';
@@ -66,6 +66,7 @@ function ChatContent({
   const service = useObservabilityAIAssistant();
   const chatService = useObservabilityAIAssistantChatService();
   const scopes = chatService.getScopes();
+  const connectors = useGenAIConnectors();
 
   const initialMessagesRef = useRef(initialMessages);
 
@@ -92,14 +93,17 @@ function ChatContent({
 
   useEffect(() => {
     if (state !== ChatState.Loading && lastAssistantResponse) {
+      const connector = connectors.getConnector(connectors.selectedConnector || '');
       chatService.sendAnalyticsEvent({
         type: ObservabilityAIAssistantTelemetryEventType.InsightResponse,
         payload: {
           '@timestamp': lastAssistantResponse['@timestamp'],
+          connector,
+          scopes,
         },
       });
     }
-  }, [state, lastAssistantResponse, chatService]);
+  }, [state, lastAssistantResponse, chatService, connectors, scopes]);
 
   return (
     <>
@@ -124,10 +128,13 @@ function ChatContent({
               <FeedbackButtons
                 onClickFeedback={(feedback) => {
                   if (lastAssistantResponse) {
+                    const connector = connectors.getConnector(connectors.selectedConnector || '');
                     chatService.sendAnalyticsEvent({
                       type: ObservabilityAIAssistantTelemetryEventType.InsightFeedback,
                       payload: {
                         feedback,
+                        connector,
+                        scopes,
                       },
                     });
                   }
@@ -436,6 +443,7 @@ export function Insight({
   } else if (messages.status === FETCH_STATUS.FAILURE) {
     children = (
       <EuiCallOut
+        announceOnMount
         size="s"
         title={i18n.translate(
           'xpack.observabilityAiAssistant.insight.div.errorFetchingMessagesLabel',

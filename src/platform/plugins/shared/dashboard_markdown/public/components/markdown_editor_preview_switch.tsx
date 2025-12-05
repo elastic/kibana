@@ -7,15 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiButtonGroup,
-  EuiButtonGroupOptionProps,
-  UseEuiTheme,
-  htmlIdGenerator,
-} from '@elastic/eui';
+import type { EuiButtonGroupOptionProps, UseEuiTheme } from '@elastic/eui';
+import { EuiButtonGroup, htmlIdGenerator } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
-import { PublishingSubject, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import React from 'react';
 
 const generateId = htmlIdGenerator();

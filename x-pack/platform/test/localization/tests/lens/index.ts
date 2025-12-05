@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EsArchiver } from '@kbn/es-archiver';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { EsArchiver } from '@kbn/es-archiver';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
   const { timePicker } = getPageObjects(['timePicker']);

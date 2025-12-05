@@ -7,23 +7,25 @@
 
 import { of, Observable } from 'rxjs';
 import { z } from '@kbn/zod';
+import type { AIMessageChunk } from '@langchain/core/messages';
 import {
   AIMessage,
-  AIMessageChunk,
   HumanMessage,
   isAIMessage,
   SystemMessage,
   ToolMessage,
 } from '@langchain/core/messages';
-import {
+import type {
   ChatCompleteAPI,
   ChatCompleteResponse,
   ChatCompleteStreamResponse,
   ChatCompletionChunkEvent,
   ChatCompletionEvent,
-  ChatCompletionEventType,
   ChatCompletionTokenCount,
   InferenceConnector,
+} from '@kbn/inference-common';
+import {
+  ChatCompletionEventType,
   InferenceConnectorType,
   MessageRole,
   createInferenceRequestError,
@@ -583,11 +585,8 @@ describe('InferenceChatModel', () => {
           ],
         },
         {
-          tool_calls: [{ toolCallId: '', index: 0, function: { name: 'myfun', arguments: '' } }],
-        },
-        {
           tool_calls: [
-            { toolCallId: '', index: 0, function: { name: 'ction', arguments: ' { "' } },
+            { toolCallId: '', index: 0, function: { name: 'myfunction', arguments: ' { "' } },
           ],
         },
         {
@@ -608,7 +607,8 @@ describe('InferenceChatModel', () => {
         concatChunk = concatChunk ? concatChunk.concat(chunk) : chunk;
       }
 
-      expect(allChunks.length).toBe(5);
+      expect(allChunks.length).toBe(4);
+
       expect(concatChunk!.tool_calls).toEqual([
         {
           id: 'my-tool-call-id',
@@ -689,16 +689,15 @@ describe('InferenceChatModel', () => {
       });
       chatComplete.mockReturnValue(response);
 
-      const output = await chatModel.stream('Some question');
-
       const allChunks: AIMessageChunk[] = [];
       await expect(async () => {
+        const output = await chatModel.stream('Some question');
         for await (const chunk of output) {
           allChunks.push(chunk);
         }
       }).rejects.toThrowErrorMatchingInlineSnapshot(`"something went wrong"`);
 
-      expect(allChunks.length).toBe(2);
+      expect(allChunks.length).toBe(0);
     });
   });
 

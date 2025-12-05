@@ -16,13 +16,15 @@ import {
 import { METRIC_TYPE } from '@kbn/analytics';
 import { useHistory } from 'react-router-dom';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
-import { useQueryClient } from '@tanstack/react-query';
-import { i18n as kbnI18n } from '@kbn/i18n';
+import { useQueryClient } from '@kbn/react-query';
 import type { RuleResponse } from '@kbn/cloud-security-posture-common';
 import { useFetchDetectionRulesAlertsStatus } from '../common/api/use_fetch_detection_rules_alerts_status';
 import { useFetchDetectionRulesByTags } from '../common/api/use_fetch_detection_rules_by_tags';
 import { useKibana } from '../common/hooks/use_kibana';
-import { showCreateDetectionRuleSuccessToast } from './take_action';
+import {
+  showCreateDetectionRuleSuccessToast,
+  showCreateDetectionRuleErrorToast,
+} from './take_action';
 import { DETECTION_ENGINE_ALERTS_KEY, DETECTION_ENGINE_RULES_KEY } from '../common/constants';
 
 const RULES_PAGE_PATH = '/rules/management';
@@ -85,12 +87,7 @@ export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounte
     } catch (e) {
       setIsCreateRuleLoading(false);
 
-      notifications.toasts.addWarning({
-        title: kbnI18n.translate('xpack.csp.detectionRuleCounter.alerts.createRuleErrorTitle', {
-          defaultMessage: 'Coming Soon',
-        }),
-        text: e.message,
-      });
+      showCreateDetectionRuleErrorToast(startServices, e);
     }
   }, [createRuleFn, http, analytics, notifications, i18n, theme, queryClient]);
 

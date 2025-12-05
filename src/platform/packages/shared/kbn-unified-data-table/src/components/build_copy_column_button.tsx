@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiListGroupItemProps } from '@elastic/eui';
+import type { EuiListGroupItemProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ToastsStart } from '@kbn/core/public';
 import {

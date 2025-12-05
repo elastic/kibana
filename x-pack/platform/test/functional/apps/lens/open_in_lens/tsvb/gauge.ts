@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { visualize, visualBuilder, lens, header } = getPageObjects([
@@ -18,7 +18,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const find = getService('find');
 
   describe('Gauge', function describeIndexTests() {
     before(async () => {
@@ -54,8 +53,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('mtrVis');
       await retry.try(async () => {
-        const layers = await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`);
-        expect(layers).to.have.length(1);
+        // layer tabs hidden for gauge/metric visualizations
+        await lens.assertLayerCount(0);
 
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
         expect(dimensions).to.have.length(2);

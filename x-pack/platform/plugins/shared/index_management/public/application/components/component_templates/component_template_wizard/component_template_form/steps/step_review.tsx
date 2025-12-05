@@ -22,12 +22,9 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { DataStreamOptions } from '../../../../../../../common/types/data_streams';
-import {
-  ComponentTemplateDeserialized,
-  serializers,
-  serializeComponentTemplate,
-} from '../../../shared_imports';
+import type { DataStreamOptions } from '../../../../../../../common/types/data_streams';
+import type { ComponentTemplateDeserialized } from '../../../shared_imports';
+import { serializers, serializeComponentTemplate } from '../../../shared_imports';
 import { getLifecycleValue } from '../../../../../lib/data_streams';
 
 const INFINITE_AS_ICON = true;

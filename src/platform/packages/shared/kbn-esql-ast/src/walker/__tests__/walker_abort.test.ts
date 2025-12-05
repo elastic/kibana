@@ -8,7 +8,7 @@
  */
 
 import { EsqlQuery } from '../../query';
-import { ESQLIntegerLiteral } from '../../types';
+import type { ESQLIntegerLiteral } from '../../types';
 import { Walker } from '../walker';
 
 describe('aborting traversal', () => {
@@ -67,7 +67,9 @@ describe('aborting traversal', () => {
 
     Walker.walk(ast, {
       visitMapEntry: (node, parent, walker) => {
-        keys.push(node.key.valueUnquoted);
+        if (node.key.type === 'literal' && node.key.literalType === 'keyword') {
+          keys.push(node.key.valueUnquoted);
+        }
         values.push((node.value as ESQLIntegerLiteral).value);
         if (keys.length === 2) {
           walker.abort();

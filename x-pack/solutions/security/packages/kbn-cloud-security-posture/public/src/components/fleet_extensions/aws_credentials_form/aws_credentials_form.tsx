@@ -7,40 +7,48 @@
 import React from 'react';
 import { EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import {
+  AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS,
+  AWS_ORGANIZATION_ACCOUNT,
+} from '@kbn/cloud-security-posture-common';
 import { getAwsCredentialsFormManualOptions } from './get_aws_credentials_form_options';
-import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
-import { getPosturePolicy } from '../utils';
+import type { CspRadioOption } from '../../csp_boxed_radio_group';
+import { RadioGroup } from '../../csp_boxed_radio_group';
+import { updatePolicyWithInputs } from '../utils';
 import { useAwsCredentialsForm } from './aws_hooks';
-import { AWS_ORGANIZATION_ACCOUNT, AWS_SETUP_FORMAT } from '../constants';
+import { AWS_SETUP_FORMAT } from '../constants';
 import { AwsInputVarFields } from './aws_input_var_fields';
-import { AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ } from './aws_test_subjects';
 import { ReadDocumentation } from '../common';
 import { AWSSetupInfoContent } from './aws_setup_info';
 import { AwsCredentialTypeSelector } from './aws_credential_type_selector';
-import { AwsSetupFormat, NewPackagePolicyPostureInput, UpdatePolicy } from '../types';
+import type { AwsSetupFormat, UpdatePolicy } from '../types';
+import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 
 const getSetupFormatOptions = (): CspRadioOption[] => [
   {
     id: AWS_SETUP_FORMAT.CLOUD_FORMATION,
     label: 'CloudFormation',
-    testId: AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.CLOUDFORMATION,
+    testId: AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.CLOUDFORMATION,
   },
   {
     id: AWS_SETUP_FORMAT.MANUAL,
-    label: i18n.translate('securitySolutionPackages.awsIntegration.setupFormatOptions.manual', {
-      defaultMessage: 'Manual',
-    }),
-    testId: AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.MANUAL,
+    label: i18n.translate(
+      'securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.setupFormatOptions.manual',
+      {
+        defaultMessage: 'Manual',
+      }
+    ),
+    testId: AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.MANUAL,
   },
 ];
 
 interface AwsFormProps {
   newPolicy: NewPackagePolicy;
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>;
+  input: NewPackagePolicyInput;
   updatePolicy: UpdatePolicy;
   packageInfo: PackageInfo;
   disabled: boolean;
@@ -57,9 +65,9 @@ const CloudFormationSetup = ({
 }) => {
   if (!hasCloudFormationTemplate) {
     return (
-      <EuiCallOut color="warning">
+      <EuiCallOut announceOnMount={false} color="warning">
         <FormattedMessage
-          id="securitySolutionPackages.awsIntegration.cloudFormationSetupStep.notSupported"
+          id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.cloudFormationSetupStep.notSupported"
           defaultMessage="CloudFormation is not supported on the current Integration version, please upgrade your integration to the latest version to use CloudFormation"
         />
       </EuiCallOut>
@@ -78,34 +86,34 @@ const CloudFormationSetup = ({
         >
           <li>
             <FormattedMessage
-              id="securitySolutionPackages.awsIntegration.cloudFormationSetupStep.hostRequirement"
+              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.cloudFormationSetupStep.hostRequirement"
               defaultMessage='Ensure "New hosts" is selected in the "Where to add this integration?" section below'
             />
           </li>
           {accountType === AWS_ORGANIZATION_ACCOUNT ? (
             <li>
               <FormattedMessage
-                id="securitySolutionPackages.awsIntegration.cloudFormationSetupStep.organizationLogin"
+                id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.cloudFormationSetupStep.organizationLogin"
                 defaultMessage="Log in as an admin in your organization's AWS management account"
               />
             </li>
           ) : (
             <li>
               <FormattedMessage
-                id="securitySolutionPackages.awsIntegration.cloudFormationSetupStep.login"
+                id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.cloudFormationSetupStep.login"
                 defaultMessage="Log in as an admin to the AWS Account you want to onboard"
               />
             </li>
           )}
           <li>
             <FormattedMessage
-              id="securitySolutionPackages.awsIntegration.cloudFormationSetupStep.save"
+              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.cloudFormationSetupStep.save"
               defaultMessage="Click the Save and continue button on the bottom right of this page"
             />
           </li>
           <li>
             <FormattedMessage
-              id="securitySolutionPackages.awsIntegration.cloudFormationSetupStep.launch"
+              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.cloudFormationSetupStep.launch"
               defaultMessage="On the subsequent pop-up modal, click the Launch CloudFormation button."
             />
           </li>
@@ -129,6 +137,7 @@ export const AwsCredentialsForm = ({
   hasInvalidRequiredVars,
   isValid,
 }: AwsFormProps) => {
+  const { awsPolicyType, shortName, awsInputFieldMapping } = useCloudSetup();
   const {
     awsCredentialsType,
     setupFormat,
@@ -145,18 +154,30 @@ export const AwsCredentialsForm = ({
     isValid,
   });
 
+  // Ensure supports_cloud_connector is false for agent-based deployments
+  if (newPolicy.supports_cloud_connector || newPolicy.cloud_connector_id) {
+    updatePolicy({
+      updatedPolicy: {
+        ...newPolicy,
+        supports_cloud_connector: false,
+        cloud_connector_id: undefined,
+      },
+    });
+  }
+
   return (
     <>
       <AWSSetupInfoContent
         info={
           <FormattedMessage
-            id="securitySolutionPackages.awsIntegration.gettingStarted.setupInfoContent"
-            defaultMessage="Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to set up and deploy CSPM for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
+            id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.gettingStarted.setupInfoContent"
+            defaultMessage="Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to set up and deploy {shortName} for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
             values={{
+              shortName,
               gettingStartedLink: (
                 <EuiLink href={elasticDocLink} target="_blank">
                   <FormattedMessage
-                    id="securitySolutionPackages.awsIntegration.gettingStarted.setupInfoContentLink"
+                    id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.gettingStarted.gettingStartedLink"
                     defaultMessage="Getting Started"
                   />
                 </EuiLink>
@@ -174,6 +195,7 @@ export const AwsCredentialsForm = ({
         onChange={(idSelected: AwsSetupFormat) =>
           idSelected !== setupFormat && onSetupFormatChange(idSelected)
         }
+        name="setupFormat"
       />
       <EuiSpacer size="l" />
       {setupFormat === AWS_SETUP_FORMAT.CLOUD_FORMATION && (
@@ -184,23 +206,23 @@ export const AwsCredentialsForm = ({
           <AwsCredentialTypeSelector
             disabled={disabled}
             label={i18n.translate(
-              'securitySolutionPackages.awsIntegration.awsCredentialTypeSelectorLabel',
+              'securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.awsCredentialTypeSelectorLabel',
               {
                 defaultMessage: 'Preferred manual method',
               }
             )}
-            options={getAwsCredentialsFormManualOptions()}
+            options={getAwsCredentialsFormManualOptions(awsInputFieldMapping)}
             type={awsCredentialsType}
             onChange={(optionId) => {
               updatePolicy({
-                updatedPolicy: getPosturePolicy(newPolicy, input.type, {
+                updatedPolicy: updatePolicyWithInputs(newPolicy, awsPolicyType, {
                   'aws.credentials.type': { value: optionId },
                 }),
               });
             }}
           />
           <EuiSpacer size="m" />
-          {group.info}
+          {group?.info}
           <EuiSpacer size="m" />
           <ReadDocumentation url={elasticDocLink} />
           <EuiSpacer size="l" />
@@ -209,10 +231,11 @@ export const AwsCredentialsForm = ({
             packageInfo={packageInfo}
             onChange={(key, value) => {
               updatePolicy({
-                updatedPolicy: getPosturePolicy(newPolicy, input.type, { [key]: { value } }),
+                updatedPolicy: updatePolicyWithInputs(newPolicy, awsPolicyType, {
+                  [key]: { value },
+                }),
               });
             }}
-            hasInvalidRequiredVars={hasInvalidRequiredVars}
           />
         </>
       )}

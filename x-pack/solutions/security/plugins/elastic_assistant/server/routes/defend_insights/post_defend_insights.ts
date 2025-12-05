@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { IKibanaResponse } from '@kbn/core/server';
+import type { IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
+import type { Replacements } from '@kbn/elastic-assistant-common';
 import moment from 'moment/moment';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import {
@@ -13,22 +14,22 @@ import {
   DefendInsightsPostRequestBody,
   DefendInsightsPostResponse,
   API_VERSIONS,
-  Replacements,
+  DefendInsightType,
 } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { IRouter, Logger } from '@kbn/core/server';
 
+import type { ElasticAssistantRequestHandlerContext } from '../../types';
 import { buildResponse } from '../../lib/build_response';
-import { ElasticAssistantRequestHandlerContext } from '../../types';
+import { CallbackIds, appContextService } from '../../services/app_context';
+import { InvalidDefendInsightTypeError } from '../../lib/defend_insights/errors';
 import {
   createDefendInsight,
   updateDefendInsights,
-  isDefendInsightsEnabled,
   invokeDefendInsightsGraph,
   handleGraphError,
   runExternalCallbacks,
+  isDefendInsightsPolicyResponseFailureEnabled,
 } from './helpers';
-import { CallbackIds, appContextService } from '../../services/app_context';
 
 const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
 const LANG_CHAIN_TIMEOUT = ROUTE_HANDLER_TIMEOUT - 10_000; // 9 minutes 50 seconds
@@ -76,20 +77,11 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
         const savedObjectsClient = assistantContext.savedObjectsClient;
 
         try {
-          const isEnabled = isDefendInsightsEnabled({
-            request,
-            logger,
-            assistantContext,
-          });
-          if (!isEnabled) {
-            return response.notFound();
-          }
-
           if (!ctx.licensing.license.hasAtLeast('enterprise')) {
             return response.forbidden({
               body: {
                 message:
-                  'Your license does not support Defend Workflows. Please upgrade your license.',
+                  'Your license does not support Automatic Troubleshooting. Please upgrade your license.',
               },
             });
           }
@@ -97,6 +89,7 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
           const actions = assistantContext.actions;
           const actionsClient = await actions.getActionsClientWithRequest(request);
           const dataClient = await assistantContext.getDefendInsightsDataClient();
+          const kbDataClient = await assistantContext.getAIAssistantKnowledgeBaseDataClient();
           const authenticatedUser = await assistantContext.getCurrentUser();
           if (authenticatedUser == null) {
             return resp.error({
@@ -138,6 +131,18 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
             apiConfig
           );
 
+          const isPolicyResponseFailureEnabled = isDefendInsightsPolicyResponseFailureEnabled({
+            request,
+            logger,
+            assistantContext,
+          });
+          if (
+            insightType === DefendInsightType.Enum.policy_response_failure &&
+            !isPolicyResponseFailureEnabled
+          ) {
+            throw new InvalidDefendInsightTypeError();
+          }
+
           invokeDefendInsightsGraph({
             insightType,
             endpointIds,
@@ -152,6 +157,7 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
             logger,
             onNewReplacements,
             savedObjectsClient,
+            kbDataClient,
           })
             .then(({ anonymizedEvents, insights }) =>
               updateDefendInsights({

@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { MlTrainedModelConfig, MlTrainedModelStats } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  MlTrainedModelConfig,
+  MlTrainedModelStats,
+} from '@elastic/elasticsearch/lib/api/types';
 
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { MlTrainedModels } from '@kbn/ml-plugin/server';
+import type { MlTrainedModels } from '@kbn/ml-plugin/server';
 
 import {
   E5_LINUX_OPTIMIZED_MODEL_ID,
@@ -21,7 +24,8 @@ import {
 
 import { getMlModelTypesForModelConfig } from '../../../common/ml_inference_pipeline';
 
-import { MlModelDeploymentState, MlModel } from '../../../common/types/ml';
+import type { MlModel } from '../../../common/types/ml';
+import { MlModelDeploymentState } from '../../../common/types/ml';
 
 import {
   BASE_MODEL,

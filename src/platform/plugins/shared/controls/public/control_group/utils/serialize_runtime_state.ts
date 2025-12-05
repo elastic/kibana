@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializedPanelState } from '@kbn/presentation-publishing';
+import type { SerializedPanelState } from '@kbn/presentation-publishing';
 import { omit } from 'lodash';
 import type {
   ControlsChainingSystem,
@@ -21,7 +21,7 @@ import {
   DEFAULT_CONTROLS_LABEL_POSITION,
   DEFAULT_IGNORE_PARENT_SETTINGS,
 } from '@kbn/controls-constants';
-import { ControlGroupRuntimeState } from '../../../common';
+import type { ControlGroupRuntimeState } from '../../../common';
 
 export const defaultRuntimeState = {
   labelPosition: DEFAULT_CONTROLS_LABEL_POSITION as ControlsLabelPosition,

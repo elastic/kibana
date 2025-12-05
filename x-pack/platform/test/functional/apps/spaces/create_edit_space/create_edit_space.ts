@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { faker } from '@faker-js/faker';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
@@ -123,7 +123,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         // Make sure we are on the classic side nav
         await testSubjects.existOrFail('mgtSideBarNav');
-        await testSubjects.missingOrFail('searchSideNav');
+        await testSubjects.missingOrFail('~searchSideNav');
 
         // change to Enterprise Search
         await PageObjects.spaceSelector.changeSolutionView('es');
@@ -133,7 +133,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await find.waitForDeletedByCssSelector('.kibanaWelcomeLogo');
 
         // Search side nav is loaded
-        await testSubjects.existOrFail('searchSideNav');
+        await testSubjects.existOrFail('~searchSideNav');
         await testSubjects.missingOrFail('mgtSideBarNav');
 
         // change back to classic
@@ -149,7 +149,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.spaceSelector.confirmModal();
 
         await testSubjects.existOrFail('mgtSideBarNav');
-        await testSubjects.missingOrFail('searchSideNav');
+        await testSubjects.missingOrFail('~searchSideNav');
       });
     });
 

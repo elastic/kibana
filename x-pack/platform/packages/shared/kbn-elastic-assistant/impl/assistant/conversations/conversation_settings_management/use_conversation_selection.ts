@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useState } from 'react';
-import { ConversationTableItem } from './types';
+import type { ConversationTableItem } from './types';
 
 const EMPTY_CONVERSATIONS_ARRAY: ConversationTableItem[] = [];
 const EMPTY_CONVERSATIONS_IDS_ARRAY: string[] = [];

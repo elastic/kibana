@@ -73,5 +73,5 @@ export function getSSLSettingsFromConfig(
   } else if (rejectUnauthorized !== undefined) {
     return { verificationMode: rejectUnauthorized ? 'full' : 'none' };
   }
-  return {};
+  return { verificationMode: 'full' };
 }

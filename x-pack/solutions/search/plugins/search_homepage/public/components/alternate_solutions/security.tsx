@@ -73,7 +73,7 @@ export const Security: React.FC = () => {
                   <EuiFlexItem grow={false}>
                     <EuiLink data-test-subj="setupSiemLink" href={docLinks.ingestDataToSecurity}>
                       {i18n.translate('xpack.searchHomepage.security.setupSiem', {
-                        defaultMessage: 'Setup your SIEM',
+                        defaultMessage: 'Set up your SIEM',
                       })}
                     </EuiLink>
                   </EuiFlexItem>
@@ -96,7 +96,7 @@ export const Security: React.FC = () => {
                       href={docLinks.installElasticDefend}
                     >
                       {i18n.translate('xpack.searchHomepage.security.setupElasticDefend', {
-                        defaultMessage: 'Setup Elastic Defend',
+                        defaultMessage: 'Set up Elastic Defend',
                       })}
                     </EuiLink>
                   </EuiFlexItem>

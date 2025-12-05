@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { isEmpty } from 'lodash/fp';
-import { Config, ConfigEntryView, FieldType, InferenceProvider } from '../types/types';
-import type { FieldsConfiguration } from '../types/types';
+import { FieldType } from '../types/types';
+import type { Config, ConfigEntryView, InferenceProvider } from '../types/types';
+import type { OverrideFieldsContentType } from '../types/dynamic_config/types';
 import * as LABELS from '../translations';
 
 export interface TaskTypeOption {
@@ -40,7 +41,7 @@ export const getNonEmptyValidator = (
 ) => {
   return (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc> => {
     const [{ value, path }] = args;
-    const newSchema: ConfigEntryView[] = [];
+    const updatedFormFields: ConfigEntryView[] = [];
 
     const configData = (value ?? {}) as Record<string, unknown>;
     let hasErrors = false;
@@ -63,10 +64,11 @@ export const getNonEmptyValidator = (
             }
           }
         }
-        newSchema.push(field);
+
+        updatedFormFields.push(field);
       });
 
-      validationEventHandler(newSchema);
+      validationEventHandler(updatedFormFields);
       if (hasErrors) {
         return {
           code: 'ERR_FIELD_MISSING',
@@ -81,7 +83,7 @@ export const getNonEmptyValidator = (
 export const mapProviderFields = (
   taskType: string,
   newProvider: InferenceProvider,
-  fieldOverrides?: { hidden: string[]; additional: FieldsConfiguration[] }
+  fieldOverrides?: OverrideFieldsContentType
 ): ConfigEntryView[] => {
   // fieldOverrides.additional
   // e.g. [ { field: { default_value: 'value', ...}, other_field: { default_value: 'value', ...} } ]

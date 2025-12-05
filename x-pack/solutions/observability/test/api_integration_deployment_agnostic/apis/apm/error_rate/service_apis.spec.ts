@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/synthtrace-client';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import expect from '@kbn/expect';
 import { mean, meanBy, sumBy } from 'lodash';
-import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
+import type { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
 import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';

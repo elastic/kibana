@@ -31,7 +31,7 @@ describe('action params validation', () => {
       },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: { timeWindow: [] },
     });
   });
@@ -39,7 +39,7 @@ describe('action params validation', () => {
   test('params validation succeeds when valid timeWindow', async () => {
     const actionParams = { subActionParams: { timeWindow: '17w' } };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: { timeWindow: [] },
     });
   });
@@ -47,7 +47,7 @@ describe('action params validation', () => {
   test('params validation fails when timeWindow is empty', async () => {
     const actionParams = { subActionParams: { timeWindow: '' } };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: { timeWindow: ['Invalid time window.'] },
     });
   });
@@ -55,7 +55,7 @@ describe('action params validation', () => {
   test('params validation fails when timeWindow is undefined', async () => {
     const actionParams = { subActionParams: { timeWindow: undefined } };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: { timeWindow: ['Invalid time window.'] },
     });
   });
@@ -63,7 +63,7 @@ describe('action params validation', () => {
   test('params validation fails when timeWindow is null', async () => {
     const actionParams = { subActionParams: { timeWindow: null } };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: { timeWindow: ['Invalid time window.'] },
     });
   });
@@ -71,7 +71,7 @@ describe('action params validation', () => {
   test('params validation fails when timeWindow size is 0', async () => {
     const actionParams = { subActionParams: { timeWindow: '0d' } };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: { timeWindow: ['Invalid time window.'] },
     });
   });
@@ -79,14 +79,14 @@ describe('action params validation', () => {
   test('params validation fails when timeWindow size is negative', async () => {
     const actionParams = { subActionParams: { timeWindow: '-5w' } };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: { timeWindow: ['Invalid time window.'] },
     });
   });
 
   test('params validation fails when timeWindow is less than 5 minutes', async () => {
     const actionParams = { subActionParams: { timeWindow: '3m' } };
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: { timeWindow: ['Time window should be at least 5 minutes'] },
     });
   });

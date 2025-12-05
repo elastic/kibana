@@ -38,7 +38,8 @@ import { SearchEmbeddableGridComponent } from './components/search_embeddable_gr
 import { initializeEditApi } from './initialize_edit_api';
 import { initializeFetch, isEsqlMode } from './initialize_fetch';
 import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
-import type { SearchEmbeddableApi, SearchEmbeddableSerializedState } from './types';
+import type { SearchEmbeddableState } from '../../common/embeddable/types';
+import type { SearchEmbeddableApi } from './types';
 import { deserializeState, serializeState } from './utils/serialization_utils';
 import { BaseAppWrapper } from '../context_awareness';
 import { ScopedServicesProvider } from '../components/scoped_services_provider';
@@ -56,7 +57,7 @@ export const getSearchEmbeddableFactory = ({
   const { save, checkForDuplicateTitle } = discoverServices.savedSearch;
 
   const savedSearchEmbeddableFactory: EmbeddableFactory<
-    SearchEmbeddableSerializedState,
+    SearchEmbeddableState,
     SearchEmbeddableApi
   > = {
     type: SEARCH_EMBEDDABLE_TYPE,
@@ -105,26 +106,6 @@ export const getSearchEmbeddableFactory = ({
       const searchEmbeddable = await initializeSearchEmbeddableApi(runtimeState, {
         discoverServices,
       });
-      const unsubscribeFromFetch = initializeFetch({
-        api: {
-          parentApi,
-          ...titleManager.api,
-          ...timeRangeManager.api,
-          defaultTitle$,
-          savedSearch$: searchEmbeddable.api.savedSearch$,
-          dataViews$: searchEmbeddable.api.dataViews$,
-          savedObjectId$,
-          dataLoading$,
-          blockingError$,
-          fetchContext$,
-          fetchWarnings$,
-        },
-        discoverServices,
-        stateManager: searchEmbeddable.stateManager,
-        scopedProfilesManager,
-        setDataLoading: (dataLoading: boolean | undefined) => dataLoading$.next(dataLoading),
-        setBlockingError: (error: Error | undefined) => blockingError$.next(error),
-      });
 
       const serialize = (savedObjectId?: string) =>
         serializeState({
@@ -133,11 +114,11 @@ export const getSearchEmbeddableFactory = ({
           savedSearch: searchEmbeddable.api.savedSearch$.getValue(),
           serializeTitles: titleManager.getLatestState,
           serializeTimeRange: timeRangeManager.getLatestState,
-          serializeDynamicActions: dynamicActionsManager?.serializeState,
+          serializeDynamicActions: dynamicActionsManager?.getLatestState,
           savedObjectId,
         });
 
-      const unsavedChangesApi = initializeUnsavedChanges<SearchEmbeddableSerializedState>({
+      const unsavedChangesApi = initializeUnsavedChanges<SearchEmbeddableState>({
         uuid,
         parentApi,
         serializeState: () => serialize(savedObjectId$.getValue()),
@@ -164,6 +145,7 @@ export const getSearchEmbeddableFactory = ({
             savedObjectId: 'skip',
             timeRestore: 'skip',
             usesAdHocDataView: 'skip',
+            controlGroupJson: 'skip',
             visContext: 'skip',
             tabs: 'skip',
           };
@@ -237,6 +219,28 @@ export const getSearchEmbeddableFactory = ({
           // compatibilty check and ensure top-level drilldowns (e.g. URL) work as expected
           return [];
         },
+      });
+
+      const unsubscribeFromFetch = initializeFetch({
+        api: {
+          ...api,
+          parentApi,
+          ...titleManager.api,
+          ...timeRangeManager.api,
+          defaultTitle$,
+          savedSearch$: searchEmbeddable.api.savedSearch$,
+          dataViews$: searchEmbeddable.api.dataViews$,
+          savedObjectId$,
+          dataLoading$,
+          blockingError$,
+          fetchContext$,
+          fetchWarnings$,
+        },
+        discoverServices,
+        stateManager: searchEmbeddable.stateManager,
+        scopedProfilesManager,
+        setDataLoading: (dataLoading: boolean | undefined) => dataLoading$.next(dataLoading),
+        setBlockingError: (error: Error | undefined) => blockingError$.next(error),
       });
 
       return {

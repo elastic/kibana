@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { visualize, visualBuilder, lens, timeToVisualize, dashboard, canvas, header } =
@@ -79,7 +79,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const visTitle = 'My TSVB to Lens viz 2';
       await dashboard.navigateToApp();
       await dashboard.clickNewDashboard();
-      await dashboardAddPanel.clickEditorMenuButton();
+      await dashboardAddPanel.openAddPanelFlyout();
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('metrics');
       await testSubjects.click('visualizesaveAndReturnButton');
       await panelActions.saveToLibrary(visTitle);

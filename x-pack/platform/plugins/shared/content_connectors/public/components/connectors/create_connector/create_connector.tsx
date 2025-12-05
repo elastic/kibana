@@ -27,12 +27,12 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
+import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 
-import { ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
+import type { ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
 import { useActions, useValues } from 'kea';
 import { useAppContext } from '../../../app_context';
 import { AddConnectorApiLogic } from '../../../api/connector/add_connector_api_logic';

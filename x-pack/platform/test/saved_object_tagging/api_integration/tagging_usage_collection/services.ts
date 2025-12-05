@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GenericFtrProviderContext } from '@kbn/test';
+import type { GenericFtrProviderContext } from '@kbn/test';
 import { services as apiIntegrationServices } from '../../../api_integration/services';
 
 export const services = {

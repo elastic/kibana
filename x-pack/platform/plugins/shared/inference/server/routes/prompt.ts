@@ -15,8 +15,8 @@ import type {
 import { InferenceTaskEventType, isInferenceError } from '@kbn/inference-common';
 import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
 import { z } from '@kbn/zod';
-import { PromptRequestBody } from '../../common/http_apis';
-import { InferenceServerStart, InferenceStartDependencies } from '../types';
+import type { PromptRequestBody } from '../../common/http_apis';
+import type { InferenceServerStart, InferenceStartDependencies } from '../types';
 import { promptBodySchema } from './schemas';
 import { getRequestAbortedSignal } from './get_request_aborted_signal';
 
@@ -54,6 +54,7 @@ export function registerPromptRoute({
       temperature = 0.25,
       metadata,
       prevMessages,
+      toolChoice,
     } = request.body;
 
     return client.prompt({
@@ -73,6 +74,7 @@ export function registerPromptRoute({
       temperature,
       metadata,
       prevMessages,
+      toolChoice,
     });
   }
 

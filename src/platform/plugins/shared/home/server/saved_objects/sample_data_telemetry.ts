@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectsType } from '@kbn/core/server';
 
 export const sampleDataTelemetry: SavedObjectsType = {
   name: 'sample-data-telemetry',

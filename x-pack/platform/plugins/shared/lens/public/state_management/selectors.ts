@@ -6,10 +6,9 @@
  */
 
 import { createSelector } from '@reduxjs/toolkit';
-import { FilterManager } from '@kbn/data-plugin/public';
+import type { FilterManager } from '@kbn/data-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { LensState } from './types';
-import { DatasourceMap, VisualizationMap } from '../types';
+import type { LensState, DatasourceMap, VisualizationMap } from '@kbn/lens-common';
 import { getDatasourceLayers } from './utils';
 import { mergeToNewDoc } from './shared_logic';
 
@@ -39,6 +38,7 @@ export const selectDataViews = (state: LensState) => state.lens.dataViews;
 export const selectIsManaged = (state: LensState) => state.lens.managed;
 export const selectIsFullscreenDatasource = (state: LensState) =>
   Boolean(state.lens.isFullscreenDatasource);
+export const selectSelectedLayerId = (state: LensState) => state.lens.visualization.selectedLayerId;
 
 let applyChangesCounter: number | undefined;
 export const selectTriggerApplyChanges = (state: LensState) => {

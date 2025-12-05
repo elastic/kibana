@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { log, timerange } from '@kbn/apm-synthtrace-client';
+import { log, timerange } from '@kbn/synthtrace-client';
 import expect from '@kbn/expect';
 
-import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';
 import {
   createBackingIndexNameWithoutVersion,
   getDataStreamSettingsOfEarliestIndex,
   rolloverDataStream,
 } from './utils';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import { RoleCredentials, SupertestWithRoleScopeType } from '../../services';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { RoleCredentials, SupertestWithRoleScopeType } from '../../services';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const samlAuth = getService('samlAuth');
@@ -43,6 +43,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           canRead: true,
           canMonitor: true,
           canReadFailureStore: true,
+          canManageFailureStore: true,
         },
       },
       canViewIntegrations: true,

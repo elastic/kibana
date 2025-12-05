@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { visualize, lens, header } = getPageObjects(['visualize', 'lens', 'header']);

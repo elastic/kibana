@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { MessageRole, ToolCallsOf } from '@kbn/inference-common';
+import type { ToolCallOfToolOptions } from '@kbn/inference-common';
+import { MessageRole } from '@kbn/inference-common';
 import { entityQuery } from '@kbn/observability-utils-common/es/queries/entity_query';
 import { RCA_INVESTIGATE_ENTITY_TOOL_NAME } from '@kbn/observability-ai-common/root_cause_analysis';
 import { isEqual } from 'lodash';
 import { getEntitiesByFuzzySearch } from '@kbn/observability-utils-server/entities/get_entities_by_fuzzy_search';
-import { RCA_TOOLS } from '../tools';
-import {
+import type { RCA_TOOLS } from '../tools';
+import type {
   InvestigateEntityToolMessage,
   RootCauseAnalysisContext,
   RootCauseAnalysisToolRequest,
@@ -50,9 +51,9 @@ export async function validateInvestigateEntityToolCalls({
   const investigateEntityToolCalls = toolCalls.filter(
     (
       toolCall
-    ): toolCall is ToolCallsOf<{
+    ): toolCall is ToolCallOfToolOptions<{
       tools: Pick<typeof RCA_TOOLS, typeof RCA_INVESTIGATE_ENTITY_TOOL_NAME>;
-    }>['toolCalls'][number] => toolCall.function.name === RCA_INVESTIGATE_ENTITY_TOOL_NAME
+    }> => toolCall.function.name === RCA_INVESTIGATE_ENTITY_TOOL_NAME
   );
 
   if (!investigateEntityToolCalls.length) {

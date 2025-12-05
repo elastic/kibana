@@ -150,7 +150,7 @@ describe('AutomaticAgentUpgradeTask', () => {
       await mockTask.start({ taskManager: mockTaskManagerStart });
       const createTaskRunner =
         mockTaskManagerSetup.registerTaskDefinitions.mock.calls[0][0][TYPE].createTaskRunner;
-      const taskRunner = createTaskRunner({ taskInstance });
+      const taskRunner = createTaskRunner({ taskInstance, abortController: new AbortController() });
       return taskRunner.run();
     };
 
@@ -530,6 +530,7 @@ describe('AutomaticAgentUpgradeTask', () => {
         {
           agents: agents.slice(0, 1),
           version: '8.18.0',
+          force: true,
         }
       );
     });

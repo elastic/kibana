@@ -12,8 +12,8 @@ import { EuiButton, EuiProvider } from '@elastic/eui';
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 
-import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 

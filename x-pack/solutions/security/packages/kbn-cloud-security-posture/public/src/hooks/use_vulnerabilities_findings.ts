@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { lastValueFrom } from 'rxjs';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
-import {
+import type {
   SearchRequest,
   SearchResponse,
   AggregationsMultiBucketAggregateBase,
@@ -19,18 +19,20 @@ import type {
   Vulnerability,
 } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/latest';
 import type { CoreStart } from '@kbn/core/public';
-import type { CspClientPluginStartDeps, UseCspOptions } from '../types';
-import { showErrorToast } from '../..';
+import type { UseCspOptions } from '@kbn/cloud-security-posture-common/types/findings';
 import {
   getVulnerabilitiesAggregationCount,
   getVulnerabilitiesQuery,
-} from '../utils/findings_query_builders';
+} from '@kbn/cloud-security-posture-common/utils/findings_query_builders';
+import type { CspClientPluginStartDeps } from '../types';
+import { showErrorToast } from '../..';
 
-export enum VULNERABILITY {
+export enum VULNERABILITY_FINDING {
   TITLE = 'vulnerability.title',
   ID = 'vulnerability.id',
   SEVERITY = 'vulnerability.severity',
   PACKAGE_NAME = 'package.name',
+  PACKAGE_VERSION = 'package.version',
 }
 
 type LatestFindingsRequest = IKibanaSearchRequest<SearchRequest>;
@@ -46,15 +48,15 @@ export interface VulnerabilitiesPackage extends Vulnerability {
 }
 
 export interface VulnerabilitiesFindingTableDetailsFields {
-  [VULNERABILITY.TITLE]: string;
-  [VULNERABILITY.ID]: string;
-  [VULNERABILITY.SEVERITY]: string;
-  [VULNERABILITY.PACKAGE_NAME]: string;
+  [VULNERABILITY_FINDING.TITLE]: string;
+  [VULNERABILITY_FINDING.ID]: string;
+  [VULNERABILITY_FINDING.SEVERITY]: string;
+  [VULNERABILITY_FINDING.PACKAGE_NAME]: string;
 }
 
 export type VulnerabilitiesFindingDetailFields = Pick<Vulnerability, 'score'> &
   Pick<CspVulnerabilityFinding, 'vulnerability' | 'resource' | 'event'> &
-  VulnerabilitiesFindingTableDetailsFields;
+  VulnerabilitiesFindingTableDetailsFields & { [VULNERABILITY_FINDING.PACKAGE_VERSION]: string };
 
 interface FindingsAggs {
   count: AggregationsMultiBucketAggregateBase<AggregationsStringRareTermsBucketKeys>;
@@ -88,10 +90,11 @@ export const useVulnerabilitiesFindings = (options: UseCspOptions) => {
           vulnerability: finding._source?.vulnerability,
           resource: finding._source?.resource,
           score: finding._source?.vulnerability?.score,
-          [VULNERABILITY.ID]: finding._source?.vulnerability?.id,
-          [VULNERABILITY.SEVERITY]: finding._source?.vulnerability?.severity,
-          [VULNERABILITY.PACKAGE_NAME]: finding._source?.package?.name,
+          [VULNERABILITY_FINDING.ID]: finding._source?.vulnerability?.id,
+          [VULNERABILITY_FINDING.SEVERITY]: finding._source?.vulnerability?.severity,
+          [VULNERABILITY_FINDING.PACKAGE_NAME]: finding._source?.package?.name,
           event: finding._source?.event,
+          [VULNERABILITY_FINDING.PACKAGE_VERSION]: finding._source?.package?.version,
         })) as VulnerabilitiesFindingDetailFields[],
       };
     },

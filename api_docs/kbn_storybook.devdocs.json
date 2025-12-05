@@ -126,7 +126,7 @@
         "label": "DEFAULT_THEME",
         "description": [],
         "signature": [
-          "\"borealis.light\" | \"borealis.dark\" | \"amsterdam.light\" | \"amsterdam.dark\""
+          "\"borealis.light\" | \"borealis.dark\""
         ],
         "path": "src/platform/packages/shared/kbn-storybook/src/lib/themes.ts",
         "deprecated": false,
@@ -423,7 +423,7 @@
         "label": "THEMES",
         "description": [],
         "signature": [
-          "readonly [\"borealis.light\", \"borealis.dark\", \"amsterdam.light\", \"amsterdam.dark\"]"
+          "readonly [\"borealis.light\", \"borealis.dark\"]"
         ],
         "path": "src/platform/packages/shared/kbn-storybook/src/lib/themes.ts",
         "deprecated": false,

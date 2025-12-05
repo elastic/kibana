@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AxisExtentConfig } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import type { AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
 import type { Panel, Series } from '../../../../../common/types';
 
 const lowerBoundShouldBeZero = (

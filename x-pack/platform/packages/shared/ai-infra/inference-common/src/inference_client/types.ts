@@ -5,16 +5,20 @@
  * 2.0.
  */
 
-import { BoundChatCompleteAPI, ChatCompleteAPI } from '../chat_complete';
-import { InferenceConnector } from '../connectors';
-import { BoundOutputAPI, OutputAPI } from '../output';
-import { BoundPromptAPI, PromptAPI } from '../prompt';
-import { BoundOptions } from '../bind';
+import type {
+  BoundChatCompleteAPI,
+  ChatCompleteAPI,
+  InferenceEventEmitter,
+} from '../chat_complete';
+import type { InferenceConnector } from '../connectors';
+import type { BoundOutputAPI, OutputAPI } from '../output';
+import type { BoundPromptAPI, PromptAPI } from '../prompt';
+import type { BoundOptions } from '../bind';
 
 /**
  * An inference client, scoped to a request, that can be used to interact with LLMs.
  */
-export interface InferenceClient {
+export interface InferenceClient extends InferenceEventEmitter {
   /**
    * `chatComplete` requests the LLM to generate a response to
    * a prompt or conversation, which might be plain text
@@ -46,7 +50,7 @@ export interface InferenceClient {
 /**
  * A version of the {@link InferenceClient} that is pre-bound to a set of parameters.
  */
-export interface BoundInferenceClient {
+export interface BoundInferenceClient extends InferenceEventEmitter {
   /**
    * `chatComplete` requests the LLM to generate a response to
    * a prompt or conversation, which might be plain text

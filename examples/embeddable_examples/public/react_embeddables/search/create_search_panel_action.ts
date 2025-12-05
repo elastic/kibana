@@ -8,9 +8,9 @@
  */
 
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
-import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { SearchSerializedState } from './types';
+import type { SearchSerializedState } from './types';
 import { embeddableExamplesGrouping } from '../embeddable_examples_grouping';
 import { ADD_SEARCH_ACTION_ID, SEARCH_EMBEDDABLE_TYPE } from './constants';
 

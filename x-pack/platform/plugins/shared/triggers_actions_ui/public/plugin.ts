@@ -319,6 +319,7 @@ export class Plugin
             fieldsMetadata: pluginsStart.fieldsMetadata,
             contentManagement: pluginsStart.contentManagement,
             share: pluginsStart.share,
+            uiActions: pluginsStart.uiActions,
           });
         },
       });
@@ -350,7 +351,6 @@ export class Plugin
         return renderApp({
           ...coreStart,
           actions: plugins.actions,
-          cloud: plugins.cloud,
           data: pluginsStart.data,
           dataViews: pluginsStart.dataViews,
           dataViewEditor: pluginsStart.dataViewEditor,
@@ -369,6 +369,7 @@ export class Plugin
           share: pluginsStart.share,
           kibanaFeatures,
           isServerless,
+          uiActions: pluginsStart.uiActions,
         });
       },
     });
@@ -418,6 +419,7 @@ export class Plugin
             fieldFormats: pluginsStart.fieldFormats,
             lens: pluginsStart.lens,
             fieldsMetadata: pluginsStart.fieldsMetadata,
+            uiActions: pluginsStart.uiActions,
           });
         },
       });

@@ -7,21 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DashboardState } from '../../common';
+import type { DashboardState } from '../../common';
 
 export const DEFAULT_DASHBOARD_STATE: DashboardState = {
-  timeRestore: false,
   query: { query: '', language: 'kuery' },
   description: '',
   filters: [],
   panels: [],
   title: '',
   tags: [],
-
-  // options
-  useMargins: true,
-  syncColors: false,
-  syncCursor: true,
-  syncTooltips: false,
-  hidePanelTitles: false,
 };

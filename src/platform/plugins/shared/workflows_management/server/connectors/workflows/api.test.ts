@@ -33,8 +33,22 @@ describe('Workflows API', () => {
 
       const params = {
         workflowId: 'test-workflow-id',
-        alerts: [{ _id: 'alert-1', _index: 'test-index' }],
-        inputs: { test: 'data' },
+        spaceId: 'default',
+        inputs: {
+          event: {
+            alerts: [{ _id: 'alert-1', _index: 'test-index' }] as any,
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: ['test'],
+              consumer: 'test-consumer',
+              producer: 'test-producer',
+              ruleTypeId: 'test-rule-type',
+            },
+            ruleUrl: 'https://example.com/rule',
+            spaceId: 'default',
+          },
+        },
       };
 
       const result = await api.run({
@@ -50,15 +64,44 @@ describe('Workflows API', () => {
 
       expect(mockExternalService.runWorkflow).toHaveBeenCalledWith({
         workflowId: 'test-workflow-id',
-        inputs: { test: 'data' },
+        spaceId: 'default',
+        inputs: {
+          event: {
+            alerts: [{ _id: 'alert-1', _index: 'test-index' }] as any,
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: ['test'],
+              consumer: 'test-consumer',
+              producer: 'test-producer',
+              ruleTypeId: 'test-rule-type',
+            },
+            ruleUrl: 'https://example.com/rule',
+            spaceId: 'default',
+          },
+        },
       });
     });
 
     it('should skip execution when no alerts are provided', async () => {
       const params = {
         workflowId: 'test-workflow-id',
-        alerts: [],
-        inputs: { test: 'data' },
+        spaceId: 'default',
+        inputs: {
+          event: {
+            alerts: [],
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: ['test'],
+              consumer: 'test-consumer',
+              producer: 'test-producer',
+              ruleTypeId: 'test-rule-type',
+            },
+            ruleUrl: 'https://example.com/rule',
+            spaceId: 'default',
+          },
+        },
       };
 
       const result = await api.run({
@@ -81,8 +124,22 @@ describe('Workflows API', () => {
     it('should skip execution when alerts is null', async () => {
       const params = {
         workflowId: 'test-workflow-id',
-        alerts: null as any,
-        inputs: { test: 'data' },
+        spaceId: 'default',
+        inputs: {
+          event: {
+            alerts: null as any,
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: ['test'],
+              consumer: 'test-consumer',
+              producer: 'test-producer',
+              ruleTypeId: 'test-rule-type',
+            },
+            ruleUrl: 'https://example.com/rule',
+            spaceId: 'default',
+          },
+        },
       };
 
       const result = await api.run({
@@ -105,7 +162,21 @@ describe('Workflows API', () => {
     it('should skip execution when alerts is undefined', async () => {
       const params = {
         workflowId: 'test-workflow-id',
-        inputs: { test: 'data' },
+        spaceId: 'default',
+        inputs: {
+          event: {
+            alerts: undefined as any,
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: ['test'],
+              consumer: 'test-consumer',
+              producer: 'test-producer',
+              ruleTypeId: 'test-rule-type',
+            },
+            spaceId: 'default',
+          },
+        },
       };
 
       const result = await api.run({
@@ -130,8 +201,22 @@ describe('Workflows API', () => {
 
       const params = {
         workflowId: 'test-workflow-id',
-        alerts: [{ _id: 'alert-1', _index: 'test-index' }],
-        inputs: { test: 'data' },
+        spaceId: 'default',
+        inputs: {
+          event: {
+            alerts: [{ _id: 'alert-1', _index: 'test-index' }] as any,
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: ['test'],
+              consumer: 'test-consumer',
+              producer: 'test-producer',
+              ruleTypeId: 'test-rule-type',
+            },
+            ruleUrl: 'https://example.com/rule',
+            spaceId: 'default',
+          },
+        },
       };
 
       await expect(
@@ -144,7 +229,22 @@ describe('Workflows API', () => {
 
       expect(mockExternalService.runWorkflow).toHaveBeenCalledWith({
         workflowId: 'test-workflow-id',
-        inputs: { test: 'data' },
+        spaceId: 'default',
+        inputs: {
+          event: {
+            alerts: [{ _id: 'alert-1', _index: 'test-index' }] as any,
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: ['test'],
+              consumer: 'test-consumer',
+              producer: 'test-producer',
+              ruleTypeId: 'test-rule-type',
+            },
+            ruleUrl: 'https://example.com/rule',
+            spaceId: 'default',
+          },
+        },
       });
     });
 
@@ -156,7 +256,22 @@ describe('Workflows API', () => {
 
       const params = {
         workflowId: 'test-workflow-id',
-        alerts: [{ _id: 'alert-1', _index: 'test-index' }],
+        spaceId: 'default',
+        inputs: {
+          event: {
+            alerts: [{ _id: 'alert-1', _index: 'test-index' }] as any,
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: ['test'],
+              consumer: 'test-consumer',
+              producer: 'test-producer',
+              ruleTypeId: 'test-rule-type',
+            },
+            ruleUrl: undefined,
+            spaceId: 'default',
+          },
+        },
       };
 
       const result = await api.run({
@@ -172,7 +287,22 @@ describe('Workflows API', () => {
 
       expect(mockExternalService.runWorkflow).toHaveBeenCalledWith({
         workflowId: 'test-workflow-id',
-        inputs: undefined,
+        spaceId: 'default',
+        inputs: {
+          event: {
+            alerts: [{ _id: 'alert-1', _index: 'test-index' }] as any,
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: ['test'],
+              consumer: 'test-consumer',
+              producer: 'test-producer',
+              ruleTypeId: 'test-rule-type',
+            },
+            ruleUrl: undefined,
+            spaceId: 'default',
+          },
+        },
       });
     });
   });

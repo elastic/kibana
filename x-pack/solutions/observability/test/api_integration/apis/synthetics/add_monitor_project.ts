@@ -6,17 +6,19 @@
  */
 import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
-import { ConfigKey, ProjectMonitorsRequest } from '@kbn/synthetics-plugin/common/runtime_types';
+import type { ProjectMonitorsRequest } from '@kbn/synthetics-plugin/common/runtime_types';
+import { ConfigKey } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
 import { syntheticsMonitorSavedObjectType } from '@kbn/synthetics-plugin/common/types/saved_objects';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('AddProjectMonitors', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/229295
+  describe.skip('AddProjectMonitors', function () {
     this.tags('skipCloud');
 
     const supertest = getService('supertest');

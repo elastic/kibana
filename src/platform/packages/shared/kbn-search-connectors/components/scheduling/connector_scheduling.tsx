@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useState, FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiCallOut,
   EuiFlexGroup,
@@ -20,12 +21,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  Connector,
-  ConnectorStatus,
-  SchedulingConfiguraton,
-  SyncJobType,
-} from '../../types/connectors';
+import type { Connector, SchedulingConfiguraton } from '../../types/connectors';
+import { ConnectorStatus, SyncJobType } from '../../types/connectors';
 import { ConnectorError } from './connector_error';
 import { ConnectorUnconfigured } from './connector_unconfigured';
 import { ConnectorContentScheduling } from './full_content';
@@ -197,6 +194,7 @@ export const ConnectorSchedulingComponent: React.FC<ConnectorContentSchedulingPr
               {isDocumentLevelSecurityDisabled && (
                 <EuiFlexItem>
                   <EuiCallOut
+                    announceOnMount={false}
                     title={i18n.translate(
                       'searchConnectors.connectorScheduling.schedulePanel.documentLevelSecurity.dlsDisabledCallout.title',
                       { defaultMessage: 'Access control syncs not allowed' }

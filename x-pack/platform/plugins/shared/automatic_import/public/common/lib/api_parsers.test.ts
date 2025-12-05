@@ -61,4 +61,37 @@ describe('getIntegrationNameFromResponse', () => {
     } as EpmPackageResponse;
     expect(getIntegrationNameFromResponse(response)).toEqual('');
   });
+
+  it('should return the integration name from _meta.name when available', () => {
+    const response = {
+      items: [{ type: 'ingest_pipeline', id: 'audit-security.data-stream-1.0.0' }],
+      _meta: {
+        install_source: 'upload',
+        name: 'my-custom-integration',
+      },
+    } as EpmPackageResponse;
+    expect(getIntegrationNameFromResponse(response)).toEqual('my-custom-integration');
+  });
+
+  it('should fall back to parsing ingest pipeline when _meta.name is not available', () => {
+    const response = {
+      items: [{ type: 'ingest_pipeline', id: 'audit-security.data-stream-1.0.0' }],
+      _meta: {
+        install_source: 'upload',
+        name: '',
+      },
+    } as EpmPackageResponse;
+    expect(getIntegrationNameFromResponse(response)).toEqual('security-1.0.0');
+  });
+
+  it('should prefer _meta.name over ingest pipeline parsing', () => {
+    const response = {
+      items: [{ type: 'ingest_pipeline', id: 'audit-old-name.data-stream-1.0.0' }],
+      _meta: {
+        install_source: 'upload',
+        name: 'new-integration-name',
+      },
+    } as EpmPackageResponse;
+    expect(getIntegrationNameFromResponse(response)).toEqual('new-integration-name');
+  });
 });

@@ -22,6 +22,7 @@ import type {
   ALERT_UUID,
   SPACE_IDS,
 } from '@kbn/rule-data-utils';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import type { Alert as LegacyAlert } from '../alert/alert';
 import type {
   AlertInstanceContext,
@@ -36,7 +37,6 @@ import type { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_
 import type { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import type { RulesSettingsFlappingProperties } from '../../common/rules_settings';
 import type { PublicAlertFactory } from '../alert/create_alert_factory';
-import type { MaintenanceWindow } from '../application/maintenance_window/types';
 
 export interface AlertRuleData {
   consumer: string;
@@ -48,6 +48,8 @@ export interface AlertRuleData {
   spaceId: string;
   tags: string[];
   alertDelay: number;
+  muteAll: boolean;
+  mutedInstanceIds: string[];
 }
 
 export interface AlertRule {
@@ -64,6 +66,16 @@ export interface AlertRule {
   [SPACE_IDS]: string[];
 }
 
+export interface AlertsToUpdateWithLastScheduledActions {
+  [alertId: string]: {
+    group: string;
+    date: string;
+    throttling?: { [key: string]: { date: string } };
+  };
+}
+
+export type AlertsToUpdateWithMaintenanceWindows = Record<string, string[]>;
+
 export interface IAlertsClient<
   AlertData extends RuleAlertData,
   State extends AlertInstanceState,
@@ -73,6 +85,7 @@ export interface IAlertsClient<
 > {
   initializeExecution(opts: InitializeExecutionOpts): Promise<void>;
   hasReachedAlertLimit(): boolean;
+  getMaxAlertLimit(): number;
   checkLimitUsage(): void;
   processAlerts(): void;
   logAlerts(opts: LogAlertsOpts): void;
@@ -82,7 +95,16 @@ export interface IAlertsClient<
   getProcessedAlerts(
     type: 'recovered' | 'trackedRecoveredAlerts'
   ): Record<string, LegacyAlert<State, Context, RecoveryActionGroupId>> | {};
-  persistAlerts(): Promise<{ alertIds: string[]; maintenanceWindowIds: string[] } | null>;
+  persistAlerts(): Promise<void>;
+  getAlertsToUpdateWithMaintenanceWindows(): Promise<AlertsToUpdateWithMaintenanceWindows>;
+  getAlertsToUpdateWithLastScheduledActions(): AlertsToUpdateWithLastScheduledActions;
+  updatePersistedAlerts({
+    alertsToUpdateWithMaintenanceWindows,
+    alertsToUpdateWithLastScheduledActions,
+  }: {
+    alertsToUpdateWithMaintenanceWindows: AlertsToUpdateWithMaintenanceWindows;
+    alertsToUpdateWithLastScheduledActions: AlertsToUpdateWithLastScheduledActions;
+  }): Promise<void>;
   isTrackedAlert(id: string): boolean;
   getSummarizedAlerts?(params: GetSummarizedAlertsParams): Promise<SummarizedAlerts>;
   getRawAlertInstancesForState(shouldOptimizeTaskState?: boolean): {
@@ -102,7 +124,6 @@ export interface IAlertsClient<
   > | null;
   determineFlappingAlerts(): void;
   determineDelayedAlerts(opts: DetermineDelayedAlertsOpts): void;
-  getTrackedExecutions(): Set<string>;
 }
 
 export interface ProcessAndLogAlertsOpts {
@@ -131,7 +152,6 @@ export interface InitializeExecutionOpts {
   flappingSettings: RulesSettingsFlappingProperties;
   activeAlertsFromState: Record<string, RawAlertInstance>;
   recoveredAlertsFromState: Record<string, RawAlertInstance>;
-  trackedExecutions?: string[];
 }
 
 export interface TrackedAlerts<

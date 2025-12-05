@@ -15,7 +15,7 @@ import { networkEventsSelector } from '../../../../../state/selectors';
 import { WaterfallChartWrapper } from './waterfall_chart_wrapper';
 import { extractItems } from './data_formatting';
 import { useStepWaterfallMetrics } from '../use_step_waterfall_metrics';
-import { JourneyStep } from '../../../../../../../common/runtime_types';
+import type { JourneyStep } from '../../../../../../../common/runtime_types';
 
 export const NO_DATA_TEXT = i18n.translate('xpack.uptime.synthetics.stepDetail.waterfallNoData', {
   defaultMessage: 'No waterfall data could be found for this step',
@@ -86,6 +86,7 @@ export const WaterfallChartContainer: React.FC<Props> = ({ checkGroup, stepIndex
       )}
       {waterfallLoaded && hasEvents && !isWaterfallSupported && (
         <EuiCallOut
+          announceOnMount
           title={
             <FormattedMessage
               id="xpack.uptime.synthetics.stepDetail.waterfallUnsupported.title"

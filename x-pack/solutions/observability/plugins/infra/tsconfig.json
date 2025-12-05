@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -101,7 +101,6 @@
     "@kbn/core-analytics-browser",
     "@kbn/alerting-rule-utils",
     "@kbn/core-application-browser",
-    "@kbn/shared-ux-page-no-data-types",
     "@kbn/core-plugins-server",
     "@kbn/config",
     "@kbn/observability-utils-common",
@@ -119,6 +118,12 @@
     "@kbn/cases-plugin",
     "@kbn/shared-ux-error-boundary",
     "@kbn/react-kibana-mount",
+    "@kbn/shared-ux-card-no-data-types",
+    "@kbn/licensing-types",
+    "@kbn/apm-types",
+    "@kbn/react-query",
+    "@kbn/deeplinks-analytics",
+    "@kbn/esql-composer",
   ],
   "exclude": ["target/**/*"]
 }
