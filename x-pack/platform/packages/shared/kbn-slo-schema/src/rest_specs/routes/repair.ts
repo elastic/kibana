@@ -19,11 +19,7 @@ const repairStatusParamsSchema = t.type({
   }),
 });
 
-type RepairInput = t.OutputOf<typeof repairParamsSchema.props.body>;
 type RepairParams = t.TypeOf<typeof repairParamsSchema.props.body>;
-interface RepairResponse {
-  taskId: string;
-}
 
 interface RepairResult {
   id: string;
@@ -37,5 +33,5 @@ interface RepairStatusResponse {
   error?: string;
 }
 
-export type { RepairInput, RepairParams, RepairResponse, RepairResult, RepairStatusResponse };
+export type { RepairParams, RepairResult, RepairStatusResponse };
 export { repairParamsSchema, repairStatusParamsSchema };

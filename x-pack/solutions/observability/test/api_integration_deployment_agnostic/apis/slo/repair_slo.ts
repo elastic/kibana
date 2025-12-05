@@ -279,5 +279,72 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       // Repair the SLO (should complete quickly since no actions needed)
       await sloApi.repair([sloId], adminRoleAuthc);
     });
+
+    it('repairs missing rollup transform for disabled SLO by recreating and stopping it', async () => {
+      const createResponse = await sloApi.create(DEFAULT_SLO, adminRoleAuthc);
+      expect(createResponse).property('id');
+      const sloId = createResponse.id;
+      const sloRevision = 1;
+
+      // Verify transforms exist initially
+      await retry.tryForTime(60 * 1000, async () => {
+        const rollupTransform = await transformHelper.assertExist(
+          getSLOTransformId(sloId, sloRevision)
+        );
+        expect(rollupTransform.transforms).to.have.length(1);
+        return true;
+      });
+
+      // Disable the SLO first
+      await sloApi.disable({ sloId }, adminRoleAuthc);
+
+      // Verify transform is stopped after disabling
+      await retry.tryForTime(60 * 1000, async () => {
+        const transform = await esClient.transform.getTransformStats({
+          transform_id: getSLOTransformId(sloId, sloRevision),
+        });
+        expect(transform.transforms[0].state).to.eql('stopped');
+        return true;
+      });
+
+      // Delete the rollup transform to simulate it being missing
+      await retry.tryForTime(60 * 1000, async () => {
+        await esClient.transform.deleteTransform({
+          transform_id: getSLOTransformId(sloId, sloRevision),
+        });
+        return true;
+      });
+
+      // Verify transform is deleted
+      await retry.tryForTime(60 * 1000, async () => {
+        try {
+          await esClient.transform.getTransform({
+            transform_id: getSLOTransformId(sloId, sloRevision),
+          });
+          throw new Error('Transform should not exist');
+        } catch (err: any) {
+          if (err.statusCode === 404) {
+            return true;
+          }
+          throw err;
+        }
+      });
+
+      // Repair the SLO
+      await sloApi.repair([sloId], adminRoleAuthc);
+
+      // Verify the rollup transform is recreated and stopped (since SLO is disabled)
+      await retry.tryForTime(60 * 1000, async () => {
+        // First verify it exists
+        await transformHelper.assertExist(getSLOTransformId(sloId, sloRevision));
+        // Then check its state - it should be stopped since the SLO is disabled
+        const rollupTransform = await esClient.transform.getTransformStats({
+          transform_id: getSLOTransformId(sloId, sloRevision),
+        });
+        expect(rollupTransform.transforms).to.have.length(1);
+        expect(rollupTransform.transforms[0].state).to.eql('stopped');
+        return true;
+      });
+    });
   });
 }

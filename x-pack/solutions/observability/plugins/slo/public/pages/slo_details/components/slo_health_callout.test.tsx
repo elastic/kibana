@@ -434,7 +434,7 @@ describe('SloHealthCallout', () => {
     fireEvent.click(repairButton);
 
     expect(mockRepairSlo).toHaveBeenCalledWith({
-      list: ['test-slo-id'],
+      sloId: 'test-slo-id',
     });
   });
 });

@@ -8,7 +8,7 @@
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import type { RepairInput, RepairResponse } from '@kbn/slo-schema';
+import type { RepairResult } from '@kbn/slo-schema';
 
 import { useKibana } from './use_kibana';
 import { usePluginContext } from './use_plugin_context';
@@ -20,40 +20,52 @@ export function useRepairSlo({ name, onConfirm }: { name: string; onConfirm?: ()
   const {
     notifications: { toasts },
   } = useKibana().services;
+
   const { sloClient } = usePluginContext();
   const queryClient = useQueryClient();
 
-  return useMutation<RepairResponse, ServerError, RepairInput>(
+  return useMutation<RepairResult[], ServerError, { sloId: string }>(
     ['repairSlo'],
-    ({ list }) => {
+    ({ sloId }) => {
       return sloClient.fetch('POST /api/observability/slos/_repair 2023-10-31', {
         params: {
           body: {
-            list,
+            list: [sloId],
           },
         },
       });
     },
     {
       onError: (error) => {
-        const errorMessage = error.body?.message ?? error.message;
-
-        toasts.addError(new Error(errorMessage), {
+        toasts.addError(error, {
           title: i18n.translate('xpack.slo.repair.errorNotification', {
             defaultMessage: 'Failed to repair {name}',
             values: { name },
           }),
         });
       },
-      onSuccess: () => {
+      onSuccess: (response) => {
+        const foundSLO = response.find((result) => result.success && result.id);
+
+        if (!foundSLO) {
+          toasts.addError(new Error('Unknown error occurred while repairing SLO'), {
+            title: i18n.translate('xpack.slo.repair.unknownError', {
+              defaultMessage: 'Unknown error occurred while repairing {name}',
+              values: { name },
+            }),
+          });
+          return;
+        } else {
+          toasts.addSuccess(
+            i18n.translate('xpack.slo.repair.successNotification', {
+              defaultMessage: 'Repaired {name}',
+              values: { name },
+            })
+          );
+        }
+
         queryClient.invalidateQueries({ queryKey: [...sloKeys.all, 'health'], exact: false });
 
-        toasts.addSuccess(
-          i18n.translate('xpack.slo.repair.successNotification', {
-            defaultMessage: 'Repaired {name}',
-            values: { name },
-          })
-        );
         onConfirm?.();
       },
     }

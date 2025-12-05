@@ -52,7 +52,7 @@ export const repairSLORoute = createSloServerRoute({
       transformManager,
       summaryTransformManager
     );
-    await repairSlo.execute(params.body);
-    return response.noContent();
+    const results = await repairSlo.execute(params.body);
+    return response.multiStatus({ body: results });
   },
 });

@@ -234,7 +234,7 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({ list })
-        .expect(204);
+        .expect(207);
     },
 
     async purgeInstances(
