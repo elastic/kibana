@@ -28,7 +28,6 @@ export const SecretsSchema = z
   })
   .strict();
 
-
 /**
  * Schema for MCP connector HTTP service configuration.
  *

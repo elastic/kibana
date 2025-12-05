@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export { mcpConnectorToolsType, MCP_CONNECTOR_TOOLS_SAVED_OBJECT_TYPE } from './mcp_connector_tools';
+export {
+  mcpConnectorToolsType,
+  MCP_CONNECTOR_TOOLS_SAVED_OBJECT_TYPE,
+} from './mcp_connector_tools';
 export type { McpConnectorToolsAttributes } from './mcp_connector_tools';
-

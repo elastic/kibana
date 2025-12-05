@@ -74,4 +74,3 @@ export const mcpConnectorToolsType: SavedObjectsType<McpConnectorToolsAttributes
     },
   },
 };
-
