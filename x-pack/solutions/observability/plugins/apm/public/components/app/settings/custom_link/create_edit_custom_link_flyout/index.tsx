@@ -17,12 +17,12 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import type { Filter } from '../../../../../../common/custom_link/custom_link_types';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
+import { Documentation } from './documentation';
 import { FiltersSection } from './filters_section';
 import { FlyoutFooter } from './flyout_footer';
+import { LinkPreview } from './link_preview';
 import { LinkSection } from './link_section';
 import { saveCustomLink } from './save_custom_link';
-import { LinkPreview } from './link_preview';
-import { Documentation } from './documentation';
 
 interface Props {
   onClose: () => void;
@@ -105,7 +105,7 @@ export function CreateEditCustomLinkFlyout({
 
           <EuiSpacer size="l" />
 
-          <FiltersSection filters={filters} onChangeFilters={setFilters} />
+          <FiltersSection filters={filters} setFilters={setFilters} />
 
           <EuiSpacer size="l" />
 

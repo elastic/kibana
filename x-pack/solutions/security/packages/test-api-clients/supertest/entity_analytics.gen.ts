@@ -14,6 +14,9 @@
  *   version: Bundle (no version)
  */
 
+import supertest_ from 'supertest';
+import type SuperTest from 'supertest';
+import { format as formatUrl } from 'url';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
@@ -49,351 +52,363 @@ import type { StopEntityEngineRequestParamsInput } from '@kbn/security-solution-
 import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
 import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
 
-export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-
-  return {
-    applyEntityEngineDataviewIndices(kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/entity_store/engines/apply_dataview_indices', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    assetCriticalityGetPrivileges(kibanaSpace: string = 'default') {
-      return supertest
-        .get(getRouteUrlForSpace('/internal/asset_criticality/privileges', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    /**
+const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
+  applyEntityEngineDataviewIndices(kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/entity_store/engines/apply_dataview_indices', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  assetCriticalityGetPrivileges(kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/internal/asset_criticality/privileges', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
       * Bulk upsert up to 1000 asset criticality records.
 
 If asset criticality records already exist for the specified entities, those records are overwritten with the specified values. If asset criticality records don't exist for the specified entities, new records are created.
 
       */
-    bulkUpsertAssetCriticalityRecords(
-      props: BulkUpsertAssetCriticalityRecordsProps,
-      kibanaSpace: string = 'default'
-    ) {
-      return supertest
-        .post(getRouteUrlForSpace('/api/asset_criticality/bulk', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
-     * Cleaning up the the Risk Engine by removing the indices, mapping and transforms
-     */
-    cleanUpRiskEngine(kibanaSpace: string = 'default') {
-      return supertest
-        .delete(getRouteUrlForSpace('/api/risk_score/engine/dangerously_delete_data', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    /**
-     * Configuring the Risk Engine Saved Object
-     */
-    configureRiskEngineSavedObject(
-      props: ConfigureRiskEngineSavedObjectProps,
-      kibanaSpace: string = 'default'
-    ) {
-      return supertest
-        .patch(getRouteUrlForSpace('/api/risk_score/engine/saved_object/configure', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
+  bulkUpsertAssetCriticalityRecords(
+    props: BulkUpsertAssetCriticalityRecordsProps,
+    kibanaSpace: string = 'default'
+  ) {
+    return supertest
+      .post(getRouteUrlForSpace('/api/asset_criticality/bulk', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * Cleaning up the the Risk Engine by removing the indices, mapping and transforms
+   */
+  cleanUpRiskEngine(kibanaSpace: string = 'default') {
+    return supertest
+      .delete(getRouteUrlForSpace('/api/risk_score/engine/dangerously_delete_data', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
+   * Configuring the Risk Engine Saved Object
+   */
+  configureRiskEngineSavedObject(
+    props: ConfigureRiskEngineSavedObjectProps,
+    kibanaSpace: string = 'default'
+  ) {
+    return supertest
+      .patch(getRouteUrlForSpace('/api/risk_score/engine/saved_object/configure', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
       * Create or update an asset criticality record for a specific entity.
 
 If a record already exists for the specified entity, that record is overwritten with the specified value. If a record doesn't exist for the specified entity, a new record is created.
 
       */
-    createAssetCriticalityRecord(
-      props: CreateAssetCriticalityRecordProps,
-      kibanaSpace: string = 'default'
-    ) {
-      return supertest
-        .post(getRouteUrlForSpace('/api/asset_criticality', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
-     * Delete the asset criticality record for a specific entity.
-     */
-    deleteAssetCriticalityRecord(
-      props: DeleteAssetCriticalityRecordProps,
-      kibanaSpace: string = 'default'
-    ) {
-      return supertest
-        .delete(getRouteUrlForSpace('/api/asset_criticality', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    deleteEntityEngine(props: DeleteEntityEngineProps, kibanaSpace: string = 'default') {
-      return supertest
-        .delete(
-          getRouteUrlForSpace(
-            replaceParams('/api/entity_store/engines/{entityType}', props.params),
-            kibanaSpace
-          )
+  createAssetCriticalityRecord(
+    props: CreateAssetCriticalityRecordProps,
+    kibanaSpace: string = 'default'
+  ) {
+    return supertest
+      .post(getRouteUrlForSpace('/api/asset_criticality', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * Delete the asset criticality record for a specific entity.
+   */
+  deleteAssetCriticalityRecord(
+    props: DeleteAssetCriticalityRecordProps,
+    kibanaSpace: string = 'default'
+  ) {
+    return supertest
+      .delete(getRouteUrlForSpace('/api/asset_criticality', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  deleteEntityEngine(props: DeleteEntityEngineProps, kibanaSpace: string = 'default') {
+    return supertest
+      .delete(
+        getRouteUrlForSpace(
+          replaceParams('/api/entity_store/engines/{entityType}', props.params),
+          kibanaSpace
         )
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    /**
-     * Calculates and persists Risk Scores for an entity, returning the calculated risk score.
-     */
-    deprecatedTriggerRiskScoreCalculation(
-      props: DeprecatedTriggerRiskScoreCalculationProps,
-      kibanaSpace: string = 'default'
-    ) {
-      return supertest
-        .post(getRouteUrlForSpace('/api/risk_scores/calculation/entity', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    disableRiskEngine(kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/internal/risk_score/engine/disable', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    enableRiskEngine(kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/internal/risk_score/engine/enable', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    entityStoreGetPrivileges(kibanaSpace: string = 'default') {
-      return supertest
-        .get(getRouteUrlForSpace('/internal/entity_store/privileges', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    /**
-     * List asset criticality records, paging, sorting and filtering as needed.
-     */
-    findAssetCriticalityRecords(
-      props: FindAssetCriticalityRecordsProps,
-      kibanaSpace: string = 'default'
-    ) {
-      return supertest
-        .get(getRouteUrlForSpace('/api/asset_criticality/list', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    /**
-     * Get the asset criticality record for a specific entity.
-     */
-    getAssetCriticalityRecord(
-      props: GetAssetCriticalityRecordProps,
-      kibanaSpace: string = 'default'
-    ) {
-      return supertest
-        .get(getRouteUrlForSpace('/api/asset_criticality', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    getAssetCriticalityStatus(kibanaSpace: string = 'default') {
-      return supertest
-        .get(getRouteUrlForSpace('/internal/asset_criticality/status', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    getEntityEngine(props: GetEntityEngineProps, kibanaSpace: string = 'default') {
-      return supertest
-        .get(
-          getRouteUrlForSpace(
-            replaceParams('/api/entity_store/engines/{entityType}', props.params),
-            kibanaSpace
-          )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+   * Calculates and persists Risk Scores for an entity, returning the calculated risk score.
+   */
+  deprecatedTriggerRiskScoreCalculation(
+    props: DeprecatedTriggerRiskScoreCalculationProps,
+    kibanaSpace: string = 'default'
+  ) {
+    return supertest
+      .post(getRouteUrlForSpace('/api/risk_scores/calculation/entity', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  disableRiskEngine(kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/internal/risk_score/engine/disable', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  enableRiskEngine(kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/internal/risk_score/engine/enable', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  entityStoreGetPrivileges(kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/internal/entity_store/privileges', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
+   * List asset criticality records, paging, sorting and filtering as needed.
+   */
+  findAssetCriticalityRecords(
+    props: FindAssetCriticalityRecordsProps,
+    kibanaSpace: string = 'default'
+  ) {
+    return supertest
+      .get(getRouteUrlForSpace('/api/asset_criticality/list', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+   * Get the asset criticality record for a specific entity.
+   */
+  getAssetCriticalityRecord(
+    props: GetAssetCriticalityRecordProps,
+    kibanaSpace: string = 'default'
+  ) {
+    return supertest
+      .get(getRouteUrlForSpace('/api/asset_criticality', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  getAssetCriticalityStatus(kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/internal/asset_criticality/status', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  getEntityEngine(props: GetEntityEngineProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(
+        getRouteUrlForSpace(
+          replaceParams('/api/entity_store/engines/{entityType}', props.params),
+          kibanaSpace
         )
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    getEntityStoreStatus(props: GetEntityStoreStatusProps, kibanaSpace: string = 'default') {
-      return supertest
-        .get(getRouteUrlForSpace('/api/entity_store/status', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    /**
-     * Returns the status of both the legacy transform-based risk engine, as well as the new risk engine
-     */
-    getRiskEngineStatus(kibanaSpace: string = 'default') {
-      return supertest
-        .get(getRouteUrlForSpace('/internal/risk_score/engine/status', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    initEntityEngine(props: InitEntityEngineProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(
-          getRouteUrlForSpace(
-            replaceParams('/api/entity_store/engines/{entityType}/init', props.params),
-            kibanaSpace
-          )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  getEntityStoreStatus(props: GetEntityStoreStatusProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/entity_store/status', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+   * Returns the status of both the legacy transform-based risk engine, as well as the new risk engine
+   */
+  getRiskEngineStatus(kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/internal/risk_score/engine/status', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  initEntityEngine(props: InitEntityEngineProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(
+        getRouteUrlForSpace(
+          replaceParams('/api/entity_store/engines/{entityType}/init', props.params),
+          kibanaSpace
         )
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    initEntityStore(props: InitEntityStoreProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/entity_store/enable', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
-     * Initializes the Risk Engine by creating the necessary indices and mappings, removing old transforms, and starting the new risk engine
-     */
-    initRiskEngine(kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/internal/risk_score/engine/init', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    internalUploadAssetCriticalityRecords(kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/internal/asset_criticality/upload_csv', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    /**
-     * List entities records, paging, sorting and filtering as needed.
-     */
-    listEntities(props: ListEntitiesProps, kibanaSpace: string = 'default') {
-      return supertest
-        .get(getRouteUrlForSpace('/api/entity_store/entities/list', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    listEntityEngines(kibanaSpace: string = 'default') {
-      return supertest
-        .get(getRouteUrlForSpace('/api/entity_store/engines', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    /**
-     * Calculates and returns a list of Risk Scores, sorted by identifier_type and risk score.
-     */
-    previewRiskScore(props: PreviewRiskScoreProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/internal/risk_score/preview', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    readRiskEngineSettings(kibanaSpace: string = 'default') {
-      return supertest
-        .get(getRouteUrlForSpace('/internal/risk_score/engine/settings', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    riskEngineGetPrivileges(kibanaSpace: string = 'default') {
-      return supertest
-        .get(getRouteUrlForSpace('/internal/risk_engine/privileges', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    runEntityAnalyticsMigrations(kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/internal/entity_analytics/migrations/run', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    /**
-     * Schedule the risk scoring engine to run as soon as possible. You can use this to recalculate entity risk scores after updating their asset criticality.
-     */
-    scheduleRiskEngineNow(kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/risk_score/engine/schedule_now', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    startEntityEngine(props: StartEntityEngineProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(
-          getRouteUrlForSpace(
-            replaceParams('/api/entity_store/engines/{entityType}/start', props.params),
-            kibanaSpace
-          )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  initEntityStore(props: InitEntityStoreProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/entity_store/enable', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * Initializes the Risk Engine by creating the necessary indices and mappings, removing old transforms, and starting the new risk engine
+   */
+  initRiskEngine(kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/internal/risk_score/engine/init', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  internalUploadAssetCriticalityRecords(kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/internal/asset_criticality/upload_csv', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
+   * List entities records, paging, sorting and filtering as needed.
+   */
+  listEntities(props: ListEntitiesProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/entity_store/entities/list', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  listEntityEngines(kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/entity_store/engines', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
+   * Calculates and returns a list of Risk Scores, sorted by identifier_type and risk score.
+   */
+  previewRiskScore(props: PreviewRiskScoreProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/internal/risk_score/preview', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  readRiskEngineSettings(kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/internal/risk_score/engine/settings', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  riskEngineGetPrivileges(kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/internal/risk_engine/privileges', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  runEntityAnalyticsMigrations(kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/internal/entity_analytics/migrations/run', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
+   * Schedule the risk scoring engine to run as soon as possible. You can use this to recalculate entity risk scores after updating their asset criticality.
+   */
+  scheduleRiskEngineNow(kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/risk_score/engine/schedule_now', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  startEntityEngine(props: StartEntityEngineProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(
+        getRouteUrlForSpace(
+          replaceParams('/api/entity_store/engines/{entityType}/start', props.params),
+          kibanaSpace
         )
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    stopEntityEngine(props: StopEntityEngineProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(
-          getRouteUrlForSpace(
-            replaceParams('/api/entity_store/engines/{entityType}/stop', props.params),
-            kibanaSpace
-          )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  stopEntityEngine(props: StopEntityEngineProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(
+        getRouteUrlForSpace(
+          replaceParams('/api/entity_store/engines/{entityType}/stop', props.params),
+          kibanaSpace
         )
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    /**
-     * Calculates and persists Risk Scores for an entity, returning the calculated risk score.
-     */
-    triggerRiskScoreCalculation(
-      props: TriggerRiskScoreCalculationProps,
-      kibanaSpace: string = 'default'
-    ) {
-      return supertest
-        .post(getRouteUrlForSpace('/internal/risk_score/calculation/entity', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    uploadAssetCriticalityRecords(kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/asset_criticality/upload_csv', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
+   * Calculates and persists Risk Scores for an entity, returning the calculated risk score.
+   */
+  triggerRiskScoreCalculation(
+    props: TriggerRiskScoreCalculationProps,
+    kibanaSpace: string = 'default'
+  ) {
+    return supertest
+      .post(getRouteUrlForSpace('/internal/risk_score/calculation/entity', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  uploadAssetCriticalityRecords(kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/asset_criticality/upload_csv', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+});
+
+export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
+  const supertestService = getService('supertest');
+  const config = getService('config');
+
+  return {
+    ...securitySolutionApiServiceFactory(supertestService),
+    withUser: (user: { username: string; password: string }) => {
+      const kbnUrl = formatUrl({ ...config.get('servers.kibana'), auth: false });
+
+      return securitySolutionApiServiceFactory(
+        supertest_.agent(kbnUrl).auth(user.username, user.password)
+      );
     },
   };
 }

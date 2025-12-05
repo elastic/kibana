@@ -7,6 +7,12 @@
 
 import expect from 'expect';
 
+import {
+  createAlertsIndex,
+  deleteAllRules,
+  createRule,
+  deleteAllAlerts,
+} from '@kbn/detections-response-ftr-services';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   getSimpleRule,
@@ -20,12 +26,6 @@ import {
   installPrebuiltRules,
   createRuleAssetSavedObject,
 } from '../../../utils';
-import {
-  createAlertsIndex,
-  deleteAllRules,
-  createRule,
-  deleteAllAlerts,
-} from '../../../../../config/services/detections_response';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

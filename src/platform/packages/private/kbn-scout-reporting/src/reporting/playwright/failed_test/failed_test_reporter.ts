@@ -16,28 +16,29 @@ import type {
   TestResult,
 } from '@playwright/test/reporter';
 
-import path from 'node:path';
-import { ToolingLog } from '@kbn/tooling-log';
-import { SCOUT_REPORT_OUTPUT_ROOT } from '@kbn/scout-info';
-import { REPO_ROOT } from '@kbn/repo-info';
 import {
-  type CodeOwnersEntry,
   getCodeOwnersEntries,
   getOwningTeamsForPath,
+  type CodeOwnersEntry,
 } from '@kbn/code-owners';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { SCOUT_REPORT_OUTPUT_ROOT } from '@kbn/scout-info';
+import { ToolingLog } from '@kbn/tooling-log';
+import path from 'node:path';
+import {
+  excapeHtmlCharacters,
+  generateTestRunId,
+  getKibanaModuleData,
+  getRunTarget,
+  getTestIDForTitle,
+  parseStdout,
+  stripFilePath,
+  stripRunCommand,
+} from '../../../helpers';
 import type { TestFailure } from '../../report';
 import { ScoutFailureReport } from '../../report';
 import type { ScoutPlaywrightReporterOptions } from '../scout_playwright_reporter';
-import {
-  getRunTarget,
-  getKibanaModuleData,
-  parseStdout,
-  generateTestRunId,
-  getTestIDForTitle,
-  stripRunCommand,
-  stripFilePath,
-  excapeHtmlCharacters,
-} from '../../../helpers';
+import { ScoutFailureTracker } from './failure_tracking';
 
 /**
  * Scout Failed Test reporter
@@ -48,6 +49,7 @@ export class ScoutFailedTestReporter implements Reporter {
   private readonly codeOwnersEntries: CodeOwnersEntry[];
   private readonly report: ScoutFailureReport;
   private readonly command: string;
+  private failureTracker?: ScoutFailureTracker;
 
   private target = 'undefined'; // when '--grep' is not provided in the command line
   private kibanaModule: TestFailure['kibanaModule'];
@@ -99,6 +101,13 @@ export class ScoutFailedTestReporter implements Reporter {
         group: metadata.group,
       };
     }
+
+    // Initialize failure tracker for GitHub issue integration
+    const reportRootPath = path.join(
+      SCOUT_REPORT_OUTPUT_ROOT,
+      `scout-playwright-test-failures-${this.runId}`
+    );
+    this.failureTracker = new ScoutFailureTracker(this.log, reportRootPath, this.runId);
   }
 
   onTestEnd(test: TestCase, result: TestResult) {
@@ -126,12 +135,17 @@ export class ScoutFailedTestReporter implements Reporter {
     };
 
     this.report.logEvent(testFailure);
+
+    // Also track failure for GitHub issue integration
+    this.failureTracker?.addFailure(testFailure);
   }
 
   onEnd(result: FullResult) {
     // Save & conclude the report
     try {
       this.report.save(this.reportRootPath);
+      // Save failure tracking file for GitHub issue integration
+      this.failureTracker?.save();
     } finally {
       this.report.conclude();
     }

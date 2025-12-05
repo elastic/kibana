@@ -17,8 +17,11 @@ import {
 } from '@kbn/fleet-plugin/common';
 import { ENROLLMENT_API_KEYS_INDEX } from '@kbn/fleet-plugin/common/constants';
 import { asyncForEach } from '@kbn/std';
+import pRetry from 'p-retry';
 
 const ES_INDEX_OPTIONS = { headers: { 'X-elastic-product-origin': 'fleet' } };
+
+const DELETE_RETRIES = 3;
 
 export async function expectToRejectWithNotFound(fn: any) {
   await expectToRejectWithError(fn, /404 "Not Found"/);
@@ -37,24 +40,36 @@ export async function expectToRejectWithError(fn: any, errRegexp: RegExp) {
 
 export async function cleanFleetIndices(esClient: Client) {
   await Promise.all([
-    esClient.deleteByQuery({
-      index: ENROLLMENT_API_KEYS_INDEX,
-      q: '*',
-      ignore_unavailable: true,
-      refresh: true,
-    }),
-    esClient.deleteByQuery({
-      index: AGENTS_INDEX,
-      q: '*',
-      ignore_unavailable: true,
-      refresh: true,
-    }),
-    esClient.deleteByQuery({
-      index: AGENT_ACTIONS_INDEX,
-      q: '*',
-      ignore_unavailable: true,
-      refresh: true,
-    }),
+    pRetry(
+      () =>
+        esClient.deleteByQuery({
+          index: ENROLLMENT_API_KEYS_INDEX,
+          q: '*',
+          ignore_unavailable: true,
+          refresh: true,
+        }),
+      { retries: DELETE_RETRIES }
+    ),
+    pRetry(
+      () =>
+        esClient.deleteByQuery({
+          index: AGENTS_INDEX,
+          q: '*',
+          ignore_unavailable: true,
+          refresh: true,
+        }),
+      { retries: DELETE_RETRIES }
+    ),
+    pRetry(
+      () =>
+        esClient.deleteByQuery({
+          index: AGENT_ACTIONS_INDEX,
+          q: '*',
+          ignore_unavailable: true,
+          refresh: true,
+        }),
+      { retries: DELETE_RETRIES }
+    ),
   ]);
 }
 
