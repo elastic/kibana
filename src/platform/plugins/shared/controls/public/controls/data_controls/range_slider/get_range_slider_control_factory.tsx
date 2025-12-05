@@ -88,7 +88,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
           return {
             ...editorComparators,
             ...defaultDataControlComparators,
-            value: 'referenceEquality',
+            value: 'deepEquality',
           };
         },
         onReset: (lastSaved) => {
