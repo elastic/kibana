@@ -28,8 +28,6 @@
     "@kbn/ml-plugin",
     "@kbn/server-route-repository",
     "@kbn/server-route-repository-utils",
-    "@kbn/logging",
-    "@kbn/inference-common",
     "@kbn/inference-plugin"
   ],
   "exclude": ["target/**/*"]
