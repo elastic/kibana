@@ -17,14 +17,16 @@ export const RULES_SETTINGS_TEST_SUBJECTS = {
   RULE_ROW: 'rule-row',
   RULE_ROW_NON_EDITABLE: 'rule-row-isNotEditable',
 
-  // Rule Actions
-  RULE_SIDEBAR_EDIT_ACTION: 'ruleSidebarEditAction',
-  EDIT_ACTION_HOVER_BUTTON: 'editActionHoverButton',
-
   // Rules Settings Flyout
   RULES_SETTINGS_FLYOUT: 'rulesSettingsFlyout',
   RULES_SETTINGS_FLYOUT_CANCEL_BUTTON: 'rulesSettingsFlyoutCancelButton',
   RULES_SETTINGS_FLYOUT_SAVE_BUTTON: 'rulesSettingsFlyoutSaveButton',
+} as const;
+
+export const RULE_LIST_TEST_SUBJECTS = {
+  // Rule Actions
+  RULE_SIDEBAR_EDIT_ACTION: 'ruleSidebarEditAction',
+  EDIT_ACTION_HOVER_BUTTON: 'editActionHoverButton',
 } as const;
 
 /**

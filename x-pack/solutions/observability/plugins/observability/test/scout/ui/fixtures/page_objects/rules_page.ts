@@ -10,6 +10,7 @@ import { expect } from '@kbn/scout-oblt';
 import {
   RULES_SETTINGS_TEST_SUBJECTS,
   RULE_TYPE_MODAL_TEST_SUBJECTS,
+  RULE_LIST_TEST_SUBJECTS,
   LOGS_TAB_TEST_SUBJECTS,
 } from '../constants';
 
@@ -202,7 +203,7 @@ export class RulesPage {
    */
   public getRuleSidebarEditAction(ruleRow: ReturnType<typeof this.page.testSubj.locator>) {
     return ruleRow.locator(
-      `[data-test-subj="${RULES_SETTINGS_TEST_SUBJECTS.RULE_SIDEBAR_EDIT_ACTION}"]`
+      `[data-test-subj="${RULE_LIST_TEST_SUBJECTS.RULE_SIDEBAR_EDIT_ACTION}"]`
     );
   }
 
@@ -211,27 +212,8 @@ export class RulesPage {
    */
   public getEditActionButton(ruleRow: ReturnType<typeof this.page.testSubj.locator>) {
     return ruleRow.locator(
-      `[data-test-subj="${RULES_SETTINGS_TEST_SUBJECTS.EDIT_ACTION_HOVER_BUTTON}"]`
+      `[data-test-subj="${RULE_LIST_TEST_SUBJECTS.EDIT_ACTION_HOVER_BUTTON}"]`
     );
-  }
-
-  /**
-   * Verifies that the edit action button is visible for a specific rule
-   */
-  async expectEditActionVisible(ruleName: string) {
-    const editableRules = this.getEditableRules();
-    const ruleRow = editableRules.filter({ hasText: ruleName });
-
-    // Hover over the rule row to make the edit button visible
-    await ruleRow.hover();
-
-    // Verify the edit action container is present
-    const editActionContainer = this.getRuleSidebarEditAction(ruleRow);
-    await expect(editActionContainer).toBeVisible();
-
-    // Verify the edit button itself is visible
-    const editButton = this.getEditActionButton(ruleRow);
-    await expect(editButton).toBeVisible();
   }
 
   // Logs Tab methods
@@ -301,5 +283,68 @@ export class RulesPage {
    */
   public get ruleSearchField() {
     return this.page.testSubj.locator('ruleSearchField');
+  }
+
+  // Edit Rule Flyout methods
+
+  /**
+   * Verifies that the edit action button is visible for a specific rule
+   */
+  async expectEditActionVisible(ruleName: string) {
+    const editableRules = this.getEditableRules();
+    const ruleRow = editableRules.filter({ hasText: ruleName });
+    // Hover over the rule row to make the edit button visible
+    await ruleRow.hover();
+    // Verify the edit action container is present
+    const editActionContainer = this.getRuleSidebarEditAction(ruleRow);
+    await expect(editActionContainer).toBeVisible();
+    // Verify the edit button itself is visible
+    const editButton = this.getEditActionButton(ruleRow);
+    await expect(editButton).toBeVisible();
+  }
+  /**
+   * Gets the rules edit flyout locator
+   */
+  public get editRuleFlyout() {
+    return this.page.getByText('Edit Rule');
+  }
+
+  /**
+   * Gets the flyout cancel button locator
+   */
+  public get editRuleFlyoutCancelButton() {
+    return this.page.getByRole('button', { name: 'Cancel' });
+  }
+
+  /**
+   * Gets the flyout save button locator
+   */
+  public get editRuleFlyoutSaveButton() {
+    return this.page.getByRole('button', { name: 'Save changes' });
+  }
+  /**
+   * Opens the edit rule flyout by clicking the edit button for a specific rule
+   */
+  async openEditRuleFlyout(ruleName: string) {
+    await this.expectEditActionVisible(ruleName);
+    await this.getEditActionButton(this.getEditableRules().filter({ hasText: ruleName })).click();
+    await expect(this.editRuleFlyout).toBeVisible();
+  }
+
+  /**
+   * Verifies the edit rule flyout is visible with expected elements
+   */
+  async expectEditRuleFlyoutVisible() {
+    await expect(this.editRuleFlyout).toBeVisible();
+    await expect(this.editRuleFlyoutCancelButton).toBeVisible();
+    await expect(this.editRuleFlyoutSaveButton).toBeVisible();
+  }
+
+  /**
+   * Closes the edit rule flyout by clicking the cancel button
+   */
+  async closeEditRuleFlyout() {
+    await this.editRuleFlyoutCancelButton.click();
+    await expect(this.editRuleFlyout).toBeHidden({ timeout: 5000 });
   }
 }
