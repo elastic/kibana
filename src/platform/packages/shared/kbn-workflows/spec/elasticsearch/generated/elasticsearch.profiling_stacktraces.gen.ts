@@ -17,11 +17,6 @@
 
 import { z } from '@kbn/zod/v4';
 
-import {
-  getShapeAt,
-  getZodLooseObjectFromProperty,
-  getZodObjectFromProperty,
-} from '../../../common/utils/zod';
 import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract

@@ -18,11 +18,7 @@
 import { z } from '@kbn/zod/v4';
 
 import { ccr_unfollow_request, ccr_unfollow_response } from './schemas/es_openapi_zod.gen';
-import {
-  getShapeAt,
-  getZodLooseObjectFromProperty,
-  getZodObjectFromProperty,
-} from '../../../common/utils/zod';
+import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
 import type { InternalConnectorContract } from '../../../types/latest';

@@ -21,11 +21,7 @@ import {
   ml_delete_data_frame_analytics_request,
   ml_delete_data_frame_analytics_response,
 } from './schemas/es_openapi_zod.gen';
-import {
-  getShapeAt,
-  getZodLooseObjectFromProperty,
-  getZodObjectFromProperty,
-} from '../../../common/utils/zod';
+import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
 import type { InternalConnectorContract } from '../../../types/latest';

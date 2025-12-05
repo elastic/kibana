@@ -19,15 +19,9 @@ import { z } from '@kbn/zod/v4';
 
 import {
   indices_exists_alias1_request,
-  indices_exists_alias1_response,
   indices_exists_alias_request,
-  indices_exists_alias_response,
 } from './schemas/es_openapi_zod.gen';
-import {
-  getShapeAt,
-  getZodLooseObjectFromProperty,
-  getZodObjectFromProperty,
-} from '../../../common/utils/zod';
+import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
 import type { InternalConnectorContract } from '../../../types/latest';
