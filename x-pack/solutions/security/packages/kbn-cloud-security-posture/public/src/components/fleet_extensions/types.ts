@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import type {
+  NewPackagePolicy,
+  SINGLE_ACCOUNT,
+  ORGANIZATION_ACCOUNT,
+} from '@kbn/fleet-plugin/common';
 import type { SetupTechnology } from '@kbn/fleet-plugin/public';
-import type { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from '@kbn/fleet-plugin/common';
 
 import type {
   AWS_SETUP_FORMAT,
