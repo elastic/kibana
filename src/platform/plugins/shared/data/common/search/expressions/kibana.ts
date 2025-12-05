@@ -40,16 +40,18 @@ export const kibana: ExpressionFunctionKibana = {
   args: {},
 
   fn(input, _, { getSearchContext }) {
+    const searchContext = getSearchContext();
     const output: ExpressionValueSearchContext = {
       // TODO: This spread is left here for legacy reasons, possibly Lens uses it.
       // TODO: But it shouldn't be need.
       ...input,
       type: 'kibana_context',
-      now: getSearchContext().now ?? Date.now(),
-      query: [...toArray(getSearchContext().query), ...toArray((input || {}).query)],
-      filters: [...(getSearchContext().filters || []), ...((input || {}).filters || [])],
-      timeRange: getSearchContext().timeRange || (input ? input.timeRange : undefined),
-      esqlVariables: getSearchContext().esqlVariables || (input ? input.esqlVariables : undefined),
+      now: searchContext.now ?? Date.now(),
+      query: [...toArray(searchContext.query), ...toArray((input || {}).query)],
+      filters: [...(searchContext.filters || []), ...((input || {}).filters || [])],
+      timeRange: searchContext.timeRange || (input ? input.timeRange : undefined),
+      esqlVariables: searchContext.esqlVariables || (input ? input.esqlVariables : undefined),
+      projectRouting: searchContext.projectRouting || (input ? input.projectRouting : undefined),
     };
 
     return output;
