@@ -35,7 +35,10 @@ import type {
   ValidationResult,
 } from '../stream_active_record/stream_active_record';
 import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
-import { validateClassicFields } from '../../helpers/validate_fields';
+import {
+  validateClassicFields,
+  validateManualIngestPipelineScripts,
+} from '../../helpers/validate_fields';
 import { validateBracketsInFieldNames, validateSettings } from '../../helpers/validate_stream';
 import type { DataStreamMappingsUpdateResponse } from '../../data_streams/manage_data_streams';
 import { formatSettings, settingsUpdateRequiresRollover } from './helpers';
@@ -227,6 +230,11 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
         };
       }
     }
+
+    await validateManualIngestPipelineScripts(
+      this._definition,
+      this.dependencies.scopedClusterClient
+    );
 
     validateClassicFields(this._definition);
     validateBracketsInFieldNames(this._definition);

@@ -328,13 +328,14 @@ const executePipelineSimulation = async (
       simulation: simulation as SuccessfulPipelineSimulateResponse,
     };
   } catch (error) {
+    // todo - why were we showing reason for this case rather than error message? error message is more descriptive
     if (error instanceof esErrors.ResponseError) {
-      const { processor_tag, reason } = error.body?.error;
+      const { processor_tag } = error.body?.error;
 
       return {
         status: 'failure',
         error: {
-          message: reason,
+          message: error.message,
           processor_id: processor_tag,
           type: 'generic_simulation_failure',
         },

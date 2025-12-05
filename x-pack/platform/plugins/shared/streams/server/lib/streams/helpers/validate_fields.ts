@@ -7,6 +7,8 @@
 
 import type { FieldDefinition, Streams } from '@kbn/streams-schema';
 import { isRoot, keepFields, namespacePrefixes } from '@kbn/streams-schema';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { Script } from '@elastic/elasticsearch/lib/api/types';
 import { MalformedFieldsError } from '../errors/malformed_fields_error';
 import { baseMappings } from '../component_templates/logs_layer';
 
@@ -83,6 +85,30 @@ export function validateClassicFields(definition: Streams.ClassicStream.Definiti
     throw new MalformedFieldsError(
       `Stream ${definition.name} is not allowed to have system fields`
     );
+  }
+}
+
+// TODO - potential issue with script here - ctx is not available in the script
+export async function validateManualIngestPipelineScripts(
+  definition: Streams.ClassicStream.Definition,
+  client: IScopedClusterClient
+) {
+  const ingestPipelineSteps = definition.ingest.processing?.steps ?? [];
+  for (const step of ingestPipelineSteps) {
+    if ('action' in step && step.action === 'manual_ingest_pipeline') {
+      for (const processor of step.processors) {
+        if ('script' in processor) {
+          const script = processor.script as Script;
+          try {
+            await client.asCurrentUser.scriptsPainlessExecute({
+              script,
+            });
+          } catch (error) {
+            throw new MalformedFieldsError(`${error.message}`);
+          }
+        }
+      }
+    }
   }
 }
 
