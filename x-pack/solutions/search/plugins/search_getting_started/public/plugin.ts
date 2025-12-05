@@ -68,23 +68,8 @@ export class SearchGettingStartedPlugin
   }
 
   public start(core: CoreStart) {
-    this.featureFlagSubscription = core.featureFlags
-      .getBooleanValue$(SEARCH_GETTING_STARTED_FEATURE_FLAG, true)
-      .subscribe((featureFlagEnabled) => {
-        const status: AppStatus = featureFlagEnabled
-          ? AppStatus.accessible
-          : AppStatus.inaccessible;
-        this.appUpdater$.next(() => ({
-          status,
-        }));
-      });
     return {};
   }
 
-  public stop() {
-    if (this.featureFlagSubscription) {
-      this.featureFlagSubscription.unsubscribe();
-      this.featureFlagSubscription = undefined;
-    }
-  }
+  public stop() {}
 }

@@ -15,7 +15,6 @@ interface Props {
 }
 
 export const GettingStartedRedirectGate = ({ coreStart, children }: Props) => {
-  const isFeatureFlagEnabled = useSearchGettingStartedFeatureFlag();
   const hasRedirected = useRef(false);
 
   useEffect(() => {
@@ -25,7 +24,7 @@ export const GettingStartedRedirectGate = ({ coreStart, children }: Props) => {
       hasRedirected.current = true;
       coreStart.application.navigateToApp('searchGettingStarted');
     }
-  }, [coreStart, isFeatureFlagEnabled]);
+  }, [coreStart]);
 
   return <>{children}</>;
 };
