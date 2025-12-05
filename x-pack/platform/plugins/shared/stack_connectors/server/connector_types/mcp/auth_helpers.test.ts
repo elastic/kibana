@@ -368,9 +368,9 @@ describe('buildHeadersFromSecrets', () => {
         ...baseConfig,
         service: {
           ...baseConfig.service,
-          authType: 'unsupported' as any,
+          authType: 'unsupported' as MCPConnectorConfig['service']['authType'],
         },
-      };
+      } as MCPConnectorConfig;
       const secrets: MCPConnectorSecrets = {
         authType: 'none',
       };

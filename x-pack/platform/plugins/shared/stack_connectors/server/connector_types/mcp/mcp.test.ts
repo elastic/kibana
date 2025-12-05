@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable max-classes-per-file */
+
 import { McpConnector } from './mcp';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -14,6 +16,20 @@ import type { McpClient } from '@kbn/mcp-client';
 import type { CallToolResponse, ListToolsResponse } from '@kbn/mcp-client';
 import { MCP_CONNECTOR_TOOLS_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { CONNECTOR_ID } from '@kbn/connector-schemas/mcp/constants';
+
+// Type for accessing private methods in tests
+// Using a type that makes private methods accessible for testing
+// Note: We use 'unknown' as an intermediate step to bypass TypeScript's private access restrictions
+interface McpConnectorPrivate {
+  safeDisconnect: (operationName?: string) => Promise<void>;
+  handleConnectionError: (error: unknown, operation: string) => Promise<void>;
+  saveTools: (toolsResult: ListToolsResponse) => Promise<void>;
+}
+
+// Helper function to safely cast connector to access private methods in tests
+const getPrivateMethods = (conn: McpConnector): McpConnectorPrivate => {
+  return conn as unknown as McpConnectorPrivate;
+};
 
 // Mock the MCP client
 jest.mock('@kbn/mcp-client', () => {
@@ -105,6 +121,7 @@ describe('McpConnector', () => {
     } as unknown as jest.Mocked<McpClient>;
 
     // Mock the McpClient constructor
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { McpClient } = require('@kbn/mcp-client');
     McpClient.mockImplementation(() => mockMcpClient);
 
@@ -374,6 +391,7 @@ describe('McpConnector', () => {
 
       await connector.listTools({}, connectorUsageCollector);
 
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { McpConnectionLifecycleManager } = require('./lifecycle_management');
       const lifecycleManagerInstance = McpConnectionLifecycleManager.mock.results[0].value;
       expect(lifecycleManagerInstance.recordActivity).toHaveBeenCalled();
@@ -513,6 +531,7 @@ describe('McpConnector', () => {
 
       await connector.callTool({ name: 'test-tool' }, connectorUsageCollector);
 
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { McpConnectionLifecycleManager } = require('./lifecycle_management');
       const lifecycleManagerInstance = McpConnectionLifecycleManager.mock.results[0].value;
       expect(lifecycleManagerInstance.recordActivity).toHaveBeenCalled();
@@ -541,63 +560,9 @@ describe('McpConnector', () => {
     });
   });
 
-  // describe('getResponseErrorMessage', () => {
-  //   it('should handle StreamableHTTPError', () => {
-  //     const error = new StreamableHTTPError(500, 'Connection error');
-  //     // Access protected method via type assertion
-  //     const message = (connector as any).getResponseErrorMessage(error as unknown as AxiosError);
-
-  //     expect(message).toBe('MCP Connection Error: Connection error');
-  //   });
-
-  //   it('should handle UnauthorizedError', () => {
-  //     const error = new UnauthorizedError('Unauthorized access');
-  //     const message = (connector as any).getResponseErrorMessage(error as unknown as AxiosError);
-
-  //     expect(message).toBe('MCP Unauthorized Error: Unauthorized access');
-  //   });
-
-  //   it('should handle Axios errors with statusText', () => {
-  //     const axiosError = {
-  //       isAxiosError: true,
-  //       response: {
-  //         statusText: 'Bad Request',
-  //       },
-  //     } as unknown as AxiosError;
-
-  //     const message = (connector as any).getResponseErrorMessage(axiosError);
-
-  //     expect(message).toBe('API Error: Bad Request');
-  //   });
-
-  //   it('should handle Axios errors with message only', () => {
-  //     const axiosError = {
-  //       isAxiosError: true,
-  //       message: 'Network error',
-  //     } as unknown as AxiosError;
-
-  //     const message = (connector as any).getResponseErrorMessage(axiosError);
-
-  //     expect(message).toBe('API Error: Network error');
-  //   });
-
-  //   it('should handle generic Error objects', () => {
-  //     const error = new Error('Generic error');
-  //     const message = (connector as any).getResponseErrorMessage(error as unknown as AxiosError);
-
-  //     expect(message).toBe('Generic error');
-  //   });
-
-  //   it('should handle non-Error objects', () => {
-  //     const error = 'String error';
-  //     const message = (connector as any).getResponseErrorMessage(error as unknown as AxiosError);
-
-  //     expect(message).toBe('String error');
-  //   });
-  // });
-
   describe('connection management', () => {
     it('should use retryWithRecovery for connection failures', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { retryWithRecovery } = require('./retry_utils');
       const mockConnectResult = {
         connected: true,
@@ -621,6 +586,7 @@ describe('McpConnector', () => {
       mockMcpClient.isConnected.mockReturnValue(false);
 
       // Mock retryWithRecovery to throw the error
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { retryWithRecovery } = require('./retry_utils');
       retryWithRecovery.mockImplementationOnce(async (fn: () => Promise<unknown>) => {
         throw connectionError;
@@ -632,6 +598,7 @@ describe('McpConnector', () => {
     });
 
     it('should disconnect on recovery before retrying', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { retryWithRecovery } = require('./retry_utils');
       const mockConnectResult = {
         connected: true,
@@ -663,7 +630,7 @@ describe('McpConnector', () => {
       mockMcpClient.isConnected.mockReturnValue(false);
 
       // Access private method via test
-      await (connector as any).safeDisconnect('test');
+      await getPrivateMethods(connector).safeDisconnect('test');
 
       expect(mockMcpClient.disconnect).not.toHaveBeenCalled();
     });
@@ -672,7 +639,7 @@ describe('McpConnector', () => {
       mockMcpClient.isConnected.mockReturnValue(true);
       mockMcpClient.disconnect.mockResolvedValue(undefined);
 
-      await (connector as any).safeDisconnect('test');
+      await getPrivateMethods(connector).safeDisconnect('test');
 
       expect(mockMcpClient.disconnect).toHaveBeenCalledTimes(1);
     });
@@ -682,7 +649,7 @@ describe('McpConnector', () => {
       mockMcpClient.isConnected.mockReturnValue(true);
       mockMcpClient.disconnect.mockRejectedValue(disconnectError);
 
-      await (connector as any).safeDisconnect('test');
+      await getPrivateMethods(connector).safeDisconnect('test');
 
       expect(mockMcpClient.disconnect).toHaveBeenCalledTimes(1);
       expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('Error disconnecting'));
@@ -695,7 +662,7 @@ describe('McpConnector', () => {
       mockMcpClient.isConnected.mockReturnValue(true);
       mockMcpClient.disconnect.mockResolvedValue(undefined);
 
-      await (connector as any).handleConnectionError(error, 'test-operation');
+      await getPrivateMethods(connector).handleConnectionError(error, 'test-operation');
 
       expect(mockMcpClient.disconnect).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(
@@ -708,7 +675,7 @@ describe('McpConnector', () => {
       mockMcpClient.isConnected.mockReturnValue(true);
       mockMcpClient.disconnect.mockResolvedValue(undefined);
 
-      await (connector as any).handleConnectionError(error, 'test-operation');
+      await getPrivateMethods(connector).handleConnectionError(error, 'test-operation');
 
       expect(mockMcpClient.disconnect).toHaveBeenCalledTimes(1);
     });
@@ -718,7 +685,7 @@ describe('McpConnector', () => {
       mockMcpClient.isConnected.mockReturnValue(true);
       mockMcpClient.disconnect.mockResolvedValue(undefined);
 
-      await (connector as any).handleConnectionError(error, 'test-operation');
+      await getPrivateMethods(connector).handleConnectionError(error, 'test-operation');
 
       expect(mockMcpClient.disconnect).toHaveBeenCalledTimes(1);
     });
@@ -727,7 +694,7 @@ describe('McpConnector', () => {
       const error = new StreamableHTTPError(500, 'Connection error');
       mockMcpClient.isConnected.mockReturnValue(false);
 
-      await (connector as any).handleConnectionError(error, 'test-operation');
+      await getPrivateMethods(connector).handleConnectionError(error, 'test-operation');
 
       expect(mockMcpClient.disconnect).not.toHaveBeenCalled();
     });
@@ -738,7 +705,7 @@ describe('McpConnector', () => {
       mockMcpClient.isConnected.mockReturnValue(true);
       mockMcpClient.disconnect.mockRejectedValue(cleanupError);
 
-      await (connector as any).handleConnectionError(error, 'test-operation');
+      await getPrivateMethods(connector).handleConnectionError(error, 'test-operation');
 
       expect(mockMcpClient.disconnect).toHaveBeenCalledTimes(1);
       expect(logger.debug).toHaveBeenCalledWith(
@@ -750,7 +717,7 @@ describe('McpConnector', () => {
       const error = new Error('Some other error');
       mockMcpClient.isConnected.mockReturnValue(true);
 
-      await (connector as any).handleConnectionError(error, 'test-operation');
+      await getPrivateMethods(connector).handleConnectionError(error, 'test-operation');
 
       expect(mockMcpClient.disconnect).not.toHaveBeenCalled();
     });
@@ -780,7 +747,7 @@ describe('McpConnector', () => {
         references: [],
       });
 
-      await (connector as any).saveTools(mockToolsResult);
+      await getPrivateMethods(connector).saveTools(mockToolsResult);
 
       expect(services.savedObjectsClient.create).toHaveBeenCalledWith(
         MCP_CONNECTOR_TOOLS_SAVED_OBJECT_TYPE,
@@ -806,7 +773,7 @@ describe('McpConnector', () => {
 
       services.savedObjectsClient.create.mockRejectedValue(new Error('Save failed'));
 
-      await (connector as any).saveTools(mockToolsResult);
+      await getPrivateMethods(connector).saveTools(mockToolsResult);
 
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Failed to save tools'));
     });
