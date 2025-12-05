@@ -53,7 +53,6 @@ import type {
   ObservabilityAIAssistantServerStart,
 } from '@kbn/observability-ai-assistant-plugin/server';
 import type { OnechatPluginSetup, OnechatPluginStart } from '@kbn/onechat-plugin/server/types';
-import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
 import type {
   ObservabilityAgentPluginSetup,
   ObservabilityAgentPluginStart,
@@ -84,7 +83,6 @@ export interface APMPluginSetupDependencies {
   observabilityAgent?: ObservabilityAgentPluginSetup;
   observabilityAIAssistant?: ObservabilityAIAssistantServerSetup;
   onechat?: OnechatPluginSetup;
-  inference?: InferenceServerSetup;
   actions?: ActionsPlugin['setup'];
   alerting?: AlertingServerSetup;
   cloud?: CloudSetup;
@@ -114,7 +112,6 @@ export interface APMPluginStartDependencies {
   observabilityAgent?: ObservabilityAgentPluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantServerStart;
   onechat?: OnechatPluginStart;
-  inference?: InferenceServerStart;
   actions?: ActionsPlugin['start'];
   alerting?: AlertingServerStart;
   cloud?: undefined;

@@ -7,11 +7,12 @@
 
 import * as t from 'io-ts';
 import { apiPrivileges } from '@kbn/onechat-plugin/common/features';
+import { generateErrorAiInsight } from './apm_error/generate_error_ai_insight';
 import { createObservabilityAgentBuilderServerRoute } from '../create_observability_agent_builder_server_route';
 
 export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
-  const exampleRoute = createObservabilityAgentBuilderServerRoute({
-    endpoint: 'POST /internal/observability_agent_builder/ai_insights/example',
+  const errorAiInsightsRoute = createObservabilityAgentBuilderServerRoute({
+    endpoint: 'POST /internal/observability_agent_builder/ai_insights/error',
     options: {
       access: 'internal',
     },
@@ -22,15 +23,41 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
     },
     params: t.type({
       body: t.type({
-        id: t.string,
+        serviceName: t.string,
+        errorId: t.string,
+        start: t.string,
+        end: t.string,
+        environment: t.union([t.string, t.undefined, t.null]),
+        kuery: t.union([t.string, t.undefined, t.null]),
+        connectorId: t.union([t.string, t.undefined, t.null]),
       }),
     }),
-    handler: async ({ params }) => {
-      return { id: params.body.id };
+    handler: async ({ request, core, dataRegistry, params, logger }) => {
+      const { errorId, serviceName, start, end, environment = '', connectorId } = params.body;
+
+      const [_, pluginsStart] = await core.getStartServices();
+
+      const { summary, context } = await generateErrorAiInsight({
+        connectorId: connectorId ?? undefined,
+        errorId,
+        serviceName,
+        start,
+        end,
+        environment: environment ?? '',
+        dataRegistry,
+        request,
+        inferenceStart: pluginsStart.inference,
+        logger,
+      });
+
+      return {
+        context,
+        summary,
+      };
     },
   });
 
   return {
-    ...exampleRoute,
+    ...errorAiInsightsRoute,
   };
 }

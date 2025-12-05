@@ -90,7 +90,7 @@ export function ErrorSampleDetails({
     urlParams: { detailTab, offset, comparisonEnabled },
   } = useLegacyUrlParams();
 
-  const { uiActions, core, onechat, inference } = useApmPluginContext();
+  const { uiActions, core, onechat } = useApmPluginContext();
   const isObservabilityAgentEnabled = getIsObservabilityAgentEnabled(core);
 
   const router = useApmRouter();
@@ -294,7 +294,7 @@ export function ErrorSampleDetails({
         <SampleSummary error={error} />
       )}
 
-      {onechat && inference && isObservabilityAgentEnabled ? (
+      {onechat && isObservabilityAgentEnabled ? (
         <ErrorSampleAgentBuilderAiInsight error={error} transaction={transaction} />
       ) : (
         <ErrorSampleContextualInsight error={error} transaction={transaction} />

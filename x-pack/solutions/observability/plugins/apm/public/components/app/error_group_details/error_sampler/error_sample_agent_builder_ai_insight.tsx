@@ -24,7 +24,7 @@ export function ErrorSampleAgentBuilderAiInsight({
   error,
   transaction,
 }: APIReturnType<'GET /internal/apm/services/{serviceName}/errors/{groupId}/error/{errorId}'>) {
-  const { onechat, core, inference } = useApmPluginContext();
+  const { onechat, core } = useApmPluginContext();
   const isObservabilityAgentEnabled = getIsObservabilityAgentEnabled(core);
 
   const { query } = useAnyOfApmParams(
@@ -120,7 +120,7 @@ export function ErrorSampleAgentBuilderAiInsight({
     end,
   ]);
 
-  if (!onechat || !isObservabilityAgentEnabled || !inference) {
+  if (!onechat || !isObservabilityAgentEnabled) {
     return <></>;
   }
 

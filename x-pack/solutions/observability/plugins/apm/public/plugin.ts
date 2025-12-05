@@ -79,7 +79,6 @@ import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
 import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
 import type { CasesPublicStart } from '@kbn/cases-plugin/public';
-import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type {
   DiscoverSharedPublicSetup,
   DiscoverSharedPublicStart,
@@ -170,7 +169,6 @@ export interface ApmPluginStartDeps {
   notifications: NotificationsStart;
   discoverShared: DiscoverSharedPublicStart;
   onechat?: OnechatPluginStart;
-  inference?: InferencePublicStart;
 }
 
 const applicationsTitle = i18n.translate('xpack.apm.navigation.rootTitle', {
