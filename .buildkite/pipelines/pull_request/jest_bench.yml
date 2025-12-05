@@ -5,7 +5,7 @@ steps:
       machineType: n2-highmem-16
       diskSizeGb: 100
     key: jest_bench
-    timeout_in_minutes: 60
+    timeout_in_minutes: 300
     soft_fail: true
     depends_on:
       # - build
