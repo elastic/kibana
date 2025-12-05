@@ -1431,15 +1431,6 @@ export const getSavedObjectTypes = (
               },
               { unknowns: 'ignore' }
             ),
-            create: schema.object({
-              name: schema.string(),
-              namespace: schema.maybe(schema.string()),
-              cloudProvider: schema.string(),
-              vars: schema.any(),
-              packagePolicyCount: schema.number(),
-              created_at: schema.string(),
-              updated_at: schema.string(),
-            }),
           },
         },
         2: {
