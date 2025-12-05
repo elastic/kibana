@@ -103,11 +103,12 @@ export function SimilarErrorsOccurrencesChart({
         {
           name: currentDocumentLabel,
           datetime: timestamp,
-          color: euiTheme.colors.danger,
+          color: euiTheme.colors.vis.euiColorVis2,
+          icon: 'mapMarker',
         },
       ],
     }),
-    [euiTheme.colors.danger]
+    [euiTheme.colors.vis.euiColorVis2]
   );
 
   const chartEsqlQuery = useMemo(() => {
