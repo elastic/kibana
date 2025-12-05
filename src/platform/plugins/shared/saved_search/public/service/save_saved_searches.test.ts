@@ -144,7 +144,6 @@ describe('saveSavedSearch', () => {
                 hideChart: false,
                 isTextBasedQuery: false,
                 timeRestore: false,
-                projectRouting: null,
               }),
             },
           ],

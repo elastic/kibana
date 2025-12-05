@@ -29,7 +29,7 @@ export const ProjectRoutingSwitch: React.FC<ProjectRoutingSwitchProps> = ({
         label={
           <FormattedMessage
             id="discover.topNav.saveModal.storeProjectRoutingWithSearchToggleLabel"
-            defaultMessage="Include cross-project search scope customizations "
+            defaultMessage="Include cross-project search scope customizations"
           />
         }
       />
