@@ -44,3 +44,9 @@ export interface NodeRoles {
    */
   migrator: boolean;
 }
+
+export interface NodeRemoteService {
+  name: string;
+
+  url: string;
+}
