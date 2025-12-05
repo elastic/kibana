@@ -38,7 +38,6 @@ import {
   MCP_CONNECTOR_TOOLS_SAVED_OBJECT_TYPE,
   type McpConnectorToolsAttributes,
 } from '../../saved_objects';
-// import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 /**
  * MCP Connector for Kibana Stack Connectors.
@@ -357,7 +356,7 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     }
 
     // Handle Axios errors
-    if ('isAxiosError' in error && error.isAxiosError) {
+    if (error && typeof error === 'object' && 'isAxiosError' in error && error.isAxiosError) {
       const axiosError = error as AxiosError;
       if (axiosError.response?.statusText) {
         return `API Error: ${axiosError.response.statusText}`;
