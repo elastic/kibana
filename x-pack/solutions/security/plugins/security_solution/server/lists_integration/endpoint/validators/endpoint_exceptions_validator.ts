@@ -11,6 +11,7 @@ import type {
 } from '@kbn/lists-plugin/server';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { PromiseFromStreams } from '@kbn/lists-plugin/server/services/exception_lists/import_exception_list_and_items';
 import { EndpointExceptionsValidationError } from './endpoint_exception_errors';
 import { BaseValidator, GLOBAL_ARTIFACT_MANAGEMENT_NOT_ALLOWED_MESSAGE } from './base_validator';
 import type { ExceptionItemLikeOptions } from '../types';
@@ -40,6 +41,12 @@ export class EndpointExceptionsValidator extends BaseValidator {
         );
       }
     }
+  }
+
+  async validatePreImport(items: PromiseFromStreams): Promise<PromiseFromStreams> {
+    await this.validateHasWritePrivilege();
+
+    return items;
   }
 
   async validatePreCreateItem(item: CreateExceptionListItemOptions) {
