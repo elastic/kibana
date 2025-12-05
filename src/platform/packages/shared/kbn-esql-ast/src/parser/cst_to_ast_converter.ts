@@ -1232,7 +1232,7 @@ export class CstToAstConverter {
 
   private fromJoinTarget(ctx: cst.JoinTargetContext): ast.ESQLSource | ast.ESQLIdentifier {
     if (ctx._index) {
-      return this.toSource(ctx._index);
+      return this.toSourceWithAlias(ctx._index, ctx._qualifier);
     } else {
       return Builder.expression.source.node(
         {
@@ -2450,6 +2450,20 @@ export class CstToAstConverter {
   }
 
   // ----------------------------------------------------- expression: "source"
+
+  private toSourceWithAlias(
+    indexCtx: antlr.ParserRuleContext,
+    aliasToken?: antlr.Token,
+    type: 'index' | 'policy' = 'index'
+  ): ast.ESQLSource {
+    const source = this.toSource(indexCtx, type);
+
+    if (aliasToken) {
+      source.alias = aliasToken.text;
+    }
+
+    return source;
+  }
 
   private toSource(
     ctx: antlr.ParserRuleContext,
