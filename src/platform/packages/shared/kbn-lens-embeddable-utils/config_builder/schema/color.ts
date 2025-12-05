@@ -12,25 +12,41 @@ import { schema } from '@kbn/config-schema';
 import { isNil } from 'lodash';
 import { serializedValueSchema } from './serializedValue';
 
-const colorByValueStepsSchema = schema.arrayOf(
-  schema.object({
+const colorByValueStepSchema = schema.object(
+  {
     /**
-     * The value from which this color applies (inclusive).
+     * The lower bound of range from which this color applies (inclusive).
      */
-    from: schema.maybe(
+    gte: schema.maybe(
       schema.nullable(
         schema.number({
-          meta: { description: 'The value from which this color applies (inclusive).' },
+          meta: {
+            description: 'The lower bound of range from which this color applies (inclusive).',
+          },
         })
       )
     ),
     /**
-     * The value up to which this color applies (inclusive).
+     * The upper bound of range to which this color applies (exclusive).
      */
-    to: schema.maybe(
+    lt: schema.maybe(
       schema.nullable(
         schema.number({
-          meta: { description: 'The value up to which this color applies (exclusive).' },
+          meta: {
+            description: 'The upper bound of range to which this color applies (exclusive).',
+          },
+        })
+      )
+    ),
+    /**
+     * The upper bound of range to which this color applies (inclusive).
+     */
+    lte: schema.maybe(
+      schema.nullable(
+        schema.number({
+          meta: {
+            description: 'The upper bound of range to which this color applies (inclusive).',
+          },
         })
       )
     ),
@@ -38,40 +54,60 @@ const colorByValueStepsSchema = schema.arrayOf(
      * The color to use for this step.
      */
     color: schema.string({ meta: { description: 'The color to use for this step.' } }),
-  }),
+  },
   {
-    meta: {
-      description: 'Array of ordered color steps defining the range each color is applied.',
-    },
-    minSize: 1,
-    validate(steps) {
-      let trackingValue = steps[0].from ?? steps[0].to ?? -Infinity;
-      for (const [i, step] of steps.entries()) {
-        if (isNil(step.from)) {
-          if (i === 0) continue;
-          return 'The "from" value is required for all steps except the first.';
-        }
+    validate(step) {
+      if (isNil(step.gte) && isNil(step.lt) && isNil(step.lte)) {
+        return 'At least one of "gte", "lt", or "lte" must be provided.';
+      }
 
-        if (isNil(step.to)) {
-          if (i === steps.length - 1) continue;
-          return 'The "to" value is required for all steps except the last.';
-        }
+      if (!isNil(step.lt) && !isNil(step.lte)) {
+        return 'Cannot provide both "lt" and "lte" for the same step.';
+      }
 
-        if (step.from > step.to) {
-          return `"step[${i}].from" must be less than the "step[${i}].to".`;
-        }
+      if (!isNil(step.gte) && !isNil(step.lt) && step.gte > step.lt) {
+        return 'Inverted range: "gte" value must be less than the "lt" value';
+      }
 
-        if (step.from !== trackingValue && i !== 0) {
-          return `Step ranges must be continuous. "step[${i}].from" and "step[${
-            i - 1
-          }].to" must be equal.`;
-        }
-
-        trackingValue = step.to;
+      if (!isNil(step.gte) && !isNil(step.lte) && step.gte > step.lte) {
+        return 'Inverted range: "gte" value must be less than the "lte" value';
       }
     },
   }
 );
+
+const colorByValueStepsSchema = schema.arrayOf(colorByValueStepSchema, {
+  meta: {
+    description: 'Array of ordered color steps defining the range each color is applied.',
+  },
+  minSize: 1,
+  validate(steps) {
+    let trackingValue = steps[0].gte ?? steps[0].lt ?? -Infinity;
+    for (const [i, step] of steps.entries()) {
+      if (isNil(step.gte)) {
+        if (i === 0) continue;
+        return 'The "gte" value is required for all steps except the first.';
+      }
+
+      if (isNil(step.lt)) {
+        if (i === steps.length - 1) continue;
+        return 'The "lt" value is required for all steps except the last.';
+      }
+
+      if (!isNil(step.lte) && i !== steps.length - 1) {
+        return 'The "lte" value is only permitted on the last step.';
+      }
+
+      if (step.gte !== trackingValue && i !== 0) {
+        return `Step ranges must be continuous. "step[${i}].gte" and "step[${
+          i - 1
+        }].lt" must be equal.`;
+      }
+
+      trackingValue = step.lt;
+    }
+  },
+});
 
 export const colorByValueSchema = schema.object({
   type: schema.literal('dynamic'),
@@ -166,7 +202,7 @@ export const allColoringTypeSchema = schema.oneOf([
 
 export type StaticColorType = TypeOf<typeof staticColorSchema>;
 export type ColorByValueType = TypeOf<typeof colorByValueSchema>;
-export type ColorByValueStep = TypeOf<typeof colorByValueStepsSchema>[number];
+export type ColorByValueStep = TypeOf<typeof colorByValueStepSchema>;
 export type ColorMappingType = TypeOf<typeof colorMappingSchema>;
 export type ColorMappingCategoricalType = TypeOf<typeof categoricalColorMappingSchema>;
 export type ColorMappingGradientType = TypeOf<typeof gradientColorMappingSchema>;
