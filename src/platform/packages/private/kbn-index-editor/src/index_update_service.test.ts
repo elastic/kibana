@@ -22,6 +22,7 @@ import {
 import { IndexEditorTelemetryService } from './telemetry/telemetry_service';
 import type { AnalyticsServiceStart } from '@kbn/core/server';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
+import { LOOKUP_INDEX_RECREATE_ROUTE, LOOKUP_INDEX_UPDATE_ROUTE } from '@kbn/esql-types';
 
 jest.mock('@kbn/esql-utils', () => ({
   getESQLAdHocDataview: jest.fn(),
@@ -92,7 +93,7 @@ describe('IndexUpdateService', () => {
       const initial = await firstValueFrom(service.hasUnsavedChanges$);
       expect(initial).toBe(false);
 
-      service.addEmptyRow();
+      service.addEmptyRow(1);
 
       const afterAdd = await firstValueFrom(service.hasUnsavedChanges$);
       expect(afterAdd).toBe(false);
@@ -112,7 +113,7 @@ describe('IndexUpdateService', () => {
       const initial = await firstValueFrom(service.hasUnsavedChanges$);
       expect(initial).toBe(false);
 
-      service.addNewColumn();
+      service.addNewColumn('column1', 'keyword');
 
       const afterAdd = await firstValueFrom(service.hasUnsavedChanges$);
       expect(afterAdd).toBe(false);
@@ -122,7 +123,7 @@ describe('IndexUpdateService', () => {
       const initial = await firstValueFrom(service.hasUnsavedChanges$);
       expect(initial).toBe(false);
 
-      service.addEmptyRow();
+      service.addEmptyRow(1);
       const placeholderRow = (await firstValueFrom(service.rows$))[0];
 
       service.deleteDoc([placeholderRow.id]);
@@ -162,7 +163,7 @@ describe('IndexUpdateService', () => {
 
       expect(http.post).toHaveBeenCalledTimes(1);
       const [url, options] = (http.post as jest.Mock).mock.calls[0];
-      expect(url).toBe('/internal/esql/lookup_index/my-index/update');
+      expect(url).toBe(`${LOOKUP_INDEX_UPDATE_ROUTE}/my-index`);
 
       const body = JSON.parse(options.body);
       expect(Array.isArray(body.operations)).toBe(true);
@@ -182,15 +183,9 @@ describe('IndexUpdateService', () => {
       const doc = body.operations[indexIdx + 1];
       expect(doc).toEqual({ b: 2, c: 3 });
     });
-
-    it('throws when calling bulkUpdate with empty operations', async () => {
-      service.setIndexName('idx');
-      await expect(service.bulkUpdate([] as any)).rejects.toThrow('empty operations');
-    });
   });
 
   it('Handles rows successive modifications in a correct manner', async () => {
-    service.addEmptyRow();
     const rows = await firstValueFrom(service.rows$);
     expect(rows.length).toBe(1);
     expect(rows[0].raw).toEqual({});
@@ -205,7 +200,7 @@ describe('IndexUpdateService', () => {
     service.deleteDoc([rowsAfterEdition[0].id]);
     const rowsAfterDeletion = await firstValueFrom(service.rows$);
     expect(rowsAfterDeletion.length).toBe(1); // An empty placeholder row should always be visible
-    expect(rowsAfterDeletion[0].raw).toMatchObject({ _id: expect.anything() });
+    expect(rowsAfterDeletion[0].id).toEqual(expect.stringContaining(ROW_PLACEHOLDER_PREFIX));
   });
 
   describe('flush operations', () => {
@@ -221,15 +216,14 @@ describe('IndexUpdateService', () => {
       service.setIndexCreated(true);
       await firstValueFrom(service.dataView$);
 
-      // Adding and modifying a new row counts as 1 row added and 0 cells edited
-      service.addEmptyRow();
+      // Modifying the placeholder row counts as 1 row added and 0 cells edited
       const placeholderRow = (await firstValueFrom(service.rows$))[0];
       service.updateDoc(placeholderRow.id, { field: 'value' });
 
       // Adding a column and editing its name counts as 1 col added
-      service.addNewColumn();
+      service.addNewColumn('column1', 'keyword');
       const newColumn = (await firstValueFrom(service.pendingColumnsToBeSaved$))[0];
-      service.editColumn('newColumn', newColumn.name);
+      service.editColumn('newColumn', newColumn.name, 'keyword');
 
       // Counts as 2 cell edited
       service.updateDoc('123', { field: 'value' });
@@ -252,6 +246,35 @@ describe('IndexUpdateService', () => {
         outcome: 'success',
         latency: expect.any(Number),
       });
+    });
+  });
+
+  describe('resetIndexMapping', () => {
+    it('should recreate index, refresh dataview, discard changes and refetch when index is created', async () => {
+      service.setIndexName('my-index');
+      service.setIndexCreated(true);
+
+      await service.resetIndexMapping();
+
+      // Verify the recreate endpoint was called
+      expect(http.post).toHaveBeenCalledWith(`${LOOKUP_INDEX_RECREATE_ROUTE}/my-index`);
+
+      // Verify unsaved changes were discarded
+      const hasChangesAfterReset = await firstValueFrom(service.hasUnsavedChanges$);
+      expect(hasChangesAfterReset).toBe(false);
+    });
+
+    it('should not call recreate endpoint if index is not created', async () => {
+      service.setIndexName('my-index');
+
+      await service.resetIndexMapping();
+
+      // Verify the recreate endpoint was not called
+      expect(http.post).not.toHaveBeenCalled();
+
+      // Verify unsaved changes were discarded
+      const hasChangesAfterReset = await firstValueFrom(service.hasUnsavedChanges$);
+      expect(hasChangesAfterReset).toBe(false);
     });
   });
 });

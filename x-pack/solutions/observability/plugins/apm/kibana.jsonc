@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/apm-plugin",
-  "owner": ["@elastic/obs-ux-infra_services-team"],
+  "owner": ["@elastic/obs-presentation-team"],
   "group": "observability",
   "visibility": "private",
   "description": "The user interface for Elastic APM",
@@ -59,7 +59,9 @@
       "licenseManagement",
       "profilingDataAccess",
       "observabilityAIAssistant",
-      "share"
+      "observabilityAgent",
+      "share",
+      "onechat"
     ],
     "requiredBundles": ["fleet", "kibanaReact", "kibanaUtils", "ml", "observability", "maps"]
   }

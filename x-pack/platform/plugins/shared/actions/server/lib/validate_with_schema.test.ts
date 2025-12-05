@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-
+import { z as z3 } from '@kbn/zod';
+import { z as z4 } from '@kbn/zod/v4';
 import {
   validateParams,
   validateConfig,
@@ -35,9 +35,9 @@ test('should validate when there are no validators', () => {
     id: 'foo',
     name: 'bar',
     validate: {
-      config: { schema: z.object({ any: z.array(z.string()) }).strict() },
-      secrets: { schema: z.object({}).strict() },
-      params: { schema: z.object({}).strict() },
+      config: { schema: z3.object({ any: z3.array(z3.string()) }).strict() },
+      secrets: { schema: z3.object({}).strict() },
+      params: { schema: z3.object({}).strict() },
     },
   });
   const testValue = { any: ['old', 'thing'] };
@@ -168,8 +168,8 @@ test('should throw with expected error when validators fail', () => {
   ).toThrowErrorMatchingInlineSnapshot(`"error validating action type connector: test error"`);
 });
 
-test('should work with @kbn/zod', () => {
-  const testSchema = z.object({ foo: z.string() }).strict();
+test('should work with @kbn/zod v3', () => {
+  const testSchema = z3.object({ foo: z3.string() }).strict();
   const actionType: ActionType = {
     id: 'foo',
     name: 'bar',
@@ -198,6 +198,39 @@ test('should work with @kbn/zod', () => {
     "error validating action params: 2 errors:
      [1]: Unrecognized key(s) in object: 'bar';
      [2]: Field \\"foo\\": Required"
+  `);
+});
+
+test('should work with @kbn/zod v4', () => {
+  const testSchema = z4.object({ foo: z4.string() }).strict();
+  const actionType: ActionType = {
+    id: 'foo',
+    name: 'bar',
+    minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
+    executor,
+    validate: {
+      params: {
+        schema: testSchema,
+      },
+      config: {
+        schema: testSchema,
+      },
+      secrets: {
+        schema: testSchema,
+      },
+      connector: () => null,
+    },
+  };
+
+  const result = validateParams(actionType, { foo: 'bar' }, { configurationUtilities });
+  expect(result).toEqual({ foo: 'bar' });
+
+  expect(() => validateParams(actionType, { bar: 2 }, { configurationUtilities }))
+    .toThrowErrorMatchingInlineSnapshot(`
+    "error validating action params: ✖ Unrecognized key: \\"bar\\"
+    ✖ Invalid input: expected string, received undefined
+      → at foo"
   `);
 });
 

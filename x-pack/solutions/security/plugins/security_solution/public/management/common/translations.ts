@@ -383,8 +383,10 @@ export const CROWDSTRIKE_CONSOLE_COMMANDS = {
     title: i18n.translate('xpack.securitySolution.crowdStrikeConsoleCommands.runscript.title', {
       defaultMessage: 'Run Script',
     }),
-    helpUsage: i18n.translate('xpack.securitySolution.crowdStrikeConsoleCommands.runscript.about', {
-      defaultMessage: `Command Examples for Running Scripts:
+    helpExample: i18n.translate(
+      'xpack.securitySolution.crowdStrikeConsoleCommands.runscript.about',
+      {
+        defaultMessage: `Command Examples for Running Scripts:
 
 1. Executes a script saved in the CrowdStrike cloud with the specified command-line arguments.
 
@@ -403,7 +405,8 @@ export const CROWDSTRIKE_CONSOLE_COMMANDS = {
    runscript --HostPath="C:\\temp\\LocalScript.ps1" --CommandLine="-Verbose true"
 
 `,
-    }),
+      }
+    ),
     privileges: i18n.translate(
       'xpack.securitySolution.crowdStrikeConsoleCommands.runscript.privileges',
       {
@@ -435,7 +438,7 @@ export const MS_DEFENDER_ENDPOINT_CONSOLE_COMMANDS = {
       },
     },
 
-    helpUsage: i18n.translate(
+    helpExample: i18n.translate(
       'xpack.securitySolution.msDefenderEndpointConsoleCommands.runscript.about',
       {
         defaultMessage: `Command Examples for Running Scripts:

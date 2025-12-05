@@ -8,7 +8,7 @@
  */
 
 import { DataSourceType, isDataSourceType } from '../../../../common/data_sources';
-import { useAppStateSelector } from '../state_management/discover_app_state_container';
+import { useAppStateSelector } from '../state_management/redux';
 
 export const useIsEsqlMode = () => {
   const dataSource = useAppStateSelector((state) => state.dataSource);

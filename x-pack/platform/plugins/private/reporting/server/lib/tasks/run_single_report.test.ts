@@ -276,6 +276,7 @@ describe('Run Single Report Task', () => {
   });
 
   it('uses authorization headers from task manager fake request if defined', async () => {
+    const notifyUsage = jest.fn();
     const runTaskFn = jest.fn().mockResolvedValue({ content_type: 'application/pdf' });
     mockReporting.getExportTypesRegistry().register({
       id: 'test1',
@@ -284,6 +285,9 @@ describe('Run Single Report Task', () => {
       start: jest.fn(),
       createJob: () => new Promise(() => {}),
       runTask: runTaskFn,
+      shouldNotifyUsage: () => true,
+      getFeatureUsageName: () => 'Reporting: test1 single export',
+      notifyUsage,
       jobContentEncoding: 'base64',
       jobType: 'test1',
       validLicenses: [],
@@ -311,6 +315,7 @@ describe('Run Single Report Task', () => {
 
     await taskRunner.run();
 
+    expect(notifyUsage).toHaveBeenCalledWith('single');
     expect(runTaskFn.mock.calls[0][0].request.headers).toEqual({
       authorization: 'ApiKey skdjtq4u543yt3rhewrh',
     });
@@ -321,6 +326,7 @@ describe('Run Single Report Task', () => {
       'cool-encryption-key-where-did-you-find-it',
       headers
     );
+    const notifyUsage = jest.fn();
     const runTaskFn = jest.fn().mockResolvedValue({ content_type: 'application/pdf' });
     mockReporting.getExportTypesRegistry().register({
       id: 'test2',
@@ -329,6 +335,9 @@ describe('Run Single Report Task', () => {
       start: jest.fn(),
       createJob: () => new Promise(() => {}),
       runTask: runTaskFn,
+      shouldNotifyUsage: () => true,
+      getFeatureUsageName: () => 'Reporting: test2 single export',
+      notifyUsage,
       jobContentEncoding: 'base64',
       jobType: 'test2',
       validLicenses: [],
@@ -360,6 +369,7 @@ describe('Run Single Report Task', () => {
 
     await taskRunner.run();
 
+    expect(notifyUsage).toHaveBeenCalledWith('single');
     expect(runTaskFn.mock.calls[0][0].request.headers).toEqual(headers);
   });
 
@@ -368,6 +378,7 @@ describe('Run Single Report Task', () => {
       'cool-encryption-key-where-did-you-find-it',
       headers
     );
+    const notifyUsage = jest.fn();
     const runTaskFn = jest.fn().mockResolvedValue({ content_type: 'application/pdf' });
     mockReporting.getExportTypesRegistry().register({
       id: 'test3',
@@ -376,6 +387,9 @@ describe('Run Single Report Task', () => {
       start: jest.fn(),
       createJob: () => new Promise(() => {}),
       runTask: runTaskFn,
+      shouldNotifyUsage: () => true,
+      getFeatureUsageName: () => 'Reporting: test3 single export',
+      notifyUsage,
       jobContentEncoding: 'base64',
       jobType: 'test3',
       validLicenses: [],
@@ -408,6 +422,7 @@ describe('Run Single Report Task', () => {
 
     await taskRunner.run();
 
+    expect(notifyUsage).toHaveBeenCalledWith('single');
     expect(runTaskFn.mock.calls[0][0].request.headers).toEqual({
       ...omit(headers, ['authorization', 'cookie']),
       authorization: 'ApiKey skdjtq4u543yt3rhewrh',
@@ -423,6 +438,9 @@ describe('Run Single Report Task', () => {
       start: jest.fn(),
       createJob: () => new Promise(() => {}),
       runTask: runTaskFn,
+      shouldNotifyUsage: () => true,
+      getFeatureUsageName: () => 'Reporting: test1 single export',
+      notifyUsage: jest.fn(),
       jobContentEncoding: 'base64',
       jobType: 'test1',
       validLicenses: [],
@@ -477,6 +495,9 @@ describe('Run Single Report Task', () => {
       start: jest.fn(),
       createJob: () => new Promise(() => {}),
       runTask: () => new Promise(() => {}),
+      shouldNotifyUsage: () => true,
+      getFeatureUsageName: () => 'Reporting: pdf single export',
+      notifyUsage: jest.fn(),
       jobContentExtension: 'pdf',
       jobType: 'noop',
       validLicenses: [],
@@ -543,6 +564,9 @@ describe('Run Single Report Task', () => {
       start: jest.fn(),
       createJob: () => new Promise(() => {}),
       runTask: runTaskFn,
+      shouldNotifyUsage: () => true,
+      getFeatureUsageName: () => 'Reporting: test1 single export',
+      notifyUsage: jest.fn(),
       jobContentEncoding: 'base64',
       jobType: 'test1',
       validLicenses: [],
@@ -607,6 +631,9 @@ describe('Run Single Report Task', () => {
       start: jest.fn(),
       createJob: () => new Promise(() => {}),
       runTask: runTaskFn,
+      shouldNotifyUsage: () => true,
+      getFeatureUsageName: () => 'Reporting: test1 single export',
+      notifyUsage: jest.fn(),
       jobContentEncoding: 'base64',
       jobType: 'test1',
       validLicenses: [],

@@ -9,6 +9,7 @@
 
 import {
   ALLOWED_KEY_REGEX,
+  isLiquidTagValue,
   LIQUID_FILTER_REGEX,
   PROPERTY_PATH_REGEX,
   UNFINISHED_VARIABLE_REGEX_GLOBAL,
@@ -242,6 +243,38 @@ describe('regex patterns', () => {
 
       expect(match).toBeTruthy();
       expect(match![1]).toBe('');
+    });
+  });
+
+  describe('isLiquidTagValue', () => {
+    it('should return true for Liquid tags with {% ... %}', () => {
+      expect(isLiquidTagValue('{% if condition %}')).toBe(true);
+      expect(isLiquidTagValue('{% assign x = 5 %}')).toBe(true);
+      expect(isLiquidTagValue('{% endif %}')).toBe(true);
+    });
+
+    it('should return true for Liquid tags with {%- ... -%}', () => {
+      expect(isLiquidTagValue('{%- if condition -%}')).toBe(true);
+      expect(isLiquidTagValue('{%- assign x = 5 -%}')).toBe(true);
+    });
+
+    it('should return true for multi-line Liquid tag blocks', () => {
+      const multiLine = `{%- if steps.get_source_version.output.severity == "critical" -%}
+critical
+{%- endif -%}`;
+      expect(isLiquidTagValue(multiLine)).toBe(true);
+    });
+
+    it('should return false for non-string values', () => {
+      expect(isLiquidTagValue(null)).toBe(false);
+      expect(isLiquidTagValue(123)).toBe(false);
+      expect(isLiquidTagValue({})).toBe(false);
+    });
+
+    it('should return false for strings without Liquid tags', () => {
+      expect(isLiquidTagValue('regular string')).toBe(false);
+      expect(isLiquidTagValue('{{ variable }}')).toBe(false);
+      expect(isLiquidTagValue('${{ dynamic }}')).toBe(false);
     });
   });
 });

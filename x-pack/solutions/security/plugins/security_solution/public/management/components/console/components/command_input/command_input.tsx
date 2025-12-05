@@ -12,6 +12,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiResizeObserver } from '@el
 import styled from 'styled-components';
 import classNames from 'classnames';
 import type { EuiResizeObserverProps } from '@elastic/eui/src/components/observer/resize_observer/resize_observer';
+import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import { InputDisplay } from './components/input_display';
 import type { ExecuteCommandPayload, ConsoleDataState } from '../console_state/types';
 import { useWithInputShowPopover } from '../../hooks/state_selectors/use_with_input_show_popover';
@@ -87,6 +88,7 @@ export interface CommandInputProps extends CommonProps {
 
 export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ...commonProps }) => {
   useInputHints();
+  const isMounted = useIsMounted();
   const getTestId = useTestIdGenerator(useDataTestSubj());
   const dispatch = useConsoleStateDispatch();
   const commands = useWithCommandList();
@@ -223,12 +225,23 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
 
             // ENTER = Execute command and blank out the input area
             case 'Enter':
-              setCommandToExecute({
-                input: inputText.getFullText(true),
-                enteredCommand: prevEnteredCommand as ConsoleDataState['input']['enteredCommand'],
-                parsedInput: prevParsedInput as ConsoleDataState['input']['parsedInput'],
-              });
-              inputText.clear();
+              // In order to avoid triggering another state update while this one is being processed,
+              // we defer the setting of the command to execute until this state update is done
+              // This essentially avoids the React warning:
+              //    "Cannot update a component (`name here`) while rendering a different component (`name here`)"
+              {
+                const commandToExecutePayload: ExecuteCommandPayload = {
+                  input: inputText.getFullText(true),
+                  enteredCommand: prevEnteredCommand as ConsoleDataState['input']['enteredCommand'],
+                  parsedInput: prevParsedInput as ConsoleDataState['input']['parsedInput'],
+                };
+                Promise.resolve().then(() => {
+                  if (isMounted()) {
+                    setCommandToExecute(commandToExecutePayload);
+                  }
+                });
+                inputText.clear();
+              }
               break;
 
             // ARROW LEFT
@@ -263,7 +276,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
         },
       });
     },
-    [commands, dispatch]
+    [commands, dispatch, isMounted]
   );
 
   // Execute the command if one was ENTER'd.

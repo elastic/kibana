@@ -80,7 +80,7 @@ export async function ensureEis({ log, signal }: { log: ToolingLog; signal: Abor
   log.debug(`Wrote docker-compose file to ${DOCKER_COMPOSE_FILE_PATH}`);
 
   untilContainerReady({
-    containerName: 'gateway-proxy',
+    containerName: 'eis-gateway',
     signal,
     log,
     dockerComposeFilePath: DOCKER_COMPOSE_FILE_PATH,
@@ -92,9 +92,9 @@ export async function ensureEis({ log, signal }: { log: ToolingLog; signal: Abor
       log.write(
         `${chalk.green(
           `✔`
-        )} EIS Gateway started. Start Elasticsearch with "-E xpack.inference.elastic.url=http://localhost:${
+        )} EIS Gateway started. Start Elasticsearch with "-E xpack.inference.elastic.url=https://localhost:${
           eisGatewayConfig.ports[0]
-        }" to connect`
+        } -E xpack.inference.elastic.http.ssl.verification_mode=none" to connect`
       );
 
       log.write('');

@@ -14,24 +14,21 @@ import { Conversation } from './conversation';
 import { ConversationHeader } from './conversation_header/conversation_header';
 import { RoutedConversationsProvider } from '../../context/conversation/routed_conversations_provider';
 import { SendMessageProvider } from '../../context/send_message/send_message_context';
+import { conversationBackgroundStyles } from './conversation.styles';
 
 export const OnechatConversationsView: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
 
   const mainStyles = css`
     border: none;
-  `;
-  const backgroundStyles = css`
-    background-color: ${euiTheme.colors.backgroundBasePlain};
+    ${conversationBackgroundStyles(euiTheme)}
   `;
   const headerHeight = `calc(${euiTheme.size.xl} * 2)`;
   const headerStyles = css`
-    ${backgroundStyles}
     justify-content: center;
-    block-size: ${headerHeight};
+    height: ${headerHeight};
   `;
   const contentStyles = css`
-    ${backgroundStyles}
     width: 100%;
     height: 100%;
     max-block-size: calc(var(--kbn-application--content-height) - ${headerHeight});

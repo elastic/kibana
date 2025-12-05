@@ -24,6 +24,7 @@ import {
   LEGACY_NOTIFICATIONS_ID,
   CLOUD_POSTURE_APP_ID,
   SERVER_APP_ID,
+  CLOUD_DEFEND_APP_ID,
 } from '../../constants';
 import type { SecurityFeatureParams } from '../types';
 import type { BaseKibanaFeatureConfig } from '../../types';
@@ -57,7 +58,7 @@ export const getSecurityV4BaseKibanaFeature = ({
   ),
   order: 1100,
   category: DEFAULT_APP_CATEGORIES.security,
-  app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
+  app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
   catalogue: [APP_ID],
   management: {
     insightsAndAlerting: ['triggersActions'],
@@ -72,7 +73,7 @@ export const getSecurityV4BaseKibanaFeature = ({
   ),
   privileges: {
     all: {
-      app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
+      app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
       catalogue: [APP_ID],
       api: [APP_ID, 'rac', 'lists-all', 'lists-read', 'lists-summary'],
       savedObject: {
@@ -89,7 +90,7 @@ export const getSecurityV4BaseKibanaFeature = ({
       ui: ['show', 'crud'],
     },
     read: {
-      app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
+      app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
       catalogue: [APP_ID],
       api: [APP_ID, 'rac', 'lists-read'],
       savedObject: {

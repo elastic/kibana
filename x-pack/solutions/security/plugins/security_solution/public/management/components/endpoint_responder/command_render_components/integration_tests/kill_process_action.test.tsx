@@ -421,10 +421,10 @@ describe('When using the kill-process action from response actions console', () 
             'Kill/terminate a process' +
             'Usage' +
             'kill-process --processName [--comment]' +
-            'Example' +
-            'kill-process --processName="notepad" --comment="kill malware"' +
             'Required parameters--processName - The process name to kill' +
-            'Optional parameters--comment - A comment to go along with the action'
+            'Optional parameters--comment - A comment to go along with the action' +
+            'Example' +
+            'kill-process --processName="notepad" --comment="kill malware"'
         );
       });
     });
@@ -458,6 +458,9 @@ describe('When using the kill-process action from response actions console', () 
     });
 
     it('should call API with correct payload for SentinelOne kill-process', async () => {
+      apiMocks.responseProvider.killProcess.mockDelay.mockImplementation(
+        () => new Promise((r) => setTimeout(r, 100))
+      );
       await render();
       await enterConsoleCommand(
         renderResult,

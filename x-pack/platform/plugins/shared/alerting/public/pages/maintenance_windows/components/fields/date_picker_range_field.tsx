@@ -13,7 +13,7 @@ import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_
 import { useFormData, useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 
-import { MAINTENANCE_WINDOW_DATE_FORMAT } from '../../../../../common';
+import { MAINTENANCE_WINDOW_DATE_FORMAT } from '@kbn/maintenance-windows-plugin/common';
 import { useUiSetting } from '../../../../utils/kibana_react';
 import { getSelectedForDatePicker as getSelected } from '../../helpers/get_selected_for_date_picker';
 import * as i18n from '../../translations';

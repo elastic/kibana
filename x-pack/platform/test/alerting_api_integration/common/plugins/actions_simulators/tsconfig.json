@@ -5,8 +5,8 @@
     "isolatedModules": true
   },
   "include": [
-    "public/**/**/*",
-    "server/**/**/*",
+    "public/**/*",
+    "server/**/*",
     "common/**/*",
     "../../../../../../../typings/**/*",
   ],
@@ -23,5 +23,6 @@
     "@kbn/expect",
     "@kbn/dev-utils",
     "@kbn/zod",
+    "@kbn/connector-specs",
   ],
 }

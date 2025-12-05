@@ -11,6 +11,47 @@ import type { ESQLCallbacks } from '../../shared/types';
 import { getCallbackMocks } from '../../__tests__/helpers';
 import { validateQuery } from '../validation';
 
+/**
+ * Wraps a promise to ensure it is awaited. If the promise is not awaited
+ * (i.e., `.then()` is not called before the next tick), the test will fail
+ * with an error indicating the missing `await`.
+ */
+const mustBeAwaited = <T>(promise: Promise<T>, fnName: string): Promise<T> => {
+  let wasAwaited = false;
+
+  setImmediate(() => {
+    if (!wasAwaited) {
+      // Force Jest to fail by throwing an error
+      throw new Error(
+        `The promise returned by \`${fnName}()\` was not awaited. ` +
+          `Add \`await\` before the call to ensure proper test execution.`
+      );
+    }
+  });
+
+  // Return a proxy promise that tracks if .then() was called
+  return {
+    then<TResult1 = T, TResult2 = never>(
+      onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | null,
+      onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | null
+    ): Promise<TResult1 | TResult2> {
+      wasAwaited = true;
+      return promise.then(onfulfilled, onrejected);
+    },
+    catch<TResult = never>(
+      onrejected?: ((reason: unknown) => TResult | PromiseLike<TResult>) | null
+    ): Promise<T | TResult> {
+      wasAwaited = true;
+      return promise.catch(onrejected);
+    },
+    finally(onfinally?: (() => void) | null): Promise<T> {
+      wasAwaited = true;
+      return promise.finally(onfinally);
+    },
+    [Symbol.toStringTag]: 'MustBeAwaitedPromise',
+  } as Promise<T>;
+};
+
 /** Validation test API factory, can be called at the start of each unit test. */
 export type Setup = typeof setup;
 
@@ -22,8 +63,8 @@ export type Setup = typeof setup;
 export const setup = async () => {
   const callbacks = getCallbackMocks();
 
-  const validate = async (query: string, cb: ESQLCallbacks = callbacks) => {
-    return await validateQuery(query, cb);
+  const validate = (query: string, cb: ESQLCallbacks = callbacks) => {
+    return mustBeAwaited(validateQuery(query, cb), 'validate');
   };
 
   const assertErrors = (errors: unknown[], expectedErrors: string[], query?: string) => {
@@ -53,17 +94,19 @@ export const setup = async () => {
     }
   };
 
-  const expectErrors = async (
+  const expectErrors = (
     query: string,
     expectedErrors: string[],
     expectedWarnings?: string[],
     cb: ESQLCallbacks = callbacks
   ) => {
-    const { errors, warnings } = await validateQuery(query, cb);
-    assertErrors(errors, expectedErrors, query);
-    if (expectedWarnings) {
-      assertErrors(warnings, expectedWarnings, query);
-    }
+    const promise = validateQuery(query, cb).then(({ errors, warnings }) => {
+      assertErrors(errors, expectedErrors, query);
+      if (expectedWarnings) {
+        assertErrors(warnings, expectedWarnings, query);
+      }
+    });
+    return mustBeAwaited(promise, 'expectErrors');
   };
 
   return {

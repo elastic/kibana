@@ -27,7 +27,7 @@ export const getHunter: () => Omit<Role, 'name'> = () => {
             'event_filters_read',
             'host_isolation_exceptions_read',
             'blocklist_all',
-            'endpoint_exceptions_all',
+            'endpoint_exceptions_read',
 
             'host_isolation_all',
             'process_operations_all',

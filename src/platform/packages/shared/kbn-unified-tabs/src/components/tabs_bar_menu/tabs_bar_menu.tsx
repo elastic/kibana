@@ -80,7 +80,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
     const contextMenuPopoverId = useGeneratedHtmlId();
 
     const menuButtonLabel = i18n.translate('unifiedTabs.tabsBarMenu.tabsBarMenuButton', {
-      defaultMessage: 'Tabs bar menu',
+      defaultMessage: 'Tabs menu',
     });
 
     const closePopover = useCallback(() => {
@@ -103,6 +103,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
         panelPaddingSize="none"
         anchorPosition="downRight"
         hasArrow={false}
+        buffer={0}
         panelProps={{
           css: popoverCss,
           ['data-test-subj']: 'unifiedTabs_tabsBarMenuPanel',

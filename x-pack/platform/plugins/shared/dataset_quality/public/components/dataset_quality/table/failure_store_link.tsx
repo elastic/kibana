@@ -48,7 +48,7 @@ export const FailureStoreHoverLink: React.FC<{
         data-test-subj="failureStoreNotEnabledTooltip"
       >
         <EuiButtonEmpty
-          data-test-subj="datasetQualitySetFailureStoreLink"
+          data-test-subj={`datasetQualitySetFailureStoreLink-${dataStreamStat.rawName}`}
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
           css={{ fontWeight: 'normal' }}

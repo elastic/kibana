@@ -9,18 +9,27 @@ import { isNotFoundError } from '@kbn/es-errors';
 import type { IStorageClient } from '@kbn/storage-adapter';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import { groupBy } from 'lodash';
 import { AttachmentNotFoundError } from '../errors/attachment_not_found_error';
+import { AttachmentLinkNotFoundError } from '../errors/attachment_link_not_found_error';
 import type { AttachmentStorageSettings } from './storage_settings';
 import { ATTACHMENT_ID, ATTACHMENT_TYPE, ATTACHMENT_UUID, STREAM_NAMES } from './storage_settings';
 import {
   ATTACHMENT_TYPES,
   type Attachment,
   type AttachmentBulkOperation,
+  type AttachmentData,
   type AttachmentDocument,
   type AttachmentLink,
   type AttachmentType,
 } from './types';
-import { getAttachmentDocument, getAttachmentLinkUuid, getSoByIds, getSuggestedSo } from './utils';
+import {
+  getAttachmentDocument,
+  getAttachmentLinkUuid,
+  getSoByIds,
+  getSuggestedSo,
+  processRuleResults,
+} from './utils';
 
 /**
  * Client for managing attachments linked to streams.
@@ -42,7 +51,7 @@ export class AttachmentClient {
 
   private getAttachmentEntitiesMap: Record<
     AttachmentType,
-    (ids: string[]) => Promise<Attachment[]>
+    (ids: string[]) => Promise<AttachmentData[]>
   > = {
     dashboard: async (ids) =>
       getSoByIds({ soClient: this.clients.soClient, attachmentType: 'dashboard', ids }),
@@ -52,12 +61,7 @@ export class AttachmentClient {
           ids,
         });
 
-        return rules.map((rule) => ({
-          id: rule.id,
-          title: rule.name,
-          tags: rule.tags,
-          type: 'rule',
-        }));
+        return processRuleResults(rules);
       } catch (error) {
         if (error.message === 'No rules found for bulk get') {
           return [];
@@ -65,11 +69,12 @@ export class AttachmentClient {
         throw error;
       }
     },
+    slo: async (ids) => getSoByIds({ soClient: this.clients.soClient, attachmentType: 'slo', ids }),
   };
 
   private getSuggestedEntitiesMap: Record<
     AttachmentType,
-    (options: { query: string; tags?: string[]; perPage: number }) => Promise<Attachment[]>
+    (options: { query: string; tags?: string[]; perPage: number }) => Promise<AttachmentData[]>
   > = {
     dashboard: async ({ query, tags, perPage }) =>
       getSuggestedSo({
@@ -92,14 +97,86 @@ export class AttachmentClient {
         },
       });
 
-      return data.map((rule) => ({
-        id: rule.id,
-        title: rule.name,
-        tags: rule.tags,
-        type: 'rule',
-      }));
+      return processRuleResults(data);
+    },
+    slo: async ({ query, tags, perPage }) =>
+      getSuggestedSo({
+        soClient: this.clients.soClient,
+        attachmentType: 'slo',
+        query,
+        tags,
+        perPage,
+      }),
+  };
+
+  /**
+   * Map of validation functions for each attachment type.
+   * TypeScript will enforce that all attachment types have a corresponding validation function.
+   */
+  private validateAttachmentExistsInSpaceMap: Record<
+    AttachmentType,
+    (id: string) => Promise<void>
+  > = {
+    dashboard: async (id) => {
+      try {
+        await this.clients.soClient.get('dashboard', id);
+      } catch (error) {
+        throw new AttachmentNotFoundError(
+          `Dashboard with id "${id}" not found in the current space`
+        );
+      }
+    },
+    rule: async (id) => {
+      try {
+        await this.clients.rulesClient.get({ id });
+      } catch (error) {
+        throw new AttachmentNotFoundError(`Rule with id "${id}" not found in the current space`);
+      }
+    },
+    slo: async (id) => {
+      try {
+        await this.clients.soClient.get('slo', id);
+      } catch (error) {
+        throw new AttachmentNotFoundError(`SLO with id "${id}" not found in the current space`);
+      }
     },
   };
+
+  /**
+   * Validates that an attachment exists in the current space.
+   *
+   * @param link - The attachment link to validate
+   * @throws {AttachmentNotFoundError} If the attachment doesn't exist in the current space
+   */
+  private async validateAttachmentExistsInSpace(link: AttachmentLink): Promise<void> {
+    await this.validateAttachmentExistsInSpaceMap[link.type](link.id);
+  }
+
+  /**
+   * Fetches full attachment details for a given array of attachment links.
+   *
+   * Groups attachment links by type and fetches them efficiently using the appropriate
+   * client methods (bulk operations when available).
+   *
+   * @param attachmentLinks - Array of attachment links to fetch
+   * @returns A promise that resolves with an array of full attachment details (without stream names)
+   */
+  private async fetchAttachments(attachmentLinks: AttachmentLink[]): Promise<AttachmentData[]> {
+    // Group attachment links by type using lodash groupBy
+    const attachmentLinksByType = groupBy(attachmentLinks, 'type');
+
+    // Fetch attachments for each type and flatten results
+    const attachments: AttachmentData[] = (
+      await Promise.all(
+        Object.entries(attachmentLinksByType).map(async ([type, links]) => {
+          const ids = links.map((link) => link.id);
+          return this.getAttachmentEntitiesMap[type as AttachmentType](ids);
+        })
+      )
+    ).flat();
+
+    return attachments;
+  }
 
   /**
    * Links an attachment to a stream.
@@ -110,6 +187,7 @@ export class AttachmentClient {
    * @param streamName - The name of the stream to link the attachment to
    * @param link - The attachment link containing the attachment id and type
    * @returns A promise that resolves when the linking operation is complete
+   * @throws {AttachmentNotFoundError} If the attachment doesn't exist in the current space
    *
    * @example
    * ```typescript
@@ -120,6 +198,9 @@ export class AttachmentClient {
    * ```
    */
   async linkAttachment(streamName: string, link: AttachmentLink): Promise<void> {
+    // Validate that the attachment exists in the current space
+    await this.validateAttachmentExistsInSpace(link);
+
     const uuid = getAttachmentLinkUuid(link);
 
     let streamNames: string[];
@@ -164,11 +245,12 @@ export class AttachmentClient {
    *
    * Removes the stream name from the attachment's link.
    * If this is the last stream associated with the link, deletes the link entirely.
+   * Does not validate that the attachment itself exists in the current space.
    *
    * @param streamName - The name of the stream to unlink the attachment from
-   * @param attachment - The attachment link containing the attachment id and type
+   * @param attachmentLink - The attachment link containing the attachment id and type
    * @returns A promise that resolves when the unlinking operation is complete
-   * @throws {AttachmentNotFoundError} If the attachment doesn't exist
+   * @throws {AttachmentLinkNotFoundError} If the attachment link doesn't exist
    *
    * @example
    * ```typescript
@@ -178,26 +260,26 @@ export class AttachmentClient {
    * });
    * ```
    */
-  async unlinkAttachment(streamName: string, attachment: AttachmentLink): Promise<void> {
-    const uuid = getAttachmentLinkUuid(attachment);
+  async unlinkAttachment(streamName: string, attachmentLink: AttachmentLink): Promise<void> {
+    const uuid = getAttachmentLinkUuid(attachmentLink);
 
     let existingAttachment: AttachmentDocument;
 
     try {
-      // Try to fetch the existing attachment
+      // Try to fetch the existing attachment link
       const response = await this.clients.storageClient.get({ id: uuid });
 
       if (!response._source) {
-        throw new AttachmentNotFoundError(
-          `Attachment not found: ${attachment.type}:${attachment.id}`
+        throw new AttachmentLinkNotFoundError(
+          `Attachment link not found: ${attachmentLink.type}:${attachmentLink.id}`
         );
       }
 
       existingAttachment = response._source;
     } catch (error) {
       if (isNotFoundError(error)) {
-        throw new AttachmentNotFoundError(
-          `Attachment not found: ${attachment.type}:${attachment.id}`
+        throw new AttachmentLinkNotFoundError(
+          `Attachment link not found: ${attachmentLink.type}:${attachmentLink.id}`
         );
       }
       throw error;
@@ -245,48 +327,73 @@ export class AttachmentClient {
    * It handles both linking (index) and unlinking (delete) operations, managing stream name
    * associations and automatic cleanup when attachments have no remaining stream associations.
    *
+   * All attachments being linked must exist in the current space and all storage operations must succeed,
+   * otherwise the entire operation fails atomically. Unlink operations do not validate that the attachment
+   * exists in the current space.
+   *
    * @param streamName - The name of the stream for the bulk operations
    * @param operations - Array of bulk operations to perform (index or delete)
-   * @returns A promise that resolves with the bulk operation result
-   * @returns result.errors - Whether any errors occurred during the bulk operation
-   * @returns result.items - Optional array of operation results (if errors occurred)
+   * @returns A promise that resolves when all operations succeed
+   * @throws {AttachmentNotFoundError} If any attachment being linked doesn't exist in the current space
+   * @throws {Error} If any storage operation fails
    *
    * @example
    * ```typescript
-   * const result = await attachmentClient.bulk('my-stream', [
+   * await attachmentClient.bulk('my-stream', [
    *   { index: { attachment: { id: 'dashboard-1', type: 'dashboard' } } },
    *   { delete: { attachment: { id: 'rule-1', type: 'rule' } } }
    * ]);
    * ```
    */
-  async bulk(streamName: string, operations: AttachmentBulkOperation[]) {
+  async bulk(streamName: string, operations: AttachmentBulkOperation[]): Promise<void> {
     if (operations.length === 0) {
-      return { errors: false };
+      return;
     }
 
     const attachmentMap = new Map<
       string,
       {
-        attachment: AttachmentLink;
+        attachmentLink: AttachmentLink;
         operation: 'link' | 'unlink';
         uuid: string;
       }
     >();
+    const attachmentLinksToValidate: AttachmentLink[] = [];
 
     operations.forEach((operation) => {
-      const attachment =
+      const attachmentLink =
         'index' in operation ? operation.index.attachment : operation.delete.attachment;
-      const uuid = getAttachmentLinkUuid(attachment);
+      const uuid = getAttachmentLinkUuid(attachmentLink);
+      const isLinkOperation = 'index' in operation;
+
+      // Only add to validation array if this is a link operation and a new attachment (no duplicates)
+      if (isLinkOperation && !attachmentMap.has(uuid)) {
+        attachmentLinksToValidate.push(attachmentLink);
+      }
+
       attachmentMap.set(uuid, {
-        attachment,
-        operation: 'index' in operation ? 'link' : 'unlink',
+        attachmentLink,
+        operation: isLinkOperation ? 'link' : 'unlink',
         uuid,
       });
     });
 
+    // Step 1: Validate all attachments exist in the current space
+
+    // Fetch attachments that exist in the current space
+    const fetchedAttachments = await this.fetchAttachments(attachmentLinksToValidate);
+
+    // Check if all attachments were found
+    if (fetchedAttachments.length !== attachmentLinksToValidate.length) {
+      const missingCount = attachmentLinksToValidate.length - fetchedAttachments.length;
+      throw new AttachmentNotFoundError(
+        `${missingCount} attachment${missingCount > 1 ? 's' : ''} not found in the current space`
+      );
+    }
+
+    // Step 2: Get existing attachments from storage
     const attachmentUuids = Array.from(attachmentMap.keys());
 
-    // Step 2: Bulk get all attachments from storage
     const existingAttachmentsResponse = await this.clients.storageClient.search({
       size: attachmentUuids.length,
       track_total_hits: false,
@@ -316,7 +423,7 @@ export class AttachmentClient {
       { index: { document: AttachmentDocument; _id: string } } | { delete: { _id: string } }
     > = [];
 
-    attachmentMap.forEach(({ attachment, operation, uuid }) => {
+    attachmentMap.forEach(({ attachmentLink, operation, uuid }) => {
       if (operation === 'link') {
         // For index operations: add stream name to stream.names array
         const existingAttachment = existingAttachmentsByUuid.get(uuid);
@@ -337,8 +444,8 @@ export class AttachmentClient {
           index: {
             _id: uuid,
             document: getAttachmentDocument({
-              id: attachment.id,
-              type: attachment.type,
+              id: attachmentLink.id,
+              type: attachmentLink.type,
               uuid,
               streamNames,
             }),
@@ -381,14 +488,14 @@ export class AttachmentClient {
     });
 
     if (bulkOperations.length === 0) {
-      return { errors: false };
+      return;
     }
 
-    const bulkResponse = await this.clients.storageClient.bulk({
+    // Execute bulk operation - will throw on any failure
+    await this.clients.storageClient.bulk({
       operations: bulkOperations,
+      throwOnFail: true,
     });
-
-    return { errors: bulkResponse.errors, items: bulkResponse.items };
   }
 
   /**
@@ -425,33 +532,23 @@ export class AttachmentClient {
       },
     });
 
-    const attachmentDocuments: AttachmentDocument[] = attachmentsResponse.hits.hits.map(
-      ({ _source }) => _source
-    );
+    // Extract attachment links and stream names in a single pass
+    const streamNamesById = new Map<string, string[]>();
+    const attachmentLinks: AttachmentLink[] = attachmentsResponse.hits.hits.map(({ _source }) => {
+      streamNamesById.set(_source[ATTACHMENT_ID], _source[STREAM_NAMES]);
+      return {
+        id: _source[ATTACHMENT_ID],
+        type: _source[ATTACHMENT_TYPE],
+      };
+    });
 
-    const attachmentIdsByType: Record<AttachmentType, string[]> = {
-      dashboard: [],
-      rule: [],
-    };
+    const attachments = await this.fetchAttachments(attachmentLinks);
 
-    for (const attachment of attachmentDocuments) {
-      attachmentIdsByType[attachment[ATTACHMENT_TYPE]].push(attachment[ATTACHMENT_ID]);
-    }
-
-    const attachments: Attachment[] = (
-      await Promise.all(
-        (attachmentType ? [attachmentType] : ATTACHMENT_TYPES).map(async (type) => {
-          const ids = attachmentIdsByType[type];
-          if (ids.length === 0) {
-            return [];
-          }
-
-          return this.getAttachmentEntitiesMap[type](ids);
-        })
-      )
-    ).flat();
-
-    return attachments;
+    // Enrich attachments with stream names
+    return attachments.map((attachment) => ({
+      ...attachment,
+      streamNames: streamNamesById.get(attachment.id) ?? [],
+    }));
   }
 
   /**
@@ -464,9 +561,9 @@ export class AttachmentClient {
    * @param options.query - Search query string to match against attachment titles/names
    * @param options.attachmentTypes - Optional array of attachment types to search (searches all if not provided)
    * @param options.tags - Optional array of tags to filter attachments by
-   * @returns A promise that resolves with search results
-   * @returns result.attachments - Array of matching attachments (up to 100)
-   * @returns result.hasMore - Whether there are more results available beyond the returned set
+   * @returns A promise that resolves with an array of matching attachments
+   *
+   * @note Until pagination is implemented, this returns up to 1000 attachments per type.
    *
    * @example
    * ```typescript
@@ -485,39 +582,65 @@ export class AttachmentClient {
     query: string;
     attachmentTypes?: AttachmentType[];
     tags?: string[];
-  }): Promise<{ hasMore: boolean; attachments: Attachment[] }> {
-    const perPage = 101;
+  }): Promise<Attachment[]> {
+    // TODO: Implement pagination
+    const perPage = 1000;
 
-    const searchAll = !attachmentTypes;
+    // Search all types if none specified, otherwise only search the requested types
+    const typesToSearch = attachmentTypes || [...ATTACHMENT_TYPES];
 
-    const searchDashboards = searchAll || attachmentTypes.includes('dashboard');
-    const searchRules = searchAll || attachmentTypes.includes('rule');
-    const suggestionsPromises: Promise<Attachment[]>[] = [];
-    if (searchDashboards) {
-      suggestionsPromises.push(
-        this.getSuggestedEntitiesMap.dashboard({
-          query,
-          tags,
-          perPage,
-        })
-      );
+    const suggestionsPromises = typesToSearch.map((type) =>
+      this.getSuggestedEntitiesMap[type]({
+        query,
+        tags,
+        perPage,
+      })
+    );
+
+    const results = await Promise.all(suggestionsPromises);
+    const attachments = results.flat();
+
+    // Get stream names for all suggested attachments
+    const streamNamesById = await this.getStreamNamesForAttachments(attachments.map((a) => a.id));
+
+    // Enrich attachments with stream names (empty array if not linked to any stream)
+    return attachments.map((attachment) => ({
+      ...attachment,
+      streamNames: streamNamesById.get(attachment.id) ?? [],
+    }));
+  }
+
+  /**
+   * Retrieves the stream names for a list of attachment IDs.
+   *
+   * Queries the attachments storage to find which streams each attachment is linked to.
+   *
+   * @param attachmentIds - Array of attachment IDs to look up
+   * @returns A Map where keys are attachment IDs and values are arrays of stream names
+   */
+  private async getStreamNamesForAttachments(
+    attachmentIds: string[]
+  ): Promise<Map<string, string[]>> {
+    if (attachmentIds.length === 0) {
+      return new Map();
     }
 
-    if (searchRules) {
-      suggestionsPromises.push(
-        this.getSuggestedEntitiesMap.rule({
-          query,
-          tags,
-          perPage,
-        })
-      );
-    }
-    const suggestions = (await Promise.all(suggestionsPromises)).flat();
+    const response = await this.clients.storageClient.search({
+      size: 10_000,
+      track_total_hits: false,
+      query: {
+        bool: {
+          filter: [{ terms: { [ATTACHMENT_ID]: attachmentIds } }],
+        },
+      },
+    });
 
-    return {
-      attachments: suggestions,
-      hasMore: suggestions.length > perPage - 1,
-    };
+    const streamNamesById = new Map<string, string[]>();
+    for (const hit of response.hits.hits) {
+      streamNamesById.set(hit._source[ATTACHMENT_ID], hit._source[STREAM_NAMES]);
+    }
+
+    return streamNamesById;
   }
 
   /**
@@ -575,8 +698,10 @@ export class AttachmentClient {
     const attachmentLinksDeleted = existingAttachmentLinks.filter((link) => !nextIds.has(link.id));
 
     const operations: AttachmentBulkOperation[] = [
-      ...attachmentLinksDeleted.map((attachment) => ({ delete: { attachment } })),
-      ...links.map((attachment) => ({ index: { attachment } })),
+      ...attachmentLinksDeleted.map((attachmentLink) => ({
+        delete: { attachment: attachmentLink },
+      })),
+      ...links.map((attachmentLink) => ({ index: { attachment: attachmentLink } })),
     ];
 
     if (operations.length) {

@@ -35,10 +35,12 @@ import {
   FIELD_SELECTOR_TOGGLE_BUTTON,
   FILTERS_GLOBAL_CONTAINER,
   FLYOUT_JSON,
+  FLYOUT_JSON_TAB,
   FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM,
   FLYOUT_OVERVIEW_HIGHLIGHTED_FIELDS_TABLE,
+  FLYOUT_OVERVIEW_TAB,
   FLYOUT_TABLE,
-  FLYOUT_TABS,
+  FLYOUT_TABLE_TAB,
   FLYOUT_TITLE,
   INDICATOR_TYPE_CELL,
   INDICATORS_TABLE,
@@ -117,8 +119,9 @@ describe('Single indicator', { tags: ['@ess'] }, () => {
       openFlyout();
 
       cy.get(FLYOUT_TITLE).should('contain', 'Indicator details');
-      cy.get(FLYOUT_TABS).should('exist').children().should('have.length', 3);
-      cy.get(FLYOUT_TABS).should('exist');
+      cy.get(FLYOUT_OVERVIEW_TAB).should('exist');
+      cy.get(FLYOUT_TABLE_TAB).should('exist');
+      cy.get(FLYOUT_JSON_TAB).should('exist');
 
       closeFlyout();
 

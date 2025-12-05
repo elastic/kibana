@@ -1,7 +1,7 @@
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "__jest__/**/*",
@@ -9,7 +9,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "../../../../../typings/**/*",
+    "../../../../../typings/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -41,8 +41,7 @@
     "@kbn/shared-ux-table-persist",
     "@kbn/index-lifecycle-management-common-shared",
     "@kbn/licensing-types",
+    "@kbn/test-eui-helpers"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

@@ -50,8 +50,8 @@ viewer:
         - feature_siemV4.endpoint_list_read
         - feature_siemV4.endpoint_exceptions_read
         - feature_securitySolutionCasesV2.read
-        - feature_securitySolutionAssistant.all
-        - feature_securitySolutionAttackDiscovery.all
+        - feature_securitySolutionAssistant.minimal_all
+        - feature_securitySolutionAttackDiscovery.minimal_all
         - feature_securitySolutionTimeline.read
         - feature_securitySolutionNotes.read
         - feature_actions.read
@@ -63,6 +63,7 @@ viewer:
         - feature_visualize_v2.all
         - feature_savedQueryManagement.all
         - feature_dataQuality.all
+        - feature_agentBuilder.read
       resources: '*'
   run_as: []
 
@@ -159,6 +160,7 @@ editor:
         - feature_maps_v2.all
         - feature_visualize_v2.all
         - feature_savedQueryManagement.all
+        - feature_agentBuilder.all
       resources: '*'
   run_as: []
 
@@ -218,6 +220,7 @@ t1_analyst:
         - feature_maps_v2.all
         - feature_visualize_v2.all
         - feature_savedQueryManagement.all
+        - feature_agentBuilder.all
       resources: '*'
 
 t2_analyst:
@@ -280,6 +283,7 @@ t2_analyst:
         - feature_maps_v2.all
         - feature_visualize_v2.all
         - feature_savedQueryManagement.all
+        - feature_agentBuilder.all
       resources: '*'
 
 t3_analyst:
@@ -362,6 +366,7 @@ t3_analyst:
         - feature_maps_v2.all
         - feature_visualize_v2.all
         - feature_savedQueryManagement.all
+        - feature_agentBuilder.all
       resources: '*'
 
 threat_intelligence_analyst:
@@ -432,6 +437,7 @@ threat_intelligence_analyst:
         - feature_maps_v2.all
         - feature_visualize_v2.all
         - feature_savedQueryManagement.all
+        - feature_agentBuilder.all
       resources: '*'
 
 rule_author:
@@ -513,6 +519,7 @@ rule_author:
         - feature_maps_v2.all
         - feature_visualize_v2.all
         - feature_savedQueryManagement.all
+        - feature_agentBuilder.all
       resources: '*'
 
 soc_manager:
@@ -610,6 +617,7 @@ soc_manager:
         - feature_maps_v2.all
         - feature_visualize_v2.all
         - feature_savedQueryManagement.all
+        - feature_agentBuilder.all
       resources: '*'
 
 detections_admin:
@@ -684,6 +692,7 @@ detections_admin:
         - feature_maps_v2.all
         - feature_visualize_v2.all
         - feature_savedQueryManagement.all
+        - feature_agentBuilder.all
       resources: '*'
 
 platform_engineer:
@@ -764,6 +773,7 @@ platform_engineer:
         - feature_maps_v2.all
         - feature_visualize_v2.all
         - feature_savedQueryManagement.all
+        - feature_agentBuilder.all
       resources: '*'
 
 endpoint_operations_analyst:
@@ -849,6 +859,7 @@ endpoint_operations_analyst:
         - feature_maps_v2.all
         - feature_visualize_v2.all
         - feature_savedQueryManagement.all
+        - feature_agentBuilder.all
       resources: '*'
 
 endpoint_policy_manager:
@@ -936,6 +947,7 @@ endpoint_policy_manager:
         - feature_maps_v2.all
         - feature_visualize_v2.all
         - feature_savedQueryManagement.all
+        - feature_agentBuilder.all
       resources: '*'
 
 # admin role defined in elasticsearch controller

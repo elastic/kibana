@@ -38,6 +38,7 @@ import { useUpdateWorkflow } from '../../../entities/workflows/model/use_update_
 import {
   selectHasChanges,
   selectIsExecutionsTab,
+  selectIsSavingYaml,
   selectIsYamlSyntaxValid,
   selectWorkflow,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
@@ -116,6 +117,7 @@ export const WorkflowDetailHeader = React.memo(
     );
 
     const saveYaml = useSaveYaml();
+    const isSaving = useSelector(selectIsSavingYaml);
     const handleSaveWorkflow = useCallback(() => {
       saveYaml();
     }, [saveYaml]);
@@ -299,7 +301,8 @@ export const WorkflowDetailHeader = React.memo(
                     color="primary"
                     size="s"
                     onClick={handleSaveWorkflow}
-                    disabled={isExecutionsTab || !canSaveWorkflow || isLoading}
+                    disabled={isExecutionsTab || !canSaveWorkflow || isLoading || isSaving}
+                    isLoading={isSaving}
                   >
                     <FormattedMessage
                       id="keepWorkflows.buttonText"

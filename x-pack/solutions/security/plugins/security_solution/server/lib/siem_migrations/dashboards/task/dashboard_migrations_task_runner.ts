@@ -60,6 +60,7 @@ export class DashboardMigrationTaskRunner extends SiemMigrationTaskRunner<
 
     const model = await this.actionsClientChat.createModel({
       connectorId,
+      migrationType: 'dashboards',
       migrationId: this.migrationId,
       abortController: this.abortController,
     });
