@@ -127,7 +127,7 @@ export const testConfigs = {
 
   forModule(name: string, type?: ScoutTestableModule['type']): ScoutTestConfig[] {
     const configs = this.all.filter((config) => config.module.name === name);
-    return type === undefined ? configs : configs.filter((config) => config.module.type === type);
+    return type ? configs.filter((config) => config.module.type === type) : configs;
   },
 
   forPlugin(pluginName: string): ScoutTestConfig[] {
