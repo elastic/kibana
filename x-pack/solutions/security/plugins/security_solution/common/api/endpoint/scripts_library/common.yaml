@@ -1,0 +1,78 @@
+openapi: 3.0.0
+info:
+  title: Common Endpoint Scripts Library schemas
+  version: '2023-10-31'
+paths: {}
+components:
+  schemas:
+    EndpointScriptPlatform:
+      type: string
+      enum:
+        - linux
+        - macos
+        - windows
+    EndpointScript:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426655440000
+        name:
+          type: string
+          example: Collect host data
+        platform:
+          type: array
+          items:
+            $ref: '#/components/schemas/EndpointScriptPlatform'
+        requiresInput:
+          type: boolean
+        downloadUri:
+          type: string
+          description: URI to download the script file. Note that this is the relative path and does not include the space (if applicable)
+          example: /api/endpoint/action/scripts_library/123e4567-e89b-12d3-a456-426655440000/download
+        description:
+          type: string
+          description: Description of the script and its purpose/functionality
+          example: Collects host data for investigation
+        instructions:
+          type: string
+          description: Instructions for using the script, including details around its supported input arguments
+        example:
+          type: string
+        executable:
+          type: string
+          description: >
+            The relative path to the file included in the archive that should be executed once its contents
+            are extracted. Applicable only for scripts uploaded as an archive (.zip file for example).
+        createdBy:
+          type: string
+          example: elastic
+        createdAt:
+          type: string
+          format: date-time
+        updatedBy:
+          type: string
+          example: admin
+        updatedAt:
+          type: string
+          format: date-time
+        version:
+          type: string
+
+
+    ScriptsApiResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/EndpointScript'
+      example:
+        data:
+          id: 123e4567-e89b-12d3-a456-426655440000
+          name: Collect host data
+          platform: [ linux, macos ]
+          requiresInput: false
+          downloadUri: /api/endpoint/action/scripts_library/123e4567-e89b-12d3-a456-426655440000/download
+          description: Collects host data for investigation
+          instructions: Collects host data for investigation
+          example: ./collect_host_data.sh --help

@@ -23,8 +23,8 @@ const IS_NOT_REGEX = /\bis\s+not\b/i;
 
 // Regex to extract field name before operator: match[1] = fieldName
 // Matches with or without opening parenthesis
-const FIELD_BEFORE_IN_REGEX = /(\w+)\s+(?:not\s+)?in\s*\(?\s*$/i;
-const FIELD_BEFORE_LIKE_REGEX = /(\w+)\s+(?:not\s+)?(?:r)?like\s*\(?\s*$/i;
+const FIELD_BEFORE_IN_REGEX = /([\w.]+)\s+(?:not\s+)?in\s*\(?\s*$/i;
+const FIELD_BEFORE_LIKE_REGEX = /([\w.]+)\s+(?:not\s+)?(?:r)?like\s*\(?\s*$/i;
 
 /**
  * Creates a synthetic infix operator node (IN, LIKE, RLIKE, etc.).

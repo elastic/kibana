@@ -15,7 +15,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { PropsWithChildren } from 'react';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useSendMessage } from '../../../context/send_message/send_message_context';
 import { useIsSendingMessage } from '../../../hooks/use_is_sending_message';
 import { MessageEditor, useMessageEditor } from './message_editor';
@@ -24,6 +24,8 @@ import { useOnechatAgents } from '../../../hooks/agents/use_agents';
 import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
 import { ConversationInputActions } from './conversation_input_actions';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
+import { useConversationContext } from '../../../context/conversation/conversation_context';
+import { AttachmentPillsRow } from './attachment_pills_row';
 
 const INPUT_MIN_HEIGHT = '150px';
 // Non-standard EUI border radius
@@ -122,11 +124,13 @@ const inputContainerStyles = css`
 
 export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }) => {
   const isSendingMessage = useIsSendingMessage();
-  const { sendMessage, pendingMessage } = useSendMessage();
+  const { sendMessage, pendingMessage, error } = useSendMessage();
   const { isFetched } = useOnechatAgents();
   const agentId = useAgentId();
   const conversationId = useConversationId();
   const messageEditor = useMessageEditor();
+  const { attachments, initialMessage, autoSendInitialMessage, resetInitialMessage } =
+    useConversationContext();
 
   const validateAgentId = useValidateAgentId();
   const isAgentIdValid = validateAgentId(agentId);
@@ -135,6 +139,35 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
   const isSubmitDisabled = messageEditor.isEmpty || isSendingMessage || !isAgentIdValid;
 
   const placeholder = isInputDisabled ? disabledPlaceholder(agentId) : enabledPlaceholder;
+
+  // Hide attachments if there's an error from current round or if message has been just sent
+  const shouldHideAttachments = Boolean(error) || isSendingMessage;
+
+  const visibleAttachments = useMemo(() => {
+    if (!attachments || shouldHideAttachments) return [];
+    return attachments
+      .filter((attachment) => !attachment.hidden)
+      .map((attachment, idx) => ({
+        ...attachment,
+        id: attachment.id ?? `attachment-${idx}`,
+      }));
+  }, [attachments, shouldHideAttachments]);
+
+  const isNewConversation = !conversationId;
+  // Set initial message in input when {autoSendInitialMessage} is false and {initialMessage} is provided
+  useEffect(() => {
+    if (initialMessage && !autoSendInitialMessage && isNewConversation) {
+      messageEditor.setContent(initialMessage);
+      messageEditor.focus();
+      resetInitialMessage?.(); // Reset the initial message to avoid sending it again
+    }
+  }, [
+    initialMessage,
+    autoSendInitialMessage,
+    isNewConversation,
+    messageEditor,
+    resetInitialMessage,
+  ]);
 
   // Auto-focus when conversation changes
   useEffect(() => {
@@ -159,6 +192,11 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
 
   return (
     <InputContainer isDisabled={isInputDisabled}>
+      {visibleAttachments.length > 0 && (
+        <EuiFlexItem grow={false}>
+          <AttachmentPillsRow attachments={visibleAttachments} removable />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem css={inputContainerStyles}>
         <MessageEditor
           messageEditor={messageEditor}

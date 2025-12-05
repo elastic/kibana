@@ -97,7 +97,7 @@ dependsOn:
   - '@kbn/shared-ux-utility'
   - '@kbn/usage-collection-plugin'
   - '@kbn/core-notifications-browser'
-  - '@kbn/deeplinks-agent-builder'
+  - '@kbn/ui-theme'
 tags:
   - plugin
   - prod

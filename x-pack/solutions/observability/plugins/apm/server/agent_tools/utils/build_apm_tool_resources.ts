@@ -22,6 +22,7 @@ export interface ApmToolResources {
   randomSampler: Awaited<ReturnType<typeof getRandomSampler>>;
   mlClient: Awaited<ReturnType<typeof getMlClient>>;
   apmAlertsClient: ApmAlertsClient;
+  esClient: IScopedClusterClient;
 }
 
 export async function buildApmToolResources({
@@ -107,5 +108,5 @@ export async function buildApmToolResources({
     apmAlertsClientPromise,
   ]);
 
-  return { apmEventClient, randomSampler, mlClient, apmAlertsClient };
+  return { apmEventClient, randomSampler, mlClient, apmAlertsClient, esClient: esScoped };
 }

@@ -6,6 +6,7 @@
  */
 import { Alert as LegacyAlert } from '../../alert/alert';
 import { buildOngoingAlert } from './build_ongoing_alert';
+import type { AlertRuleData } from '../types';
 import {
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
@@ -16,6 +17,7 @@ import {
   ALERT_FLAPPING_HISTORY,
   ALERT_INSTANCE_ID,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_MUTED,
   ALERT_START,
   ALERT_STATUS,
   ALERT_UUID,
@@ -67,6 +69,9 @@ for (const flattened of [true, false]) {
         [ALERT_FLAPPING_HISTORY]: [],
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        // @ts-ignore - ALERT_MUTED appears both here and in the flattened conditional below
+        // The duplicate is intentional - the second occurrence overwrites the first for flattened alerts.
+        [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
         [ALERT_DURATION]: 36000,
@@ -82,6 +87,7 @@ for (const flattened of [true, false]) {
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_START]: '2023-03-28T12:27:28.159Z',
               [ALERT_UUID]: 'abcdefg',
+              [ALERT_MUTED]: false,
             }
           : {
               event: {
@@ -132,6 +138,8 @@ for (const flattened of [true, false]) {
         [ALERT_FLAPPING_HISTORY]: [],
         [ALERT_SEVERITY_IMPROVING]: false,
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        // @ts-ignore
+        [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
         [ALERT_STATUS]: 'active',
@@ -147,6 +155,7 @@ for (const flattened of [true, false]) {
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_START]: '2023-03-28T12:27:28.159Z',
               [ALERT_UUID]: 'abcdefg',
+              [ALERT_MUTED]: false,
             }
           : {
               event: {
@@ -178,6 +187,7 @@ for (const flattened of [true, false]) {
             ...existingAlert,
             [ALERT_FLAPPING_HISTORY]: [true, false, false, false, true, true],
             [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
+            [ALERT_MUTED]: false,
           }
         : {
             ...existingAlert,
@@ -213,6 +223,8 @@ for (const flattened of [true, false]) {
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [false, false, true, true],
         [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-xyz'],
+        // @ts-ignore
+        [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
         [ALERT_STATUS]: 'active',
@@ -228,6 +240,7 @@ for (const flattened of [true, false]) {
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_START]: '2023-03-28T12:27:28.159Z',
               [ALERT_UUID]: 'abcdefg',
+              [ALERT_MUTED]: false,
             }
           : {
               event: {
@@ -259,6 +272,7 @@ for (const flattened of [true, false]) {
             ...existingAlert,
             [ALERT_FLAPPING_HISTORY]: [true, false, false, false, true, true],
             [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
+            [ALERT_MUTED]: false,
           }
         : {
             ...existingAlert,
@@ -295,6 +309,8 @@ for (const flattened of [true, false]) {
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [false, false, true, true],
         [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-xyz'],
+        // @ts-ignore
+        [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
         [ALERT_STATUS]: 'active',
@@ -310,6 +326,7 @@ for (const flattened of [true, false]) {
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_START]: '2023-03-28T12:27:28.159Z',
               [ALERT_UUID]: 'abcdefg',
+              [ALERT_MUTED]: false,
             }
           : {
               event: {
@@ -372,6 +389,8 @@ for (const flattened of [true, false]) {
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [],
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        // @ts-ignore
+        [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
         [ALERT_STATUS]: 'active',
@@ -388,6 +407,7 @@ for (const flattened of [true, false]) {
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_START]: '2023-03-28T12:27:28.159Z',
               [ALERT_UUID]: 'abcdefg',
+              [ALERT_MUTED]: false,
             }
           : {
               event: {
@@ -468,6 +488,8 @@ for (const flattened of [true, false]) {
         [ALERT_FLAPPING_HISTORY]: [],
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        // @ts-ignore
+        [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
         [ALERT_STATUS]: 'active',
@@ -483,6 +505,7 @@ for (const flattened of [true, false]) {
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_START]: '2023-03-28T12:27:28.159Z',
               [ALERT_UUID]: 'abcdefg',
+              [ALERT_MUTED]: false,
             }
           : {
               event: {
@@ -529,6 +552,8 @@ for (const flattened of [true, false]) {
         [ALERT_FLAPPING_HISTORY]: [],
         [ALERT_SEVERITY_IMPROVING]: false,
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        // @ts-ignore
+        [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
         [ALERT_DURATION]: 36000,
@@ -544,6 +569,7 @@ for (const flattened of [true, false]) {
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_START]: '2023-03-28T12:27:28.159Z',
               [ALERT_UUID]: 'abcdefg',
+              [ALERT_MUTED]: false,
             }
           : {
               event: {
@@ -630,6 +656,8 @@ for (const flattened of [true, false]) {
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [],
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        // @ts-ignore
+        [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
         [ALERT_STATUS]: 'active',
@@ -645,6 +673,7 @@ for (const flattened of [true, false]) {
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_START]: '2023-03-28T12:27:28.159Z',
               [ALERT_UUID]: 'abcdefg',
+              [ALERT_MUTED]: false,
             }
           : {
               event: {
@@ -736,6 +765,8 @@ for (const flattened of [true, false]) {
         [ALERT_FLAPPING_HISTORY]: [],
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        // @ts-ignore
+        [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
         [ALERT_STATUS]: 'active',
@@ -751,6 +782,7 @@ for (const flattened of [true, false]) {
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_START]: '2023-03-28T12:27:28.159Z',
               [ALERT_UUID]: 'abcdefg',
+              [ALERT_MUTED]: false,
             }
           : {
               event: {
@@ -822,6 +854,8 @@ for (const flattened of [true, false]) {
         [ALERT_FLAPPING_HISTORY]: [],
         [ALERT_SEVERITY_IMPROVING]: false,
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        // @ts-ignore
+        [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
         [ALERT_STATUS]: 'active',
@@ -838,6 +872,7 @@ for (const flattened of [true, false]) {
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_START]: '2023-03-28T12:27:28.159Z',
               [ALERT_UUID]: 'abcdefg',
+              [ALERT_MUTED]: false,
             }
           : {
               event: {
@@ -925,6 +960,8 @@ for (const flattened of [true, false]) {
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [],
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        // @ts-ignore
+        [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
         [ALERT_STATUS]: 'active',
@@ -940,6 +977,7 @@ for (const flattened of [true, false]) {
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_START]: '2023-03-28T12:27:28.159Z',
               [ALERT_UUID]: 'abcdefg',
+              [ALERT_MUTED]: false,
             }
           : {
               event: {
@@ -953,6 +991,95 @@ for (const flattened of [true, false]) {
                 },
               },
             }),
+      });
+    });
+
+    describe('ALERT_MUTED field', () => {
+      const ruleData: AlertRuleData = {
+        consumer: 'bar',
+        executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+        id: '1',
+        name: 'rule-name',
+        parameters: { bar: true },
+        revision: 0,
+        spaceId: 'default',
+        tags: ['rule-', '-tags'],
+        alertDelay: 0,
+        muteAll: false,
+        mutedInstanceIds: [],
+      };
+
+      test('should set ALERT_MUTED to false when alert is not muted', () => {
+        const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
+        legacyAlert.scheduleActions('default');
+
+        const result = buildOngoingAlert<{}, {}, {}, 'default', 'recovered'>({
+          alert: existingFlattenedNewAlert,
+          legacyAlert,
+          rule: alertRule,
+          ruleData,
+          isImproving: null,
+          timestamp: '2023-03-28T12:27:28.159Z',
+          kibanaVersion: '8.9.0',
+        });
+
+        expect((result as Record<string, unknown>)[ALERT_MUTED]).toBe(false);
+      });
+
+      test('should set ALERT_MUTED to true when muteAll is true', () => {
+        const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
+        legacyAlert.scheduleActions('default');
+
+        const result = buildOngoingAlert<{}, {}, {}, 'default', 'recovered'>({
+          alert: existingFlattenedNewAlert,
+          legacyAlert,
+          rule: alertRule,
+          ruleData: {
+            ...ruleData,
+            muteAll: true,
+          },
+          isImproving: null,
+          timestamp: '2023-03-28T12:27:28.159Z',
+          kibanaVersion: '8.9.0',
+        });
+
+        expect((result as Record<string, unknown>)[ALERT_MUTED]).toBe(true);
+      });
+
+      test('should set ALERT_MUTED to true when alert instance ID is in mutedInstanceIds', () => {
+        const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
+        legacyAlert.scheduleActions('default');
+
+        const result = buildOngoingAlert<{}, {}, {}, 'default', 'recovered'>({
+          alert: existingFlattenedNewAlert,
+          legacyAlert,
+          rule: alertRule,
+          ruleData: {
+            ...ruleData,
+            mutedInstanceIds: ['alert-A', 'alert-B'],
+          },
+          isImproving: null,
+          timestamp: '2023-03-28T12:27:28.159Z',
+          kibanaVersion: '8.9.0',
+        });
+
+        expect((result as Record<string, unknown>)[ALERT_MUTED]).toBe(true);
+      });
+
+      test('should set ALERT_MUTED to false when ruleData is not provided', () => {
+        const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
+        legacyAlert.scheduleActions('default');
+
+        const result = buildOngoingAlert<{}, {}, {}, 'default', 'recovered'>({
+          alert: existingFlattenedNewAlert,
+          legacyAlert,
+          rule: alertRule,
+          isImproving: null,
+          timestamp: '2023-03-28T12:27:28.159Z',
+          kibanaVersion: '8.9.0',
+        });
+
+        expect((result as Record<string, unknown>)[ALERT_MUTED]).toBe(false);
       });
     });
   });

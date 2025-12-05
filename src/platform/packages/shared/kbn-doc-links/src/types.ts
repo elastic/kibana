@@ -502,6 +502,7 @@ export interface DocLinks {
     kibanaPrivileges: string;
     mappingRoles: string;
     mappingRolesFieldRules: string;
+    roles: string;
     runAsPrivilege: string;
     enableElasticSearchSecurityFeatures: string;
   }>;

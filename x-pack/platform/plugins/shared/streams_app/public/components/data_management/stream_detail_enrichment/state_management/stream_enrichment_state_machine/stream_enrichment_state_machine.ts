@@ -6,6 +6,7 @@
  */
 import type { MachineImplementationsFrom, ActorRefFrom, SnapshotFrom } from 'xstate5';
 import { htmlIdGenerator } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import {
   assign,
   enqueueActions,
@@ -17,11 +18,12 @@ import {
   raise,
   stateIn,
   cancel,
+  assertEvent,
 } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { Streams } from '@kbn/streams-schema';
 import { GrokCollection } from '@kbn/grok-ui';
-import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
+import type { StreamlangStepWithUIAttributes, StreamlangDSL } from '@kbn/streamlang';
 import {
   ALWAYS_CONDITION,
   convertStepsForUI,
@@ -72,6 +74,7 @@ import {
 import { setupGrokCollectionActor } from './setup_grok_collection_actor';
 import { selectPreviewRecords } from '../simulation_state_machine/selectors';
 import { selectWhetherAnyProcessorBeforePersisted } from './selectors';
+import { createSuggestPipelineActor } from './suggest_pipeline_actor';
 
 export type StreamEnrichmentActorRef = ActorRefFrom<typeof streamEnrichmentMachine>;
 export type StreamEnrichmentActorSnapshot = SnapshotFrom<typeof streamEnrichmentMachine>;
@@ -91,10 +94,12 @@ export const streamEnrichmentMachine = setup({
     setupGrokCollection: getPlaceholderFor(setupGrokCollectionActor),
     stepMachine: getPlaceholderFor(() => stepMachine),
     simulationMachine: getPlaceholderFor(() => simulationMachine),
+    suggestPipeline: getPlaceholderFor(createSuggestPipelineActor),
   },
   actions: {
     notifyUpsertStreamSuccess: getPlaceholderFor(createUpsertStreamSuccessNofitier),
     notifyUpsertStreamFailure: getPlaceholderFor(createUpsertStreamFailureNofitier),
+    notifySuggestionFailure: () => {}, // Placeholder for suggestion failure notification
     refreshDefinition: () => {},
     /* URL state actions */
     storeUrlState: assign((_, params: { urlState: EnrichmentUrlState }) => ({
@@ -224,6 +229,22 @@ export const streamEnrichmentMachine = setup({
         stepRefs: [...reorderSteps(context.stepRefs, params.stepId, params.direction)],
       };
     }),
+    overwriteSteps: assign((assignArgs, params: { steps: StreamlangDSL['steps'] }) => {
+      // Clean-up existing step refs
+      assignArgs.context.stepRefs.forEach(stopChild);
+
+      // Convert new steps to UI format and spawn new step refs
+      // Mark as isNew: true so they're tracked as new additions
+      // Mark as isUpdated: true so they skip draft and go to configured state (can be simulated)
+      const uiSteps = convertStepsForUI({ steps: params.steps });
+      const stepRefs = uiSteps.map((step) => {
+        return spawnStep(step, assignArgs, { isNew: true, isUpdated: true });
+      });
+
+      return {
+        stepRefs,
+      };
+    }),
     reassignSteps: assign(({ context }) => ({
       stepRefs: [...context.stepRefs],
     })),
@@ -249,6 +270,11 @@ export const streamEnrichmentMachine = setup({
         dataSourceRef.send({ type: 'dataSource.refresh' })
       );
     },
+    /* Pipeline suggestion actions */
+    storeSuggestedPipeline: assign((_, params: { pipeline: StreamlangDSL }) => ({
+      suggestedPipeline: params.pipeline,
+    })),
+    clearSuggestion: assign({ suggestedPipeline: undefined }),
     /* @ts-expect-error The error is thrown because the type of the event is not inferred correctly when using enqueueActions during setup */
     sendStepsEventToSimulator: enqueueActions(
       ({ context, enqueue }, params?: { type: StreamEnrichmentEvent['type'] }) => {
@@ -310,6 +336,7 @@ export const streamEnrichmentMachine = setup({
     initialStepRefs: [],
     stepRefs: [],
     urlState: defaultEnrichmentUrlState,
+    suggestedPipeline: undefined,
     simulatorRef: spawn('simulationMachine', {
       id: 'simulator',
       input: {
@@ -551,6 +578,13 @@ export const streamEnrichmentMachine = setup({
                       target: 'creating',
                       actions: [{ type: 'addCondition', params: ({ event }) => event }],
                     },
+                    'step.resetSteps': {
+                      guard: 'hasManagePrivileges',
+                      actions: [
+                        { type: 'overwriteSteps', params: ({ event }) => event },
+                        { type: 'sendStepsEventToSimulator' },
+                      ],
+                    },
                   },
                 },
                 creating: {
@@ -573,7 +607,6 @@ export const streamEnrichmentMachine = setup({
                     },
                     'step.save': {
                       target: 'idle',
-                      actions: [{ type: 'reassignSteps' }],
                     },
                   },
                 },
@@ -603,6 +636,93 @@ export const streamEnrichmentMachine = setup({
                 },
               },
             },
+            pipelineSuggestion: {
+              initial: 'idle',
+              states: {
+                idle: {
+                  on: {
+                    'suggestion.generate': {
+                      guard: ({ context }) => context.stepRefs.length === 0,
+                      target: 'generatingSuggestion',
+                    },
+                  },
+                },
+                generatingSuggestion: {
+                  invoke: {
+                    id: 'suggestPipelineActor',
+                    src: 'suggestPipeline',
+                    input: ({ context, event }) => {
+                      assertEvent(event, ['suggestion.generate', 'suggestion.regenerate']);
+                      // Get preview documents from simulator
+                      const documents = getActiveDataSourceSamples(context);
+
+                      return {
+                        streamName: context.definition.stream.name,
+                        connectorId: event.connectorId,
+                        documents,
+                      };
+                    },
+                    onDone: {
+                      target: 'viewingSuggestion',
+                      actions: [
+                        {
+                          type: 'storeSuggestedPipeline',
+                          params: ({ event }) => ({ pipeline: event.output }),
+                        },
+                        {
+                          type: 'overwriteSteps',
+                          params: ({ event }) => ({ steps: event.output.steps }),
+                        },
+                      ],
+                    },
+                    onError: {
+                      target: 'idle',
+                      actions: [
+                        {
+                          type: 'notifySuggestionFailure',
+                          params: ({ event }: { event: { error: unknown } }) => ({ event }),
+                        },
+                      ],
+                    },
+                  },
+                  on: {
+                    'suggestion.cancel': {
+                      target: 'idle',
+                      actions: [
+                        { type: 'clearSuggestion' },
+                        { type: 'overwriteSteps', params: () => ({ steps: [] }) },
+                        { type: 'sendStepsEventToSimulator' },
+                      ],
+                    },
+                  },
+                },
+                viewingSuggestion: {
+                  entry: [{ type: 'sendStepsEventToSimulator' }],
+                  on: {
+                    'suggestion.accept': {
+                      target: 'idle',
+                      actions: [{ type: 'clearSuggestion' }],
+                    },
+                    'suggestion.dismiss': {
+                      target: 'idle',
+                      actions: [
+                        { type: 'clearSuggestion' },
+                        { type: 'overwriteSteps', params: () => ({ steps: [] }) },
+                        { type: 'sendStepsEventToSimulator' },
+                      ],
+                    },
+                    'suggestion.regenerate': {
+                      target: 'generatingSuggestion',
+                      actions: [
+                        { type: 'clearSuggestion' },
+                        { type: 'overwriteSteps', params: () => ({ steps: [] }) },
+                        { type: 'sendStepsEventToSimulator' },
+                      ],
+                    },
+                  },
+                },
+              },
+            },
           },
         },
       },
@@ -626,7 +746,11 @@ export const createStreamEnrichmentMachineImplementations = ({
     setupGrokCollection: setupGrokCollectionActor(),
     stepMachine,
     dataSourceMachine: dataSourceMachine.provide(
-      createDataSourceMachineImplementations({ data, toasts: core.notifications.toasts })
+      createDataSourceMachineImplementations({
+        data,
+        toasts: core.notifications.toasts,
+        telemetryClient,
+      })
     ),
     simulationMachine: simulationMachine.provide(
       createSimulationMachineImplementations({
@@ -635,6 +759,11 @@ export const createStreamEnrichmentMachineImplementations = ({
         toasts: core.notifications.toasts,
       })
     ),
+    suggestPipeline: createSuggestPipelineActor({
+      streamsRepositoryClient,
+      telemetryClient,
+      notifications: core.notifications,
+    }),
   },
   actions: {
     refreshDefinition,
@@ -645,5 +774,15 @@ export const createStreamEnrichmentMachineImplementations = ({
     notifyUpsertStreamFailure: createUpsertStreamFailureNofitier({
       toasts: core.notifications.toasts,
     }),
+    notifySuggestionFailure: (params: { event: unknown }) => {
+      const event = params.event as { error: Error };
+      core.notifications.toasts.addError(event.error, {
+        title: i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.suggestionError',
+          { defaultMessage: 'Failed to generate pipeline suggestion' }
+        ),
+        toastMessage: event.error.message,
+      });
+    },
   },
 });

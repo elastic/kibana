@@ -32,19 +32,11 @@ import { ProcessorMetricBadges } from './processor_metrics';
 import { ProcessorStatusIndicator } from './processor_status_indicator';
 import { getStepDescription } from './utils';
 
-export const ActionBlockListItem = ({
-  processorMetrics,
-  stepRef,
-  level,
-  stepUnderEdit,
-  rootLevelMap,
-  stepsProcessingSummaryMap,
-  isFirstStepInLevel,
-  isLastStepInLevel,
-}: ActionBlockProps) => {
-  const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
+export const ActionBlockListItem = (props: ActionBlockProps) => {
   const { euiTheme } = useEuiTheme();
+  const { stepRef, level, processorMetrics, readOnly = false } = props;
 
+  const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
   const isUnsaved = useSelector(
     stepRef,
     (snapshot) => snapshot.context.isNew || snapshot.context.isUpdated
@@ -65,18 +57,18 @@ export const ActionBlockListItem = ({
     <>
       {/* The step under edit is part of the same root level hierarchy,
       and therefore won't be covered by a top level where block overlay. */}
-      {stepUnderEdit &&
-        rootLevelMap.get(stepUnderEdit.customIdentifier) ===
-          rootLevelMap.get(step.customIdentifier) && <BlockDisableOverlay />}
+      {props.stepUnderEdit &&
+        props.rootLevelMap.get(props.stepUnderEdit.customIdentifier) ===
+          props.rootLevelMap.get(step.customIdentifier) && <BlockDisableOverlay />}
       {/* Or this is a top level action block, and therefore also needs to be covered. */}
-      {stepUnderEdit && !step.parentId && <BlockDisableOverlay />}
+      {props.stepUnderEdit && !step.parentId && <BlockDisableOverlay />}
       <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
               <ProcessorStatusIndicator
                 stepRef={stepRef}
-                stepsProcessingSummaryMap={stepsProcessingSummaryMap}
+                stepsProcessingSummaryMap={props.stepsProcessingSummaryMap}
               />
             </EuiFlexItem>
             <EuiFlexItem
@@ -127,33 +119,37 @@ export const ActionBlockListItem = ({
                 </EuiToolTip>
               </EuiFlexGroup>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" gutterSize="xs">
-                {processorMetrics && (
-                  <EuiFlexItem>
-                    <ProcessorMetricBadges {...processorMetrics} />
-                  </EuiFlexItem>
-                )}
-                {isUnsaved && (
-                  <EuiFlexItem>
-                    <EuiBadge>
-                      {i18n.translate(
-                        'xpack.streams.streamDetailView.managementTab.enrichment.ProcessorConfiguration.unsavedBadge',
-                        { defaultMessage: 'Unsaved' }
-                      )}
-                    </EuiBadge>
-                  </EuiFlexItem>
-                )}
-                <EuiFlexItem>
-                  <StepContextMenu
-                    stepRef={stepRef}
-                    stepUnderEdit={stepUnderEdit}
-                    isFirstStepInLevel={isFirstStepInLevel}
-                    isLastStepInLevel={isLastStepInLevel}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
+            {(processorMetrics || isUnsaved || !readOnly) && (
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup alignItems="center" gutterSize="xs">
+                  {processorMetrics && (
+                    <EuiFlexItem>
+                      <ProcessorMetricBadges {...processorMetrics} />
+                    </EuiFlexItem>
+                  )}
+                  {isUnsaved && (
+                    <EuiFlexItem>
+                      <EuiBadge>
+                        {i18n.translate(
+                          'xpack.streams.streamDetailView.managementTab.enrichment.ProcessorConfiguration.unsavedBadge',
+                          { defaultMessage: 'Unsaved' }
+                        )}
+                      </EuiBadge>
+                    </EuiFlexItem>
+                  )}
+                  {!readOnly && (
+                    <EuiFlexItem>
+                      <StepContextMenu
+                        stepRef={stepRef}
+                        stepUnderEdit={props.stepUnderEdit}
+                        isFirstStepInLevel={props.isFirstStepInLevel}
+                        isLastStepInLevel={props.isLastStepInLevel}
+                      />
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>

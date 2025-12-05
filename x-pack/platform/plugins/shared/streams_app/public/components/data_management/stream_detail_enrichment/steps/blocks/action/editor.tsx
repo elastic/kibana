@@ -50,6 +50,7 @@ import { deleteProcessorPromptOptions, discardChangesPromptOptions } from './pro
 import { ConvertProcessorForm } from './convert';
 import { ReplaceProcessorForm } from './replace';
 import { DropProcessorForm } from './drop_document';
+import { selectStreamType } from '../../../state_management/stream_enrichment_state_machine/selectors';
 
 export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((props, ref) => {
   const { processorMetrics, stepRef } = props;
@@ -100,6 +101,8 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
     stepRef,
     (snapshot) => !isEqual(snapshot.context.previousStep, snapshot.context.step)
   );
+
+  const streamType = useStreamEnrichmentSelector((snapshot) => selectStreamType(snapshot.context));
 
   const type = useWatch({ control: methods.control, name: 'action' });
 
@@ -155,6 +158,7 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
                 {canDelete && (
                   <EuiButton
                     data-test-subj="streamsAppProcessorConfigurationButton"
+                    data-stream-type={streamType}
                     color="danger"
                     onClick={handleDelete}
                     size="s"
@@ -171,6 +175,7 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
                       data-test-subj="streamsAppProcessorConfigurationCancelButton"
+                      data-stream-type={streamType}
                       onClick={handleCancel}
                       size="s"
                     >
@@ -183,6 +188,7 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
                   <EuiFlexItem grow={false}>
                     <EuiButton
                       data-test-subj="streamsAppProcessorConfigurationSaveProcessorButton"
+                      data-stream-type={streamType}
                       size="s"
                       fill
                       onClick={methods.handleSubmit(handleSubmit)}
