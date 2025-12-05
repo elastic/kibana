@@ -35,22 +35,17 @@ export default function ({ getService }: FtrProviderContext) {
         return;
       }
 
-      const traceId1 = '4bf92f3577b34da6a3ce929d0e0e4736';
-      const traceparent1 = `00-${traceId1}-00f067aa0ba902b7-01`;
-
-      const response1 = await supertest
-        .get('/emit_log_with_trace_id')
-        .set('traceparent', traceparent1);
+      // Explicitly unset traceparent so that APM agent provides a new trace.id for the request
+      const response1 = await supertest.get('/emit_log_with_trace_id').unset('traceparent');
+      expect(response1.body.traceId).to.be.a('string');
       expect(response1.status).to.be(200);
-      expect(response1.body.traceId).to.be(traceId1);
 
-      const traceId2 = 'a1b2c3d4e5f6789012345678901234ab';
-      const traceparent2 = `00-${traceId2}-10f067aa0ba902b7-01`;
-      const response2 = await supertest
-        .get('/emit_log_with_trace_id')
-        .set('traceparent', traceparent2);
+      // Explicitly unset traceparent so that APM agent provides a new trace.id for the request
+      const response2 = await supertest.get('/emit_log_with_trace_id').unset('traceparent');
+      expect(response2.body.traceId).to.be.a('string');
       expect(response2.status).to.be(200);
-      expect(response2.body.traceId).to.be(traceId2);
+
+      expect(response1.body.traceId).to.be(response2.body.traceId);
 
       const logs = await readLogFile();
 
