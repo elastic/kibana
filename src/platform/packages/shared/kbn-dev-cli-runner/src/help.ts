@@ -128,7 +128,7 @@ export function getHelpForAllCommands({
       return [
         chalk.bold.whiteBright.bgBlack(` ${dedent(command.usage || '') || command.name} `),
         `  ${indent(dedent(command.description || 'Runs a dev task'), 2)}`,
-        ...([indent(options, 2)] || []),
+        ...[indent(options, 2)],
       ].join('\n');
     })
     .join('\n');
