@@ -464,6 +464,30 @@
       "children": [
         {
           "parentPluginId": "onechat",
+          "id": "def-server.OnechatPluginStart.agents",
+          "type": "Object",
+          "tags": [],
+          "label": "agents",
+          "description": [
+            "\nAgents service, to execute agents."
+          ],
+          "signature": [
+            "{ runAgent: ",
+            {
+              "pluginId": "@kbn/onechat-server",
+              "scope": "common",
+              "docId": "kibKbnOnechatServerPluginApi",
+              "section": "def-common.RunAgentFn",
+              "text": "RunAgentFn"
+            },
+            "; }"
+          ],
+          "path": "x-pack/platform/plugins/shared/onechat/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "onechat",
           "id": "def-server.OnechatPluginStart.tools",
           "type": "Object",
           "tags": [],
