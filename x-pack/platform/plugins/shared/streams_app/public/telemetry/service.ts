@@ -15,6 +15,8 @@ import {
   streamsAttachmentCountEventType,
   streamsAttachmentLinkedEventType,
   streamsAttachmentUnlinkedEventType,
+  streamsAttachmentFlyoutOpenedEventType,
+  streamsAttachmentFlyoutActionEventType,
   streamsChildStreamCreatedEventType,
   streamsProcessingSavedEventType,
   streamsRetentionChangedEventType,
@@ -41,6 +43,8 @@ export class StreamsTelemetryService {
     this.analytics.registerEventType(streamsAttachmentClickEventType);
     this.analytics.registerEventType(streamsAttachmentLinkedEventType);
     this.analytics.registerEventType(streamsAttachmentUnlinkedEventType);
+    this.analytics.registerEventType(streamsAttachmentFlyoutOpenedEventType);
+    this.analytics.registerEventType(streamsAttachmentFlyoutActionEventType);
     this.analytics.registerEventType(streamsAIGrokSuggestionLatencyEventType);
     this.analytics.registerEventType(streamsAIGrokSuggestionAcceptedEventType);
     this.analytics.registerEventType(streamsAIDissectSuggestionLatencyEventType);

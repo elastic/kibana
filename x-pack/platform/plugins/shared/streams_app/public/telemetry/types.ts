@@ -27,6 +27,21 @@ interface StreamsAttachmentLinkChangedProps {
   count_by_type: Record<AttachmentType, number>;
 }
 
+interface StreamsAttachmentFlyoutOpenedProps {
+  stream_name: string;
+  attachment_type: AttachmentType;
+  attachment_id: string;
+}
+
+type AttachmentFlyoutAction = 'navigate_to_attachment' | 'unlink' | 'navigate_to_attached_stream';
+
+interface StreamsAttachmentFlyoutActionProps {
+  stream_name: string;
+  attachment_type: AttachmentType;
+  attachment_id: string;
+  action: AttachmentFlyoutAction;
+}
+
 interface StreamsAIGrokSuggestionLatencyProps {
   name: string;
   field: string;
@@ -144,6 +159,9 @@ export {
   type StreamsAttachmentCountProps,
   type StreamsAttachmentClickEventProps,
   type StreamsAttachmentLinkChangedProps,
+  type StreamsAttachmentFlyoutOpenedProps,
+  type StreamsAttachmentFlyoutActionProps,
+  type AttachmentFlyoutAction,
   type StreamsAIGrokSuggestionLatencyProps,
   type StreamsAIGrokSuggestionAcceptedProps,
   type StreamsAIDissectSuggestionLatencyProps,

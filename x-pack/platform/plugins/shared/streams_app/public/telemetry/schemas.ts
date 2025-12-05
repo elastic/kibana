@@ -16,6 +16,8 @@ import type {
   StreamsAttachmentClickEventProps,
   StreamsAttachmentCountProps,
   StreamsAttachmentLinkChangedProps,
+  StreamsAttachmentFlyoutOpenedProps,
+  StreamsAttachmentFlyoutActionProps,
   StreamsChildStreamCreatedProps,
   StreamsProcessingSavedProps,
   StreamsRetentionChangedProps,
@@ -118,6 +120,55 @@ const streamsAttachmentLinkChangedSchema: RootSchema<StreamsAttachmentLinkChange
     },
   },
   count_by_type: attachmentCountByTypeSchema,
+};
+
+const streamsAttachmentFlyoutOpenedSchema: RootSchema<StreamsAttachmentFlyoutOpenedProps> = {
+  stream_name: {
+    type: 'keyword',
+    _meta: {
+      description: 'The name of the Stream',
+    },
+  },
+  attachment_type: {
+    type: 'keyword',
+    _meta: {
+      description: 'The type of attachment: dashboard, slo, rule',
+    },
+  },
+  attachment_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'The id of the attachment',
+    },
+  },
+};
+
+const streamsAttachmentFlyoutActionSchema: RootSchema<StreamsAttachmentFlyoutActionProps> = {
+  stream_name: {
+    type: 'keyword',
+    _meta: {
+      description: 'The name of the Stream',
+    },
+  },
+  attachment_type: {
+    type: 'keyword',
+    _meta: {
+      description: 'The type of attachment: dashboard, slo, rule',
+    },
+  },
+  attachment_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'The id of the attachment',
+    },
+  },
+  action: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The action taken from the flyout: navigate_to_attachment, unlink, navigate_to_attached_stream',
+    },
+  },
 };
 
 const matchRate: SchemaArray<number, number> = {
@@ -564,6 +615,8 @@ export {
   streamsAttachmentCountSchema,
   streamsAttachmentClickEventSchema,
   streamsAttachmentLinkChangedSchema,
+  streamsAttachmentFlyoutOpenedSchema,
+  streamsAttachmentFlyoutActionSchema,
   streamsAIGrokSuggestionLatencySchema,
   streamsAIGrokSuggestionAcceptedSchema,
   streamsAIDissectSuggestionLatencySchema,

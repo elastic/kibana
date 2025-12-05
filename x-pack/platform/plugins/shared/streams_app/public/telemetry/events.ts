@@ -14,6 +14,8 @@ import {
   STREAMS_ATTACHMENT_COUNT_EVENT_TYPE,
   STREAMS_ATTACHMENT_LINKED_EVENT_TYPE,
   STREAMS_ATTACHMENT_UNLINKED_EVENT_TYPE,
+  STREAMS_ATTACHMENT_FLYOUT_OPENED_EVENT_TYPE,
+  STREAMS_ATTACHMENT_FLYOUT_ACTION_EVENT_TYPE,
   STREAMS_CHILD_STREAM_CREATED_EVENT_TYPE,
   STREAMS_PROCESSING_SAVED_EVENT_TYPE,
   STREAMS_RETENTION_CHANGED_EVENT_TYPE,
@@ -35,6 +37,8 @@ import {
   streamsAttachmentClickEventSchema,
   streamsAttachmentCountSchema,
   streamsAttachmentLinkChangedSchema,
+  streamsAttachmentFlyoutOpenedSchema,
+  streamsAttachmentFlyoutActionSchema,
   streamsChildStreamCreatedSchema,
   streamsProcessingSavedSchema,
   streamsRetentionChangedSchema,
@@ -67,6 +71,16 @@ const streamsAttachmentLinkedEventType = {
 const streamsAttachmentUnlinkedEventType = {
   eventType: STREAMS_ATTACHMENT_UNLINKED_EVENT_TYPE,
   schema: streamsAttachmentLinkChangedSchema,
+};
+
+const streamsAttachmentFlyoutOpenedEventType = {
+  eventType: STREAMS_ATTACHMENT_FLYOUT_OPENED_EVENT_TYPE,
+  schema: streamsAttachmentFlyoutOpenedSchema,
+};
+
+const streamsAttachmentFlyoutActionEventType = {
+  eventType: STREAMS_ATTACHMENT_FLYOUT_ACTION_EVENT_TYPE,
+  schema: streamsAttachmentFlyoutActionSchema,
 };
 
 const streamsAIGrokSuggestionLatencyEventType = {
@@ -154,6 +168,8 @@ export {
   streamsAttachmentClickEventType,
   streamsAttachmentLinkedEventType,
   streamsAttachmentUnlinkedEventType,
+  streamsAttachmentFlyoutOpenedEventType,
+  streamsAttachmentFlyoutActionEventType,
   streamsAIGrokSuggestionLatencyEventType,
   streamsAIGrokSuggestionAcceptedEventType,
   streamsAIDissectSuggestionLatencyEventType,

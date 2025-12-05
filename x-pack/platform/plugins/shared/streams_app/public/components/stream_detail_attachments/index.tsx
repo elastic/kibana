@@ -26,7 +26,7 @@ import type {
   AttachmentType,
 } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
 import type { Streams } from '@kbn/streams-schema';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useAttachmentsApi } from '../../hooks/use_attachments_api';
 import { useAttachmentsFetch } from '../../hooks/use_attachments_fetch';
@@ -112,6 +112,18 @@ export function StreamDetailAttachments({
   const openAddAttachmentFlyout = () => {
     setIsAddAttachmentFlyoutOpen(true);
   };
+
+  const handleViewDetails = useCallback(
+    (attachment: Attachment) => {
+      setDetailsAttachment(attachment);
+      telemetryClient.trackAttachmentFlyoutOpened({
+        stream_name: definition.stream.name,
+        attachment_type: attachment.type,
+        attachment_id: attachment.id,
+      });
+    },
+    [definition.stream.name, telemetryClient]
+  );
 
   const [{ loading: isLinkLoading }, handleLinkAttachments] = useAsyncFn(
     async (attachments: Attachment[]) => {
@@ -334,7 +346,7 @@ export function StreamDetailAttachments({
                   ? (attachment) => setAttachmentsToUnlink([attachment])
                   : undefined
               }
-              onViewDetails={setDetailsAttachment}
+              onViewDetails={handleViewDetails}
               dataTestSubj="streamsAppStreamDetailAttachmentsTable"
               showActions
             />
@@ -355,6 +367,7 @@ export function StreamDetailAttachments({
       {detailsAttachment && (
         <AttachmentDetailsFlyout
           attachment={detailsAttachment}
+          streamName={definition.stream.name}
           onClose={() => setDetailsAttachment(null)}
           onUnlink={
             canLinkAttachments

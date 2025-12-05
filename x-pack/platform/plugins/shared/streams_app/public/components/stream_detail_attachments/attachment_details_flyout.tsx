@@ -48,17 +48,20 @@ function FormattedDateTime({ value }: { value: string }) {
 
 interface AttachmentDetailsFlyoutProps {
   attachment: Attachment;
+  streamName: string;
   onClose: () => void;
   onUnlink?: () => void;
 }
 
 export function AttachmentDetailsFlyout({
   attachment,
+  streamName,
   onClose,
   onUnlink,
 }: AttachmentDetailsFlyoutProps) {
   const {
     core: { application },
+    services: { telemetryClient },
     dependencies: {
       start: { share },
     },
@@ -79,10 +82,36 @@ export function AttachmentDetailsFlyout({
     timeState.timeRange
   );
 
-  const handleNavigate = () => {
+  const handleNavigateToAttachment = () => {
     if (url) {
+      telemetryClient.trackAttachmentFlyoutAction({
+        stream_name: streamName,
+        attachment_type: attachment.type,
+        attachment_id: attachment.id,
+        action: 'navigate_to_attachment',
+      });
       application.navigateToUrl(url);
     }
+  };
+
+  const handleUnlink = () => {
+    telemetryClient.trackAttachmentFlyoutAction({
+      stream_name: streamName,
+      attachment_type: attachment.type,
+      attachment_id: attachment.id,
+      action: 'unlink',
+    });
+    onUnlink?.();
+  };
+
+  const handleNavigateToStream = (targetStreamName: string) => {
+    telemetryClient.trackAttachmentFlyoutAction({
+      stream_name: streamName,
+      attachment_type: attachment.type,
+      attachment_id: attachment.id,
+      action: 'navigate_to_attached_stream',
+    });
+    application.navigateToUrl(router.link('/{key}', { path: { key: targetStreamName } }));
   };
 
   const noDataPlaceholder = '-';
@@ -116,7 +145,7 @@ export function AttachmentDetailsFlyout({
               <EuiFlexItem key={name} grow={false}>
                 <EuiLink
                   data-test-subj="streamsAppAttachmentDetailsFlyoutStreamLink"
-                  href={router.link('/{key}', { path: { key: name } })}
+                  onClick={() => handleNavigateToStream(name)}
                 >
                   {name}
                 </EuiLink>
@@ -169,7 +198,7 @@ export function AttachmentDetailsFlyout({
               <EuiButtonEmpty
                 data-test-subj="streamsAppAttachmentDetailsFlyoutGoToButton"
                 iconType={typeConfig.icon}
-                onClick={handleNavigate}
+                onClick={handleNavigateToAttachment}
               >
                 {i18n.translate('xpack.streams.attachmentDetailsFlyout.goToButtonLabel', {
                   defaultMessage: 'Go to {type}',
@@ -184,7 +213,7 @@ export function AttachmentDetailsFlyout({
                 data-test-subj="streamsAppAttachmentDetailsFlyoutUnlinkButton"
                 iconType="unlink"
                 color="danger"
-                onClick={onUnlink}
+                onClick={handleUnlink}
               >
                 {i18n.translate('xpack.streams.attachmentDetailsFlyout.removeButtonLabel', {
                   defaultMessage: 'Remove attachment',

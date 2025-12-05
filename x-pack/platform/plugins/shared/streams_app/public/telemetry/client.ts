@@ -15,6 +15,8 @@ import type {
   StreamsAttachmentClickEventProps,
   StreamsAttachmentCountProps,
   StreamsAttachmentLinkChangedProps,
+  StreamsAttachmentFlyoutOpenedProps,
+  StreamsAttachmentFlyoutActionProps,
   StreamsChildStreamCreatedProps,
   StreamsProcessingSavedProps,
   StreamsSchemaUpdatedProps,
@@ -36,6 +38,8 @@ import {
   STREAMS_ATTACHMENT_COUNT_EVENT_TYPE,
   STREAMS_ATTACHMENT_LINKED_EVENT_TYPE,
   STREAMS_ATTACHMENT_UNLINKED_EVENT_TYPE,
+  STREAMS_ATTACHMENT_FLYOUT_OPENED_EVENT_TYPE,
+  STREAMS_ATTACHMENT_FLYOUT_ACTION_EVENT_TYPE,
   STREAMS_CHILD_STREAM_CREATED_EVENT_TYPE,
   STREAMS_PROCESSING_SAVED_EVENT_TYPE,
   STREAMS_RETENTION_CHANGED_EVENT_TYPE,
@@ -67,6 +71,14 @@ export class StreamsTelemetryClient {
 
   public trackAttachmentUnlinked(params: StreamsAttachmentLinkChangedProps) {
     this.analytics.reportEvent(STREAMS_ATTACHMENT_UNLINKED_EVENT_TYPE, params);
+  }
+
+  public trackAttachmentFlyoutOpened(params: StreamsAttachmentFlyoutOpenedProps) {
+    this.analytics.reportEvent(STREAMS_ATTACHMENT_FLYOUT_OPENED_EVENT_TYPE, params);
+  }
+
+  public trackAttachmentFlyoutAction(params: StreamsAttachmentFlyoutActionProps) {
+    this.analytics.reportEvent(STREAMS_ATTACHMENT_FLYOUT_ACTION_EVENT_TYPE, params);
   }
 
   public startTrackingAIGrokSuggestionLatency(
