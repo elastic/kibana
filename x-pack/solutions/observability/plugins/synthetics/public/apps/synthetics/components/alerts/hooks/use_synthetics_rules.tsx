@@ -16,6 +16,7 @@ import { useSyntheticsSettingsContext } from '../../../contexts';
 import {
   selectSyntheticsAlerts,
   selectSyntheticsAlertsLoading,
+  selectSyntheticsAlertsLoaded,
 } from '../../../state/alert_rules/selectors';
 import {
   enableDefaultAlertingSilentlyAction,
@@ -35,17 +36,23 @@ export const useSyntheticsRules = (isOpen: boolean) => {
 
   const defaultRules = useSelector(selectSyntheticsAlerts);
   const loading = useSelector(selectSyntheticsAlertsLoading);
+  const rulesLoaded = useSelector(selectSyntheticsAlertsLoaded);
   const alertFlyoutVisible = useSelector(selectAlertFlyoutVisibility);
   const isNewRule = useSelector(selectIsNewRule);
   const { settings } = useSelector(selectDynamicSettings);
-
+  const defaultRulesEnabled =
+    settings && (settings?.defaultStatusRuleEnabled || settings?.defaultTLSRuleEnabled);
+  // Fetch default rules when popover opens if they haven't been loaded yet
+  useEffect(() => {
+    if (isOpen && !loading && rulesLoaded === null && defaultRulesEnabled) {
+      dispatch(getDefaultAlertingAction.get());
+    }
+  }, [isOpen, loading, rulesLoaded, dispatch, defaultRulesEnabled]);
   const { canSave } = useSyntheticsSettingsContext();
 
   const { loaded, data: monitors } = useSelector(selectMonitorListState);
 
   const hasMonitors = loaded && monitors.absoluteTotal && monitors.absoluteTotal > 0;
-  const defaultRulesEnabled =
-    settings && (settings?.defaultStatusRuleEnabled || settings?.defaultTLSRuleEnabled);
 
   const getOrCreateAlerts = useCallback(() => {
     if (canSave) {
