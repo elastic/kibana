@@ -6,26 +6,19 @@
  */
 
 import { useDispatch, useSelector } from 'react-redux';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { selectDynamicSettings } from '../../../state/settings';
-import { useSyntheticsSettingsContext } from '../../../contexts';
 import {
   selectSyntheticsAlerts,
   selectSyntheticsAlertsLoading,
 } from '../../../state/alert_rules/selectors';
-import {
-  enableDefaultAlertingSilentlyAction,
-  getDefaultAlertingAction,
-} from '../../../state/alert_rules';
 import { SYNTHETICS_TLS_RULE } from '../../../../../../common/constants/synthetics_alerts';
 import {
   selectAlertFlyoutVisibility,
   selectIsNewRule,
-  selectMonitorListState,
   setAlertFlyoutVisible,
 } from '../../../state';
 import type { ClientPluginsStart } from '../../../../../plugin';
@@ -37,38 +30,6 @@ export const useSyntheticsRules = (isOpen: boolean) => {
   const loading = useSelector(selectSyntheticsAlertsLoading);
   const alertFlyoutVisible = useSelector(selectAlertFlyoutVisibility);
   const isNewRule = useSelector(selectIsNewRule);
-  const { settings } = useSelector(selectDynamicSettings);
-
-  const { canSave } = useSyntheticsSettingsContext();
-
-  const { loaded, data: monitors } = useSelector(selectMonitorListState);
-
-  const hasMonitors = loaded && monitors.absoluteTotal && monitors.absoluteTotal > 0;
-  const defaultRulesEnabled =
-    settings && (settings?.defaultStatusRuleEnabled || settings?.defaultTLSRuleEnabled);
-
-  const getOrCreateAlerts = useCallback(() => {
-    if (canSave) {
-      dispatch(enableDefaultAlertingSilentlyAction.get());
-    } else {
-      dispatch(getDefaultAlertingAction.get());
-    }
-  }, [canSave, dispatch]);
-
-  useEffect(() => {
-    if (hasMonitors && defaultRulesEnabled) {
-      if (!defaultRules) {
-        // on initial load we prioritize loading the app
-        setTimeout(() => {
-          getOrCreateAlerts();
-        }, 1000);
-      } else {
-        getOrCreateAlerts();
-      }
-    }
-    // we don't want to run this on defaultRules change
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, isOpen, hasMonitors, defaultRulesEnabled]);
 
   const {
     triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
