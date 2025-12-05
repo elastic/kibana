@@ -38,7 +38,7 @@ import {
   MCP_CONNECTOR_TOOLS_SAVED_OBJECT_TYPE,
   type McpConnectorToolsAttributes,
 } from '../../saved_objects';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+// import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 /**
  * MCP Connector for Kibana Stack Connectors.
@@ -215,33 +215,10 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
 
   /**
    * Saves the tools list to a saved object if it doesn't already exist.
-   * This is called after the first successful connection to persist the tools list.
    * @param toolsResult - The tools list result from listTools() or connect()
    */
   private async saveTools(toolsResult: ListToolsResponse): Promise<void> {
     try {
-      // Check if tools have already been saved
-      try {
-        await this.savedObjectsClient.get<McpConnectorToolsAttributes>(
-          MCP_CONNECTOR_TOOLS_SAVED_OBJECT_TYPE,
-          this.connector.id
-        );
-        // Tools already saved, skip
-        this.logger.debug(`Tools already saved for connector ${this.connector.id}, skipping save`);
-        return;
-      } catch (error) {
-        // If the saved object doesn't exist, get() will throw a 404 error
-        if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
-          // For other errors, log and continue to try saving
-          this.logger.debug(
-            `Error checking for saved tools: ${
-              error instanceof Error ? error.message : String(error)
-            }`
-          );
-        }
-        // If it's a 404, continue to save the tools
-      }
-
       const now = new Date().toISOString();
 
       // Save the tools to a saved object
