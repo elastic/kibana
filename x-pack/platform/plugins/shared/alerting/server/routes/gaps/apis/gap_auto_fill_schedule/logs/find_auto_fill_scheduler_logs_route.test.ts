@@ -88,7 +88,7 @@ describe('findAutoFillSchedulerLogsRoute', () => {
             message: 'Gap fill auto scheduler logs',
             results: [
               {
-                ruleId: 'test-rule-id',
+                rule_id: 'test-rule-id',
                 processed_gaps: 10,
                 status: 'success',
               },
@@ -105,11 +105,23 @@ describe('findAutoFillSchedulerLogsRoute', () => {
   test('ensures the license allows for getting gap auto fill scheduler logs', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
+    rulesClient.findGapAutoFillSchedulerLogs.mockResolvedValueOnce(mockGetLogsResponse);
     findAutoFillSchedulerLogsRoute(router, licenseState);
     const [, handler] = router.post.mock.calls[0];
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
-      { params: { id: 'test-scheduler-id' } }
+      {
+        params: { id: 'test-scheduler-id' },
+        body: {
+          start: '2024-01-01T00:00:00.000Z',
+          end: '2024-01-01T00:00:00.000Z',
+          page: 1,
+          per_page: 10,
+          sort_field: '@timestamp',
+          sort_direction: 'desc',
+          statuses: ['success'],
+        },
+      }
     );
     await handler(context, req, res);
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);

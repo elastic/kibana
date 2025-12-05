@@ -2883,7 +2883,7 @@ describe('BackfillClient', () => {
     test('should call updateGaps when deleting by initiator with shouldUpdateGaps', async () => {
       const attrs = getMockAdHocRunAttributes({
         overwrites: {
-          initiator: 'init-2',
+          initiator: backfillInitiator.SYSTEM,
           start: '2023-11-16T08:00:00.000Z',
           schedule: [
             {
@@ -2913,7 +2913,7 @@ describe('BackfillClient', () => {
       });
 
       await backfillClient.deleteBackfillsByInitiatorId({
-        initiatorId: 'init-2',
+        initiatorId: backfillInitiator.SYSTEM,
         unsecuredSavedObjectsClient,
         shouldUpdateGaps: true,
         internalSavedObjectsRepository,
@@ -2935,6 +2935,7 @@ describe('BackfillClient', () => {
         shouldRefetchAllBackfills: true,
         backfillClient,
         actionsClient,
+        initiator: backfillInitiator.SYSTEM,
       });
     });
   });
