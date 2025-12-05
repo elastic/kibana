@@ -40,16 +40,26 @@ const duplicateMappingErrorText = i18n.translate(
 export class MappingEditorService {
   // private mappingsSubscription: Subscription;
   private _mappings$ = new BehaviorSubject<Array<MappingEdits>>([]);
+
+  /** Observable stream of current mapping edits */
   public mappings$ = this._mappings$.asObservable();
 
   private _mappingsError$ = new BehaviorSubject<MappingError | null>(null);
+
+  /** Observable stream of mapping validation errors */
   public mappingsError$ = this._mappingsError$.asObservable();
 
   private originalMappingJSON: MappingTypeMapping;
 
   private _mappingsEdited$ = new BehaviorSubject<boolean>(false);
+
+  /** Observable stream indicating if mappings have been edited */
   public mappingsEdited$ = this._mappingsEdited$.asObservable();
 
+  /**
+   * Creates a new MappingEditorService instance.
+   * @param fileUploadManager - The file upload manager to manage mappings for
+   */
   constructor(private readonly fileUploadManager: FileUploadManager) {
     const originalMappings = this.fileUploadManager.getMappings().json;
     this.originalMappingJSON = cloneDeep(originalMappings);
@@ -70,6 +80,10 @@ export class MappingEditorService {
     }
   }
 
+  /**
+   * Applies all mapping changes to the file upload manager.
+   * Updates mappings, renames pipeline fields, updates date processors, and removes convert processors.
+   */
   public applyChanges() {
     const mappings = this._mappings$.getValue();
     const nameChanges = mappings
@@ -102,16 +116,36 @@ export class MappingEditorService {
     this.fileUploadManager.removeConvertProcessors();
   }
 
+  /**
+   * Gets the current array of mapping edits.
+   * @returns Array of mapping edit objects
+   */
   getMappings() {
     return this._mappings$.getValue();
   }
+
+  /**
+   * Gets the current mapping validation error, if any.
+   * @returns Mapping error object or null if no errors
+   */
   getMappingsError() {
     return this._mappingsError$.getValue();
   }
+
+  /**
+   * Checks if any mappings have been edited from their original state.
+   * @returns True if mappings have been edited, false otherwise
+   */
   getMappingsEdited() {
     return this._mappingsEdited$.getValue();
   }
 
+  /**
+   * Updates a mapping at the specified index with new field name and/or type.
+   * @param index - Index of the mapping to update
+   * @param fieldName - New field name
+   * @param fieldType - New field type or null
+   */
   updateMapping(index: number, fieldName: string, fieldType: string | null) {
     const mappings = [...this._mappings$.getValue()];
     if (mappings[index]) {
@@ -192,6 +226,10 @@ export class MappingEditorService {
     this._mappingsError$.next(null);
   }
 
+  /**
+   * Resets the mapping editor to its original state.
+   * Clears all edits and restores original mappings.
+   */
   public reset() {
     const mappings = this.originalMappingJSON;
     this.initializeMappings(mappings);
