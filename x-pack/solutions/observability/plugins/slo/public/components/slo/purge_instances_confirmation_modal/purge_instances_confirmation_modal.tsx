@@ -95,7 +95,7 @@ export function PurgeInstancesConfirmationModal({ items, onCancel, onConfirm }: 
                 'xpack.slo.purgeInstancesConfirmationModal.descriptionTextWithSelection',
                 {
                   defaultMessage:
-                    'Permanently remove all stale instances from the {count} selected {count, plural, one {SLO} other {SLOs}} based on the {staleSloThresholdLabel} setting. Override this setting by updating the following {staleThresholdLabel}.',
+                    'Permanently delete all stale instances from the {count} selected {count, plural, one {SLO} other {SLOs}} based on the {staleSloThresholdLabel} setting. Override this setting by updating the following {staleThresholdLabel}.',
                   values: {
                     count: items.length,
                     staleSloThresholdLabel: <strong>{STALE_SLO_THRESHOLD_LABEL}</strong>,
