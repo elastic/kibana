@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
 import type { Agent, AgentPolicy } from '../../../../types';

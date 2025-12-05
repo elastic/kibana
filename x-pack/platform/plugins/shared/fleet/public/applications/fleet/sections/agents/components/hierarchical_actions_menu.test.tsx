@@ -171,7 +171,11 @@ describe('HierarchicalActionsMenu', () => {
   describe('Flat menu items', () => {
     it('should render all action items', async () => {
       const utils = renderer.render(
-        <HierarchicalActionsMenu items={basicMenuItems} isOpen={true} data-test-subj="testMenuBtn" />
+        <HierarchicalActionsMenu
+          items={basicMenuItems}
+          isOpen={true}
+          data-test-subj="testMenuBtn"
+        />
       );
 
       expect(utils.getByTestId('action1Btn')).toBeInTheDocument();
@@ -180,7 +184,11 @@ describe('HierarchicalActionsMenu', () => {
 
     it('should call onClick when action item is clicked', async () => {
       const utils = renderer.render(
-        <HierarchicalActionsMenu items={basicMenuItems} isOpen={true} data-test-subj="testMenuBtn" />
+        <HierarchicalActionsMenu
+          items={basicMenuItems}
+          isOpen={true}
+          data-test-subj="testMenuBtn"
+        />
       );
 
       fireEvent.click(utils.getByTestId('action1Btn'));
@@ -291,7 +299,11 @@ describe('HierarchicalActionsMenu', () => {
   describe('Icons', () => {
     it('should render icons for menu items', async () => {
       const utils = renderer.render(
-        <HierarchicalActionsMenu items={basicMenuItems} isOpen={true} data-test-subj="testMenuBtn" />
+        <HierarchicalActionsMenu
+          items={basicMenuItems}
+          isOpen={true}
+          data-test-subj="testMenuBtn"
+        />
       );
 
       // EUI renders icons inside the button, we just verify the buttons are there
@@ -350,4 +362,3 @@ describe('HierarchicalActionsMenu', () => {
     });
   });
 });
-
