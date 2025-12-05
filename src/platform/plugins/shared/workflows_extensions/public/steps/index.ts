@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AiPromptStepDefinition } from './ai/ai_prompt';
+import { AiPromptStepDefinition } from './ai/ai_prompt_text';
 import type { PublicStepRegistry } from '../step_registry';
 
 export const registerStepDefinitions = (stepRegistry: PublicStepRegistry) => {

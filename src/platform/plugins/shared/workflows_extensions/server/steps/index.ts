@@ -8,7 +8,7 @@
  */
 
 import type { CoreSetup } from '@kbn/core/server';
-import { aiPromptStepDefinition } from './ai/ai_prompt';
+import { aiPromptStepDefinition } from './ai/ai_prompt_step';
 import type { ServerStepRegistry } from '../step_registry/step_registry';
 import type { WorkflowsExtensionsServerPluginStartDeps } from '../types';
 
