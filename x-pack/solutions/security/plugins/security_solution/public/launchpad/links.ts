@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ONBOARDING_PATH, SecurityPageName, SECURITY_FEATURE_ID } from '../../common/constants';
 import { i18nStrings } from '@kbn/security-solution-navigation/links';
+import { ONBOARDING_PATH, SecurityPageName, SECURITY_FEATURE_ID } from '../../common/constants';
 import type { LinkItem } from '../common/links/types';
 import { GETTING_STARTED } from '../app/translations';
 import { siemReadinessLinks } from '../siem_readiness/links';
@@ -47,4 +47,3 @@ export const launchpadLinks: LinkItem = {
   ],
   links: [getStartedChildLink, siemReadinessLinks, aiValueLinks],
 };
-
