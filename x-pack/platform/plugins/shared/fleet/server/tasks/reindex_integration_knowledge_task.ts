@@ -80,7 +80,11 @@ export async function reindexIntegrationKnowledgeForInstalledPackages(
     installedPackages.saved_objects,
     async ({ attributes: installation }) => {
       throwIfAborted(abortController);
-      const knowledgeBase = await getPackageKnowledgeBase({ esClient, pkgName: installation.name });
+      const knowledgeBase = await getPackageKnowledgeBase({
+        esClient,
+        pkgName: installation.name,
+        abortController,
+      });
       const everyKnowledgeBaseOnCurrentPackageVersion = knowledgeBase?.items.every(
         (item) => item.version === installation.version
       );
@@ -124,7 +128,8 @@ export async function reindexIntegrationKnowledgeForInstalledPackages(
         esClient,
         logger,
         { name: installation.name, version: installation.version },
-        archiveIterator!
+        archiveIterator!,
+        abortController
       ).catch((error) => {
         logger.error(
           `Failed reindexing knowledge base for package ${installation.name}@${installation.version}: ${error}`

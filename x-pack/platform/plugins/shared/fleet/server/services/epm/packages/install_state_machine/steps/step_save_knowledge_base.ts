@@ -125,7 +125,8 @@ export async function indexKnowledgeBase(
   esClient: ElasticsearchClient,
   logger: Logger,
   packageInfo: { name: string; version: string },
-  archiveIterator: ArchiveIterator
+  archiveIterator: ArchiveIterator,
+  abortController?: AbortController
 ): Promise<{ esReferences: EsAssetReference[] }> {
   // Extract knowledge base content directly from the archive
   const knowledgeBaseItems = await extractKnowledgeBaseFromArchive(
@@ -148,6 +149,7 @@ export async function indexKnowledgeBase(
         pkgName: packageInfo.name,
         pkgVersion: packageInfo.version,
         knowledgeBaseContent: knowledgeBaseItems,
+        abortController,
       });
 
       logger.debug(
