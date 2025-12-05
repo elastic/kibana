@@ -310,6 +310,18 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
           KUERY_FIELD_TO_SO_FIELD_MAP[sortField as keyof typeof KUERY_FIELD_TO_SO_FIELD_MAP],
         sortOrder: sortDirection,
       })
+      .catch((error) => {
+        // Check if the error is due to result window is too large. We currently only support up to 10k results.
+        if (error.message.toLowerCase().includes('result window is too large')) {
+          throw new ScriptLibraryError(
+            'Result window is too large, pageSize + page must be less than or equal to: [10000]',
+            400,
+            error
+          );
+        }
+
+        throw error;
+      })
       .catch(catchAndWrapError.withMessage('Failed to search for scripts'));
 
     return {
