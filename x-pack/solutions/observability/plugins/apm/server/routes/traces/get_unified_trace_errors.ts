@@ -20,6 +20,7 @@ import {
   SPAN_ID,
   TIMESTAMP_US,
   TRACE_ID,
+  AT_TIMESTAMP,
 } from '../../../common/es_fields/apm';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import type { Exception } from '../../../typings/es_schemas/raw/error_raw';
@@ -66,13 +67,14 @@ export async function getUnifiedTraceErrors({
 export const requiredOtelFields = asMutableArray([
   SPAN_ID,
   ID,
-  TIMESTAMP_US,
   SERVICE_NAME,
+  AT_TIMESTAMP,
 ] as const);
 export const optionalOtelFields = asMutableArray([
   EXCEPTION_TYPE,
   EXCEPTION_MESSAGE,
   OTEL_EVENT_NAME,
+  TIMESTAMP_US,
 ] as const);
 
 export interface UnifiedError {
@@ -133,11 +135,13 @@ async function getUnprocessedOtelErrors({
 
     if (!event) return null;
 
+    const timestamp = event[TIMESTAMP_US] ?? new Date(event[AT_TIMESTAMP]).getTime() * 1000;
+
     const error: Error = {
       id: event[ID],
       span: { id: event[SPAN_ID] },
       trace: { id: traceId },
-      timestamp: { us: event[TIMESTAMP_US] },
+      timestamp: { us: timestamp },
       eventName: event[OTEL_EVENT_NAME],
       service: { name: event[SERVICE_NAME] },
       error: {
