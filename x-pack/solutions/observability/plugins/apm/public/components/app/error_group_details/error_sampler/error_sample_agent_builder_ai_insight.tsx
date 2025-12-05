@@ -79,7 +79,6 @@ export function ErrorSampleAgentBuilderAiInsight({
 
     return [
       {
-        id: 'apm_error_details_screen_context_attachment',
         type: 'screen_context',
         data: {
           app: 'apm',
@@ -89,7 +88,6 @@ export function ErrorSampleAgentBuilderAiInsight({
         hidden: true,
       },
       {
-        id: 'apm_error_details_ai_insight_attachment',
         type: OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
         data: {
           summary,
@@ -97,7 +95,6 @@ export function ErrorSampleAgentBuilderAiInsight({
         },
       },
       {
-        id: 'apm_error_details_error_attachment',
         type: OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID,
         data: {
           errorId,
