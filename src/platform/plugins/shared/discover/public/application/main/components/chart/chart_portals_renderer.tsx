@@ -144,7 +144,6 @@ type UnifiedHistogramChartProps = Pick<UnifiedHistogramGuardProps, 'panelsToggle
 const ChartsWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartProps) => {
   const dispatch = useInternalStateDispatch();
   const getChartConfigAccessor = useProfileAccessor('getChartSectionConfiguration');
-  const isEsqlMode = isOfAggregateQueryType(stateContainer.getCurrentTab().appState.query);
 
   const chartSectionConfigurationExtParams: ChartSectionConfigurationExtensionParams =
     useMemo(() => {
@@ -157,7 +156,10 @@ const ChartsWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartPr
       };
     }, [dispatch, stateContainer.actions.updateESQLQuery]);
 
+  const query = stateContainer.getCurrentTab().appState.query;
   const chartSectionConfig = useMemo(() => {
+    const isEsqlMode = isOfAggregateQueryType(query);
+
     if (!isEsqlMode) {
       return {
         replaceDefaultChart: false,
@@ -167,7 +169,7 @@ const ChartsWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartPr
     return getChartConfigAccessor(() => ({
       replaceDefaultChart: false,
     }))(chartSectionConfigurationExtParams);
-  }, [getChartConfigAccessor, chartSectionConfigurationExtParams, isEsqlMode]);
+  }, [getChartConfigAccessor, chartSectionConfigurationExtParams, query]);
 
   useEffect(() => {
     const histogramConfig$ = selectTabRuntimeState(
