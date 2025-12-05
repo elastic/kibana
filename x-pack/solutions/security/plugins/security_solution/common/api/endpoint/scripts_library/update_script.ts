@@ -6,11 +6,40 @@
  */
 
 import { schema, type TypeOf } from '@kbn/config-schema';
+import {
+  ScriptDescriptionSchema,
+  ScriptExampleSchema,
+  ScriptFileSchema,
+  ScriptInstructionsSchema,
+  ScriptNameSchema,
+  ScriptPathToExecutableSchema,
+  ScriptPlatformSchema,
+  ScriptRequiresInputSchema,
+} from './common';
 import type { DeepMutable } from '../../../endpoint/types';
 import { validateNonEmptyString } from '../schema_utils';
 
 export const PatchUpdateRequestSchema = {
-  body: schema.object({}),
+  body: schema.object(
+    {
+      name: schema.maybe(ScriptNameSchema),
+      platform: schema.maybe(ScriptPlatformSchema),
+      file: schema.maybe(ScriptFileSchema),
+      requiresInput: schema.maybe(ScriptRequiresInputSchema),
+      description: schema.maybe(ScriptDescriptionSchema),
+      instructions: schema.maybe(ScriptInstructionsSchema),
+      example: schema.maybe(ScriptExampleSchema),
+      pathToExecutable: schema.maybe(ScriptPathToExecutableSchema),
+      version: schema.maybe(schema.string({ minLength: 1, validate: validateNonEmptyString })),
+    },
+    {
+      validate: (value) => {
+        if (Object.keys(value).length === 0) {
+          return 'At least one field must defined for updated';
+        }
+      },
+    }
+  ),
   params: schema.object({
     script_id: schema.string({ validate: validateNonEmptyString }),
   }),
