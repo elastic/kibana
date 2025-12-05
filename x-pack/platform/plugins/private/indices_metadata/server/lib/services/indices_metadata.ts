@@ -40,7 +40,7 @@ import type { ConfigurationService } from './configuration';
 
 const TASK_TYPE = 'IndicesMetadata:IndicesMetadataTask';
 const TASK_ID = 'indices-metadata:indices-metadata-task:1.0.0';
-const INTERVAL = '1m';
+const INTERVAL = '24h';
 
 export class IndicesMetadataService {
   private readonly logger: Logger;
