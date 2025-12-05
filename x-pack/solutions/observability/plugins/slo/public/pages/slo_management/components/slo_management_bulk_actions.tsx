@@ -49,19 +49,35 @@ export function SloManagementBulkActions({ items, setSelectedItems }: Props) {
           ),
         },
         {
+          'data-test-subj': 'sloSloManagementTableBulkPurgeInstancesButton',
+          icon: 'broom',
+          onClick: () => {
+            triggerAction({
+              items,
+              type: 'purge_instances',
+              onConfirm: () => resetSelectedItems(),
+            });
+            setIsOpen(false);
+          },
+          name: i18n.translate(
+            'xpack.slo.sloManagementTable.sloSloManagementTableBulkPurgeInstancesButtonLabel',
+            { defaultMessage: 'Purge stale instances' }
+          ),
+        },
+        {
           'data-test-subj': 'sloSloManagementTableBulkPurgeButton',
           icon: 'logstashOutput',
           onClick: () => {
             triggerAction({
               items,
-              type: 'bulk_purge',
+              type: 'bulk_purge_rollup',
               onConfirm: () => resetSelectedItems(),
             });
             setIsOpen(false);
           },
           name: i18n.translate(
             'xpack.slo.sloManagementTable.sloSloManagementTableBulkPurgeButtonLabel',
-            { defaultMessage: 'Purge Rollup Data' }
+            { defaultMessage: 'Purge rollup data' }
           ),
         },
       ],
