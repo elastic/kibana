@@ -38,7 +38,6 @@ import type {
   ChartSectionConfigurationExtensionParams,
   ChartSectionConfiguration,
 } from '../../../../context_awareness/types';
-import { useDataState } from '../../hooks/use_data_state';
 
 export type ChartPortalNode = HtmlPortalNode;
 export type ChartPortalNodes = Record<string, ChartPortalNode>;
@@ -280,8 +279,6 @@ const CustomChartSectionWrapper = ({
   const { chartToolbarCss, histogramCss } = useChartStyles(
     !!layoutProps.chart && !layoutProps.chart.hidden
   );
-
-  const { result, esqlQueryColumns } = useDataState(stateContainer.dataState.data$.documents$);
 
   if (!fetchParams || !hasValidFetchParams) {
     return null;

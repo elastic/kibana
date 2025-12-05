@@ -7,13 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { dimensionsRoutes } from './dimensions/route';
 import { fieldCapsRoutes } from './field_caps/route';
-import { fieldsRoutes } from './fields/route';
 
 export const routeRepository = {
-  ...dimensionsRoutes,
-  ...fieldsRoutes,
   ...fieldCapsRoutes,
 };
 

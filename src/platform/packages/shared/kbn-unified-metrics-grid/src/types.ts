@@ -10,6 +10,12 @@
 import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import type { MetricsExperienceClient } from '@kbn/metrics-experience-plugin/public';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
+import type {
+  FieldCapsFieldCapability,
+  MappingTimeSeriesMetricType,
+} from '@elastic/elasticsearch/lib/api/types';
+import type { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { SpecsKey } from './common/utils/fields';
 
 export interface MetricsExperienceService {
   client: MetricsExperienceClient;
@@ -27,3 +33,44 @@ interface ChartSectionActions {
 export interface UnifiedMetricsGridProps extends ChartSectionProps {
   actions: ChartSectionActions;
 }
+export interface Dimension {
+  name: string;
+  type: ES_FIELD_TYPES;
+}
+
+export type MetricFieldType = 'metric' | 'dimension';
+export interface MetricField {
+  name: string;
+  index: string;
+  dimensions: Dimension[];
+  type: string;
+  instrument?: MappingTimeSeriesMetricType;
+  unit?: MetricUnit;
+  display?: string;
+  scope?: string;
+  noData?: boolean;
+}
+
+export type DimensionValueFilters = Record<string, string[]>;
+
+export interface FieldSpec {
+  key: SpecsKey;
+  index: string;
+  fieldName: string;
+  fieldType: string;
+  typeInfo: FieldCapsFieldCapability;
+  dimensions: Dimension[];
+}
+
+export type MetricUnit =
+  | 'ns'
+  | 'us'
+  | 'ms'
+  | 's'
+  | 'm'
+  | 'h'
+  | 'd'
+  | 'percent'
+  | 'bytes'
+  | 'count'
+  | `{${string}}`; // otel special units of count

@@ -9,14 +9,15 @@
 
 import React, { useCallback } from 'react';
 import { createContext } from 'react';
-import type { Dimension } from '@kbn/metrics-experience-plugin/common/types';
+import type { Dimension } from '../../types';
 import { type MetricsExperienceRestorableState, useRestorableState } from '../../restorable_state';
 import { FIELD_VALUE_SEPARATOR } from '../../common/constants';
+import type { SpecsKey } from '../../common/utils';
 
 export interface MetricsExperienceStateContextValue extends MetricsExperienceRestorableState {
   onPageChange: (value: number) => void;
   onDimensionsChange: (value: Dimension[]) => void;
-  onValuesChange: (value: string[]) => void;
+  onDimensionValuesChange: (items: { value: string; metricFields: Set<SpecsKey> }[]) => void;
   onSearchTermChange: (value: string) => void;
   onToggleFullscreen: () => void;
 }
@@ -26,16 +27,23 @@ export const MetricsExperienceStateContext =
 
 export function MetricsExperienceStateProvider({ children }: { children: React.ReactNode }) {
   const [currentPage, setCurrentPage] = useRestorableState('currentPage', 0);
-  const [dimensions, setDimensions] = useRestorableState('dimensions', []);
-  const [valueFilters, setValueFilters] = useRestorableState('valueFilters', []);
+  const [selectedDimensions, setSelectedDimensions] = useRestorableState('selectedDimensions', []);
+  const [selectedDimensionValues, setSelectedDimensionValues] = useRestorableState(
+    'selectedDimensionValues',
+    []
+  );
+  const [selectedValueMetricFields, setSelectedValueMetricFields] = useRestorableState(
+    'selectedValueMetricFields',
+    []
+  );
   const [searchTerm, setSearchTerm] = useRestorableState('searchTerm', '');
   const [isFullscreen, setIsFullscreen] = useRestorableState('isFullscreen', false);
 
   const onDimensionsChange = useCallback(
     (nextDimensions: Dimension[]) => {
       setCurrentPage(0);
-      setDimensions(nextDimensions);
-      setValueFilters((prevValueFilters) => {
+      setSelectedDimensions(nextDimensions);
+      setSelectedDimensionValues((prevValueFilters) => {
         if (nextDimensions.length === 0) {
           return [];
         }
@@ -45,14 +53,15 @@ export function MetricsExperienceStateProvider({ children }: { children: React.R
         );
       });
     },
-    [setValueFilters, setCurrentPage, setDimensions]
+    [setCurrentPage, setSelectedDimensionValues, setSelectedDimensions]
   );
 
-  const onValuesChange = useCallback(
-    (values: string[]) => {
-      setValueFilters(values);
+  const onDimensionValuesChange = useCallback(
+    (items: { value: string; metricFields: Set<SpecsKey> }[]) => {
+      setSelectedDimensionValues(items.map((item) => item.value));
+      setSelectedValueMetricFields(items.flatMap((item) => Array.from(item.metricFields)));
     },
-    [setValueFilters]
+    [setSelectedDimensionValues, setSelectedValueMetricFields]
   );
 
   const onPageChange = useCallback((page: number) => setCurrentPage(page), [setCurrentPage]);
@@ -73,13 +82,14 @@ export function MetricsExperienceStateProvider({ children }: { children: React.R
     <MetricsExperienceStateContext.Provider
       value={{
         currentPage,
-        dimensions,
+        selectedDimensions,
         isFullscreen,
         searchTerm,
-        valueFilters,
+        selectedDimensionValues,
+        selectedValueMetricFields,
         onPageChange,
         onDimensionsChange,
-        onValuesChange,
+        onDimensionValuesChange,
         onSearchTermChange,
         onToggleFullscreen,
       }}

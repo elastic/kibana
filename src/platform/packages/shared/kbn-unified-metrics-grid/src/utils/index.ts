@@ -8,5 +8,3 @@
  */
 
 export { extractFilters } from './extract_filters';
-export { generateMetricFields } from './generate_metric_fields';
-export type { FieldCapsResponseMap } from './generate_metric_fields';

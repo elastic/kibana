@@ -10,26 +10,19 @@
 import React, { useMemo, useCallback } from 'react';
 import { ToolbarSelector, type SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLoadingSpinner,
-  EuiNotificationBadge,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiNotificationBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 import { css } from '@emotion/react';
-import type { Dimension } from '@kbn/metrics-experience-plugin/common/types';
-import type { TimeRange } from '@kbn/data-plugin/common';
+import type { Dimension } from '../../types';
 import { FIELD_VALUE_SEPARATOR } from '../../common/constants';
-import { useDimensionsQuery } from '../../hooks';
 import { ClearAllSection } from './clear_all_section';
 import {
   MAX_VALUES_SELECTIONS,
   METRICS_VALUES_SELECTOR_DATA_TEST_SUBJ,
 } from '../../common/constants';
+import { useExtractDimensionsValues } from '../../hooks/use_extract_dimensions_values';
+import type { SpecsKey } from '../../common/utils';
 
 export interface ValuesFilterProps {
   selectedDimensions: Dimension[];
@@ -37,17 +30,14 @@ export interface ValuesFilterProps {
   indices?: string[];
   disabled?: boolean;
   fullWidth?: boolean;
-  timeRange?: TimeRange;
-
   isLoading?: boolean;
-  onChange: (values: string[]) => void;
+  onChange: (items: { value: string; metricFields: Set<SpecsKey> }[]) => void;
   onClear: () => void;
 }
 export const ValuesSelector = ({
   selectedDimensions,
   selectedValues,
   onChange,
-  timeRange,
   fullWidth = false,
   disabled = false,
   isLoading: isFieldsLoading = false,
@@ -59,65 +49,69 @@ export const ValuesSelector = ({
     [selectedDimensions]
   );
 
-  const {
-    data: values = [],
-    isLoading: isValuesLoading,
-    error,
-  } = useDimensionsQuery({
-    dimensions: selectedDimensionNames,
+  const valuesByDimensionName = useExtractDimensionsValues({
     indices,
-    from: timeRange?.from,
-    to: timeRange?.to,
+    dimensionNames: selectedDimensionNames,
   });
 
-  const groupedValues = useMemo(() => {
-    const result = new Map<string, Array<string>>();
-    values.forEach(({ value, field }) => {
-      const arr = result.get(field) ?? [];
-      arr.push(value);
-      result.set(field, arr);
-    });
-
+  // Map: "field${SEPARATOR}value" → metricFieldKey
+  const metricsByFieldValue = useMemo(() => {
+    const result = new Map<string, Set<SpecsKey>>();
+    for (const [field, values] of valuesByDimensionName.entries()) {
+      for (const [value, metricFieldKey] of values.entries()) {
+        result.set(`${field}${FIELD_VALUE_SEPARATOR}${value}`, metricFieldKey);
+      }
+    }
     return result;
-  }, [values]);
+  }, [valuesByDimensionName]);
 
   // Convert values to EuiSelectable options with group labels
+  // Key format: field${SEPARATOR}value${SEPARATOR}metricFieldKey (3 parts for parseDimensionFilters)
   const options: SelectableEntry[] = useMemo(() => {
     const selectedSet = new Set(selectedValues);
     const isAtMaxLimit = selectedValues.length >= MAX_VALUES_SELECTIONS;
 
-    return Array.from(groupedValues.entries()).flatMap<SelectableEntry>(([field, fieldValues]) => [
-      { label: field, isGroupLabel: true, value: field },
-      ...fieldValues.map<SelectableEntry>((value) => {
-        const key = `${field}${FIELD_VALUE_SEPARATOR}${value}`;
-        const isSelected = selectedSet.has(key);
-        const isDisabledByLimit = !isSelected && isAtMaxLimit;
+    return Array.from(valuesByDimensionName.entries()).flatMap<SelectableEntry>(
+      ([field, values]) => [
+        { label: field, isGroupLabel: true, value: field },
+        ...Array.from(values.keys())
+          .map<SelectableEntry>((value) => {
+            const key = `${field}${FIELD_VALUE_SEPARATOR}${value}`;
+            const isSelected = selectedSet.has(key);
+            const isDisabledByLimit = !isSelected && isAtMaxLimit;
 
-        return {
-          value,
-          label: value,
-          checked: isSelected ? 'on' : undefined,
-          disabled: isDisabledByLimit,
-          key,
-        };
-      }),
-    ]);
-  }, [groupedValues, selectedValues]);
+            return {
+              value,
+              label: value,
+              checked: isSelected ? 'on' : undefined,
+              disabled: isDisabledByLimit,
+              key,
+            };
+          })
+          .sort((a, b) => a.label.localeCompare(b.label)),
+      ]
+    );
+  }, [valuesByDimensionName, selectedValues]);
 
   const handleChange = useCallback(
     (chosenOption?: SelectableEntry[]) => {
       const newSelectedValues = chosenOption
         ?.filter((option) => !option.isGroupLabel && option.key)
-        .map((option: SelectableEntry) => option.key!);
+        .map((option: SelectableEntry) => {
+          return {
+            value: option.key!,
+            metricFields: metricsByFieldValue.get(option.key!) ?? new Set(),
+          };
+        });
 
       // Enforce the maximum limit
       const limitedSelection = (newSelectedValues ?? []).slice(0, MAX_VALUES_SELECTIONS);
       onChange(limitedSelection);
     },
-    [onChange]
+    [onChange, metricsByFieldValue]
   );
 
-  const isLoading = isValuesLoading || isFieldsLoading;
+  const isLoading = isFieldsLoading;
 
   const buttonLabel = useMemo(() => {
     const count = selectedValues.length;
@@ -186,28 +180,10 @@ export const ValuesSelector = ({
     );
   }, [selectedValues.length, onClear]);
 
-  if (error) {
-    return (
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="xs">
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="alert" color="danger" size="s" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s" color="danger">
-            <FormattedMessage
-              id="metricsExperience.valuesSelector.errorLoadingValues"
-              defaultMessage="Error loading values"
-            />
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-
   return (
     <ToolbarSelector
       data-test-subj={METRICS_VALUES_SELECTOR_DATA_TEST_SUBJ}
-      data-selected-value={selectedDimensionNames}
+      data-selected-value={selectedValues}
       searchable
       buttonLabel={buttonLabel}
       optionMatcher={comboBoxFieldOptionMatcher}

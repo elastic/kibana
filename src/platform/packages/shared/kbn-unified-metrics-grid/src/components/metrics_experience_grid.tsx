@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { keys } from '@elastic/eui';
 import {
   METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ,
@@ -18,10 +18,11 @@ import { MetricsGridWrapper } from './metrics_grid_wrapper';
 import { EmptyState } from './empty_state/empty_state';
 import { useToolbarActions } from './toolbar/hooks/use_toolbar_actions';
 import { SearchButton } from './toolbar/right_side_actions/search_button';
-import { useMetricFieldsCaps } from '../hooks';
+import { useMetricFields } from '../hooks';
 import { MetricsExperienceGridContent } from './metrics_experience_grid_content';
 import type { UnifiedMetricsGridProps } from '../types';
 import { generateMetricFields } from '../utils';
+import { useMetricFieldsCapsContext } from '../context/metric_fields_caps_provider';
 
 export const MetricsExperienceGrid = ({
   renderToggleActions,
@@ -36,33 +37,22 @@ export const MetricsExperienceGrid = ({
   isChartLoading: isDiscoverLoading,
   isComponentVisible,
 }: UnifiedMetricsGridProps) => {
-  const { dataView, timeRange } = fetchParams;
-  const { searchTerm, isFullscreen, valueFilters, onSearchTermChange, onToggleFullscreen } =
-    useMetricsExperienceState();
+  const {
+    searchTerm,
+    isFullscreen,
+    selectedDimensionValues,
+    onSearchTermChange,
+    onToggleFullscreen,
+  } = useMetricsExperienceState();
 
-  const indexPattern = useMemo(() => dataView?.getIndexPattern() ?? 'metrics-*', [dataView]);
-  // const { data: _fields = [], isFetching: isFetchingAllFields } = useMetricFieldsQuery({
-  //   index: indexPattern,
-  //   timeRange,
-  // });
-
-  const { data: fieldCaps = {}, isFetching: isFetchingAllFields } = useMetricFieldsCaps({
-    index: indexPattern,
-    timeRange,
-  });
-
-  const metricFieldsFromResults = useMemo(
-    () => generateMetricFields(fieldCaps, results),
-    [fieldCaps, results]
-  );
-
-  const fields = metricFieldsFromResults;
+  const { isFetching: isFetchingFieldsCaps } = useMetricFieldsCapsContext();
+  const { metricFields: fields } = useMetricFields();
 
   const { toggleActions, leftSideActions, rightSideActions } = useToolbarActions({
     fields,
     renderToggleActions,
     fetchParams,
-    isLoading: isFetchingAllFields,
+    isLoading: isFetchingFieldsCaps,
   });
 
   const onKeyDown = useCallback(
@@ -75,8 +65,8 @@ export const MetricsExperienceGrid = ({
     [isFullscreen, onToggleFullscreen]
   );
 
-  if (fields.length === 0 && valueFilters.length === 0) {
-    return <EmptyState isLoading={isFetchingAllFields} />;
+  if (fields.length === 0 && selectedDimensionValues.length === 0) {
+    return <EmptyState isLoading={isFetchingFieldsCaps} />;
   }
 
   return (
@@ -113,7 +103,7 @@ export const MetricsExperienceGrid = ({
         onFilter={onFilter}
         actions={actions}
         histogramCss={histogramCss}
-        isFieldsLoading={isFetchingAllFields}
+        isFieldsLoading={isFetchingFieldsCaps}
         isDiscoverLoading={isDiscoverLoading}
       />
     </MetricsGridWrapper>

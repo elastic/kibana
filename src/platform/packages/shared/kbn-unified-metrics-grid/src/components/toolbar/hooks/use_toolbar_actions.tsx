@@ -8,12 +8,11 @@
  */
 
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
-import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { useEuiTheme, useIsWithinMaxBreakpoint } from '@elastic/eui';
-import type { TimeRange } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
 import { css } from '@emotion/react';
+import type { MetricField } from '../../../types';
 import { useMetricsExperienceState } from '../../../context/metrics_experience_state_provider';
 import { DimensionsSelector } from '../dimensions_selector';
 import { ValuesSelector } from '../values_selector';
@@ -35,16 +34,15 @@ export const useToolbarActions = ({
   hideRightSideActions = false,
   isLoading = false,
 }: UseToolbarActionsProps) => {
-  const [timeRange, setTimeRange] = useState<TimeRange | undefined>(fetchParams.timeRange);
   const [indices, setIndices] = useState<string[]>([
     ...new Set(fields.map((field) => field.index)),
   ]);
 
   const {
-    dimensions,
-    valueFilters,
+    selectedDimensions,
+    selectedDimensionValues,
     onDimensionsChange,
-    onValuesChange,
+    onDimensionValuesChange,
     isFullscreen,
     onToggleFullscreen,
   } = useMetricsExperienceState();
@@ -52,8 +50,8 @@ export const useToolbarActions = ({
   const { euiTheme } = useEuiTheme();
 
   const onClearValues = useCallback(() => {
-    onValuesChange([]);
-  }, [onValuesChange]);
+    onDimensionValuesChange([]);
+  }, [onDimensionValuesChange]);
 
   const isSmallScreen = useIsWithinMaxBreakpoint(isFullscreen ? 'm' : 'l');
 
@@ -65,7 +63,6 @@ export const useToolbarActions = ({
   useEffect(() => {
     if (!isLoading) {
       setIndices([...new Set(fields.map((field) => field.index))]);
-      setTimeRange(fetchParams.timeRange);
     }
   }, [isLoading, fields, fetchParams.timeRange]);
 
@@ -75,20 +72,19 @@ export const useToolbarActions = ({
         <DimensionsSelector
           fields={fields}
           onChange={onDimensionsChange}
-          selectedDimensions={dimensions}
+          selectedDimensions={selectedDimensions}
           singleSelection={MAX_DIMENSIONS_SELECTIONS === 1}
           fullWidth={isSmallScreen}
           isLoading={isLoading}
         />
       ),
-      dimensions.length > 0 ? (
+      selectedDimensions.length > 0 ? (
         <ValuesSelector
-          selectedDimensions={dimensions}
-          selectedValues={valueFilters}
-          onChange={onValuesChange}
-          disabled={dimensions.length === 0}
+          selectedDimensions={selectedDimensions}
+          selectedValues={selectedDimensionValues}
           indices={indices}
-          timeRange={timeRange}
+          onChange={onDimensionValuesChange}
+          disabled={selectedDimensions.length === 0}
           onClear={onClearValues}
           fullWidth={isSmallScreen}
           isLoading={isLoading}
@@ -96,15 +92,14 @@ export const useToolbarActions = ({
       ) : null,
     ],
     [
-      isSmallScreen,
-      dimensions,
-      fields,
       indices,
+      isSmallScreen,
+      selectedDimensions,
+      fields,
       onClearValues,
       onDimensionsChange,
-      onValuesChange,
-      timeRange,
-      valueFilters,
+      onDimensionValuesChange,
+      selectedDimensionValues,
       hideDimensionsSelector,
       isLoading,
     ]

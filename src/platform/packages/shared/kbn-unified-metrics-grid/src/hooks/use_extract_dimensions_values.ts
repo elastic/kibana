@@ -1,0 +1,51 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { useMemo } from 'react';
+import { useMetricFieldsCapsContext } from '../context/metric_fields_caps_provider';
+import type { SpecsKey } from '../common/utils';
+import { buildFieldSpecsKey } from '../common/utils';
+
+/**
+ * Extracts dimension values for specific indices and selected dimensions.
+ * Calls getRowsByDimension() on demand.
+ */
+export const useExtractDimensionsValues = ({
+  indices,
+  dimensionNames,
+}: {
+  indices: string[];
+  dimensionNames: string[];
+}) => {
+  const { getRowsByDimension } = useMetricFieldsCapsContext();
+
+  const specsKeys = useMemo(() => {
+    return dimensionNames.flatMap((dimName) =>
+      indices.map((index) => buildFieldSpecsKey(index, dimName))
+    );
+  }, [indices, dimensionNames]);
+
+  const rowsByDimension = useMemo(() => {
+    return getRowsByDimension(specsKeys);
+  }, [specsKeys, getRowsByDimension]);
+
+  return useMemo(() => {
+    if (rowsByDimension.size === 0) {
+      return new Map<string, Map<string, Set<SpecsKey>>>();
+    }
+
+    const result = new Map<string, Map<string, Set<SpecsKey>>>();
+
+    for (const [key, values] of rowsByDimension.entries()) {
+      result.set(key, values);
+    }
+
+    return result;
+  }, [rowsByDimension]);
+};

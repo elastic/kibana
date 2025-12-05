@@ -7,29 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MetricUnit } from '../../../common/fields/types';
+import type { MetricUnit } from '../../../types';
 
 const RATIO_FIELD_NAME_SUFFIX = 'utilization';
+
 const normalizedUnitMap: Record<string, MetricUnit> = {
-  // otel
   by: 'bytes',
   '%': 'percent',
   '1': 'count',
-  // ecs
   byte: 'bytes',
   nanos: 'ns',
   micros: 'us',
 };
-export function normalizeUnit({
+
+/**
+ * Normalizes a unit string to a standard MetricUnit.
+ * Handles OTel and ECS unit formats.
+ * For ratio fields (containing 'utilization'), defaults to 'percent'.
+ */
+export const normalizeUnit = ({
   fieldName,
   unit,
 }: {
   fieldName: string;
   unit: string | undefined;
-}): MetricUnit | undefined {
-  const isRatio = isRatioField(fieldName);
+}): MetricUnit | undefined => {
+  const isRatio = fieldName.toLowerCase().includes(RATIO_FIELD_NAME_SUFFIX);
+
   if (!unit?.trim() && !isRatio) {
-    return;
+    return undefined;
   }
 
   const normalizedUnit = unit ? normalizedUnitMap[unit.toLowerCase()] ?? unit : undefined;
@@ -39,8 +45,4 @@ export function normalizeUnit({
   }
 
   return normalizedUnit;
-}
-
-function isRatioField(fieldName: string): boolean {
-  return fieldName.toLowerCase().includes(RATIO_FIELD_NAME_SUFFIX);
-}
+};

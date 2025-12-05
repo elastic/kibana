@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type {
-  MetricField,
-  MetricFieldsResponse,
-  MetricFieldType,
-  MetricUnit,
-} from './fields/types';
-export type { Dimension, DimensionFilters } from './dimensions/types';
+import { useContext } from 'react';
+import { MetricFieldsCapsContext } from './metric_fields_caps_provider';
+
+export const useMetricFieldsCapsContext = () => {
+  return useContext(MetricFieldsCapsContext);
+};

@@ -7,11 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type ES_FIELD_TYPES } from '@kbn/field-types';
-
-export interface Dimension {
-  name: string;
-  type: ES_FIELD_TYPES;
-}
-
-export type DimensionFilters = Record<string, string[]>;
+export { MetricFieldsCapsProvider } from './metric_fields_caps_provider';
+export { useMetricFieldsCapsContext } from './use_metric_fields_caps_context';
