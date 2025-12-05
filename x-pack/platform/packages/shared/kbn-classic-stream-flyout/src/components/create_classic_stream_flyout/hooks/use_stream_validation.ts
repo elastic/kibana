@@ -7,11 +7,7 @@
 
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { useDebounceFn } from '@kbn/react-hooks';
-import {
-  validateStreamName,
-  type StreamNameValidator,
-  type ValidationErrorType,
-} from '../../../utils';
+import { validateStreamName, type StreamNameValidator } from '../../../utils';
 import { useAbortController } from './use_abort_controller';
 import {
   validationReducer,
@@ -55,10 +51,10 @@ export const useStreamValidation = ({
   const { validationError, conflictingIndexPattern, hasAttemptedSubmit, isValidating } =
     validationState;
 
-  const validationErrorRef = useRef<ValidationErrorType>(null);
   const pendingValidationNamesRef = useRef<Set<string>>(new Set());
-  const isCreateValidationInProgressRef = useRef(false);
   const lastStreamNameRef = useRef<string>('');
+  // Ref needed for closure in useDebounceFn
+  const isSubmittingRef = useRef(false);
 
   const { getAbortController: getCreateAbortController, abort: abortCreateValidation } =
     useAbortController();
@@ -85,7 +81,6 @@ export const useStreamValidation = ({
           return false;
         }
         dispatchValidation({ type: 'SET_VALIDATION_ERROR', payload: result.errorType });
-        validationErrorRef.current = result.errorType;
         dispatchValidation({
           type: 'SET_CONFLICTING_INDEX_PATTERN',
           payload: result.conflictingIndexPattern,
@@ -105,7 +100,7 @@ export const useStreamValidation = ({
     [getDebouncedAbortController, isDebouncedAborted]
   );
 
-  // Stable async function for debounced validation - use refs for stable deps
+  // Stable reference for debounced validation
   const runDebouncedValidationRef = useRef(runDebouncedValidation);
   runDebouncedValidationRef.current = runDebouncedValidation;
 
@@ -118,7 +113,7 @@ export const useStreamValidation = ({
       if (pendingValidationNamesRef.current.has(name)) {
         return;
       }
-      if (isCreateValidationInProgressRef.current) {
+      if (isSubmittingRef.current) {
         return;
       }
       pendingValidationNamesRef.current.add(name);
@@ -134,7 +129,7 @@ export const useStreamValidation = ({
     { wait: debounceMs }
   );
 
-  // Store debounced function in ref to avoid including it in dependencies
+  // Store debounced functions in refs to avoid recreating on every render
   const runDebouncedValidationDebouncedRef = useRef(runDebouncedValidationDebounced);
   runDebouncedValidationDebouncedRef.current = runDebouncedValidationDebounced;
   const cancelDebouncedValidationRef = useRef(cancelDebouncedValidation);
@@ -145,9 +140,8 @@ export const useStreamValidation = ({
     abortDebouncedValidation();
     cancelDebouncedValidationRef.current();
     dispatchValidation({ type: 'RESET_VALIDATION' });
-    validationErrorRef.current = null;
     pendingValidationNamesRef.current.clear();
-    isCreateValidationInProgressRef.current = false;
+    isSubmittingRef.current = false;
   }, [abortCreateValidation, abortDebouncedValidation]);
 
   const handleStreamNameChange = useCallback(
@@ -163,9 +157,9 @@ export const useStreamValidation = ({
 
       // If user changes input while Create validation is in progress, abort it
       // and transition to debounced validation mode
-      if (isCreateValidationInProgressRef.current && hasNameChanged) {
+      if (isSubmittingRef.current && hasNameChanged) {
+        isSubmittingRef.current = false;
         abortCreateValidation();
-        isCreateValidationInProgressRef.current = false;
         setIsSubmitting(false);
         // Keep isValidating true to show loading state during debounced validation
       }
@@ -174,9 +168,8 @@ export const useStreamValidation = ({
       lastStreamNameRef.current = newStreamName;
 
       if (hasAttemptedSubmit) {
-        if (validationErrorRef.current !== null) {
+        if (validationError !== null) {
           dispatchValidation({ type: 'SET_VALIDATION_ERROR', payload: null });
-          validationErrorRef.current = null;
           dispatchValidation({ type: 'SET_CONFLICTING_INDEX_PATTERN', payload: undefined });
         }
         if (!pendingValidationNamesRef.current.has(newStreamName)) {
@@ -189,12 +182,12 @@ export const useStreamValidation = ({
         }
       }
     },
-    [hasAttemptedSubmit, abortCreateValidation, abortDebouncedValidation]
+    [hasAttemptedSubmit, validationError, abortCreateValidation, abortDebouncedValidation]
   );
 
   const handleCreate = useCallback(async () => {
-    isCreateValidationInProgressRef.current = true;
     setIsSubmitting(true);
+    isSubmittingRef.current = true;
     cancelDebouncedValidationRef.current();
     abortDebouncedValidation();
 
@@ -211,7 +204,6 @@ export const useStreamValidation = ({
       );
 
       dispatchValidation({ type: 'SET_VALIDATION_ERROR', payload: result.errorType });
-      validationErrorRef.current = result.errorType;
       dispatchValidation({
         type: 'SET_CONFLICTING_INDEX_PATTERN',
         payload: result.conflictingIndexPattern,
@@ -228,8 +220,8 @@ export const useStreamValidation = ({
       }
     } finally {
       dispatchValidation({ type: 'SET_IS_VALIDATING', payload: false });
-      isCreateValidationInProgressRef.current = false;
       setIsSubmitting(false);
+      isSubmittingRef.current = false;
     }
   }, [abortDebouncedValidation, getCreateAbortController, onCreate, streamName, onValidateRef]);
 
