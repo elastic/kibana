@@ -11,7 +11,6 @@ import { ObjectRemover } from '../../../lib/object_remover';
 import { getConnectorByName } from './utils';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const find = getService('find');
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const actions = getService('actions');
   const supertest = getService('supertest');
@@ -27,7 +26,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await objectRemover.removeAll();
     });
 
-    it('should create a spec connector with config and secret headers', async () => {
+    it('should create a spec connector (alienvault)', async () => {
       const connectorName = 'web';
 
       await actions.connectorFromSpec.openCreateConnectorFlyout();
