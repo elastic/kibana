@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
   'x-elastic-internal-origin': 'kibana',
-  'elastic-api-version': '1',
+  [ELASTIC_HTTP_VERSION_HEADER]: '1',
 };
