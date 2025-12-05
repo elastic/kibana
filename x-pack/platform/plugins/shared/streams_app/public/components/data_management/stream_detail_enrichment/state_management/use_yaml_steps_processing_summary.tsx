@@ -14,14 +14,13 @@ import {
   useStreamEnrichmentSelector,
   useYamlModeSelector,
 } from './stream_enrichment_state_machine';
+import { selectHasAnyErrors } from './stream_enrichment_state_machine/selectors';
 
 export type YamlStepsProcessingSummaryMap = Map<string, StepStatus>;
 
 export const useYamlStepsProcessingSummary = () => {
   const nextStreamlangDSL = useStreamEnrichmentSelector((state) => state.context.nextStreamlangDSL);
-  const isNextStreamlangDSLValid = useStreamEnrichmentSelector(
-    (state) => state.context.isNextStreamlangDSLValid
-  );
+  const hasAnyErrors = useStreamEnrichmentSelector((state) => selectHasAnyErrors(state.context));
 
   const hasSimulation = useSimulatorSelector((snapshot) => Boolean(snapshot.context.simulation));
 
@@ -44,7 +43,8 @@ export const useYamlStepsProcessingSummary = () => {
   const stepsProcessingSummary = useMemo(() => {
     const summaryMap: YamlStepsProcessingSummaryMap = new Map();
 
-    if (!isNextStreamlangDSLValid) {
+    // Don't process if there are any validation or schema errors
+    if (hasAnyErrors) {
       return summaryMap;
     }
 
@@ -103,7 +103,7 @@ export const useYamlStepsProcessingSummary = () => {
 
     return summaryMap;
   }, [
-    isNextStreamlangDSLValid,
+    hasAnyErrors,
     nextStreamlangDSL.steps,
     simulatorSteps,
     processorMetrics,

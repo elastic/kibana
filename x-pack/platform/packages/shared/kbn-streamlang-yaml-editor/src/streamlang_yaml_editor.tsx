@@ -15,6 +15,7 @@ import { monaco } from '@kbn/monaco';
 import type { StreamlangYamlEditorProps, StepDecoration } from './types';
 import { useStepDecorations } from './hooks/use_step_decorations';
 import { useGutterSimulationMarkers } from './hooks/use_gutter_simulation_markers';
+import { useGutterValidationMarkers } from './hooks/use_gutter_validation_markers';
 import { useFocusedStepOutline } from './hooks/use_focused_step_outline';
 import { getStreamlangMonacoSchemaConfig } from './validation/schema_generator';
 import {
@@ -52,6 +53,7 @@ export const StreamlangYamlEditor = ({
   reinitializationDeps = [],
   simulationMode = 'partial',
   streamType,
+  validationErrors,
 }: StreamlangYamlEditorProps) => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const [decorations, setDecorations] = useState<StepDecoration[]>([]);
@@ -199,6 +201,9 @@ export const StreamlangYamlEditor = ({
     yamlLineMap,
     stepSummary
   );
+
+  // Add validation error gutter markers (independent of simulation)
+  useGutterValidationMarkers(editorRef.current, validationErrors, yamlLineMap);
 
   // Add blue border around the focused step (based on cursor position)
   const { styles: focusedStepStyles, focusedStepInfo } = useFocusedStepOutline(

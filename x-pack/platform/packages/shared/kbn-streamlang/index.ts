@@ -19,4 +19,4 @@ export * from './src/transpilers/shared/convert_for_ui';
 export * from './src/utilities';
 export { ACTION_METADATA_MAP, type ActionMetadata } from './src/actions/action_metadata';
 export { getJsonSchemaFromStreamlangSchema } from './src/schema/get_json_schema_from_streamlang_schema';
-export * from './src/validation/validate_streamlang';
+export * from './src/validation';

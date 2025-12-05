@@ -29,6 +29,36 @@ export const selectValidationErrors = (context: StreamEnrichmentContextType) => 
   return context.validationErrors;
 };
 
+/**
+ * Returns true if there are any schema errors or validation errors.
+ * Schema errors come from Zod parsing failures.
+ * Validation errors come from processor validation (namespace, reserved fields, type mismatches).
+ */
+export const selectHasAnyErrors = (context: StreamEnrichmentContextType): boolean => {
+  const hasSchemaErrors = context.schemaErrors.length > 0;
+  const hasValidationErrors = context.validationErrors.size > 0;
+  return hasSchemaErrors || hasValidationErrors;
+};
+
+/**
+ * Checks if there are any errors in a parent snapshot context.
+ * Used by child machines (YAML mode, interactive mode) to check parent state.
+ */
+export const hasErrorsInParentSnapshot = (parentSnapshot: {
+  context: { schemaErrors: string[]; validationErrors: Map<string, unknown> };
+}): boolean => {
+  const hasSchemaErrors = parentSnapshot.context.schemaErrors.length > 0;
+  const hasValidationErrors = parentSnapshot.context.validationErrors.size > 0;
+  return hasSchemaErrors || hasValidationErrors;
+};
+
+/**
+ * Selects schema errors from Zod parsing.
+ */
+export const selectSchemaErrors = (context: StreamEnrichmentContextType) => {
+  return context.schemaErrors;
+};
+
 export const selectWhetherThereAreOutdatedDocumentsInSimulation = createSelector(
   [
     (streamEnrichmentContext: StreamEnrichmentContextType) =>

@@ -66,12 +66,13 @@ export interface StreamEnrichmentContextType {
   yamlModeRef: YamlModeActorRef | undefined;
   // Regardless of mode (interactive or YAML), this holds the current blob of Streamlang DSL reflecting the current changes.
   nextStreamlangDSL: StreamlangDSL;
-  // Whether the nextStreamlangDSL is valid
-  isNextStreamlangDSLValid: boolean;
   // The last persisted Streamlang DSL blob, used to determine what has changed.
   previousStreamlangDSL: StreamlangDSL;
   // Whether there are unsaved changes (diff of nextStreamlangDSL vs previousStreamlangDSL)
   hasChanges: boolean;
+  // Schema validation errors (from Zod parsing)
+  schemaErrors: string[];
+  // Validation errors for processors (namespace, reserved fields, type mismatches)
   validationErrors: Map<string, StreamlangValidationError[]>;
   fieldTypesByProcessor: Map<string, Map<string, FieldType>>;
 }

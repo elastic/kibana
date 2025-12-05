@@ -18,7 +18,6 @@ import { isIlmLifecycle, isInheritLifecycle, Streams } from '@kbn/streams-schema
 import _, { cloneDeep } from 'lodash';
 import { isNotFoundError } from '@kbn/es-errors';
 import { isMappingProperties } from '@kbn/streams-schema/src/fields';
-import { validateStreamlang, StreamlangValidationError } from '@kbn/streamlang';
 import {
   isDisabledLifecycleFailureStore,
   isInheritFailureStore,
@@ -40,7 +39,6 @@ import { validateClassicFields } from '../../helpers/validate_fields';
 import { validateBracketsInFieldNames, validateSettings } from '../../helpers/validate_stream';
 import type { DataStreamMappingsUpdateResponse } from '../../data_streams/manage_data_streams';
 import { formatSettings, settingsUpdateRequiresRollover } from './helpers';
-import { MalformedStreamError } from '../../errors/malformed_stream_error';
 
 interface ClassicStreamChanges extends StreamChanges {
   processing: boolean;
@@ -227,21 +225,6 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
             ),
           ],
         };
-      }
-    }
-
-    if (this._changes.processing && this._definition.ingest.processing.steps.length > 0) {
-      try {
-        validateStreamlang(this._definition.ingest.processing, 'classic');
-      } catch (error) {
-        if (error instanceof StreamlangValidationError) {
-          throw new MalformedStreamError(
-            `Invalid processing Streamlang DSL "${this._definition.name}": ${error.errors.join(
-              ', '
-            )}`
-          );
-        }
-        throw error;
       }
     }
 

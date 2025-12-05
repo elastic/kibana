@@ -10,11 +10,10 @@ import {
   checkAdditiveChanges,
   addDeterministicCustomIdentifiers,
   convertStepsForUI,
-  validateStreamlang,
-  StreamlangValidationError,
 } from '@kbn/streamlang';
-import type { StreamlangDSL } from '@kbn/streamlang/types/streamlang';
+import { isStreamlangDSLSchema, type StreamlangDSL } from '@kbn/streamlang/types/streamlang';
 import type { YamlModeContext, YamlModeInput, YamlModeEvent } from './types';
+import { hasErrorsInParentSnapshot } from '../stream_enrichment_state_machine/selectors';
 
 export type YamlModeActorRef = ActorRefFrom<typeof yamlModeMachine>;
 export type YamlModeSnapshot = SnapshotFrom<typeof yamlModeMachine>;
@@ -27,29 +26,23 @@ export const yamlModeMachine = setup({
   },
   actions: {
     updateDSL: assign(({ context }, params: { streamlangDSL: StreamlangDSL; yaml: string }) => {
-      try {
-        validateStreamlang(params.streamlangDSL);
-        // Add deterministic identifiers to the DSL
-        const dslWithIds = addDeterministicCustomIdentifiers(params.streamlangDSL);
-
-        // Check if changes are purely additive
-        const additiveChanges = checkAdditiveChanges(context.previousStreamlangDSL, dslWithIds);
-
+      // Quick schema check before running additive changes check
+      // Full validation is handled by the parent enrichment machine
+      if (!isStreamlangDSLSchema(params.streamlangDSL)) {
         return {
-          nextStreamlangDSL: dslWithIds,
-          additiveChanges,
-          errors: [],
+          nextStreamlangDSL: params.streamlangDSL,
+          additiveChanges: context.additiveChanges,
         };
-      } catch (error) {
-        if (error instanceof StreamlangValidationError) {
-          return {
-            nextStreamlangDSL: params.streamlangDSL,
-            additiveChanges: context.additiveChanges,
-            errors: [...error.errors],
-          };
-        }
-        throw error;
       }
+
+      // Schema is valid - add identifiers and check additivity
+      const dslWithIds = addDeterministicCustomIdentifiers(params.streamlangDSL);
+      const additiveChanges = checkAdditiveChanges(context.previousStreamlangDSL, dslWithIds);
+
+      return {
+        nextStreamlangDSL: dslWithIds,
+        additiveChanges,
+      };
     }),
     sendDSLToParent: ({ context }) => {
       context.parentRef.send({
@@ -68,6 +61,11 @@ export const yamlModeMachine = setup({
       })
     ),
     sendStepsToSimulator: ({ context }, params?: { stepIdBreakpoint?: string }) => {
+      // Check parent for any errors (schema or validation) - don't simulate if there are errors
+      if (hasErrorsInParentSnapshot(context.parentRef.getSnapshot())) {
+        return;
+      }
+
       const filterStepsUpToBreakpoint = (
         steps: ReturnType<typeof convertStepsForUI>,
         breakpoint?: string
@@ -141,15 +139,16 @@ export const yamlModeMachine = setup({
       return !additiveChanges.isPurelyAdditive || (additiveChanges.newStepIds?.length ?? 0) > 0;
     },
     canSimulate: ({ context }) => {
+      // Check parent for any errors (schema or validation)
+      if (hasErrorsInParentSnapshot(context.parentRef.getSnapshot())) {
+        return false;
+      }
+
       return (
-        context.errors.length === 0 &&
-        (context.simulationMode === 'complete' ||
-          (context.additiveChanges.isPurelyAdditive &&
-            (context.additiveChanges.newStepIds?.length ?? 0) > 0))
+        context.simulationMode === 'complete' ||
+        (context.additiveChanges.isPurelyAdditive &&
+          (context.additiveChanges.newStepIds?.length ?? 0) > 0)
       );
-    },
-    isValidDSL: ({ context }) => {
-      return context.errors.length === 0;
     },
   },
 }).createMachine({
@@ -159,7 +158,6 @@ export const yamlModeMachine = setup({
     previousStreamlangDSL: input.previousStreamlangDSL,
     additiveChanges: checkAdditiveChanges(input.previousStreamlangDSL, input.nextStreamlangDSL),
     parentRef: input.parentRef,
-    errors: [],
     privileges: input.privileges,
     simulationMode: input.simulationMode,
   }),

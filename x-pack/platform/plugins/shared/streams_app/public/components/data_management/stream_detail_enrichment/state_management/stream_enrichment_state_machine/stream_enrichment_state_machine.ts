@@ -13,15 +13,10 @@ import type { MachineImplementationsFrom, ActorRefFrom, SnapshotFrom } from 'xst
 import {
   addDeterministicCustomIdentifiers,
   checkAdditiveChanges,
-  StreamlangValidationError,
   validateStreamlangModeCompatibility,
-  ALWAYS_CONDITION,
-  convertStepsForUI,
-  convertUIStepsToDSL,
   validateStreamlang,
-  type StreamlangProcessorDefinition,
 } from '@kbn/streamlang';
-import { isStreamlangDSLSchema, type StreamlangDSL } from '@kbn/streamlang/types/streamlang';
+import { streamlangDSLSchema, type StreamlangDSL } from '@kbn/streamlang/types/streamlang';
 import type { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
 import { getStreamTypeFromDefinition } from '../../../../../util/get_stream_type_from_definition';
 import type {
@@ -93,11 +88,7 @@ export const streamEnrichmentMachine = setup({
         };
       }
 
-      const allStepsWithUI = context.stepRefs.map(
-        (stepActorRef) => stepActorRef.getSnapshot().context.step
-      );
-      const streamlangDSL = convertUIStepsToDSL(allStepsWithUI, false);
-      const validationResult = validateStreamlang(streamlangDSL, {
+      const validationResult = validateStreamlang(context.nextStreamlangDSL, {
         reservedFields: [],
       });
 
@@ -131,24 +122,25 @@ export const streamEnrichmentMachine = setup({
       return {
         previousStreamlangDSL: dslWithIdentifiers,
         nextStreamlangDSL: dslWithIdentifiers,
-        isNextStreamlangDSLValid: true,
         hasChanges: false,
+        schemaErrors: [],
+        validationErrors: new Map(),
+        fieldTypesByProcessor: new Map(),
       };
     }),
     updateDSL: assign(({ context }, params: { dsl: StreamlangDSL }) => {
-      let isValid = true;
-      try {
-        validateStreamlang(params.dsl);
-      } catch (error) {
-        if (error instanceof StreamlangValidationError) {
-          isValid = false;
-        } else {
-          throw error;
-        }
-      }
+      // Parse with Zod to get schema errors
+      const parseResult = streamlangDSLSchema.safeParse(params.dsl);
+      const schemaErrors = parseResult.success
+        ? []
+        : parseResult.error.issues.map((issue) => {
+            const path = issue.path.length > 0 ? issue.path.join('.') : 'root';
+            return `${path}: ${issue.message}`;
+          });
+
       return {
         nextStreamlangDSL: params.dsl,
-        isNextStreamlangDSLValid: isValid,
+        schemaErrors,
         hasChanges:
           JSON.stringify(params.dsl.steps) !== JSON.stringify(context.previousStreamlangDSL.steps),
       };
@@ -250,19 +242,21 @@ export const streamEnrichmentMachine = setup({
     hasManagePrivileges: ({ context }) => context.definition.privileges.manage,
     hasSimulatePrivileges: ({ context }) => context.definition.privileges.simulate,
     canUpdateStream: ({ context }) => {
-      return (
-        isStreamlangDSLSchema(context.nextStreamlangDSL) &&
-        JSON.stringify(context.previousStreamlangDSL) !== JSON.stringify(context.nextStreamlangDSL)
-      );
+      const hasSchemaErrors = context.schemaErrors.length > 0;
+      const hasValidationErrors = context.validationErrors.size > 0;
+      const hasChanges =
+        JSON.stringify(context.previousStreamlangDSL) !== JSON.stringify(context.nextStreamlangDSL);
+
+      return !hasSchemaErrors && !hasValidationErrors && hasChanges;
     },
     canSwitchToInteractiveMode: ({ context }) => {
-      if (!context.isNextStreamlangDSLValid) {
+      // Can't switch to interactive mode if there are schema errors
+      if (context.schemaErrors.length > 0) {
         return false;
-      } else {
-        // Valid but can it actually be represented in the UI
-        const modeCompatibility = validateStreamlangModeCompatibility(context.nextStreamlangDSL);
-        return modeCompatibility.canBeRepresentedInInteractiveMode;
       }
+      // Valid DSL, but can it actually be represented in the UI?
+      const modeCompatibility = validateStreamlangModeCompatibility(context.nextStreamlangDSL);
+      return modeCompatibility.canBeRepresentedInInteractiveMode;
     },
     hasNoValidationErrors: ({ context }) => context.validationErrors.size === 0,
   },
@@ -275,9 +269,8 @@ export const streamEnrichmentMachine = setup({
       input.definition.stream.ingest.processing
     ),
     nextStreamlangDSL: addDeterministicCustomIdentifiers(input.definition.stream.ingest.processing),
-    // Should always be valid initially as it's sourced from a persisted stream definition
-    isNextStreamlangDSLValid: true,
     hasChanges: false,
+    schemaErrors: [], // Schema errors from Zod parsing
     dataSourcesRefs: [],
     grokCollection: new GrokCollection(),
     interactiveModeRef: undefined, // Will be spawned when in interactive mode
@@ -503,7 +496,10 @@ export const streamEnrichmentMachine = setup({
                       target: 'yaml',
                     },
                     'mode.dslUpdated': {
-                      actions: [{ type: 'updateDSL', params: ({ event }) => ({ dsl: event.dsl }) }],
+                      actions: [
+                        { type: 'updateDSL', params: ({ event }) => ({ dsl: event.dsl }) },
+                        { type: 'computeValidation' },
+                      ],
                     },
                     'simulation.reset': {
                       actions: 'sendResetToSimulator',
@@ -529,7 +525,10 @@ export const streamEnrichmentMachine = setup({
                       target: 'interactive',
                     },
                     'mode.dslUpdated': {
-                      actions: [{ type: 'updateDSL', params: ({ event }) => ({ dsl: event.dsl }) }],
+                      actions: [
+                        { type: 'updateDSL', params: ({ event }) => ({ dsl: event.dsl }) },
+                        { type: 'computeValidation' },
+                      ],
                     },
                     'simulation.reset': {
                       actions: 'sendResetToSimulator',

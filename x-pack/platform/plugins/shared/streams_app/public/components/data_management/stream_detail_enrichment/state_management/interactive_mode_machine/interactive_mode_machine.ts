@@ -48,6 +48,7 @@ import {
 } from './utils';
 import { selectWhetherAnyProcessorBeforePersisted } from './selectors';
 import { selectPreviewRecords } from '../simulation_state_machine/selectors';
+import { hasErrorsInParentSnapshot } from '../stream_enrichment_state_machine/selectors';
 import type { StepParentActor } from '../steps_state_machine/types';
 import {
   createNotifySuggestionFailureNotifier,
@@ -217,6 +218,11 @@ export const interactiveModeMachine = setup({
       })
     ),
     sendStepsToSimulator: enqueueActions(({ context }) => {
+      // Check parent for any errors (schema or validation) - don't simulate if there are errors
+      if (hasErrorsInParentSnapshot(context.parentRef.getSnapshot())) {
+        return;
+      }
+
       const { simulationMode } = context;
 
       if (simulationMode === 'partial' && selectWhetherAnyProcessorBeforePersisted(context)) {

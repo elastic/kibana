@@ -35,6 +35,9 @@ interface InteractiveModeParentSnapshot {
   context: {
     simulatorRef: SimulationActorRef;
     dataSourcesRefs: DataSourceActorRef[];
+    // Error state from parent (needed for hasErrorsInParentSnapshot check)
+    schemaErrors: string[];
+    validationErrors: Map<string, unknown>;
   };
 }
 

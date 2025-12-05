@@ -26,7 +26,6 @@ import {
   isIlmLifecycle,
 } from '@kbn/streams-schema';
 import _, { cloneDeep } from 'lodash';
-import { validateStreamlang, StreamlangValidationError } from '@kbn/streamlang';
 import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import {
   isDisabledLifecycleFailureStore,
@@ -64,7 +63,6 @@ import type {
 import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
 import { hasSupportedStreamsRoot } from '../../root_stream_definition';
 import { formatSettings, settingsUpdateRequiresRollover } from './helpers';
-import { MalformedStreamError } from '../../errors/malformed_stream_error';
 
 interface WiredStreamChanges extends StreamChanges {
   ownFields: boolean;
@@ -345,21 +343,6 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     }
 
     const existsInStartingState = startingState.has(this._definition.name);
-
-    if (this._changes.processing && this._definition.ingest.processing.steps.length > 0) {
-      try {
-        validateStreamlang(this._definition.ingest.processing, 'wired');
-      } catch (error) {
-        if (error instanceof StreamlangValidationError) {
-          throw new MalformedStreamError(
-            `Invalid processing Streamlang DSL "${this._definition.name}": ${error.errors.join(
-              ', '
-            )}`
-          );
-        }
-        throw error;
-      }
-    }
 
     if (!existsInStartingState) {
       // Check for conflicts

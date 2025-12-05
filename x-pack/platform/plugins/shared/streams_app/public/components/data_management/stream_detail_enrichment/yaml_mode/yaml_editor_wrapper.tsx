@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { StreamlangYamlEditor } from '@kbn/streamlang-yaml-editor';
 import type { StreamlangDSL } from '@kbn/streamlang/types/streamlang';
+import { validationErrorTypeLabels } from '@kbn/streamlang';
 import {
   EuiAccordion,
   EuiCallOut,
@@ -27,6 +28,10 @@ import {
   useYamlModeSelector,
   useSimulatorSelector,
 } from '../state_management/stream_enrichment_state_machine';
+import {
+  selectValidationErrors,
+  selectSchemaErrors,
+} from '../state_management/stream_enrichment_state_machine/selectors';
 import { useYamlStepsProcessingSummary } from '../state_management/use_yaml_steps_processing_summary';
 import { useSimulationErrors } from '../state_management/use_simulation_errors';
 import { SimulationErrorsList } from '../simulation_errors';
@@ -60,8 +65,20 @@ export const YamlEditorWrapper = () => {
   const hasSimulationResult = Boolean(simulation);
 
   const { errors: simulationErrors } = useSimulationErrors();
-  const dslErrors = useYamlModeSelector((state) => state.context.errors);
   const additiveChanges = useYamlModeSelector((state) => state.context.additiveChanges);
+
+  // Get schema errors from parent enrichment machine (Zod parsing errors)
+  const schemaErrors = useStreamEnrichmentSelector((state) => selectSchemaErrors(state.context));
+  const hasSchemaErrors = schemaErrors.length > 0;
+
+  // Get validation errors for gutter markers and accordion
+  const validationErrors = useStreamEnrichmentSelector((state) =>
+    selectValidationErrors(state.context)
+  );
+  const allValidationErrors = useMemo(() => {
+    return Array.from(validationErrors.values()).flat();
+  }, [validationErrors]);
+  const hasValidationErrors = allValidationErrors.length > 0;
 
   // Handle DSL changes from the editor (already debounced and parsed)
   const handleDslChange = useCallback(
@@ -91,6 +108,7 @@ export const YamlEditorWrapper = () => {
             additiveStepIds={additiveStepIds}
             simulationMode={simulationMode}
             streamType={streamType === 'unknown' ? undefined : streamType}
+            validationErrors={validationErrors}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -130,9 +148,45 @@ export const YamlEditorWrapper = () => {
         </EuiFlexItem>
       )}
 
-      {!isEmpty(dslErrors) && (
+      {hasSchemaErrors && (
         <EuiFlexItem grow={false}>
-          <DSLErrorsList errors={dslErrors} />
+          <DSLErrorsList errors={schemaErrors} />
+        </EuiFlexItem>
+      )}
+
+      {hasValidationErrors && (
+        <EuiFlexItem grow={false}>
+          <EuiPanel paddingSize="s" hasShadow={false} grow={false} color="danger">
+            <EuiAccordion
+              id="validation-errors-accordion"
+              initialIsOpen
+              buttonContent={
+                <strong>
+                  {i18n.translate(
+                    'xpack.streams.streamDetailView.managementTab.enrichment.validationErrors.title',
+                    {
+                      defaultMessage:
+                        '{count, plural, one {# validation error} other {# validation errors}}',
+                      values: { count: allValidationErrors.length },
+                    }
+                  )}
+                </strong>
+              }
+            >
+              <EuiText size="s">
+                <ul>
+                  {allValidationErrors.map((error, idx) => {
+                    const errorTypeLabel = validationErrorTypeLabels[error.type];
+                    return (
+                      <li key={idx}>
+                        <strong>{errorTypeLabel}:</strong> {error.message}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </EuiText>
+            </EuiAccordion>
+          </EuiPanel>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

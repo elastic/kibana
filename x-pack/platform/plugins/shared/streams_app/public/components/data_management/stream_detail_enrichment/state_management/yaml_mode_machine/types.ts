@@ -7,9 +7,15 @@
 
 import type { AdditiveChangesResult, StreamlangStepWithUIAttributes } from '@kbn/streamlang';
 import type { StreamlangDSL } from '@kbn/streamlang/types/streamlang';
-import type { ActorRef, Snapshot } from 'xstate5';
 import type { StreamPrivileges } from '../stream_enrichment_state_machine/types';
 import type { DataSourceSimulationMode } from '../data_source_state_machine';
+
+interface YamlModeParentSnapshot {
+  context: {
+    schemaErrors: string[];
+    validationErrors: Map<string, unknown>;
+  };
+}
 
 export interface YamlModeContext {
   // The current DSL being edited
@@ -20,15 +26,16 @@ export interface YamlModeContext {
   additiveChanges: AdditiveChangesResult;
   // Parent machine ref for communication
   parentRef: YamlModeParentActor;
-  // Errors in the DSL
-  errors: string[];
   // Privileges for this stream
   privileges: StreamPrivileges;
   // Current simulation mode based on the active data source
   simulationMode: DataSourceSimulationMode;
 }
 
-export type YamlModeParentActor = ActorRef<Snapshot<unknown>, YamlModeToParentEvent>;
+export interface YamlModeParentActor {
+  getSnapshot(): YamlModeParentSnapshot;
+  send: (event: YamlModeToParentEvent) => void;
+}
 
 type YamlModeToParentEvent =
   | { type: 'mode.dslUpdated'; dsl: StreamlangDSL }
