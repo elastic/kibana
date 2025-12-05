@@ -130,6 +130,7 @@ describe(
             mlRule = getMachineLearningRule({ machine_learning_job_id: [jobId] });
             forceStartDatafeeds({ jobIds: allSecurityLinuxV3JobIds });
             waitForAllDatafeedsToStart({ jobIds: allSecurityLinuxV3JobIds });
+            visit(CREATE_RULE_URL);
             selectMachineLearningRuleType();
             fillDefineMachineLearningRule(mlRule);
           });
