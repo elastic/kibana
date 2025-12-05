@@ -13,6 +13,10 @@ import { upperFirst } from 'lodash';
 import type { EuiButtonColor, PopoverAnchorPosition } from '@elastic/eui';
 import { EuiButton, EuiHideFor, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import {
+  TOP_NAV_MENU_NOTIFICATION_INDICATOR_LEFT,
+  TOP_NAV_MENU_NOTIFICATION_INDICATOR_TOP,
+} from './constants';
 import { getIsSelectedColor, getTooltip, isDisabled } from './utils';
 import type {
   TopNavMenuPrimaryActionItem,
@@ -139,7 +143,10 @@ export const TopNavMenuActionButton = (props: TopNavMenuActionButtonProps) => {
         aria-haspopup={hasSplitItems ? 'menu' : undefined}
         isSelected={isPopoverOpen}
         css={splitButtonCss}
-        notificationIndicatorPosition={{ top: 2, left: 25 }}
+        notificationIndicatorPosition={{
+          top: TOP_NAV_MENU_NOTIFICATION_INDICATOR_TOP,
+          left: TOP_NAV_MENU_NOTIFICATION_INDICATOR_LEFT,
+        }}
         notificationIndicatorSize="m"
         notificationIndicatorColor="primary"
       >

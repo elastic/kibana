@@ -9,22 +9,26 @@
 
 import React, { useState } from 'react';
 import { EuiHeaderLinks, useIsWithinBreakpoints } from '@elastic/eui';
-import { getTopNavItems, hasNoItems } from './utils';
+import { getTopNavItems } from './utils';
 import type { TopNavMenuConfigBeta } from './types';
 import { TopNavMenuActionButton } from './top_nav_menu_action_button';
 import { TopNavMenuItem } from './top_nav_menu_item';
 import { TopNavMenuOverflowButton } from './top_nav_menu_overflow_button';
 
-interface TopNavMenuItemsProps {
+export interface TopNavMenuItemsProps {
   config?: TopNavMenuConfigBeta;
+  visible?: boolean;
 }
 
-export const TopNavMenuItems = ({ config }: TopNavMenuItemsProps) => {
+const hasNoItems = (config: TopNavMenuConfigBeta) =>
+  !config.items?.length && !config?.primaryActionItem && !config?.secondaryActionItem;
+
+export const TopNavMenuItems = ({ config, visible = true }: TopNavMenuItemsProps) => {
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
   const isBetweenMandXlBreakpoint = useIsWithinBreakpoints(['m', 'l']);
   const isAtXlBreakpoint = useIsWithinBreakpoints(['xl']);
 
-  if (!config || hasNoItems(config)) {
+  if (!config || hasNoItems(config) || !visible) {
     return null;
   }
 
@@ -83,7 +87,12 @@ export const TopNavMenuItems = ({ config }: TopNavMenuItemsProps) => {
 
   if (isAtXlBreakpoint) {
     return (
-      <EuiHeaderLinks data-test-subj="top-nav" gutterSize="xs" popoverBreakpoints="none">
+      <EuiHeaderLinks
+        data-test-subj="top-nav"
+        gutterSize="xs"
+        popoverBreakpoints="none"
+        className="kbnTopNavMenu__wrapper"
+      >
         {displayedItems?.length > 0 &&
           displayedItems.map((menuItem) => (
             <TopNavMenuItem

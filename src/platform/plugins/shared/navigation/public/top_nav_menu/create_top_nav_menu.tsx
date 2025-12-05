@@ -11,7 +11,7 @@ import React, { Suspense, lazy } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { RegisteredTopNavMenuDataBeta, TopNavMenuPropsBeta } from '../top_nav_menu_beta';
+import type { TopNavMenuConfigBeta } from '../top_nav_menu_beta';
 import type { TopNavMenuProps } from './top_nav_menu';
 import type { RegisteredTopNavMenuData } from './top_nav_menu_data';
 
@@ -21,42 +21,23 @@ const LazyTopNavMenu = lazy(async () => {
 });
 
 const LazyTopNavMenuBeta = lazy(async () => {
-  const { TopNavMenuBeta } = await import('../top_nav_menu_beta/top_nav_menu_beta');
-  return { default: TopNavMenuBeta };
+  const { TopNavMenuItems } = await import('../top_nav_menu_beta/top_nav_menu_items');
+  return { default: TopNavMenuItems };
 });
 
 export function createTopNav(
   unifiedSearch: UnifiedSearchPublicPluginStart,
-  extraConfig: RegisteredTopNavMenuData[] | RegisteredTopNavMenuDataBeta[],
+  extraConfig: RegisteredTopNavMenuData[],
   isBeta?: boolean
 ) {
-  return <QT extends AggregateQuery | Query = Query>(
-    props: TopNavMenuProps<QT> | TopNavMenuPropsBeta<QT>
-  ) => {
+  return <QT extends AggregateQuery | Query = Query>(props: TopNavMenuProps<QT>) => {
     const relevantConfig = extraConfig.filter(
       (dataItem) => dataItem.appName === undefined || dataItem.appName === props.appName
     );
 
     const TopNavMenuComponent = isBeta ? (
       <Suspense>
-        <LazyTopNavMenuBeta
-          {...(props as any)}
-          unifiedSearch={unifiedSearch}
-          config={
-            props.config
-              ? {
-                  items: [
-                    ...((props.config as TopNavMenuPropsBeta<QT>['config'])?.items || []),
-                    ...relevantConfig,
-                  ],
-                  primaryActionItem: (props.config as TopNavMenuPropsBeta<QT>['config'])!
-                    .primaryActionItem,
-                  secondaryActionItem: (props.config as TopNavMenuPropsBeta<QT>['config'])!
-                    .secondaryActionItem,
-                }
-              : { items: relevantConfig }
-          }
-        />
+        <LazyTopNavMenuBeta visible={props.visible} config={props.config as TopNavMenuConfigBeta} />
       </Suspense>
     ) : (
       <Suspense>

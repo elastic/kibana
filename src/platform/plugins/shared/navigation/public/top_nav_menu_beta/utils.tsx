@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { isFunction, upperFirst } from 'lodash';
+import { isArray, isFunction, upperFirst } from 'lodash';
 import {
   type EuiButtonColor,
   type EuiThemeComputed,
@@ -106,9 +106,6 @@ export const getTooltip = ({
   };
 };
 
-export const hasNoItems = (config: TopNavMenuConfigBeta) =>
-  !config.items?.length && !config?.primaryActionItem && !config?.secondaryActionItem;
-
 const mapTopNavItemToPanelItem = (item: TopNavMenuPopoverItem, childPanelId?: number) => {
   const { content, title } = getTooltip({
     tooltipContent: item?.tooltipContent,
@@ -137,6 +134,9 @@ const mapTopNavItemToPanelItem = (item: TopNavMenuPopoverItem, childPanelId?: nu
   } as EuiContextMenuPanelItemDescriptor;
 };
 
+/**
+ * Generate action items for the popover menu. This is only used below "m" breakpoint.
+ */
 const getPopoverActionItems = ({
   primaryActionItem,
   secondaryActionItem,
@@ -144,6 +144,28 @@ const getPopoverActionItems = ({
   primaryActionItem?: TopNavMenuPrimaryActionItem;
   secondaryActionItem?: TopNavMenuSecondaryActionItem;
 }) => {
+  if (!primaryActionItem && !secondaryActionItem) {
+    return [];
+  }
+
+  const isHidden = (
+    item: TopNavMenuPrimaryActionItem | TopNavMenuSecondaryActionItem | undefined
+  ) => {
+    if (!item) return true;
+
+    const isHiddenInMobile =
+      isArray(item?.hidden) &&
+      (item.hidden.includes('m') || item.hidden.includes('s') || item.hidden.includes('xs'));
+
+    return item?.hidden === 'all' || isHiddenInMobile;
+  };
+
+  const bothButtonsAreHidden = isHidden(primaryActionItem) && isHidden(secondaryActionItem);
+
+  if (bothButtonsAreHidden) {
+    return [];
+  }
+
   return [
     {
       key: 'action-buttons-separator',
