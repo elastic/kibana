@@ -14,7 +14,7 @@ import type { FetchContext } from '@kbn/presentation-publishing';
 import type { Observable } from 'rxjs';
 import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
 import { dataService } from '../../../services/kibana_services';
-import { getFetchContextFilters } from '../utils';
+import { getFetchContextFilters, getFetchContextTimeRange } from '../utils';
 import type { DataControlStateManager } from '../data_control_manager';
 
 export function hasNoResults$({
@@ -55,6 +55,7 @@ export function hasNoResults$({
           dataView,
           rangeFilter,
           ...controlFetchContext,
+          timeRange: getFetchContextTimeRange(controlFetchContext, useGlobalFilters),
           filters: getFetchContextFilters(controlFetchContext, useGlobalFilters),
         });
       } catch (error) {
