@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { scoreSeverity, SeverityBadge, SIGNIFICANT_EVENT_SEVERITY } from '../../severity_badge';
 import { EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { scoreSeverity, SeverityBadge, SIGNIFICANT_EVENT_SEVERITY } from '../../severity_badge';
 
 export function SeveritySelector({
   severityScore,
