@@ -11,7 +11,8 @@
 /** @typedef {import("@typescript-eslint/typescript-estree").TSESTree.CallExpression} CallExpression */
 /** @typedef {import("@typescript-eslint/typescript-estree").TSESTree.Identifier} Identifier */
 
-const ERROR_MSG = 'API tests must use the apiClient fixture.';
+const ERROR_MSG =
+  'The `apiClient` fixture should be used in `apiTest` to call an endpoint and later verify response code and body.';
 
 const traverse = require('eslint-traverse');
 
@@ -96,6 +97,8 @@ const functionUsesApiClient = (fnNode, context) => {
         const fnName = node.id.name;
         const paramName = getApiClientLocalName(node.init);
         localFnUsesParam.set(fnName, paramUsesIdentifierInBody(node.init.body, paramName));
+        // Skip traversing into nested function bodies to avoid false positives
+        return traverse.SKIP;
       }
     }
 
@@ -104,6 +107,8 @@ const functionUsesApiClient = (fnNode, context) => {
       const fnName = node.id.name;
       const paramName = getApiClientLocalName(node);
       localFnUsesParam.set(fnName, paramUsesIdentifierInBody(node.body, paramName));
+      // Skip traversing into nested function bodies to avoid false positives
+      return traverse.SKIP;
     }
 
     // Detect member access on apiClient (e.g., `apiClient.get(...)`)
@@ -132,6 +137,15 @@ const functionUsesApiClient = (fnNode, context) => {
             found = true;
             return traverse.SKIP;
           }
+        }
+      }
+
+      // Also check if a local function is called that uses apiClient from closure (no args needed)
+      const callee = node.callee;
+      if (callee.type === 'Identifier' && localFnUsesParam.has(callee.name)) {
+        if (localFnUsesParam.get(callee.name)) {
+          found = true;
+          return traverse.SKIP;
         }
       }
     }
@@ -171,7 +185,7 @@ module.exports = {
         const comments = sourceCode.getCommentsBefore(node);
         if (
           comments.some((c) =>
-            /eslint-disable-next-line\s+@kbn\/eslint\/scout_api_test_encourage_api_client/.test(
+            /eslint-disable-next-line\s+@kbn\/eslint\/scout_require_api_client_in_api_test/.test(
               c.value
             )
           )

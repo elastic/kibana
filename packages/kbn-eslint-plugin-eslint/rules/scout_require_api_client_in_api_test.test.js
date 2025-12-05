@@ -8,9 +8,11 @@
  */
 
 const { RuleTester } = require('eslint');
-const rule = require('./scout_api_test_encourage_api_client');
+const rule = require('./scout_require_api_client_in_api_test');
 const dedent = require('dedent');
 
+const ERROR_MSG =
+  'The `apiClient` fixture should be used in `apiTest` to call an endpoint and later verify response code and body.';
 const ruleTester = new RuleTester({
   parser: require.resolve('@typescript-eslint/parser'),
   parserOptions: {
@@ -19,7 +21,7 @@ const ruleTester = new RuleTester({
   },
 });
 
-ruleTester.run('@kbn/eslint/scout_api_test_encourage_api_client', rule, {
+ruleTester.run('@kbn/eslint/scout_require_api_client_in_api_test', rule, {
   valid: [
     // Top-level apiClient usage
     {
@@ -89,7 +91,7 @@ ruleTester.run('@kbn/eslint/scout_api_test_encourage_api_client', rule, {
     // Override with eslint-disable comment
     {
       code: dedent`
-      // eslint-disable-next-line @kbn/eslint/scout_api_test_encourage_api_client
+      // eslint-disable-next-line @kbn/eslint/scout_require_api_client_in_api_test
       apiTest('override', () => {
         console.log('no apiClient here');
       });
@@ -127,6 +129,28 @@ ruleTester.run('@kbn/eslint/scout_api_test_encourage_api_client', rule, {
     });
   `,
     },
+    // UI test
+    {
+      code: dedent`
+    test.describe('Painless Lab', { tag: tags.ESS_ONLY }, () => {
+      test.beforeEach(async ({ browserAuth, pageObjects }) => {
+      });
+      test('validate painless lab editor and request', async ({ pageObjects }) => {
+      });
+    });
+      `,
+    },
+    // Parallel test
+    {
+      code: dedent`
+    spaceTest.describe('Painless Lab', { tag: tags.ESS_ONLY }, () => {
+      spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+      });
+      spaceTest('validate painless lab editor and request', async ({ pageObjects }) => {
+      });
+    });
+      `,
+    },
   ],
 
   invalid: [
@@ -137,7 +161,7 @@ ruleTester.run('@kbn/eslint/scout_api_test_encourage_api_client', rule, {
           console.log(other);
         });
       `,
-      errors: [{ message: 'API tests must use the apiClient fixture.' }],
+      errors: [{ message: ERROR_MSG }],
     },
     // Nested apiTest inside apiTest.describe missing apiClient
     {
@@ -146,7 +170,7 @@ ruleTester.run('@kbn/eslint/scout_api_test_encourage_api_client', rule, {
           apiTest('inner missing', () => {});
         });
       `,
-      errors: [{ message: 'API tests must use the apiClient fixture.' }],
+      errors: [{ message: ERROR_MSG }],
     },
     // Nested blocks missing apiClient
     {
@@ -157,19 +181,28 @@ ruleTester.run('@kbn/eslint/scout_api_test_encourage_api_client', rule, {
           }
         });
       `,
-      errors: [{ message: 'API tests must use the apiClient fixture.' }],
+      errors: [{ message: ERROR_MSG }],
     },
     // Nested helper function missing apiClient
     {
       code: dedent`
-        apiTest('nested helper missing', () => {
-          function helper() {
+        apiTest('nested helper missing', ({ apiClient }) => {
+          function helper(client) {
             console.log('no apiClient here');
           }
-          helper();
+          helper(apiClient);
         });
       `,
-      errors: [{ message: 'API tests must use the apiClient fixture.' }],
+      errors: [{ message: ERROR_MSG }],
+    },
+    // Arrow function inside test
+    {
+      code: dedent`
+      apiTest('inline arrow helper', async ({ apiClient }) => {
+        const callApi = () => apiClient.get('/bar');
+      });
+    `,
+      errors: [{ message: ERROR_MSG }],
     },
     // External helper without apiClient usage
     {
@@ -181,7 +214,7 @@ ruleTester.run('@kbn/eslint/scout_api_test_encourage_api_client', rule, {
         externalHelper();
       });
     `,
-      errors: [{ message: 'API tests must use the apiClient fixture.' }],
+      errors: [{ message: ERROR_MSG }],
     },
     // Passing apiClient to a variable but never using it
     {
@@ -191,7 +224,7 @@ ruleTester.run('@kbn/eslint/scout_api_test_encourage_api_client', rule, {
         fn(apiClient);
       });
     `,
-      errors: [{ message: 'API tests must use the apiClient fixture.' }],
+      errors: [{ message: ERROR_MSG }],
     },
   ],
 });
