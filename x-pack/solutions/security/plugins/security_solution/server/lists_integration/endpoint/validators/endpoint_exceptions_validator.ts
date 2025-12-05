@@ -21,11 +21,11 @@ export class EndpointExceptionsValidator extends BaseValidator {
   }
 
   protected async validateHasReadPrivilege(): Promise<void> {
-    return this.validateHasEndpointExceptionsPrivileges('canReadEndpointExceptions');
+    return this.validateHasPrivilege('canReadEndpointExceptions');
   }
 
   protected async validateHasWritePrivilege(): Promise<void> {
-    await this.validateHasEndpointExceptionsPrivileges('canWriteEndpointExceptions');
+    await this.validateHasPrivilege('canWriteEndpointExceptions');
 
     if (!this.endpointAppContext.experimentalFeatures.endpointExceptionsMovedUnderManagement) {
       // With disabled FF, Endpoint Exceptions are ONLY global, so we need to make sure the user
