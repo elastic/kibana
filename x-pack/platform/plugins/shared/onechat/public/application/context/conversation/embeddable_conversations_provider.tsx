@@ -140,13 +140,19 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     onDeleteConversation,
   });
 
+  // Resets the {initialMessage} and {autoSendInitialMessage} flags after an initial message has been sent or set in the {ConversationInput} component
   const resetInitialMessage = useCallback(() => {
-    setCurrentProps({ ...currentProps, initialMessage: undefined });
-  }, [currentProps, setCurrentProps]);
+    setCurrentProps((prevProps) => ({
+      ...prevProps,
+      initialMessage: undefined,
+      autoSendInitialMessage: false,
+    }));
+  }, []);
 
+  // Resets the {attachments} array after attachment(s) have been sent as part of a Conversation Round.
   const resetAttachments = useCallback(() => {
-    setCurrentProps({ ...currentProps, attachments: undefined });
-  }, [currentProps]);
+    setCurrentProps((prevProps) => ({ ...prevProps, attachments: undefined }));
+  }, []);
 
   const removeAttachment = useCallback((attachmentIndex: number) => {
     setCurrentProps((prevProps) => ({
@@ -163,6 +169,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       sessionTag: currentProps.sessionTag,
       agentId: currentProps.agentId,
       initialMessage: currentProps.initialMessage,
+      autoSendInitialMessage: currentProps.autoSendInitialMessage ?? false,
       resetInitialMessage,
       browserApiTools: currentProps.browserApiTools,
       setConversationId,
@@ -176,6 +183,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       currentProps.sessionTag,
       currentProps.agentId,
       currentProps.initialMessage,
+      currentProps.autoSendInitialMessage,
       currentProps.browserApiTools,
       currentProps.attachments,
       resetInitialMessage,

@@ -12,6 +12,14 @@ import type { FtrProviderContext } from '../../../../../common/ftr_provider_cont
 import { getUrlPrefix, ObjectRemover, getTestRuleData } from '../../../../../common/lib';
 import { getFindGaps } from './utils';
 
+const isUserAuthorized = (scenarioId: string) =>
+  [
+    'superuser at space1',
+    'space_1_all at space1',
+    'space_1_all_alerts_none_actions at space1',
+    'space_1_all_with_restricted_fixture at space1',
+  ].includes(scenarioId);
+
 export default function createGapAutoFillSchedulerTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -137,14 +145,7 @@ export default function createGapAutoFillSchedulerTests({ getService }: FtrProvi
         });
 
         it('cleanup unsticks in-progress gaps, then scheduler fills them', async () => {
-          if (
-            ![
-              'superuser at space1',
-              'space_1_all at space1',
-              'space_1_all_alerts_none_actions at space1',
-              'space_1_all_with_restricted_fixture at space1',
-            ].includes(scenario.id)
-          ) {
+          if (!isUserAuthorized(scenario.id)) {
             return;
           }
 
@@ -254,14 +255,7 @@ export default function createGapAutoFillSchedulerTests({ getService }: FtrProvi
         });
 
         it('for authorized users: scheduler eventually marks gap intervals and fills the gap', async () => {
-          if (
-            ![
-              'superuser at space1',
-              'space_1_all at space1',
-              'space_1_all_alerts_none_actions at space1',
-              'space_1_all_with_restricted_fixture at space1',
-            ].includes(scenario.id)
-          ) {
+          if (!isUserAuthorized(scenario.id)) {
             return;
           }
 
@@ -358,16 +352,180 @@ export default function createGapAutoFillSchedulerTests({ getService }: FtrProvi
           });
         });
 
+        describe('for authorized users: auto fill failed attempts', () => {
+          if (!isUserAuthorized(scenario.id)) {
+            return;
+          }
+
+          it('scheduler marks failed auto fill attempts', async () => {
+            // Create a rule with error pattern
+            const ruleResponse = await supertest
+              .post(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule`)
+              .set('kbn-xsrf', 'foo')
+              .send(
+                getRule({
+                  schedule: { interval: '24h' },
+                  params: {
+                    pattern: {
+                      instance: ['error'],
+                    },
+                  },
+                })
+              )
+              .expect(200);
+            const ruleId = ruleResponse.body.id;
+            objectRemover.add(apiOptions.spaceId, ruleId, 'rule', 'alerting');
+
+            // Report a gap
+            const smallGapStart = moment().subtract(30, 'minutes').startOf('minute').toISOString();
+            const smallGapEnd = moment(smallGapStart).add(10, 'minutes').toISOString();
+            await supertest
+              .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/report_gap`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                ruleId,
+                start: smallGapStart,
+                end: smallGapEnd,
+                spaceId: apiOptions.spaceId,
+              })
+              .expect(200);
+
+            const url = `${getUrlPrefix(
+              apiOptions.spaceId
+            )}/internal/alerting/rules/gaps/auto_fill_scheduler`;
+
+            // Create the scheduler
+            const schedulerResp = await supertestWithoutAuth
+              .post(url)
+              .set('kbn-xsrf', 'foo')
+              .auth(apiOptions.username, apiOptions.password)
+              .send({
+                name: `it-scheduler-fill-${Date.now()}`,
+                schedule: { interval: '1m' },
+                gap_fill_range: 'now-30d',
+                max_backfills: 100,
+                enabled: true,
+                scope: ['test-scope'],
+                num_retries: 1,
+                rule_types: [
+                  { type: 'test.patternFiringAutoRecoverFalse', consumer: 'alertsFixture' },
+                ],
+              });
+
+            expect(schedulerResp.statusCode).to.eql(200);
+
+            // Eventually gap should be marked with auto fill failure and not be filled
+            await retry.try(async () => {
+              const finalGapResponse = await findGaps({
+                ruleId,
+                start: smallGapStart,
+                end: smallGapEnd,
+                spaceId: apiOptions.spaceId,
+              });
+
+              expect(finalGapResponse.statusCode).to.eql(200);
+              expect(finalGapResponse.body.total).to.eql(1);
+              const finalGap = finalGapResponse.body.data[0];
+              expect(finalGap.status).to.eql('unfilled');
+              expect(finalGap.failed_auto_fill_attempts).to.eql(1);
+              expect(finalGap.in_progress_intervals.length).to.eql(0);
+            });
+          });
+
+          it('scheduler skips gaps with failures number greater than max retries', async () => {
+            // Create a rule with error pattern
+            const ruleResponse = await supertest
+              .post(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule`)
+              .set('kbn-xsrf', 'foo')
+              .send(
+                getRule({
+                  schedule: { interval: '24h' },
+                })
+              )
+              .expect(200);
+            const ruleId = ruleResponse.body.id;
+            objectRemover.add(apiOptions.spaceId, ruleId, 'rule', 'alerting');
+
+            // Report a gap
+            const failedGapStart = moment().subtract(30, 'minutes').startOf('minute').toISOString();
+            const failedGapEnd = moment(failedGapStart).add(10, 'minutes').toISOString();
+            await supertest
+              .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/report_gap`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                ruleId,
+                start: failedGapStart,
+                end: failedGapEnd,
+                spaceId: apiOptions.spaceId,
+                failedAutoFillAttempts: 4,
+              })
+              .expect(200);
+
+            const notFailedGapStart = moment()
+              .subtract(15, 'minutes')
+              .startOf('minute')
+              .toISOString();
+            const notFailedGapEnd = moment(notFailedGapStart).add(10, 'minutes').toISOString();
+            await supertest
+              .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/report_gap`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                ruleId,
+                start: notFailedGapStart,
+                end: notFailedGapEnd,
+                spaceId: apiOptions.spaceId,
+              })
+              .expect(200);
+
+            const url = `${getUrlPrefix(
+              apiOptions.spaceId
+            )}/internal/alerting/rules/gaps/auto_fill_scheduler`;
+
+            // Create the scheduler
+            const schedulerResp = await supertestWithoutAuth
+              .post(url)
+              .set('kbn-xsrf', 'foo')
+              .auth(apiOptions.username, apiOptions.password)
+              .send({
+                name: `it-scheduler-fill-${Date.now()}`,
+                schedule: { interval: '1m' },
+                gap_fill_range: 'now-30d',
+                max_backfills: 100,
+                enabled: true,
+                scope: ['test-scope'],
+                num_retries: 3,
+                rule_types: [
+                  { type: 'test.patternFiringAutoRecoverFalse', consumer: 'alertsFixture' },
+                ],
+              });
+
+            expect(schedulerResp.statusCode).to.eql(200);
+
+            // Eventually one gap should be filled, the other should remain unfilled with same failed attempts as it was skipped from scheduling
+            await retry.try(async () => {
+              const finalGapResponse = await findGaps({
+                ruleId,
+                start: failedGapStart,
+                end: notFailedGapEnd,
+                spaceId: apiOptions.spaceId,
+              });
+
+              expect(finalGapResponse.statusCode).to.eql(200);
+              expect(finalGapResponse.body.total).to.eql(2);
+              const gaps = finalGapResponse.body.data;
+
+              const failedGap = gaps.find((g: any) => g.failed_auto_fill_attempts === 4);
+              const filledGap = gaps.find((g: any) => g.failed_auto_fill_attempts === 0);
+
+              expect(failedGap.status).to.eql('unfilled');
+              expect(filledGap.status).to.eql('filled');
+            });
+          });
+        });
+
         it('returns 400 on invalid scheduler body for authorized user', async () => {
           // Only assert negative case for authorized scenarios; others already 403
-          if (
-            ![
-              'superuser at space1',
-              'space_1_all at space1',
-              'space_1_all_alerts_none_actions at space1',
-              'space_1_all_with_restricted_fixture at space1',
-            ].includes(scenario.id)
-          ) {
+          if (!isUserAuthorized(scenario.id)) {
             return;
           }
 
@@ -425,14 +583,7 @@ export default function createGapAutoFillSchedulerTests({ getService }: FtrProvi
         });
 
         it('returns 403 for invalid consumer for authorized user', async () => {
-          if (
-            ![
-              'superuser at space1',
-              'space_1_all at space1',
-              'space_1_all_alerts_none_actions at space1',
-              'space_1_all_with_restricted_fixture at space1',
-            ].includes(scenario.id)
-          ) {
+          if (!isUserAuthorized(scenario.id)) {
             return;
           }
 
@@ -464,14 +615,7 @@ export default function createGapAutoFillSchedulerTests({ getService }: FtrProvi
         });
 
         it('returns 409 when creating duplicate id for authorized user', async () => {
-          if (
-            ![
-              'superuser at space1',
-              'space_1_all at space1',
-              'space_1_all_alerts_none_actions at space1',
-              'space_1_all_with_restricted_fixture at space1',
-            ].includes(scenario.id)
-          ) {
+          if (!isUserAuthorized(scenario.id)) {
             return;
           }
 
@@ -514,14 +658,7 @@ export default function createGapAutoFillSchedulerTests({ getService }: FtrProvi
         });
 
         it('returns 409 when creating duplicate (ruleType, consumer) pair for authorized user', async () => {
-          if (
-            ![
-              'superuser at space1',
-              'space_1_all at space1',
-              'space_1_all_alerts_none_actions at space1',
-              'space_1_all_with_restricted_fixture at space1',
-            ].includes(scenario.id)
-          ) {
+          if (!isUserAuthorized(scenario.id)) {
             return;
           }
 
