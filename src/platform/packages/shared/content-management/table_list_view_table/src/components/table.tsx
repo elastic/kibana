@@ -89,7 +89,7 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   createdByEnabled: boolean;
   favoritesEnabled: boolean;
   tabsEnabled?: boolean;
-  tabEntityNames?: Record<string, TabEntityNameConfig>;
+  tabEntityNames?: Record<string, TabEntityNameConfig<T>>;
   /** Custom filter function for tabs. If not provided, uses item.type to match tab id. */
   filterItemByTab?: (item: T, tabId: string) => boolean;
   emptyPrompt?: JSX.Element;
@@ -132,15 +132,13 @@ export function Table<T extends UserContentCommonSchema>({
   const euiTheme = useEuiTheme();
   const { getTagList, isTaggingEnabled, isKibanaVersioningEnabled } = useServices();
 
-  // Dynamic entity name (singular) based on active tab
+  // Dynamic entity name based on active tab
   const dynamicEntityName = useMemo(() => {
     if (tabsEnabled && tableFilter.activeTab && tabEntityNames) {
       return tabEntityNames[tableFilter.activeTab]?.entityName || entityName;
     }
     return entityName;
   }, [tabsEnabled, tableFilter.activeTab, tabEntityNames, entityName]);
-
-  // Dynamic entity name (plural) based on active tab
   const dynamicEntityNamePlural = useMemo(() => {
     if (tabsEnabled && tableFilter.activeTab && tabEntityNames) {
       return tabEntityNames[tableFilter.activeTab]?.entityNamePlural || entityNamePlural;
@@ -339,7 +337,8 @@ export function Table<T extends UserContentCommonSchema>({
         tabEntityNames[tableFilter.activeTab]?.emptyPromptBody ?? (
           <FormattedMessage
             id="contentManagement.tableList.listing.noItemsBody"
-            defaultMessage="Create a new item to get started."
+            defaultMessage="Create a new {entityName} to get started."
+            values={{ entityName }}
           />
         )
       );
@@ -347,11 +346,12 @@ export function Table<T extends UserContentCommonSchema>({
 
     return (
       <FormattedMessage
-        id="contentManagement.tableList.listing.noItemsBody"
-        defaultMessage="Create a new item to get started."
+        id="contentManagement.tableList.listing.noMatchedItemsMessage"
+        defaultMessage="No {entityNamePlural} matched your search."
+        values={{ entityNamePlural }}
       />
     );
-  }, [tabsEnabled, tableFilter.activeTab, tabEntityNames]);
+  }, [tabsEnabled, tableFilter.activeTab, tabEntityNames, entityName, entityNamePlural]);
 
   const emptyPromptActions = useMemo(() => {
     return renderCreateButton(false);
@@ -362,14 +362,11 @@ export function Table<T extends UserContentCommonSchema>({
   const visibleItems = React.useMemo(() => {
     let filteredItems = items;
 
-    // Filter by active tab
     if (tabsEnabled && tableFilter?.activeTab) {
       const currentTab = tableFilter.activeTab;
       if (filterItemByTab) {
-        // Use custom filter if provided
         filteredItems = filteredItems.filter((item) => filterItemByTab(item, currentTab));
       } else {
-        // Fallback to default filtering: match item.type to tab id
         filteredItems = filteredItems.filter((item) => {
           const itemType = (item as any).type;
           return (
@@ -420,22 +417,22 @@ export function Table<T extends UserContentCommonSchema>({
       ? true // by passing "true" we disable the EuiInMemoryTable sorting and handle it ourselves, but sorting is still enabled
       : { sort: tableSort };
 
-  const tabbedFilter =
-    tabsEnabled && tabEntityNames ? (
-      <TabbedTableFilter
-        tabs={Object.keys(tabEntityNames).map((id) => ({
-          id,
-          name: tabEntityNames[id].tabName,
-        }))}
-        selectedTabId={tableFilter.activeTab ?? Object.keys(tabEntityNames)[0]}
-        onSelectedTabChanged={(newTab) => {
-          onFilterChange({ activeTab: newTab });
-        }}
-      />
-    ) : undefined;
-
-  // Show search/filters for all tabs (annotation-groups now behaves like other tabs)
-  const showSearch = true;
+  const tabbedFilter = useMemo(
+    () =>
+      tabsEnabled && tabEntityNames ? (
+        <TabbedTableFilter
+          tabs={Object.keys(tabEntityNames).map((id) => ({
+            id,
+            name: tabEntityNames[id].tabName,
+          }))}
+          selectedTabId={tableFilter.activeTab ?? Object.keys(tabEntityNames)[0]}
+          onSelectedTabChanged={(newTab) => {
+            onFilterChange({ activeTab: newTab });
+          }}
+        />
+      ) : undefined,
+    [tabsEnabled, tabEntityNames, tableFilter.activeTab, onFilterChange]
+  );
 
   return (
     <>
@@ -480,7 +477,7 @@ export function Table<T extends UserContentCommonSchema>({
               )
             }
             selection={selection}
-            search={showSearch ? search : false}
+            search={search}
             executeQueryOptions={{ enabled: false }}
             sorting={sorting}
             onChange={onTableChange}

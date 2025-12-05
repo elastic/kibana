@@ -16,7 +16,7 @@ export interface TabConfig {
   name: string | React.ReactNode;
 }
 
-export interface TabEntityNameConfig<T extends object = any> {
+export interface TabEntityNameConfig<T extends object> {
   /** Display name for the tab (e.g., "Dashboards") */
   tabName: string;
   /** Entity name singular for use in sentences (e.g., "dashboard") */

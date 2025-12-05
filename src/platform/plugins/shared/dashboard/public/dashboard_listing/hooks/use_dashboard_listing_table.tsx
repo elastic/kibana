@@ -298,6 +298,7 @@ export const useDashboardListingTable = ({
             updatedBy: visItem.updatedBy,
             references: visItem.references ?? [],
             managed: visItem.managed,
+            editor: visItem.editor, // Store editor info for proper navigation (Maps, Lens, etc.)
             attributes: {
               title: visItem.attributes.title,
               description: visItem.attributes.description,
@@ -412,28 +413,14 @@ export const useDashboardListingTable = ({
         const deleteStartTime = window.performance.now();
 
         await asyncMap(itemsToDelete, async ({ id, type }) => {
-          if (type === 'map') {
-            // Delete map using content management
-            await contentManagementService.client.delete({
-              contentTypeId: 'map',
-              id,
-            });
-          } else if (type === 'visualization') {
-            // Delete visualization using content management
-            await contentManagementService.client.delete({
-              contentTypeId: 'visualization',
-              id,
-            });
-          } else if (type === 'event-annotation-group') {
-            // Delete annotation group using content management
-            await contentManagementService.client.delete({
-              contentTypeId: 'event-annotation-group',
-              id,
-            });
-          } else {
-            // Delete dashboard
+          if (type === 'dashboard') {
             await dashboardClient.delete(id);
             dashboardBackupService.clearState(id);
+          } else if (type) {
+            await contentManagementService.client.delete({
+              contentTypeId: type,
+              id,
+            });
           }
         });
 
@@ -459,40 +446,53 @@ export const useDashboardListingTable = ({
   );
 
   const editItem = useCallback(
-    ({ id, type }: { id: string | undefined; type?: string }) => {
+    ({ id, type, editor }: { id: string | undefined; type?: string; editor?: any }) => {
       // Handle different content types
-      if (type === 'map') {
-        // Navigate to maps app
-        const stateTransfer = embeddableService.getStateTransfer();
-        stateTransfer.navigateToEditor('maps', {
-          path: `/map/${id}`,
-          state: {
-            originatingApp: DASHBOARD_APP_ID,
-          },
-        });
-        return;
-      }
-
-      if (type === 'visualization') {
-        // Navigate to visualization edit page with state transfer
-        const stateTransfer = embeddableService.getStateTransfer();
-        stateTransfer.navigateToEditor('visualize', {
-          path: `#/edit/${id}`,
-          state: {
-            originatingApp: DASHBOARD_APP_ID,
-          },
-        });
+      if (type === 'dashboard') {
+        goToDashboard(id, 'edit');
         return;
       }
 
       if (type === 'event-annotation-group') {
-        // Annotation groups are view-only from dashboards
-        // Users should create/edit them in Lens
         return;
       }
 
-      // Default: edit dashboard
-      goToDashboard(id, 'edit');
+      // Handle visualizations with custom editor (e.g., Maps with editor.editApp)
+      if (editor) {
+        // Check if editor has a custom onEdit handler
+        if (!('editApp' in editor || 'editUrl' in editor) && 'onEdit' in editor) {
+          editor.onEdit(id);
+          return;
+        }
+
+        const { editApp, editUrl } = editor;
+        // Maps and other apps with custom editApp
+        if (editApp) {
+          coreServices.application.navigateToApp(editApp, { path: editUrl });
+          return;
+        }
+
+        // Standard visualizations with editUrl - use stateTransfer
+        if (editUrl) {
+          const stateTransfer = embeddableService.getStateTransfer();
+          stateTransfer.navigateToEditor('visualize', {
+            path: `#${editUrl}`, // editUrl already includes /edit/{id}
+            state: {
+              originatingApp: DASHBOARD_APP_ID,
+            },
+          });
+          return;
+        }
+      }
+
+      // Fallback: All visualizations are edited through the visualize app
+      const stateTransfer = embeddableService.getStateTransfer();
+      stateTransfer.navigateToEditor('visualize', {
+        path: `#/edit/${id}`,
+        state: {
+          originatingApp: DASHBOARD_APP_ID,
+        },
+      });
     },
     [goToDashboard]
   );

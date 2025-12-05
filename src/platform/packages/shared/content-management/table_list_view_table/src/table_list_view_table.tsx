@@ -88,7 +88,7 @@ export interface TableListViewTableProps<
   /** Enable tabbed filtering. Allows filtering items by configurable tabs. */
   tabsEnabled?: boolean;
   /** Entity name mappings for each tab (used when tabsEnabled is true). First key is the default tab. */
-  tabEntityNames?: Record<string, TabEntityNameConfig>;
+  tabEntityNames?: Record<string, TabEntityNameConfig<T>>;
   /** Custom filter function for tabs. If not provided, uses item.type to match tab id. */
   filterItemByTab?: (item: T, tabId: string) => boolean;
   /**
@@ -419,9 +419,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
 
   const initialState = useMemo<State<T>>(() => {
     const initialSort = getInitialSorting(entityName);
-    // Determine initial active tab (first tab is default)
-    const initialActiveTab =
-      tabsEnabled && tabEntityNames ? Object.keys(tabEntityNames)[0] : undefined;
 
     return {
       items: [],
@@ -447,7 +444,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       tableFilter: {
         createdBy: [],
         favorites: false,
-        activeTab: initialActiveTab,
+        activeTab: tabsEnabled && tabEntityNames ? Object.keys(tabEntityNames)[0] : undefined,
       },
     };
   }, [initialPageSize, entityName, recentlyAccessed, tabsEnabled, tabEntityNames]);
@@ -1171,15 +1168,13 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         return;
       }
 
-      // Use first tab as fallback
-      const fallbackTab = tabEntityNames ? Object.keys(tabEntityNames)[0] : undefined;
-
       dispatch({
         type: 'onTableChange',
         data: {
           filter: {
             createdBy: filter.createdBy ?? [],
-            activeTab: filter.activeTab ?? fallbackTab,
+            activeTab:
+              filter.activeTab ?? (tabEntityNames ? Object.keys(tabEntityNames)[0] : undefined),
           },
         },
       });

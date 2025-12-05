@@ -23,6 +23,11 @@ export type DashboardListingProps = PropsWithChildren<{
 
 export interface DashboardSavedObjectUserContent extends UserContentCommonSchema {
   managed?: boolean;
+  editor?: {
+    editUrl?: string;
+    editApp?: string;
+    onEdit?: (id: string) => Promise<void>;
+  }; // Editor info for proper navigation (Maps, Lens, etc.)
   attributes: {
     title: string;
     description?: string;
