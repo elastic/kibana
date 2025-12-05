@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-
 import type { Agent, AgentPolicy } from '../../../types';
 import { ExperimentalFeaturesService } from '../../../services';
 import type { LicenseService } from '../../../../../../common/services';
@@ -79,14 +77,12 @@ describe('useSingleAgentMenuItems', () => {
 
   describe('Basic structure', () => {
     it('should return menu items array', () => {
-      const { result } = renderHook(
-        () =>
-          useSingleAgentMenuItems({
-            agent: createMockAgent(),
-            agentPolicy: createMockAgentPolicy(),
-            callbacks: mockCallbacks,
-          }),
-        { wrapper: renderer.Wrapper }
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: createMockAgent(),
+          agentPolicy: createMockAgentPolicy(),
+          callbacks: mockCallbacks,
+        })
       );
 
       expect(Array.isArray(result.current)).toBe(true);
@@ -94,14 +90,12 @@ describe('useSingleAgentMenuItems', () => {
     });
 
     it('should include View agent item when onViewAgentClick is provided', () => {
-      const { result } = renderHook(
-        () =>
-          useSingleAgentMenuItems({
-            agent: createMockAgent(),
-            agentPolicy: createMockAgentPolicy(),
-            callbacks: mockCallbacks,
-          }),
-        { wrapper: renderer.Wrapper }
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: createMockAgent(),
+          agentPolicy: createMockAgentPolicy(),
+          callbacks: mockCallbacks,
+        })
       );
 
       const viewAgentItem = result.current.find((item) => item.id === 'view-agent');
@@ -110,14 +104,12 @@ describe('useSingleAgentMenuItems', () => {
 
     it('should NOT include View agent item when onViewAgentClick is not provided', () => {
       const callbacksWithoutViewAgent = { ...mockCallbacks, onViewAgentClick: undefined };
-      const { result } = renderHook(
-        () =>
-          useSingleAgentMenuItems({
-            agent: createMockAgent(),
-            agentPolicy: createMockAgentPolicy(),
-            callbacks: callbacksWithoutViewAgent,
-          }),
-        { wrapper: renderer.Wrapper }
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: createMockAgent(),
+          agentPolicy: createMockAgentPolicy(),
+          callbacks: callbacksWithoutViewAgent,
+        })
       );
 
       const viewAgentItem = result.current.find((item) => item.id === 'view-agent');
@@ -125,14 +117,12 @@ describe('useSingleAgentMenuItems', () => {
     });
 
     it('should always include View agent JSON item in maintenance submenu', () => {
-      const { result } = renderHook(
-        () =>
-          useSingleAgentMenuItems({
-            agent: createMockAgent(),
-            agentPolicy: createMockAgentPolicy(),
-            callbacks: mockCallbacks,
-          }),
-        { wrapper: renderer.Wrapper }
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: createMockAgent(),
+          agentPolicy: createMockAgentPolicy(),
+          callbacks: mockCallbacks,
+        })
       );
 
       const maintenance = result.current.find((item) => item.id === 'maintenance');
@@ -144,14 +134,12 @@ describe('useSingleAgentMenuItems', () => {
 
   describe('Top-level action items', () => {
     it('should include tags, reassign, and upgrade when user has privileges and policy is not managed', () => {
-      const { result } = renderHook(
-        () =>
-          useSingleAgentMenuItems({
-            agent: createMockAgent(),
-            agentPolicy: createMockAgentPolicy({ is_managed: false }),
-            callbacks: mockCallbacks,
-          }),
-        { wrapper: renderer.Wrapper }
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: createMockAgent(),
+          agentPolicy: createMockAgentPolicy({ is_managed: false }),
+          callbacks: mockCallbacks,
+        })
       );
 
       expect(result.current.find((item) => item.id === 'tags')).toBeDefined();
@@ -160,14 +148,12 @@ describe('useSingleAgentMenuItems', () => {
     });
 
     it('should NOT include tags, reassign, and upgrade when policy is managed', () => {
-      const { result } = renderHook(
-        () =>
-          useSingleAgentMenuItems({
-            agent: createMockAgent(),
-            agentPolicy: createMockAgentPolicy({ is_managed: true }),
-            callbacks: mockCallbacks,
-          }),
-        { wrapper: renderer.Wrapper }
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: createMockAgent(),
+          agentPolicy: createMockAgentPolicy({ is_managed: true }),
+          callbacks: mockCallbacks,
+        })
       );
 
       expect(result.current.find((item) => item.id === 'tags')).toBeUndefined();
@@ -184,14 +170,12 @@ describe('useSingleAgentMenuItems', () => {
         integrations: {},
       } as any);
 
-      const { result } = renderHook(
-        () =>
-          useSingleAgentMenuItems({
-            agent: createMockAgent(),
-            agentPolicy: createMockAgentPolicy(),
-            callbacks: mockCallbacks,
-          }),
-        { wrapper: renderer.Wrapper }
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: createMockAgent(),
+          agentPolicy: createMockAgentPolicy(),
+          callbacks: mockCallbacks,
+        })
       );
 
       expect(result.current.find((item) => item.id === 'tags')).toBeUndefined();
@@ -202,14 +186,12 @@ describe('useSingleAgentMenuItems', () => {
 
   describe('Submenu groups', () => {
     it('should include Upgrade management submenu when user has privileges', () => {
-      const { result } = renderHook(
-        () =>
-          useSingleAgentMenuItems({
-            agent: createMockAgent(),
-            agentPolicy: createMockAgentPolicy(),
-            callbacks: mockCallbacks,
-          }),
-        { wrapper: renderer.Wrapper }
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: createMockAgent(),
+          agentPolicy: createMockAgentPolicy(),
+          callbacks: mockCallbacks,
+        })
       );
 
       const upgradeManagement = result.current.find((item) => item.id === 'upgrade-management');
@@ -218,14 +200,12 @@ describe('useSingleAgentMenuItems', () => {
     });
 
     it('should include Maintenance and diagnostics submenu', () => {
-      const { result } = renderHook(
-        () =>
-          useSingleAgentMenuItems({
-            agent: createMockAgent(),
-            agentPolicy: createMockAgentPolicy({ is_protected: false }),
-            callbacks: mockCallbacks,
-          }),
-        { wrapper: renderer.Wrapper }
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: createMockAgent(),
+          agentPolicy: createMockAgentPolicy({ is_protected: false }),
+          callbacks: mockCallbacks,
+        })
       );
 
       const maintenance = result.current.find((item) => item.id === 'maintenance');
@@ -234,14 +214,12 @@ describe('useSingleAgentMenuItems', () => {
     });
 
     it('should include Security and removal submenu when user has privileges', () => {
-      const { result } = renderHook(
-        () =>
-          useSingleAgentMenuItems({
-            agent: createMockAgent(),
-            agentPolicy: createMockAgentPolicy(),
-            callbacks: mockCallbacks,
-          }),
-        { wrapper: renderer.Wrapper }
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: createMockAgent(),
+          agentPolicy: createMockAgentPolicy(),
+          callbacks: mockCallbacks,
+        })
       );
 
       const security = result.current.find((item) => item.id === 'security');
@@ -252,14 +230,12 @@ describe('useSingleAgentMenuItems', () => {
 
   describe('Diagnostics action', () => {
     it('should include diagnostics in maintenance submenu when user has readAgents', () => {
-      const { result } = renderHook(
-        () =>
-          useSingleAgentMenuItems({
-            agent: createMockAgent(),
-            agentPolicy: createMockAgentPolicy(),
-            callbacks: mockCallbacks,
-          }),
-        { wrapper: renderer.Wrapper }
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: createMockAgent(),
+          agentPolicy: createMockAgentPolicy(),
+          callbacks: mockCallbacks,
+        })
       );
 
       const maintenance = result.current.find((item) => item.id === 'maintenance');
@@ -276,14 +252,12 @@ describe('useSingleAgentMenuItems', () => {
         integrations: {},
       } as any);
 
-      const { result } = renderHook(
-        () =>
-          useSingleAgentMenuItems({
-            agent: createMockAgent(),
-            agentPolicy: createMockAgentPolicy(),
-            callbacks: mockCallbacks,
-          }),
-        { wrapper: renderer.Wrapper }
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: createMockAgent(),
+          agentPolicy: createMockAgentPolicy(),
+          callbacks: mockCallbacks,
+        })
       );
 
       const maintenance = result.current.find((item) => item.id === 'maintenance');
@@ -294,16 +268,14 @@ describe('useSingleAgentMenuItems', () => {
 
   describe('Migrate action', () => {
     it('should include migrate in maintenance submenu for eligible agent', () => {
-      const { result } = renderHook(
-        () =>
-          useSingleAgentMenuItems({
-            agent: createMockAgent({
-              local_metadata: { elastic: { agent: { version: '8.8.0' } } },
-            }),
-            agentPolicy: createMockAgentPolicy({ is_protected: false }),
-            callbacks: mockCallbacks,
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: createMockAgent({
+            local_metadata: { elastic: { agent: { version: '8.8.0' } } },
           }),
-        { wrapper: renderer.Wrapper }
+          agentPolicy: createMockAgentPolicy({ is_protected: false }),
+          callbacks: mockCallbacks,
+        })
       );
 
       const maintenance = result.current.find((item) => item.id === 'maintenance');
@@ -312,14 +284,12 @@ describe('useSingleAgentMenuItems', () => {
     });
 
     it('should NOT include migrate for protected policy', () => {
-      const { result } = renderHook(
-        () =>
-          useSingleAgentMenuItems({
-            agent: createMockAgent(),
-            agentPolicy: createMockAgentPolicy({ is_protected: true }),
-            callbacks: mockCallbacks,
-          }),
-        { wrapper: renderer.Wrapper }
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: createMockAgent(),
+          agentPolicy: createMockAgentPolicy({ is_protected: true }),
+          callbacks: mockCallbacks,
+        })
       );
 
       const maintenance = result.current.find((item) => item.id === 'maintenance');
@@ -330,14 +300,12 @@ describe('useSingleAgentMenuItems', () => {
 
   describe('Unenroll action', () => {
     it('should include unenroll in security submenu for non-managed policy', () => {
-      const { result } = renderHook(
-        () =>
-          useSingleAgentMenuItems({
-            agent: createMockAgent(),
-            agentPolicy: createMockAgentPolicy({ is_managed: false }),
-            callbacks: mockCallbacks,
-          }),
-        { wrapper: renderer.Wrapper }
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: createMockAgent(),
+          agentPolicy: createMockAgentPolicy({ is_managed: false }),
+          callbacks: mockCallbacks,
+        })
       );
 
       const security = result.current.find((item) => item.id === 'security');
@@ -346,14 +314,12 @@ describe('useSingleAgentMenuItems', () => {
     });
 
     it('should NOT include unenroll for managed policy', () => {
-      const { result } = renderHook(
-        () =>
-          useSingleAgentMenuItems({
-            agent: createMockAgent(),
-            agentPolicy: createMockAgentPolicy({ is_managed: true }),
-            callbacks: mockCallbacks,
-          }),
-        { wrapper: renderer.Wrapper }
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: createMockAgent(),
+          agentPolicy: createMockAgentPolicy({ is_managed: true }),
+          callbacks: mockCallbacks,
+        })
       );
 
       const security = result.current.find((item) => item.id === 'security');
@@ -365,14 +331,12 @@ describe('useSingleAgentMenuItems', () => {
     });
 
     it('should show Force unenroll when agent is unenrolling', () => {
-      const { result } = renderHook(
-        () =>
-          useSingleAgentMenuItems({
-            agent: createMockAgent({ status: 'unenrolling' }),
-            agentPolicy: createMockAgentPolicy(),
-            callbacks: mockCallbacks,
-          }),
-        { wrapper: renderer.Wrapper }
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: createMockAgent({ status: 'unenrolling' }),
+          agentPolicy: createMockAgentPolicy(),
+          callbacks: mockCallbacks,
+        })
       );
 
       const security = result.current.find((item) => item.id === 'security');
@@ -384,14 +348,12 @@ describe('useSingleAgentMenuItems', () => {
 
   describe('Uninstall action', () => {
     it('should include uninstall when agent has policy_id', () => {
-      const { result } = renderHook(
-        () =>
-          useSingleAgentMenuItems({
-            agent: createMockAgent({ policy_id: 'policy-1' }),
-            agentPolicy: createMockAgentPolicy(),
-            callbacks: mockCallbacks,
-          }),
-        { wrapper: renderer.Wrapper }
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: createMockAgent({ policy_id: 'policy-1' }),
+          agentPolicy: createMockAgentPolicy(),
+          callbacks: mockCallbacks,
+        })
       );
 
       const security = result.current.find((item) => item.id === 'security');
@@ -400,14 +362,12 @@ describe('useSingleAgentMenuItems', () => {
     });
 
     it('should NOT include uninstall for agentless policy', () => {
-      const { result } = renderHook(
-        () =>
-          useSingleAgentMenuItems({
-            agent: createMockAgent({ policy_id: 'policy-1' }),
-            agentPolicy: createMockAgentPolicy({ supports_agentless: true }),
-            callbacks: mockCallbacks,
-          }),
-        { wrapper: renderer.Wrapper }
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: createMockAgent({ policy_id: 'policy-1' }),
+          agentPolicy: createMockAgentPolicy({ supports_agentless: true }),
+          callbacks: mockCallbacks,
+        })
       );
 
       const security = result.current.find((item) => item.id === 'security');
@@ -422,21 +382,19 @@ describe('useSingleAgentMenuItems', () => {
         enableAgentPrivilegeLevelChange: true,
       } as any);
 
-      const { result } = renderHook(
-        () =>
-          useSingleAgentMenuItems({
-            agent: createMockAgent({
-              agent: { version: '9.3.0' },
-              local_metadata: { elastic: { agent: { unprivileged: false } } },
-            }),
-            agentPolicy: createMockAgentPolicy({
-              package_policies: [
-                { package: { name: 'some-integration', requires_root: false } },
-              ] as any,
-            }),
-            callbacks: mockCallbacks,
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: createMockAgent({
+            agent: { id: 'agent-1', version: '9.3.0' },
+            local_metadata: { elastic: { agent: { unprivileged: false } } },
           }),
-        { wrapper: renderer.Wrapper }
+          agentPolicy: createMockAgentPolicy({
+            package_policies: [
+              { package: { name: 'some-integration', requires_root: false } },
+            ] as any,
+          }),
+          callbacks: mockCallbacks,
+        })
       );
 
       const security = result.current.find((item) => item.id === 'security');
@@ -449,21 +407,19 @@ describe('useSingleAgentMenuItems', () => {
         enableAgentPrivilegeLevelChange: false,
       } as any);
 
-      const { result } = renderHook(
-        () =>
-          useSingleAgentMenuItems({
-            agent: createMockAgent({
-              agent: { version: '9.3.0' },
-              local_metadata: { elastic: { agent: { unprivileged: false } } },
-            }),
-            agentPolicy: createMockAgentPolicy({
-              package_policies: [
-                { package: { name: 'some-integration', requires_root: false } },
-              ] as any,
-            }),
-            callbacks: mockCallbacks,
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: createMockAgent({
+            agent: { id: 'agent-1', version: '9.3.0' },
+            local_metadata: { elastic: { agent: { unprivileged: false } } },
           }),
-        { wrapper: renderer.Wrapper }
+          agentPolicy: createMockAgentPolicy({
+            package_policies: [
+              { package: { name: 'some-integration', requires_root: false } },
+            ] as any,
+          }),
+          callbacks: mockCallbacks,
+        })
       );
 
       const security = result.current.find((item) => item.id === 'security');
@@ -474,14 +430,12 @@ describe('useSingleAgentMenuItems', () => {
 
   describe('Callback invocations', () => {
     it('should wire up callbacks correctly', () => {
-      const { result } = renderHook(
-        () =>
-          useSingleAgentMenuItems({
-            agent: createMockAgent(),
-            agentPolicy: createMockAgentPolicy(),
-            callbacks: mockCallbacks,
-          }),
-        { wrapper: renderer.Wrapper }
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: createMockAgent(),
+          agentPolicy: createMockAgentPolicy(),
+          callbacks: mockCallbacks,
+        })
       );
 
       // View agent JSON callback (in maintenance submenu)
