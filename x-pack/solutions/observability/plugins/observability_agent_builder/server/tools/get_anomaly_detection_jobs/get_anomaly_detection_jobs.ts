@@ -15,9 +15,9 @@ import type Ml from '@elastic/elasticsearch/lib/api/api/ml';
 import type { MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type {
-  ObservabilityAgentPluginStart,
-  ObservabilityAgentPluginStartDependencies,
-  ObservabilityAgentPluginSetupDependencies,
+  ObservabilityAgentBuilderPluginStart,
+  ObservabilityAgentBuilderPluginStartDependencies,
+  ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../../types';
 import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
 
@@ -160,8 +160,11 @@ async function getMlJobs({
   rangeStart,
   rangeEnd,
 }: {
-  core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>;
-  plugins: ObservabilityAgentPluginSetupDependencies;
+  core: CoreSetup<
+    ObservabilityAgentBuilderPluginStartDependencies,
+    ObservabilityAgentBuilderPluginStart
+  >;
+  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   mlClient: Ml;
   request: KibanaRequest;
   logger: Logger;
