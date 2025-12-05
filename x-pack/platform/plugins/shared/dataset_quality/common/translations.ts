@@ -831,3 +831,24 @@ export const enableFailureStoreButtonLabel = i18n.translate(
     defaultMessage: 'Enable failure store',
   }
 );
+
+export const modifyFieldValue = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.modifyFieldValueLink',
+  {
+    defaultMessage: 'Modify field value',
+  }
+);
+
+export const increaseFieldCharacterLimit = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.increaseFieldCharacterLimitLink',
+  {
+    defaultMessage: 'Increase field character limit',
+  }
+);
+
+export const changeFieldType = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.changeFieldTypeLink',
+  {
+    defaultMessage: 'Change field type',
+  }
+);
