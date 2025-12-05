@@ -11,6 +11,7 @@ import { monaco } from '@kbn/monaco';
 import { ESQLVariableType, type ESQLControlVariable, QuerySource } from '@kbn/esql-types';
 import { ControlTriggerSource } from '@kbn/esql-types';
 import type { CoreStart } from '@kbn/core/public';
+import type { MutableRefObject } from 'react';
 import type { ESQLEditorDeps, ControlsContext } from './types';
 import type { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
 
@@ -46,24 +47,15 @@ const triggerControl = async (
   });
 };
 
-export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.IDisposable[] => {
-  const {
-    application,
-    uiActions,
-    telemetryService,
-    editorRef,
-    getCurrentQuery,
-    esqlVariables,
-    controlsContext,
-    openTimePickerPopover,
-  } = deps;
-
+export const registerCustomCommands = (
+  deps: MutableRefObject<MonacoCommandDependencies>
+): monaco.IDisposable[] => {
   const commandDisposables: monaco.IDisposable[] = [];
 
   // Command to redirect users to the index management page
   commandDisposables.push(
     monaco.editor.registerCommand('esql.policies.create', (...args) => {
-      application?.navigateToApp('management', {
+      deps.current.application?.navigateToApp('management', {
         path: 'data/index_management/enrich_policies/create',
         openInNewTab: true,
       });
@@ -73,7 +65,7 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
   // Choose timepicker command
   commandDisposables.push(
     monaco.editor.registerCommand('esql.timepicker.choose', (...args) => {
-      openTimePickerPopover();
+      deps.current.openTimePickerPopover();
     })
   );
 
@@ -81,7 +73,10 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
   commandDisposables.push(
     monaco.editor.registerCommand('esql.recommendedQuery.accept', (...args) => {
       const [, { queryLabel }] = args;
-      telemetryService.trackRecommendedQueryClicked(QuerySource.AUTOCOMPLETE, queryLabel);
+      deps.current.telemetryService.trackRecommendedQueryClicked(
+        QuerySource.AUTOCOMPLETE,
+        queryLabel
+      );
     })
   );
 
@@ -112,6 +107,14 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
   controlCommands.forEach(({ command, variableType }) => {
     commandDisposables.push(
       monaco.editor.registerCommand(command, async (...args) => {
+        const {
+          uiActions,
+          telemetryService,
+          editorRef,
+          getCurrentQuery,
+          esqlVariables,
+          controlsContext,
+        } = deps.current;
         const [, { triggerSource }] = args;
         const prefilled = triggerSource !== ControlTriggerSource.QUESTION_MARK;
         const currentQuery = getCurrentQuery();

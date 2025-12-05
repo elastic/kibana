@@ -46,6 +46,7 @@ import { createPortal } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
 import type { TelemetryQuerySubmittedProps } from '@kbn/esql-types';
 import { QuerySource } from '@kbn/esql-types';
+import useLatest from 'react-use/lib/useLatest';
 import { useCanCreateLookupIndex, useLookupIndexCommand } from './lookup_join';
 import { EditorFooter } from './editor_footer';
 import { QuickSearchVisor } from './editor_visor';
@@ -75,6 +76,7 @@ import { getHistoryItems } from './history_local_storage';
 import type { StarredQueryMetadata } from './editor_footer/esql_starred_queries_service';
 import type { ESQLEditorDeps, ESQLEditorProps as ESQLEditorPropsInternal } from './types';
 import {
+  type MonacoCommandDependencies,
   registerCustomCommands,
   addEditorKeyBindings,
   addTabKeybindingRules,
@@ -958,6 +960,18 @@ const ESQLEditorInternal = function ESQLEditor({
     [isDisabled]
   );
 
+  const monacoCommandDepsRef = useLatest<MonacoCommandDependencies>({
+    application,
+    uiActions,
+    telemetryService,
+    editorRef: editorRef as React.RefObject<monaco.editor.IStandaloneCodeEditor>,
+    getCurrentQuery: () =>
+      fixESQLQueryWithVariables(editorRef.current?.getValue() || '', esqlVariables),
+    esqlVariables,
+    controlsContext,
+    openTimePickerPopover,
+  });
+
   const htmlId = useGeneratedHtmlId({ prefix: 'esql-editor' });
   const [labelInFocus, setLabelInFocus] = useState(false);
   const editorPanel = (
@@ -1072,20 +1086,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     }
 
                     // Register custom commands
-                    const commandDisposables = registerCustomCommands({
-                      application,
-                      uiActions,
-                      telemetryService,
-                      editorRef: editorRef as React.RefObject<monaco.editor.IStandaloneCodeEditor>,
-                      getCurrentQuery: () =>
-                        fixESQLQueryWithVariables(
-                          editorRef.current?.getValue() || '',
-                          esqlVariables
-                        ),
-                      esqlVariables,
-                      controlsContext,
-                      openTimePickerPopover,
-                    });
+                    const commandDisposables = registerCustomCommands(monacoCommandDepsRef);
 
                     // Add editor key bindings
                     addEditorKeyBindings(editor, onQuerySubmit, setIsVisorOpen, isVisorOpen);
