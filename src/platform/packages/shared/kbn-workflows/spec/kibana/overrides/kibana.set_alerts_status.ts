@@ -11,8 +11,6 @@
  * OVERRIDE FILE
  *
  * Source: /oas_docs/output/kibana.yaml, operations: SetAlertsStatus
- *
- * To regenerate: node scripts/generate_workflow_kibana_contracts.js
  */
 
 // import all needed request and response schemas generated from the OpenAPI spec

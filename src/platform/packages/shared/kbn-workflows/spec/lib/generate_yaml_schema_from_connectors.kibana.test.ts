@@ -34,6 +34,7 @@ describe('generateYamlSchemaFromConnectors / kibana connectors', () => {
       });
       expect(result.error).toBeUndefined();
       expect(result.success).toBe(true);
+      expect((result.data as any).steps[0]).toEqual(step);
     });
   });
 });
