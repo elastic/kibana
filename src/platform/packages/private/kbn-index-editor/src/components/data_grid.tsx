@@ -277,49 +277,51 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       customBulkActions={bulkActions}
       rowLineHeightOverride={euiTheme.size.xl}
       renderCustomToolbar={gridToolbar}
-      css={css`
-        height: '100%';
-
-        .euiDataGridRowCell--controlColumn[data-gridcell-column-id='actions'] {
-          display: flex;
-          justify-content: center;
-        }
-        [data-test-subj='unifiedDataTable_actionsColumnHeaderIcon'] {
-          display: none;
-        }
-
-        .euiDataGridRowCell__content > div,
-        .unifiedDataTable__cellValue {
-          height: 100%;
-          width: 100%;
-        }
-        .unifiedDataTable__headerCell {
-          align-items: center !important;
-        }
-        .euiDataGridHeaderCell {
-          align-items: center;
-          display: flex;
-          inline-size: auto;
-        }
-
-        .dataGrid__addColumnHeader,
-        .dataGrid__addColumnHeader > div {
-          justify-content: center;
-          inline-size: auto;
-        }
-
-        .dataGrid__addRowAction {
-          opacity: 0;
-        }
-
-        .euiDataGridRow:hover .dataGrid__addRowAction,
-        .euiDataGridRow:focus-within .dataGrid__addRowAction {
-          opacity: 1;
-        }
-      `}
+      css={styles}
     />
   );
 };
+
+const styles = css`
+  height: '100%';
+
+  .euiDataGridRowCell--controlColumn[data-gridcell-column-id='actions'] {
+    display: flex;
+    justify-content: center;
+  }
+  [data-test-subj='unifiedDataTable_actionsColumnHeaderIcon'] {
+    display: none;
+  }
+
+  .euiDataGridRowCell__content > div,
+  .unifiedDataTable__cellValue {
+    height: 100%;
+    width: 100%;
+  }
+  .unifiedDataTable__headerCell {
+    align-items: center !important;
+  }
+  .euiDataGridHeaderCell {
+    align-items: center;
+    display: flex;
+    inline-size: auto;
+  }
+
+  .dataGrid__addColumnHeader,
+  .dataGrid__addColumnHeader > div {
+    justify-content: center;
+    inline-size: auto;
+  }
+
+  .dataGrid__addRowAction {
+    opacity: 0;
+  }
+
+  .euiDataGridRow:hover .dataGrid__addRowAction,
+  .euiDataGridRow:focus-within .dataGrid__addRowAction {
+    opacity: 1;
+  }
+`;
 
 // eslint-disable-next-line import/no-default-export
 export default DataGrid;
