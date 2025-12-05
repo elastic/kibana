@@ -100,7 +100,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       path_to_executable: pathToExecutable,
       created_by: '',
       created_at: now,
-      updated_by: now,
+      updated_by: '',
       updated_at: now,
     };
   }
@@ -142,9 +142,9 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
     };
   }
 
-  protected getKueryWithPrefixedSoType(kuerString: string): KueryNode {
+  protected getKueryWithPrefixedSoType(kueryString: string): KueryNode {
     const prefix = `${SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE}.attributes`;
-    const kueryAst = esKuery.fromKueryExpression(kuerString);
+    const kueryAst = esKuery.fromKueryExpression(kueryString);
     const kueryAstList = [kueryAst];
 
     this.logger.debug(

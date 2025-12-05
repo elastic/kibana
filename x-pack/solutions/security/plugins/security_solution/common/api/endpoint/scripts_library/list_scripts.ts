@@ -26,7 +26,9 @@ export const ListScriptsRequestSchema = {
           schema.literal('updatedBy'),
         ])
       ),
-      sortDirection: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
+      sortDirection: schema.maybe(
+        schema.oneOf([schema.literal('asc'), schema.literal('desc')], { defaultValue: 'asc' })
+      ),
       kuery: schema.maybe(
         schema.string({
           validate: (value) => isScriptsLibraryKqlFilterValid(value).error,
