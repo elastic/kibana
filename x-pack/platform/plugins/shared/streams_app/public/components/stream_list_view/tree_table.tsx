@@ -17,10 +17,12 @@ import {
   EuiHighlight,
   EuiIconTip,
   EuiButtonIcon,
+  EuiTourStep,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import { Streams } from '@kbn/streams-schema';
+import { useStreamsTour } from '../streams_tour';
 import type { TableRow, SortableField } from './utils';
 import {
   buildStreamRows,
@@ -71,6 +73,7 @@ export function StreamsTreeTable({
   const router = useStreamsAppRouter();
   const { euiTheme } = useEuiTheme();
   const { timeState } = useTimefilter();
+  const { getStepPropsByStepId } = useStreamsTour();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [sortField, setSortField] = useState<SortableField>('nameSortKey');
@@ -215,6 +218,25 @@ export function StreamsTreeTable({
     />
   );
 
+  const streamsListStepProps = getStepPropsByStepId('streams_list');
+
+  const nameColumnHeader = (
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      {shouldComposeTree(sortField) && hasExpandable && (
+        <EuiFlexItem grow={false}>{expandCollapseAllButton}</EuiFlexItem>
+      )}
+      <EuiFlexItem>
+        {streamsListStepProps ? (
+          <EuiTourStep {...streamsListStepProps}>
+            <span>{NAME_COLUMN_HEADER}</span>
+          </EuiTourStep>
+        ) : (
+          <span>{NAME_COLUMN_HEADER}</span>
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
   return (
     <EuiInMemoryTable<TableRow>
       loading={loading}
@@ -222,14 +244,7 @@ export function StreamsTreeTable({
       columns={[
         {
           field: 'nameSortKey',
-          name: (
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-              {shouldComposeTree(sortField) && hasExpandable && (
-                <EuiFlexItem grow={false}>{expandCollapseAllButton}</EuiFlexItem>
-              )}
-              <EuiFlexItem>{NAME_COLUMN_HEADER}</EuiFlexItem>
-            </EuiFlexGroup>
-          ),
+          name: nameColumnHeader,
           sortable: (row: TableRow) => row.rootNameSortKey,
           dataType: 'string',
           render: (_: unknown, item: TableRow) => {
@@ -255,17 +270,9 @@ export function StreamsTreeTable({
                       data-test-subj={`${isCollapsed ? 'expand' : 'collapse'}Button-${
                         item.stream.name
                       }`}
-                      aria-label={i18n.translate(
-                        isCollapsed
-                          ? 'xpack.streams.streamsTreeTable.collapsedNodeAriaLabel'
-                          : 'xpack.streams.streamsTreeTable.expandedNodeAriaLabel',
-                        {
-                          defaultMessage: isCollapsed
-                            ? 'Collapsed node with {childCount} children'
-                            : 'Expanded node with {childCount} children',
-                          values: { childCount: item.children.length },
-                        }
-                      )}
+                      aria-label={i18n.translate('xpack.streams.streamsTreeTable.', {
+                        defaultMessage: '',
+                      })}
                       onClick={(e: React.MouseEvent) => {
                         handleToggleCollapse(item.stream.name);
                       }}

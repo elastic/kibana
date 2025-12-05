@@ -264,6 +264,7 @@ export const Tab: React.FC<TabProps> = (props) => {
                     item={item}
                     getTabMenuItems={getTabMenuItems}
                     isPopoverOpen={isActionPopoverOpen}
+                    isSelected={isSelected}
                     setPopover={onToggleActionsMenu}
                     onEnterRenaming={onEnterRenaming}
                   />
@@ -273,14 +274,14 @@ export const Tab: React.FC<TabProps> = (props) => {
             )}
             {!disableCloseButton && !!onClose && (
               <EuiFlexItem grow={false} className="unifiedTabs__closeTabBtn">
-                <EuiToolTip content={closeButtonLabel}>
+                <EuiToolTip content={closeButtonLabel} disableScreenReaderOutput>
                   <EuiButtonIcon
-                    // semantically role="tablist" does not allow other buttons in tabs
-                    aria-hidden={true}
+                    aria-label={closeButtonLabel}
                     color="text"
                     data-test-subj={`unifiedTabs_closeTabBtn_${item.id}`}
                     iconType="cross"
                     onClick={onCloseEvent}
+                    tabIndex={isSelected ? 0 : -1}
                   />
                 </EuiToolTip>
               </EuiFlexItem>
