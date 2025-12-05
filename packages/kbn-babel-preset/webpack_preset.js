@@ -43,6 +43,10 @@ module.exports = (
       ...(options.useTransformRequireDefault
         ? [require.resolve('babel-plugin-transform-require-default')]
         : []),
+      [
+        'transform-barrels',
+        { executorName: 'webpack', isCacheEnabled: true, logging: { type: 'screen' } },
+      ],
     ],
     env: {
       production: {
