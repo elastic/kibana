@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -38,6 +38,18 @@ export function SloInstanceSelector({
   >([]);
   const [searchValue, setSearchValue] = useState<string>('');
   const [searchAfter, setSearchAfter] = useState<string | undefined>();
+  const [isSearching, setIsSearching] = useState(false);
+  const selectedOptionsRef = useRef(selectedOptions);
+  const onSelectedRef = useRef(onSelected);
+
+  // Keep refs in sync
+  useEffect(() => {
+    selectedOptionsRef.current = selectedOptions;
+  }, [selectedOptions]);
+
+  useEffect(() => {
+    onSelectedRef.current = onSelected;
+  }, [onSelected]);
 
   const { isLoading, data: instancesData } = useFetchSloInstances({
     sloId,
@@ -59,6 +71,11 @@ export function SloInstanceSelector({
   // Set initial selection
   useEffect(() => {
     if (instancesData?.results === undefined) {
+      return;
+    }
+
+    // Don't set initial selection if user is actively searching
+    if (isSearching) {
       return;
     }
 
@@ -88,9 +105,19 @@ export function SloInstanceSelector({
         onSelected(ALL_VALUE);
       }
     }
-  }, [initialInstanceId, instancesData, onSelected, selectedOptions.length]);
+  }, [initialInstanceId, instancesData, onSelected, selectedOptions.length, isSearching]);
 
   const onChange = (opts: Array<EuiComboBoxOptionOption<string>>) => {
+    // User explicitly selected an option, stop searching mode
+    setIsSearching(false);
+
+    // Allow clearing selection to enable searching
+    if (opts.length === 0) {
+      setSelectedOptions([]);
+      onSelected(undefined);
+      return;
+    }
+
     const isAllSelected = opts.find((opt) => opt.value === ALL_VALUE);
     const prevIsAllSelected = selectedOptions.find((opt) => opt.value === ALL_VALUE);
 
@@ -107,12 +134,23 @@ export function SloInstanceSelector({
     }
   };
 
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      // When user starts typing, clear selection to allow free searching
+      if (value && selectedOptionsRef.current.length > 0) {
+        setSelectedOptions([]);
+        onSelectedRef.current(undefined);
+      }
+      setIsSearching(!!value);
+      setSearchValue(value);
+      setSearchAfter(undefined); // Reset pagination when search changes
+    },
+    []
+  );
+
   const onSearchChange = useMemo(
-    () =>
-      debounce((value: string) => {
-        setSearchValue(value);
-        setSearchAfter(undefined); // Reset pagination when search changes
-      }, 300),
+    () => debounce(handleSearchChange, 300),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
@@ -140,7 +178,8 @@ export function SloInstanceSelector({
         fullWidth
         onSearchChange={onSearchChange}
         isInvalid={hasError}
-        singleSelection={{ asPlainText: true }}
+        singleSelection
+        isClearable
       />
     </EuiFormRow>
   );
