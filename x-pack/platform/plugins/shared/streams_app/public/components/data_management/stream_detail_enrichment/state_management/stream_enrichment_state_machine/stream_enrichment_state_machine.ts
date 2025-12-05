@@ -21,12 +21,14 @@ import {
   assertEvent,
 } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
-import type { Streams } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { GrokCollection } from '@kbn/grok-ui';
 import type { StreamlangStepWithUIAttributes, StreamlangDSL } from '@kbn/streamlang';
 import {
   ALWAYS_CONDITION,
   convertStepsForUI,
+  convertUIStepsToDSL,
+  validateStreamlang,
   type StreamlangProcessorDefinition,
 } from '@kbn/streamlang';
 import type { StreamlangWhereBlock } from '@kbn/streamlang/types/streamlang';
@@ -101,6 +103,39 @@ export const streamEnrichmentMachine = setup({
     notifyUpsertStreamFailure: getPlaceholderFor(createUpsertStreamFailureNofitier),
     notifySuggestionFailure: () => {}, // Placeholder for suggestion failure notification
     refreshDefinition: () => {},
+    /* Validation actions */
+    computeValidation: assign(({ context }) => {
+      const isWiredStream = Streams.WiredStream.Definition.is(context.definition.stream);
+
+      // Only run validation for wired streams
+      if (!isWiredStream) {
+        return {
+          validationErrors: new Map(),
+          fieldTypesByProcessor: new Map(),
+        };
+      }
+
+      const allStepsWithUI = context.stepRefs.map(
+        (stepActorRef) => stepActorRef.getSnapshot().context.step
+      );
+      const streamlangDSL = convertUIStepsToDSL(allStepsWithUI, false);
+      const validationResult = validateStreamlang(streamlangDSL, {
+        reservedFields: [],
+      });
+
+      const errorsByStep = new Map<string, typeof validationResult.errors>();
+      validationResult.errors.forEach((error) => {
+        if (error.processorId) {
+          const existing = errorsByStep.get(error.processorId) || [];
+          errorsByStep.set(error.processorId, [...existing, error]);
+        }
+      });
+
+      return {
+        validationErrors: errorsByStep,
+        fieldTypesByProcessor: validationResult.fieldTypesByProcessor,
+      };
+    }),
     /* URL state actions */
     storeUrlState: assign((_, params: { urlState: EnrichmentUrlState }) => ({
       urlState: params.urlState,
@@ -278,6 +313,12 @@ export const streamEnrichmentMachine = setup({
     /* @ts-expect-error The error is thrown because the type of the event is not inferred correctly when using enqueueActions during setup */
     sendStepsEventToSimulator: enqueueActions(
       ({ context, enqueue }, params?: { type: StreamEnrichmentEvent['type'] }) => {
+        // Don't run simulation if there are validation errors
+        if (context.validationErrors.size > 0) {
+          enqueue('sendResetEventToSimulator');
+          return;
+        }
+
         const simulationMode = getActiveSimulationMode(context);
         const isPartialSimulation = simulationMode === 'partial';
         /**
@@ -318,6 +359,7 @@ export const streamEnrichmentMachine = setup({
     },
     hasManagePrivileges: ({ context }) => context.definition.privileges.manage,
     hasSimulatePrivileges: ({ context }) => context.definition.privileges.simulate,
+    hasNoValidationErrors: ({ context }) => context.validationErrors.size === 0,
     canUpdateStream: and(['hasStagedChanges', stateIn('#managingProcessors.idle')]),
     isStagedStep: ({ context }, params: { id: string }) => {
       const stepRef = context.stepRefs.find((p) => p.id === params.id);
@@ -336,6 +378,8 @@ export const streamEnrichmentMachine = setup({
     initialStepRefs: [],
     stepRefs: [],
     urlState: defaultEnrichmentUrlState,
+    validationErrors: new Map(),
+    fieldTypesByProcessor: new Map(),
     suggestedPipeline: undefined,
     simulatorRef: spawn('simulationMachine', {
       id: 'simulator',
@@ -379,6 +423,7 @@ export const streamEnrichmentMachine = setup({
       type: 'parallel',
       entry: [
         { type: 'setupSteps' },
+        { type: 'computeValidation' },
         { type: 'setupDataSources' },
         { type: 'sendStepsEventToSimulator' },
       ],
@@ -544,7 +589,10 @@ export const streamEnrichmentMachine = setup({
                     },
                     'step.reorder': {
                       guard: 'hasSimulatePrivileges',
-                      actions: [{ type: 'reorderSteps', params: ({ event }) => event }],
+                      actions: [
+                        { type: 'reorderSteps', params: ({ event }) => event },
+                        { type: 'computeValidation' },
+                      ],
                       target: 'idle',
                       reenter: true,
                     },
@@ -554,6 +602,7 @@ export const streamEnrichmentMachine = setup({
                       actions: [
                         stopChild(({ event }) => event.id),
                         { type: 'deleteStep', params: ({ event }) => event },
+                        { type: 'computeValidation' },
                         { type: 'sendStepsEventToSimulator', params: ({ event }) => event },
                       ],
                     },
@@ -565,18 +614,25 @@ export const streamEnrichmentMachine = setup({
                           type: 'duplicateProcessor',
                           params: ({ event }) => event,
                         },
+                        { type: 'computeValidation' },
                         { type: 'sendStepsEventToSimulator' },
                       ],
                     },
                     'step.addProcessor': {
                       guard: 'hasSimulatePrivileges',
                       target: 'creating',
-                      actions: [{ type: 'addProcessor', params: ({ event }) => event }],
+                      actions: [
+                        { type: 'addProcessor', params: ({ event }) => event },
+                        { type: 'computeValidation' },
+                      ],
                     },
                     'step.addCondition': {
                       guard: 'hasSimulatePrivileges',
                       target: 'creating',
-                      actions: [{ type: 'addCondition', params: ({ event }) => event }],
+                      actions: [
+                        { type: 'addCondition', params: ({ event }) => event },
+                        { type: 'computeValidation' },
+                      ],
                     },
                     'step.resetSteps': {
                       guard: 'hasManagePrivileges',
@@ -594,6 +650,7 @@ export const streamEnrichmentMachine = setup({
                     'step.change': {
                       actions: [
                         { type: 'reassignSteps' },
+                        { type: 'computeValidation' },
                         { type: 'sendStepsEventToSimulator', params: ({ event }) => event },
                       ],
                     },
@@ -603,10 +660,12 @@ export const streamEnrichmentMachine = setup({
                       actions: [
                         stopChild(({ event }) => event.id),
                         { type: 'deleteStep', params: ({ event }) => event },
+                        { type: 'computeValidation' },
                       ],
                     },
                     'step.save': {
                       target: 'idle',
+                      actions: [{ type: 'reassignSteps' }, { type: 'computeValidation' }],
                     },
                   },
                 },
@@ -616,6 +675,7 @@ export const streamEnrichmentMachine = setup({
                   on: {
                     'step.change': {
                       actions: [
+                        { type: 'computeValidation' },
                         { type: 'sendStepsEventToSimulator', params: ({ event }) => event },
                       ],
                     },
@@ -626,11 +686,12 @@ export const streamEnrichmentMachine = setup({
                       actions: [
                         stopChild(({ event }) => event.id),
                         { type: 'deleteStep', params: ({ event }) => event },
+                        { type: 'computeValidation' },
                       ],
                     },
                     'step.save': {
                       target: 'idle',
-                      actions: [{ type: 'reassignSteps' }],
+                      actions: [{ type: 'reassignSteps' }, { type: 'computeValidation' }],
                     },
                   },
                 },
