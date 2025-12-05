@@ -42,6 +42,16 @@ export const aiPromptStepDefinition = (
         };
       }
 
+      const modelInput = [
+        {
+          role: 'system',
+          content: 'You are a helpful assistant that only responds in JSON format.',
+        },
+        { role: 'user', content: context.input.input },
+      ];
+
+      chatModel.withStructuredOutput(context.input.outputSchema).invoke(modelInput);
+
       return {
         output: {
           response: 'This is a placeholder response from the AI Prompt step.',
