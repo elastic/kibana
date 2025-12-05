@@ -14,7 +14,7 @@ import type {
 } from '../components/data_input_flyout/steps/constants';
 import { SplunkDataInputStep } from '../components/data_input_flyout/steps/constants';
 
-import { STEP_COMPONENTS } from './configs';
+import { STEP_COMPONENTS } from '../configs';
 
 import { MigrationSource } from '../types';
 import type {
