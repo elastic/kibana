@@ -121,13 +121,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // click the copy to clipboard context menu item
         await testSubjects.click('dscCascadeRowContextActionCopyToClipboard');
+        // context menu should be closed
         expect(await testSubjects.exists('dscCascadeRowContextActionMenu')).to.be(false);
 
         const canReadClipboard = await browser.checkBrowserPermission('clipboard-read');
 
         if (canReadClipboard) {
           const clipboardText = await browser.getClipboardValue();
-          // expect the clipboard text to be a valid IP address pattern
+          // expect the clipboard text to be a valid IP address pattern because the query is grouped by clientip
           expect(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(clipboardText)).to.be(true);
         }
       });
@@ -162,7 +163,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(newTabQuery).not.to.be(statsQuery);
 
           // assert new tab query contains the correct match query for the categorize function in the new tab
-          expect(/FROM logstash-\* \| WHERE clientip == .*/.test(newTabQuery)).to.be(true);
+          expect(
+            /FROM logstash-\* \| INLINE STATS count = COUNT\(bytes\), average = AVG\(memory\) BY clientip \| WHERE clientip == .*/.test(
+              newTabQuery
+            )
+          ).to.be(true);
         });
       });
 
@@ -230,11 +235,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
 
+        // input just enough of the query to trigger the editor suggestions
         await esql.typeEsqlEditorQuery(
           'FROM logstash-* | STATS count = COUNT(bytes), average = AVG(memory) BY ',
           'kibanaCodeEditor'
         );
 
+        // select the "Create control" suggestion
         await esql.selectEsqlSuggestionByLabel('Create control');
 
         await testSubjects.existOrFail('create_esql_control_flyout');
@@ -284,7 +291,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ).to.be(true);
       });
 
-      it('filtering out on row action should update the query', async () => {
+      it('should update the query on selecting the "filter out" row action', async () => {
         expect(await discover.isShowingCascadeLayout()).to.be(true);
 
         const controlId = (await dashboardControls.getAllControlIds())[0];

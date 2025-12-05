@@ -17,38 +17,8 @@ export type { DiscoverGridFlyoutProps };
 
 export function useGetDocumentViewRenderer(docViewerRef: DiscoverGridFlyoutProps['docViewerRef']) {
   return useCallback(
-    ({
-      dataView,
-      savedSearchId,
-      query,
-      initialTabId,
-      onFilter,
-      onRemoveColumn,
-      onAddColumn,
-      setExpandedDoc,
-      hit,
-      columns,
-      hits,
-      columnsMeta,
-      onClose,
-    }: Omit<DiscoverGridFlyoutProps, 'docViewerRef'>) => (
-      <DiscoverGridFlyout
-        dataView={dataView}
-        hit={hit}
-        hits={hits}
-        // if default columns are used, don't make them part of the URL - the context state handling will take care to restore them
-        columns={columns}
-        columnsMeta={columnsMeta}
-        savedSearchId={savedSearchId}
-        onFilter={onFilter}
-        onRemoveColumn={onRemoveColumn}
-        onAddColumn={onAddColumn}
-        onClose={onClose}
-        setExpandedDoc={setExpandedDoc}
-        query={query}
-        initialTabId={initialTabId}
-        docViewerRef={docViewerRef}
-      />
+    (props: Omit<DiscoverGridFlyoutProps, 'docViewerRef'>) => (
+      <DiscoverGridFlyout docViewerRef={docViewerRef} {...props} />
     ),
     [docViewerRef]
   );
