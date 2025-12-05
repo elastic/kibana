@@ -13,10 +13,10 @@ import { partition } from 'lodash';
 import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
 import { toHighPrecision } from '../../utils/number';
 import { createEsParams, typedSearch } from '../../utils/queries';
-import { getSummaryIndices, getSloSettings } from '../slo_settings';
+import { excludeStaleSummaryFilter } from '../utils/summary_stale_filter';
+import { getSloSettings, getSummaryIndices } from '../slo_settings';
 import type { EsSummaryDocument } from '../summary_transform_generator/helpers/create_temp_summary';
 import { getElasticsearchQueryOrThrow, parseStringFilters } from '../transform_generators';
-import { excludeStaleSummaryFilter } from '../summary_utils';
 import { fromRemoteSummaryDocumentToSloDefinition } from '../unsafe_federated/remote_summary_doc_to_slo';
 import { getFlattenedGroupings } from '../utils';
 import type {
@@ -55,7 +55,11 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
         bool: {
           filter: [
             { term: { spaceId: this.spaceId } },
-            ...excludeStaleSummaryFilter(settings, kqlQuery, hideStale),
+            ...excludeStaleSummaryFilter({
+              settings,
+              kqlFilter: kqlQuery,
+              forceExclude: hideStale,
+            }),
             getElasticsearchQueryOrThrow(kqlQuery),
             ...(parsedFilters.filter ?? []),
           ],
@@ -185,8 +189,6 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
     });
   }
 }
-
-// excludeStaleSummaryFilter moved to ../summary_utils.ts
 
 function getRemoteClusterName(index: string) {
   if (isCCSRemoteIndexName(index)) {

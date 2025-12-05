@@ -6,16 +6,23 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { StoredSLOSettings } from '../domain/models';
+import type { StoredSLOSettings } from '../../domain/models';
 
-export function excludeStaleSummaryFilter(
-  settings: StoredSLOSettings,
-  kqlFilter: string,
-  hideStale?: boolean
-): estypes.QueryDslQueryContainer[] {
-  if (kqlFilter.includes('summaryUpdatedAt') || !settings.staleThresholdInHours || !hideStale) {
+interface Props {
+  settings: StoredSLOSettings;
+  kqlFilter?: string;
+  forceExclude?: boolean;
+}
+
+export function excludeStaleSummaryFilter({
+  settings,
+  kqlFilter,
+  forceExclude = false,
+}: Props): estypes.QueryDslQueryContainer[] {
+  if (!forceExclude && kqlFilter?.includes('summaryUpdatedAt')) {
     return [];
   }
+
   return [
     {
       bool: {
