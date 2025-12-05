@@ -14,6 +14,7 @@ import {
   SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
   SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
   SECURITY_LABS_SEARCH_TOOL_ID,
+  SECURITY_ALERTS_TOOL_ID,
 } from '../tools';
 
 export const alertAttachmentDataSchema = z.object({
@@ -64,8 +65,10 @@ export const createAlertAttachmentType = (): AttachmentTypeDefinition => {
       SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
       SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
       SECURITY_LABS_SEARCH_TOOL_ID,
+      SECURITY_ALERTS_TOOL_ID,
       platformCoreTools.cases,
       platformCoreTools.generateEsql,
+      platformCoreTools.productDocumentation,
     ],
     getAgentDescription: () => {
       const description = `You have access to security alert data. To provide a comprehensive analysis, you MUST gather enriched context by querying for related information.

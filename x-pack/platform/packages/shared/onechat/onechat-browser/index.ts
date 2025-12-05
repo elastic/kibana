@@ -7,3 +7,4 @@
 
 export { formatOnechatErrorMessage } from './base/errors';
 export type { ToolServiceStartContract, ExecuteToolParams, ExecuteToolReturn } from './tools';
+export type { AttachmentUIDefinition, AttachmentServiceStartContract } from './attachments';
