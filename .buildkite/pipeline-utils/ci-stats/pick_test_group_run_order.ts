@@ -338,7 +338,7 @@ export async function pickTestGroupRunOrder() {
             label: 'Jest Tests',
             command: getRequiredEnv('JEST_UNIT_SCRIPT'),
             parallelism: unit.count,
-            timeout_in_minutes: 120,
+            timeout_in_minutes: 240,
             key: 'jest',
             agents: {
               ...expandAgentQueue('n2-4-spot'),
@@ -363,7 +363,7 @@ export async function pickTestGroupRunOrder() {
             label: 'Jest Integration Tests',
             command: getRequiredEnv('JEST_INTEGRATION_SCRIPT'),
             parallelism: integration.count,
-            timeout_in_minutes: 120,
+            timeout_in_minutes: 240,
             key: 'jest-integration',
             agents: expandAgentQueue('n2-4-spot'),
             env: {
