@@ -1054,7 +1054,7 @@ describe('esql query helpers', () => {
     });
   });
 
-  describe('hasTimeseriesBucketAggregation', () => {
+  describe('hasDateBreakdown', () => {
     const countColumn = {
       id: 'COUNT()',
       isNull: false,
