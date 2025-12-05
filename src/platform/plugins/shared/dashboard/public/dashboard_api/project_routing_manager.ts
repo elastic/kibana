@@ -19,26 +19,29 @@ export const COMPARE_DEBOUNCE = 100;
 
 export function initializeProjectRoutingManager(
   initialState: DashboardState,
-  projectRoutingRestore$: PublishingSubject<boolean>
+  projectRoutingRestore$: PublishingSubject<boolean>,
+  hasIncomingEmbeddables?: boolean
 ) {
   if (!cpsService?.cpsManager) {
     return;
   }
 
   const cpsManager = cpsService.cpsManager;
-
   const projectRouting$ = new BehaviorSubject<ProjectRouting>(initialState.project_routing);
-
-  // pass the initial state to CPS manager from dashboard state or just reset to default on dashboard init
-  cpsManager.setProjectRouting(
-    initialState.project_routing ?? cpsManager.getDefaultProjectRouting()
-  );
 
   function setProjectRouting(projectRouting: ProjectRouting) {
     if (projectRouting !== projectRouting$.value) {
       projectRouting$.next(projectRouting);
       cpsManager.setProjectRouting(projectRouting);
     }
+  }
+
+  // if dashboard saved state has project routing, use it to initialize CPS manager
+  // otherwise, reset to default (only if there are no incoming embeddables to preserve current state)
+  if (initialState.project_routing) {
+    setProjectRouting(initialState.project_routing);
+  } else if (!hasIncomingEmbeddables) {
+    setProjectRouting(cpsManager.getDefaultProjectRouting());
   }
 
   // Subscribe to CPS's projectRouting$ to sync changes from the project picker
