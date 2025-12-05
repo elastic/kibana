@@ -13992,7 +13992,7 @@ export const inference_types_azure_ai_studio_service_settings = z.object({
         description: 'The target URL of your Azure AI Studio model deployment.\nThis can be found on the overview page for your deployment in the management section of your Azure AI Studio account.'
     }),
     provider: z.string().register(z.globalRegistry, {
-        description: 'The model provider for your deployment.\nNote that some providers may support only certain task types.\nSupported providers include:\n\n* `cohere` - available for `text_embedding` and `completion` task types\n* `databricks` - available for `completion` task type only\n* `meta` - available for `completion` task type only\n* `microsoft_phi` - available for `completion` task type only\n* `mistral` - available for `completion` task type only\n* `openai` - available for `text_embedding` and `completion` task types'
+        description: 'The model provider for your deployment.\nNote that some providers may support only certain task types.\nSupported providers include:\n\n* `cohere` - available for `text_embedding`, `rerank` and `completion` task types\n* `databricks` - available for `completion` task type only\n* `meta` - available for `completion` task type only\n* `microsoft_phi` - available for `completion` task type only\n* `mistral` - available for `completion` task type only\n* `openai` - available for `text_embedding` and `completion` task types'
     }),
     rate_limit: z.optional(inference_types_rate_limit_setting)
 });
