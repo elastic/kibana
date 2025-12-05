@@ -111,7 +111,7 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
     if (!pageFilterHandler) return;
     // if the table is reloaded because of action by the user
     // (e.g. closed and alert)
-    // We want reload the values in the detection Page filters
+    // We want reload the values in the Attacks Page filters
     if (!isTableLoading) pageFilterHandler.reload();
   }, [isTableLoading, pageFilterHandler]);
 
@@ -153,6 +153,7 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
             setPageFilters={setPageFilters}
             setPageFilterHandler={setPageFilterHandler}
           />
+          <EuiSpacer size="l" />
         </Display>
 
         <TableSection dataView={dataView} statusFilter={statusFilter} pageFilters={pageFilters} />
