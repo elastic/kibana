@@ -215,7 +215,12 @@ export class AIAssistantManagementPlugin
       });
     }
 
-    this.registerNavControl(coreStart, openChatSubject, startDeps.spaces);
+    this.registerNavControl(
+      coreStart,
+      openChatSubject,
+      chatExperience$.asObservable(),
+      startDeps.spaces
+    );
 
     return {
       aiAssistantType$: aiAssistantType$.asObservable(),
@@ -231,6 +236,7 @@ export class AIAssistantManagementPlugin
       chatExperience: AIChatExperience;
       assistant: AIAssistantType;
     }>,
+    chatExperience$: Observable<AIChatExperience>,
     spaces?: SpacesPluginStart
   ) {
     const isObservabilityAIAssistantEnabled =
@@ -255,6 +261,7 @@ export class AIAssistantManagementPlugin
                 isObservabilityAIAssistantEnabled={isObservabilityAIAssistantEnabled}
                 isSecurityAIAssistantEnabled={isSecurityAIAssistantEnabled}
                 coreStart={coreStart}
+                chatExperience$={chatExperience$}
                 triggerOpenChat={(event: {
                   chatExperience: AIChatExperience;
                   assistant: AIAssistantType;
