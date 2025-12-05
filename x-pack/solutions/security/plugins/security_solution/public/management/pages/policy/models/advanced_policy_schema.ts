@@ -1214,7 +1214,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.kernel.capture_mode',
       {
         defaultMessage:
-          "Control whether kprobes, eBPF or Quark is used to gather data. Options are 'kprobe', 'ebpf', 'quark' or 'auto'. 'auto' uses 'quark' if possible (and supported), then tries legacy 'ebpf', and otherwise it uses 'kprobe'. 'quark' is suported by Endpoint versions 8.19.9, 9.1.9, 9.2.3, and newer, not 9.0. Default: auto.",
+          "Control whether kprobes, eBPF or Quark is used to gather data. Options are 'kprobe', 'ebpf', 'quark' or 'auto'. 'auto' uses 'quark' if possible (and supported), then tries legacy 'ebpf', and otherwise it uses 'kprobe'. 'quark' is supported by Endpoint versions 9.3 and newer. Default: auto.",
       }
     ),
   },
