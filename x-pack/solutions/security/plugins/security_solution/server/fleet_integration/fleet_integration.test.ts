@@ -140,6 +140,7 @@ describe('Fleet integrations', () => {
     licenseService.start(licenseEmitter);
     experimentalFeatures = {
       trustedDevices: true,
+      linuxDnsEvents: true,
     } as ExperimentalFeatures;
     productFeaturesService = endpointAppContextStartContract.productFeaturesService;
 
