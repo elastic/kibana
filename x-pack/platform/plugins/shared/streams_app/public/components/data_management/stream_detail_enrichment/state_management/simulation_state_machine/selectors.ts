@@ -7,42 +7,60 @@
 
 import { createSelector } from 'reselect';
 
-import type { FlattenRecord } from '@kbn/streams-schema';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
-import type { SimulationContext } from './types';
-import { getFilterSimulationDocumentsFn } from './utils';
+import type { FlattenRecord } from '@kbn/streams-schema';
+import type { Simulation, SimulationContext } from './types';
+import { getActiveSamples, getConditionDocIndexes, getFilterSimulationDocumentsFn } from './utils';
 
 /**
  * Selects the documents used for the data preview table.
  */
 export const selectPreviewRecords = createSelector(
   [
-    (context: Pick<SimulationContext, 'samples'>) => context.samples,
+    (context: SimulationContext) => getActiveSamples(context),
     (context: Pick<SimulationContext, 'previewDocsFilter'>) => context.previewDocsFilter,
     (context: Pick<SimulationContext, 'simulation'>) => context.simulation?.documents,
+    (context: SimulationContext) => getConditionDocIndexes(context),
   ],
-  (samples, previewDocsFilter, documents) => {
+  (activeSamples, previewDocsFilter, documents, docIndexes) => {
     if (!previewDocsFilter || !documents) {
-      return samples.map((sample) => flattenObjectNestedLast(sample.document)) as FlattenRecord[];
+      return activeSamples.map((sample) =>
+        flattenObjectNestedLast(sample.document)
+      ) as FlattenRecord[];
     }
+
+    const activeDocuments = getActiveDocuments(documents, docIndexes, activeSamples.length);
+
     const filterFn = getFilterSimulationDocumentsFn(previewDocsFilter);
-    return documents.filter(filterFn).map((doc) => doc.value);
+    return (activeDocuments ?? documents)
+      .filter((doc): doc is Simulation['documents'][number] => !!doc && filterFn(doc))
+      .map((doc) => doc.value);
   }
 );
 
 export const selectOriginalPreviewRecords = createSelector(
   [
-    (context: SimulationContext) => context.samples,
+    (context: SimulationContext) => getActiveSamples(context),
     (context: SimulationContext) => context.previewDocsFilter,
     (context: SimulationContext) => context.simulation?.documents,
+    (context: SimulationContext) => getConditionDocIndexes(context),
   ],
-  (samples, previewDocsFilter, documents) => {
+  (activeSamples, previewDocsFilter, documents, docIndexes) => {
     if (!previewDocsFilter || !documents) {
-      return samples;
+      return activeSamples;
     }
+
+    const activeDocuments = getActiveDocuments(documents, docIndexes, activeSamples.length);
+
+    if (!activeDocuments) {
+      return activeSamples;
+    }
+
     const filterFn = getFilterSimulationDocumentsFn(previewDocsFilter);
-    // return the samples where the filterFn matches the documents at the same index
-    return samples.filter((_, index) => filterFn(documents[index]));
+    return activeSamples.filter((_, index) => {
+      const doc = activeDocuments[index];
+      return doc ? filterFn(doc) : false;
+    });
   }
 );
 
@@ -54,7 +72,7 @@ export const selectHasSimulatedRecords = createSelector(
 );
 
 export const selectFieldsInSamples = createSelector(
-  [(context: SimulationContext) => context.samples],
+  [(context: SimulationContext) => getActiveSamples(context)],
   (samples) => {
     const fieldSet = new Set<string>();
     samples.forEach((sample) => {
@@ -64,3 +82,21 @@ export const selectFieldsInSamples = createSelector(
     return Array.from(fieldSet).sort();
   }
 );
+
+const getActiveDocuments = (
+  documents: Simulation['documents'] | undefined,
+  docIndexes: number[] | undefined,
+  activeSampleCount: number
+) => {
+  if (!documents) {
+    return undefined;
+  }
+
+  if (!docIndexes || documents.length === activeSampleCount) {
+    return documents;
+  }
+
+  return docIndexes
+    .map((index) => documents[index])
+    .filter((doc): doc is Simulation['documents'][number] => Boolean(doc));
+};

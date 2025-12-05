@@ -15,7 +15,7 @@ import {
 import { StepsListItem } from './steps_list';
 import { isRootStep, isStepUnderEdit } from '../state_management/steps_state_machine';
 import { getRootLevelStepsMap } from '../state_management/stream_enrichment_state_machine/utils';
-import { useStepsProcessingSummary } from '../state_management/use_steps_processing_summary';
+import { useStepsProcessingSummary } from '../hooks/use_steps_processing_summary';
 import { CreateStepButton } from '../create_step_button';
 
 export const RootSteps = ({

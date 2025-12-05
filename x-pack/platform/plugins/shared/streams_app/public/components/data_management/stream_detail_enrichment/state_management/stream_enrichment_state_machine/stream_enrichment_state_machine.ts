@@ -4,26 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { MachineImplementationsFrom, ActorRefFrom, SnapshotFrom } from 'xstate5';
 import { htmlIdGenerator } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import {
-  assign,
-  enqueueActions,
-  forwardTo,
-  setup,
-  sendTo,
-  stopChild,
-  and,
-  raise,
-  stateIn,
-  cancel,
-  assertEvent,
-} from 'xstate5';
-import { getPlaceholderFor } from '@kbn/xstate-utils';
-import { Streams } from '@kbn/streams-schema';
 import { GrokCollection } from '@kbn/grok-ui';
-import type { StreamlangStepWithUIAttributes, StreamlangDSL } from '@kbn/streamlang';
+import { i18n } from '@kbn/i18n';
+import type { StreamlangDSL, StreamlangStepWithUIAttributes } from '@kbn/streamlang';
 import {
   ALWAYS_CONDITION,
   convertStepsForUI,
@@ -32,15 +16,31 @@ import {
   type StreamlangProcessorDefinition,
 } from '@kbn/streamlang';
 import type { StreamlangWhereBlock } from '@kbn/streamlang/types/streamlang';
+import { Streams } from '@kbn/streams-schema';
+import { getPlaceholderFor } from '@kbn/xstate-utils';
+import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xstate5';
+import {
+  and,
+  assertEvent,
+  assign,
+  cancel,
+  enqueueActions,
+  forwardTo,
+  raise,
+  sendTo,
+  setup,
+  stateIn,
+  stopChild,
+} from 'xstate5';
 import type { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
 import { getStreamTypeFromDefinition } from '../../../../../util/get_stream_type_from_definition';
+import { getDefaultGrokProcessor, stepConverter } from '../../utils';
 import type {
   StreamEnrichmentContextType,
   StreamEnrichmentEvent,
   StreamEnrichmentInput,
   StreamEnrichmentServiceDependencies,
 } from './types';
-import { getDefaultGrokProcessor, stepConverter } from '../../utils';
 import {
   createUpsertStreamActor,
   createUpsertStreamFailureNofitier,
@@ -48,35 +48,40 @@ import {
 } from './upsert_stream_actor';
 
 import {
-  simulationMachine,
+  createDataSourceMachineImplementations,
+  dataSourceMachine,
+} from '../data_source_state_machine';
+import {
   createSimulationMachineImplementations,
+  simulationMachine,
 } from '../simulation_state_machine';
+import { selectPreviewRecords } from '../simulation_state_machine/selectors';
 import { stepMachine } from '../steps_state_machine';
+import { selectWhetherAnyProcessorBeforePersisted } from './selectors';
+import { setupGrokCollectionActor } from './setup_grok_collection_actor';
+import { createSuggestPipelineActor } from './suggest_pipeline_actor';
+import { createUrlInitializerActor, createUrlSyncAction } from './url_state_actor';
 import {
   collectDescendantIds,
   defaultEnrichmentUrlState,
   findInsertIndex,
-  getConfiguredSteps,
   getActiveDataSourceSamples,
+  getActiveSimulationMode,
+  getConfiguredSteps,
   getDataSourcesUrlState,
-  getUpsertFields,
   getStepsForSimulation,
+  getUpsertFields,
   insertAtIndex,
+  reorderSteps,
+  selectDataSource,
   spawnDataSource,
   spawnStep,
-  reorderSteps,
-  getActiveSimulationMode,
-  selectDataSource,
 } from './utils';
-import { createUrlInitializerActor, createUrlSyncAction } from './url_state_actor';
-import {
-  createDataSourceMachineImplementations,
-  dataSourceMachine,
-} from '../data_source_state_machine';
-import { setupGrokCollectionActor } from './setup_grok_collection_actor';
-import { selectPreviewRecords } from '../simulation_state_machine/selectors';
-import { selectWhetherAnyProcessorBeforePersisted } from './selectors';
-import { createSuggestPipelineActor } from './suggest_pipeline_actor';
+
+type SimulationFilterByConditionEvent = Extract<
+  StreamEnrichmentEvent,
+  { type: 'simulation.filterByCondition' }
+>;
 
 export type StreamEnrichmentActorRef = ActorRefFrom<typeof streamEnrichmentMachine>;
 export type StreamEnrichmentActorSnapshot = SnapshotFrom<typeof streamEnrichmentMachine>;
@@ -283,6 +288,20 @@ export const streamEnrichmentMachine = setup({
     reassignSteps: assign(({ context }) => ({
       stepRefs: [...context.stepRefs],
     })),
+    sendConditionFilterToSimulator: ({ context }, params: { conditionId: string }) => {
+      context.simulatorRef?.send({
+        type: 'simulation.filterByCondition',
+        conditionId: params.conditionId,
+      });
+    },
+    sendClearConditionFilterToSimulator: ({ context }) => {
+      const simulatorSnapshot = context.simulatorRef?.getSnapshot();
+      if (!simulatorSnapshot?.context.selectedConditionId) {
+        return;
+      }
+
+      context.simulatorRef?.send({ type: 'simulation.clearConditionFilter' });
+    },
     /* Data sources actions */
     setupDataSources: assign((assignArgs) => ({
       dataSourcesRefs: assignArgs.context.urlState.dataSources.map((dataSource) =>
@@ -510,6 +529,17 @@ export const streamEnrichmentMachine = setup({
             'dataSource.dataChange': {
               actions: [{ type: 'sendDataSourcesSamplesToSimulator' }],
             },
+            'simulation.filterByCondition': {
+              actions: [
+                {
+                  type: 'sendConditionFilterToSimulator',
+                  params: ({ event }: { event: SimulationFilterByConditionEvent }) => event,
+                },
+              ],
+            },
+            'simulation.clearConditionFilter': {
+              actions: forwardTo('simulator'),
+            },
           },
           states: {
             displayingSimulation: {
@@ -586,6 +616,7 @@ export const streamEnrichmentMachine = setup({
                     'step.edit': {
                       guard: 'hasSimulatePrivileges',
                       target: 'editing',
+                      actions: [{ type: 'sendClearConditionFilterToSimulator' }],
                     },
                     'step.reorder': {
                       guard: 'hasSimulatePrivileges',

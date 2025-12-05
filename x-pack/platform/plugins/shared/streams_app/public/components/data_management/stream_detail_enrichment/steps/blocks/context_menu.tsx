@@ -6,33 +6,34 @@
  */
 
 import {
-  EuiContextMenuItem,
-  EuiPopover,
-  EuiContextMenuPanel,
-  useGeneratedHtmlId,
   EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopover,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isActionBlock, isWhereBlock } from '@kbn/streamlang';
+import { useSelector } from '@xstate5/react';
 import React from 'react';
 import useToggle from 'react-use/lib/useToggle';
-import { useSelector } from '@xstate5/react';
-import { isActionBlock, isWhereBlock } from '@kbn/streamlang';
 import { useDiscardConfirm } from '../../../../../hooks/use_discard_confirm';
+import { useConditionFilteringEnabled } from '../../hooks/use_condition_filtering_enabled';
 import {
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
 } from '../../state_management/stream_enrichment_state_machine';
-import { deleteProcessorPromptOptions } from './action/prompt_options';
-import { deleteConditionPromptOptions } from './where/prompt_options';
+import { selectStreamType } from '../../state_management/stream_enrichment_state_machine/selectors';
 import { collectDescendantIds } from '../../state_management/stream_enrichment_state_machine/utils';
+import type { StepConfigurationProps } from '../steps_list';
 import { EditStepDescriptionModal } from './action/edit_step_description_modal';
+import { deleteProcessorPromptOptions } from './action/prompt_options';
 import {
   ADD_DESCRIPTION_MENU_LABEL,
   EDIT_DESCRIPTION_MENU_LABEL,
   REMOVE_DESCRIPTION_MENU_LABEL,
 } from './action/translations';
-import type { StepConfigurationProps } from '../steps_list';
-import { selectStreamType } from '../../state_management/stream_enrichment_state_machine/selectors';
+import { deleteConditionPromptOptions } from './where/prompt_options';
 
 const moveUpItemText = i18n.translate(
   'xpack.streams.streamDetailView.managementTab.enrichment.moveUpItemButtonText',
@@ -62,6 +63,13 @@ const duplicateItemText = i18n.translate(
   }
 );
 
+const previewConditionOnlyText = i18n.translate(
+  'xpack.streams.streamDetailView.managementTab.enrichment.previewConditionOnlyButtonText',
+  {
+    defaultMessage: 'Preview this only',
+  }
+);
+
 const deleteItemText = i18n.translate(
   'xpack.streams.streamDetailView.managementTab.enrichment.deleteItemButtonText',
   {
@@ -80,7 +88,8 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
   isFirstStepInLevel,
   isLastStepInLevel,
 }) => {
-  const { reorderStep, duplicateProcessor } = useStreamEnrichmentEvents();
+  const { reorderStep, duplicateProcessor, filterDocumentsByCondition } =
+    useStreamEnrichmentEvents();
   const canEdit = useStreamEnrichmentSelector((snapshot) => snapshot.can({ type: 'step.edit' }));
   const canDuplicate = useStreamEnrichmentSelector((snapshot) =>
     snapshot.can({ type: 'step.duplicateProcessor', processorStepId: stepRef.id })
@@ -95,7 +104,6 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
   );
 
   const stepRefs = useStreamEnrichmentSelector((snapshot) => snapshot.context.stepRefs);
-
   const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
 
   const streamType = useStreamEnrichmentSelector((snapshot) => selectStreamType(snapshot.context));
@@ -142,6 +150,8 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
     enabled: canDelete,
     ...deletePromptOptions,
   });
+
+  const isConditionFilteringEnabled = useConditionFilteringEnabled(step.customIdentifier);
 
   const items = [
     <EuiContextMenuItem
@@ -238,6 +248,22 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
             }}
           >
             {duplicateItemText}
+          </EuiContextMenuItem>,
+        ]
+      : []),
+    ...(isWhere
+      ? [
+          <EuiContextMenuItem
+            data-test-subj="stepContextMenuPreviewConditionItem"
+            key="previewCondition"
+            icon="filter"
+            disabled={!isConditionFilteringEnabled}
+            onClick={() => {
+              togglePopover(false);
+              filterDocumentsByCondition(step.customIdentifier);
+            }}
+          >
+            {previewConditionOnlyText}
           </EuiContextMenuItem>,
         ]
       : []),

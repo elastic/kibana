@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import type {
+  StreamlangProcessorDefinitionWithUIAttributes,
+  StreamlangStepWithUIAttributes,
+} from '@kbn/streamlang';
+import { isActionBlock } from '@kbn/streamlang';
 import type { FieldDefinition, FlattenRecord } from '@kbn/streams-schema';
-import { uniq } from 'lodash';
-import type { StreamlangProcessorDefinitionWithUIAttributes } from '@kbn/streamlang';
 import type { FieldDefinitionType } from '@kbn/streams-schema/src/fields';
 import { FIELD_DEFINITION_TYPES } from '@kbn/streams-schema/src/fields';
-import type { PreviewDocsFilterOption } from './simulation_documents_search';
-import type { DetectedField, Simulation, SimulationContext } from './types';
+import { uniq } from 'lodash';
 import type {
   MappedSchemaField,
   SchemaField,
@@ -19,6 +21,13 @@ import type {
 } from '../../../schema_editor/types';
 import { isSchemaFieldTyped } from '../../../schema_editor/types';
 import { convertToFieldDefinitionConfig } from '../../../schema_editor/utils';
+import type { PreviewDocsFilterOption } from './simulation_documents_search';
+import type {
+  DetectedField,
+  SampleDocumentWithUIAttributes,
+  Simulation,
+  SimulationContext,
+} from './types';
 
 export function getSourceField(
   processor: StreamlangProcessorDefinitionWithUIAttributes
@@ -47,6 +56,101 @@ export function getSourceField(
 
 export function getUniqueDetectedFields(detectedFields: DetectedField[] = []) {
   return uniq(detectedFields.map((field) => field.name));
+}
+
+const collectDescendantStepIds = (steps: StreamlangStepWithUIAttributes[], parentId: string) => {
+  const ids = new Set<string>();
+  steps.forEach((step) => {
+    if (step.parentId === parentId) {
+      ids.add(step.customIdentifier);
+      collectDescendantStepIds(steps, step.customIdentifier).forEach((childId) => ids.add(childId));
+    }
+  });
+  return ids;
+};
+
+const collectStepIdsForCondition = (
+  steps: StreamlangStepWithUIAttributes[],
+  conditionId: string
+) => {
+  const conditionIndex = steps.findIndex((step) => step.customIdentifier === conditionId);
+
+  if (conditionIndex === -1) {
+    return [];
+  }
+
+  const descendants = collectDescendantStepIds(steps, conditionId);
+  const ids = new Set<string>();
+
+  steps.forEach((step, index) => {
+    if (
+      index < conditionIndex ||
+      step.customIdentifier === conditionId ||
+      descendants.has(step.customIdentifier)
+    ) {
+      ids.add(step.customIdentifier);
+    }
+  });
+
+  return Array.from(ids);
+};
+
+export const collectProcessorIdsForCondition = (
+  steps: StreamlangStepWithUIAttributes[],
+  conditionId: string
+) => {
+  const stepIdsForCondition = new Set(collectStepIdsForCondition(steps, conditionId));
+  if (stepIdsForCondition.size === 0) {
+    return [];
+  }
+
+  return steps
+    .filter((step) => stepIdsForCondition.has(step.customIdentifier))
+    .filter((step) => isActionBlock(step))
+    .map((step) => step.customIdentifier);
+};
+
+export const getConditionDocIndexes = (context: SimulationContext) => {
+  if (!context.selectedConditionId) {
+    return undefined;
+  }
+
+  const simulation = context.baseSimulation ?? context.simulation;
+  const processorIds = collectProcessorIdsForCondition(context.steps, context.selectedConditionId);
+
+  return getAffectedDocumentIndexes(simulation?.documents, processorIds);
+};
+
+export function getActiveSamples(context: SimulationContext) {
+  if (!context.selectedConditionId) {
+    return context.samples;
+  }
+
+  const docIndexes = getConditionDocIndexes(context);
+  if (docIndexes === undefined) {
+    return context.samples;
+  }
+  if (!docIndexes.length) {
+    return [];
+  }
+
+  return docIndexes
+    .map((index) => context.samples[index])
+    .filter((sample): sample is SampleDocumentWithUIAttributes => Boolean(sample));
+}
+
+export function getActiveSteps(context: SimulationContext) {
+  if (!context.selectedConditionId) {
+    return context.steps;
+  }
+
+  const stepIds = collectStepIdsForCondition(context.steps, context.selectedConditionId);
+
+  if (!stepIds.length) {
+    return context.steps;
+  }
+
+  return context.steps.filter((step) => stepIds.includes(step.customIdentifier));
 }
 
 export function getAllFieldsInOrder(
@@ -106,6 +210,22 @@ export function getFilterSimulationDocumentsFn(filter: PreviewDocsFilterOption) 
     default:
       return (_doc: SimulationDocReport) => true;
   }
+}
+
+export function getAffectedDocumentIndexes(
+  documents: Simulation['documents'] | undefined,
+  processorIds: string[]
+) {
+  if (!documents || processorIds.length === 0) {
+    return [];
+  }
+
+  return documents.reduce<number[]>((acc, doc, index) => {
+    if (doc.processed_by?.some((processorId) => processorIds.includes(processorId))) {
+      acc.push(index);
+    }
+    return acc;
+  }, []);
 }
 
 export function getSchemaFieldsFromSimulation(context: SimulationContext): {

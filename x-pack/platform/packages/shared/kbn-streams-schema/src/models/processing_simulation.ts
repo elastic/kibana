@@ -45,6 +45,7 @@ export interface SimulationDocReport {
   detected_fields: Array<{ processor_id: string; name: string }>;
   errors: SimulationError[];
   status: DocSimulationStatus;
+  processed_by: string[];
   value: FlattenRecord;
 }
 
