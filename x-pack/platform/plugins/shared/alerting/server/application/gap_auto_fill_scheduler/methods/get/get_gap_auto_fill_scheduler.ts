@@ -7,9 +7,9 @@
 
 import Boom from '@hapi/boom';
 import type { RulesClientContext } from '../../../../rules_client/types';
-import type { GetGapAutoFillSchedulerParams } from './types';
+import type { GetGapAutoFillSchedulerParams } from '../types';
 import type { GapAutoFillSchedulerResponse } from '../../result/types';
-import { getGapAutoFillSchedulerSchema } from './schemas';
+import { getGapAutoFillSchedulerSchema } from '../schemas';
 import { transformSavedObjectToGapAutoFillSchedulerResult } from '../../transforms';
 import type { GapAutoFillSchedulerSO } from '../../../../data/gap_auto_fill_scheduler/types/gap_auto_fill_scheduler';
 import { ReadOperations, AlertingAuthorizationEntity } from '../../../../authorization';

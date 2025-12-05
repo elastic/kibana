@@ -14,8 +14,8 @@ import {
   GapAutoFillSchedulerAuditAction,
 } from '../../../../rules_client/common/audit_events';
 import type { GapAutoFillSchedulerSO } from '../../../../data/gap_auto_fill_scheduler/types/gap_auto_fill_scheduler';
-import { getGapAutoFillSchedulerSchema } from '../get/schemas';
-import type { GetGapAutoFillSchedulerParams } from '../get/types';
+import { getGapAutoFillSchedulerSchema } from '../schemas';
+import type { GetGapAutoFillSchedulerParams } from '../types';
 
 export async function deleteGapAutoFillScheduler(
   context: RulesClientContext,
