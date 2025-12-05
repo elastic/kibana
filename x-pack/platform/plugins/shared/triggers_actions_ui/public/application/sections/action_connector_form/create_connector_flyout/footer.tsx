@@ -27,6 +27,7 @@ interface Props {
   isSaving: boolean;
   disabled: boolean;
   onSubmit: () => Promise<void>;
+  isSpecConnector?: boolean;
 }
 
 const FlyoutFooterComponent: React.FC<Props> = ({
@@ -39,6 +40,7 @@ const FlyoutFooterComponent: React.FC<Props> = ({
   isSaving,
   disabled,
   onSubmit,
+  isSpecConnector,
 }) => {
   return (
     <EuiFlyoutFooter data-test-subj="create-connector-flyout-footer">
@@ -68,7 +70,7 @@ const FlyoutFooterComponent: React.FC<Props> = ({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup justifyContent="spaceBetween">
               <>
-                {onTestConnector && (
+                {!isSpecConnector && onTestConnector && (
                   <EuiFlexItem grow={false}>
                     <EuiButton
                       color="primary"

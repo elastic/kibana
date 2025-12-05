@@ -359,6 +359,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
           disabled={disabled}
           showButtons={showButtons}
           onClickSave={onClickSave}
+          isSpecConnector={actionTypeModel?.isSpecConnector}
         />
       </EuiFlyout>
       {showConfirmModal && (

@@ -332,6 +332,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         isSaving={isSaving}
         onSubmit={onSubmit}
         testConnector={testConnector}
+        isSpecConnector={actionTypeModel?.isSpecConnector}
       />
     </EuiFlyout>
   );
