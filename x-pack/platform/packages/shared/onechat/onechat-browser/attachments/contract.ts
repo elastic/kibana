@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IconType } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
 import type { UnknownAttachment } from '@kbn/onechat-common/attachments';
 
 /**
