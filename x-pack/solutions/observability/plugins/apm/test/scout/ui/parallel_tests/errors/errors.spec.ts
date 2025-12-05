@@ -145,6 +145,8 @@ test.describe('Errors', { tag: ['@ess', '@svlOblt'] }, () => {
 
     await test.step('clicking Open in Discover redirects to discover', async () => {
       await page.getByRole('link', { name: 'Open in Discover' }).click();
+      await page.waitForLoadingIndicatorHidden();
+      await expect(page.getByTestId('loadingSpinnerText')).not.toBeVisible();
       expect(page.url()).toContain('app/discover');
     });
   });
