@@ -186,9 +186,9 @@ export const MonacoEditor = ({
         const getLicense = licensing?.getLicense;
         return await getESQLSources({ application, http }, getLicense);
       },
-      getColumnsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
+      getColumnsFor: async ({ query }: { query?: string } | undefined = {}) => {
         const columns = await getEsqlColumns({
-          query: queryToExecute,
+          esqlQuery: query,
           search: data?.search?.search,
         });
         return columns;
