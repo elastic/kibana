@@ -19,7 +19,13 @@ const automaticImportSamplesIndexAdapterSettings = {
       integration_id: types.keyword({ ignore_above: 256 }),
       data_stream_id: types.keyword({ ignore_above: 256 }),
       created_by: types.keyword({ ignore_above: 256 }), // We can filter by this
-      original_source: types.keyword({ ignore_above: 256 }), // For scenarios to remove samples based on source
+      original_source: types.object({
+        properties: {
+          source_type: types.keyword({ ignore_above: 256 }),
+          source_value: types.keyword({ ignore_above: 256 }),
+        },
+        additionalProperties: false,
+      }),
       // Non-searchable fields (stored but not indexed)
       log_data: types.text({ index: false }), // Log samples are stored but not indexed
       metadata: types.object({
@@ -35,7 +41,10 @@ export interface AutomaticImportSamplesProperties {
   integration_id: string;
   data_stream_id: string;
   created_by: string;
-  original_source: string;
+  original_source: {
+    source_type: string; // 'index' | 'file'
+    source_value: string;
+  };
   log_data: string;
   metadata: {
     created_at: string;

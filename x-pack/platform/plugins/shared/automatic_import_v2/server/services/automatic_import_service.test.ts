@@ -163,6 +163,110 @@ describe('AutomaticImportSetupService', () => {
     });
   });
 
+  describe('addSamplesToDataStream', () => {
+    it('should delegate to samplesIndexService.addSamplesToDataStream', async () => {
+      const mockParams = {
+        integrationId: 'integration-123',
+        dataStreamId: 'data-stream-456',
+        rawSamples: ['sample1', 'sample2'],
+        originalSource: { sourceType: 'file' as const, sourceValue: 'test.log' },
+        authenticatedUser: { username: 'test-user' } as any,
+        esClient: {} as any,
+      };
+
+      const mockResult = { items: [], errors: false };
+      const mockAddSamples = jest.fn().mockResolvedValue(mockResult);
+
+      (service as any).samplesIndexService = {
+        addSamplesToDataStream: mockAddSamples,
+      };
+
+      const result = await service.addSamplesToDataStream(mockParams);
+
+      expect(mockAddSamples).toHaveBeenCalledWith(mockParams);
+      expect(result).toBe(mockResult);
+    });
+
+    it('should work without initializing savedObjectService', async () => {
+      const mockParams = {
+        integrationId: 'integration-123',
+        dataStreamId: 'data-stream-456',
+        rawSamples: ['sample1'],
+        originalSource: { sourceType: 'index' as const, sourceValue: 'logs-*' },
+        authenticatedUser: { username: 'test-user' } as any,
+        esClient: {} as any,
+      };
+
+      const mockResult = { items: [], errors: false };
+      const mockAddSamples = jest.fn().mockResolvedValue(mockResult);
+
+      (service as any).samplesIndexService = {
+        addSamplesToDataStream: mockAddSamples,
+      };
+
+      // Service is not initialized, but this should still work
+      expect((service as any).savedObjectService).toBeNull();
+
+      const result = await service.addSamplesToDataStream(mockParams);
+
+      expect(mockAddSamples).toHaveBeenCalledWith(mockParams);
+      expect(result).toBe(mockResult);
+    });
+
+    it('should pass through all parameters correctly', async () => {
+      const mockParams = {
+        integrationId: 'test-integration',
+        dataStreamId: 'test-datastream',
+        rawSamples: ['log line 1', 'log line 2', 'log line 3'],
+        originalSource: { sourceType: 'file' as const, sourceValue: 'application.log' },
+        authenticatedUser: { username: 'admin', roles: ['admin'] } as any,
+        esClient: { bulk: jest.fn() } as any,
+      };
+
+      const mockAddSamples = jest.fn().mockResolvedValue({});
+
+      (service as any).samplesIndexService = {
+        addSamplesToDataStream: mockAddSamples,
+      };
+
+      await service.addSamplesToDataStream(mockParams);
+
+      expect(mockAddSamples).toHaveBeenCalledTimes(1);
+      const callArgs = mockAddSamples.mock.calls[0][0];
+      expect(callArgs.integrationId).toBe('test-integration');
+      expect(callArgs.dataStreamId).toBe('test-datastream');
+      expect(callArgs.rawSamples).toEqual(['log line 1', 'log line 2', 'log line 3']);
+      expect(callArgs.originalSource).toEqual({
+        sourceType: 'file',
+        sourceValue: 'application.log',
+      });
+      expect(callArgs.authenticatedUser.username).toBe('admin');
+      expect(callArgs.esClient).toBe(mockParams.esClient);
+    });
+
+    it('should propagate errors from samplesIndexService', async () => {
+      const mockParams = {
+        integrationId: 'integration-123',
+        dataStreamId: 'data-stream-456',
+        rawSamples: ['sample1'],
+        originalSource: { sourceType: 'file' as const, sourceValue: 'test.log' },
+        authenticatedUser: { username: 'test-user' } as any,
+        esClient: {} as any,
+      };
+
+      const mockError = new Error('Failed to add samples');
+      const mockAddSamples = jest.fn().mockRejectedValue(mockError);
+
+      (service as any).samplesIndexService = {
+        addSamplesToDataStream: mockAddSamples,
+      };
+
+      await expect(service.addSamplesToDataStream(mockParams)).rejects.toThrow(
+        'Failed to add samples'
+      );
+    });
+  });
+
   describe('integration', () => {
     it('should properly initialize and setup the service', async () => {
       const { AutomaticImportSamplesIndexService: MockedService } = jest.requireMock(

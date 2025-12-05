@@ -98,17 +98,10 @@ export default function ({ getService }: AutomaticImportV2ApiFtrProviderContext)
           description: 'Testing integration with one data stream',
           dataStreams: [
             {
+              dataStreamId: 'access_logs',
               title: 'Access Logs',
               description: 'Web server access logs',
               inputTypes: [{ name: 'filestream' as const }],
-              rawSamples: [
-                '192.168.1.1 - - [01/Jan/2024:10:00:00 +0000] "GET /index.html HTTP/1.1" 200 1234',
-                '192.168.1.2 - - [01/Jan/2024:10:00:01 +0000] "POST /api/login HTTP/1.1" 200 567',
-              ],
-              originalSource: {
-                sourceType: 'file' as const,
-                sourceValue: 'access.log',
-              },
             },
           ],
         };
@@ -139,43 +132,22 @@ export default function ({ getService }: AutomaticImportV2ApiFtrProviderContext)
           logo: 'data:image/png;base64,multistream',
           dataStreams: [
             {
+              dataStreamId: 'error_logs',
               title: 'Error Logs',
               description: 'Application error logs',
               inputTypes: [{ name: 'filestream' as const }],
-              rawSamples: [
-                '[ERROR] 2024-01-01 10:00:00 - Database connection failed',
-                '[ERROR] 2024-01-01 10:00:05 - Timeout on API request',
-              ],
-              originalSource: {
-                sourceType: 'file' as const,
-                sourceValue: 'error.log',
-              },
             },
             {
+              dataStreamId: 'metrics',
               title: 'Metrics',
               description: 'Application performance metrics',
               inputTypes: [{ name: 'http_endpoint' as const }],
-              rawSamples: [
-                '{"timestamp": "2024-01-01T10:00:00Z", "cpu": 45.2, "memory": 2048}',
-                '{"timestamp": "2024-01-01T10:01:00Z", "cpu": 52.8, "memory": 2156}',
-              ],
-              originalSource: {
-                sourceType: 'index' as const,
-                sourceValue: 'metrics-index',
-              },
             },
             {
+              dataStreamId: 'security_events',
               title: 'Security Events',
               description: 'Security audit events',
               inputTypes: [{ name: 'aws-cloudwatch' as const }, { name: 'kafka' as const }],
-              rawSamples: [
-                '{"eventType": "login", "user": "admin", "status": "success"}',
-                '{"eventType": "file_access", "user": "user1", "file": "/etc/passwd"}',
-              ],
-              originalSource: {
-                sourceType: 'index' as const,
-                sourceValue: 'security-events',
-              },
             },
           ],
         };
@@ -222,24 +194,16 @@ export default function ({ getService }: AutomaticImportV2ApiFtrProviderContext)
           description: 'Testing data stream counts',
           dataStreams: [
             {
+              dataStreamId: 'stream_one',
               title: 'Stream One',
               description: 'First stream',
               inputTypes: [{ name: 'filestream' as const }],
-              rawSamples: ['sample log 1', 'sample log 2'],
-              originalSource: {
-                sourceType: 'file' as const,
-                sourceValue: 'stream1.log',
-              },
             },
             {
+              dataStreamId: 'stream_two',
               title: 'Stream Two',
               description: 'Second stream',
               inputTypes: [{ name: 'tcp' as const }],
-              rawSamples: ['sample log 3', 'sample log 4'],
-              originalSource: {
-                sourceType: 'file' as const,
-                sourceValue: 'stream2.log',
-              },
             },
           ],
         };
@@ -261,18 +225,10 @@ export default function ({ getService }: AutomaticImportV2ApiFtrProviderContext)
           description: 'Testing data stream from index',
           dataStreams: [
             {
+              dataStreamId: 'existing_index_logs',
               title: 'Existing Index Logs',
               description: 'Logs from existing Elasticsearch index',
               inputTypes: [{ name: 'kafka' as const }],
-              rawSamples: [
-                '{"@timestamp": "2024-01-01T10:00:00Z", "message": "Index log 1"}',
-                '{"@timestamp": "2024-01-01T10:00:01Z", "message": "Index log 2"}',
-                '{"@timestamp": "2024-01-01T10:00:02Z", "message": "Index log 3"}',
-              ],
-              originalSource: {
-                sourceType: 'index' as const,
-                sourceValue: 'logs-existing-*',
-              },
             },
           ],
         };

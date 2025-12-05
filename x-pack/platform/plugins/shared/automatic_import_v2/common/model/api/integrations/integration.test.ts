@@ -21,14 +21,10 @@ import {
 describe('integration schemas', () => {
   // Helper to create a valid data stream
   const createValidDataStream = (overrides = {}) => ({
+    dataStreamId: 'ds-123',
     title: 'logs',
     description: 'Log data stream',
     inputTypes: [{ name: 'filestream' as const }],
-    rawSamples: ['sample log 1', 'sample log 2'],
-    originalSource: {
-      sourceType: 'file' as const,
-      sourceValue: 'test.log',
-    },
     ...overrides,
   });
 
@@ -140,10 +136,9 @@ describe('integration schemas', () => {
         description: 'Integration for testing purposes',
         dataStreams: [
           {
+            dataStreamId: 'ds-123',
             description: 'Log data stream',
             inputTypes: [{ name: 'filestream' as const }],
-            rawSamples: ['sample log 1'],
-            originalSource: { sourceType: 'file' as const, sourceValue: 'test.log' },
           },
         ],
       };
@@ -154,7 +149,7 @@ describe('integration schemas', () => {
       expect(stringifyZodError(result.error)).toContain('title: Required');
     });
 
-    it('requires data stream originalSource', () => {
+    it('requires data stream dataStreamId', () => {
       const payload = {
         title: 'Test Integration',
         description: 'Integration for testing purposes',
@@ -163,7 +158,6 @@ describe('integration schemas', () => {
             title: 'logs',
             description: 'Log data stream',
             inputTypes: [{ name: 'filestream' as const }],
-            rawSamples: ['sample log 1'],
           },
         ],
       };
@@ -171,7 +165,7 @@ describe('integration schemas', () => {
       const result = CreateAutoImportIntegrationRequestBody.safeParse(payload);
       expectParseError(result);
 
-      expect(stringifyZodError(result.error)).toContain('originalSource: Required');
+      expect(stringifyZodError(result.error)).toContain('dataStreamId: Required');
     });
 
     it('rejects invalid input type', () => {
@@ -623,16 +617,14 @@ describe('integration schemas', () => {
           logo: 'data:image/png;base64,iVBORw0KGgo=',
           dataStreams: [
             createValidDataStream({
+              dataStreamId: 'access',
               title: 'access',
               description: 'Nginx access logs',
-              rawSamples: [
-                '127.0.0.1 - - [01/Jan/2024:12:00:00 +0000] "GET /index.html HTTP/1.1" 200 1234',
-              ],
             }),
             createValidDataStream({
+              dataStreamId: 'error',
               title: 'error',
               description: 'Nginx error logs',
-              rawSamples: ['2024/01/01 12:00:00 [error] 12345#0: *1 connect() failed'],
             }),
           ],
         };
@@ -720,9 +712,9 @@ describe('integration schemas', () => {
           description: 'Apache web server logs integration',
           dataStreams: [
             createValidDataStream({
+              dataStreamId: 'access',
               title: 'access',
               description: 'Apache access logs',
-              rawSamples: ['192.168.1.1 - - [01/Jan/2024:12:00:00] "GET / HTTP/1.1" 200'],
             }),
           ],
         };
@@ -740,9 +732,9 @@ describe('integration schemas', () => {
           logo: 'data:image/png;base64,mysql=',
           dataStreams: [
             createValidDataStream({
+              dataStreamId: 'error',
               title: 'error',
               description: 'MySQL error logs',
-              rawSamples: ['2024-01-01T12:00:00.123456Z 0 [ERROR] [MY-123456] Error message'],
             }),
           ],
         };
@@ -802,6 +794,7 @@ describe('integration schemas', () => {
           description: 'Integration supporting multiple input types',
           dataStreams: [
             {
+              dataStreamId: 'logs',
               title: 'logs',
               description: 'Logs from various sources',
               inputTypes: [
@@ -809,11 +802,6 @@ describe('integration schemas', () => {
                 { name: 'http_endpoint' as const },
                 { name: 'tcp' as const },
               ],
-              rawSamples: ['log sample 1', 'log sample 2'],
-              originalSource: {
-                sourceType: 'file' as const,
-                sourceValue: 'multi-source.log',
-              },
             },
           ],
         };

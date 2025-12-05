@@ -262,6 +262,12 @@ export class AutomaticImportService {
     return this.savedObjectService.deleteDataStream(dataStreamId, options);
   }
 
+  public async addSamplesToDataStream(
+    params: SamplesToDataStreamParams
+  ): Promise<ReturnType<typeof this.samplesIndexService.addSamplesToDataStream>> {
+    return this.samplesIndexService.addSamplesToDataStream(params);
+  }
+
   public stop() {
     this.pluginStop$.next();
     this.pluginStop$.complete();

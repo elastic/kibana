@@ -9,14 +9,13 @@ import type { ElasticsearchClient, Logger, LoggerFactory } from '@kbn/core/serve
 import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 import type { AutomaticImportSamplesProperties } from './storage';
 import { createIndexAdapter } from './storage';
+import type { OriginalSource } from '../../../common';
+
 export interface AddSamplesToDataStreamParams {
   integrationId: string;
   dataStreamId: string;
   rawSamples: string[];
-  originalSource: {
-    sourceType: 'file' | 'index';
-    sourceValue: string;
-  };
+  originalSource: OriginalSource;
   authenticatedUser: AuthenticatedUser;
   esClient: ElasticsearchClient;
 }
@@ -46,7 +45,10 @@ export class AutomaticImportSamplesIndexService {
         data_stream_id: dataStreamId,
         log_data: sample,
         created_by: authenticatedUser.username,
-        original_source: originalSource.sourceValue,
+        original_source: {
+          source_type: originalSource.sourceType,
+          source_value: originalSource.sourceValue,
+        },
         metadata: {
           created_at: new Date().toISOString(),
         },

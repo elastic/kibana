@@ -18,6 +18,12 @@ export {
   GetAutoImportIntegrationRequestParams,
 } from './model/api/integrations/integration.gen';
 
+export {
+  UploadSamplesToDataStreamRequestBody,
+  UploadSamplesToDataStreamRequestParams,
+  UploadSamplesToDataStreamResponse,
+} from './model/api/data_streams/data_stream.gen';
+
 export type {
   Integration,
   DataStream,
@@ -27,4 +33,6 @@ export type {
   IntegrationResponse,
   DataStreamResponse,
   AllIntegrationsResponseIntegration,
+  OriginalSource,
+  OriginalSourceType,
 } from './model/common_attributes.gen';

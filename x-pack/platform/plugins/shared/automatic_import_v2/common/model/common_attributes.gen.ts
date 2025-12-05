@@ -49,6 +49,10 @@ export const InputType = z.object({
 export type DataStream = z.infer<typeof DataStream>;
 export const DataStream = z.object({
   /**
+   * The ID of the data stream
+   */
+  dataStreamId: NonEmptyString,
+  /**
    * The title of the data stream
    */
   title: NonEmptyString,
@@ -60,25 +64,6 @@ export const DataStream = z.object({
    * The input types of the data stream
    */
   inputTypes: z.array(InputType),
-  /**
-   * The raw samples of the data stream
-   */
-  rawSamples: z.array(z.string()),
-  /**
-   * The original filename of the samples or the data stream they are picked up from.
-   */
-  originalSource: z
-    .object({
-      /**
-       * The type of the original source
-       */
-      sourceType: z.enum(['index', 'file']),
-      /**
-       * The value of the original source (e.g. index name or filename)
-       */
-      sourceValue: NonEmptyString,
-    })
-    .strict(),
 });
 
 /**
@@ -87,6 +72,10 @@ export const DataStream = z.object({
 export type Integration = z.infer<typeof Integration>;
 export const Integration = z
   .object({
+    /**
+     * The ID of the integration
+     */
+    integrationId: NonEmptyString,
     /**
      * The data streams of the integration
      */
@@ -105,6 +94,29 @@ export const Integration = z
     title: NonEmptyString,
   })
   .strict();
+
+/**
+ * The type of the original source.
+ */
+export type OriginalSourceType = z.infer<typeof OriginalSourceType>;
+export const OriginalSourceType = z.enum(['index', 'file']);
+export type OriginalSourceTypeEnum = typeof OriginalSourceType.enum;
+export const OriginalSourceTypeEnum = OriginalSourceType.enum;
+
+/**
+ * The original source of the samples.
+ */
+export type OriginalSource = z.infer<typeof OriginalSource>;
+export const OriginalSource = z.object({
+  /**
+   * The type of the original source
+   */
+  sourceType: OriginalSourceType,
+  /**
+   * The value of the original source (e.g. index name or filename)
+   */
+  sourceValue: NonEmptyString,
+});
 
 /**
  * The status of the task

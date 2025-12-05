@@ -8,10 +8,12 @@
 import type { IRouter, Logger } from '@kbn/core/server';
 import type { AutomaticImportV2PluginRequestHandlerContext } from '../types';
 import { registerIntegrationRoutes } from './integrations_route';
+import { registerDataStreamRoutes } from './data_stream_routes';
 
 export function registerRoutes(
   router: IRouter<AutomaticImportV2PluginRequestHandlerContext>,
   logger: Logger
 ) {
   registerIntegrationRoutes(router, logger);
+  registerDataStreamRoutes(router, logger);
 }

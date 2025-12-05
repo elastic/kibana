@@ -97,7 +97,10 @@ describe('AutomaticImportSamplesIndexService', () => {
         data_stream_id: 'data-stream-456',
         log_data: 'Sample log line 1',
         created_by: 'test-user',
-        original_source: 'logs.txt',
+        original_source: {
+          source_type: 'file',
+          source_value: 'logs.txt',
+        },
       });
       expect(callArgs.operations[1].index.document.log_data).toBe('Sample log line 2');
       expect(callArgs.operations[2].index.document.log_data).toBe('Sample log line 3');
@@ -129,7 +132,10 @@ describe('AutomaticImportSamplesIndexService', () => {
         data_stream_id: 'data-stream-456',
         log_data: 'Sample log line 1',
         created_by: 'test-user',
-        original_source: 'logs.txt',
+        original_source: {
+          source_type: 'file',
+          source_value: 'logs.txt',
+        },
       });
     });
 
@@ -222,7 +228,10 @@ describe('AutomaticImportSamplesIndexService', () => {
       const document = callArgs.operations[0].index.document;
 
       expect(document.log_data).toBe('Log with "quotes" and \\backslashes\\ and \nnewlines');
-      expect(document.original_source).toBe('logs with spaces.txt');
+      expect(document.original_source).toEqual({
+        source_type: 'file',
+        source_value: 'logs with spaces.txt',
+      });
     });
   });
 

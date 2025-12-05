@@ -12,9 +12,13 @@ components:
         - type: object
           additionalProperties: false
           required:
+            - integrationId
             - title
             - description
           properties:
+            integrationId:
+              description: The ID of the integration
+              $ref: "../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString"
             dataStreams:
               type: array
               description: The data streams of the integration
@@ -35,12 +39,14 @@ components:
       allOf:
         - type: object
           required:
+            - dataStreamId
             - title
             - description
             - inputTypes
-            - rawSamples
-            - originalSource
           properties:
+            dataStreamId:
+              description: The ID of the data stream
+              $ref: "../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString"
             title:
               description: The title of the data stream
               $ref: "../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString"
@@ -52,28 +58,26 @@ components:
               description: The input types of the data stream
               items:
                 $ref: "#/components/schemas/InputType"
-            rawSamples:
-              type: array
-              description: The raw samples of the data stream
-              items:
-                type: string
-            originalSource:
-              description: The original filename of the samples or the data stream they are picked up from.
-              type: object
-              additionalProperties: false
-              required:
-                - sourceType
-                - sourceValue
-              properties:
-                sourceType:
-                  description: The type of the original source
-                  type: string
-                  enum:
-                    - index
-                    - file
-                sourceValue:
-                  description: The value of the original source (e.g. index name or filename)
-                  $ref: "../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+    OriginalSourceType:
+      description: The type of the original source.
+      type: string
+      enum:
+        - index
+        - file
+    OriginalSource:
+      description: The original source of the samples.
+      allOf:
+        - type: object
+          required:
+            - sourceType
+            - sourceValue
+          properties:
+            sourceType:
+              description: The type of the original source
+              $ref: "#/components/schemas/OriginalSourceType"
+            sourceValue:
+              description: The value of the original source (e.g. index name or filename)
+              $ref: "../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString"
     InputType:
       description: The input type object with its settings.
       allOf:
