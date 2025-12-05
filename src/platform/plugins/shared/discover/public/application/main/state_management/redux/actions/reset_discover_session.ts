@@ -99,13 +99,11 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
       // If a saved value exists, restore it
       if (restoredProjectRouting) {
         dispatch(internalStateSlice.actions.setProjectRouting(restoredProjectRouting));
-        services.cps.cpsManager.setProjectRouting(restoredProjectRouting);
       } else if (!updatedDiscoverSession) {
         // Only reset to default when switching between saved objects (not after a save operation)
         // This preserves the picker value after "Save As" when projectRouting is not stored
         const defaultRouting = services.cps.cpsManager.getDefaultProjectRouting();
         dispatch(internalStateSlice.actions.setProjectRouting(defaultRouting));
-        services.cps.cpsManager.setProjectRouting(defaultRouting);
       }
     }
     await dispatch(

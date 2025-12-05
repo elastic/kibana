@@ -429,6 +429,17 @@ const createMiddleware = (options: InternalStateDependencies) => {
     },
   });
 
+  startListening({
+    actionCreator: internalStateSlice.actions.setProjectRouting,
+    effect: (action, listenerApi) => {
+      const { services } = listenerApi.extra;
+      // Sync Redux state to CPS manager whenever projectRouting changes
+      if (services.cps?.cpsManager) {
+        services.cps.cpsManager.setProjectRouting(action.payload);
+      }
+    },
+  });
+
   return listenerMiddleware.middleware;
 };
 
