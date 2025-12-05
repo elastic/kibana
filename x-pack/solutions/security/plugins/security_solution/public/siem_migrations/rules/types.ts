@@ -18,6 +18,11 @@ export enum AuthorFilter {
   CUSTOM = 'custom',
 }
 
+export enum MigrationSource {
+  SPLUNK = 'splunk',
+  QRADAR = 'qradar',
+}
+
 export enum RulesSpecificStatusFilter {
   INDEX_PATTERN_MISSING = 'index_pattern_missing',
 }

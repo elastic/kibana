@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import { RulesDataInput } from './rules_data_input';
 import { SplunkDataInputStep } from '../constants';
 import { TestProviders } from '../../../../../../common/mock/test_providers';
-import { MigrationSource } from '../../../../../common/types';
+import { MigrationSource } from '../../../../types';
 
 describe('RulesDataInput', () => {
   const defaultProps = {

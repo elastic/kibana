@@ -7,9 +7,9 @@
 import React from 'react';
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
-import { MigrationSource } from '../../types';
 import * as i18n from './translations';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { MigrationSource } from '../../../rules/types';
 
 export const useMigrationSourceOptions = () => {
   const isQradarEnabled = useIsExperimentalFeatureEnabled('qradarRulesMigration');

@@ -15,12 +15,19 @@ import type {
 import { SplunkDataInputStep } from '../../../rules/components/data_input_flyout/steps/constants';
 
 import { STEP_COMPONENTS } from './configs';
-import type {
-  QradarMigrationSteps,
-  RulesDataInputSubStepsProps,
-  SplunkMigrationSteps,
-} from '../migration_source_step/types';
-import { MigrationSource } from '../../types';
+
+import type { RuleMigrationStats } from '../../../rules/types';
+import { MigrationSource } from '../../../rules/types';
+import type { OnMissingResourcesFetched } from '../../../rules/components/data_input_flyout/types';
+import type { QradarMigrationSteps, QradarStep, SplunkMigrationSteps, SplunkStep } from './types';
+
+export interface RulesDataInputSubStepsProps {
+  dataInputStep: SplunkDataInputStep | QradarDataInputStep;
+  migrationSource: MigrationSource;
+  migrationStats?: RuleMigrationStats;
+  onMigrationCreated: (createdMigrationStats: RuleMigrationStats) => void;
+  onMissingResourcesFetched?: OnMissingResourcesFetched;
+}
 
 export type UseMigrationStepsProps = Omit<RulesDataInputSubStepsProps, 'dataInputStep'> & {
   dataInputStep: DataInputStep;
@@ -84,7 +91,7 @@ const useSplunkMigrationSteps = ({
 
   const SPLUNK_MIGRATION_STEPS: SplunkMigrationSteps = useMemo(
     () =>
-      STEP_COMPONENTS[MigrationSource.SPLUNK].map(({ id, Component }) => ({
+      STEP_COMPONENTS[MigrationSource.SPLUNK].map(({ id, Component }: SplunkStep) => ({
         id,
         Component,
         props: {
@@ -120,7 +127,7 @@ const useQradarMigrationSteps = ({
 }: UseQradarMigrationSteps): QradarMigrationSteps | null => {
   const QRADAR_MIGRATION_STEPS: QradarMigrationSteps = useMemo(
     () =>
-      STEP_COMPONENTS[MigrationSource.QRADAR].map(({ id, Component }) => ({
+      STEP_COMPONENTS[MigrationSource.QRADAR].map(({ id, Component }: QradarStep) => ({
         id,
         Component,
         props: {

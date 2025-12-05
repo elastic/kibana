@@ -23,17 +23,16 @@ import {
   SiemMigrationRetryFilter,
   SiemMigrationTaskStatus,
 } from '../../../../../common/siem_migrations/constants';
-import type { DataInputStep, DataInputStepId } from './steps/constants';
+import type { DataInputStep } from './steps/constants';
 import { QradarDataInputStep, SplunkDataInputStep } from './steps/constants';
 import { useStartRulesMigrationModal } from '../../hooks/use_start_rules_migration_modal';
-import type { RuleMigrationSettings, RuleMigrationStats } from '../../types';
+import { MigrationSource, type RuleMigrationSettings, type RuleMigrationStats } from '../../types';
 import { useStartMigration } from '../../logic/use_start_migration';
 import { useMigrationSourceStep } from '../../../common/components/migration_source_step/use_migration_source_step';
 import { MigrationSourceDropdown } from '../../../common/components/migration_source_step/migration_source_dropdown';
 import { CenteredLoadingSpinner } from '../../../../common/components/centered_loading_spinner';
-import type { Step } from '../../../common/components/migration_source_step/types';
-import { MigrationSource } from '../../../common/types';
 import { useMigrationSteps } from '../../../common/components/migration_steps/use_migration_steps';
+import type { QradarStep, SplunkStep } from '../../../common/components/migration_steps/types';
 
 export interface MigrationDataInputFlyoutProps {
   onClose: () => void;
@@ -41,7 +40,9 @@ export interface MigrationDataInputFlyoutProps {
   migrationSource?: MigrationSource;
 }
 
-function StepRenderer<K extends DataInputStepId>({ step }: { step: Step<K> }) {
+type Step = SplunkStep | QradarStep;
+
+function StepRenderer({ step }: { step: Step }) {
   const Component = step.Component as React.ComponentType<typeof step.props | {}>;
 
   return step.props ? <Component {...step.props} /> : <Component />;

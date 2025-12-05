@@ -6,15 +6,14 @@
  */
 
 import {
-  DataInputStepId,
   QradarDataInputStep,
   SplunkDataInputStep,
 } from '../../../rules/components/data_input_flyout/steps/constants';
-import { MigrationSource } from '../../types';
 import type { UseMigrationStepsProps } from './use_migration_steps';
 import { useMigrationSteps } from './use_migration_steps';
 import { renderHook } from '@testing-library/react';
 import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
+import { MigrationSource } from '../../../rules/types';
 
 describe('useMigrationSteps', () => {
   const props: UseMigrationStepsProps = {
@@ -47,15 +46,15 @@ describe('useMigrationSteps', () => {
       useMigrationSteps({ ...props, migrationSource: MigrationSource.SPLUNK })
     );
     expect(result.current?.length).toEqual(3);
-    expect(result.current?.[0].id).toBe(DataInputStepId.SplunkRules);
-    expect(result.current?.[1].id).toBe(DataInputStepId.SplunkMacros);
-    expect(result.current?.[2].id).toBe(DataInputStepId.SplunkLookups);
+    expect(result.current?.[0].id).toBe(SplunkDataInputStep.Rules);
+    expect(result.current?.[1].id).toBe(SplunkDataInputStep.Macros);
+    expect(result.current?.[2].id).toBe(SplunkDataInputStep.Lookups);
   });
   it('should return Qradar migration steps when migration source is Qradar', () => {
     const { result } = renderHook(() =>
       useMigrationSteps({ ...props, migrationSource: MigrationSource.QRADAR })
     );
     expect(result.current?.length).toEqual(1);
-    expect(result.current?.[0].id).toBe(DataInputStepId.QradarRules);
+    expect(result.current?.[0].id).toBe(QradarDataInputStep.Rules);
   });
 });

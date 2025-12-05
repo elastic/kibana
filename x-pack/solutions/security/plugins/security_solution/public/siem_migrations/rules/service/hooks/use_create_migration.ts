@@ -10,8 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { CreateRuleMigrationRulesRequestBody } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { reducer, initialState } from '../../../common/service';
-import type { RuleMigrationStats } from '../../types';
-import type { MigrationSource } from '../../../common/types';
+import type { MigrationSource, RuleMigrationStats } from '../../types';
 
 export const RULES_DATA_INPUT_CREATE_MIGRATION_SUCCESS_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.service.createRuleSuccess.title',

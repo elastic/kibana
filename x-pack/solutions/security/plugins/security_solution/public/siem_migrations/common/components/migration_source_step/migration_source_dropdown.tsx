@@ -4,27 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiForm, EuiFormRow, EuiSuperSelect } from '@elastic/eui';
 import * as i18n from './translations';
-import type { MigrationSource } from '../../types';
 import type { MigrationSourceDropdownProps } from './use_migration_source_step';
+import type { MigrationSource } from '../../../rules/types';
 
 export const MigrationSourceDropdown = React.memo<MigrationSourceDropdownProps>(
   ({ migrationSource, setMigrationSource, disabled, migrationSourceOptions }) => {
-    const [value, setValue] = useState<MigrationSource>(migrationSource);
-
     const handleMigrationSourceChange = useCallback(
       (selected: MigrationSource) => {
-        setValue(selected);
         setMigrationSource(selected);
       },
       [setMigrationSource]
     );
 
-    const onBlur = useCallback(() => {
-      setMigrationSource(value);
-    }, [setMigrationSource, value]);
     return (
       <EuiFlexGroup direction="column" gutterSize="s" alignItems="stretch">
         <EuiFlexItem grow={true}>
@@ -36,9 +30,8 @@ export const MigrationSourceDropdown = React.memo<MigrationSourceDropdownProps>(
             >
               <EuiSuperSelect
                 options={migrationSourceOptions}
-                valueOfSelected={value}
+                valueOfSelected={migrationSource}
                 onChange={handleMigrationSourceChange}
-                onBlur={onBlur}
                 autoFocus
                 data-test-subj="migrationSourceDropdown"
                 disabled={disabled}

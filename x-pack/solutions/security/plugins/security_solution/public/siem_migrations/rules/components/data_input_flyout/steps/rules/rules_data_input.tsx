@@ -17,8 +17,8 @@ import { QradarDataInputStep, SplunkDataInputStep } from '../constants';
 import { useCopyExportQueryStep } from './sub_steps/copy_export_query';
 import { useRulesFileUploadStep } from './sub_steps/rules_file_upload';
 import { useCheckResourcesStep } from './sub_steps/check_resources';
-import { MigrationSource } from '../../../../../common/types';
-import type { RulesDataInputSubStepsProps } from '../../../../../common/components/migration_source_step/types';
+import type { RulesDataInputSubStepsProps } from '../../../../../common/components/migration_steps/use_migration_steps';
+import { MigrationSource } from '../../../../types';
 
 interface RulesDataInputProps extends Omit<RulesDataInputSubStepsProps, 'dataInputStep'> {
   dataInputStep: SplunkDataInputStep | QradarDataInputStep;

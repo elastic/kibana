@@ -5,21 +5,24 @@
  * 2.0.
  */
 
-import { MigrationSource } from '../../types';
-import { DataInputStepId } from '../../../rules/components/data_input_flyout/steps/constants';
 import { RulesDataInput } from '../../../rules/components/data_input_flyout/steps/rules/rules_data_input';
 import { MacrosDataInput } from '../../../rules/components/data_input_flyout/steps/macros/macros_data_input';
 import { LookupsDataInput } from '../../../rules/components/data_input_flyout/steps/lookups/lookups_data_input';
-import type { QradarMigrationSteps, SplunkMigrationSteps } from '../migration_source_step/types';
+import { MigrationSource } from '../../../rules/types';
+import {
+  QradarDataInputStepId,
+  SplunkDataInputStepId,
+} from '../../../rules/components/data_input_flyout/steps/constants';
+import type { SplunkMigrationSteps, QradarMigrationSteps } from './types';
 
 const SPLUNK_MIGRATION_STEPS: SplunkMigrationSteps = [
-  { id: DataInputStepId.SplunkRules, Component: RulesDataInput },
-  { id: DataInputStepId.SplunkMacros, Component: MacrosDataInput },
-  { id: DataInputStepId.SplunkLookups, Component: LookupsDataInput },
+  { id: SplunkDataInputStepId.Rules, Component: RulesDataInput },
+  { id: SplunkDataInputStepId.Macros, Component: MacrosDataInput },
+  { id: SplunkDataInputStepId.Lookups, Component: LookupsDataInput },
 ] as const;
 
 const QRADAR_MIGRATION_STEPS: QradarMigrationSteps = [
-  { id: DataInputStepId.QradarRules, Component: RulesDataInput },
+  { id: QradarDataInputStepId.Rules, Component: RulesDataInput },
 ] as const;
 
 export const STEP_COMPONENTS: {

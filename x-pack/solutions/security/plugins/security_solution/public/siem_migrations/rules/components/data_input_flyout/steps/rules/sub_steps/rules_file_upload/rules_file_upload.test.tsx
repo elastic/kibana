@@ -17,7 +17,7 @@ import path from 'path';
 import os from 'os';
 import { splunkTestRules } from './splunk_rules.test.data';
 import type { OriginalRule } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
-import { MigrationSource } from '../../../../../../../common/types';
+import { MigrationSource } from '../../../../../../types';
 
 const mockCreateMigration: CreateMigration = jest.fn();
 const mockOnRulesFileChanged = jest.fn();

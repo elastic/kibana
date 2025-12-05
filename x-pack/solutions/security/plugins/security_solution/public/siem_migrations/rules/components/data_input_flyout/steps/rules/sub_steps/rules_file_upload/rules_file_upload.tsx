@@ -23,9 +23,9 @@ import type { CreateMigration } from '../../../../../../service/hooks/use_create
 import type { CreateRuleMigrationRulesRequestBody } from '../../../../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { OriginalRule } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
-import type { MigrationSource } from '../../../../../../../common/types';
 import { RULES_DATA_INPUT_CHECK_RESOURCES_DESCRIPTION } from '../check_resources/translations';
 import type { SPLUNK_RULES_COLUMNS } from '../../../../constants';
+import type { MigrationSource } from '../../../../../../types';
 
 type SplunkRulesResult = Partial<Record<(typeof SPLUNK_RULES_COLUMNS)[number], string>>;
 

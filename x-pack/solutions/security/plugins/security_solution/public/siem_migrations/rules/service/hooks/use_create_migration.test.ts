@@ -9,7 +9,7 @@ import { renderHook, act } from '@testing-library/react';
 import { useCreateMigration } from './use_create_migration';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import type { CreateRuleMigrationRulesRequestBody } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
-import { MigrationSource } from '../../../common/types';
+import { MigrationSource } from '../../types';
 
 jest.mock('../../../../common/lib/kibana/kibana_react', () => ({
   useKibana: jest.fn(),

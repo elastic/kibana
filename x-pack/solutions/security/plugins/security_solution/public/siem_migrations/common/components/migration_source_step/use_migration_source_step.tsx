@@ -7,8 +7,8 @@
 
 import { useState } from 'react';
 import type { EuiSuperSelectOption } from '@elastic/eui';
-import type { MigrationSource } from '../../types';
 import { useMigrationSourceOptions } from './use_migration_source_options';
+import type { MigrationSource } from '../../../rules/types';
 
 export interface MigrationSourceDropdownProps {
   migrationSource: MigrationSource;

@@ -14,9 +14,9 @@ import type {
 import { UploadFileButton } from '../../../../../../../common/components';
 import type { CreateMigration } from '../../../../../../service/hooks/use_create_migration';
 import * as i18n from './translations';
-import type { MigrationSource } from '../../../../../../../common/types';
 import { RULES_DATA_INPUT_CHECK_RESOURCES_DESCRIPTION } from '../check_resources/translations';
 import { useParseFileInput } from '../../../../../../../common/hooks/use_parse_file_input';
+import type { MigrationSource } from '../../../../../../types';
 
 export interface RulesXMLFileUploadProps {
   createMigration: CreateMigration;

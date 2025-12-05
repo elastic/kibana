@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiStepProps, EuiStepStatus } from '@elastic/eui';
 import type { RuleMigrationStats } from '../../../../../../types';
+import { MigrationSource } from '../../../../../../types';
 import type { OnMigrationCreated } from '../../../../types';
 import { RulesFileUpload } from './rules_file_upload';
 import {
@@ -15,7 +16,6 @@ import {
   type OnSuccess,
 } from '../../../../../../service/hooks/use_create_migration';
 import * as i18n from './translations';
-import { MigrationSource } from '../../../../../../../common/types';
 import { RulesXMLFileUpload } from './rules_xml_file_upload';
 
 export interface RulesFileUploadStepProps {
@@ -34,26 +34,14 @@ export const useRulesFileUploadStep = ({
   onMigrationCreated,
   onRulesFileChanged,
 }: RulesFileUploadStepProps): EuiStepProps => {
-  const [isCreated, setIsCreated] = useState<{
-    [MigrationSource.SPLUNK]: boolean;
-    [MigrationSource.QRADAR]: boolean;
-  }>({
-    [MigrationSource.SPLUNK]: !!migrationStats,
-    [MigrationSource.QRADAR]: !!migrationStats,
-  });
-  const setMigrationCreated = useCallback(
-    (created: boolean) => {
-      setIsCreated((prev) => ({ ...prev, ...{ [migrationSource]: created } }));
-    },
-    [migrationSource]
-  );
+  const [isCreated, setIsCreated] = useState<boolean>(!!migrationStats);
 
   const onSuccess = useCallback<OnSuccess>(
     (stats) => {
-      setMigrationCreated(true);
+      setIsCreated(true);
       onMigrationCreated(stats);
     },
-    [onMigrationCreated, setMigrationCreated]
+    [onMigrationCreated]
   );
   const { createMigration, isLoading, error } = useCreateMigration(onSuccess);
 
@@ -79,7 +67,7 @@ export const useRulesFileUploadStep = ({
         migrationName={migrationName}
         migrationSource={migrationSource}
         isLoading={isLoading}
-        isCreated={isCreated[migrationSource]}
+        isCreated={isCreated}
         apiError={error?.message}
         onRulesFileChanged={onRulesFileChanged}
       />
