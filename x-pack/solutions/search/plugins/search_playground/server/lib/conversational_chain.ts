@@ -211,6 +211,7 @@ class ConversationalChainFn {
         const lastMessageContent = lcMessages[lcMessages.length - 1]?.content;
         const question = messageContentToString(lastMessageContent ?? '');
         const retrievedDocs: Document[] = [];
+        let hasWrittenCitations = false;
 
         let retrievalChain: Runnable = RunnableLambda.from(() => '');
         const chatHistory = getSerialisedMessages(previousMessages);
@@ -330,12 +331,14 @@ class ConversationalChainFn {
                   });
                 },
                 handleChainEnd(outputs) {
-                  if (isAIMessageChunk(outputs)) {
-                    writeAnnotations(writer, {
-                      type: 'citations',
-                      documents: getCitations(outputs.content as string, 'inline', retrievedDocs),
-                    });
+                  if (hasWrittenCitations || !isAIMessageChunk(outputs)) {
+                    return;
                   }
+                  hasWrittenCitations = true;
+                  writeAnnotations(writer, {
+                    type: 'citations',
+                    documents: getCitations(outputs.content as string, 'inline', retrievedDocs),
+                  });
                 },
               },
             ],
