@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
@@ -163,6 +163,16 @@ export const GapAutoFillLogsFlyout = ({ isOpen, onClose }: GapAutoFillLogsFlyout
     [expandedRowMap]
   );
 
+  const handlePaginationChange = useCallback(
+    ({ page }: { page?: { index: number; size: number } }) => {
+      if (page) {
+        setPageIndex(page.index);
+        setPageSize(page.size);
+      }
+    },
+    [setPageIndex, setPageSize]
+  );
+
   return (
     <>
       {isOpen && (
@@ -266,12 +276,7 @@ export const GapAutoFillLogsFlyout = ({ isOpen, onClose }: GapAutoFillLogsFlyout
                   totalItemCount: logsData?.total ?? 0,
                   pageSizeOptions: [10, 25, 50],
                 }}
-                onChange={({ page }: { page?: { index: number; size: number } }) => {
-                  if (page) {
-                    setPageIndex(page.index);
-                    setPageSize(page.size);
-                  }
-                }}
+                onChange={handlePaginationChange}
                 itemIdToExpandedRowMap={expandedRowMap}
                 data-test-subj="gap-auto-fill-logs-table"
               />
