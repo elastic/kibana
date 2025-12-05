@@ -20,13 +20,16 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { i18n } from '@kbn/i18n';
 import type { ConnectorSpec } from '../../connector_spec';
 
 export const AlienVaultOTXConnector: ConnectorSpec = {
   metadata: {
     id: '.alienvault-otx',
     displayName: 'AlienVault OTX',
-    description: 'Community-driven threat intelligence from Open Threat Exchange',
+    description: i18n.translate('connectorSpecs.alienvaultOtx.metadata.description', {
+      defaultMessage: 'Community-driven threat intelligence from Open Threat Exchange',
+    }),
     minimumLicense: 'gold',
     supportedFeatureIds: ['workflows'],
   },
@@ -166,6 +169,8 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
         };
       }
     },
-    description: 'Verifies AlienVault OTX API key',
+    description: i18n.translate('connectorSpecs.alienvaultOtx.test.description', {
+      defaultMessage: 'Verifies AlienVault OTX API key',
+    }),
   },
 };

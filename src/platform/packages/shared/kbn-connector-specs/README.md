@@ -518,6 +518,8 @@ When adding a new connector:
 4. Follow the existing patterns for consistency
 5. Include proper TypeScript types
 6. Add appropriate UI metadata for better UX
+7. Consider adding a test file (`src/specs/{connector}.test.ts`) to validate your action handlers. See existing connector tests for examples.
+8. End-user documentation for connectors lives in `docs/reference/connectors-kibana/{connector-name}-action-type.md`. See existing connector docs for the expected structure. Don't forget to update the TOC and relevant `_snippets/` files!
 
 ### Adding a Lazy Icon
 

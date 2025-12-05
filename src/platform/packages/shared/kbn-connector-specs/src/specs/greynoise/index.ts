@@ -20,13 +20,16 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { i18n } from '@kbn/i18n';
 import type { ConnectorSpec } from '../../connector_spec';
 
 export const GreyNoiseConnector: ConnectorSpec = {
   metadata: {
     id: '.greynoise',
     displayName: 'GreyNoise',
-    description: 'Internet scanning noise detection and classification',
+    description: i18n.translate('connectorSpecs.greynoise.metadata.description', {
+      defaultMessage: 'Internet scanning noise detection and classification',
+    }),
     minimumLicense: 'gold',
     supportedFeatureIds: ['workflows'],
   },
@@ -135,6 +138,8 @@ export const GreyNoiseConnector: ConnectorSpec = {
         };
       }
     },
-    description: 'Verifies GreyNoise API key',
+    description: i18n.translate('connectorSpecs.greynoise.test.description', {
+      defaultMessage: 'Verifies GreyNoise API key',
+    }),
   },
 };

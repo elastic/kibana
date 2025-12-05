@@ -20,13 +20,16 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { i18n } from '@kbn/i18n';
 import type { ConnectorSpec } from '../../connector_spec';
 
 export const VirusTotalConnector: ConnectorSpec = {
   metadata: {
     id: '.virustotal',
     displayName: 'VirusTotal',
-    description: 'File scanning, URL analysis, and threat intelligence lookups',
+    description: i18n.translate('connectorSpecs.virustotal.metadata.description', {
+      defaultMessage: 'File scanning, URL analysis, and threat intelligence lookups',
+    }),
     minimumLicense: 'gold',
     supportedFeatureIds: ['workflows'],
   },
@@ -144,6 +147,8 @@ export const VirusTotalConnector: ConnectorSpec = {
         };
       }
     },
-    description: 'Verifies VirusTotal API key',
+    description: i18n.translate('connectorSpecs.virustotal.test.description', {
+      defaultMessage: 'Verifies VirusTotal API key',
+    }),
   },
 };
