@@ -17,10 +17,16 @@ import type { ControlGroupRendererApi } from '@kbn/control-group-renderer';
 
 describe('addControlsFromSavedSession', () => {
   let mockContainer: CanAddNewPanel & PublishesESQLVariables & { controlGroupApi$?: unknown };
+  let mockControlGroupApi: jest.Mocked<ControlGroupRendererApi>;
   let mockControlGroupApi$: BehaviorSubject<jest.Mocked<ControlGroupRendererApi>>;
   let mockEsqlVariables$: BehaviorSubject<ESQLControlVariable[]>;
 
   beforeEach(() => {
+    mockControlGroupApi = {
+      addNewPanel: jest.fn(),
+    } as unknown as jest.Mocked<ControlGroupRendererApi>;
+
+    mockControlGroupApi$ = new BehaviorSubject(mockControlGroupApi);
     mockEsqlVariables$ = new BehaviorSubject<ESQLControlVariable[]>([
       { key: 'var1', value: 'value1', type: ESQLVariableType.VALUES },
       { key: 'var2', value: 'value2', type: ESQLVariableType.FIELDS },
