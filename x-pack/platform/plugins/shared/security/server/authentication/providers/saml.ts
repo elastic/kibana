@@ -889,6 +889,13 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    * @param token ES native or UIAM access or refresh token.
    */
   private isUiamToken(token?: string): this is { options: { uiam: UiamServicePublic } } {
-    return this.useUiam && !!token?.startsWith('essu_');
+    const isUiamToken = !!token?.startsWith('essu_');
+    if (isUiamToken && !this.useUiam) {
+      this.logger.error('Detected UIAM token, but the provider is not configured to use UIAM.');
+    } else if (!isUiamToken && this.useUiam) {
+      this.logger.warn('Detected non-UIAM token, but the provider is configured to use UIAM.');
+    }
+
+    return this.useUiam && isUiamToken;
   }
 }
