@@ -24,3 +24,9 @@ magic-bytes.js
 @hey-api/openapi-ts
 vscode-languageserver-textdocument
 yaml-language-server
+@babel/code-frame
+@jest/create-cache-key-function
+@jest/test-result
+@types/babel__code-frame
+jest-environment-node
+jest-haste-map
