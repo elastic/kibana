@@ -68,6 +68,7 @@ const createConnectorTypeFromSpec = (
   return {
     id: spec.metadata.id,
     actionTypeTitle: spec.metadata.displayName,
+    isSpecConnector: true,
     selectMessage: spec.metadata.description,
     iconClass: getIcon(spec),
     // Temporary workaround to hide workflows connector when workflows UI setting is disabled.

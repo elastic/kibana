@@ -37,6 +37,7 @@ const FlyoutHeaderComponent: React.FC<{
   selectedTab: EditConnectorTabs;
   setTab: (nextPage: EditConnectorTabs) => void;
   icon?: IconType | null;
+  isSpecConnector?: boolean;
 }> = ({
   icon,
   isExperimental = false,
@@ -46,13 +47,14 @@ const FlyoutHeaderComponent: React.FC<{
   connectorTypeDesc,
   selectedTab,
   setTab,
+  isSpecConnector = false,
 }) => {
   const {
     application: { capabilities },
   } = useKibana().services;
 
   const { euiTheme } = useEuiTheme();
-  const canExecute = hasExecuteActionsCapability(capabilities, subFeature);
+  const canExecute = !isSpecConnector && hasExecuteActionsCapability(capabilities, subFeature);
 
   const setConfigurationTab = useCallback(() => {
     setTab(EditConnectorTabs.Configuration);
