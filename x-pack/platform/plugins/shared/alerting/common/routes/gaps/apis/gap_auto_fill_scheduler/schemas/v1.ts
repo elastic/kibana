@@ -94,8 +94,8 @@ export const gapAutoFillSchedulerUpdateBodySchema = schema.object(
     name: schema.string(),
     enabled: schema.boolean(),
     gap_fill_range: schema.string(),
-    max_backfills: schema.number({ min: 1, max: 5000 }),
-    num_retries: schema.number({ min: 1 }),
+    max_backfills: schema.number(maxBackfills),
+    num_retries: schema.number(numRetries),
     schedule: schema.object({
       interval: schema.string(),
     }),
@@ -141,26 +141,41 @@ export const gapAutoFillSchedulerResponseSchema = schema.object({
   updated_at: schema.string(),
 });
 
-export const gapAutoFillSchedulerLogsRequestQuerySchema = schema.object({
-  start: schema.string(),
-  end: schema.string(),
-  page: schema.number({ defaultValue: 1, min: 1 }),
-  per_page: schema.number({ defaultValue: 50, min: 1, max: 1000 }),
-  sort_field: schema.oneOf([schema.literal('@timestamp')], { defaultValue: '@timestamp' }),
-  sort_direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
-    defaultValue: 'desc',
-  }),
-  statuses: schema.maybe(
-    schema.arrayOf(
-      schema.oneOf([
-        schema.literal('success'),
-        schema.literal('error'),
-        schema.literal('skipped'),
-        schema.literal('no_gaps'),
-      ])
-    )
-  ),
-});
+export const gapAutoFillSchedulerLogsRequestQuerySchema = schema.object(
+  {
+    start: schema.string(),
+    end: schema.string(),
+    page: schema.number({ defaultValue: 1, min: 1 }),
+    per_page: schema.number({ defaultValue: 50, min: 1, max: 1000 }),
+    sort_field: schema.oneOf([schema.literal('@timestamp')], { defaultValue: '@timestamp' }),
+    sort_direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+      defaultValue: 'desc',
+    }),
+    statuses: schema.maybe(
+      schema.arrayOf(
+        schema.oneOf([
+          schema.literal('success'),
+          schema.literal('error'),
+          schema.literal('skipped'),
+          schema.literal('no_gaps'),
+        ])
+      )
+    ),
+  },
+  {
+    validate({ start, end }) {
+      const parsedStart = Date.parse(start);
+      if (isNaN(parsedStart)) {
+        return `[start]: query start must be valid date`;
+      }
+
+      const parsedEnd = Date.parse(end);
+      if (isNaN(parsedEnd)) {
+        return `[end]: query end must be valid date`;
+      }
+    },
+  }
+);
 
 export const gapAutoFillSchedulerLogEntrySchema = schema.object({
   id: schema.string(),
