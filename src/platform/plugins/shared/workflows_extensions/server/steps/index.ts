@@ -7,9 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { CoreSetup } from '@kbn/core/server';
 import { aiPromptStepDefinition } from './ai/ai_prompt';
 import type { ServerStepRegistry } from '../step_registry/step_registry';
+import type { WorkflowsExtensionsServerPluginStartDeps } from '../types';
 
-export const registerStepDefinitions = (serverStepRegistry: ServerStepRegistry) => {
-  serverStepRegistry.register(aiPromptStepDefinition);
+export const registerStepDefinitions = (
+  core: CoreSetup<WorkflowsExtensionsServerPluginStartDeps>,
+  serverStepRegistry: ServerStepRegistry
+) => {
+  serverStepRegistry.register(aiPromptStepDefinition(core));
 };

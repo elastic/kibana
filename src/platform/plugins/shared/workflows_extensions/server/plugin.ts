@@ -34,14 +34,14 @@ export class WorkflowsExtensionsServerPlugin
   }
 
   public setup(
-    core: CoreSetup,
+    core: CoreSetup<WorkflowsExtensionsServerPluginStartDeps>,
     _plugins: WorkflowsExtensionsServerPluginSetupDeps
   ): WorkflowsExtensionsServerPluginSetup {
     const router = core.http.createRouter();
 
     // Register HTTP route to expose step definitions for testing
     registerGetStepDefinitionsRoute(router, this.stepRegistry);
-    registerStepDefinitions(this.stepRegistry);
+    registerStepDefinitions(core, this.stepRegistry);
 
     return {
       registerStepDefinition: (definition) => {
