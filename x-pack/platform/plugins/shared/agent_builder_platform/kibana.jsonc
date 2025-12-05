@@ -7,7 +7,7 @@
   "plugin": {
     "id": "agentBuilderPlatform",
     "server": true,
-    "browser": false,
+    "browser": true,
     "configPath": ["xpack", "agentBuilderPlatform"],
     "requiredPlugins": ["onechat"],
     "requiredBundles": [],

@@ -6,12 +6,20 @@
  */
 
 import React, { useCallback, useRef, useState } from 'react';
-import { EuiHorizontalRule, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiWindowEvent,
+} from '@elastic/eui';
 import styled from '@emotion/styled';
 import { noop } from 'lodash/fp';
 import type { DataView } from '@kbn/data-views-plugin/common';
 
+import { isEqual } from 'lodash';
 import { Schedule } from '../../../attack_discovery/pages/header/schedule';
+import { FilterByAssigneesPopover } from '../../../common/components/filter_by_assignees_popover/filter_by_assignees_popover';
 import { PAGE_TITLE } from '../../pages/attacks/translations';
 import { HeaderPage } from '../../../common/components/header_page';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
@@ -20,6 +28,7 @@ import { Display } from '../../../explore/hosts/pages/display';
 import { SearchBarSection } from './search_bar/search_bar_section';
 import { SchedulesFlyout } from './schedule_flyout';
 import { TableSection } from './table/table_section';
+import type { AssigneesIdsSelection } from '../../../common/components/assignees/types';
 
 export const CONTENT_TEST_ID = 'attacks-page-content';
 export const SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID = 'attacks-page-security-solution-page-wrapper';
@@ -54,6 +63,16 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
     setShowFlyout(true);
   }, []);
   const onClose = useCallback(() => setShowFlyout(false), []);
+  const [assignees, setAssignees] = useState<AssigneesIdsSelection[]>([]);
+
+  const onAssigneesSelectionChange = useCallback(
+    (newAssignees: AssigneesIdsSelection[]) => {
+      if (!isEqual(newAssignees, assignees)) {
+        setAssignees(newAssignees);
+      }
+    },
+    [assignees]
+  );
 
   return (
     <StyledFullHeightContainer data-test-subj={CONTENT_TEST_ID} ref={containerElement}>
@@ -65,7 +84,17 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
       >
         <Display show={!globalFullScreen}>
           <HeaderPage title={PAGE_TITLE}>
-            <Schedule openFlyout={openFlyout} />
+            <EuiFlexGroup gutterSize="m">
+              <EuiFlexItem>
+                <FilterByAssigneesPopover
+                  selectedUserIds={assignees}
+                  onSelectionChange={onAssigneesSelectionChange}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <Schedule openFlyout={openFlyout} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </HeaderPage>
           <EuiHorizontalRule margin="none" />
           <EuiSpacer size="l" />
