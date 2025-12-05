@@ -77,7 +77,7 @@ export function getDashboardApi({
       accessMode: readResult?.data?.access_control?.access_mode,
       owner: readResult?.data?.access_control?.owner,
     },
-    createdBy: readResult?.meta?.createdBy,
+    createdBy: readResult?.meta?.created_by,
     user,
   });
   const trackPanel = initializeTrackPanel(async (id: string) => {
@@ -280,7 +280,7 @@ export function getDashboardApi({
     type: DASHBOARD_API_TYPE as 'dashboard',
     uuid: v4(),
     getPassThroughContext: () => creationOptions?.getPassThroughContext?.(),
-    createdBy: readResult?.meta?.createdBy,
+    createdBy: readResult?.meta?.created_by,
     user,
     // TODO: accessControl$ and changeAccessMode should be moved to internalApi
     accessControl$: accessControlManager.api.accessControl$,
