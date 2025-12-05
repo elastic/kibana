@@ -11,7 +11,6 @@ import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import type { SafeParseReturnType } from '@kbn/zod';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
 import { kibanaReactDecorator } from '../../../../.storybook/decorators';
 import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml';
@@ -95,7 +94,8 @@ steps:
       message: '--------------------------'
 `;
 const result = parseWorkflowYamlToJSON(yaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
-const definition = (result as SafeParseReturnType<WorkflowYaml, WorkflowYaml>).data as WorkflowYaml;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- it's a storybook story, we don't need to type it
+const definition = (result as any).data as WorkflowYaml;
 
 // export interface WorkflowExecutionDto {
 //   spaceId: string;

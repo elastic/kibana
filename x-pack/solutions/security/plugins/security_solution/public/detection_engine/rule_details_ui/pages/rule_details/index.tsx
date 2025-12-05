@@ -129,7 +129,7 @@ import { RuleDetailsContextProvider } from './rule_details_context';
 import { LegacyUrlConflictCallOut } from './legacy_url_conflict_callout';
 import * as i18n from './translations';
 import { NeedAdminForUpdateRulesCallOut } from '../../../rule_management/components/callouts/need_admin_for_update_rules_callout';
-import { MissingPrivilegesCallOut } from '../../../../common/components/missing_privileges';
+import { MissingDetectionsPrivilegesCallOut } from '../../../../detections/components/callouts/missing_detections_privileges_callout';
 import { useRuleWithFallback } from '../../../rule_management/logic/use_rule_with_fallback';
 import type { BadgeOptions } from '../../../../common/components/header_page/types';
 import type { AlertsStackByField } from '../../../../detections/components/alerts_kpis/common/types';
@@ -613,7 +613,7 @@ export const RuleDetailsPage = connector(
     return (
       <>
         <NeedAdminForUpdateRulesCallOut />
-        <MissingPrivilegesCallOut />
+        <MissingDetectionsPrivilegesCallOut />
         {upgradeCallout}
         {isBulkDuplicateConfirmationVisible && (
           <BulkActionDuplicateExceptionsConfirmation
