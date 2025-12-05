@@ -114,6 +114,7 @@ describe('ReindexIntegrationKnowledgeTask', () => {
       undefined,
       expect.anything(),
       { name: 'test-package', version: '1.0.0' },
+      expect.anything(),
       expect.anything()
     );
     expect(indexKnowledgeBase).toHaveBeenCalledWith(
@@ -122,6 +123,7 @@ describe('ReindexIntegrationKnowledgeTask', () => {
       undefined,
       expect.anything(),
       { name: 'test-bundled', version: '2.0.0' },
+      expect.anything(),
       expect.anything()
     );
   });
