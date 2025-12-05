@@ -24,6 +24,7 @@ import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
 import { validateQuery } from '../common/validate_query';
 import { NO_FEATURE } from '../utils/default_query';
 import { scoreSeverity, SeverityBadge, SIGNIFICANT_EVENT_SEVERITY } from '../../severity_badge';
+import { SeveritySelector } from '../common/severity_selector';
 
 interface Props {
   definition: Streams.all.Definition;
@@ -74,17 +75,6 @@ export function ManualFlowForm({
       },
     ]);
 
-  const severityOptions = [
-    {
-      value: -1,
-      inputDisplay: <SeverityBadge />,
-    },
-    ...Object.values(SIGNIFICANT_EVENT_SEVERITY).map((severity) => ({
-      value: severity.defaultValue,
-      inputDisplay: <SeverityBadge score={severity.defaultValue} />,
-    })),
-  ].reverse();
-
   return (
     <EuiPanel hasShadow={false} color="subdued">
       <EuiFlexGroup direction="column" gutterSize="m">
@@ -128,23 +118,12 @@ export function ManualFlowForm({
               </EuiFormLabel>
             }
           >
-            <EuiSuperSelect
-              options={severityOptions}
-              valueOfSelected={
-                query.severity_score
-                  ? SIGNIFICANT_EVENT_SEVERITY[scoreSeverity(query.severity_score)].defaultValue ??
-                    SIGNIFICANT_EVENT_SEVERITY.medium.defaultValue
-                  : -1
-              }
-              onChange={(value) => {
-                setQuery({ ...query, severity_score: value === -1 ? undefined : value });
+            <SeveritySelector
+              severityScore={query.severity_score}
+              onChange={(score) => {
+                setQuery({ ...query, severity_score: score });
                 setTouched((prev) => ({ ...prev, severity: true }));
               }}
-              placeholder={i18n.translate(
-                'xpack.streams.addSignificantEventFlyout.manualFlow.severityPlaceholder',
-                { defaultMessage: 'Select severity' }
-              )}
-              fullWidth
             />
           </EuiFormRow>
 
