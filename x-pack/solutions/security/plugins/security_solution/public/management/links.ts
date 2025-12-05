@@ -49,17 +49,17 @@ import { licenseService } from '../common/hooks/use_license';
 import type { LinkItem } from '../common/links/types';
 import type { StartPlugins } from '../types';
 import { links as notesLink } from '../notes/links';
-import { IconResponseActionHistory } from '../common/icons/console';
-import { IconBlocklist } from '../common/icons/shield';
+import { IconResponseActionHistory } from '../common/icons/response_action_history';
+import { IconBlocklist } from '../common/icons/blocklist';
 import { IconEndpoints } from '../common/icons/endpoints';
-import { IconPolicies } from '../common/icons/tool';
-import { IconEventFilters } from '../common/icons/pipeline';
-import { IconHostIsolationExceptions } from '../common/icons/saved_object';
+import { IconPolicies } from '../common/icons/policies';
+import { IconEventFilters } from '../common/icons/event_filters';
+import { IconHostIsolationExceptions } from '../common/icons/host_isolation_exceptions';
 import { IconTrustedApplications } from '../common/icons/trusted_applications';
 import { IconEntityAnalytics } from '../common/icons/entity_analytics';
 import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
 import { IconAssetCriticality } from '../common/icons/asset_criticality';
-import { IconTrustedDevices } from '../common/icons/device_control';
+import { IconTrustedDevices } from '../common/icons/trusted_devices';
 import { IconEndpointExceptions } from '../common/icons/endpoint_exceptions';
 
 const categories = [
