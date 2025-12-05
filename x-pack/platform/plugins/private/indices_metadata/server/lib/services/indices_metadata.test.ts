@@ -197,9 +197,9 @@ describe('Indices Metadata - IndicesMetadataService', () => {
     });
 
     it('should initialize receiver and sender', () => {
-      service.start(taskManagerStart, analytics, esClient);
+      service.start(taskManagerStart, analytics, esClient, false);
 
-      expect(MetadataReceiver).toHaveBeenCalledWith(expect.any(Object), esClient);
+      expect(MetadataReceiver).toHaveBeenCalledWith(expect.any(Object), esClient, false);
       expect(MetadataSender).toHaveBeenCalledWith(expect.any(Object), analytics);
     });
 
@@ -209,14 +209,14 @@ describe('Indices Metadata - IndicesMetadataService', () => {
         subscribe: mockSubscribe,
       } as any);
 
-      service.start(taskManagerStart, analytics, esClient);
+      service.start(taskManagerStart, analytics, esClient, false);
 
       expect(configurationService.getIndicesMetadataConfiguration$).toHaveBeenCalled();
       expect(mockSubscribe).toHaveBeenCalledWith(expect.any(Function));
     });
 
     it('should schedule indices metadata task', async () => {
-      service.start(taskManagerStart, analytics, esClient);
+      service.start(taskManagerStart, analytics, esClient, false);
 
       await new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -235,7 +235,7 @@ describe('Indices Metadata - IndicesMetadataService', () => {
       const error = new Error('Failed to schedule task');
       taskManagerStart.ensureScheduled.mockRejectedValue(error);
 
-      service.start(taskManagerStart, analytics, esClient);
+      service.start(taskManagerStart, analytics, esClient, false);
 
       await new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -250,7 +250,7 @@ describe('Indices Metadata - IndicesMetadataService', () => {
         subscribe: mockSubscribe,
       } as any);
 
-      service.start(taskManagerStart, analytics, esClient);
+      service.start(taskManagerStart, analytics, esClient, false);
 
       const configurationCallback = mockSubscribe.mock.calls[0][0];
       configurationCallback(mockConfiguration);
@@ -267,7 +267,7 @@ describe('Indices Metadata - IndicesMetadataService', () => {
         subscribe: jest.fn().mockReturnValue(subscription),
       } as any);
 
-      service.start(taskManagerStart, analytics, esClient);
+      service.start(taskManagerStart, analytics, esClient, false);
       service.stop();
 
       expect(subscription.unsubscribe).toHaveBeenCalled();
@@ -288,7 +288,7 @@ describe('Indices Metadata - IndicesMetadataService', () => {
         }),
       } as any);
 
-      service.start(taskManagerStart, analytics, esClient);
+      service.start(taskManagerStart, analytics, esClient, false);
 
       receiver.getIndices.mockResolvedValue(mockIndexSettings);
       receiver.getDataStreams.mockResolvedValue(mockDataStreams);
@@ -394,7 +394,7 @@ describe('Indices Metadata - IndicesMetadataService', () => {
         }),
       } as any);
 
-      service.start(taskManagerStart, analytics, esClient);
+      service.start(taskManagerStart, analytics, esClient, false);
     });
 
     it('should run publishIndicesMetadata and return state', async () => {
@@ -424,7 +424,7 @@ describe('Indices Metadata - IndicesMetadataService', () => {
         }),
       } as any);
 
-      service.start(taskManagerStart, analytics, esClient);
+      service.start(taskManagerStart, analytics, esClient, false);
     });
 
     describe('publishDatastreamsStats', () => {
@@ -574,7 +574,7 @@ describe('Indices Metadata - IndicesMetadataService', () => {
         }),
       } as any);
 
-      service.start(taskManagerStart, analytics, esClient);
+      service.start(taskManagerStart, analytics, esClient, false);
     });
 
     it('should handle receiver errors during publishIndicesMetadata', async () => {
