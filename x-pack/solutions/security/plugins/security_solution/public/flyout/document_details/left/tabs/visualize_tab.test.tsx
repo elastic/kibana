@@ -63,7 +63,7 @@ describe('VisualizeTab', () => {
     jest.clearAllMocks();
 
     (useGraphPreview as jest.Mock).mockReturnValue({
-      hasGraphRepresentation: true,
+      shouldShowGraph: true,
     });
 
     (useExpandableFlyoutState as jest.Mock).mockReturnValue({
@@ -83,7 +83,7 @@ describe('VisualizeTab', () => {
 
   it('should not render GraphVisualization component when graph is not available', () => {
     (useGraphPreview as jest.Mock).mockReturnValue({
-      hasGraphRepresentation: false,
+      shouldShowGraph: false,
     });
 
     renderVisualizeTab();
@@ -97,7 +97,7 @@ describe('VisualizeTab', () => {
 
   it('should render GraphVisualization component when graph is available', () => {
     (useGraphPreview as jest.Mock).mockReturnValue({
-      hasGraphRepresentation: true,
+      shouldShowGraph: true,
     });
 
     renderVisualizeTab();
