@@ -97,7 +97,6 @@ describe('AgentDetailsActionMenu', () => {
       expect(utils.getByText('Add / remove tags')).toBeInTheDocument();
       expect(utils.getByText('Assign to new policy')).toBeInTheDocument();
       expect(utils.getByText('Upgrade agent')).toBeInTheDocument();
-      expect(utils.getByText('View agent JSON')).toBeInTheDocument();
 
       // Check submenu headers are visible
       expect(utils.getByText('Maintenance and diagnostics')).toBeInTheDocument();
@@ -213,7 +212,7 @@ describe('AgentDetailsActionMenu', () => {
   });
 
   describe('View agent JSON action', () => {
-    function renderAndGetViewJSONButton({
+    async function renderAndGetViewJSONButton({
       agent,
       agentPolicy,
     }: {
@@ -225,11 +224,17 @@ describe('AgentDetailsActionMenu', () => {
         agentPolicy,
       });
 
+      // Navigate to maintenance submenu (View agent JSON is now under Maintenance and diagnostics)
+      const maintenanceButton = utils.queryByText('Maintenance and diagnostics');
+      if (maintenanceButton) {
+        await navigateToSubmenu(utils, 'Maintenance and diagnostics');
+      }
+
       return utils.queryByTestId('viewAgentDetailsJsonBtn');
     }
 
     it('should render an active button', async () => {
-      const res = renderAndGetViewJSONButton({
+      const res = await renderAndGetViewJSONButton({
         agent: {} as any,
         agentPolicy: {} as AgentPolicy,
       });
@@ -239,7 +244,7 @@ describe('AgentDetailsActionMenu', () => {
     });
 
     it('should render an active button for managed agent policy', async () => {
-      const res = renderAndGetViewJSONButton({
+      const res = await renderAndGetViewJSONButton({
         agent: {} as any,
         agentPolicy: {
           is_managed: true,

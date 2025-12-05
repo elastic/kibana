@@ -123,7 +123,6 @@ describe('TableRowActions', () => {
       expect(utils.getByText('Add / remove tags')).toBeInTheDocument();
       expect(utils.getByText('Assign to new policy')).toBeInTheDocument();
       expect(utils.getByText('Upgrade agent')).toBeInTheDocument();
-      expect(utils.getByText('View agent JSON')).toBeInTheDocument();
 
       // Check submenu headers are visible
       expect(utils.getByText('Maintenance and diagnostics')).toBeInTheDocument();
@@ -674,7 +673,7 @@ describe('TableRowActions', () => {
   });
 
   describe('View agent JSON action', () => {
-    it('should render view agent JSON button at top level', () => {
+    it('should render view agent JSON button in maintenance submenu', async () => {
       const { utils } = renderTableRowActions({
         agent: {
           active: true,
@@ -682,6 +681,12 @@ describe('TableRowActions', () => {
         } as any,
         agentPolicy: {} as AgentPolicy,
       });
+
+      await navigateToSubmenuAndWaitFor(
+        utils,
+        'Maintenance and diagnostics',
+        'viewAgentDetailsJsonBtn'
+      );
 
       expect(utils.getByTestId('viewAgentDetailsJsonBtn')).toBeInTheDocument();
       expect(utils.getByTestId('viewAgentDetailsJsonBtn')).toBeEnabled();

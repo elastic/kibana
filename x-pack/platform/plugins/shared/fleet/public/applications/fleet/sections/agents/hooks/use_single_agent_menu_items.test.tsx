@@ -124,7 +124,7 @@ describe('useSingleAgentMenuItems', () => {
       expect(viewAgentItem).toBeUndefined();
     });
 
-    it('should always include View agent JSON item', () => {
+    it('should always include View agent JSON item in maintenance submenu', () => {
       const { result } = renderHook(
         () =>
           useSingleAgentMenuItems({
@@ -135,7 +135,9 @@ describe('useSingleAgentMenuItems', () => {
         { wrapper: renderer.Wrapper }
       );
 
-      const viewJsonItem = result.current.find((item) => item.id === 'view-json');
+      const maintenance = result.current.find((item) => item.id === 'maintenance');
+      expect(maintenance).toBeDefined();
+      const viewJsonItem = maintenance?.children?.find((item) => item.id === 'view-json');
       expect(viewJsonItem).toBeDefined();
     });
   });
@@ -482,8 +484,9 @@ describe('useSingleAgentMenuItems', () => {
         { wrapper: renderer.Wrapper }
       );
 
-      // View agent JSON callback
-      const viewJsonItem = result.current.find((item) => item.id === 'view-json');
+      // View agent JSON callback (in maintenance submenu)
+      const maintenance = result.current.find((item) => item.id === 'maintenance');
+      const viewJsonItem = maintenance?.children?.find((item) => item.id === 'view-json');
       expect(viewJsonItem?.onClick).toBeDefined();
     });
   });

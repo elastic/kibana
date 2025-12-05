@@ -81,7 +81,7 @@ export function useSingleAgentMenuItems({
       });
     }
 
-    // Top-level items (only if has privileges and not managed)
+    // Top-level (common-use) items (only if has privileges and not managed)
     if (hasFleetAllPrivileges && !agentPolicy?.is_managed) {
       items.push(
         {
@@ -130,23 +130,7 @@ export function useSingleAgentMenuItems({
       );
     }
 
-    // View agent JSON - always available
-    items.push({
-      id: 'view-json',
-      name: (
-        <FormattedMessage
-          id="xpack.fleet.agentList.viewAgentDetailsJsonText"
-          defaultMessage="View agent JSON"
-        />
-      ),
-      icon: 'inspect',
-      onClick: () => {
-        callbacks.onViewAgentJsonClick();
-      },
-      'data-test-subj': 'viewAgentDetailsJsonBtn',
-    });
-
-    // Upgrade management submenu (only show if agent is stuck in updating)
+    // Upgrade management submenu - conditionally shown if the user has privileges
     if (hasFleetAllPrivileges) {
       items.push({
         id: 'upgrade-management',
@@ -177,12 +161,38 @@ export function useSingleAgentMenuItems({
       });
     }
 
-    // Maintenance and diagnostics submenu
-    const maintenanceChildren: MenuItem[] = [];
+    // Maintenance and diagnostics submenu - always shown since View agent JSON is always available
+    const maintenanceSubmenu: MenuItem = {
+      id: 'maintenance',
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.agentList.maintenanceAndDiagnostics"
+          defaultMessage="Maintenance and diagnostics"
+        />
+      ),
+      panelTitle: 'Maintenance and diagnostics',
+      children: [
+        // View agent JSON - always available
+        {
+          id: 'view-json',
+          name: (
+            <FormattedMessage
+              id="xpack.fleet.agentList.viewAgentDetailsJsonText"
+              defaultMessage="View agent JSON"
+            />
+          ),
+          icon: 'code',
+          onClick: () => {
+            callbacks.onViewAgentJsonClick();
+          },
+          'data-test-subj': 'viewAgentDetailsJsonBtn',
+        },
+      ],
+    };
 
-    // Migrate agent
+    // Migrate agent - only shown if the user has privileges and the agent is eligible for migration
     if (authz.fleet.allAgents && isAgentEligibleForMigration(agent, agentPolicy)) {
-      maintenanceChildren.push({
+      maintenanceSubmenu.children!.push({
         id: 'migrate',
         name: (
           <FormattedMessage
@@ -201,7 +211,7 @@ export function useSingleAgentMenuItems({
 
     // Request diagnostics
     if (authz.fleet.readAgents) {
-      maintenanceChildren.push({
+      maintenanceSubmenu.children!.push({
         id: 'diagnostics',
         name: (
           <FormattedMessage
@@ -218,19 +228,7 @@ export function useSingleAgentMenuItems({
       });
     }
 
-    if (maintenanceChildren.length > 0) {
-      items.push({
-        id: 'maintenance',
-        name: (
-          <FormattedMessage
-            id="xpack.fleet.agentList.maintenanceAndDiagnostics"
-            defaultMessage="Maintenance and diagnostics"
-          />
-        ),
-        panelTitle: 'Maintenance and diagnostics',
-        children: maintenanceChildren,
-      });
-    }
+    items.push(maintenanceSubmenu);
 
     // Security and removal submenu
     const securityChildren: MenuItem[] = [];
