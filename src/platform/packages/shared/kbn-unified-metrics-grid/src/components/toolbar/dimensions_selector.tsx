@@ -120,14 +120,16 @@ export const DimensionsSelector = ({
   const handleChange = useCallback(
     (chosenOption?: SelectableEntry) => {
       const isSelected = chosenOption?.checked === 'on';
+      const selectedDimension = isSelected
+        ? allDimensions.find((d) => d.name === chosenOption?.value)
+        : undefined;
 
       if (singleSelection !== false) {
-        onChange(isSelected ? [allDimensions.find((d) => d.name === chosenOption.value)!] : []);
+        onChange(selectedDimension ? [selectedDimension] : []);
       } else {
-        const newSelection = isSelected
-          ? [...selectedDimensions, allDimensions.find((d) => d.name === chosenOption.value)!]
+        const newSelection = selectedDimension
+          ? [...selectedDimensions, selectedDimension]
           : selectedDimensions.filter((d) => d.name !== chosenOption?.value);
-
         // Enforce the maximum limit
         const limitedSelection = newSelection.slice(0, MAX_DIMENSIONS_SELECTIONS);
         onChange(limitedSelection);
