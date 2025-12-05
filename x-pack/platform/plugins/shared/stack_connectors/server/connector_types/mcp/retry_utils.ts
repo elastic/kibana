@@ -22,7 +22,12 @@ export interface RetryOptions {
   initialDelayMs?: number;
   /**
    * Multiplier for exponential backoff. Delay = initialDelayMs * (backoffMultiplier ^ attempt).
-   * Set to 1 for constant delay, or undefined for no delay (default: undefined).
+   *
+   * - `undefined`: No delay (delay is always 0, regardless of initialDelayMs)
+   * - `1`: Constant delay (delay = initialDelayMs for all retries)
+   * - `> 1`: Exponential backoff (delay increases exponentially with each retry)
+   *
+   * Default: 1 (but default initialDelayMs is 0, so default behavior is no delay)
    */
   backoffMultiplier?: number;
   /**
@@ -55,8 +60,8 @@ export interface RetryOptions {
 const DEFAULT_RETRY_OPTIONS: Required<Omit<RetryOptions, 'logger' | 'operationName' | 'onRetry'>> =
   {
     maxAttempts: 1,
-    initialDelayMs: 0,
-    backoffMultiplier: 1, // 1 = constant delay, undefined = no delay
+    initialDelayMs: 0, // Default: no delay between retries
+    backoffMultiplier: 1, // Default: constant delay (but with initialDelayMs=0, results in no delay)
     maxDelayMs: Infinity,
     isRetryableError: () => true,
   };
@@ -158,9 +163,13 @@ export async function retryWithRecovery<T>(
       }
 
       // Calculate delay for this retry
-      const delayMs = backoffMultiplier
-        ? Math.min(initialDelayMs * Math.pow(backoffMultiplier, attempt - 1), maxDelayMs)
-        : 0;
+      // If backoffMultiplier is explicitly undefined/null (property exists but is undefined/null), use no delay
+      // Otherwise, calculate delay based on backoffMultiplier (default is 1 if not provided)
+      const delayMs =
+        'backoffMultiplier' in options &&
+        (options.backoffMultiplier === undefined || options.backoffMultiplier === null)
+          ? 0
+          : Math.min(initialDelayMs * Math.pow(backoffMultiplier, attempt - 1), maxDelayMs);
 
       // Execute onRetry callback if provided (for recovery operations)
       if (onRetry) {
