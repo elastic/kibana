@@ -84,6 +84,9 @@ export const suggestionsApi = ({
   } as unknown as DataViewsState;
 
   const initialVisualization = visualizationMap?.[Object.keys(visualizationMap)[0]] || null;
+  const isInitialSubTypeSupported = preferredChartType
+    ? initialVisualization?.isSubtypeSupported?.(preferredChartType.toLowerCase())
+    : undefined;
 
   // find the active visualizations from the context
   const suggestions = getSuggestions({
@@ -93,7 +96,7 @@ export const suggestionsApi = ({
     activeVisualization: initialVisualization,
     visualizationState: undefined,
     visualizeTriggerFieldContext: context,
-    subVisualizationId: preferredChartType?.toLowerCase(),
+    subVisualizationId: isInitialSubTypeSupported ? preferredChartType?.toLowerCase() : undefined,
     dataViews,
   });
   if (!suggestions.length) return [];
