@@ -6,12 +6,12 @@
  */
 
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../../../lib/license_state.mock';
-import { mockHandlerArguments } from '../../_mock_handler_arguments';
-import { listTypesRoute } from './list_types';
-import { verifyAccessAndContext } from '../../verify_access_and_context';
-import { actionsClientMock } from '../../../mocks';
 import { createMockConnectorType } from '../../../application/connector/mocks';
+import { licenseStateMock } from '../../../lib/license_state.mock';
+import { actionsClientMock } from '../../../mocks';
+import { mockHandlerArguments } from '../../_mock_handler_arguments';
+import { verifyAccessAndContext } from '../../verify_access_and_context';
+import { listTypesRoute } from './list_types';
 
 jest.mock('../../verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),
@@ -51,6 +51,7 @@ describe('listTypesRoute', () => {
       Object {
         "body": Array [
           Object {
+            "allow_multiple_system_actions": undefined,
             "enabled": true,
             "enabled_in_config": true,
             "enabled_in_license": true,
@@ -121,6 +122,7 @@ describe('listTypesRoute', () => {
       Object {
         "body": Array [
           Object {
+            "allow_multiple_system_actions": undefined,
             "enabled": true,
             "enabled_in_config": true,
             "enabled_in_license": true,
