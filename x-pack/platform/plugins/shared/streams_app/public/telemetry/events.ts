@@ -12,6 +12,8 @@ import {
   STREAMS_AI_DISSECT_SUGGESTION_LATENCY_EVENT_TYPE,
   STREAMS_ATTACHMENT_CLICK_EVENT_TYPE,
   STREAMS_ATTACHMENT_COUNT_EVENT_TYPE,
+  STREAMS_ATTACHMENT_LINKED_EVENT_TYPE,
+  STREAMS_ATTACHMENT_UNLINKED_EVENT_TYPE,
   STREAMS_CHILD_STREAM_CREATED_EVENT_TYPE,
   STREAMS_PROCESSING_SAVED_EVENT_TYPE,
   STREAMS_RETENTION_CHANGED_EVENT_TYPE,
@@ -32,6 +34,7 @@ import {
   streamsAIDissectSuggestionLatencySchema,
   streamsAttachmentClickEventSchema,
   streamsAttachmentCountSchema,
+  streamsAttachmentLinkChangedSchema,
   streamsChildStreamCreatedSchema,
   streamsProcessingSavedSchema,
   streamsRetentionChangedSchema,
@@ -54,6 +57,16 @@ const streamsAttachmentCountEventType = {
 const streamsAttachmentClickEventType = {
   eventType: STREAMS_ATTACHMENT_CLICK_EVENT_TYPE,
   schema: streamsAttachmentClickEventSchema,
+};
+
+const streamsAttachmentLinkedEventType = {
+  eventType: STREAMS_ATTACHMENT_LINKED_EVENT_TYPE,
+  schema: streamsAttachmentLinkChangedSchema,
+};
+
+const streamsAttachmentUnlinkedEventType = {
+  eventType: STREAMS_ATTACHMENT_UNLINKED_EVENT_TYPE,
+  schema: streamsAttachmentLinkChangedSchema,
 };
 
 const streamsAIGrokSuggestionLatencyEventType = {
@@ -139,6 +152,8 @@ const streamsProcessingSimulationSamplesFetchLatencyEventType = {
 export {
   streamsAttachmentCountEventType,
   streamsAttachmentClickEventType,
+  streamsAttachmentLinkedEventType,
+  streamsAttachmentUnlinkedEventType,
   streamsAIGrokSuggestionLatencyEventType,
   streamsAIGrokSuggestionAcceptedEventType,
   streamsAIDissectSuggestionLatencyEventType,

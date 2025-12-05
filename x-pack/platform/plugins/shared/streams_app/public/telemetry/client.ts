@@ -14,6 +14,7 @@ import type {
   StreamsAIDissectSuggestionLatencyProps,
   StreamsAttachmentClickEventProps,
   StreamsAttachmentCountProps,
+  StreamsAttachmentLinkChangedProps,
   StreamsChildStreamCreatedProps,
   StreamsProcessingSavedProps,
   StreamsSchemaUpdatedProps,
@@ -33,6 +34,8 @@ import {
   STREAMS_AI_DISSECT_SUGGESTION_LATENCY_EVENT_TYPE,
   STREAMS_ATTACHMENT_CLICK_EVENT_TYPE,
   STREAMS_ATTACHMENT_COUNT_EVENT_TYPE,
+  STREAMS_ATTACHMENT_LINKED_EVENT_TYPE,
+  STREAMS_ATTACHMENT_UNLINKED_EVENT_TYPE,
   STREAMS_CHILD_STREAM_CREATED_EVENT_TYPE,
   STREAMS_PROCESSING_SAVED_EVENT_TYPE,
   STREAMS_RETENTION_CHANGED_EVENT_TYPE,
@@ -56,6 +59,14 @@ export class StreamsTelemetryClient {
 
   public trackAttachmentClick(params: StreamsAttachmentClickEventProps) {
     this.analytics.reportEvent(STREAMS_ATTACHMENT_CLICK_EVENT_TYPE, params);
+  }
+
+  public trackAttachmentLinked(params: StreamsAttachmentLinkChangedProps) {
+    this.analytics.reportEvent(STREAMS_ATTACHMENT_LINKED_EVENT_TYPE, params);
+  }
+
+  public trackAttachmentUnlinked(params: StreamsAttachmentLinkChangedProps) {
+    this.analytics.reportEvent(STREAMS_ATTACHMENT_UNLINKED_EVENT_TYPE, params);
   }
 
   public startTrackingAIGrokSuggestionLatency(

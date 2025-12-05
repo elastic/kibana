@@ -6,21 +6,25 @@
  */
 
 import type { FeatureType } from '@kbn/streams-schema';
+import type { AttachmentType } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
 import type { EnrichmentDataSource } from '../../common/url_schema';
 
 type StreamType = 'wired' | 'classic' | 'unknown';
 
-interface StreamsAttachmentCountProps {
+type StreamsAttachmentCountProps = {
   name: string;
-  dashboards: number;
-  slos?: number;
-  rules?: number;
-}
+} & Record<AttachmentType, number>;
 
 interface StreamsAttachmentClickEventProps {
   name: string;
-  attachment_type: 'dashboard' | 'slo' | 'rule';
+  attachment_type: AttachmentType;
   attachment_id: string;
+}
+
+interface StreamsAttachmentLinkChangedProps {
+  stream_name: string;
+  attachment_count: number;
+  count_by_type: Record<AttachmentType, number>;
 }
 
 interface StreamsAIGrokSuggestionLatencyProps {
@@ -139,6 +143,7 @@ interface StreamsProcessingSimulationSamplesFetchLatencyProps {
 export {
   type StreamsAttachmentCountProps,
   type StreamsAttachmentClickEventProps,
+  type StreamsAttachmentLinkChangedProps,
   type StreamsAIGrokSuggestionLatencyProps,
   type StreamsAIGrokSuggestionAcceptedProps,
   type StreamsAIDissectSuggestionLatencyProps,

@@ -7,6 +7,7 @@
 
 import type { RootSchema, SchemaArray, SchemaObject } from '@elastic/ebt';
 import type { FeatureType } from '@kbn/streams-schema';
+import type { AttachmentType } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
 import type {
   StreamsAIGrokSuggestionAcceptedProps,
   StreamsAIGrokSuggestionLatencyProps,
@@ -14,6 +15,7 @@ import type {
   StreamsAIDissectSuggestionLatencyProps,
   StreamsAttachmentClickEventProps,
   StreamsAttachmentCountProps,
+  StreamsAttachmentLinkChangedProps,
   StreamsChildStreamCreatedProps,
   StreamsProcessingSavedProps,
   StreamsRetentionChangedProps,
@@ -35,24 +37,22 @@ const streamsAttachmentCountSchema: RootSchema<StreamsAttachmentCountProps> = {
       description: 'The name of the Stream',
     },
   },
-  dashboards: {
+  dashboard: {
     type: 'long',
     _meta: {
-      description: 'The duration of the endpoint in milliseconds',
+      description: 'The number of dashboard attachments linked to the stream',
     },
   },
-  slos: {
+  slo: {
     type: 'long',
     _meta: {
-      description: 'The duration of the endpoint in milliseconds',
-      optional: true,
+      description: 'The number of SLO attachments linked to the stream',
     },
   },
-  rules: {
+  rule: {
     type: 'long',
     _meta: {
-      description: 'The duration of the endpoint in milliseconds',
-      optional: true,
+      description: 'The number of rule attachments linked to the stream',
     },
   },
 };
@@ -76,6 +76,48 @@ const streamsAttachmentClickEventSchema: RootSchema<StreamsAttachmentClickEventP
       description: 'The id of the attachment',
     },
   },
+};
+
+const attachmentCountByTypeSchema: SchemaObject<Record<AttachmentType, number>> = {
+  _meta: {
+    description: 'The count of attachments grouped by type',
+  },
+  properties: {
+    dashboard: {
+      type: 'long',
+      _meta: {
+        description: 'The count of dashboard attachments',
+      },
+    },
+    slo: {
+      type: 'long',
+      _meta: {
+        description: 'The count of SLO attachments',
+      },
+    },
+    rule: {
+      type: 'long',
+      _meta: {
+        description: 'The count of rule attachments',
+      },
+    },
+  },
+};
+
+const streamsAttachmentLinkChangedSchema: RootSchema<StreamsAttachmentLinkChangedProps> = {
+  stream_name: {
+    type: 'keyword',
+    _meta: {
+      description: 'The name of the Stream',
+    },
+  },
+  attachment_count: {
+    type: 'long',
+    _meta: {
+      description: 'The number of attachments linked or unlinked',
+    },
+  },
+  count_by_type: attachmentCountByTypeSchema,
 };
 
 const matchRate: SchemaArray<number, number> = {
@@ -521,6 +563,7 @@ const streamsProcessingSimulationSamplesFetchLatencySchema: RootSchema<StreamsPr
 export {
   streamsAttachmentCountSchema,
   streamsAttachmentClickEventSchema,
+  streamsAttachmentLinkChangedSchema,
   streamsAIGrokSuggestionLatencySchema,
   streamsAIGrokSuggestionAcceptedSchema,
   streamsAIDissectSuggestionLatencySchema,
