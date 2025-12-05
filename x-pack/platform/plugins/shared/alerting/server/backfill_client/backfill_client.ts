@@ -131,16 +131,18 @@ export class BackfillClient {
   }) {
     if (adHocRuns.length === 0) return;
 
+    const canUpdateGaps =
+      shouldUpdateGaps && actionsClient && internalSavedObjectsRepository && eventLogClient;
+
     // Prepare backfill metadata for gap updates before deleting SOs
-    const backfillsForGapUpdate =
-      shouldUpdateGaps && actionsClient && internalSavedObjectsRepository && eventLogClient
-        ? adHocRuns.map((so) =>
-            transformAdHocRunToBackfillResult({
-              adHocRunSO: so,
-              isSystemAction: (id: string) => actionsClient.isSystemAction(id),
-            })
-          )
-        : [];
+    const backfillsForGapUpdate = canUpdateGaps
+      ? adHocRuns.map((so) =>
+          transformAdHocRunToBackfillResult({
+            adHocRunSO: so,
+            isSystemAction: (id: string) => actionsClient.isSystemAction(id),
+          })
+        )
+      : [];
 
     const deleteResult = await unsecuredSavedObjectsClient.bulkDelete(
       adHocRuns.map((adHocRun) => ({
@@ -160,35 +162,31 @@ export class BackfillClient {
       );
     }
 
-    if (
-      shouldUpdateGaps &&
-      backfillsForGapUpdate.length > 0 &&
-      internalSavedObjectsRepository &&
-      eventLogClient
-    ) {
-      for (const backfill of backfillsForGapUpdate) {
-        if ('rule' in backfill) {
-          try {
-            await updateGaps({
-              ruleId: backfill.rule.id,
-              start: new Date(backfill.start),
-              end: backfill.end ? new Date(backfill.end) : new Date(),
-              backfillSchedule: backfill.schedule,
-              savedObjectsRepository: internalSavedObjectsRepository,
-              logger: this.logger,
-              eventLogClient,
-              eventLogger,
-              shouldRefetchAllBackfills: true,
-              backfillClient: this,
-              actionsClient: actionsClient!,
-            });
-          } catch (e) {
-            this.logger.warn(
-              `Error updating gaps after deleting backfill ${backfill.id ?? 'unknown'}: ${
-                (e as Error).message
-              }`
-            );
-          }
+    if (canUpdateGaps) {
+      for (const backfill of backfillsForGapUpdate ?? []) {
+        if (!('rule' in backfill)) {
+          continue;
+        }
+        try {
+          await updateGaps({
+            ruleId: backfill.rule.id,
+            start: new Date(backfill.start),
+            end: backfill.end ? new Date(backfill.end) : new Date(),
+            backfillSchedule: backfill.schedule,
+            savedObjectsRepository: internalSavedObjectsRepository,
+            logger: this.logger,
+            eventLogClient,
+            eventLogger,
+            shouldRefetchAllBackfills: true,
+            backfillClient: this,
+            actionsClient: actionsClient!,
+          });
+        } catch (e) {
+          this.logger.warn(
+            `Error updating gaps after deleting backfill ${backfill.id ?? 'unknown'}: ${
+              (e as Error).message
+            }`
+          );
         }
       }
     }
@@ -507,11 +505,6 @@ export class BackfillClient {
     ruleIds,
     namespace,
     unsecuredSavedObjectsClient,
-    shouldUpdateGaps,
-    internalSavedObjectsRepository,
-    eventLogClient,
-    eventLogger,
-    actionsClient,
   }: DeleteBackfillForRulesOpts) {
     try {
       // query for all ad hoc runs that reference this ruleId
@@ -530,11 +523,6 @@ export class BackfillClient {
       await this.deleteAdHocRunsAndTasks({
         unsecuredSavedObjectsClient,
         adHocRuns,
-        shouldUpdateGaps,
-        internalSavedObjectsRepository,
-        eventLogClient,
-        eventLogger,
-        actionsClient,
       });
     } catch (error) {
       this.logger.warn(
