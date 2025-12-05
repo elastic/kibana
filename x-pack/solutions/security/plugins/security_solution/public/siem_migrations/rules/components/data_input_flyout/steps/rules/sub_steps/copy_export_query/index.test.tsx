@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react';
 import { useCopyExportQueryStep } from '.';
 import type { CopyExportQueryStepProps } from '.';
 import { TestProviders } from '../../../../../../../../common/mock';
-import { MigrationSource } from '../../../../../../../common/types';
+import { MigrationSource } from '../../../../../../types';
 
 const renderCopyExportQueryStep = (props: CopyExportQueryStepProps) => {
   const { result } = renderHook(() => useCopyExportQueryStep(props), {
