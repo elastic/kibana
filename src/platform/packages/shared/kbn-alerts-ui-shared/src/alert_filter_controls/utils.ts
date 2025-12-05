@@ -22,14 +22,15 @@ export const getFilterItemObjListFromControlState = (controlState: ControlGroupR
   return panels.map((panel) => {
     const { fieldName, selectedOptions, title, existsSelected, exclude, displaySettings } =
       panel as OptionsListDSLControlState;
-
     return {
       fieldName: fieldName as string,
       selectedOptions: selectedOptions ?? [],
       title,
       existsSelected: existsSelected ?? false,
       exclude: exclude ?? false,
-      hideActionBar: displaySettings?.hideActionBar ?? false,
+      displaySettings: {
+        hideActionBar: displaySettings?.hideActionBar ?? false,
+      },
     };
   });
 };

@@ -491,14 +491,20 @@ export const DEFAULT_DETECTION_PAGE_FILTERS: FilterControlConfig[] = [
     title: 'Status',
     fieldName: 'kibana.alert.workflow_status',
     selectedOptions: ['open'],
-    hideActionBar: true,
+    displaySettings: {
+      hideActionBar: true,
+      hideExists: true,
+    },
     persist: true,
   },
   {
     title: 'Severity',
     fieldName: 'kibana.alert.severity',
     selectedOptions: [],
-    hideActionBar: true,
+    displaySettings: {
+      hideActionBar: true,
+      hideExists: true,
+    },
   },
   {
     title: 'User',
