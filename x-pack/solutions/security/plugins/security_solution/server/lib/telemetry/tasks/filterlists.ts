@@ -13,7 +13,7 @@ import type { ITaskMetricsService } from '../task_metrics.types';
 import type { TaskExecutionPeriod } from '../task';
 import { artifactService } from '../artifact';
 import { filterList } from '../filterlists';
-import { newTelemetryLogger } from '../helpers';
+import { newTelemetryLogger, withErrorMessage } from '../helpers';
 
 export function createTelemetryFilterListArtifactTaskConfig() {
   const taskName = 'Security Solution Telemetry Filter List Artifact Task';
@@ -55,7 +55,7 @@ export function createTelemetryFilterListArtifactTaskConfig() {
         await taskMetricsService.end(trace);
         return 0;
       } catch (error) {
-        log.warn('Failed to set telemetry filterlist artifact', { error });
+        log.warn('Failed to set telemetry filterlist artifact', withErrorMessage(error));
         filterList.resetAllToDefault();
         await taskMetricsService.end(trace, error);
         return 0;
