@@ -22,9 +22,9 @@ import {
   type CallToolResponse,
   type ClientDetails,
   type ListToolsResponse,
+  StreamableHTTPError,
+  UnauthorizedError,
 } from '@kbn/mcp-client';
-import { StreamableHTTPError } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
-import { UnauthorizedError } from '@modelcontextprotocol/sdk/client/auth.js';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
 import {
   MCP_CLIENT_VERSION,
@@ -239,7 +239,6 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
         `Saved ${toolsResult.tools.length} tools for MCP connector ${this.connector.id}`
       );
     } catch (error) {
-      // Log the error but don't throw - saving tools is not critical for operation
       this.logger.warn(
         `Failed to save tools for connector ${this.connector.id}: ${
           error instanceof Error ? error.message : String(error)
