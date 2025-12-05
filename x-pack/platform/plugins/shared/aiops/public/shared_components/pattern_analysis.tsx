@@ -15,17 +15,14 @@ import React, { useEffect, useMemo, useState, type FC } from 'react';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest, distinctUntilChanged, map } from 'rxjs';
 import type { PublishesFilters } from '@kbn/presentation-publishing';
-import type { MinimumTimeRangeOption } from '../components/log_categorization/log_categorization_for_embeddable/minimum_time_range';
-import type {
-  RandomSamplerOption,
-  RandomSamplerProbability,
-} from '../components/log_categorization/sampling_menu/random_sampler';
+import type { RandomSamplerOption, RandomSamplerProbability } from '@kbn/ml-random-sampler-utils';
 import { PatternAnalysisEmbeddableWrapper } from '../embeddables/pattern_analysis/pattern_analysis_component_wrapper';
 import { AiopsAppContext, type AiopsAppContextValue } from '../hooks/use_aiops_app_context';
 import { DataSourceContextProvider } from '../hooks/use_data_source';
 import { FilterQueryContextProvider } from '../hooks/use_filters_query';
 import { ReloadContextProvider } from '../hooks/use_reload';
 import type { AiopsPluginStartDeps } from '../types';
+import type { MinimumTimeRangeOption } from '../../common/embeddables/pattern_analysis/types';
 
 /**
  * Only used to initialize internally

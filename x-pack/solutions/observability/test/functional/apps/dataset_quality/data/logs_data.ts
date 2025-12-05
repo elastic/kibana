@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { generateLongId, generateShortId, log, timerange } from '@kbn/apm-synthtrace-client';
+import { generateLongId, generateShortId, log, timerange } from '@kbn/synthtrace-client';
 import moment from 'moment';
 
 enum LogLevel {

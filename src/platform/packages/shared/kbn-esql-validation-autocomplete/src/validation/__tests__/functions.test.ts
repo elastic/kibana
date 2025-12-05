@@ -140,7 +140,7 @@ describe('function validation', () => {
 
         it('accepts nulls by default', async () => {
           const { expectErrors } = await setup();
-          expectErrors('FROM a_index | EVAL TEST(NULL)', []);
+          await expectErrors('FROM a_index | EVAL TEST(NULL)', []);
         });
       });
 
@@ -295,11 +295,13 @@ describe('function validation', () => {
 
           const { expectErrors } = await setup();
 
-          expectErrors('FROM a_index | EVAL TEST(missingColumn)', [
+          await expectErrors('FROM a_index | EVAL TEST(missingColumn)', [
             'Unknown column "missingColumn"',
           ]);
 
-          expectErrors('FROM a_index | EVAL foo=missingColumn', ['Unknown column "missingColumn"']);
+          await expectErrors('FROM a_index | EVAL foo=missingColumn', [
+            'Unknown column "missingColumn"',
+          ]);
         });
 
         describe('inline casts', () => {

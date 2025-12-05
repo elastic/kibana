@@ -23,20 +23,6 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           data: {
             title: 'Refresh Requests (Updated)',
-            options: { useMargins: false },
-            panels: [
-              {
-                config: {},
-                type: 'visualization',
-                grid: { x: 0, y: 0, w: 48, h: 60 },
-                uid: '1',
-                version: '7.3.0',
-              },
-            ],
-            timeRange: {
-              from: 'Wed Sep 16 2015 22:52:17 GMT-0700',
-              to: 'Fri Sep 18 2015 12:24:38 GMT-0700',
-            },
           },
         });
 

@@ -17,6 +17,8 @@ import {
 } from '../../common/constants';
 import { ALERT_SUMMARY, ALERTS, ATTACKS } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
+import { IconAlerts } from '../common/icons/alerts';
+import { IconAttacks } from '../common/icons/attacks';
 
 export const alertsLink: LinkItem = {
   capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SECURITY_FEATURE_ID}.detections`]],
@@ -38,6 +40,7 @@ const alertsSubLink: LinkItem = {
     defaultMessage:
       'Review individual detections triggered by security rules and take immediate action.',
   }),
+  landingIcon: IconAlerts,
 };
 
 const attacksSubLink: LinkItem = {
@@ -56,6 +59,7 @@ const attacksSubLink: LinkItem = {
     defaultMessage:
       'View correlated alerts grouped into attack chains to understand scope, impact, and progression.',
   }),
+  landingIcon: IconAttacks,
 };
 
 export const alertDetectionsLinks: LinkItem = {

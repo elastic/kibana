@@ -6,8 +6,8 @@
  */
 
 import moment from 'moment';
-import { apm, timerange, log } from '@kbn/apm-synthtrace-client';
-import type { ApmSynthtraceEsClient, LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { apm, timerange, log } from '@kbn/synthtrace-client';
+import type { ApmSynthtraceEsClient, LogsSynthtraceEsClient } from '@kbn/synthtrace';
 import { faker } from '@faker-js/faker';
 
 const APM_SERVICE_NAME = 'my-apm-service';

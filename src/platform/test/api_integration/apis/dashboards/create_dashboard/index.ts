@@ -32,5 +32,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
     loadTestFile(require.resolve('./main'));
     loadTestFile(require.resolve('./validation'));
+    loadTestFile(require.resolve('./schema'));
   });
 }

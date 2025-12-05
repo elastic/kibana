@@ -82,6 +82,8 @@ export interface ESQLEditorProps {
   hideTimeFilterInfo?: boolean;
   /** hide query history **/
   hideQueryHistory?: boolean;
+  /** hide quick search **/
+  hideQuickSearch?: boolean;
   /** adds border in the editor **/
   hasOutline?: boolean;
   /** adds a documentation icon in the footer which opens the inline docs as a flyout **/
@@ -105,10 +107,10 @@ export interface ESQLEditorProps {
 }
 
 interface ESQLVariableService {
-  areSuggestionsEnabled: boolean;
+  isCreateControlSuggestionEnabled: boolean;
   esqlVariables: ESQLControlVariable[];
-  enableSuggestions: () => void;
-  disableSuggestions: () => void;
+  enableCreateControlSuggestion: () => void;
+  disableCreateControlSuggestion: () => void;
   clearVariables: () => void;
   addVariable: (variable: ESQLControlVariable) => void;
 }

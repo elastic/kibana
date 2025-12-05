@@ -541,7 +541,7 @@
           "UiSettingsType",
           " | undefined; options?: string[] | number[] | undefined; scope?: ",
           "UiSettingsScope",
-          " | undefined; order?: number | undefined; name?: string | undefined; description?: string | undefined; getValue?: ((context?: ",
+          " | undefined; name?: string | undefined; order?: number | undefined; description?: string | undefined; getValue?: ((context?: ",
           "GetUiSettingsContext",
           " | undefined) => Promise<unknown>) | undefined; category?: string[] | undefined; metric?: { type: string; name: string; } | undefined; readonly?: boolean | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonlyMode?: ",
           "ReadonlyModeType",

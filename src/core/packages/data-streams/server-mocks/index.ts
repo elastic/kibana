@@ -18,6 +18,6 @@ export const dataStreamServiceMock = {
 
   createStartContract: (): jest.Mocked<DataStreamsStart> =>
     lazyObject({
-      getClient: jest.fn(), // TODO improve this
+      initializeClient: jest.fn(),
     }),
 };

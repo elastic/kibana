@@ -5,89 +5,132 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import { screen, waitFor, fireEvent } from '@testing-library/react';
 import { i18nTexts } from '../../../public/application/sections/edit_policy/i18n_texts';
-import { setupEnvironment } from '../../helpers';
-import { getGeneratedPolicies } from '../constants';
-import type { ValidationTestBed } from './validation.helpers';
-import { setupValidationTestBed } from './validation.helpers';
+import { setupEnvironment } from '../../helpers/setup_environment';
+import { renderEditPolicy } from '../../helpers/render_edit_policy';
+import { getGeneratedPolicies, getDefaultHotPhasePolicy, POLICY_NAME } from '../constants';
+
+const setPolicyName = (name: string) => {
+  const field = screen.getByTestId<HTMLInputElement>('policyNameField');
+  fireEvent.change(field, { target: { value: name } });
+  fireEvent.blur(field);
+};
+
+const expectErrorMessages = (expectedMessages: string[]) => {
+  const errorTexts: string[] = [];
+  const alertElements = screen.queryAllByRole('alert');
+
+  alertElements.forEach((el) => {
+    const texts = el.querySelectorAll('.euiFormErrorText');
+    texts.forEach((text) => {
+      const content = text.textContent?.trim();
+      if (content) errorTexts.push(content);
+    });
+  });
+
+  if (errorTexts.length === 0) {
+    const errorElements = document.body.querySelectorAll('.euiFormErrorText');
+    errorElements.forEach((el) => {
+      const content = el.textContent?.trim();
+      if (content) errorTexts.push(content);
+    });
+  }
+
+  expect(errorTexts).toEqual(expectedMessages);
+};
 
 describe('<EditPolicy /> policy name validation', () => {
-  let testBed: ValidationTestBed;
-  let actions: ValidationTestBed['actions'];
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    jest.useFakeTimers();
   });
 
   afterAll(() => {
     jest.useRealTimers();
   });
 
-  beforeEach(async () => {
-    httpRequestsMockHelpers.setLoadPolicies(getGeneratedPolicies());
+  afterEach(() => {
+    jest.clearAllTimers();
+  });
 
-    await act(async () => {
-      testBed = await setupValidationTestBed(httpSetup);
+  describe('new policy', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setDefaultResponses();
+      httpRequestsMockHelpers.setLoadPolicies([
+        getDefaultHotPhasePolicy(),
+        ...getGeneratedPolicies(),
+      ]);
+
+      renderEditPolicy(httpSetup, { isNewPolicy: true });
+      await screen.findByTestId('savePolicyButton');
     });
 
-    const { component } = testBed;
-    component.update();
-    ({ actions } = testBed);
-  });
-
-  test(`doesn't allow empty policy name`, async () => {
-    await actions.savePolicy();
-    actions.errors.expectMessages([i18nTexts.editPolicy.errors.policyNameRequiredMessage]);
-  });
-
-  test(`doesn't allow policy name with space`, async () => {
-    await actions.setPolicyName('my policy');
-    actions.errors.waitForValidation();
-    actions.errors.expectMessages([i18nTexts.editPolicy.errors.policyNameContainsInvalidChars]);
-  });
-
-  test(`doesn't allow policy name that is already used`, async () => {
-    await actions.setPolicyName('testy0');
-    actions.errors.waitForValidation();
-    actions.errors.expectMessages([i18nTexts.editPolicy.errors.policyNameAlreadyUsedErrorMessage]);
-  });
-
-  test(`doesn't allow to save as new policy but using the same name`, async () => {
-    await act(async () => {
-      testBed = await setupValidationTestBed(httpSetup, {
-        testBedConfig: {
-          memoryRouter: {
-            initialEntries: [`/policies/edit/testy0`],
-            componentRoutePath: `/policies/edit/:policyName`,
-          },
-        },
-      });
+    test(`doesn't allow empty policy name`, async () => {
+      fireEvent.click(screen.getByTestId('savePolicyButton'));
+      await waitFor(() =>
+        expectErrorMessages([i18nTexts.editPolicy.errors.policyNameRequiredMessage])
+      );
     });
-    const { component } = testBed;
-    component.update();
-    ({ actions } = testBed);
 
-    await actions.toggleSaveAsNewPolicy();
-    actions.errors.waitForValidation();
-    await actions.savePolicy();
-    actions.errors.expectMessages([
-      i18nTexts.editPolicy.errors.policyNameMustBeDifferentErrorMessage,
-    ]);
+    test(`doesn't allow policy name with space`, async () => {
+      setPolicyName('my policy');
+      await waitFor(() =>
+        expectErrorMessages([i18nTexts.editPolicy.errors.policyNameContainsInvalidChars])
+      );
+    });
+
+    test(`doesn't allow policy name that is already used`, async () => {
+      setPolicyName('testy0');
+      await waitFor(() =>
+        expectErrorMessages([i18nTexts.editPolicy.errors.policyNameAlreadyUsedErrorMessage])
+      );
+    });
+
+    test(`doesn't allow policy name with comma`, async () => {
+      setPolicyName('my,policy');
+      await waitFor(() =>
+        expectErrorMessages([i18nTexts.editPolicy.errors.policyNameContainsInvalidChars])
+      );
+    });
+
+    test(`doesn't allow policy name starting with underscore`, async () => {
+      setPolicyName('_mypolicy');
+      await waitFor(() =>
+        expectErrorMessages([
+          i18nTexts.editPolicy.errors.policyNameStartsWithUnderscoreErrorMessage,
+        ])
+      );
+    });
   });
 
-  test(`doesn't allow policy name with comma`, async () => {
-    await actions.setPolicyName('my,policy');
-    actions.errors.waitForValidation();
-    actions.errors.expectMessages([i18nTexts.editPolicy.errors.policyNameContainsInvalidChars]);
-  });
+  describe('existing policy', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setDefaultResponses();
+      httpRequestsMockHelpers.setLoadPolicies([
+        getDefaultHotPhasePolicy(),
+        ...getGeneratedPolicies(),
+      ]);
 
-  test(`doesn't allow policy name starting with underscore`, async () => {
-    await actions.setPolicyName('_mypolicy');
-    actions.errors.waitForValidation();
-    actions.errors.expectMessages([
-      i18nTexts.editPolicy.errors.policyNameStartsWithUnderscoreErrorMessage,
-    ]);
+      renderEditPolicy(httpSetup);
+      await screen.findByTestId('savePolicyButton');
+    });
+
+    test(`doesn't allow to save as new policy but using the same name`, async () => {
+      // Toggle "save as new" to show the policy name field
+      // The field will be pre-populated with the existing policy name (my_policy)
+      fireEvent.click(screen.getByTestId('saveAsNewSwitch'));
+
+      // Trigger validation by changing the value and changing it back
+      // This ensures validation runs on the pre-populated value
+      setPolicyName('temp');
+      setPolicyName(POLICY_NAME);
+
+      // When saving as new, the policy name must be different from the original
+      await waitFor(() =>
+        expectErrorMessages([i18nTexts.editPolicy.errors.policyNameMustBeDifferentErrorMessage])
+      );
+    });
   });
 });

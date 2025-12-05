@@ -79,7 +79,7 @@ export const WorkflowVisualEditorStateful = () => {
 
   return (
     <WorkflowVisualEditor
-      workflow={workflowYamlObject as WorkflowYaml}
+      workflow={workflowYamlObject as unknown as WorkflowYaml}
       stepExecutions={stepExecutions}
     />
   );

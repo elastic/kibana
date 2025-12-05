@@ -66,6 +66,9 @@ const ROUTE_AUTHZ_REQUIREMENTS = deepFreeze<Record<string, FleetRouteRequiredAut
             readTrustedDevices: {
               executePackageAction: true,
             },
+            showEndpointExceptions: {
+              executePackageAction: true,
+            },
           },
         },
       },
@@ -99,6 +102,9 @@ const ROUTE_AUTHZ_REQUIREMENTS = deepFreeze<Record<string, FleetRouteRequiredAut
             readTrustedDevices: {
               executePackageAction: true,
             },
+            showEndpointExceptions: {
+              executePackageAction: true,
+            },
           },
         },
       },
@@ -130,6 +136,9 @@ const ROUTE_AUTHZ_REQUIREMENTS = deepFreeze<Record<string, FleetRouteRequiredAut
               executePackageAction: true,
             },
             readTrustedDevices: {
+              executePackageAction: true,
+            },
+            showEndpointExceptions: {
               executePackageAction: true,
             },
           },
