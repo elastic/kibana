@@ -16,7 +16,6 @@ const attachmentTypeSchema = z.enum(ATTACHMENT_TYPES);
 
 export interface SuggestAttachmentsResponse {
   suggestions: Attachment[];
-  hasMore: boolean;
 }
 
 const suggestAttachmentsRoute = createServerRoute({
@@ -60,7 +59,7 @@ const suggestAttachmentsRoute = createServerRoute({
 
     const tags = query?.tags ? (Array.isArray(query.tags) ? query.tags : [query.tags]) : undefined;
 
-    const { suggestions, hasMore } = await attachmentClient.getSuggestions({
+    const { suggestions } = await attachmentClient.getSuggestions({
       streamName: params.path.streamName,
       attachmentTypes,
       query: query?.query || '',
@@ -70,7 +69,6 @@ const suggestAttachmentsRoute = createServerRoute({
 
     return {
       suggestions,
-      hasMore,
     };
   },
 });

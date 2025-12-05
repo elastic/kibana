@@ -548,21 +548,20 @@ export class AttachmentClient {
 
     const attachments = await this.fetchAttachments(attachmentLinks);
 
-    // Apply client-side filtering for query and tags
+    // Apply post-filtering for query and tags.
+    // This is necessary because tags and title are not stored in the attachment document,
+    // they are fetched from the actual saved objects.
     let filteredAttachments = attachments;
 
-    if (options?.query) {
-      const queryLower = options.query.toLowerCase();
-      filteredAttachments = filteredAttachments.filter((attachment) =>
-        attachment.title.toLowerCase().includes(queryLower)
-      );
-    }
+    const queryLower = options?.query?.toLowerCase();
+    const tagsToMatch = options?.tags;
 
-    if (options?.tags && options.tags.length > 0) {
-      filteredAttachments = filteredAttachments.filter((attachment) =>
-        options.tags!.some((tag) => attachment.tags?.includes(tag))
-      );
-    }
+    filteredAttachments = filteredAttachments.filter((attachment) => {
+      const matchesQuery = !queryLower || attachment.title.toLowerCase().includes(queryLower);
+      const matchesTags =
+        !tagsToMatch?.length || tagsToMatch.some((tag) => attachment.tags?.includes(tag));
+      return matchesQuery && matchesTags;
+    });
 
     // Enrich attachments with stream names
     return filteredAttachments.map((attachment) => ({
@@ -609,7 +608,7 @@ export class AttachmentClient {
     attachmentTypes?: AttachmentType[];
     tags?: string[];
     limit: number;
-  }): Promise<{ suggestions: Attachment[]; hasMore: boolean }> {
+  }): Promise<{ suggestions: Attachment[] }> {
     // Search all types if none specified, otherwise only search the requested types
     const typesToSearch = attachmentTypes || ATTACHMENT_TYPES;
 
@@ -651,12 +650,8 @@ export class AttachmentClient {
       streamNames: streamNamesById.get(attachment.id) ?? [],
     }));
 
-    // Check if there are more results than the limit
-    const hasMore = enrichedAttachments.length > limit;
-
     return {
       suggestions: enrichedAttachments.slice(0, limit),
-      hasMore,
     };
   }
 

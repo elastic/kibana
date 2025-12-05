@@ -82,10 +82,9 @@ export function AddAttachmentFlyout({
             query: queryParams,
           },
         })
-        .then(({ suggestions, hasMore }) => {
+        .then(({ suggestions }) => {
           return {
             attachments: suggestions,
-            hasMore,
           };
         });
     },
@@ -123,7 +122,8 @@ export function AddAttachmentFlyout({
               }
             )}
           />
-          {attachmentSuggestionsFetch.value?.hasMore && (
+          {attachmentSuggestionsFetch.value?.attachments.length ===
+            ATTACHMENT_SUGGESTIONS_LIMIT && (
             <EuiCallOut
               announceOnMount
               size="s"

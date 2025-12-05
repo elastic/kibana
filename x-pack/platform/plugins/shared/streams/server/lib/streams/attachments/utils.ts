@@ -143,30 +143,37 @@ const searchFieldsByType: Record<Extract<AttachmentType, 'dashboard' | 'slo'>, s
   slo: ['name'],
 };
 
-const MAX_PAGES = 10;
-const PAGE_SIZE = 100;
-
 /**
  * Paginates through results, filtering out excluded IDs, until we have enough items.
  * This is needed because neither the saved objects client nor the rules client
  * support filtering by ID in the query.
  */
-async function paginateWithExclusion<T extends SavedObject<unknown> | SanitizedRule>({
+async function paginateWithExclusion<
+  T extends SavedObject<DashboardSOAttributes | SloSOAttributes> | SanitizedRule
+>({
   limit,
   excludeIds,
   fetchPage,
 }: {
   limit: number;
   excludeIds?: string[];
-  fetchPage: (page: number) => Promise<{ items: T[]; total: number }>;
+  fetchPage: ({
+    page,
+    perPage,
+  }: {
+    page: number;
+    perPage: number;
+  }) => Promise<{ items: T[]; total: number }>;
 }): Promise<T[]> {
+  const MAX_PAGES = 10;
+  const PAGE_SIZE = 100;
   const excludeIdsSet = new Set(excludeIds ?? []);
   const results: T[] = [];
   let page = 1;
   let hasMore = true;
 
   while (results.length < limit && hasMore && page <= MAX_PAGES) {
-    const { items, total } = await fetchPage(page);
+    const { items, total } = await fetchPage({ page, perPage: PAGE_SIZE });
 
     const filteredItems = items.filter((item) => !excludeIdsSet.has(item.id));
     results.push(...filteredItems);
@@ -202,7 +209,6 @@ export const getSuggestedSo = async ({
     type: attachmentType,
     search: query ? `${query}*` : undefined,
     searchFields: searchFieldsByType[attachmentType],
-    perPage: PAGE_SIZE,
     ...(tags
       ? {
           hasReferenceOperator: 'OR',
@@ -215,8 +221,12 @@ export const getSuggestedSo = async ({
     const dashboardResults = await paginateWithExclusion({
       limit,
       excludeIds,
-      fetchPage: async (page) => {
-        const result = await soClient.find<DashboardSOAttributes>({ ...searchOptions, page });
+      fetchPage: async ({ page, perPage }) => {
+        const result = await soClient.find<DashboardSOAttributes>({
+          ...searchOptions,
+          page,
+          perPage,
+        });
         return { items: result.saved_objects, total: result.total };
       },
     });
@@ -225,8 +235,8 @@ export const getSuggestedSo = async ({
     const sloResults = await paginateWithExclusion({
       limit,
       excludeIds,
-      fetchPage: async (page) => {
-        const result = await soClient.find<SloSOAttributes>({ ...searchOptions, page });
+      fetchPage: async ({ page, perPage }) => {
+        const result = await soClient.find<SloSOAttributes>({ ...searchOptions, page, perPage });
         return { items: result.saved_objects, total: result.total };
       },
     });
@@ -258,12 +268,12 @@ export const getSuggestedRules = async ({
   const results = await paginateWithExclusion({
     limit,
     excludeIds,
-    fetchPage: async (page) => {
+    fetchPage: async ({ page, perPage }) => {
       const { data, total } = await rulesClient.find({
         options: {
           search: query ? `${query}*` : undefined,
           page,
-          perPage: PAGE_SIZE,
+          perPage,
           ...(tagsFilter ? { filter: tagsFilter } : {}),
         },
       });

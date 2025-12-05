@@ -60,11 +60,18 @@ export function StreamDetailAttachments({
     notifications,
   } = core;
 
+  const attachmentFilters = useMemo(
+    () => ({
+      ...(filters.debouncedQuery && { query: filters.debouncedQuery }),
+      ...(filters.types.length > 0 && { attachmentTypes: filters.types }),
+      ...(filters.tags.length > 0 && { tags: filters.tags }),
+    }),
+    [filters.debouncedQuery, filters.types, filters.tags]
+  );
+
   const attachmentsFetch = useAttachmentsFetch({
-    name: definition.stream.name,
-    ...(filters.debouncedQuery && { query: filters.debouncedQuery }),
-    ...(filters.types.length > 0 && { attachmentTypes: filters.types }),
-    ...(filters.tags.length > 0 && { tags: filters.tags }),
+    streamName: definition.stream.name,
+    filters: attachmentFilters,
   });
   const { addAttachments, removeAttachments } = useAttachmentsApi({
     name: definition.stream.name,
