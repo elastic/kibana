@@ -572,6 +572,39 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.getCloudConnectorEditIconTestSubj",
+        "type": "Function",
+        "tags": [],
+        "label": "getCloudConnectorEditIconTestSubj",
+        "description": [],
+        "signature": [
+          "(connectorId: string) => string"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.getCloudConnectorEditIconTestSubj.$1",
+            "type": "string",
+            "tags": [],
+            "label": "connectorId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
         "id": "def-common.getFindingsDetectionRuleSearchTags",
         "type": "Function",
         "tags": [],
@@ -2178,6 +2211,21 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.CLOUD_CONNECTOR_EDIT_ICON_TEST_SUBJ",
+        "type": "string",
+        "tags": [],
+        "label": "CLOUD_CONNECTOR_EDIT_ICON_TEST_SUBJ",
+        "description": [],
+        "signature": [
+          "\"cloudConnectorEditIcon\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
         "id": "def-common.CLOUD_SECURITY_PLUGIN_VERSION",
         "type": "string",
         "tags": [],
@@ -2960,6 +3008,152 @@
             "type": "string",
             "tags": [],
             "label": "MANUAL",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS",
+        "type": "Object",
+        "tags": [],
+        "label": "CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS",
+        "description": [],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.FLYOUT",
+            "type": "string",
+            "tags": [],
+            "label": "FLYOUT",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.CLOSE_BUTTON",
+            "type": "string",
+            "tags": [],
+            "label": "CLOSE_BUTTON",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.TITLE",
+            "type": "string",
+            "tags": [],
+            "label": "TITLE",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IDENTIFIER_TEXT",
+            "type": "string",
+            "tags": [],
+            "label": "IDENTIFIER_TEXT",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.COPY_IDENTIFIER_BUTTON",
+            "type": "string",
+            "tags": [],
+            "label": "COPY_IDENTIFIER_BUTTON",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.NAME_INPUT",
+            "type": "string",
+            "tags": [],
+            "label": "NAME_INPUT",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.SAVE_NAME_BUTTON",
+            "type": "string",
+            "tags": [],
+            "label": "SAVE_NAME_BUTTON",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.USAGE_COUNT_TEXT",
+            "type": "string",
+            "tags": [],
+            "label": "USAGE_COUNT_TEXT",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.POLICIES_TABLE",
+            "type": "string",
+            "tags": [],
+            "label": "POLICIES_TABLE",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.POLICY_LINK",
+            "type": "string",
+            "tags": [],
+            "label": "POLICY_LINK",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.EMPTY_STATE",
+            "type": "string",
+            "tags": [],
+            "label": "EMPTY_STATE",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.ERROR_STATE",
+            "type": "string",
+            "tags": [],
+            "label": "ERROR_STATE",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
             "deprecated": false,
