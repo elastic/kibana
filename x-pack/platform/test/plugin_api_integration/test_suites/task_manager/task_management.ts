@@ -233,6 +233,46 @@ export default function ({ getService }: FtrProviderContext) {
         .then((response: { body: BulkUpdateTaskResult }) => response.body);
     }
 
+    function bulkUpdateSchedulesWithApiKey(
+      taskIds: string[],
+      schedule:
+        | { interval: string }
+        | {
+            rrule: {
+              freq: number;
+              interval: number;
+              tzid: string;
+            };
+          }
+    ) {
+      return supertest
+        .post('/api/sample_tasks/bulk_update_schedules_with_api_key')
+        .set('kbn-xsrf', 'xxx')
+        .send({ taskIds, schedule })
+        .expect(200)
+        .then((response: { body: BulkUpdateTaskResult }) => response.body);
+    }
+
+    function bulkUpdateSchedulesWithFakeRequest(
+      taskIds: string[],
+      schedule:
+        | { interval: string }
+        | {
+            rrule: {
+              freq: number;
+              interval: number;
+              tzid: string;
+            };
+          }
+    ) {
+      return supertest
+        .post('/api/sample_tasks/bulk_update_schedules_with_fake_request')
+        .set('kbn-xsrf', 'xxx')
+        .send({ taskIds, schedule })
+        .expect(200)
+        .then((response: { body: BulkUpdateTaskResult }) => response.body);
+    }
+
     function ensureTaskScheduled(task: Partial<ConcreteTaskInstance>) {
       return supertest
         .post('/api/sample_tasks/ensure_scheduled')
@@ -302,7 +342,13 @@ export default function ({ getService }: FtrProviderContext) {
         id: 'sample-recurring-task-id',
         taskType: 'sampleRecurringTask',
         schedule: {
-          rrule: { freq: Frequency.DAILY, tzid: 'UTC', interval: 1, byhour: [15], byminute: [27] },
+          rrule: {
+            freq: Frequency.DAILY,
+            tzid: 'UTC',
+            interval: 1,
+            byhour: [15],
+            byminute: [27],
+          },
         },
         params: {},
       });
@@ -1266,6 +1312,156 @@ export default function ({ getService }: FtrProviderContext) {
           );
         });
       });
+    });
+
+    it('should bulk update schedules tasks with API keys if request is provided', async () => {
+      const rruleScheduleExample = {
+        rrule: {
+          freq: 3, // Daily
+          interval: 1,
+          tzid: 'UTC',
+        },
+      };
+      let queryResult = await supertest
+        .post('/internal/security/api_key/_query')
+        .send({})
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      const apiKeysLength = queryResult.body.apiKeys.length;
+
+      const scheduledTask = await scheduleTaskWithApiKey({
+        id: 'test-task-for-sample-task-plugin-to-test-task-api-key',
+        taskType: 'sampleTask',
+        params: {},
+        schedule: { interval: '5m' },
+      });
+
+      await retry.try(async () => {
+        const updates = await bulkUpdateSchedulesWithApiKey(
+          [scheduledTask.id],
+          rruleScheduleExample
+        );
+        expect(updates.tasks.length).to.be(1);
+        expect(updates.errors.length).to.be(0);
+      });
+
+      queryResult = await supertest
+        .post('/internal/security/api_key/_query')
+        .send({})
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      await retry.try(async () => {
+        const result = await currentTask('test-task-for-sample-task-plugin-to-test-task-api-key');
+
+        expect(
+          queryResult.body.apiKeys.filter((apiKey: { id: string }) => {
+            return apiKey.id === result.userScope?.apiKeyId;
+          }).length
+        ).eql(1);
+
+        expect(queryResult.body.apiKeys.length).eql(apiKeysLength + 1);
+        await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
+
+        queryResult = await supertest
+          .post('/internal/security/api_key/_query')
+          .send({})
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+
+        expect(
+          queryResult.body.apiKeys.filter((apiKey: { id: string }) => {
+            return apiKey.id === result.userScope?.apiKeyId;
+          }).length
+        ).eql(0);
+
+        expect(queryResult.body.apiKeys.length).eql(apiKeysLength);
+      });
+    });
+
+    it('should bulk update schedules tasks with fake request if request is provided', async () => {
+      const rruleScheduleExample24h = {
+        rrule: {
+          freq: 3, // Daily
+          interval: 1,
+          tzid: 'UTC',
+        },
+      };
+      let queryResult = await supertest
+        .post('/internal/security/api_key/_query')
+        .send({})
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+      const initialTime = Date.now();
+
+      const tasks = await Promise.all([
+        scheduleTaskWithFakeRequest({
+          taskType: 'sampleTask',
+          schedule: { interval: '1h' },
+          params: {},
+        }),
+
+        scheduleTaskWithFakeRequest({
+          taskType: 'sampleTask',
+          schedule: { interval: '5m' },
+          params: {},
+        }),
+      ]);
+
+      const taskIds = tasks.map(({ id }) => id);
+
+      await retry.try(async () => {
+        // ensure each task has ran at least once and been rescheduled for future run
+        for (const task of tasks) {
+          const { state } = await currentTask<{ count: number }>(task.id);
+          expect(state.count).to.be(1);
+        }
+
+        // first task to be scheduled in 1h
+        expect(Date.parse((await currentTask(tasks[0].id)).runAt) - initialTime).to.be.greaterThan(
+          moment.duration(1, 'hour').asMilliseconds()
+        );
+
+        // second task to be scheduled in 5m
+        expect(Date.parse((await currentTask(tasks[1].id)).runAt) - initialTime).to.be.greaterThan(
+          moment.duration(5, 'minutes').asMilliseconds()
+        );
+      });
+
+      queryResult = await supertest
+        .post('/internal/security/api_key/_query')
+        .send({})
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      const apiKeysAfterSchedule = queryResult.body.apiKeys.length;
+      await retry.try(async () => {
+        const updates = await bulkUpdateSchedulesWithFakeRequest(taskIds, rruleScheduleExample24h);
+        expect(updates.tasks.length).to.be(2);
+        expect(updates.errors.length).to.be(0);
+      });
+
+      await retry.try(async () => {
+        const updatedTasks = (await currentTasks()).docs;
+        updatedTasks.forEach((task) => {
+          expect(task.schedule).to.eql(rruleScheduleExample24h);
+          // should be scheduled to run in 1 hour
+          expect(Date.parse(task.runAt) - initialTime).to.be.greaterThan(
+            moment.duration(1, 'hours').asMilliseconds()
+          );
+          expect(task.apiKey).not.empty();
+          expect(task.userScope?.apiKeyCreatedByUser).to.be(true);
+        });
+      });
+
+      queryResult = await supertest
+        .post('/internal/security/api_key/_query')
+        .send({})
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      expect(queryResult.body.apiKeys.length).eql(apiKeysAfterSchedule + 1);
     });
 
     it('should bulk update schedules for multiple tasks with interval, using rrule', async () => {

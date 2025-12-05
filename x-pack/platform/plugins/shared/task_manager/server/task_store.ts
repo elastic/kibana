@@ -51,7 +51,6 @@ import type {
   PartialConcreteTaskInstance,
   PartialSerializedConcreteTaskInstance,
   ApiKeyOptions,
-  TaskUserScope,
 } from './task';
 import { TaskStatus, TaskLifecycleResult } from './task';
 
@@ -217,20 +216,6 @@ export class TaskStore {
       });
     }
     return this.savedObjectsRepository;
-  }
-
-  private async getRawTasksWithoutEncryptedApiKeys(tasks: ConcreteTaskInstance[]) {
-    const existingTasksResponse =
-      await this.savedObjectsRepository.bulkGet<SerializedConcreteTaskInstance>(
-        tasks.map((task) => ({ type: 'task', id: task.id }))
-      );
-
-    return new Map<string, { apiKey?: string; userScope?: TaskUserScope }>(
-      existingTasksResponse.saved_objects.map((obj) => {
-        const { apiKey, userScope } = obj.attributes;
-        return [obj.id, { apiKey, userScope }];
-      })
-    );
   }
 
   private async getApiKeyFromRequest(taskInstances: TaskInstance[], request?: KibanaRequest) {
