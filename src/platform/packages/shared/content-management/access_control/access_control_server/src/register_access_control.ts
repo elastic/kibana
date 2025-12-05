@@ -174,10 +174,13 @@ export const registerAccessControl = async ({
         },
       },
     },
-    async (_ctx, _request, response) => {
+    async (_ctx, request, response) => {
+      const { security: securityStart } = await getStartServices();
+      const useRbacForRequest = securityStart?.authz.mode.useRbacForRequest(request);
+      const enabled = isAccessControlEnabled && useRbacForRequest;
       return response.ok({
         body: {
-          isAccessControlEnabled,
+          isAccessControlEnabled: enabled,
         },
       });
     }
