@@ -23,6 +23,10 @@ export {
 export { isRootStreamDefinition } from './src/helpers/is_root';
 export { isOtelStream } from './src/helpers/is_otel_stream';
 export { getIndexPatternsForStream } from './src/helpers/hierarchy_helpers';
+export {
+  convertUpsertRequestIntoDefinition,
+  convertGetResponseIntoUpsertRequest,
+} from './src/helpers/converters';
 
 export {
   keepFields,
@@ -154,3 +158,5 @@ export {
   type DocumentsMetrics,
   type ProcessingSimulationResponse,
 } from './src/models/processing_simulation';
+
+export { type IngestStreamProcessing } from './src/models/ingest/processing';
