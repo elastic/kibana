@@ -61,7 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should filter dimension values with search parameter', async () => {
-      const searchTerm = 'station';
+      const searchTerm = 'field';
       const { body, status } = await sendRequest({
         indices: JSON.stringify(['fieldsense-station-metrics']),
         dimensions: JSON.stringify(['station.name']),
