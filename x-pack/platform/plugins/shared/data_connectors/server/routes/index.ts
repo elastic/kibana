@@ -11,6 +11,7 @@ import type { DataConnectorsServerStartDependencies } from '../types';
 
 const createDataConnectorRequestSchema = schema.object({
   type: schema.string({ minLength: 1 }),
+  name: schema.string({ minLength: 1 }),
   token: schema.string({ minLength: 1 }),
 });
 
@@ -35,14 +36,25 @@ export function registerRoutes(
     },
     async (context, request, response) => {
       try {
-        const [, { actions }] = await getStartServices();
+        const [, { actions, dataSourcesRegistry }] = await getStartServices();
+        const { name, type, token } = request.body;
+
+        const dataCatalog = dataSourcesRegistry.getCatalog();
+        const dataConnectorTypeDef = dataCatalog.get(type);
+        if (!dataConnectorTypeDef) {
+          return response.customError({
+            statusCode: 400,
+            body: {
+              message: `Data connector type "${request.body.type}" not found`,
+            },
+          });
+        }
+
         const actionsClient = await actions.getActionsClientWithRequest(request);
-        const { token } = request.body;
-        // TODO: extract these from data source registry
         const connector = await actionsClient.create({
           action: {
-            name: 'My Notion connector',
-            actionTypeId: '.notion',
+            name: `${type} stack connector for data connector '${name}'`,
+            actionTypeId: dataConnectorTypeDef.stackConnector.type,
             config: {},
             secrets: {
               authType: 'bearer',
@@ -51,7 +63,10 @@ export function registerRoutes(
           },
         });
         return response.ok({
-          body: `Data connector created successfully: ${connector.id}`,
+          body: {
+            message: `Data connector created successfully: ${connector.id}`,
+            connectorId: connector.id,
+          },
         });
       } catch (error) {
         logger.error(`Error creating data connector: ${(error as Error).message}`);

@@ -8,7 +8,10 @@ import type {
   PluginSetupContract as ActionsPluginSetup,
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
-import type { DataSourcesRegistryPluginSetup } from '@kbn/data-sources-registry-plugin/server';
+import type {
+  DataSourcesRegistryPluginSetup,
+  DataSourcesRegistryPluginStart,
+} from '@kbn/data-sources-registry-plugin/server';
 
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
@@ -23,4 +26,5 @@ export interface DataConnectorsServerSetupDependencies {
 
 export interface DataConnectorsServerStartDependencies {
   actions: ActionsPluginStart;
+  dataSourcesRegistry: DataSourcesRegistryPluginStart;
 }
