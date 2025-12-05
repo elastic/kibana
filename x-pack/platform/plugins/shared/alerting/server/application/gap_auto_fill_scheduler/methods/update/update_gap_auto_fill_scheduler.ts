@@ -6,7 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import type { SavedObject } from '@kbn/core/server';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import type { GapAutoFillSchedulerSO } from '../../../../data/gap_auto_fill_scheduler/types/gap_auto_fill_scheduler';
 import { GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
