@@ -24,8 +24,11 @@ import type {
 import { getRelevantAlertFields } from './get_relevant_alert_fields';
 import { getHitsTotal } from '../../utils/get_hits_total';
 import { kqlFilter as buildKqlFilter } from '../../utils/dsl_filters';
+import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
 
 export const OBSERVABILITY_GET_ALERTS_TOOL_ID = 'observability.get_alerts';
+
+const DEFAULT_TIME_RANGE = { start: 'now-1h', end: 'now' };
 
 export const defaultFields = [
   '@timestamp',
@@ -71,14 +74,7 @@ const OMITTED_ALERT_FIELDS = [
 ] as const;
 
 const getAlertsSchema = z.object({
-  start: z
-    .string()
-    .describe('The start of the time range, in Elasticsearch date math, like `now-24h`.')
-    .min(1),
-  end: z
-    .string()
-    .describe('The end of the time range, in Elasticsearch date math, like `now`.')
-    .min(1),
+  ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
   query: z.string().min(1).describe('Natural language query to guide relevant field selection.'),
   kqlFilter: z.string().optional().describe('Filter alerts by field:value pairs'),
   includeRecovered: z
@@ -99,10 +95,19 @@ export function createGetAlertsTool({
   const toolDefinition: BuiltinToolDefinition<typeof getAlertsSchema> = {
     id: OBSERVABILITY_GET_ALERTS_TOOL_ID,
     type: ToolType.builtin,
-    description: `Retrieve Observability alerts and relevant fields for a given time range. Defaults to active alerts (set includeRecovered to true to include recovered alerts).`,
+    description: `Retrieves Observability alerts within a specified time range. Supports filtering by status (active/recovered) and KQL queries to find specific alert instances.`,
     schema: getAlertsSchema,
     tags: ['observability', 'alerts'],
-    handler: async ({ start, end, kqlFilter, includeRecovered, query }, handlerinfo) => {
+    handler: async (
+      {
+        start = DEFAULT_TIME_RANGE.start,
+        end = DEFAULT_TIME_RANGE.end,
+        kqlFilter,
+        includeRecovered,
+        query,
+      },
+      handlerinfo
+    ) => {
       try {
         const [coreStart, pluginStart] = await core.getStartServices();
         const alertsClient = await pluginStart.ruleRegistry.getRacClientWithRequest(

@@ -13,38 +13,26 @@ import type { Logger } from '@kbn/core/server';
 import { runLogRateAnalysis } from '@kbn/aiops-log-rate-analysis/queries/fetch_log_rate_analysis_for_alert';
 import type { WindowParameters } from '@kbn/aiops-log-rate-analysis/window_parameters';
 import { parseDatemath } from '../../utils/time';
+import { timeRangeSchemaRequired, indexDescription } from '../../utils/tool_schemas';
 
 export const OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID = 'observability.run_log_rate_analysis';
 
-const dateRangeSchema = z.object({
-  from: z
-    .string()
-    .describe(
-      'Start of the time window expressed with Elasticsearch date math. Example: `now-15m`'
-    ),
-  to: z
-    .string()
-    .describe('End of the time window expressed with Elasticsearch date math. Example: `now`.'),
-});
-
 const logRateAnalysisSchema = z.object({
-  index: z
-    .string()
-    .describe(
-      'Concrete index, data stream, or alias to analyze (for example `logs-payments.api-default`).'
-    ),
+  index: z.string().describe(indexDescription),
   timeFieldName: z
     .string()
     .describe(
       'Timestamp field used to build the baseline/deviation windows. Defaults to `@timestamp`.'
     )
     .optional(),
-  baseline: dateRangeSchema.describe(
-    'Time range representing "normal" behavior that the deviation window will be compared against.'
-  ),
-  deviation: dateRangeSchema.describe(
-    'Time range representing the time period with unusual behavior.'
-  ),
+  baseline: z
+    .object(timeRangeSchemaRequired)
+    .describe(
+      'Time range representing "normal" behavior that the deviation window will be compared against.'
+    ),
+  deviation: z
+    .object(timeRangeSchemaRequired)
+    .describe('Time range representing the time period with unusual behavior.'),
   searchQuery: z
     .record(z.any())
     .describe(
@@ -61,7 +49,7 @@ export function createRunLogRateAnalysisTool({
   const toolDefinition: BuiltinToolDefinition<typeof logRateAnalysisSchema> = {
     id: OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID,
     type: ToolType.builtin,
-    description: `Identify significant changes in log rates for a given index between two time windows (baseline vs deviation) to help explain spikes or dips in log volume.`,
+    description: `Analyzes log rate changes by comparing a baseline time window to a deviation time window. Identifies significant spikes or dips in log volume and correlates them with specific field values.`,
     schema: logRateAnalysisSchema,
     tags: ['observability', 'logs'],
     handler: async (
@@ -72,10 +60,10 @@ export function createRunLogRateAnalysisTool({
         const esClient = context.esClient.asCurrentUser;
 
         const windowParameters: WindowParameters = {
-          baselineMin: parseDatemath(baseline.from),
-          baselineMax: parseDatemath(baseline.to, { roundUp: true }),
-          deviationMin: parseDatemath(deviation.from),
-          deviationMax: parseDatemath(deviation.to, { roundUp: true }),
+          baselineMin: parseDatemath(baseline.start),
+          baselineMax: parseDatemath(baseline.end, { roundUp: true }),
+          deviationMin: parseDatemath(deviation.start),
+          deviationMax: parseDatemath(deviation.end, { roundUp: true }),
         };
 
         const response = await runLogRateAnalysis({

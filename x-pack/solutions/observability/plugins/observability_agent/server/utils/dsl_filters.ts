@@ -19,6 +19,7 @@ export function timeRangeFilter(
         [timeField]: {
           gte: start,
           lt: end,
+          format: 'epoch_millis',
         },
       },
     },

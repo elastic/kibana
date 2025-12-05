@@ -15,13 +15,13 @@ const BASE_DOCS_PER_STEP = 10;
 const SPIKE_DOCS_PER_STEP = 110;
 
 export const LOG_RATE_ANALYSIS_SPIKE_BASELINE_WINDOW = {
-  from: 'now-60m',
-  to: 'now-20m',
+  start: 'now-60m',
+  end: 'now-20m',
 } as const;
 
 export const LOG_RATE_ANALYSIS_SPIKE_DEVIATION_WINDOW = {
-  from: 'now-20m',
-  to: 'now',
+  start: 'now-20m',
+  end: 'now',
 } as const;
 
 export const LOG_RATE_ANALYSIS_SPIKE_DATA_STREAM = `logs-${DATASET}-default`;
@@ -38,12 +38,12 @@ export async function createLogRateAnalysisSpikeData({
   logsSynthtraceEsClient: LogsSynthtraceEsClient;
 }) {
   const range = timerange(
-    LOG_RATE_ANALYSIS_SPIKE_BASELINE_WINDOW.from,
-    LOG_RATE_ANALYSIS_SPIKE_DEVIATION_WINDOW.to
+    LOG_RATE_ANALYSIS_SPIKE_BASELINE_WINDOW.start,
+    LOG_RATE_ANALYSIS_SPIKE_DEVIATION_WINDOW.end
   );
 
-  const spikeStart = datemath.parse(LOG_RATE_ANALYSIS_SPIKE_DEVIATION_WINDOW.from)!.valueOf();
-  const spikeEnd = datemath.parse(LOG_RATE_ANALYSIS_SPIKE_DEVIATION_WINDOW.to)!.valueOf();
+  const spikeStart = datemath.parse(LOG_RATE_ANALYSIS_SPIKE_DEVIATION_WINDOW.start)!.valueOf();
+  const spikeEnd = datemath.parse(LOG_RATE_ANALYSIS_SPIKE_DEVIATION_WINDOW.end)!.valueOf();
 
   await logsSynthtraceEsClient.clean();
 

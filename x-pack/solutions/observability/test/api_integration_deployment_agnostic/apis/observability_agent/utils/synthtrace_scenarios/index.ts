@@ -8,3 +8,4 @@
 export * from './create_synthetic_apm_data';
 export * from './create_synthetic_logs_data';
 export * from './create_log_rate_analysis_spike_data';
+export * from './create_synthetic_logs_with_categories';

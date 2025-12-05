@@ -27,6 +27,10 @@ import {
 } from './get_anomaly_detection_jobs/get_anomaly_detection_jobs';
 import { OBSERVABILITY_GET_ALERTS_TOOL_ID, createGetAlertsTool } from './get_alerts/get_alerts';
 import {
+  OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID,
+  createGetLogCategoriesTool,
+} from './get_log_categories/get_log_categories';
+import {
   OBSERVABILITY_GET_SERVICES_TOOL_ID,
   OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
 } from '../../common/constants';
@@ -43,6 +47,7 @@ const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID,
   OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
   OBSERVABILITY_GET_ALERTS_TOOL_ID,
+  OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID,
 ];
 
 // registered in the APM plugin
@@ -71,6 +76,7 @@ export async function registerTools({
     createRunLogRateAnalysisTool({ logger }),
     createGetAnomalyDetectionJobsTool({ core, plugins, logger }),
     createGetAlertsTool({ core, logger }),
+    createGetLogCategoriesTool({ core, logger }),
   ];
 
   for (const tool of observabilityTools) {
