@@ -15,6 +15,8 @@ import type {
   StreamlangProcessorDefinition,
   StreamlangDSL,
   StreamlangStepWithUIAttributes,
+  StreamlangValidationError,
+  FieldType,
 } from '@kbn/streamlang';
 import type { StreamlangWhereBlock } from '@kbn/streamlang/types/streamlang';
 import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
@@ -49,6 +51,8 @@ export interface StreamEnrichmentContextType {
   grokCollection: GrokCollection;
   simulatorRef: SimulationActorRef;
   urlState: EnrichmentUrlState;
+  validationErrors: Map<string, StreamlangValidationError[]>;
+  fieldTypesByProcessor: Map<string, Map<string, FieldType>>;
   suggestedPipeline?: StreamlangDSL;
 }
 
