@@ -34,9 +34,9 @@ describe('Color util transforms', () => {
         type: 'dynamic',
         range: 'absolute',
         steps: [
-          { color: 'red', to: 0 },
-          { color: 'green', from: 0, to: 100 },
-          { color: 'blue', from: 100 },
+          { color: 'red', lt: 0 },
+          { color: 'green', gte: 0, lt: 100 },
+          { color: 'blue', gte: 100 },
         ],
       };
 
@@ -74,8 +74,8 @@ describe('Color util transforms', () => {
         type: 'dynamic',
         range: 'percentage',
         steps: [
-          { color: 'red', from: 10, to: 50 },
-          { color: 'green', from: 50, to: 90 },
+          { color: 'red', gte: 10, lt: 50 },
+          { color: 'green', gte: 50, lt: 90 },
         ],
       };
 
@@ -109,7 +109,7 @@ describe('Color util transforms', () => {
     it('should default to absolute range when range is not specified', () => {
       const colorByValue = {
         type: 'dynamic',
-        steps: [{ color: 'red', from: 0, to: 50 }],
+        steps: [{ color: 'red', gte: 0, lte: 50 }],
       } satisfies Partial<ColorByValueType> as ColorByValueType;
 
       const result = fromColorByValueAPIToLensState(colorByValue);
@@ -158,9 +158,9 @@ describe('Color util transforms', () => {
         type: 'dynamic',
         range: 'absolute',
         steps: [
-          { color: 'red', to: 0 },
-          { color: 'green', from: 0, to: 50 },
-          { color: 'blue', from: 50 },
+          { color: 'red', lt: 0 },
+          { color: 'green', gte: 0, lt: 50 },
+          { color: 'blue', gte: 50 },
         ],
       });
     });
@@ -193,9 +193,9 @@ describe('Color util transforms', () => {
         type: 'dynamic',
         range: 'percentage',
         steps: [
-          { color: 'red', from: 5, to: 10 },
-          { color: 'green', from: 10, to: 50 },
-          { color: 'blue', from: 50, to: 95 },
+          { color: 'red', gte: 5, lt: 10 },
+          { color: 'green', gte: 10, lt: 50 },
+          { color: 'blue', gte: 50, lte: 95 },
         ],
       });
     });
@@ -216,7 +216,7 @@ describe('Color util transforms', () => {
       expect(result).toEqual({
         type: 'dynamic',
         range: 'absolute',
-        steps: [{ color: 'red', to: 50 }],
+        steps: [{ color: 'red', lt: 50 }],
       });
     });
 
@@ -240,8 +240,8 @@ describe('Color util transforms', () => {
         type: 'dynamic',
         range: 'absolute',
         steps: [
-          { color: 'red', to: 0 },
-          { color: 'green', from: 0 },
+          { color: 'red', lt: 0 },
+          { color: 'green', gte: 0 },
         ],
       });
     });
@@ -308,9 +308,9 @@ describe('Color util transforms', () => {
         type: 'dynamic',
         range: 'absolute',
         steps: [
-          { color: 'blue', to: 0 },
-          { color: 'green', from: 0, to: 50 },
-          { color: 'red', from: 50 },
+          { color: 'blue', lt: 0 },
+          { color: 'green', gte: 0, lt: 50 },
+          { color: 'red', gte: 50 },
         ],
       });
     });
@@ -545,9 +545,9 @@ describe('Color util transforms', () => {
         type: 'dynamic',
         range: 'absolute',
         steps: [
-          { color: 'red', to: 50 },
-          { color: 'green', from: 50, to: 100 },
-          { color: 'blue', from: 100 },
+          { color: 'red', lt: 50 },
+          { color: 'green', gte: 50, lt: 100 },
+          { color: 'blue', gte: 100 },
         ],
       };
 
@@ -562,8 +562,8 @@ describe('Color util transforms', () => {
         type: 'dynamic',
         range: 'absolute',
         steps: [
-          { color: 'red', from: 0, to: 50 },
-          { color: 'blue', from: 50 },
+          { color: 'red', gte: 0, lt: 50 },
+          { color: 'blue', gte: 50 },
         ],
       };
 
@@ -578,8 +578,8 @@ describe('Color util transforms', () => {
         type: 'dynamic',
         range: 'absolute',
         steps: [
-          { color: 'red', to: -50 },
-          { color: 'blue', from: -50, to: 0 },
+          { color: 'red', lt: -50 },
+          { color: 'blue', gte: -50, lte: 0 },
         ],
       };
 
@@ -594,8 +594,8 @@ describe('Color util transforms', () => {
         type: 'dynamic',
         range: 'percentage',
         steps: [
-          { color: 'red', from: 5, to: 90 },
-          { color: 'green', from: 90, to: 95 },
+          { color: 'red', gte: 5, lt: 90 },
+          { color: 'green', gte: 90, lte: 95 },
         ],
       };
 

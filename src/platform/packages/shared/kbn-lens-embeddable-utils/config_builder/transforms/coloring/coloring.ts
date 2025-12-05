@@ -39,15 +39,15 @@ export function fromColorByValueAPIToLensState(
   if (!config) return;
 
   const stops = config.steps.map(
-    ({ to, color }): ColorStop => ({
+    ({ lt, lte, color }): ColorStop => ({
       color,
-      stop: to ?? null, // we need to implicitly set this value to the domain max in client code
+      stop: lt ?? lte ?? null, // we need to implicitly set this value to the domain max in client code
     })
   );
   const colorStops = config.steps.map(
-    ({ from, color }): ColorStop => ({
+    ({ gte, color }): ColorStop => ({
       color,
-      stop: from ?? null,
+      stop: gte ?? null,
     })
   );
 
@@ -107,8 +107,8 @@ export function fromColorByValueLensStateToAPI(
       const { stop: currentStop, color } = step;
       if (i === 0) {
         return {
-          ...(!isNil(colorParams.rangeMin) && { from: colorParams.rangeMin }),
-          to: currentStop,
+          ...(!isNil(colorParams.rangeMin) && { gte: colorParams.rangeMin }),
+          lt: currentStop,
           color,
         };
       }
@@ -117,16 +117,16 @@ export function fromColorByValueLensStateToAPI(
 
       if (i === stops.length - 1) {
         return {
-          from: prevStop,
+          gte: prevStop,
           // ignores stop value, current logic sets last stop to max domain not user defined rangeMax
-          ...(!isNil(colorParams.rangeMax) && { to: colorParams.rangeMax }),
+          ...(!isNil(colorParams.rangeMax) && { lte: colorParams.rangeMax }),
           color,
         };
       }
 
       return {
-        from: prevStop,
-        to: currentStop,
+        gte: prevStop,
+        lt: currentStop,
         color,
       };
     }),
