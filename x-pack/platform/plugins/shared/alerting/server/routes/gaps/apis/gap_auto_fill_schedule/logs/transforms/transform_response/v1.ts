@@ -17,7 +17,7 @@ export const transformResponse = (
     message: entry.message,
     timestamp: entry.timestamp,
     results: entry.results?.map((ruleResult) => ({
-      ruleId: ruleResult.ruleId,
+      rule_id: ruleResult.ruleId,
       processed_gaps: ruleResult.processedGaps,
       status: ruleResult.status,
       error: ruleResult.error,
