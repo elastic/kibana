@@ -1,19 +1,14 @@
 {
   "type": "plugin",
   "id": "@kbn/observability-plugin",
-  "owner": [
-    "@elastic/obs-ux-management-team"
-  ],
+  "owner": ["@elastic/obs-ux-management-team"],
   "group": "observability",
   "visibility": "private",
   "plugin": {
     "id": "observability",
     "browser": true,
     "server": true,
-    "configPath": [
-      "xpack",
-      "observability"
-    ],
+    "configPath": ["xpack", "observability"],
     "requiredPlugins": [
       "alerting",
       "charts",
@@ -28,6 +23,7 @@
       "presentationUtil",
       "features",
       "files",
+      "fleet",
       "inspector",
       "lens",
       "observabilityShared",
@@ -45,7 +41,7 @@
       "fieldsMetadata",
       "esql",
       "savedObjectsTagging",
-      "streams",
+      "streams"
     ],
     "optionalPlugins": [
       "aiops",
@@ -58,7 +54,7 @@
       "spaces",
       "serverless",
       "observabilityAIAssistant",
-      "investigate",
+      "investigate"
     ],
     "requiredBundles": [
       "aiops",
@@ -72,8 +68,6 @@
       "stackAlerts",
       "spaces"
     ],
-    "extraPublicDirs": [
-      "common"
-    ]
+    "extraPublicDirs": ["common"]
   }
 }
