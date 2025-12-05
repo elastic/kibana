@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import type { IRouter, Logger, StartServicesAccessor } from '@kbn/core/server';
+import type {
+  IRouter,
+  Logger,
+  SavedObjectsFindResponse,
+  StartServicesAccessor,
+} from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import type { DataConnectorAttributes } from '../saved_objects';
 import { DATA_CONNECTOR_SAVED_OBJECT_TYPE } from '../saved_objects';
 import type { DataConnectorsServerStartDependencies } from '../types';
 
@@ -38,10 +44,11 @@ export function registerRoutes(
 
       try {
         const savedObjectsClient = coreContext.savedObjects.client;
-        const findResult = await savedObjectsClient.find({
-          type: DATA_CONNECTOR_SAVED_OBJECT_TYPE,
-          perPage: 100,
-        });
+        const findResult: SavedObjectsFindResponse<DataConnectorAttributes> =
+          await savedObjectsClient.find({
+            type: DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+            perPage: 100,
+          });
 
         const connectors = findResult.saved_objects.map((savedObject) => {
           const attrs = savedObject.attributes;
@@ -54,6 +61,7 @@ export function registerRoutes(
             updatedAt: attrs.updatedAt,
             workflowIds: attrs.workflowIds,
             toolIds: attrs.toolIds,
+            kscId: attrs.kscId,
             features: attrs.features,
           };
         });
@@ -94,18 +102,6 @@ export function registerRoutes(
 
       try {
         const { name, type, token } = request.body;
-
-        const savedObjectsClient = coreContext.savedObjects.client;
-        const now = new Date().toISOString();
-        await savedObjectsClient.create(DATA_CONNECTOR_SAVED_OBJECT_TYPE, {
-          name,
-          type,
-          config: {},
-          features: [],
-          createdAt: now,
-          updatedAt: now,
-        });
-
         const [, { actions, dataSourcesRegistry }] = await getStartServices();
 
         const dataCatalog = dataSourcesRegistry.getCatalog();
@@ -120,21 +116,37 @@ export function registerRoutes(
         }
 
         const actionsClient = await actions.getActionsClientWithRequest(request);
-        const connector = await actionsClient.create({
+        const stackConnector = await actionsClient.create({
           action: {
             name: `${type} stack connector for data connector '${name}'`,
             actionTypeId: dataConnectorTypeDef.stackConnector.type,
             config: {},
             secrets: {
-              authType: 'bearer',
+              authType: 'bearer', // TODO: can we get away without specifying this again
               token,
             },
           },
         });
+
+        const savedObjectsClient = coreContext.savedObjects.client;
+        const now = new Date().toISOString();
+        const savedObject = await savedObjectsClient.create(DATA_CONNECTOR_SAVED_OBJECT_TYPE, {
+          name,
+          type,
+          config: {},
+          features: [],
+          createdAt: now,
+          updatedAt: now,
+          workflowIds: [],
+          toolIds: [],
+          kscId: stackConnector.id,
+        });
+
         return response.ok({
           body: {
-            message: `Data connector created successfully: ${connector.id}`,
-            connectorId: connector.id,
+            message: 'Data connector created successfully!',
+            dataConnectorId: savedObject.id,
+            stackConnectorId: stackConnector.id,
           },
         });
       } catch (error) {

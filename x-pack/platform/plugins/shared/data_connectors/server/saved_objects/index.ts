@@ -8,6 +8,18 @@ import type { SavedObjectsServiceSetup, SavedObjectsTypeMappingDefinition } from
 
 export const DATA_CONNECTOR_SAVED_OBJECT_TYPE = 'data_connector';
 
+export interface DataConnectorAttributes {
+  name: string;
+  type: string;
+  config: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+  features?: string[];
+  workflowIds?: string[];
+  toolIds?: string[];
+  kscId?: string;
+}
+
 export const dataConnectorMappings: SavedObjectsTypeMappingDefinition = {
   properties: {
     name: {
