@@ -25,21 +25,7 @@ describe('useStreamValidation', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  afterEach(async () => {
-    // Aggressively flush all pending timers and operations to prevent leaks between tests
-    await act(async () => {
-      try {
-        // Try to run all pending timers
-        await jest.runAllTimersAsync();
-      } catch (e) {
-        // If that fails (infinite loop), just run pending ones
-        await jest.runOnlyPendingTimersAsync();
-      }
-      // Flush any remaining microtasks
-      await Promise.resolve();
-    });
+    jest.restoreAllMocks();
   });
 
   describe('WHEN initialized', () => {
@@ -92,7 +78,9 @@ describe('useStreamValidation', () => {
 
       // First attempt submit
       await act(async () => {
-        await result.current.handleCreate();
+        const handleCreatePromise = result.current.handleCreate();
+        await jest.runOnlyPendingTimersAsync();
+        await handleCreatePromise;
       });
 
       // Change name
@@ -122,7 +110,9 @@ describe('useStreamValidation', () => {
 
       // Submit with error
       await act(async () => {
-        await result.current.handleCreate();
+        const handleCreatePromise = result.current.handleCreate();
+        await jest.runOnlyPendingTimersAsync();
+        await handleCreatePromise;
       });
 
       expect(result.current.validationError).toBe('duplicate');
@@ -149,10 +139,10 @@ describe('useStreamValidation', () => {
         result.current.handleStreamNameChange('test-stream');
       });
 
-      // Attempt submit - capture reference before async
-      const handleCreate = result.current.handleCreate;
       await act(async () => {
-        await handleCreate();
+        const handleCreatePromise = result.current.handleCreate();
+        await jest.runOnlyPendingTimersAsync();
+        await handleCreatePromise;
       });
 
       // Ensure validation is complete
@@ -164,15 +154,12 @@ describe('useStreamValidation', () => {
         result.current.handleStreamNameChange('test-stream');
       });
 
-      // Advance timers to ensure no debounced validation is triggered
-      await act(async () => {
-        await jest.runOnlyPendingTimersAsync();
+      await waitFor(() => {
+        // Should still not be validating since name didn't change
+        expect(result.current.isValidating).toBe(false);
+        // onValidate should not have been called again
+        expect(mockOnValidate).toHaveBeenCalledTimes(1);
       });
-
-      // Should still not be validating since name didn't change
-      expect(result.current.isValidating).toBe(false);
-      // onValidate should not have been called again
-      expect(mockOnValidate).toHaveBeenCalledTimes(1);
     });
 
     it('SHOULD abort Create validation when name changes during Create', async () => {
@@ -203,7 +190,7 @@ describe('useStreamValidation', () => {
       const handleCreate = result.current.handleCreate;
 
       // Start Create validation
-      let createPromise: Promise<void> = Promise.resolve();
+      let createPromise = Promise.resolve();
       act(() => {
         createPromise = handleCreate();
       });
@@ -226,8 +213,8 @@ describe('useStreamValidation', () => {
       // Advance timers to let the aborted Create validation complete
       await act(async () => {
         await jest.runOnlyPendingTimersAsync();
+        await createPromise;
       });
-      await createPromise;
 
       // onCreate should not be called because Create was aborted
       expect(mockOnCreate).not.toHaveBeenCalled();
@@ -244,9 +231,10 @@ describe('useStreamValidation', () => {
         })
       );
 
-      const handleCreate = result.current.handleCreate;
       await act(async () => {
-        await handleCreate();
+        const handleCreatePromise = result.current.handleCreate();
+        await jest.runOnlyPendingTimersAsync();
+        await handleCreatePromise;
       });
 
       expect(mockOnValidate).toHaveBeenCalledWith('valid-stream', expect.any(AbortSignal));
@@ -269,9 +257,10 @@ describe('useStreamValidation', () => {
         })
       );
 
-      const handleCreate = result.current.handleCreate;
       await act(async () => {
-        await handleCreate();
+        const handleCreatePromise = result.current.handleCreate();
+        await jest.runOnlyPendingTimersAsync();
+        await handleCreatePromise;
       });
 
       expect(mockOnValidateWithError).toHaveBeenCalled();
@@ -289,9 +278,10 @@ describe('useStreamValidation', () => {
         })
       );
 
-      const handleCreate = result.current.handleCreate;
       await act(async () => {
-        await handleCreate();
+        const handleCreatePromise = result.current.handleCreate();
+        await jest.runOnlyPendingTimersAsync();
+        await handleCreatePromise;
       });
 
       expect(mockOnCreate).not.toHaveBeenCalled();
@@ -312,9 +302,10 @@ describe('useStreamValidation', () => {
         })
       );
 
-      const handleCreate = result.current.handleCreate;
       await act(async () => {
-        await handleCreate();
+        const handleCreatePromise = result.current.handleCreate();
+        await jest.runOnlyPendingTimersAsync();
+        await handleCreatePromise;
       });
 
       expect(result.current.validationError).toBe('higherPriority');
@@ -344,12 +335,9 @@ describe('useStreamValidation', () => {
         result.current.handleStreamNameChange('test-stream');
       });
 
-      // Attempt submit first - capture reference before async
-      const handleCreate = result.current.handleCreate;
-
       // Advance timers to complete first Create validation
       await act(async () => {
-        const createPromise = handleCreate();
+        const createPromise = result.current.handleCreate();
         await jest.runOnlyPendingTimersAsync();
         await createPromise;
       });
@@ -368,7 +356,7 @@ describe('useStreamValidation', () => {
 
       // Immediately call Create to cancel debounced validation before it executes
       await act(async () => {
-        const createPromise = handleCreate();
+        const createPromise = result.current.handleCreate();
         await jest.runOnlyPendingTimersAsync();
         await createPromise;
       });
@@ -395,16 +383,15 @@ describe('useStreamValidation', () => {
         })
       );
 
-      const handleCreate = result.current.handleCreate;
       await act(async () => {
-        await handleCreate();
+        const createPromise = result.current.handleCreate();
+        await jest.runOnlyPendingTimersAsync();
+        await createPromise;
       });
 
       expect(consoleSpy).toHaveBeenCalledWith('Validation error:', expect.any(Error));
       expect(mockOnCreate).not.toHaveBeenCalled();
       expect(result.current.isSubmitting).toBe(false);
-
-      consoleSpy.mockRestore();
     });
 
     it('SHOULD abort validation when signal is aborted', async () => {
@@ -436,7 +423,7 @@ describe('useStreamValidation', () => {
       const handleStreamNameChange = result.current.handleStreamNameChange;
 
       // Start Create
-      let createPromise: Promise<void> = Promise.resolve();
+      let createPromise = Promise.resolve();
       act(() => {
         createPromise = handleCreate();
       });
@@ -448,8 +435,8 @@ describe('useStreamValidation', () => {
 
       await act(async () => {
         await jest.runOnlyPendingTimersAsync();
+        await createPromise;
       });
-      await createPromise;
 
       // onCreate should not be called
       expect(mockOnCreate).not.toHaveBeenCalled();
@@ -471,9 +458,10 @@ describe('useStreamValidation', () => {
       );
 
       // Create with error - capture reference before async
-      const handleCreate = result.current.handleCreate;
       await act(async () => {
-        await handleCreate();
+        const createPromise = result.current.handleCreate();
+        await jest.runOnlyPendingTimersAsync();
+        await createPromise;
       });
 
       expect(result.current.hasAttemptedSubmit).toBe(true);
@@ -501,9 +489,10 @@ describe('useStreamValidation', () => {
         })
       );
 
-      const handleCreate = result.current.handleCreate;
       await act(async () => {
-        await handleCreate();
+        const createPromise = result.current.handleCreate();
+        await jest.runOnlyPendingTimersAsync();
+        await createPromise;
       });
 
       expect(result.current.hasAttemptedSubmit).toBe(true);
@@ -526,16 +515,10 @@ describe('useStreamValidation', () => {
         })
       );
 
-      // Attempt submit first - capture reference before async
-      const handleCreate = result.current.handleCreate;
       await act(async () => {
-        await handleCreate();
-      });
-
-      // Complete the initial Create validation so hasAttemptedSubmit is true
-      // and isCreateValidationInProgressRef is cleared before debounced validation runs
-      await act(async () => {
+        const createPromise = result.current.handleCreate();
         await jest.runOnlyPendingTimersAsync();
+        await createPromise;
       });
 
       // Rapid changes
@@ -589,13 +572,12 @@ describe('useStreamValidation', () => {
         result.current.handleStreamNameChange('initial');
       });
 
-      // Attempt submit first - capture reference before async
-      const handleCreate = result.current.handleCreate;
       await act(async () => {
-        const createPromise = handleCreate();
+        const createPromise = result.current.handleCreate();
         await jest.runOnlyPendingTimersAsync();
         await createPromise;
       });
+
       expect(result.current.hasAttemptedSubmit).toBe(true);
 
       // Change name
@@ -622,22 +604,19 @@ describe('useStreamValidation', () => {
       expect(validatorCalls).toContain('second');
       expect(result.current.isValidating).toBe(true); // Should still be validating
 
-      // Advance timers to resolve validator promises (500ms setTimeout in validator)
-      await act(async () => {
-        await jest.runOnlyPendingTimersAsync();
-      });
+      await waitFor(() => {
+        // Debug assertion to surface the current state instead of timing out
+        expect({
+          isValidating: result.current.isValidating,
+          validatorCalls,
+        }).toEqual({
+          isValidating: false,
+          validatorCalls: expect.arrayContaining(['second']),
+        });
 
-      // Debug assertion to surface the current state instead of timing out
-      expect({
-        isValidating: result.current.isValidating,
-        validatorCalls,
-      }).toEqual({
-        isValidating: false,
-        validatorCalls: expect.arrayContaining(['second']),
+        // Both validations should have been started (first aborted, second completed)
+        expect(validatorCalls).toContain('second');
       });
-
-      // Both validations should have been started (first aborted, second completed)
-      expect(validatorCalls).toContain('second');
     });
   });
 
@@ -658,7 +637,9 @@ describe('useStreamValidation', () => {
       });
 
       await act(async () => {
-        await result.current.handleCreate();
+        const createPromise = result.current.handleCreate();
+        await jest.runOnlyPendingTimersAsync();
+        await createPromise;
       });
 
       act(() => {
@@ -674,9 +655,6 @@ describe('useStreamValidation', () => {
       expect(mockOnValidate).toHaveBeenCalledTimes(1); // Only Create validation
 
       // Now wait for debounced validation to trigger after full delay
-      await act(async () => {
-        await jest.advanceTimersByTimeAsync(300);
-      });
       await waitFor(() => {
         expect(mockOnValidate).toHaveBeenCalledTimes(2);
       });

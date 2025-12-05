@@ -100,12 +100,6 @@ describe('CreateClassicStreamFlyout', () => {
     jest.clearAllMocks();
   });
 
-  afterEach(async () => {
-    await act(async () => {
-      await jest.runOnlyPendingTimersAsync();
-    });
-  });
-
   describe('rendering', () => {
     it('renders the flyout with step navigation', () => {
       const { getByTestId } = renderFlyout();
@@ -606,53 +600,17 @@ describe('CreateClassicStreamFlyout', () => {
           expect(onValidate).toHaveBeenCalled();
         });
 
-        // Clear previous calls
         onValidate.mockClear();
 
         // Now type something new - should trigger debounced validation
         fireEvent.change(streamNameInput, { target: { value: 'newstream' } });
 
-        // Wait for validation (waitFor handles fake timers automatically)
+        // Wait for validation
         await waitFor(() => {
           expect(onValidate).toHaveBeenCalledWith(
             'logs-template-1-newstream',
             expect.any(AbortSignal)
           );
-        });
-      });
-
-      it('should cancel debounced validation when user types again', async () => {
-        const onCreate = jest.fn();
-        const onValidate = jest.fn().mockResolvedValue({ errorType: null });
-        const { getByTestId } = renderFlyout({ onCreate, onValidate });
-
-        selectTemplateAndGoToStep2(getByTestId, 'template-1');
-
-        const streamNameInput = getByTestId('streamNameInput-wildcard-0');
-        fireEvent.change(streamNameInput, { target: { value: 'mystream' } });
-
-        // Click Create to enter live validation mode
-        fireEvent.click(getByTestId('createButton'));
-
-        await waitFor(() => {
-          expect(onValidate).toHaveBeenCalled();
-        });
-
-        const callCountBefore = onValidate.mock.calls.length;
-
-        // Type first value
-        fireEvent.change(streamNameInput, { target: { value: 'first' } });
-
-        // Type second value before debounce completes
-        fireEvent.change(streamNameInput, { target: { value: 'second' } });
-
-        // Wait for validation (waitFor handles fake timers automatically)
-        await waitFor(() => {
-          // Should validate 'second' (may have validated 'first' too, but 'second' should be last)
-          const calls = onValidate.mock.calls.slice(callCountBefore);
-          expect(calls.length).toBeGreaterThan(0);
-          // Last call should be for 'second'
-          expect(calls[calls.length - 1][0]).toBe('logs-template-1-second');
         });
       });
 
@@ -680,192 +638,9 @@ describe('CreateClassicStreamFlyout', () => {
           expect(queryByText(/This stream name already exists/i)).not.toBeInTheDocument();
         });
       });
-
-      it('should not trigger validation before first submit attempt', async () => {
-        const onCreate = jest.fn();
-        const onValidate = jest.fn().mockResolvedValue({ errorType: null });
-        const { getByTestId } = renderFlyout({ onCreate, onValidate });
-
-        selectTemplateAndGoToStep2(getByTestId, 'template-1');
-
-        const streamNameInput = getByTestId('streamNameInput-wildcard-0');
-
-        // Type without clicking Create
-        fireEvent.change(streamNameInput, { target: { value: 'mystream' } });
-
-        // Fast-forward debounce time (wrapped in act)
-        await act(async () => {
-          await jest.advanceTimersByTimeAsync(300);
-        });
-
-        // Should not call onValidate
-        expect(onValidate).not.toHaveBeenCalled();
-      });
-    });
-
-    describe('race condition handling', () => {
-      it('should ignore stale validation results', async () => {
-        const onCreate = jest.fn();
-
-        // Use setTimeout so fake timers can control resolution timing
-        // First validation resolves slower (100ms), second resolves faster (50ms)
-        const onValidate = jest.fn().mockImplementation((streamName: string) => {
-          if (streamName === 'logs-template-1-first') {
-            return new Promise((resolve) => {
-              setTimeout(() => resolve({ errorType: 'duplicate' }), 100);
-            });
-          }
-          if (streamName === 'logs-template-1-second') {
-            return new Promise((resolve) => {
-              setTimeout(() => resolve({ errorType: null }), 50); // Resolve faster
-            });
-          }
-          // For any other calls (e.g., debounced validation), return a resolved promise
-          return Promise.resolve({ errorType: null });
-        });
-
-        const { getByTestId } = renderFlyout({ onCreate, onValidate });
-
-        selectTemplateAndGoToStep2(getByTestId, 'template-1');
-
-        const streamNameInput = getByTestId('streamNameInput-wildcard-0');
-        fireEvent.change(streamNameInput, { target: { value: 'first' } });
-
-        // Click Create - starts first validation
-        fireEvent.click(getByTestId('createButton'));
-
-        // Wait for first validation to start
-        await waitFor(() => {
-          expect(onValidate).toHaveBeenCalledTimes(1);
-        });
-
-        // Change value immediately - this will schedule debounced validation (300ms delay)
-        // and abort the first Create validation
-        fireEvent.change(streamNameInput, { target: { value: 'second' } });
-
-        // Wait for first validation to be aborted (input change aborts Create validation)
-        // Then click Create again - button should be enabled again after abort
-        await waitFor(() => {
-          const createButton = getByTestId('createButton');
-          expect(createButton).not.toBeDisabled();
-        });
-
-        // Click Create - this should:
-        // 1. Cancel debounced validation (preventing it from incrementing validationIdRef)
-        // 2. Increment validationIdRef to 2
-        // 3. Start second validation with ID 2
-        fireEvent.click(getByTestId('createButton'));
-
-        // Wait for second validation to start
-        // waitFor will advance timers, but our fix prevents debounced validation from interfering
-        await waitFor(() => {
-          expect(onValidate.mock.calls.length).toBeGreaterThanOrEqual(2);
-          const lastCall = onValidate.mock.calls[onValidate.mock.calls.length - 1];
-          expect(lastCall[0]).toBe('logs-template-1-second');
-        });
-
-        // Note: waitFor advances timers, which may trigger debounced validation (300ms)
-        // If debounced validation fires, it will increment validationIdRef,
-        // but the Create validation should still complete because it was started first
-        // and has its own validationId that was captured before debounced validation ran
-
-        // Wait for second validation to complete and onCreate to be called
-        // waitFor will automatically advance fake timers as needed
-        // The validation promise should resolve after 50ms (faster than first validation's 100ms)
-        // The first validation should be aborted and ignored
-        // Note: waitFor advances timers, so the first validation (100ms) may complete,
-        // but it should be aborted and its result ignored due to validationId mismatch
-        await waitFor(() => {
-          expect(onCreate).toHaveBeenCalled();
-        });
-
-        // Verify onCreate was called with the correct value
-        expect(onCreate).toHaveBeenCalledWith('logs-template-1-second');
-        expect(onCreate).toHaveBeenCalledTimes(1);
-
-        // Verify the first validation was aborted (it should not have called onCreate with 'first')
-        expect(onCreate).not.toHaveBeenCalledWith('logs-template-1-first');
-      });
-
-      it('should prevent duplicate validations for same name', async () => {
-        const onCreate = jest.fn();
-        const onValidate = jest.fn().mockResolvedValue({ errorType: null });
-        const { getByTestId } = renderFlyout({ onCreate, onValidate });
-
-        selectTemplateAndGoToStep2(getByTestId, 'template-1');
-
-        const streamNameInput = getByTestId('streamNameInput-wildcard-0');
-        fireEvent.change(streamNameInput, { target: { value: 'mystream' } });
-
-        // Click Create to enter live validation mode
-        fireEvent.click(getByTestId('createButton'));
-
-        await waitFor(() => {
-          expect(onValidate).toHaveBeenCalled();
-        });
-
-        const callCountBefore = onValidate.mock.calls.length;
-
-        // Type same value multiple times rapidly
-        fireEvent.change(streamNameInput, { target: { value: 'same' } });
-        fireEvent.change(streamNameInput, { target: { value: 'same' } });
-        fireEvent.change(streamNameInput, { target: { value: 'same' } });
-
-        // Wait for validation (waitFor handles fake timers automatically)
-        await waitFor(() => {
-          // Should validate at least once for same name
-          const calls = onValidate.mock.calls.slice(callCountBefore);
-          expect(calls.length).toBeGreaterThan(0);
-          // All calls for 'same' should be for same name (filter out any other calls)
-          const sameNameCalls = calls.filter((call) => call[0] === 'logs-template-1-same');
-          expect(sameNameCalls.length).toBeGreaterThan(0);
-          // Should only have one validation for 'same' name (duplicate prevention)
-          expect(sameNameCalls.length).toBeLessThanOrEqual(1);
-        });
-      });
     });
 
     describe('AbortController cancellation', () => {
-      it('should abort validation when user changes input', async () => {
-        const onCreate = jest.fn();
-        let abortSignal: AbortSignal | undefined;
-
-        const onValidate = jest.fn().mockImplementation((name, signal) => {
-          abortSignal = signal;
-          return new Promise((resolve) => {
-            // Never resolve to simulate long-running request
-            setTimeout(() => resolve({ errorType: null }), 10000);
-          });
-        });
-
-        const { getByTestId } = renderFlyout({ onCreate, onValidate });
-
-        selectTemplateAndGoToStep2(getByTestId, 'template-1');
-
-        const streamNameInput = getByTestId('streamNameInput-wildcard-0');
-        fireEvent.change(streamNameInput, { target: { value: 'first' } });
-
-        // Click Create - starts validation
-        fireEvent.click(getByTestId('createButton'));
-
-        // Wait for validation to start and capture signal
-        await waitFor(() => {
-          expect(onValidate).toHaveBeenCalled();
-          expect(abortSignal).toBeDefined();
-        });
-
-        // Store the signal before it gets aborted
-        const signalToCheck = abortSignal;
-
-        // Change input - should abort previous validation
-        fireEvent.change(streamNameInput, { target: { value: 'second' } });
-
-        // Wait for abort to happen (the signal should be aborted)
-        await waitFor(() => {
-          expect(signalToCheck?.aborted).toBe(true);
-        });
-      });
-
       it('should abort validation when template changes', async () => {
         const onCreate = jest.fn();
         let abortSignal: AbortSignal | undefined;
@@ -969,7 +744,6 @@ describe('CreateClassicStreamFlyout', () => {
     describe('error handling', () => {
       it('should handle validation errors gracefully', async () => {
         const onCreate = jest.fn();
-        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
         const onValidate = jest.fn().mockRejectedValue(new Error('Network error'));
 
         const { getByTestId } = renderFlyout({ onCreate, onValidate });
@@ -983,49 +757,13 @@ describe('CreateClassicStreamFlyout', () => {
         fireEvent.click(getByTestId('createButton'));
 
         await waitFor(() => {
-          expect(consoleErrorSpy).toHaveBeenCalledWith('Validation error:', expect.any(Error));
+          // Component should not crash and button should re-enable
+          const createButton = getByTestId('createButton');
+          expect(createButton).not.toBeDisabled();
         });
 
         // onCreate should not be called
         expect(onCreate).not.toHaveBeenCalled();
-
-        consoleErrorSpy.mockRestore();
-      });
-
-      it('should handle aborted validation gracefully', async () => {
-        const onCreate = jest.fn();
-        const onValidate = jest.fn().mockImplementation((name, signal) => {
-          return new Promise((resolve, reject) => {
-            signal?.addEventListener('abort', () => {
-              reject(new Error('Validation aborted'));
-            });
-            setTimeout(() => resolve({ errorType: null }), 1000);
-          });
-        });
-
-        const { getByTestId } = renderFlyout({ onCreate, onValidate });
-
-        selectTemplateAndGoToStep2(getByTestId, 'template-1');
-
-        const streamNameInput = getByTestId('streamNameInput-wildcard-0');
-        fireEvent.change(streamNameInput, { target: { value: 'first' } });
-
-        // Click Create - starts validation
-        fireEvent.click(getByTestId('createButton'));
-
-        // Wait for validation to start
-        await waitFor(() => {
-          expect(onValidate).toHaveBeenCalled();
-        });
-
-        // Immediately change input - aborts previous validation
-        fireEvent.change(streamNameInput, { target: { value: 'second' } });
-
-        // Wait for abort to process
-        await waitFor(() => {
-          // Should not crash, onCreate should not be called yet (validation was aborted)
-          expect(onCreate).not.toHaveBeenCalled();
-        });
       });
     });
 
