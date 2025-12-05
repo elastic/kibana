@@ -75,9 +75,9 @@ describe('retryWithRecovery', () => {
       const error = new Error('Operation failed');
       const operation = jest.fn().mockRejectedValue(error);
 
-      await expect(
-        retryWithRecovery(operation, { maxAttempts: 2 })
-      ).rejects.toThrow('Operation failed');
+      await expect(retryWithRecovery(operation, { maxAttempts: 2 })).rejects.toThrow(
+        'Operation failed'
+      );
 
       expect(operation).toHaveBeenCalledTimes(3); // 1 initial + 2 retries
     });
@@ -330,9 +330,7 @@ describe('retryWithRecovery', () => {
         logger,
       });
 
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Retry attempt 1/1')
-      );
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Retry attempt 1/1'));
     });
 
     it('should include operation name in log messages', async () => {
@@ -347,9 +345,7 @@ describe('retryWithRecovery', () => {
         operationName: 'testOperation',
       });
 
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('[testOperation]')
-      );
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('[testOperation]'));
     });
 
     it('should include delay in log message when delay is configured', async () => {
@@ -364,9 +360,7 @@ describe('retryWithRecovery', () => {
         logger,
       });
 
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('after 100ms delay')
-      );
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('after 100ms delay'));
     });
 
     it('should log max attempts reached message', async () => {
@@ -409,25 +403,19 @@ describe('retryWithRecovery', () => {
         .mockRejectedValueOnce(new Error('Second error'))
         .mockRejectedValueOnce(lastError);
 
-      await expect(
-        retryWithRecovery(operation, { maxAttempts: 2 })
-      ).rejects.toThrow('Last error');
+      await expect(retryWithRecovery(operation, { maxAttempts: 2 })).rejects.toThrow('Last error');
     });
 
     it('should handle non-Error objects', async () => {
       const operation = jest.fn().mockRejectedValue('String error');
 
-      await expect(
-        retryWithRecovery(operation, { maxAttempts: 1 })
-      ).rejects.toBe('String error');
+      await expect(retryWithRecovery(operation, { maxAttempts: 1 })).rejects.toBe('String error');
     });
 
     it('should handle null errors', async () => {
       const operation = jest.fn().mockRejectedValue(null);
 
-      await expect(
-        retryWithRecovery(operation, { maxAttempts: 1 })
-      ).rejects.toBe(null);
+      await expect(retryWithRecovery(operation, { maxAttempts: 1 })).rejects.toBe(null);
     });
   });
 
@@ -436,9 +424,9 @@ describe('retryWithRecovery', () => {
       const error = new Error('Operation failed');
       const operation = jest.fn().mockRejectedValue(error);
 
-      await expect(
-        retryWithRecovery(operation, { maxAttempts: 0 })
-      ).rejects.toThrow('Operation failed');
+      await expect(retryWithRecovery(operation, { maxAttempts: 0 })).rejects.toThrow(
+        'Operation failed'
+      );
 
       expect(operation).toHaveBeenCalledTimes(1);
     });
@@ -536,4 +524,3 @@ describe('retryWithRecovery', () => {
     });
   });
 });
-

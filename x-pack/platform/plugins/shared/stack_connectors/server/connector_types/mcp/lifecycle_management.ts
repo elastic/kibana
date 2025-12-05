@@ -119,4 +119,3 @@ export class McpConnectionLifecycleManager {
     return Date.now() - this.lastActivityTime;
   }
 }
-

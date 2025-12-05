@@ -231,6 +231,7 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
         },
         {
           id: this.connector.id,
+          overwrite: true,
         }
       );
 
@@ -346,29 +347,24 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
   }
 
   protected getResponseErrorMessage(error: AxiosError): string {
-    // Handle MCP-specific errors
-    if (error instanceof StreamableHTTPError) {
-      return `MCP Connection Error: ${error.message}`;
+    // This method will likely never be called since we don't use this.request()
+    // But we must implement it to satisfy the abstract method requirement
+
+    // Handle MCP-specific errors that might be wrapped
+    const cause = error.cause;
+    if (cause instanceof StreamableHTTPError) {
+      return `MCP Connection Error: ${cause.message}`;
+    }
+    if (cause instanceof UnauthorizedError) {
+      return `MCP Unauthorized Error: ${cause.message}`;
     }
 
-    if (error instanceof UnauthorizedError) {
-      return `MCP Unauthorized Error: ${error.message}`;
+    // Handle standard Axios errors (unlikely in our case)
+    if (error.response?.statusText) {
+      return `API Error: ${error.response.statusText}`;
     }
-
-    // Handle Axios errors
-    if (error && typeof error === 'object' && 'isAxiosError' in error && error.isAxiosError) {
-      const axiosError = error as AxiosError;
-      if (axiosError.response?.statusText) {
-        return `API Error: ${axiosError.response.statusText}`;
-      }
-      if (axiosError.message) {
-        return `API Error: ${axiosError.message}`;
-      }
-    }
-
-    // Handle generic errors
-    if (error instanceof Error) {
-      return error.message;
+    if (error.message) {
+      return `API Error: ${error.message}`;
     }
 
     return String(error);

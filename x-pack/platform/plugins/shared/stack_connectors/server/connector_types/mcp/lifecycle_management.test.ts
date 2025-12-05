@@ -42,11 +42,7 @@ describe('McpConnectionLifecycleManager', () => {
 
     it('should initialize with custom timeout', () => {
       const customTimeout = 5000;
-      const manager = new McpConnectionLifecycleManager(
-        mockMcpClient,
-        logger,
-        customTimeout
-      );
+      const manager = new McpConnectionLifecycleManager(mockMcpClient, logger, customTimeout);
       expect(manager).toBeInstanceOf(McpConnectionLifecycleManager);
     });
   });
@@ -373,4 +369,3 @@ describe('McpConnectionLifecycleManager', () => {
     });
   });
 });
-

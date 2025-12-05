@@ -446,4 +446,3 @@ describe('buildHeadersFromSecrets', () => {
     });
   });
 });
-
