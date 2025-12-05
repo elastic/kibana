@@ -6,7 +6,6 @@
  */
 
 import type {
-  ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
@@ -23,6 +22,8 @@ import { unpackBufferToAssetsMap } from '../services/epm/archive';
 import { getBundledPackageForInstallation } from '../services/epm/packages/bundled_packages';
 import { PACKAGES_TO_INSTALL_WITH_STREAMING } from '../services/epm/packages/install';
 
+import { throwIfAborted } from './utils';
+
 const TASK_TYPE = 'fleet:reindex_integration_knowledge';
 
 export function registerReindexIntegrationKnowledgeTask(
@@ -33,15 +34,9 @@ export function registerReindexIntegrationKnowledgeTask(
       title: 'Fleet Reindex integration knowledge',
       timeout: '5m',
       maxAttempts: 3,
-      createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
-        let cancelled = false;
-        const isCancelled = () => cancelled;
+      createTaskRunner: ({ abortController }: { abortController: AbortController }) => {
         return {
           async run() {
-            if (isCancelled()) {
-              throw new Error('Task has been cancelled');
-            }
-
             // Check if user has appropriate license for knowledge base functionality
             if (!licenseService.isEnterprise()) {
               appContextService
@@ -50,10 +45,7 @@ export function registerReindexIntegrationKnowledgeTask(
               return;
             }
 
-            await reindexIntegrationKnowledgeForInstalledPackages();
-          },
-          async cancel() {
-            cancelled = true;
+            await reindexIntegrationKnowledgeForInstalledPackages(abortController);
           },
         };
       },
@@ -77,7 +69,9 @@ export async function scheduleReindexIntegrationKnowledgeTask(
   });
 }
 
-export async function reindexIntegrationKnowledgeForInstalledPackages() {
+export async function reindexIntegrationKnowledgeForInstalledPackages(
+  abortController: AbortController
+) {
   const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
   const esClient = appContextService.getInternalUserESClient();
   const logger = appContextService.getLogger();
@@ -85,6 +79,7 @@ export async function reindexIntegrationKnowledgeForInstalledPackages() {
   await pMap(
     installedPackages.saved_objects,
     async ({ attributes: installation }) => {
+      throwIfAborted(abortController);
       const knowledgeBase = await getPackageKnowledgeBase({ esClient, pkgName: installation.name });
       const everyKnowledgeBaseOnCurrentPackageVersion = knowledgeBase?.items.every(
         (item) => item.version === installation.version
