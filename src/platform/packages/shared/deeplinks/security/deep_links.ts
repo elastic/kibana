@@ -56,6 +56,7 @@ export enum SecurityPageName {
   hostsUncommonProcesses = 'hosts-uncommon_processes',
   kubernetes = 'kubernetes',
   landing = 'get_started',
+  launchpad = 'launchpad', // Used for Launchpad navigation group parent link
   network = 'network',
   networkAnomalies = 'network-anomalies',
   networkDns = 'network-dns',

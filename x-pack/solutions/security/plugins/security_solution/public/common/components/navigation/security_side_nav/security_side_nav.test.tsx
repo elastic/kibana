@@ -9,7 +9,6 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import { SecurityPageName } from '../../../../app/types';
-import { SecurityGroupName } from '@kbn/security-solution-navigation';
 import { TestProviders } from '../../../mock';
 import { BOTTOM_BAR_HEIGHT, EUI_HEADER_HEIGHT, SecuritySideNav } from './security_side_nav';
 import type { SolutionSideNavProps } from '@kbn/security-solution-side-nav';
@@ -167,37 +166,44 @@ describe('SecuritySideNav', () => {
   });
 
   describe('Launchpad', () => {
-    it('should group Launchpad items under Launchpad navigation item', () => {
-      const landingLink: NavigationLink = {
+    it('should render Launchpad as a parent link with children', () => {
+      const launchpadLink: NavigationLink = {
         id: SecurityPageName.landing,
-        title: 'Get started',
+        title: 'Launchpad',
         sideNavIcon: 'launch',
-      };
-      const siemReadinessLink: NavigationLink = {
-        id: SecurityPageName.siemReadiness,
-        title: 'SIEM Readiness',
-        sideNavIcon: 'check',
-      };
-      const aiValueLink: NavigationLink = {
-        id: SecurityPageName.aiValue,
-        title: 'Value report',
-        sideNavIcon: 'stats',
+        links: [
+          {
+            id: SecurityPageName.landing,
+            title: 'Get started',
+            sideNavIcon: 'launch',
+          },
+          {
+            id: SecurityPageName.siemReadiness,
+            title: 'SIEM Readiness',
+            sideNavIcon: 'check',
+          },
+          {
+            id: SecurityPageName.aiValue,
+            title: 'Value report',
+            sideNavIcon: 'stats',
+          },
+        ],
       };
 
-      mockUseNavLinks.mockReturnValue([landingLink, siemReadinessLink, aiValueLink]);
+      mockUseNavLinks.mockReturnValue([launchpadLink]);
       renderNav();
 
       const callArgs = mockSolutionSideNav.mock.calls[0][0];
       const launchpadItem = callArgs.items.find(
-        (item: { id: string }) => item.id === SecurityGroupName.launchpad
+        (item: { id: string }) => item.id === SecurityPageName.landing
       );
 
       expect(launchpadItem).toBeDefined();
       expect(launchpadItem).toMatchObject({
-        id: SecurityGroupName.launchpad,
+        id: SecurityPageName.landing,
+        label: 'Launchpad',
         position: 'bottom',
-        panelOpenerIconType: 'launch',
-        appendSeparator: true,
+        iconType: 'launch',
         items: expect.arrayContaining([
           expect.objectContaining({
             id: SecurityPageName.landing,
@@ -215,21 +221,23 @@ describe('SecuritySideNav', () => {
           }),
         ]),
       });
+    });
 
     it('should position Launchpad above Manage', () => {
-      const landingLink: NavigationLink = {
+      const launchpadLink: NavigationLink = {
         id: SecurityPageName.landing,
-        title: 'Get started',
+        title: 'Launchpad',
+        links: [],
       };
 
-      mockUseNavLinks.mockReturnValue([alertsNavLink, landingLink, settingsNavLink]);
+      mockUseNavLinks.mockReturnValue([alertsNavLink, launchpadLink, settingsNavLink]);
       renderNav();
 
       const callArgs = mockSolutionSideNav.mock.calls[0][0];
       const items = callArgs.items;
 
       const launchpadIndex = items.findIndex(
-        (item: { id: string }) => item.id === SecurityGroupName.launchpad
+        (item: { id: string }) => item.id === SecurityPageName.landing
       );
       const manageIndex = items.findIndex(
         (item: { id: string }) => item.id === SecurityPageName.administration
@@ -240,77 +248,34 @@ describe('SecuritySideNav', () => {
       expect(launchpadIndex).toBeLessThan(manageIndex);
     });
 
-    it('should not render Launchpad items as top-level items', () => {
-      const landingLink: NavigationLink = {
+
+    it('should exclude disabled Launchpad children', () => {
+      const launchpadLink: NavigationLink = {
         id: SecurityPageName.landing,
-        title: 'Get started',
-      };
-      const siemReadinessLink: NavigationLink = {
-        id: SecurityPageName.siemReadiness,
-        title: 'SIEM Readiness',
-      };
-
-      mockUseNavLinks.mockReturnValue([alertsNavLink, landingLink, siemReadinessLink]);
-      renderNav();
-
-      const callArgs = mockSolutionSideNav.mock.calls[0][0];
-      const items = callArgs.items;
-
-      // Launchpad items should not appear as top-level items
-      expect(items.some((item: { id: string }) => item.id === SecurityPageName.landing)).toBe(
-        false
-      );
-      expect(items.some((item: { id: string }) => item.id === SecurityPageName.siemReadiness)).toBe(
-        false
-      );
-
-      // But Launchpad group should exist
-      expect(items.some((item: { id: string }) => item.id === SecurityGroupName.launchpad)).toBe(
-        true
-      );
-    });
-
-    it('should exclude disabled Launchpad items from children', () => {
-      const landingLink: NavigationLink = {
-        id: SecurityPageName.landing,
-        title: 'Get started',
-      };
-      const disabledLink: NavigationLink = {
-        id: SecurityPageName.siemReadiness,
-        title: 'SIEM Readiness',
-        disabled: true,
+        title: 'Launchpad',
+        links: [
+          {
+            id: SecurityPageName.landing,
+            title: 'Get started',
+          },
+          {
+            id: SecurityPageName.siemReadiness,
+            title: 'SIEM Readiness',
+            disabled: true,
+          },
+        ],
       };
 
-      mockUseNavLinks.mockReturnValue([landingLink, disabledLink]);
+      mockUseNavLinks.mockReturnValue([launchpadLink]);
       renderNav();
 
       const callArgs = mockSolutionSideNav.mock.calls[0][0];
       const launchpadItem = callArgs.items.find(
-        (item: { id: string }) => item.id === SecurityGroupName.launchpad
+        (item: { id: string }) => item.id === SecurityPageName.landing
       );
 
       expect(launchpadItem?.items).toHaveLength(1);
       expect(launchpadItem?.items?.[0]?.id).toBe(SecurityPageName.landing);
-    });
-
-    it('should handle Launchpad with only disabled items', () => {
-      const disabledLink: NavigationLink = {
-        id: SecurityPageName.landing,
-        title: 'Get started',
-        disabled: true,
-      };
-
-      mockUseNavLinks.mockReturnValue([disabledLink]);
-      renderNav();
-
-      const callArgs = mockSolutionSideNav.mock.calls[0][0];
-      const launchpadItem = callArgs.items.find(
-        (item: { id: string }) => item.id === SecurityGroupName.launchpad
-      );
-
-      expect(launchpadItem).toBeDefined();
-      expect(launchpadItem?.items).toEqual([]);
-      expect(launchpadItem?.href).toBe('#');
     });
   });
 
