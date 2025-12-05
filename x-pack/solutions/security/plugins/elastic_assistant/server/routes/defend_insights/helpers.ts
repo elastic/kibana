@@ -107,8 +107,8 @@ export function getAssistantToolParams({
   esClient,
   connectorTimeout,
   langChainTimeout,
-  langSmithProject,
-  langSmithApiKey,
+  tracingProject,
+  tracingApiKey,
   logger,
   contentReferencesStore,
   latestReplacements,
@@ -123,8 +123,8 @@ export function getAssistantToolParams({
   esClient: ElasticsearchClient;
   connectorTimeout: number;
   langChainTimeout: number;
-  langSmithProject?: string;
-  langSmithApiKey?: string;
+  tracingProject?: string;
+  tracingApiKey?: string;
   logger: Logger;
   contentReferencesStore: ContentReferencesStore | undefined;
   latestReplacements: Replacements;
@@ -146,11 +146,11 @@ export function getAssistantToolParams({
   isEnabledKnowledgeBase: boolean;
 } {
   const traceOptions = {
-    projectName: langSmithProject,
+    projectName: tracingProject,
     tracers: [
       ...getLangSmithTracer({
-        apiKey: langSmithApiKey,
-        projectName: langSmithProject,
+        apiKey: tracingApiKey,
+        projectName: tracingProject,
         logger,
       }),
     ],
@@ -425,8 +425,8 @@ export const invokeDefendInsightsGraph = async ({
   apiConfig,
   connectorTimeout,
   esClient,
-  langSmithProject,
-  langSmithApiKey,
+  tracingProject,
+  tracingApiKey,
   latestReplacements,
   logger,
   onNewReplacements,
@@ -443,8 +443,8 @@ export const invokeDefendInsightsGraph = async ({
   apiConfig: ApiConfig;
   connectorTimeout: number;
   esClient: ElasticsearchClient;
-  langSmithProject?: string;
-  langSmithApiKey?: string;
+  tracingProject?: string;
+  tracingApiKey?: string;
   latestReplacements: Replacements;
   logger: Logger;
   onNewReplacements: (newReplacements: Replacements) => void;
@@ -466,11 +466,11 @@ export const invokeDefendInsightsGraph = async ({
   const tags = [DEFEND_INSIGHTS_ID, llmType, model].flatMap((tag) => tag ?? []);
 
   const traceOptions = {
-    projectName: langSmithProject,
+    projectName: tracingProject,
     tracers: [
       ...getLangSmithTracer({
-        apiKey: langSmithApiKey,
-        projectName: langSmithProject,
+        apiKey: tracingApiKey,
+        projectName: tracingProject,
         logger,
       }),
     ],

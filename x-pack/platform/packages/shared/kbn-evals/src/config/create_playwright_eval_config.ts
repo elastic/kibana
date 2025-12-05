@@ -51,9 +51,14 @@ export function createPlaywrightEvalsConfig({
   // gets the connectors from either the env variable or kibana.yml/kibana.dev.yml
   const connectors = getAvailableConnectors();
 
-  let evaluationConnectorId = process.env.EVALUATION_CONNECTOR_ID
-    ? String(process.env.EVALUATION_CONNECTOR_ID)
-    : undefined;
+  log.info(
+    `Discovered ${connectors.length} connector(s): ${connectors.map((c) => c.id).join(', ')}`
+  );
+
+  const rawEnvValue = process.env.EVALUATION_CONNECTOR_ID;
+  log.info(`EVALUATION_CONNECTOR_ID from process.env: ${rawEnvValue || '(not set)'}`);
+
+  let evaluationConnectorId = rawEnvValue ? String(rawEnvValue).trim() : undefined;
 
   if (!evaluationConnectorId) {
     evaluationConnectorId = connectors[0].id;
@@ -75,12 +80,34 @@ export function createPlaywrightEvalsConfig({
     );
   }
 
+  log.info(`Using evaluation connector: ${evaluationConnectorId}`);
+
+  // Filter connectors to use for running tests (optional, defaults to all)
+  let testConnectors = connectors;
+  const evaluationConnectorsEnv = process.env.EVALUATION_CONNECTORS;
+  if (evaluationConnectorsEnv) {
+    const allowedIds = evaluationConnectorsEnv.split(',').map((id) => id.trim());
+    testConnectors = connectors.filter((connector) => allowedIds.includes(connector.id));
+    if (testConnectors.length === 0) {
+      throw new Error(
+        `No connectors found matching EVALUATION_CONNECTORS="${evaluationConnectorsEnv}". Available connectors: ${connectors
+          .map((c) => c.id)
+          .join(', ')}`
+      );
+    }
+    log.info(
+      `Filtered to ${testConnectors.length} test connector(s): ${testConnectors
+        .map((c) => c.id)
+        .join(', ')}`
+    );
+  }
+
   // Priority of determining repetition number: env variable, config parameter, default
   const experimentRepetitions =
     parseInt(process.env.EVALUATION_REPETITIONS || '', 10) || repetitions || 1;
 
   // get just the 'local' project (for now)
-  const nextProjects = connectors.flatMap((connector) => {
+  const nextProjects = testConnectors.flatMap((connector) => {
     return (
       projects
         ?.filter((project) => project.name === 'local')

@@ -68,8 +68,8 @@ const mockConfig: AttackDiscoveryGenerationConfig = {
   replacements: {},
   model: 'gpt-4',
   size: 20,
-  langSmithProject: 'langSmithProject',
-  langSmithApiKey: 'langSmithApiKey',
+  tracingProject: 'tracingProject',
+  tracingApiKey: 'tracingApiKey',
 };
 
 // Helper function to create mock AttackDiscoveryApiAlert objects with required API fields

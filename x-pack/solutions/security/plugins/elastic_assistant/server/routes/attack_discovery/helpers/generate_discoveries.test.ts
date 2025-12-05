@@ -41,8 +41,8 @@ const mockConfig: AttackDiscoveryGenerationConfig = {
   replacements: {},
   model: 'gpt-4',
   size: 20,
-  langSmithProject: 'langSmithProject',
-  langSmithApiKey: 'langSmithApiKey',
+  tracingProject: 'tracingProject',
+  tracingApiKey: 'tracingApiKey',
 };
 
 describe('generateAttackDiscoveries', () => {
@@ -72,8 +72,8 @@ describe('generateAttackDiscoveries', () => {
       end: mockConfig.end,
       esClient: mockEsClient,
       filter: mockConfig.filter,
-      langSmithProject: mockConfig.langSmithProject,
-      langSmithApiKey: mockConfig.langSmithApiKey,
+      tracingProject: mockConfig.tracingProject,
+      tracingApiKey: mockConfig.tracingApiKey,
       latestReplacements: mockConfig.replacements,
       logger: mockLogger,
       onNewReplacements: expect.anything(),

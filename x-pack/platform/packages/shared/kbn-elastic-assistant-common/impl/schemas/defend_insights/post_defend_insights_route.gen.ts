@@ -30,8 +30,8 @@ export const DefendInsightsPostRequestBody = z.object({
    * LLM API configuration.
    */
   apiConfig: ApiConfig,
-  langSmithProject: z.string().optional(),
-  langSmithApiKey: z.string().optional(),
+  tracingProject: z.string().optional(),
+  tracingApiKey: z.string().optional(),
   model: z.string().optional(),
   replacements: Replacements.optional(),
   subAction: z.enum(['invokeAI', 'invokeStream']),

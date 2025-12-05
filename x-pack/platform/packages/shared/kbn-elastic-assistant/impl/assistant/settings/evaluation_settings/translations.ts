@@ -154,32 +154,32 @@ export const APM_URL_DESCRIPTION = i18n.translate(
   }
 );
 
-export const LANGSMITH_PROJECT_LABEL = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.evaluationSettings.langSmithProjectLabel',
+export const TRACING_PROJECT_LABEL = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.evaluationSettings.tracingProjectLabel',
   {
-    defaultMessage: 'LangSmith Project',
+    defaultMessage: 'Tracing Project',
   }
 );
 
-export const LANGSMITH_PROJECT_DESCRIPTION = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.evaluationSettings.langSmithProjectDescription',
+export const TRACING_PROJECT_DESCRIPTION = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.evaluationSettings.tracingProjectDescription',
   {
-    defaultMessage: 'LangSmith Project to write traces to.',
+    defaultMessage: 'Project name to write traces to (e.g. Phoenix or LangSmith project).',
   }
 );
 
-export const LANGSMITH_API_KEY_LABEL = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.evaluationSettings.langSmithApiKeyLabel',
+export const TRACING_API_KEY_LABEL = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.evaluationSettings.tracingApiKeyLabel',
   {
-    defaultMessage: 'LangSmith API Key',
+    defaultMessage: 'Tracing API Key',
   }
 );
 
-export const LANGSMITH_API_KEY_DESCRIPTION = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.evaluationSettings.langSmithApiKeyDescription',
+export const TRACING_API_KEY_DESCRIPTION = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.evaluationSettings.tracingApiKeyDescription',
   {
     defaultMessage:
-      'API Key for writing traces to LangSmith. Stored in Session Storage. Close tab to clear session.',
+      'API Key for writing traces. Stored in Session Storage. Close tab to clear session.',
   }
 );
 

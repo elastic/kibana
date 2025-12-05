@@ -366,10 +366,10 @@ export const langChainExecute = async ({
       eventType: INVOKE_ASSISTANT_SUCCESS_EVENT.eventType,
     },
     traceOptions: {
-      projectName: request.body.langSmithProject,
+      projectName: request.body.tracingProject,
       tracers: getLangSmithTracer({
-        apiKey: request.body.langSmithApiKey,
-        projectName: request.body.langSmithProject,
+        apiKey: request.body.tracingApiKey,
+        projectName: request.body.tracingProject,
         logger,
       }),
     },

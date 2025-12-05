@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Example, Run } from 'langsmith';
 import type {
   DefendInsights,
   DefendInsight,
@@ -16,34 +15,66 @@ import type { ExampleOutput } from './customPolicyResponseFailureEvaluator';
 import { EVALUATOR_ERRORS } from './constants';
 import {
   customPolicyResponseFailureEvaluator,
+  createPolicyResponseFailureEvaluator,
   isValidExampleOutput,
 } from './customPolicyResponseFailureEvaluator';
 
-const createMockRun = (insights: DefendInsights): Run =>
-  ({
-    id: 'test-run-id',
-    name: 'test-run',
-    run_type: 'chain',
-    inputs: {},
-    outputs: {
-      insights,
-    },
-    session_id: 'test-session',
-    extra: {},
-  } as Run);
+// Type for Phoenix evaluator params (matching EvaluatorParams from Phoenix)
+import type { EvaluatorParams } from '@arizeai/phoenix-client/dist/esm/types/experiments';
 
-const createMockExample = (insights: DefendInsights): Example =>
+// Mock types for backward compatibility with existing tests
+interface MockRun {
+  id: string;
+  name: string;
+  run_type: string;
+  inputs: Record<string, unknown>;
+  outputs?: { insights?: DefendInsights };
+  session_id: string;
+  extra: Record<string, unknown>;
+}
+
+interface MockExample {
+  id: string;
+  created_at: string;
+  runs: unknown[];
+  dataset_id: string;
+  inputs: Record<string, unknown>;
+  outputs?: { insights?: DefendInsights };
+  extra: Record<string, unknown>;
+}
+
+const createMockRun = (insights: DefendInsights): MockRun => ({
+  id: 'test-run-id',
+  name: 'test-run',
+  run_type: 'chain',
+  inputs: {},
+  outputs: {
+    insights,
+  },
+  session_id: 'test-session',
+  extra: {},
+});
+
+const createMockExample = (insights: DefendInsights): MockExample => ({
+  id: 'test-example-id',
+  created_at: '2025-01-01T00:00:00Z',
+  runs: [],
+  dataset_id: 'test-dataset',
+  inputs: {},
+  outputs: {
+    insights,
+  },
+  extra: {},
+});
+
+// Helper to convert mock run/example to Phoenix evaluator params
+const toPhoenixParams = (run: MockRun, example: MockExample | undefined) =>
   ({
-    id: 'test-example-id',
-    created_at: '2025-01-01T00:00:00Z',
-    runs: [],
-    dataset_id: 'test-dataset',
-    inputs: {},
-    outputs: {
-      insights,
-    },
-    extra: {},
-  } as Example);
+    input: run.inputs,
+    output: run.outputs,
+    expected: example?.outputs,
+    metadata: {},
+  } as EvaluatorParams);
 
 describe('customPolicyResponseFailureEvaluator', () => {
   const mockDefendInsight: DefendInsight = {
@@ -70,10 +101,10 @@ describe('customPolicyResponseFailureEvaluator', () => {
   const mockRun = createMockRun(mockDefendInsights);
   const mockExample = createMockExample(mockDefendInsights);
 
-  const evaluator = customPolicyResponseFailureEvaluator as (
-    run: Run,
-    example: Example | undefined
-  ) => { key: string; score: number; comment: string };
+  // Test both the legacy evaluator and Phoenix evaluator
+  const legacyEvaluator = (run: MockRun, example: MockExample | undefined) =>
+    customPolicyResponseFailureEvaluator(run, example as { outputs?: ExampleOutput } | undefined);
+  const phoenixEvaluator = createPolicyResponseFailureEvaluator();
 
   describe('isValidExampleOutput', () => {
     it('should return true for valid ExampleOutput', () => {
@@ -146,16 +177,16 @@ describe('customPolicyResponseFailureEvaluator', () => {
     });
   });
 
-  describe('customPolicyResponseFailureEvaluator', () => {
+  describe('legacy evaluator (backward compatibility)', () => {
     it('should return error when example output is invalid', () => {
       const invalidExample = {
         ...createMockExample([]),
         outputs: {
           insights: 'invalid',
         },
-      } as Example;
+      } as unknown as MockExample;
 
-      const result = evaluator(mockRun, invalidExample);
+      const result = legacyEvaluator(mockRun, invalidExample);
 
       expect(result).toEqual({
         key: 'correct',
@@ -165,7 +196,7 @@ describe('customPolicyResponseFailureEvaluator', () => {
     });
 
     it('should return error when example is undefined', () => {
-      const result = evaluator(mockRun, undefined);
+      const result = legacyEvaluator(mockRun, undefined);
 
       expect(result).toEqual({
         key: 'correct',
@@ -177,7 +208,7 @@ describe('customPolicyResponseFailureEvaluator', () => {
     it('should return error when run has no insights', () => {
       const runWithoutInsights = createMockRun([]);
 
-      const result = evaluator(runWithoutInsights, mockExample);
+      const result = legacyEvaluator(runWithoutInsights, mockExample);
 
       expect(result).toEqual({
         key: 'correct',
@@ -192,7 +223,7 @@ describe('customPolicyResponseFailureEvaluator', () => {
         outputs: undefined,
       };
 
-      const result = evaluator(runWithoutOutputs, mockExample);
+      const result = legacyEvaluator(runWithoutOutputs, mockExample);
 
       expect(result).toEqual({
         key: 'correct',
@@ -207,7 +238,7 @@ describe('customPolicyResponseFailureEvaluator', () => {
         { ...mockDefendInsight, group: 'different-group' },
       ]);
 
-      const result = evaluator(mockRun, exampleWithMoreInsights);
+      const result = legacyEvaluator(mockRun, exampleWithMoreInsights);
 
       expect(result.score).toBe(0);
       expect(result.comment).toContain(
@@ -222,7 +253,7 @@ describe('customPolicyResponseFailureEvaluator', () => {
         { ...mockDefendInsight, group: 'different-group' },
       ]);
 
-      const result = evaluator(mockRun, exampleWithDifferentGroup);
+      const result = legacyEvaluator(mockRun, exampleWithDifferentGroup);
 
       expect(result.score).toBe(0);
       expect(result.comment).toContain(
@@ -241,7 +272,7 @@ describe('customPolicyResponseFailureEvaluator', () => {
         },
       ]);
 
-      const result = evaluator(runWithDifferentLink, mockExample);
+      const result = legacyEvaluator(runWithDifferentLink, mockExample);
 
       expect(result.score).toBe(0);
       expect(result.comment).toContain(
@@ -257,7 +288,7 @@ describe('customPolicyResponseFailureEvaluator', () => {
         },
       ]);
 
-      const result = evaluator(runWithDifferentEvents, mockExample);
+      const result = legacyEvaluator(runWithDifferentEvents, mockExample);
 
       expect(result.score).toBe(0);
       expect(result.comment).toContain(
@@ -276,7 +307,7 @@ describe('customPolicyResponseFailureEvaluator', () => {
         },
       ]);
 
-      const result = evaluator(runWithDifferentEventId, mockExample);
+      const result = legacyEvaluator(runWithDifferentEventId, mockExample);
 
       expect(result.score).toBe(0);
       expect(result.comment).toContain(
@@ -295,7 +326,7 @@ describe('customPolicyResponseFailureEvaluator', () => {
         },
       ]);
 
-      const result = evaluator(runWithDifferentEndpointId, mockExample);
+      const result = legacyEvaluator(runWithDifferentEndpointId, mockExample);
 
       expect(result.score).toBe(0);
       expect(result.comment).toContain(
@@ -314,7 +345,7 @@ describe('customPolicyResponseFailureEvaluator', () => {
         },
       ]);
 
-      const result = evaluator(runWithDifferentValue, mockExample);
+      const result = legacyEvaluator(runWithDifferentValue, mockExample);
 
       expect(result.score).toBe(0);
       expect(result.comment).toContain(
@@ -323,7 +354,7 @@ describe('customPolicyResponseFailureEvaluator', () => {
     });
 
     it('should return perfect score when everything matches exactly', () => {
-      const result = evaluator(mockRun, mockExample);
+      const result = legacyEvaluator(mockRun, mockExample);
 
       expect(result.key).toBe('correct');
       expect(result.score).toBe(1);
@@ -341,7 +372,7 @@ describe('customPolicyResponseFailureEvaluator', () => {
         },
       ]);
 
-      const result = evaluator(runWithSimilarMessage, mockExample);
+      const result = legacyEvaluator(runWithSimilarMessage, mockExample);
 
       expect(result.key).toBe('correct');
       expect(result.score).toBeGreaterThan(0);
@@ -370,7 +401,7 @@ describe('customPolicyResponseFailureEvaluator', () => {
         },
       ]);
 
-      const result = evaluator(runWithEmptyMessage, exampleWithEmptyMessage);
+      const result = legacyEvaluator(runWithEmptyMessage, exampleWithEmptyMessage);
 
       expect(result.score).toBe(0); // Empty messages result in 0 similarity
       expect(result.comment).toBe('All checks passed');
@@ -387,7 +418,7 @@ describe('customPolicyResponseFailureEvaluator', () => {
       const exampleWithoutRemediation = createMockExample([insightWithoutRemediation]);
       const runWithoutRemediation = createMockRun([insightWithoutRemediation]);
 
-      const result = evaluator(runWithoutRemediation, exampleWithoutRemediation);
+      const result = legacyEvaluator(runWithoutRemediation, exampleWithoutRemediation);
 
       // Should fail validation because remediation.message is required to be a string
       expect(result.score).toBe(0);
@@ -405,7 +436,7 @@ describe('customPolicyResponseFailureEvaluator', () => {
       const exampleWithoutEvents = createMockExample([insightWithoutEvents]);
       const runWithoutEvents = createMockRun([insightWithoutEvents]);
 
-      const result = evaluator(runWithoutEvents, exampleWithoutEvents);
+      const result = legacyEvaluator(runWithoutEvents, exampleWithoutEvents);
 
       expect(result.key).toBe('correct');
       expect(result.score).toBe(1); // Perfect match for identical messages
@@ -424,7 +455,7 @@ describe('customPolicyResponseFailureEvaluator', () => {
         },
       ]);
 
-      const result = evaluator(runWithMultipleIssues, mockExample);
+      const result = legacyEvaluator(runWithMultipleIssues, mockExample);
 
       expect(result.score).toBe(0);
       expect(result.comment).toContain('Failed checks:');
@@ -437,6 +468,34 @@ describe('customPolicyResponseFailureEvaluator', () => {
       expect(result.comment).toContain(
         'Event with id "wrong-event" for requirement "policy-response-failure" is not matching'
       );
+    });
+  });
+
+  describe('Phoenix evaluator', () => {
+    it('should have correct name and kind', () => {
+      expect(phoenixEvaluator.name).toBe('defend_insights_policy_response_failure');
+      expect(phoenixEvaluator.kind).toBe('CODE');
+    });
+
+    it('should return FAIL label when evaluation fails', async () => {
+      const result = await phoenixEvaluator.evaluate(toPhoenixParams(mockRun, undefined));
+
+      expect(result.label).toBe('FAIL');
+      expect(result.score).toBe(0);
+    });
+
+    it('should return PASS label when everything matches', async () => {
+      const result = await phoenixEvaluator.evaluate(toPhoenixParams(mockRun, mockExample));
+
+      expect(result.label).toBe('PASS');
+      expect(result.score).toBe(1);
+    });
+
+    it('should produce same scores as legacy evaluator', async () => {
+      const legacyResult = legacyEvaluator(mockRun, mockExample);
+      const phoenixResult = await phoenixEvaluator.evaluate(toPhoenixParams(mockRun, mockExample));
+
+      expect(phoenixResult.score).toBe(legacyResult.score);
     });
   });
 
@@ -467,7 +526,7 @@ describe('customPolicyResponseFailureEvaluator', () => {
       const example = createMockExample([insight2]);
       const run = createMockRun([insight1]);
 
-      const result = evaluator(run, example);
+      const result = legacyEvaluator(run, example);
 
       expect(result.score).toBeGreaterThan(0); // Should have some similarity due to shared words
       expect(result.score).toBeLessThan(1); // But not perfect since messages are different
@@ -489,7 +548,7 @@ describe('customPolicyResponseFailureEvaluator', () => {
       const example = createMockExample([insight2]);
       const run = createMockRun([insight1]);
 
-      const result = evaluator(run, example);
+      const result = legacyEvaluator(run, example);
 
       expect(result.score).toBeLessThan(0.5); // Should have low similarity
     });
@@ -510,7 +569,7 @@ describe('customPolicyResponseFailureEvaluator', () => {
       const example = createMockExample([insight2]);
       const run = createMockRun([insight1]);
 
-      const result = evaluator(run, example);
+      const result = legacyEvaluator(run, example);
 
       expect(result.score).toBe(0); // Should be 0 when no meaningful tokens
     });

@@ -334,8 +334,8 @@ Example: .alerts-security.alerts-default
 } ``` 
       */
   filter: z.object({}).catchall(z.unknown()).optional(),
-  langSmithProject: z.string().optional(),
-  langSmithApiKey: z.string().optional(),
+  tracingProject: z.string().optional(),
+  tracingApiKey: z.string().optional(),
   model: z.string().optional(),
   replacements: Replacements.optional(),
   size: z.number(),

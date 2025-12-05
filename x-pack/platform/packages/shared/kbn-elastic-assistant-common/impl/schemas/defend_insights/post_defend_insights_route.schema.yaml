@@ -41,9 +41,9 @@ paths:
                 apiConfig:
                   $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/ApiConfig'
                   description: LLM API configuration.
-                langSmithProject:
+                tracingProject:
                   type: string
-                langSmithApiKey:
+                tracingApiKey:
                   type: string
                 model:
                   type: string

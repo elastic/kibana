@@ -13,25 +13,50 @@ import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { runDefendInsightsEvaluations } from '.';
 import type { DefaultDefendInsightsGraph } from '../../graphs/default_defend_insights_graph';
 import { getLlmType } from '../../../../routes/utils';
+import { type PhoenixConfig } from '../../../../routes/evaluate/utils';
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
 import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
-jest.mock('langsmith/evaluation', () => ({
-  evaluate: jest.fn(async (predict: Function) =>
-    predict({
-      overrides: {
-        data: 'test',
+// Mock Phoenix experiment
+const mockRunExperiment = jest.fn(
+  async ({ task }: { task: (params: unknown) => Promise<unknown> }) => {
+    // Simulate calling the task with example input
+    await task({
+      input: {
+        overrides: {
+          data: 'test',
+        },
       },
-    })
-  ),
+      output: {},
+      metadata: {},
+    });
+    return { experimentId: 'test-experiment-id' };
+  }
+);
+
+jest.mock('@arizeai/phoenix-client/experiments', () => ({
+  runExperiment: (params: { task: (params: unknown) => Promise<unknown> }) =>
+    mockRunExperiment(params),
 }));
 
-jest.mock('../helpers/get_custom_evaluator', () => ({
-  getDefendInsightsCustomEvaluator: jest.fn().mockReturnValue('mocked-evaluator'),
+jest.mock('../helpers/get_custom_evaluator/customPolicyResponseFailureEvaluator', () => ({
+  createPolicyResponseFailureEvaluator: jest.fn().mockReturnValue({
+    name: 'policy_response_failure',
+    kind: 'CODE',
+    evaluate: jest.fn(),
+  }),
 }));
 
 jest.mock('../helpers/get_graph_input_overrides', () => ({
   getDefendInsightsGraphInputOverrides: jest.fn((input) => input.overrides ?? {}),
+}));
+
+jest.mock('../../../../routes/evaluate/utils', () => ({
+  createPhoenixClient: jest.fn(() => ({
+    getDataset: jest.fn(),
+    createDataset: jest.fn(),
+  })),
+  getLlmType: jest.requireActual('../../../../routes/utils').getLlmType,
 }));
 
 const mockExperimentConnector = createMockConnector({
@@ -48,11 +73,16 @@ const mockExperimentConnector = createMockConnector({
 });
 
 const datasetName = 'test-dataset';
-const evaluatorConnectorId = 'test-evaluator-connector-id';
-const langSmithApiKey = 'test-api-key';
+const evaluationId = 'test-evaluation-id';
+const tracingApiKey = 'test-api-key';
 const logger = loggerMock.create();
 const connectors = [mockExperimentConnector];
 const projectName = 'test-lang-smith-project';
+
+const phoenixConfig: PhoenixConfig = {
+  baseUrl: 'http://localhost:6006',
+  headers: { Authorization: `Bearer ${tracingApiKey}` },
+};
 
 const graphs: Array<{
   connector: Connector;
@@ -70,7 +100,7 @@ const graphs: Array<{
     projectName,
     tracers: [
       ...getLangSmithTracer({
-        apiKey: langSmithApiKey,
+        apiKey: tracingApiKey,
         projectName,
         logger,
       }),
@@ -93,13 +123,13 @@ const graphs: Array<{
 describe('runDefendInsightsEvaluations', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('predict() invokes the graph with the expected overrides', async () => {
+  it('invokes the graph with the expected overrides from Phoenix task', async () => {
     await runDefendInsightsEvaluations({
-      evaluatorConnectorId,
       datasetName,
+      evaluationId,
       graphs,
-      langSmithApiKey,
       logger,
+      phoenixConfig,
       insightType: DefendInsightType.Enum.incompatible_antivirus,
     });
 
@@ -121,11 +151,11 @@ describe('runDefendInsightsEvaluations', () => {
     (graphs[0].graph.invoke as jest.Mock).mockRejectedValue(error);
 
     await runDefendInsightsEvaluations({
-      evaluatorConnectorId,
       datasetName,
+      evaluationId,
       graphs,
-      langSmithApiKey,
       logger,
+      phoenixConfig,
       insightType: DefendInsightType.Enum.incompatible_antivirus,
     });
 

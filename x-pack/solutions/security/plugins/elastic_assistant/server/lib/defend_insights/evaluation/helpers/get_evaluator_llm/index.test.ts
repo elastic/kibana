@@ -70,7 +70,7 @@ describe('getEvaluatorLlm', () => {
         connectorTimeout,
         evaluatorConnectorId,
         experimentConnector,
-        langSmithApiKey: undefined,
+        tracingApiKey: undefined,
         logger,
       });
 
@@ -90,7 +90,7 @@ describe('getEvaluatorLlm', () => {
         connectorTimeout,
         evaluatorConnectorId: undefined,
         experimentConnector,
-        langSmithApiKey: undefined,
+        tracingApiKey: undefined,
         logger,
       });
 
@@ -110,7 +110,7 @@ describe('getEvaluatorLlm', () => {
         connectorTimeout,
         evaluatorConnectorId,
         experimentConnector,
-        langSmithApiKey: undefined,
+        tracingApiKey: undefined,
         logger,
       });
 
@@ -132,7 +132,7 @@ describe('getEvaluatorLlm', () => {
       connectorTimeout,
       evaluatorConnectorId,
       experimentConnector,
-      langSmithApiKey: undefined,
+      tracingApiKey: undefined,
       logger,
     });
 
@@ -151,7 +151,7 @@ describe('getEvaluatorLlm', () => {
       connectorTimeout,
       evaluatorConnectorId,
       experimentConnector,
-      langSmithApiKey: 'some-key',
+      tracingApiKey: 'some-key',
       logger,
     });
 

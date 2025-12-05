@@ -14,13 +14,16 @@ import type { Logger } from '@kbn/logging';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { asyncForEach } from '@kbn/std';
-import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { ActionsClientLlm } from '@kbn/langchain/server';
 
 import type { DefendInsightsGraphMetadata } from '../../langchain/graphs';
 import type { DefaultDefendInsightsGraph } from '../graphs/default_defend_insights_graph';
 import type { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
-import { createOrUpdateEvaluationResults, EvaluationStatus } from '../../../routes/evaluate/utils';
+import {
+  createOrUpdateEvaluationResults,
+  EvaluationStatus,
+  type PhoenixConfig,
+} from '../../../routes/evaluate/utils';
 import { getLlmType } from '../../../routes/utils';
 import { DEFAULT_EVAL_ANONYMIZATION_FIELDS } from '../../attack_discovery/evaluation/constants';
 import { getDefendInsightsPrompt } from '../graphs/default_defend_insights_graph/prompts';
@@ -38,10 +41,8 @@ export const evaluateDefendInsights = async ({
   kbDataClient,
   esClientInternalUser,
   evaluationId,
-  evaluatorConnectorId,
-  langSmithApiKey,
-  langSmithProject,
   logger,
+  phoenixConfig,
   runName,
   size,
 }: {
@@ -56,10 +57,8 @@ export const evaluateDefendInsights = async ({
   kbDataClient?: AIAssistantKnowledgeBaseDataClient;
   esClientInternalUser: ElasticsearchClient;
   evaluationId: string;
-  evaluatorConnectorId: string | undefined;
-  langSmithApiKey: string | undefined;
-  langSmithProject: string | undefined;
   logger: Logger;
+  phoenixConfig: PhoenixConfig;
   runName: string;
   size: number;
 }): Promise<void> => {
@@ -87,15 +86,10 @@ export const evaluateDefendInsights = async ({
             savedObjectsClient: soClient,
           });
 
+          // Trace options - tracers can be empty for Phoenix (tracing handled separately)
           const traceOptions = {
-            projectName: langSmithProject,
-            tracers: [
-              ...getLangSmithTracer({
-                apiKey: langSmithApiKey,
-                projectName: langSmithProject,
-                logger,
-              }),
-            ],
+            projectName: undefined,
+            tracers: [] as LangChainTracer[],
           };
 
           const llm = new ActionsClientLlm({
@@ -134,11 +128,11 @@ export const evaluateDefendInsights = async ({
       // run the evaluations for each graph:
       await runDefendInsightsEvaluations({
         insightType,
-        evaluatorConnectorId,
         datasetName,
+        evaluationId,
         graphs,
-        langSmithApiKey,
         logger,
+        phoenixConfig,
       });
     }
   );

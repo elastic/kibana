@@ -10,11 +10,11 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient, Connector } from '@kbn/actions-plugin/server';
 import { ActionsClientLlm } from '@kbn/langchain/server';
-import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
 
 import { getLlmType } from '../../../routes/utils';
+import { type PhoenixConfig } from '../../../routes/evaluate/utils';
 import { runDefendInsightsEvaluations } from './run_evaluations';
 import { evaluateDefendInsights } from '.';
 import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
@@ -23,14 +23,15 @@ jest.mock('./run_evaluations');
 jest.mock('@kbn/langchain/server', () => ({
   ActionsClientLlm: jest.fn(),
 }));
-jest.mock('@kbn/langchain/server/tracers/langsmith', () => ({
-  getLangSmithTracer: jest.fn().mockReturnValue(['mockTracer']),
-}));
 jest.mock('../../../routes/utils', () => ({
   getLlmType: jest.fn().mockReturnValue('mock-llm-type'),
 }));
+jest.mock('../../../routes/evaluate/utils', () => ({
+  createOrUpdateEvaluationResults: jest.fn(),
+  EvaluationStatus: { COMPLETE: 'complete' },
+}));
 jest.mock('../graphs/default_defend_insights_graph/prompts', () => ({
-  getDefendInsightsPrompt: jest.fn().mockReturnValue({
+  getDefendInsightsPrompt: jest.fn().mockResolvedValue({
     default: 'default',
     refine: 'refine',
     continue: 'continue',
@@ -43,6 +44,11 @@ jest.mock('../graphs/default_defend_insights_graph/prompts', () => ({
 }));
 
 const mockLogger = { debug: jest.fn(), error: jest.fn(), warn: jest.fn(), info: jest.fn() };
+
+const phoenixConfig: PhoenixConfig = {
+  baseUrl: 'http://localhost:6006',
+  headers: { Authorization: 'Bearer api-key' },
+};
 
 describe('evaluateDefendInsights', () => {
   beforeEach(() => {
@@ -95,20 +101,13 @@ describe('evaluateDefendInsights', () => {
       soClient: mockSoClient,
       esClientInternalUser: mockEsClientInternalUser,
       evaluationId: 'eval-1',
-      evaluatorConnectorId: 'eval-connector',
-      langSmithApiKey: 'api-key',
-      langSmithProject: 'project-name',
       logger: mockLogger as unknown as Logger,
+      phoenixConfig,
       runName: 'test-run',
       size: 10,
     });
 
     expect(getLlmType).toHaveBeenCalledWith('.test');
-    expect(getLangSmithTracer).toHaveBeenCalledWith({
-      apiKey: 'api-key',
-      projectName: 'project-name',
-      logger: mockLogger,
-    });
     expect(ActionsClientLlm).toHaveBeenCalledWith({
       actionsClient: mockActionsClient,
       connectorId: '1',
@@ -117,9 +116,10 @@ describe('evaluateDefendInsights', () => {
       temperature: 0,
       timeout: 1000,
       traceOptions: {
-        projectName: 'project-name',
-        tracers: ['mockTracer'],
+        projectName: undefined,
+        tracers: [],
       },
+      model: undefined,
     });
 
     expect(mockGetDefaultDefendInsightsGraph).toHaveBeenCalledWith({
@@ -144,8 +144,9 @@ describe('evaluateDefendInsights', () => {
     });
 
     expect(runDefendInsightsEvaluations).toHaveBeenCalledWith({
-      evaluatorConnectorId: 'eval-connector',
+      insightType: DefendInsightType.Enum.incompatible_antivirus,
       datasetName: 'test-dataset',
+      evaluationId: 'eval-1',
       graphs: [
         expect.objectContaining({
           connector: mockConnectors[0],
@@ -153,14 +154,13 @@ describe('evaluateDefendInsights', () => {
           llmType: 'mock-llm-type',
           name: 'test-run - Test Connector - eval-1 - Defend Insights',
           traceOptions: {
-            projectName: 'project-name',
-            tracers: ['mockTracer'],
+            projectName: undefined,
+            tracers: [],
           },
         }),
       ],
-      insightType: 'incompatible_antivirus',
-      langSmithApiKey: 'api-key',
       logger: mockLogger,
+      phoenixConfig,
     });
   });
 });

@@ -79,13 +79,13 @@ export const EvaluationSettings: React.FC = React.memo(() => {
     },
     [setTraceOptions, traceOptions]
   );
-  const onLangSmithProjectChange = useCallback(
+  const onTracingProjectChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setTraceOptions({ ...traceOptions, langSmithProject: e.target.value });
     },
     [setTraceOptions, traceOptions]
   );
-  const onLangSmithApiKeyChange = useCallback(
+  const onTracingApiKeyChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setTraceOptions({ ...traceOptions, langSmithApiKey: e.target.value });
     },
@@ -196,11 +196,11 @@ export const EvaluationSettings: React.FC = React.memo(() => {
         ? { evaluatorConnectorId: selectedEvaluatorModel[0].key }
         : {};
 
-    const langSmithApiKey = isEmpty(traceOptions.langSmithApiKey)
+    const tracingApiKey = isEmpty(traceOptions.langSmithApiKey)
       ? undefined
       : traceOptions.langSmithApiKey;
 
-    const langSmithProject = isEmpty(traceOptions.langSmithProject)
+    const tracingProject = isEmpty(traceOptions.langSmithProject)
       ? undefined
       : traceOptions.langSmithProject;
 
@@ -209,8 +209,8 @@ export const EvaluationSettings: React.FC = React.memo(() => {
       graphs: selectedGraphOptions.map((option) => option.label).sort(),
       datasetName: selectedDatasetOptions[0]?.label,
       ...evaluatorConnectorId,
-      langSmithApiKey,
-      langSmithProject,
+      tracingApiKey,
+      tracingProject,
       runName,
       size: Number(size),
       screenContext: {
@@ -336,26 +336,26 @@ export const EvaluationSettings: React.FC = React.memo(() => {
             </EuiFormRow>
             <EuiFormRow
               display="rowCompressed"
-              label={i18n.LANGSMITH_PROJECT_LABEL}
+              label={i18n.TRACING_PROJECT_LABEL}
               fullWidth
-              helpText={i18n.LANGSMITH_PROJECT_DESCRIPTION}
+              helpText={i18n.TRACING_PROJECT_DESCRIPTION}
             >
               <EuiFieldText
                 value={traceOptions.langSmithProject}
-                onChange={onLangSmithProjectChange}
-                aria-label={i18n.LANGSMITH_PROJECT_LABEL}
+                onChange={onTracingProjectChange}
+                aria-label={i18n.TRACING_PROJECT_LABEL}
               />
             </EuiFormRow>
             <EuiFormRow
               display="rowCompressed"
-              label={i18n.LANGSMITH_API_KEY_LABEL}
+              label={i18n.TRACING_API_KEY_LABEL}
               fullWidth
-              helpText={i18n.LANGSMITH_API_KEY_DESCRIPTION}
+              helpText={i18n.TRACING_API_KEY_DESCRIPTION}
             >
               <EuiFieldText
                 value={traceOptions.langSmithApiKey}
-                onChange={onLangSmithApiKeyChange}
-                aria-label={i18n.LANGSMITH_API_KEY_LABEL}
+                onChange={onTracingApiKeyChange}
+                aria-label={i18n.TRACING_API_KEY_LABEL}
               />
             </EuiFormRow>
           </>

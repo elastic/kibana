@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { Example, Run } from 'langsmith';
-import type { EvaluatorT } from 'langsmith/evaluation';
 import type { DefendInsights, DefendInsight } from '@kbn/elastic-assistant-common';
+import type { Evaluator } from '@arizeai/phoenix-client/dist/esm/types/experiments';
 
 import { EVALUATOR_ERRORS } from './constants';
 
@@ -16,7 +15,7 @@ export interface ExampleOutput {
 }
 
 export function isValidExampleOutput(output: ExampleOutput): output is ExampleOutput {
-  // Check if output is an object and has the expected structure. It's defined in LangSmith, hence needs validation.
+  // Check if output is an object and has the expected structure. It's defined in Phoenix dataset, hence needs validation.
   return (
     output &&
     Array.isArray(output.insights) &&
@@ -31,14 +30,6 @@ export function isValidExampleOutput(output: ExampleOutput): output is ExampleOu
         typeof insight.remediation?.message === 'string'
     )
   );
-}
-
-function failWithComment(comment: string): { key: string; score: number; comment: string } {
-  return {
-    key: 'correct',
-    score: 0,
-    comment,
-  };
 }
 
 function tokenize(text: string): string[] {
@@ -79,17 +70,34 @@ function getSimilarityScore(insight: DefendInsight, requirement: DefendInsight):
   return cosineSimilarity(message, reqMessage);
 }
 
-export const customPolicyResponseFailureEvaluator: EvaluatorT = (
-  run: Run,
-  example: Example | undefined
-) => {
-  const expectedOutput = example?.outputs as ExampleOutput;
+/**
+ * Core evaluation logic for policy response failure defend insights.
+ *
+ * This evaluator validates:
+ * - Insight count matches expected count
+ * - Insight groups match expected groups
+ * - Links match expected links
+ * - Events match (count, IDs, endpoint IDs, values)
+ * - Calculates similarity score for remediation messages using cosine similarity
+ */
+function evaluatePolicyResponseFailure(
+  output: unknown,
+  expected: unknown
+): { score: number; label: string; explanation: string } {
+  const expectedOutput = expected as ExampleOutput;
   if (!isValidExampleOutput(expectedOutput)) {
-    return failWithComment(EVALUATOR_ERRORS.INVALID_OUTPUT_STRUCTURE);
+    return {
+      score: 0,
+      label: 'FAIL',
+      explanation: EVALUATOR_ERRORS.INVALID_OUTPUT_STRUCTURE,
+    };
   }
 
   const { insights: requirements } = expectedOutput;
-  const insights: Record<string, DefendInsight> = (run.outputs?.insights ?? []).reduce(
+
+  // Extract insights from output
+  const outputObj = output as { insights?: DefendInsights } | undefined;
+  const insights: Record<string, DefendInsight> = (outputObj?.insights ?? []).reduce(
     (acc: Record<string, DefendInsight>, insight: DefendInsight) => {
       acc[insight.group] = insight;
       return acc;
@@ -98,7 +106,11 @@ export const customPolicyResponseFailureEvaluator: EvaluatorT = (
   );
 
   if (Object.keys(insights).length === 0) {
-    return failWithComment(EVALUATOR_ERRORS.NO_RESULTS);
+    return {
+      score: 0,
+      label: 'FAIL',
+      explanation: EVALUATOR_ERRORS.NO_RESULTS,
+    };
   }
 
   const failedChecks: Array<{ label: string; details?: string[] }> = [];
@@ -187,15 +199,43 @@ export const customPolicyResponseFailureEvaluator: EvaluatorT = (
         )
       : 0;
 
-  const comment = failedChecks.length
+  const explanation = failedChecks.length
     ? `Failed checks:\n${failedChecks
         .map((c) => (c.details?.length ? `${c.label}:\n  - ${c.details.join('\n  - ')}` : c.label))
         .join('\n\n')}`
     : 'All checks passed';
 
   return {
-    key: 'correct',
     score: failedChecks.length ? 0 : score,
-    comment,
+    label: failedChecks.length ? 'FAIL' : 'PASS',
+    explanation,
+  };
+}
+
+/**
+ * Creates a Phoenix-compatible evaluator for policy response failure defend insights.
+ */
+export function createPolicyResponseFailureEvaluator(): Evaluator {
+  return {
+    name: 'defend_insights_policy_response_failure',
+    kind: 'CODE',
+    evaluate: async ({ output, expected }) => evaluatePolicyResponseFailure(output, expected),
+  };
+}
+
+/**
+ * @deprecated Use createPolicyResponseFailureEvaluator() for Phoenix-compatible evaluator.
+ * This is kept for backward compatibility with existing LangSmith-style test interfaces.
+ */
+export const customPolicyResponseFailureEvaluator = (
+  run: { outputs?: { insights?: DefendInsights } },
+  example: { outputs?: ExampleOutput } | undefined
+): { key: string; score: number; comment: string } => {
+  const result = evaluatePolicyResponseFailure(run.outputs, example?.outputs);
+
+  return {
+    key: 'correct',
+    score: result.score,
+    comment: result.explanation,
   };
 };

@@ -99,8 +99,8 @@ const mockRequestBody: PostAttackDiscoveryGenerateRequestBody = {
   replacements: {},
   model: 'gpt-4',
   size: 20,
-  langSmithProject: 'langSmithProject',
-  langSmithApiKey: 'langSmithApiKey',
+  tracingProject: 'tracingProject',
+  tracingApiKey: 'tracingApiKey',
 };
 
 describe('postAttackDiscoveryGenerateRoute', () => {

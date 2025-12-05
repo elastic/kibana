@@ -1,0 +1,18 @@
+{
+  "name": "attack_discovery: all scenarios",
+  "description": "Evaluate Attack Discovery end-to-end scenarios with graph state overrides",
+  "examples": [
+    {
+      "input": {
+        "input": "Summarize the detected attack campaigns in my environment."
+      },
+      "output": {
+        "reference": "The environment shows multiple correlated alerts forming several campaigns. Prioritize those with the highest critical alerts and affected hosts."
+      },
+      "metadata": {
+        "dataset_split": ["base"]
+      }
+    }
+  ]
+}
+

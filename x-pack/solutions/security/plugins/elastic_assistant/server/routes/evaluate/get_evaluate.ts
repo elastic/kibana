@@ -19,7 +19,7 @@ import { buildResponse } from '../../lib/build_response';
 import type { ElasticAssistantRequestHandlerContext } from '../../types';
 import { performChecks } from '../helpers';
 import { ASSISTANT_GRAPH_MAP } from '../../lib/langchain/graphs';
-import { fetchLangSmithDatasets, getEvaluationResults } from './utils';
+import { fetchPhoenixDatasets, getEvaluationResults, type PhoenixConfig } from './utils';
 
 export const getEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandlerContext>) => {
   router.versioned
@@ -61,8 +61,17 @@ export const getEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandlerC
           return checkResponse.response;
         }
 
-        const datasets = await fetchLangSmithDatasets({
+        // Get Phoenix config from environment variables
+        const phoenixConfig: PhoenixConfig = {
+          baseUrl: process.env.PHOENIX_BASE_URL ?? 'http://localhost:6006',
+          headers: process.env.PHOENIX_API_KEY
+            ? { Authorization: `Bearer ${process.env.PHOENIX_API_KEY}` }
+            : {},
+        };
+
+        const datasets = await fetchPhoenixDatasets({
           logger,
+          phoenixConfig,
         });
 
         const results = await getEvaluationResults({ esClientInternalUser, logger });
