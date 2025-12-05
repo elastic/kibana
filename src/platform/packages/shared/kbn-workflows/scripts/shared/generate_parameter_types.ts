@@ -79,7 +79,7 @@ export function generateParameterTypesForOperation(
 function extractPropertiesFromSchema(
   schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject,
   openApiDocument: OpenAPIV3.Document,
-  visited: Set<string> = new Set()
+  visited: WeakSet<object> = new WeakSet()
 ): string[] {
   // Resolve references first
   const resolvedSchema = getOrResolveObject<OpenAPIV3.SchemaObject>(schema, openApiDocument);
@@ -87,12 +87,11 @@ function extractPropertiesFromSchema(
     return [];
   }
 
-  // Prevent infinite recursion for circular references
-  const schemaId = JSON.stringify(resolvedSchema);
-  if (visited.has(schemaId)) {
+  // Prevent infinite recursion for circular references using object identity
+  if (visited.has(resolvedSchema)) {
     return [];
   }
-  visited.add(schemaId);
+  visited.add(resolvedSchema);
 
   const properties: Set<string> = new Set();
 
