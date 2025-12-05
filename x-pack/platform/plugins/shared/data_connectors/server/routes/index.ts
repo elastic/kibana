@@ -80,11 +80,7 @@ export function registerRoutes(
   router.get(
     {
       path: '/api/data_connectors/{id}',
-      validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
-      },
+      validate: { params: schema.object({ id: schema.string() }) },
       security: {
         authz: {
           enabled: false,
@@ -252,6 +248,53 @@ export function registerRoutes(
           statusCode: 500,
           body: {
             message: `Failed to delete all connectors: ${(error as Error).message}`,
+          },
+        });
+      }
+    }
+  );
+
+  // Delete data connector by ID
+  router.delete(
+    {
+      path: '/api/data_connectors/{id}',
+      validate: { params: schema.object({ id: schema.string() }) },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+    },
+    async (context, request, response) => {
+      const coreContext = await context.core;
+
+      try {
+        const savedObjectsClient = coreContext.savedObjects.client;
+        const savedObject: SavedObject<DataConnectorAttributes> = await savedObjectsClient.get(
+          DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+          request.params.id
+        );
+        const kscId: string = savedObject.attributes.kscId;
+
+        const [, { actions }] = await getStartServices();
+        const actionsClient = await actions.getActionsClientWithRequest(request);
+        await actionsClient.delete({ id: kscId });
+        logger.info(`Successfully deleted Kibana stack connector ${kscId}`);
+
+        await savedObjectsClient.delete(DATA_CONNECTOR_SAVED_OBJECT_TYPE, savedObject.id);
+        logger.info(`Successfully deleted data connector ${savedObject.id}`);
+        return response.ok({
+          body: {
+            success: true,
+          },
+        });
+      } catch (error) {
+        logger.error(`Failed to delete connector: ${(error as Error).message}`);
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: `Failed to delete connector: ${(error as Error).message}`,
           },
         });
       }

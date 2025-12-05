@@ -15,9 +15,9 @@ export interface DataConnectorAttributes {
   createdAt: string;
   updatedAt: string;
   features?: string[];
-  workflowIds?: string[];
-  toolIds?: string[];
-  kscId?: string;
+  workflowIds: string[];
+  toolIds: string[];
+  kscId: string;
 }
 
 export const dataConnectorMappings: SavedObjectsTypeMappingDefinition = {
