@@ -128,6 +128,10 @@ export class FileWrapper {
     });
   }
 
+  /**
+   * Cleans up resources and aborts any ongoing analysis.
+   * Should be called when the file wrapper is no longer needed.
+   */
   public destroy() {
     this.analysisAbortController?.abort();
 
@@ -136,6 +140,10 @@ export class FileWrapper {
     this.pipelineJsonValid$.complete();
   }
 
+  /**
+   * Analyzes the file to determine its structure and create mappings/pipelines.
+   * @param overrides - Optional analysis overrides to customize the analysis
+   */
   public async analyzeFile(overrides: InputOverrides = {}) {
     const startTime = new Date().getTime();
     this.setStatus({ analysisStatus: STATUS.STARTED });
@@ -253,6 +261,9 @@ export class FileWrapper {
     }
   }
 
+  /**
+   * Aborts the current file analysis operation.
+   */
   public abortAnalysis() {
     this.analysisAbortController?.abort();
     this.setStatus({
@@ -267,28 +278,67 @@ export class FileWrapper {
     });
   }
 
+  /**
+   * Gets the current analysis status and file information.
+   * @returns Current file analysis status
+   */
   public getStatus() {
     return this.analyzedFile$.getValue();
   }
 
+  /**
+   * Gets the name of the file being processed.
+   * @returns The file name
+   */
   public getFileName() {
     return this.analyzedFile$.getValue().fileName;
   }
+
+  /**
+   * Gets the Elasticsearch mappings generated from file analysis.
+   * @returns The mappings or undefined if analysis hasn't completed
+   */
   public getMappings() {
     return this.analyzedFile$.getValue().results?.mappings;
   }
+
+  /**
+   * Gets the current ingest pipeline for processing the file.
+   * @returns The ingest pipeline or undefined if none is set
+   */
   public getPipeline(): IngestPipeline | undefined {
     return this.pipeline$.getValue();
   }
+
+  /**
+   * Checks if the current pipeline JSON is valid.
+   * @returns True if the pipeline is valid, false otherwise
+   */
   public isPipelineValid() {
     return this.pipelineJsonValid$.getValue();
   }
+
+  /**
+   * Sets the ingest pipeline for processing the file.
+   * @param pipeline - The ingest pipeline to set
+   */
   public setPipeline(pipeline: IngestPipeline | undefined) {
     this.pipeline$.next(pipeline);
   }
+
+  /**
+   * Sets whether the pipeline JSON is valid.
+   * @param valid - True if the pipeline is valid, false otherwise
+   */
   public setPipelineValid(valid: boolean) {
     this.pipelineJsonValid$.next(valid);
   }
+
+  /**
+   * Updates the pipeline with a new pipeline object or JSON string.
+   * Validates JSON and sets pipeline validity accordingly.
+   * @param pipeline - New pipeline as object or JSON string
+   */
   public updatePipeline(pipeline: IngestPipeline | string) {
     if (typeof pipeline === 'string') {
       try {
@@ -312,15 +362,35 @@ export class FileWrapper {
       this.setPipeline(pipeline);
     }
   }
+
+  /**
+   * Gets the detected file format from analysis.
+   * @returns The file format or undefined if analysis hasn't completed
+   */
   public getFormat() {
     return this.analyzedFile$.getValue().results?.format;
   }
+
+  /**
+   * Gets the raw file data as ArrayBuffer.
+   * @returns The file data or null if not loaded
+   */
   public getData() {
     return this.analyzedFile$.getValue().data;
   }
+
+  /**
+   * Gets the file size in bytes.
+   * @returns The file size in bytes
+   */
   public getSizeInBytes() {
     return this.file.size;
   }
+
+  /**
+   * Gets formatted file size information including max allowed size.
+   * @returns Object containing formatted size strings
+   */
   public getFileSizeInfo() {
     return {
       fileSizeFormatted: this.fileSizeChecker.fileSizeFormatted(),
@@ -329,6 +399,15 @@ export class FileWrapper {
     };
   }
 
+  /**
+   * Imports the file data into the specified Elasticsearch index.
+   * @param index - Target index name
+   * @param mappings - Index mappings configuration
+   * @param pipelineId - Optional ingest pipeline ID
+   * @param getFileClashes - Function to get file clash information
+   * @param signal - Optional abort signal to cancel import
+   * @returns Promise resolving to import results
+   */
   public async import(
     index: string,
     mappings: MappingTypeMapping,
@@ -377,6 +456,10 @@ export class FileWrapper {
     }
   }
 
+  /**
+   * Removes all convert processors from the current pipeline.
+   * Convert processors are typically used for type conversion during ingestion.
+   */
   public removeConvertProcessors() {
     const pipeline = this.getPipeline();
     if (pipeline?.processors === undefined) {
@@ -389,6 +472,10 @@ export class FileWrapper {
     this.setPipeline(tempPipeline);
   }
 
+  /**
+   * Renames target fields in CSV processors within the pipeline.
+   * @param changes - Array of field name changes to apply
+   */
   public renameTargetFields(
     changes: {
       oldName: string;
@@ -419,6 +506,11 @@ export class FileWrapper {
     this.setPipeline(pipeline);
   }
 
+  /**
+   * Updates date processors in the pipeline based on current field mappings.
+   * Removes invalid date processors and adds new ones for date fields with formats.
+   * @param mappings - Current index mappings to validate against
+   */
   public updateDateField(mappings: MappingTypeMapping) {
     const pipeline = this.getPipeline();
     if (pipeline?.processors === undefined || !mappings.properties) {
