@@ -14,7 +14,7 @@ import { DefaultSummaryTransformGenerator } from '../../services/summary_transfo
 
 export const repairSLORoute = createSloServerRoute({
   endpoint: 'POST /api/observability/slos/_repair 2023-10-31',
-  options: { access: 'public' },
+  options: { access: 'internal' },
   security: {
     authz: {
       requiredPrivileges: ['slo_write'],
@@ -42,8 +42,6 @@ export const repairSLORoute = createSloServerRoute({
       scopedClusterClient,
       logger
     );
-
-    await assertPlatinumLicense(plugins);
 
     const repairSlo = new RepairSLO(
       logger,
