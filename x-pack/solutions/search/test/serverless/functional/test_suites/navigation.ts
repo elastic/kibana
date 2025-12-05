@@ -6,7 +6,7 @@
  */
 
 import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 const archiveEmptyIndex =
@@ -40,8 +40,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.expectExists();
       await svlCommonNavigation.breadcrumbs.expectExists();
       await svlSearchLandingPage.assertSvlSearchSideNavExists();
-
-      // Should default to Homepage
+      // Navigate to the home page to account for the getting started page redirect
+      await svlSearchNavigation.navigateToElasticsearchHome();
       await solutionNavigation.sidenav.expectLinkActive({
         deepLinkId: 'searchHomepage',
       });
