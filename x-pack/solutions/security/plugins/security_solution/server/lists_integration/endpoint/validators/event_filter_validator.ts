@@ -14,6 +14,7 @@ import type {
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
 
+import type { PromiseFromStreams } from '@kbn/lists-plugin/server/services/exception_lists/import_exception_list_and_items';
 import type { ExceptionItemLikeOptions } from '../types';
 
 import { BaseValidator } from './base_validator';
@@ -47,6 +48,12 @@ export class EventFilterValidator extends BaseValidator {
 
   protected async validateHasReadPrivilege(): Promise<void> {
     return super.validateHasPrivilege('canReadEventFilters');
+  }
+
+  async validatePreImport(items: PromiseFromStreams): Promise<PromiseFromStreams> {
+    await this.validateHasWritePrivilege();
+
+    return items;
   }
 
   async validatePreCreateItem(item: CreateExceptionListItemOptions) {
@@ -126,11 +133,5 @@ export class EventFilterValidator extends BaseValidator {
 
   async validatePreMultiListFind(): Promise<void> {
     await this.validateHasReadPrivilege();
-  }
-
-  async validatePreImport(): Promise<void> {
-    throw new EndpointArtifactExceptionValidationError(
-      'Import is not supported for Endpoint artifact exceptions'
-    );
   }
 }

@@ -6,25 +6,103 @@
  */
 
 import type { ExceptionsListPreImportServerExtension } from '@kbn/lists-plugin/server';
-import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import {
+  ENDPOINT_ARTIFACT_LIST_IDS,
+  ENDPOINT_ARTIFACT_LISTS,
+} from '@kbn/securitysolution-list-constants';
 import type { PromiseFromStreams } from '@kbn/lists-plugin/server/services/exception_lists/import_exception_list_and_items';
 import { stringify } from '../../../endpoint/utils/stringify';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import {
-  ALL_ENDPOINT_ARTIFACT_LIST_IDS,
-  GLOBAL_ARTIFACT_TAG,
-} from '../../../../common/endpoint/service/artifacts/constants';
+import { GLOBAL_ARTIFACT_TAG } from '../../../../common/endpoint/service/artifacts/constants';
 import { EndpointArtifactExceptionValidationError } from '../validators/errors';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
+import {
+  BlocklistValidator,
+  EndpointExceptionsValidator,
+  EventFilterValidator,
+  HostIsolationExceptionsValidator,
+  TrustedAppValidator,
+  TrustedDeviceValidator,
+} from '../validators';
 
 export const getExceptionsPreImportHandler = (
-  endpointAppContextService: EndpointAppContextService
+  endpointAppContext: EndpointAppContextService
 ): ExceptionsListPreImportServerExtension['callback'] => {
-  return async ({ data }) => {
-    validateCanEndpointArtifactsBeImported(data, endpointAppContextService.experimentalFeatures);
-    provideSpaceAwarenessCompatibilityForOldEndpointExceptions(data, endpointAppContextService);
+  return async ({ data, context: { request } }): Promise<PromiseFromStreams> => {
+    validateCanEndpointArtifactsBeImported(data, endpointAppContext.experimentalFeatures);
+    provideSpaceAwarenessCompatibilityForOldEndpointExceptions(data, endpointAppContext);
 
-    return data;
+    if (!endpointAppContext.experimentalFeatures.endpointExceptionsMovedUnderManagement) {
+      return data;
+    }
+
+    const importedListIds = new Set<string>();
+    for (const item of [...data.lists, ...data.items]) {
+      if ('list_id' in item) {
+        importedListIds.add(item.list_id);
+      }
+    }
+
+    const hasEndpointArtifact = ENDPOINT_ARTIFACT_LIST_IDS.some((endpointListId) =>
+      importedListIds.has(endpointListId)
+    );
+
+    if (!hasEndpointArtifact) {
+      return data;
+    }
+
+    if (importedListIds.size > 1) {
+      throw new EndpointArtifactExceptionValidationError(
+        'Importing multiple Endpoint artifact exception lists is not supported'
+      );
+    }
+
+    const importedListId = Array.from(importedListIds)[0];
+    let validatedItem = data;
+
+    // Validate trusted apps
+    if (TrustedAppValidator.isTrustedApp({ listId: importedListId })) {
+      const trustedAppValidator = new TrustedAppValidator(endpointAppContext, request);
+      validatedItem = await trustedAppValidator.validatePreImport(data);
+    }
+
+    // Validate trusted devices
+    if (TrustedDeviceValidator.isTrustedDevice({ listId: importedListId })) {
+      const trustedDeviceValidator = new TrustedDeviceValidator(endpointAppContext, request);
+      validatedItem = await trustedDeviceValidator.validatePreImport(data);
+    }
+
+    // Validate event filter
+    if (EventFilterValidator.isEventFilter({ listId: importedListId })) {
+      const eventFilterValidator = new EventFilterValidator(endpointAppContext, request);
+      validatedItem = await eventFilterValidator.validatePreImport(data);
+    }
+
+    // Validate host isolation
+    if (HostIsolationExceptionsValidator.isHostIsolationException({ listId: importedListId })) {
+      const hostIsolationExceptionsValidator = new HostIsolationExceptionsValidator(
+        endpointAppContext,
+        request
+      );
+      validatedItem = await hostIsolationExceptionsValidator.validatePreImport(data);
+    }
+
+    // Validate blocklists
+    if (BlocklistValidator.isBlocklist({ listId: importedListId })) {
+      const blocklistValidator = new BlocklistValidator(endpointAppContext, request);
+      validatedItem = await blocklistValidator.validatePreImport(data);
+    }
+
+    // validate endpoint exceptions
+    if (EndpointExceptionsValidator.isEndpointException({ listId: importedListId })) {
+      const endpointExceptionValidator = new EndpointExceptionsValidator(
+        endpointAppContext,
+        request
+      );
+      validatedItem = await endpointExceptionValidator.validatePreImport(data);
+    }
+
+    return validatedItem;
   };
 };
 
@@ -36,12 +114,12 @@ const validateCanEndpointArtifactsBeImported = (
     return;
   }
 
+  const NON_IMPORTABLE_ENDPOINT_ARTIFACT_IDS = ENDPOINT_ARTIFACT_LIST_IDS.filter(
+    (listId) => listId !== ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+  ) as string[];
+
   const hasEndpointArtifactListOrListItems = [...data.lists, ...data.items].some((item) => {
     if ('list_id' in item) {
-      const NON_IMPORTABLE_ENDPOINT_ARTIFACT_IDS = ALL_ENDPOINT_ARTIFACT_LIST_IDS.filter(
-        (listId) => listId !== ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
-      ) as string[];
-
       return NON_IMPORTABLE_ENDPOINT_ARTIFACT_IDS.includes(item.list_id);
     }
 
