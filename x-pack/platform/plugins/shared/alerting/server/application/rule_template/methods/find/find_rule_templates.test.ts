@@ -25,6 +25,13 @@ const rulesClientContext = {
 
 beforeEach(() => {
   jest.resetAllMocks();
+  // Default: user has access to all rule types
+  authorization.getAllAuthorizedRuleTypesFindOperation.mockResolvedValue(
+    new Map([
+      ['test.rule.type', { authorizedConsumers: { alerts: { read: true, all: true } } }],
+      ['another.rule.type', { authorizedConsumers: { alerts: { read: true, all: true } } }],
+    ])
+  );
 });
 
 describe('findRuleTemplates', () => {
@@ -102,7 +109,11 @@ describe('findRuleTemplates', () => {
       defaultSearchOperator: undefined,
       sortField: undefined,
       sortOrder: undefined,
-      filter: undefined,
+      filter: expect.any(Object), // Authorization filter is always applied
+    });
+    
+    expect(authorization.getAllAuthorizedRuleTypesFindOperation).toHaveBeenCalledWith({
+      authorizationEntity: 'rule',
     });
   });
 
@@ -228,7 +239,7 @@ describe('findRuleTemplates', () => {
       defaultSearchOperator: 'AND',
       sortField: 'name.keyword',
       sortOrder: 'desc',
-      filter: undefined,
+      filter: expect.any(Object), // Authorization filter is always applied
     });
   });
 
@@ -308,6 +319,162 @@ describe('findRuleTemplates', () => {
       perPage: 10,
       total: 0,
       data: [],
+    });
+  });
+
+  describe('authorization', () => {
+    test('throws 403 when user has no access to any rule types', async () => {
+      authorization.getAllAuthorizedRuleTypesFindOperation.mockResolvedValue(new Map());
+
+      await expect(
+        findRuleTemplates(rulesClientContext, {
+          perPage: 10,
+          page: 1,
+        })
+      ).rejects.toMatchObject({
+        output: {
+          statusCode: 403,
+        },
+        message: 'Unauthorized to find rules for any rule types',
+      });
+
+      expect(unsecuredSavedObjectsClient.find).not.toHaveBeenCalled();
+    });
+
+    test('filters templates to only authorized rule types', async () => {
+      // User only has access to test.rule.type
+      authorization.getAllAuthorizedRuleTypesFindOperation.mockResolvedValue(
+        new Map([['test.rule.type', { authorizedConsumers: { alerts: { read: true, all: true } } }]])
+      );
+
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [mockTemplate1],
+      });
+
+      const result = await findRuleTemplates(rulesClientContext, {
+        perPage: 10,
+        page: 1,
+      });
+
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0].ruleTypeId).toBe('test.rule.type');
+
+      // Verify authorization filter was applied
+      const findCall = unsecuredSavedObjectsClient.find.mock.calls[0][0];
+      expect(findCall.filter).toBeDefined();
+    });
+
+    test('allows templates if user has access to rule type via any consumer', async () => {
+      // User has access via multiple consumers
+      authorization.getAllAuthorizedRuleTypesFindOperation.mockResolvedValue(
+        new Map([
+          [
+            'test.rule.type',
+            {
+              authorizedConsumers: {
+                alerts: { read: true, all: true },
+                stackAlerts: { read: true, all: false },
+                logs: { read: false, all: false },
+              },
+            },
+          ],
+        ])
+      );
+
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [mockTemplate1],
+      });
+
+      const result = await findRuleTemplates(rulesClientContext, {
+        perPage: 10,
+        page: 1,
+      });
+
+      // Should return template since user has access via at least one consumer
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0].ruleTypeId).toBe('test.rule.type');
+    });
+
+    test('throws 403 if unauthorized template slips through filter', async () => {
+      authorization.getAllAuthorizedRuleTypesFindOperation.mockResolvedValue(
+        new Map([['test.rule.type', { authorizedConsumers: { alerts: { read: true, all: true } } }]])
+      );
+
+      // Simulating a template with unauthorized rule type slipping through
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [mockTemplate2], // another.rule.type - not authorized
+      });
+
+      await expect(
+        findRuleTemplates(rulesClientContext, {
+          perPage: 10,
+          page: 1,
+        })
+      ).rejects.toMatchObject({
+        output: {
+          statusCode: 403,
+        },
+        message: 'Unauthorized to find rule for rule type "another.rule.type"',
+      });
+    });
+
+    test('applies authorization filter combined with user filters', async () => {
+      authorization.getAllAuthorizedRuleTypesFindOperation.mockResolvedValue(
+        new Map([['test.rule.type', { authorizedConsumers: { alerts: { read: true, all: true } } }]])
+      );
+
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [mockTemplate1],
+      });
+
+      await findRuleTemplates(rulesClientContext, {
+        perPage: 10,
+        page: 1,
+        ruleTypeId: 'test.rule.type',
+        tags: ['tag1'],
+      });
+
+      // Verify that authorization filter is combined with ruleTypeId and tags filters
+      const findCall = unsecuredSavedObjectsClient.find.mock.calls[0][0];
+      expect(findCall.filter).toBeDefined();
+    });
+
+    test('verifies all returned templates are authorized', async () => {
+      authorization.getAllAuthorizedRuleTypesFindOperation.mockResolvedValue(
+        new Map([
+          ['test.rule.type', { authorizedConsumers: { alerts: { read: true, all: true } } }],
+          ['another.rule.type', { authorizedConsumers: { alerts: { read: true, all: true } } }],
+        ])
+      );
+
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 2,
+        per_page: 10,
+        page: 1,
+        saved_objects: [mockTemplate1, mockTemplate2],
+      });
+
+      const result = await findRuleTemplates(rulesClientContext, {
+        perPage: 10,
+        page: 1,
+      });
+
+      // Both templates should pass authorization check
+      expect(result.data).toHaveLength(2);
+      expect(result.data[0].ruleTypeId).toBe('test.rule.type');
+      expect(result.data[1].ruleTypeId).toBe('another.rule.type');
     });
   });
 });
