@@ -11,6 +11,7 @@ import {
   EuiFieldNumber,
   EuiFlexGroup,
   EuiFormRow,
+  EuiI18n,
   EuiSpacer,
   EuiText,
   useGeneratedHtmlId,
@@ -90,27 +91,26 @@ export function PurgeInstancesConfirmationModal({ items, onCancel, onConfirm }: 
     >
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiText>
-          {hasSelectedSlos
-            ? i18n.translate(
-                'xpack.slo.purgeInstancesConfirmationModal.descriptionTextWithSelection',
-                {
-                  defaultMessage:
-                    'Permanently delete all stale instances from the {count} selected {count, plural, one {SLO} other {SLOs}} based on the {staleSloThresholdLabel} setting. Override this setting by updating the following {staleThresholdLabel}.',
-                  values: {
-                    count: items.length,
-                    staleSloThresholdLabel: <strong>{STALE_SLO_THRESHOLD_LABEL}</strong>,
-                    staleThresholdLabel: <strong>{STALE_THRESHOLD_LABEL}</strong>,
-                  },
-                }
-              )
-            : i18n.translate('xpack.slo.purgeInstancesConfirmationModal.descriptionText', {
-                defaultMessage:
-                  'Permanently delete all stale SLO instances based on the {staleSloThresholdLabel} setting. Override this setting by updating the following {staleThresholdLabel}.',
-                values: {
-                  staleSloThresholdLabel: <strong>{STALE_SLO_THRESHOLD_LABEL}</strong>,
-                  staleThresholdLabel: <strong>{STALE_THRESHOLD_LABEL}</strong>,
-                },
-              })}
+          {hasSelectedSlos ? (
+            <EuiI18n
+              token="xpack.slo.purgeInstancesConfirmationModal.descriptionTextWithSelection"
+              default="Permanently delete all stale instances from the {count} selected SLOs based on the {settingsLabel} setting. Override this setting by updating the following {inputLabel}."
+              values={{
+                count: items.length,
+                settingsLabel: <strong>{STALE_SLO_THRESHOLD_LABEL}</strong>,
+                inputLabel: <strong>{STALE_THRESHOLD_LABEL}</strong>,
+              }}
+            />
+          ) : (
+            <EuiI18n
+              token="xpack.slo.purgeInstancesConfirmationModal.descriptionText"
+              default="Permanently delete all stale SLO instances based on the {settingsLabel} setting. Override this setting by updating the following {inputLabel}."
+              values={{
+                settingsLabel: <strong>{STALE_SLO_THRESHOLD_LABEL}</strong>,
+                inputLabel: <strong>{STALE_THRESHOLD_LABEL}</strong>,
+              }}
+            />
+          )}
         </EuiText>
 
         <EuiSpacer size="m" />
@@ -146,12 +146,16 @@ export function PurgeInstancesConfirmationModal({ items, onCancel, onConfirm }: 
             onChange={(e) => {
               setOverride(e.target.checked);
             }}
-            label={i18n.translate('xpack.slo.purgeInstancesConfirmationModal.forcePurge', {
-              defaultMessage: 'Override the {staleSloThresholdLabel} setting',
-              values: {
-                staleSloThresholdLabel: <strong>{STALE_SLO_THRESHOLD_LABEL}</strong>,
-              },
-            })}
+            label={
+              <EuiI18n
+                token="xpack.slo.purgeInstancesConfirmationModal.forcePurge"
+                default="Override the {settingsLabel} setting"
+                values={{
+                  settingsLabel: <strong>{STALE_SLO_THRESHOLD_LABEL}</strong>,
+                  inputLabel: <strong>{STALE_THRESHOLD_LABEL}</strong>,
+                }}
+              />
+            }
           />
         </EuiFormRow>
       </EuiFlexGroup>
