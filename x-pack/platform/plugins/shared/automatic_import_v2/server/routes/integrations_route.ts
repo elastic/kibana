@@ -153,7 +153,7 @@ const createIntegrationRoute = (
           const automaticImportService = automaticImportv2.automaticImportService;
           const integrationRequestBody = request.body;
           const authenticatedUser = await automaticImportv2.getCurrentUser();
-          const integrationId = createId(integrationRequestBody.title);
+          const integrationId = integrationRequestBody.integrationId;
 
           const integrationParams: IntegrationParams = {
             integrationId,
@@ -169,17 +169,14 @@ const createIntegrationRoute = (
               (dataStream) => ({
                 ...dataStream,
                 integrationId,
-                dataStreamId: createId(dataStream.title),
                 metadata: { createdAt: new Date().toISOString() },
               })
             );
-            const esClient = automaticImportv2.esClient;
             await Promise.all(
               dataStreamsParams.map((dataStreamParams) =>
                 automaticImportService.createDataStream({
                   authenticatedUser,
                   dataStreamParams,
-                  esClient,
                 })
               )
             );
@@ -198,10 +195,3 @@ const createIntegrationRoute = (
         }
       }
     );
-
-function createId(title: string | undefined): string {
-  if (!title || title.trim() === '') {
-    throw new Error('Title is required to generate an id');
-  }
-  return title.toLowerCase().replace(/ /g, '_');
-}

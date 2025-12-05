@@ -170,18 +170,7 @@ export class AutomaticImportService {
 
   public async createDataStream(params: CreateDataStreamParams): Promise<void> {
     assert(this.savedObjectService, 'Saved Objects service not initialized.');
-    const { authenticatedUser, dataStreamParams, esClient } = params;
-
-    // Add samples to samples index
-    const samplesToDataStreamParams: SamplesToDataStreamParams = {
-      integrationId: dataStreamParams.integrationId,
-      dataStreamId: dataStreamParams.dataStreamId,
-      rawSamples: dataStreamParams.rawSamples,
-      originalSource: dataStreamParams.originalSource,
-      authenticatedUser,
-      esClient,
-    };
-    await this.samplesIndexService.addSamplesToDataStream(samplesToDataStreamParams);
+    const { authenticatedUser, dataStreamParams } = params;
 
     // Schedule the data stream creation Background task
     const dataStreamTaskParams: DataStreamTaskParams = {

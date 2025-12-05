@@ -21,9 +21,13 @@ paths:
               type: object
               additionalProperties: false
               required:
+                - integrationId
                 - title
                 - description
               properties:
+                integrationId:
+                  description: The integration id
+                  $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
                 title:
                   description: The title of the integration
                   $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"

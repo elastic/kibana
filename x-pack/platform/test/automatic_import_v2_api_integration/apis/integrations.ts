@@ -25,6 +25,7 @@ export default function ({ getService }: AutomaticImportV2ApiFtrProviderContext)
       it('should return all integrations even without data streams', async function () {
         // Create an integration first
         const createResponse = await automaticImportV2Client.createIntegration({
+          integrationId: 'test_integration',
           title: 'Test Integration',
           description: 'A test integration',
         });
@@ -50,6 +51,7 @@ export default function ({ getService }: AutomaticImportV2ApiFtrProviderContext)
       it('should return integration by id even without data streams', async function () {
         // Create an integration first
         const createResponse = await automaticImportV2Client.createIntegration({
+          integrationId: 'get_by_id_test',
           title: 'Get By Id Test',
           description: 'Testing get by id',
           logo: 'data:image/png;base64,test',
@@ -82,6 +84,7 @@ export default function ({ getService }: AutomaticImportV2ApiFtrProviderContext)
     describe('PUT /api/automatic_import_v2/integrations', function () {
       it('should create a new integration without data streams', async function () {
         const integrationData = {
+          integrationId: 'new_integration',
           title: 'New Integration',
           description: 'A new integration for testing',
           logo: 'data:image/png;base64,logo123',
@@ -94,6 +97,7 @@ export default function ({ getService }: AutomaticImportV2ApiFtrProviderContext)
 
       it('should create an integration with a single data stream', async function () {
         const integrationData = {
+          integrationId: 'integration_with_single_stream',
           title: 'Integration With Single Stream',
           description: 'Testing integration with one data stream',
           dataStreams: [
@@ -127,6 +131,7 @@ export default function ({ getService }: AutomaticImportV2ApiFtrProviderContext)
 
       it('should create an integration with multiple data streams', async function () {
         const integrationData = {
+          integrationId: 'multi_stream_integration',
           title: 'Multi Stream Integration',
           description: 'Testing integration with multiple data streams',
           logo: 'data:image/png;base64,multistream',
@@ -190,6 +195,7 @@ export default function ({ getService }: AutomaticImportV2ApiFtrProviderContext)
 
       it('should reflect data streams in the get all integrations endpoint', async function () {
         const integrationData = {
+          integrationId: 'counted_streams_integration',
           title: 'Counted Streams Integration',
           description: 'Testing data stream counts',
           dataStreams: [
@@ -221,6 +227,7 @@ export default function ({ getService }: AutomaticImportV2ApiFtrProviderContext)
 
       it('should create integration with data stream from index source', async function () {
         const integrationData = {
+          integrationId: 'index_source_integration',
           title: 'Index Source Integration',
           description: 'Testing data stream from index',
           dataStreams: [

@@ -121,7 +121,10 @@ describe('AutomaticImportSamplesIndexService Integration Tests', () => {
       expect(docs[0].integration_id).toBe('integration-multi-123');
       expect(docs[0].data_stream_id).toBe('data-stream-multi-456');
       expect(docs[0].created_by).toBe('test-user');
-      expect(docs[0].original_source).toBe('logs.txt');
+      expect(docs[0].original_source).toEqual({
+        source_type: 'file',
+        source_value: 'logs.txt',
+      });
       expect(docs[0].metadata.created_at).toBeDefined();
 
       // Check that all three log lines are present
@@ -222,7 +225,10 @@ describe('AutomaticImportSamplesIndexService Integration Tests', () => {
       expect(searchResult.hits.total).toEqual({ value: 1, relation: 'eq' });
       const doc = searchResult.hits.hits[0]._source as any;
       expect(doc.log_data).toBe('Log with "quotes" and \\backslashes\\ and \nnewlines');
-      expect(doc.original_source).toBe('logs with spaces.txt');
+      expect(doc.original_source).toEqual({
+        source_type: 'file',
+        source_value: 'logs with spaces.txt',
+      });
     });
 
     it('should create documents with proper timestamp', async () => {

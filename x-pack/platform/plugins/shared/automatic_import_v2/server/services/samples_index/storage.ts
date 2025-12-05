@@ -24,7 +24,6 @@ const automaticImportSamplesIndexAdapterSettings = {
           source_type: types.keyword({ ignore_above: 256 }),
           source_value: types.keyword({ ignore_above: 256 }),
         },
-        additionalProperties: false,
       }),
       // Non-searchable fields (stored but not indexed)
       log_data: types.text({ index: false }), // Log samples are stored but not indexed

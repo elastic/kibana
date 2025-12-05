@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser, ElasticsearchClient } from '@kbn/core/server';
+import type { AuthenticatedUser } from '@kbn/core/server';
 import type { InputType } from '../../common';
 
 export interface CreateIntegrationParams {
@@ -16,7 +16,6 @@ export interface CreateIntegrationParams {
 export interface CreateDataStreamParams {
   dataStreamParams: DataStreamParams;
   authenticatedUser: AuthenticatedUser;
-  esClient: ElasticsearchClient;
 }
 
 export interface IntegrationParams {
@@ -32,11 +31,6 @@ export interface DataStreamParams {
   title: string;
   description: string;
   inputTypes: InputType[];
-  rawSamples: string[];
-  originalSource: {
-    sourceType: 'file' | 'index';
-    sourceValue: string;
-  };
   jobInfo?: {
     jobId: string;
     jobType: string;
