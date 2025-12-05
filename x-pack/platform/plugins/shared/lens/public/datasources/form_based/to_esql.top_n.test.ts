@@ -25,7 +25,7 @@ const defaultUiSettingsGet = (key: string) => {
   }
 };
 
-const aggEntries: Array<readonly [string, GenericIndexPatternColumn]> = [
+const mockAggEntries: Array<readonly [string, GenericIndexPatternColumn]> = [
   [
     '1',
     {
@@ -69,7 +69,7 @@ const aggEntries: Array<readonly [string, GenericIndexPatternColumn]> = [
   ],
 ];
 
-const indexPattern = {
+const mockIndexPattern = {
   title: 'kibana_sample_data_logs',
   timeFieldName: 'timestamp',
   getFieldByName: (field: string) => {
@@ -79,7 +79,7 @@ const indexPattern = {
   getFormatterForField: () => ({ convert: (v: unknown) => v }),
 } as unknown as IndexPattern;
 
-const layer: FormBasedLayer = {
+const mockLayer: FormBasedLayer = {
   columns: {
     '1': {
       label: 'Top 5 values of host.keyword',
@@ -120,15 +120,15 @@ const layer: FormBasedLayer = {
   columnOrder: ['1', '2'],
   incompleteColumns: {},
   sampling: 1,
-  indexPatternId: indexPattern.id,
+  indexPatternId: mockIndexPattern.id,
 };
 
-const dateRange = {
+const mockDateRange = {
   fromDate: '2021-01-01T00:00:00.000Z',
   toDate: '2021-01-01T23:59:59.999Z',
 };
 
-const nowInstant = new Date();
+const mockNowInstant = new Date();
 
 describe('to_esql top N', () => {
   const { uiSettings } = createCoreSetupMock();
@@ -140,12 +140,12 @@ describe('to_esql top N', () => {
   // should generate a valid ESQL query for top N terms and average aggregation
   it('should return undefined for top N terms and average aggregation', () => {
     const result = getESQLForLayer(
-      aggEntries,
-      layer,
-      indexPattern,
+      mockAggEntries,
+      mockLayer,
+      mockIndexPattern,
       uiSettings,
-      dateRange,
-      nowInstant
+      mockDateRange,
+      mockNowInstant
     );
 
     expect(result?.esql).toEqual(undefined);
