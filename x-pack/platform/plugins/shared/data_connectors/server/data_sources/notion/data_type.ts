@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin/server';
-import { SupportedOAuthProvider } from '@kbn/data-sources-registry-plugin/server/data_catalog/data_type';
+import { EARSSupportedOAuthProvider } from '@kbn/data-sources-registry-plugin/server/data_catalog/data_type';
 import {
   generateGetDataSourceWorkflow,
   generateGetPageWorkflow,
@@ -23,7 +23,7 @@ export const notionDataSource: DataTypeDefinition = {
   }),
 
   oauthConfiguration: {
-    provider: SupportedOAuthProvider.NOTION,
+    provider: EARSSupportedOAuthProvider.NOTION,
     initiatePath: '/oauth/start/notion',
     fetchSecretsPath: '/oauth/fetch_request_secrets',
     oauthBaseUrl: 'https://localhost:8052',

@@ -13,6 +13,7 @@ import type {
   PackagePolicyConfigRecord,
 } from '@kbn/fleet-plugin/common';
 import semver from 'semver';
+import { i18n } from '@kbn/i18n';
 
 import type {
   AwsCloudConnectorVars,
@@ -50,6 +51,46 @@ export type AzureCloudConnectorFieldNames =
 
 export type AwsCloudConnectorFieldNames =
   (typeof AWS_CLOUD_CONNECTOR_FIELD_NAMES)[keyof typeof AWS_CLOUD_CONNECTOR_FIELD_NAMES];
+
+// Cloud connector name validation constants
+export const CLOUD_CONNECTOR_NAME_MAX_LENGTH = 255;
+
+/**
+ * Validates a cloud connector name
+ * @param name - The name to validate
+ * @returns true if the name is valid, false otherwise
+ */
+export const isCloudConnectorNameValid = (name: string | undefined): boolean => {
+  if (!name) return false;
+  const trimmedLength = name.trim().length;
+  return trimmedLength > 0 && name.length <= CLOUD_CONNECTOR_NAME_MAX_LENGTH;
+};
+
+/**
+ * Gets the validation error message for a cloud connector name
+ * @param name - The name to validate
+ * @returns Error message string or undefined if valid
+ */
+export const getCloudConnectorNameError = (name: string | undefined): string | undefined => {
+  if (!name || name.trim().length === 0) {
+    return i18n.translate(
+      'securitySolutionPackages.cloudSecurityPosture.cloudConnectorNameValidation.requiredError',
+      {
+        defaultMessage: 'Cloud Connector Name is required',
+      }
+    );
+  }
+  if (name.length > CLOUD_CONNECTOR_NAME_MAX_LENGTH) {
+    return i18n.translate(
+      'securitySolutionPackages.cloudSecurityPosture.cloudConnectorNameValidation.tooLongError',
+      {
+        defaultMessage: 'Cloud Connector Name must be {maxLength} characters or less',
+        values: { maxLength: CLOUD_CONNECTOR_NAME_MAX_LENGTH },
+      }
+    );
+  }
+  return undefined;
+};
 
 export const isAwsCloudConnectorVars = (
   vars: CloudConnectorVars,
