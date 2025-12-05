@@ -98,7 +98,7 @@ export const FooterItem = forwardRef<HTMLAnchorElement, FooterItemProps>(
       <Suspense fallback={<EuiButtonIcon buttonRef={ref} {...buttonProps} />}>
         <div css={buttonWrapperStyles}>
           <EuiButtonIcon buttonRef={ref} {...buttonProps} iconType={iconType || 'empty'} />
-          {isNew && <NewItemIndicator />}
+          {isNew && <NewItemIndicator isHighlighted={isHighlighted} />}
         </div>
       </Suspense>
     );
