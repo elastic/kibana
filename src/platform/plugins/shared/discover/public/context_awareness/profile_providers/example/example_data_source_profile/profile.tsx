@@ -24,6 +24,7 @@ import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { capitalize } from 'lodash';
 import React from 'react';
 import type { DataSourceProfileProvider } from '../../../profiles';
+import { ChartWithCustomButtons } from './components';
 import { DataSourceCategory } from '../../../profiles';
 import { useExampleContext } from '../example_context';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
@@ -341,9 +342,13 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       };
     },
     getChartSectionConfiguration: (prev) => (params) => {
-      const prevConfig = prev(params);
+      const prevConfig = prev ? prev(params) : {};
+
       return {
         ...prevConfig,
+        Component: (props) => <ChartWithCustomButtons {...props} actions={params.actions} />,
+        localStorageKeyPrefix: 'discover:exampleDataSource',
+        replaceDefaultChart: true,
       };
     },
   },
