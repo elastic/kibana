@@ -40,7 +40,7 @@ export async function deleteGapAutoFillScheduler(
       params.id
     );
 
-    const schedulerName = schedulerSo.attributes?.name ?? params.id;
+    const schedulerName = schedulerSo.attributes?.name;
     const ruleTypes = schedulerSo.attributes?.ruleTypes ?? [];
     try {
       for (const ruleType of ruleTypes) {
