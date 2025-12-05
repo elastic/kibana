@@ -16,9 +16,19 @@ import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 import type { DataView } from '@kbn/data-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
-import { DEFAULT_ATTACKS_PAGE_FILTERS } from '../../../../../common/constants';
 import { URL_PARAM_KEY } from '../../../../common/hooks/use_url_state';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
+
+const DEFAULT_ATTACKS_PAGE_FILTERS: FilterControlConfig[] = [
+  {
+    title: 'Status',
+    fieldName: 'kibana.alert.workflow_status',
+    selectedOptions: ['open'],
+    hideActionBar: true,
+    persist: true,
+    hideExists: true,
+  },
+];
 
 const RULE_TYPES = [...SECURITY_SOLUTION_RULE_TYPE_IDS, ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID];
 
@@ -59,9 +69,8 @@ export const PageFilters = memo(({ dataView, ...props }: PageFiltersProps) => {
   );
 
   const setFilterControlsUrlState = useCallback(
-    (newFilterControls: FilterControlConfig[]) => {
-      urlStorage.set(URL_PARAM_KEY.pageFilter, newFilterControls);
-    },
+    (newFilterControls: FilterControlConfig[]) =>
+      urlStorage.set(URL_PARAM_KEY.pageFilter, newFilterControls),
     [urlStorage]
   );
 
