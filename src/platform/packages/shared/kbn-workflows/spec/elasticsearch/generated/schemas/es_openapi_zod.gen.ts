@@ -10022,6 +10022,8 @@ export const indices_types_downsampling_round = z.object({
     fixed_interval: types_duration_large
 });
 
+export const indices_types_sampling_method = z.enum(['aggregate', 'last_value']);
+
 /**
  * Data stream lifecycle denotes that a data stream is managed by the data stream lifecycle and contains the configuration.
  */
@@ -10030,6 +10032,7 @@ export const indices_types_data_stream_lifecycle = z.object({
     downsampling: z.optional(z.array(indices_types_downsampling_round).register(z.globalRegistry, {
         description: 'The list of downsampling rounds to execute as part of this downsampling configuration'
     })),
+    downsampling_method: z.optional(indices_types_sampling_method),
     enabled: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If defined, it turns data stream lifecycle on/off (`true`/`false`) for this data stream. A data stream lifecycle\nthat\'s disabled (enabled: `false`) will have no effect on the data stream.'
     })).default(true)
@@ -12714,8 +12717,6 @@ export const types_data_stream_names = z.union([
     types_data_stream_name,
     z.array(types_data_stream_name)
 ]);
-
-export const indices_types_sampling_method = z.enum(['aggregate', 'last_value']);
 
 export const indices_types_downsample_config = z.object({
     fixed_interval: types_duration_large,
@@ -20156,17 +20157,17 @@ export const text_structure_test_grok_pattern_matched_text = z.object({
     fields: z.optional(z.record(z.string(), z.array(text_structure_test_grok_pattern_matched_field)))
 });
 
-export const transform_get_node_stats_transform_node_stats_details = z.object({
+export const transform_get_node_stats_transform_scheduler_stats = z.object({
     registered_transform_count: z.number(),
     peek_transform: z.optional(z.string())
 });
 
-export const transform_get_node_stats_scheduler = z.object({
-    scheduler: transform_get_node_stats_transform_node_stats_details
+export const transform_get_node_stats_transform_node_stats = z.object({
+    scheduler: transform_get_node_stats_transform_scheduler_stats
 });
 
-export const transform_get_node_stats_transform_node_stats = z.object({
-    total: transform_get_node_stats_scheduler
+export const transform_get_node_stats_transform_node_full_stats = z.object({
+    total: transform_get_node_stats_transform_node_stats
 });
 
 export const ml_types_transform_authorization = z.object({
@@ -37264,6 +37265,7 @@ export const indices_put_data_lifecycle_request = z.object({
         downsampling: z.optional(z.array(indices_types_downsampling_round).register(z.globalRegistry, {
             description: 'The downsampling configuration to execute for the managed backing index after rollover.'
         })),
+        downsampling_method: z.optional(indices_types_sampling_method),
         enabled: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'If defined, it turns data stream lifecycle on/off (`true`/`false`) for this data stream. A data stream lifecycle\nthat\'s disabled (enabled: `false`) will have no effect on the data stream.'
         })).default(true)
@@ -43896,7 +43898,7 @@ export const transform_get_node_stats_request = z.object({
     query: z.optional(z.never())
 });
 
-export const transform_get_node_stats_response = transform_get_node_stats_transform_node_stats;
+export const transform_get_node_stats_response = transform_get_node_stats_transform_node_full_stats;
 
 export const transform_get_transform_stats_request = z.object({
     body: z.optional(z.never()),
