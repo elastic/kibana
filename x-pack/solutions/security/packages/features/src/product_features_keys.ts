@@ -91,6 +91,11 @@ export enum ProductFeatureSecurityKey {
   endpointAgentTamperProtection = 'endpoint_agent_tamper_protection',
 
   /**
+   * Enables access to Exceptions List page and associated views that allows management of endpoint exceptions
+   */
+  exceptionLists = 'exception_lists',
+
+  /**
    * Enables managing endpoint exceptions on rules and alerts
    */
   endpointExceptions = 'endpointExceptions',
