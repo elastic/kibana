@@ -20,6 +20,7 @@ import {
   emptyAssets,
 } from '@kbn/streams-schema';
 import type { IndicesManagedBy } from '@elastic/elasticsearch/lib/api/types';
+import { omit } from 'lodash';
 import {
   disableStreams,
   enableStreams,
@@ -124,14 +125,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('Wired streams update', () => {
       it('updates lifecycle', async () => {
-        const rootDefinition = await getStream(apiClient, 'logs');
+        const rootDefinition = (await getStream(
+          apiClient,
+          'logs'
+        )) as Streams.WiredStream.GetResponse;
 
         const response = await putStream(apiClient, 'logs', {
           ...emptyAssets,
           stream: {
             description: '',
             ingest: {
-              ...(rootDefinition as Streams.WiredStream.GetResponse).stream.ingest,
+              ...rootDefinition.stream.ingest,
+              processing: omit(rootDefinition.stream.ingest.processing, 'updated_at'),
               lifecycle: { dsl: { data_retention: '999d' } },
             },
           },
@@ -153,7 +158,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('does not allow inherit lifecycle on root', async () => {
-        const rootDefinition = await getStream(apiClient, 'logs');
+        const rootDefinition = (await getStream(
+          apiClient,
+          'logs'
+        )) as Streams.WiredStream.GetResponse;
 
         await putStream(
           apiClient,
@@ -163,7 +171,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             stream: {
               description: '',
               ingest: {
-                ...(rootDefinition as Streams.WiredStream.GetResponse).stream.ingest,
+                ...rootDefinition.stream.ingest,
+                processing: omit(rootDefinition.stream.ingest.processing, 'updated_at'),
                 lifecycle: { inherit: {} },
               },
             },
@@ -173,13 +182,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('inherits on creation', async () => {
-        const rootDefinition = await getStream(apiClient, 'logs');
+        const rootDefinition = (await getStream(
+          apiClient,
+          'logs'
+        )) as Streams.WiredStream.GetResponse;
+
         await putStream(apiClient, 'logs', {
           ...emptyAssets,
           stream: {
             description: '',
             ingest: {
-              ...(rootDefinition as Streams.WiredStream.GetResponse).stream.ingest,
+              ...rootDefinition.stream.ingest,
+              processing: omit(rootDefinition.stream.ingest.processing, 'updated_at'),
               lifecycle: { dsl: { data_retention: '50d' } },
             },
           },
@@ -198,13 +212,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, 'logs.inherits.lifecycle', wiredPutBody);
         await putStream(apiClient, 'logs.overrides.lifecycle', wiredPutBody);
 
-        const rootDefinition = await getStream(apiClient, 'logs');
+        const rootDefinition = (await getStream(
+          apiClient,
+          'logs'
+        )) as Streams.WiredStream.GetResponse;
+
         await putStream(apiClient, 'logs', {
           ...emptyAssets,
           stream: {
             description: '',
             ingest: {
-              ...(rootDefinition as Streams.WiredStream.GetResponse).stream.ingest,
+              ...rootDefinition.stream.ingest,
+              processing: omit(rootDefinition.stream.ingest.processing, 'updated_at'),
               lifecycle: { dsl: { data_retention: '10m' } },
             },
           },
