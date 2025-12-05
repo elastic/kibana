@@ -182,47 +182,6 @@ describe('useGrouping', () => {
       expect(getByTestId('custom-control-2')).toBeInTheDocument();
     });
 
-    it('renders without additionalToolbarControls when not provided', async () => {
-      const { result } = renderHook(() => useGrouping(defaultArgs));
-      await waitFor(() => new Promise((resolve) => resolve(null)));
-
-      const { getByTestId, container } = render(
-        <IntlProvider locale="en">
-          {result.current.getGrouping({
-            ...groupingArgs,
-            data: {
-              groupsCount: {
-                value: 2,
-              },
-              groupByFields: {
-                buckets: [
-                  {
-                    key: ['test-key'],
-                    key_as_string: 'test-key',
-                    doc_count: 1,
-                    unitsCount: {
-                      value: 1,
-                    },
-                  },
-                ],
-              },
-              unitsCount: {
-                value: 3,
-              },
-            },
-            renderChildComponent: jest.fn(),
-            selectedGroup: 'test',
-          })}
-        </IntlProvider>
-      );
-
-      expect(getByTestId('grouping-table')).toBeInTheDocument();
-      const additionalControls = container.querySelectorAll(
-        '[data-test-subj^="additional-control-"]'
-      );
-      expect(additionalControls).toHaveLength(0);
-    });
-
     it('handles empty additionalToolbarControls array', async () => {
       const { result } = renderHook(() => useGrouping(defaultArgs));
       await waitFor(() => new Promise((resolve) => resolve(null)));

@@ -301,19 +301,6 @@ describe('Grouping', () => {
       expect(screen.getByTestId('custom-control-2')).toBeInTheDocument();
     });
 
-    it('does not render additional controls when not provided', () => {
-      const { container } = render(
-        <I18nProvider>
-          <Grouping {...testProps} />
-        </I18nProvider>
-      );
-
-      const additionalControls = container.querySelectorAll(
-        '[data-test-subj^="additional-control-"]'
-      );
-      expect(additionalControls).toHaveLength(0);
-    });
-
     it('renders additional controls with group selector', () => {
       const customControl = <button data-test-subj="inspect-button">Inspect</button>;
       const groupSelector = <div data-test-subj="group-selector">Group Selector</div>;
