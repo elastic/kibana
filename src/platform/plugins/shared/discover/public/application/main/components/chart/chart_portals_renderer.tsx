@@ -17,6 +17,7 @@ import { UnifiedHistogramChart, useUnifiedHistogram } from '@kbn/unified-histogr
 import { useChartStyles } from '@kbn/unified-histogram/components/chart/hooks/use_chart_styles';
 import { useServicesBootstrap } from '@kbn/unified-histogram/hooks/use_services_bootstrap';
 import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-metrics-grid';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import {
   type ChartSectionConfigurationExtensionParams,
   useProfileAccessor,
@@ -143,6 +144,8 @@ type UnifiedHistogramChartProps = Pick<UnifiedHistogramGuardProps, 'panelsToggle
 const ChartsWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartProps) => {
   const dispatch = useInternalStateDispatch();
   const getChartConfigAccessor = useProfileAccessor('getChartSectionConfiguration');
+  const isEsqlMode = isOfAggregateQueryType(stateContainer.getCurrentTab().appState.query);
+
   const chartSectionConfigurationExtParams: ChartSectionConfigurationExtensionParams =
     useMemo(() => {
       return {
@@ -154,13 +157,17 @@ const ChartsWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartPr
       };
     }, [dispatch, stateContainer.actions.updateESQLQuery]);
 
-  const chartSectionConfig = useMemo(
-    () =>
-      getChartConfigAccessor(() => ({
+  const chartSectionConfig = useMemo(() => {
+    if (!isEsqlMode) {
+      return {
         replaceDefaultChart: false,
-      }))(chartSectionConfigurationExtParams),
-    [getChartConfigAccessor, chartSectionConfigurationExtParams]
-  );
+      };
+    }
+
+    return getChartConfigAccessor(() => ({
+      replaceDefaultChart: false,
+    }))(chartSectionConfigurationExtParams);
+  }, [getChartConfigAccessor, chartSectionConfigurationExtParams, isEsqlMode]);
 
   useEffect(() => {
     const histogramConfig$ = selectTabRuntimeState(
