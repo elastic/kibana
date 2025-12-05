@@ -62,10 +62,11 @@ export const useTagsAction = ({
           remove: tagsSelection.unSelectedItems?.length ? tagsSelection.unSelectedItems : undefined,
         });
 
-        onClose();
         onActionSuccess?.();
       } catch {
         onActionError?.();
+      } finally {
+        onClose();
       }
     },
     [bulkUpdateAlertTags, onClose, onActionSuccess, onActionError, selectedAlerts]
