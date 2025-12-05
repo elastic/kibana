@@ -113,7 +113,7 @@ export interface IInterpreterRenderHandlers {
    * Observable that emits when the sync parameters (syncColors, syncCursor, syncTooltips) change.
    * Renderers can subscribe to this to update without re-executing the expression.
    */
-  syncParamsUpdate$: Observable<SyncParams>;
+  syncParamsUpdate$?: Observable<SyncParams>;
 
   /**
    * This uiState interface is actually `PersistedState` from the visualizations plugin,

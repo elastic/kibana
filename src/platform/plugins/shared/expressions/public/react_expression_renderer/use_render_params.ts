@@ -29,7 +29,7 @@ export function useSyncParams(handlers: IInterpreterRenderHandlers): SyncParamsS
   const [syncTooltips, setSyncTooltips] = useState(handlers.isSyncTooltipsEnabled());
 
   useEffect(() => {
-    const subscription = handlers.syncParamsUpdate$.subscribe((params) => {
+    const subscription = handlers.syncParamsUpdate$?.subscribe((params) => {
       if (params.syncColors !== undefined) {
         setSyncColors(params.syncColors);
       }
@@ -41,7 +41,7 @@ export function useSyncParams(handlers: IInterpreterRenderHandlers): SyncParamsS
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => subscription?.unsubscribe();
   }, [handlers.syncParamsUpdate$]);
 
   return {
