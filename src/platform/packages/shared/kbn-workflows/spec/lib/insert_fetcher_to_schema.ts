@@ -10,8 +10,10 @@
 import { z } from '@kbn/zod/v4';
 import { FetcherConfigSchema } from '../schema';
 
+const MAX_RECURSION_DEPTH = 10;
+
 export function insertFetcherToSchemaRecursively(schema: z.ZodType, depth: number = 0): z.ZodType {
-  if (depth > 10) {
+  if (depth > MAX_RECURSION_DEPTH) {
     return schema;
   }
   if (schema instanceof z.ZodObject) {
