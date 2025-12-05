@@ -6,7 +6,6 @@
  */
 
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
-import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import { SECURITY_FEATURE_ID_V5 } from '@kbn/security-solution-features/constants';
 import * as i18n from './translations';
 
