@@ -25,8 +25,6 @@ export const NotionConnector: ConnectorSpec = {
     },
   },
 
-  // TODO: check if we need `schema` attribute / what for
-
   actions: {
     // https://developers.notion.com/reference/post-search
     searchPageOrDSByTitle: {
@@ -113,8 +111,6 @@ export const NotionConnector: ConnectorSpec = {
           requestData = { ...requestData, filter: JSON.parse(typedInput.filter) };
         }
 
-        // TODO: check if there's error handling for free from the framework
-        // or if we still need to add some of our own
         const response = await ctx.client.post(
           `https://api.notion.com/v1/data_sources/${typedInput.dataSourceId}/query`,
           requestData
