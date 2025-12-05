@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ItemName } from '../../edge_extractor/types';
+import type { ItemName } from '../../edge_extractor/types';
 
 export interface PluginState {
   filename?: string;

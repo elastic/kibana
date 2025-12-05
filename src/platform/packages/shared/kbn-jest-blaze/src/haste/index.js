@@ -11,6 +11,6 @@
 // earlier than we get to include setup_node_env.
 
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
-require('../../../../../../setup_node_env');
+require('@kbn/setup-node-env');
 
 module.exports = require('./haste_map');

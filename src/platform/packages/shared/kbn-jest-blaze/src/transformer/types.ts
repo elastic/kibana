@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Config } from '@jest/types';
-import { FileWalker, ChangeTracker } from '@kbn/module-graph';
+import type { Config } from '@jest/types';
+import type { FileWalker, ChangeTracker } from '@kbn/module-graph';
 
 export interface JestTransformerOptions {
   moduleDirectories?: string[];

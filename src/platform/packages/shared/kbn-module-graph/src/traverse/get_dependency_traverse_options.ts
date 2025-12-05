@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { NodePath, TraverseOptions, VisitNode, VisitNodeObject } from '@babel/traverse';
+import type { NodePath, TraverseOptions, VisitNode, VisitNodeObject } from '@babel/traverse';
 import * as t from '@babel/types';
 import { mapValues, noop } from 'lodash';
 import type {

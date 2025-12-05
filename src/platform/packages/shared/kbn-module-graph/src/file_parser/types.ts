@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TransformOptions } from '@babel/core';
-import { File } from '@babel/types';
+import type { TransformOptions } from '@babel/core';
+import type { File } from '@babel/types';
 
 export interface FileParseTransformBabelFileResult {
   ast: File;

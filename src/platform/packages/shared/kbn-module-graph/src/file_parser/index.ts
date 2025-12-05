@@ -8,9 +8,9 @@
  */
 import { loadOptions } from '@babel/core';
 import * as babel from '@babel/core';
-import { File } from '@babel/types';
-import { TransformerCache } from '../transformer_cache_provider/types';
-import { FileParseTransformOptions, FileParseTransformResult } from './types';
+import type { File } from '@babel/types';
+import type { TransformerCache } from '../transformer_cache_provider/types';
+import type { FileParseTransformOptions, FileParseTransformResult } from './types';
 
 export class FileParser {
   constructor(private readonly cache: TransformerCache<FileParseTransformResult>) {

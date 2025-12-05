@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ResolveFilePath } from '../common/types';
-import {
+import type { ResolveFilePath } from '../common/types';
+import type {
   EdgeExtractorTransformResult,
   ExportEdge,
   ImportEdge,
   ImportExportEdge,
   ItemName,
 } from '../edge_extractor/types';
-import { TransformResult } from '../transformer_cache_provider/types';
+import type { TransformResult } from '../transformer_cache_provider/types';
 
 export interface ItemSource {
   filePath: string;

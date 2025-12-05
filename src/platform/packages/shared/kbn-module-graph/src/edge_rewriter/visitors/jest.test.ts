@@ -10,9 +10,9 @@
 import { parse } from '@babel/parser';
 import { traverse } from '@babel/core';
 import { createJestVisitor } from './jest';
-import { VisitorContext } from './types';
+import type { VisitorContext } from './types';
 import { getDependencyTraverseOptions } from '../../traverse/get_dependency_traverse_options';
-import { ItemName } from '../../edge_extractor/types';
+import type { ItemName } from '../../edge_extractor/types';
 
 describe('createJestVisitor', () => {
   function createTestCode(jestCode: string, leadingComment?: string): string {

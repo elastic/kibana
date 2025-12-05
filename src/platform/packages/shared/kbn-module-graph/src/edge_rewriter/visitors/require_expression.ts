@@ -6,9 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { VisitNodeFunction } from '@babel/traverse';
-import { PluginState, VisitorContext } from './types';
-import { RequireExpression } from '../../traverse/types';
+import type { VisitNodeFunction } from '@babel/traverse';
+import type { PluginState, VisitorContext } from './types';
+import type { RequireExpression } from '../../traverse/types';
 
 /**
  * Rewrites require('./foo') calls when edge rewrites are available.

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExportEdge, ImportEdge } from './types';
+import type { ExportEdge, ImportEdge } from './types';
 
 export function createImportEdge(edge: ImportEdge): ImportEdge {
   return edge;

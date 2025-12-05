@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parseSync, types } from '@babel/core';
+import type { types } from '@babel/core';
+import { parseSync } from '@babel/core';
 import { extractEdges } from './extract_edges';
 import { createExportEdge, createImportEdge } from './helpers';
 import { normalizeEdges } from './normalize_edges';

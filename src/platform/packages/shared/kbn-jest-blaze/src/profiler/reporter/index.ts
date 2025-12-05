@@ -9,10 +9,11 @@
 
 /* eslint-disable no-console */
 import chalk from 'chalk';
-import { table, getBorderCharacters, TableUserConfig } from 'table';
+import type { TableUserConfig } from 'table';
+import { table, getBorderCharacters } from 'table';
 import Path from 'path';
-import { Config } from '@jest/types';
-import { TestContext, TestResult } from '@jest/test-result';
+import type { Config } from '@jest/types';
+import type { TestContext, TestResult } from '@jest/test-result';
 import { orderBy } from 'lodash';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { jestProfilerRuntime } from '../runtime';

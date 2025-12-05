@@ -7,8 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TransformerCache } from '../transformer_cache_provider/types';
-import { EdgeOriginResolverTransformOptions, EdgeOriginResolverTransformResult } from './types';
+import type { TransformerCache } from '../transformer_cache_provider/types';
+import type {
+  EdgeOriginResolverTransformOptions,
+  EdgeOriginResolverTransformResult,
+} from './types';
 import { findSourceForImport } from './find_source_for_import';
 
 /**

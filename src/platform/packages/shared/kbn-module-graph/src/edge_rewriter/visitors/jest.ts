@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { NodePath, VisitNodeFunction } from '@babel/traverse';
+import type { NodePath, VisitNodeFunction } from '@babel/traverse';
 import { codeFrameColumns } from '@babel/code-frame';
-import { VisitorContext, PluginState } from './types';
-import { JestMockExpression } from '../../traverse/types';
+import type { VisitorContext, PluginState } from './types';
+import type { JestMockExpression } from '../../traverse/types';
 
 /**
  * Checks if the preceding line contains a comment that opts out of jest mock rewriting

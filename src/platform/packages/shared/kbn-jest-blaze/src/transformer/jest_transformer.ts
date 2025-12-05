@@ -15,20 +15,16 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v 3.0 only", or the "Server Side Public License, v 1".
  */
-import {
-  TransformOptions as BabelTransformOptions,
-  loadOptions,
-  transformFromAstSync,
-  transformSync,
-} from '@babel/core';
-import { SyncTransformer, TransformOptions, TransformedSource } from '@jest/transform';
-import { FileWalker, ResolveFilePath, ChangeTracker } from '@kbn/module-graph';
+import type { TransformOptions as BabelTransformOptions } from '@babel/core';
+import { loadOptions, transformFromAstSync, transformSync } from '@babel/core';
+import type { SyncTransformer, TransformOptions, TransformedSource } from '@jest/transform';
+import type { FileWalker, ResolveFilePath, ChangeTracker } from '@kbn/module-graph';
 import transformerConfig from '@kbn/test/src/jest/transforms/babel/transformer_config';
 import fs from 'fs';
 import createCacheKey from '@jest/create-cache-key-function';
 import { castArray } from 'lodash';
-import { GetCacheKeyFunction } from '../types';
-import { InternalJestTransformerOptions, JestTransformerOptions } from './types';
+import type { GetCacheKeyFunction } from '../types';
+import type { InternalJestTransformerOptions, JestTransformerOptions } from './types';
 import { wrapFileContents } from '../profiler/wrap_file_contents';
 import { jestProfilerRuntime } from '../profiler/runtime';
 

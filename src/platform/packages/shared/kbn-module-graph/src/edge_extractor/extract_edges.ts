@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { NodePath, traverse } from '@babel/core';
+import type { NodePath } from '@babel/core';
+import { traverse } from '@babel/core';
 import * as t from '@babel/types';
 import { codeFrameColumns } from '@babel/code-frame';
-import { Export, Import, ImportExportEdge, ItemName } from './types';
+import type { Export, Import, ImportExportEdge, ItemName } from './types';
 import { getDependencyTraverseOptions } from '../traverse/get_dependency_traverse_options';
 import { createExportEdge, createImportEdge } from './helpers';
 

@@ -9,21 +9,25 @@
 
 import resolve from 'resolve';
 import { EdgeExtractor } from '../edge_extractor';
-import {
+import type {
   EdgeExtractorTransformOptions,
   EdgeExtractorTransformResult,
 } from '../edge_extractor/types';
 import { EdgeOriginResolver } from '../edge_origin_resolver';
-import {
+import type {
   EdgeOriginResolverTransformOptions,
   EdgeOriginResolverTransformResult,
 } from '../edge_origin_resolver/types';
 import { EdgeRewriter } from '../edge_rewriter';
-import { EdgeRewriteResult, EdgeRewriterTransformOptions } from '../edge_rewriter/types';
+import type { EdgeRewriteResult, EdgeRewriterTransformOptions } from '../edge_rewriter/types';
 import { FileParser } from '../file_parser';
-import { FileParseTransformOptions, FileParseTransformResult } from '../file_parser/types';
+import type { FileParseTransformOptions, FileParseTransformResult } from '../file_parser/types';
 import { TransformerCacheProvider } from '../transformer_cache_provider';
-import { FileWalkerOptions, FileWalkerTransformOptions, FileWalkerTransformResult } from './types';
+import type {
+  FileWalkerOptions,
+  FileWalkerTransformOptions,
+  FileWalkerTransformResult,
+} from './types';
 
 export class FileWalker {
   private readonly cacheProvider = new TransformerCacheProvider();

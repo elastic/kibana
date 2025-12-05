@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TransformerCache } from '../transformer_cache_provider/types';
+import type { TransformerCache } from '../transformer_cache_provider/types';
 import { rewriteImportsAndExports } from './rewrite_imports_and_exports';
-import { EdgeRewriteResult } from './types';
-import { EdgeRewriterTransformOptions } from './types';
+import type { EdgeRewriteResult } from './types';
+import type { EdgeRewriterTransformOptions } from './types';
 
 export class EdgeRewriter {
   constructor(private readonly cache: TransformerCache<EdgeRewriteResult>) {}

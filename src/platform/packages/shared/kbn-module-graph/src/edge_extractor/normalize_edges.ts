@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ImportExportEdge, ImportEdge, ItemName } from './types';
+import type { ImportExportEdge, ImportEdge, ItemName } from './types';
 
 /**
  * Finds implicit re-exports by matching imports and exports.

@@ -8,7 +8,7 @@
  */
 
 import { parse } from '@babel/parser';
-import { ImportExportEdge } from './types';
+import type { ImportExportEdge } from './types';
 import { extractEdges } from './extract_edges';
 import { createExportEdge, createImportEdge } from './helpers';
 

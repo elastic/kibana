@@ -9,7 +9,7 @@
 
 import Fs from 'fs';
 import Path from 'path';
-import { FileWalker } from '../file_walker';
+import type { FileWalker } from '../file_walker';
 
 function getChangedFileStatsFilename(directory: string): string {
   return Path.join(directory, 'changed-files.json');

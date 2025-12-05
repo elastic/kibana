@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { JestProfilerRuntime } from './types';
+import type { JestProfilerRuntime } from './types';
 import { wrapRequire as wrapRequireImpl } from './wrap_require';
 
 const g: typeof globalThis = globalThis;

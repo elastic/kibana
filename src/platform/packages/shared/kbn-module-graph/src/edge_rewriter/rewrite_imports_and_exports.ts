@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import Path from 'path';
-import traverse, { VisitNodeFunction } from '@babel/traverse';
-import { Node } from '@babel/core';
+import type { VisitNodeFunction } from '@babel/traverse';
+import traverse from '@babel/traverse';
+import type { Node } from '@babel/core';
 import { cloneDeepWithoutLoc } from '@babel/types';
 import { getDependencyTraverseOptions } from '../traverse/get_dependency_traverse_options';
-import { EdgeRewriteResult, RewriteStats } from './types';
-import { EdgeRewriterTransformOptions } from './types';
+import type { EdgeRewriteResult, RewriteStats } from './types';
+import type { EdgeRewriterTransformOptions } from './types';
 import { createDynamicImportDeclarationVisitor } from './visitors/dynamic_import_declaration';
 import { createDynamicImportExpressionVisitor } from './visitors/dynamic_import_expression';
 import {
@@ -23,7 +24,7 @@ import {
 import { createImportDeclarationVisitor } from './visitors/import';
 import { createRequireDeclarationVisitor } from './visitors/require_declaration';
 import { createRequireExpressionVisitor } from './visitors/require_expression';
-import { VisitorContext } from './visitors/types';
+import type { VisitorContext } from './visitors/types';
 
 export function rewriteImportsAndExports(
   filePath: string,

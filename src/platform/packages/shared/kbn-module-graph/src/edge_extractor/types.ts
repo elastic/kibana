@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ResolveFilePath } from '../common/types';
-import { FileParseTransformResult } from '../file_parser/types';
-import { TransformResult } from '../transformer_cache_provider/types';
+import type { ResolveFilePath } from '../common/types';
+import type { FileParseTransformResult } from '../file_parser/types';
+import type { TransformResult } from '../transformer_cache_provider/types';
 
 export type ItemName = 'default' | '*' | string | null;
 

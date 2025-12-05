@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { VisitNode, VisitNodeFunction, VisitNodeObject } from '@babel/traverse';
+import type { VisitNode, VisitNodeFunction, VisitNodeObject } from '@babel/traverse';
 import type t from '@babel/types';
-import { ObjectProperty } from '@babel/types';
+import type { ObjectProperty } from '@babel/types';
 import type { Overwrite } from 'utility-types';
 
 export type CommonJSExportAssignmentExpression = Overwrite<

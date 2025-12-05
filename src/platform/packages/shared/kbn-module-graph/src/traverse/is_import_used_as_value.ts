@@ -8,7 +8,7 @@
  */
 
 import * as t from '@babel/types';
-import { NodePath } from '@babel/traverse';
+import type { NodePath } from '@babel/traverse';
 
 /**
  * Determine whether an ImportDeclaration is used in value-space anywhere.

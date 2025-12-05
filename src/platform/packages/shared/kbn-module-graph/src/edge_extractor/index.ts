@@ -9,9 +9,13 @@
 
 import Path from 'path';
 import { partition } from 'lodash';
-import { TransformerCache } from '../transformer_cache_provider/types';
+import type { TransformerCache } from '../transformer_cache_provider/types';
 import { extractEdges } from './extract_edges';
-import { ExportEdge, EdgeExtractorTransformOptions, EdgeExtractorTransformResult } from './types';
+import type {
+  ExportEdge,
+  EdgeExtractorTransformOptions,
+  EdgeExtractorTransformResult,
+} from './types';
 import { normalizeEdges } from './normalize_edges';
 
 /**

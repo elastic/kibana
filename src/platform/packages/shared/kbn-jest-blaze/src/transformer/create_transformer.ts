@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Omit } from 'lodash';
+import type { Omit } from 'lodash';
 import { FileWalker, ChangeTracker } from '@kbn/module-graph';
 import { JestTransformer } from './jest_transformer';
-import { JestTransformerOptions } from './types';
+import type { JestTransformerOptions } from './types';
 
 // instantiate these once per process/worker so they can re-use the cache
 const fileWalker = new FileWalker({});

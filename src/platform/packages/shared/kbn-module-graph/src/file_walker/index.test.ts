@@ -10,7 +10,7 @@
 import Path from 'path';
 import { format, formatAst } from '../common/test_helpers';
 import { FileWalker } from '.';
-import { FileWalkerTransformOptions } from './types';
+import type { FileWalkerTransformOptions } from './types';
 
 describe('FileWalker', () => {
   let fileWalker: FileWalker;

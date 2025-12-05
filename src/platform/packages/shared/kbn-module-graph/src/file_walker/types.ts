@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TransformOptions } from '@babel/core';
-import { ResolveFilePath } from '../common/types';
-import { FileParseTransformResult } from '../file_parser/types';
-import { EdgeRewriteResult } from '../edge_rewriter/types';
-import { EdgeOriginResolverTransformResult } from '../edge_origin_resolver/types';
+import type { TransformOptions } from '@babel/core';
+import type { ResolveFilePath } from '../common/types';
+import type { FileParseTransformResult } from '../file_parser/types';
+import type { EdgeRewriteResult } from '../edge_rewriter/types';
+import type { EdgeOriginResolverTransformResult } from '../edge_origin_resolver/types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface FileWalkerOptions {}

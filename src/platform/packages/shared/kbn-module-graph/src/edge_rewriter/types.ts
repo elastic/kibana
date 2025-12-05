@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { File } from '@babel/types';
-import { ResolveFilePath } from '../common/types';
-import { ItemName } from '../edge_extractor/types';
-import { FileParseTransformResult } from '../file_parser/types';
-import { TransformResult } from '../transformer_cache_provider/types';
-import { EdgeOriginResolverTransformResult } from '../edge_origin_resolver/types';
+import type { File } from '@babel/types';
+import type { ResolveFilePath } from '../common/types';
+import type { ItemName } from '../edge_extractor/types';
+import type { FileParseTransformResult } from '../file_parser/types';
+import type { TransformResult } from '../transformer_cache_provider/types';
+import type { EdgeOriginResolverTransformResult } from '../edge_origin_resolver/types';
 
 export interface EdgeRewriteResult extends TransformResult {
   rewrites: Rewrite[];

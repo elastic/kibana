@@ -9,12 +9,15 @@
 
 import Path from 'path';
 import { EdgeExtractor } from '../edge_extractor';
-import { EdgeExtractorTransformResult } from '../edge_extractor/types';
+import type { EdgeExtractorTransformResult } from '../edge_extractor/types';
 import { FileParser } from '../file_parser';
-import { FileParseTransformResult } from '../file_parser/types';
+import type { FileParseTransformResult } from '../file_parser/types';
 import { TransformerCacheProvider } from '../transformer_cache_provider';
 import { findSourceForImport } from './find_source_for_import';
-import { EdgeOriginResolverTransformOptions, EdgeOriginResolverTransformResult } from './types';
+import type {
+  EdgeOriginResolverTransformOptions,
+  EdgeOriginResolverTransformResult,
+} from './types';
 
 describe('findSourceForImport', () => {
   let options: EdgeOriginResolverTransformOptions & {

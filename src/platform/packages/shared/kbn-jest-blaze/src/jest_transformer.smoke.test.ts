@@ -11,8 +11,8 @@ import execa from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
 import Path from 'path';
 import { promises as fs, mkdtempSync, watch } from 'fs';
-import { Config } from '@jest/types';
-import { AggregatedResult } from '@jest/test-result';
+import type { Config } from '@jest/types';
+import type { AggregatedResult } from '@jest/test-result';
 import { Subject, firstValueFrom, lastValueFrom, shareReplay, toArray } from 'rxjs';
 import { readFileSync } from 'fs';
 import Os from 'os';
@@ -31,7 +31,7 @@ async function writeFiles(files: Record<string, string>, includeFixtures: boolea
   for (const [key, content] of Object.entries({
     ...files,
     'global_setup.js': `module.exports = function () {
-        require('${require.resolve('../../../../../setup_node_env')}');
+        require('${require.resolve('@kbn/setup-node-env')}');
       };`,
   })) {
     const fullPath = Path.join(tmpDir, key);
@@ -95,7 +95,7 @@ async function runJest(jestConfig: Config.InitialOptions) {
       all: true,
       env: {
         NODE_OPTIONS: `--require ${require.resolve(
-          '../../../../../setup_node_env'
+          '@kbn/setup-node-env'
         )} --experimental-vm-modules --no-warnings`,
       },
     })
@@ -451,7 +451,7 @@ describe('jestTransformer - Import Rewriter Integration', () => {
       all: true,
       env: {
         NODE_OPTIONS: `--require ${require.resolve(
-          '../../../../../setup_node_env'
+          '@kbn/setup-node-env'
         )} --experimental-vm-modules --no-warnings`,
       },
     });

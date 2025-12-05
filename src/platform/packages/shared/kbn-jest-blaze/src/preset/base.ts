@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Config } from '@jest/types';
+import type { Config } from '@jest/types';
 import defaultPreset from '@kbn/test/jest-preset';
 import { REPO_ROOT } from '@kbn/repo-info';
 import Path from 'path';

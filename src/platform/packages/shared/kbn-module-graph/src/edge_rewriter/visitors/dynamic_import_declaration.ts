@@ -6,10 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { VisitNodeFunction } from '@babel/traverse';
+import type { VisitNodeFunction } from '@babel/traverse';
 import * as t from '@babel/types';
-import { VisitorContext } from './types';
-import { DynamicImportDeclaration, RequireLikeCallExpression } from '../../traverse/types';
+import type { VisitorContext } from './types';
+import type { DynamicImportDeclaration, RequireLikeCallExpression } from '../../traverse/types';
 
 /**
  * Handles destructured dynamic import statements like: const { foo, bar } = await import('./module');

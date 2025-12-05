@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { transformFromAstSync, transformSync, types } from '@babel/core';
+import type { types } from '@babel/core';
+import { transformFromAstSync, transformSync } from '@babel/core';
 
 export function format(code: string) {
   return transformSync(code, { parserOpts: { plugins: ['typescript'] } })?.code!;

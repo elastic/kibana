@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BabelFileResult, transformFromAstSync, traverse } from '@babel/core';
+import type { BabelFileResult } from '@babel/core';
+import { transformFromAstSync, traverse } from '@babel/core';
 import { parse } from '@babel/parser';
 import { noop } from 'lodash';
 import type { PluginState, VisitorContext } from './types';
-import { DependencyTraverseOptions } from '../../traverse/types';
+import type { DependencyTraverseOptions } from '../../traverse/types';
 import { getDependencyTraverseOptions } from '../../traverse/get_dependency_traverse_options';
-import { ItemName } from '../../edge_extractor/types';
+import type { ItemName } from '../../edge_extractor/types';
 
 /**
  * Test helper function that parses code and applies a visitor function to CommonJS export patterns

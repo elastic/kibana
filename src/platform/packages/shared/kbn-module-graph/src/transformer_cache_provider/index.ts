@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TransformerCache } from './types';
+import type { TransformerCache } from './types';
 
 export class TransformerCacheProvider {
   private readonly caches = new Set<TransformerCache<unknown>>();

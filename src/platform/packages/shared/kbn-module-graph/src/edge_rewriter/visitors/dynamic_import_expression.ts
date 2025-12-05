@@ -6,9 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { VisitNodeFunction } from '@babel/traverse';
-import { VisitorContext } from './types';
-import { DynamicImportExpression } from '../../traverse/types';
+import type { VisitNodeFunction } from '@babel/traverse';
+import type { VisitorContext } from './types';
+import type { DynamicImportExpression } from '../../traverse/types';
 
 /**
  * Handles dynamic import expressions like: import('./module')
