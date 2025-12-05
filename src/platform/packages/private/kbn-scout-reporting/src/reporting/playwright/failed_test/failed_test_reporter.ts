@@ -115,11 +115,15 @@ export class ScoutFailedTestReporter implements Reporter {
       return;
     }
 
-    const testTitle = test.titlePath().slice(3).join(' ');
+    // We don't include the first three elements in the title path (root suite, project, test file path)
+    // for full test titles in Scout, especially not when calculating test IDs
+    const fullTestTitle = test.titlePath().slice(3).join(' ');
+    const testFilePath = path.relative(REPO_ROOT, test.location.file);
+
     const testFailure: TestFailure = {
-      id: computeTestID(path.relative(REPO_ROOT, test.location.file), testTitle),
+      id: computeTestID(testFilePath, fullTestTitle),
       suite: test.parent.title,
-      title: testTitle,
+      title: test.title,
       target: this.target,
       command: this.command,
       location: stripFilePath(test.location.file),
