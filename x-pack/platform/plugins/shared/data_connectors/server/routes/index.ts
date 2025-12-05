@@ -175,6 +175,25 @@ export function registerRoutes(
           perPage: 1000,
         });
         const connectors = findResponse.saved_objects;
+
+        const kscIds: string[] = [];
+
+        // Collect ksc IDs before deletion
+        for (const connector of connectors) {
+          const attrs = connector.attributes as unknown as { kscId: string };
+          if (attrs.kscId) kscIds.push(attrs.kscId);
+        }
+        logger.info(
+          `Found ${connectors.length} data connectors and ${kscIds.length} stack connectors to delete.`
+        );
+
+        const [, { actions }] = await getStartServices();
+        const actionsClient = await actions.getActionsClientWithRequest(request);
+        for (const kscId of kscIds) {
+          await actionsClient.delete({ id: kscId });
+          logger.info(`Successfully deleted Kibana stack connector ${kscId}`);
+        }
+
         const deletePromises = connectors.map((connector) =>
           savedObjectsClient.delete(DATA_CONNECTOR_SAVED_OBJECT_TYPE, connector.id)
         );
