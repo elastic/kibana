@@ -104,14 +104,14 @@ describe('SloDetailsHistory', () => {
 
   it('renders the history view with error rate panel', () => {
     const slo = buildSlo();
-    render(<SloDetailsHistory slo={slo} isAutoRefreshing={false} />);
+    render(<SloDetailsHistory slo={slo} />);
 
     expect(screen.queryByTestId('errorRatePanel')).toBeTruthy();
   });
 
   it('renders observed value and objective in the history view', () => {
     const slo = buildSlo();
-    render(<SloDetailsHistory slo={slo} isAutoRefreshing={false} />);
+    render(<SloDetailsHistory slo={slo} />);
 
     // Check that observed value is visible (from the latest historical data entry)
     const observedValueText = screen.getByText('Observed value');
@@ -124,7 +124,7 @@ describe('SloDetailsHistory', () => {
 
   it('displays observed value from historical data within time range', () => {
     const slo = buildSlo({ id: 'test-slo-id' });
-    render(<SloDetailsHistory slo={slo} isAutoRefreshing={false} />);
+    render(<SloDetailsHistory slo={slo} />);
 
     // The observed value should be from the latest entry (0.97 from 2024-01-03)
     // Format: 0.97 -> 97.0%
@@ -133,7 +133,7 @@ describe('SloDetailsHistory', () => {
 
   it('displays objective value correctly', () => {
     const slo = buildSlo({ objective: { target: 0.95 } });
-    render(<SloDetailsHistory slo={slo} isAutoRefreshing={false} />);
+    render(<SloDetailsHistory slo={slo} />);
 
     // Objective should be 95.0%
     expect(screen.getByText('95.0%')).toBeTruthy();
@@ -143,7 +143,7 @@ describe('SloDetailsHistory', () => {
     const slo = buildSlo({
       timeWindow: buildCalendarAlignedTimeWindow(),
     });
-    render(<SloDetailsHistory slo={slo} isAutoRefreshing={false} />);
+    render(<SloDetailsHistory slo={slo} />);
 
     expect(screen.queryByTestId('errorRatePanel')).toBeTruthy();
     expect(screen.getByText('Observed value')).toBeTruthy();
@@ -154,7 +154,7 @@ describe('SloDetailsHistory', () => {
     const slo = buildSlo({
       timeWindow: buildRollingTimeWindow(),
     });
-    render(<SloDetailsHistory slo={slo} isAutoRefreshing={false} />);
+    render(<SloDetailsHistory slo={slo} />);
 
     expect(screen.queryByTestId('errorRatePanel')).toBeTruthy();
     expect(screen.getByText('Observed value')).toBeTruthy();
@@ -188,7 +188,7 @@ describe('SloDetailsHistory', () => {
     });
 
     const slo = buildSlo();
-    render(<SloDetailsHistory slo={slo} isAutoRefreshing={false} />);
+    render(<SloDetailsHistory slo={slo} />);
 
     // Should still show the metadata section
     expect(screen.getByText('Observed value')).toBeTruthy();
@@ -208,7 +208,7 @@ describe('SloDetailsHistory', () => {
     });
 
     const slo = buildSlo();
-    render(<SloDetailsHistory slo={slo} isAutoRefreshing={false} />);
+    render(<SloDetailsHistory slo={slo} />);
 
     // Should still render the component
     expect(screen.queryByTestId('errorRatePanel')).toBeTruthy();
