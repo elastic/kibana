@@ -54,7 +54,20 @@ export const dashboardListingTableStrings = {
 };
 
 export const dashboardListingTabStrings = {
+  // Dashboard tab
+  getDashboardTabName: () =>
+    i18n.translate('dashboard.listing.table.dashboardTabName', {
+      defaultMessage: 'Dashboards',
+    }),
+  getDashboardEmptyPromptBody: () =>
+    i18n.translate('dashboard.listing.table.dashboardEmptyPromptBody', {
+      defaultMessage: 'Create a dashboard to get started.',
+    }),
   // Visualization tab entity names
+  getVisualizationTabName: () =>
+    i18n.translate('dashboard.listing.table.visualizationTabName', {
+      defaultMessage: 'Visualizations',
+    }),
   getVisualizationEntityName: () =>
     i18n.translate('dashboard.listing.table.visualizationEntityName', {
       defaultMessage: 'visualization',
@@ -68,6 +81,10 @@ export const dashboardListingTabStrings = {
       defaultMessage: 'Create a visualization to get started.',
     }),
   // Annotation group tab entity names
+  getAnnotationGroupTabName: () =>
+    i18n.translate('dashboard.listing.table.annotationGroupTabName', {
+      defaultMessage: 'Annotation groups',
+    }),
   getAnnotationGroupEntityName: () =>
     i18n.translate('dashboard.listing.table.annotationGroupEntityName', {
       defaultMessage: 'annotation group',
@@ -84,11 +101,6 @@ export const dashboardListingTabStrings = {
   getAnnotationEntityName: () =>
     i18n.translate('dashboard.listing.table.annotationEntityName', {
       defaultMessage: 'annotation',
-    }),
-  // Dashboard tab
-  getDashboardEmptyPromptBody: () =>
-    i18n.translate('dashboard.listing.table.dashboardEmptyPromptBody', {
-      defaultMessage: 'Create a dashboard to get started.',
     }),
 };
 
