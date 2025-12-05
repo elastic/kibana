@@ -19,7 +19,8 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
   const retry = getService('retry');
   const supertest = getService('supertest');
 
-  describe('bulkDisable', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/239739
+  describe.skip('bulkDisable', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     const createRule = async () => {

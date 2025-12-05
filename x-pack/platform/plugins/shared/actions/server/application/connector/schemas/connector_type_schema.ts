@@ -25,4 +25,5 @@ export const connectorTypeSchema = schema.object({
   isSystemActionType: schema.boolean(),
   isDeprecated: schema.boolean({ defaultValue: false }),
   subFeature: schema.maybe(schema.oneOf([schema.literal('endpointSecurity')])),
+  allowMultipleSystemActions: schema.maybe(schema.boolean()),
 });

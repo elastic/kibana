@@ -115,6 +115,7 @@ async function deleteWithOCC(context: RulesClientContext, { id }: { id: string }
         shouldRefetchAllBackfills: true,
         backfillClient: context.backfillClient,
         actionsClient,
+        initiator: result.attributes.initiator,
       });
     }
 
