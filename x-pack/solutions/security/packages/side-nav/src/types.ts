@@ -25,8 +25,6 @@ export interface SolutionSideNavItem<T extends string = string> {
   items?: Array<SolutionSideNavItem<T>>;
   categories?: LinkCategories<T>;
   iconType?: IconType;
-  /** Custom icon type for the panel opener button. Defaults to "spaces" if not provided. */
-  panelOpenerIconType?: IconType;
   appendSeparator?: boolean;
   position?: SolutionSideNavItemPosition;
   disabled?: boolean;

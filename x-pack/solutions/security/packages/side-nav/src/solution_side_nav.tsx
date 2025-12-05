@@ -235,8 +235,7 @@ const SolutionSideNavItem: React.FC<SolutionSideNavItemProps> = React.memo(
     const { euiTheme } = useEuiTheme();
     const { tracker } = useTelemetryContext();
 
-    const { id, href, label, items, onClick, iconType, panelOpenerIconType, appendSeparator } =
-      item;
+    const { id, href, label, items, onClick, iconType, appendSeparator } = item;
 
     const solutionSideNavItemStyles = SolutionSideNavItemStyles(euiTheme);
     const itemClassNames = classNames(
@@ -304,7 +303,7 @@ const SolutionSideNavItem: React.FC<SolutionSideNavItemProps> = React.memo(
                 size="s"
                 color="text"
                 onClick={onButtonClick}
-                iconType={panelOpenerIconType ?? 'spaces'}
+                iconType="spaces"
                 iconSize="m"
                 aria-label={TOGGLE_PANEL_LABEL}
                 data-test-subj={`solutionSideNavItemButton-${id}`}

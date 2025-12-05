@@ -87,7 +87,6 @@ const formatLaunchpadItem = (
     return {
       id: SecurityGroupName.launchpad,
       label: i18nStrings.launchPad.title,
-      panelOpenerIconType: 'launch',
       position: SolutionSideNavItemPosition.bottom,
       appendSeparator: true,
       items: [],

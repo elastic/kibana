@@ -215,30 +215,6 @@ describe('SecuritySideNav', () => {
           }),
         ]),
       });
-    });
-
-    it('should not show icon for Get started item in Launchpad children', () => {
-      const landingLink: NavigationLink = {
-        id: SecurityPageName.landing,
-        title: 'Get started',
-        sideNavIcon: 'launch',
-      };
-
-      mockUseNavLinks.mockReturnValue([landingLink]);
-      renderNav();
-
-      const callArgs = mockSolutionSideNav.mock.calls[0][0];
-      const launchpadItem = callArgs.items.find(
-        (item: { id: string }) => item.id === SecurityGroupName.launchpad
-      );
-
-      const getStartedChild = launchpadItem?.items?.find(
-        (item: { id: string }) => item.id === SecurityPageName.landing
-      );
-
-      expect(getStartedChild).toBeDefined();
-      expect(getStartedChild?.iconType).toBeUndefined();
-    });
 
     it('should position Launchpad above Manage', () => {
       const landingLink: NavigationLink = {
