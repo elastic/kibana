@@ -21,6 +21,7 @@ import {
   inOperators,
   nullCheckOperators,
 } from '../../../definitions/all_operators';
+import { SuggestionCategory } from '../../../sorting/types';
 
 type ExpectedSuggestions = string[] | { contains?: string[]; notContains?: string[] };
 
@@ -112,6 +113,7 @@ describe('JOIN Autocomplete', () => {
       );
 
       expect(createIndexCommandSuggestion).toEqual({
+        category: SuggestionCategory.CUSTOM_ACTION,
         command: {
           arguments: [{ indexName: '' }],
           id: 'esql.lookup_index.create',
@@ -183,6 +185,7 @@ describe('JOIN Autocomplete', () => {
       );
 
       expect(createIndexCommandSuggestion).toEqual({
+        category: SuggestionCategory.CUSTOM_ACTION,
         command: {
           arguments: [{ indexName: 'new_join_index' }],
           id: 'esql.lookup_index.create',

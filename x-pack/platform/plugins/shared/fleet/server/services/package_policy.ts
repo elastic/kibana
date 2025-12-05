@@ -196,7 +196,11 @@ import {
   validateAdditionalDatastreamsPermissionsForSpace,
   validatePolicyNamespaceForSpace,
 } from './spaces/policy_namespaces';
-import { isSpaceAwarenessEnabled, isSpaceAwarenessMigrationPending } from './spaces/helpers';
+import {
+  getSpaceForPackagePolicy,
+  isSpaceAwarenessEnabled,
+  isSpaceAwarenessMigrationPending,
+} from './spaces/helpers';
 import { updatePackagePolicySpaces } from './spaces/package_policy';
 import {
   _packagePoliciesGetUpgradeDryRunDiff,
@@ -2643,7 +2647,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         packagePolicies,
         async (packagePolicy) => {
           const soClient = appContextService.getInternalUserSOClientForSpaceId(
-            packagePolicy.spaceIds?.[0]
+            getSpaceForPackagePolicy(packagePolicy)
           );
           const existingPackagePolicy = await this.get(soClient, packagePolicy.id);
 
@@ -2674,7 +2678,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         packagePolicies,
         (packagePolicy) => {
           const soClient = appContextService.getInternalUserSOClientForSpaceId(
-            packagePolicy.spaceIds?.[0]
+            getSpaceForPackagePolicy(packagePolicy)
           );
           return this.update(
             soClient,

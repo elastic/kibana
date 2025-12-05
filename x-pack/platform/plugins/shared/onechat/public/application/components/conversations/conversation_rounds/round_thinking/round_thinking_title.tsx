@@ -17,6 +17,7 @@ const clampTextStyles = css`
   display: -webkit-box;
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
+  overflow: hidden;
 `;
 
 const defaultThinkingLabel = i18n.translate('xpack.onechat.conversation.thinking.label', {

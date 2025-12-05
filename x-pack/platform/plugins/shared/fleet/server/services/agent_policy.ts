@@ -135,6 +135,7 @@ import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 import { isSpaceAwarenessEnabled } from './spaces/helpers';
 import { agentlessAgentService } from './agents/agentless_agent';
 import { scheduleDeployAgentPoliciesTask } from './agent_policies/deploy_agent_policies_task';
+import { getSpaceForAgentPolicy, getSpaceForAgentPolicySO } from './spaces/helpers';
 
 function normalizeKuery(savedObjectType: string, kuery: string) {
   if (savedObjectType === LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE) {
@@ -1244,7 +1245,7 @@ class AgentPolicyService {
         agentPolicies,
         async (agentPolicy) => {
           const soClient = appContextService.getInternalUserSOClientForSpaceId(
-            agentPolicy.space_ids?.[0]
+            getSpaceForAgentPolicy(agentPolicy)
           );
           const existingAgentPolicy = await this.get(soClient, agentPolicy.id, true);
 
@@ -1267,7 +1268,7 @@ class AgentPolicyService {
         agentPolicies,
         (agentPolicy) => {
           const soClient = appContextService.getInternalUserSOClientForSpaceId(
-            agentPolicy.space_ids?.[0]
+            getSpaceForAgentPolicy(agentPolicy)
           );
           return this.update(soClient, esClient, agentPolicy.id, getAgentPolicy(agentPolicy), {
             skipValidation: true,
@@ -1308,7 +1309,9 @@ class AgentPolicyService {
         agentPolicies,
         (agentPolicy) =>
           this.update(
-            appContextService.getInternalUserSOClientForSpaceId(agentPolicy.space_ids?.[0]),
+            appContextService.getInternalUserSOClientForSpaceId(
+              getSpaceForAgentPolicy(agentPolicy)
+            ),
             esClient,
             agentPolicy.id,
             {
@@ -1342,7 +1345,7 @@ class AgentPolicyService {
             updated_by: options?.user ? options.user.username : 'system',
           },
           version: policy.version,
-          namespace: policy.namespaces?.[0],
+          namespace: getSpaceForAgentPolicySO(policy),
         };
       }
     );
@@ -1376,7 +1379,7 @@ class AgentPolicyService {
       appContextService.getTaskManagerStart()!,
       savedObjectsResults.map((policy) => ({
         id: policy.id,
-        spaceId: policy.namespaces?.[0],
+        spaceId: getSpaceForAgentPolicySO(policy),
       }))
     );
 
@@ -1937,7 +1940,9 @@ class AgentPolicyService {
         agentPolicies,
         (agentPolicy) =>
           this.update(
-            appContextService.getInternalUserSOClientForSpaceId(agentPolicy.space_ids?.[0]),
+            appContextService.getInternalUserSOClientForSpaceId(
+              getSpaceForAgentPolicy(agentPolicy)
+            ),
             esClient,
             agentPolicy.id,
             {
@@ -2110,7 +2115,7 @@ class AgentPolicyService {
       appContextService.getTaskManagerStart()!,
       updatedPoliciesSuccess.map((policy) => ({
         id: policy.id,
-        spaceId: policy.namespaces?.[0],
+        spaceId: getSpaceForAgentPolicySO(policy),
       }))
     );
 

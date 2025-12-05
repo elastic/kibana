@@ -47,6 +47,7 @@ export const PopoverReference: React.FC<React.PropsWithChildren<Props>> = ({
       className={css`
         vertical-align: baseline;
       `}
+      offset={0}
       {...rest}
     >
       {children}

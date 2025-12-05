@@ -49,6 +49,8 @@ export function PurgeInstancesConfirmationModal({ items, onCancel, onConfirm }: 
   const isFormValid =
     Number.isInteger(staleDuration) && staleDuration > 0 && (!requireOverride || override);
 
+  const hasSelectedSlos = items && items.length > 0;
+
   return (
     <EuiConfirmModal
       aria-labelledby={modalTitleId}
@@ -78,10 +80,19 @@ export function PurgeInstancesConfirmationModal({ items, onCancel, onConfirm }: 
     >
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiText>
-          {i18n.translate('xpack.slo.purgeInstancesConfirmationModal.descriptionText', {
-            defaultMessage:
-              'This action will permanently delete all stale SLO instances based on the stale duration threshold defined in your settings. You can override this threshold below.',
-          })}
+          {hasSelectedSlos
+            ? i18n.translate(
+                'xpack.slo.purgeInstancesConfirmationModal.descriptionTextWithSelection',
+                {
+                  defaultMessage:
+                    'This action will permanently delete stale instances from the {count, plural, one {selected SLO} other {# selected SLOs}} based on the stale duration threshold defined in your settings. You can override this threshold below.',
+                  values: { count: items.length },
+                }
+              )
+            : i18n.translate('xpack.slo.purgeInstancesConfirmationModal.descriptionText', {
+                defaultMessage:
+                  'This action will permanently delete all stale SLO instances based on the stale duration threshold defined in your settings. You can override this threshold below.',
+              })}
         </EuiText>
 
         <EuiSpacer size="m" />

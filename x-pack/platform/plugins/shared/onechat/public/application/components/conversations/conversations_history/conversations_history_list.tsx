@@ -119,6 +119,9 @@ export const ConversationHistoryList: React.FC<ConversationHistoryListProps> = (
           defaultMessage: 'Search conversations',
         }),
         compressed: true,
+        inputRef: (node) => {
+          node?.focus();
+        },
       }}
       options={selectableOptions}
       onChange={handleChange}

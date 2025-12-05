@@ -12735,15 +12735,15 @@
               },
               {
                 "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_cases.tsx"
+              },
+              {
+                "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_cases_metrics.tsx"
               },
               {
                 "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/public/containers/configure/use_get_supported_action_connectors.tsx"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_cases.tsx"
               },
               {
                 "plugin": "cases",

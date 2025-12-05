@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import assert from 'assert';
 import type { Logger, LoggerFactory } from '@kbn/core/server';
 import type {
   TaskManagerSetupContract,
@@ -15,7 +16,7 @@ import { TaskCost, TaskPriority } from '@kbn/task-manager-plugin/server/task';
 import { MAX_ATTEMPTS_AI_WORKFLOWS, TASK_TIMEOUT_DURATION } from '../constants';
 import { TASK_STATUSES } from '../saved_objects/constants';
 
-const TASK_TYPE = 'autoImport-dataStream-task';
+export const DATA_STREAM_CREATION_TASK_TYPE = 'autoImport-dataStream-task';
 
 export interface DataStreamTaskParams {
   integrationId: string;
@@ -32,7 +33,7 @@ export class TaskManagerService {
 
     // Register task definitions during setup phase
     taskManagerSetup.registerTaskDefinitions({
-      [TASK_TYPE]: {
+      [DATA_STREAM_CREATION_TASK_TYPE]: {
         title: 'Data Stream generation workflow',
         description: 'Executes long-running AI agent workflows for data stream generation',
         timeout: TASK_TIMEOUT_DURATION,
@@ -46,7 +47,7 @@ export class TaskManagerService {
       },
     });
 
-    this.logger.info(`Task definition "${TASK_TYPE}" registered`);
+    this.logger.info(`Task definition "${DATA_STREAM_CREATION_TASK_TYPE}" registered`);
   }
 
   // for lifecycle start phase
@@ -65,17 +66,17 @@ export class TaskManagerService {
     this.logger.debug('TaskManagerService initialized');
   }
 
-  public async scheduleAIWorkflowTask(params: DataStreamTaskParams): Promise<{ taskId: string }> {
-    if (!this.taskManager) {
-      throw new Error('TaskManager not initialized');
-    }
+  public async scheduleDataStreamCreationTask(
+    params: DataStreamTaskParams
+  ): Promise<{ taskId: string }> {
+    assert(this.taskManager, 'TaskManager not initialized');
 
     // Generate an unique task ID
     const taskId = `data-stream-task-${params.integrationId}-${params.dataStreamId}`;
 
     const taskInstance = await this.taskManager.schedule({
       id: taskId,
-      taskType: TASK_TYPE,
+      taskType: DATA_STREAM_CREATION_TASK_TYPE,
       params,
       state: { task_status: TASK_STATUSES.pending },
       scope: ['automaticImport'],

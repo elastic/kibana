@@ -10022,18 +10022,14 @@ export const indices_types_downsampling_round = z.object({
     fixed_interval: types_duration_large
 });
 
-export const indices_types_data_stream_lifecycle_downsampling = z.object({
-    rounds: z.array(indices_types_downsampling_round).register(z.globalRegistry, {
-        description: 'The list of downsampling rounds to execute as part of this downsampling configuration'
-    })
-});
-
 /**
  * Data stream lifecycle denotes that a data stream is managed by the data stream lifecycle and contains the configuration.
  */
 export const indices_types_data_stream_lifecycle = z.object({
     data_retention: z.optional(types_duration),
-    downsampling: z.optional(indices_types_data_stream_lifecycle_downsampling),
+    downsampling: z.optional(z.array(indices_types_downsampling_round).register(z.globalRegistry, {
+        description: 'The list of downsampling rounds to execute as part of this downsampling configuration'
+    })),
     enabled: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If defined, it turns data stream lifecycle on/off (`true`/`false`) for this data stream. A data stream lifecycle\nthat\'s disabled (enabled: `false`) will have no effect on the data stream.'
     })).default(true)
@@ -13996,7 +13992,7 @@ export const inference_types_azure_ai_studio_service_settings = z.object({
         description: 'The target URL of your Azure AI Studio model deployment.\nThis can be found on the overview page for your deployment in the management section of your Azure AI Studio account.'
     }),
     provider: z.string().register(z.globalRegistry, {
-        description: 'The model provider for your deployment.\nNote that some providers may support only certain task types.\nSupported providers include:\n\n* `cohere` - available for `text_embedding` and `completion` task types\n* `databricks` - available for `completion` task type only\n* `meta` - available for `completion` task type only\n* `microsoft_phi` - available for `completion` task type only\n* `mistral` - available for `completion` task type only\n* `openai` - available for `text_embedding` and `completion` task types'
+        description: 'The model provider for your deployment.\nNote that some providers may support only certain task types.\nSupported providers include:\n\n* `cohere` - available for `text_embedding`, `rerank` and `completion` task types\n* `databricks` - available for `completion` task type only\n* `meta` - available for `completion` task type only\n* `microsoft_phi` - available for `completion` task type only\n* `mistral` - available for `completion` task type only\n* `openai` - available for `text_embedding` and `completion` task types'
     }),
     rate_limit: z.optional(inference_types_rate_limit_setting)
 });

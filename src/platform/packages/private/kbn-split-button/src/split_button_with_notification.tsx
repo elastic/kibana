@@ -66,6 +66,7 @@ export const SplitButtonWithNotification = ({
             left: notificationIndicatorPosition?.left,
             bottom: notificationIndicatorPosition?.bottom,
             zIndex: 1,
+            pointerEvents: 'none',
             ...(notificationIndicatorHasStroke && {
               '& svg': {
                 stroke: 'white',
@@ -75,12 +76,14 @@ export const SplitButtonWithNotification = ({
             }),
           }}
         >
-          <EuiIconTip
-            type="dot"
-            size={notificationIndicatorSize}
-            color={notificationIndicatorColor}
-            content={notifcationIndicatorTooltipContent}
-          />
+          <span css={{ pointerEvents: 'auto' }}>
+            <EuiIconTip
+              type="dot"
+              size={notificationIndicatorSize}
+              color={notificationIndicatorColor}
+              content={notifcationIndicatorTooltipContent}
+            />
+          </span>
         </div>
       )}
     </div>

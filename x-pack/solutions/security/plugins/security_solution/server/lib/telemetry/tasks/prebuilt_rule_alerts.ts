@@ -20,6 +20,7 @@ import {
   safeValue,
   unflatten,
   processDetectionRuleCustomizations,
+  withErrorMessage,
 } from '../helpers';
 import { copyAllowlistedFields, filterList } from '../filterlists';
 import type { AllowlistFields } from '../filterlists/types';
@@ -118,7 +119,7 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
         await taskMetricsService.end(trace);
         return 0;
       } catch (error) {
-        logger.error('could not complete task', { error });
+        log.error('could not complete task', withErrorMessage(error));
         await taskMetricsService.end(trace, error);
         return 0;
       }

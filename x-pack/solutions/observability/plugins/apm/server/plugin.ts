@@ -51,8 +51,8 @@ import type {
   APMPluginSetupDependencies,
   APMPluginStartDependencies,
 } from './types';
-import { registerAgentTools } from './agent_tools';
-import { registerDataProviders } from './observability_agent/register_data_providers';
+import { registerAgentTools } from './agent_builder/tools';
+import { registerDataProviders } from './agent_builder/data_provider/register_data_providers';
 
 export class APMPlugin
   implements Plugin<APMPluginSetup, void, APMPluginSetupDependencies, APMPluginStartDependencies>

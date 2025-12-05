@@ -64,11 +64,12 @@ export class IndicesMetadataService {
   public start(
     taskManager: TaskManagerStartContract,
     analytics: AnalyticsServiceStart,
-    esClient: ElasticsearchClient
+    esClient: ElasticsearchClient,
+    isServerless: boolean
   ) {
     this.logger.debug('Starting indices metadata service');
 
-    this.receiver = new MetadataReceiver(this.logger, esClient);
+    this.receiver = new MetadataReceiver(this.logger, esClient, isServerless);
     this.sender = new MetadataSender(this.logger, analytics);
 
     this.subscription$ = this.configurationService
@@ -241,7 +242,9 @@ export class IndicesMetadataService {
       indicesStats.items.push(stat);
     }
     this.sender.reportEBT(INDEX_STATS_EVENT, indicesStats);
-    this.logger.debug('Indices stats sent', { count: indicesStats.items.length } as LogMeta);
+    this.logger.debug('Indices stats sent', {
+      count: indicesStats.items.length,
+    } as LogMeta);
     return indicesStats.items.length;
   }
 

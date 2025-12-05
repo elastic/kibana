@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { IconType } from '@elastic/eui';
 import type { UnknownAttachment } from '@kbn/onechat-common/attachments';
 
 /**
@@ -18,7 +19,7 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
   /**
    * Returns the icon type to display for the attachment.
    */
-  getIcon?: () => string;
+  getIcon?: () => IconType;
 }
 
 /**

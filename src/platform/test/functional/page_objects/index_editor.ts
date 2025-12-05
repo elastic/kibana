@@ -10,6 +10,8 @@
 import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 
+const ADD_ROW_COLUMN_INDEX = 1;
+
 export class IndexEditorObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
@@ -47,8 +49,12 @@ export class IndexEditorObject extends FtrService {
     await this.common.pressEnterKey();
   }
 
-  public async addColumn(): Promise<void> {
+  public async addColumn(name: string, type: string): Promise<void> {
     await this.testSubjects.click('indexEditorAddColumnButton');
+
+    await this.comboBox.set('indexEditorColumnTypeSelect', type);
+    await this.testSubjects.setValue('indexEditorColumnNameInput', name);
+    await this.common.pressEnterKey();
   }
 
   public async deleteColumn(name: string): Promise<void> {
@@ -62,7 +68,9 @@ export class IndexEditorObject extends FtrService {
     await this.common.pressEnterKey();
   }
 
-  public async addRow(): Promise<void> {
+  public async addRow(rowIndex: number): Promise<void> {
+    const cell = await this.dataGrid.getCellElement(rowIndex, ADD_ROW_COLUMN_INDEX);
+    await cell.moveMouseTo();
     await this.testSubjects.click('indexEditorAddRowButton');
   }
 

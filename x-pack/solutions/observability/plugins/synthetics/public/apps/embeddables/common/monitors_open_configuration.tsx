@@ -12,10 +12,10 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ClientPluginsStart } from '../../../plugin';
 import { MonitorConfiguration } from './monitor_configuration';
-import type { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../constants';
 import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../constants';
 import type { OverviewMonitorsEmbeddableCustomState } from '../monitors_overview/monitors_embeddable_factory';
-import type { OverviewStatsEmbeddableCustomState } from '../stats_overview/stats_overview_embeddable_factory';
+import type { OverviewStatsEmbeddableCustomState } from '../../../../common/embeddables/stats_overview/types';
+import type { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../../../../common/embeddables/stats_overview/constants';
 
 interface CommonParams {
   title: string;
