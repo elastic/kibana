@@ -24,6 +24,18 @@ describe('cascaded documents helpers utils', () => {
   });
 
   describe('getESQLStatsQueryMeta', () => {
+    it('should return an empty array of group by fields and applied functions if the query has a sub query as the data source', () => {
+      const queryString = `
+        FROM kibana_sample_data_logs, (FROM kibana_sample_data_flights)
+        | STATS count = COUNT(bytes), average = AVG(memory)
+              BY clientip
+      `;
+
+      const result = getESQLStatsQueryMeta(queryString);
+      expect(result.groupByFields).toEqual([]);
+      expect(result.appliedFunctions).toEqual([]);
+    });
+
     it('should return an array of the columns the query has been denoted to be grouped by with the STATS command', () => {
       const queryString = `
         FROM kibana_sample_data_logs, another_index

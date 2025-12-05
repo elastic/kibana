@@ -15,6 +15,7 @@ import {
   isColumn,
   isOptionNode,
   isFunctionExpression,
+  isSubQuery,
   mutate,
   synth,
   type ESQLCommand,
@@ -182,9 +183,14 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
 
   const esqlQuery = EsqlQuery.fromSrc(queryString);
 
+  const dataSourceCommand = getESQLQueryDataSourceCommand(esqlQuery);
   const summarizedStatsCommand = getStatsCommandToOperateOn(esqlQuery);
 
-  if (!summarizedStatsCommand || Object.keys(summarizedStatsCommand?.grouping ?? {}).length === 0) {
+  if (
+    dataSourceCommand?.args.some(isSubQuery) ||
+    !summarizedStatsCommand ||
+    Object.keys(summarizedStatsCommand?.grouping ?? {}).length === 0
+  ) {
     return { groupByFields, appliedFunctions };
   }
 
