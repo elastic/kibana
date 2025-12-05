@@ -17,8 +17,8 @@ import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/constants';
 export type DashboardSettings = Required<DashboardOptions> & {
   description?: DashboardState['description'];
   tags: DashboardState['tags'];
-  timeRestore: boolean;
-  projectRoutingRestore: boolean;
+  time_restore: boolean;
+  project_routing_restore: boolean;
   title: DashboardState['title'];
 };
 
@@ -26,21 +26,21 @@ const DEFAULT_SETTINGS: WithAllKeys<DashboardSettings> = {
   ...DEFAULT_DASHBOARD_OPTIONS,
   description: undefined,
   tags: [],
-  timeRestore: false,
-  projectRoutingRestore: false,
+  time_restore: false,
+  project_routing_restore: false,
   title: '',
 };
 
 const comparators: StateComparators<DashboardSettings> = {
   title: 'referenceEquality',
   description: 'referenceEquality',
-  hidePanelTitles: 'referenceEquality',
-  syncColors: 'referenceEquality',
-  syncCursor: 'referenceEquality',
-  syncTooltips: 'referenceEquality',
-  timeRestore: 'referenceEquality',
-  projectRoutingRestore: 'referenceEquality',
-  useMargins: 'referenceEquality',
+  hide_panel_titles: 'referenceEquality',
+  sync_colors: 'referenceEquality',
+  sync_cursor: 'referenceEquality',
+  sync_tooltips: 'referenceEquality',
+  time_restore: 'referenceEquality',
+  use_margins: 'referenceEquality',
+  project_routing_restore: 'referenceEquality',
   tags: 'deepEquality',
 };
 
@@ -49,8 +49,8 @@ function deserializeState(state: DashboardState) {
     ...state.options,
     description: state.description,
     tags: state.tags,
-    timeRestore: Boolean(state.timeRange),
-    projectRoutingRestore: Boolean(state.project_routing),
+    time_restore: Boolean(state.time_range),
+    project_routing_restore: Boolean(state.project_routing),
     title: state.title,
   };
 }
@@ -63,7 +63,8 @@ export function initializeSettingsManager(initialState: DashboardState) {
   );
 
   function serializeSettings() {
-    const { description, tags, timeRestore, projectRoutingRestore, title, ...options } =
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const { description, tags, time_restore, project_routing_restore, title, ...options } =
       stateManager.getLatestState();
     return {
       ...(description && { description }),
@@ -75,25 +76,25 @@ export function initializeSettingsManager(initialState: DashboardState) {
 
   return {
     api: {
-      description$: stateManager.api.description$,
+      setTags: stateManager.api.setTags,
       getSettings: stateManager.getLatestState,
-      hideTitle$: stateManager.api.hidePanelTitles$,
-      settings: {
-        syncColors$: stateManager.api.syncColors$,
-        syncCursor$: stateManager.api.syncCursor$,
-        syncTooltips$: stateManager.api.syncTooltips$,
-        useMargins$: stateManager.api.useMargins$,
-      },
       setSettings: (settings: Partial<DashboardSettings>) => {
         stateManager.reinitializeState({
           ...stateManager.getLatestState(),
           ...settings,
         });
       },
-      setTags: stateManager.api.setTags,
-      timeRestore$: stateManager.api.timeRestore$,
-      projectRoutingRestore$: stateManager.api.projectRoutingRestore$,
+      projectRoutingRestore$: stateManager.api.project_routing_restore$,
       title$: stateManager.api.title$,
+      description$: stateManager.api.description$,
+      timeRestore$: stateManager.api.time_restore$,
+      hideTitle$: stateManager.api.hide_panel_titles$,
+      settings: {
+        syncColors$: stateManager.api.sync_colors$,
+        syncCursor$: stateManager.api.sync_cursor$,
+        syncTooltips$: stateManager.api.sync_tooltips$,
+        useMargins$: stateManager.api.use_margins$,
+      },
     },
     internalApi: {
       serializeSettings,
@@ -103,13 +104,21 @@ export function initializeSettingsManager(initialState: DashboardState) {
           map(() => stateManager.getLatestState()),
           combineLatestWith(lastSavedState$),
           map(([latestState, lastSavedState]) => {
-            const { description, tags, timeRestore, projectRoutingRestore, title, ...optionDiffs } =
-              diffComparators(
-                comparators,
-                deserializeState(lastSavedState),
-                latestState,
-                DEFAULT_SETTINGS
-              );
+            const {
+              description,
+              tags,
+              // eslint-disable-next-line @typescript-eslint/naming-convention
+              time_restore,
+              // eslint-disable-next-line @typescript-eslint/naming-convention
+              project_routing_restore,
+              title,
+              ...optionDiffs
+            } = diffComparators(
+              comparators,
+              deserializeState(lastSavedState),
+              latestState,
+              DEFAULT_SETTINGS
+            );
             // options needs to contain all values and not just diffs since is spread into saved state
             const options = Object.keys(optionDiffs).length
               ? { ...serializeSettings().options, ...optionDiffs }
@@ -118,8 +127,8 @@ export function initializeSettingsManager(initialState: DashboardState) {
               ...(description && { description }),
               ...(tags && { tags }),
               ...(title && { title }),
-              ...(typeof timeRestore === 'boolean' && { timeRestore }),
-              ...(typeof projectRoutingRestore === 'boolean' && { projectRoutingRestore }),
+              ...(typeof time_restore === 'boolean' && { time_restore }),
+              ...(typeof project_routing_restore === 'boolean' && { project_routing_restore }),
               ...(options && { options }),
             };
           })

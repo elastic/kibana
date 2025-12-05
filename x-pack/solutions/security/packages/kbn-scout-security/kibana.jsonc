@@ -1,7 +1,10 @@
 {
   "type": "test-helper",
   "id": "@kbn/scout-security",
-  "owner": "@elastic/appex-qa",
+  "owner": [
+    "@elastic/appex-qa",
+    "@elastic/security-engineering-productivity"
+  ],
   "group": "security",
   "visibility": "private",
   "devOnly": true
