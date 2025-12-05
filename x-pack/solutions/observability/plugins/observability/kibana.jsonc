@@ -23,6 +23,7 @@
       "presentationUtil",
       "features",
       "files",
+      "fleet",
       "inspector",
       "lens",
       "observabilityShared",
