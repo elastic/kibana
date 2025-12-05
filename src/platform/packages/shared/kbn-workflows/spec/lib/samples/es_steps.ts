@@ -39,6 +39,17 @@ export const ES_VALID_SAMPLE_STEPS = [
     },
   },
   {
+    name: 'create-document',
+    type: 'elasticsearch.index',
+    with: {
+      index: 'test-index',
+      id: '1111-aaaa-bbbb-cccc-1234567890ab',
+      document: {
+        message: 'test',
+      },
+    },
+  },
+  {
     name: 'update-document',
     type: 'elasticsearch.update',
     with: {
@@ -59,7 +70,7 @@ export const ES_VALID_SAMPLE_STEPS = [
   },
   // indices
   {
-    name: 'create-index-with-mappings',
+    name: 'create-index',
     type: 'elasticsearch.indices.create',
     with: {
       index: 'test-index',
@@ -73,6 +84,39 @@ export const ES_VALID_SAMPLE_STEPS = [
           },
           tags: {
             type: 'keyword',
+          },
+        },
+      },
+    },
+  },
+  {
+    name: 'create-index-with-complex-mappings',
+    type: 'elasticsearch.indices.create',
+    with: {
+      index: 'test-index',
+      mappings: {
+        properties: {
+          commit: {
+            properties: {
+              message: {
+                type: 'text',
+                analyzer: 'standard',
+                fields: {
+                  keyword: {
+                    type: 'keyword',
+                    ignore_above: 512,
+                  },
+                },
+              },
+              author: {
+                properties: {
+                  date: {
+                    type: 'date',
+                    format: 'strict_date_optional_time||epoch_millis',
+                  },
+                },
+              },
+            },
           },
         },
       },
@@ -101,5 +145,19 @@ export const ES_INVALID_SAMPLE_STEPS = [
     },
     zodErrorMessage: 'Invalid input: expected record, received array',
     diagnosticErrorMessage: /Incorrect type\. Expected "__schema\d+"\./,
+  },
+  {
+    step: {
+      name: 'create-document',
+      type: 'elasticsearch.index',
+      with: {
+        index: 'test-index',
+        id: '1111-aaaa-bbbb-cccc-1234567890ab',
+        document: {
+          message: 'test',
+        },
+        notValidField: {},
+      },
+    },
   },
 ];
