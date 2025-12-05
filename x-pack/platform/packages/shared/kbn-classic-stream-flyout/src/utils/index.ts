@@ -6,3 +6,4 @@
  */
 
 export * from './utils';
+export * from './stream_name_input_utils';
