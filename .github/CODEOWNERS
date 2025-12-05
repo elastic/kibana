@@ -1229,8 +1229,6 @@ x-pack/solutions/security/test/plugin_functional/plugins/resolver_test @elastic/
 x-pack/solutions/security/test/security_solution_api_integration @elastic/security-detection-engine
 x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response @elastic/security-detection-engine
 x-pack/solutions/security/test/security_solution_endpoint @elastic/security-defend-workflows
-x-pack/solutions/workplaceai/packages/kbn-workplaceai-api-keys-components @elastic/search-kibana @elastic/workchat-eng
-x-pack/solutions/workplaceai/packages/kbn-workplaceai-api-keys-server @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/workplaceai/plugins/serverless_workplace_ai @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/workplaceai/plugins/workplace_ai_app @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/workplaceai/test @elastic/workchat-eng
@@ -1861,6 +1859,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /.buildkite/pipelines/esql_grammar_sync.yml @elastic/kibana-esql
 /.buildkite/scripts/steps/code_generation/security_solution_codegen.sh @elastic/security-detection-rule-management
 /.buildkite/scripts/steps/security @elastic/kibana-security
+/.buildkite/scripts/steps/entity_store_performance @elastic/contextual-security
 /kbn_pm/ @elastic/kibana-operations
 /x-pack/dev-tools @elastic/kibana-operations
 /catalog-info.yaml @elastic/kibana-operations @elastic/kibana-tech-leads
@@ -2480,6 +2479,8 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/automatic_import @elastic/integration-experience
 /x-pack/solutions/security/plugins/security_solution/public/configurations @elastic/security-generative-ai
 /x-pack/solutions/security/plugins/security_solution_serverless/public/navigation/ai_soc @elastic/security-solution @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/agent_builder @elastic/security-generative-ai
+/x-pack/solutions/security/plugins/security_solution/server/agent_builder @elastic/security-generative-ai
 
 # AI4DSOC in Security Solution
 /x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/ai4dsoc @elastic/security-engineering-productivity
@@ -2624,6 +2625,7 @@ x-pack/solutions/security/test/serverless/functional/configs/config.context_awar
 /x-pack/solutions/security/plugins/security_solution/public/detections/utils @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/flyout/document_details @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/flyout/network_details @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/flyout/attack_details @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/flyout/shared @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/flyout/rule_details @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/investigations @elastic/security-threat-hunting-investigations
