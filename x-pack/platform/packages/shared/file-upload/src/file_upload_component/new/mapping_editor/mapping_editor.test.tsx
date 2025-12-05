@@ -187,7 +187,6 @@ describe('MappingEditor', () => {
 
     expect(screen.getByDisplayValue('initialField')).toBeInTheDocument();
 
-    // Update the observable
     const newMappings = [
       {
         name: 'updatedField',
@@ -207,43 +206,34 @@ describe('MappingEditor', () => {
   });
 
   it('renders reset button and calls reset method when clicked', async () => {
-    // Set up mappings with edited state
     const mappingsEditedSubject = new BehaviorSubject(true);
     (mockService.mappingsEdited$ as any) = mappingsEditedSubject.asObservable();
     (mockService.getMappingsEdited as jest.Mock).mockReturnValue(true);
 
     renderWithI18n(<MappingEditor onImportClick={onImportClick} />);
 
-    // Find the reset button by role and name
     const resetButton = screen.getByRole('button', { name: 'Reset to default' });
     expect(resetButton).toBeInTheDocument();
 
-    // Button should be enabled when mappings are edited
     expect(resetButton).toBeEnabled();
 
-    // Click the reset button
     fireEvent.click(resetButton);
 
-    // Verify that the reset method was called
     expect(mockService.reset).toHaveBeenCalledTimes(1);
   });
 
   it('disables reset button when mappings are not edited', () => {
-    // Set up mappings with no edits
     const mappingsEditedSubject = new BehaviorSubject(false);
     (mockService.mappingsEdited$ as any) = mappingsEditedSubject.asObservable();
     (mockService.getMappingsEdited as jest.Mock).mockReturnValue(false);
 
     renderWithI18n(<MappingEditor onImportClick={onImportClick} />);
 
-    // Find the reset button by role and name
     const resetButton = screen.getByRole('button', { name: 'Reset to default' });
     expect(resetButton).toBeInTheDocument();
 
-    // Button should be disabled when mappings are not edited
     expect(resetButton).toBeDisabled();
 
-    // Verify that reset method is not called when button is disabled
     fireEvent.click(resetButton);
     expect(mockService.reset).not.toHaveBeenCalled();
   });

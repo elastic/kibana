@@ -400,7 +400,6 @@ export class FileWrapper {
       return;
     }
 
-    // Create a Map of changes
     const renameMap = new Map<string, string>();
     changes.forEach((change) => {
       if (change.oldName !== change.newName) {
@@ -408,7 +407,6 @@ export class FileWrapper {
       }
     });
 
-    // Update the target_fields in CSV processors
     pipeline.processors.forEach((processor) => {
       if (Array.isArray(processor?.csv?.target_fields)) {
         processor.csv.target_fields = (processor.csv.target_fields as string[]).map((fieldName) => {
@@ -427,18 +425,15 @@ export class FileWrapper {
       return;
     }
 
-    // Remove date processors where the field is no longer of type date or has different format
     pipeline.processors = pipeline.processors.filter((processor) => {
       if (processor.date) {
         const fieldName = processor.date.field;
         const fieldMapping = mappings.properties![fieldName];
 
-        // Remove if field doesn't exist in mappings or is not of type date
         if (!fieldMapping || fieldMapping.type !== 'date') {
           return false;
         }
 
-        // Remove if formats don't match
         const processorFormats: string[] = processor.date.formats;
         const mappingFormat = fieldMapping.format;
 
@@ -455,7 +450,6 @@ export class FileWrapper {
       return true;
     });
 
-    // Find date fields in mappings that have formats and add processors for them
     const existingDateFields = new Set(
       pipeline.processors.filter((p) => p.date).map((p) => p.date!.field)
     );
@@ -476,7 +470,6 @@ export class FileWrapper {
       }
     }
 
-    // Insert new date processors before the last processor
     if (newDateProcessors.length > 0 && pipeline.processors.length > 0) {
       const lastProcessor = pipeline.processors.pop();
       pipeline.processors.push(...newDateProcessors);
