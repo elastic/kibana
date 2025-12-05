@@ -5,37 +5,42 @@
  * 2.0.
  */
 
+import { DEFAULT_SETTINGS } from '../slo_settings_repository';
 import { excludeStaleSummaryFilter } from './summary_stale_filter';
 
 describe('excludeStaleSummaryFilter', () => {
-  it('returns empty array when kqlFilter contains summaryUpdatedAt and forceExclude is false', () => {
-    const settings = { staleThresholdInHours: 24 } as any;
-    const res = excludeStaleSummaryFilter({ settings, kqlFilter: 'summaryUpdatedAt:>now-1d' });
+  it('returns empty array when kqlFilter contains summaryUpdatedAt', () => {
+    const res = excludeStaleSummaryFilter({
+      settings: DEFAULT_SETTINGS,
+      kqlFilter: 'summaryUpdatedAt > now-1d',
+    });
     expect(res).toEqual([]);
   });
 
-  it('returns the filter when forceExclude is true even if kqlFilter contains summaryUpdatedAt', () => {
-    const settings = { staleThresholdInHours: 24 } as any;
+  it('returns empty array when kqlFilter contains summaryUpdatedAt and forceExclude is true', () => {
     const res = excludeStaleSummaryFilter({
-      settings,
-      kqlFilter: 'summaryUpdatedAt:>now-1d',
+      settings: DEFAULT_SETTINGS,
+      kqlFilter: 'summaryUpdatedAt > now-1d',
       forceExclude: true,
     });
-    expect(res).toEqual([
-      {
-        bool: {
-          should: [
-            { term: { isTempDoc: true } },
-            { range: { summaryUpdatedAt: { gte: 'now-24h' } } },
-          ],
-        },
-      },
-    ]);
+    expect(res).toEqual([]);
   });
 
-  it('returns the expected bool/should filter when no kqlFilter is provided', () => {
-    const settings = { staleThresholdInHours: 48 } as any;
-    const res = excludeStaleSummaryFilter({ settings });
+  it('returns empty array when kqlFilter does not contain summaryUpdatedAt and forceExclude is false', () => {
+    const res = excludeStaleSummaryFilter({
+      settings: DEFAULT_SETTINGS,
+      kqlFilter: 'other.field: value',
+      forceExclude: false,
+    });
+    expect(res).toEqual([]);
+  });
+
+  it('returns the summaryUpdatedAt filter when kqlFilter does not contain summaryUpdatedAt but forceExclude is true', () => {
+    const res = excludeStaleSummaryFilter({
+      settings: DEFAULT_SETTINGS,
+      kqlFilter: 'other.field: value',
+      forceExclude: true,
+    });
     expect(res).toEqual([
       {
         bool: {
