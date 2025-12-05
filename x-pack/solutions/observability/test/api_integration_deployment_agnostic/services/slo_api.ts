@@ -242,10 +242,7 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
       return body;
     },
 
-    async updateSettings(
-      settings: Record<string, unknown>,
-      roleAuthc: RoleCredentials
-    ) {
+    async updateSettings(settings: Record<string, unknown>, roleAuthc: RoleCredentials) {
       const { body } = await supertestWithoutAuth
         .put(`/internal/slo/settings`)
         .set(roleAuthc.apiKeyHeader)
