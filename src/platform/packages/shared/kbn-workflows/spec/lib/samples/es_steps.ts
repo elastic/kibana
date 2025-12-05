@@ -39,17 +39,6 @@ export const ES_VALID_SAMPLE_STEPS = [
     },
   },
   {
-    name: 'create-document',
-    type: 'elasticsearch.index',
-    with: {
-      index: 'test-index',
-      id: '1111-aaaa-bbbb-cccc-1234567890ab',
-      document: {
-        message: 'test',
-      },
-    },
-  },
-  {
     name: 'update-document',
     type: 'elasticsearch.update',
     with: {
