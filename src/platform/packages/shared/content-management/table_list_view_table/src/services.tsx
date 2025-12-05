@@ -55,7 +55,6 @@ export interface Services {
   notifyError: NotifyFn;
   currentAppId$: Observable<string | undefined>;
   navigateToUrl: (url: string) => Promise<void> | void;
-  getUrlForApp: (app: string, options?: { path?: string }) => string;
   searchQueryParser?: (searchQuery: string) => Promise<{
     searchQuery: string;
     references?: SavedObjectsFindOptionsReference[];
@@ -111,7 +110,6 @@ export interface TableListViewKibanaDependencies {
       capabilities: {
         [key: string]: Readonly<Record<string, boolean | Record<string, boolean>>>;
       };
-      getUrlForApp: (app: string, options: { path: string }) => string;
       currentAppId$: Observable<string | undefined>;
       navigateToUrl: (url: string) => Promise<void> | void;
     };
@@ -282,7 +280,6 @@ export const TableListViewKibanaProvider: FC<
                 DateFormatterComp={(props) => <FormattedRelative {...props} />}
                 currentAppId$={application.currentAppId$}
                 navigateToUrl={application.navigateToUrl}
-                getUrlForApp={application.getUrlForApp}
                 isTaggingEnabled={() => Boolean(savedObjectsTagging)}
                 isFavoritesEnabled={async () => services.favorites?.isAvailable() ?? false}
                 getTagList={getTagList}
