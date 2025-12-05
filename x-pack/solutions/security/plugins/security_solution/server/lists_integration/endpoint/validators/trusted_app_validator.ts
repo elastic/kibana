@@ -15,6 +15,7 @@ import type {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
+import type { PromiseFromStreams } from '@kbn/lists-plugin/server/services/exception_lists/import_exception_list_and_items';
 import { TRUSTED_PROCESS_DESCENDANTS_TAG } from '../../../../common/endpoint/service/artifacts/constants';
 import { BaseValidator } from './base_validator';
 import type { ExceptionItemLikeOptions } from '../types';
@@ -218,6 +219,12 @@ export class TrustedAppValidator extends BaseValidator {
 
   protected async validateHasReadPrivilege(): Promise<void> {
     return super.validateHasPrivilege('canReadTrustedApplications');
+  }
+
+  async validatePreImport(items: PromiseFromStreams): Promise<PromiseFromStreams> {
+    await this.validateHasWritePrivilege();
+
+    return items;
   }
 
   async validatePreCreateItem(

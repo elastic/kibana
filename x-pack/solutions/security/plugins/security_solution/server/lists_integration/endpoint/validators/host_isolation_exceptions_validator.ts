@@ -13,6 +13,7 @@ import type {
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { PromiseFromStreams } from '@kbn/lists-plugin/server/services/exception_lists/import_exception_list_and_items';
 import { BaseValidator, BasicEndpointExceptionDataSchema } from './base_validator';
 import { EndpointArtifactExceptionValidationError } from './errors';
 import type { ExceptionItemLikeOptions } from '../types';
@@ -73,6 +74,12 @@ export class HostIsolationExceptionsValidator extends BaseValidator {
     return this.validateHasPrivilege('canReadHostIsolationExceptions');
   }
 
+  async validatePreImport(items: PromiseFromStreams): Promise<PromiseFromStreams> {
+    await this.validateHasWritePrivilege();
+
+    return items;
+  }
+
   async validatePreCreateItem(
     item: CreateExceptionListItemOptions
   ): Promise<CreateExceptionListItemOptions> {
@@ -124,12 +131,6 @@ export class HostIsolationExceptionsValidator extends BaseValidator {
 
   async validatePreMultiListFind(): Promise<void> {
     await this.validateHasReadPrivilege();
-  }
-
-  async validatePreImport(): Promise<void> {
-    throw new EndpointArtifactExceptionValidationError(
-      'Import is not supported for Endpoint artifact exceptions'
-    );
   }
 
   private async validateHostIsolationData(item: ExceptionItemLikeOptions): Promise<void> {

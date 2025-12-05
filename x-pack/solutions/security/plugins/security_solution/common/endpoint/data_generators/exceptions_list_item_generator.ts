@@ -458,7 +458,7 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
     };
   }
 
-  generateItem = (
+  generateEndpointArtifact = (
     listId: (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number],
     overrides: Partial<ExceptionListItemSchema> = {}
   ) => {

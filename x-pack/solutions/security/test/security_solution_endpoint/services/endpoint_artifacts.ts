@@ -70,10 +70,7 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
      * @param listId
      * @param supertest
      */
-    async deleteList(
-      listId: (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number],
-      supertest: TestAgent = this.supertest
-    ): Promise<void> {
+    async deleteList(listId: string, supertest: TestAgent = this.supertest): Promise<void> {
       await supertest
         .delete(`${EXCEPTION_LIST_URL}?list_id=${listId}&namespace_type=agnostic`)
         .set('kbn-xsrf', 'true')
