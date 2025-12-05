@@ -256,7 +256,7 @@ export class APMPlugin
         plugins,
         logger: this.logger!.get('observabilityAgentBuilder'),
       }).catch((e) => {
-        this.logger?.error(`Failed to register observability agent APM tools: ${e.message}`);
+        this.logger?.error(`Failed to register observability agent builderAPM tools: ${e.message}`);
         this.logger?.debug(e);
       });
 
