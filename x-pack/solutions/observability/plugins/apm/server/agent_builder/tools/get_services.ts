@@ -10,6 +10,7 @@ import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/onechat-server';
 import { ToolType } from '@kbn/onechat-common';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+<<<<<<<< HEAD:x-pack/solutions/observability/plugins/apm/server/agent_builder/tools/get_services.ts
 import { timeRangeSchema } from '../utils/tool_schemas';
 import { buildApmToolResources } from '../utils/build_apm_tool_resources';
 import { getApmToolAvailability } from '../utils/get_apm_tool_availability';
@@ -17,6 +18,15 @@ import { getApmServiceList } from '../../routes/assistant_functions/get_apm_serv
 import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
 import { ServiceHealthStatus } from '../../../common/service_health_status';
 import { OBSERVABILITY_GET_SERVICES_TOOL_ID } from '../../../common/agent_builder/tool_ids';
+========
+import { timeRangeSchema } from '../../utils/tool_schemas';
+import { buildApmToolResources } from '../../utils/build_apm_tool_resources';
+import { getApmToolAvailability } from '../../utils/get_apm_tool_availability';
+import { getApmServiceList } from '../../../routes/assistant_functions/get_apm_service_list';
+import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../../types';
+import { ServiceHealthStatus } from '../../../../common/service_health_status';
+import { OBSERVABILITY_GET_SERVICES_TOOL_ID } from '../../../../common/agent_builder/tool_ids';
+>>>>>>>> main:x-pack/solutions/observability/plugins/apm/server/agent_builder/tools/get_services/get_services.ts
 
 const getServicesSchema = z.object({
   ...timeRangeSchema.shape,
@@ -50,7 +60,8 @@ export function createGetServicesTool({
   const toolDefinition: BuiltinToolDefinition<typeof getServicesSchema> = {
     id: OBSERVABILITY_GET_SERVICES_TOOL_ID,
     type: ToolType.builtin,
-    description: 'Get the list of monitored services, their health status, and alerts.',
+    description:
+      'Retrieves a list of monitored APM services, including their health status, environment, and active alert counts. Useful for high-level system overview and identifying unhealthy services.',
     schema: getServicesSchema,
     tags: ['observability', 'services'],
     availability: {

@@ -155,8 +155,8 @@ dependsOn:
   - '@kbn/onechat-common'
   - '@kbn/onechat-plugin'
   - '@kbn/observability-agent-builder'
-  - '@kbn/observability-agent-plugin'
   - '@kbn/inference-plugin'
+  - '@kbn/observability-agent-builder-plugin'
 tags:
   - plugin
   - prod

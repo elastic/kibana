@@ -57,7 +57,7 @@ import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-
 import type {
   ObservabilityAgentPluginSetup,
   ObservabilityAgentPluginStart,
-} from '@kbn/observability-agent-plugin/server';
+} from '@kbn/observability-agent-builder-plugin/server';
 import type {
   ProfilingDataAccessPluginSetup,
   ProfilingDataAccessPluginStart,

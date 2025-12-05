@@ -430,19 +430,19 @@ export class WorkflowsService {
                   spaceId,
                   request
                 );
-                this.logger.info(`Updated scheduled tasks for workflow ${id}`);
+                this.logger.debug(`Updated scheduled tasks for workflow ${id}`);
               }
             } else {
               // No scheduled triggers, remove any existing scheduled tasks
               await this.taskScheduler.unscheduleWorkflowTasks(id);
-              this.logger.info(
+              this.logger.debug(
                 `Removed scheduled tasks for workflow ${id} (no scheduled triggers)`
               );
             }
           } else {
             // If workflow is invalid or disabled, remove all scheduled tasks
             await this.taskScheduler.unscheduleWorkflowTasks(id);
-            this.logger.info(
+            this.logger.debug(
               `Removed all scheduled tasks for workflow ${id} (workflow disabled or invalid)`
             );
           }
