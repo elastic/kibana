@@ -141,7 +141,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
             <EuiText size="s" color="subdued">
               <FormattedMessage
                 id="xpack.cloudConnect.connectedServices.service.requiresSubscription"
-                defaultMessage="This service requires an active cloud subscription"
+                defaultMessage="Requires an active cloud subscription"
               />
             </EuiText>
           </EuiFlexItem>
@@ -150,7 +150,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
               content={i18n.translate(
                 'xpack.cloudConnect.connectedServices.service.subscriptionInfo',
                 {
-                  defaultMessage: 'Contact your admin to activate a subscription',
+                  defaultMessage: 'Contact your admin to subscribe to Elastic Cloud.',
                 }
               )}
               position="top"

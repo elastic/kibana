@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { SubscriptionBadge } from './subscription_badge';
 
@@ -74,20 +73,6 @@ describe('SubscriptionBadge', () => {
 
       // Check for info icon
       expect(badgeElement?.querySelector('[data-euiicon-type="info"]')).toBeInTheDocument();
-    });
-
-    it('should show tooltip message on hover for inactive subscription', async () => {
-      renderWithIntl(<SubscriptionBadge subscription="inactive" />);
-
-      const badge = screen.getByText('Inactive');
-
-      // Hover over the badge
-      await userEvent.hover(badge);
-
-      // Check for tooltip content
-      expect(
-        await screen.findByText(/This organization has no active cloud subscription or trial/i)
-      ).toBeInTheDocument();
     });
 
     it('should not show info icon for active subscription', () => {

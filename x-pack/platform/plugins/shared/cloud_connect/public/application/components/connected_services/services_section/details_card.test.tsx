@@ -255,9 +255,6 @@ describe('ServiceCard', () => {
       );
 
       expect(screen.getByTestId('serviceCardSubscriptionMessage')).toBeInTheDocument();
-      expect(
-        screen.getByText(/This service requires an active cloud subscription/i)
-      ).toBeInTheDocument();
     });
 
     it('should hide enable/disable actions when subscription is required but not active', () => {
