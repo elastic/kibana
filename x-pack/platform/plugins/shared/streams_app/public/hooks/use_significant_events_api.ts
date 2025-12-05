@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
 import { useAbortController } from '@kbn/react-hooks';
 import type { StreamQueryKql, Feature } from '@kbn/streams-schema';
 import { type SignificantEventsGenerateResponse } from '@kbn/streams-schema';
 import { useKibana } from './use_kibana';
-import { NO_FEATURE } from '../components/stream_detail_significant_events_view/add_significant_event_flyout/utils/default_query';
 
 interface SignificantEventsApiBulkOperationCreate {
   index: StreamQueryKql;
