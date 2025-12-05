@@ -8,7 +8,7 @@ import type { SVGProps } from 'react';
 import React from 'react';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 
-export const IconEndpoints: React.FC<SVGProps<SVGSVGElement>> = ({ ...props }) => {
+export const IconPolicies: React.FC<SVGProps<SVGSVGElement>> = ({ ...props }) => {
   const isDarkMode = useKibanaIsDarkMode();
 
   const light = (
@@ -23,13 +23,13 @@ export const IconEndpoints: React.FC<SVGProps<SVGSVGElement>> = ({ ...props }) =
       <path
         fill="#101c3f"
         fillRule="evenodd"
-        d="m7.745 2.856 7.403 13.147-.277.49-7.126 12.655C5.896 32.43 1 31.078 1 27.312V4.693C1 .927 5.896-.425 7.745 2.856M3 27.31c0 1.727 2.173 2.327 3.002.854L12.852 16 6.002 3.835C5.173 2.363 3 2.964 3 4.69zM10.012 31l7.675-14h12.795l-.893 1.51-5.686 9.608A6.26 6.26 0 0 1 18.623 31zM22.2 27.07 26.975 19h-8.104L13.39 29h5.235c1.46 0 2.816-.74 3.575-1.93"
+        d="M1 0h19a7 7 0 0 1 6.326 4H29a3 3 0 0 1 3 3v3a3 3 0 0 1-3 3h-2v12a7 7 0 0 1-7 7H1zm24 13V7a5 5 0 0 0-5-5H3v28h17a5 5 0 0 0 5-5zm2-2h2a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-2v5m2 4v6h2v-6zm0 9v6h2v-6z"
         clipRule="evenodd"
       />
       <path
         fill="#0b64dd"
         fillRule="evenodd"
-        d="M17.137 14 10.012 1h8.612a6.26 6.26 0 0 1 5.28 2.882L30.323 14h-2.369l-5.74-9.044A4.26 4.26 0 0 0 18.624 3h-5.235l6.029 11z"
+        d="M7 9h3V7H7zm5 0h9V7h-9zm0 6h9v-2h-9zm9 6h-9v-2h9zm-9 5.5h9v-2h-9zM10 15H7v-2h3zm-3 6h3v-2H7zm3 5.5H7v-2h3z"
         clipRule="evenodd"
       />
     </svg>
@@ -46,7 +46,11 @@ export const IconEndpoints: React.FC<SVGProps<SVGSVGElement>> = ({ ...props }) =
     >
       <path
         fill="#fff"
-        d="M1 4.69C1 .926 5.896-.426 7.745 2.855L15.148 16l-.277.49-7.126 12.656C5.897 32.427 1 31.076 1 27.31zm5.002-.855C5.172 2.364 3 2.965 3 4.691V27.31c0 1.727 2.173 2.326 3.002.854L12.852 16zM18.624 1a6.26 6.26 0 0 1 5.279 2.882L30.323 14h-2.367l-5.74-9.044A4.26 4.26 0 0 0 18.624 3h-5.235l6.029 11h-2.28L10.011 1zM30.482 17l-.893 1.509-5.686 9.61A6.26 6.26 0 0 1 18.623 31h-8.61l7.674-14zM18.87 19l-5.482 10h5.235c1.46 0 2.816-.74 3.575-1.929L26.975 19z"
+        d="M20 0a7 7 0 0 1 6.325 4H29a3 3 0 0 1 3 3v3a3 3 0 0 1-3 3h-2v12a7 7 0 0 1-7 7H1V0zM3 30h17a5 5 0 0 0 5-5V7a5 5 0 0 0-5-5H3zm28 0h-2v-6h2zm0-9h-2v-6h2zm-4-10h2a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-2z"
+      />
+      <path
+        fill="#fff"
+        d="M10 24.5v2H7v-2zm11 2h-9v-2h9zM10 21H7v-2h3zm11 0h-9v-2h9zm-11-6H7v-2h3zm11 0h-9v-2h9zM10 9H7V7h3zm11 0h-9V7h9z"
       />
     </svg>
   );
