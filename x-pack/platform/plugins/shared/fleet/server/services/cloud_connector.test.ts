@@ -166,7 +166,7 @@ describe('CloudConnectorService', () => {
 
       const requestWithAccountType: CreateCloudConnectorRequest = {
         ...mockCreateRequest,
-        accountType: 'single',
+        accountType: 'single-account',
       };
 
       const savedObjectWithAccountType = {
@@ -198,14 +198,14 @@ describe('CloudConnectorService', () => {
 
       const requestWithAccountType: CreateCloudConnectorRequest = {
         ...mockCreateRequest,
-        accountType: 'organization',
+        accountType: 'organization-account',
       };
 
       const savedObjectWithAccountType = {
         ...mockSavedObject,
         attributes: {
           ...mockSavedObject.attributes,
-          accountType: 'organization',
+          accountType: 'organization-account',
         },
       };
 
