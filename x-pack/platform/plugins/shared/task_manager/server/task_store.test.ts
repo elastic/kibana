@@ -1205,32 +1205,6 @@ describe('TaskStore', () => {
       });
     });
 
-    beforeEach(() => {
-      savedObjectsClient.bulkGet.mockResolvedValue({
-        saved_objects: [
-          {
-            id: bulkUpdateTask.id,
-            type: 'task',
-            attributes: {
-              runAt: mockedDate,
-              scheduledAt: mockedDate,
-              startedAt: null,
-              retryAt: null,
-              params: '{"hello":"world"}',
-              state: '{"foo":"bar"}',
-              taskType: 'report',
-              attempts: 3,
-              status: 'idle' as TaskStatus,
-              ownerId: null,
-              traceparent: '',
-            },
-            references: [],
-            version: '123',
-          },
-        ],
-      });
-    });
-
     test(`doesn't validate whenever validate:false is passed-in`, async () => {
       savedObjectsClient.bulkUpdate.mockResolvedValue({
         saved_objects: [
@@ -1431,32 +1405,6 @@ describe('TaskStore', () => {
         apiKeyCreatedByUser: false,
         spaceId: 'testSpace',
       };
-
-      savedObjectsClient.bulkGet.mockResolvedValue({
-        saved_objects: [
-          {
-            id: bulkUpdateTask.id,
-            type: 'task',
-            attributes: {
-              runAt: mockedDate,
-              scheduledAt: mockedDate,
-              startedAt: null,
-              retryAt: null,
-              params: '{"hello":"world"}',
-              state: '{"foo":"bar"}',
-              taskType: 'report',
-              attempts: 3,
-              status: 'idle' as TaskStatus,
-              ownerId: null,
-              traceparent: '',
-              apiKey: mockApiKey,
-              userScope: mockUserScope,
-            },
-            references: [],
-            version: '123',
-          },
-        ],
-      });
 
       savedObjectsClient.bulkUpdate.mockResolvedValue({
         saved_objects: [

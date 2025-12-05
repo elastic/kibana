@@ -117,6 +117,7 @@ export interface FetchResult {
 export interface BulkUpdateOpts {
   validate: boolean;
   mergeAttributes?: boolean;
+  options?: ApiKeyOptions;
 }
 
 export type BulkUpdateResult = Result<ConcreteTaskInstance, ErrorOutput>;
@@ -208,7 +209,7 @@ export class TaskStore {
     }
   }
 
-  private getSoClientForCreate(options: ApiKeyOptions) {
+  private getSoClient(options: ApiKeyOptions) {
     if (options.request && this.getIsSecurityEnabled()) {
       return this.savedObjectsService.getScopedClient(options.request, {
         includedHiddenTypes: [TASK_SO_NAME],
@@ -344,7 +345,7 @@ export class TaskStore {
       (await this.getApiKeyFromRequest([taskInstance], options?.request)) || new Map();
     const { apiKey, userScope } = apiKeyAndUserScopeMap.get(taskInstance.id) || {};
 
-    const soClient = this.getSoClientForCreate(options || {});
+    const soClient = this.getSoClient(options || {});
 
     let savedObject;
     try {
@@ -402,7 +403,7 @@ export class TaskStore {
     const apiKeyAndUserScopeMap =
       (await this.getApiKeyFromRequest(taskInstances, options?.request)) || new Map();
 
-    const soClient = this.getSoClientForCreate(options || {});
+    const soClient = this.getSoClient(options || {});
 
     const objects = taskInstances.reduce(
       (acc: Array<SavedObjectsBulkCreateObject<SerializedConcreteTaskInstance>>, taskInstance) => {
@@ -533,24 +534,23 @@ export class TaskStore {
    */
   public async bulkUpdate(
     docs: ConcreteTaskInstance[],
-    { validate, mergeAttributes = true }: BulkUpdateOpts
+    { validate, mergeAttributes = true, options }: BulkUpdateOpts
   ): Promise<BulkUpdateResult[]> {
-    const existingApiKeyAndUserScopeMap = await this.getRawTasksWithoutEncryptedApiKeys(docs);
+    const soClientToUse = this.getSoClient(options || {});
     const newDocs = docs.reduce(
       (acc: Map<string, SavedObjectsBulkUpdateObject<SerializedConcreteTaskInstance>>, doc) => {
         try {
           const taskInstance = this.taskValidator.getValidatedTaskInstanceForUpdating(doc, {
             validate,
           });
-          const existingAttrs = existingApiKeyAndUserScopeMap.get(doc.id);
           acc.set(doc.id, {
             type: 'task',
             id: doc.id,
             version: doc.version,
             attributes: {
               ...taskInstanceToAttributes(taskInstance, doc.id),
-              ...(existingAttrs?.apiKey ? { apiKey: existingAttrs.apiKey } : {}),
-              ...(existingAttrs?.userScope ? { userScope: existingAttrs.userScope } : {}),
+              ...(doc?.apiKey ? { apiKey: doc.apiKey } : {}),
+              ...(doc?.userScope ? { userScope: doc.userScope } : {}),
             },
             mergeAttributes,
           });
@@ -567,7 +567,7 @@ export class TaskStore {
     let updatedSavedObjects: Array<SavedObjectsUpdateResponse<SerializedConcreteTaskInstance>>;
     try {
       ({ saved_objects: updatedSavedObjects } =
-        await this.savedObjectsRepository.bulkUpdate<SerializedConcreteTaskInstance>(
+        await soClientToUse.bulkUpdate<SerializedConcreteTaskInstance>(
           Array.from(newDocs.values()),
           {
             refresh: false,
