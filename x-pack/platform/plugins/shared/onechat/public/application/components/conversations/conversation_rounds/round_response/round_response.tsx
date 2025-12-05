@@ -8,7 +8,11 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { AssistantResponse, ConversationRoundStep } from '@kbn/onechat-common';
+import type {
+  AssistantResponse,
+  ConversationRoundStep,
+  RoundModelUsageStats,
+} from '@kbn/onechat-common';
 import React, { useState } from 'react';
 import { StreamingText } from './streaming_text';
 import { ChatMessageText } from './chat_message_text';
@@ -17,12 +21,14 @@ import { RoundResponseActions } from './round_response_actions';
 export interface RoundResponseProps {
   response: AssistantResponse;
   steps: ConversationRoundStep[];
+  modelUsage: RoundModelUsageStats;
   isLoading: boolean;
 }
 
 export const RoundResponse: React.FC<RoundResponseProps> = ({
   response: { message },
   steps,
+  modelUsage,
   isLoading,
 }) => {
   const [isHovering, setIsHovering] = useState(false);
@@ -50,7 +56,7 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
       </EuiFlexItem>
       {!isLoading && (
         <EuiFlexItem grow={false}>
-          <RoundResponseActions content={message} isVisible={isHovering} />
+          <RoundResponseActions modelUsage={modelUsage} content={message} isVisible={isHovering} />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

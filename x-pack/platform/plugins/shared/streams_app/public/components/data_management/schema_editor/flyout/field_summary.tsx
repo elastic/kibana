@@ -66,6 +66,8 @@ export const FieldSummary = (props: FieldSummaryProps) => {
 
   const router = useStreamsAppRouter();
 
+  const streamType = Streams.WiredStream.Definition.is(stream) ? 'wired' : 'classic';
+
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="s">
@@ -160,6 +162,7 @@ export const FieldSummary = (props: FieldSummaryProps) => {
               field={field}
               isEditing={isEditing}
               onTypeChange={(type) => onChange({ type })}
+              streamType={streamType}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

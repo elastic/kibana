@@ -25,7 +25,12 @@ export const request = <T = unknown>({
     ...options,
   });
 };
-export const INTERNAL_INFERENCE_CONNECTORS = ['Elastic-Managed-LLM'];
+export const INTERNAL_INFERENCE_CONNECTORS = [
+  'Elastic-Managed-LLM',
+  'General-Purpose-LLM-v1',
+  'General-Purpose-LLM-v2',
+  'General-Purpose-LLM-v3',
+];
 export const INTERNAL_CLOUD_CONNECTORS = ['Elastic-Cloud-SMTP'];
 
 export const getConnectors = () =>

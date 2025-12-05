@@ -76,6 +76,7 @@ export async function processRuleBatches({
   startISO,
   endISO,
   taskInstanceId,
+  numRetries,
 }: {
   abortController: AbortController;
   gapsPerPage: number;
@@ -92,6 +93,7 @@ export async function processRuleBatches({
   startISO: string;
   endISO: string;
   taskInstanceId: string;
+  numRetries: number;
 }): Promise<ProcessRuleBatchesResult> {
   let aggregatedByRule = new Map<string, AggregatedByRuleEntry>();
 
@@ -135,6 +137,7 @@ export async function processRuleBatches({
       startISO,
       taskInstanceId,
       toProcessRuleIds,
+      numRetries,
     });
 
     aggregatedByRule = gapsResult.aggregatedByRule;
@@ -166,6 +169,7 @@ export async function processGapsForRules({
   startISO,
   taskInstanceId,
   toProcessRuleIds,
+  numRetries,
 }: {
   abortController: AbortController;
   aggregatedByRule: Map<string, AggregatedByRuleEntry>;
@@ -181,6 +185,7 @@ export async function processGapsForRules({
   startISO: string;
   taskInstanceId: string;
   toProcessRuleIds: string[];
+  numRetries: number;
 }): Promise<ProcessGapsForRulesResult> {
   let aggregated = new Map(aggregatedByRule);
 
@@ -223,6 +228,7 @@ export async function processGapsForRules({
         searchAfter,
         pitId,
         hasUnfilledIntervals: true,
+        failedAutoFillAttemptsLessThan: numRetries + 1,
       },
     });
 
@@ -468,6 +474,7 @@ export function registerGapAutoFillSchedulerTask({
                 startISO,
                 endISO,
                 taskInstanceId: taskInstance.id,
+                numRetries: config.numRetries,
               });
 
               const aggregatedByRule = gapFillsResult.aggregatedByRule;

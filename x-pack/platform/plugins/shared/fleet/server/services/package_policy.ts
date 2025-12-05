@@ -35,7 +35,7 @@ import pMap from 'p-map';
 
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
-import { catchAndSetErrorStackTrace } from '../errors/utils';
+import { catchAndSetErrorStackTrace, rethrowIfInstanceOrWrap } from '../errors/utils';
 
 import { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
 
@@ -599,7 +599,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       .create<PackagePolicySOAttributes>(
         savedObjectType,
         {
-          ...enrichedPackagePolicy,
+          ...omit(enrichedPackagePolicy, 'cloud_connector_name'),
           ...(enrichedPackagePolicy.package
             ? { package: omit(enrichedPackagePolicy.package, 'experimental_data_stream_features') }
             : {}),
@@ -2333,6 +2333,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           supports_agentless: newPolicy.supports_agentless,
           supports_cloud_connector: newPolicy.supports_cloud_connector,
           cloud_connector_id: newPolicy.cloud_connector_id,
+          cloud_connector_name: newPolicy.cloud_connector_name,
           additional_datastreams_permissions: newPolicy.additional_datastreams_permissions,
         };
       }
@@ -3015,6 +3016,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       enrichedPackagePolicy,
       logger
     );
+
     if (cloudConnectorVars && enrichedPackagePolicy?.supports_cloud_connector) {
       if (enrichedPackagePolicy?.cloud_connector_id) {
         const existingCloudConnector = await soClient.get<CloudConnector>(
@@ -3040,8 +3042,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       } else {
         logger.info(`Creating cloud connector: ${enrichedPackagePolicy.cloud_connector_id}`);
         try {
+          // Extract cloud connector name from package policy
+          const cloudConnectorName = enrichedPackagePolicy.cloud_connector_name;
+
           const cloudConnector = await cloudConnectorService.create(soClient, {
-            name: `${cloudProvider}-cloud-connector: ${enrichedPackagePolicy.name}`,
+            name:
+              cloudConnectorName ||
+              `${cloudProvider}-cloud-connector: ${enrichedPackagePolicy.name}`,
             vars: cloudConnectorVars,
             cloudProvider,
           });
@@ -3049,7 +3056,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           return cloudConnector;
         } catch (error) {
           logger.error(`Error creating cloud connector: ${error}`);
-          throw new CloudConnectorCreateError(`${error}`);
+          rethrowIfInstanceOrWrap(error, CloudConnectorCreateError);
         }
       }
     }

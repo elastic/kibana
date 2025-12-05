@@ -1635,3 +1635,10 @@ export const RULE_SETTINGS_TITLE = i18n.translate(
     defaultMessage: 'Settings',
   }
 );
+
+export const CHAT_IN_AGENT_BUILDER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.chatInAgentBuilder',
+  {
+    defaultMessage: 'Chat in Agent Builder',
+  }
+);
