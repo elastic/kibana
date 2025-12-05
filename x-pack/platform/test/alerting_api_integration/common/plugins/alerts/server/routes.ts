@@ -830,6 +830,7 @@ export function defineRoutes(
           spaceId: schema.string(),
           markInProgress: schema.maybe(schema.boolean()),
           updatedAt: schema.maybe(schema.string()),
+          failedAutoFillAttempts: schema.maybe(schema.number()),
         }),
       },
     },
@@ -922,25 +923,30 @@ export function defineRoutes(
           { retries: 5 }
         );
 
+        const findLatestGap = async (ruleId: string) => {
+          const gaps = await eventLogClient.findEventsBySavedObjectIds('alert', [req.body.ruleId], {
+            filter: 'event.action: gap',
+            sort: [
+              {
+                sort_field: '@timestamp',
+                sort_order: 'desc',
+              },
+            ],
+            per_page: 1,
+          });
+
+          if (gaps.data[0]?._id) {
+            return gaps.data[0];
+          }
+
+          return null;
+        };
+
         // Optionally mark the just-created gap as in-progress (for testing flows)
         if (req.body.markInProgress) {
-          const found = await eventLogClient.findEventsBySavedObjectIds(
-            'alert',
-            [req.body.ruleId],
-            {
-              filter: 'event.action: gap',
-              sort: [
-                {
-                  sort_field: '@timestamp',
-                  sort_order: 'desc',
-                },
-              ],
-              per_page: 1,
-            }
-          );
+          const latest = await findLatestGap(req.body.ruleId);
 
-          if (found.total > 0 && Array.isArray(found.data) && found.data[0]?._id) {
-            const latest = found.data[0] as any;
+          if (latest) {
             const inProgressIntervals = [
               {
                 gte: req.body.start,
@@ -974,6 +980,37 @@ export function defineRoutes(
             await eventLogClient.refreshIndex();
           }
         }
+
+        // set failedAutoFillAttempts if requested
+        if (req.body.failedAutoFillAttempts !== undefined) {
+          const latestGap = await findLatestGap(req.body.ruleId);
+
+          if (latestGap) {
+            await eventLogger.updateEvents([
+              {
+                internalFields: {
+                  _id: latestGap._id,
+                  _index: latestGap._index,
+                  _seq_no: latestGap._seq_no,
+                  _primary_term: latestGap._primary_term,
+                },
+                event: {
+                  kibana: {
+                    alert: {
+                      rule: {
+                        gap: {
+                          failed_auto_fill_attempts: req.body.failedAutoFillAttempts,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            ]);
+            await eventLogClient.refreshIndex();
+          }
+        }
+
         return res.ok({ body: { ok: true } });
       } catch (err) {
         return res.customError({

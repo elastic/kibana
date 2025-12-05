@@ -15,6 +15,7 @@ describe('accessKnownApmEventFields', () => {
     'service.version': ['1.0.0'],
     'service.environment': ['production'],
     'agent.name': ['nodejs'],
+    'agent.version': [],
     'links.span_id': ['link1', 'link2'],
   };
 
@@ -107,9 +108,18 @@ describe('accessKnownApmEventFields', () => {
       // Disabling type checking here to ensure we also have runtime protection of immutability,
       // so people can't just cast their way out of this. Normally, doing the setter op will
       // error at compile time.
-      // @ts-ignore
+      // @ts-expect-error
       event['agent.name'] = 'nodejs';
     }).toThrowError("'set' on proxy: trap returned falsish for property 'agent.name'");
+  });
+
+  it('checks for the existence of any fields with values that partially match a key string', () => {
+    const event = accessKnownApmEventFields(input);
+
+    expect(event.containsFields('service')).toBe(true);
+    expect(event.containsFields('links')).toBe(true);
+    expect(event.containsFields('transaction')).toBe(false);
+    expect(event.containsFields('agent.version')).toBe(false);
   });
 
   it('lists only the keys that exist on the original object', () => {
