@@ -59,7 +59,7 @@ export const scoreSeverity = (score: number): Severity => {
 export function SeverityBadge({ score }: { score?: number }) {
   if (!score) {
     return (
-      <EuiHealth color="text" style={{ lineHeight: 'inherit' }}>
+      <EuiHealth color="text" style={{ lineHeight: 'inherit' }} textSize="xs">
         {i18n.translate('xpack.streams.significantEventsTable.severityBadge.noSeverity', {
           defaultMessage: 'None',
         })}
@@ -68,7 +68,7 @@ export function SeverityBadge({ score }: { score?: number }) {
   }
   const { color, label } = SIGNIFICANT_EVENT_SEVERITY[scoreSeverity(score)];
   return (
-    <EuiHealth color={color} style={{ lineHeight: 'inherit' }}>
+    <EuiHealth color={color} style={{ lineHeight: 'inherit' }} textSize="xs">
       {label}
     </EuiHealth>
   );

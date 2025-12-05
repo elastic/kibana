@@ -134,14 +134,14 @@ export function SignificantEventsGeneratedTable({
     },
     {
       field: 'title',
-      width: '30%',
+      width: '25%',
       name: i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.titleColumn', {
         defaultMessage: 'Title',
       }),
       render: (_, query) => <EuiText size="s">{query.title}</EuiText>,
     },
     {
-      width: '20%',
+      width: '15%',
       field: 'feature',
       name: i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.featureColumn', {
         defaultMessage: 'Feature',
@@ -161,7 +161,7 @@ export function SignificantEventsGeneratedTable({
       },
     },
     {
-      width: '20%',
+      width: '10%',
       field: 'severity_score',
       name: i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.severityScoreColumn', {
         defaultMessage: 'Severity',
