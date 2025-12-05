@@ -29,6 +29,7 @@ import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connect
 import { GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { GapAutoFillSchedulerSO } from '../../../../data/gap_auto_fill_scheduler/types/gap_auto_fill_scheduler';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
+import type { GetGapAutoFillSchedulerParams } from '../types';
 
 describe('deleteGapAutoFillScheduler()', () => {
   const kibanaVersion = 'v8.0.0';
@@ -170,7 +171,7 @@ describe('deleteGapAutoFillScheduler()', () => {
     const invalidParams = { id: 123 as unknown as string };
     await expect(
       rulesClient.deleteGapAutoFillScheduler(
-        invalidParams as unknown as import('../get/types').GetGapAutoFillSchedulerParams
+        invalidParams as unknown as GetGapAutoFillSchedulerParams
       )
     ).rejects.toThrow(/Error validating gap auto fill scheduler delete parameters/);
     expect(auditLogger.log).not.toHaveBeenCalled();

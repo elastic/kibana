@@ -90,7 +90,7 @@ import { getRuleTemplate } from '../application/rule_template/methods/get/get_ru
 import { createGapAutoFillScheduler } from '../application/gap_auto_fill_scheduler/methods/create/create_gap_auto_fill_scheduler';
 import type { CreateGapAutoFillSchedulerParams } from '../application/gap_auto_fill_scheduler/methods/create/types';
 import { getGapAutoFillScheduler } from '../application/gap_auto_fill_scheduler/methods/get/get_gap_auto_fill_scheduler';
-import type { GetGapAutoFillSchedulerParams } from '../application/gap_auto_fill_scheduler/methods/get/types';
+import type { GetGapAutoFillSchedulerParams } from '../application/gap_auto_fill_scheduler/methods/types';
 import { deleteGapAutoFillScheduler } from '../application/gap_auto_fill_scheduler/methods/delete/delete_gap_auto_fill_scheduler';
 import { updateGapAutoFillScheduler } from '../application/gap_auto_fill_scheduler/methods/update/update_gap_auto_fill_scheduler';
 import type { UpdateGapAutoFillSchedulerParams } from '../application/gap_auto_fill_scheduler/methods/update/types';

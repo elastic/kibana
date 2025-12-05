@@ -180,6 +180,7 @@ export class BackfillClient {
             shouldRefetchAllBackfills: true,
             backfillClient: this,
             actionsClient: actionsClient!,
+            initiator: backfill.initiator,
           });
         } catch (e) {
           this.logger.warn(
