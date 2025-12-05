@@ -28,6 +28,16 @@ const getValidationErrorMessage = (
     );
   }
 
+  if (validationError === 'invalidFormat') {
+    return i18n.translate(
+      'xpack.createClassicStreamFlyout.nameAndConfirmStep.invalidFormatValidationError',
+      {
+        defaultMessage:
+          'Stream name cannot include \\, /, *, ?, ", <, >, |, comma, #, colon, or spaces. It cannot start with -, _, +, or .ds-. It also cannot be . or ..',
+      }
+    );
+  }
+
   if (validationError === 'duplicate') {
     return i18n.translate(
       'xpack.createClassicStreamFlyout.nameAndConfirmStep.duplicateValidationError',
