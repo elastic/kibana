@@ -6,25 +6,30 @@
  */
 
 import { Builder } from '@kbn/esql-ast';
-import type { ESQLAstCommand, ESQLAstItem } from '@kbn/esql-ast';
+import type { ESQLAstCommand, ESQLAstItem, ESQLSingleAstItem } from '@kbn/esql-ast';
+import type {
+  BinaryExpressionArithmeticOperator,
+  BinaryExpressionComparisonOperator,
+} from '@kbn/esql-ast/src/types';
 import { parse } from '@kbn/tinymath';
 import type { TinymathAST, TinymathFunction, TinymathVariable } from '@kbn/tinymath';
 import type { MathProcessor } from '../../../../types/processors';
+import { conditionToESQLAst } from '../condition_to_esql';
+import {
+  FUNCTION_REGISTRY,
+  BINARY_ARITHMETIC_OPERATORS,
+  validateMathExpression,
+  extractFieldReferences,
+} from '../../shared/math';
 
 /**
- * ES|QL arithmetic operators supported by the math processor
+ * ES|QL binary operators supported by the math processor
+ * Combines arithmetic (+, -, *, /, %) and comparison (==, !=, <, <=, >, >=) operators
+ * Note: We exclude '=~' (regex match) as it's not used in math expressions
  */
-type ESQLArithmeticOperator = '+' | '-' | '*' | '/';
-
-/**
- * Maps TinyMath binary operator function names to ES|QL binary operators
- */
-const BINARY_OPERATORS: Record<string, ESQLArithmeticOperator> = {
-  add: '+',
-  subtract: '-',
-  multiply: '*',
-  divide: '/',
-};
+type ESQLBinaryOperator =
+  | BinaryExpressionArithmeticOperator
+  | Exclude<BinaryExpressionComparisonOperator, '=~'>;
 
 /**
  * Checks if a TinyMath node is a variable (field reference)
@@ -71,16 +76,44 @@ function convertTinymathToESQL(node: TinymathAST): ESQLAstItem {
   if (isTinymathFunction(node)) {
     const { name, args } = node;
 
-    // Check if this is a binary operator
-    const binaryOp = BINARY_OPERATORS[name];
-    if (binaryOp && args.length === 2) {
+    // Check if this is a core binary arithmetic operator (add, subtract, multiply, divide)
+    const binaryArithOp =
+      BINARY_ARITHMETIC_OPERATORS[name as keyof typeof BINARY_ARITHMETIC_OPERATORS];
+    if (binaryArithOp && args.length === 2) {
       const left = convertTinymathToESQL(args[0]);
       const right = convertTinymathToESQL(args[1]);
-      return Builder.expression.func.binary(binaryOp, [left, right]);
+      return Builder.expression.func.binary(binaryArithOp, [left, right]);
     }
 
-    // For other functions (to be expanded in Stage 2), convert as function call
-    // This handles cases like mod(a, b), abs(a), etc.
+    // Check if this function is in the registry
+    const funcDef = FUNCTION_REGISTRY[name];
+    if (funcDef) {
+      // Handle constants (0-arity functions)
+      if (funcDef.isConstant) {
+        return Builder.expression.func.call(funcDef.esql, []);
+      }
+
+      // Handle binary operators from registry (mod, comparisons)
+      if (funcDef.isBinaryOp && args.length === 2) {
+        const left = convertTinymathToESQL(args[0]);
+        const right = convertTinymathToESQL(args[1]);
+        return Builder.expression.func.binary(funcDef.esql as ESQLBinaryOperator, [left, right]);
+      }
+
+      // Handle functions with argument order swap (e.g., log(value, base) -> LOG(base, value))
+      if (funcDef.esqlArgOrder === 'swap' && args.length === 2) {
+        const convertedArgs = args.map((arg) => convertTinymathToESQL(arg));
+        // Swap the arguments for ES|QL
+        return Builder.expression.func.call(funcDef.esql, [convertedArgs[1], convertedArgs[0]]);
+      }
+
+      // Standard function call
+      const convertedArgs = args.map((arg) => convertTinymathToESQL(arg));
+      return Builder.expression.func.call(funcDef.esql, convertedArgs);
+    }
+
+    // Fallback for unknown functions - let them through uppercased
+    // (validation should have caught unsupported functions earlier)
     const convertedArgs = args.map((arg) => convertTinymathToESQL(arg));
     return Builder.expression.func.call(name.toUpperCase(), convertedArgs);
   }
@@ -90,30 +123,100 @@ function convertTinymathToESQL(node: TinymathAST): ESQLAstItem {
 }
 
 /**
+ * Builds an IS NOT NULL check expression for multiple fields combined with AND
+ *
+ * @param fields Array of field names to check
+ * @returns ES|QL AST expression: field1 IS NOT NULL AND field2 IS NOT NULL AND ...
+ */
+function buildNotNullCheck(fields: string[]): ESQLSingleAstItem | null {
+  if (fields.length === 0) {
+    return null;
+  }
+
+  const checks = fields.map((field) =>
+    Builder.expression.func.call('NOT', [
+      Builder.expression.func.postfix('IS NULL', Builder.expression.column(field)),
+    ])
+  );
+
+  if (checks.length === 1) {
+    return checks[0];
+  }
+
+  // Combine all checks with AND
+  return checks.reduce((acc, check) => Builder.expression.func.binary('and', [acc, check]));
+}
+
+/**
  * Converts a MathProcessor to ES|QL commands
  *
  * Generates: EVAL <to> = <expression>
  *
- * Example:
+ * With `where` condition:
+ *   EVAL <to> = CASE WHEN <where> THEN <expression> ELSE <to> END
+ *
+ * With `ignore_missing: true`:
+ *   EVAL <to> = CASE WHEN field1 IS NOT NULL AND field2 IS NOT NULL THEN <expression> ELSE <to> END
+ *
+ * @example
  *   { action: 'math', expression: 'price * quantity', to: 'total' }
  *   -> EVAL total = price * quantity
+ *
+ * @example
+ *   { action: 'math', expression: 'abs(price - 10)', to: 'diff', where: { field: 'active', eq: true } }
+ *   -> EVAL diff = CASE WHEN active == true THEN ABS(price - 10) ELSE diff END
  */
 export function convertMathProcessorToESQL(processor: MathProcessor): ESQLAstCommand[] {
+  // Validate the expression before processing
+  const validation = validateMathExpression(processor.expression);
+  if (!validation.valid) {
+    throw new Error(`Invalid math expression: ${validation.errors.join('; ')}`);
+  }
+
   // Parse the TinyMath expression into an AST
   const ast = parse(processor.expression);
 
   // Convert the TinyMath AST to ES|QL AST
-  const esqlExpression = convertTinymathToESQL(ast);
+  const mathExpression = convertTinymathToESQL(ast);
 
-  // Create the EVAL command: EVAL <to> = <expression>
+  // Build the condition expression (combines where and ignore_missing)
+  let conditionExpression: ESQLSingleAstItem | null = null;
+
+  // Handle `where` condition
+  const whereExpression = processor.where ? conditionToESQLAst(processor.where) : null;
+
+  // Handle `ignore_missing: true` - skip if any referenced field is null
+  let ignoreMissingExpression: ESQLSingleAstItem | null = null;
+  if (processor.ignore_missing === true) {
+    const fields = extractFieldReferences(processor.expression);
+    ignoreMissingExpression = buildNotNullCheck(fields);
+  }
+
+  // Combine conditions
+  if (whereExpression && ignoreMissingExpression) {
+    conditionExpression = Builder.expression.func.binary('and', [
+      whereExpression,
+      ignoreMissingExpression,
+    ]);
+  } else {
+    conditionExpression = whereExpression || ignoreMissingExpression;
+  }
+
+  // If there's a condition, wrap in CASE WHEN ... THEN ... ELSE <to> END
+  const assignment = conditionExpression
+    ? Builder.expression.func.call('CASE', [
+        conditionExpression,
+        mathExpression as ESQLSingleAstItem,
+        Builder.expression.column(processor.to), // ELSE keep existing value
+      ])
+    : mathExpression;
+
+  // Create the EVAL command: EVAL <to> = <assignment>
   return [
     Builder.command({
       name: 'eval',
       args: [
-        Builder.expression.func.binary('=', [
-          Builder.expression.column(processor.to),
-          esqlExpression,
-        ]),
+        Builder.expression.func.binary('=', [Builder.expression.column(processor.to), assignment]),
       ],
     }),
   ];
