@@ -41,15 +41,17 @@ export default function searchSolutionNavigation({
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Dashboards' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Playground' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Developer Tools' });
-      // await solutionNavigation.sidenav.expectLinkExists({ text: 'Agents' }); enable when available
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Agents' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Machine Learning' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Data management' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Getting started' });
     });
 
     it('has expected navigation', async () => {
-      const expectNoPageReload = await solutionNavigation.createNoPageReloadCheck();
       // Navigate to the home page to account for the getting started page redirect
       await searchSpace.navigateTo(`${spaceCreated.id}/app/elasticsearch/home`);
+      const expectNoPageReload = await solutionNavigation.createNoPageReloadCheck();
+
       // check side nav links
       await solutionNavigation.sidenav.expectLinkActive({
         deepLinkId: 'searchHomepage',
@@ -81,7 +83,7 @@ export default function searchSolutionNavigation({
           pageTestSubject: 'playgroundsListPage',
         },
         {
-          link: { navId: 'gettingStarted' },
+          link: { deepLinkId: 'searchGettingStarted' },
           breadcrumbs: ['Getting started'],
           pageTestSubject: 'gettingStartedHeader',
         },
@@ -116,6 +118,7 @@ export default function searchSolutionNavigation({
           'dashboards',
           'searchPlayground',
           'machine_learning',
+          'search_getting_started',
           'dev_tools',
           'data_management',
           'stack_management',

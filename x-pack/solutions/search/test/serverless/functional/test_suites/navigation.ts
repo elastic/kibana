@@ -34,14 +34,14 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     });
 
     it('navigate search sidenav & breadcrumbs', async () => {
+      // Navigate to the home page to account for the getting started page redirect
+      await svlSearchNavigation.navigateToElasticsearchHome();
       const expectNoPageReload = await svlCommonNavigation.createNoPageReloadCheck();
 
       // check serverless search side nav exists
       await svlCommonNavigation.expectExists();
       await svlCommonNavigation.breadcrumbs.expectExists();
       await svlSearchLandingPage.assertSvlSearchSideNavExists();
-      // Navigate to the home page to account for the getting started page redirect
-      await svlSearchNavigation.navigateToElasticsearchHome();
       await solutionNavigation.sidenav.expectLinkActive({
         deepLinkId: 'searchHomepage',
       });
@@ -78,6 +78,11 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           link: { deepLinkId: 'searchPlayground' },
           breadcrumbs: ['Playground'],
           pageTestSubject: 'playgroundsListPage',
+        },
+        {
+          link: { deepLinkId: 'searchGettingStarted' },
+          breadcrumbs: ['Getting started'],
+          pageTestSubject: 'gettingStartedHeader',
         },
         {
           link: { deepLinkId: 'dev_tools:console' },
