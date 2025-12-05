@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export { getRuleTemplateSo } from './methods/get_rule_template_so';
-export { findRuleTemplatesSo } from './methods/find_rule_templates_so';
+import type { TypeOf } from '@kbn/config-schema';
+
+import type { findRuleTemplatesParamsSchema } from './schema';
+
+export type FindRuleTemplatesParams = TypeOf<typeof findRuleTemplatesParamsSchema>;

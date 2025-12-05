@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { getRuleTemplateSo } from './methods/get_rule_template_so';
-export { findRuleTemplatesSo } from './methods/find_rule_templates_so';
+export { transformFindRuleTemplatesQueryV1 } from './transform_find_rule_templates_query_v1';
+export { transformFindRuleTemplatesResponseV1 } from './transform_find_rule_templates_response_v1';
