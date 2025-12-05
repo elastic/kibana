@@ -7600,11 +7600,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-agent-builder@link:x-pack/solutions/observability/packages/agent-builder":
+"@kbn/observability-agent-builder-plugin@link:x-pack/solutions/observability/plugins/observability_agent_builder":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-agent-plugin@link:x-pack/solutions/observability/plugins/observability_agent":
+"@kbn/observability-agent-builder@link:x-pack/solutions/observability/packages/agent-builder":
   version "0.0.0"
   uid ""
 
