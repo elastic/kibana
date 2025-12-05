@@ -14,9 +14,16 @@ import { getToolResultId } from '@kbn/onechat-server';
 import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 import type { DashboardAppLocator } from '@kbn/dashboard-plugin/common/locator/locator';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/common/constants';
 
 import { dashboardTools } from '../../../common';
-import { checkDashboardToolsAvailability, normalizePanels } from '../utils';
+import {
+  checkDashboardToolsAvailability,
+  normalizePanels,
+  buildMarkdownPanel,
+  getMarkdownPanelHeight,
+  filterOutMarkdownPanels,
+} from '../utils';
 
 const updateDashboardSchema = z.object({
   id: z.string().describe('The ID of the dashboard to update.'),
@@ -26,6 +33,12 @@ const updateDashboardSchema = z.object({
     .unknown()
     .optional()
     .describe('An array of panel configurations (PanelJSON or lens_tool_artifact) to update.'),
+  markdownContent: z
+    .string()
+    .optional()
+    .describe(
+      'Markdown content for a summary panel displayed at the top of the dashboard. If provided, replaces any existing markdown summary.'
+    ),
 });
 
 export const updateDashboardTool = (
@@ -43,15 +56,19 @@ export const updateDashboardTool = (
       cacheMode: 'space',
       handler: checkDashboardToolsAvailability,
     },
-    description: `Update an existing dashboard with new title, description, or panels.
+    description: `Update an existing dashboard with new title, description, panels, or markdown summary.
 
 This tool will:
-1. Accept a dashboard ID and optional fields to update (title, description, panels)
-2. Update the dashboard with the provided configuration
-3. Return the updated dashboard information`,
+1. Accept a dashboard ID and optional fields to update (title, description, panels, markdownContent)
+2. If markdownContent is provided, add a markdown summary panel at the top
+3. Update the dashboard with the provided configuration
+4. Return the updated dashboard information`,
     schema: updateDashboardSchema,
     tags: [],
-    handler: async ({ id, title, description, panels, ...rest }, { logger, request, esClient }) => {
+    handler: async (
+      { id, title, description, panels, markdownContent },
+      { logger, request, esClient }
+    ) => {
       try {
         const coreContext = {
           savedObjects: { client: savedObjects.getScopedClient(request) },
@@ -66,14 +83,42 @@ This tool will:
         // First, read the existing dashboard to get current values
         const existingDashboard = await dashboard.client.read(requestHandlerContext, id);
 
-        const normalizedPanels =
-          panels !== undefined ? normalizePanels(panels as unknown[]) : undefined;
+        // Build panels with optional markdown panel prepended
+        let updatedPanels = existingDashboard.data.panels;
+        if (panels !== undefined || markdownContent !== undefined) {
+          const existingPanels = existingDashboard.data.panels ?? [];
+          const existingMarkdownPanel = existingPanels.find(
+            (item) => 'type' in item && item.type === MARKDOWN_EMBEDDABLE_TYPE
+          );
+          const existingNonMarkdownPanels = filterOutMarkdownPanels(existingPanels);
+
+          // Determine the markdown panel to use (new takes precedence over existing)
+          const markdownPanelToUse = markdownContent
+            ? buildMarkdownPanel(markdownContent)
+            : existingMarkdownPanel;
+
+          // Calculate y offset for positioning new panels
+          const yOffset = markdownContent
+            ? getMarkdownPanelHeight(markdownContent)
+            : existingMarkdownPanel && 'h' in existingMarkdownPanel.grid
+            ? existingMarkdownPanel.grid.h
+            : 0;
+
+          // Use new panels if provided, otherwise keep existing non-markdown panels
+          const basePanels =
+            panels !== undefined
+              ? normalizePanels(panels as unknown[], yOffset)
+              : existingNonMarkdownPanels;
+
+          // Combine: markdown panel (if any) + base panels
+          updatedPanels = markdownPanelToUse ? [markdownPanelToUse, ...basePanels] : basePanels;
+        }
 
         // Merge existing data with provided updates
         const updateData = {
           title: title ?? existingDashboard.data.title,
           description: description ?? existingDashboard.data.description,
-          panels: normalizedPanels ?? existingDashboard.data.panels,
+          panels: updatedPanels,
         };
 
         // Update dashboard using the Dashboard plugin's client
