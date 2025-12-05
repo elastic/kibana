@@ -83,7 +83,7 @@ export function ManualFlowForm({
       value: severity.defaultValue,
       inputDisplay: <SeverityBadge score={severity.defaultValue} />,
     })),
-  ];
+  ].reverse();
 
   return (
     <EuiPanel hasShadow={false} color="subdued">
