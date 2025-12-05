@@ -43,7 +43,7 @@ export const ACTION_TYPE_TITLE = i18n.translate(
 export const ALLOWED_CHANNELS = i18n.translate(
   'xpack.stackConnectors.components.slack_api.allowedChannelsLabel',
   {
-    defaultMessage: 'Channel IDs',
+    defaultMessage: 'Allowed channels',
   }
 );
 export const SUCCESS_FETCH_CHANNELS = i18n.translate(
@@ -81,5 +81,19 @@ export const BLOCKS_REQUIRED = i18n.translate(
   'xpack.stackConnectors.components.slack_api.error.slackBlockkitBlockRequired',
   {
     defaultMessage: `JSON must contain field "blocks".`,
+  }
+);
+
+export const OPTIONAL_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.slack_api.optionalLabel',
+  {
+    defaultMessage: 'Optional',
+  }
+);
+
+export const CHANNEL_NAME_ERROR = i18n.translate(
+  'xpack.stackConnectors.components.slack_api.channelNameError',
+  {
+    defaultMessage: 'Channel name must start with a #',
   }
 );
