@@ -139,9 +139,9 @@ export function ChatMessageText({ content, steps: stepsFromCurrentRound }: Props
   }, [startDependencies, stepsFromCurrentRound, stepsFromPrevRounds]);
 
   return (
-    <EuiText size="s" className={containerClassName}>
+    <EuiText size="m" className={containerClassName}>
       <EuiMarkdownFormat
-        textSize="s"
+        textSize="m"
         parsingPluginList={parsingPluginList}
         processingPluginList={processingPluginList}
       >
