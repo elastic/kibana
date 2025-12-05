@@ -7,6 +7,7 @@
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ChartType, mapVisToChartType } from '@kbn/visualization-utils';
+import { hasTransformationalCommand } from '@kbn/esql-utils';
 import type {
   DatasourceMap,
   VisualizationMap,
@@ -15,6 +16,7 @@ import type {
   DataViewsState,
   TypedLensByValueInput,
 } from '@kbn/lens-common';
+import type { AggregateQuery } from '@kbn/es-query';
 import { getSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
 import { mergeSuggestionWithVisContext, switchVisualizationType } from './helpers';
 
@@ -160,9 +162,27 @@ export const suggestionsApi = ({
 
   const targetChartType = preferredChartType ?? chartTypeFromAttrs;
 
+  // However, for ESQL queries without transformational commands, prefer datatable
+  const query = 'query' in context ? context.query : undefined;
+  const hasTransformations = query ? hasTransformationalCommand(query.esql) : true;
+
   // in case the user asks for another type (except from area, line) check if it exists
   // in suggestions and return this instead
-  const suggestionsList = [primarySuggestion, ...newSuggestions];
+  const suggestionsList = [primarySuggestion, ...newSuggestions]
+    .filter((s) => {
+      // if we only have non-transformed ESQL, suggest only table
+      if (!hasTransformations) {
+        return s.visualizationId === 'lnsDatatable';
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      // If has transformations, prioritize lnsXY
+      if (a.visualizationId === 'lnsXY' && b.visualizationId !== 'lnsXY') return -1;
+      if (a.visualizationId !== 'lnsXY' && b.visualizationId === 'lnsXY') return 1;
+      // Both are same type, sort by score
+      return b.score - a.score;
+    });
 
   // Handle preferred chart type logic
   if (targetChartType) {
@@ -193,9 +213,5 @@ export const suggestionsApi = ({
     }
   }
 
-  // if there is no preference from the user, send everything
-  // until we separate the text based suggestions logic from the dataview one,
-  // we want to sort XY first
-  const sortXYFirst = suggestionsList.sort((a, b) => (a.visualizationId === 'lnsXY' ? -1 : 1));
-  return sortXYFirst;
+  return suggestionsList;
 };
