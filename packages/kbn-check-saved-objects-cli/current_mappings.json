@@ -2855,6 +2855,24 @@
       }
     }
   },
+  "mcp-connector-tools": {
+    "dynamic": false,
+    "properties": {
+      "connectorId": {
+        "type": "keyword"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "tools": {
+        "enabled": false,
+        "type": "object"
+      },
+      "updatedAt": {
+        "type": "date"
+      }
+    }
+  },
   "metrics-data-source": {
     "dynamic": false,
     "properties": {}
