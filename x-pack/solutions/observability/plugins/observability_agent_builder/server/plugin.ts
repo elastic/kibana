@@ -73,13 +73,7 @@ export class ObservabilityAgentPlugin
           this.logger.error(`Error registering observability attachments: ${error}`);
         });
 
-        registerServerRoutes({
-          core,
-          logger: this.logger,
-          dataRegistry: this.dataRegistry,
-        }).catch((error) => {
-          this.logger.error(`Error registering observability server routes: ${error}`);
-        });
+        registerServerRoutes({ core, logger: this.logger, dataRegistry: this.dataRegistry });
       })
       .catch((error) => {
         this.logger.error(`Error checking whether the observability agent is enabled: ${error}`);

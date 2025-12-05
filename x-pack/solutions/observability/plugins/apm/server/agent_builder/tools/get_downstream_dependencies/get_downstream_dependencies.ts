@@ -13,7 +13,7 @@ import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import { timeRangeSchema } from '../../utils/tool_schemas';
 import { buildApmToolResources } from '../../utils/build_apm_tool_resources';
 import { getApmToolAvailability } from '../../utils/get_apm_tool_availability';
-import { getApmDownstreamDependencies } from '../../../assistant_functions/get_apm_downstream_dependencies';
+import { getApmDownstreamDependencies } from '../../../routes/assistant_functions/get_apm_downstream_dependencies';
 import { OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID } from '../../../../common/agent_builder/tool_ids';
 import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../../types';
 

@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
 import { createAiInsightAttachmentType } from './ai_insight';
 import type {
   ObservabilityAgentPluginSetupDependencies,

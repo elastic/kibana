@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import * as t from 'io-ts';
+import { apiPrivileges } from '@kbn/onechat-plugin/common/features';
 import { createObservabilityAgentBuilderServerRoute } from '../create_observability_agent_builder_server_route';
 
 export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
@@ -13,6 +15,16 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
     options: {
       access: 'internal',
     },
+    security: {
+      authz: {
+        requiredPrivileges: [apiPrivileges.readOnechat],
+      },
+    },
+    params: t.type({
+      body: t.type({
+        id: t.string,
+      }),
+    }),
     handler: async () => {
       throw new Error('Not implemented');
     },
