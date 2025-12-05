@@ -35,6 +35,7 @@ export {
   gapAutoFillSchedulerLogEntrySchema as gapAutoFillSchedulerLogEntrySchemaV1,
   gapAutoFillSchedulerLogsResponseSchema as gapAutoFillSchedulerLogsResponseSchemaV1,
   gapAutoFillSchedulerLogsRequestQuerySchema as gapAutoFillSchedulerLogsRequestQuerySchemaV1,
+  getGapAutoFillSchedulerLogsParamsSchema as getGapAutoFillSchedulerLogsParamsSchemaV1,
 } from './schemas/v1';
 export type {
   GapAutoFillSchedulerRequestBody as GapAutoFillSchedulerRequestBodyV1,

@@ -200,3 +200,7 @@ export const gapAutoFillSchedulerLogsResponseSchema = schema.object({
   page: schema.number(),
   per_page: schema.number(),
 });
+
+export const getGapAutoFillSchedulerLogsParamsSchema = schema.object({
+  id: schema.string(),
+});

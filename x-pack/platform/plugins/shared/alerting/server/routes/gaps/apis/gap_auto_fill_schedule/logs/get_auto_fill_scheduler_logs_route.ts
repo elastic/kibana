@@ -5,9 +5,11 @@
  * 2.0.
  */
 import type { IRouter } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
 import type { GapAutoFillSchedulerLogsResponseV1 } from '../../../../../../common/routes/gaps/apis/gap_auto_fill_scheduler';
-import { gapAutoFillSchedulerLogsRequestQuerySchema } from '../../../../../../common/routes/gaps/apis/gap_auto_fill_scheduler';
+import {
+  getGapAutoFillSchedulerLogsParamsSchemaV1,
+  gapAutoFillSchedulerLogsRequestQuerySchemaV1,
+} from '../../../../../../common/routes/gaps/apis/gap_auto_fill_scheduler';
 import type { ILicenseState } from '../../../../../lib';
 import { verifyAccessAndContext } from '../../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../../types';
@@ -25,42 +27,28 @@ export const getAutoFillSchedulerLogsRoute = (
       security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: { access: 'internal' },
       validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
-        body: gapAutoFillSchedulerLogsRequestQuerySchema,
+        params: getGapAutoFillSchedulerLogsParamsSchemaV1,
+        body: gapAutoFillSchedulerLogsRequestQuerySchemaV1,
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         licenseState.ensureLicenseForGapAutoFillScheduler();
 
-        try {
-          const { id } = req.params as { id: string };
-          const body = req.body;
-          const alertingContext = await context.alerting;
-          const rulesClient = await alertingContext.getRulesClient();
+        const { id } = req.params as { id: string };
+        const body = req.body;
+        const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
 
-          const params = transformRequestV1(id, body);
+        const params = transformRequestV1(id, body);
 
-          const result = await rulesClient.getGapAutoFillSchedulerLogs(params);
+        const result = await rulesClient.getGapAutoFillSchedulerLogs(params);
 
-          const response: GapAutoFillSchedulerLogsResponseV1 = {
-            body: transformResponseV1(result),
-          };
+        const response: GapAutoFillSchedulerLogsResponseV1 = {
+          body: transformResponseV1(result),
+        };
 
-          return res.ok(response);
-        } catch (error) {
-          if (error?.output?.statusCode === 404) {
-            return res.notFound({
-              body: { message: `Gap fill auto scheduler with id ${req.params.id} not found` },
-            });
-          }
-          return res.customError({
-            statusCode: error?.output?.statusCode || 500,
-            body: { message: error.message || 'Error fetching gap fill event logs' },
-          });
-        }
+        return res.ok(response);
       })
     )
   );
