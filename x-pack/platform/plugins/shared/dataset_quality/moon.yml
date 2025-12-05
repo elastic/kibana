@@ -84,6 +84,7 @@ dependsOn:
   - '@kbn/test-jest-helpers'
   - '@kbn/streams-schema'
   - '@kbn/streams-plugin'
+  - '@kbn/streams-app-plugin'
 tags:
   - plugin
   - prod
