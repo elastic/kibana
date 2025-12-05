@@ -15,6 +15,7 @@ import type {
   WorkflowsExtensionsPublicPluginStart,
   WorkflowsExtensionsPublicPluginStartDeps,
 } from './types';
+import { registerStepDefinitions } from './steps';
 
 export class WorkflowsExtensionsPublicPlugin
   implements
@@ -35,6 +36,8 @@ export class WorkflowsExtensionsPublicPlugin
     _core: CoreSetup,
     _plugins: WorkflowsExtensionsPublicPluginSetupDeps
   ): WorkflowsExtensionsPublicPluginSetup {
+    registerStepDefinitions(this.stepRegistry);
+
     return {
       registerStepDefinition: (metadata) => {
         this.stepRegistry.register(metadata);
