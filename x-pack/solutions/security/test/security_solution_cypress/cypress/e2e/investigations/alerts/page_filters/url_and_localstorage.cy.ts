@@ -6,7 +6,7 @@
  */
 
 import { encode } from '@kbn/rison';
-import { DEFAULT_DETECTION_PAGE_FILTERS } from '@kbn/security-solution-plugin/common/constants';
+import { DEFAULT_DETECTION_PAGE_FILTERS } from '@kbn/security-solution-plugin/public/detections/components/alerts/filters/page_filters';
 import { formatPageFilterSearchParam } from '@kbn/security-solution-plugin/common/utils/format_page_filter_search_param';
 import { assertFilterControlsWithFilterObject } from '../../../../tasks/alerts_page_filters';
 import { getNewRule } from '../../../../objects/rule';

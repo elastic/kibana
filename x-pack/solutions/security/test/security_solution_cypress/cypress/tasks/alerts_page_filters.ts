@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DEFAULT_DETECTION_PAGE_FILTERS } from '@kbn/security-solution-plugin/common/constants';
+import { DEFAULT_DETECTION_PAGE_FILTERS } from '@kbn/security-solution-plugin/public/detections/components/alerts/filters/page_filters';
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import {
   CONTROL_FRAMES,
