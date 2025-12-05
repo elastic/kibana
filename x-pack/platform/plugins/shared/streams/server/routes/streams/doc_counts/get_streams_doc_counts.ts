@@ -13,6 +13,7 @@ import type {
   IndicesStatsIndicesStats,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { StreamDocsStat } from '../../../../common';
 
 interface MeteringStatsResponse {
@@ -47,37 +48,9 @@ export async function getDocCountsForStreams(options: {
     return [];
   }
 
-  // Use _metering/stats API for serverless when a secondary auth user client is available.
-  if (isServerless && esClientAsSecondaryAuthUser) {
-    try {
-      const meteringStatsByStream = await getDataStreamsMeteringStats({
-        esClient: esClientAsSecondaryAuthUser,
-        dataStreams: streamNames,
-      });
-
-      const meteringResults: StreamDocsStat[] = [];
-      for (const streamName of streamNames) {
-        const stats = meteringStatsByStream[streamName];
-        const totalDocs = stats?.totalDocs ?? 0;
-        if (totalDocs > 0) {
-          meteringResults.push({
-            stream: streamName,
-            count: totalDocs,
-          });
-        }
-      }
-
-      return meteringResults;
-    } catch {
-      return [];
-    }
-  }
-
-  const dataStreamsByName = await getDataStreamsByName({ esClient });
-
-  const streams = streamNames
-    .map((name) => dataStreamsByName.get(name))
-    .filter(Boolean) as IndicesGetDataStreamResponse['data_streams'];
+  const { data_streams: streams } = await esClient.indices.getDataStream({
+    name: streamNames,
+  });
 
   if (!streams.length) {
     return [];
@@ -90,18 +63,47 @@ export async function getDocCountsForStreams(options: {
     return [];
   }
 
-  const statsResponse = await esClient.indices.stats({
-    index: allBackingIndices,
-    metric: ['docs'],
-  });
+  // Accumulate doc counts per backing index, then map those back to stream names below.
+  const docsByBackingIndex: Record<string, number> = {};
 
-  const indicesStats = statsResponse.indices;
+  // Use _metering/stats API for serverless when a secondary auth user client is available.
+  if (isServerless && esClientAsSecondaryAuthUser) {
+    const meteringStatsByBackingIndex = await getDataStreamsMeteringStats({
+      esClient: esClientAsSecondaryAuthUser,
+      dataStreams: allBackingIndices,
+    });
+
+    for (const [indexName, stats] of Object.entries(meteringStatsByBackingIndex)) {
+      docsByBackingIndex[indexName] = stats.totalDocs ?? 0;
+    }
+  } else {
+    // Stateful fallback – use indices.stats, chunked for large numbers of indices.
+    const indicesStats: Record<string, IndicesStatsIndicesStats> = {};
+    const chunkSize = 100;
+
+    for (let i = 0; i < allBackingIndices.length; i += chunkSize) {
+      const indexChunk = allBackingIndices.slice(i, i + chunkSize);
+
+      const statsResponse = await esClient.indices.stats({
+        index: indexChunk,
+        metric: ['docs'],
+      });
+
+      if (statsResponse.indices) {
+        Object.assign(indicesStats, statsResponse.indices);
+      }
+    }
+
+    for (const [indexName, stats] of Object.entries(indicesStats)) {
+      const docsCount = stats.primaries?.docs?.count ?? 0;
+      docsByBackingIndex[indexName] = docsCount;
+    }
+  }
 
   const results: StreamDocsStat[] = [];
 
   for (const [streamName, indexName] of lastBackingIndexByStream.entries()) {
-    const stats: IndicesStatsIndicesStats | undefined = indicesStats?.[indexName];
-    const docsCount = stats?.primaries?.docs?.count ?? 0;
+    const docsCount = docsByBackingIndex[indexName] ?? 0;
 
     if (docsCount > 0) {
       results.push({
@@ -132,92 +134,165 @@ export async function getDegradedDocCountsForStreams(options: {
     return [];
   }
 
-  const dataStreamsByName = await getDataStreamsByName({ esClient });
-
-  const streams = streamNames
-    .map((name) => dataStreamsByName.get(name))
-    .filter(Boolean) as IndicesGetDataStreamResponse['data_streams'];
+  const { data_streams: streams } = await esClient.indices.getDataStream({
+    name: streamNames,
+  });
 
   if (!streams.length) {
     return [];
   }
 
-  // Build the list of (stream, last backing index) pairs we want to query.
-  const queries = streams
-    .map((stream) => {
-      const indices = stream.indices;
-      const lastBackingIndex = indices[indices.length - 1]?.index_name;
-      if (!lastBackingIndex) {
-        return null;
-      }
-      return { streamName: stream.name, index: lastBackingIndex };
-    })
-    .filter(
-      (q): q is { streamName: string; index: string } =>
-        q != null && Boolean(q.streamName) && Boolean(q.index)
-    );
+  const lastBackingIndexByStream = getLastBackingIndexByStream(streams);
+  const streamIndexPairs = Array.from(lastBackingIndexByStream.entries()).map(
+    ([streamName, index]) => ({ streamName, index })
+  );
 
-  if (!queries.length) {
+  if (!streamIndexPairs.length) {
     return [];
   }
 
   const results: StreamDocsStat[] = [];
   const chunkSize = 100;
 
-  for (let i = 0; i < queries.length; i += chunkSize) {
-    const chunk = queries.slice(i, i + chunkSize);
+  for (let i = 0; i < streamIndexPairs.length; i += chunkSize) {
+    const chunk = streamIndexPairs.slice(i, i + chunkSize);
 
-    // Each request in msearch is a pair of header/body lines.
-    const body = chunk.flatMap(({ index }) => [
-      { index },
-      {
-        size: 0,
-        track_total_hits: true,
-        query: {
-          exists: {
-            field: '_ignored',
+    const indicesInChunk = chunk.map(({ index }) => index);
+
+    // Build a filters aggregation keyed by index name so we get per-index counts in a single search.
+    const filters: Record<string, any> = {};
+    for (const index of indicesInChunk) {
+      filters[index] = {
+        term: {
+          _index: index,
+        },
+      };
+    }
+
+    const response = await esClient.search<any>({
+      index: indicesInChunk,
+      size: 0,
+      track_total_hits: false,
+      query: {
+        exists: {
+          field: '_ignored',
+        },
+      },
+      aggs: {
+        per_index: {
+          filters: {
+            filters,
           },
         },
       },
-    ]);
-
-    const { responses } = await esClient.msearch<{ _ignored?: string[] }>({
-      body,
     });
 
-    responses.forEach((response: any, idx: number) => {
-      const { streamName } = chunk[idx];
+    const buckets =
+      // @ts-expect-error Aggregations are not strongly typed here
+      response.aggregations?.per_index?.buckets ?? {};
 
-      // Skip errored responses.
-      if (!response || response.error) {
-        return;
-      }
+    for (const { streamName, index } of chunk) {
+      const bucket = buckets[index];
+      const docCount: number = bucket?.doc_count ?? 0;
 
-      const totalHits =
-        typeof response.hits.total === 'number'
-          ? response.hits.total
-          : response.hits.total?.value ?? 0;
-
-      if (totalHits > 0) {
+      if (docCount > 0) {
         results.push({
           stream: streamName,
-          count: totalHits,
+          count: docCount,
         });
       }
-    });
+    }
   }
 
   return results;
 }
 
-async function getDataStreamsByName({
-  esClient,
-}: {
+/**
+ * Fetches failed document counts for multiple streams.
+ *
+ * The implementation:
+ * 1) resolves failure store data streams and their backing indices via indices.getDataStream
+ * 2) runs an ES|QL query over the failure store streams to get failed doc counts per backing index
+ * 3) aggregates failed doc counts across backing indices for each original stream
+ */
+export async function getFailedDocCountsForStreams(options: {
   esClient: ElasticsearchClient;
-}): Promise<Map<string, IndicesGetDataStreamResponse['data_streams'][number]>> {
-  const { data_streams: dataStreams } = await esClient.indices.getDataStream();
+  streamNames: string[];
+  start: number;
+  end: number;
+}): Promise<StreamDocsStat[]> {
+  const { esClient, streamNames, start, end } = options;
 
-  return new Map(dataStreams.map((ds) => [ds.name, ds] as const));
+  if (!streamNames.length) {
+    return [];
+  }
+
+  const { data_streams: streams } = await esClient.indices.getDataStream({
+    name: streamNames,
+  });
+
+  if (!streams.length) {
+    return [];
+  }
+
+  // Map each fs backing index of the streams to its base stream name.
+  const backingIndexToStream = new Map<string, string>();
+
+  for (const stream of streams) {
+    for (const index of stream.failure_store.indices) {
+      backingIndexToStream.set(index.index_name, stream.name);
+    }
+  }
+
+  if (!backingIndexToStream.size) {
+    return [];
+  }
+
+  const startIso = new Date(start).toISOString();
+  const endIso = new Date(end).toISOString();
+
+  const esqlQuery = `
+FROM *::failures METADATA _index
+| WHERE @timestamp >= "${startIso}" AND @timestamp <= "${endIso}"
+| STATS failed_count = COUNT(*) BY backing_index = _index
+`.trim();
+
+  const response = (await esClient.esql.query({
+    query: esqlQuery,
+    drop_null_columns: true,
+  })) as ESQLSearchResponse;
+
+  const backingIndexCol = response.columns.findIndex((col) => col.name === 'backing_index');
+  const failedCountCol = response.columns.findIndex((col) => col.name === 'failed_count');
+
+  if (backingIndexCol === -1 || failedCountCol === -1) {
+    return [];
+  }
+
+  const countsByStream = new Map<string, number>();
+
+  for (const row of response.values) {
+    const backingIndex = row[backingIndexCol] as string | undefined;
+    const failedCount = Number(row[failedCountCol] ?? 0);
+
+    if (!backingIndex || !Number.isFinite(failedCount)) {
+      continue;
+    }
+
+    const streamName = backingIndexToStream.get(backingIndex);
+    if (!streamName) {
+      continue;
+    }
+
+    countsByStream.set(streamName, (countsByStream.get(streamName) ?? 0) + failedCount);
+  }
+
+  return Array.from(countsByStream.entries()).map(
+    ([stream, count]): StreamDocsStat => ({
+      stream,
+      count,
+    })
+  );
 }
 
 function getLastBackingIndexByStream(

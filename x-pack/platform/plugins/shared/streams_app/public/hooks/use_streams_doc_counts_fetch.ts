@@ -94,24 +94,14 @@ export function useStreamDocCountsFetch({
       });
 
       const failedCountPromise = canReadFailureStore
-        ? executeEsqlQuery({
-            query: 'FROM *::failures | STATS failed_count = COUNT(*) BY stream = document.index',
-            search: data.search.search,
+        ? streamsRepositoryClient.fetch('POST /internal/streams/doc_counts/failed', {
             signal: abortController.signal,
-            start: timeState.start,
-            end: timeState.end,
-          }).then((response) => {
-            const streamIndex = response.columns.findIndex((col) => col.name === 'stream');
-            const countIndex = response.columns.findIndex((col) => col.name === 'failed_count');
-
-            if (streamIndex === -1 || countIndex === -1) {
-              return [] as StreamDocsStat[];
-            }
-
-            return response.values.map((row) => ({
-              stream: row[streamIndex] as string,
-              count: Number(row[countIndex]),
-            }));
+            params: {
+              body: {
+                start: timeState.start,
+                end: timeState.end,
+              },
+            },
           })
         : Promise.reject(new Error('Cannot read failed doc count, insufficient privileges'));
 
