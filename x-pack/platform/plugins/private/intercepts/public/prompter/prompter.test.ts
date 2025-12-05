@@ -387,6 +387,12 @@ describe('ProductInterceptPrompter', () => {
           );
         });
 
+        // record in localstorage is cleared after showing the intercept
+        expect(localStorageSetItemSpy).toHaveBeenCalledWith(
+          InterceptPrompter.CLIENT_STORAGE_KEY,
+          '{}'
+        );
+
         subscription.unsubscribe();
       });
 
