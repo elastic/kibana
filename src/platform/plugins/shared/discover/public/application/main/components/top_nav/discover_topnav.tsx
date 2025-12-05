@@ -312,7 +312,7 @@ export const DiscoverTopNav = ({
                 onSaveControl,
                 controlsWrapper: (
                   <ControlGroupRenderer
-                    onApiAvailable={setControlGroupApi}
+                    onApiAvailable={(api) => setControlGroupApi(api)}
                     timeRange={timeRange}
                     getCreationOptions={async (initialState) => {
                       const initialChildControlState =

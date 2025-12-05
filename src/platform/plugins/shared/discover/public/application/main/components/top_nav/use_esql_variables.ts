@@ -61,6 +61,11 @@ export const useESQLVariables = ({
   const currentControlGroupState = useCurrentTabSelector((tab) => tab.controlGroupState);
   const savedSearchState = useSavedSearch();
   const pendingQueryUpdate = useRef<string>();
+  const controlGroupApiRef = useRef<ControlGroupRendererApi | undefined>(controlGroupApi);
+
+  useEffect(() => {
+    controlGroupApiRef.current = controlGroupApi;
+  }, [controlGroupApi]);
 
   useEffect(() => {
     // Only proceed if in ESQL mode and controlGroupApi is available
@@ -117,7 +122,8 @@ export const useESQLVariables = ({
 
   const onSaveControl = useCallback(
     async (controlState: Record<string, unknown>, updatedQuery: string) => {
-      if (!controlGroupApi) {
+      const currentControlGroupApi = controlGroupApiRef.current;
+      if (!currentControlGroupApi) {
         // eslint-disable-next-line no-console
         console.error('controlGroupApi is not available when attempting to save control.');
         return;
@@ -127,7 +133,7 @@ export const useESQLVariables = ({
       pendingQueryUpdate.current = updatedQuery;
 
       // add a new control
-      await controlGroupApi.addNewPanel({
+      await currentControlGroupApi.addNewPanel({
         panelType: ESQL_CONTROL,
         serializedState: {
           rawState: {
@@ -136,7 +142,7 @@ export const useESQLVariables = ({
         },
       });
     },
-    [controlGroupApi]
+    []
   );
 
   // Getter function to retrieve the currently active control panels state for the current tab
