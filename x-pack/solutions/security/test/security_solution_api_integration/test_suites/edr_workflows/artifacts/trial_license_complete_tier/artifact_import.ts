@@ -75,7 +75,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
   const rolesUsersProvider = getService('rolesUsersProvider');
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
-  const utils = getService('securitySolutionUtils'); // todo: serverless
+  const utils = getService('securitySolutionUtils');
   const config = getService('config');
 
   const IS_ENDPOINT_EXCEPTION_MOVE_FF_ENABLED = (
@@ -83,6 +83,31 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
   )
     .find((s) => s.startsWith('--xpack.securitySolution.enableExperimental'))
     ?.includes('endpointExceptionsMovedUnderManagement');
+
+  const createSupertestWithCustomRole = async (
+    name: string,
+    siemPrivileges: string[],
+    spaces: string[] = ['*']
+  ) => {
+    const role = buildRole(name, siemPrivileges, spaces);
+
+    // custom solution to have custom roles in both ess and serverless utils.
+    // it'd be nice to have the same interface for both utils services in the future
+    if ('createSuperTestWithCustomRole' in utils) {
+      // serverless utils...
+      return utils.createSuperTestWithCustomRole({
+        name: role.name,
+        privileges: {
+          elasticsearch: role.elasticsearch,
+          kibana: role.kibana,
+        },
+      });
+    } else {
+      // ess utils...
+      const loadedRole = await rolesUsersProvider.loader.create(role);
+      return utils.createSuperTest(loadedRole.username);
+    }
+  };
 
   describe('@ess @serverless @skipInServerlessMKI Import Endpoint artifacts API', function () {
     let fleetEndpointPolicy: PolicyTestResourceInfo;
@@ -115,22 +140,16 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
 
         before(async () => {
           for (const artifact of ENDPOINT_ARTIFACTS) {
-            const artifactNoneRole = await rolesUsersProvider.loader.create(
-              buildRole(`${artifact.listId}_none`, ['minimal_all'])
-            );
-
-            const artifactReadRole = await rolesUsersProvider.loader.create(
-              buildRole(`${artifact.listId}_read`, ['minimal_all', artifact.read])
-            );
-
-            const artifactAllRole = await rolesUsersProvider.loader.create(
-              buildRole(`${artifact.listId}_all`, ['minimal_read', artifact.all])
-            );
-
             supertest[artifact.listId] = {
-              none: await utils.createSuperTest(artifactNoneRole.username),
-              read: await utils.createSuperTest(artifactReadRole.username),
-              all: await utils.createSuperTest(artifactAllRole.username),
+              none: await createSupertestWithCustomRole(`${artifact.listId}_none`, ['minimal_all']),
+              read: await createSupertestWithCustomRole(`${artifact.listId}_read`, [
+                'minimal_all',
+                artifact.read,
+              ]),
+              all: await createSupertestWithCustomRole(`${artifact.listId}_all`, [
+                'minimal_read',
+                artifact.all,
+              ]),
             };
           }
         });
