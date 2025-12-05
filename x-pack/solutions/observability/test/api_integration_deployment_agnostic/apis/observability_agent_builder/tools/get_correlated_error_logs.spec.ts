@@ -622,7 +622,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               params: {
                 start: 'now-10m',
                 end: 'now',
-                terms: { 'service.name': 'service-a' },
+                terms: { 'service.name': service },
               },
             }
           );
