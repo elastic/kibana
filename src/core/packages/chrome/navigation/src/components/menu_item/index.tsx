@@ -167,7 +167,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
         <div className={iconWrapperClassName}>
           <Suspense fallback={<EuiIcon aria-hidden color="currentColor" type="empty" />}>
             <EuiIcon aria-hidden color="currentColor" type={iconType || 'empty'} />
-            {isNew && <NewItemIndicator />}
+            {isNew && <NewItemIndicator isHighlighted={isHighlighted} />}
           </Suspense>
         </div>
         {isLabelVisible ? (

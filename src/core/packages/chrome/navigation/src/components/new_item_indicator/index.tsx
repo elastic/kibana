@@ -11,20 +11,26 @@ import React from 'react';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
+interface NewItemIndicatorProps {
+  isHighlighted: boolean;
+}
+
 /**
  * A visual indicator (dot) for new items.
  */
-export const NewItemIndicator = () => {
+export const NewItemIndicator = ({ isHighlighted }: NewItemIndicatorProps) => {
   const { euiTheme } = useEuiTheme();
-
-  const dotSize = euiTheme.size.base;
 
   const styles = css`
     position: absolute;
-    top: calc(${dotSize} * -0.2);
-    right: calc(${dotSize} * -0.2);
-    stroke: ${euiTheme.colors.backgroundBasePrimary};
+    top: 1px;
+    right: 1px;
     pointer-events: none;
+    stroke: ${isHighlighted
+      ? euiTheme.components.buttons.backgroundPrimary
+      : euiTheme.components.buttons.backgroundText};
+    stroke-width: 2px;
+    paint-order: stroke;
   `;
   return <EuiIcon css={styles} color="primary" type="dot" size="m" />;
 };
