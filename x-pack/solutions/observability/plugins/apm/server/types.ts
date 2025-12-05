@@ -80,7 +80,7 @@ export interface APMPluginSetupDependencies {
   share: SharePluginSetup;
   logsDataAccess: LogsDataAccessPluginSetup;
   // optional dependencies
-  observabilityAgent?: ObservabilityAgentPluginSetup;
+  observabilityAgentBuilder?: ObservabilityAgentPluginSetup;
   observabilityAIAssistant?: ObservabilityAIAssistantServerSetup;
   onechat?: OnechatPluginSetup;
   actions?: ActionsPlugin['setup'];
@@ -109,7 +109,7 @@ export interface APMPluginStartDependencies {
   share: undefined;
   logsDataAccess: LogsDataAccessPluginStart;
   // optional dependencies
-  observabilityAgent?: ObservabilityAgentPluginStart;
+  observabilityAgentBuilder?: ObservabilityAgentPluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantServerStart;
   onechat?: OnechatPluginStart;
   actions?: ActionsPlugin['start'];

@@ -251,12 +251,14 @@ export class APMPlugin
     );
 
     if (plugins.onechat) {
-      registerAgentTools({ core, plugins, logger: this.logger!.get('observabilityAgent') }).catch(
-        (e) => {
-          this.logger?.error(`Failed to register observability agent APM tools: ${e.message}`);
-          this.logger?.debug(e);
-        }
-      );
+      registerAgentTools({
+        core,
+        plugins,
+        logger: this.logger!.get('observabilityAgentBuilder'),
+      }).catch((e) => {
+        this.logger?.error(`Failed to register observability agent APM tools: ${e.message}`);
+        this.logger?.debug(e);
+      });
 
       this.logger?.debug('Successfully registered observability agent APM tools');
     }
@@ -264,7 +266,7 @@ export class APMPlugin
     registerDataProviders({
       core,
       plugins,
-      logger: this.logger!.get('observabilityAgent'),
+      logger: this.logger!.get('observabilityAgentBuilder'),
     });
 
     registerDeprecations({
