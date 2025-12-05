@@ -17,7 +17,7 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { StreamDocsStat } from '../../../../common';
 
 interface MeteringStatsResponse {
-  datastreams: Array<{
+  indices: Array<{
     name: string;
     num_docs: number;
     size_in_bytes: number;
@@ -239,7 +239,7 @@ export async function getFailedDocCountsForStreams(options: {
   const backingIndexToStream = new Map<string, string>();
 
   for (const stream of streams) {
-    for (const index of stream.failure_store.indices) {
+    for (const index of stream.failure_store?.indices ?? []) {
       backingIndexToStream.set(index.index_name, stream.name);
     }
   }
@@ -338,16 +338,17 @@ async function getDataStreamsMeteringStats({
     )
   );
 
-  const { datastreams: dataStreamsStats } = chunkResults.reduce((result, chunkResult) =>
-    deepMerge(result, chunkResult)
-  );
+  const { indices } = chunkResults.reduce((result, chunkResult) => deepMerge(result, chunkResult));
 
-  return dataStreamsStats.reduce(
-    (acc, dataStream) => ({
+  return indices.reduce(
+    (
+      acc: Record<string, { sizeBytes: number; totalDocs: number }>,
+      index: { name: string; size_in_bytes: number; num_docs: number }
+    ) => ({
       ...acc,
-      [dataStream.name]: {
-        sizeBytes: dataStream.size_in_bytes,
-        totalDocs: dataStream.num_docs,
+      [index.name]: {
+        sizeBytes: index.size_in_bytes,
+        totalDocs: index.num_docs,
       },
     }),
     {} as Record<string, { size?: string; sizeBytes: number; totalDocs: number }>
