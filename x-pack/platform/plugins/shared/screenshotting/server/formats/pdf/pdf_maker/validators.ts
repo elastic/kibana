@@ -20,13 +20,20 @@ const layoutSchema = z.object({
   ),
 });
 
-const titleSchema = z.string().min(1).max(1024);
+const titleSchema = z.string().min(0).max(1024);
 const logoSchema = z.string().url().max(1024).optional().nullable();
+
+const contentBreakSchema = z.array(
+  z.object({
+    text: z.string().max(10),
+    pageBreak: z.enum(['before', 'after']),
+  })
+);
 
 const contentTextSchema = z.object({
   text: z.string(),
-  style: z.enum(['heading', 'subheading']),
-  font: z.enum(['Roboto', 'noto-cjk']),
+  style: z.enum(['heading', 'subheading']).optional(),
+  font: z.enum(['Roboto', 'noto-cjk']).optional(),
   noWrap: z.boolean().optional(),
 });
 
@@ -37,13 +44,6 @@ const contentImageSchema = z.object({
   height: z.number().positive().max(14400),
 });
 
-const contentBreakSchema = z.array(
-  z.object({
-    text: z.string().max(0),
-    pageBreak: z.enum(['before', 'after']),
-  })
-);
-
 const contentTableSchema = z.object({
   table: z.object({
     body: z.array(z.array(contentImageSchema)),
@@ -51,13 +51,15 @@ const contentTableSchema = z.object({
   layout: z.literal('noBorder'),
 });
 
-const contentSchema = z.array(z.union([contentTextSchema, contentTableSchema]));
+const contentSchema = z.array(
+  z.array(z.union([contentBreakSchema, contentTextSchema, contentTableSchema]))
+);
 
 export const generateReportRequestDataSchema = z.object({
   layout: layoutSchema,
   title: titleSchema,
   logo: logoSchema,
-  content: z.array(z.union([contentSchema, contentBreakSchema])),
+  content: contentSchema,
 });
 
 export const generateReportRequestSchema = z.object({
