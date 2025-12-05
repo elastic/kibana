@@ -6,6 +6,8 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
+import type { EndpointScriptApiResponse } from '../../../../common/endpoint/types';
+import {} from '../../../../common/endpoint/types';
 import type {
   PatchUpdateRequestBody,
   PatchUpdateRequestParams,
@@ -20,6 +22,7 @@ import type { EndpointAppContext } from '../../types';
 import { SCRIPTS_LIBRARY_ROUTE_ITEM } from '../../../../common/endpoint/constants';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import { stringify } from '../../utils/stringify';
+import { errorHandler } from '../error_handler';
 
 export const getPatchUpdateScriptRequestHandler = (
   endpointAppServices: EndpointAppContextService
@@ -34,7 +37,21 @@ export const getPatchUpdateScriptRequestHandler = (
   return async (context, req, res) => {
     logger.debug(() => `Patch update script: ${stringify(req.params.script_id)}`);
 
-    return res.noContent();
+    try {
+      const spaceId = (await context.securitySolution).getSpaceId();
+      const user = (await context.core).security.authc.getCurrentUser();
+      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+      const scriptsClient = endpointAppServices.getScriptsLibraryClient(
+        spaceId,
+        user?.username || 'unknown',
+        esClient
+      );
+      const response: EndpointScriptApiResponse = { data: await scriptsClient.update(req.body) };
+
+      return res.ok({ body: response });
+    } catch (err) {
+      return errorHandler(logger, res, err);
+    }
   };
 };
 

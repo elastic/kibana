@@ -32,7 +32,10 @@ import {
 } from '../../lib/scripts_library';
 import { ScriptLibraryError } from './common';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
-import type { CreateScriptRequestBody } from '../../../../common/api/endpoint/scripts_library';
+import type {
+  CreateScriptRequestBody,
+  PatchUpdateRequestBody,
+} from '../../../../common/api/endpoint/scripts_library';
 import type {
   EndpointScript,
   EndpointScriptListApiResponse,
@@ -293,7 +296,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
     }
   }
 
-  public async update(script: Partial<CreateScriptRequestBody>): Promise<EndpointScript> {
+  public async update(script: Partial<PatchUpdateRequestBody>): Promise<EndpointScript> {
     throw new ScriptLibraryError('Not implemented', 501);
   }
 

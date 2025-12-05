@@ -7,7 +7,10 @@
 
 import type { Readable } from 'stream';
 import type { ListScriptsRequestQuery } from '../../../../common/api/endpoint/scripts_library/list_scripts';
-import type { CreateScriptRequestBody } from '../../../../common/api/endpoint/scripts_library';
+import type {
+  CreateScriptRequestBody,
+  PatchUpdateRequestBody,
+} from '../../../../common/api/endpoint/scripts_library';
 import type {
   EndpointScript,
   EndpointScriptListApiResponse,
@@ -21,7 +24,7 @@ export interface ScriptsLibraryClientInterface {
    * Updates an existing script with the data provided. This method accepts partial
    * script data allowing for only certain fields to be updated
    */
-  update: (script: Partial<CreateScriptRequestBody>) => Promise<EndpointScript>;
+  update: (script: Partial<PatchUpdateRequestBody>) => Promise<EndpointScript>;
   get: (scriptId: string) => Promise<EndpointScript>;
   list: (options?: ListScriptsRequestQuery) => Promise<EndpointScriptListApiResponse>;
   delete: (scriptId: string) => Promise<void>;

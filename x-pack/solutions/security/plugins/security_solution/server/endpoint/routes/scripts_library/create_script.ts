@@ -6,6 +6,7 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
+import type { EndpointScriptApiResponse } from '../../../../common/endpoint/types';
 import { errorHandler } from '../error_handler';
 import { SCRIPTS_LIBRARY_ROUTE } from '../../../../common/endpoint/constants';
 import { withEndpointAuthz } from '../with_endpoint_authz';
@@ -40,8 +41,9 @@ export const getCreateScriptRequestHandler = (
         user?.username || 'unknown',
         esClient
       );
+      const response: EndpointScriptApiResponse = { data: await scriptsClient.create(req.body) };
 
-      return res.ok({ body: { data: await scriptsClient.create(req.body) } });
+      return res.ok({ body: response });
     } catch (err) {
       return errorHandler(logger, res, err);
     }
