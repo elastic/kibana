@@ -5316,6 +5316,17 @@
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.CLOUD_CONNECTOR_API_ROUTES.USAGE_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "USAGE_PATTERN",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
