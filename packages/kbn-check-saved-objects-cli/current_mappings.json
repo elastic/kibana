@@ -1866,6 +1866,9 @@
   "fleet-cloud-connector": {
     "dynamic": false,
     "properties": {
+      "accountType": {
+        "type": "keyword"
+      },
       "cloudProvider": {
         "type": "keyword"
       },
