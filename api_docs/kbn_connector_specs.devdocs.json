@@ -1074,13 +1074,13 @@
           },
           {
             "parentPluginId": "@kbn/connector-specs",
-            "id": "def-common.ConnectorSpec.authTypes",
-            "type": "Array",
+            "id": "def-common.ConnectorSpec.auth",
+            "type": "Object",
             "tags": [],
-            "label": "authTypes",
+            "label": "auth",
             "description": [],
             "signature": [
-              "(string | ",
+              "{ types: (string | ",
               {
                 "pluginId": "@kbn/connector-specs",
                 "scope": "common",
@@ -1088,7 +1088,9 @@
                 "section": "def-common.AuthTypeDef",
                 "text": "AuthTypeDef"
               },
-              ")[] | undefined"
+              ")[]; headers?: Record<string, ",
+              "AxiosHeaderValue",
+              "> | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
             "deprecated": false,

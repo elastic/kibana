@@ -1,0 +1,34 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
+import { createAiInsightAttachmentType } from './ai_insight';
+import type {
+  ObservabilityAgentPluginSetupDependencies,
+  ObservabilityAgentPluginStart,
+  ObservabilityAgentPluginStartDependencies,
+} from '../types';
+import type { ObservabilityAgentDataRegistry } from '../data_registry/data_registry';
+
+export async function registerAttachments({
+  core,
+  plugins,
+  logger,
+  dataRegistry,
+}: {
+  core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>;
+  plugins: ObservabilityAgentPluginSetupDependencies;
+  logger: Logger;
+  dataRegistry: ObservabilityAgentDataRegistry;
+}) {
+  const attachmentTypes: AttachmentTypeDefinition<any, any>[] = [createAiInsightAttachmentType()];
+
+  for (const attachment of attachmentTypes) {
+    plugins.onechat.attachments.registerType(attachment);
+  }
+}
