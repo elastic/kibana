@@ -345,7 +345,8 @@ describe('WorkflowStepExecutionTree', () => {
 
       expect(buildStepExecutionsTree).toHaveBeenCalledWith(
         [stepExecution],
-        expect.objectContaining({})
+        expect.objectContaining({}),
+        'completed'
       );
       expect(
         screen.getByRole('list', { name: 'Workflow step execution tree' })
@@ -537,7 +538,8 @@ describe('WorkflowStepExecutionTree', () => {
       expect(buildStepExecutionsTree).toHaveBeenCalled();
       expect(buildStepExecutionsTree).toHaveBeenCalledWith(
         [stepExecution],
-        expect.objectContaining({})
+        expect.objectContaining({}),
+        'completed'
       );
       expect(isTerminalStatus).toHaveBeenCalledWith(ExecutionStatus.COMPLETED);
     });

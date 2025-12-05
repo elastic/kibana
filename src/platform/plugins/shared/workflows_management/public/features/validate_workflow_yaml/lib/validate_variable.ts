@@ -8,9 +8,11 @@
  */
 
 import type { DynamicStepContextSchema } from '@kbn/workflows/spec/schema';
+import { z } from '@kbn/zod/v4';
 import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
-import { getSchemaAtPath, getZodTypeName } from '../../../../common/lib/zod';
+import { getSchemaAtPath } from '../../../../common/lib/zod';
 import { getDetailedTypeDescription } from '../../../../common/lib/zod/zod_type_description';
+import { InvalidForeachParameterError } from '../../workflow_context/lib/errors';
 import { getForeachItemSchema } from '../../workflow_context/lib/get_foreach_state_schema';
 import type { VariableItem, YamlValidationResult } from '../model/types';
 
@@ -32,6 +34,49 @@ export function validateVariable(
 
   const parsedPath = parseVariablePath(key);
 
+  if (!context) {
+    return {
+      ...variableItem,
+      message: `Variable ${key} cannot be validated, because the workflow schema is invalid`,
+      severity: 'warning',
+      owner: 'variable-validation',
+      hoverMessage: null,
+    };
+  }
+
+  if (type === 'foreach') {
+    try {
+      const itemSchema = getForeachItemSchema(context, key);
+      if (itemSchema instanceof z.ZodUnknown) {
+        return {
+          ...variableItem,
+          message: 'Unable to determine foreach item type',
+          severity: 'warning',
+          owner: 'variable-validation',
+          hoverMessage: getVariableHoverMessage(key, itemSchema),
+        };
+      }
+      return {
+        ...variableItem,
+        message: null,
+        severity: null,
+        owner: 'variable-validation',
+        hoverMessage: getVariableHoverMessage(key, itemSchema),
+      };
+    } catch (error) {
+      if (error instanceof InvalidForeachParameterError) {
+        return {
+          ...variableItem,
+          message: error.message,
+          severity: 'warning',
+          owner: 'variable-validation',
+          hoverMessage: null,
+        };
+      }
+      throw error;
+    }
+  }
+
   if (!parsedPath) {
     return {
       ...variableItem,
@@ -43,34 +88,13 @@ export function validateVariable(
   }
 
   if (parsedPath.errors) {
-    if (type === 'foreach' && context) {
-      try {
-        const itemSchema = getForeachItemSchema(context, key);
-        return {
-          ...variableItem,
-          message: null,
-          severity: null,
-          owner: 'variable-validation',
-          hoverMessage: `<pre>(property) ${key}: ${getDetailedTypeDescription(itemSchema)}</pre>`,
-        };
-      } catch (e) {
-        return {
-          ...variableItem,
-          message: `Foreach parameter can be an array or a JSON string. ${key} is not valid JSON`,
-          severity: 'error',
-          owner: 'variable-validation',
-          hoverMessage: null,
-        };
-      }
-    } else {
-      return {
-        ...variableItem,
-        message: parsedPath.errors.join(', '),
-        severity: 'error',
-        owner: 'variable-validation',
-        hoverMessage: null,
-      };
-    }
+    return {
+      ...variableItem,
+      message: parsedPath.errors.join(', '),
+      severity: 'error',
+      owner: 'variable-validation',
+      hoverMessage: null,
+    };
   }
 
   if (!parsedPath?.propertyPath) {
@@ -78,16 +102,6 @@ export function validateVariable(
       ...variableItem,
       message: 'Failed to parse variable path',
       severity: 'error',
-      owner: 'variable-validation',
-      hoverMessage: null,
-    };
-  }
-
-  if (!context) {
-    return {
-      ...variableItem,
-      message: `Variable ${parsedPath.propertyPath} cannot be validated, because the workflow schema is invalid`,
-      severity: 'warning',
       owner: 'variable-validation',
       hoverMessage: null,
     };
@@ -105,53 +119,23 @@ export function validateVariable(
     };
   }
 
-  const zodTypeName = getZodTypeName(refSchema);
-
-  if (zodTypeName === 'string' && type === 'foreach') {
-    return {
-      ...variableItem,
-      message: `Foreach parameter should be an array or a JSON string. ${parsedPath.propertyPath} is unknown string, engine will try to parse it as JSON in runtime, but it might fail`,
-      severity: 'warning',
-      owner: 'variable-validation',
-      hoverMessage: `<pre>(property) ${parsedPath.propertyPath}: ${getDetailedTypeDescription(
-        refSchema
-      )}</pre>`,
-    };
-  }
-
-  if (zodTypeName !== 'array' && type === 'foreach') {
-    return {
-      ...variableItem,
-      message: `Foreach parameter should be an array or a JSON string. ${parsedPath.propertyPath} is ${zodTypeName}`,
-      severity: 'error',
-      owner: 'variable-validation',
-      hoverMessage: `<pre>(property) ${parsedPath.propertyPath}: ${getDetailedTypeDescription(
-        refSchema
-      )}</pre>`,
-    };
-  }
-
-  if (zodTypeName === 'any' && refSchema.description) {
+  if (refSchema instanceof z.ZodAny && refSchema.description) {
     return {
       ...variableItem,
       message: refSchema.description,
       severity: 'warning',
       owner: 'variable-validation',
-      hoverMessage: `<pre>(property) ${parsedPath.propertyPath}: ${getDetailedTypeDescription(
-        refSchema
-      )}</pre>`,
+      hoverMessage: getVariableHoverMessage(parsedPath.propertyPath, refSchema),
     };
   }
 
-  if (zodTypeName === 'unknown') {
+  if (refSchema instanceof z.ZodUnknown) {
     return {
       ...variableItem,
       message: `Variable ${parsedPath.propertyPath} cannot be validated, because it's type is unknown`,
       severity: 'warning',
       owner: 'variable-validation',
-      hoverMessage: `<pre>(property) ${parsedPath.propertyPath}: ${getDetailedTypeDescription(
-        refSchema
-      )}</pre>`,
+      hoverMessage: getVariableHoverMessage(parsedPath.propertyPath, refSchema),
     };
   }
 
@@ -160,8 +144,20 @@ export function validateVariable(
     message: null,
     severity: null,
     owner: 'variable-validation',
-    hoverMessage: `<pre>(property) ${parsedPath.propertyPath}: ${getDetailedTypeDescription(
-      refSchema
-    )}</pre>`,
+    hoverMessage: getVariableHoverMessage(parsedPath.propertyPath, refSchema),
   };
+}
+
+// This function will be replaced with a hover provider,
+// which will allow to hover over each part of the path and show the type description
+function getVariableHoverMessage(propertyPath: string, schema: z.ZodType): string {
+  return [
+    `<pre>(property) ${propertyPath}:</pre>`,
+    '\n',
+    '```',
+    getDetailedTypeDescription(schema, {
+      maxDepth: 2,
+    }),
+    '```',
+  ].join('\n');
 }

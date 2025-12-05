@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
-import React, { useState } from 'react';
 import {
   EuiAccordion,
-  EuiButtonIcon,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
   EuiSplitPanel,
   EuiText,
-  useGeneratedHtmlId,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { ToolCallStep } from '@kbn/onechat-common';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import type { ToolCallStep } from '@kbn/onechat-common';
+import type { ReactNode } from 'react';
+import React from 'react';
+import { codeblockStyles } from './codeblock.styles';
 
 const labels = {
   parameters: i18n.translate('xpack.onechat.round.thinking.steps.thinkingItemLayout.parameters', {
@@ -40,27 +40,11 @@ interface AccordionProps {
   accordionContent: ToolCallStep['params'];
 }
 const Accordion = ({ children, accordionContent }: AccordionProps) => {
-  const [isOpen, setIsOpen] = useState(false);
-
   const accordionId = useGeneratedHtmlId({
     prefix: 'accordionId',
   });
   return (
-    <EuiAccordion
-      id={accordionId}
-      arrowDisplay="none"
-      buttonContent={children}
-      extraAction={
-        <EuiButtonIcon
-          iconType={isOpen ? 'eyeClosed' : 'eye'}
-          aria-label={isOpen ? labels.close : labels.open}
-          onClick={() => setIsOpen(!isOpen)}
-          color="text"
-        />
-      }
-      forceState={isOpen ? 'open' : 'closed'}
-      onToggle={(open) => setIsOpen(open)}
-    >
+    <EuiAccordion id={accordionId} arrowDisplay="right" buttonContent={children}>
       <>
         <EuiSpacer size="m" />
         <EuiSplitPanel.Outer hasBorder hasShadow={false}>
@@ -70,7 +54,7 @@ const Accordion = ({ children, accordionContent }: AccordionProps) => {
             </EuiText>
           </EuiSplitPanel.Inner>
           <EuiSplitPanel.Inner paddingSize="none">
-            <EuiCodeBlock isCopyable paddingSize="m" lineNumbers>
+            <EuiCodeBlock isCopyable paddingSize="m" lineNumbers css={codeblockStyles}>
               {JSON.stringify(accordionContent, null, 2)}
             </EuiCodeBlock>
           </EuiSplitPanel.Inner>

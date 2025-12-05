@@ -34,7 +34,7 @@ export const PreviewRenderCellValue: React.FC<
   return (
     <CellValue
       tableType={TableId.rulePreview}
-      sourcererScope={PageScope.alerts}
+      pageScope={PageScope.alerts}
       legacyAlert={legacyAlert}
       ecsAlert={ecsData}
       asPlainText={true}
