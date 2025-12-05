@@ -7,49 +7,48 @@
 
 import type { ElasticsearchClient, Logger, LoggerFactory } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/server';
-import type { DataStreamSamples } from '../../../common';
-import type {
-  AutomaticImportSamplesIndexAdapter,
-  AutomaticImportSamplesProperties,
-} from './storage';
+import type { AutomaticImportSamplesProperties } from './storage';
 import { createIndexAdapter } from './storage';
+import type { OriginalSource } from '../../../common';
 
+export interface AddSamplesToDataStreamParams {
+  integrationId: string;
+  dataStreamId: string;
+  rawSamples: string[];
+  originalSource: OriginalSource;
+  authenticatedUser: AuthenticatedUser;
+  esClient: ElasticsearchClient;
+}
 export class AutomaticImportSamplesIndexService {
   private logger: Logger;
-  private samplesIndexAdapter: AutomaticImportSamplesIndexAdapter | null = null;
 
-  constructor(logger: LoggerFactory, esClientPromise: Promise<ElasticsearchClient>) {
+  constructor(logger: LoggerFactory) {
     this.logger = logger.get('samplesIndexService');
-    void this.initialize(esClientPromise);
-  }
-
-  private async initialize(esClientPromise: Promise<ElasticsearchClient>) {
-    const [esClient] = await Promise.all([esClientPromise]);
-    // Initialize samples index adapter
-    this.samplesIndexAdapter = createIndexAdapter({
-      logger: this.logger,
-      esClient,
-    });
   }
 
   /**
    * Creates samples documents in the samples index.
    */
-  public async addSamplesToDataStream(
-    currentAuthenticatedUser: AuthenticatedUser,
-    dataStream: DataStreamSamples
-  ) {
-    if (!this.samplesIndexAdapter) {
-      throw new Error('Samples index adapter not initialized');
-    }
+  public async addSamplesToDataStream(params: AddSamplesToDataStreamParams) {
+    const { integrationId, dataStreamId, rawSamples, originalSource, authenticatedUser, esClient } =
+      params;
 
-    const operations = dataStream.logData.map((logData: string) => {
+    // Create adapter with the scoped ES client for this request
+    const samplesIndexAdapter = createIndexAdapter({
+      logger: this.logger,
+      esClient,
+    });
+
+    const operations = rawSamples.map((sample: string) => {
       const document: Omit<AutomaticImportSamplesProperties, '_id'> = {
-        integration_id: dataStream.integrationId,
-        data_stream_id: dataStream.dataStreamId,
-        log_data: logData,
-        created_by: currentAuthenticatedUser.username,
-        original_filename: dataStream.originalFilename,
+        integration_id: integrationId,
+        data_stream_id: dataStreamId,
+        log_data: sample,
+        created_by: authenticatedUser.username,
+        original_source: {
+          source_type: originalSource.sourceType,
+          source_value: originalSource.sourceValue,
+        },
         metadata: {
           created_at: new Date().toISOString(),
         },
@@ -61,21 +60,28 @@ export class AutomaticImportSamplesIndexService {
       };
     });
 
-    return this.samplesIndexAdapter.getClient().bulk({ operations });
+    return samplesIndexAdapter.getClient().bulk({ operations });
   }
 
   /**
    * Gets samples for a data stream
    * @param integrationId - The integration ID
    * @param dataStreamId - The data stream ID
+   * @param esClient - The Elasticsearch client to use (scoped to the user)
    * @returns The samples for the data stream
-   * @throws If the samples index adapter is not initialized
    */
-  public async getSamplesForDataStream(integrationId: string, dataStreamId: string) {
-    if (!this.samplesIndexAdapter) {
-      throw new Error('Samples index adapter not initialized');
-    }
-    const results = await this.samplesIndexAdapter.getClient().search({
+  public async getSamplesForDataStream(
+    integrationId: string,
+    dataStreamId: string,
+    esClient: ElasticsearchClient
+  ) {
+    // Create adapter with the scoped ES client for this request
+    const samplesIndexAdapter = createIndexAdapter({
+      logger: this.logger,
+      esClient,
+    });
+
+    const results = await samplesIndexAdapter.getClient().search({
       query: {
         bool: {
           must: [
