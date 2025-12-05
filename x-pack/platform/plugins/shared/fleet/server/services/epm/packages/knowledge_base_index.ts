@@ -69,9 +69,11 @@ export async function saveKnowledgeBaseContentToIndex({
             operations,
             refresh: 'wait_for',
           },
-          {
-            signal: abortController?.signal,
-          }
+          abortController
+            ? {
+                signal: abortController.signal,
+              }
+            : undefined
         ),
       { logger: appContextService.getLogger() }
     ).catch((error) => {
@@ -132,9 +134,11 @@ export async function getPackageKnowledgeBaseFromIndex(
         query,
         size: DEFAULT_SIZE,
       },
-      {
-        signal: abortController?.signal,
-      }
+      abortController
+        ? {
+            signal: abortController.signal,
+          }
+        : undefined
     );
 
     return response.hits.hits.map((hit: any) => ({
@@ -167,9 +171,11 @@ export async function deletePackageKnowledgeBase(
         index: `${INTEGRATION_KNOWLEDGE_INDEX}*`,
         query,
       },
-      {
-        signal: abortController?.signal,
-      }
+      abortController
+        ? {
+            signal: abortController.signal,
+          }
+        : undefined
     )
     .catch((error) => {
       const logger = appContextService.getLogger();
