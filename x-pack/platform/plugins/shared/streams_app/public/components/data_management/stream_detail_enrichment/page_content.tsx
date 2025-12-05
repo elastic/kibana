@@ -31,12 +31,14 @@ import {
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
+import { selectValidationErrors } from './state_management/stream_enrichment_state_machine/selectors';
 import {
   getConfiguredSteps,
   getUpsertFields,
 } from './state_management/stream_enrichment_state_machine/utils';
 import { StepsEditor } from './steps_editor';
 import { buildUpsertStreamRequestPayload } from './utils';
+import { selectStreamType } from './state_management/stream_enrichment_state_machine/selectors';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
 
@@ -83,6 +85,10 @@ export function StreamDetailEnrichmentContentImpl() {
   const isReady = useStreamEnrichmentSelector((state) => state.matches('ready'));
   const definition = useStreamEnrichmentSelector((state) => state.context.definition);
   const canUpdate = useStreamEnrichmentSelector((state) => state.can({ type: 'stream.update' }));
+  const validationErrors = useStreamEnrichmentSelector((state) =>
+    selectValidationErrors(state.context)
+  );
+  const hasValidationErrors = Array.from(validationErrors.values()).flat().length > 0;
   const detectedFields = useSimulatorSelector((state) => state.context.detectedSchemaFields);
   const isSimulating = useSimulatorSelector((state) => state.matches('runningSimulation'));
   const definitionFields = React.useMemo(() => getDefinitionFields(definition), [definition]);
@@ -151,6 +157,8 @@ export function StreamDetailEnrichmentContentImpl() {
   const isSavingChanges = useStreamEnrichmentSelector((state) =>
     state.matches({ ready: { stream: 'updating' } })
   );
+
+  const streamType = useStreamEnrichmentSelector((snapshot) => selectStreamType(snapshot.context));
 
   const hasChanges = canUpdate && !isSimulating;
   const isLoadingSuggestion = useStreamEnrichmentSelector((snapshot) =>
@@ -263,8 +271,9 @@ export function StreamDetailEnrichmentContentImpl() {
           isLoading={isSavingChanges}
           disabled={!hasChanges}
           insufficientPrivileges={!canManage}
-          isInvalid={hasDefinitionError}
+          isInvalid={hasDefinitionError || hasValidationErrors}
           onViewCodeClick={onBottomBarViewCodeClick}
+          streamType={streamType}
         />
       )}
       {isRequestPreviewFlyoutOpen && (

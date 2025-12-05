@@ -7,7 +7,7 @@
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import type { FlattenedApmEvent } from '@kbn/apm-data-access-plugin/server/utils/utility_types';
 import { getAgentName } from '@kbn/elastic-agent-utils';
 import { maybe } from '../../../common/utils/maybe';
@@ -92,7 +92,11 @@ export async function getServiceMetadataIcons({
 
   const data = await apmEventClient.search('get_service_metadata_icons', params);
 
-  if (data.hits.total.value === 0) {
+  const hit = maybe(data.hits.hits[0])?.fields;
+
+  const event = hit && accessKnownApmEventFields(hit as Partial<FlattenedApmEvent>);
+
+  if (!event) {
     return {
       agentName: undefined,
       containerType: undefined,
@@ -101,31 +105,24 @@ export async function getServiceMetadataIcons({
     };
   }
 
-  const response = structuredClone(data);
-  response.hits.hits[0].fields[AGENT_NAME] = getAgentName(
-    data.hits.hits[0]?.fields?.[AGENT_NAME] as unknown as string | null,
-    data.hits.hits[0]?.fields?.[TELEMETRY_SDK_LANGUAGE] as unknown as string | null,
-    data.hits.hits[0]?.fields?.[TELEMETRY_SDK_NAME] as unknown as string | null
-  ) as unknown as unknown[];
+  const agentName =
+    getAgentName(
+      event[AGENT_NAME] ?? null,
+      event[TELEMETRY_SDK_LANGUAGE] ?? null,
+      event[TELEMETRY_SDK_NAME] ?? null
+    ) ?? undefined;
 
-  const event = unflattenKnownApmEventFields(
-    maybe(response.hits.hits[0])?.fields as undefined | FlattenedApmEvent
+  const containerType = event.containsFields('kubernetes') ? 'Kubernetes' : 'Docker';
+
+  const serverlessType = getServerlessTypeFromCloudData(
+    event[CLOUD_PROVIDER],
+    event[CLOUD_SERVICE_NAME]
   );
 
-  const { kubernetes, cloud, container, agent } = event ?? {};
-  let containerType: ContainerType;
-  if (!!kubernetes) {
-    containerType = 'Kubernetes';
-  } else if (!!container) {
-    containerType = 'Docker';
-  }
-
-  const serverlessType = getServerlessTypeFromCloudData(cloud?.provider, cloud?.service?.name);
-
   return {
-    agentName: agent?.name,
+    agentName,
     containerType,
     serverlessType,
-    cloudProvider: cloud?.provider,
+    cloudProvider: event[CLOUD_PROVIDER],
   };
 }
