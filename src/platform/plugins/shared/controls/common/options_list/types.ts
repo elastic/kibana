@@ -92,4 +92,5 @@ export interface OptionsListRequestBody
   searchString?: string;
   fieldSpec?: FieldSpec;
   size: number;
+  isReload?: boolean;
 }

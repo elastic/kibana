@@ -99,11 +99,14 @@ export const ControlGroupRenderer = ({
     if (!childrenApi || !layoutApi) return;
 
     const disabledActionIds$ = new BehaviorSubject<string[] | undefined>(undefined);
+    const reload$ = new Subject<void>();
+
     return {
       ...childrenApi,
       ...layoutApi,
       ...searchApi,
       ...propsApi,
+      reload$,
       getEditorConfig: getEditorConfig.current,
       disabledActionIds$,
       setDisabledActionIds: (ids: string[] | undefined) => {
@@ -142,8 +145,6 @@ export const ControlGroupRenderer = ({
   useEffect(() => {
     if (!parentApi || !input$) return;
 
-    const reload$ = new Subject<void>();
-
     /**
      * the ControlGroupRenderer will render before the children are available and combineCompatibleChildrenApis
      * will default to the empty value; however, we shouldn't publish this until the value is real
@@ -159,7 +160,9 @@ export const ControlGroupRenderer = ({
       esqlVariables$: parentApi.esqlVariables$.pipe(ignoreWhileLoading),
       appliedFilters$: parentApi.appliedFilters$.pipe(ignoreWhileLoading),
       appliedTimeslice$: parentApi.appliedTimeslice$.pipe(ignoreWhileLoading),
-      reload: () => reload$.next(),
+      reload: () => {
+        parentApi.reload$.next();
+      },
       getInput$: () => input$,
       getInput: () => input$.value,
       updateInput: (newInput: Partial<ControlGroupRuntimeState>) => {
