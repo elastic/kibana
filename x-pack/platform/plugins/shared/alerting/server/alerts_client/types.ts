@@ -48,6 +48,8 @@ export interface AlertRuleData {
   spaceId: string;
   tags: string[];
   alertDelay: number;
+  muteAll: boolean;
+  mutedInstanceIds: string[];
 }
 
 export interface AlertRule {
