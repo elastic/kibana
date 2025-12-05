@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiLink, EuiConfirmModal, type EuiBadgeProps } from '@elastic/eui';
+import { EuiLink, EuiConfirmModal } from '@elastic/eui';
 import { EuiCodeBlock } from '@elastic/eui';
 import { EuiBadge } from '@elastic/eui';
 import { EuiBasicTable } from '@elastic/eui';
