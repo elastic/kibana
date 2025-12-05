@@ -129,6 +129,7 @@ const ESQLEditorInternal = function ESQLEditor({
   );
 
   const datePickerOpenStatusRef = useRef<boolean>(false);
+  const isFirstFocusRef = useRef<boolean>(true);
   const theme = useEuiTheme();
   const kibana = useKibana<ESQLEditorDeps>();
   const { application, core, fieldsMetadata, uiSettings, uiActions, data, usageCollection } =
@@ -307,13 +308,33 @@ const ESQLEditorInternal = function ESQLEditor({
     }
   }, [variablesService, controlsContext, esqlVariables]);
 
-  const showSuggestionsIfEmptyQuery = useCallback(() => {
-    if (editorModel.current?.getValueLength() === 0) {
-      setTimeout(() => {
-        editorRef.current?.trigger(undefined, 'editor.action.triggerSuggest', {});
-      }, 0);
-    }
+  const triggerSuggestions = useCallback(() => {
+    setTimeout(() => {
+      editorRef.current?.trigger(undefined, 'editor.action.triggerSuggest', {});
+    }, 0);
   }, []);
+
+  const maybeTriggerSuggestions = useCallback(() => {
+    const { current: editor } = editorRef;
+    const { current: model } = editorModel;
+
+    if (!editor || !model) {
+      return;
+    }
+
+    const position = editor.getPosition();
+    if (!position) {
+      return;
+    }
+
+    const { lineNumber, column } = position;
+    const lineContent = model.getLineContent(lineNumber);
+    const charBeforeCursor = column > 1 ? lineContent[column - 2] : '';
+
+    if (charBeforeCursor === ' ') {
+      triggerSuggestions();
+    }
+  }, [triggerSuggestions]);
 
   const openTimePickerPopover = useCallback(() => {
     const currentCursorPosition = editorRef.current?.getPosition();
@@ -397,12 +418,6 @@ const ESQLEditorInternal = function ESQLEditor({
       />
     );
   }, [onMouseDownResize, editorHeight, onKeyDownResize, setEditorHeight]);
-
-  const onEditorFocus = useCallback(() => {
-    setIsCodeEditorExpandedFocused(true);
-    showSuggestionsIfEmptyQuery();
-    setLabelInFocus(true);
-  }, [showSuggestionsIfEmptyQuery]);
 
   const { cache: esqlFieldsCache, memoizedFieldsFromESQL } = useMemo(() => {
     // need to store the timing of the first request so we can atomically clear the cache per query
@@ -1067,11 +1082,13 @@ const ESQLEditorInternal = function ESQLEditor({
                     });
 
                     editor.onDidFocusEditorText(() => {
-                      onEditorFocus();
-                    });
+                      // Skip triggering suggestions on initial focus to avoid interfering
+                      // with editor initialization and automated tests
+                      if (!isFirstFocusRef.current) {
+                        triggerSuggestions();
+                      }
 
-                    editor.onKeyDown(() => {
-                      onEditorFocus();
+                      isFirstFocusRef.current = false;
                     });
 
                     // on CMD/CTRL + / comment out the entire line
@@ -1099,7 +1116,7 @@ const ESQLEditorInternal = function ESQLEditor({
 
                     editor.onDidChangeModelContent(async () => {
                       await addLookupIndicesDecorator();
-                      showSuggestionsIfEmptyQuery();
+                      maybeTriggerSuggestions();
                     });
 
                     // Auto-focus the editor and move the cursor to the end.

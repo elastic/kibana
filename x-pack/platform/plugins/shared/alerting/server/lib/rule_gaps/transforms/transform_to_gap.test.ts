@@ -208,4 +208,78 @@ describe('transformToGap', () => {
     const result = transformToGap(events);
     expect(result).toHaveLength(0);
   });
+
+  describe('failed_auto_fill_attempts', () => {
+    it('should set failedAutoFillAttempts to 0 when gap field is not present', () => {
+      const events = createMockEvent({
+        alert: {
+          rule: {
+            gap: {
+              range: validInterval,
+              filled_intervals: [validInterval],
+              in_progress_intervals: [validInterval],
+            },
+          },
+        },
+      });
+      const result = transformToGap(events);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].failedAutoFillAttempts).toBe(0);
+    });
+
+    it('should correctly set failedAutoFillAttempts when gap field is 0', () => {
+      const events = createMockEvent({
+        alert: {
+          rule: {
+            gap: {
+              range: validInterval,
+              filled_intervals: [validInterval],
+              in_progress_intervals: [validInterval],
+              failed_auto_fill_attempts: 0,
+            },
+          },
+        },
+      });
+      const result = transformToGap(events);
+
+      expect(result[0].failedAutoFillAttempts).toBe(0);
+    });
+
+    it('should correctly set failedAutoFillAttempts when value is positive', () => {
+      const events = createMockEvent({
+        alert: {
+          rule: {
+            gap: {
+              range: validInterval,
+              filled_intervals: [validInterval],
+              in_progress_intervals: [validInterval],
+              failed_auto_fill_attempts: 5,
+            },
+          },
+        },
+      });
+      const result = transformToGap(events);
+
+      expect(result[0].failedAutoFillAttempts).toBe(5);
+    });
+
+    it('should default to 0 when failed_auto_fill_attempts is not a number', () => {
+      const events = createMockEvent({
+        alert: {
+          rule: {
+            gap: {
+              range: validInterval,
+              filled_intervals: [validInterval],
+              in_progress_intervals: [validInterval],
+              failed_auto_fill_attempts: '5', // invalid type
+            },
+          },
+        },
+      });
+      const result = transformToGap(events);
+
+      expect(result[0].failedAutoFillAttempts).toBe(0);
+    });
+  });
 });
