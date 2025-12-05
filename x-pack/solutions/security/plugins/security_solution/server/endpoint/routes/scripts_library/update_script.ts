@@ -6,6 +6,11 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
+import type {
+  PatchUpdateRequestBody,
+  PatchUpdateRequestParams,
+} from '../../../../common/api/endpoint/scripts_library';
+import { PatchUpdateRequestSchema } from '../../../../common/api/endpoint/scripts_library';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 import type {
   SecuritySolutionPluginRouter,
@@ -19,12 +24,12 @@ import { stringify } from '../../utils/stringify';
 export const getPatchUpdateScriptRequestHandler = (
   endpointAppServices: EndpointAppContextService
 ): RequestHandler<
-  unknown, // FIXME:PT add type for params
+  PatchUpdateRequestParams,
   undefined,
-  unknown, // FIXME:PT add type for body
+  PatchUpdateRequestBody,
   SecuritySolutionRequestHandlerContext
 > => {
-  const logger = endpointAppServices.createLogger('updatePatchScriptRouteHandler');
+  const logger = endpointAppServices.createLogger('patchUpdateScriptRouteHandler');
 
   return async (context, req, res) => {
     logger.debug(() => `Patch update script: ${stringify(req.params.script_id)}`);
@@ -50,12 +55,12 @@ export const registerPatchUpdateScriptRoute = (
       {
         version: '2023-10-31',
         validate: {
-          request: {}, // FIXME:PT add schema
+          request: PatchUpdateRequestSchema,
         },
       },
       withEndpointAuthz(
         { all: ['canWriteScriptsLibrary'] },
-        endpointContext.logFactory.get('updatePatchScriptRoute'),
+        endpointContext.logFactory.get('patchUpdateScriptRoute'),
         getPatchUpdateScriptRequestHandler(endpointContext.service)
       )
     );
