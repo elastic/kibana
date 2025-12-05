@@ -20,31 +20,44 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { camelCase } from 'lodash';
+import fs from 'fs';
 
 export const SCOUT_CYPRESS_REPORTER_PATH = path.join(
   REPO_ROOT,
   'src/platform/packages/shared/kbn-cypress-config/src/reporting/scout_events'
 );
 
-// Cache for work dir and counter to ensure we read reporter config path only once
-let counter: number = 0;
-let cachedWorkDir: string;
+/**
+ * Extract the Cypress spec file path from process arguments or environment
+ */
+function getSpecFilePath(): string {
+  // Try to get from process.argv (when running via Cypress CLI)
+  const specArgIndex = process.argv.findIndex((arg) => arg === '--spec');
+  if (specArgIndex !== -1 && process.argv[specArgIndex + 1]) {
+    return process.argv[specArgIndex + 1];
+  }
+
+  return '';
+}
 
 /**
- * Extract the Cypress config file path from process arguments or environment
+ * Detect if a spec file is a UI test or API test based on file path and naming patterns
  */
-function getCypressConfigPath(): string {
-  // Try to get from process.argv
-  const configFileArgIndex = process.argv.findIndex((arg) => arg === '--config-file');
-  if (configFileArgIndex !== -1 && process.argv[configFileArgIndex + 1]) {
-    return process.argv[configFileArgIndex + 1];
+function detectTestCategory(specPath: string): ScoutTestRunConfigCategory {
+  if (!specPath) {
+    return ScoutTestRunConfigCategory.UI_TEST; // Default to UI test
   }
 
-  // Try to get from environment variable (set by start_cypress_parallel script)
-  if (process.env.CYPRESS_CONFIG_FILE) {
-    return process.env.CYPRESS_CONFIG_FILE;
-  }
-  return '';
+  // Normalize path for consistent checking
+  const normalizedPath = specPath.toLowerCase();
+
+  // API test indicators
+  const apiPatterns = ['/api/', '/api_integration/', 'api.cy.', 'api_', '/apis/'];
+
+  // Check if path matches API patterns
+  const isApiTest = apiPatterns.some((pattern) => normalizedPath.includes(pattern));
+
+  return isApiTest ? ScoutTestRunConfigCategory.API_TEST : ScoutTestRunConfigCategory.UI_TEST;
 }
 
 function getReportingOptionOverrides(options?: Cypress.ConfigOptions): Record<string, any> {
@@ -64,39 +77,38 @@ function getReportingOptionOverrides(options?: Cypress.ConfigOptions): Record<st
   let reporterOptions: Record<string, any> = options?.reporterOptions ?? {};
 
   if (reporterOptions.configFile) {
-    // Load reporter options from file
-    // path in the config file is relative to package.json so I should keep the path of first process.cwd.
-    // This will ensure path exists for all cases
-    if (counter === 0) {
-      cachedWorkDir = process.cwd();
-      counter++;
+    // Check if config file exists in current directory
+    if (fs.existsSync(path.join(process.cwd(), reporterOptions.configFile))) {
+      reporterOptions = JSON.parse(
+        readFileSync(path.join(process.cwd(), reporterOptions.configFile), 'utf8')
+      );
+    } else {
+      // Count number of slashes to determine directory depth
+      const slashCount = (reporterOptions.configFile.match(/\//g) || []).length - 1;
+      // Move up directories based on slash count to find the config file
+      const searchDir = path.join(process.cwd(), '../'.repeat(slashCount));
+      reporterOptions = JSON.parse(
+        readFileSync(path.join(searchDir, reporterOptions.configFile), 'utf8')
+      );
     }
-
-    reporterOptions = JSON.parse(
-      readFileSync(path.join(cachedWorkDir, reporterOptions.configFile), 'utf8')
-    );
   }
 
   if (reporterOptions.reporterEnabled) {
     enabledReporters = reporterOptions.reporterEnabled.split(',').map((r: string) => r.trim());
   }
 
-  // if (!reporter.endsWith('cypress-multi-reporters')) {
-  //   // Given options are not using the multi-reporters plugin
-  //   reporterEnabled.push(reporter);
-  //   reporter = 'cypress-multi-reporters';
-  // }
-
   if (SCOUT_REPORTER_ENABLED) {
     enabledReporters.push(SCOUT_CYPRESS_REPORTER_PATH);
-    const configPath = getCypressConfigPath();
+    const specPath = getSpecFilePath();
     reporterOptions[`${camelCase(SCOUT_CYPRESS_REPORTER_PATH)}ReporterOptions`] = {
       name: 'cypress',
       outputPath: SCOUT_REPORT_OUTPUT_ROOT,
-      config: configPath
+      // Config will be determined at runtime from test.file
+      // Pass spec path only if available at config time for logging purposes
+      config: specPath
         ? {
-            path: configPath,
-            category: ScoutTestRunConfigCategory.UI_TEST,
+            path: specPath,
+            category: detectTestCategory(specPath),
           }
         : undefined,
     };
