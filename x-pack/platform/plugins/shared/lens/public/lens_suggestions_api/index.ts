@@ -16,7 +16,6 @@ import type {
   DataViewsState,
   TypedLensByValueInput,
 } from '@kbn/lens-common';
-import type { AggregateQuery } from '@kbn/es-query';
 import { getSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
 import { mergeSuggestionWithVisContext, switchVisualizationType } from './helpers';
 
