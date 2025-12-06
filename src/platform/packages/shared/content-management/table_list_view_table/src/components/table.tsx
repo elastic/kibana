@@ -88,10 +88,6 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   clearTagSelection: () => void;
   createdByEnabled: boolean;
   favoritesEnabled: boolean;
-  tabsEnabled?: boolean;
-  tabEntityNames?: Record<string, TabEntityNameConfig<T>>;
-  /** Custom filter function for tabs. If not provided, uses item.type to match tab id. */
-  filterItemByTab?: (item: T, tabId: string) => boolean;
   emptyPrompt?: JSX.Element;
 }
 
@@ -124,27 +120,10 @@ export function Table<T extends UserContentCommonSchema>({
   clearTagSelection,
   createdByEnabled,
   favoritesEnabled,
-  tabsEnabled,
-  tabEntityNames,
-  filterItemByTab,
   emptyPrompt,
 }: Props<T>) {
   const euiTheme = useEuiTheme();
   const { getTagList, isTaggingEnabled, isKibanaVersioningEnabled } = useServices();
-
-  // Dynamic entity name based on active tab
-  const dynamicEntityName = useMemo(() => {
-    if (tabsEnabled && tableFilter.activeTab && tabEntityNames) {
-      return tabEntityNames[tableFilter.activeTab]?.entityName || entityName;
-    }
-    return entityName;
-  }, [tabsEnabled, tableFilter.activeTab, tabEntityNames, entityName]);
-  const dynamicEntityNamePlural = useMemo(() => {
-    if (tabsEnabled && tableFilter.activeTab && tabEntityNames) {
-      return tabEntityNames[tableFilter.activeTab]?.entityNamePlural || entityNamePlural;
-    }
-    return entityNamePlural;
-  }, [tabsEnabled, tableFilter.activeTab, tabEntityNames, entityNamePlural]);
 
   const renderToolsLeft = useCallback(() => {
     if (!deleteItems || selectedIds.length === 0) {
@@ -163,12 +142,12 @@ export function Table<T extends UserContentCommonSchema>({
           defaultMessage="Delete {itemCount} {entityName}"
           values={{
             itemCount: selectedIds.length,
-            entityName: selectedIds.length === 1 ? dynamicEntityName : dynamicEntityNamePlural,
+            entityName: selectedIds.length === 1 ? entityName : entityNamePlural,
           }}
         />
       </EuiButton>
     );
-  }, [deleteItems, dispatch, dynamicEntityName, dynamicEntityNamePlural, selectedIds.length]);
+  }, [deleteItems, dispatch, entityName, entityNamePlural, selectedIds.length]);
 
   // Dynamic create button for toolbar (changes based on active tab)
   const renderDynamicCreateButton = useCallback(() => {
@@ -325,25 +304,13 @@ export function Table<T extends UserContentCommonSchema>({
       <FormattedMessage
         id="contentManagement.tableList.listing.noItemsTitle"
         defaultMessage="No {entityNamePlural} to display"
-        values={{ entityNamePlural: dynamicEntityNamePlural }}
+        values={{ entityNamePlural }}
       />
     ),
-    [dynamicEntityNamePlural]
+    [entityNamePlural]
   );
 
   const emptyPromptBody = useMemo(() => {
-    if (tabsEnabled && tableFilter.activeTab && tabEntityNames) {
-      return (
-        tabEntityNames[tableFilter.activeTab]?.emptyPromptBody ?? (
-          <FormattedMessage
-            id="contentManagement.tableList.listing.noItemsBody"
-            defaultMessage="Create a new {entityName} to get started."
-            values={{ entityName }}
-          />
-        )
-      );
-    }
-
     return (
       <FormattedMessage
         id="contentManagement.tableList.listing.noMatchedItemsMessage"
@@ -351,7 +318,7 @@ export function Table<T extends UserContentCommonSchema>({
         values={{ entityNamePlural }}
       />
     );
-  }, [tabsEnabled, tableFilter.activeTab, tabEntityNames, entityName, entityNamePlural]);
+  }, [entityNamePlural]);
 
   const emptyPromptActions = useMemo(() => {
     return renderCreateButton(false);
@@ -361,21 +328,6 @@ export function Table<T extends UserContentCommonSchema>({
 
   const visibleItems = React.useMemo(() => {
     let filteredItems = items;
-
-    if (tabsEnabled && tableFilter?.activeTab) {
-      const currentTab = tableFilter.activeTab;
-      if (filterItemByTab) {
-        filteredItems = filteredItems.filter((item) => filterItemByTab(item, currentTab));
-      } else {
-        filteredItems = filteredItems.filter((item) => {
-          const itemType = (item as any).type;
-          return (
-            itemType === currentTab ||
-            (!itemType && currentTab === Object.keys(tabEntityNames || {})[0])
-          );
-        });
-      }
-    }
 
     if (tableFilter?.createdBy?.length > 0) {
       filteredItems = filteredItems.filter((item) => {
@@ -394,7 +346,7 @@ export function Table<T extends UserContentCommonSchema>({
     }
 
     return filteredItems;
-  }, [items, tableFilter, favorites, favoritesError, tabsEnabled, filterItemByTab, tabEntityNames]);
+  }, [items, tableFilter, favorites, favoritesError]);
 
   const { allUsers, showNoUserOption } = useMemo(() => {
     if (!createdByEnabled) return { allUsers: [], showNoUserOption: false };
@@ -417,26 +369,8 @@ export function Table<T extends UserContentCommonSchema>({
       ? true // by passing "true" we disable the EuiInMemoryTable sorting and handle it ourselves, but sorting is still enabled
       : { sort: tableSort };
 
-  const tabbedFilter = useMemo(
-    () =>
-      tabsEnabled && tabEntityNames ? (
-        <TabbedTableFilter
-          tabs={Object.keys(tabEntityNames).map((id) => ({
-            id,
-            name: tabEntityNames[id].tabName,
-          }))}
-          selectedTabId={tableFilter.activeTab ?? Object.keys(tabEntityNames)[0]}
-          onSelectedTabChanged={(newTab) => {
-            onFilterChange({ activeTab: newTab });
-          }}
-        />
-      ) : undefined,
-    [tabsEnabled, tabEntityNames, tableFilter.activeTab, onFilterChange]
-  );
-
   return (
     <>
-      {tabbedFilter}
       <UserFilterContextProvider
         enabled={createdByEnabled}
         allUsers={allUsers}
@@ -446,7 +380,7 @@ export function Table<T extends UserContentCommonSchema>({
         selectedUsers={tableFilter.createdBy}
         showNoUserOption={showNoUserOption}
         isKibanaVersioningEnabled={isKibanaVersioningEnabled}
-        entityNamePlural={dynamicEntityNamePlural}
+        entityNamePlural={entityNamePlural}
       >
         <TagFilterContextProvider
           isPopoverOpen={isPopoverOpen}

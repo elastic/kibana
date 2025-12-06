@@ -58,7 +58,6 @@ import type { RowActions, SearchQueryError, TableItemsRowActions } from './types
 import type { CustomSortingOptions } from './components/table_sort_select';
 import { sortByRecentlyAccessed } from './components/table_sort_select';
 import { ContentEditorActivityRow } from './components/content_editor_activity_row';
-import type { TabEntityNameConfig } from './components/tabbed_filter';
 
 const disabledEditAction = {
   enabled: false,
@@ -85,12 +84,6 @@ export interface TableListViewTableProps<
   customSortingOptions?: CustomSortingOptions;
   urlStateEnabled?: boolean;
   createdByEnabled?: boolean;
-  /** Enable tabbed filtering. Allows filtering items by configurable tabs. */
-  tabsEnabled?: boolean;
-  /** Entity name mappings for each tab (used when tabsEnabled is true). First key is the default tab. */
-  tabEntityNames?: Record<string, TabEntityNameConfig<T>>;
-  /** Custom filter function for tabs. If not provided, uses item.type to match tab id. */
-  filterItemByTab?: (item: T, tabId: string) => boolean;
   /**
    * Id of the heading element describing the table. This id will be used as `aria-labelledby` of the wrapper element.
    * If the table is not empty, this component renders its own h1 element using the same id.
@@ -115,8 +108,8 @@ export interface TableListViewTableProps<
   getDetailViewLink?: (entity: T) => string | undefined;
   /** Handler to execute when clicking the item title */
   getOnClickTitle?: (item: T) => (() => void) | undefined;
-  /** Handler to create a new item. When tabsEnabled, receives the active tab id to create tab-specific items. */
-  createItem?(activeTab?: string): void;
+  /** Handler to create a new item. */
+  createItem?(): void;
   deleteItems?(items: T[]): Promise<void>;
   /**
    * Edit action onClick handler. Edit action not provided when property is not provided
@@ -351,9 +344,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   refreshListBouncer,
   setPageDataTestSubject,
   createdByEnabled = false,
-  tabsEnabled = false,
-  tabEntityNames,
-  filterItemByTab,
   recentlyAccessed,
 }: TableListViewTableProps<T>) {
   useEffect(() => {
@@ -444,10 +434,9 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       tableFilter: {
         createdBy: [],
         favorites: false,
-        activeTab: tabsEnabled && tabEntityNames ? Object.keys(tabEntityNames)[0] : undefined,
       },
     };
-  }, [initialPageSize, entityName, recentlyAccessed, tabsEnabled, tabEntityNames]);
+  }, [initialPageSize, entityName, recentlyAccessed]);
 
   const [state, dispatch] = useReducer(reducer, initialState);
 
@@ -618,33 +607,9 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     ]
   );
 
-  // Helper: Get active tab configuration
-  const getActiveTabConfig = useCallback(() => {
-    return tabsEnabled && tableFilter.activeTab && tabEntityNames
-      ? tabEntityNames[tableFilter.activeTab]
-      : undefined;
-  }, [tabsEnabled, tableFilter.activeTab, tabEntityNames]);
-
-  const resolveCustomColumn = useCallback(
-    (activeTabConfig: TabEntityNameConfig<T> | undefined) => {
-      return tabsEnabled ? activeTabConfig?.columns?.customTableColumn : customTableColumn;
-    },
-    [tabsEnabled, customTableColumn]
-  );
-
-  const checkShowCreatorColumn = useCallback(
-    (activeTabConfig: TabEntityNameConfig<T> | undefined) => {
-      const showInConfig = activeTabConfig?.columns?.showCreatorColumn ?? true;
-      return tabsEnabled
-        ? createdByEnabled && showInConfig
-        : hasCreatedByMetadata && createdByEnabled && showInConfig;
-    },
-    [tabsEnabled, createdByEnabled, hasCreatedByMetadata]
-  );
-
   const tableColumns = useMemo(() => {
-    const activeTabConfig = getActiveTabConfig();
-    const customColumn = resolveCustomColumn(activeTabConfig);
+    const customColumn = customTableColumn;
+    const showCreatorColumn = hasCreatedByMetadata && createdByEnabled;
 
     const columns: Array<EuiBasicTableColumn<T>> = [
       {
@@ -681,7 +646,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       columns.push(customColumn);
     }
 
-    if (checkShowCreatorColumn(activeTabConfig)) {
+    if (showCreatorColumn) {
       columns.push({
         field: tableColumnMetadata.createdBy.field,
         name: (
@@ -787,9 +752,9 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     return columns;
   }, [
     titleColumnName,
-    getActiveTabConfig,
-    resolveCustomColumn,
-    checkShowCreatorColumn,
+    customTableColumn,
+    hasCreatedByMetadata,
+    createdByEnabled,
     hasUpdatedAtMetadata,
     editItem,
     contentEditor.enabled,
@@ -1023,15 +988,9 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   const renderCreateButton = useCallback(
     (fill: boolean = false) => {
       if (createItem) {
-        // Dynamic button label based on active tab
-        let buttonLabel = entityName;
-        if (tabsEnabled && tableFilter.activeTab && tabEntityNames) {
-          buttonLabel = tabEntityNames[tableFilter.activeTab]?.entityName || entityName;
-        }
-
         return (
           <EuiButton
-            onClick={() => createItem(tableFilter.activeTab)}
+            onClick={() => createItem()}
             data-test-subj="newItemButton"
             iconType="plusInCircleFilled"
             fill={fill}
@@ -1039,13 +998,13 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
             <FormattedMessage
               id="contentManagement.tableList.listing.createNewItemButtonLabel"
               defaultMessage="Create {entityName}"
-              values={{ entityName: buttonLabel }}
+              values={{ entityName }}
             />
           </EuiButton>
         );
       }
     },
-    [createItem, entityName, tableFilter.activeTab, tabsEnabled, tabEntityNames]
+    [createItem, entityName]
   );
 
   const renderNoItemsMessage = useCallback(() => {
@@ -1119,13 +1078,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   // ------------
   useDebounce(fetchItems, 300, [fetchItems, refreshListBouncer]);
 
-  // Immediately set loading state when tab changes (before debounced fetch)
-  useEffect(() => {
-    if (tabsEnabled) {
-      dispatch({ type: 'onFetchItems' });
-    }
-  }, [tableFilter.activeTab, tabsEnabled]);
-
   // set the initial state from the URL
   useEffect(() => {
     if (!urlStateEnabled) {
@@ -1173,8 +1125,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         data: {
           filter: {
             createdBy: filter.createdBy ?? [],
-            activeTab:
-              filter.activeTab ?? (tabEntityNames ? Object.keys(tabEntityNames)[0] : undefined),
           },
         },
       });
@@ -1183,7 +1133,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     updateQueryFromURL(initialUrlState.s);
     updateSortFromURL(initialUrlState.sort);
     updateFilterFromURL(initialUrlState.filter);
-  }, [initialUrlState, buildQueryFromText, urlStateEnabled, tabEntityNames]);
+  }, [initialUrlState, buildQueryFromText, urlStateEnabled]);
 
   useEffect(() => {
     isMounted.current = true;
@@ -1221,7 +1171,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     return null;
   }
 
-  if (!showFetchError && hasNoItems && !tabsEnabled) {
+  if (!showFetchError && hasNoItems) {
     return (
       <PageTemplate isEmptyState={true}>
         <KibanaPageTemplate.Section
@@ -1275,9 +1225,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           clearTagSelection={clearTagSelection}
           createdByEnabled={createdByEnabled}
           favoritesEnabled={favoritesEnabled}
-          tabsEnabled={tabsEnabled}
-          tabEntityNames={tabEntityNames}
-          filterItemByTab={filterItemByTab}
           emptyPrompt={emptyPrompt}
         />
 

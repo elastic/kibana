@@ -16,10 +16,12 @@ import type { ContentManagementPublicStart } from '@kbn/content-management-plugi
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public/types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import type { DashboardSetup } from '@kbn/dashboard-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { EventAnnotationPluginStart } from '@kbn/event-annotation-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { TableListTabParentProps } from '@kbn/content-management-tabbed-table-list-view';
 import type { EventAnnotationListingPageServices } from './get_table_list';
 
 export interface EventAnnotationListingStartDependencies {
@@ -36,6 +38,7 @@ export interface EventAnnotationListingStartDependencies {
 
 interface SetupDependencies {
   visualizations: VisualizationsSetup;
+  dashboard: DashboardSetup;
 }
 
 /** @public */
@@ -56,12 +59,12 @@ export class EventAnnotationListingPlugin
     core: CoreSetup<EventAnnotationListingStartDependencies>,
     dependencies: SetupDependencies
   ) {
-    dependencies.visualizations.listingViewRegistry.add({
+    const annotationGroupsTabConfig = {
       title: i18n.translate('eventAnnotationListing.listingViewTitle', {
         defaultMessage: 'Annotation groups',
       }),
       id: 'annotations',
-      getTableList: async (props) => {
+      getTableList: async (props: TableListTabParentProps) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
 
         const eventAnnotationService = await pluginsStart.eventAnnotation.getService();
@@ -92,7 +95,9 @@ export class EventAnnotationListingPlugin
         const { getTableList } = await import('./get_table_list');
         return getTableList(props, services);
       },
-    });
+    };
+    dependencies.visualizations.listingViewRegistry.add(annotationGroupsTabConfig);
+    dependencies.dashboard.listingViewRegistry.add(annotationGroupsTabConfig);
   }
 
   public start(core: CoreStart, plugins: object): void {

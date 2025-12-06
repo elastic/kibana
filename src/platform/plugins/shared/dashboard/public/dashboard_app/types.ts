@@ -8,6 +8,7 @@
  */
 
 import type { AppMountParameters, ScopedHistory } from '@kbn/core-application-browser';
+import type { DashboardListingViewRegistry } from '../plugin';
 
 export interface DashboardEmbedSettings {
   forceHideFilterBar?: boolean;
@@ -21,6 +22,7 @@ export interface DashboardMountContextProps {
   scopedHistory: () => ScopedHistory;
   onAppLeave: AppMountParameters['onAppLeave'];
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  listingViewRegistry: DashboardListingViewRegistry;
 }
 
 export type DashboardRedirect = (props: RedirectToProps) => void;

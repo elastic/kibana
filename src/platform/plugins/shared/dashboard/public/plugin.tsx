@@ -64,6 +64,7 @@ import type {
 import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import type { EventAnnotationService } from '@kbn/event-annotation-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import type { TableListTab } from '@kbn/content-management-tabbed-table-list-view';
 
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import type { DashboardMountContextProps } from './dashboard_app/types';
@@ -124,8 +125,11 @@ export interface DashboardStartDependencies {
   cps?: CPSPluginStart;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface DashboardSetup {}
+export type DashboardListingViewRegistry = Pick<Set<TableListTab>, 'add'>;
+
+export interface DashboardSetup {
+  listingViewRegistry: DashboardListingViewRegistry;
+}
 
 export interface DashboardStart {
   findDashboardsService: () => Promise<FindDashboardsService>;
@@ -146,11 +150,12 @@ export class DashboardPlugin
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
+  private listingViewRegistry: DashboardListingViewRegistry = new Set();
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
     { share, home, data, urlForwarding }: DashboardSetupDependencies
-  ) {
+  ): DashboardSetup {
     core.analytics.registerEventType({
       eventType: 'dashboard_loaded_with_data',
       schema: {},
@@ -249,6 +254,7 @@ export class DashboardPlugin
           scopedHistory: () => this.currentHistory!,
           onAppLeave: params.onAppLeave,
           setHeaderActionMenu: params.setHeaderActionMenu,
+          listingViewRegistry: this.listingViewRegistry,
         };
 
         return mountApp({
@@ -287,7 +293,9 @@ export class DashboardPlugin
       });
     }
 
-    return {};
+    return {
+      listingViewRegistry: this.listingViewRegistry,
+    };
   }
 
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {

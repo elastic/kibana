@@ -25,3 +25,4 @@ export {
   annotationsIconSet,
   getAnnotationAccessor,
 } from '@kbn/event-annotation-components';
+export { GroupEditorFlyout } from './components/group_editor_flyout';

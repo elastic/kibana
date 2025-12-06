@@ -26,7 +26,6 @@ import type { EventAnnotationGroupContent } from '@kbn/event-annotation-common';
 import { asyncMap } from '@kbn/std';
 import { DASHBOARD_APP_ID } from '../../../common/page_bundle_constants';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import { getTabsConfiguration } from '../utils/get_tabs_configuration';
 import {
   SAVED_OBJECT_DELETE_TIME,
   SAVED_OBJECT_LOADED_TIME,
@@ -86,7 +85,7 @@ export const useDashboardListingTable = ({
   urlStateEnabled,
   useSessionStorageIntegration,
   showCreateDashboardButton = true,
-  tabsEnabled = true,
+  contentTypeFilter,
 }: {
   dashboardListingId?: string;
   disableCreateDashboardButton?: boolean;
@@ -97,31 +96,18 @@ export const useDashboardListingTable = ({
   urlStateEnabled?: boolean;
   useSessionStorageIntegration?: boolean;
   showCreateDashboardButton?: boolean;
-  tabsEnabled?: boolean;
+  contentTypeFilter?: 'dashboards' | 'visualizations' | 'annotation-groups';
 }): UseDashboardListingTableReturnType => {
   const { getEntityName, getTableListTitle, getEntityNamePlural } = dashboardListingTableStrings;
+
+  // Use appropriate entity names based on contentTypeFilter (each tab shows different content type)
+  const baseEntityName = getEntityName();
+  const baseEntityNamePlural = getEntityNamePlural();
+
   const title = getTableListTitle();
-  const entityName = getEntityName();
-  const entityNamePlural = getEntityNamePlural();
-
-  const { tabEntityNames } = useMemo(
-    () => getTabsConfiguration(entityName, entityNamePlural),
-    [entityName, entityNamePlural]
-  );
-
-  const filterItemByTab = useCallback((item: DashboardSavedObjectUserContent, tabId: string) => {
-    const itemType = item.type;
-    if (tabId === 'dashboards') {
-      return itemType === 'dashboard' || !itemType; // Default to dashboard if no type
-    } else if (tabId === 'visualizations') {
-      // Use negative filter: anything that's NOT a dashboard or annotation-group is a visualization
-      // This is more robust than enumerating all possible visualization types
-      return itemType !== 'dashboard' && itemType !== 'event-annotation-group';
-    } else if (tabId === 'annotation-groups') {
-      return itemType === 'event-annotation-group';
-    }
-    return true;
-  }, []);
+  const entityName = contentTypeFilter === 'visualizations' ? 'visualization' : baseEntityName;
+  const entityNamePlural =
+    contentTypeFilter === 'visualizations' ? 'visualizations' : baseEntityNamePlural;
 
   const [pageDataTestSubject, setPageDataTestSubject] = useState<string>();
   const [hasInitialFetchReturned, setHasInitialFetchReturned] = useState(false);
@@ -341,14 +327,19 @@ export const useDashboardListingTable = ({
             },
           });
 
-          const mappedHits = response.hits.map((hit: EventAnnotationGroupContent) => ({
-            ...hit,
-            type: 'event-annotation-group', // Explicitly set type for client-side filtering
-            attributes: {
-              ...hit.attributes,
-              timeRestore: false, // Annotation groups don't have timeRestore
-            },
-          }));
+          const mappedHits = response.hits.map((hit: EventAnnotationGroupContent) => {
+            return {
+              ...hit,
+              type: 'event-annotation-group', // Explicitly set type for client-side filtering
+              attributes: {
+                title: hit.attributes.title,
+                description: hit.attributes.description,
+                timeRestore: false, // Annotation groups don't have timeRestore
+                indexPatternId: hit.attributes.indexPatternId,
+                dataViewSpec: hit.attributes.dataViewSpec,
+              },
+            };
+          });
 
           return {
             total: response.total,
@@ -446,52 +437,58 @@ export const useDashboardListingTable = ({
   );
 
   const editItem = useCallback(
-    ({ id, type, editor }: { id: string | undefined; type?: string; editor?: any }) => {
-      // Handle different content types
+    async ({
+      id,
+      type,
+      editor,
+    }: {
+      id: string | undefined;
+      type?: string;
+      editor?: DashboardSavedObjectUserContent['editor'];
+    }) => {
       if (type === 'dashboard') {
         goToDashboard(id, 'edit');
         return;
       }
 
       if (type === 'event-annotation-group') {
+        // Annotation groups will be handled by the annotation groups tab component
+        // from the Event Annotation Listing plugin
         return;
       }
 
       // Handle visualizations with custom editor (e.g., Maps with editor.editApp)
       if (editor) {
-        // Check if editor has a custom onEdit handler
-        if (!('editApp' in editor || 'editUrl' in editor) && 'onEdit' in editor) {
-          editor.onEdit(id);
+        // Custom onEdit handler (e.g., some embeddables)
+        if ('onEdit' in editor && editor.onEdit) {
+          await editor.onEdit(id!);
           return;
         }
 
         const { editApp, editUrl } = editor;
-        // Maps and other apps with custom editApp
+
+        // Custom app navigation (e.g., Maps)
         if (editApp) {
           coreServices.application.navigateToApp(editApp, { path: editUrl });
           return;
         }
 
-        // Standard visualizations with editUrl - use stateTransfer
+        // Standard visualizations with editUrl
         if (editUrl) {
           const stateTransfer = embeddableService.getStateTransfer();
           stateTransfer.navigateToEditor('visualize', {
-            path: `#${editUrl}`, // editUrl already includes /edit/{id}
-            state: {
-              originatingApp: DASHBOARD_APP_ID,
-            },
+            path: `#${editUrl}`,
+            state: { originatingApp: DASHBOARD_APP_ID },
           });
           return;
         }
       }
 
-      // Fallback: All visualizations are edited through the visualize app
+      // Fallback: edit through visualize app
       const stateTransfer = embeddableService.getStateTransfer();
       stateTransfer.navigateToEditor('visualize', {
         path: `#/edit/${id}`,
-        state: {
-          originatingApp: DASHBOARD_APP_ID,
-        },
+        state: { originatingApp: DASHBOARD_APP_ID },
       });
     },
     [goToDashboard]
@@ -583,6 +580,23 @@ export const useDashboardListingTable = ({
     return undefined;
   }, []);
 
+  // Wrap findItems to inject contentTypeFilter
+  const wrappedFindItems = useCallback(
+    (
+      searchTerm: string,
+      options?: {
+        references?: Reference[];
+        referencesToExclude?: Reference[];
+        tabId?: 'dashboards' | 'visualizations' | 'annotation-groups';
+      }
+    ) => {
+      // Use contentTypeFilter as tabId when specified
+      const effectiveTabId = contentTypeFilter || 'dashboards';
+      return findItems(searchTerm, { ...options, tabId: effectiveTabId });
+    },
+    [findItems, contentTypeFilter]
+  );
+
   const tableListViewTableProps: DashboardListingViewTableProps = useMemo(() => {
     const { showWriteControls } = getDashboardCapabilities();
     return {
@@ -597,7 +611,7 @@ export const useDashboardListingTable = ({
       emptyPrompt,
       entityName,
       entityNamePlural,
-      findItems,
+      findItems: wrappedFindItems,
       getDetailViewLink,
       getOnClickTitle,
       rowItemActions,
@@ -611,24 +625,18 @@ export const useDashboardListingTable = ({
       title,
       urlStateEnabled,
       createdByEnabled: true,
-      tabsEnabled,
-      tabEntityNames,
-      filterItemByTab,
       recentlyAccessed: getDashboardRecentlyAccessedService(),
     };
   }, [
     contentEditorValidators,
-    tabsEnabled,
     createItem,
-    filterItemByTab,
-    tabEntityNames,
     dashboardListingId,
     deleteItems,
     editItem,
     emptyPrompt,
     entityName,
     entityNamePlural,
-    findItems,
+    wrappedFindItems,
     getDetailViewLink,
     getOnClickTitle,
     headingId,

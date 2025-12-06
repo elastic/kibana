@@ -10,6 +10,7 @@
 import type { PropsWithChildren } from 'react';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import type { ViewMode } from '@kbn/presentation-publishing';
+import type { DashboardListingViewRegistry } from '../plugin';
 
 export type DashboardListingProps = PropsWithChildren<{
   disableCreateDashboardButton?: boolean;
@@ -19,6 +20,7 @@ export type DashboardListingProps = PropsWithChildren<{
   getDashboardUrl: (dashboardId: string, usesTimeRestore: boolean) => string;
   urlStateEnabled?: boolean;
   showCreateDashboardButton?: boolean;
+  listingViewRegistry: DashboardListingViewRegistry;
 }>;
 
 export interface DashboardSavedObjectUserContent extends UserContentCommonSchema {
@@ -34,5 +36,7 @@ export interface DashboardSavedObjectUserContent extends UserContentCommonSchema
     timeRestore: boolean;
     visType?: string; // For visualizations only
     readOnly?: boolean; // For deprecated visualizations
+    indexPatternId?: string; // For annotation groups - references existing data view
+    dataViewSpec?: { id?: string; name?: string }; // For annotation groups - ad-hoc data view (optional)
   };
 }
