@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useCallback, useEffect, useReducer } from 'react';
+import React, { useState, useMemo, useEffect, useReducer } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -29,8 +29,6 @@ import { SelectTemplateStep, NameAndConfirmStep } from './steps';
 import { type StreamNameValidator } from '../../utils';
 import { useStreamValidation } from './hooks/use_stream_validation';
 import { formReducer, initialFormState } from './reducers/form_reducer';
-
-const VALIDATION_DEBOUNCE_MS = 300;
 
 enum ClassicStreamStep {
   SELECT_TEMPLATE = 'select_template',
@@ -87,45 +85,29 @@ export const CreateClassicStreamFlyout = ({
     ClassicStreamStep.SELECT_TEMPLATE
   );
 
-  const [formState, dispatchForm] = useReducer(formReducer, initialFormState);
-  const { selectedTemplate, selectedIndexPattern, streamName } = formState;
-
+  const [formState, dispatch] = useReducer(formReducer, initialFormState);
   const {
+    selectedTemplate,
+    selectedIndexPattern,
     validationError,
     conflictingIndexPattern,
     isValidating,
     isSubmitting,
-    handleStreamNameChange: handleValidationStreamNameChange,
-    handleCreate,
-    resetOnTemplateChange,
-    resetOnIndexPatternChange,
-  } = useStreamValidation({
-    streamName,
+  } = formState;
+
+  const { handleStreamNameChange, handleCreate, resetValidation } = useStreamValidation({
+    formState,
+    dispatch,
     onCreate,
     onValidate,
-    debounceMs: VALIDATION_DEBOUNCE_MS,
   });
 
-  const selectedTemplateData = templates.find((t) => t.name === formState.selectedTemplate);
+  const selectedTemplateData = templates.find((t) => t.name === selectedTemplate);
 
-  const handleStreamNameChange = useCallback(
-    (newStreamName: string) => {
-      dispatchForm({ type: 'SET_STREAM_NAME', payload: newStreamName });
-      handleValidationStreamNameChange(newStreamName);
-    },
-    [dispatchForm, handleValidationStreamNameChange]
-  );
-
-  // Reset form and validation when template changes
+  // Reset validation when template or index pattern changes
   useEffect(() => {
-    dispatchForm({ type: 'RESET_ON_TEMPLATE_CHANGE' });
-    resetOnTemplateChange();
-  }, [dispatchForm, resetOnTemplateChange, selectedTemplate]);
-
-  // Reset validation when index pattern changes
-  useEffect(() => {
-    resetOnIndexPatternChange();
-  }, [resetOnIndexPatternChange, selectedIndexPattern]);
+    resetValidation();
+  }, [resetValidation, selectedTemplate, selectedIndexPattern]);
 
   const isFirstStep = currentStep === ClassicStreamStep.SELECT_TEMPLATE;
   const hasNextStep = isFirstStep;
@@ -166,7 +148,7 @@ export const CreateClassicStreamFlyout = ({
             templates={templates}
             selectedTemplate={selectedTemplate}
             onTemplateSelect={(template) =>
-              dispatchForm({ type: 'SET_SELECTED_TEMPLATE', payload: template })
+              dispatch({ type: 'SET_SELECTED_TEMPLATE', payload: template })
             }
             onCreateTemplate={onCreateTemplate}
             hasErrorLoadingTemplates={hasErrorLoadingTemplates}
@@ -183,7 +165,7 @@ export const CreateClassicStreamFlyout = ({
             template={selectedTemplateData}
             selectedIndexPattern={selectedIndexPattern}
             onIndexPatternChange={(pattern) =>
-              dispatchForm({ type: 'SET_SELECTED_INDEX_PATTERN', payload: pattern })
+              dispatch({ type: 'SET_SELECTED_INDEX_PATTERN', payload: pattern })
             }
             onStreamNameChange={handleStreamNameChange}
             validationError={validationError}
