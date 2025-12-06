@@ -65,8 +65,11 @@ export function createGetAnomalyDetectionJobsTool({
   plugins,
   logger,
 }: {
-  core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>;
-  plugins: ObservabilityAgentPluginSetupDependencies;
+  core: CoreSetup<
+    ObservabilityAgentBuilderPluginStartDependencies,
+    ObservabilityAgentBuilderPluginStart
+  >;
+  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   logger: Logger;
 }): StaticToolRegistration<typeof getAnomalyDetectionJobsSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof getAnomalyDetectionJobsSchema> = {
@@ -102,6 +105,7 @@ export function createGetAnomalyDetectionJobsTool({
           rangeStart,
           rangeEnd,
         });
+
         if (!mlJobs.length) {
           return {
             results: [
