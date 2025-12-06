@@ -558,10 +558,28 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               'cloud.trace_id': 'cloud-trace-xyz',
             },
             {
+              level: 'info',
+              message: 'Cloud trace still running',
+              'service.name': 'cloud-service',
+              'cloud.trace_id': 'cloud-trace-xyz',
+            },
+            {
               level: 'error',
               message: 'Cloud operation failed',
               'service.name': 'cloud-service',
               'cloud.trace_id': 'cloud-trace-xyz',
+            },
+
+            // no correlation ID
+            {
+              level: 'info',
+              message: 'Starting',
+              'service.name': 'no-corr-id-service',
+            },
+            {
+              level: 'error',
+              message: 'Crashing',
+              'service.name': 'no-corr-id-service',
             },
           ],
         }));
@@ -569,27 +587,36 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       [
         {
-          field: 'session.id',
+          correlationField: 'session.id',
           service: 'session-service',
-          messages: ['Session started', 'Session error'],
+          expectedMessages: ['Session started', 'Session error'],
         },
         {
-          field: 'http.request.id',
+          correlationField: 'http.request.id',
           service: 'http-server',
-          messages: ['HTTP request received', 'HTTP processing error'],
+          expectedMessages: ['HTTP request received', 'HTTP processing error'],
         },
         {
-          field: 'event.id',
+          correlationField: 'event.id',
           service: 'event-processor',
-          messages: ['Event processing started', 'Event processing failed'],
+          expectedMessages: ['Event processing started', 'Event processing failed'],
         },
         {
-          field: 'cloud.trace_id',
+          correlationField: 'cloud.trace_id',
           service: 'cloud-service',
-          messages: ['Cloud trace started', 'Cloud operation failed'],
+          expectedMessages: [
+            'Cloud trace started',
+            'Cloud trace still running',
+            'Cloud operation failed',
+          ],
         },
-      ].forEach(({ field, service, messages }) => {
-        it(`groups logs by ${field}`, async () => {
+
+        {
+          service: 'no-corr-id-service',
+          expectedMessages: [],
+        },
+      ].forEach(({ correlationField, service, expectedMessages }) => {
+        it(`Correlate by ${correlationField ?? 'N/A'}`, async () => {
           const results = await agentBuilderApiClient.executeTool<GetCorrelatedErrorLogsToolResult>(
             {
               id: OBSERVABILITY_GET_CORRELATED_ERROR_LOGS_TOOL_ID,
@@ -602,9 +629,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           );
 
           const { correlatedLogs } = results[0].data;
-          expect(correlatedLogs.length).to.be(1);
-          expect(correlatedLogs[0].length).to.be(2);
-          expect(correlatedLogs[0].map((log) => log.message)).to.eql(messages);
+          expect(correlatedLogs.flatMap((log) => log.map(({ message }) => message))).to.eql(
+            expectedMessages
+          );
         });
       });
     });
