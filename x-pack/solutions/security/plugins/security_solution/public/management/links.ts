@@ -283,6 +283,10 @@ export const getManagementFilteredLinks = async (
 ): Promise<LinkItem> => {
   const fleetAuthz = plugins.fleet?.authz;
   const currentUser = await plugins.security.authc.getCurrentUser();
+
+  // Check if we're in serverless environment using cloud service
+  const isServerless: boolean = plugins.cloud?.isServerlessEnabled ?? false;
+
   const {
     canReadActionsLogManagement,
     canAccessHostIsolationExceptions,
@@ -315,6 +319,10 @@ export const getManagementFilteredLinks = async (
 
   if (!canReadPolicyManagement) {
     linksToExclude.push(SecurityPageName.policies);
+    linksToExclude.push(SecurityPageName.cloudDefendPolicies);
+  }
+
+  if (isServerless) {
     linksToExclude.push(SecurityPageName.cloudDefendPolicies);
   }
 
