@@ -10,8 +10,6 @@ import { type CoreSetup, type Plugin } from '@kbn/core/public';
 import { createAppService } from '@kbn/ai-assistant';
 import ReactDOM from 'react-dom';
 import React from 'react';
-import { AIChatExperience } from '@kbn/ai-assistant-common';
-import { AI_ASSISTANT_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type {
   SearchAssistantPluginSetup,
   SearchAssistantPluginStart,
@@ -63,33 +61,25 @@ export class SearchAssistantPlugin
       return {};
     }
 
-    // Only register nav control if using Classic chat experience
-    const chatExperience = coreStart.settings.client.get<AIChatExperience>(
-      AI_ASSISTANT_CHAT_EXPERIENCE_TYPE,
-      AIChatExperience.Classic
-    );
+    coreStart.chrome.navControls.registerRight({
+      mount: (element) => {
+        ReactDOM.render(
+          <NavControlInitiator
+            appService={appService}
+            coreStart={coreStart}
+            pluginsStart={pluginsStart}
+          />,
+          element,
+          () => {}
+        );
 
-    if (chatExperience !== AIChatExperience.Agents) {
-      coreStart.chrome.navControls.registerRight({
-        mount: (element) => {
-          ReactDOM.render(
-            <NavControlInitiator
-              appService={appService}
-              coreStart={coreStart}
-              pluginsStart={pluginsStart}
-            />,
-            element,
-            () => {}
-          );
-
-          return () => {
-            ReactDOM.unmountComponentAtNode(element);
-          };
-        },
-        // right before the user profile
-        order: 1001,
-      });
-    }
+        return () => {
+          ReactDOM.unmountComponentAtNode(element);
+        };
+      },
+      // right before the user profile
+      order: 1001,
+    });
 
     return {};
   }
