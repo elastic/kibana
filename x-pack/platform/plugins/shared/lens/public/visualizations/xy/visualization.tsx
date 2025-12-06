@@ -415,6 +415,8 @@ export const getXyVisualization = ({
       return { groups: [] };
     }
 
+    const isTextBasedLayer = frame.datasourceLayers[layerId]?.isTextBasedLanguage();
+
     if (isAnnotationsLayer(layer)) {
       return getAnnotationsConfiguration({ state, frame, layer });
     }
@@ -526,7 +528,8 @@ export const getXyVisualization = ({
               }))
             : [],
           filterOperations: isBucketed,
-          supportsMoreColumns: true, // !dataLayer.splitAccessor,
+          // multiple breakdown are supported only in text based layers
+          supportsMoreColumns: isTextBasedLayer ? true : !dataLayer.splitAccessors,
           dataTestSubj: 'lnsXY_splitDimensionPanel',
           requiredMinDimensionCount:
             dataLayer.seriesType.includes('percentage') && hasOnlyOneAccessor ? 1 : 0,
