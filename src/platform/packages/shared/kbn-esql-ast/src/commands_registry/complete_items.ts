@@ -206,7 +206,7 @@ export const semiColonCompleteItem = buildCharCompleteItem(
 
 export const listCompleteItem: ISuggestionItem = withAutoSuggest({
   label: '( ... )',
-  text: '( $0 )',
+  text: '($0)',
   asSnippet: true,
   kind: 'Operator',
   detail: i18n.translate('kbn-esql-ast.esql.autocomplete.listDoc', {
@@ -214,6 +214,72 @@ export const listCompleteItem: ISuggestionItem = withAutoSuggest({
   }),
   sortText: 'A',
 });
+
+export const likePatternItems: ISuggestionItem[] = [
+  {
+    label: '%',
+    text: '"${0:%}"',
+    asSnippet: true,
+    kind: 'Value',
+    detail: i18n.translate('kbn-esql-ast.esql.autocomplete.likePercentDoc', {
+      defaultMessage: 'Matches any sequence of zero or more characters',
+    }),
+    sortText: '1',
+  },
+  {
+    label: '_',
+    text: '"${0:_}"',
+    asSnippet: true,
+    kind: 'Value',
+    detail: i18n.translate('kbn-esql-ast.esql.autocomplete.likeUnderscoreDoc', {
+      defaultMessage: 'Matches any single character',
+    }),
+    sortText: '1',
+  },
+];
+
+export const rlikePatternItems: ISuggestionItem[] = [
+  {
+    label: '.*',
+    text: '"${0:.*}"',
+    asSnippet: true,
+    kind: 'Value',
+    detail: i18n.translate('kbn-esql-ast.esql.autocomplete.rlikeAnyStringDoc', {
+      defaultMessage: 'Matches any sequence of zero or more characters',
+    }),
+    sortText: '1',
+  },
+  {
+    label: '.',
+    text: '"${0:.}"',
+    asSnippet: true,
+    kind: 'Value',
+    detail: i18n.translate('kbn-esql-ast.esql.autocomplete.rlikeAnySingleCharDoc', {
+      defaultMessage: 'Matches any single character',
+    }),
+    sortText: '1',
+  },
+  {
+    label: '^',
+    text: '"${0:^}"',
+    asSnippet: true,
+    kind: 'Value',
+    detail: i18n.translate('kbn-esql-ast.esql.autocomplete.rlikeStartAnchorDoc', {
+      defaultMessage: 'Match to the start of the string',
+    }),
+    sortText: '1',
+  },
+  {
+    label: '$',
+    text: '"${0:$}"',
+    asSnippet: true,
+    kind: 'Value',
+    detail: i18n.translate('kbn-esql-ast.esql.autocomplete.rlikeEndAnchorDoc', {
+      defaultMessage: 'Match to the end of the string',
+    }),
+    sortText: '1',
+  },
+];
 
 export const getCommandAutocompleteDefinitions = (commands: string[]): ISuggestionItem[] => {
   const suggestions: ISuggestionItem[] = [];

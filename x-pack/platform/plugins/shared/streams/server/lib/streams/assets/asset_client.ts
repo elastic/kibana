@@ -16,7 +16,13 @@ import type {
   AssetType,
   QueryLink,
 } from '../../../../common/assets';
-import { QUERY_KQL_BODY, QUERY_FEATURE_FILTER, QUERY_FEATURE_NAME, QUERY_TITLE } from './fields';
+import {
+  QUERY_KQL_BODY,
+  QUERY_FEATURE_FILTER,
+  QUERY_FEATURE_NAME,
+  QUERY_TITLE,
+  QUERY_SEVERITY_SCORE,
+} from './fields';
 import { ASSET_ID, ASSET_TYPE, ASSET_UUID, STREAM_NAME } from './fields';
 import type { AssetStorageSettings } from './storage_settings';
 import { AssetNotFoundError } from '../errors/asset_not_found_error';
@@ -75,6 +81,7 @@ function toAssetLink<TAssetLink extends AssetLinkRequest>(
 type StoredQueryLink = Omit<QueryLink, 'query'> & {
   [QUERY_TITLE]: string;
   [QUERY_KQL_BODY]: string;
+  [QUERY_SEVERITY_SCORE]?: number;
 };
 
 export type StoredAssetLink = StoredQueryLink & {
@@ -107,6 +114,7 @@ function fromStorage(link: StoredAssetLink): AssetLink {
             filter: JSON.parse(storedQueryLink[QUERY_FEATURE_FILTER]),
           }
         : undefined,
+      severity_score: storedQueryLink[QUERY_SEVERITY_SCORE],
     },
   } satisfies QueryLink;
 }
@@ -121,6 +129,7 @@ function toStorage(name: string, request: AssetLinkRequest): StoredAssetLink {
     [QUERY_KQL_BODY]: query.kql.query,
     [QUERY_FEATURE_NAME]: query.feature ? query.feature.name : '',
     [QUERY_FEATURE_FILTER]: query.feature ? JSON.stringify(query.feature.filter) : '',
+    [QUERY_SEVERITY_SCORE]: query.severity_score,
   } as unknown as StoredAssetLink;
 }
 

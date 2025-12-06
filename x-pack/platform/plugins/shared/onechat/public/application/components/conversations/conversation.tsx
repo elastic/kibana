@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, useEuiScrollBar } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiOverflowScroll, useEuiScrollBar } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect, useRef } from 'react';
 import { useHasActiveConversation } from '../../hooks/use_conversation';
@@ -18,10 +18,15 @@ import { useSendMessage } from '../../context/send_message/send_message_context'
 import { useConversationScrollActions } from '../../hooks/use_conversation_scroll_actions';
 import { useConversationStatus } from '../../hooks/use_conversation';
 import { useSendPredefinedInitialMessage } from '../../hooks/use_initial_message';
-import { conversationElementWidthStyles, fullWidthAndHeightStyles } from './conversation.styles';
+import {
+  conversationElementPaddingStyles,
+  conversationElementWidthStyles,
+  fullWidthAndHeightStyles,
+} from './conversation.styles';
 import { ScrollButton } from './scroll_button';
 import { useAppLeave } from '../../context/app_leave_context';
 import { useNavigationAbort } from '../../hooks/use_navigation_abort';
+import { useConversationContext } from '../../context/conversation/conversation_context';
 
 export const Conversation: React.FC<{}> = () => {
   const conversationId = useConversationId();
@@ -30,6 +35,7 @@ export const Conversation: React.FC<{}> = () => {
   const { isFetched } = useConversationStatus();
   const shouldStickToBottom = useShouldStickToBottom();
   const onAppLeave = useAppLeave();
+  const { isEmbeddedContext } = useConversationContext();
 
   useSendPredefinedInitialMessage();
 
@@ -74,7 +80,7 @@ export const Conversation: React.FC<{}> = () => {
 
   const scrollableStyles = css`
     ${useEuiScrollBar()}
-    overflow-y: auto;
+    ${useEuiOverflowScroll('y', isEmbeddedContext ? false : true)}
   `;
 
   if (!hasActiveConversation) {
@@ -90,13 +96,16 @@ export const Conversation: React.FC<{}> = () => {
           ref={scrollContainerRef}
           css={scrollableStyles}
         >
-          <EuiFlexItem css={conversationElementWidthStyles}>
+          <EuiFlexItem css={[conversationElementWidthStyles, conversationElementPaddingStyles]}>
             <ConversationRounds scrollContainerHeight={scrollContainerHeight} />
           </EuiFlexItem>
         </EuiFlexGroup>
         {showScrollButton && <ScrollButton onClick={scrollToMostRecentRoundBottom} />}
       </EuiFlexItem>
-      <EuiFlexItem css={conversationElementWidthStyles} grow={false}>
+      <EuiFlexItem
+        css={[conversationElementWidthStyles, conversationElementPaddingStyles]}
+        grow={false}
+      >
         <ConversationInput onSubmit={scrollToMostRecentRoundTop} />
       </EuiFlexItem>
     </EuiFlexGroup>

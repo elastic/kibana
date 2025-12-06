@@ -24,3 +24,22 @@ export const getCreationErrorMessage = (creationError: IHttpFetchError) => {
     message: { error: creationError.message },
   };
 };
+
+export const EVENT_FILTERS_PROCESS_DESCENDANT_DECORATOR_LABELS = {
+  title: i18n.translate('xpack.securitySolution.eventFilter.processDescendantsIndicator.title', {
+    defaultMessage: 'Filtering descendants of process',
+  }),
+  tooltipText: i18n.translate(
+    'xpack.securitySolution.eventFilter.processDescendantsIndicator.tooltipText',
+    {
+      defaultMessage:
+        'Filtering the descendants of a process means that events from the matched process are ingested, but events from its descendant processes are omitted.',
+    }
+  ),
+  versionInfo: i18n.translate(
+    'xpack.securitySolution.eventFilter.processDescendantsIndicator.versionInfo',
+    {
+      defaultMessage: 'Process descendant filtering works only with Agents v8.15+.',
+    }
+  ),
+};
