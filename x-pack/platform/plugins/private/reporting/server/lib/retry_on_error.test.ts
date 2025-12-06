@@ -123,7 +123,7 @@ describe('retryOnError', () => {
     const retryPromise = retryOnError({ operation: operationMock, retries: 3, report, logger });
     await Promise.resolve();
 
-    jest.runAllTimersAsync();
+    jest.runAllTimersAsync().catch(() => {});
     expect(await retryPromise).toEqual('success');
     // initial attempt + 3 retries
     expect(setTimeout).toHaveBeenCalledTimes(3);
@@ -172,7 +172,7 @@ describe('retryOnError', () => {
     const retryPromise = retryOnError({ operation: operationMock, retries: 3, report, logger });
     await Promise.resolve();
 
-    jest.runAllTimersAsync();
+    jest.runAllTimersAsync().catch(() => {});
     await expect(retryPromise).rejects.toThrowErrorMatchingInlineSnapshot(`"fail"`);
     expect(logger.warn).toHaveBeenCalledTimes(3);
 
