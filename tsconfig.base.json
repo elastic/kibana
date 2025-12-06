@@ -254,6 +254,8 @@
       "@kbn/console-plugin/*": ["src/platform/plugins/shared/console/*"],
       "@kbn/content-connectors-plugin": ["x-pack/platform/plugins/shared/content_connectors"],
       "@kbn/content-connectors-plugin/*": ["x-pack/platform/plugins/shared/content_connectors/*"],
+      "@kbn/content-list-docs": ["src/platform/packages/shared/content-management/content_list/kbn-content-list-docs"],
+      "@kbn/content-list-docs/*": ["src/platform/packages/shared/content-management/content_list/kbn-content-list-docs/*"],
       "@kbn/content-list-grid": ["src/platform/packages/shared/content-management/content_list/kbn-content-list-grid"],
       "@kbn/content-list-grid/*": ["src/platform/packages/shared/content-management/content_list/kbn-content-list-grid/*"],
       "@kbn/content-list-mock-data": ["src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data"],
