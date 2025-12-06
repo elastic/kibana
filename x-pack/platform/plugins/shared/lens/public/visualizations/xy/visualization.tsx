@@ -598,6 +598,46 @@ export const getXyVisualization = ({
     return onDropForVisualization(props, this);
   },
 
+  reorderDimension(props) {
+    const { prevState, layerId, columnId, groupId, targetColumnId } = props;
+
+    const foundLayer: XYLayerConfig | undefined = prevState.layers.find(
+      (l) => l.layerId === layerId
+    );
+    if (!foundLayer) {
+      return prevState;
+    }
+
+    if (!isDataLayer(foundLayer)) {
+      return prevState;
+    }
+
+    const newLayer: XYDataLayerConfig = Object.assign({}, foundLayer);
+    if (groupId === 'x') {
+      newLayer.xAccessor = columnId;
+    }
+    if (groupId === 'y') {
+      newLayer.accessors = [...newLayer.accessors.filter((a) => a !== columnId), columnId];
+    }
+    if (groupId === 'breakdown') {
+      if (newLayer.splitAccessors) {
+        const columnIdIndex = newLayer.splitAccessors.indexOf(columnId);
+        const targetColumnIdIndex = newLayer.splitAccessors.indexOf(targetColumnId);
+
+        if (columnIdIndex !== -1 && targetColumnIdIndex !== -1) {
+          const newSplitAccessors = [...newLayer.splitAccessors];
+          newSplitAccessors[columnIdIndex] = targetColumnId;
+          newSplitAccessors[targetColumnIdIndex] = columnId;
+          newLayer.splitAccessors = newSplitAccessors;
+        }
+      }
+    }
+    return {
+      ...prevState,
+      layers: prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l)),
+    };
+  },
+
   setDimension(props) {
     const { prevState, layerId, columnId, groupId } = props;
 
