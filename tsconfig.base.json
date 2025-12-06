@@ -264,6 +264,8 @@
       "@kbn/content-list-provider-server/*": ["src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-server/*"],
       "@kbn/content-list-table": ["src/platform/packages/shared/content-management/content_list/kbn-content-list-table"],
       "@kbn/content-list-table/*": ["src/platform/packages/shared/content-management/content_list/kbn-content-list-table/*"],
+      "@kbn/content-list-toolbar": ["src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar"],
+      "@kbn/content-list-toolbar/*": ["src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/*"],
       "@kbn/content-management-access-control-public": ["src/platform/packages/shared/content-management/access_control/access_control_public"],
       "@kbn/content-management-access-control-public/*": ["src/platform/packages/shared/content-management/access_control/access_control_public/*"],
       "@kbn/content-management-access-control-server": ["src/platform/packages/shared/content-management/access_control/access_control_server"],
