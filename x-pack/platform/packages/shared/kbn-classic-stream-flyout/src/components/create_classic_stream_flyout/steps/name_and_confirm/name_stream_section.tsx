@@ -55,8 +55,9 @@ const getValidationErrorMessage = (
 interface NameStreamSectionProps {
   indexPatterns: string[];
   selectedIndexPattern: string;
+  streamNameParts: string[];
   onIndexPatternChange: (pattern: string) => void;
-  onStreamNameChange: (streamName: string) => void;
+  onStreamNamePartsChange: (parts: string[]) => void;
   validationError: ValidationErrorType;
   conflictingIndexPattern?: string;
 }
@@ -64,8 +65,9 @@ interface NameStreamSectionProps {
 export const NameStreamSection = ({
   indexPatterns,
   selectedIndexPattern,
+  streamNameParts,
   onIndexPatternChange,
-  onStreamNameChange,
+  onStreamNamePartsChange,
   validationError,
   conflictingIndexPattern,
 }: NameStreamSectionProps) => {
@@ -132,9 +134,9 @@ export const NameStreamSection = ({
         }
       >
         <StreamNameInput
-          key={currentPattern}
           indexPattern={currentPattern}
-          onChange={onStreamNameChange}
+          parts={streamNameParts}
+          onPartsChange={onStreamNamePartsChange}
           validationError={validationError}
           data-test-subj="streamNameInput"
         />

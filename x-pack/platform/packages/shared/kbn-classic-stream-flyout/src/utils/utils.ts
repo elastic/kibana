@@ -26,6 +26,27 @@ export const formatDataRetention = (template: TemplateDeserialized): string | un
 };
 
 /**
+ * Builds a stream name by replacing wildcards in a pattern with provided parts.
+ * If a part is empty, keeps the wildcard (*) for validation detection.
+ */
+export const buildStreamName = (pattern: string, parts: string[]): string => {
+  let partIndex = 0;
+  return pattern.replace(/\*/g, () => {
+    // Keep * if the part is empty, so validation can detect unfilled wildcards
+    const part = parts[partIndex] || '*';
+    partIndex++;
+    return part;
+  });
+};
+
+/**
+ * Counts the number of wildcards (*) in a pattern.
+ */
+export const countWildcards = (pattern: string): number => {
+  return (pattern.match(/\*/g) || []).length;
+};
+
+/**
  * Checks if a stream name has unfilled wildcards (contains *)
  */
 export const hasEmptyWildcards = (streamName: string): boolean => {

@@ -10,7 +10,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { EuiFormRow, EuiPanel, EuiSpacer, EuiText, EuiCode } from '@elastic/eui';
 
-import type { ValidationErrorType } from '../../utils';
+import { buildStreamName, countWildcards, type ValidationErrorType } from '../../utils';
 import { StreamNameInput } from './stream_name_input';
 
 const meta: Meta<typeof StreamNameInput> = {
@@ -38,7 +38,11 @@ const StreamNameInputWithPreview = ({
   indexPattern: string;
   validationError?: ValidationErrorType;
 }) => {
-  const [streamName, setStreamName] = useState('');
+  const wildcardCount = countWildcards(indexPattern);
+  const [parts, setParts] = useState<string[]>(() => Array(wildcardCount).fill(''));
+
+  // Derive stream name from parts
+  const streamName = buildStreamName(indexPattern, parts);
 
   return (
     <>
@@ -50,9 +54,10 @@ const StreamNameInputWithPreview = ({
       >
         <StreamNameInput
           indexPattern={indexPattern}
-          onChange={(name) => {
-            setStreamName(name);
-            action('onChange')(name);
+          parts={parts}
+          onPartsChange={(newParts) => {
+            setParts(newParts);
+            action('onPartsChange')(newParts);
           }}
           validationError={validationError}
         />
@@ -84,6 +89,7 @@ export const Default: Story = {
   },
   render: (args) => (
     <StreamNameInputWithPreview
+      key={args.indexPattern}
       indexPattern={args.indexPattern ?? '*-logs-*-*'}
       validationError={args.validationError}
     />

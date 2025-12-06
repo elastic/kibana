@@ -34,7 +34,7 @@ export const useStreamValidation = ({
   onValidate,
   debounceMs = DEFAULT_VALIDATION_DEBOUNCE_MS,
 }: UseStreamValidationParams): UseStreamValidationReturn => {
-  const { streamName, isSubmitting, hasAttemptedSubmit, validationError } = formState;
+  const { streamName, validationMode } = formState;
 
   const lastStreamNameRef = useRef<string>(streamName); // Initialize from state
   const onValidateRef = useRef(onValidate);
@@ -81,10 +81,10 @@ export const useStreamValidation = ({
         return result.errorType === null;
       } catch (error) {
         if (!isAbortedFn(abortController)) {
-          // eslint-disable-next-line no-console
-          console.error('Validation error:', error);
+          // Real error (not abort) - clear validation state
+          dispatch({ type: 'ABORT_VALIDATION' });
         }
-        dispatch({ type: 'ABORT_VALIDATION' });
+        // If aborted, don't dispatch anything - let the new validation manage state
         return false;
       }
     },
@@ -99,18 +99,17 @@ export const useStreamValidation = ({
         return;
       }
 
+      // Debounced validation flow - triggered in LIVE mode
       const controller = getDebouncedAbortController();
-      const isValid = await runValidation(name, controller, isDebouncedAborted);
+      await runValidation(name, controller, isDebouncedAborted);
 
-      // Reset validation state if user fixed the error
-      if (isValid && hasAttemptedSubmit) {
-        dispatch({ type: 'RESET_VALIDATION' });
-      }
+      // If validation succeeds, we'll transition back to IDLE via COMPLETE_VALIDATION
+      // (no special handling needed here)
     },
     debounceMs
   );
 
-  // Input change handler - implements two-mode (live vs idle) behavior
+  // Input change handler - state machine logic
   const handleStreamNameChange = useCallback(
     (newStreamName: string) => {
       // Skip if name hasn't changed
@@ -125,29 +124,35 @@ export const useStreamValidation = ({
       // Update form state
       dispatch({ type: 'SET_STREAM_NAME', payload: newStreamName });
 
-      // If user types during Create validation, abort and return to Idle Mode
-      if (isSubmitting && hasNameChanged) {
-        abortCreate();
-        dispatch({ type: 'ABORT_VALIDATION' });
-        // Don't start new validation - return to Idle Mode unless there's an error (handled below)
+      // State machine: determine if we should validate based on current mode
+      if (!hasNameChanged) {
+        return;
       }
 
-      // Live Validation Mode: auto-validate when there's an active error to help user recover
-      const isInLiveValidationMode = hasAttemptedSubmit && validationError !== null;
-      if (isInLiveValidationMode && hasNameChanged) {
-        // Don't clear error - keep it visible while validating, it will be replaced when validation completes
-        abortDebounced();
-        cancelDebounced();
-        // Set isValidating immediately to show loading state
-        dispatch({ type: 'START_DEBOUNCED_VALIDATION' });
-        triggerDebouncedValidation(newStreamName);
+      switch (validationMode) {
+        case 'idle':
+          // IDLE mode: don't validate on typing
+          break;
+
+        case 'submitting':
+          // SUBMITTING mode: user typed during Create validation
+          // Abort Create and return to IDLE (stop loader, no validation)
+          abortCreate();
+          dispatch({ type: 'ABORT_VALIDATION' });
+          break;
+
+        case 'live':
+          // LIVE mode: validate on every keystroke (with debounce)
+          abortDebounced();
+          cancelDebounced();
+          dispatch({ type: 'START_DEBOUNCED_VALIDATION' });
+          triggerDebouncedValidation(newStreamName);
+          break;
       }
     },
     [
       dispatch,
-      isSubmitting,
-      hasAttemptedSubmit,
-      validationError,
+      validationMode,
       abortCreate,
       abortDebounced,
       cancelDebounced,

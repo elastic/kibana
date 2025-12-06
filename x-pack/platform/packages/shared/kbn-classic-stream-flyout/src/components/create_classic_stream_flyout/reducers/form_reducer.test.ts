@@ -21,7 +21,7 @@ describe('formReducer', () => {
         streamName: 'test-stream',
         selectedIndexPattern: 'logs-*',
         validationError: 'duplicate',
-        hasAttemptedSubmit: true,
+        validationMode: 'live',
       };
 
       const state = formReducer(withData, {
@@ -47,14 +47,26 @@ describe('formReducer', () => {
     });
   });
 
+  describe('SET_STREAM_NAME_PARTS', () => {
+    it('should set stream name parts', () => {
+      const state = formReducer(initialFormState, {
+        type: 'SET_STREAM_NAME_PARTS',
+        payload: ['foo', 'bar'],
+      });
+
+      expect(state.streamNameParts).toEqual(['foo', 'bar']);
+    });
+  });
+
   describe('SET_SELECTED_INDEX_PATTERN', () => {
-    it('should set index pattern and reset validation state', () => {
+    it('should set index pattern and reset validation state and parts', () => {
       const withValidationError: FormState = {
         ...initialFormState,
         selectedTemplate: 'template-1',
         streamName: 'test-stream',
+        streamNameParts: ['old', 'parts'],
         validationError: 'duplicate',
-        hasAttemptedSubmit: true,
+        validationMode: 'live',
         isValidating: true,
       };
 
@@ -68,6 +80,7 @@ describe('formReducer', () => {
         selectedTemplate: 'template-1',
         streamName: 'test-stream',
         selectedIndexPattern: 'logs-*',
+        streamNameParts: [], // Should be reset
       });
     });
   });
@@ -78,28 +91,27 @@ describe('formReducer', () => {
         type: 'START_CREATE_VALIDATION',
       });
 
-      expect(state.isSubmitting).toBe(true);
+      expect(state.validationMode).toBe('submitting');
       expect(state.isValidating).toBe(true);
-      expect(state.hasAttemptedSubmit).toBe(true);
     });
   });
 
   describe('START_DEBOUNCED_VALIDATION', () => {
-    it('should start debounced validation', () => {
+    it('should enter LIVE mode when starting debounced validation', () => {
       const state = formReducer(initialFormState, {
         type: 'START_DEBOUNCED_VALIDATION',
       });
 
+      expect(state.validationMode).toBe('live');
       expect(state.isValidating).toBe(true);
-      expect(state.isSubmitting).toBe(false);
     });
   });
 
   describe('COMPLETE_VALIDATION', () => {
-    it('should complete validation with success', () => {
+    it('should complete validation with success and return to IDLE', () => {
       const validating: FormState = {
         ...initialFormState,
-        isSubmitting: true,
+        validationMode: 'submitting',
         isValidating: true,
       };
 
@@ -108,20 +120,19 @@ describe('formReducer', () => {
         payload: {
           errorType: null,
           conflictingIndexPattern: undefined,
-          isSubmitting: false,
         },
       });
 
       expect(state.validationError).toBe(null);
       expect(state.conflictingIndexPattern).toBeUndefined();
       expect(state.isValidating).toBe(false);
-      expect(state.isSubmitting).toBe(false);
+      expect(state.validationMode).toBe('idle');
     });
 
-    it('should complete validation with error', () => {
+    it('should complete validation with error and enter LIVE mode', () => {
       const validating: FormState = {
         ...initialFormState,
-        isSubmitting: true,
+        validationMode: 'submitting',
         isValidating: true,
       };
 
@@ -130,23 +141,22 @@ describe('formReducer', () => {
         payload: {
           errorType: 'duplicate',
           conflictingIndexPattern: 'logs-*',
-          isSubmitting: false,
         },
       });
 
       expect(state.validationError).toBe('duplicate');
       expect(state.conflictingIndexPattern).toBe('logs-*');
       expect(state.isValidating).toBe(false);
-      expect(state.isSubmitting).toBe(false);
+      expect(state.validationMode).toBe('live');
     });
   });
 
   describe('ABORT_VALIDATION', () => {
-    it('should abort validation', () => {
+    it('should abort validation and return to IDLE', () => {
       const validating: FormState = {
         ...initialFormState,
         isValidating: true,
-        isSubmitting: true,
+        validationMode: 'submitting',
       };
 
       const state = formReducer(validating, {
@@ -154,7 +164,7 @@ describe('formReducer', () => {
       });
 
       expect(state.isValidating).toBe(false);
-      expect(state.isSubmitting).toBe(false);
+      expect(state.validationMode).toBe('idle');
     });
   });
 
@@ -181,9 +191,9 @@ describe('formReducer', () => {
         selectedTemplate: 'template-1',
         streamName: 'test-stream',
         selectedIndexPattern: 'logs-*',
-        isSubmitting: true,
+        streamNameParts: [],
+        validationMode: 'live',
         isValidating: true,
-        hasAttemptedSubmit: true,
         validationError: 'duplicate',
         conflictingIndexPattern: 'logs-*',
       };
@@ -196,9 +206,9 @@ describe('formReducer', () => {
         selectedTemplate: 'template-1',
         streamName: 'test-stream',
         selectedIndexPattern: 'logs-*',
-        isSubmitting: false,
+        streamNameParts: [],
+        validationMode: 'idle',
         isValidating: false,
-        hasAttemptedSubmit: false,
         validationError: null,
         conflictingIndexPattern: undefined,
       });
@@ -211,9 +221,9 @@ describe('formReducer', () => {
         selectedTemplate: 'template-1',
         streamName: 'test-stream',
         selectedIndexPattern: 'logs-*',
-        isSubmitting: true,
+        streamNameParts: [],
+        validationMode: 'live',
         isValidating: true,
-        hasAttemptedSubmit: true,
         validationError: 'duplicate',
         conflictingIndexPattern: 'logs-*',
       };

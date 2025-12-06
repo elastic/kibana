@@ -341,18 +341,20 @@ export const WithValidation: Story = {
 };
 
 /**
- * Tests race condition scenarios with slow network (3000ms delay).
+ * Tests race condition scenarios with very slow network (5000ms delay).
  *
- * To test race condition:
- * 1. Select a template and go to name step
- * 2. Type "test" in the input
- * 3. Click Create button immediately
- * 4. Quickly type "valid" (before validation completes)
- * 5. Observe if validation state shows incorrect error for "test" after "valid" should be valid
+ * To test the debounce bug:
+ * 1. Select "multi-pattern-template" template and go to name step
+ * 2. Type "foo", "bar", "baz" in the inputs
+ * 3. Click Create button - validation starts (5s delay)
+ * 4. While validation is running, quickly backspace "baz" to "ba"
+ * 5. Observe: Create button loader stops (isSubmitting becomes false)
+ * 6. Quickly backspace again from "ba" to "b"
+ * 7. Bug: No validation is triggered, but async request eventually completes
  */
 export const WithSlowValidation: Story = {
   render: () => {
-    const validator = createMockValidator(EXISTING_STREAM_NAMES, HIGHER_PRIORITY_PATTERNS, 3000);
+    const validator = createMockValidator(EXISTING_STREAM_NAMES, HIGHER_PRIORITY_PATTERNS, 5000);
     return (
       <CreateClassicStreamFlyout
         onClose={action('onClose')}

@@ -26,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
 import { css } from '@emotion/react';
 import { SelectTemplateStep, NameAndConfirmStep } from './steps';
-import { type StreamNameValidator } from '../../utils';
+import { type StreamNameValidator, buildStreamName, countWildcards } from '../../utils';
 import { useStreamValidation } from './hooks/use_stream_validation';
 import { formReducer, initialFormState } from './reducers/form_reducer';
 
@@ -89,11 +89,15 @@ export const CreateClassicStreamFlyout = ({
   const {
     selectedTemplate,
     selectedIndexPattern,
+    streamNameParts,
     validationError,
     conflictingIndexPattern,
     isValidating,
-    isSubmitting,
+    validationMode,
   } = formState;
+
+  // Derive isSubmitting from validationMode for button state
+  const isSubmitting = validationMode === 'submitting';
 
   const { handleStreamNameChange, handleCreate, resetValidation } = useStreamValidation({
     formState,
@@ -105,19 +109,51 @@ export const CreateClassicStreamFlyout = ({
   const selectedTemplateData = templates.find((t) => t.name === selectedTemplate);
 
   const handleTemplateSelect = useCallback(
-    (template: string | null) => {
+    (templateName: string | null) => {
       resetValidation();
-      dispatch({ type: 'SET_SELECTED_TEMPLATE', payload: template });
+      dispatch({ type: 'SET_SELECTED_TEMPLATE', payload: templateName });
+
+      // Initialize index pattern and parts for the selected template
+      if (templateName) {
+        const template = templates.find((t) => t.name === templateName);
+        const firstPattern = template?.indexPatterns?.[0] || '';
+        if (firstPattern) {
+          dispatch({ type: 'SET_SELECTED_INDEX_PATTERN', payload: firstPattern });
+          const wildcardCount = countWildcards(firstPattern);
+          dispatch({ type: 'SET_STREAM_NAME_PARTS', payload: Array(wildcardCount).fill('') });
+          // Trigger validation with the new derived stream name
+          const newStreamName = buildStreamName(firstPattern, Array(wildcardCount).fill(''));
+          handleStreamNameChange(newStreamName);
+        }
+      }
     },
-    [resetValidation]
+    [resetValidation, templates, handleStreamNameChange]
   );
 
   const handleIndexPatternChange = useCallback(
     (pattern: string) => {
       resetValidation();
       dispatch({ type: 'SET_SELECTED_INDEX_PATTERN', payload: pattern });
+      // Reset parts to match new pattern wildcard count
+      const wildcardCount = countWildcards(pattern);
+      dispatch({ type: 'SET_STREAM_NAME_PARTS', payload: Array(wildcardCount).fill('') });
+      // Trigger validation with the new derived stream name
+      const newStreamName = buildStreamName(pattern, Array(wildcardCount).fill(''));
+      handleStreamNameChange(newStreamName);
     },
-    [resetValidation]
+    [resetValidation, handleStreamNameChange]
+  );
+
+  const handleStreamNamePartsChange = useCallback(
+    (parts: string[]) => {
+      dispatch({ type: 'SET_STREAM_NAME_PARTS', payload: parts });
+      // Trigger validation with the new derived stream name
+      if (selectedIndexPattern) {
+        const newStreamName = buildStreamName(selectedIndexPattern, parts);
+        handleStreamNameChange(newStreamName);
+      }
+    },
+    [selectedIndexPattern, handleStreamNameChange]
   );
 
   const isFirstStep = currentStep === ClassicStreamStep.SELECT_TEMPLATE;
@@ -173,8 +209,9 @@ export const CreateClassicStreamFlyout = ({
           <NameAndConfirmStep
             template={selectedTemplateData}
             selectedIndexPattern={selectedIndexPattern}
+            streamNameParts={streamNameParts}
             onIndexPatternChange={handleIndexPatternChange}
-            onStreamNameChange={handleStreamNameChange}
+            onStreamNamePartsChange={handleStreamNamePartsChange}
             validationError={validationError}
             conflictingIndexPattern={conflictingIndexPattern}
           />

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useCallback, useRef } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ValidationErrorType } from '../../utils';
@@ -98,25 +98,13 @@ const createInputGroups = (segments: PatternSegment[]): InputGroup[] => {
   return groups;
 };
 
-const countWildcards = (pattern: string): number => {
-  return (pattern.match(/\*/g) || []).length;
-};
-
-const buildStreamName = (pattern: string, parts: string[]): string => {
-  let partIndex = 0;
-  return pattern.replace(/\*/g, () => {
-    // Keep * if the part is empty, so validation can detect unfilled wildcards
-    const part = parts[partIndex] || '*';
-    partIndex++;
-    return part;
-  });
-};
-
 export interface StreamNameInputProps {
   /** The index pattern containing wildcards (e.g., "*-logs-*-*") */
   indexPattern: string;
-  /** Callback when the stream name changes */
-  onChange: (streamName: string) => void;
+  /** Current wildcard part values (controlled) */
+  parts: string[];
+  /** Callback when wildcard parts change */
+  onPartsChange: (parts: string[]) => void;
   /**
    * Validation error type. When 'empty', only empty inputs are highlighted.
    * For other error types, all inputs are highlighted.
@@ -128,7 +116,8 @@ export interface StreamNameInputProps {
 
 export const StreamNameInput = ({
   indexPattern,
-  onChange,
+  parts,
+  onPartsChange,
   validationError = null,
   'data-test-subj': dataTestSubj = 'streamNameInput',
 }: StreamNameInputProps) => {
@@ -136,34 +125,20 @@ export const StreamNameInput = ({
 
   const segments = useMemo(() => parseIndexPattern(indexPattern), [indexPattern]);
   const inputGroups = useMemo(() => createInputGroups(segments), [segments]);
-  const wildcardCount = useMemo(() => countWildcards(indexPattern), [indexPattern]);
-
-  // Parent is expected to pass key={indexPattern} to reset state on pattern change
-  const [parts, setParts] = useState<string[]>(() => Array(wildcardCount).fill(''));
-
-  // Call onChange once on mount to notify parent of initial stream name
-  const initializedRef = useRef(false);
-  if (!initializedRef.current) {
-    initializedRef.current = true;
-    onChange(buildStreamName(indexPattern, Array(wildcardCount).fill('')));
-  }
 
   const handleWildcardChange = useCallback(
     (wildcardIndex: number, newValue: string) => {
-      setParts((prevParts) => {
-        const newParts = [...prevParts];
-        while (newParts.length <= wildcardIndex) {
-          newParts.push('');
-        }
-        newParts[wildcardIndex] = newValue;
-        onChange(buildStreamName(indexPattern, newParts));
-        return newParts;
-      });
+      const newParts = [...parts];
+      while (newParts.length <= wildcardIndex) {
+        newParts.push('');
+      }
+      newParts[wildcardIndex] = newValue;
+      onPartsChange(newParts);
     },
-    [indexPattern, onChange]
+    [parts, onPartsChange]
   );
 
-  const hasMultipleWildcards = wildcardCount > 1;
+  const hasMultipleWildcards = inputGroups.length > 1;
 
   // Determine if a specific input should be marked as invalid
   const isInputInvalid = useCallback(

@@ -60,14 +60,13 @@ describe('useStreamValidation', () => {
 
       expect(result.current.formState.validationError).toBe(null);
       expect(result.current.formState.conflictingIndexPattern).toBeUndefined();
-      expect(result.current.formState.hasAttemptedSubmit).toBe(false);
+      expect(result.current.formState.validationMode).toBe('idle');
       expect(result.current.formState.isValidating).toBe(false);
-      expect(result.current.formState.isSubmitting).toBe(false);
     });
   });
 
   describe('WHEN handleStreamNameChange is called', () => {
-    it('SHOULD skip validation if hasAttemptedSubmit is false', async () => {
+    it('SHOULD skip validation in IDLE mode', async () => {
       const { result } = setupHook(mockOnValidate);
 
       act(() => {
@@ -82,27 +81,33 @@ describe('useStreamValidation', () => {
       expect(result.current.formState.isValidating).toBe(false);
     });
 
-    it('SHOULD NOT trigger debounced validation in Idle Mode (no error)', async () => {
+    it('SHOULD NOT trigger validation after Create completes (returns to IDLE)', async () => {
       const { result } = setupHook(mockOnValidate);
 
-      // First attempt submit
+      // Create completes successfully - returns to IDLE mode
       await act(async () => {
         const handleCreatePromise = result.current.handleCreate();
         await jest.runOnlyPendingTimersAsync();
         await handleCreatePromise;
       });
 
-      // Change name
+      // Should be in IDLE mode now
+      expect(result.current.formState.validationMode).toBe('idle');
+
+      // Change name after Create - should NOT trigger validation (IDLE mode)
       act(() => {
         result.current.handleStreamNameChange('new-stream');
       });
+
+      // Should not be validating
+      expect(result.current.formState.isValidating).toBe(false);
 
       await act(async () => {
         await jest.advanceTimersByTimeAsync(300);
       });
 
-      // Should NOT trigger validation (still in Idle Mode - no error)
-      expect(mockOnValidate).toHaveBeenCalledTimes(1); // Only the initial Create validation
+      // Should NOT trigger validation
+      expect(mockOnValidate).toHaveBeenCalledTimes(1); // Only Create validation
       expect(mockOnValidate).not.toHaveBeenCalledWith('new-stream', expect.any(AbortSignal));
     });
 
@@ -191,7 +196,7 @@ describe('useStreamValidation', () => {
       expect(mockOnValidate).not.toHaveBeenCalled();
     });
 
-    it('SHOULD abort Create validation and return to Idle Mode when name changes during Create', async () => {
+    it('SHOULD abort Create validation and return to IDLE when name changes during Create', async () => {
       const slowValidator: StreamNameValidator = jest.fn().mockImplementation(async (_, signal) => {
         await new Promise((resolve) => setTimeout(resolve, 1000));
         if (signal?.aborted) {
@@ -213,13 +218,17 @@ describe('useStreamValidation', () => {
         createPromise = result.current.handleCreate();
       });
 
+      // Verify we're in submitting mode
+      expect(result.current.formState.validationMode).toBe('submitting');
+      expect(result.current.formState.isValidating).toBe(true);
+
       // Change name to abort Create
       act(() => {
         result.current.handleStreamNameChange('new-stream');
       });
 
-      // After changing name: both isSubmitting and isValidating should be false (returned to Idle Mode)
-      expect(result.current.formState.isSubmitting).toBe(false);
+      // After changing name: should return to IDLE (no loader, no validation)
+      expect(result.current.formState.validationMode).toBe('idle');
       expect(result.current.formState.isValidating).toBe(false);
 
       // Advance timers to let the aborted Create validation complete
@@ -234,14 +243,18 @@ describe('useStreamValidation', () => {
       // After abort, onCreate should not have been called
       expect(mockOnCreate).not.toHaveBeenCalled();
 
-      // Advance debounce timers
+      // Advance debounce timers - no validation should trigger (we're in IDLE)
       await act(async () => {
         await jest.advanceTimersByTimeAsync(300);
       });
 
-      // No debounced validation should have been triggered (Idle Mode - no error)
-      expect(slowValidator).toHaveBeenCalledTimes(1); // Only the initial Create validation
-      expect(slowValidator).not.toHaveBeenCalledWith('new-stream', expect.any(AbortSignal));
+      // Only the initial Create validation should have been called
+      expect(slowValidator).toHaveBeenCalledTimes(1);
+      expect(slowValidator).toHaveBeenCalledWith('test-stream', expect.any(AbortSignal));
+
+      // Should still be in IDLE mode with no validation
+      expect(result.current.formState.validationMode).toBe('idle');
+      expect(result.current.formState.isValidating).toBe(false);
     });
   });
 
@@ -257,8 +270,7 @@ describe('useStreamValidation', () => {
 
       expect(mockOnValidate).toHaveBeenCalledWith('test-stream', expect.any(AbortSignal));
       expect(mockOnCreate).toHaveBeenCalledWith('test-stream');
-      expect(result.current.formState.hasAttemptedSubmit).toBe(true);
-      expect(result.current.formState.isSubmitting).toBe(false);
+      expect(result.current.formState.validationMode).toBe('idle'); // Success returns to IDLE
       expect(result.current.formState.isValidating).toBe(false);
     });
 
@@ -374,8 +386,6 @@ describe('useStreamValidation', () => {
         .fn()
         .mockRejectedValue(new Error('Network error'));
 
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-
       const { result } = setupHook(errorValidator);
 
       await act(async () => {
@@ -384,10 +394,9 @@ describe('useStreamValidation', () => {
         await handleCreatePromise;
       });
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith('Validation error:', expect.any(Error));
+      // Should abort validation and not call onCreate
+      expect(result.current.formState.isValidating).toBe(false);
       expect(mockOnCreate).not.toHaveBeenCalled();
-
-      consoleErrorSpy.mockRestore();
     });
 
     it('SHOULD abort validation when signal is aborted', async () => {
@@ -488,9 +497,9 @@ describe('useStreamValidation', () => {
         await handleCreatePromise;
       });
 
-      // Validation error should be set
+      // Validation error should be set and mode should be LIVE
       expect(result.current.formState.validationError).toBe('duplicate');
-      expect(result.current.formState.hasAttemptedSubmit).toBe(true);
+      expect(result.current.formState.validationMode).toBe('live');
 
       // Change name
       act(() => {

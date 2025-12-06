@@ -16,8 +16,9 @@ export type { ValidationErrorType };
 interface NameAndConfirmStepProps {
   template: TemplateDeserialized;
   selectedIndexPattern: string;
+  streamNameParts: string[];
   onIndexPatternChange: (pattern: string) => void;
-  onStreamNameChange: (streamName: string) => void;
+  onStreamNamePartsChange: (parts: string[]) => void;
   validationError: ValidationErrorType;
   conflictingIndexPattern?: string;
 }
@@ -25,8 +26,9 @@ interface NameAndConfirmStepProps {
 export const NameAndConfirmStep = ({
   template,
   selectedIndexPattern,
+  streamNameParts,
   onIndexPatternChange,
-  onStreamNameChange,
+  onStreamNamePartsChange,
   validationError = null,
   conflictingIndexPattern,
 }: NameAndConfirmStepProps) => {
@@ -37,8 +39,9 @@ export const NameAndConfirmStep = ({
       <NameStreamSection
         indexPatterns={indexPatterns}
         selectedIndexPattern={selectedIndexPattern}
+        streamNameParts={streamNameParts}
         onIndexPatternChange={onIndexPatternChange}
-        onStreamNameChange={onStreamNameChange}
+        onStreamNamePartsChange={onStreamNamePartsChange}
         validationError={validationError}
         conflictingIndexPattern={conflictingIndexPattern}
       />

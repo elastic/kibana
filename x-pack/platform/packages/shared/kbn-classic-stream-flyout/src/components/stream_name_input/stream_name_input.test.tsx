@@ -12,7 +12,8 @@ import { StreamNameInput } from './stream_name_input';
 describe('StreamNameInput', () => {
   const defaultProps = {
     indexPattern: 'logs-*',
-    onChange: jest.fn(),
+    parts: [''],
+    onPartsChange: jest.fn(),
   };
 
   beforeEach(() => {
@@ -28,7 +29,7 @@ describe('StreamNameInput', () => {
 
     it('displays static prefix as prepend text', () => {
       const { getByText } = render(
-        <StreamNameInput {...defaultProps} indexPattern="logs-apache-*" />
+        <StreamNameInput {...defaultProps} indexPattern="logs-apache-*" parts={['']} />
       );
 
       expect(getByText('logs-apache-')).toBeInTheDocument();
@@ -36,37 +37,49 @@ describe('StreamNameInput', () => {
 
     it('displays static suffix as append text', () => {
       const { getByText } = render(
-        <StreamNameInput {...defaultProps} indexPattern="*-logs-default" />
+        <StreamNameInput {...defaultProps} indexPattern="*-logs-default" parts={['']} />
       );
 
       expect(getByText('-logs-default')).toBeInTheDocument();
     });
 
-    it('calls onChange with stream name when input changes', () => {
-      const onChange = jest.fn();
+    it('calls onPartsChange when input changes', () => {
+      const onPartsChange = jest.fn();
       const { getByTestId } = render(
-        <StreamNameInput {...defaultProps} indexPattern="logs-*" onChange={onChange} />
+        <StreamNameInput
+          {...defaultProps}
+          indexPattern="logs-*"
+          parts={['']}
+          onPartsChange={onPartsChange}
+        />
       );
 
       const input = getByTestId('streamNameInput-wildcard-0');
       fireEvent.change(input, { target: { value: 'mystream' } });
 
-      expect(onChange).toHaveBeenCalledWith('logs-mystream');
+      expect(onPartsChange).toHaveBeenCalledWith(['mystream']);
     });
 
-    it('keeps wildcard (*) in stream name when input is empty', () => {
-      const onChange = jest.fn();
-      render(<StreamNameInput {...defaultProps} indexPattern="logs-*" onChange={onChange} />);
+    it('does not call initial onChange on mount', () => {
+      const onPartsChange = jest.fn();
+      render(
+        <StreamNameInput
+          {...defaultProps}
+          indexPattern="logs-*"
+          parts={['']}
+          onPartsChange={onPartsChange}
+        />
+      );
 
-      // Initial call with empty input should keep the wildcard
-      expect(onChange).toHaveBeenCalledWith('logs-*');
+      // Should not be called on mount - parent manages initial state
+      expect(onPartsChange).not.toHaveBeenCalled();
     });
   });
 
   describe('multiple wildcard patterns', () => {
     it('renders multiple inputs for patterns with multiple wildcards', () => {
       const { getByTestId } = render(
-        <StreamNameInput {...defaultProps} indexPattern="*-logs-*-*" />
+        <StreamNameInput {...defaultProps} indexPattern="*-logs-*-*" parts={['', '', '']} />
       );
 
       expect(getByTestId('streamNameInput-wildcard-0')).toBeInTheDocument();
@@ -76,7 +89,7 @@ describe('StreamNameInput', () => {
 
     it('renders static segments between wildcards as prepend text', () => {
       const { getByText } = render(
-        <StreamNameInput {...defaultProps} indexPattern="*-logs-*-data-*" />
+        <StreamNameInput {...defaultProps} indexPattern="*-logs-*-data-*" parts={['', '', '']} />
       );
 
       expect(getByText('-logs-')).toBeInTheDocument();
@@ -84,8 +97,14 @@ describe('StreamNameInput', () => {
     });
 
     it('allows editing each wildcard independently', () => {
+      const onPartsChange = jest.fn();
       const { getByTestId } = render(
-        <StreamNameInput {...defaultProps} indexPattern="*-logs-*-*" />
+        <StreamNameInput
+          {...defaultProps}
+          indexPattern="*-logs-*-*"
+          parts={['', '', '']}
+          onPartsChange={onPartsChange}
+        />
       );
 
       const input0 = getByTestId('streamNameInput-wildcard-0');
@@ -93,32 +112,42 @@ describe('StreamNameInput', () => {
       const input2 = getByTestId('streamNameInput-wildcard-2');
 
       fireEvent.change(input0, { target: { value: 'foo' } });
-      fireEvent.change(input1, { target: { value: 'bar' } });
-      fireEvent.change(input2, { target: { value: 'baz' } });
+      expect(onPartsChange).toHaveBeenLastCalledWith(['foo', '', '']);
 
-      expect(input0).toHaveValue('foo');
-      expect(input1).toHaveValue('bar');
-      expect(input2).toHaveValue('baz');
+      fireEvent.change(input1, { target: { value: 'bar' } });
+      expect(onPartsChange).toHaveBeenLastCalledWith(['', 'bar', '']);
+
+      fireEvent.change(input2, { target: { value: 'baz' } });
+      expect(onPartsChange).toHaveBeenLastCalledWith(['', '', 'baz']);
     });
 
-    it('correctly builds stream name when only some wildcards are filled', () => {
-      const onChange = jest.fn();
+    it('calls onPartsChange when only some wildcards are filled', () => {
+      const onPartsChange = jest.fn();
       const { getByTestId } = render(
-        <StreamNameInput {...defaultProps} indexPattern="*-logs-*-*" onChange={onChange} />
+        <StreamNameInput
+          {...defaultProps}
+          indexPattern="*-logs-*-*"
+          parts={['', '', '']}
+          onPartsChange={onPartsChange}
+        />
       );
 
       // Fill only the second wildcard
       const input1 = getByTestId('streamNameInput-wildcard-1');
       fireEvent.change(input1, { target: { value: 'foo' } });
 
-      // Should keep unfilled wildcards as *
-      expect(onChange).toHaveBeenLastCalledWith('*-logs-foo-*');
+      expect(onPartsChange).toHaveBeenLastCalledWith(['', 'foo', '']);
     });
 
-    it('correctly builds stream name when all wildcards are filled', () => {
-      const onChange = jest.fn();
+    it('calls onPartsChange when all wildcards are filled', () => {
+      const onPartsChange = jest.fn();
       const { getByTestId } = render(
-        <StreamNameInput {...defaultProps} indexPattern="*-logs-*-*" onChange={onChange} />
+        <StreamNameInput
+          {...defaultProps}
+          indexPattern="*-logs-*-*"
+          parts={['', '', '']}
+          onPartsChange={onPartsChange}
+        />
       );
 
       fireEvent.change(getByTestId('streamNameInput-wildcard-0'), {
@@ -131,12 +160,16 @@ describe('StreamNameInput', () => {
         target: { value: 'baz' },
       });
 
-      expect(onChange).toHaveBeenLastCalledWith('foo-logs-bar-baz');
+      expect(onPartsChange).toHaveBeenLastCalledWith(['', '', 'baz']);
     });
 
     it('supports patterns with many wildcards (5+)', () => {
       const { getByTestId, getByText } = render(
-        <StreamNameInput {...defaultProps} indexPattern="*-really-*-long-*-index-*-name-*" />
+        <StreamNameInput
+          {...defaultProps}
+          indexPattern="*-really-*-long-*-index-*-name-*"
+          parts={['', '', '', '', '']}
+        />
       );
 
       // All 5 wildcard inputs should exist
@@ -155,35 +188,26 @@ describe('StreamNameInput', () => {
   });
 
   describe('pattern changes', () => {
-    it('resets input values when pattern changes (via key prop)', () => {
-      const onChange = jest.fn();
+    it('accepts new parts when pattern changes', () => {
       const { getByTestId, rerender } = render(
-        <StreamNameInput {...defaultProps} key="logs-*" indexPattern="logs-*" onChange={onChange} />
+        <StreamNameInput {...defaultProps} indexPattern="logs-*" parts={['mystream']} />
       );
 
       // Fill in the input
       const input = getByTestId('streamNameInput-wildcard-0');
-      fireEvent.change(input, { target: { value: 'mystream' } });
       expect(input).toHaveValue('mystream');
 
-      // Change the pattern with a new key to force remount
-      rerender(
-        <StreamNameInput
-          {...defaultProps}
-          key="metrics-*"
-          indexPattern="metrics-*"
-          onChange={onChange}
-        />
-      );
+      // Change the pattern with new empty parts (parent manages reset)
+      rerender(<StreamNameInput {...defaultProps} indexPattern="metrics-*" parts={['']} />);
 
-      // Input should be reset
+      // Input should show new empty value
       const newInput = getByTestId('streamNameInput-wildcard-0');
       expect(newInput).toHaveValue('');
     });
 
-    it('updates number of inputs when pattern wildcard count changes (via key prop)', () => {
+    it('renders correct number of inputs when pattern wildcard count changes', () => {
       const { getByTestId, queryByTestId, rerender } = render(
-        <StreamNameInput {...defaultProps} key="*-logs-*-*" indexPattern="*-logs-*-*" />
+        <StreamNameInput {...defaultProps} indexPattern="*-logs-*-*" parts={['', '', '']} />
       );
 
       // Initially 3 wildcards
@@ -191,8 +215,8 @@ describe('StreamNameInput', () => {
       expect(getByTestId('streamNameInput-wildcard-1')).toBeInTheDocument();
       expect(getByTestId('streamNameInput-wildcard-2')).toBeInTheDocument();
 
-      // Change to single wildcard pattern with new key
-      rerender(<StreamNameInput {...defaultProps} key="logs-*" indexPattern="logs-*" />);
+      // Change to single wildcard pattern (parent provides new parts array)
+      rerender(<StreamNameInput {...defaultProps} indexPattern="logs-*" parts={['']} />);
 
       // Should now have only 1 wildcard
       expect(getByTestId('streamNameInput-wildcard-0')).toBeInTheDocument();
@@ -204,7 +228,12 @@ describe('StreamNameInput', () => {
   describe('validation state', () => {
     it('does not show invalid state when validationError is null', () => {
       const { getByTestId } = render(
-        <StreamNameInput {...defaultProps} indexPattern="*-logs-*" validationError={null} />
+        <StreamNameInput
+          {...defaultProps}
+          indexPattern="*-logs-*"
+          parts={['', '']}
+          validationError={null}
+        />
       );
 
       const input0 = getByTestId('streamNameInput-wildcard-0');
@@ -216,7 +245,12 @@ describe('StreamNameInput', () => {
 
     it('shows invalid state on all inputs when validationError is duplicate', () => {
       const { getByTestId } = render(
-        <StreamNameInput {...defaultProps} indexPattern="*-logs-*" validationError="duplicate" />
+        <StreamNameInput
+          {...defaultProps}
+          indexPattern="*-logs-*"
+          parts={['', '']}
+          validationError="duplicate"
+        />
       );
 
       const input0 = getByTestId('streamNameInput-wildcard-0');
@@ -231,6 +265,7 @@ describe('StreamNameInput', () => {
         <StreamNameInput
           {...defaultProps}
           indexPattern="*-logs-*"
+          parts={['', '']}
           validationError="higherPriority"
         />
       );
@@ -243,8 +278,15 @@ describe('StreamNameInput', () => {
     });
 
     it('shows invalid state only on empty inputs when validationError is empty', () => {
-      const { getByTestId } = render(
-        <StreamNameInput {...defaultProps} indexPattern="*-logs-*" validationError="empty" />
+      const onPartsChange = jest.fn();
+      const { getByTestId, rerender } = render(
+        <StreamNameInput
+          {...defaultProps}
+          indexPattern="*-logs-*"
+          parts={['', '']}
+          validationError="empty"
+          onPartsChange={onPartsChange}
+        />
       );
 
       // Initially all inputs are empty, so all should be invalid
@@ -254,8 +296,17 @@ describe('StreamNameInput', () => {
       expect(input0).toHaveAttribute('aria-invalid', 'true');
       expect(input1).toHaveAttribute('aria-invalid', 'true');
 
-      // Fill in the first input
+      // Fill in the first input - parent updates parts
       fireEvent.change(input0, { target: { value: 'filled' } });
+      rerender(
+        <StreamNameInput
+          {...defaultProps}
+          indexPattern="*-logs-*"
+          parts={['filled', '']}
+          validationError="empty"
+          onPartsChange={onPartsChange}
+        />
+      );
 
       // Now only the second input should be invalid
       expect(input0).not.toHaveAttribute('aria-invalid', 'true');
@@ -263,8 +314,15 @@ describe('StreamNameInput', () => {
     });
 
     it('clears invalid state on input when filled (empty validation error)', () => {
-      const { getByTestId } = render(
-        <StreamNameInput {...defaultProps} indexPattern="*-logs-*-data-*" validationError="empty" />
+      const onPartsChange = jest.fn();
+      const { getByTestId, rerender } = render(
+        <StreamNameInput
+          {...defaultProps}
+          indexPattern="*-logs-*-data-*"
+          parts={['', '', '']}
+          validationError="empty"
+          onPartsChange={onPartsChange}
+        />
       );
 
       const input0 = getByTestId('streamNameInput-wildcard-0');
@@ -276,8 +334,17 @@ describe('StreamNameInput', () => {
       expect(input1).toHaveAttribute('aria-invalid', 'true');
       expect(input2).toHaveAttribute('aria-invalid', 'true');
 
-      // Fill in the middle input
+      // Fill in the middle input - parent updates parts
       fireEvent.change(input1, { target: { value: 'filled' } });
+      rerender(
+        <StreamNameInput
+          {...defaultProps}
+          indexPattern="*-logs-*-data-*"
+          parts={['', 'filled', '']}
+          validationError="empty"
+          onPartsChange={onPartsChange}
+        />
+      );
 
       // Only first and third should be invalid now
       expect(input0).toHaveAttribute('aria-invalid', 'true');
