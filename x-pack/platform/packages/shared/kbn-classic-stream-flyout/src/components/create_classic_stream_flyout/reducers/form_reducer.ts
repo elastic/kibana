@@ -80,6 +80,7 @@ export const formReducer = (state: FormState, action: FormAction): FormState => 
       return {
         ...state,
         isValidating: true,
+        isSubmitting: false, // User is editing, not submitting
       };
 
     case 'COMPLETE_VALIDATION': {

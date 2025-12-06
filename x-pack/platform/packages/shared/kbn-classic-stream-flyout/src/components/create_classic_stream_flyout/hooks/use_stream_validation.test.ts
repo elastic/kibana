@@ -82,7 +82,7 @@ describe('useStreamValidation', () => {
       expect(result.current.formState.isValidating).toBe(false);
     });
 
-    it('SHOULD trigger debounced validation after submit attempt', async () => {
+    it('SHOULD NOT trigger debounced validation in Idle Mode (no error)', async () => {
       const { result } = setupHook(mockOnValidate);
 
       // First attempt submit
@@ -101,12 +101,44 @@ describe('useStreamValidation', () => {
         await jest.advanceTimersByTimeAsync(300);
       });
 
+      // Should NOT trigger validation (still in Idle Mode - no error)
+      expect(mockOnValidate).toHaveBeenCalledTimes(1); // Only the initial Create validation
+      expect(mockOnValidate).not.toHaveBeenCalledWith('new-stream', expect.any(AbortSignal));
+    });
+
+    it('SHOULD trigger debounced validation in Live Validation Mode (has error)', async () => {
+      const mockOnValidateWithError: StreamNameValidator = jest.fn().mockResolvedValue({
+        errorType: 'duplicate',
+      });
+
+      const { result } = setupHook(mockOnValidateWithError);
+
+      // First submit to get error - enters Live Validation Mode
+      await act(async () => {
+        const handleCreatePromise = result.current.handleCreate();
+        await jest.runOnlyPendingTimersAsync();
+        await handleCreatePromise;
+      });
+
+      // Validation error should be set immediately after awaiting
+      expect(result.current.formState.validationError).toBe('duplicate');
+
+      // Change name in Live Validation Mode
+      act(() => {
+        result.current.handleStreamNameChange('new-stream');
+      });
+
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(300);
+      });
+
+      // Should trigger debounced validation (in Live Validation Mode)
       await waitFor(() => {
-        expect(mockOnValidate).toHaveBeenCalledWith('new-stream', expect.any(AbortSignal));
+        expect(mockOnValidateWithError).toHaveBeenCalledWith('new-stream', expect.any(AbortSignal));
       });
     });
 
-    it('SHOULD clear validation error when name changes after submit attempt', async () => {
+    it('SHOULD keep validation error visible and trigger debounced validation in Live Validation Mode', async () => {
       const mockOnValidateWithError: StreamNameValidator = jest.fn().mockResolvedValue({
         errorType: 'duplicate',
       });
@@ -120,14 +152,29 @@ describe('useStreamValidation', () => {
         await handleCreatePromise;
       });
 
-      expect(result.current.formState.validationError).toBe('duplicate');
+      // Wait for validation to complete and error to be set
+      await waitFor(() => {
+        expect(result.current.formState.validationError).toBe('duplicate');
+      });
 
-      // Change name
+      // Change name in Live Validation Mode
       act(() => {
         result.current.handleStreamNameChange('new-stream');
       });
 
-      expect(result.current.formState.validationError).toBe(null);
+      // Validation error should stay visible (not cleared) while validating
+      expect(result.current.formState.validationError).toBe('duplicate');
+      expect(result.current.formState.isValidating).toBe(true);
+
+      // Advance timers to trigger debounced validation
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(300);
+      });
+
+      // Debounced validation should have been triggered
+      await waitFor(() => {
+        expect(mockOnValidateWithError).toHaveBeenCalledWith('new-stream', expect.any(AbortSignal));
+      });
     });
 
     it('SHOULD skip if name has not changed', async () => {
@@ -144,7 +191,7 @@ describe('useStreamValidation', () => {
       expect(mockOnValidate).not.toHaveBeenCalled();
     });
 
-    it('SHOULD abort Create validation when name changes during Create', async () => {
+    it('SHOULD abort Create validation and return to Idle Mode when name changes during Create', async () => {
       const slowValidator: StreamNameValidator = jest.fn().mockImplementation(async (_, signal) => {
         await new Promise((resolve) => setTimeout(resolve, 1000));
         if (signal?.aborted) {
@@ -171,9 +218,9 @@ describe('useStreamValidation', () => {
         result.current.handleStreamNameChange('new-stream');
       });
 
-      // After changing name: isSubmitting should be false (Create aborted), isValidating should be true (debounced validation)
+      // After changing name: both isSubmitting and isValidating should be false (returned to Idle Mode)
       expect(result.current.formState.isSubmitting).toBe(false);
-      expect(result.current.formState.isValidating).toBe(true);
+      expect(result.current.formState.isValidating).toBe(false);
 
       // Advance timers to let the aborted Create validation complete
       await act(async () => {
@@ -187,14 +234,14 @@ describe('useStreamValidation', () => {
       // After abort, onCreate should not have been called
       expect(mockOnCreate).not.toHaveBeenCalled();
 
-      // Now let debounced validation run
+      // Advance debounce timers
       await act(async () => {
         await jest.advanceTimersByTimeAsync(300);
       });
 
-      await waitFor(() => {
-        expect(slowValidator).toHaveBeenCalledWith('new-stream', expect.any(AbortSignal));
-      });
+      // No debounced validation should have been triggered (Idle Mode - no error)
+      expect(slowValidator).toHaveBeenCalledTimes(1); // Only the initial Create validation
+      expect(slowValidator).not.toHaveBeenCalledWith('new-stream', expect.any(AbortSignal));
     });
   });
 
@@ -280,17 +327,26 @@ describe('useStreamValidation', () => {
       expect(mockOnCreate).not.toHaveBeenCalled();
     });
 
-    it('SHOULD cancel debounced validation when Create is called', async () => {
-      const { result } = setupHook(mockOnValidate);
+    it('SHOULD cancel debounced validation when Create is called in Live Validation Mode', async () => {
+      const mockOnValidateWithError: StreamNameValidator = jest.fn().mockResolvedValue({
+        errorType: 'duplicate',
+      });
 
-      // First submit attempt
+      const { result } = setupHook(mockOnValidateWithError);
+
+      // First submit to get error - enters Live Validation Mode
       await act(async () => {
         const handleCreatePromise = result.current.handleCreate();
         await jest.runOnlyPendingTimersAsync();
         await handleCreatePromise;
       });
 
-      // Change name to schedule debounced validation
+      // Wait for error to be set
+      await waitFor(() => {
+        expect(result.current.formState.validationError).toBe('duplicate');
+      });
+
+      // Change name to schedule debounced validation (Live Validation Mode)
       act(() => {
         result.current.handleStreamNameChange('new-stream');
       });
@@ -305,9 +361,12 @@ describe('useStreamValidation', () => {
         await handleCreatePromise;
       });
 
-      // Debounced validator should not have been called (only Create validator)
-      expect(mockOnValidate).toHaveBeenCalledTimes(2); // Once for first submit, once for Create
-      expect(mockOnValidate).toHaveBeenLastCalledWith('new-stream', expect.any(AbortSignal));
+      // Debounced validator should not have been called (only Create validators)
+      expect(mockOnValidateWithError).toHaveBeenCalledTimes(2); // Once for first submit, once for second Create
+      expect(mockOnValidateWithError).toHaveBeenLastCalledWith(
+        'new-stream',
+        expect.any(AbortSignal)
+      );
     });
 
     it('SHOULD handle validation errors gracefully', async () => {
@@ -370,19 +429,26 @@ describe('useStreamValidation', () => {
     });
   });
 
-  describe('WHEN rapid name changes occur', () => {
+  describe('WHEN rapid name changes occur in Live Validation Mode', () => {
     it('SHOULD only validate the final name', async () => {
-      const { result } = setupHook(mockOnValidate);
+      const mockOnValidateWithError: StreamNameValidator = jest.fn().mockResolvedValue({
+        errorType: 'duplicate',
+      });
 
-      // Trigger submit to enable live validation
+      const { result } = setupHook(mockOnValidateWithError);
+
+      // Trigger submit to get error and enter Live Validation Mode
       await act(async () => {
         const handleCreatePromise = result.current.handleCreate();
         await jest.runOnlyPendingTimersAsync();
         await handleCreatePromise;
       });
 
+      // Validation error should be set
+      expect(result.current.formState.validationError).toBe('duplicate');
+
       // Clear previous calls
-      jest.mocked(mockOnValidate).mockClear();
+      jest.mocked(mockOnValidateWithError).mockClear();
 
       // Rapid name changes
       act(() => {
@@ -401,23 +467,29 @@ describe('useStreamValidation', () => {
       });
 
       await waitFor(() => {
-        expect(mockOnValidate).toHaveBeenCalledWith('final', expect.any(AbortSignal));
+        expect(mockOnValidateWithError).toHaveBeenCalledWith('final', expect.any(AbortSignal));
       });
 
       // Should only validate final name
-      expect(mockOnValidate).toHaveBeenCalledTimes(1);
+      expect(mockOnValidateWithError).toHaveBeenCalledTimes(1);
     });
 
     it('SHOULD abort previous debounced validation when name changes', async () => {
-      const { result } = setupHook(mockOnValidate);
+      const mockOnValidateWithError: StreamNameValidator = jest.fn().mockResolvedValue({
+        errorType: 'duplicate',
+      });
 
-      // Trigger submit
+      const { result } = setupHook(mockOnValidateWithError);
+
+      // Trigger submit to get error
       await act(async () => {
         const handleCreatePromise = result.current.handleCreate();
         await jest.runOnlyPendingTimersAsync();
         await handleCreatePromise;
       });
 
+      // Validation error should be set
+      expect(result.current.formState.validationError).toBe('duplicate');
       expect(result.current.formState.hasAttemptedSubmit).toBe(true);
 
       // Change name
@@ -441,16 +513,20 @@ describe('useStreamValidation', () => {
       });
 
       await waitFor(() => {
-        expect(mockOnValidate).toHaveBeenCalledWith('second', expect.any(AbortSignal));
+        expect(mockOnValidateWithError).toHaveBeenCalledWith('second', expect.any(AbortSignal));
       });
 
       // Only the second validation should have completed
-      expect(mockOnValidate).toHaveBeenCalledTimes(2); // Once for initial submit, once for 'second'
+      expect(mockOnValidateWithError).toHaveBeenCalledTimes(2); // Once for initial submit, once for 'second'
     });
   });
 
   describe('WHEN debounce delay is configured', () => {
-    it('SHOULD use custom debounce delay', async () => {
+    it('SHOULD use custom debounce delay in Live Validation Mode', async () => {
+      const mockOnValidateWithError: StreamNameValidator = jest.fn().mockResolvedValue({
+        errorType: 'duplicate',
+      });
+
       const { result } = renderHook(() => {
         const [formState, dispatch] = useReducer(formReducer, {
           ...initialFormState,
@@ -461,21 +537,25 @@ describe('useStreamValidation', () => {
           formState,
           dispatch,
           onCreate: mockOnCreate,
-          onValidate: mockOnValidate,
+          onValidate: mockOnValidateWithError,
           debounceMs: 500, // Custom delay
         });
 
         return { formState, handleCreate, handleStreamNameChange };
       });
 
-      // Trigger submit
+      // Trigger submit to get error
       await act(async () => {
         const handleCreatePromise = result.current.handleCreate();
         await jest.runOnlyPendingTimersAsync();
         await handleCreatePromise;
       });
 
-      jest.mocked(mockOnValidate).mockClear();
+      // Validation error should be set
+      expect(result.current.formState.validationError).toBe('duplicate');
+
+      // Clear mock calls
+      jest.mocked(mockOnValidateWithError).mockClear();
 
       // Change name
       act(() => {
@@ -488,7 +568,7 @@ describe('useStreamValidation', () => {
       });
 
       // Should not have validated yet
-      expect(mockOnValidate).not.toHaveBeenCalled();
+      expect(mockOnValidateWithError).not.toHaveBeenCalled();
 
       // Now wait for debounced validation to trigger after full delay
       await act(async () => {
@@ -496,7 +576,7 @@ describe('useStreamValidation', () => {
       });
 
       await waitFor(() => {
-        expect(mockOnValidate).toHaveBeenCalledTimes(1);
+        expect(mockOnValidateWithError).toHaveBeenCalledTimes(1);
       });
     });
   });

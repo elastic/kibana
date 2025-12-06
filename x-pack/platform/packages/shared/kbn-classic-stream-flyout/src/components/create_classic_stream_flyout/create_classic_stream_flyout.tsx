@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useEffect, useReducer } from 'react';
+import React, { useState, useMemo, useReducer, useCallback } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -104,10 +104,21 @@ export const CreateClassicStreamFlyout = ({
 
   const selectedTemplateData = templates.find((t) => t.name === selectedTemplate);
 
-  // Reset validation when template or index pattern changes
-  useEffect(() => {
-    resetValidation();
-  }, [resetValidation, selectedTemplate, selectedIndexPattern]);
+  const handleTemplateSelect = useCallback(
+    (template: string | null) => {
+      resetValidation();
+      dispatch({ type: 'SET_SELECTED_TEMPLATE', payload: template });
+    },
+    [resetValidation]
+  );
+
+  const handleIndexPatternChange = useCallback(
+    (pattern: string) => {
+      resetValidation();
+      dispatch({ type: 'SET_SELECTED_INDEX_PATTERN', payload: pattern });
+    },
+    [resetValidation]
+  );
 
   const isFirstStep = currentStep === ClassicStreamStep.SELECT_TEMPLATE;
   const hasNextStep = isFirstStep;
@@ -147,9 +158,7 @@ export const CreateClassicStreamFlyout = ({
           <SelectTemplateStep
             templates={templates}
             selectedTemplate={selectedTemplate}
-            onTemplateSelect={(template) =>
-              dispatch({ type: 'SET_SELECTED_TEMPLATE', payload: template })
-            }
+            onTemplateSelect={handleTemplateSelect}
             onCreateTemplate={onCreateTemplate}
             hasErrorLoadingTemplates={hasErrorLoadingTemplates}
             onRetryLoadTemplates={onRetryLoadTemplates}
@@ -164,9 +173,7 @@ export const CreateClassicStreamFlyout = ({
           <NameAndConfirmStep
             template={selectedTemplateData}
             selectedIndexPattern={selectedIndexPattern}
-            onIndexPatternChange={(pattern) =>
-              dispatch({ type: 'SET_SELECTED_INDEX_PATTERN', payload: pattern })
-            }
+            onIndexPatternChange={handleIndexPatternChange}
             onStreamNameChange={handleStreamNameChange}
             validationError={validationError}
             conflictingIndexPattern={conflictingIndexPattern}

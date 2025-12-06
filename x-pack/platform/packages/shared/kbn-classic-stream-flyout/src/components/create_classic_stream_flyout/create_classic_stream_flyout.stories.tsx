@@ -261,7 +261,7 @@ const createMockValidator = (
     // For race condition testing: make "foo-logs-bar-baz" take longer than "foo-logs-test-test"
     let delay = delayMs;
     if (streamName === 'foo-logs-bar-baz') {
-      delay = 5000; // 5 seconds - slow request
+      delay = 3000; // 3 seconds - slow request
     }
 
     // Check if aborted before starting delay
@@ -359,7 +359,7 @@ export const WithSlowValidation: Story = {
       onCreateTemplate={action('onCreateTemplate')}
       onRetryLoadTemplates={action('onRetryLoadTemplates')}
       templates={MOCK_TEMPLATES}
-      onValidate={createMockValidator(EXISTING_STREAM_NAMES, HIGHER_PRIORITY_PATTERNS, 5000)}
+      onValidate={createMockValidator(EXISTING_STREAM_NAMES, HIGHER_PRIORITY_PATTERNS, 3000)}
     />
   ),
 };

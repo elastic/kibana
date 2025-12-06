@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useRef, type Dispatch } from 'react';
+import { useCallback, useRef, type Dispatch } from 'react';
 import { validateStreamName, type StreamNameValidator } from '../../../utils';
 import { useAbortController } from './use_abort_controller';
 import { useDebouncedCallback } from './use_debounced_callback';
@@ -34,15 +34,11 @@ export const useStreamValidation = ({
   onValidate,
   debounceMs = DEFAULT_VALIDATION_DEBOUNCE_MS,
 }: UseStreamValidationParams): UseStreamValidationReturn => {
-  const { streamName, isSubmitting, hasAttemptedSubmit } = formState;
+  const { streamName, isSubmitting, hasAttemptedSubmit, validationError } = formState;
 
-  const lastStreamNameRef = useRef<string>('');
+  const lastStreamNameRef = useRef<string>(streamName); // Initialize from state
   const onValidateRef = useRef(onValidate);
   onValidateRef.current = onValidate;
-
-  // Track isSubmitting in a ref to avoid stale closures in handleStreamNameChange
-  const isSubmittingRef = useRef(isSubmitting);
-  isSubmittingRef.current = isSubmitting;
 
   const {
     getAbortController: getCreateAbortController,
@@ -54,8 +50,6 @@ export const useStreamValidation = ({
     isAborted: isDebouncedAborted,
     abort: abortDebounced,
   } = useAbortController();
-
-  const shouldDebounceValidation = hasAttemptedSubmit && !isSubmitting;
 
   // Core validation runner - handles the actual validation API call and state updates
   const runValidation = useCallback(
@@ -72,7 +66,7 @@ export const useStreamValidation = ({
         );
 
         if (isAbortedFn(abortController)) {
-          dispatch({ type: 'ABORT_VALIDATION' });
+          // Aborted - don't dispatch anything, caller will handle state
           return false;
         }
 
@@ -90,6 +84,7 @@ export const useStreamValidation = ({
           // eslint-disable-next-line no-console
           console.error('Validation error:', error);
         }
+        // On error, abort validation
         dispatch({ type: 'ABORT_VALIDATION' });
         return false;
       }
@@ -97,7 +92,7 @@ export const useStreamValidation = ({
     [dispatch]
   );
 
-  // Debounced validation flow - triggered by user typing after first submit attempt
+  // Debounced validation flow - only triggered in Live Validation Mode (when there's an active error)
   const { trigger: triggerDebouncedValidation, cancel: cancelDebounced } = useDebouncedCallback(
     async (name: string) => {
       // Skip if name changed since this was scheduled
@@ -116,7 +111,7 @@ export const useStreamValidation = ({
     debounceMs
   );
 
-  // Input change handler - decides whether to trigger validation based on current state
+  // Input change handler - implements two-mode behavior
   const handleStreamNameChange = useCallback(
     (newStreamName: string) => {
       // Skip if name hasn't changed
@@ -131,19 +126,17 @@ export const useStreamValidation = ({
       // Update form state
       dispatch({ type: 'SET_STREAM_NAME', payload: newStreamName });
 
-      // If user changes input during create validation, abort and switch to debounced mode
-      if (isSubmittingRef.current && hasNameChanged) {
+      // If user types during Create validation, abort and return to Idle Mode
+      if (isSubmitting && hasNameChanged) {
         abortCreate();
         dispatch({ type: 'ABORT_VALIDATION' });
-        // After aborting create, start debounced validation since hasAttemptedSubmit is true
-        dispatch({ type: 'START_DEBOUNCED_VALIDATION' });
-        triggerDebouncedValidation(newStreamName);
-        return;
+        // Don't start new validation - return to Idle Mode unless there's an error (handled below)
       }
 
-      // Only validate if user has already attempted submit
-      if (shouldDebounceValidation) {
-        dispatch({ type: 'CLEAR_VALIDATION_ERROR' });
+      // Live Validation Mode: auto-validate when there's an active error to help user recover
+      const isInLiveValidationMode = hasAttemptedSubmit && validationError !== null;
+      if (isInLiveValidationMode && hasNameChanged) {
+        // Don't clear error - keep it visible while validating, it will be replaced when validation completes
         abortDebounced();
         cancelDebounced();
         // Set isValidating immediately to show loading state
@@ -153,7 +146,9 @@ export const useStreamValidation = ({
     },
     [
       dispatch,
-      shouldDebounceValidation,
+      isSubmitting,
+      hasAttemptedSubmit,
+      validationError,
       abortCreate,
       abortDebounced,
       cancelDebounced,
@@ -190,13 +185,6 @@ export const useStreamValidation = ({
     abortDebounced();
     cancelDebounced();
   }, [abortCreate, abortDebounced, cancelDebounced]);
-
-  useEffect(() => {
-    return () => {
-      abortCreate();
-      abortDebounced();
-    };
-  }, [abortCreate, abortDebounced]);
 
   return {
     handleStreamNameChange,

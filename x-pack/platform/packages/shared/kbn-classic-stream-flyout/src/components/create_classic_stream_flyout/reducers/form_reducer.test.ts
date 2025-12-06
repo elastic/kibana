@@ -108,6 +108,7 @@ describe('formReducer', () => {
         payload: {
           errorType: null,
           conflictingIndexPattern: undefined,
+          isSubmitting: false,
         },
       });
 
@@ -129,6 +130,7 @@ describe('formReducer', () => {
         payload: {
           errorType: 'duplicate',
           conflictingIndexPattern: 'logs-*',
+          isSubmitting: false,
         },
       });
 
