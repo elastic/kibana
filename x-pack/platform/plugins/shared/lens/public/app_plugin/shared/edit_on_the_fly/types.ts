@@ -18,6 +18,7 @@ import type { LensPluginStartDependencies } from '../../../plugin';
 export interface FlyoutWrapperProps {
   children: JSX.Element;
   toolbar?: JSX.Element;
+  layerTabs?: JSX.Element;
   isInlineFlyoutVisible: boolean;
   isScrollable: boolean;
   displayFlyoutHeader?: boolean;
@@ -116,4 +117,11 @@ export interface LayerConfigurationProps {
   closeFlyout?: () => void;
   canEditTextBasedQuery?: boolean;
   editorContainer?: HTMLElement;
+}
+
+export interface LayerTabsProps {
+  attributes?: TypedLensSerializedState['attributes'];
+  coreStart: CoreStart;
+  framePublicAPI: FramePublicAPI;
+  uiActions: LensPluginStartDependencies['uiActions'];
 }

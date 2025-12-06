@@ -17,7 +17,10 @@ import { UnifiedHistogramChart, useUnifiedHistogram } from '@kbn/unified-histogr
 import { useChartStyles } from '@kbn/unified-histogram/components/chart/hooks/use_chart_styles';
 import { useServicesBootstrap } from '@kbn/unified-histogram/hooks/use_services_bootstrap';
 import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-metrics-grid';
-import { useProfileAccessor } from '../../../../context_awareness';
+import {
+  type ChartSectionConfigurationExtensionParams,
+  useProfileAccessor,
+} from '../../../../context_awareness';
 import { DiscoverCustomizationProvider } from '../../../../customizations';
 import {
   CurrentTabProvider,
@@ -138,13 +141,25 @@ type UnifiedHistogramChartProps = Pick<UnifiedHistogramGuardProps, 'panelsToggle
 };
 
 const ChartsWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartProps) => {
+  const dispatch = useInternalStateDispatch();
   const getChartConfigAccessor = useProfileAccessor('getChartSectionConfiguration');
+  const chartSectionConfigurationExtParams: ChartSectionConfigurationExtensionParams =
+    useMemo(() => {
+      return {
+        actions: {
+          openInNewTab: (params) =>
+            dispatch(internalStateActions.openInNewTabExtPointAction(params)),
+          updateESQLQuery: stateContainer.actions.updateESQLQuery,
+        },
+      };
+    }, [dispatch, stateContainer.actions.updateESQLQuery]);
+
   const chartSectionConfig = useMemo(
     () =>
       getChartConfigAccessor(() => ({
         replaceDefaultChart: false,
-      }))(),
-    [getChartConfigAccessor]
+      }))(chartSectionConfigurationExtParams),
+    [getChartConfigAccessor, chartSectionConfigurationExtParams]
   );
 
   useEffect(() => {
@@ -175,23 +190,21 @@ const ChartsWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartPr
 const UnifiedHistogramWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartProps) => {
   const { currentTabId, unifiedHistogramProps } = useUnifiedHistogramRuntimeState(stateContainer);
 
-  const { setUnifiedHistogramApi, ...restProps } = unifiedHistogramProps;
+  const { setUnifiedHistogramApi } = unifiedHistogramProps;
   const unifiedHistogram = useUnifiedHistogram(unifiedHistogramProps);
 
   useEffect(() => {
-    if (unifiedHistogram.isInitialized) {
-      setUnifiedHistogramApi(unifiedHistogram.api);
-    }
-  }, [setUnifiedHistogramApi, unifiedHistogram.api, unifiedHistogram.isInitialized]);
+    setUnifiedHistogramApi(unifiedHistogram.api);
+  }, [setUnifiedHistogramApi, unifiedHistogram.api]);
 
-  const { isEsqlMode, renderCustomChartToggleActions } = useUnifiedHistogramCommon({
+  const { renderCustomChartToggleActions } = useUnifiedHistogramCommon({
     currentTabId,
     layoutProps: unifiedHistogram.layoutProps,
     stateContainer,
     panelsToggle,
   });
 
-  if (!unifiedHistogram.isInitialized || (!restProps.searchSessionId && !isEsqlMode)) {
+  if (!unifiedHistogram.isInitialized) {
     return null;
   }
 
@@ -219,7 +232,7 @@ const CustomChartSectionWrapper = ({
     chartSectionConfig.localStorageKeyPrefix ?? unifiedHistogramProps.localStorageKeyPrefix;
 
   const { setUnifiedHistogramApi, ...restProps } = unifiedHistogramProps;
-  const { api, stateProps, requestParams, input$ } = useServicesBootstrap({
+  const { api, stateProps, fetch$, fetchParams, hasValidFetchParams } = useServicesBootstrap({
     ...restProps,
     initialState: unifiedHistogramProps.initialState,
     localStorageKeyPrefix,
@@ -238,10 +251,8 @@ const CustomChartSectionWrapper = ({
   );
 
   useEffect(() => {
-    if (api) {
-      setUnifiedHistogramApi(api);
-    }
-  }, [api, setUnifiedHistogramApi]);
+    setUnifiedHistogramApi(api);
+  }, [setUnifiedHistogramApi, api]);
 
   const layoutProps = useMemo<UnifiedHistogramPartialLayoutProps>(
     () => ({
@@ -259,7 +270,7 @@ const CustomChartSectionWrapper = ({
     ]
   );
 
-  const { isEsqlMode, renderCustomChartToggleActions } = useUnifiedHistogramCommon({
+  const { renderCustomChartToggleActions } = useUnifiedHistogramCommon({
     currentTabId,
     layoutProps,
     stateContainer,
@@ -271,21 +282,20 @@ const CustomChartSectionWrapper = ({
     !!layoutProps.chart && !layoutProps.chart.hidden
   );
 
-  const hasValidSession = !!unifiedHistogramProps.searchSessionId || isEsqlMode;
-  const isComponentVisible =
-    !!chartSectionConfig.Component && !!layoutProps.chart && !layoutProps.chart.hidden;
-
-  if (!hasValidSession) {
+  if (!fetchParams || !hasValidFetchParams) {
     return null;
   }
+
+  const isComponentVisible =
+    !!chartSectionConfig.Component && !!layoutProps.chart && !layoutProps.chart.hidden;
 
   return (
     <chartSectionConfig.Component
       histogramCss={histogramCss}
       chartToolbarCss={chartToolbarCss}
       renderToggleActions={renderCustomChartToggleActions}
-      input$={input$}
-      requestParams={requestParams}
+      fetch$={fetch$}
+      fetchParams={fetchParams}
       isComponentVisible={isComponentVisible}
       {...unifiedHistogramProps}
       initialState={metricsGridState}

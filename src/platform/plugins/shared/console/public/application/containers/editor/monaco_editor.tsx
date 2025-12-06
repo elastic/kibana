@@ -47,6 +47,8 @@ const useStyles = () => {
   return {
     editorActions: css`
       ${actions}
+      padding-left: ${euiTheme.size.xs};
+      padding-right: ${euiTheme.size.xs};
 
       // For IE11
       min-width: calc(${euiTheme.size.l} * 2);
@@ -273,13 +275,13 @@ export const MonacoEditor = ({
             })}
           >
             <EuiButtonIcon
-              iconType="playFilled"
+              display="fill"
+              iconType="play"
               onClick={sendRequestsCallback}
               data-test-subj="sendRequestButton"
               aria-label={i18n.translate('console.monaco.sendRequestButtonTooltipAriaLabel', {
                 defaultMessage: 'Click to send request',
               })}
-              iconSize={'s'}
             />
           </EuiToolTip>
         </EuiFlexItem>

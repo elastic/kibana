@@ -8,6 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { assetCriticalityServiceMock } from '../asset_criticality/asset_criticality_service.mock';
+import { privmonUserCrudServiceMock } from '../privilege_monitoring/users/privileged_users_crud.mock';
 
 import { calculateAndPersistRiskScores } from './calculate_and_persist_risk_scores';
 import { calculateRiskScores } from './calculate_risk_scores';
@@ -39,6 +40,7 @@ const calculateAndPersistRecentHostRiskScores = (
     range: { start: 'now - 15d', end: 'now' },
     riskScoreDataClient,
     assetCriticalityService: assetCriticalityServiceMock.create(),
+    privmonUserCrudService: privmonUserCrudServiceMock.create(),
     runtimeMappings: {},
     experimentalFeatures: {
       disableESQLRiskScoring: !esql,

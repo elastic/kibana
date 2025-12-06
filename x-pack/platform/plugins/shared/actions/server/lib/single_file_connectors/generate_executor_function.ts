@@ -5,31 +5,55 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { ConnectorSpec } from '@kbn/connector-specs';
-import type { AxiosInstance } from 'axios';
 import type {
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '../../types';
 import type { ExecutorParams } from '../../sub_action_framework/types';
+import type { GetAxiosInstanceWithAuthFn } from '../get_axios_instance';
 
 type RecordUnknown = Record<string, unknown>;
+
+function errorResultUnexpectedError(actionId: string): ConnectorTypeExecutorResult<void> {
+  const errMessage = i18n.translate('xpack.actions.singleFileConnector.unexpectedErrorMessage', {
+    defaultMessage: 'error calling connector, unexpected error',
+  });
+  return {
+    status: 'error',
+    message: errMessage,
+    actionId,
+  };
+}
 
 export const generateExecutorFunction = ({
   actions,
   getAxiosInstanceWithAuth,
 }: {
   actions: ConnectorSpec['actions'];
-  getAxiosInstanceWithAuth: (validatedSecrets: Record<string, unknown>) => Promise<AxiosInstance>;
+  getAxiosInstanceWithAuth: GetAxiosInstanceWithAuthFn;
 }) =>
   async function (
     execOptions: ConnectorTypeExecutorOptions<RecordUnknown, RecordUnknown, RecordUnknown>
-  ): Promise<ConnectorTypeExecutorResult<RecordUnknown | {}>> {
-    const { actionId, params, secrets, logger } = execOptions;
+  ): Promise<ConnectorTypeExecutorResult<unknown>> {
+    const {
+      actionId: connectorId,
+      config,
+      connectorTokenClient,
+      globalAuthHeaders,
+      params,
+      secrets,
+      logger,
+    } = execOptions;
     const { subAction, subActionParams } = params as ExecutorParams;
-    let data = null;
 
-    const axiosInstance = await getAxiosInstanceWithAuth({ ...secrets });
+    const axiosInstance = await getAxiosInstanceWithAuth({
+      connectorId,
+      connectorTokenClient,
+      additionalHeaders: globalAuthHeaders,
+      secrets,
+    });
 
     if (!actions[subAction]) {
       const errorMessage = `[Action][ExternalService] Unsupported subAction type ${subAction}.`;
@@ -37,19 +61,24 @@ export const generateExecutorFunction = ({
       throw new Error(errorMessage);
     }
 
-    // TODO - we need to update ActionContext in the spec
     const actionContext = {
       log: logger,
       client: axiosInstance,
       secrets,
+      config,
     };
 
-    // @ts-ignore
-    const res = await actions[subAction].handler(actionContext, subActionParams);
+    try {
+      let data = {};
+      const res = await actions[subAction].handler(actionContext, subActionParams);
 
-    if (res != null) {
-      data = res;
+      if (res != null) {
+        data = res;
+      }
+
+      return { status: 'ok', data, actionId: connectorId };
+    } catch (error) {
+      logger.error(`error on ${connectorId} event: ${error}`);
+      return errorResultUnexpectedError(connectorId);
     }
-
-    return { status: 'ok', data: data ?? {}, actionId };
   };

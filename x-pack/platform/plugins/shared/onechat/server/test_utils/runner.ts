@@ -12,6 +12,7 @@ import {
   httpServerMock,
   securityServiceMock,
 } from '@kbn/core/server/mocks';
+import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { WritableToolResultStore } from '@kbn/onechat-server';
 import type { AttachmentServiceStart } from '../services/attachments';
@@ -66,6 +67,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
   return {
     elasticsearch: elasticsearchServiceMock.createStart(),
     security: securityServiceMock.createStart(),
+    spaces: spacesMock.createStart(),
     modelProvider: createModelProviderMock(),
     toolsService: createToolsServiceStartMock(),
     agentsService: createAgentsServiceStartMock(),
@@ -80,6 +82,7 @@ export const createRunnerDepsMock = (): CreateRunnerDepsMock => {
   return {
     elasticsearch: elasticsearchServiceMock.createStart(),
     security: securityServiceMock.createStart(),
+    spaces: spacesMock.createStart(),
     modelProviderFactory: createModelProviderFactoryMock(),
     toolsService: createToolsServiceStartMock(),
     agentsService: createAgentsServiceStartMock(),
