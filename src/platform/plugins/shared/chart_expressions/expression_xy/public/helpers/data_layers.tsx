@@ -26,7 +26,7 @@ import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common'
 import type { PaletteRegistry, SeriesLayer } from '@kbn/coloring';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import type { KbnPalettes } from '@kbn/palettes';
-import type { RawValue } from '@kbn/data-plugin/common';
+import { MULTI_FIELD_KEY_SEPARATOR, type RawValue } from '@kbn/data-plugin/common';
 import { isDataLayer } from '../../common/utils/layer_types_guards';
 import type {
   CommonXYDataLayerConfig,
@@ -294,10 +294,12 @@ export const getSeriesName: GetSeriesNameFn = (
     if (splitValues.length === 0) {
       return yAccessorTitle;
     }
-    return `${splitValues.join(' - ')}${yAccessorTitle ? ' - ' + yAccessorTitle : ''}`;
+    return `${splitValues.join(MULTI_FIELD_KEY_SEPARATOR)}${
+      yAccessorTitle ? ' - ' + yAccessorTitle : ''
+    }`;
   }
 
-  return splitValues.length > 0 ? splitValues.join(' - ') : yAccessorTitle;
+  return splitValues.length > 0 ? splitValues.join(MULTI_FIELD_KEY_SEPARATOR) : yAccessorTitle;
 };
 
 const getPointConfig: GetPointConfigFn = ({
