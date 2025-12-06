@@ -258,11 +258,7 @@ const createMockValidator = (
     action('onValidate:start')({ streamName, timestamp: Date.now() });
 
     // Simulate network delay (configurable for testing race conditions)
-    // For race condition testing: make "foo-logs-bar-baz" take longer than "foo-logs-test-test"
-    let delay = delayMs;
-    if (streamName === 'foo-logs-bar-baz') {
-      delay = 3000; // 3 seconds - slow request
-    }
+    const delay = delayMs;
 
     // Check if aborted before starting delay
     if (signal?.aborted) {
@@ -329,16 +325,19 @@ export const Default: Story = {
  * Uses 500ms delay (normal network conditions).
  */
 export const WithValidation: Story = {
-  render: () => (
-    <CreateClassicStreamFlyout
-      onClose={action('onClose')}
-      onCreate={action('onCreate')}
-      onCreateTemplate={action('onCreateTemplate')}
-      onRetryLoadTemplates={action('onRetryLoadTemplates')}
-      templates={MOCK_TEMPLATES}
-      onValidate={createMockValidator(EXISTING_STREAM_NAMES, HIGHER_PRIORITY_PATTERNS, 500)}
-    />
-  ),
+  render: () => {
+    const validator = createMockValidator(EXISTING_STREAM_NAMES, HIGHER_PRIORITY_PATTERNS, 500);
+    return (
+      <CreateClassicStreamFlyout
+        onClose={action('onClose')}
+        onCreate={action('onCreate')}
+        onCreateTemplate={action('onCreateTemplate')}
+        onRetryLoadTemplates={action('onRetryLoadTemplates')}
+        templates={MOCK_TEMPLATES}
+        onValidate={validator}
+      />
+    );
+  },
 };
 
 /**
@@ -352,16 +351,19 @@ export const WithValidation: Story = {
  * 5. Observe if validation state shows incorrect error for "test" after "valid" should be valid
  */
 export const WithSlowValidation: Story = {
-  render: () => (
-    <CreateClassicStreamFlyout
-      onClose={action('onClose')}
-      onCreate={action('onCreate')}
-      onCreateTemplate={action('onCreateTemplate')}
-      onRetryLoadTemplates={action('onRetryLoadTemplates')}
-      templates={MOCK_TEMPLATES}
-      onValidate={createMockValidator(EXISTING_STREAM_NAMES, HIGHER_PRIORITY_PATTERNS, 3000)}
-    />
-  ),
+  render: () => {
+    const validator = createMockValidator(EXISTING_STREAM_NAMES, HIGHER_PRIORITY_PATTERNS, 3000);
+    return (
+      <CreateClassicStreamFlyout
+        onClose={action('onClose')}
+        onCreate={action('onCreate')}
+        onCreateTemplate={action('onCreateTemplate')}
+        onRetryLoadTemplates={action('onRetryLoadTemplates')}
+        templates={MOCK_TEMPLATES}
+        onValidate={validator}
+      />
+    );
+  },
 };
 
 export const EmptyState: Story = {

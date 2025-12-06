@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ValidationErrorType } from '../../utils';
@@ -138,30 +138,30 @@ export const StreamNameInput = ({
   const inputGroups = useMemo(() => createInputGroups(segments), [segments]);
   const wildcardCount = useMemo(() => countWildcards(indexPattern), [indexPattern]);
 
-  // Internal state for wildcard values
+  // Parent is expected to pass key={indexPattern} to reset state on pattern change
   const [parts, setParts] = useState<string[]>(() => Array(wildcardCount).fill(''));
 
-  // Reset parts when index pattern changes
-  useEffect(() => {
-    setParts(Array(wildcardCount).fill(''));
-  }, [indexPattern, wildcardCount]);
+  // Call onChange once on mount to notify parent of initial stream name
+  const initializedRef = useRef(false);
+  if (!initializedRef.current) {
+    initializedRef.current = true;
+    onChange(buildStreamName(indexPattern, Array(wildcardCount).fill('')));
+  }
 
-  // Update stream name when wildcard values change
-  useEffect(() => {
-    const streamName = buildStreamName(indexPattern, parts);
-    onChange(streamName);
-  }, [indexPattern, parts, onChange]);
-
-  const handleWildcardChange = useCallback((wildcardIndex: number, newValue: string) => {
-    setParts((prevParts) => {
-      const newParts = [...prevParts];
-      while (newParts.length <= wildcardIndex) {
-        newParts.push('');
-      }
-      newParts[wildcardIndex] = newValue;
-      return newParts;
-    });
-  }, []);
+  const handleWildcardChange = useCallback(
+    (wildcardIndex: number, newValue: string) => {
+      setParts((prevParts) => {
+        const newParts = [...prevParts];
+        while (newParts.length <= wildcardIndex) {
+          newParts.push('');
+        }
+        newParts[wildcardIndex] = newValue;
+        onChange(buildStreamName(indexPattern, newParts));
+        return newParts;
+      });
+    },
+    [indexPattern, onChange]
+  );
 
   const hasMultipleWildcards = wildcardCount > 1;
 

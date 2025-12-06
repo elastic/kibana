@@ -155,10 +155,10 @@ describe('StreamNameInput', () => {
   });
 
   describe('pattern changes', () => {
-    it('resets input values when pattern changes', () => {
+    it('resets input values when pattern changes (via key prop)', () => {
       const onChange = jest.fn();
       const { getByTestId, rerender } = render(
-        <StreamNameInput {...defaultProps} indexPattern="logs-*" onChange={onChange} />
+        <StreamNameInput {...defaultProps} key="logs-*" indexPattern="logs-*" onChange={onChange} />
       );
 
       // Fill in the input
@@ -166,17 +166,24 @@ describe('StreamNameInput', () => {
       fireEvent.change(input, { target: { value: 'mystream' } });
       expect(input).toHaveValue('mystream');
 
-      // Change the pattern
-      rerender(<StreamNameInput {...defaultProps} indexPattern="metrics-*" onChange={onChange} />);
+      // Change the pattern with a new key to force remount
+      rerender(
+        <StreamNameInput
+          {...defaultProps}
+          key="metrics-*"
+          indexPattern="metrics-*"
+          onChange={onChange}
+        />
+      );
 
       // Input should be reset
       const newInput = getByTestId('streamNameInput-wildcard-0');
       expect(newInput).toHaveValue('');
     });
 
-    it('updates number of inputs when pattern wildcard count changes', () => {
+    it('updates number of inputs when pattern wildcard count changes (via key prop)', () => {
       const { getByTestId, queryByTestId, rerender } = render(
-        <StreamNameInput {...defaultProps} indexPattern="*-logs-*-*" />
+        <StreamNameInput {...defaultProps} key="*-logs-*-*" indexPattern="*-logs-*-*" />
       );
 
       // Initially 3 wildcards
@@ -184,8 +191,8 @@ describe('StreamNameInput', () => {
       expect(getByTestId('streamNameInput-wildcard-1')).toBeInTheDocument();
       expect(getByTestId('streamNameInput-wildcard-2')).toBeInTheDocument();
 
-      // Change to single wildcard pattern
-      rerender(<StreamNameInput {...defaultProps} indexPattern="logs-*" />);
+      // Change to single wildcard pattern with new key
+      rerender(<StreamNameInput {...defaultProps} key="logs-*" indexPattern="logs-*" />);
 
       // Should now have only 1 wildcard
       expect(getByTestId('streamNameInput-wildcard-0')).toBeInTheDocument();

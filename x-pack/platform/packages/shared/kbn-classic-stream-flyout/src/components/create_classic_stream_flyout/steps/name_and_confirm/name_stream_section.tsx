@@ -132,6 +132,7 @@ export const NameStreamSection = ({
         }
       >
         <StreamNameInput
+          key={currentPattern}
           indexPattern={currentPattern}
           onChange={onStreamNameChange}
           validationError={validationError}
