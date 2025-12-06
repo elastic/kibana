@@ -36,39 +36,37 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ({ logsSynthtraceEsClient } = await createSyntheticLogsWithErrorsAndCorrelationIds({
           getService,
           timerangeStart: 'now-10m',
-          logGroups: [
-            [
-              {
-                level: 'info',
-                message: 'Starting payment processing',
-                'service.name': 'payment-service',
-                'trace.id': 'trace-123',
-              },
-              {
-                level: 'debug',
-                message: 'Validating payment details',
-                'service.name': 'payment-service',
-                'trace.id': 'trace-123',
-              },
-              {
-                level: 'error',
-                message: 'Payment gateway timeout',
-                'service.name': 'payment-service',
-                'trace.id': 'trace-123',
-              },
-              {
-                level: 'warn',
-                message: 'Retrying payment',
-                'service.name': 'payment-service',
-                'trace.id': 'trace-123',
-              },
-              {
-                level: 'info',
-                message: 'Payment completed',
-                'service.name': 'payment-service',
-                'trace.id': 'trace-123',
-              },
-            ],
+          logs: [
+            {
+              level: 'info',
+              message: 'Starting payment processing',
+              'service.name': 'payment-service',
+              'trace.id': 'trace-123',
+            },
+            {
+              level: 'debug',
+              message: 'Validating payment details',
+              'service.name': 'payment-service',
+              'trace.id': 'trace-123',
+            },
+            {
+              level: 'error',
+              message: 'Payment gateway timeout',
+              'service.name': 'payment-service',
+              'trace.id': 'trace-123',
+            },
+            {
+              level: 'warn',
+              message: 'Retrying payment',
+              'service.name': 'payment-service',
+              'trace.id': 'trace-123',
+            },
+            {
+              level: 'info',
+              message: 'Payment completed',
+              'service.name': 'payment-service',
+              'trace.id': 'trace-123',
+            },
           ],
         }));
       });
@@ -135,13 +133,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ({ logsSynthtraceEsClient } = await createSyntheticLogsWithErrorsAndCorrelationIds({
           getService,
           timerangeStart: 'now-10m',
-          logGroups: [
-            [
-              { level: 'info', message: 'Request started', ...sharedLogAttributes },
-              { level: 'error', message: 'Database connection failed', ...sharedLogAttributes },
-              { level: 'error', message: 'Rollback failed', ...sharedLogAttributes },
-              { level: 'warn', message: 'Request aborted', ...sharedLogAttributes },
-            ],
+          logs: [
+            { level: 'info', message: 'Request started', ...sharedLogAttributes },
+            { level: 'error', message: 'Database connection failed', ...sharedLogAttributes },
+            { level: 'error', message: 'Rollback failed', ...sharedLogAttributes },
+            { level: 'warn', message: 'Request aborted', ...sharedLogAttributes },
           ],
         }));
       });
@@ -185,35 +181,32 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ({ logsSynthtraceEsClient } = await createSyntheticLogsWithErrorsAndCorrelationIds({
           getService,
           timerangeStart: 'now-10m',
-          logGroups: [
-            [
-              {
-                level: 'info',
-                message: 'Payment flow started',
-                'service.name': 'multi-service',
-                'trace.id': 'trace-payment',
-              },
-              {
-                level: 'error',
-                message: 'Payment error',
-                'service.name': 'multi-service',
-                'trace.id': 'trace-payment',
-              },
-            ],
-            [
-              {
-                level: 'info',
-                message: 'Refund flow started',
-                'service.name': 'multi-service',
-                'transaction.id': 'txn-refund',
-              },
-              {
-                level: 'error',
-                message: 'Refund error',
-                'service.name': 'multi-service',
-                'transaction.id': 'txn-refund',
-              },
-            ],
+          logs: [
+            {
+              level: 'info',
+              message: 'Payment flow started',
+              'service.name': 'multi-service',
+              'trace.id': 'trace-payment',
+            },
+            {
+              level: 'error',
+              message: 'Payment error',
+              'service.name': 'multi-service',
+              'trace.id': 'trace-payment',
+            },
+
+            {
+              level: 'info',
+              message: 'Refund flow started',
+              'service.name': 'multi-service',
+              'transaction.id': 'txn-refund',
+            },
+            {
+              level: 'error',
+              message: 'Refund error',
+              'service.name': 'multi-service',
+              'transaction.id': 'txn-refund',
+            },
           ],
         }));
       });
@@ -265,20 +258,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ({ logsSynthtraceEsClient } = await createSyntheticLogsWithErrorsAndCorrelationIds({
           getService,
           timerangeStart: 'now-10m',
-          logGroups: [
-            [
-              {
-                level: 'info',
-                message: 'Uncorrelated info',
-                'service.name': 'no-correlation-service',
-              },
-              {
-                level: 'error',
-                message: 'Uncorrelated error',
-                'service.name': 'no-correlation-service',
-              },
-              // No correlation ID fields
-            ],
+          logs: [
+            {
+              level: 'info',
+              message: 'Uncorrelated info',
+              'service.name': 'no-correlation-service',
+            },
+            {
+              level: 'error',
+              message: 'Uncorrelated error',
+              'service.name': 'no-correlation-service',
+            },
           ],
         }));
       });
@@ -303,23 +293,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ({ logsSynthtraceEsClient } = await createSyntheticLogsWithErrorsAndCorrelationIds({
           getService,
           timerangeStart: 'now-10m',
-          logGroups: [
-            [
-              {
-                level: 'error',
-                message: 'Error in service A',
-                'service.name': 'service-a',
-                'trace.id': 'trace-a',
-              },
-            ],
-            [
-              {
-                level: 'error',
-                message: 'Error in service B',
-                'service.name': 'service-b',
-                'trace.id': 'trace-b',
-              },
-            ],
+          logs: [
+            {
+              level: 'error',
+              message: 'Error in service A',
+              'service.name': 'service-a',
+              'trace.id': 'trace-a',
+            },
+
+            {
+              level: 'error',
+              message: 'Error in service B',
+              'service.name': 'service-b',
+              'trace.id': 'trace-b',
+            },
           ],
         }));
       });
@@ -345,55 +332,51 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ({ logsSynthtraceEsClient } = await createSyntheticLogsWithErrorsAndCorrelationIds({
           getService,
           timerangeStart: 'now-10m',
-          logGroups: [
-            [
-              {
-                level: 'info',
-                message: 'Syslog request started',
-                'service.name': 'syslog-service',
-                'trace.id': 'syslog-trace',
-                'syslog.severity': 6,
-              },
-              {
-                level: 'info',
-                message: 'Syslog error occurred',
-                'service.name': 'syslog-service',
-                'trace.id': 'syslog-trace',
-                'syslog.severity': 3,
-              },
-            ],
-            [
-              {
-                level: 'info',
-                message: 'OpenTelemetry request started',
-                'service.name': 'otel-service',
-                'request.id': 'otel-req',
-                SeverityNumber: 9,
-              },
-              {
-                level: 'info',
-                message: 'OpenTelemetry error occurred',
-                'service.name': 'otel-service',
-                'request.id': 'otel-req',
-                SeverityNumber: 17,
-              },
-            ],
-            [
-              {
-                level: 'info',
-                message: 'HTTP request started',
-                'service.name': 'http-service',
-                'correlation.id': 'http-corr',
-                'http.response.status_code': 200,
-              },
-              {
-                level: 'info',
-                message: 'HTTP error occurred',
-                'service.name': 'http-service',
-                'correlation.id': 'http-corr',
-                'http.response.status_code': 500,
-              },
-            ],
+          logs: [
+            {
+              level: 'info',
+              message: 'Syslog request started',
+              'service.name': 'syslog-service',
+              'trace.id': 'syslog-trace',
+              'syslog.severity': 6,
+            },
+            {
+              level: 'info',
+              message: 'Syslog error occurred',
+              'service.name': 'syslog-service',
+              'trace.id': 'syslog-trace',
+              'syslog.severity': 3,
+            },
+
+            {
+              level: 'info',
+              message: 'OpenTelemetry request started',
+              'service.name': 'otel-service',
+              'request.id': 'otel-req',
+              SeverityNumber: 9,
+            },
+            {
+              level: 'info',
+              message: 'OpenTelemetry error occurred',
+              'service.name': 'otel-service',
+              'request.id': 'otel-req',
+              SeverityNumber: 17,
+            },
+
+            {
+              level: 'info',
+              message: 'HTTP request started',
+              'service.name': 'http-service',
+              'correlation.id': 'http-corr',
+              'http.response.status_code': 200,
+            },
+            {
+              level: 'info',
+              message: 'HTTP error occurred',
+              'service.name': 'http-service',
+              'correlation.id': 'http-corr',
+              'http.response.status_code': 500,
+            },
           ],
         }));
       });
@@ -434,11 +417,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ({ logsSynthtraceEsClient } = await createSyntheticLogsWithErrorsAndCorrelationIds({
           getService,
           timerangeStart: 'now-10m',
-          logGroups: [
-            [
-              { level: 'info', message: 'Request with multiple IDs started', ...shared },
-              { level: 'error', message: 'Error with multiple correlation IDs', ...shared },
-            ],
+          logs: [
+            { level: 'info', message: 'Request with multiple IDs started', ...shared },
+            { level: 'error', message: 'Error with multiple correlation IDs', ...shared },
           ],
         }));
       });
@@ -474,31 +455,25 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ({ logsSynthtraceEsClient } = await createSyntheticLogsWithErrorsAndCorrelationIds({
           getService,
           timerangeStart: 'now-10m',
-          logGroups: [
-            [
-              {
-                level: 'severe',
-                message: 'Java severe error',
-                'service.name': 'java-service',
-                'trace.id': 'java-trace',
-              },
-            ],
-            [
-              {
-                level: 'warning',
-                message: 'System warning',
-                'service.name': 'system-service',
-                'request.id': 'system-req',
-              },
-            ],
-            [
-              {
-                level: 'warn',
-                message: 'Application warn',
-                'service.name': 'app-service',
-                'transaction.id': 'app-txn',
-              },
-            ],
+          logs: [
+            {
+              level: 'severe',
+              message: 'Java severe error',
+              'service.name': 'java-service',
+              'trace.id': 'java-trace',
+            },
+            {
+              level: 'warning',
+              message: 'System warning',
+              'service.name': 'system-service',
+              'request.id': 'system-req',
+            },
+            {
+              level: 'warn',
+              message: 'Application warn',
+              'service.name': 'app-service',
+              'transaction.id': 'app-txn',
+            },
           ],
         }));
       });
@@ -532,63 +507,62 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ({ logsSynthtraceEsClient } = await createSyntheticLogsWithErrorsAndCorrelationIds({
           getService,
           timerangeStart: 'now-10m',
-          logGroups: [
-            [
-              {
-                level: 'info',
-                message: 'Session started',
-                'service.name': 'session-service',
-                'session.id': 'session-abc-123',
-              },
-              {
-                level: 'error',
-                message: 'Session error',
-                'service.name': 'session-service',
-                'session.id': 'session-abc-123',
-              },
-            ],
-            [
-              {
-                level: 'info',
-                message: 'HTTP request received',
-                'service.name': 'http-server',
-                'http.request.id': 'http-req-456',
-              },
-              {
-                level: 'error',
-                message: 'HTTP processing error',
-                'service.name': 'http-server',
-                'http.request.id': 'http-req-456',
-              },
-            ],
-            [
-              {
-                level: 'info',
-                message: 'Event processing started',
-                'service.name': 'event-processor',
-                'event.id': 'evt-789',
-              },
-              {
-                level: 'error',
-                message: 'Event processing failed',
-                'service.name': 'event-processor',
-                'event.id': 'evt-789',
-              },
-            ],
-            [
-              {
-                level: 'info',
-                message: 'Cloud trace started',
-                'service.name': 'cloud-service',
-                'cloud.trace_id': 'cloud-trace-xyz',
-              },
-              {
-                level: 'error',
-                message: 'Cloud operation failed',
-                'service.name': 'cloud-service',
-                'cloud.trace_id': 'cloud-trace-xyz',
-              },
-            ],
+          logs: [
+            // session.id
+            {
+              level: 'info',
+              message: 'Session started',
+              'service.name': 'session-service',
+              'session.id': 'session-abc-123',
+            },
+            {
+              level: 'error',
+              message: 'Session error',
+              'service.name': 'session-service',
+              'session.id': 'session-abc-123',
+            },
+
+            // http.request.id
+            {
+              level: 'info',
+              message: 'HTTP request received',
+              'service.name': 'http-server',
+              'http.request.id': 'http-req-456',
+            },
+            {
+              level: 'error',
+              message: 'HTTP processing error',
+              'service.name': 'http-server',
+              'http.request.id': 'http-req-456',
+            },
+
+            // event.id
+            {
+              level: 'info',
+              message: 'Event processing started',
+              'service.name': 'event-processor',
+              'event.id': 'evt-789',
+            },
+            {
+              level: 'error',
+              message: 'Event processing failed',
+              'service.name': 'event-processor',
+              'event.id': 'evt-789',
+            },
+
+            // cloud.trace_id
+            {
+              level: 'info',
+              message: 'Cloud trace started',
+              'service.name': 'cloud-service',
+              'cloud.trace_id': 'cloud-trace-xyz',
+            },
+            {
+              level: 'error',
+              message: 'Cloud operation failed',
+              'service.name': 'cloud-service',
+              'cloud.trace_id': 'cloud-trace-xyz',
+            },
           ],
         }));
       });

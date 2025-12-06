@@ -12,38 +12,36 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provi
 
 export async function createSyntheticLogsWithErrorsAndCorrelationIds({
   getService,
-  logGroups,
+  logs,
   timerangeStart,
 }: {
   getService: DeploymentAgnosticFtrProviderContext['getService'];
-  logGroups: Array<Array<{ level: string; message: string; [key: string]: unknown }>>;
+  logs: Array<{ level: string; message: string; [key: string]: unknown }>;
   timerangeStart: string;
 }): Promise<{ logsSynthtraceEsClient: LogsSynthtraceEsClient }> {
   const synthtrace = getService('synthtrace');
   const logsSynthtraceEsClient = synthtrace.createLogsSynthtraceEsClient();
   const range = timerange(timerangeStart, 'now');
 
-  const logs = range
+  const synthLogs = range
     .interval('5m')
     .rate(1)
     .generator((timestamp) => {
       const baseTime = timestamp;
 
-      return logGroups.flatMap((logGroupEvents) => {
-        return logGroupEvents.map((event, index) => {
-          const { level, message, ...logAttributes } = event;
-          return log
-            .create()
-            .message(message)
-            .logLevel(level.toUpperCase())
-            .defaults(logAttributes)
-            .timestamp(baseTime + index * 10000);
-        });
+      return logs.map((event, index) => {
+        const { level, message, ...logAttributes } = event;
+        return log
+          .create()
+          .message(message)
+          .logLevel(level.toUpperCase())
+          .defaults(logAttributes)
+          .timestamp(baseTime + index * 10000);
       });
     });
 
   const logsWithoutCorrelationId = getLogsWithoutCorrelationId({ range });
-  await logsSynthtraceEsClient.index([logs, logsWithoutCorrelationId]);
+  await logsSynthtraceEsClient.index([synthLogs, logsWithoutCorrelationId]);
 
   return { logsSynthtraceEsClient };
 }
