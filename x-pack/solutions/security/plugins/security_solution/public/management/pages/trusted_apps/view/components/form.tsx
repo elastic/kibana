@@ -383,9 +383,9 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
       (updatedFormValues?: ArtifactFormComponentProps['item']) => {
         const updatedItem = updatedFormValues
           ? {
-              ...item,
-              ...updatedFormValues,
-            }
+            ...item,
+            ...updatedFormValues,
+          }
           : item;
 
         const updatedValidationResult: ValidationResult = validateValues(updatedItem);
@@ -393,13 +393,13 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
 
         onChange({
           item: updatedItem,
-          isValid: updatedValidationResult.isValid && conditionsState.areValid,
+          isValid: updatedValidationResult.isValid && conditionsState.areValid && hasFormChanged,
           confirmModalLabels: updatedValidationResult.extraWarning
             ? CONFIRM_WARNING_MODAL_LABELS(
-                i18n.translate('xpack.securitySolution.trustedApps.flyoutForm.confirmModal.name', {
-                  defaultMessage: 'trusted application',
-                })
-              )
+              i18n.translate('xpack.securitySolution.trustedApps.flyoutForm.confirmModal.name', {
+                defaultMessage: 'trusted application',
+              })
+            )
             : undefined,
         });
       },
@@ -609,10 +609,12 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
     const handleOnBuilderChange = useCallback(
       (arg: OnChangeProps) => {
         // Early return for unnecessary calls to prevent infinite loops
-        if (!arg.exceptionItems?.[0] && !hasFormChanged) {
+        if (!arg.exceptionItems?.[0] && !hasFormChanged || isEqual(arg.exceptionItems[0]?.entries, item?.entries)) {
+          console.log('1')
           return;
         }
 
+        console.log('check', arg.exceptionItems?.[0], hasFormChanged)
         const currentItem = item;
         const newEntries = arg.exceptionItems[0]?.entries;
 
@@ -623,6 +625,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         if (!hasActualChanges && hasFormChanged) {
           // Only handle duplicate field detection for unchanged forms
           if (newEntries) {
+            console.log('2')
             const addedFields = newEntries.map((e) => e.field) || [''];
             setConditionsState((prev) => ({
               ...prev,
@@ -630,8 +633,10 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
             }));
             return;
           }
+          console.log('3')
         }
 
+        console.log('4')
         // Batch all condition state updates
         setConditionsState((prev) => ({
           ...prev,
@@ -647,20 +652,21 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         const updatedItem: ArtifactFormComponentProps['item'] =
           arg.exceptionItems[0] !== undefined
             ? ({
-                ...arg.exceptionItems[0],
-                name: currentItem?.name ?? '',
-                description: currentItem?.description ?? '',
-                comments: currentItem?.comments ?? [],
-                os_types: currentItem?.os_types ?? [OperatingSystem.WINDOWS],
-                tags: currentItem?.tags ?? [],
-                meta: currentItem.meta,
-              } as ArtifactFormComponentProps['item'])
+              ...arg.exceptionItems[0],
+              name: currentItem?.name ?? '',
+              description: currentItem?.description ?? '',
+              comments: currentItem?.comments ?? [],
+              os_types: currentItem?.os_types ?? [OperatingSystem.WINDOWS],
+              tags: currentItem?.tags ?? [],
+              meta: currentItem.meta,
+            } as ArtifactFormComponentProps['item'])
             : {
-                ...currentItem,
-                entries: [{ field: '', operator: 'included', type: 'match', value: '' }],
-              };
+              ...currentItem,
+              entries: [{ field: '', operator: 'included', type: 'match', value: '' }],
+            };
         processChanged(updatedItem);
         if (!hasFormChanged) {
+          console.log('form changed via builder');
           setHasFormChanged(true);
         }
       },
