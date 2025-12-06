@@ -20,6 +20,7 @@ import {
   findListItems as findVisualizationListItems,
   toTableListViewSavedObject,
   showNewVisModal,
+  getNoItemsMessage,
 } from '@kbn/visualizations-plugin/public';
 import type { EventAnnotationGroupContent } from '@kbn/event-annotation-common';
 
@@ -216,8 +217,11 @@ export const useDashboardListingTable = ({
     []
   );
 
-  const emptyPrompt = useMemo(
-    () => (
+  const emptyPrompt = useMemo(() => {
+    if (contentTypeFilter === 'visualizations') {
+      return getNoItemsMessage(createItem);
+    }
+    return (
       <DashboardListingEmptyPrompt
         createItem={createItem}
         disableCreateDashboardButton={disableCreateDashboardButton}
@@ -226,15 +230,15 @@ export const useDashboardListingTable = ({
         unsavedDashboardIds={unsavedDashboardIds}
         useSessionStorageIntegration={useSessionStorageIntegration}
       />
-    ),
-    [
-      createItem,
-      disableCreateDashboardButton,
-      goToDashboard,
-      unsavedDashboardIds,
-      useSessionStorageIntegration,
-    ]
-  );
+    );
+  }, [
+    contentTypeFilter,
+    createItem,
+    disableCreateDashboardButton,
+    goToDashboard,
+    unsavedDashboardIds,
+    useSessionStorageIntegration,
+  ]);
 
   const findItems = useCallback(
     async (

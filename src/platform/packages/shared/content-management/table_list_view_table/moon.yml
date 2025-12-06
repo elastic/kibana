@@ -40,7 +40,6 @@ dependsOn:
   - '@kbn/kibana-utils-plugin'
   - '@kbn/shared-ux-table-persist'
   - '@kbn/react-query'
-  - '@kbn/visualizations-plugin'
 tags:
   - shared-browser
   - package

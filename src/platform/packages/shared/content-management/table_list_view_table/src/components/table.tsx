@@ -33,7 +33,6 @@ import {
   cssFavoriteHoverWithinEuiTableRow,
   useFavorites,
 } from '@kbn/content-management-favorites-public';
-import type { TabEntityNameConfig } from './tabbed_filter';
 
 import { useServices } from '../services';
 import type { Action } from '../actions';
@@ -53,8 +52,6 @@ import {
   NULL_USER as USER_FILTER_NULL_USER,
 } from './user_filter_panel';
 import { FavoritesFilterButton } from './favorites_filter_panel';
-
-import { TabbedTableFilter } from './tabbed_filter';
 
 type State<T extends UserContentCommonSchema> = Pick<
   TableListViewState<T>,
@@ -148,11 +145,6 @@ export function Table<T extends UserContentCommonSchema>({
       </EuiButton>
     );
   }, [deleteItems, dispatch, entityName, entityNamePlural, selectedIds.length]);
-
-  // Dynamic create button for toolbar (changes based on active tab)
-  const renderDynamicCreateButton = useCallback(() => {
-    return renderCreateButton(true);
-  }, [renderCreateButton]);
 
   const selection = useMemo<EuiTableSelectionType<T> | undefined>(() => {
     if (deleteItems) {
@@ -266,7 +258,7 @@ export function Table<T extends UserContentCommonSchema>({
     return {
       onChange: onTableSearchChange,
       toolsLeft: renderToolsLeft(),
-      toolsRight: renderDynamicCreateButton(),
+      toolsRight: renderCreateButton(),
       query: searchQuery.query ?? undefined,
       box: {
         incremental: true,
@@ -292,7 +284,7 @@ export function Table<T extends UserContentCommonSchema>({
     };
   }, [
     onTableSearchChange,
-    renderDynamicCreateButton,
+    renderCreateButton,
     renderToolsLeft,
     searchFilters,
     searchQuery.query,
@@ -321,7 +313,7 @@ export function Table<T extends UserContentCommonSchema>({
   }, [entityNamePlural]);
 
   const emptyPromptActions = useMemo(() => {
-    return renderCreateButton(false);
+    return renderCreateButton();
   }, [renderCreateButton]);
 
   const { data: favorites, isError: favoritesError } = useFavorites({ enabled: favoritesEnabled });
@@ -400,8 +392,9 @@ export function Table<T extends UserContentCommonSchema>({
             noItemsMessage={
               isFetchingItems ? (
                 <></>
+              ) : emptyPrompt ? (
+                emptyPrompt
               ) : (
-                // Show empty prompt when confirmed no items
                 <EuiEmptyPrompt
                   title={<h3>{emptyPromptTitle}</h3>}
                   titleSize="xs"

@@ -26,13 +26,8 @@ export interface TableListTab<T extends UserContentCommonSchema = UserContentCom
 
 type TabbedTableListViewProps = Pick<
   TableListViewProps<UserContentCommonSchema>,
-  'description' | 'headingId' | 'children'
-> & {
-  title: string;
-  tabs: TableListTab[];
-  activeTabId: string;
-  changeActiveTab: (id: string) => void;
-};
+  'title' | 'description' | 'headingId' | 'children'
+> & { tabs: TableListTab[]; activeTabId: string; changeActiveTab: (id: string) => void };
 
 export const TabbedTableListView = ({
   title,

@@ -169,7 +169,6 @@ export interface State<T extends UserContentCommonSchema = UserContentCommonSche
   tableFilter: {
     createdBy: string[];
     favorites: boolean;
-    activeTab?: string;
   };
 }
 
@@ -181,7 +180,6 @@ export interface URLState {
   };
   filter?: {
     createdBy?: string[];
-    activeTab?: string;
   };
 
   [key: string]: unknown;
@@ -193,7 +191,6 @@ interface URLQueryParams {
   sort?: string;
   sortdir?: string;
   created_by?: string[];
-  activeTab?: string;
 
   [key: string]: unknown;
 }
@@ -253,11 +250,6 @@ const urlStateDeserializer = (params: URLQueryParams): URLState => {
     stateFromURL.filter = { createdBy: [] };
   }
 
-  // Accept any string as activeTab - let the component decide what tabs are valid
-  if (typeof sanitizedParams.activeTab === 'string' && sanitizedParams.activeTab) {
-    stateFromURL.filter.activeTab = sanitizedParams.activeTab;
-  }
-
   return stateFromURL;
 };
 
@@ -272,7 +264,6 @@ const urlStateSerializer = (updated: {
   sort?: { field: 'title' | 'updatedAt'; direction: Direction };
   filter?: {
     createdBy?: string[];
-    activeTab?: string;
   };
 }) => {
   const updatedQueryParams: Partial<URLQueryParams> = {};
@@ -294,10 +285,6 @@ const urlStateSerializer = (updated: {
 
   if (updated.filter?.createdBy) {
     updatedQueryParams.created_by = updated.filter.createdBy;
-  }
-
-  if (updated?.filter?.activeTab) {
-    updatedQueryParams.activeTab = updated.filter.activeTab;
   }
 
   return updatedQueryParams;
@@ -477,7 +464,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       const response = await findItems(searchQueryParsed, {
         references,
         referencesToExclude,
-        tabId: tableFilter.activeTab,
       });
 
       if (!isMounted.current) {
@@ -506,14 +492,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         data: err,
       });
     }
-  }, [
-    searchQueryParser,
-    searchQuery.text,
-    findItems,
-    onFetchSuccess,
-    recentlyAccessed,
-    tableFilter.activeTab,
-  ]);
+  }, [searchQueryParser, searchQuery.text, findItems, onFetchSuccess, recentlyAccessed]);
 
   const updateQuery = useCallback(
     (query: Query | null, error: SearchQueryError | null) => {
@@ -985,27 +964,24 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     dispatch({ type: 'onItemsDeleted' });
   }, [deleteItems, entityName, fetchItems, isDeletingItems, notifyError, selectedItems]);
 
-  const renderCreateButton = useCallback(
-    (fill: boolean = false) => {
-      if (createItem) {
-        return (
-          <EuiButton
-            onClick={() => createItem()}
-            data-test-subj="newItemButton"
-            iconType="plusInCircleFilled"
-            fill={fill}
-          >
-            <FormattedMessage
-              id="contentManagement.tableList.listing.createNewItemButtonLabel"
-              defaultMessage="Create {entityName}"
-              values={{ entityName }}
-            />
-          </EuiButton>
-        );
-      }
-    },
-    [createItem, entityName]
-  );
+  const renderCreateButton = useCallback(() => {
+    if (createItem) {
+      return (
+        <EuiButton
+          onClick={() => createItem()}
+          data-test-subj="newItemButton"
+          iconType="plusInCircleFilled"
+          fill
+        >
+          <FormattedMessage
+            id="contentManagement.tableList.listing.createNewItemButtonLabel"
+            defaultMessage="Create {entityName}"
+            values={{ entityName }}
+          />
+        </EuiButton>
+      );
+    }
+  }, [createItem, entityName]);
 
   const renderNoItemsMessage = useCallback(() => {
     if (emptyPrompt) {
