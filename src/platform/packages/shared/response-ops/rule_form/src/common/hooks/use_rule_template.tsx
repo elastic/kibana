@@ -7,16 +7,15 @@
 
 import { useQuery } from '@kbn/react-query';
 
-import { useKibana } from '../../common/lib/kibana';
-import { loadRuleTemplate } from '../lib/rule_template_api/get_rule_template';
+import { loadRuleTemplate } from '../apis/create_rule_from_template';
 
 export interface UseRuleTemplateProps {
+  http: any;
   templateId?: string;
 }
 
 export function useRuleTemplate(props: UseRuleTemplateProps) {
-  const { templateId } = props;
-  const { http } = useKibana().services;
+  const { http, templateId } = props;
 
   const queryFn = () => {
     if (!templateId) {

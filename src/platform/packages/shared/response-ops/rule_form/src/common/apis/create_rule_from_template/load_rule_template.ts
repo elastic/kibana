@@ -7,8 +7,8 @@
 import type { HttpSetup } from '@kbn/core/public';
 import type { AsApiContract } from '@kbn/actions-plugin/common';
 import type { RuleTemplate } from '../../../types';
-import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
-import { transformRuleTemplate } from '../rule_api/common_transformations';
+import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../constants';
+import { transformRuleTemplate } from '../../transformations';
 
 export async function loadRuleTemplate({
   http,
