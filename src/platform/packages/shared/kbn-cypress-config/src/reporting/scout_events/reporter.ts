@@ -9,12 +9,8 @@
 
 import path from 'node:path';
 import { ToolingLog } from '@kbn/tooling-log';
-import {
-  ScoutTestRunConfigCategory,
-  SCOUT_REPORT_OUTPUT_ROOT,
-  SCOUT_TARGET_MODE,
-  SCOUT_TARGET_TYPE,
-} from '@kbn/scout-info';
+import type { ScoutTestRunConfigCategory } from '@kbn/scout-info';
+import { SCOUT_REPORT_OUTPUT_ROOT, SCOUT_TARGET_MODE, SCOUT_TARGET_TYPE } from '@kbn/scout-info';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ScoutFileInfo } from '@kbn/scout-reporting';
 import {
@@ -68,22 +64,23 @@ export class ScoutCypressReporter {
 
     this.report = new ScoutEventsReport(this.log);
     this.codeOwnersEntries = getCodeOwnersEntries();
+    const configPath = reporterOptions.config?.path || undefined;
+    const category = reporterOptions.config?.category || undefined;
+
     this.baseTestRunInfo = {
       id: this.runId,
       target: {
         type: SCOUT_TARGET_TYPE,
         mode: SCOUT_TARGET_MODE,
       },
-      config: reporterOptions.config
+      config: configPath
         ? {
-            file: this.getScoutFileInfoForPath(
-              path.relative(REPO_ROOT, reporterOptions.config.path)
-            ),
-            category: reporterOptions.config.category,
+            file: this.getScoutFileInfoForPath(path.relative(REPO_ROOT, configPath)),
+            category,
           }
         : {
-            file: this.getScoutFileInfoForPath('unknown'),
-            category: ScoutTestRunConfigCategory.UI_TEST,
+            file: this.getScoutFileInfoForPath(''),
+            category,
           },
     };
 
@@ -119,6 +116,43 @@ export class ScoutCypressReporter {
   }
 
   /**
+   * Recursively find the file path by traversing up the parent chain
+   * This is required as test.file can be undefined in some Cypress tests
+   */
+  private getTestFile(test: Mocha.Test): string | undefined {
+    // Try test.file first
+    if (test.file) {
+      return test.file;
+    }
+
+    // Try parent suite
+    if (test.parent) {
+      return this.getSuiteFile(test.parent);
+    }
+
+    // Last resort: check the root suite from the runner
+    if (this.runner.suite?.file) {
+      return this.runner.suite.file;
+    }
+
+    return undefined;
+  }
+
+  private getSuiteFile(suite: Mocha.Suite): string | undefined {
+    // Try suite.file first
+    if (suite.file) {
+      return suite.file;
+    }
+
+    // Try parent suite recursively
+    if (suite.parent) {
+      return this.getSuiteFile(suite.parent);
+    }
+
+    return undefined;
+  }
+
+  /**
    * Root path of this reporter's output
    */
   public get reportRootPath(): string {
@@ -147,6 +181,8 @@ export class ScoutCypressReporter {
     /**
      * Test execution started
      */
+    const testFile = this.getTestFile(test);
+
     this.report.logEvent({
       ...datasources.environmentMetadata,
       reporter: {
@@ -157,14 +193,14 @@ export class ScoutCypressReporter {
       suite: {
         title: test.parent?.fullTitle() || 'unknown',
         type: test.parent?.root ? 'root' : 'suite',
+        file: testFile
+          ? this.getScoutFileInfoForPath(path.relative(REPO_ROOT, testFile))
+          : undefined,
       },
       test: {
         id: getTestIDForTitle(test.fullTitle()),
         title: test.title,
         tags: [],
-        file: test.file
-          ? this.getScoutFileInfoForPath(path.relative(REPO_ROOT, test.file))
-          : undefined,
       },
       event: {
         action: ScoutReportEventAction.TEST_BEGIN,
@@ -176,6 +212,8 @@ export class ScoutCypressReporter {
     /**
      * Test execution ended
      */
+    const testFile = this.getTestFile(test);
+
     this.report.logEvent({
       ...datasources.environmentMetadata,
       reporter: {
@@ -186,14 +224,14 @@ export class ScoutCypressReporter {
       suite: {
         title: test.parent?.fullTitle() || 'unknown',
         type: test.parent?.root ? 'root' : 'suite',
+        file: testFile
+          ? this.getScoutFileInfoForPath(path.relative(REPO_ROOT, testFile))
+          : undefined,
       },
       test: {
         id: getTestIDForTitle(test.fullTitle()),
         title: test.title,
         tags: [],
-        file: test.file
-          ? this.getScoutFileInfoForPath(path.relative(REPO_ROOT, test.file))
-          : undefined,
         status: test.isPending() ? 'skipped' : test.isPassed() ? 'passed' : 'failed',
         duration: test.duration,
       },

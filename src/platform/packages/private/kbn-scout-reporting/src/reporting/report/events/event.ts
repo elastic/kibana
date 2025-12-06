@@ -85,6 +85,7 @@ export interface ScoutTestRunInfo {
 export interface ScoutSuiteInfo {
   title: string;
   type: string;
+  file?: ScoutFileInfo;
 }
 
 /**

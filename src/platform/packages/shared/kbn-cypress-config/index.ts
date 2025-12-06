@@ -19,7 +19,7 @@ import {
 import { REPO_ROOT } from '@kbn/repo-info';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
-import { camelCase } from 'lodash';
+import { camelCase, get } from 'lodash';
 import fs from 'fs';
 
 export const SCOUT_CYPRESS_REPORTER_PATH = path.join(
@@ -27,37 +27,39 @@ export const SCOUT_CYPRESS_REPORTER_PATH = path.join(
   'src/platform/packages/shared/kbn-cypress-config/src/reporting/scout_events'
 );
 
-/**
- * Extract the Cypress spec file path from process arguments or environment
- */
-function getSpecFilePath(): string {
-  // Try to get from process.argv (when running via Cypress CLI)
-  const specArgIndex = process.argv.findIndex((arg) => arg === '--spec');
-  if (specArgIndex !== -1 && process.argv[specArgIndex + 1]) {
-    return process.argv[specArgIndex + 1];
+function getConfigFile(): string {
+  const fileArgIndex = process.argv.findIndex((arg) => arg === '--file');
+  if (fileArgIndex !== -1) {
+    return process.argv[fileArgIndex + 1];
   }
-
   return '';
 }
 
-/**
- * Detect if a spec file is a UI test or API test based on file path and naming patterns
- */
-function detectTestCategory(specPath: string): ScoutTestRunConfigCategory {
-  if (!specPath) {
-    return ScoutTestRunConfigCategory.UI_TEST; // Default to UI test
+function getProjectRoot(): string {
+  const projectRootIndex = process.argv.findIndex((arg) => arg === '--projectRoot');
+  if (projectRootIndex !== -1) {
+    return process.argv[projectRootIndex + 1];
+  }
+  return '';
+}
+
+function getCategoryFromPath(configPath: string): ScoutTestRunConfigCategory {
+  // Check for API integration tests
+  if (configPath.includes('api_integration') || configPath.includes('/api/')) {
+    return ScoutTestRunConfigCategory.API_TEST;
   }
 
-  // Normalize path for consistent checking
-  const normalizedPath = specPath.toLowerCase();
+  // Check for unit tests
+  if (
+    configPath.includes('unit') ||
+    configPath.includes('.test.') ||
+    configPath.includes('.spec.')
+  ) {
+    return ScoutTestRunConfigCategory.UNIT_TEST;
+  }
 
-  // API test indicators
-  const apiPatterns = ['/api/', '/api_integration/', 'api.cy.', 'api_', '/apis/'];
-
-  // Check if path matches API patterns
-  const isApiTest = apiPatterns.some((pattern) => normalizedPath.includes(pattern));
-
-  return isApiTest ? ScoutTestRunConfigCategory.API_TEST : ScoutTestRunConfigCategory.UI_TEST;
+  // Default to UI_TEST for Cypress
+  return ScoutTestRunConfigCategory.UI_TEST;
 }
 
 function getReportingOptionOverrides(options?: Cypress.ConfigOptions): Record<string, any> {
@@ -83,12 +85,9 @@ function getReportingOptionOverrides(options?: Cypress.ConfigOptions): Record<st
         readFileSync(path.join(process.cwd(), reporterOptions.configFile), 'utf8')
       );
     } else {
-      // Count number of slashes to determine directory depth
-      const slashCount = (reporterOptions.configFile.match(/\//g) || []).length - 1;
-      // Move up directories based on slash count to find the config file
-      const searchDir = path.join(process.cwd(), '../'.repeat(slashCount));
+      // Else get the project root and read the config file from there
       reporterOptions = JSON.parse(
-        readFileSync(path.join(searchDir, reporterOptions.configFile), 'utf8')
+        readFileSync(path.join(getProjectRoot(), reporterOptions.configFile), 'utf8')
       );
     }
   }
@@ -99,18 +98,16 @@ function getReportingOptionOverrides(options?: Cypress.ConfigOptions): Record<st
 
   if (SCOUT_REPORTER_ENABLED) {
     enabledReporters.push(SCOUT_CYPRESS_REPORTER_PATH);
-    const specPath = getSpecFilePath();
+    const configFile = getConfigFile();
+    const category = getCategoryFromPath(configFile);
+
     reporterOptions[`${camelCase(SCOUT_CYPRESS_REPORTER_PATH)}ReporterOptions`] = {
       name: 'cypress',
       outputPath: SCOUT_REPORT_OUTPUT_ROOT,
-      // Config will be determined at runtime from test.file
-      // Pass spec path only if available at config time for logging purposes
-      config: specPath
-        ? {
-            path: specPath,
-            category: detectTestCategory(specPath),
-          }
-        : undefined,
+      config: {
+        path: configFile,
+        category,
+      },
     };
   }
 
