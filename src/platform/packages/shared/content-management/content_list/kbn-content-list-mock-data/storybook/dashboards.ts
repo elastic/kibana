@@ -8,22 +8,22 @@
  */
 
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import type { ContentStatus } from './types';
 
 /**
  * Mock dashboard item matching the real DashboardSavedObjectUserContent type from
- * `src/platform/plugins/shared/dashboard/public/dashboard_listing/types.ts`
+ * `src/platform/plugins/shared/dashboard/public/dashboard_listing/types.ts`.
  */
 export interface DashboardMockItem extends UserContentCommonSchema {
   type: 'dashboard';
   attributes: {
     title: string;
     description?: string;
-    /** Whether dashboard should restore saved time range when opened */
+    /** Whether dashboard should restore saved time range when opened. */
     timeRestore: boolean;
   };
   managed?: boolean;
-  /** Dashboards can be favorited */
-  canFavorite: true;
+  status?: ContentStatus;
 }
 
 /**
@@ -47,7 +47,6 @@ export const MOCK_DASHBOARDS: DashboardMockItem[] = [
       { type: 'tag', id: 'tag-important', name: 'Important' },
     ],
     managed: false,
-    canFavorite: true,
   },
   {
     id: 'dashboard-002',
@@ -66,7 +65,6 @@ export const MOCK_DASHBOARDS: DashboardMockItem[] = [
       { type: 'tag', id: 'fleet-managed-default', name: 'Managed' },
     ],
     managed: true,
-    canFavorite: true,
   },
   {
     id: 'dashboard-003',
@@ -82,7 +80,6 @@ export const MOCK_DASHBOARDS: DashboardMockItem[] = [
     },
     references: [{ type: 'tag', id: 'tag-development', name: 'Development' }],
     managed: false,
-    canFavorite: true,
   },
   {
     id: 'dashboard-004',
@@ -98,7 +95,6 @@ export const MOCK_DASHBOARDS: DashboardMockItem[] = [
     },
     references: [{ type: 'tag', id: 'tag-production', name: 'Production' }],
     managed: false,
-    canFavorite: true,
   },
   {
     id: 'dashboard-005',
@@ -113,7 +109,6 @@ export const MOCK_DASHBOARDS: DashboardMockItem[] = [
     },
     references: [],
     managed: false,
-    canFavorite: true,
   },
   {
     id: 'dashboard-006',
@@ -129,7 +124,6 @@ export const MOCK_DASHBOARDS: DashboardMockItem[] = [
     },
     references: [{ type: 'tag', id: 'tag-archived', name: 'Archived' }],
     managed: false,
-    canFavorite: true,
   },
   {
     id: 'dashboard-007',
@@ -148,7 +142,6 @@ export const MOCK_DASHBOARDS: DashboardMockItem[] = [
       { type: 'tag', id: 'tag-important', name: 'Important' },
     ],
     managed: false,
-    canFavorite: true,
   },
   {
     id: 'dashboard-008',
@@ -163,7 +156,6 @@ export const MOCK_DASHBOARDS: DashboardMockItem[] = [
     },
     references: [{ type: 'tag', id: 'tag-production', name: 'Production' }],
     managed: false,
-    canFavorite: true,
   },
 ];
 
