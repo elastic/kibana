@@ -8,7 +8,16 @@
  */
 
 // Types
-export { type VisualizationType, VISUALIZATION_TYPES, MOCK_USERS, type MockUser } from './types';
+export {
+  type ContentStatus,
+  STATUS_CONFIG,
+  STATUS_DISTRIBUTION,
+  getStatusByIndex,
+  type VisualizationType,
+  VISUALIZATION_TYPES,
+  MOCK_USERS,
+  type MockUser,
+} from './types';
 
 // Tags
 export { type MockTag, MOCK_TAGS, TAG_MOCK_SEARCH_RESPONSE } from './tags';
@@ -36,6 +45,8 @@ export {
   type ItemWithStatus,
   createMockFindItems,
   createSimpleMockFindItems,
+  addStatusToItems,
+  statusSortFn,
   mockFindDashboards,
   mockFindMaps,
   mockFindFiles,
@@ -50,5 +61,10 @@ export {
   mockUserProfileServices,
 } from './user_profiles';
 
-// Services
-export { mockFavoritesClient } from './services';
+// Services helper for ContentListProvider
+export {
+  createMockServices,
+  resetMockFavorites,
+  mockFavoritesClient,
+  type MockServicesOptions,
+} from './services';

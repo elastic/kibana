@@ -8,7 +8,7 @@
  */
 
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
-import type { VisualizationType } from './types';
+import type { ContentStatus, VisualizationType } from './types';
 
 /**
  * Mock visualization item matching the real VisualizeUserContent type from
@@ -32,6 +32,7 @@ export interface VisualizationMockItem extends UserContentCommonSchema {
     editApp?: string;
   };
   error?: string;
+  status?: ContentStatus;
 }
 
 /**

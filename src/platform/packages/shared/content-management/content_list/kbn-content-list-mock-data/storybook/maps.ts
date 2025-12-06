@@ -8,6 +8,7 @@
  */
 
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import type { ContentStatus } from './types';
 
 /**
  * Mock map item matching the real MapUserContent type from
@@ -21,6 +22,7 @@ export interface MapMockItem extends UserContentCommonSchema {
     layerListJSON?: string;
   };
   managed?: boolean;
+  status?: ContentStatus;
 }
 
 /**

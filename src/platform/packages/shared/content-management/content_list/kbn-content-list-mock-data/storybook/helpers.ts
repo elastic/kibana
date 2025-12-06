@@ -8,6 +8,7 @@
  */
 
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import { getStatusByIndex, STATUS_CONFIG, type ContentStatus } from './types';
 import { MOCK_DASHBOARDS, type DashboardMockItem } from './dashboards';
 import { MOCK_MAPS, type MapMockItem } from './maps';
 import { MOCK_FILES, type FileMockItem } from './files';
@@ -135,6 +136,32 @@ export function createMockFindItems<T extends UserContentCommonSchema>(
   };
 }
 
+/**
+ * Add status to items based on their index
+ */
+export function addStatusToItems<T extends UserContentCommonSchema>(
+  items: T[]
+): Array<T & { status: ContentStatus }> {
+  return items.map((item, index) => ({
+    ...item,
+    status: getStatusByIndex(index),
+  }));
+}
+
+/**
+ * Status sort function for items with status field
+ */
+export function statusSortFn<T extends { status?: ContentStatus }>(
+  a: T,
+  b: T,
+  direction: 'asc' | 'desc'
+): number {
+  const aPriority = a.status ? STATUS_CONFIG[a.status].priority : 999;
+  const bPriority = b.status ? STATUS_CONFIG[b.status].priority : 999;
+  const comparison = aPriority - bPriority;
+  return direction === 'asc' ? comparison : -comparison;
+}
+
 // =============================================================================
 // PRE-CONFIGURED MOCK FIND ITEMS FUNCTIONS
 // =============================================================================
@@ -143,28 +170,32 @@ export function createMockFindItems<T extends UserContentCommonSchema>(
  * Pre-configured mock findItems for dashboards
  */
 export const mockFindDashboards = createMockFindItems({
-  items: MOCK_DASHBOARDS,
+  items: addStatusToItems(MOCK_DASHBOARDS),
+  statusSortFn,
 });
 
 /**
  * Pre-configured mock findItems for maps
  */
 export const mockFindMaps = createMockFindItems({
-  items: MOCK_MAPS,
+  items: addStatusToItems(MOCK_MAPS),
+  statusSortFn,
 });
 
 /**
  * Pre-configured mock findItems for files
  */
 export const mockFindFiles = createMockFindItems({
-  items: MOCK_FILES,
+  items: addStatusToItems(MOCK_FILES),
+  statusSortFn,
 });
 
 /**
  * Pre-configured mock findItems for visualizations
  */
 export const mockFindVisualizations = createMockFindItems({
-  items: MOCK_VISUALIZATIONS,
+  items: addStatusToItems(MOCK_VISUALIZATIONS),
+  statusSortFn,
 });
 
 // =============================================================================
@@ -181,8 +212,7 @@ export interface ItemWithStatus extends UserContentCommonSchema {
     description?: string;
     timeRestore: boolean;
   };
-  /** Dashboards can be favorited */
-  canFavorite: true;
+  status: ContentStatus;
 }
 
 /**
@@ -207,7 +237,7 @@ const EXAMPLE_MOCK_ITEMS: ItemWithStatus[] = [
       { type: 'tag', id: 'tag-production', name: 'Production' },
       { type: 'tag', id: 'tag-important', name: 'Important' },
     ],
-    canFavorite: true,
+    status: 'active',
   },
   {
     id: 'dashboard-002',
@@ -225,7 +255,7 @@ const EXAMPLE_MOCK_ITEMS: ItemWithStatus[] = [
       { type: 'tag', id: 'tag-security', name: 'Security' },
       { type: 'tag', id: 'fleet-managed-default', name: 'Managed' },
     ],
-    canFavorite: true,
+    status: 'draft',
   },
   {
     id: 'dashboard-003',
@@ -240,7 +270,7 @@ const EXAMPLE_MOCK_ITEMS: ItemWithStatus[] = [
       timeRestore: true,
     },
     references: [{ type: 'tag', id: 'tag-development', name: 'Development' }],
-    canFavorite: true,
+    status: 'review',
   },
   {
     id: 'dashboard-004',
@@ -255,7 +285,7 @@ const EXAMPLE_MOCK_ITEMS: ItemWithStatus[] = [
       timeRestore: true,
     },
     references: [{ type: 'tag', id: 'tag-production', name: 'Production' }],
-    canFavorite: true,
+    status: 'archived',
   },
   {
     id: 'dashboard-005',
@@ -269,7 +299,7 @@ const EXAMPLE_MOCK_ITEMS: ItemWithStatus[] = [
       timeRestore: false,
     },
     references: [],
-    canFavorite: true,
+    status: 'active',
   },
   {
     id: 'dashboard-006',
@@ -284,7 +314,7 @@ const EXAMPLE_MOCK_ITEMS: ItemWithStatus[] = [
       timeRestore: false,
     },
     references: [{ type: 'tag', id: 'tag-archived', name: 'Archived' }],
-    canFavorite: true,
+    status: 'active',
   },
   {
     id: 'dashboard-007',
@@ -302,7 +332,7 @@ const EXAMPLE_MOCK_ITEMS: ItemWithStatus[] = [
       { type: 'tag', id: 'tag-development', name: 'Development' },
       { type: 'tag', id: 'tag-important', name: 'Important' },
     ],
-    canFavorite: true,
+    status: 'draft',
   },
   {
     id: 'dashboard-008',
@@ -316,7 +346,7 @@ const EXAMPLE_MOCK_ITEMS: ItemWithStatus[] = [
       timeRestore: true,
     },
     references: [{ type: 'tag', id: 'tag-production', name: 'Production' }],
-    canFavorite: true,
+    status: 'review',
   },
 ];
 
@@ -391,6 +421,7 @@ export const createSimpleMockFindItems = (delay: number = 0) => {
     searchQuery?: string;
     filters: {
       tags?: { include?: string[]; exclude?: string[] };
+      status?: ContentStatus | ContentStatus[]; // Support both single and array
       users?: string[];
       favoritesOnly?: boolean;
     };
@@ -442,8 +473,22 @@ export const createSimpleMockFindItems = (delay: number = 0) => {
       items = items.filter((item) => favorites.favoriteIds.includes(item.id));
     }
 
+    // Apply status filter (custom filter example) - supports both single value and array
+    if (filters.status) {
+      const statusValues = Array.isArray(filters.status) ? filters.status : [filters.status];
+      items = items.filter((item) => statusValues.includes(item.status));
+    }
+
     // Apply sorting
     items.sort((a, b) => {
+      // Special handling for status field - sort by priority
+      if (sort.field === 'status') {
+        const aPriority = STATUS_CONFIG[a.status].priority;
+        const bPriority = STATUS_CONFIG[b.status].priority;
+        const comparison = aPriority - bPriority;
+        return sort.direction === 'asc' ? comparison : -comparison;
+      }
+
       const getFieldValue = (item: ItemWithStatus, field: string): unknown => {
         if (field in item) {
           return (item as unknown as Record<string, unknown>)[field];
