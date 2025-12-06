@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { AgentService } from './agents_service';
-export { createPublicAgentsContract } from './create_public_agents_contract';
+export type { AgentsServiceStartContract } from './contract';
