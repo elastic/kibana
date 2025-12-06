@@ -6,17 +6,6 @@
  */
 
 module.exports = {
-  preset: '@kbn/test/jest_node',
-  rootDir: '../../../../../../..',
-  roots: ['<rootDir>/x-pack/solutions/security/plugins/security_solution/server/lib'],
-  coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/security/plugins/security_solution/server/lib',
-  coverageReporters: ['text', 'html'],
-  collectCoverageFrom: [
-    '<rootDir>/x-pack/solutions/security/plugins/security_solution/server/lib/**/*.{ts,tsx}',
-  ],
-  moduleNameMapper: require('../__mocks__/module_name_map'),
-  haste: {
-    throwOnModuleCollision: false,
-  },
+  preset: '@kbn/jest-blaze/node',
+  rootDir: __dirname,
 };
