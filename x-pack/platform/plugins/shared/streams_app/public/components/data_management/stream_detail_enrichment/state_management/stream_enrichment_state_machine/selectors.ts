@@ -8,6 +8,7 @@
 import { createSelector } from 'reselect';
 import { isActionBlock } from '@kbn/streamlang';
 import moment from 'moment';
+import { getStreamTypeFromDefinition } from '../../../../../util/get_stream_type_from_definition';
 import type { StreamEnrichmentContextType } from './types';
 import { isStepUnderEdit } from '../steps_state_machine';
 import { canDataSourceTypeBeOutdated } from './utils';
@@ -59,6 +60,15 @@ export const selectWhetherAnyProcessorBeforePersisted = createSelector(
   }
 );
 
+/**
+ * Selects validation errors for all processors.
+ * Returns a Map of step customIdentifier to validation errors.
+ * Validation errors are computed in the state machine and stored in context.
+ */
+export const selectValidationErrors = (context: StreamEnrichmentContextType) => {
+  return context.validationErrors;
+};
+
 export const selectWhetherThereAreOutdatedDocumentsInSimulation = createSelector(
   [
     (streamEnrichmentContext: StreamEnrichmentContextType) =>
@@ -99,5 +109,12 @@ export const selectWhetherThereAreOutdatedDocumentsInSimulation = createSelector
     const streamProcessingTimestamp = new Date(processingUpdatedAt).getTime();
 
     return oldestDocumentTimestamp < streamProcessingTimestamp;
+  }
+);
+
+export const selectStreamType = createSelector(
+  [(context: StreamEnrichmentContextType) => context.definition],
+  (definition) => {
+    return getStreamTypeFromDefinition(definition.stream);
   }
 );

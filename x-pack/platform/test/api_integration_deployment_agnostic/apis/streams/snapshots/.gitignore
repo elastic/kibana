@@ -1,0 +1,4 @@
+# Ignore all snapshot data created by integration tests
+*
+# But keep this .gitignore file
+!.gitignore

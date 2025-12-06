@@ -31,14 +31,9 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
     supportedFeatureIds: ['workflows'],
   },
 
-  authTypes: [
-    {
-      type: 'api_key_header',
-      defaults: {
-        headerField: 'X-OTX-API-KEY',
-      },
-    },
-  ],
+  auth: {
+    types: [{ type: 'api_key_header', defaults: { headerField: 'X-OTX-API-KEY' } }],
+  },
 
   actions: {
     getIndicator: {
