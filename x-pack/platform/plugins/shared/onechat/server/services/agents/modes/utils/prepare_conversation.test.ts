@@ -16,6 +16,10 @@ import type {
   AttachmentTypeDefinition,
 } from '@kbn/onechat-server/attachments';
 import { getToolResultId } from '@kbn/onechat-server/tools';
+import {
+  createAgentHandlerContextMock,
+  type AgentHandlerContextMock,
+} from '../../../../test_utils/runner';
 import { prepareConversation } from './prepare_conversation';
 
 jest.mock('@kbn/onechat-server/tools', () => ({
@@ -25,6 +29,7 @@ jest.mock('@kbn/onechat-server/tools', () => ({
 const mockGetToolResultId = getToolResultId as jest.MockedFunction<typeof getToolResultId>;
 
 describe('prepareConversation', () => {
+  // TODO: replace with AgentHandlerContextMock / createAgentHandlerContextMock
   let mockAttachmentsService: jest.Mocked<AttachmentsService>;
 
   const attachmentDefinition = ({
