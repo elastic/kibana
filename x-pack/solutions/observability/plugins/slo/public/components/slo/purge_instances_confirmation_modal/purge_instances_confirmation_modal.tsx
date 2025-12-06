@@ -141,6 +141,7 @@ export function PurgeInstancesConfirmationModal({ items, onCancel, onConfirm }: 
         <EuiFormRow>
           <EuiCheckbox
             id={checkboxId}
+            data-test-subj="sloPurgeInstancesConfirmationModalOverrideCheckbox"
             checked={override}
             disabled={!requireOverride}
             onChange={(e) => {
@@ -152,7 +153,6 @@ export function PurgeInstancesConfirmationModal({ items, onCancel, onConfirm }: 
                 default="Override the {settingsLabel} setting"
                 values={{
                   settingsLabel: <strong>{STALE_SLO_THRESHOLD_LABEL}</strong>,
-                  inputLabel: <strong>{STALE_THRESHOLD_LABEL}</strong>,
                 }}
               />
             }
