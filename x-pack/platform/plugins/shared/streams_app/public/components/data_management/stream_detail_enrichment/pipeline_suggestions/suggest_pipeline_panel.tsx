@@ -33,7 +33,7 @@ export function SuggestPipelinePanel({ children }: React.PropsWithChildren) {
         <EuiFlexItem>
           <EuiTitle size="m">
             <h4>
-              <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexGroup alignItems="center" gutterSize="s" wrap>
                 <EuiFlexItem grow={false}>
                   {i18n.translate('xpack.streams.stepsEditor.h3.suggestAPipelineLabel', {
                     defaultMessage: 'Suggest a pipeline',
