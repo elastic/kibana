@@ -5,32 +5,15 @@
  * 2.0.
  */
 import { migrateOnRead } from './migrate_on_read';
-import { isNeverCondition } from '@kbn/streamlang';
 import { Streams } from '@kbn/streams-schema';
-
-jest.mock('@kbn/streamlang', () => ({
-  isNeverCondition: jest.fn(),
-}));
 
 jest.mock('./migrate_to_streamlang_on_read', () => ({
   migrateRoutingIfConditionToStreamlang: jest.fn((definition) => definition),
   migrateOldProcessingArrayToStreamlang: jest.fn((definition) => definition),
 }));
 
-jest.mock('@kbn/streams-schema', () => ({
-  Streams: {
-    all: {
-      Definition: {
-        asserts: jest.fn(),
-      },
-    },
-  },
-}));
-
-const mockIsNeverCondition = isNeverCondition as jest.MockedFunction<typeof isNeverCondition>;
-const mockStreamsAsserts = Streams.all.Definition.asserts as jest.MockedFunction<
-  typeof Streams.all.Definition.asserts
->;
+// jest.mock doesn't work with kbn-jest-blaze transformer, so we use spyOn instead
+let mockStreamsAsserts: jest.SpyInstance;
 
 function createCompleteWiredStreamDefinition(overrides: any = {}) {
   return {
@@ -98,8 +81,12 @@ function createRoutingRule(overrides: any = {}) {
 describe('migrateOnRead', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockIsNeverCondition.mockReturnValue(false);
-    mockStreamsAsserts.mockImplementation(() => {});
+    // Set up spy on asserts since jest.mock doesn't work with kbn-jest-blaze
+    mockStreamsAsserts = jest.spyOn(Streams.all.Definition, 'asserts').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    mockStreamsAsserts.mockRestore();
   });
 
   describe('routing status migration', () => {
@@ -118,8 +105,7 @@ describe('migrateOnRead', () => {
       });
 
       it('should migrate never conditions to disabled status', () => {
-        mockIsNeverCondition.mockReturnValue(true);
-
+        // Real isNeverCondition will detect { never: {} } as a never condition
         const definition = createCompleteWiredStreamDefinition({
           routing: [createRoutingRule({ where: { never: {} } })],
         });
@@ -130,16 +116,12 @@ describe('migrateOnRead', () => {
         expect(routing).toHaveLength(1);
         expect(routing[0].status).toBe('disabled');
         expect(routing[0].where).toEqual({ always: {} });
-        expect(mockIsNeverCondition).toHaveBeenCalledWith({ never: {} });
         expect(mockStreamsAsserts).toHaveBeenCalled();
       });
 
       it('should migrate multiple routing rules with mixed status', () => {
-        mockIsNeverCondition
-          .mockReturnValueOnce(false) // First rule
-          .mockReturnValueOnce(true) // Second rule
-          .mockReturnValueOnce(false); // Third rule
-
+        // Real isNeverCondition will detect { never: {} } as a never condition
+        // but not the field conditions
         const definition = createCompleteWiredStreamDefinition({
           routing: [
             createRoutingRule({
