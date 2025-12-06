@@ -19,7 +19,7 @@ import type { TransformOptions as BabelTransformOptions } from '@babel/core';
 import { loadOptions, transformFromAstSync, transformSync } from '@babel/core';
 import type { SyncTransformer, TransformOptions, TransformedSource } from '@jest/transform';
 import type { FileWalker, ResolveFilePath, ChangeTracker } from '@kbn/module-graph';
-import transformerConfig from '@kbn/test/src/jest/transforms/babel/transformer_config';
+import getTransformerConfig from '@kbn/test/src/jest/transforms/babel/transformer_config';
 import fs from 'fs';
 import createCacheKey from '@jest/create-cache-key-function';
 import { castArray } from 'lodash';
@@ -54,6 +54,8 @@ export class JestTransformer implements SyncTransformer {
       rewrite: options.rewrite ?? true,
       profile: options.profile ?? false,
     };
+
+    const transformerConfig = getTransformerConfig();
 
     this.initialBabelOptions = {
       ...transformerConfig,

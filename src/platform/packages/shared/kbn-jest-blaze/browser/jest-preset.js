@@ -7,4 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+require('@kbn/babel-register').install();
+
 module.exports = require('../src/preset/browser').browser;
