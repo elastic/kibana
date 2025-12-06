@@ -11,7 +11,11 @@ import { routes } from './routes';
 export class CloudDefend {
   public setup() {}
 
-  public start(): SecuritySubPlugin {
+  public start(isServerless?: boolean): SecuritySubPlugin {
+    if (isServerless ?? false) {
+      return { routes: [] };
+    }
+
     return { routes };
   }
 }
