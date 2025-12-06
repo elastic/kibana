@@ -8,7 +8,7 @@
  */
 
 import Path from 'path';
-import { setTimeout } from 'timers/promises';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -22,6 +22,7 @@ import { Config, readConfigFile } from '../../functional_test_runner';
 import { checkForEnabledTestsInFtrConfig, runFtr } from '../lib/run_ftr';
 import { runElasticsearch } from '../lib/run_elasticsearch';
 import { runKibanaServer } from '../lib/run_kibana_server';
+import { runDockerServers } from '../lib/run_docker_servers';
 import type { RunTestsOptions } from './flags';
 /**
  * Run servers and tests for each config
@@ -69,33 +70,32 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
 
       if (options.configs.length > 1) {
         const progress = `${i + 1}/${options.configs.length}`;
+
         log.write(`--- [${progress}] Running ${Path.relative(REPO_ROOT, path)}`);
       }
 
-      let config: Config;
-      if (process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() !== 'true') {
-        config = await readConfigFile(log, options.esVersion, path, settingOverrides);
-      } else {
-        config = await readConfigFile(
-          log,
-          options.esVersion,
-          path,
-          settingOverrides,
-          applyFipsOverrides
-        );
-      }
+      const config = await readConfigFile(
+        log,
+        options.esVersion,
+        path,
+        settingOverrides,
+        process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() !== 'true' ? undefined : applyFipsOverrides
+      );
 
-      const hasTests = await checkForEnabledTestsInFtrConfig({
+      // Check if there are any enabled tests before starting servers
+      // If not, reuse the runner instance to report skipped test group to ci-stats
+      const { hasTests, runner } = await checkForEnabledTestsInFtrConfig({
         config,
         esVersion: options.esVersion,
         log,
       });
+
       if (!hasTests) {
-        // just run the FTR, no Kibana or ES, which will quickly report a skipped test group to ci-stats and continue
         await runFtr({
           log,
           config,
           esVersion: options.esVersion,
+          runner,
         }).finally(() => {
           tx.end();
         });
@@ -111,31 +111,96 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
         };
 
         let shutdownEs: (() => Promise<void>) | undefined;
+        let shutdownDockerServers: (() => Promise<void>) | undefined;
 
         try {
-          if (process.env.TEST_ES_DISABLE_STARTUP !== 'true') {
-            shutdownEs = await withSpan('start_elasticsearch', () =>
-              runElasticsearch({ ...options, log, config, onEarlyExit })
-            );
-            if (abortCtrl.signal.aborted) {
-              return;
-            }
+          // Check if any docker servers are enabled to avoid unnecessary startup time
+          const dockerServerConfigs = config.get('dockerServers') as
+            | Record<string, any>
+            | undefined;
+
+          const hasEnabledDockerServers =
+            dockerServerConfigs &&
+            Object.keys(dockerServerConfigs).length > 0 &&
+            Object.values(dockerServerConfigs).some((cfg) => cfg.enabled === true);
+
+          if (hasEnabledDockerServers) {
+            log.info('🚀 Starting Elasticsearch, Docker servers, and Kibana in parallel...');
+          } else {
+            log.info('🚀 Starting Elasticsearch and Kibana in parallel...');
           }
 
-          await withSpan('start_kibana', () =>
-            runKibanaServer({
-              procs,
-              config,
-              logsDir: options.logsDir,
-              installDir: options.installDir,
-              onEarlyExit,
-              extraKbnOpts: [
-                config.get('serverless')
-                  ? '--server.versioned.versionResolution=newest'
-                  : '--server.versioned.versionResolution=oldest',
-              ],
-            })
-          );
+          // Start ES, Kibana and Docker servers in parallel
+          // Use Promise.allSettled to ensure all complete (or fail) before proceeding
+          // All promises start executing immediately when created
+          const results = await Promise.allSettled([
+            // Start Elasticsearch - this completes when ES cluster health is yellow/green
+            withSpan('start_elasticsearch', async () => {
+              if (process.env.TEST_ES_DISABLE_STARTUP === 'true') {
+                return undefined;
+              }
+              const shutdown = await runElasticsearch({ ...options, log, config, onEarlyExit });
+              log.info('✅ Elasticsearch is ready');
+              return shutdown;
+            }),
+
+            // Start Kibana - will retry ES connections until successful
+            withSpan('start_kibana', async () => {
+              await runKibanaServer({
+                procs,
+                config,
+                logsDir: options.logsDir,
+                installDir: options.installDir,
+                onEarlyExit,
+                extraKbnOpts: [
+                  config.get('serverless')
+                    ? '--server.versioned.versionResolution=newest'
+                    : '--server.versioned.versionResolution=oldest',
+                ],
+              });
+              log.info('✅ Kibana is ready');
+            }),
+
+            // Only start docker servers if at least one is enabled
+            ...(hasEnabledDockerServers
+              ? [
+                  withSpan('start_docker_servers', async () => {
+                    const shutdown = await runDockerServers({ log, config, onEarlyExit });
+                    log.info('✅ Docker servers are ready');
+                    return shutdown;
+                  }),
+                ]
+              : []),
+          ]);
+
+          // Check if any service failed to start
+          const [esResult, kibanaResult, dockerResult] = results;
+
+          if (esResult.status === 'rejected') {
+            throw esResult.reason;
+          }
+
+          if (kibanaResult.status === 'rejected') {
+            throw kibanaResult.reason;
+          }
+
+          if (dockerResult?.status === 'rejected') {
+            throw dockerResult.reason;
+          }
+
+          shutdownEs =
+            esResult.status === 'fulfilled'
+              ? (esResult.value as (() => Promise<void>) | undefined)
+              : undefined;
+
+          shutdownDockerServers =
+            dockerResult && dockerResult.status === 'fulfilled'
+              ? (dockerResult.value as () => Promise<void>)
+              : undefined;
+
+          if (abortCtrl.signal.aborted) {
+            return;
+          }
 
           const startRemoteKibana = config.get('kbnTestServer.startRemoteKibana');
 
@@ -195,11 +260,15 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
             const delay = config.get('kbnTestServer.delayShutdown');
             if (typeof delay === 'number') {
               log.info('Delaying shutdown of Kibana for', delay, 'ms');
-              await setTimeout(delay);
+              await setTimeoutAsync(delay);
             }
 
             await withSpan('shutdown_kibana', () => procs.stop('kibana'));
           } finally {
+            // Clean up docker servers before ES
+            if (shutdownDockerServers) {
+              await shutdownDockerServers();
+            }
             if (shutdownEs) {
               await withSpan('shutdown_es', () => shutdownEs!());
             }

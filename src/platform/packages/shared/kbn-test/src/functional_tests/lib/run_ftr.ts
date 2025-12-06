@@ -18,8 +18,10 @@ export async function runFtr(options: {
   config: Config;
   esVersion: EsVersion;
   signal?: AbortSignal;
+  runner?: FunctionalTestRunner;
 }) {
-  const ftr = new FunctionalTestRunner(options.log, options.config, options.esVersion);
+  const ftr =
+    options.runner ?? new FunctionalTestRunner(options.log, options.config, options.esVersion);
 
   const failureCount = await ftr.run(options.signal);
   if (failureCount > 0) {
@@ -33,21 +35,23 @@ export async function checkForEnabledTestsInFtrConfig(options: {
   log: ToolingLog;
   config: Config;
   esVersion: EsVersion;
-}) {
+}): Promise<{ hasTests: boolean; runner?: FunctionalTestRunner }> {
   if (options.config.get('testRunner')) {
     // configs with custom test runners are assumed to always have tests
-    return true;
+    return { hasTests: true };
   }
 
   if (options.config.module.type === 'journey') {
-    return !options.config.module.journey.config.isSkipped();
+    return { hasTests: !options.config.module.journey.config.isSkipped() };
   }
 
-  const ftr = new FunctionalTestRunner(options.log, options.config, options.esVersion);
-  const stats = await ftr.getTestStats();
+  const runner = new FunctionalTestRunner(options.log, options.config, options.esVersion);
+  const stats = await runner.getTestStats();
   if (!stats) {
     throw createFailError('unable to get test stats');
   }
 
-  return stats.nonSkippedTestCount > 0;
+  const hasTests = stats.nonSkippedTestCount > 0;
+  // Return the runner instance so it can be reused if there are no tests
+  return { hasTests, runner: hasTests ? undefined : runner };
 }

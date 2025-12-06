@@ -34,6 +34,12 @@ export function MochaReporterProvider({ getService }) {
   return class MochaReporter extends Mocha.reporters.Base {
     constructor(runner, options) {
       super(runner, options);
+
+      // Progress tracking
+      this.totalTests = 0;
+      this.completedTests = 0;
+      this.testTimings = [];
+
       runner.on('start', this.onStart);
       runner.on('hook', this.onHookStart);
       runner.on('hook end', this.onHookEnd);
@@ -73,6 +79,10 @@ export function MochaReporterProvider({ getService }) {
     }
 
     onStart = () => {
+      // Count total tests
+      this.totalTests = this.runner.suite.total();
+      log.write(colors.progress(`Starting ${this.totalTests} tests...`));
+
       if (config.get('mochaReporter.captureLogOutput')) {
         log.warning(
           'debug logs are being captured, only error logs will be written to the console'
@@ -148,6 +158,17 @@ export function MochaReporterProvider({ getService }) {
 
     onTestEnd = (test) => {
       snapshotLogsForRunnable(test);
+
+      // Track progress and timings
+      this.completedTests++;
+      this.testTimings.push({
+        title: test.fullTitle(),
+        duration: test.duration || 0,
+      });
+
+      // Display progress
+      log.write(colors.progress(`Progress: ${this.completedTests}/${this.totalTests} tests`));
+
       log.indent(-2);
     };
 
@@ -220,6 +241,20 @@ export function MochaReporterProvider({ getService }) {
     onEnd = () => {
       if (originalLogWriters) {
         log.setWriters(originalLogWriters);
+      }
+
+      // Display slowest tests summary
+      if (this.testTimings.length > 0) {
+        const slowestTests = this.testTimings.sort((a, b) => b.duration - a.duration).slice(0, 10);
+
+        log.write('');
+        log.write(colors.suite('Slowest tests:'));
+        slowestTests.forEach((test, index) => {
+          const duration = ms(test.duration);
+          const formattedDuration = colors.speed('slow', '(' + duration + ')');
+          log.write(`  ${index + 1}. ${test.title} ${formattedDuration}`);
+        });
+        log.write('');
       }
 
       writeEpilogue(log, this.stats, failuresOverTime);
