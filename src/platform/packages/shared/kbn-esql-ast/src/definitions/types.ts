@@ -169,6 +169,7 @@ export const isReturnType = (str: string | FunctionParameterType): str is Functi
 export interface FunctionParameter {
   name: string;
   type: FunctionParameterType;
+  description?: string;
   optional?: boolean;
   supportsWildcard?: boolean;
 

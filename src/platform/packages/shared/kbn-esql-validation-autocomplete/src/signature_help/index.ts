@@ -106,10 +106,15 @@ export async function getSignatureHelp(
     label: formattedSignature,
     documentation: fnDefinition.description,
     parameters:
-      parameters.map((param) => ({
-        label: param,
-        documentation: 'lalala',
-      })) || [],
+      parameters.map((param) => {
+        const paramDefinition = fnDefinition.signatures
+          ?.flatMap((sig) => sig.params)
+          .find((p) => param.startsWith(p.name));
+        return {
+          label: param,
+          documentation: paramDefinition?.description ?? '',
+        };
+      }) || [],
   };
 
   return {
