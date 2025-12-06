@@ -61,25 +61,16 @@ import { useRef, useCallback, useEffect } from 'react';
 export function useAbortController() {
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  /**
-   * Gets a new AbortController, aborting any previous one.
-   * This ensures only one async operation is active at a time.
-   */
   const getAbortController = useCallback((): AbortController => {
-    // Abort any in-flight operation
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
 
-    // Create new controller for this operation
     const controller = new AbortController();
     abortControllerRef.current = controller;
     return controller;
   }, []);
 
-  /**
-   * Manually abort the current operation
-   */
   const abort = useCallback(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -87,21 +78,14 @@ export function useAbortController() {
     }
   }, []);
 
-  /**
-   * Check if the current controller is aborted
-   */
   const isAborted = useCallback((controller: AbortController): boolean => {
     return controller.signal.aborted;
   }, []);
 
-  /**
-   * Check if the current ref controller matches the given controller
-   */
   const isCurrentController = useCallback((controller: AbortController): boolean => {
     return abortControllerRef.current === controller;
   }, []);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (abortControllerRef.current) {

@@ -84,7 +84,6 @@ export const useStreamValidation = ({
           // eslint-disable-next-line no-console
           console.error('Validation error:', error);
         }
-        // On error, abort validation
         dispatch({ type: 'ABORT_VALIDATION' });
         return false;
       }
@@ -111,7 +110,7 @@ export const useStreamValidation = ({
     debounceMs
   );
 
-  // Input change handler - implements two-mode behavior
+  // Input change handler - implements two-mode (live vs idle) behavior
   const handleStreamNameChange = useCallback(
     (newStreamName: string) => {
       // Skip if name hasn't changed

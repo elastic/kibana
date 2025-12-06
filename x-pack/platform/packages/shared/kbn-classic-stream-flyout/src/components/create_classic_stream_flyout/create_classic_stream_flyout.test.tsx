@@ -209,7 +209,7 @@ describe('CreateClassicStreamFlyout', () => {
 
     it('does not call onCreate when validation fails (empty wildcard)', async () => {
       const onCreate = jest.fn();
-      const { getByTestId, getByText } = renderFlyout({ onCreate });
+      const { getByTestId, findByText } = renderFlyout({ onCreate });
 
       // Select template and navigate to second step
       selectTemplateAndGoToStep2(getByTestId, 'template-1');
@@ -220,11 +220,7 @@ describe('CreateClassicStreamFlyout', () => {
       fireEvent.click(getByTestId('createButton'));
 
       // Wait for validation error to appear
-      await waitFor(() => {
-        expect(
-          getByText(/Please supply a valid text string for all wildcards/i)
-        ).toBeInTheDocument();
-      });
+      await findByText(/Please supply a valid text string for all wildcards/i);
 
       expect(onCreate).not.toHaveBeenCalled();
     });
@@ -484,7 +480,7 @@ describe('CreateClassicStreamFlyout', () => {
     describe('validation', () => {
       it('shows validation error when trying to create with empty wildcard', async () => {
         const onCreate = jest.fn();
-        const { getByTestId, getByText } = renderFlyout({ onCreate });
+        const { getByTestId, findByText } = renderFlyout({ onCreate });
 
         // Select template and navigate to second step
         selectTemplateAndGoToStep2(getByTestId, 'template-1');
@@ -493,11 +489,7 @@ describe('CreateClassicStreamFlyout', () => {
         fireEvent.click(getByTestId('createButton'));
 
         // Should show validation error
-        await waitFor(() => {
-          expect(
-            getByText(/Please supply a valid text string for all wildcards/i)
-          ).toBeInTheDocument();
-        });
+        await findByText(/Please supply a valid text string for all wildcards/i);
 
         // onCreate should not be called
         expect(onCreate).not.toHaveBeenCalled();
@@ -531,7 +523,7 @@ describe('CreateClassicStreamFlyout', () => {
       it('shows duplicate error from onValidate', async () => {
         const onCreate = jest.fn();
         const onValidate = jest.fn().mockResolvedValue({ errorType: 'duplicate' });
-        const { getByTestId, getByText } = renderFlyout({ onCreate, onValidate });
+        const { getByTestId, findByText } = renderFlyout({ onCreate, onValidate });
 
         // Select template and navigate to second step
         selectTemplateAndGoToStep2(getByTestId, 'template-1');
@@ -544,9 +536,7 @@ describe('CreateClassicStreamFlyout', () => {
         fireEvent.click(getByTestId('createButton'));
 
         // Should show duplicate error
-        await waitFor(() => {
-          expect(getByText(/This stream name already exists/i)).toBeInTheDocument();
-        });
+        await findByText(/This stream name already exists/i);
 
         // onCreate should not be called
         expect(onCreate).not.toHaveBeenCalled();
@@ -558,7 +548,7 @@ describe('CreateClassicStreamFlyout', () => {
           errorType: 'higherPriority',
           conflictingIndexPattern: 'logs-*',
         });
-        const { getByTestId, getByText } = renderFlyout({ onCreate, onValidate });
+        const { getByTestId, findByText, getByText } = renderFlyout({ onCreate, onValidate });
 
         // Select template and navigate to second step
         selectTemplateAndGoToStep2(getByTestId, 'template-1');
@@ -571,10 +561,8 @@ describe('CreateClassicStreamFlyout', () => {
         fireEvent.click(getByTestId('createButton'));
 
         // Should show higher priority error
-        await waitFor(() => {
-          expect(getByText(/matches a higher priority index template/i)).toBeInTheDocument();
-          expect(getByText('logs-*')).toBeInTheDocument();
-        });
+        await findByText(/matches a higher priority index template/i);
+        expect(getByText('logs-*')).toBeInTheDocument();
 
         // onCreate should not be called
         expect(onCreate).not.toHaveBeenCalled();
@@ -582,30 +570,29 @@ describe('CreateClassicStreamFlyout', () => {
     });
 
     describe('debounced validation and live validation mode', () => {
-      it('should trigger debounced validation after first submit attempt', async () => {
+      it('should trigger debounced validation in Live Validation Mode (when error exists)', async () => {
         const onCreate = jest.fn();
-        const onValidate = jest.fn().mockResolvedValue({ errorType: null });
-        const { getByTestId } = renderFlyout({ onCreate, onValidate });
+        // Return error to enter Live Validation Mode
+        const onValidate = jest.fn().mockResolvedValue({ errorType: 'duplicate' });
+        const { getByTestId, findByText } = renderFlyout({ onCreate, onValidate });
 
         selectTemplateAndGoToStep2(getByTestId, 'template-1');
 
         const streamNameInput = getByTestId('streamNameInput-wildcard-0');
         fireEvent.change(streamNameInput, { target: { value: 'mystream' } });
 
-        // Click Create to trigger first submit
+        // Click Create to trigger first submit - will return error
         fireEvent.click(getByTestId('createButton'));
 
-        // Wait for initial validation
-        await waitFor(() => {
-          expect(onValidate).toHaveBeenCalled();
-        });
+        // Wait for error to appear (confirms we're in Live Validation Mode)
+        await findByText(/This stream name already exists/i);
 
         onValidate.mockClear();
 
-        // Now type something new - should trigger debounced validation
+        // Now type something new - should trigger debounced validation (Live Validation Mode due to error)
         fireEvent.change(streamNameInput, { target: { value: 'newstream' } });
 
-        // Wait for validation
+        // Wait for debounced validation
         await waitFor(() => {
           expect(onValidate).toHaveBeenCalledWith(
             'logs-template-1-newstream',
@@ -614,10 +601,10 @@ describe('CreateClassicStreamFlyout', () => {
         });
       });
 
-      it('should clear errors immediately when user types after submit attempt', async () => {
+      it('should keep error visible while validating in Live Validation Mode', async () => {
         const onCreate = jest.fn();
         const onValidate = jest.fn().mockResolvedValue({ errorType: 'duplicate' });
-        const { getByTestId, getByText, queryByText } = renderFlyout({ onCreate, onValidate });
+        const { getByTestId, findByText, getByText } = renderFlyout({ onCreate, onValidate });
 
         selectTemplateAndGoToStep2(getByTestId, 'template-1');
 
@@ -627,16 +614,13 @@ describe('CreateClassicStreamFlyout', () => {
         // Click Create - should show error
         fireEvent.click(getByTestId('createButton'));
 
-        await waitFor(() => {
-          expect(getByText(/This stream name already exists/i)).toBeInTheDocument();
-        });
+        await findByText(/This stream name already exists/i);
 
-        // Start typing - error should clear immediately
+        // Start typing - error should stay visible while validating (Live Validation Mode)
         fireEvent.change(streamNameInput, { target: { value: 'new' } });
 
-        await waitFor(() => {
-          expect(queryByText(/This stream name already exists/i)).not.toBeInTheDocument();
-        });
+        // Error should still be visible (not cleared immediately)
+        expect(getByText(/This stream name already exists/i)).toBeInTheDocument();
       });
     });
 
@@ -681,7 +665,7 @@ describe('CreateClassicStreamFlyout', () => {
       it('should reset validation error state when template changes', async () => {
         const onCreate = jest.fn();
         const onValidate = jest.fn().mockResolvedValue({ errorType: 'duplicate' });
-        const { getByTestId, getByText, queryByText } = renderFlyout({ onCreate, onValidate });
+        const { getByTestId, findByText, queryByText } = renderFlyout({ onCreate, onValidate });
 
         selectTemplateAndGoToStep2(getByTestId, 'template-1');
 
@@ -691,9 +675,7 @@ describe('CreateClassicStreamFlyout', () => {
         // Click Create - shows error
         fireEvent.click(getByTestId('createButton'));
 
-        await waitFor(() => {
-          expect(getByText(/This stream name already exists/i)).toBeInTheDocument();
-        });
+        await findByText(/This stream name already exists/i);
 
         // Go back and change template
         fireEvent.click(getByTestId('backButton'));
@@ -709,7 +691,7 @@ describe('CreateClassicStreamFlyout', () => {
       it('should reset validation when index pattern changes', async () => {
         const onCreate = jest.fn();
         const onValidate = jest.fn().mockResolvedValue({ errorType: 'duplicate' });
-        const { getByTestId, getByText, queryByText } = renderFlyout({ onCreate, onValidate });
+        const { getByTestId, findByText, queryByText } = renderFlyout({ onCreate, onValidate });
 
         selectTemplateAndGoToStep2(getByTestId, 'multi-pattern-template');
 
@@ -723,14 +705,8 @@ describe('CreateClassicStreamFlyout', () => {
         // Click Create - shows error
         fireEvent.click(getByTestId('createButton'));
 
-        // Wait for validation to complete and error to appear
-        await waitFor(() => {
-          expect(onValidate).toHaveBeenCalled();
-        });
-
-        await waitFor(() => {
-          expect(getByText(/This stream name already exists/i)).toBeInTheDocument();
-        });
+        // Wait for error to appear (confirms we're in Live Validation Mode)
+        await findByText(/This stream name already exists/i);
 
         // Change index pattern - this should clear the error
         const patternSelect = getByTestId('indexPatternSelect');
@@ -805,26 +781,26 @@ describe('CreateClassicStreamFlyout', () => {
 
       it('should reset hasAttemptedSubmit when validation passes in live mode', async () => {
         const onCreate = jest.fn();
-        const onValidate = jest.fn().mockResolvedValue({ errorType: null });
-        const { getByTestId } = renderFlyout({ onCreate, onValidate });
+        // First return error to enter Live Validation Mode
+        const onValidate = jest.fn().mockResolvedValue({ errorType: 'duplicate' });
+        const { getByTestId, findByText } = renderFlyout({ onCreate, onValidate });
 
         selectTemplateAndGoToStep2(getByTestId, 'template-1');
 
         const streamNameInput = getByTestId('streamNameInput-wildcard-0');
         fireEvent.change(streamNameInput, { target: { value: 'invalid' } });
 
-        // Click Create - enters live validation mode
+        // Click Create - enters live validation mode with error
         fireEvent.click(getByTestId('createButton'));
 
-        await waitFor(() => {
-          expect(onValidate).toHaveBeenCalled();
-        });
+        // Wait for error to appear (confirms we're in Live Validation Mode)
+        await findByText(/This stream name already exists/i);
 
-        // Change to valid name - should trigger debounced validation
+        // Change to valid name - should trigger debounced validation (Live Validation Mode)
         onValidate.mockResolvedValueOnce({ errorType: null });
         fireEvent.change(streamNameInput, { target: { value: 'valid' } });
 
-        // Wait for validation to complete (waitFor handles fake timers automatically)
+        // Wait for debounced validation to complete
         await waitFor(() => {
           expect(onValidate).toHaveBeenCalledWith('logs-template-1-valid', expect.any(AbortSignal));
         });
@@ -832,10 +808,10 @@ describe('CreateClassicStreamFlyout', () => {
         // Clear mock to track new calls
         onValidate.mockClear();
 
-        // Change input - should NOT trigger validation (hasAttemptedSubmit was reset)
+        // Change input - should NOT trigger validation (exited Live Validation Mode - no error)
         fireEvent.change(streamNameInput, { target: { value: 'another' } });
 
-        // Advance timers - validation should not trigger (wrapped in act)
+        // Advance timers - validation should not trigger
         await act(async () => {
           await jest.advanceTimersByTimeAsync(300);
         });
