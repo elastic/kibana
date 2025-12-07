@@ -948,6 +948,7 @@ x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common @elastic/appex-
 x-pack/platform/packages/shared/kbn-inference-prompt-utils @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-inference-tracing @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-inference-tracing-config @elastic/appex-ai-infra
+x-pack/platform/packages/shared/kbn-ink @elastic/streams-program-team
 x-pack/platform/packages/shared/kbn-key-value-metadata-table @elastic/obs-presentation-team @elastic/obs-onboarding-team
 x-pack/platform/packages/shared/kbn-kibana-api-cli @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-langchain @elastic/security-generative-ai
@@ -1147,7 +1148,7 @@ x-pack/solutions/observability/plugins/exploratory_view @elastic/obs-ux-manageme
 x-pack/solutions/observability/plugins/infra @elastic/obs-exploration-team @elastic/obs-presentation-team
 x-pack/solutions/observability/plugins/metrics_data_access @elastic/obs-presentation-team
 x-pack/solutions/observability/plugins/observability @elastic/obs-ux-management-team
-x-pack/solutions/observability/plugins/observability_agent @elastic/obs-ai-team
+x-pack/solutions/observability/plugins/observability_agent_builder @elastic/obs-ai-team
 x-pack/solutions/observability/plugins/observability_ai_assistant_app @elastic/obs-ai-team
 x-pack/solutions/observability/plugins/observability_logs_explorer @elastic/obs-exploration-team
 x-pack/solutions/observability/plugins/observability_onboarding @elastic/obs-onboarding-team
@@ -1192,7 +1193,7 @@ x-pack/solutions/security/packages/index-adapter @elastic/security-threat-huntin
 x-pack/solutions/security/packages/kbn-cloud-security-posture/common @elastic/contextual-security-apps
 x-pack/solutions/security/packages/kbn-cloud-security-posture/graph @elastic/contextual-security-apps
 x-pack/solutions/security/packages/kbn-cloud-security-posture/public @elastic/contextual-security-apps
-x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa
+x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa @elastic/security-engineering-productivity
 x-pack/solutions/security/packages/kbn-securitysolution-autocomplete @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-securitysolution-endpoint-exceptions-common @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components @elastic/security-detection-engine
@@ -1494,7 +1495,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/observability_ai_assistant_functional @elastic/obs-ai-team
 /x-pack/solutions/observability/test/fixtures/es_archives/observability/ai_assistant @elastic/obs-ai-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant @elastic/obs-ai-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/observability_agent @elastic/obs-ai-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/observability_agent_builder @elastic/obs-ai-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_assistant.index.ts @elastic/obs-ai-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_assistant.serverless.config.ts @elastic/obs-ai-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_assistant.index.ts @elastic/obs-ai-team
@@ -1945,6 +1946,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/platform/test/functional/services/field_editor.ts @elastic/kibana-data-discovery
 /src/platform/test/functional/services/embedding.ts @elastic/appex-qa
 /src/platform/test/functional/services/data_grid.ts @elastic/kibana-data-discovery
+/src/platform/test/functional/services/search_sessions.ts @elastic/kibana-data-discovery
 /src/platform/test/functional/services/combo_box.ts @elastic/appex-qa
 /src/platform/test/functional/services/synthtrace/sythtrace.ts @elastic/appex-qa
 /src/platform/test/functional/page_objects/time_picker.ts @elastic/appex-qa
@@ -2127,8 +2129,10 @@ x-pack/platform/test/plugin_api_integration/test_suites/platform/ @elastic/kiban
 /config/serverless.security.essentials.yml @elastic/security-solution @elastic/kibana-security
 /config/serverless.security.complete.yml @elastic/security-solution @elastic/kibana-security
 /typings/ @elastic/kibana-core
+/typings/vega/ @elastic/kibana-visualizations
 /src/platform/test/analytics @elastic/kibana-core
 /src/platform/packages/shared/kbn-test/src/jest/setup/mocks.kbn_i18n_react.js @elastic/kibana-core
+/src/platform/packages/shared/kbn-test/src/jest/setup/mocks.vega.js @elastic/kibana-visualizations
 /x-pack/platform/test/saved_objects_field_count/ @elastic/kibana-core
 /x-pack/platform/test/serverless/**/test_suites/saved_objects_management/ @elastic/kibana-core
 /x-pack/platform/test/serverless/api_integration/test_suites/core/ @elastic/kibana-core
@@ -2310,7 +2314,6 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /src/platform/test/functional/fixtures/kbn_archiver/annotation_listing_page_search.json @elastic/search-kibana
 /src/platform/test/functional/fixtures/es_archiver/search/downsampled @elastic/search-kibana
 /x-pack/solutions/search/functional_solution_sidenav/ @elastic/search-kibana
-/x-pack/platform/test/functional/services/search_sessions.ts @elastic/search-kibana
 /x-pack/platform/test/functional/page_objects/search_sessions_management_page.ts @elastic/search-kibana
 x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/search-kibana
 /x-pack/solutions/search/test/functional/apps/search_playground @elastic/search-kibana
@@ -2530,6 +2533,7 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 /x-pack/solutions/security/test/security_solution_cypress/es_archives @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_playwright @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/scripts/run_cypress @patrykkopycinski @maximpn @banderror
+/x-pack/solutions/security/plugins/security_solution/test/scout @elastic/security-engineering-productivity
 
 ## Security Solution sub teams - Cloud Security Posture
 
@@ -2921,6 +2925,8 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/gen
 
 ## Security Solution sub teams - Automatic Import
 x-pack/platform/test/automatic_import_api_integration @elastic/integration-experience
+x-pack/platform/test/automatic_import_v2_api_integration @elastic/integration-experience
+
 
 # Security Defend Workflows - OSQuery Ownership
 /x-pack/solutions/security/test/osquery_cypress @elastic/security-defend-workflows
