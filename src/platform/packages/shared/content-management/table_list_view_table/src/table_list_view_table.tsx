@@ -861,12 +861,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         });
       }
 
-      if (data.filter && urlStateEnabled) {
-        setUrlState({
-          filter: data.filter,
-        });
-      }
-
       dispatch({
         type: 'onTableChange',
         data,

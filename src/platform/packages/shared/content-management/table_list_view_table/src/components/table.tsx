@@ -77,7 +77,7 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   customSortingOptions?: CustomSortingOptions;
   deleteItems: TableListViewTableProps<T>['deleteItems'];
   tableItemsRowActions: TableItemsRowActions;
-  renderCreateButton: (fill?: boolean) => React.ReactElement | undefined;
+  renderCreateButton: () => React.ReactElement | undefined;
   onSortChange: (column: SortColumnField, direction: Direction) => void;
   onTableChange: (criteria: CriteriaWithPagination<T>) => void;
   onFilterChange: (filter: Partial<State<T>['tableFilter']>) => void;
@@ -322,7 +322,7 @@ export function Table<T extends UserContentCommonSchema>({
     let filteredItems = items;
 
     if (tableFilter?.createdBy?.length > 0) {
-      filteredItems = filteredItems.filter((item) => {
+      filteredItems = items.filter((item) => {
         if (item.createdBy) return tableFilter.createdBy.includes(item.createdBy);
         else if (item.managed) return false;
         else return tableFilter.createdBy.includes(USER_FILTER_NULL_USER);
@@ -362,59 +362,57 @@ export function Table<T extends UserContentCommonSchema>({
       : { sort: tableSort };
 
   return (
-    <>
-      <UserFilterContextProvider
-        enabled={createdByEnabled}
-        allUsers={allUsers}
-        onSelectedUsersChange={(selectedUsers) => {
-          onFilterChange({ createdBy: selectedUsers });
-        }}
-        selectedUsers={tableFilter.createdBy}
-        showNoUserOption={showNoUserOption}
-        isKibanaVersioningEnabled={isKibanaVersioningEnabled}
-        entityNamePlural={entityNamePlural}
+    <UserFilterContextProvider
+      enabled={createdByEnabled}
+      allUsers={allUsers}
+      onSelectedUsersChange={(selectedUsers) => {
+        onFilterChange({ createdBy: selectedUsers });
+      }}
+      selectedUsers={tableFilter.createdBy}
+      showNoUserOption={showNoUserOption}
+      isKibanaVersioningEnabled={isKibanaVersioningEnabled}
+      entityNamePlural={entityNamePlural}
+    >
+      <TagFilterContextProvider
+        isPopoverOpen={isPopoverOpen}
+        closePopover={closePopover}
+        onFilterButtonClick={onFilterButtonClick}
+        onSelectChange={onSelectChange}
+        options={options}
+        totalActiveFilters={totalActiveFilters}
+        clearTagSelection={clearTagSelection}
       >
-        <TagFilterContextProvider
-          isPopoverOpen={isPopoverOpen}
-          closePopover={closePopover}
-          onFilterButtonClick={onFilterButtonClick}
-          onSelectChange={onSelectChange}
-          options={options}
-          totalActiveFilters={totalActiveFilters}
-          clearTagSelection={clearTagSelection}
-        >
-          <EuiInMemoryTable<T>
-            itemId="id"
-            items={visibleItems}
-            columns={tableColumns}
-            pagination={pagination}
-            loading={isFetchingItems}
-            noItemsMessage={
-              isFetchingItems ? (
-                <></>
-              ) : emptyPrompt ? (
-                emptyPrompt
-              ) : (
-                <EuiEmptyPrompt
-                  title={<h3>{emptyPromptTitle}</h3>}
-                  titleSize="xs"
-                  body={emptyPromptBody}
-                  actions={emptyPromptActions}
-                />
-              )
-            }
-            selection={selection}
-            search={search}
-            executeQueryOptions={{ enabled: false }}
-            sorting={sorting}
-            onChange={onTableChange}
-            data-test-subj="itemsInMemTable"
-            rowHeader="attributes.title"
-            tableCaption={tableCaption}
-            css={cssFavoriteHoverWithinEuiTableRow(euiTheme.euiTheme)}
-          />
-        </TagFilterContextProvider>
-      </UserFilterContextProvider>
-    </>
+        <EuiInMemoryTable<T>
+          itemId="id"
+          items={visibleItems}
+          columns={tableColumns}
+          pagination={pagination}
+          loading={isFetchingItems}
+          noItemsMessage={
+            isFetchingItems ? (
+              <></>
+            ) : emptyPrompt ? (
+              emptyPrompt
+            ) : (
+              <EuiEmptyPrompt
+                title={<h3>{emptyPromptTitle}</h3>}
+                titleSize="xs"
+                body={emptyPromptBody}
+                actions={emptyPromptActions}
+              />
+            )
+          }
+          selection={selection}
+          search={search}
+          executeQueryOptions={{ enabled: false }}
+          sorting={sorting}
+          onChange={onTableChange}
+          data-test-subj="itemsInMemTable"
+          rowHeader="attributes.title"
+          tableCaption={tableCaption}
+          css={cssFavoriteHoverWithinEuiTableRow(euiTheme.euiTheme)}
+        />
+      </TagFilterContextProvider>
+    </UserFilterContextProvider>
   );
 }
